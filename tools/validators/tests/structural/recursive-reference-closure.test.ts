@@ -305,18 +305,19 @@ test("recursive_reference_closure skips envelopes without PG creates", () => {
   })), false);
 });
 
-test("recursive_reference_closure fails for sibling storylet_realized page peers", async () => {
+test("recursive_reference_closure fails for sibling input.choice_id page peers", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {
-      storylet_realized: "SLT-0099"
+      input: {
+        choice_id: "CHC-0099",
+        resolved_event_id: "SE-0002"
+      }
     },
     extra: [
-      storyRecord("storylet_record", "SLT-0099", "storylets", {
-        id: "SLT-0099",
+      storyRecord("choice_record", "CHC-0099", "choices", {
+        id: "CHC-0099",
         story_id: "STORY-001",
-        scope: { visibility: "branch_scoped", branch_id: "BR-0099" },
-        created_at_page: "PG-0099",
-        provenance: { origin: "runtime_jit" }
+        created_at_page: "PG-0099"
       })
     ]
   }), {
@@ -327,10 +328,10 @@ test("recursive_reference_closure fails for sibling storylet_realized page peers
   const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
   assert.ok(leak);
   assert.deepEqual(leak.detail, {
-    reference_id: "SLT-0099",
-    reference_path: "storylet_realized",
-    referenced_file: "stories/test-story/_source/storylets/SLT-0099.yaml",
-    referenced_node_id: "test-story:SLT-0099",
+    reference_id: "CHC-0099",
+    reference_path: "input.choice_id",
+    referenced_file: "stories/test-story/_source/choices/CHC-0099.yaml",
+    referenced_node_id: "test-story:CHC-0099",
     created_at_page: "PG-0099"
   });
 });

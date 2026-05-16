@@ -136,17 +136,24 @@ function aliasBinding(event: Record<string, unknown>, alias: string): string | u
 }
 
 function selectedChoiceForEvent(event: Record<string, unknown>, maps: RecordMaps): IndexedRecord | undefined {
-  const parentPageId = stringValue(event.parent_page_id);
-  if (parentPageId === undefined) {
-    return undefined;
-  }
-  const parentPage = maps.byId.get(parentPageId);
-  const choiceId = stringValue(asPlainRecord(asPlainRecord(parentPage?.parsed).input).choice_id);
+  const childPage = pageResolvedByEvent(event, maps);
+  const choiceId = stringValue(asPlainRecord(asPlainRecord(childPage?.parsed).input).choice_id);
   if (choiceId === undefined) {
     return undefined;
   }
   const choice = maps.byId.get(choiceId);
   return choice?.node_type === "choice_record" ? choice : undefined;
+}
+
+function pageResolvedByEvent(event: Record<string, unknown>, maps: RecordMaps): IndexedRecord | undefined {
+  const eventIdValue = stringValue(event.id);
+  if (eventIdValue === undefined) {
+    return undefined;
+  }
+  return (maps.byType.get("page_record") ?? []).find((page) => {
+    const input = asPlainRecord(asPlainRecord(page.parsed).input);
+    return stringValue(input.resolved_event_id) === eventIdValue;
+  });
 }
 
 function beliefAccessVerdict(

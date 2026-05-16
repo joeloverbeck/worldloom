@@ -6,7 +6,7 @@ import { context, record } from "./helpers.js";
 
 test("branch_isolation accepts ancestor and bundle-genesis active records", async () => {
   const verdicts = await branchIsolation.run(undefined, context([
-    branch("BR-0001", null),
+    branch("BR-0001", null, "PG-0001"),
     branch("BR-0002", "BR-0001"),
     page("PG-0001", "BR-0001", { active_records: {} }),
     page("PG-0002", "BR-0002", { active_records: { SF: ["SF-0001", "SF-0002"] } }),
@@ -40,13 +40,28 @@ test("branch_isolation rejects sibling-branch active records", async () => {
 
 test("branch_isolation accepts global storylets with world-scope and bundle-genesis references", async () => {
   const verdicts = await branchIsolation.run(undefined, context([
-    branch("BR-0001", null),
+    branch("BR-0001", null, "PG-0001"),
     page("PG-0001", "BR-0001", { active_records: {} }),
     fact("SF-0001", "PG-0001"),
     storylet("SLT-0001", {
       preconditions: { hard: ["record_active(SF-0001)", "canon_fact(CF-0001)"], soft: [] },
       effects: { create: ["ENT-0001"], supersede: [], close: [] },
       exit_options: [{ likely_effects: ["CHAR-0001"] }]
+    })
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("branch_isolation allows global author-pool reference to unpadded bundle-genesis record", async () => {
+  const verdicts = await branchIsolation.run(undefined, context([
+    branch("BR-1", null, "PG-1"),
+    page("PG-1", "BR-1", { active_records: {} }, null, 0),
+    belief("BEL-1", "PG-1"),
+    storylet("SLT-1", {
+      preconditions: { hard: ["record_active(BEL-1)"], soft: [] },
+      effects: { create: [], supersede: [], close: [] },
+      exit_options: []
     })
   ]));
 
@@ -100,20 +115,29 @@ test("branch_isolation is scoped to full-world, create page/storylet plans, and 
   );
 });
 
-function branch(id: string, parentBranchId: string | null) {
+function branch(id: string, parentBranchId: string | null, rootPageId?: string) {
   return storyRecord("branch_record", id, "branches", {
     id,
     story_id: "STORY-001",
-    parent_branch_id: parentBranchId
+    parent_branch_id: parentBranchId,
+    ...(rootPageId === undefined ? {} : { root_page_id: rootPageId })
   });
 }
 
-function page(id: string, branchId: string, stateSnapshot: Record<string, unknown>) {
+function page(
+  id: string,
+  branchId: string,
+  stateSnapshot: Record<string, unknown>,
+  parentPageId?: string | null,
+  turnIndex?: number
+) {
   return storyRecord("page_record", id, "pages", {
     id,
     story_id: "STORY-001",
     branch_id: branchId,
-    state_snapshot: stateSnapshot
+    state_snapshot: stateSnapshot,
+    ...(parentPageId === undefined ? {} : { parent_page_id: parentPageId }),
+    ...(turnIndex === undefined ? {} : { turn_index: turnIndex })
   });
 }
 
@@ -124,6 +148,14 @@ function fact(id: string, createdAtPage: string) {
     created_at_page: createdAtPage,
     authority: "branch_local",
     derived_from: []
+  });
+}
+
+function belief(id: string, createdAtPage: string) {
+  return storyRecord("belief_record", id, "beliefs", {
+    id,
+    story_id: "STORY-001",
+    created_at_page: createdAtPage
   });
 }
 

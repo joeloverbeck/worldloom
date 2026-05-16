@@ -99,6 +99,29 @@ test("observer_firewall accepts public BEL grounding", async () => {
   assert.deepEqual(verdicts, []);
 });
 
+test("observer_firewall uses child page input.choice_id, not parent page", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    page("PG-2", "CHC-2", "SE-2"),
+    choice("CHC-1", ["BEL-1"]),
+    choice("CHC-2", ["BEL-2"]),
+    event("SE-2", "STENT-1", "PG-1"),
+    belief("BEL-1", "STENT-2", "public"),
+    belief("BEL-2", "STENT-2", "private")
+  ]));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "observer_firewall_violation_private_belief_leak");
+  assert.deepEqual(verdicts[0]?.detail, {
+    event_id: "SE-2",
+    actor: "STENT-1",
+    choice_id: "CHC-2",
+    belief_id: "BEL-2",
+    belief_holder: "STENT-2",
+    reference_path: "grounded_in.records[0]"
+  });
+});
+
 test("observer_firewall is scoped to full-world, create event/storylet plans, and touched event/storylet files", () => {
   assert.equal(observerFirewall.applies_to(context([])), true);
   assert.equal(observerFirewall.applies_to(context([], { run_mode: "pre-apply", patch_plan: patchPlan("create_pg_record") })), false);
@@ -110,11 +133,11 @@ test("observer_firewall is scoped to full-world, create event/storylet plans, an
   );
 });
 
-function page(id: string, choiceId: string) {
+function page(id: string, choiceId: string, resolvedEventId = "SE-0001") {
   return storyRecord("page_record", id, "pages", {
     id,
     story_id: "STORY-001",
-    input: { choice_id: choiceId }
+    input: { choice_id: choiceId, resolved_event_id: resolvedEventId }
   });
 }
 

@@ -95,19 +95,62 @@ test("getContextPacket warns when story-pipeline seed_nodes contain story-local 
 
   try {
     buildStoryBundleWorld(root);
+    const storyLocalSeedId = storyNodeId(STORY_FIXTURE_SLUG, "SF-1");
 
     const result = await withRepoRoot(root, () =>
       getContextPacket({
         task_type: "story_turn_cycle",
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
-        seed_nodes: [storyNodeId(STORY_FIXTURE_SLUG, "SF-0001")],
+        seed_nodes: ["entity:marla-kern", storyLocalSeedId],
         token_budget: 18000
       })
     );
 
     assert.ok(!("code" in result), "story_turn_cycle should return a packet");
     assert.deepEqual(result.task_header.warnings, ["story_local_seed_nodes_ignored"]);
+    assert.ok(
+      !result.local_authority.nodes.some((node) => node.id === storyLocalSeedId),
+      "story-local seed must not enter world-scope local_authority"
+    );
+    assert.ok(
+      result.local_authority.nodes.some((node) => node.id === "entity:marla-kern"),
+      "world-scope seed should still populate local_authority"
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getContextPacket accepts all-story-local seeds for story-pipeline task types", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+    const storyLocalSeeds = [
+      storyNodeId(STORY_FIXTURE_SLUG, "SF-1"),
+      storyNodeId(STORY_FIXTURE_SLUG, "STENT-2")
+    ];
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "story_turn_cycle",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        seed_nodes: storyLocalSeeds,
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result), "story_turn_cycle should return a packet");
+    assert.deepEqual(result.task_header.warnings, ["story_local_seed_nodes_ignored"]);
+    assert.equal(result.story_bundle_context?.story_slug, STORY_FIXTURE_SLUG);
+    assert.equal(result.story_bundle_context?.storylet_pool_summary.total, 1);
+    assert.deepEqual(
+      result.local_authority.nodes.map((node) => node.id),
+      [],
+      "all story-local seeds should be filtered out of world-scope local_authority"
+    );
   } finally {
     destroyTempRepoRoot(root);
   }

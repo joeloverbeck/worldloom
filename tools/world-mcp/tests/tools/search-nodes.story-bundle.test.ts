@@ -35,11 +35,11 @@ test("searchNodes scopes lexical search to the requested story bundle", async ()
     assert.deepEqual(
       current.nodes.map((node) => [node.id, node.node_type, node.story_slug]),
       [
-        ["opening-bells:OBL-0001", "obligation_record", STORY_FIXTURE_SLUG],
-        ["opening-bells:PG-0001", "page_record", STORY_FIXTURE_SLUG],
-        ["opening-bells:SE-0001", "story_event_record", STORY_FIXTURE_SLUG],
-        ["opening-bells:SF-0001", "story_fact_record", STORY_FIXTURE_SLUG],
-        ["opening-bells:SLT-0021", "storylet_record", STORY_FIXTURE_SLUG]
+        ["opening-bells:OBL-1", "obligation_record", STORY_FIXTURE_SLUG],
+        ["opening-bells:PG-1", "page_record", STORY_FIXTURE_SLUG],
+        ["opening-bells:SE-1", "story_event_record", STORY_FIXTURE_SLUG],
+        ["opening-bells:SF-1", "story_fact_record", STORY_FIXTURE_SLUG],
+        ["opening-bells:SLT-21", "storylet_record", STORY_FIXTURE_SLUG]
       ]
     );
 

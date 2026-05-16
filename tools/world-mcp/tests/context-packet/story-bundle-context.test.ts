@@ -35,7 +35,7 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     assert.equal(result.story_bundle_context.storylet_pool_summary.by_urgency.high, 1);
     assert.deepEqual(
       result.story_bundle_context.storylet_pool_summary.visible_records.map((record) => record.id),
-      ["SLT-0021"]
+      ["SLT-21"]
     );
     assert.deepEqual(
       result.story_bundle_context.storylet_pool_summary.visible_records.map((record) => [
@@ -46,37 +46,37 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     );
     assert.deepEqual(
       result.story_bundle_context.open_obligations.map((obligation) => obligation.id),
-      ["OBL-0001"]
+      ["OBL-1"]
     );
     assert.deepEqual(
       result.story_bundle_context.active_threads.map((thread) => thread.id),
-      ["THR-0001"]
+      ["THR-1"]
     );
-    assert.deepEqual(result.story_bundle_context.longest_active_branch_path, ["PG-0001"]);
+    assert.deepEqual(result.story_bundle_context.longest_active_branch_path, ["PG-1"]);
     assert.deepEqual(
       result.story_bundle_context.recent_pages_along_longest_active_branch.map((page) => page.id),
-      ["PG-0001"]
+      ["PG-1"]
     );
     assert.deepEqual(
       result.story_bundle_context.mysteries_in_play.map((mystery) => mystery.m_id),
-      ["M-0001"]
+      ["M-1"]
     );
     assert.deepEqual(result.story_bundle_context.mystery_evidence_chains, [
       {
-        mystery_id: "M-0001",
+        mystery_id: "M-1",
         claims: [
           {
-            page_id: "PG-0001",
+            page_id: "PG-1",
             authority: "apparent",
             status: "clue_added",
-            evidence_records: ["SF-0001", "SE-0001"]
+            evidence_records: ["SF-1", "SE-1"]
           }
         ]
       }
     ]);
     assert.deepEqual(
       result.story_bundle_context.cast_bind_list.map((entry) => entry.stent_id),
-      ["STENT-0002"]
+      ["STENT-2"]
     );
     assert.deepEqual(result.story_bundle_context.cast_bind_list[0]?.role_in_story, [
       "viewpoint",
@@ -100,7 +100,7 @@ test("world-canon context packets expose a null story_bundle_context", async () 
       assembleContextPacket({
         task_type: "canon_addition",
         world_slug: STORY_FIXTURE_WORLD,
-        seed_nodes: ["CF-0001"],
+        seed_nodes: ["CF-1"],
         token_budget: 18000
       })
     );

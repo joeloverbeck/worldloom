@@ -55,12 +55,17 @@ Keep the file small and machine-readable. Update it after intake, after every it
   "queue": [
     "tickets/SPEC31EXAMPLE-002.md"
   ],
+  "phase": "ready_for_next_ticket",
+  "in_progress_ticket": null,
+  "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
   "dirty_state": "clean",
   "updated_at": "YYYY-MM-DD"
 }
 ```
+
+`phase`, `in_progress_ticket`, and `owned_dirty_summary` are optional but useful when a long implementation, proof, review, or archive step may be interrupted before the iteration commit. Use concise values such as `implementing`, `implementation_done_review_pending`, `review_done_commit_pending`, `ready_for_next_ticket`, `final_spec_archive`, or `blocked`. If substantial owned dirty work exists before a long proof or review boundary, refresh these fields before continuing; do not commit only to checkpoint them.
 
 On resume after `/new`, read this state file first, then verify every important field against live repo state before continuing:
 
@@ -69,6 +74,7 @@ On resume after `/new`, read this state file first, then verify every important 
 - queued ticket paths still exist and still belong to the originating spec family
 - `last_work_commit` is reachable from `HEAD`
 - `last_state_commit` is either `null` / `"none"`, `"self"`, or reachable from `HEAD`
+- optional `phase`, `in_progress_ticket`, and `owned_dirty_summary` are consistent with the live ticket and worktree when present
 - `git status --short` matches or safely supersedes `dirty_state`
 
 After resume validation, state the checked fields compactly before invoking a child skill, for example:
@@ -80,6 +86,8 @@ Resume validation checked: spec, next_target, queue, last_work_commit, last_stat
 If the state file conflicts with the live repo, trust the live repo and patch the state file before continuing. If the conflict changes the next target or archival readiness, state that explicitly before invoking a child skill.
 
 If the only conflict is stale `dirty_state` text and live `git status --short` proves the tracked worktree is clean or safely supersedes the old classification, state the stale classification explicitly and refresh it in the next state-file update. Do not create a pre-work state-only commit solely to correct stale dirt text when target selection, queue validity, ownership classification, and archival readiness are unaffected.
+
+If live `git status --short` shows dirty owned paths for `next_target` or `in_progress_ticket`, do not restart the target from the top just because the last committed state points to the previous checkpoint. Inspect the dirty diff, ticket closeout, and available proof artifacts; infer the next uncompleted phase, state that recovery decision, refresh the optional phase fields in the next state-file update, and continue from that phase. Treat unrelated or ambiguous dirty paths under the intake dirty-path rules instead of absorbing them silently.
 
 `last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. Record full commit SHAs in the JSON state file; short SHAs are acceptable in printed handoffs only. `last_state_commit` identifies how the state update was persisted: the same sha as `last_work_commit` when amended into that commit, `"self"` when committed separately as a state-file-only commit, or `"none"` when intentionally left uncommitted. Do not overload one field for both meanings. When `last_state_commit` is `"self"`, the printed handoff must report the actual state-only commit sha. On resume, validate `"self"` by checking the state file's containing commit or latest state-only commit in `git log`, not by expecting the JSON value to contain its own sha.
 
@@ -153,6 +161,8 @@ For harness-internal child phases, this compact block is the required visible re
 
 After editing the skill, rerun a focused hygiene check over changed skill files, usually `git diff --check -- .codex/skills/implement-ticket`.
 
+If compaction, interruption, or resume recovery prevents a required compact child-phase block from being emitted at its original phase boundary, emit the missing compact block in the next visible handoff or final response before the harness handoff.
+
 ### 3. Review Completed Tickets
 
 If the target ticket is marked `COMPLETED`, run the review phase as if the user had said:
@@ -178,6 +188,8 @@ Post-ticket review:
 If `post-ticket-review` blocks archival because same-seam work remains, put the active ticket back at the front of the queue and continue through `implement-ticket` unless the review says a user decision is required. Do not archive a blocked ticket.
 
 For harness-internal review phases, this compact block is the required visible report. Apply the child skill's closeout truthing, archival, dependency-repair, and follow-up rules, but do not emit the full `post-ticket-review` report template unless archival blocks, a user decision is required, or the fuller structure is needed to make the handoff truthful.
+
+If compaction, interruption, or resume recovery prevents this compact review block from being emitted at the review boundary, emit it in the next visible handoff or final response before the harness handoff.
 
 ### 4. Audit Post-Ticket Review When It Changes Handoff Surfaces
 
@@ -205,7 +217,7 @@ Before committing:
 4. Run `git diff --check` or the child skills' stronger equivalent over tracked and newly created owned files.
 5. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
 6. Re-run `git diff --cached --name-status` after staging and confirm every staged path is owned by this iteration, explicitly approved, or intentional same-family state needed for the queue/handoff.
-7. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening.
+7. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening. Prefer a concise truthful shape such as `SPEC35STOPIPEIG-001 implement and archive observer firewall fix`. Mention `follow-up` or `skill hardening` only when the committed iteration actually created or updated a follow-up ticket or changed a skill.
 
 When `post-ticket-review` archived a ticket with `git mv`, do not try to stage the now-missing active ticket path by name. Stage the archive destination and other edited owned paths, then confirm the source deletion or rename is staged with `git diff --cached --name-status` before committing.
 

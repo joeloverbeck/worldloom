@@ -49,7 +49,7 @@ test("describeEnvelopeSchema returns the full envelope and every operation schem
   assert.equal(allocations.properties?.arc_trace_ids, undefined);
 });
 
-test("describeEnvelopeSchema exposes create_bel_record wrapper schema", async () => {
+test("describeEnvelopeSchema exposes create_bel_record full BEL wrapper schema", async () => {
   const manifest = await describeEnvelopeSchema({ op_kind: "create_bel_record" });
 
   assert.equal(manifest.delivery_status, "inline");
@@ -63,13 +63,30 @@ test("describeEnvelopeSchema exposes create_bel_record wrapper schema", async ()
     required?: string[];
     properties?: {
       story_slug?: { pattern?: string };
-      record?: { required?: string[]; properties?: { id?: { pattern?: string } } };
+      record?: { $ref?: string; required?: string[]; properties?: { id?: { pattern?: string } } };
     };
   };
   assert.deepEqual(payload.required, ["story_slug", "record"]);
   assert.equal(payload.properties?.story_slug?.pattern, "^[a-z0-9-]+$");
-  assert.deepEqual(payload.properties?.record?.required, ["id"]);
-  assert.equal(payload.properties?.record?.properties?.id?.pattern, "^BEL-[0-9]+$");
+  assert.equal(payload.properties?.record?.$ref, "https://worldloom.local/schemas/story-belief.schema.json");
+  assert.equal(payload.properties?.record?.required, undefined);
+  assert.equal(payload.properties?.record?.properties, undefined);
+
+  const beliefSchema = manifest.referenced_schemas["https://worldloom.local/schemas/story-belief.schema.json"];
+  assert.ok(beliefSchema);
+  assert.deepEqual(beliefSchema.required, [
+    "id",
+    "story_id",
+    "created_at_page",
+    "holder",
+    "claim",
+    "belief_mode",
+    "truth_relation",
+    "confidence",
+    "visibility",
+    "basis",
+    "consequences"
+  ]);
 });
 
 test("describeEnvelopeSchema exposes create_ststat_record wrapper schema", async () => {

@@ -147,9 +147,11 @@ function storyLocalReferences(value: unknown, basePath: string): StoryReference[
 }
 
 function pageClosureRoots(page: Record<string, unknown>): StoryReference[] {
+  const input = asPlainRecord(page.input);
   return [
     ...storyLocalReferences(asPlainRecord(page.state_snapshot), "state_snapshot"),
-    ...storyLocalReferences(page.storylet_realized, "storylet_realized"),
+    ...storyLocalReferences(input.choice_id, "input.choice_id"),
+    ...storyLocalReferences(input.resolved_event_id, "input.resolved_event_id"),
     ...storyLocalReferences(page.applied_event_ops, "applied_event_ops"),
     ...storyLocalReferences(page.emitted_choices, "emitted_choices")
   ];

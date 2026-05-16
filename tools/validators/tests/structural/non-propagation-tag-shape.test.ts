@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { expectedWitnessCoverage } from "../../src/structural/expected-witness-coverage.js";
+import { nonPropagationTagShape } from "../../src/structural/non-propagation-tag-shape.js";
 import { context, record } from "./helpers.js";
 
-test("expected_witness_coverage accepts valid non-propagation tags", async () => {
-  const verdicts = await expectedWitnessCoverage.run(
+test("non_propagation_tag_shape accepts valid non-propagation tags", async () => {
+  const verdicts = await nonPropagationTagShape.run(
     undefined,
     context([
       storyEvent("SE-1", {
@@ -18,8 +18,8 @@ test("expected_witness_coverage accepts valid non-propagation tags", async () =>
   assert.deepEqual(verdicts, []);
 });
 
-test("expected_witness_coverage rejects legacy reason prose without a tag", async () => {
-  const verdicts = await expectedWitnessCoverage.run(
+test("non_propagation_tag_shape rejects legacy reason prose without a tag", async () => {
+  const verdicts = await nonPropagationTagShape.run(
     undefined,
     context([
       storyEvent("SE-1", {
@@ -31,8 +31,8 @@ test("expected_witness_coverage rejects legacy reason prose without a tag", asyn
   assert.ok(verdicts.some((verdict) => verdict.code === "expected_witness_tag_missing"));
 });
 
-test("expected_witness_coverage warns on malformed non-propagation tags", async () => {
-  const verdicts = await expectedWitnessCoverage.run(
+test("non_propagation_tag_shape warns on malformed non-propagation tags", async () => {
+  const verdicts = await nonPropagationTagShape.run(
     undefined,
     context([
       storyEvent("SE-1", {
@@ -45,9 +45,9 @@ test("expected_witness_coverage warns on malformed non-propagation tags", async 
   assert.ok(!verdicts.some((verdict) => verdict.code === "expected_witness_tag_missing"));
 });
 
-test("expected_witness_coverage is pre-apply scoped to create_se_record plans", () => {
-  assert.equal(expectedWitnessCoverage.applies_to(context([], { run_mode: "pre-apply", patch_plan: patchPlan("create_pg_record") })), false);
-  assert.equal(expectedWitnessCoverage.applies_to(context([], { run_mode: "pre-apply", patch_plan: patchPlan("create_se_record") })), true);
+test("non_propagation_tag_shape is pre-apply scoped to create_se_record plans", () => {
+  assert.equal(nonPropagationTagShape.applies_to(context([], { run_mode: "pre-apply", patch_plan: patchPlan("create_pg_record") })), false);
+  assert.equal(nonPropagationTagShape.applies_to(context([], { run_mode: "pre-apply", patch_plan: patchPlan("create_se_record") })), true);
 });
 
 function storyEvent(id: string, overrides: Record<string, unknown> = {}) {

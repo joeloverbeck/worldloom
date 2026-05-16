@@ -1,14 +1,17 @@
 {
-  "originating_spec": "specs/SPEC-34-story-validator-hardening.md",
-  "archived_spec": "archive/specs/SPEC-34-story-validator-hardening.md",
-  "last_ticket": "archive/tickets/SPEC34STOVALHAR-005.md",
+  "originating_spec": "archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md",
+  "archived_spec": "archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md",
+  "last_ticket": "archive/tickets/SPEC35STOPIPEIG-009.md",
   "last_result": "spec_archived",
-  "last_work_commit": "d58fe17",
+  "last_work_commit": "7bd848b2560cc923aedc32626f517730b9b69f0b",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
+  "phase": "completed",
+  "in_progress_ticket": null,
+  "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree; expected ignored artifacts: tools/validators/dist/ and tools/validators/node_modules/",
+  "dirty_state": "clean tracked worktree after final spec archive commit; expected ignored artifacts include user-local briefs/worlds/world-proposals content, .claude/settings.local.json, and tool dist/node_modules outputs including tools/validators/, tools/world-mcp/, tools/patch-engine/, and tools/hooks/",
   "updated_at": "2026-05-16"
 }

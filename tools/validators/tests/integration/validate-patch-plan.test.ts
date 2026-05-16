@@ -123,7 +123,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     );
     assert.equal(canonBaselineDriftExecution?.status, "skipped");
     const expectedWitnessExecution = result.executions.find(
-      (execution) => execution.name === "expected_witness_coverage"
+      (execution) => execution.name === "non_propagation_tag_shape"
     );
     assert.equal(expectedWitnessExecution?.status, "skipped");
     const proposalPackageExecution = result.executions.find(
@@ -520,7 +520,6 @@ function replaySafePagePlan() {
         id: "PG-0002",
         story_id: "STORY-001",
         branch_path: ["PG-0002"],
-        storylet_realized: "SLT-0001",
         applied_event_ops: ["SE-0002"],
         state_snapshot: {
           ...completeStateSnapshot(),

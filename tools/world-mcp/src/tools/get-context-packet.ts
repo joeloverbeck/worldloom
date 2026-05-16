@@ -40,6 +40,14 @@ function storyLocalSeedNodeWarnings(args: GetContextPacketArgs): string[] {
     : [];
 }
 
+function seedNodesForAssembly(args: GetContextPacketArgs): string[] {
+  if (!isStoryPipelineTaskType(args.task_type)) {
+    return args.seed_nodes;
+  }
+
+  return args.seed_nodes.filter((seedNode) => !STORY_LOCAL_SEED_NODE_PATTERN.test(seedNode));
+}
+
 function assertValidArgs(args: GetContextPacketArgs): void {
   if (args.world_slug.trim().length === 0) {
     throw new Error("world_slug must be non-empty.");
@@ -82,12 +90,13 @@ async function getContextPacketImpl(
   args: GetContextPacketArgs
 ): Promise<ContextPacket | McpError> {
   assertValidArgs(args);
+  const seedNodes = seedNodesForAssembly(args);
 
   const result = await assembleContextPacket({
     task_type: args.task_type,
     world_slug: args.world_slug,
     ...(args.story_slug === undefined ? {} : { story_slug: args.story_slug }),
-    seed_nodes: args.seed_nodes,
+    seed_nodes: seedNodes,
     token_budget: args.token_budget ?? DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE[args.task_type],
     delivery_mode: args.delivery_mode ?? DEFAULT_DELIVERY_MODE,
     ...(args.node_classes === undefined ? {} : { node_classes: args.node_classes })

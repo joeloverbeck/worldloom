@@ -20,12 +20,12 @@ export function buildStoryBundleWorld(root: string): void {
     worldSlug: STORY_FIXTURE_WORLD,
     nodes: [
       {
-        node_id: "CF-0001",
+        node_id: "CF-1",
         world_slug: STORY_FIXTURE_WORLD,
-        file_path: "_source/canon/CF-0001.yaml",
+        file_path: "_source/canon/CF-1.yaml",
         node_type: "canon_fact_record",
         body: [
-          "id: CF-0001",
+          "id: CF-1",
           "title: Marla Kern Exists",
           "status: hard_canon",
           "type: person",
@@ -49,145 +49,151 @@ export function buildStoryBundleWorld(root: string): void {
       {
         node_id: "entity:marla-kern",
         world_slug: STORY_FIXTURE_WORLD,
-        file_path: "_source/entities/ENT-0001.yaml",
+        file_path: "_source/entities/ENT-1.yaml",
         node_type: "named_entity",
-        body: "id: ENT-0001\ncanonical_name: Marla Kern\nentity_kind: person\n"
+        body: "id: ENT-1\ncanonical_name: Marla Kern\nentity_kind: person\n"
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-0002"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-2"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
-        file_path: storyPath(STORY_FIXTURE_SLUG, "entities", "STENT-0002.yaml"),
+        file_path: storyPath(STORY_FIXTURE_SLUG, "entities", "STENT-2.yaml"),
         node_type: "story_entity_record",
         body: [
-          "id: STENT-0002",
+          "id: STENT-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
           "name: Marla Kern",
-          "world_ent_id: entity:marla-kern",
+          "display_name: Marla Kern",
+          "bound_char_id: CHAR-1",
           "role_in_story: [viewpoint, primary_actor]",
           ""
         ].join("\n")
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SF-0001"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SF-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
-        file_path: storyPath(STORY_FIXTURE_SLUG, "facts", "SF-0001.yaml"),
+        file_path: storyPath(STORY_FIXTURE_SLUG, "facts", "SF-1.yaml"),
         node_type: "story_fact_record",
         body: [
-          "id: SF-0001",
+          "id: SF-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
           "statement: Marla Kern hides in the loft.",
-          "derived_from_cf:",
-          "  - CF-0001",
+          "derived_from:",
+          "  - CF-1",
           ""
         ].join("\n")
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STSTAT-0001"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STSTAT-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
-        file_path: storyPath(STORY_FIXTURE_SLUG, "status", "STSTAT-0001.yaml"),
+        file_path: storyPath(STORY_FIXTURE_SLUG, "status", "STSTAT-1.yaml"),
         node_type: "story_status_record",
         body: [
-          "id: STSTAT-0001",
-          "story_id: STORY-0001",
-          "created_at_page: PG-0001",
-          "entity: STENT-0002",
+          "id: STSTAT-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "entity: STENT-2",
           "life: alive",
           "agency: free",
-          "location: STLOC-0001",
+          "location: STLOC-1",
           ""
         ].join("\n")
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SE-0001"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SE-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
-        file_path: storyPath(STORY_FIXTURE_SLUG, "events", "SE-0001.yaml"),
+        file_path: storyPath(STORY_FIXTURE_SLUG, "events", "SE-1.yaml"),
         node_type: "story_event_record",
-        body: "id: SE-0001\nsummary: Marla enters the loft.\n"
+        body: "id: SE-1\nsummary: Marla enters the loft.\n"
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-0001"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
-        file_path: storyPath(STORY_FIXTURE_SLUG, "obligations", "OBL-0001.yaml"),
+        file_path: storyPath(STORY_FIXTURE_SLUG, "obligations", "OBL-1.yaml"),
         node_type: "obligation_record",
         body: [
-          "id: OBL-0001",
+          "id: OBL-1",
           "type: promise",
           "status: open",
-          "owner: STENT-0002",
+          "owner: STENT-2",
           "subjects:",
-          "  - STENT-0002",
+          "  - STENT-2",
           "salience: 7",
-          "urgency: 5",
+          "urgency: high",
           "possible_payoff_modes:",
           "  - reveal",
           "coverage_cache_compatible_storylets:",
-          "  - SLT-0021",
+          "  - SLT-21",
           "summary: Pay off the loft setup.",
           ""
         ].join("\n")
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "THR-0001"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "THR-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
-        file_path: storyPath(STORY_FIXTURE_SLUG, "threads", "THR-0001.yaml"),
+        file_path: storyPath(STORY_FIXTURE_SLUG, "threads", "THR-1.yaml"),
         node_type: "thread_record",
         body: [
-          "id: THR-0001",
+          "id: THR-1",
           "type: seduction",
           "status: pressured",
           "current_pressure: 6",
           "desired_cadence: 2",
           "obligations:",
-          "  - OBL-0001",
+          "  - OBL-1",
           ""
         ].join("\n")
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "PG-0001"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "PG-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
-        file_path: storyPath(STORY_FIXTURE_SLUG, "pages", "PG-0001.yaml"),
+        file_path: storyPath(STORY_FIXTURE_SLUG, "pages", "PG-1.yaml"),
         node_type: "page_record",
         body: [
-          "id: PG-0001",
+          "id: PG-1",
           "branch_path:",
-          "  - PG-0001",
-          "storylet_realized: SLT-0021",
-          "chosen_choice_id: CHC-0001",
+          "  - PG-1",
+          "input:",
+          "  choice_id: CHC-1",
+          "  resolved_event_id: SE-1",
           "content_intensity: quiet",
           "created_at: '2026-05-03T10:00:00Z'",
           "summary: Loft opening page.",
           "state_snapshot:",
           "  unresolved_mystery_claims:",
-          "    - mystery_id: M-0001",
+          "    - mystery_id: M-1",
           "      authority: apparent",
           "      status: clue_added",
           "      evidence_records:",
-          "        - SF-0001",
-          "        - SE-0001",
+          "        - SF-1",
+          "        - SE-1",
           ""
         ].join("\n")
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "CHC-0001"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "CHC-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
-        file_path: storyPath(STORY_FIXTURE_SLUG, "choices", "CHC-0001.yaml"),
+        file_path: storyPath(STORY_FIXTURE_SLUG, "choices", "CHC-1.yaml"),
         node_type: "choice_record",
-        body: "id: CHC-0001\nparent_page_id: PG-0001\nlabel: Climb down.\n"
+        body: "id: CHC-1\nparent_page_id: PG-1\nlabel: Climb down.\n"
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-0021"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-21"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
-        file_path: storyPath(STORY_FIXTURE_SLUG, "storylets", "SLT-0021.yaml"),
+        file_path: storyPath(STORY_FIXTURE_SLUG, "storylets", "SLT-21.yaml"),
         node_type: "storylet_record",
         body: [
-          "id: SLT-0021",
+          "id: SLT-21",
           "title: Loft Choice",
           "move_family: decision",
           "scope:",
@@ -200,56 +206,56 @@ export function buildStoryBundleWorld(root: string): void {
           "    - opening",
           "summary: Marla Kern considers the loft window.",
           "provenance:",
-          "  created_at_page: PG-0001",
+          "  created_at_page: PG-1",
           "opens_obligations:",
-          "  - OBL-0001",
+          "  - OBL-1",
           ""
         ].join("\n")
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_OTHER_SLUG, "SLT-0021"),
+        node_id: storyNodeId(STORY_FIXTURE_OTHER_SLUG, "SLT-21"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_OTHER_SLUG,
-        file_path: storyPath(STORY_FIXTURE_OTHER_SLUG, "storylets", "SLT-0021.yaml"),
+        file_path: storyPath(STORY_FIXTURE_OTHER_SLUG, "storylets", "SLT-21.yaml"),
         node_type: "storylet_record",
-        body: "id: SLT-0021\ntitle: Salt Thread Choice\nsummary: Distant harbor scene.\n"
+        body: "id: SLT-21\ntitle: Salt Thread Choice\nsummary: Distant harbor scene.\n"
       }
     ],
     edges: [
       {
         story_slug: STORY_FIXTURE_SLUG,
-        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-0002"),
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-2"),
         target_node_id: "entity:marla-kern",
         edge_type: "world_entity_binding"
       },
       {
         story_slug: STORY_FIXTURE_SLUG,
-        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SF-0001"),
-        target_node_id: "CF-0001",
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SF-1"),
+        target_node_id: "CF-1",
         edge_type: "story_fact_derived_from"
       },
       {
         story_slug: STORY_FIXTURE_SLUG,
-        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-0021"),
-        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "PG-0001"),
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-21"),
+        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "PG-1"),
         edge_type: "created_at_page"
       },
       {
         story_slug: STORY_FIXTURE_SLUG,
-        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-0021"),
-        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-0001"),
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-21"),
+        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-1"),
         edge_type: "opens_obligation"
       },
       {
         story_slug: STORY_FIXTURE_SLUG,
-        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "CHC-0001"),
-        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "PG-0001"),
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "CHC-1"),
+        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "PG-1"),
         edge_type: "parent_page"
       },
       {
         story_slug: STORY_FIXTURE_SLUG,
-        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "THR-0001"),
-        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-0001"),
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "THR-1"),
+        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-1"),
         edge_type: "thread_obligation"
       }
     ],
@@ -264,7 +270,7 @@ export function buildStoryBundleWorld(root: string): void {
     ],
     mentions: [
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-0002"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-2"),
         story_slug: STORY_FIXTURE_SLUG,
         surface_text: "Marla Kern",
         resolved_entity_id: "entity:marla-kern",
@@ -272,7 +278,7 @@ export function buildStoryBundleWorld(root: string): void {
         extraction_method: "exact_canonical"
       },
       {
-        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-0021"),
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-21"),
         story_slug: STORY_FIXTURE_SLUG,
         surface_text: "Marla Kern",
         resolved_entity_id: "entity:marla-kern",
@@ -289,13 +295,13 @@ export function buildStoryBundleWorld(root: string): void {
     [
       "---",
       "mysteries_in_play:",
-      "  - m_id: M-0001",
+      "  - m_id: M-1",
       "    status: active",
       "    future_resolution_safety: medium",
       "    domain_overlap: loft",
       "cast_bind_list:",
-      "  - char_id: CHAR-0001",
-      "    stent_id: STENT-0002",
+      "  - char_id: CHAR-1",
+      "    stent_id: STENT-2",
       "    role_in_story: [viewpoint, primary_actor]",
       "invariants_acknowledged:",
       "  - INV-social-intimacy",

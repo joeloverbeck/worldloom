@@ -1,6 +1,11 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringValue, touchedFilesInclude } from "./utils.js";
 
+// This validator checks non_propagation: tag syntax and closed-reason coverage.
+// Full witness coverage (computing direct/indirect witnesses from active STSTAT.location/agency,
+// event kind/targets, BEL.basis.source_event) is planned for validator-hardening-II;
+// see SPEC-35 Risks & Open Questions.
+
 const VALID_REASONS = new Set([
   "no_witness",
   "witness_incapacitated",
@@ -15,8 +20,8 @@ const REASON_TOKEN_PATTERN =
   /\b(no_witness|witness_incapacitated|evidence_concealed|institution_suppresses_report|event_leaves_no_accessible_trace)\b/g;
 const RECORD_ID_PATTERN = /^(?:STENT|STLOC|STOBJ|BEL|SF|SE|DA|PG|BR|CHC|SLT|SREL|STSTAT|STINT|OBL|CNSQ|THR)-\d+$/;
 
-export const expectedWitnessCoverage: Validator = {
-  name: "expected_witness_coverage",
+export const nonPropagationTagShape: Validator = {
+  name: "non_propagation_tag_shape",
   severity_mode: "fail",
   applies_to: (ctx: Context) =>
     ctx.run_mode === "full-world" ||
@@ -105,7 +110,7 @@ function isInsideAnyRange(index: number, ranges: ReadonlyArray<readonly [number,
 
 function malformed(event: IndexedRecord, tag: string, detail: string): Verdict {
   return {
-    validator: "expected_witness_coverage",
+    validator: "non_propagation_tag_shape",
     severity: "warn",
     code: "expected_witness_tag_malformed",
     message: `${event.node_id} has malformed non-propagation tag ${tag}.`,
@@ -117,7 +122,7 @@ function malformed(event: IndexedRecord, tag: string, detail: string): Verdict {
 
 function missing(event: IndexedRecord, reason: string): Verdict {
   return {
-    validator: "expected_witness_coverage",
+    validator: "non_propagation_tag_shape",
     severity: "fail",
     code: "expected_witness_tag_missing",
     message: `${event.node_id} names non-propagation reason ${reason} without a parseable non_propagation tag.`,
