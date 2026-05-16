@@ -11,6 +11,7 @@ import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.j
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
+import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
 import { rule2NoPureCosmetics } from "../rules/rule2-no-pure-cosmetics.js";
 import { rule4NoGlobalizationByAccident } from "../rules/rule4-no-globalization-by-accident.js";
@@ -40,7 +41,8 @@ export const structuralValidators: readonly Validator[] = [
   stateSnapshotIntegrity,
   touchedByCfCompleteness,
   proposalPackageShape,
-  modificationHistoryRetrofit
+  modificationHistoryRetrofit,
+  validationTraceShapeCompliance
 ];
 
 export const ruleValidators: readonly Validator[] = [

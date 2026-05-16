@@ -126,6 +126,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "proposal_package_shape"
     );
     assert.equal(proposalPackageExecution?.status, "skipped");
+    const validationTraceExecution = result.executions.find(
+      (execution) => execution.name === "validation_trace_shape_compliance"
+    );
+    assert.equal(validationTraceExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -138,7 +142,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== sltCreatedAtPageExecution &&
         row !== canonDriftEvidenceExecution &&
         row !== expectedWitnessExecution &&
-        row !== proposalPackageExecution
+        row !== proposalPackageExecution &&
+        row !== validationTraceExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
@@ -556,7 +561,17 @@ function validPageFields(id: string): Record<string, unknown> {
       path: `pages-prose-plans/${id}.md`,
       plan_hash: "0000000000000000000000000000000000000000000000000000000000000001"
     },
-    state_hash: "0000000000000000000000000000000000000000000000000000000000000002"
+    state_hash: "0000000000000000000000000000000000000000000000000000000000000002",
+    validation_trace: {
+      input_legality: "PASS: resolved event and input are lawful.",
+      parent_snapshot_compatibility: "PASS: parent state hash matches.",
+      mystery_invariant_firewall: "PASS: no forbidden mystery is resolved.",
+      branch_isolation: "PASS: active records are branch visible.",
+      append_only_delta: "PASS: deltas create, supersede, or close records.",
+      consequence_or_terminal: "PASS: consequence capacity is present.",
+      plan_grounding: "PASS: plan is grounded in loaded state.",
+      canon_promotion_hold: "NOT_APPLICABLE: no promotion claim is present."
+    }
   };
 }
 

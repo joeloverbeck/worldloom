@@ -374,6 +374,8 @@ Under large bundles or wide CH windows, a skill could validate against a summary
 
 A skill author or future validator could implement an array shape rejected by `record_schema_compliance`, or accept two competing shapes silently.
 
+**Implementation note (2026-05-16, SPEC33STOPIPSEV-007)**: live reassessment corrected the enforcement boundary before implementation. The shared contract sketch at §4.2 names the flat eight-key mapping, but the JSON Schema at `tools/validators/src/schemas/story-page.schema.json` remains permissive for `validation_trace`; `record_schema_compliance` does not reject `gates[]` by itself. The landed `validation_trace_shape_compliance` structural validator is therefore the enforcing layer for exact eight-key shape and `gates` rejection. The §4.2a TS-source vs dist-JS runtime note also landed with this ticket.
+
 **Change**:
 
 1. **Contract prose** (`.claude/skills/_shared-templates/story-state-contract.md` §7):
