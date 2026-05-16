@@ -1,19 +1,18 @@
 {
   "originating_spec": "specs/SPEC-34-story-validator-hardening.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC34STOVALHAR-001.md",
+  "last_ticket": "archive/tickets/SPEC34STOVALHAR-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "c929f047caa940b59307be75175fc1c4fa65f13c",
+  "last_work_commit": "e38b1e471a4bdec45d251b7fd05b07b2d7db45d7",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC34STOVALHAR-002.md",
+  "next_target": "tickets/SPEC34STOVALHAR-003.md",
   "queue": [
-    "tickets/SPEC34STOVALHAR-002.md",
     "tickets/SPEC34STOVALHAR-003.md",
     "tickets/SPEC34STOVALHAR-004.md",
     "tickets/SPEC34STOVALHAR-005.md"
   ],
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated dirty: .claude/skills/reassess-spec/SKILL.md and SPEC-33 archive move; expected ignored artifacts: tools/validators/dist/ and tools/validators/node_modules/",
+  "dirty_state": "clean tracked worktree; expected ignored artifacts: tools/validators/dist/ and tools/validators/node_modules/",
   "updated_at": "2026-05-16"
 }
