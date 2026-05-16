@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-mcp/tests/server/capability-parity.test.ts` (new test file in existing tests/server/ directory)
-**Deps**: `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`, `archive/tickets/SPEC36STOPIPNIN-005.md`, `tickets/SPEC36STOPIPNIN-006.md`
+**Deps**: `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`, `archive/tickets/SPEC36STOPIPNIN-005.md`, `archive/tickets/SPEC36STOPIPNIN-006.md`
 
 ## Problem
 
@@ -16,7 +16,7 @@
 2. `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D5 specifies three test cases. The auditor's Amendment E originally included a "build metadata recency" sub-item; the spec drops that as not operationalizable in CI ("recent enough" cannot be defined). Runtime/deployed parity is deferred to a tenth-iteration carry-over per SPEC-36 §Risks & Open Questions.
 3. Cross-artifact boundary under audit: the source-of-truth lists (`MCP_TOOL_ORDER`, `OPERATION_KINDS`, the validator registry exports) are the canonical definitions; the exposed MCP APIs (`describe_capabilities`, `describe_envelope_schema`) and the registry must remain in lockstep with their source-of-truth lists. The parity test is the mechanical proof that the contract holds.
 4. FOUNDATIONS principle: §Machine-Facing Layer (capability and schema-discovery currency) — source-level parity is a prerequisite for any runtime parity check. Internal drift between the source-of-truth lists and the exposed APIs is the failure mode this test prevents.
-5. 2026-05-16 queue reassessment: `causal_dependency_threat_scan` is now registered by `archive/tickets/SPEC36STOPIPNIN-005.md`, while live `tools/validators/src/public/registry.ts` does not yet register `expected_witness_coverage`. Because this ticket's registry parity test must hardcode both SPEC-36 additions, the ticket is not independently landable before `tickets/SPEC36STOPIPNIN-006.md` completes. The harness retargeted the queue to process that remaining validator ticket first, then return here.
+5. 2026-05-16 queue reassessment: `causal_dependency_threat_scan` is now registered by `archive/tickets/SPEC36STOPIPNIN-005.md`, and `expected_witness_coverage` is now registered by `archive/tickets/SPEC36STOPIPNIN-006.md`. This ticket is now independently landable against both completed validator prerequisites.
 
 ## Architecture Check
 
@@ -60,7 +60,7 @@ Three test cases following the `list-tools.test.ts` pattern (Node.js built-in `t
 ### Tests That Must Pass
 
 1. All three new test cases in `tools/world-mcp/tests/server/capability-parity.test.ts` pass under `npm run build && npm test` in `tools/world-mcp/`.
-2. The hardcoded validator-name list in `validator_registry_contains_every_named_validator` includes `causal_dependency_threat_scan` and `expected_witness_coverage` — the test will FAIL until SPEC36STOPIPNIN-005 and SPEC36STOPIPNIN-006 land their validators in the registry (this is the intended cross-ticket coupling; the test asserts that D1 and D2 actually registered their validators).
+2. The hardcoded validator-name list in `validator_registry_contains_every_named_validator` includes `causal_dependency_threat_scan` and `expected_witness_coverage`; both are now registered by the archived prerequisite tickets, so this parity test can land as a current positive assertion.
 3. Full `npm test` in `tools/world-mcp/` and `tools/validators/` is green after this ticket + 005 + 006 land.
 
 ### Invariants

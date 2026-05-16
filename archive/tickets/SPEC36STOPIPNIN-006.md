@@ -1,22 +1,23 @@
 # SPEC36STOPIPNIN-006: Implement `expected_witness_coverage` validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
-**Engine Changes**: Yes — `tools/validators/src/structural/expected-witness-coverage.ts` (new structural validator); `tools/validators/src/public/registry.ts` (registration); `tools/validators/tests/structural/registry.test.ts` (test extension); `tools/validators/tests/structural/expected-witness-coverage.test.ts` (new test file); `tools/validators/src/structural/non-propagation-tag-shape.ts` (source-comment cleanup; no behavioral change); `.claude/skills/branching-story-turn-cycle/SKILL.md` (skill prose at line 439); `.claude/skills/branching-story-health-audit/SKILL.md` (skill prose at line 196)
+**Engine Changes**: Yes — `tools/validators/src/structural/expected-witness-coverage.ts` (new structural validator); `tools/validators/src/public/registry.ts` (registration); `tools/validators/tests/structural/registry.test.ts` (test extension); `tools/validators/tests/structural/expected-witness-coverage.test.ts` (new test file); `tools/validators/src/structural/non-propagation-tag-shape.ts` (source-comment cleanup; no behavioral change); `tools/validators/README.md` and validator registry/count tests (inventory/count updates); `.claude/skills/branching-story-turn-cycle/SKILL.md` (skill prose at line 439); `.claude/skills/branching-story-health-audit/SKILL.md` (skill prose at line 196)
 **Deps**: `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`
 
 ## Problem
 
-`tools/validators/src/structural/non-propagation-tag-shape.ts:4-7` source comment explicitly states *"Full witness coverage (computing direct/indirect witnesses from active STSTAT.location/agency, event kind/targets, BEL.basis.source_event) is planned for validator-hardening-II; see SPEC-35 Risks & Open Questions"*. The current `non_propagation_tag_shape` validator checks tag syntax, closed-reason coverage, and record-ID shape only — never queries SE/BEL/STSTAT to compute expected witness groups. Both `.claude/skills/branching-story-turn-cycle/SKILL.md:439` and `.claude/skills/branching-story-health-audit/SKILL.md:196` describe the gap consistently. Audit motivation (`reports/story-related-improvements-ninth-iteration.md` §WL-N9-P1-002): a public betrayal / violence / status event that fails to create BEL records can pass `non_propagation_tag_shape` if the SE author wrote a syntactically valid tag for a wrong group label. SPEC-36 §D2 adds the semantic witness-coverage validator alongside (not replacing) `non_propagation_tag_shape`.
+At intake, `tools/validators/src/structural/non-propagation-tag-shape.ts:4-7` source comment explicitly stated *"Full witness coverage (computing direct/indirect witnesses from active STSTAT.location/agency, event kind/targets, BEL.basis.source_event) is planned for validator-hardening-II; see SPEC-35 Risks & Open Questions"*. The `non_propagation_tag_shape` validator checked tag syntax, closed-reason coverage, and record-ID shape only — never querying SE/BEL/STSTAT to compute expected witness groups. Both `.claude/skills/branching-story-turn-cycle/SKILL.md:439` and `.claude/skills/branching-story-health-audit/SKILL.md:196` described the gap consistently. Audit motivation (`reports/story-related-improvements-ninth-iteration.md` §WL-N9-P1-002): a public betrayal / violence / status event that failed to create BEL records could pass `non_propagation_tag_shape` if the SE author wrote a syntactically valid tag for a wrong group label. SPEC-36 §D2 added the semantic witness-coverage validator alongside (not replacing) `non_propagation_tag_shape`.
 
 ## Assumption Reassessment (2026-05-16)
 
-1. `non-propagation-tag-shape.ts:4-7` source comment verified by direct read; only tag-shape validator currently registered. Schema fields needed for witness computation all verified by parallel-Explore-agent quotes during SPEC-36 brainstorm session: `BEL.holder` / `BEL.visibility` (enum: `private | shared | factional | public | rumored | concealed | suppressed`) / `BEL.basis.source_event` at `tools/validators/src/schemas/story-belief.schema.json`; `SE.actor` / `SE.targets` / `SE.state_delta` (`create | supersede | close`) at `tools/validators/src/schemas/story-event.schema.json`; `STSTAT.life` (enum) / `STSTAT.agency` (enum including `incapacitated`, `unconscious`, `dead`) / `STSTAT.location` (pattern `^(STLOC-[0-9]+|unknown|concealed|offstage)$`) at `tools/validators/src/schemas/story-status.schema.json`. No schema changes required.
-2. `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D2 specifies the validator with a deterministic STLOC + STSTAT co-location trigger (rejecting the auditor's natural-language event-class trigger as `(pragmatic — scoping)` per §Key design decisions), 7 tests minimum, registry registration, registry test extension, skill-prose updates at the two named sites, AND a source-comment cleanup at `non-propagation-tag-shape.ts:4-7`. The existing `non_propagation_tag_shape` validator is preserved unchanged behaviorally — only its source comment is updated to reflect that semantic witness coverage now lives in the new sibling validator.
+1. At intake, `non-propagation-tag-shape.ts:4-7` source comment was verified by direct read; only the tag-shape validator was registered. Schema fields needed for witness computation were verified from live schemas: `BEL.holder` / `BEL.visibility` (enum: `private | shared | factional | public | rumored | concealed | suppressed`) / `BEL.basis.source_event` at `tools/validators/src/schemas/story-belief.schema.json`; `SE.actor` / `SE.targets` / `SE.state_delta` (`create | supersede | close`) at `tools/validators/src/schemas/story-event.schema.json`; `STSTAT.life` (enum) / `STSTAT.agency` (enum including `incapacitated`, `unconscious`, `dead`) / `STSTAT.location` (pattern `^(STLOC-[0-9]+|unknown|concealed|offstage)$`) at `tools/validators/src/schemas/story-status.schema.json`. No schema changes were required.
+2. `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D2 specified the validator with a deterministic STLOC + STSTAT co-location trigger (rejecting the auditor's natural-language event-class trigger as `(pragmatic — scoping)` per §Key design decisions), 7 tests minimum, registry registration, registry test extension, skill-prose updates at the two named sites, AND a source-comment cleanup at `non-propagation-tag-shape.ts:4-7`. The existing `non_propagation_tag_shape` validator was preserved unchanged behaviorally — only its source comment was updated to reflect that semantic witness coverage now lives in the new sibling validator.
 3. Cross-artifact boundary under audit: the structural-validator framework contract at `tools/validators/src/structural/utils.ts` and the consumer surfaces in `branching-story-turn-cycle` Phase 9 and `branching-story-health-audit` Phase 2d. The validator framework's `Validator` type (per `tools/validators/src/framework/types.ts`) is the contract the new validator must satisfy; the skill-prose consumers must be updated to describe two deployed validators (`non_propagation_tag_shape` for syntax + `expected_witness_coverage` for semantic coverage) rather than one deferred-coverage validator.
 4. FOUNDATIONS principles: Rule 5 (No Consequence Evasion) per `docs/FOUNDATIONS.md:452-453` — public events with mechanically-visible deltas at non-concealed STLOCs that produce no BEL records and no valid non-propagation tag ARE consequence evasion (the observers' belief state should record what they witnessed). §Story Bundles §6a (Belief vs Fact) per `docs/FOUNDATIONS.md:646-650` — BEL records are the canonical surface for observer consequences; the validator enforces that public events produce the BEL records the contract requires. §Story Bundles §6b (Information / Observer Firewall) per `docs/FOUNDATIONS.md:652-656` — the validator's STLOC + STSTAT co-location heuristic is the structural counterpart to §6b's observer-side access-route enforcement; together they govern both directions of the witness firewall (information access AND consequence propagation).
 5. Canon Safety surface: new structural validator gates patch-engine pre-apply via `validate_patch_plan` / `submit_patch_plan` for patch plans containing `create_se_record` ops. The validator does NOT weaken the Mystery Reserve firewall (Rule 7) — concealed / offstage STLOCs explicitly exempt SEs from the trigger (the validator never fires on concealed-location events). The semantic event-classification judgment that previously lived in `non_propagation_tag_shape`'s deferred scope remains in skill prose where it already lives; the validator catches the subset of events whose deltas produce mechanically-visible consequences at non-concealed STLOCs.
+6. 2026-05-16 live-substrate correction: `story-location.schema.json` does not expose a `location` or `parent_location` field; concealment/offstage state is represented on `STSTAT.location`, and indirect parent-location chain computation is therefore not mechanizable without schema expansion. This ticket narrows the validator to direct co-location groups computed from active STSTAT records and treats `indirect_witness_group` as empty until a future schema change adds a structured location hierarchy. `story-diegetic-artifact.schema.json` uses `circulation`, not `visibility`, so the DA trigger checks `circulation in {public, factional}`. `audit_only` is not a current `SE.event_kind`; the audit-only SE validator treats `prose_attach` and `promotion_closeout` as audit-only shapes, and this validator exempts those same kinds.
 
 ## Architecture Check
 
@@ -28,11 +29,11 @@
 
 1. `expected_witness_coverage` appears in `structuralValidators` array exports → codebase grep-proof: `grep -n 'expected_witness_coverage\\|expectedWitnessCoverage' tools/validators/src/public/registry.ts` returns at least two hits (import + array entry).
 2. `tools/validators/tests/structural/registry.test.ts` expected validator-name list includes `"expected_witness_coverage"` → schema validation: registry test passes under updated expected list.
-3. Four verdict codes (`expected_witness_coverage_missing_public_bel`, `expected_witness_coverage_wrong_group_label`, `expected_witness_coverage_partial_bel_coverage`, `expected_witness_coverage_tag_records_unresolved`) emit correctly under failure fixtures → schema validation: 7 tests minimum (verdict-cases + accept-paths + concealed-location no-trigger case) pass.
+3. Four verdict codes (`expected_witness_coverage_missing_public_bel`, `expected_witness_coverage_wrong_group_label`, `expected_witness_coverage_partial_bel_coverage`, `expected_witness_coverage_tag_records_unresolved`) emit correctly under failure fixtures → schema validation: 8 tests (verdict-cases + accept paths + concealed-location no-trigger case + selector behavior) pass.
 4. `non_propagation_tag_shape` behavior unchanged → regression check: `tools/validators/tests/structural/non-propagation-tag-shape.test.ts` continues to pass without modification.
 5. Skill-prose pointers updated at both consumer sites + source-comment cleanup → codebase grep-proof: `grep -n 'full witness coverage planned but not yet implemented\\|planned for validator-hardening-II' .claude/skills/ tools/validators/src/` returns ZERO hits.
 
-## What to Change
+## Landed Changes
 
 ### 1. Create `tools/validators/src/structural/expected-witness-coverage.ts`
 
@@ -45,19 +46,19 @@ Implement the validator with:
 
 **Deterministic trigger condition.** The validator fires on an SE record when ALL of the following hold:
 
-- `SE.event_kind` is not `audit_only` (audit-only SE shapes are exempt; see `audit_only_se_shape` validator)
-- The actor's STSTAT-derived `location` (from most recent active STSTAT for `SE.actor` at parent-PG snapshot) is a STLOC-N id (not in {`unknown`, `concealed`, `offstage`}) AND that STLOC's `location` field is not in {`concealed`, `offstage`}
-- The SE's `state_delta` either (a) creates BEL records with `visibility` in {`public`, `shared`, `factional`, `rumored`}, OR (b) supersedes any STSTAT for a STENT other than the actor, OR (c) creates/supersedes any STENT, OR (d) creates DA records with `visibility` matching the same set
+- `SE.event_kind` is not one of the current audit-only SE kinds (`prose_attach`, `promotion_closeout`; see `audit_only_se_shape` validator)
+- The actor's STSTAT-derived `location` (from most recent active STSTAT for `SE.actor` at parent-PG snapshot) is a STLOC-N id (not in {`unknown`, `concealed`, `offstage`}); live STLOC records do not carry a separate concealment field
+- The SE's `state_delta` either (a) creates BEL records with `visibility` in {`public`, `shared`, `factional`, `rumored`}, OR (b) supersedes any STSTAT for a STENT other than the actor, OR (c) creates/supersedes any STENT, OR (d) creates DA records with `circulation` in {`public`, `factional`}
 
 **Expected-witness group computation.** For each triggering SE:
 
 - `direct_witness_group`: all active STENT-ids whose most-recent STSTAT at parent-PG snapshot has `location` equal to the SE actor's `location` AND `life: alive` AND `agency` not in {`incapacitated`, `unconscious`, `dead`}, excluding the actor itself
-- `indirect_witness_group`: all active STENT-ids whose STSTAT location matches any STLOC in the same `parent_location` chain as the actor's STLOC (per `STLOC.parent_location` if the field exists; otherwise empty), with the same alive/agency filter
+- `indirect_witness_group`: empty in the current schema because STLOC hierarchy is not structured; health-audit prose still owns indirect/judgment-shaped propagation.
 
 **Coverage check.** Accept when EITHER:
 
-- `state_delta.create[]` includes BEL records covering every STENT in `direct_witness_group` (one BEL per STENT OR one BEL with `holder` in `group:<label>` / `public` form whose semantic membership the validator can verify against the computed group), with `basis.source_event` matching the triggering SE id and appropriate `visibility`; OR
-- `SE.world_logic_rationale` contains a parseable `non_propagation:<reason>(group=<label>, records=[...])` tag with `<reason>` in the closed set, `<label>` matching a computed group, and `records=[...]` ids existing and corresponding to that group
+- `state_delta.create[]` includes BEL records covering every STENT in `direct_witness_group` (one BEL per STENT OR one BEL with `holder` in `group:direct_witnesses` / `public` form), with `basis.source_event` matching the triggering SE id and appropriate `visibility`; OR
+- `SE.world_logic_rationale` contains a parseable `non_propagation:<reason>(group=<label>, records=[...])` tag with `<reason>` in the closed set, `<label>` matching one of the computed direct-group labels (`direct`, `direct_witnesses`, `direct:<STLOC-id>`, or `location:<STLOC-id>`), and `records=[...]` ids existing and corresponding to the direct witness group
 
 On failure, emit one of:
 - `expected_witness_coverage_missing_public_bel` — trigger fires; neither BEL coverage nor a valid non-propagation tag present
@@ -67,15 +68,15 @@ On failure, emit one of:
 
 ### 2. Register the validator in `tools/validators/src/public/registry.ts`
 
-Add `import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";` (alphabetical-by-export-name with other imports). Append `expectedWitnessCoverage` to the `structuralValidators` readonly array after the existing 21 entries, including the `causalDependencyThreatScan` entry landed by `archive/tickets/SPEC36STOPIPNIN-005.md`; the array is unordered for validator-runner consumers.
+Added `import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";` and appended `expectedWitnessCoverage` to the `structuralValidators` readonly array after the `causalDependencyThreatScan` entry landed by `archive/tickets/SPEC36STOPIPNIN-005.md`; the array is unordered for validator-runner consumers.
 
 ### 3. Update `tools/validators/tests/structural/registry.test.ts`
 
-Add `"expected_witness_coverage"` to the expected validator-name list (becomes 22 entries after both 005 and 006 land; this ticket can land first with 21 or after 005 with 22).
+Added `"expected_witness_coverage"` to the expected validator-name list; structural registry count is now 22 after both 005 and 006 landed.
 
 ### 4. Create `tools/validators/tests/structural/expected-witness-coverage.test.ts`
 
-7 tests minimum following the established pattern:
+Added 8 tests following the established pattern:
 
 - `expected_witness_coverage_rejects_missing_public_bel` — fixture: SE at non-concealed STLOC with two active co-located STENTs other than actor; state_delta creates public-visibility DA but no BEL records and no non-propagation tag. Expect verdict.
 - `expected_witness_coverage_rejects_wrong_group_label` — fixture: SE at public STLOC; non-propagation tag with `group=guards` when computed group label is `group=tavern_patrons`. Expect verdict.
@@ -84,6 +85,7 @@ Add `"expected_witness_coverage"` to the expected validator-name list (becomes 2
 - `expected_witness_coverage_accepts_full_bel_coverage` — fixture: BEL records for every direct witness. Expect no verdict.
 - `expected_witness_coverage_accepts_valid_non_propagation_evidence` — fixture: offstage/concealed event with valid tag citing DA/STOBJ evidence. Expect no verdict.
 - `expected_witness_coverage_does_not_trigger_for_concealed_location` — fixture: SE at STLOC with `location: concealed`; no BEL, no tag. Expect no verdict (trigger does not fire).
+- `expected_witness_coverage is scoped to full-world, create_se_record patch plans, and touched event files` — verifies run-mode selector behavior.
 
 Use unpadded mock IDs per FOUNDATIONS-002.
 
@@ -117,6 +119,9 @@ with:
 - `tools/validators/src/structural/expected-witness-coverage.ts` (new)
 - `tools/validators/src/structural/non-propagation-tag-shape.ts` (modify — source comment only; no behavioral change)
 - `tools/validators/src/public/registry.ts` (modify)
+- `tools/validators/README.md` (modify — structural validator inventory)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — registry count)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply skip expectation)
 - `tools/validators/tests/structural/registry.test.ts` (modify)
 - `tools/validators/tests/structural/expected-witness-coverage.test.ts` (new)
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify — line 439)
@@ -133,7 +138,7 @@ with:
 
 ### Tests That Must Pass
 
-1. All 7 new test cases in `tools/validators/tests/structural/expected-witness-coverage.test.ts` pass under `npm run build && npm test` in `tools/validators/`.
+1. All 8 new test cases in `tools/validators/tests/structural/expected-witness-coverage.test.ts` pass under `npm run build && npm test` in `tools/validators/`.
 2. `tools/validators/tests/structural/registry.test.ts` expected validator-name list includes `expected_witness_coverage` and the test passes.
 3. `tools/validators/tests/structural/non-propagation-tag-shape.test.ts` continues to pass unchanged (zero behavioral regression on the syntax validator).
 4. Full `npm test` in `tools/validators/` is green.
@@ -142,7 +147,7 @@ with:
 ### Invariants
 
 1. `expected_witness_coverage` is a registered structural validator with `severity_mode: "fail"` that runs against patch plans containing `create_se_record` ops.
-2. The validator fires only on SEs whose actor is at a non-concealed STLOC AND whose `state_delta` produces mechanically-visible consequences (public-visibility BEL, STSTAT supersessions on other STENTs, STENT create/supersede, or public-visibility DA).
+2. The validator fires only on SEs whose actor is at a non-concealed STLOC AND whose `state_delta` produces mechanically-visible consequences (public-visibility BEL, STSTAT supersessions on other STENTs, STENT create/supersede, or public/factional-circulation DA).
 3. `non_propagation_tag_shape` continues to gate tag syntax independently; the two validators coexist as siblings without overlapping verdict codes.
 4. Concealed-location SEs are exempt from the trigger; the validator does not weaken the Mystery Reserve firewall or any other Canon Safety check.
 
@@ -150,7 +155,7 @@ with:
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/expected-witness-coverage.test.ts` (new) — 7 tests covering all four verdict codes + accept paths + concealed-location no-trigger case; rationale per change list step 4.
+1. `tools/validators/tests/structural/expected-witness-coverage.test.ts` (new) — 8 tests covering all four verdict codes + accept paths + concealed-location no-trigger case + run-mode selector behavior; rationale per landed change list step 4.
 2. `tools/validators/tests/structural/registry.test.ts` (modify) — extend expected validator-name list with the new entry.
 3. `tools/validators/tests/structural/non-propagation-tag-shape.test.ts` — unchanged; regression-tested as part of the full suite to confirm zero behavioral impact.
 
@@ -159,3 +164,25 @@ with:
 1. `cd tools/validators && npm run build && node --test dist/tests/structural/expected-witness-coverage.test.js` — targeted test-file run.
 2. `cd tools/validators && npm test` — full-suite proof.
 3. `grep -n 'full witness coverage planned but not yet implemented\\|planned for validator-hardening-II' .claude/skills/ tools/validators/src/` — confirm skill-prose pointers + source-comment cleanup all landed.
+
+## Outcome
+
+Completed: 2026-05-16
+
+Implemented `expected_witness_coverage` as a registered structural validator that runs in full-world mode, pre-apply mode for `create_se_record`, and incremental mode for touched SE files. The validator computes direct witness groups from the parent page's active STSTAT records, requires BEL coverage or a valid non-propagation tag for mechanically public SE deltas, and emits the four planned verdict codes.
+
+Also updated the non-propagation tag-shape source comment, validator registry, validator README inventory, registry/count tests, clean pre-apply skip expectations, and the two branching-story skill prose pointers.
+
+## Verification Result
+
+1. `cd tools/validators && npm run build` — passed.
+2. `cd tools/validators && node --test dist/tests/structural/expected-witness-coverage.test.js` — passed, 8/8 tests.
+3. `cd tools/validators && npm test` — passed, 323/323 tests.
+4. `rg -n 'full witness coverage planned but not yet implemented|planned for validator-hardening-II' .claude/skills tools/validators/src` — expected no-match result, confirming stale skill/source pointers were removed.
+5. `rg -n 'expected_witness_coverage|expectedWitnessCoverage' tools/validators/src/public/registry.ts tools/validators/tests/structural/registry.test.ts tools/validators/README.md` — confirmed registry import/array entry, registry test list entry, and README inventory entry.
+
+## Deviations
+
+- Live `story-location.schema.json` lacks `location` / `parent_location`; indirect witness hierarchy is left to health-audit prose until a future schema change adds a structured location hierarchy.
+- Live story DA records use `circulation`, not `visibility`; the DA trigger checks `circulation in {public, factional}`.
+- Live audit-only SE kinds are `prose_attach` and `promotion_closeout`, not `audit_only`; the validator exempts those current-contract kinds.

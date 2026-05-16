@@ -59,7 +59,7 @@ Add `import { causalDependencyThreatScan } from "../structural/causal-dependency
 
 ### 3. Update `tools/validators/tests/structural/registry.test.ts`
 
-Add `"causal_dependency_threat_scan"` to the expected validator-name list (currently 20 entries; becomes 21 after this ticket, becomes 22 after SPEC36STOPIPNIN-006 also lands).
+Added `"causal_dependency_threat_scan"` to the expected validator-name list; the list became 21 after this ticket and is 22 after `archive/tickets/SPEC36STOPIPNIN-006.md`.
 
 ### 4. Create `tools/validators/tests/structural/causal-dependency-threat-scan.test.ts`
 
@@ -105,7 +105,7 @@ The Rule 5 alignment row mentions `causal_dependency_threat_scan` (judgment-base
 - Schema additions or field expansions. Per SPEC-36 §13 Anti-recommendations and §Key design decisions, all four subcases operate over existing CHC/OBL/SLT/STSTAT/STLOC/STOBJ schema fields; no new fields needed.
 - Health-audit Phase 2g implementation changes beyond the prose-pointer update at line 236. The replay sub-checks the audit lists remain in place; flipping the validator from "deferred" to "registered" does not alter the audit's replay flow.
 - SLT-precondition predicate evaluation architecture decisions. Per SPEC-36 §Risks, the `slt_precondition_clobbered` subcheck may use either the existing `storylet_predicate_dsl` evaluator OR an overapproximation ("any reference to a clobbered record id in any hard precondition counts as clobbered"). Operator judgment at implementation time.
-- `expected_witness_coverage` validator (SPEC-36 §D2 / SPEC36STOPIPNIN-006). Independent of this ticket; both can land in parallel.
+- `expected_witness_coverage` validator (SPEC-36 §D2 / `archive/tickets/SPEC36STOPIPNIN-006.md`). Independent of this ticket; now completed separately.
 
 ## Acceptance Criteria
 

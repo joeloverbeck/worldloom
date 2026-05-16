@@ -2,9 +2,9 @@ import type { Context, IndexedRecord, Validator, Verdict } from "../framework/ty
 import { asPlainRecord, locationFor, queryStructuralRecords, stringValue, touchedFilesInclude } from "./utils.js";
 
 // This validator checks non_propagation: tag syntax and closed-reason coverage.
-// Full witness coverage (computing direct/indirect witnesses from active STSTAT.location/agency,
-// event kind/targets, BEL.basis.source_event) is planned for validator-hardening-II;
-// see SPEC-35 Risks & Open Questions.
+// Full witness coverage is performed by the sibling validator expected_witness_coverage
+// (see ./expected-witness-coverage.ts). This validator remains the tag-syntax check
+// for non-propagation tags.
 
 const VALID_REASONS = new Set([
   "no_witness",
