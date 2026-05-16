@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None — docs/ticket closeout only (`docs/FOUNDATIONS.md`)
-**Deps**: `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D9
+**Deps**: `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D9
 
 ## Problem
 

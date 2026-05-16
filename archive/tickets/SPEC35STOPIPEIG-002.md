@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators` (`branch-isolation.ts` validator) + test fixture; originating spec progress note
-**Deps**: `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D2
+**Deps**: `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D2
 
 ## Problem
 
@@ -20,7 +20,7 @@ This was SPEC-34 D1 immediate post-merge drift. The padded literal was almost ce
 4. Rule 4 (No Globalization by Accident) and §Story Bundles §5 motivate this ticket: branch_isolation is the standalone deterministic validator that prevents branch-local records from leaking into global author-pool storylets (per SPEC-34 D1's intake). Restated: bundle-genesis records remain globally visible until superseded; branch-local records do not. The validator must correctly identify which records are bundle-genesis under the unpadded-ID convention.
 5. This ticket touches a structural validator (`branch_isolation`) that gates story-bundle record writes at engine pre-apply time — a Canon Safety Check surface for story records. The fix CORRECTS the firewall by recognizing legal bundle-genesis records (no false-positive flagging of legal global-storylet references); the validator does not interact with the Mystery Reserve firewall directly, so no MR weakening is possible from this change.
 6. Pre-edit validator package baseline passed: `npm test` from `tools/validators/` reported 303 passing tests. Existing branch-isolation positive fixtures needed `BR.root_page_id` on root branches to remain truthful under the new derivation; this is local fixture truthing, not the broader padded-ID sweep owned by `archive/tickets/SPEC35STOPIPEIG-008.md`.
-7. The originating spec progress note was stale after D2 landed, so `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` was updated with a dated D2 completion note.
+7. The originating spec progress note was stale after D2 landed, so `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` was updated with a dated D2 completion note.
 
 ## Architecture Check
 
@@ -47,7 +47,7 @@ This was SPEC-34 D1 immediate post-merge drift. The padded literal was almost ce
 
 - `tools/validators/src/structural/branch-isolation.ts` (modify)
 - `tools/validators/tests/structural/branch-isolation.test.ts` (modify — new test + coordination with SPEC35STOPIPEIG-008's fixture refresh)
-- `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` (modify — D2 implementation progress note)
+- `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` (modify — D2 implementation progress note)
 
 ## Out of Scope
 
@@ -94,7 +94,7 @@ Completed 2026-05-16.
 3. `node --test dist/tests/structural/branch-isolation.test.js` from `tools/validators/` passed with 7 tests, including the new unpadded bundle-genesis fixture.
 4. `! grep -nE 'PG-0001' tools/validators/src/structural/branch-isolation.ts` passed from the repo root; the validator source has no hardcoded padded root-page literal.
 5. Final post-closeout proof: `npm test` from `tools/validators/` passed with 304 tests.
-6. Manual review confirmed `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` now records D2 completion in `## Implementation Progress`.
+6. Manual review confirmed `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` now records D2 completion in `## Implementation Progress`.
 
 ## Deviations
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators` (validator rename + registry update + tests) + cross-skill sweep (`branching-story-turn-cycle/SKILL.md`, `branching-story-health-audit/SKILL.md`, `spec-to-tickets/SKILL.md`) + cross-doc sweep (`tools/validators/README.md`, `docs/triage/2026-05-16-story-related-improvements-eighth-iteration-triage.md`, integration test, registry test)
-**Deps**: `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D4
+**Deps**: `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D4
 
 ## Problem
 

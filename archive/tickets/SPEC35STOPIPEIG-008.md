@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — test fixture refresh plus `recursive_reference_closure` PG input traversal
-**Deps**: `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D8
+**Deps**: `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D8
 
 ## Problem
 

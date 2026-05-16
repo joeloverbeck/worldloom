@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-turn-cycle/SKILL.md` and `.claude/skills/branching-story-health-audit/SKILL.md` (skill prose only)
-**Deps**: `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D5
+**Deps**: `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D5
 
 ## Problem
 

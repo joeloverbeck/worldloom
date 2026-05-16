@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-mcp` (`describe-envelope-schema.ts` tool) + schema-discovery test
-**Deps**: `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D7
+**Deps**: `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D7
 
 ## Problem
 

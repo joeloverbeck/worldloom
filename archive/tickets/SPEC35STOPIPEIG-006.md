@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-mcp` (`server.ts` capability description) + MCP-boundary capability test
-**Deps**: `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D6
+**Deps**: `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D6
 
 ## Problem
 

@@ -2,7 +2,7 @@
 
 # SPEC-35 — Story Pipeline Eighth-Iteration Fixes
 
-**Status**: ACTIVE
+**Status**: COMPLETED
 **Date**: 2026-05-16
 **Supersedes**: none
 **Companion triage**: `docs/triage/2026-05-16-story-related-improvements-eighth-iteration-triage.md`
@@ -455,3 +455,28 @@ Full-suite proof at spec close: `npm test` green across `tools/validators/`, `to
 - **D8 fixture-rewrite test impact.** Some tests in the four refreshed fixture files may have been authored to verify the legacy field presence as a structural assertion (e.g., a test that read `chosen_choice_id` from a fixture and asserted equality). Such tests need to be rewritten to read the new field name; operator judgment at refresh time. The test-suite-green acceptance criterion catches any silent breakage.
 
 - **D5 FOUNDATIONS treatment is operator-judgment.** D5 instructs the operator to use judgment when editing `docs/FOUNDATIONS.md` references to `causal_dependency_threat_scan` (vs the seven skill files where the framing is more rigid). FOUNDATIONS uses the term at the principle level rather than the validator level in some places; leaving those references intact may be correct. The acceptance criterion is "no skill prose claims the validator is registered," which does not constrain FOUNDATIONS prose.
+
+## Outcome
+
+Completed on 2026-05-16.
+
+All nine SPEC-35 deliverables landed and their tickets were archived:
+
+- D1-D2 corrected validator behavior for observer-firewall choice resolution and branch-isolation genesis detection.
+- D3 corrected story-local seed partitioning in `get_context_packet`.
+- D4 renamed the overclaiming witness-coverage validator surface to `non_propagation_tag_shape`.
+- D5 reframed `causal_dependency_threat_scan` as judgment-based review until the deferred validator-hardening-II work exists.
+- D6-D7 corrected MCP capability/schema-discovery surfaces for allocator wording and BEL envelope schemas.
+- D8 refreshed story-bundle fixture and consumer test records to current schema fields and unpadded IDs.
+- D9 replaced archived-spec references in `docs/FOUNDATIONS.md` with current tracked authorities.
+
+Deviations from the original plan:
+
+- D4 and D5 intentionally kept full witness-coverage and causal-dependency validator implementation deferred to validator-hardening-II, as planned in this spec's pragmatic scope boundary.
+- D9 corrected the drafted hooks authority from absent `.claude/settings.json` to tracked `.claude/settings.json.example` plus `tools/hooks/README.md`.
+
+Verification:
+
+- Per-ticket targeted and package proof is recorded in `archive/tickets/SPEC35STOPIPEIG-001.md` through `archive/tickets/SPEC35STOPIPEIG-009.md`.
+- Final close proof confirmed no active SPEC-35 tickets remain, all D1-D9 tickets are archived, and `docs/FOUNDATIONS.md` has zero `archive/specs/` references.
+- Final package proof passed: `npm test` in `tools/validators` (304 passing tests), `tools/world-mcp` (370 passing tests), `tools/patch-engine` (75 passing tests), and `tools/hooks` (18 passing tests).

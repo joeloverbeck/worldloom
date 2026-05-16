@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators` (`observer-firewall.ts` validator) + test fixture
-**Deps**: `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D1
+**Deps**: `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D1
 
 ## Problem
 

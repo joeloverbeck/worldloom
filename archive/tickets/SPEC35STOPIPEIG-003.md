@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-mcp` (`get-context-packet.ts` tool) + integration test
-**Deps**: `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D3
+**Deps**: `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` D3
 
 ## Problem
 
@@ -45,7 +45,7 @@ The warning was added per SPEC-31 D14 as a defensive backstop, but the underlyin
 
 - `tools/world-mcp/src/tools/get-context-packet.ts` (modify)
 - `tools/world-mcp/tests/tools/get-context-packet.story-pipeline.test.ts` (modify — extend existing test + add new test)
-- `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` (modify — progress note)
+- `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` (modify — progress note)
 
 ## Out of Scope
 
