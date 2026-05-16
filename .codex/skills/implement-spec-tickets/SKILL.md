@@ -205,7 +205,7 @@ Before committing:
 4. Run `git diff --check` or the child skills' stronger equivalent over tracked and newly created owned files.
 5. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
 6. Re-run `git diff --cached --name-status` after staging and confirm every staged path is owned by this iteration, explicitly approved, or intentional same-family state needed for the queue/handoff.
-7. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening.
+7. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening. Prefer a concise truthful shape such as `SPEC35STOPIPEIG-001 implement and archive observer firewall fix`. Mention `follow-up` or `skill hardening` only when the committed iteration actually created or updated a follow-up ticket or changed a skill.
 
 When `post-ticket-review` archived a ticket with `git mv`, do not try to stage the now-missing active ticket path by name. Stage the archive destination and other edited owned paths, then confirm the source deletion or rename is staged with `git diff --cached --name-status` before committing.
 
