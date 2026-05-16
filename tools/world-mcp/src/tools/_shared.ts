@@ -2,6 +2,7 @@ import { readdirSync } from "node:fs";
 import path from "node:path";
 
 import type Database from "better-sqlite3";
+import { CREATE_OP_CANONICAL_RECORD_ID_FIELD } from "@worldloom/patch-engine";
 import type { EdgeType, NodeType } from "@worldloom/world-index/public/types";
 
 import { openIndexDb, resolveRepoRoot } from "../db";
@@ -488,6 +489,35 @@ export function validatePatchPlanEnvelopeShape(plan: unknown): McpError | null {
         `patch_plan.patches[${index}].payload is required.`,
         `patch_plan.patches[${index}].payload`
       ));
+      continue;
+    }
+
+    if (
+      typeof patch.op === "string" &&
+      Object.hasOwn(CREATE_OP_CANONICAL_RECORD_ID_FIELD, patch.op)
+    ) {
+      const { recordKey, idField, idPattern } =
+        CREATE_OP_CANONICAL_RECORD_ID_FIELD[
+          patch.op as keyof typeof CREATE_OP_CANONICAL_RECORD_ID_FIELD
+        ];
+      const payload = isRecord(patch.payload) ? patch.payload : null;
+      const innerRecord = payload && isRecord(payload[recordKey]) ? payload[recordKey] : null;
+
+      if (innerRecord === null) {
+        errors.push(invalidInput(
+          `patch_plan.patches[${index}].payload.${recordKey} must be an object.`,
+          `patch_plan.patches[${index}].payload.${recordKey}`
+        ));
+        continue;
+      }
+
+      const idValue = innerRecord[idField];
+      if (typeof idValue !== "string" || !idPattern.test(idValue)) {
+        errors.push(invalidInput(
+          `patch_plan.patches[${index}].payload.${recordKey}.${idField} must be a non-empty string matching ${idPattern.source}.`,
+          `patch_plan.patches[${index}].payload.${recordKey}.${idField}`
+        ));
+      }
     }
   }
 

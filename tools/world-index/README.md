@@ -20,6 +20,14 @@ world-index stats <world-slug>           # counts by node_type; file freshness
 world-index verify <world-slug>          # re-parse disk-backed indexed files; skip synthetic atomic logical rows; flag drift
 ```
 
+`verify` flags drift between disk-backed indexed rows and current source files, but it does not rewrite stale parser-emitted vocabulary in place. If a schema-version migration changes what `node_type` the parser emits for unchanged source content, recovery belongs in the migration file plus a subsequent `world-index sync`; for severe local drift, `world-index init <world-slug>` deletes the DB and rebuilds from scratch.
+
+## Migration authoring discipline
+
+Each SQL file in `tools/world-index/src/schema/migrations/<NNN>_<slug>.sql` is executed once when `openIndex` detects `recordedVersion < CURRENT_INDEX_VERSION`. Migrations must satisfy the row-staleness contract: if the parser change introduced in the new schema version would emit a different `node_type` for the same source content, the migration must delete existing `nodes` rows whose `(file_path, node_type)` would be reclassified, delete dependent rows, and clear the corresponding `file_versions` rows so incremental sync re-parses the unchanged files.
+
+Comment-only migrations are acceptable only when zero existing rows would be reclassified by the new parser. Otherwise the version file can show the new schema version while `nodes` still contains old parser vocabulary, which can make downstream `list_records`, `get_record`, and context-packet consumers fail on stale rows. MCPENH-049 is the precedent: v5 reclassified `WORLD_KERNEL.md` H2 spans from `section` to `narrative_section`, so migration 005 invalidates those rows and `WORLD_KERNEL.md` file freshness for v4 upgrades; migration 006 reapplies the same repair for indexes that had already recorded the original v5 no-op migration.
+
 ## Planned package layout
 
 See `archive/specs/SPEC-01-world-index.md` §Deliverables §Package location.

@@ -215,3 +215,71 @@ test("listRecords filters story-bundle records by dotted paths and reduces respo
     destroyTempRepoRoot(root);
   }
 });
+
+test("listRecords returns accepted projection keys for story-bundle validation errors", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "storylet_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        fields: ["unknown_storylet_key"]
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "invalid_input");
+    assert.equal(result.details?.field, "fields");
+    assert.deepEqual(result.details?.unknown_projection_keys, ["unknown_storylet_key"]);
+    assert.deepEqual(result.details?.accepted_projection_keys, [
+      "id",
+      "move_family",
+      "opens_obligations",
+      "provenance",
+      "record_id",
+      "record_kind",
+      "saliency",
+      "scope",
+      "summary",
+      "title"
+    ]);
+    assert.equal(result.details?.record_type, "storylet_record");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords returns empty accepted projection keys for empty story-bundle result sets", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "storylet_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        filters: { id: "SLT-9999" },
+        fields: ["unknown_storylet_key"]
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "invalid_input");
+    assert.equal(result.details?.field, "fields");
+    assert.deepEqual(result.details?.unknown_projection_keys, ["unknown_storylet_key"]);
+    assert.deepEqual(result.details?.accepted_projection_keys, []);
+    assert.match(
+      String(result.details?.note),
+      /Empty result set: accepted projection keys cannot be derived/
+    );
+    assert.equal(result.details?.record_type, "storylet_record");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});

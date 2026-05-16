@@ -26,15 +26,17 @@ import type { OpContext } from "./ops/types.js";
 import { checkIdAllocationRace } from "./pre-apply-checks/id-allocation-race.js";
 
 export type {
+  CreateOpCanonicalRecordIdField,
   OperationKind,
   PatchOperation,
   PatchPlanEnvelope,
   PatchReceipt,
   RetconAttestation,
-  ValidatorRunReceipt
+  ValidatorRunReceipt,
+  WorldCanonCreateOperationKind
 } from "./envelope/schema.js";
 
-export { OPERATION_KINDS } from "./envelope/schema.js";
+export { CREATE_OP_CANONICAL_RECORD_ID_FIELD, OPERATION_KINDS } from "./envelope/schema.js";
 export { canonicalOpHash } from "./approval/verify-token.js";
 export { checkIdAllocationRace } from "./pre-apply-checks/id-allocation-race.js";
 export type {

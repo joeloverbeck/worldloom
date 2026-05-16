@@ -5,7 +5,8 @@ import { domainFileNodeId } from "./prose";
 import { parseYamlWithRecovery } from "./yaml";
 import type { CanonFactRecord, ChangeLogEntry, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
 
-const STRUCTURED_ID_REGEX = /\b(CF|CH|PA|M|DA|CHAR|PR|BATCH|NCP|NCB|AU|RP)-\d+\b/g;
+const STRUCTURED_ID_REGEX = /\b(CF|CH|PA|M|DA|CHAR|PR|BATCH|NCP|NCB|AU|RP)-\d+\b/;
+const STRUCTURED_ID_REGEX_GLOBAL = /\b(CF|CH|PA|M|DA|CHAR|PR|BATCH|NCP|NCB|AU|RP)-\d+\b/g;
 const ATTRIBUTION_COMMENT_REGEX = /<!--\s*(added|clarified|modified)\s+by\s+([A-Z]+-\d+)\s*-->/i;
 
 export function extractSemanticEdges(
@@ -187,13 +188,12 @@ function extractFirewallTargets(body: string): string[] {
           targets.add(target);
         }
       }
-      STRUCTURED_ID_REGEX.lastIndex = 0;
     }
   }
 
   const lineMatch = body.match(/^\s*firewall(?:_for)?\s*:\s*(.+)$/gim) ?? [];
   for (const line of lineMatch) {
-    const matches = line.match(STRUCTURED_ID_REGEX) ?? [];
+    const matches = line.match(STRUCTURED_ID_REGEX_GLOBAL) ?? [];
     for (const target of matches) {
       targets.add(target);
     }

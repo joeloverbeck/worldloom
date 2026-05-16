@@ -48,6 +48,24 @@ Each entry in `patches[]` is a `PatchOperationEnvelope` with this shape:
 
 Required fields on every op: `op`, `target_world`, **`target_file`**, **`payload`**. The typed-record key (`cf_record`, `ch_record`, `m_record`, `oq_record`, `extension`, `target_sec_id` + `cf_id`, etc.) lives **inside `payload`**, not at the op's top level.
 
+### World-canon create ops validate their canonical record-id field
+
+Envelope-shape validation also checks the canonical record-id field inside every world-canon `create_*_record` payload before any pre-apply validators run. `create_ch_record` is the asymmetric case: the ID field is `payload.ch_record.change_id`, not `payload.ch_record.id`.
+
+Use these payload paths:
+
+| Op kind | Required payload path |
+|---|---|
+| `create_cf_record` | `payload.cf_record.id` |
+| `create_ch_record` | `payload.ch_record.change_id` |
+| `create_inv_record` | `payload.inv_record.id` |
+| `create_m_record` | `payload.m_record.id` |
+| `create_oq_record` | `payload.oq_record.id` |
+| `create_ent_record` | `payload.ent_record.id` |
+| `create_sec_record` | `payload.sec_record.id` |
+
+Do not write `payload.ch_record.id` and do not treat it as a compatibility alias. If validation reports `patch_plan.patches[N].payload.ch_record.change_id`, fix the CH payload to use `change_id`; otherwise the patch plan has not reached validator delegation.
+
 ### `target_file` is required on every op despite being typed optional
 
 The TypeScript interface in `tools/patch-engine/src/envelope/schema.ts` declares `target_file?: string` (optional). The shape validator in `tools/world-mcp/src/tools/_shared.ts:375-380` (`validatePatchPlanEnvelopeShape`) rejects any patch op whose `target_file` is missing or empty with `invalid_input: patch_plan.patches[N].target_file must be a non-empty string`. Operators reading the typed interface alone will reasonably omit `target_file` and hit this failure mode at validation time. **Always populate `target_file` on every op.**
@@ -163,6 +181,7 @@ The patch engine and retrieval tools surface these failure modes; map each to th
 | Code | Meaning | Response |
 |---|---|---|
 | `invalid_input` | Envelope or op field missing / malformed (e.g., empty `approval_token`, missing `target_file`, missing `payload`). The error's `details.field` names the first offending path. When multiple shape errors are present, `details.additional_errors[]` lists the remaining invalid-input errors for the same call. | Fix the envelope; re-validate. The signed approval token does NOT need to be re-signed if the envelope content does not change — but if the envelope IS changed, re-sign before submit. |
+| `invalid_input` on `patch_plan.patches[N].payload.<record_key>.<canonical_id_field>` | World-canon `create_*_record` payload is missing or misshapes the canonical record-id field. The common CH typo is `payload.ch_record.id`; the accepted CH field is `payload.ch_record.change_id`. The response is `status: "skipped"` with `validators_run: []`, because envelope-shape validation stopped before validator delegation. | Correct the payload field name/value and re-validate. Do not add an alias field; the canonical record body must use the field named by the error path. |
 | `envelope_shape_invalid` | Same family as `invalid_input`; structural shape rejected before per-op validation. | Same as `invalid_input`. |
 | `target_file_missing` / `target_file_outside_world` | Op's `target_file` is empty, missing, or escapes the world root (or for hybrid-file ops, doesn't start with the expected directory prefix). | Fix the op's `target_file` per §2; re-validate. |
 | `op_target_class_mismatch` | Typed payload key (e.g., `cf_record`) doesn't match `op` kind (e.g., `create_inv_record`). | Fix the op's payload key to match the op kind; re-validate. |

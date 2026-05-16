@@ -58,6 +58,8 @@ If a path that was clean at the initial snapshot becomes dirty later, inspect it
 
 MCP connector discovery, tool approval, or local session configuration can create or modify files such as `.codex/config.toml` while a ticket is in progress. Treat that as `externally appeared unrelated` unless the active ticket explicitly owns Codex/MCP configuration. Do not include those changes in the ticket file set; remove only the incidental hunks you created yourself, and never revert user-authored config changes.
 
+If instruction-source files such as `AGENTS.md`, `CLAUDE.md`, or active `.codex/skills/` / `.claude/skills/` files become dirty after the initial snapshot, classify ownership normally and also decide whether the changed guidance affects the active run before final response. If it is unrelated, leave it out of the ticket file set but name it as externally appeared instruction-source dirt when reporting the ledger.
+
 When mid-run dirt appears in a file you also touched, classify at hunk level:
 
 - `owned edits`: hunks required by the active ticket

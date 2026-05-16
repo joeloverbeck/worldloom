@@ -105,6 +105,9 @@ const HYBRID_METADATA_FIELD_KEYS = [
   "file_path"
 ] as const;
 
+const EMPTY_ACCEPTED_PROJECTION_KEYS_NOTE =
+  "Empty result set: accepted projection keys cannot be derived from matched records. Consult get_record_schema or omit fields to inspect default records.";
+
 const RECORD_TYPE_TO_NODE_TYPE: Record<ListRecordType, NodeType> = {
   canon_fact: "canon_fact_record",
   change_log_entry: "change_log_entry",
@@ -183,16 +186,6 @@ function hasProjectionFields(fields: string[] | undefined): fields is string[] {
   return fields !== undefined && fields.length > 0;
 }
 
-function unknownHybridProjectionKeys(fields: string[] | undefined): string[] {
-  if (!hasProjectionFields(fields)) {
-    return [];
-  }
-
-  return fields.filter(
-    (field) => !(HYBRID_METADATA_FIELD_KEYS as readonly string[]).includes(field)
-  );
-}
-
 function hasFilters(filters: ListRecordFilters | undefined): filters is ListRecordFilters {
   return filters !== undefined && Object.keys(filters).length > 0;
 }
@@ -258,30 +251,54 @@ function unknownFilterKeys(
   );
 }
 
-function unknownProjectionKeys(
+function acceptedProjectionKeys(
   recordType: ListRecordType,
   projectionSources: ListedRecord[],
-  fields: string[] | undefined,
   includeFullBody: boolean | undefined
 ): string[] {
-  if (includeFullBody === true || !hasProjectionFields(fields)) {
+  if (includeFullBody === true) {
     return [];
   }
 
   const nodeType = RECORD_TYPE_TO_NODE_TYPE[recordType];
   if (getHybridKind(nodeType) !== null) {
-    return unknownHybridProjectionKeys(fields);
+    return [...HYBRID_METADATA_FIELD_KEYS].sort();
   }
 
   if (projectionSources.length === 0) {
     return [];
   }
 
-  return fields.filter((field) =>
-    projectionSources.every(
-      (record) => !Object.prototype.hasOwnProperty.call(record, field)
-    )
-  );
+  const accepted = new Set<string>();
+  for (const record of projectionSources) {
+    for (const key of Object.keys(record)) {
+      accepted.add(key);
+    }
+  }
+
+  return [...accepted].sort();
+}
+
+function projectionFieldValidation(
+  recordType: ListRecordType,
+  projectionSources: ListedRecord[],
+  fields: string[] | undefined,
+  includeFullBody: boolean | undefined
+): { acceptedKeys: string[]; unknownKeys: string[]; note?: string } {
+  if (includeFullBody === true || !hasProjectionFields(fields)) {
+    return { acceptedKeys: [], unknownKeys: [] };
+  }
+
+  const acceptedKeys = acceptedProjectionKeys(recordType, projectionSources, includeFullBody);
+  const accepted = new Set(acceptedKeys);
+  const unknownKeys =
+    acceptedKeys.length === 0 ? [...fields] : fields.filter((field) => !accepted.has(field));
+
+  return {
+    acceptedKeys,
+    unknownKeys,
+    ...(acceptedKeys.length === 0 ? { note: EMPTY_ACCEPTED_PROJECTION_KEYS_NOTE } : {})
+  };
 }
 
 function withFullBody(row: RecordRow, record: ParsedRecord): ListedFullBodyRecord {
@@ -439,34 +456,37 @@ async function listRecordsImpl(args: ListRecordsArgs): Promise<ListRecordsRespon
       });
     }
 
-    const unknownFieldKeys = unknownProjectionKeys(
+    const filters = hasFilters(args.filters) ? args.filters : undefined;
+    const responseRows = filters !== undefined
+      ? parsedRows
+          .filter((entry) => matchesFilters(entry.filterSource, filters))
+      : parsedRows;
+
+    const projectionValidation = projectionFieldValidation(
       args.record_type,
-      parsedRows.map((entry) => entry.projectionSource),
+      responseRows.map((entry) => entry.projectionSource),
       args.fields,
       args.include_full_body
     );
-    if (unknownFieldKeys.length > 0) {
-      return createMcpError("invalid_input", `Unknown list_records fields key '${unknownFieldKeys[0]}'.`, {
-        field: "fields",
-        unknown_projection_keys: unknownFieldKeys,
-        record_type: args.record_type
-      });
+    if (projectionValidation.unknownKeys.length > 0) {
+      return createMcpError(
+        "invalid_input",
+        `Unknown list_records fields key '${projectionValidation.unknownKeys[0]}'.`,
+        {
+          field: "fields",
+          unknown_projection_keys: projectionValidation.unknownKeys,
+          record_type: args.record_type,
+          accepted_projection_keys: projectionValidation.acceptedKeys,
+          ...(projectionValidation.note === undefined ? {} : { note: projectionValidation.note })
+        }
+      );
     }
 
-    const filters = hasFilters(args.filters) ? args.filters : undefined;
-    const records = filters !== undefined
-      ? parsedRows
-          .filter((entry) => matchesFilters(entry.filterSource, filters))
-          .map((entry) =>
-            args.include_full_body === true
-              ? entry.output
-              : projectRecord(entry.output as ListedRecord, args.fields)
-          )
-      : parsedRows.map((entry) =>
-          args.include_full_body === true
-            ? entry.output
-            : projectRecord(entry.output as ListedRecord, args.fields)
-        );
+    const records = responseRows.map((entry) =>
+      args.include_full_body === true
+        ? entry.output
+        : projectRecord(entry.output as ListedRecord, args.fields)
+    );
 
     return {
       records,
