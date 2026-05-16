@@ -1,6 +1,6 @@
 # PEENH-011: Canon-addition envelope-shape reference must document world-canon create-op canonical ID field validation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None — documentation/reference update only in `.claude/skills/canon-addition/references/engine-envelope-shape.md`
@@ -8,9 +8,9 @@
 
 ## Problem
 
-PEENH-010 tightened `validate_patch_plan` / `submit_patch_plan` envelope-shape validation so malformed world-canon `create_*_record` payloads are rejected before downstream validators run. The public docs now name the behavior, but the canon-addition operator reference still only describes generic missing/malformed payloads and mentions the `create_ch_record` `change_id` asymmetry indirectly through path construction.
+At intake, PEENH-010 had tightened `validate_patch_plan` / `submit_patch_plan` envelope-shape validation so malformed world-canon `create_*_record` payloads are rejected before downstream validators run. The public docs named the behavior, but the canon-addition operator reference still only described generic missing/malformed payloads and mentioned the `create_ch_record` `change_id` asymmetry indirectly through path construction.
 
-That leaves the most likely operator mistake underdocumented: using `payload.ch_record.id` instead of `payload.ch_record.change_id`. The runtime now reports this as a single early `invalid_input` error with `validators_run: []`; canon-addition's reference should teach that exact failure mode and recovery.
+That left the most likely operator mistake underdocumented: using `payload.ch_record.id` instead of `payload.ch_record.change_id`. The runtime reports this as a single early `invalid_input` error with `validators_run: []`; canon-addition's reference now teaches that exact failure mode and recovery.
 
 ## Assumption Reassessment (2026-05-16)
 
@@ -19,7 +19,7 @@ That leaves the most likely operator mistake underdocumented: using `payload.ch_
 3. The shared boundary under audit is the prose contract consumed by the `canon-addition` skill during patch-plan assembly/debugging, specifically `.claude/skills/canon-addition/references/engine-envelope-shape.md` §2 and §6.
 4. FOUNDATIONS Rule 6 (No Silent Retcons) motivates the change: operators must see malformed canon-write payloads as root-cause envelope-shape errors, not downstream orphan-reference noise.
 5. This ticket touches a hard-gate validation reference only; it does not weaken approval tokens, submit ordering, the Mystery Reserve firewall, or any canon-write enforcement.
-6. Adjacent contradiction classified as future cleanup for this ticket: `.claude/skills/canon-addition/references/engine-envelope-shape.md` should explicitly state that `create_ch_record` uses `payload.ch_record.change_id` while the other world-canon create ops use `payload.<record_kind>.id`, and its failure-mode table should name the resulting `invalid_input` / `validators_run: []` behavior.
+6. Live reassessment confirmed the remaining gap was local to `.claude/skills/canon-addition/references/engine-envelope-shape.md`: the reference needed to state that `create_ch_record` uses `payload.ch_record.change_id` while the other world-canon create ops use `payload.<record_kind>.id`, and its failure-mode table needed to name the resulting `invalid_input` / `validators_run: []` behavior.
 
 ## Architecture Check
 
@@ -32,20 +32,20 @@ That leaves the most likely operator mistake underdocumented: using `payload.ch_
 2. The common failure-mode table names the new early validation behavior and `validators_run: []` skip signal -> codebase grep-proof and manual review.
 3. FOUNDATIONS Rule 6 remains strengthened because malformed canon-write payloads are diagnosed at the root cause -> FOUNDATIONS alignment check.
 
-## What to Change
+## Landed Changes
 
 ### 1. Canon-addition per-op payload prose
 
-Update `.claude/skills/canon-addition/references/engine-envelope-shape.md` §2 to explicitly distinguish:
+Updated `.claude/skills/canon-addition/references/engine-envelope-shape.md` §2 with a world-canon create-op canonical record-id field table that explicitly distinguishes:
 
 - `create_ch_record`: `payload.ch_record.change_id`
 - the other world-canon create ops: `payload.<record_kind>.id`
 
-Make clear that `payload.ch_record.id` is invalid and should be corrected to `payload.ch_record.change_id`, not aliased.
+The reference now states that `payload.ch_record.id` is invalid and should be corrected to `payload.ch_record.change_id`, not aliased.
 
 ### 2. Failure-mode table
 
-Update §6 "Pre-validation envelope-shape errors" to include the PEENH-010 behavior: missing/malformed canonical ID fields on world-canon create-op payloads fail before validators run, with an `invalid_input` field path such as `patch_plan.patches[N].payload.ch_record.change_id` and `validators_run: []`.
+Updated §6 "Pre-validation envelope-shape errors" to include the PEENH-010 behavior: missing/malformed canonical ID fields on world-canon create-op payloads fail before validators run, with an `invalid_input` field path such as `patch_plan.patches[N].payload.ch_record.change_id` and `validators_run: []`.
 
 ## Files to Touch
 
@@ -59,10 +59,10 @@ Update §6 "Pre-validation envelope-shape errors" to include the PEENH-010 behav
 
 ## Acceptance Criteria
 
-### Tests That Must Pass
+### Tests That Passed
 
 1. `rg -n "payload\\.ch_record\\.change_id|payload\\.ch_record\\.id|validators_run: \\[\\]|canonical ID field" .claude/skills/canon-addition/references/engine-envelope-shape.md`
-2. `git diff --check -- .claude/skills/canon-addition/references/engine-envelope-shape.md tickets/PEENH-011-canon-addition-engine-envelope-shape-ch-field-guidance.md`
+2. `git diff --check -- .claude/skills/canon-addition/references/engine-envelope-shape.md archive/tickets/PEENH-011-canon-addition-engine-envelope-shape-ch-field-guidance.md`
 3. Manual review confirms the reference recommends `change_id` for CH records and does not introduce a backwards-compatibility alias.
 
 ### Invariants
@@ -76,8 +76,22 @@ Update §6 "Pre-validation envelope-shape errors" to include the PEENH-010 behav
 
 1. None — documentation-only ticket; verification is command-based and existing PEENH-010 runtime coverage is named in Assumption Reassessment.
 
-### Commands
+### Commands Run
 
 1. `rg -n "payload\\.ch_record\\.change_id|payload\\.ch_record\\.id|validators_run: \\[\\]|canonical ID field" .claude/skills/canon-addition/references/engine-envelope-shape.md`
-2. `git diff --check -- .claude/skills/canon-addition/references/engine-envelope-shape.md tickets/PEENH-011-canon-addition-engine-envelope-shape-ch-field-guidance.md`
+2. `git diff --check -- .claude/skills/canon-addition/references/engine-envelope-shape.md archive/tickets/PEENH-011-canon-addition-engine-envelope-shape-ch-field-guidance.md`
 3. Manual review of `.claude/skills/canon-addition/references/engine-envelope-shape.md` §2 and §6 is the correct verification boundary because this ticket changes operator prose only.
+
+## Outcome
+
+Completed. The canon-addition engine-envelope reference now names the canonical record-id field for every world-canon create op, calls out the `create_ch_record` `change_id` asymmetry directly, rejects `payload.ch_record.id` as an alias, and documents the skipped-envelope `invalid_input` / `validators_run: []` behavior for malformed canonical ID fields.
+
+## Verification Result
+
+1. `rg -n "payload\\.ch_record\\.change_id|payload\\.ch_record\\.id|validators_run: \\[\\]|canonical ID field" .claude/skills/canon-addition/references/engine-envelope-shape.md` passed, showing the accepted CH path, the explicit invalid `payload.ch_record.id` warning, the canonical ID field prose, and `validators_run: []` failure-mode wording.
+2. Manual review confirmed §2 recommends `payload.ch_record.change_id`, does not introduce a compatibility alias, and §6 says skipped envelope-shape failures stop before validator delegation.
+3. `git diff --check -- .claude/skills/canon-addition/references/engine-envelope-shape.md archive/tickets/PEENH-011-canon-addition-engine-envelope-shape-ch-field-guidance.md` passed.
+
+## Deviations
+
+1. None. The run stayed docs/reference-only and did not modify runtime, schemas, tests, or unrelated skill references.
