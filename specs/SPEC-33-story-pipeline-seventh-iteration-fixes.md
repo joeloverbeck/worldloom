@@ -427,6 +427,8 @@ A skill author or future validator could implement an array shape rejected by `r
 
 But Phase 3 deterministic check 3 (`forbidden_mystery_resolution`, lines 185–189, after SPEC-32 D1's amendment) retrieves firewall fields via `mcp__worldloom__get_firewall_content(world_slug, m_ids=<plan §11 ids>)` **unless the page plan already inlines the same fields**. The unconditional "no retrieval needed" claim contradicts the conditional retrieval path that runs in standard operation when plan §11 names mysteries that aren't fully inlined.
 
+**Implementation note (2026-05-16, SPEC33STOPIPSEV-008)**: landed in `.claude/skills/branching-story-prose-attach/SKILL.md`. The World-State Prerequisites paragraph and the FOUNDATIONS Alignment / Tooling Recommendation row now preserve the "no normal context-packet retrieval" guidance while naming the conditional `mcp__worldloom__get_firewall_content` path when plan §11 does not inline Mystery Reserve firewall fields. Remaining D8 proposal text below is historical intake context.
+
 **Change**:
 
 1. **Skill prose** (`.claude/skills/branching-story-prose-attach/SKILL.md` both line 114 and the FOUNDATIONS Alignment / Tooling Recommendation row at ~line 326): replace the "No world-canon retrieval needed" sentence with:
