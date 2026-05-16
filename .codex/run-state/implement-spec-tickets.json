@@ -1,22 +1,21 @@
 {
   "originating_spec": "specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md",
   "archived_spec": null,
-  "last_ticket": "tickets/SPEC36STOPIPNIN-003.md",
-  "last_result": "blocked_retargeted_to_prerequisites",
-  "last_work_commit": "6f7439e48c4781740de6e100b656631f3776d2fe",
+  "last_ticket": "archive/tickets/SPEC36STOPIPNIN-004.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "841d972a16e179fb44d77e07da9daef8244fc5d1",
   "last_state_commit": "self",
   "next_target": "tickets/SPEC36STOPIPNIN-005.md",
   "queue": [
     "tickets/SPEC36STOPIPNIN-005.md",
     "tickets/SPEC36STOPIPNIN-006.md",
-    "tickets/SPEC36STOPIPNIN-003.md",
-    "tickets/SPEC36STOPIPNIN-004.md"
+    "tickets/SPEC36STOPIPNIN-003.md"
   ],
   "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
-  "owned_dirty_summary": "tickets/SPEC36STOPIPNIN-003.md dependency/reassessment truthing for blocked queue retarget",
+  "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree after retarget commit; expected ignored artifacts include user-local briefs/worlds content, .claude/settings.local.json, and tool package dist/node_modules outputs",
+  "dirty_state": "clean tracked worktree after state commit; expected ignored artifacts include tools/validators/dist and tools/validators/node_modules from package proof",
   "updated_at": "2026-05-16"
 }
