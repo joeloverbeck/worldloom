@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC36STOPIPNIN-004.md",
+  "last_ticket": "archive/tickets/SPEC36STOPIPNIN-005.md",
   "last_result": "completed_archived",
-  "last_work_commit": "841d972a16e179fb44d77e07da9daef8244fc5d1",
+  "last_work_commit": "91988c3393ced4b454dcfb9cd52688cf956b477d",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC36STOPIPNIN-005.md",
+  "next_target": "tickets/SPEC36STOPIPNIN-006.md",
   "queue": [
-    "tickets/SPEC36STOPIPNIN-005.md",
     "tickets/SPEC36STOPIPNIN-006.md",
     "tickets/SPEC36STOPIPNIN-003.md"
   ],
