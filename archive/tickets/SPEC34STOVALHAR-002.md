@@ -83,7 +83,7 @@ Add to `tools/validators/src/public/registry.ts`:
 - `tools/validators/tests/integration/spec04-verification.test.ts` (modify — structural/all-validator count assertions)
 - `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply skip expectation for this scoped validator)
 - `tools/validators/README.md` (modify — structural validator inventory/count)
-- `specs/SPEC-34-story-validator-hardening.md` (modify — implementation note truthing for D2 landing and narrowed CHC/SF boundary)
+- `archive/specs/SPEC-34-story-validator-hardening.md` (modify — implementation note truthing for D2 landing and narrowed CHC/SF boundary)
 
 ## Out of Scope
 

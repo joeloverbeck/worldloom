@@ -2,7 +2,7 @@
 
 # SPEC-34 — Story Validator Hardening
 
-**Status**: ACTIVE
+**Status**: COMPLETED
 **Date**: 2026-05-16
 **Supersedes**: none (extends `archive/specs/SPEC-33-story-pipeline-seventh-iteration-fixes.md` §Risks "Missing audit-named validators")
 **Companion triage**: `docs/triage/2026-05-16-story-related-improvements-seventh-iteration-triage.md` — SPEC-34 is the validator-hardening follow-up named in the triage's "Cross-spec follow-ups" section under SPEC-33.
@@ -10,7 +10,7 @@
 
 ## Problem Statement
 
-The seventh-iteration audit (per `reports/story-related-improvements-seventh-iteration.md` §11.3) and the seven story-pipeline skills' prose name four structural validators — `branch_isolation`, `observer_firewall`, `lie_promoted_silently`, and `canon_baseline_drift` — as the deterministic enforcement surfaces for FOUNDATIONS §Story Bundles §4b (Canon Baseline Drift), §5 (Validation Rules at Story Scope — Rule 4 No Globalization by Accident), §6a (Belief vs. Fact), and §6b (Information / Observer Firewall). Audit §11.3's prompt-coverage test plan expects each as a deterministic gate (or deterministic-subset gate for observer_firewall) — see lines 824 (`observer_firewall_violation`), 829 (`branch_isolation`), 834 (`canon_baseline_full_ch_window`), 844 (`global_author_pool_branch_local_leakage`), 855 (`belief_fact_separation_lies_rumors` → `lie_promoted_silently`). The shared story-state contract at `.claude/skills/_shared-templates/story-state-contract.md` §7 explicitly names `branch_isolation` as Eight-Shared-Hard-Gate 4 and Observer Firewall as part of gate 7. At spec intake, none of the four was implemented as a standalone validator in `tools/validators/src/structural/`; D1-D3 have since landed, while D4 remains the active implementation gap.
+The seventh-iteration audit (per `reports/story-related-improvements-seventh-iteration.md` §11.3) and the seven story-pipeline skills' prose name four structural validators — `branch_isolation`, `observer_firewall`, `lie_promoted_silently`, and `canon_baseline_drift` — as the deterministic enforcement surfaces for FOUNDATIONS §Story Bundles §4b (Canon Baseline Drift), §5 (Validation Rules at Story Scope — Rule 4 No Globalization by Accident), §6a (Belief vs. Fact), and §6b (Information / Observer Firewall). Audit §11.3's prompt-coverage test plan expects each as a deterministic gate (or deterministic-subset gate for observer_firewall) — see lines 824 (`observer_firewall_violation`), 829 (`branch_isolation`), 834 (`canon_baseline_full_ch_window`), 844 (`global_author_pool_branch_local_leakage`), 855 (`belief_fact_separation_lies_rumors` → `lie_promoted_silently`). The shared story-state contract at `.claude/skills/_shared-templates/story-state-contract.md` §7 explicitly names `branch_isolation` as Eight-Shared-Hard-Gate 4 and Observer Firewall as part of gate 7. At spec intake, none of the four was implemented as a standalone validator in `tools/validators/src/structural/`; all four validators and the CLI integration sanity capstone have now landed.
 
 At D4 intake, the closest coverage was `tools/validators/src/structural/canon-drift-classification-evidence.ts`, which audits drift-classification rationale evidence (does a classification cite a CH entry?) but does NOT perform the full CH-window traversal the audit's `canon_baseline_full_ch_window` test requires (a classification citing only the latest CH passes the existing validator even when intervening CH entries should have been considered). D4 landed the standalone `canon_baseline_drift` validator to cover that gap; its discipline also lives at the hard-gate layer in PG-authoring skills (`branching-story-bootstrap`, `branching-story-turn-cycle`), but the SPEC-34 validator-layer work now catches the D4 violation when it slips past the hard gates or surfaces in non-authoring contexts (replay, drift classification, sibling-bundle audits).
 
@@ -308,3 +308,32 @@ After all deliverables land, the following acceptance evidence is required:
 - **Mid-implementation cascade to `branching-story-health-audit`** `(pragmatic)`: health-audit Phase 2d currently emits `observer_firewall_violation` as an audit finding without a backing standalone validator. Once D2 lands, health-audit Phase 2d could optionally call the new validator and reformat its findings against the validator's diagnostic codes. This cascade is NOT in scope for SPEC-34; the validator stands alone, and any health-audit alignment is a follow-up consideration after D2 lands and stabilizes.
 
 - **Shared-template proliferation continuity from SPEC-33**: SPEC-33 §Risks noted growing `.claude/skills/_shared-templates/` contents. This spec adds zero shared-template files; no continuity risk. (Noted here only for cross-spec audit-trail clarity.)
+
+## Outcome
+
+Completed: 2026-05-16
+
+SPEC-34 landed as five archived tickets:
+
+- `archive/tickets/SPEC34STOVALHAR-001.md` — `branch_isolation` structural validator.
+- `archive/tickets/SPEC34STOVALHAR-002.md` — `observer_firewall` deterministic-subset structural validator.
+- `archive/tickets/SPEC34STOVALHAR-003.md` — `lie_promoted_silently` structural validator.
+- `archive/tickets/SPEC34STOVALHAR-004.md` — `canon_baseline_drift` structural validator with CH-window traversal.
+- `archive/tickets/SPEC34STOVALHAR-005.md` — temp-indexed CLI integration sanity across all four new validators.
+
+What changed:
+
+- Added the four standalone story structural validators and registered them in `tools/validators/src/public/registry.ts`.
+- Added focused structural tests for each validator plus a capstone CLI integration test at `tools/validators/tests/integration/spec34-integration.test.ts`.
+- Kept the implementation additive: no patch-engine ops, MCP retrieval surfaces, schema fields, or production CLI behavior changed.
+
+Verification:
+
+- D1-D4 were verified by their archived ticket proof lanes.
+- Final capstone verification passed with `cd tools/validators && node --test dist/tests/integration/spec34-integration.test.js`.
+- Final package verification passed with `cd tools/validators && npm run test` — 302 tests passed, 0 failed.
+
+Deviations from original plan:
+
+- The D5 integration sanity proof uses temp indexed worlds rather than checked-in fixture-world directories because the live `world-validate` CLI accepts a world slug under `worlds/<slug>/` and requires `_index/world.db`.
+- D2's schema-valid CHC enforcement landed BEL-focused plus SLT holder-consistency coverage, while the SF access-route branch remains defensive malformed-record coverage because the live `story-choice` schema does not allow `SF` ids in `CHC.grounded_in.records[]`.
