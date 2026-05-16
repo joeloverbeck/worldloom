@@ -3,7 +3,7 @@ import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
-import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
+import { nonPropagationTagShape } from "../structural/non-propagation-tag-shape.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
@@ -43,7 +43,7 @@ export const structuralValidators: readonly Validator[] = [
   sltCreatedAtPageOriginConsistency,
   canonBaselineDrift,
   canonDriftClassificationEvidence,
-  expectedWitnessCoverage,
+  nonPropagationTagShape,
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,

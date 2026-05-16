@@ -123,7 +123,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     );
     assert.equal(canonBaselineDriftExecution?.status, "skipped");
     const expectedWitnessExecution = result.executions.find(
-      (execution) => execution.name === "expected_witness_coverage"
+      (execution) => execution.name === "non_propagation_tag_shape"
     );
     assert.equal(expectedWitnessExecution?.status, "skipped");
     const proposalPackageExecution = result.executions.find(
