@@ -233,7 +233,7 @@ For each terminal leaf (`continuation.terminal_status: terminal_closed`):
 
 ### Phase 2g: Causal dependency health
 
-Apply the same judgment-based replay sub-checks across replayed branch state that `branching-story-turn-cycle` Phase 9 applies before a page commits. Full deterministic `causal_dependency_threat_scan` validator implementation is deferred; see SPEC-35 §Risks & Open Questions.
+Apply the same replay sub-checks across replayed branch state that `branching-story-turn-cycle` Phase 9 applies before a page commits. Full deterministic `causal_dependency_threat_scan` validator is registered; see `tools/validators/src/structural/causal-dependency-threat-scan.ts` and SPEC-36 D1. Replay sub-checks listed here remain in place to surface the same verdicts during health-audit replay even when patch-plan validation was bypassed during initial commit.
 
 - `choice_dependency_clobbered` (ERROR): a record in any emitted `CHC.grounded_in.records[]` is closed, superseded, moved, or invalidated by this turn while the `CHC` remains emitted or player-visible.
 - `affordance_dependency_clobbered` (ERROR): a `PG.state_snapshot.visible_affordances` entry remains after its grounding `STLOC`, `STOBJ`, or `STENT` is no longer active, accessible, or located where the affordance asserts.

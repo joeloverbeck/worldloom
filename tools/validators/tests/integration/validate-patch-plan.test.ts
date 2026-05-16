@@ -110,6 +110,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "audit_only_se_shape"
     );
     assert.equal(auditOnlyExecution?.status, "skipped");
+    const causalDependencyExecution = result.executions.find(
+      (execution) => execution.name === "causal_dependency_threat_scan"
+    );
+    assert.equal(causalDependencyExecution?.status, "skipped");
     const sltCreatedAtPageExecution = result.executions.find(
       (execution) => execution.name === "slt_created_at_page_origin_consistency"
     );
@@ -155,6 +159,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== recursiveClosureExecution &&
         row !== snapshotIntegrityExecution &&
         row !== auditOnlyExecution &&
+        row !== causalDependencyExecution &&
         row !== sltCreatedAtPageExecution &&
         row !== canonDriftEvidenceExecution &&
         row !== canonBaselineDriftExecution &&

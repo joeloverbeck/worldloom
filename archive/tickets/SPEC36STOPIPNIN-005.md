@@ -1,9 +1,9 @@
 # SPEC36STOPIPNIN-005: Implement `causal_dependency_threat_scan` validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
-**Engine Changes**: Yes — `tools/validators/src/structural/causal-dependency-threat-scan.ts` (new structural validator); `tools/validators/src/public/registry.ts` (registration); `tools/validators/tests/structural/registry.test.ts` (test extension); `tools/validators/tests/structural/causal-dependency-threat-scan.test.ts` (new test file); `.claude/skills/branching-story-turn-cycle/SKILL.md` (skill prose at line 443); `.claude/skills/branching-story-health-audit/SKILL.md` (skill prose at line 236)
+**Engine Changes**: Yes — `tools/validators/src/structural/causal-dependency-threat-scan.ts` (new structural validator); `tools/validators/src/public/registry.ts` (registration); `tools/validators/tests/structural/registry.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, `tools/validators/tests/integration/validate-patch-plan.test.ts`, and `tools/validators/tests/structural/causal-dependency-threat-scan.test.ts` (test updates); `tools/validators/README.md` (inventory count/name truthing); `.claude/skills/branching-story-turn-cycle/SKILL.md` and `.claude/skills/branching-story-health-audit/SKILL.md` (skill prose)
 **Deps**: `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`
 
 ## Problem
@@ -17,6 +17,7 @@
 3. Cross-artifact boundary under audit: the structural-validator framework contract at `tools/validators/src/structural/utils.ts` and the consumer surfaces in `branching-story-turn-cycle` Phase 9 and `branching-story-health-audit` Phase 2g. The validator framework's `Validator` type (per `tools/validators/src/framework/types.ts`) is the contract the new validator must satisfy; the skill-prose consumers must be updated to reflect "validator-backed" status rather than "deferred".
 4. FOUNDATIONS principles: Rule 5 (No Consequence Evasion) per `docs/FOUNDATIONS.md:452-453` — *"If a new fact has obvious second-order effects, either integrate them or explicitly explain why they do not manifest"*. Clobbering a dependency a visible CHC / OBL / SLT relies on without closing the dependent record IS consequence evasion. §Story Bundles §4a (Plan-Authority Boundary) per `docs/FOUNDATIONS.md:590-594` — *"Story state is authoritative at page-plan commit. Rendered prose is a rendering of that state, not a second state engine."* — the page snapshot's authority over what the player can act on is broken when a visible record's grounding has been clobbered.
 5. Canon Safety surface: new structural validator gates patch-engine pre-apply via `validate_patch_plan` / `submit_patch_plan` for patch plans containing `create_se_record | create_pg_record | create_chc_record | create_slt_record` ops. The validator does NOT weaken the Mystery Reserve firewall (Rule 7) or silently resolve a Mystery Reserve entry — it adds enforcement for an orthogonal concern (causal dependency integrity) without touching MR firewall logic.
+6. Live same-package inventory scan found same-seam registry-count surfaces beyond the drafted file list: `tools/validators/tests/integration/spec04-verification.test.ts` asserted `20` structural / `30` total validators; `tools/validators/tests/integration/validate-patch-plan.test.ts` enumerated skipped structural validators for a clean non-story pre-apply plan; `tools/validators/README.md` still said `19 structural validators` and omitted `canon_baseline_drift` from its inventory. These are validator-registry truthing fallout, so they moved with this ticket rather than remaining stale after registration.
 
 ## Architecture Check
 
@@ -93,6 +94,9 @@ The Rule 5 alignment row mentions `causal_dependency_threat_scan` (judgment-base
 - `tools/validators/src/public/registry.ts` (modify)
 - `tools/validators/tests/structural/registry.test.ts` (modify)
 - `tools/validators/tests/structural/causal-dependency-threat-scan.test.ts` (new)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — registry count)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean-plan skipped execution list)
+- `tools/validators/README.md` (modify — structural validator count and inventory)
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify — lines 443, 510)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify — line 236)
 
@@ -109,7 +113,7 @@ The Rule 5 alignment row mentions `causal_dependency_threat_scan` (judgment-base
 
 1. All 8 new test cases in `tools/validators/tests/structural/causal-dependency-threat-scan.test.ts` pass under `npm run build && npm test` in `tools/validators/`.
 2. `tools/validators/tests/structural/registry.test.ts` expected validator-name list includes `causal_dependency_threat_scan` and the test passes.
-3. Full `npm test` in `tools/validators/` is green (no regression in existing 20 structural / 10 rule validators).
+3. Full `npm test` in `tools/validators/` is green (no regression in the existing 20 structural / 10 rule validators, and the new 21st structural validator is included in registry/capstone coverage).
 4. `grep -n 'causal_dependency_threat_scan.*deferred\\|deferred.*causal_dependency_threat_scan' .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md` returns ZERO hits (the "deferred" wording has been removed from both consumer sites).
 
 ### Invariants
@@ -124,9 +128,36 @@ The Rule 5 alignment row mentions `causal_dependency_threat_scan` (judgment-base
 
 1. `tools/validators/tests/structural/causal-dependency-threat-scan.test.ts` (new) — 8 tests covering all four verdict codes + their accept paths; rationale per change list step 4.
 2. `tools/validators/tests/structural/registry.test.ts` (modify) — extend expected validator-name list with the new entry.
+3. `tools/validators/tests/integration/spec04-verification.test.ts` (modify) — update structural/total validator counts to 21/31.
+4. `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify) — assert the new validator is skipped for clean non-story pre-apply plans.
 
 ### Commands
 
 1. `cd tools/validators && npm run build && node --test dist/tests/structural/causal-dependency-threat-scan.test.js` — targeted test-file run.
 2. `cd tools/validators && npm test` — full-suite proof.
 3. `grep -n 'causal_dependency_threat_scan.*deferred\\|deferred.*causal_dependency_threat_scan' .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md` — confirm skill-prose pointers flipped.
+
+## Outcome
+
+Completed: 2026-05-16
+
+What changed:
+
+- Added and registered `causal_dependency_threat_scan` as a structural validator with fail severity, full-world coverage, pre-apply coverage for `create_se_record`, `create_pg_record`, `create_chc_record`, and `create_slt_record`, plus incremental touched-file coverage for the same story surfaces.
+- Implemented the four verdict families: `choice_dependency_clobbered`, `affordance_dependency_clobbered`, `obligation_counterparty_unavailable_without_transfer`, and `slt_precondition_clobbered`.
+- Added focused structural tests for the four rejection paths, four accept paths, and run-mode selector behavior.
+- Updated registry/capstone/pre-apply execution-list tests and the validators README inventory so same-package surfaces now report 21 structural validators and include `causal_dependency_threat_scan`.
+- Updated the turn-cycle and health-audit skill prose from "deferred/judgment-based" to the registered validator-backed status.
+
+## Verification Result
+
+- `cd tools/validators && npm run build` — PASS.
+- `cd tools/validators && node --test dist/tests/structural/causal-dependency-threat-scan.test.js` — PASS; 9 tests passed.
+- `cd tools/validators && npm test` — PASS; 315 tests passed.
+- `grep -n 'causal_dependency_threat_scan\\|causalDependencyThreatScan' tools/validators/src/public/registry.ts` — PASS; import and array entry found.
+- `grep -n 'causal_dependency_threat_scan.*deferred\\|deferred.*causal_dependency_threat_scan' .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md` — PASS; command exited 1 with zero stale deferred hits.
+
+## Deviations
+
+- The landed SLT-precondition subcheck uses the ticket's allowed overapproximation path: hard preconditions are scanned for explicit clobbered record ids rather than fully evaluating the storylet predicate DSL. This keeps the validator deterministic over existing record fields and leaves predicate-aware refinement out of scope.
+- Same-package inventory/capstone surfaces were added to `Files to Touch` after live reassessment. The README also gained the already-registered `canon_baseline_drift` entry because its absence made the validator inventory stale before this ticket; leaving it omitted while updating the count to 21 would have produced an internally inconsistent handoff.

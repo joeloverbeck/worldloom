@@ -67,7 +67,7 @@ On failure, emit one of:
 
 ### 2. Register the validator in `tools/validators/src/public/registry.ts`
 
-Add `import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";` (alphabetical-by-export-name with other imports). Append `expectedWitnessCoverage` to the `structuralValidators` readonly array (after the existing 20 entries; if SPEC36STOPIPNIN-005 lands first, append after its `causalDependencyThreatScan` entry — either ordering works since the array is unordered for validator-runner consumers).
+Add `import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";` (alphabetical-by-export-name with other imports). Append `expectedWitnessCoverage` to the `structuralValidators` readonly array after the existing 21 entries, including the `causalDependencyThreatScan` entry landed by `archive/tickets/SPEC36STOPIPNIN-005.md`; the array is unordered for validator-runner consumers.
 
 ### 3. Update `tools/validators/tests/structural/registry.test.ts`
 
@@ -127,7 +127,7 @@ with:
 - Schema additions or field expansions. Per SPEC-36 §13 Anti-recommendations, no new SE fields (`SE.event_kind` enum expansion, `SE.requires_witness_coverage` boolean) are added. The deterministic STLOC + STSTAT co-location trigger covers the audit motivation without schema changes.
 - Modifying `non_propagation_tag_shape` validator behavior. The sibling validator is preserved unchanged; only its source comment is updated to reflect that semantic coverage now lives in `expected_witness_coverage`.
 - Semantic event-class classification (which events are "secrecy / betrayal / public ritual"). Per SPEC-36 §Risks, the deterministic trigger heuristic is the chosen approach; semantic classification stays in skill prose where it already lives. Future calibration after pilot-tier authoring may revisit per §Risks.
-- `causal_dependency_threat_scan` validator (SPEC-36 §D1 / SPEC36STOPIPNIN-005). Independent of this ticket; both can land in parallel.
+- `causal_dependency_threat_scan` validator (SPEC-36 §D1 / `archive/tickets/SPEC36STOPIPNIN-005.md`). Independent sibling validator; it has already landed and does not need further edits in this ticket.
 
 ## Acceptance Criteria
 
