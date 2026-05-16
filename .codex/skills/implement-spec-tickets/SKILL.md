@@ -196,7 +196,7 @@ If compaction, interruption, or resume recovery prevents this compact review blo
 
 If `post-ticket-review` creates or materially updates a follow-up ticket, active spec, active ticket dependency, or current contract doc, run:
 
-Archive-path and dependency repairs in active specs or active sibling tickets count as material handoff updates for this trigger, even when the repairs are mechanical.
+Archive-path and dependency repairs in active specs, active sibling tickets, or same-family archived tickets count as material handoff updates for this trigger, even when the repairs are mechanical.
 
 ```text
 $skill-audit .codex/skills/post-ticket-review
@@ -215,7 +215,7 @@ Before committing:
 1. Refresh `git status --short`.
 2. Inspect `git diff --cached --name-status` before staging owned paths. If pre-existing staged entries are unrelated to the current iteration, unstage those paths or stop for approval before committing; path-scoped `git add` will not protect the commit from unrelated entries already in the index.
 3. Verify all dirty paths are either owned by this iteration, previously approved for inclusion, or generated/ignored artifacts that should remain unstaged.
-4. Run `git diff --check` or the child skills' stronger equivalent over tracked and newly created owned files.
+4. Run `git diff --check` or the child skills' stronger equivalent over tracked and newly created owned files. If owned files are newly untracked, plain `git diff --check` will not inspect their content; cover each new file with `git diff --check --no-index /dev/null <path>` or temporary `git add -N <path>` plus cleanup before final status.
 5. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
 6. Re-run `git diff --cached --name-status` after staging and confirm every staged path is owned by this iteration, explicitly approved, or intentional same-family state needed for the queue/handoff.
 7. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening. Prefer a concise truthful shape such as `SPEC35STOPIPEIG-001 implement and archive observer firewall fix`. Mention `follow-up` or `skill hardening` only when the committed iteration actually created or updated a follow-up ticket or changed a skill.
