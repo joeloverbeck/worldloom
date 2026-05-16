@@ -4,6 +4,7 @@ import { canonDriftClassificationEvidence } from "../structural/canon-drift-clas
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
+import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
@@ -34,6 +35,7 @@ export const structuralValidators: readonly Validator[] = [
   crossFileReference,
   recordSchemaCompliance,
   storyFactAuthority,
+  liePromotedSilently,
   branchIsolation,
   observerFirewall,
   auditOnlySeShape,

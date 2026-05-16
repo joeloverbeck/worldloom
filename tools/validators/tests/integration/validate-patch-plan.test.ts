@@ -138,6 +138,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "observer_firewall"
     );
     assert.equal(observerFirewallExecution?.status, "skipped");
+    const liePromotedSilentlyExecution = result.executions.find(
+      (execution) => execution.name === "lie_promoted_silently"
+    );
+    assert.equal(liePromotedSilentlyExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -153,7 +157,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== proposalPackageExecution &&
         row !== validationTraceExecution &&
         row !== branchIsolationExecution &&
-        row !== observerFirewallExecution
+        row !== observerFirewallExecution &&
+        row !== liePromotedSilentlyExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

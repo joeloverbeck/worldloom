@@ -1,6 +1,6 @@
 # SPEC34STOVALHAR-003: lie_promoted_silently structural validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new structural validator at `tools/validators/src/structural/lie-promoted-silently.ts`; new test fixture at `tools/validators/tests/structural/lie-promoted-silently.test.ts`; one-line registry append at `tools/validators/src/public/registry.ts`. No impact on existing validators.
@@ -18,6 +18,8 @@ FOUNDATIONS §Story Bundles §6a (Belief vs. Fact) requires `SF` records (branch
 4. FOUNDATIONS principle motivating this ticket — §Story Bundles §6a (Belief vs. Fact): `truth_relation` distinguishes belief from truth; lawful authority for promoting a non-true BEL to branch state is `branch_local_counterfactual` only. Indirectly aligns with Rule 6 (No Silent Retcons) per FOUNDATIONS.md — `lie_promoted_silently` catches one class of silent retcon (silent belief-to-fact authority promotion); other Rule 6 surfaces remain `canon-addition`'s responsibility.
 5. Adjacent contradiction noted at reassess-spec time: D3 Case 6 (`canon_linked` + `[CF-3, BEL-13]` where BEL-13 is counterfactual) would PASS the existing `story-fact-authority.ts` (CF-3 satisfies the CF-parent requirement) but FAIL D3 (counterfactual BEL is unlawful for canon_linked). Classified as **required consequence of this ticket** — the two validators are complementary by design per spec §D3 line 170 §Boundary clause; modest overlap on the canon_linked case is intended, not a bug to reconcile.
 6. Mismatch + correction: spec §Verification item 3 cites `npm run test -- --grep 'lie-promoted-silently'` (Mocha syntax); the actual runner is node:test (`node --test dist/tests/**/*.test.js` per `tools/validators/package.json`). Corrected to direct invocation `node --test dist/tests/structural/lie-promoted-silently.test.js`. Mechanical drift; spec intent preserved.
+7. Implementation hard-gate check: because `lie_promoted_silently.applies_to` runs for `create_sf_record` pre-apply patch plans, `docs/HARD-GATE-DISCIPLINE.md` was read before closeout. The validator preserves fail-closed behavior by emitting `severity: "fail"` under the normal validator framework; it does not add approval-token behavior, patch submission behavior, or any canon-write shortcut.
+8. Same-package inventory fallout: registering the validator made existing validator inventory surfaces stale. `tools/validators/README.md`, `tools/validators/tests/structural/registry.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, and `tools/validators/tests/integration/validate-patch-plan.test.ts` were included as same-seam proof-surface updates.
 
 ## Architecture Check
 
@@ -76,6 +78,10 @@ Add to `tools/validators/src/public/registry.ts`:
 - `tools/validators/src/structural/lie-promoted-silently.ts` (new)
 - `tools/validators/tests/structural/lie-promoted-silently.test.ts` (new)
 - `tools/validators/src/public/registry.ts` (modify — 1 import line + 1 array entry)
+- `tools/validators/tests/structural/registry.test.ts` (modify — expected structural registry list)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — structural/all-validator counts)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean-plan skipped-validator expectation)
+- `tools/validators/README.md` (modify — structural validator inventory/count)
 
 ## Out of Scope
 
@@ -100,10 +106,32 @@ Add to `tools/validators/src/public/registry.ts`:
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/lie-promoted-silently.test.ts` (new) — exercises the 6 fixture cases above; covers no-BEL-PASS, lawful-counterfactual-PASS, true-BEL-PASS, unlawful-false-BEL-FAIL, unlawful-contested-BEL-FAIL, and canon-linked-counterfactual-BEL-FAIL paths.
+1. `tools/validators/tests/structural/lie-promoted-silently.test.ts` (new) — exercises the 6 fixture cases above plus `applies_to` selector coverage; covers no-BEL-PASS, lawful-counterfactual-PASS, true-BEL-PASS, unlawful-false-BEL-FAIL, unlawful-contested-BEL-FAIL, canon-linked-counterfactual-BEL-FAIL, and pre-apply/incremental selector paths.
+2. `tools/validators/tests/structural/registry.test.ts` (modified) — asserts the registered structural validator list includes `lie_promoted_silently`.
+3. `tools/validators/tests/integration/spec04-verification.test.ts` and `tools/validators/tests/integration/validate-patch-plan.test.ts` (modified) — keep package-level validator counts and clean pre-apply skipped-validator expectations truthful after registry expansion.
 
 ### Commands
 
 1. `cd tools/validators && npm run build && node --test dist/tests/structural/lie-promoted-silently.test.js` (targeted)
 2. `cd tools/validators && npm run test` (full suite — confirms no regressions; specifically that `story-fact-authority.test.ts` still passes after the registry append).
 3. The targeted command is the correct verification boundary for the validator's own correctness; the full-suite command catches integration regressions including the complementary-validator overlap on the canon_linked case.
+
+## Outcome
+
+Completed: 2026-05-16
+
+What changed:
+- Added `tools/validators/src/structural/lie-promoted-silently.ts`, a fail-mode structural validator that rejects `SF.authority ∈ {branch_local, canon_candidate, canon_linked}` when `SF.derived_from[]` cites a non-true BEL (`false`, `partly_true`, `contested`, or `branch_counterfactual`).
+- Added focused tests covering the six D3 PASS/FAIL cases plus selector behavior for full-world, pre-apply `create_sf_record`, non-owned pre-apply ops, and touched SF files.
+- Registered `lie_promoted_silently` in `structuralValidators` adjacent to `story_fact_authority`, and truthed same-package validator inventory/count surfaces.
+
+Verification result:
+- `cd tools/validators && npm run build` — PASS.
+- `cd tools/validators && node --test dist/tests/structural/lie-promoted-silently.test.js` — PASS, 7/7 tests.
+- `cd tools/validators && grep -nE 'liePromotedSilently' src/public/registry.ts` — PASS, import and array entry found.
+- `cd tools/validators && grep -n 'derived_from\|truth_relation' src/structural/lie-promoted-silently.ts` — PASS, implementation reads both required fields.
+- `cd tools/validators && npm run test` — PASS, 294/294 tests.
+
+Deviations from original plan:
+- Same-package inventory surfaces were added to the touched-file set because registry expansion made the README, structural registry assertion, SPEC-04 validator counts, and clean pre-apply skipped-validator expectation stale.
+- The validator participates in pre-apply for `create_sf_record` patch plans; `docs/HARD-GATE-DISCIPLINE.md` was read and the implementation preserves fail-closed validator behavior without changing approval-token or submit flow.

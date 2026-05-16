@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — adds an integration fixture story-bundle under `tools/validators/tests/integration/` (or equivalent under the existing tests/ layout) exercising all four new validators end-to-end via the `world-validate` CLI. No new production code; no impact on existing validators.
-**Deps**: archive/tickets/SPEC34STOVALHAR-001.md, archive/tickets/SPEC34STOVALHAR-002.md, SPEC34STOVALHAR-003, SPEC34STOVALHAR-004
+**Deps**: archive/tickets/SPEC34STOVALHAR-001.md, archive/tickets/SPEC34STOVALHAR-002.md, archive/tickets/SPEC34STOVALHAR-003.md, tickets/SPEC34STOVALHAR-004.md
 
 ## Problem
 
@@ -60,7 +60,7 @@ Per `spec-to-tickets/SKILL.md` §Spec-Integration Ticket Shape "fixture-world co
 
 ## Out of Scope
 
-- Modifying any of the four validator implementations (D1 covered by `archive/tickets/SPEC34STOVALHAR-001.md`; D2 covered by `archive/tickets/SPEC34STOVALHAR-002.md`; D3-D4 covered by SPEC34STOVALHAR-003 through SPEC34STOVALHAR-004).
+- Modifying any of the four validator implementations (D1 covered by `archive/tickets/SPEC34STOVALHAR-001.md`; D2 covered by `archive/tickets/SPEC34STOVALHAR-002.md`; D3 covered by `archive/tickets/SPEC34STOVALHAR-003.md`; D4 covered by `tickets/SPEC34STOVALHAR-004.md`).
 - Modifying the `world-validate` CLI itself — the integration ticket exercises the CLI as-is.
 - Wall-clock performance assertions — spec §Verification names no performance gate for SPEC-34's validators; performance is a deferred concern per spec §Risks line 303 (CH-window traversal).
 - Additional fixture cases beyond the "at least one PASS and one FAIL per validator" spec floor — broader fixture coverage belongs in each upstream ticket's own per-validator node:test fixture.

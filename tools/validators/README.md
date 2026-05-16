@@ -4,7 +4,7 @@ Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus story-scope predi
 
 **Design**: `../../archive/specs/SPEC-04-validator-framework.md`
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 18 structural validators, the 10 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 19 structural validators, the 10 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
@@ -36,6 +36,7 @@ Structural validators:
 - `cross_file_reference`
 - `record_schema_compliance`
 - `story_fact_authority`
+- `lie_promoted_silently`
 - `branch_isolation`
 - `observer_firewall`
 - `audit_only_se_shape`
