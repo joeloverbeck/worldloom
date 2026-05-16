@@ -128,6 +128,7 @@ Use the live `implement-ticket` skill exactly. The child skill owns reassessment
 If implementation ends blocked:
 
 - if a concrete follow-up ticket was created or named as the next owner, put that follow-up at the front of the queue and continue the loop
+- if reassessment proves the current ticket is blocked only by existing active prerequisite tickets, truth the current ticket's `Deps` / reassessment / queue notes as needed, move those prerequisite tickets ahead of it, commit the retarget plus state update, print a harness handoff, and resume at the first prerequisite after the reset boundary
 - if no follow-up exists, stop the harness and report the blocker, current ticket, proof gap, and next required action
 
 ### 2. Audit And Apply Implement-Ticket Suggestions
