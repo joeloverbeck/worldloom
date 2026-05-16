@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-mcp/tests/server/capability-parity.test.ts` (new test file in existing tests/server/ directory)
-**Deps**: `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`
+**Deps**: `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`, `tickets/SPEC36STOPIPNIN-005.md`, `tickets/SPEC36STOPIPNIN-006.md`
 
 ## Problem
 
@@ -16,6 +16,7 @@
 2. `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D5 specifies three test cases. The auditor's Amendment E originally included a "build metadata recency" sub-item; the spec drops that as not operationalizable in CI ("recent enough" cannot be defined). Runtime/deployed parity is deferred to a tenth-iteration carry-over per SPEC-36 §Risks & Open Questions.
 3. Cross-artifact boundary under audit: the source-of-truth lists (`MCP_TOOL_ORDER`, `OPERATION_KINDS`, the validator registry exports) are the canonical definitions; the exposed MCP APIs (`describe_capabilities`, `describe_envelope_schema`) and the registry must remain in lockstep with their source-of-truth lists. The parity test is the mechanical proof that the contract holds.
 4. FOUNDATIONS principle: §Machine-Facing Layer (capability and schema-discovery currency) — source-level parity is a prerequisite for any runtime parity check. Internal drift between the source-of-truth lists and the exposed APIs is the failure mode this test prevents.
+5. 2026-05-16 queue reassessment: live `tools/validators/src/public/registry.ts` does not yet register `causal_dependency_threat_scan` or `expected_witness_coverage`; `rg -n "causal_dependency_threat_scan|expected_witness_coverage" tools/validators/src/public/registry.ts tools/validators/src/structural tools/validators/tests/structural/registry.test.ts` returned no matches for either validator. Because this ticket's registry parity test must hardcode both SPEC-36 additions, the ticket is not independently landable before `tickets/SPEC36STOPIPNIN-005.md` and `tickets/SPEC36STOPIPNIN-006.md` complete. The harness retargeted the queue to process those validator tickets first, then return here.
 
 ## Architecture Check
 

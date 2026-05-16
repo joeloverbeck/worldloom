@@ -1,22 +1,22 @@
 {
   "originating_spec": "specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC36STOPIPNIN-002.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "8d56b0279c300dc8e5045172e55087ef0c6f464d",
-  "last_state_commit": "self",
-  "next_target": "tickets/SPEC36STOPIPNIN-003.md",
+  "last_ticket": "tickets/SPEC36STOPIPNIN-003.md",
+  "last_result": "blocked_retargeted_to_prerequisites",
+  "last_work_commit": "9ca422cece89846b1b145ce55ef499e15cae187c",
+  "last_state_commit": "9ca422cece89846b1b145ce55ef499e15cae187c",
+  "next_target": "tickets/SPEC36STOPIPNIN-005.md",
   "queue": [
-    "tickets/SPEC36STOPIPNIN-003.md",
-    "tickets/SPEC36STOPIPNIN-004.md",
     "tickets/SPEC36STOPIPNIN-005.md",
-    "tickets/SPEC36STOPIPNIN-006.md"
+    "tickets/SPEC36STOPIPNIN-006.md",
+    "tickets/SPEC36STOPIPNIN-003.md",
+    "tickets/SPEC36STOPIPNIN-004.md"
   ],
   "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
-  "owned_dirty_summary": null,
+  "owned_dirty_summary": "tickets/SPEC36STOPIPNIN-003.md dependency/reassessment truthing for blocked queue retarget",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree after state commit; expected ignored artifacts include user-local briefs/worlds content, .claude/settings.local.json, and tool package dist/node_modules outputs",
+  "dirty_state": "clean tracked worktree after retarget commit; expected ignored artifacts include user-local briefs/worlds content, .claude/settings.local.json, and tool package dist/node_modules outputs",
   "updated_at": "2026-05-16"
 }
