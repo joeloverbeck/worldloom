@@ -177,6 +177,12 @@ Before Phase 1:
 11. Compare `parent.state_snapshot.canon_revision` against the current world-canon revision and classify canon-baseline drift as exactly one of `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict`. Abort before Phase 1 unless the classification is `compatible` or `grandfathered`; route the other classifications to `branching-story-health-audit`, a repair turn, or `story-fact-promotion-to-canon` / `canon-addition` as appropriate. Record the classification and cited CH ids in working memory for the page plan and `validation_trace.parent_snapshot_compatibility` rationale.
 12. Verify the new `_source/pages/PG-<integer>.yaml` does NOT already exist (defensive against a stale allocator state). Abort on collision.
 
+Persisted-summary recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
+`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
+`delivery_status: persisted_with_summary`, retrieve required slices via
+`mcp__worldloom__get_persisted_packet_slice` before continuing.
+
 If any precondition fails, the skill aborts before Phase 1.
 
 ## Phase 1: Resolve the action

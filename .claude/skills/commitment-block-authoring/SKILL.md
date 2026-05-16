@@ -33,7 +33,7 @@ Create compact reusable commitment blocks (`SLT` records) for the author pool of
 <HARD-GATE>
 Do NOT write `worlds/<world_slug>/stories/<story_slug>/storylet-batches/SLB-<integer>.md` or update `worlds/<world_slug>/stories/<story_slug>/INDEX.md`, AND do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, until:
 
-(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; mode validated; current SLT pool loaded from `_source/storylets/SLT-*.yaml` (`direct_batch`) OR audit + RSP cards loaded from `audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md` (`audit_repair`); SLT ids and one SLB id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='commitment_block_authoring', ...)` (MCPENH-041 landed the task_type rename — see Guardrails §Known integration debt).
+(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; mode validated; current SLT pool loaded from `_source/storylets/SLT-*.yaml` (`direct_batch`) OR audit + RSP cards loaded from `audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md` (`audit_repair`); SLT ids and one SLB id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='commitment_block_authoring', ...)`.
 
 (b) Phases 1-5 have completed in working memory: coverage gaps diagnosed (`direct_batch`) OR RSP cards loaded with non-commitment-block `repair_kind` cards skipped (`audit_repair`); per-block drafts authored per shared contract §4.4 schema + §5 predicate DSL; 6-gate per-block validation complete (schema completeness, predicate parse, branch-scope legality, mystery/invariant firewall, effect legality, exit-option grounding); 4-check batch-diversity validation complete (`direct_batch` only — move-family diversity, recovery coverage, belief-or-relationship coverage, no branch-local dependencies in global-author-pool blocks); SLB-<integer> batch manifest drafted.
 
@@ -124,6 +124,12 @@ Before Phase 1:
    - `audit_repair`: load `audits/<audit_id>-*.md` (verify exists); for each `RSP-<integer>` in `finding_ids`, load `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md`. Abort with rsp-not-found error on any missing card.
 5. Allocate ids: one `SLT` per planned block (`target_count` for `direct_batch`; `len(finding_ids)` for `audit_repair` — actual usage may be fewer if Phase 1 skips RSP cards) via `mcp__worldloom__allocate_next_id(world_slug, 'SLT', story_slug=<story_slug>)`. Allocate one `SLB` id for the batch manifest.
 6. Load story-local context first via `story_slug` scoped retrieval: active cast `STENT` ids and the bundle's currently-open obligations / consequences / threads with `urgency` (for `direct_batch` gap diagnosis weighting) come from `story_bundle_context` or targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records`. Then load the world canon context packet with `story_slug=<story_slug>` and world-scope seeds only: every Mystery Reserve `M-<integer>` with `status: forbidden` (loaded whole-class for per-block firewall), every world INV record (loaded whole-class for invariant verification), and any other world-canon anchors needed by the batch.
+
+Persisted-summary recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
+`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
+`delivery_status: persisted_with_summary`, retrieve required slices via
+`mcp__worldloom__get_persisted_packet_slice` before continuing.
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -353,11 +359,6 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 - **No word-count enforcement** (per FOUNDATIONS §Story Bundles §9). Beat instructions carry no min/max word counts.
 - **Skills do not chain.** Commitment-block-authoring never invokes `branching-story-turn-cycle`, `branching-story-prose-attach`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. When `audit_repair` skips an RSP card with non-commitment-block `repair_kind`, the SLB manifest records the sibling-handoff recommendation; the user separately invokes the named sibling.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **Known integration debt**:
-  - **MCPENH-041** (task_type rename: `storylet_pool_authoring` -> `commitment_block_authoring`) — **Now landed** (verified at `tools/world-mcp/src/ranking/profiles/index.ts`: `commitment_block_authoring` is registered in `TASK_TYPES`). Pre-flight step 6 uses `task_type='commitment_block_authoring'`.
-  - **MCPENH-040** (BEL allocator registration) — **Now landed** (verified at `tools/world-mcp/src/tools/allocate-next-id.ts`: `BEL` is registered in `ID_CLASS_FORMATS` and `STORY_SCOPED_ID_CLASS_DIRECTORIES`). Commitment-block-authoring references BEL ids in SLT effects but does not allocate BEL records.
-  - **PEENH-007** (`create_bel_record` patch op) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `create_bel_record` is listed in `OPERATION_KINDS`). Commitment-block-authoring references BEL ids in SLT effects but does not write BEL records.
-  - **VALENH-011** (BEL `record_schema_compliance`) — **Now landed** (verified at `tools/validators/src/schemas/story-belief.schema.json` and `tools/validators/src/structural/utils.ts`: `belief_record` maps to `story-belief`). Commitment-block-authoring's Phase 3 gate 5 validates BEL references against schema-backed records.
 
 ## Final Rule
 

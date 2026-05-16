@@ -208,6 +208,12 @@ Before Phase 1:
 5. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for every class to be created: `STORY` (per-world; no story_slug param needed), `BR` (will be `BR-1`), `SE` (will be `SE-1`), `PG` (will be `PG-1`), and class-specific ids for every STENT / STSTAT / STINT / SF / **BEL** / OBL / CNSQ / THR / SREL / STLOC / STOBJ / (optional DA) / CHC / (optional SLT) record to be drafted in Phases 1-8. The allocator returns `<CLASS>-1` for fresh story-bundle scopes when the named bundle directory does not yet exist under an existing world; no skill-side hard-coding of pre-bundle ids is required.
 6. Load world canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_bootstrap', story_slug=<story_slug>, seed_nodes=<cast CHAR ids + initial_location label if provided>, token_budget=<default>)`. Confirm `story_bundle_context: null`; bootstrap uses the slug as the target bundle identifier before indexed story-bundle records exist.
 
+Persisted-summary recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
+`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
+`delivery_status: persisted_with_summary`, retrieve required slices via
+`mcp__worldloom__get_persisted_packet_slice` before continuing.
+
 If any precondition fails, the skill aborts before Phase 1.
 
 ## Phase 1: Normalize the premise into a state seed

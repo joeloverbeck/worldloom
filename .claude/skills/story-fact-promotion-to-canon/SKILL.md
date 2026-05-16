@@ -149,6 +149,12 @@ Before Phase 1:
 6. Allocate `SP-<integer>` id via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`.
 7. Load `source_record_ids`, related authoring `SE` events, and witness `BEL` records through `story_slug` scoped targeted retrieval (or direct story-bundle reads allowed by the current workflow). Load the world canon context packet with `story_slug=<story_slug>` and world-scope seeds only: whole-class Mystery Reserve (for Phase 4 firewall), whole-class INV (for invariant check), and parent CFs of any mirrored `SF` sources (for Phase 2 candidate's `source_basis.derived_from`).
 
+Persisted-summary recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
+`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
+`delivery_status: persisted_with_summary`, retrieve required slices via
+`mcp__worldloom__get_persisted_packet_slice` before continuing.
+
 If any precondition fails, the skill aborts before Phase 1.
 
 ## Phase 1: Load source and branch provenance
@@ -378,11 +384,6 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 - **No post-adjudication closeout in this skill.** After canon-addition adjudicates, the user runs `story-promotion-closeout` to write the verdict back onto story-local records (supersession of SF / BEL / DA / STENT / SREL records that the canon-addition outcome implicates, with branch disposition recorded in the closeout ledger / INDEX surfaces).
 - **Skills do not chain.** This skill never invokes `canon-addition` or `story-promotion-closeout`. Phase 7 surfaces the recommendation; the user separately invokes the named sibling.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **Known integration debt**:
-  - **MCPENH-040** (BEL allocator registration) — **Now landed** (verified at `tools/world-mcp/src/tools/allocate-next-id.ts`: `BEL` is registered in `ID_CLASS_FORMATS` and `STORY_SCOPED_ID_CLASS_DIRECTORIES`). Phase 1 reads `BEL` records as evidence for mystery_resolution / story_fact / character_outcome source kinds.
-  - **PEENH-007** (`create_bel_record` patch op) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `create_bel_record` is listed in `OPERATION_KINDS`). This skill reads the BEL records that op can create.
-  - **VALENH-011** (BEL `record_schema_compliance`) — **Now landed** (verified at `tools/validators/src/schemas/story-belief.schema.json` and `tools/validators/src/structural/utils.ts`: `belief_record` maps to `story-belief`). Phase 1's BEL evidence records are schema-backed.
-  - **MCPENH-041** (task_type rename) — **Now landed** (verified at `tools/world-mcp/src/ranking/profiles/index.ts`: `story_fact_promotion_to_canon` is registered in `TASK_TYPES`). The rename did not change this skill's task_type string.
 
 ## Final Rule
 

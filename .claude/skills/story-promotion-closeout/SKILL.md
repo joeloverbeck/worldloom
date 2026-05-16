@@ -47,7 +47,7 @@ Do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, write `worl
 
 (a) Pre-flight Check has completed: bundle resolved; `SP-<integer>-proposal-package.yaml` + `SP-<integer>.md` ledger loaded and `promotion_id` verified; canon-addition verdict + accepted-flavored linked CF / CH / PA records existence-verified through MCP retrieval; source records loaded from the proposal package inventory; optional SE id allocated.
 
-(b) Phases 1-4 have completed in working memory: verdict context loaded with linked CF / CH / PA cross-references (Phase 1); story-local effects determined per verdict-specific supersession pattern and supersession ids allocated only for records that actually need new story-state records (Phase 2); 6-gate Phase 3 validation passed (no world-canon mutation; linked-records exist; branch-handling same-story; supersedes pattern verified; rejected preserves history; `source_record_dispositions` completeness matches proposal package `source_records` inventory); `SP-<integer>-closeout.md` ledger drafted (Phase 4).
+(b) Phases 1-4 have completed in working memory: verdict context loaded with linked CF / CH / PA cross-references (Phase 1); story-local effects determined per verdict-specific supersession pattern and supersession ids allocated only for records that actually need new story-state records (Phase 2); 6-gate Phase 3 validation passed (no world-canon mutation; linked-records exist; branch-handling same-story; supersedes pattern verified; rejected preserves history; `source_record_dispositions` completeness matches proposal package `proposal_evidence.source_records[]` inventory); `SP-<integer>-closeout.md` ledger drafted (Phase 4).
 
 (c) Phase 3 validation passed across all 6 gates.
 
@@ -61,7 +61,7 @@ This gate is authoritative under Auto Mode or any other autonomous-execution con
 ```
 Pre-flight Check (load FOUNDATIONS + shared contract; resolve bundle +
   SP-<integer>-proposal-package.yaml + SP-<integer>.md ledger; verify verdict-
-  linked CF / CH / PA records exist through MCP retrieval; load source_records
+  linked CF / CH / PA records exist through MCP retrieval; load proposal_evidence.source_records[]
   inventory + optional SE id)
         |
         v
@@ -134,8 +134,8 @@ All patch-engine submissions target story-bundle scope; ZERO ops target `worlds/
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §5 (story-scope authority discipline), §Canon Layers (linked CF status references), Rule 6 (Change Log Entry — canon-addition wrote it; closeout reads + cites it)
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (SF, BEL, STENT, SREL, DA, SE — closeout output classes; BR — read-only branch lineage), §10 shared write order, §11 mystery and canon authority
-- `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml` — source of truth for the promotion's `source_records` / `source_kind` / `branch_path` / `contradiction_preference` / `downstream_impact_report`
+- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (SF, BEL, STENT, STSTAT, SREL, DA, SE — closeout output classes for superseded or audit-emitted records; BR — read-only branch lineage), §4.3a (audit-only SE events), §4.5.13 (STSTAT — character-outcome supersession-chain evidence), §10 shared write order, §11 mystery and canon authority
+- `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml` — source of truth for the promotion's `proposal_evidence.source_records[]` / `proposal_evidence.source_kind` / `proposal_evidence.story_branch`, plus top-level `contradiction_preference` / `downstream_impact_report`
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>.md` — original ledger (read-only; cross-referenced in closeout ledger)
 - `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>, world_slug=<world_slug>)` — read-only linked CF and CH records for world-canon reference and Rule 6 audit-trail citation
 - `mcp__worldloom__get_record(record_id=<linked_pa_id>, world_slug=<world_slug>)` for each linked PA — read-only adjudication record lookup until hybrid PA batch retrieval is available in `get_records`
@@ -152,8 +152,14 @@ Before Phase 1:
 3. Load `story-promotions/SP-<integer>-proposal-package.yaml` and `story-promotions/SP-<integer>.md`. Verify the package's `promotion_id` matches the `promotion_id` argument. Abort with promotion-not-found or promotion-id-mismatch error on miss.
 4. Validate `canon_addition_verdict`: must be one of `accepted | accepted_with_limits | rejected | deferred`. On accepted-flavored verdicts, validate that `linked_cf_ids`, `linked_ch_ids`, `linked_pa_ids` are all supplied + non-empty.
 5. On accepted-flavored verdicts: verify each `linked_cf_ids` and `linked_ch_ids` entry resolves through `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>, world_slug=<world_slug>)`; verify each `linked_pa_ids` entry resolves through per-PA `mcp__worldloom__get_record(record_id=<linked_pa_id>, world_slug=<world_slug>)`. Abort with linked-record-not-found error on any miss — this is the primary defense against fake-verdict invocations.
-6. Load all source records from the proposal package's `source_records[]` for Phase 2 supersession drafting and disposition classification.
+6. Load all source records from the proposal package's `proposal_evidence.source_records[]` for Phase 2 supersession drafting and disposition classification.
 7. Allocate one `SE-<integer>` when `emit_closeout_event: true`.
+
+Persisted-summary recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
+`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
+`delivery_status: persisted_with_summary`, retrieve required slices via
+`mcp__worldloom__get_persisted_packet_slice` before continuing.
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -164,7 +170,7 @@ Load into working memory:
 - The `SP-<integer>-proposal-package.yaml` (per Pre-flight step 3).
 - The original `SP-<integer>.md` ledger (for cross-reference in the closeout ledger).
 - On accepted-flavored verdicts: each linked CF / CH record loaded through `mcp__worldloom__get_records(...)` plus each linked PA record loaded through per-PA `mcp__worldloom__get_record(...)`. **Read-only** — closeout cites these in superseding story-local records but does NOT modify them.
-- All source records from the proposal package: SF / BEL / STENT / SREL / DA per source_kind.
+- All source records from the proposal package: SF / BEL / STENT / SREL / DA per `proposal_evidence.source_kind`.
 - The branches in `affected_branch_ids` (for Phase 2 branch-handling decisions).
 
 ## Phase 2: Determine story-local effects per verdict
@@ -178,7 +184,7 @@ The candidate is now world canon. Record the canon link in the closeout ledger. 
 - Each `SF-<integer>` source MAY be superseded with the same class shape from shared contract §4.5.3, carrying `supersedes: SF-<integer>`, `authority: canon_linked`, and at least one parent CF id in `derived_from`. The broader CF / CH / PA verdict linkage lives in the closeout ledger; the parent CF id on the superseding SF is the schema-backed authority link.
 - Each implicated `BEL-<integer>` MAY be superseded with the §4.1 shape when `truth_relation`, `claim`, `basis`, or `consequences` must change to reflect the adjudicated canon outcome. The CF / CH / PA linkage lives in the closeout ledger.
 - For `source_kind: artifact_canonization`, supersede story-local `DA` only if a §4.5.10 field changes. World-level DA linkage is recorded in the closeout ledger.
-- For `source_kind: character_outcome`, supersede `STENT` only if a §4.5.1 field changes.
+- For `source_kind: character_outcome`, supersede `STENT` only if a §4.5.1 field changes; supersede `STSTAT` only if a source STSTAT in `proposal_evidence.source_records[]` needs an amended-schema update after the canon-addition verdict (e.g., character-outcome status evidence becoming canon-linked, or explicitly retained as branch-local after rejection).
 - For `source_kind: relationship_or_institutional_outcome`, supersede `SREL` only if a §4.5.7 field changes.
 
 ### `accepted_with_limits`
@@ -205,7 +211,7 @@ Canon-addition didn't decide either way. No supersessions by default. Closeout r
 
 ### Source-record disposition map
 
-Phase 2 MUST draft a `source_record_dispositions:` map whose key set exactly equals the proposal package's `source_records[]` inventory. Each source record receives exactly one closed-enum disposition:
+Phase 2 MUST draft a `source_record_dispositions:` map whose key set exactly equals the proposal package's `proposal_evidence.source_records[]` inventory. Each source record receives exactly one closed-enum disposition:
 
 - `superseded` — a new story-local record is drafted because an amended-schema field actually changes. Allocate the replacement id for this record through `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)`.
 - `ledger_only` — the verdict / canon link / rejection / deferral is recorded in the closeout ledger only; no story-local source record changes.
@@ -227,7 +233,7 @@ Run 6 validation gates BEFORE patch submission:
 
 5. **Rejected outcomes preserve branch-local history** — on `rejected`, source records are either left intact with the rejection recorded in the closeout ledger, or superseded through amended-schema fields when the story-local state itself must change. The original `SF` / `BEL` / etc. remain on disk.
 
-6. **Source-record disposition completeness matches the proposal package's source_records inventory** — the `source_record_dispositions:` map's key set MUST exactly equal the proposal package's `source_records[]` set, with no missing or extraneous entries. Every value MUST be one of `superseded | ledger_only | unchanged_no_schema_field_changed`. Any `superseded` entry MUST correspond to a drafted replacement story record carrying `supersedes: <prior-id>`; any non-superseded entry MUST NOT have a replacement record. Abort on mismatch.
+6. **Source-record disposition completeness matches the proposal package's `proposal_evidence.source_records[]` inventory** — the `source_record_dispositions:` map's key set MUST exactly equal the proposal package's `proposal_evidence.source_records[]` set, with no missing or extraneous entries. Every value MUST be one of `superseded | ledger_only | unchanged_no_schema_field_changed`. Any `superseded` entry MUST correspond to a drafted replacement story record carrying `supersedes: <prior-id>`; any non-superseded entry MUST NOT have a replacement record. Abort on mismatch.
 
 ## Phase 4: Author SP-<integer>-closeout.md ledger
 
@@ -270,10 +276,11 @@ source_record_dispositions:
   BEL-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
   DA-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
   STENT-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
+  STSTAT-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
   SREL-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
 ```
 
-The map is required. Its key set must exactly match the proposal package's `source_records[]` inventory. `superseded` means a new story-local record was written because an amended-schema field changed; `ledger_only` means the verdict or canon link is recorded only in this closeout ledger; `unchanged_no_schema_field_changed` means the source record remains unchanged because no amended-schema field needed updating.
+The map is required. Its key set must exactly match the proposal package's `proposal_evidence.source_records[]` inventory. `superseded` means a new story-local record was written because an amended-schema field changed; `ledger_only` means the verdict or canon link is recorded only in this closeout ledger; `unchanged_no_schema_field_changed` means the source record remains unchanged because no amended-schema field needed updating.
 
 ## Branch handling
 
@@ -294,9 +301,9 @@ The original `SP-<integer>.md` ledger stays unchanged as the historical proposal
 
 ## Phase 5: Commit / Write — HARD-GATE fires
 
-1. Build the patch plan covering all supersessions from Phase 2 as a single envelope. Operations include `create_sf_record`, `create_bel_record` (via PEENH-007 inheritance — now landed), `create_stent_record`, `create_srel_record`, `append_story_diegetic_artifact_record` (for story-local DA supersessions, with `expected_id_allocations.story_da_ids`), and optionally `create_se_record` (when `emit_closeout_event: true`, with `event_kind: promotion_closeout` conforming to story-state contract §4.3a audit-only SE events). Branch disposition is recorded in the closeout ledger / INDEX surfaces, not as a `BR` record operation. Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
+1. Build the patch plan covering all supersessions from Phase 2 as a single envelope. Operations include `create_sf_record`, `create_bel_record`, `create_stent_record`, `create_ststat_record` (only when a source STSTAT in `proposal_evidence.source_records[]` needs amended-schema supersession), `create_srel_record`, `append_story_diegetic_artifact_record` (for story-local DA supersessions, with `expected_id_allocations.story_da_ids`), and optionally `create_se_record` (when `emit_closeout_event: true`, with `event_kind: promotion_closeout` conforming to story-state contract §4.3a audit-only SE events). Branch disposition is recorded in the closeout ledger / INDEX surfaces, not as a `BR` record operation. Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
 
-2. Dry-run via `mcp__worldloom__validate_patch_plan`. Each new record passes `record_schema_compliance` (BEL via VALENH-011 inheritance).
+2. Dry-run via `mcp__worldloom__validate_patch_plan`. Each new record passes `record_schema_compliance`.
 
 3. Present the complete deliverable summary to the user:
    - `SP-<integer>` id + verdict.
@@ -366,12 +373,6 @@ The `SP-<integer>-closeout.md` ledger schema is defined inline in Phase 4's temp
 - **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Superseding records must conform to the amended class schemas in shared contract §4. Ledger-only canon links, rejection disposition, archive disposition, and deferral notes stay in `SP-<integer>-closeout.md` / INDEX surfaces until a future contract amendment deliberately promotes a structured field.
 - **Skills do not chain.** Closeout never invokes `canon-addition` (already ran), `story-fact-promotion-to-canon` (already ran), or any other sibling. The user invokes closeout separately after canon-addition adjudicates.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **Known integration debt**:
-  - **MCPENH-040** (BEL allocator registration) — **Now landed** (verified at `tools/world-mcp/src/tools/allocate-next-id.ts`: `BEL` is registered in `ID_CLASS_FORMATS` and `STORY_SCOPED_ID_CLASS_DIRECTORIES`). Phase 2 supersedes BEL records during accepted-flavored verdicts.
-  - **PEENH-007** (`create_bel_record` patch op) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `create_bel_record` is listed in `OPERATION_KINDS`). Phase 2 + Phase 5 submit BEL supersession ops.
-  - **VALENH-011** (BEL `record_schema_compliance`) — **Now landed** (verified at `tools/validators/src/schemas/story-belief.schema.json` and `tools/validators/src/structural/utils.ts`: `belief_record` maps to `story-belief`). Phase 5 dry-run exercises BEL validator on each BEL supersession.
-  - **PEENH-008** (story-local DA supersession op for `source_kind: artifact_canonization`) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `append_story_diegetic_artifact_record` and `story_da_ids` are listed; `tools/patch-engine/src/ops/create-story-record.ts` maps the op to `_source/artifacts/`). Phase 2 + Phase 5 use the existing story-local DA op.
-  - **MCPENH-041** (task_type rename) — **Now landed** (verified at `tools/world-mcp/src/ranking/profiles/index.ts`: rebuilt story-pipeline task types are registered in `TASK_TYPES`). Closeout does not use `get_context_packet` retrieval, so the rename has no closeout caller impact.
 
 ## What is intentionally NOT in this skill
 

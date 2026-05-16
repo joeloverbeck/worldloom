@@ -21,7 +21,7 @@ Production-readiness window: zero active `_source/` story bundles depend on the 
 
 - **Considered adding per-skill persisted-summary recovery paragraphs (A6 as drafted, seven verbatim inlines); chose a single shared template at `.claude/skills/_shared-templates/persisted-packet-recovery.md` cross-referenced from each consuming skill, because the seven consuming skills (`branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) share an identical recovery surface and the existing precedent in `.claude/skills/_shared-templates/story-state-contract.md` already establishes the shared-template pattern for cross-skill discipline.** Seven verbatim inlines would diverge under future amendment; a shared file with cross-references stays canonical.
 
-- **Considered adding `describe_capabilities` / `describe_envelope_schema` capability calls to every consuming skill's Pre-flight per A11 as drafted; chose a `(pragmatic)` softening where "now landed" claims must link to a specific archived ticket path (e.g., `archive/tickets/PEENH-007-…md`) or a test path, because adding runtime capability calls to seven skill pre-flights is structurally cleaner but disproportionate to the actual problem — opaque provenance, not stale-capability risk.** The archived-ticket-link form is the lower-cost audit-trail backstop. Under no-trust-deficit conditions (a future audit grants the codebase trust the seventh iteration did not), the link form is sufficient. Under stronger drift constraints (e.g., a future MCP-server major version where deployed capability and skill prose can diverge silently), the full capability-check discipline likely wins.
+- **Considered adding `describe_capabilities` / `describe_envelope_schema` capability calls to every consuming skill's Pre-flight per A11 as drafted; chose a `(pragmatic)` softening where "now landed" claims must link to a specific archived ticket path (e.g., `archive/tickets/PEENH-007-…md`) or a test path, because adding runtime capability calls to seven skill pre-flights is structurally cleaner but disproportionate to the actual problem — opaque provenance, not stale-capability risk.** The archived-ticket-link form is the lower-cost audit-trail backstop. Under no-trust-deficit conditions (a future audit grants the codebase trust the seventh iteration did not), the link form is sufficient. Under stronger drift constraints (e.g., a future MCP-server major version where deployed capability and skill prose can diverge silently), the full capability-check discipline likely wins. — **REVISED (2026-05-16)**: this decision's premise — that skills SHOULD carry an audit trail for landed tickets — was rejected during D9's implementation triage. The lower-cost-audit-trail-backstop argument holds only conditional on the premise. Under the operational principle that skills carry only what they need to execute, post-landing ticket history is not skill-prose territory at all; the spec body, ticket archive, and `git log -p` already own that audit trail. See §D9 status note.
 
 - **Considered limiting A2 to the literal wording the auditor proposed (replace both line 134 and line 213 in `branching-story-prose-attach/SKILL.md`); chose to limit the fix to line 213 only, because verification revealed line 134 is already correct.** Line 134 reads `SE.promotion_claims[]` (no `PG.SE.` prefix) — the auditor's drafted A2 would have re-corrected it unnecessarily and introduced its own drift. Line 213 has the actual path bug.
 
@@ -187,6 +187,8 @@ proposal_evidence:
 
 Closeout would fail to find `source_records[]` at the top level and silently mark disposition completeness on an empty set.
 
+**Implementation note (2026-05-16, SPEC33STOPIPSEV-004)**: live reassessment corrected this deliverable's field list before implementation. The producer skill and `.claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml` nest `story_branch`, `source_kind`, and `source_records[]` under `proposal_evidence`, but keep `downstream_impact_report` and `contradiction_preference` as top-level proposal-package fields. The D4 implementation preserves those two top-level paths; remaining `proposal_evidence.contradiction_preference` / `proposal_evidence.downstream_impact_report` wording below is historical intake context, not the landed contract.
+
 **Change**:
 
 1. **Skill prose** (`.claude/skills/story-promotion-closeout/SKILL.md`, all occurrences): replace top-level references to `source_records[]`, `branch_path`, `source_kind`, `contradiction_preference`, `downstream_impact_report` with their nested forms:
@@ -221,6 +223,8 @@ Closeout would fail to find `source_records[]` at the top level and silently mar
 - **Phase 5 operation list** (line ~297) lists `create_sf_record`, `create_bel_record`, `create_stent_record`, `create_srel_record`, `append_story_diegetic_artifact_record`; `create_ststat_record` is omitted.
 
 The patch engine already implements `create_ststat_record` (verified at `tools/patch-engine/src/envelope/schema.ts:76` in `OPERATION_KINDS`, and the dispatch in `tools/patch-engine/src/ops/create-story-record.ts`). The gap is purely skill-prose propagation.
+
+**Implementation note (2026-05-16, archive/tickets/SPEC33STOPIPSEV-005.md)**: landed in `.claude/skills/story-promotion-closeout/SKILL.md`. Closeout now lists STSTAT in World-State Prerequisites, adds the character-outcome STSTAT supersession condition, includes `STSTAT-<integer>` in the closeout ledger disposition template, and enumerates `create_ststat_record` in Phase 5 when a source STSTAT in `proposal_evidence.source_records[]` needs amended-schema supersession. The patch-engine implementation remained unchanged.
 
 **Change**:
 
@@ -279,6 +283,8 @@ None of the seven consuming story-pipeline skills documents recovery wording. Ve
 - `story-promotion-closeout`: Pre-flight calls `get_records` (linked CF/CH/PA via MCP retrieval per SPEC-31 D10); no recovery wording.
 
 Under large bundles or wide CH windows, a skill could validate against a summary-only packet and miss governing records.
+
+**Implementation note (2026-05-16, archive/tickets/SPEC33STOPIPSEV-006.md)**: landed in `.claude/skills/_shared-templates/persisted-packet-recovery.md` and the seven consuming story-pipeline skills. Each consuming skill now has a Pre-flight persisted-summary recovery cross-reference, and the ticket closeout corrected the drafted proof surface to the live MCP registration shape (`tools/world-mcp/src/tools/get-persisted-packet-slice.ts` exists; `get_persisted_packet_slice` is registered in `tools/world-mcp/src/server.ts` and `tools/world-mcp/src/tool-names.ts`). The MCP/tool implementation remained unchanged.
 
 **Change**:
 
@@ -368,6 +374,8 @@ Under large bundles or wide CH windows, a skill could validate against a summary
 
 A skill author or future validator could implement an array shape rejected by `record_schema_compliance`, or accept two competing shapes silently.
 
+**Implementation note (2026-05-16, SPEC33STOPIPSEV-007)**: live reassessment corrected the enforcement boundary before implementation. The shared contract sketch at §4.2 names the flat eight-key mapping, but the JSON Schema at `tools/validators/src/schemas/story-page.schema.json` remains permissive for `validation_trace`; `record_schema_compliance` does not reject `gates[]` by itself. The landed `validation_trace_shape_compliance` structural validator is therefore the enforcing layer for exact eight-key shape and `gates` rejection. The §4.2a TS-source vs dist-JS runtime note also landed with this ticket.
+
 **Change**:
 
 1. **Contract prose** (`.claude/skills/_shared-templates/story-state-contract.md` §7):
@@ -419,6 +427,8 @@ A skill author or future validator could implement an array shape rejected by `r
 
 But Phase 3 deterministic check 3 (`forbidden_mystery_resolution`, lines 185–189, after SPEC-32 D1's amendment) retrieves firewall fields via `mcp__worldloom__get_firewall_content(world_slug, m_ids=<plan §11 ids>)` **unless the page plan already inlines the same fields**. The unconditional "no retrieval needed" claim contradicts the conditional retrieval path that runs in standard operation when plan §11 names mysteries that aren't fully inlined.
 
+**Implementation note (2026-05-16, SPEC33STOPIPSEV-008)**: landed in `.claude/skills/branching-story-prose-attach/SKILL.md`. The World-State Prerequisites paragraph and the FOUNDATIONS Alignment / Tooling Recommendation row now preserve the "no normal context-packet retrieval" guidance while naming the conditional `mcp__worldloom__get_firewall_content` path when plan §11 does not inline Mystery Reserve firewall fields. Remaining D8 proposal text below is historical intake context.
+
 **Change**:
 
 1. **Skill prose** (`.claude/skills/branching-story-prose-attach/SKILL.md` both line 114 and the FOUNDATIONS Alignment / Tooling Recommendation row at ~line 326): replace the "No world-canon retrieval needed" sentence with:
@@ -443,7 +453,11 @@ But Phase 3 deterministic check 3 (`forbidden_mystery_resolution`, lines 185–1
 
 ---
 
-### D9 — Adjudicate "now landed" integration-debt claims with archived-ticket provenance (P2, intake WL-S7-P2-011)
+### D9 — Adjudicate "now landed" integration-debt claims with archived-ticket provenance (P2, intake WL-S7-P2-011) — **REJECTED (2026-05-16)**
+
+**Status (2026-05-16, REJECTED)**: Reframed during implementation triage. The premise that skills should carry an audit trail for landed tickets — whether as `verified at tools/...` prose (original form) or as archived-ticket links (this deliverable's proposed form) — does not survive the operational principle that skills should carry only what they need to execute. Post-landing ticket history is not operationally valuable to a skill; the spec body, the ticket archive, and `git log -p` already own that audit trail. The lower-cost-audit-trail-backstop argument in the Key Design Decisions section holds only if you accept the underlying premise.
+
+Adopted resolution: delete every "Known integration debt" block across the 4 affected skills (18 sites: `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) AND strip the inline "(via PEENH-007 inheritance — now landed)" parenthetical in `story-promotion-closeout/SKILL.md:304`. The active-deferred-debt disclosure pattern (a skill discloses a not-yet-landed ticket it depends on, per `skill-creator/SKILL.md:91`) remains valid; when a deferred ticket lands, the entry is **deleted** rather than rewritten as "Now landed." Child ticket `tickets/SPEC33STOPIPSEV-009.md` deleted; no replacement ticket; cleanup work landed inline with this amendment. D9 deliverable body below preserved as historical context.
 
 **Problem**: Multiple skills cite ticket IDs (PEENH-007, MCPENH-040, MCPENH-041, PEENH-008, VALENH-011, etc.) as "now landed" without linking to a verification artifact. A future audit cannot validate the landed claim without external research, and a future drift (e.g., a tool re-rolled under a different name) would not be flagged.
 
@@ -508,7 +522,7 @@ After all deliverables land, the following acceptance evidence is required:
 6. **D6**: `.claude/skills/_shared-templates/persisted-packet-recovery.md` exists; each of the seven consuming skills' Pre-flight cross-references it.
 7. **D7**: `grep -rn 'validation_trace\.gates' .claude/skills/_shared-templates/` returns zero matches; the new validator file is registered and passes four fixtures.
 8. **D8**: `grep -rn 'No world-canon retrieval needed' .claude/skills/branching-story-prose-attach/` returns zero matches.
-9. **D9**: `grep -rn 'now landed\|Now landed' .claude/skills/` returns matches that are each immediately followed by an `archive/` path or replaced by a `describe_capabilities` call.
+9. **D9 (REJECTED, 2026-05-16)**: per-skill "Known integration debt" blocks deleted across the 4 affected skills + the inline parenthetical in `story-promotion-closeout/SKILL.md:304` stripped. Verification: `grep -rnE 'now landed|Now landed|Known integration debt' .claude/skills/{commitment-block-authoring,branching-story-health-audit,story-fact-promotion-to-canon,story-promotion-closeout}` returns zero matches.
 
 ---
 
@@ -527,6 +541,6 @@ After all deliverables land, the following acceptance evidence is required:
 ## Risks & Open Questions
 
 - **Missing audit-named validators** `(pragmatic)`: four standalone validators named in skill prose and audit §11.2 are not implemented in `tools/validators/`. The closest current coverage is `tools/validators/src/structural/canon-drift-classification-evidence.ts` (partial coverage for canon-baseline-drift). A follow-up spec should implement each as a structural validator + fixture set + registry update. Pre-existing gap; deferral is cost-driven, not structurally permanent. Under stronger production-readiness constraints (e.g., production story-bundle authorization), implementing these is on the critical path.
-- **`describe_capabilities` static-claim mismatch** `(pragmatic)`: D9 substitutes archived-ticket links for runtime capability checks. If a future MCP-server major version changes deployed capabilities without updating skill prose, the skill's "now landed" link could become stale (the ticket landed, but the capability was later removed or renamed). A follow-up enhancement could add `describe_capabilities` pre-flight checks to skills whose execution depends on capability currency; this spec defers the heavier discipline.
-- **Shared-template proliferation**: D6 adds a sixth file under `.claude/skills/_shared-templates/` (joining story-state-contract.md, clothing-consistency-vocabulary.md, and others). If the shared-template directory grows further, a brief README enumerating template scope and consumers may help. Out of scope for this spec.
-- **D9 site enumeration**: the exhaustive list of "now landed" occurrences was not enumerated at spec-authoring time (deferred to ticket-authoring per FOUNDATIONS shared-discipline cross-skill grep). Ticket authoring must produce the site list before the multi-file edit pass; the §Authoring-time site enumeration discipline in the brainstorm skill's Multi-file triage rules applies.
+- **`describe_capabilities` static-claim mismatch** `(pragmatic)` — **OBSOLETE (2026-05-16)**: D9 rejection removed the "now landed" prose entirely from skills, eliminating both the static-claim mismatch risk and the rationale for adding `describe_capabilities` pre-flight checks. If a future deferred ticket lands, its entry is deleted from the active-debt block rather than rewritten as "Now landed," so no stale static claim accumulates. A future audit can still propose runtime capability checks if independent evidence (a real MCP-server major version + a real skill that needs to verify capability currency at runtime) warrants it.
+- **Shared-template proliferation**: D6 adds a third file under `.claude/skills/_shared-templates/` (joining `story-state-contract.md` and `clothing-consistency-vocabulary.md`). If the shared-template directory grows further, a brief README enumerating template scope and consumers may help. Out of scope for this spec.
+- **D9 site enumeration** — **RESOLVED (2026-05-16, n/a)**: site enumeration was performed during the D9 rejection's inline cleanup pass (18 sites in 4 skills + 1 inline parenthetical). Per the rejection, the "Known integration debt" blocks were deleted rather than rewritten; the site list is preserved in archived `tickets/SPEC33STOPIPSEV-009.md` history via `git log` if a future reader needs it.

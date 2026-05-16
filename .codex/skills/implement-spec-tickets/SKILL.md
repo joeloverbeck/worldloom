@@ -91,13 +91,17 @@ If the only conflict is stale `dirty_state` text and live `git status --short` p
    - ticket/spec family state for the active run
    - existing user work that the run must not absorb silently
    - unrelated noise
-4. If `.codex/run-state/implement-spec-tickets.json` already exists, read and validate it even on a normal first invocation. If it conflicts with live repo state, trust the live repo and refresh the state file before invoking child skills.
-5. If unrelated dirty paths exist and the invocation expects this harness to stage and commit all uncommitted files, stop and ask whether those paths should be included in the harness commits. Do not silently commit unrelated user work.
-6. Resolve the first ticket:
+4. If the initial snapshot shows staged/index entries, inspect `git diff --cached --name-status` and classify them separately from unstaged dirt. Pre-existing staged unrelated work must not be absorbed by a harness commit. Either leave it staged and avoid committing until it is explicitly approved for inclusion, or unstage it before the harness commit while leaving the working-tree content intact. Record the choice in the dirty-state classification.
+5. If `.codex/run-state/implement-spec-tickets.json` already exists, read and validate it even on a normal first invocation. If it conflicts with live repo state, trust the live repo and refresh the state file before invoking child skills.
+6. If unrelated dirty paths exist and the invocation expects this harness to stage and commit all uncommitted files, stop and ask whether those paths should be included in the harness commits. Do not silently commit unrelated user work.
+7. Resolve the first ticket:
    - if `ticket_path` is supplied, resolve it to exactly one active ticket under `tickets/`
    - otherwise inspect active `tickets/*.md`, choose the first ticket in lexical order whose filename, `Deps`, problem statement, or explicit spec reference ties it to the originating spec, and state the selection
-7. Build the initial pending queue from active tickets that clearly belong to the same originating spec family. Keep the queue lexical and append-only; do not jump ahead of a follow-up created by the current iteration.
-8. Write or refresh `.codex/run-state/implement-spec-tickets.json` with the resolved spec, initial target, initial queue, dirty-state classification, and `blocked: false`.
+8. Build the initial pending queue from active tickets that clearly belong to the same originating spec family. Keep the queue lexical and append-only; do not jump ahead of a follow-up created by the current iteration.
+9. Decide how to handle pre-existing untracked same-family ticket/spec files before implementation. If they are required to define the active family queue, dependency chain, or truthful handoff for the current iteration, they may be included in the first iteration commit and named as pre-existing same-family state. If they are not required for the current iteration, either leave them uncommitted or split them into a separate intake/state commit; state the choice in the handoff.
+10. Write or refresh `.codex/run-state/implement-spec-tickets.json` with the resolved spec, initial target, initial queue, dirty-state classification, and `blocked: false`.
+
+If an old state file exists, no reset or blocker will occur before the first target is processed, and refreshing the state file immediately would create noisy pre-work dirt while ownership is still being classified, the state refresh may be deferred until the first iteration state commit. This deferral is allowed only when the next target, queue, ownership classification, and archival readiness have been validated against live repo state before invoking child skills. State the deferral explicitly if it affects resume expectations.
 
 ## Loop
 
@@ -179,6 +183,8 @@ For harness-internal review phases, this compact block is the required visible r
 
 If `post-ticket-review` creates or materially updates a follow-up ticket, active spec, active ticket dependency, or current contract doc, run:
 
+Archive-path and dependency repairs in active specs or active sibling tickets count as material handoff updates for this trigger, even when the repairs are mechanical.
+
 ```text
 $skill-audit .codex/skills/post-ticket-review
 ```
@@ -194,10 +200,12 @@ Put any review-created follow-up ticket at the front of the queue, ahead of the 
 Before committing:
 
 1. Refresh `git status --short`.
-2. Verify all dirty paths are either owned by this iteration, previously approved for inclusion, or generated/ignored artifacts that should remain unstaged.
-3. Run `git diff --check` or the child skills' stronger equivalent over tracked and newly created owned files.
-4. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
-5. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening.
+2. Inspect `git diff --cached --name-status` before staging owned paths. If pre-existing staged entries are unrelated to the current iteration, unstage those paths or stop for approval before committing; path-scoped `git add` will not protect the commit from unrelated entries already in the index.
+3. Verify all dirty paths are either owned by this iteration, previously approved for inclusion, or generated/ignored artifacts that should remain unstaged.
+4. Run `git diff --check` or the child skills' stronger equivalent over tracked and newly created owned files.
+5. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
+6. Re-run `git diff --cached --name-status` after staging and confirm every staged path is owned by this iteration, explicitly approved, or intentional same-family state needed for the queue/handoff.
+7. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening.
 
 When `post-ticket-review` archived a ticket with `git mv`, do not try to stage the now-missing active ticket path by name. Stage the archive destination and other edited owned paths, then confirm the source deletion or rename is staged with `git diff --cached --name-status` before committing.
 

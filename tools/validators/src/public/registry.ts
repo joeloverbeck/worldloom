@@ -1,9 +1,13 @@
 import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
+import { branchIsolation } from "../structural/branch-isolation.js";
+import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
+import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
+import { observerFirewall } from "../structural/observer-firewall.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
@@ -11,6 +15,7 @@ import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.j
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
+import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
 import { rule2NoPureCosmetics } from "../rules/rule2-no-pure-cosmetics.js";
 import { rule4NoGlobalizationByAccident } from "../rules/rule4-no-globalization-by-accident.js";
@@ -31,8 +36,12 @@ export const structuralValidators: readonly Validator[] = [
   crossFileReference,
   recordSchemaCompliance,
   storyFactAuthority,
+  liePromotedSilently,
+  branchIsolation,
+  observerFirewall,
   auditOnlySeShape,
   sltCreatedAtPageOriginConsistency,
+  canonBaselineDrift,
   canonDriftClassificationEvidence,
   expectedWitnessCoverage,
   snapshotReplayEquality,
@@ -40,7 +49,8 @@ export const structuralValidators: readonly Validator[] = [
   stateSnapshotIntegrity,
   touchedByCfCompleteness,
   proposalPackageShape,
-  modificationHistoryRetrofit
+  modificationHistoryRetrofit,
+  validationTraceShapeCompliance
 ];
 
 export const ruleValidators: readonly Validator[] = [

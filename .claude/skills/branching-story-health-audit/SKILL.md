@@ -131,6 +131,12 @@ Before Phase 1:
 5. Load story-local audit inputs through `story_slug` scoped retrieval: use `story_bundle_context` and targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records` for active cast `STENT` ids (Phase 2d belief / visibility checks), mirrored `SF` records, and other bundle-local ids. Load the world canon context packet with `story_slug=<story_slug>` and seed it only with world-scope ids: every `M-<integer>` (whole-class for forbidden-resolution and cumulative-accretion checks in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), and parent `CF` records derived from mirrored `SF` records (for Phase 2e canon-authority classification). Extract the current world-canon revision from the latest `change_log_entry` in the context packet (`CH-<integer>`, or `null` only if no change log exists).
 6. If `cross_story` in `mode`: enumerate `worlds/<world_slug>/stories/*/` directories; for each sibling bundle, load its `_source/` record-index sufficient for Phase 4 contradiction checks (mirrored `SF` records keyed by CF ids in `derived_from`, `SE.promotion_claims[]` queue, terminal-closure inherited-debt notes).
 
+Persisted-summary recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
+`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
+`delivery_status: persisted_with_summary`, retrieve required slices via
+`mcp__worldloom__get_persisted_packet_slice` before continuing.
+
 If any precondition fails, the skill aborts before Phase 1.
 
 ## Phase 1: Scope branches
@@ -469,11 +475,6 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 - **Schema minimalism per shared contract §2.** SAU report + RSP card shapes defined inline. No nice-to-have fields.
 - **Skills do not chain.** The audit never invokes `commitment-block-authoring`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. RSP cards record sibling-handoff recommendations; the user separately invokes the named sibling with the RSP card path as input.
 - **Worktree discipline**: paths resolve from worktree root if invoked inside one.
-- **Known integration debt**:
-  - **MCPENH-040** (BEL allocator registration) — **Now landed** (verified at `tools/world-mcp/src/tools/allocate-next-id.ts`: `BEL` is registered in `ID_CLASS_FORMATS` and `STORY_SCOPED_ID_CLASS_DIRECTORIES`). Phase 2d reads `BEL` records for belief / visibility health checks.
-  - **PEENH-007** (`create_bel_record` patch op) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `create_bel_record` is listed in `OPERATION_KINDS`). This skill reads the BEL records that op can create.
-  - **VALENH-011** (BEL `record_schema_compliance`) — **Now landed** (verified at `tools/validators/src/schemas/story-belief.schema.json` and `tools/validators/src/structural/utils.ts`: `belief_record` maps to `story-belief`). Phase 2d's BEL reads are schema-backed.
-  - **MCPENH-041** (task_type rename) — **Now landed** (verified at `tools/world-mcp/src/ranking/profiles/index.ts`: `branching_story_health_audit` is registered in `TASK_TYPES`). The rename did not change this skill's task_type string.
 
 ## What is intentionally NOT in this skill
 

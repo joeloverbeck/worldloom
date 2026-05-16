@@ -12,8 +12,12 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "cross_file_reference",
       "record_schema_compliance",
       "story_fact_authority",
+      "lie_promoted_silently",
+      "branch_isolation",
+      "observer_firewall",
       "audit_only_se_shape",
       "slt_created_at_page_origin_consistency",
+      "canon_baseline_drift",
       "canon_drift_classification_evidence",
       "expected_witness_coverage",
       "snapshot_replay_equality",
@@ -21,7 +25,8 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "state_snapshot_integrity",
       "touched_by_cf_completeness",
       "proposal_package_shape",
-      "modification_history_retrofit"
+      "modification_history_retrofit",
+      "validation_trace_shape_compliance"
     ]
   );
 });

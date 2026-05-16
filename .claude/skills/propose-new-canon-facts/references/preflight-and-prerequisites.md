@@ -14,7 +14,7 @@ mcp__worldloom__get_context_packet(
 )
 ```
 
-`propose_new_canon_facts` is registered in the TASK_TYPES enum by MCPENH-002. Its ranking profile keeps this skill's broad-domain thinness scan while lifting canon facts, invariants, Mystery Reserve entries, named-entity neighbors, and section context above the generic fallback.
+`propose_new_canon_facts` is registered in the TASK_TYPES enum. Its ranking profile keeps this skill's broad-domain thinness scan while lifting canon facts, invariants, Mystery Reserve entries, named-entity neighbors, and section context above the generic fallback.
 
 Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel concepts + invariants + relevant CFs + named-entity neighbors + section context for the seed-local domains. It is the entry point, not the whole load — Phases 1-7 expand on demand via record-addressed retrieval.
 

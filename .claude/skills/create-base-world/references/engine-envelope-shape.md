@@ -78,7 +78,7 @@ Most classes are consistent across both layers — `cf_ids` uses `CF-<integer>` 
 
 `sec_ids` uses `SEC-<PREFIX>-<integer>` (e.g., `SEC-GEO-1`); the verifier scans nodes per-prefix, so each SEC ID is checked against the next-id for that specific prefix. Lay them out in the order ops are emitted (`SEC-GEO-1`, `SEC-PAS-1`, `SEC-INS-1`, ...).
 
-`inv_ids` uses category-prefix IDs directly (`ONT-N`, `CAU-N`, `DIS-N`, `SOC-N`, `AES-N`). After PATCHENG-001, the verifier scans per category prefix just like `sec_ids`; do not include any `INV-N` sentinel. For multiple new invariants under the same category, list them in monotonic order (`ONT-1`, `ONT-2`, ...).
+`inv_ids` uses category-prefix IDs directly (`ONT-N`, `CAU-N`, `DIS-N`, `SOC-N`, `AES-N`). The verifier scans per category prefix just like `sec_ids`; do not include any `INV-N` sentinel. For multiple new invariants under the same category, list them in monotonic order (`ONT-1`, `ONT-2`, ...).
 
 ### Full `expected_id_allocations` shape
 

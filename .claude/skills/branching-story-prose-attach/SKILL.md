@@ -111,7 +111,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` — user-supplied rendered prose; MUST exist
 - Optional: `worlds/<world_slug>/stories/<story_slug>/pages-prose/<recent-N>.md` (prior 1-2 prose pages, only when `run_craft_critic: true`)
 
-The bundle MUST exist (non-bootstrap variant); the page MUST exist; the plan + prose pair MUST exist. No world-canon retrieval needed — the plan body inlines all load-bearing canon excerpts per shared contract §8 §4.
+The bundle MUST exist (non-bootstrap variant); the page MUST exist; the plan + prose pair MUST exist. No context-packet retrieval is normally needed because the plan body inlines the load-bearing canon per shared contract §8 §4. Targeted `mcp__worldloom__get_firewall_content` retrieval is required when plan §11 does not inline the Mystery Reserve firewall fields used by the `forbidden_mystery_resolution` check (Phase 3 check 3). Persisted-summary recovery still applies if retrieval returns `delivery_status: persisted_with_summary` (see `.claude/skills/_shared-templates/persisted-packet-recovery.md`).
 
 ## Pre-flight Check
 
@@ -124,6 +124,12 @@ Before Phase 1:
 5. Verify the required artifact pair: `pages-prose-plans/<page_id>.md` and `pages-prose/<page_id>.md` both exist. Abort with missing-artifact error if either is absent.
 6. Create `worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/` directory if absent (idempotent `mkdir -p`).
 7. Allocate `SE` id via `mcp__worldloom__allocate_next_id(world_slug, 'SE', story_slug=<story_slug>)` only when `emit_attach_event: true`. Skip otherwise.
+
+Persisted-summary recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
+`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
+`delivery_status: persisted_with_summary`, retrieve required slices via
+`mcp__worldloom__get_persisted_packet_slice` before continuing.
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -323,7 +329,7 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 | §Story Bundles §6a (Belief vs. Fact) | N/A | Prose-attach reads `PG.state_snapshot.active_records.BEL` references alongside the `STSTAT`-derived status projection for entity-status-consistency checks but does not create or supersede BEL or STSTAT records. |
 | §Story Bundles §9 (Prose Length Discipline) | Phase 4 craft critic | Craft critic uses 7 qualitative axes; no word-count enforcement. |
 | Change Control Policy | N/A | Canon-reading skill emits no Change Log Entries. |
-| Tooling Recommendation | N/A | No world-canon retrieval needed — plan body inlines all load-bearing canon per shared contract §8. |
+| Tooling Recommendation | N/A | No context-packet retrieval is normally needed because the plan body inlines the load-bearing canon per shared contract §8. Targeted `mcp__worldloom__get_firewall_content` retrieval is required when plan §11 does not inline the Mystery Reserve firewall fields used by the `forbidden_mystery_resolution` check (Phase 3 check 3). Persisted-summary recovery still applies if retrieval returns `delivery_status: persisted_with_summary` (see `.claude/skills/_shared-templates/persisted-packet-recovery.md`). |
 
 ## Guardrails
 
@@ -336,7 +342,7 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 - **Silent acceptance forbidden for structural inventions.** Every `invented_structural_fact: FAIL` or `canon_claim_without_authority: FAIL` routes through `repair_recommendation` to one of three lawful repair paths: `revise_prose`, `run_turn_cycle_repair`, `run_story_fact_promotion_to_canon`.
 - **Skills do not chain.** Prose-attach does not invoke `branching-story-turn-cycle`, `story-fact-promotion-to-canon`, or `branching-story-health-audit`. When `repair_recommendation` is non-`none`, the receipt records the recommendation; the user separately invokes the named sibling.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **No deferred-integration tickets named by this skill** — prose-attach is structurally simple. It inherits the rebuilt-family infrastructure from bootstrap and turn-cycle without adding its own deferred surfaces: MCPENH-040 BEL allocator, PEENH-007 `create_bel_record`, VALENH-011 BEL validator, MCPENH-041 task-type renames, and VALENH-016 (story-page.schema.json requires `plan_hash` + `state_hash` as sha256-shaped fields; prose-attach now treats missing, placeholder, or non-sha256 PG hash fields as `hash_integrity: FAIL`). The shared contract §4.6 receipt schema is already in place.
+- **No deferred-integration tickets named by this skill** — prose-attach is structurally simple. It inherits the rebuilt-family infrastructure from bootstrap and turn-cycle without adding its own deferred surfaces. `tools/validators/src/schemas/story-page.schema.json` requires `plan_hash` + `state_hash` as sha256-shaped fields; prose-attach treats missing, placeholder, or non-sha256 PG hash fields as `hash_integrity: FAIL`. The shared contract §4.6 receipt schema is already in place.
 
 ## Final Rule
 

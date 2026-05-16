@@ -1,6 +1,6 @@
 # SPEC33STOPIPSEV-006: Add shared persisted-packet-recovery template + cross-refs in 7 consuming skills
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new shared-template file at `.claude/skills/_shared-templates/persisted-packet-recovery.md`; cross-reference inserts in 7 story-pipeline consuming skills. No tool/validator/patch-engine changes.
@@ -8,12 +8,12 @@
 
 ## Problem
 
-`docs/CONTEXT-PACKET-CONTRACT.md` §Fast-Summary Inline Delivery and `docs/MACHINE-FACING-LAYER.md` §Retrieval Tool Scope define the persisted-summary recovery contract: when `get_context_packet`, `get_records`, or `describe_envelope_schema` returns `delivery_status: persisted_with_summary`, the consuming workflow must retrieve required slices via `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)` before validation. The MCP side implements the recovery API (`tools/world-mcp/src/tools/get-persisted-packet-slice.ts`, registered in `tools/world-mcp/src/server.ts`; assembler emits `delivery_status` and `fallback_advice` at `tools/world-mcp/src/context-packet/assemble.ts`). But none of the seven consuming story-pipeline skills documents recovery wording — under large bundles or wide CH windows, a skill could validate against a summary-only packet and miss governing records.
+`docs/CONTEXT-PACKET-CONTRACT.md` §Fast-Summary Inline Delivery and `docs/MACHINE-FACING-LAYER.md` §Retrieval Tool Scope define the persisted-summary recovery contract: when `get_context_packet`, `get_records`, or `describe_envelope_schema` returns `delivery_status: persisted_with_summary`, the consuming workflow must retrieve required slices via `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)` before validation. The MCP side implements the recovery API (`tools/world-mcp/src/tools/get-persisted-packet-slice.ts`, registered in `tools/world-mcp/src/server.ts`; assembler emits `delivery_status` and `fallback_advice` at `tools/world-mcp/src/context-packet/assemble.ts`). At intake, none of the seven consuming story-pipeline skills documented recovery wording — under large bundles or wide CH windows, a skill could validate against a summary-only packet and miss governing records.
 
 ## Assumption Reassessment (2026-05-16)
 
 1. **Codebase verification of MCP-side implementation**: live read confirms `tools/world-mcp/src/tools/get-persisted-packet-slice.ts` exists and is registered in `tools/world-mcp/src/server.ts`; the context-packet assembler emits `delivery_status: persisted_with_summary` correctly per `docs/CONTEXT-PACKET-CONTRACT.md` §Fast-Summary Inline Delivery.
-2. **Codebase verification of consuming-skill gap**: live read of all seven consuming SKILL.md files (`branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) confirms none mentions `persisted_with_summary` or `get_persisted_packet_slice`.
+2. **Codebase verification of consuming-skill gap**: at intake, live read of all seven consuming SKILL.md files (`branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) confirmed none mentioned `persisted_with_summary` or `get_persisted_packet_slice`. This ticket added exactly one Pre-flight cross-reference to each consuming skill.
 3. **Cross-skill boundary**: the shared boundary under audit is the persisted-summary recovery contract documented at `docs/CONTEXT-PACKET-CONTRACT.md` and `docs/MACHINE-FACING-LAYER.md`, plus the MCP-side `get_persisted_packet_slice` tool. The new shared template centralizes the skill-facing discipline so cross-skill divergence is structurally prevented; the precedent at `.claude/skills/_shared-templates/story-state-contract.md` establishes the shared-template pattern.
 4. **FOUNDATIONS principle restatement**: §3 Read Discipline (story-pipeline retrieval via targeted MCP tools); §5 Validation Rules at Story Scope (validation rationales must cite real records, not summary metadata). Closing this gap brings consuming skills into compliance with the contract that already names the recovery API.
 
@@ -28,14 +28,14 @@
 2. Each of seven consuming skills' Pre-flight section cross-references the shared template → codebase grep-proof per skill.
 3. MCP-side `get_persisted_packet_slice` and `delivery_status: persisted_with_summary` already implemented → codebase grep-proof on `tools/world-mcp/`.
 
-## What to Change
+## Landed Changes
 
 ### 1. Create the shared template file
 
-Create `.claude/skills/_shared-templates/persisted-packet-recovery.md` with this exact body:
+Created `.claude/skills/_shared-templates/persisted-packet-recovery.md` with the shared recovery discipline:
 
 ```markdown
-# Persisted-Packet Recovery — Shared Discipline
+# Persisted-Packet Recovery - Shared Discipline
 
 This shared discipline applies to every story-pipeline skill whose Pre-flight
 invokes `mcp__worldloom__get_context_packet`,
@@ -52,7 +52,7 @@ If `get_context_packet`, `get_records`, or `describe_envelope_schema` returns
 envelope field on `get_records` / `describe_envelope_schema`), the inline
 response is a recovery summary, not the full payload. The full packet lives
 at `task_header.persisted_output_path`. Validation rationales may cite only
-retrieved records, fields, packet layers, slices, or validator results —
+retrieved records, fields, packet layers, slices, or validator results -
 never summary metadata alone.
 
 ## Recovery Action
@@ -78,13 +78,13 @@ identify which slices to retrieve, then retrieve.
 
 If a required slice cannot be retrieved (e.g., the persisted file is
 inaccessible or the slice path is malformed), abort the workflow and surface
-the persisted-path to the user for post-session analysis. Do not validate
+the persisted path to the user for post-session analysis. Do not validate
 from summary-only context.
 ```
 
 ### 2. Cross-reference insert in each consuming skill's Pre-flight
 
-Insert this exact paragraph into each consuming skill's Pre-flight section, placed immediately after the relevant retrieval-tool call (typically right after `mcp__worldloom__get_context_packet` or `mcp__worldloom__get_records`):
+Inserted this paragraph into each consuming skill's Pre-flight section, placed after the relevant retrieval-tool call or precondition block:
 
 ```
 Persisted-summary recovery: see
@@ -94,15 +94,15 @@ Persisted-summary recovery: see
 `mcp__worldloom__get_persisted_packet_slice` before continuing.
 ```
 
-Insert sites (paths and approximate line markers — locate the relevant retrieval call by reading the file):
+Insert sites:
 
-- `branching-story-bootstrap/SKILL.md` — after the `get_context_packet` call (~line 45 region).
-- `branching-story-turn-cycle/SKILL.md` — after the `get_context_packet` call (~line 39 region).
-- `branching-story-prose-attach/SKILL.md` — after the `get_firewall_content` reference in Pre-flight (~line 114 region; one short note covering the conditional retrieval path).
-- `branching-story-health-audit/SKILL.md` — after the `get_context_packet` call (~line 33 region).
-- `commitment-block-authoring/SKILL.md` — after the `get_context_packet` call (~line 36 region).
-- `story-fact-promotion-to-canon/SKILL.md` — after the `get_context_packet` / `get_records` calls.
-- `story-promotion-closeout/SKILL.md` — after the `get_records` call (~line 154 region for linked CF/CH/PA retrieval).
+- `branching-story-bootstrap/SKILL.md` — after Pre-flight step 6 (`get_context_packet`).
+- `branching-story-turn-cycle/SKILL.md` — after Pre-flight step 12; the note covers step 9 `get_context_packet` and step 10 `get_records` recovery.
+- `branching-story-prose-attach/SKILL.md` — after Pre-flight step 7; this skill has no context-packet pre-flight call, but the note covers any later `describe_envelope_schema` recovery path.
+- `branching-story-health-audit/SKILL.md` — after Pre-flight step 6; the note covers step 5 `get_context_packet` / targeted retrieval recovery.
+- `commitment-block-authoring/SKILL.md` — after Pre-flight step 6 (`get_context_packet` / targeted retrieval).
+- `story-fact-promotion-to-canon/SKILL.md` — after Pre-flight step 7 (`get_context_packet` / targeted retrieval).
+- `story-promotion-closeout/SKILL.md` — after Pre-flight step 7; the note covers step 5 `get_records` recovery.
 
 ## Files to Touch
 
@@ -128,8 +128,8 @@ Insert sites (paths and approximate line markers — locate the relevant retriev
 
 1. `test -f .claude/skills/_shared-templates/persisted-packet-recovery.md` succeeds.
 2. `grep -l 'persisted-packet-recovery.md' .claude/skills/{branching-story-bootstrap,branching-story-turn-cycle,branching-story-prose-attach,branching-story-health-audit,commitment-block-authoring,story-fact-promotion-to-canon,story-promotion-closeout}/SKILL.md` returns all seven file paths.
-3. `grep -n 'persisted_with_summary' .claude/skills/` returns matches in the shared template + each consuming skill's Pre-flight cross-reference.
-4. `grep -l 'get_persisted_packet_slice' tools/world-mcp/src/tools/` returns `get-persisted-packet-slice.ts` (sanity check that MCP-side implementation is unchanged).
+3. `grep -n 'persisted_with_summary' .claude/skills/_shared-templates/persisted-packet-recovery.md .claude/skills/{branching-story-bootstrap,branching-story-turn-cycle,branching-story-prose-attach,branching-story-health-audit,commitment-block-authoring,story-fact-promotion-to-canon,story-promotion-closeout}/SKILL.md` returns matches in the shared template + each consuming skill's Pre-flight cross-reference.
+4. `test -f tools/world-mcp/src/tools/get-persisted-packet-slice.ts && rg -n "get_persisted_packet_slice" tools/world-mcp/src/server.ts tools/world-mcp/src/tool-names.ts` succeeds (sanity check that MCP-side implementation and registration are unchanged).
 
 ### Invariants
 
@@ -144,7 +144,27 @@ Insert sites (paths and approximate line markers — locate the relevant retriev
 
 ### Commands
 
-1. `test -f .claude/skills/_shared-templates/persisted-packet-recovery.md && echo "✓ template exists"` — must succeed.
-2. `grep -c 'persisted-packet-recovery.md' .claude/skills/*/SKILL.md` — count must be 7 (one cross-reference per consuming skill).
-3. `grep -n 'persisted_with_summary' .claude/skills/_shared-templates/persisted-packet-recovery.md` — confirms the canonical recovery wording uses the contract terminology.
+1. `test -f .claude/skills/_shared-templates/persisted-packet-recovery.md && echo "template exists"` — succeeded.
+2. `grep -l 'persisted-packet-recovery.md' .claude/skills/{branching-story-bootstrap,branching-story-turn-cycle,branching-story-prose-attach,branching-story-health-audit,commitment-block-authoring,story-fact-promotion-to-canon,story-promotion-closeout}/SKILL.md` — returned all seven consuming skill paths.
+3. `grep -n 'persisted_with_summary' .claude/skills/_shared-templates/persisted-packet-recovery.md .claude/skills/{branching-story-bootstrap,branching-story-turn-cycle,branching-story-prose-attach,branching-story-health-audit,commitment-block-authoring,story-fact-promotion-to-canon,story-promotion-closeout}/SKILL.md` — returned one shared-template match plus one match in each consuming skill.
 4. A narrower glob-and-grep verification is the right boundary because the MCP-side recovery API is unchanged (no integration-test exercise of the MCP recovery surface is needed for this skill-prose-only ticket).
+
+## Outcome
+
+Completed: 2026-05-16
+
+Added `.claude/skills/_shared-templates/persisted-packet-recovery.md` as the canonical skill-facing recovery discipline for `persisted_with_summary` responses from `get_context_packet`, `get_records`, and `describe_envelope_schema`. Added one Pre-flight cross-reference to each of the seven consuming story-pipeline skills.
+
+No tool, validator, patch-engine, MCP handler, or world-content changes were made.
+
+## Verification Result
+
+1. `test -f .claude/skills/_shared-templates/persisted-packet-recovery.md && echo "template exists"` — passed.
+2. `grep -l 'persisted-packet-recovery.md' .claude/skills/{branching-story-bootstrap,branching-story-turn-cycle,branching-story-prose-attach,branching-story-health-audit,commitment-block-authoring,story-fact-promotion-to-canon,story-promotion-closeout}/SKILL.md` — returned all seven consuming skill paths.
+3. `grep -n 'persisted_with_summary' .claude/skills/_shared-templates/persisted-packet-recovery.md .claude/skills/{branching-story-bootstrap,branching-story-turn-cycle,branching-story-prose-attach,branching-story-health-audit,commitment-block-authoring,story-fact-promotion-to-canon,story-promotion-closeout}/SKILL.md` — returned the shared template plus all seven Pre-flight cross-reference hits.
+4. `test -f tools/world-mcp/src/tools/get-persisted-packet-slice.ts && rg -n "get_persisted_packet_slice" tools/world-mcp/src/server.ts tools/world-mcp/src/tool-names.ts` — passed, confirming the existing MCP-side implementation file and registration references remain present.
+
+## Deviations
+
+1. The drafted command `grep -l 'get_persisted_packet_slice' tools/world-mcp/src/tools/` was stale for the live implementation: the handler file is `get-persisted-packet-slice.ts`, while the snake-case tool name is registered in `tools/world-mcp/src/server.ts` and `tools/world-mcp/src/tool-names.ts`. Closeout replaced that proof with the direct file-exists + registration grep above.
+2. The drafted count command `grep -c 'persisted-packet-recovery.md' .claude/skills/*/SKILL.md` emits one count per file, not a scalar total. Closeout uses `grep -l` against the seven named consuming skills instead.
