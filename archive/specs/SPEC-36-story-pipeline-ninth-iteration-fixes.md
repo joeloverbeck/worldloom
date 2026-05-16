@@ -2,7 +2,7 @@
 
 # SPEC-36 — Story Pipeline Ninth-Iteration Fixes
 
-**Status**: DRAFT
+**Status**: COMPLETED
 **Date**: 2026-05-16
 **Supersedes**: completes the validator-hardening-II cluster deferred at `archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` §Risks & Open Questions (D4 full witness coverage; D5 `causal_dependency_threat_scan` four-subcase implementation)
 
@@ -327,3 +327,26 @@ Full-suite proof at spec close: `npm test` green across `tools/validators/`, `to
 - **D1 / D2 health-audit replay integration.** The skill-prose updates at `branching-story-health-audit/SKILL.md:196,236` describe the validators as patch-plan-enforced AND health-audit-replay-enforced. The validators themselves are written for patch-plan validation entry points; the health-audit's Phase 2d / Phase 2g replay logic must be updated to invoke the same validators against replayed state. This is in-scope for D1 and D2 acceptance, but the precise integration shape (do the validators need a replay-mode flag? do they consume a parent-snapshot context the patch-plan path doesn't supply?) is not specified here. Operator judgment at implementation time; surfaced as a Risk so the ticket-decomposition pass can scope it explicitly.
 
 - **No active story bundles yet.** This spec lands during the pre-pilot window. D1 and D2 are tested against synthetic fixtures only; their behavior under real pilot bundles (with realistic witness-group sizes, realistic OBL/SLT dependency depths, realistic SE-per-page densities) is untested. Pilot-tier authoring will surface calibration needs the synthetic fixtures cannot anticipate; the validator-hardening-III iteration is likely.
+
+## Outcome
+
+Completed 2026-05-17.
+
+SPEC-36 landed and archived the full `SPEC36STOPIPNIN` ticket family:
+
+- D1 / `archive/tickets/SPEC36STOPIPNIN-005.md`: registered `causal_dependency_threat_scan`, added four-subcase verdict coverage, updated validator inventory/proof surfaces, and truthed turn-cycle / health-audit prose from deferred to validator-backed.
+- D2 / `archive/tickets/SPEC36STOPIPNIN-006.md`: registered `expected_witness_coverage`, added deterministic STLOC + STSTAT witness coverage tests, preserved `non_propagation_tag_shape` as the syntax validator, and updated the same consumer skill prose.
+- D3 / `archive/tickets/SPEC36STOPIPNIN-004.md`: tightened story-bundle id regexes to the unpadded FOUNDATIONS-002 form, normalized validators-package fixtures, added padded PG/BEL rejection tests, and aligned recursive reference closure with unpadded PG ids.
+- D4 / `archive/tickets/SPEC36STOPIPNIN-001.md`: replaced the uncaveated archived validator-spec design citation in `tools/validators/README.md` with current authorities plus a historical note.
+- D5 / `archive/tickets/SPEC36STOPIPNIN-003.md`: added source-level capability parity tests for `describe_capabilities`, `describe_envelope_schema`, and validator registry names; also fixed the real `describe_capabilities` ordering drift and same-family schema-discovery expectation exposed during proof.
+- D6 / `archive/tickets/SPEC36STOPIPNIN-002.md`: added PG/BEL/SE story-local seed filtering tests for `get_context_packet`.
+
+Final verification:
+
+- `cd tools/validators && npm test` — passed; 323 tests.
+- `cd tools/world-mcp && npm test` — passed; 376 tests.
+- `cd tools/patch-engine && npm test` — passed; 75 tests.
+- `cd tools/hooks && npm test` — passed; 18 tests.
+- `cd tools/validators && node --test dist/tests/cli/world-validate.story-bundle.test.js` — passed; 1 story-scoped CLI test.
+
+The spec's runtime/deployed MCP parity, generated `dist` freshness check, repo-wide archive-citation lint, broad retired-field cleanup, and pilot-bundle calibration risks remain out of scope as documented above.

@@ -4,7 +4,7 @@
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: None
-**Deps**: `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`
+**Deps**: `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ At intake, `tools/world-mcp/tests/tools/get-context-packet.story-pipeline.test.t
 ## Assumption Reassessment (2026-05-16)
 
 1. `tools/world-mcp/tests/tools/get-context-packet.story-pipeline.test.ts` exists and, before this ticket, exercised SF / STENT seed-id types. This ticket appended PG / BEL / SE coverage in the same file. The filter `STORY_LOCAL_SEED_NODE_PATTERN` at `tools/world-mcp/src/tools/get-context-packet.ts` matches PG / BEL / SE among its 20 covered classes; the warning code `story_local_seed_nodes_ignored` is the same warning emitted under the SF / STENT path.
-2. `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D6 specifies three new test cases (one per added seed type) appended to the existing test file. SPEC-35 D3's archived ticket landed the original story-local seed filter and the SF / STENT test coverage; this ticket extends that surface.
+2. `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D6 specifies three new test cases (one per added seed type) appended to the existing test file. SPEC-35 D3's archived ticket landed the original story-local seed filter and the SF / STENT test coverage; this ticket extends that surface.
 3. Cross-artifact boundary under audit: the context-packet story-local seed filter is a contract between the MCP retrieval surface (`get_context_packet`) and story-pipeline-task-type consumers — story-local IDs must be filtered before assembly, with the documented warning emitted. The test surface is the mechanical proof that the contract holds for every story-local class the filter pattern covers.
 4. FOUNDATIONS principle: §Story Bundles §3 (Read Discipline) — story-local records load through `story_slug`-scoped tools, not as world-scope context-packet seeds. Test coverage of additional seed types hardens the discipline by mechanically rejecting regressions that would silently widen the world-scope seed surface to include story-local IDs.
 

@@ -4,7 +4,7 @@
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: None
-**Deps**: `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`
+**Deps**: `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ At intake, `tools/validators/README.md:5` cited `**Design**: ../../archive/specs
 ## Assumption Reassessment (2026-05-16)
 
 1. At intake, `tools/validators/README.md:5` read `**Design**: \`../../archive/specs/SPEC-04-validator-framework.md\`` with no historical caveat — verified by direct read of the file's first 20 lines. The archived spec at `archive/specs/SPEC-04-validator-framework.md` is a completed historical record, not the current design authority.
-2. `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D4 specifies the exact replacement text (`**Current authority**:` + 4 named current docs + a `Historical note:` paragraph). The SPEC-35 D9 precedent (`archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` §D9) used the `(historical reference — superseded by <current authority>)` marker convention for the same problem in `docs/FOUNDATIONS.md`; this ticket adapts the convention for a README file by promoting it to a paragraph-level `Historical note:` instead of an inline parenthetical.
+2. `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D4 specifies the exact replacement text (`**Current authority**:` + 4 named current docs + a `Historical note:` paragraph). The SPEC-35 D9 precedent (`archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` §D9) used the `(historical reference — superseded by <current authority>)` marker convention for the same problem in `docs/FOUNDATIONS.md`; this ticket adapts the convention for a README file by promoting it to a paragraph-level `Historical note:` instead of an inline parenthetical.
 3. Cross-artifact boundary under audit: the validators README is the docs-side surface that orients readers to current authority for the validators package; the archived SPEC-04 is the historical-record-side surface that documents what was implemented. The fix preserves both by retaining the archive path under an explicit historical caveat while routing readers to current authorities.
 4. FOUNDATIONS principle: §Read Discipline (current-source-over-archived) — the canonical authority for current behavior lives at `docs/FOUNDATIONS.md` + `.claude/skills/_shared-templates/story-state-contract.md` + `docs/MACHINE-FACING-LAYER.md` + current validator source under `tools/validators/src/`, not at archived spec files. The README must orient readers to those current sources.
 

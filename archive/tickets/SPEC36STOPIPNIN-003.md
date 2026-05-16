@@ -3,8 +3,8 @@
 **Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — `tools/world-mcp/tests/server/capability-parity.test.ts` (new), `tools/world-mcp/src/server.ts` (capability ordering), `tools/world-mcp/tests/tools/get-record-schema.test.ts` (schema-discovery proof expectation), `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` (D5 implementation note)
-**Deps**: `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`, `archive/tickets/SPEC36STOPIPNIN-005.md`, `archive/tickets/SPEC36STOPIPNIN-006.md`
+**Engine Changes**: Yes — `tools/world-mcp/tests/server/capability-parity.test.ts` (new), `tools/world-mcp/src/server.ts` (capability ordering), `tools/world-mcp/tests/tools/get-record-schema.test.ts` (schema-discovery proof expectation), `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` (D5 implementation note)
+**Deps**: `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`, `archive/tickets/SPEC36STOPIPNIN-005.md`, `archive/tickets/SPEC36STOPIPNIN-006.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ At intake, `tools/world-mcp/tests/server/list-tools.test.ts` verified `client.li
 ## Assumption Reassessment (2026-05-16)
 
 1. `tools/world-mcp/tests/server/` exists with `dispatch.test.ts` + `list-tools.test.ts` — verified by directory listing. `MCP_TOOL_ORDER` lives at `tools/world-mcp/src/tool-names.ts:29-52` (22 tool entries); `OPERATION_KINDS` lives at `tools/patch-engine/src/envelope/schema.ts:58-92` (33 op kinds); both confirmed by parallel-Explore-agent quotes during the SPEC-36 brainstorm session. `structuralValidators` and `ruleValidators` are exported from `tools/validators/src/public/registry.ts` (20 + 10 validators respectively, including the SPEC-36 D1/D2 additions once they land).
-2. `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D5 specifies three test cases. The auditor's Amendment E originally included a "build metadata recency" sub-item; the spec drops that as not operationalizable in CI ("recent enough" cannot be defined). Runtime/deployed parity is deferred to a tenth-iteration carry-over per SPEC-36 §Risks & Open Questions.
+2. `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D5 specifies three test cases. The auditor's Amendment E originally included a "build metadata recency" sub-item; the spec drops that as not operationalizable in CI ("recent enough" cannot be defined). Runtime/deployed parity is deferred to a tenth-iteration carry-over per SPEC-36 §Risks & Open Questions.
 3. Cross-artifact boundary under audit: the source-of-truth lists (`MCP_TOOL_ORDER`, `OPERATION_KINDS`, the validator registry exports) are the canonical definitions; the exposed MCP APIs (`describe_capabilities`, `describe_envelope_schema`) and the registry must remain in lockstep with their source-of-truth lists. The parity test is the mechanical proof that the contract holds.
 4. FOUNDATIONS principle: §Machine-Facing Layer (capability and schema-discovery currency) — source-level parity is a prerequisite for any runtime parity check. Internal drift between the source-of-truth lists and the exposed APIs is the failure mode this test prevents.
 5. 2026-05-16 queue reassessment: `causal_dependency_threat_scan` is now registered by `archive/tickets/SPEC36STOPIPNIN-005.md`, and `expected_witness_coverage` is now registered by `archive/tickets/SPEC36STOPIPNIN-006.md`. This ticket is now independently landable against both completed validator prerequisites.
@@ -60,7 +60,7 @@ Three test cases now follow the `list-tools.test.ts` pattern (Node.js built-in `
 - `tools/world-mcp/tests/server/capability-parity.test.ts` (new)
 - `tools/world-mcp/src/server.ts` (modify capability ordering)
 - `tools/world-mcp/tests/tools/get-record-schema.test.ts` (modify same-family proof expectation)
-- `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` (D5 implementation note)
+- `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` (D5 implementation note)
 
 ## Out of Scope
 
@@ -89,7 +89,7 @@ Three test cases now follow the `list-tools.test.ts` pattern (Node.js built-in `
 
 1. `tools/world-mcp/tests/server/capability-parity.test.ts` — new test file housing the three parity assertions; rationale per the change list above.
 2. `tools/world-mcp/tests/tools/get-record-schema.test.ts` — same-family proof-surface truthing for the SPEC-36 D3 unpadded storylet id schema exposed through `get_record_schema`.
-3. `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` — D5 implementation note keeps the active originating spec aligned with the landed ticket.
+3. `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` — D5 implementation note keeps the active originating spec aligned with the landed ticket.
 
 ### Commands
 
@@ -104,7 +104,7 @@ Completed 2026-05-17.
 - Added `tools/world-mcp/tests/server/capability-parity.test.ts` with three source-level parity checks for `describe_capabilities`, `describe_envelope_schema`, and the validators registry.
 - Updated `tools/world-mcp/src/server.ts` so `describe_capabilities` returns its capability list in `MCP_TOOL_ORDER`.
 - Updated `tools/world-mcp/tests/tools/get-record-schema.test.ts` to expect the SPEC-36 D3 unpadded SLT id regex surfaced through validator-backed schema discovery.
-- Added a D5 implementation note to `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`.
+- Added a D5 implementation note to `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md`.
 
 ## Verification Result
 
