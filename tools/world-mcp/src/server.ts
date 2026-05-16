@@ -437,7 +437,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "allocate_next_id",
-    "Allocate the next append-only id for a world-specific, story-bundle-scoped, sub-audit-scoped, or pipeline-scoped record class. Story-bundle-scoped classes return <CLASS>-0001 for a fresh missing bundle under an existing world. RSP requires story_slug and audit_id.",
+    "Allocate the next append-only id for a world-specific, story-bundle-scoped, sub-audit-scoped, or pipeline-scoped record class. Story-bundle-scoped classes return unpadded natural-integer IDs such as <CLASS>-1 for a fresh missing bundle under an existing world (per FOUNDATIONS-002). RSP requires story_slug and audit_id.",
     allocateNextIdInputSchema,
     async (args) => allocateNextId(args as unknown as Parameters<typeof allocateNextId>[0]),
     { id_class: ID_CLASSES }
