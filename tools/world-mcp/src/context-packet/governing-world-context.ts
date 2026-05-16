@@ -105,6 +105,8 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
   other: ["WORLD_KERNEL.md", "INVARIANTS.md"]
 };
 
+// Numbered entries start with the canonical FOUNDATIONS rule name; task-specific
+// application notes follow after " - " so packet consumers can grep the rule.
 const ACTIVE_RULES: Record<TaskType, string[]> = {
   canon_addition: [
     "Rule 1: no floating facts",
@@ -117,7 +119,7 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
     "Rule 12: no single-trace truths"
   ],
   character_generation: [
-    "Rule 4: distribution discipline",
+    "Rule 4: no globalization by accident - distribution discipline",
     "Rule 7: preserve Mystery Reserve deliberately",
     "No world-level writes from generation flows"
   ],
@@ -137,7 +139,7 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
   ],
   propose_new_characters: [
     "Proposal-only surface; character realization happens in character-generation",
-    "Rule 4: distribution discipline",
+    "Rule 4: no globalization by accident - distribution discipline",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
   propose_new_worlds_from_preferences: [
@@ -147,53 +149,53 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
   ],
   canon_facts_from_diegetic_artifacts: [
     "Proposal-only surface; canonization happens in canon-addition",
-    "Rule 5: separate diegetic claims from world-level truth",
+    "Diegetic-to-world laundering firewall: diegetic claims must not become world-canon without canon-addition adjudication",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
   emergent_pressure_events: [
     "Pressure events are proposal inputs, not accepted canon",
-    "Rule 2: visible consequences are required",
-    "Rule 4: distribution discipline",
-    "Rule 5: separate candidate events from world-level truth",
+    "Rule 5: no consequence evasion - visible consequences are required",
+    "Rule 4: no globalization by accident - distribution discipline",
+    "Candidate events remain proposal inputs until canon-addition adjudication",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
   story_bootstrap: [
     "Story bootstrap is story-local; world canon remains read-only",
-    "Rule 1: imported facts must cite world authority",
-    "Rule 4: distribution discipline",
-    "Rule 5: separate story-local truth from world-level canon",
+    "Rule 1: no floating facts - imported facts must cite world authority",
+    "Rule 4: no globalization by accident - distribution discipline",
+    "Rule 5: no consequence evasion - story-local consequences remain visible",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
   story_turn_cycle: [
     "Story turn cycle is story-local; world canon remains read-only",
-    "Rule 1: imported facts must cite world authority",
-    "Rule 4: distribution discipline",
-    "Rule 5: separate story-local truth from world-level canon",
-    "Rule 6: story state changes remain append-only by supersession",
+    "Rule 1: no floating facts - imported facts must cite world authority",
+    "Rule 4: no globalization by accident - distribution discipline",
+    "Rule 5: no consequence evasion - story-local consequences remain visible",
+    "Rule 6: no silent retcons - story state changes remain append-only by supersession",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
   commitment_block_authoring: [
     "Commitment block authoring is story-local; world canon remains read-only",
-    "Rule 1: imported facts must cite world authority",
-    "Rule 4: distribution discipline",
-    "Rule 5: separate story-local truth from world-level canon",
-    "Rule 6: storylet records remain append-only by new allocation",
+    "Rule 1: no floating facts - imported facts must cite world authority",
+    "Rule 4: no globalization by accident - distribution discipline",
+    "Rule 5: no consequence evasion - story-local consequences remain visible",
+    "Rule 6: no silent retcons - storylet records remain append-only by new allocation",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
   branching_story_health_audit: [
     "Branching story health audit is diagnostic; world canon remains read-only",
-    "Rule 1: findings must cite world and story authority",
-    "Rule 4: branch-local facts must not globalize by accident",
-    "Rule 5: consequence and obligation debt must remain visible",
+    "Rule 1: no floating facts - findings must cite world and story authority",
+    "Rule 4: no globalization by accident - branch-local facts must not globalize",
+    "Rule 5: no consequence evasion - consequence and obligation debt must remain visible",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
   story_fact_promotion_to_canon: [
     "Story fact promotion is a canon-addition handoff, not a direct world-canon write",
-    "Rule 1: promoted facts must cite story and world authority",
-    "Rule 4: story-local truth must not globalize by accident",
-    "Rule 6: promotion must preserve visible change lineage",
+    "Rule 1: no floating facts - promoted facts must cite story and world authority",
+    "Rule 4: no globalization by accident - story-local truth must not globalize",
+    "Rule 6: no silent retcons - promotion must preserve visible change lineage",
     "Rule 7: preserve Mystery Reserve deliberately",
-    "Rule 12: hard-canon promotions need redundant support"
+    "Rule 12: no single-trace truths - hard-canon promotions need redundant support"
   ],
   other: ["Rule 1: no floating facts", "Rule 7: preserve Mystery Reserve deliberately"]
 };
