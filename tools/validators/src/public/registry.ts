@@ -5,6 +5,7 @@ import { crossFileReference } from "../structural/cross-file-reference.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
+import { observerFirewall } from "../structural/observer-firewall.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
@@ -34,6 +35,7 @@ export const structuralValidators: readonly Validator[] = [
   recordSchemaCompliance,
   storyFactAuthority,
   branchIsolation,
+  observerFirewall,
   auditOnlySeShape,
   sltCreatedAtPageOriginConsistency,
   canonDriftClassificationEvidence,
