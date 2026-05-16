@@ -131,6 +131,12 @@ Before Phase 1:
 5. Load story-local audit inputs through `story_slug` scoped retrieval: use `story_bundle_context` and targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records` for active cast `STENT` ids (Phase 2d belief / visibility checks), mirrored `SF` records, and other bundle-local ids. Load the world canon context packet with `story_slug=<story_slug>` and seed it only with world-scope ids: every `M-<integer>` (whole-class for forbidden-resolution and cumulative-accretion checks in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), and parent `CF` records derived from mirrored `SF` records (for Phase 2e canon-authority classification). Extract the current world-canon revision from the latest `change_log_entry` in the context packet (`CH-<integer>`, or `null` only if no change log exists).
 6. If `cross_story` in `mode`: enumerate `worlds/<world_slug>/stories/*/` directories; for each sibling bundle, load its `_source/` record-index sufficient for Phase 4 contradiction checks (mirrored `SF` records keyed by CF ids in `derived_from`, `SE.promotion_claims[]` queue, terminal-closure inherited-debt notes).
 
+Persisted-summary recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
+`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
+`delivery_status: persisted_with_summary`, retrieve required slices via
+`mcp__worldloom__get_persisted_packet_slice` before continuing.
+
 If any precondition fails, the skill aborts before Phase 1.
 
 ## Phase 1: Scope branches

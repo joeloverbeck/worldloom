@@ -125,6 +125,12 @@ Before Phase 1:
 6. Create `worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/` directory if absent (idempotent `mkdir -p`).
 7. Allocate `SE` id via `mcp__worldloom__allocate_next_id(world_slug, 'SE', story_slug=<story_slug>)` only when `emit_attach_event: true`. Skip otherwise.
 
+Persisted-summary recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
+`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
+`delivery_status: persisted_with_summary`, retrieve required slices via
+`mcp__worldloom__get_persisted_packet_slice` before continuing.
+
 If any precondition fails, the skill aborts before Phase 1.
 
 ## Phase 1: Pair plan, page, and prose

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-prose-attach/SKILL.md` skill-prose update at lines 114 and ~326; no tool/validator/patch-engine changes.
-**Deps**: SPEC33STOPIPSEV-006 (the replacement wording cross-references the shared `_shared-templates/persisted-packet-recovery.md` template created by 006).
+**Deps**: archive/tickets/SPEC33STOPIPSEV-006.md (the replacement wording cross-references the shared `_shared-templates/persisted-packet-recovery.md` template created by 006).
 
 ## Problem
 
@@ -15,7 +15,7 @@
 1. **Codebase verification of contradictory claim**: live grep of `branching-story-prose-attach/SKILL.md` confirms line 114 and ~line 326 say "No world-canon retrieval needed — the plan body inlines all load-bearing canon excerpts"; lines 185-189 (Phase 3 check 3) confirm conditional `get_firewall_content` retrieval when plan §11 does not inline firewall fields.
 2. **Specs/docs cross-reference**: SPEC-33 §D8 names the contradiction; SPEC-32 D1 (archived) is the source of the conditional retrieval at Phase 3 check 3.
 3. **Cross-skill boundary**: the shared boundary under audit is the `get_firewall_content` retrieval contract — when plan §11 inlines firewall fields, no retrieval is needed; when plan §11 names mysteries without inlining their firewall fields, retrieval is required. The wording must reflect this conditional path.
-4. **FOUNDATIONS principle restatement**: §3 Read Discipline (skill prose must accurately document its retrieval calls; the unconditional "no retrieval needed" claim contradicts the conditional `get_firewall_content` retrieval at Phase 3 check 3). The Deps field declares the cross-template dependency on SPEC33STOPIPSEV-006; landing 008 before 006 would leave the cross-reference dangling.
+4. **FOUNDATIONS principle restatement**: §3 Read Discipline (skill prose must accurately document its retrieval calls; the unconditional "no retrieval needed" claim contradicts the conditional `get_firewall_content` retrieval at Phase 3 check 3). The Deps field declares the cross-template dependency on archive/tickets/SPEC33STOPIPSEV-006.md; landing 008 before 006 would have left the cross-reference dangling.
 
 ## Architecture Check
 
@@ -26,7 +26,7 @@
 
 1. The "No world-canon retrieval needed" sentence is removed → codebase grep-proof.
 2. The replacement names `get_firewall_content` and the conditional firing on plan §11 inlining → codebase grep-proof.
-3. The persisted-summary cross-reference points at the shared template (which SPEC33STOPIPSEV-006 creates) → manual link verification.
+3. The persisted-summary cross-reference points at the shared template (created by archive/tickets/SPEC33STOPIPSEV-006.md) → manual link verification.
 
 ## What to Change
 
@@ -60,7 +60,7 @@ Implementer must read the full file and apply at both occurrences — the line n
 
 - The `get_firewall_content` MCP tool implementation — already exists and is unchanged.
 - Phase 3 check 3 logic — already correctly performs conditional retrieval; not modified.
-- The shared `_shared-templates/persisted-packet-recovery.md` template — created by SPEC33STOPIPSEV-006 (this ticket's dependency); not modified here.
+- The shared `_shared-templates/persisted-packet-recovery.md` template — created by archive/tickets/SPEC33STOPIPSEV-006.md (this ticket's dependency); not modified here.
 - Other prose-attach SKILL.md sections (Phase 3 check 8 promotion-claims, Phase 6 write order) — covered by archive/tickets/SPEC33STOPIPSEV-002.md (D2) and archive/tickets/SPEC33STOPIPSEV-003.md (D3). Same-file co-location: this ticket's two edit sites (line 114, ~line 326) are independent of D2's line 213 and D3's Phase 6 block.
 
 ## Acceptance Criteria
@@ -69,8 +69,8 @@ Implementer must read the full file and apply at both occurrences — the line n
 
 1. `grep -n 'No world-canon retrieval needed' .claude/skills/branching-story-prose-attach/SKILL.md` returns zero matches.
 2. `grep -n 'get_firewall_content' .claude/skills/branching-story-prose-attach/SKILL.md` returns matches at lines 114 and ~326 in addition to its existing matches in Phase 3 check 3 (lines 185-189).
-3. `grep -n 'persisted-packet-recovery.md' .claude/skills/branching-story-prose-attach/SKILL.md` returns matches at lines 114 and ~326 (cross-reference to the shared template created by SPEC33STOPIPSEV-006).
-4. SPEC33STOPIPSEV-006 has landed (verifies the shared template exists at `.claude/skills/_shared-templates/persisted-packet-recovery.md` before the cross-reference is added).
+3. `grep -n 'persisted-packet-recovery.md' .claude/skills/branching-story-prose-attach/SKILL.md` returns matches at lines 114 and ~326 (cross-reference to the shared template created by archive/tickets/SPEC33STOPIPSEV-006.md).
+4. archive/tickets/SPEC33STOPIPSEV-006.md has landed (verifies the shared template exists at `.claude/skills/_shared-templates/persisted-packet-recovery.md` before the cross-reference is added).
 
 ### Invariants
 
