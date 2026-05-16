@@ -93,6 +93,37 @@ export const OPERATION_KINDS = [
 
 export type OperationKind = (typeof OPERATION_KINDS)[number];
 
+export type WorldCanonCreateOperationKind =
+  | "create_cf_record"
+  | "create_ch_record"
+  | "create_inv_record"
+  | "create_m_record"
+  | "create_oq_record"
+  | "create_ent_record"
+  | "create_sec_record";
+
+export interface CreateOpCanonicalRecordIdField {
+  recordKey: string;
+  idField: string;
+  idPattern: RegExp;
+}
+
+/**
+ * Canonical record-id field per world-canon create op. CH is the only one
+ * whose canonical field is `change_id`; the others use `id`.
+ */
+export const CREATE_OP_CANONICAL_RECORD_ID_FIELD: Readonly<
+  Record<WorldCanonCreateOperationKind, CreateOpCanonicalRecordIdField>
+> = {
+  create_cf_record: { recordKey: "cf_record", idField: "id", idPattern: /^CF-\d+$/ },
+  create_ch_record: { recordKey: "ch_record", idField: "change_id", idPattern: /^CH-\d+$/ },
+  create_inv_record: { recordKey: "inv_record", idField: "id", idPattern: /^(ONT|CAU|DIS|SOC|AES)-\d+$/ },
+  create_m_record: { recordKey: "m_record", idField: "id", idPattern: /^M-\d+$/ },
+  create_oq_record: { recordKey: "oq_record", idField: "id", idPattern: /^OQ-\d+$/ },
+  create_ent_record: { recordKey: "ent_record", idField: "id", idPattern: /^ENT-\d+$/ },
+  create_sec_record: { recordKey: "sec_record", idField: "id", idPattern: /^SEC-[A-Z]{3}-\d+$/ }
+};
+
 export interface RetconAttestation {
   retcon_type: "A" | "B" | "C" | "D" | "E" | "F";
   originating_ch?: string;

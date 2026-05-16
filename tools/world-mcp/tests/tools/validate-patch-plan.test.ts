@@ -280,6 +280,32 @@ test("validatePatchPlan returns skipped for an empty patch list before validator
   });
 });
 
+test("validatePatchPlan skips misshapen create_ch_record payload before cross-reference validators", async () => {
+  const plan = buildValidPatchPlan();
+  plan.patches[0] = {
+    op: "create_ch_record",
+    target_world: "seeded",
+    target_file: "_source/change-log/CH-8.yaml",
+    payload: {
+      ch_record: {
+        id: "CH-8",
+        date: "2026-05-16",
+        change_type: "canon_addition",
+        affected_fact_ids: ["CF-1"]
+      }
+    }
+  } as unknown as ReturnType<typeof buildValidPatchPlan>["patches"][number];
+
+  const result = await validatePatchPlan({ patch_plan: plan });
+
+  assert.deepEqual(result, {
+    status: "skipped",
+    reason: "patch_plan.patches[0].payload.ch_record.change_id must be a non-empty string matching ^CH-\\d+$.",
+    verdicts: [],
+    validators_run: []
+  });
+});
+
 test("validatePatchPlan preserves additional envelope-shape errors on skipped responses", async () => {
   const plan = buildValidPatchPlan();
   plan.patches = [
