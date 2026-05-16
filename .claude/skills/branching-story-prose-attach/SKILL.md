@@ -285,13 +285,13 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
 3. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
 
 4. On approval:
-   - Write `pages-prose-receipts/<page_id>.yaml` (direct write, not patch-engine routed — the receipt is not a `_source/` record).
-   - Update bundle `INDEX.md` to reflect prose status + receipt verdict.
-   - If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach` conforming to story-state contract §4.3a (audit-only SE events); the op requires a `target_file` field (`worlds/<world_slug>/stories/<story_slug>/_source/events/SE-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record')` for the machine-readable shape; dry-run validate via `mcp__worldloom__validate_patch_plan`; obtain patch approval token; submit via `mcp__worldloom__submit_patch_plan`.
+   a. If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach` conforming to story-state contract §4.3a (audit-only SE events); the op requires a `target_file` field (`worlds/<world_slug>/stories/<story_slug>/_source/events/SE-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record')` for the machine-readable shape. Dry-run validate via `mcp__worldloom__validate_patch_plan`, obtain the approval token, and submit via `mcp__worldloom__submit_patch_plan`. If this optional patch fails, abort: write no receipt and no INDEX update for this invocation; surface the patch failure and allow the user to re-run with `emit_attach_event=false` or repair the patch shape.
+   b. Write `pages-prose-receipts/<page_id>.yaml` (direct write, not patch-engine routed — the receipt is not a `_source/` record).
+   c. Update bundle `INDEX.md` to reflect prose status + receipt verdict.
 
 5. Report receipt path + verdict + `repair_recommendation` to the user. If `repair_recommendation` is non-`none`, surface the named lawful repair path (revise prose, invoke `branching-story-turn-cycle` with repair-action semantics, or invoke `story-fact-promotion-to-canon` with the asserted canon claim). Do NOT `git commit`.
 
-**Failure behavior**: receipt-write fail (filesystem error) → surface to user with one-paragraph diagnostic; the receipt was the deliverable, so this is a hard fail with no partial state. INDEX update fail (after receipt write succeeded) → receipt is authoritative; the index can be repaired directly. `emit_attach_event` patch fail → receipt is still authoritative; the SE event is opt-in audit-trail extra, not a verdict carrier.
+**Failure behavior**: `emit_attach_event` patch fail → abort before receipt or INDEX writes; surface to user with a one-paragraph diagnostic and no partial direct artifacts. Receipt-write fail (filesystem error) → surface to user with one-paragraph diagnostic; the receipt was the deliverable, so this is a hard fail with no partial direct-artifact state. INDEX update fail (after receipt write succeeded) → receipt is authoritative; the index can be repaired directly.
 
 ## Validation Rules This Skill Upholds
 
