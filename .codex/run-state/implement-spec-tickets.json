@@ -3,8 +3,8 @@
   "archived_spec": null,
   "last_ticket": "tickets/SPEC36STOPIPNIN-003.md",
   "last_result": "blocked_retargeted_to_prerequisites",
-  "last_work_commit": "9ca422cece89846b1b145ce55ef499e15cae187c",
-  "last_state_commit": "9ca422cece89846b1b145ce55ef499e15cae187c",
+  "last_work_commit": "6f7439e48c4781740de6e100b656631f3776d2fe",
+  "last_state_commit": "self",
   "next_target": "tickets/SPEC36STOPIPNIN-005.md",
   "queue": [
     "tickets/SPEC36STOPIPNIN-005.md",
