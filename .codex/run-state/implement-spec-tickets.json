@@ -1,16 +1,19 @@
 {
-  "originating_spec": "specs/SPEC-33-story-pipeline-seventh-iteration-fixes.md",
+  "originating_spec": "specs/SPEC-34-story-validator-hardening.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC33STOPIPSEV-008.md",
+  "last_ticket": "archive/tickets/SPEC34STOVALHAR-001.md",
   "last_result": "completed_archived",
-  "last_work_commit": "36a5110",
+  "last_work_commit": "c929f047caa940b59307be75175fc1c4fa65f13c",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC33STOPIPSEV-009.md",
+  "next_target": "tickets/SPEC34STOVALHAR-002.md",
   "queue": [
-    "tickets/SPEC33STOPIPSEV-009.md"
+    "tickets/SPEC34STOVALHAR-002.md",
+    "tickets/SPEC34STOVALHAR-003.md",
+    "tickets/SPEC34STOVALHAR-004.md",
+    "tickets/SPEC34STOVALHAR-005.md"
   ],
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree after state commit; expected ignored artifacts under tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
+  "dirty_state": "unrelated dirty: .claude/skills/reassess-spec/SKILL.md and SPEC-33 archive move; expected ignored artifacts: tools/validators/dist/ and tools/validators/node_modules/",
   "updated_at": "2026-05-16"
 }
