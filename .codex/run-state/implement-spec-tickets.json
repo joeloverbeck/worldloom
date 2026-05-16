@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC35STOPIPEIG-006.md",
+  "last_ticket": "archive/tickets/SPEC35STOPIPEIG-007.md",
   "last_result": "completed_archived",
-  "last_work_commit": "4f5bdb68eff720486710cc7bcb12b2e96c01a086",
+  "last_work_commit": "5042192416c5edc17fa56add0176228d142438c2",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC35STOPIPEIG-007.md",
+  "next_target": "tickets/SPEC35STOPIPEIG-008.md",
   "queue": [
-    "tickets/SPEC35STOPIPEIG-007.md",
     "tickets/SPEC35STOPIPEIG-008.md",
     "tickets/SPEC35STOPIPEIG-009.md"
   ],
