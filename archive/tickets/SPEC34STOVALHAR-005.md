@@ -1,6 +1,6 @@
 # SPEC34STOVALHAR-005: Integration sanity across all four new validators
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — adds an integration fixture story-bundle under `tools/validators/tests/integration/` (or equivalent under the existing tests/ layout) exercising all four new validators end-to-end via the `world-validate` CLI. No new production code; no impact on existing validators.
@@ -16,7 +16,8 @@ SPEC-34 §Verification item 5 requires `cd tools/validators && npm run test` (fu
 2. SPEC-34 §Verification (lines 271-280) is the authoritative spec section for this ticket's acceptance contract. The four upstream tickets (001-004) produce the four validators; this ticket exercises them through a fixture story-bundle and the existing CLI without touching production code.
 3. Shared boundary under audit: (i) `tools/validators/src/public/registry.ts` `structuralValidators` array — after all four upstream tickets land, the array grows from 16 to 20 entries (verified at audit time); the integration test exercises the full registered set via CLI invocation, not direct validator imports. (ii) the fixture story-bundle's location and shape — preferred path `tools/validators/tests/fixtures/spec34-integration/` to match existing fixture layout under `tools/validators/tests/structural/`; the fixture is a minimal world directory exercising at least one PASS and one FAIL case per validator.
 4. FOUNDATIONS principle motivating this ticket — §Tooling Recommendation (per FOUNDATIONS.md): *"LLM agents should never operate on prose alone."* Validators are the executable enforcement layer of this commitment for story-bundle state. The integration ticket confirms the four new validators are exercisable as a coherent set through the same CLI surface skills and CI workflows depend on.
-5. Mismatch + correction: spec §Verification items 5 and 6 use the shape `cd tools/validators && npm run test` which works as-is (no `--grep` flag; runs the full node:test suite). The integration fixture is invoked via the CLI separately: `cd tools/validators && node dist/src/cli/world-validate.js <fixture-world-path>`. No mechanical drift correction needed here; the CLI invocation is direct.
+5. Mismatch + correction: spec §Verification item 5 uses the shape `cd tools/validators && npm run test` which works as-is (no `--grep` flag; runs the full node:test suite). The drafted item 6 path-style invocation was stale: the live `world-validate` CLI takes a world slug under the current working directory's `worlds/<slug>/` and requires `worlds/<slug>/_index/world.db` before it runs. The truthful integration proof is therefore a node:test driver that seeds temp indexed worlds and invokes `node dist/src/cli/world-validate.js <world-slug> --structural --json` from the temp repo root.
+6. Baseline before source edits: `cd tools/validators && npm run test` passed 301 tests on 2026-05-16 with the pre-existing ignored `dist/` and `node_modules/` artifacts present. The active delta can stay test-only.
 
 ## Architecture Check
 
@@ -34,29 +35,27 @@ SPEC-34 §Verification item 5 requires `cd tools/validators && npm run test` (fu
 
 ### 1. Integration fixture story-bundle
 
-Create `tools/validators/tests/fixtures/spec34-integration/` (path subject to fitting the existing fixture layout — adjust if the project's fixtures live elsewhere; verify against `tools/validators/tests/` directory at implementation time):
+Add an integration test that seeds temp indexed worlds with the live CLI's expected `worlds/<slug>/_index/world.db` shape:
 
-- A minimal world directory (`worlds/spec34-integration/` shape under the fixture root) containing:
-  - `_source/canon/CF-1.yaml`, `_source/change-log/CH-1.yaml` … CH-N as needed for D4's CH-window cases.
-  - `stories/test-bundle/_source/` with the story-bundle subdirs (`branches/`, `pages/`, `storylets/`, `facts/`, `beliefs/`, `events/`, `choices/`, plus the other story-bundle classes that the validators reference).
-- The fixture records collectively trip at least one FAIL per validator: a sibling-branch reference for D1, a private-BEL leak or no-access-route for D2, an unlawful BEL→SF promotion for D3, and a missing CH-window classification for D4. PASS cases for each validator are also represented (e.g., a separate PG that classifies drift correctly to satisfy D4's PASS path).
+- A PASS world containing schema-valid indexed story-bundle records that exercise lawful branch isolation, observer access through an actor-held BEL, true-BEL-to-SF promotion, and complete CH-window classification.
+- A FAIL world containing schema-valid indexed story-bundle records that collectively trip at least one FAIL per validator: a sibling-branch active record for D1, a private-BEL leak for D2, an unlawful BEL→SF promotion for D3, and a missing CH-window citation for D4.
+- Physical source files are written beside the temp index for CLI realism, but the checked-in fixture source is the test builder because the CLI requires a database artifact and the existing package convention already uses temp indexed worlds for CLI tests.
 
 ### 2. Integration test or test driver
 
-Create `tools/validators/tests/integration/spec34-integration.test.ts` (or equivalent) that:
+Create `tools/validators/tests/integration/spec34-integration.test.ts` that:
 
-- Invokes `node dist/src/cli/world-validate.js` against the fixture world root.
+- Invokes `node dist/src/cli/world-validate.js <world-slug> --structural --json` from the temp repo root.
 - Asserts on the JSON or text output: at least one diagnostic with each of the four expected codes when run against the FAIL fixture; zero diagnostics when run against the PASS-only subset.
 - Re-enumerates expected counts from the fixture rather than hardcoding (per `spec-to-tickets/SKILL.md` §Spec-Integration Ticket Shape "re-enumerate expected counts (not hardcoded)").
 
 ### 3. Fixture world copy strategy
 
-Per `spec-to-tickets/SKILL.md` §Spec-Integration Ticket Shape "fixture-world copy strategy": if the fixture would be mutated by validator runs (it should not be — validators are read-only — but as a discipline matter), the test should `fs.cpSync` the fixture to a temp root and run the CLI against the copy. The fixture under `tests/fixtures/` is the canonical source; the temp copy is the run target.
+Per `spec-to-tickets/SKILL.md` §Spec-Integration Ticket Shape "fixture-world copy strategy": this integration test uses temp worlds as the run target from the start. `world-validate` persists verdict rows to `_index/world.db`, so using temp indexed worlds avoids checking in a mutable database artifact.
 
 ## Files to Touch
 
-- `tools/validators/tests/fixtures/spec34-integration/` (new directory tree — fixture world)
-- `tools/validators/tests/integration/spec34-integration.test.ts` (new — test driver invoking the CLI) — adjust path to match existing project layout if `tests/integration/` does not yet exist; coordinate with sibling test layout at implementation time.
+- `tools/validators/tests/integration/spec34-integration.test.ts` (new — test driver invoking the CLI against temp indexed worlds)
 
 ## Out of Scope
 
@@ -70,8 +69,8 @@ Per `spec-to-tickets/SKILL.md` §Spec-Integration Ticket Shape "fixture-world co
 ### Tests That Must Pass
 
 1. `cd tools/validators && npm run test` — full suite green (all existing 16 validators + 4 new validators' tests + this integration test).
-2. `cd tools/validators && node dist/src/cli/world-validate.js tests/fixtures/spec34-integration/world-pass/` — exit code 0; no FAIL diagnostics in stdout.
-3. `cd tools/validators && node dist/src/cli/world-validate.js tests/fixtures/spec34-integration/world-fail/` — exit code non-zero; stdout contains diagnostic codes from each of the four new validators (one per validator minimum, per spec §Verification item 6).
+2. `cd tools/validators && node --test dist/tests/integration/spec34-integration.test.js` — targeted integration driver exits 0; its internal PASS-world CLI invocation exits 0 with no FAIL diagnostics.
+3. `cd tools/validators && node --test dist/tests/integration/spec34-integration.test.js` — targeted integration driver exits 0; its internal FAIL-world CLI invocation exits non-zero and stdout contains diagnostic codes from each of the four new validators (one per validator minimum, per spec §Verification item 6).
 
 ### Invariants
 
@@ -82,11 +81,32 @@ Per `spec-to-tickets/SKILL.md` §Spec-Integration Ticket Shape "fixture-world co
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/fixtures/spec34-integration/` (new directory tree) — fixture world exercising one PASS + one FAIL per new validator.
-2. `tools/validators/tests/integration/spec34-integration.test.ts` (new) — test driver invoking `world-validate` CLI against the fixture and asserting diagnostic-code presence/absence.
+1. `tools/validators/tests/integration/spec34-integration.test.ts` (new) — test driver seeding temp indexed worlds with one PASS + one FAIL surface per new validator, then invoking `world-validate` CLI and asserting diagnostic-code presence/absence.
 
 ### Commands
 
 1. `cd tools/validators && npm run build` (prerequisite — produces `dist/src/cli/world-validate.js`)
-2. `cd tools/validators && node --test dist/tests/integration/spec34-integration.test.js` (targeted — runs the integration driver)
+2. `cd tools/validators && node --test dist/tests/integration/spec34-integration.test.js` (targeted — runs the integration driver against temp indexed worlds)
 3. `cd tools/validators && npm run test` (full suite — confirms no regressions and that the integration test runs alongside the per-validator node:test fixtures from upstream tickets)
+
+## Outcome
+
+Completed: 2026-05-16
+
+Implemented the SPEC-34 capstone as a test-only CLI integration driver at `tools/validators/tests/integration/spec34-integration.test.ts`. The test seeds temp indexed worlds matching the live `world-validate` contract (`worlds/<slug>/_index/world.db`), invokes `node dist/src/cli/world-validate.js <world-slug> --structural --json`, and proves:
+
+- PASS fixture: the four SPEC-34 validators run together through the CLI with zero fail diagnostics.
+- FAIL fixture: the CLI emits at least one diagnostic code from each SPEC-34 validator (`branch_isolation_violation`, `observer_firewall_violation_private_belief_leak`, `lie_promoted_silently`, `canon_baseline_drift_window_incomplete`).
+
+No production validator, registry, schema, or CLI code changed.
+
+## Verification Result
+
+- `cd tools/validators && npm run build` — passed.
+- `cd tools/validators && node --test dist/tests/integration/spec34-integration.test.js` — passed; 1 targeted integration test passed.
+- `cd tools/validators && npm run test` — passed; 302 tests passed, 0 failed.
+
+## Deviations
+
+- The drafted static fixture-world path was replaced with a temp-indexed world builder inside the integration test. This matches the live CLI contract: `world-validate` accepts a world slug under the current repo root and requires `_index/world.db`; it does not accept an arbitrary fixture-world path as its positional argument.
+- The fixture writes physical source files in the temp world for CLI realism, but does not check in a mutable `_index/world.db` artifact.
