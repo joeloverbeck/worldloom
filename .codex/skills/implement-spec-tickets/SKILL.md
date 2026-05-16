@@ -183,6 +183,8 @@ For harness-internal review phases, this compact block is the required visible r
 
 If `post-ticket-review` creates or materially updates a follow-up ticket, active spec, active ticket dependency, or current contract doc, run:
 
+Archive-path and dependency repairs in active specs or active sibling tickets count as material handoff updates for this trigger, even when the repairs are mechanical.
+
 ```text
 $skill-audit .codex/skills/post-ticket-review
 ```
