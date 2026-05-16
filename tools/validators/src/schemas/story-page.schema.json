@@ -19,14 +19,14 @@
     "validation_trace"
   ],
   "properties": {
-    "id": { "type": "string", "pattern": "^PG-[0-9]+$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
-    "branch_id": { "type": "string", "pattern": "^BR-[0-9]+$" },
-    "parent_page_id": { "type": ["string", "null"], "pattern": "^PG-[0-9]+$" },
+    "id": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
+    "branch_id": { "type": "string", "pattern": "^BR-(0|[1-9][0-9]*)$" },
+    "parent_page_id": { "type": ["string", "null"], "pattern": "^PG-(0|[1-9][0-9]*)$" },
     "branch_path": {
       "type": "array",
       "minItems": 1,
-      "items": { "type": "string", "pattern": "^PG-[0-9]+$" }
+      "items": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" }
     },
     "turn_index": { "type": "integer", "minimum": 0 },
     "input": {
@@ -34,9 +34,9 @@
       "description": "Exactly-one legality is enforced by state_snapshot_integrity conditional on the resolved event kind, with a carve-out for event_kind: story_start.",
       "required": ["choice_id", "manual_action_text", "resolved_event_id"],
       "properties": {
-        "choice_id": { "type": ["string", "null"], "pattern": "^CHC-[0-9]+$" },
+        "choice_id": { "type": ["string", "null"], "pattern": "^CHC-(0|[1-9][0-9]*)$" },
         "manual_action_text": { "type": ["string", "null"], "minLength": 1 },
-        "resolved_event_id": { "type": "string", "pattern": "^SE-[0-9]+$" }
+        "resolved_event_id": { "type": "string", "pattern": "^SE-(0|[1-9][0-9]*)$" }
       },
       "additionalProperties": false
     },
@@ -45,7 +45,7 @@
     "state_snapshot": {
       "type": "object",
       "properties": {
-        "canon_revision": { "type": ["string", "null"], "pattern": "^CH-[0-9]+$" },
+        "canon_revision": { "type": ["string", "null"], "pattern": "^CH-(0|[1-9][0-9]*)$" },
         "entity_status": {
           "type": "object",
           "additionalProperties": {
@@ -56,7 +56,7 @@
               "agency": { "type": "string", "enum": ["free", "constrained", "coerced", "captive", "incapacitated", "unconscious", "dead", "unknown"] },
               "location": {
                 "oneOf": [
-                  { "type": "string", "pattern": "^STLOC-[0-9]+$" },
+                  { "type": "string", "pattern": "^STLOC-(0|[1-9][0-9]*)$" },
                   { "type": "string", "enum": ["unknown", "concealed", "offstage"] }
                 ]
               }
@@ -70,13 +70,13 @@
             "type": "object",
             "required": ["mystery_id", "authority", "status"],
             "properties": {
-              "mystery_id": { "type": "string", "pattern": "^M-[0-9]+$" },
+              "mystery_id": { "type": "string", "pattern": "^M-(0|[1-9][0-9]*)$" },
               "authority": { "type": "string", "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"] },
               "status": { "type": "string", "enum": ["preserved", "clue_added", "narrowed", "apparent_resolution", "held_for_promotion"] },
               "evidence_records": {
                 "type": "array",
                 "default": [],
-                "items": { "type": "string", "pattern": "^(SF|BEL|DA|SE)-[0-9]+$" }
+                "items": { "type": "string", "pattern": "^(SF|BEL|DA|SE)-(0|[1-9][0-9]*)$" }
               }
             },
             "additionalProperties": false
@@ -92,11 +92,11 @@
               "label": { "type": "string", "minLength": 1 },
               "grounded_in": {
                 "type": "array",
-                "items": { "type": "string", "pattern": "^(STLOC|STOBJ)-[0-9]+$" }
+                "items": { "type": "string", "pattern": "^(STLOC|STOBJ)-(0|[1-9][0-9]*)$" }
               },
               "available_to": {
                 "type": "array",
-                "items": { "type": "string", "pattern": "^STENT-[0-9]+$" }
+                "items": { "type": "string", "pattern": "^STENT-(0|[1-9][0-9]*)$" }
               },
               "action_families": {
                 "type": "array",
@@ -157,12 +157,12 @@
     },
     "prose_plan_path": {
       "type": "string",
-      "pattern": "^pages-prose-plans/PG-[0-9]+\\.md$",
+      "pattern": "^pages-prose-plans/PG-(0|[1-9][0-9]*)\\.md$",
       "description": "Canonical top-level address of the page plan."
     },
     "emitted_choices": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^CHC-[0-9]+$" }
+      "items": { "type": "string", "pattern": "^CHC-(0|[1-9][0-9]*)$" }
     },
     "validation_trace": {
       "type": "object",

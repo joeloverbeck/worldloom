@@ -100,79 +100,79 @@ test("story schemas expose the amended contract field sets", () => {
 
 test("representative amended contract records validate against tightened schemas", async () => {
   const records = [
-    storyRecord("story_entity_record", "STENT-0001", "entities", {
-      id: "STENT-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("story_entity_record", "STENT-1", "entities", {
+      id: "STENT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       display_name: "Mara",
       role_in_story: ["primary_actor"]
     }),
-    storyRecord("story_status_record", "STSTAT-0001", "status", {
-      id: "STSTAT-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
-      entity: "STENT-0001",
+    storyRecord("story_status_record", "STSTAT-1", "status", {
+      id: "STSTAT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      entity: "STENT-1",
       life: "alive",
       agency: "free",
-      location: "STLOC-0001",
-      derived_from: ["SE-0001"]
+      location: "STLOC-1",
+      derived_from: ["SE-1"]
     }),
-    storyRecord("intention_record", "STINT-0001", "intentions", {
-      id: "STINT-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
-      holder: "STENT-0001",
+    storyRecord("intention_record", "STINT-1", "intentions", {
+      id: "STINT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      holder: "STENT-1",
       intent: "Repair the gate.",
       urgency: "medium",
       expires_when: "The gate is secured."
     }),
-    storyRecord("story_fact_record", "SF-0001", "facts", {
-      id: "SF-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("story_fact_record", "SF-1", "facts", {
+      id: "SF-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       statement: "The gate is damaged.",
       authority: "canon_linked",
-      derived_from: ["CF-0001"]
+      derived_from: ["CF-1"]
     }),
-    storyRecord("obligation_record", "OBL-0001", "obligations", {
-      id: "OBL-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("obligation_record", "OBL-1", "obligations", {
+      id: "OBL-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       status: "open",
       obligation_kind: "promise",
       description: "Mara promised to fix the gate.",
-      owed_by: "STENT-0001",
+      owed_by: "STENT-1",
       owed_to: "public",
       trigger_to_close: "The gate is fixed.",
       urgency: "high"
     }),
-    storyRecord("consequence_record", "CNSQ-0001", "consequences", {
-      id: "CNSQ-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("consequence_record", "CNSQ-1", "consequences", {
+      id: "CNSQ-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       status: "pending",
       consequence_kind: "danger",
       description: "The broken gate leaves the alley exposed.",
       urgency: "high",
       resolves_when: "The gate is fixed.",
-      derived_from: ["SE-0001"]
+      derived_from: ["SE-1"]
     }),
-    storyRecord("thread_record", "THR-0001", "threads", {
-      id: "THR-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("thread_record", "THR-1", "threads", {
+      id: "THR-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       status: "active",
       title: "Gate repair",
       summary: "The damaged gate remains unresolved.",
       urgency: "medium",
-      derived_from: ["OBL-0001"]
+      derived_from: ["OBL-1"]
     }),
-    storyRecord("relationship_record_story", "SREL-0001", "relationships", {
-      id: "SREL-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("relationship_record_story", "SREL-1", "relationships", {
+      id: "SREL-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       axis: "trust",
-      participants: ["STENT-0001", "STENT-0002"],
+      participants: ["STENT-1", "STENT-2"],
       direction: {
         kind: "bidirectional",
         from: null,
@@ -182,27 +182,27 @@ test("representative amended contract records validate against tightened schemas
       valence: "bidirectional",
       description: "They have a little trust."
     }),
-    storyRecord("story_location_record", "STLOC-0001", "locations", {
-      id: "STLOC-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("story_location_record", "STLOC-1", "locations", {
+      id: "STLOC-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       label: "Salt gate",
       description: "A damaged gate near the alley.",
       bound_ent: null
     }),
-    storyRecord("story_object_record", "STOBJ-0001", "objects", {
-      id: "STOBJ-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("story_object_record", "STOBJ-1", "objects", {
+      id: "STOBJ-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       label: "Broken latch",
       description: "A latch that can be repaired.",
       owner: "public",
-      current_location: "STLOC-0001"
+      current_location: "STLOC-1"
     }),
-    storyRecord("story_diegetic_artifact_record", "DA-0001", "artifacts", {
-      id: "DA-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("story_diegetic_artifact_record", "DA-1", "artifacts", {
+      id: "DA-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       title: "Gate Notice",
       author: "unknown",
       genre: "notice",
@@ -211,69 +211,69 @@ test("representative amended contract records validate against tightened schemas
       circulation: "public",
       truth_relation: "true"
     }),
-    storyRecord("story_event_record", "SE-0001", "events", {
-      id: "SE-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("story_event_record", "SE-1", "events", {
+      id: "SE-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       parent_page_id: null,
       event_kind: "selected_choice",
-      actor: "STENT-0001",
+      actor: "STENT-1",
       commitment: {
-        selected_slt_id: "SLT-0001",
+        selected_slt_id: "SLT-1",
         selection_source: "author_pool",
         alias_bindings: {
-          actor: "STENT-0001",
-          debt: "OBL-0001"
+          actor: "STENT-1",
+          debt: "OBL-1"
         }
       },
       outcome_route: "accept",
       world_logic_rationale: "The selected commitment block is available in the current branch state.",
       state_delta: {
-        create: ["SF-0001"],
+        create: ["SF-1"],
         supersede: [],
         close: []
       }
     }),
-    storyRecord("belief_record", "BEL-0001", "beliefs", {
-      id: "BEL-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
-      holder: "STENT-0001",
+    storyRecord("belief_record", "BEL-1", "beliefs", {
+      id: "BEL-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      holder: "STENT-1",
       claim: "Mara knows the gate is damaged.",
       belief_mode: "knows",
       truth_relation: "true",
       confidence: "certain",
       visibility: "shared",
       basis: {
-        source_event: "SE-0001",
+        source_event: "SE-1",
         access_route: "direct_observation",
-        access_records: ["STENT-0001", "SE-0001"]
+        access_records: ["STENT-1", "SE-1"]
       },
       consequences: {
         opens: [],
         constrains_choices: []
       }
     }),
-    storyRecord("branch_record", "BR-0001", "branches", {
-      id: "BR-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("branch_record", "BR-1", "branches", {
+      id: "BR-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       label: "Root",
       parent_branch_id: null,
       forked_at_page_id: null,
-      root_page_id: "PG-0001"
+      root_page_id: "PG-1"
     }),
-    storyRecord("choice_record", "CHC-0001", "choices", {
-      id: "CHC-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
+    storyRecord("choice_record", "CHC-1", "choices", {
+      id: "CHC-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
       surface_label: "Fix the gate",
       player_visible_intent: "Repair the gate before anyone comes through.",
       target_or_action_families: ["make_change", "protect"],
       likely_state_pressure: "safety and obligation",
       associated_commitment_block: null,
       grounded_in: {
-        records: ["STENT-0001", "STLOC-0001"],
+        records: ["STENT-1", "STLOC-1"],
         affordance_ordinals: [0]
       }
     })

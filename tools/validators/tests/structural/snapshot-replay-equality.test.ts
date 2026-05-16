@@ -7,25 +7,25 @@ import { snapshotReplayEquality } from "../../src/structural/snapshot-replay-equ
 import { context, record } from "./helpers.js";
 
 const parentSnapshot = {
-  canon_revision: "CH-0001",
-  objective_facts: ["SF-0001"],
+  canon_revision: "CH-1",
+  objective_facts: ["SF-1"],
   apparent_facts: [],
   disputed_facts: [],
   reader_known_facts: [],
   belief_state_by_actor: {},
   rumor_state: [],
-  obligations_open: ["OBL-0001"],
+  obligations_open: ["OBL-1"],
   obligations_paid_off: [],
   obligations_complicated: [],
   obligations_abandoned: [],
   consequences_pending: [],
   consequences_addressed: [],
-  threads_active: ["THR-0001"],
-  relationships_current: ["SREL-0001"],
-  intentions_current: ["STINT-0001"],
-  cast_present: ["STENT-0001"],
-  current_location: "STLOC-0001",
-  accessible_locations: ["STLOC-0001"],
+  threads_active: ["THR-1"],
+  relationships_current: ["SREL-1"],
+  intentions_current: ["STINT-1"],
+  cast_present: ["STENT-1"],
+  current_location: "STLOC-1",
+  accessible_locations: ["STLOC-1"],
   objects_in_scope: [],
   inventory_by_entity: {},
   entity_status: {},
@@ -34,11 +34,11 @@ const parentSnapshot = {
 
 const nextSnapshot = {
   ...parentSnapshot,
-  objective_facts: ["SF-0001", "SF-0002"],
-  obligations_open: ["OBL-0002"],
-  threads_active: ["THR-0002"],
-  relationships_current: ["SREL-0002"],
-  intentions_current: ["STINT-0002"],
+  objective_facts: ["SF-1", "SF-2"],
+  obligations_open: ["OBL-2"],
+  threads_active: ["THR-2"],
+  relationships_current: ["SREL-2"],
+  intentions_current: ["STINT-2"],
   applied_effect_variant: "useful-lie"
 };
 
@@ -54,33 +54,33 @@ test("snapshot_replay_equality passes for a clean page-cycle envelope", async ()
 test("snapshot_replay_equality compares active_records snapshots with BEL entries", async () => {
   const activeRecordsSnapshot = {
     active_records: {
-      BEL: ["BEL-0001"]
+      BEL: ["BEL-1"]
     }
   };
   const verdicts = await snapshotReplayEquality.run(undefined, context([
-    record("page_record", "test-story:PG-0001", "stories/test-story/_source/pages/PG-0001.yaml", {
-      id: "PG-0001",
-      story_id: "STORY-001",
+    record("page_record", "test-story:PG-1", "stories/test-story/_source/pages/PG-1.yaml", {
+      id: "PG-1",
+      story_id: "STORY-1",
       state_snapshot: activeRecordsSnapshot,
       state_hash: "hash-parent"
     }),
-    record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
-      id: "SE-0002",
-      story_id: "STORY-001",
+    record("story_event_record", "test-story:SE-2", "stories/test-story/_source/events/SE-2.yaml", {
+      id: "SE-2",
+      story_id: "STORY-1",
       event_kind: "selected_choice",
       ops: [],
       state_hash_after: "hash-next"
     }),
-    record("belief_record", "test-story:BEL-0001", "stories/test-story/_source/beliefs/BEL-0001.yaml", {
-      id: "BEL-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001"
+    record("belief_record", "test-story:BEL-1", "stories/test-story/_source/beliefs/BEL-1.yaml", {
+      id: "BEL-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1"
     }),
-    record("page_record", "test-story:PG-0002", "stories/test-story/_source/pages/PG-0002.yaml", {
-      id: "PG-0002",
-      story_id: "STORY-001",
-      parent_page_id: "PG-0001",
-      applied_event_ops: ["SE-0002"],
+    record("page_record", "test-story:PG-2", "stories/test-story/_source/pages/PG-2.yaml", {
+      id: "PG-2",
+      story_id: "STORY-1",
+      parent_page_id: "PG-1",
+      applied_event_ops: ["SE-2"],
       state_snapshot: activeRecordsSnapshot,
       state_hash: "hash-next"
     })
@@ -106,9 +106,9 @@ test("snapshot_replay_equality ignores audit-only SE records that are not page i
   const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords());
   const verdicts = await snapshotReplayEquality.run(undefined, context([
     ...newSchemaRecords(childPage),
-    record("story_event_record", "test-story:SE-0003", "stories/test-story/_source/events/SE-0003.yaml", {
-      id: "SE-0003",
-      story_id: "STORY-001",
+    record("story_event_record", "test-story:SE-3", "stories/test-story/_source/events/SE-3.yaml", {
+      id: "SE-3",
+      story_id: "STORY-1",
       event_kind: "prose_attach",
       state_delta: {
         create: [],
@@ -126,7 +126,7 @@ test("snapshot_replay_equality ignores audit-only SE records that are not page i
 
 test("snapshot_replay_equality derives entity_status from active STSTAT records", async () => {
   const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords(), {
-    "STENT-0001": { life: "dead", agency: "dead", location: "STLOC-0001" }
+    "STENT-1": { life: "dead", agency: "dead", location: "STLOC-1" }
   });
   const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
     run_mode: "pre-apply",
@@ -138,7 +138,7 @@ test("snapshot_replay_equality derives entity_status from active STSTAT records"
 
 test("snapshot_replay_equality reports entity_status drift from active STSTAT records", async () => {
   const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords(), {
-    "STENT-0001": { life: "alive", agency: "free", location: "STLOC-0001" }
+    "STENT-1": { life: "alive", agency: "free", location: "STLOC-1" }
   });
   const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
     run_mode: "pre-apply",
@@ -150,8 +150,8 @@ test("snapshot_replay_equality reports entity_status drift from active STSTAT re
   assert.deepEqual((drift.detail as { drifts: unknown[] }).drifts, [
     {
       field: "entity_status",
-      expected: { "STENT-0001": { life: "dead", agency: "dead", location: "STLOC-0001" } },
-      got: { "STENT-0001": { life: "alive", agency: "free", location: "STLOC-0001" } }
+      expected: { "STENT-1": { life: "dead", agency: "dead", location: "STLOC-1" } },
+      got: { "STENT-1": { life: "alive", agency: "free", location: "STLOC-1" } }
     }
   ]);
 });
@@ -159,7 +159,7 @@ test("snapshot_replay_equality reports entity_status drift from active STSTAT re
 test("snapshot_replay_equality reports new-schema active_records class drift", async () => {
   const childPage = newSchemaChildPage({
     ...newSchemaExpectedActiveRecords(),
-    OBL: ["OBL-0001"]
+    OBL: ["OBL-1"]
   });
   const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
     run_mode: "pre-apply",
@@ -169,7 +169,7 @@ test("snapshot_replay_equality reports new-schema active_records class drift", a
   const drift = verdicts.find((verdict) => verdict.code === "snapshot_replay_equality.snapshot_drift");
   assert.ok(drift);
   assert.deepEqual((drift.detail as { drifts: unknown[] }).drifts, [
-    { field: "active_records.OBL", expected: ["OBL-0001", "OBL-0002"], got: ["OBL-0001"] }
+    { field: "active_records.OBL", expected: ["OBL-1", "OBL-2"], got: ["OBL-1"] }
   ]);
 });
 
@@ -189,18 +189,18 @@ test("snapshot_replay_equality reports new-schema canonical state_hash mismatche
 test("snapshot_replay_equality accepts accumulated mystery evidence from the resolved event", async () => {
   const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords(), undefined, [
     {
-      mystery_id: "M-0001",
+      mystery_id: "M-1",
       authority: "apparent",
       status: "clue_added",
-      evidence_records: ["SF-0001", "SF-0002"]
+      evidence_records: ["SF-1", "SF-2"]
     }
   ]);
   const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage, [
     {
-      mystery_id: "M-0001",
+      mystery_id: "M-1",
       authority: "apparent",
       status: "preserved",
-      evidence_records: ["SF-0001"]
+      evidence_records: ["SF-1"]
     }
   ]), {
     run_mode: "pre-apply",
@@ -213,18 +213,18 @@ test("snapshot_replay_equality accepts accumulated mystery evidence from the res
 test("snapshot_replay_equality reports mystery evidence drift", async () => {
   const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords(), undefined, [
     {
-      mystery_id: "M-0001",
+      mystery_id: "M-1",
       authority: "apparent",
       status: "clue_added",
-      evidence_records: ["SF-0001", "SF-0003"]
+      evidence_records: ["SF-1", "SF-3"]
     }
   ]);
   const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage, [
     {
-      mystery_id: "M-0001",
+      mystery_id: "M-1",
       authority: "apparent",
       status: "preserved",
-      evidence_records: ["SF-0001"]
+      evidence_records: ["SF-1"]
     }
   ]), {
     run_mode: "pre-apply",
@@ -235,23 +235,23 @@ test("snapshot_replay_equality reports mystery evidence drift", async () => {
   assert.ok(drift);
   assert.deepEqual((drift.detail as { drifts: unknown[] }).drifts, [
     {
-      field: "unresolved_mystery_claims.M-0001.status",
+      field: "unresolved_mystery_claims.M-1.status",
       expected: { authority: "apparent", status: "preserved" },
       got: { authority: "apparent", status: "clue_added" }
     },
     {
-      field: "unresolved_mystery_claims.M-0001.evidence_records",
+      field: "unresolved_mystery_claims.M-1.evidence_records",
       expected: {
-        inherited: ["SF-0001"],
-        event_evidence_records: ["SE-0002", "SF-0002"]
+        inherited: ["SF-1"],
+        event_evidence_records: ["SE-2", "SF-2"]
       },
-      got: ["SF-0001", "SF-0003"]
+      got: ["SF-1", "SF-3"]
     }
   ]);
 });
 
 test("snapshot_replay_equality emits field-level drift details", async () => {
-  const drifted = { ...nextSnapshot, obligations_open: ["OBL-0001"] };
+  const drifted = { ...nextSnapshot, obligations_open: ["OBL-1"] };
   const verdicts = await snapshotReplayEquality.run(undefined, context(recordsFor(drifted, "hash-next"), {
     run_mode: "pre-apply",
     patch_plan: patchPlan()
@@ -260,7 +260,7 @@ test("snapshot_replay_equality emits field-level drift details", async () => {
   const drift = verdicts.find((verdict) => verdict.code === "snapshot_replay_equality.snapshot_drift");
   assert.ok(drift);
   assert.deepEqual((drift.detail as { drifts: unknown[] }).drifts, [
-    { field: "obligations_open", expected: ["OBL-0002"], got: ["OBL-0001"] }
+    { field: "obligations_open", expected: ["OBL-2"], got: ["OBL-1"] }
   ]);
 });
 
@@ -289,9 +289,9 @@ test("snapshot_replay_equality verifies the last event hash", async () => {
 
 test("snapshot_replay_equality resolves parent and event ids within the page story scope", async () => {
   const collidingParent = {
-    ...record("page_record", "other-story:PG-0001", "stories/other-story/_source/pages/PG-0001.yaml", {
-      id: "PG-0001",
-      story_id: "STORY-001",
+    ...record("page_record", "other-story:PG-1", "stories/other-story/_source/pages/PG-1.yaml", {
+      id: "PG-1",
+      story_id: "STORY-1",
       state_snapshot: { objective_facts: ["SF-9999"] },
       state_hash: "other-story-hash"
     }),
@@ -314,42 +314,42 @@ test("snapshot_replay_equality skips envelopes without PG creates", () => {
 
 function recordsFor(pageSnapshot: Record<string, unknown>, pageHash: string) {
   return [
-    record("page_record", "test-story:PG-0001", "stories/test-story/_source/pages/PG-0001.yaml", {
-      id: "PG-0001",
-      story_id: "STORY-001",
+    record("page_record", "test-story:PG-1", "stories/test-story/_source/pages/PG-1.yaml", {
+      id: "PG-1",
+      story_id: "STORY-1",
       state_snapshot: parentSnapshot,
       state_hash: "hash-parent"
     }),
-    record("story_fact_record", "test-story:SF-0002", "stories/test-story/_source/facts/SF-0002.yaml", {
-      id: "SF-0002",
-      story_id: "STORY-001",
+    record("story_fact_record", "test-story:SF-2", "stories/test-story/_source/facts/SF-2.yaml", {
+      id: "SF-2",
+      story_id: "STORY-1",
       epistemic_class: "objective"
     }),
-    record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
-      id: "SE-0002",
-      story_id: "STORY-001",
+    record("story_event_record", "test-story:SE-2", "stories/test-story/_source/events/SE-2.yaml", {
+      id: "SE-2",
+      story_id: "STORY-1",
       event_kind: "selected_choice",
       ops: [
-        { op_id: "OP-0001", op_type: "fact_create", input_records: [], output_records: ["SF-0002"], deterministic_payload: {} },
-        { op_id: "OP-0002", op_type: "obligation_supersede", input_records: ["OBL-0001"], output_records: ["OBL-0002"], deterministic_payload: {} },
-        { op_id: "OP-0003", op_type: "thread_supersede", input_records: ["THR-0001"], output_records: ["THR-0002"], deterministic_payload: {} },
-        { op_id: "OP-0004", op_type: "relationship_supersede", input_records: ["SREL-0001"], output_records: ["SREL-0002"], deterministic_payload: {} },
-        { op_id: "OP-0005", op_type: "intention_refresh", input_records: ["STINT-0001"], output_records: ["STINT-0002"], deterministic_payload: {} }
+        { op_id: "OP-0001", op_type: "fact_create", input_records: [], output_records: ["SF-2"], deterministic_payload: {} },
+        { op_id: "OP-0002", op_type: "obligation_supersede", input_records: ["OBL-1"], output_records: ["OBL-2"], deterministic_payload: {} },
+        { op_id: "OP-0003", op_type: "thread_supersede", input_records: ["THR-1"], output_records: ["THR-2"], deterministic_payload: {} },
+        { op_id: "OP-0004", op_type: "relationship_supersede", input_records: ["SREL-1"], output_records: ["SREL-2"], deterministic_payload: {} },
+        { op_id: "OP-0005", op_type: "intention_refresh", input_records: ["STINT-1"], output_records: ["STINT-2"], deterministic_payload: {} }
       ],
       state_hash_before: "hash-parent",
       state_hash_after: "hash-next"
     }),
-    record("page_record", "test-story:PG-0002", "stories/test-story/_source/pages/PG-0002.yaml", {
-      id: "PG-0002",
-      story_id: "STORY-001",
-      parent_page_id: "PG-0001",
-      applied_event_ops: ["SE-0002"],
+    record("page_record", "test-story:PG-2", "stories/test-story/_source/pages/PG-2.yaml", {
+      id: "PG-2",
+      story_id: "STORY-1",
+      parent_page_id: "PG-1",
+      applied_event_ops: ["SE-2"],
       state_snapshot: pageSnapshot,
       state_hash: pageHash
     }),
-    record("storylet_record", "test-story:SLT-0001", "stories/test-story/_source/storylets/SLT-0001.yaml", {
-      id: "SLT-0001",
-      story_id: "STORY-001",
+    record("storylet_record", "test-story:SLT-1", "stories/test-story/_source/storylets/SLT-1.yaml", {
+      id: "SLT-1",
+      story_id: "STORY-1",
       effect_model: {
         variants: [
           {
@@ -374,14 +374,14 @@ function patchPlan() {
     approval_token: "placeholder",
     verdict: "page_cycle_accept",
     originating_skill: "branching-story-page-cycle",
-    expected_id_allocations: { pg_ids: ["PG-0002"] },
+    expected_id_allocations: { pg_ids: ["PG-2"] },
     patches: [
       {
         op: "create_pg_record" as const,
         target_world: "test",
         payload: {
           story_slug: "test-story",
-          record: { id: "PG-0002", story_id: "STORY-001" }
+          record: { id: "PG-2", story_id: "STORY-1" }
         }
       }
     ]
@@ -393,69 +393,69 @@ function newSchemaRecords(
   parentMysteryClaims: readonly Record<string, unknown>[] = []
 ) {
   return [
-    record("page_record", "test-story:PG-0001", "stories/test-story/_source/pages/PG-0001.yaml", {
-      id: "PG-0001",
-      story_id: "STORY-001",
+    record("page_record", "test-story:PG-1", "stories/test-story/_source/pages/PG-1.yaml", {
+      id: "PG-1",
+      story_id: "STORY-1",
       state_snapshot: {
         active_records: newSchemaParentActiveRecords(),
         unresolved_mystery_claims: parentMysteryClaims
       },
       state_hash: "0".repeat(64)
     }),
-    record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
-      id: "SE-0002",
-      story_id: "STORY-001",
+    record("story_event_record", "test-story:SE-2", "stories/test-story/_source/events/SE-2.yaml", {
+      id: "SE-2",
+      story_id: "STORY-1",
       state_delta: {
-        create: ["SF-0002", "OBL-0002", "CHC-0002", "STSTAT-0002"],
-        supersede: ["STINT-0001", "THR-0001", "STSTAT-0001"],
-        close: ["BEL-0001"]
+        create: ["SF-2", "OBL-2", "CHC-2", "STSTAT-2"],
+        supersede: ["STINT-1", "THR-1", "STSTAT-1"],
+        close: ["BEL-1"]
       }
     }),
-    record("story_status_record", "test-story:STSTAT-0001", "stories/test-story/_source/status/STSTAT-0001.yaml", {
-      id: "STSTAT-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
-      entity: "STENT-0001",
+    record("story_status_record", "test-story:STSTAT-1", "stories/test-story/_source/status/STSTAT-1.yaml", {
+      id: "STSTAT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      entity: "STENT-1",
       life: "alive",
       agency: "free",
-      location: "STLOC-0001",
-      derived_from: ["SE-0001"]
+      location: "STLOC-1",
+      derived_from: ["SE-1"]
     }),
-    record("story_status_record", "test-story:STSTAT-0002", "stories/test-story/_source/status/STSTAT-0002.yaml", {
-      id: "STSTAT-0002",
-      story_id: "STORY-001",
-      created_at_page: "PG-0002",
-      supersedes: "STSTAT-0001",
-      entity: "STENT-0001",
+    record("story_status_record", "test-story:STSTAT-2", "stories/test-story/_source/status/STSTAT-2.yaml", {
+      id: "STSTAT-2",
+      story_id: "STORY-1",
+      created_at_page: "PG-2",
+      supersedes: "STSTAT-1",
+      entity: "STENT-1",
       life: "dead",
       agency: "dead",
-      location: "STLOC-0001",
-      derived_from: ["SE-0002"]
+      location: "STLOC-1",
+      derived_from: ["SE-2"]
     }),
-    record("page_record", "test-story:PG-0002", "stories/test-story/_source/pages/PG-0002.yaml", childPage)
+    record("page_record", "test-story:PG-2", "stories/test-story/_source/pages/PG-2.yaml", childPage)
   ];
 }
 
 function newSchemaChildPage(
   activeRecords: Record<string, readonly string[]>,
-  entityStatus: Record<string, unknown> = { "STENT-0001": { life: "dead", agency: "dead", location: "STLOC-0001" } },
+  entityStatus: Record<string, unknown> = { "STENT-1": { life: "dead", agency: "dead", location: "STLOC-1" } },
   mysteryClaims: readonly Record<string, unknown>[] = []
 ): Record<string, unknown> {
   const page: Record<string, unknown> = {
-    id: "PG-0002",
-    story_id: "STORY-001",
-    parent_page_id: "PG-0001",
-    input: { resolved_event_id: "SE-0002" },
+    id: "PG-2",
+    story_id: "STORY-1",
+    parent_page_id: "PG-1",
+    input: { resolved_event_id: "SE-2" },
     state_hash_parent: "0".repeat(64),
     state_snapshot: {
       active_records: activeRecords,
-      visible_affordances: ["CHC-0002"],
+      visible_affordances: ["CHC-2"],
       entity_status: entityStatus,
       unresolved_mystery_claims: mysteryClaims,
-      continuation: { next_storylets: ["SLT-0002"] }
+      continuation: { next_storylets: ["SLT-2"] }
     },
     plan: {
-      path: "pages-prose-plans/PG-0002.md",
+      path: "pages-prose-plans/PG-2.md",
       plan_hash: "1".repeat(64)
     },
     validation_trace: {
@@ -471,34 +471,34 @@ function newSchemaChildPage(
 
 function newSchemaParentActiveRecords(): Record<string, string[]> {
   return {
-    STENT: ["STENT-0001"],
-    STINT: ["STINT-0001"],
-    SF: ["SF-0001"],
-    BEL: ["BEL-0001"],
-    OBL: ["OBL-0001"],
+    STENT: ["STENT-1"],
+    STINT: ["STINT-1"],
+    SF: ["SF-1"],
+    BEL: ["BEL-1"],
+    OBL: ["OBL-1"],
     CNSQ: [],
-    THR: ["THR-0001"],
+    THR: ["THR-1"],
     SREL: [],
-    STLOC: ["STLOC-0001"],
+    STLOC: ["STLOC-1"],
     STOBJ: [],
     DA: [],
-    STSTAT: ["STSTAT-0001"]
+    STSTAT: ["STSTAT-1"]
   };
 }
 
 function newSchemaExpectedActiveRecords(): Record<string, string[]> {
   return {
-    STENT: ["STENT-0001"],
+    STENT: ["STENT-1"],
     STINT: [],
-    SF: ["SF-0001", "SF-0002"],
+    SF: ["SF-1", "SF-2"],
     BEL: [],
-    OBL: ["OBL-0001", "OBL-0002"],
+    OBL: ["OBL-1", "OBL-2"],
     CNSQ: [],
     THR: [],
     SREL: [],
-    STLOC: ["STLOC-0001"],
+    STLOC: ["STLOC-1"],
     STOBJ: [],
     DA: [],
-    STSTAT: ["STSTAT-0002"]
+    STSTAT: ["STSTAT-2"]
   };
 }

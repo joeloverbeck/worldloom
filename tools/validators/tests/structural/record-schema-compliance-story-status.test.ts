@@ -4,7 +4,7 @@ import test from "node:test";
 import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
 import { context, record } from "./helpers.js";
 
-const FILE_PATH = "stories/test-story/_source/status/STSTAT-0001.yaml";
+const FILE_PATH = "stories/test-story/_source/status/STSTAT-1.yaml";
 
 test("record_schema_compliance accepts complete STSTAT records", async () => {
   const result = await recordSchemaCompliance.run({}, context([
@@ -52,21 +52,21 @@ test("record_schema_compliance rejects invalid STSTAT enum values", async () => 
 
 function statusRecord(parsed: Record<string, unknown>) {
   return {
-    ...record("story_status_record", "test-story:STSTAT-0001", FILE_PATH, parsed),
+    ...record("story_status_record", "test-story:STSTAT-1", FILE_PATH, parsed),
     story_slug: "test-story"
   };
 }
 
 function validStatus(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
-    id: "STSTAT-0001",
-    story_id: "STORY-001",
-    created_at_page: "PG-0001",
-    entity: "STENT-0001",
+    id: "STSTAT-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    entity: "STENT-1",
     life: "alive",
     agency: "free",
-    location: "STLOC-0001",
-    derived_from: ["SE-0001"],
+    location: "STLOC-1",
+    derived_from: ["SE-1"],
     ...overrides
   };
 }

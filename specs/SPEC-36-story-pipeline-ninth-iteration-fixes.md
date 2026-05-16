@@ -176,6 +176,8 @@ Deliverables grouped by severity (P1 → P2). Each is self-contained and can lan
 
 **FOUNDATIONS alignment**: FOUNDATIONS-002 (unpadded natural-integer ID convention — schema tightening converts a documentation convention into mechanical enforcement); §Read Discipline (test fixtures train contributors into current contracts).
 
+**Implementation note (2026-05-16 / SPEC36STOPIPNIN-004)**: D3 landed the schema tightening plus validators-package fixture normalization, appended PG/BEL padded-id rejection tests to the existing class-specific `record_schema_compliance` tests, and also updated `tools/validators/src/structural/recursive-reference-closure.ts` so branch-prefix storylet visibility uses the same unpadded `PG` id pattern now enforced by `story-storylet.schema.json`. `tools/world-mcp/tests/` padded literals were classified as allocator/legacy/world-level or consumer-package fixtures and left out of this validators-package ticket.
+
 **Acceptance criteria**:
 - Grep across `tools/validators/src/schemas/` for `\\[0-9\\]\\+\\$` returns zero matches in story-bundle schema files (all replaced with `(0|[1-9][0-9]*)$` pattern); world-canon schemas (CF, CH, INV, M, OQ, ENT, SEC) are out of scope and unchanged.
 - Grep across `tools/validators/tests/` and `tools/world-mcp/tests/` for `-[0]{2,}[0-9]+` matching story-bundle prefixes returns zero matches, OR every match carries a comment naming the negative-test intent.

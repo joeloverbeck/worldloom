@@ -22,7 +22,7 @@ const coreTruth = {
 };
 
 test("rule12_redundancy accepts hard-canon core truth with two trace registers", async () => {
-  const cf = cfRecord("CF-0001", coreTruth);
+  const cf = cfRecord("CF-1", coreTruth);
   const law = sectionRecord("SEC-INS-001", {
     heading: "Ward Law",
     body: "Trace register: law. The ward code names the truth."
@@ -38,7 +38,7 @@ test("rule12_redundancy accepts hard-canon core truth with two trace registers",
 });
 
 test("rule12_redundancy fails hard-canon core truth with one trace register", async () => {
-  const cf = cfRecord("CF-0001", coreTruth);
+  const cf = cfRecord("CF-1", coreTruth);
   const law = sectionRecord("SEC-INS-001", {
     body: "Trace register: law. The ward code names the truth."
   });
@@ -50,7 +50,7 @@ test("rule12_redundancy fails hard-canon core truth with one trace register", as
 });
 
 test("rule12_redundancy applies hidden-truth carve-out for Mystery Reserve source basis", async () => {
-  const cf = cfRecord("CF-0001", {
+  const cf = cfRecord("CF-1", {
     ...coreTruth,
     source_basis: { direct_user_approval: true, derived_from: ["M-1"] }
   });
@@ -61,7 +61,7 @@ test("rule12_redundancy applies hidden-truth carve-out for Mystery Reserve sourc
 });
 
 test("rule12_redundancy ignores historical hard canon without SPEC-09 blocks", async () => {
-  const cf = cfRecord("CF-0001", {
+  const cf = cfRecord("CF-1", {
     ...completeCf,
     status: "hard_canon",
     truth_scope: { world_level: true, diegetic_status: "objective" }
@@ -78,7 +78,7 @@ function sectionRecord(id: string, overrides: Record<string, unknown>) {
   return record("section", id, `_source/${subdir}/${id}.yaml`, {
     ...validSection,
     id,
-    touched_by_cf: ["CF-0001"],
+    touched_by_cf: ["CF-1"],
     ...overrides
   });
 }

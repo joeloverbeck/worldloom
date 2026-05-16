@@ -4,17 +4,17 @@
   "type": "object",
   "required": ["id", "story_id", "created_at_page", "status", "title", "summary", "urgency"],
   "properties": {
-    "id": { "type": "string", "pattern": "^THR-[0-9]+$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
-    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]+$" },
-    "supersedes": { "type": ["string", "null"], "pattern": "^THR-[0-9]+$" },
+    "id": { "type": "string", "pattern": "^THR-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^THR-(0|[1-9][0-9]*)$" },
     "status": { "type": "string", "enum": ["active", "resolved", "escalated", "abandoned"] },
     "title": { "type": "string", "minLength": 1 },
     "summary": { "type": "string", "minLength": 1 },
     "urgency": { "type": "string", "enum": ["low", "medium", "high"] },
     "derived_from": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^(CF|STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
+      "items": { "type": "string", "pattern": "^(CF|STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-(0|[1-9][0-9]*)$" }
     }
   },
   "additionalProperties": false

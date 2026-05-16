@@ -9,7 +9,7 @@ test("yaml_parse_integrity catches malformed atomic YAML and hybrid frontmatter"
   const result = await yamlParseIntegrity.run(
     {
       files: [
-        { path: "_source/canon/CF-0099.yaml", content: "id: [unterminated" },
+        { path: "_source/canon/CF-99.yaml", content: "id: [unterminated" },
         { path: "characters/test.md", content: "---\ncharacter_id: [unterminated\n---\nBody" }
       ]
     },

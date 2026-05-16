@@ -200,9 +200,9 @@ function createIndexedWorld(options: WorldOptions = {}): string {
 
   const records = [
     {
-      node_id: "CF-0001",
+      node_id: "CF-1",
       node_type: "canon_fact_record",
-      file_path: "_source/canon/CF-0001.yaml",
+      file_path: "_source/canon/CF-1.yaml",
       body: validCanonFact()
     },
     {
@@ -272,7 +272,7 @@ function updateNodeBody(dbPath: string, nodeId: string, body: Record<string, unk
 
 function validCanonFact(): Record<string, unknown> {
   return {
-    id: "CF-0001",
+    id: "CF-1",
     title: "Grounded Institution",
     status: "hard_canon",
     type: "institution",
@@ -305,7 +305,7 @@ function validSection(): Record<string, unknown> {
     heading_level: 2,
     body: "The ward office keeps public records.",
     extensions: [],
-    touched_by_cf: ["CF-0001"]
+    touched_by_cf: ["CF-1"]
   };
 }
 

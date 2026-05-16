@@ -73,7 +73,7 @@ Add `"causal_dependency_threat_scan"` to the expected validator-name list (curre
 - `causal_dependency_threat_scan_warns_slt_precondition_clobbered` — fixture: high-urgency OBL with eligible SLT; SE invalidates precondition without SLT replacement. Expect verdict.
 - `causal_dependency_threat_scan_accepts_slt_precondition_clobbered_when_replacement_emitted` — fixture with replacement SLT emitted in same patch plan. Expect no verdict.
 
-Use unpadded mock IDs per FOUNDATIONS-002 (and per the schema regex tightening landing in SPEC36STOPIPNIN-004 — note that this ticket and 004 can land independently; either ordering is fine but the test fixtures should use unpadded IDs regardless of 004's status).
+Use unpadded mock IDs per FOUNDATIONS-002 (and per the schema regex tightening landed in `archive/tickets/SPEC36STOPIPNIN-004.md`; the test fixtures should use unpadded IDs regardless of this ticket's position in the queue).
 
 ### 5. Update skill prose at `.claude/skills/branching-story-turn-cycle/SKILL.md:443`
 

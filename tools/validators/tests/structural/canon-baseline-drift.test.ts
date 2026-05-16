@@ -6,9 +6,9 @@ import { context, record } from "./helpers.js";
 
 test("canon_baseline_drift accepts pages already at the current canon head", async () => {
   const verdicts = await canonBaselineDrift.run(undefined, context([
-    change("CH-0007", ["CF-0001"]),
-    page("PG-0002", "CH-0007", ["SF-0001"], "compatible after reviewing CH-0007."),
-    fact("SF-0001", ["CF-0001"])
+    change("CH-7", ["CF-1"]),
+    page("PG-2", "CH-7", ["SF-1"], "compatible after reviewing CH-7."),
+    fact("SF-1", ["CF-1"])
   ]));
 
   assert.deepEqual(verdicts, []);
@@ -16,11 +16,11 @@ test("canon_baseline_drift accepts pages already at the current canon head", asy
 
 test("canon_baseline_drift accepts drift windows with no active mirrored SF intersection", async () => {
   const verdicts = await canonBaselineDrift.run(undefined, context([
-    change("CH-0003", ["CF-0001"]),
-    change("CH-0005", ["CF-0002"]),
-    change("CH-0007", ["CF-0003"]),
-    page("PG-0002", "CH-0003", ["SF-0001"], "compatible after reviewing CH-0007."),
-    fact("SF-0001", ["CF-0099"])
+    change("CH-3", ["CF-1"]),
+    change("CH-5", ["CF-2"]),
+    change("CH-7", ["CF-3"]),
+    page("PG-2", "CH-3", ["SF-1"], "compatible after reviewing CH-7."),
+    fact("SF-1", ["CF-99"])
   ]));
 
   assert.deepEqual(verdicts, []);
@@ -28,29 +28,29 @@ test("canon_baseline_drift accepts drift windows with no active mirrored SF inte
 
 test("canon_baseline_drift rejects classifications that omit an intersecting CH", async () => {
   const verdicts = await canonBaselineDrift.run(undefined, context([
-    change("CH-0003", ["CF-0001"]),
-    change("CH-0005", ["CF-0002"]),
-    change("CH-0007", ["CF-0003"]),
-    page("PG-0002", "CH-0003", ["SF-0001"], "compatible after reviewing CH-0007."),
-    fact("SF-0001", ["CF-0002"])
+    change("CH-3", ["CF-1"]),
+    change("CH-5", ["CF-2"]),
+    change("CH-7", ["CF-3"]),
+    page("PG-2", "CH-3", ["SF-1"], "compatible after reviewing CH-7."),
+    fact("SF-1", ["CF-2"])
   ]));
 
   assert.equal(verdicts.length, 1);
   assert.equal(verdicts[0]?.code, "canon_baseline_drift_window_incomplete");
   assert.deepEqual(verdicts[0]?.detail, {
-    page_id: "PG-0002",
-    missed_change_id: "CH-0005",
-    affected_fact_id: "CF-0002",
-    active_story_fact_id: "SF-0001"
+    page_id: "PG-2",
+    missed_change_id: "CH-5",
+    affected_fact_id: "CF-2",
+    active_story_fact_id: "SF-1"
   });
 });
 
 test("canon_baseline_drift rejects drift with no recorded classification", async () => {
   const verdicts = await canonBaselineDrift.run(undefined, context([
-    change("CH-0003", ["CF-0001"]),
-    change("CH-0007", ["CF-0002"]),
-    page("PG-0002", "CH-0003", ["SF-0001"], undefined),
-    fact("SF-0001", ["CF-0002"])
+    change("CH-3", ["CF-1"]),
+    change("CH-7", ["CF-2"]),
+    page("PG-2", "CH-3", ["SF-1"], undefined),
+    fact("SF-1", ["CF-2"])
   ]));
 
   assert.equal(verdicts.length, 1);
@@ -59,10 +59,10 @@ test("canon_baseline_drift rejects drift with no recorded classification", async
 
 test("canon_baseline_drift rejects invalid classification values", async () => {
   const verdicts = await canonBaselineDrift.run(undefined, context([
-    change("CH-0003", ["CF-0001"]),
-    change("CH-0007", ["CF-0002"]),
-    page("PG-0002", "CH-0003", ["SF-0001"], "latest_only_drift after reviewing CH-0007."),
-    fact("SF-0001", ["CF-0002"])
+    change("CH-3", ["CF-1"]),
+    change("CH-7", ["CF-2"]),
+    page("PG-2", "CH-3", ["SF-1"], "latest_only_drift after reviewing CH-7."),
+    fact("SF-1", ["CF-2"])
   ]));
 
   assert.equal(verdicts.length, 1);
@@ -71,12 +71,12 @@ test("canon_baseline_drift rejects invalid classification values", async () => {
 
 test("canon_baseline_drift accepts event-rationale classifications", async () => {
   const verdicts = await canonBaselineDrift.run(undefined, context([
-    change("CH-0003", ["CF-0001"]),
-    change("CH-0005", ["CF-0002"]),
-    change("CH-0007", ["CF-0003"]),
-    event("SE-0002", "requires_health_audit after reviewing CH-0005 and CH-0007."),
-    page("PG-0002", "CH-0003", ["SF-0001"], undefined),
-    fact("SF-0001", ["CF-0002"])
+    change("CH-3", ["CF-1"]),
+    change("CH-5", ["CF-2"]),
+    change("CH-7", ["CF-3"]),
+    event("SE-2", "requires_health_audit after reviewing CH-5 and CH-7."),
+    page("PG-2", "CH-3", ["SF-1"], undefined),
+    fact("SF-1", ["CF-2"])
   ]));
 
   assert.deepEqual(verdicts, []);
@@ -87,7 +87,7 @@ test("canon_baseline_drift is scoped to full-world, create page plans, and touch
   assert.equal(canonBaselineDrift.applies_to(context([], { run_mode: "pre-apply", patch_plan: patchPlan("create_se_record") })), false);
   assert.equal(canonBaselineDrift.applies_to(context([], { run_mode: "pre-apply", patch_plan: patchPlan("create_pg_record") })), true);
   assert.equal(
-    canonBaselineDrift.applies_to(context([], { run_mode: "incremental", touched_files: ["stories/test-story/_source/pages/PG-0002.yaml"] })),
+    canonBaselineDrift.applies_to(context([], { run_mode: "incremental", touched_files: ["stories/test-story/_source/pages/PG-2.yaml"] })),
     true
   );
 });
@@ -103,7 +103,7 @@ function event(id: string, worldLogicRationale: string) {
   return {
     ...record("story_event_record", `test-story:${id}`, `stories/test-story/_source/events/${id}.yaml`, {
       id,
-      story_id: "STORY-001",
+      story_id: "STORY-1",
       world_logic_rationale: worldLogicRationale
     }),
     story_slug: "test-story"
@@ -124,8 +124,8 @@ function page(
   return {
     ...record("page_record", `test-story:${id}`, `stories/test-story/_source/pages/${id}.yaml`, {
       id,
-      story_id: "STORY-001",
-      input: { resolved_event_id: "SE-0002" },
+      story_id: "STORY-1",
+      input: { resolved_event_id: "SE-2" },
       state_snapshot: {
         canon_revision: canonRevision,
         active_records: { SF: activeFactIds }
@@ -140,9 +140,9 @@ function fact(id: string, derivedFrom: string[]) {
   return {
     ...record("story_fact_record", `test-story:${id}`, `stories/test-story/_source/facts/${id}.yaml`, {
       id,
-      story_id: "STORY-001",
+      story_id: "STORY-1",
       authority: "canon_linked",
-      created_at_page: "PG-0001",
+      created_at_page: "PG-1",
       derived_from: derivedFrom
     }),
     story_slug: "test-story"
@@ -157,6 +157,6 @@ function patchPlan(op: "create_pg_record" | "create_se_record") {
     verdict: "story_turn",
     originating_skill: "test",
     expected_id_allocations: {},
-    patches: [{ op, target_world: "test", payload: { story_slug: "test-story", record: { id: "PG-0002" } } }]
+    patches: [{ op, target_world: "test", payload: { story_slug: "test-story", record: { id: "PG-2" } } }]
   };
 }

@@ -7,7 +7,7 @@ import { context, record } from "./helpers.js";
 test("audit_only_se_shape accepts a valid promotion_closeout event", async () => {
   const verdicts = await auditOnlySeShape.run(
     undefined,
-    context([auditOnlyEvent("SE-0001", { event_kind: "promotion_closeout" })])
+    context([auditOnlyEvent("SE-1", { event_kind: "promotion_closeout" })])
   );
 
   assert.deepEqual(verdicts, []);
@@ -17,9 +17,9 @@ test("audit_only_se_shape rejects audit-only events with non-empty state deltas"
   const verdicts = await auditOnlySeShape.run(
     undefined,
     context([
-      auditOnlyEvent("SE-0001", {
+      auditOnlyEvent("SE-1", {
         state_delta: {
-          create: ["SF-0001"],
+          create: ["SF-1"],
           supersede: [],
           close: []
         }
@@ -35,9 +35,9 @@ test("audit_only_se_shape rejects audit-only events with selected storylets", as
   const verdicts = await auditOnlySeShape.run(
     undefined,
     context([
-      auditOnlyEvent("SE-0001", {
+      auditOnlyEvent("SE-1", {
         commitment: {
-          selected_slt_id: "SLT-0001",
+          selected_slt_id: "SLT-1",
           selection_source: "author_pool",
           alias_bindings: {}
         }
@@ -53,11 +53,11 @@ test("audit_only_se_shape rejects audit-only events with alias bindings", async 
   const verdicts = await auditOnlySeShape.run(
     undefined,
     context([
-      auditOnlyEvent("SE-0001", {
+      auditOnlyEvent("SE-1", {
         commitment: {
           selected_slt_id: null,
           selection_source: "none",
-          alias_bindings: { actor: "STENT-0001" }
+          alias_bindings: { actor: "STENT-1" }
         }
       })
     ])
@@ -70,12 +70,12 @@ test("audit_only_se_shape rejects audit-only events with resolution or promotion
   const verdicts = await auditOnlySeShape.run(
     undefined,
     context([
-      auditOnlyEvent("SE-0001", {
+      auditOnlyEvent("SE-1", {
         resolution: {
           result: "success",
           player_visible_feedback: "The closeout resolves cleanly."
         },
-        promotion_claims: [{ source_record: "SF-0001", authority: "apparent" }]
+        promotion_claims: [{ source_record: "SF-1", authority: "apparent" }]
       })
     ])
   );
@@ -88,11 +88,11 @@ test("audit_only_se_shape rejects audit-only events used as page-producing input
   const verdicts = await auditOnlySeShape.run(
     undefined,
     context([
-      auditOnlyEvent("SE-0001"),
-      record("page_record", "test-story:PG-0002", "stories/test-story/_source/pages/PG-0002.yaml", {
-        id: "PG-0002",
-        story_id: "STORY-001",
-        input: { resolved_event_id: "SE-0001" }
+      auditOnlyEvent("SE-1"),
+      record("page_record", "test-story:PG-2", "stories/test-story/_source/pages/PG-2.yaml", {
+        id: "PG-2",
+        story_id: "STORY-1",
+        input: { resolved_event_id: "SE-1" }
       })
     ])
   );
@@ -109,9 +109,9 @@ function auditOnlyEvent(id: string, overrides: Record<string, unknown> = {}) {
   return {
     ...record("story_event_record", `test-story:${id}`, `stories/test-story/_source/events/${id}.yaml`, {
       id,
-      story_id: "STORY-001",
-      created_at_page: "PG-0002",
-      parent_page_id: "PG-0002",
+      story_id: "STORY-1",
+      created_at_page: "PG-2",
+      parent_page_id: "PG-2",
       event_kind: "prose_attach",
       actor: "system",
       commitment: {
@@ -141,6 +141,6 @@ function patchPlan(op: "create_pg_record" | "create_se_record") {
     verdict: "story_audit",
     originating_skill: "test",
     expected_id_allocations: {},
-    patches: [{ op, target_world: "test", payload: { story_slug: "test-story", record: { id: "SE-0001" } } }]
+    patches: [{ op, target_world: "test", payload: { story_slug: "test-story", record: { id: "SE-1" } } }]
   };
 }

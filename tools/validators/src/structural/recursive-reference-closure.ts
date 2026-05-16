@@ -10,7 +10,7 @@ import {
 
 // Includes STSTAT and SREL because SE.promotion_claims[].source_record can cite them.
 const STORY_LOCAL_ID = /^(?:STENT|STSTAT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
-const PAGE_ID = /^PG-\d{4}$/;
+const PAGE_ID = /^PG-(0|[1-9][0-9]*)$/;
 const NON_EDGE_FIELDS = new Set([
   "id",
   "story_id",

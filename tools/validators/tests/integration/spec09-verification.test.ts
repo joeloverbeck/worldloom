@@ -255,9 +255,9 @@ function genesisEnvelope() {
       {
         op: "create_cf_record" as const,
         target_world: "seeded",
-        target_file: "_source/canon/CF-0001.yaml",
+        target_file: "_source/canon/CF-1.yaml",
         payload: {
-          cf_record: capabilityCf("CF-0001", { required_world_updates: ["INSTITUTIONS"] })
+          cf_record: capabilityCf("CF-1", { required_world_updates: ["INSTITUTIONS"] })
         }
       },
       {
@@ -265,15 +265,15 @@ function genesisEnvelope() {
         target_world: "seeded",
         target_file: "_source/institutions/SEC-INS-001.yaml",
         payload: {
-          sec_record: section("SEC-INS-001", "INSTITUTIONS", "CF-0001", "Trace register: law. Trace register: songs.")
+          sec_record: section("SEC-INS-001", "INSTITUTIONS", "CF-1", "Trace register: law. Trace register: songs.")
         }
       },
       {
         op: "create_cf_record" as const,
         target_world: "seeded",
-        target_file: "_source/canon/CF-0002.yaml",
+        target_file: "_source/canon/CF-2.yaml",
         payload: {
-          cf_record: geographyCf("CF-0002")
+          cf_record: geographyCf("CF-2")
         }
       },
       {
@@ -281,7 +281,7 @@ function genesisEnvelope() {
         target_world: "seeded",
         target_file: "_source/geography/SEC-GEO-001.yaml",
         payload: {
-          sec_record: section("SEC-GEO-001", "GEOGRAPHY", "CF-0002", "Trace register: maps. Trace register: landscape.")
+          sec_record: section("SEC-GEO-001", "GEOGRAPHY", "CF-2", "Trace register: maps. Trace register: landscape.")
         }
       }
     ]

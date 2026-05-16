@@ -5,7 +5,7 @@ import { modificationHistoryRetrofit } from "../../src/structural/modification-h
 import { context, record, validCf } from "./helpers.js";
 
 test("modification_history_retrofit catches notes-pattern entries without array entries", async () => {
-  const cf = record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+  const cf = record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", {
     ...validCf,
     notes: "Modified 2026-04-18 by CH-0006",
     modification_history: []
@@ -18,10 +18,10 @@ test("modification_history_retrofit catches notes-pattern entries without array 
 });
 
 test("modification_history_retrofit accepts matching notes-pattern array entries", async () => {
-  const cf = record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+  const cf = record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", {
     ...validCf,
     notes: "Modified 2026-04-18 by CH-0006",
-    modification_history: [{ date: "2026-04-18", change_id: "CH-0006", originating_cf: "CF-0001", summary: "Update" }]
+    modification_history: [{ date: "2026-04-18", change_id: "CH-0006", originating_cf: "CF-1", summary: "Update" }]
   });
 
   const result = await modificationHistoryRetrofit.run({}, context([cf]));

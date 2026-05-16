@@ -5,7 +5,7 @@ import { touchedByCfCompleteness } from "../../src/structural/touched-by-cf-comp
 import { context, record, validCf, validSection } from "./helpers.js";
 
 test("touched_by_cf_completeness catches SEC-to-CF and CF-to-SEC misses", async () => {
-  const cf = record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+  const cf = record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", {
     ...validCf,
     required_world_updates: ["GEOGRAPHY"]
   });
@@ -23,7 +23,7 @@ test("touched_by_cf_completeness catches SEC-to-CF and CF-to-SEC misses", async 
 });
 
 test("touched_by_cf_completeness accepts matching bidirectional CF/SEC mapping", async () => {
-  const cf = record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", validCf);
+  const cf = record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", validCf);
   const section = record("section", "SEC-INS-001", "_source/institutions/SEC-INS-001.yaml", validSection);
 
   const result = await touchedByCfCompleteness.run({}, context([cf, section]));

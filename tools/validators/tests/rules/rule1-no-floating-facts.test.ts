@@ -5,7 +5,7 @@ import { rule1NoFloatingFacts } from "../../src/rules/rule1-no-floating-facts.js
 import { cfRecord, completeCf, testContext } from "./helpers.js";
 
 test("rule1_no_floating_facts catches missing CF structure", async () => {
-  const bad = cfRecord("CF-0001", {
+  const bad = cfRecord("CF-1", {
     ...completeCf,
     domains_affected: [],
     scope: { geographic: "local" },
@@ -30,6 +30,6 @@ test("rule1_no_floating_facts catches missing CF structure", async () => {
 });
 
 test("rule1_no_floating_facts accepts complete CF structure", async () => {
-  const result = await rule1NoFloatingFacts.run({}, testContext([cfRecord("CF-0001")]));
+  const result = await rule1NoFloatingFacts.run({}, testContext([cfRecord("CF-1")]));
   assert.equal(result.length, 0);
 });

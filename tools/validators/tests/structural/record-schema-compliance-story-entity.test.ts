@@ -4,7 +4,7 @@ import test from "node:test";
 import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
 import { context, record } from "./helpers.js";
 
-const FILE_PATH = "stories/test-story/_source/entities/STENT-0001.yaml";
+const FILE_PATH = "stories/test-story/_source/entities/STENT-1.yaml";
 
 test("record_schema_compliance accepts STENT role_in_story contract values", async () => {
   const result = await recordSchemaCompliance.run({}, context([
@@ -41,16 +41,16 @@ test("record_schema_compliance requires STENT role_in_story", async () => {
 
 function entityRecord(parsed: Record<string, unknown>) {
   return {
-    ...record("story_entity_record", "test-story:STENT-0001", FILE_PATH, parsed),
+    ...record("story_entity_record", "test-story:STENT-1", FILE_PATH, parsed),
     story_slug: "test-story"
   };
 }
 
 function validEntity(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
-    id: "STENT-0001",
-    story_id: "STORY-001",
-    created_at_page: "PG-0001",
+    id: "STENT-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
     display_name: "Mara",
     role_in_story: ["primary_actor"],
     ...overrides
