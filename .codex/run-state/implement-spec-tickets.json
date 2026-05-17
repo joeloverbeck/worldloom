@@ -1,20 +1,19 @@
 {
   "originating_spec": "specs/SPEC-39-tools-esm-migration.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC39TOOESMMIG-001.md",
+  "last_ticket": "archive/tickets/SPEC39TOOESMMIG-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "9763facc6524696015322dc238c78fe1dcbdfeb0",
+  "last_work_commit": "47656676c3fd4e214a6972baff56e3528b0165a9",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC39TOOESMMIG-003.md",
+  "next_target": "tickets/SPEC39TOOESMMIG-005.md",
   "queue": [
-    "tickets/SPEC39TOOESMMIG-003.md",
     "tickets/SPEC39TOOESMMIG-005.md"
   ],
   "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
-  "owned_dirty_summary": "SPEC39TOOESMMIG-001 completed and archived; patch-engine now declares type module; validators and world-mcp builds passed against the symlinked post-flip package",
+  "owned_dirty_summary": "SPEC39TOOESMMIG-003 completed and archived; hooks now declare type module, source/test imports use .js suffixes, ESM path globals are repaired, and hooks tests pass 22/22 with escalated child-process permission",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree; expected ignored artifacts remain under tools/patch-engine/dist, tools/patch-engine/node_modules, tools/validators/dist, tools/validators/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, tools/world-mcp/node_modules",
+  "dirty_state": "clean tracked worktree; expected ignored artifacts remain under tools/hooks/dist, tools/hooks/logs, tools/hooks/node_modules",
   "updated_at": "2026-05-17"
 }
