@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC37STOPIPTEN-001.md",
+  "last_ticket": "archive/tickets/SPEC37STOPIPTEN-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "bb7d87b9789e392486776fc8fbab9fe682329a2d",
+  "last_work_commit": "6cba7478d2bfaf6467a8ecc6c45c79f395cf014f",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC37STOPIPTEN-002.md",
+  "next_target": "tickets/SPEC37STOPIPTEN-003.md",
   "queue": [
-    "tickets/SPEC37STOPIPTEN-002.md",
     "tickets/SPEC37STOPIPTEN-003.md",
     "tickets/SPEC37STOPIPTEN-004.md"
   ],
