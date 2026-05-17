@@ -1,17 +1,21 @@
 {
-  "originating_spec": "specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md",
-  "archived_spec": "archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md",
-  "last_ticket": "archive/tickets/SPEC36STOPIPNIN-003.md",
-  "last_result": "completed_archived_and_spec_archived",
-  "last_work_commit": "8509aebadde2496584bc420efc8095f5689e187f",
+  "originating_spec": "specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC37STOPIPTEN-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "bb7d87b9789e392486776fc8fbab9fe682329a2d",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "complete",
+  "next_target": "tickets/SPEC37STOPIPTEN-002.md",
+  "queue": [
+    "tickets/SPEC37STOPIPTEN-002.md",
+    "tickets/SPEC37STOPIPTEN-003.md",
+    "tickets/SPEC37STOPIPTEN-004.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree after state commit; expected ignored artifacts include tools/validators/dist, tools/validators/node_modules, tools/world-mcp/dist, tools/world-mcp/node_modules, tools/world-mcp/.secret, tools/patch-engine/dist, tools/patch-engine/node_modules, tools/hooks/dist, tools/hooks/logs, and tools/hooks/node_modules from package proof",
+  "dirty_state": "clean tracked worktree expected after state commit; expected ignored artifacts include pre-existing tools/validators/node_modules and refreshed tools/validators/dist from package proof",
   "updated_at": "2026-05-17"
 }
