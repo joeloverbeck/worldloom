@@ -104,6 +104,11 @@ No new patch-engine ops, no new MCP retrieval surfaces, no new schema fields, no
 
 #### D2 — Amend `.claude/skills/_shared-templates/story-state-contract.md` §4.5.10 with DA-semantics commentary
 
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-002.md` landed this
+as `story-state-contract.md` §4.5.10a. The live contract keeps the DA schema
+definition in `story-record-schemas.md` §4.5.10 and records only additive
+rules-of-use commentary in the main story-state contract.
+
 **Problem**: §4.5.10 (lines 554–571 of `story-record-schemas.md`, contract-side commentary in `story-state-contract.md`) defines the DA schema fields but provides no rule-of-use commentary. Consumers cannot deduce from the schema alone that `truth_relation: true` requires branch/canon support, that `circulation: public|factional` triggers `expected_witness_coverage`, or that claims inside a DA do not propagate to SF or canon automatically.
 
 **Change**: Add a §4.5.10a (or analogous adjacent subsection) commentary block to `story-state-contract.md` covering:

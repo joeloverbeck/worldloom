@@ -67,6 +67,40 @@ Consumers that need only the authority model (§1), schema-minimalism doctrine (
 
 The split is purely structural — §4 is overwhelmingly the bulk of the contract, and the bundled file exceeded the per-call read limit of bulk-loading tools at HEAD. No schema content changed in the move; this stub is the navigational pointer.
 
+### 4.5.10a `DA` Rule-Of-Use Commentary
+
+The `DA` field list remains defined in
+`.claude/skills/_shared-templates/story-record-schemas.md` §4.5.10. This
+subsection records the cross-skill rules of use for those existing fields; it
+does not add or remove schema fields.
+
+- `truth_relation` is the relation of the artifact content to branch or canon
+  truth, not the reader's belief about that content. Reader belief lives in
+  `BEL.belief_mode`, `BEL.truth_relation`, and `BEL.confidence`.
+- `circulation` is the artifact's actual access or distribution state, not its
+  intended audience. `intended_audience` records who the artifact was meant
+  for; `circulation` records who can actually access or receive it now.
+- Claims inside a `DA` do not become `SF` or `CF` automatically. Promotion to
+  world canon routes through `story-fact-promotion-to-canon` to
+  `canon-addition`; branch-truth establishment uses `SF` records that may cite
+  the DA in `derived_from` but stand on independent branch evidence.
+- `circulation: public` and `circulation: factional` trigger
+  `expected_witness_coverage`: the same event must create BEL propagation
+  through an indirect access route (`document`, `object_trace`,
+  `location_trace`, `rumor`, `surveillance`, `institutional_channel`, or
+  `magic_tech`) or `SE.world_logic_rationale` must include a parseable
+  `non_propagation:event_leaves_no_accessible_trace(group=<label>, records=[DA-<N>])`
+  tag.
+- `derived_from: [DA-N]` is ambiguous between world-level diegetic artifacts
+  (`worlds/<slug>/diegetic-artifacts/DA-N.md`) and story-local artifact records
+  (`worlds/<slug>/stories/<story>/_source/artifacts/DA-N.yaml`). Until namespace
+  resolution exists, prefer body annotation such as `Story-local copy of
+  world-level DA-12: Council Edict of the Salt Charter` over a bare
+  `derived_from` entry for cross-namespace provenance.
+
+For the full triage rubric, decision matrix, field-semantics tables, and patch
+obligations, see `.claude/skills/_shared-templates/da-authoring-reference.md`.
+
 ## 5. Closed Predicate DSL
 
 `SLT.preconditions.hard | soft` use this closed grammar. No free-form predicate prose.
