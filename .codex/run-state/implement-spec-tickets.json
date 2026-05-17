@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-41-spec40-followup-hygiene.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC41FUP-002.md",
+  "last_ticket": "archive/tickets/SPEC41FUP-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "a1a9b28ac5de0d9e7af39bee42feb052b892c15f",
+  "last_work_commit": "a80de93d81295771a3075966b9591a9052f5ebf0",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC41FUP-003.md",
+  "next_target": "tickets/SPEC41FUP-004.md",
   "queue": [
-    "tickets/SPEC41FUP-003.md",
     "tickets/SPEC41FUP-004.md"
   ],
   "phase": "ready_for_next_ticket",
