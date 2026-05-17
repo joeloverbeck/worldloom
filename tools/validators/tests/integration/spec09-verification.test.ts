@@ -5,7 +5,8 @@ import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 
-import Ajv2020 from "ajv/dist/2020";
+import Ajv2020Module from "ajv/dist/2020.js";
+import type { AnySchema, ErrorObject, ValidateFunction } from "ajv";
 import Database from "better-sqlite3";
 import YAML from "js-yaml";
 import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
@@ -16,6 +17,13 @@ import { rule11ActionSpace } from "../../src/rules/rule11-action-space.js";
 import { completeCf } from "../rules/helpers.js";
 import { context, record, validSection } from "../structural/helpers.js";
 
+type Ajv2020Instance = {
+  addSchema(schema: AnySchema): unknown;
+  compile(schema: AnySchema): ValidateFunction;
+  errorsText(errors?: ErrorObject[] | null): string;
+};
+type Ajv2020Constructor = new (opts?: Record<string, unknown>) => Ajv2020Instance;
+const Ajv2020 = Ajv2020Module as unknown as Ajv2020Constructor;
 const packageRoot = resolvePackageRoot();
 const repoRoot = path.resolve(packageRoot, "../..");
 const realAnimaliaRoot = path.join(repoRoot, "tests", "fixtures", "animalia");
@@ -159,8 +167,8 @@ test("SPEC-09 §V11 (surrogate): patch-plan envelope for genesis-world bundle pa
 function resolvePackageRoot(): string {
   for (const candidate of [
     process.cwd(),
-    path.resolve(__dirname, "../../.."),
-    path.resolve(__dirname, "../../../..")
+    path.resolve(import.meta.dirname, "../../.."),
+    path.resolve(import.meta.dirname, "../../../..")
   ]) {
     const packageJson = path.join(candidate, "package.json");
     if (!existsSync(packageJson)) {
@@ -178,7 +186,7 @@ function copyDirectory(from: string, to: string): void {
   cpSync(from, to, { recursive: true });
 }
 
-function compileCanonFactSchema(): ReturnType<Ajv2020["compile"]> {
+function compileCanonFactSchema(): ValidateFunction {
   const ajv = new Ajv2020({ allErrors: true, strict: true, formats: { date: true } });
   ajv.addSchema(JSON.parse(readFileSync(path.join(packageRoot, "src", "schemas", "_shared", "extension-entry.schema.json"), "utf8")));
   return ajv.compile(

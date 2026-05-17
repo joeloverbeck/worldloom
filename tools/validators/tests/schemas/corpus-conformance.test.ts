@@ -3,14 +3,22 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import test from "node:test";
 
-import Ajv2020 from "ajv/dist/2020";
-import type { AnySchema } from "ajv";
+import Ajv2020Module from "ajv/dist/2020.js";
+import type { AnySchema, ErrorObject, ValidateFunction } from "ajv";
 import yaml from "js-yaml";
 
 const packageRoot = process.cwd();
 const repoRoot = resolve(packageRoot, "../..");
 const schemaRoot = resolve(packageRoot, "src/schemas");
 const sourceRoot = resolve(repoRoot, "tests/fixtures/animalia/_source");
+type Ajv2020Instance = {
+  addSchema(schema: AnySchema): unknown;
+  compile(schema: AnySchema): ValidateFunction;
+  errorsText(errors?: ErrorObject[] | null): string;
+  getSchema(keyRef: string): ValidateFunction | undefined;
+};
+type Ajv2020Constructor = new (opts?: Record<string, unknown>) => Ajv2020Instance;
+const Ajv2020 = Ajv2020Module as unknown as Ajv2020Constructor;
 
 const schemaNames = [
   "canon-fact-record",
@@ -54,7 +62,7 @@ function loadJson(path: string): AnySchema {
   return JSON.parse(readFileSync(path, "utf8")) as AnySchema;
 }
 
-function makeAjv(): Ajv2020 {
+function makeAjv(): Ajv2020Instance {
   const ajv = new Ajv2020({ allErrors: true, strict: true, formats: { date: true } });
   ajv.addSchema(loadJson(join(schemaRoot, "_shared/extension-entry.schema.json")));
   for (const schemaName of schemaNames) {

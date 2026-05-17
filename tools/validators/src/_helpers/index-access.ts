@@ -394,7 +394,7 @@ function resolveRepoRootForWorld(worldSlug: string): string {
     }
   }
 
-  const packageRoot = path.resolve(__dirname, "../../..");
+  const packageRoot = path.resolve(import.meta.dirname, "../../..");
   const maybeRepoRoot = path.resolve(packageRoot, "../..");
   if (existsSync(path.join(maybeRepoRoot, "worlds", worldSlug, "_index", "world.db"))) {
     return maybeRepoRoot;

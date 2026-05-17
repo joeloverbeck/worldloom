@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Executable FOUNDATIONS rule validators plus structural invariant enforcement (SPEC-04).",
   "private": true,
-  "type": "commonjs",
+  "type": "module",
   "main": "dist/src/public/index.js",
   "types": "dist/src/public/index.d.ts",
   "exports": {

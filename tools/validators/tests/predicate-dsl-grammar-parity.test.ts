@@ -3,9 +3,17 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import Ajv2020 from "ajv/dist/2020.js";
+import Ajv2020Module from "ajv/dist/2020.js";
+import type { ErrorObject, ValidateFunction } from "ajv";
 
 import { PRED_TYPES, PREDICATE_ARG_SCHEMAS } from "../src/rules/_shared/predicate-dsl-grammar.js";
+
+type Ajv2020Instance = {
+  compile(schema: unknown): ValidateFunction;
+  errorsText(errors?: ErrorObject[] | null): string;
+};
+type Ajv2020Constructor = new (opts?: Record<string, unknown>) => Ajv2020Instance;
+const Ajv2020 = Ajv2020Module as unknown as Ajv2020Constructor;
 
 type PredicateSchema = {
   $id: string;

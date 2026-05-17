@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-import Ajv2020 from "ajv/dist/2020";
+import Ajv2020Module from "ajv/dist/2020.js";
 import type { AnySchema, ErrorObject, ValidateFunction } from "ajv";
 import yaml from "js-yaml";
 
@@ -9,6 +9,12 @@ import type { Context, Validator, Verdict } from "../framework/types.js";
 import { asPlainRecord, fileInputsFrom, toPosixPath, worldRootFrom } from "./utils.js";
 
 const RECEIPT_PATH_PATTERN = /^stories\/([^/]+)\/pages-prose-receipts\/PG-(0|[1-9][0-9]*)\.yaml$/;
+type Ajv2020Instance = {
+  compile(schema: AnySchema): ValidateFunction;
+  errorsText(errors?: ErrorObject[] | null): string;
+};
+type Ajv2020Constructor = new (opts?: Record<string, unknown>) => Ajv2020Instance;
+const Ajv2020 = Ajv2020Module as unknown as Ajv2020Constructor;
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 const validateReceipt = loadReceiptSchemaValidator();
 
@@ -149,7 +155,7 @@ function parseYamlReceipt(content: string): unknown | null {
 }
 
 function loadReceiptSchemaValidator(): ValidateFunction {
-  const schemaRoot = path.resolve(__dirname, "../../../src/schemas");
+  const schemaRoot = path.resolve(import.meta.dirname, "../../../src/schemas");
   const schema = JSON.parse(readFileSync(path.join(schemaRoot, "prose-receipt.schema.json"), "utf8")) as AnySchema;
   return ajv.compile(schema);
 }

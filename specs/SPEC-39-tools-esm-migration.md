@@ -7,6 +7,10 @@
 **Blocks**: None (no skill or canon work waits on this; this is infrastructural hygiene)
 **Status**: PROPOSED
 
+## Implementation Notes
+
+- 2026-05-17: `archive/tickets/SPEC39TOOESMMIG-002.md` completed the `tools/validators` migration. The landed slice flipped `tools/validators/package.json` to `"type": "module"`, replaced validators source `__dirname` schema-path lookups with `import.meta.dirname`, and repaired same-seam AJV 2020 subpath/test-helper ESM interop. The deliverables table's original "Source edits: None" entry for validators is historical intake context; the archived ticket is the active implementation record.
+
 ## Problem Statement
 
 Dependabot bumped `tools/hooks` and `tools/world-index` from TypeScript 5.9.3 → 6.0.3 in PRs #46 and #49. TS 6 emits `error TS5107: Option 'moduleResolution=node10' is deprecated and will stop functioning in TypeScript 7.0` because both packages used the legacy `module: "commonjs"` + `moduleResolution: "node"` combination. The dependabot-PR fix was to add `"ignoreDeprecations": "6.0"` to both tsconfigs — a workaround that silences the warning until TS 7 lands.

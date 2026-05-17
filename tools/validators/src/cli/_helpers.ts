@@ -49,7 +49,7 @@ const NAMED_RULE_SELECTORS = new Set([
 ]);
 
 export function packageVersion(): string {
-  const packageJsonPath = path.resolve(__dirname, "../../../package.json");
+  const packageJsonPath = path.resolve(import.meta.dirname, "../../../package.json");
   const parsed = JSON.parse(readFileSync(packageJsonPath, "utf8")) as { version?: unknown };
   return typeof parsed.version === "string" ? parsed.version : "unknown";
 }
