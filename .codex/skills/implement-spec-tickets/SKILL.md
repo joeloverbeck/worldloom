@@ -282,7 +282,8 @@ Then prefer one of these reset paths:
 
 - If Codex exposes context compaction or the user can issue `/new`, request it before starting the next ticket.
 - If compaction is unavailable but the context is still small and the next target is an immediate follow-up from the just-finished ticket, continuing in the same context is acceptable.
-- If the context is large, proof output was noisy, or the next queued ticket is not a direct same-seam follow-up, stop after the handoff instead of starting the next ticket in a saturated context.
+- If the next target is an active direct dependent that consumes the just-landed seam, continuing in the same context is acceptable only when the dependency relation is explicit in `Deps`, the queue was recomputed from live tickets, and the harness states why this is a same-seam continuation. Otherwise treat it as a non-follow-up reset boundary.
+- If the context is large, proof output was noisy, or the next queued ticket is not a direct same-seam follow-up or explicit direct-dependent continuation, stop after the handoff instead of starting the next ticket in a saturated context.
 
 The next session must reload this skill and the child skills from disk, then resume from the state file and live repo state. Do not rely on remembered queue state without rechecking active `tickets/*.md` and `git status --short`.
 
@@ -301,14 +302,16 @@ When all originating-spec tickets are completed, reviewed, archived, and committ
 
 1. Re-read the originating spec.
 2. Confirm no active `tickets/*.md` still names the spec as active implementation work.
-3. Inspect the spec's final verification or close-proof section. Run the final proof lanes it names, or explicitly classify why a named lane is superseded, unavailable, or not part of the accepted close boundary. Record the final proof results in `## Outcome` so the archived spec is self-contained.
+3. Inspect the spec's final verification or close-proof section. Run the final proof lanes it names, or explicitly classify why a named lane is superseded, unavailable, or not part of the accepted close boundary. If final proof exposes a small same-seam mismatch in already-completed deliverables, make the minimal repair before archival, update affected archived ticket/spec closeout text if the repair changes their truth, rerun focused hygiene, and include those repairs in the final archive commit. Do not widen into new behavior; if the mismatch needs new ownership, create or surface a follow-up ticket instead of archiving the spec green. Record the final proof results in `## Outcome` so the archived spec is self-contained.
 4. Update the spec status and `## Outcome` according to `docs/archival-workflow.md`.
 5. Move the spec to `archive/specs/`, preferring `git mv` when tracked and plain `mv` when untracked.
 6. Confirm the original `specs/` path no longer exists.
-7. Sweep active tickets, docs, specs, same-family archived tickets, and same-seam triage/report docs for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, and direct implementation-reference snippets that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
+7. Sweep active tickets, docs, specs, same-family archived tickets, same-seam triage/report docs, and `.codex/run-state/implement-spec-tickets.json` for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, direct implementation-reference snippets, and state-file `originating_spec` / `archived_spec` fields that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
 8. Run hygiene over the spec archive move and reference repairs.
 9. Commit the spec archive as its own finalization commit unless it is already included in the last ticket-family commit for a clear reason.
 10. Update `.codex/run-state/implement-spec-tickets.json` with `archived_spec`, `next_target: null`, an empty queue, `blocked: false`, the final commit sha, and clean dirty-state classification.
+
+When staging a spec archived with `git mv`, do not try to stage the now-missing active `specs/...` path by name. Stage the archive destination and other edited owned paths, then confirm the source deletion or rename is staged with `git diff --cached --name-status` before committing.
 
 If `git mv`, `git add`, or `git commit` fails during final archival because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun the same non-destructive command with the required approval/escalation and record the first failure plus retry result. Do not widen the staged set while retrying.
 
