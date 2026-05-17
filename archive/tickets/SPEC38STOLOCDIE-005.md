@@ -1,9 +1,9 @@
 # SPEC38STOLOCDIE-005: Amend `branching-story-health-audit` with Phase 2x DA checks
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — modifies `.claude/skills/branching-story-health-audit/SKILL.md`
+**Engine Changes**: Yes — modifies `.claude/skills/branching-story-health-audit/SKILL.md` and truths SPEC-38 D5 implementation status
 **Deps**: archive/tickets/SPEC38STOLOCDIE-001.md, archive/tickets/SPEC38STOLOCDIE-010.md, archive/tickets/SPEC38STOLOCDIE-011.md
 
 ## Problem
@@ -16,6 +16,8 @@
 2. Verified SPEC-38 §D5 prescribes 3 mechanical checks (consumes validators from tickets 010 + 011) plus 1 authorial warning, with a cross-reference to existing validators (`expected_witness_coverage`, `record_schema_compliance`) that already cover their respective surfaces and are not re-implemented here. The narrowed scope (vs the source report's 9 FAIL + 8 WARN list) is documented per SPEC-38 §Key design decision #2 with overlapping conditions deferred to §Risks #2.
 3. Cross-skill boundary: this ticket's audit prose consumes verdict codes `chc_grounded_in_da_not_active` (from ticket 010) and `story_da_duplicate_heuristic` (from ticket 011). The verdict-code names must match the validator implementations; ticket 005 lands AFTER 010 and 011 so the cited codes resolve. Cross-reference to existing validators must match their current names exactly.
 4. FOUNDATIONS principles motivating this ticket: Rule 1 No Floating Facts (DA must remain reachable from its grounding choices — D10 check enforces this at the CHC boundary); Rule 6 No Silent Retcons (duplicate DAs without supersedes/derived_from break the audit trail — D11 heuristic surfaces candidates); §Story Bundles §6b Information / Observer Firewall (CHC grounding access is the runtime firewall enforcement point at audit time).
+5. Live HARD-GATE check: `.claude/skills/branching-story-health-audit/SKILL.md` includes a `<HARD-GATE>` block whose pre-write condition listed 8 structural sub-phases. Adding Phase 2x changes the structural checklist operators must complete before approval can fire, so `docs/HARD-GATE-DISCIPLINE.md` and `.codex/skills/implement-ticket/references/hard-gate-read-triage.md` were read. The landed edit preserves approval timing, write surfaces, and user-approval requirements while making the required sub-phase list truthful.
+6. SPEC-38 reference truthing: D5 needed an implementation note because this ticket completes the D5 surface and because ticket 011 intentionally landed exact `(title, author)` duplicate clustering while body-similarity remains deferred. The spec note records that boundary instead of rewriting the whole proposal section.
 
 ## Architecture Check
 
@@ -30,20 +32,29 @@
 3. Cross-reference to existing validators (`expected_witness_coverage`, `record_schema_compliance`) noted as already-covered → grep-proof.
 4. Validator verdict-code names match implementations in tickets 010 + 011 → cross-validation: `grep -E 'chc_grounded_in_da_not_active' tools/validators/src/rules/rule_chc_grounded_in_artifact_accessible.ts` (per ticket 010) AND `grep -E 'story_da_duplicate_heuristic' tools/validators/src/structural/story-da-duplicate-heuristic.ts` (per ticket 011) — names align across audit prose and validator implementations.
 
-## What to Change
+## Landed Changes
 
-### 1. Add new Phase 2x sub-section
+### 1. Added new Phase 2x sub-section
 
-Placement per SPEC-38 §D5: after Phase 2d (belief/visibility health), before Phase 2e (mystery/canon safety). Title: `2x — DA health`. Content covers 4 checks:
+Placement per SPEC-38 §D5: after Phase 2d (belief/visibility health), before Phase 2e (mystery/canon safety). Title: `Phase 2x: DA health`. Landed content covers 4 checks:
 
 1. **CHC active-record DA accessibility** (consumes ticket 010 validator). Every `DA-<integer>` in any active `CHC.grounded_in.records[]` MUST be in the emitting PG's `state_snapshot.active_records.DA[]`. Verdict code `chc_grounded_in_da_not_active` (D10) surfaces violations. Severity: FAIL.
 2. **Duplicate DA heuristic** (consumes ticket 011 validator). WARN when multiple active DAs share `(title + author)` exactly without a chain via `supersedes` or `derived_from`. Verdict code `story_da_duplicate_heuristic` (D11) surfaces candidates; the audit lists each cluster for operator review. Severity: WARN.
 3. **DA body specificity** (authorial; no validator). WARN when a DA body matches non-specific patterns such as "contains a clue", "reveals a secret", "describes the truth", "explains everything", or otherwise lacks the clue-bearing content that later quotation / comparison / audit would require. Phase 2x scans active DA bodies, lists candidates for operator review, and points the operator at `da-authoring-reference.md` §Field semantics §body. No verdict-code consumption — authorial warning only.
 4. **Cross-reference to existing validators**. Phase 2x prose notes that `expected_witness_coverage` (public/factional DA propagation) and `record_schema_compliance` (DA schema enum violations) already cover their respective surfaces and are not re-implemented here.
 
+### 2. Updated health-audit structural sub-phase inventory
+
+Updated the skill description, HARD-GATE condition, process-flow diagram, and Phase 2 introduction from 8 to 9 structural sub-phases so Phase 2x is not omitted from the pre-write checklist.
+
+### 3. Added SPEC-38 implementation note
+
+Added a D5 implementation note to `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` recording the landed health-audit amendment and the exact D11 duplicate-heuristic boundary.
+
 ## Files to Touch
 
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
+- `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
 
 ## Out of Scope
 
@@ -77,3 +88,42 @@ Placement per SPEC-38 §D5: after Phase 2d (belief/visibility health), before Ph
 1. `grep -nE 'Phase 2x|DA health|chc_grounded_in_da_not_active|story_da_duplicate_heuristic' .claude/skills/branching-story-health-audit/SKILL.md`
 2. `grep -nE 'chc_grounded_in_da_not_active' tools/validators/src/rules/rule_chc_grounded_in_artifact_accessible.ts` (cross-validation against ticket 010)
 3. `grep -nE 'story_da_duplicate_heuristic' tools/validators/src/structural/story-da-duplicate-heuristic.ts` (cross-validation against ticket 011)
+
+## Outcome
+
+Completed on 2026-05-17.
+
+Added `Phase 2x: DA health` to `.claude/skills/branching-story-health-audit/SKILL.md`, covering CHC-grounded DA accessibility, duplicate DA heuristic reporting, authorial body-specificity warnings, and explicit reliance on existing `expected_witness_coverage` / `record_schema_compliance` validators. Updated the health-audit description, HARD-GATE checklist, process-flow diagram, and Phase 2 introduction so the skill now names 9 structural sub-phases. Added a SPEC-38 D5 implementation note.
+
+## Verification Result
+
+Commands run:
+
+```bash
+grep -nE 'Phase 2x|DA health|chc_grounded_in_da_not_active|story_da_duplicate_heuristic' .claude/skills/branching-story-health-audit/SKILL.md
+```
+
+Result: matched the description, HARD-GATE list, process-flow entry, Phase 2x heading, and both validator verdict codes.
+
+```bash
+grep -nE 'chc_grounded_in_da_not_active' tools/validators/src/rules/rule_chc_grounded_in_artifact_accessible.ts
+```
+
+Result: matched the D10 validator verdict code.
+
+```bash
+grep -nE 'story_da_duplicate_heuristic' tools/validators/src/structural/story-da-duplicate-heuristic.ts
+```
+
+Result: matched the D11 structural validator name/verdict code.
+
+```bash
+grep -nE 'expected_witness_coverage|record_schema_compliance|da-authoring-reference\.md' .claude/skills/branching-story-health-audit/SKILL.md
+```
+
+Result: matched the existing validator references and the DA body-semantics shared-reference pointer.
+
+## Deviations
+
+1. Same-seam HARD-GATE inventory updates were required even though the draft only named the new Phase 2x prose. Without updating the gate/process-flow count, the skill would still tell operators to complete only 8 structural sub-phases before writing the audit output.
+2. SPEC-38 received a D5 implementation note rather than a broad section rewrite. The remaining proposal prose is historical context; the note records the current landed boundary and the deferred body-similarity clustering detail.

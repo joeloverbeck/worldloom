@@ -202,6 +202,13 @@ and §Patch obligations.
 
 #### D5 — Amend `.claude/skills/branching-story-health-audit/SKILL.md` with DA-specific Phase 2 checks
 
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-005.md` landed
+the health-audit amendment as `Phase 2x: DA health`, updated the health-audit
+HARD-GATE and process-flow sub-phase count from 8 to 9, and cross-referenced the
+landed D10/D11 validator verdict codes. The duplicate-DA check consumes the
+live D11 exact `(title, author)` clustering validator; body-similarity clustering
+remains deferred per D11 and SPEC-38 Risks.
+
 **Problem**: Phase 2a–2h has zero DA-specific checks (verified). The audit covers BEL/visibility, mystery/canon safety, and continuation health but does not check DA active-record consistency, CHC.grounded_in.records[].DA accessibility, duplicate-DA presence, or body specificity.
 
 **Change**: Add a new Phase 2-sub-section `2x — DA health` (placement: after 2d belief/visibility health, before 2e mystery/canon safety). Content covers four checks:

@@ -1,6 +1,6 @@
 ---
 name: branching-story-health-audit
-description: "Use when diagnosing the health of a branching-story bundle. Four modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + mystery/canon + continuation), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
+description: "Use when diagnosing the health of a branching-story bundle. Four modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -32,7 +32,7 @@ Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/r
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 8 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 9 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -51,11 +51,12 @@ Phase 1: Scope branches (build tree from BR + PG; apply
                          branch_path_filter)
         |
         v
-Phase 2 [structural; default]: 8 sub-phases executed sequentially
+Phase 2 [structural; default]: 9 sub-phases executed sequentially
   ├─ 2a: Replay events (snapshot hash comparison)
   ├─ 2b: Branch isolation
   ├─ 2c: Debt health
   ├─ 2d: Belief / visibility health
+  ├─ 2x: DA health
   ├─ 2e: Mystery / canon safety
   ├─ 2f: Continuation / terminal proof
   ├─ 2g: Causal dependency health
@@ -155,7 +156,7 @@ Output: a scoped branch list + per-branch metadata used by Phases 2-4.
 
 ## Phase 2: Structural checks (mandatory when `structural` in `mode`; default)
 
-Eight sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
+Nine sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
 
 ### Phase 2a: Replay events
 
@@ -203,6 +204,15 @@ Flag:
 - `lie_promoted_silently` — `BEL` records with `truth_relation: false, belief_mode: deceives` that become accepted-as-true (`SF` records derived from them without a `branch_local_counterfactual` authority marker). ERROR; `repair_kind: turn_repair`.
 
 When a choice or selected `SLT` is grounded through a binding-predicate storylet, audit the resolved binding rather than the literal `bound:<alias>` token. For example, a block with `any_relationship_axis(trust_edge, trust, <=, low, primary_actor)` and `effects.supersede: [bound:trust_edge]` is plan-grounded only if the leaf snapshot has a matching active `SREL`; a block with `any_belief(public_belief, public, knows, true, public)` and `likely_effects: [bound:public_belief]` is grounded only if the matching active `BEL` exists and satisfies the filters.
+
+### Phase 2x: DA health
+
+Flag:
+
+- `chc_grounded_in_da_not_active` — every `DA-<integer>` in an emitted or active `CHC.grounded_in.records[]` MUST be present in the emitting PG's `state_snapshot.active_records.DA[]`. The rule validator `chc_grounded_in_artifact_accessible` surfaces this as FAIL verdict `chc_grounded_in_da_not_active`; list the CHC id, DA id, emitting PG id, and whether the DA is missing, superseded, or branch-inaccessible. ERROR; `repair_kind: turn_repair`.
+- `story_da_duplicate_heuristic` — likely duplicate active DAs share exact `(title, author)` without a `supersedes` or `derived_from` chain linking the cluster. The structural validator `story_da_duplicate_heuristic` surfaces candidates as WARN verdicts; list each cluster for operator review rather than treating the heuristic as automatic corruption. WARNING; `repair_kind: turn_repair` when a repair turn should supersede or derive the duplicate, otherwise `branch_flag` when the branch needs manual adjudication.
+- `da_body_nonspecific` — active DA bodies that use non-specific placeholder phrasing such as "contains a clue", "reveals a secret", "describes the truth", "explains everything", or equivalent wording without the clue-bearing content future quotation, comparison, or audit would need. This is an authorial audit warning, not a validator verdict; point the operator to `.claude/skills/_shared-templates/da-authoring-reference.md` §Field semantics / `body` for the "write the clue" rule. WARNING; `repair_kind: turn_repair` when a repair turn should supersede the DA body.
+- Existing DA-related validators remain the source of truth for their current surfaces: `expected_witness_coverage` covers public/factional DA propagation through same-event indirect-route BEL or parseable non-propagation tags, and `record_schema_compliance` covers story-local DA schema field shape and enum violations. Phase 2x consumes and reports those findings when present, but does not re-implement their checks.
 
 ### Phase 2e: Mystery / canon safety (per FOUNDATIONS Rule 7 + shared contract §11)
 
