@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-38-story-local-diegetic-artifact-authoring.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC38STOLOCDIE-004.md",
+  "last_ticket": "archive/tickets/SPEC38STOLOCDIE-007.md",
   "last_result": "completed_archived",
-  "last_work_commit": "ed52f1a09ff66671ceb481f5fbd0a428f56a2df6",
+  "last_work_commit": "bc7624bc0ebc00358154fbef557cc60a3d108e26",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC38STOLOCDIE-007.md",
+  "next_target": "tickets/SPEC38STOLOCDIE-008.md",
   "queue": [
-    "tickets/SPEC38STOLOCDIE-007.md",
     "tickets/SPEC38STOLOCDIE-008.md",
     "tickets/SPEC38STOLOCDIE-009.md",
     "tickets/SPEC38STOLOCDIE-010.md",
