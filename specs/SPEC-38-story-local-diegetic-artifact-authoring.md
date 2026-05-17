@@ -363,6 +363,12 @@ Worked examples of when DA supersession is and is NOT triggered by closeout:
 
 #### D10 — New validator `chc_grounded_in_artifact_accessible` (rule)
 
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-010.md` landed
+this validator as `tools/validators/src/rules/rule_chc_grounded_in_artifact_accessible.ts`.
+The live rule is registered in the validators package registry, selectable by
+name through `world-validate --rules=chc_grounded_in_artifact_accessible`, and
+covered by focused rule tests plus the package-wide validators suite.
+
 **Problem**: A CHC's `grounded_in.records[]` may legitimately include `DA-<integer>` references (story-record-schemas.md §4.5.12 line 603), but no validator currently enforces that every such DA is active in the emitting page's `state_snapshot.active_records.DA[]`. The verified gap in the audit (D5 check 1) requires this validator.
 
 **Change**: Add `tools/validators/src/rules/chc-grounded-in-artifact-accessible.ts`. The validator:

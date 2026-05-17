@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-health-audit/SKILL.md`
-**Deps**: archive/tickets/SPEC38STOLOCDIE-001.md, SPEC38STOLOCDIE-010, SPEC38STOLOCDIE-011
+**Deps**: archive/tickets/SPEC38STOLOCDIE-001.md, archive/tickets/SPEC38STOLOCDIE-010.md, SPEC38STOLOCDIE-011
 
 ## Problem
 

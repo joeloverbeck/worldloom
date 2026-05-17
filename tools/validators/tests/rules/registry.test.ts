@@ -13,6 +13,7 @@ test("rule registry contains the active rule-derived validators", () => {
       "rule5_no_consequence_evasion",
       "rule6_no_silent_retcons",
       "rule7_mystery_reserve_preservation",
+      "chc_grounded_in_artifact_accessible",
       "choice_set_noncollapse",
       "storylet_predicate_dsl_parsability",
       "rule11_action_space",

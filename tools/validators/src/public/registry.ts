@@ -25,6 +25,7 @@ import { rule4NoGlobalizationByAccident } from "../rules/rule4-no-globalization-
 import { rule5NoConsequenceEvasion } from "../rules/rule5-no-consequence-evasion.js";
 import { rule6NoSilentRetcons } from "../rules/rule6-no-silent-retcons.js";
 import { rule7MysteryReservePreservation } from "../rules/rule7-mystery-reserve-preservation.js";
+import { ruleChcGroundedInArtifactAccessible } from "../rules/rule_chc_grounded_in_artifact_accessible.js";
 import { ruleChoiceSetNoncollapse } from "../rules/rule_choice_set_noncollapse.js";
 import { storyletPredicateDslParsability } from "../rules/rule_storylet_predicate_dsl_parsability.js";
 import { rule11ActionSpace } from "../rules/rule11-action-space.js";
@@ -66,6 +67,7 @@ export const ruleValidators: readonly Validator[] = [
   rule5NoConsequenceEvasion,
   rule6NoSilentRetcons,
   rule7MysteryReservePreservation,
+  ruleChcGroundedInArtifactAccessible,
   ruleChoiceSetNoncollapse,
   storyletPredicateDslParsability,
   rule11ActionSpace,
