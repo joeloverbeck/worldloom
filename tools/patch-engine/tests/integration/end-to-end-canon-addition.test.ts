@@ -240,14 +240,17 @@ test("submitPatchPlan rejects unsigned, expired, tampered, and replayed approval
       preApplyValidator: OK_VALIDATOR
     })
   );
-  assertEngineError(
-    await submitPatchPlan(envelope, token, {
-      worldRoot: world.worldRoot,
-      hmacSecretPath: secretPath,
-      preApplyValidator: OK_VALIDATOR
-    }),
-    "approval_replayed"
-  );
+  const replayed = await submitPatchPlan(envelope, token, {
+    worldRoot: world.worldRoot,
+    hmacSecretPath: secretPath,
+    preApplyValidator: OK_VALIDATOR
+  });
+  assertEngineError(replayed, "approval_replayed");
+  assert.equal(typeof replayed.detail, "string");
+  const replayedDetail = replayed.detail as string;
+  assert.match(replayedDetail, /single-use|already consumed/);
+  assert.match(replayedDetail, /prior successful submit/);
+  assert.match(replayedDetail, /HARD-GATE-DISCIPLINE/);
 });
 
 test("submitPatchPlan creates OQ records before adjudications that cite them", async (t) => {

@@ -20,7 +20,28 @@ test("verifyApprovalToken accepts a fresh token and rejects replay", (t) => {
     markTokenConsumed(verdict.token_hash, envelope.plan_id, { db: world.db, hmac_secret: secret });
   }
   const replayed = verifyApprovalToken(token, envelope, { db: world.db, hmac_secret: secret, now: new Date("2026-04-25T12:00:00.000Z") });
-  assert.deepEqual(replayed, { ok: false, code: "approval_replayed" });
+  assert.equal(replayed.ok, false);
+  assert.equal(replayed.code, "approval_replayed");
+});
+
+test("verifyApprovalToken includes a recovery hint for replayed approval tokens", (t) => {
+  const world = createTestWorld(t);
+  const secret = Buffer.from("unit-test-secret");
+  const patch = createOp({ op: "create_cf_record", target_world: world.worldSlug, payload: { cf_record: canonFact("CF-0099") } } satisfies Extract<PatchOperation, { op: "create_cf_record" }>);
+  const envelope = { ...baseEnvelope({ cf_ids: ["CF-0099"] }), patches: [patch] };
+  const token = signedToken({ envelope, secret });
+  const verdict = verifyApprovalToken(token, envelope, { db: world.db, hmac_secret: secret, now: new Date("2026-04-25T12:00:00.000Z") });
+
+  assert.equal(verdict.ok, true);
+  if (verdict.ok) {
+    markTokenConsumed(verdict.token_hash, envelope.plan_id, { db: world.db, hmac_secret: secret });
+  }
+  const replayed = verifyApprovalToken(token, envelope, { db: world.db, hmac_secret: secret, now: new Date("2026-04-25T12:00:00.000Z") });
+  assert.equal(replayed.ok, false);
+  assert.equal(replayed.code, "approval_replayed");
+  assert.match(replayed.detail ?? "", /single-use|already consumed/);
+  assert.match(replayed.detail ?? "", /prior successful submit/);
+  assert.match(replayed.detail ?? "", /HARD-GATE-DISCIPLINE/);
 });
 
 test("verifyApprovalToken rejects expired, tampered, hash-mismatch, and malformed tokens", (t) => {
