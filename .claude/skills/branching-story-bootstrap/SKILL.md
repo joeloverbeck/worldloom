@@ -188,7 +188,8 @@ The frontmatter is authoritative for machine retrieval. Keep `cast_bind_list` in
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles governs this skill's record discipline; §Tooling Recommendation mandates the retrieval surface
-- `.claude/skills/_shared-templates/story-state-contract.md` — shared schemas (§4), predicate DSL (§5), action routing (§6), eight hard gates (§7), page-plan minimum contract (§8), shared write order (§10)
+- `.claude/skills/_shared-templates/story-state-contract.md` — predicate DSL (§5), action routing (§6), eight hard gates (§7), page-plan minimum contract (§8), shared write order (§10)
+- `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (all 17 story-bundle record classes plus §4.6 prose receipt)
 - `reports/prose-quality-instructions.md` — canonical source for the page plan's verbatim §2 (Content Policy), §3 (Prose Craft Contract), §19 (Render-Time Instruction Template)
 - `worlds/<world_slug>/WORLD_KERNEL.md` and `worlds/<world_slug>/ONTOLOGY.md` — world identity, invariants, ontology categories the bundle's records must respect
 - `worlds/<world_slug>/characters/INDEX.md` — every entry in `selected_cast[]` must resolve to an existing CHAR-<integer> dossier
@@ -389,7 +390,7 @@ If any gate, additional check, or hash check fails, abort before Phase 10 — wr
 
 ## Record Schemas
 
-All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
+All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-record-schemas.md`:
 
 - `STENT`, `STSTAT`, `STINT`, `SF`, `BEL` (§4.1), `OBL`, `CNSQ`, `THR`, `SREL`, `STLOC`, `STOBJ`, `DA` — story-bundle record classes
 - `PG` (§4.2) — page snapshot

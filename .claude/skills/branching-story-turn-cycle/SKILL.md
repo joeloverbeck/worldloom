@@ -138,7 +138,8 @@ Atomic-record writes route through `mcp__worldloom__submit_patch_plan`. Superses
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles (especially §4a Plan-Authority Boundary, §4b Canon Baseline Drift, §5 / §5a / §5b, §6a Belief vs. Fact) governs this skill
-- `.claude/skills/_shared-templates/story-state-contract.md` — shared schemas (§4), predicate DSL (§5), action routing (§6), eight hard gates (§7), page-plan minimum contract (§8), branching procedure (§9), shared write order (§10)
+- `.claude/skills/_shared-templates/story-state-contract.md` — predicate DSL (§5), action routing (§6), eight hard gates (§7), page-plan minimum contract (§8), branching procedure (§9), shared write order (§10)
+- `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (BEL §4.1, PG §4.2, SE §4.3, SLT §4.4, plus §4.4a/§4.4b taxonomies, §4.5.X additional classes, §4.6 receipt)
 - `reports/prose-quality-instructions.md` — canonical source for verbatim §2 / §3 / §19 of the page plan
 - `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` and `INDEX.md` — bundle root context
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml` — parent page; MUST exist
@@ -193,8 +194,9 @@ follow the operator-recovery procedure documented at
 Required Classes Cannot Fit: retrieve the named seed-record ids directly via
 `mcp__worldloom__get_records(record_ids=[...])` or load whole classes via
 `mcp__worldloom__list_records(record_type=..., include_full_body=true)`. Do
-not blindly retry the suggested `retry_with: { token_budget }` when the
-harness ceiling is the binding constraint.
+not retry unless the error details include `retry_with.token_budget`; when
+`retry_with` is absent, follow the error's `fallback_advice` and use targeted
+retrieval.
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -511,7 +513,7 @@ Only the page plan requires long-form language generation. All other state work 
 
 ## Record Schemas
 
-All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md` §4 (`BEL` §4.1, `PG` §4.2, `SE` §4.3, `SLT` §4.4). No skill-local templates needed — the shared contract is the canonical reference.
+All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-record-schemas.md` §4 (`BEL` §4.1, `PG` §4.2, `SE` §4.3, `SLT` §4.4). No skill-local templates needed — the shared schemas file is the canonical reference.
 
 ## FOUNDATIONS Alignment
 

@@ -134,7 +134,8 @@ All patch-engine submissions target story-bundle scope; ZERO ops target `worlds/
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §5 (story-scope authority discipline), §Canon Layers (linked CF status references), Rule 6 (Change Log Entry — canon-addition wrote it; closeout reads + cites it)
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (SF, BEL, STENT, STSTAT, SREL, DA, SE — closeout output classes for superseded or audit-emitted records; BR — read-only branch lineage), §4.3a (audit-only SE events), §4.5.13 (STSTAT — character-outcome supersession-chain evidence), §10 shared write order, §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-state-contract.md` — §10 shared write order, §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (SF, BEL, STENT, STSTAT, SREL, DA, SE — closeout output classes for superseded or audit-emitted records; BR — read-only branch lineage), §4.3a (audit-only SE events), §4.5.13 (STSTAT — character-outcome supersession-chain evidence)
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml` — source of truth for the promotion's `proposal_evidence.source_records[]` / `proposal_evidence.source_kind` / `proposal_evidence.story_branch`, plus top-level `contradiction_preference` / `downstream_impact_report`
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>.md` — original ledger (read-only; cross-referenced in closeout ledger)
 - `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>, world_slug=<world_slug>)` — read-only linked CF and CH records for world-canon reference and Rule 6 audit-trail citation
@@ -336,7 +337,7 @@ Rules 1 / 2 / 3 / 5 / 11 / 12 enforced upstream by `canon-addition` at adjudicat
 
 ## Record Schemas
 
-All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
+All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-record-schemas.md`:
 
 - `SF` (§4), `BEL` (§4.1), `STENT`, `SREL`, `DA`, `SE` (§4.3) — record classes that may be superseded or emitted by closeout.
 - `BR` (§4.5.11) — read-only for same-story branch disposition; branches fork rather than replace prior branch records.

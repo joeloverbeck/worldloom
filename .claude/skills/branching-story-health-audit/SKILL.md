@@ -109,7 +109,8 @@ All direct-write markdown. No patch-engine submissions — the audit is read-onl
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §4b / §5 / §5a / §5b / §6a govern the audit checks
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (audit reads against), §5 closed predicate DSL, §7 eight hard gates, §9 branching procedure, §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-state-contract.md` — §5 closed predicate DSL, §7 eight hard gates, §9 branching procedure, §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (audit reads against)
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/BR-*.yaml` — branch tree
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/PG-*.yaml` — page snapshots
 - `worlds/<world_slug>/stories/<story_slug>/_source/events/SE-*.yaml` — event deltas
@@ -435,7 +436,7 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 
 ## Record Schemas
 
-All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
+All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-record-schemas.md`:
 
 - `PG` (§4.2), `SE` (§4.3), `SLT` (§4.4), `BEL` (§4.1), prose receipt (§4.6) — the audit reads these record types.
 

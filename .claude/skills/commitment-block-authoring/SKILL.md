@@ -104,7 +104,8 @@ All SLT records in a batch share the same `provenance.origin` value: `author_bat
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §5 (Validation Rules At Story Scope), §5a (Commitment Blocks Are Causal Moves), §5b (Schema-Minimalism), §6a (Belief vs. Fact), §9 (Prose Length Discipline) govern this skill
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4.4 SLT schema (canonical), §5 closed predicate DSL, §10 shared write order, §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-state-contract.md` — §5 closed predicate DSL, §10 shared write order, §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-record-schemas.md` — §4.4 SLT schema (canonical)
 - `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` — bundle root context
 - `worlds/<world_slug>/stories/<story_slug>/_source/storylets/SLT-*.yaml` — current SLT pool (`direct_batch` only; may be empty post-bootstrap if `seed_commitment_blocks: none`)
 - `worlds/<world_slug>/stories/<story_slug>/audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md` — source audit + RSP cards (`audit_repair` only; abort with audit-not-found or rsp-not-found error if any reference missing)
@@ -319,7 +320,7 @@ The SLB file is a markdown direct-write manifest, not an atomic YAML record. No 
 
 ## Record Schemas
 
-All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
+All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-record-schemas.md`:
 
 - `SLT` (§4.4) — commitment block schema (this skill's primary output).
 - Predicate DSL (§5) — closed predicate language for `preconditions.hard | soft`, including predicate DSL v2 existential predicates and `bound:<alias>` effect references.

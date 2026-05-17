@@ -35,7 +35,7 @@ Do NOT write `pages-prose-receipts/<page_id>.yaml`, update `worlds/<world_slug>/
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `STORY_KERNEL.md` loaded, including `## Player Agency Contract`; page loaded from `_source/pages/<page_id>.yaml`; plan + prose pair verified at `pages-prose-plans/<page_id>.md` + `pages-prose/<page_id>.md`; `pages-prose-receipts/` directory present (idempotent `mkdir -p` if absent); `SE` id allocated via `mcp__worldloom__allocate_next_id` only when `emit_attach_event: true`.
 
-(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + `STORY_KERNEL.md` Player Agency Contract + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `state_hash` + `prose_hash` derived; `hash_integrity` check applied per `accept_plan_drift`; 8 deterministic checks complete per `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (hash_integrity, engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, choice_consequence_visibility, entity_status_consistency, invented_structural_fact, canon_claim_without_authority); optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
+(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + `STORY_KERNEL.md` Player Agency Contract + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `state_hash` + `prose_hash` derived; `hash_integrity` check applied per `accept_plan_drift`; 8 deterministic checks complete per `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 (hash_integrity, engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, choice_consequence_visibility, entity_status_consistency, invented_structural_fact, canon_claim_without_authority); optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
 
 (c) The user has explicitly approved the deliverable summary (receipt path, per-check verdict table, roll-up verdict, repair_recommendation, strict-mode publication-blocking decision if applicable, optional SE-<integer> id + patch op preview when `emit_attach_event: true`).
 
@@ -104,7 +104,8 @@ Atomic-record writes (the optional `SE-<integer>`) route through `mcp__worldloom
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §4a (Plan-Authority Boundary), §5b (Schema-Minimalism), §9 (Prose Length Discipline) govern this skill
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4.6 receipt schema (canonical and mirrored by `prose_receipt_schema_compliance`); §7 hard gates (gate 3 redundantly enforced on rendered prose); §8 page plan minimum contract (the 19-section structure prose-attach reads)
+- `.claude/skills/_shared-templates/story-state-contract.md` — §7 hard gates (gate 3 redundantly enforced on rendered prose); §8 page plan minimum contract (the 19-section structure prose-attach reads)
+- `.claude/skills/_shared-templates/story-record-schemas.md` — §4.6 receipt schema (canonical and mirrored by `prose_receipt_schema_compliance`)
 - `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` — bundle root contract; `## Player Agency Contract` is load-bearing for agency-surface consistency
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/<page_id>.yaml` — PG record; MUST exist
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/<page_id>.md` — comprehensive prose plan; MUST exist
@@ -307,7 +308,7 @@ Rules 1 / 4 / 5 are upstream-enforced at bootstrap and turn-cycle Phase 9 (the e
 
 ## Record Schemas
 
-The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (canonical). The validator-side mirror is `prose_receipt_schema_compliance` in `tools/validators`; after a receipt exists, a receipt-specific structural smoke can run:
+The prose receipt schema lives in `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 (canonical; extracted from the main `story-state-contract.md` per its §4 pointer stub). The validator-side mirror is `prose_receipt_schema_compliance` in `tools/validators`; after a receipt exists, a receipt-specific structural smoke can run:
 
 ```bash
 node tools/validators/dist/src/cli/world-validate.js <world_slug> --structural --file worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/<page_id>.yaml --json

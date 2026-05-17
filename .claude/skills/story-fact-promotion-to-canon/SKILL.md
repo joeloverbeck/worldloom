@@ -129,7 +129,8 @@ All direct-write. No patch-engine submissions to world scope. **No world-canon w
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Canon Layers (candidate status enum), §Canon Fact Record Schema (parity target for Phase 2 candidate), §Story Bundles §5 (story-scope authority discipline), Rules 1-7 + 11-12 (canon-addition enforces; this skill's candidate must respect them)
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (BEL §4.1, PG §4.2, SE §4.3 — read as evidence), §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-state-contract.md` — §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (BEL §4.1, PG §4.2, SE §4.3 — read as evidence)
 - `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<record-id>.yaml` — source records per `source_record_ids` + authoring `SE` events + witness `BEL` records (resolved by following `consequences.opens[]` and `basis.source_event` chains)
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/<branch_path>.yaml` — branch lineage verification
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — for each `supporting_page_ids` entry (required for prose-evidence source kinds)

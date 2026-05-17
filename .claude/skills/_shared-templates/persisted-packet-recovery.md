@@ -55,13 +55,14 @@ constraint axes: `minimum_required_budget` (the token budget needed) and
 When `minimum_required_harness_ceiling_chars > effective_harness_ceiling_chars`,
 the harness ceiling is fixed by the operator's environment, NOT by the
 caller's `token_budget` argument — no `token_budget` retry can succeed even
-when the error's `retry_with: { token_budget: <minimum_required_budget> }`
-field is present. Inspect both axes before retrying; only retry with the
-suggested budget when the budget axis is the binding constraint.
+though `minimum_required_budget` is reported for diagnosis. Inspect whether
+the error details include `retry_with` before retrying; only retry with
+`retry_with.token_budget` when that field is present, which means the token
+budget is the binding constraint under the current harness ceiling.
 
 When the harness ceiling is binding (or when any retry is impractical), the
-documented operator-recovery path is direct per-class retrieval of the
-missing records:
+documented operator-recovery path is the top-level `fallback_advice` plus
+direct per-class retrieval of the missing records:
 
 - For named seed records (Mystery Reserve entries, Invariants, governing
   CF / SEC / ENT records the packet would have delivered as full bodies):
