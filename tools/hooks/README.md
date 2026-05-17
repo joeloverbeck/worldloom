@@ -32,3 +32,5 @@ Hook 2 has an `ALLOW_FULL_READ` prompt-level override for human-driven review. H
 ## Testing
 
 `npm test` builds the package and runs compiled-script tests for Hooks 1 through 6 against synthetic hook payloads and fixture worlds. Hook 5 tests stub the `world-validate` CLI under a temp repo root so the validator runner is exercised without a real world index.
+
+`npm run check:dist-currency` verifies that an existing local `dist/` matches a fresh `npm run build` output. If `dist/` is absent, the command builds it.

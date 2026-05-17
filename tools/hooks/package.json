@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "check:dist-currency": "bash scripts/check-dist-currency.sh",
     "test": "npm run build && node --test dist/tests/*.test.js",
     "clean": "rm -rf dist"
   },
