@@ -227,6 +227,12 @@ remains deferred per D11 and SPEC-38 Risks.
 
 #### D6 — Amend `.claude/skills/branching-story-prose-attach/SKILL.md` with load-bearing artifact-mention check
 
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-006.md`
+landed the prose-attach amendment as an `invented_structural_fact` subcheck that
+consumes the D12 validator verdict `prose_load_bearing_artifact_mention_without_da`.
+The landed wording preserves the existing prose receipt schema by recording the
+worst artifact-mention verdict under `invented_structural_fact`.
+
 **Problem**: The `invented_structural_fact` deterministic check at `SKILL.md:204-218` catches prose that asserts a named record id absent from state, but does not catch prose mentioning a load-bearing artifact in narrative phrasing ("a letter arrived bearing the king's seal", "she unfolded the map", "the proclamation was nailed to the door") without a corresponding DA in `PG.state_snapshot.active_records.DA[]`.
 
 **Change**: Add a new deterministic check sub-section to Phase 3 (placement: immediately after the existing `invented_structural_fact` block at lines 204–218). Content:

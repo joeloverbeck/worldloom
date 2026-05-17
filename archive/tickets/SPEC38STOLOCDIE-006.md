@@ -1,6 +1,6 @@
 # SPEC38STOLOCDIE-006: Amend `branching-story-prose-attach` with load-bearing artifact-mention check
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-prose-attach/SKILL.md`
@@ -8,7 +8,7 @@
 
 ## Problem
 
-`branching-story-prose-attach` Phase 3 (`SKILL.md:204-218`) has an `invented_structural_fact` deterministic check that catches prose asserting a named record id absent from state, but does NOT catch prose mentioning a load-bearing artifact in narrative phrasing — e.g., "a letter arrived bearing the king's seal", "she unfolded the map", "the proclamation was nailed to the door" — without a corresponding DA in `PG.state_snapshot.active_records.DA[]`. Operators attaching rendered prose with such phrasings receive no warning that the prose introduces a structural fact the page-plan didn't author. This ticket adds a new deterministic check sub-section consuming ticket 012's `prose_load_bearing_artifact_mention` validator.
+At intake, `branching-story-prose-attach` Phase 3 (`SKILL.md:204-218`) had an `invented_structural_fact` deterministic check that caught prose asserting a named record id absent from state, but did NOT catch prose mentioning a load-bearing artifact in narrative phrasing — e.g., "a letter arrived bearing the king's seal", "she unfolded the map", "the proclamation was nailed to the door" — without a corresponding DA in `PG.state_snapshot.active_records.DA[]`. Operators attaching rendered prose with such phrasings received no warning that the prose introduced a structural fact the page-plan did not author. This ticket added a deterministic subcheck consuming ticket 012's `prose_load_bearing_artifact_mention` validator.
 
 ## Assumption Reassessment (2026-05-17)
 
@@ -16,6 +16,7 @@
 2. Verified SPEC-38 §D6 prescribes a new check sub-section to Phase 3 (placement: immediately after `invented_structural_fact` block at lines 204-218) consuming ticket 012's `prose_load_bearing_artifact_mention` validator. WARN-default-FAIL-on-quotation severity split is documented.
 3. Cross-skill boundary: this ticket's prose-attach check consumes verdict code `prose_load_bearing_artifact_mention_without_da` (from ticket 012). The verdict-code name must match the validator implementation; ticket 006 lands AFTER 012 so the cited code resolves. Cross-reference to the validator must match its current name.
 4. FOUNDATIONS principles motivating this ticket: §Story Bundles §4a Plan-Authority Boundary (rendered prose is a rendering of state, not a second state engine — prose-introduced load-bearing artifacts violate the boundary per FOUNDATIONS line 590); Rule 1 No Floating Facts (load-bearing prose mentions without state-record backing are floating facts in prose).
+5. Live closeout correction: the new check lands as a subcheck of `invented_structural_fact`, not as a ninth receipt-schema field. This preserves `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 and keeps the receipt roll-up stable while exposing the D12 validator verdict to operators.
 
 ## Architecture Check
 
@@ -32,7 +33,7 @@
 
 ## What to Change
 
-### 1. Add new deterministic check sub-section
+### 1. Landed deterministic subcheck
 
 Placement per SPEC-38 §D6: immediately after the existing `invented_structural_fact` block at lines 204-218. Content:
 
@@ -52,11 +53,12 @@ through the prose-attach disposition table (structural-fact issue → run a
 repair turn that creates the DA + BEL + optional STOBJ).
 ```
 
-D6 implementation depends on D12 validator (ticket 012); the validator implements the pattern-detection, context-filter, and quoted-content escalation logic.
+D6 implementation depends on D12 validator (ticket 012); the validator implements the pattern-detection, context-filter, and quoted-content escalation logic. The landed prose records the worst result under `invented_structural_fact` so no receipt-schema change is required.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-prose-attach/SKILL.md` (modify)
+- `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify — D6 implementation note)
 
 ## Out of Scope
 
@@ -90,3 +92,32 @@ D6 implementation depends on D12 validator (ticket 012); the validator implement
 
 1. `grep -nE 'prose_load_bearing_artifact_mention_without_da|load-bearing artifact' .claude/skills/branching-story-prose-attach/SKILL.md`
 2. `grep -nE 'prose_load_bearing_artifact_mention_without_da' tools/validators/src/rules/rule_prose_load_bearing_artifact_mention.ts` (cross-validation against ticket 012)
+
+## Outcome
+
+Completed: 2026-05-17
+
+Implemented the prose-attach Phase 3 artifact-mention check as an
+`invented_structural_fact` subcheck. The skill now tells operators to consume
+validator verdict `prose_load_bearing_artifact_mention_without_da`, scan for the
+specified artifact noun set, apply WARN-by-default / FAIL-on-quoted-or-accessed
+severity, record the worst result under `invented_structural_fact`, and route
+structural-fact repair through a turn repair that creates the DA + BEL +
+optional STOBJ.
+
+SPEC-38 now includes a dated D6 implementation note explaining that the landed
+shape preserves the existing prose receipt schema by avoiding a ninth receipt
+field.
+
+Verification result:
+
+- `grep -nE 'prose_load_bearing_artifact_mention_without_da|load-bearing artifact' .claude/skills/branching-story-prose-attach/SKILL.md` — matched the new subcheck.
+- `grep -nE 'prose_load_bearing_artifact_mention_without_da' tools/validators/src/rules/rule_prose_load_bearing_artifact_mention.ts` — matched the D12 validator code.
+- `git diff --check` — passed.
+
+Deviations:
+
+- The ticket's drafted phrase "new deterministic check sub-section" landed as an
+  `invented_structural_fact` subcheck rather than a new top-level receipt field.
+  This keeps the existing receipt schema and HARD-GATE checklist stable while
+  still surfacing the validator verdict in Phase 3.
