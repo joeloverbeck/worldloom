@@ -1,17 +1,17 @@
 {
-  "originating_spec": "archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md",
-  "archived_spec": "archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md",
-  "last_ticket": "archive/tickets/SPEC38STOLOCDIE-006.md",
+  "originating_spec": "archive/specs/SPEC-39-tools-esm-migration.md",
+  "archived_spec": "archive/specs/SPEC-39-tools-esm-migration.md",
+  "last_ticket": "archive/tickets/SPEC39TOOESMMIG-005.md",
   "last_result": "spec_archived",
-  "last_work_commit": "9403f11ab2e653cca4e768b394714e8f72154056",
+  "last_work_commit": "042ee9868f67c1366faa4a03d0bf5d19dce5874c",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
   "phase": "completed",
   "in_progress_ticket": null,
-  "owned_dirty_summary": null,
+  "owned_dirty_summary": "SPEC39TOOESMMIG-005 completed and archived; SPEC-39 archived after all tools packages migrated to ESM; final world-index proof and downstream builds passed",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree expected after state commit; pre-existing ignored artifacts remain under tools/validators, tools/world-index, and tools/world-mcp",
+  "dirty_state": "clean tracked worktree; expected ignored artifacts remain under tools/hooks/dist, tools/hooks/logs, tools/hooks/node_modules, tools/patch-engine/dist, tools/patch-engine/node_modules, tools/validators/dist, tools/validators/node_modules, tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, tools/world-mcp/node_modules, worlds/animalia",
   "updated_at": "2026-05-17"
 }

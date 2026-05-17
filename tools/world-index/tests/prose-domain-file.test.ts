@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseMarkdown } from "../src/parse/markdown";
-import { domainFileNodeId, extractProseNodes } from "../src/parse/prose";
-import { extractSemanticEdges } from "../src/parse/semantic";
-import { extractYamlNodes } from "../src/parse/yaml";
+import { parseMarkdown } from "../src/parse/markdown.js";
+import { domainFileNodeId, extractProseNodes } from "../src/parse/prose.js";
+import { extractSemanticEdges } from "../src/parse/semantic.js";
+import { extractYamlNodes } from "../src/parse/yaml.js";
 
 test("mandatory top-level world files emit one stable domain-file node", () => {
   const source = [

@@ -5,7 +5,7 @@ import {
   createTempRepoRoot,
   destroyTempRepoRoot,
   runCompiledHook
-} from "./_shared";
+} from "./_shared.js";
 
 test("hook4 injects localization bootstrap context for subagents", () => {
   const root = createTempRepoRoot();

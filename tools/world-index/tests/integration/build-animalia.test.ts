@@ -6,28 +6,28 @@ import test from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 
 import Database from "better-sqlite3";
-import type { NodeRow, NodeType } from "../../src/schema/types";
+import type { NodeRow, NodeType } from "../../src/schema/types.js";
 
-import { build } from "../../src/commands/build";
-import { stats } from "../../src/commands/stats";
-import { sync } from "../../src/commands/sync";
-import { verify } from "../../src/commands/verify";
-import { enumerate } from "../../src/enumerate";
+import { build } from "../../src/commands/build.js";
+import { stats } from "../../src/commands/stats.js";
+import { sync } from "../../src/commands/sync.js";
+import { verify } from "../../src/commands/verify.js";
+import { enumerate } from "../../src/enumerate.js";
 import {
   ATOMIC_LOGICAL_WORLD_FILES,
   createAtomicLogicalFileResults,
   loadAtomicEntityRegistry,
   parseAtomicSourceFile
-} from "../../src/parse/atomic";
-import { extractEntities } from "../../src/parse/entities";
-import { extractScopedReferences } from "../../src/parse/scoped";
-import { extractStructuredRecordEdges } from "../../src/parse/structured-edges";
-import { parseWorldFile } from "../../src/commands/shared";
-import { CURRENT_INDEX_VERSION } from "../../src/schema/version";
+} from "../../src/parse/atomic.js";
+import { extractEntities } from "../../src/parse/entities.js";
+import { extractScopedReferences } from "../../src/parse/scoped.js";
+import { extractStructuredRecordEdges } from "../../src/parse/structured-edges.js";
+import { parseWorldFile } from "../../src/commands/shared.js";
+import { CURRENT_INDEX_VERSION } from "../../src/schema/version.js";
 
 const WORLD_SLUG = "animalia";
 const ANIMALIA_SOURCE = path.resolve(
-  __dirname,
+  import.meta.dirname,
   "..",
   "..",
   "..",

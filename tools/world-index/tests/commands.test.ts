@@ -5,13 +5,13 @@ import test from "node:test";
 
 import Database from "better-sqlite3";
 
-import { build } from "../src/commands/build";
-import { inspect } from "../src/commands/inspect";
-import { render } from "../src/commands/render";
-import { stats } from "../src/commands/stats";
-import { sync } from "../src/commands/sync";
-import { verify } from "../src/commands/verify";
-import { cleanup, createAtomicRepoRoot } from "./helpers/atomic-fixture";
+import { build } from "../src/commands/build.js";
+import { inspect } from "../src/commands/inspect.js";
+import { render } from "../src/commands/render.js";
+import { stats } from "../src/commands/stats.js";
+import { sync } from "../src/commands/sync.js";
+import { verify } from "../src/commands/verify.js";
+import { cleanup, createAtomicRepoRoot } from "./helpers/atomic-fixture.js";
 
 function unresolvedAttributionRows(root: string): Array<{
   code: string;

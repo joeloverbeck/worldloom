@@ -4,14 +4,15 @@ import test from "node:test";
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { OPERATION_KINDS, type OperationKind } from "@worldloom/patch-engine";
+import type { OperationKind } from "@worldloom/patch-engine";
 
-import { computePatchOperationSchemaHash, computeValidatorRegistryHash } from "../../src/build-info";
-import { createServer } from "../../src/server";
-import { MCP_TOOL_ORDER, MCP_TOOL_NAMES } from "../../src/tool-names";
-import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema";
+import { computePatchOperationSchemaHash, computeValidatorRegistryHash } from "../../src/build-info.js";
+import { OPERATION_KINDS } from "../../src/package-interop.js";
+import { createServer } from "../../src/server.js";
+import { MCP_TOOL_ORDER, MCP_TOOL_NAMES } from "../../src/tool-names.js";
+import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema.js";
 
-const requireFromThisTest = createRequire(__filename);
+const requireFromThisTest = createRequire(import.meta.url);
 
 const EXPECTED_VALIDATOR_NAMES = [
   "audit_only_se_shape",

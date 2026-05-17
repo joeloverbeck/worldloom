@@ -3,11 +3,11 @@ import { mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { getRecord } from "../../src/tools/get-record";
-import { getRecords } from "../../src/tools/get-records";
+import { getRecord } from "../../src/tools/get-record.js";
+import { getRecords } from "../../src/tools/get-records.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
-import { STORY_FIXTURE_SLUG, buildStoryBundleWorld } from "./story-bundle-fixture";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
+import { STORY_FIXTURE_SLUG, buildStoryBundleWorld } from "./story-bundle-fixture.js";
 
 const CHAR_FILE_BODY = [
   "---",

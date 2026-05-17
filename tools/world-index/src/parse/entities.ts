@@ -3,10 +3,10 @@ import path from "node:path";
 import type { Root } from "mdast";
 import YAML from "yaml";
 
-import { contentHashForProse } from "./canonical";
-import { isStoplistedEntityCandidate } from "./stoplist";
-import { sha256Hex } from "../hash/content";
-import { CURRENT_INDEX_VERSION } from "../schema/version";
+import { contentHashForProse } from "./canonical.js";
+import { isStoplistedEntityCandidate } from "./stoplist.js";
+import { sha256Hex } from "../hash/content.js";
+import { CURRENT_INDEX_VERSION } from "../schema/version.js";
 import type {
   EdgeRow,
   EntityAliasRow,
@@ -14,7 +14,7 @@ import type {
   EntityRow,
   NodeRow,
   ValidationResultRow
-} from "../schema/types";
+} from "../schema/types.js";
 
 export interface EntityRegistryEntry {
   canonicalName: string;

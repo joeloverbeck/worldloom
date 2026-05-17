@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-import { databasePathForWorld, openIndex } from "../index/open";
+import { databasePathForWorld, openIndex } from "../index/open.js";
 
 const WORLD_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 

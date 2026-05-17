@@ -1,14 +1,14 @@
 import { existsSync } from "node:fs";
 import type Database from "better-sqlite3";
 
-import { insertValidationResults } from "../index/nodes";
+import { insertValidationResults } from "../index/nodes.js";
 import {
   ATOMIC_LOGICAL_WORLD_FILES,
   parseAtomicSourceFile,
   parseStoryBundleSourceFile
-} from "../parse/atomic";
-import type { NodeRow, ValidationResultRow } from "../schema/types";
-import { openExistingWorldIndex, parseWorldFile, resolveWorldDirectory } from "./shared";
+} from "../parse/atomic.js";
+import type { NodeRow, ValidationResultRow } from "../schema/types.js";
+import { openExistingWorldIndex, parseWorldFile, resolveWorldDirectory } from "./shared.js";
 
 export function verify(worldRoot: string, worldSlug: string): number {
   const opened = openExistingWorldIndex(worldRoot, worldSlug);

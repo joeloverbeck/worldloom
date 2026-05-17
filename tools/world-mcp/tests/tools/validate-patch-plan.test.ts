@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { validatePatchPlan } from "../../src/tools/validate-patch-plan";
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { validatePatchPlan } from "../../src/tools/validate-patch-plan.js";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function buildValidPatchPlan() {
   return {

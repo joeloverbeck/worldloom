@@ -4,13 +4,13 @@ import path from "node:path";
 import type Database from "better-sqlite3";
 import YAML from "yaml";
 
-import { resolveWorldDirectory } from "../db";
+import { resolveWorldDirectory } from "../db/index.js";
 
 import type {
   ContextPacketStoryBundleContext,
   ContextPacketStoryBundleContextSummary,
   RoleInStory
-} from "./shared";
+} from "./shared.js";
 
 interface StoryNodeRow {
   node_id: string;

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-import Ajv2020 from "ajv/dist/2020";
+import Ajv2020Module from "ajv/dist/2020.js";
 import type { AnySchema, ErrorObject, ValidateFunction } from "ajv";
 import yaml from "js-yaml";
 
@@ -19,6 +19,13 @@ import {
 } from "./utils.js";
 import { frontmatterFor } from "./yaml-parse-integrity.js";
 
+type Ajv2020Instance = {
+  addSchema(schema: AnySchema): unknown;
+  compile(schema: AnySchema): ValidateFunction;
+  errorsText(errors?: ErrorObject[] | null): string;
+};
+type Ajv2020Constructor = new (opts?: Record<string, unknown>) => Ajv2020Instance;
+const Ajv2020 = Ajv2020Module as unknown as Ajv2020Constructor;
 const ajv = new Ajv2020({ allErrors: true, strict: true, formats: { date: true } });
 const validatorsByRecordType = loadSchemaValidators();
 
@@ -224,7 +231,7 @@ function normalizeType(type: string): string {
 }
 
 function loadSchemaValidators(): Map<string, ValidateFunction> {
-  const schemaRoot = path.resolve(__dirname, "../../../src/schemas");
+  const schemaRoot = path.resolve(import.meta.dirname, "../../../src/schemas");
   const sharedSchema = JSON.parse(readFileSync(path.join(schemaRoot, "_shared/extension-entry.schema.json"), "utf8")) as AnySchema;
   ajv.addSchema(sharedSchema);
 

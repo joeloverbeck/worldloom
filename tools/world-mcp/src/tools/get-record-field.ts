@@ -1,12 +1,12 @@
-import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
-import { createMcpError, type McpError } from "../errors";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard.js";
+import { createMcpError, type McpError } from "../errors.js";
 
 import {
   isMcpError,
   parseRecordBody,
   resolveRecordRow,
   validateRecordId
-} from "./get-record";
+} from "./get-record.js";
 
 export interface GetRecordFieldArgs {
   record_id: string;

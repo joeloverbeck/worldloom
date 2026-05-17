@@ -5,9 +5,9 @@ import test from "node:test";
 
 import Database from "better-sqlite3";
 
-import { build } from "../src/commands/build";
-import { verify } from "../src/commands/verify";
-import { cleanup, createAtomicRepoRoot, createLegacyRepoRoot } from "./helpers/atomic-fixture";
+import { build } from "../src/commands/build.js";
+import { verify } from "../src/commands/verify.js";
+import { cleanup, createAtomicRepoRoot, createLegacyRepoRoot } from "./helpers/atomic-fixture.js";
 
 function loadDriftRows(
   root: string

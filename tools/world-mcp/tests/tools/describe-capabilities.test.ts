@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createBuildInfo } from "../../src/build-info";
-import { TASK_TYPES } from "../../src/ranking/profiles";
-import { ID_CLASSES } from "../../src/server";
-import { MCP_TOOL_NAMES } from "../../src/tool-names";
-import { describeCapabilities, type ToolCapability } from "../../src/tools/describe-capabilities";
-import { SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "../../src/tools/get-record-schema";
-import { SUPPORTED_LIST_RECORD_TYPES } from "../../src/tools/list-records";
+import { createBuildInfo } from "../../src/build-info.js";
+import { TASK_TYPES } from "../../src/ranking/profiles/index.js";
+import { ID_CLASSES } from "../../src/server.js";
+import { MCP_TOOL_NAMES } from "../../src/tool-names.js";
+import { describeCapabilities, type ToolCapability } from "../../src/tools/describe-capabilities.js";
+import { SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "../../src/tools/get-record-schema.js";
+import { SUPPORTED_LIST_RECORD_TYPES } from "../../src/tools/list-records.js";
 
 const CAPABILITIES: ToolCapability[] = [
   {

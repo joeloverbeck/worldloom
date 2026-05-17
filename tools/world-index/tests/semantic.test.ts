@@ -3,16 +3,16 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { parseMarkdown } from "../src/parse/markdown";
-import { contentHashForProse } from "../src/parse/canonical";
-import { extractSemanticEdges } from "../src/parse/semantic";
-import { domainFileNodeId } from "../src/parse/prose";
-import { extractYamlNodes } from "../src/parse/yaml";
-import { CURRENT_INDEX_VERSION } from "../src/schema/version";
-import type { NodeRow } from "../src/schema/types";
+import { parseMarkdown } from "../src/parse/markdown.js";
+import { contentHashForProse } from "../src/parse/canonical.js";
+import { extractSemanticEdges } from "../src/parse/semantic.js";
+import { domainFileNodeId } from "../src/parse/prose.js";
+import { extractYamlNodes } from "../src/parse/yaml.js";
+import { CURRENT_INDEX_VERSION } from "../src/schema/version.js";
+import type { NodeRow } from "../src/schema/types.js";
 
 function loadFixture(name: string): { source: string; filePath: string } {
-  const filePath = path.resolve(__dirname, "..", "..", "tests", "fixtures", name);
+  const filePath = path.resolve(import.meta.dirname, "..", "..", "tests", "fixtures", name);
   return {
     source: readFileSync(filePath, "utf8"),
     filePath

@@ -2,7 +2,7 @@ import {
   normalizeProseWhitespace,
   serializeStableYaml,
   sha256Hex
-} from "../hash/content";
+} from "../hash/content.js";
 
 export const ANCHOR_CONTEXT_LINES = 3;
 

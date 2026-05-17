@@ -4,12 +4,12 @@ import path from "node:path";
 import test from "node:test";
 import YAML from "yaml";
 
-import { parseMarkdown } from "../src/parse/markdown";
-import { contentHashForProse, contentHashForYaml } from "../src/parse/canonical";
-import { extractYamlNodes } from "../src/parse/yaml";
+import { parseMarkdown } from "../src/parse/markdown.js";
+import { contentHashForProse, contentHashForYaml } from "../src/parse/canonical.js";
+import { extractYamlNodes } from "../src/parse/yaml.js";
 
 function loadFixture(name: string): { source: string; filePath: string } {
-  const filePath = path.resolve(__dirname, "..", "..", "tests", "fixtures", name);
+  const filePath = path.resolve(import.meta.dirname, "..", "..", "tests", "fixtures", name);
   return {
     source: readFileSync(filePath, "utf8"),
     filePath

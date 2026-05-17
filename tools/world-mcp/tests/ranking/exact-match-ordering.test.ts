@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { RankingCandidate } from "../../src/ranking/policy";
-import { rankCandidates } from "../../src/ranking/policy";
-import { TASK_TYPES, getRankingProfile } from "../../src/ranking/profiles";
+import type { RankingCandidate } from "../../src/ranking/policy.js";
+import { rankCandidates } from "../../src/ranking/policy.js";
+import { TASK_TYPES, getRankingProfile } from "../../src/ranking/profiles/index.js";
 
 function createCandidate(overrides: Partial<RankingCandidate>): RankingCandidate {
   return {

@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { assembleContextPacket } from "../../src/context-packet/assemble";
+import { assembleContextPacket } from "../../src/context-packet/assemble.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared.js";
 import {
   buildStoryBundleWorld,
   STORY_FIXTURE_SLUG,
   STORY_FIXTURE_WORLD
-} from "../tools/story-bundle-fixture";
+} from "../tools/story-bundle-fixture.js";
 
 test("story-pipeline context packets include indexed story-bundle context", async () => {
   const root = createTempRepoRoot();

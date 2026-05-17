@@ -4,17 +4,17 @@ import { readFileSync, writeSync } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 
-import { build } from "./commands/build";
-import { init } from "./commands/init";
-import { inspect } from "./commands/inspect";
-import { render } from "./commands/render";
-import { stats } from "./commands/stats";
-import { sync } from "./commands/sync";
-import { verify } from "./commands/verify";
-import { SchemaVersionMismatchError } from "./index/open";
+import { build } from "./commands/build.js";
+import { init } from "./commands/init.js";
+import { inspect } from "./commands/inspect.js";
+import { render } from "./commands/render.js";
+import { stats } from "./commands/stats.js";
+import { sync } from "./commands/sync.js";
+import { verify } from "./commands/verify.js";
+import { SchemaVersionMismatchError } from "./index/open.js";
 
 function loadPackageVersion(): string {
-  const packageJsonPath = path.resolve(__dirname, "..", "..", "package.json");
+  const packageJsonPath = path.resolve(import.meta.dirname, "..", "..", "package.json");
   const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
     version?: unknown;
   };

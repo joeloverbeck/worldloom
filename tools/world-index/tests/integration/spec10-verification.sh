@@ -5,16 +5,23 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGE_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REPO_ROOT="$(cd "$PACKAGE_ROOT/../.." && pwd)"
 WORLD_SLUG="animalia"
+FIXTURE_SOURCE="$REPO_ROOT/tests/fixtures/$WORLD_SLUG"
+FIXTURE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/world-index-spec10-XXXXXX")"
+trap 'rm -rf "$FIXTURE_ROOT"' EXIT
+
+mkdir -p "$FIXTURE_ROOT/worlds"
+cp -R "$FIXTURE_SOURCE" "$FIXTURE_ROOT/worlds/$WORLD_SLUG"
+rm -rf "$FIXTURE_ROOT/worlds/$WORLD_SLUG/_index"
 
 cd "$PACKAGE_ROOT"
 npm run build
 
-cd "$REPO_ROOT"
-node tools/world-index/dist/src/cli.js build "$WORLD_SLUG"
-node tools/world-index/dist/src/cli.js verify "$WORLD_SLUG"
+cd "$FIXTURE_ROOT"
+node "$REPO_ROOT/tools/world-index/dist/src/cli.js" build "$WORLD_SLUG"
+node "$REPO_ROOT/tools/world-index/dist/src/cli.js" verify "$WORLD_SLUG"
 
 cd "$PACKAGE_ROOT"
-REPO_ROOT="$REPO_ROOT" WORLD_SLUG="$WORLD_SLUG" node <<'EOF'
+REPO_ROOT="$FIXTURE_ROOT" WORLD_SLUG="$WORLD_SLUG" node <<'EOF'
 const assert = require("node:assert/strict");
 const path = require("node:path");
 const Database = require("better-sqlite3");
@@ -102,7 +109,7 @@ const KEPT_CANONICALS = [
   "A Season on the Circuit: Dispatches from Vespera Nightwhisper",
   "After-Action Report on the Harrowgate Contract"
 ];
-const NONCANONICAL_EVIDENCE = ["Melissa Threadscar", "Charter Hall", "Copper Weir", "Bent Willow"];
+const NONCANONICAL_EVIDENCE = ["Charter Hall", "Copper Weir", "Bent Willow"];
 
 function count(sql, ...args) {
   return db.prepare(sql).get(...args).count;
@@ -327,8 +334,8 @@ for (const [title, entityCount] of Object.entries(mysteryReserveFirewall)) {
 
 for (const [name, value] of Object.entries(integrity)) {
   if (name === "malformed_authority_source") {
-    if (value !== 1) {
-      failures.push(`expected exactly one malformed authority-source warning, found ${value}`);
+    if (value !== 0) {
+      failures.push(`expected no malformed authority-source warnings, found ${value}`);
     }
     continue;
   }

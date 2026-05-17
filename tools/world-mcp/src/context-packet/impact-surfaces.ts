@@ -1,9 +1,9 @@
 import type Database from "better-sqlite3";
 
-import { findImpactedFragments } from "../tools/find-impacted-fragments";
+import { findImpactedFragments } from "../tools/find-impacted-fragments.js";
 
-import type { ContextPacketNode, DeliveryMode, PacketRecordProjection } from "./shared";
-import { loadPacketNodes } from "./shared";
+import type { ContextPacketNode, DeliveryMode, PacketRecordProjection } from "./shared.js";
+import { loadPacketNodes } from "./shared.js";
 
 export async function buildImpactSurfaces(
   db: Database.Database,

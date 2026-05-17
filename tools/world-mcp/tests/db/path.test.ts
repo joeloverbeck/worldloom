@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { resolveRepoRoot, resolveWorldDbPath } from "../../src/db/path";
+import { resolveRepoRoot, resolveWorldDbPath } from "../../src/db/path.js";
 
 function createTempRepoRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-mcp-path-"));

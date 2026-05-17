@@ -6,7 +6,7 @@ import {
   createTempRepoRoot,
   destroyTempRepoRoot,
   runCompiledHook
-} from "./_shared";
+} from "./_shared.js";
 
 function buildToolInput(filePath: string): Record<string, unknown> {
   return { file_path: filePath };

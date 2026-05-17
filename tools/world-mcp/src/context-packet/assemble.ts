@@ -1,21 +1,21 @@
 import type { NodeType } from "@worldloom/world-index/public/types";
 
-import { openIndexDb } from "../db";
-import { createMcpError, type McpError } from "../errors";
-import type { TaskType } from "../ranking/profiles";
+import { openIndexDb } from "../db/index.js";
+import { createMcpError, type McpError } from "../errors.js";
+import type { TaskType } from "../ranking/profiles/index.js";
 
-import { applyTaskTypeFullBodyDelivery } from "./full-body-delivery";
-import { buildExactRecordLinks } from "./exact-record-links";
+import { applyTaskTypeFullBodyDelivery } from "./full-body-delivery.js";
+import { buildExactRecordLinks } from "./exact-record-links.js";
 import {
   buildGoverningWorldContext,
   createCharacterGenerationRecordProjection
-} from "./governing-world-context";
+} from "./governing-world-context.js";
 import {
   buildLocalAuthority,
   findLocalAuthoritySourceNodeIds
-} from "./local-authority";
-import { buildImpactSurfaces } from "./impact-surfaces";
-import { buildScopedLocalContext } from "./scoped-local-context";
+} from "./local-authority.js";
+import { buildImpactSurfaces } from "./impact-surfaces.js";
+import { buildScopedLocalContext } from "./scoped-local-context.js";
 import {
   CONTEXT_PACKET_ESTIMATOR_VERSION,
   DEFAULT_DELIVERY_MODE,
@@ -34,15 +34,15 @@ import {
   type ContextPacketNode,
   type ContextPacketTruncationSummary,
   type DeliveryMode
-} from "./shared";
-import { persistContextPacket } from "./persistence";
+} from "./shared.js";
+import { persistContextPacket } from "./persistence.js";
 import {
   buildStoryBundleContext,
   summarizeStoryBundleContext
-} from "./story-bundle-context";
+} from "./story-bundle-context.js";
 
-export { DEFAULT_BUDGET_SPLIT, DEFAULT_PACKET_VERSION } from "./shared";
-export type { ContextPacket, ContextPacketArgs } from "./shared";
+export { DEFAULT_BUDGET_SPLIT, DEFAULT_PACKET_VERSION } from "./shared.js";
+export type { ContextPacket, ContextPacketArgs } from "./shared.js";
 
 const DROP_PRIORITY = [
   "impact_surfaces",

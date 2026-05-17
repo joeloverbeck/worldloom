@@ -1,14 +1,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
-import { OPERATION_KINDS, type OperationKind } from "@worldloom/patch-engine";
+import type { OperationKind } from "@worldloom/patch-engine";
 
-import { MCP_TOOL_NAMES } from "../tool-names";
+import { OPERATION_KINDS } from "../package-interop.js";
+import { MCP_TOOL_NAMES } from "../tool-names.js";
 import {
   ceilingMetadata,
   persistWithSummary,
   type PersistedWithSummaryFields
-} from "./oversize-delivery";
+} from "./oversize-delivery.js";
 
 type JsonObject = { [key: string]: JsonValue };
 type JsonValue = JsonObject | JsonValue[] | string | number | boolean | null;
@@ -108,7 +109,7 @@ const PREDICATE_DSL_GRAMMAR_SCHEMA = "predicate-dsl-grammar.schema.json";
 const schemaCache = new Map<string, JsonObject>();
 
 function findRepoRoot(): string {
-  const starts = [process.cwd(), __dirname];
+  const starts = [process.cwd(), import.meta.dirname];
 
   for (const start of starts) {
     let current = path.resolve(start);
@@ -126,7 +127,7 @@ function findRepoRoot(): string {
     }
   }
 
-  return path.resolve(__dirname, "..", "..", "..", "..", "..");
+  return path.resolve(import.meta.dirname, "..", "..", "..", "..", "..");
 }
 
 function validatorsSchemaRoot(): string {

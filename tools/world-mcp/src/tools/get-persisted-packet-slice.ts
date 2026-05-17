@@ -1,5 +1,5 @@
-import { readPersistedPacketJson } from "../context-packet/persistence";
-import { createMcpError, type McpError } from "../errors";
+import { readPersistedPacketJson } from "../context-packet/persistence.js";
+import { createMcpError, type McpError } from "../errors.js";
 
 export interface GetPersistedPacketSliceArgs {
   persisted_path: string;

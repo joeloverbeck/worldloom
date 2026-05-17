@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import path from "node:path";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import test from "node:test";
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 
-import { createServer } from "../../src/server";
-import { MCP_TOOL_NAMES } from "../../src/tool-names";
+import { createServer } from "../../src/server.js";
+import { MCP_TOOL_NAMES } from "../../src/tool-names.js";
 import {
   SPEC02_FIXTURE_SEED_NODE,
   SPEC02_FIXTURE_SUMMARY_NULL_NODE,
@@ -18,10 +19,12 @@ import {
   buildSpec02MultiWorldFixture,
   buildVersionMismatchFixture,
   createSpec02FixtureRoot
-} from "../fixtures/build-fixture";
-import { destroyTempRepoRoot, seedWorld } from "../tools/_shared";
+} from "../fixtures/build-fixture.js";
 
-const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
+const requireForTest = createRequire(import.meta.url);
+import { destroyTempRepoRoot, seedWorld } from "../tools/_shared.js";
+
+const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..", "..", "..", "..");
 
 function extractContractKeyTree(): Record<string, string[]> {
   const contractPath = path.join(
@@ -400,7 +403,7 @@ test("SPEC-02 capstone: context packet shape still matches the canonical contrac
 });
 
 test("SPEC-02 capstone: world-index public contract export imports cleanly", () => {
-  const exported = require("@worldloom/world-index/public/types") as {
+  const exported = requireForTest("@worldloom/world-index/public/types") as {
     ATOMIC_LOGICAL_WORLD_FILES?: unknown;
     CURRENT_INDEX_VERSION?: unknown;
   };

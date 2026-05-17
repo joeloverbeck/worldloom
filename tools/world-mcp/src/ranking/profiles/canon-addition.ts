@@ -1,5 +1,5 @@
-import type { RankingWeights } from "../policy";
-import { defaultRankingProfile } from "./default";
+import type { RankingWeights } from "../policy.js";
+import { defaultRankingProfile } from "./default.js";
 
 export const canonAdditionRankingProfile: RankingWeights = {
   ...defaultRankingProfile,

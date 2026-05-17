@@ -6,12 +6,12 @@ import test from "node:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 
-import { createServer } from "../../src/server";
+import { createServer } from "../../src/server.js";
 import {
   buildSpec02Fixture,
   createSpec02FixtureRoot
-} from "../fixtures/build-fixture";
-import { destroyTempRepoRoot } from "../tools/_shared";
+} from "../fixtures/build-fixture.js";
+import { destroyTempRepoRoot } from "../tools/_shared.js";
 
 function estimateTokens(bytes: number): number {
   return Math.ceil(bytes / 4);

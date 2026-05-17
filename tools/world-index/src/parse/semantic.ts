@@ -1,9 +1,9 @@
 import type { Html, Root, RootContent } from "mdast";
 
-import { MANDATORY_WORLD_FILES } from "../enumerate";
-import { domainFileNodeId } from "./prose";
-import { parseYamlWithRecovery } from "./yaml";
-import type { CanonFactRecord, ChangeLogEntry, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
+import { MANDATORY_WORLD_FILES } from "../enumerate.js";
+import { domainFileNodeId } from "./prose.js";
+import { parseYamlWithRecovery } from "./yaml.js";
+import type { CanonFactRecord, ChangeLogEntry, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types.js";
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|PA|M|DA|CHAR|PR|BATCH|NCP|NCB|AU|RP)-\d+\b/;
 const STRUCTURED_ID_REGEX_GLOBAL = /\b(CF|CH|PA|M|DA|CHAR|PR|BATCH|NCP|NCB|AU|RP)-\d+\b/g;

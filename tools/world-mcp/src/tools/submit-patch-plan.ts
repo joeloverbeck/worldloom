@@ -1,20 +1,16 @@
+import type { EngineError, PatchReceipt, ValidatorRunReceipt } from "@worldloom/patch-engine";
+import type { ValidatorExecution } from "@worldloom/validators";
+
+import { createMcpError, type McpError } from "../errors.js";
 import {
   submitPatchPlan,
-  type EngineError,
-  type PatchReceipt,
-  type ValidatorRunReceipt
-} from "@worldloom/patch-engine";
-import {
-  validatePatchPlan as runPreApplyValidators,
-  type ValidatorExecution
-} from "@worldloom/validators";
-
-import { createMcpError, type McpError } from "../errors";
+  validatePatchPlan as runPreApplyValidators
+} from "../package-interop.js";
 
 import {
   type PatchPlanEnvelope,
   validatePatchPlanEnvelopeShape
-} from "./_shared";
+} from "./_shared.js";
 
 type EnginePatchPlanEnvelope = Parameters<typeof submitPatchPlan>[0];
 

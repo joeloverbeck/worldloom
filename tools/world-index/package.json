@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Structure-aware SQLite index over worldloom markdown world files",
   "private": true,
+  "type": "module",
   "bin": {
     "world-index": "dist/src/cli.js"
   },

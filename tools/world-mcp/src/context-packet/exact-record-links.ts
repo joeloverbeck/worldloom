@@ -6,7 +6,7 @@ import {
   type ContextPacketNode,
   type DeliveryMode,
   type PacketRecordProjection
-} from "./shared";
+} from "./shared.js";
 
 export function buildExactRecordLinks(
   db: Database.Database,

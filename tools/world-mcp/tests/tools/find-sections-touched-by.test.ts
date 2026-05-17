@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { findSectionsTouchedBy } from "../../src/tools/find-sections-touched-by";
+import { findSectionsTouchedBy } from "../../src/tools/find-sections-touched-by.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function seedTouchedSectionsWorld(root: string): void {
   seedWorld(root, {

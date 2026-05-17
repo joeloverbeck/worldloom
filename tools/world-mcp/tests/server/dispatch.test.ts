@@ -5,15 +5,15 @@ import test from "node:test";
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { OPERATION_KINDS } from "@worldloom/patch-engine";
+import { OPERATION_KINDS } from "../../src/package-interop.js";
 
-import { TASK_TYPES } from "../../src/ranking/profiles";
-import { createServer, ID_CLASSES } from "../../src/server";
-import { MCP_TOOL_NAMES } from "../../src/tool-names";
-import { VOCABULARY_CLASSES } from "../../src/tools/get-canonical-vocabulary";
-import { SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "../../src/tools/get-record-schema";
-import { SUPPORTED_LIST_RECORD_TYPES } from "../../src/tools/list-records";
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld } from "../tools/_shared";
+import { TASK_TYPES } from "../../src/ranking/profiles/index.js";
+import { createServer, ID_CLASSES } from "../../src/server.js";
+import { MCP_TOOL_NAMES } from "../../src/tool-names.js";
+import { VOCABULARY_CLASSES } from "../../src/tools/get-canonical-vocabulary.js";
+import { SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "../../src/tools/get-record-schema.js";
+import { SUPPORTED_LIST_RECORD_TYPES } from "../../src/tools/list-records.js";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld } from "../tools/_shared.js";
 
 function textContent(result: any): string {
   const content = result.content as Array<{ type: string; text?: string }>;

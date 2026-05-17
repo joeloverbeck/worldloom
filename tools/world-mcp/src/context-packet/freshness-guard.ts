@@ -1,9 +1,8 @@
 import { performance } from "node:perf_hooks";
 
-import { sync as syncWorldIndex } from "@worldloom/world-index/commands/sync";
-
-import { resolveRepoRoot } from "../db";
-import type { McpError } from "../errors";
+import { resolveRepoRoot } from "../db/index.js";
+import type { McpError } from "../errors.js";
+import { syncWorldIndex } from "../package-interop.js";
 
 export interface FreshnessAudit {
   pre_call_index_was_stale: true;

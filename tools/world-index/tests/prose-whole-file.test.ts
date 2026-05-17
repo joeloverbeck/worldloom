@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseMarkdown } from "../src/parse/markdown";
-import { extractProseNodes } from "../src/parse/prose";
+import { parseMarkdown } from "../src/parse/markdown.js";
+import { extractProseNodes } from "../src/parse/prose.js";
 
 function parseWholeFile(relativePath: string, source: string) {
   const { tree, lines } = parseMarkdown(source);

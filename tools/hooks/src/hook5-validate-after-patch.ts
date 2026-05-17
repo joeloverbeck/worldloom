@@ -6,9 +6,9 @@ import {
   emitAdditionalContext,
   readHookInput,
   type HookEnvelope
-} from "./lib/hook-io";
-import { logDecision } from "./lib/logging";
-import { resolveRepoRoot } from "./lib/pathing";
+} from "./lib/hook-io.js";
+import { logDecision } from "./lib/logging.js";
+import { resolveRepoRoot } from "./lib/pathing.js";
 
 interface PostToolUseInput extends HookEnvelope {
   hook_event_name: "PostToolUse";

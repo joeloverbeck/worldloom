@@ -6,7 +6,7 @@ import test from "node:test";
 
 import type Database from "better-sqlite3";
 
-import { insertEdges } from "../src/index/edges";
+import { insertEdges } from "../src/index/edges.js";
 import {
   deleteNodesByFile,
   insertAnchorChecksums,
@@ -14,17 +14,17 @@ import {
   insertEntityAliases,
   insertEntityMentions,
   insertNodes
-} from "../src/index/nodes";
-import { openIndex } from "../src/index/open";
-import { contentHashForProse } from "../src/parse/canonical";
-import { CURRENT_INDEX_VERSION } from "../src/schema/version";
+} from "../src/index/nodes.js";
+import { openIndex } from "../src/index/open.js";
+import { contentHashForProse } from "../src/parse/canonical.js";
+import { CURRENT_INDEX_VERSION } from "../src/schema/version.js";
 import type {
   AnchorChecksumRow,
   EntityAliasRow,
   EntityMentionRow,
   EntityRow,
   NodeRow
-} from "../src/schema/types";
+} from "../src/schema/types.js";
 
 function createTempRoot(): string {
   return mkdtempSync(path.join(os.tmpdir(), "world-index-crud-"));

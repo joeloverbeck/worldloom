@@ -4,11 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { runValidatePatchPlanCli } from "../../src/cli/validate-patch-plan";
-import { validatePatchPlan } from "../../src/tools/validate-patch-plan";
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { runValidatePatchPlanCli } from "../../src/cli/validate-patch-plan.js";
+import { validatePatchPlan } from "../../src/tools/validate-patch-plan.js";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 
-const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
+const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..", "..", "..", "..");
 
 function buildValidPatchPlan() {
   return {

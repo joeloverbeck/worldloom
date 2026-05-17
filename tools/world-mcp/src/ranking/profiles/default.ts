@@ -1,4 +1,4 @@
-import type { RankingWeights } from "../policy";
+import type { RankingWeights } from "../policy.js";
 
 export const defaultRankingProfile: RankingWeights = {
   heading_path_match: 50,

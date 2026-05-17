@@ -2,14 +2,14 @@ import { readdirSync } from "node:fs";
 import path from "node:path";
 
 import type Database from "better-sqlite3";
-import { CREATE_OP_CANONICAL_RECORD_ID_FIELD } from "@worldloom/patch-engine";
 import type { EdgeType, NodeType } from "@worldloom/world-index/public/types";
 
-import { openIndexDb, resolveRepoRoot } from "../db";
-import { createMcpError, type McpError } from "../errors";
-import type { RankingCandidate, RankingWeights } from "../ranking/policy";
-import { rankCandidates } from "../ranking/policy";
-import { defaultRankingProfile } from "../ranking/profiles";
+import { openIndexDb, resolveRepoRoot } from "../db/index.js";
+import { createMcpError, type McpError } from "../errors.js";
+import { CREATE_OP_CANONICAL_RECORD_ID_FIELD } from "../package-interop.js";
+import type { RankingCandidate, RankingWeights } from "../ranking/policy.js";
+import { rankCandidates } from "../ranking/policy.js";
+import { defaultRankingProfile } from "../ranking/profiles/index.js";
 
 export interface SearchNodeFilters {
   world_slug?: string;

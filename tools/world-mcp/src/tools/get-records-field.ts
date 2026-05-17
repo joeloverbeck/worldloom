@@ -1,10 +1,10 @@
-import { createMcpError, type McpError } from "../errors";
+import { createMcpError, type McpError } from "../errors.js";
 
 import {
   getRecordField,
   type GetRecordFieldResponse
-} from "./get-record-field";
-import { isMcpError } from "./get-record";
+} from "./get-record-field.js";
+import { isMcpError } from "./get-record.js";
 
 export interface GetRecordsFieldArgs {
   record_ids: string[];

@@ -1,4 +1,4 @@
-import { openExistingWorldIndex } from "./shared";
+import { openExistingWorldIndex } from "./shared.js";
 
 interface StoryRenderRow {
   node_id: string;

@@ -3,10 +3,10 @@ import { appendFileSync, existsSync, readFileSync, readdirSync, unlinkSync } fro
 import path from "node:path";
 import type { Root } from "mdast";
 
-import { enumerate } from "../enumerate";
-import { sha256Hex } from "../hash/content";
-import { insertEdges, resolveUnresolvedEdges } from "../index/edges";
-import { rebuildFtsIndex, shouldRebuildFts } from "../index/fts";
+import { enumerate } from "../enumerate.js";
+import { sha256Hex } from "../hash/content.js";
+import { insertEdges, resolveUnresolvedEdges } from "../index/edges.js";
+import { rebuildFtsIndex, shouldRebuildFts } from "../index/fts.js";
 import {
   deleteNodesByFile,
   insertAnchorChecksums,
@@ -17,22 +17,22 @@ import {
   insertScopedReferenceAliases,
   insertScopedReferences,
   insertValidationResults
-} from "../index/nodes";
-import { getFileVersion, listIndexedFiles, removeFileVersion, upsertFileVersion } from "../index/file-versions";
+} from "../index/nodes.js";
+import { getFileVersion, listIndexedFiles, removeFileVersion, upsertFileVersion } from "../index/file-versions.js";
 import {
   databasePathForWorld,
   hasIndex,
   openIndex,
   openExistingIndex,
   SchemaVersionMismatchError
-} from "../index/open";
-import { parseMarkdown } from "../parse/markdown";
-import { extractEntities } from "../parse/entities";
-import { extractProseNodes } from "../parse/prose";
-import { extractScopedReferences } from "../parse/scoped";
-import { extractStructuredRecordEdges } from "../parse/structured-edges";
-import { extractSemanticEdges } from "../parse/semantic";
-import { extractYamlNodes } from "../parse/yaml";
+} from "../index/open.js";
+import { parseMarkdown } from "../parse/markdown.js";
+import { extractEntities } from "../parse/entities.js";
+import { extractProseNodes } from "../parse/prose.js";
+import { extractScopedReferences } from "../parse/scoped.js";
+import { extractStructuredRecordEdges } from "../parse/structured-edges.js";
+import { extractSemanticEdges } from "../parse/semantic.js";
+import { extractYamlNodes } from "../parse/yaml.js";
 import {
   ATOMIC_LOGICAL_WORLD_FILES,
   createAtomicLogicalFileResults,
@@ -41,9 +41,9 @@ import {
   loadAtomicEntityRegistry,
   parseAtomicSourceFile,
   parseStoryBundleSourceFile
-} from "../parse/atomic";
-import type { AtomicSkippedRecord } from "../parse/atomic";
-import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
+} from "../parse/atomic.js";
+import type { AtomicSkippedRecord } from "../parse/atomic.js";
+import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types.js";
 
 export const ENTITY_SOURCE_NODE_TYPES = new Set([
   "ontology_category",

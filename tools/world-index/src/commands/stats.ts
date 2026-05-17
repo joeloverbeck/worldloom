@@ -1,4 +1,4 @@
-import { openExistingWorldIndex } from "./shared";
+import { openExistingWorldIndex } from "./shared.js";
 
 export function stats(worldRoot: string, worldSlug: string): number {
   const opened = openExistingWorldIndex(worldRoot, worldSlug);

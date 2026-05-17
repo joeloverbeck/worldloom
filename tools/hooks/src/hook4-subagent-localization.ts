@@ -1,9 +1,9 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-import { emitAdditionalContext, readHookInput, type SubagentStartInput } from "./lib/hook-io";
-import { logDecision } from "./lib/logging";
-import { resolveRepoRoot } from "./lib/pathing";
+import { emitAdditionalContext, readHookInput, type SubagentStartInput } from "./lib/hook-io.js";
+import { logDecision } from "./lib/logging.js";
+import { resolveRepoRoot } from "./lib/pathing.js";
 
 function buildAdditionalContext(cwd?: string): string {
   const repoRoot = resolveRepoRoot(cwd);

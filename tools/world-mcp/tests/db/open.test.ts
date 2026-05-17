@@ -6,9 +6,9 @@ import path from "node:path";
 import test from "node:test";
 
 import Database from "better-sqlite3";
-import { CURRENT_INDEX_VERSION } from "@worldloom/world-index/public/types";
+import { CURRENT_INDEX_VERSION } from "../../src/package-interop.js";
 
-import { openIndexDb } from "../../src/db/open";
+import { openIndexDb } from "../../src/db/open.js";
 
 function createTempRepoRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-mcp-open-"));

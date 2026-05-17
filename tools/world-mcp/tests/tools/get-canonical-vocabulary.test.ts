@@ -16,9 +16,9 @@ import {
   REVISION_DIFFICULTY_VALUES,
   SEC_FILE_CLASS_VALUES,
   VERDICT_ENUM
-} from "@worldloom/world-index/public/canonical-vocabularies";
+} from "../../src/package-interop.js";
 
-import { getCanonicalVocabulary } from "../../src/tools/get-canonical-vocabulary";
+import { getCanonicalVocabulary } from "../../src/tools/get-canonical-vocabulary.js";
 
 function changeLogMysteryReserveEffectEnum(): string[] {
   const schemaPath = path.resolve(

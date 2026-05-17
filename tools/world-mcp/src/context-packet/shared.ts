@@ -2,7 +2,7 @@ import type Database from "better-sqlite3";
 import YAML from "yaml";
 import type { NodeType } from "@worldloom/world-index/public/types";
 
-import type { TaskType } from "../ranking/profiles";
+import type { TaskType } from "../ranking/profiles/index.js";
 
 export const DELIVERY_MODES = ["full", "summary_only"] as const;
 export type DeliveryMode = (typeof DELIVERY_MODES)[number];

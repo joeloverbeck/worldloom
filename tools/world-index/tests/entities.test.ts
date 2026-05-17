@@ -4,10 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { extractEntities, loadOntologyRegistry } from "../src/parse/entities";
-import { contentHashForProse } from "../src/parse/canonical";
-import { CURRENT_INDEX_VERSION } from "../src/schema/version";
-import type { NodeRow, NodeType } from "../src/schema/types";
+import { extractEntities, loadOntologyRegistry } from "../src/parse/entities.js";
+import { contentHashForProse } from "../src/parse/canonical.js";
+import { CURRENT_INDEX_VERSION } from "../src/schema/version.js";
+import type { NodeRow, NodeType } from "../src/schema/types.js";
 
 function makeNode(nodeId: string, nodeType: NodeType, body: string, filePath = "fixtures.md"): NodeRow {
   return {

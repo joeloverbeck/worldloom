@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { assembleContextPacket } from "../../src/context-packet/assemble";
+import { assembleContextPacket } from "../../src/context-packet/assemble.js";
 import {
   SUMMARY_MAX_LENGTH,
   estimatePacketTokens,
   type ContextPacket,
   type ContextPacketNode
-} from "../../src/context-packet/shared";
+} from "../../src/context-packet/shared.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 
 function seedMatureFixture(root: string): void {
   const longFiller = "filler ".repeat(80);

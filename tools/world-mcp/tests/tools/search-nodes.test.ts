@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { searchNodes } from "../../src/tools/search-nodes";
+import { searchNodes } from "../../src/tools/search-nodes.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function longBody(prefix: string): string {
   return `${prefix} ${"lorem ipsum ".repeat(40)}`.trim();

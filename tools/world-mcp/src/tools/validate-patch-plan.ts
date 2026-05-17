@@ -1,16 +1,20 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-import { createMcpError, type McpError } from "../errors";
-import { checkIdAllocationRace, OPERATION_KINDS, type ValidatorRunReceipt } from "@worldloom/patch-engine";
-import { openExistingIndex } from "@worldloom/world-index/index/open";
-import { validatePatchPlan as runValidatePatchPlan } from "@worldloom/validators";
+import { createMcpError, type McpError } from "../errors.js";
+import type { ValidatorRunReceipt } from "@worldloom/patch-engine";
 import type { ValidatorExecution, Verdict } from "@worldloom/validators/public/types";
+import {
+  checkIdAllocationRace,
+  openExistingIndex,
+  OPERATION_KINDS,
+  validatePatchPlan as runValidatePatchPlan
+} from "../package-interop.js";
 
 import {
   type PatchPlanEnvelope,
   validatePatchPlanEnvelopeShape
-} from "./_shared";
+} from "./_shared.js";
 
 const OPERATION_KIND_SET = new Set<string>(OPERATION_KINDS);
 
@@ -160,7 +164,7 @@ function resolveRepoRootForWorld(worldSlug: string): string {
     }
   }
 
-  const packageRoot = path.resolve(__dirname, "../../..");
+  const packageRoot = path.resolve(import.meta.dirname, "../../..");
   const maybeRepoRoot = path.resolve(packageRoot, "../..");
   if (existsSync(path.join(maybeRepoRoot, "worlds", worldSlug, "_index", "world.db"))) {
     return maybeRepoRoot;

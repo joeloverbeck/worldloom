@@ -33,7 +33,7 @@ export function resolveRepoRoot(): string {
     return cwdRoot;
   }
 
-  const moduleRoot = findRepoRootFrom(__dirname);
+  const moduleRoot = findRepoRootFrom(import.meta.dirname);
   if (moduleRoot !== null) {
     return moduleRoot;
   }

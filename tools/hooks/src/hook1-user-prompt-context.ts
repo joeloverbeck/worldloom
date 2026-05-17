@@ -1,12 +1,12 @@
-import { detectWorldSlug } from "./lib/detect-world";
-import { emitAdditionalContext, readHookInput, type UserPromptSubmitInput } from "./lib/hook-io";
+import { detectWorldSlug } from "./lib/detect-world.js";
+import { emitAdditionalContext, readHookInput, type UserPromptSubmitInput } from "./lib/hook-io.js";
 import {
   detectNamedEntitiesFromPrompt,
   findRelevantNodeIds,
   readProtectedFileWarnings,
   readWorldSummary
-} from "./lib/index-query";
-import { logDecision } from "./lib/logging";
+} from "./lib/index-query.js";
+import { logDecision } from "./lib/logging.js";
 
 async function main(): Promise<void> {
   const input = await readHookInput<UserPromptSubmitInput>();

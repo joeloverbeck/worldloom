@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getContextPacket } from "../../src/tools/get-context-packet";
-import type { ContextPacket, ContextPacketNode } from "../../src/context-packet/shared";
+import { getContextPacket } from "../../src/tools/get-context-packet.js";
+import type { ContextPacket, ContextPacketNode } from "../../src/context-packet/shared.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 
 function seedDefaultModeFixture(root: string): void {
   seedWorld(root, {

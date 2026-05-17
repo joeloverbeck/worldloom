@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 
-import { cleanup, createAtomicRepoRoot } from "./helpers/atomic-fixture";
+import { cleanup, createAtomicRepoRoot } from "./helpers/atomic-fixture.js";
 
-const cliPath = path.resolve(__dirname, "..", "src", "cli.js");
+const cliPath = path.resolve(import.meta.dirname, "..", "src", "cli.js");
 
 test("--version prints the package version", () => {
   const result = spawnSync(process.execPath, [cliPath, "--version"], {

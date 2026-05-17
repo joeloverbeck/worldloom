@@ -8,7 +8,7 @@ import {
   computePlanHash,
   sha256Hex,
   sha256OfUtf8
-} from "../../src/hash/content";
+} from "../../src/hash/content.js";
 
 function sha256Raw(input: string | Buffer): string {
   return createHash("sha256").update(input).digest("hex");

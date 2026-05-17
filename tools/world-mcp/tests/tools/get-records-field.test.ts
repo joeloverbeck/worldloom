@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getRecords } from "../../src/tools/get-records";
-import { getRecordsField } from "../../src/tools/get-records-field";
+import { getRecords } from "../../src/tools/get-records.js";
+import { getRecordsField } from "../../src/tools/get-records-field.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function cfId(index: number): string {
   return `CF-${String(index).padStart(4, "0")}`;

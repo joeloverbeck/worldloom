@@ -1,15 +1,15 @@
 import type { Code, Content, Heading, Parent, Root, RootContent } from "mdast";
 import YAML from "yaml";
 
-import { anchorChecksum, contentHashForProse, contentHashForYaml } from "./canonical";
-import { CURRENT_INDEX_VERSION } from "../schema/version";
+import { anchorChecksum, contentHashForProse, contentHashForYaml } from "./canonical.js";
+import { CURRENT_INDEX_VERSION } from "../schema/version.js";
 import type {
   CanonFactRecord,
   ChangeLogEntry,
   NodeRow,
   NodeType,
   ValidationResultRow
-} from "../schema/types";
+} from "../schema/types.js";
 
 type SectionKind = "canon_fact_records" | "change_log" | "other";
 const CHANGE_LOG_ID_REGEX = /^CH-\d+$/;

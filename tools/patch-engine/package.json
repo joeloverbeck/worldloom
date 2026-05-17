@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Deterministic atomic-record patch applier (SPEC-03).",
   "private": true,
-  "type": "commonjs",
+  "type": "module",
   "main": "dist/src/apply.js",
   "types": "dist/src/apply.d.ts",
   "scripts": {

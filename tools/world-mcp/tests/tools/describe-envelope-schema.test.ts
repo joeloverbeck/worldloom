@@ -3,11 +3,11 @@ import { mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { createTempRepoRoot, destroyTempRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot } from "./_shared.js";
 
-import { OPERATION_KINDS } from "@worldloom/patch-engine";
+import { OPERATION_KINDS } from "../../src/package-interop.js";
 
-import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema";
+import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema.js";
 
 const PREDICATE_DSL_GRAMMAR_ID = "https://worldloom.local/schemas/predicate-dsl-grammar.schema.json";
 

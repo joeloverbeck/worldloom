@@ -6,10 +6,10 @@ import { pathToFileURL } from "node:url";
 
 import Database from "better-sqlite3";
 
-import { findNamedEntities } from "../../src/tools/find-named-entities";
-import { getContextPacket } from "../../src/tools/get-context-packet";
-import { getNeighbors } from "../../src/tools/get-neighbors";
-import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared";
+import { findNamedEntities } from "../../src/tools/find-named-entities.js";
+import { getContextPacket } from "../../src/tools/get-context-packet.js";
+import { getNeighbors } from "../../src/tools/get-neighbors.js";
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared.js";
 
 const REPO_ROOT = path.resolve(process.cwd(), "..", "..");
 const WORLD_SLUG = "animalia";

@@ -1,11 +1,11 @@
-import { createMcpError, type McpError } from "../errors";
+import { createMcpError, type McpError } from "../errors.js";
 
-import { getRecord, isMcpError, type GetRecordResponse } from "./get-record";
+import { getRecord, isMcpError, type GetRecordResponse } from "./get-record.js";
 import {
   ceilingMetadata,
   persistWithSummary,
   type PersistedWithSummaryFields
-} from "./oversize-delivery";
+} from "./oversize-delivery.js";
 
 export interface GetRecordsArgs {
   record_ids: string[];

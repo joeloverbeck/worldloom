@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { searchNodes } from "../../src/tools/search-nodes";
+import { searchNodes } from "../../src/tools/search-nodes.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared.js";
 import {
   STORY_FIXTURE_OTHER_SLUG,
   STORY_FIXTURE_SLUG,
   buildStoryBundleWorld
-} from "./story-bundle-fixture";
+} from "./story-bundle-fixture.js";
 
 test("searchNodes scopes lexical search to the requested story bundle", async () => {
   const root = createTempRepoRoot();

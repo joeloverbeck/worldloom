@@ -4,9 +4,9 @@ import test from "node:test";
 import {
   assembleContextPacket,
   DEFAULT_BUDGET_SPLIT
-} from "../../src/context-packet/assemble";
+} from "../../src/context-packet/assemble.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 
 function seedBudgetWorld(root: string): void {
   seedWorld(root, {

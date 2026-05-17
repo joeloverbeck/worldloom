@@ -3,9 +3,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { getPersistedPacketSlice } from "../../src/tools/get-persisted-packet-slice";
+import { getPersistedPacketSlice } from "../../src/tools/get-persisted-packet-slice.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot } from "./_shared.js";
 
 async function withToolResults<T>(run: (resultsDir: string) => Promise<T>): Promise<T> {
   const root = createTempRepoRoot();

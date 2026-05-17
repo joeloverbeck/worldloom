@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { findEditAnchors } from "../../src/tools/find-edit-anchors";
+import { findEditAnchors } from "../../src/tools/find-edit-anchors.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function buildAnchorWorld(root: string): void {
   seedWorld(root, {

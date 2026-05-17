@@ -1,4 +1,4 @@
-import { listWorldSlugs, openExistingWorldIndex } from "./shared";
+import { listWorldSlugs, openExistingWorldIndex } from "./shared.js";
 
 interface InspectPayload {
   worldSlug: string;

@@ -1,22 +1,22 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
-import { detectWorldSlug, worldRelativeFilePath } from "./lib/detect-world";
+import { detectWorldSlug, worldRelativeFilePath } from "./lib/detect-world.js";
 import {
   emitPermissionDecision,
   readHookInput,
   tailContainsToken,
   type PreToolUseReadInput
-} from "./lib/hook-io";
-import { logDecision } from "./lib/logging";
-import { resolveWorldRoot } from "./lib/pathing";
+} from "./lib/hook-io.js";
+import { logDecision } from "./lib/logging.js";
+import { resolveWorldRoot } from "./lib/pathing.js";
 import {
   ATOMIC_SOURCE_DEFAULT_THRESHOLD,
   ALWAYS_ALLOWED_DIRECTORIES,
   ALWAYS_PROTECTED_FILES,
   isAtomicSourceYaml,
   thresholdForFile
-} from "./lib/size-thresholds";
+} from "./lib/size-thresholds.js";
 
 function countLines(source: string): number {
   if (source.length === 0) {

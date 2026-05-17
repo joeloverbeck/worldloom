@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getRecord } from "../../src/tools/get-record";
-import { getRecordField } from "../../src/tools/get-record-field";
-import { getRecords } from "../../src/tools/get-records";
-import { getRecordsField } from "../../src/tools/get-records-field";
+import { getRecord } from "../../src/tools/get-record.js";
+import { getRecordField } from "../../src/tools/get-record-field.js";
+import { getRecords } from "../../src/tools/get-records.js";
+import { getRecordsField } from "../../src/tools/get-records-field.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
-import { STORY_FIXTURE_SLUG, buildStoryBundleWorld, storyNodeId } from "./story-bundle-fixture";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
+import { STORY_FIXTURE_SLUG, buildStoryBundleWorld, storyNodeId } from "./story-bundle-fixture.js";
 
 test("getRecord resolves authored story-bundle ids through story_slug", async () => {
   const root = createTempRepoRoot();

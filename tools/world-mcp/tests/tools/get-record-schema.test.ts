@@ -7,7 +7,7 @@ import {
   getRecordSchema,
   SUPPORTED_RECORD_SCHEMA_NODE_TYPES,
   type SupportedRecordSchemaNodeType
-} from "../../src/tools/get-record-schema";
+} from "../../src/tools/get-record-schema.js";
 
 const EXPECTED_SCHEMA_IDS: Record<SupportedRecordSchemaNodeType, string> = {
   canon_fact_record: "https://worldloom.local/schemas/canon-fact-record.schema.json",

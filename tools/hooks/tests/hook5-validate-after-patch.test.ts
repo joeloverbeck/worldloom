@@ -7,7 +7,7 @@ import {
   createTempRepoRoot,
   destroyTempRepoRoot,
   runCompiledHook
-} from "./_shared";
+} from "./_shared.js";
 
 interface FakeRunPayload {
   verdicts: Array<{

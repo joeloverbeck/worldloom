@@ -10,14 +10,14 @@ import type {
   SectionRecord
 } from "@worldloom/world-index/public/types";
 
-import { openIndexDb } from "../db";
-import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
-import { persistToolResultJson } from "../context-packet/persistence";
+import { openIndexDb } from "../db/index.js";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard.js";
+import { persistToolResultJson } from "../context-packet/persistence.js";
 import {
   ENVELOPE_OVERHEAD_RESERVE_CHARS,
   resolveHarnessCeilingChars
-} from "../context-packet/shared";
-import { createMcpError, type McpError } from "../errors";
+} from "../context-packet/shared.js";
+import { createMcpError, type McpError } from "../errors.js";
 
 import {
   STORY_BUNDLE_NODE_TYPES,
@@ -26,7 +26,7 @@ import {
   listIndexedWorldSlugs,
   toStoryScopedNodeId,
   type StoryBundleNodeType
-} from "./_shared";
+} from "./_shared.js";
 
 export interface GetRecordArgs {
   record_id: string;

@@ -7,7 +7,7 @@ import path from "node:path";
 
 import Database from "better-sqlite3";
 
-const cliPath = path.resolve(__dirname, "..", "src", "cli.js");
+const cliPath = path.resolve(import.meta.dirname, "..", "src", "cli.js");
 
 function createTempRepo(): string {
   return mkdtempSync(path.join(os.tmpdir(), "world-index-init-"));

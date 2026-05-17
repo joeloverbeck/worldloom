@@ -243,6 +243,6 @@ function loadCanonSourceBasisFields(): ReadonlySet<string> {
 }
 
 function loadCanonFactSchema(): Record<string, unknown> {
-  const schemaPath = path.resolve(__dirname, "../../../src/schemas/canon-fact-record.schema.json");
+  const schemaPath = path.resolve(import.meta.dirname, "../../../src/schemas/canon-fact-record.schema.json");
   return asPlainRecord(JSON.parse(readFileSync(schemaPath, "utf8")));
 }

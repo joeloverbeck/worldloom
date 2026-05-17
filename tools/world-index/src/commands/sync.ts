@@ -1,5 +1,5 @@
-import { syncWorldIndex } from "./shared";
-import type { IndexCommandOptions } from "./shared";
+import { syncWorldIndex } from "./shared.js";
+import type { IndexCommandOptions } from "./shared.js";
 
 export function sync(worldRoot: string, worldSlug: string, options: IndexCommandOptions = {}): number {
   const result = syncWorldIndex(worldRoot, worldSlug, options);

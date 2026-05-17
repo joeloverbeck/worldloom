@@ -4,17 +4,17 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { parseMarkdown } from "../src/parse/markdown";
+import { parseMarkdown } from "../src/parse/markdown.js";
 import {
   ANCHOR_CONTEXT_LINES,
   anchorChecksum,
   contentHashForProse,
   contentHashForYaml
-} from "../src/parse/canonical";
-import { normalizeProseWhitespace, serializeStableYaml } from "../src/hash/content";
+} from "../src/parse/canonical.js";
+import { normalizeProseWhitespace, serializeStableYaml } from "../src/hash/content.js";
 
 function loadFixture(name: string): string {
-  return readFileSync(path.resolve(__dirname, "..", "..", "tests", "fixtures", name), "utf8");
+  return readFileSync(path.resolve(import.meta.dirname, "..", "..", "tests", "fixtures", name), "utf8");
 }
 
 test("prose hashing normalizes whitespace before hashing", () => {
@@ -62,18 +62,18 @@ test("anchorChecksum responds only to local surrounding-context drift", () => {
 });
 
 test("canonical hash helpers are deterministic across fresh node processes", () => {
-  const fixturePath = path.resolve(__dirname, "..", "..", "tests", "fixtures", "fixture-ledger.md");
+  const fixturePath = path.resolve(import.meta.dirname, "..", "..", "tests", "fixtures", "fixture-ledger.md");
   const script = `
-    const fs = require("node:fs");
+    import fs from "node:fs";
+    const { parseMarkdown } = await import(${JSON.stringify(path.resolve(import.meta.dirname, "..", "src", "parse", "markdown.js"))});
+    const { contentHashForProse } = await import(${JSON.stringify(path.resolve(import.meta.dirname, "..", "src", "parse", "canonical.js"))});
     const source = fs.readFileSync(${JSON.stringify(fixturePath)}, "utf8");
-    const { parseMarkdown } = require(${JSON.stringify(path.resolve(__dirname, "..", "src", "parse", "markdown.js"))});
-    const { contentHashForProse } = require(${JSON.stringify(path.resolve(__dirname, "..", "src", "parse", "canonical.js"))});
     const parsed = parseMarkdown(source);
     process.stdout.write(JSON.stringify({ lines: parsed.lines.length, hash: contentHashForProse(source) }));
   `;
 
-  const first = spawnSync(process.execPath, ["-e", script], { encoding: "utf8" });
-  const second = spawnSync(process.execPath, ["-e", script], { encoding: "utf8" });
+  const first = spawnSync(process.execPath, ["--input-type=module", "-e", script], { encoding: "utf8" });
+  const second = spawnSync(process.execPath, ["--input-type=module", "-e", script], { encoding: "utf8" });
 
   assert.equal(first.status, 0);
   assert.equal(second.status, 0);
