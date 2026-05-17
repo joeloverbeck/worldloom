@@ -6,7 +6,7 @@
 **Date**: 2026-05-17
 **Supersedes**: closes one inconsistency carried since SPEC-35 D4 (`non_propagation_tag_shape` rename landed with `severity_mode: "fail"` but the in-file malformed-verdict helper still emits `severity: "warn"`); adds three new hardening deliverables intaken from the eleventh external audit; folds a same-class docs-text drift surfaced by codebase verification into the F-04 deliverable.
 
-**Implementation note (2026-05-17)**: D1 / `archive/tickets/SPEC40STOPIPELE-001.md` is implemented and archived. `non_propagation_tag_shape` now emits `severity: "fail"` for both malformed and missing tag verdicts, and the validators package build/test lane passed. D2-D4 remain active.
+**Implementation note (2026-05-17)**: D1 / `archive/tickets/SPEC40STOPIPELE-001.md` is implemented and archived. `non_propagation_tag_shape` now emits `severity: "fail"` for both malformed and missing tag verdicts, and the validators package build/test lane passed. D2 / `archive/tickets/SPEC40STOPIPELE-002.md` is implemented and archived: `expected_witness_coverage` now has fixture coverage for the `institutional_channel`, `rumor`, `location_trace`, and `object_trace` DA-anchored indirect routes, and `branching-story-health-audit` Phase 2d now classifies non-mechanized propagation routes as `judgment_assisted_indirect_propagation_unverified`. D3-D4 remain active.
 
 ## Problem Statement
 

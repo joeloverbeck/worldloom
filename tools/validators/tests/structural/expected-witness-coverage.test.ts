@@ -99,6 +99,100 @@ test("expected_witness_coverage_accepts_public_da_with_indirect_route_bel", asyn
   assert.deepEqual(verdicts, []);
 });
 
+test("expected_witness_coverage_accepts_public_da_with_institutional_channel_route", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "BEL-3", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    belief("BEL-3", "public", { access_route: "institutional_channel", access_records: ["DA-1"] }),
+    artifact("DA-1", "public")
+  ])));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("expected_witness_coverage_rejects_public_da_missing_institutional_channel_bel", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    artifact("DA-1", "public")
+  ])));
+
+  assertMissingIndirectPropagation(verdicts);
+});
+
+test("expected_witness_coverage_accepts_factional_da_with_rumor_route", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "BEL-3", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    belief("BEL-3", "faction", { access_route: "rumor", access_records: ["DA-1"] }),
+    artifact("DA-1", "factional")
+  ])));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("expected_witness_coverage_rejects_factional_da_with_direct_observation_route", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "BEL-3", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    belief("BEL-3", "faction", { access_route: "direct_observation", access_records: ["DA-1"] }),
+    artifact("DA-1", "factional")
+  ])));
+
+  assertMissingIndirectPropagation(verdicts);
+});
+
+test("expected_witness_coverage_accepts_public_da_with_location_trace_route", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "BEL-3", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    belief("BEL-3", "public", { access_route: "location_trace", access_records: ["DA-1"] }),
+    artifact("DA-1", "public")
+  ])));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("expected_witness_coverage_rejects_public_da_missing_location_trace_bel", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    artifact("DA-1", "public")
+  ])));
+
+  assertMissingIndirectPropagation(verdicts);
+});
+
+test("expected_witness_coverage_accepts_public_da_with_object_trace_route", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "BEL-3", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    belief("BEL-3", "public", { access_route: "object_trace", access_records: ["DA-1"] }),
+    artifact("DA-1", "public")
+  ])));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("expected_witness_coverage_rejects_public_da_with_direct_observation_object_trace_bel", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "BEL-3", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    belief("BEL-3", "public", { access_route: "direct_observation", access_records: ["DA-1"] }),
+    artifact("DA-1", "public")
+  ])));
+
+  assertMissingIndirectPropagation(verdicts);
+});
+
 test("expected_witness_coverage_accepts_public_da_with_event_leaves_no_accessible_trace_tag", async () => {
   const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
     event("SE-1", {
@@ -157,6 +251,11 @@ test("expected_witness_coverage is scoped to full-world, create_se_record patch 
     true
   );
 });
+
+function assertMissingIndirectPropagation(verdicts: Awaited<ReturnType<typeof expectedWitnessCoverage.run>>) {
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "expected_witness_coverage_missing_indirect_propagation");
+}
 
 function baseRecords(records: Array<ReturnType<typeof storyRecord>> = []) {
   return [
