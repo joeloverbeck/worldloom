@@ -5,7 +5,7 @@ import { spawnSync } from "node:child_process";
 
 import Database from "better-sqlite3";
 
-const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..");
+const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..", "..", "..");
 
 export function createTempRepoRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "worldloom-hooks-"));

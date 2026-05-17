@@ -45,7 +45,7 @@ export function resolveRepoRoot(cwd?: string): string {
     return processRoot;
   }
 
-  const moduleRoot = findRepoRootFrom(__dirname);
+  const moduleRoot = findRepoRootFrom(import.meta.dirname);
   if (moduleRoot !== null) {
     return moduleRoot;
   }

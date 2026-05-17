@@ -6,7 +6,7 @@ import {
   destroyTempRepoRoot,
   runCompiledHook,
   seedHookFixtureWorld
-} from "./_shared";
+} from "./_shared.js";
 
 test("hook1 injects world context, named entities, relevant nodes, and size warnings", () => {
   const root = createTempRepoRoot();

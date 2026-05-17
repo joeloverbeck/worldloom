@@ -3,11 +3,11 @@ import path from "node:path";
 
 import Database from "better-sqlite3";
 
-import { resolveWorldDbPath, resolveWorldRoot } from "./pathing";
+import { resolveWorldDbPath, resolveWorldRoot } from "./pathing.js";
 import {
   ALWAYS_PROTECTED_FILES,
   THRESHOLD_PROTECTED_FILES
-} from "./size-thresholds";
+} from "./size-thresholds.js";
 
 interface NamedEntityMatch {
   entity_id: string;

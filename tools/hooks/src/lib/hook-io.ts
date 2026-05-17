@@ -31,11 +31,11 @@ export interface SubagentStartInput extends HookEnvelope {
 export function readHookInput<T extends HookEnvelope>(): Promise<T> {
   const chunks: Buffer[] = [];
 
-  process.stdin.on("data", (chunk) => {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  });
-
   return new Promise<T>((resolve, reject) => {
+    process.stdin.on("data", (chunk) => {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    });
+
     process.stdin.on("end", () => {
       try {
         const source = Buffer.concat(chunks).toString("utf8").trim();
@@ -46,6 +46,7 @@ export function readHookInput<T extends HookEnvelope>(): Promise<T> {
     });
 
     process.stdin.on("error", reject);
+    process.stdin.resume();
   });
 }
 

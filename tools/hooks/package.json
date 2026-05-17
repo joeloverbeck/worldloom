@@ -1,6 +1,7 @@
 {
   "name": "@worldloom/hooks",
   "version": "0.1.0",
+  "type": "module",
   "description": "Claude Code hook scripts for worldloom retrieval discipline",
   "private": true,
   "scripts": {

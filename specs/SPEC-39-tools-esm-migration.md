@@ -9,6 +9,7 @@
 
 ## Implementation Notes
 
+- 2026-05-17: `archive/tickets/SPEC39TOOESMMIG-003.md` completed the `tools/hooks` migration. The landed slice added `"type": "module"`, added `.js` suffixes to hooks source/test relative imports, replaced hooks source and test-helper `__dirname` lookups with `import.meta.dirname`, and hardened `readHookInput` so spawned compiled hook tests reliably consume stdin under ESM. The deliverables table's old import/global counts are historical intake context; the archived ticket is the active implementation record.
 - 2026-05-17: `archive/tickets/SPEC39TOOESMMIG-002.md` completed the `tools/validators` migration. The landed slice flipped `tools/validators/package.json` to `"type": "module"`, replaced validators source `__dirname` schema-path lookups with `import.meta.dirname`, and repaired same-seam AJV 2020 subpath/test-helper ESM interop. The deliverables table's original "Source edits: None" entry for validators is historical intake context; the archived ticket is the active implementation record.
 - 2026-05-17: `archive/tickets/SPEC39TOOESMMIG-001.md` completed the `tools/patch-engine` migration. The landed slice flipped only `tools/patch-engine/package.json` to `"type": "module"`; patch-engine build/test/compile-reject/integration lanes passed, and symlinked `tools/validators` plus `tools/world-mcp` consumer builds passed against the post-flip patch-engine package.
 

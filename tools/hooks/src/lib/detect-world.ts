@@ -1,7 +1,7 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
 
-import { resolveWorldsRoot } from "./pathing";
+import { resolveWorldsRoot } from "./pathing.js";
 
 function listWorldSlugs(cwd?: string): string[] {
   try {

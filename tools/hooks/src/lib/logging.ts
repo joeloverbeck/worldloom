@@ -1,7 +1,7 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 
-import { resolveRepoRoot } from "./pathing";
+import { resolveRepoRoot } from "./pathing.js";
 
 type LogLevel = "info" | "error";
 

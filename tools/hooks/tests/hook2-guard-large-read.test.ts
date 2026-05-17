@@ -8,7 +8,7 @@ import {
   runCompiledHook,
   seedHookFixtureWorld,
   writeTranscript
-} from "./_shared";
+} from "./_shared.js";
 
 test("hook2 blocks full reads of always-protected files", () => {
   const root = createTempRepoRoot();

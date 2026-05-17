@@ -4,8 +4,8 @@ import {
   emitPermissionDecision,
   readHookInput,
   type PreToolUseReadInput
-} from "./lib/hook-io";
-import { logDecision } from "./lib/logging";
+} from "./lib/hook-io.js";
+import { logDecision } from "./lib/logging.js";
 
 interface PreToolUseEditInput extends PreToolUseReadInput {
   tool_input?: {
