@@ -47,9 +47,9 @@ test("SPEC-04 capstone re-enumerates animalia source counts from the fixture cop
 });
 
 test("SPEC-04 verification: Unit registry exposes the active mechanized validators", () => {
-  assert.equal(structuralValidators.length, 23);
+  assert.equal(structuralValidators.length, 24);
   assert.equal(ruleValidators.length, 11);
-  assert.equal([...structuralValidators, ...ruleValidators].length, 34);
+  assert.equal([...structuralValidators, ...ruleValidators].length, 35);
   assert.ok(!structuralValidators.some((validator) => validator.name === "adjudication_discovery_fields"));
 });
 

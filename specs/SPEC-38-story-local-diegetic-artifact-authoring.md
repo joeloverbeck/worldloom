@@ -396,6 +396,12 @@ covered by focused rule tests plus the package-wide validators suite.
 
 #### D11 — New validator `story_da_duplicate_heuristic` (structural)
 
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-011.md`
+landed this validator as `tools/validators/src/structural/story-da-duplicate-heuristic.ts`,
+registered it in the structural validator list, updated validator inventory/count
+proof surfaces, and covered distinct, unlinked duplicate, supersession,
+derivation, and `applies_to` scoping cases.
+
 **Problem**: Health-audit (D5 check 2) needs duplicate-DA detection but no validator currently surfaces it. Duplicate DAs arise from operator error during turn-cycle authoring when the operator forgets to supersede an existing DA or to use `derived_from` for a copy.
 
 **Change**: Add `tools/validators/src/structural/story-da-duplicate-heuristic.ts`. The validator:

@@ -17,6 +17,7 @@ import { recursiveReferenceClosure } from "../structural/recursive-reference-clo
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
+import { storyDaDuplicateHeuristic } from "../structural/story-da-duplicate-heuristic.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
 import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
@@ -53,6 +54,7 @@ export const structuralValidators: readonly Validator[] = [
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,
+  storyDaDuplicateHeuristic,
   touchedByCfCompleteness,
   proposalPackageShape,
   proseReceiptSchemaCompliance,
