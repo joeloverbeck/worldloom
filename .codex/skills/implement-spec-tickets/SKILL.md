@@ -105,7 +105,13 @@ If live `git status --short` shows dirty owned paths for `next_target` or `in_pr
 7. Resolve the first ticket:
    - if `ticket_path` is supplied, resolve it to exactly one active ticket under `tickets/`
    - otherwise inspect active `tickets/*.md`, choose the first ticket in lexical order whose filename, `Deps`, problem statement, or explicit spec reference ties it to the originating spec, and state the selection
-8. Build the initial pending queue from active tickets that clearly belong to the same originating spec family. Keep the queue lexical and append-only; do not jump ahead of a follow-up created by the current iteration.
+8. Build the initial pending queue from active tickets that clearly belong to the same originating spec family. Parse active same-family `Deps` before freezing the order:
+   - Resolve dependency entries that name active same-family ticket ids, active ticket paths, or archived ticket paths.
+   - Treat archived/completed dependencies as already satisfied.
+   - Order active prerequisites before their active dependents, using lexical order only within each ready set.
+   - If the supplied first ticket has unsatisfied active same-family prerequisites, retarget to the first prerequisite before invoking `implement-ticket`, refresh the state file, and state the retarget.
+   - If active same-family dependencies form a cycle or name an unresolved active prerequisite, stop and report the dependency problem instead of guessing.
+   Keep the queue append-only after this dependency-aware ordering; do not jump ahead of a follow-up created by the current iteration.
 9. Decide how to handle pre-existing untracked same-family ticket/spec files before implementation. If they are required to define the active family queue, dependency chain, or truthful handoff for the current iteration, they may be included in the first iteration commit and named as pre-existing same-family state. If they are not required for the current iteration, either leave them uncommitted or split them into a separate intake/state commit; state the choice in the handoff.
 10. Write or refresh `.codex/run-state/implement-spec-tickets.json` with the resolved spec, initial target, initial queue, dirty-state classification, and `blocked: false`.
 
@@ -284,7 +290,8 @@ The next session must reload this skill and the child skills from disk, then res
 
 - A follow-up ticket created by `implement-ticket` or `post-ticket-review` is always the next target.
 - If multiple follow-ups are created in one iteration, choose the one explicitly identified as the next owner. If none is identified, choose the lowest lexical path and record the ordering.
-- Do not skip active tickets in the originating spec family unless their `Deps`, status, or review result proves they are no longer valid next work.
+- Between non-follow-up tickets, keep active same-family prerequisites ahead of active dependents. Recompute this from live `Deps` after archive/dependency repairs, treating archived/completed deps as satisfied and lexical order as the tie-breaker among currently ready tickets.
+- Do not skip active tickets in the originating spec family unless their `Deps`, status, or review result proves they are not currently valid next work.
 - If a sibling ticket is absorbed into the current ticket, update the queue after the child skill has made that sibling truthful.
 - If a ticket is archived, remove its old active path from the queue and replace dependency references according to `post-ticket-review`.
 
