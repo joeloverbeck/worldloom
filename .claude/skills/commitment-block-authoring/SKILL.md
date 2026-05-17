@@ -33,7 +33,7 @@ Create compact reusable commitment blocks (`SLT` records) for the author pool of
 <HARD-GATE>
 Do NOT write `worlds/<world_slug>/stories/<story_slug>/storylet-batches/SLB-<integer>.md` or update `worlds/<world_slug>/stories/<story_slug>/INDEX.md`, AND do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, until:
 
-(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; mode validated; current SLT pool loaded from `_source/storylets/SLT-*.yaml` (`direct_batch`) OR audit + RSP cards loaded from `audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md` (`audit_repair`); SLT ids and one SLB id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='commitment_block_authoring', ...)`.
+(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; mode validated; current SLT pool loaded via `mcp__worldloom__list_records(record_type='storylet_record', world_slug=<world_slug>, story_slug=<story_slug>, include_full_body=true)` (`direct_batch`) OR audit + RSP cards loaded from `audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md` (`audit_repair`); SLT ids and one SLB id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='commitment_block_authoring', ...)`.
 
 (b) Phases 1-5 have completed in working memory: coverage gaps diagnosed (`direct_batch`) OR RSP cards loaded with non-commitment-block `repair_kind` cards skipped (`audit_repair`); per-block drafts authored per shared contract §4.4 schema + §5 predicate DSL; 6-gate per-block validation complete (schema completeness, predicate parse, branch-scope legality, mystery/invariant firewall, effect legality, exit-option grounding); 4-check batch-diversity validation complete (`direct_batch` only — move-family diversity, recovery coverage, belief-or-relationship coverage, no branch-local dependencies in global-author-pool blocks); SLB-<integer> batch manifest drafted.
 
@@ -107,7 +107,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `.claude/skills/_shared-templates/story-state-contract.md` — §5 closed predicate DSL, §10 shared write order, §11 mystery and canon authority
 - `.claude/skills/_shared-templates/story-record-schemas.md` — §4.4 SLT schema (canonical)
 - `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` — bundle root context
-- `worlds/<world_slug>/stories/<story_slug>/_source/storylets/SLT-*.yaml` — current SLT pool (`direct_batch` only; may be empty post-bootstrap if `seed_commitment_blocks: none`)
+- current SLT pool via `mcp__worldloom__list_records(record_type='storylet_record', world_slug=<world_slug>, story_slug=<story_slug>, include_full_body=true)` (`direct_batch` only; may be empty post-bootstrap if `seed_commitment_blocks: none`)
 - `worlds/<world_slug>/stories/<story_slug>/audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md` — source audit + RSP cards (`audit_repair` only; abort with audit-not-found or rsp-not-found error if any reference missing)
 - World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='commitment_block_authoring', story_slug=<story_slug>, seed_nodes=<Mystery Reserve forbidden-status entries + world INV records + other world-scope canon anchors>, token_budget=<default>)`. Load active cast and open obligations / threads in the bundle through `story_slug` + `story_bundle_context` or targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records`; do not pass story-local ids in world-scope `seed_nodes`.
 
@@ -121,7 +121,7 @@ Before Phase 1:
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
 3. Validate `mode`: must be `direct_batch` or `audit_repair`; for `direct_batch`, validate `target_count` (1–12 inclusive, default 6); for `audit_repair`, validate `audit_id` matches the `SAU-<integer>` pattern and `finding_ids` is non-empty.
 4. Mode-specific load:
-   - `direct_batch`: scan `_source/storylets/` for every `SLT-*.yaml`; load each into a current-pool inventory keyed by `move_family`.
+   - `direct_batch`: invoke `mcp__worldloom__list_records(record_type='storylet_record', world_slug=<world_slug>, story_slug=<story_slug>, include_full_body=true)` and key the returned records into a current-pool inventory by `move_family`. The returned records carry full bodies for the gap-diagnosis weighting in Phase 1; no per-file `Read` fallback is required.
    - `audit_repair`: load `audits/<audit_id>-*.md` (verify exists); for each `RSP-<integer>` in `finding_ids`, load `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md`. Abort with rsp-not-found error on any missing card.
 5. Allocate ids: one `SLT` per planned block (`target_count` for `direct_batch`; `len(finding_ids)` for `audit_repair` — actual usage may be fewer if Phase 1 skips RSP cards) via `mcp__worldloom__allocate_next_id(world_slug, 'SLT', story_slug=<story_slug>)`. Allocate one `SLB` id for the batch manifest.
 6. Load story-local context first via `story_slug` scoped retrieval: active cast `STENT` ids and the bundle's currently-open obligations / consequences / threads with `urgency` (for `direct_batch` gap diagnosis weighting) come from `story_bundle_context` or targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records`. Then load the world canon context packet with `story_slug=<story_slug>` and world-scope seeds only: every Mystery Reserve `M-<integer>` with `status: forbidden` (loaded whole-class for per-block firewall), every world INV record (loaded whole-class for invariant verification), and any other world-canon anchors needed by the batch.
@@ -151,7 +151,7 @@ If any precondition fails, the skill aborts before Phase 1.
 11. Negotiation / resource-exchange block
 
 Identify which coverage targets are absent or under-represented in the current pool. If a `focus` hint was supplied, weight gap diagnosis toward the named focus area (the Phase 4 diversity gate still enforces minimum spread regardless).
-Use predicate DSL v2 for global-pool social-state coverage. The function-call forms below are notation only; emitted `SLT.preconditions.hard | soft` entries are flat predicate objects per shared contract §5. Prefer existential social-state predicates with `urgency?` filters such as `any_obligation_open(alias, kind?, urgency?, owed_by_role?, owed_to_role?)`, `any_consequence_pending(alias, kind?, urgency?, derived_from?)`, `any_thread_active(alias, tag?, urgency?)`, `any_relationship_axis(alias, axis, comparator, value, participant_role?)`, `any_belief(alias, holder_role?, mode?, truth_relation?, visibility?)`, and `any_intention(alias, holder_role?, urgency?)` for global-pool blocks that address high-salience debts, relationships, beliefs, threads, and intentions without naming branch-local record ids. Pick stable aliases that describe the matched record's role in the block, for example `urgent_debt`, `pending_fallout`, `trust_edge`, `public_belief`, or `open_intent`.
+Use the existential predicates in the predicate DSL for global-pool social-state coverage. The function-call forms below are notation only; emitted `SLT.preconditions.hard | soft` entries are flat predicate objects per shared contract §5. Prefer existential social-state predicates with `urgency?` filters such as `any_obligation_open(alias, kind?, urgency?, owed_by_role?, owed_to_role?)`, `any_consequence_pending(alias, kind?, urgency?, derived_from?)`, `any_thread_active(alias, tag?, urgency?)`, `any_relationship_axis(alias, axis, comparator, value, participant_role?)`, `any_belief(alias, holder_role?, mode?, truth_relation?, visibility?)`, and `any_intention(alias, holder_role?, urgency?)` for global-pool blocks that address high-salience debts, relationships, beliefs, threads, and intentions without naming branch-local record ids. Pick stable aliases that describe the matched record's role in the block, for example `urgent_debt`, `pending_fallout`, `trust_edge`, `public_belief`, or `open_intent`.
 
 Output: a list of `target_count` planned blocks, each with a `move_family` value from the 16-value enum (per shared contract §4.4 SLT schema) and a brief draft scope (preconditions sketch, beat outline, effects shape).
 
@@ -166,7 +166,7 @@ Output: a list of `target_count` planned blocks, each with a `move_family` value
 
 Each commitment-block-kind card maps 1:1 to one planned block.
 
-If an author-pool RSP targets an open social-state record class covered by predicate DSL v2 (`OBL`, `CNSQ`, `THR`, `SREL`, `BEL`, or `STINT`), translate the repair into an actor-unbound existential predicate rather than copying a branch-local record id into the `SLT`. Use the RSP's `target_records` and rationale to choose filters (`kind`, `urgency`, role, axis, belief mode, truth relation, or visibility) and bind the matched record to an alias. Branch-scoped RSP repairs may use exact-ID predicates when the target branch owns those records.
+If an author-pool RSP targets an open social-state record class covered by the existential predicates (`OBL`, `CNSQ`, `THR`, `SREL`, `BEL`, or `STINT`), translate the repair into an actor-unbound existential predicate rather than copying a branch-local record id into the `SLT`. Use the RSP's `target_records` and rationale to choose filters (`kind`, `urgency`, role, axis, belief mode, truth relation, or visibility) and bind the matched record to an alias. Branch-scoped RSP repairs may use exact-ID predicates when the target branch owns those records.
 
 ## Phase 2: Draft commitment blocks
 
@@ -320,10 +320,10 @@ The SLB file is a markdown direct-write manifest, not an atomic YAML record. No 
 
 ## Record Schemas
 
-All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-record-schemas.md`:
+All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-record-schemas.md` (canonical prose form); the machine-readable JSON Schema for the SLT body is also retrievable via `mcp__worldloom__get_record_schema(node_type='storylet_record')`, parallel to how Phase 6 sub-step 1 retrieves the envelope shape via `describe_envelope_schema`:
 
 - `SLT` (§4.4) — commitment block schema (this skill's primary output).
-- Predicate DSL (§5) — closed predicate language for `preconditions.hard | soft`, including predicate DSL v2 existential predicates and `bound:<alias>` effect references.
+- Predicate DSL (§5) — closed predicate language for `preconditions.hard | soft`, including the existential predicates and `bound:<alias>` effect references.
 - The SLB manifest is a markdown direct-write artifact (not an atomic `_source/` record); its shape is defined inline in this skill's Phase 5 template.
 
 ## FOUNDATIONS Alignment

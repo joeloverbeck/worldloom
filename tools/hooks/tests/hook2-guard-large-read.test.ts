@@ -140,3 +140,152 @@ test("hook2 respects ALLOW_FULL_READ override", () => {
     destroyTempRepoRoot(root);
   }
 });
+
+test("hook2 blocks full reads of world-canon atomic-source YAML above threshold", () => {
+  const root = createTempRepoRoot();
+  seedHookFixtureWorld(root);
+  const transcriptPath = writeTranscript(root, "transcript.jsonl", '{"prompt":"Please inspect worlds/animalia/_source/canon/CF-1.yaml"}\n');
+
+  try {
+    const result = runCompiledHook(
+      "hook2-guard-large-read.js",
+      {
+        hook_event_name: "PreToolUse",
+        cwd: root,
+        transcript_path: transcriptPath,
+        tool_name: "Read",
+        tool_input: {
+          file_path: path.join(root, "worlds", "animalia", "_source", "canon", "CF-1.yaml")
+        }
+      },
+      {
+        cwd: root,
+        projectDir: root
+      }
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /"permissionDecision":"deny"/);
+    assert.match(result.stdout, /mcp__worldloom__get_record\(record_id='CF-1'\)/);
+    assert.match(result.stdout, /mcp__worldloom__list_records\(record_type='canon'/);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("hook2 blocks full reads of story-bundle atomic-source YAML above threshold", () => {
+  const root = createTempRepoRoot();
+  seedHookFixtureWorld(root);
+  const transcriptPath = writeTranscript(
+    root,
+    "transcript.jsonl",
+    '{"prompt":"Please inspect worlds/animalia/stories/red-bunny/_source/storylets/SLT-1.yaml"}\n'
+  );
+
+  try {
+    const result = runCompiledHook(
+      "hook2-guard-large-read.js",
+      {
+        hook_event_name: "PreToolUse",
+        cwd: root,
+        transcript_path: transcriptPath,
+        tool_name: "Read",
+        tool_input: {
+          file_path: path.join(root, "worlds", "animalia", "stories", "red-bunny", "_source", "storylets", "SLT-1.yaml")
+        }
+      },
+      {
+        cwd: root,
+        projectDir: root
+      }
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /"permissionDecision":"deny"/);
+    assert.match(result.stdout, /mcp__worldloom__get_record\(record_id='SLT-1', story_slug='red-bunny'\)/);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("hook2 allows scoped reads and below-threshold full reads of atomic-source YAML", () => {
+  const root = createTempRepoRoot();
+  seedHookFixtureWorld(root);
+  const transcriptPath = writeTranscript(root, "transcript.jsonl", '{"prompt":"Please inspect worlds/animalia/_source/canon/CF-1.yaml"}\n');
+
+  try {
+    const scopedAllowed = runCompiledHook(
+      "hook2-guard-large-read.js",
+      {
+        hook_event_name: "PreToolUse",
+        cwd: root,
+        transcript_path: transcriptPath,
+        tool_name: "Read",
+        tool_input: {
+          file_path: path.join(root, "worlds", "animalia", "_source", "canon", "CF-1.yaml"),
+          offset: 0,
+          limit: 50
+        }
+      },
+      {
+        cwd: root,
+        projectDir: root
+      }
+    );
+    assert.equal(scopedAllowed.stdout, "");
+
+    const belowThresholdAllowed = runCompiledHook(
+      "hook2-guard-large-read.js",
+      {
+        hook_event_name: "PreToolUse",
+        cwd: root,
+        transcript_path: transcriptPath,
+        tool_name: "Read",
+        tool_input: {
+          file_path: path.join(root, "worlds", "animalia", "_source", "canon", "CF-2.yaml")
+        }
+      },
+      {
+        cwd: root,
+        projectDir: root
+      }
+    );
+    assert.equal(belowThresholdAllowed.stdout, "");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("hook2 respects ALLOW_FULL_READ override for atomic-source YAML", () => {
+  const root = createTempRepoRoot();
+  seedHookFixtureWorld(root);
+  const transcriptPath = writeTranscript(
+    root,
+    "transcript.jsonl",
+    '{"prompt":"ALLOW_FULL_READ Please inspect worlds/animalia/_source/canon/CF-1.yaml"}\n'
+  );
+
+  try {
+    const result = runCompiledHook(
+      "hook2-guard-large-read.js",
+      {
+        hook_event_name: "PreToolUse",
+        cwd: root,
+        transcript_path: transcriptPath,
+        tool_name: "Read",
+        tool_input: {
+          file_path: path.join(root, "worlds", "animalia", "_source", "canon", "CF-1.yaml")
+        }
+      },
+      {
+        cwd: root,
+        projectDir: root
+      }
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout, "");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});

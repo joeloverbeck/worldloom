@@ -90,6 +90,32 @@ preconditions:
   soft: []
 ```
 
+Combinator emission. `all` and `any` wrap a list of inner predicate objects under the `predicates:` key; `not` wraps a single inner predicate object under the `predicate:` key (singular). Each inner predicate is itself a flat predicate object per the canonical form above — combinators do not introduce a new wrapper shape, they only nest. An existential `any_*` predicate inside a combinator binds its `alias` for the same-block effect references described below; the validator collects every alias from every nested branch into a single bound-alias set, so the same `alias` may legitimately re-use across sibling branches of one `any[…]` combinator (the runtime selects whichever branch matched and the alias resolves to that branch's matched record). Canonical emitted form:
+
+```yaml
+preconditions:
+  hard:
+    - pred: any
+      predicates:
+        - pred: any_relationship_axis
+          alias: tension_axis
+          axis: hostility
+          comparator: ">="
+          value: medium
+        - pred: any_relationship_axis
+          alias: tension_axis
+          axis: fear
+          comparator: ">="
+          value: medium
+    - pred: not
+      predicate:
+        pred: record_active
+        record: STENT-7
+  soft: []
+```
+
+(Argument-name shapes per `PREDICATE_ARG_SCHEMAS` in `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`: `all: required ["predicates"]`, `any: required ["predicates"]`, `not: required ["predicate"]`. The plural/singular split is load-bearing — `all`/`any` with a singular `predicate:` key, or `not` with a plural `predicates:` key, fails predicate-DSL parsability validation.)
+
 | Predicate | Shape | Consumed by |
 |---|---|---|
 | `fact_true(SF-<integer>)` | Branch-local fact must be currently active. | turn-cycle eligibility |
