@@ -108,7 +108,7 @@ Completed: 2026-05-17
 1. `deployed_mcp_rejects_known_bad_causal_dependency_plan` builds a known-bad story patch plan where a choice remains active while grounded in a closed `STOBJ`, then asserts the deployed validator path emits `causal_dependency_threat_scan` / `choice_dependency_clobbered`.
 2. `deployed_mcp_rejects_known_bad_expected_witness_plan` builds a known-bad public event with a co-located witness and no BEL witness coverage, then asserts the deployed validator path emits `expected_witness_coverage` / `expected_witness_coverage_missing_public_bel`.
 
-Both tests use the existing `withServerClient` in-memory MCP dispatch harness. No production code, helper module, MCP registration, or CI workflow changed. `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` now records the D3 implementation note and the remaining D4/capability-parity boundary.
+Both tests use the existing `withServerClient` in-memory MCP dispatch harness. No production code, helper module, MCP registration, or CI workflow changed. `archive/specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` records the D3 implementation note and the D4/capability-parity closeout boundary.
 
 ## Verification Result
 

@@ -82,7 +82,7 @@ of the canon-addition adjudication.
 - `tools/validators/src/structural/record-schema-compliance.ts` (modify — exports `SchemaTarget` and `naRationaleVerdicts`)
 - `tools/validators/tests/structural/proposal-package-shape.test.ts` (modify)
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify)
-- `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` (modify — D1 implementation note)
+- `archive/specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` (modify — D1 implementation note)
 
 ## Out of Scope
 
@@ -123,7 +123,7 @@ Completed: 2026-05-17.
 
 This ticket extended `proposal_package_shape` so proposal-package candidates now enforce the same conditional CF safety-block contract that accepted CF records already enforce. Safety-sensitive `candidate.type` values now emit proposal-stage verdicts for missing `exception_governance`, missing `epistemic_profile`, missing `type`, and thin `{ n_a: ... }` rationales. The implementation reuses `requiresExceptionGovernance`, `requiresEpistemicProfile`, and `naRationaleVerdicts` from `record-schema-compliance.ts` so rationale-quality logic stays single-source.
 
-The validators package gained five focused proposal-package tests, and `.claude/skills/story-fact-promotion-to-canon/SKILL.md` now tells authors to include the required safety blocks in the proposal candidate instead of deferring that reasoning to `canon-addition`. `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` was updated with a D1 implementation note so the active spec no longer presents this deliverable as wholly pending.
+The validators package gained five focused proposal-package tests, and `.claude/skills/story-fact-promotion-to-canon/SKILL.md` now tells authors to include the required safety blocks in the proposal candidate instead of deferring that reasoning to `canon-addition`. `archive/specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` records the D1 implementation note.
 
 ## Verification Result
 

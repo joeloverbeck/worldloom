@@ -2,7 +2,7 @@
 
 # SPEC-37 — Story Pipeline Tenth-Iteration Fixes
 
-**Status**: DRAFT
+**Status**: COMPLETED
 **Date**: 2026-05-17
 **Supersedes**: closes the runtime/deployed MCP capability parity carry-over deferred at `archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §Risks & Open Questions ("Runtime / deployed-MCP parity for D5"). Adds two new structural-validator hardening deliverables intaken from the tenth external audit.
 
@@ -356,3 +356,22 @@ Full-suite proof at spec close: `npm test` green across `tools/validators/`, `to
 - **Pilot-tier calibration unknowns.** Both D2's indirect-cue check and D1's safety-block enforcement are validated against synthetic fixtures only. Pilot-tier story-bundle authoring will surface calibration needs — false positives (validator fires when author's design is intentional), false negatives (validator misses a class of public-DA shape), and author-friction signals (validator obligates patterns authors find unnatural). The validator-hardening-IV iteration is likely.
 
 - **No active story bundles yet.** This spec lands during the pre-pilot window. The blast radius on existing content is zero — there are no pilot-tier story bundles whose D1/D2 fixtures could break under tightened enforcement. D3/D4 changes are purely additive on test and build-info surfaces; no existing capability consumer breaks.
+
+## Outcome
+
+Completed: 2026-05-17
+
+SPEC-37 landed all four deliverables:
+
+- D1: `proposal_package_shape` now enforces proposal-stage canon safety blocks for safety-sensitive candidate types and thin `n_a` rationales; archived at `archive/tickets/SPEC37STOPIPTEN-001.md`.
+- D2: `expected_witness_coverage` now enforces the public/factional DA indirect-propagation cue through same-SE indirect-route BEL records or the explicit `event_leaves_no_accessible_trace` non-propagation tag; archived at `archive/tickets/SPEC37STOPIPTEN-002.md`.
+- D3: `tools/world-mcp/tests/server/dispatch.test.ts` now exercises known-bad `validate_patch_plan` fixtures through the in-memory MCP boundary; archived at `archive/tickets/SPEC37STOPIPTEN-003.md`.
+- D4: `describe_capabilities().build_info` now exposes `validator_registry_hash` and `patch_operation_schema_hash`, with docs and schema-paired tests updated; archived at `archive/tickets/SPEC37STOPIPTEN-004.md`.
+
+Final verification:
+
+- `cd tools/validators && npm test` passed with 342 tests.
+- `cd tools/world-mcp && npm test` passed with 380 tests.
+- `cd tools/patch-engine && npm test` passed with 75 tests.
+- `cd tools/hooks && npm test` passed with 18 tests.
+- The manual external MCP-client smoke named in the draft verification section was not run through a restarted external client; the accepted substitute surface is the package-local in-memory MCP dispatch tests from D3/D4, plus the broad `tools/world-mcp` suite.

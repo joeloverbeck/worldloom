@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — extends `tools/world-mcp/src/build-info.ts` (BuildInfo interface + `createBuildInfo` function + exported hash helpers); extends `tools/world-mcp/src/tools/describe-envelope-schema.ts` (shared op-schema manifest helper); extends `tools/world-mcp/tests/server/capability-parity.test.ts` (two new tests); updates two schema-paired test files for symmetry; adds new prose to `docs/MACHINE-FACING-LAYER.md` (new `### Build-info fields` sub-section + revision of line 113's stale-diagnostic row); updates `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` with the D4 implementation note.
+**Engine Changes**: Yes — extends `tools/world-mcp/src/build-info.ts` (BuildInfo interface + `createBuildInfo` function + exported hash helpers); extends `tools/world-mcp/src/tools/describe-envelope-schema.ts` (shared op-schema manifest helper); extends `tools/world-mcp/tests/server/capability-parity.test.ts` (two new tests); updates two schema-paired test files for symmetry; adds new prose to `docs/MACHINE-FACING-LAYER.md` (new `### Build-info fields` sub-section + revision of line 113's stale-diagnostic row); updates `archive/specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` with the D4 implementation note.
 **Deps**: None
 
 ## Problem
@@ -148,7 +148,7 @@ The existing row at line 113 (the "A tool's pre-apply validators reject a patch 
 - `tools/world-mcp/tests/tools/describe-capabilities.test.ts` (modify — schema-paired format assertions)
 - `tools/world-mcp/tests/server/dispatch.test.ts` (modify — schema-paired format assertions in the existing describe_capabilities test at line 948)
 - `docs/MACHINE-FACING-LAYER.md` (modify — new `### Build-info fields` sub-section + line 93 prose extension + line 113 stale-diagnostic revision)
-- `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` (modify — D4 implementation note)
+- `archive/specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` (modify — D4 implementation note)
 
 ## Out of Scope
 
@@ -195,7 +195,7 @@ Completed: 2026-05-17
 
 `BuildInfo` now includes `validator_registry_hash` and `patch_operation_schema_hash`, both populated once at server startup through `createBuildInfo`. `validator_registry_hash` hashes normalized source contents from `tools/validators/src/rules/*.ts` and `tools/validators/src/structural/*.ts`. `patch_operation_schema_hash` hashes the shared patch-operation schema manifest exported from `tools/world-mcp/src/tools/describe-envelope-schema.ts`, so `describe_capabilities` and `describe_envelope_schema` use the same op-schema authority.
 
-`tools/world-mcp/tests/server/capability-parity.test.ts` now asserts both runtime-exposed fingerprints against locally computed expectations. `tools/world-mcp/tests/tools/describe-capabilities.test.ts` and `tools/world-mcp/tests/server/dispatch.test.ts` now assert the augmented `build_info` shape. `docs/MACHINE-FACING-LAYER.md` now documents all five build-info fields, extends the schema-currency guidance to the new hashes, and removes the stale validator-bundle "cannot detect" claim. `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` records D4 as landed.
+`tools/world-mcp/tests/server/capability-parity.test.ts` now asserts both runtime-exposed fingerprints against locally computed expectations. `tools/world-mcp/tests/tools/describe-capabilities.test.ts` and `tools/world-mcp/tests/server/dispatch.test.ts` now assert the augmented `build_info` shape. `docs/MACHINE-FACING-LAYER.md` now documents all five build-info fields, extends the schema-currency guidance to the new hashes, and removes the stale validator-bundle "cannot detect" claim. `archive/specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` records D4 as landed.
 
 ## Verification Result
 
