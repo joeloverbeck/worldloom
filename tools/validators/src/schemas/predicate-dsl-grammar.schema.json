@@ -83,6 +83,38 @@
       }
     },
     {
+      "title": "clock_at_least",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "clock", "value"],
+      "properties": {
+        "pred": { "const": "clock_at_least" },
+        "clock": { "type": "string", "pattern": "^CLK-[0-9]+$" },
+        "value": { "type": "integer", "minimum": 0 }
+      }
+    },
+    {
+      "title": "clock_below",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "clock", "value"],
+      "properties": {
+        "pred": { "const": "clock_below" },
+        "clock": { "type": "string", "pattern": "^CLK-[0-9]+$" },
+        "value": { "type": "integer", "minimum": 0 }
+      }
+    },
+    {
+      "title": "clock_full",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "clock"],
+      "properties": {
+        "pred": { "const": "clock_full" },
+        "clock": { "type": "string", "pattern": "^CLK-[0-9]+$" }
+      }
+    },
+    {
       "title": "any_obligation_open",
       "type": "object",
       "additionalProperties": true,
@@ -119,6 +151,18 @@
         "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
         "tag": { "type": "string", "pattern": "^[a-z][a-z0-9_:-]*$" },
         "urgency": { "type": "string", "enum": ["low", "medium", "high"] }
+      }
+    },
+    {
+      "title": "any_clock_active",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_clock_active" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "kind": { "type": "string", "enum": ["danger", "racing", "mission", "faction", "exposure", "pursuit", "deadline"] },
+        "salience": { "type": "string", "enum": ["low", "medium", "high"] }
       }
     },
     {

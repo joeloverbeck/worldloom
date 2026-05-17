@@ -2,6 +2,11 @@ import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
+import { clockFiringThresholdIntegrity } from "../structural/clock-firing-threshold-integrity.js";
+import { clockTerminalDebtIntegrity } from "../structural/clock-terminal-debt-integrity.js";
+import { clockThresholdOrdering } from "../structural/clock-threshold-ordering.js";
+import { clockTickProvenance } from "../structural/clock-tick-provenance.js";
+import { clockValueInRange } from "../structural/clock-value-in-range.js";
 import { causalDependencyThreatScan } from "../structural/causal-dependency-threat-scan.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
@@ -55,6 +60,11 @@ export const structuralValidators: readonly Validator[] = [
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,
+  clockValueInRange,
+  clockThresholdOrdering,
+  clockTickProvenance,
+  clockFiringThresholdIntegrity,
+  clockTerminalDebtIntegrity,
   storyDaDuplicateHeuristic,
   touchedByCfCompleteness,
   proposalPackageShape,

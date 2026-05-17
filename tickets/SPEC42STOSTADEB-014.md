@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: No new production code; documentation-only ticket landing the cross-class story-state-contract.md updates (§5 predicate list, §6 integration matrix, §8 page-plan §10b section) and the CLAUDE.md Story Bundles inventory update. Per the spec-to-tickets §Cross-Cutting Docs Ticket Shape, this is a cross-cutting docs ticket that lands atomically once all upstream implementation tickets have shipped
-**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, archive/tickets/SPEC42STOSTADEB-003.md, SPEC42STOSTADEB-005, SPEC42STOSTADEB-006, SPEC42STOSTADEB-007
+**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, archive/tickets/SPEC42STOSTADEB-003.md, archive/tickets/SPEC42STOSTADEB-005.md, SPEC42STOSTADEB-006, SPEC42STOSTADEB-007
 
 ## Problem
 
