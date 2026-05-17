@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-prose-attach/SKILL.md`
-**Deps**: archive/tickets/SPEC38STOLOCDIE-001.md, SPEC38STOLOCDIE-012
+**Deps**: archive/tickets/SPEC38STOLOCDIE-001.md, archive/tickets/SPEC38STOLOCDIE-012.md
 
 ## Problem
 

@@ -434,6 +434,12 @@ derivation, and `applies_to` scoping cases.
 
 #### D12 — New validator `prose_load_bearing_artifact_mention` (rule)
 
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-012.md`
+landed this validator as `tools/validators/src/rules/rule_prose_load_bearing_artifact_mention.ts`.
+The live rule is registered in the validators package registry, selectable by
+name through `world-validate --rules=prose_load_bearing_artifact_mention`, and
+covered by focused rule tests plus the package-wide validators suite.
+
 **Problem**: Prose-attach (D6) needs the pattern-detection logic to catch prose mentioning load-bearing artifacts absent from state, but no validator currently surfaces this.
 
 **Change**: Add `tools/validators/src/rules/prose-load-bearing-artifact-mention.ts`. The validator:

@@ -14,6 +14,7 @@ test("RULE_FILTER_PATTERN accepts mechanized rule 11 and 12 combinations", () =>
     "all",
     "chc_grounded_in_artifact_accessible",
     "choice_set_noncollapse",
+    "prose_load_bearing_artifact_mention",
     "storylet_predicate_dsl_parsability"
   ]) {
     assert.equal(validateOptions({ rules }), null, rules);

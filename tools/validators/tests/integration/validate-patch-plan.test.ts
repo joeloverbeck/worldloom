@@ -97,6 +97,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "chc_grounded_in_artifact_accessible"
     );
     assert.equal(chcDaExecution?.status, "skipped");
+    const proseArtifactExecution = result.executions.find(
+      (execution) => execution.name === "prose_load_bearing_artifact_mention"
+    );
+    assert.equal(proseArtifactExecution?.status, "skipped");
     const storyDaDuplicateExecution = result.executions.find(
       (execution) => execution.name === "story_da_duplicate_heuristic"
     );
@@ -172,6 +176,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== storyletExecution &&
         row !== choiceSetExecution &&
         row !== chcDaExecution &&
+        row !== proseArtifactExecution &&
         row !== storyDaDuplicateExecution &&
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
