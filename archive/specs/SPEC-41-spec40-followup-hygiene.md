@@ -2,7 +2,7 @@
 
 # SPEC-41 — SPEC-40 Follow-up Hygiene Cluster
 
-**Status**: ACTIVE
+**Status**: COMPLETED
 **Date**: 2026-05-17
 
 ## Problem Statement
@@ -142,3 +142,28 @@ Recommended within-spec ticket ordering (smallest-first; all `Deps: None`):
 2. **SPEC41FUP-001** — D1 fixture_unpadded_id_lint (small lint script + CI workflow extension)
 3. **SPEC41FUP-002** — D2 archive-citation-lint (small lint script + CI workflow extension)
 4. **SPEC41FUP-004** — D4 hook-deployment-currency CI check (introduces new CI check pattern)
+
+## Outcome
+
+Completed 2026-05-17.
+
+All SPEC-41 deliverables are implemented and archived:
+
+- `archive/tickets/SPEC41FUP-001.md` landed the baseline-aware fixture ID padding lint and wired it into `ci-validators.yml`.
+- `archive/tickets/SPEC41FUP-002.md` landed the archive-citation discipline lint and wired it into `ci-validators.yml`.
+- `archive/tickets/SPEC41FUP-003.md` landed the DA story-local seed filter/test slice in `tools/world-mcp`.
+- `archive/tickets/SPEC41FUP-004.md` landed the hooks dist-currency check and wired it into `ci-hooks.yml`.
+
+Final verification run 2026-05-17:
+
+- `bash tools/validators/scripts/check-fixture-id-padding.sh` — passed.
+- `bash tools/validators/scripts/check-archive-citation-discipline.sh` — passed.
+- `cd tools/hooks && npm run check:dist-currency` — passed.
+- `cd tools/world-mcp && npm test` — passed, 392/392 tests.
+- Active ticket sweep confirmed no remaining `SPEC41FUP` tickets under `tickets/`.
+
+Deviations from draft:
+
+- D1 became baseline-aware because current fixtures already contained legacy padded IDs.
+- D3 landed a real DA prefix filter fix in addition to the drafted test.
+- D4 enforces ignored local runtime `dist/` currency rather than committed-artifact parity because `tools/hooks/dist/` is intentionally gitignored.
