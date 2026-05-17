@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC40STOPIPELE-002.md",
+  "last_ticket": "archive/tickets/SPEC40STOPIPELE-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "359568809cc68b84e90e46f3e1180f08cf9dfad5",
+  "last_work_commit": "52a352dfa8344cf784b50b14135cc994bfa52dcf",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC40STOPIPELE-003.md",
+  "next_target": "tickets/SPEC40STOPIPELE-004.md",
   "queue": [
-    "tickets/SPEC40STOPIPELE-003.md",
     "tickets/SPEC40STOPIPELE-004.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -15,6 +14,6 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated dirty path remains: .claude/skills/brainstorm/SKILL.md; expected ignored validators artifacts remain under tools/validators/dist and tools/validators/node_modules",
+  "dirty_state": "unrelated dirty path remains: .claude/skills/brainstorm/SKILL.md; expected ignored hooks artifacts remain under tools/hooks/dist, tools/hooks/logs, and tools/hooks/node_modules; expected ignored validators artifacts remain under tools/validators/dist and tools/validators/node_modules",
   "updated_at": "2026-05-17"
 }
