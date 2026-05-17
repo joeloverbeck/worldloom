@@ -27,6 +27,27 @@ test("findImpactedFragments resolves story-bundle authored ids with story_slug",
   }
 });
 
+test("findImpactedFragments resolves BEL authored ids with story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      findImpactedFragments({
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG,
+        node_ids: ["BEL-1"]
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.impacted, []);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("findImpactedFragments rejects story-bundle authored ids without story_slug", async () => {
   const root = createTempRepoRoot();
 

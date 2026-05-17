@@ -105,7 +105,13 @@ If live `git status --short` shows dirty owned paths for `next_target` or `in_pr
 7. Resolve the first ticket:
    - if `ticket_path` is supplied, resolve it to exactly one active ticket under `tickets/`
    - otherwise inspect active `tickets/*.md`, choose the first ticket in lexical order whose filename, `Deps`, problem statement, or explicit spec reference ties it to the originating spec, and state the selection
-8. Build the initial pending queue from active tickets that clearly belong to the same originating spec family. Keep the queue lexical and append-only; do not jump ahead of a follow-up created by the current iteration.
+8. Build the initial pending queue from active tickets that clearly belong to the same originating spec family. Parse active same-family `Deps` before freezing the order:
+   - Resolve dependency entries that name active same-family ticket ids, active ticket paths, or archived ticket paths.
+   - Treat archived/completed dependencies as already satisfied.
+   - Order active prerequisites before their active dependents, using lexical order only within each ready set.
+   - If the supplied first ticket has unsatisfied active same-family prerequisites, retarget to the first prerequisite before invoking `implement-ticket`, refresh the state file, and state the retarget.
+   - If active same-family dependencies form a cycle or name an unresolved active prerequisite, stop and report the dependency problem instead of guessing.
+   Keep the queue append-only after this dependency-aware ordering; do not jump ahead of a follow-up created by the current iteration.
 9. Decide how to handle pre-existing untracked same-family ticket/spec files before implementation. If they are required to define the active family queue, dependency chain, or truthful handoff for the current iteration, they may be included in the first iteration commit and named as pre-existing same-family state. If they are not required for the current iteration, either leave them uncommitted or split them into a separate intake/state commit; state the choice in the handoff.
 10. Write or refresh `.codex/run-state/implement-spec-tickets.json` with the resolved spec, initial target, initial queue, dirty-state classification, and `blocked: false`.
 
@@ -276,7 +282,8 @@ Then prefer one of these reset paths:
 
 - If Codex exposes context compaction or the user can issue `/new`, request it before starting the next ticket.
 - If compaction is unavailable but the context is still small and the next target is an immediate follow-up from the just-finished ticket, continuing in the same context is acceptable.
-- If the context is large, proof output was noisy, or the next queued ticket is not a direct same-seam follow-up, stop after the handoff instead of starting the next ticket in a saturated context.
+- If the next target is an active direct dependent that consumes the just-landed seam, continuing in the same context is acceptable only when the dependency relation is explicit in `Deps`, the queue was recomputed from live tickets, and the harness states why this is a same-seam continuation. Otherwise treat it as a non-follow-up reset boundary.
+- If the context is large, proof output was noisy, or the next queued ticket is not a direct same-seam follow-up or explicit direct-dependent continuation, stop after the handoff instead of starting the next ticket in a saturated context.
 
 The next session must reload this skill and the child skills from disk, then resume from the state file and live repo state. Do not rely on remembered queue state without rechecking active `tickets/*.md` and `git status --short`.
 
@@ -284,7 +291,8 @@ The next session must reload this skill and the child skills from disk, then res
 
 - A follow-up ticket created by `implement-ticket` or `post-ticket-review` is always the next target.
 - If multiple follow-ups are created in one iteration, choose the one explicitly identified as the next owner. If none is identified, choose the lowest lexical path and record the ordering.
-- Do not skip active tickets in the originating spec family unless their `Deps`, status, or review result proves they are no longer valid next work.
+- Between non-follow-up tickets, keep active same-family prerequisites ahead of active dependents. Recompute this from live `Deps` after archive/dependency repairs, treating archived/completed deps as satisfied and lexical order as the tie-breaker among currently ready tickets.
+- Do not skip active tickets in the originating spec family unless their `Deps`, status, or review result proves they are not currently valid next work.
 - If a sibling ticket is absorbed into the current ticket, update the queue after the child skill has made that sibling truthful.
 - If a ticket is archived, remove its old active path from the queue and replace dependency references according to `post-ticket-review`.
 
@@ -294,14 +302,16 @@ When all originating-spec tickets are completed, reviewed, archived, and committ
 
 1. Re-read the originating spec.
 2. Confirm no active `tickets/*.md` still names the spec as active implementation work.
-3. Inspect the spec's final verification or close-proof section. Run the final proof lanes it names, or explicitly classify why a named lane is superseded, unavailable, or not part of the accepted close boundary. Record the final proof results in `## Outcome` so the archived spec is self-contained.
+3. Inspect the spec's final verification or close-proof section. Run the final proof lanes it names, or explicitly classify why a named lane is superseded, unavailable, or not part of the accepted close boundary. If final proof exposes a small same-seam mismatch in already-completed deliverables, make the minimal repair before archival, update affected archived ticket/spec closeout text if the repair changes their truth, rerun focused hygiene, and include those repairs in the final archive commit. Do not widen into new behavior; if the mismatch needs new ownership, create or surface a follow-up ticket instead of archiving the spec green. Record the final proof results in `## Outcome` so the archived spec is self-contained.
 4. Update the spec status and `## Outcome` according to `docs/archival-workflow.md`.
 5. Move the spec to `archive/specs/`, preferring `git mv` when tracked and plain `mv` when untracked.
 6. Confirm the original `specs/` path no longer exists.
-7. Sweep active tickets, docs, specs, same-family archived tickets, and same-seam triage/report docs for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, and direct implementation-reference snippets that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
+7. Sweep active tickets, docs, specs, same-family archived tickets, same-seam triage/report docs, and `.codex/run-state/implement-spec-tickets.json` for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, direct implementation-reference snippets, and state-file `originating_spec` / `archived_spec` fields that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
 8. Run hygiene over the spec archive move and reference repairs.
 9. Commit the spec archive as its own finalization commit unless it is already included in the last ticket-family commit for a clear reason.
 10. Update `.codex/run-state/implement-spec-tickets.json` with `archived_spec`, `next_target: null`, an empty queue, `blocked: false`, the final commit sha, and clean dirty-state classification.
+
+When staging a spec archived with `git mv`, do not try to stage the now-missing active `specs/...` path by name. Stage the archive destination and other edited owned paths, then confirm the source deletion or rename is staged with `git diff --cached --name-status` before committing.
 
 If `git mv`, `git add`, or `git commit` fails during final archival because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun the same non-destructive command with the required approval/escalation and record the first failure plus retry result. Do not widen the staged set while retrying.
 

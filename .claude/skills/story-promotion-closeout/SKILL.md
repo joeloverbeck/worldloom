@@ -134,7 +134,8 @@ All patch-engine submissions target story-bundle scope; ZERO ops target `worlds/
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §5 (story-scope authority discipline), §Canon Layers (linked CF status references), Rule 6 (Change Log Entry — canon-addition wrote it; closeout reads + cites it)
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (SF, BEL, STENT, STSTAT, SREL, DA, SE — closeout output classes for superseded or audit-emitted records; BR — read-only branch lineage), §4.3a (audit-only SE events), §4.5.13 (STSTAT — character-outcome supersession-chain evidence), §10 shared write order, §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-state-contract.md` — §10 shared write order, §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (SF, BEL, STENT, STSTAT, SREL, DA, SE — closeout output classes for superseded or audit-emitted records; BR — read-only branch lineage), §4.3a (audit-only SE events), §4.5.13 (STSTAT — character-outcome supersession-chain evidence)
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml` — source of truth for the promotion's `proposal_evidence.source_records[]` / `proposal_evidence.source_kind` / `proposal_evidence.story_branch`, plus top-level `contradiction_preference` / `downstream_impact_report`
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>.md` — original ledger (read-only; cross-referenced in closeout ledger)
 - `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>, world_slug=<world_slug>)` — read-only linked CF and CH records for world-canon reference and Rule 6 audit-trail citation
@@ -184,6 +185,15 @@ The candidate is now world canon. Record the canon link in the closeout ledger. 
 - Each `SF-<integer>` source MAY be superseded with the same class shape from shared contract §4.5.3, carrying `supersedes: SF-<integer>`, `authority: canon_linked`, and at least one parent CF id in `derived_from`. The broader CF / CH / PA verdict linkage lives in the closeout ledger; the parent CF id on the superseding SF is the schema-backed authority link.
 - Each implicated `BEL-<integer>` MAY be superseded with the §4.1 shape when `truth_relation`, `claim`, `basis`, or `consequences` must change to reflect the adjudicated canon outcome. The CF / CH / PA linkage lives in the closeout ledger.
 - For `source_kind: artifact_canonization`, supersede story-local `DA` only if a §4.5.10 field changes. World-level DA linkage is recorded in the closeout ledger.
+  For story-local DA field semantics used by this comparison, see
+  `.claude/skills/_shared-templates/da-authoring-reference.md` §Field
+  semantics.
+
+  Worked examples of when DA supersession is and is not triggered by closeout:
+
+  - **NOT triggered**: canon-addition accepts the DA's central claim as a CF, but the DA's §4.5.10 fields (`title`, `author`, `genre`, `body`, `intended_audience`, `circulation`, `truth_relation`, `supersedes`, `derived_from`) are unchanged. Record the verdict in the closeout ledger; do not supersede the DA. The CF's `source_basis.derived_from[]` includes the DA id as audit trail.
+  - **Triggered**: canon-addition accepts the DA's claim and clarifies a field the DA carried in an ambiguous state, such as `truth_relation` changing from `contested` to `true` per the accepted CF, or `circulation` shifting because closeout reveals factional propagation the original DA did not record. Supersede the DA via `append_story_diegetic_artifact_record` with `supersedes: DA-<old>` and the corrected fields; record the supersession cause in the closeout ledger.
+  - **NOT triggered**: canon-addition rejects the DA's claim. The DA remains active with its original `truth_relation` (typically `contested` or `false`); the rejection is recorded in the closeout ledger. The DA continues to exist as branch-local in-world evidence even when its claim does not promote.
 - For `source_kind: character_outcome`, supersede `STENT` only if a §4.5.1 field changes; supersede `STSTAT` only if a source STSTAT in `proposal_evidence.source_records[]` needs an amended-schema update after the canon-addition verdict (e.g., character-outcome status evidence becoming canon-linked, or explicitly retained as branch-local after rejection).
 - For `source_kind: relationship_or_institutional_outcome`, supersede `SREL` only if a §4.5.7 field changes.
 
@@ -336,7 +346,7 @@ Rules 1 / 2 / 3 / 5 / 11 / 12 enforced upstream by `canon-addition` at adjudicat
 
 ## Record Schemas
 
-All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
+All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-record-schemas.md`:
 
 - `SF` (§4), `BEL` (§4.1), `STENT`, `SREL`, `DA`, `SE` (§4.3) — record classes that may be superseded or emitted by closeout.
 - `BR` (§4.5.11) — read-only for same-story branch disposition; branches fork rather than replace prior branch records.

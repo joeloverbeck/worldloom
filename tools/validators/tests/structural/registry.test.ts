@@ -25,6 +25,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "snapshot_replay_equality",
       "recursive_reference_closure",
       "state_snapshot_integrity",
+      "story_da_duplicate_heuristic",
       "touched_by_cf_completeness",
       "proposal_package_shape",
       "prose_receipt_schema_compliance",

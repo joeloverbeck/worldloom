@@ -35,7 +35,7 @@ Do NOT write `pages-prose-receipts/<page_id>.yaml`, update `worlds/<world_slug>/
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `STORY_KERNEL.md` loaded, including `## Player Agency Contract`; page loaded from `_source/pages/<page_id>.yaml`; plan + prose pair verified at `pages-prose-plans/<page_id>.md` + `pages-prose/<page_id>.md`; `pages-prose-receipts/` directory present (idempotent `mkdir -p` if absent); `SE` id allocated via `mcp__worldloom__allocate_next_id` only when `emit_attach_event: true`.
 
-(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + `STORY_KERNEL.md` Player Agency Contract + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `state_hash` + `prose_hash` derived; `hash_integrity` check applied per `accept_plan_drift`; 8 deterministic checks complete per `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (hash_integrity, engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, choice_consequence_visibility, entity_status_consistency, invented_structural_fact, canon_claim_without_authority); optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
+(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + `STORY_KERNEL.md` Player Agency Contract + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `state_hash` + `prose_hash` derived; `hash_integrity` check applied per `accept_plan_drift`; 8 deterministic checks complete per `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 (hash_integrity, engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, choice_consequence_visibility, entity_status_consistency, invented_structural_fact, canon_claim_without_authority); optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
 
 (c) The user has explicitly approved the deliverable summary (receipt path, per-check verdict table, roll-up verdict, repair_recommendation, strict-mode publication-blocking decision if applicable, optional SE-<integer> id + patch op preview when `emit_attach_event: true`).
 
@@ -104,7 +104,8 @@ Atomic-record writes (the optional `SE-<integer>`) route through `mcp__worldloom
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §4a (Plan-Authority Boundary), §5b (Schema-Minimalism), §9 (Prose Length Discipline) govern this skill
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4.6 receipt schema (canonical and mirrored by `prose_receipt_schema_compliance`); §7 hard gates (gate 3 redundantly enforced on rendered prose); §8 page plan minimum contract (the 19-section structure prose-attach reads)
+- `.claude/skills/_shared-templates/story-state-contract.md` — §7 hard gates (gate 3 redundantly enforced on rendered prose); §8 page plan minimum contract (the 19-section structure prose-attach reads)
+- `.claude/skills/_shared-templates/story-record-schemas.md` — §4.6 receipt schema (canonical and mirrored by `prose_receipt_schema_compliance`)
 - `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` — bundle root contract; `## Player Agency Contract` is load-bearing for agency-surface consistency
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/<page_id>.yaml` — PG record; MUST exist
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/<page_id>.md` — comprehensive prose plan; MUST exist
@@ -216,6 +217,24 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
 
    Decorative inventions (a minor object name, a weather detail, an unmentioned NPC's name) are `WARN`. The roll-up `invented_structural_fact` receipt field records the worst verdict across both sub-categories. Judgment-assisted findings are flagged in `notes` so the user can review and decide on `revise_prose` vs. `run_turn_cycle_repair` vs. canon-promotion.
 
+   **`prose_load_bearing_artifact_mention_without_da`**: scan rendered prose
+   for load-bearing artifact phrases (letter, map, diary, decree, log,
+   recording, inscription, confession, notice, ledger, transcript, briefing,
+   proclamation, seal, codex, marginalia, redaction) used in a way that
+   grounds knowledge, choice availability, mystery progression, or character
+   action. If such a phrase appears AND the emitting PG's
+   `state_snapshot.active_records.DA[]` contains no DA matching the artifact's
+   diegetic role, emit validator verdict
+   `prose_load_bearing_artifact_mention_without_da` (WARN-level by default;
+   FAIL when the prose explicitly quotes the artifact's content or describes
+   the protagonist's access to it). Record the worst result under
+   `invented_structural_fact` in the receipt. For DA field semantics and the
+   repair bundle shape, see
+   `.claude/skills/_shared-templates/da-authoring-reference.md` §Field
+   semantics and §Patch obligations. Recommended repair: route the deviation
+   through the prose-attach disposition table (structural-fact issue: run a
+   repair turn that creates the DA + BEL + optional STOBJ).
+
 8. **`canon_claim_without_authority`** (`PASS | FAIL`) — scan prose for assertions that would make a world-level canon claim absent from plan §4. Examples: asserting a historical date that plan §4 does not list; stating a metaphysical rule (e.g., "magic is fundamentally entropic") that plan §4 does not include; declaring a faction's secret identity that plan §4 leaves to Mystery Reserve. Any such assertion without corresponding `SE.promotion_claims[]` evidence on the resolving event (loaded via `PG.input.resolved_event_id`) is `FAIL` and routes to `repair_recommendation: run_story_fact_promotion_to_canon`.
 
 ## Phase 4: Optional craft critic
@@ -307,7 +326,7 @@ Rules 1 / 4 / 5 are upstream-enforced at bootstrap and turn-cycle Phase 9 (the e
 
 ## Record Schemas
 
-The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (canonical). The validator-side mirror is `prose_receipt_schema_compliance` in `tools/validators`; after a receipt exists, a receipt-specific structural smoke can run:
+The prose receipt schema lives in `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 (canonical; extracted from the main `story-state-contract.md` per its §4 pointer stub). The validator-side mirror is `prose_receipt_schema_compliance` in `tools/validators`; after a receipt exists, a receipt-specific structural smoke can run:
 
 ```bash
 node tools/validators/dist/src/cli/world-validate.js <world_slug> --structural --file worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/<page_id>.yaml --json

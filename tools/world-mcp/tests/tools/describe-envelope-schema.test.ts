@@ -9,6 +9,8 @@ import { OPERATION_KINDS } from "@worldloom/patch-engine";
 
 import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema";
 
+const PREDICATE_DSL_GRAMMAR_ID = "https://worldloom.local/schemas/predicate-dsl-grammar.schema.json";
+
 async function withHarnessCeiling<T>(ceiling: string, run: () => Promise<T>): Promise<T> {
   const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
   try {
@@ -142,6 +144,41 @@ test("describeEnvelopeSchema filters to one op kind and exposes CF payload schem
   assert.ok(cfSchema.required?.includes("id"));
   assert.ok(cfSchema.required?.includes("required_world_updates"));
   assert.ok(cfSchema.properties?.status);
+  assert.equal(manifest.referenced_schemas[PREDICATE_DSL_GRAMMAR_ID], undefined);
+});
+
+test("describeEnvelopeSchema includes predicate DSL grammar for storylet creation", async () => {
+  const manifest = await describeEnvelopeSchema({ op_kind: "create_slt_record" });
+
+  assert.equal(manifest.delivery_status, "inline");
+  assert.deepEqual(Object.keys(manifest.op_schemas), ["create_slt_record"]);
+
+  const storyletSchema = manifest.referenced_schemas["https://worldloom.local/schemas/story-storylet.schema.json"];
+  assert.ok(storyletSchema);
+
+  const predicateSchema = manifest.referenced_schemas[PREDICATE_DSL_GRAMMAR_ID] as {
+    $id?: string;
+    oneOf?: Array<{ title?: string; required?: string[]; properties?: { pred?: { const?: string } } }>;
+  };
+  assert.equal(predicateSchema.$id, PREDICATE_DSL_GRAMMAR_ID);
+  assert.ok(predicateSchema.oneOf);
+  assert.ok(predicateSchema.oneOf.length > 0);
+  assert.ok(
+    predicateSchema.oneOf.some(
+      (entry) =>
+        entry.title === "obligation_open" &&
+        entry.properties?.pred?.const === "obligation_open" &&
+        entry.required?.includes("obligation")
+    )
+  );
+  assert.ok(
+    predicateSchema.oneOf.some(
+      (entry) =>
+        entry.title === "consequence_pending" &&
+        entry.properties?.pred?.const === "consequence_pending" &&
+        entry.required?.includes("consequence")
+    )
+  );
 });
 
 test("describeEnvelopeSchema exposes update and hybrid operation payloads", async () => {

@@ -1,17 +1,17 @@
 {
-  "originating_spec": "specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md",
-  "archived_spec": "archive/specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md",
-  "last_ticket": "archive/tickets/SPEC37STOPIPTEN-004.md",
+  "originating_spec": "archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md",
+  "archived_spec": "archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md",
+  "last_ticket": "archive/tickets/SPEC38STOLOCDIE-006.md",
   "last_result": "spec_archived",
-  "last_work_commit": "bb333db64714647e47dd94f239bf89e4641b063a",
+  "last_work_commit": "9403f11ab2e653cca4e768b394714e8f72154056",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
-  "phase": "complete",
+  "phase": "completed",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree expected after state commit; expected ignored artifacts include tools/hooks/dist, tools/hooks/logs, tools/hooks/node_modules, tools/patch-engine/dist, tools/patch-engine/node_modules, tools/validators/dist, tools/validators/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, and tools/world-mcp/node_modules",
+  "dirty_state": "clean tracked worktree expected after state commit; pre-existing ignored artifacts remain under tools/validators, tools/world-index, and tools/world-mcp",
   "updated_at": "2026-05-17"
 }

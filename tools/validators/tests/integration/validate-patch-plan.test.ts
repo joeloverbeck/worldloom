@@ -93,6 +93,18 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "choice_set_noncollapse"
     );
     assert.equal(choiceSetExecution?.status, "skipped");
+    const chcDaExecution = result.executions.find(
+      (execution) => execution.name === "chc_grounded_in_artifact_accessible"
+    );
+    assert.equal(chcDaExecution?.status, "skipped");
+    const proseArtifactExecution = result.executions.find(
+      (execution) => execution.name === "prose_load_bearing_artifact_mention"
+    );
+    assert.equal(proseArtifactExecution?.status, "skipped");
+    const storyDaDuplicateExecution = result.executions.find(
+      (execution) => execution.name === "story_da_duplicate_heuristic"
+    );
+    assert.equal(storyDaDuplicateExecution?.status, "skipped");
     assert.ok(!result.executions.some((execution) => execution.name === "arc_envelope_conformance"));
     const snapshotReplayExecution = result.executions.find(
       (execution) => execution.name === "snapshot_replay_equality"
@@ -163,6 +175,9 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (row) =>
         row !== storyletExecution &&
         row !== choiceSetExecution &&
+        row !== chcDaExecution &&
+        row !== proseArtifactExecution &&
+        row !== storyDaDuplicateExecution &&
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
         row !== snapshotIntegrityExecution &&

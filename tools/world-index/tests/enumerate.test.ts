@@ -79,15 +79,17 @@ test("unexpected markdown paths are reported while hidden files remain excluded"
   }
 });
 
-test("story-bundle markdown paths are recognized as indexable closed inventory", () => {
+test("story-bundle paths are recognized as indexable closed inventory", () => {
   const worldRoot = createFixtureWorldRoot();
 
   try {
     for (const relativeFilePath of [
       "stories/foo/STORY_KERNEL.md",
+      "stories/foo/_source/beliefs/BEL-0001.yaml",
       "stories/foo/_source/status/STSTAT-0001.yaml",
       "stories/foo/pages-prose/PG-0001.md",
       "stories/foo/pages-prose-plans/PG-0001.md",
+      "stories/foo/pages-prose-receipts/PG-0001.yaml",
       "stories/foo/storylet-batches/SLB-0001.md",
       "stories/foo/story-promotions/SP-0001.md",
       "stories/foo/audits/SAU-0001-2026-05-04.md",
@@ -95,6 +97,7 @@ test("story-bundle markdown paths are recognized as indexable closed inventory",
       "stories/foo/character-proposals/NCP-0001-sample.md",
       "stories/foo/character-proposals/batches/NCB-0001.md",
       "stories/foo/notes.md",
+      "stories/foo/pages-prose-rejected/PG-0001.yaml",
       "stories/foo/scratch/draft.md",
       "stories/foo/audits/SAU-0001/RSP-0001.md"
     ]) {
@@ -107,9 +110,11 @@ test("story-bundle markdown paths are recognized as indexable closed inventory",
 
     for (const expected of [
       "stories/foo/STORY_KERNEL.md",
+      "stories/foo/_source/beliefs/BEL-0001.yaml",
       "stories/foo/_source/status/STSTAT-0001.yaml",
       "stories/foo/pages-prose/PG-0001.md",
       "stories/foo/pages-prose-plans/PG-0001.md",
+      "stories/foo/pages-prose-receipts/PG-0001.yaml",
       "stories/foo/storylet-batches/SLB-0001.md",
       "stories/foo/story-promotions/SP-0001.md",
       "stories/foo/audits/SAU-0001-2026-05-04.md",
@@ -123,6 +128,7 @@ test("story-bundle markdown paths are recognized as indexable closed inventory",
 
     for (const unexpected of [
       "stories/foo/notes.md",
+      "stories/foo/pages-prose-rejected/PG-0001.yaml",
       "stories/foo/scratch/draft.md",
       "stories/foo/audits/SAU-0001/RSP-0001.md"
     ]) {

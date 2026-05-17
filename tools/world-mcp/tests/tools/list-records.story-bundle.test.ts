@@ -107,6 +107,53 @@ test("listRecords returns story status records scoped by story_slug", async () =
   }
 });
 
+test("listRecords returns belief records scoped by story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const compact = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "belief_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        fields: ["id", "holder", "claim", "belief_mode", "truth_relation", "confidence", "visibility"]
+      })
+    );
+    const fullBody = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "belief_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        include_full_body: true
+      })
+    );
+
+    assert.ok(!("code" in compact));
+    assert.equal(compact.total, 2);
+    assert.deepEqual(compact.records.map((record) => record.record_id), ["BEL-1", "BEL-2"]);
+    assert.deepEqual(compact.records[0], {
+      record_id: "BEL-1",
+      id: "BEL-1",
+      holder: "STENT-2",
+      claim: "Marla believes the loft is empty.",
+      belief_mode: "believes",
+      truth_relation: "false",
+      confidence: "likely",
+      visibility: "private"
+    });
+
+    assert.ok(!("code" in fullBody));
+    assert.equal(fullBody.total, 2);
+    const record = fullBody.records[0] as { body?: Record<string, unknown> };
+    assert.equal(record.body?.record_kind, "belief_record");
+    assert.equal(record.body?.claim, "Marla believes the loft is empty.");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("listRecords requires story_slug for story-bundle record types", async () => {
   const root = createTempRepoRoot();
 

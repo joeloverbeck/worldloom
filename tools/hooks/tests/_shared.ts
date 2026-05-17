@@ -25,6 +25,11 @@ function repeatLine(label: string, count: number): string {
   return Array.from({ length: count }, (_, index) => `${label} line ${index + 1}.`).join("\n");
 }
 
+function writeAtomicFixtureRecord(filePath: string, id: string, lineCount: number): void {
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, `id: ${id}\n${repeatLine(id, lineCount - 1)}\n`, "utf8");
+}
+
 export function seedHookFixtureWorld(root: string, worldSlug = "animalia"): void {
   const worldRoot = path.join(root, "worlds", worldSlug);
   mkdirSync(path.join(worldRoot, "_index"), { recursive: true });
@@ -44,6 +49,13 @@ export function seedHookFixtureWorld(root: string, worldSlug = "animalia"): void
   writeFileSync(path.join(worldRoot, "CANON_LEDGER.md"), `# CANON LEDGER\n## CF-0001\nBrinewick keeps the northern lighthouse.\n${repeatLine("ledger", 600)}\n`, "utf8");
   mkdirSync(path.join(worldRoot, "characters"), { recursive: true });
   writeFileSync(path.join(worldRoot, "characters", "vespera-nightwhisper.md"), "# Vespera\nScout.\n", "utf8");
+  writeAtomicFixtureRecord(path.join(worldRoot, "_source", "canon", "CF-1.yaml"), "CF-1", 250);
+  writeAtomicFixtureRecord(path.join(worldRoot, "_source", "canon", "CF-2.yaml"), "CF-2", 50);
+  writeAtomicFixtureRecord(
+    path.join(worldRoot, "stories", "red-bunny", "_source", "storylets", "SLT-1.yaml"),
+    "SLT-1",
+    250
+  );
 
   const migrationSql = readFileSync(
     path.join(

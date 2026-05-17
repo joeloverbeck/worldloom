@@ -38,7 +38,7 @@ This fallback covers the three cases the contract surfaces:
 
 In any case, do NOT silently proceed without world-state load. Apply this three-step fallback in order:
 
-**Step 1 — Reduce seed nodes and retry, or honor the suggested retry budget.** Narrow `seed_nodes` to the 3–5 most-cited records in the brief (the named CFs the brief explicitly references, the named place's SEC-GEO record, the named institution's SEC-INS record). Retry the packet call. If `packet_incomplete_required_classes` was returned, retry at `response.details.retry_with.token_budget`. If the retry fits with empty `truncation_summary`, proceed normally.
+**Step 1 — Reduce seed nodes and retry, or honor the suggested retry budget when present.** Narrow `seed_nodes` to the 3–5 most-cited records in the brief (the named CFs the brief explicitly references, the named place's SEC-GEO record, the named institution's SEC-INS record). Retry the packet call. If `packet_incomplete_required_classes` was returned and `response.details.retry_with.token_budget` is present, retry at that budget. If `retry_with` is absent, the harness ceiling is binding; skip budget retry and follow `response.details.fallback_advice` through targeted retrieval in Step 2. If the retry fits with empty `truncation_summary`, proceed normally.
 
 **Step 2 — Use inline summary + targeted retrieval, then slice the persisted packet only when needed.** If `truncation_summary.dropped_layers` is still non-empty after Step 1 (or `packet_incomplete_required_classes` still fires, or `delivery_status === 'persisted_with_summary'`):
 

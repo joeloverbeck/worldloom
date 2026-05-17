@@ -48,6 +48,12 @@ const APPROVAL_TOKEN_RECOVERY_HINT =
   "node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>. " +
   "See docs/HARD-GATE-DISCIPLINE.md section Issuing a token.";
 
+const APPROVAL_TOKEN_REPLAY_HINT =
+  " This token has already been consumed by a prior successful submit. " +
+  "If the prior submit succeeded, inspect the target world for the applied records " +
+  "before re-submitting; the patch engine enforces single-use approval tokens. " +
+  "See docs/HARD-GATE-DISCIPLINE.md section Token re-use semantics.";
+
 export function verifyApprovalToken(
   token: string,
   envelope: PatchPlanEnvelope,
@@ -94,7 +100,7 @@ export function verifyApprovalToken(
     .get(tokenHash);
 
   if (existing !== undefined) {
-    return { ok: false, code: "approval_replayed" };
+    return approvalReplayed();
   }
 
   return { ok: true, token_hash: tokenHash };
@@ -197,6 +203,14 @@ function approvalMalformed(detail: string): ApprovalFailure {
     ok: false,
     code: "approval_malformed",
     detail: detail + APPROVAL_TOKEN_RECOVERY_HINT
+  };
+}
+
+function approvalReplayed(): ApprovalFailure {
+  return {
+    ok: false,
+    code: "approval_replayed",
+    detail: "approval token rejected: token already consumed." + APPROVAL_TOKEN_REPLAY_HINT
   };
 }
 

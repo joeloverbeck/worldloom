@@ -290,6 +290,29 @@ function seedServerWorld(root: string): void {
           "The harbor letter names Brinewick.",
           ""
         ].join("\n")
+      },
+      {
+        node_id: "opening-bells:BEL-1",
+        world_slug: "seeded",
+        story_slug: "opening-bells",
+        file_path: "stories/opening-bells/_source/beliefs/BEL-1.yaml",
+        heading_path: "BEL-1",
+        node_type: "belief_record",
+        body: [
+          "id: BEL-1",
+          "story_id: STORY-0003",
+          "created_at_page: PG-0003",
+          "supersedes: null",
+          "holder: STENT-1",
+          "claim: The lighthouse bell is a warning.",
+          "belief_mode: believes",
+          "truth_relation: unknown",
+          "confidence: likely",
+          "visibility: shared",
+          "basis:",
+          "  source_event: SE-1",
+          ""
+        ].join("\n")
       }
     ],
     edges: [
@@ -736,6 +759,77 @@ test("list_records accepts hybrid record types through the MCP boundary", async 
   });
 });
 
+test("get_record accepts BEL story-bundle ids through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.get_record,
+      arguments: {
+        world_slug: "seeded",
+        story_slug: "opening-bells",
+        record_id: "BEL-1"
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      record?: { record_kind?: string; id?: string; belief_mode?: string };
+      file_path?: string;
+    };
+    assert.equal(structured.record?.record_kind, "belief_record");
+    assert.equal(structured.record?.id, "BEL-1");
+    assert.equal(structured.record?.belief_mode, "believes");
+    assert.equal(structured.file_path, "stories/opening-bells/_source/beliefs/BEL-1.yaml");
+  });
+});
+
+test("get_records accepts BEL story-bundle ids through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.get_records,
+      arguments: {
+        world_slug: "seeded",
+        story_slug: "opening-bells",
+        record_ids: ["BEL-1"]
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      records?: Array<{ found?: boolean; record?: { record?: { record_kind?: string; id?: string } } }>;
+    };
+    assert.equal(structured.records?.[0]?.found, true);
+    assert.equal(structured.records?.[0]?.record?.record?.record_kind, "belief_record");
+    assert.equal(structured.records?.[0]?.record?.record?.id, "BEL-1");
+  });
+});
+
+test("list_records accepts belief_record through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.list_records,
+      arguments: {
+        world_slug: "seeded",
+        story_slug: "opening-bells",
+        record_type: "belief_record",
+        fields: ["id", "claim", "belief_mode"]
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      total?: number;
+      records?: Array<{ record_id?: string; id?: string; claim?: string; belief_mode?: string }>;
+    };
+    assert.equal(structured.total, 1);
+    assert.deepEqual(structured.records?.[0], {
+      record_id: "BEL-1",
+      id: "BEL-1",
+      claim: "The lighthouse bell is a warning.",
+      belief_mode: "believes"
+    });
+  });
+});
+
 test("list_records filters through the MCP validation and dispatch boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({
@@ -827,7 +921,7 @@ test("BEL id_class dispatches through the MCP boundary", async () => {
 
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
-    assert.equal(structured.next_id, "BEL-1");
+    assert.equal(structured.next_id, "BEL-2");
   });
 });
 
@@ -1167,6 +1261,9 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     ]);
     assert.ok(
       byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type?.includes("storylet_record")
+    );
+    assert.ok(
+      byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type?.includes("belief_record")
     );
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.describe_envelope_schema)?.input_schema_enums?.op_kind, [
       ...OPERATION_KINDS

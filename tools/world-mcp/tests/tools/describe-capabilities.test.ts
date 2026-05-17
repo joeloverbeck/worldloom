@@ -80,6 +80,9 @@ test("describeCapabilities returns build metadata and enum-valued input contract
   assert.ok(
     byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("story_fact_record")
   );
+  assert.ok(
+    byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("belief_record")
+  );
   assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_record_schema)?.input_schema_enums.node_type, [
     ...SUPPORTED_RECORD_SCHEMA_NODE_TYPES
   ]);

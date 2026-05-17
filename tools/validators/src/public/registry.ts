@@ -17,6 +17,7 @@ import { recursiveReferenceClosure } from "../structural/recursive-reference-clo
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
+import { storyDaDuplicateHeuristic } from "../structural/story-da-duplicate-heuristic.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
 import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
@@ -25,7 +26,9 @@ import { rule4NoGlobalizationByAccident } from "../rules/rule4-no-globalization-
 import { rule5NoConsequenceEvasion } from "../rules/rule5-no-consequence-evasion.js";
 import { rule6NoSilentRetcons } from "../rules/rule6-no-silent-retcons.js";
 import { rule7MysteryReservePreservation } from "../rules/rule7-mystery-reserve-preservation.js";
+import { ruleChcGroundedInArtifactAccessible } from "../rules/rule_chc_grounded_in_artifact_accessible.js";
 import { ruleChoiceSetNoncollapse } from "../rules/rule_choice_set_noncollapse.js";
+import { ruleProseLoadBearingArtifactMention } from "../rules/rule_prose_load_bearing_artifact_mention.js";
 import { storyletPredicateDslParsability } from "../rules/rule_storylet_predicate_dsl_parsability.js";
 import { rule11ActionSpace } from "../rules/rule11-action-space.js";
 import { rule12Redundancy } from "../rules/rule12-redundancy.js";
@@ -52,6 +55,7 @@ export const structuralValidators: readonly Validator[] = [
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,
+  storyDaDuplicateHeuristic,
   touchedByCfCompleteness,
   proposalPackageShape,
   proseReceiptSchemaCompliance,
@@ -66,7 +70,9 @@ export const ruleValidators: readonly Validator[] = [
   rule5NoConsequenceEvasion,
   rule6NoSilentRetcons,
   rule7MysteryReservePreservation,
+  ruleChcGroundedInArtifactAccessible,
   ruleChoiceSetNoncollapse,
+  ruleProseLoadBearingArtifactMention,
   storyletPredicateDslParsability,
   rule11ActionSpace,
   rule12Redundancy

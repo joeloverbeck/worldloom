@@ -114,6 +114,30 @@ test("record_schema_compliance rejects accepted CFs without direct user approval
   );
 });
 
+test("record_schema_compliance accepts CHAR pre-figurement in source_basis but keeps pre_figured_by CF-only", async () => {
+  const accepted = record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", {
+    ...validCf,
+    source_basis: { direct_user_approval: true, derived_from: ["CHAR-1"] }
+  });
+  const rejected = record("canon_fact_record", "CF-2", "_source/canon/CF-2.yaml", {
+    ...validCf,
+    id: "CF-2",
+    pre_figured_by: ["CHAR-1"]
+  });
+
+  const result = await recordSchemaCompliance.run({}, context([accepted, rejected]));
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "CF-1"));
+  assert.ok(
+    result.some(
+      (verdict) =>
+        verdict.location.node_id === "CF-2" &&
+        verdict.code === "record_schema_compliance.pattern" &&
+        verdict.message.includes("/pre_figured_by/0")
+    )
+  );
+});
+
 test("record_schema_compliance rejects removed affected_cf_ids alias on change logs", async () => {
   const result = await recordSchemaCompliance.run(
     {},

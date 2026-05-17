@@ -547,6 +547,63 @@ test("reserve-policy task types fail loudly when required governing full bodies 
   }
 });
 
+test("reserve-policy errors omit retry_with when the harness ceiling is binding", async () => {
+  const root = createTempRepoRoot();
+  const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+  process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "9000";
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "CF-0001",
+          world_slug: "seeded",
+          file_path: "_source/canon/CF-0001.yaml",
+          node_type: "canon_fact_record",
+          body: "id: CF-0001\nstatement: Seed.\n"
+        },
+        {
+          node_id: "ONT-1",
+          world_slug: "seeded",
+          file_path: "_source/invariants/ONT-1.yaml",
+          node_type: "invariant",
+          body: `id: ONT-1\nstatement: ${"Required governing body. ".repeat(500)}\n`
+        }
+      ]
+    });
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "diegetic_artifact_generation",
+        world_slug: "seeded",
+        seed_nodes: ["CF-0001"],
+        token_budget: 100000
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "packet_incomplete_required_classes");
+    assert.ok(result.details);
+    assert.ok(
+      (result.details.minimum_required_harness_ceiling_chars as number) >
+        (result.details.effective_harness_ceiling_chars as number)
+    );
+    assert.equal(result.details.retry_with, undefined);
+    assert.equal(
+      result.details.fallback_advice,
+      "Retrieve dropped nodes via mcp__worldloom__get_record(record_id), mcp__worldloom__get_records(record_ids), or mcp__worldloom__get_record_field(record_id, field_path) as needed."
+    );
+  } finally {
+    if (originalCeiling === undefined) {
+      delete process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+    } else {
+      process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = originalCeiling;
+    }
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("other task type keeps pre-ticket preview-only node delivery", async () => {
   const root = createTempRepoRoot();
 

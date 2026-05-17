@@ -42,7 +42,9 @@ const RULE_NUMBER_TO_PREFIX = new Map([
   ["12", "rule12_"]
 ]);
 const NAMED_RULE_SELECTORS = new Set([
+  "chc_grounded_in_artifact_accessible",
   "choice_set_noncollapse",
+  "prose_load_bearing_artifact_mention",
   "storylet_predicate_dsl_parsability"
 ]);
 
