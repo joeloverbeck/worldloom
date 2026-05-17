@@ -27,6 +27,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "non_propagation_tag_shape",
   "observer_firewall",
   "proposal_package_shape",
+  "prose_receipt_schema_compliance",
   "record_schema_compliance",
   "recursive_reference_closure",
   "rule1_no_floating_facts",
