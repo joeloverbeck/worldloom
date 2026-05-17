@@ -229,7 +229,8 @@ Before committing:
 5. If review changed or created follow-up tickets, active dependencies, active specs, current contract docs, or same-family archive references, confirm the `.codex/skills/post-ticket-review` audit block was already emitted. If compaction or interruption skipped it, emit the compact child-audit block before staging.
 6. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
 7. Re-run `git diff --cached --name-status` after staging and confirm every staged path is owned by this iteration, explicitly approved, or intentional same-family state needed for the queue/handoff.
-8. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening. Prefer a concise truthful shape such as `SPEC35STOPIPEIG-001 implement and archive observer firewall fix`. Mention `follow-up` or `skill hardening` only when the committed iteration actually created or updated a follow-up ticket or changed a skill.
+8. Emit the required-visible-block checkpoint below before committing or stopping at a reset-boundary handoff.
+9. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening. Prefer a concise truthful shape such as `SPEC35STOPIPEIG-001 implement and archive observer firewall fix`. Mention `follow-up` or `skill hardening` only when the committed iteration actually created or updated a follow-up ticket or changed a skill.
 
 Before the final commit or reset-boundary handoff for an iteration, run a required-visible-block checkpoint. Emit this compact block visibly; after compaction or resume, emit it even when the individual child blocks were already printed earlier, so the commit/handoff boundary has an explicit checklist:
 
