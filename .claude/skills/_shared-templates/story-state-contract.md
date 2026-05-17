@@ -676,7 +676,7 @@ No `display_name`, `role_in_story`, or `bound_char_id` fields: identity stays on
 
 ### 4.6 Prose receipt
 
-Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record).
+Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record). The canonical schema below is mirrored by the structural validator `prose_receipt_schema_compliance`, which validates receipt YAML in full-world runs and receipt-file incremental runs.
 
 ```yaml
 page_id: PG-<integer>*
@@ -704,6 +704,12 @@ repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_f
 ```
 
 The `checks` mapping contains eight deterministic prose/state checks plus the optional `craft_critic` result. `hash_integrity` is `PASS` when the recorded `PG.plan.plan_hash` and `PG.state_hash` are lowercase sha256-shaped and match the recomputed plan/state hashes, `WARN` when drift is accepted because `accept_plan_drift=true`, and `FAIL` when drift is not accepted or either PG hash field is missing, placeholder, or non-sha256. `choice_consequence_visibility` verifies that rendered prose realizes `SE.resolution.player_visible_feedback`; it does not mutate `PG` state or re-author the selected event.
+
+Receipt schema drift is checked by `prose_receipt_schema_compliance` in `tools/validators`. A receipt-specific structural smoke uses the compiled validator CLI after the receipt exists, for example:
+
+```bash
+node tools/validators/dist/src/cli/world-validate.js <world_slug> --structural --file worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/PG-<integer>.yaml --json
+```
 
 A failed receipt blocks publication only if the attaching skill ran with `strict=true`. **A receipt never mutates `PG` state.**
 
