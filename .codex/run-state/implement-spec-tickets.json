@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC40STOPIPELE-001.md",
+  "last_ticket": "archive/tickets/SPEC40STOPIPELE-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "5b6a1036f44a69f7d6f4147cbc81fa597459414a",
+  "last_work_commit": "359568809cc68b84e90e46f3e1180f08cf9dfad5",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC40STOPIPELE-002.md",
+  "next_target": "tickets/SPEC40STOPIPELE-003.md",
   "queue": [
-    "tickets/SPEC40STOPIPELE-002.md",
     "tickets/SPEC40STOPIPELE-003.md",
     "tickets/SPEC40STOPIPELE-004.md"
   ],
