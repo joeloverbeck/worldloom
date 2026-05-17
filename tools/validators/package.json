@@ -31,7 +31,7 @@
     "@worldloom/world-index": "file:../world-index",
     "ajv": "8.20.0",
     "better-sqlite3": "12.2.0",
-    "js-yaml": "4.1.0"
+    "js-yaml": "4.1.1"
   },
   "devDependencies": {
     "@types/better-sqlite3": "7.6.13",
