@@ -111,7 +111,7 @@ function isInsideAnyRange(index: number, ranges: ReadonlyArray<readonly [number,
 function malformed(event: IndexedRecord, tag: string, detail: string): Verdict {
   return {
     validator: "non_propagation_tag_shape",
-    severity: "warn",
+    severity: "fail",
     code: "expected_witness_tag_malformed",
     message: `${event.node_id} has malformed non-propagation tag ${tag}.`,
     location: locationFor(event),

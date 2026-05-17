@@ -31,7 +31,7 @@ test("non_propagation_tag_shape rejects legacy reason prose without a tag", asyn
   assert.ok(verdicts.some((verdict) => verdict.code === "expected_witness_tag_missing"));
 });
 
-test("non_propagation_tag_shape warns on malformed non-propagation tags", async () => {
+test("non_propagation_tag_shape rejects malformed non-propagation tags", async () => {
   const verdicts = await nonPropagationTagShape.run(
     undefined,
     context([
@@ -41,8 +41,25 @@ test("non_propagation_tag_shape warns on malformed non-propagation tags", async 
     ])
   );
 
-  assert.ok(verdicts.some((verdict) => verdict.code === "expected_witness_tag_malformed"));
+  assert.ok(
+    verdicts.some(
+      (verdict) => verdict.code === "expected_witness_tag_malformed" && verdict.severity === "fail"
+    )
+  );
   assert.ok(!verdicts.some((verdict) => verdict.code === "expected_witness_tag_missing"));
+});
+
+test("non_propagation_tag_shape does not emit malformed verdicts for well-formed tags", async () => {
+  const verdicts = await nonPropagationTagShape.run(
+    undefined,
+    context([
+      storyEvent("SE-1", {
+        world_logic_rationale: "The group is covered by non_propagation:no_witness(group=public, records=[BEL-1])."
+      })
+    ])
+  );
+
+  assert.ok(!verdicts.some((verdict) => verdict.code === "expected_witness_tag_malformed"));
 });
 
 test("non_propagation_tag_shape is pre-apply scoped to create_se_record plans", () => {
