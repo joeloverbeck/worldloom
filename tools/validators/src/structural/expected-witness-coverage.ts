@@ -11,6 +11,18 @@ import {
 const AUDIT_ONLY_EVENT_KINDS = new Set(["prose_attach", "promotion_closeout"]);
 const PUBLIC_BEL_VISIBILITIES = new Set(["public", "shared", "factional", "rumored"]);
 const PUBLIC_DA_CIRCULATION = new Set(["public", "factional"]);
+// Excludes direct_observation (covered by direct witness checks), testimony
+// (multi-hop chain), inference (not evidence-bearing), and
+// authorial_initialization (bundle genesis, not propagation).
+const INDIRECT_ACCESS_ROUTES = new Set([
+  "document",
+  "object_trace",
+  "location_trace",
+  "rumor",
+  "surveillance",
+  "institutional_channel",
+  "magic_tech"
+]);
 const UNAVAILABLE_AGENCY = new Set(["incapacitated", "unconscious", "dead"]);
 const VALID_NON_PROPAGATION_REASONS = new Set([
   "no_witness",
@@ -106,11 +118,28 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   }
 
   const belCoverage = belCoverageForEvent(parsed, eventId, group, maps);
+  const tags = parseTags(stringValue(parsed.world_logic_rationale) ?? "");
+  const directVerdicts = directWitnessVerdicts(event, eventId, group, directWitnesses, belCoverage, tags, maps);
+  if (directVerdicts.length > 0) {
+    return directVerdicts;
+  }
+
+  return indirectPropagationVerdicts(event, parsed, eventId, tags, maps);
+}
+
+function directWitnessVerdicts(
+  event: IndexedRecord,
+  eventId: string,
+  group: WitnessGroup,
+  directWitnesses: ReadonlySet<string>,
+  belCoverage: ReadonlySet<string>,
+  tags: readonly ParsedTag[],
+  maps: RecordMaps
+): Verdict[] {
   if (belCoverage.size === directWitnesses.size) {
     return [];
   }
 
-  const tags = parseTags(stringValue(parsed.world_logic_rationale) ?? "");
   const invalidTagRecord = firstInvalidTagRecord(tags, directWitnesses, maps);
   if (invalidTagRecord !== undefined) {
     return [tagRecordsUnresolved(event, eventId, invalidTagRecord)];
@@ -130,6 +159,58 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   }
 
   return [missingPublicBel(event, eventId, [...directWitnesses])];
+}
+
+function indirectPropagationVerdicts(
+  event: IndexedRecord,
+  parsedEvent: Record<string, unknown>,
+  eventId: string,
+  tags: readonly ParsedTag[],
+  maps: RecordMaps
+): Verdict[] {
+  const verdicts: Verdict[] = [];
+  const creates = stringArray(asPlainRecord(parsedEvent.state_delta).create);
+
+  for (const id of creates) {
+    if (!/^DA-\d+$/.test(id)) {
+      continue;
+    }
+    const artifact = maps.byId.get(id);
+    if (artifact?.node_type !== "story_diegetic_artifact_record") {
+      continue;
+    }
+    const circulation = stringValue(asPlainRecord(artifact.parsed).circulation);
+    if (!PUBLIC_DA_CIRCULATION.has(circulation ?? "")) {
+      continue;
+    }
+    if (hasIndirectBelForArtifact(id, creates, maps) || hasEventLeavesNoAccessibleTraceTag(id, tags)) {
+      continue;
+    }
+    verdicts.push(missingIndirectPropagation(event, eventId, id, circulation ?? "unknown"));
+  }
+
+  return verdicts;
+}
+
+function hasIndirectBelForArtifact(artifactId: string, createdIds: readonly string[], maps: RecordMaps): boolean {
+  for (const id of createdIds) {
+    const belief = maps.byId.get(id);
+    if (belief?.node_type !== "belief_record") {
+      continue;
+    }
+    const basis = asPlainRecord(asPlainRecord(belief.parsed).basis);
+    if (
+      stringArray(basis.access_records).includes(artifactId) &&
+      INDIRECT_ACCESS_ROUTES.has(stringValue(basis.access_route) ?? "")
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function hasEventLeavesNoAccessibleTraceTag(artifactId: string, tags: readonly ParsedTag[]): boolean {
+  return tags.some((tag) => tag.reason === "event_leaves_no_accessible_trace" && tag.records.includes(artifactId));
 }
 
 function witnessGroup(
@@ -357,5 +438,23 @@ function tagRecordsUnresolved(event: IndexedRecord, eventId: string, invalid: { 
     location: locationFor(event),
     detail: { event_id: eventId, group: invalid.tag.group, record_id: invalid.recordId },
     suggested_fix: "Use record ids that exist in the story bundle and correspond to the computed direct witness group."
+  };
+}
+
+function missingIndirectPropagation(event: IndexedRecord, eventId: string, artifactId: string, circulation: string): Verdict {
+  return {
+    validator: "expected_witness_coverage",
+    severity: "fail",
+    code: "expected_witness_coverage_missing_indirect_propagation",
+    message:
+      `${eventId} creates DA ${artifactId} with circulation '${circulation}' but no BEL with indirect access_route ` +
+      "(one of: document, object_trace, location_trace, rumor, surveillance, institutional_channel, magic_tech) references it " +
+      "and no event_leaves_no_accessible_trace tag covers it.",
+    location: locationFor(event),
+    detail: { event_id: eventId, artifact_id: artifactId, circulation },
+    suggested_fix:
+      "Create a BEL whose basis.access_records names the DA and whose basis.access_route is in " +
+      "{document, object_trace, location_trace, rumor, surveillance, institutional_channel, magic_tech}, or add a " +
+      "non_propagation:event_leaves_no_accessible_trace tag naming the DA in SE.world_logic_rationale."
   };
 }

@@ -49,7 +49,7 @@ Add after smoke test 1. Construct a patch plan:
 - Do NOT include the BEL records the direct-witness check requires.
 - Do NOT include a valid non-propagation tag in `SE.world_logic_rationale`.
 
-Invoke `validate_patch_plan` through the MCP client. Assert the response contains a verdict where `verdict.validator === "expected_witness_coverage"` AND `verdict.code` is one of the existing direct-witness failure codes (e.g., `"expected_witness_coverage_missing_public_bel"`). The v1 test exercises the direct-witness path because it is the longest-standing validator behavior and the best smoke-test signal for "validator bundle current at all." If SPEC37STOPIPTEN-002 lands first, the same smoke-test infrastructure can be extended later with a fixture variant exercising the new `expected_witness_coverage_missing_indirect_propagation` verdict — that extension is out of scope for this ticket.
+Invoke `validate_patch_plan` through the MCP client. Assert the response contains a verdict where `verdict.validator === "expected_witness_coverage"` AND `verdict.code` is one of the existing direct-witness failure codes (e.g., `"expected_witness_coverage_missing_public_bel"`). The v1 test exercises the direct-witness path because it is the longest-standing validator behavior and the best smoke-test signal for "validator bundle current at all." `archive/tickets/SPEC37STOPIPTEN-002.md` has now landed the `expected_witness_coverage_missing_indirect_propagation` verdict; a fixture variant exercising that new verdict can extend the same smoke-test infrastructure later, but remains out of scope for this ticket.
 
 Loud-failure message convention identical to smoke test 1.
 
@@ -67,7 +67,7 @@ If the inline fixture construction in either smoke test exceeds ~50 lines, facto
 - New MCP tools, new dispatch surfaces, new patch-engine ops, new validators — this ticket is pure test extension on existing infrastructure.
 - CI workflow changes — `.github/workflows/ci-world-mcp.yml` already runs `npm test`; the new tests run inside that invocation automatically.
 - A separate `npm run test:smoke` script — only justified if the new tests add >10s wall-clock to CI per the spec's contingency clause; v1 keeps the tests inside the main test suite. If boot time becomes a problem, split-out is a follow-up.
-- Smoke-test coverage for the new `expected_witness_coverage_missing_indirect_propagation` verdict — that requires SPEC37STOPIPTEN-002 to land and is a follow-up extension of this same fixture infrastructure.
+- Smoke-test coverage for the new `expected_witness_coverage_missing_indirect_propagation` verdict landed by `archive/tickets/SPEC37STOPIPTEN-002.md` — this is a follow-up extension of the same fixture infrastructure, not part of this v1 smoke-test ticket.
 - Validator-source-content fingerprinting — that is SPEC37STOPIPTEN-004's scope (passive currency indicator).
 
 ## Acceptance Criteria
