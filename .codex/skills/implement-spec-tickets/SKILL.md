@@ -49,8 +49,8 @@ Keep the file small and machine-readable. Update it after intake, after every it
   "archived_spec": null,
   "last_ticket": "tickets/SPEC31EXAMPLE-001.md",
   "last_result": "completed_archived",
-  "last_work_commit": "abc1234",
-  "last_state_commit": "def5678",
+  "last_work_commit": "0123456789abcdef0123456789abcdef01234567",
+  "last_state_commit": "89abcdef0123456789abcdef0123456789abcdef",
   "next_target": "tickets/SPEC31EXAMPLE-002.md",
   "queue": [
     "tickets/SPEC31EXAMPLE-002.md"
@@ -89,7 +89,7 @@ If the only conflict is stale `dirty_state` text and live `git status --short` p
 
 If live `git status --short` shows dirty owned paths for `next_target` or `in_progress_ticket`, do not restart the target from the top just because the last committed state points to the previous checkpoint. Inspect the dirty diff, ticket closeout, and available proof artifacts; infer the next uncompleted phase, state that recovery decision, refresh the optional phase fields in the next state-file update, and continue from that phase. Treat unrelated or ambiguous dirty paths under the intake dirty-path rules instead of absorbing them silently.
 
-If compaction, interruption, or resume recovery happens while a proof command or test session may still be running, identify and poll or close the outstanding session before rerunning proof, editing closeout, committing, or finalizing. Do not claim a lane passed, failed, or needs rerun while an earlier invocation is still unresolved.
+If compaction, interruption, or resume recovery happens while a proof command or test session may still be running, identify and poll or close the outstanding session before rerunning proof, editing closeout, committing, or finalizing. If the recorded session id is no longer known or the tool reports it cannot be found after compaction, report the lost session, mark that proof lane unverified, and rerun the proof before closeout or commit. Do not claim a lane passed, failed, or needs rerun while an earlier invocation is still unresolved.
 
 `last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. Record full commit SHAs in the JSON state file; short SHAs are acceptable in printed handoffs only. `last_state_commit` identifies how the state update was persisted: the same sha as `last_work_commit` when amended into that commit, `"self"` when committed separately as a state-file-only commit, or `"none"` when intentionally left uncommitted. Do not overload one field for both meanings. When `last_state_commit` is `"self"`, the printed handoff must report the actual state-only commit sha. On resume, validate `"self"` by checking the state file's containing commit or latest state-only commit in `git log`, not by expecting the JSON value to contain its own sha.
 
@@ -216,6 +216,8 @@ Before applying or rejecting suggestions, print the same compact visible child-a
 
 Put any review-created follow-up ticket at the front of the queue, ahead of the original lexical next ticket. If review only truthed a spec, ticket dependency, or current contract doc and created no follow-up, keep the existing queue order.
 
+If this trigger fires, record that fact in the next visible checkpoint or state update before committing, using a compact marker such as `post_review_material_updates: true` in the handoff notes or state file. Also record whether the post-review audit block is `emitted`, `not_applicable`, or `blocked`. This marker exists to catch missed audit blocks after archive-path repairs, dependency repairs, or compaction.
+
 ### 5. Commit The Iteration
 
 Before committing:
@@ -228,6 +230,15 @@ Before committing:
 6. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
 7. Re-run `git diff --cached --name-status` after staging and confirm every staged path is owned by this iteration, explicitly approved, or intentional same-family state needed for the queue/handoff.
 8. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening. Prefer a concise truthful shape such as `SPEC35STOPIPEIG-001 implement and archive observer firewall fix`. Mention `follow-up` or `skill hardening` only when the committed iteration actually created or updated a follow-up ticket or changed a skill.
+
+Before the final commit or reset-boundary handoff for an iteration, run a required-visible-block checkpoint:
+
+- `implement-ticket` audit block: `emitted` or `not_applicable` with reason
+- `post-ticket-review` block: `emitted` or `not_applicable` with reason
+- `post-ticket-review` audit block: `emitted`, `not_applicable` with reason, or `blocked`
+- `Harness handoff` block: `ready_to_emit` or `not_applicable` with reason
+
+If compaction, interruption, or resume recovery caused any required block to be missed at its phase boundary, emit the missing compact block before staging, committing, or sending the final response. Do not rely on the final prose summary as an implicit substitute for these blocks.
 
 When `post-ticket-review` archived a ticket with `git mv`, do not try to stage the now-missing active ticket path by name. Stage the archive destination and other edited owned paths, then confirm the source deletion or rename is staged with `git diff --cached --name-status` before committing.
 
@@ -255,6 +266,15 @@ If the state file itself changes after the work commit, either:
 
 - amend it into the work commit before reporting the sha, then set `last_work_commit` and `last_state_commit` to that amended commit sha; or
 - commit it separately as a harness-state commit, then set `last_work_commit` to the implementation/archive commit and `last_state_commit` to `"self"`. Report the actual state-only commit sha in the handoff after the commit succeeds.
+
+After any state-only commit succeeds, verify the committed JSON still matches the chosen persistence mode:
+
+- if the state file was committed separately, `last_state_commit` must be `"self"`
+- if the state file was amended into the work commit, `last_state_commit` must equal `last_work_commit`
+- if the state file was intentionally left uncommitted, `last_state_commit` must be `"none"` and the handoff must say why
+- `last_work_commit` must be `"none"` or a full reachable commit SHA; if `last_state_commit` stores a commit value instead of `"self"` / `"none"`, it must also be a full reachable commit SHA
+
+Run this as an explicit post-commit check, such as reading `.codex/run-state/implement-spec-tickets.json` from `HEAD`. If the check fails, fix or amend before reporting a clean handoff.
 
 When the remaining queue is empty and the next action is immediate final spec archival in the same context, a separate post-ticket state-only commit may be deferred until after the final spec archive commit. This deferral is allowed only when the tracked worktree is clean except for the state file, no reset boundary is being requested, no blocker exists, and the harness prints a compact checkpoint stating that it is proceeding directly to final spec archival. The final archived-spec state must still be persisted and committed before branch creation or push.
 
