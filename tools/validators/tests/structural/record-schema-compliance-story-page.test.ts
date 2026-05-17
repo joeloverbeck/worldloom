@@ -59,7 +59,10 @@ function validPagePayload(): Record<string, unknown> {
           available_to: ["STENT-1"],
           action_families: ["move", "evade"]
         }
-      ]
+      ],
+      active_records: {
+        CLK: ["CLK-1"]
+      }
     },
     emitted_choices: [],
     validation_trace: {

@@ -46,6 +46,25 @@
       "type": "object",
       "properties": {
         "canon_revision": { "type": ["string", "null"], "pattern": "^CH-[0-9]+$" },
+        "active_records": {
+          "type": "object",
+          "properties": {
+            "STENT": { "type": "array", "items": { "type": "string", "pattern": "^STENT-[0-9]+$" } },
+            "STINT": { "type": "array", "items": { "type": "string", "pattern": "^STINT-[0-9]+$" } },
+            "SF": { "type": "array", "items": { "type": "string", "pattern": "^SF-[0-9]+$" } },
+            "BEL": { "type": "array", "items": { "type": "string", "pattern": "^BEL-[0-9]+$" } },
+            "OBL": { "type": "array", "items": { "type": "string", "pattern": "^OBL-[0-9]+$" } },
+            "CNSQ": { "type": "array", "items": { "type": "string", "pattern": "^CNSQ-[0-9]+$" } },
+            "THR": { "type": "array", "items": { "type": "string", "pattern": "^THR-[0-9]+$" } },
+            "SREL": { "type": "array", "items": { "type": "string", "pattern": "^SREL-[0-9]+$" } },
+            "STLOC": { "type": "array", "items": { "type": "string", "pattern": "^STLOC-[0-9]+$" } },
+            "STOBJ": { "type": "array", "items": { "type": "string", "pattern": "^STOBJ-[0-9]+$" } },
+            "DA": { "type": "array", "items": { "type": "string", "pattern": "^DA-[0-9]+$" } },
+            "STSTAT": { "type": "array", "items": { "type": "string", "pattern": "^STSTAT-[0-9]+$" } },
+            "CLK": { "type": "array", "items": { "type": "string", "pattern": "^CLK-[0-9]+$" } }
+          },
+          "additionalProperties": true
+        },
         "entity_status": {
           "type": "object",
           "additionalProperties": {

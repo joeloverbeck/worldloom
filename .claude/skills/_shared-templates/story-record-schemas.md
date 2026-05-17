@@ -10,7 +10,7 @@ Authority and supersession discipline live in the main contract's §1; schema-mi
 
 ## 4. Record Schemas
 
-Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 17 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 13 additional classes, and §4.6 covers the prose receipt direct-write artifact.
+Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 18 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 14 additional classes, and §4.6 covers the prose receipt direct-write artifact.
 
 ### 4.1 `BEL` (13 fields)
 
@@ -72,6 +72,7 @@ state_snapshot:
     STOBJ: [STOBJ-<integer>]
     DA: [DA-<integer>]
     STSTAT: [STSTAT-<integer>]
+    CLK: [CLK-<integer>]
   entity_status:                       # * derived projection of active STSTAT; one entry per active STENT
     STENT-<integer>:
       life: alive | dead | unknown
@@ -624,6 +625,40 @@ derived_from: [SE-<integer> | <record_id>]     # default []
 ```
 
 No `display_name`, `role_in_story`, or `bound_char_id` fields: identity stays on `STENT`.
+
+#### 4.5.14 `CLK` (pressure clock)
+
+Tracks present-causal pressure that advances over time or through events: danger clocks, faction activity, countdowns, pursuit, exposure, deadlines, and worsening conditions. `CLK` is a state record; active instances appear in `PG.state_snapshot.active_records.CLK`.
+
+```yaml
+id: CLK-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: CLK-<integer> | null            # default null
+title: string*
+clock_kind: danger | racing | mission | faction | exposure | pursuit | deadline*
+driver: STENT-<integer> | group:<name> | system | unknown*
+linked_records: [THR-<integer> | OBL-<integer> | CNSQ-<integer> | STINT-<integer> | SREL-<integer> | STLOC-<integer> | STOBJ-<integer> | STQ-<integer>]*
+value: integer >= 0*
+max: integer >= 1*
+salience: low | medium | high*
+visibility: hidden | holder_specific | public | factional*
+thresholds:
+  - at: integer >= 1*
+    label: string*
+    effects:
+      create: [<record_id> | bound:<alias>]
+      supersede: [<record_id> | bound:<alias>]
+      close: [<record_id> | bound:<alias>]
+tick_history:
+  - event: SE-<integer>*
+    delta: nonzero integer*
+    cause: string*
+status: active | paused | resolved | fired | abandoned | superseded*
+resolution_event: SE-<integer> | null
+```
+
+`title`, `clock_kind`, and `driver` scope the pressure for humans and future predicates. `linked_records` grounds the clock in existing state. `value` and `max` are present-causal state; `thresholds` names staged effects that become available when value crosses them; `tick_history` is the replay trail; `salience` and `visibility` support terminal-debt and information-firewall checks; `status` and `resolution_event` close the lifecycle. Do not add `deadline.natural_language`, `clock_kind: front`, or `visibility: audience_only`.
 
 ### 4.6 Prose receipt
 

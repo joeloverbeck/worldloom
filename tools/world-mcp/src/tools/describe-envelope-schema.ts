@@ -71,6 +71,7 @@ const ID_ALLOCATION_KEYS = [
   "chc_ids",
   "slt_ids",
   "bel_ids",
+  "clk_ids",
   "story_da_ids"
 ] as const;
 
@@ -101,6 +102,7 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   story_page_record: "story-page.schema.json",
   story_choice_record: "story-choice.schema.json",
   storylet_record: "story-storylet.schema.json",
+  pressure_clock_record: "story-pressure-clock.schema.json",
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 } as const;
 
@@ -428,6 +430,33 @@ function operationSchema(kind: OperationKind): JsonObject {
       return baseOperationProperties(kind, storyPayloadWithRecord("storylet_record"));
     case "create_bel_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("belief_record"));
+    case "create_clk_record":
+    case "supersede_clk_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("pressure_clock_record"));
+    case "tick_pressure_clock":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_clock_id", "event", "delta", "cause"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_clock_id: stringSchema("^CLK-[0-9]+$"),
+          event: stringSchema("^SE-[0-9]+$"),
+          delta: { type: "integer", not: { const: 0 } },
+          cause: stringSchema()
+        }
+      });
+    case "resolve_pressure_clock":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_clock_id", "resolution_event"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_clock_id: stringSchema("^CLK-[0-9]+$"),
+          resolution_event: stringSchema("^SE-[0-9]+$")
+        }
+      });
     case "append_story_diegetic_artifact_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_diegetic_artifact_record"));
   }

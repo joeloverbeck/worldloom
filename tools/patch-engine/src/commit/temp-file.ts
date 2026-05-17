@@ -14,8 +14,10 @@ import { stageCreateMRecord } from "../ops/create-m-record.js";
 import { stageCreateOqRecord } from "../ops/create-oq-record.js";
 import { stageCreateSecRecord } from "../ops/create-sec-record.js";
 import { stageCreateStoryRecord, STORY_RECORD_SPECS, storyRecordMetadata } from "../ops/create-story-record.js";
+import { stageResolvePressureClock } from "../ops/resolve-pressure-clock.js";
 import { stageRemoveChAffectedCfIds } from "../ops/remove-ch-affected-cf-ids.js";
 import { stageRepairSkippedChangeLogEntry } from "../ops/repair-skipped-change-log-entry.js";
+import { stageTickPressureClock } from "../ops/tick-pressure-clock.js";
 import { stageUpdateRecordField } from "../ops/update-record-field.js";
 import type { OpContext, StagedRecord, StagedWrite } from "../ops/types.js";
 import { unlinkAllTempFiles } from "./rename.js";
@@ -127,10 +129,15 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "create_chc_record":
     case "create_slt_record":
     case "create_bel_record":
+    case "create_clk_record":
+    case "supersede_clk_record":
     case "append_story_diegetic_artifact_record": {
       const metadata = storyRecordMetadata(patch);
       return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
     }
+    case "tick_pressure_clock":
+    case "resolve_pressure_clock":
+      return metadataForTargetRecordId(patch.payload.target_clock_id);
     case "update_record_field":
     case "append_extension":
       return metadataForTargetRecordId(patch.payload.target_record_id);
@@ -152,7 +159,7 @@ const STORY_BUNDLE_NODE_TYPE_BY_PREFIX: Readonly<Record<string, string>> = Objec
 );
 
 const STORY_BUNDLE_ID_PATTERN =
-  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA)-\d+$/;
+  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA|CLK)-\d+$/;
 
 function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType: string } | null {
   if (/^CF-\d+$/.test(recordId)) {
@@ -245,7 +252,13 @@ function stageOne(
     case "create_chc_record":
     case "create_slt_record":
     case "create_bel_record":
+    case "create_clk_record":
+    case "supersede_clk_record":
     case "append_story_diegetic_artifact_record":
       return stageCreateStoryRecord(envelope, patch, ctx);
+    case "tick_pressure_clock":
+      return stageTickPressureClock(envelope, patch, ctx);
+    case "resolve_pressure_clock":
+      return stageResolvePressureClock(envelope, patch, ctx);
   }
 }

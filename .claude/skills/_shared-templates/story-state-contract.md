@@ -37,6 +37,7 @@ Core page-cycle state records:
 | `OBL` | Obligation. |
 | `CNSQ` | Consequence. |
 | `THR` | Thread. |
+| `CLK` | Pressure clock — staged danger, faction, deadline, exposure, pursuit, or mission pressure with value / max / threshold tracking. |
 | `SREL` | Relationship. |
 | `STLOC` | Location. |
 | `STOBJ` | Object. |
@@ -61,7 +62,7 @@ Auxiliary story-bundle records:
 
 ## 4. Record Schemas
 
-The full record-schema enumeration for all 17 story-bundle record classes plus the prose-receipt direct-write artifact lives in a sibling shared template at `.claude/skills/_shared-templates/story-record-schemas.md`. That file preserves §4.X subsection numbering verbatim (so existing citations to §4.1 `BEL`, §4.2 `PG`, §4.2a deterministic PG hash computation, §4.3 `SE`, §4.3a audit-only SE events, §4.4 `SLT`, §4.4a shared `action_family` taxonomy, §4.4b `STENT` role and `SREL` axis taxonomies, §4.5.1 through §4.5.13, and §4.6 prose receipt all resolve without rewording in consumer skills, validators, and other shared templates).
+The full record-schema enumeration for all 18 story-bundle record classes plus the prose-receipt direct-write artifact lives in a sibling shared template at `.claude/skills/_shared-templates/story-record-schemas.md`. That file preserves §4.X subsection numbering verbatim (so existing citations to §4.1 `BEL`, §4.2 `PG`, §4.2a deterministic PG hash computation, §4.3 `SE`, §4.3a audit-only SE events, §4.4 `SLT`, §4.4a shared `action_family` taxonomy, §4.4b `STENT` role and `SREL` axis taxonomies, §4.5.1 through §4.5.13, and §4.6 prose receipt all resolve without rewording in consumer skills, validators, and other shared templates). SPEC-42 adds `CLK` as §4.5.14 in the schema file without renumbering the existing prose-receipt §4.6 section.
 
 Consumers that need only the authority model (§1), schema-minimalism doctrine (§2), record class inventory (§3), closed predicate DSL (§5), action routing (§6), eight shared hard gates (§7), page-plan minimum contract (§8), branching procedure (§9), shared write order (§10), mystery and canon authority (§11), or skill-usage overview (§12) can read this main contract alone; consumers that need any record schema additionally load `story-record-schemas.md`.
 

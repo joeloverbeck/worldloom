@@ -40,6 +40,7 @@ export interface IdAllocations {
   slt_ids?: string[];
   bel_ids?: string[];
   story_da_ids?: string[];
+  clk_ids?: string[];
 }
 
 export interface PatchPlanEnvelope {
@@ -88,6 +89,10 @@ export const OPERATION_KINDS = [
   "create_chc_record",
   "create_slt_record",
   "create_bel_record",
+  "create_clk_record",
+  "supersede_clk_record",
+  "tick_pressure_clock",
+  "resolve_pressure_clock",
   "append_story_diegetic_artifact_record"
 ] as const;
 
@@ -190,6 +195,20 @@ export interface StoryRecordPayload<TRecord = Record<string, unknown>> {
   record: TRecord;
 }
 
+export interface TickPressureClockPayload {
+  story_slug: string;
+  target_clock_id: string;
+  event: string;
+  delta: number;
+  cause: string;
+}
+
+export interface ResolvePressureClockPayload {
+  story_slug: string;
+  target_clock_id: string;
+  resolution_event: string;
+}
+
 export type PatchOperation =
   | OperationBase<"create_cf_record", { cf_record: CanonFactRecord }>
   | OperationBase<"create_ch_record", { ch_record: ChangeLogEntry }>
@@ -257,6 +276,10 @@ export type PatchOperation =
   | OperationBase<"create_chc_record", StoryRecordPayload>
   | OperationBase<"create_slt_record", StoryRecordPayload>
   | OperationBase<"create_bel_record", StoryRecordPayload>
+  | OperationBase<"create_clk_record", StoryRecordPayload>
+  | OperationBase<"supersede_clk_record", StoryRecordPayload>
+  | OperationBase<"tick_pressure_clock", TickPressureClockPayload>
+  | OperationBase<"resolve_pressure_clock", ResolvePressureClockPayload>
   | OperationBase<"append_story_diegetic_artifact_record", StoryRecordPayload>;
 
 export type OperationPayload = PatchOperation["payload"];

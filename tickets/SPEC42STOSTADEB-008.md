@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends 4 existing structural validators to handle the 3 new record classes in their cross-class validation logic; no new validators introduced; no existing per-class validator logic altered
-**Deps**: SPEC42STOSTADEB-001, SPEC42STOSTADEB-002, SPEC42STOSTADEB-003
+**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, SPEC42STOSTADEB-002, SPEC42STOSTADEB-003
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds 5 new CLK-specific structural validators under `tools/validators/src/structural/`, 4 new CLK-specific predicates to the closed predicate DSL at `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`, and registers all 5 validators in the validator registry at `tools/validators/src/public/registry.ts`; no existing validators or predicates altered
-**Deps**: SPEC42STOSTADEB-001
+**Deps**: archive/tickets/SPEC42STOSTADEB-001.md
 
 ## Problem
 

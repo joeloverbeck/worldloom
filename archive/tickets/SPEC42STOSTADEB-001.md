@@ -1,6 +1,6 @@
 # SPEC42STOSTADEB-001: CLK pressure clock — class foundation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds new story-bundle record class `CLK` (Pressure Clock) end-to-end across `tools/world-index/`, `tools/world-mcp/`, `tools/patch-engine/`, `tools/validators/`, and the canonical story state contract; introduces two new custom patch-engine ops (`tick_pressure_clock`, `resolve_pressure_clock`) on top of the generic `create_<class>_record` / `supersede_<class>_record` pattern; no impact on existing record classes
@@ -14,12 +14,12 @@ Worldloom's story-bundle pipeline has no first-class structure for staged pressu
 
 <!-- Items 1-3 always required. Items 4+ are a menu; include only those matching this ticket's scope and renumber surviving items sequentially starting from 4. Lists like 1, 2, 3, 14 are malformed output. -->
 
-1. Codebase verified at SPEC-42 brainstorm + Step 2 codebase validation (2026-05-17): all spec-cited foundation files exist (`tools/patch-engine/src/envelope/schema.ts`, `tools/patch-engine/src/ops/create-story-record.ts`, `tools/patch-engine/src/commit/order.ts`, `tools/patch-engine/src/commit/temp-file.ts`, `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`, `tools/world-mcp/src/tools/allocate-next-id.ts`, `tools/world-index/src/parse/atomic.ts`, `tools/validators/src/schemas/story-page.schema.json`); existing SLT class confirmed as parity-scan baseline with full registry surface across the same files.
+1. Codebase verified at implementation intake (2026-05-17): all spec-cited foundation files exist (`tools/patch-engine/src/envelope/schema.ts`, `tools/patch-engine/src/ops/create-story-record.ts`, `tools/patch-engine/src/commit/order.ts`, `tools/patch-engine/src/commit/temp-file.ts`, `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`, `tools/world-mcp/src/tools/allocate-next-id.ts`, `tools/world-index/src/parse/atomic.ts`, `tools/validators/src/schemas/story-page.schema.json`); existing SLT class confirmed as parity-scan baseline with full registry surface across the same files.
 2. Spec verified at `specs/SPEC-42-story-state-debt-secret-clock-records.md` §A (CLK schema, 16 fields), §D (`PG.state_snapshot.active_records[]` extension from 12 to 15 classes), §E Phase 1 (CLK as cleanest §5c-aligned addition shipping first); ChatGPT-Pro proposal at `reports/new-narrative-features-first-iteration.md` §Feature 3 (CLK schema source) with spec-level drops (`deadline.natural_language`, `clock_kind: front`, `visibility: audience_only`) enumerated at §A drops; brainstorm-triage rationale at SPEC-42 §Key design decisions.
-3. Cross-skill / cross-tool shared boundary: the `_source/<class>/<ID>.yaml` atomic-source convention established by SPEC-13 (atomic-source migration) and extended to story-bundle records by PEENH-001 governs the new `clocks/` subdirectory; the story-bundle id-class registry at `tools/world-mcp/src/tools/allocate-next-id.ts:81-102` is the canonical class-registration site; the OPERATION_KINDS enum at `tools/patch-engine/src/envelope/schema.ts:58-92` is the canonical op-registration site; the parser registrations at `tools/world-index/src/parse/atomic.ts` and commit-ordering at `tools/patch-engine/src/commit/order.ts` must enumerate the new class for end-to-end machine-layer integration. **§Step 2 New-class parity scan surfaced 5 machine-layer files the spec §Deliverables did not enumerate** (parser/atomic.ts, ops/create-story-record.ts, commit/order.ts, commit/temp-file.ts, pre-apply-checks/id-allocation-race.ts); propagated into Files to Touch per §Step 2 routing for under-enumeration that does not change spec intent.
+3. Cross-skill / cross-tool shared boundary: the `_source/<class>/<ID>.yaml` atomic-source convention established by SPEC-13 (atomic-source migration) and extended to story-bundle records by PEENH-001 governs the new `clocks/` subdirectory; the story-bundle id-class registry at `tools/world-mcp/src/tools/allocate-next-id.ts` is the canonical class-registration site; the OPERATION_KINDS enum at `tools/patch-engine/src/envelope/schema.ts` is the canonical op-registration site; the parser registrations at `tools/world-index/src/parse/atomic.ts` and commit-ordering at `tools/patch-engine/src/commit/order.ts` must enumerate the new class for end-to-end machine-layer integration. Live contract drift corrected before source edits: the canonical §4 schema text now lives in `.claude/skills/_shared-templates/story-record-schemas.md`, while `.claude/skills/_shared-templates/story-state-contract.md` only carries the §3 inventory and non-schema story-state contract. **§Step 2 New-class parity scan surfaced 5 machine-layer files the spec §Deliverables did not enumerate** (parser/atomic.ts, ops/create-story-record.ts, commit/order.ts, commit/temp-file.ts, pre-apply-checks/id-allocation-race.ts); propagated into Files to Touch per §Step 2 routing for under-enumeration that does not change spec intent.
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism) motivates this ticket's tight 16-field schema: every field must be load-bearing — directly consumed by a validation gate, replay primitive, predicate, fork operation, or audit-trail discipline. `title` / `clock_kind` / `driver` for human and predicate scoping; `linked_records[]` for traceability + terminal-debt audit; `value` / `max` for present-causal state + threshold tests; `salience` / `visibility` for storylet preconditioning + witness-firewall integration; `thresholds[]` for staged-consequence firing (mirroring `SE.state_delta` and `SLT.effects` create/supersede/close triple); `tick_history[]` for replay determinism; `status` + `resolution_event` for lifecycle. Three fields explicitly DROPPED from the proposal as §5b-violating: `deadline.natural_language` (not validator-readable), `clock_kind: front` (plot-rail-flavored), `visibility: audience_only` (fourth-wall-breaking, §5c-violating).
 5. HARD-GATE engine surfaces touched: `tools/patch-engine/src/envelope/schema.ts` OPERATION_KINDS extension (engine-pre-apply gate) + `tools/patch-engine/src/commit/order.ts` (commit-time class-prefix registration that orders engine writes); both surfaces gate canon and story-bundle record writes. Verified: the change does NOT weaken the Mystery Reserve firewall (CLK records are story-local; do not touch world `M-*` records); does NOT silently resolve any Mystery Reserve entry; does NOT alter Hook 3 (`_source/*.yaml` engine-only write enforcement) which continues to apply to the new `_source/clocks/CLK-<integer>.yaml` files. Hook 3 is path-pattern-based (`worlds/<slug>/stories/<story-slug>/_source/<class>/*.yaml`); the new `clocks/` subdirectory is covered by the existing pattern without modification.
-6. Existing output schema extended: `tools/validators/src/schemas/story-page.schema.json` — `state_snapshot.active_records[]` enum extended from 12 entries to add `CLK`. This is an **additive-only** extension (new enum value; existing 12 entries unchanged; no consumer needs migration). The active_records[] entry is a bare ID list per existing convention; no schema-restructuring is required for the CLK class itself (the CLK schema is a new file, not an extension).
+6. Existing output schema extended: `tools/validators/src/schemas/story-page.schema.json` — `state_snapshot.active_records` is a permissive mapping in the current JSON Schema, so the ticket-owned schema change is to add the standalone `story-pressure-clock.schema.json` and prove PG records with `state_snapshot.active_records.CLK` remain schema-compliant. The deterministic class enumeration that actually replays bare active-record ID lists lives in `tools/validators/src/_helpers/state-snapshot-replay.ts` and shared structural validators; full cross-class validator enforcement for CLK/STSEC/STQ remains owned by SPEC42STOSTADEB-008.
 
 ## Architecture Check
 
@@ -32,7 +32,7 @@ Worldloom's story-bundle pipeline has no first-class structure for staged pressu
 1. CLK schema validates representative record cleanly → schema validation via `npm test --prefix tools/validators`
 2. `_source/clocks/CLK-1.yaml` file emission survives Hook 3 write-discipline check → engine pre-apply test via `npm test --prefix tools/patch-engine`
 3. `mcp__worldloom__allocate_next_id(world_slug, id_class="CLK", story_slug)` returns next integer → MCP retrieval test via `npm test --prefix tools/world-mcp`
-4. `PG.state_snapshot.active_records[CLK]` enum extension validates → schema validation via `npm test --prefix tools/validators` (story-page.schema.json positive test)
+4. `PG.state_snapshot.active_records.CLK` is accepted as an additive bare-ID list by the page schema and deterministic replay helpers know the CLK class → schema validation plus replay-helper unit coverage via `npm test --prefix tools/validators`
 5. `tick_pressure_clock` op increments `value` and appends `tick_history[]` entry deterministically → patch-engine op test via `npm test --prefix tools/patch-engine`
 6. `resolve_pressure_clock` op sets `status: resolved` and binds `resolution_event` → patch-engine op test via `npm test --prefix tools/patch-engine`
 7. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism) alignment → FOUNDATIONS alignment check (manual review against the 16-field roster; each field defended in §A schema-text comment)
@@ -45,14 +45,14 @@ Create `tools/validators/src/schemas/story-pressure-clock.schema.json` with the 
 
 ### 2. Contract document update — story-state-contract.md
 
-Modify `.claude/skills/_shared-templates/story-state-contract.md`:
+Modify `.claude/skills/_shared-templates/story-state-contract.md` and `.claude/skills/_shared-templates/story-record-schemas.md`:
 - §3 (class catalog): add row `CLK | Pressure clock — staged pressure with value/max/thresholds tracking faction/deadline/exposure/pursuit pressure that advances over time or via events.`
-- §4 (per-class schemas): insert new §4.6 (Pressure Clock — CLK) with the canonical schema text matching the JSON Schema above. Use the same prose-style schema-text format as existing §4.1 (BEL), §4.2 (PG), §4.3 (SE), §4.4 (SLT), §4.5 (state records).
-- §4.2 (PG.state_snapshot.active_records): extend the enum from 12 classes to add `CLK: [CLK-<integer>]` (one new entry; STSEC + STQ added in SPEC42STOSTADEB-002 / -003 — note the cross-ticket co-edit in the prose; the inline ordering CLK / STSEC / STQ matches SPEC-42 §D).
+- §4 schema text lives in `story-record-schemas.md`; add a CLK subsection with canonical schema text matching the JSON Schema below. Keep the existing §4.1 / §4.2 / §4.3 / §4.4 / §4.5 numbering stable; add CLK as an added story-bundle schema subsection rather than repurposing the existing §4.6 prose-receipt section.
+- `story-record-schemas.md` §4.2 (`PG.state_snapshot.active_records`): extend the bare-ID list from 12 classes to add `CLK: [CLK-<integer>]` (one new entry; STSEC + STQ added in SPEC42STOSTADEB-002 / -003 — note the cross-ticket co-edit in the prose; the inline ordering CLK / STSEC / STQ matches SPEC-42 §D).
 
 ### 3. PG state-snapshot schema extension
 
-Modify `tools/validators/src/schemas/story-page.schema.json`: extend `state_snapshot.active_records[]` enum from its current 12 entries to add `CLK`. Additive-only; existing 12 entries unchanged. STSEC and STQ added in SPEC42STOSTADEB-002 / -003 (per-ticket co-edit at the same enum site — flag for reviewer).
+Modify `tools/validators/src/schemas/story-page.schema.json` only as needed to preserve schema acceptance for `state_snapshot.active_records.CLK`; the current schema already permits arbitrary `state_snapshot` keys, so the implementation proof is a positive PG schema test plus `ACTIVE_RECORDS_CLASSES` replay-helper extension in `tools/validators/src/_helpers/state-snapshot-replay.ts`. STSEC and STQ entries are added later by SPEC42STOSTADEB-002 / -003.
 
 ### 4. Allocator registration
 
@@ -66,7 +66,7 @@ Modify `tools/world-index/src/parse/atomic.ts`: register `CLK-<integer>` ID pref
 
 Modify `tools/patch-engine/src/envelope/schema.ts`: add four new operation kinds to `OPERATION_KINDS`:
 - `create_clk_record` — generic create-story-record handler (uses existing `create-story-record.ts` pattern)
-- `supersede_clk_record` — generic supersede pattern (uses existing supersede mechanism)
+- `supersede_clk_record` — same story-record staging path as create, with the replacement record carrying `supersedes: CLK-<integer>`
 - `tick_pressure_clock` — custom op: increments `CLK.value` by signed `delta` (positive ticks up, negative ticks down for pause/de-escalation), appends `tick_history[]` entry with `event` + `delta` + `cause`
 - `resolve_pressure_clock` — custom op: sets `CLK.status = resolved`, binds `resolution_event`
 
@@ -105,8 +105,10 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `CLK
 - `tools/validators/src/schemas/story-pressure-clock.schema.json` (new)
 - `tools/patch-engine/src/ops/tick-pressure-clock.ts` (new)
 - `tools/patch-engine/src/ops/resolve-pressure-clock.ts` (new)
-- `.claude/skills/_shared-templates/story-state-contract.md` (modify — §3 row, §4.6 new sub-section, §4.2 enum extension)
+- `.claude/skills/_shared-templates/story-state-contract.md` (modify — §3 row)
+- `.claude/skills/_shared-templates/story-record-schemas.md` (modify — CLK schema sub-section, §4.2 active_records entry)
 - `tools/validators/src/schemas/story-page.schema.json` (modify — state_snapshot.active_records enum extension)
+- `tools/validators/src/_helpers/state-snapshot-replay.ts` (modify — active-record class enumeration)
 - `tools/world-mcp/src/tools/allocate-next-id.ts` (modify — class registry row for CLK)
 - `tools/world-index/src/parse/atomic.ts` (modify — CLK class-prefix + clocks/ subdirectory registration)
 - `tools/patch-engine/src/envelope/schema.ts` (modify — OPERATION_KINDS adds 4 entries)
@@ -119,7 +121,7 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `CLK
 
 - CLK validators (`clock_value_in_range`, `clock_threshold_ordering`, `clock_tick_provenance`, `clock_firing_threshold_integrity`, `clock_terminal_debt_integrity`) — owned by SPEC42STOSTADEB-005
 - CLK predicate DSL entries (`clock_at_least`, `clock_below`, `clock_full`, `any_clock_active`) — owned by SPEC42STOSTADEB-005
-- MCP retrieval extensions (`get_record` / `get_records` / `list_records` / `get_context_packet` / `describe_envelope_schema` / `get_record_schema`) — owned by SPEC42STOSTADEB-004
+- MCP retrieval extensions (`get_record` / `get_records` / `list_records` / `get_context_packet` / `get_record_schema`) — owned by SPEC42STOSTADEB-004. Minimal `describe_envelope_schema` coverage landed here because the existing `OPERATION_KINDS` exhaustiveness test requires every patch operation to be introspectable when it is introduced.
 - Shared validator extensions for `state_snapshot_integrity` / `snapshot_replay_equality` / `branch_isolation` / `observer_firewall` — owned by SPEC42STOSTADEB-008
 - Skill integrations (turn-cycle / bootstrap / commitment-block-authoring / health-audit / prose-attach) — owned by SPEC42STOSTADEB-009 through -013
 - STSEC and STQ class foundations — owned by SPEC42STOSTADEB-002 / -003
@@ -128,7 +130,7 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `CLK
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators` — story-pressure-clock.schema.json validates a representative CLK record (positive test) and rejects invalid records (negative tests: `value > max`, `thresholds[].at > max`, `status: fired` without firing event in `tick_history`); story-page.schema.json validates `state_snapshot.active_records[CLK]` enum extension
+1. `npm test --prefix tools/validators` — `story-pressure-clock.schema.json` validates a representative CLK record and rejects structural invalid records (enum violations and zero tick deltas); `story-page.schema.json` accepts `state_snapshot.active_records.CLK`, and replay-helper coverage proves CLK participates in active-record replay. Plain JSON Schema sibling comparisons (`value <= max`, `thresholds[].at <= max`) remain outside this ticket's structural schema proof and are enforced by the patch op or later semantic validators.
 2. `npm test --prefix tools/patch-engine` — `create_clk_record` writes valid YAML at `_source/clocks/CLK-1.yaml`; `supersede_clk_record` writes superseding record; `tick_pressure_clock` increments `value` and appends `tick_history[]`; `resolve_pressure_clock` sets `status: resolved` and binds `resolution_event`; commit-ordering places CLK alongside state-record classes
 3. `npm test --prefix tools/world-mcp` — `allocate_next_id(world_slug, id_class="CLK", story_slug)` returns next CLK integer scoped to the bundle
 4. `npm run build --prefix tools/world-index` (build only — no integration test until SPEC42STOSTADEB-004 lands MCP retrieval extensions for CLK)
@@ -144,8 +146,9 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `CLK
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/schemas/story-pressure-clock.test.ts` (new) — schema-level positive + negative tests for CLK (value/max bounds, threshold ordering, tick_history shape, enum constraints)
-2. `tools/validators/tests/schemas/story-page.test.ts` (modify) — extend existing tests to cover `state_snapshot.active_records[CLK]` enum entry
+1. `tools/validators/tests/structural/record-schema-compliance-pressure-clock.test.ts` (new) — record-schema-compliance positive + negative tests for CLK structural schema coverage (enum constraints and nonzero tick deltas)
+2. `tools/validators/tests/structural/record-schema-compliance-story-page.test.ts` (modify) — cover `state_snapshot.active_records.CLK` schema acceptance
+3. `tools/validators/tests/structural/snapshot-replay-equality.test.ts` (modify) — cover CLK active-record replay
 3. `tools/patch-engine/tests/ops/tick-pressure-clock.test.ts` (new) — op-level tests for `tick_pressure_clock` (positive ticks, negative ticks for pause/de-escalation, out-of-range rejection)
 4. `tools/patch-engine/tests/ops/resolve-pressure-clock.test.ts` (new) — op-level tests for `resolve_pressure_clock` (status transition, resolution_event binding)
 5. `tools/patch-engine/tests/ops/create-story-record.test.ts` (modify) — extend existing tests to cover `create_clk_record` writing to `_source/clocks/`
@@ -158,3 +161,26 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `CLK
 3. `npm test --prefix tools/world-mcp` — allocator tests
 4. `npm run build --prefix tools/world-index` — parser builds cleanly with CLK registration (full retrieval integration deferred to SPEC42STOSTADEB-004)
 5. The full-pipeline verification command (representative CLK record round-tripping through allocator → patch-engine → world-index → retrieval) lands in SPEC42STOSTADEB-015 capstone; this ticket's verification boundary is the per-package test surface above
+
+## Outcome
+
+Implemented the CLK foundation across the machine-layer seams:
+
+- Added `pressure_clock_record` / `CLK` registration to world-index parsing, validator structural discovery, MCP allocation, MCP input validation, patch-engine operation schemas, create/supersede staging, commit ordering/temp-file handling, and ID allocation race checks.
+- Added `create_clk_record`, `supersede_clk_record`, `tick_pressure_clock`, and `resolve_pressure_clock` support. `tick_pressure_clock` rejects non-integer, zero, and out-of-range deltas; `resolve_pressure_clock` writes `status: resolved` and binds `resolution_event`.
+- Added `story-pressure-clock.schema.json`, `state_snapshot.active_records.CLK` schema acceptance, and CLK replay-helper support.
+- Updated the story-state and story-record schema templates so CLK is documented in the canonical class inventory and story-bundle schema text.
+
+## Deviations / Truthing
+
+- The ticket's drafted schema-level `value > max` and `thresholds[].at > max` negative tests were narrowed. Standard JSON Schema cannot compare sibling values without nonstandard `$data`; this ticket enforces post-tick `value` bounds in `tick_pressure_clock`, while richer semantic clock validators remain assigned to SPEC42STOSTADEB-005.
+- `describe_envelope_schema` and the MCP `ID_CLASSES` input enum were updated in the same seam because the existing MCP build/tests require the public operation and allocator surfaces to remain exhaustive. Broader CLK retrieval remains out of scope for SPEC42STOSTADEB-004.
+- `tools/validators/src/structural/utils.ts` needed both schema mapping and structural-authority recognition for `_source/clocks/CLK-<integer>.yaml`; without both, `record_schema_compliance` would silently skip CLK records.
+
+## Verification Result
+
+- PASS: `npm test` in `tools/patch-engine` (81 tests)
+- PASS: `npm test` in `tools/validators` (371 tests)
+- PASS: `npm test` in `tools/world-mcp` (392 tests)
+- PASS: `npm run build` in `tools/world-index`
+- PASS: `git diff --check`

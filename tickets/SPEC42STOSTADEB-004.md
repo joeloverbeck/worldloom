@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — extends the MCP retrieval surface (`tools/world-mcp/src/tools/`) to recognize three new story-bundle record types (`pressure_clock_record`, `story_secret_record`, `story_question_record`) across the standard query tools and the context-packet assembly; no new MCP tools introduced; no impact on existing record-type handling
-**Deps**: SPEC42STOSTADEB-001, SPEC42STOSTADEB-002, SPEC42STOSTADEB-003
+**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, SPEC42STOSTADEB-002, SPEC42STOSTADEB-003
 
 ## Problem
 

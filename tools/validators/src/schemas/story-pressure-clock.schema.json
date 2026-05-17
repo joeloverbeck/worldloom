@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/story-pressure-clock.schema.json",
+  "type": "object",
+  "required": [
+    "id",
+    "story_id",
+    "created_at_page",
+    "title",
+    "clock_kind",
+    "driver",
+    "linked_records",
+    "value",
+    "max",
+    "salience",
+    "visibility",
+    "thresholds",
+    "tick_history",
+    "status"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^CLK-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^CLK-(0|[1-9][0-9]*)$" },
+    "title": { "type": "string", "minLength": 1 },
+    "clock_kind": {
+      "type": "string",
+      "enum": ["danger", "racing", "mission", "faction", "exposure", "pursuit", "deadline"]
+    },
+    "driver": {
+      "type": "string",
+      "pattern": "^(STENT-(0|[1-9][0-9]*)|group:[A-Za-z0-9][A-Za-z0-9 _.-]*|system|unknown)$"
+    },
+    "linked_records": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(THR|OBL|CNSQ|STINT|SREL|STLOC|STOBJ|STQ)-(0|[1-9][0-9]*)$"
+      }
+    },
+    "value": { "type": "integer", "minimum": 0 },
+    "max": { "type": "integer", "minimum": 1 },
+    "salience": { "type": "string", "enum": ["low", "medium", "high"] },
+    "visibility": { "type": "string", "enum": ["hidden", "holder_specific", "public", "factional"] },
+    "thresholds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["at", "label", "effects"],
+        "properties": {
+          "at": { "type": "integer", "minimum": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "effects": {
+            "type": "object",
+            "required": ["create", "supersede", "close"],
+            "properties": {
+              "create": { "type": "array", "items": { "$ref": "#/$defs/effectReference" } },
+              "supersede": { "type": "array", "items": { "$ref": "#/$defs/effectReference" } },
+              "close": { "type": "array", "items": { "$ref": "#/$defs/effectReference" } }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tick_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["event", "delta", "cause"],
+        "properties": {
+          "event": { "type": "string", "pattern": "^SE-(0|[1-9][0-9]*)$" },
+          "delta": { "type": "integer", "not": { "const": 0 } },
+          "cause": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "paused", "resolved", "fired", "abandoned", "superseded"]
+    },
+    "resolution_event": { "type": ["string", "null"], "pattern": "^SE-(0|[1-9][0-9]*)$" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "effectReference": {
+      "type": "string",
+      "pattern": "^((STENT|STSTAT|SF|BEL|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|DA|CLK|STQ|STSEC)-(0|[1-9][0-9]*)|bound:[A-Za-z][A-Za-z0-9_-]*)$"
+    }
+  }
+}

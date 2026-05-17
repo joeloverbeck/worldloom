@@ -69,6 +69,7 @@ const STORY_CLASS_CASES: Array<{
   { idClass: "CHC", subdir: "choices", fileName: "CHC-0007.yaml", expected: "CHC-8" },
   { idClass: "STENT", subdir: "entities", fileName: "STENT-0007.yaml", expected: "STENT-8" },
   { idClass: "STSTAT", subdir: "status", fileName: "STSTAT-0007.yaml", expected: "STSTAT-8" },
+  { idClass: "CLK", subdir: "clocks", fileName: "CLK-0007.yaml", expected: "CLK-8" },
   { idClass: "DA", subdir: "artifacts", fileName: "DA-0007.yaml", expected: "DA-8" }
 ];
 
@@ -340,6 +341,9 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     const statusResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "STSTAT", story_slug: "empty-story" })
     );
+    const clockResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "CLK", story_slug: "empty-story" })
+    );
 
     assert.ok(!("code" in pageResult));
     assert.ok(!("code" in stintResult));
@@ -348,6 +352,7 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     assert.ok(!("code" in spResult));
     assert.ok(!("code" in beliefResult));
     assert.ok(!("code" in statusResult));
+    assert.ok(!("code" in clockResult));
     assert.equal(pageResult.next_id, "PG-1");
     assert.equal(stintResult.next_id, "STINT-1");
     assert.equal(slbResult.next_id, "SLB-1");
@@ -355,6 +360,7 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     assert.equal(spResult.next_id, "SP-1");
     assert.equal(beliefResult.next_id, "BEL-1");
     assert.equal(statusResult.next_id, "STSTAT-1");
+    assert.equal(clockResult.next_id, "CLK-1");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -729,7 +735,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
   }
 });
 
-test("allocateNextId exposes all 50 id classes with canonical unpadded formats", () => {
+test("allocateNextId exposes all 51 id classes with canonical unpadded formats", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -766,6 +772,7 @@ test("allocateNextId exposes all 50 id classes with canonical unpadded formats",
     "CHC",
     "STENT",
     "STSTAT",
+    "CLK",
     "M",
     "ONT",
     "CAU",
@@ -782,7 +789,7 @@ test("allocateNextId exposes all 50 id classes with canonical unpadded formats",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 50);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 51);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, false);
   assert.match("STORY-8", ID_CLASS_FORMATS.STORY.regex);
@@ -790,6 +797,8 @@ test("allocateNextId exposes all 50 id classes with canonical unpadded formats",
   assert.match("BEL-8", ID_CLASS_FORMATS.BEL.regex);
   assert.equal(ID_CLASS_FORMATS.STSTAT.zeroPad, false);
   assert.match("STSTAT-8", ID_CLASS_FORMATS.STSTAT.regex);
+  assert.equal(ID_CLASS_FORMATS.CLK.zeroPad, false);
+  assert.match("CLK-8", ID_CLASS_FORMATS.CLK.regex);
   assert.equal(ID_CLASS_FORMATS.PG.zeroPad, false);
   assert.match("PG-8", ID_CLASS_FORMATS.PG.regex);
   assert.match("STINT-8", ID_CLASS_FORMATS.STINT.regex);

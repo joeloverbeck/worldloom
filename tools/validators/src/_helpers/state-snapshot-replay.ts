@@ -17,7 +17,8 @@ export const ACTIVE_RECORDS_CLASSES = [
   "STLOC",
   "STOBJ",
   "DA",
-  "STSTAT"
+  "STSTAT",
+  "CLK"
 ] as const;
 
 export type ActiveRecordsClass = (typeof ACTIVE_RECORDS_CLASSES)[number];
