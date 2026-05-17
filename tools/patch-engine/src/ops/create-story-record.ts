@@ -37,6 +37,8 @@ export type StoryRecordOperationKind =
   | "create_bel_record"
   | "create_clk_record"
   | "supersede_clk_record"
+  | "create_stsec_record"
+  | "supersede_stsec_record"
   | "append_story_diegetic_artifact_record";
 
 type StoryRecordOperation = Extract<PatchOperation, { op: StoryRecordOperationKind }> & {
@@ -62,6 +64,8 @@ const STORY_RECORD_OPERATION_KINDS: readonly StoryRecordOperationKind[] = [
   "create_bel_record",
   "create_clk_record",
   "supersede_clk_record",
+  "create_stsec_record",
+  "supersede_stsec_record",
   "append_story_diegetic_artifact_record"
 ];
 
@@ -193,6 +197,20 @@ export const STORY_RECORD_SPECS: Readonly<Record<StoryRecordOperationKind, Story
     nodeType: "pressure_clock_record",
     prefix: "CLK",
     sourceDir: "clocks"
+  },
+  create_stsec_record: {
+    allocationKey: "stsec_ids",
+    idPattern: /^STSEC-\d+$/,
+    nodeType: "story_secret_record",
+    prefix: "STSEC",
+    sourceDir: "secrets"
+  },
+  supersede_stsec_record: {
+    allocationKey: "stsec_ids",
+    idPattern: /^STSEC-\d+$/,
+    nodeType: "story_secret_record",
+    prefix: "STSEC",
+    sourceDir: "secrets"
   },
   append_story_diegetic_artifact_record: {
     allocationKey: "story_da_ids",

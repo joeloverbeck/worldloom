@@ -48,6 +48,7 @@ test("describeEnvelopeSchema returns the full envelope and every operation schem
   assert.ok(allocations.properties?.char_ids);
   assert.ok(allocations.properties?.da_ids);
   assert.ok(allocations.properties?.bel_ids);
+  assert.ok(allocations.properties?.stsec_ids);
   assert.equal(allocations.properties?.arc_trace_ids, undefined);
 });
 

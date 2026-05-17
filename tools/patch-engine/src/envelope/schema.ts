@@ -41,6 +41,7 @@ export interface IdAllocations {
   bel_ids?: string[];
   story_da_ids?: string[];
   clk_ids?: string[];
+  stsec_ids?: string[];
 }
 
 export interface PatchPlanEnvelope {
@@ -93,6 +94,11 @@ export const OPERATION_KINDS = [
   "supersede_clk_record",
   "tick_pressure_clock",
   "resolve_pressure_clock",
+  "create_stsec_record",
+  "supersede_stsec_record",
+  "append_secret_clue_carrier",
+  "mark_secret_clue_discovered",
+  "reveal_story_secret",
   "append_story_diegetic_artifact_record"
 ] as const;
 
@@ -209,6 +215,26 @@ export interface ResolvePressureClockPayload {
   resolution_event: string;
 }
 
+export interface AppendSecretClueCarrierPayload {
+  story_slug: string;
+  target_secret_id: string;
+  clue_carrier: Record<string, unknown>;
+}
+
+export interface MarkSecretClueDiscoveredPayload {
+  story_slug: string;
+  target_secret_id: string;
+  carrier_record: string;
+  discovered_by: string;
+}
+
+export interface RevealStorySecretPayload {
+  story_slug: string;
+  target_secret_id: string;
+  reveal_event: string;
+  reveal_records: string[];
+}
+
 export type PatchOperation =
   | OperationBase<"create_cf_record", { cf_record: CanonFactRecord }>
   | OperationBase<"create_ch_record", { ch_record: ChangeLogEntry }>
@@ -280,6 +306,11 @@ export type PatchOperation =
   | OperationBase<"supersede_clk_record", StoryRecordPayload>
   | OperationBase<"tick_pressure_clock", TickPressureClockPayload>
   | OperationBase<"resolve_pressure_clock", ResolvePressureClockPayload>
+  | OperationBase<"create_stsec_record", StoryRecordPayload>
+  | OperationBase<"supersede_stsec_record", StoryRecordPayload>
+  | OperationBase<"append_secret_clue_carrier", AppendSecretClueCarrierPayload>
+  | OperationBase<"mark_secret_clue_discovered", MarkSecretClueDiscoveredPayload>
+  | OperationBase<"reveal_story_secret", RevealStorySecretPayload>
   | OperationBase<"append_story_diegetic_artifact_record", StoryRecordPayload>;
 
 export type OperationPayload = PatchOperation["payload"];

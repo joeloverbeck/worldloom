@@ -26,6 +26,8 @@ const TIER_ONE = new Set<PatchOperation["op"]>([
   "create_bel_record",
   "create_clk_record",
   "supersede_clk_record",
+  "create_stsec_record",
+  "supersede_stsec_record",
   "append_story_diegetic_artifact_record"
 ]);
 

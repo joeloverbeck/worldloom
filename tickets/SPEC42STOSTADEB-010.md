@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `branching-story-bootstrap` SKILL.md with an optional Phase 4 step for seeding initial CLK/STSEC/STQ records when the premise warrants them (deadline-flavored premise → seed CLK; conspiracy/betrayal-flavored premise → seed STSEC; explicitly-introduced-setup premise → seed STQ); no new phases introduced; CLK/STSEC/STQ are NOT mandatory at bundle creation
-**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, SPEC42STOSTADEB-002, SPEC42STOSTADEB-003
+**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, SPEC42STOSTADEB-003
 
 ## Problem
 

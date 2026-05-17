@@ -61,7 +61,8 @@
             "STOBJ": { "type": "array", "items": { "type": "string", "pattern": "^STOBJ-[0-9]+$" } },
             "DA": { "type": "array", "items": { "type": "string", "pattern": "^DA-[0-9]+$" } },
             "STSTAT": { "type": "array", "items": { "type": "string", "pattern": "^STSTAT-[0-9]+$" } },
-            "CLK": { "type": "array", "items": { "type": "string", "pattern": "^CLK-[0-9]+$" } }
+            "CLK": { "type": "array", "items": { "type": "string", "pattern": "^CLK-[0-9]+$" } },
+            "STSEC": { "type": "array", "items": { "type": "string", "pattern": "^STSEC-[0-9]+$" } }
           },
           "additionalProperties": true
         },

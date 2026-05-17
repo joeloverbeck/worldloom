@@ -185,6 +185,17 @@ test("snapshot_replay_equality replays CLK active records", async () => {
   assert.deepEqual(pageSnapshot.CLK, ["CLK-1"]);
 });
 
+test("snapshot_replay_equality replays STSEC active records", async () => {
+  const parentSnapshot = newSchemaParentActiveRecords();
+  const pageSnapshot = replayActiveRecords(parentSnapshot, {
+    create: ["STSEC-1"],
+    supersede: [],
+    close: []
+  });
+
+  assert.deepEqual(pageSnapshot.STSEC, ["STSEC-1"]);
+});
+
 test("snapshot_replay_equality reports new-schema canonical state_hash mismatches", async () => {
   const childPage = {
     ...newSchemaChildPage(newSchemaExpectedActiveRecords()),

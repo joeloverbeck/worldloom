@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds 3 new STSEC-specific structural validators under `tools/validators/src/structural/`, 4 new STSEC-specific predicates to the closed predicate DSL, and registers all 3 validators in the validator registry; integrates with the existing Mystery Reserve firewall via the `secret_mystery_firewall_compliance` validator; no existing validators or predicates altered
-**Deps**: SPEC42STOSTADEB-002
+**Deps**: archive/tickets/SPEC42STOSTADEB-002.md
 
 ## Problem
 
@@ -77,7 +77,7 @@ Modify `tools/validators/src/public/registry.ts` to register the 3 new STSEC val
 
 ## Out of Scope
 
-- STSEC class foundation — owned by SPEC42STOSTADEB-002
+- STSEC class foundation — owned by archive/tickets/SPEC42STOSTADEB-002.md
 - CLK and STQ validators + predicates — owned by SPEC42STOSTADEB-005 / -007
 - Shared validator extensions — owned by SPEC42STOSTADEB-008
 - Per-STSEC `coverage_policy.minimum_clues_required: <integer ≥ 1>` override field (SPEC-42 §Risks open question) — deferred to a follow-up decision; this ticket implements the default-2 structural minimum only

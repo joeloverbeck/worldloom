@@ -1,6 +1,6 @@
 # SPEC42STOSTADEB-002: STSEC story secret — class foundation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds new story-bundle record class `STSEC` (Story Secret) end-to-end across `tools/world-index/`, `tools/world-mcp/`, `tools/patch-engine/`, `tools/validators/`, and the canonical story state contract; introduces three new custom patch-engine ops (`append_secret_clue_carrier`, `mark_secret_clue_discovered`, `reveal_story_secret`) on top of the generic `create_<class>_record` / `supersede_<class>_record` pattern; integrates with the existing Mystery Reserve firewall via `protected_mystery_refs[]`; no impact on existing record classes
@@ -111,18 +111,34 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `STS
 ## Files to Touch
 
 - `tools/validators/src/schemas/story-secret.schema.json` (new)
+- `tools/validators/src/schemas/story-page.schema.json` (modify - add `STSEC` to `state_snapshot.active_records[]`)
+- `tools/validators/src/structural/utils.ts` (modify - register `story_secret_record` schema and authority path)
+- `tools/validators/src/_helpers/state-snapshot-replay.ts` (modify - include `STSEC` in active-record replay parity)
+- `tools/validators/tests/structural/record-schema-compliance-story-secret.test.ts` (new)
+- `tools/validators/tests/structural/record-schema-compliance-story-page.test.ts` (modify)
+- `tools/validators/tests/structural/snapshot-replay-equality.test.ts` (modify)
 - `tools/patch-engine/src/ops/append-secret-clue-carrier.ts` (new)
 - `tools/patch-engine/src/ops/mark-secret-clue-discovered.ts` (new)
 - `tools/patch-engine/src/ops/reveal-story-secret.ts` (new)
-- `.claude/skills/_shared-templates/story-state-contract.md` (modify — §3 row, §4.7 new sub-section, §4.2 enum extension; co-edit with SPEC42STOSTADEB-001 / -003)
-- `tools/validators/src/schemas/story-page.schema.json` (modify — state_snapshot.active_records enum extension; co-edit with SPEC42STOSTADEB-001 / -003)
-- `tools/world-mcp/src/tools/allocate-next-id.ts` (modify — STSEC class registry row)
-- `tools/world-index/src/parse/atomic.ts` (modify — STSEC class-prefix + secrets/ subdirectory registration)
-- `tools/patch-engine/src/envelope/schema.ts` (modify — OPERATION_KINDS adds 5 entries)
-- `tools/patch-engine/src/ops/create-story-record.ts` (modify — STSEC class-prefix mapping)
-- `tools/patch-engine/src/commit/order.ts` (modify — STSEC class ordering)
-- `tools/patch-engine/src/commit/temp-file.ts` (modify — STSEC class temp-file handling)
-- `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts` (modify — STSEC class registration)
+- `tools/patch-engine/src/envelope/schema.ts` (modify - operation kinds, payload types, and `expected_id_allocations.stsec_ids`)
+- `tools/patch-engine/src/ops/create-story-record.ts` (modify - STSEC class-prefix mapping)
+- `tools/patch-engine/src/ops/shared.ts` (modify - shared story-bundle ID pattern includes STSEC)
+- `tools/patch-engine/src/commit/order.ts` (modify - STSEC class ordering)
+- `tools/patch-engine/src/commit/temp-file.ts` (modify - STSEC class temp-file handling)
+- `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts` (modify - STSEC class registration)
+- `tools/patch-engine/tests/ops/create-story-record.test.ts` (modify)
+- `tools/patch-engine/tests/ops/append-secret-clue-carrier.test.ts` (new)
+- `tools/patch-engine/tests/ops/mark-secret-clue-discovered.test.ts` (new)
+- `tools/patch-engine/tests/ops/reveal-story-secret.test.ts` (new)
+- `tools/world-mcp/src/tools/allocate-next-id.ts` (modify - STSEC class registry row)
+- `tools/world-mcp/src/server.ts` (modify - MCP input enum includes STSEC)
+- `tools/world-mcp/src/tools/describe-envelope-schema.ts` (modify - exhaustive operation/schema manifest includes STSEC)
+- `tools/world-mcp/tests/tools/allocate-next-id.test.ts` (modify)
+- `tools/world-mcp/tests/tools/describe-envelope-schema.test.ts` (modify)
+- `tools/world-index/src/parse/atomic.ts` (modify - STSEC class-prefix and `secrets/` subdirectory registration)
+- `tools/world-index/src/schema/types.ts` (modify - `story_secret_record` node type)
+- `.claude/skills/_shared-templates/story-state-contract.md` (modify - class catalog and active-record contract)
+- `.claude/skills/_shared-templates/story-record-schemas.md` (modify - canonical STSEC record schema section)
 
 ## Out of Scope
 
@@ -169,3 +185,31 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `STS
 3. `npm test --prefix tools/world-mcp`
 4. `npm run build --prefix tools/world-index`
 5. The full-pipeline verification command lands in SPEC42STOSTADEB-015 capstone; this ticket's verification boundary is the per-package test surface above
+
+## Outcome
+
+Completed on 2026-05-17.
+
+STSEC now has a first-class structural foundation across the machine layer:
+
+1. Added `story-secret.schema.json` and structural validator registration for `story_secret_record` under `_source/secrets/STSEC-<integer>.yaml`.
+2. Registered STSEC in story-page active records and snapshot/replay parity helpers.
+3. Registered STSEC in world-index parser and node-type surfaces.
+4. Registered STSEC ID allocation and MCP input enum support; `describe_envelope_schema` now exposes the STSEC create/supersede/custom operation schemas because that schema surface is exhaustive.
+5. Registered patch-engine create/supersede support, ID-allocation race checks, commit ordering, temp-file dispatch, and shared STSEC ID matching.
+6. Added custom patch-engine operations for appending clue carriers, marking clue carriers discovered, and revealing story secrets.
+7. Updated shared story-state contract prose and the canonical story-record schema template.
+
+Truthful boundary corrections:
+
+1. `get_record_schema`, retrieval, predicates, and STSEC semantic validators remain out of scope for later SPEC42STOSTADEB tickets.
+2. Mystery Reserve firewall enforcement is not implemented here; this ticket only preserves the structural reference field `protected_mystery_refs[]` for downstream validator enforcement.
+3. The live validator test pattern is structural record compliance, not a standalone `tests/schemas/story-secret.test.ts` file.
+
+## Verification Result
+
+1. `npm test` in `tools/patch-engine` - pass, 89 tests.
+2. `npm test` in `tools/validators` - pass, 375 tests.
+3. `npm test` in `tools/world-mcp` - pass, 392 tests.
+4. `npm run build` in `tools/world-index` - pass after registering `story_secret_record` in node types.
+5. `git diff --check` - pass.

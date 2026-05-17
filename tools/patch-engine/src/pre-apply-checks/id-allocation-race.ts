@@ -145,6 +145,7 @@ function collectIdAllocationRaceFailures(
     ["slt_ids", "SLT", /^SLT-(\d+)$/, 1, false],
     ["bel_ids", "BEL", /^BEL-(\d+)$/, 1, false],
     ["clk_ids", "CLK", /^CLK-(\d+)$/, 1, false],
+    ["stsec_ids", "STSEC", /^STSEC-(\d+)$/, 1, false],
     ["story_da_ids", "DA", /^DA-(\d+)$/, 1, false]
   ];
 

@@ -1,6 +1,6 @@
 # Story Record Schemas
 
-This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 17 story-bundle record classes plus the prose-receipt direct-write artifact. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the eight hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
+This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 19 story-bundle record classes plus the prose-receipt direct-write artifact. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the eight hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
 
 Subsection numbering matches the original `§4.X` form (e.g. `§4.6 prose receipt`, `§4.2 PG`, `§4.4 SLT`) so cross-references in skill prose, validator source, and other shared templates continue to resolve verbatim. The split is purely structural — §4 is overwhelmingly the bulk of the contract, and the bundled file exceeded the per-call read limit of bulk-loading tools at HEAD.
 
@@ -10,7 +10,7 @@ Authority and supersession discipline live in the main contract's §1; schema-mi
 
 ## 4. Record Schemas
 
-Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 18 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 14 additional classes, and §4.6 covers the prose receipt direct-write artifact.
+Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 19 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 15 additional classes, and §4.6 covers the prose receipt direct-write artifact.
 
 ### 4.1 `BEL` (13 fields)
 
@@ -73,6 +73,7 @@ state_snapshot:
     DA: [DA-<integer>]
     STSTAT: [STSTAT-<integer>]
     CLK: [CLK-<integer>]
+    STSEC: [STSEC-<integer>]
   entity_status:                       # * derived projection of active STSTAT; one entry per active STENT
     STENT-<integer>:
       life: alive | dead | unknown
@@ -659,6 +660,37 @@ resolution_event: SE-<integer> | null
 ```
 
 `title`, `clock_kind`, and `driver` scope the pressure for humans and future predicates. `linked_records` grounds the clock in existing state. `value` and `max` are present-causal state; `thresholds` names staged effects that become available when value crosses them; `tick_history` is the replay trail; `salience` and `visibility` support terminal-debt and information-firewall checks; `status` and `resolution_event` close the lifecycle. Do not add `deadline.natural_language`, `clock_kind: front`, or `visibility: audience_only`.
+
+#### 4.5.15 `STSEC` (story secret)
+
+Tracks story-local hidden truth: the branch-level secret that multiple BEL, SF, or DA records point toward, plus clue carriers and revelation lifecycle. `STSEC` is story-local. If it touches a world Mystery Reserve entry, `protected_mystery_refs[]` records the referenced `M-*`; the Mystery Reserve firewall remains authoritative and is not bypassed by a story-local reveal.
+
+```yaml
+id: STSEC-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: STSEC-<integer> | null          # default null
+secret_kind: identity | motive | location | event_cause | artifact_truth | relationship | institutional*
+secret_claim: string*
+truth_anchor: SF-<integer> | BEL-<integer> | DA-<integer> | null
+holders: [STENT-<integer> | group:<name> | narrator]*
+salience: low | medium | high*
+protected_mystery_refs: [M-<integer>]        # default []
+clue_carriers:
+  - kind: DA | STOBJ | STLOC | BEL | SF | SE*
+    record: DA-<integer> | STOBJ-<integer> | STLOC-<integer> | BEL-<integer> | SF-<integer> | SE-<integer>*
+    clue_text: string*
+    clue_strength: weak | suggestive | confirming | decisive | misleading*
+    discovered_by: [STENT-<integer> | group:<name> | public]
+    audience_visible: hidden | visible | ambiguous*
+    status: available | discovered | destroyed | suppressed | superseded*
+source_records: [<record_id>]*
+status: hidden | partially_revealed | revealed | disproven | abandoned*
+reveal_event: SE-<integer> | null
+reveal_records: [BEL-<integer> | SF-<integer> | DA-<integer> | STQ-<integer>]
+```
+
+`secret_kind` supports predicate filtering. `secret_claim` gives the human-readable hidden truth. `truth_anchor` distinguishes branch truth from belief-only claims. `holders` records who knows or guards the secret. `salience` and `protected_mystery_refs` support criticality and Mystery Reserve checks. `clue_carriers` is the canonical clue-to-secret binding; do not add a parallel STCLUE record class. `source_records`, `status`, `reveal_event`, and `reveal_records` close the lifecycle. Do not add `audience_state`, `criticality`, `secret_kind: other`, or a parallel `STCLUE` class.
 
 ### 4.6 Prose receipt
 

@@ -45,6 +45,7 @@ export const ID_CLASS_FORMATS = {
   STENT: { width: 1, zeroPad: false, regex: /^STENT-(\d+)$/ },
   STSTAT: { width: 1, zeroPad: false, regex: /^STSTAT-(\d+)$/ },
   CLK: { width: 1, zeroPad: false, regex: /^CLK-(\d+)$/ },
+  STSEC: { width: 1, zeroPad: false, regex: /^STSEC-(\d+)$/ },
   M: { width: 1, zeroPad: false, regex: /^M-(\d+)$/ },
   ONT: { width: 1, zeroPad: false, regex: /^ONT-(\d+)$/ },
   CAU: { width: 1, zeroPad: false, regex: /^CAU-(\d+)$/ },
@@ -100,6 +101,7 @@ const STORY_SCOPED_ID_CLASS_DIRECTORIES = {
   STENT: "entities",
   STSTAT: "status",
   CLK: "clocks",
+  STSEC: "secrets",
   DA: "artifacts"
 } as const satisfies Partial<Record<IdClass, string>>;
 

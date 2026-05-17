@@ -14,6 +14,9 @@ import { stageCreateMRecord } from "../ops/create-m-record.js";
 import { stageCreateOqRecord } from "../ops/create-oq-record.js";
 import { stageCreateSecRecord } from "../ops/create-sec-record.js";
 import { stageCreateStoryRecord, STORY_RECORD_SPECS, storyRecordMetadata } from "../ops/create-story-record.js";
+import { stageAppendSecretClueCarrier } from "../ops/append-secret-clue-carrier.js";
+import { stageMarkSecretClueDiscovered } from "../ops/mark-secret-clue-discovered.js";
+import { stageRevealStorySecret } from "../ops/reveal-story-secret.js";
 import { stageResolvePressureClock } from "../ops/resolve-pressure-clock.js";
 import { stageRemoveChAffectedCfIds } from "../ops/remove-ch-affected-cf-ids.js";
 import { stageRepairSkippedChangeLogEntry } from "../ops/repair-skipped-change-log-entry.js";
@@ -131,6 +134,8 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "create_bel_record":
     case "create_clk_record":
     case "supersede_clk_record":
+    case "create_stsec_record":
+    case "supersede_stsec_record":
     case "append_story_diegetic_artifact_record": {
       const metadata = storyRecordMetadata(patch);
       return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
@@ -138,6 +143,10 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "tick_pressure_clock":
     case "resolve_pressure_clock":
       return metadataForTargetRecordId(patch.payload.target_clock_id);
+    case "append_secret_clue_carrier":
+    case "mark_secret_clue_discovered":
+    case "reveal_story_secret":
+      return metadataForTargetRecordId(patch.payload.target_secret_id);
     case "update_record_field":
     case "append_extension":
       return metadataForTargetRecordId(patch.payload.target_record_id);
@@ -159,7 +168,7 @@ const STORY_BUNDLE_NODE_TYPE_BY_PREFIX: Readonly<Record<string, string>> = Objec
 );
 
 const STORY_BUNDLE_ID_PATTERN =
-  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA|CLK)-\d+$/;
+  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA|CLK|STSEC)-\d+$/;
 
 function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType: string } | null {
   if (/^CF-\d+$/.test(recordId)) {
@@ -254,11 +263,19 @@ function stageOne(
     case "create_bel_record":
     case "create_clk_record":
     case "supersede_clk_record":
+    case "create_stsec_record":
+    case "supersede_stsec_record":
     case "append_story_diegetic_artifact_record":
       return stageCreateStoryRecord(envelope, patch, ctx);
     case "tick_pressure_clock":
       return stageTickPressureClock(envelope, patch, ctx);
     case "resolve_pressure_clock":
       return stageResolvePressureClock(envelope, patch, ctx);
+    case "append_secret_clue_carrier":
+      return stageAppendSecretClueCarrier(envelope, patch, ctx);
+    case "mark_secret_clue_discovered":
+      return stageMarkSecretClueDiscovered(envelope, patch, ctx);
+    case "reveal_story_secret":
+      return stageRevealStorySecret(envelope, patch, ctx);
   }
 }

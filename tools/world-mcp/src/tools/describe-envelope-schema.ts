@@ -72,6 +72,7 @@ const ID_ALLOCATION_KEYS = [
   "slt_ids",
   "bel_ids",
   "clk_ids",
+  "stsec_ids",
   "story_da_ids"
 ] as const;
 
@@ -103,6 +104,7 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   story_choice_record: "story-choice.schema.json",
   storylet_record: "story-storylet.schema.json",
   pressure_clock_record: "story-pressure-clock.schema.json",
+  story_secret_record: "story-secret.schema.json",
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 } as const;
 
@@ -433,6 +435,9 @@ function operationSchema(kind: OperationKind): JsonObject {
     case "create_clk_record":
     case "supersede_clk_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("pressure_clock_record"));
+    case "create_stsec_record":
+    case "supersede_stsec_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_secret_record"));
     case "tick_pressure_clock":
       return baseOperationProperties(kind, {
         type: "object",
@@ -455,6 +460,44 @@ function operationSchema(kind: OperationKind): JsonObject {
           story_slug: stringSchema("^[a-z0-9-]+$"),
           target_clock_id: stringSchema("^CLK-[0-9]+$"),
           resolution_event: stringSchema("^SE-[0-9]+$")
+        }
+      });
+    case "append_secret_clue_carrier":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_secret_id", "clue_carrier"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_secret_id: stringSchema("^STSEC-[0-9]+$"),
+          clue_carrier: { $ref: `${schemaRef("story_secret_record")}#/properties/clue_carriers/items` }
+        }
+      });
+    case "mark_secret_clue_discovered":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_secret_id", "carrier_record", "discovered_by"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_secret_id: stringSchema("^STSEC-[0-9]+$"),
+          carrier_record: stringSchema("^(DA|STOBJ|STLOC|BEL|SF|SE)-[0-9]+$"),
+          discovered_by: stringSchema("^(STENT-[0-9]+|group:[A-Za-z0-9_-]+|public)$")
+        }
+      });
+    case "reveal_story_secret":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_secret_id", "reveal_event", "reveal_records"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_secret_id: stringSchema("^STSEC-[0-9]+$"),
+          reveal_event: stringSchema("^SE-[0-9]+$"),
+          reveal_records: {
+            type: "array",
+            items: stringSchema("^(BEL|SF|DA|STQ)-[0-9]+$")
+          }
         }
       });
     case "append_story_diegetic_artifact_record":

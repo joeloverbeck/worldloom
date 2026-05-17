@@ -61,7 +61,8 @@ function validPagePayload(): Record<string, unknown> {
         }
       ],
       active_records: {
-        CLK: ["CLK-1"]
+        CLK: ["CLK-1"],
+        STSEC: ["STSEC-1"]
       }
     },
     emitted_choices: [],
