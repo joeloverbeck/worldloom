@@ -1,17 +1,23 @@
 {
-  "originating_spec": "archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md",
-  "archived_spec": "archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md",
-  "last_ticket": "archive/tickets/SPEC38STOLOCDIE-006.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "9403f11ab2e653cca4e768b394714e8f72154056",
+  "originating_spec": "specs/SPEC-39-tools-esm-migration.md",
+  "archived_spec": null,
+  "last_ticket": null,
+  "last_result": "retargeted_due_to_unsatisfied_prerequisites",
+  "last_work_commit": "none",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "completed",
+  "next_target": "tickets/SPEC39TOOESMMIG-004.md",
+  "queue": [
+    "tickets/SPEC39TOOESMMIG-004.md",
+    "tickets/SPEC39TOOESMMIG-002.md",
+    "tickets/SPEC39TOOESMMIG-001.md",
+    "tickets/SPEC39TOOESMMIG-003.md",
+    "tickets/SPEC39TOOESMMIG-005.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
-  "owned_dirty_summary": null,
+  "owned_dirty_summary": "ticket 001 proof found CJS consumers cannot compile against ESM patch-engine; ticket 001/002 dependency text corrected; patch-engine manifest flip backed out before commit",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree expected after state commit; pre-existing ignored artifacts remain under tools/validators, tools/world-index, and tools/world-mcp",
+  "dirty_state": "pre-existing unrelated tracked edits remain: .claude/skills/brainstorm/SKILL.md, .claude/skills/skill-audit/references/follow-up-implementation.md, tools/hooks/tsconfig.json; pre-existing ignored artifacts under tools/patch-engine, tools/validators, tools/world-mcp",
   "updated_at": "2026-05-17"
 }
