@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-42-story-state-debt-secret-clock-records.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC42STOSTADEB-005.md",
+  "last_ticket": "archive/tickets/SPEC42STOSTADEB-006.md",
   "last_result": "completed_and_archived",
-  "last_work_commit": "d20cf1fa0e72a58f69fbad30a7bb241ff3ebc9d1",
+  "last_work_commit": "961f0d95a22b599ff4b28f114692528c105ae1a2",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC42STOSTADEB-006.md",
+  "next_target": "tickets/SPEC42STOSTADEB-007.md",
   "queue": [
-    "tickets/SPEC42STOSTADEB-006.md",
     "tickets/SPEC42STOSTADEB-007.md",
     "tickets/SPEC42STOSTADEB-008.md",
     "tickets/SPEC42STOSTADEB-009.md",
@@ -25,6 +24,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked worktree clean after SPEC42STOSTADEB-005 work commit; expected ignored local artifacts may remain under briefs/, world-proposals/, worlds/, tools/*/dist, tools/*/node_modules, tools/hooks/logs, tools/world-mcp/.secret, and .claude/settings.local.json",
+  "dirty_state": "tracked worktree clean after SPEC42STOSTADEB-006 work and state commits; expected ignored local artifacts may remain under briefs/, world-proposals/, worlds/, tools/*/dist, tools/*/node_modules, tools/hooks/logs, tools/world-mcp/.secret, and .claude/settings.local.json",
   "updated_at": "2026-05-17"
 }
