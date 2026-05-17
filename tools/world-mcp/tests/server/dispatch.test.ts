@@ -39,6 +39,156 @@ function buildValidPatchPlan() {
   };
 }
 
+function buildKnownBadCausalDependencyPlan() {
+  return {
+    plan_id: "plan-known-bad-causal-dependency",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-turn-cycle",
+    expected_id_allocations: {},
+    patches: [
+      storyPatch("create_stobj_record", "objects", {
+        id: "STOBJ-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        label: "Locked gate"
+      }),
+      storyPatch("create_chc_record", "choices", {
+        id: "CHC-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        label: "Force the locked gate",
+        grounded_in: { records: ["STOBJ-1"] }
+      }),
+      storyPatch("create_se_record", "events", {
+        id: "SE-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
+        parent_page_id: "PG-1",
+        event_kind: "selected_choice",
+        actor: "STENT-1",
+        commitment: { selected_slt_id: "SLT-1", selection_source: "emitted_choice", alias_bindings: {} },
+        outcome_route: "accept",
+        world_logic_rationale: "The selected choice closes the object it still depends on.",
+        state_delta: {
+          create: [],
+          supersede: [],
+          close: ["STOBJ-1"]
+        },
+        promotion_claims: []
+      }),
+      storyPatch("create_pg_record", "pages", {
+        id: "PG-2",
+        story_id: "STORY-1",
+        parent_page_id: "PG-1",
+        input: { choice_id: "CHC-1", manual_action_text: null, resolved_event_id: "SE-1" },
+        emitted_choices: [],
+        state_snapshot: {
+          active_records: { CHC: ["CHC-1"] },
+          visible_affordances: []
+        }
+      })
+    ]
+  };
+}
+
+function buildKnownBadExpectedWitnessPlan() {
+  return {
+    plan_id: "plan-known-bad-expected-witness",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-turn-cycle",
+    expected_id_allocations: {},
+    patches: [
+      storyPatch("create_stent_record", "entities", {
+        id: "STENT-1",
+        story_id: "STORY-1",
+        label: "Actor"
+      }),
+      storyPatch("create_stent_record", "entities", {
+        id: "STENT-2",
+        story_id: "STORY-1",
+        label: "Witness"
+      }),
+      storyPatch("create_stloc_record", "locations", {
+        id: "STLOC-1",
+        story_id: "STORY-1",
+        label: "Market square",
+        description: "A public location."
+      }),
+      storyPatch("create_ststat_record", "status", {
+        id: "STSTAT-1",
+        story_id: "STORY-1",
+        entity: "STENT-1",
+        life: "alive",
+        agency: "free",
+        location: "STLOC-1"
+      }),
+      storyPatch("create_ststat_record", "status", {
+        id: "STSTAT-2",
+        story_id: "STORY-1",
+        entity: "STENT-2",
+        life: "alive",
+        agency: "free",
+        location: "STLOC-1"
+      }),
+      storyPatch("create_pg_record", "pages", {
+        id: "PG-1",
+        story_id: "STORY-1",
+        input: { choice_id: null, manual_action_text: null, resolved_event_id: null },
+        emitted_choices: [],
+        state_snapshot: {
+          active_records: { STSTAT: ["STSTAT-1", "STSTAT-2"] },
+          visible_affordances: []
+        }
+      }),
+      storyPatch("append_story_diegetic_artifact_record", "artifacts", {
+        id: "DA-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
+        title: "Public notice",
+        author: "STENT-1",
+        genre: "notice",
+        body: "A public notice.",
+        intended_audience: "public",
+        circulation: "public",
+        truth_relation: "true"
+      }),
+      storyPatch("create_se_record", "events", {
+        id: "SE-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
+        parent_page_id: "PG-1",
+        event_kind: "selected_choice",
+        actor: "STENT-1",
+        commitment: { selected_slt_id: "SLT-1", selection_source: "emitted_choice", alias_bindings: {} },
+        outcome_route: "accept",
+        world_logic_rationale: "The event is public.",
+        state_delta: {
+          create: ["DA-1"],
+          supersede: [],
+          close: []
+        },
+        promotion_claims: []
+      })
+    ]
+  };
+}
+
+function storyPatch(op: string, sourceDir: string, record: Record<string, unknown>) {
+  return {
+    op,
+    target_world: "seeded",
+    target_file: `stories/dispatch-smoke/_source/${sourceDir}/${String(record.id)}.yaml`,
+    payload: {
+      story_slug: "dispatch-smoke",
+      record
+    }
+  };
+}
+
 function seedServerWorld(root: string): void {
   seedWorld(root, {
     worldSlug: "seeded",
@@ -1017,6 +1167,60 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.describe_envelope_schema)?.input_schema_enums?.op_kind, [
       ...OPERATION_KINDS
     ]);
+  });
+});
+
+test("deployed_mcp_rejects_known_bad_causal_dependency_plan", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.validate_patch_plan,
+      arguments: { patch_plan: buildKnownBadCausalDependencyPlan() }
+    });
+
+    const structured = result.structuredContent as {
+      status?: string;
+      verdicts?: Array<{ validator?: string; code?: string }>;
+    };
+    assert.equal(
+      structured.status,
+      "fail",
+      "deployed validator bundle appears stale: expected causal_dependency_threat_scan.choice_dependency_clobbered verdict on choice grounded in closed STOBJ; got pass - run 'cd tools/validators && npm run build' and restart the MCP server/client session"
+    );
+    assert.ok(
+      structured.verdicts?.some(
+        (verdict) =>
+          verdict.validator === "causal_dependency_threat_scan" &&
+          verdict.code === "choice_dependency_clobbered"
+      ),
+      "deployed validator bundle appears stale: expected causal_dependency_threat_scan.choice_dependency_clobbered verdict on choice grounded in closed STOBJ; run 'cd tools/validators && npm run build' and restart the MCP server/client session"
+    );
+  });
+});
+
+test("deployed_mcp_rejects_known_bad_expected_witness_plan", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.validate_patch_plan,
+      arguments: { patch_plan: buildKnownBadExpectedWitnessPlan() }
+    });
+
+    const structured = result.structuredContent as {
+      status?: string;
+      verdicts?: Array<{ validator?: string; code?: string }>;
+    };
+    assert.equal(
+      structured.status,
+      "fail",
+      "deployed validator bundle appears stale: expected expected_witness_coverage verdict on public event with missing BEL witness coverage; got pass - run 'cd tools/validators && npm run build' and restart the MCP server/client session"
+    );
+    assert.ok(
+      structured.verdicts?.some(
+        (verdict) =>
+          verdict.validator === "expected_witness_coverage" &&
+          verdict.code === "expected_witness_coverage_missing_public_bel"
+      ),
+      "deployed validator bundle appears stale: expected expected_witness_coverage.expected_witness_coverage_missing_public_bel verdict on public event with missing BEL witness coverage; run 'cd tools/validators && npm run build' and restart the MCP server/client session"
+    );
   });
 });
 
