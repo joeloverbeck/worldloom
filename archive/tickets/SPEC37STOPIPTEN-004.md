@@ -1,19 +1,19 @@
 # SPEC37STOPIPTEN-004: Build-info validator/schema fingerprint extension and MACHINE-FACING-LAYER.md docs
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — extends `tools/world-mcp/src/build-info.ts` (BuildInfo interface + `createBuildInfo` function); extends `tools/world-mcp/tests/server/capability-parity.test.ts` (two new tests); updates two schema-paired test files for symmetry; adds new prose to `docs/MACHINE-FACING-LAYER.md` (new `### Build-info fields` sub-section + revision of line 113's stale-diagnostic row).
+**Engine Changes**: Yes — extends `tools/world-mcp/src/build-info.ts` (BuildInfo interface + `createBuildInfo` function + exported hash helpers); extends `tools/world-mcp/src/tools/describe-envelope-schema.ts` (shared op-schema manifest helper); extends `tools/world-mcp/tests/server/capability-parity.test.ts` (two new tests); updates two schema-paired test files for symmetry; adds new prose to `docs/MACHINE-FACING-LAYER.md` (new `### Build-info fields` sub-section + revision of line 113's stale-diagnostic row); updates `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` with the D4 implementation note.
 **Deps**: None
 
 ## Problem
 
-`tools/world-mcp/src/build-info.ts:6` defines the `BuildInfo` interface with exactly three fields — `git_commit_hash`, `build_timestamp`, `source_schema_hash` — where `source_schema_hash` (line 41) is SHA-256 over normalized tool capabilities (sorted `{name, description, input_schema_enums}` per tool). Validator source content, record-schema files, and the patch-operation schema manifest are NOT hashed; consequently a running MCP server with a stale validator bundle exposes no fingerprint that diverges from a current-source server, and `describe_capabilities()` cannot detect the staleness. `tools/world-mcp/tests/server/capability-parity.test.ts` asserts the validator-registry name list against an expected set but cannot detect implementation drift inside an unchanged-name validator — most validator changes adjust predicate logic without adding or removing validators. `docs/MACHINE-FACING-LAYER.md` mentions `describe_capabilities` at line 83 and discusses the validator-bundle-staleness diagnostic at line 113, but does not enumerate the `build_info` field surface — any fingerprint extension introduces field documentation as new prose. Additionally, line 113 currently states `describe_capabilities()` "cannot detect this because the validators bundle version is not part of the world-mcp tool or enum contract surface" — this assertion becomes false once `validator_registry_hash` lands, so the same edit must revise line 113. This ticket lands the supporting passive currency indicator that complements SPEC37STOPIPTEN-003's load-bearing smoke test; together they cover both behavioral and introspective runtime currency.
+At intake, `tools/world-mcp/src/build-info.ts:6` defined the `BuildInfo` interface with exactly three fields — `git_commit_hash`, `build_timestamp`, `source_schema_hash` — where `source_schema_hash` was SHA-256 over normalized tool capabilities (sorted `{name, description, input_schema_enums}` per tool). Validator source content, record-schema files, and the patch-operation schema manifest were not hashed; consequently a running MCP server with a stale validator bundle exposed no fingerprint that diverged from a current-source server, and `describe_capabilities()` could not detect the staleness. `tools/world-mcp/tests/server/capability-parity.test.ts` asserted the validator-registry name list against an expected set but could not detect implementation drift inside an unchanged-name validator — most validator changes adjust predicate logic without adding or removing validators. `docs/MACHINE-FACING-LAYER.md` mentioned `describe_capabilities` and discussed the validator-bundle-staleness diagnostic, but did not enumerate the `build_info` field surface. This ticket lands the supporting passive currency indicator that complements SPEC37STOPIPTEN-003's load-bearing smoke test; together they cover both behavioral and introspective runtime currency.
 
 ## Assumption Reassessment (2026-05-17)
 
-1. `tools/world-mcp/src/build-info.ts` exists with `BuildInfo` interface at line 6 (3 fields) and `createBuildInfo(tools)` function at line 37 returning the populated interface; the function is referenced by name (`createBuildInfo`, not `computeBuildInfo` as SPEC-37 D4 §1 prose hedges) from `tools/world-mcp/src/server.ts:479`. `BuildInfo` is consumed by `tools/world-mcp/src/tools/describe-capabilities.ts` (lines 1, 10, 19) as the typed shape of the `build_info` response field; extending the interface flows automatically into the response shape. The interface extension is additive — no consumer breaks. `tools/patch-engine/src/envelope/schema.ts:58` exports `OPERATION_KINDS` (the closed list of patch operation kinds); the per-kind payload schemas live in the same envelope schema module surface and are the source-of-truth for `patch_operation_schema_hash`.
-2. `tools/world-mcp/tests/server/capability-parity.test.ts` exists (126 lines); two additional tests are appended per the spec. Two additional test files assert the existing 3-field `build_info` shape and must be kept in sync with the new 2 fields for symmetry: `tools/world-mcp/tests/tools/describe-capabilities.test.ts` (lines 44-47) and `tools/world-mcp/tests/server/dispatch.test.ts` (lines 969-971). Adding the two new fingerprint-format assertions to those two files is additive consistency, not new scope (spec under-enumeration of schema-paired test surfaces; resolved by adding both files to Files to Touch). `docs/MACHINE-FACING-LAYER.md` mentions `describe_capabilities` at line 83, the rebuild-and-restart guidance at line 93, the stale-tool-contract diagnostic at line 112, and the stale-validator-bundle diagnostic at line 113. Line 113 explicitly states `describe_capabilities()` "cannot detect this" — that assertion is invalidated by this ticket's `validator_registry_hash` extension and must be revised in the same edit.
+1. At intake, `tools/world-mcp/src/build-info.ts` had a `BuildInfo` interface with 3 fields and a `createBuildInfo(tools)` function returning the populated interface; the function was referenced by name (`createBuildInfo`, not `computeBuildInfo` as SPEC-37 D4 §1 prose hedged) from `tools/world-mcp/src/server.ts`. `BuildInfo` was consumed by `tools/world-mcp/src/tools/describe-capabilities.ts` as the typed shape of the `build_info` response field; extending the interface was additive and flowed automatically into the response shape. `tools/patch-engine/src/envelope/schema.ts` exported `OPERATION_KINDS` (the closed list of patch operation kinds); the per-kind payload schemas lived in the same envelope schema module surface and were the source-of-truth for `patch_operation_schema_hash`.
+2. At intake, `tools/world-mcp/tests/server/capability-parity.test.ts` existed with no fingerprint tests; two additional tests were appended per the spec. Two additional test files asserted the existing 3-field `build_info` shape and were kept in sync with the new 2 fields for symmetry: `tools/world-mcp/tests/tools/describe-capabilities.test.ts` and `tools/world-mcp/tests/server/dispatch.test.ts`. Adding the two new fingerprint-format assertions to those two files was additive consistency, not new scope (spec under-enumeration of schema-paired test surfaces; resolved by adding both files to Files to Touch). At intake, `docs/MACHINE-FACING-LAYER.md` mentioned `describe_capabilities`, rebuild-and-restart guidance, the stale-tool-contract diagnostic, and the stale-validator-bundle diagnostic, but the stale-validator-bundle row explicitly stated `describe_capabilities()` could not detect the issue. That assertion was invalidated by this ticket's `validator_registry_hash` extension and revised in the same edit.
 3. Cross-skill / cross-artifact boundary under audit: the runtime introspection contract between `describe_capabilities` (MCP tool that returns `build_info`), `BuildInfo` (the typed shape), `createBuildInfo` (the source-of-truth function), and the docs surface at `docs/MACHINE-FACING-LAYER.md` that documents what each field means. Two passive fingerprint surfaces (`validator_registry_hash` over validator-source content, `patch_operation_schema_hash` over op-schema manifest) add two distinct currency signals — neither alone catches all drift; both together cover validator-implementation drift and contract drift respectively. The smoke test in SPEC37STOPIPTEN-003 complements these passive fingerprints with active validator-code-path exercise.
 4. FOUNDATIONS principle under audit: `docs/FOUNDATIONS.md` §Machine-Facing Layer (line 532) — capability and schema-discovery currency; the runtime surface must expose enough fingerprinting that consumers can verify "this running server has the validator/schema bundle I expect." §Read Discipline — machine-facing layer documentation must enumerate what each runtime-exposed field means; adding fingerprint fields without documenting them perpetuates the documentation gap the spec calls out.
 
@@ -33,6 +33,8 @@
 ## What to Change
 
 ### 1. Build-info source extension at `tools/world-mcp/src/build-info.ts`
+
+Landed.
 
 Extend the `BuildInfo` interface (currently 3 fields at lines 6-10) with two new fields:
 
@@ -55,12 +57,16 @@ The existing `source_schema_hash` is preserved unchanged for backward compatibil
 
 ### 2. Capability-parity test extension at `tools/world-mcp/tests/server/capability-parity.test.ts`
 
+Landed.
+
 Add two new test cases:
 
 - `describe_capabilities_exposes_validator_registry_hash` — invoke `describe_capabilities` via the in-memory server using the existing test pattern; assert `result.build_info.validator_registry_hash` matches `/^[0-9a-f]{64}$/`. Compute the expected hash locally in the test (read the same validator files using the same glob pattern, hash with SHA-256 and identical line normalization) and assert equality. The parity check is what catches a stale runtime hash against a current source-tree.
 - `describe_capabilities_exposes_patch_operation_schema_hash` — analogous: assert `result.build_info.patch_operation_schema_hash` matches `/^[0-9a-f]{64}$/` and equals a locally computed manifest hash.
 
 ### 3. Schema-paired test symmetry — `tools/world-mcp/tests/tools/describe-capabilities.test.ts`
+
+Landed.
 
 This test file (lines 44-47) asserts the existing 3-field `build_info` shape. Add two additional shape assertions for the new fingerprints so all `build_info`-asserting tests stay in sync:
 
@@ -73,6 +79,8 @@ Apply the same additions to the second test in the file (the `assert.deepEqual(s
 
 ### 4. Schema-paired test symmetry — `tools/world-mcp/tests/server/dispatch.test.ts`
 
+Landed.
+
 The describe_capabilities test at lines 948-1021 asserts existing field shapes at lines 969-971. Add the two new format assertions analogously:
 
 ```typescript
@@ -81,6 +89,8 @@ assert.match(structured.build_info?.patch_operation_schema_hash ?? "", /^[0-9a-f
 ```
 
 ### 5. Documentation extension at `docs/MACHINE-FACING-LAYER.md`
+
+Landed.
 
 Insert a new sub-section after the existing `describe_capabilities` paragraph at line 83. Suggested header: `### Build-info fields`. Content:
 
@@ -124,17 +134,21 @@ known-bad fixtures.
 
 Also extend the existing line 93 prose to mention `validator_registry_hash` and `patch_operation_schema_hash` as the deterministic comparison surface (the existing prose says *"call `mcp__worldloom__describe_capabilities()` for enum/contract inspection when deployed server is stale"* — add a clause naming both new fingerprints).
 
-### 6. Stale-diagnostic row revision at `docs/MACHINE-FACING-LAYER.md` line 113
+### 6. Stale-diagnostic row revision at `docs/MACHINE-FACING-LAYER.md`
+
+Landed.
 
 The existing row at line 113 (the "A tool's pre-apply validators reject a patch plan with verdicts inconsistent with the just-rebuilt validators source" diagnostic) explicitly states *"`describe_capabilities()` cannot detect this because the validators bundle version is not part of the world-mcp tool or enum contract surface"* — this assertion becomes false once `validator_registry_hash` lands. Revise the row's "cannot detect" clause to read approximately: *"`describe_capabilities()` exposes `build_info.validator_registry_hash` (per SPEC-37 D4) as the deterministic fingerprint over validator source content — compare the runtime value against a locally computed hash to detect bundle staleness directly. The temporary CLI workaround below remains available when session restart is not immediately practical."* Retain the existing CLI workaround prose verbatim (the principled fix and CLI escape valve both still apply); only the "cannot detect" claim is invalidated.
 
 ## Files to Touch
 
 - `tools/world-mcp/src/build-info.ts` (modify — extend interface + function)
+- `tools/world-mcp/src/tools/describe-envelope-schema.ts` (modify — export shared patch-operation schema manifest helper)
 - `tools/world-mcp/tests/server/capability-parity.test.ts` (modify — two new tests)
 - `tools/world-mcp/tests/tools/describe-capabilities.test.ts` (modify — schema-paired format assertions)
 - `tools/world-mcp/tests/server/dispatch.test.ts` (modify — schema-paired format assertions in the existing describe_capabilities test at line 948)
 - `docs/MACHINE-FACING-LAYER.md` (modify — new `### Build-info fields` sub-section + line 93 prose extension + line 113 stale-diagnostic revision)
+- `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` (modify — D4 implementation note)
 
 ## Out of Scope
 
@@ -174,3 +188,25 @@ The existing row at line 113 (the "A tool's pre-apply validators reject a patch 
 2. `grep -n "validator_registry_hash\|patch_operation_schema_hash" tools/world-mcp/src/build-info.ts tools/world-mcp/tests/` — verify both new fields land in source and all three test files.
 3. `grep -n "validator_registry_hash\|patch_operation_schema_hash\|cannot detect" docs/MACHINE-FACING-LAYER.md` — verify docs prose mentions both new fingerprints and the line 113 "cannot detect" assertion is no longer present (or is contextualized away from the validator-bundle staleness diagnostic).
 4. Hash-divergence manual sanity (post-implementation, optional): temporarily append a whitespace-only change to any file in `tools/validators/src/structural/`, rebuild both packages, observe `validator_registry_hash` changes between rebuilds; revert the whitespace change.
+
+## Outcome
+
+Completed: 2026-05-17
+
+`BuildInfo` now includes `validator_registry_hash` and `patch_operation_schema_hash`, both populated once at server startup through `createBuildInfo`. `validator_registry_hash` hashes normalized source contents from `tools/validators/src/rules/*.ts` and `tools/validators/src/structural/*.ts`. `patch_operation_schema_hash` hashes the shared patch-operation schema manifest exported from `tools/world-mcp/src/tools/describe-envelope-schema.ts`, so `describe_capabilities` and `describe_envelope_schema` use the same op-schema authority.
+
+`tools/world-mcp/tests/server/capability-parity.test.ts` now asserts both runtime-exposed fingerprints against locally computed expectations. `tools/world-mcp/tests/tools/describe-capabilities.test.ts` and `tools/world-mcp/tests/server/dispatch.test.ts` now assert the augmented `build_info` shape. `docs/MACHINE-FACING-LAYER.md` now documents all five build-info fields, extends the schema-currency guidance to the new hashes, and removes the stale validator-bundle "cannot detect" claim. `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` records D4 as landed.
+
+## Verification Result
+
+- Pre-edit baseline: `cd tools/world-mcp && npm test` passed with 378 tests.
+- Build/type check: `cd tools/world-mcp && npm run build` passed.
+- Focused proof: `cd tools/world-mcp && node --test dist/tests/tools/describe-capabilities.test.js dist/tests/server/capability-parity.test.js dist/tests/server/dispatch.test.js` passed with 39 tests.
+- Final broad package proof: `cd tools/world-mcp && npm test` passed with 380 tests.
+- Grep proof: `rg -n "validator_registry_hash|patch_operation_schema_hash" tools/world-mcp/src/build-info.ts tools/world-mcp/tests docs/MACHINE-FACING-LAYER.md` found both fields in source, all three test files, and docs.
+- Stale-doc proof: `rg -n 'cannot detect' docs/MACHINE-FACING-LAYER.md` returned no matches.
+
+## Deviations
+
+- The ticket's preferred implementation mentioned build-time embedding. The landed implementation computes the hashes at server startup when `createBuildInfo` runs, matching the existing `build_timestamp` capture point and avoiding a new build-generation step. The computation runs once per server instance.
+- The optional hash-divergence manual sanity check was not performed; the capability-parity tests directly compare the runtime-exposed fingerprints with freshly computed local expectations.

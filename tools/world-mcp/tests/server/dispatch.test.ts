@@ -1108,6 +1108,8 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
         git_commit_hash?: string;
         build_timestamp?: string;
         source_schema_hash?: string;
+        validator_registry_hash?: string;
+        patch_operation_schema_hash?: string;
       };
       tools?: Array<{
         name?: string;
@@ -1119,6 +1121,8 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.match(structured.build_info?.git_commit_hash ?? "", /^[0-9a-f]{40}$|^unknown$/);
     assert.ok(!Number.isNaN(Date.parse(structured.build_info?.build_timestamp ?? "")));
     assert.match(structured.build_info?.source_schema_hash ?? "", /^[0-9a-f]{64}$/);
+    assert.match(structured.build_info?.validator_registry_hash ?? "", /^[0-9a-f]{64}$/);
+    assert.match(structured.build_info?.patch_operation_schema_hash ?? "", /^[0-9a-f]{64}$/);
 
     const byName = new Map(structured.tools?.map((tool) => [tool.name, tool]) ?? []);
     assert.ok(byName.has(MCP_TOOL_NAMES.describe_capabilities));
