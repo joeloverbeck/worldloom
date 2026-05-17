@@ -1,21 +1,20 @@
 {
   "originating_spec": "specs/SPEC-39-tools-esm-migration.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC39TOOESMMIG-002.md",
+  "last_ticket": "archive/tickets/SPEC39TOOESMMIG-001.md",
   "last_result": "completed_archived",
-  "last_work_commit": "f2fe41f2b63930f9089c83c56170963e4de586e1",
+  "last_work_commit": "9763facc6524696015322dc238c78fe1dcbdfeb0",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC39TOOESMMIG-001.md",
+  "next_target": "tickets/SPEC39TOOESMMIG-003.md",
   "queue": [
-    "tickets/SPEC39TOOESMMIG-001.md",
     "tickets/SPEC39TOOESMMIG-003.md",
     "tickets/SPEC39TOOESMMIG-005.md"
   ],
   "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
-  "owned_dirty_summary": "SPEC39TOOESMMIG-002 completed and archived; validators is now ESM with source/test path and AJV 2020 interop repaired; SPEC39TOOESMMIG-001 deps now point to the archived validators ticket",
+  "owned_dirty_summary": "SPEC39TOOESMMIG-001 completed and archived; patch-engine now declares type module; validators and world-mcp builds passed against the symlinked post-flip package",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree; expected ignored artifacts remain under tools/validators/dist, tools/validators/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, tools/world-mcp/node_modules",
+  "dirty_state": "clean tracked worktree; expected ignored artifacts remain under tools/patch-engine/dist, tools/patch-engine/node_modules, tools/validators/dist, tools/validators/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, tools/world-mcp/node_modules",
   "updated_at": "2026-05-17"
 }
