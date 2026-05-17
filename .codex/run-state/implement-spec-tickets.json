@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-41-spec40-followup-hygiene.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC41FUP-001.md",
+  "last_ticket": "archive/tickets/SPEC41FUP-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "57043f13f619d1915337db5db790eded01ff5cc7",
+  "last_work_commit": "a1a9b28ac5de0d9e7af39bee42feb052b892c15f",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC41FUP-002.md",
+  "next_target": "tickets/SPEC41FUP-003.md",
   "queue": [
-    "tickets/SPEC41FUP-002.md",
     "tickets/SPEC41FUP-003.md",
     "tickets/SPEC41FUP-004.md"
   ],
@@ -16,6 +15,6 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "expected ignored validators artifacts remain under tools/validators/dist and tools/validators/node_modules",
+  "dirty_state": "expected ignored artifacts remain under tools/hooks/dist, tools/hooks/logs, tools/hooks/node_modules, tools/validators/dist, tools/validators/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, and tools/world-mcp/node_modules",
   "updated_at": "2026-05-17"
 }
