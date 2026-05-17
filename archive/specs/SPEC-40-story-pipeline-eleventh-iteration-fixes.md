@@ -2,7 +2,7 @@
 
 # SPEC-40 — Story Pipeline Eleventh-Iteration Fixes
 
-**Status**: ACTIVE
+**Status**: COMPLETED
 **Date**: 2026-05-17
 **Supersedes**: closes one inconsistency carried since SPEC-35 D4 (`non_propagation_tag_shape` rename landed with `severity_mode: "fail"` but the in-file malformed-verdict helper still emits `severity: "warn"`); adds three new hardening deliverables intaken from the eleventh external audit; folds a same-class docs-text drift surfaced by codebase verification into the F-04 deliverable.
 
@@ -282,3 +282,23 @@ Single-spec deliverable; `specs/IMPLEMENTATION-ORDER.md` not created (no other a
 Recommended within-spec ordering per §Approach above:
 - **Phase 1 (parallelizable)**: D1, D2, D4.
 - **Phase 2 (after Phase 1)**: D3 (independent but cleanest after D4 lands the deployed-smoke pattern).
+
+## Outcome
+
+Completed on 2026-05-17.
+
+- D1 is implemented and archived at `archive/tickets/SPEC40STOPIPELE-001.md`: `non_propagation_tag_shape` malformed and missing tag verdicts now align to fail severity.
+- D2 is implemented and archived at `archive/tickets/SPEC40STOPIPELE-002.md`: `expected_witness_coverage` has indirect-route fixture coverage for `institutional_channel`, `rumor`, `location_trace`, and `object_trace`, and `branching-story-health-audit` classifies non-mechanized propagation routes explicitly.
+- D3 is implemented and archived at `archive/tickets/SPEC40STOPIPELE-003.md`: Hook 6 guards story plan markdown and bundle `INDEX.md` plan-hash drift, with hook tests and active workflow references updated.
+- D4 is implemented and archived at `archive/tickets/SPEC40STOPIPELE-004.md`: `tools/world-mcp/tests/integration/server-capabilities-hash-parity.test.ts` spawns `dist/src/server.js`, checks capability hashes over stdio, and submits a known-bad causal-dependency fixture through the spawned process; `docs/MACHINE-FACING-LAYER.md` distinguishes in-memory and deployed-process smoke tests.
+
+Verification:
+
+- `cd tools/validators && npm test` — passed; reported 367 passing tests.
+- `cd tools/hooks && npm test` — passed; reported 28 passing tests.
+- `cd tools/world-mcp && npm test` — passed during D4 closeout; reported 391 passing tests.
+- Cross-spec source-surface check: no tracked diff touched `tools/validators/src/public/registry.ts`, `tools/patch-engine/src/envelope/schema.ts`, `tools/world-mcp/src/tool-names.ts`, or `tools/validators/src/schemas/`, preserving the no-new-validator, no-new-patch-op, no-new-MCP-tool, and no-new-schema-field boundaries.
+
+Deviation:
+
+- The D4 manual stale-`dist/` mutation regression was not performed; D4 closeout accepts the fresh build, spawned-process integration test, full package test, and docs grep proof instead.

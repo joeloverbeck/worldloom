@@ -49,7 +49,7 @@ In `.claude/skills/branching-story-health-audit/SKILL.md`, the Phase 2d witness-
 
 - `tools/validators/tests/structural/expected-witness-coverage.test.ts` (modify) — append 8 new tests.
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify) — rewrite Phase 2d witness-completeness paragraph trailing prose.
-- `specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md` (modify) — update the implementation note to mark D2 implemented while D3-D4 remain active.
+- `archive/specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md` (modify) — update the implementation note to mark D2 implemented while D3-D4 remain active.
 
 ## Out of Scope
 
@@ -95,7 +95,7 @@ The validator source, registry, schemas, MCP surfaces, hooks, and patch-engine s
 - `cd tools/validators && npm run build` — passed.
 - `cd tools/validators && npm test` — passed: 367 tests, 367 pass, 0 fail. Pre-edit baseline was 359 tests, 359 pass, 0 fail.
 - `grep -nE 'judgment_assisted_indirect_propagation_unverified' .claude/skills/branching-story-health-audit/SKILL.md` — returned the Phase 2d witness-completeness paragraph.
-- `git diff --check -- archive/tickets/SPEC40STOPIPELE-002.md specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md tools/validators/tests/structural/expected-witness-coverage.test.ts .claude/skills/branching-story-health-audit/SKILL.md` — passed.
+- `git diff --check -- archive/tickets/SPEC40STOPIPELE-002.md archive/specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md tools/validators/tests/structural/expected-witness-coverage.test.ts .claude/skills/branching-story-health-audit/SKILL.md` — passed.
 
 ## Deviations
 

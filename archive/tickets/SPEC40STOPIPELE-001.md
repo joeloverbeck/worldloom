@@ -85,7 +85,7 @@ Completed: 2026-05-17.
 What changed:
 - `tools/validators/src/structural/non-propagation-tag-shape.ts` now aligns the malformed non-propagation tag verdict with the validator's declared fail severity.
 - `tools/validators/tests/structural/non-propagation-tag-shape.test.ts` now asserts the malformed verdict's fail severity and covers the well-formed-tag negative case.
-- `specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md` now records that D1 is implemented while D2-D4 remain active.
+- `archive/specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md` now records that D1 is implemented while D2-D4 remain active.
 
 Deviations from original plan:
 - None. The implementation stayed within the planned validator source/test seam plus the same-family spec status note.

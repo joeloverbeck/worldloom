@@ -91,7 +91,7 @@ Completed on 2026-05-17.
 - Added `tools/world-mcp/tests/integration/server-capabilities-hash-parity.test.ts`.
 - The new integration test spawns the compiled `dist/src/server.js` over stdio, calls `describe_capabilities`, checks both capability hash fields, and submits a known-bad `validate_patch_plan` fixture through the spawned process.
 - Corrected `docs/MACHINE-FACING-LAYER.md` so `dispatch.test.ts` is no longer described as the deployed-process smoke and added the `Pre-deploy capability-currency smoke` release-checklist subsection.
-- Updated `specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md` with a dated D4 implementation note.
+- Updated `archive/specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md` with a dated D4 implementation note.
 
 ## Verification Result
 
