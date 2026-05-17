@@ -103,6 +103,8 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 } as const;
 
+const PREDICATE_DSL_GRAMMAR_SCHEMA = "predicate-dsl-grammar.schema.json";
+
 const schemaCache = new Map<string, JsonObject>();
 
 function findRepoRoot(): string {
@@ -471,6 +473,7 @@ function extensionPayloadSchema(): JsonObject {
 
 function collectReferencedSchemas(opKinds: readonly OperationKind[]): Record<string, JsonObject> {
   const referenced: Record<string, JsonObject> = {};
+  let includePredicateDslGrammar = false;
 
   for (const schema of Object.values(RECORD_SCHEMA_BY_PAYLOAD_KEY)) {
     const parsed = readSchema(schema);
@@ -485,6 +488,17 @@ function collectReferencedSchemas(opKinds: readonly OperationKind[]): Record<str
       )
     ) {
       referenced[id] = parsed;
+      if (JSON.stringify(parsed).includes("predicateObject")) {
+        includePredicateDslGrammar = true;
+      }
+    }
+  }
+
+  if (includePredicateDslGrammar) {
+    const predicateSchema = readSchema(PREDICATE_DSL_GRAMMAR_SCHEMA);
+    const predicateId = predicateSchema.$id;
+    if (typeof predicateId === "string") {
+      referenced[predicateId] = predicateSchema;
     }
   }
 
@@ -532,7 +546,8 @@ export async function describeEnvelopeSchema(
     source_paths: [
       "tools/world-mcp/src/tools/_shared.ts",
       "tools/patch-engine/src/envelope/schema.ts",
-      "tools/validators/src/schemas/*.schema.json"
+      "tools/validators/src/schemas/*.schema.json",
+      "tools/validators/src/schemas/predicate-dsl-grammar.schema.json"
     ],
     envelope_schema: envelopeSchema(opKinds),
     op_schemas: opSchemas,

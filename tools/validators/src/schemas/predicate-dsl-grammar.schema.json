@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/predicate-dsl-grammar.schema.json",
+  "title": "PredicateDslGrammar",
+  "description": "Per-predicate argument schemas for the closed predicate DSL used in SLT.preconditions.hard/soft. Mirrors PREDICATE_ARG_SCHEMAS in tools/validators/src/rules/_shared/predicate-dsl-grammar.ts.",
+  "oneOf": [
+    {
+      "title": "fact_true",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "fact"],
+      "properties": {
+        "pred": { "const": "fact_true" },
+        "fact": { "type": "string", "pattern": "^SF-[0-9]+$" }
+      }
+    },
+    {
+      "title": "belief_record",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "holder", "belief_id"],
+      "properties": {
+        "pred": { "const": "belief_record" },
+        "holder": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "belief_id": { "type": "string", "pattern": "^BEL-[0-9]+$" },
+        "mode": { "type": "string", "enum": ["knows", "believes", "suspects", "doubts", "denies", "reports", "claims", "deceives", "misremembers", "interprets"] },
+        "confidence_floor": { "type": "string", "enum": ["certain", "high", "medium", "low", "uncommitted"] }
+      }
+    },
+    {
+      "title": "entity_status",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "entity", "field", "value"],
+      "properties": {
+        "pred": { "const": "entity_status" },
+        "entity": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "field": { "type": "string", "enum": ["life", "agency", "location"] },
+        "value": {}
+      }
+    },
+    {
+      "title": "relationship_axis",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "from", "to", "axis"],
+      "properties": {
+        "pred": { "const": "relationship_axis" },
+        "from": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "to": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "axis": { "type": "string", "enum": ["trust", "fear", "desire", "debt", "intimacy", "loyalty", "resentment", "power_imbalance", "attention", "familiarity", "approval", "respect", "obligation", "hostility"] },
+        "value": {}
+      }
+    },
+    {
+      "title": "obligation_open",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "obligation"],
+      "properties": {
+        "pred": { "const": "obligation_open" },
+        "obligation": { "type": "string", "pattern": "^OBL-[0-9]+$" }
+      }
+    },
+    {
+      "title": "consequence_pending",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "consequence"],
+      "properties": {
+        "pred": { "const": "consequence_pending" },
+        "consequence": { "type": "string", "pattern": "^CNSQ-[0-9]+$" }
+      }
+    },
+    {
+      "title": "thread_active",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "thread"],
+      "properties": {
+        "pred": { "const": "thread_active" },
+        "thread": { "type": "string", "pattern": "^THR-[0-9]+$" }
+      }
+    },
+    {
+      "title": "any_obligation_open",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_obligation_open" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "kind": { "type": "string", "pattern": "^[a-z][a-z0-9_:-]*$" },
+        "urgency": { "type": "string", "enum": ["low", "medium", "high"] },
+        "owed_by_role": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" },
+        "owed_to_role": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" }
+      }
+    },
+    {
+      "title": "any_consequence_pending",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_consequence_pending" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "kind": { "type": "string", "pattern": "^[a-z][a-z0-9_:-]*$" },
+        "urgency": { "type": "string", "enum": ["low", "medium", "high"] },
+        "derived_from": { "type": "string", "pattern": "^(?:SE|STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-[0-9]+$" }
+      }
+    },
+    {
+      "title": "any_thread_active",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_thread_active" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "tag": { "type": "string", "pattern": "^[a-z][a-z0-9_:-]*$" },
+        "urgency": { "type": "string", "enum": ["low", "medium", "high"] }
+      }
+    },
+    {
+      "title": "any_relationship_axis",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias", "axis", "comparator", "value"],
+      "properties": {
+        "pred": { "const": "any_relationship_axis" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "axis": { "type": "string", "enum": ["trust", "fear", "desire", "debt", "intimacy", "loyalty", "resentment", "power_imbalance", "attention", "familiarity", "approval", "respect", "obligation", "hostility"] },
+        "comparator": { "type": "string", "enum": [">=", "<=", "==", "!="] },
+        "value": {},
+        "participant_role": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" }
+      }
+    },
+    {
+      "title": "any_belief",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_belief" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "holder_role": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" },
+        "mode": { "type": "string", "enum": ["knows", "believes", "suspects", "doubts", "denies", "reports", "claims", "deceives", "misremembers", "interprets"] },
+        "truth_relation": { "type": "string", "enum": ["true", "false", "partly_true", "unknown", "contested", "branch_counterfactual", "future_contingent"] },
+        "visibility": { "type": "string", "enum": ["private", "shared", "factional", "public", "rumored", "concealed", "suppressed"] }
+      }
+    },
+    {
+      "title": "any_intention",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_intention" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "holder_role": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" },
+        "urgency": { "type": "string", "enum": ["low", "medium", "high"] }
+      }
+    },
+    {
+      "title": "location",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "entity", "location"],
+      "properties": {
+        "pred": { "const": "location" },
+        "entity": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "location": { "type": "string", "pattern": "^STLOC-[0-9]+$" }
+      }
+    },
+    {
+      "title": "has_affordance",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "action_family"],
+      "properties": {
+        "pred": { "const": "has_affordance" },
+        "action_family": { "type": "string", "enum": ["move", "evade", "pursue", "perceive", "investigate", "communicate", "persuade", "negotiate", "bond", "oppose", "harm", "protect", "control", "transfer", "use", "make_change", "ritual_protocol", "recover", "wait", "decide"] }
+      }
+    },
+    {
+      "title": "record_active",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "record"],
+      "properties": {
+        "pred": { "const": "record_active" },
+        "record": { "type": "string", "pattern": "^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-[0-9]+$" }
+      }
+    },
+    {
+      "title": "record_age",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "record", "comparator", "pages"],
+      "properties": {
+        "pred": { "const": "record_age" },
+        "record": { "type": "string", "pattern": "^(?:(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-[0-9]+|[a-z][a-z0-9_-]*)$" },
+        "comparator": { "type": "string", "enum": [">=", "<=", "==", "!="] },
+        "pages": { "type": "integer", "minimum": 0 }
+      }
+    },
+    {
+      "title": "intention_active",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "intention"],
+      "properties": {
+        "pred": { "const": "intention_active" },
+        "intention": { "type": "string", "pattern": "^STINT-[0-9]+$" }
+      }
+    },
+    {
+      "title": "object_accessible",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "entity", "object"],
+      "properties": {
+        "pred": { "const": "object_accessible" },
+        "entity": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "object": { "type": "string", "pattern": "^STOBJ-[0-9]+$" }
+      }
+    },
+    {
+      "title": "artifact_accessible",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "entity", "artifact"],
+      "properties": {
+        "pred": { "const": "artifact_accessible" },
+        "entity": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "artifact": { "type": "string", "pattern": "^DA-[0-9]+$" }
+      }
+    },
+    {
+      "title": "affordance_available_to",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "entity", "action_family"],
+      "properties": {
+        "pred": { "const": "affordance_available_to" },
+        "entity": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "action_family": { "type": "string", "enum": ["move", "evade", "pursue", "perceive", "investigate", "communicate", "persuade", "negotiate", "bond", "oppose", "harm", "protect", "control", "transfer", "use", "make_change", "ritual_protocol", "recover", "wait", "decide"] }
+      }
+    },
+    {
+      "title": "not",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "predicate"],
+      "properties": {
+        "pred": { "const": "not" },
+        "predicate": { "$ref": "#" }
+      }
+    },
+    {
+      "title": "all",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "predicates"],
+      "properties": {
+        "pred": { "const": "all" },
+        "predicates": { "type": "array", "items": { "$ref": "#" } }
+      }
+    },
+    {
+      "title": "any",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "predicates"],
+      "properties": {
+        "pred": { "const": "any" },
+        "predicates": { "type": "array", "items": { "$ref": "#" } }
+      }
+    }
+  ]
+}
