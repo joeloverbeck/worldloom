@@ -49,7 +49,7 @@ Rebuilt `tools/validators` and `tools/world-mcp` against the new patch-engine `d
 ## Files to Touch
 
 - `tools/patch-engine/package.json` (modify — flip `"type": "commonjs"` to `"type": "module"`)
-- `specs/SPEC-39-tools-esm-migration.md` (modify — dated implementation note for the patch-engine row)
+- `archive/specs/SPEC-39-tools-esm-migration.md` (modify — dated implementation note for the patch-engine row)
 
 ## Out of Scope
 

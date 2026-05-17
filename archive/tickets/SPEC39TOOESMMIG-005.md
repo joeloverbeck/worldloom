@@ -90,7 +90,7 @@ All succeeded against the new world-index `dist/`.
 - `tools/world-index/src/**/*.ts` (modify — append `.js` to every extensionless relative import/re-export)
 - `tools/world-index/tests/**/*.ts` (modify — same as above)
 - `tools/world-index/tests/integration/spec10-verification.sh` (modify — use a temp copy of the tracked Animalia fixture and refresh stale fixture assertions)
-- `specs/SPEC-39-tools-esm-migration.md` (modify — dated implementation note for the world-index capstone row)
+- `archive/specs/SPEC-39-tools-esm-migration.md` (modify — dated implementation note for the world-index capstone row)
 
 ## Out of Scope
 

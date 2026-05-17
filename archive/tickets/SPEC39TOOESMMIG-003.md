@@ -65,7 +65,7 @@ Type-only imports (`import type { ... }`) and barrel imports follow the same rul
 - `tools/hooks/src/**/*.ts` (modify — append `.js` to relative imports)
 - `tools/hooks/tests/_shared.ts` (modify — `__dirname` → `import.meta.dirname` for compiled-test repo-root resolution)
 - `tools/hooks/tests/**/*.ts` (modify — append `.js` to relative imports)
-- `specs/SPEC-39-tools-esm-migration.md` (modify — dated implementation note for the hooks row)
+- `archive/specs/SPEC-39-tools-esm-migration.md` (modify — dated implementation note for the hooks row)
 
 ## Out of Scope
 

@@ -5,7 +5,7 @@
 **Phase**: Single phase, per-package execution
 **Depends on**: None (independent build-system migration)
 **Blocks**: None (no skill or canon work waits on this; this is infrastructural hygiene)
-**Status**: PROPOSED
+**Status**: COMPLETED
 
 ## Implementation Notes
 
@@ -129,3 +129,19 @@ This spec touches only build configuration and import syntax — it does not cha
 1. **Order of per-package landings**: independent per-package PRs in any order, or one bundled PR? Bundled keeps the CI-greenness atomic; independent PRs reduce review surface. Recommendation: independent PRs, smallest-to-largest order (`world-mcp` → `validators` → `patch-engine` → finish `hooks` → `world-index`).
 2. **CI runner Node version pinning**: `.github/workflows/ci-*.yml` all use `node-version: '22'`. Should that pin to `22.12` or higher to guarantee `require(esm)` availability for transitional cases? The downstream consumers `import` world-index, so `require(esm)` is not exercised — but pinning is cheap insurance. Recommendation: leave at `'22'` (consistent with current spec); revisit only if a real `require(esm)` boundary surfaces.
 3. **`@types/node` major bump**: hooks and world-index already on `@types/node 25.8.0`; patch-engine, validators, world-mcp may lag. Not required for ESM migration but worth aligning during the PRs to reduce dependabot churn. Recommendation: align in each per-package PR opportunistically.
+
+## Outcome
+
+Completed on 2026-05-17. SPEC-39 migrated the `tools/` package family to ESM through archived tickets:
+
+- `archive/tickets/SPEC39TOOESMMIG-004.md` — `tools/world-mcp`
+- `archive/tickets/SPEC39TOOESMMIG-002.md` — `tools/validators`
+- `archive/tickets/SPEC39TOOESMMIG-001.md` — `tools/patch-engine`
+- `archive/tickets/SPEC39TOOESMMIG-003.md` — `tools/hooks`
+- `archive/tickets/SPEC39TOOESMMIG-005.md` — `tools/world-index` capstone
+
+What actually changed: package manifests now declare ESM where required, TypeScript configs use the modern Node16 module/resolution shape, relative imports use Node ESM `.js` suffixes, CJS path globals were replaced with ESM-safe equivalents, and package-local test/runtime probes were adjusted where ESM required it. The `tools/world-index` capstone also made the spec10 verification script portable by using the tracked Animalia fixture instead of gitignored local world state.
+
+Deviations from the original plan: the per-package source-edit counts in the draft were approximate, several packages had additional CJS path-global or test-helper fallout, and the corrected implementation order landed consumers before producer packages where TypeScript's Node16 compile gate required it.
+
+Verification results: package-local build/test lanes passed for each migrated ticket. The final world-index capstone passed `npm run clean`, `npm run build`, `npm test` (87/87), `npm run test:spec10-verification`, static ESM greps, CLI `--help`, and downstream builds for `tools/patch-engine`, `tools/validators`, `tools/world-mcp`, and `tools/hooks`.

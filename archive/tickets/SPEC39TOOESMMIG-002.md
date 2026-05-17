@@ -76,7 +76,7 @@ Rebuilt `tools/world-mcp` against the new validators `dist/` (`npm run build` fr
 - `tools/validators/tests/integration/spec09-verification.test.ts` (modify — AJV 2020 subpath interop and `__dirname` replacement)
 - `tools/validators/tests/predicate-dsl-grammar-parity.test.ts` (modify — AJV 2020 subpath interop)
 - `tools/validators/tests/schemas/corpus-conformance.test.ts` (modify — AJV 2020 subpath interop)
-- `specs/SPEC-39-tools-esm-migration.md` (modify — dated implementation note for the validators row)
+- `archive/specs/SPEC-39-tools-esm-migration.md` (modify — dated implementation note for the validators row)
 
 ## Out of Scope
 
