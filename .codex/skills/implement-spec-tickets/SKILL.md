@@ -231,7 +231,17 @@ Before committing:
 7. Re-run `git diff --cached --name-status` after staging and confirm every staged path is owned by this iteration, explicitly approved, or intentional same-family state needed for the queue/handoff.
 8. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening. Prefer a concise truthful shape such as `SPEC35STOPIPEIG-001 implement and archive observer firewall fix`. Mention `follow-up` or `skill hardening` only when the committed iteration actually created or updated a follow-up ticket or changed a skill.
 
-Before the final commit or reset-boundary handoff for an iteration, run a required-visible-block checkpoint:
+Before the final commit or reset-boundary handoff for an iteration, run a required-visible-block checkpoint. Emit this compact block visibly; after compaction or resume, emit it even when the individual child blocks were already printed earlier, so the commit/handoff boundary has an explicit checklist:
+
+```text
+Required-visible-block checkpoint:
+- implement-ticket audit block: <emitted | not_applicable: reason>
+- post-ticket-review block: <emitted | not_applicable: reason>
+- post-ticket-review audit block: <emitted | not_applicable: reason | blocked: reason>
+- Harness handoff: <ready_to_emit | not_applicable: reason>
+```
+
+The checkpoint values must cover:
 
 - `implement-ticket` audit block: `emitted` or `not_applicable` with reason
 - `post-ticket-review` block: `emitted` or `not_applicable` with reason
