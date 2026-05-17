@@ -185,6 +185,12 @@ The candidate is now world canon. Record the canon link in the closeout ledger. 
 - Each `SF-<integer>` source MAY be superseded with the same class shape from shared contract §4.5.3, carrying `supersedes: SF-<integer>`, `authority: canon_linked`, and at least one parent CF id in `derived_from`. The broader CF / CH / PA verdict linkage lives in the closeout ledger; the parent CF id on the superseding SF is the schema-backed authority link.
 - Each implicated `BEL-<integer>` MAY be superseded with the §4.1 shape when `truth_relation`, `claim`, `basis`, or `consequences` must change to reflect the adjudicated canon outcome. The CF / CH / PA linkage lives in the closeout ledger.
 - For `source_kind: artifact_canonization`, supersede story-local `DA` only if a §4.5.10 field changes. World-level DA linkage is recorded in the closeout ledger.
+
+  Worked examples of when DA supersession is and is not triggered by closeout:
+
+  - **NOT triggered**: canon-addition accepts the DA's central claim as a CF, but the DA's §4.5.10 fields (`title`, `author`, `genre`, `body`, `intended_audience`, `circulation`, `truth_relation`, `supersedes`, `derived_from`) are unchanged. Record the verdict in the closeout ledger; do not supersede the DA. The CF's `source_basis.derived_from[]` includes the DA id as audit trail.
+  - **Triggered**: canon-addition accepts the DA's claim and clarifies a field the DA carried in an ambiguous state, such as `truth_relation` changing from `contested` to `true` per the accepted CF, or `circulation` shifting because closeout reveals factional propagation the original DA did not record. Supersede the DA via `append_story_diegetic_artifact_record` with `supersedes: DA-<old>` and the corrected fields; record the supersession cause in the closeout ledger.
+  - **NOT triggered**: canon-addition rejects the DA's claim. The DA remains active with its original `truth_relation` (typically `contested` or `false`); the rejection is recorded in the closeout ledger. The DA continues to exist as branch-local in-world evidence even when its claim does not promote.
 - For `source_kind: character_outcome`, supersede `STENT` only if a §4.5.1 field changes; supersede `STSTAT` only if a source STSTAT in `proposal_evidence.source_records[]` needs an amended-schema update after the canon-addition verdict (e.g., character-outcome status evidence becoming canon-linked, or explicitly retained as branch-local after rejection).
 - For `source_kind: relationship_or_institutional_outcome`, supersede `SREL` only if a §4.5.7 field changes.
 

@@ -321,6 +321,12 @@ applies to character pre-figurement (CHAR records also belong in
 
 #### D9 — Amend `.claude/skills/story-promotion-closeout/SKILL.md` with DA-supersession-only-on-field-change reinforcement
 
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-009.md` landed the
+three worked examples immediately after the existing `artifact_canonization`
+DA-supersession rule. The landed examples preserve the existing rule and clarify
+ledger-only versus supersession outcomes for accepted unchanged claims, accepted
+field clarifications, and rejected claims.
+
 **Problem**: `SKILL.md:187` already states "For `source_kind: artifact_canonization`, supersede story-local `DA` only if a §4.5.10 field changes. World-level DA linkage is recorded in the closeout ledger." The rule is correct but compact; the worked-example set does not cover the common ambiguity cases (canon adds context but does not change a §4.5.10 field; canon clarifies truth_relation; canon contradicts the DA's claim but the DA's content is the artifact, not the claim).
 
 **Change**: Expand the existing rule with three worked-disposition examples:
