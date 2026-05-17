@@ -1,6 +1,6 @@
 # SPEC37STOPIPTEN-001: Extend proposal_package_shape with conditional safety-block enforcement
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `tools/validators/src/structural/proposal-package-shape.ts` (existing structural validator); extends its test file; adds prescriptive prose to `.claude/skills/story-fact-promotion-to-canon/SKILL.md`. No new validator, no new patch-engine op, no new schema field.
@@ -33,23 +33,23 @@
 
 ## What to Change
 
-### 1. Validator extension at `tools/validators/src/structural/proposal-package-shape.ts`
+### 1. Validator extension at `tools/validators/src/structural/proposal-package-shape.ts` (landed)
 
-Import `requiresEpistemicProfile`, `requiresExceptionGovernance`, and `naRationaleVerdicts` from `./record-schema-compliance` — implementer's choice between adding `export` to `naRationaleVerdicts` at its definition (line 190) or extracting all three to a sibling helper module (`tools/validators/src/structural/cf-safety-block-helpers.ts` would be a reasonable home; both validators then import from the helper to keep the contract single-source). The helper's actual signature is `(record: SchemaTarget, blockName: string, block: unknown)`.
+`proposal-package-shape.ts` now imports `requiresEpistemicProfile`, `requiresExceptionGovernance`, and `naRationaleVerdicts` from `./record-schema-compliance`. The implementation chose the direct-export path for `naRationaleVerdicts` and the shared `SchemaTarget` type instead of creating a new helper module. The helper's actual signature remains `(record: SchemaTarget, blockName: string, block: unknown)`.
 
-After the existing candidate-purity loop (lines 53-57) and before the `source_basis` loop (line 59), insert a new block:
+After the existing candidate-purity loop and before the `source_basis` loop, the validator now:
 
-- Read `candidate.type` as a string. If absent (i.e., `typeof candidate.type !== "string"`), emit verdict `proposal_candidate_missing_type` with message `proposal candidate missing 'type' field required for safety-block resolution`.
-- If `requiresExceptionGovernance(type)` returns true AND `candidate.exception_governance === undefined`, emit verdict `proposal_candidate_exception_governance_missing` with message `proposal candidate type '<type>' requires exception_governance (see CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED)`.
-- If `candidate.exception_governance` is present, build a `SchemaTarget`-shaped adapter (file path = proposal-package path; node_id = the candidate's CF candidate id if available, else the file path) and invoke `naRationaleVerdicts(adapter, "exception_governance", candidate.exception_governance)`; append any returned verdicts to the local `verdicts[]` (rewriting the verdict's `validator` field to `"proposal_package_shape"` and verdict `code` to `proposal_candidate_na_rationale_quality` so adjudication logs distinguish proposal-stage failures from accepted-CF failures).
-- If `requiresEpistemicProfile(type)` returns true AND `candidate.epistemic_profile === undefined`, emit verdict `proposal_candidate_epistemic_profile_missing` with analogous message.
-- If `candidate.epistemic_profile` is present, invoke `naRationaleVerdicts` analogously and append rewritten verdicts.
+- Reads `candidate.type` as a string. If absent (i.e., `typeof candidate.type !== "string"`), emits verdict `proposal_candidate_missing_type` with message `proposal candidate missing 'type' field required for safety-block resolution`.
+- If `requiresExceptionGovernance(type)` returns true AND `candidate.exception_governance === undefined`, emits verdict `proposal_candidate_exception_governance_missing` with message `proposal candidate type '<type>' requires exception_governance (see CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED)`.
+- If `candidate.exception_governance` is present, builds a `SchemaTarget`-shaped adapter (file path = proposal-package path; node_id = the candidate's CF candidate id if available, else the file path) and invokes `naRationaleVerdicts(adapter, "exception_governance", candidate.exception_governance)`; any returned verdicts are rewritten to `validator: "proposal_package_shape"` and `code: "proposal_candidate_na_rationale_quality"` so adjudication logs distinguish proposal-stage failures from accepted-CF failures.
+- If `requiresEpistemicProfile(type)` returns true AND `candidate.epistemic_profile === undefined`, emits verdict `proposal_candidate_epistemic_profile_missing` with analogous message.
+- If `candidate.epistemic_profile` is present, invokes `naRationaleVerdicts` analogously and appends rewritten verdicts.
 
-All new verdicts use `validator: "proposal_package_shape"` and the existing `verdict()` helper at line 148 — extend the helper or add a sibling helper to accept a custom `code` parameter (the current helper hardcodes nothing; just pass the new `code` strings through). The existing `suggested_fix` ("Keep the proposal candidate CF-shaped and move branch-local evidence into top-level proposal_evidence.") does not apply to safety-block verdicts; emit a safety-block-specific suggested_fix such as `"Add the required safety-block reasoning to candidate.exception_governance / candidate.epistemic_profile, or provide an { n_a: '<rationale>' } block citing a FOUNDATIONS ontology category keyword."`.
+All new verdicts use `validator: "proposal_package_shape"`. Safety-block verdicts use the safety-block-specific `suggested_fix`: `"Add the required safety-block reasoning to candidate.exception_governance / candidate.epistemic_profile, or provide an { n_a: '<rationale>' } block citing a FOUNDATIONS ontology category keyword."`
 
-### 2. Test extension at `tools/validators/tests/structural/proposal-package-shape.test.ts`
+### 2. Test extension at `tools/validators/tests/structural/proposal-package-shape.test.ts` (landed)
 
-Add five new test cases (preserving the existing six unchanged):
+Five test cases were added, preserving the existing six:
 
 - `proposal_package_shape_rejects_safety_sensitive_candidate_without_epistemic_profile` — fixture: proposal package with `candidate.type: knowledge_asymmetric_fact`, all other candidate fields valid (CF-shaped), no `epistemic_profile`. Assert verdict array contains exactly one verdict whose `code === "proposal_candidate_epistemic_profile_missing"`.
 - `proposal_package_shape_rejects_safety_sensitive_candidate_without_exception_governance` — fixture: `candidate.type: technology`, no `exception_governance`. Assert one verdict with `code === "proposal_candidate_exception_governance_missing"`.
@@ -57,9 +57,9 @@ Add five new test cases (preserving the existing six unchanged):
 - `proposal_package_shape_accepts_substantive_n_a_safety_rationale` — fixture: `candidate.type: technology`, `candidate.exception_governance: { n_a: "no exception axis applies because this artifact's effect is universally available across the populace, per ontology category artifact ..." }`. Assert no `proposal_candidate_*` verdict.
 - `proposal_package_shape_rejects_thin_n_a_safety_rationale` — fixture: same as above but `{ n_a: "N/A" }`. Assert one verdict with `code === "proposal_candidate_na_rationale_quality"`.
 
-### 3. Skill-prose alignment at `.claude/skills/story-fact-promotion-to-canon/SKILL.md`
+### 3. Skill-prose alignment at `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (landed)
 
-In the proposal-package-authoring section (after the existing candidate-shape guidance, before the submission step), insert the directive paragraph from SPEC-37 D1 §3 verbatim:
+The proposal-package-authoring section now includes this directive after the candidate-shape guidance:
 
 ```
 When `candidate.type` is in `CF_TYPE_EPISTEMIC_PROFILE_REQUIRED` (`capability`,
@@ -79,10 +79,10 @@ of the canon-addition adjudication.
 ## Files to Touch
 
 - `tools/validators/src/structural/proposal-package-shape.ts` (modify)
-- `tools/validators/src/structural/record-schema-compliance.ts` (modify — add `export` to `naRationaleVerdicts`, OR leave unchanged if the implementer chooses the shared-helper-extraction path)
-- `tools/validators/src/structural/cf-safety-block-helpers.ts` (new, optional — only if the implementer extracts shared helpers instead of exporting `naRationaleVerdicts` in place)
+- `tools/validators/src/structural/record-schema-compliance.ts` (modify — exports `SchemaTarget` and `naRationaleVerdicts`)
 - `tools/validators/tests/structural/proposal-package-shape.test.ts` (modify)
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify)
+- `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` (modify — D1 implementation note)
 
 ## Out of Scope
 
@@ -116,3 +116,26 @@ of the canon-addition adjudication.
 1. `cd tools/validators && npm run build && npm test` — full validators package verification.
 2. `grep -n "proposal_candidate_" tools/validators/src/structural/proposal-package-shape.ts` — verify the new verdict codes are emitted from the right file.
 3. `grep -n "CF_TYPE_EPISTEMIC_PROFILE_REQUIRED" .claude/skills/story-fact-promotion-to-canon/SKILL.md` — verify the directive paragraph landed in the consumer skill.
+
+## Outcome
+
+Completed: 2026-05-17.
+
+This ticket extended `proposal_package_shape` so proposal-package candidates now enforce the same conditional CF safety-block contract that accepted CF records already enforce. Safety-sensitive `candidate.type` values now emit proposal-stage verdicts for missing `exception_governance`, missing `epistemic_profile`, missing `type`, and thin `{ n_a: ... }` rationales. The implementation reuses `requiresExceptionGovernance`, `requiresEpistemicProfile`, and `naRationaleVerdicts` from `record-schema-compliance.ts` so rationale-quality logic stays single-source.
+
+The validators package gained five focused proposal-package tests, and `.claude/skills/story-fact-promotion-to-canon/SKILL.md` now tells authors to include the required safety blocks in the proposal candidate instead of deferring that reasoning to `canon-addition`. `specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md` was updated with a D1 implementation note so the active spec no longer presents this deliverable as wholly pending.
+
+## Verification Result
+
+Commands run on 2026-05-17:
+
+1. `cd tools/validators && npm test` — passed. The package script ran `npm run build` and then `node --test dist/tests/**/*.test.js`; result: 337 tests passed, 0 failed.
+2. `grep -n "proposal_candidate_" tools/validators/src/structural/proposal-package-shape.ts` — passed. Found `proposal_candidate_missing_type`, `proposal_candidate_exception_governance_missing`, `proposal_candidate_epistemic_profile_missing`, and `proposal_candidate_na_rationale_quality`.
+3. `grep -n "CF_TYPE_EPISTEMIC_PROFILE_REQUIRED" .claude/skills/story-fact-promotion-to-canon/SKILL.md` — passed. Found the inserted promotion-skill directive.
+
+Ignored artifact classification: `tools/validators/dist/` was refreshed by the validators package build/test lane; `tools/validators/node_modules/` was pre-existing ignored package state.
+
+## Deviations
+
+- The optional helper-extraction path was not used. Exporting `SchemaTarget` and `naRationaleVerdicts` from `record-schema-compliance.ts` kept the change smaller while preserving single-source helper reuse.
+- The test count is now 337 total validators package tests after adding the five proposal-package tests.

@@ -61,6 +61,8 @@ Deliverables grouped by severity (P1 → P2). Each is self-contained and can lan
 
 ### D1 — Extend `proposal_package_shape` with conditional safety-block enforcement (P1, intake WL-T10-P1-001)
 
+**Implementation note (2026-05-17)**: D1 landed in `archive/tickets/SPEC37STOPIPTEN-001.md`. `proposal_package_shape` now emits proposal-stage safety-block verdicts for missing `exception_governance`, missing `epistemic_profile`, missing `candidate.type`, and thin `{ n_a: ... }` rationales; the validators package proof was `cd tools/validators && npm test` with 337 passing tests. The remaining D1 prose below is retained as historical intake/design context unless a later ticket explicitly reopens this surface.
+
 **Problem**: `tools/validators/src/structural/proposal-package-shape.ts:53-64` enforces candidate purity (every key in `candidate` must be in `CANON_FACT_FIELDS` and not in `CANDIDATE_PROMOTION_FIELDS`) and `source_basis` property placement only. The validator never invokes the conditional safety-block predicates that `tools/validators/src/structural/record-schema-compliance.ts:140-153` runs against accepted CF records:
 
 ```typescript

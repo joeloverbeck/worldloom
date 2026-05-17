@@ -207,6 +207,19 @@ candidate:
 
 **Branch provenance lives in top-level `proposal_evidence`, NEVER inside `candidate.source_basis` or `candidate.promotion_provenance`.** `candidate.source_basis.derived_from` is reserved for parent CF references — world authority. The branch is evidence, not authority. The package is not an accepted Canon Fact Record: `direct_user_approval` stays `false` until `canon-addition` accepts the proposal through its own HARD-GATE and emits a `create_cf_record` payload with `true`.
 
+When `candidate.type` is in `CF_TYPE_EPISTEMIC_PROFILE_REQUIRED` (`capability`,
+`bloodline`, `magic_practice`, `technology`, `divine_action`,
+`artifact_dependent_truth`, `exception_introducing_fact`,
+`institution_with_secrecy`, `knowledge_asymmetric_fact`) OR
+`CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED` (the same list minus the last two), the
+candidate MUST include the corresponding `epistemic_profile` and/or
+`exception_governance` block — either as a full object, or as
+`{ n_a: "<substantive rationale citing an ontology category>" }`. Do not defer
+this reasoning to `canon-addition`; `proposal_package_shape` enforces it at
+validation time. The reasoning lives in the candidate because it is part of
+what story-promotion-closeout reviewers need to evaluate the proposal, not part
+of the canon-addition adjudication.
+
 ## Phase 3: Scope-inflation check (FOUNDATIONS Rule 4)
 
 For each source record, verify the candidate's `scope` does not over-promote. Five sub-checks:
