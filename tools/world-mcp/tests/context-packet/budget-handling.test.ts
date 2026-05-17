@@ -132,6 +132,10 @@ test("assembler reports packet_incomplete_required_classes when local authority 
       (result.details?.retry_with as { token_budget?: unknown } | undefined)?.token_budget,
       result.details?.minimum_required_budget
     );
+    assert.equal(
+      result.details?.fallback_advice,
+      "Retrieve dropped nodes via mcp__worldloom__get_record(record_id), mcp__worldloom__get_records(record_ids), or mcp__worldloom__get_record_field(record_id, field_path) as needed."
+    );
     const truncationSummary = result.details?.truncation_summary as
       | { dropped_layers: string[]; fallback_advice: string }
       | undefined;

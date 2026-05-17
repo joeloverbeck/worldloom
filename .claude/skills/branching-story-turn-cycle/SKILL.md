@@ -166,7 +166,7 @@ Before Phase 1:
 3. Load `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` and its `## Player Agency Contract` section. Abort with agency-contract-missing error if the section is absent or does not name the agency surface, write-in envelope, and viewpoint limits.
 4. Load `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml`. Abort with parent-not-found error if missing.
 5. Verify XOR action source: exactly one of `chosen_choice_id` / `manual_action_text` non-null. If `chosen_choice_id` supplied, verify the CHC exists, was emitted by `parent_page_id`, and is not retired. Abort with action-source error on any failure.
-6. Detect continuation vs fork: continuation when `parent_page_id` is the active leaf of `parent.branch_id` and no `force_branch_id` is set; fork otherwise. Allocate a new `BR-<integer>` via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` for forks.
+6. Detect continuation vs fork: continuation when `parent_page_id` is the active leaf of `parent.branch_id` (the page with the highest `turn_index` on that branch and no descendant page citing it as `parent_page_id`) and no `force_branch_id` is set; fork otherwise. Allocate a new `BR-<integer>` via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` for forks.
 7. Verify parent prose policy: if `accept_parent_unrendered: false` and `worlds/<world_slug>/stories/<story_slug>/pages-prose/<parent_page_id>.md` is absent on disk, abort with parent-unrendered error. Default `true` bypasses the check.
 8. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for: `SE`, `PG`, optional `BR`, candidate ids per record class (lazily on first use), `CHC` ids in Phase 8 after the page stop-point is known.
 9. Load parent's `state_snapshot.active_records` into working state. Load optional parent + grandparent `pages-prose/*.md` if available for §14 continuity. Load whole-class Mystery Reserve and Invariants via context packet. Extract the current world-canon revision from the latest `change_log_entry` in the context packet (`CH-<integer>`, or `null` only if no change log exists).
@@ -181,7 +181,20 @@ Persisted-summary recovery: see
 `.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
 `get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
 `delivery_status: persisted_with_summary`, retrieve required slices via
-`mcp__worldloom__get_persisted_packet_slice` before continuing.
+`mcp__worldloom__get_persisted_packet_slice` before continuing. If
+`get_context_packet` instead returns a hard
+`packet_incomplete_required_classes` error (typical when the
+`story_turn_cycle` profile's reserve-priority full bodies for Mystery
+Reserve / Invariants cannot fit the harness's character ceiling — inspect
+the error's `minimum_required_harness_ceiling_chars` vs
+`effective_harness_ceiling_chars` to distinguish from a budget-binding case),
+follow the operator-recovery procedure documented at
+`.claude/skills/_shared-templates/persisted-packet-recovery.md` §When
+Required Classes Cannot Fit: retrieve the named seed-record ids directly via
+`mcp__worldloom__get_records(record_ids=[...])` or load whole classes via
+`mcp__worldloom__list_records(record_type=..., include_full_body=true)`. Do
+not blindly retry the suggested `retry_with: { token_budget }` when the
+harness ceiling is the binding constraint.
 
 If any precondition fails, the skill aborts before Phase 1.
 

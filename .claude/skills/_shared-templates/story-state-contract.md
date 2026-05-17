@@ -491,6 +491,8 @@ No `certainty`, `scope`, `who_knows`, `derived_from_cf`, `why_it_matters_at_open
 
 Use `branch_local` for ordinary story-local truths, `branch_local_counterfactual` for deliberately branch-only contradictions, `canon_candidate` for claims held for promotion, and `canon_linked` only after canon acceptance. A `canon_linked` `SF` must include at least one parent `CF-<integer>` in `derived_from`; no separate canon-link field exists.
 
+**Truth-relation propagation through `derived_from`.** When a `derived_from[]` entry references a `BEL` whose `truth_relation` is anything other than `true` (i.e., `false`, `partly_true`, `unknown`, `contested`, `branch_counterfactual`, or `future_contingent`), the SF MUST use `authority: branch_local_counterfactual` — the `lie_promoted_silently` validator enforces that non-true beliefs cannot be silently promoted into branch-local-true facts. The rule preserves FOUNDATIONS Rule 4 (No Globalization by Accident) at the SF-vs-BEL boundary: a non-true belief is a holder's epistemic state, not a branch-local truth, and an SF that cites it as a source inherits its non-true authority. When a BEL's role in the fact is causal-but-not-truth-bearing (e.g., the holder's belief motivated their action but the action's outcome stands on its own as a branch-local truth), capture the BEL via `BEL.basis.access_records[]` on a downstream witness or interpretation belief rather than via `SF.derived_from[]`; the fact then carries `authority: branch_local` based on its own truth-status and the belief's role is recorded in the belief-state delta without propagating non-true authority to the fact.
+
 #### 4.5.4 `OBL` (obligation)
 
 Tracks promised, owed, or required behavior that constrains future choice.

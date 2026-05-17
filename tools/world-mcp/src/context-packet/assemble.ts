@@ -53,6 +53,40 @@ const DROP_PRIORITY = [
 
 type DroppableLayer = (typeof DROP_PRIORITY)[number];
 
+function incompletePacketDetails(
+  args: {
+    missingClasses: string[];
+    requestedBudget: number;
+    minimumRequiredBudget: number;
+    harnessCeilingChars: number;
+    effectiveHarnessCeilingChars: number;
+    minimumRequiredHarnessCeilingChars: number;
+    retainedClasses: string[];
+    truncationSummary: ContextPacketTruncationSummary;
+  },
+  extra: Record<string, unknown> = {}
+): Record<string, unknown> {
+  const harnessCeilingIsBinding =
+    args.minimumRequiredHarnessCeilingChars > args.effectiveHarnessCeilingChars;
+
+  return {
+    missing_classes: args.missingClasses,
+    requested_budget: args.requestedBudget,
+    minimum_required_budget: args.minimumRequiredBudget,
+    ...(harnessCeilingIsBinding
+      ? {}
+      : { retry_with: { token_budget: args.minimumRequiredBudget } }),
+    harness_ceiling_chars: args.harnessCeilingChars,
+    envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,
+    effective_harness_ceiling_chars: args.effectiveHarnessCeilingChars,
+    minimum_required_harness_ceiling_chars: args.minimumRequiredHarnessCeilingChars,
+    fallback_advice: TRUNCATION_FALLBACK_ADVICE,
+    ...extra,
+    retained_classes: args.retainedClasses,
+    truncation_summary: args.truncationSummary
+  };
+}
+
 function makeEmptyTruncationSummary(): ContextPacketTruncationSummary {
   return {
     dropped_layers: [],
@@ -448,18 +482,16 @@ export async function assembleContextPacket(args: {
       return createMcpError(
         "packet_incomplete_required_classes",
         "The requested budget cannot fit local_authority under the configured context-packet ceilings.",
-        {
-          missing_classes: ["local_authority", ...packet.truncation_summary.dropped_layers],
-          requested_budget: args.token_budget,
-          minimum_required_budget: previewAllocated,
-          retry_with: { token_budget: previewAllocated },
-          harness_ceiling_chars: harnessCeilingChars,
-          envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,
-          effective_harness_ceiling_chars: effectiveHarnessCeilingChars,
-          minimum_required_harness_ceiling_chars: previewChars,
-          retained_classes: [],
-          truncation_summary: packet.truncation_summary
-        }
+        incompletePacketDetails({
+          missingClasses: ["local_authority", ...packet.truncation_summary.dropped_layers],
+          requestedBudget: args.token_budget,
+          minimumRequiredBudget: previewAllocated,
+          harnessCeilingChars,
+          effectiveHarnessCeilingChars,
+          minimumRequiredHarnessCeilingChars: previewChars,
+          retainedClasses: [],
+          truncationSummary: packet.truncation_summary
+        })
       );
     }
 
@@ -473,20 +505,22 @@ export async function assembleContextPacket(args: {
       return createMcpError(
         "packet_incomplete_required_classes",
         "The requested budget cannot fit required governing-context full bodies under the configured context-packet ceilings.",
-        {
-          missing_classes: fullBodyDeliveryResult.missing_classes,
-          requested_budget: args.token_budget,
-          minimum_required_budget: fullBodyDeliveryResult.minimum_required_budget,
-          retry_with: { token_budget: fullBodyDeliveryResult.minimum_required_budget },
-          harness_ceiling_chars: harnessCeilingChars,
-          envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,
-          effective_harness_ceiling_chars: effectiveHarnessCeilingChars,
-          minimum_required_harness_ceiling_chars:
-            fullBodyDeliveryResult.minimum_required_harness_ceiling_chars,
-          governing_full_body_priority: packet.task_header.governing_full_body_priority,
-          retained_classes: [],
-          truncation_summary: packet.truncation_summary
-        }
+        incompletePacketDetails(
+          {
+            missingClasses: fullBodyDeliveryResult.missing_classes,
+            requestedBudget: args.token_budget,
+            minimumRequiredBudget: fullBodyDeliveryResult.minimum_required_budget,
+            harnessCeilingChars,
+            effectiveHarnessCeilingChars,
+            minimumRequiredHarnessCeilingChars:
+              fullBodyDeliveryResult.minimum_required_harness_ceiling_chars,
+            retainedClasses: [],
+            truncationSummary: packet.truncation_summary
+          },
+          {
+            governing_full_body_priority: packet.task_header.governing_full_body_priority
+          }
+        )
       );
     }
 
@@ -500,43 +534,46 @@ export async function assembleContextPacket(args: {
       packet.truncation_summary.dropped_layers.includes("governing_world_context")
     ) {
       const minimumPacket = minimumPacketWithGoverningContext(packetWithRequiredGoverningBodies);
+      const minimumRequiredBudget = estimateStablePacketSize(minimumPacket);
+      const minimumRequiredHarnessCeilingChars = estimateStablePacketChars(minimumPacket);
       return createMcpError(
         "packet_incomplete_required_classes",
         "The requested budget cannot fit required governing-context full bodies under the configured context-packet ceilings.",
-        {
-          missing_classes: ["governing_world_context.full_body"],
-          requested_budget: args.token_budget,
-          minimum_required_budget: estimateStablePacketSize(minimumPacket),
-          retry_with: { token_budget: estimateStablePacketSize(minimumPacket) },
-          harness_ceiling_chars: harnessCeilingChars,
-          envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,
-          effective_harness_ceiling_chars: effectiveHarnessCeilingChars,
-          minimum_required_harness_ceiling_chars: estimateStablePacketChars(minimumPacket),
-          governing_full_body_priority: packet.task_header.governing_full_body_priority,
-          retained_classes: ["local_authority", "governing_world_context"],
-          truncation_summary: minimumPacket.truncation_summary
-        }
+        incompletePacketDetails(
+          {
+            missingClasses: ["governing_world_context.full_body"],
+            requestedBudget: args.token_budget,
+            minimumRequiredBudget,
+            harnessCeilingChars,
+            effectiveHarnessCeilingChars,
+            minimumRequiredHarnessCeilingChars,
+            retainedClasses: ["local_authority", "governing_world_context"],
+            truncationSummary: minimumPacket.truncation_summary
+          },
+          {
+            governing_full_body_priority: packet.task_header.governing_full_body_priority
+          }
+        )
       );
     }
 
     const stableAllocated = estimateStablePacketSize(packet);
     packet.task_header.token_budget.allocated = stableAllocated;
     if (stableAllocated > args.token_budget || estimatePacketChars(packet) > effectiveHarnessCeilingChars) {
+      const minimumRequiredHarnessCeilingChars = estimatePacketChars(packet);
       return createMcpError(
         "packet_incomplete_required_classes",
         "The context packet exceeded the configured ceilings after full-body allocation.",
-        {
-          missing_classes: ["local_authority", ...packet.truncation_summary.dropped_layers],
-          requested_budget: args.token_budget,
-          minimum_required_budget: stableAllocated,
-          retry_with: { token_budget: stableAllocated },
-          harness_ceiling_chars: harnessCeilingChars,
-          envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,
-          effective_harness_ceiling_chars: effectiveHarnessCeilingChars,
-          minimum_required_harness_ceiling_chars: estimatePacketChars(packet),
-          retained_classes: [],
-          truncation_summary: packet.truncation_summary
-        }
+        incompletePacketDetails({
+          missingClasses: ["local_authority", ...packet.truncation_summary.dropped_layers],
+          requestedBudget: args.token_budget,
+          minimumRequiredBudget: stableAllocated,
+          harnessCeilingChars,
+          effectiveHarnessCeilingChars,
+          minimumRequiredHarnessCeilingChars,
+          retainedClasses: [],
+          truncationSummary: packet.truncation_summary
+        })
       );
     }
 

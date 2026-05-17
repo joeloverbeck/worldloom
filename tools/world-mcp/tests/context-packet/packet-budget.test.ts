@@ -183,6 +183,15 @@ test("packet retry at minimum_required_budget succeeds with local_authority inta
       ?.token_budget;
     assert.equal(typeof retryBudget, "number");
     assert.equal(retryBudget, initial.details?.minimum_required_budget);
+    assert.ok(
+      (initial.details?.minimum_required_harness_ceiling_chars as number) <=
+        (initial.details?.effective_harness_ceiling_chars as number),
+      "retry_with is only actionable when the harness ceiling is not the binding constraint"
+    );
+    assert.equal(
+      initial.details?.fallback_advice,
+      "Retrieve dropped nodes via mcp__worldloom__get_record(record_id), mcp__worldloom__get_records(record_ids), or mcp__worldloom__get_record_field(record_id, field_path) as needed."
+    );
 
     const retry = await withRepoRoot(root, () =>
       assembleContextPacket({
