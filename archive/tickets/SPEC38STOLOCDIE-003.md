@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — modifies `.claude/skills/branching-story-bootstrap/SKILL.md`; truths `specs/SPEC-38-story-local-diegetic-artifact-authoring.md`
+**Engine Changes**: Yes — modifies `.claude/skills/branching-story-bootstrap/SKILL.md`; truths `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md`
 **Deps**: archive/tickets/SPEC38STOLOCDIE-001.md
 
 ## Problem
@@ -66,7 +66,7 @@ Added a dated SPEC-38 §D3 implementation note recording the landed bootstrap am
 ## Files to Touch
 
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify)
-- `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
+- `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
 
 ## Out of Scope
 

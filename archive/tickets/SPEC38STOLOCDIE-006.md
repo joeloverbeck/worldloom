@@ -58,7 +58,7 @@ D6 implementation depends on D12 validator (ticket 012); the validator implement
 ## Files to Touch
 
 - `.claude/skills/branching-story-prose-attach/SKILL.md` (modify)
-- `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify — D6 implementation note)
+- `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify — D6 implementation note)
 
 ## Out of Scope
 

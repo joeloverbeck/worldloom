@@ -228,9 +228,12 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
    `prose_load_bearing_artifact_mention_without_da` (WARN-level by default;
    FAIL when the prose explicitly quotes the artifact's content or describes
    the protagonist's access to it). Record the worst result under
-   `invented_structural_fact` in the receipt. Recommended repair: route the
-   deviation through the prose-attach disposition table (structural-fact issue:
-   run a repair turn that creates the DA + BEL + optional STOBJ).
+   `invented_structural_fact` in the receipt. For DA field semantics and the
+   repair bundle shape, see
+   `.claude/skills/_shared-templates/da-authoring-reference.md` §Field
+   semantics and §Patch obligations. Recommended repair: route the deviation
+   through the prose-attach disposition table (structural-fact issue: run a
+   repair turn that creates the DA + BEL + optional STOBJ).
 
 8. **`canon_claim_without_authority`** (`PASS | FAIL`) — scan prose for assertions that would make a world-level canon claim absent from plan §4. Examples: asserting a historical date that plan §4 does not list; stating a metaphysical rule (e.g., "magic is fundamentally entropic") that plan §4 does not include; declaring a faction's secret identity that plan §4 leaves to Mystery Reserve. Any such assertion without corresponding `SE.promotion_claims[]` evidence on the resolving event (loaded via `PG.input.resolved_event_id`) is `FAIL` and routes to `repair_recommendation: run_story_fact_promotion_to_canon`.
 

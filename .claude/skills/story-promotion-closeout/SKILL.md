@@ -185,6 +185,9 @@ The candidate is now world canon. Record the canon link in the closeout ledger. 
 - Each `SF-<integer>` source MAY be superseded with the same class shape from shared contract §4.5.3, carrying `supersedes: SF-<integer>`, `authority: canon_linked`, and at least one parent CF id in `derived_from`. The broader CF / CH / PA verdict linkage lives in the closeout ledger; the parent CF id on the superseding SF is the schema-backed authority link.
 - Each implicated `BEL-<integer>` MAY be superseded with the §4.1 shape when `truth_relation`, `claim`, `basis`, or `consequences` must change to reflect the adjudicated canon outcome. The CF / CH / PA linkage lives in the closeout ledger.
 - For `source_kind: artifact_canonization`, supersede story-local `DA` only if a §4.5.10 field changes. World-level DA linkage is recorded in the closeout ledger.
+  For story-local DA field semantics used by this comparison, see
+  `.claude/skills/_shared-templates/da-authoring-reference.md` §Field
+  semantics.
 
   Worked examples of when DA supersession is and is not triggered by closeout:
 

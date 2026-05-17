@@ -49,7 +49,7 @@ Added a dated SPEC-38 D8 implementation note and created the CHAR pre-figurement
 ## Files to Touch
 
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify)
-- `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
+- `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
 - `archive/tickets/SPEC38STOLOCDIE-013.md` (follow-up, now archived)
 
 ## Out of Scope

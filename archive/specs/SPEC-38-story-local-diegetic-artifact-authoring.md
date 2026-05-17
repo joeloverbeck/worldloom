@@ -2,7 +2,7 @@
 
 # SPEC-38 — Story-Local Diegetic Artifact Authoring Discipline
 
-**Status**: PROPOSED
+**Status**: COMPLETED
 **Date**: 2026-05-17
 **Source**: `reports/story-local-diegetic-artifacts.md` (ChatGPT-Pro external review of story-local DA involvement); triage at `docs/triage/2026-05-17-story-local-diegetic-artifacts-triage.md`.
 
@@ -69,6 +69,11 @@ No new patch-engine ops, no new MCP retrieval surfaces, no new schema fields, no
 ### Tier 1 — Reference + contract
 
 #### D1 — Create `.claude/skills/_shared-templates/da-authoring-reference.md`
+
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-001.md`
+landed the shared DA authoring reference with the triage rubric, decision
+matrix, field-semantics commentary, patch obligations, worked examples, and
+anti-patterns consumed by the later skill amendments.
 
 **Problem**: No single source of truth defines when a story-local DA should be created versus another record class, what field-semantic rules govern `truth_relation` / `circulation` / `body` / `derived_from` / `supersedes`, what patch obligations follow from creating a DA, or what anti-patterns to avoid. Consumer skills today either omit DA guidance entirely (bootstrap, health-audit, prose-attach) or treat it as one delta operation among many (turn-cycle Phase 3).
 
@@ -165,6 +170,11 @@ satisfy `expected_witness_coverage` for `public`/`factional` circulation).
 - Output table at line 131 cross-references the new sub-step.
 
 #### D4 — Amend `.claude/skills/branching-story-turn-cycle/SKILL.md` Phase 3 with DA-triage step; reinforce Phase 4 cross-reference
+
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-004.md`
+landed the turn-cycle DA creation / supersession / derivation triage sub-step
+and reinforced the public/factional propagation guidance with a concrete
+`da-authoring-reference.md` cross-reference.
 
 **Problem**: Phase 3 (`SKILL.md:289`) lists DA creation/alteration as one delta operation among many ("Create or alter story-local artifacts (`DA` new or supersession)") with no triage prompt. Phase 4 (`SKILL.md:325`) correctly documents the `expected_witness_coverage` propagation discipline but does not cross-reference the shared reference's broader DA-authoring rubric.
 
@@ -263,6 +273,11 @@ D6 implementation depends on D12 (validator).
 - Repair routing references the existing disposition table.
 
 #### D7 — Amend `.claude/skills/commitment-block-authoring/SKILL.md` with `artifact_accessible` reference + anti-pattern
+
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-007.md`
+landed the DA-grounded eligibility paragraph and the no-fabricated-DA
+anti-pattern in `commitment-block-authoring`, with concrete references to
+`story-state-contract.md` §5 and `da-authoring-reference.md` §Field semantics.
 
 **Problem**: The `artifact_accessible(STENT, DA)` predicate is defined at story-state-contract §5 line 140 but not referenced in commitment-block-authoring's SKILL.md prose. The skill mentions "accessible `DA` / `STOBJ` evidence" in its Information / Observer Firewall paragraph (line 256) but does not name the predicate or warn against SLT preconditions that depend on DAs whose existence the storylet author cannot guarantee at runtime.
 
@@ -536,4 +551,39 @@ Per-deliverable acceptance criteria above. Cross-cutting checks:
 
 ## Outcome
 
-(To be filled at implementation completion.)
+Completed: 2026-05-17
+
+What changed:
+
+- Landed the shared DA authoring reference and contract commentary without adding
+  schema fields, patch-engine ops, or ID classes.
+- Amended all seven consumer skills named by D3-D9 and verified each now
+  cross-references `.claude/skills/_shared-templates/da-authoring-reference.md`.
+- Added and registered the three validator surfaces:
+  `chc_grounded_in_artifact_accessible`, `story_da_duplicate_heuristic`, and
+  `prose_load_bearing_artifact_mention`.
+- Archived all SPEC-38 tickets under `archive/tickets/`; no active SPEC-38
+  ticket remains under `tickets/`.
+
+Deviations from original plan:
+
+- D6 records the D12 verdict under the existing `invented_structural_fact`
+  receipt field instead of introducing a ninth prose receipt field, preserving
+  the live prose receipt schema.
+- D8 keeps authoring `SE-*` provenance in `proposal_evidence` and routes
+  story-local `DA-*` / `CHAR-*` pre-figurement through
+  `candidate.source_basis.derived_from[]`, matching the live FOUNDATIONS and
+  canon-addition contract.
+- D11 landed exact `(title, author)` duplicate clustering with body-similarity
+  matching still deferred, as scoped in the risk section.
+
+Verification:
+
+- `cd tools/validators && npm run build` passed during D12.
+- `cd tools/validators && npm test` passed during D12 with 358/358 tests.
+- Focused D10, D11, and D12 validator tests passed in their ticket closeouts.
+- `grep -l '_shared-templates/da-authoring-reference.md'` across the seven
+  amended skills returned all seven files.
+- `rg -n 'SPEC-38|SPEC38STOLOCDIE|story-local-diegetic' tickets` returned no
+  active ticket hits.
+- `git diff --check` passed after the final spec-closeout edits.

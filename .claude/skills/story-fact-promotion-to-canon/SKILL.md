@@ -127,6 +127,8 @@ will reject CF candidates with non-CF `pre_figured_by[]` references at
 adjudication time. The same no-`pre_figured_by[]` rule applies to character
 pre-figurement; record the originating `CHAR-<integer>` in
 `candidate.source_basis.derived_from[]` alongside CF parents and DA lineage.
+For story-local DA field semantics before promotion, see
+`.claude/skills/_shared-templates/da-authoring-reference.md` §Field semantics.
 
 ## Output
 

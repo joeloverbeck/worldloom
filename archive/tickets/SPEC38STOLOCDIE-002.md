@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — modifies `.claude/skills/_shared-templates/story-state-contract.md`; truths `specs/SPEC-38-story-local-diegetic-artifact-authoring.md`
+**Engine Changes**: Yes — modifies `.claude/skills/_shared-templates/story-state-contract.md`; truths `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md`
 **Deps**: archive/tickets/SPEC38STOLOCDIE-001.md
 
 ## Problem
@@ -52,7 +52,7 @@ Added a dated implementation note under SPEC-38 §D2 stating that ticket 002 lan
 ## Files to Touch
 
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify)
-- `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
+- `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
 
 ## Out of Scope
 

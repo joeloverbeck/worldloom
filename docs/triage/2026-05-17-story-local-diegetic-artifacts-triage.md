@@ -2,7 +2,7 @@
 
 **Source**: `reports/story-local-diegetic-artifacts.md` — ChatGPT-Pro external review (15 sections + copy-pasteable spec section, ~1675 lines). User instruction: reassess proposals critically and create a spec if changes warranted.
 
-**Deliverable**: `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (single spec, 12 grouped deliverables across 3 tiers).
+**Deliverable**: `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (single spec, 12 grouped deliverables across 3 tiers).
 
 **Verification**: four parallel Explore agents covering schema/contract, patch-engine/validators, FOUNDATIONS, and skill-capability claim clusters. All four returned verbatim quotes with file:line citations confirming the substrate is complete and the prescription gaps are real.
 

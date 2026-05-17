@@ -89,7 +89,7 @@ Added the new validator to the package README inventory, CLI named-rule selector
 - `tools/validators/tests/integration/spec04-verification.test.ts` (modify — rule/total counts and sorted rule list)
 - `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply skip classification)
 - `tools/validators/README.md` (modify — validator count and inventory)
-- `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify — D10 implementation note)
+- `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify — D10 implementation note)
 
 ## Out of Scope
 

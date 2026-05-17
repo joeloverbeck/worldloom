@@ -99,7 +99,7 @@ inventory.
 - `tools/validators/tests/integration/spec04-verification.test.ts` (modify — rule-count/name capstone)
 - `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply execution-status expectation)
 - `tools/validators/README.md` (modify — validator inventory/count)
-- `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify — D12 implementation note)
+- `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify — D12 implementation note)
 
 ## Out of Scope
 

@@ -49,12 +49,12 @@ Updated the skill description, HARD-GATE condition, process-flow diagram, and Ph
 
 ### 3. Added SPEC-38 implementation note
 
-Added a D5 implementation note to `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` recording the landed health-audit amendment and the exact D11 duplicate-heuristic boundary.
+Added a D5 implementation note to `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md` recording the landed health-audit amendment and the exact D11 duplicate-heuristic boundary.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
-- `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
+- `archive/specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
 
 ## Out of Scope
 
