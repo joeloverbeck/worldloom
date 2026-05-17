@@ -38,6 +38,10 @@ jobs:
       - name: Install
         working-directory: tools/validators
         run: npm install
+      - name: Lint fixture ID padding
+        run: bash tools/validators/scripts/check-fixture-id-padding.sh
+      - name: Lint archive-citation discipline
+        run: bash tools/validators/scripts/check-archive-citation-discipline.sh
       - name: Test
         working-directory: tools/validators
         run: npm test

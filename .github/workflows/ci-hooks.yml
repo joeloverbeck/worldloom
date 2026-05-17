@@ -28,6 +28,9 @@ jobs:
       - name: Install
         working-directory: tools/hooks
         run: npm install
+      - name: Verify hooks dist currency
+        working-directory: tools/hooks
+        run: npm run check:dist-currency
       - name: Test
         working-directory: tools/hooks
         run: npm test

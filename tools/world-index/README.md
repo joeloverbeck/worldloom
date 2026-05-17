@@ -2,7 +2,7 @@
 
 SQLite-backed structure-aware index over worldloom world sources. Parsed nodes, typed edges, entity mentions, anchor checksums — the machine-facing view that every other tool in `tools/` consumes.
 
-**Design**: `archive/specs/SPEC-01-world-index.md`
+**Historical prior art**: `archive/specs/SPEC-01-world-index.md`
 **Phase**: 1
 **Status**: core package implemented; public types entry added for SPEC-02
 
@@ -28,9 +28,9 @@ Each SQL file in `tools/world-index/src/schema/migrations/<NNN>_<slug>.sql` is e
 
 Comment-only migrations are acceptable only when zero existing rows would be reclassified by the new parser. Otherwise the version file can show the new schema version while `nodes` still contains old parser vocabulary, which can make downstream `list_records`, `get_record`, and context-packet consumers fail on stale rows. MCPENH-049 is the precedent: v5 reclassified `WORLD_KERNEL.md` H2 spans from `section` to `narrative_section`, so migration 005 invalidates those rows and `WORLD_KERNEL.md` file freshness for v4 upgrades; migration 006 reapplies the same repair for indexes that had already recorded the original v5 no-op migration.
 
-## Planned package layout
+## Historical package layout
 
-See `archive/specs/SPEC-01-world-index.md` §Deliverables §Package location.
+For prior art only, see `archive/specs/SPEC-01-world-index.md` §Deliverables §Package location.
 
 ## Dependencies
 

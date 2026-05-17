@@ -2,7 +2,7 @@
 
 MCP retrieval server exposing the world index (`tools/world-index/`) as a structured API. Skills consume `mcp__worldloom__*` tools instead of reading raw markdown.
 
-**Design**: `archive/specs/SPEC-02-retrieval-mcp-server.md`
+**Historical prior art**: `archive/specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 2 (read side plus SPEC-03 patch-engine delegation)
 **Status**: Stdio MCP entrypoint registers 22 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators`, also checks patch-engine ID allocation races, and returns an explicit validation status; `submit_patch_plan` delegates to `@worldloom/patch-engine`; `describe_capabilities` exposes server-start build metadata plus the deployed tool/enum contract for schema-currency checks; `get_record_schema` exposes world-canon, hybrid, and schema-backed story-bundle JSON schemas plus validator-sourced conditional block requirements; `describe_envelope_schema` exposes the patch-plan envelope and per-op payload schema contract for envelope assembly.
 
@@ -77,7 +77,7 @@ The patch-plan CLIs also serve as a fresh-process workaround for the stale-valid
 
 ## Configuration
 
-Registered via `.mcp.json`. See `archive/specs/SPEC-02-retrieval-mcp-server.md` §`.mcp.json` (example).
+Registered via `.mcp.json`. For historical prior art, see `archive/specs/SPEC-02-retrieval-mcp-server.md` §`.mcp.json` (example).
 
 The built stdio entrypoint is `dist/src/server.js`, so a local MCP config uses:
 
