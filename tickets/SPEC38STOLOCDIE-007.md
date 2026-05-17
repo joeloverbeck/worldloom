@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `.claude/skills/commitment-block-authoring/SKILL.md`
-**Deps**: SPEC38STOLOCDIE-001
+**Deps**: archive/tickets/SPEC38STOLOCDIE-001.md
 
 ## Problem
 

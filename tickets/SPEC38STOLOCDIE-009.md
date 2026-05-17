@@ -4,7 +4,7 @@
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — modifies `.claude/skills/story-promotion-closeout/SKILL.md`
-**Deps**: SPEC38STOLOCDIE-001
+**Deps**: archive/tickets/SPEC38STOLOCDIE-001.md
 
 ## Problem
 

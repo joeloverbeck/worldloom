@@ -1,6 +1,6 @@
 # SPEC38STOLOCDIE-001: Create `_shared-templates/da-authoring-reference.md`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — new shared template `.claude/skills/_shared-templates/da-authoring-reference.md` (no impact on existing `_shared-templates/` files)
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The story-bundle pipeline carries a full machine substrate for story-local diegetic artifacts (DA schema, `append_story_diegetic_artifact_record` patch op, `story_da_ids` allocation, `expected_witness_coverage` validator, `artifact_accessible` predicate) but no single source of truth defines when a story-local DA should be created versus another record class, what field-semantic rules govern its components, what patch obligations follow from creating a DA, or what anti-patterns to avoid. Consumer skills today either omit DA guidance entirely (bootstrap, health-audit, prose-attach) or treat DA as one delta operation among many (turn-cycle Phase 3). This ticket creates the canonical shared reference that tickets 002-009 will cross-reference inline.
+At intake, the story-bundle pipeline carried a full machine substrate for story-local diegetic artifacts (DA schema, `append_story_diegetic_artifact_record` patch op, `story_da_ids` allocation, `expected_witness_coverage` validator, `artifact_accessible` predicate) but no single source of truth defined when a story-local DA should be created versus another record class, what field-semantic rules govern its components, what patch obligations follow from creating a DA, or what anti-patterns to avoid. This ticket created the canonical shared reference that tickets 002-009 cross-reference inline.
 
 ## Assumption Reassessment (2026-05-17)
 
@@ -29,11 +29,11 @@ The story-bundle pipeline carries a full machine substrate for story-local diege
 3. Cross-references to canonical sources concrete → codebase grep-proof: `grep -nE 'story-record-schemas\.md.*§4\.5\.10|story-state-contract\.md.*§(4\.1|5)' .claude/skills/_shared-templates/da-authoring-reference.md` returns matches.
 4. Single-layer ticket: documentation-only deliverable; verification is structural completeness (sections present, cross-references resolve at exact-string match) rather than runtime behavior. Runtime correctness of the discipline this reference codifies lands in consumer tickets 002-009 (skill amendments) + 010-012 (validators).
 
-## What to Change
+## Landed Changes
 
-### 1. Create new shared-reference file
+### 1. Created new shared-reference file
 
-Path: `.claude/skills/_shared-templates/da-authoring-reference.md`. Six sections per SPEC-38 §D1 Change list:
+Path: `.claude/skills/_shared-templates/da-authoring-reference.md`. Six sections landed per SPEC-38 §D1 Change list:
 
 1. **Triage rubric** — the 8-property test from SPEC-38 §D1 (diegetic authorship + recoverable content + belief-impact + choice-grounding + mystery-progression + circulation-mattering + truth-status-mattering + likely-cross-page-reference). Create when ≥2 properties hold.
 2. **Decision matrix** — tabular DA vs STOBJ vs SF vs BEL vs prose-only, covering 8 common confusions (physical possession vs content; branch truth vs claim; belief vs knowledge; atmospheric vs load-bearing; one-turn vs persistent; world-level vs story-local; accepted canon vs candidate; durable text vs rumor) per SPEC-38 §D1 §Section 2.
@@ -43,13 +43,13 @@ Path: `.claude/skills/_shared-templates/da-authoring-reference.md`. Six sections
    - `body`: full text for short/central artifacts; excerpt for long; transcript/description for non-text; material-uncertainty conventions (`[redacted]`, `[illegible]`, `[torn away]`, `[translation uncertain: ...]`); "never write 'contains a clue', write the clue" rule.
    - `derived_from`: provenance/dependency; permitted reference types (`SE-*`, `DA-*`, `STOBJ-*`, `BEL-*`, `SF-*`); ambiguity note for cross-namespace `DA-*` (world-level vs story-local) — prefer body annotation until namespace resolution per SPEC-38 §Risks #1.
    - `supersedes`: same logical artifact replaced by a later version; contrast with `derived_from` (separate communicative object).
-4. **Patch obligations checklist** — full 7-item list per SPEC-38 §D1 §Section 4 (allocate `DA-*` via `mcp__worldloom__allocate_next_id(world_slug, "DA", story_slug=<slug>)`; write via `append_story_diegetic_artifact_record` with `expected_id_allocations.story_da_ids: ["DA-<N>"]`; include in `SE.state_delta.create[]`; include in `PG.state_snapshot.active_records.DA[]`; include in `CHC.grounded_in.records[]` when CHC depends; create/supersede BEL with appropriate `basis.access_route` from the 11-route enum at `story-record-schemas.md` §4.1; create/supersede STOBJ when custody matters; satisfy `expected_witness_coverage` for `public`/`factional` circulation via same-event indirect-route BEL OR `non_propagation:event_leaves_no_accessible_trace(group=<label>, records=[DA-<N>])` tag in `SE.world_logic_rationale`).
+4. **Patch obligations checklist** — full obligation list per SPEC-38 §D1 §Section 4 (allocate `DA-*` via `mcp__worldloom__allocate_next_id(world_slug, "DA", story_slug=<slug>)`; write via `append_story_diegetic_artifact_record` with `expected_id_allocations.story_da_ids: ["DA-<N>"]`; include in `SE.state_delta.create[]` / supersession and `PG.state_snapshot.active_records.DA[]`; include in `CHC.grounded_in.records[]` when CHC depends; create/supersede BEL with appropriate `basis.access_route` from the 11-route enum at `story-record-schemas.md` §4.1; create/supersede STOBJ when custody matters; satisfy `expected_witness_coverage` for `public`/`factional` circulation via same-event indirect-route BEL OR `non_propagation:event_leaves_no_accessible_trace(group=<label>, records=[DA-<N>])` tag in `SE.world_logic_rationale`; use `artifact_accessible(...)` for future DA-gated SLT/page-plan access).
 5. **Worked examples (3)** — private letter at bootstrap, public proclamation, found forged document (source: `reports/story-local-diegetic-artifacts.md` §13 Examples 1, 2, 3 — the bootstrap-vs-turn-cycle and private-vs-public-vs-concealed circulation axes). Each example shows full DA + SE.state_delta + PG.state_snapshot + BEL + CHC.grounded_in bundle with correct field syntax matching the §4.5.10 schema.
 6. **Anti-patterns** — 8 items per SPEC-38 §D1 §Section 6 (creating DA for trivial signs; treating body as branch truth; `truth_relation: true` without canon/branch support; missing propagation; inaccessible choice grounding; modeling physical letter only as DA when custody matters; duplicating instead of superseding/BEL; promoting DA claims without `story-fact-promotion-to-canon`).
 
 ### 2. Cross-references concrete
 
-Every cross-reference cites file path + section identifier — e.g., `story-record-schemas.md` §4.5.10, `story-state-contract.md` §4.1 + §5. Avoid bare "see the contract" phrasings.
+Every cross-reference cites file path + section identifier, including `story-record-schemas.md` §4.5.10, `story-record-schemas.md` §4.1, and `story-state-contract.md` §5. The live `story-state-contract.md` §4 is a pointer to `story-record-schemas.md`, so the BEL access-route enum is cited at the live schema section that owns it.
 
 ## Files to Touch
 
@@ -87,3 +87,51 @@ Every cross-reference cites file path + section identifier — e.g., `story-reco
 1. `test -f .claude/skills/_shared-templates/da-authoring-reference.md`
 2. `grep -cE '^## ' .claude/skills/_shared-templates/da-authoring-reference.md`
 3. The reference is consumed inline by sibling tickets 002-009; no separate validator runs because the file is documentation, not code.
+
+## Outcome
+
+Completed: 2026-05-17
+
+What changed:
+- Created `.claude/skills/_shared-templates/da-authoring-reference.md` as the shared story-local DA authoring reference.
+- Landed the six required sections: `Triage`, `Decision matrix`, `Field semantics`, `Patch obligations`, `Worked examples`, and `Anti-patterns`.
+- Included three compact DA + SE + PG + BEL + CHC examples for a bootstrap private letter, public proclamation, and found forged document.
+- Cited the live schema and predicate authorities: `story-record-schemas.md` §4.5.10 and §4.1, plus `story-state-contract.md` §5.
+
+Deviations from original plan:
+- The live BEL access-route enum authority is `story-record-schemas.md` §4.1; `story-state-contract.md` §4 is a pointer to the split schema file. The reference therefore cites the enum at the live owning section while still citing `story-state-contract.md` §5 for `artifact_accessible(...)`.
+- The patch-obligations checklist includes an explicit `artifact_accessible(...)` obligation for future SLT/page-plan access, preserving the same contract in the shared predicate DSL.
+
+## Verification Result
+
+Commands run:
+
+```bash
+test -f .claude/skills/_shared-templates/da-authoring-reference.md
+```
+
+Result: passed.
+
+```bash
+grep -cE '^## (Triage|Decision matrix|Field semantics|Patch obligations|Worked examples|Anti-patterns)' .claude/skills/_shared-templates/da-authoring-reference.md
+```
+
+Result: `6`.
+
+```bash
+grep -nE 'story-record-schemas\.md.*§4\.5\.10|story-state-contract\.md.*§(4\.1|5)' .claude/skills/_shared-templates/da-authoring-reference.md
+```
+
+Result: matched `story-record-schemas.md` §4.5.10 and `story-state-contract.md` §5 references.
+
+```bash
+grep -nE 'story-record-schemas\.md|story-state-contract\.md|expected_witness_coverage|non_propagation|append_story_diegetic_artifact_record' .claude/skills/_shared-templates/da-authoring-reference.md
+```
+
+Result: matched all required contract anchors.
+
+```bash
+git diff --check -- .claude/skills/_shared-templates/da-authoring-reference.md .codex/run-state/implement-spec-tickets.json
+```
+
+Result: passed.
