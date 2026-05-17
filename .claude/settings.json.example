@@ -1,5 +1,5 @@
 {
-  "_comment": "Worldloom hook configuration example. Copy or merge into .claude/settings.json. All five hooks are active as of SPEC-05 Part B (Phase 2). Each hook's implementation lives at tools/hooks/dist/src/*.js, built from tools/hooks/src/*.ts (see archive/specs/SPEC-05-hooks-discipline.md).",
+  "_comment": "Worldloom hook configuration example. Copy or merge into .claude/settings.json. Hooks 1-5 are active as of SPEC-05 Part B (Phase 2); Hook 6 is active as of SPEC-40. Each hook's implementation lives at tools/hooks/dist/src/*.js, built from tools/hooks/src/*.ts (see archive/specs/SPEC-05-hooks-discipline.md and specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md).",
 
   "hooks": {
     "UserPromptSubmit": [
@@ -38,6 +38,18 @@
           {
             "type": "command",
             "command": "node tools/hooks/dist/src/hook3-guard-direct-edit.js"
+          }
+        ]
+      },
+      {
+        "_phase": 2,
+        "_spec": "SPEC-40 Hook 6",
+        "_purpose": "Block direct Edit/Write to pages-prose-plans/PG-*.md and bundle INDEX.md when stamped PG.plan.plan_hash does not match on-disk plan-body SHA-256. Redirect to compute-pg-hashes re-stamping CLI.",
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/hooks/dist/src/hook6-guard-story-markdown-hash.js"
           }
         ]
       }
