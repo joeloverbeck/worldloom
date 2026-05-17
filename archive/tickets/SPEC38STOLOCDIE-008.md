@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — modifies `.claude/skills/story-fact-promotion-to-canon/SKILL.md`; truths SPEC-38 D8 note; creates follow-up `tickets/SPEC38STOLOCDIE-013.md`
+**Engine Changes**: Yes — modifies `.claude/skills/story-fact-promotion-to-canon/SKILL.md`; truths SPEC-38 D8 note; created follow-up now archived at `archive/tickets/SPEC38STOLOCDIE-013.md`
 **Deps**: archive/tickets/SPEC38STOLOCDIE-001.md
 
 ## Problem
@@ -18,7 +18,7 @@ At intake, `story-fact-promotion-to-canon` SKILL.md line 115 registered `artifac
 4. FOUNDATIONS principles motivating this ticket: FOUNDATIONS.md line 365 (verbatim — the routing rule); Rule 6 No Silent Retcons (audit-trail routing through `source_basis.derived_from` preserves DA-to-CF lineage; placing the DA in `pre_figured_by[]` would either be rejected by `record_schema_compliance` or, if the rule slipped, would break Rule 6's audit-trail discipline).
 5. Live reassessment found `tools/validators/src/schemas/canon-fact-record.schema.json` currently patterns `source_basis.derived_from[]` as `^(CF|DA)-[0-9]+$`. That means the drafted `SE-<integer>` and `CHAR-<integer>` routing prose would instruct operators to author a candidate shape the validator rejects.
 6. Corrected scope: the landed story-promotion paragraph routes story-local `DA-*` through `candidate.source_basis.derived_from[]`, keeps authoring `SE-*` provenance in top-level `proposal_evidence`, and forbids DA use in `candidate.pre_figured_by[]`.
-7. Follow-up created: `tickets/SPEC38STOLOCDIE-013.md` owns the remaining CHAR pre-figurement/schema alignment across FOUNDATIONS, canon-addition, story-promotion, and the Canon Fact schema.
+7. Follow-up created and completed: `archive/tickets/SPEC38STOLOCDIE-013.md` owns the CHAR pre-figurement/schema alignment across FOUNDATIONS, canon-addition, story-promotion, and the Canon Fact schema.
 
 ## Architecture Check
 
@@ -44,13 +44,13 @@ Updated nearby Phase 2 and Guardrails prose that previously said `source_basis.d
 
 ### 3. Recorded follow-up state
 
-Added a dated SPEC-38 D8 implementation note and created `tickets/SPEC38STOLOCDIE-013.md` for the CHAR pre-figurement/schema mismatch.
+Added a dated SPEC-38 D8 implementation note and created the CHAR pre-figurement/schema follow-up, now completed and archived at `archive/tickets/SPEC38STOLOCDIE-013.md`.
 
 ## Files to Touch
 
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify)
 - `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
-- `tickets/SPEC38STOLOCDIE-013.md` (new)
+- `archive/tickets/SPEC38STOLOCDIE-013.md` (follow-up, now archived)
 
 ## Out of Scope
 
@@ -66,7 +66,7 @@ Added a dated SPEC-38 D8 implementation note and created `tickets/SPEC38STOLOCDI
 1. Routing-rule paragraph present at or near the `artifact_canonization` source-kind row.
 2. Explicit prohibition on `pre_figured_by[]` DA references.
 3. Cross-reference to FOUNDATIONS line 365.
-4. CHAR record routing is not overclaimed; remaining schema/prose mismatch is owned by `tickets/SPEC38STOLOCDIE-013.md`.
+4. CHAR record routing is no longer overclaimed; schema/prose alignment is completed by `archive/tickets/SPEC38STOLOCDIE-013.md`.
 
 ### Invariants
 
@@ -86,7 +86,7 @@ Added a dated SPEC-38 D8 implementation note and created `tickets/SPEC38STOLOCDI
 
 ## Outcome
 
-Completed on 2026-05-17. `story-fact-promotion-to-canon` now has a DA-to-CF routing paragraph next to the `artifact_canonization` source-kind row, forbids DA references in `candidate.pre_figured_by[]`, and keeps branch/event provenance in top-level `proposal_evidence`. Same-skill comments that contradicted DA source-basis routing were corrected. SPEC-38 now records the narrowed D8 implementation note, and `tickets/SPEC38STOLOCDIE-013.md` captures the remaining CHAR pre-figurement/schema alignment work.
+Completed on 2026-05-17. `story-fact-promotion-to-canon` now has a DA-to-CF routing paragraph next to the `artifact_canonization` source-kind row, forbids DA references in `candidate.pre_figured_by[]`, and keeps branch/event provenance in top-level `proposal_evidence`. Same-skill comments that contradicted DA source-basis routing were corrected. SPEC-38 now records the narrowed D8 implementation note, and `archive/tickets/SPEC38STOLOCDIE-013.md` completed the CHAR pre-figurement/schema alignment work.
 
 ## Verification Result
 
@@ -102,4 +102,4 @@ Manual review: verified the edit is outside the skill's `<HARD-GATE>` block and 
 ## Deviations
 
 - The drafted paragraph included authoring `SE-<integer>` events in `candidate.source_basis.derived_from[]`; live schema rejects `SE-*`, so the landed guidance keeps SE provenance in `proposal_evidence`.
-- The drafted acceptance expected CHAR routing through `source_basis.derived_from[]`; live schema rejects `CHAR-*`, so ticket 008 records a caveat and `tickets/SPEC38STOLOCDIE-013.md` owns schema/prose alignment.
+- The drafted acceptance expected CHAR routing through `source_basis.derived_from[]`; live schema rejected `CHAR-*` at ticket-008 closeout, so ticket 008 recorded a caveat and `archive/tickets/SPEC38STOLOCDIE-013.md` completed schema/prose alignment.

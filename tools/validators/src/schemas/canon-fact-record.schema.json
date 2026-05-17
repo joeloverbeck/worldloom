@@ -71,7 +71,7 @@
         "direct_user_approval": { "const": true },
         "derived_from": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(CF|DA)-[0-9]+$" }
+          "items": { "type": "string", "pattern": "^(CF|DA|CHAR)-[0-9]+$" }
         }
       }
     },

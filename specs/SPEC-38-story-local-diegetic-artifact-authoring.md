@@ -289,12 +289,12 @@ parsability does not verify record existence at authoring time.
 
 **Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-008.md` landed
 the DA routing paragraph in `story-fact-promotion-to-canon` and truthed adjacent
-`source_basis.derived_from[]` comments. Live schema reassessment found that the
-Canon Fact schema currently permits `CF-*` and `DA-*`, not `SE-*` or `CHAR-*`, in
-`source_basis.derived_from[]`. The landed skill therefore keeps authoring
-`SE-*` provenance in `proposal_evidence`, routes story-local `DA-*` through
-`candidate.source_basis.derived_from[]`, and leaves CHAR pre-figurement behind a
-temporary caveat pending `tickets/SPEC38STOLOCDIE-013.md`.
+`source_basis.derived_from[]` comments. `archive/tickets/SPEC38STOLOCDIE-013.md`
+then aligned the Canon Fact schema with the live FOUNDATIONS/canon-addition
+contract by allowing `CHAR-*` in `source_basis.derived_from[]` while keeping
+`pre_figured_by[]` CF-only. The landed skill therefore keeps authoring `SE-*`
+provenance in `proposal_evidence` and routes story-local `DA-*` / `CHAR-*`
+pre-figurement through `candidate.source_basis.derived_from[]`.
 
 **Problem**: `SKILL.md:115` registers `artifact_canonization` as a `source_kind` taking a story-local `DA-<integer>` plus authoring `SE`, but does not surface FOUNDATIONS line 365's binding rule: "Diegetic-artifact or character pre-figurement belongs in `source_basis.derived_from` alongside any contributing CF parents, preserving Rule 6 audit-trail routing without widening `pre_figured_by` beyond CF references." Without an explicit anchor, operators authoring `artifact_canonization` packages can plausibly place the source DA in `candidate.pre_figured_by[]`; schema validation will reject it at adjudication, wasting one round-trip.
 

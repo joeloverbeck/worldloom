@@ -125,8 +125,8 @@ story-event ids. **Do NOT** place the source DA in `candidate.pre_figured_by[]`;
 that field is CF-only per FOUNDATIONS line 365, and `record_schema_compliance`
 will reject CF candidates with non-CF `pre_figured_by[]` references at
 adjudication time. The same no-`pre_figured_by[]` rule applies to character
-pre-figurement; keep CHAR lineage in proposal evidence unless the live CF
-schema accepts it in `source_basis.derived_from[]`.
+pre-figurement; record the originating `CHAR-<integer>` in
+`candidate.source_basis.derived_from[]` alongside CF parents and DA lineage.
 
 ## Output
 
@@ -215,10 +215,10 @@ candidate:
     soft: true | false
   source_basis:
     direct_user_approval: false   # pre-acceptance package only; canon-addition sets accepted CF records to true after its own HARD-GATE
-    derived_from: []              # novel candidate; mirrored candidate uses [<parent CF id>]; DA pre-figurement also belongs here per FOUNDATIONS line 365; never null or branch ids
+    derived_from: []              # novel candidate; mirrored candidate uses [<parent CF id>]; DA/CHAR pre-figurement also belongs here per FOUNDATIONS line 365; never null or branch ids
 ```
 
-**Branch provenance lives in top-level `proposal_evidence`, NEVER inside `candidate.source_basis` or `candidate.promotion_provenance`.** `candidate.source_basis.derived_from` carries world-authority provenance: parent CF references, plus DA pre-figurement when FOUNDATIONS line 365 applies. The branch is evidence, not authority. The package is not an accepted Canon Fact Record: `direct_user_approval` stays `false` until `canon-addition` accepts the proposal through its own HARD-GATE and emits a `create_cf_record` payload with `true`.
+**Branch provenance lives in top-level `proposal_evidence`, NEVER inside `candidate.source_basis` or `candidate.promotion_provenance`.** `candidate.source_basis.derived_from` carries world-authority provenance: parent CF references, plus DA/CHAR pre-figurement when FOUNDATIONS line 365 applies. The branch is evidence, not authority. The package is not an accepted Canon Fact Record: `direct_user_approval` stays `false` until `canon-addition` accepts the proposal through its own HARD-GATE and emits a `create_cf_record` payload with `true`.
 
 When `candidate.type` is in `CF_TYPE_EPISTEMIC_PROFILE_REQUIRED` (`capability`,
 `bloodline`, `magic_practice`, `technology`, `divine_action`,
@@ -405,7 +405,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 - **Never write world-level canon.** Hook 3 blocks raw `Edit` / `Write` on `worlds/<slug>/_source/<world-subdir>/*.yaml`. This skill writes ONLY to `worlds/<world_slug>/stories/<story_slug>/story-promotions/` + bundle `INDEX.md`. No patch-engine submissions to world scope.
 - **Output is NOT canon until canon-addition adjudicates.** The proposal package is a CANDIDATE. The skill explicitly instructs the user to invoke canon-addition separately. No automatic chaining; no implicit acceptance.
 - **Forbidden mysteries cannot be promoted.** Phase 4 ABORT-on-forbidden-resolution. The skill REFUSES to write a proposal package whose candidate would resolve a forbidden mystery.
-- **Branch-local truth is evidence, not authority.** Phase 2 keeps branch provenance in top-level `proposal_evidence`, NEVER in `candidate.source_basis` or `source_basis.derived_from`; `derived_from` carries world-authority provenance such as parent CFs and FOUNDATIONS line 365 DA pre-figurement.
+- **Branch-local truth is evidence, not authority.** Phase 2 keeps branch provenance in top-level `proposal_evidence`, NEVER in `candidate.source_basis` or `source_basis.derived_from`; `derived_from` carries world-authority provenance such as parent CFs and FOUNDATIONS line 365 DA/CHAR pre-figurement.
 - **HARD-GATE is absolute.** Always show the proposal to the user. No execution-mode bypass; no Auto Mode override. Phase 7 always pauses for explicit user approval. World-canon promotion is too high-stakes for automation.
 - **No post-adjudication closeout in this skill.** After canon-addition adjudicates, the user runs `story-promotion-closeout` to write the verdict back onto story-local records (supersession of SF / BEL / DA / STENT / SREL records that the canon-addition outcome implicates, with branch disposition recorded in the closeout ledger / INDEX surfaces).
 - **Skills do not chain.** This skill never invokes `canon-addition` or `story-promotion-closeout`. Phase 7 surfaces the recommendation; the user separately invokes the named sibling.
