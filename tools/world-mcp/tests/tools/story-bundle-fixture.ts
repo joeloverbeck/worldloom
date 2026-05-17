@@ -156,6 +156,22 @@ export function buildStoryBundleWorld(root: string): void {
         body: "id: SE-1\nsummary: Marla enters the loft.\n"
       },
       {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "DA-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "artifacts", "DA-1.yaml"),
+        node_type: "story_diegetic_artifact_record",
+        body: [
+          "id: DA-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "title: Loft Bell",
+          "artifact_type: note",
+          "artifact_text: The bell rang before Marla entered.",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,

@@ -36,6 +36,7 @@ test("searchNodes scopes lexical search to the requested story bundle", async ()
       current.nodes.map((node) => [node.id, node.node_type, node.story_slug]),
       [
         ["opening-bells:BEL-1", "belief_record", STORY_FIXTURE_SLUG],
+        ["opening-bells:DA-1", "story_diegetic_artifact_record", STORY_FIXTURE_SLUG],
         ["opening-bells:OBL-1", "obligation_record", STORY_FIXTURE_SLUG],
         ["opening-bells:PG-1", "page_record", STORY_FIXTURE_SLUG],
         ["opening-bells:SE-1", "story_event_record", STORY_FIXTURE_SLUG],

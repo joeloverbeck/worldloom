@@ -14,7 +14,7 @@ Reassessment evidence (verified via parallel greps against current main at the S
 - **F1 validator-hardening-III**: `tools/validators/src/structural/expected-witness-coverage.ts` lines 17 and 164 confirm only the `INDIRECT_ACCESS_ROUTES` set + `indirectPropagationVerdicts` DA-anchored cue from SPEC-37 D2 exist. No multi-location supersession, STENT-death-with-SREL, STOBJ-as-independent-route, or environmental-change-via-STLOC-modification cues have landed. The structural-distinct deferral reason from SPEC-40 holds — these cues remain scope-distinct from SPEC-40's narrow scope and the eleventh-iteration audit itself characterized them as "remain authorial discipline and are not yet enforced." Recommend keeping deferred (`confirms-existing-position` verdict); no SPEC-41 deliverable.
 - **F2.a fixture_unpadded_id_lint_current_only**: No CI script enforces fixture-ID conformance. `.github/workflows/` has 6 CI configs (`ci-hooks.yml`, `ci-patch-engine.yml`, `ci-validators.yml`, `ci-world-index.yml`, `ci-world-mcp.yml`, `codeql.yml`) but none lints fixture IDs against the unpadded-natural-integer convention. SPEC-35 D8 and SPEC-36 D3 both addressed fixture rot as recurring drift; a deterministic CI lint would prevent recurrence. Accept → D1.
 - **F2.b current_docs_do_not_cite_archive_as_authority**: No CI script enforces this. SPEC-35 D9 fixed FOUNDATIONS.md citing archived specs; SPEC-36 D4 fixed `tools/validators/README.md` doing the same. A grep-based CI lint with a whitelist for legitimate historical citations (`**Supersedes**: archive/specs/SPEC-XX`, archive-as-context references) would prevent recurrence. Accept → D2.
-- **F3 story_local_seed_warning_for_pg_bel_se_da**: Substantially resolved — `tools/world-mcp/tests/tools/get-context-packet.story-pipeline.test.ts` already has dedicated tests for PG (line 125), BEL (line 157), and SE (line 189) seed-types via the same pattern, plus generic story-local seed coverage (lines 93, 221). Only the DA seed-type test is missing from the audit's `PG/BEL/SE/DA` enumeration. Accept-with-modification → D3 (scope narrowed to a single test case).
+- **F3 story_local_seed_warning_for_pg_bel_se_da**: Intake evidence showed `tools/world-mcp/tests/tools/get-context-packet.story-pipeline.test.ts` already had dedicated tests for PG/BEL/SE seed-types via the same pattern, plus generic story-local seed coverage. Only the DA seed-type test was missing from the audit's `PG/BEL/SE/DA` enumeration. Implementation later found the DA prefix was also absent from the live story-local seed filter, so D3 landed the minimal same-seam filter fix plus the test. Accept-with-modification → D3.
 - **F4 hook-deployment-currency**: `tools/world-mcp/tests/integration/server-capabilities-hash-parity.test.ts` (from SPEC-40 D4) covers MCP `dist/` parity. No analogous check covers `tools/hooks/dist/` parity. Hooks are invoked freshly per Claude Code tool event, so stale dist on disk is loaded directly without process-restart warning. Accept → D4 (scope-path-A: src-vs-dist content-hash CI check, simpler than the spawned-process pattern; hooks are one-shot CLI invocations rather than persistent processes, so the runtime spawn pattern adds wall-clock cost without proportional value).
 
 ### Key design decisions
@@ -34,15 +34,15 @@ Reassessment evidence (verified via parallel greps against current main at the S
 Each deliverable targets a single named follow-up from SPEC-40's §Risks & Open Questions. The four deliverables fall into three architectural concerns:
 
 - **CI hygiene lints** (D1, D2): two new grep-based lint scripts + CI workflow integration. Each catches a specific recurring drift channel (fixture-ID rot; archive-citation drift). Both are pure CI surface additions; neither modifies validators, hooks, or pipeline runtime.
-- **Test-coverage extension** (D3): one new test case extending an existing test file with a missing seed-type fixture. Pure additive work.
+- **Test-coverage extension** (D3): DA story-local seed filtering fix plus one new test case extending the existing PG/BEL/SE coverage. Reassessment found the live filter omitted the DA prefix, so D3 landed a minimal same-seam source fix, fixture row, and fixture-consumer expectation update.
 - **Build-currency CI check** (D4): one new CI check script + workflow integration that verifies `tools/hooks/dist/` matches `tools/hooks/src/` at every CI run. Closes the parallel-to-SPEC-40-D4 gap for the hooks package.
 
 Implementation phasing recommendation (independent, parallelizable; no inter-ticket Deps):
 
 - All four tickets are independent of each other (`Deps: None`).
-- Suggested implementation order (smallest first): D3 → D1 → D2 → D4. D3 is the simplest (one test case mirroring an existing pattern); D1/D2 share the same CI workflow modification skill; D4 introduces a new CI check pattern.
+- Suggested implementation order (smallest first): D3 → D1 → D2 → D4. D3 was the smallest same-seam fix/test slice; D1/D2 share the same CI workflow modification skill; D4 introduces a new CI check pattern.
 
-No new patch-engine ops, no new MCP retrieval surfaces, no new schema fields, no new validators, no new hooks. The blast radius is two new lint scripts + two CI workflow extensions (D1, D2), one test-case addition (D3), one new CI check script + one workflow extension (D4).
+No new patch-engine ops, no new MCP retrieval surfaces, no new schema fields, no new validators, no new hooks. The blast radius is two new lint scripts + two CI workflow extensions (D1, D2), one DA story-local seed filter/test slice (D3), one new CI check script + one workflow extension (D4).
 
 ---
 
@@ -68,13 +68,13 @@ Deliverables grouped by category (CI lints → test extension → CI build check
 
 **Archived ticket**: `archive/tickets/SPEC41FUP-002.md` — completed; see ticket for full Files to Touch, Acceptance Criteria, Test Plan.
 
-### D3 — DA seed-node test case for context-packet story-pipeline filtering (P2, follow-up SPEC-40 F3, scope narrowed)
+### D3 — DA seed-node filtering fix and test case for context-packet story-pipeline filtering (P2, follow-up SPEC-40 F3, scope narrowed)
 
-**Problem**: `tools/world-mcp/tests/tools/get-context-packet.story-pipeline.test.ts` has dedicated test cases for PG/BEL/SE seed-nodes at lines 125, 157, 189 respectively. The DA seed-type case from the eleventh-iteration audit's `PG/BEL/SE/DA` enumeration is the only missing dedicated test. Generic story-local seed coverage exists at lines 93 and 221, so the DA case is incremental rather than load-bearing.
+**Problem**: At intake, `tools/world-mcp/tests/tools/get-context-packet.story-pipeline.test.ts` had dedicated test cases for PG/BEL/SE seed-nodes, but the DA seed-type case from the eleventh-iteration audit's `PG/BEL/SE/DA` enumeration was missing. Generic story-local seed coverage existed, but live implementation also found `STORY_LOCAL_SEED_NODE_PATTERN` omitted `DA`, so the DA case exposed a real filter gap rather than only a coverage gap.
 
-**Change**: Add one test case `getContextPacket ignores DA seed nodes for story-pipeline task types` mirroring the existing PG/BEL/SE pattern (define `storyLocalSeedId = storyNodeId(STORY_FIXTURE_SLUG, "DA-1")`; invoke `get_context_packet` with `seed_nodes: [storyLocalSeedId, "CF-1"]`; assert the world-seeds set is filtered and `story_local_seed_nodes_ignored` warning is present).
+**Change**: Add `DA` to the story-local seed prefix filter; add one `DA-1` story-local diegetic artifact fixture row; update the fixed story-bundle search expectation for the new fixture row; and add one test case `getContextPacket ignores DA seed nodes for story-pipeline task types` mirroring the existing PG/BEL/SE pattern.
 
-**Ticket**: `tickets/SPEC41FUP-003.md` — see ticket for full details. Smallest ticket in the cluster.
+**Archived ticket**: `archive/tickets/SPEC41FUP-003.md` — completed; see ticket for full Files to Touch, Acceptance Criteria, Test Plan, and same-seam deviations.
 
 ### D4 — Hook-deployment-currency CI check (P2, follow-up SPEC-40 F4, scope-path-A)
 
@@ -90,9 +90,9 @@ Deliverables grouped by category (CI lints → test extension → CI build check
 
 | Principle | Stance | Rationale |
 |---|---|---|
-| §Tooling Recommendation (`docs/FOUNDATIONS.md:510`) | aligns | All four deliverables reinforce the CI/lint tooling discipline FOUNDATIONS endorses — three CI hygiene lints (D1, D2, D4) prevent recurring drift channels; one test case (D3) closes a coverage gap. None weakens existing tooling enforcement. |
+| §Tooling Recommendation (`docs/FOUNDATIONS.md:510`) | aligns | All four deliverables reinforce the CI/lint tooling discipline FOUNDATIONS endorses — three CI hygiene lints (D1, D2, D4) prevent recurring drift channels; the D3 filter/test slice closes the DA story-local seed filtering gap. None weakens existing tooling enforcement. |
 
-Tooling-adjacent scope per Step 4 §FOUNDATIONS.md alignment rule — only §Tooling Recommendation is actively engaged; other FOUNDATIONS principles (Rules 1-7, Canon Layering, HARD-GATE) are not load-bearing here since the spec adds CI surface and one test case without touching canon records, story-bundle records, validators, hooks, or HARD-GATE surfaces.
+Tooling-adjacent scope per Step 4 §FOUNDATIONS.md alignment rule — only §Tooling Recommendation is actively engaged; other FOUNDATIONS principles (Rules 1-7, Canon Layering, HARD-GATE) are not load-bearing here since the spec adds CI surface and package-local test/filter coverage without touching canon records, validators, hooks, or HARD-GATE surfaces.
 
 ---
 
@@ -102,7 +102,7 @@ Per-deliverable verification (each acceptance criterion in the ticket is the loa
 
 - **D1**: lint script fails on a fixture containing `PG-0001`; lint script passes on a fixture containing `PG-1`; CI workflow runs the lint and reports the failure.
 - **D2**: lint script fails on a doc citing `archive/specs/SPEC-XX` without whitelist marker; lint script passes on a doc citing `archive/specs/SPEC-XX` with `**Supersedes**:` marker; CI workflow runs the lint.
-- **D3**: `cd tools/world-mcp && npm test` passes with the new test asserting the DA seed-node is filtered and the warning is present.
+- **D3**: `cd tools/world-mcp && npm test` passes with the DA prefix filter, fixture row, search expectation, and test asserting the DA seed-node is filtered and the warning is present.
 - **D4**: dist-currency check fails when source is modified without rebuilding dist; passes when dist matches source; CI workflow runs the check.
 
 Cross-spec verification:
@@ -138,7 +138,7 @@ Cross-spec verification:
 Single-spec deliverable; `specs/IMPLEMENTATION-ORDER.md` not created (single spec, no sequencing across specs).
 
 Recommended within-spec ticket ordering (smallest-first; all `Deps: None`):
-1. **SPEC41FUP-003** — D3 DA seed-node test case (smallest; one test case mirroring existing pattern)
+1. **SPEC41FUP-003** — D3 DA seed-node filter/test slice (smallest same-seam slice)
 2. **SPEC41FUP-001** — D1 fixture_unpadded_id_lint (small lint script + CI workflow extension)
 3. **SPEC41FUP-002** — D2 archive-citation-lint (small lint script + CI workflow extension)
 4. **SPEC41FUP-004** — D4 hook-deployment-currency CI check (introduces new CI check pattern)
