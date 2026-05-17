@@ -75,6 +75,56 @@ test("getRecord resolves BEL story-bundle records through story_slug", async () 
   }
 });
 
+test("getRecord resolves CLK, STSEC, and STQ story-bundle records through story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const clock = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "CLK-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG
+      })
+    );
+    const secret = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "STSEC-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG
+      })
+    );
+    const question = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "STQ-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG
+      })
+    );
+
+    assert.ok("record" in clock);
+    assert.equal(clock.record.record_kind, "pressure_clock_record");
+    assert.equal(clock.record.id, "CLK-1");
+    assert.equal(clock.record.clock_kind, "danger");
+    assert.equal(clock.file_path, "stories/opening-bells/_source/clocks/CLK-1.yaml");
+
+    assert.ok("record" in secret);
+    assert.equal(secret.record.record_kind, "story_secret_record");
+    assert.equal(secret.record.id, "STSEC-1");
+    assert.equal(secret.record.secret_kind, "event_cause");
+    assert.equal(secret.file_path, "stories/opening-bells/_source/secrets/STSEC-1.yaml");
+
+    assert.ok("record" in question);
+    assert.equal(question.record.record_kind, "story_question_record");
+    assert.equal(question.record.id, "STQ-1");
+    assert.equal(question.record.question_or_setup, "Who rang the loft bell?");
+    assert.equal(question.file_path, "stories/opening-bells/_source/story-questions/STQ-1.yaml");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("getRecord rejects bundle-scoped ids without story_slug", async () => {
   const root = createTempRepoRoot();
 
@@ -176,7 +226,7 @@ test("getRecordField and batch retrieval support story_slug", async () => {
     );
     const records = await withRepoRoot(root, () =>
       getRecords({
-        record_ids: ["SLT-21", "BEL-1", "PG-1"],
+        record_ids: ["SLT-21", "BEL-1", "PG-1", "CLK-1", "STSEC-1", "STQ-1"],
         world_slug: "seeded",
         story_slug: STORY_FIXTURE_SLUG
       })
@@ -203,13 +253,20 @@ test("getRecordField and batch retrieval support story_slug", async () => {
 
     assert.ok(!("code" in records));
     assert.equal(records.delivery_status, "inline");
-    assert.deepEqual(records.records.map((entry) => entry.found), [true, true, true]);
+    assert.deepEqual(records.records.map((entry) => entry.found), [true, true, true, true, true, true]);
     assert.equal(records.records[1]?.found, true);
     if (records.records[1]?.found) {
       assert.ok("record" in records.records[1].record);
       const belRecord = records.records[1].record.record as Record<string, unknown>;
       assert.equal(belRecord.record_kind, "belief_record");
       assert.equal(belRecord.id, "BEL-1");
+    }
+    assert.equal(records.records[3]?.found, true);
+    if (records.records[3]?.found) {
+      assert.ok("record" in records.records[3].record);
+      const clockRecord = records.records[3].record.record as Record<string, unknown>;
+      assert.equal(clockRecord.record_kind, "pressure_clock_record");
+      assert.equal(clockRecord.id, "CLK-1");
     }
 
     assert.ok(!("code" in fields));

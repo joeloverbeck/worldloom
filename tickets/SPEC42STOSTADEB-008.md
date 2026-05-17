@@ -76,7 +76,7 @@ Existing 12-class enumeration unchanged.
 
 - CLK/STSEC/STQ per-class validators — owned by SPEC42STOSTADEB-005 / -006 / -007
 - CLK/STSEC/STQ class foundations — owned by SPEC42STOSTADEB-001 / -002 / -003
-- MCP retrieval surface extensions — owned by SPEC42STOSTADEB-004
+- MCP retrieval surface extensions — owned by archive/tickets/SPEC42STOSTADEB-004.md
 - Skill integrations — owned by SPEC42STOSTADEB-009 through -013
 - Predicate DSL extensions — owned by SPEC42STOSTADEB-005 / -006 / -007 (per-class)
 - Validator registry registrations — owned by SPEC42STOSTADEB-005 / -006 / -007 (per-class new validators); this ticket extends existing registered validators only

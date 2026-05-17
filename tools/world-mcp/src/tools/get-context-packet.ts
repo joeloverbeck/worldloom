@@ -28,7 +28,7 @@ export interface GetContextPacketArgs {
 }
 
 const STORY_LOCAL_SEED_NODE_PATTERN =
-  /^(?:(?:[a-z0-9-]+):)?(?:SF|BEL|SE|DA|OBL|CNSQ|THR|SREL|STINT|STENT|STSTAT|STLOC|STOBJ|BR|PG|CHC|SLT|SLB|SAU|SP|RSP)-\d+$/;
+  /^(?:(?:[a-z0-9-]+):)?(?:SF|BEL|SE|DA|OBL|CNSQ|THR|SREL|STINT|STENT|STSTAT|STLOC|STOBJ|CLK|STSEC|STQ|BR|PG|CHC|SLT|SLB|SAU|SP|RSP)-\d+$/;
 const STORY_LOCAL_SEED_NODE_WARNING = "story_local_seed_nodes_ignored";
 
 function storyLocalSeedNodeWarnings(args: GetContextPacketArgs): string[] {

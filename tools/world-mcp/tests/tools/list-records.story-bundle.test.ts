@@ -154,6 +154,71 @@ test("listRecords returns belief records scoped by story_slug", async () => {
   }
 });
 
+test("listRecords returns CLK, STSEC, and STQ records scoped by story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const clocks = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "pressure_clock_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        fields: ["id", "title", "clock_kind", "value", "max", "status"]
+      })
+    );
+    const secrets = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "story_secret_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        fields: ["id", "secret_kind", "status", "salience"]
+      })
+    );
+    const questions = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "story_question_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        include_full_body: true
+      })
+    );
+
+    assert.ok(!("code" in clocks));
+    assert.equal(clocks.total, 1);
+    assert.deepEqual(clocks.records, [
+      {
+        record_id: "CLK-1",
+        id: "CLK-1",
+        title: "Loft Patrol",
+        clock_kind: "danger",
+        value: 2,
+        max: 6,
+        status: "active"
+      }
+    ]);
+
+    assert.ok(!("code" in secrets));
+    assert.equal(secrets.total, 1);
+    assert.deepEqual(secrets.records[0], {
+      record_id: "STSEC-1",
+      id: "STSEC-1",
+      secret_kind: "event_cause",
+      status: "hidden",
+      salience: "high"
+    });
+
+    assert.ok(!("code" in questions));
+    assert.equal(questions.total, 1);
+    const question = questions.records[0] as { body?: Record<string, unknown> };
+    assert.equal(question.body?.record_kind, "story_question_record");
+    assert.equal(question.body?.question_or_setup, "Who rang the loft bell?");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("listRecords requires story_slug for story-bundle record types", async () => {
   const root = createTempRepoRoot();
 

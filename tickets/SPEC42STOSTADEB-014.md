@@ -66,7 +66,7 @@ Modify `CLAUDE.md` Story Bundles section. The inventory list of story-bundle rec
 - Per-class validators + predicate-grammar parser extensions — owned by SPEC42STOSTADEB-005 / -006 / -007
 - Shared validator extensions — owned by SPEC42STOSTADEB-008
 - §10b per-page-computed RENDERING in turn-cycle Phase 7 — owned by SPEC42STOSTADEB-009
-- MCP retrieval surface — owned by SPEC42STOSTADEB-004
+- MCP retrieval surface — owned by archive/tickets/SPEC42STOSTADEB-004.md
 - Other skill integrations — owned by SPEC42STOSTADEB-010 through -013
 
 ## Acceptance Criteria

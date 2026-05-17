@@ -141,7 +141,7 @@ The HARD-REJECT runs at engine pre-apply (alongside other `record_schema_complia
 
 - STQ validators (`story_question_payoff_integrity`, `story_question_setup_predates_payoff`, `story_question_grounding_integrity`, `story_question_terminal_debt`) — owned by SPEC42STOSTADEB-007
 - STQ predicate DSL entries (`story_question_open`, `story_question_status`, `any_story_question_open`, `promise_due`) — owned by SPEC42STOSTADEB-007
-- MCP retrieval extensions — owned by SPEC42STOSTADEB-004
+- MCP retrieval extensions — owned by `archive/tickets/SPEC42STOSTADEB-004.md`
 - Shared validator extensions — owned by SPEC42STOSTADEB-008
 - Skill integrations — owned by SPEC42STOSTADEB-009 through -013
 - CLK and STSEC class foundations — owned by SPEC42STOSTADEB-001 / -002

@@ -121,7 +121,7 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `CLK
 
 - CLK validators (`clock_value_in_range`, `clock_threshold_ordering`, `clock_tick_provenance`, `clock_firing_threshold_integrity`, `clock_terminal_debt_integrity`) — owned by SPEC42STOSTADEB-005
 - CLK predicate DSL entries (`clock_at_least`, `clock_below`, `clock_full`, `any_clock_active`) — owned by SPEC42STOSTADEB-005
-- MCP retrieval extensions (`get_record` / `get_records` / `list_records` / `get_context_packet` / `get_record_schema`) — owned by SPEC42STOSTADEB-004. Minimal `describe_envelope_schema` coverage landed here because the existing `OPERATION_KINDS` exhaustiveness test requires every patch operation to be introspectable when it is introduced.
+- MCP retrieval extensions (`get_record` / `get_records` / `list_records` / `get_context_packet` / `get_record_schema`) — owned by `archive/tickets/SPEC42STOSTADEB-004.md`. Minimal `describe_envelope_schema` coverage landed here because the existing `OPERATION_KINDS` exhaustiveness test requires every patch operation to be introspectable when it is introduced.
 - Shared validator extensions for `state_snapshot_integrity` / `snapshot_replay_equality` / `branch_isolation` / `observer_firewall` — owned by SPEC42STOSTADEB-008
 - Skill integrations (turn-cycle / bootstrap / commitment-block-authoring / health-audit / prose-attach) — owned by SPEC42STOSTADEB-009 through -013
 - STSEC and STQ class foundations — owned by SPEC42STOSTADEB-002 / -003
@@ -133,7 +133,7 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `CLK
 1. `npm test --prefix tools/validators` — `story-pressure-clock.schema.json` validates a representative CLK record and rejects structural invalid records (enum violations and zero tick deltas); `story-page.schema.json` accepts `state_snapshot.active_records.CLK`, and replay-helper coverage proves CLK participates in active-record replay. Plain JSON Schema sibling comparisons (`value <= max`, `thresholds[].at <= max`) remain outside this ticket's structural schema proof and are enforced by the patch op or later semantic validators.
 2. `npm test --prefix tools/patch-engine` — `create_clk_record` writes valid YAML at `_source/clocks/CLK-1.yaml`; `supersede_clk_record` writes superseding record; `tick_pressure_clock` increments `value` and appends `tick_history[]`; `resolve_pressure_clock` sets `status: resolved` and binds `resolution_event`; commit-ordering places CLK alongside state-record classes
 3. `npm test --prefix tools/world-mcp` — `allocate_next_id(world_slug, id_class="CLK", story_slug)` returns next CLK integer scoped to the bundle
-4. `npm run build --prefix tools/world-index` (build only — no integration test until SPEC42STOSTADEB-004 lands MCP retrieval extensions for CLK)
+4. `npm run build --prefix tools/world-index` (build only — MCP retrieval integration for CLK landed later in `archive/tickets/SPEC42STOSTADEB-004.md`)
 
 ### Invariants
 
@@ -159,7 +159,7 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `CLK
 1. `npm test --prefix tools/validators` — schema-level validation
 2. `npm test --prefix tools/patch-engine` — op-level + commit-pipeline tests
 3. `npm test --prefix tools/world-mcp` — allocator tests
-4. `npm run build --prefix tools/world-index` — parser builds cleanly with CLK registration (full retrieval integration deferred to SPEC42STOSTADEB-004)
+4. `npm run build --prefix tools/world-index` — parser builds cleanly with CLK registration (full retrieval integration deferred to `archive/tickets/SPEC42STOSTADEB-004.md`)
 5. The full-pipeline verification command (representative CLK record round-tripping through allocator → patch-engine → world-index → retrieval) lands in SPEC42STOSTADEB-015 capstone; this ticket's verification boundary is the per-package test surface above
 
 ## Outcome
@@ -174,7 +174,7 @@ Implemented the CLK foundation across the machine-layer seams:
 ## Deviations / Truthing
 
 - The ticket's drafted schema-level `value > max` and `thresholds[].at > max` negative tests were narrowed. Standard JSON Schema cannot compare sibling values without nonstandard `$data`; this ticket enforces post-tick `value` bounds in `tick_pressure_clock`, while richer semantic clock validators remain assigned to SPEC42STOSTADEB-005.
-- `describe_envelope_schema` and the MCP `ID_CLASSES` input enum were updated in the same seam because the existing MCP build/tests require the public operation and allocator surfaces to remain exhaustive. Broader CLK retrieval remains out of scope for SPEC42STOSTADEB-004.
+- `describe_envelope_schema` and the MCP `ID_CLASSES` input enum were updated in the same seam because the existing MCP build/tests require the public operation and allocator surfaces to remain exhaustive. Broader CLK retrieval remained out of scope here and later landed in `archive/tickets/SPEC42STOSTADEB-004.md`.
 - `tools/validators/src/structural/utils.ts` needed both schema mapping and structural-authority recognition for `_source/clocks/CLK-<integer>.yaml`; without both, `record_schema_compliance` would silently skip CLK records.
 
 ## Verification Result

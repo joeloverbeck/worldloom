@@ -62,7 +62,7 @@ Modify Phase 7 (page-plan rendering — verify exact location at edit time; like
 - CLK/STSEC/STQ class foundations — owned by SPEC42STOSTADEB-001 / -002 / -003
 - Per-class validators + predicates — owned by SPEC42STOSTADEB-005 / -006 / -007
 - Shared validator extensions — owned by SPEC42STOSTADEB-008
-- MCP retrieval surface — owned by SPEC42STOSTADEB-004
+- MCP retrieval surface — owned by archive/tickets/SPEC42STOSTADEB-004.md
 - Other skill integrations (bootstrap, commitment-block-authoring, health-audit, prose-attach) — owned by SPEC42STOSTADEB-010 through -013
 - Cross-class contract doc updates (story-state-contract.md §5 predicate list, §6 integration matrix, §8 page-plan section) — owned by SPEC42STOSTADEB-014
 - CLAUDE.md inventory update — owned by SPEC42STOSTADEB-014

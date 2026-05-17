@@ -144,7 +144,7 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `STS
 
 - STSEC validators (`secret_carrier_existence`, `critical_secret_clue_coverage_when_revealed`, `secret_mystery_firewall_compliance`) — owned by SPEC42STOSTADEB-006
 - STSEC predicate DSL entries (`secret_unrevealed`, `secret_revealed`, `revelation_ready`, `any_secret_unrevealed`) — owned by SPEC42STOSTADEB-006
-- MCP retrieval extensions — owned by SPEC42STOSTADEB-004
+- MCP retrieval extensions — owned by `archive/tickets/SPEC42STOSTADEB-004.md`
 - Shared validator extensions — owned by SPEC42STOSTADEB-008
 - Skill integrations — owned by SPEC42STOSTADEB-009 through -013
 - CLK and STQ class foundations — owned by SPEC42STOSTADEB-001 / -003

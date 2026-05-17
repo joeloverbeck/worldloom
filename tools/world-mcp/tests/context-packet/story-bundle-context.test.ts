@@ -52,6 +52,25 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
       result.story_bundle_context.active_threads.map((thread) => thread.id),
       ["THR-1"]
     );
+    assert.deepEqual(
+      result.story_bundle_context.active_clocks.map((clock) => [clock.id, clock.value, clock.max]),
+      [["CLK-1", 2, 6]]
+    );
+    assert.deepEqual(
+      result.story_bundle_context.hidden_secrets.map((secret) => [
+        secret.id,
+        secret.clue_carrier_count,
+        secret.discovered_clue_count
+      ]),
+      [["STSEC-1", 1, 1]]
+    );
+    assert.deepEqual(
+      result.story_bundle_context.open_story_questions.map((question) => [
+        question.id,
+        question.question_or_setup
+      ]),
+      [["STQ-1", "Who rang the loft bell?"]]
+    );
     assert.deepEqual(result.story_bundle_context.longest_active_branch_path, ["PG-1"]);
     assert.deepEqual(
       result.story_bundle_context.recent_pages_along_longest_active_branch.map((page) => page.id),

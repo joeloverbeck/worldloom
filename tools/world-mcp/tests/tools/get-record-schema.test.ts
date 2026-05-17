@@ -32,6 +32,9 @@ const EXPECTED_SCHEMA_IDS: Record<SupportedRecordSchemaNodeType, string> = {
   intention_record: "https://worldloom.local/schemas/story-intention.schema.json",
   story_location_record: "https://worldloom.local/schemas/story-location.schema.json",
   story_object_record: "https://worldloom.local/schemas/story-object.schema.json",
+  pressure_clock_record: "https://worldloom.local/schemas/story-pressure-clock.schema.json",
+  story_secret_record: "https://worldloom.local/schemas/story-secret.schema.json",
+  story_question_record: "https://worldloom.local/schemas/story-question.schema.json",
   branch_record: "https://worldloom.local/schemas/story-branch.schema.json",
   page_record: "https://worldloom.local/schemas/story-page.schema.json",
   choice_record: "https://worldloom.local/schemas/story-choice.schema.json",
@@ -63,6 +66,9 @@ const EXPECTED_SOURCE_PATHS: Record<SupportedRecordSchemaNodeType, string> = {
   intention_record: "tools/validators/src/schemas/story-intention.schema.json",
   story_location_record: "tools/validators/src/schemas/story-location.schema.json",
   story_object_record: "tools/validators/src/schemas/story-object.schema.json",
+  pressure_clock_record: "tools/validators/src/schemas/story-pressure-clock.schema.json",
+  story_secret_record: "tools/validators/src/schemas/story-secret.schema.json",
+  story_question_record: "tools/validators/src/schemas/story-question.schema.json",
   branch_record: "tools/validators/src/schemas/story-branch.schema.json",
   page_record: "tools/validators/src/schemas/story-page.schema.json",
   choice_record: "tools/validators/src/schemas/story-choice.schema.json",
@@ -162,6 +168,9 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
   const storyFact = await getRecordSchema({ node_type: "story_fact_record" });
   const page = await getRecordSchema({ node_type: "page_record" });
   const belief = await getRecordSchema({ node_type: "belief_record" });
+  const clock = await getRecordSchema({ node_type: "pressure_clock_record" });
+  const secret = await getRecordSchema({ node_type: "story_secret_record" });
+  const question = await getRecordSchema({ node_type: "story_question_record" });
   const branch = await getRecordSchema({ node_type: "branch_record" });
   const status = await getRecordSchema({ node_type: "story_status_record" });
 
@@ -169,6 +178,9 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
   assert.ok(!("code" in storyFact));
   assert.ok(!("code" in page));
   assert.ok(!("code" in belief));
+  assert.ok(!("code" in clock));
+  assert.ok(!("code" in secret));
+  assert.ok(!("code" in question));
   assert.ok(!("code" in branch));
   assert.ok(!("code" in status));
 
@@ -203,6 +215,15 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
     "consequences"
   ]);
   assert.equal(branch.schema.$id, "https://worldloom.local/schemas/story-branch.schema.json");
+  assert.equal(clock.schema.$id, "https://worldloom.local/schemas/story-pressure-clock.schema.json");
+  assert.equal(secret.schema.$id, "https://worldloom.local/schemas/story-secret.schema.json");
+  assert.equal(question.schema.$id, "https://worldloom.local/schemas/story-question.schema.json");
+  assert.equal(clock.source_path, "tools/validators/src/schemas/story-pressure-clock.schema.json");
+  assert.equal(secret.source_path, "tools/validators/src/schemas/story-secret.schema.json");
+  assert.equal(question.source_path, "tools/validators/src/schemas/story-question.schema.json");
+  assert.ok(clock.required_fields.includes("clock_kind"));
+  assert.ok((secret.schema.properties as Record<string, unknown>).clue_carriers);
+  assert.ok(question.required_fields.includes("question_or_setup"));
   assert.equal(status.schema.$id, "https://worldloom.local/schemas/story-status.schema.json");
   assert.deepEqual(status.required_fields, [
     "id",
