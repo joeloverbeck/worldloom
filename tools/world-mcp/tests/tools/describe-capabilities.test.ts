@@ -45,6 +45,8 @@ test("describeCapabilities returns build metadata and enum-valued input contract
   assert.match(manifest.build_info.build_timestamp, /^\d{4}-\d{2}-\d{2}T/);
   assert.ok(!Number.isNaN(Date.parse(manifest.build_info.build_timestamp)));
   assert.match(manifest.build_info.source_schema_hash, /^[0-9a-f]{64}$/);
+  assert.match(manifest.build_info.validator_registry_hash, /^[0-9a-f]{64}$/);
+  assert.match(manifest.build_info.patch_operation_schema_hash, /^[0-9a-f]{64}$/);
 
   const byName = new Map(manifest.tools.map((tool) => [tool.name, tool]));
   assert.deepEqual(byName.get(MCP_TOOL_NAMES.allocate_next_id)?.input_schema_enums.id_class, [...ID_CLASSES]);

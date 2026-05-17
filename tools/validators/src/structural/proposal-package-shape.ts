@@ -4,6 +4,12 @@ import path from "node:path";
 import yaml from "js-yaml";
 
 import type { Context, Validator, Verdict } from "../framework/types.js";
+import {
+  naRationaleVerdicts,
+  requiresEpistemicProfile,
+  requiresExceptionGovernance,
+  type SchemaTarget
+} from "./record-schema-compliance.js";
 import { asPlainRecord, fileInputsFrom, isPlainRecord, toPosixPath, touchedFilesInclude, worldRootFrom } from "./utils.js";
 
 const PROPOSAL_PACKAGE_PATTERN = /(?:^|\/)story-promotions\/SP-\d+-proposal-package\.ya?ml$/;
@@ -55,6 +61,8 @@ export const proposalPackageShape: Validator = {
           verdicts.push(candidateImpurity(proposal.path, `candidate.${key}`));
         }
       }
+
+      verdicts.push(...candidateSafetyBlockVerdicts(proposal.path, candidate));
 
       const sourceBasis = asPlainRecord(candidate.source_basis);
       for (const key of Object.keys(sourceBasis)) {
@@ -145,14 +153,77 @@ function mysteryResolutionSourceMisclass(file: string, sourceRecord: unknown): V
   );
 }
 
-function verdict(file: string, code: string, message: string): Verdict {
+function candidateSafetyBlockVerdicts(file: string, candidate: Record<string, unknown>): Verdict[] {
+  const type = candidate.type;
+  if (typeof type !== "string") {
+    return [
+      safetyVerdict(
+        file,
+        "proposal_candidate_missing_type",
+        "proposal candidate missing 'type' field required for safety-block resolution"
+      )
+    ];
+  }
+
+  const target = candidateSchemaTarget(file, candidate);
+  const verdicts: Verdict[] = [];
+  if (requiresExceptionGovernance(type) && candidate.exception_governance === undefined) {
+    verdicts.push(safetyVerdict(
+      file,
+      "proposal_candidate_exception_governance_missing",
+      `proposal candidate type '${type}' requires exception_governance (see CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED)`
+    ));
+  }
+  verdicts.push(...proposalNaRationaleVerdicts(target, "exception_governance", candidate.exception_governance));
+
+  if (requiresEpistemicProfile(type) && candidate.epistemic_profile === undefined) {
+    verdicts.push(safetyVerdict(
+      file,
+      "proposal_candidate_epistemic_profile_missing",
+      `proposal candidate type '${type}' requires epistemic_profile (see CF_TYPE_EPISTEMIC_PROFILE_REQUIRED)`
+    ));
+  }
+  verdicts.push(...proposalNaRationaleVerdicts(target, "epistemic_profile", candidate.epistemic_profile));
+
+  return verdicts;
+}
+
+function candidateSchemaTarget(file: string, candidate: Record<string, unknown>): SchemaTarget {
+  return {
+    node_id: typeof candidate.id === "string" ? candidate.id : file,
+    node_type: "canon_fact_record",
+    file_path: file,
+    parsed: candidate
+  };
+}
+
+function proposalNaRationaleVerdicts(target: SchemaTarget, blockName: string, block: unknown): Verdict[] {
+  return naRationaleVerdicts(target, blockName, block).map((original) => safetyVerdict(
+    original.location.file,
+    "proposal_candidate_na_rationale_quality",
+    original.message.replace(/^.+? canon safety block violation/, "proposal candidate canon safety block violation"),
+    original.location.node_id
+  ));
+}
+
+function safetyVerdict(file: string, code: string, message: string, nodeId?: string): Verdict {
+  return verdict(
+    file,
+    code,
+    message,
+    "Add the required safety-block reasoning to candidate.exception_governance / candidate.epistemic_profile, or provide an { n_a: '<rationale>' } block citing a FOUNDATIONS ontology category keyword.",
+    nodeId
+  );
+}
+
+function verdict(file: string, code: string, message: string, suggestedFix?: string, nodeId?: string): Verdict {
   return {
     validator: "proposal_package_shape",
     severity: "fail",
     code,
     message,
-    location: { file },
-    suggested_fix: "Keep the proposal candidate CF-shaped and move branch-local evidence into top-level proposal_evidence."
+    location: nodeId ? { file, node_id: nodeId } : { file },
+    suggested_fix: suggestedFix ?? "Keep the proposal candidate CF-shaped and move branch-local evidence into top-level proposal_evidence."
   };
 }
 

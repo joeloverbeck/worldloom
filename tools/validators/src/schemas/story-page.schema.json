@@ -45,7 +45,7 @@
     "state_snapshot": {
       "type": "object",
       "properties": {
-        "canon_revision": { "type": ["string", "null"], "pattern": "^CH-(0|[1-9][0-9]*)$" },
+        "canon_revision": { "type": ["string", "null"], "pattern": "^CH-[0-9]+$" },
         "entity_status": {
           "type": "object",
           "additionalProperties": {
@@ -56,7 +56,7 @@
               "agency": { "type": "string", "enum": ["free", "constrained", "coerced", "captive", "incapacitated", "unconscious", "dead", "unknown"] },
               "location": {
                 "oneOf": [
-                  { "type": "string", "pattern": "^STLOC-(0|[1-9][0-9]*)$" },
+                  { "type": "string", "pattern": "^STLOC-[0-9]+$" },
                   { "type": "string", "enum": ["unknown", "concealed", "offstage"] }
                 ]
               }
@@ -70,13 +70,13 @@
             "type": "object",
             "required": ["mystery_id", "authority", "status"],
             "properties": {
-              "mystery_id": { "type": "string", "pattern": "^M-(0|[1-9][0-9]*)$" },
+              "mystery_id": { "type": "string", "pattern": "^M-[0-9]+$" },
               "authority": { "type": "string", "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"] },
               "status": { "type": "string", "enum": ["preserved", "clue_added", "narrowed", "apparent_resolution", "held_for_promotion"] },
               "evidence_records": {
                 "type": "array",
                 "default": [],
-                "items": { "type": "string", "pattern": "^(SF|BEL|DA|SE)-(0|[1-9][0-9]*)$" }
+                "items": { "type": "string", "pattern": "^(SF|BEL|DA|SE)-[0-9]+$" }
               }
             },
             "additionalProperties": false
@@ -92,11 +92,11 @@
               "label": { "type": "string", "minLength": 1 },
               "grounded_in": {
                 "type": "array",
-                "items": { "type": "string", "pattern": "^(STLOC|STOBJ)-(0|[1-9][0-9]*)$" }
+                "items": { "type": "string", "pattern": "^(STLOC|STOBJ)-[0-9]+$" }
               },
               "available_to": {
                 "type": "array",
-                "items": { "type": "string", "pattern": "^STENT-(0|[1-9][0-9]*)$" }
+                "items": { "type": "string", "pattern": "^STENT-[0-9]+$" }
               },
               "action_families": {
                 "type": "array",

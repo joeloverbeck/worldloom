@@ -103,7 +103,7 @@ export const recordSchemaCompliance: Validator = {
   }
 };
 
-interface SchemaTarget {
+export interface SchemaTarget {
   node_id: string;
   node_type: string;
   file_path: string;
@@ -187,7 +187,7 @@ function touchedPreApplyFiles(input: unknown, ctx: Context): ReadonlySet<string>
   return new Set(fileInputsFrom(input, ctx).map((file) => toPosixPath(file.path)));
 }
 
-function naRationaleVerdicts(record: SchemaTarget, blockName: string, block: unknown): Verdict[] {
+export function naRationaleVerdicts(record: SchemaTarget, blockName: string, block: unknown): Verdict[] {
   const value = asPlainRecord(block).n_a;
   if (value === undefined) {
     return [];

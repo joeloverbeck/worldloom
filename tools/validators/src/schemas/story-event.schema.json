@@ -31,10 +31,10 @@
         "promotion_closeout"
       ]
     },
-    "actor": { "type": "string", "pattern": "^(STENT-(0|[1-9][0-9]*)|system|unknown)$" },
+    "actor": { "type": "string", "pattern": "^(STENT-[0-9]+|system|unknown)$" },
     "targets": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^(STENT|STLOC|STOBJ)-(0|[1-9][0-9]*)$" }
+      "items": { "type": "string", "pattern": "^(STENT|STLOC|STOBJ)-[0-9]+$" }
     },
     "commitment": {
       "type": "object",
@@ -50,7 +50,7 @@
           "propertyNames": { "pattern": "^[A-Za-z][A-Za-z0-9_-]*$" },
           "additionalProperties": {
             "type": "string",
-            "pattern": "^(STENT|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-(0|[1-9][0-9]*)$"
+            "pattern": "^(STENT|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$"
           }
         }
       },
@@ -93,15 +93,15 @@
       "properties": {
         "create": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-(0|[1-9][0-9]*)$" }
+          "items": { "type": "string", "pattern": "^(STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
         },
         "supersede": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-(0|[1-9][0-9]*)$" }
+          "items": { "type": "string", "pattern": "^(STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
         },
         "close": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-(0|[1-9][0-9]*)$" }
+          "items": { "type": "string", "pattern": "^(STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
         }
       },
       "additionalProperties": false
@@ -112,7 +112,7 @@
         "type": "object",
         "required": ["source_record", "authority"],
         "properties": {
-          "source_record": { "type": "string", "pattern": "^(SF|BEL|DA|STENT|STSTAT|SREL)-(0|[1-9][0-9]*)$" },
+          "source_record": { "type": "string", "pattern": "^(SF|BEL|DA|STENT|STSTAT|SREL)-[0-9]+$" },
           "authority": { "type": "string", "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"] }
         },
         "additionalProperties": false

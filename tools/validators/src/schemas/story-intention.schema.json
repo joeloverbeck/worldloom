@@ -8,7 +8,7 @@
     "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
     "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
     "supersedes": { "type": ["string", "null"], "pattern": "^STINT-(0|[1-9][0-9]*)$" },
-    "holder": { "type": "string", "pattern": "^STENT-(0|[1-9][0-9]*)$" },
+    "holder": { "type": "string", "pattern": "^STENT-[0-9]+$" },
     "intent": { "type": "string", "minLength": 1 },
     "urgency": { "type": "string", "enum": ["low", "medium", "high"] },
     "expires_when": { "type": "string", "minLength": 1 }

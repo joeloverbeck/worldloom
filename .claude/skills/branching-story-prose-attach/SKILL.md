@@ -104,7 +104,7 @@ Atomic-record writes (the optional `SE-<integer>`) route through `mcp__worldloom
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §4a (Plan-Authority Boundary), §5b (Schema-Minimalism), §9 (Prose Length Discipline) govern this skill
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4.6 receipt schema (canonical); §7 hard gates (gate 3 redundantly enforced on rendered prose); §8 page plan minimum contract (the 19-section structure prose-attach reads)
+- `.claude/skills/_shared-templates/story-state-contract.md` — §4.6 receipt schema (canonical and mirrored by `prose_receipt_schema_compliance`); §7 hard gates (gate 3 redundantly enforced on rendered prose); §8 page plan minimum contract (the 19-section structure prose-attach reads)
 - `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` — bundle root contract; `## Player Agency Contract` is load-bearing for agency-surface consistency
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/<page_id>.yaml` — PG record; MUST exist
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/<page_id>.md` — comprehensive prose plan; MUST exist
@@ -153,7 +153,7 @@ Load into working memory:
 Compute fresh hashes:
 
 - `computed_plan_hash`: sha256 over the plan file's bytes.
-- `computed_state_hash`: sha256 over the loaded PG record per shared contract §4.2a, excluding `state_hash` from the payload.
+- `computed_state_hash`: produced by the canonical CLI per shared contract §4.2a — run `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan pages-prose-plans/<page_id>.md --pg _source/pages/<page_id>.yaml`, parse the JSON `{plan_hash, state_hash}` from stdout, and use the `state_hash` value as `computed_state_hash`. The CLI applies the canonical-JSON serializer the contract mandates (sorted keys, no insignificant whitespace, `state_hash` excluded from the payload by construction). Hand-rolling the serializer at verification time is forbidden — it produces drift that the receipt would misclassify as `hash_integrity: FAIL` when no actual drift exists. The same CLI invocation's `plan_hash` matches the `computed_plan_hash` above (sha256 over plan file bytes), so one CLI call can replace both the `computed_plan_hash` and `computed_state_hash` steps if preferred.
 - `computed_prose_hash`: sha256 over the prose file's bytes.
 
 ## Phase 2: Hash integrity check
@@ -188,7 +188,7 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
    - Predicate-DSL terms (literal): `fact_true(`, `belief_record(`, `entity_status(`, `relationship_axis(`, `obligation_open(`, `consequence_pending(`, `thread_active(`, `any_belief(`, `location(`, `has_affordance(`, `all[`, `any[`, `not[`
    - Routing terms in engine register: `outcome_route`, `state_delta`, `promotion_claims`, `validation_trace`, `state_snapshot`, `forbidden_resolutions`, `truth_relation`, `branch_local_counterfactual`, `canon_candidate`
 
-3. **`forbidden_mystery_resolution`** (`PASS | FAIL`) — retrieve firewall fields for every `M-<integer>` named in plan §11 via `mcp__worldloom__get_firewall_content(world_slug, m_ids=<plan §11 ids>)`, unless the page plan already inlines the same fields. Derive deterministic patterns from `disallowed_cheap_answers[]` (each entry is a forbidden resolution string and is compared by case-insensitive substring match) and from `unknowns[]` collapsed to plan §11 `forbidden_resolutions[]` (each entry names a protected question whose surface-level resolution is forbidden).
+3. **`forbidden_mystery_resolution`** (`PASS | FAIL`) — retrieve firewall fields for every `M-<integer>` named in plan §11 via `mcp__worldloom__get_firewall_content(world_slug, m_ids=<plan §11 ids>)`, unless plan §11's per-mystery `forbidden_resolutions[]` already enumerates concrete forbidden-resolution strings collapsing both the firewall's `disallowed_cheap_answers[]` AND the protected-question entries from `unknowns[]` (the typical case when bootstrap or turn-cycle authored the plan from a firewall-aware seed pool — the inlining IS the plan-authority equivalence, not a deferred retrieval step). Derive deterministic patterns from `disallowed_cheap_answers[]` (each entry is a forbidden resolution string and is compared by case-insensitive substring match) and from `unknowns[]` collapsed to plan §11 `forbidden_resolutions[]` (each entry names a protected question whose surface-level resolution is forbidden).
 
    Any direct assertion matching a `disallowed_cheap_answers[]` entry is `FAIL` and routes to `repair_recommendation: revise_prose`. Cumulative semantic narrowing of a protected `unknowns[]` entry that does not match a `disallowed_cheap_answers[]` string is recorded as a judgment-assisted note in `notes[]` and routed to `branching-story-health-audit` mystery-accretion review (see Phase 2e); do not fail the receipt for cumulative narrowing alone.
 
@@ -293,7 +293,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
 4. On approval:
    a. If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach` conforming to story-state contract §4.3a (audit-only SE events); the op requires a `target_file` field (`worlds/<world_slug>/stories/<story_slug>/_source/events/SE-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record')` for the machine-readable shape. Dry-run validate via `mcp__worldloom__validate_patch_plan`, obtain the approval token, and submit via `mcp__worldloom__submit_patch_plan`. If this optional patch fails, abort: write no receipt and no INDEX update for this invocation; surface the patch failure and allow the user to re-run with `emit_attach_event=false` or repair the patch shape.
    b. Write `pages-prose-receipts/<page_id>.yaml` (direct write, not patch-engine routed — the receipt is not a `_source/` record).
-   c. Update bundle `INDEX.md` to reflect prose status + receipt verdict.
+   c. Update bundle `INDEX.md` to reflect prose status + receipt verdict. Append a `## Rendered Prose` section if not already present, with columns: `PG | Status | Receipt verdict | Receipt`. Status values per receipt outcome: `rendered` (verdict PASS or WARN; or non-strict FAIL); `rendered (FAILED receipt — publication blocked)` (strict=true AND verdict=FAIL only). The Receipt verdict column contains the receipt's roll-up verdict literally (PASS / WARN / FAIL). The Receipt column contains the relative path to the receipt file (e.g., `pages-prose-receipts/PG-<integer>.yaml`). When the section already exists from prior page attachments, add a new row under the existing header — do not duplicate the header.
 
 5. Report receipt path + verdict + `repair_recommendation` to the user. If `repair_recommendation` is non-`none`, surface the named lawful repair path (revise prose, invoke `branching-story-turn-cycle` with repair-action semantics, or invoke `story-fact-promotion-to-canon` with the asserted canon claim). Do NOT `git commit`.
 
@@ -307,7 +307,13 @@ Rules 1 / 4 / 5 are upstream-enforced at bootstrap and turn-cycle Phase 9 (the e
 
 ## Record Schemas
 
-The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (canonical). No skill-local templates — the shared contract is the canonical reference per sub-class (d) of skill-creator's template-derivation discipline.
+The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (canonical). The validator-side mirror is `prose_receipt_schema_compliance` in `tools/validators`; after a receipt exists, a receipt-specific structural smoke can run:
+
+```bash
+node tools/validators/dist/src/cli/world-validate.js <world_slug> --structural --file worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/<page_id>.yaml --json
+```
+
+No skill-local templates — the shared contract is the canonical reference per sub-class (d) of skill-creator's template-derivation discipline.
 
 ## FOUNDATIONS Alignment
 
@@ -337,12 +343,12 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 - **Never create ARC_TRACE.** The class is removed per the greenfield plan; the receipt's verdict + `repair_recommendation` are the audit-trail substitute.
 - **Never write rendered prose.** `pages-prose/<page_id>.md` is user-supplied; prose-attach reads it as input.
 - **`emit_attach_event` is the ONLY way prose-attach mutates atomic story-bundle records.** Opt-in. Default off. When enabled, emits exactly one §4.3a-conformant `create_se_record` op with `event_kind: prose_attach`; never alters page state.
-- **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Receipt schema conforms strictly to §4.6. No nice-to-have fields.
+- **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Receipt schema conforms strictly to §4.6 and is structurally checked by `prose_receipt_schema_compliance`. No nice-to-have fields.
 - **No word-count enforcement.** Craft critic axes are qualitative per FOUNDATIONS §Story Bundles §9. The receipt records no word counts.
 - **Silent acceptance forbidden for structural inventions.** Every `invented_structural_fact: FAIL` or `canon_claim_without_authority: FAIL` routes through `repair_recommendation` to one of three lawful repair paths: `revise_prose`, `run_turn_cycle_repair`, `run_story_fact_promotion_to_canon`.
 - **Skills do not chain.** Prose-attach does not invoke `branching-story-turn-cycle`, `story-fact-promotion-to-canon`, or `branching-story-health-audit`. When `repair_recommendation` is non-`none`, the receipt records the recommendation; the user separately invokes the named sibling.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **No deferred-integration tickets named by this skill** — prose-attach is structurally simple. It inherits the rebuilt-family infrastructure from bootstrap and turn-cycle without adding its own deferred surfaces. `tools/validators/src/schemas/story-page.schema.json` requires `plan_hash` + `state_hash` as sha256-shaped fields; prose-attach treats missing, placeholder, or non-sha256 PG hash fields as `hash_integrity: FAIL`. The shared contract §4.6 receipt schema is already in place.
+- **No deferred-integration tickets named by this skill** — prose-attach is structurally simple. It inherits the rebuilt-family infrastructure from bootstrap and turn-cycle without adding its own deferred surfaces. `tools/validators/src/schemas/story-page.schema.json` requires `plan_hash` + `state_hash` as sha256-shaped fields; prose-attach treats missing, placeholder, or non-sha256 PG hash fields as `hash_integrity: FAIL`. The shared contract §4.6 receipt schema is the canonical prose shape, and `prose_receipt_schema_compliance` is the validator-side structural backstop for receipt YAML.
 
 ## Final Rule
 

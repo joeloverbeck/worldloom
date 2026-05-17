@@ -63,14 +63,75 @@ test("expected_witness_coverage_accepts_full_bel_coverage", async () => {
   assert.deepEqual(verdicts, []);
 });
 
+test("expected_witness_coverage_rejects_public_da_without_indirect_propagation", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    artifact("DA-1", "public")
+  ])));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "expected_witness_coverage_missing_indirect_propagation");
+});
+
+test("expected_witness_coverage_rejects_factional_da_without_indirect_propagation", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    artifact("DA-1", "factional")
+  ])));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "expected_witness_coverage_missing_indirect_propagation");
+});
+
+test("expected_witness_coverage_accepts_public_da_with_indirect_route_bel", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "BEL-3", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    belief("BEL-3", "public", { access_route: "document", access_records: ["DA-1"] }),
+    artifact("DA-1", "public")
+  ])));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("expected_witness_coverage_accepts_public_da_with_event_leaves_no_accessible_trace_tag", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", {
+      create: ["BEL-1", "BEL-2", "DA-1"],
+      world_logic_rationale:
+        "No spread: non_propagation:event_leaves_no_accessible_trace(group=public_general, records=[DA-1])."
+    }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    artifact("DA-1", "public")
+  ])));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("expected_witness_coverage_does_not_trigger_indirect_check_for_private_da", async () => {
+  const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
+    event("SE-1", { create: ["BEL-1", "BEL-2", "DA-1"] }),
+    belief("BEL-1", "STENT-2"),
+    belief("BEL-2", "STENT-3"),
+    artifact("DA-1", "private")
+  ])));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("expected_witness_coverage_accepts_valid_non_propagation_evidence", async () => {
   const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
     event("SE-1", {
-      create: ["DA-1"],
+      create: ["STENT-4"],
       world_logic_rationale:
         "No spread: non_propagation:institution_suppresses_report(group=direct_witnesses, records=[STENT-2, STENT-3])."
-    }),
-    artifact("DA-1", "public")
+    })
   ])));
 
   assert.deepEqual(verdicts, []);
@@ -173,7 +234,11 @@ function status(id: string, entityId: string, currentLocation: string, overrides
   });
 }
 
-function belief(id: string, holder: string) {
+function belief(
+  id: string,
+  holder: string,
+  basisOverrides: Partial<{ access_route: string; access_records: string[] }> = {}
+) {
   return storyRecord("belief_record", id, "beliefs", {
     id,
     story_id: "STORY-1",
@@ -184,7 +249,11 @@ function belief(id: string, holder: string) {
     truth_relation: "true",
     confidence: "high",
     visibility: "public",
-    basis: { source_event: "SE-1", access_route: "direct_observation", access_records: ["SE-1"] },
+    basis: {
+      source_event: "SE-1",
+      access_route: basisOverrides.access_route ?? "direct_observation",
+      access_records: basisOverrides.access_records ?? ["SE-1"]
+    },
     consequences: { opens: [], constrains_choices: [] }
   });
 }

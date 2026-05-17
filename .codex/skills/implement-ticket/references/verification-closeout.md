@@ -140,6 +140,7 @@ For long tickets, use this expedited stale-anchor pass before final response:
 - Proof history: rerun, escalated, superseded, and count-changing commands have one final accepted result, with older results either removed from active proof language or clearly labelled as historical/environment/deviation evidence.
 - stale command fragments, old fixture names, placeholder alternatives, and old proof options have been grepped or manually scanned and resolved.
 - if any owned or closeout-edited file is untracked, `git diff --check` coverage has been made explicit: either temporary `git add -N` made the file visible and was cleaned up afterward, or an equivalent whitespace check was run over the exact untracked paths and recorded.
+- For untracked markdown ticket/spec/doc closeout, the preferred exact hygiene lane is `git add -N <path> && git diff --check -- <path> && git reset -- <path>`, followed by `git status --short` to prove the intent-to-add marker was cleared. If index staging is inappropriate or unavailable, run and record an explicit markdown fallback over the exact file: `grep -n '[[:blank:]]$' <path>` must return no matches, and `tail -c 1 <path> | od -An -tx1` must report `0a` for the final newline.
 
 ## Archival
 

@@ -430,6 +430,12 @@ function operationSchema(kind: OperationKind): JsonObject {
   }
 }
 
+export function createPatchOperationSchemaManifest(
+  opKinds: readonly OperationKind[] = OPERATION_KINDS
+): Record<string, JsonObject> {
+  return Object.fromEntries(opKinds.map((kind) => [kind, operationSchema(kind)]));
+}
+
 function retconAttestationSchema(): JsonObject {
   return {
     type: "object",
@@ -516,7 +522,7 @@ export async function describeEnvelopeSchema(
   args: DescribeEnvelopeSchemaArgs = {}
 ): Promise<DescribeEnvelopeSchemaResult> {
   const opKinds = args.op_kind === undefined ? [...OPERATION_KINDS] : [args.op_kind];
-  const opSchemas = Object.fromEntries(opKinds.map((kind) => [kind, operationSchema(kind)]));
+  const opSchemas = createPatchOperationSchemaManifest(opKinds);
 
   const response = {
     tool_names: {

@@ -11,6 +11,7 @@ import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
+import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
@@ -53,6 +54,7 @@ export const structuralValidators: readonly Validator[] = [
   stateSnapshotIntegrity,
   touchedByCfCompleteness,
   proposalPackageShape,
+  proseReceiptSchemaCompliance,
   modificationHistoryRetrofit,
   validationTraceShapeCompliance
 ];

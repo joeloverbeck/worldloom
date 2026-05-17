@@ -5,6 +5,7 @@ import test from "node:test";
 
 import yaml from "js-yaml";
 
+import { PRED_TYPES } from "../../src/rules/_shared/predicate-dsl-grammar.js";
 import {
   recordSchemaCompliance,
   requiresEpistemicProfile,
@@ -451,6 +452,63 @@ test("record_schema_compliance accepts storylet bound effect references and reje
     verdict.location.node_id === "SLT-16" &&
     verdict.message.includes("/exit_options/0/likely_effects/0")
   ));
+});
+
+test("record_schema_compliance enforces storylet predicate object shape", async () => {
+  const validPredicate = completeStorylet();
+  validPredicate.preconditions = {
+    hard: [{ pred: "record_active", record: "STENT-1" }],
+    soft: [{ pred: "has_affordance", action_family: "communicate" }]
+  };
+
+  const missingPred = completeStorylet();
+  missingPred.preconditions = {
+    hard: [{ predicate: "record_active", args: { target: "STENT-1" } }],
+    soft: []
+  };
+
+  const unknownPred = completeStorylet();
+  unknownPred.preconditions = {
+    hard: [{ pred: "unknown_predicate", record: "STENT-1" }],
+    soft: []
+  };
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      storyletRecord(validPredicate, "SLT-17"),
+      storyletRecord(missingPred, "SLT-18"),
+      storyletRecord(unknownPred, "SLT-19")
+    ])
+  );
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "SLT-17"));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "SLT-18" &&
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("must have required property 'pred'")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "SLT-19" &&
+    verdict.code === "record_schema_compliance.enum" &&
+    verdict.message.includes("/preconditions/hard/0/pred")
+  ));
+});
+
+test("record_schema_compliance storylet predicate schema mirrors runtime predicate names", () => {
+  const schema = JSON.parse(readFixture("../../src/schemas/story-storylet.schema.json")) as {
+    $defs: {
+      predicateObject: {
+        properties: {
+          pred: {
+            enum: string[];
+          };
+        };
+      };
+    };
+  };
+
+  assert.deepEqual(schema.$defs.predicateObject.properties.pred.enum, [...PRED_TYPES]);
 });
 
 test("record_schema_compliance rejects malformed branch-prefix-scoped storylet prefix fields", async () => {

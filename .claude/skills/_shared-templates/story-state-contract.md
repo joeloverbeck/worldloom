@@ -199,7 +199,7 @@ The state payload serialization is deterministic canonical JSON: objects seriali
 
 For root pages, compute both hashes after `PG-1`, the final page-plan bytes, emitted `CHC` records, and `PG-1.validation_trace` are finalized in working memory, then validate/submit the patch plan. For child pages, copy `state_hash_parent` exactly from the already-committed parent PG's `state_hash`, finalize the new PG and plan bytes, compute `plan.plan_hash`, compute `state_hash`, then validate/submit. If any later edit changes an included PG field or the page-plan bytes before submission, recompute the affected hash values before validation.
 
-**Tooling.** Every PG-authoring skill (`branching-story-bootstrap` Phase 7 hash steps, `branching-story-turn-cycle` Phase 9) MUST compute these hashes through the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js`, not through ad-hoc one-off scripts. Implementation source: `tools/world-mcp/src/cli/compute-pg-hashes.ts`; runtime invocation after build: `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-md-path> --pg <pg-record-path>`. The TS source path is the canonical reference for code authors; the dist JS path is the runtime invocation. Both are correct in their respective contexts. The CLI reuses the same `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator package (`snapshot_replay_equality`) uses for drift detection, so authoring-time hashes and validation-time drift comparisons are byte-identical by construction. Skill invocation pattern:
+**Tooling.** Every PG-authoring OR PG-verifying skill (PG-authoring: `branching-story-bootstrap` Phase 7 hash steps, `branching-story-turn-cycle` Phase 9; PG-verifying: `branching-story-prose-attach` Phase 2 `computed_state_hash` recomputation against the committed `PG.state_hash` for `hash_integrity` check) MUST compute these hashes through the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js`, not through ad-hoc one-off scripts. The PG-verifying case requires the same canonical-JSON serializer as the PG-authoring case — hand-rolling the serializer at verification time produces drift between committed and recomputed hashes that the receipt would misclassify as `hash_integrity: FAIL` when no actual drift exists. Implementation source: `tools/world-mcp/src/cli/compute-pg-hashes.ts`; runtime invocation after build: `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-md-path> --pg <pg-record-path>`. The TS source path is the canonical reference for code authors; the dist JS path is the runtime invocation. Both are correct in their respective contexts. The CLI reuses the same `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator package (`snapshot_replay_equality`) uses for drift detection, so authoring-time hashes and validation-time drift comparisons are byte-identical by construction. Skill invocation pattern:
 
 ```
 node tools/world-mcp/dist/src/cli/compute-pg-hashes.js \
@@ -314,8 +314,8 @@ created_at_page: PG-<integer> | null        # required for provenance.origin: ru
 title: string*
 move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery   # *
 preconditions:
-  hard: [<predicate>]*                 # see §5 closed predicate DSL
-  soft: [<predicate>]
+  hard: [<predicate object>]*          # see §5 closed predicate DSL emitted form
+  soft: [<predicate object>]
 beats:                                 # * 1-5 beats per block
   - beat_id: B1*
     function: setup | action | pressure | turn | consequence | exit   # *
@@ -676,7 +676,7 @@ No `display_name`, `role_in_story`, or `bound_char_id` fields: identity stays on
 
 ### 4.6 Prose receipt
 
-Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record).
+Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record). The canonical schema below is mirrored by the structural validator `prose_receipt_schema_compliance`, which validates receipt YAML in full-world runs and receipt-file incremental runs.
 
 ```yaml
 page_id: PG-<integer>*
@@ -705,11 +705,36 @@ repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_f
 
 The `checks` mapping contains eight deterministic prose/state checks plus the optional `craft_critic` result. `hash_integrity` is `PASS` when the recorded `PG.plan.plan_hash` and `PG.state_hash` are lowercase sha256-shaped and match the recomputed plan/state hashes, `WARN` when drift is accepted because `accept_plan_drift=true`, and `FAIL` when drift is not accepted or either PG hash field is missing, placeholder, or non-sha256. `choice_consequence_visibility` verifies that rendered prose realizes `SE.resolution.player_visible_feedback`; it does not mutate `PG` state or re-author the selected event.
 
+Receipt schema drift is checked by `prose_receipt_schema_compliance` in `tools/validators`. A receipt-specific structural smoke uses the compiled validator CLI after the receipt exists, for example:
+
+```bash
+node tools/validators/dist/src/cli/world-validate.js <world_slug> --structural --file worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/PG-<integer>.yaml --json
+```
+
 A failed receipt blocks publication only if the attaching skill ran with `strict=true`. **A receipt never mutates `PG` state.**
 
 ## 5. Closed Predicate DSL
 
 `SLT.preconditions.hard | soft` use this closed grammar. No free-form predicate prose.
+The table below is compact notation for humans; actual SLT YAML emits flat
+predicate objects with `pred: <predicate_name>` plus predicate-specific fields.
+`pred` names are closed by `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`
+and exposed in the `tools/validators/src/schemas/story-storylet.schema.json`
+schema-discovery surface. Do not emit `predicate` / `args` wrapper objects.
+
+Canonical emitted form:
+
+```yaml
+preconditions:
+  hard:
+    - pred: record_active
+      record: STENT-1
+    - pred: any_belief
+      alias: public_belief
+      holder_role: witness
+      mode: believes
+  soft: []
+```
 
 | Predicate | Shape | Consumed by |
 |---|---|---|

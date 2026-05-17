@@ -241,12 +241,7 @@ If `docs/FOUNDATIONS.md` or the live package/test boundary makes the drafted spl
 
 When this happens, rewrite the active ticket as the truthful owner before code edits. Name any absorbed sibling tickets explicitly in `Assumption Reassessment`, then update or archive those sibling tickets during closeout if the user asked for full completion or archival.
 
-Escalate with 1-3-1 when the fallout crosses a real ownership boundary even if it was discovered during reassessment.
-
-Examples:
-
-- same-seam / no escalation: a CLI ticket also needs the missing parser/helper module that the CLI path cannot function without
-- boundary growth / escalate: a CLI ticket appears to require MCP wiring, hook orchestration, or a sibling validator/spec family that the active ticket did not already own
+Escalate with 1-3-1 when the fallout crosses a real ownership boundary even if it was discovered during reassessment. Use `references/mismatch-handling.md` for concrete same-seam vs boundary-growth examples.
 
 If the discovered fallout crosses into high-trust world canon or other canon-mutating cleanup, do not widen a package/tool/docs ticket into direct source cleanup just to make a broad gate green. When the current ticket can close truthfully by preserving visible failures, documenting the baseline, and creating a bounded follow-up for canon-addition-equivalent cleanup or an explicit grandfather policy, keep the active implementation on its original non-canon seam and create/update that follow-up instead.
 

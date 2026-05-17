@@ -88,9 +88,45 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 **Persisted tool results**: `get_context_packet` overflow, unprojected hybrid `get_record` overflow, oversized `get_records`, and oversized `describe_envelope_schema` use the same package-owned results directory. Set `WORLDLOOM_MCP_TOOL_RESULTS_DIR` to override it; otherwise the default is `/tmp/worldloom-mcp-tool-results/`. These persisted JSON files are recovery artifacts for the current local agent session, not canon or durable project outputs.
 
+### Build-info fields
+
+`describe_capabilities` returns a `build_info` object alongside the tool list.
+Each field exposes a different currency surface:
+
+- `git_commit_hash` — the git commit the server source was built from.
+  `unknown` when the build environment lacks git context.
+- `build_timestamp` — ISO-8601 timestamp of server-start build-info capture.
+  Useful for "when was this server instance made" inspection; not a fingerprint.
+- `source_schema_hash` — SHA-256 over normalized tool capabilities (sorted
+  `{name, description, input_schema_enums}` per tool). Changes when the tool
+  surface itself changes (new tool added, enum value added, description
+  rewritten). It does not change when validator or patch-operation internals
+  change without affecting the tool surface.
+- `validator_registry_hash` — SHA-256 over the concatenated source bytes of
+  every `.ts` file in `tools/validators/src/structural/` and
+  `tools/validators/src/rules/`, sorted by path. Changes when any validator's
+  source content changes, even when the validator name is unchanged. This is the
+  fingerprint a consumer checks to verify whether the running server has the
+  expected validator bundle.
+- `patch_operation_schema_hash` — SHA-256 over the patch-operation schema
+  manifest (op-kind to op-schema mapping, sorted by kind). Changes when an
+  op-kind's payload schema changes, such as required-field additions/removals,
+  type changes, or enum value changes. Use it to catch schema drift in deployed
+  servers where the tool surface name may be unchanged but the underlying
+  contract has shifted.
+
+Consumers verifying server currency should compare both
+`validator_registry_hash` and `patch_operation_schema_hash` against locally
+computed expectations. Neither alone catches all drift:
+`validator_registry_hash` catches validator-implementation drift;
+`patch_operation_schema_hash` catches contract drift. The deployed smoke test at
+`tools/world-mcp/tests/server/dispatch.test.ts` complements these passive
+fingerprints by actively exercising validator code paths against known-bad
+fixtures.
+
 ## Schema Currency Verification
 
-When source adds a new MCP enum value or tool, the running server may still be older than the checkout if `tools/world-mcp/dist/` was not rebuilt or the MCP server/client session was not restarted. Use `mcp__worldloom__describe_capabilities()` to inspect the deployed server's build metadata and enum-valued input contracts. If the deployed contract is stale, run `cd tools/world-mcp && npm run build`, then restart the MCP server/client session so it loads `tools/world-mcp/dist/src/server.js`.
+When source adds a new MCP enum value, tool, validator behavior, or patch-operation contract, the running server may still be older than the checkout if `tools/world-mcp/dist/` was not rebuilt or the MCP server/client session was not restarted. Use `mcp__worldloom__describe_capabilities()` to inspect the deployed server's build metadata, enum-valued input contracts, `build_info.validator_registry_hash`, and `build_info.patch_operation_schema_hash`. If the deployed contract is stale, run `cd tools/world-mcp && npm run build`, rebuild `tools/validators` when validator source changed, then restart the MCP server/client session so it loads `tools/world-mcp/dist/src/server.js` and the rebuilt validator bundle.
 
 For patch-plan assembly, use `mcp__worldloom__describe_envelope_schema(op_kind?)` to retrieve the current deployed envelope and operation-payload shapes for `validate_patch_plan` and `submit_patch_plan`. This is the machine-readable path for fields that previously lived only in skill prose, such as `patch_plan.approval_token`, `patches[].target_file`, and `payload.cf_record`.
 
@@ -110,7 +146,7 @@ Retrieval now distinguishes four trust tiers instead of flattening everything in
 | Retrieval tools report missing nodes or persistent `stale_index` | `_index/world.db` is absent, incompatible, or still stale after the retrieval layer's one-shot auto-sync recovery | Run `world-index init <world>` for an empty bootstrap, or `world-index build <world>` / `world-index sync <world>` for populated world state. If a successful retrieval response includes `freshness_audit.pre_call_index_was_stale: true`, auto-sync already recovered the stale index and no manual retry is needed. |
 | A record exists under `_source/` or `stories/<story>/_source/` but is missing from retrieval/index queries | The record's extracted id failed the registered schema pattern, so `world-index build` / `sync` skipped it instead of inserting an invalid node | Inspect `worlds/<slug>/_index/world.db.skipped_records.log` for the file path, node type, extracted id, skip reason, and expected pattern. Legacy suffixed STINT ids such as `STINT-1-<char>` are preserved on disk but skipped by the current bare-numeric `STINT-<integer>` index contract. |
 | A tool rejects an enum value that exists in source, such as a new `task_type` or `id_class` | The running MCP server is older than the source checkout, or `tools/world-mcp/dist/` was not rebuilt after the source change | Run `mcp__worldloom__describe_capabilities()` to inspect the deployed enum contract. If it is stale, run `cd tools/world-mcp && npm run build`, then restart the MCP server/client session so it loads `tools/world-mcp/dist/src/server.js`. This is the schema currency verification path introduced after the MCPENH-005 / ENGINESYNC-002 friction case. |
-| A tool's pre-apply validators reject a patch plan with verdicts inconsistent with the just-rebuilt validators source | The running MCP server still holds the pre-rebuild `@worldloom/validators` compiled bundle in memory. `describe_capabilities()` cannot detect this because the validators bundle version is not part of the world-mcp tool or enum contract surface. | Principled fix: run `cd tools/validators && npm run build`, then restart the MCP server/client session so the world-mcp process re-imports the rebuilt validators bundle. Temporary workaround when session restart is not immediately available: invoke the pre-apply validators through `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>` and the patch engine through `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>`. Both CLI scripts spawn fresh Node processes that load the just-rebuilt validators bundle, bypassing the running server's startup-time cache. The CLI paths are functionally equivalent to the MCP tools: same engine wiring, same `PatchReceipt` output, same failure-mode codes. |
+| A tool's pre-apply validators reject a patch plan with verdicts inconsistent with the just-rebuilt validators source | The running MCP server still holds the pre-rebuild `@worldloom/validators` compiled bundle in memory. `describe_capabilities()` exposes `build_info.validator_registry_hash` as the deterministic fingerprint over validator source content; compare the runtime value against a locally computed hash to detect validator-bundle staleness directly. | Principled fix: run `cd tools/validators && npm run build`, then restart the MCP server/client session so the world-mcp process re-imports the rebuilt validators bundle. Temporary workaround when session restart is not immediately available: invoke the pre-apply validators through `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>` and the patch engine through `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>`. Both CLI scripts spawn fresh Node processes that load the just-rebuilt validators bundle, bypassing the running server's startup-time cache. The CLI paths are functionally equivalent to the MCP tools: same engine wiring, same `PatchReceipt` output, same failure-mode codes. |
 | A skill still wants giant raw reads | Retrieval integration is incomplete for that skill or phase | Use the current skill contract, but treat the context-packet path as the target state |
 | Direct Edit/Write is blocked on protected paths | Hook 3 sees an engine-only surface | Route the change through a patch plan instead of direct file editing |
 | Validation fails after a write | Rule or structural invariant violation | Fix the underlying world state and rerun validation; do not bypass the validator surface |

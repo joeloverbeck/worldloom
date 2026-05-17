@@ -31,15 +31,15 @@
       "type": "array",
       "minItems": 2,
       "maxItems": 2,
-      "items": { "type": "string", "pattern": "^STENT-(0|[1-9][0-9]*)$" }
+      "items": { "type": "string", "pattern": "^STENT-[0-9]+$" }
     },
     "direction": {
       "type": "object",
       "required": ["kind", "from", "to"],
       "properties": {
         "kind": { "type": "string", "enum": ["directed", "bidirectional"] },
-        "from": { "type": ["string", "null"], "pattern": "^STENT-(0|[1-9][0-9]*)$" },
-        "to": { "type": ["string", "null"], "pattern": "^STENT-(0|[1-9][0-9]*)$" }
+        "from": { "type": ["string", "null"], "pattern": "^STENT-[0-9]+$" },
+        "to": { "type": ["string", "null"], "pattern": "^STENT-[0-9]+$" }
       },
       "additionalProperties": false,
       "allOf": [
@@ -74,7 +74,7 @@
     "description": { "type": "string", "minLength": 1 },
     "derived_from": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^(CF|STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-(0|[1-9][0-9]*)$" }
+      "items": { "type": "string", "pattern": "^(CF|STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
     }
   },
   "additionalProperties": false

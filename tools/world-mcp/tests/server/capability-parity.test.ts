@@ -6,6 +6,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { OPERATION_KINDS, type OperationKind } from "@worldloom/patch-engine";
 
+import { computePatchOperationSchemaHash, computeValidatorRegistryHash } from "../../src/build-info";
 import { createServer } from "../../src/server";
 import { MCP_TOOL_ORDER, MCP_TOOL_NAMES } from "../../src/tool-names";
 import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema";
@@ -27,6 +28,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "non_propagation_tag_shape",
   "observer_firewall",
   "proposal_package_shape",
+  "prose_receipt_schema_compliance",
   "record_schema_compliance",
   "recursive_reference_closure",
   "rule1_no_floating_facts",
@@ -123,4 +125,38 @@ test("validator registry contains every named validator", () => {
     .sort((left, right) => left.localeCompare(right));
 
   assert.deepEqual(names, EXPECTED_VALIDATOR_NAMES);
+});
+
+test("describe_capabilities exposes validator_registry_hash for the current validator source content", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.describe_capabilities,
+      arguments: {}
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      build_info?: { validator_registry_hash?: string };
+    };
+
+    assert.match(structured.build_info?.validator_registry_hash ?? "", /^[0-9a-f]{64}$/);
+    assert.equal(structured.build_info?.validator_registry_hash, computeValidatorRegistryHash());
+  });
+});
+
+test("describe_capabilities exposes patch_operation_schema_hash for the current op schema manifest", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.describe_capabilities,
+      arguments: {}
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      build_info?: { patch_operation_schema_hash?: string };
+    };
+
+    assert.match(structured.build_info?.patch_operation_schema_hash ?? "", /^[0-9a-f]{64}$/);
+    assert.equal(structured.build_info?.patch_operation_schema_hash, computePatchOperationSchemaHash());
+  });
 });
