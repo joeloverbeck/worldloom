@@ -1,6 +1,6 @@
 # SPEC38STOLOCDIE-004: Amend `branching-story-turn-cycle` Phase 3+4 DA prescription
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-turn-cycle/SKILL.md`
@@ -8,7 +8,7 @@
 
 ## Problem
 
-`branching-story-turn-cycle` Phase 3 (`SKILL.md:289`) lists DA creation/alteration as one delta operation among many (`Create or alter story-local artifacts (DA new or supersession)`) with no triage prompt — authors creating page deltas have no rubric to apply when deciding whether the selected choice / write-in / event should create a new DA, supersede an existing one, create a derived DA via `derived_from`, or modify only BEL/SF/STOBJ. Phase 4 (`SKILL.md:325`) correctly documents the `expected_witness_coverage` propagation discipline for public/factional DAs but does not cross-reference the broader DA-authoring rubric that consumer skills now share. This ticket adds a Phase 3 triage sub-step + a Phase 4 cross-reference sentence.
+At intake, `branching-story-turn-cycle` Phase 3 listed DA creation/alteration as one delta operation among many (`Create or alter story-local artifacts (DA new or supersession)`) with no triage prompt — authors creating page deltas had no rubric to apply when deciding whether the selected choice / write-in / event should create a new DA, supersede an existing one, create a derived DA via `derived_from`, or modify only BEL/SF/STOBJ. Phase 4 correctly documented the `expected_witness_coverage` propagation discipline for public/factional DAs but did not cross-reference the broader DA-authoring rubric that consumer skills now share. This ticket added the Phase 3 triage sub-step and Phase 4 cross-reference sentence.
 
 ## Assumption Reassessment (2026-05-17)
 
@@ -30,11 +30,11 @@
 3. Cross-reference target resolves → `test -f .claude/skills/_shared-templates/da-authoring-reference.md` (per ticket 001).
 4. Single-layer ticket: documentation-only; verification is grep-based.
 
-## What to Change
+## Landed Changes
 
 ### 1. Phase 3 amendment
 
-Add a sub-step immediately before the state-delta materialization step in Phase 3 (placement: adjacent to or replacing the current `Create or alter story-local artifacts (DA new or supersession)` line). Content:
+Updated Phase 3 to name DA derivation alongside new/supersession cases and added this triage sub-step immediately after the state-delta operation list:
 
 ```
 **DA creation / supersession / derivation triage.** Before finalizing
@@ -51,7 +51,7 @@ or modify only BEL / SF / STOBJ. Satisfy the patch obligations at
 
 ### 2. Phase 4 amendment
 
-Add a single sentence to the existing propagation paragraph at line 325 (which describes `expected_witness_coverage` and the `non_propagation:event_leaves_no_accessible_trace` tag). Content:
+Added this sentence immediately after the existing propagation paragraph that describes `expected_witness_coverage` and the `non_propagation:event_leaves_no_accessible_trace` tag:
 
 ```
 For the full circulation-and-propagation rule set including the BEL
@@ -60,7 +60,7 @@ access-route enum, non-propagation tag syntax, and worked examples, see
 and §Patch obligations.
 ```
 
-The existing `expected_witness_coverage` description remains in place — the new sentence is purely additive cross-reference.
+The existing `expected_witness_coverage` description remains in place; the new sentence is a purely additive cross-reference.
 
 ## Files to Touch
 
@@ -97,3 +97,30 @@ The existing `expected_witness_coverage` description remains in place — the ne
 
 1. `grep -nE 'DA creation.*triage|da-authoring-reference|expected_witness_coverage' .claude/skills/branching-story-turn-cycle/SKILL.md` (presence checks across both phases)
 2. `test -f .claude/skills/_shared-templates/da-authoring-reference.md` (cross-reference target exists per ticket 001)
+
+## Outcome
+
+Completed: 2026-05-17
+
+- Added Phase 3 DA creation / supersession / derivation triage to `.claude/skills/branching-story-turn-cycle/SKILL.md`, pointing operators to `.claude/skills/_shared-templates/da-authoring-reference.md` §Triage, §Decision matrix, and §Patch obligations.
+- Added the Phase 4 circulation-and-propagation cross-reference sentence to the same shared reference's §Field semantics and §Patch obligations.
+- Preserved the existing `expected_witness_coverage` validator description unchanged; this ticket made no validator, schema, or story-content changes.
+
+## Verification Result
+
+Commands run from repository root:
+
+```bash
+grep -nE 'DA creation.*triage|da-authoring-reference|expected_witness_coverage' .claude/skills/branching-story-turn-cycle/SKILL.md
+test -f .claude/skills/_shared-templates/da-authoring-reference.md
+```
+
+Results:
+
+- `grep` returned the Phase 3 DA triage heading, shared-reference citations, the retained `expected_witness_coverage` paragraph, the new Phase 4 shared-reference sentence, and the pre-existing Phase 9 expected-witness checklist reference.
+- `test -f` returned success for `.claude/skills/_shared-templates/da-authoring-reference.md`.
+- Manual review of `.claude/skills/branching-story-turn-cycle/SKILL.md` confirmed the Phase 4 cross-reference is additive and does not remove or weaken the existing validator description.
+
+## Deviations
+
+- No implementation deviations for this ticket.

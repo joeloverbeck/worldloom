@@ -286,10 +286,23 @@ Apply exactly one causal delta from parent snapshot. The delta may:
 - Create consequences (`CNSQ` new), always setting `urgency` on the emitted record.
 - Advance or close threads (`THR` supersession).
 - Move entities or objects (`STSTAT.location` supersession for entity movement; `STOBJ` supersession for object movement).
-- Create or alter story-local artifacts (`DA` new or supersession).
+- Create or alter story-local artifacts (`DA` new, supersession, or
+  derivation).
 - Mark the branch terminal (set `PG-<integer>.state_snapshot.continuation.terminal_status: terminal_closed` with `terminal_rationale`).
 
 Supersession is file-level append-only per shared contract §3 — a new record file (e.g., a new `SREL-<integer>.yaml` or `STSTAT-<integer>.yaml`) carries `supersedes: <prior-id>` in its YAML body. The existing `create_*_record` patch ops handle this.
+
+**DA creation / supersession / derivation triage.** Before finalizing
+`SE.state_delta`, scan the selected choice / write-in / event effects for
+written, found, read, posted, forged, translated, copied, redacted, damaged,
+broadcast, suppressed, or destroyed communicative artifacts. Apply the triage
+rubric and decision matrix at
+`.claude/skills/_shared-templates/da-authoring-reference.md` §Triage and
+§Decision matrix to decide whether the turn should create a new DA, supersede
+an existing DA, create a derived DA (`derived_from: [DA-*]`), or modify only
+`BEL` / `SF` / `STOBJ`. Satisfy the patch obligations at
+`.claude/skills/_shared-templates/da-authoring-reference.md` §Patch
+obligations for every DA created or superseded.
 
 For every life / agency / location change, supersede the affected entity's active `STSTAT` record and include both the superseded id and the new `STSTAT` id in `SE.state_delta` (`supersede` and `create`, respectively). Do not encode those status changes by superseding `STENT`; `STENT` remains stable identity / role metadata. Recompute `PG.state_snapshot.entity_status` from the resulting active `STSTAT` set.
 
@@ -323,6 +336,7 @@ For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL
   - `indirect`: public or factional holders who would receive the event through law, ritual, bureaucracy, artifact circulation, public violence, visible environmental change, or other accessible evidence (`DA` / `STOBJ` / location-state traces).
   - `excluded`: `STENT` records that are concealed, offstage, unconscious, socially barred, lacking access, or otherwise unable to perceive or receive the event.
 - The structural validator `expected_witness_coverage` enforces the indirect-witness obligation deterministically for one specific cue: when the SE's `state_delta.create[]` produces a DA with `circulation` in `{public, factional}`, at least one BEL referencing that DA via `basis.access_records[]` MUST carry `basis.access_route` in the indirect-route set `{document, object_trace, location_trace, rumor, surveillance, institutional_channel, magic_tech}`, or the SE's `world_logic_rationale` MUST carry a parseable `non_propagation:event_leaves_no_accessible_trace(group=<label>, records=[<DA-id>])` tag. Missing coverage emits `expected_witness_coverage_missing_indirect_propagation`. Other indirect-witness obligations (multi-location supersession, STENT-death with SREL ties, environmental change) remain authorial discipline and are not yet enforced by the validator; see SPEC-37 D2 for the indirect-cue calibration roadmap.
+- For the full circulation-and-propagation rule set including the `BEL` access-route enum, non-propagation tag syntax, and worked examples, see `.claude/skills/_shared-templates/da-authoring-reference.md` §Field semantics and §Patch obligations.
 - For every relevant direct or indirect witness group, account for propagation with either a created/superseded `BEL` or an explicit non-propagation rationale from this closed set: `no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, `event_leaves_no_accessible_trace`.
 - Record each non-propagation rationale in `SE.world_logic_rationale` with the parseable tag form `non_propagation:<reason>(group=<label>, records=[<record_ids>])`, using one tag per uncovered witness group. The `group` label must match the direct or indirect witness group from `expected_witnesses`; `records` names the story records that prove concealment, incapacity, institutional suppression, lack of accessible trace, or other closed-set reason (use `records=[]` only for `no_witness` when no record can exist). Authoring notes may elaborate, but the tag in `SE.world_logic_rationale` is the replay authority for `branching-story-health-audit`.
 - Who knows (`belief_mode: knows`, `truth_relation: true`, `visibility: shared` or `public`, `confidence: certain`).
