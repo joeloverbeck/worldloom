@@ -42,6 +42,7 @@ export interface IdAllocations {
   story_da_ids?: string[];
   clk_ids?: string[];
   stsec_ids?: string[];
+  stq_ids?: string[];
 }
 
 export interface PatchPlanEnvelope {
@@ -99,6 +100,10 @@ export const OPERATION_KINDS = [
   "append_secret_clue_carrier",
   "mark_secret_clue_discovered",
   "reveal_story_secret",
+  "create_stq_record",
+  "supersede_stq_record",
+  "answer_story_question",
+  "abandon_story_question",
   "append_story_diegetic_artifact_record"
 ] as const;
 
@@ -235,6 +240,20 @@ export interface RevealStorySecretPayload {
   reveal_records: string[];
 }
 
+export interface AnswerStoryQuestionPayload {
+  story_slug: string;
+  target_question_id: string;
+  status: "answered" | "paid_off";
+  answer_event: string;
+  answer_records: string[];
+}
+
+export interface AbandonStoryQuestionPayload {
+  story_slug: string;
+  target_question_id: string;
+  abandonment_rationale: string;
+}
+
 export type PatchOperation =
   | OperationBase<"create_cf_record", { cf_record: CanonFactRecord }>
   | OperationBase<"create_ch_record", { ch_record: ChangeLogEntry }>
@@ -311,6 +330,10 @@ export type PatchOperation =
   | OperationBase<"append_secret_clue_carrier", AppendSecretClueCarrierPayload>
   | OperationBase<"mark_secret_clue_discovered", MarkSecretClueDiscoveredPayload>
   | OperationBase<"reveal_story_secret", RevealStorySecretPayload>
+  | OperationBase<"create_stq_record", StoryRecordPayload>
+  | OperationBase<"supersede_stq_record", StoryRecordPayload>
+  | OperationBase<"answer_story_question", AnswerStoryQuestionPayload>
+  | OperationBase<"abandon_story_question", AbandonStoryQuestionPayload>
   | OperationBase<"append_story_diegetic_artifact_record", StoryRecordPayload>;
 
 export type OperationPayload = PatchOperation["payload"];

@@ -250,6 +250,90 @@ test("supersede_stsec_record writes replacement STSEC YAML through the story-rec
   assertYamlEquals(staged, op.payload.record);
 });
 
+test("create_stq_record writes STQ YAML under the story _source story-questions tree", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ stq_ids: ["STQ-1"] });
+  const op = {
+    op: "create_stq_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "STQ-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        setup_kind: "setup",
+        question_or_setup: "The locked drawer remains unopened.",
+        salience: "high",
+        audience_visibility: "explicit",
+        source_event: "SE-1",
+        source_records: ["STOBJ-1"],
+        status: "open"
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_stq_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "story-questions",
+      "STQ-1.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
+test("supersede_stq_record writes replacement STQ YAML through the story-record path", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ stq_ids: ["STQ-2"] });
+  const op = {
+    op: "supersede_stq_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "STQ-2",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
+        supersedes: "STQ-1",
+        setup_kind: "dramatic_question",
+        question_or_setup: "Who hid the ledger?",
+        salience: "high",
+        audience_visibility: "implied",
+        source_event: "SE-2",
+        source_records: ["BEL-1"],
+        payoff_of: "STQ-1",
+        status: "complicated"
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "supersede_stq_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "story-questions",
+      "STQ-2.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
 test("create_ststat_record writes STSTAT YAML under the story _source status tree", async (t) => {
   const world = createTestWorld(t);
   const env = baseEnvelope({ ststat_ids: ["STSTAT-0001"] });

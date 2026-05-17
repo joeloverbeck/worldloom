@@ -71,6 +71,7 @@ const STORY_CLASS_CASES: Array<{
   { idClass: "STSTAT", subdir: "status", fileName: "STSTAT-0007.yaml", expected: "STSTAT-8" },
   { idClass: "CLK", subdir: "clocks", fileName: "CLK-0007.yaml", expected: "CLK-8" },
   { idClass: "STSEC", subdir: "secrets", fileName: "STSEC-0007.yaml", expected: "STSEC-8" },
+  { idClass: "STQ", subdir: "story-questions", fileName: "STQ-0007.yaml", expected: "STQ-8" },
   { idClass: "DA", subdir: "artifacts", fileName: "DA-0007.yaml", expected: "DA-8" }
 ];
 
@@ -348,6 +349,9 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     const secretResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "STSEC", story_slug: "empty-story" })
     );
+    const questionResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "STQ", story_slug: "empty-story" })
+    );
 
     assert.ok(!("code" in pageResult));
     assert.ok(!("code" in stintResult));
@@ -358,6 +362,7 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     assert.ok(!("code" in statusResult));
     assert.ok(!("code" in clockResult));
     assert.ok(!("code" in secretResult));
+    assert.ok(!("code" in questionResult));
     assert.equal(pageResult.next_id, "PG-1");
     assert.equal(stintResult.next_id, "STINT-1");
     assert.equal(slbResult.next_id, "SLB-1");
@@ -367,6 +372,7 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     assert.equal(statusResult.next_id, "STSTAT-1");
     assert.equal(clockResult.next_id, "CLK-1");
     assert.equal(secretResult.next_id, "STSEC-1");
+    assert.equal(questionResult.next_id, "STQ-1");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -780,6 +786,7 @@ test("allocateNextId exposes all 52 id classes with canonical unpadded formats",
     "STSTAT",
     "CLK",
     "STSEC",
+    "STQ",
     "M",
     "ONT",
     "CAU",
@@ -796,7 +803,7 @@ test("allocateNextId exposes all 52 id classes with canonical unpadded formats",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 52);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 53);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, false);
   assert.match("STORY-8", ID_CLASS_FORMATS.STORY.regex);
@@ -808,6 +815,8 @@ test("allocateNextId exposes all 52 id classes with canonical unpadded formats",
   assert.match("CLK-8", ID_CLASS_FORMATS.CLK.regex);
   assert.equal(ID_CLASS_FORMATS.STSEC.zeroPad, false);
   assert.match("STSEC-8", ID_CLASS_FORMATS.STSEC.regex);
+  assert.equal(ID_CLASS_FORMATS.STQ.zeroPad, false);
+  assert.match("STQ-8", ID_CLASS_FORMATS.STQ.regex);
   assert.equal(ID_CLASS_FORMATS.PG.zeroPad, false);
   assert.match("PG-8", ID_CLASS_FORMATS.PG.regex);
   assert.match("STINT-8", ID_CLASS_FORMATS.STINT.regex);

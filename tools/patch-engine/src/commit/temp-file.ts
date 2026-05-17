@@ -1,6 +1,8 @@
 import type { PatchOperation, PatchPlanEnvelope } from "../envelope/schema.js";
 import { contentHashForYaml, isRecord } from "../ops/shared.js";
 import { stageAppendAdjudicationRecord } from "../ops/append-adjudication-record.js";
+import { stageAbandonStoryQuestion } from "../ops/abandon-story-question.js";
+import { stageAnswerStoryQuestion } from "../ops/answer-story-question.js";
 import { stageAppendCharacterRecord } from "../ops/append-character-record.js";
 import { stageAppendDiegeticArtifactRecord } from "../ops/append-diegetic-artifact-record.js";
 import { stageAppendExtension } from "../ops/append-extension.js";
@@ -136,6 +138,8 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "supersede_clk_record":
     case "create_stsec_record":
     case "supersede_stsec_record":
+    case "create_stq_record":
+    case "supersede_stq_record":
     case "append_story_diegetic_artifact_record": {
       const metadata = storyRecordMetadata(patch);
       return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
@@ -147,6 +151,9 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "mark_secret_clue_discovered":
     case "reveal_story_secret":
       return metadataForTargetRecordId(patch.payload.target_secret_id);
+    case "answer_story_question":
+    case "abandon_story_question":
+      return metadataForTargetRecordId(patch.payload.target_question_id);
     case "update_record_field":
     case "append_extension":
       return metadataForTargetRecordId(patch.payload.target_record_id);
@@ -168,7 +175,7 @@ const STORY_BUNDLE_NODE_TYPE_BY_PREFIX: Readonly<Record<string, string>> = Objec
 );
 
 const STORY_BUNDLE_ID_PATTERN =
-  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA|CLK|STSEC)-\d+$/;
+  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA|CLK|STSEC|STQ)-\d+$/;
 
 function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType: string } | null {
   if (/^CF-\d+$/.test(recordId)) {
@@ -265,6 +272,8 @@ function stageOne(
     case "supersede_clk_record":
     case "create_stsec_record":
     case "supersede_stsec_record":
+    case "create_stq_record":
+    case "supersede_stq_record":
     case "append_story_diegetic_artifact_record":
       return stageCreateStoryRecord(envelope, patch, ctx);
     case "tick_pressure_clock":
@@ -277,5 +286,9 @@ function stageOne(
       return stageMarkSecretClueDiscovered(envelope, patch, ctx);
     case "reveal_story_secret":
       return stageRevealStorySecret(envelope, patch, ctx);
+    case "answer_story_question":
+      return stageAnswerStoryQuestion(envelope, patch, ctx);
+    case "abandon_story_question":
+      return stageAbandonStoryQuestion(envelope, patch, ctx);
   }
 }

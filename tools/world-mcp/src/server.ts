@@ -249,6 +249,7 @@ export const ID_CLASSES = [
   "STSTAT",
   "CLK",
   "STSEC",
+  "STQ",
   "M",
   "ONT",
   "CAU",

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `branching-story-turn-cycle` SKILL.md with Phase 4 (state-delta computation) integration for ticking clocks, revealing secrets, and advancing story questions during SE state-delta computation; extends Phase 7 (page-plan rendering) with a new §10b "Open Setups, Active Clocks, Hidden Secrets" per-page-computed section; no new skill phases introduced
-**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, SPEC42STOSTADEB-003, SPEC42STOSTADEB-005, SPEC42STOSTADEB-006, SPEC42STOSTADEB-007, SPEC42STOSTADEB-008
+**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, archive/tickets/SPEC42STOSTADEB-003.md, SPEC42STOSTADEB-005, SPEC42STOSTADEB-006, SPEC42STOSTADEB-007, SPEC42STOSTADEB-008
 
 ## Problem
 

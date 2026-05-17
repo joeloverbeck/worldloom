@@ -93,6 +93,7 @@ export const recordSchemaCompliance: Validator = {
       if (!validate(record.parsed)) {
         verdicts.push(...schemaVerdicts(record, validate.errors ?? []));
       }
+      verdicts.push(...storyQuestionDisciplineVerdicts(record));
       verdicts.push(...canonSafetyBlockVerdicts(record, ctx, preApplyTouchedFiles));
     }
 
@@ -162,6 +163,70 @@ function canonSafetyBlockVerdicts(
 
   verdicts.push(...naRationaleVerdicts(record, "epistemic_profile", parsed.epistemic_profile));
   verdicts.push(...naRationaleVerdicts(record, "exception_governance", parsed.exception_governance));
+  return verdicts;
+}
+
+function storyQuestionDisciplineVerdicts(record: SchemaTarget): Verdict[] {
+  if (record.node_type !== "story_question_record") {
+    return [];
+  }
+
+  const parsed = asPlainRecord(record.parsed);
+  const directFields: Array<[string, string]> = [
+    [
+      "expected_payoff_mode",
+      "STQ records prohibit expected_payoff_mode per FOUNDATIONS Story Bundles 5c; it encodes future shape."
+    ],
+    [
+      "act_position",
+      "STQ records prohibit act-position fields per FOUNDATIONS Story Bundles 5c; the engine tracks present causal state, not narrative shape."
+    ],
+    [
+      "midpoint",
+      "STQ records prohibit act-position fields per FOUNDATIONS Story Bundles 5c; the engine tracks present causal state, not narrative shape."
+    ],
+    [
+      "climax",
+      "STQ records prohibit act-position fields per FOUNDATIONS Story Bundles 5c; the engine tracks present causal state, not narrative shape."
+    ],
+    [
+      "dramatic_curve_position",
+      "STQ records prohibit dramatic-curve fields per FOUNDATIONS Story Bundles 5c."
+    ],
+    [
+      "tension_arc",
+      "STQ records prohibit dramatic-curve fields per FOUNDATIONS Story Bundles 5c."
+    ],
+    [
+      "expected_chapter",
+      "STQ records prohibit scene-sequence fields per FOUNDATIONS Story Bundles 5a."
+    ],
+    [
+      "scene_sequence",
+      "STQ records prohibit scene-sequence fields per FOUNDATIONS Story Bundles 5a."
+    ],
+    [
+      "holders",
+      "STQ records prohibit separate holders field; audience-vs-character distinction is covered by audience_visibility plus source_records grounding."
+    ]
+  ];
+
+  const verdicts = directFields
+    .filter(([field]) => Object.prototype.hasOwnProperty.call(parsed, field))
+    .map(([field, message]) => customSchemaVerdict(
+      record,
+      `record_schema_compliance.stq_prohibited_${field}`,
+      `${record.node_id} STQ discipline violation at /${field}: ${message}`
+    ));
+
+  if (parsed.setup_kind === "moral_question") {
+    verdicts.push(customSchemaVerdict(
+      record,
+      "record_schema_compliance.stq_prohibited_moral_question",
+      `${record.node_id} STQ discipline violation at /setup_kind: STQ.setup_kind prohibits moral_question per FOUNDATIONS Story Bundles 5c; it is authorial and not validator-readable.`
+    ));
+  }
+
   return verdicts;
 }
 

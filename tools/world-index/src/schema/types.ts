@@ -42,6 +42,7 @@ export const NODE_TYPES = [
   "storylet_record",
   "pressure_clock_record",
   "story_secret_record",
+  "story_question_record",
   "story_diegetic_artifact_record",
   "audit_record_story",
   "promotion_record",

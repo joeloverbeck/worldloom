@@ -39,6 +39,8 @@ export type StoryRecordOperationKind =
   | "supersede_clk_record"
   | "create_stsec_record"
   | "supersede_stsec_record"
+  | "create_stq_record"
+  | "supersede_stq_record"
   | "append_story_diegetic_artifact_record";
 
 type StoryRecordOperation = Extract<PatchOperation, { op: StoryRecordOperationKind }> & {
@@ -66,6 +68,8 @@ const STORY_RECORD_OPERATION_KINDS: readonly StoryRecordOperationKind[] = [
   "supersede_clk_record",
   "create_stsec_record",
   "supersede_stsec_record",
+  "create_stq_record",
+  "supersede_stq_record",
   "append_story_diegetic_artifact_record"
 ];
 
@@ -211,6 +215,20 @@ export const STORY_RECORD_SPECS: Readonly<Record<StoryRecordOperationKind, Story
     nodeType: "story_secret_record",
     prefix: "STSEC",
     sourceDir: "secrets"
+  },
+  create_stq_record: {
+    allocationKey: "stq_ids",
+    idPattern: /^STQ-\d+$/,
+    nodeType: "story_question_record",
+    prefix: "STQ",
+    sourceDir: "story-questions"
+  },
+  supersede_stq_record: {
+    allocationKey: "stq_ids",
+    idPattern: /^STQ-\d+$/,
+    nodeType: "story_question_record",
+    prefix: "STQ",
+    sourceDir: "story-questions"
   },
   append_story_diegetic_artifact_record: {
     allocationKey: "story_da_ids",

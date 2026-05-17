@@ -83,11 +83,12 @@ const STORY_DIRS = new Map<string, AtomicRecordSpec>([
   ["storylets", recordSpec("storylet_record", "id", "^SLT-[0-9]+$")],
   ["clocks", recordSpec("pressure_clock_record", "id", "^CLK-[0-9]+$")],
   ["secrets", recordSpec("story_secret_record", "id", "^STSEC-[0-9]+$")],
+  ["story-questions", recordSpec("story_question_record", "id", "^STQ-[0-9]+$")],
   ["artifacts", recordSpec("story_diegetic_artifact_record", "id", "^DA-[0-9]+$")]
 ]);
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
-const STORY_REF_REGEX = /\b(STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|DA)-[A-Za-z0-9-]+\b/g;
+const STORY_REF_REGEX = /\b(STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|DA)-[A-Za-z0-9-]+\b/g;
 
 export type AtomicSkipReason = "missing_id_field" | "schema_pattern_mismatch";
 

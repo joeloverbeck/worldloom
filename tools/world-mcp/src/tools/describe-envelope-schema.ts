@@ -105,6 +105,7 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   storylet_record: "story-storylet.schema.json",
   pressure_clock_record: "story-pressure-clock.schema.json",
   story_secret_record: "story-secret.schema.json",
+  story_question_record: "story-question.schema.json",
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 } as const;
 
@@ -438,6 +439,9 @@ function operationSchema(kind: OperationKind): JsonObject {
     case "create_stsec_record":
     case "supersede_stsec_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_secret_record"));
+    case "create_stq_record":
+    case "supersede_stq_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_question_record"));
     case "tick_pressure_clock":
       return baseOperationProperties(kind, {
         type: "object",
@@ -498,6 +502,33 @@ function operationSchema(kind: OperationKind): JsonObject {
             type: "array",
             items: stringSchema("^(BEL|SF|DA|STQ)-[0-9]+$")
           }
+        }
+      });
+    case "answer_story_question":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_question_id", "status", "answer_event", "answer_records"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_question_id: stringSchema("^STQ-[0-9]+$"),
+          status: { type: "string", enum: ["answered", "paid_off"] },
+          answer_event: stringSchema("^SE-[0-9]+$"),
+          answer_records: {
+            type: "array",
+            items: stringSchema("^[A-Z]+-[0-9]+$")
+          }
+        }
+      });
+    case "abandon_story_question":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_question_id", "abandonment_rationale"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_question_id: stringSchema("^STQ-[0-9]+$"),
+          abandonment_rationale: stringSchema()
         }
       });
     case "append_story_diegetic_artifact_record":

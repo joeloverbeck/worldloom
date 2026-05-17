@@ -3,12 +3,12 @@
 **Status**: PENDING
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — adds 4 new STQ-specific structural validators under `tools/validators/src/structural/`, 4 new STQ-specific predicates to the closed predicate DSL, and registers all 4 validators in the validator registry; reinforces the §5c discipline at the validator layer (the schema-level `additionalProperties: false` from SPEC42STOSTADEB-003 catches authoring-time mistakes; the validators catch state-evolution mistakes like a payoff that predates its setup); no existing validators or predicates altered
-**Deps**: SPEC42STOSTADEB-003
+**Engine Changes**: Yes — adds 4 new STQ-specific structural validators under `tools/validators/src/structural/`, 4 new STQ-specific predicates to the closed predicate DSL, and registers all 4 validators in the validator registry; reinforces the §5c discipline at the validator layer (the schema-level `additionalProperties: false` from archive/tickets/SPEC42STOSTADEB-003.md catches authoring-time mistakes; the validators catch state-evolution mistakes like a payoff that predates its setup); no existing validators or predicates altered
+**Deps**: archive/tickets/SPEC42STOSTADEB-003.md
 
 ## Problem
 
-SPEC42STOSTADEB-003 landed the STQ class foundation including the `record_schema_compliance` HARD-REJECT extension for §5c prohibited fields, but STQ records have no domain-specific validator coverage yet — payoff_of links can predate their setups, status transitions can land without grounding events, and high-salience open STQs at terminal pages can silently violate Rule 5. Storylets also cannot precondition on STQ state because the predicate DSL has no `story_question_*` predicates yet. This ticket lands the STQ-specific validator + predicate layer as one cohesive PR, completing the per-class validator + predicate trio (-005 CLK, -006 STSEC, -007 STQ).
+archive/tickets/SPEC42STOSTADEB-003.md landed the STQ class foundation including the `record_schema_compliance` HARD-REJECT extension for §5c prohibited fields, but STQ records have no domain-specific validator coverage yet — payoff_of links can predate their setups, status transitions can land without grounding events, and high-salience open STQs at terminal pages can silently violate Rule 5. Storylets also cannot precondition on STQ state because the predicate DSL has no `story_question_*` predicates yet. This ticket lands the STQ-specific validator + predicate layer as one cohesive PR, completing the per-class validator + predicate trio (-005 CLK, -006 STSEC, -007 STQ).
 
 ## Assumption Reassessment (2026-05-17)
 
@@ -23,7 +23,7 @@ SPEC42STOSTADEB-003 landed the STQ class foundation including the `record_schema
 ## Architecture Check
 
 1. **Per-class validator cohesion**: STQ's 4 validators all enforce STQ-specific invariants. Bundling them keeps STQ-specific structural-defense logic reviewable as a unit.
-2. **Validators complement schema-level §5c discipline**: SPEC42STOSTADEB-003's schema-level `additionalProperties: false` + `record_schema_compliance` HARD-REJECT catch *authoring-time* mistakes (someone trying to add a prohibited field). This ticket's validators catch *state-evolution* mistakes (someone trying to link a payoff to a setup that doesn't precede it in the branch path, or trying to terminal-commit with high-salience open STQs). Two-layer defense parallels SPEC42STOSTADEB-003 §3.
+2. **Validators complement schema-level §5c discipline**: archive/tickets/SPEC42STOSTADEB-003.md's schema-level `additionalProperties: false` + `record_schema_compliance` HARD-REJECT catch *authoring-time* mistakes (someone trying to add a prohibited field). This ticket's validators catch *state-evolution* mistakes (someone trying to link a payoff to a setup that doesn't precede it in the branch path, or trying to terminal-commit with high-salience open STQs). Two-layer defense parallels archive/tickets/SPEC42STOSTADEB-003.md §3.
 3. **`story_question_terminal_debt` mirrors `clock_terminal_debt_integrity` from -005**: both enforce Rule 5 at terminal-page commits; same branch-walk pattern, same high-salience-required threshold; reviewer can cross-reference for consistency.
 4. **Predicates ship alongside their validators**: the 4 STQ predicates are consumed at storylet-eligibility time; `promise_due(STQ-<int>, age_pages)` in particular is consumed by `branching-story-health-audit`'s dropped-setup detection (owned by SPEC42STOSTADEB-012).
 
@@ -83,7 +83,7 @@ Modify `tools/validators/src/public/registry.ts` to register the 4 new STQ valid
 
 ## Out of Scope
 
-- STQ class foundation (schema, machine-layer wiring, §5c HARD-REJECT extension to `record_schema_compliance`) — owned by SPEC42STOSTADEB-003
+- STQ class foundation (schema, machine-layer wiring, §5c HARD-REJECT extension to `record_schema_compliance`) — owned by archive/tickets/SPEC42STOSTADEB-003.md
 - CLK and STSEC validators + predicates — owned by SPEC42STOSTADEB-005 / -006
 - Shared validator extensions — owned by SPEC42STOSTADEB-008
 - Storylet authoring extensions consuming new STQ predicates — owned by SPEC42STOSTADEB-011

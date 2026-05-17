@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `branching-story-prose-attach` SKILL.md Phase 4 (prose-vs-state checks) to verify that rendered prose mentions clock-tick events present in the page's SE state-delta AND discloses revealed secrets when STSEC.status flips to `revealed`; surfaces findings as prose-receipt observations (not engine HARD-REJECTs); no new prose-attach phases introduced
-**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, SPEC42STOSTADEB-003, SPEC42STOSTADEB-009
+**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, archive/tickets/SPEC42STOSTADEB-003.md, SPEC42STOSTADEB-009
 
 ## Problem
 

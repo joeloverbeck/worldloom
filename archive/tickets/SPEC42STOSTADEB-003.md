@@ -1,6 +1,6 @@
 # SPEC42STOSTADEB-003: STQ story question — class foundation + §5c discipline statement
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds new story-bundle record class `STQ` (Story Question / Open Setup) end-to-end across `tools/world-index/`, `tools/world-mcp/`, `tools/patch-engine/`, `tools/validators/`, and the canonical story state contract; introduces two new custom patch-engine ops (`answer_story_question`, `abandon_story_question`); extends `record_schema_compliance` validator with §5c prohibited-field HARD-REJECT enforcement (the structural defense against re-introducing the rejected scene-commitment-arc encoding); no impact on existing record classes
@@ -14,9 +14,9 @@ Worldloom's story-bundle pipeline has no record class encoding "this Chekhov's g
 
 <!-- Items 1-3 always required. Items 4+ are a menu; include only those matching this ticket's scope and renumber surviving items sequentially starting from 4. Lists like 1, 2, 3, 14 are malformed output. -->
 
-1. Codebase verified at SPEC-42 brainstorm + Step 2 codebase validation (2026-05-17): all spec-cited foundation files exist; `tools/validators/src/structural/record-schema-compliance.ts` verified present (this ticket extends it); existing SLT class confirmed as parity-scan baseline; archived SPEC-19 through SPEC-22 (scene-commitment-arc) verified at `archive/specs/SPEC-19-scene-commitment-arc-schema.md` through `archive/specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (all rolled back; their `arc_contract` / `dramatic_unit` / `execution_envelope` / `ARC_TRACE` patterns are structurally forbidden by current `.claude/skills/_shared-templates/story-state-contract.md` §5a).
+1. Codebase verified during implementation (2026-05-17): all spec-cited foundation files exist; `tools/validators/src/structural/record-schema-compliance.ts` verified present (this ticket extends it); existing CLK/STSEC class foundations are the live parity baseline; archived SPEC-19 through SPEC-22 (scene-commitment-arc) verified at `archive/specs/SPEC-19-scene-commitment-arc-schema.md` through `archive/specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (all rolled back; their `arc_contract` / `dramatic_unit` / `execution_envelope` / `ARC_TRACE` patterns are structurally forbidden by current `.claude/skills/_shared-templates/story-state-contract.md` §5a).
 2. Spec verified at `specs/SPEC-42-story-state-debt-secret-clock-records.md` §C (STQ schema, 13 fields), §C §5c discipline statement (load-bearing — enumerates prohibited fields), §D (active_records extension), §E Phase 3 (STQ ships last because it carries highest §5c risk); ChatGPT-Pro proposal at `reports/new-narrative-features-first-iteration.md` §Feature 1 (STQ source) with the reduced-scope `expected_payoff_mode` removal documented in SPEC-42 §Key design decisions (the 7-value enum is structurally analogous to rejected archived-SPEC-19 `allowed_outcome_band`).
-3. Cross-skill / cross-tool shared boundary: same five machine-layer registration sites as CLK/STSEC; plus the **`record_schema_compliance` validator** at `tools/validators/src/structural/record-schema-compliance.ts` is the structural-defense surface where the §5c prohibited-field HARD-REJECT lives. This validator already runs against every story-bundle record at engine pre-apply; extending it with STQ-specific HARD-REJECTs preserves the validator's role as the single canonical structural-compliance gate.
+3. Cross-skill / cross-tool shared boundary: same five machine-layer registration sites as CLK/STSEC; plus the **`record_schema_compliance` validator** at `tools/validators/src/structural/record-schema-compliance.ts` is the structural-defense surface where the §5c prohibited-field HARD-REJECT lives. This validator already runs against every story-bundle record at engine pre-apply; extending it with STQ-specific HARD-REJECTs preserves the validator's role as the single canonical structural-compliance gate. Live contract split correction: the schema detail no longer lives inline in `.claude/skills/_shared-templates/story-state-contract.md` §4; §4 now points to `.claude/skills/_shared-templates/story-record-schemas.md`, so this ticket updates `story-state-contract.md` only for §3 inventory / §4 pointer counts and puts the STQ schema body in `story-record-schemas.md`.
 4. FOUNDATIONS §Story Bundles §5c (Present Causal State, Not Narrative Shape) + §5b (Schema-Minimalism) motivate this ticket. §5c: STQ tracks PRESENT open-setup state ("what setups are currently open, what state do they license, what would close them") — not FUTURE dramatic obligation ("are we before or after the midpoint, what shape should the eventual payoff take, what arc position are we at"). The prohibited-field list IS the discipline; without HARD-REJECT enforcement, authoring patterns will naturally drift toward narrative-shape framing (SPEC-42 §Risks explicitly flags this slippage temptation). §5b: 13-field schema is tight (`id`, `story_id`, `created_at_page`, `supersedes`, `setup_kind`, `question_or_setup`, `salience`, `audience_visibility`, `source_event`, `source_records`, `payoff_of`, `status`, `answer_event`, `answer_records`, `abandonment_rationale` — minus those marked optional). Drops: `expected_payoff_mode` (§5c violation), `kind: moral_question` (authorial/subjective; §5b violation), `character_visibility` (audience-vs-character distinction already covered by `audience_visibility` + `source_records[]` grounding), `holders[]` (re-encodes the same distinction).
 5. HARD-GATE engine surfaces touched: `tools/patch-engine/src/envelope/schema.ts` + `tools/patch-engine/src/commit/order.ts` (same as -001 / -002) PLUS `tools/validators/src/structural/record-schema-compliance.ts` (the validator that HARD-REJECTs malformed records at engine pre-apply). The §5c HARD-REJECT extension strengthens the Canon Safety surface (rejects schemas that smuggle narrative-shape encoding into a present-causal class). Mystery Reserve firewall: not directly touched (STQ does not interact with `M-*` records). Hook 3 path-pattern coverage: the new `_source/story-questions/` subdirectory is covered by the existing pattern without modification.
 6. Existing output schema extended in TWO places: (a) `tools/validators/src/schemas/story-page.schema.json` — `state_snapshot.active_records[]` enum extended to add `STQ` (co-edit with SPEC42STOSTADEB-001 / -002); (b) the `record_schema_compliance` validator's per-class HARD-REJECT registry extended with STQ-specific prohibited-field rules. Both are additive-only — existing entries and rules unchanged.
@@ -48,10 +48,11 @@ Create `tools/validators/src/schemas/story-question.schema.json` with the 13-fie
 
 ### 2. Contract document update — story-state-contract.md
 
-Modify `.claude/skills/_shared-templates/story-state-contract.md`:
-- §3 (class catalog): add row `STQ | Story question / open setup — present-causal open-setup state; tracks Chekhov's-gun-style introduced elements with typed setup→payoff link; subject to §5c discipline statement.`
-- §4: insert new §4.8 (Story Question — STQ) with canonical schema text PLUS the §5c discipline statement reproduced verbatim from SPEC-42 §C (the prohibited-field table is load-bearing canonical content — it must live in the contract document, not just in the spec).
-- §4.2 (PG.state_snapshot.active_records): add `STQ: [STQ-<integer>]` (co-edit with SPEC42STOSTADEB-001 / -002).
+Modify `.claude/skills/_shared-templates/story-state-contract.md` and `.claude/skills/_shared-templates/story-record-schemas.md`:
+- `story-state-contract.md` §3 (class catalog): add row `STQ | Story question / open setup — present-causal open-setup state; tracks Chekhov's-gun-style introduced elements with typed setup->payoff link; subject to §5c discipline statement.`
+- `story-state-contract.md` §4 pointer text: update the split-template count and SPEC-42 note to include STQ as §4.5.16.
+- `story-record-schemas.md` §4.2 (PG.state_snapshot.active_records): add `STQ: [STQ-<integer>]` (co-edit with SPEC42STOSTADEB-001 / -002).
+- `story-record-schemas.md`: insert new §4.5.16 (Story Question — STQ) with canonical schema text PLUS the §5c discipline statement reproduced from SPEC-42 §C (the prohibited-field table is load-bearing canonical content — it must live in the contract document, not just in the spec).
 
 ### 3. PG state-snapshot schema extension
 
@@ -124,7 +125,8 @@ The HARD-REJECT runs at engine pre-apply (alongside other `record_schema_complia
 - `tools/validators/src/schemas/story-question.schema.json` (new)
 - `tools/patch-engine/src/ops/answer-story-question.ts` (new)
 - `tools/patch-engine/src/ops/abandon-story-question.ts` (new)
-- `.claude/skills/_shared-templates/story-state-contract.md` (modify — §3 row, §4.8 new sub-section incl. §5c discipline statement, §4.2 enum extension; co-edit with SPEC42STOSTADEB-001 / -002)
+- `.claude/skills/_shared-templates/story-state-contract.md` (modify — §3 row and §4 pointer/count text)
+- `.claude/skills/_shared-templates/story-record-schemas.md` (modify — §4.2 enum extension and §4.5.16 new STQ sub-section incl. §5c discipline statement; co-edit with SPEC42STOSTADEB-001 / -002)
 - `tools/validators/src/schemas/story-page.schema.json` (modify — state_snapshot.active_records enum extension; co-edit)
 - `tools/world-mcp/src/tools/allocate-next-id.ts` (modify — STQ class registry row)
 - `tools/world-index/src/parse/atomic.ts` (modify — STQ class-prefix + story-questions/ subdirectory registration)
@@ -164,13 +166,12 @@ The HARD-REJECT runs at engine pre-apply (alongside other `record_schema_complia
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/schemas/story-question.test.ts` (new) — schema-level positive + negative tests including ALL prohibited fields
-2. `tools/validators/tests/structural/record-schema-compliance.test.ts` (modify) — extend with STQ-specific HARD-REJECT tests covering every prohibited field individually + a combined fixture
-3. `tools/validators/tests/schemas/story-page.test.ts` (modify — co-edit with SPEC42STOSTADEB-001 / -002) — `state_snapshot.active_records[STQ]` enum entry test
-4. `tools/patch-engine/tests/ops/answer-story-question.test.ts` (new) — answer op test
-5. `tools/patch-engine/tests/ops/abandon-story-question.test.ts` (new) — abandon op test
-6. `tools/patch-engine/tests/ops/create-story-record.test.ts` (modify — co-edit) — `create_stq_record` test
-7. `tools/world-mcp/tests/tools/allocate-next-id.test.ts` (modify — co-edit) — `id_class="STQ"` test
+1. `tools/validators/tests/structural/record-schema-compliance-story-question.test.ts` (new) — schema-level positive + negative tests plus STQ-specific HARD-REJECT tests covering every prohibited field individually
+2. `tools/validators/tests/structural/record-schema-compliance-story-page.test.ts` (modify — co-edit with SPEC42STOSTADEB-001 / -002) — `state_snapshot.active_records[STQ]` enum entry test
+3. `tools/patch-engine/tests/ops/answer-story-question.test.ts` (new) — answer op test
+4. `tools/patch-engine/tests/ops/abandon-story-question.test.ts` (new) — abandon op test
+5. `tools/patch-engine/tests/ops/create-story-record.test.ts` (modify — co-edit) — `create_stq_record` test
+6. `tools/world-mcp/tests/tools/allocate-next-id.test.ts` (modify — co-edit) — `id_class="STQ"` test
 
 ### Commands
 
@@ -179,3 +180,29 @@ The HARD-REJECT runs at engine pre-apply (alongside other `record_schema_complia
 3. `npm test --prefix tools/world-mcp`
 4. `npm run build --prefix tools/world-index`
 5. The full-pipeline verification command lands in SPEC42STOSTADEB-015 capstone
+
+## Outcome (2026-05-17)
+
+Implemented the STQ class foundation across the machine layer and shared story-state contract:
+
+- Added `story-question.schema.json`, registered `story_question_record`, and extended `record_schema_compliance` with STQ-specific HARD-REJECTs for all §5c prohibited fields, including `setup_kind: moral_question`.
+- Extended `PG.state_snapshot.active_records` with `STQ`.
+- Registered STQ allocation and indexing through `tools/world-mcp`, `tools/world-index`, and patch-engine ID-race checks.
+- Added `create_stq_record`, `supersede_stq_record`, `answer_story_question`, and `abandon_story_question` envelope/commit support with focused patch-engine tests.
+- Updated `.claude/skills/_shared-templates/story-state-contract.md` for the STQ catalog row and split-template count/pointer, and updated `.claude/skills/_shared-templates/story-record-schemas.md` with the canonical STQ schema plus the §5c discipline table.
+
+## Verification Result (2026-05-17)
+
+Passing:
+
+1. `npm test --prefix tools/validators` — 380 tests passed.
+2. `npm test --prefix tools/patch-engine` — 95 tests passed.
+3. `npm test --prefix tools/world-mcp` — 392 tests passed.
+4. `npm run build --prefix tools/world-index` — TypeScript build passed.
+
+## Deviations / Scope Notes
+
+- The live shared contract is split: `story-state-contract.md` owns the §3 class catalog and §4 pointer/count text, while `story-record-schemas.md` owns the detailed §4.5.16 STQ schema. This ticket was updated before implementation to match that live split.
+- Same-seam registration required additional files beyond the initial file list: `tools/validators/src/structural/utils.ts`, `tools/world-mcp/src/server.ts`, `tools/world-mcp/src/tools/describe-envelope-schema.ts`, `tools/patch-engine/src/ops/shared.ts`, and focused tests for the registration/proof surfaces.
+- `CLAUDE.md`, cross-class §5 predicate list, §6 integration matrix, and §8 page-plan §10b docs remain owned by `SPEC42STOSTADEB-014`.
+- STQ semantic validators, predicate DSL entries, MCP retrieval, shared validators, and skill integrations remain out of scope and are owned by the later SPEC42STOSTADEB tickets listed above.

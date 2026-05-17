@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `branching-story-health-audit` SKILL.md Phase 2 (structural mode) with three new structural checks: `stalled_clock_check`, `under_supported_critical_revelation_check`, `dropped_high_salience_setup_check`; surfaces findings as audit warnings (not engine HARD-REJECTs); no new audit modes introduced
-**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, SPEC42STOSTADEB-003, SPEC42STOSTADEB-005, SPEC42STOSTADEB-006, SPEC42STOSTADEB-007
+**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, archive/tickets/SPEC42STOSTADEB-003.md, SPEC42STOSTADEB-005, SPEC42STOSTADEB-006, SPEC42STOSTADEB-007
 
 ## Problem
 
