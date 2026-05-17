@@ -41,6 +41,7 @@ const ATOMIC_SOURCE_DIRECTORIES = new Set([
 const STORY_SOURCE_DIRECTORIES = new Set([
   "entities",
   "status",
+  "beliefs",
   "facts",
   "events",
   "obligations",
@@ -65,6 +66,7 @@ const STORY_BUNDLE_MARKDOWN_DIRECTORIES = new Set([
   "audits",
   "character-proposals"
 ]);
+const STORY_BUNDLE_YAML_DIRECTORIES = new Set(["pages-prose-receipts"]);
 const STORY_BUNDLE_CHARACTER_PROPOSAL_SUBDIRECTORIES = new Set(["batches"]);
 
 /**
@@ -167,6 +169,15 @@ function isIndexablePath(relativePath: string): boolean {
   ) {
     const sourceDirectory = segments[3];
     return sourceDirectory ? STORY_SOURCE_DIRECTORIES.has(sourceDirectory) : false;
+  }
+
+  if (
+    segments.length === 4 &&
+    segments[0] === "stories" &&
+    basename.endsWith(".yaml")
+  ) {
+    const bundleDirectory = segments[2];
+    return bundleDirectory ? STORY_BUNDLE_YAML_DIRECTORIES.has(bundleDirectory) : false;
   }
 
   if (!basename.endsWith(".md")) {

@@ -133,6 +133,24 @@ export function createAtomicRepoRoot(worldSlug = "atomic-world"): string {
     "created_at_page: PG-0001",
     "notes: Brinewick anchors the harborwatch story."
   ]);
+  writeStory(world, "harborwatch", "beliefs", "BEL-1.yaml", [
+    "id: BEL-1",
+    "story_id: STORY-1",
+    "created_at_page: PG-1",
+    "holder: STENT-0001",
+    "claim: Brinewick believes the salt gate needs watching.",
+    "belief_mode: believes",
+    "truth_relation: true",
+    "confidence: high",
+    "visibility: shared",
+    "basis:",
+    "  source_event: SE-1",
+    "  access_route: authorial_initialization",
+    "  access_records: [STENT-0001]",
+    "consequences:",
+    "  opens: []",
+    "  constrains_choices: []"
+  ]);
   writeStory(world, "harborwatch", "facts", "SF-0001.yaml", [
     "id: SF-0001",
     "story_id: STORY-0001",
@@ -226,6 +244,30 @@ export function createAtomicRepoRoot(worldSlug = "atomic-world"): string {
     "",
     "Brinewick watches the salt gate."
   ]);
+  writeStoryArtifact(world, "harborwatch", "pages-prose-receipts/PG-1.yaml", [
+    "page_id: PG-1",
+    "story_id: STORY-1",
+    "plan_path: pages-prose-plans/PG-1.md",
+    "prose_path: pages-prose/PG-1.md",
+    "plan_hash: 0000000000000000000000000000000000000000000000000000000000000000",
+    "prose_hash: 1111111111111111111111111111111111111111111111111111111111111111",
+    "state_hash_at_plan_time: 2222222222222222222222222222222222222222222222222222222222222222",
+    "checked_at: 2026-05-17T00:00:00Z",
+    "strict: true",
+    "verdict: PASS",
+    "checks:",
+    "  hash_integrity: PASS",
+    "  engine_jargon_leak: PASS",
+    "  forbidden_mystery_resolution: PASS",
+    "  required_event_rendered: PASS",
+    "  choice_consequence_visibility: PASS",
+    "  entity_status_consistency: PASS",
+    "  invented_structural_fact: PASS",
+    "  canon_claim_without_authority: PASS",
+    "  craft_critic: NOT_RUN",
+    "notes: []",
+    "repair_recommendation: none"
+  ]);
   writeStoryMarkdown(world, "harborwatch", "storylet-batches/SLB-0001.md", [
     "# Storylet Batch SLB-0001"
   ]);
@@ -284,6 +326,15 @@ function writeStory(
 }
 
 function writeStoryMarkdown(
+  world: string,
+  storySlug: string,
+  relativeFilePath: string,
+  lines: string[]
+): void {
+  writeStoryArtifact(world, storySlug, relativeFilePath, lines);
+}
+
+function writeStoryArtifact(
   world: string,
   storySlug: string,
   relativeFilePath: string,
