@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-37-story-pipeline-tenth-iteration-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC37STOPIPTEN-002.md",
+  "last_ticket": "archive/tickets/SPEC37STOPIPTEN-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "6cba7478d2bfaf6467a8ecc6c45c79f395cf014f",
+  "last_work_commit": "8c3ff57f42ab66a5f0eeda34adfab43a681ddb9f",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC37STOPIPTEN-003.md",
+  "next_target": "tickets/SPEC37STOPIPTEN-004.md",
   "queue": [
-    "tickets/SPEC37STOPIPTEN-003.md",
     "tickets/SPEC37STOPIPTEN-004.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -15,6 +14,6 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree expected after state commit; expected ignored artifacts include pre-existing tools/validators/node_modules and refreshed tools/validators/dist from package proof",
+  "dirty_state": "clean tracked worktree expected after state commit; expected ignored artifacts include pre-existing tools/validators/dist, tools/validators/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, and tools/world-mcp/node_modules",
   "updated_at": "2026-05-17"
 }
