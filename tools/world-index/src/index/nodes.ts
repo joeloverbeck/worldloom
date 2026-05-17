@@ -9,7 +9,7 @@ import type {
   ScopedReferenceAliasRow,
   ScopedReferenceRow,
   ValidationResultRow
-} from "../schema/types";
+} from "../schema/types.js";
 
 export function insertNodes(db: Database.Database, rows: NodeRow[]): void {
   db.transaction((batch: NodeRow[]) => {

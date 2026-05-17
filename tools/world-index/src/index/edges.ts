@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
 
-import type { EdgeRow } from "../schema/types";
+import type { EdgeRow } from "../schema/types.js";
 
 export function insertEdges(db: Database.Database, rows: EdgeRow[]): void {
   db.transaction((batch: EdgeRow[]) => {

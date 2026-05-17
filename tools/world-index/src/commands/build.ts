@@ -1,5 +1,5 @@
-import { buildWorldIndex } from "./shared";
-import type { IndexCommandOptions } from "./shared";
+import { buildWorldIndex } from "./shared.js";
+import type { IndexCommandOptions } from "./shared.js";
 
 export function build(worldRoot: string, worldSlug: string, options: IndexCommandOptions = {}): number {
   const result = buildWorldIndex(worldRoot, worldSlug, options);

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 import test from "node:test";
 
 import {
@@ -10,11 +11,11 @@ import {
   NODE_TYPES,
   SCOPED_EDGE_TYPES,
   YAML_EDGE_TYPES
-} from "../src/public/types";
+} from "../src/public/types.js";
 import {
   CANONICAL_DOMAINS,
   VERDICT_ENUM
-} from "../src/public/canonical-vocabularies";
+} from "../src/public/canonical-vocabularies.js";
 import type {
   AttributionEdgeType,
   CanonContradictionRisk,
@@ -38,8 +39,8 @@ import type {
   NodeType,
   ScopedEdgeType,
   YamlEdgeType
-} from "../src/public/types";
-import { ATOMIC_LOGICAL_WORLD_FILES as SOURCE_ATOMIC_LOGICAL_WORLD_FILES } from "../src/parse/atomic";
+} from "../src/public/types.js";
+import { ATOMIC_LOGICAL_WORLD_FILES as SOURCE_ATOMIC_LOGICAL_WORLD_FILES } from "../src/parse/atomic.js";
 import {
   ATTRIBUTION_EDGE_TYPES as SOURCE_ATTRIBUTION_EDGE_TYPES,
   EDGE_TYPES as SOURCE_EDGE_TYPES,
@@ -47,8 +48,10 @@ import {
   NODE_TYPES as SOURCE_NODE_TYPES,
   SCOPED_EDGE_TYPES as SOURCE_SCOPED_EDGE_TYPES,
   YAML_EDGE_TYPES as SOURCE_YAML_EDGE_TYPES
-} from "../src/schema/types";
-import { CURRENT_INDEX_VERSION as SOURCE_SCHEMA_VERSION } from "../src/schema/version";
+} from "../src/schema/types.js";
+import { CURRENT_INDEX_VERSION as SOURCE_SCHEMA_VERSION } from "../src/schema/version.js";
+
+const require = createRequire(import.meta.url);
 
 type Assert<T extends true> = T;
 type IsEqual<A, B> =

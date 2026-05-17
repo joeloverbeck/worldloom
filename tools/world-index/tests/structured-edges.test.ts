@@ -4,13 +4,13 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { insertAnchorChecksums, insertNodes, insertScopedReferences } from "../src/index/nodes";
-import { insertEdges } from "../src/index/edges";
-import { openIndex } from "../src/index/open";
-import { contentHashForProse } from "../src/parse/canonical";
-import { extractStructuredRecordEdges } from "../src/parse/structured-edges";
-import { CURRENT_INDEX_VERSION } from "../src/schema/version";
-import type { NodeRow, NodeType } from "../src/schema/types";
+import { insertAnchorChecksums, insertNodes, insertScopedReferences } from "../src/index/nodes.js";
+import { insertEdges } from "../src/index/edges.js";
+import { openIndex } from "../src/index/open.js";
+import { contentHashForProse } from "../src/parse/canonical.js";
+import { extractStructuredRecordEdges } from "../src/parse/structured-edges.js";
+import { CURRENT_INDEX_VERSION } from "../src/schema/version.js";
+import type { NodeRow, NodeType } from "../src/schema/types.js";
 
 function makeNode(nodeId: string, nodeType: NodeType, body: string, filePath = "fixtures.md"): NodeRow {
   return {

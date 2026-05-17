@@ -5,11 +5,11 @@ import test from "node:test";
 
 import type { Root, Content, Parent } from "mdast";
 
-import { contentHashForProse } from "../src/parse/canonical";
-import { parseMarkdown } from "../src/parse/markdown";
+import { contentHashForProse } from "../src/parse/canonical.js";
+import { parseMarkdown } from "../src/parse/markdown.js";
 
 function loadFixture(name: string): string {
-  return readFileSync(path.resolve(__dirname, "..", "..", "tests", "fixtures", name), "utf8");
+  return readFileSync(path.resolve(import.meta.dirname, "..", "..", "tests", "fixtures", name), "utf8");
 }
 
 function visit(node: Content | Root, callback: (node: Content) => void): void {

@@ -1,13 +1,13 @@
-import { contentHashForProse } from "./canonical";
+import { contentHashForProse } from "./canonical.js";
 import {
   firstNonEmptyString,
   parseAuthorityFrontmatter
-} from "./entities";
+} from "./entities.js";
 import type {
   EdgeRow,
   NodeRow,
   ScopedReferenceRow
-} from "../schema/types";
+} from "../schema/types.js";
 
 export interface StructuredEdgeExtractionOutput {
   scopedNodes: NodeRow[];

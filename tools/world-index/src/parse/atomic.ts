@@ -3,13 +3,13 @@ import path from "node:path";
 import YAML from "yaml";
 import type { Root } from "mdast";
 
-import type { ParsedFileResult } from "../commands/shared";
-import { contentHashForProse, contentHashForYaml, anchorChecksum } from "./canonical";
-import { parseYamlWithRecovery } from "./yaml";
-import { domainFileNodeId } from "./prose";
-import { CURRENT_INDEX_VERSION } from "../schema/version";
-import type { EdgeRow, NodeRow, NodeType, ValidationResultRow } from "../schema/types";
-import type { EntityRegistry, EntityRegistryEntry } from "./entities";
+import type { ParsedFileResult } from "../commands/shared.js";
+import { contentHashForProse, contentHashForYaml, anchorChecksum } from "./canonical.js";
+import { parseYamlWithRecovery } from "./yaml.js";
+import { domainFileNodeId } from "./prose.js";
+import { CURRENT_INDEX_VERSION } from "../schema/version.js";
+import type { EdgeRow, NodeRow, NodeType, ValidationResultRow } from "../schema/types.js";
+import type { EntityRegistry, EntityRegistryEntry } from "./entities.js";
 
 export const ATOMIC_LOGICAL_WORLD_FILES = [
   "CANON_LEDGER.md",

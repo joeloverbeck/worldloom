@@ -11,7 +11,7 @@ import {
   YAML_EDGE_TYPES,
   type EdgeType,
   type NodeType
-} from "../src/schema/types";
+} from "../src/schema/types.js";
 
 type Assert<T extends true> = T;
 type IsEqual<A, B> =

@@ -4,11 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { enumerate } from "../src/enumerate";
+import { enumerate } from "../src/enumerate.js";
 
 function createFixtureWorldRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-index-enumerate-"));
-  const source = path.resolve(__dirname, "..", "..", "tests", "fixtures", "fixture-world");
+  const source = path.resolve(import.meta.dirname, "..", "..", "tests", "fixtures", "fixture-world");
   const target = path.join(root, "fixture-world");
   cpSync(source, target, { recursive: true });
   return target;

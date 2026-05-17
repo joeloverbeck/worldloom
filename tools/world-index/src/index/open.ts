@@ -2,10 +2,10 @@ import Database from "better-sqlite3";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-import { CURRENT_INDEX_VERSION } from "../schema/version";
+import { CURRENT_INDEX_VERSION } from "../schema/version.js";
 
 const MIGRATIONS_DIRECTORY = path.resolve(
-  __dirname,
+  import.meta.dirname,
   "..",
   "..",
   "..",

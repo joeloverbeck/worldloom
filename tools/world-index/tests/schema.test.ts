@@ -14,13 +14,13 @@ import test from "node:test";
 
 import Database from "better-sqlite3";
 
-import { parseWorldFile, syncWorldIndex } from "../src/commands/shared";
-import { openIndex, SchemaVersionMismatchError } from "../src/index/open";
-import { CURRENT_INDEX_VERSION } from "../src/schema/version";
-import { cleanup as cleanupAtomicRoot, createAtomicRepoRoot } from "./helpers/atomic-fixture";
+import { parseWorldFile, syncWorldIndex } from "../src/commands/shared.js";
+import { openIndex, SchemaVersionMismatchError } from "../src/index/open.js";
+import { CURRENT_INDEX_VERSION } from "../src/schema/version.js";
+import { cleanup as cleanupAtomicRoot, createAtomicRepoRoot } from "./helpers/atomic-fixture.js";
 
 const INITIAL_MIGRATION_SQL = readFileSync(
-  path.resolve(__dirname, "..", "..", "src", "schema", "migrations", "001_initial.sql"),
+  path.resolve(import.meta.dirname, "..", "..", "src", "schema", "migrations", "001_initial.sql"),
   "utf8"
 );
 
@@ -54,7 +54,7 @@ function createVersionOneIndex(root: string): void {
 }
 
 function readMigration(version: number): string {
-  const migrationDirectory = path.resolve(__dirname, "..", "..", "src", "schema", "migrations");
+  const migrationDirectory = path.resolve(import.meta.dirname, "..", "..", "src", "schema", "migrations");
   const fileName = readdirSync(migrationDirectory).find((entry) =>
     entry.startsWith(String(version).padStart(3, "0"))
   );
@@ -253,7 +253,7 @@ test("FTS triggers keep insert, delete, and update search results coherent", () 
 
     try {
       const fixtureSqlPath = path.resolve(
-        __dirname,
+        import.meta.dirname,
         "..",
         "..",
         "tests",

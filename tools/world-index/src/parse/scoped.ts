@@ -1,17 +1,17 @@
-import { contentHashForProse } from "./canonical";
+import { contentHashForProse } from "./canonical.js";
 import {
   canonicalEntitySlug,
   firstNonEmptyString,
   normalizeSurface,
   parseAuthorityFrontmatter
-} from "./entities";
+} from "./entities.js";
 import type {
   EdgeRow,
   NodeRow,
   ScopedReferenceAliasRow,
   ScopedReferenceRow,
   ValidationResultRow
-} from "../schema/types";
+} from "../schema/types.js";
 
 export interface ScopedReferenceExtractionOutput {
   scopedNodes: NodeRow[];

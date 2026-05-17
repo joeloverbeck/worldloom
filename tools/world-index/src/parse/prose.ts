@@ -2,10 +2,10 @@ import path from "node:path";
 import type { Content, Heading, List, Parent, Root, RootContent, Root as MdastRoot } from "mdast";
 import YAML from "yaml";
 
-import { anchorChecksum, contentHashForProse } from "./canonical";
-import { MANDATORY_WORLD_FILES } from "../enumerate";
-import { CURRENT_INDEX_VERSION } from "../schema/version";
-import type { NodeRow, NodeType } from "../schema/types";
+import { anchorChecksum, contentHashForProse } from "./canonical.js";
+import { MANDATORY_WORLD_FILES } from "../enumerate.js";
+import { CURRENT_INDEX_VERSION } from "../schema/version.js";
+import type { NodeRow, NodeType } from "../schema/types.js";
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|PA|M|DA|CHAR|PR|BATCH|NCP|NCB|AU|RP)-\d+\b/;
 const FILE_RECORD_TYPES = new Map<string, NodeType>([
