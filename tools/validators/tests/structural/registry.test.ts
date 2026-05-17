@@ -27,6 +27,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "state_snapshot_integrity",
       "touched_by_cf_completeness",
       "proposal_package_shape",
+      "prose_receipt_schema_compliance",
       "modification_history_retrofit",
       "validation_trace_shape_compliance"
     ]

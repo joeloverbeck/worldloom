@@ -138,6 +138,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "proposal_package_shape"
     );
     assert.equal(proposalPackageExecution?.status, "skipped");
+    const proseReceiptExecution = result.executions.find(
+      (execution) => execution.name === "prose_receipt_schema_compliance"
+    );
+    assert.equal(proseReceiptExecution?.status, "skipped");
     const validationTraceExecution = result.executions.find(
       (execution) => execution.name === "validation_trace_shape_compliance"
     );
@@ -170,6 +174,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== expectedWitnessExecution &&
         row !== nonPropagationExecution &&
         row !== proposalPackageExecution &&
+        row !== proseReceiptExecution &&
         row !== validationTraceExecution &&
         row !== branchIsolationExecution &&
         row !== observerFirewallExecution &&

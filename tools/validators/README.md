@@ -6,15 +6,17 @@ Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus story-scope predi
 
 Historical note: `archive/specs/SPEC-04-validator-framework.md` is archived prior art only. It is not current design authority.
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 21 structural validators, the 10 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 23 structural validators, the 10 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
 Static JSON Schemas live under `src/schemas/`. They cover the CF, CH, INV, M,
 OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, DA frontmatter, and story-bundle
 atomic YAML record classes (STENT, STSTAT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC,
-STOBJ, BR, PG, CHC, SLT, BEL, and story-local DA). The PA schema validates YAML frontmatter parsed from
-`adjudications/PA-NNNN-*.md`; PA body prose is not schema-constrained.
+STOBJ, BR, PG, CHC, SLT, BEL, and story-local DA). The prose receipt schema covers
+direct-write `stories/<story-slug>/pages-prose-receipts/PG-*.yaml` artifacts. The PA
+schema validates YAML frontmatter parsed from `adjudications/PA-NNNN-*.md`; PA body
+prose is not schema-constrained.
 
 ## Validator Inventory
 
@@ -53,6 +55,7 @@ Structural validators:
 - `state_snapshot_integrity`
 - `touched_by_cf_completeness`
 - `proposal_package_shape`
+- `prose_receipt_schema_compliance`
 - `modification_history_retrofit`
 - `validation_trace_shape_compliance`
 

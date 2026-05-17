@@ -35,6 +35,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, the target ticket, and `docs/archival-w
 - When a `git mv` archive step creates a staged rename and later closeout edits modify the archived ticket unstaged, report those as separate states: the staged tracked rename, plus unstaged archived-ticket content edits.
 - For tool or package tickets that ran builds or installs, also inspect `git status --short --ignored` when ignored generated artifacts may affect the handoff; classify ignored artifacts separately from tracked review state.
 - Classify dirty paths into: reviewed-ticket implementation state, review-created edits, and unrelated noise. Only the reviewed-ticket implementation state should drive archival readiness unless another dirty path changes the ticket's factual closeout.
+- If a pre-existing dirty path is a forbidden review surface such as a skill, tool, hook, validator, or world-content file, inspect it only enough to classify whether it fully covers, partially covers, or does not cover a same-seam follow-up concern. Do not modify it during post-ticket review, and report the classification separately from review-created edits.
 - Treat follow-up tickets created during the review as `review-created edits`. Report them explicitly in the handoff, but do not let their presence block archival unless they prove unfinished owned work inside the reviewed ticket.
 - Review the local implementation state as it exists now, committed or not.
 - Compare the ticket's closeout against what actually landed, not against the original plan.
