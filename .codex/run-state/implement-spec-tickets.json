@@ -1,17 +1,21 @@
 {
-  "originating_spec": "archive/specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md",
-  "archived_spec": "archive/specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md",
-  "last_ticket": "archive/tickets/SPEC40STOPIPELE-004.md",
-  "last_result": "completed_archived_spec_archived",
-  "last_work_commit": "285410b22212ff029cc2bccd41b0fddd4a72d783",
+  "originating_spec": "specs/SPEC-41-spec40-followup-hygiene.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC41FUP-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "57043f13f619d1915337db5db790eded01ff5cc7",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "complete",
+  "next_target": "tickets/SPEC41FUP-002.md",
+  "queue": [
+    "tickets/SPEC41FUP-002.md",
+    "tickets/SPEC41FUP-003.md",
+    "tickets/SPEC41FUP-004.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated dirty path remains: .claude/skills/brainstorm/SKILL.md; expected ignored hooks artifacts remain under tools/hooks/dist, tools/hooks/logs, and tools/hooks/node_modules; expected ignored validators artifacts remain under tools/validators/dist and tools/validators/node_modules; expected ignored world-mcp artifacts remain under tools/world-mcp/.secret, tools/world-mcp/dist, and tools/world-mcp/node_modules",
+  "dirty_state": "expected ignored validators artifacts remain under tools/validators/dist and tools/validators/node_modules",
   "updated_at": "2026-05-17"
 }
