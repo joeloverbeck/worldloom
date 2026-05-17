@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-42-story-state-debt-secret-clock-records.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC42STOSTADEB-002.md",
+  "last_ticket": "archive/tickets/SPEC42STOSTADEB-003.md",
   "last_result": "completed_and_archived",
-  "last_work_commit": "4a3549c",
+  "last_work_commit": "04fae51ccb78b3a737b38121c85898e1306e484c",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC42STOSTADEB-003.md",
+  "next_target": "tickets/SPEC42STOSTADEB-004.md",
   "queue": [
-    "tickets/SPEC42STOSTADEB-003.md",
     "tickets/SPEC42STOSTADEB-004.md",
     "tickets/SPEC42STOSTADEB-005.md",
     "tickets/SPEC42STOSTADEB-006.md",
@@ -26,6 +25,6 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "pre-existing unrelated tracked edit remains at .codex/skills/implement-spec-tickets/SKILL.md; expected ignored local artifacts under briefs/, world-proposals/, worlds/, tools/*/dist, tools/*/node_modules, tools/hooks/logs, tools/world-mcp/.secret, and .claude/settings.local.json",
+  "dirty_state": "tracked worktree clean after SPEC42STOSTADEB-003 work commit; expected ignored local artifacts may remain under briefs/, world-proposals/, worlds/, tools/*/dist, tools/*/node_modules, tools/hooks/logs, tools/world-mcp/.secret, and .claude/settings.local.json",
   "updated_at": "2026-05-17"
 }
