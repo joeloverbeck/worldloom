@@ -4,7 +4,7 @@ Deterministic patch applier for the SPEC-03 write path. The package entrypoint i
 
 The engine consumes post-SPEC-13 atomic-record patch plans, verifies expected ID allocations, verifies the HARD-GATE approval token, stages writes through temp files, commits with atomic per-file rename, consumes the token, and triggers `world-index sync` after storage commit. Canonical storage remains `worlds/<slug>/_source/`; `_index/world.db` is derived and may be regenerated.
 
-Design authority: `archive/specs/SPEC-03-patch-engine.md`, amended by `specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md` for adjudication frontmatter and bidirectional CF/SEC checks.
+Historical prior art: `archive/specs/SPEC-03-patch-engine.md`, amended by archived SPEC-14 history for adjudication frontmatter and bidirectional CF/SEC checks. Current behavior is described by this README, `docs/FOUNDATIONS.md`, `docs/HARD-GATE-DISCIPLINE.md`, and the live package source/tests.
 
 ## Public Surface
 

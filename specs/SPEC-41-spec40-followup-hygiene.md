@@ -7,7 +7,7 @@
 
 ## Problem Statement
 
-`archive/specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md` archived with four cross-spec follow-ups documented in its §Risks & Open Questions section: (1) validator-hardening-III spec for full F-02 indirect-cue mechanization; (2) repo-hygiene CI lints (`fixture_unpadded_id_lint_current_only` + `current_docs_do_not_cite_archive_as_authority`); (3) `story_local_seed_warning_for_pg_bel_se_da` follow-up test; (4) hook-deployment-currency parity check extending SPEC-40 D4's MCP-server pattern to `tools/hooks/dist/`. Reassessment against current main (post-merge of SPEC-40) confirms three of the four still warrant action and surfaces scope refinements for one. This spec batches those three accept-with-modification verdicts into a single follow-up hygiene cluster, with each deliverable executed by a dedicated ticket in the same brainstorm session.
+Historical archived spec `archive/specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md` archived with four cross-spec follow-ups documented in its §Risks & Open Questions section: (1) validator-hardening-III spec for full F-02 indirect-cue mechanization; (2) repo-hygiene CI lints (`fixture_unpadded_id_lint_current_only` + `current_docs_do_not_cite_archive_as_authority`); (3) `story_local_seed_warning_for_pg_bel_se_da` follow-up test; (4) hook-deployment-currency parity check extending SPEC-40 D4's MCP-server pattern to `tools/hooks/dist/`. Reassessment against current main (post-merge of SPEC-40) confirms three of the four still warrant action and surfaces scope refinements for one. This spec batches those three accept-with-modification verdicts into a single follow-up hygiene cluster, with each deliverable executed by a dedicated ticket in the same brainstorm session.
 
 Reassessment evidence (verified via parallel greps against current main at the SPEC-40 merge commit):
 
@@ -58,7 +58,7 @@ Deliverables grouped by category (CI lints → test extension → CI build check
 
 **Implementation note (2026-05-17 / SPEC41FUP-001)**: Live implementation found the draft "current fixtures are clean" premise was false: `tools/**/tests/**` and `tools/**/src/**/*-fixture.ts` contained 1,192 existing padded-ID occurrences aggregated into 307 file/ID baseline entries. The accepted D1 shape is therefore baseline-aware forward enforcement: `check-fixture-id-padding.sh` fails on new occurrences beyond `fixture-id-padding-baseline.tsv` while preserving legacy fixture cleanup for a separate owner.
 
-**Ticket**: `archive/tickets/SPEC41FUP-001.md` — completed; see ticket for full Files to Touch, Acceptance Criteria, Test Plan.
+**Archived ticket**: `archive/tickets/SPEC41FUP-001.md` — completed; see ticket for full Files to Touch, Acceptance Criteria, Test Plan.
 
 ### D2 — `current_docs_do_not_cite_archive_as_authority` CI lint (P2, follow-up SPEC-40 F2.b)
 
@@ -66,7 +66,7 @@ Deliverables grouped by category (CI lints → test extension → CI build check
 
 **Change**: Add a grep-based lint script (likely `tools/validators/scripts/check-archive-citation-discipline.sh` or equivalent) that scans `docs/**/*.md`, `.claude/skills/**/*.md`, `specs/**/*.md`, `tools/**/README.md` (excluding `archive/`) for `archive/specs/SPEC-` or `archive/tickets/` citations that lack a whitelist marker. Whitelist patterns: `**Supersedes**: archive/specs/SPEC-`, `historical`-tagged citations, `archived-as-context` markers. Fails with non-zero exit code listing offending file:line + the offending citation. Wire into `.github/workflows/ci-validators.yml` (or `ci-hygiene.yml`) as a CI gate.
 
-**Ticket**: `tickets/SPEC41FUP-002.md` — see ticket for full Files to Touch, Acceptance Criteria, Test Plan.
+**Archived ticket**: `archive/tickets/SPEC41FUP-002.md` — completed; see ticket for full Files to Touch, Acceptance Criteria, Test Plan.
 
 ### D3 — DA seed-node test case for context-packet story-pipeline filtering (P2, follow-up SPEC-40 F3, scope narrowed)
 
