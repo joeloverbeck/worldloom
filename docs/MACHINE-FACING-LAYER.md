@@ -119,10 +119,22 @@ Consumers verifying server currency should compare both
 `validator_registry_hash` and `patch_operation_schema_hash` against locally
 computed expectations. Neither alone catches all drift:
 `validator_registry_hash` catches validator-implementation drift;
-`patch_operation_schema_hash` catches contract drift. The deployed smoke test at
+`patch_operation_schema_hash` catches contract drift.
 `tools/world-mcp/tests/server/dispatch.test.ts` complements these passive
-fingerprints by actively exercising validator code paths against known-bad
-fixtures.
+fingerprints in memory by actively exercising validator code paths against
+known-bad fixtures. `tools/world-mcp/tests/integration/server-capabilities-hash-parity.test.ts`
+spawns `dist/src/server.js` and checks the same currency across the deployed
+stdio boundary.
+
+### Pre-deploy capability-currency smoke
+
+Before claiming capability currency for a freshly built `dist/` server:
+
+1. Run `cd tools/world-mcp && npm run build`.
+2. Run `cd tools/world-mcp && npm test`.
+3. Confirm `server-capabilities-hash-parity` passes. A mismatch means
+   `dist/` is stale and must be rebuilt before the server is restarted in a
+   live MCP session.
 
 ## Schema Currency Verification
 

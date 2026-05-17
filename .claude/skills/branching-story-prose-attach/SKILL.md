@@ -172,6 +172,8 @@ If either hash differs AND `accept_plan_drift: true`: set `checks.hash_integrity
 
 If either `PG.plan.plan_hash` or `PG.state_hash` is missing, placeholder (`PLACEHOLDER_TO_BE_COMPUTED*`), or non-sha256-shaped: set `checks.hash_integrity: FAIL` regardless of `accept_plan_drift`. The receipt records the invalid value in `notes`; the repair path is upstream PG repair, not silent acceptance.
 
+Hook 6 blocks direct `Edit` / `Write` drift on `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md` between prose-attach invocations when the stamped `PG.plan.plan_hash` does not match the plan body; this Phase 2 check still runs because receipt truth must not depend only on hook installation.
+
 **Drift is recorded in the receipt, NEVER in the `PG` record.** The PG is committed state per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary).
 
 ## Phase 3: Deterministic checks
