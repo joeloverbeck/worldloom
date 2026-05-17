@@ -132,6 +132,12 @@ Cross-reference `da-authoring-reference.md` from this commentary for the full tr
 
 #### D3 — Amend `.claude/skills/branching-story-bootstrap/SKILL.md` with DA-triage step
 
+**Implementation note (2026-05-17)**: `archive/tickets/SPEC38STOLOCDIE-003.md` landed the
+bootstrap amendment as an additive Phase 3 DA-triage paragraph and updated the
+DA output-table row to point operators at that sub-step. The landed wording
+uses the shared reference path directly for §Triage, §Decision matrix, and
+§Patch obligations.
+
 **Problem**: `SKILL.md:131` mentions DA only in the output table as `IF an in-story diegetic artifact is in play at opening`. No triage step exists, no decision logic for DA-vs-STOBJ-vs-BEL-vs-SF, no opening-access guidance.
 
 **Change**: Add a sub-step inside the bootstrap phase that authors initial story-bundle records (currently the Phase covering "Create initial debts / OBL / CNSQ / THR / SREL records"). Recommended placement: as an explicit sub-step before SE-1 state delta is finalized. Content:

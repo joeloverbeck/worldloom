@@ -1,21 +1,22 @@
 # SPEC38STOLOCDIE-003: Amend `branching-story-bootstrap` with DA-triage step
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — modifies `.claude/skills/branching-story-bootstrap/SKILL.md`
+**Engine Changes**: Yes — modifies `.claude/skills/branching-story-bootstrap/SKILL.md`; truths `specs/SPEC-38-story-local-diegetic-artifact-authoring.md`
 **Deps**: archive/tickets/SPEC38STOLOCDIE-001.md
 
 ## Problem
 
-`branching-story-bootstrap` mentions story-local DAs only as an output-table row (`SKILL.md:131` — `DA-<integer>` produced `IF an in-story diegetic artifact is in play at opening`). No triage step exists, no decision logic for DA-vs-STOBJ-vs-BEL-vs-SF, no opening-access guidance. Authors creating opening situations have no prompt to ask "is this a load-bearing artifact?" and no rubric to apply when the answer is yes. This ticket adds an explicit DA-triage sub-step inside the bootstrap phase that authors initial story-bundle records, cross-referencing the shared rubric created by ticket 001.
+At intake, `branching-story-bootstrap` mentioned story-local DAs only as an output-table row (`SKILL.md:131` — `DA-<integer>` produced `IF an in-story diegetic artifact is in play at opening`). No triage step existed, no decision logic for DA-vs-STOBJ-vs-BEL-vs-SF was prescribed, and no opening-access guidance was present. Authors creating opening situations had no prompt to ask "is this a load-bearing artifact?" and no rubric to apply when the answer was yes. This ticket added an explicit DA-triage sub-step inside the bootstrap phase that authors initial story-bundle records, cross-referencing the shared rubric created by ticket 001.
 
 ## Assumption Reassessment (2026-05-17)
 
-1. Verified `.claude/skills/branching-story-bootstrap/SKILL.md` line 131 (per brainstorm agent verification) mentions DA only in the output table with `IF an in-story diegetic artifact is in play at opening` and line 372 (patch-engine ops list) mentions `append_story_diegetic_artifact_record` only as `(if story-local DA records are applicable)`. No DA-triage phase exists in the current process flow.
+1. At intake, `.claude/skills/branching-story-bootstrap/SKILL.md` line 131 mentioned DA only in the output table with `IF an in-story diegetic artifact is in play at opening`, and line 372 (patch-engine ops list) mentioned `append_story_diegetic_artifact_record` only as `(if story-local DA records are applicable)`. No DA-triage phase existed in the then-current process flow.
 2. Verified SPEC-38 §D3 prescribes a new DA-triage sub-step in the initial-records-authoring phase, referencing `.claude/skills/_shared-templates/da-authoring-reference.md` §Triage + §Decision matrix + §Patch obligations.
 3. Cross-skill boundary: bootstrap's new sub-step references the new shared reference at `.claude/skills/_shared-templates/da-authoring-reference.md` (created by ticket 001). The cross-reference path must match 001's output exactly; the cited section names (`§Triage`, `§Decision matrix`, `§Patch obligations`) must match the section headers ticket 001 ships.
 4. FOUNDATIONS principles motivating this ticket: §Story Bundles §6b Information / Observer Firewall (opening-access discipline — initial BEL records reflect who has read what); Rule 1 No Floating Facts (DA must have author / audience / circulation / truth-relation / downstream-use before creation, surfaced at the triage step).
+5. HARD-GATE read was not required for this implementation: the landed edit does not modify the existing `<HARD-GATE>` block, approval checkpoint semantics, validator behavior, or canon-write ordering. It adds operational triage guidance before the already-gated Phase 10 write path.
 
 ## Architecture Check
 
@@ -29,11 +30,11 @@
 3. Cross-reference target path resolves → codebase grep-proof: `test -f .claude/skills/_shared-templates/da-authoring-reference.md` returns success (per ticket 001).
 4. Single-layer ticket: documentation-only; verification is grep-based.
 
-## What to Change
+## Landed Changes
 
 ### 1. Add DA-triage sub-step in the initial-records-authoring phase
 
-Per SPEC-38 §D3 §Change, insert the sub-step before SE-1 state delta is finalized. Recommended placement: as an explicit sub-step within the existing Phase 3 ("Create initial debts / OBL / CNSQ / THR / SREL records (in memory)" per brainstorm agent finding) or analogous phase that authors initial story-bundle records. Content:
+Added the sub-step in Phase 3, after initial BEL / STENT / STSTAT guidance and before Phase 4 debts. This placement keeps the triage before `SE-1.state_delta` / `PG-1.state_snapshot` materialization in Phase 6 and before first-choice grounding in Phase 8. Landed content:
 
 ```
 **DA triage at opening.** Scan the user premise, opening scene, starting
@@ -44,7 +45,8 @@ rubric and decision matrix at
 `.claude/skills/_shared-templates/da-authoring-reference.md` §Triage and
 §Decision matrix. Create a DA only when content / authorship / circulation
 / truth relation has persistent state value. For every bootstrap DA,
-satisfy the patch obligations at `da-authoring-reference.md` §Patch
+satisfy the patch obligations at
+`.claude/skills/_shared-templates/da-authoring-reference.md` §Patch
 obligations (allocate via `story_da_ids`; create via
 `append_story_diegetic_artifact_record`; include in `SE-1.state_delta.create[]`
 and `PG-1.state_snapshot.active_records.DA[]`; create BEL for initial readers
@@ -55,11 +57,16 @@ circulation via same-event indirect-route BEL or `non_propagation` tag).
 
 ### 2. Cross-reference the sub-step from the output table
 
-The output table at line 131 (DA-* row) gets a parenthetical cross-reference to the new DA-triage sub-step so future operators see the entry point from the output enumeration.
+Updated the output table's `DA-<integer>` row with `see Phase 3 DA triage` so future operators see the entry point from the output enumeration.
+
+### 3. Truth SPEC-38 handoff
+
+Added a dated SPEC-38 §D3 implementation note recording the landed bootstrap amendment and table-row pointer.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify)
+- `specs/SPEC-38-story-local-diegetic-artifact-authoring.md` (modify)
 
 ## Out of Scope
 
@@ -91,3 +98,31 @@ The output table at line 131 (DA-* row) gets a parenthetical cross-reference to 
 
 1. `grep -nE 'DA triage|da-authoring-reference' .claude/skills/branching-story-bootstrap/SKILL.md`
 2. `test -f .claude/skills/_shared-templates/da-authoring-reference.md` (cross-reference target exists per ticket 001)
+
+## Outcome
+
+Completed: 2026-05-17
+
+What changed:
+- Added Phase 3 `DA triage at opening` guidance to `.claude/skills/branching-story-bootstrap/SKILL.md`.
+- Updated the bootstrap output table's `DA-<integer>` row to point to the new Phase 3 triage sub-step.
+- Added a dated SPEC-38 §D3 implementation note.
+
+Deviations from original plan:
+- The live bootstrap skill's initial-records-authoring boundary is Phase 3 for initial belief/status setup followed by Phase 4 for debts, not the older draft wording that described Phase 3 as debt creation. The triage landed in live Phase 3, before Phase 6 commits the root event/page snapshot and before Phase 10 writes.
+
+## Verification Result
+
+Commands run:
+
+```bash
+grep -nE 'DA triage|da-authoring-reference' .claude/skills/branching-story-bootstrap/SKILL.md
+```
+
+Result: matched the updated `DA-<integer>` output-table row and the new Phase 3 `DA triage at opening` paragraph with concrete shared-reference links.
+
+```bash
+test -f .claude/skills/_shared-templates/da-authoring-reference.md
+```
+
+Result: passed; the shared-reference target exists.

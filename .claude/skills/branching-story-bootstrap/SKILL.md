@@ -128,7 +128,7 @@ Atomic story-bundle records (via `mcp__worldloom__submit_patch_plan`) + direct-w
 | `SREL-<integer>` | `_source/relationships/SREL-<integer>.yaml` | IF cast relationships constrain opening choice |
 | `STLOC-<integer>` | `_source/locations/STLOC-<integer>.yaml` | Always (initial location) |
 | `STOBJ-<integer>` | `_source/objects/STOBJ-<integer>.yaml` | IF an object is grounded in the opening situation |
-| `DA-<integer>` | `_source/artifacts/DA-<integer>.yaml` | IF an in-story diegetic artifact is in play at opening |
+| `DA-<integer>` | `_source/artifacts/DA-<integer>.yaml` | IF an in-story diegetic artifact is in play at opening; see Phase 3 DA triage |
 | `BR-1` | `_source/branches/BR-1.yaml` | Always (root branch) |
 | `SE-1` | `_source/events/SE-1.yaml` | Always (event_kind: story_start) |
 | `PG-1` | `_source/pages/PG-1.yaml` | Always (root page snapshot) |
@@ -256,6 +256,8 @@ Use `BEL` (not `SF`) for false beliefs, suspicions, rumors, lies, and private as
 For every cast-member `STENT`, set `role_in_story` as a list from the closed shared contract §4.4b values: `viewpoint`, `player_proxy`, `primary_actor`, `opposing_actor`, `allied_actor`, `authority`, `dependent`, `witness`, `information_source`, `pressure_source`, `social_bridge`, `background`. Use multiple values only when both are operationally true.
 
 For every active cast-member `STENT`, create exactly one initial `STSTAT` record carrying the opening life / agency / location state per shared contract §4.5.13. Use `life: alive` unless the premise explicitly starts with a dead or unknown-status entity; choose `agency` from the contract enum; set `location` to the opening `STLOC` when known, otherwise `unknown` / `concealed` / `offstage` as appropriate. `PG-1.state_snapshot.entity_status` is derived from these active `STSTAT` records; do not author an independent status block.
+
+**DA triage at opening.** Scan the user premise, opening scene, starting inventory, faction briefings, rumors, public notices, private letters, requested clues, maps, recordings, inscriptions, object-with-text, and existing world-level DA references. For each candidate, apply the triage rubric and decision matrix at `.claude/skills/_shared-templates/da-authoring-reference.md` §Triage and §Decision matrix. Create a DA only when content / authorship / circulation / truth relation has persistent state value. For every bootstrap DA, satisfy the patch obligations at `.claude/skills/_shared-templates/da-authoring-reference.md` §Patch obligations: allocate via `story_da_ids`; create via `append_story_diegetic_artifact_record`; include it in `SE-1.state_delta.create[]` and `PG-1.state_snapshot.active_records.DA[]`; create BEL for initial readers with an appropriate `basis.access_route`; create STOBJ when physical custody, location, damage, or sealing matters; and satisfy `expected_witness_coverage` for `public` / `factional` circulation with same-event indirect-route BEL propagation or a parseable `non_propagation:event_leaves_no_accessible_trace(group=<label>, records=[DA-<N>])` tag in `SE-1.world_logic_rationale`.
 
 ## Phase 4: Create initial debts
 
