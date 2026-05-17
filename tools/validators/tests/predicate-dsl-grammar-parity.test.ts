@@ -51,10 +51,15 @@ function sampleFor(pred: (typeof PRED_TYPES)[number]): Record<string, unknown> {
       return { pred, clock: "CLK-1", value: 2 };
     case "clock_full":
       return { pred, clock: "CLK-1" };
+    case "secret_unrevealed":
+    case "secret_revealed":
+    case "revelation_ready":
+      return { pred, secret: "STSEC-1" };
     case "any_obligation_open":
     case "any_consequence_pending":
     case "any_thread_active":
     case "any_clock_active":
+    case "any_secret_unrevealed":
     case "any_belief":
     case "any_intention":
       return { pred, alias: "matched_record" };

@@ -115,6 +115,36 @@
       }
     },
     {
+      "title": "secret_unrevealed",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "secret"],
+      "properties": {
+        "pred": { "const": "secret_unrevealed" },
+        "secret": { "type": "string", "pattern": "^STSEC-[0-9]+$" }
+      }
+    },
+    {
+      "title": "secret_revealed",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "secret"],
+      "properties": {
+        "pred": { "const": "secret_revealed" },
+        "secret": { "type": "string", "pattern": "^STSEC-[0-9]+$" }
+      }
+    },
+    {
+      "title": "revelation_ready",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "secret"],
+      "properties": {
+        "pred": { "const": "revelation_ready" },
+        "secret": { "type": "string", "pattern": "^STSEC-[0-9]+$" }
+      }
+    },
+    {
       "title": "any_obligation_open",
       "type": "object",
       "additionalProperties": true,
@@ -162,6 +192,18 @@
         "pred": { "const": "any_clock_active" },
         "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
         "kind": { "type": "string", "enum": ["danger", "racing", "mission", "faction", "exposure", "pursuit", "deadline"] },
+        "salience": { "type": "string", "enum": ["low", "medium", "high"] }
+      }
+    },
+    {
+      "title": "any_secret_unrevealed",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_secret_unrevealed" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "kind": { "type": "string", "enum": ["identity", "motive", "location", "event_cause", "artifact_truth", "relationship", "institutional"] },
         "salience": { "type": "string", "enum": ["low", "medium", "high"] }
       }
     },
@@ -233,7 +275,7 @@
       "required": ["pred", "record"],
       "properties": {
         "pred": { "const": "record_active" },
-        "record": { "type": "string", "pattern": "^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-[0-9]+$" }
+        "record": { "type": "string", "pattern": "^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC)-[0-9]+$" }
       }
     },
     {
@@ -243,7 +285,7 @@
       "required": ["pred", "record", "comparator", "pages"],
       "properties": {
         "pred": { "const": "record_age" },
-        "record": { "type": "string", "pattern": "^(?:(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-[0-9]+|[a-z][a-z0-9_-]*)$" },
+        "record": { "type": "string", "pattern": "^(?:(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC)-[0-9]+|[a-z][a-z0-9_-]*)$" },
         "comparator": { "type": "string", "enum": [">=", "<=", "==", "!="] },
         "pages": { "type": "integer", "minimum": 0 }
       }

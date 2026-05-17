@@ -19,6 +19,9 @@ import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
+import { criticalSecretClueCoverageWhenRevealed } from "../structural/critical-secret-clue-coverage-when-revealed.js";
+import { secretCarrierExistence } from "../structural/secret-carrier-existence.js";
+import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-firewall-compliance.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
@@ -65,6 +68,9 @@ export const structuralValidators: readonly Validator[] = [
   clockTickProvenance,
   clockFiringThresholdIntegrity,
   clockTerminalDebtIntegrity,
+  secretCarrierExistence,
+  criticalSecretClueCoverageWhenRevealed,
+  secretMysteryFirewallCompliance,
   storyDaDuplicateHeuristic,
   touchedByCfCompleteness,
   proposalPackageShape,

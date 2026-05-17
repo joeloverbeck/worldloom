@@ -148,7 +148,7 @@ Modify `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts`: add `STS
 - Shared validator extensions — owned by SPEC42STOSTADEB-008
 - Skill integrations — owned by SPEC42STOSTADEB-009 through -013
 - CLK and STQ class foundations — owned by SPEC42STOSTADEB-001 / -003
-- The optional per-STSEC `coverage_policy.minimum_clues_required: <integer ≥ 1>` override field flagged in SPEC-42 §Risks — this is an open question deferred to SPEC42STOSTADEB-006's validator-tuning decision
+- The optional per-STSEC `coverage_policy.minimum_clues_required: <integer ≥ 1>` override field flagged in SPEC-42 §Risks — archive/tickets/SPEC42STOSTADEB-006.md implemented the default-2 validator baseline and left the override field out of scope
 
 ## Acceptance Criteria
 

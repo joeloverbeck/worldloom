@@ -173,6 +173,9 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     const clockExecutions = result.executions.filter((execution) => execution.name.startsWith("clock_"));
     assert.equal(clockExecutions.length, 5);
     assert.ok(clockExecutions.every((execution) => execution.status === "skipped"));
+    const secretExecutions = result.executions.filter((execution) => execution.name.startsWith("secret_") || execution.name === "critical_secret_clue_coverage_when_revealed");
+    assert.equal(secretExecutions.length, 3);
+    assert.ok(secretExecutions.every((execution) => execution.status === "skipped"));
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -197,7 +200,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== branchIsolationExecution &&
         row !== observerFirewallExecution &&
         row !== liePromotedSilentlyExecution &&
-        !clockExecutions.includes(row)
+        !clockExecutions.includes(row) &&
+        !secretExecutions.includes(row)
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

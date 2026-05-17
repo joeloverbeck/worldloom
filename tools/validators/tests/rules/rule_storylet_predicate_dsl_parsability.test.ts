@@ -21,10 +21,14 @@ test("storylet predicate DSL accepts nested preconditions and every contract pre
           { pred: "clock_at_least", clock: "CLK-1", value: 2 },
           { pred: "clock_below", clock: "CLK-1", value: 6 },
           { pred: "clock_full", clock: "CLK-1" },
+          { pred: "secret_unrevealed", secret: "STSEC-1" },
+          { pred: "secret_revealed", secret: "STSEC-1" },
+          { pred: "revelation_ready", secret: "STSEC-1" },
           { pred: "any_obligation_open", alias: "urgent_debt", kind: "promise", urgency: "high", owed_by_role: "primary_actor", owed_to_role: "dependent" },
           { pred: "any_consequence_pending", alias: "pending_fallout", kind: "danger", urgency: "medium", derived_from: "SE-1" },
           { pred: "any_thread_active", alias: "active_thread", tag: "gate_repair", urgency: "low" },
           { pred: "any_clock_active", alias: "active_clock", kind: "exposure", salience: "high" },
+          { pred: "any_secret_unrevealed", alias: "hidden_secret", kind: "identity", salience: "high" },
           { pred: "any_relationship_axis", alias: "trust_edge", axis: "trust", comparator: ">=", value: "medium", participant_role: "allied_actor" },
           { pred: "any_belief", alias: "public_belief", holder_role: "witness", mode: "believes", truth_relation: "contested", visibility: "public" },
           { pred: "any_intention", alias: "open_intent", holder_role: "primary_actor", urgency: "high" },
@@ -47,7 +51,7 @@ test("storylet predicate DSL accepts nested preconditions and every contract pre
       effects: {
         create: ["bound:pending_fallout"],
         supersede: ["bound:urgent_debt"],
-        close: ["bound:active_thread"]
+        close: ["bound:active_thread", "bound:hidden_secret"]
       },
       exit_options: [
         {
@@ -274,6 +278,7 @@ function validReferenceRecords(): IndexedRecord[] {
     record("consequence_record", "marla:CNSQ-1", "stories/marla/_source/consequences/CNSQ-1.yaml", { id: "CNSQ-1" }),
     record("thread_record", "marla:THR-1", "stories/marla/_source/threads/THR-1.yaml", { id: "THR-1" }),
     record("pressure_clock_record", "marla:CLK-1", "stories/marla/_source/clocks/CLK-1.yaml", { id: "CLK-1" }),
+    record("story_secret_record", "marla:STSEC-1", "stories/marla/_source/secrets/STSEC-1.yaml", { id: "STSEC-1" }),
     record("relationship_record_story", "marla:SREL-1", "stories/marla/_source/relationships/SREL-1.yaml", { id: "SREL-1" }),
     record("intention_record", "marla:STINT-1", "stories/marla/_source/intentions/STINT-1.yaml", { id: "STINT-1" }),
     record("story_location_record", "marla:STLOC-1", "stories/marla/_source/locations/STLOC-1.yaml", { id: "STLOC-1" }),
