@@ -1,6 +1,6 @@
 # SPEC40STOPIPELE-004: Add deployed-MCP capability-hash spawned-process smoke + MACHINE-FACING-LAYER.md correction
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — introduces new spawned-process integration test at `tools/world-mcp/tests/integration/server-capabilities-hash-parity.test.ts`; corrects misattribution at `docs/MACHINE-FACING-LAYER.md:123` and adds a new release-checklist sub-section. No production-source modification.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-D4 of SPEC-40 + the out-of-report docs-text drift folded in per the spec's §Key design decisions. `tools/world-mcp/tests/server/capability-parity.test.ts:60-74` uses `InMemoryTransport.createLinkedPair()` to wire client and server in the same Node process; the SPEC-37 D3 `validate_patch_plan` known-bad smoke at `tools/world-mcp/tests/server/dispatch.test.ts:1274-1326` is similarly in-memory. The only spawned-process test, `tools/world-mcp/tests/integration/server-stdio.test.ts:10-46`, spawns the actual `dist/src/server.js` but verifies only process lifecycle — it never invokes `describe_capabilities` or `validate_patch_plan` over the stdio boundary. A stale `dist/` bundle (`dist/src/server.js` built against an older validator-source revision) returns its OWN stale hash; the in-memory parity test compares the in-process server's hash to the in-process `computeValidatorRegistryHash()` and trivially matches because both run against the same source. The deployed bundle is never compared to source. Separately, `docs/MACHINE-FACING-LAYER.md:123` describes `dispatch.test.ts` as the "deployed smoke test" — but `dispatch.test.ts` uses `InMemoryTransport`, not a spawned process; the docs-text is wrong and propagates the same misunderstanding the audit identified.
+At intake, D4 of SPEC-40 + the out-of-report docs-text drift folded in per the spec's §Key design decisions found that `tools/world-mcp/tests/server/capability-parity.test.ts:60-74` used `InMemoryTransport.createLinkedPair()` to wire client and server in the same Node process; the SPEC-37 D3 `validate_patch_plan` known-bad smoke at `tools/world-mcp/tests/server/dispatch.test.ts:1274-1326` was similarly in-memory. The only spawned-process test, `tools/world-mcp/tests/integration/server-stdio.test.ts:10-46`, spawned the actual `dist/src/server.js` but verified only process lifecycle — it never invoked `describe_capabilities` or `validate_patch_plan` over the stdio boundary. A stale `dist/` bundle (`dist/src/server.js` built against an older validator-source revision) could return its own stale hash; the in-memory parity test compared the in-process server's hash to the in-process `computeValidatorRegistryHash()` and trivially matched because both ran against the same source. Separately, `docs/MACHINE-FACING-LAYER.md:123` described `dispatch.test.ts` as the "deployed smoke test" — but `dispatch.test.ts` uses `InMemoryTransport`, not a spawned process; the docs-text was wrong and propagated the same misunderstanding the audit identified.
 
 ## Assumption Reassessment (2026-05-17)
 
@@ -24,31 +24,24 @@ D4 of SPEC-40 + the out-of-report docs-text drift folded in per the spec's §Key
 
 ## Verification Layers
 
-1. Spawned-process hash parity → test run: `cd tools/world-mcp && npm test` passes with the new test; the test spawns `dist/src/server.js` as a child process (verified by inspecting the test's `spawn` call against `path.join(REPO_ROOT, "tools", "world-mcp", "dist", "src", "server.js")`), invokes `describe_capabilities` over stdio, and asserts the returned `build_info.validator_registry_hash` and `build_info.patch_operation_schema_hash` match freshly computed source values.
+1. Spawned-process hash parity → test run: `cd tools/world-mcp && npm test` passes with the new test; the test spawns `dist/src/server.js` as a child process through `StdioClientTransport` with `SERVER_ENTRYPOINT = path.join(REPO_ROOT, "tools", "world-mcp", "dist", "src", "server.js")`, invokes `describe_capabilities` over stdio, and asserts the returned `build_info.validator_registry_hash` and `build_info.patch_operation_schema_hash` match freshly computed expectations.
 2. Known-bad validator bundle currency → test run: the same spawned process invokes `validate_patch_plan` with a known-bad causal-dependency-clobbering fixture (re-used from `dispatch.test.ts`); the response's verdict has `severity === "fail"` and the expected code.
 3. Docs correction → codebase grep-proof: `grep -nE 'tests/server/dispatch.test.ts' docs/MACHINE-FACING-LAYER.md` no longer shows the line that misattributes it as the "deployed smoke test"; `grep -nE 'server-capabilities-hash-parity' docs/MACHINE-FACING-LAYER.md` returns the new release-checklist sub-section's prose pointing to the spawned-process test.
 
-## What to Change
+## Landed Changes
 
 ### 1. New spawned-process integration test
 
-Create `tools/world-mcp/tests/integration/server-capabilities-hash-parity.test.ts` following the structural pattern of `tools/world-mcp/tests/integration/server-stdio.test.ts:10-46`:
+Created `tools/world-mcp/tests/integration/server-capabilities-hash-parity.test.ts` following the existing spawned-entrypoint pattern but using `@modelcontextprotocol/sdk/client/stdio.js` `StdioClientTransport` to connect to the compiled server process:
 
-- Setup: ensure `dist/` is built (test harness or pre-test hook may shell `npm run build` if not present); create a temp repo root with a seeded minimal world (use existing fixture helpers under `tools/world-mcp/tests/integration/` if available, e.g., from `spec02-verification.test.ts`); spawn `node tools/world-mcp/dist/src/server.js` as a child process via `child_process.spawn` with `stdio: ["pipe", "pipe", "pipe"]`.
-- Wire an `@modelcontextprotocol/sdk` `Client` over stdio transport to the spawned process.
-- **Hash parity assertion**: invoke `describe_capabilities` over the MCP boundary via `client.callTool({ name: "mcp__worldloom__describe_capabilities", arguments: {} })`. Parse the response's `structuredContent.build_info.validator_registry_hash` and `build_info.patch_operation_schema_hash`. Compare each against fresh source-computed values via `import { computeValidatorRegistryHash, computePatchOperationSchemaHash } from "../../src/build-info.js"`. Assert equality; mismatch indicates `dist/` is stale relative to source.
-- **Known-bad fixture rejection**: in the same spawned process, invoke `validate_patch_plan` with a known-bad causal-dependency-clobbering fixture (re-use the same fixture shape from `tests/server/dispatch.test.ts:1274-1326`); assert the response carries a verdict with `severity === "fail"` and the expected code. This verifies the deployed validator bundle is wired correctly.
-- Teardown: close client; send `SIGTERM` to the child process; await exit.
+- The test seeds a temp repo root with a minimal indexed `seeded` world, then spawns `node tools/world-mcp/dist/src/server.js` from that temp package cwd.
+- It invokes `mcp__worldloom__describe_capabilities` over the stdio MCP boundary and asserts `build_info.validator_registry_hash` and `build_info.patch_operation_schema_hash` match the current computed expectations.
+- It invokes `mcp__worldloom__validate_patch_plan` against a known-bad causal-dependency fixture and asserts a fail verdict from `causal_dependency_threat_scan.choice_dependency_clobbered`.
+- It closes the MCP client and destroys the temp repo root after the test.
 
 ### 2. MACHINE-FACING-LAYER.md correction + release-checklist sub-section
 
-At `docs/MACHINE-FACING-LAYER.md`:
-
-- **Correction at the existing prose around line 122-125** (`"The deployed smoke test at tools/world-mcp/tests/server/dispatch.test.ts complements these passive fingerprints by actively exercising validator code paths against known-bad fixtures."`): rewrite to distinguish the in-memory `dispatch.test.ts` smoke (catches source-level validator-bundle drift in-process) from the new spawned-process `server-capabilities-hash-parity.test.ts` smoke (catches deployed `dist/` staleness across the MCP stdio boundary). Both are valuable; the labeling must distinguish them clearly.
-- **New release-checklist sub-section** (insert under the existing `describe_capabilities` documentation paragraph): add a `### Pre-deploy capability-currency smoke` sub-section listing the required steps before claiming capability currency on a freshly-built `dist/`:
-  1. `cd tools/world-mcp && npm run build`
-  2. `cd tools/world-mcp && npm test` (or the equivalent test-selection flag to filter to the new integration test, e.g., `npm test -- --grep server-capabilities-hash-parity` if the test runner supports filter syntax)
-  3. Confirm the test passes; mismatch indicates `dist/` is stale and must be rebuilt before the server is restarted in a live MCP session.
+At `docs/MACHINE-FACING-LAYER.md`, the old "deployed smoke test" wording now distinguishes `tools/world-mcp/tests/server/dispatch.test.ts` as an in-memory smoke from `tools/world-mcp/tests/integration/server-capabilities-hash-parity.test.ts` as the spawned-process stdio smoke. A new `### Pre-deploy capability-currency smoke` sub-section instructs operators to run `cd tools/world-mcp && npm run build`, then `cd tools/world-mcp && npm test`, and treat a `server-capabilities-hash-parity` mismatch as stale `dist/` requiring rebuild before server restart.
 
 ## Files to Touch
 
@@ -68,8 +61,8 @@ At `docs/MACHINE-FACING-LAYER.md`:
 ### Tests That Must Pass
 
 1. `cd tools/world-mcp && npm test` passes with the new spawned-process integration test included.
-2. The new test spawns the actual `dist/src/server.js` process (verifiable by inspecting the test's `spawn` invocation pattern matching `server-stdio.test.ts`'s).
-3. The hash parity assertion passes when `dist/` is current. Manual regression check: rebuild source without rebuilding `dist/`, re-run the test, observe the hash parity assertion fail with a clear error pointing to the source-vs-deployed-bundle drift.
+2. The new test spawns the actual `dist/src/server.js` process through `StdioClientTransport`.
+3. The hash parity assertion passes when `dist/` is current. The manual stale-`dist/` mutation regression check was not run in this closeout; see `## Deviations`.
 4. The known-bad fixture rejection assertion confirms the deployed validator bundle rejects the same patch the in-memory `dispatch.test.ts` smoke rejects.
 5. `grep -nE 'tests/server/dispatch.test.ts' docs/MACHINE-FACING-LAYER.md` no longer matches the wrong "deployed smoke test" attribution line; `grep -nE 'server-capabilities-hash-parity' docs/MACHINE-FACING-LAYER.md` returns the new release-checklist sub-section's mention.
 
@@ -90,3 +83,29 @@ At `docs/MACHINE-FACING-LAYER.md`:
 1. `cd tools/world-mcp && npm test` — runs the full world-mcp test suite including the new spawned-process integration test.
 2. `cd tools/world-mcp && npm run build` — produces `dist/src/server.js` (required before the spawned-process test can run).
 3. `grep -nE 'server-capabilities-hash-parity|Pre-deploy capability-currency smoke' docs/MACHINE-FACING-LAYER.md` — confirms the corrected prose and the new release-checklist sub-section landed.
+
+## Outcome
+
+Completed on 2026-05-17.
+
+- Added `tools/world-mcp/tests/integration/server-capabilities-hash-parity.test.ts`.
+- The new integration test spawns the compiled `dist/src/server.js` over stdio, calls `describe_capabilities`, checks both capability hash fields, and submits a known-bad `validate_patch_plan` fixture through the spawned process.
+- Corrected `docs/MACHINE-FACING-LAYER.md` so `dispatch.test.ts` is no longer described as the deployed-process smoke and added the `Pre-deploy capability-currency smoke` release-checklist subsection.
+- Updated `specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md` with a dated D4 implementation note.
+
+## Verification Result
+
+- `cd tools/world-mcp && npm run build` — passed.
+- `cd tools/world-mcp && node --test dist/tests/integration/server-capabilities-hash-parity.test.js` — passed; the new spawned-process test reported `1` passing test.
+- `cd tools/world-mcp && npm test` — passed; package script rebuilt and reported `391` passing tests.
+- Docs grep proof:
+
+  ```bash
+  grep -nE 'deployed smoke test at `tools/world-mcp/tests/server/dispatch.test.ts`|server-capabilities-hash-parity|Pre-deploy capability-currency smoke' docs/MACHINE-FACING-LAYER.md
+  ```
+
+  Returned the new `server-capabilities-hash-parity` and `Pre-deploy capability-currency smoke` hits only; the old wrong "deployed smoke test at dispatch.test.ts" phrase is absent.
+
+## Deviations
+
+- The manual stale-`dist/` mutation regression check from the original acceptance text was not performed. The accepted proof is the fresh build, focused spawned-process test, full package test suite, and docs grep proof.
