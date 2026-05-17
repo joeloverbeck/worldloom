@@ -7,6 +7,7 @@ import { getRecord } from "../../src/tools/get-record";
 import { getRecords } from "../../src/tools/get-records";
 
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { STORY_FIXTURE_SLUG, buildStoryBundleWorld } from "./story-bundle-fixture";
 
 const CHAR_FILE_BODY = [
   "---",
@@ -197,6 +198,37 @@ test("getRecords keeps partial failures in request order", async () => {
     const invalid = result.records[2]!;
     assert.equal(invalid.found, false);
     assert.equal(invalid.error.code, "invalid_input");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getRecords returns BEL story-bundle records inline", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getRecords({
+        record_ids: ["BEL-1", "SLT-21"],
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.delivery_status, "inline");
+    assert.deepEqual(result.records.map((entry) => entry.found), [true, true]);
+    const beliefEntry = result.records[0];
+    assert.equal(beliefEntry?.found, true);
+    if (beliefEntry?.found) {
+      assert.ok("record" in beliefEntry.record);
+      const record = beliefEntry.record.record as Record<string, unknown>;
+      assert.equal(record.record_kind, "belief_record");
+      assert.equal(record.id, "BEL-1");
+      assert.equal(record.belief_mode, "believes");
+    }
   } finally {
     destroyTempRepoRoot(root);
   }

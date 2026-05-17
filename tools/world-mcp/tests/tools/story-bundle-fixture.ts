@@ -87,6 +87,50 @@ export function buildStoryBundleWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "BEL-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "beliefs", "BEL-1.yaml"),
+        node_type: "belief_record",
+        body: [
+          "id: BEL-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "holder: STENT-2",
+          "claim: Marla believes the loft is empty.",
+          "belief_mode: believes",
+          "truth_relation: 'false'",
+          "confidence: likely",
+          "visibility: private",
+          "basis:",
+          "  source_event: SE-1",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "BEL-2"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "beliefs", "BEL-2.yaml"),
+        node_type: "belief_record",
+        body: [
+          "id: BEL-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "holder: STENT-2",
+          "claim: Marla suspects someone listened at the stairwell.",
+          "belief_mode: suspects",
+          "truth_relation: unknown",
+          "confidence: suspected",
+          "visibility: shared",
+          "basis:",
+          "  source_event: SE-1",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "STSTAT-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
@@ -233,6 +277,12 @@ export function buildStoryBundleWorld(root: string): void {
         source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SF-1"),
         target_node_id: "CF-1",
         edge_type: "story_fact_derived_from"
+      },
+      {
+        story_slug: STORY_FIXTURE_SLUG,
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "BEL-1"),
+        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SE-1"),
+        edge_type: "created_at_page"
       },
       {
         story_slug: STORY_FIXTURE_SLUG,

@@ -33,6 +33,48 @@ test("getRecord resolves authored story-bundle ids through story_slug", async ()
   }
 });
 
+test("getRecord resolves BEL story-bundle records through story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "BEL-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG
+      })
+    );
+    const holder = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "BEL-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG,
+        section_path: "holder"
+      })
+    );
+
+    assert.ok("record" in result);
+    assert.equal(result.record.record_kind, "belief_record");
+    assert.equal(result.record.id, "BEL-1");
+    assert.equal(result.record.holder, "STENT-2");
+    assert.equal(result.record.claim, "Marla believes the loft is empty.");
+    assert.equal(result.record.belief_mode, "believes");
+    assert.equal(result.record.truth_relation, "false");
+    assert.equal(result.record.confidence, "likely");
+    assert.equal(result.record.visibility, "private");
+    assert.equal(result.file_path, "stories/opening-bells/_source/beliefs/BEL-1.yaml");
+
+    assert.ok("value" in holder);
+    assert.equal(holder.record_kind, "belief_record");
+    assert.equal(holder.section_path, "holder");
+    assert.equal(holder.value, "STENT-2");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("getRecord rejects bundle-scoped ids without story_slug", async () => {
   const root = createTempRepoRoot();
 
@@ -134,7 +176,7 @@ test("getRecordField and batch retrieval support story_slug", async () => {
     );
     const records = await withRepoRoot(root, () =>
       getRecords({
-        record_ids: ["SLT-21", "PG-1"],
+        record_ids: ["SLT-21", "BEL-1", "PG-1"],
         world_slug: "seeded",
         story_slug: STORY_FIXTURE_SLUG
       })
@@ -161,7 +203,14 @@ test("getRecordField and batch retrieval support story_slug", async () => {
 
     assert.ok(!("code" in records));
     assert.equal(records.delivery_status, "inline");
-    assert.deepEqual(records.records.map((entry) => entry.found), [true, true]);
+    assert.deepEqual(records.records.map((entry) => entry.found), [true, true, true]);
+    assert.equal(records.records[1]?.found, true);
+    if (records.records[1]?.found) {
+      assert.ok("record" in records.records[1].record);
+      const belRecord = records.records[1].record.record as Record<string, unknown>;
+      assert.equal(belRecord.record_kind, "belief_record");
+      assert.equal(belRecord.id, "BEL-1");
+    }
 
     assert.ok(!("code" in fields));
     assert.deepEqual(

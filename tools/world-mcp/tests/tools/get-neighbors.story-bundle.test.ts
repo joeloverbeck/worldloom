@@ -36,6 +36,34 @@ test("getNeighbors resolves authored story-bundle ids through story_slug", async
   }
 });
 
+test("getNeighbors resolves BEL authored ids through story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getNeighbors({
+        node_id: "BEL-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG,
+        depth: 1
+      })
+    );
+
+    assert.ok("seed" in result);
+    assert.equal(result.seed.node_id, "BEL-1");
+    assert.equal(result.seed.node_type, "belief_record");
+    assert.equal(result.seed.story_slug, STORY_FIXTURE_SLUG);
+    assert.deepEqual(
+      result.hop1.map((node) => [node.node_id, node.node_type, node.story_slug, node.edge_types]),
+      [["SE-1", "story_event_record", STORY_FIXTURE_SLUG, ["created_at_page"]]]
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("getNeighbors rejects authored story-bundle ids without story_slug", async () => {
   const root = createTempRepoRoot();
 

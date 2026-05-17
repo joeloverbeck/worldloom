@@ -80,6 +80,7 @@ export const STORY_SLUG_PATTERN = /^[a-z0-9-]+$/;
 export const STORY_BUNDLE_NODE_TYPES = [
   "story_entity_record",
   "story_status_record",
+  "belief_record",
   "story_fact_record",
   "story_event_record",
   "obligation_record",
@@ -105,6 +106,7 @@ export type StoryBundleNodeType = (typeof STORY_BUNDLE_NODE_TYPES)[number];
 export const STORY_BUNDLE_ID_PREFIXES = [
   "PG",
   "SE",
+  "BEL",
   "SF",
   "OBL",
   "CNSQ",
