@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getRecord } from "../../src/tools/get-record";
+import { getRecord } from "../../src/tools/get-record.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 const CHAR_FILE_BODY = [
   "---",

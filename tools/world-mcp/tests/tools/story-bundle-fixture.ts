@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-import { seedWorld } from "./_shared";
+import { seedWorld } from "./_shared.js";
 
 export const STORY_FIXTURE_WORLD = "seeded";
 export const STORY_FIXTURE_SLUG = "opening-bells";

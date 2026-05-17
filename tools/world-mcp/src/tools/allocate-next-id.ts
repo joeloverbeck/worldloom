@@ -3,10 +3,10 @@ import path from "node:path";
 
 import YAML from "yaml";
 
-import { openIndexDb } from "../db";
-import { resolveRepoRoot, resolveWorldDirectory } from "../db/path";
-import { createMcpError } from "../errors";
-import type { McpError } from "../errors";
+import { openIndexDb } from "../db/index.js";
+import { resolveRepoRoot, resolveWorldDirectory } from "../db/path.js";
+import { createMcpError } from "../errors.js";
+import type { McpError } from "../errors.js";
 
 export const ID_CLASS_FORMATS = {
   CF: { width: 1, zeroPad: false, regex: /^CF-(\d+)$/ },

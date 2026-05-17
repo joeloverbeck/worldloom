@@ -42,7 +42,7 @@ The migration is per-package self-contained: each package's PR can land independ
 | Package | tsconfig change | package.json change | Source edits | Notes |
 |---|---|---|---|---|
 | `tools/hooks` | DONE (Node16/Node16, no `ignoreDeprecations`) | Add `"type": "module"` | Add `.js` suffix to 23 relative imports across `src/` + `tests/` | tsconfig already migrated in commit `<pending>`; 22/22 tests pass |
-| `tools/world-mcp` | None (already Node16/Node16) | Add `"type": "module"` | Add `.js` suffix to relative imports across `src/` + `tests/` | Smallest source surface |
+| `tools/world-mcp` | None (already Node16/Node16) | Add `"type": "module"` | Add `.js` suffix to relative imports across `src/` + `tests/`; replace CJS globals; add ESM-safe runtime interop while sibling packages remain CJS | Largest live import surface by grep; first consumer migration in corrected dependency order |
 | `tools/validators` | None (already Node16/Node16) | Change `"type": "commonjs"` → `"type": "module"` | None (`.js` suffixes already used) | Already authored for ESM-shape; flip the package.json flag |
 | `tools/patch-engine` | None (already Node16/Node16) | Change `"type": "commonjs"` → `"type": "module"` | None (`.js` suffixes already used) | Same as validators |
 | `tools/world-index` | Change `module: "commonjs"` → `"Node16"`, `moduleResolution: "node"` → `"Node16"`, remove `ignoreDeprecations: "6.0"` | Add `"type": "module"` | Add `.js` suffix to ~158 relative imports across `src/` + `tests/` | Largest surface; mdast-consuming files (`parse/atomic.ts`, `parse/canonical.ts`, `parse/entities.ts`, `parse/markdown.ts`, `parse/prose.ts`, `parse/scoped.ts`, `parse/semantic.ts`, `parse/structured-edges.ts`) remain unchanged at the type-import level |

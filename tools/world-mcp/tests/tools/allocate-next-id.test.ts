@@ -8,10 +8,10 @@ import {
   ID_CLASS_FORMATS,
   type AllocateNextIdArgs,
   type IdClass
-} from "../../src/tools/allocate-next-id";
-import { ID_CLASSES } from "../../src/server";
+} from "../../src/tools/allocate-next-id.js";
+import { ID_CLASSES } from "../../src/server.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 const CLASS_CASES: Array<{ idClass: IdClass; highest: string; expected: string }> = [
   { idClass: "CF", highest: "CF-0047", expected: "CF-48" },

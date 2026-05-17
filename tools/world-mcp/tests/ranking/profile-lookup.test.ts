@@ -6,7 +6,7 @@ import {
   defaultRankingProfile,
   getRankingProfile,
   rankingProfilesByTaskType
-} from "../../src/ranking/profiles";
+} from "../../src/ranking/profiles/index.js";
 
 test("every spec task type resolves to a ranking profile", () => {
   for (const taskType of TASK_TYPES) {

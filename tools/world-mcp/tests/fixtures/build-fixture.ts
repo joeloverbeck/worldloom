@@ -3,9 +3,9 @@ import { mkdirSync, readFileSync, utimesSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import Database from "better-sqlite3";
-import { CURRENT_INDEX_VERSION } from "@worldloom/world-index/public/types";
+import { CURRENT_INDEX_VERSION } from "../../src/package-interop.js";
 
-import { createTempRepoRoot, seedWorld } from "../tools/_shared";
+import { createTempRepoRoot, seedWorld } from "../tools/_shared.js";
 
 export const SPEC02_FIXTURE_WORLD = "seeded";
 export const SPEC02_MULTI_WORLD_A = "seeded-a";
@@ -292,7 +292,7 @@ export function buildEmptyWorldFixture(root: string, worldSlug: string): void {
   writeFileSync(path.join(worldRoot, "index_version.txt"), `${CURRENT_INDEX_VERSION}\n`, "utf8");
 
   const migrationsRoot = path.join(
-    path.resolve(__dirname, "..", "..", "..", "..", ".."),
+    path.resolve(import.meta.dirname, "..", "..", "..", "..", ".."),
     "tools",
     "world-index",
     "src",

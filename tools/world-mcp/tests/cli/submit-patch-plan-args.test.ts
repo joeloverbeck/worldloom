@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { runSubmitPatchPlanCli } from "../../src/cli/submit-patch-plan";
+import { runSubmitPatchPlanCli } from "../../src/cli/submit-patch-plan.js";
 
 interface RunResult {
   status: number | null;

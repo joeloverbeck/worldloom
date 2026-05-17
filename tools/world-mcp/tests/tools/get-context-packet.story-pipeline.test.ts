@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getContextPacket } from "../../src/tools/get-context-packet";
+import { getContextPacket } from "../../src/tools/get-context-packet.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared.js";
 import {
   buildStoryBundleWorld,
   storyNodeId,
   STORY_FIXTURE_SLUG,
   STORY_FIXTURE_WORLD
-} from "./story-bundle-fixture";
+} from "./story-bundle-fixture.js";
 
 test("getContextPacket requires story_slug for story-pipeline task types", async () => {
   const root = createTempRepoRoot();

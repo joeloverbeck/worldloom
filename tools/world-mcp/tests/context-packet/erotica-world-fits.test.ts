@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getContextPacket } from "../../src/tools/get-context-packet";
-import { GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE } from "../../src/context-packet/shared";
+import { getContextPacket } from "../../src/tools/get-context-packet.js";
+import { GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE } from "../../src/context-packet/shared.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 
 const FIXTURE_WORLD = "governing-body-world";
 const TYPICAL_SEED_NODES = ["ENT-0001", "ENT-0004", "ENT-0003"];

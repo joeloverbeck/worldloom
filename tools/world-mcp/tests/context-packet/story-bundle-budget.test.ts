@@ -5,14 +5,14 @@ import path from "node:path";
 
 import Database from "better-sqlite3";
 
-import { assembleContextPacket } from "../../src/context-packet/assemble";
+import { assembleContextPacket } from "../../src/context-packet/assemble.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared.js";
 import {
   buildStoryBundleWorld,
   STORY_FIXTURE_SLUG,
   STORY_FIXTURE_WORLD
-} from "../tools/story-bundle-fixture";
+} from "../tools/story-bundle-fixture.js";
 
 function hashValue(source: string): string {
   return createHash("sha256").update(source.normalize("NFC"), "utf8").digest("hex");

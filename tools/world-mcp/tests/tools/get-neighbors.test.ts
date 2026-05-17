@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getNeighbors } from "../../src/tools/get-neighbors";
+import { getNeighbors } from "../../src/tools/get-neighbors.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function buildNeighborWorld(root: string): void {
   seedWorld(root, {

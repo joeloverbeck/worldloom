@@ -3,13 +3,13 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { assembleContextPacket } from "../../src/context-packet/assemble";
+import { assembleContextPacket } from "../../src/context-packet/assemble.js";
 import {
   DEFAULT_HARNESS_CEILING_CHARS,
   ENVELOPE_OVERHEAD_RESERVE_CHARS
-} from "../../src/context-packet/shared";
+} from "../../src/context-packet/shared.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 
 function seedHarnessCeilingWorld(root: string): void {
   const largeSummary = "structural-key ".repeat(260);

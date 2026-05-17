@@ -4,10 +4,10 @@ import assert from "node:assert/strict";
 import {
   withIndexFreshnessGuard,
   type FreshnessAuditedResponse
-} from "../../src/context-packet/freshness-guard";
-import type { McpError } from "../../src/errors";
+} from "../../src/context-packet/freshness-guard.js";
+import type { McpError } from "../../src/errors.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared.js";
 
 interface HandlerArgs {
   world_slug: string;

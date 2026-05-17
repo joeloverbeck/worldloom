@@ -1,20 +1,21 @@
-import { NODE_TYPES, type NodeType } from "@worldloom/world-index/public/types";
+import type { NodeType } from "@worldloom/world-index/public/types";
 
-import { assembleContextPacket, type ContextPacket } from "../context-packet/assemble";
-import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
+import { assembleContextPacket, type ContextPacket } from "../context-packet/assemble.js";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard.js";
 import {
   DEFAULT_DELIVERY_MODE,
   DELIVERY_MODES,
   isStoryPipelineTaskType,
   type DeliveryMode
-} from "../context-packet/shared";
-import type { McpError } from "../errors";
+} from "../context-packet/shared.js";
+import type { McpError } from "../errors.js";
+import { NODE_TYPES } from "../package-interop.js";
 import {
   DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE,
   TASK_TYPES,
   type TaskType
-} from "../ranking/profiles";
-import { STORY_SLUG_PATTERN } from "./_shared";
+} from "../ranking/profiles/index.js";
+import { STORY_SLUG_PATTERN } from "./_shared.js";
 
 export interface GetContextPacketArgs {
   task_type: TaskType;

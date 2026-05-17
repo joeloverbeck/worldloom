@@ -1,8 +1,8 @@
 import YAML from "yaml";
 
-import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
-import { openIndexDb } from "../db";
-import { createMcpError, type McpError } from "../errors";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard.js";
+import { openIndexDb } from "../db/index.js";
+import { createMcpError, type McpError } from "../errors.js";
 
 export interface FindSectionsTouchedByArgs {
   cf_id: string;

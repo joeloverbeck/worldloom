@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
 
-import { createMcpError, type McpError } from "../errors";
+import { createMcpError, type McpError } from "../errors.js";
 
 import {
   loadPacketNodes,
@@ -8,7 +8,7 @@ import {
   type ContextPacketNode,
   type DeliveryMode,
   type PacketRecordProjection
-} from "./shared";
+} from "./shared.js";
 
 interface SeedNodeRow {
   node_id: string;

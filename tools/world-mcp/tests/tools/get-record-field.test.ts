@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getRecordField } from "../../src/tools/get-record-field";
+import { getRecordField } from "../../src/tools/get-record-field.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function buildSeededAtomicWorld(root: string): void {
   seedWorld(root, {

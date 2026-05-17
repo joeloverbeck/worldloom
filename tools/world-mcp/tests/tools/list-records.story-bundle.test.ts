@@ -1,16 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { listRecords } from "../../src/tools/list-records";
+import { listRecords } from "../../src/tools/list-records.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 import {
   STORY_FIXTURE_OTHER_SLUG,
   STORY_FIXTURE_WORLD,
   STORY_FIXTURE_SLUG,
   buildStoryBundleWorld,
   storyNodeId
-} from "./story-bundle-fixture";
+} from "./story-bundle-fixture.js";
 
 function buildLargeStoryletWorld(root: string): void {
   const nodes = Array.from({ length: 40 }, (_, index) => {

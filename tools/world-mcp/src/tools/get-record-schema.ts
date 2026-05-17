@@ -1,12 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
+import { createMcpError, type McpError } from "../errors.js";
 import {
   EPISTEMIC_PROFILE_REQUIRED_TYPES,
   EXCEPTION_GOVERNANCE_REQUIRED_TYPES
-} from "@worldloom/validators";
-
-import { createMcpError, type McpError } from "../errors";
+} from "../package-interop.js";
 
 type JsonObject = { [key: string]: JsonValue };
 type JsonValue = JsonObject | JsonValue[] | string | number | boolean | null;
@@ -95,7 +94,7 @@ function isSupportedNodeType(value: string): value is SupportedRecordSchemaNodeT
 }
 
 function findRepoRoot(): string {
-  const starts = [process.cwd(), __dirname];
+  const starts = [process.cwd(), import.meta.dirname];
 
   for (const start of starts) {
     let current = path.resolve(start);
@@ -113,7 +112,7 @@ function findRepoRoot(): string {
     }
   }
 
-  return path.resolve(__dirname, "..", "..", "..", "..", "..");
+  return path.resolve(import.meta.dirname, "..", "..", "..", "..", "..");
 }
 
 function validatorsSchemaRoot(): string {

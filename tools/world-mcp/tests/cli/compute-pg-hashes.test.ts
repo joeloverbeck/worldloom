@@ -5,9 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { computePgStateHash } from "@worldloom/world-index/hash/content";
+import { computePgStateHash } from "../../src/package-interop.js";
 
-import { runComputePgHashesCli } from "../../src/cli/compute-pg-hashes";
+import { runComputePgHashesCli } from "../../src/cli/compute-pg-hashes.js";
 
 function makeTmpDir(): string {
   return mkdtempSync(path.join(os.tmpdir(), "world-mcp-cli-compute-pg-hashes-"));

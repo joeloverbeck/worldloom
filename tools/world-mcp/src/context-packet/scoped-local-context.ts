@@ -1,7 +1,7 @@
 import type Database from "better-sqlite3";
 
-import type { ContextPacketNode, DeliveryMode, PacketRecordProjection } from "./shared";
-import { loadPacketNodes } from "./shared";
+import type { ContextPacketNode, DeliveryMode, PacketRecordProjection } from "./shared.js";
+import { loadPacketNodes } from "./shared.js";
 
 const LOCAL_CONTEXT_EDGE_TYPES = [
   "derived_from",

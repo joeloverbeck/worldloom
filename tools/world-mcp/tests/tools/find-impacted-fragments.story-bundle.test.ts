@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { findImpactedFragments } from "../../src/tools/find-impacted-fragments";
+import { findImpactedFragments } from "../../src/tools/find-impacted-fragments.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared";
-import { STORY_FIXTURE_SLUG, buildStoryBundleWorld } from "./story-bundle-fixture";
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared.js";
+import { STORY_FIXTURE_SLUG, buildStoryBundleWorld } from "./story-bundle-fixture.js";
 
 test("findImpactedFragments resolves story-bundle authored ids with story_slug", async () => {
   const root = createTempRepoRoot();

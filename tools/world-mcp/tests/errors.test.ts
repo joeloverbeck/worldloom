@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { MCP_ERROR_CODES } from "../src/errors";
+import { MCP_ERROR_CODES } from "../src/errors.js";
 
 test("MCP_ERROR_CODES matches the registered MCP error taxonomy exactly", () => {
   assert.deepEqual(MCP_ERROR_CODES, [

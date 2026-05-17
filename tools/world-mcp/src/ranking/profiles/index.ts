@@ -1,4 +1,4 @@
-import type { RankingWeights } from "../policy";
+import type { RankingWeights } from "../policy.js";
 import {
   branchingStoryHealthAuditRankingProfile,
   canonFactsFromDiegeticArtifactsRankingProfile,
@@ -10,11 +10,11 @@ import {
   storyFactPromotionToCanonRankingProfile,
   storyTurnCycleRankingProfile,
   commitmentBlockAuthoringRankingProfile
-} from "./canon-pipeline-adjacent";
-import { canonAdditionRankingProfile } from "./canon-addition";
-import { characterGenerationRankingProfile } from "./character-generation";
-import { continuityAuditRankingProfile } from "./continuity-audit";
-import { defaultRankingProfile } from "./default";
+} from "./canon-pipeline-adjacent.js";
+import { canonAdditionRankingProfile } from "./canon-addition.js";
+import { characterGenerationRankingProfile } from "./character-generation.js";
+import { continuityAuditRankingProfile } from "./continuity-audit.js";
+import { defaultRankingProfile } from "./default.js";
 
 export const TASK_TYPES = [
   "canon_addition",

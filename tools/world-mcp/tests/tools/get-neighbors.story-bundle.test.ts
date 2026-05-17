@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getNeighbors } from "../../src/tools/get-neighbors";
+import { getNeighbors } from "../../src/tools/get-neighbors.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared";
-import { STORY_FIXTURE_SLUG, buildStoryBundleWorld } from "./story-bundle-fixture";
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared.js";
+import { STORY_FIXTURE_SLUG, buildStoryBundleWorld } from "./story-bundle-fixture.js";
 
 test("getNeighbors resolves authored story-bundle ids through story_slug", async () => {
   const root = createTempRepoRoot();

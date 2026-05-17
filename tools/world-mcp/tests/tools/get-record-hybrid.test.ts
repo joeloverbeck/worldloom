@@ -4,9 +4,9 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { getRecord } from "../../src/tools/get-record";
+import { getRecord } from "../../src/tools/get-record.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 const CHAR_FILE_BODY = [
   "---",

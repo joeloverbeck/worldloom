@@ -3,9 +3,9 @@ import { spawn } from "node:child_process";
 import path from "node:path";
 import test from "node:test";
 
-import { createTempRepoRoot, destroyTempRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot } from "../tools/_shared.js";
 
-const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
+const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..", "..", "..", "..");
 
 test("stdio server entrypoint stays alive as a child process until stdin closes", async () => {
   const root = createTempRepoRoot();

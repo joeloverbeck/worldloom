@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getContextPacket } from "../../src/tools/get-context-packet";
-import { GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE } from "../../src/context-packet/shared";
+import { getContextPacket } from "../../src/tools/get-context-packet.js";
+import { GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE } from "../../src/context-packet/shared.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 
 function collectNodes(packet: Awaited<ReturnType<typeof getContextPacket>>) {
   assert.ok(!("code" in packet));

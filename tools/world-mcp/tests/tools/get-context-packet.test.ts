@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getContextPacket } from "../../src/tools/get-context-packet";
+import { getContextPacket } from "../../src/tools/get-context-packet.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function buildContextPacketWorld(root: string): void {
   seedWorld(root, {

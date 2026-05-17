@@ -3,10 +3,9 @@ import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
-import { OPERATION_KINDS } from "@worldloom/patch-engine";
-
-import type { ToolCapability } from "./tools/describe-capabilities";
-import { createPatchOperationSchemaManifest } from "./tools/describe-envelope-schema";
+import { OPERATION_KINDS } from "./package-interop.js";
+import type { ToolCapability } from "./tools/describe-capabilities.js";
+import { createPatchOperationSchemaManifest } from "./tools/describe-envelope-schema.js";
 
 export interface BuildInfo {
   git_commit_hash: string;
@@ -42,7 +41,7 @@ function stableCapabilityPayload(tools: readonly ToolCapability[]): string {
 }
 
 function findRepoRoot(): string {
-  const starts = [process.cwd(), __dirname];
+  const starts = [process.cwd(), import.meta.dirname];
 
   for (const start of starts) {
     let current = path.resolve(start);
@@ -60,7 +59,7 @@ function findRepoRoot(): string {
     }
   }
 
-  return path.resolve(__dirname, "..", "..", "..", "..");
+  return path.resolve(import.meta.dirname, "..", "..", "..", "..");
 }
 
 function stableJson(value: unknown): string {

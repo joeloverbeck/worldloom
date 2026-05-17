@@ -1,8 +1,8 @@
 import type { NodeType } from "@worldloom/world-index/public/types";
 
-import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
-import { openIndexDb } from "../db";
-import type { McpError } from "../errors";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard.js";
+import { openIndexDb } from "../db/index.js";
+import type { McpError } from "../errors.js";
 
 export interface FindNamedEntitiesArgs {
   world_slug: string;

@@ -2,7 +2,7 @@ import { createHmac, randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-import { resolveRepoRoot } from "../db/path";
+import { resolveRepoRoot } from "../db/path.js";
 
 const SECRET_FILENAME = ".secret";
 const SECRET_SIZE_BYTES = 32;

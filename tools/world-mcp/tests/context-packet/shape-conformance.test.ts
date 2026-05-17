@@ -3,11 +3,11 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-import { getContextPacket } from "../../src/tools/get-context-packet";
+import { getContextPacket } from "../../src/tools/get-context-packet.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 
-const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
+const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..", "..", "..", "..");
 
 function extractContractKeyTree(): Record<string, string[]> {
   const contractPath = path.join(

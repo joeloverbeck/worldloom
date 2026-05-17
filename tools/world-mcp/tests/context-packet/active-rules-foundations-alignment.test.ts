@@ -2,16 +2,16 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
 
-import { assembleContextPacket } from "../../src/context-packet/assemble";
-import { TASK_TYPES, type TaskType } from "../../src/ranking/profiles";
-import { getContextPacket } from "../../src/tools/get-context-packet";
+import { assembleContextPacket } from "../../src/context-packet/assemble.js";
+import { TASK_TYPES, type TaskType } from "../../src/ranking/profiles/index.js";
+import { getContextPacket } from "../../src/tools/get-context-packet.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 import {
   buildStoryBundleWorld,
   STORY_FIXTURE_SLUG,
   STORY_FIXTURE_WORLD
-} from "../tools/story-bundle-fixture";
+} from "../tools/story-bundle-fixture.js";
 
 const EXPECTED_CANON_ADDITION_RULES = [
   "Rule 1: no floating facts",

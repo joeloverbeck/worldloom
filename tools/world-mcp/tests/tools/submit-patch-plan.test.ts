@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { handleSubmitPatchPlanTool } from "../../src/tools/submit-patch-plan";
+import { handleSubmitPatchPlanTool } from "../../src/tools/submit-patch-plan.js";
 
 function buildValidPatchPlan() {
   return {

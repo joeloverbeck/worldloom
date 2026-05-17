@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
 
-import type { TaskType } from "../ranking/profiles";
+import type { TaskType } from "../ranking/profiles/index.js";
 
 import type {
   ContextPacketNode,
@@ -8,8 +8,8 @@ import type {
   DeliveryMode,
   PacketNodeRow,
   PacketRecordProjection
-} from "./shared";
-import { loadPacketNodes, parsePacketNodeRecord, uniqueStrings } from "./shared";
+} from "./shared.js";
+import { loadPacketNodes, parsePacketNodeRecord, uniqueStrings } from "./shared.js";
 
 const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
   canon_addition: ["WORLD_KERNEL.md", "INVARIANTS.md"],

@@ -2,9 +2,10 @@
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
-import { computePgStateHash, computePlanHash } from "@worldloom/world-index/hash/content";
 import YAML from "yaml";
 
+import { isMainModule } from "../esm-main.js";
+import { computePgStateHash, computePlanHash } from "../package-interop.js";
 export interface CliResult {
   stdout: string;
   stderr: string;
@@ -225,6 +226,6 @@ async function main(): Promise<void> {
   process.exitCode = result.exitCode;
 }
 
-if (require.main === module) {
+if (isMainModule(import.meta.url)) {
   void main();
 }

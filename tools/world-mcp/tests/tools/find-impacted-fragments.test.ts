@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { findImpactedFragments } from "../../src/tools/find-impacted-fragments";
+import { findImpactedFragments } from "../../src/tools/find-impacted-fragments.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function buildImpactWorld(root: string): void {
   seedWorld(root, {

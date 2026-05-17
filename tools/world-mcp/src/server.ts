@@ -5,45 +5,44 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import * as z from "zod/v4";
 
-import { OPERATION_KINDS } from "@worldloom/patch-engine";
-import { NODE_TYPES } from "@worldloom/world-index/public/types";
-
-import { createBuildInfo } from "./build-info";
-import { DELIVERY_MODES } from "./context-packet/shared";
-import { TASK_TYPES } from "./ranking/profiles";
-import { allocateNextId } from "./tools/allocate-next-id";
-import { describeCapabilities, type ToolCapability } from "./tools/describe-capabilities";
-import { describeEnvelopeSchema } from "./tools/describe-envelope-schema";
-import { findEditAnchors } from "./tools/find-edit-anchors";
-import { findImpactedFragments } from "./tools/find-impacted-fragments";
-import { findNamedEntities } from "./tools/find-named-entities";
-import { findSectionsTouchedBy } from "./tools/find-sections-touched-by";
-import { getCanonicalVocabulary, VOCABULARY_CLASSES } from "./tools/get-canonical-vocabulary";
-import { getContextPacket } from "./tools/get-context-packet";
-import { getFirewallContent } from "./tools/get-firewall-content";
-import { getNeighbors } from "./tools/get-neighbors";
-import { getPersistedPacketSlice } from "./tools/get-persisted-packet-slice";
-import { getNode } from "./tools/get-node";
-import { getRecord } from "./tools/get-record";
-import { getRecordField } from "./tools/get-record-field";
-import { getRecords } from "./tools/get-records";
-import { getRecordsField } from "./tools/get-records-field";
-import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get-record-schema";
-import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records";
-import { searchNodes } from "./tools/search-nodes";
-import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan";
-import { validatePatchPlan } from "./tools/validate-patch-plan";
+import { createBuildInfo } from "./build-info.js";
+import { DELIVERY_MODES } from "./context-packet/shared.js";
+import { isMainModule } from "./esm-main.js";
+import { NODE_TYPES, OPERATION_KINDS } from "./package-interop.js";
+import { TASK_TYPES } from "./ranking/profiles/index.js";
+import { allocateNextId } from "./tools/allocate-next-id.js";
+import { describeCapabilities, type ToolCapability } from "./tools/describe-capabilities.js";
+import { describeEnvelopeSchema } from "./tools/describe-envelope-schema.js";
+import { findEditAnchors } from "./tools/find-edit-anchors.js";
+import { findImpactedFragments } from "./tools/find-impacted-fragments.js";
+import { findNamedEntities } from "./tools/find-named-entities.js";
+import { findSectionsTouchedBy } from "./tools/find-sections-touched-by.js";
+import { getCanonicalVocabulary, VOCABULARY_CLASSES } from "./tools/get-canonical-vocabulary.js";
+import { getContextPacket } from "./tools/get-context-packet.js";
+import { getFirewallContent } from "./tools/get-firewall-content.js";
+import { getNeighbors } from "./tools/get-neighbors.js";
+import { getPersistedPacketSlice } from "./tools/get-persisted-packet-slice.js";
+import { getNode } from "./tools/get-node.js";
+import { getRecord } from "./tools/get-record.js";
+import { getRecordField } from "./tools/get-record-field.js";
+import { getRecords } from "./tools/get-records.js";
+import { getRecordsField } from "./tools/get-records-field.js";
+import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get-record-schema.js";
+import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records.js";
+import { searchNodes } from "./tools/search-nodes.js";
+import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan.js";
+import { validatePatchPlan } from "./tools/validate-patch-plan.js";
 import {
   MCP_TOOL_NAMES,
   MCP_TOOL_ORDER,
   type McpToolName,
   type ToolKey
-} from "./tool-names";
-import type { McpError } from "./errors";
-import { STORY_SLUG_PATTERN } from "./tools/_shared";
+} from "./tool-names.js";
+import type { McpError } from "./errors.js";
+import { STORY_SLUG_PATTERN } from "./tools/_shared.js";
 
 function readPackageVersion(): string {
-  const packageJsonPath = path.join(__dirname, "..", "..", "package.json");
+  const packageJsonPath = path.join(import.meta.dirname, "..", "..", "package.json");
   const raw = readFileSync(packageJsonPath, "utf8");
   const parsed = JSON.parse(raw) as { version?: string };
   return parsed.version ?? "0.1.0";
@@ -518,7 +517,7 @@ export async function startStdioServer(): Promise<McpServer> {
   return server;
 }
 
-if (require.main === module) {
+if (isMainModule(import.meta.url)) {
   startStdioServer()
     .then(
       async () =>

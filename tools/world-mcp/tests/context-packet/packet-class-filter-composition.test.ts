@@ -1,19 +1,19 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getContextPacket } from "../../src/tools/get-context-packet";
+import { getContextPacket } from "../../src/tools/get-context-packet.js";
 import {
   SUMMARY_MAX_LENGTH,
   type ContextPacket,
   type ContextPacketNode
-} from "../../src/context-packet/shared";
+} from "../../src/context-packet/shared.js";
 
 import {
   createTempRepoRoot,
   destroyTempRepoRoot,
   seedWorld,
   withRepoRoot
-} from "../tools/_shared";
+} from "../tools/_shared.js";
 
 function seedCompositionFixture(root: string): void {
   const filler = "filler ".repeat(60);

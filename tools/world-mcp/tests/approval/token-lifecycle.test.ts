@@ -4,9 +4,9 @@ import { existsSync, readFileSync, rmSync, statSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { parseToken, readOrCreateSecret, signToken } from "../../src/approval/token";
+import { parseToken, readOrCreateSecret, signToken } from "../../src/approval/token.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared.js";
 
 function resolveSecretPath(root: string): string {
   return path.join(root, "tools", "world-mcp", ".secret");

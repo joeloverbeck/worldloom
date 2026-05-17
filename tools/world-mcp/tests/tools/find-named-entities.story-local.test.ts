@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { findNamedEntities } from "../../src/tools/find-named-entities";
+import { findNamedEntities } from "../../src/tools/find-named-entities.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared";
-import { STORY_FIXTURE_SLUG, buildStoryBundleWorld } from "./story-bundle-fixture";
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared.js";
+import { STORY_FIXTURE_SLUG, buildStoryBundleWorld } from "./story-bundle-fixture.js";
 
 test("findNamedEntities returns story-local matches alongside canonical matches", async () => {
   const root = createTempRepoRoot();

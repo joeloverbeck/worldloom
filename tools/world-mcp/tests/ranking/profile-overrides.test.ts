@@ -17,7 +17,7 @@ import {
   storyFactPromotionToCanonRankingProfile,
   storyTurnCycleRankingProfile,
   commitmentBlockAuthoringRankingProfile
-} from "../../src/ranking/profiles";
+} from "../../src/ranking/profiles/index.js";
 
 test("canon_addition lifts canon-facing file class priorities above default", () => {
   assert.ok(

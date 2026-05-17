@@ -1,9 +1,9 @@
 import type { NodeType } from "@worldloom/world-index/public/types";
 
-import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
-import { openIndexDb } from "../db";
-import { createMcpError, type McpError } from "../errors";
-import { isStoryBundleRecordId, toStoryScopedNodeId } from "./_shared";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard.js";
+import { openIndexDb } from "../db/index.js";
+import { createMcpError, type McpError } from "../errors.js";
+import { isStoryBundleRecordId, toStoryScopedNodeId } from "./_shared.js";
 
 export interface FindImpactedFragmentsArgs {
   world_slug: string;

@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
-import type { ContextPacket } from "./shared";
+import type { ContextPacket } from "./shared.js";
 
 const DEFAULT_TOOL_RESULTS_DIR_NAME = "worldloom-mcp-tool-results";
 

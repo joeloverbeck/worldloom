@@ -1,4 +1,4 @@
-import type { BuildInfo } from "../build-info";
+import type { BuildInfo } from "../build-info.js";
 
 export interface ToolCapability {
   name: string;

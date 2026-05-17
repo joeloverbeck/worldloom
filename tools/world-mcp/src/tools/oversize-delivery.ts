@@ -1,8 +1,8 @@
 import {
   ENVELOPE_OVERHEAD_RESERVE_CHARS,
   resolveHarnessCeilingChars
-} from "../context-packet/shared";
-import { persistToolResultJson } from "../context-packet/persistence";
+} from "../context-packet/shared.js";
+import { persistToolResultJson } from "../context-packet/persistence.js";
 
 export type InlineDeliveryStatus = "inline";
 export type PersistedWithSummaryDeliveryStatus = "persisted_with_summary";

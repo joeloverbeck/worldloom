@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getContextPacket } from "../../src/tools/get-context-packet";
+import { getContextPacket } from "../../src/tools/get-context-packet.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 
 test("canon_addition packet replaces ad hoc multi-file loading with a bounded packet", async () => {
   const root = createTempRepoRoot();

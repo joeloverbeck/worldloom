@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getFirewallContent } from "../../src/tools/get-firewall-content";
+import { getFirewallContent } from "../../src/tools/get-firewall-content.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function buildSeededFirewallWorld(root: string): void {
   seedWorld(root, {

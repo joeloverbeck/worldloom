@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { runSubmitPatchPlanCli } from "../../src/cli/submit-patch-plan";
-import { handleSubmitPatchPlanTool } from "../../src/tools/submit-patch-plan";
+import { runSubmitPatchPlanCli } from "../../src/cli/submit-patch-plan.js";
+import { handleSubmitPatchPlanTool } from "../../src/tools/submit-patch-plan.js";
 
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";

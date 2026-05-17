@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
+import { createMcpError, type McpError } from "../errors.js";
 import {
   CANONICAL_DOMAINS,
   CF_TYPE_EPISTEMIC_PROFILE_REQUIRED,
@@ -14,9 +15,7 @@ import {
   REVISION_DIFFICULTY_VALUES,
   SEC_FILE_CLASS_VALUES,
   VERDICT_ENUM
-} from "@worldloom/world-index/public/canonical-vocabularies";
-
-import { createMcpError, type McpError } from "../errors";
+} from "../package-interop.js";
 
 export const VOCABULARY_CLASSES = [
   "domain",
@@ -71,7 +70,7 @@ type JsonValue = JsonObject | JsonValue[] | string | number | boolean | null;
 let mysteryReserveEffectValuesCache: string[] | undefined;
 
 function findRepoRoot(): string {
-  const starts = [process.cwd(), __dirname];
+  const starts = [process.cwd(), import.meta.dirname];
 
   for (const start of starts) {
     let current = path.resolve(start);
@@ -89,7 +88,7 @@ function findRepoRoot(): string {
     }
   }
 
-  return path.resolve(__dirname, "..", "..", "..", "..", "..");
+  return path.resolve(import.meta.dirname, "..", "..", "..", "..", "..");
 }
 
 function asObject(value: JsonValue | undefined): JsonObject {

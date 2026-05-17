@@ -1,6 +1,6 @@
-import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
-import { openIndexDb } from "../db";
-import type { McpError } from "../errors";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard.js";
+import { openIndexDb } from "../db/index.js";
+import type { McpError } from "../errors.js";
 
 import {
   applyFilters,
@@ -12,7 +12,7 @@ import {
   type SearchNodesArgs,
   type SearchNodesResponse,
   type SearchRow
-} from "./_shared";
+} from "./_shared.js";
 
 function mergeRows(rows: SearchRow[]): SearchRow[] {
   const merged = new Map<string, SearchRow>();

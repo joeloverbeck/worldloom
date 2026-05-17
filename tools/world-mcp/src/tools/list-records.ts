@@ -1,11 +1,11 @@
 import type { NodeType } from "@worldloom/world-index/public/types";
 
-import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
-import { openIndexDb } from "../db";
-import { createMcpError, type McpError } from "../errors";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard.js";
+import { openIndexDb } from "../db/index.js";
+import { createMcpError, type McpError } from "../errors.js";
 import {
   isStoryBundleNodeType
-} from "./_shared";
+} from "./_shared.js";
 
 import {
   getHybridKind,
@@ -16,7 +16,7 @@ import {
   type HybridRecordKind,
   type ParsedRecord,
   type RecordRow
-} from "./get-record";
+} from "./get-record.js";
 
 export const SUPPORTED_LIST_RECORD_TYPES = [
   "canon_fact",

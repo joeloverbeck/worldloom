@@ -1,14 +1,14 @@
 # SPEC39TOOESMMIG-004: world-mcp ESM convert
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Large
-**Engine Changes**: Yes — `tools/world-mcp` package.json `type` field adds `"module"`; 239 relative imports in `src/` and `tests/` gain `.js` suffix; 7 source files replace `__dirname` with `import.meta.dirname`.
+**Engine Changes**: Yes — `tools/world-mcp` package.json `type` field adds `"module"`; relative imports in `src/` and `tests/` gain `.js` suffix; CJS-only path and entrypoint globals are replaced; ESM runtime interop is added for sibling packages that remain CommonJS during the staged migration.
 **Deps**: None (independent per SPEC-39's per-package self-contained migration; runtime-recommended order suggests landing after patch-engine + validators have migrated, but each package's PR stands alone)
 
 ## Problem
 
-`tools/world-mcp` is already authored for the modern Node16/Node16 module form (tsconfig uses `module: "Node16"` + `moduleResolution: "Node16"`) but the actual migration scope is materially larger than SPEC-39's deliverable table implied. Three surfaces need work: (a) `package.json` has no `"type"` declaration, so Node defaults to CJS; (b) 239 relative imports across `src/` and `tests/` are extensionless (the spec called world-mcp "smallest" in its recommended order, but world-mcp has the most extensionless imports of any package in the batch — verified via grep); (c) 7 source files use `__dirname` for path resolution (server.ts, build-info.ts, db/path.ts, tools/validate-patch-plan.ts, tools/get-record-schema.ts, tools/describe-envelope-schema.ts, tools/get-canonical-vocabulary.ts) — `__dirname` is undefined in ESM.
+`tools/world-mcp` is already authored for the modern Node16/Node16 module form (tsconfig uses `module: "Node16"` + `moduleResolution: "Node16"`) but the actual migration scope is materially larger than SPEC-39's deliverable table implied. The implemented surfaces are: (a) `package.json` had no `"type"` declaration, so Node defaulted to CJS; (b) relative imports across `src/` and `tests/` were extensionless (the spec called world-mcp "smallest" in its recommended order, but world-mcp has the most extensionless imports of any package in the batch — verified via grep); (c) source and test files used CJS-only globals (`__dirname`, `__filename`, `require.main`) that are undefined in ESM; (d) runtime named imports from `@worldloom/patch-engine`, `@worldloom/validators`, and `@worldloom/world-index` are not safe while those sibling packages remain CommonJS, so world-mcp now centralizes those transitional runtime loads behind an ESM package-interop module while preserving type-only imports.
 
 The expanded scope is documented at item 5 of Assumption Reassessment below; the spec's intent (full ESM convert of world-mcp) is preserved, but the ticket is sized against the actual implementation surface.
 
@@ -19,19 +19,23 @@ The expanded scope is documented at item 5 of Assumption Reassessment below; the
 3. **Cross-artifact boundary**: world-mcp consumes `@worldloom/world-index`, `@worldloom/patch-engine`, and `@worldloom/validators` via file-dependencies. The runtime order recommendation in SPEC-39 (consumers first) means world-mcp may land while world-index is still CJS — ESM-from-CJS imports work in Node 22 via default-export interop and named-export support, so the transition is functional. world-mcp is consumed by no downstream package (it is the deepest consumer in the tools/ chain); its migration cannot break sibling builds, only its own CI workflow (ci-world-mcp).
 4. **FOUNDATIONS principle restatement**: `docs/FOUNDATIONS.md` §Machine-Facing Layer item 2 names `tools/world-mcp` as the "structured read API over the world index" that "replaces ad hoc raw-file loading with typed retrieval and context-packet assembly" — non-negotiable infrastructure for the canon-retrieval surface every canon-mutating and canon-reading skill consumes. Aligning its module system with the modern Node ESM trajectory completes the §Machine-Facing Layer's transition to a unified ESM surface across all five tools/ packages.
 5. **Mismatch + correction**: SPEC-39 mis-sized world-mcp in two places — (a) the §Deliverables row called source-edit scope "smallest"; actual extensionless-import count is 239 (largest in batch). (b) SPEC-39's Risks section item 2 mentioned `__dirname` mitigation only for `src/cli.ts` in world-index; world-mcp has 7 `__dirname` sites that the spec did not enumerate. Both corrections are sized into this ticket's What to Change. The replacement uses `import.meta.dirname` (Node 22+ native), functionally equivalent to `__dirname` for the path-resolution patterns these sites implement. Neither correction changes SPEC-39's intent; both size the ticket against the actual implementation surface.
+6. **Runtime proof expansion**: The first ESM `npm test` run exposed additional same-seam runtime gaps beyond the draft's source-file list: CLI/server entrypoint guards used `require.main`, tests still used `__dirname`/`__filename`, and ESM world-mcp could not safely rely on named runtime imports from still-CommonJS sibling packages. The implementation therefore adds `src/esm-main.ts` for entrypoint checks and `src/package-interop.ts` for centralized CJS sibling-package runtime interop. This keeps the corrected dependency order true: world-mcp can migrate first while validators, patch-engine, and world-index remain CJS.
+7. **Proof artifact freshness**: During verification, `tools/patch-engine/dist` was stale from an earlier local retarget attempt and had to be cleaned and rebuilt under the current CommonJS package manifest before world-mcp's file dependency tests were meaningful. No patch-engine source or package manifest changes are owned by this ticket.
 
 ## Architecture Check
 
 1. Landing all three surfaces in one ticket keeps world-mcp's migration co-located and reviewable as one diff. The `.js`-suffix work and the `__dirname` work could theoretically split, but they share a single build/test verification cycle and would force two PR-review rounds without architectural benefit. The 239-import count is large but the per-import edit is purely mechanical (append `.js`); reviewers can spot-check a sample and trust the grep-based verification at acceptance.
-2. No backwards-compatibility shims introduced. `import.meta.dirname` matches `engines.node: >=22`. The `.js` suffix discipline matches the convention `tools/patch-engine` and `tools/validators` already use. CLI scripts (`src/cli/validate-patch-plan.ts`, `src/cli/compute-pg-hashes.ts`) retain their shebangs; Node 22+ treats `.js` files in `"type": "module"` packages as ESM transparently, so the shebang interface is unchanged.
+2. No public backwards-compatibility shims introduced. `import.meta.dirname` matches `engines.node: >=22`. The `.js` suffix discipline matches the convention `tools/patch-engine` and `tools/validators` already use. CLI scripts (`src/cli/validate-patch-plan.ts`, `src/cli/compute-pg-hashes.ts`) retain their shebangs; Node 22+ treats `.js` files in `"type": "module"` packages as ESM transparently, so the shebang interface is unchanged.
+3. The transitional sibling-package interop is deliberately centralized in `src/package-interop.ts`. That avoids scattering `createRequire` across MCP handlers and makes the temporary CJS producer boundary explicit until the remaining SPEC-39 tickets flip validators, patch-engine, and world-index.
 
 ## Verification Layers
 
 1. **Build produces no deprecation warnings or interop errors** → codebase grep-proof: `npm --prefix tools/world-mcp run build 2>&1 | grep -E "deprecat|TS1479|TS5107"` returns empty.
 2. **All existing tests pass under the new module emission + suffix discipline + `__dirname` shim** → command-execution proof: `npm --prefix tools/world-mcp test` exits 0 with all existing tests passing.
-3. **No residual extensionless relative imports** → codebase grep-proof: `grep -rEc "from ['\"]\\.\\.?/[^.'\"]*['\"]" tools/world-mcp/src tools/world-mcp/tests` returns 0.
+3. **No residual extensionless relative imports** → codebase grep-proof: `rg --pcre2 -n "(?:from|export\\s+.*from) ['\\\"]\\.\\.?/(?![^'\\\"]*\\.js['\\\"])[^'\\\"]+['\\\"]" tools/world-mcp/src tools/world-mcp/tests` returns no matches.
 4. **No residual `__dirname` usage in world-mcp source** → codebase grep-proof: `grep -rE "__dirname|__filename" tools/world-mcp/src` returns empty.
 5. **CLI binaries still execute** → command-execution proof: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --help` (or analogous smoke) returns usage text without `Cannot use import statement outside a module` errors.
+6. **Runtime sibling-package interop is safe while siblings remain CJS** → command-execution proof: `npm --prefix tools/world-mcp test` passes against freshly rebuilt sibling file-dependency `dist/` artifacts.
 
 ## What to Change
 
@@ -63,7 +67,13 @@ In each of the following files, replace `__dirname` (and `__filename`, if any) u
 
 For each file: locate every `__dirname` reference (typically inside `path.resolve(__dirname, ...)`, `path.join(__dirname, ...)`, or `findRepoRootFrom(__dirname)` calls), replace `__dirname` with `import.meta.dirname`. No surrounding logic changes; the resolved path semantics are byte-identical.
 
-### 4. Rebuild and re-verify
+### 4. Add ESM-safe entrypoint and sibling package interop helpers
+
+Add `tools/world-mcp/src/esm-main.ts` and replace `require.main === module` checks with `isMainModule(import.meta.url)`.
+
+Add `tools/world-mcp/src/package-interop.ts` and route runtime imports from `@worldloom/patch-engine`, `@worldloom/validators`, and `@worldloom/world-index` through `createRequire(import.meta.url)`. Keep direct sibling-package imports type-only where TypeScript types are needed.
+
+### 5. Rebuild and re-verify
 
 Run `npm --prefix tools/world-mcp run clean && npm --prefix tools/world-mcp run build` to regenerate `dist/`. Then `npm --prefix tools/world-mcp test` to confirm all tests pass. Smoke the CLI binaries via `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --help` and `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --help` to confirm the shebang + ESM interaction works.
 
@@ -71,8 +81,14 @@ Run `npm --prefix tools/world-mcp run clean && npm --prefix tools/world-mcp run 
 
 - `tools/world-mcp/package.json` (modify — add `"type": "module"`)
 - `tools/world-mcp/src/server.ts` (modify — `__dirname` → `import.meta.dirname`)
+- `tools/world-mcp/src/package-interop.ts` (add — centralized runtime interop for CJS sibling packages during staged migration)
+- `tools/world-mcp/src/esm-main.ts` (add — ESM-safe main-module detection)
 - `tools/world-mcp/src/build-info.ts` (modify — same)
 - `tools/world-mcp/src/db/path.ts` (modify — same)
+- `tools/world-mcp/src/cli/compute-pg-hashes.ts` (modify — ESM-safe main-module detection)
+- `tools/world-mcp/src/cli/sign-approval-token.ts` (modify — sibling package runtime interop)
+- `tools/world-mcp/src/cli/submit-patch-plan.ts` (modify — ESM-safe main-module detection)
+- `tools/world-mcp/src/cli/validate-patch-plan.ts` (modify — ESM-safe main-module detection)
 - `tools/world-mcp/src/tools/validate-patch-plan.ts` (modify — same)
 - `tools/world-mcp/src/tools/get-record-schema.ts` (modify — same)
 - `tools/world-mcp/src/tools/describe-envelope-schema.ts` (modify — same)
@@ -94,7 +110,7 @@ Run `npm --prefix tools/world-mcp run clean && npm --prefix tools/world-mcp run 
 
 1. `npm --prefix tools/world-mcp run clean && npm --prefix tools/world-mcp run build` exits 0 with no TypeScript deprecation warnings (no TS5107) and no ESM/CJS interop errors (no TS1479).
 2. `npm --prefix tools/world-mcp test` exits 0 with all existing tests passing.
-3. `grep -rEc "from ['\"]\\.\\.?/[^.'\"]*['\"]" tools/world-mcp/src tools/world-mcp/tests` returns 0 (no extensionless relative imports remain).
+3. `rg --pcre2 -n "(?:from|export\\s+.*from) ['\\\"]\\.\\.?/(?![^'\\\"]*\\.js['\\\"])[^'\\\"]+['\\\"]" tools/world-mcp/src tools/world-mcp/tests` returns no matches (no extensionless relative imports remain).
 4. `grep -rE "__dirname|__filename" tools/world-mcp/src` returns empty (no residual CJS-only globals).
 5. `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --help` and `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --help` both output usage text without `Cannot use import statement outside a module` or `require is not defined` errors.
 
@@ -105,12 +121,13 @@ Run `npm --prefix tools/world-mcp run clean && npm --prefix tools/world-mcp run 
 3. `package.json` `"type"` field is `"module"` after the change.
 4. Every relative import in `src/` and `tests/` carries the `.js` suffix.
 5. No source file under `tools/world-mcp/src/` references `__dirname` or `__filename`.
+6. Runtime sibling-package value imports are centralized through `src/package-interop.ts` until the remaining sibling packages migrate.
 
 ## Test Plan
 
 ### New/Modified Tests
 
-1. `None — config-and-suffix-and-shim ticket; verification is command-based against the existing world-mcp test suite, which already exercises every MCP tool and the modified path-resolution sites.`
+1. `None — config-and-suffix-and-shim ticket; verification is command-based against the existing world-mcp test suite, which already exercises every MCP tool and the modified path-resolution and package-interop sites.`
 
 ### Commands
 
@@ -118,3 +135,30 @@ Run `npm --prefix tools/world-mcp run clean && npm --prefix tools/world-mcp run 
 2. `grep -rEc "from ['\"]\\.\\.?/[^.'\"]*['\"]" tools/world-mcp/src tools/world-mcp/tests` (must return 0)
 3. `grep -rE "__dirname|__filename" tools/world-mcp/src` (must return empty)
 4. `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --help && node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --help` (CLI binary ESM smoke)
+
+## Outcome
+
+Completed. `tools/world-mcp` now declares `"type": "module"`, all relative imports in `src/` and `tests/` use `.js` suffixes, CJS path and entrypoint globals were replaced with ESM-native equivalents, and sibling-package runtime values are loaded through a centralized interop module while the remaining SPEC-39 packages are still CommonJS.
+
+The implementation intentionally expanded beyond the draft's 7-file `__dirname` list because runtime proof showed same-seam ESM failures in CLI/server entrypoints, tests, and sibling package runtime imports. No MCP tool schemas, handler contracts, CLI argument interfaces, or package exports were changed.
+
+## Verification Result
+
+Passed:
+
+1. `npm run clean` in `tools/world-mcp`
+2. `npm run build` in `tools/world-mcp`
+3. `npm run clean` and `npm run build` in `tools/patch-engine` to refresh a stale generated file-dependency artifact before world-mcp runtime tests
+4. `node --test dist/tests/integration/spec02-verification.test.js` in `tools/world-mcp`
+5. `npm test` in `tools/world-mcp` — 390/390 tests passed
+6. `rg --pcre2 -n "(?:from|export\\s+.*from) ['\\\"]\\.\\.?/(?![^'\\\"]*\\.js['\\\"])[^'\\\"]+['\\\"]" tools/world-mcp/src tools/world-mcp/tests` — no matches
+7. `rg -n "__dirname|__filename" tools/world-mcp/src` — no matches
+8. `rg -n "from ['\\\"]@worldloom/(patch-engine|validators|world-index)|require\\.main|__dirname|__filename" tools/world-mcp/src tools/world-mcp/tests` — remaining matches are type-only sibling package imports
+9. `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --help`
+10. `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --help`
+
+## Deviations
+
+The ticket changed from a mechanical package flag plus import suffix rewrite into the truthful world-mcp ESM migration seam. The added files `src/package-interop.ts` and `src/esm-main.ts` are necessary because world-mcp is migrating before its sibling producer packages.
+
+`tools/patch-engine/dist` was rebuilt as a verification prerequisite only. The ticket owns no patch-engine source or manifest changes.

@@ -4,9 +4,10 @@ import os from "node:os";
 import path from "node:path";
 
 import Database from "better-sqlite3";
-import { CURRENT_INDEX_VERSION, type EdgeType, type NodeType } from "@worldloom/world-index/public/types";
+import type { EdgeType, NodeType } from "@worldloom/world-index/public/types";
+import { CURRENT_INDEX_VERSION } from "../../src/package-interop.js";
 
-const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
+const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..", "..", "..", "..");
 
 interface SeedNodeInput {
   node_id: string;

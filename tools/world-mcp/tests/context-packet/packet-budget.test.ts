@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { assembleContextPacket } from "../../src/context-packet/assemble";
-import { estimatePacketTokens } from "../../src/context-packet/shared";
+import { assembleContextPacket } from "../../src/context-packet/assemble.js";
+import { estimatePacketTokens } from "../../src/context-packet/shared.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared.js";
 
 function seedFiveLayerWorld(root: string): void {
   seedWorld(root, {

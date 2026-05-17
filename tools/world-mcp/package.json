@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "MCP retrieval server scaffold for worldloom machine-facing reads",
   "private": true,
+  "type": "module",
   "bin": {
     "compute-pg-hashes": "dist/src/cli/compute-pg-hashes.js",
     "sign-approval-token": "dist/src/cli/sign-approval-token.js",

@@ -2,9 +2,10 @@
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
-import { canonicalOpHash, type PatchOperation } from "@worldloom/patch-engine";
+import type { PatchOperation } from "@worldloom/patch-engine";
 
-import { readOrCreateSecret, signToken } from "../approval/token";
+import { readOrCreateSecret, signToken } from "../approval/token.js";
+import { canonicalOpHash } from "../package-interop.js";
 
 const DEFAULT_EXPIRY_MINUTES = 20;
 

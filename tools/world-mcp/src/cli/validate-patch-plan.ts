@@ -2,9 +2,10 @@
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
-import { validatePatchPlan } from "../tools/validate-patch-plan";
+import { isMainModule } from "../esm-main.js";
+import { validatePatchPlan } from "../tools/validate-patch-plan.js";
 
-import type { PatchPlanEnvelope } from "../tools/_shared";
+import type { PatchPlanEnvelope } from "../tools/_shared.js";
 
 interface CliArgs {
   planPath: string;
@@ -138,6 +139,6 @@ async function main(): Promise<void> {
   process.exitCode = result.exitCode;
 }
 
-if (require.main === module) {
+if (isMainModule(import.meta.url)) {
   void main();
 }

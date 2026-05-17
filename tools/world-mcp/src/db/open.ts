@@ -1,11 +1,11 @@
 import Database from "better-sqlite3";
-import { ATOMIC_LOGICAL_WORLD_FILES, CURRENT_INDEX_VERSION } from "@worldloom/world-index/public/types";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 
-import { createMcpError, type McpError } from "../errors";
-import { resolveIndexVersionPath, resolveWorldDbPath, resolveWorldDirectory } from "./path";
+import { createMcpError, type McpError } from "../errors.js";
+import { ATOMIC_LOGICAL_WORLD_FILES, CURRENT_INDEX_VERSION } from "../package-interop.js";
+import { resolveIndexVersionPath, resolveWorldDbPath, resolveWorldDirectory } from "./path.js";
 
 const ATOMIC_LOGICAL_WORLD_FILE_SET = new Set<string>(ATOMIC_LOGICAL_WORLD_FILES);
 

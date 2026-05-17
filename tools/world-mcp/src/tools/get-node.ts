@@ -1,10 +1,10 @@
 import type { EdgeType, NodeType } from "@worldloom/world-index/public/types";
 
-import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
-import { openIndexDb } from "../db";
-import { createMcpError, type McpError } from "../errors";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard.js";
+import { openIndexDb } from "../db/index.js";
+import { createMcpError, type McpError } from "../errors.js";
 
-import { makeBodyPreview, resolveNodeWorld } from "./_shared";
+import { makeBodyPreview, resolveNodeWorld } from "./_shared.js";
 
 export interface GetNodeArgs {
   node_id: string;

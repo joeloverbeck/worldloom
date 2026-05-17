@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { findNamedEntities } from "../../src/tools/find-named-entities";
+import { findNamedEntities } from "../../src/tools/find-named-entities.js";
 
-import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
 function buildEntityWorld(root: string): void {
   seedWorld(root, {

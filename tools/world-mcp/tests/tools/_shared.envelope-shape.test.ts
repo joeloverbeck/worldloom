@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { McpError } from "../../src/errors";
-import { validatePatchPlanEnvelopeShape } from "../../src/tools/_shared";
+import type { McpError } from "../../src/errors.js";
+import { validatePatchPlanEnvelopeShape } from "../../src/tools/_shared.js";
 
 function buildValidPatchPlan() {
   return {
