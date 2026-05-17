@@ -38,26 +38,40 @@ fi
 tmp_files="$(mktemp)"
 trap 'rm -f "$tmp_files"' EXIT
 
+existing_roots() {
+  local root
+  for root in "$@"; do
+    [[ -e "$repo_root/$root" || "$root" == /* && -e "$root" ]] || continue
+    printf '%s\n' "$root"
+  done
+}
+
 collect_files() {
   if [[ -n "${ARCHIVE_CITATION_LINT_ROOTS:-}" ]]; then
     IFS=':' read -r -a roots <<<"$ARCHIVE_CITATION_LINT_ROOTS"
-    (cd "$repo_root" && find "${roots[@]}" \
-      -path '*/archive/*' -prune -o \
-      -path '*/tickets/*' -prune -o \
-      -path '*/node_modules/*' -prune -o \
-      -path '*/dist/*' -prune -o \
-      -type f -name '*.md' -print)
+    mapfile -t present_roots < <(existing_roots "${roots[@]}")
+    if [[ "${#present_roots[@]}" -gt 0 ]]; then
+      (cd "$repo_root" && find "${present_roots[@]}" \
+        -path '*/archive/*' -prune -o \
+        -path '*/tickets/*' -prune -o \
+        -path '*/node_modules/*' -prune -o \
+        -path '*/dist/*' -prune -o \
+        -type f -name '*.md' -print)
+    fi
     return
   fi
 
   (
     cd "$repo_root"
-    find docs .claude/skills specs \
-      -path '*/archive/*' -prune -o \
-      -path '*/tickets/*' -prune -o \
-      -path '*/node_modules/*' -prune -o \
-      -path '*/dist/*' -prune -o \
-      -type f -name '*.md' -print
+    mapfile -t doc_roots < <(existing_roots docs .claude/skills specs)
+    if [[ "${#doc_roots[@]}" -gt 0 ]]; then
+      find "${doc_roots[@]}" \
+        -path '*/archive/*' -prune -o \
+        -path '*/tickets/*' -prune -o \
+        -path '*/node_modules/*' -prune -o \
+        -path '*/dist/*' -prune -o \
+        -type f -name '*.md' -print
+    fi
     find tools \
       -path '*/archive/*' -prune -o \
       -path '*/node_modules/*' -prune -o \
