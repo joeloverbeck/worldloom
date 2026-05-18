@@ -2,6 +2,7 @@ import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
 
 import {
   buildPreApplyFileInputs,
+  buildPreApplyExistingFilePaths,
   buildPreApplyReadSurface,
   openWorldIndex
 } from "../_helpers/index-access.js";
@@ -45,7 +46,8 @@ export async function validatePatchPlan(envelope: PatchPlanEnvelope): Promise<{
         world_slug: envelope.target_world,
         index: buildPreApplyReadSurface(db, envelope),
         touched_files: [],
-        patch_plan: envelope
+        patch_plan: envelope,
+        pre_apply_existing_files: buildPreApplyExistingFilePaths(db, envelope)
       }
     );
     return { verdicts: run.verdicts, executions: run.summary.executions };

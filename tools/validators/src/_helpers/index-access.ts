@@ -80,6 +80,13 @@ export function buildPreApplyFileInputs(
   }));
 }
 
+export function buildPreApplyExistingFilePaths(
+  db: Database.Database,
+  envelope: PatchPlanEnvelope
+): string[] {
+  return queryRows(db, envelope.target_world).map((record) => record.file_path);
+}
+
 function queryRows(
   db: Database.Database,
   worldSlug: string,
@@ -297,91 +304,6 @@ function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperat
     return current.node_id;
   }
 
-  if (patch.op === "tick_pressure_clock") {
-    const current = findStoryRecord(byId, patch.payload.target_clock_id, "pressure_clock_record");
-    if (!current) {
-      return null;
-    }
-    const parsed = cloneRecord(current.parsed);
-    const value = typeof parsed.value === "number" ? parsed.value : 0;
-    const tickHistory = Array.isArray(parsed.tick_history) ? parsed.tick_history : [];
-    parsed.value = value + patch.payload.delta;
-    parsed.tick_history = [
-      ...tickHistory,
-      {
-        event: patch.payload.event,
-        delta: patch.payload.delta,
-        cause: patch.payload.cause
-      }
-    ];
-    byId.set(current.node_id, { ...current, parsed });
-    return current.node_id;
-  }
-
-  if (patch.op === "resolve_pressure_clock") {
-    const current = findStoryRecord(byId, patch.payload.target_clock_id, "pressure_clock_record");
-    if (!current) {
-      return null;
-    }
-    const parsed = cloneRecord(current.parsed);
-    parsed.status = "resolved";
-    parsed.resolution_event = patch.payload.resolution_event;
-    byId.set(current.node_id, { ...current, parsed });
-    return current.node_id;
-  }
-  if (patch.op === "answer_story_question") {
-    const current = findStoryRecord(byId, patch.payload.target_question_id, "story_question_record");
-    if (!current) {
-      return null;
-    }
-    const parsed = cloneRecord(current.parsed);
-    const answerRecords = Array.isArray(parsed.answer_records)
-      ? parsed.answer_records.filter((item): item is string => typeof item === "string")
-      : [];
-    for (const recordId of patch.payload.answer_records) {
-      if (!answerRecords.includes(recordId)) {
-        answerRecords.push(recordId);
-      }
-    }
-    parsed.status = patch.payload.status;
-    parsed.answer_event = patch.payload.answer_event;
-    parsed.answer_records = answerRecords;
-    byId.set(current.node_id, { ...current, parsed });
-    return current.node_id;
-  }
-
-  if (patch.op === "abandon_story_question") {
-    const current = findStoryRecord(byId, patch.payload.target_question_id, "story_question_record");
-    if (!current) {
-      return null;
-    }
-    const parsed = cloneRecord(current.parsed);
-    parsed.status = "abandoned";
-    parsed.abandonment_rationale = patch.payload.abandonment_rationale;
-    byId.set(current.node_id, { ...current, parsed });
-    return current.node_id;
-  }
-  return null;
-}
-
-function findStoryRecord(
-  byId: ReadonlyMap<string, IndexedRecord>,
-  targetId: string,
-  nodeType: string
-): IndexedRecord | null {
-  const direct = byId.get(targetId);
-  if (direct?.node_type === nodeType) {
-    return direct;
-  }
-  for (const record of byId.values()) {
-    if (record.node_type !== nodeType) {
-      continue;
-    }
-    const parsed = asPlainRecord(record.parsed);
-    if (parsed.id === targetId || record.node_id.endsWith(`:${targetId}`)) {
-      return record;
-    }
-  }
   return null;
 }
 

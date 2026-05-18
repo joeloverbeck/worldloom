@@ -20,6 +20,7 @@ import { idUniqueness } from "../structural/id-uniqueness.js";
 import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
 import { narrativeShapeFieldRejection } from "../structural/narrative-shape-field-rejection.js";
+import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-place-mutation.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
@@ -67,6 +68,7 @@ export const structuralValidators: readonly Validator[] = [
   liePromotedSilently,
   branchIsolation,
   observerFirewall,
+  noStoryStateInPlaceMutation,
   auditOnlySeShape,
   causalDependencyThreatScan,
   expectedWitnessCoverage,

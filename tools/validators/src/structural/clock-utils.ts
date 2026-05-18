@@ -19,9 +19,7 @@ export interface ClockTick {
 
 export const CLOCK_MUTATION_OPS = new Set([
   "create_clk_record",
-  "supersede_clk_record",
-  "tick_pressure_clock",
-  "resolve_pressure_clock"
+  "supersede_clk_record"
 ]);
 
 export function clockValidatorApplies(ctx: Context): boolean {

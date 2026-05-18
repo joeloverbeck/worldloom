@@ -53,7 +53,7 @@ Create `.claude/skills/branching-story-turn-cycle/references/append-only-state-l
 - **Section §CLK lifecycle authoring**: how to tick a clock (new CLK-N+1 with `value: new_value`, `tick_history: [...prior, new_entry]`, `supersedes: CLK-N`), threshold-fire (new CLK-N+1 with `value: threshold_at`, fire event in `tick_history`), resolve (new CLK-N+1 with `status: "resolved"`, `resolution_event: SE-X`).
 - **Section §STSEC lifecycle authoring**: how to append a clue carrier (new STSEC-N+1 with extended `clue_carriers: [...prior, new_carrier]`), mark a clue discovered (new STSEC-N+1 with the carrier's `status: "discovered"` and `discovered_by: [...holders]`), reveal a secret (new STSEC-N+1 with `status: "revealed"`, `reveal_event: SE-X`, `reveal_records: [BEL/SF/DA/STQ ids]`).
 - **Section §STQ lifecycle authoring**: how to answer a question (new STQ-N+1 with `status: "answered"`, `answer_event: SE-X`, `answer_records: [...]`), abandon (new STQ-N+1 with `status: "abandoned"`, `abandonment_rationale: "..."`).
-- **Section §Cross-references**: link to `tools/patch-engine/src/ops/create-story-record.ts:198-232` for the `supersede_<class>_record` STORY_RECORD_SPECS definitions; link to FOUNDATIONS §Story Bundles §8; link to ticket SPEC44STOSTAAPP-003's `no_story_state_in_place_mutation` validator as the structural enforcement.
+- **Section §Cross-references**: link to `tools/patch-engine/src/ops/create-story-record.ts:198-232` for the `supersede_<class>_record` STORY_RECORD_SPECS definitions; link to FOUNDATIONS §Story Bundles §8; link to `archive/tickets/SPEC44STOSTAAPP-003.md`'s `no_story_state_in_place_mutation` validator as the structural enforcement.
 
 ## Files to Touch
 

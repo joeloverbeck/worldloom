@@ -9,9 +9,7 @@ import {
 
 export const STORY_QUESTION_MUTATION_OPS = new Set([
   "create_stq_record",
-  "supersede_stq_record",
-  "answer_story_question",
-  "abandon_story_question"
+  "supersede_stq_record"
 ]);
 
 export const SOURCE_RECORD_TYPES: Readonly<Record<string, string>> = {

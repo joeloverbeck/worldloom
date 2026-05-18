@@ -66,7 +66,7 @@ Create `tools/validators/tests/structural/state-delta-class-integrity.test.ts` c
 
 ## Out of Scope
 
-- The `no_story_state_in_place_mutation` validator (ticket SPEC44STOSTAAPP-003).
+- The `no_story_state_in_place_mutation` validator (`archive/tickets/SPEC44STOSTAAPP-003.md`).
 - Validation of the SE record's other fields (event_kind, actor, outcome_route, etc.) — handled by the existing `record-schema-compliance-story-event` test.
 - Validation of `SE.state_delta.close` semantics (which records are eligible for closing) — distinct from class-prefix + id-resolution checks.
 

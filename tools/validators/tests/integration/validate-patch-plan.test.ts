@@ -170,6 +170,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "observer_firewall"
     );
     assert.equal(observerFirewallExecution?.status, "skipped");
+    const noStoryStateMutationExecution = result.executions.find(
+      (execution) => execution.name === "no_story_state_in_place_mutation"
+    );
+    assert.equal(noStoryStateMutationExecution?.status, "skipped");
     const introductionObserverFirewallExecution = result.executions.find(
       (execution) => execution.name === "introduction_observer_firewall"
     );
@@ -231,6 +235,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== validationTraceExecution &&
         row !== branchIsolationExecution &&
         row !== observerFirewallExecution &&
+        row !== noStoryStateMutationExecution &&
         row !== introductionObserverFirewallExecution &&
         row !== liePromotedSilentlyExecution &&
         !clockExecutions.includes(row) &&
@@ -333,6 +338,80 @@ test("validatePatchPlan runs CLK validators over same-envelope pressure clock re
 
     assert.ok(result.executions.some((execution) => execution.name === "clock_value_in_range" && execution.status === "fail"));
     assert.ok(result.verdicts.some((verdict) => verdict.code === "clock_value_in_range.out_of_range"));
+  });
+});
+
+test("validatePatchPlan rejects story-state patch plans that target existing files", async () => {
+  await withTempRoot(async () => {
+    seedIndexedStoryRecord("CLK-2", "pressure_clock_record", "clocks", {
+      id: "CLK-2",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      supersedes: null,
+      title: "Exposure clock",
+      clock_kind: "exposure",
+      driver: "system",
+      linked_records: [],
+      value: 2,
+      max: 6,
+      salience: "high",
+      visibility: "hidden",
+      thresholds: [{ at: 4, label: "break", effects: { create: [], supersede: [], close: [] } }],
+      tick_history: [],
+      status: "active",
+      resolution_event: null
+    });
+
+    const result = await validatePatchPlan({
+      plan_id: "clk-overwrite-plan-001",
+      target_world: "seeded",
+      approval_token: "token-from-gate",
+      verdict: "ACCEPT",
+      originating_skill: "branching-story-turn-cycle",
+      expected_id_allocations: {},
+      patches: [
+        {
+          op: "create_clk_record",
+          target_world: "seeded",
+          target_file: "stories/marla-kern-seduction/_source/clocks/CLK-2.yaml",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            record: {
+              id: "CLK-2",
+              story_id: "STORY-1",
+              created_at_page: "PG-2",
+              supersedes: null,
+              title: "Exposure clock overwritten",
+              clock_kind: "exposure",
+              driver: "system",
+              linked_records: [],
+              value: 3,
+              max: 6,
+              salience: "high",
+              visibility: "hidden",
+              thresholds: [{ at: 4, label: "break", effects: { create: [], supersede: [], close: [] } }],
+              tick_history: [],
+              status: "active",
+              resolution_event: null
+            }
+          }
+        }
+      ]
+    } as unknown as PatchPlanEnvelope);
+
+    assert.ok(
+      result.executions.some(
+        (execution) => execution.name === "no_story_state_in_place_mutation" && execution.status === "fail"
+      )
+    );
+    assert.ok(
+      result.verdicts.some(
+        (verdict) =>
+          verdict.validator === "no_story_state_in_place_mutation" &&
+          verdict.code === "story_state_in_place_mutation" &&
+          verdict.location.file === "stories/marla-kern-seduction/_source/clocks/CLK-2.yaml"
+      )
+    );
   });
 });
 
