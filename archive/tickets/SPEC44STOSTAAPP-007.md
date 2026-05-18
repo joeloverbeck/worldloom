@@ -42,13 +42,13 @@ The remaining owned work is therefore ticket/spec truthing, not a new validator.
 ### 1. Truth active ticket/spec wording
 
 - Replaced this ticket's stale implementation request with a completed reassessment that names the live validator boundary.
-- Updated `specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` Phase 3 and verification text to use `expected_witness_coverage`.
+- Updated `archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` Phase 3 and verification text to use `expected_witness_coverage`.
 - Updated `archive/tickets/SPEC44STOSTAAPP-009.md` so the capstone test expects the live validator, not `propagation_exception_integrity`.
 
 ## Files to Touch
 
 - `archive/tickets/SPEC44STOSTAAPP-007.md` (modify)
-- `specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` (modify)
+- `archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` (modify)
 - `archive/tickets/SPEC44STOSTAAPP-009.md` (modify)
 
 ## Out of Scope
@@ -63,7 +63,7 @@ The remaining owned work is therefore ticket/spec truthing, not a new validator.
 ### Tests That Must Pass
 
 1. `npm test --prefix tools/validators -- expected-witness-coverage non-propagation-tag-shape` exits 0.
-2. `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md archive/tickets/SPEC44STOSTAAPP-009.md` exits 0.
+2. `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md archive/tickets/SPEC44STOSTAAPP-009.md` exits 0.
 
 ### Invariants
 
@@ -81,7 +81,7 @@ The remaining owned work is therefore ticket/spec truthing, not a new validator.
 ### Commands
 
 1. `npm test --prefix tools/validators -- expected-witness-coverage non-propagation-tag-shape`
-2. `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md archive/tickets/SPEC44STOSTAAPP-009.md`
+2. `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md archive/tickets/SPEC44STOSTAAPP-009.md`
 
 ## Outcome
 
@@ -97,4 +97,4 @@ Deviations from original plan:
 
 Verification results:
 - `npm test --prefix tools/validators -- expected-witness-coverage non-propagation-tag-shape` exited 0.
-- `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md archive/tickets/SPEC44STOSTAAPP-009.md` exited 0.
+- `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md archive/tickets/SPEC44STOSTAAPP-009.md` exited 0.

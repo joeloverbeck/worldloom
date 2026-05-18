@@ -2,7 +2,7 @@
 
 # SPEC-44: Story-State Append-Only Lifecycle and Schema Correctness
 
-**Status**: draft (2026-05-18)
+**Status**: COMPLETED (2026-05-18)
 **Brainstorm source**: `reports/story-system-consolidation.md` triage
 **Companion**: `docs/triage/2026-05-18-story-system-consolidation-triage.md`
 
@@ -153,11 +153,26 @@ Phase 3:
 - `page_affordance_integrity` validator fires on synthetic fixtures: duplicate ordinals; affordance grounded in inactive STOBJ; affordance available_to inactive STENT; unknown action_family.
 - `expected_witness_coverage` remains the semantic propagation-exception coverage validator: it fires when computed direct witnesses lack BEL coverage and no matching `non_propagation:` tag covers the group, and it also fires for public/factional DA indirect propagation gaps without an indirect-route BEL or `event_leaves_no_accessible_trace` tag.
 - `active_records_full_shape` validator emits `warn` when a synthetic PG omits any active-record class key, including legacy snapshots; `compatibility-drift` remains the validator that classifies whether the same omission is grandfathered or requires migration.
-- Full validator suite passes (`npm test --prefix tools/validators`).
+- Full validator suite passes (`npm test` from `tools/validators`).
 - `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` exits 0 with `fail_count: 0` (the warn-only `active_records_full_shape` adds to `warn_count`; pre-SPEC-43 bundles add to `info_count` via existing compatibility-drift; document expected counts).
 
 End-to-end:
-- The five-skill story-pipeline regression suite (turn-cycle bootstrap → turn → prose-attach → health-audit → promotion-closeout) runs against the red-bunny bundle without failures attributable to this spec's changes.
+- No live executable five-skill story-pipeline regression harness was found for bootstrap -> turn-cycle -> prose-attach -> health-audit -> promotion-closeout. The accepted capstone substitutes a validators integration test over all seven lifecycle transitions plus a red-bunny structural CLI smoke; a future executable story-pipeline harness remains outside this spec's completed proof surface.
+
+## Outcome
+
+Completed on 2026-05-18 through archived ticket chain `archive/tickets/SPEC44STOSTAAPP-001.md` through `archive/tickets/SPEC44STOSTAAPP-009.md`.
+
+The implementation landed the schema correction, removed the seven in-place story-state lifecycle ops, documented append-only create-with-supersedes semantics for CLK/STSEC/STQ lifecycle transitions, added the `no_story_state_in_place_mutation`, `state_delta_class_integrity`, `page_affordance_integrity`, and `active_records_full_shape` validators, preserved `expected_witness_coverage` as the semantic propagation-exception coverage gate, and added the SPEC-44 validators capstone at `tools/validators/tests/integration/spec44-append-only-supersession.test.ts`.
+
+Final proof:
+- `npm run build` from `tools/validators` passed.
+- `node --test dist/tests/integration/spec44-append-only-supersession.test.js` from `tools/validators` passed with 7 tests and 0 failures.
+- `npm test` from `tools/validators` passed with 537 tests and 0 failures.
+- `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` from repo root exited 0 with `fail_count: 0`, `warn_count: 15`, and `info_count: 10`.
+- `git diff --check` passed over the owned archive/spec/test edits.
+
+Deviation: the originally drafted five-skill story-pipeline regression suite was not run because no live executable harness for that chain exists in the repo. The completed proof boundary is the portable validators capstone plus the red-bunny structural CLI smoke.
 
 ## Out of Scope
 
