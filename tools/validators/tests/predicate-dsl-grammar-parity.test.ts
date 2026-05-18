@@ -55,11 +55,18 @@ function sampleFor(pred: (typeof PRED_TYPES)[number]): Record<string, unknown> {
     case "secret_revealed":
     case "revelation_ready":
       return { pred, secret: "STSEC-1" };
+    case "story_question_open":
+      return { pred, question: "STQ-1" };
+    case "story_question_status":
+      return { pred, question: "STQ-1", status: "open" };
+    case "promise_due":
+      return { pred, question: "STQ-1", age_pages: 3 };
     case "any_obligation_open":
     case "any_consequence_pending":
     case "any_thread_active":
     case "any_clock_active":
     case "any_secret_unrevealed":
+    case "any_story_question_open":
     case "any_belief":
     case "any_intention":
       return { pred, alias: "matched_record" };

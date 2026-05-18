@@ -25,6 +25,10 @@ import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-fi
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
+import { storyQuestionGroundingIntegrity } from "../structural/story-question-grounding-integrity.js";
+import { storyQuestionPayoffIntegrity } from "../structural/story-question-payoff-integrity.js";
+import { storyQuestionSetupPredatesPayoff } from "../structural/story-question-setup-predates-payoff.js";
+import { storyQuestionTerminalDebt } from "../structural/story-question-terminal-debt.js";
 import { storyDaDuplicateHeuristic } from "../structural/story-da-duplicate-heuristic.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
 import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
@@ -71,6 +75,10 @@ export const structuralValidators: readonly Validator[] = [
   secretCarrierExistence,
   criticalSecretClueCoverageWhenRevealed,
   secretMysteryFirewallCompliance,
+  storyQuestionPayoffIntegrity,
+  storyQuestionSetupPredatesPayoff,
+  storyQuestionGroundingIntegrity,
+  storyQuestionTerminalDebt,
   storyDaDuplicateHeuristic,
   touchedByCfCompleteness,
   proposalPackageShape,

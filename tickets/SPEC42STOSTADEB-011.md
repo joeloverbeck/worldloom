@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `commitment-block-authoring` SKILL.md's 11-target coverage list to 14 targets (adds `clock_advancing`, `clue_discovering`, `setup_paying_off`); no new skill phases introduced; no schema changes
-**Deps**: archive/tickets/SPEC42STOSTADEB-005.md, archive/tickets/SPEC42STOSTADEB-006.md, SPEC42STOSTADEB-007
+**Deps**: archive/tickets/SPEC42STOSTADEB-005.md, archive/tickets/SPEC42STOSTADEB-006.md, archive/tickets/SPEC42STOSTADEB-007.md
 
 ## Problem
 

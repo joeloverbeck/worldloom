@@ -176,6 +176,9 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     const secretExecutions = result.executions.filter((execution) => execution.name.startsWith("secret_") || execution.name === "critical_secret_clue_coverage_when_revealed");
     assert.equal(secretExecutions.length, 3);
     assert.ok(secretExecutions.every((execution) => execution.status === "skipped"));
+    const storyQuestionExecutions = result.executions.filter((execution) => execution.name.startsWith("story_question_"));
+    assert.equal(storyQuestionExecutions.length, 4);
+    assert.ok(storyQuestionExecutions.every((execution) => execution.status === "skipped"));
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -201,12 +204,56 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== observerFirewallExecution &&
         row !== liePromotedSilentlyExecution &&
         !clockExecutions.includes(row) &&
-        !secretExecutions.includes(row)
+        !secretExecutions.includes(row) &&
+        !storyQuestionExecutions.includes(row)
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
       assert.ok(execution.duration_ms >= 0);
     }
+  });
+});
+
+test("validatePatchPlan runs STQ validators over same-envelope story question records", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan({
+      plan_id: "stq-plan-001",
+      target_world: "seeded",
+      approval_token: "token-from-gate",
+      verdict: "ACCEPT",
+      originating_skill: "branching-story-turn-cycle",
+      expected_id_allocations: {},
+      patches: [
+        {
+          op: "create_stq_record",
+          target_world: "seeded",
+          target_file: "stories/marla/_source/story-questions/STQ-1.yaml",
+          payload: {
+            story_slug: "marla",
+            record: {
+              id: "STQ-1",
+              story_id: "STORY-1",
+              created_at_page: "PG-1",
+              setup_kind: "dramatic_question",
+              question_or_setup: "Who rang the bell?",
+              salience: "high",
+              audience_visibility: "explicit",
+              source_event: "SE-1",
+              source_records: ["SF-404"],
+              payoff_of: null,
+              status: "answered",
+              answer_event: null,
+              answer_records: []
+            }
+          }
+        }
+      ]
+    } as unknown as PatchPlanEnvelope);
+
+    assert.ok(result.executions.some((execution) => execution.name === "story_question_payoff_integrity" && execution.status === "fail"));
+    assert.ok(result.executions.some((execution) => execution.name === "story_question_grounding_integrity" && execution.status === "fail"));
+    assert.ok(result.verdicts.some((verdict) => verdict.code === "story_question_payoff_integrity.missing_answer_event"));
+    assert.ok(result.verdicts.some((verdict) => verdict.code === "story_question_grounding_integrity.missing_source_record"));
   });
 });
 

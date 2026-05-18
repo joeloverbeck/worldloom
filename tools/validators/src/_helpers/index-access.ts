@@ -183,6 +183,8 @@ const STORY_CREATE_OPS: Readonly<Record<string, { nodeType: string; sourceDir: s
   create_bel_record: { nodeType: "belief_record", sourceDir: "beliefs" },
   create_clk_record: { nodeType: "pressure_clock_record", sourceDir: "clocks" },
   supersede_clk_record: { nodeType: "pressure_clock_record", sourceDir: "clocks" },
+  create_stq_record: { nodeType: "story_question_record", sourceDir: "story-questions" },
+  supersede_stq_record: { nodeType: "story_question_record", sourceDir: "story-questions" },
   append_story_diegetic_artifact_record: { nodeType: "story_diegetic_artifact_record", sourceDir: "artifacts" }
 };
 
@@ -322,6 +324,38 @@ function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperat
     const parsed = cloneRecord(current.parsed);
     parsed.status = "resolved";
     parsed.resolution_event = patch.payload.resolution_event;
+    byId.set(current.node_id, { ...current, parsed });
+    return current.node_id;
+  }
+  if (patch.op === "answer_story_question") {
+    const current = findStoryRecord(byId, patch.payload.target_question_id, "story_question_record");
+    if (!current) {
+      return null;
+    }
+    const parsed = cloneRecord(current.parsed);
+    const answerRecords = Array.isArray(parsed.answer_records)
+      ? parsed.answer_records.filter((item): item is string => typeof item === "string")
+      : [];
+    for (const recordId of patch.payload.answer_records) {
+      if (!answerRecords.includes(recordId)) {
+        answerRecords.push(recordId);
+      }
+    }
+    parsed.status = patch.payload.status;
+    parsed.answer_event = patch.payload.answer_event;
+    parsed.answer_records = answerRecords;
+    byId.set(current.node_id, { ...current, parsed });
+    return current.node_id;
+  }
+
+  if (patch.op === "abandon_story_question") {
+    const current = findStoryRecord(byId, patch.payload.target_question_id, "story_question_record");
+    if (!current) {
+      return null;
+    }
+    const parsed = cloneRecord(current.parsed);
+    parsed.status = "abandoned";
+    parsed.abandonment_rationale = patch.payload.abandonment_rationale;
     byId.set(current.node_id, { ...current, parsed });
     return current.node_id;
   }

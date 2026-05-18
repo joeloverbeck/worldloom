@@ -21,6 +21,8 @@ const URGENCY_LEVELS = new Set(["low", "medium", "high"]);
 const SALIENCE_LEVELS = new Set(["low", "medium", "high"]);
 const CLOCK_KINDS = new Set(["danger", "racing", "mission", "faction", "exposure", "pursuit", "deadline"]);
 const SECRET_KINDS = new Set(["identity", "motive", "location", "event_cause", "artifact_truth", "relationship", "institutional"]);
+const STORY_QUESTION_KINDS = new Set(["setup", "dramatic_question", "promise"]);
+const STORY_QUESTION_STATUSES = new Set(["open", "complicated", "answered", "paid_off", "abandoned", "inherited", "superseded"]);
 const STORY_ROLES = new Set([
   "viewpoint",
   "player_proxy",
@@ -54,13 +56,14 @@ const STORY_ID_PATTERNS = {
   thread: /^THR-\d+$/,
   clock: /^CLK-\d+$/,
   secret: /^STSEC-\d+$/,
+  question: /^STQ-\d+$/,
   relationship: /^SREL-\d+$/,
   location: /^STLOC-\d+$/,
   object: /^STOBJ-\d+$/,
   artifact: /^DA-\d+$/,
   intention: /^STINT-\d+$/
 } as const;
-const RECORD_ACTIVE_PATTERN = /^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC)-\d+$/;
+const RECORD_ACTIVE_PATTERN = /^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ)-\d+$/;
 const DERIVED_FROM_PATTERN = /^(?:SE|STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-\d+$/;
 const BOUND_EFFECT_PATTERN = /^bound:([a-z][a-z0-9_-]*)$/;
 
@@ -75,6 +78,7 @@ interface ReferenceSets {
   threads: Map<string, Set<string>>;
   clocks: Map<string, Set<string>>;
   secrets: Map<string, Set<string>>;
+  questions: Map<string, Set<string>>;
   relationships: Map<string, Set<string>>;
   locations: Map<string, Set<string>>;
   objects: Map<string, Set<string>>;
@@ -155,6 +159,7 @@ async function loadReferenceSets(ctx: Context): Promise<ReferenceSets> {
     threads: await query("thread_record"),
     clocks: await query("pressure_clock_record"),
     secrets: await query("story_secret_record"),
+    questions: await query("story_question_record"),
     relationships: await query("relationship_record_story"),
     locations: await query("story_location_record"),
     objects: await query("story_object_record"),
@@ -254,6 +259,17 @@ function validatePredicate(state: ValidationState, value: unknown, path: string,
     case "revelation_ready":
       requireStoryRef(state, value.secret, "secret", idsFor(state.refs.secrets, state.record), `${path}.secret`);
       return;
+    case "story_question_open":
+      requireStoryRef(state, value.question, "question", idsFor(state.refs.questions, state.record), `${path}.question`);
+      return;
+    case "story_question_status":
+      requireStoryRef(state, value.question, "question", idsFor(state.refs.questions, state.record), `${path}.question`);
+      requireEnum(state, value.status, STORY_QUESTION_STATUSES, `${path}.status`);
+      return;
+    case "promise_due":
+      requireStoryRef(state, value.question, "question", idsFor(state.refs.questions, state.record), `${path}.question`);
+      requireIntegerPages(state, value.age_pages, `${path}.age_pages`);
+      return;
     case "any_obligation_open":
       requireExistentialScope(state, value.pred, path);
       requireAlias(state, value.alias, `${path}.alias`, boundAliases);
@@ -286,6 +302,12 @@ function validatePredicate(state: ValidationState, value: unknown, path: string,
       requireAlias(state, value.alias, `${path}.alias`, boundAliases);
       requireOptionalEnum(state, value.salience, SALIENCE_LEVELS, `${path}.salience`);
       requireOptionalEnum(state, value.kind, SECRET_KINDS, `${path}.kind`);
+      return;
+    case "any_story_question_open":
+      requireExistentialScope(state, value.pred, path);
+      requireAlias(state, value.alias, `${path}.alias`, boundAliases);
+      requireOptionalEnum(state, value.salience, SALIENCE_LEVELS, `${path}.salience`);
+      requireOptionalEnum(state, value.setup_kind, STORY_QUESTION_KINDS, `${path}.setup_kind`);
       return;
     case "any_relationship_axis":
       requireExistentialScope(state, value.pred, path);
@@ -508,6 +530,7 @@ function activeRecordIds(state: ValidationState): Set<string> {
     ...idsFor(state.refs.threads, state.record),
     ...idsFor(state.refs.clocks, state.record),
     ...idsFor(state.refs.secrets, state.record),
+    ...idsFor(state.refs.questions, state.record),
     ...idsFor(state.refs.relationships, state.record),
     ...idsFor(state.refs.locations, state.record),
     ...idsFor(state.refs.objects, state.record),
