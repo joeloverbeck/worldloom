@@ -2,7 +2,24 @@
 
 ## Phase 4: Update belief and visibility state
 
-Before belief propagation, apply any instantiated new-class state transitions from `SE.state_delta`:
+Before belief propagation, apply any instantiated new-class state transitions from `SE.state_delta`.
+
+**Same-event creation precedence (SPEC-43).** Apply any same-event creations for
+`CLK`, `STSEC`, and `STQ` before lifecycle operations against those classes.
+Lifecycle operations run on the post-creation state, not on the pre-creation
+state. A `CLK` created and ticked in the same `SE` lands through create first;
+the initial tick is then represented through `tick_history[]` per
+`tick_pressure_clock` semantics.
+
+**belief propagation for STSEC creation and new causal state (SPEC-43).** Any new `STSEC`,
+deceptive event, public relationship formation, new witness-bearing entity, or
+newly visible pressure must pass the belief/visibility propagation discipline
+below. Create or supersede `BEL` records through the existing Phase 4 belief
+surface, or emit closed-set non-propagation tags. A new `STSEC` involving
+deception or concealment must create initial `BEL` records for the holders'
+lie-or-knowledge state and for witnesses who observed the deceptive event.
+
+Apply class-specific lifecycle transitions:
 
 - **CLK pressure clocks.** When the accepted event advances or resolves an active `CLK`, emit `tick_pressure_clock` with `target_clock_id`, `event: SE-<integer>`, nonzero `delta`, and a concrete `cause`; use `resolve_pressure_clock` when the clock is resolved without another tick. If a tick crosses one or more `CLK.thresholds[].at` values, materialize the threshold's `effects.create[]`, `effects.supersede[]`, and `effects.close[]` entries in the same `SE.state_delta` after resolving any `bound:<alias>` targets from Phase 2. Do not encode clock progress by directly editing prior CLK YAML or by inventing a prose-only clock note.
 - **STSEC story secrets.** When the event discovers a clue carrier, emit `mark_secret_clue_discovered` for the carrier record and discoverer. When the event reveals the secret, emit `reveal_story_secret` with `reveal_event: SE-<integer>` and the BEL / SF / DA / STQ records that carry the revealed truth. A STSEC reveal is a secrecy / betrayal / deception event for this phase, so witness propagation below is mandatory: create or supersede the required `BEL` records for direct and indirect witnesses, or record closed-set non-propagation tags.
