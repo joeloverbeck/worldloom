@@ -13,7 +13,7 @@ Before this ticket, after Phase C implementation tickets 006-013 landed, the 22 
 ## Assumption Reassessment (2026-05-18)
 
 1. `docs/MACHINE-FACING-LAYER.md` exists and is the canonical operator-facing reference for the world-index, MCP server, patch engine, validator framework, and hooks per FOUNDATIONS §Machine-Facing Layer. Before this ticket, the doc did not enumerate the Phase C story-edge expansion; the 22 edges contributed by sibling tickets 006-013 needed to be enumerated alongside the placeholder-skip and tick-history-granularity conventions.
-2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C Deliverable D-C7 names `docs/MACHINE-FACING-LAYER.md` story-edge enumeration as the docs target; §R-3 (Risks & Open Questions) names the placeholder-skip convention's rationale as the second documentation concern.
+2. `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C Deliverable D-C7 names `docs/MACHINE-FACING-LAYER.md` story-edge enumeration as the docs target; §R-3 (Risks & Open Questions) names the placeholder-skip convention's rationale as the second documentation concern.
 3. Cross-skill boundary: `docs/MACHINE-FACING-LAYER.md` is consumed by skill operators authoring graph-walking queries, by integration-audit operators, and by readers cross-referencing FOUNDATIONS §Machine-Facing Layer. The docs update must enumerate every new edge type with its source class, target class, and semantic shape.
 4. FOUNDATIONS §Machine-Facing Layer motivating this ticket (cited at FOUNDATIONS line 537 — *"a phased machine-facing layer beside the human-facing markdown"*): the operator-facing docs are the canonical reference for the world-index surface; without the new edge enumeration, skill operators and audit operators cannot discover the graph-walks the new edges enable. The placeholder-skip and tick-history-granularity convention statements similarly preserve operator-facing transparency per the principle's "directly or via the documented ... pattern" framing.
 
@@ -93,7 +93,7 @@ Completed: 2026-05-18
 - `grep -n "placeholder\|group:\|narrator" docs/MACHINE-FACING-LAYER.md` — passed; placeholder-skip convention is documented.
 - `grep -n "tick_history\|delta.*cause" docs/MACHINE-FACING-LAYER.md` — passed; tick-history granularity is documented.
 - `grep -n "14 story\|14 edge" docs/MACHINE-FACING-LAYER.md` — expected no-match result; no stale 14-count wording remains.
-- `git diff --check -- docs/MACHINE-FACING-LAYER.md archive/tickets/SPEC46STOPIPMAC-014.md tickets/SPEC46STOPIPMAC-015.md` — passed after archival and dependency repair.
+- `git diff --check -- docs/MACHINE-FACING-LAYER.md archive/tickets/SPEC46STOPIPMAC-014.md archive/tickets/SPEC46STOPIPMAC-015.md` — passed after archival and dependency repair.
 
 ## Deviations
 

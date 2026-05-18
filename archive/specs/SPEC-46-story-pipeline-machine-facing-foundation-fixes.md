@@ -2,7 +2,7 @@
 
 # SPEC-46: Story-Pipeline Machine-Facing Layer Foundation Fixes for Existing Record Classes
 
-**Status**: DRAFT
+**Status**: COMPLETED
 **Phase**: wave-1 machine-facing layer reconciliation (no new story-bundle record classes; existing-record retrieval surface fixes)
 **Depends on**: SPEC-42 (introduced CLK / STSEC / STQ — the new classes this spec catches the retrieval surface up to); SPEC-45 (story-state provenance indexing — established the pattern of expanding `STORY_EDGE_TYPES` for previously-unindexed story-record fields)
 **Blocks**: follow-up specs for `STPLAN` (actor-owned tactical plan), `STEMO` (actor-owned affective state), the Priority 2 render packets (present-causal-situation, dramatic-irony, reader-expectation, social-pressure, pressure-texture, branch-possibility-space), and the `SE.record_introductions[]` migration brainstorm — none in this spec's scope
@@ -31,6 +31,10 @@
 **Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-012.md`)**: Phase C STQ edge extraction is landed in `tools/world-index`: `story_question_source`, `story_question_payoff_of`, and `story_question_answer_record` are registered in `STORY_EDGE_TYPES`, emitted for live `story_question_record` nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 33`). The live `STQ` schema carries scalar nullable `payoff_of: STQ-<integer> | null`, not the drafted `payoff_of[]` array shape, so `story_question_payoff_of` emits at most one edge from the payoff question to its setup question. Remaining Phase C edge families are still owned by tickets 013-015 until later implementation notes supersede this line.
 
 **Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-013.md`)**: Phase C SE edge extraction is landed in `tools/world-index`: `event_actor`, `event_target`, and `event_selected_storylet` are registered in `STORY_EDGE_TYPES`, emitted by the existing `edgesForStoryEvent` helper for live `story_event_record` nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 36`). The live `SE` schema allows placeholder `actor: system | unknown`, so `event_actor` emits only for structured story-record ids. Remaining Phase C docs and capstone proof are owned by tickets 014-015 until later implementation notes supersede this line.
+
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-014.md`)**: Phase C story-edge documentation is landed in `docs/MACHINE-FACING-LAYER.md`: the machine-facing layer docs now enumerate the original 14 story-edge families, all 22 SPEC-46 Phase C edge types, the placeholder-skip convention for `CLK.driver`, `STSEC.holders[]`, and `SE.actor`, and the `CLK.tick_history[].event` granularity boundary.
+
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-015.md`)**: Phase C capstone proof is landed in `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts`. The integration fixture rebuilds a temporary story-bundle index, asserts `STORY_EDGE_TYPES.length === 36` with no duplicates, verifies exact source-derived counts for all 22 SPEC-46 Phase C edge types, confirms placeholder/empty fields do not emit rows, verifies `story_slug` scoping on checked edges, and preserves the 14 pre-SPEC-46 story-edge families at the family-presence boundary.
 
 ---
 
@@ -265,3 +269,15 @@ Per-phase deliverables that will be decomposed into implementation tickets by a 
 - **T-8 (Phase C end-to-end rebuild)**: Run `world-index build` on the SPEC-45 regression-test world fixture; assert the resulting `world.db` contains the 22 new edge rows where expected and zero new edge rows where the source fields are empty.
 - **T-9 (cross-phase no-regression)**: Existing test suites for `world-mcp`, `world-index`, `patch-engine`, `validators`, and the seven story-pipeline skills pass unchanged after this spec's deliverables land.
 - **T-10 (cross-phase FOUNDATIONS compliance)**: Lint pass over the new Phase B summary type asserting no field name carries narrative-shape framing (no `act_*`, `climax_*`, `beat_*`, `arc_*`, `expected_outcome_*`, `target_curve_*`); same lint over the new Phase C edge type names. Codifies §5c discipline structurally.
+
+## Outcome
+
+Completed on 2026-05-18.
+
+SPEC-46 landed as an additive machine-facing retrieval-surface reconciliation for existing story-bundle record classes. Phase A corrected the `open_obligations` MCP projection to match the live `OBL` schema. Phase B added schema-faithful story-bundle context summaries and documented/capability-described the new context-packet fields. Phase C expanded `tools/world-index` story-edge extraction from the original 14 story-edge families to 36 story-edge families total, documented the expanded edge surface in `docs/MACHINE-FACING-LAYER.md`, and added an end-to-end integration proof for the 22 new SPEC-46 edge types.
+
+The implementation deliberately stayed inside the spec's retrieval-layer boundary. It did not introduce new story-bundle record classes, page-plan render packets, STPLAN/STEMO schemas, record-introduction migration work, or canon/world-content mutation. Placeholder-bearing fields keep their record-body semantics: graph edges emit only for structured record ids, while placeholder values such as `system`, `unknown`, `group:<name>`, and `narrator` remain available through targeted record reads.
+
+Deviations from the original plan were live-schema truthing rather than scope expansion. The `SREL`, `STLOC`, `STOBJ`, story-local `DA`, `STQ.payoff_of`, and `SE.actor` slices were implemented against the validator-backed shapes present at implementation time, not the stale draft field shapes. The final capstone preserves the original 14 story-edge families at a family-presence boundary rather than exact historical row counts, while keeping exact source-derived count assertions for the 22 new Phase C edge types. The drafted manual CLI smoke was replaced by an integration test that invokes the same `build` path on a temporary fixture, with existing package tests continuing to cover operator-facing CLI behavior.
+
+Verification was completed through the package-local proof surfaces owned by the implementation tickets. The final Phase C package proof was `npm run build` and `npm test` in `tools/world-index`, with the test suite passing at 119 tests after the capstone integration test landed. Earlier archived tickets carry the corresponding Phase A and Phase B MCP/context-packet proof. A fresh full cross-package no-regression sweep over `world-mcp`, `world-index`, `patch-engine`, `validators`, and all seven story-pipeline skills was not rerun during final archival, so T-9 is recorded as covered by ticket-local proof rather than claimed as a new final-session broad sweep.

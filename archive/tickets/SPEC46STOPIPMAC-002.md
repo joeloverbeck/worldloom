@@ -13,12 +13,12 @@ The story-bundle context-packet projection at `tools/world-mcp/src/context-packe
 ## Assumption Reassessment (2026-05-18)
 
 1. `tools/world-mcp/src/context-packet/shared.ts:97` declares `ContextPacketStoryBundleContext`; line 67 declares `ContextPacketStoryBundleContextSummary`. The existing builder pattern at `tools/world-mcp/src/context-packet/story-bundle-context.ts:213-242` (`buildActiveThreads` / `buildActiveClocks`) is the model for new builders. `STINT` schema at `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.2 carries `id`, `story_id`, `created_at_page`, `supersedes`, `holder`, `intent`, `urgency: low | medium | high`, `expires_when`. `STSTAT` schema (story-state-contract.md §3 confirms `entity_status` is its purpose; story-record-schemas.md §4.5.x carries `entity` + `life` + `agency` + `location` fields per SPEC-44 lifecycle).
-2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase B table specifies `active_intentions: [{id, holder, intent, urgency, expires_when}]` and `active_statuses: [{entity, life, agency, location}]` — every field has a named retrieval-surface consumer per the spec's per-class load-bearing table.
+2. `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase B table specifies `active_intentions: [{id, holder, intent, urgency, expires_when}]` and `active_statuses: [{entity, life, agency, location}]` — every field has a named retrieval-surface consumer per the spec's per-class load-bearing table.
 3. Cross-skill boundary: the MCP context-packet contract is consumed by `branching-story-turn-cycle` (eligibility scoring for `intention_active` / `entity_status` predicates per `story-state-contract.md` §5) and by `branching-story-health-audit` (stale-intention detection, life/agency consistency checks). Adding the new fields is additive — consumers that don't request the new field set continue to work unchanged.
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism) motivates the field selection: every emitted field is consumed by a named retrieval-surface consumer per the Phase B table. No nice-to-have fields are included. The two projections also align with §Tooling Recommendation by making queryable state previously requiring raw-file reads or per-id `get_record` round-trips.
 5. Baseline proof before implementation: `npm test --prefix tools/world-mcp` passed with 405 passing tests. Package ignored artifacts (`tools/world-mcp/.secret`, `tools/world-mcp/dist/`, `tools/world-mcp/node_modules/`) were pre-existing/expected package-local artifacts and are not tracked owned edits.
 6. Live fixture/proof reassessment added `tools/world-mcp/tests/tools/story-bundle-fixture.ts`, `tools/world-mcp/tests/context-packet/story-bundle-budget.test.ts`, and `tools/world-mcp/tests/tools/search-nodes.story-bundle.test.ts` to the owned surface. The shared story-bundle fixture needed a representative `STINT` row so the new intention projection could be tested, the persisted summary test needed the two new summary fallback fields, and the existing lexical-search fixture expectation needed to include the new `STINT-1` row because its body legitimately matches the shared `"loft"` query.
-7. Same-seam spec truthing: `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` is the originating authority and contains broad current-state absence prose for all seven Phase B summaries. This ticket added a dated implementation note for the two actor-bound summaries rather than rewriting the remaining broad proposal text, because sibling tickets 003-015 still own the rest of the spec.
+7. Same-seam spec truthing: `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` is the originating authority and contains broad current-state absence prose for all seven Phase B summaries. This ticket added a dated implementation note for the two actor-bound summaries rather than rewriting the remaining broad proposal text, because sibling tickets 003-015 still own the rest of the spec.
 
 ## Architecture Check
 
@@ -75,7 +75,7 @@ In `tools/world-mcp/src/context-packet/story-bundle-context.ts`, `buildActiveInt
 
 ### 5. Added a SPEC-46 implementation note
 
-`specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` now records that ticket 002 landed the actor-bound Phase B summaries, while leaving the rest of the broad spec text active for sibling tickets 003-015.
+`archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` now records that ticket 002 landed the actor-bound Phase B summaries, while leaving the rest of the broad spec text active for sibling tickets 003-015.
 
 ## Files to Touch
 
@@ -85,7 +85,7 @@ In `tools/world-mcp/src/context-packet/story-bundle-context.ts`, `buildActiveInt
 - `tools/world-mcp/tests/context-packet/story-bundle-budget.test.ts` (modify — add persisted summary fallback assertions)
 - `tools/world-mcp/tests/tools/story-bundle-fixture.ts` (modify — seed representative `STINT` fixture row)
 - `tools/world-mcp/tests/tools/search-nodes.story-bundle.test.ts` (modify — update shared-fixture lexical-search expectation)
-- `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (modify — add dated implementation note for this landed slice)
+- `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (modify — add dated implementation note for this landed slice)
 
 ## Out of Scope
 

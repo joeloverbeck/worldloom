@@ -13,7 +13,7 @@ Before this ticket, the existing `edgesForStoryEvent` helper at `tools/world-ind
 ## Assumption Reassessment (2026-05-18)
 
 1. `tools/world-index/src/schema/types.ts` declares `STORY_EDGE_TYPES`; `tools/world-index/src/parse/atomic.ts` contains the existing `edgesForStoryEvent` helper (from SPEC-45). The `SE` schema at `.claude/skills/_shared-templates/story-record-schemas.md` §4.3 carries `actor: STENT-<integer> | system | unknown`, `targets[]` (story record ids), and `commitment.selected_slt_id` (SLT id or null per audit-only `SE` events that omit commitment) fields. Live reassessment corrected the draft's "actor is always STENT" claim: `event_actor` emits only when `actor` is a structured story-record id and skips `system` / `unknown` placeholders, matching the placeholder-skip convention already used by `clock_driver` and `secret_holder`.
-2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the three SE edges (`event_actor`, `event_target`, `event_selected_storylet`) and Deliverable D-C3 explicitly says *"Extend the existing `edgesForStoryEvent` helper to emit `event_actor`, `event_target`, `event_selected_storylet` edges."* — the spec is explicit that this is an extension of an existing helper, not a new per-class helper. The implementation also truthed the spec with a dated note so downstream tickets 014/015 know Phase C SE extraction is landed.
+2. `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the three SE edges (`event_actor`, `event_target`, `event_selected_storylet`) and Deliverable D-C3 explicitly says *"Extend the existing `edgesForStoryEvent` helper to emit `event_actor`, `event_target`, `event_selected_storylet` edges."* — the spec is explicit that this is an extension of an existing helper, not a new per-class helper. The implementation also truthed the spec with a dated note so downstream tickets 014/015 know Phase C SE extraction is landed.
 3. Cross-skill boundary: the world-index edge extraction is consumed by MCP graph-walking helpers and by future packets (deferred per SPEC-46 §Out of Scope items 3-7). The SE extension is additive — consumers that don't query the new edge types continue to work unchanged; the existing `state_delta_create` / `state_delta_supersede` / `creation_evidence` edges are preserved and the older structured-edge tests now assert the added `event_selected_storylet` row where their fixture already carries `commitment.selected_slt_id`.
 4. FOUNDATIONS §Tooling Recommendation motivates this ticket: SE is the causal-tick record at story scope; making actor / target / selected-storylet relations graph-queryable supports any future audit or query that walks "who did what with which storylet to whom". FOUNDATIONS §Rule 4 (No Globalization by Accident) is preserved by `createStoryRefEdge` carrying `storySlug` on every emitted edge.
 
@@ -57,8 +57,8 @@ Updated the existing structured-edge tests to expect `event_selected_storylet` f
 - `tools/world-index/tests/story-bundle-edges.test.ts` (modify — append SE-extension tests including SPEC-45-edge-preservation regression)
 - `tools/world-index/tests/structured-edges.test.ts` (modify — same-seam expectation update for fixtures that now emit `event_selected_storylet`)
 - `tools/world-index/tests/types.test.ts` (modify — existing registry count assertion updated to the post-013 totals)
-- `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (modify — dated implementation note for ticket 013)
-- `tickets/SPEC46STOPIPMAC-015.md` (modify — capstone wording truthed because the existing registry assertion moved with ticket 013)
+- `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (modify — dated implementation note for ticket 013)
+- `archive/tickets/SPEC46STOPIPMAC-015.md` (modify — capstone wording truthed because the existing registry assertion moved with ticket 013)
 
 ## Out of Scope
 

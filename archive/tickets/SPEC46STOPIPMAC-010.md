@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — `tools/world-index/src/schema/types.ts` (3 new edge types in `STORY_EDGE_TYPES`), `tools/world-index/src/parse/atomic.ts` (new `edgesForStoryClock` helper + dispatch wiring + placeholder-skip convention application), `tools/world-index/tests/story-bundle-edges.test.ts` (append per-class tests including placeholder-skip case), `tools/world-index/tests/types.test.ts` (current registry-count assertion), and `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (implementation note)
+**Engine Changes**: Yes — `tools/world-index/src/schema/types.ts` (3 new edge types in `STORY_EDGE_TYPES`), `tools/world-index/src/parse/atomic.ts` (new `edgesForStoryClock` helper + dispatch wiring + placeholder-skip convention application), `tools/world-index/tests/story-bundle-edges.test.ts` (append per-class tests including placeholder-skip case), `tools/world-index/tests/types.test.ts` (current registry-count assertion), and `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (implementation note)
 **Deps**: None
 
 ## Problem
@@ -13,11 +13,11 @@ At intake, the world-index story-edge extraction at `tools/world-index/src/parse
 ## Assumption Reassessment (2026-05-18)
 
 1. `tools/world-index/src/schema/types.ts:84-99` declares `STORY_EDGE_TYPES`; `tools/world-index/src/parse/atomic.ts:564` is the dispatch site. The `CLK` schema at SPEC-42 §4.5.14 (archived spec) and `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.14 carries `linked_records: [THR | OBL | CNSQ | STINT | SREL | STLOC | STOBJ | STQ ids]`, `driver: STENT-<integer> | group:<name> | system | unknown`, and `tick_history: [{event: SE-<integer>, delta, cause}]` fields.
-2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the three CLK edges and explicitly notes the `driver` placeholder-skip behavior (`group:/system/unknown drivers do not emit`). The §Group/system reference convention paragraph names CLK as one of two record classes where this convention applies (the other being STSEC.holders, covered by SPEC46STOPIPMAC-011). The §Tick-history granularity paragraph specifies that `clock_tick_event` emits one row per `event` entry; `delta` and `cause` are not encoded as edge properties.
+2. `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the three CLK edges and explicitly notes the `driver` placeholder-skip behavior (`group:/system/unknown drivers do not emit`). The §Group/system reference convention paragraph names CLK as one of two record classes where this convention applies (the other being STSEC.holders, covered by SPEC46STOPIPMAC-011). The §Tick-history granularity paragraph specifies that `clock_tick_event` emits one row per `event` entry; `delta` and `cause` are not encoded as edge properties.
 3. Cross-skill boundary: the world-index edge extraction is consumed by MCP graph-walking helpers. The placeholder-skip convention matches SPEC-45's `creation_evidence` handling of non-id evidence — edges capture record-to-record relations, while abstract drivers (groups, system, unknown) remain on the source record retrievable via `get_record`.
 4. FOUNDATIONS §Tooling Recommendation motivates this ticket: making CLK linkage and tick-history graph-queryable supports the `clock_at_least` / `clock_below` / `clock_full` predicates per `story-state-contract.md` §5 and prepares for future audit views (clock-tick walks). FOUNDATIONS §Rule 4 (No Globalization by Accident) is preserved by `createStoryRefEdge`.
 5. Live package reassessment added `tools/world-index/tests/types.test.ts` to the owned surface. The existing registry-count assertion moves with each Phase C edge slice; this ticket updates it from 23 to 26 story-edge types and from 38 to 41 total edge types while leaving the final `36` story-edge capstone assertion to SPEC46STOPIPMAC-015.
-6. Same-seam spec truthing: `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` is the originating authority and carries dated implementation notes for prior landed Phase C slices. This ticket adds a narrow implementation note for the CLK slice rather than rewriting the proposal's broader historical Phase C prose.
+6. Same-seam spec truthing: `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` is the originating authority and carries dated implementation notes for prior landed Phase C slices. This ticket adds a narrow implementation note for the CLK slice rather than rewriting the proposal's broader historical Phase C prose.
 
 ## Architecture Check
 
@@ -63,7 +63,7 @@ Updated `tools/world-index/tests/types.test.ts` to the post-CLK current count (`
 - `tools/world-index/src/parse/atomic.ts` (modify — add `edgesForStoryClock` + dispatch wiring + placeholder-check helper)
 - `tools/world-index/tests/story-bundle-edges.test.ts` (modify — append CLK tests including placeholder-skip cases)
 - `tools/world-index/tests/types.test.ts` (modify — update current registry-count assertion to the post-CLK count)
-- `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (modify — add dated implementation note for the landed CLK slice)
+- `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (modify — add dated implementation note for the landed CLK slice)
 
 ## Out of Scope
 

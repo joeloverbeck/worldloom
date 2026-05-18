@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — `tools/world-index/src/schema/types.ts` (2 new edge types in `STORY_EDGE_TYPES`), `tools/world-index/src/parse/atomic.ts` (new `edgesForStoryIntention` helper + dispatch wiring), `tools/world-index/tests/story-bundle-edges.test.ts` (append per-class tests), `tools/world-index/tests/types.test.ts` (current registry-count assertion), and `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (implementation note)
+**Engine Changes**: Yes — `tools/world-index/src/schema/types.ts` (2 new edge types in `STORY_EDGE_TYPES`), `tools/world-index/src/parse/atomic.ts` (new `edgesForStoryIntention` helper + dispatch wiring), `tools/world-index/tests/story-bundle-edges.test.ts` (append per-class tests), `tools/world-index/tests/types.test.ts` (current registry-count assertion), and `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (implementation note)
 **Deps**: None
 
 ## Problem
@@ -13,7 +13,7 @@ At intake, world-index story-edge extraction did not extract `STINT` (intention)
 ## Assumption Reassessment (2026-05-18)
 
 1. `tools/world-index/src/schema/types.ts` declares `STORY_EDGE_TYPES` with 20 entries after `archive/tickets/SPEC46STOPIPMAC-007.md`; `tools/world-index/src/parse/atomic.ts` dispatches story-record edge helpers in `edgesForStoryRecord`. The `STINT` schema at `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.2 carries `holder` (STENT id) and `supersedes` (STINT id or null) fields. The supersession chain is the canonical store for STINT lifecycle per FOUNDATIONS §Story Bundles append-only / supersession discipline (story-state-contract.md §3).
-2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the two STINT edges (`intention_holder`, `intention_supersedes`). The §Extractor implementation pattern paragraph names `edgesForStoryIntention` as one of the seven per-class helpers.
+2. `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the two STINT edges (`intention_holder`, `intention_supersedes`). The §Extractor implementation pattern paragraph names `edgesForStoryIntention` as one of the seven per-class helpers.
 3. Cross-skill boundary: the world-index edge extraction is consumed by MCP graph-walking helpers and by the active-intentions projection landed in `archive/tickets/SPEC46STOPIPMAC-002.md`. Future STPLAN tickets (deferred per SPEC-46 §Out of Scope item 1) will depend on intention-supersession chain walking via `intention_supersedes`. Adding STINT edges is additive.
 4. FOUNDATIONS §Tooling Recommendation motivates this ticket: making STINT ownership and supersession graph-queryable supports the `intention_active` predicate per `story-state-contract.md` §5 and prepares for future STPLAN `root_intention` linking. FOUNDATIONS §Rule 4 (No Globalization by Accident) is preserved by `createStoryRefEdge` carrying `storySlug` on every emitted edge.
 5. Live package reassessment added `tools/world-index/tests/types.test.ts` to the owned surface. The existing registry-count assertion moves with each Phase C edge slice; this ticket updates it from 20 to 22 story-edge types and from 35 to 37 total edge types while leaving the final `36` story-edge capstone assertion to SPEC46STOPIPMAC-015.
@@ -56,7 +56,7 @@ Appended positive + negative tests for both STINT edges to the shared file. The 
 - `tools/world-index/src/parse/atomic.ts` (modify — add `edgesForStoryIntention` + dispatch wiring)
 - `tools/world-index/tests/story-bundle-edges.test.ts` (modify — append STINT tests)
 - `tools/world-index/tests/types.test.ts` (modify — update current registry-count assertions to the post-STINT edge count)
-- `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (modify — add dated implementation note for the landed STINT slice)
+- `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (modify — add dated implementation note for the landed STINT slice)
 
 ## Out of Scope
 
@@ -109,4 +109,4 @@ Completed on 2026-05-18:
 ## Deviations
 
 - `tools/world-index/tests/types.test.ts` was added to the touched surface during reassessment because the existing current-count assertion moves with each Phase C edge slice. This does not replace the final `STORY_EDGE_TYPES.length === 36` capstone assertion owned by SPEC46STOPIPMAC-015.
-- `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` was updated with a narrow implementation note instead of rewriting the proposal's broader historical Phase C prose.
+- `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` was updated with a narrow implementation note instead of rewriting the proposal's broader historical Phase C prose.

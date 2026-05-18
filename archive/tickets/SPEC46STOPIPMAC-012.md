@@ -13,7 +13,7 @@ At intake, world-index story-edge extraction did not extract `STQ` (story questi
 ## Assumption Reassessment (2026-05-18)
 
 1. `tools/world-index/src/schema/types.ts` declares `STORY_EDGE_TYPES`; `tools/world-index/src/parse/atomic.ts` is the dispatch site. The live `STQ` schema at `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.16 and `tools/validators/src/schemas/story-question.schema.json` carries `source_records: [record ids]`, scalar nullable `payoff_of: STQ-<integer> | null`, and `answer_records: [record ids]` fields among others (`question_or_setup`, `setup_kind`, `salience`, `audience_visibility`, `status`, `answer_event`). The ticket/spec draft's older `payoff_of[]` wording was stale and is corrected to the scalar live contract before implementation.
-2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the three STQ edges. The §Extractor implementation pattern paragraph names `edgesForStoryQuestion` as one of the seven per-class helpers.
+2. `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the three STQ edges. The §Extractor implementation pattern paragraph names `edgesForStoryQuestion` as one of the seven per-class helpers.
 3. Cross-skill boundary: the world-index edge extraction is consumed by MCP graph-walking helpers and prepares for the future reader-expectation packet (deferred per SPEC-46 §Out of Scope item 4) which will walk setup-to-payoff chains via `payoff_of` edges. Adding STQ edges is additive.
 4. FOUNDATIONS §Tooling Recommendation motivates this ticket: making STQ setup-payoff chains graph-queryable supports the `promise_due(STQ, age_pages)` and `any_story_question_open` predicates and prepares for future reader-expectation surface. FOUNDATIONS §Rule 4 (No Globalization by Accident) is preserved by `createStoryRefEdge`.
 
@@ -104,7 +104,7 @@ The implementation added the parser dispatch/helper and parser-level tests for p
 
 ## Verification Result
 
-1. `git diff --check -- archive/tickets/SPEC46STOPIPMAC-012.md tickets/SPEC46STOPIPMAC-015.md specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md tools/world-index/src/schema/types.ts tools/world-index/src/parse/atomic.ts tools/world-index/tests/types.test.ts tools/world-index/tests/story-bundle-edges.test.ts` — passed.
+1. `git diff --check -- archive/tickets/SPEC46STOPIPMAC-012.md archive/tickets/SPEC46STOPIPMAC-015.md archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md tools/world-index/src/schema/types.ts tools/world-index/src/parse/atomic.ts tools/world-index/tests/types.test.ts tools/world-index/tests/story-bundle-edges.test.ts` — passed.
 2. `npm run build` from `tools/world-index` — passed.
 3. `npm test` from `tools/world-index` — passed: 116 tests, 116 pass.
 

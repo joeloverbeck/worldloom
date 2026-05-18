@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — `tools/world-index/src/schema/types.ts` (4 new edge types in `STORY_EDGE_TYPES`), `tools/world-index/src/parse/atomic.ts` (new `edgesForStorySecret` helper + dispatch wiring + placeholder-skip convention reuse), `tools/world-index/tests/story-bundle-edges.test.ts` (append per-class tests including placeholder-skip cases), `tools/world-index/tests/types.test.ts` (current registry-count assertion), and `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (implementation note)
+**Engine Changes**: Yes — `tools/world-index/src/schema/types.ts` (4 new edge types in `STORY_EDGE_TYPES`), `tools/world-index/src/parse/atomic.ts` (new `edgesForStorySecret` helper + dispatch wiring + placeholder-skip convention reuse), `tools/world-index/tests/story-bundle-edges.test.ts` (append per-class tests including placeholder-skip cases), `tools/world-index/tests/types.test.ts` (current registry-count assertion), and `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (implementation note)
 **Deps**: None
 
 ## Problem
@@ -13,11 +13,11 @@ At intake, the world-index story-edge extraction at `tools/world-index/src/parse
 ## Assumption Reassessment (2026-05-18)
 
 1. `tools/world-index/src/schema/types.ts:84-99` declares `STORY_EDGE_TYPES`; `tools/world-index/src/parse/atomic.ts:564` is the dispatch site; `archive/tickets/SPEC46STOPIPMAC-010.md` establishes the placeholder-skip convention application pattern. The `STSEC` schema at SPEC-42 §4.5.15 carries `truth_anchor: SF | BEL | DA | null`, `holders: [STENT | group:<name> | narrator]`, `clue_carriers: [{kind, record, ...}]`, and `reveal_records: [BEL | SF | DA | STQ]` fields.
-2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the four STSEC edges and explicitly notes the `holders` placeholder-skip behavior (`skip group: and narrator entries — same exclusion pattern as clock_driver`). The §Group/system reference convention paragraph names STSEC.holders as one of two record classes where the convention applies. The `secret_truth_anchor` edge skips when `truth_anchor` is null.
+2. `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the four STSEC edges and explicitly notes the `holders` placeholder-skip behavior (`skip group: and narrator entries — same exclusion pattern as clock_driver`). The §Group/system reference convention paragraph names STSEC.holders as one of two record classes where the convention applies. The `secret_truth_anchor` edge skips when `truth_anchor` is null.
 3. Cross-skill boundary: the world-index edge extraction is consumed by MCP graph-walking helpers and by the future dramatic-irony packet (deferred per SPEC-46 §Out of Scope item 5). The placeholder-skip convention preserves the same semantics as `archive/tickets/SPEC46STOPIPMAC-010.md`: abstract holders (`group:<name>`, `narrator`) remain on the source record retrievable via `get_record`; only STENT-bound holders produce edges.
 4. FOUNDATIONS §Rule 7 (Preserve Mystery Deliberately) is the primary motivating principle: STSEC is the per-bundle hidden-truth class that protects Mystery Reserve entries at story scope per `story-state-contract.md` §5 ("Mystery firewall enforcement"). The edges added by this ticket do NOT weaken the mystery firewall — they make secret-to-anchor / secret-to-holder / secret-to-clue-carrier / secret-to-reveal relationships graph-queryable so audits and future Mystery Reserve checks can walk the relations, but the firewall logic (which forbids `STSEC.status: revealed` on a `protected_mystery_refs[]: forbidden M-*` ref per SPEC-42 §STSEC Story-local vs. world Mystery Reserve) is unaffected. FOUNDATIONS §Tooling Recommendation additionally motivates the secret-clue-carrier edges: clue-carrier visibility queries are a deferred-but-important downstream consumer.
 5. Live package reassessment adds `tools/world-index/tests/types.test.ts` to the owned surface. The existing current registry-count assertion moves with each Phase C edge slice; this ticket updates it from 26 to 30 story-edge types and from 41 to 45 total edge types while leaving the final `36` story-edge capstone assertion to SPEC46STOPIPMAC-015.
-6. Same-seam spec truthing: `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` is the originating authority and carries dated implementation notes for prior landed Phase C slices. This ticket adds a narrow implementation note for the STSEC slice rather than rewriting the proposal's broader historical Phase C prose.
+6. Same-seam spec truthing: `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` is the originating authority and carries dated implementation notes for prior landed Phase C slices. This ticket adds a narrow implementation note for the STSEC slice rather than rewriting the proposal's broader historical Phase C prose.
 
 ## Architecture Check
 
@@ -65,7 +65,7 @@ Updated `tools/world-index/tests/types.test.ts` to the post-STSEC current count 
 - `tools/world-index/src/parse/atomic.ts` (modify — add `edgesForStorySecret` + dispatch wiring; reuse the same live `isStoryRecordReference` predicate as `archive/tickets/SPEC46STOPIPMAC-010.md`)
 - `tools/world-index/tests/story-bundle-edges.test.ts` (modify — append STSEC tests including placeholder-skip cases)
 - `tools/world-index/tests/types.test.ts` (modify — update current registry-count assertion to the post-STSEC count)
-- `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (modify — added dated implementation note for the landed STSEC slice)
+- `archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` (modify — added dated implementation note for the landed STSEC slice)
 
 ## Out of Scope
 
