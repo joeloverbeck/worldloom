@@ -1,6 +1,6 @@
 # SPEC45STOSTAPRO-003: get_story_state_provenance MCP tool
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new MCP tool `mcp__worldloom__get_story_state_provenance` at `tools/world-mcp/src/tools/get-story-state-provenance.ts`; new entry in `tools/world-mcp/src/tool-names.ts` `MCP_TOOL_NAMES` and `MCP_TOOL_ORDER`; new `registerToolWithCapability` call in `tools/world-mcp/src/server.ts`; new tool tests.
@@ -16,6 +16,7 @@ Per SPEC-45 §Approach Phase 2, the world-mcp package needs a new retrieval tool
 2. SPEC-45 §Approach Phase 2 D7 specifies the new MCP tool at `tools/world-mcp/src/tools/get-story-state-provenance.ts` with the return shape `{ record_id, record_class, creating_se_id, modifying_se_ids, evidence_records }`; D8 specifies registration; D9 specifies optional update to `describe-capabilities.ts` (likely a no-op since the inventory is derived from registration); D10 specifies tool tests at `tools/world-mcp/tests/tools/get-story-state-provenance.test.ts`. Tool-tests directory exists; tool path is new.
 3. Cross-skill / cross-package boundary under audit: this tool reads edges produced by world-index (`archive/tickets/SPEC45STOSTAPRO-002.md`); it is consumed by `.claude/skills/story-fact-promotion-to-canon/SKILL.md` Phase 1 (wired by SPEC45STOSTAPRO-004). The edge-type string contract (`state_delta_create`, `state_delta_supersede`, `creation_evidence`) must match exactly between the archived producer ticket's emitter and this ticket's consumer SQL queries.
 4. FOUNDATIONS principle under audit: §Tooling Recommendation (the new MCP tool extends the existing `mcp__worldloom__*` surface following established conventions — `story_slug` parameter, JSON return shape, story-bundle id resolution) AND §Story Bundles §6b (Observer Firewall) — the tool exposes creation provenance and supersession lineage, neither of which is viewer-restricted information. Firewall-sensitive edges (`affordance_available_to` and related) were deliberately excluded from SPEC-45's edge set per §Out of Scope, so this tool's surface is firewall-safe by construction.
+5. 2026-05-18 live reassessment found same-seam MCP inventory surfaces not listed in the original draft: `tools/world-mcp/tests/server/list-tools.test.ts` hard-codes the registered tool count, `tools/world-mcp/tests/server/dispatch.test.ts` exercises each registered tool through the MCP boundary, and public retrieval inventory docs in `tools/world-mcp/README.md` / `docs/MACHINE-FACING-LAYER.md` enumerate MCP retrieval tools. These are now included in this ticket's owned file/proof surface. Pre-edit baseline: `npm test --prefix tools/world-mcp` passed with 399 tests.
 
 ## Architecture Check
 
@@ -93,6 +94,10 @@ Use the existing `tools/world-mcp/tests/tools/` test harness setup (in-memory or
 - `tools/world-mcp/src/server.ts` (modify) — add `registerToolWithCapability(...)` call with description and handler wiring.
 - `tools/world-mcp/src/tools/describe-capabilities.ts` (modify — only if manual enumeration is required; default expectation is automatic via registration).
 - `tools/world-mcp/tests/tools/get-story-state-provenance.test.ts` (new) — tool tests.
+- `tools/world-mcp/tests/server/list-tools.test.ts` (modify) — update the exact registered-tool count.
+- `tools/world-mcp/tests/server/dispatch.test.ts` (modify) — add MCP-boundary success and missing-input coverage for the new tool.
+- `tools/world-mcp/README.md` (modify) — add the new public retrieval tool to the package inventory.
+- `docs/MACHINE-FACING-LAYER.md` (modify) — add the new public retrieval tool to the repo-level machine-facing retrieval inventory.
 
 ## Out of Scope
 
@@ -121,10 +126,46 @@ Use the existing `tools/world-mcp/tests/tools/` test harness setup (in-memory or
 
 ### New/Modified Tests
 
-1. `tools/world-mcp/tests/tools/get-story-state-provenance.test.ts` (new) — covers happy path, null creating_se_id, non-empty modifying/evidence, error cases (unknown id, missing story_slug).
+1. `tools/world-mcp/tests/tools/get-story-state-provenance.test.ts` (new) — covers happy path, null creating_se_id, non-empty modifying/evidence, error cases (unknown id, missing story_slug, non-story id).
+2. `tools/world-mcp/tests/server/list-tools.test.ts` (modified) — updates the exact registered-tool inventory count.
+3. `tools/world-mcp/tests/server/dispatch.test.ts` (modified) — proves success dispatch and missing-input validation through the MCP boundary.
 
 ### Commands
 
 1. `npm run build --prefix tools/world-mcp` — type-checking + compilation.
 2. `npm test --prefix tools/world-mcp` — full world-mcp test suite.
 3. Manual `describe_capabilities` query against a running server instance (or test-harness equivalent) confirms the new tool appears in the inventory.
+
+## Outcome
+
+Completed: 2026-05-18
+
+The `mcp__worldloom__get_story_state_provenance` retrieval tool is implemented and registered in `tools/world-mcp`. It resolves story-bundle ids through the existing `story_slug` / indexed-record path, reads the indexed `state_delta_create`, `state_delta_supersede`, and `creation_evidence` edges, and returns the SPEC-45 response shape:
+
+```typescript
+{
+  record_id: string;
+  record_class: string;
+  creating_se_id: string | null;
+  modifying_se_ids: string[];
+  evidence_records: string[];
+}
+```
+
+Same-seam registration and public inventory surfaces were also updated: exact server tool inventory count, MCP dispatch coverage, `tools/world-mcp/README.md`, and `docs/MACHINE-FACING-LAYER.md`.
+
+## Verification Result
+
+Passed:
+
+1. `npm test --prefix tools/world-mcp` before source edits — passed, 399 tests.
+2. `npm run build --prefix tools/world-mcp` — passed.
+3. `node --test tools/world-mcp/dist/tests/tools/get-story-state-provenance.test.js` — passed, 4 tests.
+4. `node --test tools/world-mcp/dist/tests/server/list-tools.test.js tools/world-mcp/dist/tests/server/dispatch.test.js` — passed, 36 tests.
+5. `rg -n "get_story_state_provenance" tools/world-mcp/src/tool-names.ts tools/world-mcp/src/server.ts tools/world-mcp/README.md docs/MACHINE-FACING-LAYER.md` — passed, tool appears in registration and public docs.
+6. `npm test --prefix tools/world-mcp` after implementation — passed, 403 tests.
+
+## Deviations
+
+- The live implementation uses the current SQLite schema column names (`source_node_id`, `target_node_id`, `edge_type`) rather than the shorthand `src` / `tgt` names in the draft ticket SQL snippets.
+- Same-seam MCP inventory docs and server-boundary tests were added to the owned surface during reassessment because the live package hard-codes the registered tool count and documents the retrieval inventory.

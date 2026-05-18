@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — updates `.claude/skills/story-fact-promotion-to-canon/SKILL.md` Phase 1 instruction (line 180) to call the new MCP tool from SPEC45STOSTAPRO-003 instead of the filesystem-walk pattern, plus a §World-State Prerequisites update (line 148) listing the new tool. Skill prose change only; no code change.
-**Deps**: SPEC45STOSTAPRO-003
+**Deps**: `archive/tickets/SPEC45STOSTAPRO-003.md`
 
 ## Problem
 
@@ -19,7 +19,7 @@
 ## Architecture Check
 
 1. **Skill instruction now matches deterministic retrieval pattern**: the rewrite replaces probabilistic LLM file-walking with a deterministic MCP graph query, eliminating the failure modes the Problem Statement names (missing references in long files, mis-parsing YAML, context-window-trimming mid-scan).
-2. **No backwards-compatibility shims introduced**: the skill prose changes directly to the new instruction; no fallback to the file-walk pattern is preserved. The skill cannot operate without the new MCP tool — SPEC45STOSTAPRO-003 must land first (declared in `Deps`).
+2. **No backwards-compatibility shims introduced**: the skill prose changes directly to the new instruction; no fallback to the file-walk pattern is preserved. The skill cannot operate without the new MCP tool — `archive/tickets/SPEC45STOSTAPRO-003.md` must land first (declared in `Deps`).
 
 ## Verification Layers
 
@@ -76,7 +76,7 @@ The lookup composes naturally with the new helper's output — the skill takes t
 
 1. Phase 1's SE-load instruction is deterministic at execution time (MCP graph query, not LLM file-walk).
 2. Phase 1's BEL-load instruction is unchanged in shape and substance (composes naturally with the new helper's output).
-3. The skill cannot operate against an index that lacks the new edges from `archive/tickets/SPEC45STOSTAPRO-002.md` — this is enforced structurally by the `Deps: SPEC45STOSTAPRO-003` chain (which transitively reaches the archived edge-producer ticket).
+3. The skill cannot operate against an index that lacks the new edges from `archive/tickets/SPEC45STOSTAPRO-002.md` — this is enforced structurally by the `Deps: archive/tickets/SPEC45STOSTAPRO-003.md` chain (which transitively reaches the archived edge-producer ticket).
 
 ## Test Plan
 

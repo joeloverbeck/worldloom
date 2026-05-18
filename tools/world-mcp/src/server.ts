@@ -28,6 +28,7 @@ import { getRecordField } from "./tools/get-record-field.js";
 import { getRecords } from "./tools/get-records.js";
 import { getRecordsField } from "./tools/get-records-field.js";
 import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get-record-schema.js";
+import { getStoryStateProvenance } from "./tools/get-story-state-provenance.js";
 import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records.js";
 import { searchNodes } from "./tools/search-nodes.js";
 import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan.js";
@@ -119,6 +120,12 @@ const getRecordsInputSchema = z.object({
 const getRecordsFieldInputSchema = z.object({
   record_ids: z.array(z.string().min(1)).min(1),
   field_path: z.array(z.union([z.string(), z.number().int()])).min(1),
+  world_slug: z.string().min(1).optional(),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN).optional()
+});
+
+const getStoryStateProvenanceInputSchema = z.object({
+  record_id: z.string().min(1),
   world_slug: z.string().min(1).optional(),
   story_slug: z.string().regex(STORY_SLUG_PATTERN).optional()
 });
@@ -360,6 +367,13 @@ export function createServer(): McpServer {
     "get_records_field: Fetch one field from multiple parsed atomic or story-bundle records in one ordered response. Optional story_slug scopes bundle-scoped story ids. Returns per-id field_value entries or per-id errors without aborting the batch.",
     getRecordsFieldInputSchema,
     async (args) => getRecordsField(args as unknown as Parameters<typeof getRecordsField>[0])
+  );
+  registerToolWithCapability(
+    "get_story_state_provenance",
+    "get_story_state_provenance: Fetch story-event provenance for one story-bundle record. Requires story_slug for bundle-scoped ids and returns record_id, record_class, creating_se_id, modifying_se_ids, and evidence_records from indexed state_delta_create, state_delta_supersede, and creation_evidence edges.",
+    getStoryStateProvenanceInputSchema,
+    async (args) =>
+      getStoryStateProvenance(args as unknown as Parameters<typeof getStoryStateProvenance>[0])
   );
   registerToolWithCapability(
     "get_persisted_packet_slice",
