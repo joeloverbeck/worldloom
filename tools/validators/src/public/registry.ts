@@ -22,6 +22,7 @@ import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
+import { relationshipIntroductionGroundingIntegrity } from "../structural/relationship-introduction-grounding-integrity.js";
 import { criticalSecretClueCoverageWhenRevealed } from "../structural/critical-secret-clue-coverage-when-revealed.js";
 import { secretIntroductionAnchorIntegrity } from "../structural/secret-introduction-anchor-integrity.js";
 import { secretCarrierExistence } from "../structural/secret-carrier-existence.js";
@@ -87,6 +88,7 @@ export const structuralValidators: readonly Validator[] = [
   storyQuestionIntroductionGroundingIntegrity,
   threadIntroductionGroundingIntegrity,
   entityIntroductionStatusPairing,
+  relationshipIntroductionGroundingIntegrity,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,

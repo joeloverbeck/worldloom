@@ -1,6 +1,6 @@
 # SPEC43PRECAUSTO-009: `relationship_introduction_grounding_integrity` Validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/relationship-introduction-grounding-integrity.ts` (SREL-specific introduction gate). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
@@ -69,6 +69,9 @@ Add `relationship_introduction_grounding_integrity` to the validator-name assert
 - `tools/validators/src/public/registry.ts` (modify — shared with 8 sibling tickets)
 - `tools/validators/tests/structural/relationship-introduction-grounding-integrity.test.ts` (new)
 - `tools/validators/tests/structural/registry.test.ts` (modify — shared with 8 sibling tickets)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — registry count assertion)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean non-story pre-apply skip assertion)
+- `tools/validators/README.md` (modify — structural validator inventory/status count)
 
 ## Out of Scope
 
@@ -97,8 +100,32 @@ Add `relationship_introduction_grounding_integrity` to the validator-name assert
 
 1. `tools/validators/tests/structural/relationship-introduction-grounding-integrity.test.ts` — 6 test cases per §What to Change item 3.
 2. `tools/validators/tests/structural/registry.test.ts` (modify) — adds the new validator to the name assertion (coordinate with tickets 003-008, 010-012 per §Step 6.5).
+3. `tools/validators/tests/integration/spec04-verification.test.ts` — updates active structural/total validator counts.
+4. `tools/validators/tests/integration/validate-patch-plan.test.ts` — confirms the validator is skipped for clean non-story pre-apply plans.
 
 ### Commands
 
-1. `npm test --prefix tools/validators -- relationship-introduction-grounding-integrity` (targeted test pass).
-2. `npm test --prefix tools/validators` (full validator package test pass).
+1. `npm run build --prefix tools/validators && cd tools/validators && node --test dist/tests/structural/relationship-introduction-grounding-integrity.test.js` (targeted test pass).
+2. `cd tools/validators && node --test --test-name-pattern "clean pre-apply" dist/tests/integration/validate-patch-plan.test.js` (clean non-story pre-apply skip proof).
+3. `npm test --prefix tools/validators` (full validator package test pass).
+
+## Outcome
+
+Completed: 2026-05-18.
+
+Implemented `relationship_introduction_grounding_integrity` as an additive structural validator in `tools/validators/src/structural/relationship-introduction-grounding-integrity.ts` and registered it in `tools/validators/src/public/registry.ts`. The validator runs for full-world validation, relevant story-bundle pre-apply plans, and incremental touches to SE / PG / SREL / STENT files. It enforces mid-story SREL participant grounding against parent-active or same-event-created STENT records, requires non-empty `derived_from[]`, and emits a warn-level duplicate-axis finding when a fresh SREL duplicates an active relationship without `supersedes`.
+
+Added focused structural tests covering the shared creation-pass SREL fixture, inactive participant failure, empty `derived_from[]` failure, duplicate-axis warning, supersedes suppression, lifecycle non-introduction behavior, same-event STENT participants, and selector scoping. Updated registry, validator count, README inventory, and clean non-story pre-apply skip assertions so the package's broader guardrails remain truthful.
+
+## Verification Result
+
+- `node --test dist/tests/structural/relationship-introduction-grounding-integrity.test.js` passed after `npm run build --prefix tools/validators`: 8 tests, 0 failures.
+- `node --test --test-name-pattern "clean pre-apply" dist/tests/integration/validate-patch-plan.test.js` passed from `tools/validators`: 1 test, 0 failures.
+- `npm test --prefix tools/validators` passed: 467 tests, 0 failures.
+- `grep -n "relationshipIntroductionGroundingIntegrity\|relationship_introduction_grounding_integrity" tools/validators/src/public/registry.ts` returned the import and structural registry entry.
+
+## Deviations
+
+- The drafted `npm test --prefix tools/validators -- relationship-introduction-grounding-integrity` targeted command is not a true narrow target in this package because the package script runs the compiled glob and treats extra arguments as additional paths. The actual narrow proof used the compiled test directly after build.
+- The live validator API uses `severity_mode` plus `applies_to(ctx)`, not a literal `applies_to: ["branching-story-turn-cycle"]` list. The implementation records the equivalent live run-mode predicate.
+- The ticket's "believed-only relationship" fixture proves the objective-SREL shortfall through empty `derived_from[]` and therefore emits fail-level `srel_intro_missing_derived_from`; broader BEL-vs-SREL authoring discipline remains out of scope for ticket 015 as originally drafted.

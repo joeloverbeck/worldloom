@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-turn-cycle/SKILL.md` (Output table rows for 6 mid-story-introducible classes) + `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` (adds Gates 12-15 referencing the 9 new validators from tickets 003-011 + the compatibility-drift validator from ticket 012). No impact on Phase 10 op enumeration (wildcard `create_*_record` already covers all 6 create ops per R-correction-A).
-**Deps**: archive/tickets/SPEC43PRECAUSTO-003.md, archive/tickets/SPEC43PRECAUSTO-004.md, archive/tickets/SPEC43PRECAUSTO-005.md, archive/tickets/SPEC43PRECAUSTO-006.md, 007, archive/tickets/SPEC43PRECAUSTO-008.md, 009, 010, 011
+**Deps**: archive/tickets/SPEC43PRECAUSTO-003.md, archive/tickets/SPEC43PRECAUSTO-004.md, archive/tickets/SPEC43PRECAUSTO-005.md, archive/tickets/SPEC43PRECAUSTO-006.md, archive/tickets/SPEC43PRECAUSTO-007.md, archive/tickets/SPEC43PRECAUSTO-008.md, archive/tickets/SPEC43PRECAUSTO-009.md, 010, 011
 
 ## Problem
 
