@@ -43,13 +43,13 @@ The remaining owned work is therefore ticket/spec truthing, not a new validator.
 
 - Replaced this ticket's stale implementation request with a completed reassessment that names the live validator boundary.
 - Updated `specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` Phase 3 and verification text to use `expected_witness_coverage`.
-- Updated `tickets/SPEC44STOSTAAPP-009.md` so the capstone test expects the live validator, not `propagation_exception_integrity`.
+- Updated `archive/tickets/SPEC44STOSTAAPP-009.md` so the capstone test expects the live validator, not `propagation_exception_integrity`.
 
 ## Files to Touch
 
 - `archive/tickets/SPEC44STOSTAAPP-007.md` (modify)
 - `specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` (modify)
-- `tickets/SPEC44STOSTAAPP-009.md` (modify)
+- `archive/tickets/SPEC44STOSTAAPP-009.md` (modify)
 
 ## Out of Scope
 
@@ -63,7 +63,7 @@ The remaining owned work is therefore ticket/spec truthing, not a new validator.
 ### Tests That Must Pass
 
 1. `npm test --prefix tools/validators -- expected-witness-coverage non-propagation-tag-shape` exits 0.
-2. `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md tickets/SPEC44STOSTAAPP-009.md` exits 0.
+2. `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md archive/tickets/SPEC44STOSTAAPP-009.md` exits 0.
 
 ### Invariants
 
@@ -81,7 +81,7 @@ The remaining owned work is therefore ticket/spec truthing, not a new validator.
 ### Commands
 
 1. `npm test --prefix tools/validators -- expected-witness-coverage non-propagation-tag-shape`
-2. `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md tickets/SPEC44STOSTAAPP-009.md`
+2. `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md archive/tickets/SPEC44STOSTAAPP-009.md`
 
 ## Outcome
 
@@ -90,11 +90,11 @@ Completed: 2026-05-18.
 What changed:
 - Reassessed the drafted `propagation_exception_integrity` ticket against the live validator package.
 - Confirmed the intended semantic coverage already belongs to `expected_witness_coverage`.
-- Corrected SPEC-44 and the active capstone ticket to reference the live validator name and avoid a phantom `expected_witnesses` schema field.
+- Corrected SPEC-44 and the capstone ticket to reference the live validator name and avoid a phantom `expected_witnesses` schema field.
 
 Deviations from original plan:
 - No new validator or tests were added. The original plan would have duplicated the existing semantic validator and depended on a non-existent closed-schema field.
 
 Verification results:
 - `npm test --prefix tools/validators -- expected-witness-coverage non-propagation-tag-shape` exited 0.
-- `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md tickets/SPEC44STOSTAAPP-009.md` exited 0.
+- `git diff --check -- archive/tickets/SPEC44STOSTAAPP-007.md specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md archive/tickets/SPEC44STOSTAAPP-009.md` exited 0.
