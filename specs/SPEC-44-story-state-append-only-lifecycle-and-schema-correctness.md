@@ -87,7 +87,7 @@ Three phases, executed in order. Each phase is independently testable; later pha
     - `action_families[]` values are drawn from the closed action-family enum (already in schema)
     Consumes the `$defs.PageAffordance` component extracted in Phase 1 step 2.
 
-11. Add validator `tools/validators/src/structural/propagation-exception-integrity.ts`. Rule: when an `SE`'s `expected_witnesses` group receives no BEL create/supersession in `state_delta`, the rationale string MUST contain a parseable `non_propagation:<reason>(group=<label>, records=[...])` tag covering that group (mechanism is already validated for tag *shape* by `non-propagation-tag-shape.ts`; this validator enforces *coverage* — that the tag exists when expected propagation is omitted, not merely that any present tag is well-formed). Severity: `fail`. Wire into the structural registry.
+11. Reassess propagation-exception coverage against the live validator package. The semantic coverage validator already exists as `tools/validators/src/structural/expected-witness-coverage.ts`: it computes direct witnesses from active STSTAT/STLOC state, checks same-event BEL propagation, accepts parseable `non_propagation:<reason>(group=<label>, records=[...])` tags, and enforces the DA-anchored indirect propagation route. Keep `non-propagation-tag-shape.ts` as the tag-syntax validator and do not add a duplicate `propagation_exception_integrity` validator or a phantom `SE.expected_witnesses` schema field.
 
 12. Add validator `tools/validators/src/structural/active-records-full-shape.ts`. Rule: emit a `warn`-level diagnostic when a `PG.state_snapshot.active_records` map omits any of the 15 documented record classes. Distinct from the existing SPEC-43 `compatibility_drift.compat_missing_active_record_key` which classifies the absence as `grandfathered_snapshot_shape`/`requires_migration_patch`; this validator is the consolidated check that the active_records map is shape-complete at child-PG commit time. The Wave 3 `branching-story-compatibility-repair` skill will eventually upgrade this to `fail`; ship as `warn` to preserve pre-SPEC-43 bundles consistent with §Story Bundles §4b drift discipline.
 
@@ -114,11 +114,11 @@ Three phases, executed in order. Each phase is independently testable; later pha
 | 2 | `.claude/skills/branching-story-turn-cycle/SKILL.md` | Update Output table rows for CLK/STSEC/STQ |
 | 2 | `.claude/skills/branching-story-turn-cycle/references/phase-4-5-belief-and-mystery.md` (or new ref) | Document create-with-supersedes semantics for lifecycle transitions |
 | 3 | `tools/validators/src/structural/page-affordance-integrity.ts` | New validator (fail) |
-| 3 | `tools/validators/src/structural/propagation-exception-integrity.ts` | New validator (fail) |
+| 3 | `tools/validators/src/structural/expected-witness-coverage.ts` | Existing validator confirmed as the semantic propagation-exception coverage gate |
 | 3 | `tools/validators/src/structural/active-records-full-shape.ts` | New validator (warn) |
 | 3 | `tools/validators/src/public/registry.ts` | Register three new validators |
 | All | `tools/patch-engine/tests/` | Remove tests for 7 deleted ops; add tests for new validators |
-| All | `tools/validators/tests/structural/` | Add tests for 5 new validators |
+| All | `tools/validators/tests/structural/` | Add tests for 4 new validators and preserve existing `expected_witness_coverage` / `non_propagation_tag_shape` coverage |
 | All | `tools/validators/tests/integration/spec44-*.test.ts` | Integration test covering append-only enforcement across the 7 lifecycle scenarios via supersession |
 
 ## FOUNDATIONS Alignment
@@ -151,7 +151,7 @@ Phase 2:
 
 Phase 3:
 - `page_affordance_integrity` validator fires on synthetic fixtures: duplicate ordinals; affordance grounded in inactive STOBJ; affordance available_to inactive STENT; unknown action_family.
-- `propagation_exception_integrity` validator fires when `expected_witnesses` group receives no BEL create/supersede AND no `non_propagation:` tag covers the group; passes when the tag exists.
+- `expected_witness_coverage` remains the semantic propagation-exception coverage validator: it fires when computed direct witnesses lack BEL coverage and no matching `non_propagation:` tag covers the group, and it also fires for public/factional DA indirect propagation gaps without an indirect-route BEL or `event_leaves_no_accessible_trace` tag.
 - `active_records_full_shape` validator emits `warn` when a synthetic PG omits CLK/STSEC/STQ/DA keys; remains silent (or `info`) when the bundle is classified as legacy by `compatibility-drift`.
 - Full validator suite passes (`npm test --prefix tools/validators`).
 - `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` exits 0 with `fail_count: 0` (the warn-only `active_records_full_shape` may add to `warn_count`; pre-SPEC-43 bundles may add to `info_count` via existing compatibility-drift; document expected counts).

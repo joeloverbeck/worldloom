@@ -4,11 +4,11 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: No production code introduced — adds `tools/validators/tests/integration/spec44-append-only-supersession.test.ts` exercising the post-SPEC-44 contract end-to-end. Parallels the existing `spec43-midstory-introduction.test.ts` integration test.
-**Deps**: archive/tickets/SPEC44STOSTAAPP-003.md, archive/tickets/SPEC44STOSTAAPP-004.md, archive/tickets/SPEC44STOSTAAPP-006.md, tickets/SPEC44STOSTAAPP-007.md, tickets/SPEC44STOSTAAPP-008.md
+**Deps**: archive/tickets/SPEC44STOSTAAPP-003.md, archive/tickets/SPEC44STOSTAAPP-004.md, archive/tickets/SPEC44STOSTAAPP-006.md, archive/tickets/SPEC44STOSTAAPP-007.md, tickets/SPEC44STOSTAAPP-008.md
 
 ## Problem
 
-SPEC-44 introduces three structural changes (Phase 1 schema corrections, Phase 2 append-only enforcement, Phase 3 validator additions) that interact at runtime: the schema fix (ticket 001) is backstopped by the `state_delta_class_integrity` validator (ticket 004); the lifecycle op removal (ticket 002) is backstopped by the `no_story_state_in_place_mutation` validator (ticket 003); the new validators (tickets 006, 007, 008) gate page-affordance integrity, propagation-exception coverage, and active-records shape completeness respectively.
+SPEC-44 introduces three structural changes (Phase 1 schema corrections, Phase 2 append-only enforcement, Phase 3 validator additions/reassessment) that interact at runtime: the schema fix (ticket 001) is backstopped by the `state_delta_class_integrity` validator (ticket 004); the lifecycle op removal (ticket 002) is backstopped by the `no_story_state_in_place_mutation` validator (ticket 003); the Phase 3 surfaces gate page-affordance integrity (ticket 006), preserve the existing `expected_witness_coverage` propagation gate (ticket 007), and add active-records shape completeness (ticket 008).
 
 An integration test covering the 7 lifecycle scenarios via supersession (clock tick, clock resolution, secret clue carrier append, secret clue discovery, secret reveal, question answer, question abandon) plus the new validator firing scenarios end-to-end ensures the runtime contract holds at the pipeline boundary, not just at the per-validator unit-test level. Per SPEC-44 §Verification End-to-end + §Approach Phase 2 step 9: "The five-skill story-pipeline regression suite ... runs against the red-bunny bundle without failures attributable to this spec's changes."
 
@@ -17,8 +17,8 @@ The integration test is the SPEC-44 capstone; it parallels the existing `spec43-
 ## Assumption Reassessment (2026-05-18)
 
 1. `tools/validators/tests/integration/spec43-midstory-introduction.test.ts` exists as the SPEC-43 capstone integration test; the new `spec44-*.test.ts` follows the same convention. `tools/validators/dist/tests/integration/` already contains the SPEC-43 `.js` build output (verified via direct ls), so the test-build pipeline supports adding the new file. The integration test runs against synthetic fixture bundles built in-test (the SPEC-43 test pattern); it does NOT depend on the real `worlds/<slug>/` tree.
-2. SPEC-44 §Verification covers the test matrix: each of the 7 lifecycle scenarios authored via supersession (new `<class>-<N+1>.yaml` + `supersedes: <class>-<N>` + state_delta references) must validate clean; each of the 5 new-validator-firing scenarios (no_story_state_in_place_mutation, state_delta_class_integrity, page_affordance_integrity, propagation_exception_integrity, active_records_full_shape) must fire its expected verdict. Per SPEC-44 §Verification End-to-end the red-bunny bundle CLI run is the smoke test: `fail_count: 0`, `warn_count` may increase (from ticket 008's new warn-level diagnostic), `info_count` unchanged.
-3. **Cross-boundary surface under audit**: this integration test spans patch-engine (validates the supersession authoring path lands clean) + validators (all 5 new validators) + the existing compatibility-drift validator (coexistence with the new warn-level diagnostic). The test exercises the runtime composition that SPEC-44's three phases collectively establish.
+2. SPEC-44 §Verification covers the test matrix: each of the 7 lifecycle scenarios authored via supersession (new `<class>-<N+1>.yaml` + `supersedes: <class>-<N>` + state_delta references) must validate clean; each SPEC-44 enforcement surface (`no_story_state_in_place_mutation`, `state_delta_class_integrity`, `page_affordance_integrity`, existing `expected_witness_coverage`, `active_records_full_shape`) must fire its expected verdict. Per SPEC-44 §Verification End-to-end the red-bunny bundle CLI run is the smoke test: `fail_count: 0`, `warn_count` may increase (from ticket 008's new warn-level diagnostic), `info_count` unchanged.
+3. **Cross-boundary surface under audit**: this integration test spans patch-engine (validates the supersession authoring path lands clean) + validators (the SPEC-44 new validators plus existing `expected_witness_coverage`) + the existing compatibility-drift validator (coexistence with the new warn-level diagnostic). The test exercises the runtime composition that SPEC-44's three phases collectively establish.
 4. **FOUNDATIONS principle**: §Story Bundles §8 (atomic YAML records append-only at the filesystem level) — the integration test verifies that the entire SPEC-44 deliverable preserves the rule end-to-end. The 7 supersession scenarios are the operationalization of the rule; the validators are the structural enforcement; the integration test is the runtime proof.
 
 ## Architecture Check
@@ -33,7 +33,7 @@ The integration test is the SPEC-44 capstone; it parallels the existing `spec43-
 2. **`no_story_state_in_place_mutation` fires on synthetic in-place attempt** → integration test: build a patch plan that (hypothetically) targets an existing `_source/clocks/CLK-2.yaml` file. Assert ticket 003's validator returns `fail`.
 3. **`state_delta_class_integrity` fires on synthetic class drift** → integration test: build an SE record with `state_delta.create: [INVALID-1]`. Assert ticket 004's validator returns `fail`.
 4. **`page_affordance_integrity` fires on synthetic duplicate ordinal** → integration test: build a PG record with two affordances sharing `ordinal: 2`. Assert ticket 006's validator returns `fail`.
-5. **`propagation_exception_integrity` fires on synthetic uncovered omission** → integration test: build an SE record with `expected_witnesses: ["group:council"]`, no BEL create, no `non_propagation:` tag. Assert ticket 007's validator returns `fail`.
+5. **`expected_witness_coverage` fires on synthetic uncovered propagation** → integration test: build an SE/direct-witness fixture where computed direct witnesses receive no same-event BEL coverage and no matching `non_propagation:` tag. Assert the existing validator returns `fail`.
 6. **`active_records_full_shape` fires per missing class at warn severity** → integration test: build a PG record missing CLK / STSEC / STQ / DA keys. Assert ticket 008's validator returns 4 `warn` verdicts.
 7. **Red-bunny bundle CLI smoke test** → command: `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` exits 0 with `fail_count: 0`; `warn_count` may increase from ticket 008's new diagnostic (document expected count in test commentary); `info_count` unchanged.
 
@@ -55,7 +55,7 @@ Test cases:
 - **Validator fire 1: in-place mutation attempt** — Hypothetical patch plan staging a write to existing `CLK-2.yaml`. Assert `no_story_state_in_place_mutation` returns `fail`.
 - **Validator fire 2: state_delta class drift** — SE with `state_delta.create: [BADCLASS-1]`. Assert `state_delta_class_integrity` returns `fail`.
 - **Validator fire 3: page affordance duplicate ordinal** — PG with two affordances sharing `ordinal: 2`. Assert `page_affordance_integrity` returns `fail`.
-- **Validator fire 4: propagation exception uncovered** — SE with `expected_witnesses: ["group:council"]`, no BEL covering it, no `non_propagation:` tag. Assert `propagation_exception_integrity` returns `fail`.
+- **Validator fire 4: expected witness propagation uncovered** — SE/direct-witness fixture with no same-event BEL covering the computed witness group and no matching `non_propagation:` tag. Assert `expected_witness_coverage` returns `fail`.
 - **Validator fire 5: active_records shape gap** — PG with `active_records` missing CLK / STSEC / STQ / DA. Assert `active_records_full_shape` returns 4 `warn` verdicts (one per missing class).
 - **CLI smoke test**: invoke `world-validate.js` against a fixture-world copy; assert exit code 0 and `fail_count: 0`.
 
@@ -79,7 +79,7 @@ If the synthetic scenarios require pre-built fixture YAML files (rather than in-
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators -- spec44-append-only-supersession` passes all 12 test scenarios (7 supersession + 5 validator-fire).
+1. `npm test --prefix tools/validators -- spec44-append-only-supersession` passes all 12 test scenarios (7 supersession + 5 enforcement-surface fires).
 2. `npm test --prefix tools/validators` exits 0 (full validator suite regression).
 3. `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` exits 0 with `fail_count: 0`.
 4. `npm run build --prefix tools/validators` exits 0.
@@ -87,7 +87,7 @@ If the synthetic scenarios require pre-built fixture YAML files (rather than in-
 ### Invariants
 
 1. All 7 lifecycle transitions (clock tick / clock resolution / secret clue carrier append / secret clue discovery / secret reveal / question answer / question abandon) succeed via supersession (new `<class>-<N+1>.yaml` with `supersedes: <class>-<N>`); the prior records remain on disk unmodified.
-2. All 5 new validators (`no_story_state_in_place_mutation` / `state_delta_class_integrity` / `page_affordance_integrity` / `propagation_exception_integrity` / `active_records_full_shape`) fire at their expected severity on synthetic failure scenarios.
+2. The SPEC-44 enforcement surfaces (`no_story_state_in_place_mutation` / `state_delta_class_integrity` / `page_affordance_integrity` / `expected_witness_coverage` / `active_records_full_shape`) fire at their expected severity on synthetic failure scenarios.
 3. The red-bunny bundle CLI smoke test exits clean — no SPEC-44-attributable regression in the existing-bundle validation surface.
 
 ## Test Plan
