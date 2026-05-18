@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC46STOPIPMAC-002.md",
+  "last_ticket": "archive/tickets/SPEC46STOPIPMAC-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "db0566b7129a30fba8dc13353a538ee96711c15b",
+  "last_work_commit": "bda61a841f461b6f76351500eb592ced890a4f53",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC46STOPIPMAC-003.md",
+  "next_target": "tickets/SPEC46STOPIPMAC-004.md",
   "queue": [
-    "tickets/SPEC46STOPIPMAC-003.md",
     "tickets/SPEC46STOPIPMAC-004.md",
     "tickets/SPEC46STOPIPMAC-005.md",
     "tickets/SPEC46STOPIPMAC-006.md",
