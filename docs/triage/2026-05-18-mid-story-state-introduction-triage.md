@@ -1,7 +1,7 @@
 # Mid-story state introduction triage — 2026-05-18
 
 **Source**: `reports/mid-story-state-introduction.md` (ChatGPT-Pro deep-research response, 2026-05-18, in response to `reports/mid-story-state-introduction-research-brief.md` by Claude Opus same day).
-**Deliverable**: `specs/SPEC-43-present-causal-mid-story-state-introduction.md`.
+**Deliverable**: `archive/specs/SPEC-43-present-causal-mid-story-state-introduction.md`.
 **Triage operator**: Claude Opus 4.7 (1M context) via `/brainstorm` workflow with user pre-authorization ("create a spec in specs/*").
 
 ## Verification corrections (reframings to source report)
@@ -59,6 +59,6 @@ None. Proposal is FOUNDATIONS-aligned end-to-end.
 
 ## Deliverable-shape decision
 
-One spec at `specs/SPEC-43-present-causal-mid-story-state-introduction.md`. Bundled (not split into SPEC-43 + SPEC-44) because both concerns share §5c discipline and overlap deliverable surfaces (validators, audit-mode integration, replay semantics). Wave 3 deferrals captured in SPEC-43 §Out of Scope with explicit re-evaluation triggers; they will form the SPEC-44 candidate when triggers fire. No tickets created in this brainstorm — user pre-authorized "a spec" only.
+One spec at `archive/specs/SPEC-43-present-causal-mid-story-state-introduction.md`. Bundled (not split into SPEC-43 + SPEC-44) because both concerns share §5c discipline and overlap deliverable surfaces (validators, audit-mode integration, replay semantics). Wave 3 deferrals captured in SPEC-43 §Out of Scope with explicit re-evaluation triggers; they will form the SPEC-44 candidate when triggers fire. No tickets created in this brainstorm — user pre-authorized "a spec" only.
 
 `specs/IMPLEMENTATION-ORDER.md` is absent in `specs/`; index update skipped per Step 5 default. Per Step 6 summary.

@@ -2,8 +2,8 @@
 
 # SPEC-43: Present-Causal Mid-Story State Introduction and Non-Retcon Bundle Compatibility Repair
 
-**Status**: DRAFT
-**Phase**: wave-2 turn-cycle authoring + validator + audit extensions
+**Status**: COMPLETED
+**Phase**: archived after wave-2 turn-cycle authoring + validator + audit extensions
 **Depends on**: SPEC-13 (atomic-source per-record-per-file `_source/<class>/<ID>.yaml`); SPEC-34 (validator registry pattern); SPEC-38 (story-local diegetic artifacts); SPEC-42 (CLK / STSEC / STQ classes — establishes the bootstrap creation path the turn-cycle gap mirrors)
 **Blocks**: follow-up spec (working title SPEC-44 or later) covering dedicated `branching-story-compatibility-repair` skill, `story_system_contract_revision` marker, and CLK `linked_records[]` widening
 **Source**: `reports/mid-story-state-introduction.md` (ChatGPT-Pro deep-research response, 2026-05-18); `reports/mid-story-state-introduction-research-brief.md` (Claude Opus brief, 2026-05-18); brainstorm-triage at `docs/triage/2026-05-18-mid-story-state-introduction-triage.md`; cross-checked against `docs/FOUNDATIONS.md` §Story Bundles §4a / §4b / §5a / §5b / §5c / §6a / §6b, archived SPEC-19 through SPEC-22 (scene-commitment-arc, rolled back), `.claude/skills/_shared-templates/story-state-contract.md`, and verified codebase state under `tools/patch-engine/src/`, `tools/validators/src/`, and `.claude/skills/branching-story-*`.
@@ -258,3 +258,18 @@ Explicit non-goals (lifted verbatim from source report §13):
 - **CLK `linked_records[]` narrowness blocks Wave 2 introductions** (pragmatic — current 8-class pattern at `story-pressure-clock.schema.json:39` may force authoring workarounds). Mitigation: Wave 2 fixture authoring tracks workarounds with explicit notes; ≥3 documented cases triggers Wave 3 schema widening.
 - **Phase 2i (health-audit) vs Phase 9 (turn-cycle) confusion** (structural — skill authors might wire the new validators into the wrong phase). Mitigation: SPEC-43 §Approach H explicitly names "Phase 9 turn-cycle gates, NOT Phase 2i retrospective audits"; SAU report's compatibility section IS the new Phase 2i extension; the introduction validators are not.
 - **Belief-propagation hook for STSEC creation may double-fire** (pragmatic — Phase 4 already runs belief propagation for existing-secret reveal/discovery; adding a hook for STSEC creation could fire twice on the same event). Mitigation: Phase 4 reference file explicitly distinguishes creation-time propagation (initial holder + clue-carrier propagation) from lifecycle-time propagation (reveal / discovery propagation); validator covers both.
+
+## Outcome
+
+Completed: 2026-05-18
+
+SPEC-43 landed through tickets `SPEC43PRECAUSTO-001` through `SPEC43PRECAUSTO-017`, now archived under `archive/tickets/`. The implementation delivered the mid-story introduction parser and closed trigger vocabularies, the synthetic fixture corpus, the generic and per-class validators, narrative-shape rejection, introduction observer firewall, compatibility-drift reporting, snapshot-key normalization, turn-cycle skill amendments, the per-class turn-cycle reference, health-audit compatibility-mode prose, and the final capstone integration test.
+
+The live implementation corrected several draft paths and proof details while preserving the spec boundary: the parser utility lives at `tools/validators/src/structural/midstory-introduction-utils.ts`; STQ future-shape rejection is enforced by `record_schema_compliance.stq_prohibited_expected_payoff_mode`; non-STQ future-shape rejection is enforced by `narrative_shape_field_rejection`; and `midstory_record_introduction_grounding` skips root/bootstrap and legacy compatibility-era pages so pre-SPEC-43 bundles remain valid.
+
+Final verification completed:
+
+1. `npm run build` from `tools/validators` passed.
+2. `node --test dist/tests/integration/spec43-midstory-introduction.test.js` from `tools/validators` passed: 21 tests, 21 pass.
+3. `npm test --prefix tools/validators -- spec43-midstory-introduction` passed and, due to the live package script, rebuilt and ran the full validators suite: 504 tests, 504 pass.
+4. `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` exited 0 with `fail_count: 0`, `warn_count: 0`, `info_count: 10`, and classifications `compatible_optional_absence` plus `grandfathered_snapshot_shape`.
