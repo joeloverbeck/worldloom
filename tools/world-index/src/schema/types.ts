@@ -99,7 +99,9 @@ export const STORY_EDGE_TYPES = [
   "belief_holder",
   "belief_basis_event",
   "belief_access_record",
-  "belief_opens"
+  "belief_opens",
+  "relationship_participant",
+  "relationship_derived_from"
 ] as const;
 
 export type StoryEdgeType = (typeof STORY_EDGE_TYPES)[number];

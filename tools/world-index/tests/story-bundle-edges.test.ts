@@ -131,6 +131,103 @@ test("belief records with empty optional fields emit only populated belief edges
   }
 });
 
+test("relationship records emit participant and derived-from edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-srel-edges-"));
+
+  try {
+    writeStoryRelationship(root, "harborwatch", "SREL-1", [
+      "id: SREL-1",
+      "story_id: STORY-1",
+      "created_at_page: PG-2",
+      "supersedes: null",
+      "participants:",
+      "  - STENT-1",
+      "  - STENT-2",
+      "axis: trust",
+      "value: allied",
+      "direction:",
+      "  kind: bidirectional",
+      "  from: null",
+      "  to: null",
+      "evidence:",
+      "  - SE-1",
+      "derived_from:",
+      "  - SE-1",
+      "  - BEL-1"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/relationships/SREL-1.yaml"
+    );
+
+    assert.deepEqual(
+      relationshipEdges(parsed.edges),
+      [
+        {
+          source_node_id: "harborwatch:SREL-1",
+          target_unresolved_ref: "harborwatch:STENT-1",
+          edge_type: "relationship_participant",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SREL-1",
+          target_unresolved_ref: "harborwatch:STENT-2",
+          edge_type: "relationship_participant",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SREL-1",
+          target_unresolved_ref: "harborwatch:SE-1",
+          edge_type: "relationship_derived_from",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SREL-1",
+          target_unresolved_ref: "harborwatch:BEL-1",
+          edge_type: "relationship_derived_from",
+          story_slug: "harborwatch"
+        }
+      ]
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("relationship records with empty arrays emit no relationship edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-srel-empty-"));
+
+  try {
+    writeStoryRelationship(root, "harborwatch", "SREL-2", [
+      "id: SREL-2",
+      "story_id: STORY-1",
+      "created_at_page: PG-2",
+      "supersedes: null",
+      "participants: []",
+      "axis: trust",
+      "value: neutral",
+      "direction:",
+      "  kind: bidirectional",
+      "  from: null",
+      "  to: null",
+      "evidence: []",
+      "derived_from: []"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/relationships/SREL-2.yaml"
+    );
+
+    assert.deepEqual(relationshipEdges(parsed.edges), []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 function beliefEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
   source_node_id: string;
   target_unresolved_ref: string | null;
@@ -139,6 +236,22 @@ function beliefEdges(edges: Array<{ edge_type: string; source_node_id: string; t
 }> {
   return edges
     .filter((edge) => edge.edge_type.startsWith("belief_"))
+    .map((edge) => ({
+      source_node_id: edge.source_node_id,
+      target_unresolved_ref: edge.target_unresolved_ref,
+      edge_type: edge.edge_type,
+      story_slug: edge.story_slug ?? null
+    }));
+}
+
+function relationshipEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
+  source_node_id: string;
+  target_unresolved_ref: string | null;
+  edge_type: string;
+  story_slug: string | null;
+}> {
+  return edges
+    .filter((edge) => edge.edge_type.startsWith("relationship_"))
     .map((edge) => ({
       source_node_id: edge.source_node_id,
       target_unresolved_ref: edge.target_unresolved_ref,
@@ -159,4 +272,18 @@ function writeStoryBelief(root: string, storySlug: string, beliefId: string, lin
   );
   mkdirSync(relativeDirectory, { recursive: true });
   writeFileSync(path.join(relativeDirectory, `${beliefId}.yaml`), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStoryRelationship(root: string, storySlug: string, relationshipId: string, lines: string[]): void {
+  const relativeDirectory = path.join(
+    root,
+    "worlds",
+    "fixture-world",
+    "stories",
+    storySlug,
+    "_source",
+    "relationships"
+  );
+  mkdirSync(relativeDirectory, { recursive: true });
+  writeFileSync(path.join(relativeDirectory, `${relationshipId}.yaml`), `${lines.join("\n")}\n`, "utf8");
 }

@@ -35,7 +35,7 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.equal(ATTRIBUTION_EDGE_TYPES.length, 2);
   assert.equal(ENTITY_EDGE_TYPES.length, 1);
   assert.equal(SCOPED_EDGE_TYPES.length, 2);
-  assert.equal(STORY_EDGE_TYPES.length, 18);
+  assert.equal(STORY_EDGE_TYPES.length, 20);
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_create"));
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_supersede"));
   assert.ok(STORY_EDGE_TYPES.includes("creation_evidence"));
@@ -43,6 +43,8 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.ok(STORY_EDGE_TYPES.includes("belief_basis_event"));
   assert.ok(STORY_EDGE_TYPES.includes("belief_access_record"));
   assert.ok(STORY_EDGE_TYPES.includes("belief_opens"));
-  assert.equal(edgeTypes.length, 33);
+  assert.ok(STORY_EDGE_TYPES.includes("relationship_participant"));
+  assert.ok(STORY_EDGE_TYPES.includes("relationship_derived_from"));
+  assert.equal(edgeTypes.length, 35);
   assert.equal(new Set(edgeTypes).size, edgeTypes.length);
 });
