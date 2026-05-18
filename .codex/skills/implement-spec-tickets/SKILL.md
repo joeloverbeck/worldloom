@@ -194,6 +194,8 @@ Post-ticket review:
 - Verification: <rerun proof command/result or why rerun was not needed>
 ```
 
+When reporting the reference sweep after archiving a ticket, distinguish stale active-path references from valid archived-path references that contain the old active path as a substring. A literal search for `tickets/<id>.md` can match `archive/tickets/<id>.md`; classify those archived-path hits as repaired/current archive references unless they still instruct future work to use the active path. Prefer an exact active-path check that excludes `archive/tickets/`, or explicitly report the substring classification before saying stale refs remain.
+
 If `post-ticket-review` blocks archival because same-seam work remains, put the active ticket back at the front of the queue and continue through `implement-ticket` unless the review says a user decision is required. Do not archive a blocked ticket.
 
 For harness-internal review phases, this compact block is the required visible report. Apply the child skill's closeout truthing, archival, dependency-repair, and follow-up rules, but do not emit the full `post-ticket-review` report template unless archival blocks, a user decision is required, or the fuller structure is needed to make the handoff truthful.
@@ -291,6 +293,8 @@ When the remaining queue is empty and the next action is immediate final spec ar
 
 When committing the state file separately with `last_state_commit: "self"`, write `dirty_state` as the expected state after that state-only commit succeeds. Do not record transient dirt for `.codex/run-state/implement-spec-tickets.json` itself unless intentionally leaving the state file uncommitted.
 
+For state-file-only persistence, run the index-mutating steps serially: stage `.codex/run-state/implement-spec-tickets.json`, inspect the staged JSON/diff, then commit. If staging, staged inspection, or commit fails because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun that exact failed step with the required approval/escalation before continuing. Do not bundle the state-file `git add`, staged inspection, and `git commit` into one command when a failure would obscure which step actually needs retry.
+
 Before creating a state-file-only commit, re-read the staged JSON or run `git diff --cached -- .codex/run-state/implement-spec-tickets.json` and confirm `last_state_commit` is already `"self"`. The actual state-only commit sha belongs in the printed handoff's `State commit` line, not inside the JSON.
 
 Do not create a chain of state-only commits just to update the previous state-only commit sha. A commit cannot embed its own final sha without changing that sha again, so do not try to make `last_state_commit` self-referential. One state-only commit per iteration is enough; if exact current `HEAD` matters, use the handoff's `State commit` line.
@@ -308,6 +312,7 @@ Harness handoff:
 - Dirty state: <clean | expected ignored artifacts | owned/unrelated paths still present>
 - State file: .codex/run-state/implement-spec-tickets.json
 - Required next invocation: $implement-spec-tickets <spec> <next-target-if-any>
+- Reset boundary: <fresh context recommended before next non-follow-up ticket | continuing same-seam follow-up/direct dependent with reason | not_applicable: final/blocked>
 ```
 
 For an intentional reset-boundary stop between non-follow-up tickets, this `Harness handoff` is the required interim report; reserve the full `Final Report` checklist for blocked or final-family exits.

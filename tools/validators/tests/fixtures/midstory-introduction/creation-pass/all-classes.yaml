@@ -1,0 +1,184 @@
+fixture_id: spec43-midstory-creation-pass-all-classes
+world_slug: synthetic-world
+story_slug: midstory-introduction-test
+story_id: STORY-1
+expected_verdict: pass
+shared_state:
+  parent_page:
+    id: PG-1
+    active_records:
+      STENT: [STENT-1, STENT-2]
+      STSTAT: [STSTAT-1, STSTAT-2]
+      STLOC: [STLOC-1]
+      STINT: []
+      SF: []
+      BEL: []
+      OBL: []
+      CNSQ: []
+      THR: []
+      SREL: []
+      STOBJ: []
+      DA: []
+      CLK: []
+      STSEC: []
+      STQ: []
+  child_page:
+    id: PG-2
+    active_records:
+      STENT: [STENT-1, STENT-2, STENT-3]
+      STSTAT: [STSTAT-1, STSTAT-2, STSTAT-3]
+      STLOC: [STLOC-1]
+      STINT: []
+      SF: [SF-1]
+      BEL: [BEL-1]
+      OBL: [OBL-1]
+      CNSQ: []
+      THR: [THR-1]
+      SREL: [SREL-1]
+      STOBJ: []
+      DA: [DA-1]
+      CLK: [CLK-1]
+      STSEC: [STSEC-1]
+      STQ: [STQ-1]
+creating_event:
+  node_type: story_event_record
+  node_id: midstory-introduction-test:SE-2
+  file_path: stories/midstory-introduction-test/_source/events/SE-2.yaml
+  parsed:
+    id: SE-2
+    story_id: STORY-1
+    created_at_page: PG-2
+    parent_page_id: PG-1
+    event_kind: selected_choice
+    actor: STENT-1
+    commitment:
+      selected_slt_id: SLT-1
+      selection_source: runtime_jit
+      alias_bindings:
+        actor: STENT-1
+    outcome_route: accept
+    world_logic_rationale: "The accepted event introduces persistent causal objects: intro:CLK(id=CLK-1, trigger=deadline_declared, evidence=[OBL-1,THR-1], distinct_from=[]); intro:STSEC(id=STSEC-1, trigger=clue_carrier_enters_play, evidence=[DA-1,SF-1], distinct_from=[]); intro:STQ(id=STQ-1, trigger=explicit_question_raised, evidence=[DA-1,THR-1], distinct_from=[]); intro:THR(id=THR-1, trigger=investigation_line_opened, evidence=[BEL-1,DA-1], distinct_from=[]); intro:STENT(id=STENT-3, trigger=information_source_enters, evidence=[DA-1], distinct_from=[STENT-1,STENT-2]); intro:SREL(id=SREL-1, trigger=trust_axis_becomes_relevant, evidence=[DA-1,SE-2], distinct_from=[])."
+    state_delta:
+      create: [OBL-1, THR-1, CLK-1, STSEC-1, STQ-1, STENT-3, STSTAT-3, SREL-1, DA-1, BEL-1, SF-1]
+      supersede: []
+      close: []
+records:
+  - node_type: pressure_clock_record
+    node_id: midstory-introduction-test:CLK-1
+    file_path: stories/midstory-introduction-test/_source/clocks/CLK-1.yaml
+    parsed:
+      id: CLK-1
+      story_id: STORY-1
+      created_at_page: PG-2
+      title: Dusk gate deadline
+      clock_kind: deadline
+      driver: group:gate_watch
+      linked_records: [OBL-1, THR-1]
+      value: 1
+      max: 6
+      salience: high
+      visibility: public
+      thresholds: []
+      tick_history:
+        - event: SE-2
+          delta: 1
+          cause: The order declares the dusk deadline.
+      status: active
+  - node_type: story_secret_record
+    node_id: midstory-introduction-test:STSEC-1
+    file_path: stories/midstory-introduction-test/_source/secrets/STSEC-1.yaml
+    parsed:
+      id: STSEC-1
+      story_id: STORY-1
+      created_at_page: PG-2
+      secret_kind: location
+      secret_claim: The sealed order reveals a hidden second gate.
+      truth_anchor: SF-1
+      holders: [STENT-1]
+      salience: high
+      source_records: [SF-1, DA-1, SE-2]
+      clue_carriers:
+        - kind: DA
+          record: DA-1
+          clue_text: The order names a second gate only Mara can see.
+          clue_strength: confirming
+          discovered_by: [STENT-1]
+          audience_visible: hidden
+          status: available
+      status: hidden
+  - node_type: story_question_record
+    node_id: midstory-introduction-test:STQ-1
+    file_path: stories/midstory-introduction-test/_source/story-questions/STQ-1.yaml
+    parsed:
+      id: STQ-1
+      story_id: STORY-1
+      created_at_page: PG-2
+      setup_kind: dramatic_question
+      question_or_setup: Why did the northern patrol vanish before the order arrived?
+      salience: high
+      audience_visibility: explicit
+      source_event: SE-2
+      source_records: [DA-1, THR-1]
+      status: open
+  - node_type: story_thread_record
+    node_id: midstory-introduction-test:THR-1
+    file_path: stories/midstory-introduction-test/_source/threads/THR-1.yaml
+    parsed:
+      id: THR-1
+      story_id: STORY-1
+      created_at_page: PG-2
+      status: active
+      title: Find the missing northern patrol
+      summary: Rell's report opens an investigation line about the patrol's absence.
+      urgency: high
+      derived_from: [SE-2, BEL-1]
+  - node_type: story_entity_record
+    node_id: midstory-introduction-test:STENT-3
+    file_path: stories/midstory-introduction-test/_source/entities/STENT-3.yaml
+    parsed:
+      id: STENT-3
+      story_id: STORY-1
+      created_at_page: PG-2
+      display_name: Courier
+      role_in_story: [witness, information_source]
+  - node_type: story_status_record
+    node_id: midstory-introduction-test:STSTAT-3
+    file_path: stories/midstory-introduction-test/_source/status/STSTAT-3.yaml
+    parsed:
+      id: STSTAT-3
+      story_id: STORY-1
+      created_at_page: PG-2
+      entity: STENT-3
+      life: alive
+      agency: free
+      location: STLOC-1
+      derived_from: [SE-2]
+  - node_type: story_relationship_record
+    node_id: midstory-introduction-test:SREL-1
+    file_path: stories/midstory-introduction-test/_source/relationships/SREL-1.yaml
+    parsed:
+      id: SREL-1
+      story_id: STORY-1
+      created_at_page: PG-2
+      axis: trust
+      participants: [STENT-1, STENT-3]
+      direction:
+        kind: directed
+        from: STENT-1
+        to: STENT-3
+      value: trace
+      valence: asymmetric
+      description: Mara grants the courier tentative trust after the courier bears the order.
+      derived_from: [SE-2, DA-1]
+  - node_type: story_choice_record
+    node_id: midstory-introduction-test:CHC-1
+    file_path: stories/midstory-introduction-test/_source/choices/CHC-1.yaml
+    parsed:
+      id: CHC-1
+      story_id: STORY-1
+      created_at_page: PG-2
+      label: Inspect the hidden second gate named in the order.
+      available_to: [STENT-1]
+      grounded_in:
+        records: [STSEC-1, DA-1]
+      action_family: investigate

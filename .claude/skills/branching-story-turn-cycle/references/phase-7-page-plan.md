@@ -14,6 +14,19 @@ Use §10b "Open Setups, Active Clocks, Hidden Secrets" only when at least one po
 - Hidden or revealed secrets: name each relevant `STSEC` with `status`, holders / discoverers that may affect prose perspective, clue-carrier discovery count or decisive carrier, and whether this page revealed the secret.
 - Open setups / story questions: name each relevant `STQ` with `status`, `salience`, `audience_visibility`, source or payoff record, and whether this page answered, paid off, abandoned, or complicated it.
 
+When this turn creates or activates any `CLK`, `STSEC`, or `STQ`, §10b must
+distinguish newly introduced records from records that were already active:
+
+- Newly introduced clocks: name the new `CLK`, its `value` / `max`, nearest
+  threshold, salience, visibility, and a one-line note explaining the new
+  pressure driver the renderer may dramatize.
+- Newly introduced story secrets: name the new `STSEC`, its `secret_kind`, what
+  the renderer may show as the observable surface, and what remains hidden
+  behind the secret claim, truth anchor, and holders' knowledge state.
+- Newly introduced story questions: name the new `STQ`, its `setup_kind`, the
+  concrete setup or affordance introduced, audience visibility, and which
+  choices in the page plan are grounded in the new question.
+
 Omit empty subsections. If no CLK, STSEC, or STQ is active or relevant, omit §10b entirely rather than emitting a placeholder.
 
 The plan must not expose engine jargon to prose. Engine terms confined to §15 frontmatter only. No word-count targets (per FOUNDATIONS §Story Bundles §9).

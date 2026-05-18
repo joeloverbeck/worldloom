@@ -31,6 +31,22 @@ Avoid pre-emptive JIT creation. If a flexible author-pool block fits with slight
 
 Apply exactly one causal delta from parent snapshot. The delta may:
 
+- Apply the mid-story introduction rule when the selected or
+  JIT-created `SLT` makes that object true in this accepted event. After
+  binding the `SLT`, ask whether the event creates a new `CLK`, `STSEC`,
+  `STQ`, `THR`, `STENT`, or `SREL` that is not reducible to an existing active
+  record and that changes future eligibility, visibility, obligations,
+  pressure, witness propagation, relationship constraints, affordances, or
+  choice grounding. If yes, include the new id in `SE.state_delta.create[]`
+  and include a parseable
+  `intro:<CLASS>(id=..., trigger=..., evidence=[...], distinct_from=[...])`
+  tag in `SE.world_logic_rationale` per shared contract §5a.
+- Prefer advancing, superseding, discovering, ticking, answering, revealing,
+  changing status, or changing a relationship axis on an existing active record
+  when the event is only a complication of that existing record. Fresh creation
+  is reserved for genuinely new causal objects. Use
+  `references/mid-story-record-introduction.md` as the per-class threshold
+  authority.
 - Honor the selected `SLT`'s instantiated effects: after Phase 2's bind-then-instantiate step, any former `bound:<alias>` targets are concrete record ids and must be treated like exact effect targets in `SE.state_delta`.
 - Create new facts (`SF`) or beliefs (`BEL`).
 - Supersede beliefs when truth-relation or visibility changes (every public discovery, betrayal, lie, or confession produces at least one `BEL` create or supersession in this phase or Phase 4 per FOUNDATIONS §6a).

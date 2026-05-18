@@ -146,6 +146,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "non_propagation_tag_shape"
     );
     assert.equal(nonPropagationExecution?.status, "skipped");
+    const midstoryIntroExecution = result.executions.find(
+      (execution) => execution.name === "midstory_record_introduction_grounding"
+    );
+    assert.equal(midstoryIntroExecution?.status, "skipped");
     const proposalPackageExecution = result.executions.find(
       (execution) => execution.name === "proposal_package_shape"
     );
@@ -166,19 +170,43 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "observer_firewall"
     );
     assert.equal(observerFirewallExecution?.status, "skipped");
+    const introductionObserverFirewallExecution = result.executions.find(
+      (execution) => execution.name === "introduction_observer_firewall"
+    );
+    assert.equal(introductionObserverFirewallExecution?.status, "skipped");
     const liePromotedSilentlyExecution = result.executions.find(
       (execution) => execution.name === "lie_promoted_silently"
     );
     assert.equal(liePromotedSilentlyExecution?.status, "skipped");
     const clockExecutions = result.executions.filter((execution) => execution.name.startsWith("clock_"));
-    assert.equal(clockExecutions.length, 5);
+    assert.equal(clockExecutions.length, 6);
     assert.ok(clockExecutions.every((execution) => execution.status === "skipped"));
     const secretExecutions = result.executions.filter((execution) => execution.name.startsWith("secret_") || execution.name === "critical_secret_clue_coverage_when_revealed");
-    assert.equal(secretExecutions.length, 3);
+    assert.equal(secretExecutions.length, 4);
     assert.ok(secretExecutions.every((execution) => execution.status === "skipped"));
     const storyQuestionExecutions = result.executions.filter((execution) => execution.name.startsWith("story_question_"));
-    assert.equal(storyQuestionExecutions.length, 4);
+    assert.equal(storyQuestionExecutions.length, 5);
     assert.ok(storyQuestionExecutions.every((execution) => execution.status === "skipped"));
+    const threadIntroExecution = result.executions.find(
+      (execution) => execution.name === "thread_introduction_grounding_integrity"
+    );
+    assert.equal(threadIntroExecution?.status, "skipped");
+    const entityIntroExecution = result.executions.find(
+      (execution) => execution.name === "entity_introduction_status_pairing"
+    );
+    assert.equal(entityIntroExecution?.status, "skipped");
+    const relationshipIntroExecution = result.executions.find(
+      (execution) => execution.name === "relationship_introduction_grounding_integrity"
+    );
+    assert.equal(relationshipIntroExecution?.status, "skipped");
+    const narrativeShapeExecution = result.executions.find(
+      (execution) => execution.name === "narrative_shape_field_rejection"
+    );
+    assert.equal(narrativeShapeExecution?.status, "skipped");
+    const compatibilityDriftExecution = result.executions.find(
+      (execution) => execution.name === "compatibility_drift"
+    );
+    assert.equal(compatibilityDriftExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -197,15 +225,22 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== canonBaselineDriftExecution &&
         row !== expectedWitnessExecution &&
         row !== nonPropagationExecution &&
+        row !== midstoryIntroExecution &&
         row !== proposalPackageExecution &&
         row !== proseReceiptExecution &&
         row !== validationTraceExecution &&
         row !== branchIsolationExecution &&
         row !== observerFirewallExecution &&
+        row !== introductionObserverFirewallExecution &&
         row !== liePromotedSilentlyExecution &&
         !clockExecutions.includes(row) &&
         !secretExecutions.includes(row) &&
-        !storyQuestionExecutions.includes(row)
+        !storyQuestionExecutions.includes(row) &&
+        row !== threadIntroExecution &&
+        row !== entityIntroExecution &&
+        row !== relationshipIntroExecution &&
+        row !== narrativeShapeExecution &&
+        row !== compatibilityDriftExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

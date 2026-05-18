@@ -1,0 +1,89 @@
+fixture_id: spec43-midstory-narrative-shape-fail
+world_slug: synthetic-world
+story_slug: midstory-introduction-test
+story_id: STORY-1
+target_validator: narrative_shape_field_rejection
+expected_verdict: { severity: fail, code: narrative_shape_forbidden_field }
+cases:
+  - case_id: clock-expected-payoff-mode
+    forbidden_field: expected_payoff_mode
+    record:
+      node_type: pressure_clock_record
+      node_id: midstory-introduction-test:CLK-500
+      parsed:
+        id: CLK-500
+        story_id: STORY-1
+        created_at_page: PG-2
+        title: Tension clock
+        clock_kind: danger
+        driver: system
+        linked_records: [THR-1]
+        value: 1
+        max: 4
+        salience: high
+        visibility: hidden
+        thresholds: []
+        tick_history: []
+        status: active
+        expected_payoff_mode: climax
+  - case_id: secret-act-position
+    forbidden_field: act_position
+    record:
+      node_type: story_secret_record
+      node_id: midstory-introduction-test:STSEC-500
+      parsed:
+        id: STSEC-500
+        story_id: STORY-1
+        created_at_page: PG-2
+        secret_kind: motive
+        secret_claim: A hidden motive will become the act-two reversal.
+        truth_anchor: SF-1
+        holders: [narrator]
+        salience: high
+        source_records: [SF-1]
+        status: hidden
+        act_position: act_two_reversal
+  - case_id: thread-midpoint
+    forbidden_field: midpoint
+    record:
+      node_type: story_thread_record
+      node_id: midstory-introduction-test:THR-500
+      parsed:
+        id: THR-500
+        story_id: STORY-1
+        created_at_page: PG-2
+        status: active
+        title: Investigation line
+        summary: A grounded investigation line with a forbidden midpoint annotation.
+        urgency: medium
+        derived_from: [SE-2]
+        midpoint: true
+  - case_id: relationship-climax
+    forbidden_field: climax
+    record:
+      node_type: story_relationship_record
+      node_id: midstory-introduction-test:SREL-500
+      parsed:
+        id: SREL-500
+        story_id: STORY-1
+        created_at_page: PG-2
+        axis: trust
+        participants: [STENT-1, STENT-2]
+        direction: { kind: bidirectional, from: null, to: null }
+        value: low
+        valence: bidirectional
+        description: A relationship state with a forbidden climax marker.
+        derived_from: [SE-2]
+        climax: final_betrayal
+  - case_id: entity-dramatic-curve-position
+    forbidden_field: dramatic_curve_position
+    record:
+      node_type: story_entity_record
+      node_id: midstory-introduction-test:STENT-500
+      parsed:
+        id: STENT-500
+        story_id: STORY-1
+        created_at_page: PG-2
+        display_name: Background Stranger
+        role_in_story: [background]
+        dramatic_curve_position: rising_action

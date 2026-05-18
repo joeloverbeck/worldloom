@@ -3,34 +3,44 @@ import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
 import { clockFiringThresholdIntegrity } from "../structural/clock-firing-threshold-integrity.js";
+import { clockIntroductionGroundingIntegrity } from "../structural/clock-introduction-grounding-integrity.js";
 import { clockTerminalDebtIntegrity } from "../structural/clock-terminal-debt-integrity.js";
 import { clockThresholdOrdering } from "../structural/clock-threshold-ordering.js";
 import { clockTickProvenance } from "../structural/clock-tick-provenance.js";
 import { clockValueInRange } from "../structural/clock-value-in-range.js";
+import { compatibilityDrift } from "../structural/compatibility-drift.js";
 import { causalDependencyThreatScan } from "../structural/causal-dependency-threat-scan.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
+import { entityIntroductionStatusPairing } from "../structural/entity-introduction-status-pairing.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
+import { introductionObserverFirewall } from "../structural/introduction-observer-firewall.js";
+import { midstoryRecordIntroductionGrounding } from "../structural/midstory-record-introduction-grounding.js";
 import { nonPropagationTagShape } from "../structural/non-propagation-tag-shape.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
+import { narrativeShapeFieldRejection } from "../structural/narrative-shape-field-rejection.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
+import { relationshipIntroductionGroundingIntegrity } from "../structural/relationship-introduction-grounding-integrity.js";
 import { criticalSecretClueCoverageWhenRevealed } from "../structural/critical-secret-clue-coverage-when-revealed.js";
+import { secretIntroductionAnchorIntegrity } from "../structural/secret-introduction-anchor-integrity.js";
 import { secretCarrierExistence } from "../structural/secret-carrier-existence.js";
 import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-firewall-compliance.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
+import { storyQuestionIntroductionGroundingIntegrity } from "../structural/story-question-introduction-grounding-integrity.js";
 import { storyQuestionGroundingIntegrity } from "../structural/story-question-grounding-integrity.js";
 import { storyQuestionPayoffIntegrity } from "../structural/story-question-payoff-integrity.js";
 import { storyQuestionSetupPredatesPayoff } from "../structural/story-question-setup-predates-payoff.js";
 import { storyQuestionTerminalDebt } from "../structural/story-question-terminal-debt.js";
 import { storyDaDuplicateHeuristic } from "../structural/story-da-duplicate-heuristic.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
+import { threadIntroductionGroundingIntegrity } from "../structural/thread-introduction-grounding-integrity.js";
 import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
 import { rule2NoPureCosmetics } from "../rules/rule2-no-pure-cosmetics.js";
@@ -60,6 +70,8 @@ export const structuralValidators: readonly Validator[] = [
   auditOnlySeShape,
   causalDependencyThreatScan,
   expectedWitnessCoverage,
+  midstoryRecordIntroductionGrounding,
+  clockIntroductionGroundingIntegrity,
   sltCreatedAtPageOriginConsistency,
   canonBaselineDrift,
   canonDriftClassificationEvidence,
@@ -74,7 +86,15 @@ export const structuralValidators: readonly Validator[] = [
   clockTerminalDebtIntegrity,
   secretCarrierExistence,
   criticalSecretClueCoverageWhenRevealed,
+  secretIntroductionAnchorIntegrity,
   secretMysteryFirewallCompliance,
+  storyQuestionIntroductionGroundingIntegrity,
+  threadIntroductionGroundingIntegrity,
+  entityIntroductionStatusPairing,
+  relationshipIntroductionGroundingIntegrity,
+  introductionObserverFirewall,
+  narrativeShapeFieldRejection,
+  compatibilityDrift,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,

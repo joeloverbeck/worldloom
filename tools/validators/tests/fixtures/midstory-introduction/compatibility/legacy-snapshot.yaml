@@ -1,0 +1,96 @@
+fixture_id: spec43-midstory-compatibility-legacy-snapshot
+world_slug: synthetic-world
+story_slug: midstory-introduction-test
+story_id: STORY-1
+expected_verdict: pass_with_info
+compatibility_classifications:
+  - compatible_optional_absence
+  - grandfathered_snapshot_shape
+  - current_contract_child_materializes_full_map
+missing_optional_subdirectories:
+  - _source/clocks
+  - _source/secrets
+  - _source/story-questions
+  - _source/artifacts
+records:
+  - node_type: story_page_record
+    node_id: midstory-introduction-test:PG-1
+    file_path: stories/midstory-introduction-test/_source/pages/PG-1.yaml
+    parsed:
+      id: PG-1
+      story_id: STORY-1
+      branch_id: BR-1
+      parent_page_id: null
+      branch_path: [PG-1]
+      turn_index: 0
+      input: { choice_id: null, manual_action_text: null, resolved_event_id: SE-1 }
+      state_hash_parent: null
+      state_hash: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      state_snapshot:
+        canon_revision: null
+        active_records:
+          STENT: [STENT-1]
+          STSTAT: [STSTAT-1]
+          STLOC: [STLOC-1]
+          STINT: []
+          SF: []
+          BEL: []
+          OBL: []
+          CNSQ: []
+          THR: []
+          SREL: []
+          STOBJ: []
+        entity_status:
+          STENT-1: { life: alive, agency: free, location: STLOC-1 }
+        continuation:
+          has_eligible_commitment_block: true
+          terminal_status: open
+          terminal_rationale: null
+      plan: { plan_hash: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }
+      prose_plan_path: pages-prose-plans/PG-1.md
+      emitted_choices: []
+      validation_trace: {}
+  - node_type: story_page_record
+    node_id: midstory-introduction-test:PG-2
+    file_path: stories/midstory-introduction-test/_source/pages/PG-2.yaml
+    parsed:
+      id: PG-2
+      story_id: STORY-1
+      branch_id: BR-1
+      parent_page_id: PG-1
+      branch_path: [PG-1, PG-2]
+      turn_index: 1
+      input:
+        choice_id: null
+        manual_action_text: Continue from the legacy parent.
+        resolved_event_id: SE-2
+      state_hash_parent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      state_hash: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      state_snapshot:
+        canon_revision: null
+        active_records:
+          STENT: [STENT-1]
+          STSTAT: [STSTAT-1]
+          STLOC: [STLOC-1]
+          STINT: []
+          SF: []
+          BEL: []
+          OBL: []
+          CNSQ: []
+          THR: []
+          SREL: []
+          STOBJ: []
+          DA: []
+          CLK: []
+          STSEC: []
+          STQ: []
+        entity_status:
+          STENT-1: { life: alive, agency: free, location: STLOC-1 }
+        continuation:
+          has_eligible_commitment_block: true
+          terminal_status: open
+          terminal_rationale: null
+      plan: { plan_hash: "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd" }
+      prose_plan_path: pages-prose-plans/PG-2.md
+      emitted_choices: []
+      validation_trace: {}

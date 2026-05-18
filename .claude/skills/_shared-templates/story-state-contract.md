@@ -196,6 +196,104 @@ preconditions:
 
 An existential predicate binds its `alias` to the matched active record during block selection. `SLT.effects.create`, `SLT.effects.supersede`, `SLT.effects.close`, and `SLT.exit_options[].likely_effects` may reference that matched record as `bound:<alias>`. Every `bound:<alias>` reference must resolve to an alias bound by a hard or soft precondition on the same `SLT`.
 
+### §5a. Mid-Story Introduction Tag Grammar and Closed Trigger Vocabularies
+
+Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, or `SREL` records is recorded in `SE.world_logic_rationale` with a parseable `intro:<CLASS>(...)` tag. The tag is parallel to the non-propagation tag pattern: it rides on an existing string field, is consumed by per-commit Phase 9 validators, and uses a closed trigger vocabulary so authoring stays anchored in present causal state rather than narrative shape.
+
+Grammar:
+
+```text
+intro_tag    := "intro:" class "(" args ")"
+class        := "CLK" | "STSEC" | "STQ" | "THR" | "STENT" | "SREL"
+args         := id_arg "," trigger_arg "," evidence_arg "," distinct_arg
+id_arg       := "id=" record_id
+trigger_arg  := "trigger=" trigger_name
+evidence_arg := "evidence=[" record_id_list "]"
+distinct_arg := "distinct_from=[" record_id_list "]"
+record_id    := uppercase_id "-" positive_integer
+trigger_name := lowercase_snake_case (must match one of the closed-set values below per class)
+```
+
+Regex witness:
+
+```text
+intro:(CLK|STSEC|STQ|THR|STENT|SREL)\(id=([A-Z]+-(?:0|[1-9][0-9]*)), trigger=([a-z_]+), evidence=\[([A-Z0-9,\-]*)\], distinct_from=\[([A-Z0-9,\-]*)\]\)
+```
+
+Worked example:
+
+```text
+intro:CLK(id=CLK-12, trigger=deadline_declared, evidence=[SE-31,OBL-7,THR-9], distinct_from=[CLK-3])
+```
+
+The parser implementation lives at `tools/validators/src/structural/midstory-introduction-utils.ts`. The generic per-commit validator that consumes the grammar is `tools/validators/src/structural/midstory-record-introduction-grounding.ts`; class-specific validators compose the same parser rather than re-implementing the grammar.
+
+### CLK Triggers
+
+| Trigger | Present-causal meaning |
+|---|---|
+| `deadline_declared` | A deadline becomes explicit in the accepted event. |
+| `pursuit_started` | An active pursuit begins and will constrain later choices. |
+| `exposure_accumulation_started` | Exposure or discovery risk starts accumulating from this event. |
+| `faction_mobilized` | A faction begins a pressure-producing mobilization. |
+| `environmental_degradation_started` | A worsening environment becomes trackable pressure. |
+| `mission_or_race_started` | A mission or race enters active timed pressure. |
+| `staged_danger_became_trackable` | A danger was already staged and now becomes measurable. |
+
+### STSEC Triggers
+
+| Trigger | Present-causal meaning |
+|---|---|
+| `lie_made_hidden_truth_branch_relevant` | A lie makes a hidden truth branch-relevant. |
+| `hidden_truth_constrains_action` | A hidden truth now constrains lawful future action. |
+| `clue_carrier_enters_play` | A clue carrier enters the branch and makes the secret trackable. |
+| `holder_access_changed` | Someone's access to the secret changes in this event. |
+| `protected_mystery_story_secret_needed` | A protected mystery needs story-local secret tracking without resolving world canon. |
+
+### STQ Triggers
+
+| Trigger | Present-causal meaning |
+|---|---|
+| `promise_made` | A promise creates a present open setup. |
+| `explicit_question_raised` | A concrete question is raised in the branch. |
+| `unexplained_evidence_introduced` | Evidence enters play and creates a specific open question. |
+| `affordance_setup_introduced` | A new affordance setup becomes trackable. |
+| `open_decision_created` | A decision point is created but not yet resolved. |
+
+### THR Triggers
+
+| Trigger | Present-causal meaning |
+|---|---|
+| `new_ongoing_causal_concern` | A new ongoing concern begins to constrain the branch. |
+| `investigation_line_opened` | An investigation line opens from the accepted event. |
+| `recovery_line_opened` | A recovery effort becomes an active thread. |
+| `negotiation_line_opened` | A negotiation becomes an ongoing thread. |
+| `mission_line_opened` | A mission line becomes active without requiring a clock. |
+| `social_fallout_line_opened` | Social fallout becomes an ongoing branch concern. |
+
+### STENT Triggers
+
+| Trigger | Present-causal meaning |
+|---|---|
+| `actor_enters_branch` | A new actor enters the branch as persistent state. |
+| `witness_needed` | A witness needs explicit story-state representation. |
+| `information_source_enters` | A new information source enters play. |
+| `pressure_driver_enters` | A new entity becomes a pressure driver. |
+| `counterparty_enters` | A counterparty enters a negotiation, debt, conflict, or exchange. |
+| `choice_target_enters` | A new entity becomes a lawful target for future choices. |
+
+### SREL Triggers
+
+| Trigger | Present-causal meaning |
+|---|---|
+| `alliance_forms` | An alliance becomes true in branch state. |
+| `rivalry_forms` | A rivalry becomes true in branch state. |
+| `debt_relation_forms` | A debt relation between participants becomes active. |
+| `authority_relation_forms` | Authority between participants becomes active. |
+| `trust_axis_becomes_relevant` | Trust becomes a load-bearing relationship axis. |
+| `intimacy_axis_becomes_relevant` | Intimacy becomes a load-bearing relationship axis. |
+| `hostility_axis_becomes_relevant` | Hostility becomes a load-bearing relationship axis. |
+
 ## 6. Action Routing
 
 When a player selects a `CHC` or supplies a write-in, the turn-cycle resolves it to exactly one of six outcomes:

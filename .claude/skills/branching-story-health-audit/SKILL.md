@@ -1,6 +1,6 @@
 ---
 name: branching-story-health-audit
-description: "Use when diagnosing the health of a branching-story bundle. Four modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
+description: "Use when diagnosing the health of a branching-story bundle. Five modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health), compatibility (schema-drift compatibility reporting), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -10,7 +10,7 @@ arguments:
     description: "Existing story bundle slug under worlds/<world_slug>/stories/"
     required: true
   - name: mode
-    description: "Comma-separated list of modes; default 'structural'. Valid: structural, prose, remediation, cross_story. Modes can be combined."
+    description: "Comma-separated list of modes; default 'structural'. Valid: structural, compatibility, prose, remediation, cross_story. Modes can be combined, including structural,compatibility."
     required: false
   - name: branch_path_filter
     description: "BR-<integer> or list; restricts structural checks to named branches + descendants. Default: all branches."
@@ -25,14 +25,14 @@ arguments:
 
 # Branching Story Health Audit
 
-Diagnose the health of a branching-story bundle via deterministic structural-replay checks, optional prose-mode receipt scan, optional remediation-mode RSP card drafting, and optional cross-story contradiction scan — the audit never mutates story state or world canon.
+Diagnose the health of a branching-story bundle via deterministic structural-replay checks, optional compatibility-drift reporting, optional prose-mode receipt scan, optional remediation-mode RSP card drafting, and optional cross-story contradiction scan — the audit never mutates story state or world canon.
 
 <HARD-GATE>
 Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md` cards, or update `audits/INDEX.md` until:
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 10 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 10 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health) executed when `structural` in mode (default); compatibility-drift reporting executed when `compatibility` in mode; prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -64,6 +64,11 @@ Phase 2 [structural; default]: 10 sub-phases executed sequentially
   └─ 2i: CLK / STSEC / STQ mechanism health
         |
         v
+Phase 2j [conditional on `compatibility` in mode]: Compatibility drift
+        (runs alongside structural in `structural,compatibility` mode;
+         emits a separate SAU section)
+        |
+        v
 Phase 3 [conditional on `prose` in mode]: Prose checks (5 finding
                                                         types over
                                                         prose + receipts)
@@ -93,7 +98,7 @@ Phase 7: HARD-GATE fires → write SAU report + RSP cards (if any)
 
 ### Optional
 
-- `mode` — comma-separated list — default `structural`. Valid values: `structural`, `prose`, `remediation`, `cross_story`. Modes can be combined.
+- `mode` — comma-separated list — default `structural`. Valid values: `structural`, `compatibility`, `prose`, `remediation`, `cross_story`. Modes can be combined, including `structural,compatibility` for structural checks plus compatibility-drift reporting in one SAU.
 - `branch_path_filter` — `BR-<integer>` or list — restricts structural checks to named branches + descendants. Default: all branches.
 - `severity_threshold` — enum — `error | warning | info`. Default: `info` (report everything).
 - `emit_remediation_requests` — `true | false` — default `false`. Forces RSP drafting even without explicit `remediation` mode.
@@ -129,7 +134,7 @@ Before Phase 1:
 
 1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md`. Abort with clear missing-file error on any unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
-3. Parse `mode` argument — comma-separated list of `structural | prose | remediation | cross_story`; default to `structural` if absent. Validate every named mode is in the valid set.
+3. Parse `mode` argument — comma-separated list of `structural | compatibility | prose | remediation | cross_story`; default to `structural` if absent. Validate every named mode is in the valid set. `compatibility` may run alone for schema-drift reporting or as `structural,compatibility` to keep structural findings and compatibility findings in separate SAU sections.
 4. Allocate `SAU` id via `mcp__worldloom__allocate_next_id(world_slug, 'SAU', story_slug=<story_slug>)`. **`RSP` ids are allocated at Phase 5 per-finding** via `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id='SAU-<integer>')` — deferred-allocation pattern, since the count of fixable findings is unknown until phases complete.
 5. Load story-local audit inputs through `story_slug` scoped retrieval: use `story_bundle_context` and targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records` for active cast `STENT` ids (Phase 2d belief / visibility checks), mirrored `SF` records, and other bundle-local ids. Load the world canon context packet with `story_slug=<story_slug>` and seed it only with world-scope ids: every `M-<integer>` (whole-class for forbidden-resolution and cumulative-accretion checks in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), and parent `CF` records derived from mirrored `SF` records (for Phase 2e canon-authority classification). Extract the current world-canon revision from the latest `change_log_entry` in the context packet (`CH-<integer>`, or `null` only if no change log exists).
 6. If `cross_story` in `mode`: enumerate `worlds/<world_slug>/stories/*/` directories; for each sibling bundle, load its `_source/` record-index sufficient for Phase 4 contradiction checks (mirrored `SF` records keyed by CF ids in `derived_from`, `SE.promotion_claims[]` queue, terminal-closure inherited-debt notes).
@@ -279,10 +284,26 @@ specific CH id in the finding rationale when a stale baseline is classified as
 
 These checks are retrospective audit warnings, not page-commit HARD-REJECTs. They complement the per-commit validators for CLK, STSEC, and STQ by finding mechanism rot that can accumulate across an otherwise schema-valid bundle. They only run when the corresponding record class exists in the scoped bundle; absence of CLK / STSEC / STQ records is never itself a finding.
 
+**Phase 2i scope vs SPEC-43 mid-story-introduction validators**: the SPEC-43 mid-story-introduction validators (`midstory_record_introduction_grounding`, `clock_introduction_grounding_integrity`, `secret_introduction_anchor_integrity`, `story_question_introduction_grounding_integrity`, `thread_introduction_grounding_integrity`, `entity_introduction_status_pairing`, `relationship_introduction_grounding_integrity`, `introduction_observer_firewall`, `narrative_shape_field_rejection`) are per-commit gates in branching-story-turn-cycle Phase 9, not Phase 2i retrospective audits. Phase 2i keeps its absence-is-not-a-finding rule and retrospective mechanism-rot posture. The `compatibility_drift` report is the SPEC-43 Phase 2i extension via `compatibility` mode; the introduction validators are not.
+
 - `stalled_clock_check` — For each active high-salience `CLK` (`status: active`) in the scoped branch leaf snapshots, inspect `tick_history[]` and the page chain. If no tick has been recorded within the last `N=5` pages by default, emit a WARNING with `repair_kind: branch_flag`. Do not flag low / medium salience clocks, paused clocks, resolved / fired / abandoned / superseded clocks, or clocks absent from the scoped active snapshot. Cite the CLK id, current `value` / `max`, most recent tick event if any, current page id, and the page window considered.
 - `under_supported_critical_revelation_check` — For each high-salience `STSEC` with `status: revealed`, count `clue_carriers[].status: discovered` entries whose discovery precedes or coincides with `reveal_event` on the branch path. If the count is below the default minimum of 2, emit a WARNING with `repair_kind: branch_flag`. Cite the STSEC id, `reveal_event`, discovered-carrier count, missing support threshold, and any `protected_mystery_refs[]`. This is a health-audit warning; the commit-time `critical_secret_clue_coverage_when_revealed` validator remains the gate for malformed reveal commits.
 - `dropped_high_salience_setup_check` — For each terminal page snapshot, inspect active high-salience `STQ` records with `status: open | complicated`. If `PG.state_snapshot.continuation.terminal_rationale` does not name the STQ id or otherwise explicitly classify it as answered, paid off, inherited, superseded, or intentionally abandoned, emit a WARNING with `repair_kind: branch_flag`. Cite the terminal PG id, STQ id, current status, salience, and terminal rationale excerpt or absence.
 - `clock_proliferation_warning` — Count active or paused `CLK` records in the scoped bundle. If the count exceeds the default threshold of 5, emit a WARNING with `repair_kind: bundle_advice`. Cite the count, threshold, and the active CLK ids so the operator can decide whether clocks should be merged, resolved, abandoned, or left as intentional complexity.
+
+## Phase 2j: Compatibility drift (conditional on `compatibility` in `mode`)
+
+Run the `compatibility_drift` validator against the bundle structure and `PG.state_snapshot.active_records` maps. In Wave 2 this mode reports schema-drift compatibility findings; it does not hard-fail the audit and does not create or modify story records.
+
+Flag:
+
+- `compat_optional_directory_absent` — Missing newer optional `_source/clocks/`, `_source/secrets/`, `_source/story-questions/`, or `_source/artifacts/` directories. INFO; classification usually includes `compatible_optional_absence`.
+- `compat_missing_active_record_key` — Older `PG.state_snapshot.active_records` maps omit optional `CLK`, `STSEC`, `STQ`, or `DA` keys. INFO when the page is a legacy/grandfathered snapshot; classification may include `grandfathered_snapshot_shape`.
+- `compat_requires_migration_patch` — A new/current-contract page omits required active-record keys without a grandfathered-parent explanation. WARNING in Wave 2; hard-fail severity is deferred until a future `story_system_contract_revision` marker makes current-contract detection deterministic.
+
+Record one bundle-level classification in the SAU report: `current_contract`, `compatible_optional_absence`, `grandfathered_snapshot_shape`, `compatible_with_advisory`, `requires_compatibility_audit`, `requires_migration_patch`, `manual_review`, or `blocked_contract_break`.
+
+When invoked as `structural,compatibility`, run the structural phases and compatibility mode in the same audit but keep their findings in separate SAU sections. This mode never auto-creates optional `CLK`, `STSEC`, or `STQ` records to improve playability; pure compatibility scans write SAU/SCMP report artifacts only.
 
 ## Phase 3: Prose checks (conditional on `prose` in `mode`)
 
@@ -412,6 +433,12 @@ rsp_cards_emitted: N | 0
 ## Canon baseline drift
 
 (Phase 2h findings.)
+
+## Compatibility drift (if `compatibility` in modes)
+
+- **Classification**: one of `current_contract`, `compatible_optional_absence`, `grandfathered_snapshot_shape`, `compatible_with_advisory`, `requires_compatibility_audit`, `requires_migration_patch`, `manual_review`, or `blocked_contract_break`.
+- **Findings**: per-finding INFO/WARNING entries from `compatibility_drift` with location and recommendation.
+- **Recommendation**: classification routing, such as `compatible_optional_absence` -> no action required, `requires_compatibility_audit` -> manual review, and `requires_migration_patch` -> defer to the dedicated compatibility-repair workflow.
 
 ## Prose health (if `prose` in modes)
 

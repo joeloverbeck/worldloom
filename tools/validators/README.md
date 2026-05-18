@@ -6,7 +6,7 @@ Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus story-scope predi
 
 Historical note: `archive/specs/SPEC-04-validator-framework.md` is archived prior art only. It is not current design authority.
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 36 structural validators, the 12 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 46 structural validators, the 12 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
@@ -49,6 +49,8 @@ Structural validators:
 - `slt_created_at_page_origin_consistency`
 - `causal_dependency_threat_scan`
 - `expected_witness_coverage`
+- `midstory_record_introduction_grounding`
+- `clock_introduction_grounding_integrity`
 - `canon_baseline_drift`
 - `canon_drift_classification_evidence`
 - `non_propagation_tag_shape`
@@ -62,7 +64,15 @@ Structural validators:
 - `clock_terminal_debt_integrity`
 - `secret_carrier_existence`
 - `critical_secret_clue_coverage_when_revealed`
+- `secret_introduction_anchor_integrity`
 - `secret_mystery_firewall_compliance`
+- `story_question_introduction_grounding_integrity`
+- `thread_introduction_grounding_integrity`
+- `entity_introduction_status_pairing`
+- `relationship_introduction_grounding_integrity`
+- `introduction_observer_firewall`
+- `narrative_shape_field_rejection`
+- `compatibility_drift`
 - `story_question_payoff_integrity`
 - `story_question_setup_predates_payoff`
 - `story_question_grounding_integrity`
