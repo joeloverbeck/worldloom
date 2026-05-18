@@ -1,6 +1,6 @@
 # SPEC47STPSTE-001: Add STPLAN + STEMO record-class schemas to shared record-schema template
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `.claude/skills/_shared-templates/story-record-schemas.md` with two new record-class schema sections (§4.5.17 STPLAN, §4.5.18 STEMO); no code changes
@@ -30,11 +30,11 @@ SPEC-47 introduces two new active story-bundle record classes — `STPLAN` (acto
 2. Field lists match SPEC-47 §Approach §A specification verbatim (closed enums, required-field markers, default values) → manual review against the spec's authoritative schema sketches
 3. Cross-skill boundary preserved: §4.5 existing subsection numbering (§4.5.1 through §4.5.16) is unchanged → codebase grep-proof `awk '/^#### 4\.5\./' .claude/skills/_shared-templates/story-record-schemas.md` returns exactly the existing 16 + 2 new = 18 subsections in order
 
-## What to Change
+## Landed Changes
 
 ### 1. Add §4.5.17 STPLAN schema
 
-Insert immediately after §4.5.16 STQ. Use the schema sketch from SPEC-47 §Approach §A verbatim:
+Inserted immediately after §4.5.16 STQ. The landed schema follows SPEC-47 §Approach §A:
 
 ```yaml
 id: STPLAN-<integer>*
@@ -68,11 +68,11 @@ expires_when: string*                         # natural-language supersession tr
 derived_from: [<record_id>]                   # default []
 ```
 
-Add prose preamble explaining: actor-owned tactical plan over multiple pages; strict-minimalist v1 schema per §5b (dropped `risk_posture`, `visibility`, `current_step.rationale`, `fallback_steps[*].rationale` — extension list captured in SPEC-47 §Out of Scope item 1 for future spec).
+Added prose preamble explaining actor-owned tactical plans over multiple pages; strict-minimalist v1 schema per §5b; and the dropped extension-list fields (`risk_posture`, `visibility`, `current_step.rationale`, `fallback_steps[*].rationale`) that require a future spec with concrete consumers.
 
 ### 2. Add §4.5.18 STEMO schema
 
-Insert immediately after §4.5.17 STPLAN. Use the schema sketch from SPEC-47 §Approach §A verbatim:
+Inserted immediately after §4.5.17 STPLAN. The landed schema follows SPEC-47 §Approach §A:
 
 ```yaml
 id: STEMO-<integer>*
@@ -103,7 +103,7 @@ expires_when: string*
 derived_from: [<record_id>]                   # default []
 ```
 
-Add prose preamble: actor-owned transient affective state; closed enums backed by Ekman 1972/1999 + Plutchik + OCC + Geneva Emotion Wheel + Cowen & Keltner 2017 (affect_kind) and Frijda 1986/1987 + Roseman 2011 + Lazarus-Folkman 1984 + Skinner et al. 2003 + Gray-McNaughton + Taylor 2000 + Gross 1998/2015 (behavioral_pressure); two derivative design calls per SPEC-47 Key Design Decisions item 2: (i) `numbness` represented as `status: dissociated` + `affect_kind: null` rather than as an enum value; (ii) `surprise` not represented at STEMO level (already adequately recorded at `SE.event_kind`).
+Added prose preamble explaining actor-owned transient affective state; the closed-enum research basis from SPEC-47; and the two derivative design calls from SPEC-47 Key Design Decisions item 2: `numbness` is represented as `status: dissociated` + `affect_kind: null`, and `surprise` remains at the `SE.event_kind` / appraisal surface rather than STEMO.
 
 ## Files to Touch
 
@@ -140,3 +140,26 @@ Add prose preamble: actor-owned transient affective state; closed enums backed b
 1. `grep -c "^#### 4\.5\." .claude/skills/_shared-templates/story-record-schemas.md` (returns 18)
 2. `grep -nE "^#### 4\.5\.(17|18)" .claude/skills/_shared-templates/story-record-schemas.md` (returns 2 matches)
 3. `grep -nE "STPLAN-<integer>|STEMO-<integer>" .claude/skills/_shared-templates/story-record-schemas.md | head -10` (confirms schema-anchor ids appear)
+
+## Outcome
+
+Completed: 2026-05-19.
+
+- Added `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.17 `STPLAN` with the SPEC-47 tactical-plan schema, strict-minimalist prose, and present-causal guardrails.
+- Added `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.18 `STEMO` with the SPEC-47 affective-state schema, closed-enum notes, dissociated/null-affect handling, and observer-firewall-oriented field notes.
+- Left existing §4.5.1 through §4.5.16 content unchanged; §4.6 Prose receipt remains the next top-level section.
+
+## Verification Result
+
+1. `grep -c "^#### 4\.5\." .claude/skills/_shared-templates/story-record-schemas.md` returned `18`.
+2. `grep -nE "^#### 4\.5\.(17|18)" .claude/skills/_shared-templates/story-record-schemas.md` returned exactly:
+   ```text
+   733:#### 4.5.17 `STPLAN` (actor-owned tactical plan)
+   771:#### 4.5.18 `STEMO` (actor-owned affective state)
+   ```
+3. `grep -nE "STPLAN-<integer>|STEMO-<integer>" .claude/skills/_shared-templates/story-record-schemas.md | head -10` returned the expected schema-anchor id lines for both classes.
+4. `awk '/^#### 4\.5\./ {print}' .claude/skills/_shared-templates/story-record-schemas.md` showed the ordered sequence from §4.5.1 through §4.5.18, with the two new sections appended after §4.5.16.
+
+## Deviations
+
+- None. This ticket remained documentation/template-only; JSON schemas, engine wiring, validators, inventories, and downstream skill prose stay with the active follow-up tickets named in Out of Scope.

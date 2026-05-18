@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds two new JSON schemas under `tools/validators/src/schemas/` (story-plan.schema.json + story-emotion.schema.json); no other code changes
-**Deps**: 001
+**Deps**: `archive/tickets/SPEC47STPSTE-001.md`
 
 ## Problem
 
