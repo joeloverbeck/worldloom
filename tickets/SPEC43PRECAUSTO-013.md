@@ -53,7 +53,7 @@ Append after the existing Gates 1-11:
 - **Gate 14: Relationship participant grounding** — every fresh SREL names active or same-event-created participants AND has non-empty `derived_from[]`. Enforced by `relationship_introduction_grounding_integrity` (ticket 009).
 - **Gate 15: Narrative-shape field rejection** — no new CLK / STSEC / THR / SREL / STENT carries prohibited future-shape fields (`expected_payoff_mode`, `act_position`, `midpoint`, `climax`, `dramatic_curve_position`, `tension_arc`, `expected_chapter`, `scene_sequence`). Enforced by `narrative_shape_field_rejection` (ticket 010). Note: STQ has its own pre-existing prohibition at `record_schema_compliance` line 177-193 (unchanged by SPEC-43).
 
-Plus a brief mention of Gate 12 sub-rule: introduction observer firewall (`introduction_observer_firewall` per ticket 011) — Wave 2 scope is explicit-reference access routes only; inferential access deferred Wave 3.
+Plus a brief mention of Gate 12 sub-rule: introduction observer firewall (`introduction_observer_firewall` per `archive/tickets/SPEC43PRECAUSTO-011.md`) — Wave 2 scope is explicit-reference access routes only; inferential access deferred Wave 3.
 
 ### 3. No changes to Phase 10 op enumeration
 

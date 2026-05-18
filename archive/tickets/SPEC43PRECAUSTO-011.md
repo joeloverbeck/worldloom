@@ -1,9 +1,9 @@
 # SPEC43PRECAUSTO-011: `introduction_observer_firewall` Validator (Wave 2 Explicit-Reference Scope)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — new `tools/validators/src/structural/introduction-observer-firewall.ts` (Wave 2 explicit-reference scope: gates choices grounded in freshly-introduced records through the existing `observer-firewall.ts` access-route check). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
+**Engine Changes**: Yes — new `tools/validators/src/structural/introduction-observer-firewall.ts` (Wave 2 explicit-reference scope: gates choices grounded in freshly-introduced records through the existing `observer-firewall.ts` access-route check). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5). Same-seam validator inventory/count surfaces also move with the registration.
 **Deps**: archive/tickets/SPEC43PRECAUSTO-002.md, archive/tickets/SPEC43PRECAUSTO-003.md
 
 ## Problem
@@ -17,6 +17,7 @@ SPEC-43 §Approach D Table row 8 + §Approach H Phase 9 / Phase 2i clarification
 3. Cross-skill boundary under audit: this validator composes with `observer-firewall.ts` (existing) and the per-class introduction validators (003-009). The Validator object's `applies_to` field must include `branching-story-turn-cycle`. Implementation may import access-route helpers from `observer-firewall.ts` if exported, or compose with the existing validator via shared utility extraction.
 4. FOUNDATIONS §Story Bundles §6b (Information / Observer Firewall) restated: storylet selection, emitted choices, and character actions must not rely on information unavailable to the acting entity. The new validator extends §6b discipline to freshly-introduced records — without this gate, a fresh STSEC could license a choice the acting STENT has no `BEL` about and no clue-carrier route to.
 5. HARD-GATE / Canon Safety surface: per-commit Phase 9 gate gating choices grounded in mid-story-introduced records. The change does not weaken existing observer-firewall coverage; it extends the coverage surface to the new fresh-record class.
+6. Live registry/count reassessment: `tools/validators/README.md` advertises the structural validator count and inventory, `tools/validators/tests/integration/spec04-verification.test.ts` asserts the structural/all-validator counts, and `tools/validators/tests/integration/validate-patch-plan.test.ts` checks clean non-story pre-apply skipped statuses. These are same-seam registry fallout and are included in this ticket's file/proof surface.
 
 ## Architecture Check
 
@@ -31,37 +32,42 @@ SPEC-43 §Approach D Table row 8 + §Approach H Phase 9 / Phase 2i clarification
 3. Composition with existing observer-firewall → schema validation: a CHC grounded in an EXISTING (not freshly-introduced) record continues to be gated by `observer-firewall.ts`; the new validator does not double-fire.
 4. FOUNDATIONS §6b alignment → FOUNDATIONS alignment check: every CHC `grounded_in.records[]` reference to a fresh-record id must have a recorded access route per the existing observer-firewall access-route taxonomy.
 
-## What to Change
+## Landed Changes
 
-### 1. Create `tools/validators/src/structural/introduction-observer-firewall.ts`
+### 1. Created `tools/validators/src/structural/introduction-observer-firewall.ts`
 
-Validator object:
+Implemented validator object:
 - `name: "introduction_observer_firewall"`.
 - `applies_to: ["branching-story-turn-cycle"]`.
 - `severity: "fail"`.
 - For each SE in the bundle:
   - Extract `freshRecordIds = se.state_delta.create[].filter(id => /^(CLK|STSEC|STQ|SREL|STENT|THR)-/.test(id))`. If empty, skip.
   - For each CHC record in the bundle whose `created_at_page` is the new child PG (i.e., choices emitted alongside the introduction):
-    - If `chc.grounded_in.records[]` contains any of the `freshRecordIds`, verify the acting entity (per `chc.actor` or the parent move's actor) has an explicit access route to that fresh record per the observer-firewall taxonomy (BEL with `subject` referencing the fresh record, DA / STOBJ / STLOC `accessible_to` referencing the actor, institutional-channel link, direct observation via the creating SE's `expected_witnesses` field).
+    - If `chc.grounded_in.records[]` contains any of the `freshRecordIds`, verify the acting entity (per `chc.actor`, single `available_to[]`, or the parent move's actor) has an explicit access route to that fresh record through intrinsic record access, a `BEL.basis.access_records[]` / `BEL.subject` route, or creating-event `expected_witnesses[]`.
 - Failure code: `intro_observer_no_access_route` (with the offending CHC id, fresh record id, and missing-access-route diagnosis).
 
 Wave 2 scope: ONLY explicit-record-reference access routes (the access route must be a named record in BEL/DA/STOBJ/STLOC or a witness in `expected_witnesses`). Inferential access (e.g., "the actor was in the room when the institutional norm changed, so they implicitly know") is OUT OF SCOPE — deferred to Wave 3.
 
-### 2. Register in `tools/validators/src/public/registry.ts`
+### 2. Registered in `tools/validators/src/public/registry.ts`
 
-Add import + array entry (coordinate slot ordering with tickets 003-010, 012 per §Step 6.5).
+Added the import + structural validator array entry.
 
-### 3. Add test `tools/validators/tests/structural/introduction-observer-firewall.test.ts`
+### 3. Added test `tools/validators/tests/structural/introduction-observer-firewall.test.ts`
 
-Test cases (using ticket 002's fixtures):
-- creation-pass: CHC grounded in fresh STSEC, acting STENT has a BEL with `subject: STSEC-fresh-id` → 0 failures.
-- creation-fail: CHC grounded in fresh STSEC, no BEL / DA / institutional access for the acting STENT → emits `intro_observer_no_access_route`.
-- creation-pass: CHC grounded in fresh CLK, fresh CLK has `visibility: public`, acting STENT is in `expected_witnesses` of creating SE → 0 failures.
-- not-applicable: CHC grounded in an existing (non-fresh) record → 0 failures from this validator (existing `observer-firewall.ts` handles it).
+Test cases cover:
+- CHC grounded in fresh STSEC where the acting STENT is a holder -> 0 failures.
+- CHC grounded in fresh STSEC with no actor access route -> `intro_observer_no_access_route`.
+- CHC grounded in fresh CLK with a `BEL.basis.access_records[]` route -> 0 failures.
+- CHC grounded in fresh CLK where the creating event names the actor in `expected_witnesses[]` -> 0 failures.
+- CHC grounded in an existing, non-fresh record -> 0 failures from this validator.
 
-### 4. Update `tools/validators/tests/structural/registry.test.ts`
+### 4. Updated `tools/validators/tests/structural/registry.test.ts`
 
-Add `introduction_observer_firewall` to the validator-name assertion list (coordinate with tickets 003-010, 012 per §Step 6.5).
+Added `introduction_observer_firewall` to the validator-name assertion list.
+
+### 5. Updated validator inventory/count surfaces
+
+Updated the validators README inventory and count, the SPEC-04 integration count assertions, and the clean non-story pre-apply skipped-status assertion so registry-facing package proof remains truthful after the new structural validator is registered.
 
 ## Files to Touch
 
@@ -69,6 +75,9 @@ Add `introduction_observer_firewall` to the validator-name assertion list (coord
 - `tools/validators/src/public/registry.ts` (modify — shared with 8 sibling tickets)
 - `tools/validators/tests/structural/introduction-observer-firewall.test.ts` (new)
 - `tools/validators/tests/structural/registry.test.ts` (modify — shared with 8 sibling tickets)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — structural/all-validator count assertions)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean non-story pre-apply skipped-status assertion)
+- `tools/validators/README.md` (modify — structural validator count/inventory)
 
 ## Out of Scope
 
@@ -81,10 +90,11 @@ Add `introduction_observer_firewall` to the validator-name assertion list (coord
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators -- introduction-observer-firewall` (test file passes).
-2. `npm test --prefix tools/validators -- observer-firewall` (existing observer-firewall tests continue to pass).
-3. `npm test --prefix tools/validators` (full validator package test pass).
-4. `grep -n "introductionObserverFirewall\|introduction_observer_firewall" tools/validators/src/public/registry.ts` returns import + array entry.
+1. `node --test dist/tests/structural/introduction-observer-firewall.test.js` passed after `npm test --prefix tools/validators` rebuilt the package.
+2. `node --test dist/tests/structural/observer-firewall.test.js` passed.
+3. `npm test --prefix tools/validators` passed: 477 tests, 0 failures.
+4. `grep -n "introductionObserverFirewall\|introduction_observer_firewall" tools/validators/src/public/registry.ts` returned the import + array entry.
+5. `grep -n "introduction_observer_firewall" tools/validators/README.md tools/validators/tests/structural/registry.test.ts tools/validators/tests/integration/validate-patch-plan.test.ts` returned the registry/inventory/skipped-status witnesses.
 
 ### Invariants
 
@@ -95,10 +105,37 @@ Add `introduction_observer_firewall` to the validator-name assertion list (coord
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/introduction-observer-firewall.test.ts` — 4 test cases per §What to Change item 3.
+1. `tools/validators/tests/structural/introduction-observer-firewall.test.ts` — 6 focused tests covering accepted routes, rejection, non-fresh records, and `applies_to` behavior.
 2. `tools/validators/tests/structural/registry.test.ts` (modify) — adds the new validator to the name assertion (coordinate with tickets 003-010, 012 per §Step 6.5).
+3. `tools/validators/tests/integration/spec04-verification.test.ts` (modify) — updates structural/all-validator counts.
+4. `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify) — confirms the new validator skips clean non-story pre-apply plans.
 
 ### Commands
 
-1. `npm test --prefix tools/validators -- introduction-observer-firewall` (targeted test pass).
-2. `npm test --prefix tools/validators` (full validator package test pass).
+1. `node --test dist/tests/structural/introduction-observer-firewall.test.js` (targeted compiled test pass after package build).
+2. `node --test dist/tests/structural/observer-firewall.test.js` (existing observer-firewall compiled test pass).
+3. `node --test dist/tests/structural/registry.test.js` (registry assertion pass).
+4. `npm test --prefix tools/validators` (full validator package test pass).
+
+## Outcome
+
+Completed on 2026-05-18.
+
+Implemented `introduction_observer_firewall` as an additive structural validator in `tools/validators/src/structural/introduction-observer-firewall.ts` and registered it in `tools/validators/src/public/registry.ts`. The validator enumerates fresh SPEC-43 mid-story introduction ids from `SE.state_delta.create[]`, inspects CHC records emitted on the child page / created at the child page, and fails with `intro_observer_no_access_route` when the acting STENT lacks an explicit route to the freshly introduced record.
+
+Added focused structural tests for pass, fail, BEL-route, expected-witness, non-fresh-record, and `applies_to` behavior. Updated the structural registry assertion, validator README inventory/count, SPEC-04 count assertions, and clean pre-apply skipped-status assertion.
+
+## Verification Result
+
+1. `npm test --prefix tools/validators -- introduction-observer-firewall` passed after rebuilding and ran the compiled package suite: 477 tests, 0 failures. The package wrapper did not narrow to only this test file, so direct compiled-file proofs below record the focused acceptance surface.
+2. `node --test dist/tests/structural/introduction-observer-firewall.test.js` passed: 6 tests, 0 failures.
+3. `node --test dist/tests/structural/observer-firewall.test.js` passed: 10 tests, 0 failures.
+4. `node --test dist/tests/structural/registry.test.js` passed: 1 test, 0 failures.
+5. `npm test --prefix tools/validators` passed after rebuilding: 477 tests, 0 failures.
+6. `grep -n "introductionObserverFirewall\|introduction_observer_firewall" tools/validators/src/public/registry.ts` returned the import and structural registry entry.
+7. `grep -n "introduction_observer_firewall" tools/validators/README.md tools/validators/tests/structural/registry.test.ts tools/validators/tests/integration/validate-patch-plan.test.ts` returned the inventory, registry-test, and pre-apply skipped-status witnesses.
+
+## Deviations
+
+- The drafted `npm test --prefix tools/validators -- introduction-observer-firewall` command was not a narrow test selector in this package; it rebuilt and ran the full compiled suite. The accepted narrow proof is the direct compiled test command `node --test dist/tests/structural/introduction-observer-firewall.test.js`, with the full package suite retained as broad verification.
+- Same-seam validator inventory/count fallout was added to the owned file set after live reassessment: `tools/validators/README.md`, `tools/validators/tests/integration/spec04-verification.test.ts`, and `tools/validators/tests/integration/validate-patch-plan.test.ts`.

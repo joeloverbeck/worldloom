@@ -12,6 +12,7 @@ import { causalDependencyThreatScan } from "../structural/causal-dependency-thre
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { entityIntroductionStatusPairing } from "../structural/entity-introduction-status-pairing.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
+import { introductionObserverFirewall } from "../structural/introduction-observer-firewall.js";
 import { midstoryRecordIntroductionGrounding } from "../structural/midstory-record-introduction-grounding.js";
 import { nonPropagationTagShape } from "../structural/non-propagation-tag-shape.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
@@ -90,6 +91,7 @@ export const structuralValidators: readonly Validator[] = [
   threadIntroductionGroundingIntegrity,
   entityIntroductionStatusPairing,
   relationshipIntroductionGroundingIntegrity,
+  introductionObserverFirewall,
   narrativeShapeFieldRejection,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
