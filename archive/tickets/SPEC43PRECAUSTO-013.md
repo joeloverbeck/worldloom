@@ -1,22 +1,23 @@
 # SPEC43PRECAUSTO-013: Turn-Cycle SKILL.md Output Table + Phase 9 Gates 12-15
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-turn-cycle/SKILL.md` (Output table rows for 6 mid-story-introducible classes) + `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` (adds Gates 12-15 referencing the 9 new validators from tickets 003-011 + the compatibility-drift validator from `archive/tickets/SPEC43PRECAUSTO-012.md`). No impact on Phase 10 op enumeration (wildcard `create_*_record` already covers all 6 create ops per R-correction-A).
-**Deps**: archive/tickets/SPEC43PRECAUSTO-003.md, archive/tickets/SPEC43PRECAUSTO-004.md, archive/tickets/SPEC43PRECAUSTO-005.md, archive/tickets/SPEC43PRECAUSTO-006.md, archive/tickets/SPEC43PRECAUSTO-007.md, archive/tickets/SPEC43PRECAUSTO-008.md, archive/tickets/SPEC43PRECAUSTO-009.md, 010, 011
+**Deps**: archive/tickets/SPEC43PRECAUSTO-003.md, archive/tickets/SPEC43PRECAUSTO-004.md, archive/tickets/SPEC43PRECAUSTO-005.md, archive/tickets/SPEC43PRECAUSTO-006.md, archive/tickets/SPEC43PRECAUSTO-007.md, archive/tickets/SPEC43PRECAUSTO-008.md, archive/tickets/SPEC43PRECAUSTO-009.md, archive/tickets/SPEC43PRECAUSTO-010.md, archive/tickets/SPEC43PRECAUSTO-011.md
 
 ## Problem
 
-SPEC-43 §Approach G + the spec's R-correction-A require turn-cycle skill amendments at TWO surfaces: (a) the SKILL.md Output table rows at lines 113-129 currently frame CLK / STSEC / STQ / THR / STENT / SREL as "(existing record update)" or "(supersession)" only — these rows must be extended to "(new or supersession)" or "(new or lifecycle update)" with IF-clauses covering both fresh creation and lifecycle; (b) phase-9-validation-gates.md must enumerate the 9 new Phase 9 gates that the per-class introduction validators implement, plus the cross-class validators (narrative-shape-field-rejection, introduction-observer-firewall). Per R-correction-A, NO amendment to Phase 10 op enumeration is needed — the wildcard `create_*_record` at SKILL.md:155 already deliberately covers all 6 create ops.
+SPEC-43 §Approach G + the spec's R-correction-A require turn-cycle skill amendments at TWO surfaces: (a) the SKILL.md Output table rows at lines 113-129 currently frame CLK / STSEC / STQ / THR / STENT / SREL as "(existing record update)" or "(supersession)" only — these rows must be extended to "(new or supersession)" or "(new or lifecycle update)" with IF-clauses covering both fresh creation and lifecycle; (b) phase-9-validation-gates.md must enumerate Gates 12-15 that the per-class introduction validators implement, plus the cross-class validators (narrative-shape-field-rejection, introduction-observer-firewall). Per R-correction-A, NO amendment to Phase 10 op enumeration is needed — the wildcard `create_*_record` at SKILL.md:155 already deliberately covers all 6 create ops.
 
 ## Assumption Reassessment (2026-05-18)
 
 1. SKILL.md Output table rows for CLK/STSEC/STQ/THR/STENT/SREL at lines 113-129 (verified via brainstorm exploration). The Phase 10 op enumeration at line 155 already uses wildcard `create_*_record` for every changed record class — deliberately covers all 6 create ops; NO amendment to Phase 10 is needed (correction noted per SPEC-43 §Key design decisions).
-2. SPEC-43 §Approach G specifies: Output table rows extended from "(existing record update)" / "(supersession)" to "(new or supersession)" or "(new or lifecycle update)" with IF-clauses covering both fresh creation and lifecycle. SPEC-43 §Approach D Table enumerates the 9 new validators (8 ship in Wave 2 per the table; compatibility-drift is the 9th); SPEC-43 §Approach H is explicit that introduction validators are Phase 9 per-commit gates, NOT Phase 2i retrospective audits.
+2. SPEC-43 §Approach G specifies: Output table rows extended from "(existing record update)" / "(supersession)" to "(new or supersession)" or "(new or lifecycle update)" with IF-clauses covering both fresh creation and lifecycle. SPEC-43 §Approach D Table enumerates the 9 new introduction/future-shape validators from tickets 003-011, while compatibility-drift from ticket 012 remains info/warn-only in Wave 2; SPEC-43 §Approach H is explicit that introduction validators are Phase 9 per-commit gates, NOT Phase 2i retrospective audits.
 3. Cross-skill boundary under audit: turn-cycle Phase 9 references the validator registry at `tools/validators/src/public/registry.ts`; each new gate's documentation in `phase-9-validation-gates.md` cites the corresponding validator's `name` field. Downstream ticket 014 amends phase-2-3 + phase-4-5 + phase-7 reference files; ticket 015 creates the new `mid-story-record-introduction.md` reference file; ticket 016 amends health-audit SKILL.md for the compatibility mode.
 4. FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary) + §5a (Commitment Blocks Are Causal Moves) restated: Output table amendments make mid-story creation visible as an authoring affordance in the page-plan commit envelope; Phase 9 gates 12-15 enforce that authoring is constrained by SPEC-43's §5c discipline at engine pre-apply time. The plan-authority boundary is preserved — introduction happens in the page-plan + patch envelope, not in rendered prose.
 5. HARD-GATE / Canon Safety surface: Phase 9 IS the gating surface where the new validators run per-commit. The change adds 4 new gate descriptions (Gates 12-15) without modifying existing gates 1-11. Does not weaken Mystery Reserve firewall (preserved by `secret_mystery_firewall_compliance` + ticket 005's STSEC introduction validator running independently).
+6. Live dependency-path correction: the drafted `Deps` field used symbolic `010, 011`; these resolve unambiguously to `archive/tickets/SPEC43PRECAUSTO-010.md` and `archive/tickets/SPEC43PRECAUSTO-011.md`, so the header now names the archived paths directly.
 
 ## Architecture Check
 
@@ -27,7 +28,7 @@ SPEC-43 §Approach G + the spec's R-correction-A require turn-cycle skill amendm
 ## Verification Layers
 
 1. Output table amendment → codebase grep-proof: `grep -nE "CLK-<integer>.*new or|STSEC-<integer>.*new or|STQ-<integer>.*new or|THR-<integer>.*new or|STENT-<integer>.*new or|SREL-<integer>.*new or" .claude/skills/branching-story-turn-cycle/SKILL.md` returns 6 lines (one per class row).
-2. Phase 9 gates 12-15 → codebase grep-proof: `grep -nE "^(Gate )?1[2-5]\b" .claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` returns the 4 new gates.
+2. Phase 9 gates 12-15 → codebase grep-proof: `grep -nE "Gate 1[2-5]|gate 1[2-5]" .claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` returns the 4 new gates.
 3. Phase 10 op enumeration unchanged → codebase grep-proof: `grep -n "create_\*_record" .claude/skills/branching-story-turn-cycle/SKILL.md` returns the existing wildcard line (no new entries added).
 4. FOUNDATIONS §4a + §5a alignment → FOUNDATIONS alignment check: amendments preserve the plan-authority boundary (introduction decided in page-plan + patch envelope, not in rendered prose); preserve the causal-move primitive (introduction is the effect of an SLT, not an out-of-band engine event).
 
@@ -77,7 +78,7 @@ Per R-correction-A: the wildcard `create_*_record` at SKILL.md:155 already delib
 ### Tests That Must Pass
 
 1. `grep -nE "CLK-<integer>.*new or|STSEC-<integer>.*new or|STQ-<integer>.*new or|THR-<integer>.*new or|STENT-<integer>.*new or|SREL-<integer>.*new or" .claude/skills/branching-story-turn-cycle/SKILL.md` returns 6 lines.
-2. `grep -cE "^(Gate )?1[2-5]\b" .claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` returns ≥4.
+2. `grep -nE "Gate 1[2-5]|gate 1[2-5]" .claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` returns ≥4 lines.
 3. `grep -n "create_clk_record\|create_stsec_record\|create_stq_record" .claude/skills/branching-story-turn-cycle/SKILL.md` returns the new Phase 10 addendum naming the 6 create ops (or returns the existing wildcard line, depending on implementation choice for the addendum format).
 4. Skill prose remains internally consistent: every Output table row's IF-clause is reachable through one of the documented Phase 9 gates.
 
@@ -97,3 +98,23 @@ Per R-correction-A: the wildcard `create_*_record` at SKILL.md:155 already delib
 
 1. `grep -nE "new or supersession|new or lifecycle update" .claude/skills/branching-story-turn-cycle/SKILL.md` (sanity grep that the 6 rows landed).
 2. `grep -nE "Gate 1[2-5]|gate 1[2-5]" .claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` (sanity grep that the 4 new gates landed).
+
+## Outcome
+
+Completed: 2026-05-18.
+
+Updated the turn-cycle Output table so all six SPEC-43 mid-story-introducible classes (`CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `SREL`) advertise the new creation path as well as lifecycle/supersession handling. Added the Phase 10 `create_*_record` addendum naming the six create ops without replacing the wildcard operation model.
+
+Added Phase 9 checks 12-15 for mid-story introduction grounding, fresh STENT/STSTAT pairing, relationship participant grounding plus explicit observer access, and narrative-shape field rejection. Added the Wave 2 compatibility-drift note as info/warn-only and preserved existing Gates 1-11 unchanged.
+
+## Verification Result
+
+1. `grep -nE "CLK-<integer>.*new or|STSEC-<integer>.*new or|STQ-<integer>.*new or|THR-<integer>.*new or|STENT-<integer>.*new or|SREL-<integer>.*new or" .claude/skills/branching-story-turn-cycle/SKILL.md` returned 6 rows.
+2. `grep -nE "Gate 1[2-5]|gate 1[2-5]" .claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` returned checks 12-15.
+3. `grep -n "create_clk_record\|create_stsec_record\|create_stq_record" .claude/skills/branching-story-turn-cycle/SKILL.md` returned the Phase 10 addendum that keeps the wildcard create-op model and names the SPEC-43 create ops.
+4. Manual FOUNDATIONS/HARD-GATE review: the prose remains additive to turn-cycle validation; it documents new pre-apply checks without weakening explicit approval or engine-routed write discipline.
+
+## Deviations
+
+1. The live Output table had `STENT` earlier than the other five introducible classes, so the update changed the existing `STENT` row in place rather than moving it next to `SREL`.
+2. Compatibility-drift is documented as an info/warn note rather than a numbered Gate 16, preserving the ticket's Gates 12-15 acceptance boundary while still surfacing the validator from `archive/tickets/SPEC43PRECAUSTO-012.md`.
