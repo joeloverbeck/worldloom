@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-43-present-causal-mid-story-state-introduction.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC43PRECAUSTO-013.md",
+  "last_ticket": "archive/tickets/SPEC43PRECAUSTO-014.md",
   "last_result": "completed_and_archived",
-  "last_work_commit": "b6a4f20cfd0ffa70c1d483b0c15b25a4539e73c6",
+  "last_work_commit": "67aaa2e7dab725293cecbce743887ceeb934074b",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC43PRECAUSTO-014.md",
+  "next_target": "tickets/SPEC43PRECAUSTO-015.md",
   "queue": [
-    "tickets/SPEC43PRECAUSTO-014.md",
     "tickets/SPEC43PRECAUSTO-015.md",
     "tickets/SPEC43PRECAUSTO-016.md",
     "tickets/SPEC43PRECAUSTO-017.md"
@@ -15,8 +14,8 @@
   "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
-  "post_review_material_updates": true,
-  "post_review_audit_block": "emitted",
+  "post_review_material_updates": false,
+  "post_review_audit_block": "not_applicable",
   "blocked": false,
   "blocker": null,
   "dirty_state": "expected ignored artifacts remain under tools/validators/dist/ and tools/validators/node_modules/; tracked worktree clean after work commit",
