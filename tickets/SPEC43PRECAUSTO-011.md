@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/introduction-observer-firewall.ts` (Wave 2 explicit-reference scope: gates choices grounded in freshly-introduced records through the existing `observer-firewall.ts` access-route check). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
-**Deps**: archive/tickets/SPEC43PRECAUSTO-002.md, 003
+**Deps**: archive/tickets/SPEC43PRECAUSTO-002.md, archive/tickets/SPEC43PRECAUSTO-003.md
 
 ## Problem
 

@@ -146,6 +146,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "non_propagation_tag_shape"
     );
     assert.equal(nonPropagationExecution?.status, "skipped");
+    const midstoryIntroExecution = result.executions.find(
+      (execution) => execution.name === "midstory_record_introduction_grounding"
+    );
+    assert.equal(midstoryIntroExecution?.status, "skipped");
     const proposalPackageExecution = result.executions.find(
       (execution) => execution.name === "proposal_package_shape"
     );
@@ -197,6 +201,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== canonBaselineDriftExecution &&
         row !== expectedWitnessExecution &&
         row !== nonPropagationExecution &&
+        row !== midstoryIntroExecution &&
         row !== proposalPackageExecution &&
         row !== proseReceiptExecution &&
         row !== validationTraceExecution &&
