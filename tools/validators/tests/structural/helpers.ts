@@ -1,4 +1,4 @@
-import type { Context, IndexedRecord, WorldIndexReadSurface } from "../../src/framework/types.js";
+import type { Context, IndexedEdge, IndexedRecord, WorldIndexReadSurface } from "../../src/framework/types.js";
 
 export function record(
   node_type: string,
@@ -15,9 +15,16 @@ export function record(
   };
 }
 
-export function context(records: IndexedRecord[], overrides: Partial<Context> = {}): Context {
+export function context(
+  records: IndexedRecord[],
+  overrides: Partial<Context> & { edges?: IndexedEdge[] } = {}
+): Context {
+  const { edges = [], ...contextOverrides } = overrides;
   const index: WorldIndexReadSurface = {
-    query: async ({ record_type }) => records.filter((item) => !record_type || item.node_type === record_type)
+    query: async ({ record_type }) =>
+      records.filter((item) => !record_type || item.node_type === record_type),
+    queryEdges: async ({ edge_type }) =>
+      edges.filter((item) => !edge_type || item.edge_type === edge_type)
   };
 
   return {
@@ -25,7 +32,7 @@ export function context(records: IndexedRecord[], overrides: Partial<Context> = 
     world_slug: "test",
     index,
     touched_files: [],
-    ...overrides
+    ...contextOverrides
   };
 }
 

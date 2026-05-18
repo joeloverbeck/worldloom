@@ -81,6 +81,19 @@ export interface WorldIndexReadSurface {
     world_slug: string;
     story_slug?: string | null;
   }): Promise<IndexedRecord[]>;
+  queryEdges?(args: {
+    edge_type?: string;
+    world_slug: string;
+    story_slug?: string | null;
+  }): Promise<IndexedEdge[]>;
+}
+
+export interface IndexedEdge {
+  source_node_id: string;
+  target_node_id: string | null;
+  target_unresolved_ref: string | null;
+  edge_type: string;
+  story_slug?: string | null;
 }
 
 export interface Context {

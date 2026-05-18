@@ -6,7 +6,7 @@ import yaml from "js-yaml";
 
 import type { PatchOperation, PatchPlanEnvelope } from "@worldloom/patch-engine";
 
-import type { IndexedRecord, WorldIndexReadSurface } from "../framework/types.js";
+import type { IndexedEdge, IndexedRecord, WorldIndexReadSurface } from "../framework/types.js";
 import {
   FILE_CLASS_TO_SUBDIR,
   RECORD_TYPE_BY_SOURCE_DIR,
@@ -38,6 +38,12 @@ export function buildFullWorldReadSurface(db: Database.Database, worldSlug: stri
         return [];
       }
       return queryRows(db, worldSlug, record_type, story_slug);
+    },
+    queryEdges: async ({ edge_type, world_slug, story_slug }) => {
+      if (world_slug !== worldSlug) {
+        return [];
+      }
+      return queryEdges(db, worldSlug, edge_type, story_slug);
     }
   };
 }
@@ -66,6 +72,12 @@ export function buildPreApplyReadSurface(
         byKey.set(recordKey(record), record);
       }
       return [...byKey.values()];
+    },
+    queryEdges: async ({ edge_type, world_slug, story_slug }) => {
+      if (world_slug !== worldSlug) {
+        return [];
+      }
+      return queryEdges(db, worldSlug, edge_type, story_slug);
     }
   };
 }
@@ -113,6 +125,44 @@ function queryRows(
     .all(...params) as NodeRow[];
 
   return rows.map(rowToIndexedRecord);
+}
+
+function queryEdges(
+  db: Database.Database,
+  worldSlug: string,
+  edgeType?: string,
+  storySlug?: string | null
+): IndexedEdge[] {
+  if (!tableExists(db, "edges")) {
+    return [];
+  }
+
+  const hasStorySlug = tableHasColumn(db, "edges", "story_slug");
+  const selectedColumns = hasStorySlug
+    ? "edges.source_node_id, edges.target_node_id, edges.target_unresolved_ref, edges.edge_type, edges.story_slug"
+    : "edges.source_node_id, edges.target_node_id, edges.target_unresolved_ref, edges.edge_type, NULL AS story_slug";
+  const predicates = ["source.world_slug = ?"];
+  const params: unknown[] = [worldSlug];
+
+  if (edgeType !== undefined) {
+    predicates.push("edges.edge_type = ?");
+    params.push(edgeType);
+  }
+  if (storySlug !== undefined && storySlug !== null && hasStorySlug) {
+    predicates.push("edges.story_slug = ?");
+    params.push(storySlug);
+  }
+
+  return db
+    .prepare(
+      `
+        SELECT ${selectedColumns}
+        FROM edges
+        JOIN nodes source ON source.node_id = edges.source_node_id
+        WHERE ${predicates.join(" AND ")}
+      `
+    )
+    .all(...params) as IndexedEdge[];
 }
 
 function buildOverlayRecords(
@@ -420,4 +470,11 @@ function resolveRepoRootForWorld(worldSlug: string): string {
 function tableHasColumn(db: Database.Database, tableName: string, columnName: string): boolean {
   const rows = db.prepare(`PRAGMA table_info(${tableName})`).all() as Array<{ name: string }>;
   return rows.some((row) => row.name === columnName);
+}
+
+function tableExists(db: Database.Database, tableName: string): boolean {
+  const row = db
+    .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?")
+    .get(tableName);
+  return row !== undefined;
 }

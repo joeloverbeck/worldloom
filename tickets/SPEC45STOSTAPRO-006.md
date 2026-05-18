@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: No new production code — only test fixtures and integration test files. Exercises the full Phase 1 + Phase 2 + Phase 3 pipeline composed by SPEC45STOSTAPRO-001 through -005.
-**Deps**: `archive/tickets/SPEC45STOSTAPRO-004.md`, SPEC45STOSTAPRO-005
+**Deps**: `archive/tickets/SPEC45STOSTAPRO-004.md`, `archive/tickets/SPEC45STOSTAPRO-005.md`
 
 ## Problem
 
@@ -14,7 +14,7 @@ Per SPEC-45 §Verification §End-to-end, the spec ships two capstone tests that 
 
 1. `tools/world-index/tests/integration/` and `tools/world-mcp/tests/integration/` directories exist; both have existing capstone tests (`spec02-verification.test.ts`, `spec12-live-corpus.test.ts`, `spec42-capstone.test.ts`, etc.) that serve as structural precedents for the SPEC-45 capstone format. `tools/world-index/tests/fixtures/fixture-world/` exists and includes `_source/` subdirectories for synthetic-bundle construction; story-bundle fixture conventions established by SPEC-42 are usable. **Mechanical-drift note**: SPEC-45 §Deliverables D15 says `tools/world-index/tests/parse/atomic-integration.test.ts` — world-index tests live FLAT at `tests/` and integration tests live at `tests/integration/`; the test lands at `tools/world-index/tests/integration/spec45-atomic-integration.test.ts`.
 2. SPEC-45 §Verification §End-to-end specifies three test cases: (a) red-bunny indexer rebuild with edge count assertions matching `Σ|SE.state_delta.create[]|`, etc.; (b) synthetic bundle with known provenance shape — index, call `get_story_state_provenance` on each record, assert shape matches; (c) manual dry-run of story-fact-promotion-to-canon Phase 1 against red-bunny verifying proposal package narrative shape is unchanged.
-3. Cross-skill / cross-package boundary under audit: the capstone exercises three packages simultaneously — world-index (Phase 1 indexer from `archive/tickets/SPEC45STOSTAPRO-001.md` + `archive/tickets/SPEC45STOSTAPRO-002.md`), world-mcp (Phase 2 tool from `archive/tickets/SPEC45STOSTAPRO-003.md` + consumer skill update from `archive/tickets/SPEC45STOSTAPRO-004.md`), and validators (Phase 3 hygiene from SPEC45STOSTAPRO-005). Test must be runnable independently of any actively-maintained world bundle.
+3. Cross-skill / cross-package boundary under audit: the capstone exercises three packages simultaneously — world-index (Phase 1 indexer from `archive/tickets/SPEC45STOSTAPRO-001.md` + `archive/tickets/SPEC45STOSTAPRO-002.md`), world-mcp (Phase 2 tool from `archive/tickets/SPEC45STOSTAPRO-003.md` + consumer skill update from `archive/tickets/SPEC45STOSTAPRO-004.md`), and validators (Phase 3 hygiene from `archive/tickets/SPEC45STOSTAPRO-005.md`). Test must be runnable independently of any actively-maintained world bundle.
 4. FOUNDATIONS principle under audit: §Story Bundles §4 — *"Hook 3 blocks direct `Edit` / `Write` to both `worlds/<slug>/_source/...` and `worlds/<slug>/stories/<story-slug>/_source/...` YAML records. ... Story-pipeline skills must not mutate world canon directly."* The capstone confirms the read-only nature of the indexer — assertion: no `worlds/<slug>/` files are modified during the capstone run; fixture-world copy strategy keeps real bundles untouched. This is the structural proof that SPEC-45's indexer additions do not introduce any write surface.
 
 ## Architecture Check
@@ -53,7 +53,7 @@ Create `tools/world-mcp/tests/integration/spec45-provenance-e2e.test.ts` coverin
 
 ### 3. (Optional) Validator capstone integration
 
-The validator's `cross_file_reference` extension from SPEC45STOSTAPRO-005 is exercised in its own test (`cross-file-reference.test.ts`). The spec's §Verification §End-to-end does not require an additional capstone for the validator extension specifically; the existing validator test plus the world-index synthetic-bundle test together cover the validator's surface. No additional capstone work unless the operator finds structural coverage gaps at implementation time.
+The validator's `cross_file_reference` extension from `archive/tickets/SPEC45STOSTAPRO-005.md` is exercised in its own test (`cross-file-reference.test.ts`). The spec's §Verification §End-to-end does not require an additional capstone for the validator extension specifically; the existing validator test plus the world-index synthetic-bundle test together cover the validator's surface. No additional capstone work unless the operator finds structural coverage gaps at implementation time.
 
 ## Files to Touch
 
