@@ -2,7 +2,7 @@
 
 # SPEC-42: Story-State Debt, Secret, and Clock Records
 
-**Status**: DRAFT
+**Status**: COMPLETED
 **Phase**: wave-1 story-bundle schema additions (debt / secret / clock layer)
 **Depends on**: SPEC-13 (atomic-source migration — establishes per-record-per-file `_source/<class>/<ID>.yaml`); PEENH-001 (story-bundle records use the same pattern); SPEC-34 (validator hardening sets the registry pattern the new validators register into)
 **Blocks**: follow-up specs for `STPLAN` (character plan / motive chain) and `CONV` (branch convergence contract), neither in this spec's scope
@@ -352,3 +352,21 @@ Shared:
 - **`PG.state_snapshot.active_records[]` LLM-token cost. (pragmatic — current 12 classes already produce substantial snapshot text; adding 3 more classes adds proportional cost.)** The snapshot is loaded into every storylet-selection decision; adding three more record-class slots adds proportional LLM-token cost. Page-plan §10b includes only currently-active CLK/STSEC/STQ; the active_records[] entries are bare ID lists per existing convention.
 - **Phase 4 page-plan section addition. (open question — should the new §10b section be inlined verbatim per the §2/§3/§19 inlining convention, or computed per-page?)** The existing §2 Content Policy / §3 Prose Craft Contract / §19 Render-Time Instruction Block are inlined verbatim per `.claude/skills/_shared-templates/story-state-contract.md` §8 because the external LLM renderer has no cross-plan state. §10b is per-page content (different active CLK/STSEC/STQ per page), so it should be computed per-page like §5 (active cast) and §6 (location/affordances). Recommendation: §10b is per-page-computed, not inlined verbatim.
 - **Backfill mode scope. (pragmatic — Phase 5 backfill could become its own spec.)** The proposed `branching-story-health-audit` `backfill_proposal` mode at Phase 5 is a substantial pattern-recognition workflow; it may warrant its own spec rather than living inside this one. Recommendation: ship Phase 5 as RSP-style proposal-card emission within the existing `branching-story-health-audit` mode taxonomy; if the pattern-recognition complexity grows, extract.
+
+---
+
+## Outcome
+
+Completion date: 2026-05-18.
+
+SPEC-42 completed across archived tickets `archive/tickets/SPEC42STOSTADEB-001.md` through `archive/tickets/SPEC42STOSTADEB-015.md`. The implementation added the CLK, STSEC, and STQ story-bundle record surfaces across validators, patch-engine operation schemas, world-mcp retrieval/allocation/context/envelope surfaces, story-pipeline skill contracts, and documentation handoffs.
+
+The final capstone landed in `tools/world-mcp/tests/integration/spec42-capstone.test.ts` and verifies the executable composition boundary for schema/envelope discovery, indexed retrieval/listing/allocation/context packets, validate-patch-plan behavior, and story-pipeline skill contract surrogates.
+
+Verification completed:
+
+1. `npm test` from `tools/validators` — passed, 416 tests.
+2. `npm test` from `tools/world-mcp` — passed, 399 tests.
+3. `node --test dist/tests/integration/spec42-capstone.test.js` from `tools/world-mcp` — passed, 4 tests.
+
+Deviation: `.claude/skills/` story-pipeline flows remain prose workflows rather than executable programs, so skill-level capstone coverage is represented by executable contract-surface surrogate checks instead of live skill dry-runs.

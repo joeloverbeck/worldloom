@@ -15,7 +15,7 @@ At intake, the per-class foundation tickets (SPEC42STOSTADEB-001 / -002 / -003) 
 <!-- Items 1-3 always required. Items 4+ are a menu; include only those matching this ticket's scope and renumber surviving items sequentially starting from 4. Lists like 1, 2, 3, 14 are malformed output. -->
 
 1. Codebase verified during live reassessment (2026-05-18): `.claude/skills/_shared-templates/story-state-contract.md` exists and already lists CLK/STSEC/STQ in §3; `.claude/skills/_shared-templates/story-record-schemas.md` exists and carries the §4 schema split; `CLAUDE.md` exists but still described the story-bundle `_source/` layout and skill record inventories without CLK/STSEC/STQ; live §6 in `story-state-contract.md` is Action Routing, not an integration matrix.
-2. Spec verified at `specs/SPEC-42-story-state-debt-secret-clock-records.md` §Deliverables "Canonical contract updates" section. Live reassessment found the spec's §6 integration-matrix deliverable stale because the main contract no longer owns such a matrix; this ticket truths that spec row while landing the live §5 predicate table and §8 §10b contract. SPEC-42 §Risks "Phase 4 page-plan section addition" recommendation remains current: §10b is per-page-computed (not inlined verbatim like §2 / §3 / §19) — this ticket documents the §10b SECTION DESCRIPTION in §8, while the per-page-computed RENDERING landed in `archive/tickets/SPEC42STOSTADEB-009.md`.
+2. Spec verified at `archive/specs/SPEC-42-story-state-debt-secret-clock-records.md` §Deliverables "Canonical contract updates" section. Live reassessment found the spec's §6 integration-matrix deliverable stale because the main contract no longer owns such a matrix; this ticket truths that spec row while landing the live §5 predicate table and §8 §10b contract. SPEC-42 §Risks "Phase 4 page-plan section addition" recommendation remains current: §10b is per-page-computed (not inlined verbatim like §2 / §3 / §19) — this ticket documents the §10b SECTION DESCRIPTION in §8, while the per-page-computed RENDERING landed in `archive/tickets/SPEC42STOSTADEB-009.md`.
 3. Cross-skill / cross-tool shared boundary: the shared `story-state-contract.md` is the canonical reference for Skill Category 2c story-pipeline skills for predicate DSL (§5), action routing (§6), hard gates (§7), and page-plan minimum contract (§8). Integration behavior is now owned by the skill-specific surfaces that already landed in archived tickets -009 through -013; this ticket does not reintroduce a duplicate integration matrix.
 
 ## Architecture Check
@@ -59,7 +59,7 @@ Updated the active spec deliverables row that still named `.claude/skills/_share
 
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify — §5 grammar table 12 new entries; §8 §10b section description)
 - `CLAUDE.md` (modify — Story Bundles section inventory list 3 new class entries)
-- `specs/SPEC-42-story-state-debt-secret-clock-records.md` (modify — truth stale §6 integration-matrix deliverable row)
+- `archive/specs/SPEC-42-story-state-debt-secret-clock-records.md` (modify — truth stale §6 integration-matrix deliverable row)
 - `archive/tickets/SPEC42STOSTADEB-014.md` (modify — reassessment and closeout truthing after archival)
 
 ## Out of Scope
@@ -78,7 +78,7 @@ Updated the active spec deliverables row that still named `.claude/skills/_share
 1. Grep-proof: `grep -cE '(clock_at_least|clock_below|clock_full|any_clock_active|secret_unrevealed|secret_revealed|revelation_ready|any_secret_unrevealed|story_question_open|story_question_status|any_story_question_open|promise_due)' .claude/skills/_shared-templates/story-state-contract.md` returns at least 12 (the 12 new predicate names in §5; may also appear elsewhere in the doc)
 2. Grep-proof: §8 has §10b section (`grep -n '§10b\|10b\|Open Setups, Active Clocks' .claude/skills/_shared-templates/story-state-contract.md` shows hits in §8)
 3. Grep-proof: `grep -n 'CLK\|STSEC\|STQ' CLAUDE.md` shows hits in the Story Bundles section inventory list
-4. Grep-proof: active SPEC-42 no longer carries the old actionable deliverable phrase (`! grep -nF '§6 — add CLK/STSEC/STQ to story-pipeline integration matrix' specs/SPEC-42-story-state-debt-secret-clock-records.md`)
+4. Grep-proof: active SPEC-42 no longer carries the old actionable deliverable phrase (`! grep -nF '§6 — add CLK/STSEC/STQ to story-pipeline integration matrix' archive/specs/SPEC-42-story-state-debt-secret-clock-records.md`)
 5. No production code changes — `git diff --stat -- tools/` shows no modifications
 
 ### Invariants
@@ -100,7 +100,7 @@ Updated the active spec deliverables row that still named `.claude/skills/_share
 1. `grep -cE '(clock_at_least|clock_below|clock_full|any_clock_active|secret_unrevealed|secret_revealed|revelation_ready|any_secret_unrevealed|story_question_open|story_question_status|any_story_question_open|promise_due)' .claude/skills/_shared-templates/story-state-contract.md` — verify §5 predicate-list growth
 2. `grep -n '§10b\|Open Setups, Active Clocks' .claude/skills/_shared-templates/story-state-contract.md` — verify the new §10b section exists
 3. `grep -n 'CLK\|STSEC\|STQ' CLAUDE.md` — verify the inventory extension landed
-4. `! grep -nF '§6 — add CLK/STSEC/STQ to story-pipeline integration matrix' specs/SPEC-42-story-state-debt-secret-clock-records.md` — verify the active spec no longer names the retired §6 matrix as a current deliverable
+4. `! grep -nF '§6 — add CLK/STSEC/STQ to story-pipeline integration matrix' archive/specs/SPEC-42-story-state-debt-secret-clock-records.md` — verify the active spec no longer names the retired §6 matrix as a current deliverable
 5. `git diff --stat -- tools/` — verify no production code changes (output should show zero file modifications under tools/)
 6. The full-pipeline verification command lands in SPEC42STOSTADEB-015 capstone
 
@@ -115,9 +115,9 @@ The shared story-state contract now documents the 12 SPEC-42 predicate forms in 
 1. `grep -cE '(clock_at_least|clock_below|clock_full|any_clock_active|secret_unrevealed|secret_revealed|revelation_ready|any_secret_unrevealed|story_question_open|story_question_status|any_story_question_open|promise_due)' .claude/skills/_shared-templates/story-state-contract.md` — passed; returned `12`.
 2. `grep -n '§10b\|Open Setups, Active Clocks' .claude/skills/_shared-templates/story-state-contract.md` — passed; found the §10b intro, table row, and per-page-computed explanation.
 3. `grep -n 'CLK\|STSEC\|STQ' CLAUDE.md` — passed; found the story `_source/` layout and bootstrap / turn-cycle summaries.
-4. `grep -nF '§6 — add CLK/STSEC/STQ to story-pipeline integration matrix' specs/SPEC-42-story-state-debt-secret-clock-records.md` — passed as a negative proof; exited 1 with no matches.
+4. `grep -nF '§6 — add CLK/STSEC/STQ to story-pipeline integration matrix' archive/specs/SPEC-42-story-state-debt-secret-clock-records.md` — passed as a negative proof; exited 1 with no matches.
 5. `git diff --stat -- tools/` — passed; no output, so this ticket changed no production code under `tools/`.
-6. `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md CLAUDE.md specs/SPEC-42-story-state-debt-secret-clock-records.md tickets/SPEC42STOSTADEB-014.md` — passed before archival. After archival, the equivalent archived-path hygiene was `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md CLAUDE.md specs/SPEC-42-story-state-debt-secret-clock-records.md archive/tickets/SPEC42STOSTADEB-014.md`.
+6. `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md CLAUDE.md archive/specs/SPEC-42-story-state-debt-secret-clock-records.md tickets/SPEC42STOSTADEB-014.md` — passed before archival. After archival, the equivalent archived-path hygiene was `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md CLAUDE.md archive/specs/SPEC-42-story-state-debt-secret-clock-records.md archive/tickets/SPEC42STOSTADEB-014.md`.
 
 ## Deviations
 
