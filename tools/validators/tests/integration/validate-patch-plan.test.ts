@@ -195,6 +195,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "relationship_introduction_grounding_integrity"
     );
     assert.equal(relationshipIntroExecution?.status, "skipped");
+    const narrativeShapeExecution = result.executions.find(
+      (execution) => execution.name === "narrative_shape_field_rejection"
+    );
+    assert.equal(narrativeShapeExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -225,7 +229,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         !storyQuestionExecutions.includes(row) &&
         row !== threadIntroExecution &&
         row !== entityIntroExecution &&
-        row !== relationshipIntroExecution
+        row !== relationshipIntroExecution &&
+        row !== narrativeShapeExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

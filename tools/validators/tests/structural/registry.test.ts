@@ -40,6 +40,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "thread_introduction_grounding_integrity",
       "entity_introduction_status_pairing",
       "relationship_introduction_grounding_integrity",
+      "narrative_shape_field_rejection",
       "story_question_payoff_integrity",
       "story_question_setup_predates_payoff",
       "story_question_grounding_integrity",

@@ -17,6 +17,7 @@ import { nonPropagationTagShape } from "../structural/non-propagation-tag-shape.
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
+import { narrativeShapeFieldRejection } from "../structural/narrative-shape-field-rejection.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
@@ -89,6 +90,7 @@ export const structuralValidators: readonly Validator[] = [
   threadIntroductionGroundingIntegrity,
   entityIntroductionStatusPairing,
   relationshipIntroductionGroundingIntegrity,
+  narrativeShapeFieldRejection,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,
