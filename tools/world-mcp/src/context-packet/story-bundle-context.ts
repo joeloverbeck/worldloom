@@ -45,6 +45,7 @@ const HIDDEN_SECRET_STATUSES = new Set(["hidden", "partially_revealed"]);
 const OPEN_STORY_QUESTION_STATUSES = new Set(["open", "complicated", "inherited"]);
 const MAX_VISIBLE_STORYLETS = 50;
 const MAX_RECENT_BRANCH_PAGES = 10;
+const STORY_RECORD_ID_REGEX = /\b(?:STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|DA)-[A-Za-z0-9-]+\b/g;
 const ROLE_IN_STORY_VALUES = new Set<RoleInStory>([
   "viewpoint",
   "player_proxy",
@@ -78,6 +79,20 @@ function rowsForNodeType(
       `
     )
     .all(worldSlug, storySlug, nodeType) as StoryNodeRow[];
+}
+
+function rowsForStory(db: Database.Database, worldSlug: string, storySlug: string): StoryNodeRow[] {
+  return db
+    .prepare(
+      `
+        SELECT node_id, story_slug, node_type, file_path, body, summary
+        FROM nodes
+        WHERE world_slug = ?
+          AND story_slug = ?
+        ORDER BY node_id
+      `
+    )
+    .all(worldSlug, storySlug) as StoryNodeRow[];
 }
 
 function authoredId(row: Pick<StoryNodeRow, "node_id" | "story_slug">): string {
@@ -326,6 +341,98 @@ function buildActiveRelationshipsByParticipant(
   return [...groups.values()];
 }
 
+function referencedStoryRecordIds(rows: StoryNodeRow[], excludedNodeId: string): Set<string> {
+  const ids = new Set<string>();
+
+  for (const row of rows) {
+    if (row.node_id === excludedNodeId) {
+      continue;
+    }
+
+    for (const match of row.body.matchAll(STORY_RECORD_ID_REGEX)) {
+      ids.add(match[0]);
+    }
+  }
+
+  return ids;
+}
+
+function isReferencedByOtherRecord(row: StoryNodeRow, rows: StoryNodeRow[]): boolean {
+  return referencedStoryRecordIds(rows, row.node_id).has(authoredId(row));
+}
+
+/**
+ * Scoped to records referenced by any other active record's body on the current
+ * branch path. See SPEC-46 Phase B scope heuristic.
+ */
+function buildActiveLocationsInScope(
+  locationRows: StoryNodeRow[],
+  allStoryRows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_locations_in_scope"] {
+  return locationRows
+    .filter((row) => isReferencedByOtherRecord(row, allStoryRows))
+    .map((row) => {
+      const record = parseYamlRecord(row);
+      return {
+        id: asString(record.id, authoredId(row)),
+        label: asString(record.label),
+        description: asString(record.description),
+        bound_ent: asNullableString(record.bound_ent)
+      };
+    });
+}
+
+/**
+ * Scoped to records referenced by any other active record's body on the current
+ * branch path. See SPEC-46 Phase B scope heuristic.
+ */
+function buildActiveObjectsInScope(
+  objectRows: StoryNodeRow[],
+  allStoryRows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_objects_in_scope"] {
+  return objectRows
+    .filter((row) => isReferencedByOtherRecord(row, allStoryRows))
+    .map((row) => {
+      const record = parseYamlRecord(row);
+      return {
+        id: asString(record.id, authoredId(row)),
+        label: asString(record.label),
+        description: asString(record.description),
+        owner:
+          typeof record.owner === "string" && record.owner.length > 0
+            ? record.owner
+            : null,
+        current_location: asString(record.current_location)
+      };
+    });
+}
+
+/**
+ * Scoped to story-local DA records referenced by any other active record's body
+ * on the current branch path. World-level DA still routes through list_records.
+ * See SPEC-46 Phase B scope heuristic.
+ */
+function buildActiveStoryDiegeticArtifacts(
+  storyDaRows: StoryNodeRow[],
+  allStoryRows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_story_diegetic_artifacts"] {
+  return storyDaRows
+    .filter((row) => isReferencedByOtherRecord(row, allStoryRows))
+    .map((row) => {
+      const record = parseYamlRecord(row);
+      return {
+        id: asString(record.id, authoredId(row)),
+        title: asString(record.title),
+        author: asString(record.author),
+        genre: asString(record.genre),
+        intended_audience: asString(record.intended_audience),
+        circulation: asString(record.circulation),
+        truth_relation: asString(record.truth_relation),
+        derived_from: asStringArray(record.derived_from)
+      };
+    });
+}
+
 function buildActiveThreads(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_threads"] {
   return rows
     .map((row) => ({ row, record: parseYamlRecord(row) }))
@@ -562,6 +669,9 @@ export function summarizeStoryBundleContext(
     active_relationship_participants: context.active_relationships_by_participant.map(
       (group) => [...group.participants]
     ),
+    active_location_ids: context.active_locations_in_scope.map((location) => location.id),
+    active_object_ids: context.active_objects_in_scope.map((object) => object.id),
+    active_story_da_ids: context.active_story_diegetic_artifacts.map((artifact) => artifact.id),
     active_thread_ids: context.active_threads.map((thread) => thread.id),
     active_clock_ids: context.active_clocks.map((clock) => clock.id),
     hidden_secret_ids: context.hidden_secrets.map((secret) => secret.id),
@@ -585,11 +695,15 @@ export function buildStoryBundleContext(
   const statusRows = rowsForNodeType(db, worldSlug, storySlug, "story_status_record");
   const beliefRows = rowsForNodeType(db, worldSlug, storySlug, "belief_record");
   const relationshipRows = rowsForNodeType(db, worldSlug, storySlug, "relationship_record_story");
+  const locationRows = rowsForNodeType(db, worldSlug, storySlug, "story_location_record");
+  const objectRows = rowsForNodeType(db, worldSlug, storySlug, "story_object_record");
+  const storyDaRows = rowsForNodeType(db, worldSlug, storySlug, "story_diegetic_artifact_record");
   const threadRows = rowsForNodeType(db, worldSlug, storySlug, "thread_record");
   const clockRows = rowsForNodeType(db, worldSlug, storySlug, "pressure_clock_record");
   const secretRows = rowsForNodeType(db, worldSlug, storySlug, "story_secret_record");
   const storyQuestionRows = rowsForNodeType(db, worldSlug, storySlug, "story_question_record");
   const pageRows = rowsForNodeType(db, worldSlug, storySlug, "page_record");
+  const allStoryRows = rowsForStory(db, worldSlug, storySlug);
   const frontmatter = parseStoryKernelFrontmatter(worldSlug, storySlug);
   const branchContext = buildBranchContext(pageRows);
 
@@ -602,6 +716,9 @@ export function buildStoryBundleContext(
     active_beliefs_by_holder: buildActiveBeliefsByHolder(beliefRows),
     active_relationships_by_participant:
       buildActiveRelationshipsByParticipant(relationshipRows),
+    active_locations_in_scope: buildActiveLocationsInScope(locationRows, allStoryRows),
+    active_objects_in_scope: buildActiveObjectsInScope(objectRows, allStoryRows),
+    active_story_diegetic_artifacts: buildActiveStoryDiegeticArtifacts(storyDaRows, allStoryRows),
     active_threads: buildActiveThreads(threadRows),
     active_clocks: buildActiveClocks(clockRows),
     hidden_secrets: buildHiddenSecrets(secretRows),

@@ -12,6 +12,8 @@
 
 **Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-003.md`)**: the live `SREL` schema uses node type `relationship_record_story` and carries singular `axis` / `value` fields with no `status` field. `archive/tickets/SPEC46STOPIPMAC-003.md` therefore landed `active_relationships_by_participant` as grouped participant pairs plus `axes: [{axis, value}]`; it does not fabricate the drafted `status` field.
 
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-004.md`)**: the live `STLOC`, `STOBJ`, and story-local `DA` schemas do not contain the drafted Phase B `name`, `status`, `affordances`, `accessible_to`, `kind`, `holders`, or DA `location` fields. `archive/tickets/SPEC46STOPIPMAC-004.md` therefore landed schema-faithful `active_locations_in_scope`, `active_objects_in_scope`, and `active_story_diegetic_artifacts` projections using the validator-backed fields documented in that ticket's Outcome. Downstream docs/capability ticket 005 should mirror the landed schema-faithful shapes rather than the stale Phase B table.
+
 ---
 
 ## Problem Statement

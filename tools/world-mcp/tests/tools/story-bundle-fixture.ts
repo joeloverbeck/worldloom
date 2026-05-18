@@ -122,6 +122,8 @@ export function buildStoryBundleWorld(root: string): void {
           "visibility: private",
           "basis:",
           "  source_event: SE-1",
+          "  access_records:",
+          "    - DA-1",
           ""
         ].join("\n")
       },
@@ -209,6 +211,76 @@ export function buildStoryBundleWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STLOC-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "locations", "STLOC-1.yaml"),
+        node_type: "story_location_record",
+        body: [
+          "id: STLOC-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "label: Loft window",
+          "description: A narrow window above the old loft.",
+          "bound_ent: null",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STLOC-2"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "locations", "STLOC-2.yaml"),
+        node_type: "story_location_record",
+        body: [
+          "id: STLOC-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "label: Unused cellar",
+          "description: A cellar not referenced by the active branch state.",
+          "bound_ent: null",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STOBJ-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "objects", "STOBJ-1.yaml"),
+        node_type: "story_object_record",
+        body: [
+          "id: STOBJ-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "label: Brass latch",
+          "description: A tarnished latch on the loft window.",
+          "owner: public",
+          "current_location: STLOC-1",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STOBJ-2"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "objects", "STOBJ-2.yaml"),
+        node_type: "story_object_record",
+        body: [
+          "id: STOBJ-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "label: Unused ledger",
+          "description: A ledger not referenced by the active branch state.",
+          "owner: null",
+          "current_location: unknown",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "SREL-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
@@ -268,7 +340,7 @@ export function buildStoryBundleWorld(root: string): void {
         story_slug: STORY_FIXTURE_SLUG,
         file_path: storyPath(STORY_FIXTURE_SLUG, "events", "SE-1.yaml"),
         node_type: "story_event_record",
-        body: "id: SE-1\nsummary: Marla enters the loft.\n"
+        body: "id: SE-1\nsummary: Marla enters the loft.\ntargets:\n  - STLOC-1\n  - STOBJ-1\n"
       },
       {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "DA-1"),
@@ -280,9 +352,38 @@ export function buildStoryBundleWorld(root: string): void {
           "id: DA-1",
           "story_id: STORY-1",
           "created_at_page: PG-1",
-          "title: Loft Bell",
-          "artifact_type: note",
-          "artifact_text: The bell rang before Marla entered.",
+          "supersedes: null",
+          "title: Loft Bell Note",
+          "author: unknown",
+          "genre: note",
+          "body: The bell rang before Marla entered.",
+          "intended_audience: public",
+          "circulation: public",
+          "truth_relation: unknown",
+          "derived_from:",
+          "  - SE-1",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "DA-2"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "artifacts", "DA-2.yaml"),
+        node_type: "story_diegetic_artifact_record",
+        body: [
+          "id: DA-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "title: Unused receipt",
+          "author: anonymous",
+          "genre: receipt",
+          "body: A receipt no one has referenced.",
+          "intended_audience: none",
+          "circulation: private",
+          "truth_relation: unknown",
+          "derived_from: []",
           ""
         ].join("\n")
       },

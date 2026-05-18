@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/CONTEXT-PACKET-CONTRACT.md` (story_bundle_context section update for the 7 new summaries + scope heuristic), `tools/world-mcp/src/tools/describe-capabilities.ts` (enumerate the 7 new summary fields)
-**Deps**: archive/tickets/SPEC46STOPIPMAC-002.md, archive/tickets/SPEC46STOPIPMAC-003.md, SPEC46STOPIPMAC-004
+**Deps**: archive/tickets/SPEC46STOPIPMAC-002.md, archive/tickets/SPEC46STOPIPMAC-003.md, archive/tickets/SPEC46STOPIPMAC-004.md
 
 ## Problem
 
@@ -12,8 +12,8 @@ After Phase B implementation tickets 002 / 003 / 004 land, the seven new MCP con
 
 ## Assumption Reassessment (2026-05-18)
 
-1. `docs/CONTEXT-PACKET-CONTRACT.md` exists and is the canonical contract doc for context-packet shape per FOUNDATIONS §Tooling Recommendation (cited at FOUNDATIONS line 522). `tools/world-mcp/src/tools/describe-capabilities.ts` exists and is the runtime capability-description surface. Both surfaces will reference the seven new summary fields contributed by sibling tickets 002, 003, 004.
-2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase B Deliverable D-B5 names `docs/CONTEXT-PACKET-CONTRACT.md` under the `story_bundle_context` section as the docs target for the scope heuristic; D-B7 names `tools/world-mcp/src/tools/describe-capabilities.ts` (or equivalent capability-description surface) for enumeration of the new summary fields.
+1. `docs/CONTEXT-PACKET-CONTRACT.md` exists and is the canonical contract doc for context-packet shape per FOUNDATIONS §Tooling Recommendation. `tools/world-mcp/src/tools/describe-capabilities.ts` exists and is the runtime capability-description surface. Both surfaces will reference the seven new summary fields contributed by sibling tickets 002, 003, and 004.
+2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase B Deliverable D-B5 names `docs/CONTEXT-PACKET-CONTRACT.md` under the `story_bundle_context` section as the docs target for the scope heuristic; D-B7 names `tools/world-mcp/src/tools/describe-capabilities.ts` (or equivalent capability-description surface) for enumeration of the new summary fields. The implementation notes for `archive/tickets/SPEC46STOPIPMAC-003.md` and `archive/tickets/SPEC46STOPIPMAC-004.md` correct stale drafted field shapes; this docs ticket must mirror the archived ticket outcomes and live `ContextPacketStoryBundleContext` type, not the stale Phase B table rows.
 3. Cross-skill boundary: `docs/CONTEXT-PACKET-CONTRACT.md` is consumed by skill operators authoring new skills, by integration-audit operators, and by readers cross-referencing FOUNDATIONS §Tooling Recommendation. `describe-capabilities.ts` is consumed by every MCP client at session start. Both surfaces must be coherent with the implemented context-packet shape post-Phase-B.
 4. FOUNDATIONS §Tooling Recommendation principle motivating this ticket: *"LLM agents should never operate on prose alone. They should always receive ... the documented context-packet + targeted-retrieval pattern"*. The contract doc IS the documented surface for the context-packet pattern; if it does not enumerate the 7 new Phase B summary fields, downstream skill authors cannot discover those summaries and the §Tooling Recommendation promise weakens. The docs update is the operational completion of the principle for the Phase B additions.
 
@@ -34,7 +34,7 @@ After Phase B implementation tickets 002 / 003 / 004 land, the seven new MCP con
 
 Locate the `story_bundle_context` section in `docs/CONTEXT-PACKET-CONTRACT.md` and:
 - Add the seven new summary fields under the existing summary-field enumeration (alongside `storylet_pool_summary`, `open_obligations`, `active_threads`, `active_clocks`, `hidden_secrets`, `open_story_questions`, `longest_active_branch_path`, `recent_pages_along_longest_active_branch`, `mysteries_in_play`, `mystery_evidence_chains`, `cast_bind_list`, `invariants_acknowledged`). For each new field, name its shape (one-sentence summary) and its named consumer (one-sentence summary per the Phase B per-class consumer table).
-- Add a sub-section documenting the scope heuristic for `active_locations_in_scope` / `active_objects_in_scope` (and the story-local filter for `active_story_diegetic_artifacts`), copying the heuristic statement from the JSDoc landed in sibling ticket 004. Cite SPEC-46 §Phase B as the authoritative source.
+- Add a sub-section documenting the scope heuristic for `active_locations_in_scope` / `active_objects_in_scope` (and the story-local filter for `active_story_diegetic_artifacts`), copying the heuristic statement from the JSDoc landed in archived sibling ticket 004. Cite SPEC-46 §Phase B as the heuristic source, and cite `archive/tickets/SPEC46STOPIPMAC-004.md` for the schema-faithful field shapes.
 - Add a brief Out-of-Scope note pointing to the deferred Priority 2 packets (present-causal-situation, dramatic-irony, reader-expectation, social-pressure, pressure-texture, branch-possibility-space) so doc readers know the seven new summaries are foundation for those packets but not the packets themselves.
 
 ### 2. Update `tools/world-mcp/src/tools/describe-capabilities.ts`
@@ -48,7 +48,7 @@ Locate the surface that enumerates the story-bundle context summary fields in th
 
 ## Out of Scope
 
-- Production code changes: covered by sibling tickets 002, 003, 004.
+- Production code changes: covered by archived sibling tickets 002, 003, 004.
 - Phase C documentation (MACHINE-FACING-LAYER.md story-edge enumeration): covered by SPEC46STOPIPMAC-014.
 - Updates to skill prose under `.claude/skills/` that reference the new fields: spec §Deliverable D-X2 marks this as strictly opt-in / no-change.
 
@@ -63,8 +63,8 @@ Locate the surface that enumerates the story-bundle context summary fields in th
 
 ### Invariants
 
-1. Every field name added to `describe-capabilities.ts` matches the field name landed on `ContextPacketStoryBundleContext` by sibling tickets 002, 003, 004 — no drift between the type and the capability description.
-2. The scope-heuristic statement in `CONTEXT-PACKET-CONTRACT.md` matches the JSDoc statement landed on `buildActiveLocationsInScope` / `buildActiveObjectsInScope` by sibling ticket 004 — single source of truth for the heuristic prose; the docs section is the canonical reference and the JSDoc is the colocated mirror.
+1. Every field name added to `describe-capabilities.ts` matches the field name landed on `ContextPacketStoryBundleContext` by archived sibling tickets 002, 003, 004 — no drift between the type and the capability description.
+2. The scope-heuristic statement in `CONTEXT-PACKET-CONTRACT.md` matches the JSDoc statement landed on `buildActiveLocationsInScope` / `buildActiveObjectsInScope` by archived sibling ticket 004 — single source of truth for the heuristic prose; the docs section is the canonical reference and the JSDoc is the colocated mirror.
 
 ## Test Plan
 

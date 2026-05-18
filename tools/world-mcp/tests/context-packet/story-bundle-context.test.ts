@@ -267,6 +267,60 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
       }
     ]);
     assert.deepEqual(
+      result.story_bundle_context.active_locations_in_scope.map((location) => Object.keys(location)),
+      [["id", "label", "description", "bound_ent"]]
+    );
+    assert.deepEqual(result.story_bundle_context.active_locations_in_scope, [
+      {
+        id: "STLOC-1",
+        label: "Loft window",
+        description: "A narrow window above the old loft.",
+        bound_ent: null
+      }
+    ]);
+    assert.deepEqual(
+      result.story_bundle_context.active_objects_in_scope.map((object) => Object.keys(object)),
+      [["id", "label", "description", "owner", "current_location"]]
+    );
+    assert.deepEqual(result.story_bundle_context.active_objects_in_scope, [
+      {
+        id: "STOBJ-1",
+        label: "Brass latch",
+        description: "A tarnished latch on the loft window.",
+        owner: "public",
+        current_location: "STLOC-1"
+      }
+    ]);
+    assert.deepEqual(
+      result.story_bundle_context.active_story_diegetic_artifacts.map((artifact) =>
+        Object.keys(artifact)
+      ),
+      [
+        [
+          "id",
+          "title",
+          "author",
+          "genre",
+          "intended_audience",
+          "circulation",
+          "truth_relation",
+          "derived_from"
+        ]
+      ]
+    );
+    assert.deepEqual(result.story_bundle_context.active_story_diegetic_artifacts, [
+      {
+        id: "DA-1",
+        title: "Loft Bell Note",
+        author: "unknown",
+        genre: "note",
+        intended_audience: "public",
+        circulation: "public",
+        truth_relation: "unknown",
+        derived_from: ["SE-1"]
+      }
+    ]);
+    assert.deepEqual(
       result.story_bundle_context.active_threads.map((thread) => thread.id),
       ["THR-1"]
     );
@@ -328,6 +382,9 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     assert.deepEqual(storyBundleContextSummary?.active_relationship_participants, [
       ["STENT-2", "STENT-3"]
     ]);
+    assert.deepEqual(storyBundleContextSummary?.active_location_ids, ["STLOC-1"]);
+    assert.deepEqual(storyBundleContextSummary?.active_object_ids, ["STOBJ-1"]);
+    assert.deepEqual(storyBundleContextSummary?.active_story_da_ids, ["DA-1"]);
   } finally {
     destroyTempRepoRoot(root);
   }

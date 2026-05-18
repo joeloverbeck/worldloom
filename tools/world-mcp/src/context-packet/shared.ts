@@ -73,6 +73,9 @@ export interface ContextPacketStoryBundleContextSummary {
   active_status_entities: string[];
   active_belief_holders: string[];
   active_relationship_participants: string[][];
+  active_location_ids: string[];
+  active_object_ids: string[];
+  active_story_da_ids: string[];
   active_thread_ids: string[];
   active_clock_ids: string[];
   hidden_secret_ids: string[];
@@ -167,6 +170,29 @@ export interface ContextPacketStoryBundleContext {
       axis: string;
       value: string;
     }>;
+  }>;
+  active_locations_in_scope: Array<{
+    id: string;
+    label: string;
+    description: string;
+    bound_ent: string | null;
+  }>;
+  active_objects_in_scope: Array<{
+    id: string;
+    label: string;
+    description: string;
+    owner: string | null;
+    current_location: string;
+  }>;
+  active_story_diegetic_artifacts: Array<{
+    id: string;
+    title: string;
+    author: string;
+    genre: string;
+    intended_audience: string;
+    circulation: string;
+    truth_relation: string;
+    derived_from: string[];
   }>;
   active_threads: Array<{
     id: string;

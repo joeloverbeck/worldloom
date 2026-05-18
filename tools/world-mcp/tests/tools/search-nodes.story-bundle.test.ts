@@ -45,6 +45,8 @@ test("searchNodes scopes lexical search to the requested story bundle", async ()
         ["opening-bells:SF-1", "story_fact_record", STORY_FIXTURE_SLUG],
         ["opening-bells:SLT-21", "storylet_record", STORY_FIXTURE_SLUG],
         ["opening-bells:STINT-1", "intention_record", STORY_FIXTURE_SLUG],
+        ["opening-bells:STLOC-1", "story_location_record", STORY_FIXTURE_SLUG],
+        ["opening-bells:STOBJ-1", "story_object_record", STORY_FIXTURE_SLUG],
         ["opening-bells:STQ-1", "story_question_record", STORY_FIXTURE_SLUG],
         ["opening-bells:STSEC-1", "story_secret_record", STORY_FIXTURE_SLUG]
       ]
