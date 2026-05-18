@@ -1,6 +1,6 @@
 # SPEC44STOSTAAPP-008: `active_records_full_shape` validator (warn severity)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new structural validator `active_records_full_shape` registered in `tools/validators/src/public/registry.ts` at `warn` severity; complements the existing `compatibility-drift.ts` `compat_missing_active_record_key` diagnostic. No impact on existing validators.
@@ -18,7 +18,9 @@ SPEC-44 §Approach Phase 3 step 12 introduces a consolidated `warn`-level diagno
 2. SPEC-44 §Approach Phase 3 step 12 specifies the validator's scope and severity (warn). §Out of Scope confirms that hard-fail and the Wave 3 repair skill are deferred. The validator's role is consolidated shape-completeness surfacing, not the bundle-classification work that `compatibility-drift.ts` owns.
 3. **Cross-boundary surface under audit**: this validator complements `compatibility-drift.ts` — the existing validator owns bundle classification (`compatible_optional_absence` / `grandfathered_snapshot_shape` / `requires_migration_patch` / etc.); the new validator owns the per-page shape-completeness diagnostic uniformly at warn severity. The two run in distinct phases (compatibility classifies the bundle at audit-time; the new validator fires at each PG commit).
 4. **FOUNDATIONS principle**: §Story Bundles §4b (Canon Baseline Drift) — drift between a parent PG snapshot and the current contract MUST classify; this validator surfaces shape-drift at commit time (per-PG) rather than only at audit time (per-bundle), keeping the audit-trail anchor visible at every commit gate.
-5. **Canon Safety surface touched**: the new validator is a structural pre-apply gate under `tools/validators/src/structural/` per the per-ticket-type granularity rule. It gates page-record submission at `warn` severity; the change does NOT weaken the Mystery Reserve firewall — active-records completeness is internal snapshot consistency, distinct from mystery-resolution gating. Future Wave 3 upgrade to `fail` severity requires the `branching-story-compatibility-repair` skill to land first.
+5. **Canon Safety surface touched**: the new validator is a structural full-world validator under `tools/validators/src/structural/` with `applies_to` excluding `pre-apply`. It does not gate patch-plan submission or approval-token flows in this ticket; the change does NOT weaken the Mystery Reserve firewall — active-records completeness is internal snapshot consistency, distinct from mystery-resolution gating. Future Wave 3 upgrade to `fail` severity or pre-apply participation requires the `branching-story-compatibility-repair` skill to land first.
+6. Live package reassessment found same-seam registry fallout beyond the original file list: `tools/validators/tests/structural/registry.test.ts` asserts the exact structural validator list, `tools/validators/tests/integration/spec04-verification.test.ts` asserts `structuralValidators.length === 49`, and `tools/validators/README.md` inventories the structural validator names. These surfaces must move with the new registry entry.
+7. The drafted targeted command `npm test --prefix tools/validators -- active-records-full-shape` is not the truthful narrow lane for this package because the package `test` script always runs `npm run build && node --test dist/tests/**/*.test.js`. The targeted lane is `npm run build --prefix tools/validators` followed by direct `node --test tools/validators/dist/tests/structural/active-records-full-shape.test.js`.
 
 ## Architecture Check
 
@@ -30,7 +32,7 @@ SPEC-44 §Approach Phase 3 step 12 introduces a consolidated `warn`-level diagno
 1. **Validator registered with `warn` severity** → codebase grep-proof: `grep -n 'active_records_full_shape' tools/validators/src/public/registry.ts` returns a registry entry with `severity_mode: "warn"`.
 2. **Validator fires per missing class** → synthetic-fixture test: a page record whose `state_snapshot.active_records` omits CLK / STSEC / STQ / DA returns 4 `warn` verdicts (one per missing class).
 3. **Validator validates clean on full shape** → synthetic-fixture test: a page record whose `state_snapshot.active_records` has all 15 class keys (each as `[]` or populated) returns clean.
-4. **Validator coexists with compatibility-drift classifications** → end-to-end fixture test: a pre-SPEC-43 bundle audit run shows BOTH the SPEC-43 `compat_missing_active_record_key` / `compatible_optional_absence` classifications AND the SPEC-44 `active_records_full_shape` `warn` verdicts; neither subsumes the other.
+4. **Validator coexists with compatibility-drift classifications** → synthetic-fixture and CLI smoke tests show BOTH the SPEC-43 `compat_missing_active_record_key` / `compatible_optional_absence` classifications AND the SPEC-44 `active_records_full_shape` `warn` verdicts; neither subsumes the other.
 
 ## What to Change
 
@@ -61,6 +63,9 @@ Create `tools/validators/tests/structural/active-records-full-shape.test.ts` cov
 - `tools/validators/src/structural/active-records-full-shape.ts` (new)
 - `tools/validators/src/public/registry.ts` (modify — add import + registry entry)
 - `tools/validators/tests/structural/active-records-full-shape.test.ts` (new)
+- `tools/validators/tests/structural/registry.test.ts` (modify — registry inventory)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — structural validator count)
+- `tools/validators/README.md` (modify — validator inventory)
 
 ## Out of Scope
 
@@ -74,7 +79,7 @@ Create `tools/validators/tests/structural/active-records-full-shape.test.ts` cov
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators -- active-records-full-shape` passes all 5 test cases (2 diagnostic, 2 positive, 1 coexistence).
+1. `npm run build --prefix tools/validators` followed by `node --test tools/validators/dist/tests/structural/active-records-full-shape.test.js` passes all 6 test cases (1 run-mode scoping, 2 diagnostic, 2 positive, 1 coexistence).
 2. `npm test --prefix tools/validators` exits 0 (full validator suite regression; pre-SPEC-43 bundle fixtures should now emit `warn` verdicts but not `fail`).
 3. `npm run build --prefix tools/validators` exits 0.
 
@@ -88,11 +93,29 @@ Create `tools/validators/tests/structural/active-records-full-shape.test.ts` cov
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/active-records-full-shape.test.ts` (new) — 5 test cases per §What to Change step 3.
-2. No modifications to existing tests (the SPEC-43 `compatibility-drift` tests remain unchanged).
+1. `tools/validators/tests/structural/active-records-full-shape.test.ts` (new) — 6 test cases covering run-mode scoping plus the 5 behavior cases from §What to Change step 3.
+2. `tools/validators/tests/structural/registry.test.ts` (modified) — structural validator inventory includes `active_records_full_shape`.
+3. `tools/validators/tests/integration/spec04-verification.test.ts` (modified) — expected structural validator count increments from 49 to 50.
+4. No modifications to compatibility-drift behavior tests (the SPEC-43 `compatibility-drift` tests remain unchanged).
 
 ### Commands
 
-1. `npm test --prefix tools/validators -- active-records-full-shape` — targeted validator test.
-2. `npm test --prefix tools/validators` — full validator suite regression.
-3. `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` — end-to-end CLI run against a real bundle; expected output: `fail_count: 0`, `warn_count` may increase (this validator's new `warn` verdicts), `info_count` unchanged.
+1. `npm run build --prefix tools/validators` — producer build for compiled test artifacts.
+2. `node --test tools/validators/dist/tests/structural/active-records-full-shape.test.js` — targeted validator test.
+3. `npm test --prefix tools/validators` — full validator suite regression.
+4. `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` — end-to-end CLI run against a real bundle; expected output in this checkout: `fail_count: 0`, `warn_count: 15` from `active_records_full_shape`, `info_count: 10` from existing `compatibility_drift` classifications.
+
+## Outcome (2026-05-18)
+
+- Added `active_records_full_shape` as a full-world-only structural validator with `severity_mode: "warn"`. It emits one `active_records_class_key_missing` verdict per missing `PG.state_snapshot.active_records` class key and does not participate in pre-apply validation.
+- Registered the validator in the structural validator registry and updated same-seam inventory/count surfaces in `tools/validators/README.md`, `tools/validators/tests/structural/registry.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, and `tools/validators/tests/integration/validate-patch-plan.test.ts`.
+- Added `tools/validators/tests/structural/active-records-full-shape.test.ts` covering run-mode scoping, per-class warnings, full-shape positive cases, and coexistence with `compatibility_drift`.
+- Deviation from draft: the targeted proof uses `npm run build --prefix tools/validators` plus direct `node --test tools/validators/dist/tests/structural/active-records-full-shape.test.js` because the package `test` script does not provide a narrow file selector. The real red-bunny smoke produced `fail_count: 0`, `warn_count: 15`, and `info_count: 10`; the info count is not unchanged because existing compatibility-drift informational verdicts are visible in this checkout.
+
+## Verification Result (2026-05-18)
+
+- `npm run build --prefix tools/validators` — passed.
+- `node --test tools/validators/dist/tests/structural/active-records-full-shape.test.js` — passed (6 tests).
+- `node --test dist/tests/integration/validate-patch-plan.test.js --test-name-pattern 'clean pre-apply plan'` from `tools/validators` — passed after the new validator was classified as skipped in pre-apply.
+- `npm test --prefix tools/validators` — passed (530 tests).
+- `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` — exited 0 with `fail_count: 0`, `warn_count: 15`, `info_count: 10`.

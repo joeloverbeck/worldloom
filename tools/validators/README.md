@@ -75,6 +75,7 @@ Structural validators:
 - `introduction_observer_firewall`
 - `narrative_shape_field_rejection`
 - `compatibility_drift`
+- `active_records_full_shape`
 - `story_question_payoff_integrity`
 - `story_question_setup_predates_payoff`
 - `story_question_grounding_integrity`

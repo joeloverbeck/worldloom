@@ -152,9 +152,9 @@ Phase 2:
 Phase 3:
 - `page_affordance_integrity` validator fires on synthetic fixtures: duplicate ordinals; affordance grounded in inactive STOBJ; affordance available_to inactive STENT; unknown action_family.
 - `expected_witness_coverage` remains the semantic propagation-exception coverage validator: it fires when computed direct witnesses lack BEL coverage and no matching `non_propagation:` tag covers the group, and it also fires for public/factional DA indirect propagation gaps without an indirect-route BEL or `event_leaves_no_accessible_trace` tag.
-- `active_records_full_shape` validator emits `warn` when a synthetic PG omits CLK/STSEC/STQ/DA keys; remains silent (or `info`) when the bundle is classified as legacy by `compatibility-drift`.
+- `active_records_full_shape` validator emits `warn` when a synthetic PG omits any active-record class key, including legacy snapshots; `compatibility-drift` remains the validator that classifies whether the same omission is grandfathered or requires migration.
 - Full validator suite passes (`npm test --prefix tools/validators`).
-- `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` exits 0 with `fail_count: 0` (the warn-only `active_records_full_shape` may add to `warn_count`; pre-SPEC-43 bundles may add to `info_count` via existing compatibility-drift; document expected counts).
+- `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` exits 0 with `fail_count: 0` (the warn-only `active_records_full_shape` adds to `warn_count`; pre-SPEC-43 bundles add to `info_count` via existing compatibility-drift; document expected counts).
 
 End-to-end:
 - The five-skill story-pipeline regression suite (turn-cycle bootstrap → turn → prose-attach → health-audit → promotion-closeout) runs against the red-bunny bundle without failures attributable to this spec's changes.
