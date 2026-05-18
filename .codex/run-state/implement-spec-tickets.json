@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC44STOSTAAPP-003.md",
+  "last_ticket": "archive/tickets/SPEC44STOSTAAPP-004.md",
   "last_result": "completed_archived",
-  "last_work_commit": "7d8550a26b727630e84723610055c51f11826f76",
+  "last_work_commit": "949f00397dc49e9883a6332c4dc39808426bf88c",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC44STOSTAAPP-004.md",
+  "next_target": "tickets/SPEC44STOSTAAPP-005.md",
   "queue": [
-    "tickets/SPEC44STOSTAAPP-004.md",
     "tickets/SPEC44STOSTAAPP-005.md",
     "tickets/SPEC44STOSTAAPP-006.md",
     "tickets/SPEC44STOSTAAPP-007.md",
