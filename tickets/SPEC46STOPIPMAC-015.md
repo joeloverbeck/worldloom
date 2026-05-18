@@ -56,7 +56,7 @@ In `tools/world-index/tests/fixtures/` (or a new sub-directory following the SPE
 - STSTAT records with entity bindings.
 - CLK records with `linked_records[]`, `driver: STENT-...` AND `driver: system` / `driver: group:<name>`, and `tick_history[]` populated.
 - STSEC records with `truth_anchor` populated AND null; `holders: [STENT-..., group:..., narrator]`; `clue_carriers[]` populated; `reveal_records[]` populated and empty.
-- STQ records with `source_records[]`, `payoff_of[]` chains, and `answer_records[]` populated.
+- STQ records with `source_records[]`, scalar `payoff_of` chains, and `answer_records[]` populated.
 - SE records with `actor`, `targets[]`, `commitment.selected_slt_id` populated AND audit-only events with `commitment` omitted.
 
 ## Files to Touch

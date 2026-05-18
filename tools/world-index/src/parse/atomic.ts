@@ -629,6 +629,12 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "story_question_record") {
+    for (const edge of edgesForStoryQuestion(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   pushStoryRef("created_at_page", stringField(record, "created_at_page"));
   pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
@@ -805,6 +811,29 @@ function edgesForStorySecret(
 
   for (const target of stringArrayField(record, "reveal_records")) {
     edges.push(createStoryRefEdge(node.node_id, "secret_reveal_record", storySlug, target));
+  }
+
+  return edges;
+}
+
+function edgesForStoryQuestion(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  for (const target of stringArrayField(record, "source_records")) {
+    edges.push(createStoryRefEdge(node.node_id, "story_question_source", storySlug, target));
+  }
+
+  const payoffOf = stringField(record, "payoff_of");
+  if (payoffOf) {
+    edges.push(createStoryRefEdge(node.node_id, "story_question_payoff_of", storySlug, payoffOf));
+  }
+
+  for (const target of stringArrayField(record, "answer_records")) {
+    edges.push(createStoryRefEdge(node.node_id, "story_question_answer_record", storySlug, target));
   }
 
   return edges;

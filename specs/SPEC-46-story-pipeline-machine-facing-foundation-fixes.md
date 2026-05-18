@@ -28,6 +28,8 @@
 
 **Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-011.md`)**: Phase C STSEC edge extraction is landed in `tools/world-index`: `secret_truth_anchor`, `secret_holder`, `secret_clue_carrier`, and `secret_reveal_record` are registered in `STORY_EDGE_TYPES`, emitted for live `story_secret_record` story-bundle nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 30`). Placeholder secret holders (`group:<name>` and `narrator`) intentionally do not emit `secret_holder` edges. Remaining Phase C edge families are still owned by tickets 012-015 until later implementation notes supersede this line.
 
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-012.md`)**: Phase C STQ edge extraction is landed in `tools/world-index`: `story_question_source`, `story_question_payoff_of`, and `story_question_answer_record` are registered in `STORY_EDGE_TYPES`, emitted for live `story_question_record` nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 33`). The live `STQ` schema carries scalar nullable `payoff_of: STQ-<integer> | null`, not the drafted `payoff_of[]` array shape, so `story_question_payoff_of` emits at most one edge from the payoff question to its setup question. Remaining Phase C edge families are still owned by tickets 013-015 until later implementation notes supersede this line.
+
 ---
 
 ## Problem Statement

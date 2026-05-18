@@ -811,6 +811,177 @@ test("secret holder placeholders are skipped while STENT holders still emit", ()
   }
 });
 
+test("story question records emit source, payoff, and answer edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-stq-edges-"));
+
+  try {
+    writeStoryQuestion(root, "harborwatch", "STQ-2", [
+      "id: STQ-2",
+      "story_id: STORY-1",
+      "created_at_page: PG-6",
+      "supersedes: null",
+      "setup_kind: dramatic_question",
+      "question_or_setup: Who opened the harbor gate?",
+      "salience: high",
+      "audience_visibility: explicit",
+      "source_event: SE-2",
+      "source_records:",
+      "  - BEL-1",
+      "  - STSEC-1",
+      "payoff_of: STQ-1",
+      "status: answered",
+      "answer_event: SE-3",
+      "answer_records:",
+      "  - BEL-2",
+      "  - DA-1",
+      "abandonment_rationale: null"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/story-questions/STQ-2.yaml"
+    );
+
+    assert.deepEqual(
+      questionEdges(parsed.edges),
+      [
+        {
+          source_node_id: "harborwatch:STQ-2",
+          target_unresolved_ref: "harborwatch:BEL-1",
+          edge_type: "story_question_source",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STQ-2",
+          target_unresolved_ref: "harborwatch:STSEC-1",
+          edge_type: "story_question_source",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STQ-2",
+          target_unresolved_ref: "harborwatch:STQ-1",
+          edge_type: "story_question_payoff_of",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STQ-2",
+          target_unresolved_ref: "harborwatch:BEL-2",
+          edge_type: "story_question_answer_record",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STQ-2",
+          target_unresolved_ref: "harborwatch:DA-1",
+          edge_type: "story_question_answer_record",
+          story_slug: "harborwatch"
+        }
+      ]
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("story question records with empty relation fields emit no question edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-stq-empty-"));
+
+  try {
+    writeStoryQuestion(root, "harborwatch", "STQ-3", [
+      "id: STQ-3",
+      "story_id: STORY-1",
+      "created_at_page: PG-6",
+      "supersedes: null",
+      "setup_kind: setup",
+      "question_or_setup: A quiet setup with no linked records.",
+      "salience: low",
+      "audience_visibility: hidden",
+      "source_event: SE-2",
+      "source_records: []",
+      "payoff_of: null",
+      "status: open",
+      "answer_event: null",
+      "answer_records: []",
+      "abandonment_rationale: null"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/story-questions/STQ-3.yaml"
+    );
+
+    assert.deepEqual(questionEdges(parsed.edges), []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("story question payoff chains are walkable through payoff edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-stq-chain-"));
+
+  try {
+    writeStoryQuestion(root, "harborwatch", "STQ-1", [
+      "id: STQ-1",
+      "story_id: STORY-1",
+      "created_at_page: PG-5",
+      "supersedes: null",
+      "setup_kind: setup",
+      "question_or_setup: A bell key goes missing.",
+      "salience: medium",
+      "audience_visibility: implied",
+      "source_event: SE-1",
+      "source_records:",
+      "  - DA-1",
+      "payoff_of: null",
+      "status: open",
+      "answer_event: null",
+      "answer_records: []",
+      "abandonment_rationale: null"
+    ]);
+    writeStoryQuestion(root, "harborwatch", "STQ-2", [
+      "id: STQ-2",
+      "story_id: STORY-1",
+      "created_at_page: PG-6",
+      "supersedes: null",
+      "setup_kind: promise",
+      "question_or_setup: The missing key is found in the bell room.",
+      "salience: high",
+      "audience_visibility: explicit",
+      "source_event: SE-2",
+      "source_records:",
+      "  - BEL-2",
+      "payoff_of: STQ-1",
+      "status: paid_off",
+      "answer_event: SE-3",
+      "answer_records:",
+      "  - SF-1",
+      "abandonment_rationale: null"
+    ]);
+
+    const parsed = ["STQ-1", "STQ-2"].flatMap((questionId) =>
+      parseStoryBundleSourceFile(
+        root,
+        "fixture-world",
+        `stories/harborwatch/_source/story-questions/${questionId}.yaml`
+      ).edges
+    );
+
+    const payoffEdges = questionEdges(parsed).filter((edge) => edge.edge_type === "story_question_payoff_of");
+
+    assert.deepEqual(payoffEdges, [
+      {
+        source_node_id: "harborwatch:STQ-2",
+        target_unresolved_ref: "harborwatch:STQ-1",
+        edge_type: "story_question_payoff_of",
+        story_slug: "harborwatch"
+      }
+    ]);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 function beliefEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
   source_node_id: string;
   target_unresolved_ref: string | null;
@@ -907,6 +1078,22 @@ function secretEdges(edges: Array<{ edge_type: string; source_node_id: string; t
     }));
 }
 
+function questionEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
+  source_node_id: string;
+  target_unresolved_ref: string | null;
+  edge_type: string;
+  story_slug: string | null;
+}> {
+  return edges
+    .filter((edge) => edge.edge_type.startsWith("story_question_"))
+    .map((edge) => ({
+      source_node_id: edge.source_node_id,
+      target_unresolved_ref: edge.target_unresolved_ref,
+      edge_type: edge.edge_type,
+      story_slug: edge.story_slug ?? null
+    }));
+}
+
 function writeStoryBelief(root: string, storySlug: string, beliefId: string, lines: string[]): void {
   const relativeDirectory = path.join(
     root,
@@ -989,4 +1176,18 @@ function writeStorySecret(root: string, storySlug: string, secretId: string, lin
   );
   mkdirSync(relativeDirectory, { recursive: true });
   writeFileSync(path.join(relativeDirectory, `${secretId}.yaml`), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStoryQuestion(root: string, storySlug: string, questionId: string, lines: string[]): void {
+  const relativeDirectory = path.join(
+    root,
+    "worlds",
+    "fixture-world",
+    "stories",
+    storySlug,
+    "_source",
+    "story-questions"
+  );
+  mkdirSync(relativeDirectory, { recursive: true });
+  writeFileSync(path.join(relativeDirectory, `${questionId}.yaml`), `${lines.join("\n")}\n`, "utf8");
 }

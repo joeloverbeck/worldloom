@@ -111,7 +111,10 @@ export const STORY_EDGE_TYPES = [
   "secret_truth_anchor",
   "secret_holder",
   "secret_clue_carrier",
-  "secret_reveal_record"
+  "secret_reveal_record",
+  "story_question_source",
+  "story_question_payoff_of",
+  "story_question_answer_record"
 ] as const;
 
 export type StoryEdgeType = (typeof STORY_EDGE_TYPES)[number];
