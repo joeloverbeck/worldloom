@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/CONTEXT-PACKET-CONTRACT.md` (story_bundle_context section update for the 7 new summaries + scope heuristic), `tools/world-mcp/src/tools/describe-capabilities.ts` (enumerate the 7 new summary fields)
-**Deps**: SPEC46STOPIPMAC-002, SPEC46STOPIPMAC-003, SPEC46STOPIPMAC-004
+**Deps**: archive/tickets/SPEC46STOPIPMAC-002.md, SPEC46STOPIPMAC-003, SPEC46STOPIPMAC-004
 
 ## Problem
 

@@ -109,7 +109,7 @@ function asNumber(value: unknown, fallback = 0): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
-function asObligationUrgency(value: unknown): "low" | "medium" | "high" {
+function asUrgency(value: unknown): "low" | "medium" | "high" {
   return value === "low" || value === "medium" || value === "high" ? value : "medium";
 }
 
@@ -208,10 +208,35 @@ function buildOpenObligations(rows: StoryNodeRow[]): ContextPacketStoryBundleCon
       description: asString(record.description),
       owed_by: asString(record.owed_by),
       owed_to: asString(record.owed_to),
-      urgency: asObligationUrgency(record.urgency),
+      urgency: asUrgency(record.urgency),
       trigger_to_close: asString(record.trigger_to_close),
       status: asString(record.status, "open")
     }));
+}
+
+function buildActiveIntentions(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_intentions"] {
+  return rows.map((row) => {
+    const record = parseYamlRecord(row);
+    return {
+      id: asString(record.id, authoredId(row)),
+      holder: asString(record.holder),
+      intent: asString(record.intent),
+      urgency: asUrgency(record.urgency),
+      expires_when: asString(record.expires_when)
+    };
+  });
+}
+
+function buildActiveStatuses(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_statuses"] {
+  return rows.map((row) => {
+    const record = parseYamlRecord(row);
+    return {
+      entity: asString(record.entity),
+      life: asString(record.life),
+      agency: asString(record.agency),
+      location: asString(record.location)
+    };
+  });
 }
 
 function buildActiveThreads(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_threads"] {
@@ -444,6 +469,8 @@ export function summarizeStoryBundleContext(
     storylet_total: context.storylet_pool_summary.total,
     visibility_filtered_storylet_count: context.storylet_pool_summary.visibility_filtered_count,
     open_obligation_ids: context.open_obligations.map((obligation) => obligation.id),
+    active_intention_ids: context.active_intentions.map((intention) => intention.id),
+    active_status_entities: context.active_statuses.map((status) => status.entity),
     active_thread_ids: context.active_threads.map((thread) => thread.id),
     active_clock_ids: context.active_clocks.map((clock) => clock.id),
     hidden_secret_ids: context.hidden_secrets.map((secret) => secret.id),
@@ -463,6 +490,8 @@ export function buildStoryBundleContext(
 ): ContextPacketStoryBundleContext {
   const storyletRows = rowsForNodeType(db, worldSlug, storySlug, "storylet_record");
   const obligationRows = rowsForNodeType(db, worldSlug, storySlug, "obligation_record");
+  const intentionRows = rowsForNodeType(db, worldSlug, storySlug, "intention_record");
+  const statusRows = rowsForNodeType(db, worldSlug, storySlug, "story_status_record");
   const threadRows = rowsForNodeType(db, worldSlug, storySlug, "thread_record");
   const clockRows = rowsForNodeType(db, worldSlug, storySlug, "pressure_clock_record");
   const secretRows = rowsForNodeType(db, worldSlug, storySlug, "story_secret_record");
@@ -475,6 +504,8 @@ export function buildStoryBundleContext(
     story_slug: storySlug,
     storylet_pool_summary: buildStoryletPoolSummary(storyletRows),
     open_obligations: buildOpenObligations(obligationRows),
+    active_intentions: buildActiveIntentions(intentionRows),
+    active_statuses: buildActiveStatuses(statusRows),
     active_threads: buildActiveThreads(threadRows),
     active_clocks: buildActiveClocks(clockRows),
     hidden_secrets: buildHiddenSecrets(secretRows),

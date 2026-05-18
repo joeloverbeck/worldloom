@@ -8,13 +8,13 @@
 
 ## Problem
 
-The world-index story-edge extraction at `tools/world-index/src/parse/atomic.ts:564` does not extract `STINT` (intention) record relations. Intention-ownership (`STINT.holder`) and intention-supersession chains (`STINT.supersedes`) are schema-defined on the `STINT` record but are not extracted as edges. The active-intentions projection landing in SPEC46STOPIPMAC-002 benefits from holder-edge traversal; future STPLAN (deferred) will depend on intention-supersession chain walking. This ticket adds the two `STINT`-rooted edges following the per-class helper pattern established by SPEC46STOPIPMAC-006.
+The world-index story-edge extraction at `tools/world-index/src/parse/atomic.ts:564` does not extract `STINT` (intention) record relations. Intention-ownership (`STINT.holder`) and intention-supersession chains (`STINT.supersedes`) are schema-defined on the `STINT` record but are not extracted as edges. The active-intentions projection landed in `archive/tickets/SPEC46STOPIPMAC-002.md` benefits from holder-edge traversal; future STPLAN (deferred) will depend on intention-supersession chain walking. This ticket adds the two `STINT`-rooted edges following the per-class helper pattern established by SPEC46STOPIPMAC-006.
 
 ## Assumption Reassessment (2026-05-18)
 
 1. `tools/world-index/src/schema/types.ts:84-99` declares `STORY_EDGE_TYPES`; `tools/world-index/src/parse/atomic.ts:564` is the dispatch site. The `STINT` schema at `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.2 carries `holder` (STENT id) and `supersedes` (STINT id or null) fields. The supersession chain is the canonical store for STINT lifecycle per FOUNDATIONS §Story Bundles append-only / supersession discipline (story-state-contract.md §3).
 2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the two STINT edges (`intention_holder`, `intention_supersedes`). The §Extractor implementation pattern paragraph names `edgesForStoryIntention` as one of the seven per-class helpers.
-3. Cross-skill boundary: the world-index edge extraction is consumed by MCP graph-walking helpers and by the active-intentions projection landing in SPEC46STOPIPMAC-002. Future STPLAN tickets (deferred per SPEC-46 §Out of Scope item 1) will depend on intention-supersession chain walking via `intention_supersedes`. Adding STINT edges is additive.
+3. Cross-skill boundary: the world-index edge extraction is consumed by MCP graph-walking helpers and by the active-intentions projection landed in `archive/tickets/SPEC46STOPIPMAC-002.md`. Future STPLAN tickets (deferred per SPEC-46 §Out of Scope item 1) will depend on intention-supersession chain walking via `intention_supersedes`. Adding STINT edges is additive.
 4. FOUNDATIONS §Tooling Recommendation motivates this ticket: making STINT ownership and supersession graph-queryable supports the `intention_active` predicate per `story-state-contract.md` §5 and prepares for future STPLAN `root_intention` linking. FOUNDATIONS §Rule 4 (No Globalization by Accident) is preserved by `createStoryRefEdge` carrying `storySlug` on every emitted edge.
 
 ## Architecture Check

@@ -126,6 +126,46 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
       ]
     );
     assert.deepEqual(
+      result.story_bundle_context.active_intentions.map((intention) => Object.keys(intention)),
+      [
+        [
+          "id",
+          "holder",
+          "intent",
+          "urgency",
+          "expires_when"
+        ]
+      ]
+    );
+    assert.deepEqual(result.story_bundle_context.active_intentions, [
+      {
+        id: "STINT-1",
+        holder: "STENT-2",
+        intent: "Marla wants to reach the loft window unseen.",
+        urgency: "high",
+        expires_when: "Marla is seen by the watch patrol."
+      }
+    ]);
+    assert.deepEqual(
+      result.story_bundle_context.active_statuses.map((status) => Object.keys(status)),
+      [
+        [
+          "entity",
+          "life",
+          "agency",
+          "location"
+        ]
+      ]
+    );
+    assert.deepEqual(result.story_bundle_context.active_statuses, [
+      {
+        entity: "STENT-2",
+        life: "alive",
+        agency: "free",
+        location: "STLOC-1"
+      }
+    ]);
+    assert.deepEqual(
       result.story_bundle_context.active_threads.map((thread) => thread.id),
       ["THR-1"]
     );

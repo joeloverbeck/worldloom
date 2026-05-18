@@ -8,6 +8,8 @@
 **Blocks**: follow-up specs for `STPLAN` (actor-owned tactical plan), `STEMO` (actor-owned affective state), the Priority 2 render packets (present-causal-situation, dramatic-irony, reader-expectation, social-pressure, pressure-texture, branch-possibility-space), and the `SE.record_introductions[]` migration brainstorm — none in this spec's scope
 **Source**: `reports/new-story-structures-proposal.md` (ChatGPT-Pro deep-research proposal, 2026-05-18, Priority 0 only); brainstorm-triage cross-checked against `docs/FOUNDATIONS.md` §Story Bundles §4a / §5a / §5b / §5c, `.claude/skills/_shared-templates/story-state-contract.md` §3-5 / §7-8, `.claude/skills/_shared-templates/story-record-schemas.md`, archived SPEC-42 (CLK / STSEC / STQ contract precedent), archived SPEC-45 (provenance edge precedent), and `tools/validators/src/`, `tools/patch-engine/src/`, `tools/world-mcp/src/`, `tools/world-index/src/` verified codebase state.
 
+**Implementation note (2026-05-18)**: `archive/tickets/SPEC46STOPIPMAC-002.md` landed the Phase B actor-bound MCP summaries `active_intentions`, `active_statuses`, `active_intention_ids`, and `active_status_entities` in `tools/world-mcp`. The remaining Phase B/Phase C absence claims below remain active for tickets 003-015 unless a later implementation note supersedes them.
+
 ---
 
 ## Problem Statement

@@ -8,13 +8,13 @@
 
 ## Problem
 
-The world-index story-edge extraction at `tools/world-index/src/parse/atomic.ts:564` does not extract `STSTAT` (status) record relations. Status-to-entity binding (`STSTAT.entity`) is schema-defined on the `STSTAT` record but is not extracted as an edge. The active-statuses projection landing in SPEC46STOPIPMAC-002 and the `entity_status` predicate per `story-state-contract.md` §5 both benefit from entity-edge traversal. This ticket adds the single `STSTAT`-rooted edge following the per-class helper pattern established by SPEC46STOPIPMAC-006.
+The world-index story-edge extraction at `tools/world-index/src/parse/atomic.ts:564` does not extract `STSTAT` (status) record relations. Status-to-entity binding (`STSTAT.entity`) is schema-defined on the `STSTAT` record but is not extracted as an edge. The active-statuses projection landed in `archive/tickets/SPEC46STOPIPMAC-002.md` and the `entity_status` predicate per `story-state-contract.md` §5 both benefit from entity-edge traversal. This ticket adds the single `STSTAT`-rooted edge following the per-class helper pattern established by SPEC46STOPIPMAC-006.
 
 ## Assumption Reassessment (2026-05-18)
 
 1. `tools/world-index/src/schema/types.ts:84-99` declares `STORY_EDGE_TYPES`; `tools/world-index/src/parse/atomic.ts:564` is the dispatch site. The `STSTAT` schema at `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.x carries `entity` (STENT id) plus `life` / `agency` / `location` fields per SPEC-44's append-only lifecycle.
 2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C table specifies the single STSTAT edge (`status_entity`). The §Extractor implementation pattern paragraph names `edgesForStoryStatus` as one of the seven per-class helpers.
-3. Cross-skill boundary: the world-index edge extraction is consumed by MCP graph-walking helpers and by the active-statuses projection landing in SPEC46STOPIPMAC-002. Adding the STSTAT edge is additive.
+3. Cross-skill boundary: the world-index edge extraction is consumed by MCP graph-walking helpers and by the active-statuses projection landed in `archive/tickets/SPEC46STOPIPMAC-002.md`. Adding the STSTAT edge is additive.
 4. FOUNDATIONS §Tooling Recommendation motivates this ticket: making STSTAT entity binding graph-queryable supports the `entity_status` predicate and health-audit life/agency consistency checks. FOUNDATIONS §Rule 4 (No Globalization by Accident) is preserved by `createStoryRefEdge`.
 
 ## Architecture Check

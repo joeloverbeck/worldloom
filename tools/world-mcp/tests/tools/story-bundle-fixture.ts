@@ -148,6 +148,24 @@ export function buildStoryBundleWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STINT-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "intentions", "STINT-1.yaml"),
+        node_type: "intention_record",
+        body: [
+          "id: STINT-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "holder: STENT-2",
+          "intent: Marla wants to reach the loft window unseen.",
+          "urgency: high",
+          "expires_when: Marla is seen by the watch patrol.",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "SE-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,

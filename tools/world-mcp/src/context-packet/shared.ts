@@ -69,6 +69,8 @@ export interface ContextPacketStoryBundleContextSummary {
   storylet_total: number;
   visibility_filtered_storylet_count: number;
   open_obligation_ids: string[];
+  active_intention_ids: string[];
+  active_status_entities: string[];
   active_thread_ids: string[];
   active_clock_ids: string[];
   hidden_secret_ids: string[];
@@ -118,6 +120,19 @@ export interface ContextPacketStoryBundleContext {
     urgency: "low" | "medium" | "high";
     trigger_to_close: string;
     status: string;
+  }>;
+  active_intentions: Array<{
+    id: string;
+    holder: string;
+    intent: string;
+    urgency: "low" | "medium" | "high";
+    expires_when: string;
+  }>;
+  active_statuses: Array<{
+    entity: string;
+    life: string;
+    agency: string;
+    location: string;
   }>;
   active_threads: Array<{
     id: string;
