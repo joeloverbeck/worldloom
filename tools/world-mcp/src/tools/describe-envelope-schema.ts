@@ -73,6 +73,7 @@ const ID_ALLOCATION_KEYS = [
   "bel_ids",
   "clk_ids",
   "stsec_ids",
+  "stq_ids",
   "story_da_ids"
 ] as const;
 

@@ -183,6 +183,8 @@ const STORY_CREATE_OPS: Readonly<Record<string, { nodeType: string; sourceDir: s
   create_bel_record: { nodeType: "belief_record", sourceDir: "beliefs" },
   create_clk_record: { nodeType: "pressure_clock_record", sourceDir: "clocks" },
   supersede_clk_record: { nodeType: "pressure_clock_record", sourceDir: "clocks" },
+  create_stsec_record: { nodeType: "story_secret_record", sourceDir: "secrets" },
+  supersede_stsec_record: { nodeType: "story_secret_record", sourceDir: "secrets" },
   create_stq_record: { nodeType: "story_question_record", sourceDir: "story-questions" },
   supersede_stq_record: { nodeType: "story_question_record", sourceDir: "story-questions" },
   append_story_diegetic_artifact_record: { nodeType: "story_diegetic_artifact_record", sourceDir: "artifacts" }
