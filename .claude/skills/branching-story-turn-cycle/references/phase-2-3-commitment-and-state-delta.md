@@ -44,9 +44,9 @@ Apply exactly one causal delta from parent snapshot. The delta may:
 - Prefer advancing, superseding, discovering, ticking, answering, revealing,
   changing status, or changing a relationship axis on an existing active record
   when the event is only a complication of that existing record. Fresh creation
-  is reserved for genuinely new causal objects. Until
-  `references/mid-story-record-introduction.md` lands, use SPEC-43 §Approach C
-  as the per-class threshold authority.
+  is reserved for genuinely new causal objects. Use
+  `references/mid-story-record-introduction.md` as the per-class threshold
+  authority.
 - Honor the selected `SLT`'s instantiated effects: after Phase 2's bind-then-instantiate step, any former `bound:<alias>` targets are concrete record ids and must be treated like exact effect targets in `SE.state_delta`.
 - Create new facts (`SF`) or beliefs (`BEL`).
 - Supersede beliefs when truth-relation or visibility changes (every public discovery, betrayal, lie, or confession produces at least one `BEL` create or supersession in this phase or Phase 4 per FOUNDATIONS §6a).
