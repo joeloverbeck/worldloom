@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/MACHINE-FACING-LAYER.md` (extend story-edge enumeration with 22 new edge types + placeholder-skip rationale + tick-history granularity note)
-**Deps**: archive/tickets/SPEC46STOPIPMAC-006.md, archive/tickets/SPEC46STOPIPMAC-007.md, archive/tickets/SPEC46STOPIPMAC-008.md, archive/tickets/SPEC46STOPIPMAC-009.md, archive/tickets/SPEC46STOPIPMAC-010.md, archive/tickets/SPEC46STOPIPMAC-011.md, archive/tickets/SPEC46STOPIPMAC-012.md, SPEC46STOPIPMAC-013
+**Deps**: archive/tickets/SPEC46STOPIPMAC-006.md, archive/tickets/SPEC46STOPIPMAC-007.md, archive/tickets/SPEC46STOPIPMAC-008.md, archive/tickets/SPEC46STOPIPMAC-009.md, archive/tickets/SPEC46STOPIPMAC-010.md, archive/tickets/SPEC46STOPIPMAC-011.md, archive/tickets/SPEC46STOPIPMAC-012.md, archive/tickets/SPEC46STOPIPMAC-013.md
 
 ## Problem
 

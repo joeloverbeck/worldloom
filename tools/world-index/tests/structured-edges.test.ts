@@ -322,6 +322,12 @@ test("story event records emit state-delta and creation-evidence edges", () => {
       [
         {
           source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:SLT-1",
+          edge_type: "event_selected_storylet",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
           target_unresolved_ref: "harborwatch:CLK-1",
           edge_type: "state_delta_create",
           story_slug: "harborwatch"
@@ -400,13 +406,13 @@ test("story event records emit state-delta and creation-evidence edges", () => {
         }
       ]
     );
-    assert.equal(parsed.edges.length, 13);
+    assert.equal(parsed.edges.length, 14);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
 });
 
-test("story event records with no state delta or intro tags emit no event edges", () => {
+test("story event records with no state delta or intro tags still emit selected-storylet edges", () => {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-index-story-event-empty-"));
 
   try {
@@ -421,7 +427,22 @@ test("story event records with no state delta or intro tags emit no event edges"
       "stories/harborwatch/_source/events/SE-1.yaml"
     );
 
-    assert.equal(parsed.edges.length, 0);
+    assert.deepEqual(
+      parsed.edges.map((edge) => ({
+        source_node_id: edge.source_node_id,
+        target_unresolved_ref: edge.target_unresolved_ref,
+        edge_type: edge.edge_type,
+        story_slug: edge.story_slug
+      })),
+      [
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:SLT-1",
+          edge_type: "event_selected_storylet",
+          story_slug: "harborwatch"
+        }
+      ]
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

@@ -846,6 +846,20 @@ function edgesForStoryEvent(
 ): Array<Omit<EdgeRow, "edge_id">> {
   const edges: Array<Omit<EdgeRow, "edge_id">> = [];
 
+  const actor = stringField(record, "actor");
+  if (actor && isStoryRecordReference(actor)) {
+    edges.push(createStoryRefEdge(node.node_id, "event_actor", storySlug, actor));
+  }
+
+  for (const target of stringArrayField(record, "targets")) {
+    edges.push(createStoryRefEdge(node.node_id, "event_target", storySlug, target));
+  }
+
+  const selectedStorylet = stringField(record, "selected_slt_id", ["commitment"]);
+  if (selectedStorylet) {
+    edges.push(createStoryRefEdge(node.node_id, "event_selected_storylet", storySlug, selectedStorylet));
+  }
+
   for (const target of stringArrayField(record, "create", ["state_delta"])) {
     edges.push(createStoryRefEdge(node.node_id, "state_delta_create", storySlug, target));
   }

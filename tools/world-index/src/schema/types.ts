@@ -114,7 +114,10 @@ export const STORY_EDGE_TYPES = [
   "secret_reveal_record",
   "story_question_source",
   "story_question_payoff_of",
-  "story_question_answer_record"
+  "story_question_answer_record",
+  "event_actor",
+  "event_target",
+  "event_selected_storylet"
 ] as const;
 
 export type StoryEdgeType = (typeof STORY_EDGE_TYPES)[number];

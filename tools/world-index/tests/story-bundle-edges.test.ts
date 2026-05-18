@@ -982,6 +982,151 @@ test("story question payoff chains are walkable through payoff edges", () => {
   }
 });
 
+test("story event records emit actor, target, selected-storylet, and existing event edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-se-edges-"));
+
+  try {
+    writeStoryEvent(root, "harborwatch", "SE-1", [
+      "id: SE-1",
+      "story_id: STORY-1",
+      "created_at_page: PG-7",
+      "parent_page_id: PG-6",
+      "event_kind: selected_choice",
+      "actor: STENT-1",
+      "targets:",
+      "  - STENT-2",
+      "  - STLOC-1",
+      "  - STOBJ-1",
+      "commitment:",
+      "  selected_slt_id: SLT-4",
+      "  selection_source: emitted_choice",
+      "  alias_bindings:",
+      "    actor: STENT-1",
+      "outcome_route: accept",
+      "resolution:",
+      "  result: success",
+      "  player_visible_feedback: The harbor watch moves.",
+      "world_logic_rationale: >-",
+      "  intro:STQ(id=STQ-4, trigger=explicit_question_raised, evidence=[PG-7,SE-0], distinct_from=[])",
+      "state_delta:",
+      "  create:",
+      "    - BEL-3",
+      "  supersede:",
+      "    - STSTAT-1",
+      "  close: []",
+      "promotion_claims: []"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/events/SE-1.yaml"
+    );
+
+    assert.deepEqual(
+      eventEdges(parsed.edges),
+      [
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STENT-1",
+          edge_type: "event_actor",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STENT-2",
+          edge_type: "event_target",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STLOC-1",
+          edge_type: "event_target",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STOBJ-1",
+          edge_type: "event_target",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:SLT-4",
+          edge_type: "event_selected_storylet",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:BEL-3",
+          edge_type: "state_delta_create",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STSTAT-1",
+          edge_type: "state_delta_supersede",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STQ-4",
+          target_unresolved_ref: "harborwatch:PG-7",
+          edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STQ-4",
+          target_unresolved_ref: "harborwatch:SE-0",
+          edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        }
+      ]
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("story event records skip placeholder actors and null selected storylets", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-se-placeholder-"));
+
+  try {
+    for (const [index, actor] of ["system", "unknown"].entries()) {
+      writeStoryEvent(root, "harborwatch", `SE-${index + 2}`, [
+        `id: SE-${index + 2}`,
+        "story_id: STORY-1",
+        "created_at_page: PG-7",
+        "parent_page_id: null",
+        "event_kind: story_start",
+        `actor: ${actor}`,
+        "targets: []",
+        "commitment:",
+        "  selected_slt_id: null",
+        "  selection_source: none",
+        "  alias_bindings: {}",
+        "outcome_route: accept",
+        "resolution:",
+        "  result: success",
+        "  player_visible_feedback: The story starts.",
+        "world_logic_rationale: No structured introductions in this event.",
+        "state_delta:",
+        "  create: []",
+        "  supersede: []",
+        "  close: []",
+        "promotion_claims: []"
+      ]);
+    }
+
+    const parsed = ["SE-2", "SE-3"].flatMap((eventId) =>
+      parseStoryBundleSourceFile(root, "fixture-world", `stories/harborwatch/_source/events/${eventId}.yaml`).edges
+    );
+
+    assert.deepEqual(eventEdges(parsed), []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 function beliefEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
   source_node_id: string;
   target_unresolved_ref: string | null;
@@ -1094,6 +1239,27 @@ function questionEdges(edges: Array<{ edge_type: string; source_node_id: string;
     }));
 }
 
+function eventEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
+  source_node_id: string;
+  target_unresolved_ref: string | null;
+  edge_type: string;
+  story_slug: string | null;
+}> {
+  return edges
+    .filter(
+      (edge) =>
+        edge.edge_type.startsWith("event_") ||
+        edge.edge_type.startsWith("state_delta_") ||
+        edge.edge_type === "creation_evidence"
+    )
+    .map((edge) => ({
+      source_node_id: edge.source_node_id,
+      target_unresolved_ref: edge.target_unresolved_ref,
+      edge_type: edge.edge_type,
+      story_slug: edge.story_slug ?? null
+    }));
+}
+
 function writeStoryBelief(root: string, storySlug: string, beliefId: string, lines: string[]): void {
   const relativeDirectory = path.join(
     root,
@@ -1190,4 +1356,10 @@ function writeStoryQuestion(root: string, storySlug: string, questionId: string,
   );
   mkdirSync(relativeDirectory, { recursive: true });
   writeFileSync(path.join(relativeDirectory, `${questionId}.yaml`), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStoryEvent(root: string, storySlug: string, eventId: string, lines: string[]): void {
+  const relativeDirectory = path.join(root, "worlds", "fixture-world", "stories", storySlug, "_source", "events");
+  mkdirSync(relativeDirectory, { recursive: true });
+  writeFileSync(path.join(relativeDirectory, `${eventId}.yaml`), `${lines.join("\n")}\n`, "utf8");
 }

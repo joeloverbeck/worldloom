@@ -3,16 +3,16 @@
 **Status**: PENDING
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — `tools/world-index/src/schema/types.ts` (assert `STORY_EDGE_TYPES.length === 36`), `tools/world-index/tests/types.test.ts` (registry-completeness assertion), `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts` (new integration test following SPEC-45 fixture pattern)
+**Engine Changes**: Yes — `tools/world-index/tests/types.test.ts` (verify existing registry-completeness assertion already updated by ticket 013), `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts` (new integration test following SPEC-45 fixture pattern)
 **Deps**: SPEC46STOPIPMAC-014
 
 ## Problem
 
-After all Phase C implementation tickets 006-013 land plus the docs ticket 014, the spec's §Test Plan T-6 (registry completeness) and T-8 (end-to-end rebuild) capstone checks must pass: `STORY_EDGE_TYPES.length === 36`, `new Set(STORY_EDGE_TYPES).size === STORY_EDGE_TYPES.length` (no duplicates), and `world-index build` on a representative test world produces the 22 new edge rows where expected and zero new edge rows where the source fields are empty. This ticket is the §Spec-Integration Ticket Shape capstone for Phase C — it introduces no new production code; it exercises the pipeline composed by tickets 006-013 end-to-end against a SPEC-45-pattern integration test, with `Deps: 014` per the transitive-head convention (ticket 014 reaches 006-013 transitively as its own deps).
+After all Phase C implementation tickets 006-013 land plus the docs ticket 014, the spec's §Test Plan T-6 (registry completeness) and T-8 (end-to-end rebuild) capstone checks must pass: `STORY_EDGE_TYPES.length === 36`, `new Set(STORY_EDGE_TYPES).size === STORY_EDGE_TYPES.length` (no duplicates), and `world-index build` on a representative test world produces the 22 new edge rows where expected and zero new edge rows where the source fields are empty. Ticket 013 already updated the live `tools/world-index/tests/types.test.ts` registry assertion to the 36-story-edge / 51-total-edge count because the existing package suite asserted the registry total. This ticket remains the §Spec-Integration Ticket Shape capstone for Phase C: it verifies that registry assertion and adds the end-to-end SPEC-46 build regression without introducing production code, with `Deps: 014` per the transitive-head convention (ticket 014 reaches 006-013 transitively as its own deps).
 
 ## Assumption Reassessment (2026-05-18)
 
-1. `tools/world-index/src/schema/types.ts:84-99` declares `STORY_EDGE_TYPES`; post-Phase-C it carries 36 entries (14 pre-Phase-C + 22 new from tickets 006-013). `tools/world-index/tests/types.test.ts` is the existing test file for STORY_EDGE_TYPES registry assertions (verified via Step 2 grep). `tools/world-index/tests/integration/spec45-atomic-integration.test.ts` is the canonical pattern for end-to-end build regression — fixture-world copy via `fs.cpSync` / `cpSync` to a temp root, build via `build` command from `../../src/commands/build.js`, query the built `world.db` via better-sqlite3, assert per-edge expectations.
+1. `tools/world-index/src/schema/types.ts:84-99` declares `STORY_EDGE_TYPES`; post-Phase-C it carries 36 entries (14 pre-Phase-C + 22 new from tickets 006-013). `tools/world-index/tests/types.test.ts` is the existing test file for STORY_EDGE_TYPES registry assertions and already asserts the 36 / 51 counts after ticket 013. `tools/world-index/tests/integration/spec45-atomic-integration.test.ts` is the canonical pattern for end-to-end build regression — fixture-world copy via `fs.cpSync` / `cpSync` to a temp root, build via `build` command from `../../src/commands/build.js`, query the built `world.db` via better-sqlite3, assert per-edge expectations.
 2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Test Plan T-6 specifies the registry-completeness assertion (`STORY_EDGE_TYPES.length === 36` and `new Set(STORY_EDGE_TYPES).size === STORY_EDGE_TYPES.length`); T-8 specifies the end-to-end rebuild assertion. §Deliverable D-X1 names this ticket as the cross-phase deliverable.
 3. Cross-skill boundary: the capstone validates the full Phase C pipeline composed by tickets 006-013. The integration test fixture is a self-contained story-bundle fixture that exercises records of every Phase C class (BEL, SREL, STINT, STSTAT, CLK, STSEC, STQ, SE) with populated and empty source fields per edge type. The `Deps: 014` transitive-head wiring is per spec-to-tickets §Spec-Integration Ticket Shape: 014 depends on 006-013, so transitively reaches the full implementation chain; the linear-chain DAG condition is satisfied (no parallel branches beyond 014 — Phase B is parallel to Phase C, but Phase B is not exercised by D-X1's build regression which is index-only).
 4. FOUNDATIONS §Rule 4 (No Globalization by Accident) motivates the capstone's bundle-isolation assertion: every new edge row in the rebuilt `world.db` carries `story_slug` matching the fixture world's story; no cross-bundle edge leakage. FOUNDATIONS §Tooling Recommendation is operationally validated by the test — the new edges ARE queryable via the index after build.
@@ -32,9 +32,9 @@ After all Phase C implementation tickets 006-013 land plus the docs ticket 014, 
 
 ## What to Change
 
-### 1. Add registry-completeness assertion to `tools/world-index/tests/types.test.ts`
+### 1. Verify the registry-completeness assertion in `tools/world-index/tests/types.test.ts`
 
-In `tools/world-index/tests/types.test.ts` (the existing test file for STORY_EDGE_TYPES per Step 2 grep), add or extend a test asserting `STORY_EDGE_TYPES.length === 36` and `new Set(STORY_EDGE_TYPES).size === STORY_EDGE_TYPES.length` (no duplicates) per spec T-6.
+In `tools/world-index/tests/types.test.ts` (the existing test file for STORY_EDGE_TYPES per Step 2 grep), verify the existing test asserts `STORY_EDGE_TYPES.length === 36` and `new Set(STORY_EDGE_TYPES).size === STORY_EDGE_TYPES.length` (no duplicates) per spec T-6. Ticket 013 already updated this assertion because the package suite required the new count immediately after SE edge registration.
 
 ### 2. Create `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts`
 
@@ -61,7 +61,7 @@ In `tools/world-index/tests/fixtures/` (or a new sub-directory following the SPE
 
 ## Files to Touch
 
-- `tools/world-index/tests/types.test.ts` (modify — add registry-completeness assertion per T-6)
+- `tools/world-index/tests/types.test.ts` (review/verify — registry-completeness assertion already updated by ticket 013 unless later drift requires a truthing edit)
 - `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts` (new — capstone integration test following SPEC-45 fixture pattern)
 - `tools/world-index/tests/fixtures/` (new fixture sub-directory if needed; otherwise extends existing fixture helpers under `tests/helpers/`)
 
