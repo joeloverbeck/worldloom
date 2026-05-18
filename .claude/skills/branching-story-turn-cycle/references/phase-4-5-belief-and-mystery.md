@@ -4,12 +4,13 @@
 
 Before belief propagation, apply any instantiated new-class state transitions from `SE.state_delta`.
 
-**Same-event creation precedence (SPEC-43).** Apply any same-event creations for
-`CLK`, `STSEC`, and `STQ` before lifecycle operations against those classes.
-Lifecycle operations run on the post-creation state, not on the pre-creation
-state. A `CLK` created and ticked in the same `SE` lands through create first;
-the initial tick is then represented through `tick_history[]` per
-`tick_pressure_clock` semantics.
+**Same-event creation precedence (SPEC-43 + SPEC-44).** Apply any same-event
+creations for `CLK`, `STSEC`, and `STQ` before lifecycle transitions against
+those classes. Lifecycle transitions run on the post-creation state, not on the
+pre-creation state. A `CLK` created and ticked in the same `SE` lands through
+create first; the initial tick is then represented in the new record's
+`tick_history[]`. Later advances or resolutions create a fresh `CLK` with
+`supersedes: <prior_clk_id>` via `supersede_clk_record`.
 
 **belief propagation for STSEC creation and new causal state (SPEC-43).** Any new `STSEC`,
 deceptive event, public relationship formation, new witness-bearing entity, or
@@ -21,9 +22,9 @@ lie-or-knowledge state and for witnesses who observed the deceptive event.
 
 Apply class-specific lifecycle transitions:
 
-- **CLK pressure clocks.** When the accepted event advances or resolves an active `CLK`, emit `tick_pressure_clock` with `target_clock_id`, `event: SE-<integer>`, nonzero `delta`, and a concrete `cause`; use `resolve_pressure_clock` when the clock is resolved without another tick. If a tick crosses one or more `CLK.thresholds[].at` values, materialize the threshold's `effects.create[]`, `effects.supersede[]`, and `effects.close[]` entries in the same `SE.state_delta` after resolving any `bound:<alias>` targets from Phase 2. Do not encode clock progress by directly editing prior CLK YAML or by inventing a prose-only clock note.
-- **STSEC story secrets.** When the event discovers a clue carrier, emit `mark_secret_clue_discovered` for the carrier record and discoverer. When the event reveals the secret, emit `reveal_story_secret` with `reveal_event: SE-<integer>` and the BEL / SF / DA / STQ records that carry the revealed truth. A STSEC reveal is a secrecy / betrayal / deception event for this phase, so witness propagation below is mandatory: create or supersede the required `BEL` records for direct and indirect witnesses, or record closed-set non-propagation tags.
-- **STQ open setups.** When the event answers or pays off an open `STQ`, emit `answer_story_question` with `status: answered | paid_off`, `answer_event: SE-<integer>`, and the answer records that prove the closure. When the event intentionally abandons an open setup, emit `abandon_story_question` with a non-empty `abandonment_rationale`. Never add prohibited future-shape fields such as `expected_payoff_mode`, `act_position`, `midpoint`, `climax`, or `dramatic_curve_position`; `STQ` remains present-causal open-setup state per shared contract §4.5.16.
+- **CLK pressure clocks.** When the accepted event advances or resolves an active `CLK`, emit `supersede_clk_record` for a new `CLK` carrying `supersedes: <prior_clk_id>`, the updated `value` / `status` / `resolution_event`, and the extended `tick_history[]` with the event, nonzero delta, and concrete cause. If a tick crosses one or more `CLK.thresholds[].at` values, materialize the threshold's `effects.create[]`, `effects.supersede[]`, and `effects.close[]` entries in the same `SE.state_delta` after resolving any `bound:<alias>` targets from Phase 2. Do not encode clock progress by directly editing prior CLK YAML or by inventing a prose-only clock note.
+- **STSEC story secrets.** When the event discovers a clue carrier or reveals the secret, emit `supersede_stsec_record` for a new `STSEC` carrying `supersedes: <prior_stsec_id>` plus the updated clue-carrier status, `discovered_by`, `status`, `reveal_event: SE-<integer>`, and BEL / SF / DA / STQ reveal records as applicable. A STSEC reveal is a secrecy / betrayal / deception event for this phase, so witness propagation below is mandatory: create or supersede the required `BEL` records for direct and indirect witnesses, or record closed-set non-propagation tags.
+- **STQ open setups.** When the event answers, pays off, or intentionally abandons an open `STQ`, emit `supersede_stq_record` for a new `STQ` carrying `supersedes: <prior_stq_id>` plus `status: answered | paid_off | abandoned`, `answer_event: SE-<integer>` and answer records, or a non-empty `abandonment_rationale` as applicable. Never add prohibited future-shape fields such as `expected_payoff_mode`, `act_position`, `midpoint`, `climax`, or `dramatic_curve_position`; `STQ` remains present-causal open-setup state per shared contract §4.5.16.
 - **Snapshot handoff.** Ensure Phase 6 recomputes `PG.state_snapshot.active_records.CLK`, `.STSEC`, and `.STQ` from the post-delta active set. Newly resolved / revealed / answered / abandoned records remain active or close only according to their class lifecycle and the patch-engine / validator semantics; do not remove an id from the snapshot merely because it was mentioned in a delta.
 
 For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL` records per shared contract §4.1 + FOUNDATIONS §Story Bundles §6a:
