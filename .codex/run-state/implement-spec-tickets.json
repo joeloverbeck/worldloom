@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-43-present-causal-mid-story-state-introduction.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC43PRECAUSTO-011.md",
+  "last_ticket": "archive/tickets/SPEC43PRECAUSTO-012.md",
   "last_result": "completed_and_archived",
-  "last_work_commit": "199cf4cb7593a2ecfe554ecdebba2d4695e88900",
+  "last_work_commit": "6a95136e0a0c932292b5789d3d04b89db42a1898",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC43PRECAUSTO-012.md",
+  "next_target": "tickets/SPEC43PRECAUSTO-013.md",
   "queue": [
-    "tickets/SPEC43PRECAUSTO-012.md",
     "tickets/SPEC43PRECAUSTO-013.md",
     "tickets/SPEC43PRECAUSTO-014.md",
     "tickets/SPEC43PRECAUSTO-015.md",
