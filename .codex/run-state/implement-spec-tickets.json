@@ -1,21 +1,19 @@
 {
-  "originating_spec": "specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC46STOPIPMAC-014.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "1451471712d7ece5ea78abfb2760bd20266c1b59",
+  "originating_spec": "archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md",
+  "archived_spec": "archive/specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md",
+  "last_ticket": "archive/tickets/SPEC46STOPIPMAC-015.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "059d41f10519c9e437142bfb21bb78b2082a02f4",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC46STOPIPMAC-015.md",
-  "queue": [
-    "tickets/SPEC46STOPIPMAC-015.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "completed",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
-  "post_review_audit_block": "emitted",
+  "post_review_audit_block": "not_applicable_after_final_spec_archive",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked worktree clean after state commit; expected ignored artifacts remain under tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, and tools/world-mcp/node_modules",
+  "dirty_state": "tracked worktree clean before final state update; expected ignored artifacts remain under tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, and tools/world-mcp/node_modules",
   "updated_at": "2026-05-18"
 }
