@@ -1,0 +1,169 @@
+# Deliverable Classification
+
+The full specification for Step 5's deliverable-classification rules. SKILL.md retains the Quick-triage table; this file is the full per-deliverable specification, the deliverable-pivot rule, and the persistence + post-implementation rules.
+
+## Quick triage
+
+(Also rendered in SKILL.md Step 5 for fast lookup; reproduced here for self-contained reference.)
+
+| Deliverable shape | Output destination |
+|---|---|
+| Inline ops/setup task | execute inline + summary; no file persisted |
+| New skill design | `.claude/skills/<name>/SKILL.md` |
+| Modify existing skill file(s) | edit in place |
+| Project documentation (`CLAUDE.md`, `docs/*.md`, etc.) | edit/create in place |
+| Port external skill into repo | new `.claude/skills/<name>/SKILL.md` + delete source |
+| Replaces an existing artifact | new file + delete old + update cross-references |
+| System spec | `specs/<spec>.md` |
+| Umbrella spec driving sibling amendments | `specs/<spec>.md` + named sibling-spec edits |
+| Triage producing 1 spec or <3 tickets | matching single-deliverable row above (`System spec` / `Implementation tickets`); triage file skipped by default — see §Spec deliverable for the input-complexity carve-out |
+| Triage producing ≥2 specs / ≥3 tickets | deliverables + `docs/triage/YYYY-MM-DD-<topic>-triage.md` |
+| Hybrid (code + spec) | plan file orchestrates sequence |
+| Data-gathering required first | pre-deliverable phase + final deliverable |
+| Implementation tickets | `tickets/<ID>.md` |
+| New canon-pipeline proposal | `brainstorming/<topic>.md` |
+| Modify canon-pipeline proposal(s) | edit in place |
+| Reconcile existing spec(s) / ticket(s) / triage file(s) in place | edit in place |
+| Research brief for external researcher | `reports/<topic>-research-brief.md` |
+
+## Per-deliverable rules
+
+### Inline ops/setup task or mechanical-fix triage
+
+If the brainstorm topic is a **small tooling or ops task or mechanical-fix triage executed inline with no persisted design artifact** (e.g., one-shot shell commands, repo setup, local configuration, a short sequence of pre-approved steps, small mechanical-fix triage batches across docs / source / config / scripts where each fix is a bounded operation), skip both the `docs/plans/` design doc write AND the Step 6 next-steps menu. The deliverable is the in-conversation design + post-execution summary of what was done. The HARD-GATE still applies — explicit user approval of the consolidated design is required before executing. "No persisted design artifact" means no `docs/plans/*.md` design doc or plan file is written; the implementation results (file edits, new files, lockfile regens, scripts) ARE persisted — only the design doc is what's elided. Typical indicators: ≤4 design decisions, small-deliverable carve-out applied in Step 4, implementation is a bounded sequence (not an open-ended feature build). When applied, the skill flow concludes at Step 4 approval → inline execution → summary; Steps 5 (persist) and 6 (menu) are both elided. Distinct from the Step 6 `If implementation was completed inline` guardrail: this category PRE-DECLARES inline at Step 5 time based on deliverable shape; the Step 6 guardrail is the catchall for tasks that become inline-implemented at approval time without matching this category.
+
+### New skill design
+
+If the brainstorm topic is itself a skill design, the deliverable is the skill file (written to the appropriate skills directory, e.g., `.claude/skills/<name>/SKILL.md`). Skip the `docs/plans/` design doc — the skill file IS the design. Adjust the Step 6 menu to reflect this (omit "create a spec" option, replace with "run skill-audit on the new skill"). When plan mode is active AND the deliverable is a skill file: the skill file cannot be written until after `ExitPlanMode` is called and the plan is approved. Write the plan file first with the skill design (process overview, key decisions, verification). After plan approval, write the full SKILL.md as the first implementation step. Keep the plan file under 120 lines for skill deliverables.
+
+### Modify existing skill file(s)
+
+If the brainstorm topic is modifying or reconciling existing skill files, the deliverable is the modified skill file(s) themselves. Skip the `docs/plans/` design doc — the edits ARE the design. If merging multiple skills, the deliverable includes the new unified skill file, deletion of superseded skill directories, and updating any cross-references in other skills or configuration files.
+
+### Project documentation
+
+If the brainstorm topic is **modifying project documentation or creating supporting `docs/` files** (e.g., `CLAUDE.md`, `README.md`, `docs/WORKFLOWS.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/FOUNDATIONS.md`), the deliverable is the edited/created documentation file(s) themselves. Skip the `docs/plans/` design doc — the edits ARE the design. This category covers `docs/*` files **whether or not they carry canon semantics**, as long as the doc edit itself IS the brainstorm's deliverable: a direct edit to `docs/FOUNDATIONS.md` (the canon design contract) routes here — consistent with Step 1 sub-step 2's recognition that a brainstorm which only edits governance docs is non-implementation even when its subject matter is canon- or story-canon-flavored. This is distinct from the umbrella-spec category below, where amendments to `docs/FOUNDATIONS.md` are *collateral* of a new spec rather than the primary deliverable. The Step 6 next-steps menu may be omitted when implementation is completed inline in the same turn as design approval. Distinct from "modifying or reconciling existing skill files" (which covers `.claude/skills/*` edits) and from "small tooling or ops task executed inline with no persisted artifact" (which applies when no file is produced); this category covers project-root documentation and `docs/*` files that ARE produced and persist.
+
+### Port external skill
+
+If the brainstorm topic is **adopting/porting a skill from another repository or sibling directory**, the deliverable is (a) the new skill file at the target path (e.g., `.claude/skills/<name>/SKILL.md`), (b) deletion of the reference directory once the new file is verified, and (c) a transformations-table design enumerating per-element strip/replace/preserve decisions rather than fresh architecture. The approach proposal focuses on identifying extraneous source-repo elements (terminology, skill names, file paths, shared-surface triggers) and their worldloom-appropriate replacements. This is a variant of the "modifying or reconciling existing skill files" deliverable where the source lives outside the repo; the transformations-table format is preferred over section-by-section design because the source file already provides the architectural spine.
+
+**Row granularity**: the transformations table must enumerate one row per substitution site, not one row per source line. When multiple source-repo-flavored tokens share a single source line (e.g., a line that contains both an extraneous glob path and an extraneous example skill name), list each token as its own row, or as labeled sub-rows (`N.a`, `N.b`) under the line. A substitution that the implementer expects to apply "for consistency" but is not itemized in the table is out of scope — either itemize it or propose a table revision and re-request approval before applying it. The Step 6 next-steps menu may be omitted when implementation (write new + delete reference) is completed inline in the same turn as design approval.
+
+### Replaces an existing artifact
+
+If the brainstorm produces a deliverable that **replaces** an existing artifact (skill, spec, config), the replacement plan should include: (a) confirming deletion of the old artifact, (b) checking for cross-references to the old artifact in other skills, CLAUDE.md, or MEMORY.md, (c) noting the replacement in the design doc or plan.
+
+### System spec
+
+If the brainstorm topic produces a system spec (architectural change, new subsystem, or any change requiring formal spec compliance), the deliverable is the spec file in `specs/`. Skip the `docs/plans/` design doc — the spec IS the design. If `docs/spec-drafting-rules.md` exists, follow it. If absent, write the spec with default sections (Problem Statement, Approach, FOUNDATIONS Alignment, Verification, Out of Scope) and add a top-of-file note: `<!-- spec-drafting-rules.md not present; using default structure. -->`. For specs with concrete code/file artifacts (package layouts, CLI contracts, schemas, file-level outputs), a **Deliverables** section between Approach and FOUNDATIONS Alignment is recommended — it houses the committed artifacts the spec enumerates. For specs with known unknowns worth surfacing to future readers, a **Risks & Open Questions** section after Out of Scope is recommended. Authors may add further sections (e.g., Migration, Testing Strategy, Performance Targets) as the spec's subject matter requires; update the top-of-file note to reflect any non-default sections added (e.g., `<!-- spec-drafting-rules.md not present; using default structure + Deliverables + Risks & Open Questions. -->`).
+
+**Spec-ID assignment**: scan `specs/` + `archive/specs/` together for the next free integer — archived specs occupy their assigned IDs permanently; new specs claim the next-higher integer above the union. When `specs/` is empty but `archive/specs/` has `SPEC-<N>` as the highest, the new spec is `SPEC-<N+1>`, not `SPEC-1`. Parallel to mcp-integration-audit's ticket-namespace pre-write scan convention (`mcp-integration-audit/SKILL.md:29`). Adjust the Step 6 menu accordingly — omit the "create a spec" option and use this template:
+
+```
+Spec(s) written: <list each produced spec with its full path>
+[Companion triage file: <path> — present when §Input-complexity carve-out fires (≥8 evaluated items in source report) AND the file is written; OR "Companion triage file: declined — verdicts landed in spec §<sections>" when the carve-out fires but the file is not written]
+[Implementation order: <"updated specs/IMPLEMENTATION-ORDER.md across <region list>" | "skipped — file not present and <3 specs produced" | "created fresh specs/IMPLEMENTATION-ORDER.md covering <N> specs"> — present per the IMPLEMENTATION-ORDER instruction below]
+
+What would you like to do next?
+1. Reassess each produced spec against current codebase state
+2. Decompose each produced spec into tickets
+3. Start implementing a spec directly
+4. Done for now — I'll review later
+```
+
+**Variant — when the brainstorm also produced tickets alongside the spec** (umbrella shape — one spec defines verdicts, with one or more tickets executing them in dependency order, all written in the same brainstorm session): use this variant instead, because option 2 of the standard template ("Decompose each produced spec into tickets") is misleading when tickets already exist:
+
+```
+Spec(s) and ticket(s) written:
+  - <spec path>
+  - <ticket paths>
+[Implementation order: <"updated specs/IMPLEMENTATION-ORDER.md across <region list>" | "skipped — file not present and <3 specs produced" | "created fresh specs/IMPLEMENTATION-ORDER.md covering <N> specs"> — present per the IMPLEMENTATION-ORDER instruction below]
+
+What would you like to do next?
+1. Reassess the produced spec against current codebase state
+2. Begin the first ticket in the dependency chain (<ticket-id>)
+3. Done for now — I'll review the deliverables later
+```
+
+Use this variant when the same brainstorm produced both a spec and one or more tickets; the spec's §Deliverables section should list the dependency order between tickets so option 2 names the correct first ticket. Distinct from the umbrella-spec-driving-sibling-amendments bullet below (which produces spec + edits to existing files, not spec + new tickets) and from the implementation-tickets bullet below (which produces tickets-only, no spec).
+
+The menu's verbs are intentionally portable — substitute whatever reassessment or decomposition workflow your repo provides (e.g., a `/reassess-spec` slash command, a manual checklist, a `/spec-to-tickets` skill), or omit an item if no equivalent exists. **Adding an option beyond the canonical four is also authorized** when the triage surfaces an immediate next-step opportunity the user might want to take in-session — e.g., a deferred follow-up spec / ticket whose context is still fresh, or an immediate cross-cutting cleanup the spec implies. Keep additions to one option per surface to preserve menu scannability; if more than one addition would fit, prefer summarizing them in the chat narration above the menu rather than expanding the menu itself. The menu is presented once per triage, not once per spec.
+
+After writing the spec(s): if `specs/IMPLEMENTATION-ORDER.md` exists, update it in every structurally-relevant region — design read order chain if present, phased implementation sequence if phases exist, dependency tree if diagrammed, deliverable status table if tabulated, and any cross-spec history or summary paragraph at the file's end — rather than only appending to a single heading. For flat index files (single list of specs, no phase structure or dependency tree), a single append under an appropriate heading suffices. Missing a region leaves the file internally inconsistent: a new phase with no read-order mention, or a new spec with no deliverable-table row, breaks cross-region reconcilability. If absent: (a) default — skip the index update and note this in the Step 6 summary; (b) permitted — create a fresh `specs/IMPLEMENTATION-ORDER.md` when the brainstorm produces ≥3 specs as a logical bundle with meaningful sequencing (phase ordering, dependency tree, parallelization tiers). When creating fresh, note the file creation in the Step 6 summary alongside the spec list.
+
+For spec deliverables, the "Brainstorm Context" header is replaced by the spec's Problem Statement section, which should include the motivation, evidence sources, and key decisions that shaped the spec design — decisions made during the interview, during approach selection, and during any mid-design scope revisions (each captured as a one-to-two-sentence "considered X, chose Y because Z" note). Carve-out-shortened brainstorms that skipped the interview (Step 1 sub-step 5) still have decision points; they move from interview-time to design-time, and the Problem Statement should capture them.
+
+**Recommended sub-structure for carve-out brainstorms producing ≥2 specs, or a single spec carrying ≥3 load-bearing mid-design decisions**: include a `### Key design decisions` sub-section in the Problem Statement of each such spec enumerating 3-5 load-bearing mid-design decisions in the literal `considered X, chose Y because Z` form (e.g., `Considered per-arc cadence_policy block; chose STORY_KERNEL.md placement because cadence is per-bundle authorial taste, not per-arc structure`). Without the dedicated sub-section, decisions tend to disperse into the Approach and Risks & Open Questions sections, forcing future readers to hunt for the rationale across multiple sections — and the dispersal compounds when a triage file ALSO records the same decisions, since cross-region reconciliation becomes the reader's burden. The sub-section may cross-reference the triage file (`See docs/triage/<date>-<topic>-triage.md for the cross-spec view of these decisions`) when the same decisions land in both places.
+
+**Triage-file composition**: when the brainstorm produces ≥2 specs, the triage-file rule below ALSO applies — write `docs/triage/YYYY-MM-DD-<topic>-triage.md` in addition to the specs. The triage file is mandatory for multi-spec brainstorms; do not treat the spec-deliverable bullet as exhaustive.
+
+### Umbrella spec driving sibling amendments
+
+If the brainstorm produces an **umbrella spec that drives amendments to N existing specs and/or `docs/FOUNDATIONS.md` and/or project-root docs** (architectural-amendment shape — one new spec sets a new contract that several existing specs must be revised to reflect), treat the umbrella spec as the primary deliverable and the sibling-spec + FOUNDATIONS + CLAUDE.md amendments as collateral work tracked within the umbrella spec's §Deliverables or a dedicated "Amendments to sibling specs" section naming the specific edits each sibling receives. Skip the `docs/plans/` design doc — the new spec IS the design, and the amendments ARE the cascade. The Step 6 summary lists the new spec's path plus the inventory of files amended (paths and one-phrase summaries per amendment; not line-count details). No separate triage file is needed unless the scope is explicitly triage-flavored (triaging a report into action items) rather than design-flavored. Distinct from "hybrid deliverables" (which mixes code + spec and uses a plan file in plan mode) and from "produces a deliverable that replaces an existing artifact" (which is a wholesale supersession rather than multi-file amendment).
+
+**Archived-spec consideration**: if the umbrella spec's amendment scope would touch files under `archive/specs/`, those archived specs are completed historical records — in-place amendments are not appropriate (archived specs document what was implemented, not what to implement next). The new umbrella spec must contain ALL the new implementation work; it should include a `**Supersedes**:` header naming the specific sections of the archived spec(s) being replaced, so future readers see the live contract supersedes the archived record. The archived files themselves remain unedited as historical record. Active specs (under `specs/`) follow the normal collateral-amendment path — only `archive/specs/` triggers this carve-out. Worked precedent: SPEC-14 supersedes parts of archived SPEC-03 (`append_adjudication_record` payload shape; `append_touched_by_cf` semantics) and archived SPEC-04 (`record_schema_compliance` adjudication parsing; `rule7_mystery_reserve_preservation` enum; `rule2_no_pure_cosmetics` domain enum) without modifying the archived files.
+
+### Triage producing ≥2 specs or ≥3 tickets
+
+If the brainstorm is a **triage that produces ≥ 2 specs or ≥ 3 tickets**, additionally write a short `docs/triage/YYYY-MM-DD-<topic>-triage.md` summarizing: the source report/finding set, accepted items (with the full path to each written spec or ticket and a one-line rationale), dismissed items (with a one-line reason each), and any follow-up work items the triage identified but did not action. Keep the triage file under 80 lines. Do not duplicate spec or ticket content — reference by path. The triage file makes the brainstorm's decisions durable and shareable without re-running the brainstorm. For triage brainstorms producing a single spec or fewer than 3 tickets, skip this file by default — the individual deliverables are sufficient history.
+
+**Input-complexity carve-out**: consider writing the triage file even at the single-deliverable count when the input report has ≥8 evaluated items (one item = one explicit triage verdict the operator emits — typically a P-numbered or analogously-tagged finding in the source report; verification-ledger items that confirm prior triage and items the report itself segregates from its findings list do not count separately). When the source report lacks explicit numbering, count distinct triage-verdict-emittable proposals at H2/H3 heading granularity or per-bullet within proposal lists; the operator's emitted-verdict count is authoritative. The threshold operates on deliverable count, but triage-file value is driven by input-report complexity, which is orthogonal — a 13-item triage that produces one spec leaves 12 items' verdicts / rationale / dismissal reasons with nowhere clean to live except a dense Problem Statement section, where a triage file would preserve them at light cost. When the carve-out fires and the triage file IS written, surface it in the Step 6 summary alongside the deliverable — a `Companion triage file:` line beside the menu's `Spec(s) written:` list, per the optional bracketed `[Companion triage file: ...]` slot in the spec-deliverable Step 6 menu template above. When the ≥8-item condition fires but the triage file is declined, note that decision — and where the item verdicts landed instead (e.g., the spec's Problem Statement / Out of Scope sections) — in the Step 6 summary, for parity with the `specs/IMPLEMENTATION-ORDER.md`-absent "skip the index update and note this in the Step 6 summary" instruction above.
+
+### Hybrid deliverables
+
+If the brainstorm produces **hybrid deliverables** (e.g., both implementation code AND a spec), the plan file describes the full implementation sequence — code changes, spec writing, and any other artifacts. The spec is still written after plan approval, but the plan may describe implementation steps for non-spec deliverables at normal detail. Keep the plan file under 100 lines when the spec is the primary deliverable; for plans with N independent deliverables, the line budget scales to approximately 100 + 20*(N-1) lines to accommodate per-deliverable summaries. Investigation findings that change the deliverable set (items added, dropped, or reframed) should be captured in the plan's Context section.
+
+### Data-gathering required first
+
+If the brainstorm reveals that the deliverable **requires data that doesn't yet exist** (e.g., new instrumentation, enhanced diagnostics, or data-gathering tooling), the plan should include a pre-deliverable data-gathering phase. In plan mode, the plan file describes both the tooling enhancement and the final deliverable. The tooling work is executed after plan approval but before the spec/design doc is written, since the spec content depends on the gathered data.
+
+### Implementation tickets
+
+If the brainstorm produces **implementation tickets** (bounded fixes to existing code, not requiring full spec compliance), the deliverable is the ticket file(s) in `tickets/`. Skip the `docs/plans/` design doc — the tickets ARE the design. If `tickets/_TEMPLATE.md` and `tickets/README.md` exist, follow them. If absent, write a minimal ticket with Title, Context, Acceptance Criteria, Verification, and add a top-of-file note: `<!-- tickets/_TEMPLATE.md not present; using minimal format. -->`.
+
+**Ticket creation vs ticket update**: For ticket *creation* brainstorms (new ticket file written to `tickets/`), present the adjusted Step 6 menu — typically omit "create a spec" and replace with "implement ticket" or "reassess ticket" — since the user will execute the ticket later. For ticket *update* brainstorms — modifying an existing ticket file in place — the update IS the inline-completed deliverable; skip the Step 6 menu and summarize the rewrite delta, parallel to the bullet above for modifying existing skill files, where the edits ARE the design.
+
+### New canon-pipeline proposal
+
+If the brainstorm produces a **new worldloom canon-pipeline proposal** (a design for a new pipeline similar to existing files like `archive/brainstorming/canon-addition.md`, `archive/brainstorming/create-base-world.md`), the deliverable is the proposal file at `brainstorming/<topic>.md`. Skip `docs/plans/`. Read both `archive/brainstorming/canon-addition.md` and `archive/brainstorming/create-base-world.md` first as structural templates (brainstorming docs migrate to `archive/brainstorming/` once their `skill-creator` runs produce runnable SKILL.md files; the canonical templates are read from archive) — match whichever pattern fits the proposal type (single-process pipelines like `canon-addition.md` use Purpose / Input / Output / Process / Validation; multi-phase pipelines like `create-base-world.md` use Purpose / Inputs / Output Bundle / Phase 0..N with domain-specific subsections). If the target filename already exists in `brainstorming/`, prompt the user for confirmation before overwriting (existing pipeline files may themselves be the *target* of a brainstorm). Adjust the Step 6 menu accordingly — omit "create a spec" option, replace with "reassess proposal" or "turn proposal into spec/tickets".
+
+### Modify canon-pipeline proposal(s)
+
+If the brainstorm topic is **modifying or reconciling existing `brainstorming/*.md` canon-pipeline proposal(s)** (e.g., two proposals claim overlapping territory and need boundary definition, or a proposal needs architectural refinement in light of new sibling pipelines), the deliverable is the modified file(s) themselves. Skip the `docs/plans/` design doc — the edits ARE the design. When reconciling cross-file overlaps, the deliverable may include surgical edits to each affected file plus any cross-reference blocks needed to acknowledge newly-broken standalone-document properties (existing proposals frequently declare themselves "intentionally standalone and repeats repository assumptions on purpose" — adding a cross-reference to a sibling proposal is a deliberate exception that should be noted at the reference site). Adjust the Step 6 menu accordingly — omit the "write an implementation plan" and "create a spec" options; offer instead (1) run `skill-creator` on the edited proposal(s) when ready, (2) run `skill-audit` on any sibling brainstorming files that might be affected, (3) done — proposals are ready for later skill-creation.
+
+### Reconcile existing spec/ticket/triage in place
+
+If the brainstorm topic is **reconciling existing spec(s), ticket(s), or triage file(s) in place** (e.g., a decision that supersedes prior work forces edits across a spec plus its companion tickets plus its triage file, possibly including deletion of an obsolete ticket), the deliverable is the modified file(s) themselves. Skip the `docs/plans/` design doc — the edits ARE the design, and the Step 3 triage recommendation (per §"For triage/analysis brainstorms") satisfies Step 4's design-presentation gate, so no section-by-section design presentation runs. Skip the Step 6 next-steps menu and summarize the rewrite delta, parallel to the ticket-update sub-rule above. This is **distinct from** the `system spec` and `implementation tickets` categories (which produce NEW specs/tickets and DO present the Step 6 menu per the Step 6 §Exception): reconciling an EXISTING spec/ticket/triage in place has no post-deliverable next phase, so the inline-completion skip applies. Apply the §Multi-file triage implementation discipline (in `triage-workflow-rules.md`) when the reconciliation spans ≥3 files.
+
+### Research brief
+
+If the brainstorm topic is producing a **research brief targeted at an external researcher / LLM** (whose recommendations will feed into a later design or spec phase), the deliverable is a self-contained markdown report at `reports/<topic>-research-brief.md`. Skip the `docs/plans/` design doc — the brief IS the deliverable. The brief must be self-contained: inline all schemas, evidence samples, terminology, hard constraints, and explicit research questions the external audience needs to engage with the problem cold, since they have no access to the codebase.
+
+For canon-related, story-canon-related, or canon-pipeline-adjacent topics, the brief MUST include an explicit non-negotiable-constraint section (typical title: "FOUNDATIONS alignment — non-negotiable" or analogous) naming the FOUNDATIONS.md principles the topic engages, any archived or rolled-back specs that represent cautionary precedent, and any rejection criteria future recommendations must satisfy. External researchers proposing FOUNDATIONS-violating solutions waste research cost; the explicit constraint section is the prevention. Length is optimized for completeness over brevity (target 2000-4000 words); this inverts the spec-deliverable line budget rule. Adjust the Step 6 menu accordingly — omit "create a spec" and "implement plan" options, replace with (1) feed brief to external researcher, (2) wait for findings before deciding next steps; the menu may also be skipped entirely under the existing "implementation completed inline" rule when the brief lands in the same turn as design approval. The research-brief deliverable is structurally distinct from project documentation (external audience), from design docs (precedes the design phase), and from specs (no implementation contract).
+
+## Deliverable pivot
+
+If the user redirects the deliverable type mid-brainstorm (e.g., "actually, make this a spec" or "create a spec for this"), reclassify using the rules above and adjust the flow accordingly. In plan mode, rewrite the plan file to match the new deliverable type before calling ExitPlanMode. Do not ask the user to confirm the pivot — they just told you what they want.
+
+**Operator-judgment reclassification under pre-authorization**: when the user's request pre-authorizes multiple deliverable types contingent on scope (e.g., "ticket or spec, whichever fits scope"; "inline fix or follow-up brainstorm depending on size"; "a multi-package ticket (or spec, if the scope warrants)"), the operator may reclassify based on the scope evidence surfaced during exploration without re-prompting. Cite the scope-evidence basis in the deliverable's lead so the user can confirm the judgment at design-approval time. Distinct from explicit user redirect above (where the user names the deliverable type directly) and from Step 4's §Classification pivot check (which covers in-design deliverable-type shifts after initial classification); operator-judgment reclassification fires when the user's pre-authorization shape permits operator selection among named alternatives. Pairs with Guardrails §User pre-authorization patterns — pre-authorization satisfies the HARD-GATE on the chosen deliverable type, regardless of which authorized option the operator selects.
+
+## Persistence routing
+
+Once all sections are approved, write the complete design:
+
+- **If plan mode is active**: Write the design to the plan file (the only writable file in plan mode). The plan file serves as the design doc. When plan mode is active AND the deliverable is a spec: the spec cannot be written to `specs/` until after `ExitPlanMode` is called and the plan is approved. Write the plan file first with the spec design (deliverables, FOUNDATIONS alignment, verification). After plan approval, write the spec to `specs/` as the first implementation step. The plan file references the spec and summarizes the implementation sequence — it is not the design itself. Keep the plan file under 100 lines when the spec is the primary deliverable; the plan should summarize intent, list deliverables, and describe the implementation sequence without duplicating the full spec content. If investigation during implementation changes the deliverable set (items added, dropped, or reframed), update the plan file's deliverables section to reflect the final state before presenting results to the user.
+- **Otherwise**: Write to `docs/plans/YYYY-MM-DD-<topic>-design.md`, where `<topic>` is a kebab-case short name derived from the brainstorm topic.
+
+The design doc should consolidate all approved sections into a clean document. Include a "Brainstorm Context" header at the top noting:
+
+- The original request
+- Reference file (if any)
+- Key decisions that shaped the design (interview insights, approach selection, and mid-design scope revisions — whichever were load-bearing for this brainstorm)
+- Final confidence score and any assumptions made
+
+Do NOT commit the file. Leave it for user review.
+
+## Post-implementation plan update
+
+If the brainstorm was in plan mode and implementation changed the deliverable set (new tickets created, scope expanded beyond the original plan), update the plan file's deliverable list before the final summary to the user. The plan file should reflect what was actually delivered, not just what was planned. This applies even when the original plan was approved via ExitPlanMode — the plan is a living document during implementation.

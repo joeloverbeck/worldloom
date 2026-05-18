@@ -13,8 +13,11 @@ Fresh creation is lawful only when the committed event or current branch state
 creates present causal state that is not reducible to an existing active record.
 Prefer advancing, superseding, ticking, resolving, revealing, answering,
 changing status, or changing a relationship axis on an existing record when the
-event is a complication of the same causal object. Do not introduce records to
-prefigure act structure, future payoff, dramatic rhythm, or author-only plans.
+event is a complication of the same causal object. For story-bundle atomic
+records, "advancing" or "superseding" means creating a new record file with
+`supersedes: <prior_id>`; do not edit the prior YAML file in place. Do not
+introduce records to prefigure act structure, future payoff, dramatic rhythm,
+or author-only plans.
 
 ## CLK — Pressure Clock
 
@@ -43,10 +46,11 @@ clock for the same driver because tension increased.
   `intro:CLK(id=..., trigger=..., evidence=[...], distinct_from=[...])` tag.
 
 **Required turn-cycle handling.** Phase 3 may create a `CLK` before Phase 4
-applies clock lifecycle operations. If the same event creates and immediately
+applies clock lifecycle transitions. If the same event creates and immediately
 ticks a clock, the create operation lands first and the initial tick is
-represented through `tick_history[]` or `tick_pressure_clock` semantics; do not
-direct-edit prior YAML.
+represented through `tick_history[]` on that new record. Later advancement or
+resolution emits a new `CLK` through `supersede_clk_record` with
+`supersedes: <prior_clk_id>`; do not direct-edit prior YAML.
 
 **Validator checks.** `clock_introduction_grounding_integrity` checks non-empty
 driver, positive `max`, valid thresholds, and at least one grounding

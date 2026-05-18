@@ -105,52 +105,7 @@
         },
         "visible_affordances": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["ordinal", "label", "grounded_in", "available_to", "action_families"],
-            "properties": {
-              "ordinal": { "type": "integer", "minimum": 0 },
-              "label": { "type": "string", "minLength": 1 },
-              "grounded_in": {
-                "type": "array",
-                "items": { "type": "string", "pattern": "^(STLOC|STOBJ)-[0-9]+$" }
-              },
-              "available_to": {
-                "type": "array",
-                "items": { "type": "string", "pattern": "^STENT-[0-9]+$" }
-              },
-              "action_families": {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "string",
-                  "enum": [
-                    "move",
-                    "evade",
-                    "pursue",
-                    "perceive",
-                    "investigate",
-                    "communicate",
-                    "persuade",
-                    "negotiate",
-                    "bond",
-                    "oppose",
-                    "harm",
-                    "protect",
-                    "control",
-                    "transfer",
-                    "use",
-                    "make_change",
-                    "ritual_protocol",
-                    "recover",
-                    "wait",
-                    "decide"
-                  ]
-                }
-              }
-            },
-            "additionalProperties": false
-          }
+          "items": { "$ref": "#/$defs/PageAffordance" }
         },
         "continuation": {
           "type": "object",
@@ -189,6 +144,54 @@
       "type": "object",
       "additionalProperties": true,
       "description": "One PASS-with-rationale entry per shared hard gate."
+    }
+  },
+  "$defs": {
+    "PageAffordance": {
+      "type": "object",
+      "required": ["ordinal", "label", "grounded_in", "available_to", "action_families"],
+      "properties": {
+        "ordinal": { "type": "integer", "minimum": 0 },
+        "label": { "type": "string", "minLength": 1 },
+        "grounded_in": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(STLOC|STOBJ)-[0-9]+$" }
+        },
+        "available_to": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^STENT-[0-9]+$" }
+        },
+        "action_families": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "move",
+              "evade",
+              "pursue",
+              "perceive",
+              "investigate",
+              "communicate",
+              "persuade",
+              "negotiate",
+              "bond",
+              "oppose",
+              "harm",
+              "protect",
+              "control",
+              "transfer",
+              "use",
+              "make_change",
+              "ritual_protocol",
+              "recover",
+              "wait",
+              "decide"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

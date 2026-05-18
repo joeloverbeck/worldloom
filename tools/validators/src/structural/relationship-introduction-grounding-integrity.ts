@@ -89,7 +89,7 @@ function validateRelationship(relationship: IndexedRecord, parentPageId: string 
   if (duplicate !== undefined && stringValue(parsed.supersedes) !== duplicate) {
     verdicts.push({
       validator: VALIDATOR,
-      severity: "warn",
+      severity: "fail",
       code: "srel_intro_duplicate_axis",
       message: `${relationshipId} duplicates active relationship ${duplicate} on the same participants, axis, and direction without superseding it.`,
       location: locationFor(relationship),

@@ -15,6 +15,7 @@ import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema
 const requireFromThisTest = createRequire(import.meta.url);
 
 const EXPECTED_VALIDATOR_NAMES = [
+  "active_records_full_shape",
   "audit_only_se_shape",
   "branch_isolation",
   "canon_baseline_drift",
@@ -39,8 +40,10 @@ const EXPECTED_VALIDATOR_NAMES = [
   "midstory_record_introduction_grounding",
   "modification_history_retrofit",
   "narrative_shape_field_rejection",
+  "no_story_state_in_place_mutation",
   "non_propagation_tag_shape",
   "observer_firewall",
+  "page_affordance_integrity",
   "proposal_package_shape",
   "prose_load_bearing_artifact_mention",
   "prose_receipt_schema_compliance",
@@ -60,6 +63,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "secret_mystery_firewall_compliance",
   "slt_created_at_page_origin_consistency",
   "snapshot_replay_equality",
+  "state_delta_class_integrity",
   "state_snapshot_integrity",
   "story_da_duplicate_heuristic",
   "story_fact_authority",

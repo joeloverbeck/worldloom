@@ -1,4 +1,5 @@
 import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
+import { activeRecordsFullShape } from "../structural/active-records-full-shape.js";
 import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
@@ -20,7 +21,9 @@ import { idUniqueness } from "../structural/id-uniqueness.js";
 import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
 import { narrativeShapeFieldRejection } from "../structural/narrative-shape-field-rejection.js";
+import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-place-mutation.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
+import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
@@ -32,6 +35,7 @@ import { secretCarrierExistence } from "../structural/secret-carrier-existence.j
 import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-firewall-compliance.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
+import { stateDeltaClassIntegrity } from "../structural/state-delta-class-integrity.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
 import { storyQuestionIntroductionGroundingIntegrity } from "../structural/story-question-introduction-grounding-integrity.js";
 import { storyQuestionGroundingIntegrity } from "../structural/story-question-grounding-integrity.js";
@@ -67,6 +71,8 @@ export const structuralValidators: readonly Validator[] = [
   liePromotedSilently,
   branchIsolation,
   observerFirewall,
+  noStoryStateInPlaceMutation,
+  stateDeltaClassIntegrity,
   auditOnlySeShape,
   causalDependencyThreatScan,
   expectedWitnessCoverage,
@@ -95,6 +101,8 @@ export const structuralValidators: readonly Validator[] = [
   introductionObserverFirewall,
   narrativeShapeFieldRejection,
   compatibilityDrift,
+  activeRecordsFullShape,
+  pageAffordanceIntegrity,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,

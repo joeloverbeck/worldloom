@@ -193,6 +193,20 @@ test("record_schema_compliance accepts STSTAT and SREL promotion claim source re
   }
 });
 
+test("record_schema_compliance accepts state_delta references to every SPEC-44 story-state class", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({
+      state_delta: {
+        create: ["STSTAT-1", "CLK-1", "STSEC-1", "STQ-1"],
+        supersede: ["STSTAT-2", "CLK-2", "STSEC-2", "STQ-2"],
+        close: ["STSTAT-3", "CLK-3", "STSEC-3", "STQ-3"]
+      }
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
 function eventRecord(parsed: Record<string, unknown>) {
   return {
     ...record("story_event_record", "test-story:SE-1", FILE_PATH, parsed),

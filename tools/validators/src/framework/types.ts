@@ -90,6 +90,7 @@ export interface Context {
   index: WorldIndexReadSurface;
   touched_files: string[];
   patch_plan?: PatchPlanEnvelope;
+  pre_apply_existing_files?: readonly string[];
 }
 
 export interface Validator<TInput = unknown> {

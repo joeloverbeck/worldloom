@@ -93,17 +93,10 @@ export const OPERATION_KINDS = [
   "create_bel_record",
   "create_clk_record",
   "supersede_clk_record",
-  "tick_pressure_clock",
-  "resolve_pressure_clock",
   "create_stsec_record",
   "supersede_stsec_record",
-  "append_secret_clue_carrier",
-  "mark_secret_clue_discovered",
-  "reveal_story_secret",
   "create_stq_record",
   "supersede_stq_record",
-  "answer_story_question",
-  "abandon_story_question",
   "append_story_diegetic_artifact_record"
 ] as const;
 
@@ -206,54 +199,6 @@ export interface StoryRecordPayload<TRecord = Record<string, unknown>> {
   record: TRecord;
 }
 
-export interface TickPressureClockPayload {
-  story_slug: string;
-  target_clock_id: string;
-  event: string;
-  delta: number;
-  cause: string;
-}
-
-export interface ResolvePressureClockPayload {
-  story_slug: string;
-  target_clock_id: string;
-  resolution_event: string;
-}
-
-export interface AppendSecretClueCarrierPayload {
-  story_slug: string;
-  target_secret_id: string;
-  clue_carrier: Record<string, unknown>;
-}
-
-export interface MarkSecretClueDiscoveredPayload {
-  story_slug: string;
-  target_secret_id: string;
-  carrier_record: string;
-  discovered_by: string;
-}
-
-export interface RevealStorySecretPayload {
-  story_slug: string;
-  target_secret_id: string;
-  reveal_event: string;
-  reveal_records: string[];
-}
-
-export interface AnswerStoryQuestionPayload {
-  story_slug: string;
-  target_question_id: string;
-  status: "answered" | "paid_off";
-  answer_event: string;
-  answer_records: string[];
-}
-
-export interface AbandonStoryQuestionPayload {
-  story_slug: string;
-  target_question_id: string;
-  abandonment_rationale: string;
-}
-
 export type PatchOperation =
   | OperationBase<"create_cf_record", { cf_record: CanonFactRecord }>
   | OperationBase<"create_ch_record", { ch_record: ChangeLogEntry }>
@@ -323,17 +268,10 @@ export type PatchOperation =
   | OperationBase<"create_bel_record", StoryRecordPayload>
   | OperationBase<"create_clk_record", StoryRecordPayload>
   | OperationBase<"supersede_clk_record", StoryRecordPayload>
-  | OperationBase<"tick_pressure_clock", TickPressureClockPayload>
-  | OperationBase<"resolve_pressure_clock", ResolvePressureClockPayload>
   | OperationBase<"create_stsec_record", StoryRecordPayload>
   | OperationBase<"supersede_stsec_record", StoryRecordPayload>
-  | OperationBase<"append_secret_clue_carrier", AppendSecretClueCarrierPayload>
-  | OperationBase<"mark_secret_clue_discovered", MarkSecretClueDiscoveredPayload>
-  | OperationBase<"reveal_story_secret", RevealStorySecretPayload>
   | OperationBase<"create_stq_record", StoryRecordPayload>
   | OperationBase<"supersede_stq_record", StoryRecordPayload>
-  | OperationBase<"answer_story_question", AnswerStoryQuestionPayload>
-  | OperationBase<"abandon_story_question", AbandonStoryQuestionPayload>
   | OperationBase<"append_story_diegetic_artifact_record", StoryRecordPayload>;
 
 export type OperationPayload = PatchOperation["payload"];
