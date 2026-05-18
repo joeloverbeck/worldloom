@@ -101,7 +101,9 @@ export const STORY_EDGE_TYPES = [
   "belief_access_record",
   "belief_opens",
   "relationship_participant",
-  "relationship_derived_from"
+  "relationship_derived_from",
+  "intention_holder",
+  "intention_supersedes"
 ] as const;
 
 export type StoryEdgeType = (typeof STORY_EDGE_TYPES)[number];

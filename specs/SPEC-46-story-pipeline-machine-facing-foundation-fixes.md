@@ -20,6 +20,8 @@
 
 **Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-007.md`)**: Phase C SREL edge extraction is landed in `tools/world-index`: `relationship_participant` and `relationship_derived_from` are registered in `STORY_EDGE_TYPES`, emitted for live `relationship_record_story` nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 20`). Remaining Phase C edge families are still owned by tickets 008-015 until later implementation notes supersede this line.
 
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-008.md`)**: Phase C STINT edge extraction is landed in `tools/world-index`: `intention_holder` and `intention_supersedes` are registered in `STORY_EDGE_TYPES`, emitted for live `intention_record` story-bundle nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 22`). Remaining Phase C edge families are still owned by tickets 009-015 until later implementation notes supersede this line.
+
 ---
 
 ## Problem Statement
