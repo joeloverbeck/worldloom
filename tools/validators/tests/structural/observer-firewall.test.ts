@@ -99,6 +99,57 @@ test("observer_firewall accepts public BEL grounding", async () => {
   assert.deepEqual(verdicts, []);
 });
 
+test("observer_firewall rejects hidden CLK/STSEC/STQ preconditions without actor access", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", []),
+    event("SE-1", "STENT-1", "PG-1", {
+      selected_slt_id: "SLT-1",
+      alias_bindings: {}
+    }),
+    storylet("SLT-1", [
+      "clock_at_least(CLK-1, 2)",
+      "secret_unrevealed(STSEC-1)",
+      "story_question_open(STQ-1)"
+    ]),
+    pressureClock("CLK-1", "hidden", "STENT-2"),
+    storySecret("STSEC-1", ["STENT-2"], "hidden"),
+    storyQuestion("STQ-1", "hidden", ["SF-1"]),
+    fact("SF-1")
+  ]));
+
+  assert.deepEqual(
+    verdicts
+      .filter((verdict) => verdict.code === "observer_firewall_violation_hidden_record_precondition")
+      .map((verdict) => (verdict.detail as { reference_id: string }).reference_id)
+      .sort(),
+    ["CLK-1", "STQ-1", "STSEC-1"]
+  );
+});
+
+test("observer_firewall accepts SPEC-42 hidden preconditions with actor access routes", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", []),
+    event("SE-1", "STENT-1", "PG-1", {
+      selected_slt_id: "SLT-1",
+      alias_bindings: {}
+    }),
+    storylet("SLT-1", [
+      { pred: "clock_at_least", clock: "CLK-1", value: 2 },
+      { pred: "secret_unrevealed", secret: "STSEC-1" },
+      { pred: "story_question_open", question: "STQ-1" }
+    ]),
+    pressureClock("CLK-1", "hidden", "STENT-2"),
+    storySecret("STSEC-1", ["STENT-1"], "hidden"),
+    storyQuestion("STQ-1", "hidden", ["SF-1"]),
+    fact("SF-1"),
+    belief("BEL-1", "STENT-1", "private", ["CLK-1", "SF-1"])
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("observer_firewall uses child page input.choice_id, not parent page", async () => {
   const verdicts = await observerFirewall.run(undefined, context([
     page("PG-1", "CHC-1"),
@@ -184,7 +235,34 @@ function fact(id: string) {
   });
 }
 
-function storylet(id: string, hardPreconditions: string[]) {
+function pressureClock(id: string, visibility: string, driver: string) {
+  return storyRecord("pressure_clock_record", id, "clocks", {
+    id,
+    story_id: "STORY-1",
+    visibility,
+    driver
+  });
+}
+
+function storySecret(id: string, holders: string[], status: string) {
+  return storyRecord("story_secret_record", id, "secrets", {
+    id,
+    story_id: "STORY-1",
+    holders,
+    status
+  });
+}
+
+function storyQuestion(id: string, audienceVisibility: string, sourceRecords: string[]) {
+  return storyRecord("story_question_record", id, "story-questions", {
+    id,
+    story_id: "STORY-1",
+    audience_visibility: audienceVisibility,
+    source_records: sourceRecords
+  });
+}
+
+function storylet(id: string, hardPreconditions: unknown[]) {
   return storyRecord("storylet_record", id, "storylets", {
     id,
     story_id: "STORY-1",

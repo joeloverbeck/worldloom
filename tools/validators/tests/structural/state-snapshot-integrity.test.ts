@@ -112,6 +112,67 @@ test("state_snapshot_integrity accepts active_records BEL references", async () 
   assert.deepEqual(verdicts, []);
 });
 
+test("state_snapshot_integrity validates CLK/STSEC/STQ active record statuses", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context([
+    storyRecord("page_record", "PG-2", "pages", {
+      id: "PG-2",
+      story_id: "STORY-1",
+      input: {
+        choice_id: "CHC-1",
+        manual_action_text: null,
+        resolved_event_id: "SE-1"
+      },
+      state_snapshot: {
+        active_records: {
+          CLK: ["CLK-1", "CLK-2"],
+          STSEC: ["STSEC-1", "STSEC-2"],
+          STQ: ["STQ-1", "STQ-2"]
+        }
+      }
+    }),
+    storyRecord("story_event_record", "SE-1", "events", {
+      id: "SE-1",
+      story_id: "STORY-1",
+      event_kind: "selected_choice"
+    }),
+    storyRecord("pressure_clock_record", "CLK-1", "clocks", {
+      id: "CLK-1",
+      status: "active"
+    }),
+    storyRecord("pressure_clock_record", "CLK-2", "clocks", {
+      id: "CLK-2",
+      status: "resolved"
+    }),
+    storyRecord("story_secret_record", "STSEC-1", "secrets", {
+      id: "STSEC-1",
+      status: "partially_revealed"
+    }),
+    storyRecord("story_secret_record", "STSEC-2", "secrets", {
+      id: "STSEC-2",
+      status: "revealed"
+    }),
+    storyRecord("story_question_record", "STQ-1", "story-questions", {
+      id: "STQ-1",
+      status: "open"
+    }),
+    storyRecord("story_question_record", "STQ-2", "story-questions", {
+      id: "STQ-2",
+      status: "answered"
+    })
+  ], {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(
+    verdicts
+      .filter((verdict) => verdict.code === "state_snapshot_integrity.inactive_active_record")
+      .map((verdict) => (verdict.detail as { reference_id: string }).reference_id)
+      .sort(),
+    ["CLK-2", "STQ-2", "STSEC-2"]
+  );
+});
+
 test("state_snapshot_integrity requires evidence_records for narrowing mystery claims", async () => {
   const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
     pageSnapshot: {

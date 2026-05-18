@@ -1,6 +1,6 @@
 # SPEC42STOSTADEB-008: Shared validators — state-snapshot / replay / branch-isolation / observer-firewall extensions for CLK/STSEC/STQ
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends 4 existing structural validators to handle the 3 new record classes in their cross-class validation logic; no new validators introduced; no existing per-class validator logic altered
@@ -19,6 +19,8 @@ Four existing structural validators (`state_snapshot_integrity`, `snapshot_repla
 3. Cross-skill / cross-tool shared boundary: these 4 validators are the **cross-class structural defenses** that protect every PG commit. Their extensions compose with the per-class validators from SPEC42STOSTADEB-005 / -006 / -007 — per-class validators enforce per-record invariants; these shared validators enforce cross-record invariants (snapshot integrity, replay determinism, branch isolation, observer-firewall integration). The shared file `tools/validators/src/public/registry.ts` is also touched by -005 / -006 / -007 with non-overlapping additions; no semantic conflict.
 4. FOUNDATIONS §Rule 4 (No Globalization by Accident) motivates the `branch_isolation` extension: all three new classes are branch-scoped (each carries `created_at_page`); `branch_isolation` extends to enforce no sibling-branch CLK/STSEC/STQ references in PG snapshots — preserving the per-branch scope guarantee per SPEC-42 §FOUNDATIONS Alignment Rule 4 row.
 5. HARD-GATE validator surface: all 4 extended validators continue to run at engine pre-apply on every story-bundle commit. Extension preserves their gate status; just expands the class coverage. Mystery Reserve firewall: not directly touched (these are cross-class structural validators; Mystery Reserve firewall is enforced by `rule7_mystery_reserve_preservation` + `secret_mystery_firewall_compliance` from -006). Hook 3 path-pattern coverage: unchanged.
+6. Reassessment update (2026-05-18): live implementation drift is narrower than the draft but still real. `tools/validators/src/_helpers/state-snapshot-replay.ts` already included `CLK` and `STSEC` in `ACTIVE_RECORDS_CLASSES`, but not `STQ`; `state_snapshot_integrity` and `branch_isolation` still used story-local ID regexes that excluded all three SPEC-42 active-record ids; `observer_firewall` had no CLK/STSEC/STQ predicate-access checks. The owned implementation is therefore the remaining shared-validator coverage gap, not a from-zero rewrite of all four validators.
+7. Reassessment update (2026-05-18): `snapshot_replay_equality`'s new-schema replay is `SE.state_delta`-based rather than per-class lifecycle-specific. Adding `STQ` to `ACTIVE_RECORDS_CLASSES` makes STQ create/supersede/close replay deterministic in the same mechanism already used for `CLK` and `STSEC`; no separate bespoke clock/secret/question transition interpreter is introduced in this ticket.
 
 ## Architecture Check
 
@@ -71,6 +73,11 @@ Existing 12-class enumeration unchanged.
 - `tools/validators/src/structural/snapshot-replay-equality.ts` (modify — replay logic extension)
 - `tools/validators/src/structural/branch-isolation.ts` (modify — cross-branch reference scan extension)
 - `tools/validators/src/structural/observer-firewall.ts` (modify — visibility-field handling extension)
+- `tools/validators/src/_helpers/state-snapshot-replay.ts` (modify — include STQ in active-record replay class list)
+- `tools/validators/tests/structural/state-snapshot-integrity.test.ts` (modify — CLK/STSEC/STQ active-record status coverage)
+- `tools/validators/tests/structural/snapshot-replay-equality.test.ts` (modify — STQ active-record replay coverage)
+- `tools/validators/tests/structural/branch-isolation.test.ts` (modify — sibling-branch SPEC-42 active-record coverage)
+- `tools/validators/tests/structural/observer-firewall.test.ts` (modify — hidden CLK/STSEC/STQ predicate-access coverage)
 
 ## Out of Scope
 
@@ -110,3 +117,18 @@ Existing 12-class enumeration unchanged.
 
 1. `npm test --prefix tools/validators` — full validator test pass with cross-class extension coverage
 2. The full-pipeline verification command lands in SPEC42STOSTADEB-015 capstone
+
+## Outcome
+
+Completed: 2026-05-18
+
+Implemented the remaining SPEC-42 shared-validator coverage for CLK/STSEC/STQ. `state_snapshot_integrity` now recognizes the three new active-record ids and fails inactive lifecycle statuses in `PG.state_snapshot.active_records`; `snapshot_replay_equality` now replays STQ through the shared `ACTIVE_RECORDS_CLASSES` state-delta path; `branch_isolation` includes CLK/STSEC/STQ in story-local active-record and static-reference checks; `observer_firewall` rejects selected storylets that predicate on hidden CLK/STSEC/STQ records without actor access. Focused tests cover each shared validator extension.
+
+## Verification Result
+
+- `npm test --prefix tools/validators` — PASS on 2026-05-18. The command rebuilt the validators package and ran `416` node:test tests with `0` failures.
+
+## Deviations
+
+- Live reassessment found `CLK` and `STSEC` replay support had already partially landed in `ACTIVE_RECORDS_CLASSES`; this ticket added the missing `STQ` replay entry and preserved the existing generic `SE.state_delta` replay model instead of adding class-specific replay interpreters.
+- `observer_firewall` implements SPEC-42 hidden-state access through existing BEL access-route evidence and direct STSEC holder membership. CLK has no standalone `holders[]` schema field, so hidden CLK access is accepted for the clock driver or an actor with a `BEL.basis.access_records[]` route to the CLK.

@@ -64,7 +64,7 @@ Modify `CLAUDE.md` Story Bundles section. The inventory list of story-bundle rec
 
 - CLK/STSEC/STQ class foundations (incl. §3 catalog rows, §4.6 / §4.7 / §4.8 per-class schemas, §4.2 active_records enum extension) — owned by SPEC42STOSTADEB-001 / -002 / -003
 - Per-class validators + predicate-grammar parser extensions — owned by SPEC42STOSTADEB-005 / -006 / -007
-- Shared validator extensions — owned by SPEC42STOSTADEB-008
+- Shared validator extensions — owned by archive/tickets/SPEC42STOSTADEB-008.md
 - §10b per-page-computed RENDERING in turn-cycle Phase 7 — owned by SPEC42STOSTADEB-009
 - MCP retrieval surface — owned by archive/tickets/SPEC42STOSTADEB-004.md
 - Other skill integrations — owned by SPEC42STOSTADEB-010 through -013

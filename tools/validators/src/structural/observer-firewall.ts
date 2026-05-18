@@ -10,7 +10,7 @@ import {
 
 const ACCESSIBLE_BEL_VISIBILITIES = new Set(["public", "rumored", "shared"]);
 const PRIVATE_BEL_VISIBILITIES = new Set(["private", "suppressed", "concealed"]);
-const STATIC_ACCESS_RECORD_ID = /^(?:STENT|STLOC|STOBJ|DA|BEL|SF|SE)-\d+$/;
+const STATIC_ACCESS_RECORD_ID = /^(?:STENT|STLOC|STOBJ|DA|BEL|SF|SE|CLK|STSEC|STQ)-\d+$/;
 
 export const observerFirewall: Validator = {
   name: "observer_firewall",
@@ -37,6 +37,17 @@ export const observerFirewall: Validator = {
         const actor = actorForEvent(parsed);
         if (actor === undefined) {
           continue;
+        }
+
+        const selectedStorylet = selectedStoryletForEvent(parsed, maps);
+        if (selectedStorylet !== undefined) {
+          for (const reference of hiddenStatePredicates(asPlainRecord(selectedStorylet.parsed))) {
+            const stateRecord = maps.byId.get(reference.recordId);
+            if (stateRecord === undefined || actorCanUseHiddenStatePredicate(actor, stateRecord, maps)) {
+              continue;
+            }
+            verdicts.push(hiddenStatePredicateLeak(event, parsed, actor, selectedStorylet, reference));
+          }
         }
 
         const selectedChoice = selectedChoiceForEvent(parsed, maps);
@@ -94,6 +105,11 @@ interface BeliefPredicateReference {
   path: string;
 }
 
+interface HiddenStatePredicateReference {
+  recordId: string;
+  path: string;
+}
+
 function recordMapsForStory(records: readonly IndexedRecord[], storySlug: string): RecordMaps {
   const byId = new Map<string, IndexedRecord>();
   const byType = new Map<string, IndexedRecord[]>();
@@ -143,6 +159,15 @@ function selectedChoiceForEvent(event: Record<string, unknown>, maps: RecordMaps
   }
   const choice = maps.byId.get(choiceId);
   return choice?.node_type === "choice_record" ? choice : undefined;
+}
+
+function selectedStoryletForEvent(event: Record<string, unknown>, maps: RecordMaps): IndexedRecord | undefined {
+  const storyletId = stringValue(asPlainRecord(event.commitment).selected_slt_id);
+  if (storyletId === undefined) {
+    return undefined;
+  }
+  const storylet = maps.byId.get(storyletId);
+  return storylet?.node_type === "storylet_record" ? storylet : undefined;
 }
 
 function pageResolvedByEvent(event: Record<string, unknown>, maps: RecordMaps): IndexedRecord | undefined {
@@ -221,6 +246,89 @@ function collectBeliefRecordPredicates(
   for (const [key, nested] of Object.entries(record)) {
     collectBeliefRecordPredicates(nested, `${path}.${key}`, references);
   }
+}
+
+function hiddenStatePredicates(storylet: Record<string, unknown>): HiddenStatePredicateReference[] {
+  const references: HiddenStatePredicateReference[] = [];
+  const preconditions = asPlainRecord(storylet.preconditions);
+  collectHiddenStatePredicates(preconditions.hard, "preconditions.hard", references);
+  collectHiddenStatePredicates(preconditions.soft, "preconditions.soft", references);
+  return references;
+}
+
+function collectHiddenStatePredicates(
+  value: unknown,
+  path: string,
+  references: HiddenStatePredicateReference[]
+): void {
+  if (typeof value === "string") {
+    for (const match of value.matchAll(/\b(?:clock_at_least|clock_below|clock_full)\(\s*(CLK-\d+)/g)) {
+      references.push({ recordId: match[1]!, path });
+    }
+    for (const match of value.matchAll(/\b(?:secret_unrevealed|secret_revealed|revelation_ready)\(\s*(STSEC-\d+)/g)) {
+      references.push({ recordId: match[1]!, path });
+    }
+    for (const match of value.matchAll(/\b(?:story_question_open|story_question_status|promise_due)\(\s*(STQ-\d+)/g)) {
+      references.push({ recordId: match[1]!, path });
+    }
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => collectHiddenStatePredicates(item, `${path}[${index}]`, references));
+    return;
+  }
+
+  const record = asPlainRecord(value);
+  const pred = stringValue(record.pred);
+  if (pred !== undefined) {
+    const clock = stringValue(record.clock);
+    const secret = stringValue(record.secret);
+    const question = stringValue(record.question);
+    if (pred.startsWith("clock_") && clock !== undefined) {
+      references.push({ recordId: clock, path });
+    } else if ((pred.startsWith("secret_") || pred === "revelation_ready") && secret !== undefined) {
+      references.push({ recordId: secret, path });
+    } else if ((pred.startsWith("story_question_") || pred === "promise_due") && question !== undefined) {
+      references.push({ recordId: question, path });
+    }
+  }
+
+  for (const [key, nested] of Object.entries(record)) {
+    collectHiddenStatePredicates(nested, `${path}.${key}`, references);
+  }
+}
+
+function actorCanUseHiddenStatePredicate(actor: string, stateRecord: IndexedRecord, maps: RecordMaps): boolean {
+  const parsed = asPlainRecord(stateRecord.parsed);
+  const id = recordId(stateRecord);
+
+  if (stateRecord.node_type === "pressure_clock_record") {
+    const visibility = stringValue(parsed.visibility);
+    if (visibility === "public") {
+      return true;
+    }
+    return stringValue(parsed.driver) === actor || actorHasAccessRecord(actor, id, maps);
+  }
+
+  if (stateRecord.node_type === "story_secret_record") {
+    const status = stringValue(parsed.status);
+    if (status === "revealed" || status === "disproven") {
+      return true;
+    }
+    const holders = stringArray(parsed.holders);
+    return holders.includes(actor) || holders.includes("public") || actorHasAccessRecord(actor, id, maps);
+  }
+
+  if (stateRecord.node_type === "story_question_record") {
+    if (stringValue(parsed.audience_visibility) !== "hidden") {
+      return true;
+    }
+    const sources = stringArray(parsed.source_records);
+    return actorHasAccessRecord(actor, id, maps) || sources.some((sourceId) => actorHasAccessRecord(actor, sourceId, maps));
+  }
+
+  return true;
 }
 
 function resolvedPredicateHolder(holder: string, storylet: IndexedRecord, maps: RecordMaps): string | undefined {
@@ -349,6 +457,30 @@ function predicateHolderMismatch(
       expected_holder: expectedHolder,
       belief_id: reference.beliefId,
       belief_holder: actualHolder
+    }
+  };
+}
+
+function hiddenStatePredicateLeak(
+  event: IndexedRecord,
+  parsedEvent: Record<string, unknown>,
+  actor: string,
+  storylet: IndexedRecord,
+  reference: HiddenStatePredicateReference
+): Verdict {
+  const storyletLabel = recordId(storylet);
+  return {
+    validator: "observer_firewall",
+    severity: "fail",
+    code: "observer_firewall_violation_hidden_record_precondition",
+    message: `${eventId(parsedEvent)} actor ${actor} cannot use hidden record ${reference.recordId} in ${storyletLabel} preconditions without an access route.`,
+    location: locationFor(event),
+    detail: {
+      event_id: eventId(parsedEvent),
+      actor,
+      storylet_id: storyletLabel,
+      reference_id: reference.recordId,
+      reference_path: reference.path
     }
   };
 }

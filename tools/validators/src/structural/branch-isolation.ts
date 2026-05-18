@@ -7,9 +7,9 @@ import {
   touchedFilesInclude
 } from "./utils.js";
 
-const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|STSTAT|SLT|CHC|BR|PG)-\d+$/;
+const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|SLT|CHC|BR|PG)-\d+$/;
 const WORLD_SCOPE_ID = /^(?:CF|CHAR|ENT)-\d+$/;
-const STATIC_RECORD_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|STSTAT|SLT|CHC|BR|PG|CF|CHAR|ENT)-\d+$/;
+const STATIC_RECORD_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|SLT|CHC|BR|PG|CF|CHAR|ENT)-\d+$/;
 
 export const branchIsolation: Validator = {
   name: "branch_isolation",
@@ -219,7 +219,7 @@ function collectStaticRecordReferences(value: unknown, path: string, references:
       references.push({ id: value, path });
       return;
     }
-    for (const match of value.matchAll(/\b(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|STSTAT|SLT|CHC|BR|PG|CF|CHAR|ENT)-\d+\b/g)) {
+    for (const match of value.matchAll(/\b(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|SLT|CHC|BR|PG|CF|CHAR|ENT)-\d+\b/g)) {
       references.push({ id: match[0], path });
     }
     return;

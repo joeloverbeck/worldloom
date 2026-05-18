@@ -60,7 +60,7 @@ If the prose-receipt schema (`pages-prose-receipts/PG-<integer>.yaml`) has a str
 
 - CLK/STSEC/STQ class foundations — owned by SPEC42STOSTADEB-001 / -002 / -003
 - Per-class validators — owned by SPEC42STOSTADEB-005 / -006 / -007
-- Shared validator extensions — owned by SPEC42STOSTADEB-008
+- Shared validator extensions — owned by archive/tickets/SPEC42STOSTADEB-008.md
 - Turn-cycle integration producing the SE.state_delta entries this ticket inspects — owned by SPEC42STOSTADEB-009
 - Bootstrap optional seeding — owned by SPEC42STOSTADEB-010
 - Commitment-block-authoring extension — owned by SPEC42STOSTADEB-011

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `branching-story-turn-cycle` SKILL.md with Phase 4 (state-delta computation) integration for ticking clocks, revealing secrets, and advancing story questions during SE state-delta computation; extends Phase 7 (page-plan rendering) with a new §10b "Open Setups, Active Clocks, Hidden Secrets" per-page-computed section; no new skill phases introduced
-**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, archive/tickets/SPEC42STOSTADEB-003.md, archive/tickets/SPEC42STOSTADEB-005.md, archive/tickets/SPEC42STOSTADEB-006.md, archive/tickets/SPEC42STOSTADEB-007.md, SPEC42STOSTADEB-008
+**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, archive/tickets/SPEC42STOSTADEB-003.md, archive/tickets/SPEC42STOSTADEB-005.md, archive/tickets/SPEC42STOSTADEB-006.md, archive/tickets/SPEC42STOSTADEB-007.md, archive/tickets/SPEC42STOSTADEB-008.md
 
 ## Problem
 
@@ -61,7 +61,7 @@ Modify Phase 7 (page-plan rendering — verify exact location at edit time; like
 
 - CLK/STSEC/STQ class foundations — owned by SPEC42STOSTADEB-001 / -002 / -003
 - Per-class validators + predicates — owned by SPEC42STOSTADEB-005 / -006 / -007
-- Shared validator extensions — owned by SPEC42STOSTADEB-008
+- Shared validator extensions — owned by archive/tickets/SPEC42STOSTADEB-008.md
 - MCP retrieval surface — owned by archive/tickets/SPEC42STOSTADEB-004.md
 - Other skill integrations (bootstrap, commitment-block-authoring, health-audit, prose-attach) — owned by SPEC42STOSTADEB-010 through -013
 - Cross-class contract doc updates (story-state-contract.md §5 predicate list, §6 integration matrix, §8 page-plan section) — owned by SPEC42STOSTADEB-014
