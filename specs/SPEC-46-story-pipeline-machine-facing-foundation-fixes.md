@@ -10,6 +10,8 @@
 
 **Implementation note (2026-05-18)**: `archive/tickets/SPEC46STOPIPMAC-002.md` landed the Phase B actor-bound MCP summaries `active_intentions`, `active_statuses`, `active_intention_ids`, and `active_status_entities` in `tools/world-mcp`. The remaining Phase B/Phase C absence claims below remain active for tickets 003-015 unless a later implementation note supersedes them.
 
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-003.md`)**: the live `SREL` schema uses node type `relationship_record_story` and carries singular `axis` / `value` fields with no `status` field. `archive/tickets/SPEC46STOPIPMAC-003.md` therefore landed `active_relationships_by_participant` as grouped participant pairs plus `axes: [{axis, value}]`; it does not fabricate the drafted `status` field.
+
 ---
 
 ## Problem Statement
@@ -87,7 +89,7 @@ Each new summary projects only the load-bearing-for-skill-retrieval subset of th
 |---|---|---|
 | `active_intentions` | `[{id, holder, intent, urgency, expires_when}]` | turn-cycle eligibility scoring; health-audit stale-intention detection; future STPLAN root-intention linking |
 | `active_beliefs_by_holder` | `[{holder, beliefs: [{id, claim, belief_mode, truth_relation, confidence, visibility}]}]` grouped by `holder` | observer firewall; dramatic-irony queries; future STEMO appraisal-basis access |
-| `active_relationships_by_participant` | `[{participants: [STENT, STENT], axes: [{axis, value}], status}]` | social-state firewall prefiltering; turn-cycle eligibility for `relationship_axis` predicates; future social-pressure packet |
+| `active_relationships_by_participant` | `[{participants: [STENT, STENT], axes: [{axis, value}]}]` | social-state firewall prefiltering; turn-cycle eligibility for `relationship_axis` predicates; future social-pressure packet |
 | `active_statuses` | `[{entity, life, agency, location}]` | turn-cycle eligibility for `entity_status` predicates; health-audit life/agency consistency |
 | `active_locations_in_scope` | `[{id, name, status, affordances: [{action_family, accessible_to}]}]` (in-scope = locations of any actor in `cast_bind_list` or any location referenced by an active record on this branch) | turn-cycle eligibility for `location` and `has_affordance` predicates |
 | `active_objects_in_scope` | `[{id, name, location, accessible_to: [STENT]}]` (in-scope = same heuristic) | turn-cycle eligibility for `object_accessible` predicates |

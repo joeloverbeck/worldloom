@@ -71,6 +71,8 @@ export interface ContextPacketStoryBundleContextSummary {
   open_obligation_ids: string[];
   active_intention_ids: string[];
   active_status_entities: string[];
+  active_belief_holders: string[];
+  active_relationship_participants: string[][];
   active_thread_ids: string[];
   active_clock_ids: string[];
   hidden_secret_ids: string[];
@@ -133,6 +135,38 @@ export interface ContextPacketStoryBundleContext {
     life: string;
     agency: string;
     location: string;
+  }>;
+  active_beliefs_by_holder: Array<{
+    holder: string;
+    beliefs: Array<{
+      id: string;
+      claim: string;
+      belief_mode: string;
+      truth_relation:
+        | "true"
+        | "false"
+        | "partly_true"
+        | "unknown"
+        | "contested"
+        | "branch_counterfactual"
+        | "future_contingent";
+      confidence: string;
+      visibility:
+        | "private"
+        | "shared"
+        | "factional"
+        | "public"
+        | "rumored"
+        | "concealed"
+        | "suppressed";
+    }>;
+  }>;
+  active_relationships_by_participant: Array<{
+    participants: string[];
+    axes: Array<{
+      axis: string;
+      value: string;
+    }>;
   }>;
   active_threads: Array<{
     id: string;

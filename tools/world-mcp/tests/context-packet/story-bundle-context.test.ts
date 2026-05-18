@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { assembleContextPacket } from "../../src/context-packet/assemble.js";
+import { summarizeStoryBundleContext } from "../../src/context-packet/story-bundle-context.js";
 
 import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared.js";
 import {
@@ -166,6 +167,106 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
       }
     ]);
     assert.deepEqual(
+      result.story_bundle_context.active_beliefs_by_holder.map((group) => Object.keys(group)),
+      [
+        ["holder", "beliefs"],
+        ["holder", "beliefs"]
+      ]
+    );
+    assert.deepEqual(
+      result.story_bundle_context.active_beliefs_by_holder.map((group) => [
+        group.holder,
+        group.beliefs.map((belief) => Object.keys(belief))
+      ]),
+      [
+        [
+          "STENT-2",
+          [
+            [
+              "id",
+              "claim",
+              "belief_mode",
+              "truth_relation",
+              "confidence",
+              "visibility"
+            ],
+            [
+              "id",
+              "claim",
+              "belief_mode",
+              "truth_relation",
+              "confidence",
+              "visibility"
+            ]
+          ]
+        ],
+        [
+          "STENT-3",
+          [
+            [
+              "id",
+              "claim",
+              "belief_mode",
+              "truth_relation",
+              "confidence",
+              "visibility"
+            ]
+          ]
+        ]
+      ]
+    );
+    assert.deepEqual(result.story_bundle_context.active_beliefs_by_holder, [
+      {
+        holder: "STENT-2",
+        beliefs: [
+          {
+            id: "BEL-1",
+            claim: "Marla believes the loft is empty.",
+            belief_mode: "believes",
+            truth_relation: "false",
+            confidence: "likely",
+            visibility: "private"
+          },
+          {
+            id: "BEL-2",
+            claim: "Marla suspects someone listened at the stairwell.",
+            belief_mode: "suspects",
+            truth_relation: "unknown",
+            confidence: "suspected",
+            visibility: "shared"
+          }
+        ]
+      },
+      {
+        holder: "STENT-3",
+        beliefs: [
+          {
+            id: "BEL-3",
+            claim: "The watcher believes Marla heard the bell.",
+            belief_mode: "believes",
+            truth_relation: "unknown",
+            confidence: "medium",
+            visibility: "factional"
+          }
+        ]
+      }
+    ]);
+    assert.deepEqual(result.story_bundle_context.active_relationships_by_participant, [
+      {
+        participants: ["STENT-2", "STENT-3"],
+        axes: [
+          {
+            axis: "trust",
+            value: "low"
+          },
+          {
+            axis: "fear",
+            value: "medium"
+          }
+        ]
+      }
+    ]);
+    assert.deepEqual(
       result.story_bundle_context.active_threads.map((thread) => thread.id),
       ["THR-1"]
     );
@@ -220,6 +321,12 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     ]);
     assert.deepEqual(result.story_bundle_context.invariants_acknowledged, [
       "INV-social-intimacy"
+    ]);
+
+    const storyBundleContextSummary = summarizeStoryBundleContext(result.story_bundle_context);
+    assert.deepEqual(storyBundleContextSummary?.active_belief_holders, ["STENT-2", "STENT-3"]);
+    assert.deepEqual(storyBundleContextSummary?.active_relationship_participants, [
+      ["STENT-2", "STENT-3"]
     ]);
   } finally {
     destroyTempRepoRoot(root);

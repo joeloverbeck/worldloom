@@ -71,6 +71,23 @@ export function buildStoryBundleWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-3"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "entities", "STENT-3.yaml"),
+        node_type: "story_entity_record",
+        body: [
+          "id: STENT-3",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "name: The stairwell watcher",
+          "display_name: The stairwell watcher",
+          "bound_char_id: null",
+          "role_in_story: [witness, pressure_source]",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "SF-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
@@ -131,6 +148,32 @@ export function buildStoryBundleWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "BEL-3"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "beliefs", "BEL-3.yaml"),
+        node_type: "belief_record",
+        body: [
+          "id: BEL-3",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "holder: STENT-3",
+          "claim: The watcher believes Marla heard the bell.",
+          "belief_mode: believes",
+          "truth_relation: unknown",
+          "confidence: medium",
+          "visibility: factional",
+          "basis:",
+          "  source_event: SE-1",
+          "  access_route: direct_observation",
+          "consequences:",
+          "  opens: []",
+          "  constrains_choices: []",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "STSTAT-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
@@ -162,6 +205,60 @@ export function buildStoryBundleWorld(root: string): void {
           "intent: Marla wants to reach the loft window unseen.",
           "urgency: high",
           "expires_when: Marla is seen by the watch patrol.",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SREL-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "relationships", "SREL-1.yaml"),
+        node_type: "relationship_record_story",
+        body: [
+          "id: SREL-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "axis: trust",
+          "participants:",
+          "  - STENT-2",
+          "  - STENT-3",
+          "direction:",
+          "  kind: bidirectional",
+          "  from: null",
+          "  to: null",
+          "value: low",
+          "valence: symmetric",
+          "description: Marla and the watcher do not yet trust each other.",
+          "derived_from:",
+          "  - BEL-2",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SREL-2"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "relationships", "SREL-2.yaml"),
+        node_type: "relationship_record_story",
+        body: [
+          "id: SREL-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "axis: fear",
+          "participants:",
+          "  - STENT-3",
+          "  - STENT-2",
+          "direction:",
+          "  kind: directed",
+          "  from: STENT-3",
+          "  to: STENT-2",
+          "value: medium",
+          "valence: asymmetric",
+          "description: The watcher fears Marla may expose him.",
+          "derived_from:",
+          "  - SE-1",
           ""
         ].join("\n")
       },

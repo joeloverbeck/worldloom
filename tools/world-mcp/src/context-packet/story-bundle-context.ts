@@ -113,6 +113,34 @@ function asUrgency(value: unknown): "low" | "medium" | "high" {
   return value === "low" || value === "medium" || value === "high" ? value : "medium";
 }
 
+function asTruthRelation(
+  value: unknown
+): "true" | "false" | "partly_true" | "unknown" | "contested" | "branch_counterfactual" | "future_contingent" {
+  return value === "true" ||
+    value === "false" ||
+    value === "partly_true" ||
+    value === "unknown" ||
+    value === "contested" ||
+    value === "branch_counterfactual" ||
+    value === "future_contingent"
+    ? value
+    : "unknown";
+}
+
+function asBeliefVisibility(
+  value: unknown
+): "private" | "shared" | "factional" | "public" | "rumored" | "concealed" | "suppressed" {
+  return value === "private" ||
+    value === "shared" ||
+    value === "factional" ||
+    value === "public" ||
+    value === "rumored" ||
+    value === "concealed" ||
+    value === "suppressed"
+    ? value
+    : "private";
+}
+
 function asStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
 }
@@ -237,6 +265,65 @@ function buildActiveStatuses(rows: StoryNodeRow[]): ContextPacketStoryBundleCont
       location: asString(record.location)
     };
   });
+}
+
+function buildActiveBeliefsByHolder(
+  rows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_beliefs_by_holder"] {
+  const groups = new Map<string, ContextPacketStoryBundleContext["active_beliefs_by_holder"][number]["beliefs"]>();
+
+  for (const row of rows) {
+    const record = parseYamlRecord(row);
+    const holder = asString(record.holder, "unspecified");
+    const beliefs = groups.get(holder) ?? [];
+    beliefs.push({
+      id: asString(record.id, authoredId(row)),
+      claim: asString(record.claim),
+      belief_mode: asString(record.belief_mode, "unspecified"),
+      truth_relation: asTruthRelation(record.truth_relation),
+      confidence: asString(record.confidence, "unspecified"),
+      visibility: asBeliefVisibility(record.visibility)
+    });
+    groups.set(holder, beliefs);
+  }
+
+  return [...groups.entries()].map(([holder, beliefs]) => ({ holder, beliefs }));
+}
+
+function participantGroupKey(participants: string[]): string {
+  return [...participants].sort((left, right) => left.localeCompare(right)).join("\u0000");
+}
+
+function buildActiveRelationshipsByParticipant(
+  rows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_relationships_by_participant"] {
+  const groups = new Map<
+    string,
+    ContextPacketStoryBundleContext["active_relationships_by_participant"][number]
+  >();
+
+  for (const row of rows) {
+    const record = parseYamlRecord(row);
+    const participants = asStringArray(record.participants).sort((left, right) =>
+      left.localeCompare(right)
+    );
+    if (participants.length === 0) {
+      continue;
+    }
+
+    const key = participantGroupKey(participants);
+    const group = groups.get(key) ?? {
+      participants,
+      axes: []
+    };
+    group.axes.push({
+      axis: asString(record.axis, "unspecified"),
+      value: asString(record.value, "unspecified")
+    });
+    groups.set(key, group);
+  }
+
+  return [...groups.values()];
 }
 
 function buildActiveThreads(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_threads"] {
@@ -471,6 +558,10 @@ export function summarizeStoryBundleContext(
     open_obligation_ids: context.open_obligations.map((obligation) => obligation.id),
     active_intention_ids: context.active_intentions.map((intention) => intention.id),
     active_status_entities: context.active_statuses.map((status) => status.entity),
+    active_belief_holders: context.active_beliefs_by_holder.map((group) => group.holder),
+    active_relationship_participants: context.active_relationships_by_participant.map(
+      (group) => [...group.participants]
+    ),
     active_thread_ids: context.active_threads.map((thread) => thread.id),
     active_clock_ids: context.active_clocks.map((clock) => clock.id),
     hidden_secret_ids: context.hidden_secrets.map((secret) => secret.id),
@@ -492,6 +583,8 @@ export function buildStoryBundleContext(
   const obligationRows = rowsForNodeType(db, worldSlug, storySlug, "obligation_record");
   const intentionRows = rowsForNodeType(db, worldSlug, storySlug, "intention_record");
   const statusRows = rowsForNodeType(db, worldSlug, storySlug, "story_status_record");
+  const beliefRows = rowsForNodeType(db, worldSlug, storySlug, "belief_record");
+  const relationshipRows = rowsForNodeType(db, worldSlug, storySlug, "relationship_record_story");
   const threadRows = rowsForNodeType(db, worldSlug, storySlug, "thread_record");
   const clockRows = rowsForNodeType(db, worldSlug, storySlug, "pressure_clock_record");
   const secretRows = rowsForNodeType(db, worldSlug, storySlug, "story_secret_record");
@@ -506,6 +599,9 @@ export function buildStoryBundleContext(
     open_obligations: buildOpenObligations(obligationRows),
     active_intentions: buildActiveIntentions(intentionRows),
     active_statuses: buildActiveStatuses(statusRows),
+    active_beliefs_by_holder: buildActiveBeliefsByHolder(beliefRows),
+    active_relationships_by_participant:
+      buildActiveRelationshipsByParticipant(relationshipRows),
     active_threads: buildActiveThreads(threadRows),
     active_clocks: buildActiveClocks(clockRows),
     hidden_secrets: buildHiddenSecrets(secretRows),
