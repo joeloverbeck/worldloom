@@ -22,6 +22,7 @@ import { modificationHistoryRetrofit } from "../structural/modification-history-
 import { narrativeShapeFieldRejection } from "../structural/narrative-shape-field-rejection.js";
 import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-place-mutation.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
+import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
@@ -99,6 +100,7 @@ export const structuralValidators: readonly Validator[] = [
   introductionObserverFirewall,
   narrativeShapeFieldRejection,
   compatibilityDrift,
+  pageAffordanceIntegrity,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,

@@ -1,6 +1,6 @@
 # SPEC44STOSTAAPP-006: `page_affordance_integrity` validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new structural validator `page_affordance_integrity` registered in `tools/validators/src/public/registry.ts`; consumes the `$defs.PageAffordance` schema component extracted in `archive/tickets/SPEC44STOSTAAPP-001.md`. No impact on existing validators.
@@ -8,14 +8,14 @@
 
 ## Problem
 
-`tools/validators/src/schemas/story-page.schema.json` defines `visible_affordances` as an array of affordance objects with structural constraints (`ordinal` integer ≥ 0, `label` minLength 1, `grounded_in` array of STLOC/STOBJ ids, `available_to` array of STENT ids, `action_families` array from a 20-value enum). Schema validation catches form-violations (missing required fields, wrong types), but four runtime integrity invariants are NOT enforced today:
+At intake, `tools/validators/src/schemas/story-page.schema.json` defined `visible_affordances` as an array of affordance objects with structural constraints (`ordinal` integer >= 0, `label` minLength 1, `grounded_in` array of STLOC/STOBJ ids, `available_to` array of STENT ids, `action_families` array from a 20-value enum). Schema validation caught form-violations (missing required fields, wrong types), but four runtime integrity invariants were not enforced:
 
 1. **Ordinal uniqueness within a page**: two affordances on the same `PG.state_snapshot.visible_affordances` array can carry the same `ordinal` integer; schema permits it, but downstream choice grounding (which references affordances by ordinal) becomes ambiguous.
-2. **Grounded-in records must be ACTIVE in the page's snapshot**: an affordance's `grounded_in: [STOBJ-4]` references a STOBJ that must appear in `state_snapshot.active_records.STOBJ`; today nothing enforces this, so an affordance can ground in a record that was closed or superseded out.
+2. **Grounded-in records must be ACTIVE in the page's snapshot**: an affordance's `grounded_in: [STOBJ-4]` references a STOBJ that must appear in `state_snapshot.active_records.STOBJ`; at intake nothing enforced this, so an affordance could ground in a record that was closed or superseded out.
 3. **Available-to entities must be ACTIVE**: same as #2 for STENT references in `available_to`.
 4. **Action_families values from the closed enum**: schema already enforces this at parse-time; the validator adds runtime confirmation as a defense-in-depth check (catches enum drift between schema and consumer code).
 
-Per SPEC-44 §Approach Phase 3 step 10, this validator codifies the four integrity invariants and emits `fail` for any violation. The `$defs.PageAffordance` extraction in `archive/tickets/SPEC44STOSTAAPP-001.md` supplies the validator with a reusable type reference rather than forcing the validator to duplicate the schema shape inline.
+Per SPEC-44 §Approach Phase 3 step 10, this ticket codified the four integrity invariants and emits `fail` for any violation. The `$defs.PageAffordance` extraction in `archive/tickets/SPEC44STOSTAAPP-001.md` supplies the schema shape that the validator mirrors with a typed action-family constant.
 
 ## Assumption Reassessment (2026-05-18)
 
@@ -24,6 +24,7 @@ Per SPEC-44 §Approach Phase 3 step 10, this validator codifies the four integri
 3. **Cross-boundary surface under audit**: this validator consumes both `story-page.schema.json` `$defs.PageAffordance` (post-Phase-1 extraction) AND the page record's `state_snapshot.active_records` (to resolve grounded_in / available_to active-status checks). The boundary is the page-record + schema-shape pair.
 4. **FOUNDATIONS principle**: §Story Bundles §5b (Schema-Minimalism At Story Scope) — affordances are page-local projections of durable records (STLOC / STOBJ / STENT); the integrity rules enforce that affordance fields are load-bearing (each named ordinal addresses one affordance; each grounded_in references an actually-active record).
 5. **Canon Safety surface touched**: the new validator is a structural pre-apply gate under `tools/validators/src/structural/` per the per-ticket-type granularity rule. It gates page-record submission; the change does NOT weaken the Mystery Reserve firewall — affordance integrity is internal page-snapshot consistency, distinct from mystery-resolution gating.
+6. Package reassessment found same-seam registry/count proof fallout: `tools/validators/tests/structural/registry.test.ts` enumerates structural validator names, `tools/validators/tests/integration/spec04-verification.test.ts` asserts structural and total validator counts, and `tools/validators/tests/integration/validate-patch-plan.test.ts` classifies skipped validators for a non-story clean pre-apply plan. These proof surfaces moved with the new registration. The drafted `npm test --prefix tools/validators -- page-affordance-integrity` command is accepted as broad package verification because the package script forwards the extra argument to `node --test dist/tests/**/*.test.js page-affordance-integrity` and still runs the full compiled suite; the narrow targeted proof is the direct compiled test file.
 
 ## Architecture Check
 
@@ -39,13 +40,13 @@ Per SPEC-44 §Approach Phase 3 step 10, this validator codifies the four integri
 5. **Validator fires on unknown action_families value** → synthetic-fixture test: an affordance with `action_families: ["fly"]` (not in the 20-value enum) returns a `fail` verdict.
 6. **Validator validates clean on a well-formed page** → synthetic-fixture test: a page with two affordances at distinct ordinals, all grounded_in / available_to records active, all action_families from the closed enum, returns a clean verdict.
 
-## What to Change
+## Landed Changes
 
 ### 1. Author the validator module
 
-Create `tools/validators/src/structural/page-affordance-integrity.ts`. The module exports a `pageAffordanceIntegrity` validator following the existing structural-validator pattern. The validator:
-- Targets the pre-apply and full validation phases (`applies_to: ["pre_apply", "full"]`).
-- Iterates each `PG` record's `state_snapshot.visible_affordances` array.
+Created `tools/validators/src/structural/page-affordance-integrity.ts`. The module exports a `pageAffordanceIntegrity` validator following the existing structural-validator pattern. The validator:
+- Targets full-world validation and pre-apply patch plans that create PG records.
+- Iterates each `PG` record's `state_snapshot.visible_affordances` array, limited to created PG records in pre-apply mode.
 - For each page:
   - Build a set of `ordinal` values; emit `fail` on any duplicate.
   - For each affordance, check `grounded_in[i]` ∈ `state_snapshot.active_records.STLOC ∪ state_snapshot.active_records.STOBJ`; emit `fail` per unresolved reference.
@@ -53,24 +54,29 @@ Create `tools/validators/src/structural/page-affordance-integrity.ts`. The modul
   - For each affordance, check `action_families[i]` ∈ the closed 20-value enum; emit `fail` per unknown value.
 - Embed the 20-value action_families enum as a typed constant (matching `story-page.schema.json` `$defs.PageAffordance` post-Phase-1); the constant is the single source of truth for this validator's enum check.
 
-### 2. Register the validator
+### 2. Registered the validator
 
-Edit `tools/validators/src/public/registry.ts` to add an import for the new validator module and a registry entry alongside the other page-record structural validators.
+Edited `tools/validators/src/public/registry.ts` to add an import for the new validator module and a registry entry alongside the other page/story structural validators.
 
-### 3. Author the test module
+### 3. Authored and updated test modules
 
-Create `tools/validators/tests/structural/page-affordance-integrity.test.ts` covering:
+Created `tools/validators/tests/structural/page-affordance-integrity.test.ts` covering:
 - **Negative test 1 (duplicate ordinal)**: a page with two affordances sharing `ordinal: 2` → expect `fail`.
 - **Negative test 2 (inactive grounded_in)**: an affordance grounded in STOBJ-4 where STOBJ-4 is absent from `state_snapshot.active_records.STOBJ` → expect `fail`.
 - **Negative test 3 (inactive available_to)**: an affordance available_to STENT-1 where STENT-1 is absent from `state_snapshot.active_records.STENT` → expect `fail`.
 - **Negative test 4 (unknown action_family)**: an affordance with `action_families: ["fly"]` → expect `fail`.
 - **Positive test (well-formed)**: a page with two affordances at distinct ordinals, all grounded_in / available_to records active, all action_families from the closed enum → expect clean verdict.
 
+Updated registry and integration proof surfaces that enumerate validator names/counts or skipped pre-apply validators.
+
 ## Files to Touch
 
 - `tools/validators/src/structural/page-affordance-integrity.ts` (new)
 - `tools/validators/src/public/registry.ts` (modify — add import + registry entry)
 - `tools/validators/tests/structural/page-affordance-integrity.test.ts` (new)
+- `tools/validators/tests/structural/registry.test.ts` (modify — add validator name)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — update validator counts)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — classify the validator as skipped for non-PG clean plans)
 
 ## Out of Scope
 
@@ -82,7 +88,7 @@ Create `tools/validators/tests/structural/page-affordance-integrity.test.ts` cov
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators -- page-affordance-integrity` passes all 5 test cases (4 negative, 1 positive).
+1. `node --test tools/validators/dist/tests/structural/page-affordance-integrity.test.js` passes all 6 test cases (1 applies-to, 4 negative, 1 positive).
 2. `npm test --prefix tools/validators` exits 0 (full validator suite regression).
 3. `npm run build --prefix tools/validators` exits 0.
 
@@ -97,11 +103,31 @@ Create `tools/validators/tests/structural/page-affordance-integrity.test.ts` cov
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/page-affordance-integrity.test.ts` (new) — 5 test cases per §What to Change step 3.
-2. No modifications to existing tests.
+1. `tools/validators/tests/structural/page-affordance-integrity.test.ts` (new) — 6 test cases per §Landed Changes step 3.
+2. `tools/validators/tests/structural/registry.test.ts` (modified) — registry name list includes `page_affordance_integrity`.
+3. `tools/validators/tests/integration/spec04-verification.test.ts` (modified) — structural/total validator counts updated to 49/61.
+4. `tools/validators/tests/integration/validate-patch-plan.test.ts` (modified) — non-PG clean pre-apply plan expects `page_affordance_integrity` to skip.
 
 ### Commands
 
-1. `npm test --prefix tools/validators -- page-affordance-integrity` — targeted validator test.
+1. `node --test tools/validators/dist/tests/structural/page-affordance-integrity.test.js` — targeted validator test.
 2. `npm test --prefix tools/validators` — full validator suite regression.
 3. `npm run build --prefix tools/validators` — compilation check.
+
+## Outcome
+
+Completed on 2026-05-18.
+
+Implemented `page_affordance_integrity` as a fail-severity structural validator for full-world runs and pre-apply PG-create plans. It enforces unique page-local affordance ordinals, active STLOC/STOBJ grounding, active STENT availability, and action-family enum parity with `story-page.schema.json` `$defs.PageAffordance`. The validator is registered in `tools/validators/src/public/registry.ts`, and registry/count/pre-apply execution tests were updated to include the new validator.
+
+## Verification Result
+
+1. `npm run build --prefix tools/validators` — passed before edits and after implementation.
+2. `node --test tools/validators/dist/tests/structural/page-affordance-integrity.test.js` — passed 6/6 focused tests.
+3. `npm test --prefix tools/validators` — passed 524/524 after adding the same-seam pre-apply skipped-validator assertion.
+4. `npm test --prefix tools/validators -- page-affordance-integrity` — passed 524/524; this package wrapper still ran the full compiled suite, so it is recorded as broad verification rather than the narrow proof.
+
+## Deviations
+
+- The drafted targeted npm command was not a true file-level selector in the live package script; the direct compiled `node --test tools/validators/dist/tests/structural/page-affordance-integrity.test.js` command is the narrow targeted proof.
+- Registry fallout required updates to `registry.test.ts`, `spec04-verification.test.ts`, and `validate-patch-plan.test.ts`; these were same-seam proof-surface updates, not separate product behavior.

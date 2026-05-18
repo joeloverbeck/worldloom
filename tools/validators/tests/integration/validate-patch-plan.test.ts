@@ -215,6 +215,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "compatibility_drift"
     );
     assert.equal(compatibilityDriftExecution?.status, "skipped");
+    const pageAffordanceExecution = result.executions.find(
+      (execution) => execution.name === "page_affordance_integrity"
+    );
+    assert.equal(pageAffordanceExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -250,7 +254,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== entityIntroExecution &&
         row !== relationshipIntroExecution &&
         row !== narrativeShapeExecution &&
-        row !== compatibilityDriftExecution
+        row !== compatibilityDriftExecution &&
+        row !== pageAffordanceExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
