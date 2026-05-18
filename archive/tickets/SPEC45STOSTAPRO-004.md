@@ -1,6 +1,6 @@
 # SPEC45STOSTAPRO-004: story-fact-promotion-to-canon Phase 1 wiring
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — updates `.claude/skills/story-fact-promotion-to-canon/SKILL.md` Phase 1 instruction (line 180) to call the new MCP tool from SPEC45STOSTAPRO-003 instead of the filesystem-walk pattern, plus a §World-State Prerequisites update (line 148) listing the new tool. Skill prose change only; no code change.
@@ -89,3 +89,22 @@ The lookup composes naturally with the new helper's output — the skill takes t
 1. `grep -n "mcp__worldloom__get_story_state_provenance" .claude/skills/story-fact-promotion-to-canon/SKILL.md` — confirm new tool referenced at the expected sites.
 2. `grep -n "traverse.*SE-\*.yaml" .claude/skills/story-fact-promotion-to-canon/SKILL.md` — confirm file-walk instruction is fully removed.
 3. Manual prose-coherence review: read SKILL.md Phase 1 in full post-edit, confirm the instruction reads cleanly end-to-end and the BEL flow at line 181 connects to the new helper's `creating_se_id` output coherently.
+
+## Outcome
+
+Completed: 2026-05-18
+
+The `story-fact-promotion-to-canon` skill now names `mcp__worldloom__get_story_state_provenance(record_id=<id>, story_slug=<story_slug>)` in its World-State Prerequisites and uses it in Phase 1 to enumerate authoring and modifying `SE` records for each `source_record_ids` entry. The old instruction to traverse every `SE-*.yaml` file was removed. The BEL lookup instruction immediately after the SE-load bullet is unchanged in shape and still keys off `consequences.opens[]` / `basis.source_event`.
+
+## Verification Result
+
+Passed:
+
+1. `grep -n "mcp__worldloom__get_story_state_provenance" .claude/skills/story-fact-promotion-to-canon/SKILL.md` — passed with matches in World-State Prerequisites and Phase 1.
+2. `grep -n "traverse.*SE-\*.yaml" .claude/skills/story-fact-promotion-to-canon/SKILL.md || true` — passed with zero matches.
+3. `grep -n "consequences.opens\|basis.source_event" .claude/skills/story-fact-promotion-to-canon/SKILL.md` — passed with the source-record prerequisite and the unchanged BEL lookup bullet.
+4. Manual prose-coherence review of `.claude/skills/story-fact-promotion-to-canon/SKILL.md` lines 144-184 — passed; the new provenance helper output flows into the existing SE hydration and BEL lookup instructions.
+
+## Deviations
+
+- No executable skill dry-run harness is available for this prose-only skill wiring ticket in the current Codex session. Verification used grep proof plus manual contract review, which is the ticket's command-based proof surface.
