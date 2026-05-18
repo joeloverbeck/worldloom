@@ -402,6 +402,9 @@ function reindexAllFiles(
   const skippedRecordLogPath = skippedRecordLogPathForWorld(worldRoot, worldSlug);
 
   clearEntityState(db);
+  if (fullBuild) {
+    clearStoryProvenanceEdges(db);
+  }
 
   for (const relativeFilePath of filesToIndex) {
     const parsed = parseWorldFile(worldRoot, worldSlug, relativeFilePath);
@@ -542,6 +545,15 @@ function emptyBuildResult(exitCode: number): BuildLikeResult {
     skippedRecordCount: 0,
     skippedRecordLogPath: null
   };
+}
+
+function clearStoryProvenanceEdges(db: Database.Database): void {
+  db.prepare(
+    `
+      DELETE FROM edges
+      WHERE edge_type IN ('state_delta_create', 'state_delta_supersede', 'creation_evidence')
+    `
+  ).run();
 }
 
 function skippedRecordLogPathForWorld(worldRoot: string, worldSlug: string): string {

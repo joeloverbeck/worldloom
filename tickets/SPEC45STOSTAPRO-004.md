@@ -76,7 +76,7 @@ The lookup composes naturally with the new helper's output — the skill takes t
 
 1. Phase 1's SE-load instruction is deterministic at execution time (MCP graph query, not LLM file-walk).
 2. Phase 1's BEL-load instruction is unchanged in shape and substance (composes naturally with the new helper's output).
-3. The skill cannot operate against an index that lacks the new edges from SPEC45STOSTAPRO-002 — this is enforced structurally by the `Deps: SPEC45STOSTAPRO-003` chain (which transitively reaches 002).
+3. The skill cannot operate against an index that lacks the new edges from `archive/tickets/SPEC45STOSTAPRO-002.md` — this is enforced structurally by the `Deps: SPEC45STOSTAPRO-003` chain (which transitively reaches the archived edge-producer ticket).
 
 ## Test Plan
 

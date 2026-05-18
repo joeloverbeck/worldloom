@@ -7,6 +7,7 @@ import type { ParsedFileResult } from "../commands/shared.js";
 import { contentHashForProse, contentHashForYaml, anchorChecksum } from "./canonical.js";
 import { parseYamlWithRecovery } from "./yaml.js";
 import { domainFileNodeId } from "./prose.js";
+import { extractIntroTags } from "./intro-tag-parser.js";
 import { CURRENT_INDEX_VERSION } from "../schema/version.js";
 import type { EdgeRow, NodeRow, NodeType, ValidationResultRow } from "../schema/types.js";
 import type { EntityRegistry, EntityRegistryEntry } from "./entities.js";
@@ -69,7 +70,6 @@ const STORY_DIRS = new Map<string, AtomicRecordSpec>([
   ["status", recordSpec("story_status_record", "id", "^STSTAT-[0-9]+$")],
   ["beliefs", recordSpec("belief_record", "id", "^BEL-[0-9]+$")],
   ["facts", recordSpec("story_fact_record", "id", "^SF-[0-9]+$")],
-  ["events", recordSpec("story_event_record", "id", "^SE-[0-9]+$")],
   ["obligations", recordSpec("obligation_record", "id", "^OBL-[0-9]+$")],
   ["consequences", recordSpec("consequence_record", "id", "^CNSQ-[0-9]+$")],
   ["threads", recordSpec("thread_record", "id", "^THR-[0-9]+$")],
@@ -84,8 +84,10 @@ const STORY_DIRS = new Map<string, AtomicRecordSpec>([
   ["clocks", recordSpec("pressure_clock_record", "id", "^CLK-[0-9]+$")],
   ["secrets", recordSpec("story_secret_record", "id", "^STSEC-[0-9]+$")],
   ["story-questions", recordSpec("story_question_record", "id", "^STQ-[0-9]+$")],
-  ["artifacts", recordSpec("story_diegetic_artifact_record", "id", "^DA-[0-9]+$")]
+  ["artifacts", recordSpec("story_diegetic_artifact_record", "id", "^DA-[0-9]+$")],
+  ["events", recordSpec("story_event_record", "id", "^SE-[0-9]+$")]
 ]);
+const STORY_DIR_ORDER = new Map(Array.from(STORY_DIRS.keys()).map((directory, index) => [directory, index]));
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
 const STORY_REF_REGEX = /\b(STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|DA)-[A-Za-z0-9-]+\b/g;
@@ -169,7 +171,7 @@ export function listStoryBundleSourceFiles(worldDirectory: string): string[] {
     }
   }
 
-  return relativePaths.sort((left, right) => left.localeCompare(right, "en-US"));
+  return relativePaths.sort(compareStoryBundleSourcePaths);
 }
 
 export function parseAtomicSourceFile(
@@ -458,6 +460,27 @@ function specForStoryPath(relativeFilePath: string): {
   return { ...spec, storySlug };
 }
 
+function compareStoryBundleSourcePaths(left: string, right: string): number {
+  const leftSegments = left.split("/");
+  const rightSegments = right.split("/");
+  const leftStory = leftSegments[1] ?? "";
+  const rightStory = rightSegments[1] ?? "";
+  const storyOrder = leftStory.localeCompare(rightStory, "en-US");
+  if (storyOrder !== 0) {
+    return storyOrder;
+  }
+
+  const leftDirectory = leftSegments[3] ?? "";
+  const rightDirectory = rightSegments[3] ?? "";
+  const leftOrder = STORY_DIR_ORDER.get(leftDirectory) ?? Number.MAX_SAFE_INTEGER;
+  const rightOrder = STORY_DIR_ORDER.get(rightDirectory) ?? Number.MAX_SAFE_INTEGER;
+  if (leftOrder !== rightOrder) {
+    return leftOrder - rightOrder;
+  }
+
+  return left.localeCompare(right, "en-US");
+}
+
 function skipForExtractedId(
   relativeFilePath: string,
   spec: AtomicRecordSpec,
@@ -564,6 +587,12 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "story_event_record") {
+    for (const edge of edgesForStoryEvent(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   pushStoryRef("created_at_page", stringField(record, "created_at_page"));
   pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
@@ -600,6 +629,31 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
   if (node.node_type === "thread_record") {
     for (const target of stringArrayField(record, "obligations")) {
       pushStoryRef("thread_obligation", target);
+    }
+  }
+
+  return edges;
+}
+
+function edgesForStoryEvent(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  for (const target of stringArrayField(record, "create", ["state_delta"])) {
+    edges.push(createStoryRefEdge(node.node_id, "state_delta_create", storySlug, target));
+  }
+
+  for (const target of stringArrayField(record, "supersede", ["state_delta"])) {
+    edges.push(createStoryRefEdge(node.node_id, "state_delta_supersede", storySlug, target));
+  }
+
+  for (const tag of extractIntroTags(stringField(record, "world_logic_rationale") ?? "")) {
+    const sourceNodeId = storyNodeId(storySlug, tag.recordId);
+    for (const evidenceId of tag.evidence) {
+      edges.push(createStoryRefEdge(sourceNodeId, "creation_evidence", storySlug, evidenceId));
     }
   }
 
