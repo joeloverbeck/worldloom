@@ -203,6 +203,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "narrative_shape_field_rejection"
     );
     assert.equal(narrativeShapeExecution?.status, "skipped");
+    const compatibilityDriftExecution = result.executions.find(
+      (execution) => execution.name === "compatibility_drift"
+    );
+    assert.equal(compatibilityDriftExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -235,7 +239,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== threadIntroExecution &&
         row !== entityIntroExecution &&
         row !== relationshipIntroExecution &&
-        row !== narrativeShapeExecution
+        row !== narrativeShapeExecution &&
+        row !== compatibilityDriftExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

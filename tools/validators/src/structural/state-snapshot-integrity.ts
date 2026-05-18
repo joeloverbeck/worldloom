@@ -1,4 +1,5 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { OPTIONAL_ACTIVE_RECORDS_CLASSES } from "../_helpers/state-snapshot-replay.js";
 import {
   asPlainRecord,
   isPlainRecord,
@@ -59,7 +60,10 @@ export const stateSnapshotIntegrity: Validator = {
       const snapshot = asPlainRecord(parsed.state_snapshot);
       const pageLabel = pageId(parsed);
       const maps = recordMapForStory(records, page.story_slug ?? null);
-      const activeRecords = asPlainRecord(snapshot.active_records);
+      const rawActiveRecords = asPlainRecord(snapshot.active_records);
+      const activeRecords = Object.keys(rawActiveRecords).length > 0
+        ? normalizeOptionalActiveRecordKeys(rawActiveRecords)
+        : rawActiveRecords;
 
       const inputLegalityViolation = validateInputLegality(page, parsed, pageLabel, maps);
       if (inputLegalityViolation !== undefined) {
@@ -395,4 +399,15 @@ function formatInputState(value: unknown): string {
 
 function pageId(page: Record<string, unknown>): string {
   return stringValue(page.id) ?? "<unknown page>";
+}
+
+function normalizeOptionalActiveRecordKeys(activeRecords: Record<string, unknown>): Record<string, unknown> {
+  const normalized = { ...activeRecords };
+  for (const cls of OPTIONAL_ACTIVE_RECORDS_CLASSES) {
+    if (Array.isArray(normalized[cls])) {
+      continue;
+    }
+    normalized[cls] = [];
+  }
+  return normalized;
 }

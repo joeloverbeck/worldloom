@@ -1,6 +1,6 @@
 # SPEC43PRECAUSTO-012: `compatibility_drift` Validator + Snapshot-Key Normalization
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/validators/src/structural/compatibility-drift.ts` (info/warn severities for Wave 2; fail deferred to Wave 3). Modifies existing `tools/validators/src/structural/snapshot-replay-equality.ts` and `tools/validators/src/structural/state-snapshot-integrity.ts` to normalize missing CLK / STSEC / STQ / DA keys on parent PG reads to empty arrays. Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
@@ -17,6 +17,7 @@ SPEC-43 §Approach E + §Approach F + spec §Verification ("Old-style `PG.active
 3. Cross-skill boundary under audit: this validator is consumed by ticket 016 (health-audit `compatibility` mode + SAU report section). The Validator object's `applies_to` field includes `branching-story-health-audit` (audit mode) + `branching-story-turn-cycle` (per-commit warn-level for new PG omitting required keys). The classifications enumerate per SPEC-43 §Approach E: `current_contract`, `compatible_optional_absence`, `grandfathered_snapshot_shape`, `compatible_with_advisory`, `requires_compatibility_audit`, `requires_migration_patch`, `manual_review`, `blocked_contract_break`.
 4. FOUNDATIONS §Story Bundles §4b (Canon Baseline Drift) restated: canon-baseline drift uses classifications (`compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, `promotion_or_retcon_conflict`). The new compatibility-drift validator uses ANALOGOUS classifications for SCHEMA drift (not canon drift); the two are operationally orthogonal — schema drift is structural, canon-baseline drift is fictional. SPEC-43 §Approach D's compatibility-drift validator inherits §4b's classification-ladder pattern.
 5. HARD-GATE / Canon Safety surface: this ticket modifies two existing structural validators (`snapshot-replay-equality.ts` + `state-snapshot-integrity.ts`) — both run at branching-story-turn-cycle Phase 9 and gate story-bundle record writes at engine pre-apply time. The snapshot-key normalization is one-directional: parent PG reads tolerate missing optional CLK / STSEC / STQ / DA keys as empty arrays (preserves append-only / supersession discipline — no historical PG is rewritten); new child PG writes still require the full active-record map per ticket 013's Phase 9 gate enforcement. Does not weaken the Mystery Reserve firewall (`secret_mystery_firewall_compliance.ts` continues to gate MR interactions independently); does not weaken any existing Canon Safety surface — the normalization is a tolerant-read extension, not a permissive-write extension.
+6. Live registry/count reassessment: adding a structural validator requires same-seam updates to `tools/validators/README.md`, `tools/validators/tests/structural/registry.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, `tools/validators/tests/cli/world-validate.test.ts`, and `tools/validators/tests/integration/validate-patch-plan.test.ts`. These are package inventory and proof-surface truthing, not new behavior beyond the compatibility validator registration.
 
 ## Architecture Check
 
@@ -84,6 +85,10 @@ Add `compatibility_drift` to the validator-name assertion list (coordinate with 
 - `tools/validators/tests/structural/snapshot-replay-equality.test.ts` (modify)
 - `tools/validators/tests/structural/state-snapshot-integrity.test.ts` (modify)
 - `tools/validators/tests/structural/registry.test.ts` (modify — shared with 8 sibling tickets)
+- `tools/validators/tests/cli/world-validate.test.ts` (modify — structural selector expectation)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — structural/all-validator count assertions)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply skipped-status assertion)
+- `tools/validators/README.md` (modify — structural validator count/inventory)
 
 ## Out of Scope
 
@@ -118,8 +123,33 @@ Add `compatibility_drift` to the validator-name assertion list (coordinate with 
 2. `tools/validators/tests/structural/snapshot-replay-equality.test.ts` (modify) — add normalization-case test cases.
 3. `tools/validators/tests/structural/state-snapshot-integrity.test.ts` (modify) — add normalization-case test cases.
 4. `tools/validators/tests/structural/registry.test.ts` (modify) — adds the new validator to the name assertion (coordinate with tickets 003-011 per §Step 6.5).
+5. `tools/validators/tests/cli/world-validate.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, and `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify) — update selector/count/skipped-status proof surfaces for the new structural validator.
 
 ### Commands
 
 1. `npm test --prefix tools/validators -- compatibility-drift` (targeted test pass).
 2. `npm test --prefix tools/validators` (full validator package test pass).
+
+## Outcome
+
+Completed on 2026-05-18.
+
+Implemented `compatibility_drift` as an additive structural validator in `tools/validators/src/structural/compatibility-drift.ts` and registered it in `tools/validators/src/public/registry.ts`. The validator reports missing optional story-bundle directories and missing optional `PG.state_snapshot.active_records` keys as Wave 2 info/warn findings with compatibility classifications (`compatible_optional_absence`, `grandfathered_snapshot_shape`, `requires_migration_patch`, `current_contract`). It stays fail-free in Wave 2.
+
+Added shared optional active-record class constants (`DA`, `CLK`, `STSEC`, `STQ`) and made `snapshot_replay_equality` / `state_snapshot_integrity` normalize those missing optional keys to `[]` when reading active-record maps. This is read-time compatibility only; no parent PG rewrite or permissive child-write migration was introduced.
+
+Added focused compatibility-drift tests, normalization tests for both snapshot validators, and same-seam registry/count/selector/skipped-status updates in the validator package README and tests.
+
+## Verification Result
+
+1. `npm test --prefix tools/validators -- compatibility-drift` passed after rebuilding and ran the compiled package suite: 483 tests, 0 failures. The package wrapper did not narrow to only the compatibility test file.
+2. `node --test dist/tests/structural/compatibility-drift.test.js` passed: 4 tests, 0 failures.
+3. `node --test dist/tests/structural/snapshot-replay-equality.test.js` passed: 19 tests, 0 failures.
+4. `node --test dist/tests/structural/state-snapshot-integrity.test.js` passed: 16 tests, 0 failures.
+5. `node --test dist/tests/structural/registry.test.js` passed: 1 test, 0 failures.
+6. `grep -n "compatibilityDrift\|compatibility_drift" tools/validators/src/public/registry.ts tools/validators/README.md tools/validators/tests/structural/registry.test.ts tools/validators/tests/integration/validate-patch-plan.test.ts` returned the registry import/entry, README inventory, registry assertion, and pre-apply skipped-status witnesses.
+
+## Deviations
+
+- The drafted `npm test --prefix tools/validators -- compatibility-drift` command is not a narrow selector in this package; it rebuilt and ran the full compiled suite. The accepted narrow proof is the direct compiled test command `node --test dist/tests/structural/compatibility-drift.test.js`, with the full package suite retained as broad verification.
+- Same-seam registry/inventory/count fallout was added to the owned file set after live reassessment: `tools/validators/README.md`, `tools/validators/tests/cli/world-validate.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, and `tools/validators/tests/integration/validate-patch-plan.test.ts`.

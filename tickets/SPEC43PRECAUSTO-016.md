@@ -4,17 +4,17 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-health-audit/SKILL.md` to add a new `compatibility` audit mode (also `structural,compatibility` composite mode) + a new `Compatibility drift` section in SAU reports.
-**Deps**: 012
+**Deps**: archive/tickets/SPEC43PRECAUSTO-012.md
 
 ## Problem
 
-SPEC-43 §Approach E + §Approach H Phase 2i vs Phase 9 clarification require health-audit skill amendments: (a) a new audit mode `compatibility` (or composite `structural,compatibility`) that runs the `compatibility_drift` validator from ticket 012 + emits findings in a new SAU report section; (b) explicit clarification that the new mid-story-introduction validators (tickets 003-011) are Phase 9 turn-cycle gates (per ticket 013), NOT Phase 2i retrospective audits. Without (a), authors have no documented way to scope a health-audit run to compatibility drift only; without (b), skill authors might mis-wire the new validators into Phase 2i and double-fire them at audit time.
+SPEC-43 §Approach E + §Approach H Phase 2i vs Phase 9 clarification require health-audit skill amendments: (a) a new audit mode `compatibility` (or composite `structural,compatibility`) that runs the `compatibility_drift` validator from `archive/tickets/SPEC43PRECAUSTO-012.md` + emits findings in a new SAU report section; (b) explicit clarification that the new mid-story-introduction validators (tickets 003-011) are Phase 9 turn-cycle gates (per ticket 013), NOT Phase 2i retrospective audits. Without (a), authors have no documented way to scope a health-audit run to compatibility drift only; without (b), skill authors might mis-wire the new validators into Phase 2i and double-fire them at audit time.
 
 ## Assumption Reassessment (2026-05-18)
 
 1. `branching-story-health-audit/SKILL.md` (verified to exist via Pre-flight) currently documents Phase 2i ("CLK / STSEC / STQ mechanism health") with the load-bearing rule at line 280: "These checks are retrospective audit warnings, not page-commit HARD-REJECTs... They only run when the corresponding record class exists in the scoped bundle; absence of CLK / STSEC / STQ records is never itself a finding." This rule is preserved unchanged; the new `compatibility` mode is additive.
 2. SPEC-43 §Approach H is explicit: "The new mid-story-introduction validators are per-commit gates in Phase 9 of turn-cycle, NOT Phase 2i retrospective audits. Phase 2i at `branching-story-health-audit/SKILL.md:280` retains its 'absence of CLK / STSEC / STQ records is never itself a finding' rule + retrospective mechanism-rot audits. The new `compatibility_drift` reporting IS a Phase 2i extension (new audit-mode `compatibility` or `structural,compatibility`); the introduction validators are NOT."
-3. Cross-skill boundary under audit: the new audit mode consumes ticket 012's `compatibility_drift` validator (`applies_to: ["branching-story-health-audit", ...]`); the SAU report section enumerates compatibility-drift findings + classifications.
+3. Cross-skill boundary under audit: the new audit mode consumes `archive/tickets/SPEC43PRECAUSTO-012.md`'s `compatibility_drift` validator (`applies_to: ["branching-story-health-audit", ...]`); the SAU report section enumerates compatibility-drift findings + classifications.
 4. FOUNDATIONS §Story Bundles §4b (Canon Baseline Drift) restated: canon-baseline drift is operationally distinct from schema drift; this audit mode tracks the latter. The SAU report's new Compatibility-drift section sits alongside existing audit sections without conflating with canon-baseline-drift findings.
 
 ## Architecture Check
@@ -36,7 +36,7 @@ SPEC-43 §Approach E + §Approach H Phase 2i vs Phase 9 clarification require he
 
 Add to the audit-mode listing (alongside existing `structural`, `prose`, `remediation`, `cross_story`):
 
-> **`compatibility`** (or `structural,compatibility` composite) — runs the `compatibility_drift` validator (per SPEC-43 ticket 012) against the bundle structure + PG snapshots. Emits info-level findings for missing optional `_source/{clocks,secrets,story-questions,artifacts}/` subdirectories + missing CLK/STSEC/STQ/DA keys in PG snapshots; warn-level findings when a new PG omits required active-record keys without grandfathered-parent explanation. Hard-fail severity for new-current-contract PG shape mismatch is deferred to Wave 3 (needs the `story_system_contract_revision` marker for deterministic detection).
+> **`compatibility`** (or `structural,compatibility` composite) — runs the `compatibility_drift` validator (per `archive/tickets/SPEC43PRECAUSTO-012.md`) against the bundle structure + PG snapshots. Emits info-level findings for missing optional `_source/{clocks,secrets,story-questions,artifacts}/` subdirectories + missing CLK/STSEC/STQ/DA keys in PG snapshots; warn-level findings when a new PG omits required active-record keys without grandfathered-parent explanation. Hard-fail severity for new-current-contract PG shape mismatch is deferred to Wave 3 (needs the `story_system_contract_revision` marker for deterministic detection).
 >
 > When invoked as the composite `structural,compatibility` mode, both structural-mode and compatibility-mode validators run; their findings are emitted in separate SAU sections.
 >
@@ -68,8 +68,8 @@ Phase 2i mechanism-health rules at line 280 ("absence of CLK / STSEC / STQ recor
 ## Out of Scope
 
 - Phase 9 gates 12-15 documentation — handled by ticket 013.
-- The `compatibility_drift` validator implementation — handled by ticket 012.
-- Snapshot-key normalization — handled by ticket 012.
+- The `compatibility_drift` validator implementation — handled by `archive/tickets/SPEC43PRECAUSTO-012.md`.
+- Snapshot-key normalization — handled by `archive/tickets/SPEC43PRECAUSTO-012.md`.
 - Dedicated `branching-story-compatibility-repair` skill — deferred to Wave 3.
 - `story_system_contract_revision` marker — deferred to Wave 3.
 
@@ -92,7 +92,7 @@ Phase 2i mechanism-health rules at line 280 ("absence of CLK / STSEC / STQ recor
 
 ### New/Modified Tests
 
-1. `None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment.` The `compatibility_drift` validator behavior is tested by ticket 012; this ticket only updates skill prose to document the audit mode + SAU report section + Phase 2i/9 clarification.
+1. `None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment.` The `compatibility_drift` validator behavior is tested by `archive/tickets/SPEC43PRECAUSTO-012.md`; this ticket only updates skill prose to document the audit mode + SAU report section + Phase 2i/9 clarification.
 
 ### Commands
 

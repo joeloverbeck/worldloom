@@ -3,6 +3,7 @@ import { canonicalJsonStringify, computePgStateHash } from "@worldloom/world-ind
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
   ACTIVE_RECORDS_CLASSES,
+  OPTIONAL_ACTIVE_RECORDS_CLASSES,
   SnapshotReplayError,
   replayUnresolvedMysteryClaims,
   replayActiveRecords,
@@ -222,7 +223,7 @@ function runNewSchemaReplay(
   };
 
   const parentSnapshot = asPlainRecord(parent.state_snapshot);
-  const parentActive = asPlainRecord(parentSnapshot.active_records) as Record<string, readonly string[]>;
+  const parentActive = normalizeOptionalActiveRecordKeys(asPlainRecord(parentSnapshot.active_records));
   const expectedActive = replayActiveRecords(parentActive, delta);
   const expectedEntityStatus = deriveEntityStatus(expectedActive.STSTAT, byId);
   const gotSnapshot = asPlainRecord(parsed.state_snapshot);
@@ -298,6 +299,17 @@ function runNewSchemaReplay(
   }
 
   return verdicts;
+}
+
+function normalizeOptionalActiveRecordKeys(activeRecords: Record<string, unknown>): Record<string, readonly string[]> {
+  const normalized: Record<string, readonly string[]> = { ...activeRecords } as Record<string, readonly string[]>;
+  for (const cls of OPTIONAL_ACTIVE_RECORDS_CLASSES) {
+    if (Array.isArray(normalized[cls])) {
+      continue;
+    }
+    normalized[cls] = [];
+  }
+  return normalized;
 }
 
 function mysteryEvidenceRecordsForEvent(resolvedEventId: string, delta: StateDelta): string[] {

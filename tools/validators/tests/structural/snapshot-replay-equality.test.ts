@@ -103,6 +103,22 @@ test("snapshot_replay_equality replays new-schema SE state_delta active_records"
   assert.deepEqual(verdicts, []);
 });
 
+test("snapshot_replay_equality normalizes missing optional parent active-record keys", async () => {
+  const childPage = newSchemaChildPage({
+    ...newSchemaExpectedActiveRecords(),
+    DA: [],
+    CLK: [],
+    STSEC: [],
+    STQ: []
+  });
+  const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("snapshot_replay_equality ignores audit-only SE records that are not page inputs", async () => {
   const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords());
   const verdicts = await snapshotReplayEquality.run(undefined, context([

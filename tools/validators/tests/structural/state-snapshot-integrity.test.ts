@@ -112,6 +112,49 @@ test("state_snapshot_integrity accepts active_records BEL references", async () 
   assert.deepEqual(verdicts, []);
 });
 
+test("state_snapshot_integrity normalizes absent optional active-record keys", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context([
+    storyRecord("page_record", "PG-2", "pages", {
+      id: "PG-2",
+      story_id: "STORY-1",
+      input: {
+        choice_id: "CHC-1",
+        manual_action_text: null,
+        resolved_event_id: "SE-1"
+      },
+      state_snapshot: {
+        active_records: {
+          STENT: ["STENT-1"],
+          STSTAT: ["STSTAT-1"],
+          STLOC: ["STLOC-1"]
+        }
+      }
+    }),
+    storyRecord("story_event_record", "SE-1", "events", {
+      id: "SE-1",
+      story_id: "STORY-1",
+      event_kind: "selected_choice"
+    }),
+    storyRecord("story_entity_record", "STENT-1", "entities", {
+      id: "STENT-1",
+      story_id: "STORY-1"
+    }),
+    storyRecord("story_status_record", "STSTAT-1", "status", {
+      id: "STSTAT-1",
+      story_id: "STORY-1"
+    }),
+    storyRecord("story_location_record", "STLOC-1", "locations", {
+      id: "STLOC-1",
+      story_id: "STORY-1"
+    })
+  ], {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("state_snapshot_integrity validates CLK/STSEC/STQ active record statuses", async () => {
   const verdicts = await stateSnapshotIntegrity.run(undefined, context([
     storyRecord("page_record", "PG-2", "pages", {

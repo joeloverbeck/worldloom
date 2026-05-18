@@ -8,6 +8,7 @@ import { clockTerminalDebtIntegrity } from "../structural/clock-terminal-debt-in
 import { clockThresholdOrdering } from "../structural/clock-threshold-ordering.js";
 import { clockTickProvenance } from "../structural/clock-tick-provenance.js";
 import { clockValueInRange } from "../structural/clock-value-in-range.js";
+import { compatibilityDrift } from "../structural/compatibility-drift.js";
 import { causalDependencyThreatScan } from "../structural/causal-dependency-threat-scan.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { entityIntroductionStatusPairing } from "../structural/entity-introduction-status-pairing.js";
@@ -93,6 +94,7 @@ export const structuralValidators: readonly Validator[] = [
   relationshipIntroductionGroundingIntegrity,
   introductionObserverFirewall,
   narrativeShapeFieldRejection,
+  compatibilityDrift,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,
