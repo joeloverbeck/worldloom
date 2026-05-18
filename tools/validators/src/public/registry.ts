@@ -3,6 +3,7 @@ import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
 import { clockFiringThresholdIntegrity } from "../structural/clock-firing-threshold-integrity.js";
+import { clockIntroductionGroundingIntegrity } from "../structural/clock-introduction-grounding-integrity.js";
 import { clockTerminalDebtIntegrity } from "../structural/clock-terminal-debt-integrity.js";
 import { clockThresholdOrdering } from "../structural/clock-threshold-ordering.js";
 import { clockTickProvenance } from "../structural/clock-tick-provenance.js";
@@ -62,6 +63,7 @@ export const structuralValidators: readonly Validator[] = [
   causalDependencyThreatScan,
   expectedWitnessCoverage,
   midstoryRecordIntroductionGrounding,
+  clockIntroductionGroundingIntegrity,
   sltCreatedAtPageOriginConsistency,
   canonBaselineDrift,
   canonDriftClassificationEvidence,

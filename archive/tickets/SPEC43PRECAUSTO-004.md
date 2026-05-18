@@ -1,6 +1,6 @@
 # SPEC43PRECAUSTO-004: `clock_introduction_grounding_integrity` Validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/clock-introduction-grounding-integrity.ts` (CLK-specific introduction gate). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
@@ -12,11 +12,12 @@ SPEC-43 §Approach D Table row 2 + §Approach C CLK rules + spec §Verification 
 
 ## Assumption Reassessment (2026-05-18)
 
-1. CLK schema at `tools/validators/src/schemas/story-pressure-clock.schema.json` requires `driver`, `max`, `thresholds`, and `linked_records` per the SPEC-42-landed schema. `linked_records[]` is constrained to 8 classes (`THR | OBL | CNSQ | STINT | SREL | STLOC | STOBJ | STQ`) per `tools/validators/src/schemas/story-pressure-clock.schema.json:39`. Widening this pattern to BEL / SF / DA / STENT is explicitly deferred to Wave 3 per SPEC-43 §Out of Scope.
+1. CLK schema at `tools/validators/src/schemas/story-pressure-clock.schema.json` requires `driver`, `max`, `thresholds`, and `linked_records` per the SPEC-42-landed schema. `linked_records[]` is constrained to 8 classes (`THR | OBL | CNSQ | STINT | SREL | STLOC | STOBJ | STQ`) per `tools/validators/src/schemas/story-pressure-clock.schema.json`. Widening this pattern to BEL / SF / DA / STENT is explicitly deferred to Wave 3 per SPEC-43 §Out of Scope.
 2. SPEC-43 §Approach C CLK rules specify the validator's checks; SPEC-43 §Verification names two pass + one fail test case (deadline declared with grounding pass; vague pressure no driver/link fails; existing-clock tick remains valid — the negative case where the validator should NOT fire).
 3. Cross-skill boundary under audit: this validator is one of 6 class-specific introduction validators composing with the generic ticket-003 gate; the composition pattern (generic gate runs first → per-class gate runs after) is shared across tickets 004-009. The Validator object's `applies_to` field must include `branching-story-turn-cycle` (Phase 9).
 4. FOUNDATIONS §Story Bundles §5c (Present Causal State) restated: every CLK's `driver` field must name a present pressure source (the staged-pressure rule of SPEC-42), and every CLK's `linked_records[]` must include a record active in current branch state. The validator enforces both at mid-story-creation time; existing CLK lifecycle is unaffected.
 5. HARD-GATE / Canon Safety surface: per-commit Phase 9 gate gating mid-story CLK creation. Does not weaken Mystery Reserve firewall (no MR interaction).
+6. Live fixture/schema correction: the drafted `thresholds[] is non-empty` requirement is too strong. The accepted ticket-002 `creation-pass/all-classes.yaml` CLK fixture has `thresholds: []`, and the live CLK schema requires the field but does not set `minItems`. This ticket validates threshold bounds when thresholds are present; it does not require an introduced CLK to already define a threshold.
 
 ## Architecture Check
 
@@ -31,26 +32,26 @@ SPEC-43 §Approach D Table row 2 + §Approach C CLK rules + spec §Verification 
 3. Composition with generic gate → schema validation: a fixture failing generic grounding (e.g., missing tag) surfaces ticket-003's failure code; a fixture failing CLK-specific grounding (e.g., missing driver) surfaces this validator's failure code; both codes can coexist on a fixture failing both gates.
 4. FOUNDATIONS §5c alignment → FOUNDATIONS alignment check: no future-shape predicates referenced (no `expected_payoff_mode`, no act position, no climax — those are validated by ticket 010's `narrative_shape_field_rejection`).
 
-## What to Change
+## Landed Changes
 
-### 1. Create `tools/validators/src/structural/clock-introduction-grounding-integrity.ts`
+### 1. Created `tools/validators/src/structural/clock-introduction-grounding-integrity.ts`
 
 Validator object:
 - `name: "clock_introduction_grounding_integrity"`.
-- `applies_to: ["branching-story-turn-cycle"]`.
-- `severity: "fail"`.
-- For each CLK record whose `created_at_page` is the new child PG (i.e., mid-story-created), verify:
+- `severity_mode: "fail"`.
+- `applies_to(ctx)` returns true for full-world validation, story-bundle pre-apply plans that create SE / PG / CLK records, and incremental touches to SE / PG / CLK story files.
+- For each CLK id in an SE's `state_delta.create[]` whose record has a non-root `created_at_page`, verify:
   - `driver` is non-empty.
   - `max` is a positive integer ≥1.
-  - `thresholds[]` is non-empty AND every threshold's `at` is in `[1, max]`.
+  - `thresholds[]` is present; when non-empty, every threshold's `at` is in `[1, max]`.
   - `linked_records[]` is non-empty AND at least one linked record is active in the parent PG's `state_snapshot.active_records.<class>[]` OR appears in the creating SE's `state_delta.create[]`.
 - Failure codes: `clock_intro_missing_driver`, `clock_intro_missing_linked_record`, `clock_intro_link_not_active`, `clock_intro_missing_grounding_link` (the spec-named umbrella code emitted when no linked_records resolve to active/same-event records).
 
-### 2. Register in `tools/validators/src/public/registry.ts`
+### 2. Registered in `tools/validators/src/public/registry.ts`
 
-Add import + array entry (coordinate slot ordering with tickets 003, 005-012 per §Step 6.5).
+Added import + array entry after `midstory_record_introduction_grounding` in the active structural registry order.
 
-### 3. Add test `tools/validators/tests/structural/clock-introduction-grounding-integrity.test.ts`
+### 3. Added test `tools/validators/tests/structural/clock-introduction-grounding-integrity.test.ts`
 
 Test cases (using ticket 002's fixtures):
 - creation-pass for CLK (deadline declared with grounding THR/OBL) → 0 failures.
@@ -58,10 +59,11 @@ Test cases (using ticket 002's fixtures):
 - creation-fail: CLK with no linked_records[] → emits `clock_intro_missing_grounding_link`.
 - creation-fail: CLK linked to a record absent from parent + absent from same-event create[] → emits `clock_intro_link_not_active`.
 - lifecycle-still-valid: existing CLK tick (no new creation) → 0 failures (validator does not fire on lifecycle updates).
+- root-bootstrap creation: `created_at_page: PG-1` does not trigger this mid-story validator.
 
-### 4. Update `tools/validators/tests/structural/registry.test.ts`
+### 4. Updated package registry/count/inventory surfaces
 
-Add `clock_introduction_grounding_integrity` to the validator-name assertion list.
+Added `clock_introduction_grounding_integrity` to the validator-name assertion list, updated SPEC-04 structural/total validator counts, updated clean pre-apply skip assertions, and updated the validators README inventory.
 
 ## Files to Touch
 
@@ -69,6 +71,9 @@ Add `clock_introduction_grounding_integrity` to the validator-name assertion lis
 - `tools/validators/src/public/registry.ts` (modify — shared with 8 sibling tickets)
 - `tools/validators/tests/structural/clock-introduction-grounding-integrity.test.ts` (new)
 - `tools/validators/tests/structural/registry.test.ts` (modify — shared with 8 sibling tickets)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — structural/total validator count)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply skip assertion)
+- `tools/validators/README.md` (modify — validator count and inventory)
 
 ## Out of Scope
 
@@ -81,7 +86,7 @@ Add `clock_introduction_grounding_integrity` to the validator-name assertion lis
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators -- clock-introduction-grounding-integrity` (test file passes).
+1. `npm run build --prefix tools/validators && cd tools/validators && node --test dist/tests/structural/clock-introduction-grounding-integrity.test.js` (test file passes).
 2. `npm test --prefix tools/validators` (full validator package test pass).
 3. `grep -n "clockIntroductionGroundingIntegrity\|clock_introduction_grounding_integrity" tools/validators/src/public/registry.ts` returns import + array entry.
 
@@ -94,10 +99,34 @@ Add `clock_introduction_grounding_integrity` to the validator-name assertion lis
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/clock-introduction-grounding-integrity.test.ts` — 5 test cases per scoping in §What to Change item 3; uses ticket 002's fixtures.
+1. `tools/validators/tests/structural/clock-introduction-grounding-integrity.test.ts` — 8 test cases covering creation-pass, missing driver, no grounding links, inactive links, threshold bounds, lifecycle non-fire, root-bootstrap non-fire, and selector scope.
 2. `tools/validators/tests/structural/registry.test.ts` (modify) — adds the new validator to the name assertion (coordinate with tickets 003, 005-012 per §Step 6.5).
+3. `tools/validators/tests/integration/spec04-verification.test.ts` (modify) — updates active structural/total validator counts.
+4. `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify) — confirms the new CLK validator skips clean world-canon-only pre-apply plans.
 
 ### Commands
 
-1. `npm test --prefix tools/validators -- clock-introduction-grounding-integrity` (targeted test pass).
-2. `npm test --prefix tools/validators` (full validator package test pass).
+1. `npm run build --prefix tools/validators && cd tools/validators && node --test dist/tests/structural/clock-introduction-grounding-integrity.test.js` (targeted test pass).
+2. `cd tools/validators && node --test --test-name-pattern "clean pre-apply" dist/tests/integration/validate-patch-plan.test.js` (clean non-story pre-apply skip proof).
+3. `npm test --prefix tools/validators` (full validator package test pass).
+
+## Outcome
+
+Completed: 2026-05-18.
+
+Implemented `clock_introduction_grounding_integrity` as an additive structural validator in `tools/validators/src/structural/clock-introduction-grounding-integrity.ts` and registered it in `tools/validators/src/public/registry.ts`. The validator runs for full-world validation, relevant story-bundle pre-apply plans, and incremental touches to SE / PG / CLK story files. It inspects CLK ids created by the current SE, requires a non-empty driver, a positive integer `max`, valid threshold bounds when thresholds are present, and at least one `linked_records[]` entry grounded in the parent PG snapshot or same-event creates.
+
+Added focused structural coverage for the accepted creation-pass fixture, missing driver, missing grounding links, inactive links, threshold bounds, lifecycle non-fire, and root-bootstrap non-fire. Updated registry, validator count, README inventory, and clean non-story pre-apply skip assertions so the broader package guardrails remain truthful.
+
+## Verification Result
+
+- `npm run build --prefix tools/validators` passed.
+- `node --test dist/tests/structural/clock-introduction-grounding-integrity.test.js` passed from `tools/validators`: 8 tests, 0 failures.
+- `node --test --test-name-pattern "clean pre-apply" dist/tests/integration/validate-patch-plan.test.js` passed from `tools/validators`: 1 test, 0 failures.
+- `npm test --prefix tools/validators` passed: 430 tests, 0 failures.
+- `grep -n "clockIntroductionGroundingIntegrity\|clock_introduction_grounding_integrity" tools/validators/src/public/registry.ts` returned the import and structural registry entry.
+
+## Deviations
+
+- The drafted `npm test --prefix tools/validators -- clock-introduction-grounding-integrity` targeted command was not used because the package test script runs compiled `dist/tests/**/*.test.js`; the actual narrow proof builds first and runs the compiled test file directly.
+- The drafted non-empty `thresholds[]` requirement was corrected during reassessment. The live schema and accepted ticket-002 creation-pass fixture allow `thresholds: []`; this ticket validates threshold bounds when thresholds are present.

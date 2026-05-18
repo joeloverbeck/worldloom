@@ -175,7 +175,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     );
     assert.equal(liePromotedSilentlyExecution?.status, "skipped");
     const clockExecutions = result.executions.filter((execution) => execution.name.startsWith("clock_"));
-    assert.equal(clockExecutions.length, 5);
+    assert.equal(clockExecutions.length, 6);
     assert.ok(clockExecutions.every((execution) => execution.status === "skipped"));
     const secretExecutions = result.executions.filter((execution) => execution.name.startsWith("secret_") || execution.name === "critical_secret_clue_coverage_when_revealed");
     assert.equal(secretExecutions.length, 3);
