@@ -46,7 +46,84 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     );
     assert.deepEqual(
       result.story_bundle_context.open_obligations.map((obligation) => obligation.id),
-      ["OBL-1"]
+      ["OBL-1", "OBL-2", "OBL-3", "OBL-4", "OBL-5"]
+    );
+    assert.deepEqual(
+      result.story_bundle_context.open_obligations.map((obligation) => Object.keys(obligation)),
+      Array.from({ length: 5 }, () => [
+        "id",
+        "obligation_kind",
+        "description",
+        "owed_by",
+        "owed_to",
+        "urgency",
+        "trigger_to_close",
+        "status"
+      ])
+    );
+    assert.deepEqual(
+      result.story_bundle_context.open_obligations.map((obligation) => [
+        obligation.id,
+        obligation.obligation_kind,
+        obligation.description,
+        obligation.owed_by,
+        obligation.owed_to,
+        obligation.urgency,
+        obligation.trigger_to_close,
+        obligation.status
+      ]),
+      [
+        [
+          "OBL-1",
+          "promise",
+          "Pay off the loft setup.",
+          "STENT-2",
+          "public",
+          "high",
+          "Marla reveals why the loft bell rang.",
+          "open"
+        ],
+        [
+          "OBL-2",
+          "debt",
+          "Marla owes the stairwell watcher a true answer.",
+          "STENT-2",
+          "group:watch",
+          "medium",
+          "Marla gives the watcher a true answer.",
+          "open"
+        ],
+        [
+          "OBL-3",
+          "moral",
+          "Marla must decide whether to warn the public.",
+          "STENT-2",
+          "public",
+          "low",
+          "The public warning is either made or deliberately withheld.",
+          "open"
+        ],
+        [
+          "OBL-4",
+          "protection",
+          "Marla must keep the loft child unseen.",
+          "STENT-2",
+          "STENT-2",
+          "high",
+          "The child is moved beyond the watch patrol.",
+          "open"
+        ],
+        [
+          "OBL-5",
+          "promise",
+          "Marla promised to leave a signal if the roof path is clear.",
+          "STENT-2",
+          "public",
+          "medium",
+          "A roof-path signal is left or the promise is superseded.",
+          "open"
+        ]
+      ]
     );
     assert.deepEqual(
       result.story_bundle_context.active_threads.map((thread) => thread.id),

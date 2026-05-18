@@ -111,13 +111,13 @@ export interface ContextPacketStoryBundleContext {
   };
   open_obligations: Array<{
     id: string;
-    type: string;
-    owner: string | null;
-    subjects: string[];
-    salience: number;
-    urgency: number;
-    possible_payoff_modes: string[];
-    coverage_cache_compatible_storylets: string[];
+    obligation_kind: string;
+    description: string;
+    owed_by: string;
+    owed_to: string;
+    urgency: "low" | "medium" | "high";
+    trigger_to_close: string;
+    status: string;
   }>;
   active_threads: Array<{
     id: string;

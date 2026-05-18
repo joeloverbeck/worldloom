@@ -109,6 +109,10 @@ function asNumber(value: unknown, fallback = 0): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
+function asObligationUrgency(value: unknown): "low" | "medium" | "high" {
+  return value === "low" || value === "medium" || value === "high" ? value : "medium";
+}
+
 function asStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
 }
@@ -200,13 +204,13 @@ function buildOpenObligations(rows: StoryNodeRow[]): ContextPacketStoryBundleCon
     .filter(({ record }) => asString(record.status, "open") === "open")
     .map(({ row, record }) => ({
       id: asString(record.id, authoredId(row)),
-      type: asString(record.type, "unspecified"),
-      owner: asNullableString(record.owner),
-      subjects: asStringArray(record.subjects),
-      salience: asNumber(record.salience),
-      urgency: asNumber(record.urgency),
-      possible_payoff_modes: asStringArray(record.possible_payoff_modes),
-      coverage_cache_compatible_storylets: asStringArray(record.coverage_cache_compatible_storylets)
+      obligation_kind: asString(record.obligation_kind, "unspecified"),
+      description: asString(record.description),
+      owed_by: asString(record.owed_by),
+      owed_to: asString(record.owed_to),
+      urgency: asObligationUrgency(record.urgency),
+      trigger_to_close: asString(record.trigger_to_close),
+      status: asString(record.status, "open")
     }));
 }
 
