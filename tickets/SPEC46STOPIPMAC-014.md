@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/MACHINE-FACING-LAYER.md` (extend story-edge enumeration with 22 new edge types + placeholder-skip rationale + tick-history granularity note)
-**Deps**: archive/tickets/SPEC46STOPIPMAC-006.md, archive/tickets/SPEC46STOPIPMAC-007.md, archive/tickets/SPEC46STOPIPMAC-008.md, archive/tickets/SPEC46STOPIPMAC-009.md, archive/tickets/SPEC46STOPIPMAC-010.md, SPEC46STOPIPMAC-011, SPEC46STOPIPMAC-012, SPEC46STOPIPMAC-013
+**Deps**: archive/tickets/SPEC46STOPIPMAC-006.md, archive/tickets/SPEC46STOPIPMAC-007.md, archive/tickets/SPEC46STOPIPMAC-008.md, archive/tickets/SPEC46STOPIPMAC-009.md, archive/tickets/SPEC46STOPIPMAC-010.md, archive/tickets/SPEC46STOPIPMAC-011.md, SPEC46STOPIPMAC-012, SPEC46STOPIPMAC-013
 
 ## Problem
 
@@ -65,7 +65,7 @@ Add a brief note pointing to the deferred Priority 2 packets (dramatic-irony, so
 ### Invariants
 
 1. Every edge type name added to `docs/MACHINE-FACING-LAYER.md` matches the edge type string landed on `STORY_EDGE_TYPES` by sibling tickets 006-013 — no drift between the docs enumeration and the const-typed const.
-2. The placeholder-skip convention statement in the docs matches the convention applied in code by `archive/tickets/SPEC46STOPIPMAC-010.md` (CLK.driver) and SPEC46STOPIPMAC-011 (STSEC.holders[]) — single source of truth for the convention's rationale; the docs section is the canonical operator reference.
+2. The placeholder-skip convention statement in the docs matches the convention applied in code by `archive/tickets/SPEC46STOPIPMAC-010.md` (CLK.driver) and `archive/tickets/SPEC46STOPIPMAC-011.md` (STSEC.holders[]) — single source of truth for the convention's rationale; the docs section is the canonical operator reference.
 3. The tick-history granularity statement matches the convention applied in code by `archive/tickets/SPEC46STOPIPMAC-010.md` — `clock_tick_event` encodes only `event`, not `delta` or `cause`.
 
 ## Test Plan

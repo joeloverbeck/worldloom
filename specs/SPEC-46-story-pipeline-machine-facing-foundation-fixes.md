@@ -26,6 +26,8 @@
 
 **Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-010.md`)**: Phase C CLK edge extraction is landed in `tools/world-index`: `clock_linked_record`, `clock_driver`, and `clock_tick_event` are registered in `STORY_EDGE_TYPES`, emitted for live `pressure_clock_record` story-bundle nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 26`). Placeholder clock drivers (`system`, `unknown`, and `group:<name>`) intentionally do not emit `clock_driver` edges. Remaining Phase C edge families are still owned by tickets 011-015 until later implementation notes supersede this line.
 
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-011.md`)**: Phase C STSEC edge extraction is landed in `tools/world-index`: `secret_truth_anchor`, `secret_holder`, `secret_clue_carrier`, and `secret_reveal_record` are registered in `STORY_EDGE_TYPES`, emitted for live `story_secret_record` story-bundle nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 30`). Placeholder secret holders (`group:<name>` and `narrator`) intentionally do not emit `secret_holder` edges. Remaining Phase C edge families are still owned by tickets 012-015 until later implementation notes supersede this line.
+
 ---
 
 ## Problem Statement

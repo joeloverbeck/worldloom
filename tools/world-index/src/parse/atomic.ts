@@ -623,6 +623,12 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "story_secret_record") {
+    for (const edge of edgesForStorySecret(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   pushStoryRef("created_at_page", stringField(record, "created_at_page"));
   pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
@@ -767,6 +773,38 @@ function edgesForStoryClock(
     if (event) {
       edges.push(createStoryRefEdge(node.node_id, "clock_tick_event", storySlug, event));
     }
+  }
+
+  return edges;
+}
+
+function edgesForStorySecret(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  const truthAnchor = stringField(record, "truth_anchor");
+  if (truthAnchor) {
+    edges.push(createStoryRefEdge(node.node_id, "secret_truth_anchor", storySlug, truthAnchor));
+  }
+
+  for (const holder of stringArrayField(record, "holders")) {
+    if (isStoryRecordReference(holder)) {
+      edges.push(createStoryRefEdge(node.node_id, "secret_holder", storySlug, holder));
+    }
+  }
+
+  for (const carrier of recordArrayField(record, "clue_carriers")) {
+    const carrierRecord = stringField(carrier, "record");
+    if (carrierRecord) {
+      edges.push(createStoryRefEdge(node.node_id, "secret_clue_carrier", storySlug, carrierRecord));
+    }
+  }
+
+  for (const target of stringArrayField(record, "reveal_records")) {
+    edges.push(createStoryRefEdge(node.node_id, "secret_reveal_record", storySlug, target));
   }
 
   return edges;

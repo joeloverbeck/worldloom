@@ -107,7 +107,11 @@ export const STORY_EDGE_TYPES = [
   "status_entity",
   "clock_linked_record",
   "clock_driver",
-  "clock_tick_event"
+  "clock_tick_event",
+  "secret_truth_anchor",
+  "secret_holder",
+  "secret_clue_carrier",
+  "secret_reveal_record"
 ] as const;
 
 export type StoryEdgeType = (typeof STORY_EDGE_TYPES)[number];

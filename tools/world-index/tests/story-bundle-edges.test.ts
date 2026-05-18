@@ -593,6 +593,224 @@ test("clock driver placeholders do not emit driver edges", () => {
   }
 });
 
+test("secret records emit truth-anchor, holder, clue-carrier, and reveal-record edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-secret-edges-"));
+
+  try {
+    writeStorySecret(root, "harborwatch", "STSEC-1", [
+      "id: STSEC-1",
+      "story_id: STORY-1",
+      "created_at_page: PG-5",
+      "supersedes: null",
+      "secret_kind: identity",
+      "secret_claim: The bell keeper is the masked witness.",
+      "truth_anchor: SF-1",
+      "holders:",
+      "  - STENT-1",
+      "  - STENT-2",
+      "salience: high",
+      "protected_mystery_refs: []",
+      "clue_carriers:",
+      "  - kind: DA",
+      "    record: DA-1",
+      "    clue_text: The bell ledger has a hidden initial.",
+      "    clue_strength: confirming",
+      "    discovered_by:",
+      "      - STENT-1",
+      "    audience_visible: hidden",
+      "    status: available",
+      "  - kind: STOBJ",
+      "    record: STOBJ-3",
+      "    clue_text: A mask lies under the winch.",
+      "    clue_strength: suggestive",
+      "    discovered_by: []",
+      "    audience_visible: ambiguous",
+      "    status: discovered",
+      "source_records:",
+      "  - BEL-1",
+      "status: hidden",
+      "reveal_event: null",
+      "reveal_records:",
+      "  - BEL-2",
+      "  - STQ-4"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/secrets/STSEC-1.yaml"
+    );
+
+    assert.deepEqual(
+      secretEdges(parsed.edges),
+      [
+        {
+          source_node_id: "harborwatch:STSEC-1",
+          target_unresolved_ref: "harborwatch:SF-1",
+          edge_type: "secret_truth_anchor",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-1",
+          target_unresolved_ref: "harborwatch:STENT-1",
+          edge_type: "secret_holder",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-1",
+          target_unresolved_ref: "harborwatch:STENT-2",
+          edge_type: "secret_holder",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-1",
+          target_unresolved_ref: "harborwatch:DA-1",
+          edge_type: "secret_clue_carrier",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-1",
+          target_unresolved_ref: "harborwatch:STOBJ-3",
+          edge_type: "secret_clue_carrier",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-1",
+          target_unresolved_ref: "harborwatch:BEL-2",
+          edge_type: "secret_reveal_record",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-1",
+          target_unresolved_ref: "harborwatch:STQ-4",
+          edge_type: "secret_reveal_record",
+          story_slug: "harborwatch"
+        }
+      ]
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("secret records with empty nullable fields emit no secret edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-secret-empty-"));
+
+  try {
+    writeStorySecret(root, "harborwatch", "STSEC-2", [
+      "id: STSEC-2",
+      "story_id: STORY-1",
+      "created_at_page: PG-5",
+      "supersedes: null",
+      "secret_kind: motive",
+      "secret_claim: The watch motive remains unanchored.",
+      "truth_anchor: null",
+      "holders: []",
+      "salience: low",
+      "protected_mystery_refs: []",
+      "clue_carriers: []",
+      "source_records: []",
+      "status: hidden",
+      "reveal_event: null",
+      "reveal_records: []"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/secrets/STSEC-2.yaml"
+    );
+
+    assert.deepEqual(secretEdges(parsed.edges), []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("secret holder placeholders do not emit holder edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-secret-placeholder-"));
+
+  try {
+    writeStorySecret(root, "harborwatch", "STSEC-3", [
+      "id: STSEC-3",
+      "story_id: STORY-1",
+      "created_at_page: PG-5",
+      "supersedes: null",
+      "secret_kind: institutional",
+      "secret_claim: The harbor compact has a hidden clause.",
+      "truth_anchor: null",
+      "holders:",
+      "  - group:foundlings",
+      "  - narrator",
+      "salience: medium",
+      "protected_mystery_refs: []",
+      "clue_carriers: []",
+      "source_records: []",
+      "status: hidden",
+      "reveal_event: null",
+      "reveal_records: []"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/secrets/STSEC-3.yaml"
+    );
+
+    assert.deepEqual(secretEdges(parsed.edges), []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("secret holder placeholders are skipped while STENT holders still emit", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-secret-mixed-holder-"));
+
+  try {
+    writeStorySecret(root, "harborwatch", "STSEC-4", [
+      "id: STSEC-4",
+      "story_id: STORY-1",
+      "created_at_page: PG-5",
+      "supersedes: null",
+      "secret_kind: artifact_truth",
+      "secret_claim: The bell tongue is not original.",
+      "truth_anchor: null",
+      "holders:",
+      "  - STENT-7",
+      "  - group:foundlings",
+      "  - narrator",
+      "salience: medium",
+      "protected_mystery_refs: []",
+      "clue_carriers: []",
+      "source_records: []",
+      "status: hidden",
+      "reveal_event: null",
+      "reveal_records: []"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/secrets/STSEC-4.yaml"
+    );
+
+    assert.deepEqual(
+      secretEdges(parsed.edges).map((edge) => ({
+        target_unresolved_ref: edge.target_unresolved_ref,
+        edge_type: edge.edge_type
+      })),
+      [
+        {
+          target_unresolved_ref: "harborwatch:STENT-7",
+          edge_type: "secret_holder"
+        }
+      ]
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 function beliefEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
   source_node_id: string;
   target_unresolved_ref: string | null;
@@ -673,6 +891,22 @@ function clockEdges(edges: Array<{ edge_type: string; source_node_id: string; ta
     }));
 }
 
+function secretEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
+  source_node_id: string;
+  target_unresolved_ref: string | null;
+  edge_type: string;
+  story_slug: string | null;
+}> {
+  return edges
+    .filter((edge) => edge.edge_type.startsWith("secret_"))
+    .map((edge) => ({
+      source_node_id: edge.source_node_id,
+      target_unresolved_ref: edge.target_unresolved_ref,
+      edge_type: edge.edge_type,
+      story_slug: edge.story_slug ?? null
+    }));
+}
+
 function writeStoryBelief(root: string, storySlug: string, beliefId: string, lines: string[]): void {
   const relativeDirectory = path.join(
     root,
@@ -741,4 +975,18 @@ function writeStoryClock(root: string, storySlug: string, clockId: string, lines
   );
   mkdirSync(relativeDirectory, { recursive: true });
   writeFileSync(path.join(relativeDirectory, `${clockId}.yaml`), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStorySecret(root: string, storySlug: string, secretId: string, lines: string[]): void {
+  const relativeDirectory = path.join(
+    root,
+    "worlds",
+    "fixture-world",
+    "stories",
+    storySlug,
+    "_source",
+    "secrets"
+  );
+  mkdirSync(relativeDirectory, { recursive: true });
+  writeFileSync(path.join(relativeDirectory, `${secretId}.yaml`), `${lines.join("\n")}\n`, "utf8");
 }

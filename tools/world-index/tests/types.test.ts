@@ -35,7 +35,7 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.equal(ATTRIBUTION_EDGE_TYPES.length, 2);
   assert.equal(ENTITY_EDGE_TYPES.length, 1);
   assert.equal(SCOPED_EDGE_TYPES.length, 2);
-  assert.equal(STORY_EDGE_TYPES.length, 26);
+  assert.equal(STORY_EDGE_TYPES.length, 30);
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_create"));
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_supersede"));
   assert.ok(STORY_EDGE_TYPES.includes("creation_evidence"));
@@ -51,6 +51,10 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.ok(STORY_EDGE_TYPES.includes("clock_linked_record"));
   assert.ok(STORY_EDGE_TYPES.includes("clock_driver"));
   assert.ok(STORY_EDGE_TYPES.includes("clock_tick_event"));
-  assert.equal(edgeTypes.length, 41);
+  assert.ok(STORY_EDGE_TYPES.includes("secret_truth_anchor"));
+  assert.ok(STORY_EDGE_TYPES.includes("secret_holder"));
+  assert.ok(STORY_EDGE_TYPES.includes("secret_clue_carrier"));
+  assert.ok(STORY_EDGE_TYPES.includes("secret_reveal_record"));
+  assert.equal(edgeTypes.length, 45);
   assert.equal(new Set(edgeTypes).size, edgeTypes.length);
 });
