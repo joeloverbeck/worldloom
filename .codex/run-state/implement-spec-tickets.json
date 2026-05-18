@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-42-story-state-debt-secret-clock-records.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC42STOSTADEB-011.md",
+  "last_ticket": "archive/tickets/SPEC42STOSTADEB-012.md",
   "last_result": "completed_and_archived",
-  "last_work_commit": "b47af81ebd61a9cd653072341d0e26e7e695de21",
+  "last_work_commit": "ef7c64013b02ba6c268f5f1e32a0672e0c9d908f",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC42STOSTADEB-012.md",
+  "next_target": "tickets/SPEC42STOSTADEB-013.md",
   "queue": [
-    "tickets/SPEC42STOSTADEB-012.md",
     "tickets/SPEC42STOSTADEB-013.md",
     "tickets/SPEC42STOSTADEB-014.md",
     "tickets/SPEC42STOSTADEB-015.md"
