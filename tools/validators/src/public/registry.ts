@@ -22,6 +22,7 @@ import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
 import { criticalSecretClueCoverageWhenRevealed } from "../structural/critical-secret-clue-coverage-when-revealed.js";
+import { secretIntroductionAnchorIntegrity } from "../structural/secret-introduction-anchor-integrity.js";
 import { secretCarrierExistence } from "../structural/secret-carrier-existence.js";
 import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-firewall-compliance.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
@@ -78,6 +79,7 @@ export const structuralValidators: readonly Validator[] = [
   clockTerminalDebtIntegrity,
   secretCarrierExistence,
   criticalSecretClueCoverageWhenRevealed,
+  secretIntroductionAnchorIntegrity,
   secretMysteryFirewallCompliance,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,

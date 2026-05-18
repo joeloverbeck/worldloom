@@ -1,14 +1,14 @@
 # SPEC43PRECAUSTO-005: `secret_introduction_anchor_integrity` Validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — new `tools/validators/src/structural/secret-introduction-anchor-integrity.ts` (STSEC-specific introduction gate enforcing the first-lie rule + Mystery Reserve firewall preservation). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
+**Engine Changes**: Yes — new `tools/validators/src/structural/secret-introduction-anchor-integrity.ts` (STSEC-specific introduction gate enforcing the first-lie rule + Mystery Reserve firewall preservation). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5), with structural registry and validator-count witnesses updated.
 **Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, archive/tickets/SPEC43PRECAUSTO-002.md, archive/tickets/SPEC43PRECAUSTO-003.md
 
 ## Problem
 
-SPEC-43 §Approach D Table row 3 + §Approach C STSEC rules + the §6a "first lie rule" require a STSEC-specific introduction validator that enforces: (a) `source_records[]` exists, naming records that made the secret branch-relevant; (b) `truth_anchor` exists if provided OR is null only when mystery/canon policy requires it; (c) `holders[]` are valid STENT ids or schema-allowed holder labels OR at least one of `holders` / `clue_carriers[]` / `truth_anchor` / `protected_mystery_refs[]` is populated (per SPEC-43 §Approach C STSEC "minimum grounding"). The validator also preserves the Mystery Reserve firewall — a new STSEC that touches Mystery Reserve must populate `protected_mystery_refs[]` and the existing `secret_mystery_firewall_compliance` validator's rules apply unchanged. Without this validator, an STSEC could land as a thin "author-only future twist" with no source records / holder / clue carrier / truth anchor — exactly the §5c anti-pattern.
+SPEC-43 §Approach D Table row 3 + §Approach C STSEC rules + the §6a "first lie rule" required a STSEC-specific introduction validator that enforces: (a) `source_records[]` exists, naming records that made the secret branch-relevant; (b) `truth_anchor` exists if provided OR is null only when mystery/canon policy requires it; (c) `holders[]` are valid STENT ids or schema-allowed holder labels OR at least one of `holders` / `clue_carriers[]` / `truth_anchor` / `protected_mystery_refs[]` is populated (per SPEC-43 §Approach C STSEC "minimum grounding"). The validator also preserves the Mystery Reserve firewall — a new STSEC that touches Mystery Reserve must populate `protected_mystery_refs[]` and the existing `secret_mystery_firewall_compliance` validator's rules apply unchanged. At intake, without this validator, an STSEC could land as a thin "author-only future twist" with no source records / holder / clue carrier / truth anchor — exactly the §5c anti-pattern.
 
 ## Assumption Reassessment (2026-05-18)
 
@@ -17,6 +17,7 @@ SPEC-43 §Approach D Table row 3 + §Approach C STSEC rules + the §6a "first li
 3. Cross-skill boundary under audit: this validator composes with the existing `secret-mystery-firewall-compliance.ts` (verified at `tools/validators/src/structural/` listing); the two validators run independently — firewall compliance governs Mystery Reserve interactions, introduction-anchor-integrity governs the STSEC's own grounding fields. The shared `secret-utils.ts` helper may be used for STSEC-shape helpers (parallel to `clock-utils.ts` usage in ticket 004).
 4. FOUNDATIONS §Story Bundles §6a (Belief vs. Fact) restated: `BEL` records what a holder claims/believes/witnesses/lies about; `SF` records branch truth; STSEC binds together the BEL/SF/DA records pointing at the same hidden truth + names the secret's criticality. The "first lie rule" is the operational expression of §6a: a deceptive utterance creates a BEL with `truth_relation: false`; the STSEC only enters when the engine needs to track the hidden truth across multiple subsequent moves. Plus FOUNDATIONS §Validation Rules at story scope, Rule 7 (Preserve Mystery Deliberately): a new STSEC that references Mystery Reserve must not silently resolve an MR entry; the existing `secret_mystery_firewall_compliance` validator gates that.
 5. HARD-GATE / Canon Safety surface: per-commit Phase 9 gate gating mid-story STSEC creation. This validator does NOT weaken the Mystery Reserve firewall — the existing `secret_mystery_firewall_compliance.ts` continues to gate MR interactions independently. The change preserves the §Rule 7 firewall by requiring `protected_mystery_refs[]` to be populated whenever the secret references MR; the validator emits `secret_intro_holder_missing` (or analogous failure code) when grounding evidence is absent across all four anchor fields, preventing thin "author-only" secrets that would skirt the firewall.
+6. Implementation-time proof correction: `npm test --prefix tools/validators -- secret-introduction-anchor-integrity` does not narrow the Node test wrapper; it builds and runs the full `dist/tests/**/*.test.js` suite plus the extra positional arg. The truthful targeted proof is `npm run build` from `tools/validators/` followed by `node --test dist/tests/structural/secret-introduction-anchor-integrity.test.js`; the broad package proof remains `npm test --prefix tools/validators`.
 
 ## Architecture Check
 
@@ -31,37 +32,39 @@ SPEC-43 §Approach D Table row 3 + §Approach C STSEC rules + the §6a "first li
 3. Mystery Reserve firewall preservation → FOUNDATIONS alignment check: a fixture where `protected_mystery_refs[]` references an MR entry passes both this validator AND `secret_mystery_firewall_compliance.ts`; a fixture that silently resolves an MR entry (without proper firewall handling) is caught by the existing firewall validator (separate ticket scope; out of scope here).
 4. First-lie rule alignment → manual review: the validator does NOT enforce BEL creation (authoring discipline); reviewer confirms the test fixtures correctly exercise the boundary (a fixture where a lie is told and ONLY a BEL is created should pass schema validation; a fixture where an STSEC is created for that lie must satisfy this validator's grounding requirements).
 
-## What to Change
+## Landed Changes
 
-### 1. Create `tools/validators/src/structural/secret-introduction-anchor-integrity.ts`
+### 1. Created `tools/validators/src/structural/secret-introduction-anchor-integrity.ts`
 
 Validator object:
 - `name: "secret_introduction_anchor_integrity"`.
 - `applies_to: ["branching-story-turn-cycle"]`.
 - `severity: "fail"`.
-- For each STSEC record whose `created_at_page` is the new child PG (mid-story-created), verify:
+- For each STSEC record created by the same event's `SE.state_delta.create[]`, excluding root-bootstrap `PG-1` creation, verify:
   - `source_records[]` is non-empty AND every id resolves to a record active in parent PG OR created in the same SE.
-  - `truth_anchor`, if non-null, exists in the bundle and is branch-legal (active record id).
-  - `holders[]` is non-empty AND every id is a valid STENT-id (or schema-allowed holder label per the existing schema enum).
+  - `truth_anchor`, if non-null, exists in the bundle and is branch-legal (parent-active or same-event-created); `truth_anchor: null` is accepted only when `protected_mystery_refs[]` records the Mystery Reserve boundary.
+  - `holders[]`, when populated, names valid STENT ids or schema-allowed holder labels per the existing schema pattern.
   - At least one of `holders` / `clue_carriers` / `truth_anchor` / `protected_mystery_refs` is populated (per SPEC-43 §Approach C STSEC "minimum grounding": at least one anchor).
 - Failure codes: `secret_intro_missing_source`, `secret_intro_truth_anchor_missing`, `secret_intro_holder_missing`.
 
-### 2. Register in `tools/validators/src/public/registry.ts`
+### 2. Registered in `tools/validators/src/public/registry.ts`
 
-Add import + array entry (coordinate slot ordering with tickets 003-004, 006-012 per §Step 6.5).
+Added import + array entry in the secret-validator cluster.
 
-### 3. Add test `tools/validators/tests/structural/secret-introduction-anchor-integrity.test.ts`
+### 3. Added test `tools/validators/tests/structural/secret-introduction-anchor-integrity.test.ts`
 
-Test cases (using ticket 002's fixtures):
+Test cases:
 - creation-pass: first revealable secret (lie creates BEL + truth anchor SF + STSEC binding both, holders populated) → 0 failures.
 - creation-fail: STSEC with empty source_records[] → emits `secret_intro_missing_source`.
 - creation-fail: STSEC with empty holders[] AND empty clue_carriers[] AND null truth_anchor AND empty protected_mystery_refs[] → emits `secret_intro_holder_missing`.
 - creation-fail: STSEC truth_anchor points to a non-existent record → emits `secret_intro_truth_anchor_missing`.
 - mystery-firewall-still-valid: STSEC with populated protected_mystery_refs[] referencing an MR entry → 0 failures from this validator (the firewall validator runs independently).
+- root-bootstrap STSEC creation is ignored.
+- run-mode scoping covers full-world, `create_stsec_record` pre-apply plans, touched STSEC files, and excludes unrelated CF plans.
 
-### 4. Update `tools/validators/tests/structural/registry.test.ts`
+### 4. Updated registry/count witnesses
 
-Add `secret_introduction_anchor_integrity` to the validator-name assertion list (coordinate with tickets 003-004, 006-012 per §Step 6.5).
+Added `secret_introduction_anchor_integrity` to `tools/validators/tests/structural/registry.test.ts`, updated `tools/validators/tests/integration/spec04-verification.test.ts` from 38/50 to 39/51 active mechanized validators, and updated `tools/validators/tests/integration/validate-patch-plan.test.ts` to expect 4 skipped secret-family validators on a clean non-story pre-apply plan.
 
 ## Files to Touch
 
@@ -69,6 +72,8 @@ Add `secret_introduction_anchor_integrity` to the validator-name assertion list 
 - `tools/validators/src/public/registry.ts` (modify — shared with 8 sibling tickets)
 - `tools/validators/tests/structural/secret-introduction-anchor-integrity.test.ts` (new)
 - `tools/validators/tests/structural/registry.test.ts` (modify — shared with 8 sibling tickets)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — active structural validator count)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — secret-family pre-apply skipped-validator count)
 
 ## Out of Scope
 
@@ -82,7 +87,7 @@ Add `secret_introduction_anchor_integrity` to the validator-name assertion list 
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators -- secret-introduction-anchor-integrity` (test file passes).
+1. `cd tools/validators && npm run build && node --test dist/tests/structural/secret-introduction-anchor-integrity.test.js` (targeted test file passes).
 2. `npm test --prefix tools/validators` (full validator package test pass).
 3. `grep -n "secretIntroductionAnchorIntegrity\|secret_introduction_anchor_integrity" tools/validators/src/public/registry.ts` returns import + array entry.
 
@@ -95,10 +100,30 @@ Add `secret_introduction_anchor_integrity` to the validator-name assertion list 
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/secret-introduction-anchor-integrity.test.ts` — 5 test cases per §What to Change item 3; uses ticket 002's fixtures.
+1. `tools/validators/tests/structural/secret-introduction-anchor-integrity.test.ts` — 7 test cases per §Landed Changes item 3; uses ticket 002's pass/fail fixtures plus focused inline records.
 2. `tools/validators/tests/structural/registry.test.ts` (modify) — adds the new validator to the name assertion (coordinate with tickets 003-004, 006-012 per §Step 6.5).
+3. `tools/validators/tests/integration/spec04-verification.test.ts` — updates active structural/total validator counts.
+4. `tools/validators/tests/integration/validate-patch-plan.test.ts` — updates the clean-plan skipped secret-validator count.
 
 ### Commands
 
-1. `npm test --prefix tools/validators -- secret-introduction-anchor-integrity` (targeted test pass).
+1. `cd tools/validators && npm run build && node --test dist/tests/structural/secret-introduction-anchor-integrity.test.js` (targeted test pass).
 2. `npm test --prefix tools/validators` (full validator package test pass).
+
+## Outcome
+
+Completed: 2026-05-18
+
+Implemented the `secret_introduction_anchor_integrity` structural validator for mid-story-created STSEC records. The validator is additive, skips root-bootstrap STSEC creation, checks parent-active or same-event-created source records, verifies truth-anchor references, allows `truth_anchor: null` only when `protected_mystery_refs[]` makes the Mystery Reserve boundary explicit, validates holder IDs/labels when present, and requires at least one grounding anchor across holders, clue carriers, truth anchor, or protected mystery refs. It is registered in the structural validator registry and covered by focused structural tests plus package-wide registry/count witnesses.
+
+## Verification Result
+
+- `cd tools/validators && npm run build` → pass.
+- `cd tools/validators && node --test dist/tests/structural/secret-introduction-anchor-integrity.test.js` → pass, 7/7 tests.
+- `npm test --prefix tools/validators` → pass, 437/437 tests.
+- `rg -n "secretIntroductionAnchorIntegrity|secret_introduction_anchor_integrity" tools/validators/src/public/registry.ts tools/validators/src/structural tools/validators/tests` → confirms import, registry entry, validator name, structural tests, and fixture target.
+
+## Deviations
+
+- The drafted targeted command `npm test --prefix tools/validators -- secret-introduction-anchor-integrity` was not a truthful narrow proof: the package script still ran the full compiled test suite and initially exposed same-seam registry/count fallout. The accepted targeted proof is the direct compiled test command after `npm run build`; the broad package proof is `npm test --prefix tools/validators`.
+- Same-seam package witnesses in `spec04-verification.test.ts` and `validate-patch-plan.test.ts` moved with the new structural validator registration. No behavior outside the validator package was widened.
