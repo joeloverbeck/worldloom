@@ -95,7 +95,11 @@ export const STORY_EDGE_TYPES = [
   "parent_page",
   "leaf_page",
   "dependent_fact",
-  "thread_obligation"
+  "thread_obligation",
+  "belief_holder",
+  "belief_basis_event",
+  "belief_access_record",
+  "belief_opens"
 ] as const;
 
 export type StoryEdgeType = (typeof STORY_EDGE_TYPES)[number];

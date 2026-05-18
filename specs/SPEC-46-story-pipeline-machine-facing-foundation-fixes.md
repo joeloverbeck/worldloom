@@ -16,6 +16,8 @@
 
 **Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-005.md`)**: Phase B cross-cutting docs now mirror the landed schema-faithful summary shapes in `docs/CONTEXT-PACKET-CONTRACT.md`, including the id-list scope heuristic for locations, objects, and story-local diegetic artifacts. Runtime capability discovery now enumerates the seven fields through the registered `get_context_packet` description in `tools/world-mcp/src/server.ts`, which is the live metadata source serialized by `mcp__worldloom__describe_capabilities`.
 
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-006.md`)**: Phase C BEL edge extraction is landed in `tools/world-index`: `belief_holder`, `belief_basis_event`, `belief_access_record`, and `belief_opens` are registered in `STORY_EDGE_TYPES`, emitted for live `belief_record` story-bundle nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 18`). Remaining Phase C edge families are still owned by tickets 007-015.
+
 ---
 
 ## Problem Statement

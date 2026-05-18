@@ -593,6 +593,12 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "belief_record") {
+    for (const edge of edgesForStoryBelief(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   pushStoryRef("created_at_page", stringField(record, "created_at_page"));
   pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
@@ -630,6 +636,34 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     for (const target of stringArrayField(record, "obligations")) {
       pushStoryRef("thread_obligation", target);
     }
+  }
+
+  return edges;
+}
+
+function edgesForStoryBelief(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  const holder = stringField(record, "holder");
+  if (holder) {
+    edges.push(createStoryRefEdge(node.node_id, "belief_holder", storySlug, holder));
+  }
+
+  const sourceEvent = stringField(record, "source_event", ["basis"]);
+  if (sourceEvent) {
+    edges.push(createStoryRefEdge(node.node_id, "belief_basis_event", storySlug, sourceEvent));
+  }
+
+  for (const target of stringArrayField(record, "access_records", ["basis"])) {
+    edges.push(createStoryRefEdge(node.node_id, "belief_access_record", storySlug, target));
+  }
+
+  for (const target of stringArrayField(record, "opens", ["consequences"])) {
+    edges.push(createStoryRefEdge(node.node_id, "belief_opens", storySlug, target));
   }
 
   return edges;
