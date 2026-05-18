@@ -1,9 +1,9 @@
 # SPEC43PRECAUSTO-017: Capstone Integration Test — SPEC-43 §Verification
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — new integration test file at `tools/validators/tests/integration/spec43-midstory-introduction.test.ts` exercising every SPEC-43 §Verification bullet end-to-end across all introduction validators + compatibility-drift reporting + snapshot normalization + observer firewall + future-shape rejection. Uses ticket 002's synthetic fixtures PLUS a fixture-world copy of `worlds/erotica-world/stories/red-bunny/` for the backwards-compatibility verification.
+**Engine Changes**: Yes — new integration test file at `tools/validators/tests/integration/spec43-midstory-introduction.test.ts` exercising every SPEC-43 §Verification bullet end-to-end across all introduction validators + compatibility-drift reporting + snapshot normalization + observer firewall + future-shape rejection. Also updates `tools/validators/src/structural/midstory-record-introduction-grounding.ts` so legacy/root and pre-current-contract pages are grandfathered rather than treated as mid-story introduction failures. Uses ticket 002's synthetic fixtures PLUS a fixture-world copy of `worlds/erotica-world/stories/red-bunny/` for the backwards-compatibility verification.
 **Deps**: archive/tickets/SPEC43PRECAUSTO-014.md, archive/tickets/SPEC43PRECAUSTO-015.md, archive/tickets/SPEC43PRECAUSTO-016.md
 
 ## Problem
@@ -40,6 +40,8 @@ Per-validator unit tests (tickets 003-012) cover individual behaviors. A capston
 3. Cross-skill boundary under audit: this capstone exercises the FULL pipeline composed by tickets 003-016 — every introduction validator, compatibility-drift, snapshot normalization, observer firewall, narrative-shape rejection, plus turn-cycle skill amendments (013/014) + new reference file (015) + health-audit amendments (016). The capstone is the gate that proves the parts compose correctly.
 4. FOUNDATIONS §Story Bundles §5c (Present Causal State, Not Narrative Shape) restated: the capstone's narrative-shape rejection sub-tests (bullets 7-8) are the canonical end-to-end §5c enforcement check. A capstone pass means no narrative-shape field leaks through any record class at engine pre-apply time; a capstone fail surfaces the leak path immediately.
 5. HARD-GATE / Canon Safety surface: the capstone exercises Phase 9 gating end-to-end. The change does not add new gates (those land in ticket 013); it verifies the gates compose with each other + with existing validators (observer-firewall, secret-mystery-firewall-compliance, record-schema-compliance) without conflict.
+6. Live reassessment exposed one same-seam compatibility gap before closeout: `midstory_record_introduction_grounding` correctly ignored `story_start`/`PG-1` root-bootstrap creates after this run, but still treated legacy red-bunny non-root pages whose `PG.state_snapshot.active_records` omitted current optional `CLK` / `STSEC` / `STQ` keys as current-contract mid-story creates. That contradicted SPEC-43's backwards-compatibility goal and the `compatibility_drift` classification, so this ticket also landed a narrow validator grandfathering guard for pages with legacy optional-key absence.
+7. The executable capstone uses the live validator codes. The STQ future-shape rejection is `record_schema_compliance.stq_prohibited_expected_payoff_mode`; the per-class non-STQ future-shape rejection remains `narrative_shape_forbidden_field`. The believed-only SREL fixture currently fails with `srel_intro_missing_derived_from` rather than warning, which is allowed by SPEC-43's fail/warn table. The thematic THR fixture emits `thread_intro_missing_derived_from` for the empty `derived_from[]` case.
 
 ## Architecture Check
 
@@ -119,6 +121,7 @@ SPEC-43 does not name an explicit performance gate, so no perf assertion is adde
 ## Files to Touch
 
 - `tools/validators/tests/integration/spec43-midstory-introduction.test.ts` (new)
+- `tools/validators/src/structural/midstory-record-introduction-grounding.ts` (modify — grandfather root/bootstrap and legacy compatibility-era pages)
 
 ## Out of Scope
 
@@ -131,10 +134,11 @@ SPEC-43 does not name an explicit performance gate, so no perf assertion is adde
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators -- spec43-midstory-introduction` (capstone test file passes — all 18+ sub-tests).
+1. `node --test dist/tests/integration/spec43-midstory-introduction.test.js` from `tools/validators` after `npm run build` (targeted capstone test file passes — all 18+ sub-tests).
 2. `npm test --prefix tools/validators` (full validator package test pass including the new capstone).
 3. `grep -cE "^\s*(test|it)\(" tools/validators/tests/integration/spec43-midstory-introduction.test.ts` returns ≥18 (one sub-test per spec §Verification bullet).
 4. `grep -n "red-bunny\|compatible_optional_absence\|grandfathered_snapshot_shape" tools/validators/tests/integration/spec43-midstory-introduction.test.ts` returns the red-bunny sub-test setup + classification assertions.
+5. `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` exits 0 with `fail_count: 0` and compatibility-drift info classifications only.
 
 ### Invariants
 
@@ -150,6 +154,30 @@ SPEC-43 does not name an explicit performance gate, so no perf assertion is adde
 
 ### Commands
 
-1. `npm test --prefix tools/validators -- spec43-midstory-introduction` (targeted capstone test pass).
-2. `npm test --prefix tools/validators` (full validator package test pass including the new capstone).
-3. `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny` (sanity-runs the CLI against the actual bundle; expected clean exit + warnings only for compatibility drift).
+1. `npm run build` from `tools/validators`.
+2. `node --test dist/tests/integration/spec43-midstory-introduction.test.js` from `tools/validators` (targeted capstone test pass).
+3. `npm test --prefix tools/validators -- spec43-midstory-introduction` (wrapper pass; live package script runs the full validators suite, not a narrow selector).
+4. `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` (sanity-runs the CLI against the actual bundle; expected clean exit + info-only compatibility drift).
+
+## Outcome
+
+Completed: 2026-05-18
+
+Landed `tools/validators/tests/integration/spec43-midstory-introduction.test.ts` with 21 `node:test` subtests: one per SPEC-43 §Verification bullet plus a shared pass-fixture composition test for the Wave 2 introduction validators. The test composes the already-landed validator implementations and fixture corpus rather than duplicating validator logic.
+
+Updated `midstory_record_introduction_grounding` to skip `story_start` / `PG-1` root bootstrap events and legacy compatibility-era child pages whose active-record map omits the current optional `CLK` / `STSEC` / `STQ` keys. This preserves SPEC-43's compatibility promise for pre-SPEC-43 bundles while still enforcing intro tags on current-contract pages that materialize the full active-record map.
+
+## Verification Result
+
+1. `npm run build` from `tools/validators` passed.
+2. `node --test dist/tests/integration/spec43-midstory-introduction.test.js` from `tools/validators` passed: 21 tests, 21 pass.
+3. `npm test --prefix tools/validators -- spec43-midstory-introduction` passed. The package script rebuilt and ran the full validators suite: 504 tests, 504 pass.
+4. `grep -cE "^\s*(test|it)\(" tools/validators/tests/integration/spec43-midstory-introduction.test.ts` returned `21`.
+5. `grep -n "red-bunny\|compatible_optional_absence\|grandfathered_snapshot_shape" tools/validators/tests/integration/spec43-midstory-introduction.test.ts` returned the temp-copy red-bunny subtest and classification assertions.
+6. `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` exited 0 with `fail_count: 0`, `warn_count: 0`, `info_count: 10`, and classifications `compatible_optional_absence` plus `grandfathered_snapshot_shape`.
+
+## Deviations
+
+1. The drafted `npm test --prefix tools/validators -- spec43-midstory-introduction` command is not a narrow selector in the live package script. It appends the token after `node --test dist/tests/**/*.test.js` and still runs the full validators suite. The accepted targeted proof is therefore `npm run build` followed by `node --test dist/tests/integration/spec43-midstory-introduction.test.js`; the wrapper remains useful as broad proof and passed.
+2. The capstone uses live failure codes rather than stale draft shorthand: STQ future-shape rejection is proven through `record_schema_compliance.stq_prohibited_expected_payoff_mode`; non-STQ future-shape classes use `narrative_shape_forbidden_field`; empty THR `derived_from[]` emits `thread_intro_missing_derived_from`; believed-only SREL currently fails with `srel_intro_missing_derived_from`.
+3. The live red-bunny smoke initially exposed same-seam over-enforcement in `midstory_record_introduction_grounding` against legacy compatibility-era pages. The validator was narrowed to skip root/bootstrap events and legacy optional-key-absence pages before final proof, matching SPEC-43's backwards-compatibility boundary.

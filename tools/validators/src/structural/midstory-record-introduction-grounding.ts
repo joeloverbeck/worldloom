@@ -56,6 +56,14 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   const eventId = stringValue(parsed.id) ?? bareNodeId(event);
   const childPageId = stringValue(parsed.created_at_page);
   const parentPageId = stringValue(parsed.parent_page_id);
+
+  if (parentPageId === undefined || childPageId === undefined || childPageId === "PG-1" || stringValue(parsed.event_kind) === "story_start") {
+    return [];
+  }
+  if (isLegacyCompatibilityPage(childPageId, maps)) {
+    return [];
+  }
+
   const parentActiveIds = activeIdsForPage(parentPageId, maps);
   parentActiveIds.add(eventId);
   for (const createdId of createdIds) {
@@ -141,6 +149,15 @@ function activeIdsForPage(pageId: string | undefined, maps: RecordMaps): Set<str
     }
   }
   return ids;
+}
+
+function isLegacyCompatibilityPage(pageId: string, maps: RecordMaps): boolean {
+  const page = maps.byId.get(pageId);
+  const activeRecords = asPlainRecord(asPlainRecord(asPlainRecord(page?.parsed).state_snapshot).active_records);
+  return (
+    Object.keys(activeRecords).length > 0 &&
+    (!Array.isArray(activeRecords.CLK) || !Array.isArray(activeRecords.STSEC) || !Array.isArray(activeRecords.STQ))
+  );
 }
 
 function introClassForId(id: string): MidstoryIntroductionClass | undefined {
