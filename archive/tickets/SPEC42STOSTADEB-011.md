@@ -32,7 +32,7 @@ At intake, `commitment-block-authoring` Phase 1 listed 11 causal-function covera
 
 1. Skill prose: Phase 1 coverage list contains 14 targets (the 11 existing + 3 new) → grep-proof against the post-implementation SKILL.md
 2. Authoring guidance: `commitment-block-authoring` direct_batch mode includes coverage-target prompts for `clock_advancing` / `clue_discovering` / `setup_paying_off` and names the matching predicates/effects → grep-proof plus manual contract review
-3. Health-audit consistency: SPEC42STOSTADEB-012's `stalled_clock_check` / `under_supported_critical_revelation_check` / `dropped_high_salience_setup_check` will detect coverage gaps that the new coverage targets are meant to prevent — the two skills compose correctly
+3. Health-audit consistency: `archive/tickets/SPEC42STOSTADEB-012.md`'s `stalled_clock_check` / `under_supported_critical_revelation_check` / `dropped_high_salience_setup_check` will detect coverage gaps that the new coverage targets are meant to prevent — the two skills compose correctly
 
 ## Landed Changes
 
@@ -57,7 +57,7 @@ Updated the skill's global-pool predicate guidance so the old "six `any_*` exist
 
 - CLK/STSEC/STQ class foundations — owned by SPEC42STOSTADEB-001 / -002 / -003
 - Per-class predicates — owned by SPEC42STOSTADEB-005 / -006 / -007
-- Health-audit checks consuming the new coverage gaps — owned by SPEC42STOSTADEB-012
+- Health-audit checks consuming the new coverage gaps — landed in `archive/tickets/SPEC42STOSTADEB-012.md`
 - Turn-cycle integration — landed in `archive/tickets/SPEC42STOSTADEB-009.md`
 - Bootstrap optional seeding — owned by SPEC42STOSTADEB-010
 - Prose-attach verification — owned by SPEC42STOSTADEB-013

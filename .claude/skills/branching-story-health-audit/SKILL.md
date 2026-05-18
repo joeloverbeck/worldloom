@@ -1,6 +1,6 @@
 ---
 name: branching-story-health-audit
-description: "Use when diagnosing the health of a branching-story bundle. Four modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
+description: "Use when diagnosing the health of a branching-story bundle. Four modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -32,7 +32,7 @@ Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/r
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 9 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 10 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -51,7 +51,7 @@ Phase 1: Scope branches (build tree from BR + PG; apply
                          branch_path_filter)
         |
         v
-Phase 2 [structural; default]: 9 sub-phases executed sequentially
+Phase 2 [structural; default]: 10 sub-phases executed sequentially
   ├─ 2a: Replay events (snapshot hash comparison)
   ├─ 2b: Branch isolation
   ├─ 2c: Debt health
@@ -60,7 +60,8 @@ Phase 2 [structural; default]: 9 sub-phases executed sequentially
   ├─ 2e: Mystery / canon safety
   ├─ 2f: Continuation / terminal proof
   ├─ 2g: Causal dependency health
-  └─ 2h: Canon baseline drift
+  ├─ 2h: Canon baseline drift
+  └─ 2i: CLK / STSEC / STQ mechanism health
         |
         v
 Phase 3 [conditional on `prose` in mode]: Prose checks (5 finding
@@ -115,7 +116,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/BR-*.yaml` — branch tree
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/PG-*.yaml` — page snapshots
 - `worlds/<world_slug>/stories/<story_slug>/_source/events/SE-*.yaml` — event deltas
-- `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` — every other record class read per Phase 2 sub-phase needs (SF, BEL, OBL, CNSQ, THR, SREL, STENT, STSTAT, STINT, STLOC, STOBJ, DA, SLT, CHC)
+- `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` — every other record class read per Phase 2 sub-phase needs (SF, BEL, OBL, CNSQ, THR, SREL, STENT, STSTAT, STINT, STLOC, STOBJ, DA, CLK, STSEC, STQ, SLT, CHC)
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — Phase 3 prose checks (conditional on `prose` in mode)
 - `worlds/<world_slug>/stories/<sibling_story_slug>/_source/` — Phase 4 cross-story checks (conditional on `cross_story` in mode); may be empty if this is the only bundle in the world
 - World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', story_slug=<story_slug>, seed_nodes=<every M-<integer> + every INV + parent CFs for the bundle's mirrored SF records>, token_budget=<default>)`; story-local records such as active cast `STENT` and mirrored `SF` records are loaded through `story_slug` + `story_bundle_context` or targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records`, not world-scope `seed_nodes`; the latest `change_log_entry` in governing context is the current world-canon revision for §4b canon-baseline drift checks
@@ -156,7 +157,7 @@ Output: a scoped branch list + per-branch metadata used by Phases 2-4.
 
 ## Phase 2: Structural checks (mandatory when `structural` in `mode`; default)
 
-Nine sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
+Ten sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
 
 ### Phase 2a: Replay events
 
@@ -273,6 +274,15 @@ specific CH id in the finding rationale when a stale baseline is classified as
 - `canon_baseline_requires_repair_turn` (ERROR): changed canon contradicts a story-local active record, affordance, or open debt that a new turn would otherwise treat as current. `repair_kind: turn_repair`.
 - `canon_baseline_promotion_or_retcon_conflict` (ERROR): changed canon collides with a held `canon_candidate`, `canon_linked` story fact, or promotion queue entry. `repair_kind: promotion`.
 - `canon_baseline_grandfathered` (WARNING): the page remains valid as a committed historical branch state, but new turns must cite the grandfathered baseline classification before proceeding.
+
+### Phase 2i: CLK / STSEC / STQ mechanism health
+
+These checks are retrospective audit warnings, not page-commit HARD-REJECTs. They complement the per-commit validators for CLK, STSEC, and STQ by finding mechanism rot that can accumulate across an otherwise schema-valid bundle. They only run when the corresponding record class exists in the scoped bundle; absence of CLK / STSEC / STQ records is never itself a finding.
+
+- `stalled_clock_check` — For each active high-salience `CLK` (`status: active`) in the scoped branch leaf snapshots, inspect `tick_history[]` and the page chain. If no tick has been recorded within the last `N=5` pages by default, emit a WARNING with `repair_kind: branch_flag`. Do not flag low / medium salience clocks, paused clocks, resolved / fired / abandoned / superseded clocks, or clocks absent from the scoped active snapshot. Cite the CLK id, current `value` / `max`, most recent tick event if any, current page id, and the page window considered.
+- `under_supported_critical_revelation_check` — For each high-salience `STSEC` with `status: revealed`, count `clue_carriers[].status: discovered` entries whose discovery precedes or coincides with `reveal_event` on the branch path. If the count is below the default minimum of 2, emit a WARNING with `repair_kind: branch_flag`. Cite the STSEC id, `reveal_event`, discovered-carrier count, missing support threshold, and any `protected_mystery_refs[]`. This is a health-audit warning; the commit-time `critical_secret_clue_coverage_when_revealed` validator remains the gate for malformed reveal commits.
+- `dropped_high_salience_setup_check` — For each terminal page snapshot, inspect active high-salience `STQ` records with `status: open | complicated`. If `PG.state_snapshot.continuation.terminal_rationale` does not name the STQ id or otherwise explicitly classify it as answered, paid off, inherited, superseded, or intentionally abandoned, emit a WARNING with `repair_kind: branch_flag`. Cite the terminal PG id, STQ id, current status, salience, and terminal rationale excerpt or absence.
+- `clock_proliferation_warning` — Count active or paused `CLK` records in the scoped bundle. If the count exceeds the default threshold of 5, emit a WARNING with `repair_kind: bundle_advice`. Cite the count, threshold, and the active CLK ids so the operator can decide whether clocks should be merged, resolved, abandoned, or left as intentional complexity.
 
 ## Phase 3: Prose checks (conditional on `prose` in `mode`)
 

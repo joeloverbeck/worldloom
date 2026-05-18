@@ -1,6 +1,6 @@
 # SPEC42STOSTADEB-012: branching-story-health-audit structural checks for CLK/STSEC/STQ
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `branching-story-health-audit` SKILL.md Phase 2 (structural mode) with three new structural checks: `stalled_clock_check`, `under_supported_critical_revelation_check`, `dropped_high_salience_setup_check`; surfaces findings as audit warnings (not engine HARD-REJECTs); no new audit modes introduced
@@ -10,15 +10,16 @@
 
 Once CLK/STSEC/STQ are in active use across bundles (per the foundation + validator + skill-integration tickets), audit detection of three new failure modes is needed: (a) **stalled clocks** (a high-salience active CLK with no tick across N pages — the pressure is supposedly building but the engine never advances it), (b) **under-supported critical revelations** (a STSEC.salience: high transitions to revealed with insufficient discovered clue carriers — distinct from the engine pre-apply `critical_secret_clue_coverage_when_revealed` validator from -006 which HARD-REJECTs at commit; the health-audit check is a retrospective bundle-wide diagnostic), and (c) **dropped high-salience setups** (a STQ.salience: high remains open at a terminal page without `terminal_rationale` — distinct from the per-commit `story_question_terminal_debt` validator from -007 which fires at the terminal-commit moment; the health-audit check is the bundle-wide retrospective). Without these checks, authors will not notice stalled mechanisms during health audits, and the new classes will rot in bundles.
 
-## Assumption Reassessment (2026-05-17)
+## Assumption Reassessment (2026-05-18)
 
 <!-- Items 1-3 always required. Items 4+ are a menu; include only those matching this ticket's scope and renumber surviving items sequentially starting from 4. Lists like 1, 2, 3, 14 are malformed output. -->
 
-1. Codebase verified at Step 2 codebase validation (2026-05-17): `.claude/skills/branching-story-health-audit/SKILL.md` exists; existing Phase 2 (structural mode) deterministic checks include 2a (replay/snapshot/choice-consequence), 2b (branch isolation), 2c (debt health), 2d (belief/visibility), 2x (DA health), 2e (mystery/canon), 2f (continuation/terminal proof), 2g (causal dependency), 2h (canon baseline drift) — verified in SPEC-42 brainstorm agent reports. The three new checks fit naturally as sub-checks under existing Phase 2 categories or as net-new sub-checks (decision deferred to implementer based on existing structure).
-2. Spec verified at `specs/SPEC-42-story-state-debt-secret-clock-records.md` §E Phase 1 ("stalled-clock check"), §E Phase 2 ("under-supported-revelation check"), §E Phase 3 ("dropped-setup check"); §Risks "Author abuse — clock proliferation" notes that health-audit should "warn (not block) when CLK count exceeds a threshold per bundle" — this ticket adds the per-bundle CLK-proliferation warning as a fourth check sub-rule alongside the three named structural checks.
-3. Cross-skill / cross-tool shared boundary: `branching-story-health-audit` is a Skill Category 2c skill. The three new checks complement the per-commit validators (-005 / -006 / -007) — validators run at commit time and HARD-REJECT malformed transitions; health-audit checks run at audit time and surface accumulated mechanism rot. The two surfaces compose: a bundle that never violates a per-commit validator can still accumulate stalled clocks (the engine never asked it to tick) or dropped setups (no terminal page was committed). The health-audit predicates use the same predicate DSL from -005 / -006 / -007 (`any_clock_active`, `revelation_ready`, `any_story_question_open`, `promise_due`).
+1. Codebase verified on 2026-05-18: `.claude/skills/branching-story-health-audit/SKILL.md` exists; existing Phase 2 (structural mode) deterministic checks include 2a (replay/snapshot/choice-consequence), 2b (branch isolation), 2c (debt health), 2d (belief/visibility), 2x (DA health), 2e (mystery/canon), 2f (continuation/terminal proof), 2g (causal dependency), and 2h (canon baseline drift). The new checks land as a new Phase 2i so the existing debt, mystery, continuation, and canon-baseline checks remain unaltered.
+2. Spec verified at `specs/SPEC-42-story-state-debt-secret-clock-records.md` §E Phase 1 ("stalled-clock check"), §E Phase 2 ("under-supported-revelation check"), §E Phase 3 ("dropped-setup check"); §Risks "Author abuse — clock proliferation" notes that health-audit should "warn (not block) when CLK count exceeds a threshold per bundle" — this ticket adds the per-bundle CLK-proliferation warning as a fourth Phase 2i sub-rule alongside the three named structural checks.
+3. Cross-skill / cross-tool shared boundary: `branching-story-health-audit` is a Skill Category 2c skill. The three new checks complement the per-commit validators (-005 / -006 / -007) — validators run at commit time and HARD-REJECT malformed transitions; health-audit checks run at audit time and surface accumulated mechanism rot. The two surfaces compose: a bundle that never violates a per-commit validator can still accumulate stalled clocks (the engine never asked it to tick) or dropped setups (no terminal page was committed). The health-audit checks cite the same record classes and semantics from the shared story-state contract (`CLK`, `STSEC`, `STQ`; `tick_history[]`, `clue_carriers[]`, `terminal_rationale`) while remaining warning-only.
 4. FOUNDATIONS §Rule 5 (No Consequence Evasion) motivates the three new checks. Stalled clocks: a clock whose `value` never advances despite being active represents accumulated consequence evasion (the pressure was named but never materialized). Under-supported revelations: a critical secret revealed without clue support represents revelation-from-nowhere, which violates the fair-revelation discipline that motivates Rule 5 + Mystery-Reserve preservation. Dropped setups: a high-salience open STQ at terminal represents an open consequence ignored.
 5. HARD-GATE validator surface: not directly touched — this ticket's checks are health-audit WARNINGS, not engine HARD-REJECTs. The HARD-REJECTs are owned by -005 / -006 / -007 / -008. Mystery Reserve firewall: not directly touched. Hook 3 path-pattern coverage: unchanged.
+6. Proof correction: the drafted "skill dry-run" fixture tests are not executable in the live repo because there is no skill-test runner or fixture harness for `.claude/skills/branching-story-health-audit/SKILL.md`. Acceptance is narrowed to the strongest truthful surface for this skill-only ticket: manual contract review plus grep proof over the skill text and unchanged package boundaries.
 
 ## Architecture Check
 
@@ -29,11 +30,11 @@ Once CLK/STSEC/STQ are in active use across bundles (per the foundation + valida
 
 ## Verification Layers
 
-1. `stalled_clock_check` flags a CLK with `salience: high`, `status: active`, and no `tick_history[]` entries across the last N pages (default N: configurable per-bundle, suggest 5 pages); does NOT flag low/medium-salience or paused/resolved clocks → audit dry-run test
-2. `under_supported_critical_revelation_check` flags a STSEC with `salience: high`, `status: revealed`, and `clue_carriers[].status: discovered` count below the configured minimum (default 2 per -006) at the time of reveal → audit dry-run test
-3. `dropped_high_salience_setup_check` flags a STQ with `salience: high`, `status: open | complicated`, at a terminal page snapshot without `terminal_rationale` naming the STQ → audit dry-run test
-4. `clock_proliferation_warning` (per §Risks) flags a bundle with CLK count exceeding a per-bundle threshold (default: 5 active CLKs; configurable) → audit dry-run test
-5. Audit reports correctly attribute each warning to the responsible record IDs and pages → grep-proof against rendered audit report
+1. `stalled_clock_check` guidance names the exact CLK condition (`salience: high`, `status: active`, no recent `tick_history[]` within default `N=5` pages), exclusions, severity, repair kind, and required cited evidence → manual contract review + grep-proof
+2. `under_supported_critical_revelation_check` guidance names the exact STSEC condition (`salience: high`, `status: revealed`, fewer than 2 discovered `clue_carriers[]` before or at `reveal_event`), severity, repair kind, and required cited evidence → manual contract review + grep-proof
+3. `dropped_high_salience_setup_check` guidance names the exact STQ condition (`salience: high`, `status: open | complicated`, terminal page, missing `terminal_rationale` coverage), severity, repair kind, and required cited evidence → manual contract review + grep-proof
+4. `clock_proliferation_warning` guidance names the active/paused CLK count threshold (default 5), severity, `bundle_advice` repair kind, and required cited evidence → manual contract review + grep-proof
+5. The structural-mode inventory is updated from 9 to 10 sub-phases and includes Phase 2i without changing existing Phase 2a-2h semantics → grep-proof + manual review
 
 ## What to Change
 
@@ -86,11 +87,11 @@ Add a fourth check for CLK over-modeling. The check:
 
 ### Tests That Must Pass
 
-1. Skill dry-run on a fixture bundle with a stalled high-salience CLK: `branching-story-health-audit structural` flags it via `stalled_clock_check` warning
-2. Skill dry-run on a fixture bundle with a revealed high-salience STSEC and fewer than 2 discovered carriers: audit flags it via `under_supported_critical_revelation_check` warning
-3. Skill dry-run on a fixture bundle with a terminal page leaving a high-salience open STQ unaccounted: audit flags it via `dropped_high_salience_setup_check` warning
-4. Skill dry-run on a fixture bundle with 6+ active CLKs: audit flags it via `clock_proliferation_warning` (per SPEC-42 §Risks default threshold 5)
-5. Skill dry-run on a fixture bundle with NO instances of the four failure modes: audit produces no false-positive warnings for the new checks
+1. Grep-proof confirms `.claude/skills/branching-story-health-audit/SKILL.md` contains `stalled_clock_check`, `under_supported_critical_revelation_check`, `dropped_high_salience_setup_check`, and `clock_proliferation_warning`.
+2. Grep-proof confirms the skill now names Phase 2i and "10 structural sub-phases" in its structural-mode inventory.
+3. Manual review confirms each new check is warning-only and emits existing health-audit repair kinds (`branch_flag` for per-branch mechanism rot, `bundle_advice` for clock proliferation), not a HARD-REJECT or new audit mode.
+4. Manual review confirms each new check is conditional on the corresponding record class being present, so bundles without CLK/STSEC/STQ records are not flagged for absence.
+5. `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md archive/tickets/SPEC42STOSTADEB-012.md` passes.
 
 ### Invariants
 
@@ -103,10 +104,29 @@ Add a fourth check for CLK over-modeling. The check:
 
 ### New/Modified Tests
 
-1. Skill-level fixture tests (path depends on existing health-audit test structure; confirm at edit time) — fixtures covering: stalled CLK, under-supported critical STSEC reveal, dropped high-salience STQ at terminal, clock proliferation, and a clean bundle (no false positives)
+1. None — skill-only guidance change with no executable skill-test harness in the live repo. Verification is manual contract review plus grep-proof over the changed skill and ticket.
 
 ### Commands
 
-1. Skill dry-run (manual or via skill-test harness if available): invoke `branching-story-health-audit structural` on each fixture bundle and inspect the produced audit report for the expected warnings (or their absence in the clean bundle)
-2. `npm test --prefix tools/validators` (regression — confirms the existing per-commit validators continue to fire correctly; health-audit checks are a different surface)
-3. The full-pipeline verification command lands in SPEC42STOSTADEB-015 capstone
+1. `rg -n 'stalled_clock_check|under_supported_critical_revelation_check|dropped_high_salience_setup_check|clock_proliferation_warning|Phase 2i|10 structural sub-phases|bundle_advice' .claude/skills/branching-story-health-audit/SKILL.md`
+2. `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md archive/tickets/SPEC42STOSTADEB-012.md`
+3. Manual contract review against `docs/FOUNDATIONS.md` §Story Bundles §5 / §5c, `.claude/skills/_shared-templates/story-state-contract.md`, and `.claude/skills/_shared-templates/story-record-schemas.md` confirms the added warning guidance matches the landed CLK/STSEC/STQ schemas and does not alter HARD-GATE or validator behavior.
+4. The full-pipeline executable verification remains owned by `tickets/SPEC42STOSTADEB-015.md`.
+
+## Outcome
+
+Completed: 2026-05-18
+
+What changed:
+- `.claude/skills/branching-story-health-audit/SKILL.md` now treats structural mode as 10 sub-phases and adds Phase 2i for CLK / STSEC / STQ mechanism health.
+- Phase 2i defines warning-only audit checks for stalled high-salience clocks, under-supported high-salience secret revelations, dropped high-salience open setups at terminal pages, and clock proliferation.
+- The health-audit prerequisites now include CLK, STSEC, and STQ records in the class set read by Phase 2.
+
+Deviations from original plan:
+- No executable skill dry-run or fixture harness exists for this prose skill in the live repo. Verification was narrowed to manual contract review plus grep/hygiene proof.
+- No `tools/validators` regression run was needed because the ticket changed only `.claude/skills/branching-story-health-audit/SKILL.md`; per-commit validators are owned by earlier tickets and unchanged here.
+
+Verification results:
+- `rg -n 'stalled_clock_check|under_supported_critical_revelation_check|dropped_high_salience_setup_check|clock_proliferation_warning|Phase 2i|10 structural sub-phases|bundle_advice' .claude/skills/branching-story-health-audit/SKILL.md` showed the four new warning ids, Phase 2i, the updated 10-sub-phase inventory, and `bundle_advice`.
+- `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md archive/tickets/SPEC42STOSTADEB-012.md` passed.
+- Manual review against `docs/FOUNDATIONS.md` §Story Bundles §5 / §5c and the shared story record schemas confirmed the checks are warning-only, conditional on record presence, and use landed CLK/STSEC/STQ fields.

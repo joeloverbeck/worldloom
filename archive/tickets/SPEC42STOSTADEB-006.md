@@ -98,7 +98,7 @@ Modify `tools/validators/src/public/registry.ts` to register the 3 new STSEC val
 - Per-STSEC `coverage_policy.minimum_clues_required: <integer ≥ 1>` override field (SPEC-42 §Risks open question) — deferred to a follow-up decision; this ticket implements the default-2 structural minimum only
 - Storylet authoring extensions consuming new STSEC predicates — owned by archive/tickets/SPEC42STOSTADEB-011.md
 - Turn-cycle integration consuming new STSEC predicates at runtime — owned by SPEC42STOSTADEB-009
-- Health-audit "under-supported revelation" check (uses `revelation_ready` predicate; complementary to this ticket's validator) — owned by SPEC42STOSTADEB-012
+- Health-audit "under-supported revelation" check (uses `revelation_ready` predicate; complementary to this ticket's validator) — landed in `archive/tickets/SPEC42STOSTADEB-012.md`
 
 ## Acceptance Criteria
 

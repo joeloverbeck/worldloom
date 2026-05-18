@@ -28,7 +28,7 @@ At intake, archive/tickets/SPEC42STOSTADEB-003.md had landed the STQ class found
 1. **Per-class validator cohesion**: STQ's 4 validators all enforce STQ-specific invariants. Bundling them keeps STQ-specific structural-defense logic reviewable as a unit.
 2. **Validators complement schema-level §5c discipline**: archive/tickets/SPEC42STOSTADEB-003.md's schema-level `additionalProperties: false` + `record_schema_compliance` HARD-REJECT catch *authoring-time* mistakes (someone trying to add a prohibited field). This ticket's validators catch *state-evolution* mistakes (someone trying to link a payoff to a setup that doesn't precede it in the branch path, or trying to terminal-commit with high-salience open STQs). Two-layer defense parallels archive/tickets/SPEC42STOSTADEB-003.md §3.
 3. **`story_question_terminal_debt` mirrors `clock_terminal_debt_integrity` from -005**: both enforce Rule 5 at terminal-page commits; same branch-walk pattern, same high-salience-required threshold; reviewer can cross-reference for consistency.
-4. **Predicates ship alongside their validators**: the 4 STQ predicates are consumed at storylet-eligibility time; `promise_due(STQ-<int>, age_pages)` in particular is consumed by `branching-story-health-audit`'s dropped-setup detection (owned by SPEC42STOSTADEB-012).
+4. **Predicates ship alongside their validators**: the 4 STQ predicates are consumed at storylet-eligibility time; `promise_due(STQ-<int>, age_pages)` in particular is consumed by `branching-story-health-audit`'s dropped-setup detection (landed in `archive/tickets/SPEC42STOSTADEB-012.md`).
 
 ## Verification Layers
 
@@ -110,7 +110,7 @@ Modified `tools/validators/src/_helpers/index-access.ts` so pre-apply validation
 - Shared validator extensions — owned by SPEC42STOSTADEB-008
 - Storylet authoring extensions consuming new STQ predicates — owned by archive/tickets/SPEC42STOSTADEB-011.md
 - Turn-cycle integration consuming new STQ predicates at runtime — owned by SPEC42STOSTADEB-009
-- Health-audit "dropped high-salience setup" check (uses `story_question_terminal_debt` validator output) — owned by SPEC42STOSTADEB-012
+- Health-audit "dropped high-salience setup" check (uses `story_question_terminal_debt` validator output) — landed in `archive/tickets/SPEC42STOSTADEB-012.md`
 
 ## Acceptance Criteria
 

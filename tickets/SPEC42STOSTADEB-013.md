@@ -64,7 +64,7 @@ If the prose-receipt schema (`pages-prose-receipts/PG-<integer>.yaml`) has a str
 - Turn-cycle integration producing the SE.state_delta entries this ticket inspects — landed in `archive/tickets/SPEC42STOSTADEB-009.md`
 - Bootstrap optional seeding — owned by SPEC42STOSTADEB-010
 - Commitment-block-authoring extension — owned by archive/tickets/SPEC42STOSTADEB-011.md
-- Health-audit bundle-wide checks — owned by SPEC42STOSTADEB-012
+- Health-audit bundle-wide checks — landed in `archive/tickets/SPEC42STOSTADEB-012.md`
 - STQ-specific prose verification (per SPEC-42 §E Phase 4 names CLK and STSEC; STQ has no equivalent prose-verification requirement in the spec)
 - Semantic-match refinement for keyword-based heuristics (deferred to future tickets if the v1 heuristic proves insufficient)
 
