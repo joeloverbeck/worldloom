@@ -1,0 +1,79 @@
+fixture_id: spec43-midstory-lifecycle-still-valid
+world_slug: synthetic-world
+story_slug: midstory-introduction-test
+story_id: STORY-1
+expected_verdict: pass
+cases:
+  - case_id: existing-clock-tick
+    note: Existing clock lifecycle updates remain valid and must not require intro tags.
+    event:
+      node_type: story_event_record
+      node_id: midstory-introduction-test:SE-2
+      file_path: stories/midstory-introduction-test/_source/events/SE-2.yaml
+      parsed:
+        id: SE-2
+        story_id: STORY-1
+        created_at_page: PG-2
+        parent_page_id: PG-1
+        event_kind: selected_choice
+        actor: STENT-1
+        commitment:
+          selected_slt_id: SLT-2
+          selection_source: emitted_choice
+          alias_bindings: { actor: STENT-1 }
+        outcome_route: accept
+        world_logic_rationale: Existing CLK-1 ticks because time passes; no new record is introduced.
+        state_delta: { create: [], supersede: [CLK-1], close: [] }
+    record:
+      node_type: pressure_clock_record
+      node_id: midstory-introduction-test:CLK-1
+      file_path: stories/midstory-introduction-test/_source/clocks/CLK-1.yaml
+      parsed:
+        id: CLK-1
+        story_id: STORY-1
+        created_at_page: PG-1
+        title: Gate deadline
+        clock_kind: deadline
+        driver: group:gate_watch
+        linked_records: [OBL-1]
+        value: 2
+        max: 6
+        salience: high
+        visibility: public
+        thresholds: []
+        tick_history: [{ event: SE-2, delta: 1, cause: "Mara delayed at the gate." }]
+        status: active
+  - case_id: existing-entity-status-update
+    note: Existing entity status supersession does not trigger STENT introduction pairing.
+    event:
+      node_type: story_event_record
+      node_id: midstory-introduction-test:SE-3
+      file_path: stories/midstory-introduction-test/_source/events/SE-3.yaml
+      parsed:
+        id: SE-3
+        story_id: STORY-1
+        created_at_page: PG-2
+        parent_page_id: PG-1
+        event_kind: selected_choice
+        actor: STENT-1
+        commitment:
+          selected_slt_id: SLT-3
+          selection_source: emitted_choice
+          alias_bindings: { actor: STENT-1 }
+        outcome_route: accept
+        world_logic_rationale: Existing STENT-1 changes agency; no new STENT appears in create.
+        state_delta: { create: [], supersede: [STSTAT-1], close: [] }
+    record:
+      node_type: story_status_record
+      node_id: midstory-introduction-test:STSTAT-2
+      file_path: stories/midstory-introduction-test/_source/status/STSTAT-2.yaml
+      parsed:
+        id: STSTAT-2
+        story_id: STORY-1
+        created_at_page: PG-2
+        supersedes: STSTAT-1
+        entity: STENT-1
+        life: alive
+        agency: constrained
+        location: STLOC-1
+        derived_from: [SE-3]

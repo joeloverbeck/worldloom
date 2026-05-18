@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/story-question-introduction-grounding-integrity.ts` (STQ-specific introduction gate; extends or runs alongside existing `story-question-grounding-integrity.ts`). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
-**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, 002, 003
+**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, archive/tickets/SPEC43PRECAUSTO-002.md, 003
 
 ## Problem
 
@@ -27,7 +27,7 @@ SPEC-43 §Approach D Table row 4 + §Approach C STQ rules + spec §Verification 
 ## Verification Layers
 
 1. Validator registration → codebase grep-proof: `grep -n "storyQuestionIntroductionGroundingIntegrity\|story_question_introduction_grounding_integrity" tools/validators/src/public/registry.ts` returns import + array entry.
-2. Class-specific grounding enforcement → schema validation: ticket 002's `creation-pass/stq-promise-made/` fixture passes; `creation-fail/stq-source-event-mismatch/` fixture (where source_event points to an earlier SE, not the creating one) emits `stq_intro_source_event_mismatch`.
+2. Class-specific grounding enforcement → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `creation-pass/all-classes.yaml` `STQ-1` case passes; `creation-fail/failure-cases.yaml` `stq-source-event-mismatch` case (where `source_event` points to an earlier SE, not the creating one) emits `stq_intro_source_event_mismatch`.
 3. Composition with existing STQ validators → schema validation: a fixture that passes this validator continues to pass `story_question_grounding_integrity` + `story_question_payoff_integrity` + `story_question_setup_predates_payoff` (those validators are out of scope here).
 4. FOUNDATIONS §5c alignment → FOUNDATIONS alignment check: the validator never references future-shape predicates; STQ.setup_kind enum is preserved per existing schema.
 

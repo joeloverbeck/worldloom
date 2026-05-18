@@ -166,7 +166,7 @@ The new mid-story-introduction validators are per-commit gates in **Phase 9 of t
 - `tools/validators/src/structural/compatibility-drift.ts` (`info` / `warn` only for Wave 2).
 - `tools/validators/src/structural/_shared/midstory-introduction-tag-parser.ts` (exported tag parser utility + tests).
 - Updated `snapshot_replay_equality` / `state_snapshot_integrity` validators to normalize missing optional-class keys to `[]` on parent PG reads.
-- Synthetic fixture bundle exercising all six mid-story creation classes + old-style PG snapshot grandfathering + future-shape rejection + observer-firewall enforcement (under `tools/validators/test/fixtures/`).
+- Synthetic fixture bundle exercising all six mid-story creation classes + old-style PG snapshot grandfathering + future-shape rejection + observer-firewall enforcement (under `tools/validators/tests/fixtures/midstory-introduction/`).
 
 ---
 

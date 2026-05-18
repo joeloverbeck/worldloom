@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/introduction-observer-firewall.ts` (Wave 2 explicit-reference scope: gates choices grounded in freshly-introduced records through the existing `observer-firewall.ts` access-route check). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
-**Deps**: 002, 003
+**Deps**: archive/tickets/SPEC43PRECAUSTO-002.md, 003
 
 ## Problem
 
@@ -27,7 +27,7 @@ SPEC-43 §Approach D Table row 8 + §Approach H Phase 9 / Phase 2i clarification
 ## Verification Layers
 
 1. Validator registration → codebase grep-proof: `grep -n "introductionObserverFirewall\|introduction_observer_firewall" tools/validators/src/public/registry.ts` returns import + array entry.
-2. Access-route enforcement → schema validation: ticket 002's `creation-pass/observer-firewall-pass/` fixture (CHC grounded in fresh STSEC, with acting entity having a BEL or clue-carrier access route) passes; `creation-fail/observer-firewall-fail/` fixture (CHC grounded in fresh STSEC, no BEL / DA / institutional access for the actor) emits `intro_observer_no_access_route`.
+2. Access-route enforcement → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `creation-pass/all-classes.yaml` `CHC-1` / `STSEC-1` access-route case passes; `creation-fail/failure-cases.yaml` `observer-firewall-no-access` case (CHC grounded in fresh STSEC, no BEL / DA / institutional access for the actor) emits `intro_observer_no_access_route`.
 3. Composition with existing observer-firewall → schema validation: a CHC grounded in an EXISTING (not freshly-introduced) record continues to be gated by `observer-firewall.ts`; the new validator does not double-fire.
 4. FOUNDATIONS §6b alignment → FOUNDATIONS alignment check: every CHC `grounded_in.records[]` reference to a fresh-record id must have a recorded access route per the existing observer-firewall access-route taxonomy.
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/entity-introduction-status-pairing.ts` (STENT-specific introduction gate enforcing same-event STSTAT pairing). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
-**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, 002, 003
+**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, archive/tickets/SPEC43PRECAUSTO-002.md, 003
 
 ## Problem
 
@@ -27,8 +27,8 @@ SPEC-43 §Approach D Table row 6 + §Approach C STENT rules + spec §Verificatio
 ## Verification Layers
 
 1. Validator registration → codebase grep-proof: `grep -n "entityIntroductionStatusPairing\|entity_introduction_status_pairing" tools/validators/src/public/registry.ts` returns import + array entry.
-2. Class-specific pairing enforcement → schema validation: ticket 002's `creation-pass/stent-courier-enters/` fixture (new STENT + paired STSTAT in same SE) passes; `creation-fail/stent-without-status/` fixture (new STENT, no paired STSTAT) emits `entity_intro_missing_status`.
-3. No over-firing on existing-entity updates → schema validation: ticket 002's `lifecycle-still-valid/existing-entity-status-update/` fixture (no new STENT, only STSTAT update) → 0 failures (validator's precondition correctly excludes this case).
+2. Class-specific pairing enforcement → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `creation-pass/all-classes.yaml` `STENT-3` + `STSTAT-3` case passes; `creation-fail/failure-cases.yaml` `stent-without-status` case emits `entity_intro_missing_status`.
+3. No over-firing on existing-entity updates → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `lifecycle-still-valid/lifecycle-cases.yaml` `existing-entity-status-update` case (no new STENT, only STSTAT update) → 0 failures (validator's precondition correctly excludes this case).
 4. FOUNDATIONS §5c alignment → FOUNDATIONS alignment check: validator enforces immediate agency-bearing for fresh entities; never asks about outline importance.
 
 ## What to Change

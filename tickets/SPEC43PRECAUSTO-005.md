@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/secret-introduction-anchor-integrity.ts` (STSEC-specific introduction gate enforcing the first-lie rule + Mystery Reserve firewall preservation). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
-**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, 002, 003
+**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, archive/tickets/SPEC43PRECAUSTO-002.md, 003
 
 ## Problem
 
@@ -27,7 +27,7 @@ SPEC-43 §Approach D Table row 3 + §Approach C STSEC rules + the §6a "first li
 ## Verification Layers
 
 1. Validator registration → codebase grep-proof: `grep -n "secretIntroductionAnchorIntegrity\|secret_introduction_anchor_integrity" tools/validators/src/public/registry.ts` returns import + array entry.
-2. Class-specific grounding enforcement → schema validation: ticket 002's `creation-pass/stsec-first-revealable-secret/` fixture passes; `creation-fail/stsec-author-only-future-twist/` fixture (no source records / holder / clue carrier / truth anchor) emits `secret_intro_missing_source` or `secret_intro_holder_missing`.
+2. Class-specific grounding enforcement → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `creation-pass/all-classes.yaml` `STSEC-1` case passes; `creation-fail/failure-cases.yaml` `author-only-future-twist-secret` case (no source records / usable truth anchor) emits `secret_intro_missing_source`, `secret_intro_truth_anchor_missing`, or the equivalent named failure code per SPEC-43 §Approach D Table.
 3. Mystery Reserve firewall preservation → FOUNDATIONS alignment check: a fixture where `protected_mystery_refs[]` references an MR entry passes both this validator AND `secret_mystery_firewall_compliance.ts`; a fixture that silently resolves an MR entry (without proper firewall handling) is caught by the existing firewall validator (separate ticket scope; out of scope here).
 4. First-lie rule alignment → manual review: the validator does NOT enforce BEL creation (authoring discipline); reviewer confirms the test fixtures correctly exercise the boundary (a fixture where a lie is told and ONLY a BEL is created should pass schema validation; a fixture where an STSEC is created for that lie must satisfy this validator's grounding requirements).
 

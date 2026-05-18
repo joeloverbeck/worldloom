@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/validators/src/structural/midstory-record-introduction-grounding.ts` (generic introduction validator gating any mid-story-created CLK / STSEC / STQ / THR / STENT / SREL via the `intro:<CLASS>(...)` tag from ticket 001). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets; see Step 6.5 overlap note).
-**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, 002
+**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, archive/tickets/SPEC43PRECAUSTO-002.md
 
 ## Problem
 
@@ -27,7 +27,7 @@ SPEC-43 §Approach D's first validator entry — `midstory_record_introduction_g
 ## Verification Layers
 
 1. Validator registration → codebase grep-proof: `grep -n "midstoryRecordIntroductionGrounding\|midstory_record_introduction_grounding" tools/validators/src/public/registry.ts` returns the import + array entry.
-2. Generic grounding gate enforcement → schema validation: ticket 002's `creation-pass/` fixtures pass (returns no failures); ticket 002's `creation-fail/` fixtures for "tag missing" / "evidence id absent" / "state_delta membership missing" fail with the expected failure codes.
+2. Generic grounding gate enforcement → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `creation-pass/all-classes.yaml` cases pass (returns no failures); `creation-fail/failure-cases.yaml` cases for `missing-intro-tag`, `intro-evidence-missing`, and `created-at-mismatch` fail with the expected failure codes.
 3. Tag-parser composition → schema validation: validator calls `parseIntroTag()` from `midstory-introduction-utils.ts` (ticket 001); malformed tags surface `midstory_intro_missing_tag` (not a separate parse-error code).
 4. FOUNDATIONS §5c + §5a alignment → FOUNDATIONS alignment check: the four checks enforce same-event authority + present-causal grounding without referencing any future-shape predicate.
 

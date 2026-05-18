@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/relationship-introduction-grounding-integrity.ts` (SREL-specific introduction gate). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
-**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, 002, 003
+**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, archive/tickets/SPEC43PRECAUSTO-002.md, 003
 
 ## Problem
 
@@ -27,8 +27,8 @@ SPEC-43 §Approach D Table row 7 + §Approach C SREL rules + spec §Verification
 ## Verification Layers
 
 1. Validator registration → codebase grep-proof: `grep -n "relationshipIntroductionGroundingIntegrity\|relationship_introduction_grounding_integrity" tools/validators/src/public/registry.ts` returns import + array entry.
-2. Class-specific grounding enforcement → schema validation: ticket 002's `creation-pass/srel-oath-of-loyalty/` fixture passes; `creation-fail/srel-participant-inactive/` fixture (SREL participant not in parent + not in same-event create[]) emits `srel_intro_participant_inactive`.
-3. Believed-only relationship handling → schema validation: ticket 002's `creation-fail/srel-believed-only/` fixture (one actor merely suspects a relationship — derived_from references only a BEL with `truth_relation: unknown` or `contested`) → warn-level finding (per SPEC-43 §Approach D Table: "fail/warn" — implementation choice; recommend warn-level when only BEL grounding exists and the truth is uncertain).
+2. Class-specific grounding enforcement → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `creation-pass/all-classes.yaml` `SREL-1` case passes; `creation-fail/failure-cases.yaml` `srel-participant-inactive` case emits `srel_intro_participant_inactive`.
+3. Believed-only relationship handling → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `creation-fail/failure-cases.yaml` `believed-only-relationship` case → warn-level finding (per SPEC-43 §Approach D Table: "fail/warn" — implementation choice; recommend warn-level when only BEL grounding exists and the truth is uncertain).
 4. FOUNDATIONS §5c alignment → FOUNDATIONS alignment check: validator enforces present-causal grounding; never asks about planned emotional trajectory.
 
 ## What to Change

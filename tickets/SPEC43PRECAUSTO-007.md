@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/thread-introduction-grounding-integrity.ts` (THR-specific introduction gate). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
-**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, 002, 003
+**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, archive/tickets/SPEC43PRECAUSTO-002.md, 003
 
 ## Problem
 
@@ -27,7 +27,7 @@ SPEC-43 §Approach D Table row 5 + §Approach C THR rules + spec §Verification 
 ## Verification Layers
 
 1. Validator registration → codebase grep-proof: `grep -n "threadIntroductionGroundingIntegrity\|thread_introduction_grounding_integrity" tools/validators/src/public/registry.ts` returns import + array entry.
-2. Class-specific grounding enforcement → schema validation: ticket 002's `creation-pass/thr-investigation-line-opened/` fixture passes; `creation-fail/thr-thematic-no-grounding/` fixture (thread titled "the corruption arc" with empty derived_from) emits `thread_intro_missing_derived_from`.
+2. Class-specific grounding enforcement → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `creation-pass/all-classes.yaml` `THR-1` case passes; `creation-fail/failure-cases.yaml` `thematic-thread` case (thread titled as a thematic arc with empty `derived_from`) emits `thread_intro_missing_derived_from` or `thread_intro_grounding_missing`.
 3. Composition with generic gate → schema validation: a fixture failing generic grounding surfaces ticket 003's codes; a fixture failing THR-specific grounding surfaces this validator's codes.
 4. FOUNDATIONS §5c alignment → FOUNDATIONS alignment check: validator never inspects thematic content (the rule is "derived_from non-empty AND grounded", not "title doesn't contain 'arc'"); §5c discipline is enforced through structural grounding requirements, not through text-mining.
 

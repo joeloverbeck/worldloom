@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/clock-introduction-grounding-integrity.ts` (CLK-specific introduction gate). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
-**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, 002, 003
+**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, archive/tickets/SPEC43PRECAUSTO-002.md, 003
 
 ## Problem
 
@@ -27,7 +27,7 @@ SPEC-43 §Approach D Table row 2 + §Approach C CLK rules + spec §Verification 
 ## Verification Layers
 
 1. Validator registration → codebase grep-proof: `grep -n "clockIntroductionGroundingIntegrity\|clock_introduction_grounding_integrity" tools/validators/src/public/registry.ts` returns import + array entry.
-2. Class-specific grounding enforcement → schema validation: ticket 002's `creation-pass/clk-deadline-declared/` fixture passes; `creation-fail/clk-vague-pressure/` fixture emits `clock_intro_missing_grounding_link` (or the equivalent named failure code per SPEC-43 §Approach D Table).
+2. Class-specific grounding enforcement → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `creation-pass/all-classes.yaml` `CLK-1` case passes; `creation-fail/failure-cases.yaml` `vague-pressure-clock` case emits `clock_intro_missing_grounding_link` (or the equivalent named failure code per SPEC-43 §Approach D Table).
 3. Composition with generic gate → schema validation: a fixture failing generic grounding (e.g., missing tag) surfaces ticket-003's failure code; a fixture failing CLK-specific grounding (e.g., missing driver) surfaces this validator's failure code; both codes can coexist on a fixture failing both gates.
 4. FOUNDATIONS §5c alignment → FOUNDATIONS alignment check: no future-shape predicates referenced (no `expected_payoff_mode`, no act position, no climax — those are validated by ticket 010's `narrative_shape_field_rejection`).
 

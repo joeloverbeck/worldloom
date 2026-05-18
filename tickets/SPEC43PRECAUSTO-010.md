@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/narrative-shape-field-rejection.ts` (extends per-class prohibition of narrative-shape fields beyond the existing STQ-only check at `record-schema-compliance.ts:177-193` to CLK / STSEC / THR / SREL / STENT). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
-**Deps**: 002
+**Deps**: archive/tickets/SPEC43PRECAUSTO-002.md
 
 ## Problem
 
@@ -27,7 +27,7 @@ SPEC-43 §Approach D Table row 9 + §Approach C non-goals + spec §Verification 
 ## Verification Layers
 
 1. Validator registration → codebase grep-proof: `grep -n "narrativeShapeFieldRejection\|narrative_shape_field_rejection" tools/validators/src/public/registry.ts` returns import + array entry.
-2. Per-class prohibition enforcement → schema validation: ticket 002's `narrative-shape-fail/` fixtures (one per class with a prohibited field — CLK with `expected_payoff_mode`, STSEC with `midpoint`, etc.) each emit `narrative_shape_forbidden_field`.
+2. Per-class prohibition enforcement → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `narrative-shape-fail/prohibited-fields.yaml` cases (one per class with a prohibited field — CLK with `expected_payoff_mode`, STSEC with `act_position`, etc.) each emit `narrative_shape_forbidden_field`.
 3. STQ prohibition preserved → schema validation: existing `record_schema_compliance` STQ tests continue to pass (the new validator does not duplicate or override the existing STQ-only gate).
 4. FOUNDATIONS §5c alignment → FOUNDATIONS alignment check: prohibited-field list matches `story-record-schemas.md:720-731` STQ prohibition + extends to CLK/STSEC/THR/SREL/STENT.
 

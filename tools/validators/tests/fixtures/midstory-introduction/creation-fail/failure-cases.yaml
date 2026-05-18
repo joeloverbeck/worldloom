@@ -1,0 +1,182 @@
+fixture_id: spec43-midstory-creation-fail-cases
+world_slug: synthetic-world
+story_slug: midstory-introduction-test
+story_id: STORY-1
+cases:
+  - case_id: missing-intro-tag
+    target_validator: midstory_record_introduction_grounding
+    expected_verdict: { severity: fail, code: midstory_intro_missing_tag }
+    creating_event:
+      state_delta: { create: [THR-91], supersede: [], close: [] }
+      world_logic_rationale: A new investigation line opens, but no parseable intro tag is present.
+  - case_id: intro-evidence-missing
+    target_validator: midstory_record_introduction_grounding
+    expected_verdict: { severity: fail, code: midstory_intro_evidence_missing }
+    creating_event:
+      state_delta: { create: [THR-92], supersede: [], close: [] }
+      world_logic_rationale: "intro:THR(id=THR-92, trigger=investigation_line_opened, evidence=[BEL-404], distinct_from=[])"
+  - case_id: created-at-mismatch
+    target_validator: midstory_record_introduction_grounding
+    expected_verdict: { severity: fail, code: midstory_intro_created_at_mismatch }
+    creating_event:
+      created_at_page: PG-2
+      state_delta: { create: [THR-93], supersede: [], close: [] }
+      world_logic_rationale: "intro:THR(id=THR-93, trigger=investigation_line_opened, evidence=[SE-2], distinct_from=[])"
+    record:
+      node_type: story_thread_record
+      node_id: midstory-introduction-test:THR-93
+      file_path: stories/midstory-introduction-test/_source/threads/THR-93.yaml
+      parsed:
+        id: THR-93
+        story_id: STORY-1
+        created_at_page: PG-3
+        status: active
+        title: Wrong page thread
+        summary: The record is tagged by a PG-2 event but claims PG-3.
+        urgency: medium
+        derived_from: [SE-2]
+  - case_id: vague-pressure-clock
+    target_validator: clock_introduction_grounding_integrity
+    expected_verdict: { severity: fail, code: clock_intro_missing_grounding_link }
+    record:
+      node_type: pressure_clock_record
+      node_id: midstory-introduction-test:CLK-99
+      file_path: stories/midstory-introduction-test/_source/clocks/CLK-99.yaml
+      parsed:
+        id: CLK-99
+        story_id: STORY-1
+        created_at_page: PG-2
+        title: Tension rises
+        clock_kind: danger
+        driver: unknown
+        linked_records: []
+        value: 1
+        max: 4
+        salience: high
+        visibility: hidden
+        thresholds: []
+        tick_history: [{ event: SE-2, delta: 1, cause: "The story needs pressure." }]
+        status: active
+  - case_id: author-only-future-twist-secret
+    target_validator: secret_introduction_anchor_integrity
+    expected_verdict: { severity: fail, code: secret_intro_truth_anchor_missing }
+    record:
+      node_type: story_secret_record
+      node_id: midstory-introduction-test:STSEC-99
+      file_path: stories/midstory-introduction-test/_source/secrets/STSEC-99.yaml
+      parsed:
+        id: STSEC-99
+        story_id: STORY-1
+        created_at_page: PG-2
+        secret_kind: event_cause
+        secret_claim: A future betrayal will eventually matter.
+        truth_anchor: null
+        holders: [narrator]
+        salience: high
+        source_records: []
+        status: hidden
+  - case_id: stent-without-status
+    target_validator: entity_introduction_status_pairing
+    expected_verdict: { severity: fail, code: entity_intro_missing_status }
+    creating_event:
+      state_delta: { create: [STENT-99], supersede: [], close: [] }
+      world_logic_rationale: "intro:STENT(id=STENT-99, trigger=actor_enters_branch, evidence=[SE-99], distinct_from=[STENT-1])"
+    record:
+      node_type: story_entity_record
+      node_id: midstory-introduction-test:STENT-99
+      file_path: stories/midstory-introduction-test/_source/entities/STENT-99.yaml
+      parsed:
+        id: STENT-99
+        story_id: STORY-1
+        created_at_page: PG-2
+        display_name: Unlocated Stranger
+        role_in_story: [background]
+  - case_id: stq-source-event-mismatch
+    target_validator: story_question_introduction_grounding_integrity
+    expected_verdict: { severity: fail, code: stq_intro_source_event_mismatch }
+    creating_event:
+      id: SE-2
+      state_delta: { create: [STQ-98], supersede: [], close: [] }
+      world_logic_rationale: "intro:STQ(id=STQ-98, trigger=explicit_question_raised, evidence=[DA-1], distinct_from=[])"
+    record:
+      node_type: story_question_record
+      node_id: midstory-introduction-test:STQ-98
+      file_path: stories/midstory-introduction-test/_source/story-questions/STQ-98.yaml
+      parsed:
+        id: STQ-98
+        story_id: STORY-1
+        created_at_page: PG-2
+        setup_kind: dramatic_question
+        question_or_setup: Why did the old courier vanish?
+        salience: high
+        audience_visibility: explicit
+        source_event: SE-1
+        source_records: [DA-1]
+        status: open
+  - case_id: srel-participant-inactive
+    target_validator: relationship_introduction_grounding_integrity
+    expected_verdict: { severity: fail, code: srel_intro_participant_inactive }
+    record:
+      node_type: story_relationship_record
+      node_id: midstory-introduction-test:SREL-98
+      file_path: stories/midstory-introduction-test/_source/relationships/SREL-98.yaml
+      parsed:
+        id: SREL-98
+        story_id: STORY-1
+        created_at_page: PG-2
+        axis: debt
+        participants: [STENT-1, STENT-404]
+        direction: { kind: directed, from: STENT-1, to: STENT-404 }
+        value: low
+        valence: asymmetric
+        description: A debt relation names a participant absent from parent and same-event create state.
+        derived_from: [SE-2]
+  - case_id: believed-only-relationship
+    target_validator: relationship_introduction_grounding_integrity
+    expected_verdict: { severity: warn, code: srel_intro_missing_derived_from }
+    record:
+      node_type: story_relationship_record
+      node_id: midstory-introduction-test:SREL-99
+      file_path: stories/midstory-introduction-test/_source/relationships/SREL-99.yaml
+      parsed:
+        id: SREL-99
+        story_id: STORY-1
+        created_at_page: PG-2
+        axis: trust
+        participants: [STENT-1, STENT-2]
+        direction: { kind: bidirectional, from: null, to: null }
+        value: high
+        valence: bidirectional
+        description: Mara only believes the pair are allies; no objective relation has formed.
+        derived_from: []
+  - case_id: thematic-thread
+    target_validator: thread_introduction_grounding_integrity
+    expected_verdict: { severity: fail, code: thread_intro_grounding_missing }
+    record:
+      node_type: story_thread_record
+      node_id: midstory-introduction-test:THR-99
+      file_path: stories/midstory-introduction-test/_source/threads/THR-99.yaml
+      parsed:
+        id: THR-99
+        story_id: STORY-1
+        created_at_page: PG-2
+        status: active
+        title: Trust becomes complicated
+        summary: A thematic arc label with no concrete causal source.
+        urgency: medium
+        derived_from: []
+  - case_id: observer-firewall-no-access
+    target_validator: introduction_observer_firewall
+    expected_verdict: { severity: fail, code: intro_observer_no_access_route }
+    record:
+      node_type: story_choice_record
+      node_id: midstory-introduction-test:CHC-99
+      file_path: stories/midstory-introduction-test/_source/choices/CHC-99.yaml
+      parsed:
+        id: CHC-99
+        story_id: STORY-1
+        created_at_page: PG-2
+        label: Act on the hidden second gate.
+        available_to: [STENT-2]
+        grounded_in: { records: [STSEC-1] }
+        action_family: investigate

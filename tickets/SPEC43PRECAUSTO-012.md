@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/validators/src/structural/compatibility-drift.ts` (info/warn severities for Wave 2; fail deferred to Wave 3). Modifies existing `tools/validators/src/structural/snapshot-replay-equality.ts` and `tools/validators/src/structural/state-snapshot-integrity.ts` to normalize missing CLK / STSEC / STQ / DA keys on parent PG reads to empty arrays. Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
-**Deps**: 002
+**Deps**: archive/tickets/SPEC43PRECAUSTO-002.md
 
 ## Problem
 
@@ -27,8 +27,8 @@ SPEC-43 §Approach E + §Approach F + spec §Verification ("Old-style `PG.active
 ## Verification Layers
 
 1. Validator registration → codebase grep-proof: `grep -n "compatibilityDrift\|compatibility_drift" tools/validators/src/public/registry.ts` returns import + array entry.
-2. Drift detection → schema validation: ticket 002's `compatibility/pre-spec42-bundle/` fixture (missing subdirs + missing keys) emits `compat_missing_active_record_key` (info) + `compat_optional_directory_absent` (info); a fixture where a NEW PG (post-SPEC-43) omits CLK/STSEC/STQ keys without grandfathered-parent explanation emits `compat_requires_migration_patch` (warn).
-3. Snapshot normalization → schema validation: ticket 002's `compatibility/old-style-pg-snapshot/` fixture's parent PG (missing CLK/STSEC/STQ/DA keys) is read by `snapshot-replay-equality.ts` as if those keys were `[]`; replay succeeds (no parent-PG rewrite, no validator failure).
+2. Drift detection → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `compatibility/legacy-snapshot.yaml` fixture (missing optional subdirs + missing parent keys) emits `compat_missing_active_record_key` (info) + `compat_optional_directory_absent` (info); a fixture where a NEW PG (post-SPEC-43) omits CLK/STSEC/STQ keys without grandfathered-parent explanation emits `compat_requires_migration_patch` (warn).
+3. Snapshot normalization → schema validation: `archive/tickets/SPEC43PRECAUSTO-002.md`'s `compatibility/legacy-snapshot.yaml` parent PG (missing CLK/STSEC/STQ/DA keys) is read by `snapshot-replay-equality.ts` as if those keys were `[]`; replay succeeds (no parent-PG rewrite, no validator failure).
 4. Red-bunny pass → integration: ticket 017's capstone test runs `world-validate --story red-bunny` and verifies clean exit + compatibility-mode audit emits expected classifications.
 
 ## What to Change
