@@ -3,8 +3,8 @@
 **Status**: PENDING
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — new structural validator `page_affordance_integrity` registered in `tools/validators/src/public/registry.ts`; consumes the `$defs.PageAffordance` schema component extracted in ticket SPEC44STOSTAAPP-001. No impact on existing validators.
-**Deps**: SPEC44STOSTAAPP-001
+**Engine Changes**: Yes — new structural validator `page_affordance_integrity` registered in `tools/validators/src/public/registry.ts`; consumes the `$defs.PageAffordance` schema component extracted in `archive/tickets/SPEC44STOSTAAPP-001.md`. No impact on existing validators.
+**Deps**: archive/tickets/SPEC44STOSTAAPP-001.md
 
 ## Problem
 
@@ -15,11 +15,11 @@
 3. **Available-to entities must be ACTIVE**: same as #2 for STENT references in `available_to`.
 4. **Action_families values from the closed enum**: schema already enforces this at parse-time; the validator adds runtime confirmation as a defense-in-depth check (catches enum drift between schema and consumer code).
 
-Per SPEC-44 §Approach Phase 3 step 10, this validator codifies the four integrity invariants and emits `fail` for any violation. The `$defs.PageAffordance` extraction (ticket SPEC44STOSTAAPP-001) supplies the validator with a reusable type reference rather than forcing the validator to duplicate the schema shape inline.
+Per SPEC-44 §Approach Phase 3 step 10, this validator codifies the four integrity invariants and emits `fail` for any violation. The `$defs.PageAffordance` extraction in `archive/tickets/SPEC44STOSTAAPP-001.md` supplies the validator with a reusable type reference rather than forcing the validator to duplicate the schema shape inline.
 
 ## Assumption Reassessment (2026-05-18)
 
-1. `tools/validators/src/schemas/story-page.schema.json` carries `visible_affordances` at lines 106-153 (post-Phase-1 ticket SPEC44STOSTAAPP-001 will move this inline schema into `$defs.PageAffordance` and replace the original site with a `$ref`). The 20 action_families enum values are: move, evade, pursue, perceive, investigate, communicate, persuade, negotiate, bond, oppose, harm, protect, control, transfer, use, make_change, ritual_protocol, recover, wait, decide. The shape requires `ordinal` (integer, minimum 0), `label` (string, minLength 1), `grounded_in` (array of `^(STLOC|STOBJ)-[0-9]+$`), `available_to` (array of `^STENT-[0-9]+$`), `action_families` (array with `minItems: 1`). `additionalProperties: false`.
+1. `tools/validators/src/schemas/story-page.schema.json` now carries the `visible_affordances.items` shape under `$defs.PageAffordance`, with the original site referencing it via `$ref`. The 20 action_families enum values are: move, evade, pursue, perceive, investigate, communicate, persuade, negotiate, bond, oppose, harm, protect, control, transfer, use, make_change, ritual_protocol, recover, wait, decide. The shape requires `ordinal` (integer, minimum 0), `label` (string, minLength 1), `grounded_in` (array of `^(STLOC|STOBJ)-[0-9]+$`), `available_to` (array of `^STENT-[0-9]+$`), `action_families` (array with `minItems: 1`). `additionalProperties: false`.
 2. SPEC-44 §Approach Phase 3 step 10 specifies the four integrity rules; §Out of Scope confirms no schema-shape change beyond Phase 1's $defs extraction. Existing validator `recursive-reference-closure.ts` validates that `visible_affordances` reference syntax is well-formed, but does not enforce ordinal-uniqueness, active-grounded-in, active-available-to, or action-family enum runtime.
 3. **Cross-boundary surface under audit**: this validator consumes both `story-page.schema.json` `$defs.PageAffordance` (post-Phase-1 extraction) AND the page record's `state_snapshot.active_records` (to resolve grounded_in / available_to active-status checks). The boundary is the page-record + schema-shape pair.
 4. **FOUNDATIONS principle**: §Story Bundles §5b (Schema-Minimalism At Story Scope) — affordances are page-local projections of durable records (STLOC / STOBJ / STENT); the integrity rules enforce that affordance fields are load-bearing (each named ordinal addresses one affordance; each grounded_in references an actually-active record).
@@ -74,7 +74,7 @@ Create `tools/validators/tests/structural/page-affordance-integrity.test.ts` cov
 
 ## Out of Scope
 
-- Changes to `story-page.schema.json` `visible_affordances` shape beyond ticket SPEC44STOSTAAPP-001's `$defs.PageAffordance` extraction.
+- Changes to `story-page.schema.json` `visible_affordances` shape beyond `archive/tickets/SPEC44STOSTAAPP-001.md`'s `$defs.PageAffordance` extraction.
 - Choice grounding integrity (which references affordance ordinals from `CHC.grounded_in.affordance_ordinals`) — covered by the existing `choice-grounding-accessibility.ts` validator (if present) or out of scope for SPEC-44.
 - Validation of `state_snapshot.active_records` shape — covered by ticket SPEC44STOSTAAPP-008's `active_records_full_shape` validator.
 

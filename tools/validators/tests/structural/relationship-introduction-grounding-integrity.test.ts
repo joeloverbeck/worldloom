@@ -55,7 +55,7 @@ test("relationship_introduction_grounding_integrity rejects introduced SREL with
   assert.equal(verdicts[0]?.severity, "fail");
 });
 
-test("relationship_introduction_grounding_integrity warns on duplicate active relationship axis without supersedes", async () => {
+test("relationship_introduction_grounding_integrity fails on duplicate active relationship axis without supersedes", async () => {
   const records = baseRecords([
     relationship("SREL-1", { created_at_page: "PG-1", derived_from: ["SE-1"] }),
     event("SE-2", { create: ["SREL-2"] }),
@@ -67,7 +67,7 @@ test("relationship_introduction_grounding_integrity warns on duplicate active re
 
   assert.equal(verdicts.length, 1);
   assert.equal(verdicts[0]?.code, "srel_intro_duplicate_axis");
-  assert.equal(verdicts[0]?.severity, "warn");
+  assert.equal(verdicts[0]?.severity, "fail");
   assert.deepEqual(verdicts[0]?.detail, { relationship_id: "SREL-2", duplicate_relationship_id: "SREL-1" });
 });
 

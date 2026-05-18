@@ -3,12 +3,12 @@
 **Status**: PENDING
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — new structural validator `state_delta_class_integrity` registered in `tools/validators/src/public/registry.ts`; runtime backstop for the state_delta schema fix that lands in ticket SPEC44STOSTAAPP-001. No impact on existing validators.
-**Deps**: SPEC44STOSTAAPP-001
+**Engine Changes**: Yes — new structural validator `state_delta_class_integrity` registered in `tools/validators/src/public/registry.ts`; runtime backstop for the state_delta schema fix that landed in `archive/tickets/SPEC44STOSTAAPP-001.md`. No impact on existing validators.
+**Deps**: archive/tickets/SPEC44STOSTAAPP-001.md
 
 ## Problem
 
-Ticket SPEC44STOSTAAPP-001 expands `story-event.schema.json` `state_delta` regex to include STSTAT/CLK/STSEC/STQ. JSON Schema validation enforces the pattern at envelope-validation time, but a schema fix alone doesn't catch two related failure modes:
+Archived ticket `archive/tickets/SPEC44STOSTAAPP-001.md` expanded `story-event.schema.json` `state_delta` regex to include STSTAT/CLK/STSEC/STQ. JSON Schema validation enforces the pattern at envelope-validation time, but a schema fix alone doesn't catch two related failure modes:
 
 1. **Class prefix correct, ID doesn't resolve.** `SE.state_delta.create: [STSTAT-99]` matches the regex but no record with id `STSTAT-99` exists in the patch plan or repository. The schema accepts the syntactic form; semantically, the id is dangling.
 2. **Class prefix outside the permitted 20-class set.** A future op that produces a new story-bundle class (e.g., a hypothetical `STPLAN`) could leak into `state_delta` ahead of the schema being updated to permit it; a runtime check catches this drift before the schema regression is noticed.
@@ -17,7 +17,7 @@ The `state_delta_class_integrity` validator backstops both cases at runtime: eve
 
 ## Assumption Reassessment (2026-05-18)
 
-1. The 20 story-bundle class prefixes after the SPEC44STOSTAAPP-001 expansion are: STENT, STSTAT, STINT, SF, BEL, SE, OBL, CNSQ, THR, CLK, STSEC, STQ, SREL, STLOC, STOBJ, DA, BR, PG, CHC, SLT. `tools/validators/src/schemas/story-event.schema.json:90-104` will hold the updated `state_delta` pattern after ticket SPEC44STOSTAAPP-001 lands. `tools/patch-engine/src/ops/create-story-record.ts:21-44` `StoryRecordOperationKind` enumerates the `create_<class>_record` ops; the class set in this Assumption Reassessment item matches the union.
+1. The 20 story-bundle class prefixes after `archive/tickets/SPEC44STOSTAAPP-001.md` are: STENT, STSTAT, STINT, SF, BEL, SE, OBL, CNSQ, THR, CLK, STSEC, STQ, SREL, STLOC, STOBJ, DA, BR, PG, CHC, SLT. `tools/validators/src/schemas/story-event.schema.json` now holds the updated `state_delta` pattern. `tools/patch-engine/src/ops/create-story-record.ts:21-44` `StoryRecordOperationKind` enumerates the `create_<class>_record` ops; the class set in this Assumption Reassessment item matches the union.
 2. SPEC-44 §Approach Phase 2 step 8 specifies this validator's scope and discrimination logic; §Risks & Open Questions item 1 names the failure mode (existing-file overwrite + class-prefix drift) the validator backstops at runtime.
 3. **Cross-boundary surface under audit**: this validator gates `SE` record submission via the validator harness; it consumes patch-plan staged writes + repository state to resolve id references. The boundary is the validator-protocol contract (verdict-emit + severity-mode).
 4. **FOUNDATIONS principle**: §Story Bundles §5b (Schema-Minimalism At Story Scope) — `state_delta` ids are fields whose load-bearing function is to address records; an unresolvable id fails the load-bearing test. The validator restores load-bearing fidelity by reject-at-runtime when the schema's syntactic check passes but the semantic resolution fails.
