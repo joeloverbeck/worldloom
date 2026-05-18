@@ -22,15 +22,11 @@ import {
 const REPO_ROOT = path.resolve(process.cwd(), "..", "..");
 const SPEC42_OPS = [
   "create_clk_record",
-  "tick_pressure_clock",
-  "resolve_pressure_clock",
+  "supersede_clk_record",
   "create_stsec_record",
-  "append_secret_clue_carrier",
-  "mark_secret_clue_discovered",
-  "reveal_story_secret",
+  "supersede_stsec_record",
   "create_stq_record",
-  "answer_story_question",
-  "abandon_story_question"
+  "supersede_stq_record"
 ] as const;
 
 test("SPEC-42 capstone exposes schema and envelope surfaces for CLK, STSEC, and STQ", async () => {
@@ -197,9 +193,9 @@ test("SPEC-42 capstone covers story-skill contract surfaces as executable surrog
     "id_class=\"CLK\"|\"STSEC\"|\"STQ\""
   ]);
   assertContains(readRepoFile(".claude/skills/branching-story-turn-cycle/SKILL.md"), [
-    "tick_pressure_clock",
-    "reveal_story_secret",
-    "answer_story_question",
+    "create_clk_record",
+    "create_stsec_record",
+    "create_stq_record",
     "§10b new-class visibility block"
   ]);
   assertContains(readRepoFile(".claude/skills/commitment-block-authoring/SKILL.md"), [

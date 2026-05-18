@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new structural validator `no_story_state_in_place_mutation` registered in `tools/validators/src/public/registry.ts`; pre-apply gate wired into the patch-plan validation pipeline. No impact on existing validators.
-**Deps**: SPEC44STOSTAAPP-002
+**Deps**: archive/tickets/SPEC44STOSTAAPP-002.md
 
 ## Problem
 

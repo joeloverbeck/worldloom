@@ -4,11 +4,11 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — updates `.claude/skills/branching-story-turn-cycle/SKILL.md` Output table rows for CLK/STSEC/STQ to remove references to the deleted lifecycle ops; introduces a new reference file `.claude/skills/branching-story-turn-cycle/references/append-only-state-lifecycle.md` documenting the create-with-supersedes semantics for CLK/STSEC/STQ lifecycle transitions.
-**Deps**: SPEC44STOSTAAPP-002
+**Deps**: archive/tickets/SPEC44STOSTAAPP-002.md
 
 ## Problem
 
-After ticket SPEC44STOSTAAPP-002 removes the 7 patch-engine lifecycle ops (`tick_pressure_clock` / `resolve_pressure_clock` / `append_secret_clue_carrier` / `mark_secret_clue_discovered` / `reveal_story_secret` / `answer_story_question` / `abandon_story_question`), the `branching-story-turn-cycle` skill's documented authoring path for CLK / STSEC / STQ lifecycle transitions points at op kinds that no longer exist. Specifically:
+After archived ticket `archive/tickets/SPEC44STOSTAAPP-002.md` removed the 7 patch-engine lifecycle ops (`tick_pressure_clock` / `resolve_pressure_clock` / `append_secret_clue_carrier` / `mark_secret_clue_discovered` / `reveal_story_secret` / `answer_story_question` / `abandon_story_question`), the `branching-story-turn-cycle` skill's documented authoring path for CLK / STSEC / STQ lifecycle transitions points at op kinds that no longer exist. Specifically:
 
 - The SKILL.md Output table's rows for CLK / STSEC / STQ currently frame lifecycle transitions in terms of the deleted ops (e.g., "tick CLK via `tick_pressure_clock`"); after ticket 002, the rows are stale.
 - The reference file authoring path (under `references/`) does not yet document the create-with-supersedes semantics that replace the deleted ops. Operators authoring story moves need to understand that ticking a clock, revealing a secret, or answering a question now requires authoring a NEW record with `supersedes: <prior_id>` via the existing `supersede_clk_record` / `supersede_stsec_record` / `supersede_stq_record` ops (which, despite the name, route to `stageCreateStoryRecord` and emit new files — they're create-with-supersedes, not in-place edits).

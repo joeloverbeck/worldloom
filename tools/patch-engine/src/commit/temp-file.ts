@@ -1,8 +1,6 @@
 import type { PatchOperation, PatchPlanEnvelope } from "../envelope/schema.js";
 import { contentHashForYaml, isRecord } from "../ops/shared.js";
 import { stageAppendAdjudicationRecord } from "../ops/append-adjudication-record.js";
-import { stageAbandonStoryQuestion } from "../ops/abandon-story-question.js";
-import { stageAnswerStoryQuestion } from "../ops/answer-story-question.js";
 import { stageAppendCharacterRecord } from "../ops/append-character-record.js";
 import { stageAppendDiegeticArtifactRecord } from "../ops/append-diegetic-artifact-record.js";
 import { stageAppendExtension } from "../ops/append-extension.js";
@@ -16,13 +14,8 @@ import { stageCreateMRecord } from "../ops/create-m-record.js";
 import { stageCreateOqRecord } from "../ops/create-oq-record.js";
 import { stageCreateSecRecord } from "../ops/create-sec-record.js";
 import { stageCreateStoryRecord, STORY_RECORD_SPECS, storyRecordMetadata } from "../ops/create-story-record.js";
-import { stageAppendSecretClueCarrier } from "../ops/append-secret-clue-carrier.js";
-import { stageMarkSecretClueDiscovered } from "../ops/mark-secret-clue-discovered.js";
-import { stageRevealStorySecret } from "../ops/reveal-story-secret.js";
-import { stageResolvePressureClock } from "../ops/resolve-pressure-clock.js";
 import { stageRemoveChAffectedCfIds } from "../ops/remove-ch-affected-cf-ids.js";
 import { stageRepairSkippedChangeLogEntry } from "../ops/repair-skipped-change-log-entry.js";
-import { stageTickPressureClock } from "../ops/tick-pressure-clock.js";
 import { stageUpdateRecordField } from "../ops/update-record-field.js";
 import type { OpContext, StagedRecord, StagedWrite } from "../ops/types.js";
 import { unlinkAllTempFiles } from "./rename.js";
@@ -144,16 +137,6 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
       const metadata = storyRecordMetadata(patch);
       return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
     }
-    case "tick_pressure_clock":
-    case "resolve_pressure_clock":
-      return metadataForTargetRecordId(patch.payload.target_clock_id);
-    case "append_secret_clue_carrier":
-    case "mark_secret_clue_discovered":
-    case "reveal_story_secret":
-      return metadataForTargetRecordId(patch.payload.target_secret_id);
-    case "answer_story_question":
-    case "abandon_story_question":
-      return metadataForTargetRecordId(patch.payload.target_question_id);
     case "update_record_field":
     case "append_extension":
       return metadataForTargetRecordId(patch.payload.target_record_id);
@@ -276,19 +259,5 @@ function stageOne(
     case "supersede_stq_record":
     case "append_story_diegetic_artifact_record":
       return stageCreateStoryRecord(envelope, patch, ctx);
-    case "tick_pressure_clock":
-      return stageTickPressureClock(envelope, patch, ctx);
-    case "resolve_pressure_clock":
-      return stageResolvePressureClock(envelope, patch, ctx);
-    case "append_secret_clue_carrier":
-      return stageAppendSecretClueCarrier(envelope, patch, ctx);
-    case "mark_secret_clue_discovered":
-      return stageMarkSecretClueDiscovered(envelope, patch, ctx);
-    case "reveal_story_secret":
-      return stageRevealStorySecret(envelope, patch, ctx);
-    case "answer_story_question":
-      return stageAnswerStoryQuestion(envelope, patch, ctx);
-    case "abandon_story_question":
-      return stageAbandonStoryQuestion(envelope, patch, ctx);
   }
 }
