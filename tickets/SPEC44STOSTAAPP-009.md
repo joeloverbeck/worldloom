@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: No production code introduced — adds `tools/validators/tests/integration/spec44-append-only-supersession.test.ts` exercising the post-SPEC-44 contract end-to-end. Parallels the existing `spec43-midstory-introduction.test.ts` integration test.
-**Deps**: archive/tickets/SPEC44STOSTAAPP-003.md, SPEC44STOSTAAPP-004, SPEC44STOSTAAPP-006, SPEC44STOSTAAPP-007, SPEC44STOSTAAPP-008
+**Deps**: archive/tickets/SPEC44STOSTAAPP-003.md, archive/tickets/SPEC44STOSTAAPP-004.md, SPEC44STOSTAAPP-006, SPEC44STOSTAAPP-007, SPEC44STOSTAAPP-008
 
 ## Problem
 

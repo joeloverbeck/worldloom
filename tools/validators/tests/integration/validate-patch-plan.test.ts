@@ -174,6 +174,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "no_story_state_in_place_mutation"
     );
     assert.equal(noStoryStateMutationExecution?.status, "skipped");
+    const stateDeltaClassExecution = result.executions.find(
+      (execution) => execution.name === "state_delta_class_integrity"
+    );
+    assert.equal(stateDeltaClassExecution?.status, "skipped");
     const introductionObserverFirewallExecution = result.executions.find(
       (execution) => execution.name === "introduction_observer_firewall"
     );
@@ -236,6 +240,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== branchIsolationExecution &&
         row !== observerFirewallExecution &&
         row !== noStoryStateMutationExecution &&
+        row !== stateDeltaClassExecution &&
         row !== introductionObserverFirewallExecution &&
         row !== liePromotedSilentlyExecution &&
         !clockExecutions.includes(row) &&
