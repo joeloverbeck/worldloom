@@ -1,21 +1,19 @@
 {
-  "originating_spec": "specs/SPEC-45-story-state-provenance-indexing.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC45STOSTAPRO-005.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "c151a9ac6233fdde7a5e07daa985013d7d5bf03b",
+  "originating_spec": null,
+  "archived_spec": "archive/specs/SPEC-45-story-state-provenance-indexing.md",
+  "last_ticket": "archive/tickets/SPEC45STOSTAPRO-006.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "dbeefe3b359b354ef5595d1e9562261c954a949a",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC45STOSTAPRO-006.md",
-  "queue": [
-    "tickets/SPEC45STOSTAPRO-006.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "pre-existing unrelated tracked edits under .claude/skills and remaining unstaged .codex/skills/implement-ticket/references/validator-schema-migrations.md hunk; pre-existing unrelated untracked archive/reports/red-bunny-validation-remediation.md and docs/plans/2026-05-18-world-index-story-state-provenance-indexing-design.md; expected ignored artifacts under tools/validators/dist, tools/validators/node_modules, and worlds/erotica-world from build/test proof",
+  "dirty_state": "pre-existing unrelated tracked edits under .claude/skills and .codex/skills/implement-ticket/references/validator-schema-migrations.md; pre-existing unrelated untracked archive/reports/red-bunny-validation-remediation.md; expected ignored build/test artifacts remain under tools/validators/dist, tools/validators/node_modules, tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/dist, tools/world-mcp/node_modules, and tools/world-mcp/.secret",
   "updated_at": "2026-05-18"
 }
