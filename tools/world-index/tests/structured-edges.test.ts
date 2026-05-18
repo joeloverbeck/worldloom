@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -8,6 +8,8 @@ import { insertAnchorChecksums, insertNodes, insertScopedReferences } from "../s
 import { insertEdges } from "../src/index/edges.js";
 import { openIndex } from "../src/index/open.js";
 import { contentHashForProse } from "../src/parse/canonical.js";
+import { MidstoryIntroductionTagError } from "../src/parse/intro-tag-parser.js";
+import { parseStoryBundleSourceFile } from "../src/parse/atomic.js";
 import { extractStructuredRecordEdges } from "../src/parse/structured-edges.js";
 import { CURRENT_INDEX_VERSION } from "../src/schema/version.js";
 import type { NodeRow, NodeType } from "../src/schema/types.js";
@@ -285,3 +287,206 @@ test("structured-edge rows persist into scoped_references and edges tables", () 
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("story event records emit state-delta and creation-evidence edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-story-event-"));
+
+  try {
+    writeStoryEvent(root, "harborwatch", "SE-1", {
+      stateDelta: {
+        create: ["CLK-1", "STSEC-1", "STQ-1"],
+        supersede: ["THR-1", "STENT-1"],
+        close: ["OBL-1"]
+      },
+      worldLogicRationale: [
+        "intro:CLK(id=CLK-1, trigger=deadline_declared, evidence=[PG-1,SF-1], distinct_from=[])",
+        "intro:STSEC(id=STSEC-1, trigger=clue_carrier_enters_play, evidence=[PG-1,DA-1], distinct_from=[])",
+        "intro:STQ(id=STQ-1, trigger=promise_made, evidence=[BEL-1,SE-0], distinct_from=[])",
+        "intro:THR(id=THR-2, trigger=new_ongoing_causal_concern, evidence=[OBL-1,CNSQ-1], distinct_from=[])"
+      ].join(" ")
+    });
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/events/SE-1.yaml"
+    );
+
+    assert.deepEqual(
+      parsed.edges.map((edge) => ({
+        source_node_id: edge.source_node_id,
+        target_unresolved_ref: edge.target_unresolved_ref,
+        edge_type: edge.edge_type,
+        story_slug: edge.story_slug
+      })),
+      [
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:CLK-1",
+          edge_type: "state_delta_create",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STSEC-1",
+          edge_type: "state_delta_create",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STQ-1",
+          edge_type: "state_delta_create",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:THR-1",
+          edge_type: "state_delta_supersede",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STENT-1",
+          edge_type: "state_delta_supersede",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:CLK-1",
+          target_unresolved_ref: "harborwatch:PG-1",
+          edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:CLK-1",
+          target_unresolved_ref: "harborwatch:SF-1",
+          edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-1",
+          target_unresolved_ref: "harborwatch:PG-1",
+          edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-1",
+          target_unresolved_ref: "harborwatch:DA-1",
+          edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STQ-1",
+          target_unresolved_ref: "harborwatch:BEL-1",
+          edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STQ-1",
+          target_unresolved_ref: "harborwatch:SE-0",
+          edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:THR-2",
+          target_unresolved_ref: "harborwatch:OBL-1",
+          edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:THR-2",
+          target_unresolved_ref: "harborwatch:CNSQ-1",
+          edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        }
+      ]
+    );
+    assert.equal(parsed.edges.length, 13);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("story event records with no state delta or intro tags emit no event edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-story-event-empty-"));
+
+  try {
+    writeStoryEvent(root, "harborwatch", "SE-1", {
+      stateDelta: { create: [], supersede: [], close: [] },
+      worldLogicRationale: "No structured introductions in this event."
+    });
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/events/SE-1.yaml"
+    );
+
+    assert.equal(parsed.edges.length, 0);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("story event malformed intro tags reject through the shared parser", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-story-event-malformed-"));
+
+  try {
+    writeStoryEvent(root, "harborwatch", "SE-1", {
+      stateDelta: { create: ["CLK-1"], supersede: [], close: [] },
+      worldLogicRationale: "intro:CLK(id=CLK-1, trigger=deadline_declared, evidence=[PG-1], distinct_from=[]"
+    });
+
+    assert.throws(
+      () =>
+        parseStoryBundleSourceFile(
+          root,
+          "fixture-world",
+          "stories/harborwatch/_source/events/SE-1.yaml"
+        ),
+      MidstoryIntroductionTagError
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+function writeStoryEvent(
+  root: string,
+  storySlug: string,
+  eventId: string,
+  args: {
+    stateDelta: { create: string[]; supersede: string[]; close: string[] };
+    worldLogicRationale: string;
+  }
+): void {
+  const relativeDirectory = path.join(
+    root,
+    "worlds",
+    "fixture-world",
+    "stories",
+    storySlug,
+    "_source",
+    "events"
+  );
+  mkdirSync(relativeDirectory, { recursive: true });
+  writeFileSync(
+    path.join(relativeDirectory, `${eventId}.yaml`),
+    [
+      `id: ${eventId}`,
+      "title: Fixture event",
+      "commitment:",
+      "  selected_slt_id: SLT-1",
+      "world_logic_rationale: >-",
+      `  ${args.worldLogicRationale}`,
+      "state_delta:",
+      "  create:",
+      ...args.stateDelta.create.map((id) => `    - ${id}`),
+      "  supersede:",
+      ...args.stateDelta.supersede.map((id) => `    - ${id}`),
+      "  close:",
+      ...args.stateDelta.close.map((id) => `    - ${id}`),
+      ""
+    ].join("\n"),
+    "utf8"
+  );
+}

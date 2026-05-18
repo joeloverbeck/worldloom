@@ -1,4 +1,4 @@
-import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import type { Context, IndexedEdge, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
   FILE_CLASS_TO_SUBDIR,
   asPlainRecord,
@@ -11,6 +11,11 @@ import {
 } from "./utils.js";
 
 const RECORD_REFERENCE_PATTERN = /^(CF|CH|M|OQ|ENT|SEC-[A-Z]{3})-[0-9]+$/;
+const INDEXED_REFERENCE_EDGE_TYPES = [
+  "state_delta_create",
+  "state_delta_supersede",
+  "creation_evidence"
+] as const;
 
 export const crossFileReference: Validator = {
   name: "cross_file_reference",
@@ -19,6 +24,7 @@ export const crossFileReference: Validator = {
   run: async (_input: unknown, ctx: Context): Promise<Verdict[]> => {
     const records = await queryStructuralRecords(ctx);
     const existingIds = new Set(records.map((record) => record.node_id));
+    const recordsById = new Map(records.map((record) => [record.node_id, record]));
     const verdicts: Verdict[] = [];
 
     for (const record of records) {
@@ -40,6 +46,8 @@ export const crossFileReference: Validator = {
         }
       }
     }
+
+    verdicts.push(...(await indexedEdgeReferenceVerdicts(ctx, existingIds, recordsById)));
 
     return verdicts;
   }
@@ -99,5 +107,61 @@ function orphanReference(record: IndexedRecord, missingId: string, field: string
     code: "cross_file_reference.orphan_reference",
     message: `${record.node_id} references missing ${missingId} in ${field}`,
     location: locationFor(record)
+  };
+}
+
+async function indexedEdgeReferenceVerdicts(
+  ctx: Context,
+  existingIds: ReadonlySet<string>,
+  recordsById: ReadonlyMap<string, IndexedRecord>
+): Promise<Verdict[]> {
+  if (!ctx.index.queryEdges) {
+    return [];
+  }
+
+  const allRelevantEdges = (
+    await Promise.all(
+      INDEXED_REFERENCE_EDGE_TYPES.map((edgeType) =>
+        ctx.index.queryEdges!({
+          edge_type: edgeType,
+          world_slug: ctx.world_slug,
+          story_slug: ctx.story_slug ?? null
+        })
+      )
+    )
+  ).flat();
+  const creatingSeByCreatedRecord = new Map(
+    allRelevantEdges
+      .filter((edge) => edge.edge_type === "state_delta_create" && edge.target_node_id !== null)
+      .map((edge) => [edge.target_node_id!, edge.source_node_id])
+  );
+
+  return allRelevantEdges
+    .filter((edge) => edge.target_unresolved_ref !== null)
+    .filter((edge) => !existingIds.has(edge.target_unresolved_ref!))
+    .map((edge) => danglingIndexedEdge(edge, recordsById, creatingSeByCreatedRecord));
+}
+
+function danglingIndexedEdge(
+  edge: IndexedEdge,
+  recordsById: ReadonlyMap<string, IndexedRecord>,
+  creatingSeByCreatedRecord: ReadonlyMap<string, string>
+): Verdict {
+  const source = recordsById.get(edge.source_node_id);
+  const missingId = edge.target_unresolved_ref ?? "<unknown>";
+  const authoringSe = edge.edge_type === "creation_evidence" ? creatingSeByCreatedRecord.get(edge.source_node_id) : undefined;
+  const authoringSuffix = authoringSe ? ` authored by ${authoringSe}` : "";
+
+  return {
+    validator: "cross_file_reference",
+    severity: "warn",
+    code: `cross_file_reference.dangling_${edge.edge_type}`,
+    message: `${edge.source_node_id}${authoringSuffix} has unresolved ${edge.edge_type} target ${missingId}`,
+    location: source
+      ? locationFor(source)
+      : {
+          file: "<indexed-edge>",
+          node_id: edge.source_node_id
+        }
   };
 }

@@ -1,5 +1,5 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
-import { extractIntroTags, type MidstoryIntroductionClass, type ParsedIntroTag } from "./midstory-introduction-utils.js";
+import { extractIntroTags, type MidstoryIntroductionClass, type ParsedIntroTag } from "@worldloom/world-index/parse/intro-tag-parser";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, stringValue, touchedFilesInclude } from "./utils.js";
 
 const VALIDATOR = "midstory_record_introduction_grounding";

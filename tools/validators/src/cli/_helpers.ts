@@ -7,6 +7,7 @@ import yaml from "js-yaml";
 
 import type {
   Context,
+  IndexedEdge,
   IndexedRecord,
   Validator,
   ValidatorRun,
@@ -208,6 +209,41 @@ export function buildReadSurface(db: Database.Database, worldSlug: string): Worl
         .all(...params) as NodeRow[];
 
       return rows.map(rowToIndexedRecord);
+    },
+    queryEdges: async ({ edge_type, world_slug, story_slug }) => {
+      if (world_slug !== worldSlug) {
+        return [];
+      }
+      if (!tableExists(db, "edges")) {
+        return [];
+      }
+
+      const hasStorySlug = tableHasColumn(db, "edges", "story_slug");
+      const selectedColumns = hasStorySlug
+        ? "edges.source_node_id, edges.target_node_id, edges.target_unresolved_ref, edges.edge_type, edges.story_slug"
+        : "edges.source_node_id, edges.target_node_id, edges.target_unresolved_ref, edges.edge_type, NULL AS story_slug";
+      const predicates = ["source.world_slug = ?"];
+      const params: unknown[] = [worldSlug];
+
+      if (edge_type) {
+        predicates.push("edges.edge_type = ?");
+        params.push(edge_type);
+      }
+      if (hasStorySlug && story_slug) {
+        predicates.push("edges.story_slug = ?");
+        params.push(story_slug);
+      }
+
+      return db
+        .prepare(
+          `
+            SELECT ${selectedColumns}
+            FROM edges
+            JOIN nodes source ON source.node_id = edges.source_node_id
+            WHERE ${predicates.join(" AND ")}
+          `
+        )
+        .all(...params) as IndexedEdge[];
     }
   };
 }
@@ -307,6 +343,13 @@ function rowToIndexedRecord(row: NodeRow): IndexedRecord {
     file_path: normalizePosix(row.file_path),
     parsed: parsedBodyFor(row)
   };
+}
+
+function tableExists(db: Database.Database, table: string): boolean {
+  const row = db
+    .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?")
+    .get(table);
+  return row !== undefined;
 }
 
 function tableHasColumn(db: Database.Database, table: string, column: string): boolean {

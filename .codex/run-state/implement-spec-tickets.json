@@ -1,9 +1,9 @@
 {
-  "originating_spec": "archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md",
-  "archived_spec": "archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md",
-  "last_ticket": "archive/tickets/SPEC44STOSTAAPP-009.md",
+  "originating_spec": null,
+  "archived_spec": "archive/specs/SPEC-45-story-state-provenance-indexing.md",
+  "last_ticket": "archive/tickets/SPEC45STOSTAPRO-006.md",
   "last_result": "spec_archived",
-  "last_work_commit": "5894f1988984c90104b588aa0aa047610ef313f5",
+  "last_work_commit": "dbeefe3b359b354ef5595d1e9562261c954a949a",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -14,6 +14,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked worktree clean; expected ignored local artifacts remain under briefs/, worlds/, world-proposals/, tools/*/dist, tools/*/node_modules, tools/hooks/logs, tools/world-mcp/.secret, and .claude/settings.local.json",
+  "dirty_state": "pre-existing unrelated tracked edits under .claude/skills and .codex/skills/implement-ticket/references/validator-schema-migrations.md; pre-existing unrelated untracked archive/reports/red-bunny-validation-remediation.md; expected ignored build/test artifacts remain under tools/validators/dist, tools/validators/node_modules, tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/dist, tools/world-mcp/node_modules, and tools/world-mcp/.secret",
   "updated_at": "2026-05-18"
 }
