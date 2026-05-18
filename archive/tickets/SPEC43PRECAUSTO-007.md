@@ -1,6 +1,6 @@
 # SPEC43PRECAUSTO-007: `thread_introduction_grounding_integrity` Validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/thread-introduction-grounding-integrity.ts` (THR-specific introduction gate). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
@@ -17,6 +17,8 @@ SPEC-43 §Approach D Table row 5 + §Approach C THR rules + spec §Verification 
 3. Cross-skill boundary under audit: this validator composes with the existing tickets 003 (generic gate) and Phase 9 (turn-cycle). The Validator object's `applies_to` field must include `branching-story-turn-cycle`.
 4. FOUNDATIONS §Story Bundles §5c (Present Causal State) restated: a thread is an ongoing causal concern with state consequences, not a narrative arc. The `derived_from[]` non-empty rule enforces this at mid-story-creation time — every new THR must be grounded in present branch state (a recorded fact, a current obligation, a pending consequence, an active relationship), never in future plot structure.
 5. HARD-GATE / Canon Safety surface: per-commit Phase 9 gate gating mid-story THR creation.
+6. Implementation reassessment confirmed the pass fixture's lawful THR uses `derived_from: [SE-2, BEL-1]`, so the validator must treat the creating event id as same-event grounding in addition to `state_delta.create[]` records. This mirrors the STQ/STSEC introduction validators' same-event handling and keeps SPEC-43's "creation-pass" THR case valid.
+7. Same-seam integration expectations needed updates because adding a structural validator changes `structuralValidators.length` in `tools/validators/tests/integration/spec04-verification.test.ts` and adds a skipped story-scoped validator row for clean non-story pre-apply plans in `tools/validators/tests/integration/validate-patch-plan.test.ts`.
 
 ## Architecture Check
 
@@ -66,6 +68,8 @@ Add `thread_introduction_grounding_integrity` to the validator-name assertion li
 - `tools/validators/src/public/registry.ts` (modify — shared with 8 sibling tickets)
 - `tools/validators/tests/structural/thread-introduction-grounding-integrity.test.ts` (new)
 - `tools/validators/tests/structural/registry.test.ts` (modify — shared with 8 sibling tickets)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — registry count expectation updated for the new structural validator)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply skip expectation updated for the new story-scoped validator)
 
 ## Out of Scope
 
@@ -94,8 +98,29 @@ Add `thread_introduction_grounding_integrity` to the validator-name assertion li
 
 1. `tools/validators/tests/structural/thread-introduction-grounding-integrity.test.ts` — 4 test cases per §What to Change item 3.
 2. `tools/validators/tests/structural/registry.test.ts` (modify) — adds the new validator to the name assertion (coordinate with tickets 003-006, 008-012 per §Step 6.5).
+3. `tools/validators/tests/integration/spec04-verification.test.ts` — registry-size expectation updated from 40/52 to 41/53.
+4. `tools/validators/tests/integration/validate-patch-plan.test.ts` — clean pre-apply fixture expects `thread_introduction_grounding_integrity` to skip on non-story plans.
 
 ### Commands
 
 1. `npm test --prefix tools/validators -- thread-introduction-grounding-integrity` (targeted test pass).
 2. `npm test --prefix tools/validators` (full validator package test pass).
+
+## Outcome
+
+Completed: 2026-05-18.
+
+Implemented `thread_introduction_grounding_integrity` as a fail-mode structural validator registered in the validator package. It fires only for same-event-created non-root `THR-*` records, requires non-empty `derived_from[]`, and verifies each grounding id is one of the SPEC-43 THR grounding classes and is either parent-active, the creating `SE`, or created in the same event.
+
+Added focused structural coverage for the creation-pass fixture, missing `derived_from`, inactive grounding, disallowed grounding class, same-event-created grounding, existing lifecycle updates, root-bootstrap creation, and selector applicability. Updated registry and integration expectations that necessarily changed when the new structural validator was registered.
+
+Deviations from original plan:
+
+- Added same-seam integration expectation updates in `spec04-verification.test.ts` and `validate-patch-plan.test.ts`; the ticket's original file list omitted those count/skip expectations, but they are required consequences of adding a new structural validator.
+- The targeted npm command runs the package's existing build plus full `dist/tests/**/*.test.js` suite with the extra pattern argument, not only the new test file. That command now passes and includes the new THR subtests.
+
+Verification:
+
+- `grep -n "threadIntroductionGroundingIntegrity\|thread_introduction_grounding_integrity" tools/validators/src/public/registry.ts` returned the import and registry entry.
+- `npm test --prefix tools/validators -- thread-introduction-grounding-integrity` passed: 452 tests, 452 pass.
+- `npm test --prefix tools/validators` passed: 452 tests, 452 pass.

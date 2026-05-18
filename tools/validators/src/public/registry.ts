@@ -35,6 +35,7 @@ import { storyQuestionSetupPredatesPayoff } from "../structural/story-question-s
 import { storyQuestionTerminalDebt } from "../structural/story-question-terminal-debt.js";
 import { storyDaDuplicateHeuristic } from "../structural/story-da-duplicate-heuristic.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
+import { threadIntroductionGroundingIntegrity } from "../structural/thread-introduction-grounding-integrity.js";
 import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
 import { rule2NoPureCosmetics } from "../rules/rule2-no-pure-cosmetics.js";
@@ -83,6 +84,7 @@ export const structuralValidators: readonly Validator[] = [
   secretIntroductionAnchorIntegrity,
   secretMysteryFirewallCompliance,
   storyQuestionIntroductionGroundingIntegrity,
+  threadIntroductionGroundingIntegrity,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,
