@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC42STOSTADEB-001 landed the CLK class foundation (schema, machine-layer wiring, custom ops), but CLK records have no validator coverage yet — their structural correctness depends on per-class validators that enforce value-in-range, threshold ordering, tick provenance, firing-threshold integrity, and terminal-debt accountability. Without these, malformed CLK records can persist, and high-salience active clocks at terminal pages can silently violate Rule 5 (No Consequence Evasion). Storylets also cannot precondition on clock state because the predicate DSL has no `clock_*` predicates yet — SPEC42STOSTADEB-011's `commitment-block-authoring` 14-target coverage extension depends on these predicates being available. This ticket lands the CLK-specific validator + predicate layer as one cohesive PR.
+SPEC42STOSTADEB-001 landed the CLK class foundation (schema, machine-layer wiring, custom ops), but CLK records have no validator coverage yet — their structural correctness depends on per-class validators that enforce value-in-range, threshold ordering, tick provenance, firing-threshold integrity, and terminal-debt accountability. Without these, malformed CLK records can persist, and high-salience active clocks at terminal pages can silently violate Rule 5 (No Consequence Evasion). Storylets also cannot precondition on clock state because the predicate DSL has no `clock_*` predicates yet — archive/tickets/SPEC42STOSTADEB-011.md's `commitment-block-authoring` 14-target coverage extension depends on these predicates being available. This ticket lands the CLK-specific validator + predicate layer as one cohesive PR.
 
 ## Assumption Reassessment (2026-05-17)
 
@@ -107,7 +107,7 @@ Modify `tools/validators/src/public/registry.ts` to register the 5 new CLK valid
 - CLK class foundation (schema, machine-layer wiring, custom ops) — owned by SPEC42STOSTADEB-001
 - STSEC and STQ validators + predicates — owned by SPEC42STOSTADEB-006 / -007
 - Shared validator extensions (`state_snapshot_integrity` / `snapshot_replay_equality` / `branch_isolation` / `observer_firewall`) — owned by SPEC42STOSTADEB-008
-- Storylet authoring extensions consuming new CLK predicates — owned by SPEC42STOSTADEB-011
+- Storylet authoring extensions consuming new CLK predicates — owned by archive/tickets/SPEC42STOSTADEB-011.md
 - Turn-cycle integration consuming new CLK predicates at runtime — owned by SPEC42STOSTADEB-009
 - Health-audit warnings for CLK proliferation (per SPEC-42 §Risks "Author abuse") — owned by SPEC42STOSTADEB-012
 
@@ -164,6 +164,6 @@ It also added the four CLK predicate names to the closed predicate grammar (`clo
 
 ## Deviations
 
-- Drafted predicate wording said the four CLK predicates would "evaluate" clock state. The live validators package owns grammar/schema/parsability, not runtime storylet selection, so this ticket proves predicate shape and reference validation. Runtime use remains owned by SPEC42STOSTADEB-009 and SPEC42STOSTADEB-011.
+- Drafted predicate wording said the four CLK predicates would "evaluate" clock state. The live validators package owns grammar/schema/parsability, not runtime storylet selection, so this ticket proves predicate shape and reference validation. Runtime use remains owned by SPEC42STOSTADEB-009 and archive/tickets/SPEC42STOSTADEB-011.md.
 - The drafted baseline counts were stale: the live package started this ticket at 24 structural validators and 24 predicate grammar entries, not 22/22. The completed state is 29 structural validators and 28 predicate grammar entries.
 - `clock_terminal_debt_integrity` emits a warning for terminal high-salience active clock debt, matching the existing health-audit terminal-debt convention that terminal proof gaps are branch-flag warnings rather than hard structural failures.

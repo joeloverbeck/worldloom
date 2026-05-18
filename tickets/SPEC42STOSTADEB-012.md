@@ -77,7 +77,7 @@ Add a fourth check for CLK over-modeling. The check:
 - Shared validator extensions — owned by archive/tickets/SPEC42STOSTADEB-008.md
 - Turn-cycle integration — landed in `archive/tickets/SPEC42STOSTADEB-009.md`
 - Bootstrap optional seeding — owned by SPEC42STOSTADEB-010
-- Commitment-block-authoring extension — owned by SPEC42STOSTADEB-011
+- Commitment-block-authoring extension — owned by archive/tickets/SPEC42STOSTADEB-011.md
 - Prose-attach verification — owned by SPEC42STOSTADEB-013
 - Cross-class contract doc updates — owned by SPEC42STOSTADEB-014
 - **`backfill_proposal` mode** (per SPEC-42 §Phase 5): deferred to a follow-up spec per SPEC-42 §Risks recommendation (pattern-recognition complexity is substantial: 3 distinct backfill flows — THR→STQ, DA/BEL/SF→STSEC, THR/CNSQ/OBL→CLK — each requiring its own pattern-recognition logic). The §Step 6 cross-spec follow-ups list flags this for follow-up-spec drafting.

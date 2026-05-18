@@ -108,7 +108,7 @@ Modified `tools/validators/src/_helpers/index-access.ts` so pre-apply validation
 - STQ class foundation (schema, machine-layer wiring, §5c HARD-REJECT extension to `record_schema_compliance`) — owned by archive/tickets/SPEC42STOSTADEB-003.md
 - CLK and STSEC validators + predicates — owned by SPEC42STOSTADEB-005 / -006
 - Shared validator extensions — owned by SPEC42STOSTADEB-008
-- Storylet authoring extensions consuming new STQ predicates — owned by SPEC42STOSTADEB-011
+- Storylet authoring extensions consuming new STQ predicates — owned by archive/tickets/SPEC42STOSTADEB-011.md
 - Turn-cycle integration consuming new STQ predicates at runtime — owned by SPEC42STOSTADEB-009
 - Health-audit "dropped high-salience setup" check (uses `story_question_terminal_debt` validator output) — owned by SPEC42STOSTADEB-012
 
