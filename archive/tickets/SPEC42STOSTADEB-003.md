@@ -204,5 +204,5 @@ Passing:
 
 - The live shared contract is split: `story-state-contract.md` owns the §3 class catalog and §4 pointer/count text, while `story-record-schemas.md` owns the detailed §4.5.16 STQ schema. This ticket was updated before implementation to match that live split.
 - Same-seam registration required additional files beyond the initial file list: `tools/validators/src/structural/utils.ts`, `tools/world-mcp/src/server.ts`, `tools/world-mcp/src/tools/describe-envelope-schema.ts`, `tools/patch-engine/src/ops/shared.ts`, and focused tests for the registration/proof surfaces.
-- `CLAUDE.md`, cross-class §5 predicate list, §6 integration matrix, and §8 page-plan §10b docs remain owned by `SPEC42STOSTADEB-014`.
+- `CLAUDE.md`, cross-class §5 predicate list, and §8 page-plan §10b docs landed in `archive/tickets/SPEC42STOSTADEB-014.md`; the active SPEC-42 deliverables row was also truthed so the retired §6 integration-matrix wording no longer directs future work.
 - STQ semantic validators, predicate DSL entries, MCP retrieval, shared validators, and skill integrations remain out of scope and are owned by the later SPEC42STOSTADEB tickets listed above.

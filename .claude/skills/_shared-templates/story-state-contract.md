@@ -168,9 +168,21 @@ preconditions:
 | `any_relationship_axis(alias, axis, comparator, value, participant_role?)` | Actor-unbound existential predicate over active `SREL` records; comparator is one of `>= | <= | == | !=`; role filters use §4.4b role values. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
 | `any_belief(alias, holder_role?, mode?, truth_relation?, visibility?)` | Actor-unbound existential predicate over active `BEL` records using `belief_mode`, `truth_relation`, and `visibility` filters. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
 | `any_intention(alias, holder_role?, urgency?)` | Actor-unbound existential predicate over active `STINT` records. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `clock_at_least(CLK-<integer>, value)` | Named pressure clock's active `value` must be greater than or equal to `value`. | turn-cycle eligibility |
+| `clock_below(CLK-<integer>, value)` | Named pressure clock's active `value` must be less than `value`. | turn-cycle eligibility |
+| `clock_full(CLK-<integer>)` | Named pressure clock must be active and at its `max` value. | turn-cycle eligibility |
+| `any_clock_active(alias, kind?, salience?)` | Actor-unbound existential predicate over active `CLK` records, optionally filtered by `clock_kind` and `salience`. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `secret_unrevealed(STSEC-<integer>)` | Named story secret must be active and not yet fully revealed. | turn-cycle eligibility |
+| `secret_revealed(STSEC-<integer>)` | Named story secret must be active with `status: revealed`. | turn-cycle eligibility |
+| `revelation_ready(STSEC-<integer>)` | Named story secret must have enough discovered clue carriers to support revelation under the active validator policy. | turn-cycle eligibility |
+| `any_secret_unrevealed(alias, salience?, kind?)` | Actor-unbound existential predicate over unrevealed active `STSEC` records, optionally filtered by `salience` and `secret_kind`. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `story_question_open(STQ-<integer>)` | Named story question / open setup must be active with `status: open` or `status: complicated`. | turn-cycle eligibility |
+| `story_question_status(STQ-<integer>, status)` | Named story question / open setup must be active with the named lifecycle `status`. | turn-cycle eligibility |
+| `any_story_question_open(alias, salience?, setup_kind?)` | Actor-unbound existential predicate over open or complicated active `STQ` records, optionally filtered by `salience` and `setup_kind`. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `promise_due(STQ-<integer>, age_pages)` | Named promise-like `STQ` must be at least `age_pages` old in the evaluating branch path. | turn-cycle eligibility, debt-pressure maturation |
 | `location(STENT-<integer>, STLOC-<integer>)` | Entity must currently be at location. | turn-cycle eligibility |
 | `has_affordance(<action_family>)` | The current page's `visible_affordances` must include an affordance whose `action_families` contain the named family. | turn-cycle eligibility, plan grounding |
-| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
+| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / CLK / STSEC / STQ / SREL / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
 | `record_age(<record_id \| bound:<alias>>, >= \| <= \| == \| !=, <integer_pages>)` | Derived age check over the record's `created_at_page` and the evaluating page's position in `branch_path`; `bound:<alias>` may reference a same-block existential match. | turn-cycle eligibility, debt-pressure maturation |
 | `intention_active(STINT-<integer>)` | Named intention must be currently active. | turn-cycle eligibility |
 | `object_accessible(STENT-<integer>, STOBJ-<integer>)` | Entity must have page-state access to the named object. | turn-cycle eligibility, plan grounding |
@@ -222,7 +234,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 
 ## 8. Page Plan Minimum Contract
 
-`pages-prose-plans/PG-<integer>.md` is a direct-write artifact (not an atomic `_source/` record). It is the prompt package for the external prose renderer. Each plan body has 19 sections:
+`pages-prose-plans/PG-<integer>.md` is a direct-write artifact (not an atomic `_source/` record). It is the prompt package for the external prose renderer. Each plan body has 19 numbered sections plus optional §10b when SPEC-42 story-state records are active or relevant:
 
 | § | Section | Source |
 |---|---|---|
@@ -236,6 +248,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 8 | Required beats from the commitment block | selected `SLT.beats` |
 | 9 | Relationship and belief context | active `SREL`, `BEL` |
 | 10 | Open obligations, consequences, threads | active `OBL`, `CNSQ`, `THR`, including each record's `urgency` |
+| 10b | Open Setups, Active Clocks, Hidden Secrets (optional) | per-page-computed from active `STQ`, `CLK`, and `STSEC`; omitted entirely when all three sets are empty or irrelevant |
 | 11 | Forbidden mystery resolutions | `mystery_policy.forbidden_resolutions` |
 | 12 | Stopping point | from commitment block + author judgment |
 | 13 | Next choices to foreshadow or make available | emitted `CHC[]` |
@@ -247,6 +260,8 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 19 | **Render-time instruction block** | **inlined verbatim from `reports/prose-quality-instructions.md` §Render-Time Instruction Template** |
 
 **§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages.
+
+**§10b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `CLK` records (value / max, nearest threshold, salience), active `STSEC` records (status, holders, discovered clue-carrier count), and active `STQ` records (status, salience, audience visibility). Subsections appear only for classes with relevant active records; when no `CLK`, `STSEC`, or `STQ` content matters for the render, §10b is omitted rather than emitted as an empty placeholder. `branching-story-turn-cycle` owns the rendering procedure for this section.
 
 The plan must not expose engine jargon to prose. Engine terms (record ids, gate names) may appear in §15 frontmatter only.
 

@@ -61,7 +61,7 @@ Updated the skill's global-pool predicate guidance so the old "six `any_*` exist
 - Turn-cycle integration — landed in `archive/tickets/SPEC42STOSTADEB-009.md`
 - Bootstrap optional seeding — owned by SPEC42STOSTADEB-010
 - Prose-attach verification — owned by SPEC42STOSTADEB-013
-- Cross-class contract doc updates — owned by SPEC42STOSTADEB-014
+- Cross-class contract doc updates — landed in archive/tickets/SPEC42STOSTADEB-014.md
 - Extending `SLT.move_family` enum (NOT in scope; the new coverage targets are authoring-concern guidance, not schema enum members)
 
 ## Acceptance Criteria

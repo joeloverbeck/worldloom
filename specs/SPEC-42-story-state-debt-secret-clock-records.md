@@ -206,7 +206,7 @@ active_records:
 - `.claude/skills/_shared-templates/story-state-contract.md` §4 — add §4.6 (CLK), §4.7 (STSEC), §4.8 (STQ) with canonical schema text matching the JSON Schemas
 - `.claude/skills/_shared-templates/story-state-contract.md` §4.2 — extend `PG.state_snapshot.active_records[]` enumeration from 12 to 15 classes
 - `.claude/skills/_shared-templates/story-state-contract.md` §5 — add new predicate entries (12 new predicates total: 4 clock, 4 secret, 4 story-question)
-- `.claude/skills/_shared-templates/story-state-contract.md` §6 — add CLK/STSEC/STQ to story-pipeline integration matrix
+- `.claude/skills/_shared-templates/story-state-contract.md` §6 — no longer owns a story-pipeline integration matrix in the live contract; SPEC-42 integration lives in skill-specific surfaces (`branching-story-bootstrap`, `branching-story-turn-cycle`, `commitment-block-authoring`, `branching-story-health-audit`, and `branching-story-prose-attach`) plus the shared §5 predicate and §8 page-plan contracts
 - `.claude/skills/_shared-templates/story-state-contract.md` §8 — add optional §10b page-plan section ("Open Setups, Active Clocks, Hidden Secrets")
 
 ### Patch-engine ops (added to `tools/patch-engine/src/envelope/schema.ts` `OPERATION_KINDS`)

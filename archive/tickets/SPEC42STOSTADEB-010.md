@@ -56,7 +56,7 @@ At intake, the CLK/STSEC/STQ classes existed (SPEC42STOSTADEB-001 / -002 / -003)
 - Commitment-block-authoring extension consuming new class predicates — owned by archive/tickets/SPEC42STOSTADEB-011.md
 - Health-audit checks for stalled clocks / under-supported revelations / dropped setups — landed in `archive/tickets/SPEC42STOSTADEB-012.md`
 - Prose-attach verification for clock-tick / revealed-secret prose — owned by SPEC42STOSTADEB-013
-- Cross-class contract doc updates — owned by SPEC42STOSTADEB-014
+- Cross-class contract doc updates — landed in archive/tickets/SPEC42STOSTADEB-014.md
 
 ## Acceptance Criteria
 

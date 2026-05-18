@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: No new production code; introduces an integration test exercising every prior implementation ticket end-to-end against a fixture story bundle. Per the spec-to-tickets §Spec-Integration Ticket Shape, this is a single trailing ticket whose acceptance criteria enumerate the spec's §Verification bullets as test sub-cases
-**Deps**: SPEC42STOSTADEB-014
+**Deps**: archive/tickets/SPEC42STOSTADEB-010.md, archive/tickets/SPEC42STOSTADEB-011.md, archive/tickets/SPEC42STOSTADEB-012.md, archive/tickets/SPEC42STOSTADEB-013.md, archive/tickets/SPEC42STOSTADEB-014.md
 
 ## Problem
 
@@ -16,11 +16,11 @@ After all 14 upstream tickets (SPEC42STOSTADEB-001 through -014) have landed, th
 
 1. Codebase verified at Step 2 codebase validation (2026-05-17): all package test surfaces exist (`tools/validators/tests`, `tools/patch-engine/tests`, `tools/world-mcp/tests`, `tools/world-index/tests`); fixture-world copying via `fs.cpSync` is the canonical pattern (verified in §Spec-Integration Ticket Shape worked example). The capstone follows the established `cpSync to temp root` pattern so the real `worlds/<slug>/` tree is never touched.
 2. Spec verified at `specs/SPEC-42-story-state-debt-secret-clock-records.md` §Verification section (schema-level + validator-level + MCP-level + skill-level + backwards-compatibility — 5 sub-categories, ~15 individual bullets). Each spec §Verification bullet becomes a test sub-case in this capstone.
-3. Cross-skill / cross-tool shared boundary: this capstone exercises every Skill Category 2c story-pipeline skill that consumes the new classes (bootstrap, turn-cycle, prose-attach, commitment-block-authoring, health-audit), every machine-layer surface (validators, patch-engine, world-mcp, world-index), and the docs surfaces (contract, CLAUDE.md). The transitive-head dep on -014 (the docs ticket) composes all upstream surfaces — when -014's docs describe the post-implementation state and grep-proofs pass, all upstream tickets have shipped.
+3. Cross-skill / cross-tool shared boundary: this capstone exercises every Skill Category 2c story-pipeline skill that consumes the new classes (bootstrap, turn-cycle, prose-attach, commitment-block-authoring, health-audit), every machine-layer surface (validators, patch-engine, world-mcp, world-index), and the docs surfaces (contract, CLAUDE.md). Live dependency truthing after `archive/tickets/SPEC42STOSTADEB-014.md` completed uses the leaf set: archived skill-integration leaves -010 through -013 plus archived docs ticket -014. Together they cover the parallel-branch upstream graph.
 
 ## Architecture Check
 
-1. **Transitive-head dep per §Spec-Integration Ticket Shape**: depending on only -014 keeps the dep list short; the DAG already records the full upstream chain (014 → 001/002/003/005/006/007; 005/006/007 → 001/002/003; etc.). Listing every upstream ticket would duplicate the DAG without information gain.
+1. **Leaf-set dep per current spec-to-tickets guidance**: the upstream DAG is not a linear chain, so the capstone depends on the archived skill-integration leaves -010 / -011 / -012 / -013 plus archived docs ticket -014. The docs ticket reaches the foundation / predicate-doc surfaces it owns, while the skill leaves cover the parallel skill-integration branches.
 2. **Fixture-world copy via fs.cpSync**: the test never mutates the real `worlds/<slug>/` tree. cpSync to a temp root at test start; teardown removes the temp root.
 3. **Re-enumerated expected counts, not hardcoded**: per §Spec-Integration Ticket Shape — hardcoded counts become stale as canon grows; re-enumeration stays valid over time. The capstone computes expected counts from the fixture at test start.
 4. **One assertion per spec §Verification bullet**: each bullet becomes its own test sub-case; the spec's §Verification section IS the capstone's test matrix.
@@ -66,7 +66,7 @@ h. **Teardown**: remove the temp root.
 - Per-package tests (each upstream ticket owns its own per-package tests; capstone is the cross-package integration only)
 - Wall-clock performance assertions (SPEC-42 names no perf gate)
 - Production code changes (this is a test-only ticket)
-- Documentation updates (owned by SPEC42STOSTADEB-014)
+- Documentation updates (owned by archive/tickets/SPEC42STOSTADEB-014.md)
 
 ## Acceptance Criteria
 
