@@ -22,6 +22,8 @@
 
 **Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-008.md`)**: Phase C STINT edge extraction is landed in `tools/world-index`: `intention_holder` and `intention_supersedes` are registered in `STORY_EDGE_TYPES`, emitted for live `intention_record` story-bundle nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 22`). Remaining Phase C edge families are still owned by tickets 009-015 until later implementation notes supersede this line.
 
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-009.md`)**: Phase C STSTAT edge extraction is landed in `tools/world-index`: `status_entity` is registered in `STORY_EDGE_TYPES`, emitted for live `story_status_record` story-bundle nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 23`). Remaining Phase C edge families are still owned by tickets 010-015 until later implementation notes supersede this line.
+
 ---
 
 ## Problem Statement

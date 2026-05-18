@@ -366,6 +366,73 @@ test("intention supersession chains are walkable through supersedes edges", () =
   }
 });
 
+test("status records emit entity edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-ststat-edges-"));
+
+  try {
+    writeStoryStatus(root, "harborwatch", "STSTAT-1", [
+      "id: STSTAT-1",
+      "story_id: STORY-1",
+      "created_at_page: PG-3",
+      "supersedes: null",
+      "entity: STENT-1",
+      "life: alive",
+      "agency: free",
+      "location: STLOC-1",
+      "derived_from:",
+      "  - SE-1"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/status/STSTAT-1.yaml"
+    );
+
+    assert.deepEqual(
+      statusEdges(parsed.edges),
+      [
+        {
+          source_node_id: "harborwatch:STSTAT-1",
+          target_unresolved_ref: "harborwatch:STENT-1",
+          edge_type: "status_entity",
+          story_slug: "harborwatch"
+        }
+      ]
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("status records with empty entity emit no status edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-ststat-empty-"));
+
+  try {
+    writeStoryStatus(root, "harborwatch", "STSTAT-2", [
+      "id: STSTAT-2",
+      "story_id: STORY-1",
+      "created_at_page: PG-3",
+      "supersedes: null",
+      "entity: ''",
+      "life: unknown",
+      "agency: unknown",
+      "location: unknown",
+      "derived_from: []"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/status/STSTAT-2.yaml"
+    );
+
+    assert.deepEqual(statusEdges(parsed.edges), []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 function beliefEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
   source_node_id: string;
   target_unresolved_ref: string | null;
@@ -414,6 +481,22 @@ function intentionEdges(edges: Array<{ edge_type: string; source_node_id: string
     }));
 }
 
+function statusEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
+  source_node_id: string;
+  target_unresolved_ref: string | null;
+  edge_type: string;
+  story_slug: string | null;
+}> {
+  return edges
+    .filter((edge) => edge.edge_type.startsWith("status_"))
+    .map((edge) => ({
+      source_node_id: edge.source_node_id,
+      target_unresolved_ref: edge.target_unresolved_ref,
+      edge_type: edge.edge_type,
+      story_slug: edge.story_slug ?? null
+    }));
+}
+
 function writeStoryBelief(root: string, storySlug: string, beliefId: string, lines: string[]): void {
   const relativeDirectory = path.join(
     root,
@@ -454,4 +537,18 @@ function writeStoryIntention(root: string, storySlug: string, intentionId: strin
   );
   mkdirSync(relativeDirectory, { recursive: true });
   writeFileSync(path.join(relativeDirectory, `${intentionId}.yaml`), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStoryStatus(root: string, storySlug: string, statusId: string, lines: string[]): void {
+  const relativeDirectory = path.join(
+    root,
+    "worlds",
+    "fixture-world",
+    "stories",
+    storySlug,
+    "_source",
+    "status"
+  );
+  mkdirSync(relativeDirectory, { recursive: true });
+  writeFileSync(path.join(relativeDirectory, `${statusId}.yaml`), `${lines.join("\n")}\n`, "utf8");
 }

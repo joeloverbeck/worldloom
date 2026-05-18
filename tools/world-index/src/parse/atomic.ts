@@ -611,6 +611,12 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "story_status_record") {
+    for (const edge of edgesForStoryStatus(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   pushStoryRef("created_at_page", stringField(record, "created_at_page"));
   pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
@@ -714,6 +720,21 @@ function edgesForStoryIntention(
   const supersedes = stringField(record, "supersedes");
   if (supersedes) {
     edges.push(createStoryRefEdge(node.node_id, "intention_supersedes", storySlug, supersedes));
+  }
+
+  return edges;
+}
+
+function edgesForStoryStatus(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  const entity = stringField(record, "entity");
+  if (entity) {
+    edges.push(createStoryRefEdge(node.node_id, "status_entity", storySlug, entity));
   }
 
   return edges;
