@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — creates new `.claude/skills/branching-story-turn-cycle/references/mid-story-record-introduction.md` (per-class creation thresholds, supersede thresholds, minimum grounding requirements, required turn-cycle handling, validator checks, anti-patterns, and worked examples for CLK / STSEC / STQ / THR / STENT / SREL — lifted from SPEC-43 §Approach C).
-**Deps**: 001
+**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md
 
 ## Problem
 

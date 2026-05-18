@@ -1,6 +1,6 @@
 # SPEC43PRECAUSTO-001: `intro:<CLASS>(...)` Tag Grammar + Closed Trigger Vocabularies
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/validators/src/structural/midstory-introduction-utils.ts` (parser + closed trigger vocabulary constants for 6 record classes); new §5a section in `.claude/skills/_shared-templates/story-state-contract.md` documenting the tag grammar + closed trigger vocabularies. No impact on existing `non-propagation-tag-shape.ts` (structurally parallel; not consumed).
@@ -117,3 +117,25 @@ The utility module is not a Validator object; it exports parser + constants only
 
 1. `npm test --prefix tools/validators` (full validator package test pass — confirms current tests survive the new utility addition).
 2. `grep -nE "parseIntroTag|MIDSTORY_TRIGGERS_|INTRO_TAG_PATTERN" tools/validators/src/structural/midstory-introduction-utils.ts` (sanity grep that the named exports landed).
+
+## Outcome
+
+Completed: 2026-05-18
+
+Implemented the additive mid-story introduction parser contract in `tools/validators/src/structural/midstory-introduction-utils.ts`. The utility exports the six closed trigger vocabularies, `INTRO_TAG_PATTERN`, `ParsedIntroTag`, `MidstoryIntroductionTagError`, `parseIntroTag()`, and `extractIntroTags()`. The parser returns `null` when no `intro:` tag is present, throws a parseable tag error for malformed tags, accepts whitespace around delimiters, validates record-id list shape, and rejects triggers outside the per-class closed vocabulary.
+
+Added `.claude/skills/_shared-templates/story-state-contract.md` §5a with the grammar, regex witness, worked example, six per-class trigger tables, and parser/validator cross-references. No `tools/validators/src/public/registry.ts` changes were made; ticket 003 remains the first validator-registration owner.
+
+## Verification Result
+
+- `grep -nE "MIDSTORY_TRIGGERS_(CLK|STSEC|STQ|THR|STENT|SREL)" tools/validators/src/structural/midstory-introduction-utils.ts` returned exactly 6 closed-set constant export lines.
+- `grep -n "parseIntroTag\|extractIntroTags\|INTRO_TAG_PATTERN\|MidstoryIntroductionTagError" tools/validators/src/structural/midstory-introduction-utils.ts` returned the 4 named export lines.
+- `grep -nE "^### §?5a" .claude/skills/_shared-templates/story-state-contract.md` returned the §5a contract section header.
+- `grep -c "intro:" .claude/skills/_shared-templates/story-state-contract.md` returned `4`, proving the worked example and grammar references are present.
+- `git diff --check -- .codex/run-state/implement-spec-tickets.json .claude/skills/_shared-templates/story-state-contract.md tools/validators/src/structural/midstory-introduction-utils.ts archive/tickets/SPEC43PRECAUSTO-001.md` passed.
+- `npm test --prefix tools/validators` passed: 416 tests, 416 pass, 0 fail.
+
+## Deviations
+
+- The shared contract section is headed `### §5a...` rather than `## 5a...` so the accepted proof command `grep -nE "^### §?5a"` remains exact while the section still sits between §5 Closed Predicate DSL and §6 Action Routing.
+- The exported trigger constants use private backing arrays so the acceptance grep returns exactly one line per exported `MIDSTORY_TRIGGERS_<CLASS>` constant.

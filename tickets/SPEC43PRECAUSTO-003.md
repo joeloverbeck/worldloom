@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/validators/src/structural/midstory-record-introduction-grounding.ts` (generic introduction validator gating any mid-story-created CLK / STSEC / STQ / THR / STENT / SREL via the `intro:<CLASS>(...)` tag from ticket 001). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets; see Step 6.5 overlap note).
-**Deps**: 001, 002
+**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, 002
 
 ## Problem
 

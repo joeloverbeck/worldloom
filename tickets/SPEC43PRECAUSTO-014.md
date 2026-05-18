@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies three turn-cycle reference files: `references/phase-2-3-commitment-and-state-delta.md` (Phase 3 mid-story introduction subsection after SLT binding), `references/phase-4-5-belief-and-mystery.md` (Phase 4 belief-propagation hook for STSEC creation + same-event-creation-precedence rule), `references/phase-7-page-plan.md` (§10b extension covering newly-introduced CLK/STSEC/STQ render-relevant visibility).
-**Deps**: 001, 013
+**Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, 013
 
 ## Problem
 
