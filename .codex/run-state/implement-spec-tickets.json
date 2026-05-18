@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-45-story-state-provenance-indexing.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC45STOSTAPRO-002.md",
+  "last_ticket": "archive/tickets/SPEC45STOSTAPRO-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "d81e2aaf54990fc67be671e6a8dfa1b6e060fd40",
+  "last_work_commit": "c117168d37705ae1b85c2b6b647de8f5de047575",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC45STOSTAPRO-003.md",
+  "next_target": "tickets/SPEC45STOSTAPRO-004.md",
   "queue": [
-    "tickets/SPEC45STOSTAPRO-003.md",
     "tickets/SPEC45STOSTAPRO-004.md",
     "tickets/SPEC45STOSTAPRO-005.md",
     "tickets/SPEC45STOSTAPRO-006.md"
