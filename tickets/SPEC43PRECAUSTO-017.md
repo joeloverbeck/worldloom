@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new integration test file at `tools/validators/tests/integration/spec43-midstory-introduction.test.ts` exercising every SPEC-43 §Verification bullet end-to-end across all introduction validators + compatibility-drift reporting + snapshot normalization + observer firewall + future-shape rejection. Uses ticket 002's synthetic fixtures PLUS a fixture-world copy of `worlds/erotica-world/stories/red-bunny/` for the backwards-compatibility verification.
-**Deps**: 014, 015, 016
+**Deps**: archive/tickets/SPEC43PRECAUSTO-014.md, archive/tickets/SPEC43PRECAUSTO-015.md, archive/tickets/SPEC43PRECAUSTO-016.md
 
 ## Problem
 
