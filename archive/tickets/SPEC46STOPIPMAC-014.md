@@ -1,6 +1,6 @@
 # SPEC46STOPIPMAC-014: Phase C cross-cutting docs (MACHINE-FACING-LAYER.md story-edge enumeration)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/MACHINE-FACING-LAYER.md` (extend story-edge enumeration with 22 new edge types + placeholder-skip rationale + tick-history granularity note)
@@ -8,11 +8,11 @@
 
 ## Problem
 
-After Phase C implementation tickets 006-013 land, the 22 new story-edge types added to `STORY_EDGE_TYPES` (4 BEL + 2 SREL + 2 STINT + 1 STSTAT + 3 CLK + 4 STSEC + 3 STQ + 3 SE = 22) plus the placeholder-skip convention (applied to `CLK.driver` and `STSEC.holders[]`) and the tick-history granularity convention (`CLK.tick_history[].event` emits one edge per entry; payload fields stay on the source record) need to be reflected in the canonical machine-facing-layer docs. `docs/MACHINE-FACING-LAYER.md` is the operator-facing reference for the world-index surface; without the new edge enumeration, skill operators and audit operators cannot discover what graph-walks the new edges enable. Landing the docs atomically once all Phase C implementation tickets ship matches the §Cross-Cutting Docs Ticket Shape from spec-to-tickets — grep-proof acceptance against the post-implementation tree.
+Before this ticket, after Phase C implementation tickets 006-013 landed, the 22 new story-edge types added to `STORY_EDGE_TYPES` (4 BEL + 2 SREL + 2 STINT + 1 STSTAT + 3 CLK + 4 STSEC + 3 STQ + 3 SE = 22) plus the placeholder-skip convention and the tick-history granularity convention still needed to be reflected in the canonical machine-facing-layer docs. `docs/MACHINE-FACING-LAYER.md` is the operator-facing reference for the world-index surface; without the new edge enumeration, skill operators and audit operators could not discover what graph-walks the new edges enable. Landing the docs atomically once all Phase C implementation tickets shipped matched the §Cross-Cutting Docs Ticket Shape from spec-to-tickets — grep-proof acceptance against the post-implementation tree.
 
 ## Assumption Reassessment (2026-05-18)
 
-1. `docs/MACHINE-FACING-LAYER.md` exists and is the canonical operator-facing reference for the world-index, MCP server, patch engine, validator framework, and hooks per FOUNDATIONS §Machine-Facing Layer (cited at FOUNDATIONS line 537). The current story-edge enumeration covers the 14 pre-Phase-C edges; the new 22 edges contributed by sibling tickets 006-013 need to be enumerated, alongside the placeholder-skip and tick-history-granularity conventions.
+1. `docs/MACHINE-FACING-LAYER.md` exists and is the canonical operator-facing reference for the world-index, MCP server, patch engine, validator framework, and hooks per FOUNDATIONS §Machine-Facing Layer. Before this ticket, the doc did not enumerate the Phase C story-edge expansion; the 22 edges contributed by sibling tickets 006-013 needed to be enumerated alongside the placeholder-skip and tick-history-granularity conventions.
 2. `specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md` §Phase C Deliverable D-C7 names `docs/MACHINE-FACING-LAYER.md` story-edge enumeration as the docs target; §R-3 (Risks & Open Questions) names the placeholder-skip convention's rationale as the second documentation concern.
 3. Cross-skill boundary: `docs/MACHINE-FACING-LAYER.md` is consumed by skill operators authoring graph-walking queries, by integration-audit operators, and by readers cross-referencing FOUNDATIONS §Machine-Facing Layer. The docs update must enumerate every new edge type with its source class, target class, and semantic shape.
 4. FOUNDATIONS §Machine-Facing Layer motivating this ticket (cited at FOUNDATIONS line 537 — *"a phased machine-facing layer beside the human-facing markdown"*): the operator-facing docs are the canonical reference for the world-index surface; without the new edge enumeration, skill operators and audit operators cannot discover the graph-walks the new edges enable. The placeholder-skip and tick-history-granularity convention statements similarly preserve operator-facing transparency per the principle's "directly or via the documented ... pattern" framing.
@@ -33,15 +33,15 @@ After Phase C implementation tickets 006-013 land, the 22 new story-edge types a
 
 ### 1. Extend `docs/MACHINE-FACING-LAYER.md` story-edge enumeration
 
-Locate the story-edge enumeration section in `docs/MACHINE-FACING-LAYER.md` and:
-- Add the 22 new edge types to the enumeration, grouped by source class (BEL, SREL, STINT, STSTAT, CLK, STSEC, STQ, SE-extension). For each edge, name the source class, target class (per the Phase C table in spec §C), and semantic shape (one short sentence summarizing what the edge represents).
-- Add a sub-section documenting the **placeholder-skip convention**: edges emit only when the source field resolves to a known node-id prefix; `group:<name>`, `system`, `unknown`, and `narrator` placeholder values are silently skipped to keep the edge graph capturing only record-to-record relations. The convention applies to `CLK.driver` and `STSEC.holders[]`. The information remains on the source record retrievable via `get_record`.
-- Add a sub-section documenting the **tick-history granularity convention**: `clock_tick_event` edges encode one row per `tick_history[].event` field; the `delta` and `cause` payload fields stay on the source `CLK` record (not encoded as edge properties), matching SPEC-45's `creation_evidence` payload convention.
-- If the doc cites a current story-edge count (e.g., "14 story-edge types"), update to "36 story-edge types" per the post-Phase-C total.
+Added a `Story-Bundle Edge Types` section to `docs/MACHINE-FACING-LAYER.md` that:
+- Enumerates the 14 original story-edge types and the 22 SPEC-46 Phase C edge types, grouped by source class for the new entries.
+- Documents the **placeholder-skip convention**: edges emit only when the source field resolves to a structured record id; `group:<name>`, `system`, `unknown`, and `narrator` placeholder values are skipped. The convention applies to `CLK.driver`, `STSEC.holders[]`, and `SE.actor`.
+- Documents the **tick-history granularity convention**: `clock_tick_event` edges encode one row per `tick_history[].event`; `delta` and `cause` stay on the source `CLK` record.
+- States the post-Phase-C total as 36 story-bundle edge types.
 
 ### 2. Add a brief Out-of-Scope / Future note
 
-Add a brief note pointing to the deferred Priority 2 packets (dramatic-irony, social-pressure, reader-expectation, branch-possibility-space) that will consume the new edges, so doc readers know the 22 new edges are foundation for those packets but not the packets themselves.
+Added a brief future-consumer note pointing to deferred dramatic-irony, social-pressure, reader-expectation, and branch-possibility-space packets. The doc now states the 22 new edges are foundation for those packets but do not introduce the packets themselves.
 
 ## Files to Touch
 
@@ -80,3 +80,21 @@ Add a brief note pointing to the deferred Priority 2 packets (dramatic-irony, so
 2. `grep -n "placeholder\|group:\|narrator" docs/MACHINE-FACING-LAYER.md` (placeholder-skip convention documented)
 3. `grep -n "tick_history\|delta.*cause" docs/MACHINE-FACING-LAYER.md` (tick-history granularity documented)
 4. `grep -n "14 story\|14 edge" docs/MACHINE-FACING-LAYER.md` (returns nothing — any stale "14" count was updated to "36")
+
+## Outcome
+
+Completed: 2026-05-18
+
+`docs/MACHINE-FACING-LAYER.md` now documents the story-bundle edge graph surface after SPEC-46 Phase C: the 36-edge total, the 14 original story-edge families, and all 22 new edge types from BEL, SREL, STINT, STSTAT, CLK, STSEC, STQ, and SE. The same section documents placeholder-skip behavior and tick-history payload granularity, plus a short note that deferred render/audit packets are future consumers rather than delivered packet surfaces.
+
+## Verification Result
+
+- `grep -nE "belief_holder|belief_basis_event|belief_access_record|belief_opens|relationship_participant|relationship_derived_from|intention_holder|intention_supersedes|status_entity|clock_linked_record|clock_driver|clock_tick_event|secret_truth_anchor|secret_holder|secret_clue_carrier|secret_reveal_record|story_question_source|story_question_payoff_of|story_question_answer_record|event_actor|event_target|event_selected_storylet" docs/MACHINE-FACING-LAYER.md` — passed; all 22 new edge names appear.
+- `grep -n "placeholder\|group:\|narrator" docs/MACHINE-FACING-LAYER.md` — passed; placeholder-skip convention is documented.
+- `grep -n "tick_history\|delta.*cause" docs/MACHINE-FACING-LAYER.md` — passed; tick-history granularity is documented.
+- `grep -n "14 story\|14 edge" docs/MACHINE-FACING-LAYER.md` — expected no-match result; no stale 14-count wording remains.
+- `git diff --check -- docs/MACHINE-FACING-LAYER.md archive/tickets/SPEC46STOPIPMAC-014.md tickets/SPEC46STOPIPMAC-015.md` — passed after archival and dependency repair.
+
+## Deviations
+
+- The docs section also names `SE.actor` in the placeholder-skip convention because ticket 013's live-schema reassessment proved `actor: system | unknown` is valid SE syntax. This is same-seam truthing of the cross-cutting convention, not a new production behavior.

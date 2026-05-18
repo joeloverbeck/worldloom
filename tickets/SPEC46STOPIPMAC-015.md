@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-index/tests/types.test.ts` (verify existing registry-completeness assertion already updated by ticket 013), `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts` (new integration test following SPEC-45 fixture pattern)
-**Deps**: SPEC46STOPIPMAC-014
+**Deps**: archive/tickets/SPEC46STOPIPMAC-014.md
 
 ## Problem
 

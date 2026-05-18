@@ -58,6 +58,59 @@ The docs describe the intended steady-state contract, but any workflow should st
 | Inspect the patch-plan envelope and per-op payload contract before assembly | `describe_envelope_schema`, optionally filtered by `op_kind` |
 | Prove structural integrity | `world-validate <world> --structural` |
 
+## Story-Bundle Edge Types
+
+`world-index` emits 36 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, obligation/thread links, branch/page links, and SPEC-45 event provenance:
+
+- `world_entity_binding` — `STENT.world_ent_id` to a world-canon entity id.
+- `story_fact_derived_from` — `SF.derived_from_cf` to the originating CF.
+- `created_at_page` — story records with `created_at_page` / `provenance.created_at_page` to the creating `PG`.
+- `state_delta_create`, `state_delta_supersede` — `SE.state_delta.create[]` / `SE.state_delta.supersede[]` to affected story records.
+- `creation_evidence` — parseable `intro:<CLASS>(...)` evidence from the introduced record to its evidence records.
+- `opens_obligation`, `pays_off_obligation`, `complicates_obligation`, `transfers_obligation` — `SLT` obligation references to `OBL`.
+- `parent_page`, `leaf_page` — `PG` / `CHC` / `BR` page-tree links.
+- `dependent_fact` — `OBL.dependent_facts[]` to fact records.
+- `thread_obligation` — `THR.obligations[]` to obligation records.
+
+SPEC-46 extends that graph surface with 22 additional edge types for existing story-bundle record classes:
+
+| Source | Edge type | Target | Meaning |
+|---|---|---|---|
+| `BEL` | `belief_holder` | `STENT` | The actor or entity that holds the belief. |
+| `BEL` | `belief_basis_event` | `SE` | The event named by `basis.source_event`. |
+| `BEL` | `belief_access_record` | record | Records named by `basis.access_records[]`. |
+| `BEL` | `belief_opens` | record | Records opened by `consequences.opens[]`. |
+| `SREL` | `relationship_participant` | `STENT` | Each participant in the relationship. |
+| `SREL` | `relationship_derived_from` | record | Records named by `derived_from[]`. |
+| `STINT` | `intention_holder` | `STENT` | The actor or entity that owns the intention. |
+| `STINT` | `intention_supersedes` | `STINT` | The prior intention superseded by the current record. |
+| `STSTAT` | `status_entity` | `STENT` | The entity whose status is being recorded. |
+| `CLK` | `clock_linked_record` | record | Records named by `linked_records[]`. |
+| `CLK` | `clock_driver` | `STENT` | The record-id driver for the pressure clock. |
+| `CLK` | `clock_tick_event` | `SE` | The event named by each `tick_history[].event`. |
+| `STSEC` | `secret_truth_anchor` | `SF` / `BEL` / `DA` | The record named by `truth_anchor` when present. |
+| `STSEC` | `secret_holder` | `STENT` | Record-id holders named by `holders[]`. |
+| `STSEC` | `secret_clue_carrier` | record | The record named by each `clue_carriers[].record`. |
+| `STSEC` | `secret_reveal_record` | `BEL` / `SF` / `DA` / `STQ` | Records named by `reveal_records[]`. |
+| `STQ` | `story_question_source` | record | Records named by `source_records[]`. |
+| `STQ` | `story_question_payoff_of` | `STQ` | The setup question named by scalar `payoff_of`. |
+| `STQ` | `story_question_answer_record` | record | Records named by `answer_records[]`. |
+| `SE` | `event_actor` | `STENT` | The structured-id actor for the event. |
+| `SE` | `event_target` | record | Each record named by `targets[]`. |
+| `SE` | `event_selected_storylet` | `SLT` | The selected storylet named by `commitment.selected_slt_id`. |
+
+### Placeholder Skip Convention
+
+Story-bundle edges represent record-to-record graph links. When a source field permits placeholders, `world-index` emits an edge only when the value resolves to a structured record id. Placeholder values such as `group:<name>`, `system`, `unknown`, and `narrator` are silently skipped for edge emission. This applies to `CLK.driver`, `STSEC.holders[]`, and `SE.actor`. The skipped value remains on the source record and is retrievable with `get_record`.
+
+### Tick-History Granularity
+
+`clock_tick_event` emits one edge per `CLK.tick_history[].event`. The `delta` and `cause` payload fields are not encoded as edge properties; they stay on the source `CLK` record and should be read with `get_record` when the payload matters. This mirrors `creation_evidence`: edges carry traversal data, while entry-level payload stays on the record body.
+
+### Future Consumers
+
+The SPEC-46 edge expansion is foundation work for deferred render and audit packets such as dramatic-irony, social-pressure, reader-expectation, and branch-possibility-space. Those packets are not introduced by the edge enumeration itself.
+
 `world-index` schema migrations are also responsible for parser-vocabulary staleness. When a schema-version bump changes the `node_type` emitted for unchanged source content, the migration file must delete the rows that would be reclassified, delete dependent rows, and clear the affected `file_versions` entries so the next `world-index sync` re-parses those files. Comment-only migrations are valid only when no existing rows would be reclassified; `world-index verify` can flag drift but does not auto-correct this class of stale indexed vocabulary.
 
 ## Retrieval Tool Scope
