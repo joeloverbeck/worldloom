@@ -36,6 +36,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "critical_secret_clue_coverage_when_revealed",
       "secret_introduction_anchor_integrity",
       "secret_mystery_firewall_compliance",
+      "story_question_introduction_grounding_integrity",
       "story_question_payoff_integrity",
       "story_question_setup_predates_payoff",
       "story_question_grounding_integrity",

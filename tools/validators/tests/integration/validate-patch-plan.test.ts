@@ -181,7 +181,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     assert.equal(secretExecutions.length, 4);
     assert.ok(secretExecutions.every((execution) => execution.status === "skipped"));
     const storyQuestionExecutions = result.executions.filter((execution) => execution.name.startsWith("story_question_"));
-    assert.equal(storyQuestionExecutions.length, 4);
+    assert.equal(storyQuestionExecutions.length, 5);
     assert.ok(storyQuestionExecutions.every((execution) => execution.status === "skipped"));
 
     for (const execution of result.executions.filter(

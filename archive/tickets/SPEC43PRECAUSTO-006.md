@@ -1,14 +1,14 @@
 # SPEC43PRECAUSTO-006: `story_question_introduction_grounding_integrity` Validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — new `tools/validators/src/structural/story-question-introduction-grounding-integrity.ts` (STQ-specific introduction gate; extends or runs alongside existing `story-question-grounding-integrity.ts`). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
+**Engine Changes**: Yes — new `tools/validators/src/structural/story-question-introduction-grounding-integrity.ts` (STQ-specific introduction gate; runs alongside existing `story-question-grounding-integrity.ts`). Registered in `tools/validators/src/public/registry.ts` (shared file with sibling SPEC-43 tickets); same-seam registry/count assertions and validator README inventory were updated.
 **Deps**: archive/tickets/SPEC43PRECAUSTO-001.md, archive/tickets/SPEC43PRECAUSTO-002.md, archive/tickets/SPEC43PRECAUSTO-003.md
 
 ## Problem
 
-SPEC-43 §Approach D Table row 4 + §Approach C STQ rules + spec §Verification ("Future-shape `STQ` fails (`narrative_shape_forbidden_field`): `expected_payoff_mode` or `climax` field present") require an STQ-specific introduction validator that enforces: (a) for mid-story-created STQ, `source_event` equals the creating `SE`; (b) `source_records[]` exists in the bundle and is active at `created_at_page` (parent PG or same-event-created). Without this validator, an STQ could land with a `source_event` pointing at an unrelated past event, breaking the "same-event authority" corollary of SPEC-43 §Approach A. The existing `story-question-grounding-integrity.ts` validator covers general STQ grounding; this new validator extends it with mid-story-creation specific gates.
+At intake, SPEC-43 §Approach D Table row 4 + §Approach C STQ rules + spec §Verification required an STQ-specific introduction validator that enforces: (a) for mid-story-created STQ, `source_event` equals the creating `SE`; (b) `source_records[]` exists in the bundle and is active at `created_at_page` (parent PG or same-event-created). Without this validator, an STQ could land with a `source_event` pointing at an unrelated past event, breaking the "same-event authority" corollary of SPEC-43 §Approach A. The existing `story-question-grounding-integrity.ts` validator covers general STQ grounding; this ticket landed the mid-story-creation-specific sibling gate.
 
 ## Assumption Reassessment (2026-05-18)
 
@@ -17,6 +17,8 @@ SPEC-43 §Approach D Table row 4 + §Approach C STQ rules + spec §Verification 
 3. Cross-skill boundary under audit: this validator extends the existing `story_question_grounding_integrity` validator's surface. Per the spec's wording ("extends `story_question_grounding_integrity` or sibling"), the implementation may either (a) register as a separate Validator object running alongside the existing one, or (b) extend the existing validator's check list with the mid-story-specific gates. Implementer choice — recommendation: register separately for cleaner test isolation, parallel to other per-class introduction validators (004 / 005 / 007 / 008 / 009).
 4. FOUNDATIONS §Story Bundles §5c (Present Causal State) restated: STQ tracks PRESENT open-setup state, not FUTURE dramatic obligation. The `source_event = creating SE` rule enforces this at mid-story-creation time — the STQ must be born from the just-committed event, not from some earlier event being retconned into a future-shape promise.
 5. HARD-GATE / Canon Safety surface: per-commit Phase 9 gate gating mid-story STQ creation. Does not weaken Mystery Reserve firewall (STQ does not interact with MR directly).
+6. Implementation chose the sibling-validator path. The new validator runs from the same event-driven creation surface as the existing SPEC-43 CLK/STSEC introduction validators, so same-event-created STQ source records are accepted while root-bootstrap STQs and lifecycle updates are ignored.
+7. Package reassessment found same-seam registry inventory fallout: `tools/validators/tests/integration/spec04-verification.test.ts`, `tools/validators/tests/integration/validate-patch-plan.test.ts`, and `tools/validators/README.md` needed count/list updates after the new registration. The README also lacked the already-landed `secret_introduction_anchor_integrity`; this was corrected as adjacent inventory truthing.
 
 ## Architecture Check
 
@@ -31,9 +33,9 @@ SPEC-43 §Approach D Table row 4 + §Approach C STQ rules + spec §Verification 
 3. Composition with existing STQ validators → schema validation: a fixture that passes this validator continues to pass `story_question_grounding_integrity` + `story_question_payoff_integrity` + `story_question_setup_predates_payoff` (those validators are out of scope here).
 4. FOUNDATIONS §5c alignment → FOUNDATIONS alignment check: the validator never references future-shape predicates; STQ.setup_kind enum is preserved per existing schema.
 
-## What to Change
+## Landed Changes
 
-### 1. Create `tools/validators/src/structural/story-question-introduction-grounding-integrity.ts`
+### 1. Created `tools/validators/src/structural/story-question-introduction-grounding-integrity.ts`
 
 Validator object:
 - `name: "story_question_introduction_grounding_integrity"`.
@@ -44,23 +46,23 @@ Validator object:
   - Every id in `source_records[]` resolves to a record active at `created_at_page` (parent PG `state_snapshot.active_records.<class>[]` OR same-event `state_delta.create[]`).
 - Failure codes: `stq_intro_source_event_mismatch`, `stq_intro_source_not_active`.
 
-May import shared STQ-shape helpers from `story-question-utils.ts` (verified to exist in `tools/validators/src/structural/` listing).
+The validator uses the structural record query surface and event-driven creation detection, matching the SPEC-43 class-specific validator pattern.
 
-### 2. Register in `tools/validators/src/public/registry.ts`
+### 2. Registered in `tools/validators/src/public/registry.ts`
 
-Add import + array entry (coordinate slot ordering with tickets 003-005, 007-012 per §Step 6.5).
+Added import + array entry.
 
-### 3. Add test `tools/validators/tests/structural/story-question-introduction-grounding-integrity.test.ts`
+### 3. Added test `tools/validators/tests/structural/story-question-introduction-grounding-integrity.test.ts`
 
-Test cases (using ticket 002's fixtures):
+Test cases:
 - creation-pass: promise made via a DA letter, source_event = creating SE, source_records = [DA-letter-id, BEL-claim-id] → 0 failures.
 - creation-fail: STQ source_event points to an earlier SE, not the creating one → emits `stq_intro_source_event_mismatch`.
 - creation-fail: STQ source_records[] includes an id absent from parent active_records AND absent from same-event create[] → emits `stq_intro_source_not_active`.
 - lifecycle-still-valid: existing STQ answered via `answer_records[]` (no new creation) → 0 failures (validator does not fire on lifecycle).
 
-### 4. Update `tools/validators/tests/structural/registry.test.ts`
+### 4. Updated registry and inventory surfaces
 
-Add `story_question_introduction_grounding_integrity` to the validator-name assertion list (coordinate with tickets 003-005, 007-012 per §Step 6.5).
+Added `story_question_introduction_grounding_integrity` to the structural registry assertion, package registry counts, pre-apply skipped-STQ-validator count, and validator README inventory.
 
 ## Files to Touch
 
@@ -68,6 +70,9 @@ Add `story_question_introduction_grounding_integrity` to the validator-name asse
 - `tools/validators/src/public/registry.ts` (modify — shared with 8 sibling tickets)
 - `tools/validators/tests/structural/story-question-introduction-grounding-integrity.test.ts` (new)
 - `tools/validators/tests/structural/registry.test.ts` (modify — shared with 8 sibling tickets)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — registry count assertion)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — skipped STQ validator count)
+- `tools/validators/README.md` (modify — validator inventory)
 
 ## Out of Scope
 
@@ -80,8 +85,8 @@ Add `story_question_introduction_grounding_integrity` to the validator-name asse
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators -- story-question-introduction-grounding-integrity` (test file passes).
-2. `npm test --prefix tools/validators` (full validator package test pass).
+1. `cd tools/validators && npm run build && node --test dist/tests/structural/story-question-introduction-grounding-integrity.test.js` (test file passes).
+2. `cd tools/validators && npm test` (full validator package test pass).
 3. `grep -n "storyQuestionIntroductionGroundingIntegrity\|story_question_introduction_grounding_integrity" tools/validators/src/public/registry.ts` returns import + array entry.
 
 ### Invariants
@@ -93,10 +98,33 @@ Add `story_question_introduction_grounding_integrity` to the validator-name asse
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/story-question-introduction-grounding-integrity.test.ts` — 4 test cases per §What to Change item 3.
-2. `tools/validators/tests/structural/registry.test.ts` (modify) — adds the new validator to the name assertion (coordinate with tickets 003-005, 007-012 per §Step 6.5).
+1. `tools/validators/tests/structural/story-question-introduction-grounding-integrity.test.ts` — 7 test cases covering pass, mismatch, inactive source, same-event source, lifecycle ignore, root-bootstrap ignore, and applies_to scoping.
+2. `tools/validators/tests/structural/registry.test.ts` (modify) — adds the new validator to the name assertion.
+3. `tools/validators/tests/integration/spec04-verification.test.ts` (modify) — updates mechanized validator counts.
+4. `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify) — updates the skipped STQ-validator count in clean pre-apply.
 
 ### Commands
 
-1. `npm test --prefix tools/validators -- story-question-introduction-grounding-integrity` (targeted test pass).
-2. `npm test --prefix tools/validators` (full validator package test pass).
+1. `cd tools/validators && npm run build && node --test dist/tests/structural/story-question-introduction-grounding-integrity.test.js` (targeted test pass).
+2. `cd tools/validators && npm test` (full validator package test pass).
+
+## Outcome
+
+Completed 2026-05-18.
+
+This ticket landed the additive `story_question_introduction_grounding_integrity` structural validator. It detects STQs introduced by an SE's `state_delta.create[]`, skips root bootstrap STQs, verifies `source_event` equals the creating SE, and verifies every `source_records[]` id is parent-active or same-event-created. The validator is registered in `tools/validators/src/public/registry.ts`.
+
+Same-seam proof surfaces were updated: the focused structural test file, structural registry test, SPEC-04 mechanized-validator count, clean pre-apply skipped-STQ-validator count, and `tools/validators/README.md` validator inventory. No backwards-compatibility aliases or schema changes were introduced.
+
+## Verification Result
+
+1. `cd tools/validators && npm run build` — passed.
+2. `cd tools/validators && node --test dist/tests/structural/story-question-introduction-grounding-integrity.test.js` — passed, 7/7 tests.
+3. `cd tools/validators && npm test` — passed, 444/444 tests.
+
+The initially drafted command shape `npm test --prefix tools/validators -- story-question-introduction-grounding-integrity` was tried and proved to run the full package suite rather than a targeted file. Its first run failed only on same-seam registry/count assertions exposed by the new validator registration; those assertions were corrected before the final green package suite.
+
+## Deviations
+
+- The implementation did not import `story-question-utils.ts`; the event-driven introduction pattern from the existing CLK/STSEC class-specific validators was a cleaner fit because this validator must inspect creating SE records and same-event creates.
+- The README inventory correction also added missing `secret_introduction_anchor_integrity`, an already-landed sibling validator omitted from the package inventory.

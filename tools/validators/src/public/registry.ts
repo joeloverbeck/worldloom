@@ -28,6 +28,7 @@ import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-fi
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
+import { storyQuestionIntroductionGroundingIntegrity } from "../structural/story-question-introduction-grounding-integrity.js";
 import { storyQuestionGroundingIntegrity } from "../structural/story-question-grounding-integrity.js";
 import { storyQuestionPayoffIntegrity } from "../structural/story-question-payoff-integrity.js";
 import { storyQuestionSetupPredatesPayoff } from "../structural/story-question-setup-predates-payoff.js";
@@ -81,6 +82,7 @@ export const structuralValidators: readonly Validator[] = [
   criticalSecretClueCoverageWhenRevealed,
   secretIntroductionAnchorIntegrity,
   secretMysteryFirewallCompliance,
+  storyQuestionIntroductionGroundingIntegrity,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,
