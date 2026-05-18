@@ -104,7 +104,10 @@ export const STORY_EDGE_TYPES = [
   "relationship_derived_from",
   "intention_holder",
   "intention_supersedes",
-  "status_entity"
+  "status_entity",
+  "clock_linked_record",
+  "clock_driver",
+  "clock_tick_event"
 ] as const;
 
 export type StoryEdgeType = (typeof STORY_EDGE_TYPES)[number];

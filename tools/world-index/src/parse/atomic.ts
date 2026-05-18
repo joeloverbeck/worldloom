@@ -617,6 +617,12 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "pressure_clock_record") {
+    for (const edge of edgesForStoryClock(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   pushStoryRef("created_at_page", stringField(record, "created_at_page"));
   pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
@@ -735,6 +741,32 @@ function edgesForStoryStatus(
   const entity = stringField(record, "entity");
   if (entity) {
     edges.push(createStoryRefEdge(node.node_id, "status_entity", storySlug, entity));
+  }
+
+  return edges;
+}
+
+function edgesForStoryClock(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  for (const target of stringArrayField(record, "linked_records")) {
+    edges.push(createStoryRefEdge(node.node_id, "clock_linked_record", storySlug, target));
+  }
+
+  const driver = stringField(record, "driver");
+  if (driver && isStoryRecordReference(driver)) {
+    edges.push(createStoryRefEdge(node.node_id, "clock_driver", storySlug, driver));
+  }
+
+  for (const tick of recordArrayField(record, "tick_history")) {
+    const event = stringField(tick, "event");
+    if (event) {
+      edges.push(createStoryRefEdge(node.node_id, "clock_tick_event", storySlug, event));
+    }
   }
 
   return edges;
@@ -948,6 +980,14 @@ function stringArrayField(record: Record<string, unknown>, field: string, nested
   }
   const value = container[field];
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function recordArrayField(record: Record<string, unknown>, field: string): Array<Record<string, unknown>> {
+  return arrayOfRecords(record[field]);
+}
+
+function isStoryRecordReference(value: string): boolean {
+  return /^[A-Z]+-[0-9]+$/.test(value);
 }
 
 function arrayOfRecords(value: unknown): Array<Record<string, unknown>> {

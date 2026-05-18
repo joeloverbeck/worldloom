@@ -433,6 +433,166 @@ test("status records with empty entity emit no status edges", () => {
   }
 });
 
+test("clock records emit linked-record, driver, and tick-event edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-clock-edges-"));
+
+  try {
+    writeStoryClock(root, "harborwatch", "CLK-1", [
+      "id: CLK-1",
+      "story_id: STORY-1",
+      "created_at_page: PG-4",
+      "supersedes: null",
+      "title: Harbor gate deadline",
+      "clock_kind: deadline",
+      "driver: STENT-1",
+      "linked_records:",
+      "  - OBL-1",
+      "  - STQ-1",
+      "value: 2",
+      "max: 6",
+      "salience: high",
+      "visibility: public",
+      "thresholds: []",
+      "tick_history:",
+      "  - event: SE-1",
+      "    delta: 1",
+      "    cause: The first bell rang.",
+      "  - event: SE-2",
+      "    delta: 1",
+      "    cause: The tide turned.",
+      "  - event: SE-3",
+      "    delta: -1",
+      "    cause: The watch bought time.",
+      "status: active",
+      "resolution_event: null"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/clocks/CLK-1.yaml"
+    );
+
+    assert.deepEqual(
+      clockEdges(parsed.edges),
+      [
+        {
+          source_node_id: "harborwatch:CLK-1",
+          target_unresolved_ref: "harborwatch:OBL-1",
+          edge_type: "clock_linked_record",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:CLK-1",
+          target_unresolved_ref: "harborwatch:STQ-1",
+          edge_type: "clock_linked_record",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:CLK-1",
+          target_unresolved_ref: "harborwatch:STENT-1",
+          edge_type: "clock_driver",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:CLK-1",
+          target_unresolved_ref: "harborwatch:SE-1",
+          edge_type: "clock_tick_event",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:CLK-1",
+          target_unresolved_ref: "harborwatch:SE-2",
+          edge_type: "clock_tick_event",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:CLK-1",
+          target_unresolved_ref: "harborwatch:SE-3",
+          edge_type: "clock_tick_event",
+          story_slug: "harborwatch"
+        }
+      ]
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("clock records with empty nullable fields emit no clock edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-clock-empty-"));
+
+  try {
+    writeStoryClock(root, "harborwatch", "CLK-2", [
+      "id: CLK-2",
+      "story_id: STORY-1",
+      "created_at_page: PG-4",
+      "supersedes: null",
+      "title: Empty clock",
+      "clock_kind: danger",
+      "driver: ''",
+      "linked_records: []",
+      "value: 0",
+      "max: 4",
+      "salience: low",
+      "visibility: hidden",
+      "thresholds: []",
+      "tick_history: []",
+      "status: paused",
+      "resolution_event: null"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/clocks/CLK-2.yaml"
+    );
+
+    assert.deepEqual(clockEdges(parsed.edges), []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("clock driver placeholders do not emit driver edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-clock-placeholder-"));
+
+  try {
+    for (const [index, driver] of ["system", "unknown", "group:watchmen"].entries()) {
+      writeStoryClock(root, "harborwatch", `CLK-${index + 3}`, [
+        `id: CLK-${index + 3}`,
+        "story_id: STORY-1",
+        "created_at_page: PG-4",
+        "supersedes: null",
+        `title: Placeholder clock ${index + 1}`,
+        "clock_kind: faction",
+        `driver: ${driver}`,
+        "linked_records: []",
+        "value: 1",
+        "max: 4",
+        "salience: medium",
+        "visibility: factional",
+        "thresholds: []",
+        "tick_history: []",
+        "status: active",
+        "resolution_event: null"
+      ]);
+    }
+
+    const parsed = ["CLK-3", "CLK-4", "CLK-5"].flatMap((clockId) =>
+      parseStoryBundleSourceFile(
+        root,
+        "fixture-world",
+        `stories/harborwatch/_source/clocks/${clockId}.yaml`
+      ).edges
+    );
+
+    assert.deepEqual(clockEdges(parsed), []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 function beliefEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
   source_node_id: string;
   target_unresolved_ref: string | null;
@@ -497,6 +657,22 @@ function statusEdges(edges: Array<{ edge_type: string; source_node_id: string; t
     }));
 }
 
+function clockEdges(edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>): Array<{
+  source_node_id: string;
+  target_unresolved_ref: string | null;
+  edge_type: string;
+  story_slug: string | null;
+}> {
+  return edges
+    .filter((edge) => edge.edge_type.startsWith("clock_"))
+    .map((edge) => ({
+      source_node_id: edge.source_node_id,
+      target_unresolved_ref: edge.target_unresolved_ref,
+      edge_type: edge.edge_type,
+      story_slug: edge.story_slug ?? null
+    }));
+}
+
 function writeStoryBelief(root: string, storySlug: string, beliefId: string, lines: string[]): void {
   const relativeDirectory = path.join(
     root,
@@ -551,4 +727,18 @@ function writeStoryStatus(root: string, storySlug: string, statusId: string, lin
   );
   mkdirSync(relativeDirectory, { recursive: true });
   writeFileSync(path.join(relativeDirectory, `${statusId}.yaml`), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStoryClock(root: string, storySlug: string, clockId: string, lines: string[]): void {
+  const relativeDirectory = path.join(
+    root,
+    "worlds",
+    "fixture-world",
+    "stories",
+    storySlug,
+    "_source",
+    "clocks"
+  );
+  mkdirSync(relativeDirectory, { recursive: true });
+  writeFileSync(path.join(relativeDirectory, `${clockId}.yaml`), `${lines.join("\n")}\n`, "utf8");
 }

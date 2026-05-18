@@ -24,6 +24,8 @@
 
 **Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-009.md`)**: Phase C STSTAT edge extraction is landed in `tools/world-index`: `status_entity` is registered in `STORY_EDGE_TYPES`, emitted for live `story_status_record` story-bundle nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 23`). Remaining Phase C edge families are still owned by tickets 010-015 until later implementation notes supersede this line.
 
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-010.md`)**: Phase C CLK edge extraction is landed in `tools/world-index`: `clock_linked_record`, `clock_driver`, and `clock_tick_event` are registered in `STORY_EDGE_TYPES`, emitted for live `pressure_clock_record` story-bundle nodes, and covered by parser-level tests plus the current registry count (`STORY_EDGE_TYPES.length === 26`). Placeholder clock drivers (`system`, `unknown`, and `group:<name>`) intentionally do not emit `clock_driver` edges. Remaining Phase C edge families are still owned by tickets 011-015 until later implementation notes supersede this line.
+
 ---
 
 ## Problem Statement
