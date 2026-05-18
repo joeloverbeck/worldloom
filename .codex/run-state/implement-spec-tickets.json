@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-46-story-pipeline-machine-facing-foundation-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC46STOPIPMAC-007.md",
+  "last_ticket": "archive/tickets/SPEC46STOPIPMAC-008.md",
   "last_result": "completed_archived",
-  "last_work_commit": "c66b95d0fcc408f195059fc6fcc8270f5ea2dec7",
+  "last_work_commit": "7e368d13d28f12b08097f16e83cc2c0c59374de6",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC46STOPIPMAC-008.md",
+  "next_target": "tickets/SPEC46STOPIPMAC-009.md",
   "queue": [
-    "tickets/SPEC46STOPIPMAC-008.md",
     "tickets/SPEC46STOPIPMAC-009.md",
     "tickets/SPEC46STOPIPMAC-010.md",
     "tickets/SPEC46STOPIPMAC-011.md",
@@ -23,6 +22,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked worktree clean; expected ignored artifacts remain under tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, and tools/world-mcp/node_modules",
+  "dirty_state": "tracked worktree clean after state commit; expected ignored artifacts remain under tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, and tools/world-mcp/node_modules",
   "updated_at": "2026-05-18"
 }
