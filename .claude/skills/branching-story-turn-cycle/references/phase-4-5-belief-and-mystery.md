@@ -2,6 +2,13 @@
 
 ## Phase 4: Update belief and visibility state
 
+Before belief propagation, apply any instantiated new-class state transitions from `SE.state_delta`:
+
+- **CLK pressure clocks.** When the accepted event advances or resolves an active `CLK`, emit `tick_pressure_clock` with `target_clock_id`, `event: SE-<integer>`, nonzero `delta`, and a concrete `cause`; use `resolve_pressure_clock` when the clock is resolved without another tick. If a tick crosses one or more `CLK.thresholds[].at` values, materialize the threshold's `effects.create[]`, `effects.supersede[]`, and `effects.close[]` entries in the same `SE.state_delta` after resolving any `bound:<alias>` targets from Phase 2. Do not encode clock progress by directly editing prior CLK YAML or by inventing a prose-only clock note.
+- **STSEC story secrets.** When the event discovers a clue carrier, emit `mark_secret_clue_discovered` for the carrier record and discoverer. When the event reveals the secret, emit `reveal_story_secret` with `reveal_event: SE-<integer>` and the BEL / SF / DA / STQ records that carry the revealed truth. A STSEC reveal is a secrecy / betrayal / deception event for this phase, so witness propagation below is mandatory: create or supersede the required `BEL` records for direct and indirect witnesses, or record closed-set non-propagation tags.
+- **STQ open setups.** When the event answers or pays off an open `STQ`, emit `answer_story_question` with `status: answered | paid_off`, `answer_event: SE-<integer>`, and the answer records that prove the closure. When the event intentionally abandons an open setup, emit `abandon_story_question` with a non-empty `abandonment_rationale`. Never add prohibited future-shape fields such as `expected_payoff_mode`, `act_position`, `midpoint`, `climax`, or `dramatic_curve_position`; `STQ` remains present-causal open-setup state per shared contract §4.5.16.
+- **Snapshot handoff.** Ensure Phase 6 recomputes `PG.state_snapshot.active_records.CLK`, `.STSEC`, and `.STQ` from the post-delta active set. Newly resolved / revealed / answered / abandoned records remain active or close only according to their class lifecycle and the patch-engine / validator semantics; do not remove an id from the snapshot merely because it was mentioned in a delta.
+
 For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL` records per shared contract §4.1 + FOUNDATIONS §Story Bundles §6a:
 
 - First compute `expected_witnesses` for the event:

@@ -75,7 +75,7 @@ Add a fourth check for CLK over-modeling. The check:
 - CLK/STSEC/STQ class foundations — owned by SPEC42STOSTADEB-001 / -002 / -003
 - Per-class validators — owned by SPEC42STOSTADEB-005 / -006 / -007
 - Shared validator extensions — owned by archive/tickets/SPEC42STOSTADEB-008.md
-- Turn-cycle integration — owned by SPEC42STOSTADEB-009
+- Turn-cycle integration — landed in `archive/tickets/SPEC42STOSTADEB-009.md`
 - Bootstrap optional seeding — owned by SPEC42STOSTADEB-010
 - Commitment-block-authoring extension — owned by SPEC42STOSTADEB-011
 - Prose-attach verification — owned by SPEC42STOSTADEB-013

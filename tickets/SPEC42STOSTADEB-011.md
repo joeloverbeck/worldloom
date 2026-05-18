@@ -51,7 +51,7 @@ Each new entry follows the existing 11-entry format (one bullet per target, with
 - CLK/STSEC/STQ class foundations — owned by SPEC42STOSTADEB-001 / -002 / -003
 - Per-class predicates — owned by SPEC42STOSTADEB-005 / -006 / -007
 - Health-audit checks consuming the new coverage gaps — owned by SPEC42STOSTADEB-012
-- Turn-cycle integration — owned by SPEC42STOSTADEB-009
+- Turn-cycle integration — landed in `archive/tickets/SPEC42STOSTADEB-009.md`
 - Bootstrap optional seeding — owned by SPEC42STOSTADEB-010
 - Prose-attach verification — owned by SPEC42STOSTADEB-013
 - Cross-class contract doc updates — owned by SPEC42STOSTADEB-014

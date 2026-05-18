@@ -15,14 +15,14 @@ The per-class foundation tickets (SPEC42STOSTADEB-001 / -002 / -003) each touch 
 <!-- Items 1-3 always required. Items 4+ are a menu; include only those matching this ticket's scope and renumber surviving items sequentially starting from 4. Lists like 1, 2, 3, 14 are malformed output. -->
 
 1. Codebase verified at Step 2 codebase validation (2026-05-17): `.claude/skills/_shared-templates/story-state-contract.md` exists; `CLAUDE.md` exists with a Story Bundles section enumerating the current 17 record classes (verified in CLAUDE.md content already in context for this session). The four cross-class docs surfaces (§5, §6, §8, CLAUDE.md inventory) are NOT touched by any per-class foundation ticket — they are correctly scoped to this cross-cutting docs ticket per §Cross-Cutting Docs Ticket Shape.
-2. Spec verified at `specs/SPEC-42-story-state-debt-secret-clock-records.md` §Deliverables "Canonical contract updates" section enumerates the four cross-class surfaces; §Deliverables "Documentation" section names the CLAUDE.md update; SPEC-42 §Risks "Phase 4 page-plan section addition" recommendation: §10b is per-page-computed (not inlined verbatim like §2 / §3 / §19) — this ticket documents the §10b SECTION DESCRIPTION in §8, but the per-page-computed RENDERING is implemented by SPEC42STOSTADEB-009.
+2. Spec verified at `specs/SPEC-42-story-state-debt-secret-clock-records.md` §Deliverables "Canonical contract updates" section enumerates the four cross-class surfaces; §Deliverables "Documentation" section names the CLAUDE.md update; SPEC-42 §Risks "Phase 4 page-plan section addition" recommendation: §10b is per-page-computed (not inlined verbatim like §2 / §3 / §19) — this ticket documents the §10b SECTION DESCRIPTION in §8, while the per-page-computed RENDERING landed in `archive/tickets/SPEC42STOSTADEB-009.md`.
 3. Cross-skill / cross-tool shared boundary: the shared `story-state-contract.md` is the canonical reference for all Skill Category 2c story-pipeline skills. Cross-class docs surfaces (§5 predicate list, §6 integration matrix, §8 page-plan section) describe pipeline-wide conventions that all 7 story-pipeline skills consume. The atomic landing of this ticket (after all upstream tickets) ensures the docs describe the actual post-implementation state, not a partial state.
 
 ## Architecture Check
 
 1. **Cross-cutting docs ticket per §Cross-Cutting Docs Ticket Shape**: all four docs surfaces require all upstream implementation tickets to have shipped for the docs to land coherently. Without atomic landing, individual ticket-level docs updates would create staleness windows (e.g., §5 predicate list partially populated with CLK predicates but not STSEC/STQ; §6 integration matrix showing CLK row but not STSEC/STQ rows).
 2. **`Deps: lists every upstream implementation ticket**: unlike §Spec-Integration Ticket Shape (which uses transitive-head dep), docs tickets reference each surface independently per the §Cross-Cutting Docs Ticket Shape guidance — the §5 predicate list grows by 4 entries per upstream ticket (-005 / -006 / -007); the §6 integration matrix grows by one row per class (-001 / -002 / -003); CLAUDE.md inventory grows by 3 entries (one per class). Enumerating every upstream ticket in Deps makes the docs-to-surface relationship explicit.
-3. **§10b page-plan section: description here, rendering elsewhere**: this ticket adds the §10b section DESCRIPTION to §8 of the contract; SPEC42STOSTADEB-009 implements the per-page-computed RENDERING in turn-cycle Phase 7. The two-ticket split keeps the docs canonical description (§8) separate from the skill-implementation logic (Phase 7).
+3. **§10b page-plan section: description here, rendering elsewhere**: this ticket adds the §10b section DESCRIPTION to §8 of the contract; `archive/tickets/SPEC42STOSTADEB-009.md` implements the per-page-computed RENDERING in turn-cycle Phase 7. The two-ticket split keeps the docs canonical description (§8) separate from the skill-implementation logic (Phase 7).
 
 ## Verification Layers
 
@@ -49,7 +49,7 @@ Modify §6 (story-pipeline integration matrix). Add 3 new rows for CLK / STSEC /
 
 ### 3. story-state-contract.md §8 — page-plan §10b section description
 
-Modify §8 (page-plan minimum contract). Add a new §10b section description: "**§10b — Open Setups, Active Clocks, Hidden Secrets** (per-page-computed, not inlined verbatim). Renders the current page's active CLK records (value/max + nearest threshold + salience), active STSEC records (status + holders + carrier discovery count), and active STQ records (status + salience + audience_visibility). Omitted entirely when all three sets are empty. Sub-sections render only when relevant content exists. Implemented by `branching-story-turn-cycle` Phase 7 per SPEC42STOSTADEB-009."
+Modify §8 (page-plan minimum contract). Add a new §10b section description: "**§10b — Open Setups, Active Clocks, Hidden Secrets** (per-page-computed, not inlined verbatim). Renders the current page's active CLK records (value/max + nearest threshold + salience), active STSEC records (status + holders + carrier discovery count), and active STQ records (status + salience + audience_visibility). Omitted entirely when all three sets are empty. Sub-sections render only when relevant content exists. Implemented by `branching-story-turn-cycle` Phase 7 per `archive/tickets/SPEC42STOSTADEB-009.md`."
 
 ### 4. CLAUDE.md Story Bundles inventory extension
 
@@ -65,7 +65,7 @@ Modify `CLAUDE.md` Story Bundles section. The inventory list of story-bundle rec
 - CLK/STSEC/STQ class foundations (incl. §3 catalog rows, §4.6 / §4.7 / §4.8 per-class schemas, §4.2 active_records enum extension) — owned by SPEC42STOSTADEB-001 / -002 / -003
 - Per-class validators + predicate-grammar parser extensions — owned by SPEC42STOSTADEB-005 / -006 / -007
 - Shared validator extensions — owned by archive/tickets/SPEC42STOSTADEB-008.md
-- §10b per-page-computed RENDERING in turn-cycle Phase 7 — owned by SPEC42STOSTADEB-009
+- §10b per-page-computed RENDERING in turn-cycle Phase 7 — landed in `archive/tickets/SPEC42STOSTADEB-009.md`
 - MCP retrieval surface — owned by archive/tickets/SPEC42STOSTADEB-004.md
 - Other skill integrations — owned by SPEC42STOSTADEB-010 through -013
 

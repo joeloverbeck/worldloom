@@ -4,11 +4,11 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `branching-story-prose-attach` SKILL.md Phase 4 (prose-vs-state checks) to verify that rendered prose mentions clock-tick events present in the page's SE state-delta AND discloses revealed secrets when STSEC.status flips to `revealed`; surfaces findings as prose-receipt observations (not engine HARD-REJECTs); no new prose-attach phases introduced
-**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, archive/tickets/SPEC42STOSTADEB-003.md, SPEC42STOSTADEB-009
+**Deps**: archive/tickets/SPEC42STOSTADEB-001.md, archive/tickets/SPEC42STOSTADEB-002.md, archive/tickets/SPEC42STOSTADEB-003.md, archive/tickets/SPEC42STOSTADEB-009.md
 
 ## Problem
 
-Once turn-cycle integration (SPEC42STOSTADEB-009) lands clock-tick and secret-reveal mechanisms during page commits, the rendered prose at `pages-prose/PG-<integer>.md` must reflect those state transitions for the bundle to remain coherent — a CLK that ticks but isn't mentioned in prose leaves readers without the dramatic-pressure cue; a STSEC that flips to `revealed` but the prose doesn't disclose creates state/prose divergence. The existing prose-attach Phase 4 (prose-vs-state checks per SPEC-42 brainstorm agent reports) handles BEL / SF / DA divergence but doesn't yet cover the new classes. This ticket extends Phase 4 with two new prose verification checks.
+Now that turn-cycle integration (`archive/tickets/SPEC42STOSTADEB-009.md`) lands clock-tick and secret-reveal mechanisms during page commits, the rendered prose at `pages-prose/PG-<integer>.md` must reflect those state transitions for the bundle to remain coherent — a CLK that ticks but isn't mentioned in prose leaves readers without the dramatic-pressure cue; a STSEC that flips to `revealed` but the prose doesn't disclose creates state/prose divergence. The existing prose-attach Phase 4 (prose-vs-state checks per SPEC-42 brainstorm agent reports) handles BEL / SF / DA divergence but doesn't yet cover the new classes. This ticket extends Phase 4 with two new prose verification checks.
 
 ## Assumption Reassessment (2026-05-17)
 
@@ -61,7 +61,7 @@ If the prose-receipt schema (`pages-prose-receipts/PG-<integer>.yaml`) has a str
 - CLK/STSEC/STQ class foundations — owned by SPEC42STOSTADEB-001 / -002 / -003
 - Per-class validators — owned by SPEC42STOSTADEB-005 / -006 / -007
 - Shared validator extensions — owned by archive/tickets/SPEC42STOSTADEB-008.md
-- Turn-cycle integration producing the SE.state_delta entries this ticket inspects — owned by SPEC42STOSTADEB-009
+- Turn-cycle integration producing the SE.state_delta entries this ticket inspects — landed in `archive/tickets/SPEC42STOSTADEB-009.md`
 - Bootstrap optional seeding — owned by SPEC42STOSTADEB-010
 - Commitment-block-authoring extension — owned by SPEC42STOSTADEB-011
 - Health-audit bundle-wide checks — owned by SPEC42STOSTADEB-012
