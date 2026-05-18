@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-42-story-state-debt-secret-clock-records.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC42STOSTADEB-007.md",
+  "last_ticket": "archive/tickets/SPEC42STOSTADEB-008.md",
   "last_result": "completed_and_archived",
-  "last_work_commit": "49d78af17e16139ec5bbd0169de15689e14636fb",
+  "last_work_commit": "a010f3e44abfb028ae2ea243f8b168b15dcd5d1d",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC42STOSTADEB-008.md",
+  "next_target": "tickets/SPEC42STOSTADEB-009.md",
   "queue": [
-    "tickets/SPEC42STOSTADEB-008.md",
     "tickets/SPEC42STOSTADEB-009.md",
     "tickets/SPEC42STOSTADEB-010.md",
     "tickets/SPEC42STOSTADEB-011.md",
@@ -23,6 +22,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "expected tracked worktree clean after SPEC42STOSTADEB-007 state commit; expected ignored artifacts remain under tools/validators/dist/ and tools/validators/node_modules/",
+  "dirty_state": "pre-existing unrelated modified .codex/skills/implement-spec-tickets/SKILL.md left unstaged; expected ignored artifacts remain under tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
   "updated_at": "2026-05-18"
 }
