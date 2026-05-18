@@ -22,10 +22,6 @@ import { cleanup, createAtomicRepoRoot } from "../helpers/atomic-fixture.js";
 
 const WORLD_SLUG = "atomic-world";
 const STORY_SLUG = "spec45-provenance";
-const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..", "..", "..", "..");
-const RED_BUNNY_WORLD = path.join(REPO_ROOT, "worlds", "erotica-world");
-const RED_BUNNY_SOURCE = path.join(RED_BUNNY_WORLD, "stories", "red-bunny", "_source");
-const RED_BUNNY_SE_1 = path.join(RED_BUNNY_SOURCE, "events", "SE-1.yaml");
 
 interface EdgeSummary {
   source_node_id: string;
@@ -248,22 +244,28 @@ test("SPEC-45 world-index capstone builds synthetic story provenance edges", () 
   }
 });
 
-test("SPEC-45 world-index capstone rebuilds red-bunny from a temp copy without mutating source files", () => {
-  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-spec45-red-bunny-"));
-  const before = statSync(RED_BUNNY_SE_1).mtimeMs;
+test("SPEC-45 world-index capstone rebuilds a story temp copy without mutating source files", () => {
+  const sourceRoot = createAtomicRepoRoot(WORLD_SLUG);
+  const copiedRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-spec45-copy-"));
 
   try {
-    const copiedWorld = path.join(root, "worlds", "erotica-world");
+    addSyntheticProvenanceStory(sourceRoot);
+
+    const sourceWorld = path.join(sourceRoot, "worlds", WORLD_SLUG);
+    const copiedWorld = path.join(copiedRoot, "worlds", WORLD_SLUG);
     mkdirSync(path.dirname(copiedWorld), { recursive: true });
-    cpSync(RED_BUNNY_WORLD, copiedWorld, { recursive: true });
+    cpSync(sourceWorld, copiedWorld, { recursive: true });
     rmSync(path.join(copiedWorld, "_index"), { recursive: true, force: true });
 
-    const expected = expectedCountsFromEvents(path.join(copiedWorld, "stories", "red-bunny", "_source"));
+    const copiedSe1 = path.join(copiedWorld, "stories", STORY_SLUG, "_source", "events", "SE-1.yaml");
+    const before = statSync(copiedSe1).mtimeMs;
+    const expected = expectedCountsFromEvents(path.join(copiedWorld, "stories", STORY_SLUG, "_source"));
 
-    assert.equal(build(root, "erotica-world", { quiet: true }), 0);
-    assert.deepEqual(countRows(edgeRows(root, "erotica-world", "red-bunny")), expected);
-    assert.equal(statSync(RED_BUNNY_SE_1).mtimeMs, before);
+    assert.equal(build(copiedRoot, WORLD_SLUG, { quiet: true }), 0);
+    assert.deepEqual(countRows(edgeRows(copiedRoot, WORLD_SLUG, STORY_SLUG)), expected);
+    assert.equal(statSync(copiedSe1).mtimeMs, before);
   } finally {
-    rmSync(root, { recursive: true, force: true });
+    cleanup(sourceRoot);
+    rmSync(copiedRoot, { recursive: true, force: true });
   }
 });
