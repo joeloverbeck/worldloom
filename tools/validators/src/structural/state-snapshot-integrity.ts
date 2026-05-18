@@ -7,7 +7,7 @@ import {
   stringValue
 } from "./utils.js";
 
-const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|STSTAT|SLT|CHC|BR|PG)-\d+$/;
+const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|SLT|CHC|BR|PG)-\d+$/;
 const MYSTERY_EVIDENCE_ID = /^(?:SF|BEL|DA|SE)-\d+$/;
 const MYSTERY_EVIDENCE_REQUIRED_STATUSES = new Set([
   "clue_added",
@@ -95,6 +95,10 @@ export const stateSnapshotIntegrity: Validator = {
       for (const reference of storyLocalReferences(snapshot, "state_snapshot")) {
         const target = maps.byId.get(reference.id);
         if (target !== undefined) {
+          const inactive = inactiveActiveRecordVerdict(page, pageLabel, reference, target);
+          if (inactive !== undefined) {
+            verdicts.push(inactive);
+          }
           continue;
         }
         if (maps.worldLevelIds.has(reference.id)) {
@@ -257,6 +261,54 @@ function validateMysteryEvidence(
     });
   });
   return verdicts;
+}
+
+function inactiveActiveRecordVerdict(
+  page: IndexedRecord,
+  pageLabel: string,
+  reference: StoryReference,
+  target: IndexedRecord
+): Verdict | undefined {
+  const activeRecordMatch = reference.path.match(/^state_snapshot\.active_records\.(CLK|STSEC|STQ)\[\d+\]$/);
+  if (activeRecordMatch === null) {
+    return undefined;
+  }
+
+  const parsed = asPlainRecord(target.parsed);
+  const status = stringValue(parsed.status);
+  const recordClass = activeRecordMatch[1]!;
+  const allowed = allowedActiveStatuses(recordClass);
+  if (status !== undefined && allowed.has(status)) {
+    return undefined;
+  }
+
+  return {
+    validator: "state_snapshot_integrity",
+    severity: "fail",
+    code: "state_snapshot_integrity.inactive_active_record",
+    message: `${pageLabel} state_snapshot active_records.${recordClass} lists ${reference.id} with inactive status ${status ?? "<missing>"}`,
+    location: locationFor(page),
+    detail: {
+      reference_id: reference.id,
+      reference_path: reference.path,
+      status: status ?? null,
+      allowed_statuses: [...allowed]
+    },
+    suggested_fix: `Remove ${reference.id} from ${pageLabel}.state_snapshot.active_records.${recordClass} or update its lifecycle status before submit.`
+  };
+}
+
+function allowedActiveStatuses(recordClass: string): ReadonlySet<string> {
+  switch (recordClass) {
+    case "CLK":
+      return new Set(["active", "paused", "fired"]);
+    case "STSEC":
+      return new Set(["hidden", "partially_revealed"]);
+    case "STQ":
+      return new Set(["open", "complicated"]);
+    default:
+      return new Set();
+  }
 }
 
 function missingOrMalformed(page: IndexedRecord, pageLabel: string, field: string, reason: string): Verdict {

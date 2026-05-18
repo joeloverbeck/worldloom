@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { computePgStateHash } from "@worldloom/world-index/hash/content";
 
+import { replayActiveRecords } from "../../src/_helpers/state-snapshot-replay.js";
 import { snapshotReplayEquality } from "../../src/structural/snapshot-replay-equality.js";
 import { context, record } from "./helpers.js";
 
@@ -171,6 +172,39 @@ test("snapshot_replay_equality reports new-schema active_records class drift", a
   assert.deepEqual((drift.detail as { drifts: unknown[] }).drifts, [
     { field: "active_records.OBL", expected: ["OBL-1", "OBL-2"], got: ["OBL-1"] }
   ]);
+});
+
+test("snapshot_replay_equality replays CLK active records", async () => {
+  const parentSnapshot = newSchemaParentActiveRecords();
+  const pageSnapshot = replayActiveRecords(parentSnapshot, {
+    create: ["CLK-1"],
+    supersede: [],
+    close: []
+  });
+
+  assert.deepEqual(pageSnapshot.CLK, ["CLK-1"]);
+});
+
+test("snapshot_replay_equality replays STSEC active records", async () => {
+  const parentSnapshot = newSchemaParentActiveRecords();
+  const pageSnapshot = replayActiveRecords(parentSnapshot, {
+    create: ["STSEC-1"],
+    supersede: [],
+    close: []
+  });
+
+  assert.deepEqual(pageSnapshot.STSEC, ["STSEC-1"]);
+});
+
+test("snapshot_replay_equality replays STQ active records", async () => {
+  const parentSnapshot = newSchemaParentActiveRecords();
+  const pageSnapshot = replayActiveRecords(parentSnapshot, {
+    create: ["STQ-1"],
+    supersede: [],
+    close: []
+  });
+
+  assert.deepEqual(pageSnapshot.STQ, ["STQ-1"]);
 });
 
 test("snapshot_replay_equality reports new-schema canonical state_hash mismatches", async () => {

@@ -73,6 +73,267 @@ test("create_bel_record writes BEL YAML under the story _source tree", async (t)
   assertYamlEquals(staged, op.payload.record);
 });
 
+test("create_clk_record writes CLK YAML under the story _source clocks tree", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ clk_ids: ["CLK-1"] });
+  const op = {
+    op: "create_clk_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "CLK-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        title: "Harbor patrol alert",
+        clock_kind: "exposure",
+        driver: "group:harbor watch",
+        linked_records: ["THR-1"],
+        value: 1,
+        max: 4,
+        salience: "medium",
+        visibility: "factional",
+        thresholds: [],
+        tick_history: [{ event: "SE-1", delta: 1, cause: "The ledger was seen." }],
+        status: "active"
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_clk_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "clocks",
+      "CLK-1.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
+test("supersede_clk_record writes replacement CLK YAML through the story-record path", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ clk_ids: ["CLK-2"] });
+  const op = {
+    op: "supersede_clk_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "CLK-2",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
+        supersedes: "CLK-1",
+        title: "Harbor patrol alert",
+        clock_kind: "exposure",
+        driver: "group:harbor watch",
+        linked_records: ["THR-1"],
+        value: 2,
+        max: 4,
+        salience: "medium",
+        visibility: "factional",
+        thresholds: [],
+        tick_history: [],
+        status: "active"
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "supersede_clk_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "clocks",
+      "CLK-2.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
+test("create_stsec_record writes STSEC YAML under the story _source secrets tree", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ stsec_ids: ["STSEC-1"] });
+  const op = {
+    op: "create_stsec_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "STSEC-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        secret_kind: "motive",
+        secret_claim: "Kern hid the ledgers.",
+        truth_anchor: "SF-1",
+        holders: ["STENT-1"],
+        salience: "high",
+        protected_mystery_refs: [],
+        clue_carriers: [],
+        source_records: ["BEL-1"],
+        status: "hidden",
+        reveal_event: null,
+        reveal_records: []
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_stsec_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "secrets",
+      "STSEC-1.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
+test("supersede_stsec_record writes replacement STSEC YAML through the story-record path", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ stsec_ids: ["STSEC-2"] });
+  const op = {
+    op: "supersede_stsec_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "STSEC-2",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
+        supersedes: "STSEC-1",
+        secret_kind: "motive",
+        secret_claim: "Kern hid the ledgers.",
+        holders: ["STENT-1"],
+        salience: "high",
+        source_records: ["BEL-2"],
+        status: "partially_revealed"
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "supersede_stsec_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "secrets",
+      "STSEC-2.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
+test("create_stq_record writes STQ YAML under the story _source story-questions tree", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ stq_ids: ["STQ-1"] });
+  const op = {
+    op: "create_stq_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "STQ-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        setup_kind: "setup",
+        question_or_setup: "The locked drawer remains unopened.",
+        salience: "high",
+        audience_visibility: "explicit",
+        source_event: "SE-1",
+        source_records: ["STOBJ-1"],
+        status: "open"
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_stq_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "story-questions",
+      "STQ-1.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
+test("supersede_stq_record writes replacement STQ YAML through the story-record path", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ stq_ids: ["STQ-2"] });
+  const op = {
+    op: "supersede_stq_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "STQ-2",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
+        supersedes: "STQ-1",
+        setup_kind: "dramatic_question",
+        question_or_setup: "Who hid the ledger?",
+        salience: "high",
+        audience_visibility: "implied",
+        source_event: "SE-2",
+        source_records: ["BEL-1"],
+        payoff_of: "STQ-1",
+        status: "complicated"
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "supersede_stq_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "story-questions",
+      "STQ-2.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
 test("create_ststat_record writes STSTAT YAML under the story _source status tree", async (t) => {
   const world = createTestWorld(t);
   const env = baseEnvelope({ ststat_ids: ["STSTAT-0001"] });

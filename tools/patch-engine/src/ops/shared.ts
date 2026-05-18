@@ -262,7 +262,7 @@ export async function loadExistingRecord(params: {
 type ExistingRecordRow = { node_id: string; node_type: string; file_path: string };
 
 const BARE_STORY_BUNDLE_ID_PATTERN =
-  /^(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|DA)-\d+$/;
+  /^(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|DA|CLK|STSEC|STQ)-\d+$/;
 
 function findExistingRecordRow(params: {
   ctx: OpContext;

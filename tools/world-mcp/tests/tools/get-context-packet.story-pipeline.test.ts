@@ -250,6 +250,44 @@ test("getContextPacket ignores DA seed nodes for story-pipeline task types", asy
   }
 });
 
+test("getContextPacket ignores CLK, STSEC, and STQ seed nodes for story-pipeline task types", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+    const storyLocalSeeds = [
+      storyNodeId(STORY_FIXTURE_SLUG, "CLK-1"),
+      storyNodeId(STORY_FIXTURE_SLUG, "STSEC-1"),
+      storyNodeId(STORY_FIXTURE_SLUG, "STQ-1")
+    ];
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "story_turn_cycle",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        seed_nodes: [...storyLocalSeeds, "CF-1"],
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result), "story_turn_cycle should return a packet");
+    assert.deepEqual(result.task_header.warnings, ["story_local_seed_nodes_ignored"]);
+    for (const seed of storyLocalSeeds) {
+      assert.ok(
+        !result.local_authority.nodes.some((node) => node.id === seed),
+        `${seed} seed must not enter world-scope local_authority`
+      );
+    }
+    assert.ok(
+      result.local_authority.nodes.some((node) => node.id === "CF-1"),
+      "world-canon seed should still populate local_authority"
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("getContextPacket accepts all-story-local seeds for story-pipeline task types", async () => {
   const root = createTempRepoRoot();
 

@@ -6,14 +6,14 @@ Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus story-scope predi
 
 Historical note: `archive/specs/SPEC-04-validator-framework.md` is archived prior art only. It is not current design authority.
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 24 structural validators, the 12 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 36 structural validators, the 12 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
 Static JSON Schemas live under `src/schemas/`. They cover the CF, CH, INV, M,
 OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, DA frontmatter, and story-bundle
-atomic YAML record classes (STENT, STSTAT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC,
-STOBJ, BR, PG, CHC, SLT, BEL, and story-local DA). The prose receipt schema covers
+atomic YAML record classes (STENT, STSTAT, SF, SE, OBL, CNSQ, THR, CLK, STSEC, STQ,
+SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, BEL, and story-local DA). The prose receipt schema covers
 direct-write `stories/<story-slug>/pages-prose-receipts/PG-*.yaml` artifacts. The PA
 schema validates YAML frontmatter parsed from `adjudications/PA-NNNN-*.md`; PA body
 prose is not schema-constrained.
@@ -55,6 +55,18 @@ Structural validators:
 - `snapshot_replay_equality`
 - `recursive_reference_closure`
 - `state_snapshot_integrity`
+- `clock_value_in_range`
+- `clock_threshold_ordering`
+- `clock_tick_provenance`
+- `clock_firing_threshold_integrity`
+- `clock_terminal_debt_integrity`
+- `secret_carrier_existence`
+- `critical_secret_clue_coverage_when_revealed`
+- `secret_mystery_firewall_compliance`
+- `story_question_payoff_integrity`
+- `story_question_setup_predates_payoff`
+- `story_question_grounding_integrity`
+- `story_question_terminal_debt`
 - `story_da_duplicate_heuristic`
 - `touched_by_cf_completeness`
 - `proposal_package_shape`

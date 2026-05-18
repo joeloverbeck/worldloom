@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/story-question.schema.json",
+  "type": "object",
+  "required": [
+    "id",
+    "story_id",
+    "created_at_page",
+    "setup_kind",
+    "question_or_setup",
+    "salience",
+    "audience_visibility",
+    "source_event",
+    "source_records",
+    "status"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^STQ-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^STQ-(0|[1-9][0-9]*)$" },
+    "setup_kind": {
+      "type": "string",
+      "enum": ["setup", "dramatic_question", "promise"]
+    },
+    "question_or_setup": { "type": "string", "minLength": 1 },
+    "salience": { "type": "string", "enum": ["low", "medium", "high"] },
+    "audience_visibility": { "type": "string", "enum": ["hidden", "implied", "explicit"] },
+    "source_event": { "type": "string", "pattern": "^SE-(0|[1-9][0-9]*)$" },
+    "source_records": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(SF|BEL|DA|THR|OBL|CNSQ|STINT|SREL|STLOC|STOBJ|CLK|STSEC)-(0|[1-9][0-9]*)$"
+      }
+    },
+    "payoff_of": { "type": ["string", "null"], "pattern": "^STQ-(0|[1-9][0-9]*)$" },
+    "status": {
+      "type": "string",
+      "enum": ["open", "complicated", "answered", "paid_off", "abandoned", "inherited", "superseded"]
+    },
+    "answer_event": { "type": ["string", "null"], "pattern": "^SE-(0|[1-9][0-9]*)$" },
+    "answer_records": {
+      "type": "array",
+      "default": [],
+      "items": { "type": "string", "pattern": "^[A-Z]+-[0-9]+$" }
+    },
+    "abandonment_rationale": { "type": ["string", "null"], "minLength": 1 }
+  },
+  "additionalProperties": false
+}

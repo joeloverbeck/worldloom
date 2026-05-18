@@ -38,6 +38,25 @@ test("branch_isolation rejects sibling-branch active records", async () => {
   });
 });
 
+test("branch_isolation rejects sibling-branch CLK/STSEC/STQ active records", async () => {
+  const verdicts = await branchIsolation.run(undefined, context([
+    branch("BR-1", null),
+    branch("BR-2", "BR-1"),
+    branch("BR-3", "BR-1"),
+    page("PG-1", "BR-1", { active_records: {} }),
+    page("PG-2", "BR-2", { active_records: { CLK: ["CLK-3"], STSEC: ["STSEC-3"], STQ: ["STQ-3"] } }),
+    page("PG-3", "BR-3", { active_records: {} }),
+    storyStateRecord("pressure_clock_record", "CLK-3", "clocks", "PG-3"),
+    storyStateRecord("story_secret_record", "STSEC-3", "secrets", "PG-3"),
+    storyStateRecord("story_question_record", "STQ-3", "story-questions", "PG-3")
+  ]));
+
+  assert.deepEqual(
+    verdicts.map((verdict) => (verdict.detail as { reference_id: string }).reference_id).sort(),
+    ["CLK-3", "STQ-3", "STSEC-3"]
+  );
+});
+
 test("branch_isolation accepts global storylets with world-scope and bundle-genesis references", async () => {
   const verdicts = await branchIsolation.run(undefined, context([
     branch("BR-1", null, "PG-1"),
@@ -153,6 +172,14 @@ function fact(id: string, createdAtPage: string) {
 
 function belief(id: string, createdAtPage: string) {
   return storyRecord("belief_record", id, "beliefs", {
+    id,
+    story_id: "STORY-1",
+    created_at_page: createdAtPage
+  });
+}
+
+function storyStateRecord(nodeType: string, id: string, sourceDir: string, createdAtPage: string) {
+  return storyRecord(nodeType, id, sourceDir, {
     id,
     story_id: "STORY-1",
     created_at_page: createdAtPage

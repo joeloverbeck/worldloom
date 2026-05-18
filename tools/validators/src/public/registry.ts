@@ -2,6 +2,11 @@ import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
+import { clockFiringThresholdIntegrity } from "../structural/clock-firing-threshold-integrity.js";
+import { clockTerminalDebtIntegrity } from "../structural/clock-terminal-debt-integrity.js";
+import { clockThresholdOrdering } from "../structural/clock-threshold-ordering.js";
+import { clockTickProvenance } from "../structural/clock-tick-provenance.js";
+import { clockValueInRange } from "../structural/clock-value-in-range.js";
 import { causalDependencyThreatScan } from "../structural/causal-dependency-threat-scan.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
@@ -14,9 +19,16 @@ import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
+import { criticalSecretClueCoverageWhenRevealed } from "../structural/critical-secret-clue-coverage-when-revealed.js";
+import { secretCarrierExistence } from "../structural/secret-carrier-existence.js";
+import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-firewall-compliance.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
+import { storyQuestionGroundingIntegrity } from "../structural/story-question-grounding-integrity.js";
+import { storyQuestionPayoffIntegrity } from "../structural/story-question-payoff-integrity.js";
+import { storyQuestionSetupPredatesPayoff } from "../structural/story-question-setup-predates-payoff.js";
+import { storyQuestionTerminalDebt } from "../structural/story-question-terminal-debt.js";
 import { storyDaDuplicateHeuristic } from "../structural/story-da-duplicate-heuristic.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
 import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
@@ -55,6 +67,18 @@ export const structuralValidators: readonly Validator[] = [
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,
+  clockValueInRange,
+  clockThresholdOrdering,
+  clockTickProvenance,
+  clockFiringThresholdIntegrity,
+  clockTerminalDebtIntegrity,
+  secretCarrierExistence,
+  criticalSecretClueCoverageWhenRevealed,
+  secretMysteryFirewallCompliance,
+  storyQuestionPayoffIntegrity,
+  storyQuestionSetupPredatesPayoff,
+  storyQuestionGroundingIntegrity,
+  storyQuestionTerminalDebt,
   storyDaDuplicateHeuristic,
   touchedByCfCompleteness,
   proposalPackageShape,

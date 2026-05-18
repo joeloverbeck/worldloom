@@ -83,6 +83,100 @@
       }
     },
     {
+      "title": "clock_at_least",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "clock", "value"],
+      "properties": {
+        "pred": { "const": "clock_at_least" },
+        "clock": { "type": "string", "pattern": "^CLK-[0-9]+$" },
+        "value": { "type": "integer", "minimum": 0 }
+      }
+    },
+    {
+      "title": "clock_below",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "clock", "value"],
+      "properties": {
+        "pred": { "const": "clock_below" },
+        "clock": { "type": "string", "pattern": "^CLK-[0-9]+$" },
+        "value": { "type": "integer", "minimum": 0 }
+      }
+    },
+    {
+      "title": "clock_full",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "clock"],
+      "properties": {
+        "pred": { "const": "clock_full" },
+        "clock": { "type": "string", "pattern": "^CLK-[0-9]+$" }
+      }
+    },
+    {
+      "title": "secret_unrevealed",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "secret"],
+      "properties": {
+        "pred": { "const": "secret_unrevealed" },
+        "secret": { "type": "string", "pattern": "^STSEC-[0-9]+$" }
+      }
+    },
+    {
+      "title": "secret_revealed",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "secret"],
+      "properties": {
+        "pred": { "const": "secret_revealed" },
+        "secret": { "type": "string", "pattern": "^STSEC-[0-9]+$" }
+      }
+    },
+    {
+      "title": "revelation_ready",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "secret"],
+      "properties": {
+        "pred": { "const": "revelation_ready" },
+        "secret": { "type": "string", "pattern": "^STSEC-[0-9]+$" }
+      }
+    },
+    {
+      "title": "story_question_open",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "question"],
+      "properties": {
+        "pred": { "const": "story_question_open" },
+        "question": { "type": "string", "pattern": "^STQ-[0-9]+$" }
+      }
+    },
+    {
+      "title": "story_question_status",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "question", "status"],
+      "properties": {
+        "pred": { "const": "story_question_status" },
+        "question": { "type": "string", "pattern": "^STQ-[0-9]+$" },
+        "status": { "type": "string", "enum": ["open", "complicated", "answered", "paid_off", "abandoned", "inherited", "superseded"] }
+      }
+    },
+    {
+      "title": "promise_due",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "question", "age_pages"],
+      "properties": {
+        "pred": { "const": "promise_due" },
+        "question": { "type": "string", "pattern": "^STQ-[0-9]+$" },
+        "age_pages": { "type": "integer", "minimum": 0 }
+      }
+    },
+    {
       "title": "any_obligation_open",
       "type": "object",
       "additionalProperties": true,
@@ -119,6 +213,42 @@
         "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
         "tag": { "type": "string", "pattern": "^[a-z][a-z0-9_:-]*$" },
         "urgency": { "type": "string", "enum": ["low", "medium", "high"] }
+      }
+    },
+    {
+      "title": "any_clock_active",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_clock_active" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "kind": { "type": "string", "enum": ["danger", "racing", "mission", "faction", "exposure", "pursuit", "deadline"] },
+        "salience": { "type": "string", "enum": ["low", "medium", "high"] }
+      }
+    },
+    {
+      "title": "any_secret_unrevealed",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_secret_unrevealed" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "kind": { "type": "string", "enum": ["identity", "motive", "location", "event_cause", "artifact_truth", "relationship", "institutional"] },
+        "salience": { "type": "string", "enum": ["low", "medium", "high"] }
+      }
+    },
+    {
+      "title": "any_story_question_open",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_story_question_open" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "setup_kind": { "type": "string", "enum": ["setup", "dramatic_question", "promise"] },
+        "salience": { "type": "string", "enum": ["low", "medium", "high"] }
       }
     },
     {
@@ -189,7 +319,7 @@
       "required": ["pred", "record"],
       "properties": {
         "pred": { "const": "record_active" },
-        "record": { "type": "string", "pattern": "^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-[0-9]+$" }
+        "record": { "type": "string", "pattern": "^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ)-[0-9]+$" }
       }
     },
     {
@@ -199,7 +329,7 @@
       "required": ["pred", "record", "comparator", "pages"],
       "properties": {
         "pred": { "const": "record_age" },
-        "record": { "type": "string", "pattern": "^(?:(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-[0-9]+|[a-z][a-z0-9_-]*)$" },
+        "record": { "type": "string", "pattern": "^(?:(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ)-[0-9]+|[a-z][a-z0-9_-]*)$" },
         "comparator": { "type": "string", "enum": [">=", "<=", "==", "!="] },
         "pages": { "type": "integer", "minimum": 0 }
       }

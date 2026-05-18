@@ -46,9 +46,27 @@ function sampleFor(pred: (typeof PRED_TYPES)[number]): Record<string, unknown> {
       return { pred, consequence: "CNSQ-1" };
     case "thread_active":
       return { pred, thread: "THR-1" };
+    case "clock_at_least":
+    case "clock_below":
+      return { pred, clock: "CLK-1", value: 2 };
+    case "clock_full":
+      return { pred, clock: "CLK-1" };
+    case "secret_unrevealed":
+    case "secret_revealed":
+    case "revelation_ready":
+      return { pred, secret: "STSEC-1" };
+    case "story_question_open":
+      return { pred, question: "STQ-1" };
+    case "story_question_status":
+      return { pred, question: "STQ-1", status: "open" };
+    case "promise_due":
+      return { pred, question: "STQ-1", age_pages: 3 };
     case "any_obligation_open":
     case "any_consequence_pending":
     case "any_thread_active":
+    case "any_clock_active":
+    case "any_secret_unrevealed":
+    case "any_story_question_open":
     case "any_belief":
     case "any_intention":
       return { pred, alias: "matched_record" };

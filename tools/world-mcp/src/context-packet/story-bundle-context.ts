@@ -40,6 +40,9 @@ interface MysteryClaimEvidence {
 }
 
 const ACTIVE_THREAD_STATUSES = new Set(["active", "pressured", "critical", "dormant"]);
+const ACTIVE_CLOCK_STATUSES = new Set(["active", "paused"]);
+const HIDDEN_SECRET_STATUSES = new Set(["hidden", "partially_revealed"]);
+const OPEN_STORY_QUESTION_STATUSES = new Set(["open", "complicated", "inherited"]);
 const MAX_VISIBLE_STORYLETS = 50;
 const MAX_RECENT_BRANCH_PAGES = 10;
 const ROLE_IN_STORY_VALUES = new Set<RoleInStory>([
@@ -221,6 +224,61 @@ function buildActiveThreads(rows: StoryNodeRow[]): ContextPacketStoryBundleConte
     }));
 }
 
+function buildActiveClocks(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_clocks"] {
+  return rows
+    .map((row) => ({ row, record: parseYamlRecord(row) }))
+    .filter(({ record }) => ACTIVE_CLOCK_STATUSES.has(asString(record.status, "active")))
+    .map(({ row, record }) => ({
+      id: asString(record.id, authoredId(row)),
+      title: asString(record.title, authoredId(row)),
+      clock_kind: asString(record.clock_kind, "unspecified"),
+      driver: asString(record.driver, "unknown"),
+      value: asNumber(record.value),
+      max: asNumber(record.max),
+      salience: asString(record.salience, "unspecified"),
+      visibility: asString(record.visibility, "unspecified"),
+      status: asString(record.status, "active")
+    }));
+}
+
+function buildHiddenSecrets(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["hidden_secrets"] {
+  return rows
+    .map((row) => ({ row, record: parseYamlRecord(row) }))
+    .filter(({ record }) => HIDDEN_SECRET_STATUSES.has(asString(record.status, "hidden")))
+    .map(({ row, record }) => {
+      const clueCarriers = arrayOfObjects(record.clue_carriers);
+      return {
+        id: asString(record.id, authoredId(row)),
+        secret_kind: asString(record.secret_kind, "unspecified"),
+        salience: asString(record.salience, "unspecified"),
+        status: asString(record.status, "hidden"),
+        holders: asStringArray(record.holders),
+        clue_carrier_count: clueCarriers.length,
+        discovered_clue_count: clueCarriers.filter(
+          (carrier) => asString(carrier.status) === "discovered"
+        ).length,
+        protected_mystery_refs: asStringArray(record.protected_mystery_refs)
+      };
+    });
+}
+
+function buildOpenStoryQuestions(
+  rows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["open_story_questions"] {
+  return rows
+    .map((row) => ({ row, record: parseYamlRecord(row) }))
+    .filter(({ record }) => OPEN_STORY_QUESTION_STATUSES.has(asString(record.status, "open")))
+    .map(({ row, record }) => ({
+      id: asString(record.id, authoredId(row)),
+      setup_kind: asString(record.setup_kind, "unspecified"),
+      question_or_setup: asString(record.question_or_setup),
+      salience: asString(record.salience, "unspecified"),
+      audience_visibility: asString(record.audience_visibility, "unspecified"),
+      status: asString(record.status, "open"),
+      source_event: asNullableString(record.source_event)
+    }));
+}
+
 function pageFromRow(row: StoryNodeRow): PageRecord {
   const record = parseYamlRecord(row);
   const id = asString(record.id, authoredId(row));
@@ -383,6 +441,9 @@ export function summarizeStoryBundleContext(
     visibility_filtered_storylet_count: context.storylet_pool_summary.visibility_filtered_count,
     open_obligation_ids: context.open_obligations.map((obligation) => obligation.id),
     active_thread_ids: context.active_threads.map((thread) => thread.id),
+    active_clock_ids: context.active_clocks.map((clock) => clock.id),
+    hidden_secret_ids: context.hidden_secrets.map((secret) => secret.id),
+    open_story_question_ids: context.open_story_questions.map((question) => question.id),
     longest_active_branch_path: [...context.longest_active_branch_path],
     recent_page_ids: context.recent_pages_along_longest_active_branch.map((page) => page.id),
     mystery_ids: context.mysteries_in_play.map((mystery) => mystery.m_id),
@@ -399,6 +460,9 @@ export function buildStoryBundleContext(
   const storyletRows = rowsForNodeType(db, worldSlug, storySlug, "storylet_record");
   const obligationRows = rowsForNodeType(db, worldSlug, storySlug, "obligation_record");
   const threadRows = rowsForNodeType(db, worldSlug, storySlug, "thread_record");
+  const clockRows = rowsForNodeType(db, worldSlug, storySlug, "pressure_clock_record");
+  const secretRows = rowsForNodeType(db, worldSlug, storySlug, "story_secret_record");
+  const storyQuestionRows = rowsForNodeType(db, worldSlug, storySlug, "story_question_record");
   const pageRows = rowsForNodeType(db, worldSlug, storySlug, "page_record");
   const frontmatter = parseStoryKernelFrontmatter(worldSlug, storySlug);
   const branchContext = buildBranchContext(pageRows);
@@ -408,6 +472,9 @@ export function buildStoryBundleContext(
     storylet_pool_summary: buildStoryletPoolSummary(storyletRows),
     open_obligations: buildOpenObligations(obligationRows),
     active_threads: buildActiveThreads(threadRows),
+    active_clocks: buildActiveClocks(clockRows),
+    hidden_secrets: buildHiddenSecrets(secretRows),
+    open_story_questions: buildOpenStoryQuestions(storyQuestionRows),
     longest_active_branch_path: branchContext.longest_active_branch_path,
     recent_pages_along_longest_active_branch:
       branchContext.recent_pages_along_longest_active_branch,

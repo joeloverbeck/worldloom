@@ -1,6 +1,6 @@
 # Story Record Schemas
 
-This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 17 story-bundle record classes plus the prose-receipt direct-write artifact. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the eight hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
+This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 20 story-bundle record classes plus the prose-receipt direct-write artifact. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the eight hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
 
 Subsection numbering matches the original `§4.X` form (e.g. `§4.6 prose receipt`, `§4.2 PG`, `§4.4 SLT`) so cross-references in skill prose, validator source, and other shared templates continue to resolve verbatim. The split is purely structural — §4 is overwhelmingly the bulk of the contract, and the bundled file exceeded the per-call read limit of bulk-loading tools at HEAD.
 
@@ -10,7 +10,7 @@ Authority and supersession discipline live in the main contract's §1; schema-mi
 
 ## 4. Record Schemas
 
-Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 17 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 13 additional classes, and §4.6 covers the prose receipt direct-write artifact.
+Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 20 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 16 additional classes, and §4.6 covers the prose receipt direct-write artifact.
 
 ### 4.1 `BEL` (13 fields)
 
@@ -72,6 +72,9 @@ state_snapshot:
     STOBJ: [STOBJ-<integer>]
     DA: [DA-<integer>]
     STSTAT: [STSTAT-<integer>]
+    CLK: [CLK-<integer>]
+    STSEC: [STSEC-<integer>]
+    STQ: [STQ-<integer>]
   entity_status:                       # * derived projection of active STSTAT; one entry per active STENT
     STENT-<integer>:
       life: alive | dead | unknown
@@ -624,6 +627,108 @@ derived_from: [SE-<integer> | <record_id>]     # default []
 ```
 
 No `display_name`, `role_in_story`, or `bound_char_id` fields: identity stays on `STENT`.
+
+#### 4.5.14 `CLK` (pressure clock)
+
+Tracks present-causal pressure that advances over time or through events: danger clocks, faction activity, countdowns, pursuit, exposure, deadlines, and worsening conditions. `CLK` is a state record; active instances appear in `PG.state_snapshot.active_records.CLK`.
+
+```yaml
+id: CLK-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: CLK-<integer> | null            # default null
+title: string*
+clock_kind: danger | racing | mission | faction | exposure | pursuit | deadline*
+driver: STENT-<integer> | group:<name> | system | unknown*
+linked_records: [THR-<integer> | OBL-<integer> | CNSQ-<integer> | STINT-<integer> | SREL-<integer> | STLOC-<integer> | STOBJ-<integer> | STQ-<integer>]*
+value: integer >= 0*
+max: integer >= 1*
+salience: low | medium | high*
+visibility: hidden | holder_specific | public | factional*
+thresholds:
+  - at: integer >= 1*
+    label: string*
+    effects:
+      create: [<record_id> | bound:<alias>]
+      supersede: [<record_id> | bound:<alias>]
+      close: [<record_id> | bound:<alias>]
+tick_history:
+  - event: SE-<integer>*
+    delta: nonzero integer*
+    cause: string*
+status: active | paused | resolved | fired | abandoned | superseded*
+resolution_event: SE-<integer> | null
+```
+
+`title`, `clock_kind`, and `driver` scope the pressure for humans and future predicates. `linked_records` grounds the clock in existing state. `value` and `max` are present-causal state; `thresholds` names staged effects that become available when value crosses them; `tick_history` is the replay trail; `salience` and `visibility` support terminal-debt and information-firewall checks; `status` and `resolution_event` close the lifecycle. Do not add `deadline.natural_language`, `clock_kind: front`, or `visibility: audience_only`.
+
+#### 4.5.15 `STSEC` (story secret)
+
+Tracks story-local hidden truth: the branch-level secret that multiple BEL, SF, or DA records point toward, plus clue carriers and revelation lifecycle. `STSEC` is story-local. If it touches a world Mystery Reserve entry, `protected_mystery_refs[]` records the referenced `M-*`; the Mystery Reserve firewall remains authoritative and is not bypassed by a story-local reveal.
+
+```yaml
+id: STSEC-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: STSEC-<integer> | null          # default null
+secret_kind: identity | motive | location | event_cause | artifact_truth | relationship | institutional*
+secret_claim: string*
+truth_anchor: SF-<integer> | BEL-<integer> | DA-<integer> | null
+holders: [STENT-<integer> | group:<name> | narrator]*
+salience: low | medium | high*
+protected_mystery_refs: [M-<integer>]        # default []
+clue_carriers:
+  - kind: DA | STOBJ | STLOC | BEL | SF | SE*
+    record: DA-<integer> | STOBJ-<integer> | STLOC-<integer> | BEL-<integer> | SF-<integer> | SE-<integer>*
+    clue_text: string*
+    clue_strength: weak | suggestive | confirming | decisive | misleading*
+    discovered_by: [STENT-<integer> | group:<name> | public]
+    audience_visible: hidden | visible | ambiguous*
+    status: available | discovered | destroyed | suppressed | superseded*
+source_records: [<record_id>]*
+status: hidden | partially_revealed | revealed | disproven | abandoned*
+reveal_event: SE-<integer> | null
+reveal_records: [BEL-<integer> | SF-<integer> | DA-<integer> | STQ-<integer>]
+```
+
+`secret_kind` supports predicate filtering. `secret_claim` gives the human-readable hidden truth. `truth_anchor` distinguishes branch truth from belief-only claims. `holders` records who knows or guards the secret. `salience` and `protected_mystery_refs` support criticality and Mystery Reserve checks. `clue_carriers` is the canonical clue-to-secret binding; do not add a parallel STCLUE record class. `source_records`, `status`, `reveal_event`, and `reveal_records` close the lifecycle. Do not add `audience_state`, `criticality`, `secret_kind: other`, or a parallel `STCLUE` class.
+
+#### 4.5.16 `STQ` (story question / open setup)
+
+Tracks present-causal open-setup state: an element introduced into the branch that remains active until answered, paid off, abandoned, inherited, or superseded. `STQ` is not narrative-debt tracking and not promise-fulfillment expectation.
+
+```yaml
+id: STQ-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: STQ-<integer> | null           # default null
+setup_kind: setup | dramatic_question | promise*
+question_or_setup: string*
+salience: low | medium | high*
+audience_visibility: hidden | implied | explicit*
+source_event: SE-<integer>*
+source_records: [SF-<integer> | BEL-<integer> | DA-<integer> | THR-<integer> | OBL-<integer> | CNSQ-<integer> | STINT-<integer> | SREL-<integer> | STLOC-<integer> | STOBJ-<integer> | CLK-<integer> | STSEC-<integer>]*
+payoff_of: STQ-<integer> | null
+status: open | complicated | answered | paid_off | abandoned | inherited | superseded*
+answer_event: SE-<integer> | null
+answer_records: [<record_id>]
+abandonment_rationale: string | null
+```
+
+`STQ` tracks present open-setup state, not future dramatic obligation. The engine asks what setups are currently open, what state they license, and what would close them; it does not ask whether the branch is before or after the midpoint, what shape an eventual payoff should take, or what arc position the story occupies.
+
+The following fields are prohibited in STQ schemas, validators, predicates, and skill integrations:
+
+| Prohibited field | Reason |
+|---|---|
+| `expected_payoff_mode` | Encodes future shape — categorical prediction of how an eventual resolution would be structured. |
+| `act_position` / `midpoint` / `climax` | Per §5c, the engine tracks present causal state, not narrative shape. |
+| `dramatic_curve_position` / `tension_arc` | Encodes narrative shape rather than present state. |
+| `kind: moral_question` | Authorial / subjective; not validator-readable. |
+| `expected_chapter` / `scene_sequence` | Per §5a, no `arc_contract`, `dramatic_unit`, or `execution_envelope`. |
+| `holders[]` | Audience-vs-character distinction is covered by `audience_visibility` plus `source_records[]` grounding. |
+
+Validators hard-reject any `STQ` record carrying a prohibited field at the `record_schema_compliance` gate.
 
 ### 4.6 Prose receipt
 

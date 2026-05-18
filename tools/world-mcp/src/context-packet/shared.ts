@@ -70,6 +70,9 @@ export interface ContextPacketStoryBundleContextSummary {
   visibility_filtered_storylet_count: number;
   open_obligation_ids: string[];
   active_thread_ids: string[];
+  active_clock_ids: string[];
+  hidden_secret_ids: string[];
+  open_story_question_ids: string[];
   longest_active_branch_path: string[];
   recent_page_ids: string[];
   mystery_ids: string[];
@@ -123,6 +126,36 @@ export interface ContextPacketStoryBundleContext {
     current_pressure: number;
     desired_cadence: number;
     obligations: string[];
+  }>;
+  active_clocks: Array<{
+    id: string;
+    title: string;
+    clock_kind: string;
+    driver: string;
+    value: number;
+    max: number;
+    salience: string;
+    visibility: string;
+    status: string;
+  }>;
+  hidden_secrets: Array<{
+    id: string;
+    secret_kind: string;
+    salience: string;
+    status: string;
+    holders: string[];
+    clue_carrier_count: number;
+    discovered_clue_count: number;
+    protected_mystery_refs: string[];
+  }>;
+  open_story_questions: Array<{
+    id: string;
+    setup_kind: string;
+    question_or_setup: string;
+    salience: string;
+    audience_visibility: string;
+    status: string;
+    source_event: string | null;
   }>;
   longest_active_branch_path: string[];
   recent_pages_along_longest_active_branch: Array<{
