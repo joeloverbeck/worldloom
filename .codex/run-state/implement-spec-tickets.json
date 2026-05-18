@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-47-stplan-stemo.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC47STPSTE-001.md",
+  "last_ticket": "archive/tickets/SPEC47STPSTE-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "6cc336d56c20c02cff5ccf060141dac17d726d38",
+  "last_work_commit": "9b1141ee32090a4e7f5f8374b3917d9a6ea10dc9",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC47STPSTE-002.md",
+  "next_target": "tickets/SPEC47STPSTE-003.md",
   "queue": [
-    "tickets/SPEC47STPSTE-002.md",
     "tickets/SPEC47STPSTE-003.md",
     "tickets/SPEC47STPSTE-004.md",
     "tickets/SPEC47STPSTE-005.md",
@@ -31,6 +30,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated dirty tracked path remains: .claude/skills/spec-to-tickets/SKILL.md; expected ignored artifacts remain under tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, and tools/world-mcp/node_modules",
+  "dirty_state": "clean",
   "updated_at": "2026-05-19"
 }
