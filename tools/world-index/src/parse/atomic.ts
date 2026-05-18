@@ -593,6 +593,48 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "belief_record") {
+    for (const edge of edgesForStoryBelief(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
+  if (node.node_type === "relationship_record_story") {
+    for (const edge of edgesForStoryRelationship(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
+  if (node.node_type === "intention_record") {
+    for (const edge of edgesForStoryIntention(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
+  if (node.node_type === "story_status_record") {
+    for (const edge of edgesForStoryStatus(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
+  if (node.node_type === "pressure_clock_record") {
+    for (const edge of edgesForStoryClock(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
+  if (node.node_type === "story_secret_record") {
+    for (const edge of edgesForStorySecret(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
+  if (node.node_type === "story_question_record") {
+    for (const edge of edgesForStoryQuestion(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   pushStoryRef("created_at_page", stringField(record, "created_at_page"));
   pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
@@ -635,12 +677,188 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
   return edges;
 }
 
+function edgesForStoryBelief(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  const holder = stringField(record, "holder");
+  if (holder) {
+    edges.push(createStoryRefEdge(node.node_id, "belief_holder", storySlug, holder));
+  }
+
+  const sourceEvent = stringField(record, "source_event", ["basis"]);
+  if (sourceEvent) {
+    edges.push(createStoryRefEdge(node.node_id, "belief_basis_event", storySlug, sourceEvent));
+  }
+
+  for (const target of stringArrayField(record, "access_records", ["basis"])) {
+    edges.push(createStoryRefEdge(node.node_id, "belief_access_record", storySlug, target));
+  }
+
+  for (const target of stringArrayField(record, "opens", ["consequences"])) {
+    edges.push(createStoryRefEdge(node.node_id, "belief_opens", storySlug, target));
+  }
+
+  return edges;
+}
+
+function edgesForStoryRelationship(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  for (const target of stringArrayField(record, "participants")) {
+    edges.push(createStoryRefEdge(node.node_id, "relationship_participant", storySlug, target));
+  }
+
+  for (const target of stringArrayField(record, "derived_from")) {
+    edges.push(createStoryRefEdge(node.node_id, "relationship_derived_from", storySlug, target));
+  }
+
+  return edges;
+}
+
+function edgesForStoryIntention(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  const holder = stringField(record, "holder");
+  if (holder) {
+    edges.push(createStoryRefEdge(node.node_id, "intention_holder", storySlug, holder));
+  }
+
+  const supersedes = stringField(record, "supersedes");
+  if (supersedes) {
+    edges.push(createStoryRefEdge(node.node_id, "intention_supersedes", storySlug, supersedes));
+  }
+
+  return edges;
+}
+
+function edgesForStoryStatus(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  const entity = stringField(record, "entity");
+  if (entity) {
+    edges.push(createStoryRefEdge(node.node_id, "status_entity", storySlug, entity));
+  }
+
+  return edges;
+}
+
+function edgesForStoryClock(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  for (const target of stringArrayField(record, "linked_records")) {
+    edges.push(createStoryRefEdge(node.node_id, "clock_linked_record", storySlug, target));
+  }
+
+  const driver = stringField(record, "driver");
+  if (driver && isStoryRecordReference(driver)) {
+    edges.push(createStoryRefEdge(node.node_id, "clock_driver", storySlug, driver));
+  }
+
+  for (const tick of recordArrayField(record, "tick_history")) {
+    const event = stringField(tick, "event");
+    if (event) {
+      edges.push(createStoryRefEdge(node.node_id, "clock_tick_event", storySlug, event));
+    }
+  }
+
+  return edges;
+}
+
+function edgesForStorySecret(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  const truthAnchor = stringField(record, "truth_anchor");
+  if (truthAnchor) {
+    edges.push(createStoryRefEdge(node.node_id, "secret_truth_anchor", storySlug, truthAnchor));
+  }
+
+  for (const holder of stringArrayField(record, "holders")) {
+    if (isStoryRecordReference(holder)) {
+      edges.push(createStoryRefEdge(node.node_id, "secret_holder", storySlug, holder));
+    }
+  }
+
+  for (const carrier of recordArrayField(record, "clue_carriers")) {
+    const carrierRecord = stringField(carrier, "record");
+    if (carrierRecord) {
+      edges.push(createStoryRefEdge(node.node_id, "secret_clue_carrier", storySlug, carrierRecord));
+    }
+  }
+
+  for (const target of stringArrayField(record, "reveal_records")) {
+    edges.push(createStoryRefEdge(node.node_id, "secret_reveal_record", storySlug, target));
+  }
+
+  return edges;
+}
+
+function edgesForStoryQuestion(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  for (const target of stringArrayField(record, "source_records")) {
+    edges.push(createStoryRefEdge(node.node_id, "story_question_source", storySlug, target));
+  }
+
+  const payoffOf = stringField(record, "payoff_of");
+  if (payoffOf) {
+    edges.push(createStoryRefEdge(node.node_id, "story_question_payoff_of", storySlug, payoffOf));
+  }
+
+  for (const target of stringArrayField(record, "answer_records")) {
+    edges.push(createStoryRefEdge(node.node_id, "story_question_answer_record", storySlug, target));
+  }
+
+  return edges;
+}
+
 function edgesForStoryEvent(
   node: NodeRow,
   record: Record<string, unknown>,
   storySlug: string
 ): Array<Omit<EdgeRow, "edge_id">> {
   const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  const actor = stringField(record, "actor");
+  if (actor && isStoryRecordReference(actor)) {
+    edges.push(createStoryRefEdge(node.node_id, "event_actor", storySlug, actor));
+  }
+
+  for (const target of stringArrayField(record, "targets")) {
+    edges.push(createStoryRefEdge(node.node_id, "event_target", storySlug, target));
+  }
+
+  const selectedStorylet = stringField(record, "selected_slt_id", ["commitment"]);
+  if (selectedStorylet) {
+    edges.push(createStoryRefEdge(node.node_id, "event_selected_storylet", storySlug, selectedStorylet));
+  }
 
   for (const target of stringArrayField(record, "create", ["state_delta"])) {
     edges.push(createStoryRefEdge(node.node_id, "state_delta_create", storySlug, target));
@@ -843,6 +1061,14 @@ function stringArrayField(record: Record<string, unknown>, field: string, nested
   }
   const value = container[field];
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function recordArrayField(record: Record<string, unknown>, field: string): Array<Record<string, unknown>> {
+  return arrayOfRecords(record[field]);
+}
+
+function isStoryRecordReference(value: string): boolean {
+  return /^[A-Z]+-[0-9]+$/.test(value);
 }
 
 function arrayOfRecords(value: unknown): Array<Record<string, unknown>> {

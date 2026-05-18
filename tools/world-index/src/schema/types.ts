@@ -95,7 +95,29 @@ export const STORY_EDGE_TYPES = [
   "parent_page",
   "leaf_page",
   "dependent_fact",
-  "thread_obligation"
+  "thread_obligation",
+  "belief_holder",
+  "belief_basis_event",
+  "belief_access_record",
+  "belief_opens",
+  "relationship_participant",
+  "relationship_derived_from",
+  "intention_holder",
+  "intention_supersedes",
+  "status_entity",
+  "clock_linked_record",
+  "clock_driver",
+  "clock_tick_event",
+  "secret_truth_anchor",
+  "secret_holder",
+  "secret_clue_carrier",
+  "secret_reveal_record",
+  "story_question_source",
+  "story_question_payoff_of",
+  "story_question_answer_record",
+  "event_actor",
+  "event_target",
+  "event_selected_storylet"
 ] as const;
 
 export type StoryEdgeType = (typeof STORY_EDGE_TYPES)[number];

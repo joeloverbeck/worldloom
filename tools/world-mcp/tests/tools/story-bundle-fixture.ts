@@ -71,6 +71,23 @@ export function buildStoryBundleWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-3"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "entities", "STENT-3.yaml"),
+        node_type: "story_entity_record",
+        body: [
+          "id: STENT-3",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "name: The stairwell watcher",
+          "display_name: The stairwell watcher",
+          "bound_char_id: null",
+          "role_in_story: [witness, pressure_source]",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "SF-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
@@ -105,6 +122,8 @@ export function buildStoryBundleWorld(root: string): void {
           "visibility: private",
           "basis:",
           "  source_event: SE-1",
+          "  access_records:",
+          "    - DA-1",
           ""
         ].join("\n")
       },
@@ -131,6 +150,32 @@ export function buildStoryBundleWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "BEL-3"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "beliefs", "BEL-3.yaml"),
+        node_type: "belief_record",
+        body: [
+          "id: BEL-3",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "holder: STENT-3",
+          "claim: The watcher believes Marla heard the bell.",
+          "belief_mode: believes",
+          "truth_relation: unknown",
+          "confidence: medium",
+          "visibility: factional",
+          "basis:",
+          "  source_event: SE-1",
+          "  access_route: direct_observation",
+          "consequences:",
+          "  opens: []",
+          "  constrains_choices: []",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "STSTAT-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
@@ -148,12 +193,154 @@ export function buildStoryBundleWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STINT-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "intentions", "STINT-1.yaml"),
+        node_type: "intention_record",
+        body: [
+          "id: STINT-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "holder: STENT-2",
+          "intent: Marla wants to reach the loft window unseen.",
+          "urgency: high",
+          "expires_when: Marla is seen by the watch patrol.",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STLOC-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "locations", "STLOC-1.yaml"),
+        node_type: "story_location_record",
+        body: [
+          "id: STLOC-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "label: Loft window",
+          "description: A narrow window above the old loft.",
+          "bound_ent: null",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STLOC-2"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "locations", "STLOC-2.yaml"),
+        node_type: "story_location_record",
+        body: [
+          "id: STLOC-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "label: Unused cellar",
+          "description: A cellar not referenced by the active branch state.",
+          "bound_ent: null",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STOBJ-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "objects", "STOBJ-1.yaml"),
+        node_type: "story_object_record",
+        body: [
+          "id: STOBJ-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "label: Brass latch",
+          "description: A tarnished latch on the loft window.",
+          "owner: public",
+          "current_location: STLOC-1",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STOBJ-2"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "objects", "STOBJ-2.yaml"),
+        node_type: "story_object_record",
+        body: [
+          "id: STOBJ-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "label: Unused ledger",
+          "description: A ledger not referenced by the active branch state.",
+          "owner: null",
+          "current_location: unknown",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SREL-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "relationships", "SREL-1.yaml"),
+        node_type: "relationship_record_story",
+        body: [
+          "id: SREL-1",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "axis: trust",
+          "participants:",
+          "  - STENT-2",
+          "  - STENT-3",
+          "direction:",
+          "  kind: bidirectional",
+          "  from: null",
+          "  to: null",
+          "value: low",
+          "valence: symmetric",
+          "description: Marla and the watcher do not yet trust each other.",
+          "derived_from:",
+          "  - BEL-2",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SREL-2"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "relationships", "SREL-2.yaml"),
+        node_type: "relationship_record_story",
+        body: [
+          "id: SREL-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "axis: fear",
+          "participants:",
+          "  - STENT-3",
+          "  - STENT-2",
+          "direction:",
+          "  kind: directed",
+          "  from: STENT-3",
+          "  to: STENT-2",
+          "value: medium",
+          "valence: asymmetric",
+          "description: The watcher fears Marla may expose him.",
+          "derived_from:",
+          "  - SE-1",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "SE-1"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
         file_path: storyPath(STORY_FIXTURE_SLUG, "events", "SE-1.yaml"),
         node_type: "story_event_record",
-        body: "id: SE-1\nsummary: Marla enters the loft.\n"
+        body: "id: SE-1\nsummary: Marla enters the loft.\ntargets:\n  - STLOC-1\n  - STOBJ-1\n"
       },
       {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "DA-1"),
@@ -165,9 +352,38 @@ export function buildStoryBundleWorld(root: string): void {
           "id: DA-1",
           "story_id: STORY-1",
           "created_at_page: PG-1",
-          "title: Loft Bell",
-          "artifact_type: note",
-          "artifact_text: The bell rang before Marla entered.",
+          "supersedes: null",
+          "title: Loft Bell Note",
+          "author: unknown",
+          "genre: note",
+          "body: The bell rang before Marla entered.",
+          "intended_audience: public",
+          "circulation: public",
+          "truth_relation: unknown",
+          "derived_from:",
+          "  - SE-1",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "DA-2"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "artifacts", "DA-2.yaml"),
+        node_type: "story_diegetic_artifact_record",
+        body: [
+          "id: DA-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "title: Unused receipt",
+          "author: anonymous",
+          "genre: receipt",
+          "body: A receipt no one has referenced.",
+          "intended_audience: none",
+          "circulation: private",
+          "truth_relation: unknown",
+          "derived_from: []",
           ""
         ].join("\n")
       },
@@ -179,18 +395,100 @@ export function buildStoryBundleWorld(root: string): void {
         node_type: "obligation_record",
         body: [
           "id: OBL-1",
-          "type: promise",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
           "status: open",
-          "owner: STENT-2",
-          "subjects:",
-          "  - STENT-2",
-          "salience: 7",
+          "obligation_kind: promise",
+          "description: Pay off the loft setup.",
+          "owed_by: STENT-2",
+          "owed_to: public",
+          "trigger_to_close: Marla reveals why the loft bell rang.",
           "urgency: high",
-          "possible_payoff_modes:",
-          "  - reveal",
-          "coverage_cache_compatible_storylets:",
-          "  - SLT-21",
-          "summary: Pay off the loft setup.",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-2"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "obligations", "OBL-2.yaml"),
+        node_type: "obligation_record",
+        body: [
+          "id: OBL-2",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "status: open",
+          "obligation_kind: debt",
+          "description: Marla owes the stairwell watcher a true answer.",
+          "owed_by: STENT-2",
+          "owed_to: group:watch",
+          "trigger_to_close: Marla gives the watcher a true answer.",
+          "urgency: medium",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-3"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "obligations", "OBL-3.yaml"),
+        node_type: "obligation_record",
+        body: [
+          "id: OBL-3",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "status: open",
+          "obligation_kind: moral",
+          "description: Marla must decide whether to warn the public.",
+          "owed_by: STENT-2",
+          "owed_to: public",
+          "trigger_to_close: The public warning is either made or deliberately withheld.",
+          "urgency: low",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-4"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "obligations", "OBL-4.yaml"),
+        node_type: "obligation_record",
+        body: [
+          "id: OBL-4",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "status: open",
+          "obligation_kind: protection",
+          "description: Marla must keep the loft child unseen.",
+          "owed_by: STENT-2",
+          "owed_to: STENT-2",
+          "trigger_to_close: The child is moved beyond the watch patrol.",
+          "urgency: high",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-5"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "obligations", "OBL-5.yaml"),
+        node_type: "obligation_record",
+        body: [
+          "id: OBL-5",
+          "story_id: STORY-1",
+          "created_at_page: PG-1",
+          "supersedes: null",
+          "status: open",
+          "obligation_kind: promise",
+          "description: Marla promised to leave a signal if the roof path is clear.",
+          "owed_by: STENT-2",
+          "owed_to: public",
+          "trigger_to_close: A roof-path signal is left or the promise is superseded.",
+          "urgency: medium",
           ""
         ].join("\n")
       },

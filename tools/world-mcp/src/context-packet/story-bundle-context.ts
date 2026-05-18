@@ -45,6 +45,7 @@ const HIDDEN_SECRET_STATUSES = new Set(["hidden", "partially_revealed"]);
 const OPEN_STORY_QUESTION_STATUSES = new Set(["open", "complicated", "inherited"]);
 const MAX_VISIBLE_STORYLETS = 50;
 const MAX_RECENT_BRANCH_PAGES = 10;
+const STORY_RECORD_ID_REGEX = /\b(?:STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|DA)-[A-Za-z0-9-]+\b/g;
 const ROLE_IN_STORY_VALUES = new Set<RoleInStory>([
   "viewpoint",
   "player_proxy",
@@ -80,6 +81,20 @@ function rowsForNodeType(
     .all(worldSlug, storySlug, nodeType) as StoryNodeRow[];
 }
 
+function rowsForStory(db: Database.Database, worldSlug: string, storySlug: string): StoryNodeRow[] {
+  return db
+    .prepare(
+      `
+        SELECT node_id, story_slug, node_type, file_path, body, summary
+        FROM nodes
+        WHERE world_slug = ?
+          AND story_slug = ?
+        ORDER BY node_id
+      `
+    )
+    .all(worldSlug, storySlug) as StoryNodeRow[];
+}
+
 function authoredId(row: Pick<StoryNodeRow, "node_id" | "story_slug">): string {
   return row.node_id.startsWith(`${row.story_slug}:`)
     ? row.node_id.slice(row.story_slug.length + 1)
@@ -107,6 +122,38 @@ function asNullableString(value: unknown): string | null {
 
 function asNumber(value: unknown, fallback = 0): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function asUrgency(value: unknown): "low" | "medium" | "high" {
+  return value === "low" || value === "medium" || value === "high" ? value : "medium";
+}
+
+function asTruthRelation(
+  value: unknown
+): "true" | "false" | "partly_true" | "unknown" | "contested" | "branch_counterfactual" | "future_contingent" {
+  return value === "true" ||
+    value === "false" ||
+    value === "partly_true" ||
+    value === "unknown" ||
+    value === "contested" ||
+    value === "branch_counterfactual" ||
+    value === "future_contingent"
+    ? value
+    : "unknown";
+}
+
+function asBeliefVisibility(
+  value: unknown
+): "private" | "shared" | "factional" | "public" | "rumored" | "concealed" | "suppressed" {
+  return value === "private" ||
+    value === "shared" ||
+    value === "factional" ||
+    value === "public" ||
+    value === "rumored" ||
+    value === "concealed" ||
+    value === "suppressed"
+    ? value
+    : "private";
 }
 
 function asStringArray(value: unknown): string[] {
@@ -200,14 +247,190 @@ function buildOpenObligations(rows: StoryNodeRow[]): ContextPacketStoryBundleCon
     .filter(({ record }) => asString(record.status, "open") === "open")
     .map(({ row, record }) => ({
       id: asString(record.id, authoredId(row)),
-      type: asString(record.type, "unspecified"),
-      owner: asNullableString(record.owner),
-      subjects: asStringArray(record.subjects),
-      salience: asNumber(record.salience),
-      urgency: asNumber(record.urgency),
-      possible_payoff_modes: asStringArray(record.possible_payoff_modes),
-      coverage_cache_compatible_storylets: asStringArray(record.coverage_cache_compatible_storylets)
+      obligation_kind: asString(record.obligation_kind, "unspecified"),
+      description: asString(record.description),
+      owed_by: asString(record.owed_by),
+      owed_to: asString(record.owed_to),
+      urgency: asUrgency(record.urgency),
+      trigger_to_close: asString(record.trigger_to_close),
+      status: asString(record.status, "open")
     }));
+}
+
+function buildActiveIntentions(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_intentions"] {
+  return rows.map((row) => {
+    const record = parseYamlRecord(row);
+    return {
+      id: asString(record.id, authoredId(row)),
+      holder: asString(record.holder),
+      intent: asString(record.intent),
+      urgency: asUrgency(record.urgency),
+      expires_when: asString(record.expires_when)
+    };
+  });
+}
+
+function buildActiveStatuses(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_statuses"] {
+  return rows.map((row) => {
+    const record = parseYamlRecord(row);
+    return {
+      entity: asString(record.entity),
+      life: asString(record.life),
+      agency: asString(record.agency),
+      location: asString(record.location)
+    };
+  });
+}
+
+function buildActiveBeliefsByHolder(
+  rows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_beliefs_by_holder"] {
+  const groups = new Map<string, ContextPacketStoryBundleContext["active_beliefs_by_holder"][number]["beliefs"]>();
+
+  for (const row of rows) {
+    const record = parseYamlRecord(row);
+    const holder = asString(record.holder, "unspecified");
+    const beliefs = groups.get(holder) ?? [];
+    beliefs.push({
+      id: asString(record.id, authoredId(row)),
+      claim: asString(record.claim),
+      belief_mode: asString(record.belief_mode, "unspecified"),
+      truth_relation: asTruthRelation(record.truth_relation),
+      confidence: asString(record.confidence, "unspecified"),
+      visibility: asBeliefVisibility(record.visibility)
+    });
+    groups.set(holder, beliefs);
+  }
+
+  return [...groups.entries()].map(([holder, beliefs]) => ({ holder, beliefs }));
+}
+
+function participantGroupKey(participants: string[]): string {
+  return [...participants].sort((left, right) => left.localeCompare(right)).join("\u0000");
+}
+
+function buildActiveRelationshipsByParticipant(
+  rows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_relationships_by_participant"] {
+  const groups = new Map<
+    string,
+    ContextPacketStoryBundleContext["active_relationships_by_participant"][number]
+  >();
+
+  for (const row of rows) {
+    const record = parseYamlRecord(row);
+    const participants = asStringArray(record.participants).sort((left, right) =>
+      left.localeCompare(right)
+    );
+    if (participants.length === 0) {
+      continue;
+    }
+
+    const key = participantGroupKey(participants);
+    const group = groups.get(key) ?? {
+      participants,
+      axes: []
+    };
+    group.axes.push({
+      axis: asString(record.axis, "unspecified"),
+      value: asString(record.value, "unspecified")
+    });
+    groups.set(key, group);
+  }
+
+  return [...groups.values()];
+}
+
+function referencedStoryRecordIds(rows: StoryNodeRow[], excludedNodeId: string): Set<string> {
+  const ids = new Set<string>();
+
+  for (const row of rows) {
+    if (row.node_id === excludedNodeId) {
+      continue;
+    }
+
+    for (const match of row.body.matchAll(STORY_RECORD_ID_REGEX)) {
+      ids.add(match[0]);
+    }
+  }
+
+  return ids;
+}
+
+function isReferencedByOtherRecord(row: StoryNodeRow, rows: StoryNodeRow[]): boolean {
+  return referencedStoryRecordIds(rows, row.node_id).has(authoredId(row));
+}
+
+/**
+ * Scoped to records referenced by any other active record's body on the current
+ * branch path. See SPEC-46 Phase B scope heuristic.
+ */
+function buildActiveLocationsInScope(
+  locationRows: StoryNodeRow[],
+  allStoryRows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_locations_in_scope"] {
+  return locationRows
+    .filter((row) => isReferencedByOtherRecord(row, allStoryRows))
+    .map((row) => {
+      const record = parseYamlRecord(row);
+      return {
+        id: asString(record.id, authoredId(row)),
+        label: asString(record.label),
+        description: asString(record.description),
+        bound_ent: asNullableString(record.bound_ent)
+      };
+    });
+}
+
+/**
+ * Scoped to records referenced by any other active record's body on the current
+ * branch path. See SPEC-46 Phase B scope heuristic.
+ */
+function buildActiveObjectsInScope(
+  objectRows: StoryNodeRow[],
+  allStoryRows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_objects_in_scope"] {
+  return objectRows
+    .filter((row) => isReferencedByOtherRecord(row, allStoryRows))
+    .map((row) => {
+      const record = parseYamlRecord(row);
+      return {
+        id: asString(record.id, authoredId(row)),
+        label: asString(record.label),
+        description: asString(record.description),
+        owner:
+          typeof record.owner === "string" && record.owner.length > 0
+            ? record.owner
+            : null,
+        current_location: asString(record.current_location)
+      };
+    });
+}
+
+/**
+ * Scoped to story-local DA records referenced by any other active record's body
+ * on the current branch path. World-level DA still routes through list_records.
+ * See SPEC-46 Phase B scope heuristic.
+ */
+function buildActiveStoryDiegeticArtifacts(
+  storyDaRows: StoryNodeRow[],
+  allStoryRows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_story_diegetic_artifacts"] {
+  return storyDaRows
+    .filter((row) => isReferencedByOtherRecord(row, allStoryRows))
+    .map((row) => {
+      const record = parseYamlRecord(row);
+      return {
+        id: asString(record.id, authoredId(row)),
+        title: asString(record.title),
+        author: asString(record.author),
+        genre: asString(record.genre),
+        intended_audience: asString(record.intended_audience),
+        circulation: asString(record.circulation),
+        truth_relation: asString(record.truth_relation),
+        derived_from: asStringArray(record.derived_from)
+      };
+    });
 }
 
 function buildActiveThreads(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_threads"] {
@@ -440,6 +663,15 @@ export function summarizeStoryBundleContext(
     storylet_total: context.storylet_pool_summary.total,
     visibility_filtered_storylet_count: context.storylet_pool_summary.visibility_filtered_count,
     open_obligation_ids: context.open_obligations.map((obligation) => obligation.id),
+    active_intention_ids: context.active_intentions.map((intention) => intention.id),
+    active_status_entities: context.active_statuses.map((status) => status.entity),
+    active_belief_holders: context.active_beliefs_by_holder.map((group) => group.holder),
+    active_relationship_participants: context.active_relationships_by_participant.map(
+      (group) => [...group.participants]
+    ),
+    active_location_ids: context.active_locations_in_scope.map((location) => location.id),
+    active_object_ids: context.active_objects_in_scope.map((object) => object.id),
+    active_story_da_ids: context.active_story_diegetic_artifacts.map((artifact) => artifact.id),
     active_thread_ids: context.active_threads.map((thread) => thread.id),
     active_clock_ids: context.active_clocks.map((clock) => clock.id),
     hidden_secret_ids: context.hidden_secrets.map((secret) => secret.id),
@@ -459,11 +691,19 @@ export function buildStoryBundleContext(
 ): ContextPacketStoryBundleContext {
   const storyletRows = rowsForNodeType(db, worldSlug, storySlug, "storylet_record");
   const obligationRows = rowsForNodeType(db, worldSlug, storySlug, "obligation_record");
+  const intentionRows = rowsForNodeType(db, worldSlug, storySlug, "intention_record");
+  const statusRows = rowsForNodeType(db, worldSlug, storySlug, "story_status_record");
+  const beliefRows = rowsForNodeType(db, worldSlug, storySlug, "belief_record");
+  const relationshipRows = rowsForNodeType(db, worldSlug, storySlug, "relationship_record_story");
+  const locationRows = rowsForNodeType(db, worldSlug, storySlug, "story_location_record");
+  const objectRows = rowsForNodeType(db, worldSlug, storySlug, "story_object_record");
+  const storyDaRows = rowsForNodeType(db, worldSlug, storySlug, "story_diegetic_artifact_record");
   const threadRows = rowsForNodeType(db, worldSlug, storySlug, "thread_record");
   const clockRows = rowsForNodeType(db, worldSlug, storySlug, "pressure_clock_record");
   const secretRows = rowsForNodeType(db, worldSlug, storySlug, "story_secret_record");
   const storyQuestionRows = rowsForNodeType(db, worldSlug, storySlug, "story_question_record");
   const pageRows = rowsForNodeType(db, worldSlug, storySlug, "page_record");
+  const allStoryRows = rowsForStory(db, worldSlug, storySlug);
   const frontmatter = parseStoryKernelFrontmatter(worldSlug, storySlug);
   const branchContext = buildBranchContext(pageRows);
 
@@ -471,6 +711,14 @@ export function buildStoryBundleContext(
     story_slug: storySlug,
     storylet_pool_summary: buildStoryletPoolSummary(storyletRows),
     open_obligations: buildOpenObligations(obligationRows),
+    active_intentions: buildActiveIntentions(intentionRows),
+    active_statuses: buildActiveStatuses(statusRows),
+    active_beliefs_by_holder: buildActiveBeliefsByHolder(beliefRows),
+    active_relationships_by_participant:
+      buildActiveRelationshipsByParticipant(relationshipRows),
+    active_locations_in_scope: buildActiveLocationsInScope(locationRows, allStoryRows),
+    active_objects_in_scope: buildActiveObjectsInScope(objectRows, allStoryRows),
+    active_story_diegetic_artifacts: buildActiveStoryDiegeticArtifacts(storyDaRows, allStoryRows),
     active_threads: buildActiveThreads(threadRows),
     active_clocks: buildActiveClocks(clockRows),
     hidden_secrets: buildHiddenSecrets(secretRows),

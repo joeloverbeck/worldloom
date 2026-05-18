@@ -130,10 +130,21 @@ This layer carries:
 
 - storylet pool totals, `move_family` distribution, `saliency.urgency` counts, and capped visible storylet records
 - open obligations
+- active intentions, exposed as `active_intentions` entries with `id`, `holder`, `intent`, `urgency`, and `expires_when` for turn-cycle eligibility and stale-intention audits
+- active entity status, exposed as `active_statuses` entries with `entity`, `life`, `agency`, and `location` for entity-status predicates and health checks
+- active beliefs grouped by holder, exposed as `active_beliefs_by_holder` entries preserving `belief_mode`, `truth_relation`, `confidence`, and `visibility` for observer-firewall and dramatic-irony consumers
+- active relationships grouped by participant pair, exposed as `active_relationships_by_participant` entries with schema-backed `axis` / `value` pairs for social-state prefiltering
+- active locations in scope, exposed as `active_locations_in_scope` entries with `id`, `label`, `description`, and `bound_ent`
+- active objects in scope, exposed as `active_objects_in_scope` entries with `id`, `label`, `description`, `owner`, and `current_location`
+- active story-local diegetic artifacts, exposed as `active_story_diegetic_artifacts` entries with `id`, `title`, `author`, `genre`, `intended_audience`, `circulation`, `truth_relation`, and `derived_from`
 - active / pressured / critical / dormant threads
 - the longest active branch path and recent page metadata along that path
 - `STORY_KERNEL.md` `mysteries_in_play`, `cast_bind_list`, and `invariants_acknowledged`
 - per-mystery `PG.state_snapshot.unresolved_mystery_claims[]` evidence chains, including page id, authority, status, and `evidence_records[]`
+
+Scope heuristic: `active_locations_in_scope`, `active_objects_in_scope`, and `active_story_diegetic_artifacts` include records referenced by any other active record's body on the current branch path. This is the SPEC-46 Phase B id-list heuristic mirrored from the scoped-builder JSDoc and landed in `archive/tickets/SPEC46STOPIPMAC-004.md`; world-level diegetic artifacts still route through targeted `list_records(record_type='diegetic_artifact_record')` retrieval.
+
+These seven summaries are the machine-facing foundation for deferred render packets such as present-causal-situation, dramatic-irony, reader-expectation, social-pressure, pressure-texture, and branch-possibility-space. They do not add those packets or any narrative-shape framing.
 
 For story turn-cycle and story health-audit consumers, the latest
 `change_log_entry` delivered in governing context is a drift trigger, not the

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { assembleContextPacket } from "../../src/context-packet/assemble.js";
+import { summarizeStoryBundleContext } from "../../src/context-packet/story-bundle-context.js";
 
 import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared.js";
 import {
@@ -46,8 +47,279 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     );
     assert.deepEqual(
       result.story_bundle_context.open_obligations.map((obligation) => obligation.id),
-      ["OBL-1"]
+      ["OBL-1", "OBL-2", "OBL-3", "OBL-4", "OBL-5"]
     );
+    assert.deepEqual(
+      result.story_bundle_context.open_obligations.map((obligation) => Object.keys(obligation)),
+      Array.from({ length: 5 }, () => [
+        "id",
+        "obligation_kind",
+        "description",
+        "owed_by",
+        "owed_to",
+        "urgency",
+        "trigger_to_close",
+        "status"
+      ])
+    );
+    assert.deepEqual(
+      result.story_bundle_context.open_obligations.map((obligation) => [
+        obligation.id,
+        obligation.obligation_kind,
+        obligation.description,
+        obligation.owed_by,
+        obligation.owed_to,
+        obligation.urgency,
+        obligation.trigger_to_close,
+        obligation.status
+      ]),
+      [
+        [
+          "OBL-1",
+          "promise",
+          "Pay off the loft setup.",
+          "STENT-2",
+          "public",
+          "high",
+          "Marla reveals why the loft bell rang.",
+          "open"
+        ],
+        [
+          "OBL-2",
+          "debt",
+          "Marla owes the stairwell watcher a true answer.",
+          "STENT-2",
+          "group:watch",
+          "medium",
+          "Marla gives the watcher a true answer.",
+          "open"
+        ],
+        [
+          "OBL-3",
+          "moral",
+          "Marla must decide whether to warn the public.",
+          "STENT-2",
+          "public",
+          "low",
+          "The public warning is either made or deliberately withheld.",
+          "open"
+        ],
+        [
+          "OBL-4",
+          "protection",
+          "Marla must keep the loft child unseen.",
+          "STENT-2",
+          "STENT-2",
+          "high",
+          "The child is moved beyond the watch patrol.",
+          "open"
+        ],
+        [
+          "OBL-5",
+          "promise",
+          "Marla promised to leave a signal if the roof path is clear.",
+          "STENT-2",
+          "public",
+          "medium",
+          "A roof-path signal is left or the promise is superseded.",
+          "open"
+        ]
+      ]
+    );
+    assert.deepEqual(
+      result.story_bundle_context.active_intentions.map((intention) => Object.keys(intention)),
+      [
+        [
+          "id",
+          "holder",
+          "intent",
+          "urgency",
+          "expires_when"
+        ]
+      ]
+    );
+    assert.deepEqual(result.story_bundle_context.active_intentions, [
+      {
+        id: "STINT-1",
+        holder: "STENT-2",
+        intent: "Marla wants to reach the loft window unseen.",
+        urgency: "high",
+        expires_when: "Marla is seen by the watch patrol."
+      }
+    ]);
+    assert.deepEqual(
+      result.story_bundle_context.active_statuses.map((status) => Object.keys(status)),
+      [
+        [
+          "entity",
+          "life",
+          "agency",
+          "location"
+        ]
+      ]
+    );
+    assert.deepEqual(result.story_bundle_context.active_statuses, [
+      {
+        entity: "STENT-2",
+        life: "alive",
+        agency: "free",
+        location: "STLOC-1"
+      }
+    ]);
+    assert.deepEqual(
+      result.story_bundle_context.active_beliefs_by_holder.map((group) => Object.keys(group)),
+      [
+        ["holder", "beliefs"],
+        ["holder", "beliefs"]
+      ]
+    );
+    assert.deepEqual(
+      result.story_bundle_context.active_beliefs_by_holder.map((group) => [
+        group.holder,
+        group.beliefs.map((belief) => Object.keys(belief))
+      ]),
+      [
+        [
+          "STENT-2",
+          [
+            [
+              "id",
+              "claim",
+              "belief_mode",
+              "truth_relation",
+              "confidence",
+              "visibility"
+            ],
+            [
+              "id",
+              "claim",
+              "belief_mode",
+              "truth_relation",
+              "confidence",
+              "visibility"
+            ]
+          ]
+        ],
+        [
+          "STENT-3",
+          [
+            [
+              "id",
+              "claim",
+              "belief_mode",
+              "truth_relation",
+              "confidence",
+              "visibility"
+            ]
+          ]
+        ]
+      ]
+    );
+    assert.deepEqual(result.story_bundle_context.active_beliefs_by_holder, [
+      {
+        holder: "STENT-2",
+        beliefs: [
+          {
+            id: "BEL-1",
+            claim: "Marla believes the loft is empty.",
+            belief_mode: "believes",
+            truth_relation: "false",
+            confidence: "likely",
+            visibility: "private"
+          },
+          {
+            id: "BEL-2",
+            claim: "Marla suspects someone listened at the stairwell.",
+            belief_mode: "suspects",
+            truth_relation: "unknown",
+            confidence: "suspected",
+            visibility: "shared"
+          }
+        ]
+      },
+      {
+        holder: "STENT-3",
+        beliefs: [
+          {
+            id: "BEL-3",
+            claim: "The watcher believes Marla heard the bell.",
+            belief_mode: "believes",
+            truth_relation: "unknown",
+            confidence: "medium",
+            visibility: "factional"
+          }
+        ]
+      }
+    ]);
+    assert.deepEqual(result.story_bundle_context.active_relationships_by_participant, [
+      {
+        participants: ["STENT-2", "STENT-3"],
+        axes: [
+          {
+            axis: "trust",
+            value: "low"
+          },
+          {
+            axis: "fear",
+            value: "medium"
+          }
+        ]
+      }
+    ]);
+    assert.deepEqual(
+      result.story_bundle_context.active_locations_in_scope.map((location) => Object.keys(location)),
+      [["id", "label", "description", "bound_ent"]]
+    );
+    assert.deepEqual(result.story_bundle_context.active_locations_in_scope, [
+      {
+        id: "STLOC-1",
+        label: "Loft window",
+        description: "A narrow window above the old loft.",
+        bound_ent: null
+      }
+    ]);
+    assert.deepEqual(
+      result.story_bundle_context.active_objects_in_scope.map((object) => Object.keys(object)),
+      [["id", "label", "description", "owner", "current_location"]]
+    );
+    assert.deepEqual(result.story_bundle_context.active_objects_in_scope, [
+      {
+        id: "STOBJ-1",
+        label: "Brass latch",
+        description: "A tarnished latch on the loft window.",
+        owner: "public",
+        current_location: "STLOC-1"
+      }
+    ]);
+    assert.deepEqual(
+      result.story_bundle_context.active_story_diegetic_artifacts.map((artifact) =>
+        Object.keys(artifact)
+      ),
+      [
+        [
+          "id",
+          "title",
+          "author",
+          "genre",
+          "intended_audience",
+          "circulation",
+          "truth_relation",
+          "derived_from"
+        ]
+      ]
+    );
+    assert.deepEqual(result.story_bundle_context.active_story_diegetic_artifacts, [
+      {
+        id: "DA-1",
+        title: "Loft Bell Note",
+        author: "unknown",
+        genre: "note",
+        intended_audience: "public",
+        circulation: "public",
+        truth_relation: "unknown",
+        derived_from: ["SE-1"]
+      }
+    ]);
     assert.deepEqual(
       result.story_bundle_context.active_threads.map((thread) => thread.id),
       ["THR-1"]
@@ -104,6 +376,15 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     assert.deepEqual(result.story_bundle_context.invariants_acknowledged, [
       "INV-social-intimacy"
     ]);
+
+    const storyBundleContextSummary = summarizeStoryBundleContext(result.story_bundle_context);
+    assert.deepEqual(storyBundleContextSummary?.active_belief_holders, ["STENT-2", "STENT-3"]);
+    assert.deepEqual(storyBundleContextSummary?.active_relationship_participants, [
+      ["STENT-2", "STENT-3"]
+    ]);
+    assert.deepEqual(storyBundleContextSummary?.active_location_ids, ["STLOC-1"]);
+    assert.deepEqual(storyBundleContextSummary?.active_object_ids, ["STOBJ-1"]);
+    assert.deepEqual(storyBundleContextSummary?.active_story_da_ids, ["DA-1"]);
   } finally {
     destroyTempRepoRoot(root);
   }
