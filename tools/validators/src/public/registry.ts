@@ -10,6 +10,7 @@ import { clockTickProvenance } from "../structural/clock-tick-provenance.js";
 import { clockValueInRange } from "../structural/clock-value-in-range.js";
 import { causalDependencyThreatScan } from "../structural/causal-dependency-threat-scan.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
+import { entityIntroductionStatusPairing } from "../structural/entity-introduction-status-pairing.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { midstoryRecordIntroductionGrounding } from "../structural/midstory-record-introduction-grounding.js";
 import { nonPropagationTagShape } from "../structural/non-propagation-tag-shape.js";
@@ -85,6 +86,7 @@ export const structuralValidators: readonly Validator[] = [
   secretMysteryFirewallCompliance,
   storyQuestionIntroductionGroundingIntegrity,
   threadIntroductionGroundingIntegrity,
+  entityIntroductionStatusPairing,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,

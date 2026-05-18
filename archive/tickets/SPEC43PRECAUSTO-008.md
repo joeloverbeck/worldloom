@@ -1,6 +1,6 @@
 # SPEC43PRECAUSTO-008: `entity_introduction_status_pairing` Validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/entity-introduction-status-pairing.ts` (STENT-specific introduction gate enforcing same-event STSTAT pairing). Registered in `tools/validators/src/public/registry.ts` (shared file with 8 other SPEC-43 tickets per §Step 6.5).
@@ -17,6 +17,8 @@ SPEC-43 §Approach D Table row 6 + §Approach C STENT rules + spec §Verificatio
 3. Cross-skill boundary under audit: the validator's precondition is critical — checking "any STSTAT created" would over-fire on existing-entity status updates (a common case). Per SPEC-43 §Verification: "Existing-entity status update does NOT trigger pairing requirement: validator checks `STENT` IS in `SE.state_delta.create[]` before requiring pairing." The precondition is `len(SE.state_delta.create[].filter(r => r.startsWith("STENT-"))) > 0`.
 4. FOUNDATIONS §Story Bundles §5c (Present Causal State) restated: STENT representation is earned by present branch utility (agency, witness role, information-source role, pressure-driver role, choice-target role), not by outline importance. The STSTAT pairing rule enforces that every fresh entity becomes immediately agency-bearing (with a status record committing life/agency/location), not a background name-drop.
 5. HARD-GATE / Canon Safety surface: per-commit Phase 9 gate gating mid-story STENT creation. Critical that the precondition correctly distinguishes fresh STENT creation from existing-entity status updates — an over-firing validator would break legitimate STSTAT-only updates (e.g., entity's life changes from alive to dead after an event).
+6. Live validator API correction: `Validator` objects use `severity_mode: "fail"` and an `applies_to(ctx)` predicate, not a literal `severity` / `applies_to: ["branching-story-turn-cycle"]` shape. This validator's live run-mode equivalent is full-world plus pre-apply/incremental story-bundle predicates for SE / PG / STENT / STSTAT touches.
+7. Same-seam inventory/count fallout: adding a structural validator also updates `tools/validators/README.md`, `tools/validators/tests/integration/spec04-verification.test.ts`, and `tools/validators/tests/integration/validate-patch-plan.test.ts`. These are package proof surfaces, not separate feature scope.
 
 ## Architecture Check
 
@@ -37,8 +39,8 @@ SPEC-43 §Approach D Table row 6 + §Approach C STENT rules + spec §Verificatio
 
 Validator object:
 - `name: "entity_introduction_status_pairing"`.
-- `applies_to: ["branching-story-turn-cycle"]`.
-- `severity: "fail"`.
+- `severity_mode: "fail"`.
+- `applies_to(ctx)` returns true for full-world validation, relevant story-bundle pre-apply plans, and incremental touched files under events/pages/entities/status.
 - For each SE in the bundle:
   - Extract `freshStentIds = se.state_delta.create[].filter(id => id.startsWith("STENT-"))`. If `freshStentIds.length === 0`, skip (no pairing requirement triggered).
   - For each fresh STENT id:
@@ -69,6 +71,9 @@ Add `entity_introduction_status_pairing` to the validator-name assertion list (c
 - `tools/validators/src/public/registry.ts` (modify — shared with 8 sibling tickets)
 - `tools/validators/tests/structural/entity-introduction-status-pairing.test.ts` (new)
 - `tools/validators/tests/structural/registry.test.ts` (modify — shared with 8 sibling tickets)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — registry count assertion)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean non-story pre-apply skip assertion)
+- `tools/validators/README.md` (modify — structural validator inventory/status count)
 
 ## Out of Scope
 
@@ -81,7 +86,7 @@ Add `entity_introduction_status_pairing` to the validator-name assertion list (c
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators -- entity-introduction-status-pairing` (test file passes).
+1. `npm run build --prefix tools/validators && cd tools/validators && node --test dist/tests/structural/entity-introduction-status-pairing.test.js` (test file passes).
 2. `npm test --prefix tools/validators` (full validator package test pass).
 3. `grep -n "entityIntroductionStatusPairing\|entity_introduction_status_pairing" tools/validators/src/public/registry.ts` returns import + array entry.
 
@@ -94,10 +99,32 @@ Add `entity_introduction_status_pairing` to the validator-name assertion list (c
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/entity-introduction-status-pairing.test.ts` — 4 test cases per §What to Change item 3 (creation-pass + creation-fail-missing + creation-fail-multiple + lifecycle-still-valid).
+1. `tools/validators/tests/structural/entity-introduction-status-pairing.test.ts` — 7 test cases: creation-pass, missing paired STSTAT, multiple paired STSTATs, paired STSTAT absent from child PG, existing-entity STSTAT-only update, root-bootstrap STENT creation, and run-mode scoping.
 2. `tools/validators/tests/structural/registry.test.ts` (modify) — adds the new validator to the name assertion (coordinate with tickets 003-007, 009-012 per §Step 6.5).
 
 ### Commands
 
-1. `npm test --prefix tools/validators -- entity-introduction-status-pairing` (targeted test pass).
+1. `npm run build --prefix tools/validators && cd tools/validators && node --test dist/tests/structural/entity-introduction-status-pairing.test.js` (targeted test pass).
 2. `npm test --prefix tools/validators` (full validator package test pass).
+
+## Outcome
+
+Completed: 2026-05-18.
+
+Implemented `entity_introduction_status_pairing` as an additive structural validator in `tools/validators/src/structural/entity-introduction-status-pairing.ts` and registered it in `tools/validators/src/public/registry.ts`. The validator runs in full-world, relevant story-bundle pre-apply plans, and incremental event/page/entity/status touches. It fires only when an SE creates a fresh `STENT-*`, then requires exactly one same-event `STSTAT-*` whose `entity` field points at the fresh STENT and verifies the child PG active-record map carries both records.
+
+Added focused structural tests for the creation-pass fixture, missing paired status, multiple same-event status records, missing active child-PG status, existing-entity status-only updates, root-bootstrap STENT creation, and run-mode scoping. Updated the structural registry assertion, SPEC-04 validator counts, clean non-story pre-apply skip assertions, and `tools/validators/README.md` inventory. The README update also restored the already-live `thread_introduction_grounding_integrity` inventory row, which was missing before this ticket's same-seam inventory pass.
+
+## Verification Result
+
+- Baseline before edits: `npm test --prefix tools/validators` passed with 452 tests, 0 failures.
+- `npm run build --prefix tools/validators` passed.
+- `cd tools/validators && node --test dist/tests/structural/entity-introduction-status-pairing.test.js` passed: 7 tests, 0 failures.
+- `npm test --prefix tools/validators` passed: 459 tests, 0 failures.
+- `grep -n "entityIntroductionStatusPairing\|entity_introduction_status_pairing" tools/validators/src/public/registry.ts` returned the import and structural registry entry.
+
+## Deviations
+
+- Replaced the drafted `npm test --prefix tools/validators -- entity-introduction-status-pairing` targeted command with a direct compiled Node test after package build, matching the established validator-package proof pattern.
+- The implementation uses the live `Validator` API (`severity_mode` plus `applies_to(ctx)`) rather than the ticket's originally drafted literal `severity` / array `applies_to` shape.
+- The package README inventory had pre-existing drift from ticket 007 (`thread_introduction_grounding_integrity` already registered but missing from the list). This ticket corrected that inventory row while adding `entity_introduction_status_pairing`.
