@@ -14,6 +14,8 @@
 
 **Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-004.md`)**: the live `STLOC`, `STOBJ`, and story-local `DA` schemas do not contain the drafted Phase B `name`, `status`, `affordances`, `accessible_to`, `kind`, `holders`, or DA `location` fields. `archive/tickets/SPEC46STOPIPMAC-004.md` therefore landed schema-faithful `active_locations_in_scope`, `active_objects_in_scope`, and `active_story_diegetic_artifacts` projections using the validator-backed fields documented in that ticket's Outcome. Downstream docs/capability ticket 005 should mirror the landed schema-faithful shapes rather than the stale Phase B table.
 
+**Implementation note (2026-05-18, `archive/tickets/SPEC46STOPIPMAC-005.md`)**: Phase B cross-cutting docs now mirror the landed schema-faithful summary shapes in `docs/CONTEXT-PACKET-CONTRACT.md`, including the id-list scope heuristic for locations, objects, and story-local diegetic artifacts. Runtime capability discovery now enumerates the seven fields through the registered `get_context_packet` description in `tools/world-mcp/src/server.ts`, which is the live metadata source serialized by `mcp__worldloom__describe_capabilities`.
+
 ---
 
 ## Problem Statement

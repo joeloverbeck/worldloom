@@ -50,7 +50,7 @@ Add a brief note pointing to the deferred Priority 2 packets (dramatic-irony, so
 ## Out of Scope
 
 - Production code changes: covered by sibling tickets 006-013.
-- Phase B documentation (CONTEXT-PACKET-CONTRACT.md + describe-capabilities.ts): covered by SPEC46STOPIPMAC-005.
+- Phase B documentation (`docs/CONTEXT-PACKET-CONTRACT.md` + registered `get_context_packet` capability description in `tools/world-mcp/src/server.ts`): covered by `archive/tickets/SPEC46STOPIPMAC-005.md`.
 - Updates to skill prose under `.claude/skills/` that reference the new edges: spec §Deliverable D-X2 marks this as strictly opt-in / no-change.
 
 ## Acceptance Criteria
