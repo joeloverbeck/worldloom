@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds capstone integration test exercising every prior SPEC47STPSTE ticket end-to-end against a fixture story bundle; folds T-1 through T-10 from SPEC-47 §Test Plan into per-test-bullet assertions; verifies Hook 3 covers `_source/plans/` + `_source/emotions/` subdirs (per SPEC-47 D-A9, no Hook 3 code change required)
-**Deps**: 002, 004, 010, 012, 014, 016
+**Deps**: `archive/tickets/SPEC47STPSTE-002.md`, 004, 010, 012, 014, 016
 
 ## Problem
 

@@ -44,6 +44,8 @@ Core page-cycle state records:
 | `STLOC` | Location. |
 | `STOBJ` | Object. |
 | `DA` | Story-local diegetic artifact. |
+| `STPLAN` | Actor-owned tactical plan over multiple pages; carries belief basis, resource basis, blockers, current step, fallback steps. |
+| `STEMO` | Actor-owned transient affective state; carries closed-enum affect_kind, intensity, behavioral_pressure, appraisal basis. |
 | `BR` | Branch. |
 | `PG` | Page / causal-tick state snapshot. |
 | `CHC` | Emitted choice. |

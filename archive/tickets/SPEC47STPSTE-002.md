@@ -1,6 +1,6 @@
 # SPEC47STPSTE-002: Update record-class inventory + backfill FOUNDATIONS §Story Bundles §6
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — extends `.claude/skills/_shared-templates/story-state-contract.md` §3 record-class inventory and `docs/FOUNDATIONS.md` §Story Bundles §6 (Story-Bundle ID Classes); no code changes
@@ -92,3 +92,21 @@ Per-bundle records include STENT, STSTAT, SF, BEL, SE, OBL, CNSQ, THR, SREL, STI
 1. `awk '/^## 3\. Record Class Inventory/,/^## 4\. Record Schemas/' .claude/skills/_shared-templates/story-state-contract.md | grep -c "^| \`[A-Z]"` (returns 26 = original 24 + STPLAN + STEMO)
 2. `awk '/^### 6\. Story-Bundle ID Classes/,/^### 6a\./' docs/FOUNDATIONS.md | grep -oE "STENT|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|CLK|STSEC|STQ|DA|BR|PG|CHC|SLT|STPLAN|STEMO|SLB" | sort -u | wc -l` (returns 23)
 3. `grep -nE "STPLAN|STEMO" docs/FOUNDATIONS.md` (returns matches only inside §Story Bundles §6, no spurious matches elsewhere)
+
+## Outcome
+
+Completed: 2026-05-19.
+
+- Added `STPLAN` and `STEMO` rows to `.claude/skills/_shared-templates/story-state-contract.md` §3 as core page-cycle state records.
+- Updated `docs/FOUNDATIONS.md` §Story Bundles §6 to enumerate the post-SPEC-47 per-bundle record set: the 17 existing classes, the inherited `CLK` / `STSEC` / `STQ` / story-local `DA` backfill, and the new `STPLAN` / `STEMO` classes.
+- Left the surrounding allocation-route prose, §6a, and §6b unchanged.
+
+## Verification Result
+
+1. `awk '/^## 3\. Record Class Inventory/,/^## 4\. Record Schemas/' .claude/skills/_shared-templates/story-state-contract.md | grep -c '^| `[A-Z]'` returned `26`.
+2. `awk '/^### 6\. Story-Bundle ID Classes/,/^### 6a\./' docs/FOUNDATIONS.md | grep -oE 'STENT|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|CLK|STSEC|STQ|DA|BR|PG|CHC|SLT|STPLAN|STEMO|SLB' | sort -u | wc -l` returned `23`.
+3. `grep -nE 'STPLAN|STEMO' docs/FOUNDATIONS.md` returned only the §Story Bundles §6 per-bundle records sentence.
+
+## Deviations
+
+- None. This ticket remained documentation/contract-only; JSON schemas, patch-engine wiring, validators, predicate/tag grammar, MCP summaries, world-index edges, page-plan sections, and downstream skill prose remain with the active follow-up tickets named in the SPEC-47 queue.
