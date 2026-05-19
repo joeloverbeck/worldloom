@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `docs/MACHINE-FACING-LAYER.md` story-edge enumeration with the 14 new STPLAN+STEMO edge types and their semantic shapes; no code changes
-**Deps**: 013
+**Deps**: `archive/tickets/SPEC47STPSTE-013.md`
 
 ## Problem
 
