@@ -1,6 +1,6 @@
 # SPEC47STPSTE-016: Update 7 story-pipeline SKILL.md files for STPLAN/STEMO awareness
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — extends 7 story-pipeline SKILL.md files (`branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) with STPLAN/STEMO-awareness prose; cross-cutting docs ticket landing atomically after all upstream implementation tickets ship
@@ -18,6 +18,7 @@ SPEC-47's STPLAN/STEMO records, MCP context-packet summaries, world-index edges,
 2. Verified SPEC-47 §Approach §C D-C10 specifies updating all 7 SKILL.md files with per-skill prose detail: bootstrap (load-bearing STPLAN/STEMO discipline + first-page §9b/§9c render), turn-cycle (maintenance lifecycle + intro/plan_relation tag emission + §9b/§9c render), prose-attach (prose-validation against §9b/§9c), health-audit (bootstrap-drift check + stale-active-plan + stale-active-emotion + SE-plan-relation consistency walk), commitment-block-authoring (6 new predicates available for SLT preconditions), story-fact-promotion-to-canon (STPLAN/STEMO as evidence context only; not promotion source classes), story-promotion-closeout (canon-verdict-driven supersession of affected STPLAN/STEMO).
 3. Cross-skill boundary under audit: the 7 SKILL.md files constitute the operational surface of the story-pipeline (Skill Category 2c). They reference the shared `story-state-contract.md`, the validator framework, the MCP retrieval surface, the world-index edges, and the page-plan template — all of which SPEC-47 extends via tickets 003-015. This cross-cutting docs ticket lands the consuming-skill awareness atomically after all upstream surfaces ship (per the §Cross-Cutting Docs Ticket Shape's "Deps: list every implementation ticket whose surface the docs reference" rule).
 4. FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary) — story state is authoritative at page-plan commit; rendered prose is supplied externally and validated by prose-attach. Adding STPLAN/STEMO awareness to bootstrap + turn-cycle + prose-attach preserves the §4a discipline: bootstrap seeds load-bearing STPLAN/STEMO at story_start (state authoritative at commit), turn-cycle maintains them at every page (state authoritative at commit), prose-attach validates that rendered prose reflects the planned §9b/§9c content (does not create new STPLAN/STEMO state from prose). Plus §Tooling Recommendation — the per-skill prose updates teach skills to consume the new MCP context-packet summaries and world-index edges via the documented retrieval surface, preserving the "directly or via the documented context-packet + targeted-retrieval pattern" principle.
+5. Reassessment correction: the drafted cross-skill consistency proof named `story-state-contract.md §4.5.17/§4.5.18` as the schema authority, but the live repo stores the detailed record schemas in `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.17 / §4.5.18 while `story-state-contract.md` owns the class inventory, predicate DSL (§5), tag grammar (§5a), and page-plan §9b / §9c contract. Verification was corrected to grep the live schema authority and the shared operational surfaces rather than preserving the stale command.
 
 ## Architecture Check
 
@@ -28,7 +29,7 @@ SPEC-47's STPLAN/STEMO records, MCP context-packet summaries, world-index edges,
 
 1. All 7 SKILL.md files contain STPLAN/STEMO references → codebase grep-proof `grep -lE "STPLAN|STEMO" .claude/skills/branching-story-*/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md | wc -l` returns 7
 2. Per-skill prose follows SPEC-47 §Approach §C D-C10 detail → manual review per skill
-3. Cross-skill consistency: each skill's STPLAN/STEMO prose references the same canonical surfaces (story-state-contract.md §4.5.17/§4.5.18 schemas; story-state-contract.md §9b/§9c page-plan sections; predicate-DSL grammar at §5; tag grammar at §5a; MCP summaries at CONTEXT-PACKET-CONTRACT.md; world-index edges at MACHINE-FACING-LAYER.md) → grep across SKILL.md files for consistent citations
+3. Cross-skill consistency: each skill's STPLAN/STEMO prose references the same canonical surfaces (`story-record-schemas.md` §4.5.17/§4.5.18 schemas; `story-state-contract.md` §5 predicate DSL, §5a tag grammar, and §8 page-plan §9b/§9c sections; MCP summaries at `CONTEXT-PACKET-CONTRACT.md`; world-index edges at `MACHINE-FACING-LAYER.md`) → grep across SKILL.md files for consistent citations
 4. Bootstrap-drift health-audit check named in `branching-story-health-audit/SKILL.md` per SPEC-47 §Approach §C ("SAU mode adds a check flagging STPLAN/STEMO records seeded at story_start that were never queried/superseded/consumed across the bundle's branch tree")
 
 ## What to Change
@@ -80,6 +81,7 @@ Add canon-verdict-driven supersession logic: when a canon verdict invalidates a 
 - `.claude/skills/commitment-block-authoring/SKILL.md` (modify)
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify)
 - `.claude/skills/story-promotion-closeout/SKILL.md` (modify)
+- `archive/tickets/SPEC47STPSTE-016.md` (modify — closeout truthing and proof-command correction)
 
 ## Out of Scope
 
@@ -96,7 +98,7 @@ Add canon-verdict-driven supersession logic: when a canon verdict invalidates a 
 2. `grep -nE "intro:STPLAN|intro:STEMO|plan_relation:" .claude/skills/branching-story-turn-cycle/SKILL.md` returns matches (turn-cycle owns tag emission).
 3. `grep -nE "bootstrap-drift|stale-active-plan|stale-active-emotion|SE-plan-relation consistency" .claude/skills/branching-story-health-audit/SKILL.md` returns matches (4 new check categories).
 4. `grep -nE "plan_active|emotion_active|emotion_pressure" .claude/skills/commitment-block-authoring/SKILL.md` returns matches (6 new predicates available).
-5. Each skill's STPLAN/STEMO prose cites the same canonical surfaces (story-state-contract.md §4.5.17/§4.5.18; §9b/§9c; predicate-DSL §5; tag grammar §5a; CONTEXT-PACKET-CONTRACT.md; MACHINE-FACING-LAYER.md) → cross-skill grep.
+5. Each skill's STPLAN/STEMO prose cites the same canonical surfaces (`story-record-schemas.md` §4.5.17/§4.5.18; `story-state-contract.md` §5 / §5a / §8 / §9b / §9c; `CONTEXT-PACKET-CONTRACT.md`; `MACHINE-FACING-LAYER.md`) → cross-skill grep.
 
 ### Invariants
 
@@ -114,4 +116,23 @@ Add canon-verdict-driven supersession logic: when a canon verdict invalidates a 
 
 1. `for s in branching-story-bootstrap branching-story-turn-cycle branching-story-prose-attach branching-story-health-audit commitment-block-authoring story-fact-promotion-to-canon story-promotion-closeout; do echo "=== $s ==="; grep -cE "STPLAN|STEMO" .claude/skills/$s/SKILL.md; done` (each skill returns ≥1 match)
 2. `grep -lE "STPLAN|STEMO" .claude/skills/*/SKILL.md | sort` (returns all 7 expected skill paths plus any other unexpected matches for review)
-3. Cross-skill consistency grep: `grep -nE "story-state-contract.md §4\.5\.(17|18)" .claude/skills/branching-story-*/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md` (returns consistent §4.5.17/§4.5.18 citations across skills referencing the new schemas)
+3. Cross-skill consistency grep: `grep -nE "story-record-schemas.md.*§4\.5\.17|story-record-schemas.md.*§4\.5\.18|story-state-contract.md.*§5a|CONTEXT-PACKET-CONTRACT.md|MACHINE-FACING-LAYER.md" .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md` (returns the live schema, tag/page-plan, context-packet, and edge-surface citations across the 7 skills)
+
+## Outcome
+
+Completed: 2026-05-19.
+
+What changed:
+- Updated all 7 story-pipeline SKILL.md files with consuming STPLAN/STEMO prose: bootstrap seeding discipline, turn-cycle lifecycle/tag/page-plan ownership, prose-attach validation, health-audit drift/stale/plan-relation checks, commitment-block predicate authoring, promotion evidence-context limits, and promotion-closeout basis fallout.
+- Corrected this ticket's stale schema-authority proof from `story-state-contract.md §4.5.17/§4.5.18` to the live `story-record-schemas.md` §4.5.17 / §4.5.18 authority plus `story-state-contract.md` §5 / §5a / §8 operational surfaces.
+
+Deviations from original plan:
+- The implementation did not add executable tests because this is documentation-only skill prose. Verification is grep/manual-review based as planned.
+- The live schema authority is `story-record-schemas.md`, not `story-state-contract.md`; proof commands and verification wording were corrected accordingly.
+
+Verification results:
+- `grep -lE "STPLAN|STEMO" .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md | wc -l` returned `7`.
+- `grep -nE "intro:STPLAN|intro:STEMO|plan_relation:" .claude/skills/branching-story-turn-cycle/SKILL.md` returned the turn-cycle tag guidance.
+- `grep -nE "bootstrap-drift|stale-active-plan|stale-active-emotion|SE-plan-relation consistency" .claude/skills/branching-story-health-audit/SKILL.md` returned all four health-audit categories.
+- `grep -nE "plan_active|emotion_active|emotion_pressure" .claude/skills/commitment-block-authoring/SKILL.md` returned predicate guidance.
+- `git diff --check -- .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md archive/tickets/SPEC47STPSTE-016.md tickets/SPEC47STPSTE-017.md` passed.

@@ -1,6 +1,6 @@
 ---
 name: branching-story-health-audit
-description: "Use when diagnosing the health of a branching-story bundle. Five modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health), compatibility (schema-drift compatibility reporting), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
+description: "Use when diagnosing the health of a branching-story bundle. Five modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health + STPLAN/STEMO health), compatibility (schema-drift compatibility reporting), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -32,7 +32,7 @@ Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/r
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 10 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health) executed when `structural` in mode (default); compatibility-drift reporting executed when `compatibility` in mode; prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 11 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health, 2k STPLAN / STEMO health) executed when `structural` in mode (default); compatibility-drift reporting executed when `compatibility` in mode; prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -51,7 +51,7 @@ Phase 1: Scope branches (build tree from BR + PG; apply
                          branch_path_filter)
         |
         v
-Phase 2 [structural; default]: 10 sub-phases executed sequentially
+Phase 2 [structural; default]: 11 sub-phases executed sequentially
   ├─ 2a: Replay events (snapshot hash comparison)
   ├─ 2b: Branch isolation
   ├─ 2c: Debt health
@@ -61,7 +61,8 @@ Phase 2 [structural; default]: 10 sub-phases executed sequentially
   ├─ 2f: Continuation / terminal proof
   ├─ 2g: Causal dependency health
   ├─ 2h: Canon baseline drift
-  └─ 2i: CLK / STSEC / STQ mechanism health
+  ├─ 2i: CLK / STSEC / STQ mechanism health
+  └─ 2k: STPLAN / STEMO health
         |
         v
 Phase 2j [conditional on `compatibility` in mode]: Compatibility drift
@@ -118,10 +119,11 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `docs/FOUNDATIONS.md` — §Story Bundles §4b / §5 / §5a / §5b / §6a govern the audit checks
 - `.claude/skills/_shared-templates/story-state-contract.md` — §5 closed predicate DSL, §7 eight hard gates, §9 branching procedure, §11 mystery and canon authority
 - `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (audit reads against)
+- `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.17 / §4.5.18, `.claude/skills/_shared-templates/story-state-contract.md` §5 / §5a / §8, `docs/CONTEXT-PACKET-CONTRACT.md`, and `docs/MACHINE-FACING-LAYER.md` — canonical STPLAN/STEMO schema, predicate/tag/page-plan, context summary, and edge surfaces for Phase 2k
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/BR-*.yaml` — branch tree
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/PG-*.yaml` — page snapshots
 - `worlds/<world_slug>/stories/<story_slug>/_source/events/SE-*.yaml` — event deltas
-- `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` — every other record class read per Phase 2 sub-phase needs (SF, BEL, OBL, CNSQ, THR, SREL, STENT, STSTAT, STINT, STLOC, STOBJ, DA, CLK, STSEC, STQ, SLT, CHC)
+- `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` — every other record class read per Phase 2 sub-phase needs (SF, BEL, OBL, CNSQ, THR, SREL, STENT, STSTAT, STINT, STLOC, STOBJ, DA, CLK, STSEC, STQ, STPLAN, STEMO, SLT, CHC)
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — Phase 3 prose checks (conditional on `prose` in mode)
 - `worlds/<world_slug>/stories/<sibling_story_slug>/_source/` — Phase 4 cross-story checks (conditional on `cross_story` in mode); may be empty if this is the only bundle in the world
 - World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', story_slug=<story_slug>, seed_nodes=<every M-<integer> + every INV + parent CFs for the bundle's mirrored SF records>, token_budget=<default>)`; story-local records such as active cast `STENT` and mirrored `SF` records are loaded through `story_slug` + `story_bundle_context` or targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records`, not world-scope `seed_nodes`; the latest `change_log_entry` in governing context is the current world-canon revision for §4b canon-baseline drift checks
@@ -290,6 +292,15 @@ These checks are retrospective audit warnings, not page-commit HARD-REJECTs. The
 - `under_supported_critical_revelation_check` — For each high-salience `STSEC` with `status: revealed`, count `clue_carriers[].status: discovered` entries whose discovery precedes or coincides with `reveal_event` on the branch path. If the count is below the default minimum of 2, emit a WARNING with `repair_kind: branch_flag`. Cite the STSEC id, `reveal_event`, discovered-carrier count, missing support threshold, and any `protected_mystery_refs[]`. This is a health-audit warning; the commit-time `critical_secret_clue_coverage_when_revealed` validator remains the gate for malformed reveal commits.
 - `dropped_high_salience_setup_check` — For each terminal page snapshot, inspect active high-salience `STQ` records with `status: open | complicated`. If `PG.state_snapshot.continuation.terminal_rationale` does not name the STQ id or otherwise explicitly classify it as answered, paid off, inherited, superseded, or intentionally abandoned, emit a WARNING with `repair_kind: branch_flag`. Cite the terminal PG id, STQ id, current status, salience, and terminal rationale excerpt or absence.
 - `clock_proliferation_warning` — Count active or paused `CLK` records in the scoped bundle. If the count exceeds the default threshold of 5, emit a WARNING with `repair_kind: bundle_advice`. Cite the count, threshold, and the active CLK ids so the operator can decide whether clocks should be merged, resolved, abandoned, or left as intentional complexity.
+
+### Phase 2k: STPLAN / STEMO health
+
+These checks are retrospective audit warnings and errors for SPEC-47 tactical and affective state. They only run when `STPLAN` or `STEMO` records exist in the scoped bundle; absence of either class is never itself a finding.
+
+- `bootstrap-drift` (`bootstrap_drift_stplan_stemo`) — For each `STPLAN` / `STEMO` seeded at `story_start`, walk the scoped branch tree and check whether the record was queried by predicate, cited by `CHC.grounded_in.records[]`, cited in page-plan §9b / §9c, superseded, consumed by `plan_relation:...`, or otherwise used in a later state delta. If a root-seeded record is never queried, superseded, consumed, or rendered across the branch tree, emit an INFO or WARNING with `repair_kind: bundle_advice` depending on salience. This is the post-hoc bloat check for bootstrap over-seeding.
+- `stale-active-plan` (`stale_active_plan`) — For each active `STPLAN`, verify that its `belief_basis[]`, `resource_basis.*[]`, `blockers[]`, `current_step.target_records[]`, and `root_intention` still resolve to active or explicitly blocker-classified records on the scoped branch leaf. If basis records are inactive, superseded, branch-inaccessible, or contradicted without a plan supersession, emit a WARNING with `repair_kind: turn_repair`. If the plan's holder is dead, unavailable, or no longer has matching active intention state and no abandonment/revision event exists, emit ERROR.
+- `stale-active-emotion` (`stale_active_emotion`) — For each active `STEMO`, inspect page age, holder status, `trigger_event`, `appraisal_basis[]`, and `behavioral_pressure[]`. If a high-intensity or extreme emotion remains active for many pages with no reflection, suppression, settlement, transformation, or relevant action, emit a WARNING with `repair_kind: turn_repair`. If `appraisal_basis[]` records are inactive or contradicted without emotion supersession, emit WARNING or ERROR according to whether downstream choices used the stale emotion.
+- `SE-plan-relation consistency` (`se_plan_relation_consistency`) — Walk `SE.world_logic_rationale` for `plan_relation:<relation>(plan=STPLAN-<integer>)` tags. For `advances`, the event must create or supersede at least one record cited by the plan's `current_step.target_records[]` or `current_step.success_condition.predicates[]`. For `blocks`, `revises`, `fulfills`, or `abandons`, the event must create/supersede/close state that makes the relation true. For `ignores`, the rationale must name why the plan was lawfully ignored. Missing or contradictory relation evidence emits WARNING with `repair_kind: turn_repair`; impossible references emit ERROR.
 
 ## Phase 2j: Compatibility drift (conditional on `compatibility` in `mode`)
 
