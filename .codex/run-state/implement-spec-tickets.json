@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC50STPSTECHC-008.md",
+  "last_ticket": "archive/tickets/SPEC50STPSTECHC-009.md",
   "last_result": "completed_archived",
-  "last_work_commit": "77655ad2d2609459089e0559f0bcd7ebddc5246e",
+  "last_work_commit": "a7a3a178c7a119d9d365ba1df195005580f06bcd",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC50STPSTECHC-009.md",
+  "next_target": "tickets/SPEC50STPSTECHC-010.md",
   "queue": [
-    "tickets/SPEC50STPSTECHC-009.md",
     "tickets/SPEC50STPSTECHC-010.md",
     "tickets/SPEC50STPSTECHC-011.md",
     "tickets/SPEC50STPSTECHC-012.md",
@@ -20,6 +19,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated dirty path remains .claude/skills/spec-to-tickets/SKILL.md; expected ignored artifacts remain tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, and tools/world-index/node_modules/",
+  "dirty_state": "unrelated dirty path remains .claude/skills/spec-to-tickets/SKILL.md; expected ignored artifacts remain tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
   "updated_at": "2026-05-20"
 }
