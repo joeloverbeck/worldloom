@@ -7,6 +7,7 @@ import {
   stringValue,
   touchedFilesInclude
 } from "./utils.js";
+import { readSeNonPropagationFacts, type ParsedNonPropagationFact } from "./midstory-introduction-utils.js";
 
 const AUDIT_ONLY_EVENT_KINDS = new Set(["prose_attach", "promotion_closeout"]);
 const PUBLIC_BEL_VISIBILITIES = new Set(["public", "shared", "factional", "rumored"]);
@@ -31,7 +32,6 @@ const VALID_NON_PROPAGATION_REASONS = new Set([
   "institution_suppresses_report",
   "event_leaves_no_accessible_trace"
 ]);
-const TAG_PATTERN = /non_propagation:([A-Za-z_]+)\(group=([^,()[\]\s]+), records=\[([^\]]*)\]\)/g;
 
 export const expectedWitnessCoverage: Validator = {
   name: "expected_witness_coverage",
@@ -64,12 +64,6 @@ interface RecordMaps {
 interface WitnessGroup {
   actorLocation: string;
   directWitnesses: string[];
-}
-
-interface ParsedTag {
-  reason: string;
-  group: string;
-  records: string[];
 }
 
 function recordMapsForStory(records: readonly IndexedRecord[], storySlug: string): RecordMaps {
@@ -118,13 +112,13 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   }
 
   const belCoverage = belCoverageForEvent(parsed, eventId, group, maps);
-  const tags = parseTags(stringValue(parsed.world_logic_rationale) ?? "");
-  const directVerdicts = directWitnessVerdicts(event, eventId, group, directWitnesses, belCoverage, tags, maps);
+  const nonPropagationFacts = readSeNonPropagationFacts(event);
+  const directVerdicts = directWitnessVerdicts(event, eventId, group, directWitnesses, belCoverage, nonPropagationFacts, maps);
   if (directVerdicts.length > 0) {
     return directVerdicts;
   }
 
-  return indirectPropagationVerdicts(event, parsed, eventId, tags, maps);
+  return indirectPropagationVerdicts(event, parsed, eventId, nonPropagationFacts, maps);
 }
 
 function directWitnessVerdicts(
@@ -133,25 +127,25 @@ function directWitnessVerdicts(
   group: WitnessGroup,
   directWitnesses: ReadonlySet<string>,
   belCoverage: ReadonlySet<string>,
-  tags: readonly ParsedTag[],
+  nonPropagationFacts: readonly ParsedNonPropagationFact[],
   maps: RecordMaps
 ): Verdict[] {
   if (belCoverage.size === directWitnesses.size) {
     return [];
   }
 
-  const invalidTagRecord = firstInvalidTagRecord(tags, directWitnesses, maps);
-  if (invalidTagRecord !== undefined) {
-    return [tagRecordsUnresolved(event, eventId, invalidTagRecord)];
+  const invalidFactRecord = firstInvalidFactRecord(nonPropagationFacts, directWitnesses, maps);
+  if (invalidFactRecord !== undefined) {
+    return [factRecordsUnresolved(event, eventId, invalidFactRecord)];
   }
 
-  const matchingTag = tags.find((tag) => tagMatchesGroup(tag, group, directWitnesses));
-  if (matchingTag !== undefined) {
+  const matchingFact = nonPropagationFacts.find((fact) => factMatchesGroup(fact, group, directWitnesses));
+  if (matchingFact !== undefined) {
     return [];
   }
 
-  if (tags.some((tag) => VALID_NON_PROPAGATION_REASONS.has(tag.reason))) {
-    return [wrongGroupLabel(event, eventId, group, tags.map((tag) => tag.group))];
+  if (nonPropagationFacts.some((fact) => VALID_NON_PROPAGATION_REASONS.has(fact.reason))) {
+    return [wrongGroupLabel(event, eventId, group, nonPropagationFacts.map((fact) => fact.group))];
   }
 
   if (belCoverage.size > 0) {
@@ -165,7 +159,7 @@ function indirectPropagationVerdicts(
   event: IndexedRecord,
   parsedEvent: Record<string, unknown>,
   eventId: string,
-  tags: readonly ParsedTag[],
+  nonPropagationFacts: readonly ParsedNonPropagationFact[],
   maps: RecordMaps
 ): Verdict[] {
   const verdicts: Verdict[] = [];
@@ -183,7 +177,7 @@ function indirectPropagationVerdicts(
     if (!PUBLIC_DA_CIRCULATION.has(circulation ?? "")) {
       continue;
     }
-    if (hasIndirectBelForArtifact(id, creates, maps) || hasEventLeavesNoAccessibleTraceTag(id, tags)) {
+    if (hasIndirectBelForArtifact(id, creates, maps) || hasEventLeavesNoAccessibleTraceFact(id, nonPropagationFacts)) {
       continue;
     }
     verdicts.push(missingIndirectPropagation(event, eventId, id, circulation ?? "unknown"));
@@ -209,8 +203,11 @@ function hasIndirectBelForArtifact(artifactId: string, createdIds: readonly stri
   return false;
 }
 
-function hasEventLeavesNoAccessibleTraceTag(artifactId: string, tags: readonly ParsedTag[]): boolean {
-  return tags.some((tag) => tag.reason === "event_leaves_no_accessible_trace" && tag.records.includes(artifactId));
+function hasEventLeavesNoAccessibleTraceFact(
+  artifactId: string,
+  nonPropagationFacts: readonly ParsedNonPropagationFact[]
+): boolean {
+  return nonPropagationFacts.some((fact) => fact.reason === "event_leaves_no_accessible_trace" && fact.records.includes(artifactId));
 }
 
 function witnessGroup(
@@ -347,46 +344,35 @@ function belCoverageForEvent(
   return covered;
 }
 
-function parseTags(rationale: string): ParsedTag[] {
-  return [...rationale.matchAll(TAG_PATTERN)].map((match) => ({
-    reason: match[1] ?? "",
-    group: match[2] ?? "",
-    records: (match[3] ?? "")
-      .split(",")
-      .map((record) => record.trim())
-      .filter((record) => record.length > 0)
-  }));
-}
-
-function firstInvalidTagRecord(
-  tags: readonly ParsedTag[],
+function firstInvalidFactRecord(
+  facts: readonly ParsedNonPropagationFact[],
   directWitnesses: ReadonlySet<string>,
   maps: RecordMaps
-): { tag: ParsedTag; recordId: string } | undefined {
-  for (const tag of tags) {
-    if (!VALID_NON_PROPAGATION_REASONS.has(tag.reason)) {
+): { fact: ParsedNonPropagationFact; recordId: string } | undefined {
+  for (const fact of facts) {
+    if (!VALID_NON_PROPAGATION_REASONS.has(fact.reason)) {
       continue;
     }
-    for (const recordId of tag.records) {
+    for (const recordId of fact.records) {
       if (!maps.byId.has(recordId) || (recordId.startsWith("STENT-") && !directWitnesses.has(recordId))) {
-        return { tag, recordId };
+        return { fact, recordId };
       }
     }
   }
   return undefined;
 }
 
-function tagMatchesGroup(tag: ParsedTag, group: WitnessGroup, directWitnesses: ReadonlySet<string>): boolean {
-  if (!VALID_NON_PROPAGATION_REASONS.has(tag.reason)) {
+function factMatchesGroup(fact: ParsedNonPropagationFact, group: WitnessGroup, directWitnesses: ReadonlySet<string>): boolean {
+  if (!VALID_NON_PROPAGATION_REASONS.has(fact.reason)) {
     return false;
   }
-  if (!computedGroupLabels(group).has(tag.group)) {
+  if (!computedGroupLabels(group).has(fact.group)) {
     return false;
   }
-  if (tag.records.length === 0) {
-    return tag.reason === "no_witness" && directWitnesses.size === 0;
+  if (fact.records.length === 0) {
+    return fact.reason === "no_witness" && directWitnesses.size === 0;
   }
-  return [...directWitnesses].every((witness) => tag.records.includes(witness));
+  return [...directWitnesses].every((witness) => fact.records.includes(witness));
 }
 
 function computedGroupLabels(group: WitnessGroup): Set<string> {
@@ -398,10 +384,11 @@ function missingPublicBel(event: IndexedRecord, eventId: string, missingWitnesse
     validator: "expected_witness_coverage",
     severity: "fail",
     code: "expected_witness_coverage_missing_public_bel",
-    message: `${eventId} has direct witnesses but no BEL coverage or valid non-propagation tag.`,
+    message: `${eventId} has direct witnesses but no BEL coverage or valid non-propagation fact.`,
     location: locationFor(event),
     detail: { event_id: eventId, missing_witnesses: missingWitnesses },
-    suggested_fix: "Create BEL records for every direct witness or add a valid non_propagation tag for the direct witness group."
+    suggested_fix:
+      "Create BEL records for every direct witness or add an SE.non_propagation_facts[] entry for the direct witness group."
   };
 }
 
@@ -413,7 +400,7 @@ function wrongGroupLabel(event: IndexedRecord, eventId: string, group: WitnessGr
     message: `${eventId} uses a non-propagation group label that does not match the computed witness group.`,
     location: locationFor(event),
     detail: { event_id: eventId, groups, expected_groups: [...computedGroupLabels(group)] },
-    suggested_fix: "Use group=direct_witnesses or another computed direct-group label in the non_propagation tag."
+    suggested_fix: "Use group=direct_witnesses or another computed direct-group label in SE.non_propagation_facts[]."
   };
 }
 
@@ -425,18 +412,23 @@ function partialBelCoverage(event: IndexedRecord, eventId: string, missingWitnes
     message: `${eventId} creates BEL coverage for only part of the direct witness group.`,
     location: locationFor(event),
     detail: { event_id: eventId, missing_witnesses: missingWitnesses },
-    suggested_fix: "Create BEL records for the remaining direct witnesses or use a valid group-level BEL/non_propagation tag."
+    suggested_fix:
+      "Create BEL records for the remaining direct witnesses or use a valid group-level BEL/SE.non_propagation_facts[] entry."
   };
 }
 
-function tagRecordsUnresolved(event: IndexedRecord, eventId: string, invalid: { tag: ParsedTag; recordId: string }): Verdict {
+function factRecordsUnresolved(
+  event: IndexedRecord,
+  eventId: string,
+  invalid: { fact: ParsedNonPropagationFact; recordId: string }
+): Verdict {
   return {
     validator: "expected_witness_coverage",
     severity: "fail",
     code: "expected_witness_coverage_tag_records_unresolved",
-    message: `${eventId} has a non-propagation tag whose records do not resolve to the computed witness group.`,
+    message: `${eventId} has a non-propagation fact whose records do not resolve to the computed witness group.`,
     location: locationFor(event),
-    detail: { event_id: eventId, group: invalid.tag.group, record_id: invalid.recordId },
+    detail: { event_id: eventId, group: invalid.fact.group, record_id: invalid.recordId },
     suggested_fix: "Use record ids that exist in the story bundle and correspond to the computed direct witness group."
   };
 }
@@ -449,12 +441,12 @@ function missingIndirectPropagation(event: IndexedRecord, eventId: string, artif
     message:
       `${eventId} creates DA ${artifactId} with circulation '${circulation}' but no BEL with indirect access_route ` +
       "(one of: document, object_trace, location_trace, rumor, surveillance, institutional_channel, magic_tech) references it " +
-      "and no event_leaves_no_accessible_trace tag covers it.",
+      "and no event_leaves_no_accessible_trace non-propagation fact covers it.",
     location: locationFor(event),
     detail: { event_id: eventId, artifact_id: artifactId, circulation },
     suggested_fix:
       "Create a BEL whose basis.access_records names the DA and whose basis.access_route is in " +
-      "{document, object_trace, location_trace, rumor, surveillance, institutional_channel, magic_tech}, or add a " +
-      "non_propagation:event_leaves_no_accessible_trace tag naming the DA in SE.world_logic_rationale."
+      "{document, object_trace, location_trace, rumor, surveillance, institutional_channel, magic_tech}, or add an " +
+      "SE.non_propagation_facts[] entry with reason=event_leaves_no_accessible_trace, group=<witness-group>, and records=[<DA-id>]."
   };
 }

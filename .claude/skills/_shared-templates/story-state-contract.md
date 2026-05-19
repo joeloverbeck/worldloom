@@ -93,9 +93,9 @@ does not add or remove schema fields.
   `expected_witness_coverage`: the same event must create BEL propagation
   through an indirect access route (`document`, `object_trace`,
   `location_trace`, `rumor`, `surveillance`, `institutional_channel`, or
-  `magic_tech`) or `SE.world_logic_rationale` must include a parseable
-  `non_propagation:event_leaves_no_accessible_trace(group=<label>, records=[DA-<N>])`
-  tag.
+  `magic_tech`) or `SE.non_propagation_facts[]` must include a structured
+  entry with `reason: event_leaves_no_accessible_trace`, a witness-group
+  `group`, and supporting `records[]`.
 - `derived_from: [DA-N]` is ambiguous between world-level diegetic artifacts
   (`worlds/<slug>/diegetic-artifacts/DA-N.md`) and story-local artifact records
   (`worlds/<slug>/stories/<story>/_source/artifacts/DA-N.yaml`). Until namespace
@@ -206,51 +206,26 @@ Closed grammar contains 39 individual predicates plus 3 combinators (`not`, `all
 
 An existential predicate binds its `alias` to the matched active record during block selection. `SLT.effects.create`, `SLT.effects.supersede`, `SLT.effects.close`, and `SLT.exit_options[].likely_effects` may reference that matched record as `bound:<alias>`. Every `bound:<alias>` reference must resolve to an alias bound by a hard or soft precondition on the same `SLT`.
 
-### §5a. Mid-Story Introduction Tag Grammar and Closed Trigger Vocabularies
+### §5a. Mid-Story Introduction Structured Fields
 
-Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `SREL`, `STPLAN`, or `STEMO` records is recorded in `SE.world_logic_rationale` with a parseable `intro:<CLASS>(...)` tag. The tag is parallel to the non-propagation tag pattern: it rides on an existing string field, is consumed by per-commit Phase 9 validators, and uses a closed trigger vocabulary so authoring stays anchored in present causal state rather than narrative shape.
+Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `SREL`, `STPLAN`, or `STEMO` records is recorded on `SE.record_introductions[]`. Relations from an event to an active plan are recorded on `SE.state_relations[]`. Explicit non-propagation assertions are recorded on `SE.non_propagation_facts[]`. These fields carry the machine-readable WHAT; `SE.world_logic_rationale` carries the human-readable WHY.
 
-Grammar:
+`SE.world_logic_rationale` is prose-only. Validators MUST NOT attempt to parse `world_logic_rationale` for structural facts. The structured WHAT lives in `record_introductions[]`, `state_relations[]`, and `non_propagation_facts[]`; the prose WHY lives in `world_logic_rationale`.
 
-```text
-intro_tag    := "intro:" class "(" args ")"
-class        := "CLK" | "STSEC" | "STQ" | "THR" | "STENT" | "SREL" | "STPLAN" | "STEMO"
-args         := id_arg "," trigger_arg "," evidence_arg "," distinct_arg
-id_arg       := "id=" record_id
-trigger_arg  := "trigger=" trigger_name
-evidence_arg := "evidence=[" record_id_list "]"
-distinct_arg := "distinct_from=[" record_id_list "]"
-record_id    := uppercase_id "-" positive_integer
-trigger_name := lowercase_snake_case (must match one of the closed-set values below per class)
+`tools/validators/src/schemas/story-event.schema.json` is the schema-level source of truth for the structured field shapes, required keys, record-id patterns, closed enums, and per-class trigger constraints. Introduction-grounding validators consume `SE.record_introductions[]` through `tools/validators/src/structural/midstory-introduction-utils.ts`; plan-relation validators consume `SE.state_relations[]`; witness/non-propagation validators consume `SE.non_propagation_facts[]`.
+
+`record_introductions[]` entries have this shape:
+
+```yaml
+record_id: CLK-12
+class: CLK
+trigger: deadline_declared
+evidence: [SE-31, OBL-7, THR-9]
+distinct_from: [CLK-3]
+rationale: "Optional per-introduction prose context."
 ```
 
-Regex witness:
-
-```text
-intro:(CLK|STSEC|STQ|THR|STENT|SREL|STPLAN|STEMO)\(id=([A-Z]+-(?:0|[1-9][0-9]*)), trigger=([a-z_]+), evidence=\[([A-Z0-9,\-]*)\], distinct_from=\[([A-Z0-9,\-]*)\]\)
-```
-
-Worked example:
-
-```text
-intro:CLK(id=CLK-12, trigger=deadline_declared, evidence=[SE-31,OBL-7,THR-9], distinct_from=[CLK-3])
-```
-
-The parser implementation lives at `tools/world-index/src/parse/intro-tag-parser.ts` and is re-exported for validator consumers through `tools/validators/src/structural/midstory-introduction-utils.ts`. The generic per-commit validator that consumes the grammar is `tools/validators/src/structural/midstory-record-introduction-grounding.ts`; class-specific validators compose the same parser rather than re-implementing the grammar.
-
-**plan_relation tag pattern** (parallel to `intro:<CLASS>` and `non_propagation:` patterns; rides on `SE.world_logic_rationale`):
-
-```text
-plan_relation_tag := "plan_relation:" relation "(plan=" record_id ")"
-relation          := "advances" | "tests" | "blocks" | "revises" | "fulfills" | "abandons" | "ignores"
-record_id         := "STPLAN-" positive_integer
-```
-
-Worked example:
-
-```text
-plan_relation:advances(plan=STPLAN-12)
-```
+The `class` field is one of `CLK | STSEC | STQ | THR | STENT | SREL | STPLAN | STEMO`. The `trigger` field MUST match the closed trigger vocabulary for that class below. `evidence[]` names story-local records that ground why the new record is lawful now. `distinct_from[]` names similar existing records that do not already cover the introduced record. `rationale` is optional prose and carries no structural meaning.
 
 ### CLK Triggers
 
@@ -341,6 +316,33 @@ plan_relation:advances(plan=STPLAN-12)
 | `event_changed_relationship_with_other` | Relationship state with another actor moved on a load-bearing axis in this event (betrayal, intimacy, debt, authority shift). |
 | `accumulated_pressure_crossed_threshold` | Sustained pressure (clock value rising across pages, repeated micro-stresses) became affectively load-bearing without a single triggering event; the cited `trigger_event` names the latest contributing SE. |
 
+#### §5a.1 `state_relations[]` Field
+
+`state_relations[]` records this event's relation to a target story-state record, currently the plan-related relation domain consumed by `stplan-event-plan-relation-consistency`, `stplan-closure-status-requires-closure-event`, and `stemo-agency-effect-compatibility`.
+
+Each entry has this shape:
+
+```yaml
+relation: advances
+target_record: STPLAN-12
+```
+
+`relation` is one of `advances | tests | blocks | revises | fulfills | abandons | ignores`. `target_record` is a record id; the plan-relation validators require the target to be the relevant `STPLAN-*` record for this relation domain.
+
+#### §5a.2 `non_propagation_facts[]` Field
+
+When an expected witness group receives no `BEL` create/supersession, record the explicit non-propagation assertion in `SE.non_propagation_facts[]`.
+
+Each entry has this shape:
+
+```yaml
+reason: event_leaves_no_accessible_trace
+group: direct_witnesses
+records: [DA-4]
+```
+
+`reason` is one of `no_witness | witness_incapacitated | evidence_concealed | institution_suppresses_report | event_leaves_no_accessible_trace`. `group` is a free-form witness-group label. `records[]` names the story-local records that justify or contextualize the non-propagation fact. `expected-witness-coverage` and `non_propagation_facts_completeness` consume this field directly.
+
 ## 6. Action Routing
 
 When a player selects a `CHC` or supplies a write-in, the turn-cycle resolves it to exactly one of six outcomes:
@@ -421,7 +423,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
   - Resources/leverage (resource_basis projection):
   - Blockers:
   - Fallbacks currently available:
-  - This page's plan_relation: advances | tests | blocks | revises | fulfills | abandons | ignores
+  - This page's `SE.state_relations[]`: advances | tests | blocks | revises | fulfills | abandons | ignores
   - Prose must show:
   - Prose must not imply:
 ```

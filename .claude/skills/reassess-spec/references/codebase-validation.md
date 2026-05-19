@@ -11,7 +11,7 @@ Substep applicability is determined by the Pre-Process classification:
 | 3.2 Types and interfaces | ✓ | ✓ | ✓ | ✓ (rigorous) |
 | 3.3 Functions and exports | ✓ | ✓ | ✓ | ✓ (rigorous) |
 | 3.4 Dependencies | ✓ | ✓ | ✓ | ✓ (rigorous) |
-| 3.5 Skill-structure validation | ✓ | if SKILL.md modified | if content moves between SKILLs | skip |
+| 3.5 Skill-structure validation | ✓ | if SKILL.md modified **structurally** (N/A for content-only edits — see §3.5 preamble) | if content moves between SKILLs | skip |
 | 3.6 Downstream consumers | ✓ | ✓ | skip | skip |
 | 3.7 Package-boundary validation | ✓ | if boundaries shift | if boundaries shift | skip |
 | 3.8 Upstream spec references | ✓ | ✓ | ✓ | skip |
@@ -82,7 +82,7 @@ Three sub-checks:
 
 ## 3.5 Skill-Structure Validation
 
-For deliverables that propose SKILL.md changes (new skill, skill modification, skill consolidation), verify the proposed structure passes `skill-creator`'s universal and class-specific checks:
+For deliverables that propose SKILL.md changes (new skill, skill modification, skill consolidation), verify the proposed structure passes `skill-creator`'s universal and class-specific checks. **Applicability is gated on the SHAPE of the SKILL.md modification, not its presence**: content-only edits (rewording examples, prose updates, illustrative-YAML swaps that preserve the existing structural surface) need no 3.5 validation — the structural checks pass by default because nothing structural changed; report 3.5 as N/A in the substeps-applied list rather than claiming applied-but-trivial. Structural edits (introducing or modifying frontmatter fields, the HARD-GATE block, Phase / Step definitions, World-State Prerequisites declarations, Validation Rules listings, Output format declarations, or any other surface the universal + class-specific checks below govern) require the full 3.5 checklist:
 
 - **Universal**: Frontmatter declares `name`, `description`, `user-invocable`, `arguments`. Description names triggers, produces, and mutates. World-State Prerequisites block present. Final Rule is a single enforceable sentence.
 - **If canon-mutating**: `<HARD-GATE>` block present. References `templates/canon-fact-record.yaml` or `templates/change-log-entry.yaml` as applicable. Names at least 3 of the 7 Validation Rules with enforcing phases. Pre-flight Check section present. Commit / Write phase present.

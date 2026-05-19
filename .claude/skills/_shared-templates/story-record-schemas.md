@@ -181,6 +181,20 @@ resolution:
   result: success | partial_success | failure | impossible | transformed | held_for_promotion
   player_visible_feedback: >          # * one-sentence player-legible consequence feedback
 world_logic_rationale: >               # * natural-language justification of why this route follows from world canon + branch state
+record_introductions:                  # optional; records newly introduced CLK/STSEC/STQ/THR/STENT/SREL/STPLAN/STEMO state
+  - record_id: CLK-<integer>
+    class: CLK | STSEC | STQ | THR | STENT | SREL | STPLAN | STEMO
+    trigger: <closed trigger for class, per story-state-contract §5a>
+    evidence: [record_id]
+    distinct_from: [record_id]
+    rationale: string                  # optional prose; no structural meaning
+state_relations:                       # optional; records this event's relation to an existing state record
+  - relation: advances | tests | blocks | revises | fulfills | abandons | ignores
+    target_record: STPLAN-<integer>
+non_propagation_facts:                 # optional; records why expected witness propagation did not occur
+  - reason: no_witness | witness_incapacitated | evidence_concealed | institution_suppresses_report | event_leaves_no_accessible_trace
+    group: string
+    records: [record_id]
 state_delta:
   create: [record_id]
   supersede: [record_id]
@@ -201,21 +215,37 @@ Per-source-kind `promotion_claims[].source_record` requirements:
 | `relationship_or_institutional_outcome` | SREL | BEL, SF |
 | `other_branch_claim` | any `promotion_claims[].source_record` class | none |
 
-`world_logic_rationale` is required (no silent rejection — see §6). `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; all other event kinds name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
+`world_logic_rationale` is required (no silent rejection — see §6) and is prose-only: validators MUST NOT parse it for structural facts. `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; all other event kinds name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
 
-When an expected witness group receives no `BEL` create/supersession, the
-rationale MUST include a parseable non-propagation tag inside
-`SE.world_logic_rationale`:
+`record_introductions[]`, `state_relations[]`, and `non_propagation_facts[]` are optional structured fields. Their closed enums, per-class trigger vocabulary, and full validation shape are defined in `tools/validators/src/schemas/story-event.schema.json`; the authoring contract and trigger tables live in `story-state-contract.md` §5a.
 
-```text
-non_propagation:<reason>(group=<label>, records=[<record_ids>])
+Worked `record_introductions[]` example:
+
+```yaml
+record_introductions:
+  - record_id: CLK-7
+    class: CLK
+    trigger: deadline_declared
+    evidence: [SE-11, OBL-3]
+    distinct_from: []
 ```
 
-Valid `<reason>` values are `no_witness`, `witness_incapacitated`,
-`evidence_concealed`, `institution_suppresses_report`, and
-`event_leaves_no_accessible_trace`. The tag is carried inside
-`world_logic_rationale` to avoid adding a schema field, but it is mechanically
-consumed by turn-cycle validation and health-audit replay.
+Worked `state_relations[]` example:
+
+```yaml
+state_relations:
+  - relation: advances
+    target_record: STPLAN-5
+```
+
+Worked `non_propagation_facts[]` example:
+
+```yaml
+non_propagation_facts:
+  - reason: event_leaves_no_accessible_trace
+    group: direct_witnesses
+    records: [DA-4]
+```
 
 There is no `input_surface` block on SE; the PG record's `input.resolved_event_id` is the authoritative PG-to-SE link. There is no `state_delta.no_change` list — absence from `create / supersede / close` is the no-change signal. There is no `required_action` on promotion claims — `authority == canon_candidate` implies `run_story_fact_promotion_to_canon`.
 

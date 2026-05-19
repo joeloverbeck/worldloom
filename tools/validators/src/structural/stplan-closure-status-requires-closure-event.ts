@@ -12,5 +12,5 @@ export const stplanClosureStatusRequiresClosureEvent = defineStplanValidator(VAL
   if (eventsWithClosureFor(plan, maps).length > 0) {
     return [];
   }
-  return [fail(plan, VALIDATOR, "stplan_closure_status_requires_closure_event.missing_closure_event", `plan_status ${status} requires an SE world_logic_rationale plan_relation closure tag.`)];
+  return [fail(plan, VALIDATOR, "stplan_closure_status_requires_closure_event.missing_closure_event", `plan_status ${status} requires an SE state_relations[] entry with relation in {fulfills, abandons, blocks} naming this plan as target_record.`)];
 });

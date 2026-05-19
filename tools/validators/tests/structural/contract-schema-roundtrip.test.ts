@@ -19,7 +19,7 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
   },
   "story-event": {
     required: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "commitment", "outcome_route", "world_logic_rationale", "state_delta"],
-    properties: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "targets", "commitment", "outcome_route", "resolution", "world_logic_rationale", "state_delta", "promotion_claims"]
+    properties: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "targets", "commitment", "outcome_route", "resolution", "world_logic_rationale", "record_introductions", "state_relations", "non_propagation_facts", "state_delta", "promotion_claims"]
   },
   "story-storylet": {
     required: ["id", "story_id", "scope", "title", "move_family", "preconditions", "beats", "exit_options", "saliency", "mystery_policy", "provenance"],
@@ -228,6 +228,29 @@ test("representative amended contract records validate against tightened schemas
       },
       outcome_route: "accept",
       world_logic_rationale: "The selected commitment block is available in the current branch state.",
+      record_introductions: [
+        {
+          record_id: "CLK-1",
+          class: "CLK",
+          trigger: "deadline_declared",
+          evidence: ["SE-1"],
+          distinct_from: [],
+          rationale: "The event starts a concrete deadline."
+        }
+      ],
+      state_relations: [
+        {
+          relation: "advances",
+          target_record: "STPLAN-1"
+        }
+      ],
+      non_propagation_facts: [
+        {
+          reason: "event_leaves_no_accessible_trace",
+          group: "direct_witnesses",
+          records: ["DA-1"]
+        }
+      ],
       state_delta: {
         create: ["SF-1"],
         supersede: [],
@@ -282,6 +305,50 @@ test("representative amended contract records validate against tightened schemas
   const result = await recordSchemaCompliance.run({}, context(records));
 
   assert.deepEqual(result, []);
+});
+
+test("story-event schema rejects malformed SPEC-48 structured fields", async () => {
+  const invalidRecords = [
+    storyRecord("story_event_record", "SE-1", "events", {
+      ...validEventRecord(),
+      record_introductions: [
+        {
+          record_id: "CLK-1",
+          class: "CLK",
+          trigger: "tactical_approach_committed",
+          evidence: ["SE-1"],
+          distinct_from: []
+        }
+      ],
+      state_relations: [
+        {
+          relation: "convolves",
+          target_record: "STPLAN-1"
+        }
+      ],
+      non_propagation_facts: [
+        {
+          reason: "event_leaves_no_accessible_trace",
+          group: "direct_witnesses",
+          records: ["not-a-record"]
+        }
+      ]
+    })
+  ];
+
+  const result = await recordSchemaCompliance.run({}, context(invalidRecords));
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.oneOf" &&
+    verdict.message.includes("/record_introductions/0")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.enum" &&
+    verdict.message.includes("/state_relations/0/relation")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/non_propagation_facts/0/records/0")
+  ));
 });
 
 test("story schemas accept padded legacy cross-references but keep malformed references invalid", async () => {
@@ -438,5 +505,28 @@ function storyRecord(nodeType: string, id: string, dir: string, parsed: Record<s
   return {
     ...record(nodeType, `test-story:${id}`, `stories/test-story/_source/${dir}/${id}.yaml`, parsed),
     story_slug: "test-story"
+  };
+}
+
+function validEventRecord(): Record<string, unknown> {
+  return {
+    id: "SE-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    parent_page_id: null,
+    event_kind: "selected_choice",
+    actor: "STENT-1",
+    commitment: {
+      selected_slt_id: "SLT-1",
+      selection_source: "author_pool",
+      alias_bindings: {}
+    },
+    outcome_route: "accept",
+    world_logic_rationale: "The selected commitment block is available in the current branch state.",
+    state_delta: {
+      create: [],
+      supersede: [],
+      close: []
+    }
   };
 }

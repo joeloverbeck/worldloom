@@ -5,6 +5,7 @@ import Ajv2020Module from "ajv/dist/2020.js";
 import type { AnySchema, ErrorObject, ValidateFunction } from "ajv";
 
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { readSeStateRelations } from "./midstory-introduction-utils.js";
 import {
   asPlainRecord,
   locationFor,
@@ -21,11 +22,10 @@ type Ajv2020Instance = {
 type Ajv2020Constructor = new (opts?: Record<string, unknown>) => Ajv2020Instance;
 
 const Ajv2020 = Ajv2020Module as unknown as Ajv2020Constructor;
-const PLAN_CLOSURE_RELATION = /plan_relation:(fulfills|abandons|blocks)\(plan=(STPLAN-[0-9]+)\)/g;
-const PLAN_ADVANCES_RELATION = /plan_relation:advances\(plan=(STPLAN-[0-9]+)\)/g;
 const STORY_PLAN_MUTATION_OPS = new Set(["create_stplan_record"]);
 const STORY_PLAN_TOUCHED_FILE = /(?:^|\/)stories\/[^/]+\/_source\/plans\/STPLAN-\d+\.yaml$/;
 const RECORD_ID = /\b(?:STENT|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT|STPLAN|STEMO|CF|CH|M|INV|SEC)-[0-9]+\b/g;
+const CLOSING_STATE_RELATIONS = new Set(["fulfills", "abandons", "blocks"]);
 
 let storyPlanSchemaValidator: ValidateFunction | null = null;
 
@@ -228,10 +228,8 @@ export function eventsWithClosureFor(plan: IndexedRecord, maps: StoryMaps): Inde
     if (record.node_type !== "story_event_record") {
       return false;
     }
-    const rationale = stringValue(asPlainRecord(record.parsed).world_logic_rationale) ?? "";
-    PLAN_CLOSURE_RELATION.lastIndex = 0;
-    for (const match of rationale.matchAll(PLAN_CLOSURE_RELATION)) {
-      if (match[2] === id) {
+    for (const relation of readSeStateRelations(record)) {
+      if (relation.targetRecord === id && CLOSING_STATE_RELATIONS.has(relation.relation)) {
         return true;
       }
     }
@@ -242,11 +240,9 @@ export function eventsWithClosureFor(plan: IndexedRecord, maps: StoryMaps): Inde
 export function planAdvanceRelations(maps: StoryMaps): Array<{ event: IndexedRecord; planId: string }> {
   const relations: Array<{ event: IndexedRecord; planId: string }> = [];
   for (const event of maps.all.filter((record) => record.node_type === "story_event_record")) {
-    const rationale = stringValue(asPlainRecord(event.parsed).world_logic_rationale) ?? "";
-    for (const match of rationale.matchAll(PLAN_ADVANCES_RELATION)) {
-      const planId = match[1];
-      if (planId !== undefined) {
-        relations.push({ event, planId });
+    for (const relation of readSeStateRelations(event)) {
+      if (relation.relation === "advances") {
+        relations.push({ event, planId: relation.targetRecord });
       }
     }
   }

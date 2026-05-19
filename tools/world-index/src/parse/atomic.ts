@@ -7,7 +7,6 @@ import type { ParsedFileResult } from "../commands/shared.js";
 import { contentHashForProse, contentHashForYaml, anchorChecksum } from "./canonical.js";
 import { parseYamlWithRecovery } from "./yaml.js";
 import { domainFileNodeId } from "./prose.js";
-import { extractIntroTags } from "./intro-tag-parser.js";
 import { CURRENT_INDEX_VERSION } from "../schema/version.js";
 import type { EdgeRow, NodeRow, NodeType, ValidationResultRow } from "../schema/types.js";
 import type { EntityRegistry, EntityRegistryEntry } from "./entities.js";
@@ -968,9 +967,13 @@ function edgesForStoryEvent(
     edges.push(createStoryRefEdge(node.node_id, "state_delta_supersede", storySlug, target));
   }
 
-  for (const tag of extractIntroTags(stringField(record, "world_logic_rationale") ?? "")) {
-    const sourceNodeId = storyNodeId(storySlug, tag.recordId);
-    for (const evidenceId of tag.evidence) {
+  for (const introduction of recordArrayField(record, "record_introductions")) {
+    const introducedRecordId = stringField(introduction, "record_id");
+    if (!introducedRecordId) {
+      continue;
+    }
+    const sourceNodeId = storyNodeId(storySlug, introducedRecordId);
+    for (const evidenceId of stringArrayField(introduction, "evidence")) {
       edges.push(createStoryRefEdge(sourceNodeId, "creation_evidence", storySlug, evidenceId));
     }
   }

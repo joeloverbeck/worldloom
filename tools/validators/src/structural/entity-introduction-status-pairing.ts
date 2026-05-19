@@ -1,4 +1,5 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { readSeIntroductions } from "./midstory-introduction-utils.js";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, stringValue, touchedFilesInclude } from "./utils.js";
 
 const VALIDATOR = "entity_introduction_status_pairing";
@@ -44,10 +45,7 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
     .filter((record): record is IndexedRecord => record !== undefined);
 
   const verdicts: Verdict[] = [];
-  for (const createdId of createdIds) {
-    if (!createdId.startsWith("STENT-")) {
-      continue;
-    }
+  for (const createdId of introducedRecordIds(event, "STENT")) {
     const entity = maps.byId.get(createdId);
     const createdAtPage = entity === undefined ? childPageId : stringValue(asPlainRecord(entity.parsed).created_at_page);
     if (createdAtPage === "PG-1") {
@@ -76,6 +74,12 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   }
 
   return verdicts;
+}
+
+function introducedRecordIds(event: IndexedRecord, recordClass: "STENT"): string[] {
+  return readSeIntroductions(event)
+    .filter((intro) => intro.class === recordClass)
+    .map((intro) => intro.recordId);
 }
 
 function recordMapsForStory(records: readonly IndexedRecord[], storySlug: string): RecordMaps {

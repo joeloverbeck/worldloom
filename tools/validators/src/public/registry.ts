@@ -16,7 +16,7 @@ import { entityIntroductionStatusPairing } from "../structural/entity-introducti
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { introductionObserverFirewall } from "../structural/introduction-observer-firewall.js";
 import { midstoryRecordIntroductionGrounding } from "../structural/midstory-record-introduction-grounding.js";
-import { nonPropagationTagShape } from "../structural/non-propagation-tag-shape.js";
+import { nonPropagationFactsCompleteness } from "../structural/non-propagation-facts-completeness.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
@@ -26,6 +26,7 @@ import { observerFirewall } from "../structural/observer-firewall.js";
 import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
+import { recordIntroductionUniqueness } from "../structural/record-introduction-uniqueness.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
 import { relationshipIntroductionGroundingIntegrity } from "../structural/relationship-introduction-grounding-integrity.js";
@@ -102,7 +103,7 @@ export const structuralValidators: readonly Validator[] = [
   sltCreatedAtPageOriginConsistency,
   canonBaselineDrift,
   canonDriftClassificationEvidence,
-  nonPropagationTagShape,
+  nonPropagationFactsCompleteness,
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,
@@ -120,6 +121,7 @@ export const structuralValidators: readonly Validator[] = [
   entityIntroductionStatusPairing,
   relationshipIntroductionGroundingIntegrity,
   introductionObserverFirewall,
+  recordIntroductionUniqueness,
   narrativeShapeFieldRejection,
   compatibilityDrift,
   activeRecordsFullShape,

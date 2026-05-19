@@ -1,5 +1,5 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
-import { extractIntroTags, type MidstoryIntroductionClass, type ParsedIntroTag } from "@worldloom/world-index/parse/intro-tag-parser";
+import { readSeIntroductions, type MidstoryIntroductionClass, type ParsedIntroduction } from "./midstory-introduction-utils.js";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, stringValue, touchedFilesInclude } from "./utils.js";
 
 const VALIDATOR = "midstory_record_introduction_grounding";
@@ -52,7 +52,6 @@ interface RecordMaps {
 
 function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   const parsed = asPlainRecord(event.parsed);
-  const rationale = stringValue(parsed.world_logic_rationale) ?? "";
   const stateDelta = asPlainRecord(parsed.state_delta);
   const createdIds = new Set(stringArray(stateDelta.create));
   const eventId = stringValue(parsed.id) ?? bareNodeId(event);
@@ -73,30 +72,24 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   }
 
   const verdicts: Verdict[] = [];
-  let tags: ParsedIntroTag[] = [];
-  try {
-    tags = extractIntroTags(rationale);
-  } catch (error) {
-    verdicts.push(missingTag(event, undefined, error instanceof Error ? error.message : String(error)));
-  }
-
-  const tagsByRecordId = new Map(tags.map((tag) => [tag.recordId, tag]));
-  for (const tag of tags) {
-    if (!createdIds.has(tag.recordId)) {
-      verdicts.push(missingStateDelta(event, tag));
+  const introductions = readSeIntroductions(event);
+  const introductionsByRecordId = new Map(introductions.map((intro) => [intro.recordId, intro]));
+  for (const intro of introductions) {
+    if (!createdIds.has(intro.recordId)) {
+      verdicts.push(missingStateDelta(event, intro));
     }
 
-    const introducedRecord = maps.byId.get(tag.recordId);
+    const introducedRecord = maps.byId.get(intro.recordId);
     const actualCreatedAt = introducedRecord === undefined
       ? undefined
       : stringValue(asPlainRecord(introducedRecord.parsed).created_at_page);
     if (childPageId !== undefined && actualCreatedAt !== childPageId) {
-      verdicts.push(createdAtMismatch(introducedRecord ?? event, tag, childPageId, actualCreatedAt));
+      verdicts.push(createdAtMismatch(introducedRecord ?? event, intro, childPageId, actualCreatedAt));
     }
 
-    for (const evidenceId of tag.evidence) {
+    for (const evidenceId of intro.evidence) {
       if (!parentActiveIds.has(evidenceId)) {
-        verdicts.push(evidenceMissing(event, tag, evidenceId));
+        verdicts.push(evidenceMissing(event, intro, evidenceId));
       }
     }
   }
@@ -106,9 +99,9 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
     if (createdClass === undefined) {
       continue;
     }
-    const tag = tagsByRecordId.get(createdId);
-    if (tag === undefined || tag.class !== createdClass) {
-      verdicts.push(missingTag(event, createdId));
+    const intro = introductionsByRecordId.get(createdId);
+    if (intro === undefined || intro.class !== createdClass) {
+      verdicts.push(missingIntroduction(event, createdId));
     }
   }
 
@@ -172,52 +165,50 @@ function bareNodeId(record: IndexedRecord): string {
   return parts.at(-1) ?? record.node_id;
 }
 
-function missingStateDelta(event: IndexedRecord, tag: ParsedIntroTag): Verdict {
+function missingStateDelta(event: IndexedRecord, intro: ParsedIntroduction): Verdict {
   return {
     validator: VALIDATOR,
     severity: "fail",
     code: "midstory_intro_missing_state_delta",
-    message: `${tag.recordId} has an intro:${tag.class}(...) tag on ${bareNodeId(event)} but is absent from SE.state_delta.create[].`,
+    message: `${intro.recordId} has a record_introductions[] entry on ${bareNodeId(event)} but is absent from SE.state_delta.create[].`,
     location: locationFor(event),
-    detail: { event_id: bareNodeId(event), record_id: tag.recordId, class: tag.class },
-    suggested_fix: `Add ${tag.recordId} to ${bareNodeId(event)}.state_delta.create[] or remove the intro tag.`
+    detail: { event_id: bareNodeId(event), record_id: intro.recordId, class: intro.class },
+    suggested_fix: `Add ${intro.recordId} to ${bareNodeId(event)}.state_delta.create[] or remove the structured introduction entry.`
   };
 }
 
-function createdAtMismatch(record: IndexedRecord, tag: ParsedIntroTag, expected: string, actual: string | undefined): Verdict {
+function createdAtMismatch(record: IndexedRecord, intro: ParsedIntroduction, expected: string, actual: string | undefined): Verdict {
   return {
     validator: VALIDATOR,
     severity: "fail",
     code: "midstory_intro_created_at_mismatch",
-    message: `${tag.recordId} created_at_page ${actual ?? "<missing>"} does not match creating event page ${expected}.`,
+    message: `${intro.recordId} created_at_page ${actual ?? "<missing>"} does not match creating event page ${expected}.`,
     location: locationFor(record),
-    detail: { record_id: tag.recordId, expected_created_at_page: expected, actual_created_at_page: actual ?? null },
-    suggested_fix: `Set ${tag.recordId}.created_at_page to ${expected}, or bind the intro tag to the event that created the record.`
+    detail: { record_id: intro.recordId, expected_created_at_page: expected, actual_created_at_page: actual ?? null },
+    suggested_fix: `Set ${intro.recordId}.created_at_page to ${expected}, or bind the structured introduction to the event that created the record.`
   };
 }
 
-function missingTag(event: IndexedRecord, recordId?: string, reason?: string): Verdict {
+function missingIntroduction(event: IndexedRecord, recordId: string): Verdict {
   return {
     validator: VALIDATOR,
     severity: "fail",
     code: "midstory_intro_missing_tag",
-    message: recordId === undefined
-      ? `${bareNodeId(event)} has a malformed intro tag.`
-      : `${bareNodeId(event)} creates ${recordId} without a matching intro:<CLASS>(id=${recordId}, ...) tag.`,
+    message: `${bareNodeId(event)} creates ${recordId} without a matching SE.record_introductions[] entry.`,
     location: locationFor(event),
-    detail: { event_id: bareNodeId(event), record_id: recordId, reason },
-    suggested_fix: "Carry every mid-story-created CLK/STSEC/STQ/THR/STENT/SREL/STPLAN/STEMO as a parseable intro:<CLASS>(...) tag in SE.world_logic_rationale."
+    detail: { event_id: bareNodeId(event), record_id: recordId, reason: undefined },
+    suggested_fix: "Carry every mid-story-created CLK/STSEC/STQ/THR/STENT/SREL/STPLAN/STEMO as a structured entry in SE.record_introductions[] (record_id, class, trigger, evidence, distinct_from)."
   };
 }
 
-function evidenceMissing(event: IndexedRecord, tag: ParsedIntroTag, evidenceId: string): Verdict {
+function evidenceMissing(event: IndexedRecord, intro: ParsedIntroduction, evidenceId: string): Verdict {
   return {
     validator: VALIDATOR,
     severity: "fail",
     code: "midstory_intro_evidence_missing",
-    message: `${tag.recordId} intro tag cites evidence ${evidenceId}, but it is neither parent-active nor same-event-created.`,
+    message: `${intro.recordId} structured introduction cites evidence ${evidenceId}, but it is neither parent-active nor same-event-created.`,
     location: locationFor(event),
-    detail: { event_id: bareNodeId(event), record_id: tag.recordId, evidence_id: evidenceId },
+    detail: { event_id: bareNodeId(event), record_id: intro.recordId, evidence_id: evidenceId },
     suggested_fix: `Use evidence records active in the parent PG snapshot or created by the same ${bareNodeId(event)} event.`
   };
 }

@@ -2,6 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-event.schema.json",
   "type": "object",
+  "$defs": {
+    "recordId": { "type": "string", "pattern": "^[A-Z]+-(?:0|[1-9][0-9]*)$" }
+  },
   "required": [
     "id",
     "story_id",
@@ -87,6 +90,203 @@
       "additionalProperties": false
     },
     "world_logic_rationale": { "type": "string", "minLength": 1 },
+    "record_introductions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["record_id", "class", "trigger", "evidence", "distinct_from"],
+        "properties": {
+          "record_id": { "$ref": "#/$defs/recordId" },
+          "class": {
+            "type": "string",
+            "enum": ["CLK", "STSEC", "STQ", "THR", "STENT", "SREL", "STPLAN", "STEMO"]
+          },
+          "trigger": { "type": "string" },
+          "evidence": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/recordId" }
+          },
+          "distinct_from": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/recordId" }
+          },
+          "rationale": { "type": "string" }
+        },
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "properties": {
+              "class": { "const": "CLK" },
+              "trigger": {
+                "enum": [
+                  "deadline_declared",
+                  "pursuit_started",
+                  "exposure_accumulation_started",
+                  "faction_mobilized",
+                  "environmental_degradation_started",
+                  "mission_or_race_started",
+                  "staged_danger_became_trackable"
+                ]
+              }
+            },
+            "required": ["class", "trigger"]
+          },
+          {
+            "properties": {
+              "class": { "const": "STSEC" },
+              "trigger": {
+                "enum": [
+                  "lie_made_hidden_truth_branch_relevant",
+                  "hidden_truth_constrains_action",
+                  "clue_carrier_enters_play",
+                  "holder_access_changed",
+                  "protected_mystery_story_secret_needed"
+                ]
+              }
+            },
+            "required": ["class", "trigger"]
+          },
+          {
+            "properties": {
+              "class": { "const": "STQ" },
+              "trigger": {
+                "enum": [
+                  "promise_made",
+                  "explicit_question_raised",
+                  "unexplained_evidence_introduced",
+                  "affordance_setup_introduced",
+                  "open_decision_created"
+                ]
+              }
+            },
+            "required": ["class", "trigger"]
+          },
+          {
+            "properties": {
+              "class": { "const": "THR" },
+              "trigger": {
+                "enum": [
+                  "new_ongoing_causal_concern",
+                  "investigation_line_opened",
+                  "recovery_line_opened",
+                  "negotiation_line_opened",
+                  "mission_line_opened",
+                  "social_fallout_line_opened"
+                ]
+              }
+            },
+            "required": ["class", "trigger"]
+          },
+          {
+            "properties": {
+              "class": { "const": "STENT" },
+              "trigger": {
+                "enum": [
+                  "actor_enters_branch",
+                  "witness_needed",
+                  "information_source_enters",
+                  "pressure_driver_enters",
+                  "counterparty_enters",
+                  "choice_target_enters"
+                ]
+              }
+            },
+            "required": ["class", "trigger"]
+          },
+          {
+            "properties": {
+              "class": { "const": "SREL" },
+              "trigger": {
+                "enum": [
+                  "alliance_forms",
+                  "rivalry_forms",
+                  "debt_relation_forms",
+                  "authority_relation_forms",
+                  "trust_axis_becomes_relevant",
+                  "intimacy_axis_becomes_relevant",
+                  "hostility_axis_becomes_relevant"
+                ]
+              }
+            },
+            "required": ["class", "trigger"]
+          },
+          {
+            "properties": {
+              "class": { "const": "STPLAN" },
+              "trigger": {
+                "enum": [
+                  "tactical_approach_committed",
+                  "resource_gained_enables_plan",
+                  "blocker_requires_plan",
+                  "pressure_forces_plan",
+                  "opportunity_recognized",
+                  "counterparty_plan_observed"
+                ]
+              }
+            },
+            "required": ["class", "trigger"]
+          },
+          {
+            "properties": {
+              "class": { "const": "STEMO" },
+              "trigger": {
+                "enum": [
+                  "event_revealed_truth_to_actor",
+                  "event_threatened_actor_or_charge",
+                  "event_harmed_actor_or_charge",
+                  "event_relieved_pressure_on_actor",
+                  "event_violated_actor_principle_or_value",
+                  "event_changed_relationship_with_other",
+                  "accumulated_pressure_crossed_threshold"
+                ]
+              }
+            },
+            "required": ["class", "trigger"]
+          }
+        ]
+      }
+    },
+    "state_relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["relation", "target_record"],
+        "properties": {
+          "relation": {
+            "type": "string",
+            "enum": ["advances", "tests", "blocks", "revises", "fulfills", "abandons", "ignores"]
+          },
+          "target_record": { "$ref": "#/$defs/recordId" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "non_propagation_facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["reason", "group", "records"],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "no_witness",
+              "witness_incapacitated",
+              "evidence_concealed",
+              "institution_suppresses_report",
+              "event_leaves_no_accessible_trace"
+            ]
+          },
+          "group": { "type": "string", "minLength": 1 },
+          "records": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/recordId" }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "state_delta": {
       "type": "object",
       "required": ["create", "supersede", "close"],

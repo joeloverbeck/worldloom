@@ -147,9 +147,22 @@ function event(id: string, overrides: { create: string[]; created_at_page?: stri
     actor: "STENT-1",
     commitment: { selected_slt_id: "SLT-1", selection_source: "runtime_jit", alias_bindings: {} },
     outcome_route: "accept",
-    world_logic_rationale: "intro:STQ(id=STQ-1, trigger=explicit_question_raised, evidence=[DA-1], distinct_from=[])",
+    world_logic_rationale: "Structured story-question introduction.",
+    record_introductions: introEntries(overrides.create),
     state_delta: { create: overrides.create, supersede: [], close: [] }
   });
+}
+
+function introEntries(ids: string[]): Record<string, unknown>[] {
+  return ids
+    .filter((id) => id.startsWith("STQ-"))
+    .map((record_id) => ({
+      record_id,
+      class: "STQ",
+      trigger: "explicit_question_raised",
+      evidence: ["DA-1"],
+      distinct_from: []
+    }));
 }
 
 function eventFromFixture(item: FixtureEvent): IndexedRecord {

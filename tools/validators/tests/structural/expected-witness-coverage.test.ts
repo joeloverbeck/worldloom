@@ -19,7 +19,9 @@ test("expected_witness_coverage_rejects_wrong_group_label", async () => {
   const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
     event("SE-1", {
       create: ["DA-1"],
-      world_logic_rationale: "No spread: non_propagation:evidence_concealed(group=guards, records=[STENT-2, STENT-3])."
+      non_propagation_facts: [
+        { reason: "evidence_concealed", group: "guards", records: ["STENT-2", "STENT-3"] }
+      ]
     }),
     artifact("DA-1", "public")
   ])));
@@ -44,7 +46,9 @@ test("expected_witness_coverage_rejects_tag_records_unresolved", async () => {
   const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
     event("SE-1", {
       create: ["DA-1"],
-      world_logic_rationale: "No spread: non_propagation:evidence_concealed(group=direct_witnesses, records=[STENT-99])."
+      non_propagation_facts: [
+        { reason: "evidence_concealed", group: "direct_witnesses", records: ["STENT-99"] }
+      ]
     }),
     artifact("DA-1", "public")
   ])));
@@ -193,12 +197,13 @@ test("expected_witness_coverage_rejects_public_da_with_direct_observation_object
   assertMissingIndirectPropagation(verdicts);
 });
 
-test("expected_witness_coverage_accepts_public_da_with_event_leaves_no_accessible_trace_tag", async () => {
+test("expected_witness_coverage_accepts_public_da_with_event_leaves_no_accessible_trace_fact", async () => {
   const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
     event("SE-1", {
       create: ["BEL-1", "BEL-2", "DA-1"],
-      world_logic_rationale:
-        "No spread: non_propagation:event_leaves_no_accessible_trace(group=public_general, records=[DA-1])."
+      non_propagation_facts: [
+        { reason: "event_leaves_no_accessible_trace", group: "public_general", records: ["DA-1"] }
+      ]
     }),
     belief("BEL-1", "STENT-2"),
     belief("BEL-2", "STENT-3"),
@@ -223,8 +228,9 @@ test("expected_witness_coverage_accepts_valid_non_propagation_evidence", async (
   const verdicts = await expectedWitnessCoverage.run(undefined, context(baseRecords([
     event("SE-1", {
       create: ["STENT-4"],
-      world_logic_rationale:
-        "No spread: non_propagation:institution_suppresses_report(group=direct_witnesses, records=[STENT-2, STENT-3])."
+      non_propagation_facts: [
+        { reason: "institution_suppresses_report", group: "direct_witnesses", records: ["STENT-2", "STENT-3"] }
+      ]
     })
   ])));
 
@@ -271,7 +277,16 @@ function baseRecords(records: Array<ReturnType<typeof storyRecord>> = []) {
   ];
 }
 
-function event(id: string, overrides: Partial<{ create: string[]; supersede: string[]; close: string[]; world_logic_rationale: string }>) {
+function event(
+  id: string,
+  overrides: Partial<{
+    create: string[];
+    supersede: string[];
+    close: string[];
+    world_logic_rationale: string;
+    non_propagation_facts: Array<{ reason: string; group: string; records: string[] }>;
+  }>
+) {
   return storyRecord("story_event_record", id, "events", {
     id,
     story_id: "STORY-1",
@@ -282,6 +297,7 @@ function event(id: string, overrides: Partial<{ create: string[]; supersede: str
     commitment: { selected_slt_id: "SLT-1", selection_source: "emitted_choice", alias_bindings: {} },
     outcome_route: "accept",
     world_logic_rationale: overrides.world_logic_rationale ?? "The event is public.",
+    non_propagation_facts: overrides.non_propagation_facts ?? [],
     state_delta: {
       create: overrides.create ?? [],
       supersede: overrides.supersede ?? [],

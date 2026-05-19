@@ -7,7 +7,6 @@ import Database from "better-sqlite3";
 import YAML from "yaml";
 
 import { build } from "../../src/commands/build.js";
-import { extractIntroTags } from "../../src/parse/intro-tag-parser.js";
 import { STORY_EDGE_TYPES } from "../../src/schema/types.js";
 import { cleanup, createAtomicRepoRoot } from "../helpers/atomic-fixture.js";
 
@@ -457,7 +456,13 @@ function addSpec46Story(root: string): void {
     "  alias_bindings:",
     "    actor: STENT-1",
     "world_logic_rationale: >-",
-    "  intro:STQ(id=STQ-2, trigger=explicit_question_raised, evidence=[PG-2,SE-0], distinct_from=[])",
+    "  STQ-2 is introduced through record_introductions.",
+    "record_introductions:",
+    "  - record_id: STQ-2",
+    "    class: STQ",
+    "    trigger: explicit_question_raised",
+    "    evidence: [PG-2, SE-0]",
+    "    distinct_from: []",
     "state_delta:",
     "  create: [BEL-1, STQ-2]",
     "  supersede: [STSTAT-1]",
@@ -570,7 +575,10 @@ function expectedCountsFromSource(sourceRoot: string): Record<EdgeTypeUnderTest,
     addCount(
       counts,
       "creation_evidence",
-      extractIntroTags(stringField(event, "world_logic_rationale") ?? "").reduce((sum, tag) => sum + tag.evidence.length, 0)
+      recordArray(event, "record_introductions").reduce(
+        (sum, introduction) => sum + fieldArray(introduction, "evidence").length,
+        0
+      )
     );
   }
 

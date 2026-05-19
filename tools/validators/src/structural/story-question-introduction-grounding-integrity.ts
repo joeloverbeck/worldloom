@@ -1,4 +1,5 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { readSeIntroductions } from "./midstory-introduction-utils.js";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, stringValue, touchedFilesInclude } from "./utils.js";
 
 const VALIDATOR = "story_question_introduction_grounding_integrity";
@@ -45,10 +46,7 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   }
 
   const verdicts: Verdict[] = [];
-  for (const createdId of createdIds) {
-    if (!createdId.startsWith("STQ-")) {
-      continue;
-    }
+  for (const createdId of introducedRecordIds(event, "STQ")) {
     const question = maps.byId.get(createdId);
     if (question === undefined) {
       continue;
@@ -60,6 +58,12 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
     verdicts.push(...validateQuestion(question, eventId, activeOrCreated));
   }
   return verdicts;
+}
+
+function introducedRecordIds(event: IndexedRecord, recordClass: "STQ"): string[] {
+  return readSeIntroductions(event)
+    .filter((intro) => intro.class === recordClass)
+    .map((intro) => intro.recordId);
 }
 
 function validateQuestion(question: IndexedRecord, creatingEventId: string, activeOrCreatedIds: Set<string>): Verdict[] {

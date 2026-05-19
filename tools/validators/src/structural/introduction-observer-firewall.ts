@@ -1,8 +1,9 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { readSeIntroductions } from "./midstory-introduction-utils.js";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, stringValue, touchedFilesInclude } from "./utils.js";
 
 const VALIDATOR = "introduction_observer_firewall";
-const INTRO_RECORD_ID = /^(?:CLK|STSEC|STQ|THR|STENT|SREL)-\d+$/;
+const INTRO_RECORD_ID = /^(?:CLK|STSEC|STQ|THR|STENT|SREL|STPLAN|STEMO)-\d+$/;
 const INTRO_CREATE_OPS = new Set([
   "create_se_record",
   "create_pg_record",
@@ -12,7 +13,9 @@ const INTRO_CREATE_OPS = new Set([
   "create_stq_record",
   "create_thr_record",
   "create_stent_record",
-  "create_srel_record"
+  "create_srel_record",
+  "create_stplan_record",
+  "create_stemo_record"
 ]);
 const PUBLIC_BEL_VISIBILITIES = new Set(["public", "rumored", "shared", "faction"]);
 
@@ -24,7 +27,7 @@ export const introductionObserverFirewall: Validator = {
     ctx.patch_plan?.patches.some((patch) => INTRO_CREATE_OPS.has(patch.op)) === true ||
     touchedFilesInclude(
       ctx,
-      /^stories\/[^/]+\/_source\/(?:events|pages|choices|clocks|secrets|story-questions|threads|entities|relationships)\/(?:SE|PG|CHC|CLK|STSEC|STQ|THR|STENT|SREL)-\d+\.yaml$/
+      /^stories\/[^/]+\/_source\/(?:events|pages|choices|clocks|secrets|story-questions|threads|entities|relationships|plans|emotions)\/(?:SE|PG|CHC|CLK|STSEC|STQ|THR|STENT|SREL|STPLAN|STEMO)-\d+\.yaml$/
     ),
   run: async (_input: unknown, ctx: Context): Promise<Verdict[]> => {
     const records = await queryStructuralRecords(ctx);
@@ -49,7 +52,7 @@ interface RecordMaps {
 
 function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   const parsed = asPlainRecord(event.parsed);
-  const freshIds = new Set(stringArray(asPlainRecord(parsed.state_delta).create).filter((id) => INTRO_RECORD_ID.test(id)));
+  const freshIds = new Set(readSeIntroductions(event).map((intro) => intro.recordId).filter((id) => INTRO_RECORD_ID.test(id)));
   if (freshIds.size === 0) {
     return [];
   }

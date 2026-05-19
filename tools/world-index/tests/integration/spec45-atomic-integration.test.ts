@@ -17,7 +17,6 @@ import Database from "better-sqlite3";
 import YAML from "yaml";
 
 import { build } from "../../src/commands/build.js";
-import { extractIntroTags } from "../../src/parse/intro-tag-parser.js";
 import { cleanup, createAtomicRepoRoot } from "../helpers/atomic-fixture.js";
 
 const WORLD_SLUG = "atomic-world";
@@ -130,7 +129,28 @@ function addSyntheticProvenanceStory(root: string): void {
     "  selected_slt_id: null",
     "  selection_source: none",
     "world_logic_rationale: >-",
-    "  intro:CLK(id=CLK-1, trigger=deadline_declared, evidence=[PG-1,SF-1], distinct_from=[]) intro:STSEC(id=STSEC-1, trigger=clue_carrier_enters_play, evidence=[PG-1,BEL-1], distinct_from=[]) intro:STQ(id=STQ-1, trigger=promise_made, evidence=[BEL-1,SF-1], distinct_from=[]) intro:THR(id=THR-1, trigger=new_ongoing_causal_concern, evidence=[PG-1,BEL-1], distinct_from=[])",
+    "  Structured introductions are represented by record_introductions.",
+    "record_introductions:",
+    "  - record_id: CLK-1",
+    "    class: CLK",
+    "    trigger: deadline_declared",
+    "    evidence: [PG-1, SF-1]",
+    "    distinct_from: []",
+    "  - record_id: STSEC-1",
+    "    class: STSEC",
+    "    trigger: clue_carrier_enters_play",
+    "    evidence: [PG-1, BEL-1]",
+    "    distinct_from: []",
+    "  - record_id: STQ-1",
+    "    class: STQ",
+    "    trigger: promise_made",
+    "    evidence: [BEL-1, SF-1]",
+    "    distinct_from: []",
+    "  - record_id: THR-1",
+    "    class: THR",
+    "    trigger: new_ongoing_causal_concern",
+    "    evidence: [PG-1, BEL-1]",
+    "    distinct_from: []",
     "state_delta:",
     "  create: [CLK-1, STSEC-1, STQ-1]",
     "  supersede: [THR-1, STENT-1]",
@@ -196,12 +216,12 @@ function expectedCountsFromEvents(sourceRoot: string): ExpectedCounts {
   for (const fileName of eventFiles) {
     const parsed = YAML.parse(readFileSync(path.join(eventsDirectory, fileName), "utf8")) as {
       state_delta?: { create?: unknown[]; supersede?: unknown[] };
-      world_logic_rationale?: string;
+      record_introductions?: Array<{ evidence?: unknown[] }>;
     };
     counts.state_delta_create += parsed.state_delta?.create?.length ?? 0;
     counts.state_delta_supersede += parsed.state_delta?.supersede?.length ?? 0;
-    counts.creation_evidence += extractIntroTags(parsed.world_logic_rationale ?? "").reduce(
-      (sum, tag) => sum + tag.evidence.length,
+    counts.creation_evidence += (parsed.record_introductions ?? []).reduce(
+      (sum, introduction) => sum + (Array.isArray(introduction.evidence) ? introduction.evidence.length : 0),
       0
     );
   }

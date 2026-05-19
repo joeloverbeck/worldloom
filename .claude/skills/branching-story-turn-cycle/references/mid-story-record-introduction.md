@@ -4,9 +4,9 @@ Use this reference during turn-cycle Phase 3 when deciding whether the accepted
 event creates a new persistent causal object, during Phase 4 when new state
 requires belief or visibility propagation, and during Phase 7 when page-plan
 section 10b explains what newly introduced state may render or ground choices.
-The `intro:<CLASS>(...)` tag grammar and closed trigger vocabularies live in
-`.claude/skills/_shared-templates/story-state-contract.md` §5a. The parser
-implementation lives at
+The `SE.record_introductions[]` structured-field schema and closed trigger
+vocabularies live in `.claude/skills/_shared-templates/story-state-contract.md`
+§5a. The typed reader lives at
 `tools/validators/src/structural/midstory-introduction-utils.ts`.
 
 Fresh creation is lawful only when the committed event or current branch state
@@ -42,8 +42,8 @@ clock for the same driver because tension increased.
 - `value`, `max`, `thresholds[]`, `salience`, `visibility`, and `status` are
   valid for the clock schema.
 - `SE.state_delta.create[]` includes the new clock id.
-- `SE.world_logic_rationale` includes an
-  `intro:CLK(id=..., trigger=..., evidence=[...], distinct_from=[...])` tag.
+- `SE.record_introductions[]` includes
+  `{record_id: CLK-<N>, class: CLK, trigger: <closed trigger>, evidence: [...], distinct_from: [...]}`.
 
 **Required turn-cycle handling.** Phase 3 may create a `CLK` before Phase 4
 applies clock lifecycle transitions. If the same event creates and immediately
@@ -102,8 +102,8 @@ remains continuous.
 - If touching Mystery Reserve, `protected_mystery_refs[]` is populated and
   firewall rules apply.
 - `SE.state_delta.create[]` includes the new secret id.
-- `SE.world_logic_rationale` includes an
-  `intro:STSEC(id=..., trigger=..., evidence=[...], distinct_from=[...])` tag.
+- `SE.record_introductions[]` includes
+  `{record_id: STSEC-<N>, class: STSEC, trigger: <closed trigger>, evidence: [...], distinct_from: [...]}`.
 
 **Required turn-cycle handling.** Phase 4 must run belief and witness
 propagation after any secret creation, clue discovery, or reveal. A first lie
@@ -159,8 +159,8 @@ existing `STQ` when the new event addresses the same setup. Do not create a new
 - `status` starts as open or complicated according to schema.
 - No prohibited future-shape fields are present.
 - `SE.state_delta.create[]` includes the new question id.
-- `SE.world_logic_rationale` includes an
-  `intro:STQ(id=..., trigger=..., evidence=[...], distinct_from=[...])` tag.
+- `SE.record_introductions[]` includes
+  `{record_id: STQ-<N>, class: STQ, trigger: <closed trigger>, evidence: [...], distinct_from: [...]}`.
 
 **Required turn-cycle handling.** Phase 3 may create `STQ`; Phase 4 may answer,
 pay off, or abandon existing `STQ`. Page-plan section 10b should surface newly
@@ -211,8 +211,8 @@ only when the driver, participants, or branch concern is genuinely distinct.
 - `urgency` is set.
 - Title and summary describe current causal concern, not theme.
 - `SE.state_delta.create[]` includes the new thread id.
-- `SE.world_logic_rationale` includes an
-  `intro:THR(id=..., trigger=..., evidence=[...], distinct_from=[...])` tag.
+- `SE.record_introductions[]` includes
+  `{record_id: THR-<N>, class: THR, trigger: <closed trigger>, evidence: [...], distinct_from: [...]}`.
 
 **Required turn-cycle handling.** Phase 3 may open a new thread beside
 advancing or closing existing threads. Phase 8 choices can ground in the new
@@ -263,8 +263,8 @@ mirror, or role metadata changes. Life, agency, and location belong in
 - If only one actor believes the entity exists, create `BEL` first; do not
   create objective `STENT` unless branch state commits the entity.
 - `SE.state_delta.create[]` includes the new entity id.
-- `SE.world_logic_rationale` includes an
-  `intro:STENT(id=..., trigger=..., evidence=[...], distinct_from=[...])` tag.
+- `SE.record_introductions[]` includes
+  `{record_id: STENT-<N>, class: STENT, trigger: <closed trigger>, evidence: [...], distinct_from: [...]}`.
 
 **Required turn-cycle handling.** The output table allows `STENT` as new or
 superseded. Phase 3 must require same-event `STSTAT` pairing for fresh `STENT`.
@@ -315,8 +315,8 @@ not create parallel duplicate edges for incremental change.
 - If the relationship is only believed or rumored, use `BEL`, not objective
   `SREL`.
 - `SE.state_delta.create[]` includes the new relationship id.
-- `SE.world_logic_rationale` includes an
-  `intro:SREL(id=..., trigger=..., evidence=[...], distinct_from=[...])` tag.
+- `SE.record_introductions[]` includes
+  `{record_id: SREL-<N>, class: SREL, trigger: <closed trigger>, evidence: [...], distinct_from: [...]}`.
 
 **Required turn-cycle handling.** The output table allows `SREL` as new or
 superseded. Phase 4 must propagate beliefs when relationship formation is
@@ -350,9 +350,9 @@ emotional trajectory.
 
 ## Cross-References
 
-- Tag grammar and closed trigger vocabularies:
+- Structured introduction fields and closed trigger vocabularies:
   `.claude/skills/_shared-templates/story-state-contract.md` §5a.
-- Parser and trigger constants:
+- Typed reader and trigger constants:
   `tools/validators/src/structural/midstory-introduction-utils.ts`.
 - Phase 3 creation decision:
   `.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md`.

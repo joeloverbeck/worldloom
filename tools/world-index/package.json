@@ -37,11 +37,6 @@
       "import": "./dist/src/public/canonical-vocabularies.js",
       "require": "./dist/src/public/canonical-vocabularies.js",
       "types": "./dist/src/public/canonical-vocabularies.d.ts"
-    },
-    "./parse/intro-tag-parser": {
-      "import": "./dist/src/parse/intro-tag-parser.js",
-      "require": "./dist/src/parse/intro-tag-parser.js",
-      "types": "./dist/src/parse/intro-tag-parser.d.ts"
     }
   },
   "scripts": {

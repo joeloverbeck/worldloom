@@ -1,4 +1,5 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { readSeIntroductions } from "./midstory-introduction-utils.js";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, stringValue, touchedFilesInclude } from "./utils.js";
 
 const VALIDATOR = "relationship_introduction_grounding_integrity";
@@ -45,10 +46,7 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   }
 
   const verdicts: Verdict[] = [];
-  for (const createdId of createdIds) {
-    if (!createdId.startsWith("SREL-")) {
-      continue;
-    }
+  for (const createdId of introducedRecordIds(event, "SREL")) {
     const relationship = maps.byId.get(createdId);
     if (relationship === undefined) {
       continue;
@@ -61,6 +59,12 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   }
 
   return verdicts;
+}
+
+function introducedRecordIds(event: IndexedRecord, recordClass: "SREL"): string[] {
+  return readSeIntroductions(event)
+    .filter((intro) => intro.class === recordClass)
+    .map((intro) => intro.recordId);
 }
 
 function validateRelationship(relationship: IndexedRecord, parentPageId: string | undefined, activeOrCreatedEntities: Set<string>, maps: RecordMaps): Verdict[] {

@@ -160,9 +160,22 @@ function event(id: string, overrides: { create: string[]; created_at_page?: stri
     actor: "STENT-1",
     commitment: { selected_slt_id: "SLT-1", selection_source: "runtime_jit", alias_bindings: {} },
     outcome_route: "accept",
-    world_logic_rationale: "intro:THR(id=THR-1, trigger=investigation_line_opened, evidence=[BEL-1], distinct_from=[])",
+    world_logic_rationale: "Structured thread introduction.",
+    record_introductions: introEntries(overrides.create),
     state_delta: { create: overrides.create, supersede: [], close: [] }
   });
+}
+
+function introEntries(ids: string[]): Record<string, unknown>[] {
+  return ids
+    .filter((id) => id.startsWith("THR-"))
+    .map((record_id) => ({
+      record_id,
+      class: "THR",
+      trigger: "investigation_line_opened",
+      evidence: ["BEL-1"],
+      distinct_from: []
+    }));
 }
 
 function page(id: string, activeRecords: Record<string, string[]>): IndexedRecord {
