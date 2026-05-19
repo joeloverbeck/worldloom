@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-49-stplan-stemo-integration-hardening.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC49STPSTEINT-004.md",
+  "last_ticket": "archive/tickets/SPEC49STPSTEINT-005.md",
   "last_result": "completed_archived",
-  "last_work_commit": "ae0d925a162ee6d723b2040f5a19d394f2d63bcb",
+  "last_work_commit": "c805fe893eec5ce7c68d2031b0eb578ce024d4b3",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC49STPSTEINT-005.md",
+  "next_target": "tickets/SPEC49STPSTEINT-006.md",
   "queue": [
-    "tickets/SPEC49STPSTEINT-005.md",
     "tickets/SPEC49STPSTEINT-006.md",
     "tickets/SPEC49STPSTEINT-007.md",
     "tickets/SPEC49STPSTEINT-008.md",
@@ -18,10 +17,10 @@
   "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
-  "post_review_material_updates": false,
-  "post_review_audit_block": "not_applicable",
+  "post_review_material_updates": true,
+  "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked clean after SPEC49STPSTEINT-004 work commit; expected ignored artifacts remain tools/validators/dist/ and tools/validators/node_modules/",
+  "dirty_state": "tracked clean after SPEC49STPSTEINT-005 work commit; expected ignored artifacts remain tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
   "updated_at": "2026-05-19"
 }
