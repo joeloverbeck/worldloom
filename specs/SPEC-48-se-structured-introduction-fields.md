@@ -39,6 +39,7 @@ The user has additionally established a load-bearing scoping constraint: **no pr
 - **D6. `record_introductions[].rationale?` is optional prose, not structured.** Origin report's example includes a per-introduction `rationale` field. Keep it as optional prose for the case where the author wants per-introduction context beyond the SE-level `world_logic_rationale`. NOT a schema vehicle for structured content.
 - **D7. Closed-vocabulary updates remain a separate concern.** Adding a new class to `record_introductions[].class`, a new trigger to a per-class vocabulary, a new relation to `state_relations[].relation`, or a new reason to `non_propagation_facts[].reason` is a future spec under the same "named §5b-class consumer" discipline as SPEC-47 §Out of Scope items 1-2. This spec freezes the current vocabularies in the new structured form.
 - **D8. Parser file deletion is a CI gate, not a soft signal.** A static-analysis test asserts no source file imports from `tools/world-index/src/parse/intro-tag-parser.ts` (post-deletion target). The same gate prevents re-introduction. A parallel gate over SKILL.md files prevents `intro:<CLASS>` / `plan_relation:` / `non_propagation:` tag-syntax strings from drifting back into skill prose.
+- **Implementation note (2026-05-19 / SPEC48SESTRINT-001):** Standard JSON Schema `uniqueItems` compares whole array items; it does not enforce uniqueness by a dynamic object property such as `record_introductions[].record_id` when other fields differ. SPEC48SESTRINT-001 lands the additive schema fields and exact-duplicate object rejection. Keyed `record_id` uniqueness is split to `tickets/SPEC48SESTRINT-014.md`, which must enforce the dynamic uniqueness invariant through the validator/typed-reader layer before final capstone archival.
 
 ## Approach
 
@@ -49,7 +50,7 @@ Five-phase decomposition mirroring SPEC-47's structure.
 Author the three new optional fields in the `SE` schema; rewrite the contract section that documents the deprecated tag grammar.
 
 - Extend `tools/validators/src/schemas/story-event.schema.json` with three new optional properties:
-  - `record_introductions`: array of `{record_id (RECORD_ID pattern), class (8-value enum), trigger (string), evidence (array of RECORD_ID), distinct_from (array of RECORD_ID), rationale? (string)}` with `uniqueItems` on `record_id` and a per-class `oneOf` constraint enforcing trigger-vocabulary-per-class.
+  - `record_introductions`: array of `{record_id (RECORD_ID pattern), class (8-value enum), trigger (string), evidence (array of RECORD_ID), distinct_from (array of RECORD_ID), rationale? (string)}` with exact duplicate object rejection via JSON Schema `uniqueItems` and a per-class `oneOf` constraint enforcing trigger-vocabulary-per-class. Dynamic uniqueness by `record_id` is enforced by SPEC48SESTRINT-014, not by the schema alone.
   - `state_relations`: array of `{relation (7-value enum: advances/tests/blocks/revises/fulfills/abandons/ignores), target_record (RECORD_ID pattern)}`. Plan-relation domain is implicit (target_record currently restricted to STPLAN-* by validator consistency check, not by schema).
   - `non_propagation_facts`: array of `{reason (closed enum, set discovered from `non-propagation-tag-shape.ts` accepted-reason list), group (string), records (array of RECORD_ID)}`.
 - Update `.claude/skills/_shared-templates/story-record-schemas.md` SE entry to document the three new fields, their semantics, the closed enums, and one worked YAML example per field.
@@ -148,7 +149,7 @@ Per-phase deliverables that will be decomposed into implementation tickets by a 
 
 ### Phase A: Schemas, structured field definitions, contract rewrite
 
-- D-A1: Extend `tools/validators/src/schemas/story-event.schema.json` with `record_introductions[]` field per the §A schema specification (8-value class enum, per-class trigger `oneOf`, RECORD_ID patterns on `record_id` / `evidence[*]` / `distinct_from[*]`, `uniqueItems` on `record_id`).
+- D-A1: Extend `tools/validators/src/schemas/story-event.schema.json` with `record_introductions[]` field per the §A schema specification (8-value class enum, per-class trigger `oneOf`, RECORD_ID patterns on `record_id` / `evidence[*]` / `distinct_from[*]`, exact duplicate object rejection via JSON Schema `uniqueItems`). Keyed `record_id` uniqueness is enforced by SPEC48SESTRINT-014.
 - D-A2: Extend the same schema with `state_relations[]` field (7-value relation enum, RECORD_ID pattern on `target_record`).
 - D-A3: Extend the same schema with `non_propagation_facts[]` field. Closed reason enum migrated verbatim from `non-propagation-tag-shape.ts:9-14` — the 5 values are `no_witness | witness_incapacitated | evidence_concealed | institution_suppresses_report | event_leaves_no_accessible_trace`. RECORD_ID pattern on `records[*]`. `group` is a free-form string label (no closed enum; see `non-propagation-tag-shape.ts:85` regex group pattern `[^,()[\]\s]+`).
 - D-A4: Update `.claude/skills/_shared-templates/story-record-schemas.md` SE entry: document the three new fields, the closed enums, and one worked YAML example per field.
@@ -206,7 +207,7 @@ Test cases that the implementation must satisfy. Numbered for traceability with 
 
 - **T-1: Schema validation — `record_introductions[]` happy path.** A valid record-introduction shape passes schema validation.
 - **T-2: Schema validation — class-trigger mismatch rejection.** `class: CLK` paired with a STPLAN trigger (`tactical_approach_committed`) rejects at schema validation with a per-class `oneOf` failure message.
-- **T-3: Schema validation — duplicate `record_id` rejection.** Same `record_id` in `record_introductions[]` twice rejects via `uniqueItems`.
+- **T-3: Structured validation — duplicate `record_id` rejection.** Identical duplicate `record_introductions[]` objects reject via JSON Schema `uniqueItems`; duplicate `record_id` entries with differing fields reject through the SPEC48SESTRINT-014 validator/typed-reader layer.
 - **T-4: Schema validation — malformed RECORD_ID rejection.** `record_id: "foo"` rejects via RECORD_ID pattern.
 - **T-5: Validator refactor regression — all 12 refactored validators.** Every existing positive and negative test case in `tools/validators/src/structural/__tests__/` for the refactored validators (8 introduction-grounding + 3 plan-relation + 1 non-propagation) continues to pass with the same input semantics (now structurally expressed) and the same output (PASS / FAIL with same error messages, including the rewritten `suggested_fix` strings per M2).
 - **T-6: Schema-vs-vocabulary parity.** Per-class trigger enums in `story-event.schema.json` match the TypeScript exports `MIDSTORY_TRIGGERS_CLK` … `MIDSTORY_TRIGGERS_STEMO` from `midstory-introduction-utils.ts` post-refactor; parity check is a unit test that compares the two sets and fails on divergence.

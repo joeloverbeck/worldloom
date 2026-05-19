@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds 1 integration test under `tools/validators/tests/integration/`; folds D-A7 patch-engine STORY_RECORD_SPECS verification as a sub-assertion (no code change to patch-engine)
-**Deps**: 005, 006, 007, 010, 011, 012
+**Deps**: 005, 006, 007, 010, 011, 012, SPEC48SESTRINT-014
 
 ## Problem
 
@@ -26,7 +26,7 @@ SPEC-48 §Phase E D-E3 specifies a cross-phase integration test that exercises t
 ## Verification Layers
 
 1. Fixture bundle bootstrap + clean-break SE records → integration test bootstraps a temp-root fixture with seeded SE records carrying all 3 new fields; asserts no error at bootstrap time.
-2. Schema validation rejects malformed structured-field shapes → 4 negative-case sub-tests: (i) trigger-class mismatch (`class: CLK` + `trigger: tactical_approach_committed`) → schema rejects; (ii) duplicate `record_id` in same SE.record_introductions[] → schema rejects via `uniqueItems`; (iii) malformed RECORD_ID (`record_id: foo`) → schema rejects via pattern; (iv) invalid relation enum value (`relation: convolves`) → schema rejects via enum.
+2. Structured validation rejects malformed structured-field shapes → 4 negative-case sub-tests: (i) trigger-class mismatch (`class: CLK` + `trigger: tactical_approach_committed`) → schema rejects; (ii) duplicate `record_id` in same SE.record_introductions[] with differing item bodies → SPEC48SESTRINT-014 validator rejects; (iii) malformed RECORD_ID (`record_id: foo`) → schema rejects via pattern; (iv) invalid relation enum value (`relation: convolves`) → schema rejects via enum.
 3. 8 hard gates pass on the fixture bundle → `world-validate` (or equivalent test-harness invocation per existing integration-test convention) runs and reports all 8 hard gates green.
 4. World-index edge extraction → run `world-index build` over the fixture; assert introduction-derived edges are emitted from `SE.record_introductions[]` (count + types match expected).
 5. MCP context-packet builders → invoke `mcp__worldloom__get_context_packet` (or its test-harness equivalent) for the fixture's story bundle; assert no error and no reference to parser/tag-grammar anywhere in the returned packet.

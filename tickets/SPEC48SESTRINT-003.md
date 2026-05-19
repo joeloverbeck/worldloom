@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — refactors 3 shared utility files in `tools/validators/src/structural/` (`midstory-introduction-utils.ts`, `stplan-utils.ts`, `stemo-utils.ts`); exposes new typed readers consumed by tickets 004-007
-**Deps**: 001
+**Deps**: archive/tickets/SPEC48SESTRINT-001.md
 
 ## Problem
 

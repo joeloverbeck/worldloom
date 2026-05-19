@@ -1,21 +1,22 @@
 # SPEC48SESTRINT-001: Extend story-event schema with `record_introductions[]`, `state_relations[]`, `non_propagation_facts[]` fields
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — extends `tools/validators/src/schemas/story-event.schema.json` (additive only; new optional fields with closed enums)
+**Engine Changes**: Yes — extends `tools/validators/src/schemas/story-event.schema.json` (additive only; new optional fields with closed enums) and truths SPEC-48 handoff for keyed uniqueness follow-up
 **Deps**: None
 
 ## Problem
 
-SPEC-48 replaces three parseable tag patterns currently riding on `SE.world_logic_rationale` (`intro:<CLASS>(...)`, `plan_relation:<...>(plan=...)`, `non_propagation:<...>(group=..., records=[...])`) with three first-class structured fields on the `SE` schema. This ticket lands the schema extension that every downstream refactor (Phase B validators, Phase D world-index, Phase E skill prose) reads against. Without the schema, validators have nothing to consume and the JSON-schema rejection of malformed structured content (trigger-class mismatch, duplicate record_id, invalid relation enum value) cannot fire at patch-engine pre-apply time.
+SPEC-48 replaces three parseable tag patterns currently riding on `SE.world_logic_rationale` (`intro:<CLASS>(...)`, `plan_relation:<...>(plan=...)`, `non_propagation:<...>(group=..., records=[...])`) with three first-class structured fields on the `SE` schema. This ticket lands the schema extension that every downstream refactor (Phase B validators, Phase D world-index, Phase E skill prose) reads against. Without the schema, validators have nothing to consume and JSON-schema rejection of malformed structured content (trigger-class mismatch, exact duplicate introduction objects, invalid relation enum value) cannot fire at patch-engine pre-apply time.
 
 ## Assumption Reassessment (2026-05-19)
 
-1. `tools/validators/src/schemas/story-event.schema.json` exists and is the canonical SE schema consumed by patch-engine `create_se_record` op validation (verified via `ls tools/validators/src/schemas/` during SPEC-48 reassess-spec; confirmed file path resolves via Pre-Write Files-to-Touch existence verification at this ticket's batch).
+1. `tools/validators/src/schemas/story-event.schema.json` exists and is the canonical SE schema consumed by patch-engine `create_se_record` op validation (verified by live file inspection and package-local Ajv2020 compile in this run).
 2. SPEC-48 D-A1/D-A2/D-A3 enumerate three new optional fields with closed-enum constraints; the 8 per-class trigger vocabularies (CLK/STSEC/STQ/THR/STENT/SREL/STPLAN/STEMO), 7 relation enum values (`advances | tests | blocks | revises | fulfills | abandons | ignores`), and 5 non-propagation reason enum values (`no_witness | witness_incapacitated | evidence_concealed | institution_suppresses_report | event_leaves_no_accessible_trace`) are migrated verbatim from the existing parser constants per `tools/world-index/src/parse/intro-tag-parser.ts:4-85` and the existing closed-reason set at `tools/validators/src/structural/non-propagation-tag-shape.ts:9-14`.
 3. Cross-skill boundary under audit: the SE schema is consumed by the patch-engine `create_se_record` op (`tools/patch-engine/src/ops/create-story-record.ts:104` STORY_RECORD_SPECS map) + structural validators in `tools/validators/src/structural/` + world-index parsers in `tools/world-index/src/parse/atomic.ts`. The new optional fields must not break any existing consumer; the additive-only shape (every new field carries no `required` marker at the schema level) is the contract.
 4. Extends existing output schema: `tools/validators/src/schemas/story-event.schema.json` is the host SE schema. The extension is **additive-only** — three new optional `properties` entries plus their per-property `oneOf` / `enum` / `pattern` constraints. No existing field is renamed, removed, or made required by this change. Consumers that don't yet emit the new fields continue to validate as-is.
+5. Reassessment correction: the drafted `uniqueItems on record_id` claim is not expressible with standard JSON Schema. JSON Schema `uniqueItems` rejects identical duplicate array objects only; duplicate `record_id` entries with differing bodies require validator-layer enforcement. This run updated `specs/SPEC-48-se-structured-introduction-fields.md`, created `tickets/SPEC48SESTRINT-014.md`, and added that ticket as a capstone dependency for `tickets/SPEC48SESTRINT-013.md`.
 
 ## Architecture Check
 
@@ -25,7 +26,7 @@ SPEC-48 replaces three parseable tag patterns currently riding on `SE.world_logi
 ## Verification Layers
 
 1. Schema syntactic validity → JSON-schema parse via `ajv` (existing validator dependency); `npm test --prefix tools/validators` builds and runs schema-conformance smoke tests.
-2. Closed-enum constraint coverage → per-class `oneOf` rejects an invalid `class` + `trigger` pairing at schema validation (covered later by ticket 013's integration test T-2).
+2. Closed-enum constraint coverage → per-class `oneOf` rejects an invalid `class` + `trigger` pairing at schema validation (covered here by `contract-schema-roundtrip.test.ts`, with capstone coverage later in ticket 013).
 3. Additive-only invariant → grep proof that no `required` marker references the 3 new field names; existing SE records (without the new fields) continue to validate.
 
 ## What to Change
@@ -41,7 +42,7 @@ Insert a new optional property `record_introductions` of type `array`. Each item
 - `distinct_from`: array of RECORD_ID-matching strings (required per item; may be empty array)
 - `rationale`: optional string (free-form prose; no schema constraint beyond `string` type)
 
-The array carries `uniqueItems: true` keyed on `record_id` so the same record cannot be declared in two `record_introductions[]` entries on the same SE.
+The array carries standard JSON Schema `uniqueItems: true`, which rejects exact duplicate introduction objects. Dynamic uniqueness by `record_id` is intentionally handed to `tickets/SPEC48SESTRINT-014.md`.
 
 Per-class `trigger` enum (via `oneOf` with 8 branches matching the 8 class values; migrate verbatim from `tools/world-index/src/parse/intro-tag-parser.ts:4-75`):
 
@@ -71,11 +72,15 @@ Insert a new optional property `non_propagation_facts` of type `array`. Each ite
 
 ### 4. Verify schema parses cleanly via existing build path
 
-After the property insertions, run `npm test --prefix tools/validators` — `tsc` build succeeds and `ajv`-driven schema-conformance test cases pass with no regression on the existing SE-field set.
+After the property insertions, run `npm test --prefix tools/validators` — `tsc` build succeeds and `ajv`-driven schema-conformance test cases pass with no regression on the existing SE-field set. Also run the package-local Ajv2020 compile/shape probe from `tools/validators`, because the root-level generic `ajv` one-liner cannot resolve the package-local dependency and does not match the live draft-2020-12 compiler setup.
 
 ## Files to Touch
 
 - `tools/validators/src/schemas/story-event.schema.json` (modify)
+- `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` (modify — expected SE property set plus focused structured-field acceptance/rejection coverage)
+- `specs/SPEC-48-se-structured-introduction-fields.md` (modify — implementation note for JSON Schema keyed-uniqueness boundary)
+- `tickets/SPEC48SESTRINT-013.md` (modify — capstone dependency/proof boundary truthing)
+- `tickets/SPEC48SESTRINT-014.md` (new — validator-layer keyed-uniqueness follow-up)
 
 ## Out of Scope
 
@@ -91,21 +96,57 @@ After the property insertions, run `npm test --prefix tools/validators` — `tsc
 ### Tests That Must Pass
 
 1. `npm test --prefix tools/validators` — full validator package test suite passes (schema-parse smoke tests + existing structural validator tests).
-2. `node -e "const Ajv = require('ajv'); const ajv = new Ajv({allErrors:true,strict:false}); const s = require('./tools/validators/src/schemas/story-event.schema.json'); console.log(ajv.compile(s) ? 'compiles' : 'fails');"` — schema compiles via `ajv` without error.
+2. From `tools/validators`: `node --input-type=module -e 'import Ajv2020 from "ajv/dist/2020.js"; import schema from "./src/schemas/story-event.schema.json" with { type: "json" }; const ajv = new Ajv2020({ allErrors: true, strict: true, formats: { date: true } }); ajv.compile(schema); console.log("compiles");'` — schema compiles via the package-local Ajv2020 setup.
 3. Existing SE records (without the new fields) continue to validate successfully — `npm test --prefix tools/validators` re-runs any fixture-bundle SE conformance tests with no regression.
 
 ### Invariants
 
 1. The 3 new properties are optional — no `required` marker on the root SE schema references `record_introductions` / `state_relations` / `non_propagation_facts`.
 2. The 8 per-class trigger vocabularies in the schema match the 8 TypeScript exports `MIDSTORY_TRIGGERS_CLK` through `MIDSTORY_TRIGGERS_STEMO` in `tools/world-index/src/parse/intro-tag-parser.ts` exactly (parity asserted by a separate test in ticket 003).
+3. Exact duplicate `record_introductions[]` objects reject via schema `uniqueItems`; duplicate `record_id` with differing bodies is a validator-layer invariant owned by `tickets/SPEC48SESTRINT-014.md`.
 
 ## Test Plan
 
 ### New/Modified Tests
 
-1. `None — schema-extension ticket; verification is command-based (ajv compile + existing test suite regression). Schema-vs-vocabulary parity test arrives with ticket 003's typed reader infrastructure.`
+1. `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` — updated the exact `story-event` property-set guard and added focused `record_schema_compliance` coverage for valid structured fields plus malformed trigger/relation/record-id rejection. Schema-vs-vocabulary parity test arrives with ticket 003's typed reader infrastructure.
 
 ### Commands
 
 1. `npm test --prefix tools/validators` — full test suite passes.
-2. `node -e "..."` ajv compile check (see Acceptance Criteria #2) — schema compiles standalone.
+2. Package-local Ajv2020 compile/shape probe (see Acceptance Criteria #2) — schema compiles and accepts/rejects the expected structured-field cases.
+
+## Outcome
+
+Completed: 2026-05-19.
+
+This ticket added three optional structured fields to `tools/validators/src/schemas/story-event.schema.json`:
+
+- `record_introductions[]` with 8 closed `class` values, per-class trigger `oneOf` branches, record-id patterns on `record_id`, `evidence[]`, and `distinct_from[]`, exact duplicate object rejection, and optional prose `rationale`.
+- `state_relations[]` with the 7 closed plan-relation values and patterned `target_record`.
+- `non_propagation_facts[]` with the 5 closed reason values, non-empty `group`, and patterned `records[]`.
+
+The schema remains additive-only: the root `required` array was not changed and existing SE records without the new fields remain valid.
+
+The existing contract-schema roundtrip test now names the three new optional SE properties and includes a focused malformed-structured-field rejection test.
+
+## Verification Result
+
+Commands run:
+
+1. From `tools/validators`: package-local Ajv2020 compile/shape probe passed. It proved:
+   - existing SE records without new fields validate
+   - an SE carrying all three new fields validates
+   - `class: CLK` plus `trigger: tactical_approach_committed` rejects
+   - malformed `record_id: foo` rejects
+   - invalid `state_relations[].relation: convolves` rejects
+   - exact duplicate introduction objects reject
+2. From `tools/validators`: `npm run build` passed.
+3. From `tools/validators`: `node --test dist/tests/structural/contract-schema-roundtrip.test.js` passed after updating the same-seam expected field-set test.
+4. From repo root: `npm test --prefix tools/validators` passed (`616` tests).
+
+## Deviations
+
+- The drafted generic root `node -e ... require('ajv')` probe was replaced with the package-local Ajv2020 probe because `ajv` is installed under `tools/validators/node_modules`, and the live schema declares draft 2020-12. A root-launched import could not resolve `ajv`.
+- Standard JSON Schema cannot enforce uniqueness by the dynamic `record_id` property. This run landed exact duplicate object rejection in schema and created `tickets/SPEC48SESTRINT-014.md` for validator-layer keyed uniqueness.
+- The first broad `npm test --prefix tools/validators` run built successfully but failed on the same-seam `contract-schema-roundtrip.test.ts` exact property list. The test was updated to the new SE property set and focused structured-field rejection cases; the direct test and final broad suite then passed.

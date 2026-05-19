@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — refactors `tools/world-index/src/parse/atomic.ts` `edgesForStoryEvent` helper; removes parser import
-**Deps**: 001
+**Deps**: archive/tickets/SPEC48SESTRINT-001.md
 
 ## Problem
 
