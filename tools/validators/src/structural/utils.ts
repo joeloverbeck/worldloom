@@ -35,6 +35,7 @@ export const STRUCTURAL_NODE_TYPES = [
   "choice_record",
   "storylet_record",
   "belief_record",
+  "story_emotion_record",
   "story_diegetic_artifact_record"
 ] as const;
 
@@ -99,6 +100,7 @@ export const RECORD_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
   choice_record: "story-choice",
   storylet_record: "story-storylet",
   belief_record: "story-belief",
+  story_emotion_record: "story-emotion",
   pressure_clock_record: "story-pressure-clock",
   story_diegetic_artifact_record: "story-diegetic-artifact"
 };

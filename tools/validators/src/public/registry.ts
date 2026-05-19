@@ -49,6 +49,15 @@ import { stplanResourceBasisGrounded } from "../structural/stplan-resource-basis
 import { stplanRootIntentionGrounded } from "../structural/stplan-root-intention-grounded.js";
 import { stplanSchemaCompliance } from "../structural/stplan-schema-compliance.js";
 import { stplanSupersessionChainValid } from "../structural/stplan-supersession-chain-valid.js";
+import { stemoAgencyEffectCompatibility } from "../structural/stemo-agency-effect-compatibility.js";
+import { stemoAppraisalBasisAccessibleToHolder } from "../structural/stemo-appraisal-basis-accessible-to-holder.js";
+import { stemoEnumCompliance } from "../structural/stemo-enum-compliance.js";
+import { stemoHolderExistsAndActive } from "../structural/stemo-holder-exists-and-active.js";
+import { stemoNoFuturePageIds } from "../structural/stemo-no-future-page-ids.js";
+import { stemoOrientationRecordsExist } from "../structural/stemo-orientation-records-exist.js";
+import { stemoSchemaCompliance } from "../structural/stemo-schema-compliance.js";
+import { stemoSupersessionLifecycleValid } from "../structural/stemo-supersession-lifecycle-valid.js";
+import { stemoTriggerEventOnBranchPath } from "../structural/stemo-trigger-event-on-branch-path.js";
 import { storyQuestionIntroductionGroundingIntegrity } from "../structural/story-question-introduction-grounding-integrity.js";
 import { storyQuestionGroundingIntegrity } from "../structural/story-question-grounding-integrity.js";
 import { storyQuestionPayoffIntegrity } from "../structural/story-question-payoff-integrity.js";
@@ -136,7 +145,16 @@ export const structuralValidators: readonly Validator[] = [
   stplanNoFuturePageIds,
   stplanSupersessionChainValid,
   stplanClosureStatusRequiresClosureEvent,
-  stplanEventPlanRelationConsistency
+  stplanEventPlanRelationConsistency,
+  stemoSchemaCompliance,
+  stemoHolderExistsAndActive,
+  stemoTriggerEventOnBranchPath,
+  stemoAppraisalBasisAccessibleToHolder,
+  stemoOrientationRecordsExist,
+  stemoEnumCompliance,
+  stemoNoFuturePageIds,
+  stemoSupersessionLifecycleValid,
+  stemoAgencyEffectCompatibility
 ];
 
 export const ruleValidators: readonly Validator[] = [

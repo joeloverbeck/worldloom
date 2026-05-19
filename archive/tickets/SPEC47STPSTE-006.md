@@ -1,6 +1,6 @@
 # SPEC47STPSTE-006: Add 8 STEMO deterministic validators
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds 8 new STEMO structural validators under `tools/validators/src/structural/`; extends `tools/validators/src/public/registry.ts` with 8 new registrations
@@ -19,6 +19,9 @@ SPEC-47's STEMO record class needs deterministic validators to enforce its schem
 3. Cross-skill boundary under audit: the validator registry is consumed by the patch engine's pre-apply gate, `world-validate` CLI, and `branching-story-health-audit`. Adding 8-9 STEMO validators extends the surface those consumers iterate over.
 4. FOUNDATIONS §Story Bundles §6b (Information / Observer Firewall) — STEMO.appraisal_basis must be accessible to holder (validator `stemo_appraisal_basis_accessible_to_holder`); STEMO.trigger_event must be on the branch path or same-event-created (validator `stemo_trigger_event_on_branch_path`). These access-route checks protect the firewall at the STEMO-emission boundary.
 5. STEMO validators land in `tools/validators/src/structural/` — per the §Step 6.2(c) per-ticket-type granularity rule for item 5: structural validators are a Canon Safety surface (engine pre-apply gate). HARD-GATE discipline preserved.
+6. Reassessment correction: the validator package's pre-apply overlay in `tools/validators/src/_helpers/index-access.ts` did not yet materialize `create_stemo_record` patches as `story_emotion_record` rows. That mapping is same-seam required for the 9 validators to run against incoming patch plans, so this ticket includes the STEMO-only overlay addition.
+7. Reassessment correction: `tools/validators/src/structural/utils.ts` did not yet include `story_emotion_record` in the structural node/schema inventory. Adding the record type and `story-emotion` schema mapping is same-seam validator-package fallout so `record_schema_compliance` and full-world structural sweeps can see STEMO records consistently.
+8. Registry/count fallout is same-seam package surface: `tools/validators/tests/structural/registry.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, `tools/validators/tests/integration/validate-patch-plan.test.ts`, and `tools/validators/README.md` carried exact structural validator lists/counts. They were updated from 62 structural / 74 total mechanized validators to 71 structural / 83 total mechanized validators.
 
 ## Architecture Check
 
@@ -63,7 +66,17 @@ Add 8-9 import statements and 8-9 registry entries. Coordinate slot ordering wit
 - `tools/validators/src/structural/stemo-no-future-page-ids.ts` (new)
 - `tools/validators/src/structural/stemo-supersession-lifecycle-valid.ts` (new)
 - `tools/validators/src/structural/stemo-agency-effect-compatibility.ts` (new)
+- `tools/validators/src/structural/stemo-utils.ts` (new)
 - `tools/validators/src/public/registry.ts` (modify) — 8-9 new registrations; coordinate with ticket 005
+- `tools/validators/src/_helpers/index-access.ts` (modify) — pre-apply overlay maps `create_stemo_record` to `story_emotion_record`
+- `tools/validators/src/structural/utils.ts` (modify) — structural node/schema inventory recognizes `story_emotion_record`
+- `tools/validators/tests/structural/stemo-*.test.ts` (new)
+- `tools/validators/tests/structural/stemo-helpers.ts` (new)
+- `tools/validators/tests/integration/stemo-full-validation.test.ts` (new)
+- `tools/validators/tests/structural/registry.test.ts` (modify)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify)
+- `tools/validators/README.md` (modify)
 
 ## Out of Scope
 
@@ -96,4 +109,31 @@ Add 8-9 import statements and 8-9 registry entries. Coordinate slot ordering wit
 ### Commands
 
 1. `npm --prefix tools/validators run build && npm --prefix tools/validators test` (full validator package tests pass)
-2. `npm --prefix tools/validators test -- --test-name-pattern "stemo_"` (only STEMO validator tests run)
+2. From `tools/validators`: `node --test dist/tests/structural/stemo-*.test.js dist/tests/integration/stemo-full-validation.test.js dist/tests/structural/registry.test.js` (focused STEMO + registry proof; replaces the drafted `--test-name-pattern` wrapper because this package runs compiled `dist/` tests and the wrapper does not provide a reliable source-level selector)
+
+## Outcome
+
+Completed: 2026-05-19.
+
+- Added the 9 STEMO deterministic validators named in SPEC-47 §Approach §B, with shared `stemo-utils.ts` support for STEMO record lookup, page-snapshot active checks, holder/accessibility checks, schema compilation, branch-path event checks, supersession traversal, page-reference scans, closed-enum/duplicate-pressure checks, and constraining-agency compatibility checks.
+- Registered all 9 validators in `tools/validators/src/public/registry.ts`.
+- Added `create_stemo_record` pre-apply overlay materialization in `tools/validators/src/_helpers/index-access.ts` so patch-plan validation can see incoming STEMO records before commit.
+- Added `story_emotion_record` to the validators package structural node/schema inventory so `record_schema_compliance` and full-world structural reads can cover STEMO records.
+- Added 9 focused structural test files plus `stemo-full-validation.test.ts`; updated the clean pre-apply validation integration test to assert the 9 STEMO validators skip non-STEMO plans instead of being mistaken for pass-expected validators.
+- Updated package registry/count witnesses and README inventory to the post-ticket total: 71 structural validators and 83 total mechanized validators.
+
+## Verification Result
+
+Commands run from `tools/validators` unless noted:
+
+1. `npm run build` — initially failed on two strict TypeScript narrowing issues in the new holder/trigger validators; fixed those checks, then reran successfully.
+2. `node --test dist/tests/structural/stemo-*.test.js dist/tests/integration/stemo-full-validation.test.js dist/tests/structural/registry.test.js` — initially failed on a fixture active-record mismatch and a same-event existence bug; fixed the fixture and required same-event SE resolution, then reran successfully: 26 tests passed.
+3. `find tools/validators/src/structural -maxdepth 1 -name 'stemo-*.ts' ! -name 'stemo-utils.ts' | wc -l` from repo root — returned `9`.
+4. `node -e "import('./tools/validators/dist/src/public/registry.js').then(({structuralValidators}) => console.log(structuralValidators.filter((v) => v.name.startsWith('stemo_')).map((v) => v.name).join('\\n')))"` from repo root — listed the 9 STEMO validator names.
+5. `npm test` — passed: 601 tests passed.
+
+## Deviations
+
+- The ticket headline says "8 STEMO deterministic validators", but SPEC-47 §Approach §B enumerates 9 distinct STEMO validators (`stemo_agency_effect_compatibility` is the ninth). Per the ticket's own reassessment and SPEC-47's "all deterministic validators land in v1" boundary, this implementation lands all 9 as separate validators.
+- The drafted command `npm --prefix tools/validators test -- --test-name-pattern "stemo_"` was replaced with direct compiled `node --test dist/...` proof because this package's `npm test` wrapper runs compiled output and does not provide a reliable source-level STEMO-only selector.
+- The drafted `grep -c "stemo_" tools/validators/src/public/registry.ts` proof was replaced with compiled registry introspection. The registry imports/exports camelCase validator objects, so the snake_case names are runtime `Validator.name` values rather than source literals in `registry.ts`.
