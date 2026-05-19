@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-47-stplan-stemo.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC47STPSTE-011.md",
+  "last_ticket": "archive/tickets/SPEC47STPSTE-012.md",
   "last_result": "completed_archived",
-  "last_work_commit": "00ebec499816459bc886246ad826cf12aef926a5",
+  "last_work_commit": "0a28930754e8504ffcde9f48799cedf7fb352150",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC47STPSTE-012.md",
+  "next_target": "tickets/SPEC47STPSTE-013.md",
   "queue": [
-    "tickets/SPEC47STPSTE-012.md",
     "tickets/SPEC47STPSTE-013.md",
     "tickets/SPEC47STPSTE-014.md",
     "tickets/SPEC47STPSTE-015.md",
