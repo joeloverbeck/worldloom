@@ -16,4 +16,6 @@ test("stplan_closure_status_requires_closure_event accepts closed plans with clo
 test("stplan_closure_status_requires_closure_event rejects closed plans without closure events", async () => {
   const verdicts = await stplanClosureStatusRequiresClosureEvent.run(undefined, context(baseRecords([plan({ plan_status: "fulfilled" })])));
   assert.ok(hasCode(verdicts, "stplan_closure_status_requires_closure_event.missing_closure_event"));
+  assert.match(verdicts[0]?.message ?? "", /state_relations\[\] entry/);
+  assert.doesNotMatch(verdicts[0]?.message ?? "", /world_logic_rationale plan_relation closure tag/);
 });

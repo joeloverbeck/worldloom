@@ -10,5 +10,5 @@ export const stemoAgencyEffectCompatibility = defineStemoValidator(VALIDATOR, (e
   if (holderHasCompatibleAgency(emotion, maps) || sameEventExplainsConstrainedAgency(emotion, maps)) {
     return [];
   }
-  return [fail(emotion, VALIDATOR, "stemo_agency_effect_compatibility.unexplained_constraining_effect", "agency_effect: constraining requires compatible active STSTAT.agency or same-event plan_relation/non_propagation rationale.")];
+  return [fail(emotion, VALIDATOR, "stemo_agency_effect_compatibility.unexplained_constraining_effect", "agency_effect: constraining requires compatible active STSTAT.agency or same-event state_relations[] / non_propagation_facts[] entry.")];
 });

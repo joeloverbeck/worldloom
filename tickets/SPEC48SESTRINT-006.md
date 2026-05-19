@@ -51,7 +51,7 @@ The witness-coverage gap-detection logic (covering every direct-witness in `expe
 ## Out of Scope
 
 - Introduction-grounding validator refactor (deferred to ticket 004).
-- Plan-relation consumer refactor (deferred to ticket 005).
+- Plan-relation consumer refactor (completed in archive/tickets/SPEC48SESTRINT-005.md).
 - non-propagation-tag-shape replacement (deferred to ticket 007).
 - Schema field changes (covered by ticket 001).
 - Typed reader infrastructure (covered by ticket 003).

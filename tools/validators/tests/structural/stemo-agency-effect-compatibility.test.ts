@@ -36,4 +36,6 @@ test("stemo_agency_effect_compatibility rejects unexplained constraining agency 
     context(baseRecords([emotion({ agency_effect: "constraining" })]))
   );
   assert.ok(hasCode(verdicts, "stemo_agency_effect_compatibility.unexplained_constraining_effect"));
+  assert.match(verdicts[0]?.message ?? "", /state_relations\[\] \/ non_propagation_facts\[\] entry/);
+  assert.doesNotMatch(verdicts[0]?.message ?? "", /plan_relation\/non_propagation rationale/);
 });

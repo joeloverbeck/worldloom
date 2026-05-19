@@ -1,6 +1,6 @@
 # SPEC48SESTRINT-005: Refactor 3 plan-relation consumers to consume `SE.state_relations[]`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — refactors 3 structural validators in `tools/validators/src/structural/`
@@ -8,14 +8,15 @@
 
 ## Problem
 
-SPEC-48 §Phase B specifies refactoring the 3 validators that currently consume parseable `plan_relation:<...>(plan=...)` tags via regex scanning of `SE.world_logic_rationale`. Without refactoring them, ticket 009's parser deletion + ticket 003's removal of `PLAN_CLOSURE_RELATION` / `PLAN_ADVANCES_RELATION` regex constants breaks the validators' build. The 3 consumers each have distinct firing semantics — `stplan-event-plan-relation-consistency` checks that an SE advancing a plan matches the plan's current step or success-condition records; `stplan-closure-status-requires-closure-event` checks that a plan_status closure has a matching closure event; `stemo-agency-effect-compatibility` checks that constraining agency effects have a compatible STSTAT or same-event plan_relation/non_propagation rationale. All three must migrate to read `SE.state_relations[]` via the typed reader `readSeStateRelations(event)` from ticket 003.
+SPEC-48 §Phase B specified refactoring the 3 validators that had consumed parseable `plan_relation:<...>(plan=...)` tags via regex scanning of `SE.world_logic_rationale`. After archive/tickets/SPEC48SESTRINT-003.md landed the shared helper migration, the remaining risk was stale validator failure prose still instructing authors to use the deprecated tag grammar. The 3 consumers each keep their distinct firing semantics — `stplan-event-plan-relation-consistency` checks that an SE advancing a plan matches the plan's current step or success-condition records; `stplan-closure-status-requires-closure-event` checks that a plan_status closure has a matching closure event; `stemo-agency-effect-compatibility` checks that constraining agency effects have a compatible STSTAT or same-event structured relation/non-propagation explanation.
 
 ## Assumption Reassessment (2026-05-19)
 
-1. **3 plan-relation consumers verified**: per SPEC-48 reassessment Phase B-2 enumeration and the SPEC-48-Phase-B grep against `tools/validators/src/structural/*.ts`, the 3 consumers are: `stplan-event-plan-relation-consistency.ts:21` (currently reads `world_logic_rationale` via `stplan-utils.ts` regex constants), `stplan-closure-status-requires-closure-event.ts:15` (currently emits `"plan_status ${status} requires an SE world_logic_rationale plan_relation closure tag"` — message string referencing the deprecated grammar), and `stemo-agency-effect-compatibility.ts:13` (currently uses the `stemo-utils.ts:322` `rationale.includes("plan_relation:")` shortcut).
+1. **3 plan-relation consumers verified**: per SPEC-48 reassessment Phase B-2 enumeration and the SPEC-48-Phase-B grep against `tools/validators/src/structural/*.ts`, the 3 consumers are: `stplan-event-plan-relation-consistency.ts:21`, `stplan-closure-status-requires-closure-event.ts:15`, and `stemo-agency-effect-compatibility.ts:13`. Live reassessment found the first consumer and the helper read seams had already been migrated by archive/tickets/SPEC48SESTRINT-003.md; the remaining deprecated-grammar hits were the closure-event and agency-effect failure messages.
 2. **SPEC-48 D-B2 enumeration**: replace parser/regex/shortcut consumption with structured-field read via `readSeStateRelations(event)` from `midstory-introduction-utils.ts` (ticket 003). Preserve every existing PASS/FAIL semantic. Rewrite `suggested_fix` / `message` strings referencing the deprecated grammar to reference structured-field form (per the M2-refined Phase B preamble — verified site: `stplan-closure-status-requires-closure-event.ts:15`).
 3. **Cross-skill boundary**: the 3 consumers each call helper functions in `stplan-utils.ts` and `stemo-utils.ts` (the consumers don't call the parser directly; they call helpers that did the regex/shortcut work internally). After ticket 003 refactors those helpers to consume `readSeStateRelations(event)` instead of regex-scanning rationale strings, the consumers inherit the structured-field migration automatically — but the `suggested_fix` / `message` strings in the consumer files still need updating, and any consumer-local code that directly inspected `world_logic_rationale` needs migration too.
 4. **Canon Safety surface**: all 3 files live under `tools/validators/src/structural/`. Per-ticket-type granularity rule for structural validators fires. The refactor preserves all existing PASS/FAIL semantics: `stplan-event-plan-relation-consistency` still flags SE-advances-plan mismatches; `stplan-closure-status-requires-closure-event` still flags missing closure events; `stemo-agency-effect-compatibility` still flags unexplained constraining effects. No Canon Safety check is weakened.
+5. **Live narrowing after dependency landing**: archive/tickets/SPEC48SESTRINT-003.md already refactored `stplan-utils.ts` / `stemo-utils.ts` to consume `readSeStateRelations(event)` and `readSeNonPropagationFacts(event)`, and already updated the three plan-relation test inputs to structured-field form. The remaining owned delta for this ticket was the two stale validator failure-message strings plus focused assertions proving the new wording and absence of the old tag wording.
 
 ## Architecture Check
 
@@ -83,3 +84,25 @@ Update line 13's caller of the `stemo-utils.ts:322` shortcut to use `readSeState
 
 1. `npm test --prefix tools/validators` — full test suite.
 2. `grep -n "world_logic_rationale" tools/validators/src/structural/stplan-event-plan-relation-consistency.ts tools/validators/src/structural/stplan-closure-status-requires-closure-event.ts tools/validators/src/structural/stemo-agency-effect-compatibility.ts` — confirms zero matches.
+
+## Outcome
+
+Completed: 2026-05-19.
+
+What changed:
+
+- Updated `stplan-closure-status-requires-closure-event.ts` to tell authors to add an `SE.state_relations[]` closure entry instead of a `world_logic_rationale plan_relation` tag.
+- Updated `stemo-agency-effect-compatibility.ts` to describe the structured `state_relations[]` / `non_propagation_facts[]` explanation path instead of the deprecated tag-rationale path.
+- Added focused assertions in the two affected structural tests so the emitted messages contain the structured-field wording and do not contain the old tag wording.
+
+Deviations from original plan:
+
+- `stplan-event-plan-relation-consistency.ts`, `stplan-utils.ts`, `stemo-utils.ts`, and the structured test-input conversion were already landed by archive/tickets/SPEC48SESTRINT-003.md. This ticket did not re-edit those surfaces; it verified the typed-reader consumption and completed the stale message/proof gap.
+
+Verification:
+
+- `npm test --prefix tools/validators` passed: 620 tests, 0 failures.
+- `grep -n "world_logic_rationale" tools/validators/src/structural/stplan-event-plan-relation-consistency.ts tools/validators/src/structural/stplan-closure-status-requires-closure-event.ts tools/validators/src/structural/stemo-agency-effect-compatibility.ts` returned no matches.
+- `grep -n "world_logic_rationale plan_relation closure tag" tools/validators/src/structural/stplan-closure-status-requires-closure-event.ts` returned no matches.
+- `grep -n "readSeStateRelations" tools/validators/src/structural/stplan-utils.ts tools/validators/src/structural/stemo-utils.ts` confirmed typed-reader use in the shared helper seam.
+- `grep -n "readSeNonPropagationFacts" tools/validators/src/structural/stemo-utils.ts` confirmed the same-event STEMO explanation path reads the structured non-propagation field.
