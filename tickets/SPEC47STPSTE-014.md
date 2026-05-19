@@ -63,7 +63,7 @@ Update any total-edge-count statement in the doc body to reflect the post-SPEC-4
 ## Out of Scope
 
 - Code-side STORY_EDGE_TYPES extension and extractor helpers — covered by ticket 013.
-- CONTEXT-PACKET-CONTRACT.md updates for MCP summaries — covered by ticket 012.
+- CONTEXT-PACKET-CONTRACT.md updates for MCP summaries — covered by `archive/tickets/SPEC47STPSTE-012.md`.
 - Other docs/MACHINE-FACING-LAYER.md sections (world-index core, MCP retrieval, patch-engine, validator framework, hooks) are unchanged — only the story-edge enumeration section is extended.
 
 ## Acceptance Criteria

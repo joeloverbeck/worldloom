@@ -137,6 +137,8 @@ This layer carries:
 - active locations in scope, exposed as `active_locations_in_scope` entries with `id`, `label`, `description`, and `bound_ent`
 - active objects in scope, exposed as `active_objects_in_scope` entries with `id`, `label`, `description`, `owner`, and `current_location`
 - active story-local diegetic artifacts, exposed as `active_story_diegetic_artifacts` entries with `id`, `title`, `author`, `genre`, `intended_audience`, `circulation`, `truth_relation`, and `derived_from`
+- active actor plans, exposed as `active_actor_plans` entries with `id`, `holder`, `root_intention`, `objective`, `plan_status`, and `current_step_action_family` for plan-aware turn-cycle, commitment-block, and health-audit consumers. Summary fallback fields: `active_plan_ids` and `active_plan_holders`.
+- active emotional states, exposed as `active_emotional_states` entries with `id`, `holder`, `status`, `affect_kind`, `intensity`, `behavioral_pressure`, and `agency_effect` for emotion-aware turn-cycle, commitment-block, and health-audit consumers. `affect_kind` and `intensity` may be `null` for dissociated states. Summary fallback fields: `active_emotion_ids` and `active_emotion_holders`.
 - active / pressured / critical / dormant threads
 - the longest active branch path and recent page metadata along that path
 - `STORY_KERNEL.md` `mysteries_in_play`, `cast_bind_list`, and `invariants_acknowledged`
@@ -144,7 +146,7 @@ This layer carries:
 
 Scope heuristic: `active_locations_in_scope`, `active_objects_in_scope`, and `active_story_diegetic_artifacts` include records referenced by any other active record's body on the current branch path. This is the SPEC-46 Phase B id-list heuristic mirrored from the scoped-builder JSDoc and landed in `archive/tickets/SPEC46STOPIPMAC-004.md`; world-level diegetic artifacts still route through targeted `list_records(record_type='diegetic_artifact_record')` retrieval.
 
-These seven summaries are the machine-facing foundation for deferred render packets such as present-causal-situation, dramatic-irony, reader-expectation, social-pressure, pressure-texture, and branch-possibility-space. They do not add those packets or any narrative-shape framing.
+These nine summaries are the machine-facing foundation for deferred render packets such as present-causal-situation, dramatic-irony, reader-expectation, social-pressure, pressure-texture, and branch-possibility-space. They do not add those packets or any narrative-shape framing.
 
 For story turn-cycle and story health-audit consumers, the latest
 `change_log_entry` delivered in governing context is a drift trigger, not the

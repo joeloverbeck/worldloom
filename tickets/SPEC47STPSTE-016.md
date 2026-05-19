@@ -85,7 +85,7 @@ Add canon-verdict-driven supersession logic: when a canon verdict invalidates a 
 
 - Code-side implementation of the new surfaces (validators, MCP summaries, edges, predicates, parser, page-plan sections) — covered by tickets 005-015.
 - Contract docs synchronization (story-state-contract.md §3 / §5 / §5a / §8) — covered by tickets 002, 010, 015.
-- World-index docs and CONTEXT-PACKET-CONTRACT.md — covered by tickets 012, 014.
+- World-index docs and CONTEXT-PACKET-CONTRACT.md — covered by `archive/tickets/SPEC47STPSTE-012.md` and ticket 014.
 - Per-skill ticket decomposition (this ticket is intentionally cross-cutting per the §Cross-Cutting Docs Ticket Shape).
 
 ## Acceptance Criteria
