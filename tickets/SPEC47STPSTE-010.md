@@ -4,23 +4,23 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `.claude/skills/_shared-templates/story-state-contract.md` §5 closed-predicate-DSL table with 6 new predicates + §5a tag-grammar specification with 2 new class entries, their trigger vocabularies, and the new `plan_relation:` tag pattern; no code changes
-**Deps**: `archive/tickets/SPEC47STPSTE-008.md`, 009
+**Deps**: `archive/tickets/SPEC47STPSTE-008.md`, `archive/tickets/SPEC47STPSTE-009.md`
 
 ## Problem
 
-SPEC-47 `archive/tickets/SPEC47STPSTE-008.md` lands the 6 new predicates in the validator framework (predicate-dsl-grammar.ts); ticket 009 lands the §5a tag-grammar parser extensions for STPLAN/STEMO + plan_relation. The shared contract at `.claude/skills/_shared-templates/story-state-contract.md` §5 (closed-predicate-DSL table) and §5a (mid-story introduction tag grammar specification) document what those code surfaces provide; without updating the docs, story-pipeline skill authors and reviewers see a stale closed-grammar table that omits the 6 new predicates and a stale tag-grammar specification that doesn't enumerate the STPLAN/STEMO classes or the new `plan_relation:` pattern. Per SPEC-47 §Approach §B D-B7, this docs-sync ticket lands after the code tickets it documents.
+SPEC-47 `archive/tickets/SPEC47STPSTE-008.md` lands the 6 new predicates in the validator framework (predicate-dsl-grammar.ts); `archive/tickets/SPEC47STPSTE-009.md` lands the §5a tag-grammar parser extensions for STPLAN/STEMO + plan_relation. The shared contract at `.claude/skills/_shared-templates/story-state-contract.md` §5 (closed-predicate-DSL table) and §5a (mid-story introduction tag grammar specification) document what those code surfaces provide; without updating the docs, story-pipeline skill authors and reviewers see a stale closed-grammar table that omits the 6 new predicates and a stale tag-grammar specification that doesn't enumerate the STPLAN/STEMO classes or the new `plan_relation:` pattern. Per SPEC-47 §Approach §B D-B7, this docs-sync ticket lands after the code tickets it documents.
 
 ## Assumption Reassessment (2026-05-19)
 
 <!-- Items 1-3 always required. Items 4+ are a menu; include only those matching this ticket's scope and renumber surviving items sequentially starting from 4. Lists like 1, 2, 3, 14 are malformed output. -->
 
 1. Verified `.claude/skills/_shared-templates/story-state-contract.md` §5 contains the closed-predicate-DSL table currently enumerating 33 individual predicates + 3 combinators (per the reassess-spec session's exact count); §5a contains the tag-grammar specification with the 6-class `class` enum and per-class trigger vocabularies (CLK / STSEC / STQ / THR / STENT / SREL). Both sections need extension per SPEC-47 §Approach §B D-B7.
-2. Verified SPEC-47 §Approach §B specifies the 6 new predicates' shapes and consumers (table in §B) and the new §5a grammar additions (regex witness, STPLAN/STEMO triggers, plan_relation pattern, all enumerated in the §5a-and-related Approach §B detail). Verified `archive/tickets/SPEC47STPSTE-008.md` lands the code-side predicate extensions and ticket 009 lands the parser extensions; this ticket synchronizes the contract docs to match.
+2. Verified SPEC-47 §Approach §B specifies the 6 new predicates' shapes and consumers (table in §B) and the new §5a grammar additions (regex witness, STPLAN/STEMO triggers, plan_relation pattern, all enumerated in the §5a-and-related Approach §B detail). Verified `archive/tickets/SPEC47STPSTE-008.md` lands the code-side predicate extensions and `archive/tickets/SPEC47STPSTE-009.md` lands the parser extensions; this ticket synchronizes the contract docs to match.
 3. Cross-skill boundary under audit: the story-state-contract is the shared contract for the 7 Skill Category 2c story-pipeline skills; §5 + §5a are the authoritative reference for predicate-DSL grammar and mid-story tag grammar respectively. Other Category 2c skill SKILL.md files cite §5 / §5a by section number; docs-sync here lands the canonical post-SPEC-47 reference text without modifying any other skill's SKILL.md.
 
 ## Architecture Check
 
-1. Docs-sync after code lands preserves the canonical contract — skills consume the contract docs at pre-flight; outdated contract docs would mislead skill authors about what the closed grammar provides. Landing docs-sync as its own ticket (rather than co-edit with tickets 008/009) keeps the contract-edit reviewable independently of the code change.
+1. Docs-sync after code lands preserves the canonical contract — skills consume the contract docs at pre-flight; outdated contract docs would mislead skill authors about what the closed grammar provides. Landing docs-sync as its own ticket (rather than co-edit with `archive/tickets/SPEC47STPSTE-008.md` / `archive/tickets/SPEC47STPSTE-009.md`) keeps the contract-edit reviewable independently of the code change.
 2. No backwards-compatibility aliasing/shims introduced — docs additions only. Existing §5 table entries (33 predicates + 3 combinators) and §5a content (6 classes + their triggers) are unchanged.
 
 ## Verification Layers
@@ -100,7 +100,7 @@ Worked example: plan_relation:advances(plan=STPLAN-12)
 ## Out of Scope
 
 - Code-side predicate-DSL extensions — covered by `archive/tickets/SPEC47STPSTE-008.md`.
-- Code-side parser extensions for STPLAN/STEMO + plan_relation — covered by ticket 009.
+- Code-side parser extensions for STPLAN/STEMO + plan_relation — covered by `archive/tickets/SPEC47STPSTE-009.md`.
 - Section §3 record-class inventory update — covered by ticket 002.
 - Section §8 page-plan minimum contract update — covered by ticket 015.
 

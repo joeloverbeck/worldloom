@@ -6,7 +6,7 @@
 **Phase**: wave-2 active-record additions (two new story-bundle record classes built on SPEC-46's machine-facing retrieval foundation)
 **Depends on**: SPEC-46 (machine-facing layer foundation fixes — all Phase B summaries and Phase C edges this spec extends from are landed); SPEC-42 (precedent pattern for adding new active record classes — `CLK`, `STSEC`, `STQ`); SPEC-45 (story-state provenance edge precedent)
 **Blocks**: follow-up spec for present-causal-situation packet (depends on `STPLAN.objective` / `STPLAN.current_step` / `STPLAN.blockers` to populate `active_actor_wants` and `opposition`); follow-up `get_page_render_packet` aggregator spec (depends on both new classes + the Priority 2 packets)
-**Source**: `reports/new-story-structures-proposal.md` §1 `STPLAN` + §2 `STEMO`; SPEC-46 §Out of Scope items 1 + 2 (deferred to follow-up specs on stated grounds); prior triage at this conversation's Wave 2 routing recommendation. Brainstorm-resolved decisions verified against `docs/FOUNDATIONS.md` §Story Bundles §5a / §5b / §5c / §6a / §6b, `.claude/skills/_shared-templates/story-state-contract.md` §3 / §4.5.2 (`STINT`) / §5 (closed predicate DSL) / §5a (mid-story tag grammar) / §7 (eight hard gates) / §8 (page plan contract) / §10 (shared write order), `.claude/skills/_shared-templates/story-record-schemas.md` (verified current `STINT` field count = 8; verified `SE` tag-pattern precedents at `non_propagation:` and `intro:<CLASS>(...)`), and `tools/validators/src/structural/midstory-introduction-utils.ts` parser surface.
+**Source**: `reports/new-story-structures-proposal.md` §1 `STPLAN` + §2 `STEMO`; SPEC-46 §Out of Scope items 1 + 2 (deferred to follow-up specs on stated grounds); prior triage at this conversation's Wave 2 routing recommendation. Brainstorm-resolved decisions verified against `docs/FOUNDATIONS.md` §Story Bundles §5a / §5b / §5c / §6a / §6b, `.claude/skills/_shared-templates/story-state-contract.md` §3 / §4.5.2 (`STINT`) / §5 (closed predicate DSL) / §5a (mid-story tag grammar) / §7 (eight hard gates) / §8 (page plan contract) / §10 (shared write order), `.claude/skills/_shared-templates/story-record-schemas.md` (verified current `STINT` field count = 8; verified `SE` tag-pattern precedents at `non_propagation:` and `intro:<CLASS>(...)`), and the shared parser surface currently implemented at `tools/world-index/src/parse/intro-tag-parser.ts` and re-exported to validators through `tools/validators/src/structural/midstory-introduction-utils.ts`.
 
 ---
 
@@ -122,7 +122,7 @@ Hook 3 blocks raw `Edit`/`Write` on both new subdirs (extends the existing `_sou
 
 ### B. Validators, predicate-DSL extension, tag-grammar extension
 
-**Site**: `tools/validators/src/` (~20 new validator registrations across the deterministic chain); `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts` (`PREDICATE_NAMES` closure + `PREDICATE_ARG_SCHEMAS`); `tools/validators/src/schemas/story-storylet.schema.json` (predicate-discovery surface); `tools/validators/src/structural/midstory-introduction-utils.ts` (parser extension); `tools/validators/src/structural/midstory-record-introduction-grounding.ts` (consumes the extended parser).
+**Site**: `tools/validators/src/` (~20 new validator registrations across the deterministic chain); `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts` (`PREDICATE_NAMES` closure + `PREDICATE_ARG_SCHEMAS`); `tools/validators/src/schemas/story-storylet.schema.json` (predicate-discovery surface); `tools/world-index/src/parse/intro-tag-parser.ts` plus the validators re-export at `tools/validators/src/structural/midstory-introduction-utils.ts` (parser extension); `tools/validators/src/structural/midstory-record-introduction-grounding.ts` (consumes the extended parser).
 
 **Deterministic validator coverage (v1)**:
 
@@ -219,7 +219,7 @@ Worked example:
 plan_relation:advances(plan=STPLAN-12)
 ```
 
-Parser: extends `tools/validators/src/structural/midstory-introduction-utils.ts` with parser functions for both the extended `intro:` grammar and the new `plan_relation:` pattern. Class-specific validators compose the same parser rather than re-implementing the grammar (parallel to how SPEC-42 / SPEC-43 extensions are organized).
+Parser: extends the shared implementation at `tools/world-index/src/parse/intro-tag-parser.ts` and the validators re-export at `tools/validators/src/structural/midstory-introduction-utils.ts` with parser functions for both the extended `intro:` grammar and the new `plan_relation:` pattern. Class-specific validators compose the same parser rather than re-implementing the grammar (parallel to how SPEC-42 / SPEC-43 extensions are organized).
 
 ### C. MCP context-packet, world-index edges, page-plan template, skill prose
 
@@ -375,7 +375,7 @@ Per-phase deliverables that will be decomposed into implementation tickets by a 
 - D-B2: Register 8 new STEMO deterministic validators.
 - D-B3: Extend 5 shared validators (`active_records_full_shape`, `state_delta_class_integrity`, `snapshot_replay_equality`, `midstory_record_introduction_grounding`, `observer_firewall`) to recognize both new classes per the Approach §B detail.
 - D-B4: Register 6 new predicates in `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts` (`PREDICATE_NAMES` + `PREDICATE_ARG_SCHEMAS`); update `tools/validators/src/schemas/story-storylet.schema.json` predicate-discovery surface to enumerate them.
-- D-B5: Extend `tools/validators/src/structural/midstory-introduction-utils.ts` parser with the 2 new `class` enum values + 6 STPLAN triggers + 7 STEMO triggers + new `plan_relation:` tag pattern with 7 closed relations. Add named exports `MIDSTORY_TRIGGERS_STPLAN` and `MIDSTORY_TRIGGERS_STEMO` following the existing per-class export convention (`MIDSTORY_TRIGGERS_CLK`, `MIDSTORY_TRIGGERS_SREL`, `MIDSTORY_TRIGGERS_STENT`, `MIDSTORY_TRIGGERS_STQ`, `MIDSTORY_TRIGGERS_STSEC`, `MIDSTORY_TRIGGERS_THR`).
+- D-B5: Extend `tools/world-index/src/parse/intro-tag-parser.ts` and the validators re-export at `tools/validators/src/structural/midstory-introduction-utils.ts` with the 2 new `class` enum values + 6 STPLAN triggers + 7 STEMO triggers + new `plan_relation:` tag pattern with 7 closed relations. Add named exports `MIDSTORY_TRIGGERS_STPLAN` and `MIDSTORY_TRIGGERS_STEMO` following the existing per-class export convention (`MIDSTORY_TRIGGERS_CLK`, `MIDSTORY_TRIGGERS_SREL`, `MIDSTORY_TRIGGERS_STENT`, `MIDSTORY_TRIGGERS_STQ`, `MIDSTORY_TRIGGERS_STSEC`, `MIDSTORY_TRIGGERS_THR`).
 - D-B6: Extend `tools/validators/src/structural/midstory-record-introduction-grounding.ts` to consume the extended parser without re-implementing the grammar.
 - D-B7: Update `.claude/skills/_shared-templates/story-state-contract.md` §5 closed-predicate-DSL table with the 6 new predicates and their consumer annotations; update §5a tag grammar specification with the 2 new class entries, their trigger vocabularies, and the new `plan_relation:` pattern.
 

@@ -1,4 +1,5 @@
-export type MidstoryIntroductionClass = "CLK" | "STSEC" | "STQ" | "THR" | "STENT" | "SREL";
+export type MidstoryIntroductionClass = "CLK" | "STSEC" | "STQ" | "THR" | "STENT" | "SREL" | "STPLAN" | "STEMO";
+export type PlanRelation = typeof PLAN_RELATIONS[number];
 
 const CLK_TRIGGERS = [
   "deadline_declared",
@@ -54,12 +55,43 @@ const SREL_TRIGGERS = [
   "hostility_axis_becomes_relevant"
 ] as const;
 
+const STPLAN_TRIGGERS = [
+  "tactical_approach_committed",
+  "resource_gained_enables_plan",
+  "blocker_requires_plan",
+  "pressure_forces_plan",
+  "opportunity_recognized",
+  "counterparty_plan_observed"
+] as const;
+
+const STEMO_TRIGGERS = [
+  "event_revealed_truth_to_actor",
+  "event_threatened_actor_or_charge",
+  "event_harmed_actor_or_charge",
+  "event_relieved_pressure_on_actor",
+  "event_violated_actor_principle_or_value",
+  "event_changed_relationship_with_other",
+  "accumulated_pressure_crossed_threshold"
+] as const;
+
+export const PLAN_RELATIONS = [
+  "advances",
+  "tests",
+  "blocks",
+  "revises",
+  "fulfills",
+  "abandons",
+  "ignores"
+] as const;
+
 export const MIDSTORY_TRIGGERS_CLK = CLK_TRIGGERS;
 export const MIDSTORY_TRIGGERS_STSEC = STSEC_TRIGGERS;
 export const MIDSTORY_TRIGGERS_STQ = STQ_TRIGGERS;
 export const MIDSTORY_TRIGGERS_THR = THR_TRIGGERS;
 export const MIDSTORY_TRIGGERS_STENT = STENT_TRIGGERS;
 export const MIDSTORY_TRIGGERS_SREL = SREL_TRIGGERS;
+export const MIDSTORY_TRIGGERS_STPLAN = STPLAN_TRIGGERS;
+export const MIDSTORY_TRIGGERS_STEMO = STEMO_TRIGGERS;
 
 export const MIDSTORY_TRIGGERS_BY_CLASS: Readonly<Record<MidstoryIntroductionClass, readonly string[]>> = {
   CLK: CLK_TRIGGERS,
@@ -67,14 +99,18 @@ export const MIDSTORY_TRIGGERS_BY_CLASS: Readonly<Record<MidstoryIntroductionCla
   STQ: STQ_TRIGGERS,
   THR: THR_TRIGGERS,
   STENT: STENT_TRIGGERS,
-  SREL: SREL_TRIGGERS
+  SREL: SREL_TRIGGERS,
+  STPLAN: STPLAN_TRIGGERS,
+  STEMO: STEMO_TRIGGERS
 };
 
 export const INTRO_TAG_PATTERN =
-  /intro:(CLK|STSEC|STQ|THR|STENT|SREL)\(id=([A-Z]+-(?:0|[1-9][0-9]*)), trigger=([a-z_]+), evidence=\[([A-Z0-9,\-]*)\], distinct_from=\[([A-Z0-9,\-]*)\]\)/g;
+  /intro:(CLK|STSEC|STQ|THR|STENT|SREL|STPLAN|STEMO)\(id=([A-Z]+-(?:0|[1-9][0-9]*)), trigger=([a-z_]+), evidence=\[([A-Z0-9,\-]*)\], distinct_from=\[([A-Z0-9,\-]*)\]\)/g;
 
 const INTRO_TAG_PARSE_PATTERN =
-  /^intro:(CLK|STSEC|STQ|THR|STENT|SREL)\s*\(\s*id\s*=\s*([A-Z]+-(?:0|[1-9][0-9]*))\s*,\s*trigger\s*=\s*([a-z_]+)\s*,\s*evidence\s*=\s*\[([A-Z0-9,\-\s]*)\]\s*,\s*distinct_from\s*=\s*\[([A-Z0-9,\-\s]*)\]\s*\)$/;
+  /^intro:(CLK|STSEC|STQ|THR|STENT|SREL|STPLAN|STEMO)\s*\(\s*id\s*=\s*([A-Z]+-(?:0|[1-9][0-9]*))\s*,\s*trigger\s*=\s*([a-z_]+)\s*,\s*evidence\s*=\s*\[([A-Z0-9,\-\s]*)\]\s*,\s*distinct_from\s*=\s*\[([A-Z0-9,\-\s]*)\]\s*\)$/;
+const PLAN_RELATION_TAG_PARSE_PATTERN =
+  /^plan_relation:([a-z_]+)\s*\(\s*plan\s*=\s*(STPLAN-(?:0|[1-9][0-9]*))\s*\)$/;
 const RECORD_ID_PATTERN = /^[A-Z]+-(?:0|[1-9][0-9]*)$/;
 
 export interface ParsedIntroTag {
@@ -83,6 +119,11 @@ export interface ParsedIntroTag {
   trigger: string;
   evidence: string[];
   distinctFrom: string[];
+}
+
+export interface ParsedPlanRelationTag {
+  relation: PlanRelation;
+  plan: string;
 }
 
 export class MidstoryIntroductionTagError extends Error {
@@ -104,6 +145,10 @@ export function extractIntroTags(rationale: string): ParsedIntroTag[] {
   return tags.map((tag) => parseExactIntroTag(tag));
 }
 
+export function parsePlanRelationTags(rationale: string): ParsedPlanRelationTag[] {
+  return planRelationTagCandidates(rationale).map((tag) => parseExactPlanRelationTag(tag));
+}
+
 function firstIntroTag(rationale: string): string | null {
   return introTagCandidates(rationale)[0] ?? null;
 }
@@ -121,6 +166,28 @@ function introTagCandidates(rationale: string): string[] {
     const close = rationale.indexOf(")", start);
     if (close === -1) {
       throw new TagError("Malformed intro tag: missing closing parenthesis.");
+    }
+
+    candidates.push(rationale.slice(start, close + 1));
+    cursor = close + 1;
+  }
+
+  return candidates;
+}
+
+function planRelationTagCandidates(rationale: string): string[] {
+  const candidates: string[] = [];
+  let cursor = 0;
+
+  while (cursor < rationale.length) {
+    const start = rationale.indexOf("plan_relation:", cursor);
+    if (start === -1) {
+      break;
+    }
+
+    const close = rationale.indexOf(")", start);
+    if (close === -1) {
+      throw new TagError("Malformed plan_relation tag: missing closing parenthesis.");
     }
 
     candidates.push(rationale.slice(start, close + 1));
@@ -156,6 +223,28 @@ function parseExactIntroTag(tag: string): ParsedIntroTag {
     trigger,
     evidence,
     distinctFrom
+  };
+}
+
+function parseExactPlanRelationTag(tag: string): ParsedPlanRelationTag {
+  const match = PLAN_RELATION_TAG_PARSE_PATTERN.exec(tag);
+  if (match === null) {
+    throw new TagError(
+      "Malformed plan_relation tag: expected plan_relation:<relation>(plan=STPLAN-<integer>)."
+    );
+  }
+
+  const relation = match[1] ?? "";
+  const plan = match[2] ?? "";
+  if (!PLAN_RELATIONS.includes(relation as PlanRelation)) {
+    throw new TagError(
+      `Malformed plan_relation tag: relation=${relation} is not valid.`
+    );
+  }
+
+  return {
+    relation: relation as PlanRelation,
+    plan
   };
 }
 
