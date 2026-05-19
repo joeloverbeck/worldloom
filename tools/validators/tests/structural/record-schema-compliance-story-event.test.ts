@@ -86,6 +86,45 @@ test("record_schema_compliance accepts selected-choice SE commitment bindings", 
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts existential predicate class alias bindings", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({
+      commitment: {
+        selected_slt_id: "SLT-7",
+        selection_source: "author_pool",
+        alias_bindings: {
+          active_clock: "CLK-1",
+          hidden_secret: "STSEC-1",
+          open_setup: "STQ-1",
+          active_plan: "STPLAN-1",
+          active_emotion: "STEMO-1"
+        }
+      }
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects alias bindings outside the story-event binding set", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({
+      commitment: {
+        selected_slt_id: "SLT-7",
+        selection_source: "author_pool",
+        alias_bindings: {
+          mystery: "M-1"
+        }
+      }
+    }))
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/commitment/alias_bindings/mystery")
+  ));
+});
+
 test("record_schema_compliance rejects none source with selected SLT", async () => {
   const result = await recordSchemaCompliance.run({}, context([
     eventRecord(validEvent({

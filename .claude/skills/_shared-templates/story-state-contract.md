@@ -206,6 +206,8 @@ Closed grammar contains 39 individual predicates plus 3 combinators (`not`, `all
 
 An existential predicate binds its `alias` to the matched active record during block selection. `SLT.effects.create`, `SLT.effects.supersede`, `SLT.effects.close`, and `SLT.exit_options[].likely_effects` may reference that matched record as `bound:<alias>`. Every `bound:<alias>` reference must resolve to an alias bound by a hard or soft precondition on the same `SLT`.
 
+When the selected block becomes an `SE`, `SE.commitment.alias_bindings` records the exact matched ids. The event schema accepts `CLK`, `STSEC`, `STQ`, `STPLAN`, and `STEMO` for the corresponding `any_clock_active`, `any_secret_unrevealed`, `any_story_question_open`, `any_plan_active`, and `any_emotion_active` aliases, in addition to the pre-existing selected-move binding classes.
+
 ### §5a. Mid-Story Introduction Structured Fields
 
 Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `SREL`, `STPLAN`, or `STEMO` records is recorded on `SE.record_introductions[]`. Relations from an event to an active plan are recorded on `SE.state_relations[]`. Explicit non-propagation assertions are recorded on `SE.non_propagation_facts[]`. These fields carry the machine-readable WHAT; `SE.world_logic_rationale` carries the human-readable WHY.

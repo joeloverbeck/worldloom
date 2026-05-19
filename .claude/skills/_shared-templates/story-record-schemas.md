@@ -219,6 +219,8 @@ Per-source-kind `promotion_claims[].source_record` requirements:
 
 `world_logic_rationale` is required (no silent rejection — see §6) and is prose-only: validators MUST NOT parse it for structural facts. `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; all other event kinds name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
 
+`commitment.alias_bindings` accepts the existing selected-move binding classes plus the five existential-predicate-bindable classes `CLK`, `STSEC`, `STQ`, `STPLAN`, and `STEMO`, so author-pool prefilter aliases can become exact event bindings without bypassing branch-local validation.
+
 `record_introductions[]`, `state_relations[]`, and `non_propagation_facts[]` are optional structured fields. Their closed enums, per-class trigger vocabulary, and full validation shape are defined in `tools/validators/src/schemas/story-event.schema.json`; the authoring contract and trigger tables live in `story-state-contract.md` §5a.
 
 Worked `record_introductions[]` example:
