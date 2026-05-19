@@ -273,14 +273,14 @@ function inactiveActiveRecordVerdict(
   reference: StoryReference,
   target: IndexedRecord
 ): Verdict | undefined {
-  const activeRecordMatch = reference.path.match(/^state_snapshot\.active_records\.(CLK|STSEC|STQ)\[\d+\]$/);
+  const activeRecordMatch = reference.path.match(/^state_snapshot\.active_records\.(CLK|STSEC|STQ|STPLAN|STEMO)\[\d+\]$/);
   if (activeRecordMatch === null) {
     return undefined;
   }
 
   const parsed = asPlainRecord(target.parsed);
-  const status = stringValue(parsed.status);
   const recordClass = activeRecordMatch[1]!;
+  const status = lifecycleStatus(parsed, recordClass);
   const allowed = allowedActiveStatuses(recordClass);
   if (status !== undefined && allowed.has(status)) {
     return undefined;
@@ -302,6 +302,13 @@ function inactiveActiveRecordVerdict(
   };
 }
 
+function lifecycleStatus(record: Record<string, unknown>, recordClass: string): string | undefined {
+  if (recordClass === "STPLAN") {
+    return stringValue(record.plan_status);
+  }
+  return stringValue(record.status);
+}
+
 function allowedActiveStatuses(recordClass: string): ReadonlySet<string> {
   switch (recordClass) {
     case "CLK":
@@ -310,6 +317,10 @@ function allowedActiveStatuses(recordClass: string): ReadonlySet<string> {
       return new Set(["hidden", "partially_revealed"]);
     case "STQ":
       return new Set(["open", "complicated"]);
+    case "STPLAN":
+      return new Set(["active", "blocked", "suspended", "revised"]);
+    case "STEMO":
+      return new Set(["active", "suppressed", "dissociated"]);
     default:
       return new Set();
   }

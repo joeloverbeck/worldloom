@@ -1,6 +1,6 @@
 # SPEC49STPSTEINT-003: Extend state-snapshot-integrity inactive-record lifecycle regex to STPLAN and STEMO with status sets
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators/src/structural/state-snapshot-integrity.ts` (modify), `tools/validators/tests/structural/state-snapshot-integrity.test.ts` (modify)
@@ -17,11 +17,12 @@
 3. Cross-skill boundary under audit: `state-snapshot-integrity` is a structural validator that runs at engine pre-apply time when `create_pg_record` is submitted. The validator gates story-bundle record writes; weakening it would silently admit lifecycle-violating PG records. Archived ticket `archive/tickets/SPEC49STPSTEINT-001.md` landed the PG schema extension that allows STPLAN/STEMO keys in active_records; this ticket lands the corresponding lifecycle check on those keys. Without 001's schema landing first, this ticket has no records to validate.
 4. FOUNDATIONS §Story Bundles §5 Rule 1 No Floating Facts: terminal-status records in active_records are a Rule 1 violation (the page claims the record is active when it isn't). The validator enforces the prerequisite "record is active" for active_records membership. SPEC-49 §FOUNDATIONS Alignment confirms this Rule 1 alignment.
 5. Canon Safety surface touched: `state-snapshot-integrity.ts` is a structural validator under `tools/validators/src/structural/`. The validator gates `create_pg_record` writes at engine pre-apply; weakening or skipping its lifecycle check would let pages claim active state for terminated records. The extension preserves the existing CLK/STSEC/STQ enforcement and adds STPLAN/STEMO at the same enforcement strength.
+6. Live reassessment correction: the drafted `revision_marker` / legacy-WARN fixture is not implementable in this ticket because the live PG schema and validators expose no page-level `revision_marker` field. The current compatibility surface is `compatibility_drift` plus health-audit migration guidance; `.claude/skills/branching-story-health-audit/SKILL.md` states hard current-contract detection is deferred until a future `story_system_contract_revision` marker. This ticket therefore owns fail-closed `create_pg_record` lifecycle enforcement for current pre-apply pages. It does not add an invented revision marker or downgrade `state_snapshot_integrity` pre-apply failures to WARN.
 
 ## Architecture Check
 
 1. Extending the existing regex and `allowedActiveStatuses()` switch is the minimal-blast-radius approach. Alternative (introducing a lookup table keyed by class) would over-engineer a 5-class total (3 existing + 2 new). The regex pattern's `(CLK|STSEC|STQ|STPLAN|STEMO)` alternation extends naturally.
-2. No backwards-compatibility aliasing introduced. Migration posture for legacy pages (per SPEC-49 D-CX.1 distributed contract): compatibility-mode WARN for pages that pre-date SPEC-49's landing commit and list STPLAN/STEMO active_records records that turned out to be terminal; current-contract pages FAIL closed.
+2. No backwards-compatibility aliasing introduced. Current `create_pg_record` pre-apply pages fail closed when they list terminal STPLAN/STEMO records in `active_records`. Legacy migration posture remains advisory through the existing compatibility/audit surfaces until the repo grows a deterministic story-system revision marker; this ticket does not add a marker shim.
 
 ## Verification Layers
 
@@ -55,9 +56,9 @@ case "STEMO":
 
 Preserve the existing CLK/STSEC/STQ arms unchanged.
 
-### 3. D-CX.1 migration-posture handling
+### 3. Status field selection
 
-Distinct from the regex/status-set extension above, add a compatibility-mode WARN path for legacy pages (per SPEC-49 D-CX.1 distributed contract): when a page's `revision_marker` predates the SPEC-49 landing commit AND the page lists a terminal-status STPLAN/STEMO in active_records, emit a WARN finding rather than FAIL. Current-contract pages (post-SPEC-49) FAIL closed. The revision_marker detection mechanism follows SPEC-44's append-only-lifecycle precedent.
+Use `plan_status` for STPLAN lifecycle checks and `status` for STEMO lifecycle checks. CLK/STSEC/STQ continue to read `status`.
 
 ## Files to Touch
 
@@ -79,8 +80,7 @@ Distinct from the regex/status-set extension above, add a compatibility-mode WAR
 2. A page fixture listing `STPLAN-1` where STPLAN-1 has `plan_status: active` passes the check.
 3. A page fixture listing `STEMO-1` in `state_snapshot.active_records.STEMO[]` where STEMO-1 has `status: settled` fails the lifecycle check (current-contract page FAIL).
 4. A page fixture listing `STEMO-1` where STEMO-1 has `status: active` passes the check.
-5. A legacy-marker page fixture (pre-SPEC-49 revision_marker) listing a terminal-status STPLAN/STEMO emits a WARN rather than FAIL.
-6. Existing CLK/STSEC/STQ test cases continue to pass without modification.
+5. Existing CLK/STSEC/STQ test cases continue to pass without modification.
 
 ### Invariants
 
@@ -91,13 +91,30 @@ Distinct from the regex/status-set extension above, add a compatibility-mode WAR
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/fixtures/pg-with-terminal-stplan-in-active-records.json` — new fixture (current-contract page; terminal STPLAN in active_records → FAIL).
-2. `tools/validators/tests/fixtures/pg-with-active-stplan-in-active-records.json` — new fixture (active STPLAN → PASS).
-3. `tools/validators/tests/fixtures/pg-with-terminal-stemo-in-active-records.json` — new fixture (terminal STEMO → FAIL).
-4. `tools/validators/tests/fixtures/pg-with-legacy-marker-terminal-stplan.json` — new fixture (legacy-marker page; terminal STPLAN → WARN, not FAIL).
-5. `tools/validators/tests/structural/state-snapshot-integrity.test.ts` — modify to add the 4 new STPLAN/STEMO test cases above + the legacy-marker WARN test case.
+1. `tools/validators/tests/structural/state-snapshot-integrity.test.ts` — modified to add inline STPLAN/STEMO active and terminal status cases covering all allowed and terminal statuses.
 
 ### Commands
 
 1. `npm test --prefix tools/validators` (full validator suite)
 2. Targeted: `npm run build --prefix tools/validators && node --test tools/validators/dist/tests/structural/state-snapshot-integrity.test.js`
+
+## Outcome
+
+Completed: 2026-05-19
+
+`state_snapshot_integrity` now lifecycle-checks STPLAN and STEMO entries under `PG.state_snapshot.active_records` alongside the existing CLK/STSEC/STQ classes. STPLAN reads lifecycle state from `plan_status`; STEMO continues to use `status`. Terminal STPLAN statuses (`fulfilled`, `failed`, `abandoned`) and terminal STEMO statuses (`settled`, `transformed`) now emit `state_snapshot_integrity.inactive_active_record` when listed as active records on a `create_pg_record` pre-apply page.
+
+The ticket's drafted legacy-marker WARN requirement was corrected during reassessment because the live repo has no page-level `revision_marker` or deterministic story-system revision marker. The implemented boundary is fail-closed pre-apply enforcement for newly created/current pages; legacy migration diagnostics remain advisory through existing compatibility and health-audit surfaces.
+
+## Verification Result
+
+1. Pre-edit baseline: `npm run build --prefix tools/validators` — PASS.
+2. Pre-edit baseline: `node --test tools/validators/dist/tests/structural/state-snapshot-integrity.test.js` — PASS, 16/16 tests.
+3. Final targeted: `npm run build --prefix tools/validators` — PASS.
+4. Final targeted: `node --test tools/validators/dist/tests/structural/state-snapshot-integrity.test.js` — PASS, 17/17 tests.
+5. Final package gate: `npm test --prefix tools/validators` — PASS, 631/631 tests.
+
+## Deviations
+
+1. No standalone JSON fixture files were added. The existing structural test suite uses inline indexed-record fixtures for `state_snapshot_integrity`, so the new proof follows that local pattern.
+2. The drafted legacy-marker WARN acceptance case was not implemented because the live repo has no such marker field. Adding one in this ticket would invent a compatibility shim and weaken a pre-apply validator. The ticket records the live advisory compatibility boundary instead.
