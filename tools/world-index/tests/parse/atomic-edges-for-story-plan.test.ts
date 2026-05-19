@@ -40,10 +40,21 @@ test("STPLAN records emit plan ownership, basis, target, provenance, and superse
       "    - STQ-1",
       "    - unknown",
       "  success_condition:",
-      "    predicates: []",
-      "fallback_steps: []",
-      "expires_when: after the bell council convenes",
-      "derived_from: []"
+      "    predicates:",
+      "      - pred: plan_active(STPLAN-4)",
+      "      - pred: record_active(BEL-3)",
+      "fallback_steps:",
+      "  - action_family: bargain",
+      "    target_records:",
+      "      - OBL-2",
+      "      - group:watch",
+      "    trigger_condition:",
+      "      predicates:",
+      "        - pred: record_active(STSEC-2)",
+      "        - pred: emotion_active(STENT-1, fear)",
+      "expires_when: after STPLAN-4 fulfills",
+      "derived_from:",
+      "  - SE-2"
     ]);
 
     const parsed = parseStoryBundleSourceFile(
@@ -65,6 +76,13 @@ test("STPLAN records emit plan ownership, basis, target, provenance, and superse
       edge("STPLAN-2", "OBL-1", "plan_resource_basis"),
       edge("STPLAN-2", "STSEC-1", "plan_blocker"),
       edge("STPLAN-2", "STQ-1", "plan_current_step_target"),
+      edge("STPLAN-2", "BEL-3", "plan_success_predicate_ref"),
+      edge("STPLAN-2", "STPLAN-4", "plan_success_predicate_ref"),
+      edge("STPLAN-2", "OBL-2", "plan_fallback_step_target"),
+      edge("STPLAN-2", "STENT-1", "plan_fallback_predicate_ref"),
+      edge("STPLAN-2", "STSEC-2", "plan_fallback_predicate_ref"),
+      edge("STPLAN-2", "SE-2", "plan_derived_from"),
+      edge("STPLAN-2", "STPLAN-4", "plan_expires_when_ref"),
       edge("STPLAN-2", "SE-3", "plan_created_by_event"),
       edge("STPLAN-2", "STPLAN-1", "plan_supersedes")
     ]);

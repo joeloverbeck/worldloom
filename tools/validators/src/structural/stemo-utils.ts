@@ -182,6 +182,9 @@ export function resolveRecord(source: IndexedRecord, id: string, maps: EmotionMa
 
 export function isRecordAccessibleToHolder(record: IndexedRecord, holder: string): boolean {
   const parsed = asPlainRecord(record.parsed);
+  if (record.node_type === "story_fact_record" || record.node_type === "story_location_record") {
+    return true;
+  }
   const recordHolder = stringValue(parsed.holder);
   if (recordHolder === holder || recordHolder === "public" || recordHolder === "narrator") {
     return true;
@@ -199,6 +202,13 @@ export function isRecordAccessibleToHolder(record: IndexedRecord, holder: string
     return true;
   }
   return false;
+}
+
+export function isOrientationTargetAccessibleToHolder(record: IndexedRecord, holder: string | undefined): boolean {
+  if (holder === undefined) {
+    return false;
+  }
+  return isRecordAccessibleToHolder(record, holder);
 }
 
 export function pageBranchPathFor(emotion: IndexedRecord, maps: EmotionMaps): string[] {
@@ -300,7 +310,7 @@ export function holderHasCompatibleAgency(emotion: IndexedRecord, maps: EmotionM
       continue;
     }
     const parsed = asPlainRecord(record.parsed);
-    if (stringValue(parsed.holder) === holder && COMPATIBLE_AGENCY.has(stringValue(parsed.agency) ?? "")) {
+    if (stringValue(parsed.entity) === holder && COMPATIBLE_AGENCY.has(stringValue(parsed.agency) ?? "")) {
       const statusId = recordId(record);
       if (statusId === undefined || isActiveAtEmotionPage(emotion, statusId, maps)) {
         return true;

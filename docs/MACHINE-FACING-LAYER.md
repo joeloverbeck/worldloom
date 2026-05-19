@@ -60,7 +60,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 ## Story-Bundle Edge Types
 
-`world-index` emits 50 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, obligation/thread links, branch/page links, and SPEC-45 event provenance:
+`world-index` emits 56 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, obligation/thread links, branch/page links, and SPEC-45 event provenance:
 
 - `world_entity_binding` — `STENT.world_ent_id` to a world-canon entity id.
 - `story_fact_derived_from` — `SF.derived_from_cf` to the originating CF.
@@ -99,7 +99,7 @@ SPEC-46 extends that graph surface with 22 additional edge types for existing st
 | `SE` | `event_target` | record | Each record named by `targets[]`. |
 | `SE` | `event_selected_storylet` | `SLT` | The selected storylet named by `commitment.selected_slt_id`. |
 
-SPEC-47 extends that graph surface with 14 additional edge types for STPLAN and STEMO records:
+SPEC-47 and SPEC-49 extend that graph surface with 20 additional edge types for STPLAN and STEMO records:
 
 | Source | Edge type | Target | Meaning |
 |---|---|---|---|
@@ -109,6 +109,11 @@ SPEC-47 extends that graph surface with 14 additional edge types for STPLAN and 
 | `STPLAN` | `plan_resource_basis` | `SF` / `STOBJ` / `STLOC` / `DA` / `SREL` / `OBL` | Each resource named across `resource_basis.facts[]`, `objects[]`, `locations[]`, `artifacts[]`, `relationships[]`, and `obligations[]`. |
 | `STPLAN` | `plan_blocker` | record | Each record named by `blockers[]`. |
 | `STPLAN` | `plan_current_step_target` | record | Each record named by `current_step.target_records[]`. |
+| `STPLAN` | `plan_fallback_step_target` | record | Each record named by `fallback_steps[].target_records[]`. |
+| `STPLAN` | `plan_success_predicate_ref` | record | Record ids parsed from `current_step.success_condition.predicates[].pred`. |
+| `STPLAN` | `plan_fallback_predicate_ref` | record | Record ids parsed from `fallback_steps[].trigger_condition.predicates[].pred`. |
+| `STPLAN` | `plan_derived_from` | record | Each record named by `derived_from[]`. |
+| `STPLAN` | `plan_expires_when_ref` | record | Record ids parsed from scalar `expires_when`. |
 | `STPLAN` | `plan_created_by_event` | `SE` | The event named by `created_by_event`. |
 | `STPLAN` | `plan_supersedes` | `STPLAN` | The prior plan named by scalar `supersedes`, when present. |
 | `STEMO` | `emotion_holder` | `STENT` | The actor or entity whose affective state is recorded. |
@@ -117,6 +122,7 @@ SPEC-47 extends that graph surface with 14 additional edge types for STPLAN and 
 | `STEMO` | `emotion_oriented_toward` | record | Each record named by `orientation.toward_records[]`. |
 | `STEMO` | `emotion_supersedes` | `STEMO` | The prior emotion record named by scalar `supersedes`, when present. |
 | `STEMO` | `emotion_derived_from` | record | Each record named by `derived_from[]`. |
+| `STEMO` | `emotion_expires_when_ref` | record | Record ids parsed from scalar `expires_when`. |
 
 ### Placeholder Skip Convention
 

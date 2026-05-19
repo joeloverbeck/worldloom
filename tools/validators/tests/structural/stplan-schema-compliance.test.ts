@@ -15,3 +15,20 @@ test("stplan_schema_compliance rejects malformed STPLAN records", async () => {
   assert.ok(hasCode(verdicts, "stplan_schema_compliance.additionalProperties"));
   assert.ok(hasCode(verdicts, "stplan_schema_compliance.enum"));
 });
+
+test("stplan_schema_compliance enforces active-lifecycle required fields", async () => {
+  const missingCurrentStep = plan({ current_step: undefined });
+  const emptyBeliefBasis = plan({ belief_basis: [] });
+
+  const currentStepVerdicts = await stplanSchemaCompliance.run(undefined, context(baseRecords([missingCurrentStep])));
+  assert.ok(hasCode(currentStepVerdicts, "stplan_schema_compliance.required"));
+
+  const beliefBasisVerdicts = await stplanSchemaCompliance.run(undefined, context(baseRecords([emptyBeliefBasis])));
+  assert.ok(hasCode(beliefBasisVerdicts, "stplan_schema_compliance.minItems"));
+});
+
+test("stplan_schema_compliance allows terminal plans without live-step grounding", async () => {
+  const terminalPlan = plan({ plan_status: "abandoned", belief_basis: [], current_step: undefined });
+  const verdicts = await stplanSchemaCompliance.run(undefined, context(baseRecords([terminalPlan])));
+  assert.deepEqual(verdicts, []);
+});

@@ -139,7 +139,7 @@ test("SPEC-47 T-6/T-7: world-index build registers and emits all new STPLAN/STEM
     addSpec47Story(root);
 
     const registeredEdgeTypes = storyEdgeTypesFromSource();
-    assert.equal(registeredEdgeTypes.length, 50);
+    assert.equal(registeredEdgeTypes.length, 56);
     assert.equal(new Set(registeredEdgeTypes).size, registeredEdgeTypes.length);
     for (const edgeType of SPEC47_EDGE_TYPES) {
       assert.ok(registeredEdgeTypes.includes(edgeType), `${edgeType} should be registered`);
@@ -220,7 +220,7 @@ test("SPEC-47 T-10/D-A9: no-regression surfaces and Hook 3 coverage remain wired
     ...stplanRecords(),
     ...stemoRecords()
   ]));
-  assert.equal(validatorsRun.summary.validators_run.filter((name) => name.startsWith("stplan_")).length, 12);
+  assert.equal(validatorsRun.summary.validators_run.filter((name) => name.startsWith("stplan_")).length, 13);
   assert.equal(validatorsRun.summary.validators_run.filter((name) => name.startsWith("stemo_")).length, 9);
 
   const hook3 = readRepoFile("tools/hooks/src/hook3-guard-direct-edit.ts");

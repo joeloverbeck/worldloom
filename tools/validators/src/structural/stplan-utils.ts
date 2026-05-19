@@ -160,6 +160,20 @@ export function successConditionRecordIds(plan: IndexedRecord): string[] {
   return idsInValue(predicates);
 }
 
+export function fallbackTriggerRecordIds(plan: IndexedRecord): string[] {
+  const fallbackSteps = asPlainRecord(plan.parsed).fallback_steps;
+  if (!Array.isArray(fallbackSteps)) {
+    return [];
+  }
+  const ids = new Set<string>();
+  for (const step of fallbackSteps) {
+    for (const id of idsInValue(nestedRecord(asPlainRecord(step), "trigger_condition").predicates)) {
+      ids.add(id);
+    }
+  }
+  return [...ids].sort();
+}
+
 export function activeRecordIdsAt(plan: IndexedRecord, maps: StoryMaps): ReadonlySet<string> {
   const pageId = planField(plan, "created_at_page");
   const page = pageId === undefined ? undefined : maps.pagesById.get(scopedId(plan, pageId)) ?? maps.pagesById.get(pageId);

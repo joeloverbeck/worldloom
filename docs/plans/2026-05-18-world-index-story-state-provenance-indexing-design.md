@@ -1,7 +1,7 @@
 # Design — Story-State Provenance Indexing (Narrowed)
 
 **Date**: 2026-05-18 (narrowed same-day after consumer-enumeration check)
-**Source**: `reports/story-system-consolidation.md` §10 (R-MD8); deferred from `archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` §Out of Scope.
+**Source**: `archive/reports/story-system-consolidation.md` §10 (R-MD8); deferred from `archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` §Out of Scope.
 **Brainstorm trajectory**: originally drafted as full Phase 1 + Phase 2 R-MD8 subset (~15-19 tickets, ~5 weeks). Narrowed after explicit consumer enumeration confirmed only one Tier 1 hard consumer (`story-fact-promotion-to-canon`). Final scope: ~6-7 tickets / ~1.5-2 weeks. Dropped items are listed under Out of Scope with re-evaluation triggers.
 **Status**: archived design — fed `archive/specs/SPEC-45-story-state-provenance-indexing.md`.
 
@@ -161,7 +161,7 @@ Items below were in the original Phase 1 + Phase 2 design; each is independently
 
 ## Cross-reference
 
-- `reports/story-system-consolidation.md` §10 — origin of the full 18-edge R-MD8 proposal (pre-SPEC-43)
+- `archive/reports/story-system-consolidation.md` §10 — origin of the full 18-edge R-MD8 proposal (pre-SPEC-43; archived as exploited on 2026-05-19)
 - `archive/specs/SPEC-43-present-causal-mid-story-state-introduction.md` — parseable-tag grammar; intro-tag parser origin
 - `archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` §Out of Scope — R-MD8 deferral
 - `docs/triage/2026-05-18-story-system-consolidation-triage.md` — R-MD8 routed to "follow-up spec (SPEC-45-or-later)"

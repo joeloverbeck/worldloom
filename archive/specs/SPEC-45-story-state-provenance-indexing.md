@@ -2,7 +2,7 @@
 
 **Status**: COMPLETED
 **Brainstorm source**: `docs/plans/2026-05-18-world-index-story-state-provenance-indexing-design.md`
-**Source report**: `reports/story-system-consolidation.md` §10 (R-MD8)
+**Source report**: `archive/reports/story-system-consolidation.md` §10 (R-MD8)
 **Deferred from**: `archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` §Out of Scope
 **Blocks**: future incremental adds (per design's Out of Scope table) — each independently scoped when its first consumer materializes
 

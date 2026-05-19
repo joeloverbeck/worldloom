@@ -8,7 +8,7 @@ test("stemo_agency_effect_compatibility accepts compatible active STSTAT agency"
   const constrainedStatus = storyRecord("story_status_record", "STSTAT-1", "status", {
     id: "STSTAT-1",
     created_at_page: "PG-1",
-    holder: "STENT-1",
+    entity: "STENT-1",
     agency: "constrained"
   });
   const verdicts = await stemoAgencyEffectCompatibility.run(
@@ -16,6 +16,20 @@ test("stemo_agency_effect_compatibility accepts compatible active STSTAT agency"
     context(baseRecords([constrainedStatus, emotion({ agency_effect: "constraining" })]))
   );
   assert.deepEqual(verdicts, []);
+});
+
+test("stemo_agency_effect_compatibility rejects incompatible active STSTAT agency", async () => {
+  const freeStatus = storyRecord("story_status_record", "STSTAT-1", "status", {
+    id: "STSTAT-1",
+    created_at_page: "PG-1",
+    entity: "STENT-1",
+    agency: "free"
+  });
+  const verdicts = await stemoAgencyEffectCompatibility.run(
+    undefined,
+    context(baseRecords([freeStatus, emotion({ agency_effect: "constraining" })]))
+  );
+  assert.ok(hasCode(verdicts, "stemo_agency_effect_compatibility.unexplained_constraining_effect"));
 });
 
 test("stemo_agency_effect_compatibility accepts same-event structured relation", async () => {

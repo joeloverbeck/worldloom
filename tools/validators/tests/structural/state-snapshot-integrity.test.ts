@@ -216,6 +216,65 @@ test("state_snapshot_integrity validates CLK/STSEC/STQ active record statuses", 
   );
 });
 
+test("state_snapshot_integrity validates STPLAN and STEMO active record statuses", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context([
+    storyRecord("page_record", "PG-2", "pages", {
+      id: "PG-2",
+      story_id: "STORY-1",
+      input: {
+        choice_id: "CHC-1",
+        manual_action_text: null,
+        resolved_event_id: "SE-1"
+      },
+      state_snapshot: {
+        active_records: {
+          STPLAN: ["STPLAN-1", "STPLAN-2", "STPLAN-3", "STPLAN-4", "STPLAN-5", "STPLAN-6", "STPLAN-7"],
+          STEMO: ["STEMO-1", "STEMO-2", "STEMO-3", "STEMO-4", "STEMO-5"]
+        }
+      }
+    }),
+    storyRecord("story_event_record", "SE-1", "events", {
+      id: "SE-1",
+      story_id: "STORY-1",
+      event_kind: "selected_choice"
+    }),
+    ...["active", "blocked", "suspended", "revised", "fulfilled", "failed", "abandoned"].map((planStatus, index) =>
+      storyRecord("story_plan_record", `STPLAN-${index + 1}`, "plans", {
+        id: `STPLAN-${index + 1}`,
+        story_id: "STORY-1",
+        plan_status: planStatus
+      })
+    ),
+    ...["active", "suppressed", "dissociated", "settled", "transformed"].map((status, index) =>
+      storyRecord("story_emotion_record", `STEMO-${index + 1}`, "emotions", {
+        id: `STEMO-${index + 1}`,
+        story_id: "STORY-1",
+        status
+      })
+    )
+  ], {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(
+    verdicts
+      .filter((verdict) => verdict.code === "state_snapshot_integrity.inactive_active_record")
+      .map((verdict) => ({
+        id: (verdict.detail as { reference_id: string }).reference_id,
+        allowed: (verdict.detail as { allowed_statuses: string[] }).allowed_statuses
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    [
+      { id: "STEMO-4", allowed: ["active", "suppressed", "dissociated"] },
+      { id: "STEMO-5", allowed: ["active", "suppressed", "dissociated"] },
+      { id: "STPLAN-5", allowed: ["active", "blocked", "suspended", "revised"] },
+      { id: "STPLAN-6", allowed: ["active", "blocked", "suspended", "revised"] },
+      { id: "STPLAN-7", allowed: ["active", "blocked", "suspended", "revised"] }
+    ]
+  );
+});
+
 test("state_snapshot_integrity requires evidence_records for narrowing mystery claims", async () => {
   const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
     pageSnapshot: {

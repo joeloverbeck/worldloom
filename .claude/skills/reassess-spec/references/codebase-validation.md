@@ -18,6 +18,7 @@ Substep applicability is determined by the Pre-Process classification:
 | 3.9 FOUNDATIONS-contract fidelity | ✓ | if canon-pipeline semantics touched | skip | skip |
 | 3.10 Project-convention drift (CLAUDE.md) | ✓ | if new ID conventions or project-level conventions introduced | skip | if the landed work introduced new conventions |
 | 3.11 New-deliverable consumer verification | ✓ | ✓ | skip | skip |
+| 3.12 Source-document completeness check | ✓ | ✓ | skip | ✓ (rigorous — verify landing) |
 
 ## 3.0 Cross-Package Scope Establishment
 
@@ -170,6 +171,8 @@ For each new deliverable, grep for references to it by name across:
 
 Also inspect the spec's own Problem Statement and Approach: does the spec name a concrete consumer-side workflow the deliverable enables? "Used primarily for X" where X is a speculative use case (future skill, hypothetical HARD-GATE preview, "skills assembling a preview of...") without a pending consumer spec or ticket is a red flag — the justification is aspirational, not operational.
 
+**Graph-edge deliverables** (new world-index edge types, new query-graph node types, new MCP retrieval-surface fields) have a structural consumer model rather than a name-greppable consumer model — they are consumed by general query primitives (`get_neighbors`, `get_record_field`, `find_impacted_fragments`, context-packet edge projections) rather than by direct name invocation. Consumer verification for these deliverables is satisfied by confirming (a) the new edge type fits within the existing edge-vocabulary contract (one entry per resolved record reference; no novel semantics), and (b) the retrieval surface will project the new edges automatically without requiring per-edge consumer wiring. Skip the name-grep enumeration for graph-edge deliverables; the consumer existence is structural. Worked example: a spec adding `plan_fallback_step_target` / `emotion_expires_when_ref` edges to `tools/world-index/src/parse/atomic.ts`'s STPLAN / STEMO extraction would return zero name-grep hits across `.claude/skills/*/SKILL.md` and `tools/*/src/` because the edges are new, yet the consumer model is the world-index retrieval surface itself; flagging "zero consumers found" as a HIGH Issue would be a false-positive — the structural-consumer model applies.
+
 **Outcome classification**:
 
 - **≥1 consumer found** (grep match in skills / specs / tickets / docs, OR a concrete consumer-side workflow named in the spec and traceable to a pending spec or ticket): deliverable is justified. Record the consumers in Step 6 presentation for audit-trail visibility so the reader can reconstruct why the deliverable earned its place.
@@ -177,6 +180,26 @@ Also inspect the spec's own Problem Statement and Approach: does the spec name a
 - **Inherited-commitment case** (deliverable originates from a parent, archived, or superseded spec's commitment but no surviving consumer exists in current work): this is the "ghost deliverable" pattern. Treat as the zero-consumers case — the archived commitment does not justify carrying forward if the consumer path evaporated. Cite the archived-spec anchor (e.g., `archive/specs/SPEC-NN-foo.md §C`) in the finding so the retcon of the archived commitment is surfaced per Rule 6 (No Silent Retcons); dropping silently would be a silent retcon of the archived commitment.
 
 When the consumer check surfaces a zero-consumers deliverable, **defer the decision to the Step 6 Question path** — do not silently drop the deliverable at Step 3. The user is the one to confirm the drop or to name the consumer that the grep missed. The reassessor's job is to surface the question, not to answer it unilaterally.
+
+## 3.12 Source-Document Completeness Check
+
+For specs that cite an external source document — audit reports under `reports/`, brainstorm outputs under `docs/plans/`, deep-research reports, or any other artifact named in the spec's Problem Statement, Motivating Evidence, or Approach as the origin of the spec's findings:
+
+1. **Identify** the source document(s). The cite is typically a parenthetical reference (e.g., *"per `reports/<name>.md`"*) or an explicit Motivating Evidence anchor naming the document path.
+2. **Enumerate** the source document's claims / recommendations: numbered findings (`F-01`, `R-7`), P-tier items (Priority 0 must-do, Priority 1 should-do), surgical-hole lists, "deterministic validators to strengthen" tables, or any other claim-set the document presents as actionable. For oversized source documents (token-limit exceeded on a single Read), prefer section-targeted reads of the claim-enumerating sections (grep section headers first, then read the relevant lists) over chunked end-to-end reads.
+3. **Verify** each enumerated claim is adjudicated by the spec:
+   - **Accepted** in §Approach / §Deliverables with a per-claim mapping to a deliverable, OR
+   - **Rejected** in §Out of Scope with a per-claim rationale, OR
+   - **Deferred** with a named follow-up surface (next spec, ticket queue, future investigation).
+4. **Surface unadjudicated claims** as MEDIUM Improvement findings at Step 5-6 — name the unadjudicated claim, cite the source-document line, and recommend the spec add an adjudication (accept / reject / defer). The brainstorm session that produced the spec is the natural prior site where such adjudication would have happened; an unadjudicated claim surfaced here is evidence that the brainstorm triage missed the claim, and the reassessment's role is to close that gap before ticket decomposition.
+
+For classification (d) retroactive, apply a stronger variant: verify each "accepted" claim in the spec's §Approach actually landed in the codebase as a delivering commit or sibling-spec absorption (cross-reference §3.1-§3.4's rigorous-landing posture). A spec whose §Approach accepted a claim but whose Outcome section can't cite the delivering work has a Motivating-Evidence-to-Outcome gap that the retroactive branch must close — surface as a HIGH Issue (Rule 6 silent-retcon risk: the spec's acceptance is unredeemed without the landing citation).
+
+**Skip** this substep when:
+- (c) refactor classification — refactors typically have no external source document.
+- No external source document is cited in the spec's Problem Statement, Motivating Evidence, or Approach. Self-originating specs (those whose findings come from operator analysis of the codebase rather than from a separate document) are scoped by §3.0-§3.11 alone.
+
+This substep is the symmetric backward-direction complement to §3.8 (Upstream Spec References), which checks FORWARD cross-spec references (other specs that reference this spec's deliverables); §3.12 checks BACKWARD source-document references (claims this spec inherits from a prior document) for adjudication completeness.
 
 ## Conditional Deliverable Validation
 

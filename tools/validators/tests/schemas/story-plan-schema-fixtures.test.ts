@@ -18,13 +18,34 @@ test("story-plan schema accepts complete STPLAN records", () => {
   assert.equal(validate(validPlan()), true, JSON.stringify(validate.errors, null, 2));
 });
 
-test("story-plan schema rejects missing required fields", () => {
+test("story-plan schema requires current_step for active-lifecycle plans", () => {
   const validate = compileSchema();
   const parsed = validPlan();
   delete parsed.current_step;
 
   assert.equal(validate(parsed), false);
   assert.ok(validate.errors?.some((error) => error.keyword === "required" && error.message?.includes("current_step")));
+});
+
+test("story-plan schema allows terminal plans without current_step", () => {
+  const validate = compileSchema();
+  const parsed = validPlan({ plan_status: "fulfilled", belief_basis: [] });
+  delete parsed.current_step;
+
+  assert.equal(validate(parsed), true, JSON.stringify(validate.errors, null, 2));
+});
+
+test("story-plan schema requires non-empty belief_basis for active-lifecycle plans", () => {
+  const validate = compileSchema();
+
+  assert.equal(validate(validPlan({ belief_basis: [] })), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "minItems" && error.instancePath === "/belief_basis"));
+});
+
+test("story-plan schema allows terminal plans with empty belief_basis", () => {
+  const validate = compileSchema();
+
+  assert.equal(validate(validPlan({ plan_status: "failed", belief_basis: [] })), true, JSON.stringify(validate.errors, null, 2));
 });
 
 test("story-plan schema rejects invalid enum and ID shapes", () => {

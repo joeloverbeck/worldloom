@@ -30,7 +30,7 @@ test("STEMO records emit holder, trigger, appraisal, orientation, supersession, 
       "trigger_event: SE-4",
       "behavioral_pressure: [flee, protect_other]",
       "agency_effect: constraining",
-      "expires_when: when the bell tower is secure",
+      "expires_when: after SE-5 resolves the bell tower",
       "derived_from:",
       "  - SE-4",
       "  - SREL-1",
@@ -51,7 +51,8 @@ test("STEMO records emit holder, trigger, appraisal, orientation, supersession, 
       edge("STEMO-2", "STENT-2", "emotion_oriented_toward"),
       edge("STEMO-2", "STEMO-1", "emotion_supersedes"),
       edge("STEMO-2", "SE-4", "emotion_derived_from"),
-      edge("STEMO-2", "SREL-1", "emotion_derived_from")
+      edge("STEMO-2", "SREL-1", "emotion_derived_from"),
+      edge("STEMO-2", "SE-5", "emotion_expires_when_ref")
     ]);
   } finally {
     rmSync(root, { recursive: true, force: true });

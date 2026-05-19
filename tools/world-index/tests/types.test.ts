@@ -37,7 +37,7 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.equal(ATTRIBUTION_EDGE_TYPES.length, 2);
   assert.equal(ENTITY_EDGE_TYPES.length, 1);
   assert.equal(SCOPED_EDGE_TYPES.length, 2);
-  assert.equal(STORY_EDGE_TYPES.length, 50);
+  assert.equal(STORY_EDGE_TYPES.length, 56);
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_create"));
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_supersede"));
   assert.ok(STORY_EDGE_TYPES.includes("creation_evidence"));
@@ -66,6 +66,11 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.ok(STORY_EDGE_TYPES.includes("plan_resource_basis"));
   assert.ok(STORY_EDGE_TYPES.includes("plan_blocker"));
   assert.ok(STORY_EDGE_TYPES.includes("plan_current_step_target"));
+  assert.ok(STORY_EDGE_TYPES.includes("plan_fallback_step_target"));
+  assert.ok(STORY_EDGE_TYPES.includes("plan_success_predicate_ref"));
+  assert.ok(STORY_EDGE_TYPES.includes("plan_fallback_predicate_ref"));
+  assert.ok(STORY_EDGE_TYPES.includes("plan_derived_from"));
+  assert.ok(STORY_EDGE_TYPES.includes("plan_expires_when_ref"));
   assert.ok(STORY_EDGE_TYPES.includes("plan_created_by_event"));
   assert.ok(STORY_EDGE_TYPES.includes("plan_supersedes"));
   assert.ok(STORY_EDGE_TYPES.includes("emotion_holder"));
@@ -74,9 +79,10 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.ok(STORY_EDGE_TYPES.includes("emotion_oriented_toward"));
   assert.ok(STORY_EDGE_TYPES.includes("emotion_supersedes"));
   assert.ok(STORY_EDGE_TYPES.includes("emotion_derived_from"));
+  assert.ok(STORY_EDGE_TYPES.includes("emotion_expires_when_ref"));
   assert.ok(STORY_EDGE_TYPES.includes("event_actor"));
   assert.ok(STORY_EDGE_TYPES.includes("event_target"));
   assert.ok(STORY_EDGE_TYPES.includes("event_selected_storylet"));
-  assert.equal(edgeTypes.length, 65);
+  assert.equal(edgeTypes.length, 71);
   assert.equal(new Set(edgeTypes).size, edgeTypes.length);
 });

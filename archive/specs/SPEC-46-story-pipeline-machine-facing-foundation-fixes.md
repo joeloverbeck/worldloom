@@ -6,7 +6,7 @@
 **Phase**: wave-1 machine-facing layer reconciliation (no new story-bundle record classes; existing-record retrieval surface fixes)
 **Depends on**: SPEC-42 (introduced CLK / STSEC / STQ — the new classes this spec catches the retrieval surface up to); SPEC-45 (story-state provenance indexing — established the pattern of expanding `STORY_EDGE_TYPES` for previously-unindexed story-record fields)
 **Blocks**: follow-up specs for `STPLAN` (actor-owned tactical plan), `STEMO` (actor-owned affective state), the Priority 2 render packets (present-causal-situation, dramatic-irony, reader-expectation, social-pressure, pressure-texture, branch-possibility-space), and the `SE.record_introductions[]` migration brainstorm — none in this spec's scope
-**Source**: `reports/new-story-structures-proposal.md` (ChatGPT-Pro deep-research proposal, 2026-05-18, Priority 0 only); brainstorm-triage cross-checked against `docs/FOUNDATIONS.md` §Story Bundles §4a / §5a / §5b / §5c, `.claude/skills/_shared-templates/story-state-contract.md` §3-5 / §7-8, `.claude/skills/_shared-templates/story-record-schemas.md`, archived SPEC-42 (CLK / STSEC / STQ contract precedent), archived SPEC-45 (provenance edge precedent), and `tools/validators/src/`, `tools/patch-engine/src/`, `tools/world-mcp/src/`, `tools/world-index/src/` verified codebase state.
+**Source**: `archive/reports/new-story-structures-proposal.md` (ChatGPT-Pro deep-research proposal, 2026-05-18, Priority 0 only); brainstorm-triage cross-checked against `docs/FOUNDATIONS.md` §Story Bundles §4a / §5a / §5b / §5c, `.claude/skills/_shared-templates/story-state-contract.md` §3-5 / §7-8, `.claude/skills/_shared-templates/story-record-schemas.md`, archived SPEC-42 (CLK / STSEC / STQ contract precedent), archived SPEC-45 (provenance edge precedent), and `tools/validators/src/`, `tools/patch-engine/src/`, `tools/world-mcp/src/`, `tools/world-index/src/` verified codebase state.
 
 **Implementation note (2026-05-18)**: `archive/tickets/SPEC46STOPIPMAC-002.md` landed the Phase B actor-bound MCP summaries `active_intentions`, `active_statuses`, `active_intention_ids`, and `active_status_entities` in `tools/world-mcp`. The remaining Phase B/Phase C absence claims below remain active for tickets 003-015 unless a later implementation note supersedes them.
 
@@ -40,7 +40,7 @@
 
 ## Problem Statement
 
-The proposal at `reports/new-story-structures-proposal.md` makes a two-layer claim: (1) Worldloom's story ontology is rich (20 record classes, eight hard gates, 22-predicate closed DSL — verified), and (2) its **machine-facing retrieval surface and rendering support underuse that ontology**. Brainstorm-triage verification confirmed the second claim at three concrete sites:
+The proposal at `archive/reports/new-story-structures-proposal.md` makes a two-layer claim: (1) Worldloom's story ontology is rich (20 record classes, eight hard gates, 22-predicate closed DSL — verified), and (2) its **machine-facing retrieval surface and rendering support underuse that ontology**. Brainstorm-triage verification confirmed the second claim at three concrete sites:
 
 1. **MCP context-packet projection drift for `OBL`.** The current `OBL` schema at `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.4 (lines 448-464) carries `obligation_kind`, `description`, `owed_by`, `owed_to`, `trigger_to_close`, and `urgency: low | medium | high` (closed enum). The MCP context builder at `tools/world-mcp/src/context-packet/story-bundle-context.ts:197-211` (`buildOpenObligations`) instead emits a projection with `type` (not `obligation_kind`), `owner` (absent from schema), `subjects` (absent from schema), numeric `salience` (absent from schema), and numeric `urgency` (schema is enum). Skills relying on `mcp__worldloom__get_context_packet` with `story_slug` receive a story-bundle-context obligation summary that does not reflect the persisted records — silent retrieval drift. The most-likely cause is field-name evolution against an earlier `OBL` shape that was never propagated into the projection layer.
 
@@ -188,7 +188,7 @@ Each new summary projects only the load-bearing-for-skill-retrieval subset of th
 
 ## Out of Scope
 
-The following items from `reports/new-story-structures-proposal.md` are **explicitly out of scope** for SPEC-46 and routed as named below:
+The following items from `archive/reports/new-story-structures-proposal.md` are **explicitly out of scope** for SPEC-46 and routed as named below:
 
 1. **`STPLAN` (actor-owned tactical plan record class)** — deferred to a follow-up spec. Requires its own §5b stress-test on proposed fields (`risk_posture`, `visibility`, `current_step.rationale`, `fallback_steps[*].rationale`) and §5c safeguard design (forbidding future PG ids, guaranteed-outcome framing, supersession-on-revision discipline). Depends on this spec's Phase B for actor-state retrieval and Phase C for plan-basis edge traversal.
 2. **`STEMO` (actor-owned affective state record class)** — deferred to a follow-up spec. Schema is more defensible than STPLAN but depends on this spec's Phase B for belief / status retrieval.
