@@ -1,21 +1,19 @@
 {
   "originating_spec": "specs/SPEC-48-se-structured-introduction-fields.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC48SESTRINT-012.md",
+  "last_ticket": "archive/tickets/SPEC48SESTRINT-013.md",
   "last_result": "completed_archived",
-  "last_work_commit": "14824467791b010195c2053748267e91a2ff4092",
+  "last_work_commit": "eeedc5072e53a586b15fd81ccf7ad0a20c058a3d",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC48SESTRINT-013.md",
-  "queue": [
-    "tickets/SPEC48SESTRINT-013.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": "final_spec_archive",
+  "queue": [],
+  "phase": "ready_for_final_spec_archive",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked clean after SPEC48SESTRINT-012 work commit; expected ignored artifacts remain tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
+  "dirty_state": "tracked clean after SPEC48SESTRINT-013 work commit; expected ignored artifacts remain briefs/, world-proposals/, worlds/, .claude/settings.local.json, tools/hooks/dist/, tools/hooks/logs/, tools/hooks/node_modules/, tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
   "updated_at": "2026-05-19"
 }
