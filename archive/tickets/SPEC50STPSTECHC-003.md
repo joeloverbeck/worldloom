@@ -50,7 +50,7 @@ Mirrored the bounded alias-binding rule in `story-state-contract.md` §5 and `st
 ## Out of Scope
 
 - `SE.state_delta` STPLAN/STEMO (archive/tickets/SPEC50STPSTECHC-001.md).
-- Eligibility-source grounding or additional selected-move binding validation beyond the schema class set (covered where SPEC50STPSTECHC-009 lands).
+- Eligibility-source grounding or additional selected-move binding validation beyond the schema class set (covered by archive/tickets/SPEC50STPSTECHC-009.md).
 - Widening alias_bindings to classes with no existential predicate.
 
 ## Acceptance Criteria

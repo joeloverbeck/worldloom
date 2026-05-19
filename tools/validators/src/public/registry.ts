@@ -3,6 +3,7 @@ import { activeRecordsFullShape } from "../structural/active-records-full-shape.
 import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
+import { chcSltEligibilitySourceGrounding } from "../structural/chc-slt-eligibility-source-grounding.js";
 import { clockFiringThresholdIntegrity } from "../structural/clock-firing-threshold-integrity.js";
 import { clockIntroductionGroundingIntegrity } from "../structural/clock-introduction-grounding-integrity.js";
 import { clockTerminalDebtIntegrity } from "../structural/clock-terminal-debt-integrity.js";
@@ -107,6 +108,7 @@ export const structuralValidators: readonly Validator[] = [
   nonPropagationFactsCompleteness,
   snapshotReplayEquality,
   recursiveReferenceClosure,
+  chcSltEligibilitySourceGrounding,
   stateSnapshotIntegrity,
   clockValueInRange,
   clockThresholdOrdering,

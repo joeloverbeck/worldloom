@@ -348,9 +348,9 @@ test("listRecords returns accepted projection keys for story-bundle validation e
     assert.equal(result.details?.field, "fields");
     assert.deepEqual(result.details?.unknown_projection_keys, ["unknown_storylet_key"]);
     assert.deepEqual(result.details?.accepted_projection_keys, [
+      "effects",
       "id",
       "move_family",
-      "opens_obligations",
       "provenance",
       "record_id",
       "record_kind",

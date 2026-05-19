@@ -97,6 +97,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "chc_grounded_in_artifact_accessible"
     );
     assert.equal(chcDaExecution?.status, "skipped");
+    const chcSltGroundingExecution = result.executions.find(
+      (execution) => execution.name === "chc_slt_eligibility_source_grounding"
+    );
+    assert.equal(chcSltGroundingExecution?.status, "skipped");
     const proseArtifactExecution = result.executions.find(
       (execution) => execution.name === "prose_load_bearing_artifact_mention"
     );
@@ -239,6 +243,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== storyletExecution &&
         row !== choiceSetExecution &&
         row !== chcDaExecution &&
+        row !== chcSltGroundingExecution &&
         row !== proseArtifactExecution &&
         row !== storyDaDuplicateExecution &&
         row !== snapshotReplayExecution &&

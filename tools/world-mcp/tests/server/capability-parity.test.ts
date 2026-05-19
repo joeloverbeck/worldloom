@@ -21,6 +21,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "canon_baseline_drift",
   "canon_drift_classification_evidence",
   "causal_dependency_threat_scan",
+  "chc_slt_eligibility_source_grounding",
   "chc_grounded_in_artifact_accessible",
   "choice_set_noncollapse",
   "clock_firing_threshold_integrity",

@@ -57,7 +57,7 @@ Kept `recursive-reference-closure.ts` production logic unchanged because it alre
 ## Out of Scope
 
 - `SE.state_delta` STPLAN/STEMO (archive/tickets/SPEC50STPSTECHC-001.md).
-- The CHC↔SLT eligibility-source grounding validator (SPEC50STPSTECHC-009).
+- The CHC↔SLT eligibility-source grounding validator (archive/tickets/SPEC50STPSTECHC-009.md).
 - Any pool-level salience / pressure-distribution check.
 
 ## Acceptance Criteria
