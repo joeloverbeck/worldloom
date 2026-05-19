@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-48-se-structured-introduction-fields.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC48SESTRINT-011.md",
+  "last_ticket": "archive/tickets/SPEC48SESTRINT-010.md",
   "last_result": "completed_archived",
-  "last_work_commit": "299adb9e30e591eb551a6c718982b9216e2bda64",
+  "last_work_commit": "4f54889f35c42a4fd294cdca804212411d719968",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC48SESTRINT-010.md",
+  "next_target": "tickets/SPEC48SESTRINT-012.md",
   "queue": [
-    "tickets/SPEC48SESTRINT-010.md",
     "tickets/SPEC48SESTRINT-012.md",
     "tickets/SPEC48SESTRINT-013.md"
   ],
@@ -18,6 +17,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked clean after SPEC48SESTRINT-011 work commit; expected ignored artifacts remain tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
+  "dirty_state": "tracked clean after SPEC48SESTRINT-010 work commit; expected ignored artifacts remain tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
   "updated_at": "2026-05-19"
 }
