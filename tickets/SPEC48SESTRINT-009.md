@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — deletes `tools/world-index/src/parse/intro-tag-parser.ts`
-**Deps**: 003, 004, 008
+**Deps**: archive/tickets/SPEC48SESTRINT-003.md, 004, 008
 
 ## Problem
 

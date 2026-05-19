@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds validator-layer enforcement for a SPEC-48 structured-field invariant
-**Deps**: archive/tickets/SPEC48SESTRINT-001.md, SPEC48SESTRINT-003
+**Deps**: archive/tickets/SPEC48SESTRINT-001.md, archive/tickets/SPEC48SESTRINT-003.md
 
 ## Problem
 

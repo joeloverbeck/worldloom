@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — refactors 8 structural validators in `tools/validators/src/structural/`; retargets cross-package import at `midstory-record-introduction-grounding.ts`
-**Deps**: 003
+**Deps**: archive/tickets/SPEC48SESTRINT-003.md
 
 ## Problem
 

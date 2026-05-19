@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — refactors 1 structural validator in `tools/validators/src/structural/`
-**Deps**: 003
+**Deps**: archive/tickets/SPEC48SESTRINT-003.md
 
 ## Problem
 

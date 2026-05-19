@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — replaces 1 structural validator (delete `non-propagation-tag-shape.ts`; create `non-propagation-facts-completeness.ts`); updates registry + README + 2 test files; deletes old test file
-**Deps**: 003
+**Deps**: archive/tickets/SPEC48SESTRINT-003.md
 
 ## Problem
 

@@ -1,6 +1,6 @@
 # SPEC48SESTRINT-003: Refactor shared utility modules (drop parser re-exports + regex constants + rationale.includes shortcuts; expose typed readers)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — refactors 3 shared utility files in `tools/validators/src/structural/` (`midstory-introduction-utils.ts`, `stplan-utils.ts`, `stemo-utils.ts`); exposes new typed readers consumed by tickets 004-007
@@ -18,6 +18,7 @@ SPEC-48's clean-break design replaces the parseable tag grammar on `SE.world_log
 4. **FOUNDATIONS §Story Bundles §5b (Schema-Minimalism)**: typed readers over structured fields enforce the load-bearing-only doctrine — each utility export has a named §5b-class consumer (the validator refactors in tickets 004-007 are the consumers). The 8 per-class trigger vocabularies are preserved as TS exports because they are the source of truth for the schema-vs-vocabulary parity test (added in this ticket).
 5. **Canon Safety surface**: `midstory-introduction-utils.ts`, `stplan-utils.ts`, `stemo-utils.ts` all live under `tools/validators/src/structural/`. Modifying utility modules in that directory falls under the per-ticket-type granularity rule for structural validators — even though these are helpers rather than gate-firing validators, they are imported by gates and their refactor affects gate behavior at runtime. The change preserves all existing validator semantics (no firewall weakening; no Mystery Reserve exposure); typed readers expose the same data the parsed tags exposed, just through structured fields.
 6. **Rename / remove**: regex constants `PLAN_CLOSURE_RELATION` + `PLAN_ADVANCES_RELATION` are removed from `stplan-utils.ts`; the `rationale.includes(...)` shortcut function in `stemo-utils.ts` is removed; `parsePlanRelationTags` re-export is dropped from `midstory-introduction-utils.ts` (the per-class trigger constants are KEPT as TS exports for the parity test, not removed). Blast radius for the removed symbols: every consumer in `tools/validators/src/structural/` that imported them needs the typed-reader migration in tickets 004-007. No `.claude/skills/` or `docs/` consumers exist (these are TypeScript-internal helpers).
+7. **Same-seam proof fixture fallout**: after the utility helpers stopped parsing `world_logic_rationale`, three focused structural tests still encoded plan-relation evidence only as deprecated prose tags. These fixtures are part of this ticket's owned proof surface, not downstream validator implementation scope: `stplan-closure-status-requires-closure-event.test.ts`, `stplan-event-plan-relation-consistency.test.ts`, and `stemo-agency-effect-compatibility.test.ts` now express the same PASS/FAIL semantics through `SE.state_relations[]`.
 
 ## Architecture Check
 
@@ -85,6 +86,9 @@ Add `tools/validators/tests/structural/midstory-vocabulary-parity.test.ts` asser
 - `tools/validators/src/structural/stplan-utils.ts` (modify)
 - `tools/validators/src/structural/stemo-utils.ts` (modify)
 - `tools/validators/tests/structural/midstory-vocabulary-parity.test.ts` (new)
+- `tools/validators/tests/structural/stplan-closure-status-requires-closure-event.test.ts` (modify — same-seam fixture proof updated to structured `state_relations[]`)
+- `tools/validators/tests/structural/stplan-event-plan-relation-consistency.test.ts` (modify — same-seam fixture proof updated to structured `state_relations[]`)
+- `tools/validators/tests/structural/stemo-agency-effect-compatibility.test.ts` (modify — same-seam fixture proof updated to structured `state_relations[]`)
 
 ## Out of Scope
 
@@ -98,7 +102,7 @@ Add `tools/validators/tests/structural/midstory-vocabulary-parity.test.ts` asser
 ### Tests That Must Pass
 
 1. `npm test --prefix tools/validators` — build succeeds, all existing validator tests pass with no regression.
-2. `npm test --prefix tools/validators -- --test-name-pattern=midstory-vocabulary-parity` (or equivalent narrowing) — the new parity test passes for all 8 trigger classes + relation enum + non-propagation reasons.
+2. `node --test dist/tests/structural/midstory-vocabulary-parity.test.js` from `tools/validators/` after `npm run build --prefix tools/validators` — the new parity test passes for all 8 trigger classes + relation enum + non-propagation reasons.
 3. Grep proof: `grep -n "PLAN_CLOSURE_RELATION\|PLAN_ADVANCES_RELATION" tools/validators/src/structural/stplan-utils.ts` returns zero matches.
 4. Grep proof: `grep -n "rationale.includes.*plan_relation\|rationale.includes.*non_propagation" tools/validators/src/structural/stemo-utils.ts` returns zero matches.
 5. Grep proof: `grep -n "parsePlanRelationTags" tools/validators/src/structural/midstory-introduction-utils.ts` returns zero matches.
@@ -114,8 +118,40 @@ Add `tools/validators/tests/structural/midstory-vocabulary-parity.test.ts` asser
 ### New/Modified Tests
 
 1. `tools/validators/tests/structural/midstory-vocabulary-parity.test.ts` (new) — asserts TS-export ↔ JSON-schema parity for the 8 trigger classes + 7-value relation enum + 5-value non-propagation reason enum.
+2. `tools/validators/tests/structural/stplan-closure-status-requires-closure-event.test.ts` (modified) — updates the closure-event pass fixture from deprecated tag prose to `state_relations[]`.
+3. `tools/validators/tests/structural/stplan-event-plan-relation-consistency.test.ts` (modified) — updates advancing-event pass/fail fixtures from deprecated tag prose to `state_relations[]`.
+4. `tools/validators/tests/structural/stemo-agency-effect-compatibility.test.ts` (modified) — updates the same-event explanation fixture from deprecated tag prose to `state_relations[]`.
 
 ### Commands
 
 1. `npm test --prefix tools/validators` — full validator test suite (build + run).
-2. `node -e "const utils = require('./tools/validators/dist/src/structural/midstory-introduction-utils.js'); console.log(Object.keys(utils).filter(k => k.startsWith('readSe') || k.startsWith('MIDSTORY_TRIGGERS') || k === 'PLAN_RELATIONS'));"` — confirms the typed readers + preserved trigger constants + relation enum are exported.
+2. `node --test dist/tests/structural/midstory-vocabulary-parity.test.js` from `tools/validators/` — focused parity proof.
+3. `node -e "const utils = require('./tools/validators/dist/src/structural/midstory-introduction-utils.js'); console.log(Object.keys(utils).filter(k => k.startsWith('readSe') || k.startsWith('MIDSTORY_TRIGGERS') || k === 'PLAN_RELATIONS' || k === 'NON_PROPAGATION_REASONS').sort());"` — confirms the typed readers + preserved trigger constants + relation/reason enums are exported.
+4. `grep -n "parsePlanRelationTags\|extractIntroTags" tools/validators/src/structural/midstory-introduction-utils.ts` — expected no-match exit 1.
+5. `grep -n "PLAN_CLOSURE_RELATION\|PLAN_ADVANCES_RELATION" tools/validators/src/structural/stplan-utils.ts` — expected no-match exit 1.
+6. `grep -n "rationale.includes.*plan_relation\|rationale.includes.*non_propagation" tools/validators/src/structural/stemo-utils.ts` — expected no-match exit 1.
+
+## Outcome
+
+Completed: 2026-05-19
+
+Implemented the shared SPEC-48 utility seam:
+
+- `tools/validators/src/structural/midstory-introduction-utils.ts` now owns the 8 mid-story trigger vocabularies, `PLAN_RELATIONS`, `NON_PROPAGATION_REASONS`, and typed readers for `SE.record_introductions[]`, `SE.state_relations[]`, and `SE.non_propagation_facts[]`.
+- `tools/validators/src/structural/stplan-utils.ts` now reads closure and advancing relations through `readSeStateRelations(event)` instead of local plan-relation regexes.
+- `tools/validators/src/structural/stemo-utils.ts` now treats same-event plan/non-propagation explanation as the presence of structured `state_relations[]` or `non_propagation_facts[]`, not tag substrings in `world_logic_rationale`.
+- Added `tools/validators/tests/structural/midstory-vocabulary-parity.test.ts` and updated three STPLAN/STEMO focused fixtures so the utility consumers are exercised through structured fields.
+
+Deviations:
+
+- The ticket's narrowed parity command was replaced with a direct compiled test command because the package's `npm test` wrapper runs the full compiled suite rather than reliably narrowing by `--test-name-pattern`.
+- Same-seam fixture updates were added after the first post-change full-suite run exposed three stale tag-prose fixtures. This did not widen into tickets 004-007; it only moved the proof fixtures for helper consumers touched by this ticket.
+
+## Verification Result
+
+- Baseline before edits: `npm test --prefix tools/validators` passed (`616` tests).
+- `npm run build --prefix tools/validators` passed after implementation.
+- `node --test dist/tests/structural/midstory-vocabulary-parity.test.js` passed from `tools/validators/`.
+- Focused fallout tests passed: `node --test dist/tests/structural/stplan-closure-status-requires-closure-event.test.js`, `node --test dist/tests/structural/stplan-event-plan-relation-consistency.test.js`, and `node --test dist/tests/structural/stemo-agency-effect-compatibility.test.js`.
+- Final full suite: `npm test --prefix tools/validators` passed (`617` tests).
+- Negative grep proofs returned expected no-match exit 1 for parser re-exports in `midstory-introduction-utils.ts`, removed STPLAN regex constants in `stplan-utils.ts`, and deprecated `rationale.includes(...plan_relation/non_propagation...)` checks in `stemo-utils.ts`.

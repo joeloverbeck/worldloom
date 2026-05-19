@@ -5,6 +5,7 @@ import Ajv2020Module from "ajv/dist/2020.js";
 import type { AnySchema, ErrorObject, ValidateFunction } from "ajv";
 
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { readSeNonPropagationFacts, readSeStateRelations } from "./midstory-introduction-utils.js";
 import {
   asPlainRecord,
   locationFor,
@@ -318,8 +319,7 @@ export function sameEventExplainsConstrainedAgency(emotion: IndexedRecord, maps:
   if (event?.node_type !== "story_event_record") {
     return false;
   }
-  const rationale = stringValue(asPlainRecord(event.parsed).world_logic_rationale) ?? "";
-  return rationale.includes("plan_relation:") || rationale.includes("non_propagation:");
+  return readSeStateRelations(event).length > 0 || readSeNonPropagationFacts(event).length > 0;
 }
 
 export function fail(emotion: IndexedRecord, validator: string, code: string, message: string, detail?: unknown): Verdict {
