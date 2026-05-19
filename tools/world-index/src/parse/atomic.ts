@@ -661,6 +661,12 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "page_record") {
+    for (const edge of edgesForPage(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   pushStoryRef("created_at_page", stringField(record, "created_at_page"));
   pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
@@ -749,6 +755,30 @@ function edgesForStorylet(
     for (const target of stringArrayField(exitOption, "likely_effects")) {
       pushStoryEdgeIfReference(edges, node.node_id, "storylet_exit_likely_effect_ref", storySlug, target);
     }
+  }
+
+  return edges;
+}
+
+function edgesForPage(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  for (const target of stringArraysInRecordField(record, "active_records", ["state_snapshot"])) {
+    pushStoryEdgeIfReference(edges, node.node_id, "page_active_record", storySlug, target);
+  }
+
+  for (const affordance of recordArrayField(record, "visible_affordances", ["state_snapshot"])) {
+    for (const target of stringArrayField(affordance, "grounded_in")) {
+      pushStoryEdgeIfReference(edges, node.node_id, "page_visible_affordance_record", storySlug, target);
+    }
+  }
+
+  for (const target of stringArrayField(record, "emitted_choices")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "page_emitted_choice", storySlug, target);
   }
 
   return edges;
@@ -1055,11 +1085,30 @@ function edgesForStoryEvent(
     edges.push(createStoryRefEdge(node.node_id, "state_delta_supersede", storySlug, target));
   }
 
+  for (const target of stringArrayField(record, "close", ["state_delta"])) {
+    edges.push(createStoryRefEdge(node.node_id, "state_delta_close", storySlug, target));
+  }
+
+  for (const relation of recordArrayField(record, "state_relations")) {
+    pushStoryEdgeIfReference(
+      edges,
+      node.node_id,
+      "event_state_relation_target",
+      storySlug,
+      stringField(relation, "target_record")
+    );
+  }
+
+  for (const target of stringValuesInRecordField(record, "alias_bindings", ["commitment"])) {
+    pushStoryEdgeIfReference(edges, node.node_id, "event_alias_binding", storySlug, target);
+  }
+
   for (const introduction of recordArrayField(record, "record_introductions")) {
     const introducedRecordId = stringField(introduction, "record_id");
     if (!introducedRecordId) {
       continue;
     }
+    edges.push(createStoryRefEdge(node.node_id, "event_introduces_record", storySlug, introducedRecordId));
     const sourceNodeId = storyNodeId(storySlug, introducedRecordId);
     for (const evidenceId of stringArrayField(introduction, "evidence")) {
       edges.push(createStoryRefEdge(sourceNodeId, "creation_evidence", storySlug, evidenceId));
@@ -1258,6 +1307,44 @@ function numberArrayField(record: Record<string, unknown>, field: string, nested
   }
   const value = container[field];
   return Array.isArray(value) ? value.filter((item): item is number => typeof item === "number") : [];
+}
+
+function stringValuesInRecordField(
+  record: Record<string, unknown>,
+  field: string,
+  nestedPath: string[] = []
+): string[] {
+  let container: unknown = record;
+  for (const segment of nestedPath) {
+    if (!isRecord(container)) {
+      return [];
+    }
+    container = container[segment];
+  }
+  if (!isRecord(container) || !isRecord(container[field])) {
+    return [];
+  }
+  return Object.values(container[field]).filter((item): item is string => typeof item === "string");
+}
+
+function stringArraysInRecordField(
+  record: Record<string, unknown>,
+  field: string,
+  nestedPath: string[] = []
+): string[] {
+  let container: unknown = record;
+  for (const segment of nestedPath) {
+    if (!isRecord(container)) {
+      return [];
+    }
+    container = container[segment];
+  }
+  if (!isRecord(container) || !isRecord(container[field])) {
+    return [];
+  }
+  return Object.values(container[field]).flatMap((value) =>
+    Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
+  );
 }
 
 function recordArrayField(

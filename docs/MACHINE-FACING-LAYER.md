@@ -60,14 +60,20 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 ## Story-Bundle Edge Types
 
-`world-index` emits 58 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, thread links, branch/page links, and SPEC-45 event provenance:
+`world-index` emits 65 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, thread links, branch/page links, and SPEC-45 event provenance:
 
 - `world_entity_binding` — `STENT.world_ent_id` to a world-canon entity id.
 - `story_fact_derived_from` — `SF.derived_from_cf` to the originating CF.
 - `created_at_page` — story records with `created_at_page` / `provenance.created_at_page` to the creating `PG`.
-- `state_delta_create`, `state_delta_supersede` — `SE.state_delta.create[]` / `SE.state_delta.supersede[]` to affected story records.
+- `state_delta_create`, `state_delta_supersede`, `state_delta_close` — `SE.state_delta.create[]` / `SE.state_delta.supersede[]` / `SE.state_delta.close[]` to affected story records.
 - `creation_evidence` — `SE.record_introductions[]` evidence links from the introduced record to its evidence records.
+- `event_state_relation_target` — `SE.state_relations[].target_record` to the related story record.
+- `event_alias_binding` — each structured record id value in `SE.commitment.alias_bindings`.
+- `event_introduces_record` — `SE.record_introductions[].record_id` from the event to the introduced record.
 - `parent_page`, `leaf_page` — `PG` / `CHC` / `BR` page-tree links.
+- `page_active_record` — each record id listed in `PG.state_snapshot.active_records.<class>[]`.
+- `page_visible_affordance_record` — each record id named by `PG.state_snapshot.visible_affordances[].grounded_in[]`.
+- `page_emitted_choice` — each `CHC` id named by `PG.emitted_choices[]`.
 - `dependent_fact` — `OBL.dependent_facts[]` to fact records.
 - `thread_obligation` — `THR.obligations[]` to obligation records.
 
@@ -123,7 +129,7 @@ SPEC-47 and SPEC-49 extend that graph surface with 20 additional edge types for 
 | `STEMO` | `emotion_derived_from` | record | Each record named by `derived_from[]`. |
 | `STEMO` | `emotion_expires_when_ref` | record | Record ids parsed from scalar `expires_when`. |
 
-SPEC-50 removes the legacy `SLT` obligation-field edges (`opens_obligation`, `pays_off_obligation`, `complicates_obligation`, `transfers_obligation`) because the current `SLT` schema uses `effects` and `exit_options` instead of those fields. It adds six CHC/SLT exploitation edges:
+SPEC-50 removes the legacy `SLT` obligation-field edges (`opens_obligation`, `pays_off_obligation`, `complicates_obligation`, `transfers_obligation`) because the current `SLT` schema uses `effects` and `exit_options` instead of those fields. It adds six CHC/SLT exploitation edges, plus the page and event-completion edges listed above:
 
 | Source | Edge type | Target | Meaning |
 |---|---|---|---|
