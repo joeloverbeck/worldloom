@@ -8,9 +8,9 @@ Each triage item has three fields (parallel to the per-approach `Name / How it w
 
 | Field | Always | Content |
 |---|---|---|
-| (i) **verdict** | yes | one of the 6 verdict types — see §Verdict types below |
+| (i) **verdict** | yes | one of the 7 verdict types — see §Verdict types below |
 | (ii) **rationale** | yes | 1-2 sentences naming the FOUNDATIONS / codebase / contract grounds for the verdict — content varies per verdict (see §Rationale field content per verdict) |
-| (iii) **conditional sub-field** | conditional | `modification scope` (for `accept-with-modification`) / `alternative path` (for `reject`) / `deferred_to` (for `defer`); absent for `accept` / `already-resolved` / `confirms-existing-position` |
+| (iii) **conditional sub-field** | conditional | `modification scope` (for `accept-with-modification`) / `alternative path` (for `reject`) / `deferred_to` (for `defer`) / `verification source` (for `refuted-by-verification`); absent for `accept` / `already-resolved` / `confirms-existing-position` |
 
 ## Verdict types
 
@@ -22,6 +22,7 @@ Each triage item has three fields (parallel to the per-approach `Name / How it w
 | `defer` | `deferred_to` | item judged sound but routed to a follow-up deliverable (later spec / ticket / brainstorm); positive judgment with scheduling delay | when declining outright (use `reject`) |
 | `already-resolved` | none | re-triage scenario where the item was actioned between the original triage and the new pass | when the item was never actioned (use `accept` or `confirms-existing-position` per shape) |
 | `confirms-existing-position` | none | source-report item whose recommendation — positive or negative — matches the project's current state without implying new work | when the item was actioned between triages (use `already-resolved`); when the item requires new work (use `accept`) |
+| `refuted-by-verification` | `verification source` | source-report item whose claimed gap or recommendation premise is refuted by codebase / contract / agent verification at triage time (parallel-agent verification pattern or per-finding pre-emission verification per `triage-workflow-rules.md` §Schema/contract-claim verification before triage emission); the rationale field cites the file:line evidence refuting the premise | when the item was actioned between triages (use `already-resolved`); when the premise is sound but the proposal would violate architecture (use `reject` + alternative path); when the report endorses the existing position rather than challenging it (use `confirms-existing-position`) |
 
 **Common `confirms-existing-position` shapes**: (a) a "do not recommend X" item from the source report that aligns with an existing architectural decision the project never adopted X under; (b) a "should keep doing Y" item that confirms an established convention.
 
@@ -38,6 +39,7 @@ Each triage item has three fields (parallel to the per-approach `Name / How it w
 | `defer` | proposal's own deferral recommendation OR operator's scope-distinct/cost-distinct rationale per SKILL.md §Pragmatic-softening disclosure site (4) |
 | `already-resolved` | cites the resolving artifact (archived ticket / spec / commit / pull request) + the resolution date |
 | `confirms-existing-position` | cites the architectural decision, prior triage, or canonical convention establishing the position |
+| `refuted-by-verification` | cites the verification artifact (parallel-agent Explore finding, Read of cited file:line, grep of referenced section) + the specific premise refuted; quote the file:line evidence so a future reader can reconstruct the refutation without re-running the verification |
 
 ## Sub-variant splitting within modification scope
 
@@ -68,6 +70,7 @@ Group items by verdict bucket so the user can scan by verdict shape:
 - All `defer` items together
 - All `already-resolved` items together
 - All `confirms-existing-position` items together
+- All `refuted-by-verification` items together
 
 **Section header rendering**: any case/styling fitting the brainstorm's prose register (e.g., `**ACCEPT**`, `### Accept`, `## accept-with-modification`). **In cross-references, rationale prose, and the per-item verdict field itself, use the canonical lowercase-hyphenated form** (e.g., `accept-with-modification`) for consistency with the skill's internal vocabulary.
 
@@ -133,6 +136,10 @@ Two operators triaging the same input arrive at comparable shape regardless of j
 ### Reject
 
 - **R<N>** — <item summary>. _Alternative path_: <what to do INSTEAD or "none">. _Rationale_: <grounds>.
+
+### Refuted-by-verification
+
+- **R<N>** — <item summary>. _`verification source`_: <agent finding / file:line / grep result>. _Rationale_: <verbatim evidence refuting the claim>.
 
 ## Out-of-report findings (auditor-introduced)
 
