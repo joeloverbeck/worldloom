@@ -85,12 +85,15 @@ const STORY_DIRS = new Map<string, AtomicRecordSpec>([
   ["secrets", recordSpec("story_secret_record", "id", "^STSEC-[0-9]+$")],
   ["story-questions", recordSpec("story_question_record", "id", "^STQ-[0-9]+$")],
   ["artifacts", recordSpec("story_diegetic_artifact_record", "id", "^DA-[0-9]+$")],
+  ["plans", recordSpec("story_plan_record", "id", "^STPLAN-[0-9]+$")],
+  ["emotions", recordSpec("story_emotion_record", "id", "^STEMO-[0-9]+$")],
   ["events", recordSpec("story_event_record", "id", "^SE-[0-9]+$")]
 ]);
 const STORY_DIR_ORDER = new Map(Array.from(STORY_DIRS.keys()).map((directory, index) => [directory, index]));
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
-const STORY_REF_REGEX = /\b(STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|DA)-[A-Za-z0-9-]+\b/g;
+const STORY_REF_REGEX =
+  /\b(STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|STPLAN|STEMO|DA)-[A-Za-z0-9-]+\b/g;
 
 export type AtomicSkipReason = "missing_id_field" | "schema_pattern_mismatch";
 
@@ -635,6 +638,18 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "story_plan_record") {
+    for (const edge of edgesForStoryPlan(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
+  if (node.node_type === "story_emotion_record") {
+    for (const edge of edgesForStoryEmotion(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   pushStoryRef("created_at_page", stringField(record, "created_at_page"));
   pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
@@ -839,6 +854,91 @@ function edgesForStoryQuestion(
   return edges;
 }
 
+function edgesForStoryPlan(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  pushStoryEdgeIfReference(edges, node.node_id, "plan_holder", storySlug, stringField(record, "holder"));
+  pushStoryEdgeIfReference(
+    edges,
+    node.node_id,
+    "plan_root_intention",
+    storySlug,
+    stringField(record, "root_intention")
+  );
+
+  for (const target of stringArrayField(record, "belief_basis")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "plan_belief_basis", storySlug, target);
+  }
+
+  for (const field of ["facts", "objects", "locations", "artifacts", "relationships", "obligations"]) {
+    for (const target of stringArrayField(record, field, ["resource_basis"])) {
+      pushStoryEdgeIfReference(edges, node.node_id, "plan_resource_basis", storySlug, target);
+    }
+  }
+
+  for (const target of stringArrayField(record, "blockers")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "plan_blocker", storySlug, target);
+  }
+
+  for (const target of stringArrayField(record, "target_records", ["current_step"])) {
+    pushStoryEdgeIfReference(edges, node.node_id, "plan_current_step_target", storySlug, target);
+  }
+
+  pushStoryEdgeIfReference(
+    edges,
+    node.node_id,
+    "plan_created_by_event",
+    storySlug,
+    stringField(record, "created_by_event")
+  );
+  pushStoryEdgeIfReference(edges, node.node_id, "plan_supersedes", storySlug, stringField(record, "supersedes"));
+
+  return edges;
+}
+
+function edgesForStoryEmotion(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  pushStoryEdgeIfReference(edges, node.node_id, "emotion_holder", storySlug, stringField(record, "holder"));
+  pushStoryEdgeIfReference(
+    edges,
+    node.node_id,
+    "emotion_trigger_event",
+    storySlug,
+    stringField(record, "trigger_event")
+  );
+
+  for (const target of stringArrayField(record, "appraisal_basis")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "emotion_appraisal_basis", storySlug, target);
+  }
+
+  for (const target of stringArrayField(record, "toward_records", ["orientation"])) {
+    pushStoryEdgeIfReference(edges, node.node_id, "emotion_oriented_toward", storySlug, target);
+  }
+
+  pushStoryEdgeIfReference(
+    edges,
+    node.node_id,
+    "emotion_supersedes",
+    storySlug,
+    stringField(record, "supersedes")
+  );
+
+  for (const target of stringArrayField(record, "derived_from")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "emotion_derived_from", storySlug, target);
+  }
+
+  return edges;
+}
+
 function edgesForStoryEvent(
   node: NodeRow,
   record: Record<string, unknown>,
@@ -926,6 +1026,18 @@ function createStoryRefEdge(
     edge_type: edgeType,
     story_slug: storySlug
   };
+}
+
+function pushStoryEdgeIfReference(
+  edges: Array<Omit<EdgeRow, "edge_id">>,
+  sourceNodeId: string,
+  edgeType: EdgeRow["edge_type"],
+  storySlug: string,
+  targetRef: string | null
+): void {
+  if (targetRef && isStoryRecordReference(targetRef)) {
+    edges.push(createStoryRefEdge(sourceNodeId, edgeType, storySlug, targetRef));
+  }
 }
 
 function storyNodeId(storySlug: string, recordId: string): string {

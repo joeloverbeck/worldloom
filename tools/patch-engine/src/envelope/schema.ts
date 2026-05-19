@@ -43,6 +43,8 @@ export interface IdAllocations {
   clk_ids?: string[];
   stsec_ids?: string[];
   stq_ids?: string[];
+  stplan_ids?: string[];
+  stemo_ids?: string[];
 }
 
 export interface PatchPlanEnvelope {
@@ -97,6 +99,8 @@ export const OPERATION_KINDS = [
   "supersede_stsec_record",
   "create_stq_record",
   "supersede_stq_record",
+  "create_stplan_record",
+  "create_stemo_record",
   "append_story_diegetic_artifact_record"
 ] as const;
 
@@ -272,6 +276,8 @@ export type PatchOperation =
   | OperationBase<"supersede_stsec_record", StoryRecordPayload>
   | OperationBase<"create_stq_record", StoryRecordPayload>
   | OperationBase<"supersede_stq_record", StoryRecordPayload>
+  | OperationBase<"create_stplan_record", StoryRecordPayload>
+  | OperationBase<"create_stemo_record", StoryRecordPayload>
   | OperationBase<"append_story_diegetic_artifact_record", StoryRecordPayload>;
 
 export type OperationPayload = PatchOperation["payload"];

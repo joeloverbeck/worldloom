@@ -20,7 +20,9 @@ export const ACTIVE_RECORDS_CLASSES = [
   "STSTAT",
   "CLK",
   "STSEC",
-  "STQ"
+  "STQ",
+  "STPLAN",
+  "STEMO"
 ] as const;
 
 export type ActiveRecordsClass = (typeof ACTIVE_RECORDS_CLASSES)[number];
@@ -29,7 +31,9 @@ export const OPTIONAL_ACTIVE_RECORDS_CLASSES = [
   "DA",
   "CLK",
   "STSEC",
-  "STQ"
+  "STQ",
+  "STPLAN",
+  "STEMO"
 ] as const satisfies readonly ActiveRecordsClass[];
 
 export interface StateDelta {

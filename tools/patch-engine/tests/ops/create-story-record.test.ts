@@ -334,6 +334,96 @@ test("supersede_stq_record writes replacement STQ YAML through the story-record 
   assertYamlEquals(staged, op.payload.record);
 });
 
+test("create_stplan_record writes STPLAN YAML under the story _source plans tree", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ stplan_ids: ["STPLAN-1"] });
+  const op = {
+    op: "create_stplan_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "STPLAN-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        created_by_event: "SE-1",
+        holder: "STENT-1",
+        root_intention: "STINT-1",
+        objective: "Recover the harbor ledger before Kern destroys it.",
+        plan_status: "active",
+        belief_basis: ["BEL-1"],
+        current_step: {
+          action_family: "investigate",
+          target_records: ["STOBJ-1"],
+          success_condition: { predicates: [] }
+        },
+        expires_when: "The ledger is recovered or destroyed."
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_stplan_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "plans",
+      "STPLAN-1.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
+test("create_stemo_record writes STEMO YAML under the story _source emotions tree", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ stemo_ids: ["STEMO-1"] });
+  const op = {
+    op: "create_stemo_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "STEMO-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        created_by_event: "SE-1",
+        holder: "STENT-1",
+        status: "dissociated",
+        affect_kind: null,
+        orientation: { toward_records: [] },
+        appraisal_basis: [],
+        trigger_event: "SE-1",
+        behavioral_pressure: [],
+        agency_effect: "none",
+        expires_when: "The actor reorients to the threat."
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_stemo_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "emotions",
+      "STEMO-1.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
 test("create_ststat_record writes STSTAT YAML under the story _source status tree", async (t) => {
   const world = createTestWorld(t);
   const env = baseEnvelope({ ststat_ids: ["STSTAT-0001"] });

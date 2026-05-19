@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
+import { build } from "@worldloom/world-index/commands/build";
 
 import { ACTIVE_RECORDS_CLASSES } from "../../src/_helpers/state-snapshot-replay.js";
 import { runValidators } from "../../src/framework/run.js";
@@ -16,6 +17,7 @@ import { noStoryStateInPlaceMutation } from "../../src/structural/no-story-state
 import { pageAffordanceIntegrity } from "../../src/structural/page-affordance-integrity.js";
 import { stateDeltaClassIntegrity } from "../../src/structural/state-delta-class-integrity.js";
 import { context, record } from "../structural/helpers.js";
+import { materializeCompatibilityFixtureWorld } from "./synthetic-compatibility-world.js";
 
 const STORY_SLUG = "spec44-capstone";
 const SPEC44_VALIDATORS: readonly Validator[] = [
@@ -126,24 +128,16 @@ test("SPEC-44 capstone reports active_records_full_shape gaps as warn-level diag
   );
 });
 
-test("SPEC-44 capstone red-bunny structural CLI smoke exits with no fail verdicts when local world exists", (t) => {
-  const repoRoot = path.resolve(packageRoot(), "..", "..");
-  const worldSource = path.join(repoRoot, "worlds", "erotica-world");
-  const dbSource = path.join(worldSource, "_index", "world.db");
-  if (!existsSync(worldSource) || !existsSync(dbSource)) {
-    t.skip("local red-bunny world or derived index is absent in this checkout");
-    return;
-  }
-
-  const tempRepo = mkdtempSync(path.join(tmpdir(), "spec44-red-bunny-"));
-  const tempWorld = path.join(tempRepo, "worlds", "erotica-world");
-  cpSync(worldSource, tempWorld, { recursive: true });
+test("SPEC-44 capstone synthetic story-bundle structural CLI smoke exits with no fail verdicts", () => {
+  const tempRepo = mkdtempSync(path.join(tmpdir(), "spec44-synthetic-story-"));
+  const fixture = materializeCompatibilityFixtureWorld(tempRepo, packageRoot());
   try {
+    assert.equal(build(tempRepo, fixture.worldSlug, { quiet: true }), 0);
     const run = spawnSync(process.execPath, [
       path.join(packageRoot(), "dist", "src", "cli", "world-validate.js"),
-      "erotica-world",
+      fixture.worldSlug,
       "--story",
-      "red-bunny",
+      fixture.storySlug,
       "--structural",
       "--json"
     ], {

@@ -37,6 +37,27 @@ import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.j
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateDeltaClassIntegrity } from "../structural/state-delta-class-integrity.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
+import { stplanBeliefBasisGrounded } from "../structural/stplan-belief-basis-grounded.js";
+import { stplanBlockersGrounded } from "../structural/stplan-blockers-grounded.js";
+import { stplanClosureStatusRequiresClosureEvent } from "../structural/stplan-closure-status-requires-closure-event.js";
+import { stplanCurrentStepTargetsGrounded } from "../structural/stplan-current-step-targets-grounded.js";
+import { stplanEventPlanRelationConsistency } from "../structural/stplan-event-plan-relation-consistency.js";
+import { stplanHolderExistsAndActive } from "../structural/stplan-holder-exists-and-active.js";
+import { stplanIdUniquenessAndAppendOnly } from "../structural/stplan-id-uniqueness-and-append-only.js";
+import { stplanNoFuturePageIds } from "../structural/stplan-no-future-page-ids.js";
+import { stplanResourceBasisGrounded } from "../structural/stplan-resource-basis-grounded.js";
+import { stplanRootIntentionGrounded } from "../structural/stplan-root-intention-grounded.js";
+import { stplanSchemaCompliance } from "../structural/stplan-schema-compliance.js";
+import { stplanSupersessionChainValid } from "../structural/stplan-supersession-chain-valid.js";
+import { stemoAgencyEffectCompatibility } from "../structural/stemo-agency-effect-compatibility.js";
+import { stemoAppraisalBasisAccessibleToHolder } from "../structural/stemo-appraisal-basis-accessible-to-holder.js";
+import { stemoEnumCompliance } from "../structural/stemo-enum-compliance.js";
+import { stemoHolderExistsAndActive } from "../structural/stemo-holder-exists-and-active.js";
+import { stemoNoFuturePageIds } from "../structural/stemo-no-future-page-ids.js";
+import { stemoOrientationRecordsExist } from "../structural/stemo-orientation-records-exist.js";
+import { stemoSchemaCompliance } from "../structural/stemo-schema-compliance.js";
+import { stemoSupersessionLifecycleValid } from "../structural/stemo-supersession-lifecycle-valid.js";
+import { stemoTriggerEventOnBranchPath } from "../structural/stemo-trigger-event-on-branch-path.js";
 import { storyQuestionIntroductionGroundingIntegrity } from "../structural/story-question-introduction-grounding-integrity.js";
 import { storyQuestionGroundingIntegrity } from "../structural/story-question-grounding-integrity.js";
 import { storyQuestionPayoffIntegrity } from "../structural/story-question-payoff-integrity.js";
@@ -112,7 +133,28 @@ export const structuralValidators: readonly Validator[] = [
   proposalPackageShape,
   proseReceiptSchemaCompliance,
   modificationHistoryRetrofit,
-  validationTraceShapeCompliance
+  validationTraceShapeCompliance,
+  stplanSchemaCompliance,
+  stplanIdUniquenessAndAppendOnly,
+  stplanHolderExistsAndActive,
+  stplanRootIntentionGrounded,
+  stplanBeliefBasisGrounded,
+  stplanResourceBasisGrounded,
+  stplanBlockersGrounded,
+  stplanCurrentStepTargetsGrounded,
+  stplanNoFuturePageIds,
+  stplanSupersessionChainValid,
+  stplanClosureStatusRequiresClosureEvent,
+  stplanEventPlanRelationConsistency,
+  stemoSchemaCompliance,
+  stemoHolderExistsAndActive,
+  stemoTriggerEventOnBranchPath,
+  stemoAppraisalBasisAccessibleToHolder,
+  stemoOrientationRecordsExist,
+  stemoEnumCompliance,
+  stemoNoFuturePageIds,
+  stemoSupersessionLifecycleValid,
+  stemoAgencyEffectCompatibility
 ];
 
 export const ruleValidators: readonly Validator[] = [

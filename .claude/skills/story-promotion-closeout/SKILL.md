@@ -47,9 +47,9 @@ Do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, write `worl
 
 (a) Pre-flight Check has completed: bundle resolved; `SP-<integer>-proposal-package.yaml` + `SP-<integer>.md` ledger loaded and `promotion_id` verified; canon-addition verdict + accepted-flavored linked CF / CH / PA records existence-verified through MCP retrieval; source records loaded from the proposal package inventory; optional SE id allocated.
 
-(b) Phases 1-4 have completed in working memory: verdict context loaded with linked CF / CH / PA cross-references (Phase 1); story-local effects determined per verdict-specific supersession pattern and supersession ids allocated only for records that actually need new story-state records (Phase 2); 6-gate Phase 3 validation passed (no world-canon mutation; linked-records exist; branch-handling same-story; supersedes pattern verified; rejected preserves history; `source_record_dispositions` completeness matches proposal package `proposal_evidence.source_records[]` inventory); `SP-<integer>-closeout.md` ledger drafted (Phase 4).
+(b) Phases 1-4 have completed in working memory: verdict context loaded with linked CF / CH / PA cross-references (Phase 1); story-local effects determined per verdict-specific supersession pattern and supersession ids allocated only for records that actually need new story-state records (Phase 2); 7-gate Phase 3 validation passed (no world-canon mutation; linked-records exist; branch-handling same-story; supersedes pattern verified; rejected preserves history; `source_record_dispositions` completeness matches proposal package `proposal_evidence.source_records[]` inventory; STPLAN/STEMO basis fallout classified); `SP-<integer>-closeout.md` ledger drafted (Phase 4).
 
-(c) Phase 3 validation passed across all 6 gates.
+(c) Phase 3 validation passed across all 7 gates.
 
 (d) The user has explicitly approved the deliverable summary (verdict + linked-records inventory; per-source-record disposition plan; branch-handling actions per `affected_branch_ids`; optional SE event preview; closeout ledger preview).
 
@@ -74,7 +74,7 @@ Phase 2: Determine story-local effects per verdict
                                     disposition map)
         |
         v
-Phase 3: Validate (6 gates: no world canon mutation; linked-records
+Phase 3: Validate (7 gates: no world canon mutation; linked-records
                   exist; branch-handling same-story; supersedes used;
                   rejected preserves history; disposition completeness)
         |
@@ -122,6 +122,8 @@ Phase 5: HARD-GATE fires → patch (create_*_record per supersession +
 | `STSTAT-<integer>` (supersession) | `_source/status/STSTAT-<integer>.yaml` | IF a source STSTAT in the promotion's source-record set needs an amended-schema update after becoming canon-linked, such as character-outcome supersession-chain evidence (`source_record_dispositions[STSTAT-<integer>] = superseded`) |
 | `SREL-<integer>` (supersession) | `_source/relationships/SREL-<integer>.yaml` | IF a source SREL needs an amended-schema update (`source_record_dispositions[SREL-<integer>] = superseded`) |
 | `DA-<integer>` (supersession) | `_source/artifacts/DA-<integer>.yaml` | IF a source DA needs an amended-schema update (`source_record_dispositions[DA-<integer>] = superseded`; uses `append_story_diegetic_artifact_record`) |
+| `STPLAN-<integer>` (supersession) | `_source/plans/STPLAN-<integer>.yaml` | IF an accepted or rejected canon verdict invalidates an active plan's `belief_basis`, `resource_basis`, or blocker assumptions and the affected plan must be abandoned, revised, or fulfilled |
+| `STEMO-<integer>` (supersession) | `_source/emotions/STEMO-<integer>.yaml` | IF a canon verdict invalidates or transforms an active emotion's `appraisal_basis` or orientation and the affective state must be settled, transformed, suppressed, or dissociated |
 | `SE-<integer>` | `_source/events/SE-<integer>.yaml` | IF `emit_closeout_event: true` (single record with `event_kind: promotion_closeout`) |
 | `SP-<integer>-closeout.md` | `story-promotions/SP-<integer>-closeout.md` | Always (closeout ledger; companion to original SP-<integer>.md which stays unchanged) |
 | Bundle `INDEX.md` | `INDEX.md` | Always (updated last) |
@@ -136,11 +138,13 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `docs/FOUNDATIONS.md` — §Story Bundles §5 (story-scope authority discipline), §Canon Layers (linked CF status references), Rule 6 (Change Log Entry — canon-addition wrote it; closeout reads + cites it)
 - `.claude/skills/_shared-templates/story-state-contract.md` — §10 shared write order, §11 mystery and canon authority
 - `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (SF, BEL, STENT, STSTAT, SREL, DA, SE — closeout output classes for superseded or audit-emitted records; BR — read-only branch lineage), §4.3a (audit-only SE events), §4.5.13 (STSTAT — character-outcome supersession-chain evidence)
+- `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.17 / §4.5.18, `.claude/skills/_shared-templates/story-state-contract.md` §5a / §8, `docs/CONTEXT-PACKET-CONTRACT.md`, and `docs/MACHINE-FACING-LAYER.md` — STPLAN/STEMO basis fallout and plan-relation closeout guidance
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml` — source of truth for the promotion's `proposal_evidence.source_records[]` / `proposal_evidence.source_kind` / `proposal_evidence.story_branch`, plus top-level `contradiction_preference` / `downstream_impact_report`
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>.md` — original ledger (read-only; cross-referenced in closeout ledger)
 - `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>, world_slug=<world_slug>)` — read-only linked CF and CH records for world-canon reference and Rule 6 audit-trail citation
 - `mcp__worldloom__get_record(record_id=<linked_pa_id>, world_slug=<world_slug>)` for each linked PA — read-only adjudication record lookup until hybrid PA batch retrieval is available in `get_records`
 - `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<record-id>.yaml` for each source record from the proposal package
+- Active `STPLAN` and `STEMO` records whose `belief_basis[]`, `resource_basis.*[]`, `blockers[]`, `appraisal_basis[]`, or `orientation.toward_records[]` cite the proposal source records or verdict-linked evidence, when the verdict can make those basis records false, canon-linked, rejected, or branch-local counterfactual.
 
 The bundle MUST exist; SP-<integer> proposal package + ledger MUST exist; on accepted-flavored verdicts, every linked CF / CH / PA MUST resolve through MCP retrieval (Pre-flight aborts with linked-record-not-found error otherwise — this prevents recording a fake canon-addition outcome).
 
@@ -197,6 +201,13 @@ The candidate is now world canon. Record the canon link in the closeout ledger. 
 - For `source_kind: character_outcome`, supersede `STENT` only if a §4.5.1 field changes; supersede `STSTAT` only if a source STSTAT in `proposal_evidence.source_records[]` needs an amended-schema update after the canon-addition verdict (e.g., character-outcome status evidence becoming canon-linked, or explicitly retained as branch-local after rejection).
 - For `source_kind: relationship_or_institutional_outcome`, supersede `SREL` only if a §4.5.7 field changes.
 
+For active `STPLAN` / `STEMO` records that cite the promotion source records or verdict-linked evidence, decide whether the canon verdict changes their present-causal truth:
+
+- If an accepted or accepted-with-limits verdict confirms the basis and no STPLAN/STEMO schema field changes, record `ledger_only` or `unchanged_no_schema_field_changed`.
+- If the verdict invalidates a plan's `belief_basis`, `resource_basis`, or blocker assumptions, supersede the affected `STPLAN` with `plan_status: abandoned` or `revised` as appropriate, and cite the closeout evidence in the new record's `derived_from[]` / rationale surface allowed by §4.5.17.
+- If the verdict invalidates or transforms an emotion's `appraisal_basis`, supersede the affected `STEMO` with `status: transformed`, `settled`, `suppressed`, or `dissociated` as appropriate, using the §4.5.18 closed enums.
+- When `emit_closeout_event: true`, the closeout `SE.world_logic_rationale` should cite the affected records with `plan_relation:abandons(plan=STPLAN-<n>)`, `plan_relation:revises(plan=STPLAN-<n>)`, or a natural-language STEMO transition rationale. Do not invent a new promotion source class for STPLAN/STEMO.
+
 ### `accepted_with_limits`
 
 Same decision pattern as `accepted`, with canon-addition's restrictions recorded in the closeout ledger and reflected in superseding records only through existing amended-schema fields.
@@ -231,7 +242,7 @@ Use `superseded` only when Phase 2 has a concrete replacement record carrying `s
 
 ## Phase 3: Validate
 
-Run 6 validation gates BEFORE patch submission:
+Run 7 validation gates BEFORE patch submission:
 
 1. **No world-canon mutation attempted** — every op in the patch plan targets `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml`; ZERO ops target `worlds/<world_slug>/_source/<world-subdir>/*.yaml`. Hook 3 enforces structurally; this gate verifies before submission as defense-in-depth.
 
@@ -244,6 +255,8 @@ Run 6 validation gates BEFORE patch submission:
 5. **Rejected outcomes preserve branch-local history** — on `rejected`, source records are either left intact with the rejection recorded in the closeout ledger, or superseded through amended-schema fields when the story-local state itself must change. The original `SF` / `BEL` / etc. remain on disk.
 
 6. **Source-record disposition completeness matches the proposal package's `proposal_evidence.source_records[]` inventory** — the `source_record_dispositions:` map's key set MUST exactly equal the proposal package's `proposal_evidence.source_records[]` set, with no missing or extraneous entries. Every value MUST be one of `superseded | ledger_only | unchanged_no_schema_field_changed`. Any `superseded` entry MUST correspond to a drafted replacement story record carrying `supersedes: <prior-id>`; any non-superseded entry MUST NOT have a replacement record. Abort on mismatch.
+
+7. **Plan / emotion basis fallout classified** — every active `STPLAN` / `STEMO` whose basis cites the proposal source records or verdict-linked evidence is classified as unaffected, ledger-only, or superseded. Supersede only when a §4.5.17 / §4.5.18 schema field actually changes; otherwise keep the verdict in the closeout ledger.
 
 ## Phase 4: Author SP-<integer>-closeout.md ledger
 

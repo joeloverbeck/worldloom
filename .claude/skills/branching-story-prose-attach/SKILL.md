@@ -104,8 +104,9 @@ Atomic-record writes (the optional `SE-<integer>`) route through `mcp__worldloom
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §4a (Plan-Authority Boundary), §5b (Schema-Minimalism), §9 (Prose Length Discipline) govern this skill
-- `.claude/skills/_shared-templates/story-state-contract.md` — §7 hard gates (gate 3 redundantly enforced on rendered prose); §8 page plan minimum contract (the 19-section structure prose-attach reads)
+- `.claude/skills/_shared-templates/story-state-contract.md` — §7 hard gates (gate 3 redundantly enforced on rendered prose); §8 page plan minimum contract (the 19 numbered sections plus optional §9b / §9c / §10b that prose-attach reads when present)
 - `.claude/skills/_shared-templates/story-record-schemas.md` — §4.6 receipt schema (canonical and mirrored by `prose_receipt_schema_compliance`)
+- `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.17 / §4.5.18 and `.claude/skills/_shared-templates/story-state-contract.md` §5a / §8 — STPLAN/STEMO record labels, tag grammar, and page-plan §9b / §9c constraints prose-attach validates when present
 - `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` — bundle root contract; `## Player Agency Contract` is load-bearing for agency-surface consistency
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/<page_id>.yaml` — PG record; MUST exist
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/<page_id>.md` — comprehensive prose plan; MUST exist
@@ -147,6 +148,8 @@ Load into working memory:
 - Plan §5 (active cast + entity statuses) — load-bearing for `entity_status_consistency`; these statuses are the `STSTAT`-derived projection from `PG.state_snapshot`, not an independently-authored block.
 - Plan §7 (selected event + state delta) — load-bearing for `required_event_rendered` and `invented_structural_fact`.
 - Plan §8 (required beats) — supplements `required_event_rendered` check.
+- Optional plan §9b (active actor plans / tactical agency) — load-bearing for plan-relation rendering: prose must show required plan movement and must not imply plan state beyond the committed STPLAN records.
+- Optional plan §9c (emotional causality / affective transition) — load-bearing for affective-state rendering: prose must render required affective transitions and must avoid ungrounded emotion shifts or engine terminology.
 - Plan §15 (frontmatter, including engine fields) — load-bearing for `engine_jargon_leak` (engine vocabulary may legitimately appear in plan §15 but NOT in the rendered prose body).
 - `PG.state_snapshot.active_records` — the at-commit state the prose must respect.
 - If `run_craft_critic: true`, optional prior 1-2 prose pages from `pages-prose/<recent-N>.md` for continuity checks.
@@ -186,9 +189,9 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
 
    **Closed engine-vocabulary list** (inline; promote to `.claude/skills/_shared-templates/engine-vocabulary.md` only if list grows beyond ~30 tokens OR another skill consumes it):
 
-   - Record-ID patterns: `PG-\d+`, `SE-\d+`, `BEL-\d+`, `SF-\d+`, `STENT-\d+`, `STINT-\d+`, `OBL-\d+`, `CNSQ-\d+`, `THR-\d+`, `SREL-\d+`, `STLOC-\d+`, `STOBJ-\d+`, `DA-\d+`, `BR-\d+`, `CHC-\d+`, `SLT-\d+`, `STORY-\d+`
+   - Record-ID patterns: `PG-\d+`, `SE-\d+`, `BEL-\d+`, `SF-\d+`, `STENT-\d+`, `STINT-\d+`, `OBL-\d+`, `CNSQ-\d+`, `THR-\d+`, `SREL-\d+`, `STLOC-\d+`, `STOBJ-\d+`, `STPLAN-\d+`, `STEMO-\d+`, `DA-\d+`, `BR-\d+`, `CHC-\d+`, `SLT-\d+`, `STORY-\d+`
    - Gate names (literal): `input legality`, `parent snapshot compatibility`, `mystery firewall`, `branch isolation`, `append-only delta`, `consequence capacity`, `plan grounding`, `canon promotion hold`
-   - Predicate-DSL terms (literal): `fact_true(`, `belief_record(`, `entity_status(`, `relationship_axis(`, `obligation_open(`, `consequence_pending(`, `thread_active(`, `any_belief(`, `location(`, `has_affordance(`, `all[`, `any[`, `not[`
+   - Predicate-DSL terms (literal): `fact_true(`, `belief_record(`, `entity_status(`, `relationship_axis(`, `obligation_open(`, `consequence_pending(`, `thread_active(`, `any_belief(`, `plan_active(`, `plan_blocked(`, `emotion_active(`, `emotion_pressure(`, `location(`, `has_affordance(`, `all[`, `any[`, `not[`
    - Routing terms in engine register: `outcome_route`, `state_delta`, `promotion_claims`, `validation_trace`, `state_snapshot`, `forbidden_resolutions`, `truth_relation`, `branch_local_counterfactual`, `canon_candidate`
 
 3. **`forbidden_mystery_resolution`** (`PASS | FAIL`) — retrieve firewall fields for every `M-<integer>` named in plan §11 via `mcp__worldloom__get_firewall_content(world_slug, m_ids=<plan §11 ids>)`, unless plan §11's per-mystery `forbidden_resolutions[]` already enumerates concrete forbidden-resolution strings collapsing both the firewall's `disallowed_cheap_answers[]` AND the protected-question entries from `unknowns[]` (the typical case when bootstrap or turn-cycle authored the plan from a firewall-aware seed pool — the inlining IS the plan-authority equivalence, not a deferred retrieval step). Derive deterministic patterns from `disallowed_cheap_answers[]` (each entry is a forbidden resolution string and is compared by case-insensitive substring match) and from `unknowns[]` collapsed to plan §11 `forbidden_resolutions[]` (each entry names a protected question whose surface-level resolution is forbidden).
@@ -205,6 +208,11 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
    - **`secret_reveal_undisclosed`** — for each `reveal_story_secret` op or STSEC status transition to `revealed` in plan §7 / `SE.state_delta`, verify the prose discloses the secret using keywords from `secret_claim`, `reveal_records[]`, or `clue_carriers[].clue_text` when those details are present in the page plan. If the reveal is omitted but the surrounding event is otherwise rendered, set `required_event_rendered: WARN` and add a `notes[]` entry beginning `secret_reveal_undisclosed:`. If the prose actively contradicts the reveal or implies the secret remains hidden after the committed reveal, set `required_event_rendered: FAIL`.
 
    These subchecks are receipt observations only. They do not reject or rewrite the already-committed page state; repair still routes through the existing prose-attach disposition ladder (`revise_prose`, `run_turn_cycle_repair`, or `run_story_fact_promotion_to_canon` as applicable).
+
+   SPEC-47 plan / emotion subchecks are part of this check rather than new receipt-schema fields:
+
+   - **`plan_relation_undisclosed`** — when plan §9b names this page's `plan_relation` for an active `STPLAN`, verify the prose dramatizes the relation through the plan holder, objective, current step, blockers, resources, or success condition named in §9b. If the selected event is otherwise rendered but the plan movement is easy to miss, set `required_event_rendered: WARN` and add a `notes[]` entry beginning `plan_relation_undisclosed:`. If prose contradicts the committed relation, set `required_event_rendered: FAIL`.
+   - **`affective_transition_undisclosed`** — when plan §9c marks a transition or required affective rendering for an active `STEMO`, verify the prose renders the affect kind / intensity / behavioral pressure in character-facing language without record ids or engine terms. If present but weak, set `required_event_rendered: WARN` and add a `notes[]` entry beginning `affective_transition_undisclosed:`. If absent or contradictory, set `required_event_rendered: FAIL`.
 
 5. **`choice_consequence_visibility`** (`PASS | WARN | FAIL`) — verify the prose realizes `SE.resolution.player_visible_feedback` from plan §7 and stays within `STORY_KERNEL.md` `## Player Agency Contract`. `PASS` means the selected action, route, and immediate consequence are legible to a first-time reader and do not imply player control outside the agency surface / write-in envelope / viewpoint limits. `WARN` means the action occurred but the route outcome, consequence feedback, or agency boundary is easy to miss. `FAIL` means the prose obscures, contradicts, or omits the consequence, or implies a broader/narrower agency surface than the contract permits, especially for `attempt`, `accommodate`, `world_block`, `promotion_hold`, or `terminal` routes. For `accept` routes with no `resolution`, pass this check when the selected event and consequence remain legible under `required_event_rendered` and the agency implication remains within the contract.
 

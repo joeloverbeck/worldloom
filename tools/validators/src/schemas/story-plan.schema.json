@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/story-plan.schema.json",
+  "type": "object",
+  "required": [
+    "id",
+    "story_id",
+    "created_at_page",
+    "created_by_event",
+    "holder",
+    "root_intention",
+    "objective",
+    "plan_status",
+    "belief_basis",
+    "current_step",
+    "expires_when"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^STPLAN-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "created_by_event": { "type": "string", "pattern": "^SE-(0|[1-9][0-9]*)$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^STPLAN-(0|[1-9][0-9]*)$" },
+    "holder": { "type": "string", "pattern": "^STENT-[0-9]+$" },
+    "root_intention": { "type": "string", "pattern": "^STINT-[0-9]+$" },
+    "objective": { "type": "string", "minLength": 1 },
+    "plan_status": {
+      "type": "string",
+      "enum": ["active", "blocked", "suspended", "fulfilled", "failed", "abandoned", "revised"]
+    },
+    "belief_basis": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^BEL-[0-9]+$" },
+      "default": []
+    },
+    "resource_basis": {
+      "type": "object",
+      "properties": {
+        "facts": { "type": "array", "items": { "type": "string", "pattern": "^SF-[0-9]+$" }, "default": [] },
+        "objects": { "type": "array", "items": { "type": "string", "pattern": "^STOBJ-[0-9]+$" }, "default": [] },
+        "locations": { "type": "array", "items": { "type": "string", "pattern": "^STLOC-[0-9]+$" }, "default": [] },
+        "artifacts": { "type": "array", "items": { "type": "string", "pattern": "^DA-[0-9]+$" }, "default": [] },
+        "relationships": { "type": "array", "items": { "type": "string", "pattern": "^SREL-[0-9]+$" }, "default": [] },
+        "obligations": { "type": "array", "items": { "type": "string", "pattern": "^OBL-[0-9]+$" }, "default": [] }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/recordId" },
+      "default": []
+    },
+    "current_step": {
+      "type": "object",
+      "required": ["action_family", "target_records", "success_condition"],
+      "properties": {
+        "action_family": { "$ref": "#/$defs/actionFamily" },
+        "target_records": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/recordId" },
+          "default": []
+        },
+        "success_condition": {
+          "type": "object",
+          "required": ["predicates"],
+          "properties": {
+            "predicates": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/predicateObject" }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "fallback_steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action_family", "trigger_predicates", "target_records"],
+        "properties": {
+          "action_family": { "$ref": "#/$defs/actionFamily" },
+          "trigger_predicates": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/predicateObject" }
+          },
+          "target_records": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/recordId" },
+            "default": []
+          }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "expires_when": { "type": "string", "minLength": 1 },
+    "derived_from": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/recordId" },
+      "default": []
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "actionFamily": {
+      "type": "string",
+      "enum": [
+        "move",
+        "evade",
+        "pursue",
+        "perceive",
+        "investigate",
+        "communicate",
+        "persuade",
+        "negotiate",
+        "bond",
+        "oppose",
+        "harm",
+        "protect",
+        "control",
+        "transfer",
+        "use",
+        "make_change",
+        "ritual_protocol",
+        "recover",
+        "wait",
+        "decide"
+      ]
+    },
+    "predicateObject": {
+      "type": "object",
+      "required": ["pred"],
+      "properties": {
+        "pred": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "recordId": {
+      "type": "string",
+      "pattern": "^(STENT|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT|STPLAN|STEMO|CF|CH|M|INV|SEC)-[0-9]+$"
+    }
+  }
+}

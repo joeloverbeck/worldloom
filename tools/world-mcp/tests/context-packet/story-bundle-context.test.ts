@@ -321,6 +321,72 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
       }
     ]);
     assert.deepEqual(
+      result.story_bundle_context.active_actor_plans.map((plan) => Object.keys(plan)),
+      [
+        [
+          "id",
+          "holder",
+          "root_intention",
+          "objective",
+          "plan_status",
+          "current_step_action_family"
+        ]
+      ]
+    );
+    assert.deepEqual(result.story_bundle_context.active_actor_plans, [
+      {
+        id: "STPLAN-1",
+        holder: "STENT-2",
+        root_intention: "STINT-1",
+        objective: "Reach the loft window by using the brass latch before the watcher arrives.",
+        plan_status: "active",
+        current_step_action_family: "evade"
+      }
+    ]);
+    assert.deepEqual(
+      result.story_bundle_context.active_emotional_states.map((emotion) => Object.keys(emotion)),
+      [
+        [
+          "id",
+          "holder",
+          "status",
+          "affect_kind",
+          "intensity",
+          "behavioral_pressure",
+          "agency_effect"
+        ],
+        [
+          "id",
+          "holder",
+          "status",
+          "affect_kind",
+          "intensity",
+          "behavioral_pressure",
+          "agency_effect"
+        ]
+      ]
+    );
+    assert.deepEqual(result.story_bundle_context.active_emotional_states, [
+      {
+        id: "STEMO-1",
+        holder: "STENT-2",
+        status: "active",
+        affect_kind: "anxiety",
+        intensity: "high",
+        behavioral_pressure: ["conceal", "plan"],
+        agency_effect: "constraining"
+      },
+      {
+        id: "STEMO-2",
+        holder: "STENT-3",
+        status: "dissociated",
+        affect_kind: null,
+        intensity: null,
+        behavioral_pressure: [],
+        agency_effect: "none"
+      }
+    ]);
+    assert.deepEqual(
       result.story_bundle_context.active_threads.map((thread) => thread.id),
       ["THR-1"]
     );
@@ -385,6 +451,10 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     assert.deepEqual(storyBundleContextSummary?.active_location_ids, ["STLOC-1"]);
     assert.deepEqual(storyBundleContextSummary?.active_object_ids, ["STOBJ-1"]);
     assert.deepEqual(storyBundleContextSummary?.active_story_da_ids, ["DA-1"]);
+    assert.deepEqual(storyBundleContextSummary?.active_plan_ids, ["STPLAN-1"]);
+    assert.deepEqual(storyBundleContextSummary?.active_plan_holders, ["STENT-2"]);
+    assert.deepEqual(storyBundleContextSummary?.active_emotion_ids, ["STEMO-1", "STEMO-2"]);
+    assert.deepEqual(storyBundleContextSummary?.active_emotion_holders, ["STENT-2", "STENT-3"]);
   } finally {
     destroyTempRepoRoot(root);
   }

@@ -295,6 +295,8 @@ When committing the state file separately with `last_state_commit: "self"`, writ
 
 For state-file-only persistence, run the index-mutating steps serially: stage `.codex/run-state/implement-spec-tickets.json`, inspect the staged JSON/diff, then commit. If staging, staged inspection, or commit fails because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun that exact failed step with the required approval/escalation before continuing. Do not bundle the state-file `git add`, staged inspection, and `git commit` into one command when a failure would obscure which step actually needs retry.
 
+If resume finds only `.codex/run-state/implement-spec-tickets.json` already staged for the state-file-only commit, inspect the cached diff or staged JSON and proceed with the state-only commit instead of restaging or treating the staged state file as unrelated dirt.
+
 Before creating a state-file-only commit, re-read the staged JSON or run `git diff --cached -- .codex/run-state/implement-spec-tickets.json` and confirm `last_state_commit` is already `"self"`. The actual state-only commit sha belongs in the printed handoff's `State commit` line, not inside the JSON.
 
 Do not create a chain of state-only commits just to update the previous state-only commit sha. A commit cannot embed its own final sha without changing that sha again, so do not try to make `last_state_commit` self-referential. One state-only commit per iteration is enough; if exact current `HEAD` matters, use the handoff's `State commit` line.

@@ -177,6 +177,74 @@
       }
     },
     {
+      "title": "plan_active",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "holder"],
+      "properties": {
+        "pred": { "const": "plan_active" },
+        "holder": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "plan": { "type": "string", "pattern": "^STPLAN-[0-9]+$" }
+      }
+    },
+    {
+      "title": "plan_blocked",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "holder"],
+      "properties": {
+        "pred": { "const": "plan_blocked" },
+        "holder": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" }
+      }
+    },
+    {
+      "title": "any_plan_active",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_plan_active" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "holder_role": { "type": "string", "enum": ["viewpoint", "player_proxy", "primary_actor", "opposing_actor", "allied_actor", "authority", "dependent", "witness", "information_source", "pressure_source", "social_bridge", "background"] }
+      }
+    },
+    {
+      "title": "emotion_active",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "holder"],
+      "properties": {
+        "pred": { "const": "emotion_active" },
+        "holder": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "kind": { "type": "string", "enum": ["fear", "anxiety", "anger", "disgust", "grief", "shame", "guilt", "humiliation", "hope", "relief", "joy", "awe", "tenderness", "desire", "envy", "contempt", "confusion", "dread"] },
+        "min_intensity": { "type": "string", "enum": ["low", "medium", "high", "extreme"] }
+      }
+    },
+    {
+      "title": "any_emotion_active",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "alias"],
+      "properties": {
+        "pred": { "const": "any_emotion_active" },
+        "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "holder_role": { "type": "string", "enum": ["viewpoint", "player_proxy", "primary_actor", "opposing_actor", "allied_actor", "authority", "dependent", "witness", "information_source", "pressure_source", "social_bridge", "background"] },
+        "kind": { "type": "string", "enum": ["fear", "anxiety", "anger", "disgust", "grief", "shame", "guilt", "humiliation", "hope", "relief", "joy", "awe", "tenderness", "desire", "envy", "contempt", "confusion", "dread"] },
+        "min_intensity": { "type": "string", "enum": ["low", "medium", "high", "extreme"] }
+      }
+    },
+    {
+      "title": "emotion_pressure",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pred", "holder", "pressure"],
+      "properties": {
+        "pred": { "const": "emotion_pressure" },
+        "holder": { "type": "string", "pattern": "^(?:STENT-[0-9]+|role:[a-z][a-z0-9_-]*)$" },
+        "pressure": { "type": "string", "enum": ["approach", "flee", "freeze", "attack", "reject", "dominate", "submit", "seek_contact", "protect_other", "seek_help", "confess", "conceal", "withdraw_socially", "plan", "accommodate", "self_soothe", "ruminate", "collapse"] }
+      }
+    },
+    {
       "title": "any_obligation_open",
       "type": "object",
       "additionalProperties": true,

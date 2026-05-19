@@ -730,6 +730,79 @@ The following fields are prohibited in STQ schemas, validators, predicates, and 
 
 Validators hard-reject any `STQ` record carrying a prohibited field at the `record_schema_compliance` gate.
 
+#### 4.5.17 `STPLAN` (actor-owned tactical plan)
+
+Tracks an actor-owned tactical plan over multiple pages: how a holder is presently trying to pursue an intention, which resources or leverage the plan rests on, what currently blocks it, and what the actor would try if the current step fails. `STPLAN` is strict-minimalist v1 story state per §5b. Do not add `risk_posture`, `visibility`, `current_step.rationale`, or `fallback_steps[*].rationale`; those are extension-list candidates that require a future spec with concrete validator, predicate, MCP, fork-operation, or audit-trail consumers.
+
+```yaml
+id: STPLAN-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+created_by_event: SE-<integer>*               # introducing event provenance
+supersedes: STPLAN-<integer> | null           # default null
+holder: STENT-<integer>*
+root_intention: STINT-<integer>*
+objective: string*                            # natural-language plan objective
+plan_status: active | blocked | suspended | fulfilled | failed | abandoned | revised*
+belief_basis: [BEL-<integer>]*                # default []; non-empty when plan_status: active
+resource_basis:                                # composite; all sub-lists default []
+  facts: [SF-<integer>]
+  objects: [STOBJ-<integer>]
+  locations: [STLOC-<integer>]
+  artifacts: [DA-<integer>]
+  relationships: [SREL-<integer>]
+  obligations: [OBL-<integer>]
+blockers: [<record_id>]                       # default []
+current_step:                                  # composite; required when plan_status: active
+  action_family: <action_family>*              # closed enum per story-state-contract.md §4.4a
+  target_records: [<record_id>]                # default []
+  success_condition:
+    predicates: [<predicate object>]*          # closed predicate DSL per §5
+fallback_steps:                                # default []; 0+ entries
+  - action_family: <action_family>*
+    trigger_predicates: [<predicate object>]*
+    target_records: [<record_id>]
+expires_when: string*                         # natural-language supersession trigger
+derived_from: [<record_id>]                   # default []
+```
+
+`objective` is present causal strategy, not future plot shape. `plan_status` has no climax, expected-outcome, act-position, or target-scene values. `belief_basis`, `resource_basis`, `blockers`, and `current_step` ground the plan in accessible branch state so validators and MCP summaries can distinguish an actor's medium-range agency from authorial plot planning.
+
+#### 4.5.18 `STEMO` (actor-owned affective state)
+
+Tracks an actor-owned transient affective state: the current emotional pressure causally biasing the holder's next action. `STEMO` is not a mood arc or prose-tone note. Its closed `affect_kind` enum follows the SPEC-47 convergence review across Ekman 1972/1999, Plutchik, OCC, Geneva Emotion Wheel, and Cowen & Keltner 2017; its closed `behavioral_pressure` enum follows the SPEC-47 action-tendency review across Frijda 1986/1987, Roseman 2011, Lazarus-Folkman 1984, Skinner et al. 2003, Gray-McNaughton, Taylor 2000, and Gross 1998/2015. `numbness` is represented as `status: dissociated` with `affect_kind: null`; `surprise` stays at the event/appraisal surface rather than as a STEMO affect kind.
+
+```yaml
+id: STEMO-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+created_by_event: SE-<integer>*
+supersedes: STEMO-<integer> | null            # default null
+holder: STENT-<integer>*
+status: active | suppressed | settled | transformed | dissociated*
+affect_kind: <closed enum 18 values> | null   # null only when status: dissociated
+                                              # values: fear | anxiety | anger | disgust | grief |
+                                              #         shame | guilt | humiliation | hope | relief |
+                                              #         joy | awe | tenderness | desire | envy |
+                                              #         contempt | confusion | dread
+intensity: low | medium | high | extreme*     # required when affect_kind != null
+orientation:
+  toward_records: [<record_id>]               # default []; observer firewall input
+appraisal_basis: [BEL-<integer>]              # default []; required non-empty unless status: dissociated
+trigger_event: SE-<integer>*                  # must resolve to SE on branch path or same-event
+behavioral_pressure: [<closed enum 18 values>] # default []; required non-empty unless status: dissociated
+                                              # values: approach | flee | freeze | attack | reject |
+                                              #         dominate | submit | seek_contact |
+                                              #         protect_other | seek_help | confess |
+                                              #         conceal | withdraw_socially | plan |
+                                              #         accommodate | self_soothe | ruminate | collapse
+agency_effect: none | constraining*
+expires_when: string*
+derived_from: [<record_id>]                   # default []
+```
+
+`status`, `trigger_event`, `appraisal_basis`, and `behavioral_pressure` make the emotional state replayable and validator-readable. `orientation.toward_records` feeds observer-firewall checks without adding a free-form `toward_claim` field. `agency_effect` is intentionally binary in v1: either the affect constrains agency or it does not.
+
 ### 4.6 Prose receipt
 
 Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record). The canonical schema below is mirrored by the structural validator `prose_receipt_schema_compliance`, which validates receipt YAML in full-world runs and receipt-file incremental runs.

@@ -1,19 +1,16 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
-  cpSync,
-  existsSync,
   mkdtempSync,
   readFileSync,
-  readdirSync,
-  rmSync,
-  statSync
+  rmSync
 } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
+import { build } from "@worldloom/world-index/commands/build";
 import yaml from "js-yaml";
 
 import { replayActiveRecords } from "../../src/_helpers/state-snapshot-replay.js";
@@ -30,6 +27,7 @@ import { secretIntroductionAnchorIntegrity } from "../../src/structural/secret-i
 import { storyQuestionIntroductionGroundingIntegrity } from "../../src/structural/story-question-introduction-grounding-integrity.js";
 import { threadIntroductionGroundingIntegrity } from "../../src/structural/thread-introduction-grounding-integrity.js";
 import { context, record } from "../structural/helpers.js";
+import { materializeCompatibilityFixtureWorld } from "./synthetic-compatibility-world.js";
 
 const STORY_SLUG = "midstory-introduction-test";
 const INTRODUCTION_VALIDATORS: readonly Validator[] = [
@@ -230,12 +228,12 @@ test("§Verification bullet 16: choice grounded in fresh record fails observer f
   assertHasCode(verdicts, "intro_observer_no_access_route");
 });
 
-test("§Verification bullet 17: absence of optional CLK/STSEC/STQ remains valid", async () => {
+test("§Verification bullet 17: absence of optional CLK/STSEC/STQ/STPLAN/STEMO remains valid", async () => {
   const verdicts = await compatibilityDrift.run(undefined, testContext([
     page("PG-1", { active_records: legacyActiveRecords() })
   ]));
 
-  assert.equal(verdicts.filter((verdict) => verdict.code === "compat_optional_directory_absent").length, 4);
+  assert.equal(verdicts.filter((verdict) => verdict.code === "compat_optional_directory_absent").length, 6);
   assert.ok(verdicts.every((verdict) => verdict.severity === "info"));
   assert.ok(verdicts.every((verdict) => verdict.severity !== "fail"));
 });
@@ -255,25 +253,17 @@ test("§Verification bullet 18: old-style PG compatibility drift is info; replay
   }
 });
 
-test("§Verification bullet 19: red-bunny bundle validates cleanly from a temp world copy", (t) => {
-  const repoRoot = packageRoot();
-  const worldSource = path.resolve(repoRoot, "..", "..", "worlds", "erotica-world");
-  const dbSource = path.join(worldSource, "_index", "world.db");
-  if (!existsSync(worldSource) || !existsSync(dbSource)) {
-    t.skip("local red-bunny world or derived index is absent in this checkout");
-    return;
-  }
-
-  const tempRepo = mkdtempSync(path.join(tmpdir(), "spec43-red-bunny-"));
-  const tempWorld = path.join(tempRepo, "worlds", "erotica-world");
-  cpSync(worldSource, tempWorld, { recursive: true });
+test("§Verification bullet 19: synthetic legacy bundle validates cleanly from a temp indexed world", () => {
+  const tempRepo = mkdtempSync(path.join(tmpdir(), "spec43-compatibility-world-"));
+  const fixture = materializeCompatibilityFixtureWorld(tempRepo, packageRoot());
   try {
+    assert.equal(build(tempRepo, fixture.worldSlug, { quiet: true }), 0);
     const run = spawnSync(process.execPath, [
       path.resolve(packageRoot(), "dist", "src", "cli", "world-validate.js"),
-      "erotica-world",
+      fixture.worldSlug,
       "--structural",
       "--story",
-      "red-bunny",
+      fixture.storySlug,
       "--json"
     ], {
       cwd: tempRepo,
@@ -289,9 +279,6 @@ test("§Verification bullet 19: red-bunny bundle validates cleanly from a temp w
 });
 
 test("§Verification bullet 20: compatibility scan writes no SE/PG files and creates no optional records", async () => {
-  const repoRoot = path.resolve(packageRoot(), "..", "..");
-  const redBunny = path.join(repoRoot, "worlds", "erotica-world", "stories", "red-bunny");
-  const before = existsSync(redBunny) ? snapshotStorySource(redBunny) : new Map<string, number>();
   const records = compatibilityRecords();
 
   const verdicts = await compatibilityDrift.run(undefined, testContext(records));
@@ -302,9 +289,6 @@ test("§Verification bullet 20: compatibility scan writes no SE/PG files and cre
   assert.deepEqual(records.filter((item) => item.file_path.includes("/_source/clocks/")), []);
   assert.deepEqual(records.filter((item) => item.file_path.includes("/_source/secrets/")), []);
   assert.deepEqual(records.filter((item) => item.file_path.includes("/_source/story-questions/")), []);
-  if (existsSync(redBunny)) {
-    assert.deepEqual(snapshotStorySource(redBunny), before);
-  }
 });
 
 test("SPEC-43 capstone composes all registered Wave 2 introduction validators on the shared pass fixture", async () => {
@@ -578,27 +562,6 @@ function assertRecordActive(recordId: string, pageId: string): void {
   const activeRecords = ((pageRecord?.parsed as { state_snapshot?: { active_records?: Record<string, string[]> } })
     .state_snapshot?.active_records) ?? {};
   assert.ok(Object.values(activeRecords).some((ids) => ids.includes(recordId)), `${recordId} not active on ${pageId}`);
-}
-
-function snapshotStorySource(storyRoot: string): Map<string, number> {
-  const sourceRoot = path.join(storyRoot, "_source");
-  const snapshot = new Map<string, number>();
-  if (!existsSync(sourceRoot)) {
-    return snapshot;
-  }
-  const stack = [sourceRoot];
-  while (stack.length > 0) {
-    const current = stack.pop() as string;
-    for (const entry of readdirSync(current, { withFileTypes: true })) {
-      const entryPath = path.join(current, entry.name);
-      if (entry.isDirectory()) {
-        stack.push(entryPath);
-      } else {
-        snapshot.set(path.relative(sourceRoot, entryPath), statSync(entryPath).mtimeMs);
-      }
-    }
-  }
-  return snapshot;
 }
 
 interface SharedState {

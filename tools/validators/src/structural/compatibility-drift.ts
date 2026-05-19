@@ -18,6 +18,8 @@ const OPTIONAL_SUBDIRECTORIES: Readonly<Record<OptionalActiveRecordsClass, strin
   CLK: "_source/clocks",
   STSEC: "_source/secrets",
   STQ: "_source/story-questions",
+  STPLAN: "_source/plans",
+  STEMO: "_source/emotions",
   DA: "_source/artifacts"
 };
 
@@ -180,6 +182,10 @@ function classForRecord(record: IndexedRecord): ActiveRecordsClass | undefined {
       return "STSEC";
     case "story_question_record":
       return "STQ";
+    case "story_plan_record":
+      return "STPLAN";
+    case "story_emotion_record":
+      return "STEMO";
     case "story_diegetic_artifact_record":
       return "DA";
     default:

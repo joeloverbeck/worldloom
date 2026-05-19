@@ -14,13 +14,13 @@ test("active_records_full_shape is scoped to full-world only", () => {
 
 test("active_records_full_shape warns once for each missing active-record class", async () => {
   const verdicts = await activeRecordsFullShape.run(undefined, context([
-    storyPage("PG-1", activeRecordsWithout("DA", "CLK", "STSEC", "STQ"))
+    storyPage("PG-1", activeRecordsWithout("DA", "CLK", "STSEC", "STQ", "STPLAN", "STEMO"))
   ]));
 
-  assert.equal(verdicts.length, 4);
+  assert.equal(verdicts.length, 6);
   assert.ok(verdicts.every((verdict) => verdict.validator === "active_records_full_shape"));
   assert.ok(verdicts.every((verdict) => verdict.severity === "warn"));
-  assert.deepEqual(missingClasses(verdicts), ["CLK", "DA", "STQ", "STSEC"]);
+  assert.deepEqual(missingClasses(verdicts), ["CLK", "DA", "STEMO", "STPLAN", "STQ", "STSEC"]);
 });
 
 test("active_records_full_shape reports a single omitted class", async () => {
@@ -52,7 +52,7 @@ test("active_records_full_shape accepts the full shape when arrays are empty", a
 
 test("active_records_full_shape coexists with compatibility_drift diagnostics", async () => {
   const records = [
-    storyPage("PG-1", activeRecordsWithout("DA", "CLK", "STSEC", "STQ"))
+    storyPage("PG-1", activeRecordsWithout("DA", "CLK", "STSEC", "STQ", "STPLAN", "STEMO"))
   ];
 
   const compatibilityVerdicts = await compatibilityDrift.run(undefined, context(records));
@@ -60,8 +60,8 @@ test("active_records_full_shape coexists with compatibility_drift diagnostics", 
 
   assert.ok(compatibilityVerdicts.some((verdict) => verdict.validator === "compatibility_drift"));
   assert.ok(compatibilityVerdicts.some((verdict) => verdict.code === "compat_missing_active_record_key"));
-  assert.equal(fullShapeVerdicts.length, 4);
-  assert.deepEqual(missingClasses(fullShapeVerdicts), ["CLK", "DA", "STQ", "STSEC"]);
+  assert.equal(fullShapeVerdicts.length, 6);
+  assert.deepEqual(missingClasses(fullShapeVerdicts), ["CLK", "DA", "STEMO", "STPLAN", "STQ", "STSEC"]);
 });
 
 function storyPage(id: string, activeRecords: Record<string, string[]>) {

@@ -27,6 +27,12 @@ test("storylet predicate DSL accepts nested preconditions and every contract pre
           { pred: "story_question_open", question: "STQ-1" },
           { pred: "story_question_status", question: "STQ-1", status: "open" },
           { pred: "promise_due", question: "STQ-1", age_pages: 3 },
+          { pred: "plan_active", holder: "STENT-1", plan: "STPLAN-1" },
+          { pred: "plan_blocked", holder: "role:protagonist" },
+          { pred: "any_plan_active", alias: "active_plan", holder_role: "primary_actor" },
+          { pred: "emotion_active", holder: "STENT-1", kind: "fear", min_intensity: "medium" },
+          { pred: "any_emotion_active", alias: "active_emotion", holder_role: "viewpoint", kind: "relief", min_intensity: "low" },
+          { pred: "emotion_pressure", holder: "STENT-1", pressure: "conceal" },
           { pred: "any_obligation_open", alias: "urgent_debt", kind: "promise", urgency: "high", owed_by_role: "primary_actor", owed_to_role: "dependent" },
           { pred: "any_consequence_pending", alias: "pending_fallout", kind: "danger", urgency: "medium", derived_from: "SE-1" },
           { pred: "any_thread_active", alias: "active_thread", tag: "gate_repair", urgency: "low" },
@@ -61,13 +67,70 @@ test("storylet predicate DSL accepts nested preconditions and every contract pre
         {
           action_family: "communicate",
           surface_hint: "Name the consequence.",
-          likely_effects: ["bound:trust_edge", "bound:public_belief", "bound:open_intent", "bound:active_clock", "bound:open_setup"]
+          likely_effects: ["bound:trust_edge", "bound:public_belief", "bound:open_intent", "bound:active_clock", "bound:open_setup", "bound:active_plan", "bound:active_emotion"]
         }
       ]
     })
   ])));
 
   assert.deepEqual(verdicts, []);
+});
+
+test("storylet predicate DSL rejects malformed plan and emotion predicate args", async () => {
+  const verdicts = await storyletPredicateDslParsability.run(null, context(validReferenceRecords().concat([
+    storyletRecord("SLT-10", {
+      scope: { visibility: "global_author_pool", branch_id: null },
+      preconditions: {
+        hard: [
+          { pred: "plan_active", holder: "STENT-1", plan: "STINT-1" },
+          { pred: "emotion_active", holder: "STENT-1", kind: "surprise" },
+          { pred: "emotion_active", holder: "STENT-1", min_intensity: "overwhelming" },
+          { pred: "emotion_pressure", holder: "STENT-1", pressure: "teleport" },
+          { pred: "any_plan_active", alias: "plan match" },
+          { pred: "any_emotion_active", alias: "emotion_match", holder_role: "narrator" }
+        ],
+        soft: [
+          { pred: "plan_active", holder: "STENT-1", plan: "STPLAN-404" }
+        ]
+      },
+      exit_options: [
+        {
+          action_family: "communicate",
+          surface_hint: "Name the emotional pressure.",
+          likely_effects: ["bound:emotion_match"]
+        }
+      ]
+    })
+  ])));
+
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_reference" &&
+    verdict.message.includes("preconditions.hard[0].plan")
+  ));
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_enum" &&
+    verdict.message.includes("preconditions.hard[1].kind")
+  ));
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_enum" &&
+    verdict.message.includes("preconditions.hard[2].min_intensity")
+  ));
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_enum" &&
+    verdict.message.includes("preconditions.hard[3].pressure")
+  ));
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_alias" &&
+    verdict.message.includes("preconditions.hard[4].alias")
+  ));
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_enum" &&
+    verdict.message.includes("preconditions.hard[5].holder_role")
+  ));
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.unresolved_reference" &&
+    verdict.message.includes("preconditions.soft[0].plan")
+  ));
 });
 
 test("storylet predicate DSL rejects legacy belief predicate and free-claim belief_record argument", async () => {
@@ -317,7 +380,9 @@ function validReferenceRecords(): IndexedRecord[] {
     record("story_location_record", "marla:STLOC-1", "stories/marla/_source/locations/STLOC-1.yaml", { id: "STLOC-1" }),
     record("story_object_record", "marla:STOBJ-1", "stories/marla/_source/objects/STOBJ-1.yaml", { id: "STOBJ-1" }),
     record("story_diegetic_artifact_record", "marla:DA-1", "stories/marla/_source/artifacts/DA-1.yaml", { id: "DA-1" }),
-    record("story_status_record", "marla:STSTAT-1", "stories/marla/_source/status/STSTAT-1.yaml", { id: "STSTAT-1" })
+    record("story_status_record", "marla:STSTAT-1", "stories/marla/_source/status/STSTAT-1.yaml", { id: "STSTAT-1" }),
+    record("story_plan_record", "marla:STPLAN-1", "stories/marla/_source/plans/STPLAN-1.yaml", { id: "STPLAN-1" }),
+    record("story_emotion_record", "marla:STEMO-1", "stories/marla/_source/emotions/STEMO-1.yaml", { id: "STEMO-1" })
   ];
 }
 

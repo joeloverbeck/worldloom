@@ -200,6 +200,232 @@ test("validatePatchPlan accepts append_story_diegetic_artifact_record through pr
   }
 });
 
+test("validatePatchPlan accepts STPLAN and STEMO create ops through pre-apply validation", async () => {
+  const root = createTempRepoRoot();
+  seedStoryPlanPrereqs(root);
+
+  try {
+    const plan = {
+      plan_id: "plan-stplan-stemo-001",
+      target_world: "seeded",
+      approval_token: "token-from-gate",
+      verdict: "ACCEPT",
+      originating_skill: "branching-story-turn-cycle",
+      expected_id_allocations: {
+        stplan_ids: ["STPLAN-1"],
+        stemo_ids: ["STEMO-1"]
+      },
+      patches: [
+        {
+          op: "create_stplan_record",
+          target_world: "seeded",
+          target_file: "stories/marla-kern-seduction/_source/plans/STPLAN-1.yaml",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            record: {
+              id: "STPLAN-1",
+              story_id: "STORY-1",
+              created_at_page: "PG-1",
+              created_by_event: "SE-1",
+              holder: "STENT-1",
+              root_intention: "STINT-1",
+              objective: "Recover the harbor ledger before Kern destroys it.",
+              plan_status: "active",
+              belief_basis: ["BEL-1"],
+              resource_basis: {
+                facts: [],
+                objects: ["STOBJ-1"],
+                locations: [],
+                artifacts: [],
+                relationships: [],
+                obligations: []
+              },
+              blockers: [],
+              current_step: {
+                action_family: "investigate",
+                target_records: ["STOBJ-1"],
+                success_condition: { predicates: [{ pred: "record_active", record: "STOBJ-1" }] }
+              },
+              fallback_steps: [],
+              expires_when: "The ledger is recovered or destroyed.",
+              derived_from: ["BEL-1"]
+            }
+          }
+        },
+        {
+          op: "create_stemo_record",
+          target_world: "seeded",
+          target_file: "stories/marla-kern-seduction/_source/emotions/STEMO-1.yaml",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            record: {
+              id: "STEMO-1",
+              story_id: "STORY-1",
+              created_at_page: "PG-1",
+              created_by_event: "SE-1",
+              holder: "STENT-1",
+              status: "active",
+              affect_kind: "fear",
+              intensity: "high",
+              orientation: { toward_records: [] },
+              appraisal_basis: ["BEL-1"],
+              trigger_event: "SE-1",
+              behavioral_pressure: ["flee"],
+              agency_effect: "none",
+              expires_when: "The actor reorients to the threat.",
+              derived_from: ["BEL-1"]
+            }
+          }
+        }
+      ]
+    };
+
+    const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
+
+    assert.ok("status" in result);
+    assert.equal(result.status, "pass", JSON.stringify(result, null, 2));
+    assert.deepEqual(result.verdicts, []);
+    assert.ok(
+      result.validators_run.some(
+        (entry) => entry.validator_name === "record_schema_compliance" && entry.status === "pass"
+      )
+    );
+    assert.ok(
+      result.validators_run.some(
+        (entry) => entry.validator_name === "id_allocation_race" && entry.status === "pass"
+      )
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+function seedStoryPlanPrereqs(root: string): void {
+  const storySlug = "marla-kern-seduction";
+  seedWorld(root, {
+    worldSlug: "seeded",
+    nodes: [
+      storyNode(storySlug, "page_record", "PG-1", "pages", [
+        "id: PG-1",
+        "story_id: STORY-1",
+        "branch_id: BR-1",
+        "parent_page_id: null",
+        "branch_path: [PG-1]",
+        "turn_index: 0",
+        "input:",
+        "  choice_id: null",
+        "  manual_action_text: null",
+        "  resolved_event_id: SE-1",
+        "state_hash_parent: null",
+        "state_hash: '0000000000000000000000000000000000000000000000000000000000000000'",
+        "state_snapshot:",
+        "  active_records:",
+        "    STENT: [STENT-1]",
+        "    STINT: [STINT-1]",
+        "    BEL: [BEL-1]",
+        "    STOBJ: [STOBJ-1]",
+        "    SE: [SE-1]",
+        "plan:",
+        "  plan_hash: '1111111111111111111111111111111111111111111111111111111111111111'",
+        "prose_plan_path: pages-prose-plans/PG-1.md",
+        "emitted_choices: []",
+        "validation_trace:",
+        "  bootstrap: pass"
+      ]),
+      storyNode(storySlug, "branch_record", "BR-1", "branches", [
+        "id: BR-1",
+        "story_id: STORY-1",
+        "created_at_page: PG-1",
+        "label: Root branch",
+        "description: Root fixture branch.",
+        "parent_branch_id: null",
+        "forked_at_page_id: null",
+        "root_page_id: PG-1"
+      ]),
+      storyNode(storySlug, "story_entity_record", "STENT-1", "entities", [
+        "id: STENT-1",
+        "story_id: STORY-1",
+        "display_name: Marla",
+        "bound_char_id: null",
+        "role_in_story: [primary_actor]",
+        "created_at_page: PG-1"
+      ]),
+      storyNode(storySlug, "intention_record", "STINT-1", "intentions", [
+        "id: STINT-1",
+        "story_id: STORY-1",
+        "created_at_page: PG-1",
+        "holder: STENT-1",
+        "intent: Recover the harbor ledger.",
+        "urgency: high",
+        "expires_when: The ledger is recovered or destroyed."
+      ]),
+      storyNode(storySlug, "belief_record", "BEL-1", "beliefs", [
+        "id: BEL-1",
+        "story_id: STORY-1",
+        "created_at_page: PG-1",
+        "holder: STENT-1",
+        "claim: Marla believes the ledger is hidden in the harbor office.",
+        "belief_mode: believes",
+        "truth_relation: unknown",
+        "confidence: medium",
+        "visibility: private",
+        "basis:",
+        "  source_event: SE-1",
+        "  access_route: direct_observation",
+        "  access_records: [STENT-1, SE-1]",
+        "consequences:",
+        "  opens: []",
+        "  constrains_choices: []"
+      ]),
+      storyNode(storySlug, "story_object_record", "STOBJ-1", "objects", [
+        "id: STOBJ-1",
+        "story_id: STORY-1",
+        "created_at_page: PG-1",
+        "label: Harbor ledger",
+        "description: The ledger Marla needs to recover.",
+        "owner: STENT-1",
+        "current_location: carried_by:STENT-1"
+      ]),
+      storyNode(storySlug, "story_event_record", "SE-1", "events", [
+        "id: SE-1",
+        "story_id: STORY-1",
+        "created_at_page: PG-1",
+        "parent_page_id: null",
+        "event_kind: story_start",
+        "actor: system",
+        "commitment:",
+        "  selected_slt_id: null",
+        "  selection_source: none",
+        "  alias_bindings: {}",
+        "outcome_route: accept",
+        "world_logic_rationale: Marla can form a plan and emotion from direct evidence.",
+        "state_delta:",
+        "  create: []",
+        "  supersede: []",
+        "  close: []"
+      ])
+    ]
+  });
+}
+
+function storyNode(
+  storySlug: string,
+  nodeType: Parameters<typeof seedWorld>[1]["nodes"][number]["node_type"],
+  id: string,
+  subdir: string,
+  lines: string[]
+): Parameters<typeof seedWorld>[1]["nodes"][number] {
+  return {
+    node_id: `${storySlug}:${id}`,
+    world_slug: "seeded",
+    story_slug: storySlug,
+    file_path: `stories/${storySlug}/_source/${subdir}/${id}.yaml`,
+    heading_path: id,
+    node_type: nodeType,
+    body: `${lines.join("\n")}\n`
+  };
+}
+
 test("validatePatchPlan returns fail and surfaces rule verdicts from the validators package", async () => {
   const root = createTempRepoRoot();
   seedEmptyWorld(root);

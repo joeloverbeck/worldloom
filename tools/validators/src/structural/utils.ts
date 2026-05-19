@@ -26,6 +26,7 @@ export const STRUCTURAL_NODE_TYPES = [
   "pressure_clock_record",
   "story_secret_record",
   "story_question_record",
+  "story_plan_record",
   "relationship_record_story",
   "intention_record",
   "story_location_record",
@@ -35,6 +36,7 @@ export const STRUCTURAL_NODE_TYPES = [
   "choice_record",
   "storylet_record",
   "belief_record",
+  "story_emotion_record",
   "story_diegetic_artifact_record"
 ] as const;
 
@@ -91,6 +93,7 @@ export const RECORD_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
   relationship_record_story: "story-relationship",
   story_secret_record: "story-secret",
   story_question_record: "story-question",
+  story_plan_record: "story-plan",
   intention_record: "story-intention",
   story_location_record: "story-location",
   story_object_record: "story-object",
@@ -99,6 +102,7 @@ export const RECORD_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
   choice_record: "story-choice",
   storylet_record: "story-storylet",
   belief_record: "story-belief",
+  story_emotion_record: "story-emotion",
   pressure_clock_record: "story-pressure-clock",
   story_diegetic_artifact_record: "story-diegetic-artifact"
 };
@@ -277,6 +281,12 @@ function isStructuralAuthorityRecord(record: IndexedRecord): boolean {
   }
   if (record.node_type === "story_question_record") {
     return /^stories\/[^/]+\/_source\/story-questions\/STQ-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "story_plan_record") {
+    return /^stories\/[^/]+\/_source\/plans\/STPLAN-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "story_emotion_record") {
+    return /^stories\/[^/]+\/_source\/emotions\/STEMO-\d+\.yaml$/.test(filePath);
   }
   if (record.node_type === "relationship_record_story") {
     return /^stories\/[^/]+\/_source\/relationships\/SREL-\d+\.yaml$/.test(filePath);

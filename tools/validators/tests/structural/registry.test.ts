@@ -56,7 +56,28 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "proposal_package_shape",
       "prose_receipt_schema_compliance",
       "modification_history_retrofit",
-      "validation_trace_shape_compliance"
+      "validation_trace_shape_compliance",
+      "stplan_schema_compliance",
+      "stplan_id_uniqueness_and_append_only",
+      "stplan_holder_exists_and_active",
+      "stplan_root_intention_grounded",
+      "stplan_belief_basis_grounded",
+      "stplan_resource_basis_grounded",
+      "stplan_blockers_grounded",
+      "stplan_current_step_targets_grounded",
+      "stplan_no_future_page_ids",
+      "stplan_supersession_chain_valid",
+      "stplan_closure_status_requires_closure_event",
+      "stplan_event_plan_relation_consistency",
+      "stemo_schema_compliance",
+      "stemo_holder_exists_and_active",
+      "stemo_trigger_event_on_branch_path",
+      "stemo_appraisal_basis_accessible_to_holder",
+      "stemo_orientation_records_exist",
+      "stemo_enum_compliance",
+      "stemo_no_future_page_ids",
+      "stemo_supersession_lifecycle_valid",
+      "stemo_agency_effect_compatibility"
     ]
   );
 });
