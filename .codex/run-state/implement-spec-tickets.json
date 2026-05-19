@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-49-stplan-stemo-integration-hardening.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC49STPSTEINT-007.md",
+  "last_ticket": "archive/tickets/SPEC49STPSTEINT-008.md",
   "last_result": "completed_archived",
-  "last_work_commit": "024c9b8f6f737ec45213ab73fce3ae02e42c65a2",
+  "last_work_commit": "284066940332a6abf997b10218427ecc033fb996",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC49STPSTEINT-008.md",
+  "next_target": "tickets/SPEC49STPSTEINT-009.md",
   "queue": [
-    "tickets/SPEC49STPSTEINT-008.md",
     "tickets/SPEC49STPSTEINT-009.md",
     "tickets/SPEC49STPSTEINT-010.md",
     "tickets/SPEC49STPSTEINT-011.md"
@@ -19,6 +18,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked clean after SPEC49STPSTEINT-007 work commit; expected ignored artifacts remain tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
+  "dirty_state": "tracked clean after SPEC49STPSTEINT-008 work commit; expected ignored artifacts remain tools/validators/dist/ and tools/validators/node_modules/",
   "updated_at": "2026-05-19"
 }
