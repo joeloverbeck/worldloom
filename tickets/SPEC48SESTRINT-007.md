@@ -106,7 +106,7 @@ Delete the old test file. Create a new test file with positive cases (SE carryin
 
 - Introduction-grounding validator refactor (deferred to ticket 004).
 - Plan-relation consumer refactor (completed in archive/tickets/SPEC48SESTRINT-005.md).
-- Expected-witness-coverage refactor (deferred to ticket 006).
+- Expected-witness-coverage refactor (completed in archive/tickets/SPEC48SESTRINT-006.md).
 - Schema field changes (covered by ticket 001).
 - Parser file deletion (deferred to ticket 009).
 
