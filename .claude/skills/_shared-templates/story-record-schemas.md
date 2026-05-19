@@ -635,12 +635,12 @@ target_or_action_families: [<action_family>]*  # non-empty list; §4.4a closed e
 likely_state_pressure: string*                 # natural-language pressure description
 associated_commitment_block: SLT-<integer> | null*   # SLT id if known, null if turn-cycle will JIT
 grounded_in:
-  records: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer> | BEL-<integer> | OBL-<integer> | CNSQ-<integer> | THR-<integer> | SREL-<integer> | DA-<integer> | STPLAN-<integer> | STEMO-<integer> | CLK-<integer> | STSEC-<integer> | STQ-<integer> | STINT-<integer> | SF-<integer>]*  # non-empty; active records grounding this choice
+  records: [STENT-<integer> | STSTAT-<integer> | STLOC-<integer> | STOBJ-<integer> | BEL-<integer> | OBL-<integer> | CNSQ-<integer> | THR-<integer> | SREL-<integer> | DA-<integer> | STPLAN-<integer> | STEMO-<integer> | CLK-<integer> | STSEC-<integer> | STQ-<integer> | STINT-<integer> | SF-<integer>]*  # non-empty; active records grounding this choice
   affordance_ordinals: [integer]               # optional; ordinals from PG.state_snapshot.visible_affordances
 success_policy: string                         # optional; only present when the resolving SE.outcome_route is `attempt`
 ```
 
-Use `STPLAN` when the choice's availability or salience materially depends on the actor's current tactical plan. Use `STEMO` when the choice exists because of active affective pressure. Use `CLK` for staged pressure, `STSEC` for hidden truth or clue-carrier grounding, `STQ` for an open setup or story question, `STINT` for an active desire/goal, and `SF` for a branch-local fact rather than a belief. Prefer `BEL` when the choice is grounded in the actor's belief, even if the belief is true.
+Use `STSTAT` when the choice's availability, prohibition, risk, or transformation turns on life, agency, or location status. Use `STPLAN` when the choice's availability or salience materially depends on the actor's current tactical plan. Use `STEMO` when the choice exists because of active affective pressure. Use `CLK` for staged pressure, `STSEC` for hidden truth or clue-carrier grounding, `STQ` for an open setup or story question, `STINT` for an active desire/goal, and `SF` for a branch-local fact rather than a belief. Prefer `BEL` when the choice is grounded in the actor's belief, even if the belief is true.
 
 No `target_or_action_family` singular field, `choice_contract`, `choice_worthiness`, `commitment_class`, `commitment_detail`, `commitment_family`, `continuation_capacity`, `likely_effects`, `record_version`, `strategy_cluster`, `emitted_at_branch`, or `emitted_by_page` fields.
 

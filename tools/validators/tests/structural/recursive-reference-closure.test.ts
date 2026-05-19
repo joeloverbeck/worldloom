@@ -655,6 +655,51 @@ test("recursive_reference_closure fails choices grounded in inactive records", a
   });
 });
 
+test("recursive_reference_closure fails choices grounded in inactive STSTAT records", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      emitted_choices: ["CHC-1"],
+      state_snapshot: {
+        ...stateSnapshot,
+        active_records: {
+          STENT: ["STENT-1"]
+        }
+      }
+    },
+    extra: [
+      storyRecord("choice_record", "CHC-1", "choices", {
+        id: "CHC-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
+        grounded_in: {
+          records: ["STSTAT-1"]
+        }
+      }),
+      storyRecord("story_status_record", "STSTAT-1", "status", {
+        id: "STSTAT-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        entity: "STENT-1",
+        life: "alive",
+        agency: "free",
+        location: "STLOC-1"
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const missing = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.choice_grounding_missing_active_record");
+  assert.ok(missing);
+  assert.deepEqual(missing.detail, {
+    page_id: "PG-2",
+    choice_id: "CHC-1",
+    reference_id: "STSTAT-1",
+    reference_path: "emitted_choices[0].grounded_in.records[0]"
+  });
+});
+
 test("recursive_reference_closure fails choices grounded in absent affordance ordinals", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {

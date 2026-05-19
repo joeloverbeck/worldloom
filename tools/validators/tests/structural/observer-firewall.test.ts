@@ -110,6 +110,48 @@ test("observer_firewall accepts STEMO grounding through actor-accessible apprais
   assert.deepEqual(verdicts, []);
 });
 
+test("observer_firewall accepts CHC status grounding for the actor's own active STSTAT", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STSTAT-1"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    status("STSTAT-1", "STENT-1")
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("observer_firewall rejects CHC status grounding for another actor without an access route", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STSTAT-2"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    status("STSTAT-2", "STENT-2")
+  ]));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "observer_firewall_violation_no_access_route");
+  assert.deepEqual(verdicts[0]?.detail, {
+    event_id: "SE-1",
+    actor: "STENT-1",
+    choice_id: "CHC-1",
+    reference_id: "STSTAT-2",
+    reference_path: "grounded_in.records[0]"
+  });
+});
+
+test("observer_firewall accepts CHC status grounding through a BEL access route", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STSTAT-2"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    status("STSTAT-2", "STENT-2"),
+    belief("BEL-1", "STENT-1", "private", ["STSTAT-2"])
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("observer_firewall rejects SLT belief_record holder mismatches after alias resolution", async () => {
   const verdicts = await observerFirewall.run(undefined, context([
     storylet("SLT-1", ["belief_record(role_protagonist, BEL-1, knows)"]),
@@ -295,6 +337,17 @@ function emotion(id: string, holder: string, appraisalBasis: string[]) {
     holder,
     status: "active",
     appraisal_basis: appraisalBasis
+  });
+}
+
+function status(id: string, entity: string) {
+  return storyRecord("story_status_record", id, "status", {
+    id,
+    story_id: "STORY-1",
+    entity,
+    life: "alive",
+    agency: "free",
+    location: "STLOC-1"
   });
 }
 

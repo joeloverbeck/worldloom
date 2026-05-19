@@ -45,7 +45,7 @@ When `CHC.associated_commitment_block` is non-null, require the choice to ground
 ## Out of Scope
 
 - Any pool-level salience / active-state pressure-distribution audit (§5c-forbidden).
-- CHC.grounded_in STSTAT schema change (SPEC50STPSTECHC-002).
+- CHC.grounded_in STSTAT schema change (archive/tickets/SPEC50STPSTECHC-002.md).
 - The accept-route prose-receipt check (SPEC50STPSTECHC-010).
 
 ## Acceptance Criteria

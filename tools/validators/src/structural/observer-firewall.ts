@@ -10,8 +10,9 @@ import {
 
 const ACCESSIBLE_BEL_VISIBILITIES = new Set(["public", "rumored", "shared"]);
 const PRIVATE_BEL_VISIBILITIES = new Set(["private", "suppressed", "concealed"]);
-const STATIC_ACCESS_RECORD_ID = /^(?:STENT|STLOC|STOBJ|DA|BEL|SF|SE|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/;
+const STATIC_ACCESS_RECORD_ID = /^(?:STENT|STSTAT|STLOC|STOBJ|DA|BEL|SF|SE|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/;
 const PLAN_OR_EMOTION_RECORD_ID = /^(?:STPLAN|STEMO)-\d+$/;
+const STATUS_RECORD_ID = /^STSTAT-\d+$/;
 
 export const observerFirewall: Validator = {
   name: "observer_firewall",
@@ -70,6 +71,11 @@ export const observerFirewall: Validator = {
           }
 
           if (PLAN_OR_EMOTION_RECORD_ID.test(referenceId) && !actorCanUsePlanOrEmotion(actor, referenceId, maps)) {
+            verdicts.push(noAccessRoute(event, parsed, actor, selectedChoice, referenceId, index));
+            return;
+          }
+
+          if (STATUS_RECORD_ID.test(referenceId) && !actorCanUseStatus(actor, referenceId, maps)) {
             verdicts.push(noAccessRoute(event, parsed, actor, selectedChoice, referenceId, index));
             return;
           }
@@ -230,6 +236,15 @@ function actorCanUsePlanOrEmotion(actor: string, referenceId: string, maps: Reco
     const belief = maps.byId.get(beliefId);
     return belief !== undefined && actorCanAccessBelief(actor, belief);
   });
+}
+
+function actorCanUseStatus(actor: string, referenceId: string, maps: RecordMaps): boolean {
+  const record = maps.byId.get(referenceId);
+  if (record === undefined) {
+    return false;
+  }
+  const entity = stringValue(asPlainRecord(record.parsed).entity);
+  return entity === actor || actorHasAccessRecord(actor, referenceId, maps);
 }
 
 function actorHasAccessRecord(actor: string, referenceId: string, maps: RecordMaps): boolean {
