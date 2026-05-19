@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-47-stplan-stemo.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC47STPSTE-004.md",
+  "last_ticket": "archive/tickets/SPEC47STPSTE-005.md",
   "last_result": "completed_archived",
-  "last_work_commit": "fc632c03d703782f97985e31ca34963df262ed61",
+  "last_work_commit": "67850382175352a771af7a000c00b42477ff913c",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC47STPSTE-005.md",
+  "next_target": "tickets/SPEC47STPSTE-006.md",
   "queue": [
-    "tickets/SPEC47STPSTE-005.md",
     "tickets/SPEC47STPSTE-006.md",
     "tickets/SPEC47STPSTE-008.md",
     "tickets/SPEC47STPSTE-009.md",
@@ -28,6 +27,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "expected ignored artifacts: tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/, tools/validators/dist/, tools/validators/node_modules/",
+  "dirty_state": "tracked clean; expected ignored artifacts include tools/validators/dist/ refreshed by build/test and pre-existing ignored package/local content under briefs/, tools/*/{dist,node_modules}, tools/world-mcp/.secret, worlds/, and world-proposals/",
   "updated_at": "2026-05-19"
 }
