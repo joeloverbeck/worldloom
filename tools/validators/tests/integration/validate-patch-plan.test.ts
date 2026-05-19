@@ -228,7 +228,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     );
     assert.equal(activeRecordsFullShapeExecution?.status, "skipped");
     const stplanExecutions = result.executions.filter((execution) => execution.name.startsWith("stplan_"));
-    assert.equal(stplanExecutions.length, 12);
+    assert.equal(stplanExecutions.length, 13);
     assert.ok(stplanExecutions.every((execution) => execution.status === "skipped"));
     const stemoExecutions = result.executions.filter((execution) => execution.name.startsWith("stemo_"));
     assert.equal(stemoExecutions.length, 9);

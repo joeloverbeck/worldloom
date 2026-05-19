@@ -46,6 +46,7 @@ import { stplanEventPlanRelationConsistency } from "../structural/stplan-event-p
 import { stplanHolderExistsAndActive } from "../structural/stplan-holder-exists-and-active.js";
 import { stplanIdUniquenessAndAppendOnly } from "../structural/stplan-id-uniqueness-and-append-only.js";
 import { stplanNoFuturePageIds } from "../structural/stplan-no-future-page-ids.js";
+import { stplanPredicateReferences } from "../structural/stplan-predicate-references.js";
 import { stplanResourceBasisGrounded } from "../structural/stplan-resource-basis-grounded.js";
 import { stplanRootIntentionGrounded } from "../structural/stplan-root-intention-grounded.js";
 import { stplanSchemaCompliance } from "../structural/stplan-schema-compliance.js";
@@ -144,6 +145,7 @@ export const structuralValidators: readonly Validator[] = [
   stplanResourceBasisGrounded,
   stplanBlockersGrounded,
   stplanCurrentStepTargetsGrounded,
+  stplanPredicateReferences,
   stplanNoFuturePageIds,
   stplanSupersessionChainValid,
   stplanClosureStatusRequiresClosureEvent,

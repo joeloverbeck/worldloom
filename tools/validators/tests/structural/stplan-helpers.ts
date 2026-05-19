@@ -26,7 +26,7 @@ export function plan(overrides: Record<string, unknown> = {}): IndexedRecord {
     current_step: {
       action_family: "investigate",
       target_records: ["STOBJ-1"],
-      success_condition: { predicates: [{ pred: "record_active", id: "SF-1" }] }
+      success_condition: { predicates: [{ pred: "record_active", record: "SF-1" }] }
     },
     fallback_steps: [],
     expires_when: "The key is found or the guard leaves.",

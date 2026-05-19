@@ -220,7 +220,7 @@ test("SPEC-47 T-10/D-A9: no-regression surfaces and Hook 3 coverage remain wired
     ...stplanRecords(),
     ...stemoRecords()
   ]));
-  assert.equal(validatorsRun.summary.validators_run.filter((name) => name.startsWith("stplan_")).length, 12);
+  assert.equal(validatorsRun.summary.validators_run.filter((name) => name.startsWith("stplan_")).length, 13);
   assert.equal(validatorsRun.summary.validators_run.filter((name) => name.startsWith("stemo_")).length, 9);
 
   const hook3 = readRepoFile("tools/hooks/src/hook3-guard-direct-edit.ts");

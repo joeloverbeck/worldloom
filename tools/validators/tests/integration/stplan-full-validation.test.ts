@@ -9,7 +9,7 @@ test("STPLAN structural validators pass together on a representative fixture", a
   const run = await runValidators(structuralValidators, undefined, context(baseRecords([plan()])));
   const stplanVerdicts = run.verdicts.filter((verdict) => verdict.validator.startsWith("stplan_"));
   assert.deepEqual(stplanVerdicts, []);
-  assert.equal(run.summary.validators_run.filter((name) => name.startsWith("stplan_")).length, 12);
+  assert.equal(run.summary.validators_run.filter((name) => name.startsWith("stplan_")).length, 13);
 });
 
 test("STPLAN structural validators report targeted failures", async () => {

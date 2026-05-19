@@ -66,6 +66,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "stplan_resource_basis_grounded",
       "stplan_blockers_grounded",
       "stplan_current_step_targets_grounded",
+      "stplan_predicate_references",
       "stplan_no_future_page_ids",
       "stplan_supersession_chain_valid",
       "stplan_closure_status_requires_closure_event",
