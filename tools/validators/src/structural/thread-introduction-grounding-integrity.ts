@@ -1,4 +1,5 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { readSeIntroductions } from "./midstory-introduction-utils.js";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, stringValue, touchedFilesInclude } from "./utils.js";
 
 const VALIDATOR = "thread_introduction_grounding_integrity";
@@ -46,10 +47,7 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   }
 
   const verdicts: Verdict[] = [];
-  for (const createdId of createdIds) {
-    if (!createdId.startsWith("THR-")) {
-      continue;
-    }
+  for (const createdId of introducedRecordIds(event, "THR")) {
     const thread = maps.byId.get(createdId);
     if (thread === undefined) {
       continue;
@@ -61,6 +59,12 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
     verdicts.push(...validateThread(thread, activeOrCreated));
   }
   return verdicts;
+}
+
+function introducedRecordIds(event: IndexedRecord, recordClass: "THR"): string[] {
+  return readSeIntroductions(event)
+    .filter((intro) => intro.class === recordClass)
+    .map((intro) => intro.recordId);
 }
 
 function validateThread(thread: IndexedRecord, activeOrCreatedIds: Set<string>): Verdict[] {

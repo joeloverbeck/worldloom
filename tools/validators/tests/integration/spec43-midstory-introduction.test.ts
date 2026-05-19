@@ -425,9 +425,36 @@ function event(id: string, overrides: Partial<{ create: string[]; actor: string;
     actor: overrides.actor ?? "STENT-1",
     commitment: { selected_slt_id: "SLT-1", selection_source: "runtime_jit", alias_bindings: {} },
     outcome_route: "accept",
-    world_logic_rationale: overrides.rationale ?? "intro validator test",
+    world_logic_rationale: overrides.rationale ?? "Structured introduction validator test.",
+    record_introductions: introEntries(overrides.create ?? []),
     state_delta: { create: overrides.create ?? [], supersede: [], close: [] }
   });
+}
+
+function introEntries(ids: string[]): Record<string, unknown>[] {
+  return ids
+    .map((id) => {
+      if (id.startsWith("CLK-")) return intro(id, "CLK", "deadline_declared", ["SE-2"]);
+      if (id.startsWith("STSEC-")) return intro(id, "STSEC", "clue_carrier_enters_play", ["SE-2"]);
+      if (id.startsWith("STQ-")) return intro(id, "STQ", "explicit_question_raised", ["SE-2"]);
+      if (id.startsWith("THR-")) return intro(id, "THR", "investigation_line_opened", ["SE-2"]);
+      if (id.startsWith("STENT-")) return intro(id, "STENT", "actor_enters_branch", ["SE-2"]);
+      if (id.startsWith("SREL-")) return intro(id, "SREL", "trust_axis_becomes_relevant", ["SE-2"]);
+      if (id.startsWith("STPLAN-")) return intro(id, "STPLAN", "tactical_approach_committed", ["SE-2"]);
+      if (id.startsWith("STEMO-")) return intro(id, "STEMO", "event_revealed_truth_to_actor", ["SE-2"]);
+      return undefined;
+    })
+    .filter((entry): entry is Record<string, unknown> => entry !== undefined);
+}
+
+function intro(record_id: string, recordClass: string, trigger: string, evidence: string[]): Record<string, unknown> {
+  return {
+    record_id,
+    class: recordClass,
+    trigger,
+    evidence,
+    distinct_from: []
+  };
 }
 
 function choice(id: string, groundedRecords: string[], availableTo: string[]): IndexedRecord {

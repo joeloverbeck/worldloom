@@ -1,4 +1,5 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { readSeIntroductions } from "./midstory-introduction-utils.js";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, stringValue, touchedFilesInclude } from "./utils.js";
 
 const VALIDATOR = "clock_introduction_grounding_integrity";
@@ -43,10 +44,7 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   }
 
   const verdicts: Verdict[] = [];
-  for (const createdId of createdIds) {
-    if (!createdId.startsWith("CLK-")) {
-      continue;
-    }
+  for (const createdId of introducedRecordIds(event, "CLK")) {
     const clock = maps.byId.get(createdId);
     if (clock === undefined) {
       continue;
@@ -58,6 +56,12 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
     verdicts.push(...validateClock(clock, activeOrCreated));
   }
   return verdicts;
+}
+
+function introducedRecordIds(event: IndexedRecord, recordClass: "CLK"): string[] {
+  return readSeIntroductions(event)
+    .filter((intro) => intro.class === recordClass)
+    .map((intro) => intro.recordId);
 }
 
 function validateClock(clock: IndexedRecord, activeOrCreatedIds: Set<string>): Verdict[] {

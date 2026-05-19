@@ -57,7 +57,38 @@ creating_event:
       alias_bindings:
         actor: STENT-1
     outcome_route: accept
-    world_logic_rationale: "The accepted event introduces persistent causal objects: intro:CLK(id=CLK-1, trigger=deadline_declared, evidence=[OBL-1,THR-1], distinct_from=[]); intro:STSEC(id=STSEC-1, trigger=clue_carrier_enters_play, evidence=[DA-1,SF-1], distinct_from=[]); intro:STQ(id=STQ-1, trigger=explicit_question_raised, evidence=[DA-1,THR-1], distinct_from=[]); intro:THR(id=THR-1, trigger=investigation_line_opened, evidence=[BEL-1,DA-1], distinct_from=[]); intro:STENT(id=STENT-3, trigger=information_source_enters, evidence=[DA-1], distinct_from=[STENT-1,STENT-2]); intro:SREL(id=SREL-1, trigger=trust_axis_becomes_relevant, evidence=[DA-1,SE-2], distinct_from=[])."
+    world_logic_rationale: "The accepted event introduces persistent causal objects through structured SE.record_introductions entries."
+    record_introductions:
+      - record_id: CLK-1
+        class: CLK
+        trigger: deadline_declared
+        evidence: [OBL-1, THR-1]
+        distinct_from: []
+      - record_id: STSEC-1
+        class: STSEC
+        trigger: clue_carrier_enters_play
+        evidence: [DA-1, SF-1]
+        distinct_from: []
+      - record_id: STQ-1
+        class: STQ
+        trigger: explicit_question_raised
+        evidence: [DA-1, THR-1]
+        distinct_from: []
+      - record_id: THR-1
+        class: THR
+        trigger: investigation_line_opened
+        evidence: [BEL-1, DA-1]
+        distinct_from: []
+      - record_id: STENT-3
+        class: STENT
+        trigger: information_source_enters
+        evidence: [DA-1]
+        distinct_from: [STENT-1, STENT-2]
+      - record_id: SREL-1
+        class: SREL
+        trigger: trust_axis_becomes_relevant
+        evidence: [DA-1, SE-2]
+        distinct_from: []
     state_delta:
       create: [OBL-1, THR-1, CLK-1, STSEC-1, STQ-1, STENT-3, STSTAT-3, SREL-1, DA-1, BEL-1, SF-1]
       supersede: []

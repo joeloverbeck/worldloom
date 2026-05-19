@@ -178,9 +178,22 @@ function event(id: string, overrides: Partial<{ create: string[]; supersede: str
     actor: "STENT-1",
     commitment: { selected_slt_id: "SLT-1", selection_source: "runtime_jit", alias_bindings: {} },
     outcome_route: "accept",
-    world_logic_rationale: overrides.world_logic_rationale ?? "intro:SREL(id=SREL-2, trigger=trust_axis_becomes_relevant, evidence=[SE-2], distinct_from=[])",
+    world_logic_rationale: overrides.world_logic_rationale ?? "Structured relationship introduction.",
+    record_introductions: introEntries(overrides.create ?? []),
     state_delta: { create: overrides.create ?? [], supersede: overrides.supersede ?? [], close: [] }
   });
+}
+
+function introEntries(ids: string[]): Record<string, unknown>[] {
+  return ids
+    .filter((id) => id.startsWith("SREL-"))
+    .map((record_id) => ({
+      record_id,
+      class: "SREL",
+      trigger: "trust_axis_becomes_relevant",
+      evidence: ["SE-2"],
+      distinct_from: []
+    }));
 }
 
 function page(id: string, activeRecords: Record<string, string[]>): IndexedRecord {

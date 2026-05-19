@@ -108,10 +108,35 @@ function event(
     actor: overrides.actor ?? "STENT-1",
     commitment: { selected_slt_id: "SLT-1", selection_source: "runtime_jit", alias_bindings: {} },
     outcome_route: "accept",
-    world_logic_rationale: "intro validator test",
+    world_logic_rationale: "Structured introduction firewall test.",
+    record_introductions: introEntries(overrides.create ?? []),
     expected_witnesses: overrides.expected_witnesses ?? [],
     state_delta: { create: overrides.create ?? [], supersede: [], close: [] }
   });
+}
+
+function introEntries(ids: string[]): Record<string, unknown>[] {
+  return ids
+    .filter((id) => /^(?:CLK|STSEC|STQ|THR|STENT|SREL|STPLAN|STEMO)-/.test(id))
+    .map((record_id) => ({
+      record_id,
+      class: record_id.split("-", 1)[0],
+      trigger: triggerFor(record_id),
+      evidence: ["SE-2"],
+      distinct_from: []
+    }));
+}
+
+function triggerFor(id: string): string {
+  if (id.startsWith("CLK-")) return "deadline_declared";
+  if (id.startsWith("STSEC-")) return "clue_carrier_enters_play";
+  if (id.startsWith("STQ-")) return "explicit_question_raised";
+  if (id.startsWith("THR-")) return "investigation_line_opened";
+  if (id.startsWith("STENT-")) return "actor_enters_branch";
+  if (id.startsWith("SREL-")) return "trust_axis_becomes_relevant";
+  if (id.startsWith("STPLAN-")) return "tactical_approach_committed";
+  if (id.startsWith("STEMO-")) return "event_revealed_truth_to_actor";
+  throw new Error(`No introduction trigger for ${id}.`);
 }
 
 function page(id: string, emittedChoices: string[], resolvedEventId: string) {
