@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/validators/tests/integration/spec49-stplan-stemo-hardening.test.ts`
-**Deps**: archive/tickets/SPEC49STPSTEINT-002.md, archive/tickets/SPEC49STPSTEINT-003.md, archive/tickets/SPEC49STPSTEINT-004.md, archive/tickets/SPEC49STPSTEINT-005.md, archive/tickets/SPEC49STPSTEINT-006.md, archive/tickets/SPEC49STPSTEINT-007.md, archive/tickets/SPEC49STPSTEINT-008.md, 009, 010
+**Deps**: archive/tickets/SPEC49STPSTEINT-002.md, archive/tickets/SPEC49STPSTEINT-003.md, archive/tickets/SPEC49STPSTEINT-004.md, archive/tickets/SPEC49STPSTEINT-005.md, archive/tickets/SPEC49STPSTEINT-006.md, archive/tickets/SPEC49STPSTEINT-007.md, archive/tickets/SPEC49STPSTEINT-008.md, archive/tickets/SPEC49STPSTEINT-009.md, tickets/SPEC49STPSTEINT-010.md
 
 ## Problem
 
@@ -19,16 +19,16 @@ SPEC-49's §Test Plan declares an end-to-end test exercising the cumulative beha
 
 ## Architecture Check
 
-1. Single trailing capstone ticket depending on the upstream leaf set (per §Spec-Integration Ticket Shape) is the canonical pattern. The DAG is parallel-branch (most upstream tickets are independent leaves; only ticket 003 has a Deps:001 chain), so the capstone's `Deps` enumerates the 9 leaves (002, 003, 004, 005, 006, archive/tickets/SPEC49STPSTEINT-007.md, archive/tickets/SPEC49STPSTEINT-008.md, 009, 010) per the parallel-branch resolution rule. The single ticket 001 is reachable transitively via ticket 003.
+1. Single trailing capstone ticket depending on the upstream leaf set (per §Spec-Integration Ticket Shape) is the canonical pattern. The DAG is parallel-branch (most upstream tickets are independent leaves; only ticket 003 has a Deps:001 chain), so the capstone's `Deps` enumerates the 9 leaves (002, 003, 004, 005, 006, archive/tickets/SPEC49STPSTEINT-007.md, archive/tickets/SPEC49STPSTEINT-008.md, archive/tickets/SPEC49STPSTEINT-009.md, tickets/SPEC49STPSTEINT-010.md) per the parallel-branch resolution rule. The single ticket 001 is reachable transitively via ticket 003.
 2. The capstone introduces no new production code — only a new test file. It exercises the pipeline composed by tickets 001-010.
 3. Fixture-world copy strategy: the test uses `fs.cpSync` (or equivalent) to copy a fixture world to a temp root before exercising the pipeline, keeping the real `worlds/<slug>/` tree untouched per §Spec-Integration Ticket Shape's discipline. Re-enumerated expected counts (not hardcoded) computed from the fixture at test start.
 
 ## Verification Layers
 
 1. Engine pre-apply gate: each new validator (tickets 003-008) fires correctly on the fixture-world's STPLAN/STEMO records. Validator surface: assertion on validator output (PASS for compliant records; named-finding FAIL for non-compliant records).
-2. World-index round-trip: rebuilding the index after ticket 009's edge extraction surfaces the 6 new edge types. Validator surface: assertion on `get_neighbors` query results.
+2. World-index round-trip: rebuilding the index after `archive/tickets/SPEC49STPSTEINT-009.md`'s edge extraction surfaces the 6 new edge types. Validator surface: assertion on world-index edge rows and any available retrieval-layer query results.
 3. Health-audit Phase 2k: invoking the health-audit skill (per ticket 010) on the fixture-world produces the expected findings for each of the 4 new checks. Validator surface: assertion on health-audit finding-code matches.
-4. Cross-ticket integration: a STPLAN with a malformed predicate is caught by ticket 006's validator at pre-apply, AND its world-index edge extraction (ticket 009) doesn't crash on the malformed input. Validator surface: composition-level test fixture.
+4. Cross-ticket integration: a STPLAN with a malformed predicate is caught by ticket 006's validator at pre-apply, AND its world-index edge extraction (`archive/tickets/SPEC49STPSTEINT-009.md`) doesn't crash on the malformed input. Validator surface: composition-level test fixture.
 
 ## What to Change
 
@@ -39,9 +39,9 @@ Implement an end-to-end test following the pattern of `tools/validators/tests/in
 - **Fixture setup**: `fs.cpSync` a fixture-world tree to a temp directory. Re-enumerate expected STPLAN/STEMO record counts at test start.
 - **Sub-test 1 (schema constraints)**: assert that PG.state_snapshot.active_records.STPLAN[] / STEMO[] is allowed (ticket 001), CHC.grounded_in.records[] accepts STPLAN/STEMO/CLK/STSEC/STQ/STINT/SF (ticket 002), STPLAN if/then constraints fire correctly for active+terminal cases (ticket 005).
 - **Sub-test 2 (validator bug fixes + new validators)**: assert that STEMO agency_effect compatibility fires correctly (ticket 004), STPLAN predicate-references catches unparseable + unresolvable predicates (ticket 006), SE.state_relations[] deterministic coverage fires for all seven declared relations (archive/tickets/SPEC49STPSTEINT-007.md), STEMO orientation strengthening fires for inactive/inaccessible targets with the BEL imagined-object carve-out (ticket 008), state-snapshot-integrity inactive-record lifecycle fires for terminal-status STPLAN/STEMO (ticket 003).
-- **Sub-test 3 (world-index edges)**: after `world-index build` on the fixture, assert the 6 new edge types are extracted (ticket 009).
+- **Sub-test 3 (world-index edges)**: after `world-index build` on the fixture, assert the 6 new edge types are extracted (`archive/tickets/SPEC49STPSTEINT-009.md`).
 - **Sub-test 4 (health-audit Phase 2k)**: invoke the health-audit skill prose against a fixture bundle containing the 4 new check trigger patterns; assert each finding code fires (ticket 010).
-- **Sub-test 5 (composition)**: a single fixture containing a STPLAN with both malformed predicates (ticket 006 validator FAIL) and a derived_from edge (ticket 009) is correctly handled — validator FAIL on the predicate doesn't block world-index extraction of the edge.
+- **Sub-test 5 (composition)**: a single fixture containing a STPLAN with both malformed predicates (ticket 006 validator FAIL) and a derived_from edge (`archive/tickets/SPEC49STPSTEINT-009.md`) is correctly handled — validator FAIL on the predicate doesn't block world-index extraction of the edge.
 
 Re-enumerated expected counts: at test start, walk the fixture's `_source/plans/`, `_source/emotions/`, `_source/pages/`, `_source/choices/` directories to compute expected counts dynamically. Hardcoded counts become stale; re-enumeration stays valid.
 

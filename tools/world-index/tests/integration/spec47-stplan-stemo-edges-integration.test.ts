@@ -19,6 +19,11 @@ const SPEC47_EDGE_TYPES = [
   "plan_resource_basis",
   "plan_blocker",
   "plan_current_step_target",
+  "plan_fallback_step_target",
+  "plan_success_predicate_ref",
+  "plan_fallback_predicate_ref",
+  "plan_derived_from",
+  "plan_expires_when_ref",
   "plan_created_by_event",
   "plan_supersedes",
   "emotion_holder",
@@ -26,16 +31,17 @@ const SPEC47_EDGE_TYPES = [
   "emotion_appraisal_basis",
   "emotion_oriented_toward",
   "emotion_supersedes",
-  "emotion_derived_from"
+  "emotion_derived_from",
+  "emotion_expires_when_ref"
 ] as const;
 
-test("SPEC-47 STPLAN/STEMO edge integration builds all new story edge rows", () => {
+test("SPEC-47/SPEC-49 STPLAN/STEMO edge integration builds all story edge rows", () => {
   const root = createAtomicRepoRoot(WORLD_SLUG);
 
   try {
     addSpec47Story(root);
 
-    assert.equal(STORY_EDGE_TYPES.length, 50);
+    assert.equal(STORY_EDGE_TYPES.length, 56);
     assert.equal(new Set(STORY_EDGE_TYPES).size, STORY_EDGE_TYPES.length);
     for (const edgeType of SPEC47_EDGE_TYPES) {
       assert.ok(STORY_EDGE_TYPES.includes(edgeType), `${edgeType} should be registered`);
@@ -50,6 +56,11 @@ test("SPEC-47 STPLAN/STEMO edge integration builds all new story edge rows", () 
       plan_resource_basis: 6,
       plan_blocker: 1,
       plan_current_step_target: 1,
+      plan_fallback_step_target: 1,
+      plan_success_predicate_ref: 2,
+      plan_fallback_predicate_ref: 2,
+      plan_derived_from: 1,
+      plan_expires_when_ref: 1,
       plan_created_by_event: 1,
       plan_supersedes: 1,
       emotion_holder: 1,
@@ -57,7 +68,8 @@ test("SPEC-47 STPLAN/STEMO edge integration builds all new story edge rows", () 
       emotion_appraisal_basis: 2,
       emotion_oriented_toward: 1,
       emotion_supersedes: 1,
-      emotion_derived_from: 2
+      emotion_derived_from: 2,
+      emotion_expires_when_ref: 1
     });
     assert.ok(rows.every((row) => row.story_slug === STORY_SLUG));
     assertNoEdgeTarget(rows, "system");
@@ -113,10 +125,18 @@ function addSpec47Story(root: string): void {
     "  action_family: reveal",
     "  target_records: [STQ-1, unknown]",
     "  success_condition:",
-    "    predicates: []",
-    "fallback_steps: []",
-    "expires_when: after the bell council convenes",
-    "derived_from: []"
+    "    predicates:",
+    "      - pred: plan_active(STPLAN-4)",
+    "      - pred: record_active(BEL-3)",
+    "fallback_steps:",
+    "  - action_family: bargain",
+    "    target_records: [OBL-2, group:watch]",
+    "    trigger_condition:",
+    "      predicates:",
+    "        - pred: record_active(STSEC-2)",
+    "        - pred: emotion_active(STENT-1, fear)",
+    "expires_when: after STPLAN-4 fulfills",
+    "derived_from: [SE-2]"
   ]);
   writeStoryRecord(root, "emotions", "STEMO-2.yaml", [
     "id: STEMO-2",
@@ -134,7 +154,7 @@ function addSpec47Story(root: string): void {
     "trigger_event: SE-4",
     "behavioral_pressure: [flee, protect_other]",
     "agency_effect: constraining",
-    "expires_when: when the bell tower is secure",
+    "expires_when: after SE-5 resolves the bell tower",
     "derived_from: [SE-4, SREL-1, group:watch]"
   ]);
 }

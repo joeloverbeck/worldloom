@@ -92,7 +92,7 @@ const STORY_DIR_ORDER = new Map(Array.from(STORY_DIRS.keys()).map((directory, in
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
 const STORY_REF_REGEX =
-  /\b(STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|STPLAN|STEMO|DA)-[A-Za-z0-9-]+\b/g;
+  /\b(STENT|STSTAT|SF|SE|BEL|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|STPLAN|STEMO|DA)-[A-Za-z0-9-]+\b/g;
 
 export type AtomicSkipReason = "missing_id_field" | "schema_pattern_mismatch";
 
@@ -887,6 +887,27 @@ function edgesForStoryPlan(
     pushStoryEdgeIfReference(edges, node.node_id, "plan_current_step_target", storySlug, target);
   }
 
+  for (const target of storyRefsInRecordArrayField(record, "predicates", ["current_step", "success_condition"])) {
+    pushStoryEdgeIfReference(edges, node.node_id, "plan_success_predicate_ref", storySlug, target);
+  }
+
+  for (const fallbackStep of recordArrayField(record, "fallback_steps")) {
+    for (const target of stringArrayField(fallbackStep, "target_records")) {
+      pushStoryEdgeIfReference(edges, node.node_id, "plan_fallback_step_target", storySlug, target);
+    }
+    for (const target of storyRefsInRecordArrayField(fallbackStep, "predicates", ["trigger_condition"])) {
+      pushStoryEdgeIfReference(edges, node.node_id, "plan_fallback_predicate_ref", storySlug, target);
+    }
+  }
+
+  for (const target of stringArrayField(record, "derived_from")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "plan_derived_from", storySlug, target);
+  }
+
+  for (const target of storyRefsInString(stringField(record, "expires_when"))) {
+    pushStoryEdgeIfReference(edges, node.node_id, "plan_expires_when_ref", storySlug, target);
+  }
+
   pushStoryEdgeIfReference(
     edges,
     node.node_id,
@@ -933,6 +954,10 @@ function edgesForStoryEmotion(
 
   for (const target of stringArrayField(record, "derived_from")) {
     pushStoryEdgeIfReference(edges, node.node_id, "emotion_derived_from", storySlug, target);
+  }
+
+  for (const target of storyRefsInString(stringField(record, "expires_when"))) {
+    pushStoryEdgeIfReference(edges, node.node_id, "emotion_expires_when_ref", storySlug, target);
   }
 
   return edges;
@@ -1178,8 +1203,44 @@ function stringArrayField(record: Record<string, unknown>, field: string, nested
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
-function recordArrayField(record: Record<string, unknown>, field: string): Array<Record<string, unknown>> {
-  return arrayOfRecords(record[field]);
+function recordArrayField(
+  record: Record<string, unknown>,
+  field: string,
+  nestedPath: string[] = []
+): Array<Record<string, unknown>> {
+  let container: unknown = record;
+  for (const segment of nestedPath) {
+    if (!isRecord(container)) {
+      return [];
+    }
+    container = container[segment];
+  }
+  if (!isRecord(container)) {
+    return [];
+  }
+  return arrayOfRecords(container[field]);
+}
+
+function storyRefsInRecordArrayField(record: Record<string, unknown>, field: string, nestedPath: string[] = []): string[] {
+  const refs = new Set<string>();
+  for (const item of recordArrayField(record, field, nestedPath)) {
+    for (const target of storyRefsInString(stringField(item, "pred"))) {
+      refs.add(target);
+    }
+  }
+  return [...refs].sort((left, right) => left.localeCompare(right, "en-US"));
+}
+
+function storyRefsInString(value: string | null): string[] {
+  if (!value) {
+    return [];
+  }
+  const refs = new Set<string>();
+  for (const match of value.match(STORY_REF_REGEX) ?? []) {
+    refs.add(match);
+  }
+  STORY_REF_REGEX.lastIndex = 0;
+  return [...refs].sort((left, right) => left.localeCompare(right, "en-US"));
 }
 
 function isStoryRecordReference(value: string): boolean {
