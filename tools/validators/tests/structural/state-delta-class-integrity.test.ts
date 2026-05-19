@@ -65,13 +65,15 @@ test("state_delta_class_integrity rejects unresolvable supersede ids", async () 
   assert.match(verdicts[0]?.message ?? "", /CLK-99 which does not resolve/);
 });
 
-test("state_delta_class_integrity accepts all newly permitted SPEC-44 classes when they resolve", async () => {
+test("state_delta_class_integrity accepts all newly permitted SPEC-44 and SPEC-47 classes when they resolve", async () => {
   const ctx = context([
-    event("marla", "SE-1", { create: ["STSTAT-1", "CLK-1", "STSEC-1", "STQ-1"], supersede: [], close: [] }),
+    event("marla", "SE-1", { create: ["STSTAT-1", "CLK-1", "STSEC-1", "STQ-1", "STPLAN-1", "STEMO-1"], supersede: [], close: [] }),
     storyRecord("story_status_record", "marla", "STSTAT-1", "status"),
     storyRecord("pressure_clock_record", "marla", "CLK-1", "clocks"),
     storyRecord("story_secret_record", "marla", "STSEC-1", "secrets"),
-    storyRecord("story_question_record", "marla", "STQ-1", "story-questions")
+    storyRecord("story_question_record", "marla", "STQ-1", "story-questions"),
+    storyRecord("story_plan_record", "marla", "STPLAN-1", "plans"),
+    storyRecord("story_emotion_record", "marla", "STEMO-1", "emotions")
   ]);
 
   assert.deepEqual(await stateDeltaClassIntegrity.run({}, ctx), []);

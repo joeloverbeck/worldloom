@@ -3,14 +3,16 @@ import { extractIntroTags, type MidstoryIntroductionClass, type ParsedIntroTag }
 import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, stringValue, touchedFilesInclude } from "./utils.js";
 
 const VALIDATOR = "midstory_record_introduction_grounding";
-const INTRO_CLASSES = new Set<MidstoryIntroductionClass>(["CLK", "STSEC", "STQ", "THR", "STENT", "SREL"]);
+const INTRO_CLASSES = new Set<MidstoryIntroductionClass>(["CLK", "STSEC", "STQ", "THR", "STENT", "SREL", "STPLAN", "STEMO"]);
 const INTRO_CREATE_OPS = new Set([
   "create_clk_record",
   "create_stsec_record",
   "create_stq_record",
   "create_thr_record",
   "create_stent_record",
-  "create_srel_record"
+  "create_srel_record",
+  "create_stplan_record",
+  "create_stemo_record"
 ]);
 
 export const midstoryRecordIntroductionGrounding: Validator = {
@@ -25,7 +27,7 @@ export const midstoryRecordIntroductionGrounding: Validator = {
     ) === true ||
     touchedFilesInclude(
       ctx,
-      /^stories\/[^/]+\/_source\/(?:events|pages|clocks|secrets|story-questions|threads|entities|relationships)\/(?:SE|PG|CLK|STSEC|STQ|THR|STENT|SREL)-\d+\.yaml$/
+      /^stories\/[^/]+\/_source\/(?:events|pages|clocks|secrets|story-questions|threads|entities|relationships|plans|emotions)\/(?:SE|PG|CLK|STSEC|STQ|THR|STENT|SREL|STPLAN|STEMO)-\d+\.yaml$/
     ),
   run: async (_input: unknown, ctx: Context): Promise<Verdict[]> => {
     const records = await queryStructuralRecords(ctx);
@@ -204,7 +206,7 @@ function missingTag(event: IndexedRecord, recordId?: string, reason?: string): V
       : `${bareNodeId(event)} creates ${recordId} without a matching intro:<CLASS>(id=${recordId}, ...) tag.`,
     location: locationFor(event),
     detail: { event_id: bareNodeId(event), record_id: recordId, reason },
-    suggested_fix: "Carry every mid-story-created CLK/STSEC/STQ/THR/STENT/SREL as a parseable intro:<CLASS>(...) tag in SE.world_logic_rationale."
+    suggested_fix: "Carry every mid-story-created CLK/STSEC/STQ/THR/STENT/SREL/STPLAN/STEMO as a parseable intro:<CLASS>(...) tag in SE.world_logic_rationale."
   };
 }
 

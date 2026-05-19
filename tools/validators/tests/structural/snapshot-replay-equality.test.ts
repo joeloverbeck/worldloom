@@ -223,6 +223,18 @@ test("snapshot_replay_equality replays STQ active records", async () => {
   assert.deepEqual(pageSnapshot.STQ, ["STQ-1"]);
 });
 
+test("snapshot_replay_equality replays STPLAN and STEMO active records", async () => {
+  const parentSnapshot = newSchemaParentActiveRecords();
+  const pageSnapshot = replayActiveRecords(parentSnapshot, {
+    create: ["STPLAN-1", "STEMO-1"],
+    supersede: [],
+    close: []
+  });
+
+  assert.deepEqual(pageSnapshot.STPLAN, ["STPLAN-1"]);
+  assert.deepEqual(pageSnapshot.STEMO, ["STEMO-1"]);
+});
+
 test("snapshot_replay_equality reports new-schema canonical state_hash mismatches", async () => {
   const childPage = {
     ...newSchemaChildPage(newSchemaExpectedActiveRecords()),
@@ -532,7 +544,9 @@ function newSchemaParentActiveRecords(): Record<string, string[]> {
     STLOC: ["STLOC-1"],
     STOBJ: [],
     DA: [],
-    STSTAT: ["STSTAT-1"]
+    STSTAT: ["STSTAT-1"],
+    STPLAN: [],
+    STEMO: []
   };
 }
 
@@ -549,6 +563,8 @@ function newSchemaExpectedActiveRecords(): Record<string, string[]> {
     STLOC: ["STLOC-1"],
     STOBJ: [],
     DA: [],
-    STSTAT: ["STSTAT-2"]
+    STSTAT: ["STSTAT-2"],
+    STPLAN: [],
+    STEMO: []
   };
 }

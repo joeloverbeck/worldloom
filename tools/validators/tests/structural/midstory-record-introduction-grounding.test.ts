@@ -89,6 +89,24 @@ test("midstory_record_introduction_grounding rejects created_at_page mismatch", 
   });
 });
 
+test("midstory_record_introduction_grounding accepts STPLAN and STEMO intro tags", async () => {
+  const records = baseRecords([
+    event("SE-2", {
+      create: ["STPLAN-1", "STEMO-1"],
+      world_logic_rationale: [
+        "intro:STPLAN(id=STPLAN-1, trigger=tactical_approach_committed, evidence=[SE-2], distinct_from=[])",
+        "intro:STEMO(id=STEMO-1, trigger=event_revealed_truth_to_actor, evidence=[SE-2], distinct_from=[])"
+      ].join(" ")
+    }),
+    introducedRecord("STPLAN-1", "story_plan_record", "plans", { created_at_page: "PG-2" }),
+    introducedRecord("STEMO-1", "story_emotion_record", "emotions", { created_at_page: "PG-2" })
+  ]);
+
+  const verdicts = await midstoryRecordIntroductionGrounding.run(undefined, testContext(records));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("midstory_record_introduction_grounding is scoped to full-world, story-bundle patch plans, and touched story files", () => {
   assert.equal(midstoryRecordIntroductionGrounding.applies_to(testContext([])), true);
   assert.equal(
@@ -97,6 +115,14 @@ test("midstory_record_introduction_grounding is scoped to full-world, story-bund
   );
   assert.equal(
     midstoryRecordIntroductionGrounding.applies_to(testContext([], { run_mode: "pre-apply", patch_plan: patchPlan("create_clk_record") })),
+    true
+  );
+  assert.equal(
+    midstoryRecordIntroductionGrounding.applies_to(testContext([], { run_mode: "pre-apply", patch_plan: patchPlan("create_stplan_record") })),
+    true
+  );
+  assert.equal(
+    midstoryRecordIntroductionGrounding.applies_to(testContext([], { run_mode: "pre-apply", patch_plan: patchPlan("create_stemo_record") })),
     true
   );
   assert.equal(
@@ -204,6 +230,8 @@ function nodeTypeForId(id: string): string {
   if (id.startsWith("THR-")) return "thread_record";
   if (id.startsWith("STENT-")) return "story_entity_record";
   if (id.startsWith("SREL-")) return "relationship_record_story";
+  if (id.startsWith("STPLAN-")) return "story_plan_record";
+  if (id.startsWith("STEMO-")) return "story_emotion_record";
   if (id.startsWith("STSTAT-")) return "story_status_record";
   if (id.startsWith("CHC-")) return "choice_record";
   throw new Error(`No fixture node type mapping for ${id}.`);

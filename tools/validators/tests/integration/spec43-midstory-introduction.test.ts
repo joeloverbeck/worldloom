@@ -228,12 +228,12 @@ test("§Verification bullet 16: choice grounded in fresh record fails observer f
   assertHasCode(verdicts, "intro_observer_no_access_route");
 });
 
-test("§Verification bullet 17: absence of optional CLK/STSEC/STQ remains valid", async () => {
+test("§Verification bullet 17: absence of optional CLK/STSEC/STQ/STPLAN/STEMO remains valid", async () => {
   const verdicts = await compatibilityDrift.run(undefined, testContext([
     page("PG-1", { active_records: legacyActiveRecords() })
   ]));
 
-  assert.equal(verdicts.filter((verdict) => verdict.code === "compat_optional_directory_absent").length, 4);
+  assert.equal(verdicts.filter((verdict) => verdict.code === "compat_optional_directory_absent").length, 6);
   assert.ok(verdicts.every((verdict) => verdict.severity === "info"));
   assert.ok(verdicts.every((verdict) => verdict.severity !== "fail"));
 });

@@ -66,6 +66,50 @@ test("observer_firewall rejects defensive SF grounding without an access route",
   });
 });
 
+test("observer_firewall accepts STPLAN grounding through actor-accessible belief basis", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STPLAN-1"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    plan("STPLAN-1", "STENT-1", ["BEL-1"]),
+    belief("BEL-1", "STENT-1", "private")
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("observer_firewall rejects STPLAN grounding without actor-accessible belief basis", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STPLAN-1"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    plan("STPLAN-1", "STENT-1", ["BEL-2"]),
+    belief("BEL-2", "STENT-2", "private")
+  ]));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "observer_firewall_violation_no_access_route");
+  assert.deepEqual(verdicts[0]?.detail, {
+    event_id: "SE-1",
+    actor: "STENT-1",
+    choice_id: "CHC-1",
+    reference_id: "STPLAN-1",
+    reference_path: "grounded_in.records[0]"
+  });
+});
+
+test("observer_firewall accepts STEMO grounding through actor-accessible appraisal basis", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STEMO-1"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    emotion("STEMO-1", "STENT-1", ["BEL-1"]),
+    belief("BEL-1", "STENT-1", "private")
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("observer_firewall rejects SLT belief_record holder mismatches after alias resolution", async () => {
   const verdicts = await observerFirewall.run(undefined, context([
     storylet("SLT-1", ["belief_record(role_protagonist, BEL-1, knows)"]),
@@ -232,6 +276,25 @@ function fact(id: string) {
     story_id: "STORY-1",
     authority: "branch_local",
     derived_from: []
+  });
+}
+
+function plan(id: string, holder: string, beliefBasis: string[]) {
+  return storyRecord("story_plan_record", id, "plans", {
+    id,
+    story_id: "STORY-1",
+    holder,
+    belief_basis: beliefBasis
+  });
+}
+
+function emotion(id: string, holder: string, appraisalBasis: string[]) {
+  return storyRecord("story_emotion_record", id, "emotions", {
+    id,
+    story_id: "STORY-1",
+    holder,
+    status: "active",
+    appraisal_basis: appraisalBasis
   });
 }
 
