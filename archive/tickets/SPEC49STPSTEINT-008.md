@@ -1,9 +1,9 @@
 # SPEC49STPSTEINT-008: Strengthen stemo-orientation-records-exist validator with active+accessibility checks + BEL imagined-object carve-out
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — `tools/validators/src/structural/stemo-orientation-records-exist.ts` (modify), `tools/validators/src/structural/stemo-utils.ts` (modify — add helper), `tools/validators/tests/structural/stemo-orientation-records-exist.test.ts` (modify)
+**Engine Changes**: Yes — `tools/validators/src/structural/stemo-orientation-records-exist.ts` (modify), `tools/validators/src/structural/stemo-utils.ts` (modify — add helper), `tools/validators/tests/structural/stemo-orientation-records-exist.test.ts` (modify), `tools/validators/tests/structural/stemo-helpers.ts` (modify)
 **Deps**: None
 
 ## Problem
@@ -21,8 +21,8 @@
 ## Architecture Check
 
 1. Extending the existing validator with active+accessibility checks (paralleling `stplan-belief-basis-grounded.ts`'s discipline) is the minimal-blast-radius approach. Alternative (introducing a separate `stemo-orientation-target-active.ts` validator) would multiply the validator-registry surface without semantic gain. The single-validator-per-target shape is the canonical pattern.
-2. No backwards-compatibility aliasing introduced. Migration posture for legacy bundles with STEMO records pointing to inactive/inaccessible orientation targets (per SPEC-49 D-CX.1 distributed contract — extending the WARN-then-FAIL pattern by mechanism continuity since B.6 is an audit-identified gap): WARN-mode rollout for one revision cycle, then FAIL.
-3. The new helper `isOrientationTargetAccessibleToHolder()` at `stemo-utils.ts` parallels `isRecordAccessibleToHolder` at `stplan-utils.ts` — same shape, extended with the BEL imagined-object carve-out (when target is a BEL with `truth_relation: false`, waive the active-at-page check but apply the accessibility check on the BEL itself).
+2. No backwards-compatibility aliasing introduced. Reassessment closeout correction (2026-05-19): the live repo has no deterministic SPEC-49 revision marker for classifying legacy STEMO orientation entries at this validator boundary, so this ticket lands the active/accessibility checks fail-closed in the structural validator path rather than adding a speculative WARN-mode branch. Legacy bundle triage remains a health-audit/migration concern.
+3. The new helper `isOrientationTargetAccessibleToHolder()` at `stemo-utils.ts` parallels `isRecordAccessibleToHolder` at `stplan-utils.ts` for the holder-accessibility half of the check. The BEL imagined-object carve-out lives at the validator call site: when target is a BEL with `truth_relation: false`, active-at-page checking is waived while accessibility to the BEL itself still applies.
 4. Shared file `tools/validators/src/structural/stemo-utils.ts` is also modified by ticket 004 (B.1 STEMO agency_effect bug fix); the two tickets touch different functions (004 fixes `holderHasCompatibleAgency` at line 303; this ticket adds `isOrientationTargetAccessibleToHolder` as a new function). Mechanical merge expected; no semantic overlap.
 
 ## Verification Layers
@@ -44,36 +44,29 @@ The existing existence-check finding code (e.g., `stemo_orientation_records_exis
 
 ### 2. Add `isOrientationTargetAccessibleToHolder()` helper to `tools/validators/src/structural/stemo-utils.ts`
 
-Parallel to `stplan-utils.ts`'s `isRecordAccessibleToHolder`, with the BEL imagined-object carve-out:
+Parallel to `stplan-utils.ts`'s `isRecordAccessibleToHolder`; the validator call site applies the BEL imagined-object carve-out after resolving active status:
 
 ```typescript
 export function isOrientationTargetAccessibleToHolder(
   target: IndexedRecord,
-  holder: string,
-  maps: Maps
+  holder: string | undefined
 ): boolean {
-  // When target is a BEL record with truth_relation: false,
-  // waive the active-at-page check (the imagined object behind the BEL need not exist),
-  // but apply the accessibility check on the BEL itself.
-  if (target.node_type === "belief_record" && stringField(target.parsed, "truth_relation") === "false") {
-    return isRecordAccessibleToHolder(target, holder);
-  }
-  // Otherwise: full active + accessibility check.
-  return isActiveAtEmotionPage(target, maps) && isRecordAccessibleToHolder(target, holder);
+  return holder !== undefined && isRecordAccessibleToHolder(target, holder);
 }
 ```
 
-The helper composes existing primitives where possible; only the carve-out's branch logic is new.
+The helper composes existing primitives where possible. The active-at-page check and BEL false carve-out stay in `stemo-orientation-records-exist.ts` so the validator can emit distinct `inactive_target` and `inaccessible_target` findings.
 
-### 3. D-CX.1-style migration-posture handling
+### 3. Fail-closed structural enforcement
 
-Per the SPEC-49 D-CX.1 distributed contract (extending by mechanism continuity since B.6 is an audit-identified gap): WARN-mode rollout for one revision cycle, then FAIL. Legacy bundles' STEMO records pointing to inactive/inaccessible orientation targets emit WARN at the validator-error-reporting layer; current-contract pages FAIL.
+The live validator path now emits fail verdicts for inactive and inaccessible `orientation.toward_records[]` targets. No WARN-mode legacy branch was added because the current validator context does not expose a deterministic SPEC-49 revision marker for this boundary.
 
 ## Files to Touch
 
 - `tools/validators/src/structural/stemo-orientation-records-exist.ts` (modify)
 - `tools/validators/src/structural/stemo-utils.ts` (modify — add helper; shared with ticket 004, different function)
 - `tools/validators/tests/structural/stemo-orientation-records-exist.test.ts` (modify)
+- `tools/validators/tests/structural/stemo-helpers.ts` (modify — default orientation target remains valid under the stronger accessibility check)
 
 ## Out of Scope
 
@@ -91,28 +84,42 @@ Per the SPEC-49 D-CX.1 distributed contract (extending by mechanism continuity s
 3. A STEMO with `orientation.toward_records: [STENT-1]` where STENT-1 is active BUT inaccessible to the holder FAILS with `stemo_orientation_records_active.inaccessible_target`.
 4. A STEMO with `orientation.toward_records: [BEL-5]` where BEL-5 has `truth_relation: false` (imagined-object case) AND is accessible to the holder PASSES, even when the imagined object's existence on the branch cannot be verified.
 5. A STEMO with `orientation.toward_records: [BEL-5]` where BEL-5 has `truth_relation: false` but is INACCESSIBLE to the holder FAILS with `stemo_orientation_records_active.inaccessible_target` (the carve-out waives active-status check but not accessibility check on the BEL).
-6. A STEMO with `orientation.toward_records: [INVALID-1]` continues to FAIL with the existing existence check (`stemo_orientation_records_exist.missing_target`); the existence check is preserved unchanged.
-7. A legacy-marker bundle (pre-SPEC-49 revision_marker) with a STEMO pointing to an inactive orientation target emits WARN (not FAIL) at the validator-error-reporting layer.
+6. A STEMO with `orientation.toward_records: [INVALID-1]` continues to FAIL with the existing existence check (`stemo_orientation_records_exist.missing_orientation_record`); the existence check is preserved unchanged.
+7. The focused structural validator path remains fail-closed for inactive and inaccessible targets; legacy WARN classification is intentionally not implemented in this ticket because the required SPEC-49 revision marker is absent.
 
 ### Invariants
 
 1. Every active orientation target on a STEMO record is either (a) active at the emotion's `created_at_page` and accessible to the holder, OR (b) a BEL with `truth_relation: false` and the BEL is accessible to the holder (imagined-object carve-out).
-2. The existing existence-check finding code (`stemo_orientation_records_exist.missing_target`) is preserved alongside the new `stemo_orientation_records_active.*` codes — the existence dimension and the active+accessibility dimension are independent checks.
+2. The existing existence-check finding code (`stemo_orientation_records_exist.missing_orientation_record`) is preserved alongside the new `stemo_orientation_records_active.*` codes — the existence dimension and the active+accessibility dimension are independent checks.
 
 ## Test Plan
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/fixtures/stemo-orientation-active-accessible.yaml` — PASS fixture (standard case).
-2. `tools/validators/tests/fixtures/stemo-orientation-inactive-target.yaml` — FAIL with `inactive_target`.
-3. `tools/validators/tests/fixtures/stemo-orientation-inaccessible-target.yaml` — FAIL with `inaccessible_target`.
-4. `tools/validators/tests/fixtures/stemo-orientation-bel-imagined-pass.yaml` — PASS via carve-out (BEL with truth_relation: false, accessible).
-5. `tools/validators/tests/fixtures/stemo-orientation-bel-imagined-inaccessible-fail.yaml` — FAIL (BEL with truth_relation: false but inaccessible — carve-out waives active but not accessibility).
-6. `tools/validators/tests/fixtures/stemo-orientation-legacy-warn.yaml` — WARN at legacy-marker bundle.
-7. `tools/validators/tests/structural/stemo-orientation-records-exist.test.ts` — modify to add 5 new test cases (PASS + 2 FAIL + 1 carve-out PASS + 1 carve-out FAIL) consuming the fixtures above. Existing existence-check test case (missing_target FAIL) preserved unchanged.
+1. `tools/validators/tests/structural/stemo-orientation-records-exist.test.ts` — modified with inline fixture records for six cases: known target PASS, missing target FAIL, inactive target FAIL, inaccessible target FAIL, accessible BEL false imagined-object PASS, and inaccessible BEL false imagined-object FAIL. Existing existence-check coverage was preserved.
+2. `tools/validators/tests/structural/stemo-helpers.ts` — modified the default orientation target to be holder-accessible so the representative STEMO fixture remains valid after the stronger validator lands.
 
 ### Commands
 
 1. `npm test --prefix tools/validators` (full validator suite)
 2. Targeted: `npm run build --prefix tools/validators && node --test tools/validators/dist/tests/structural/stemo-orientation-records-exist.test.js`
 3. Helper-uniqueness grep: `grep -n "isOrientationTargetAccessibleToHolder" tools/validators/src/structural/stemo-utils.ts` should return at least 1 match (the new helper export); `grep -n "isOrientationTargetAccessibleToHolder" tools/validators/src/structural/stemo-orientation-records-exist.ts` should return at least 1 match (the validator's call site).
+
+## Outcome
+
+Completed: 2026-05-19.
+
+What changed:
+- `tools/validators/src/structural/stemo-orientation-records-exist.ts` now preserves the missing-record check and additionally emits `stemo_orientation_records_active.inactive_target` when an orientation target is absent from the STEMO page's active-record snapshot, unless the target is a false BEL imagined-object case.
+- The same validator emits `stemo_orientation_records_active.inaccessible_target` when an orientation target is not accessible to the STEMO holder. The BEL false carve-out waives only active-status checking; accessibility to the BEL itself remains required.
+- `tools/validators/src/structural/stemo-utils.ts` now exports `isOrientationTargetAccessibleToHolder()` and aligns STEMO accessibility with the STPLAN helper's public fact/location treatment.
+- `tools/validators/tests/structural/stemo-orientation-records-exist.test.ts` covers known, missing, inactive, inaccessible, BEL false pass, and BEL false inaccessible-fail cases with inline records.
+
+Deviations from original plan:
+- The drafted YAML fixture files were not added. The existing structural test style for this seam uses inline `IndexedRecord` helpers, and that produced a smaller, direct proof surface.
+- The drafted WARN-mode legacy-marker case was not implemented. The live repo does not expose a deterministic SPEC-49 revision marker to classify legacy STEMO orientation targets at this validator boundary, so the structural validator remains fail-closed. Migration triage remains outside this ticket.
+
+Verification:
+- `npm run build --prefix tools/validators` — passed.
+- `node --test tools/validators/dist/tests/structural/stemo-orientation-records-exist.test.js` — passed, 6 tests.
+- `npm test --prefix tools/validators` — passed, 659 tests.

@@ -36,7 +36,7 @@ export function baseRecords(extra: IndexedRecord[] = []): IndexedRecord[] {
       STEMO: ["STEMO-0"]
     }),
     storyRecord("story_entity_record", "STENT-1", "entities", { id: "STENT-1", created_at_page: "PG-1" }),
-    storyRecord("story_entity_record", "STENT-2", "entities", { id: "STENT-2", created_at_page: "PG-1" }),
+    storyRecord("story_entity_record", "STENT-2", "entities", { id: "STENT-2", created_at_page: "PG-1", holder: "public" }),
     storyRecord("story_status_record", "STSTAT-1", "status", {
       id: "STSTAT-1",
       created_at_page: "PG-1",

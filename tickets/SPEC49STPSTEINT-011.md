@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/validators/tests/integration/spec49-stplan-stemo-hardening.test.ts`
-**Deps**: archive/tickets/SPEC49STPSTEINT-002.md, archive/tickets/SPEC49STPSTEINT-003.md, archive/tickets/SPEC49STPSTEINT-004.md, archive/tickets/SPEC49STPSTEINT-005.md, archive/tickets/SPEC49STPSTEINT-006.md, archive/tickets/SPEC49STPSTEINT-007.md, 008, 009, 010
+**Deps**: archive/tickets/SPEC49STPSTEINT-002.md, archive/tickets/SPEC49STPSTEINT-003.md, archive/tickets/SPEC49STPSTEINT-004.md, archive/tickets/SPEC49STPSTEINT-005.md, archive/tickets/SPEC49STPSTEINT-006.md, archive/tickets/SPEC49STPSTEINT-007.md, archive/tickets/SPEC49STPSTEINT-008.md, 009, 010
 
 ## Problem
 
@@ -19,7 +19,7 @@ SPEC-49's §Test Plan declares an end-to-end test exercising the cumulative beha
 
 ## Architecture Check
 
-1. Single trailing capstone ticket depending on the upstream leaf set (per §Spec-Integration Ticket Shape) is the canonical pattern. The DAG is parallel-branch (most upstream tickets are independent leaves; only ticket 003 has a Deps:001 chain), so the capstone's `Deps` enumerates the 9 leaves (002, 003, 004, 005, 006, archive/tickets/SPEC49STPSTEINT-007.md, 008, 009, 010) per the parallel-branch resolution rule. The single ticket 001 is reachable transitively via ticket 003.
+1. Single trailing capstone ticket depending on the upstream leaf set (per §Spec-Integration Ticket Shape) is the canonical pattern. The DAG is parallel-branch (most upstream tickets are independent leaves; only ticket 003 has a Deps:001 chain), so the capstone's `Deps` enumerates the 9 leaves (002, 003, 004, 005, 006, archive/tickets/SPEC49STPSTEINT-007.md, archive/tickets/SPEC49STPSTEINT-008.md, 009, 010) per the parallel-branch resolution rule. The single ticket 001 is reachable transitively via ticket 003.
 2. The capstone introduces no new production code — only a new test file. It exercises the pipeline composed by tickets 001-010.
 3. Fixture-world copy strategy: the test uses `fs.cpSync` (or equivalent) to copy a fixture world to a temp root before exercising the pipeline, keeping the real `worlds/<slug>/` tree untouched per §Spec-Integration Ticket Shape's discipline. Re-enumerated expected counts (not hardcoded) computed from the fixture at test start.
 
