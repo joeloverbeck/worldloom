@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-48-se-structured-introduction-fields.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC48SESTRINT-006.md",
+  "last_ticket": "archive/tickets/SPEC48SESTRINT-007.md",
   "last_result": "completed_archived",
-  "last_work_commit": "faa1ac1ff9945462a5825686cbec243769b1739b",
+  "last_work_commit": "91ffc7bad66fa805098fa9e73b95983ecd2f839f",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC48SESTRINT-007.md",
+  "next_target": "tickets/SPEC48SESTRINT-008.md",
   "queue": [
-    "tickets/SPEC48SESTRINT-007.md",
     "tickets/SPEC48SESTRINT-008.md",
     "tickets/SPEC48SESTRINT-009.md",
     "tickets/SPEC48SESTRINT-010.md",
@@ -22,6 +21,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked clean after state commit; expected ignored artifacts remain tools/validators/dist/ and tools/validators/node_modules/",
+  "dirty_state": "tracked clean after state commit; expected ignored artifacts remain tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
   "updated_at": "2026-05-19"
 }
