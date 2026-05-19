@@ -119,9 +119,9 @@ The dormant helper `successConditionRecordIds()` at `tools/validators/src/struct
 
 Migration posture: WARN-mode rollout for one revision cycle, then FAIL.
 
-**B.5 SE.state_relations[] — extend deterministic coverage to all 6 relations**
+**B.5 SE.state_relations[] — extend deterministic coverage to all declared relations**
 
-`tools/validators/src/structural/stplan-event-plan-relation-consistency.ts` currently validates only the `advances` relation (line 21's fail-message string is hardcoded to "advances"). The remaining 5 relation values declared in the SE state-relation vocabulary — `tests`, `blocks`, `revises`, `fulfills`, `abandons`, `ignores` — are accepted by schema but unenforced by the deterministic validator. The audit report's deterministic-validator strengthening list (line 810 item 9) identifies this as a surgical-hole gap parallel to the `advances` coverage.
+At intake, `tools/validators/src/structural/stplan-event-plan-relation-consistency.ts` validated only the `advances` relation. The other six relation values declared in the SE state-relation vocabulary — `tests`, `blocks`, `revises`, `fulfills`, `abandons`, `ignores` — were accepted by schema but unenforced by the deterministic validator. The audit report's deterministic-validator strengthening list (line 810 item 9) identifies this as a surgical-hole gap parallel to the `advances` coverage.
 
 Fix: extend `stplan-event-plan-relation-consistency.ts` to enforce each relation's deterministic shape:
 
@@ -135,7 +135,7 @@ Fix: extend `stplan-event-plan-relation-consistency.ts` to enforce each relation
 
 Each new relation gets its own fail-message constant paralleling the existing `stplan_event_plan_relation_consistency.no_matching_delta` (e.g., `.tests_no_predicate_touch`, `.blocks_no_obstruction_delta`, `.fulfills_status_mismatch`, etc.).
 
-Migration posture: WARN-mode rollout for one revision cycle, then FAIL — same precedent as B.3 / B.4. Legacy STPLANs whose SE.state_relations use non-`advances` values were never deterministically validated, so any latent violations surface as WARNs first.
+Implementation note (2026-05-19): ticket `SPEC49STPSTEINT-007` landed the B.5 relation checks fail-closed for the validator path rather than adding a WARN-mode legacy heuristic. The live repo still lacks a deterministic SPEC-49 `story_system_contract_revision` marker for classifying legacy SE relation entries, and related health-audit prose already defers hard current-contract detection until that marker exists. Latent legacy violations therefore remain ordinary validator failures; bundle migration triage stays with the health-audit compatibility surface.
 
 **B.6 STEMO orientation — strengthen target active-status and accessibility check**
 
@@ -232,7 +232,7 @@ The following items from the second-iteration audit report (reports/new-story-st
 - B.4.2 Extend `tools/validators/src/structural/stplan-utils.ts` with `fallbackTriggerRecordIds()` helper paralleling the existing `successConditionRecordIds()` at line 159.
 - B.4.3 Validator registry wiring — register B.4.1 in `tools/validators/src/public/registry.ts` alongside the existing structural validators (e.g., `stplanBeliefBasisGrounded` at line 41) so the dispatch on `create_stplan_record` and bundle-replay validation passes engage the new check.
 - B.4.4 Test fixtures covering parseable/unparseable predicates and resolvable/unresolvable record references.
-- B.5.1 `tools/validators/src/structural/stplan-event-plan-relation-consistency.ts` — extend the existing relation-consistency check to enforce the deterministic shape of each of the 5 newly covered SE.state_relations values (`tests`, `blocks`, `revises`, `fulfills`, `abandons`, `ignores`) per the rubrics in §B.5. Existing `advances` enforcement is preserved unchanged.
+- B.5.1 `tools/validators/src/structural/stplan-event-plan-relation-consistency.ts` — extend the existing relation-consistency check to enforce the deterministic shape of each of the six formerly uncovered SE.state_relations values (`tests`, `blocks`, `revises`, `fulfills`, `abandons`, `ignores`) per the rubrics in §B.5. Existing `advances` enforcement is preserved unchanged.
 - B.5.2 Per-relation fail-message constants paralleling the existing `stplan_event_plan_relation_consistency.no_matching_delta` (one per newly enforced relation: `.tests_no_predicate_touch`, `.blocks_no_obstruction_delta`, `.revises_no_supersession`, `.fulfills_status_mismatch`, `.abandons_status_mismatch`, `.ignores_unexpected_delta`).
 - B.5.3 Test fixtures under `tools/validators/test/` covering each of the 6 enforced relations (PASS + FAIL cases per relation), with the existing `advances` test extended to cover the new validator surface.
 - B.6.1 `tools/validators/src/structural/stemo-orientation-records-exist.ts` — extend the existing existence check to verify `orientation.toward_records[]` targets are active at the emotion's `created_at_page` and accessible to the holder, with the BEL-imagined-object carve-out per §B.6.
@@ -277,7 +277,7 @@ The following items from the second-iteration audit report (reports/new-story-st
 - **B.2**: A STPLAN with `plan_status: fulfilled` and no `current_step` passes; a STPLAN with `plan_status: active` and no `current_step` fails.
 - **B.3**: A STPLAN with `plan_status: active` and `belief_basis: []` fails; a STPLAN with `plan_status: fulfilled` and `belief_basis: []` passes.
 - **B.4**: Parseable predicate with resolvable record refs passes; unparseable predicate FAILs with `stplan_predicate_unparseable`; parseable predicate referencing nonexistent record ID FAILs with `stplan_predicate_record_unresolved`.
-- **B.5**: For each of the 6 relations (`advances`, `tests`, `blocks`, `revises`, `fulfills`, `abandons`, `ignores`), an SE with `state_relations[]` referencing the relation against a STPLAN must PASS when the SE's state-delta matches the rubric in §B.5 (existing record-ID touch, status change, or supersession as required by the relation's rule) and FAIL with the relation-specific fail-message constant otherwise. The pre-existing `advances` test stays green; the 5 new relations each gain one PASS + one FAIL fixture.
+- **B.5**: For each of the seven declared relations (`advances`, `tests`, `blocks`, `revises`, `fulfills`, `abandons`, `ignores`), an SE with `state_relations[]` referencing the relation against a STPLAN must PASS when the SE's state-delta matches the rubric in §B.5 (existing record-ID touch, status change, or supersession as required by the relation's rule) and FAIL with the relation-specific fail-message constant otherwise. The pre-existing `advances` test stays green; the six formerly uncovered relations each gain one PASS + one FAIL case.
 - **B.6**: A STEMO with `orientation.toward_records: [STENT-1]` where STENT-1 is inactive at the emotion's `created_at_page` must FAIL with `stemo_orientation_records_active.inactive_target`; the same STEMO where STENT-1 is active and accessible to the holder must PASS; a STEMO with `orientation.toward_records: [BEL-5]` (BEL with `truth_relation: false`) representing imagined-object orientation must PASS without active-status check on the BEL but with accessibility check on the BEL itself; an inaccessible target must FAIL with `stemo_orientation_records_active.inaccessible_target`.
 - **C.1, C.2**: World-index round-trip — create a STPLAN with `fallback_steps`, `derived_from`, `expires_when` populated, rebuild the index, verify each new edge appears in the indexed graph.
 - **C.3**: Health-audit fixtures covering each of the four new checks with a known-FAIL and known-PASS bundle each.
