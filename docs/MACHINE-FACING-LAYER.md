@@ -60,7 +60,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 ## Story-Bundle Edge Types
 
-`world-index` emits 36 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, obligation/thread links, branch/page links, and SPEC-45 event provenance:
+`world-index` emits 50 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, obligation/thread links, branch/page links, and SPEC-45 event provenance:
 
 - `world_entity_binding` — `STENT.world_ent_id` to a world-canon entity id.
 - `story_fact_derived_from` — `SF.derived_from_cf` to the originating CF.
@@ -99,9 +99,28 @@ SPEC-46 extends that graph surface with 22 additional edge types for existing st
 | `SE` | `event_target` | record | Each record named by `targets[]`. |
 | `SE` | `event_selected_storylet` | `SLT` | The selected storylet named by `commitment.selected_slt_id`. |
 
+SPEC-47 extends that graph surface with 14 additional edge types for STPLAN and STEMO records:
+
+| Source | Edge type | Target | Meaning |
+|---|---|---|---|
+| `STPLAN` | `plan_holder` | `STENT` | The actor or entity that owns the plan. |
+| `STPLAN` | `plan_root_intention` | `STINT` | The intention the plan pursues. |
+| `STPLAN` | `plan_belief_basis` | `BEL` | Each belief named by `belief_basis[]`. |
+| `STPLAN` | `plan_resource_basis` | `SF` / `STOBJ` / `STLOC` / `DA` / `SREL` / `OBL` | Each resource named across `resource_basis.facts[]`, `objects[]`, `locations[]`, `artifacts[]`, `relationships[]`, and `obligations[]`. |
+| `STPLAN` | `plan_blocker` | record | Each record named by `blockers[]`. |
+| `STPLAN` | `plan_current_step_target` | record | Each record named by `current_step.target_records[]`. |
+| `STPLAN` | `plan_created_by_event` | `SE` | The event named by `created_by_event`. |
+| `STPLAN` | `plan_supersedes` | `STPLAN` | The prior plan named by scalar `supersedes`, when present. |
+| `STEMO` | `emotion_holder` | `STENT` | The actor or entity whose affective state is recorded. |
+| `STEMO` | `emotion_trigger_event` | `SE` | The event named by `trigger_event`. |
+| `STEMO` | `emotion_appraisal_basis` | `BEL` | Each belief named by `appraisal_basis[]`. |
+| `STEMO` | `emotion_oriented_toward` | record | Each record named by `orientation.toward_records[]`. |
+| `STEMO` | `emotion_supersedes` | `STEMO` | The prior emotion record named by scalar `supersedes`, when present. |
+| `STEMO` | `emotion_derived_from` | record | Each record named by `derived_from[]`. |
+
 ### Placeholder Skip Convention
 
-Story-bundle edges represent record-to-record graph links. When a source field permits placeholders, `world-index` emits an edge only when the value resolves to a structured record id. Placeholder values such as `group:<name>`, `system`, `unknown`, and `narrator` are silently skipped for edge emission. This applies to `CLK.driver`, `STSEC.holders[]`, and `SE.actor`. The skipped value remains on the source record and is retrievable with `get_record`.
+Story-bundle edges represent record-to-record graph links. When a source field permits placeholders, `world-index` emits an edge only when the value resolves to a structured record id. Placeholder values such as `group:<name>`, `system`, `unknown`, and `narrator` are silently skipped for edge emission. This applies to `CLK.driver`, `STSEC.holders[]`, `SE.actor`, and any STPLAN/STEMO reference-bearing field that can carry placeholder prose rather than a structured record id. The skipped value remains on the source record and is retrievable with `get_record`.
 
 ### Tick-History Granularity
 

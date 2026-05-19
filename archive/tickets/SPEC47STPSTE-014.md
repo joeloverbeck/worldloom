@@ -1,6 +1,6 @@
 # SPEC47STPSTE-014: Update MACHINE-FACING-LAYER docs with 14 new STPLAN+STEMO edges
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `docs/MACHINE-FACING-LAYER.md` story-edge enumeration with the 14 new STPLAN+STEMO edge types and their semantic shapes; no code changes
@@ -8,7 +8,7 @@
 
 ## Problem
 
-Ticket 013 lands 14 new STPLAN/STEMO edge types in the world-index STORY_EDGE_TYPES constant. The documented machine-facing layer reference at `docs/MACHINE-FACING-LAYER.md` enumerates the existing story-edge surface for consumers (skills, future packet builders, audit-pattern authors); without updating the docs, those consumers see a stale 36-edge enumeration that omits the 14 new STPLAN/STEMO edges, leaving the documented retrieval surface inconsistent with the actual code surface. Per SPEC-47 §Approach §C D-C8, this docs-sync ticket lands after the code ticket it documents.
+At intake, ticket 013 had landed 14 new STPLAN/STEMO edge types in the world-index STORY_EDGE_TYPES constant, but the documented machine-facing layer reference at `docs/MACHINE-FACING-LAYER.md` still described the pre-SPEC-47 36-edge surface for consumers (skills, future packet builders, audit-pattern authors). Without this docs update, those consumers would see a stale enumeration that omitted the 14 new STPLAN/STEMO edges, leaving the documented retrieval surface inconsistent with the actual code surface. Per SPEC-47 §Approach §C D-C8, this docs-sync ticket lands after the code ticket it documents.
 
 ## Assumption Reassessment (2026-05-19)
 
@@ -28,11 +28,11 @@ Ticket 013 lands 14 new STPLAN/STEMO edge types in the world-index STORY_EDGE_TY
 1. MACHINE-FACING-LAYER.md story-edge enumeration includes 14 new edge type rows → codebase grep-proof
 2. Documented semantic shapes (source class → target class, multi-edge markers) match ticket 013's actual STORY_EDGE_TYPES extraction logic → manual review against the extractor code
 
-## What to Change
+## Landed Changes
 
-### 1. Extend `docs/MACHINE-FACING-LAYER.md` story-edge enumeration
+### 1. Extended `docs/MACHINE-FACING-LAYER.md` story-edge enumeration
 
-Add 14 new rows to the story-edge enumeration table (parallel to SPEC-46 Phase C's edge documentation). Format follows the existing per-edge row convention (edge type | source field | source class | target class | notes):
+Added 14 new rows to the story-edge enumeration table (parallel to SPEC-46 Phase C's edge documentation). Format follows the existing per-edge row convention (source | edge type | target | meaning):
 
 **STPLAN edges** (8):
 - `plan_holder` | `STPLAN.holder` | STPLAN | STENT | single edge per record
@@ -54,7 +54,7 @@ Add 14 new rows to the story-edge enumeration table (parallel to SPEC-46 Phase C
 
 Note any placeholder-skip conventions inherited from the SPEC-46 Phase C documentation (e.g., when source field contains `system`, `unknown`, `group:<name>`, no edge is emitted; per-record-body retrieval via `get_record` preserves the semantic concept).
 
-Update any total-edge-count statement in the doc body to reflect the post-SPEC-47 total: `STORY_EDGE_TYPES.length === 50` (was 36).
+Updated the story-bundle edge-count statement in the doc body from 36 to 50.
 
 ## Files to Touch
 
@@ -71,7 +71,7 @@ Update any total-edge-count statement in the doc body to reflect the post-SPEC-4
 ### Tests That Must Pass
 
 1. `grep -cE "plan_holder|plan_root_intention|plan_belief_basis|plan_resource_basis|plan_blocker|plan_current_step_target|plan_created_by_event|plan_supersedes|emotion_holder|emotion_trigger_event|emotion_appraisal_basis|emotion_oriented_toward|emotion_supersedes|emotion_derived_from" docs/MACHINE-FACING-LAYER.md` returns ≥14.
-2. `grep -nE "STORY_EDGE_TYPES.length.*50|50 story-edge" docs/MACHINE-FACING-LAYER.md` returns a match for any updated total-count statement (or returns no matches if the doc doesn't carry a total-count statement; in that case the count update is N/A).
+2. `grep -nE "STORY_EDGE_TYPES.length.*50|50 story-bundle edge" docs/MACHINE-FACING-LAYER.md` returns a match for the updated total-count statement.
 3. Manual review: documented semantic shapes match ticket 013's actual STORY_EDGE_TYPES extraction logic.
 
 ### Invariants
@@ -88,4 +88,24 @@ Update any total-edge-count statement in the doc body to reflect the post-SPEC-4
 ### Commands
 
 1. `grep -cE "plan_(holder|root_intention|belief_basis|resource_basis|blocker|current_step_target|created_by_event|supersedes)|emotion_(holder|trigger_event|appraisal_basis|oriented_toward|supersedes|derived_from)" docs/MACHINE-FACING-LAYER.md` (returns ≥14)
-2. `grep -n "story-edge" docs/MACHINE-FACING-LAYER.md` (returns matches in the relevant enumeration section)
+2. `grep -nE "STORY_EDGE_TYPES.length.*50|50 story-bundle edge" docs/MACHINE-FACING-LAYER.md` (returns the updated total-count statement)
+
+## Outcome
+
+Completed: 2026-05-19.
+
+- Updated `docs/MACHINE-FACING-LAYER.md` to state that `world-index` emits 50 story-bundle edge types.
+- Added a SPEC-47 STPLAN/STEMO table documenting all 14 new edge types, their source classes, target classes, and semantics.
+- Extended the placeholder-skip convention note so STPLAN/STEMO reference-bearing fields follow the same structured-record-id edge-emission discipline as the existing story-edge surface.
+
+## Verification Result
+
+Commands run from the repo root:
+
+1. `grep -cE "plan_(holder|root_intention|belief_basis|resource_basis|blocker|current_step_target|created_by_event|supersedes)|emotion_(holder|trigger_event|appraisal_basis|oriented_toward|supersedes|derived_from)" docs/MACHINE-FACING-LAYER.md` — returned `14`.
+2. `grep -nE "STORY_EDGE_TYPES.length.*50|50 story-bundle edge" docs/MACHINE-FACING-LAYER.md` — returned the updated count line.
+3. Manual review against `tools/world-index/src/schema/types.ts` and `tools/world-index/src/parse/atomic.ts` — documented edge names and source/target semantics match the 14 STPLAN/STEMO edge extractors landed by `archive/tickets/SPEC47STPSTE-013.md`.
+
+## Deviations
+
+- The drafted total-count grep looked for `50 story-edge`; the live docs use the clearer phrase `50 story-bundle edge types`, so the accepted grep was updated to match the landed wording.
