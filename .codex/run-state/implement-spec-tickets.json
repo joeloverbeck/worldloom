@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC50STPSTECHC-007.md",
+  "last_ticket": "archive/tickets/SPEC50STPSTECHC-008.md",
   "last_result": "completed_archived",
-  "last_work_commit": "c3dc9100156eb46c80253b37e9ce03d330aaca03",
+  "last_work_commit": "77655ad2d2609459089e0559f0bcd7ebddc5246e",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC50STPSTECHC-008.md",
+  "next_target": "tickets/SPEC50STPSTECHC-009.md",
   "queue": [
-    "tickets/SPEC50STPSTECHC-008.md",
     "tickets/SPEC50STPSTECHC-009.md",
     "tickets/SPEC50STPSTECHC-010.md",
     "tickets/SPEC50STPSTECHC-011.md",
@@ -21,6 +20,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated dirty path remains .claude/skills/spec-to-tickets/SKILL.md; expected ignored artifacts remain tools/world-index/dist/ and tools/world-index/node_modules/",
+  "dirty_state": "unrelated dirty path remains .claude/skills/spec-to-tickets/SKILL.md; expected ignored artifacts remain tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, and tools/world-index/node_modules/",
   "updated_at": "2026-05-20"
 }
