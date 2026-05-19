@@ -2,7 +2,7 @@
 
 # SPEC-47: Actor-Owned Tactical Plans (`STPLAN`) and Affective State (`STEMO`)
 
-**Status**: PROPOSED
+**Status**: COMPLETED
 **Phase**: wave-2 active-record additions (two new story-bundle record classes built on SPEC-46's machine-facing retrieval foundation)
 **Depends on**: SPEC-46 (machine-facing layer foundation fixes — all Phase B summaries and Phase C edges this spec extends from are landed); SPEC-42 (precedent pattern for adding new active record classes — `CLK`, `STSEC`, `STQ`); SPEC-45 (story-state provenance edge precedent)
 **Blocks**: follow-up spec for present-causal-situation packet (depends on `STPLAN.objective` / `STPLAN.current_step` / `STPLAN.blockers` to populate `active_actor_wants` and `opposition`); follow-up `get_page_render_packet` aggregator spec (depends on both new classes + the Priority 2 packets)
@@ -426,3 +426,26 @@ Per-phase deliverables that will be decomposed into implementation tickets by a 
 - **T-8 (MCP context-packet summary fidelity)**: Fixture-load a bundle with active STPLAN and STEMO records; call `mcp__worldloom__get_context_packet({task_type: 'page_authoring', seed_nodes: [...], story_slug: ...})`; assert `active_actor_plans` and `active_emotional_states` summary shapes match the Approach §C tables; assert `active_plan_ids` / `active_emotion_ids` / `active_plan_holders` / `active_emotion_holders` enumerate the corresponding ids/holders without orphans or omissions.
 - **T-9 (FOUNDATIONS §5c lint pass)**: Lint pass over the new STPLAN/STEMO schema, validator names, predicate names, edge type names, page-plan section names, and trigger vocabularies asserting no narrative-shape framing tokens (`act_*`, `climax_*`, `beat_position_*`, `arc_*`, `expected_outcome_*`, `target_curve_*`, `planned_resolution_*`, `setup_for_*`, `payoff_at_*`). Codifies §5c discipline structurally.
 - **T-10 (No-regression sweep)**: Existing test suites for `world-mcp`, `world-index`, `patch-engine`, `validators`, and the 7 story-pipeline skills pass unchanged after this spec's deliverables land. STORY_EDGE_TYPES.length === 36 → 50 transition validated by the edge-completeness test (T-6) rather than by removing or renaming any SPEC-46 edge.
+
+## Outcome
+
+Completed on 2026-05-19. SPEC-47 landed as additive STPLAN/STEMO story-bundle support across the repo: shared story-state and schema prose, FOUNDATIONS ID-class alignment, JSON schemas, deterministic validators, predicate DSL and tag-grammar extensions, patch-engine operations and ID allocation, MCP context-packet summaries and capability docs, world-index edge extraction, page-plan template updates, story-pipeline skill prose, and the capstone integration test in `tools/validators/tests/integration/spec47-stplan-stemo-integration.test.ts`.
+
+All implementation tickets are archived under `archive/tickets/SPEC47STPSTE-001.md` through `archive/tickets/SPEC47STPSTE-017.md`.
+
+Verification completed on 2026-05-19:
+
+1. `cd tools/validators && npm run build`
+2. `cd tools/validators && node --test dist/tests/integration/spec47-stplan-stemo-integration.test.js` — 8/8 tests passed.
+3. `cd tools/validators && npm test` — 615/615 tests passed.
+4. `cd tools/world-index && npm run build`
+5. `cd tools/world-index && npm test` — 129/129 tests passed.
+6. `cd tools/world-mcp && npm run build`
+7. `cd tools/world-mcp && node --test dist/tests/tools/validate-patch-plan.test.js`
+8. `cd tools/world-mcp && node --test dist/tests/tools/search-nodes.story-bundle.test.js`
+9. `cd tools/world-mcp && node --test dist/tests/server/capability-parity.test.js`
+10. `cd tools/world-mcp && node --test dist/tests/integration/server-capabilities-hash-parity.test.js`
+11. `cd tools/world-mcp && npm test` — 407/407 tests passed.
+12. `cd tools/patch-engine && npm test` — 85/85 tests passed.
+
+Deviation from the original test plan: the final capstone does not directly invoke the external `mcp__worldloom__get_context_packet` tool from inside the validators package, because that would invert the package dependency direction. The capstone uses static MCP context-packet source-contract checks for T-8, while the executable MCP boundary is covered by the `tools/world-mcp` focused and broad suites listed above.

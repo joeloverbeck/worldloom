@@ -1,19 +1,19 @@
 {
   "originating_spec": "specs/SPEC-47-stplan-stemo.md",
-  "archived_spec": null,
+  "archived_spec": "archive/specs/SPEC-47-stplan-stemo.md",
   "last_ticket": "archive/tickets/SPEC47STPSTE-017.md",
   "last_result": "completed_archived",
   "last_work_commit": "ba229da57544f575babec509c39795b8154b2b45",
   "last_state_commit": "self",
-  "next_target": "specs/SPEC-47-stplan-stemo.md",
+  "next_target": null,
   "queue": [],
-  "phase": "ready_for_spec_archive",
+  "phase": "spec_archived_pending_commit",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked clean after SPEC47STPSTE-017 work commit except state self-update; expected ignored artifacts remain tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
+  "dirty_state": "SPEC-47 spec archive pending commit; expected ignored artifacts remain tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
   "updated_at": "2026-05-19"
 }
