@@ -67,7 +67,7 @@ Add `"story_plan_record"` and `"story_emotion_record"` to the central constant (
 - Per-class STPLAN validators (12) — covered by ticket 005.
 - Per-class STEMO validators (8-9) — covered by ticket 006.
 - Tag-grammar parser extension (`midstory-introduction-utils.ts`) — covered by ticket 009 (this ticket consumes that ticket's parser exports).
-- Predicate-DSL extensions — covered by ticket 008.
+- Predicate-DSL extensions — covered by `archive/tickets/SPEC47STPSTE-008.md`.
 
 ## Acceptance Criteria
 

@@ -2,8 +2,11 @@ import type { Context, IndexedRecord, Validator, Verdict } from "../framework/ty
 import { asPlainRecord, locationFor } from "../structural/utils.js";
 import {
   ACTION_FAMILIES,
+  AFFECT_KINDS,
+  BEHAVIORAL_PRESSURES,
   BELIEF_MODES,
   CONFIDENCE_LEVELS,
+  EMOTION_INTENSITIES,
   PRED_TYPES,
   RELATIONSHIP_AXES
 } from "./_shared/predicate-dsl-grammar.js";
@@ -14,8 +17,11 @@ const MAX_DEPTH = 10;
 const PRED_TYPE_SET = new Set<string>(PRED_TYPES);
 const RELATIONSHIP_AXIS_SET = new Set<string>(RELATIONSHIP_AXES);
 const ACTION_FAMILY_SET = new Set<string>(ACTION_FAMILIES);
+const AFFECT_KIND_SET = new Set<string>(AFFECT_KINDS);
+const BEHAVIORAL_PRESSURE_SET = new Set<string>(BEHAVIORAL_PRESSURES);
 const BELIEF_MODE_SET = new Set<string>(BELIEF_MODES);
 const CONFIDENCE_LEVEL_SET = new Set<string>(CONFIDENCE_LEVELS);
+const EMOTION_INTENSITY_SET = new Set<string>(EMOTION_INTENSITIES);
 const ENTITY_STATUS_AXES = new Set(["life", "agency", "location"]);
 const URGENCY_LEVELS = new Set(["low", "medium", "high"]);
 const SALIENCE_LEVELS = new Set(["low", "medium", "high"]);
@@ -61,9 +67,11 @@ const STORY_ID_PATTERNS = {
   location: /^STLOC-\d+$/,
   object: /^STOBJ-\d+$/,
   artifact: /^DA-\d+$/,
-  intention: /^STINT-\d+$/
+  intention: /^STINT-\d+$/,
+  plan: /^STPLAN-\d+$/,
+  emotion: /^STEMO-\d+$/
 } as const;
-const RECORD_ACTIVE_PATTERN = /^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ)-\d+$/;
+const RECORD_ACTIVE_PATTERN = /^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/;
 const DERIVED_FROM_PATTERN = /^(?:SE|STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-\d+$/;
 const BOUND_EFFECT_PATTERN = /^bound:([a-z][a-z0-9_-]*)$/;
 
@@ -85,6 +93,8 @@ interface ReferenceSets {
   artifacts: Map<string, Set<string>>;
   statuses: Map<string, Set<string>>;
   intentions: Map<string, Set<string>>;
+  plans: Map<string, Set<string>>;
+  emotions: Map<string, Set<string>>;
 }
 
 interface ValidationState {
@@ -165,7 +175,9 @@ async function loadReferenceSets(ctx: Context): Promise<ReferenceSets> {
     objects: await query("story_object_record"),
     artifacts: await query("story_diegetic_artifact_record"),
     statuses: await query("story_status_record"),
-    intentions: await query("intention_record")
+    intentions: await query("intention_record"),
+    plans: await query("story_plan_record"),
+    emotions: await query("story_emotion_record")
   };
 }
 
@@ -269,6 +281,34 @@ function validatePredicate(state: ValidationState, value: unknown, path: string,
     case "promise_due":
       requireStoryRef(state, value.question, "question", idsFor(state.refs.questions, state.record), `${path}.question`);
       requireIntegerPages(state, value.age_pages, `${path}.age_pages`);
+      return;
+    case "plan_active":
+      requireActorRef(state, value.holder, `${path}.holder`);
+      requireOptionalStoryRef(state, value.plan, "plan", idsFor(state.refs.plans, state.record), `${path}.plan`);
+      return;
+    case "plan_blocked":
+      requireActorRef(state, value.holder, `${path}.holder`);
+      return;
+    case "any_plan_active":
+      requireExistentialScope(state, value.pred, path);
+      requireAlias(state, value.alias, `${path}.alias`, boundAliases);
+      requireOptionalRole(state, value.holder_role, `${path}.holder_role`);
+      return;
+    case "emotion_active":
+      requireActorRef(state, value.holder, `${path}.holder`);
+      requireOptionalEnum(state, value.kind, AFFECT_KIND_SET, `${path}.kind`);
+      requireOptionalEnum(state, value.min_intensity, EMOTION_INTENSITY_SET, `${path}.min_intensity`);
+      return;
+    case "any_emotion_active":
+      requireExistentialScope(state, value.pred, path);
+      requireAlias(state, value.alias, `${path}.alias`, boundAliases);
+      requireOptionalRole(state, value.holder_role, `${path}.holder_role`);
+      requireOptionalEnum(state, value.kind, AFFECT_KIND_SET, `${path}.kind`);
+      requireOptionalEnum(state, value.min_intensity, EMOTION_INTENSITY_SET, `${path}.min_intensity`);
+      return;
+    case "emotion_pressure":
+      requireActorRef(state, value.holder, `${path}.holder`);
+      requireEnum(state, value.pressure, BEHAVIORAL_PRESSURE_SET, `${path}.pressure`);
       return;
     case "any_obligation_open":
       requireExistentialScope(state, value.pred, path);
@@ -535,8 +575,23 @@ function activeRecordIds(state: ValidationState): Set<string> {
     ...idsFor(state.refs.locations, state.record),
     ...idsFor(state.refs.objects, state.record),
     ...idsFor(state.refs.artifacts, state.record),
-    ...idsFor(state.refs.statuses, state.record)
+    ...idsFor(state.refs.statuses, state.record),
+    ...idsFor(state.refs.plans, state.record),
+    ...idsFor(state.refs.emotions, state.record)
   ]);
+}
+
+function requireOptionalStoryRef(
+  state: ValidationState,
+  value: unknown,
+  kind: RefKind,
+  knownIds: Set<string>,
+  path: string
+): void {
+  if (value === undefined || value === null) {
+    return;
+  }
+  requireStoryRef(state, value, kind, knownIds, path);
 }
 
 function requireOpenLabel(state: ValidationState, value: unknown, path: string): void {

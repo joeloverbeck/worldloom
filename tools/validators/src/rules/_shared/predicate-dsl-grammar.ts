@@ -18,6 +18,12 @@ export const PRED_TYPES = [
   "story_question_open",
   "story_question_status",
   "promise_due",
+  "plan_active",
+  "plan_blocked",
+  "any_plan_active",
+  "emotion_active",
+  "any_emotion_active",
+  "emotion_pressure",
   "any_obligation_open",
   "any_consequence_pending",
   "any_thread_active",
@@ -95,6 +101,50 @@ export const BELIEF_MODES = [
 
 export const CONFIDENCE_LEVELS = ["certain", "high", "medium", "low", "uncommitted"] as const;
 
+export const AFFECT_KINDS = [
+  "fear",
+  "anxiety",
+  "anger",
+  "disgust",
+  "grief",
+  "shame",
+  "guilt",
+  "humiliation",
+  "hope",
+  "relief",
+  "joy",
+  "awe",
+  "tenderness",
+  "desire",
+  "envy",
+  "contempt",
+  "confusion",
+  "dread"
+] as const;
+
+export const EMOTION_INTENSITIES = ["low", "medium", "high", "extreme"] as const;
+
+export const BEHAVIORAL_PRESSURES = [
+  "approach",
+  "flee",
+  "freeze",
+  "attack",
+  "reject",
+  "dominate",
+  "submit",
+  "seek_contact",
+  "protect_other",
+  "seek_help",
+  "confess",
+  "conceal",
+  "withdraw_socially",
+  "plan",
+  "accommodate",
+  "self_soothe",
+  "ruminate",
+  "collapse"
+] as const;
+
 export const PREDICATE_ARG_SCHEMAS = {
   fact_true: { required: ["fact"] },
   belief_record: { required: ["holder", "belief_id"] },
@@ -112,6 +162,12 @@ export const PREDICATE_ARG_SCHEMAS = {
   story_question_open: { required: ["question"] },
   story_question_status: { required: ["question", "status"] },
   promise_due: { required: ["question", "age_pages"] },
+  plan_active: { required: ["holder"] },
+  plan_blocked: { required: ["holder"] },
+  any_plan_active: { required: ["alias"] },
+  emotion_active: { required: ["holder"] },
+  any_emotion_active: { required: ["alias"] },
+  emotion_pressure: { required: ["holder", "pressure"] },
   any_obligation_open: { required: ["alias"] },
   any_consequence_pending: { required: ["alias"] },
   any_thread_active: { required: ["alias"] },

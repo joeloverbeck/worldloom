@@ -61,6 +61,18 @@ function sampleFor(pred: (typeof PRED_TYPES)[number]): Record<string, unknown> {
       return { pred, question: "STQ-1", status: "open" };
     case "promise_due":
       return { pred, question: "STQ-1", age_pages: 3 };
+    case "plan_active":
+      return { pred, holder: "STENT-1", plan: "STPLAN-1" };
+    case "plan_blocked":
+      return { pred, holder: "STENT-1" };
+    case "any_plan_active":
+      return { pred, alias: "matched_record" };
+    case "emotion_active":
+      return { pred, holder: "STENT-1", kind: "fear", min_intensity: "medium" };
+    case "any_emotion_active":
+      return { pred, alias: "matched_record", kind: "relief", min_intensity: "low" };
+    case "emotion_pressure":
+      return { pred, holder: "STENT-1", pressure: "conceal" };
     case "any_obligation_open":
     case "any_consequence_pending":
     case "any_thread_active":
@@ -136,4 +148,7 @@ test("predicate DSL schema exposes runtime-derived ID patterns for representativ
   assert.equal(validate({ pred: "consequence_pending", consequence: "OBL-1" }), false);
   assert.equal(validate({ pred: "location", entity: "STENT-1", location: "STENT-2" }), false);
   assert.equal(validate({ pred: "intention_active", intention: "STENT-1" }), false);
+  assert.equal(validate({ pred: "plan_active", holder: "STENT-1", plan: "STINT-1" }), false);
+  assert.equal(validate({ pred: "emotion_active", holder: "STENT-1", kind: "surprise" }), false);
+  assert.equal(validate({ pred: "emotion_pressure", holder: "STENT-1", pressure: "teleport" }), false);
 });
