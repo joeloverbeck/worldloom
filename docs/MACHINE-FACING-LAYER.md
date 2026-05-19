@@ -66,7 +66,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 - `story_fact_derived_from` — `SF.derived_from_cf` to the originating CF.
 - `created_at_page` — story records with `created_at_page` / `provenance.created_at_page` to the creating `PG`.
 - `state_delta_create`, `state_delta_supersede` — `SE.state_delta.create[]` / `SE.state_delta.supersede[]` to affected story records.
-- `creation_evidence` — parseable `intro:<CLASS>(...)` evidence from the introduced record to its evidence records.
+- `creation_evidence` — `SE.record_introductions[]` evidence links from the introduced record to its evidence records.
 - `opens_obligation`, `pays_off_obligation`, `complicates_obligation`, `transfers_obligation` — `SLT` obligation references to `OBL`.
 - `parent_page`, `leaf_page` — `PG` / `CHC` / `BR` page-tree links.
 - `dependent_fact` — `OBL.dependent_facts[]` to fact records.

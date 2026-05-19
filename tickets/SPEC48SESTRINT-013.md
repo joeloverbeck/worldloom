@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds 1 integration test under `tools/validators/tests/integration/`; folds D-A7 patch-engine STORY_RECORD_SPECS verification as a sub-assertion (no code change to patch-engine)
-**Deps**: archive/tickets/SPEC48SESTRINT-005.md, archive/tickets/SPEC48SESTRINT-006.md, archive/tickets/SPEC48SESTRINT-007.md, archive/tickets/SPEC48SESTRINT-010.md, archive/tickets/SPEC48SESTRINT-011.md, 012, archive/tickets/SPEC48SESTRINT-014.md
+**Deps**: archive/tickets/SPEC48SESTRINT-005.md, archive/tickets/SPEC48SESTRINT-006.md, archive/tickets/SPEC48SESTRINT-007.md, archive/tickets/SPEC48SESTRINT-010.md, archive/tickets/SPEC48SESTRINT-011.md, archive/tickets/SPEC48SESTRINT-012.md, archive/tickets/SPEC48SESTRINT-014.md
 
 ## Problem
 
