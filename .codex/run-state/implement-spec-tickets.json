@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-47-stplan-stemo.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC47STPSTE-010.md",
+  "last_ticket": "archive/tickets/SPEC47STPSTE-011.md",
   "last_result": "completed_archived",
-  "last_work_commit": "9a4ed6a83520f18ef5fa4cabc00e8545597ea1e8",
+  "last_work_commit": "00ebec499816459bc886246ad826cf12aef926a5",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC47STPSTE-011.md",
+  "next_target": "tickets/SPEC47STPSTE-012.md",
   "queue": [
-    "tickets/SPEC47STPSTE-011.md",
     "tickets/SPEC47STPSTE-012.md",
     "tickets/SPEC47STPSTE-013.md",
     "tickets/SPEC47STPSTE-014.md",
@@ -18,10 +17,10 @@
   "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
-  "post_review_material_updates": false,
-  "post_review_audit_block": "not_applicable",
+  "post_review_material_updates": true,
+  "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked clean after state commit; expected ignored artifacts remain tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, and tools/world-index/node_modules/",
+  "dirty_state": "tracked clean after state commit; expected ignored artifacts remain tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, and tools/world-index/node_modules/",
   "updated_at": "2026-05-19"
 }
