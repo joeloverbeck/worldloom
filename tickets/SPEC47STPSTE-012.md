@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `tools/world-mcp/src/tools/describe-capabilities.ts` to enumerate the 2 new context-packet fields; extends `docs/CONTEXT-PACKET-CONTRACT.md` `story_bundle_context` section with the 2 new summary specifications
-**Deps**: 011
+**Deps**: `archive/tickets/SPEC47STPSTE-011.md`
 
 ## Problem
 

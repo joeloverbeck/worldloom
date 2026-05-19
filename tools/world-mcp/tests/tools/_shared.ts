@@ -15,7 +15,7 @@ interface SeedNodeInput {
   story_slug?: string | null;
   file_path: string;
   heading_path?: string | null;
-  node_type: NodeType;
+  node_type: NodeType | "story_plan_record" | "story_emotion_record";
   body: string;
   summary?: string | null;
   line_start?: number;

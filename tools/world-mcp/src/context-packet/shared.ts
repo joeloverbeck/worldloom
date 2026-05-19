@@ -76,6 +76,10 @@ export interface ContextPacketStoryBundleContextSummary {
   active_location_ids: string[];
   active_object_ids: string[];
   active_story_da_ids: string[];
+  active_plan_ids: string[];
+  active_plan_holders: string[];
+  active_emotion_ids: string[];
+  active_emotion_holders: string[];
   active_thread_ids: string[];
   active_clock_ids: string[];
   hidden_secret_ids: string[];
@@ -193,6 +197,23 @@ export interface ContextPacketStoryBundleContext {
     circulation: string;
     truth_relation: string;
     derived_from: string[];
+  }>;
+  active_actor_plans: Array<{
+    id: string;
+    holder: string;
+    root_intention: string;
+    objective: string;
+    plan_status: string;
+    current_step_action_family: string;
+  }>;
+  active_emotional_states: Array<{
+    id: string;
+    holder: string;
+    status: string;
+    affect_kind: string | null;
+    intensity: string | null;
+    behavioral_pressure: string[];
+    agency_effect: string;
   }>;
   active_threads: Array<{
     id: string;

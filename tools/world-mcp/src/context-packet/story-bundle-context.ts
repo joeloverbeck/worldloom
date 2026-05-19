@@ -43,9 +43,11 @@ const ACTIVE_THREAD_STATUSES = new Set(["active", "pressured", "critical", "dorm
 const ACTIVE_CLOCK_STATUSES = new Set(["active", "paused"]);
 const HIDDEN_SECRET_STATUSES = new Set(["hidden", "partially_revealed"]);
 const OPEN_STORY_QUESTION_STATUSES = new Set(["open", "complicated", "inherited"]);
+const CURRENT_PLAN_STATUSES = new Set(["active", "blocked", "suspended", "revised"]);
+const CURRENT_EMOTION_STATUSES = new Set(["active", "suppressed", "dissociated"]);
 const MAX_VISIBLE_STORYLETS = 50;
 const MAX_RECENT_BRANCH_PAGES = 10;
-const STORY_RECORD_ID_REGEX = /\b(?:STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|DA)-[A-Za-z0-9-]+\b/g;
+const STORY_RECORD_ID_REGEX = /\b(?:STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|DA|STPLAN|STEMO)-[A-Za-z0-9-]+\b/g;
 const ROLE_IN_STORY_VALUES = new Set<RoleInStory>([
   "viewpoint",
   "player_proxy",
@@ -433,6 +435,69 @@ function buildActiveStoryDiegeticArtifacts(
     });
 }
 
+function supersededRecordIds(rows: StoryNodeRow[]): Set<string> {
+  const ids = new Set<string>();
+
+  for (const row of rows) {
+    const supersedes = parseYamlRecord(row).supersedes;
+    if (typeof supersedes === "string" && supersedes.length > 0) {
+      ids.add(supersedes);
+    }
+  }
+
+  return ids;
+}
+
+export function buildActiveActorPlans(
+  rows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_actor_plans"] {
+  const supersededIds = supersededRecordIds(rows);
+
+  return rows
+    .map((row) => ({ row, record: parseYamlRecord(row) }))
+    .filter(({ row, record }) => {
+      const id = asString(record.id, authoredId(row));
+      return (
+        !supersededIds.has(id) &&
+        CURRENT_PLAN_STATUSES.has(asString(record.plan_status, "active"))
+      );
+    })
+    .map(({ row, record }) => ({
+      id: asString(record.id, authoredId(row)),
+      holder: asString(record.holder),
+      root_intention: asString(record.root_intention),
+      objective: asString(record.objective),
+      plan_status: asString(record.plan_status, "active"),
+      current_step_action_family:
+        readNestedString(record, ["current_step", "action_family"]) ?? "unspecified"
+    }));
+}
+
+export function buildActiveEmotionalStates(
+  rows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_emotional_states"] {
+  const supersededIds = supersededRecordIds(rows);
+
+  return rows
+    .map((row) => ({ row, record: parseYamlRecord(row) }))
+    .filter(({ row, record }) => {
+      const id = asString(record.id, authoredId(row));
+      return (
+        !supersededIds.has(id) &&
+        CURRENT_EMOTION_STATUSES.has(asString(record.status, "active"))
+      );
+    })
+    .map(({ row, record }) => ({
+      id: asString(record.id, authoredId(row)),
+      holder: asString(record.holder),
+      status: asString(record.status, "active"),
+      affect_kind: asNullableString(record.affect_kind),
+      intensity: asNullableString(record.intensity),
+      behavioral_pressure: asStringArray(record.behavioral_pressure),
+      agency_effect: asString(record.agency_effect, "none")
+    }));
+}
+
 function buildActiveThreads(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_threads"] {
   return rows
     .map((row) => ({ row, record: parseYamlRecord(row) }))
@@ -672,6 +737,10 @@ export function summarizeStoryBundleContext(
     active_location_ids: context.active_locations_in_scope.map((location) => location.id),
     active_object_ids: context.active_objects_in_scope.map((object) => object.id),
     active_story_da_ids: context.active_story_diegetic_artifacts.map((artifact) => artifact.id),
+    active_plan_ids: context.active_actor_plans.map((plan) => plan.id),
+    active_plan_holders: context.active_actor_plans.map((plan) => plan.holder),
+    active_emotion_ids: context.active_emotional_states.map((emotion) => emotion.id),
+    active_emotion_holders: context.active_emotional_states.map((emotion) => emotion.holder),
     active_thread_ids: context.active_threads.map((thread) => thread.id),
     active_clock_ids: context.active_clocks.map((clock) => clock.id),
     hidden_secret_ids: context.hidden_secrets.map((secret) => secret.id),
@@ -698,6 +767,8 @@ export function buildStoryBundleContext(
   const locationRows = rowsForNodeType(db, worldSlug, storySlug, "story_location_record");
   const objectRows = rowsForNodeType(db, worldSlug, storySlug, "story_object_record");
   const storyDaRows = rowsForNodeType(db, worldSlug, storySlug, "story_diegetic_artifact_record");
+  const planRows = rowsForNodeType(db, worldSlug, storySlug, "story_plan_record");
+  const emotionRows = rowsForNodeType(db, worldSlug, storySlug, "story_emotion_record");
   const threadRows = rowsForNodeType(db, worldSlug, storySlug, "thread_record");
   const clockRows = rowsForNodeType(db, worldSlug, storySlug, "pressure_clock_record");
   const secretRows = rowsForNodeType(db, worldSlug, storySlug, "story_secret_record");
@@ -719,6 +790,8 @@ export function buildStoryBundleContext(
     active_locations_in_scope: buildActiveLocationsInScope(locationRows, allStoryRows),
     active_objects_in_scope: buildActiveObjectsInScope(objectRows, allStoryRows),
     active_story_diegetic_artifacts: buildActiveStoryDiegeticArtifacts(storyDaRows, allStoryRows),
+    active_actor_plans: buildActiveActorPlans(planRows),
+    active_emotional_states: buildActiveEmotionalStates(emotionRows),
     active_threads: buildActiveThreads(threadRows),
     active_clocks: buildActiveClocks(clockRows),
     hidden_secrets: buildHiddenSecrets(secretRows),
