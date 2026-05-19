@@ -300,7 +300,7 @@ export function holderHasCompatibleAgency(emotion: IndexedRecord, maps: EmotionM
       continue;
     }
     const parsed = asPlainRecord(record.parsed);
-    if (stringValue(parsed.holder) === holder && COMPATIBLE_AGENCY.has(stringValue(parsed.agency) ?? "")) {
+    if (stringValue(parsed.entity) === holder && COMPATIBLE_AGENCY.has(stringValue(parsed.agency) ?? "")) {
       const statusId = recordId(record);
       if (statusId === undefined || isActiveAtEmotionPage(emotion, statusId, maps)) {
         return true;
