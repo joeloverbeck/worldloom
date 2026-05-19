@@ -4,16 +4,16 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — deletes `tools/world-index/src/parse/intro-tag-parser.ts`
-**Deps**: archive/tickets/SPEC48SESTRINT-003.md, archive/tickets/SPEC48SESTRINT-004.md, 008
+**Deps**: archive/tickets/SPEC48SESTRINT-003.md, archive/tickets/SPEC48SESTRINT-004.md, archive/tickets/SPEC48SESTRINT-008.md
 
 ## Problem
 
-SPEC-48 §Phase C D-C1 specifies deleting `tools/world-index/src/parse/intro-tag-parser.ts`, the parser file that hosts the 8 per-class trigger vocabularies + 7-value relation enum + the regex patterns + the `extractIntroTags` / `parsePlanRelationTags` / `parseIntroTag` exported functions. Under SPEC-48's clean break, no consumer should import from this file after the upstream refactors land — ticket 003 drops parser re-exports from `midstory-introduction-utils.ts`, archive/tickets/SPEC48SESTRINT-004.md retargets the cross-package import at `midstory-record-introduction-grounding.ts:2`, and ticket 008 removes the parser import at `tools/world-index/src/parse/atomic.ts:10`. With those three upstream tickets landed, the parser file has zero consumers and can be deleted safely.
+SPEC-48 §Phase C D-C1 specifies deleting `tools/world-index/src/parse/intro-tag-parser.ts`, the parser file that hosts the 8 per-class trigger vocabularies + 7-value relation enum + the regex patterns + the `extractIntroTags` / `parsePlanRelationTags` / `parseIntroTag` exported functions. Under SPEC-48's clean break, no consumer should import from this file after the upstream refactors land — ticket 003 drops parser re-exports from `midstory-introduction-utils.ts`, archive/tickets/SPEC48SESTRINT-004.md retargets the cross-package import at `midstory-record-introduction-grounding.ts:2`, and archive/tickets/SPEC48SESTRINT-008.md removes the parser import from `tools/world-index/src/parse/atomic.ts`. With those three upstream tickets landed, the parser file has zero consumers and can be deleted safely.
 
 ## Assumption Reassessment (2026-05-19)
 
 1. **Parser file currently exists**: `tools/world-index/src/parse/intro-tag-parser.ts` (266 lines per the SPEC-48 reassess-spec inspection; carries `MIDSTORY_TRIGGERS_*` constants for 8 classes + `PLAN_RELATIONS` 7-value enum + `INTRO_TAG_PATTERN` regex + `INTRO_TAG_PARSE_PATTERN` regex + `PLAN_RELATION_TAG_PARSE_PATTERN` regex + `RECORD_ID_PATTERN` regex + `parseIntroTag` / `extractIntroTags` / `parsePlanRelationTags` / `parseExactIntroTag` / `parseExactPlanRelationTag` / `parseRecordList` functions). The Pre-Write Files-to-Touch existence check at Step 5 confirmed the file resolves at the cited path.
-2. **Consumers verified by SPEC-48 reassess-spec M4 finding**: 2 known consumers — `tools/world-index/src/parse/atomic.ts:10,971` (refactored by ticket 008) and `tools/validators/src/structural/midstory-record-introduction-grounding.ts:2,78` (refactored by archive/tickets/SPEC48SESTRINT-004.md). Additionally, `tools/validators/src/structural/midstory-introduction-utils.ts:2-12` re-exports parser symbols (refactored by ticket 003). After all three upstream tickets land, no source file imports from the parser path.
+2. **Consumers verified by SPEC-48 reassess-spec M4 finding**: 2 known consumers — `tools/world-index/src/parse/atomic.ts` (refactored by archive/tickets/SPEC48SESTRINT-008.md) and `tools/validators/src/structural/midstory-record-introduction-grounding.ts:2,78` (refactored by archive/tickets/SPEC48SESTRINT-004.md). Additionally, `tools/validators/src/structural/midstory-introduction-utils.ts:2-12` re-exports parser symbols (refactored by ticket 003). After all three upstream tickets land, no source file imports from the parser path.
 3. **Per-class trigger vocabularies migrated**: ticket 003 preserves the 8 per-class trigger constants as TypeScript exports under `tools/validators/src/structural/midstory-introduction-utils.ts` (renamed from the parser file's exports). The 7-value `PLAN_RELATIONS` enum is also migrated to `midstory-introduction-utils.ts` per ticket 003. The 8 per-class vocabularies are also encoded in `tools/validators/src/schemas/story-event.schema.json` per ticket 001 as `oneOf` branches. Two source-of-truth representations are intentional (TypeScript exports + JSON-schema enum), kept in sync by the parity test added in ticket 003.
 4. **FOUNDATIONS Rule 6 (No Silent Retcons)**: the parser deletion is a documented clean-break, not a silent retcon. SPEC-48 documents the deletion + the clean-break rationale + the no-production-stories invariant that authorizes the deletion. The deletion's audit trail is the spec + this ticket + the CI gate added by ticket 010 that asserts the file's absence going forward. Rule 6 is preserved: the change is logged with justification.
 5. **Canon Safety surface**: `intro-tag-parser.ts` lives under `tools/world-index/src/parse/` (NOT under `tools/validators/src/structural/`); per the per-ticket-type granularity rule, world-index parsers are not in the named directories that trigger item 5. However, the old non-propagation-tag-shape.ts (which ticket 007 deletes) IS in `tools/validators/src/structural/`. This ticket inherits item 5's firing from the deletion of validator-package files. Both deletions preserve all Canon Safety semantics (the validators' replacement coverage + schema-level enforcement together preserve every check the deleted code performed).
@@ -41,12 +41,12 @@ Remove the file via `rm tools/world-index/src/parse/intro-tag-parser.ts` (or equ
 
 After deletion, the following must hold:
 
-- `tools/world-index/src/parse/atomic.ts` no longer imports from `./intro-tag-parser.js` (ticket 008 dependency).
+- `tools/world-index/src/parse/atomic.ts` no longer imports from `./intro-tag-parser.js` (archive/tickets/SPEC48SESTRINT-008.md dependency).
 - `tools/validators/src/structural/midstory-introduction-utils.ts` no longer re-exports from `@worldloom/world-index/parse/intro-tag-parser` (ticket 003 dependency).
 - `tools/validators/src/structural/midstory-record-introduction-grounding.ts` no longer imports from `@worldloom/world-index/parse/intro-tag-parser` (archive/tickets/SPEC48SESTRINT-004.md dependency).
 - No other consumer exists (verified by pipeline-wide grep prior to deletion).
 
-If `npm test --prefix tools/world-index` or `npm test --prefix tools/validators` reports a broken import after deletion, the dependent ticket (003 / 004 / 008) did not land cleanly — block this ticket's deletion until the upstream refactor completes correctly.
+If `npm test --prefix tools/world-index` or `npm test --prefix tools/validators` reports a broken import after deletion, the dependent ticket (003 / 004 / archive/tickets/SPEC48SESTRINT-008.md) did not land cleanly — block this ticket's deletion until the upstream refactor completes correctly.
 
 ### 3. Verify the dist/ build regenerates without the file
 

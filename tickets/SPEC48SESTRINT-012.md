@@ -59,7 +59,7 @@ Grep for `intro-tag-parser` / parser-surface references / tag-grammar references
 - Schema file extension (covered by ticket 001).
 - Contract document rewrite at `story-state-contract.md` / `story-record-schemas.md` (covered by ticket 002).
 - Validator refactor (covered by tickets 003-007).
-- World-index refactor (covered by ticket 008).
+- World-index refactor (covered by archive/tickets/SPEC48SESTRINT-008.md).
 - Parser deletion (covered by ticket 009).
 - CI gates (covered by ticket 010).
 - Skill prose updates (covered by ticket 011).

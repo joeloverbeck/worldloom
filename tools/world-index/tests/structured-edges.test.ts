@@ -8,7 +8,6 @@ import { insertAnchorChecksums, insertNodes, insertScopedReferences } from "../s
 import { insertEdges } from "../src/index/edges.js";
 import { openIndex } from "../src/index/open.js";
 import { contentHashForProse } from "../src/parse/canonical.js";
-import { MidstoryIntroductionTagError } from "../src/parse/intro-tag-parser.js";
 import { parseStoryBundleSourceFile } from "../src/parse/atomic.js";
 import { extractStructuredRecordEdges } from "../src/parse/structured-edges.js";
 import { CURRENT_INDEX_VERSION } from "../src/schema/version.js";
@@ -298,12 +297,13 @@ test("story event records emit state-delta and creation-evidence edges", () => {
         supersede: ["THR-1", "STENT-1"],
         close: ["OBL-1"]
       },
-      worldLogicRationale: [
-        "intro:CLK(id=CLK-1, trigger=deadline_declared, evidence=[PG-1,SF-1], distinct_from=[])",
-        "intro:STSEC(id=STSEC-1, trigger=clue_carrier_enters_play, evidence=[PG-1,DA-1], distinct_from=[])",
-        "intro:STQ(id=STQ-1, trigger=promise_made, evidence=[BEL-1,SE-0], distinct_from=[])",
-        "intro:THR(id=THR-2, trigger=new_ongoing_causal_concern, evidence=[OBL-1,CNSQ-1], distinct_from=[])"
-      ].join(" ")
+      worldLogicRationale: "Structured introductions are captured in record_introductions.",
+      recordIntroductions: [
+        { recordId: "CLK-1", recordClass: "CLK", trigger: "deadline_declared", evidence: ["PG-1", "SF-1"] },
+        { recordId: "STSEC-1", recordClass: "STSEC", trigger: "clue_carrier_enters_play", evidence: ["PG-1", "DA-1"] },
+        { recordId: "STQ-1", recordClass: "STQ", trigger: "promise_made", evidence: ["BEL-1", "SE-0"] },
+        { recordId: "THR-2", recordClass: "THR", trigger: "new_ongoing_causal_concern", evidence: ["OBL-1", "CNSQ-1"] }
+      ]
     });
 
     const parsed = parseStoryBundleSourceFile(
@@ -418,7 +418,8 @@ test("story event records with no state delta or intro tags still emit selected-
   try {
     writeStoryEvent(root, "harborwatch", "SE-1", {
       stateDelta: { create: [], supersede: [], close: [] },
-      worldLogicRationale: "No structured introductions in this event."
+      worldLogicRationale: "No structured introductions in this event.",
+      recordIntroductions: []
     });
 
     const parsed = parseStoryBundleSourceFile(
@@ -448,24 +449,22 @@ test("story event records with no state delta or intro tags still emit selected-
   }
 });
 
-test("story event malformed intro tags reject through the shared parser", () => {
+test("story event tag-like prose is inert when record_introductions is absent", () => {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-index-story-event-malformed-"));
 
   try {
     writeStoryEvent(root, "harborwatch", "SE-1", {
       stateDelta: { create: ["CLK-1"], supersede: [], close: [] },
-      worldLogicRationale: "intro:CLK(id=CLK-1, trigger=deadline_declared, evidence=[PG-1], distinct_from=[]"
+      worldLogicRationale: "intro:CLK(id=CLK-1, trigger=deadline_declared, evidence=[PG-1], distinct_from=[]",
+      recordIntroductions: []
     });
 
-    assert.throws(
-      () =>
-        parseStoryBundleSourceFile(
-          root,
-          "fixture-world",
-          "stories/harborwatch/_source/events/SE-1.yaml"
-        ),
-      MidstoryIntroductionTagError
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/events/SE-1.yaml"
     );
+    assert.deepEqual(parsed.edges.map((edge) => edge.edge_type), ["event_selected_storylet", "state_delta_create"]);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -478,6 +477,13 @@ function writeStoryEvent(
   args: {
     stateDelta: { create: string[]; supersede: string[]; close: string[] };
     worldLogicRationale: string;
+    recordIntroductions: Array<{
+      recordId: string;
+      recordClass: string;
+      trigger: string;
+      evidence: string[];
+      distinctFrom?: string[];
+    }>;
   }
 ): void {
   const relativeDirectory = path.join(
@@ -499,6 +505,18 @@ function writeStoryEvent(
       "  selected_slt_id: SLT-1",
       "world_logic_rationale: >-",
       `  ${args.worldLogicRationale}`,
+      "record_introductions:",
+      ...args.recordIntroductions.flatMap((intro) => [
+        `  - record_id: ${intro.recordId}`,
+        `    class: ${intro.recordClass}`,
+        `    trigger: ${intro.trigger}`,
+        ...(intro.evidence.length > 0
+          ? ["    evidence:", ...intro.evidence.map((id) => `      - ${id}`)]
+          : ["    evidence: []"]),
+        ...((intro.distinctFrom ?? []).length > 0
+          ? ["    distinct_from:", ...(intro.distinctFrom ?? []).map((id) => `      - ${id}`)]
+          : ["    distinct_from: []"])
+      ]),
       "state_delta:",
       "  create:",
       ...args.stateDelta.create.map((id) => `    - ${id}`),

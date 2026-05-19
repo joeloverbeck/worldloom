@@ -83,7 +83,7 @@ Replace the `non_propagation:event_leaves_no_accessible_trace(group=<label>, rec
 - Contract document rewrite at `story-state-contract.md` §5a + SE entry at `story-record-schemas.md` (covered by ticket 002).
 - Schema file extension (covered by ticket 001).
 - Validator refactor (covered by tickets 003-007).
-- World-index refactor (covered by ticket 008).
+- World-index refactor (covered by archive/tickets/SPEC48SESTRINT-008.md).
 - Parser deletion (covered by ticket 009).
 - CI gate addition (covered by ticket 010).
 - MCP / docs surface updates (deferred to ticket 012).
