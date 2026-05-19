@@ -49,7 +49,15 @@ records:
       plan: { plan_hash: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }
       prose_plan_path: pages-prose-plans/PG-1.md
       emitted_choices: []
-      validation_trace: {}
+      validation_trace:
+        input_legality: "PASS: synthetic compatibility fixture legacy start page."
+        parent_snapshot_compatibility: "PASS: no parent snapshot for root page."
+        mystery_invariant_firewall: "PASS: no mystery claims in fixture."
+        branch_isolation: "PASS: single-branch fixture."
+        append_only_delta: "PASS: root fixture page has no mutation delta."
+        consequence_or_terminal: "PASS: continuation remains open."
+        plan_grounding: "PASS: synthetic plan hash present."
+        canon_promotion_hold: "PASS: no canon promotion in fixture."
   - node_type: story_page_record
     node_id: midstory-introduction-test:PG-2
     file_path: stories/midstory-introduction-test/_source/pages/PG-2.yaml
@@ -93,4 +101,12 @@ records:
       plan: { plan_hash: "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd" }
       prose_plan_path: pages-prose-plans/PG-2.md
       emitted_choices: []
-      validation_trace: {}
+      validation_trace:
+        input_legality: "PASS: synthetic compatibility fixture manual input."
+        parent_snapshot_compatibility: "PASS: parent snapshot shape is intentionally legacy-compatible."
+        mystery_invariant_firewall: "PASS: no mystery claims in fixture."
+        branch_isolation: "PASS: child remains on the single fixture branch."
+        append_only_delta: "PASS: no mutation delta is under test."
+        consequence_or_terminal: "PASS: continuation remains open."
+        plan_grounding: "PASS: synthetic plan hash present."
+        canon_promotion_hold: "PASS: no canon promotion in fixture."
