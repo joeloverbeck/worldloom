@@ -1054,3 +1054,10 @@ Worldloom should **not add another first-class active story-state record now**.
 
 The ontology is now structurally complete enough for rich causal branching fiction. Future work should stop hunting for familiar narrative nouns and instead make the current state impossible to under-render, silently omit, or misuse. Unless sample-story evaluation reveals a truly recurrent active branch-local state that cannot be owned by the existing records, this should be the final missing-structures audit.
 
+---
+
+## Outcome
+
+Archived on 2026-05-19 as an exploited source report. Its recommendations were triaged into `archive/specs/SPEC-49-stplan-stemo-integration-hardening.md`.
+
+The report remains preserved as provenance for the second-iteration audit. Its recommendations are not current authority; `docs/FOUNDATIONS.md`, SPEC-49, and landed ticket closeouts are authoritative for accepted, rejected, modified, and deferred outcomes.

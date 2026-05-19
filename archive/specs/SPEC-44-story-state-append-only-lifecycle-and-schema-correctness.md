@@ -3,12 +3,12 @@
 # SPEC-44: Story-State Append-Only Lifecycle and Schema Correctness
 
 **Status**: COMPLETED (2026-05-18)
-**Brainstorm source**: `reports/story-system-consolidation.md` triage
+**Brainstorm source**: `archive/reports/story-system-consolidation.md` triage
 **Companion**: `docs/triage/2026-05-18-story-system-consolidation-triage.md`
 
 ## Problem Statement
 
-The story-bundle pipeline has two production-real correctness defects against the FOUNDATIONS contract that SPEC-43 (`Present-Causal Mid-Story State Introduction`, merged 2026-05-18) did not address. Both are surfaced by a third-party consolidation report (`reports/story-system-consolidation.md`); the report makes ~30 codebase claims, most verified, but several of its top-billed recommendations contradict SPEC-43 design decisions made 5 days earlier. The companion triage file enumerates the full verdict set; this spec scopes to the items not addressed by SPEC-43 and not deferred to Wave 3.
+The story-bundle pipeline has two production-real correctness defects against the FOUNDATIONS contract that SPEC-43 (`Present-Causal Mid-Story State Introduction`, merged 2026-05-18) did not address. Both are surfaced by a third-party consolidation report (`archive/reports/story-system-consolidation.md`); the report makes ~30 codebase claims, most verified, but several of its top-billed recommendations contradict SPEC-43 design decisions made 5 days earlier. The companion triage file enumerates the full verdict set; this spec scopes to the items not addressed by SPEC-43 and not deferred to Wave 3.
 
 ### Defect 1: Seven patch-engine lifecycle ops mutate story-state YAML in-place
 
@@ -30,7 +30,7 @@ Four classes that the patch-engine creates via `create_ststat_record`, `create_c
 
 ### Why not bundled with SPEC-43
 
-SPEC-43 scoped to mid-story *introduction* of the six causal-engine classes (CLK/STSEC/STQ/THR/STENT/SREL); it did not touch the patch-engine op vocabulary or the SE schema id patterns. The report `reports/story-system-consolidation.md` independently surfaced both defects after SPEC-43 merged; verification confirms both are real and non-overlapping with SPEC-43's deliverables.
+SPEC-43 scoped to mid-story *introduction* of the six causal-engine classes (CLK/STSEC/STQ/THR/STENT/SREL); it did not touch the patch-engine op vocabulary or the SE schema id patterns. The report `archive/reports/story-system-consolidation.md` independently surfaced both defects after SPEC-43 merged; verification confirms both are real and non-overlapping with SPEC-43's deliverables.
 
 ### Key design decisions
 

@@ -1,7 +1,7 @@
 # SPEC-47 Cross-Spec Follow-Ups — Routing Recommendation
 
 **Date**: 2026-05-19
-**Source**: `reports/new-story-structures-proposal.md` (the origin design report)
+**Source**: `archive/reports/new-story-structures-proposal.md` (the origin design report; archived as exploited on 2026-05-19)
 **Inputs**: SPEC-46 §Out of Scope items 1-13; SPEC-47 §Out of Scope items 1-10; SPEC-47 ticket batch (`SPEC47STPSTE-001` … `-017`, all archived).
 **Status**: triage recommendation — not a spec.
 **Authority**: routing only. Each accept-routed brainstorm produces its own spec; this document is the routing register.
@@ -125,4 +125,4 @@ These three assumptions are load-bearing for the verdicts above. If any is wrong
 
 - SPEC-47 tickets 005, 006, 011, 013 (named in the SPEC-47 prose as the present-causal-situation cross-ticket dependency) all reside in `archive/tickets/SPEC47STPSTE-*` — the SPEC-47 batch has landed. When Priority 2 packet specs are drafted, their prose should cite this dependency as satisfied.
 - SPEC-46 §Out of Scope items 3-9 and SPEC-47 §Out of Scope items 5-7 list the same 7 Priority 2 packets with consistent deferral grounds across both specs. Wave-3 routing is precedent-established, not novel.
-- The origin report (`reports/new-story-structures-proposal.md`) has not been archived; it remains the canonical source for any Priority 2 packet brainstorm and should be cited by each.
+- The origin report (`archive/reports/new-story-structures-proposal.md`) is archived as an exploited provenance source. It remains the historical source for any Priority 2 packet brainstorm, but current specs and `docs/FOUNDATIONS.md` govern accepted or deferred outcomes.

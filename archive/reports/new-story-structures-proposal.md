@@ -2245,3 +2245,10 @@ The strongest roadmap is:
 
 **First fix MCP/index/page-plan support for the ontology Worldloom already has. Then add `STPLAN` and `STEMO`. Then add the non-state render/audit packets that make those structures visible to story skills and the external prose LLM. Reject all fixed-shape plot machinery.**
 
+---
+
+## Outcome
+
+Archived on 2026-05-19 as an exploited source report. Its recommendations were triaged into the SPEC-46 through SPEC-48 story-pipeline work and the 2026-05-19 cross-spec follow-up routing plan.
+
+The report remains preserved as provenance for the origin design analysis. Its recommendations are not current authority; `docs/FOUNDATIONS.md`, the relevant archived specs, and landed ticket closeouts are authoritative for accepted, rejected, modified, and deferred outcomes.

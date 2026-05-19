@@ -1234,3 +1234,10 @@ The story breaks, correctly. The user can manually repair it.
 
 Do not “improve storytelling” by adding arc labels. Do not add validators that guess meaning from text. Do not keep old snapshots alive through normalization. Do not let patch-engine mutate story-state YAML in place. Do not let `world_logic_rationale` carry hidden machine state. Do not add any first-class concept unless schema, patch-engine, index, MCP, validators, skills, fixtures, and story-bundle context all consume it.
 
+---
+
+## Outcome
+
+Archived on 2026-05-19 as an exploited source report. Its recommendations were triaged into `docs/triage/2026-05-18-story-system-consolidation-triage.md`, then formalized through `archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md` and `archive/specs/SPEC-45-story-state-provenance-indexing.md`.
+
+The report remains preserved as provenance for the consolidation analysis. Its recommendations are not current authority; `docs/FOUNDATIONS.md`, the triage record, the archived specs, and landed ticket closeouts are authoritative for accepted, rejected, modified, and deferred outcomes.

@@ -91,6 +91,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "stplan_holder_exists_and_active",
   "stplan_id_uniqueness_and_append_only",
   "stplan_no_future_page_ids",
+  "stplan_predicate_references",
   "stplan_resource_basis_grounded",
   "stplan_root_intention_grounded",
   "stplan_schema_compliance",

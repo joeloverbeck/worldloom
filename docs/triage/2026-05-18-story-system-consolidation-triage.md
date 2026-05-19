@@ -1,6 +1,6 @@
 # Story-System Consolidation — Triage (2026-05-18)
 
-**Source**: `reports/story-system-consolidation.md` (ChatGPT-Pro consolidation analysis)
+**Source**: `archive/reports/story-system-consolidation.md` (ChatGPT-Pro consolidation analysis; archived as exploited on 2026-05-19)
 **Deliverable**: `archive/specs/SPEC-44-story-state-append-only-lifecycle-and-schema-correctness.md`
 **Triggering context**: User suspected overlap/missing structures after recent story-pipeline additions (SPEC-38 / SPEC-42 / SPEC-43). Report produced before SPEC-43 landed; SPEC-43 was the user's contemporaneous response to a sibling research brief.
 
