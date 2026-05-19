@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/validators/tests/integration/spec49-stplan-stemo-hardening.test.ts`
-**Deps**: 002, 003, 004, 005, 006, 007, 008, 009, 010
+**Deps**: archive/tickets/SPEC49STPSTEINT-002.md, archive/tickets/SPEC49STPSTEINT-003.md, archive/tickets/SPEC49STPSTEINT-004.md, archive/tickets/SPEC49STPSTEINT-005.md, 006, 007, 008, 009, 010
 
 ## Problem
 
