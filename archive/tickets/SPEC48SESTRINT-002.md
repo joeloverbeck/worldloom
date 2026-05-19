@@ -1,6 +1,6 @@
 # SPEC48SESTRINT-002: Rewrite `story-state-contract.md` §5a tag grammar → structured field schema + update SE schema documentation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — rewrites `.claude/skills/_shared-templates/story-state-contract.md` §5a (authoritative contract for mid-story introduction grammar); updates `.claude/skills/_shared-templates/story-record-schemas.md` SE entry
@@ -8,11 +8,11 @@
 
 ## Problem
 
-SPEC-48's contract layer is `story-state-contract.md` §5a — currently titled "Mid-Story Introduction Tag Grammar and Closed Trigger Vocabularies" and documenting the parseable tag patterns (`intro:<CLASS>(...)`, `plan_relation:<...>(plan=...)`, `non_propagation:<...>(group=..., records=[...])`) that ride on `SE.world_logic_rationale`. SPEC-48 §D2 makes `world_logic_rationale` prose-only after the clean break; the contract must reflect the new structured-field schema, not the deprecated grammar. The 7 story-pipeline skills + `da-authoring-reference.md` (updated separately by ticket 011) consume this contract verbatim; without §5a rewriting, skill authors continue authoring tag-syntax under a deprecated grammar that the post-clean-break validators reject.
+At intake, SPEC-48's contract layer was `story-state-contract.md` §5a titled "Mid-Story Introduction Tag Grammar and Closed Trigger Vocabularies" and documented parseable tag patterns (`intro:<CLASS>(...)`, `plan_relation:<...>(plan=...)`, `non_propagation:<...>(group=..., records=[...])`) riding on `SE.world_logic_rationale`. SPEC-48 §D2 makes `world_logic_rationale` prose-only after the clean break; the contract now reflects the new structured-field schema, not the deprecated grammar. The 7 story-pipeline skills + `da-authoring-reference.md` are updated separately by ticket 011.
 
 ## Assumption Reassessment (2026-05-19)
 
-1. `.claude/skills/_shared-templates/story-state-contract.md` §5a currently begins at line 209 (header `### §5a. Mid-Story Introduction Tag Grammar and Closed Trigger Vocabularies` verified by grep during SPEC-48 reassess-spec); the 8 per-class trigger tables span the subsequent lines and document the same vocabulary that ticket 001 migrates to JSON-schema. `.claude/skills/_shared-templates/story-record-schemas.md` SE entry exists and is the canonical SE-record schema documentation.
+1. At intake, `.claude/skills/_shared-templates/story-state-contract.md` §5a began at line 209 with header `### §5a. Mid-Story Introduction Tag Grammar and Closed Trigger Vocabularies`; this ticket rewrote that section to `### §5a. Mid-Story Introduction Structured Fields`. The 8 per-class trigger tables were preserved while their framing changed from tag grammar to `record_introductions[]`. `.claude/skills/_shared-templates/story-record-schemas.md` SE entry exists and is the canonical SE-record schema documentation.
 2. SPEC-48 D-A4/D-A5/D-A6 enumerate three contract surfaces: (i) `story-record-schemas.md` SE entry adds the 3 new fields with one worked YAML example per field; (ii) `story-state-contract.md` §5a is rewritten from tag-grammar specification to structured-field schema specification, preserving the 8 trigger tables verbatim under the new structured-field framing; (iii) explicit prose-field-discipline statement added to §5a ("`SE.world_logic_rationale` is prose-only. Validators MUST NOT parse `world_logic_rationale` for structural facts.").
 3. Cross-skill boundary under audit: `story-state-contract.md` §5a is consumed verbatim by all 7 story-pipeline SKILL.md files (per FOUNDATIONS §Story Bundles §7 enumeration) + `da-authoring-reference.md`. Ticket 011 propagates the contract changes into skill prose; this ticket establishes the contract authority. The contract is also referenced by the schema-vs-vocabulary parity test in ticket 003 (the typed-reader source-of-truth assertion).
 4. FOUNDATIONS principle motivating this ticket: **§Story Bundles §5b (Schema-Minimalism At Story Scope)** — the 3 new fields each have closed-enum constraints and named §5b-class consumers (the 12 refactored validators are validation gates + replay primitives + predicate-input sources). The §5a rewrite is the contract-level expression of that schema-minimalism commitment; without §5a authority, future skill-prose extensions can drift back toward the deprecated grammar.
@@ -27,33 +27,33 @@ SPEC-48's contract layer is `story-state-contract.md` §5a — currently titled 
 1. §5a structural rewrite → manual review of the rewritten section (8 trigger tables preserved verbatim; `plan_relation:` documentation moved to `state_relations` sub-section; `non_propagation:` documentation moved to `non_propagation_facts` sub-section).
 2. Prose-field-discipline statement present → grep proof: `grep -n "prose-only" .claude/skills/_shared-templates/story-state-contract.md` returns ≥1 hit referencing `SE.world_logic_rationale`.
 3. SE schema documentation extended → grep proof: `grep -n "record_introductions\|state_relations\|non_propagation_facts" .claude/skills/_shared-templates/story-record-schemas.md` returns ≥3 hits naming the 3 new fields.
-4. Closed-regex specifications removed → grep proof: `grep -n "intro:(CLK|STSEC\|plan_relation:.*\\\\(plan=\|non_propagation:.*\\\\(group=" .claude/skills/_shared-templates/story-state-contract.md` returns zero matches in operational §5a content (audit-trail prose mentioning the removed grammar is acceptable, scoped to retrospective explanation).
+4. Closed-regex specifications removed → grep proof: `! grep -nE "intro_tag *= *\"intro:\"" .claude/skills/_shared-templates/story-state-contract.md` confirms the BNF-style grammar is absent; the broader old-tag-shape sweep in `## Verification Result` confirms operational examples are absent from the edited template surfaces.
 
-## What to Change
+## Landed Changes
 
-### 1. Rewrite `story-state-contract.md` §5a title and preamble
+### 1. Rewrote `story-state-contract.md` §5a title and preamble
 
-Update the H3 header from `### §5a. Mid-Story Introduction Tag Grammar and Closed Trigger Vocabularies` to `### §5a. Mid-Story Introduction Structured Fields`. Replace the existing preamble paragraph (which currently describes the parseable tag patterns riding on `world_logic_rationale`) with a new preamble describing the 3 structured fields on `SE` and naming `world_logic_rationale` as prose-only.
+Updated the H3 header from `### §5a. Mid-Story Introduction Tag Grammar and Closed Trigger Vocabularies` to `### §5a. Mid-Story Introduction Structured Fields`. Replaced the old parseable-tag preamble with a structured-field preamble describing `SE.record_introductions[]`, `SE.state_relations[]`, and `SE.non_propagation_facts[]`, and naming `world_logic_rationale` as prose-only.
 
-### 2. Move per-class trigger tables under the structured-field framing
+### 2. Moved per-class trigger tables under the structured-field framing
 
-The 8 per-class trigger tables (`CLK Triggers`, `STSEC Triggers`, ..., `STEMO Triggers`) currently document the parseable `intro:<CLASS>(trigger=...)` grammar. Reframe each table's introduction to describe the `record_introductions[].trigger` field, preserving the trigger lists verbatim. The closed regex specifications (the `intro_tag := "intro:" class "(" args ")"` BNF and the matching regex around `story-state-contract.md:230`) are deleted — replaced by a single sentence pointing at `tools/validators/src/schemas/story-event.schema.json` as the canonical schema-level source of truth (per ticket 001).
+The 8 per-class trigger tables (`CLK Triggers`, `STSEC Triggers`, ..., `STEMO Triggers`) now document `record_introductions[].trigger` under structured-field framing. The closed regex specifications and parser-path authority prose were deleted and replaced by a schema-source-of-truth statement pointing at `tools/validators/src/schemas/story-event.schema.json`.
 
-### 3. Add `state_relations` sub-section
+### 3. Added `state_relations` sub-section
 
-Add a new H4 sub-section `#### §5a.1 `state_relations[]` field` documenting the 7-value relation enum (`advances | tests | blocks | revises | fulfills | abandons | ignores`) and naming the consumers (`stplan-event-plan-relation-consistency`, `stplan-closure-status-requires-closure-event`, `stemo-agency-effect-compatibility`). Move the existing `plan_relation:` tag documentation (around `story-state-contract.md:241-242`) into this sub-section, rewritten as structured-field documentation.
+Added ``#### §5a.1 `state_relations[]` Field`` documenting the 7-value relation enum (`advances | tests | blocks | revises | fulfills | abandons | ignores`) and naming the consumers (`stplan-event-plan-relation-consistency`, `stplan-closure-status-requires-closure-event`, `stemo-agency-effect-compatibility`).
 
-### 4. Add `non_propagation_facts` sub-section
+### 4. Added `non_propagation_facts` sub-section
 
-Add a new H4 sub-section `#### §5a.2 `non_propagation_facts[]` field` documenting the 5-value reason enum + `group` + `records[]` shape. Name the consumers (`expected-witness-coverage`, `non_propagation_facts_completeness`). The existing non-propagation example near `story-state-contract.md:97` and tag specification near `story-state-contract.md:241` is rewritten as structured-field documentation.
+Added ``#### §5a.2 `non_propagation_facts[]` Field`` documenting the 5-value reason enum + `group` + `records[]` shape. Named the consumers (`expected-witness-coverage`, `non_propagation_facts_completeness`). Rewrote the DA non-propagation note near the top of the same contract to reference `SE.non_propagation_facts[]`.
 
-### 5. Add explicit prose-field-discipline statement
+### 5. Added explicit prose-field-discipline statement
 
-Add a normative paragraph to §5a (placement: end of preamble, before the per-class trigger tables): "`SE.world_logic_rationale` is prose-only. Validators MUST NOT attempt to parse `world_logic_rationale` for structural facts. The structured WHAT lives in `record_introductions[]`, `state_relations[]`, and `non_propagation_facts[]`; the prose WHY (the human-readable explanation of what the event means) lives in `world_logic_rationale`."
+Added the normative paragraph: "`SE.world_logic_rationale` is prose-only. Validators MUST NOT attempt to parse `world_logic_rationale` for structural facts. The structured WHAT lives in `record_introductions[]`, `state_relations[]`, and `non_propagation_facts[]`; the prose WHY lives in `world_logic_rationale`."
 
-### 6. Update `story-record-schemas.md` SE entry
+### 6. Updated `story-record-schemas.md` SE entry
 
-Document the 3 new optional fields on the SE schema, with one worked YAML example per field:
+Documented the 3 new optional fields on the SE schema, with one worked YAML example per field:
 
 ```yaml
 SE-12:
@@ -73,7 +73,7 @@ SE-12:
       records: [DA-4]
 ```
 
-Name each field's closed enum and reference `story-state-contract.md` §5a + the schema file as the authoritative sources.
+Named each field's closed enum and referenced `story-state-contract.md` §5a + the schema file as the authoritative sources.
 
 ## Files to Touch
 
@@ -114,3 +114,26 @@ Name each field's closed enum and reference `story-state-contract.md` §5a + the
 1. `grep -n "### §5a\\." .claude/skills/_shared-templates/story-state-contract.md` — confirms §5a structural rewrite landed.
 2. `grep -n "prose-only" .claude/skills/_shared-templates/story-state-contract.md` — confirms the prose-field-discipline statement is present.
 3. `grep -c "record_introductions\|state_relations\|non_propagation_facts" .claude/skills/_shared-templates/story-record-schemas.md` — confirms ≥3 hits documenting the new SE fields.
+
+## Outcome
+
+Completed: 2026-05-19
+
+This ticket rewrote `.claude/skills/_shared-templates/story-state-contract.md` §5a from tag-grammar authority to structured-field authority, added the prose-only `SE.world_logic_rationale` discipline, added `state_relations[]` and `non_propagation_facts[]` subsections, and updated the DA non-propagation note to use the structured field. It also extended `.claude/skills/_shared-templates/story-record-schemas.md` with the three optional SE structured fields and worked YAML examples.
+
+No validator behavior, schema source, story-pipeline skill prose, or `da-authoring-reference.md` prose was changed here; those remain owned by sibling tickets in the SPEC-48 family.
+
+## Verification Result
+
+Passed:
+
+1. `grep -n "### §5a\\." .claude/skills/_shared-templates/story-state-contract.md` returned the new §5a header plus the two new subsections.
+2. `grep -n "prose-only" .claude/skills/_shared-templates/story-state-contract.md` returned the `SE.world_logic_rationale` prose-only discipline.
+3. `grep -c "record_introductions\|state_relations\|non_propagation_facts" .claude/skills/_shared-templates/story-record-schemas.md` returned `10`.
+4. `! grep -nE "intro_tag *= *\"intro:\"" .claude/skills/_shared-templates/story-state-contract.md` passed; the BNF-style `intro_tag` grammar is absent.
+5. `! grep -nE "intro:\(CLK|intro:CLK\(|intro:STSEC\(|intro:STQ\(|intro:THR\(|intro:STENT\(|intro:SREL\(|intro:STPLAN\(|intro:STEMO\(|plan_relation:.*\\(plan=|non_propagation:.*\\(group=" .claude/skills/_shared-templates/story-state-contract.md .claude/skills/_shared-templates/story-record-schemas.md` passed; old operational tag-shape examples are absent from the edited template surfaces.
+6. `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md .claude/skills/_shared-templates/story-record-schemas.md` passed.
+
+## Deviations
+
+- The existing page-plan §9b line `This page's plan_relation: advances | tests | blocks | revises | fulfills | abandons | ignores` remains in `story-state-contract.md`. It is not the deprecated `plan_relation:<relation>(plan=...)` tag syntax and does not instruct parsing `SE.world_logic_rationale`; downstream skill prose propagation and page-plan wording are owned by ticket 011.
