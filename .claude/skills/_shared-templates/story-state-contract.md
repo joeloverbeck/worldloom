@@ -184,15 +184,23 @@ preconditions:
 | `promise_due(STQ-<integer>, age_pages)` | Named promise-like `STQ` must be at least `age_pages` old in the evaluating branch path. | turn-cycle eligibility, debt-pressure maturation |
 | `location(STENT-<integer>, STLOC-<integer>)` | Entity must currently be at location. | turn-cycle eligibility |
 | `has_affordance(<action_family>)` | The current page's `visible_affordances` must include an affordance whose `action_families` contain the named family. | turn-cycle eligibility, plan grounding |
-| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / CLK / STSEC / STQ / SREL / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
+| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / CLK / STSEC / STQ / SREL / STPLAN / STEMO / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
 | `record_age(<record_id \| bound:<alias>>, >= \| <= \| == \| !=, <integer_pages>)` | Derived age check over the record's `created_at_page` and the evaluating page's position in `branch_path`; `bound:<alias>` may reference a same-block existential match. | turn-cycle eligibility, debt-pressure maturation |
 | `intention_active(STINT-<integer>)` | Named intention must be currently active. | turn-cycle eligibility |
 | `object_accessible(STENT-<integer>, STOBJ-<integer>)` | Entity must have page-state access to the named object. | turn-cycle eligibility, plan grounding |
 | `artifact_accessible(STENT-<integer>, DA-<integer>)` | Entity must have access to the named story-local diegetic artifact. | turn-cycle eligibility, plan grounding |
 | `affordance_available_to(STENT-<integer>, <action_family>)` | Actor-specific affordance grounding must exist for the named action family. | turn-cycle eligibility, plan grounding |
+| `plan_active(holder, plan?)` | Actor has an active `STPLAN`. When `plan` is supplied, matches that specific plan id; otherwise matches any. | turn-cycle eligibility, plan grounding |
+| `plan_blocked(holder)` | Actor has at least one active `STPLAN` with `plan_status: blocked`. | turn-cycle eligibility |
+| `any_plan_active(alias, holder_role?)` | Actor-unbound existential over active `STPLAN`. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `emotion_active(holder, kind?, min_intensity?)` | Actor has an active `STEMO`. `kind` filters by closed-enum `affect_kind`; `min_intensity` is one of `low | medium | high | extreme` and matches that intensity or higher. | turn-cycle eligibility, plan grounding |
+| `any_emotion_active(alias, holder_role?, kind?, min_intensity?)` | Actor-unbound existential over active `STEMO`. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `emotion_pressure(holder, pressure)` | Actor has an active `STEMO` whose `behavioral_pressure[]` includes the named closed-enum pressure. | turn-cycle eligibility |
 | `all[…]`, `any[…]`, `not[…]` | Boolean composition. | combinator |
 
-`has_affordance(<action_family>)` and the `any_*` existential predicates are valid only for `global_author_pool` and `branch_prefix_scoped` prefiltering when an actor is not yet bound. Branch-execution eligibility checks use exact-ID predicates (for example `affordance_available_to(<actor>, <family>)`, `obligation_open(OBL-<integer>)`, or `belief_record(holder, BEL-<integer>)`) so plan-time grounding is actor-specific. Free-claim string matching is not a lawful predicate; the only belief-family predicates are `belief_record` (exact BEL-id) and `any_belief` (existential alias-binding).
+Closed grammar contains 39 individual predicates plus 3 combinators (`not`, `all`, `any`) for 42 total entries.
+
+`has_affordance(<action_family>)` and the `any_*` existential predicates are valid only for `global_author_pool` and `branch_prefix_scoped` prefiltering when an actor is not yet bound. Branch-execution eligibility checks use exact-ID predicates (for example `affordance_available_to(<actor>, <family>)`, `obligation_open(OBL-<integer>)`, `plan_active(holder=STENT-1, plan=STPLAN-4)`, or `belief_record(holder, BEL-<integer>)`) so plan-time grounding is actor-specific. Free-claim string matching is not a lawful predicate; the only belief-family predicates are `belief_record` (exact BEL-id) and `any_belief` (existential alias-binding).
 
 **Information / Observer Firewall.** At move-generation time, every selected `SLT` actor-binding and every emitted `CHC` must be grounded in information available to the acting entity. Valid access routes include the actor's active `BEL` records, direct observation from active location/status, accessible `DA` / `STOBJ` evidence, testimony, document access, inference from known facts, surveillance, institutional channel, magic/tech, or another canonically valid mechanism named in the plan. A `BEL` or `DA` may ground a move only when the actor can access it; narrator-only knowledge, hidden branch state, and facts known only to another actor cannot license that actor's move unless a valid access route is recorded.
 
@@ -200,13 +208,13 @@ An existential predicate binds its `alias` to the matched active record during b
 
 ### §5a. Mid-Story Introduction Tag Grammar and Closed Trigger Vocabularies
 
-Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, or `SREL` records is recorded in `SE.world_logic_rationale` with a parseable `intro:<CLASS>(...)` tag. The tag is parallel to the non-propagation tag pattern: it rides on an existing string field, is consumed by per-commit Phase 9 validators, and uses a closed trigger vocabulary so authoring stays anchored in present causal state rather than narrative shape.
+Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `SREL`, `STPLAN`, or `STEMO` records is recorded in `SE.world_logic_rationale` with a parseable `intro:<CLASS>(...)` tag. The tag is parallel to the non-propagation tag pattern: it rides on an existing string field, is consumed by per-commit Phase 9 validators, and uses a closed trigger vocabulary so authoring stays anchored in present causal state rather than narrative shape.
 
 Grammar:
 
 ```text
 intro_tag    := "intro:" class "(" args ")"
-class        := "CLK" | "STSEC" | "STQ" | "THR" | "STENT" | "SREL"
+class        := "CLK" | "STSEC" | "STQ" | "THR" | "STENT" | "SREL" | "STPLAN" | "STEMO"
 args         := id_arg "," trigger_arg "," evidence_arg "," distinct_arg
 id_arg       := "id=" record_id
 trigger_arg  := "trigger=" trigger_name
@@ -219,7 +227,7 @@ trigger_name := lowercase_snake_case (must match one of the closed-set values be
 Regex witness:
 
 ```text
-intro:(CLK|STSEC|STQ|THR|STENT|SREL)\(id=([A-Z]+-(?:0|[1-9][0-9]*)), trigger=([a-z_]+), evidence=\[([A-Z0-9,\-]*)\], distinct_from=\[([A-Z0-9,\-]*)\]\)
+intro:(CLK|STSEC|STQ|THR|STENT|SREL|STPLAN|STEMO)\(id=([A-Z]+-(?:0|[1-9][0-9]*)), trigger=([a-z_]+), evidence=\[([A-Z0-9,\-]*)\], distinct_from=\[([A-Z0-9,\-]*)\]\)
 ```
 
 Worked example:
@@ -228,7 +236,21 @@ Worked example:
 intro:CLK(id=CLK-12, trigger=deadline_declared, evidence=[SE-31,OBL-7,THR-9], distinct_from=[CLK-3])
 ```
 
-The parser implementation lives at `tools/validators/src/structural/midstory-introduction-utils.ts`. The generic per-commit validator that consumes the grammar is `tools/validators/src/structural/midstory-record-introduction-grounding.ts`; class-specific validators compose the same parser rather than re-implementing the grammar.
+The parser implementation lives at `tools/world-index/src/parse/intro-tag-parser.ts` and is re-exported for validator consumers through `tools/validators/src/structural/midstory-introduction-utils.ts`. The generic per-commit validator that consumes the grammar is `tools/validators/src/structural/midstory-record-introduction-grounding.ts`; class-specific validators compose the same parser rather than re-implementing the grammar.
+
+**plan_relation tag pattern** (parallel to `intro:<CLASS>` and `non_propagation:` patterns; rides on `SE.world_logic_rationale`):
+
+```text
+plan_relation_tag := "plan_relation:" relation "(plan=" record_id ")"
+relation          := "advances" | "tests" | "blocks" | "revises" | "fulfills" | "abandons" | "ignores"
+record_id         := "STPLAN-" positive_integer
+```
+
+Worked example:
+
+```text
+plan_relation:advances(plan=STPLAN-12)
+```
 
 ### CLK Triggers
 
@@ -295,6 +317,29 @@ The parser implementation lives at `tools/validators/src/structural/midstory-int
 | `trust_axis_becomes_relevant` | Trust becomes a load-bearing relationship axis. |
 | `intimacy_axis_becomes_relevant` | Intimacy becomes a load-bearing relationship axis. |
 | `hostility_axis_becomes_relevant` | Hostility becomes a load-bearing relationship axis. |
+
+### STPLAN Triggers
+
+| Trigger | Present-causal meaning |
+|---|---|
+| `tactical_approach_committed` | Actor moves from open intention to a specific multi-step tactical approach in the accepted event. |
+| `resource_gained_enables_plan` | Actor acquired a resource / leverage / ally / piece of information in this event that newly makes a previously-blocked plan tractable. |
+| `blocker_requires_plan` | Actor encountered an obstacle in this event that requires explicit planning (negotiation, deception, alliance-building) rather than ad-hoc reaction. |
+| `pressure_forces_plan` | External pressure produced by this event (clock fires, deadline declared, antagonist move) forces the actor to formalize a tactical response. |
+| `opportunity_recognized` | The event surfaced a specific opportunity in the current state that warrants planned pursuit rather than ad-hoc reaction. |
+| `counterparty_plan_observed` | Actor inferred another actor's plan from this event and forms a counter-plan in response. |
+
+### STEMO Triggers
+
+| Trigger | Present-causal meaning |
+|---|---|
+| `event_revealed_truth_to_actor` | Actor learned something new in the event (witness, reveal, document discovery, testimony); affective shift is appraisal-driven. |
+| `event_threatened_actor_or_charge` | Actor or someone they are responsible for came under threat in the event. |
+| `event_harmed_actor_or_charge` | Actor or someone they care about was harmed, lost, or damaged in the event. |
+| `event_relieved_pressure_on_actor` | Pressure on the actor was removed in the event (rescue, deadline averted, threat neutralized, accusation withdrawn). |
+| `event_violated_actor_principle_or_value` | Actor's belief, principle, oath, or value was violated by the event. |
+| `event_changed_relationship_with_other` | Relationship state with another actor moved on a load-bearing axis in this event (betrayal, intimacy, debt, authority shift). |
+| `accumulated_pressure_crossed_threshold` | Sustained pressure (clock value rising across pages, repeated micro-stresses) became affectively load-bearing without a single triggering event; the cited `trigger_event` names the latest contributing SE. |
 
 ## 6. Action Routing
 

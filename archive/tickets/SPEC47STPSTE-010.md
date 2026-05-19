@@ -1,6 +1,6 @@
 # SPEC47STPSTE-010: Update story-state-contract §5 predicate-DSL table + §5a tag-grammar prose
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `.claude/skills/_shared-templates/story-state-contract.md` §5 closed-predicate-DSL table with 6 new predicates + §5a tag-grammar specification with 2 new class entries, their trigger vocabularies, and the new `plan_relation:` tag pattern; no code changes
@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC-47 `archive/tickets/SPEC47STPSTE-008.md` lands the 6 new predicates in the validator framework (predicate-dsl-grammar.ts); `archive/tickets/SPEC47STPSTE-009.md` lands the §5a tag-grammar parser extensions for STPLAN/STEMO + plan_relation. The shared contract at `.claude/skills/_shared-templates/story-state-contract.md` §5 (closed-predicate-DSL table) and §5a (mid-story introduction tag grammar specification) document what those code surfaces provide; without updating the docs, story-pipeline skill authors and reviewers see a stale closed-grammar table that omits the 6 new predicates and a stale tag-grammar specification that doesn't enumerate the STPLAN/STEMO classes or the new `plan_relation:` pattern. Per SPEC-47 §Approach §B D-B7, this docs-sync ticket lands after the code tickets it documents.
+At intake, SPEC-47 `archive/tickets/SPEC47STPSTE-008.md` had landed the 6 new predicates in the validator framework (predicate-dsl-grammar.ts), and `archive/tickets/SPEC47STPSTE-009.md` had landed the §5a tag-grammar parser extensions for STPLAN/STEMO + plan_relation. The shared contract at `.claude/skills/_shared-templates/story-state-contract.md` §5 (closed-predicate-DSL table) and §5a (mid-story introduction tag grammar specification) still omitted those surfaces, so story-pipeline skill authors and reviewers saw a stale closed-grammar table and stale tag-grammar specification. Per SPEC-47 §Approach §B D-B7, this docs-sync ticket lands after the code tickets it documents.
 
 ## Assumption Reassessment (2026-05-19)
 
@@ -17,6 +17,7 @@ SPEC-47 `archive/tickets/SPEC47STPSTE-008.md` lands the 6 new predicates in the 
 1. Verified `.claude/skills/_shared-templates/story-state-contract.md` §5 contains the closed-predicate-DSL table currently enumerating 33 individual predicates + 3 combinators (per the reassess-spec session's exact count); §5a contains the tag-grammar specification with the 6-class `class` enum and per-class trigger vocabularies (CLK / STSEC / STQ / THR / STENT / SREL). Both sections need extension per SPEC-47 §Approach §B D-B7.
 2. Verified SPEC-47 §Approach §B specifies the 6 new predicates' shapes and consumers (table in §B) and the new §5a grammar additions (regex witness, STPLAN/STEMO triggers, plan_relation pattern, all enumerated in the §5a-and-related Approach §B detail). Verified `archive/tickets/SPEC47STPSTE-008.md` lands the code-side predicate extensions and `archive/tickets/SPEC47STPSTE-009.md` lands the parser extensions; this ticket synchronizes the contract docs to match.
 3. Cross-skill boundary under audit: the story-state-contract is the shared contract for the 7 Skill Category 2c story-pipeline skills; §5 + §5a are the authoritative reference for predicate-DSL grammar and mid-story tag grammar respectively. Other Category 2c skill SKILL.md files cite §5 / §5a by section number; docs-sync here lands the canonical post-SPEC-47 reference text without modifying any other skill's SKILL.md.
+4. Reassessment correction: `archive/tickets/SPEC47STPSTE-009.md` truthed the live parser implementation site to `tools/world-index/src/parse/intro-tag-parser.ts` plus the validators re-export at `tools/validators/src/structural/midstory-introduction-utils.ts`. The §5a parser-location sentence in the shared contract is same-seam docs-sync fallout and was updated here.
 
 ## Architecture Check
 
@@ -29,11 +30,11 @@ SPEC-47 `archive/tickets/SPEC47STPSTE-008.md` lands the 6 new predicates in the 
 2. §5a tag-grammar specification includes 2 new `class` enum values (STPLAN, STEMO) + 6 STPLAN trigger rows + 7 STEMO trigger rows + new `plan_relation:` tag-pattern specification with 7 closed relations → codebase grep-proof
 3. Cross-skill consumers (other Category 2c skills citing §5 / §5a) continue to resolve — section numbering unchanged → grep `\§5\|\§5a` across .claude/skills/*/SKILL.md returns the same matches before and after this ticket
 
-## What to Change
+## Landed Changes
 
 ### 1. Extend §5 closed-predicate-DSL table
 
-Add 6 new rows to the predicate table (parallel to existing per-predicate rows). Format (per the existing table):
+Added 6 new rows to the predicate table (parallel to existing per-predicate rows):
 
 ```text
 | `plan_active(holder, plan?)` | Actor has an active `STPLAN`. When `plan` is supplied, matches that specific plan id; otherwise matches any. | turn-cycle eligibility, plan grounding |
@@ -44,17 +45,17 @@ Add 6 new rows to the predicate table (parallel to existing per-predicate rows).
 | `emotion_pressure(holder, pressure)` | Actor has an active `STEMO` whose `behavioral_pressure[]` includes the named closed-enum pressure. | turn-cycle eligibility |
 ```
 
-Update the closing prose sentence describing closed-grammar size: "Closed grammar grows from 33 individual predicates to 39 (combinators `not | all | any` unchanged at 3, for 42 total entries)."
+Updated the closing prose sentence describing closed-grammar size: "Closed grammar contains 39 individual predicates plus 3 combinators (`not`, `all`, `any`) for 42 total entries." Also updated `record_active(<record_id>)` to include STPLAN/STEMO ids because ticket 008 made those classes legal active-record ids in the parser.
 
 ### 2. Extend §5a tag-grammar specification
 
-Update the `class` enum in the grammar witness from 6 alternatives to 8:
+Updated the `class` enum in the grammar witness from 6 alternatives to 8:
 
 ```text
 class := "CLK" | "STSEC" | "STQ" | "THR" | "STENT" | "SREL" | "STPLAN" | "STEMO"
 ```
 
-Add two new trigger-vocabulary tables after the existing 6 class tables:
+Added two new trigger-vocabulary tables after the existing 6 class tables:
 
 **STPLAN Triggers** (6):
 
@@ -81,7 +82,7 @@ Add two new trigger-vocabulary tables after the existing 6 class tables:
 
 ### 3. Add new `plan_relation:` tag-pattern specification
 
-Insert a new sub-section in §5a (parallel to the `intro:<CLASS>` and `non_propagation:` tag-pattern specifications):
+Inserted a new sub-section in §5a (parallel to the `intro:<CLASS>` and `non_propagation:` tag-pattern specifications):
 
 ```text
 **plan_relation tag pattern** (parallel to `intro:<CLASS>` and `non_propagation:` patterns; rides on `SE.world_logic_rationale`):
@@ -92,6 +93,10 @@ record_id        := "STPLAN-" positive_integer
 
 Worked example: plan_relation:advances(plan=STPLAN-12)
 ```
+
+### 4. Truth the parser implementation-site sentence
+
+Updated §5a to state that the parser implementation lives at `tools/world-index/src/parse/intro-tag-parser.ts` and is re-exported for validator consumers through `tools/validators/src/structural/midstory-introduction-utils.ts`.
 
 ## Files to Touch
 
@@ -129,4 +134,22 @@ Worked example: plan_relation:advances(plan=STPLAN-12)
 
 1. `grep -cE "plan_active|plan_blocked|any_plan_active|emotion_active|any_emotion_active|emotion_pressure" .claude/skills/_shared-templates/story-state-contract.md` (returns ≥6)
 2. `grep -n "STPLAN Triggers\|STEMO Triggers\|plan_relation tag pattern" .claude/skills/_shared-templates/story-state-contract.md` (returns 3 matches, one per new sub-section)
-3. `awk '/^## 5\. Closed Predicate DSL/,/^## 6\./' .claude/skills/_shared-templates/story-state-contract.md | grep -c "^| \`"` (predicate-DSL table row count: original 33 + combinators row + new 6 = 40 or similar — verify count matches expectation)
+3. `awk '/^\| Predicate \| Shape \| Consumed by \|/{in_table=1} in_table && /^\| `/{count++} in_table && /^$/{print count; exit}' .claude/skills/_shared-templates/story-state-contract.md` (predicate-DSL table row count: original 33 + combinators row + new 6 = 40)
+
+## Outcome
+
+Completed on 2026-05-19.
+
+Updated `.claude/skills/_shared-templates/story-state-contract.md` §5 with the six SPEC-47 predicate rows, the updated active-record id list, and the 39-predicate / 42-total grammar count. Updated §5a with the STPLAN/STEMO intro classes, regex witness, trigger tables, `plan_relation:` grammar, and live parser implementation-site wording.
+
+## Verification Result
+
+1. `grep -cE "plan_active|plan_blocked|any_plan_active|emotion_active|any_emotion_active|emotion_pressure" .claude/skills/_shared-templates/story-state-contract.md` returned `7`; six hits are the predicate rows and one is the explanatory branch-execution example.
+2. `grep -n "STPLAN Triggers\|STEMO Triggers\|plan_relation tag pattern" .claude/skills/_shared-templates/story-state-contract.md` returned 3 matches, one per new subsection.
+3. `awk '/^\| Predicate \| Shape \| Consumed by \|/{in_table=1} in_table && /^\| `/{count++} in_table && /^$/{print count; exit}' .claude/skills/_shared-templates/story-state-contract.md` returned `40`.
+4. Manual review confirmed section numbering remains unchanged: §5, §5a, and §6 are still the same headings; only intra-section content changed.
+
+## Deviations
+
+- The drafted §5 row-count proof over the full `## 5` to `## 6` range counted §5a trigger tables too, returning `89`. Closeout replaced it with a predicate-table-bounded command that returns the intended `40` rows.
+- §5a parser implementation-site prose was updated as same-seam fallout from `archive/tickets/SPEC47STPSTE-009.md`; the live parser is in `tools/world-index`, with validators consuming it through a re-export wrapper.
