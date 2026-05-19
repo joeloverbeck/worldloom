@@ -131,10 +131,9 @@ function addSpec47Story(root: string): void {
     "fallback_steps:",
     "  - action_family: bargain",
     "    target_records: [OBL-2, group:watch]",
-    "    trigger_condition:",
-    "      predicates:",
-    "        - pred: record_active(STSEC-2)",
-    "        - pred: emotion_active(STENT-1, fear)",
+    "    trigger_predicates:",
+    "      - pred: record_active(STSEC-2)",
+    "      - pred: emotion_active(STENT-1, fear)",
     "expires_when: after STPLAN-4 fulfills",
     "derived_from: [SE-2]"
   ]);

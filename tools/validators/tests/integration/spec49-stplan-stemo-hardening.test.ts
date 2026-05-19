@@ -92,7 +92,7 @@ test("SPEC-49 capstone: structural validators compose the STPLAN/STEMO hardening
           {
             action_family: "evade",
             target_records: ["STPLAN-9999"],
-            trigger_condition: { predicates: [{ pred: "record_active", record: "STPLAN-9999" }] }
+            trigger_predicates: [{ pred: "record_active", record: "STPLAN-9999" }]
           }
         ]
       })
@@ -351,10 +351,9 @@ function addStoryRecords(root: string): void {
     "fallback_steps:",
     "  - action_family: evade",
     "    target_records: [OBL-2]",
-    "    trigger_condition:",
-    "      predicates:",
-    "        - pred: record_active(STSEC-2)",
-    "        - pred: emotion_active(STENT-1, fear)",
+    "    trigger_predicates:",
+    "      - pred: record_active(STSEC-2)",
+    "      - pred: emotion_active(STENT-1, fear)",
     "expires_when: after STPLAN-4 fulfills",
     "derived_from: [SE-2]"
   ]);

@@ -895,7 +895,7 @@ function edgesForStoryPlan(
     for (const target of stringArrayField(fallbackStep, "target_records")) {
       pushStoryEdgeIfReference(edges, node.node_id, "plan_fallback_step_target", storySlug, target);
     }
-    for (const target of storyRefsInRecordArrayField(fallbackStep, "predicates", ["trigger_condition"])) {
+    for (const target of storyRefsInRecordArrayField(fallbackStep, "trigger_predicates")) {
       pushStoryEdgeIfReference(edges, node.node_id, "plan_fallback_predicate_ref", storySlug, target);
     }
   }

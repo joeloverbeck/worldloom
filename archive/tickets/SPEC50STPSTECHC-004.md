@@ -1,6 +1,6 @@
 # SPEC50STPSTECHC-004: Correct trigger_predicates field-name drift (4 production + 5 test sites)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-index` (parser), `tools/validators` (validator + helper + fixtures), `branching-story-health-audit` skill. Corrective of SPEC-49.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The STPLAN schema defines fallback predicates at `fallback_steps[].trigger_predicates[]` (`story-plan.schema.json:81,84`, a required field). Four production sites and five test fixtures instead read/construct the non-existent path `fallback_steps[].trigger_condition.predicates[]`. Production effects: `plan_fallback_predicate_ref` edges silently never emit; fallback-predicate validation is a no-op; `fallbackTriggerRecordIds` returns empty; the `stplan-long-blocked-no-fallback` health check never fires. The five test fixtures share the same wrong field name, which is why the drift shipped green through SPEC-49 — the suite never exercises the real schema shape, and the schema's `trigger_predicates` requirement is never enforced against these fixtures.
+Before this ticket, the STPLAN schema defined fallback predicates at `fallback_steps[].trigger_predicates[]` (`story-plan.schema.json:81,84`, a required field), but four production sites and five test fixtures read/constructed the non-existent path `fallback_steps[].trigger_condition.predicates[]`. Production effects were: `plan_fallback_predicate_ref` edges silently never emitted; fallback-predicate validation was a no-op; `fallbackTriggerRecordIds` returned empty; the `stplan-long-blocked-no-fallback` health check never fired. The five test fixtures shared the same wrong field name, which is why the drift shipped green through SPEC-49 — the suite did not exercise the real schema shape, and the schema's `trigger_predicates` requirement was not enforced against these fixtures.
 
 ## Assumption Reassessment (2026-05-19)
 
@@ -30,22 +30,22 @@ The STPLAN schema defines fallback predicates at `fallback_steps[].trigger_predi
 3. `fallbackTriggerRecordIds` returns the referenced ids -> unit test.
 4. Zero remaining `trigger_condition.predicates` references -> `grep -rn "trigger_condition" tools/ .claude/skills/` returns no fallback-path matches.
 
-## What to Change
+## Landed Changes
 
 ### 1. Production sites
 
-- `atomic.ts:898` — read `fallback_steps[].trigger_predicates[]` directly (no `trigger_condition` nesting).
-- `stplan-utils.ts:170` (`fallbackTriggerRecordIds`) — read `trigger_predicates` off each fallback step.
-- `stplan-predicate-references.ts:46-47` — read `trigger_predicates`; fix the diagnostic path string from `fallback_steps[${stepIndex}].trigger_condition.predicates` to `fallback_steps[${stepIndex}].trigger_predicates`.
-- `branching-story-health-audit/SKILL.md:305` — change the `stplan-long-blocked-no-fallback` description to `trigger_predicates[]`.
+- `atomic.ts` reads `fallback_steps[].trigger_predicates[]` directly (no `trigger_condition` nesting).
+- `stplan-utils.ts` (`fallbackTriggerRecordIds`) reads `trigger_predicates` off each fallback step.
+- `stplan-predicate-references.ts` reads `trigger_predicates` and reports diagnostic paths as `fallback_steps[${stepIndex}].trigger_predicates`.
+- `branching-story-health-audit/SKILL.md` describes `stplan-long-blocked-no-fallback` fallback evaluation in terms of `trigger_predicates[]`.
 
 ### 2. New schema-validated fixture (B.5)
 
-Add a STPLAN with non-empty `fallback_steps[].trigger_predicates[]` referencing a real record; the fixture MUST be schema-validated so a future field-name drift fails the schema gate, not merely a hand-written assertion.
+Added schema regression coverage in `tools/validators/tests/schemas/story-plan-schema-fixtures.test.ts`: a STPLAN with non-empty `fallback_steps[].trigger_predicates[]` validates, while the legacy `trigger_condition` shape is rejected by the required `trigger_predicates` gate.
 
 ### 3. Correct existing fixtures (B.6)
 
-Change the five drifted fixtures to `trigger_predicates`; re-confirm intended behavior (assertions may flip from "no fallback edges" to "produces fallback edges").
+Changed the five drifted fixtures to `trigger_predicates`; existing assertions now exercise the real schema shape and continue to produce fallback edges / fallback predicate verdicts.
 
 ## Files to Touch
 
@@ -57,7 +57,9 @@ Change the five drifted fixtures to `trigger_predicates`; re-confirm intended be
 - `tools/validators/tests/integration/spec49-stplan-stemo-hardening.test.ts` (modify)
 - `tools/world-index/tests/parse/atomic-edges-for-story-plan.test.ts` (modify)
 - `tools/world-index/tests/integration/spec47-stplan-stemo-edges-integration.test.ts` (modify)
-- new schema-validated STPLAN-fallback fixture (validators tests) (new)
+- `tools/validators/tests/schemas/story-plan-schema-fixtures.test.ts` (modify — schema-validated fallback regression)
+- `docs/MACHINE-FACING-LAYER.md` (modify — current edge-contract row repaired during post-ticket review)
+- `specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify — Phase B implementation note added during post-ticket review)
 
 ## Out of Scope
 
@@ -89,4 +91,24 @@ Change the five drifted fixtures to `trigger_predicates`; re-confirm intended be
 
 1. `npm run build --prefix tools/validators && npm run build --prefix tools/world-index`
 2. `npm test --prefix tools/validators && npm test --prefix tools/world-index`
-3. `grep -rn "trigger_condition" tools/ .claude/skills/ | grep -v node_modules | grep -v /dist/` — expect no fallback-path matches.
+3. `rg -n 'trigger_condition\\.predicates|trigger_condition:' tools/ .claude/skills/ -g '!**/node_modules/**' -g '!**/dist/**'` — only the intentional legacy-shape rejection fixture remains.
+
+## Outcome
+
+Completed on 2026-05-20. The STPLAN fallback predicate contract now uses the schema-canonical `fallback_steps[].trigger_predicates[]` path across world-index edge extraction, validators helper/diagnostic logic, the health-audit skill, the named SPEC-47/SPEC-49 fixtures, and the current machine-facing edge-contract row. No compatibility shim was added for `trigger_condition`.
+
+## Verification Result
+
+1. `npm run build` from `tools/world-index` — PASS.
+2. `node --test dist/tests/parse/atomic-edges-for-story-plan.test.js dist/tests/integration/spec47-stplan-stemo-edges-integration.test.js` from `tools/world-index` — PASS (3 tests).
+3. `npm run build` from `tools/validators` — PASS.
+4. `node --test dist/tests/structural/stplan-predicate-references.test.js dist/tests/schemas/story-plan-schema-fixtures.test.js dist/tests/integration/spec49-stplan-stemo-hardening.test.js` from `tools/validators` — PASS (18 tests) after correcting the new schema test to assert the actual Ajv rejection signal.
+5. `npm test` from `tools/world-index` — PASS (119 tests).
+6. `npm test` from `tools/validators` — PASS (671 tests).
+7. `rg -n "trigger_condition|trigger_predicates|fallbackTriggerRecordIds|plan_fallback_predicate_ref" tools/world-index/src/parse/atomic.ts tools/validators/src/structural/stplan-utils.ts tools/validators/src/structural/stplan-predicate-references.ts .claude/skills/branching-story-health-audit/SKILL.md tools/validators/tests/structural/stplan-predicate-references.test.ts tools/validators/tests/integration/spec49-stplan-stemo-hardening.test.ts tools/world-index/tests/parse/atomic-edges-for-story-plan.test.ts tools/world-index/tests/integration/spec47-stplan-stemo-edges-integration.test.ts tools/validators/tests/schemas/story-plan-schema-fixtures.test.ts` confirmed production and positive fixtures use `trigger_predicates`; the only remaining `trigger_condition` mention in touched test surfaces is the intentional legacy-shape rejection case in `story-plan-schema-fixtures.test.ts`.
+
+## Deviations
+
+- The drafted "new fixture" landed as an added schema-fixture test case in the existing `story-plan-schema-fixtures.test.ts`, not as a new fixture file. The same file now proves both acceptance of `trigger_predicates` and rejection of the legacy `trigger_condition` shape.
+- A literal `trigger_condition` string remains in the schema rejection fixture by design. The operational stale path `fallback_steps[].trigger_condition.predicates[]` was removed from production, positive fixtures, and skill guidance.
+- Post-ticket review added the SPEC-50 Phase B implementation note and repaired `docs/MACHINE-FACING-LAYER.md`; no source/test rerun was needed for those prose-only handoff repairs beyond hygiene and stale-anchor checks.

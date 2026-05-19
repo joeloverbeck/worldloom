@@ -111,7 +111,7 @@ SPEC-47 and SPEC-49 extend that graph surface with 20 additional edge types for 
 | `STPLAN` | `plan_current_step_target` | record | Each record named by `current_step.target_records[]`. |
 | `STPLAN` | `plan_fallback_step_target` | record | Each record named by `fallback_steps[].target_records[]`. |
 | `STPLAN` | `plan_success_predicate_ref` | record | Record ids parsed from `current_step.success_condition.predicates[].pred`. |
-| `STPLAN` | `plan_fallback_predicate_ref` | record | Record ids parsed from `fallback_steps[].trigger_condition.predicates[].pred`. |
+| `STPLAN` | `plan_fallback_predicate_ref` | record | Record ids parsed from `fallback_steps[].trigger_predicates[].pred`. |
 | `STPLAN` | `plan_derived_from` | record | Each record named by `derived_from[]`. |
 | `STPLAN` | `plan_expires_when_ref` | record | Record ids parsed from scalar `expires_when`. |
 | `STPLAN` | `plan_created_by_event` | `SE` | The event named by `created_by_event`. |
