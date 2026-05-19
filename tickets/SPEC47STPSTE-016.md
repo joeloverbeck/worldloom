@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — extends 7 story-pipeline SKILL.md files (`branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) with STPLAN/STEMO-awareness prose; cross-cutting docs ticket landing atomically after all upstream implementation tickets ship
-**Deps**: `archive/tickets/SPEC47STPSTE-005.md`, `archive/tickets/SPEC47STPSTE-006.md`, `archive/tickets/SPEC47STPSTE-007.md`, `archive/tickets/SPEC47STPSTE-008.md`, `archive/tickets/SPEC47STPSTE-009.md`, `archive/tickets/SPEC47STPSTE-011.md`, `archive/tickets/SPEC47STPSTE-013.md`, 015
+**Deps**: `archive/tickets/SPEC47STPSTE-005.md`, `archive/tickets/SPEC47STPSTE-006.md`, `archive/tickets/SPEC47STPSTE-007.md`, `archive/tickets/SPEC47STPSTE-008.md`, `archive/tickets/SPEC47STPSTE-009.md`, `archive/tickets/SPEC47STPSTE-011.md`, `archive/tickets/SPEC47STPSTE-013.md`, `archive/tickets/SPEC47STPSTE-015.md`
 
 ## Problem
 
@@ -35,7 +35,7 @@ SPEC-47's STPLAN/STEMO records, MCP context-packet summaries, world-index edges,
 
 ### 1. Update `.claude/skills/branching-story-bootstrap/SKILL.md`
 
-Add load-bearing STPLAN/STEMO discipline ("seed plans for actors whose medium-range agency matters at story start; seed emotions only where load-bearing for choice / prose / state interpretation"). Note first-page plan §9b/§9c render integration (delegate to turn-cycle's render procedure per ticket 015). Discipline lives in skill prose + health-audit drift check (per SPEC-47 §Key Design Decisions item 5); no validator-enforced numeric cap at story_start.
+Add load-bearing STPLAN/STEMO discipline ("seed plans for actors whose medium-range agency matters at story start; seed emotions only where load-bearing for choice / prose / state interpretation"). Note first-page plan §9b/§9c render integration (delegate to turn-cycle's render procedure per `archive/tickets/SPEC47STPSTE-015.md`). Discipline lives in skill prose + health-audit drift check (per SPEC-47 §Key Design Decisions item 5); no validator-enforced numeric cap at story_start.
 
 ### 2. Update `.claude/skills/branching-story-turn-cycle/SKILL.md`
 
@@ -83,8 +83,8 @@ Add canon-verdict-driven supersession logic: when a canon verdict invalidates a 
 
 ## Out of Scope
 
-- Code-side implementation of the new surfaces (validators, MCP summaries, edges, predicates, parser, page-plan sections) — covered by tickets 005-015.
-- Contract docs synchronization (story-state-contract.md §3 / §5 / §5a / §8) — covered by tickets 002, 010, 015.
+- Code-side implementation of the new surfaces (validators, MCP summaries, edges, predicates, parser, page-plan sections) — covered by tickets 005-014 and `archive/tickets/SPEC47STPSTE-015.md`.
+- Contract docs synchronization (story-state-contract.md §3 / §5 / §5a / §8) — covered by tickets 002, 010, and `archive/tickets/SPEC47STPSTE-015.md`.
 - World-index docs and CONTEXT-PACKET-CONTRACT.md — covered by `archive/tickets/SPEC47STPSTE-012.md` and ticket 014.
 - Per-skill ticket decomposition (this ticket is intentionally cross-cutting per the §Cross-Cutting Docs Ticket Shape).
 

@@ -379,7 +379,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 
 ## 8. Page Plan Minimum Contract
 
-`pages-prose-plans/PG-<integer>.md` is a direct-write artifact (not an atomic `_source/` record). It is the prompt package for the external prose renderer. Each plan body has 19 numbered sections plus optional §10b when SPEC-42 story-state records are active or relevant:
+`pages-prose-plans/PG-<integer>.md` is a direct-write artifact (not an atomic `_source/` record). It is the prompt package for the external prose renderer. Each plan body has 19 numbered sections plus optional §9b, §9c, §10b when relevant story-state records are active or relevant:
 
 | § | Section | Source |
 |---|---|---|
@@ -392,6 +392,8 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 7 | Selected event and state delta | `SE` |
 | 8 | Required beats from the commitment block | selected `SLT.beats` |
 | 9 | Relationship and belief context | active `SREL`, `BEL` |
+| 9b | Active actor plans / tactical agency (optional) | per-page-computed from active `STPLAN` records; omitted entirely when no active STPLANs exist |
+| 9c | Emotional causality / affective transition (optional) | per-page-computed from active `STEMO` records; omitted entirely when no active STEMOs exist |
 | 10 | Open obligations, consequences, threads | active `OBL`, `CNSQ`, `THR`, including each record's `urgency` |
 | 10b | Open Setups, Active Clocks, Hidden Secrets (optional) | per-page-computed from active `STQ`, `CLK`, and `STSEC`; omitted entirely when all three sets are empty or irrelevant |
 | 11 | Forbidden mystery resolutions | `mystery_policy.forbidden_resolutions` |
@@ -405,6 +407,43 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 19 | **Render-time instruction block** | **inlined verbatim from `reports/prose-quality-instructions.md` §Render-Time Instruction Template** |
 
 **§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages.
+
+**§9b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `STPLAN` records — one entry per active plan with sub-bullets per the template below:
+
+```markdown
+## 9b. Active actor plans / tactical agency
+
+- STPLAN-<integer> — Holder: STENT-<integer>.
+  - Objective:
+  - Root intention:
+  - Current step (action_family + target_records):
+  - Belief basis:
+  - Resources/leverage (resource_basis projection):
+  - Blockers:
+  - Fallbacks currently available:
+  - This page's plan_relation: advances | tests | blocks | revises | fulfills | abandons | ignores
+  - Prose must show:
+  - Prose must not imply:
+```
+
+§9b is omitted entirely when no active STPLANs exist on the current branch.
+
+**§9c is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `STEMO` records — one entry per active emotion with sub-bullets per the template below:
+
+```markdown
+## 9c. Emotional causality / affective transition
+
+- STEMO-<integer> — Holder: STENT-<integer>.
+  - Affect (kind + intensity):
+  - Trigger event:
+  - Appraisal basis:
+  - Behavioral pressure:
+  - Transition this page (if any):
+  - Prose must render:
+  - Prose must avoid:
+```
+
+§9c is omitted entirely when no active STEMOs exist on the current branch. `branching-story-turn-cycle` owns the rendering procedure for both §9b and §9c, parallel to its existing §10b rendering ownership.
 
 **§10b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `CLK` records (value / max, nearest threshold, salience), active `STSEC` records (status, holders, discovered clue-carrier count), and active `STQ` records (status, salience, audience visibility). Subsections appear only for classes with relevant active records; when no `CLK`, `STSEC`, or `STQ` content matters for the render, §10b is omitted rather than emitted as an empty placeholder. `branching-story-turn-cycle` owns the rendering procedure for this section.
 

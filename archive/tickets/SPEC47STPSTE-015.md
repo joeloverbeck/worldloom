@@ -1,6 +1,6 @@
 # SPEC47STPSTE-015: Add §9b + §9c page-plan template sections + update §8 preamble
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `.claude/skills/_shared-templates/story-state-contract.md` §8 page-plan minimum contract with §9b (STPLAN render) + §9c (STEMO render) per-page-computed sub-sections + preamble update (parallel to existing §10b "plus optional" framing)
@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC-47's STPLAN/STEMO records need rendering surfaces in the page-plan template so the external prose renderer receives plan/emotion context structurally. Without page-plan §9b (active actor plans / tactical agency) and §9c (emotional causality / affective transition) sections, the external prose LLM must either ignore STPLAN/STEMO state (rendering pages where validated actor plans and affective states have no prose expression) or invent emotional transitions and tactical reasoning (which §5c discipline forbids — invented narrative-arc content rather than rendered present-causal state). Per SPEC-47 §Approach §C D-C9, both sections are per-page-computed (parallel to §10b's pattern) and omitted entirely when no active records of the respective class exist.
+At intake, SPEC-47's STPLAN/STEMO records needed rendering surfaces in the page-plan template so the external prose renderer receives plan/emotion context structurally. Without page-plan §9b (active actor plans / tactical agency) and §9c (emotional causality / affective transition) sections, the external prose LLM would either ignore STPLAN/STEMO state (rendering pages where validated actor plans and affective states have no prose expression) or invent emotional transitions and tactical reasoning (which §5c discipline forbids — invented narrative-arc content rather than rendered present-causal state). This ticket adds both per-page-computed sections, parallel to §10b's pattern, and makes them omitted entirely when no active records of the respective class exist.
 
 ## Assumption Reassessment (2026-05-19)
 
@@ -29,14 +29,14 @@ SPEC-47's STPLAN/STEMO records need rendering surfaces in the page-plan template
 
 1. §8 preamble updated to "19 numbered sections plus optional §9b, §9c, §10b when relevant story-state records are active or relevant" → codebase grep-proof
 2. §9b (Active actor plans / tactical agency) and §9c (Emotional causality / affective transition) sub-section definitions added → codebase grep-proof
-3. Both new sections follow the §10b per-page-computed pattern (omitted entirely when no relevant active records exist) → manual review against §10b precedent at lines 335-362 of story-state-contract.md
+3. Both new sections follow the §10b per-page-computed pattern (omitted entirely when no relevant active records exist) → manual review against the current §10b precedent in story-state-contract.md
 4. `branching-story-turn-cycle` skill prose owns the rendering procedure for both sections (parallel to its §10b rendering ownership) → covered by ticket 016 skill prose update
 
-## What to Change
+## Landed Changes
 
-### 1. Update §8 preamble at `.claude/skills/_shared-templates/story-state-contract.md`
+### 1. Updated §8 preamble at `.claude/skills/_shared-templates/story-state-contract.md`
 
-Replace current preamble:
+Replaced the prior preamble:
 
 > Each plan body has 19 numbered sections plus optional §10b when SPEC-42 story-state records are active or relevant:
 
@@ -44,9 +44,9 @@ With:
 
 > Each plan body has 19 numbered sections plus optional §9b, §9c, §10b when relevant story-state records are active or relevant:
 
-### 2. Add §9b definition (after §9 Relationship and belief context, before §10)
+### 2. Added §9b definition (after §9 Relationship and belief context, before §10)
 
-Insert per the §10b precedent — table-row insertion in the §8 section table + a per-page-computed paragraph parallel to §10b's "**§10b is per-page-computed, not inlined verbatim**" prose:
+Inserted per the §10b precedent — table-row insertion in the §8 section table + a per-page-computed paragraph parallel to §10b's "**§10b is per-page-computed, not inlined verbatim**" prose:
 
 Table row insertion (after the §9 row):
 
@@ -54,7 +54,7 @@ Table row insertion (after the §9 row):
 | 9b | Active actor plans / tactical agency (optional) | per-page-computed from active `STPLAN` records; omitted entirely when no active STPLANs exist |
 ```
 
-Per-page-computed paragraph (after the §10b paragraph; parallel structure):
+Per-page-computed paragraph (after the inlined-verbatim paragraph and before the §10b paragraph; parallel structure):
 
 ```text
 **§9b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `STPLAN` records — one entry per active plan with sub-bullets per the template below:
@@ -76,7 +76,7 @@ Per-page-computed paragraph (after the §10b paragraph; parallel structure):
 §9b is omitted entirely when no active STPLANs exist on the current branch.
 ```
 
-### 3. Add §9c definition (after §9b, before §10)
+### 3. Added §9c definition (after §9b, before §10)
 
 Table row insertion:
 
@@ -139,3 +139,20 @@ Per-page-computed paragraph (after the §9b paragraph):
 1. `grep -nE "## 9b\.|## 9c\." .claude/skills/_shared-templates/story-state-contract.md` (returns 2 matches at expected positions)
 2. `grep -n "plus optional §9b, §9c, §10b" .claude/skills/_shared-templates/story-state-contract.md` (returns updated preamble)
 3. `awk '/^## 8\. Page Plan Minimum Contract/,/^## 9\. Branching and Rewind/' .claude/skills/_shared-templates/story-state-contract.md | grep -c "^| [0-9]"` (table row count — should reflect 19 top-level rows + 3 optional sub-rows = 22 if all sub-rows are in the table)
+
+## Outcome
+
+Completed 2026-05-19.
+
+The page-plan minimum contract in `.claude/skills/_shared-templates/story-state-contract.md` now names optional §9b, §9c, and §10b sections in the §8 preamble. The §8 table now includes §9b (Active actor plans / tactical agency) and §9c (Emotional causality / affective transition) as optional per-page-computed rows, and the template text now provides concrete render sub-bullets for active `STPLAN` and active `STEMO` records. Both sections explicitly omit themselves when the current branch has no active records of the corresponding class, preserving the §10b precedent.
+
+## Verification Result
+
+1. `grep -nE "## 9b\.|## 9c\." .claude/skills/_shared-templates/story-state-contract.md` returned 2 matches: `## 9b. Active actor plans / tactical agency` and `## 9c. Emotional causality / affective transition`.
+2. `grep -n "plus optional §9b, §9c, §10b" .claude/skills/_shared-templates/story-state-contract.md` returned the updated §8 preamble.
+3. `awk '/^## 8\. Page Plan Minimum Contract/,/^## 9\. Branching and Rewind/' .claude/skills/_shared-templates/story-state-contract.md | grep -c "^| [0-9]"` returned `22`.
+4. Manual review confirmed §9b and §9c are per-page-computed, not inlined verbatim; both are omitted entirely when no relevant active records exist, preserving the §10b optional-section pattern.
+
+## Deviations
+
+None.
