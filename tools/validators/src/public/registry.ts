@@ -26,6 +26,7 @@ import { observerFirewall } from "../structural/observer-firewall.js";
 import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
+import { recordIntroductionUniqueness } from "../structural/record-introduction-uniqueness.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
 import { relationshipIntroductionGroundingIntegrity } from "../structural/relationship-introduction-grounding-integrity.js";
@@ -120,6 +121,7 @@ export const structuralValidators: readonly Validator[] = [
   entityIntroductionStatusPairing,
   relationshipIntroductionGroundingIntegrity,
   introductionObserverFirewall,
+  recordIntroductionUniqueness,
   narrativeShapeFieldRejection,
   compatibilityDrift,
   activeRecordsFullShape,

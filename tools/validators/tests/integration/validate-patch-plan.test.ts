@@ -150,6 +150,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "midstory_record_introduction_grounding"
     );
     assert.equal(midstoryIntroExecution?.status, "skipped");
+    const recordIntroductionUniquenessExecution = result.executions.find(
+      (execution) => execution.name === "record_introduction_uniqueness"
+    );
+    assert.equal(recordIntroductionUniquenessExecution?.status, "skipped");
     const proposalPackageExecution = result.executions.find(
       (execution) => execution.name === "proposal_package_shape"
     );
@@ -248,6 +252,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== expectedWitnessExecution &&
         row !== nonPropagationExecution &&
         row !== midstoryIntroExecution &&
+        row !== recordIntroductionUniquenessExecution &&
         row !== proposalPackageExecution &&
         row !== proseReceiptExecution &&
         row !== validationTraceExecution &&
