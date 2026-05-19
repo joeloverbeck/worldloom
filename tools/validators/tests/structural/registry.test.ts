@@ -25,7 +25,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "slt_created_at_page_origin_consistency",
       "canon_baseline_drift",
       "canon_drift_classification_evidence",
-      "non_propagation_tag_shape",
+      "non_propagation_facts_completeness",
       "snapshot_replay_equality",
       "recursive_reference_closure",
       "state_snapshot_integrity",

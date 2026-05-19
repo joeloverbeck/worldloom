@@ -143,7 +143,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     );
     assert.equal(canonBaselineDriftExecution?.status, "skipped");
     const nonPropagationExecution = result.executions.find(
-      (execution) => execution.name === "non_propagation_tag_shape"
+      (execution) => execution.name === "non_propagation_facts_completeness"
     );
     assert.equal(nonPropagationExecution?.status, "skipped");
     const midstoryIntroExecution = result.executions.find(

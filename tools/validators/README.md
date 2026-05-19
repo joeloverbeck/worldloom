@@ -55,7 +55,7 @@ Structural validators:
 - `clock_introduction_grounding_integrity`
 - `canon_baseline_drift`
 - `canon_drift_classification_evidence`
-- `non_propagation_tag_shape`
+- `non_propagation_facts_completeness`
 - `snapshot_replay_equality`
 - `recursive_reference_closure`
 - `state_snapshot_integrity`

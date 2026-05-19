@@ -16,7 +16,7 @@ import { entityIntroductionStatusPairing } from "../structural/entity-introducti
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { introductionObserverFirewall } from "../structural/introduction-observer-firewall.js";
 import { midstoryRecordIntroductionGrounding } from "../structural/midstory-record-introduction-grounding.js";
-import { nonPropagationTagShape } from "../structural/non-propagation-tag-shape.js";
+import { nonPropagationFactsCompleteness } from "../structural/non-propagation-facts-completeness.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
@@ -103,7 +103,7 @@ export const structuralValidators: readonly Validator[] = [
   sltCreatedAtPageOriginConsistency,
   canonBaselineDrift,
   canonDriftClassificationEvidence,
-  nonPropagationTagShape,
+  nonPropagationFactsCompleteness,
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,

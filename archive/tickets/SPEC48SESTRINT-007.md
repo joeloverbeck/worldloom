@@ -1,9 +1,9 @@
 # SPEC48SESTRINT-007: Replace `non-propagation-tag-shape.ts` with `non_propagation_facts_completeness` validator + delete old validator + update registry / README / tests
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — replaces 1 structural validator (delete `non-propagation-tag-shape.ts`; create `non-propagation-facts-completeness.ts`); updates registry + README + 2 test files; deletes old test file
+**Engine Changes**: Yes — replaces 1 structural validator (delete `non-propagation-tag-shape.ts`; create `non-propagation-facts-completeness.ts`); updates registry + README + validator tests + downstream `world-mcp` capability-parity expected validator list; deletes old test file
 **Deps**: archive/tickets/SPEC48SESTRINT-003.md
 
 ## Problem
@@ -18,6 +18,7 @@ SPEC-48 D-B7 specifies replacing `tools/validators/src/structural/non-propagatio
 4. **FOUNDATIONS Rule 5 (No Consequence Evasion)**: the required-when-cited semantics enforce that an SE naming a non-propagation reason (in prose or via the structured field) must carry the structured-field entry — preventing the silent drop where the prose mentions a reason but no machine-readable record exists. This is Rule 5 in the witness-coverage domain: if the event has non-propagation consequence semantics, the consequence must be ground-truth-recorded in `non_propagation_facts[]`, not relegated to prose where downstream consumers cannot reliably extract it.
 5. **Canon Safety surface**: both the deleted `non-propagation-tag-shape.ts` and the new `non_propagation_facts_completeness.ts` live under `tools/validators/src/structural/`. Per-ticket-type granularity rule fires. The new validator preserves the Canon Safety contract — required-when-cited semantics are the firewall the old validator enforced; the new validator's structured-field check is the equivalent enforcement against the post-clean-break input shape.
 6. **Rename / remove**: `non-propagation-tag-shape.ts` (validator + test file) deletion — registered in `registry.ts`, named in `README.md`, tested by `non-propagation-tag-shape.test.ts`, referenced in `validate-patch-plan.test.ts`. Replacement registers as `non_propagation_facts_completeness` — new name, new file (per kebab-case-to-snake-case validator-name convention), new test file.
+7. **Baseline and downstream consumer proof**: pre-edit `npm test --prefix tools/validators` passed with 620 tests. After the validator rename, `tools/world-mcp/tests/server/capability-parity.test.ts` was same-seam fallout because it asserts the complete validator registry exposed through the local `@worldloom/validators` dependency; the expected list now names `non_propagation_facts_completeness` and includes the already-live `record_introduction_uniqueness` validator.
 
 ## Architecture Check
 
@@ -33,63 +34,39 @@ SPEC-48 D-B7 specifies replacing `tools/validators/src/structural/non-propagatio
 5. Test files updated → `test ! -f tools/validators/tests/structural/non-propagation-tag-shape.test.ts` returns success; `test -f tools/validators/tests/structural/non-propagation-facts-completeness.test.ts` returns success.
 6. Required-when-cited regression coverage → new validator's test cases cover the same positive (reason cited + structured entry present → PASS) and negative (reason cited in prose + no structured entry → FAIL) cases as the deleted validator.
 
-## What to Change
+## Landed Changes
 
 ### 1. Create `tools/validators/src/structural/non-propagation-facts-completeness.ts`
 
-New validator file. Implementation:
-
-```typescript
-import type { IndexedRecord, Verdict } from "../framework/types.js";
-import { asPlainRecord, stringValue } from "./utils.js";
-import { readSeNonPropagationFacts } from "./midstory-introduction-utils.js";
-
-const VALIDATOR = "non_propagation_facts_completeness";
-const VALID_REASONS = new Set([
-  "no_witness",
-  "witness_incapacitated",
-  "evidence_concealed",
-  "institution_suppresses_report",
-  "event_leaves_no_accessible_trace"
-]);
-const REASON_TOKEN_PATTERN =
-  /\b(no_witness|witness_incapacitated|evidence_concealed|institution_suppresses_report|event_leaves_no_accessible_trace)\b/g;
-
-export const nonPropagationFactsCompleteness = {
-  name: VALIDATOR,
-  // applies_to: pre-apply scoped to create_se_record plans (same scope as deleted validator)
-  // run(event): check that every reason named in world_logic_rationale prose has a matching
-  //   structured entry in SE.non_propagation_facts[]; emit `missing_structured_entry` verdict for gaps.
-  // ... (full implementation following the same shape as the deleted non-propagation-tag-shape.ts:122-134
-  //      `missing` function, but reading `readSeNonPropagationFacts(event)` instead of regex-extracting tags)
-};
-```
-
-Preserve the exact `applies_to: create_se_record` scoping from the deleted validator. The required-when-cited check finds every `REASON_TOKEN_PATTERN` match in `world_logic_rationale` prose, then asserts that each matched reason appears as a `reason` field in at least one entry of `readSeNonPropagationFacts(event)`. Gaps emit a `non_propagation_facts_completeness.missing_structured_entry` verdict with `suggested_fix: "Add an SE.non_propagation_facts[] entry with reason=<reason>, group=<witness-group>, records=[<record_ids>]."`.
+Created the new validator. It reads `SE.non_propagation_facts[]` through `readSeNonPropagationFacts(event)`, preserves the old full-world / touched-SE / `create_se_record` applicability surface, and emits `non_propagation_facts_completeness.missing_structured_entry` when `world_logic_rationale` names a closed-set non-propagation reason without a matching structured fact entry.
 
 ### 2. Delete `tools/validators/src/structural/non-propagation-tag-shape.ts`
 
-The deprecated validator file. Its work is subsumed by (i) schema-level rejection of malformed `non_propagation_facts[]` shape at ticket 001 + (ii) the new completeness validator above.
+The deprecated validator file was deleted. Its old tag-shape checks are now split between schema-level `non_propagation_facts[]` shape enforcement from ticket 001 and the new completeness validator's required-when-cited check.
 
 ### 3. Update `tools/validators/src/public/registry.ts`
 
-Replace the import at line 19 (`import { nonPropagationTagShape } from "../structural/non-propagation-tag-shape.js"`) with `import { nonPropagationFactsCompleteness } from "../structural/non-propagation-facts-completeness.js"`. Replace the array entry at line 103 (`nonPropagationTagShape,`) with `nonPropagationFactsCompleteness,`. Preserve the array's insertion order.
+Replaced the import and structural-validator array entry with `nonPropagationFactsCompleteness`, preserving insertion order.
 
 ### 4. Update `tools/validators/README.md` validator inventory
 
-Replace line 58 (`- non_propagation_tag_shape`) with `- non_propagation_facts_completeness`.
+Replaced the old inventory entry with `non_propagation_facts_completeness`.
 
 ### 5. Update `tools/validators/tests/structural/registry.test.ts`
 
-Replace the test-array name entry (around line 24 per the grep proof — `"non_propagation_tag_shape",`) with `"non_propagation_facts_completeness",`. Preserve the array's insertion order.
+Replaced the expected registry-name entry with `non_propagation_facts_completeness`.
 
 ### 6. Update `tools/validators/tests/integration/validate-patch-plan.test.ts`
 
-Replace the integration-test reference (around line 108 per the grep) — `result.executions.find((execution) => execution.name === "non_propagation_tag_shape")` becomes `result.executions.find((execution) => execution.name === "non_propagation_facts_completeness")`. Update any subsequent assertion shape to match the new validator's verdict-code (`non_propagation_facts_completeness.missing_structured_entry` instead of `non_propagation_tag_shape.malformed_tag` / `non_propagation_tag_shape.missing_tag`).
+Replaced the pre-apply execution-status lookup with `non_propagation_facts_completeness`.
 
 ### 7. Delete `tools/validators/tests/structural/non-propagation-tag-shape.test.ts` + create `non-propagation-facts-completeness.test.ts`
 
-Delete the old test file. Create a new test file with positive cases (SE carrying `non_propagation_facts[]` entries matching the reasons named in `world_logic_rationale`), negative cases (SE naming a reason in prose without a matching structured entry → `missing_structured_entry` verdict), and edge cases (empty `non_propagation_facts[]` + prose with no reason references → PASS).
+Deleted the old tag-shape test and created a structured-field completeness test with positive, negative, no-reference, duplicate-reason, and applicability-scope coverage.
+
+### 8. Update downstream `world-mcp` validator-registry parity
+
+Updated `tools/world-mcp/tests/server/capability-parity.test.ts` so the expected validator registry names match the current validator package after the rename.
 
 ## Files to Touch
 
@@ -101,6 +78,7 @@ Delete the old test file. Create a new test file with positive cases (SE carryin
 - `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify)
 - `tools/validators/tests/structural/non-propagation-tag-shape.test.ts` (delete)
 - `tools/validators/tests/structural/non-propagation-facts-completeness.test.ts` (new)
+- `tools/world-mcp/tests/server/capability-parity.test.ts` (modify)
 
 ## Out of Scope
 
@@ -133,8 +111,38 @@ Delete the old test file. Create a new test file with positive cases (SE carryin
 1. `tools/validators/tests/structural/non-propagation-facts-completeness.test.ts` (new) — positive case: SE with structured-field entry matching the reason cited in prose → PASS; negative case: SE with prose-cited reason but no structured-field entry → FAIL with `missing_structured_entry`; edge case: SE with no reason references → PASS.
 2. `tools/validators/tests/structural/registry.test.ts` (modify) — swap the name entry.
 3. `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify) — swap the integration assertion to the new validator name.
+4. `tools/world-mcp/tests/server/capability-parity.test.ts` (modify) — update the downstream expected validator registry names after the rename.
 
 ### Commands
 
 1. `npm test --prefix tools/validators` — full test suite.
-2. `grep -rn "nonPropagationTagShape\|non-propagation-tag-shape\|non_propagation_tag_shape" tools/validators/` — confirms zero matches in `src/` and `tests/` (excluding `dist/` build output which regenerates from source).
+2. `rg -n "nonPropagationTagShape|non-propagation-tag-shape|non_propagation_tag_shape" tools/validators/src tools/validators/tests tools/validators/README.md` — confirms zero matches in current source, tests, and package inventory (ignored generated `dist/` is excluded from this proof).
+3. `npm run build --prefix tools/world-mcp` followed by `node --test dist/tests/server/capability-parity.test.js` from `tools/world-mcp/` — downstream validator-registry parity proof.
+
+## Outcome
+
+Completed: 2026-05-19
+
+Implemented the SPEC-48 non-propagation validator replacement:
+
+- Deleted `tools/validators/src/structural/non-propagation-tag-shape.ts` and its tag-syntax test.
+- Added `tools/validators/src/structural/non-propagation-facts-completeness.ts` and `tools/validators/tests/structural/non-propagation-facts-completeness.test.ts`.
+- Swapped the validator registry, validator README, structural registry test, and `validatePatchPlan` integration test from `non_propagation_tag_shape` to `non_propagation_facts_completeness`.
+- Updated `tools/world-mcp/tests/server/capability-parity.test.ts` so the downstream validator-registry expected list matches the current validator package after the rename.
+
+## Verification Result
+
+- Baseline before edits: `npm test --prefix tools/validators` passed with 620 tests.
+- `npm run build --prefix tools/validators` passed after implementation.
+- Focused compiled validator proof passed: `node --test dist/tests/structural/non-propagation-facts-completeness.test.js`.
+- Registry proof passed: `node --test dist/tests/structural/registry.test.js`.
+- Pre-apply integration proof passed: `node --test dist/tests/integration/validate-patch-plan.test.js`.
+- Negative stale-symbol proof passed: `rg -n "nonPropagationTagShape|non-propagation-tag-shape|non_propagation_tag_shape" tools/validators/src tools/validators/tests tools/validators/README.md` returned no matches.
+- Deletion proofs passed: `test ! -f tools/validators/src/structural/non-propagation-tag-shape.ts` and `test ! -f tools/validators/tests/structural/non-propagation-tag-shape.test.ts`.
+- Final clean broad validator suite passed after `npm run clean --prefix tools/validators`: `npm test --prefix tools/validators` passed with 620 tests.
+- Downstream capability parity passed after `npm run build --prefix tools/world-mcp`: `node --test dist/tests/server/capability-parity.test.js` passed from `tools/world-mcp/`.
+
+## Deviations
+
+- The replacement validator preserved the live old validator's applicability surface (`full-world`, `create_se_record` patch plans, and touched story-event files), not only the narrower prose phrase "pre-apply scoped to create_se_record plans".
+- `tools/world-mcp/tests/server/capability-parity.test.ts` was added to the touched file set after the downstream parity proof exposed same-seam registry-name fallout. The same update also included the already-live `record_introduction_uniqueness` validator that the previous expected list had missed.
