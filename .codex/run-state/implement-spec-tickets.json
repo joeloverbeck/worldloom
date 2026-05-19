@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC50STPSTECHC-006.md",
+  "last_ticket": "archive/tickets/SPEC50STPSTECHC-007.md",
   "last_result": "completed_archived",
-  "last_work_commit": "87e01fb3ef631080aa0a879b1f21ef9f2c3e9b0b",
+  "last_work_commit": "c3dc9100156eb46c80253b37e9ce03d330aaca03",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC50STPSTECHC-007.md",
+  "next_target": "tickets/SPEC50STPSTECHC-008.md",
   "queue": [
-    "tickets/SPEC50STPSTECHC-007.md",
     "tickets/SPEC50STPSTECHC-008.md",
     "tickets/SPEC50STPSTECHC-009.md",
     "tickets/SPEC50STPSTECHC-010.md",
