@@ -244,6 +244,7 @@ const STORY_CREATE_OPS: Readonly<Record<string, { nodeType: string; sourceDir: s
   supersede_stsec_record: { nodeType: "story_secret_record", sourceDir: "secrets" },
   create_stq_record: { nodeType: "story_question_record", sourceDir: "story-questions" },
   supersede_stq_record: { nodeType: "story_question_record", sourceDir: "story-questions" },
+  create_stplan_record: { nodeType: "story_plan_record", sourceDir: "plans" },
   append_story_diegetic_artifact_record: { nodeType: "story_diegetic_artifact_record", sourceDir: "artifacts" }
 };
 

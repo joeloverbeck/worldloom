@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — extends 7 story-pipeline SKILL.md files (`branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) with STPLAN/STEMO-awareness prose; cross-cutting docs ticket landing atomically after all upstream implementation tickets ship
-**Deps**: 005, 006, 007, 008, 009, 011, 013, 015
+**Deps**: `archive/tickets/SPEC47STPSTE-005.md`, 006, 007, 008, 009, 011, 013, 015
 
 ## Problem
 

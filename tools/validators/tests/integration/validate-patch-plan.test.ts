@@ -223,6 +223,9 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "active_records_full_shape"
     );
     assert.equal(activeRecordsFullShapeExecution?.status, "skipped");
+    const stplanExecutions = result.executions.filter((execution) => execution.name.startsWith("stplan_"));
+    assert.equal(stplanExecutions.length, 12);
+    assert.ok(stplanExecutions.every((execution) => execution.status === "skipped"));
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -260,7 +263,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== narrativeShapeExecution &&
         row !== compatibilityDriftExecution &&
         row !== pageAffordanceExecution &&
-        row !== activeRecordsFullShapeExecution
+        row !== activeRecordsFullShapeExecution &&
+        !stplanExecutions.includes(row)
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

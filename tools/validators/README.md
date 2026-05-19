@@ -6,14 +6,14 @@ Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus story-scope predi
 
 Historical note: `archive/specs/SPEC-04-validator-framework.md` is archived prior art only. It is not current design authority.
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 48 structural validators, the 12 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 62 structural validators, the 12 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
 Static JSON Schemas live under `src/schemas/`. They cover the CF, CH, INV, M,
 OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, DA frontmatter, and story-bundle
 atomic YAML record classes (STENT, STSTAT, SF, SE, OBL, CNSQ, THR, CLK, STSEC, STQ,
-SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, BEL, and story-local DA). The prose receipt schema covers
+SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, BEL, STPLAN, STEMO, and story-local DA). The prose receipt schema covers
 direct-write `stories/<story-slug>/pages-prose-receipts/PG-*.yaml` artifacts. The PA
 schema validates YAML frontmatter parsed from `adjudications/PA-NNNN-*.md`; PA body
 prose is not schema-constrained.
@@ -86,6 +86,18 @@ Structural validators:
 - `prose_receipt_schema_compliance`
 - `modification_history_retrofit`
 - `validation_trace_shape_compliance`
+- `stplan_schema_compliance`
+- `stplan_id_uniqueness_and_append_only`
+- `stplan_holder_exists_and_active`
+- `stplan_root_intention_grounded`
+- `stplan_belief_basis_grounded`
+- `stplan_resource_basis_grounded`
+- `stplan_blockers_grounded`
+- `stplan_current_step_targets_grounded`
+- `stplan_no_future_page_ids`
+- `stplan_supersession_chain_valid`
+- `stplan_closure_status_requires_closure_event`
+- `stplan_event_plan_relation_consistency`
 
 Skill-judgment rule:
 
