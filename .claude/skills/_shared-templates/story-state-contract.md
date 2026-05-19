@@ -210,6 +210,8 @@ An existential predicate binds its `alias` to the matched active record during b
 
 Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `SREL`, `STPLAN`, or `STEMO` records is recorded on `SE.record_introductions[]`. Relations from an event to an active plan are recorded on `SE.state_relations[]`. Explicit non-propagation assertions are recorded on `SE.non_propagation_facts[]`. These fields carry the machine-readable WHAT; `SE.world_logic_rationale` carries the human-readable WHY.
 
+`SE.state_delta.create[]`, `SE.state_delta.supersede[]`, and `SE.state_delta.close[]` accept the same lifecycle-managed story-state class set, including `STPLAN` and `STEMO`; the event schema and `state_delta_class_integrity` validator must move together with this contract.
+
 `SE.world_logic_rationale` is prose-only. Validators MUST NOT attempt to parse `world_logic_rationale` for structural facts. The structured WHAT lives in `record_introductions[]`, `state_relations[]`, and `non_propagation_facts[]`; the prose WHY lives in `world_logic_rationale`.
 
 `tools/validators/src/schemas/story-event.schema.json` is the schema-level source of truth for the structured field shapes, required keys, record-id patterns, closed enums, and per-class trigger constraints. Introduction-grounding validators consume `SE.record_introductions[]` through `tools/validators/src/structural/midstory-introduction-utils.ts`; plan-relation validators consume `SE.state_relations[]`; witness/non-propagation validators consume `SE.non_propagation_facts[]`.

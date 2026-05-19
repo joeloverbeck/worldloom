@@ -55,7 +55,7 @@ In `recursive-reference-closure.ts` / `observer-firewall.ts` / `rule_chc_grounde
 
 ## Out of Scope
 
-- `SE.state_delta` STPLAN/STEMO (SPEC50STPSTECHC-001).
+- `SE.state_delta` STPLAN/STEMO (archive/tickets/SPEC50STPSTECHC-001.md).
 - The CHC↔SLT eligibility-source grounding validator (SPEC50STPSTECHC-009).
 - Any pool-level salience / pressure-distribution check.
 

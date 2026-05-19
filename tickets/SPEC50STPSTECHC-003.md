@@ -48,7 +48,7 @@ Mirror in `story-state-contract.md` §4 and `story-record-schemas.md`, noting th
 
 ## Out of Scope
 
-- `SE.state_delta` STPLAN/STEMO (SPEC50STPSTECHC-001).
+- `SE.state_delta` STPLAN/STEMO (archive/tickets/SPEC50STPSTECHC-001.md).
 - Selected-binding-validity validator logic beyond the schema class set (covered where the eligibility-source grounding validator lands, SPEC50STPSTECHC-009).
 - Widening alias_bindings to classes with no existential predicate.
 

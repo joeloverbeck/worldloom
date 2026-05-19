@@ -198,9 +198,9 @@ non_propagation_facts:                 # optional; records why expected witness 
     group: string
     records: [record_id]
 state_delta:
-  create: [record_id]
-  supersede: [record_id]
-  close: [record_id]
+  create: [record_id]                  # accepts the lifecycle-managed story-state classes, including STPLAN/STEMO
+  supersede: [record_id]               # same class set as create
+  close: [record_id]                   # same class set as create
 promotion_claims:
   - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer> | STSTAT-<integer> | SREL-<integer>
     authority: apparent | branch_local_counterfactual | canon_candidate

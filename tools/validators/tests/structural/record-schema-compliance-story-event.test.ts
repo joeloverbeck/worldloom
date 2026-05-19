@@ -197,9 +197,9 @@ test("record_schema_compliance accepts state_delta references to every SPEC-44 s
   const result = await recordSchemaCompliance.run({}, context([
     eventRecord(validEvent({
       state_delta: {
-        create: ["STSTAT-1", "CLK-1", "STSEC-1", "STQ-1"],
-        supersede: ["STSTAT-2", "CLK-2", "STSEC-2", "STQ-2"],
-        close: ["STSTAT-3", "CLK-3", "STSEC-3", "STQ-3"]
+        create: ["STSTAT-1", "CLK-1", "STSEC-1", "STQ-1", "STPLAN-1", "STEMO-1"],
+        supersede: ["STSTAT-2", "CLK-2", "STSEC-2", "STQ-2", "STPLAN-2", "STEMO-2"],
+        close: ["STSTAT-3", "CLK-3", "STSEC-3", "STQ-3", "STPLAN-3", "STEMO-3"]
       }
     }))
   ]));
