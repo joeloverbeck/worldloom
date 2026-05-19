@@ -74,6 +74,8 @@ const ID_ALLOCATION_KEYS = [
   "clk_ids",
   "stsec_ids",
   "stq_ids",
+  "stplan_ids",
+  "stemo_ids",
   "story_da_ids"
 ] as const;
 
@@ -107,6 +109,8 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   pressure_clock_record: "story-pressure-clock.schema.json",
   story_secret_record: "story-secret.schema.json",
   story_question_record: "story-question.schema.json",
+  story_plan_record: "story-plan.schema.json",
+  story_emotion_record: "story-emotion.schema.json",
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 } as const;
 
@@ -443,6 +447,10 @@ function operationSchema(kind: OperationKind): JsonObject {
     case "create_stq_record":
     case "supersede_stq_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_question_record"));
+    case "create_stplan_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_plan_record"));
+    case "create_stemo_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_emotion_record"));
     case "append_story_diegetic_artifact_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_diegetic_artifact_record"));
   }

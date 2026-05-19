@@ -200,6 +200,105 @@ test("validatePatchPlan accepts append_story_diegetic_artifact_record through pr
   }
 });
 
+test("validatePatchPlan accepts STPLAN and STEMO create ops through pre-apply validation", async () => {
+  const root = createTempRepoRoot();
+  seedEmptyWorld(root);
+
+  try {
+    const plan = {
+      plan_id: "plan-stplan-stemo-001",
+      target_world: "seeded",
+      approval_token: "token-from-gate",
+      verdict: "ACCEPT",
+      originating_skill: "branching-story-turn-cycle",
+      expected_id_allocations: {
+        stplan_ids: ["STPLAN-1"],
+        stemo_ids: ["STEMO-1"]
+      },
+      patches: [
+        {
+          op: "create_stplan_record",
+          target_world: "seeded",
+          target_file: "stories/marla-kern-seduction/_source/plans/STPLAN-1.yaml",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            record: {
+              id: "STPLAN-1",
+              story_id: "STORY-1",
+              created_at_page: "PG-1",
+              created_by_event: "SE-1",
+              holder: "STENT-1",
+              root_intention: "STINT-1",
+              objective: "Recover the harbor ledger before Kern destroys it.",
+              plan_status: "active",
+              belief_basis: ["BEL-1"],
+              resource_basis: {
+                facts: [],
+                objects: ["STOBJ-1"],
+                locations: [],
+                artifacts: [],
+                relationships: [],
+                obligations: []
+              },
+              blockers: [],
+              current_step: {
+                action_family: "investigate",
+                target_records: ["STOBJ-1"],
+                success_condition: { predicates: [{ pred: "fact_known", fact: "SF-1" }] }
+              },
+              fallback_steps: [],
+              expires_when: "The ledger is recovered or destroyed.",
+              derived_from: ["BEL-1"]
+            }
+          }
+        },
+        {
+          op: "create_stemo_record",
+          target_world: "seeded",
+          target_file: "stories/marla-kern-seduction/_source/emotions/STEMO-1.yaml",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            record: {
+              id: "STEMO-1",
+              story_id: "STORY-1",
+              created_at_page: "PG-1",
+              created_by_event: "SE-1",
+              holder: "STENT-1",
+              status: "dissociated",
+              affect_kind: null,
+              orientation: { toward_records: [] },
+              appraisal_basis: [],
+              trigger_event: "SE-1",
+              behavioral_pressure: [],
+              agency_effect: "none",
+              expires_when: "The actor reorients to the threat.",
+              derived_from: []
+            }
+          }
+        }
+      ]
+    };
+
+    const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
+
+    assert.ok("status" in result);
+    assert.equal(result.status, "pass", JSON.stringify(result, null, 2));
+    assert.deepEqual(result.verdicts, []);
+    assert.ok(
+      result.validators_run.some(
+        (entry) => entry.validator_name === "record_schema_compliance" && entry.status === "pass"
+      )
+    );
+    assert.ok(
+      result.validators_run.some(
+        (entry) => entry.validator_name === "id_allocation_race" && entry.status === "pass"
+      )
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("validatePatchPlan returns fail and surfaces rule verdicts from the validators package", async () => {
   const root = createTempRepoRoot();
   seedEmptyWorld(root);

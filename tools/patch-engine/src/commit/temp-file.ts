@@ -133,6 +133,8 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "supersede_stsec_record":
     case "create_stq_record":
     case "supersede_stq_record":
+    case "create_stplan_record":
+    case "create_stemo_record":
     case "append_story_diegetic_artifact_record": {
       const metadata = storyRecordMetadata(patch);
       return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
@@ -158,7 +160,7 @@ const STORY_BUNDLE_NODE_TYPE_BY_PREFIX: Readonly<Record<string, string>> = Objec
 );
 
 const STORY_BUNDLE_ID_PATTERN =
-  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA|CLK|STSEC|STQ)-\d+$/;
+  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/;
 
 function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType: string } | null {
   if (/^CF-\d+$/.test(recordId)) {
@@ -257,6 +259,8 @@ function stageOne(
     case "supersede_stsec_record":
     case "create_stq_record":
     case "supersede_stq_record":
+    case "create_stplan_record":
+    case "create_stemo_record":
     case "append_story_diegetic_artifact_record":
       return stageCreateStoryRecord(envelope, patch, ctx);
   }

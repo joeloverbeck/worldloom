@@ -41,6 +41,8 @@ export type StoryRecordOperationKind =
   | "supersede_stsec_record"
   | "create_stq_record"
   | "supersede_stq_record"
+  | "create_stplan_record"
+  | "create_stemo_record"
   | "append_story_diegetic_artifact_record";
 
 type StoryRecordOperation = Extract<PatchOperation, { op: StoryRecordOperationKind }> & {
@@ -70,6 +72,8 @@ const STORY_RECORD_OPERATION_KINDS: readonly StoryRecordOperationKind[] = [
   "supersede_stsec_record",
   "create_stq_record",
   "supersede_stq_record",
+  "create_stplan_record",
+  "create_stemo_record",
   "append_story_diegetic_artifact_record"
 ];
 
@@ -229,6 +233,20 @@ export const STORY_RECORD_SPECS: Readonly<Record<StoryRecordOperationKind, Story
     nodeType: "story_question_record",
     prefix: "STQ",
     sourceDir: "story-questions"
+  },
+  create_stplan_record: {
+    allocationKey: "stplan_ids",
+    idPattern: /^STPLAN-\d+$/,
+    nodeType: "story_plan_record",
+    prefix: "STPLAN",
+    sourceDir: "plans"
+  },
+  create_stemo_record: {
+    allocationKey: "stemo_ids",
+    idPattern: /^STEMO-\d+$/,
+    nodeType: "story_emotion_record",
+    prefix: "STEMO",
+    sourceDir: "emotions"
   },
   append_story_diegetic_artifact_record: {
     allocationKey: "story_da_ids",

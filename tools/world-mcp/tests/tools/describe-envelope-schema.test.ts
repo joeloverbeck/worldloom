@@ -50,6 +50,8 @@ test("describeEnvelopeSchema returns the full envelope and every operation schem
   assert.ok(allocations.properties?.bel_ids);
   assert.ok(allocations.properties?.stsec_ids);
   assert.ok(allocations.properties?.stq_ids);
+  assert.ok(allocations.properties?.stplan_ids);
+  assert.ok(allocations.properties?.stemo_ids);
   assert.equal(allocations.properties?.arc_trace_ids, undefined);
 });
 
@@ -116,6 +118,40 @@ test("describeEnvelopeSchema exposes create_ststat_record wrapper schema", async
   assert.equal(
     manifest.referenced_schemas["https://worldloom.local/schemas/story-status.schema.json"]?.$id,
     "https://worldloom.local/schemas/story-status.schema.json"
+  );
+});
+
+test("describeEnvelopeSchema exposes STPLAN and STEMO wrapper schemas", async () => {
+  const planManifest = await describeEnvelopeSchema({ op_kind: "create_stplan_record" });
+  const emotionManifest = await describeEnvelopeSchema({ op_kind: "create_stemo_record" });
+
+  assert.equal(planManifest.delivery_status, "inline");
+  assert.equal(emotionManifest.delivery_status, "inline");
+
+  const planProperties = planManifest.op_schemas.create_stplan_record!.properties as Record<string, unknown>;
+  const planPayload = planProperties.payload as {
+    required?: string[];
+    properties?: { story_slug?: { pattern?: string }; record?: { $ref?: string } };
+  };
+  assert.deepEqual(planPayload.required, ["story_slug", "record"]);
+  assert.equal(planPayload.properties?.story_slug?.pattern, "^[a-z0-9-]+$");
+  assert.equal(planPayload.properties?.record?.$ref, "https://worldloom.local/schemas/story-plan.schema.json");
+  assert.equal(
+    planManifest.referenced_schemas["https://worldloom.local/schemas/story-plan.schema.json"]?.$id,
+    "https://worldloom.local/schemas/story-plan.schema.json"
+  );
+
+  const emotionProperties = emotionManifest.op_schemas.create_stemo_record!.properties as Record<string, unknown>;
+  const emotionPayload = emotionProperties.payload as {
+    required?: string[];
+    properties?: { story_slug?: { pattern?: string }; record?: { $ref?: string } };
+  };
+  assert.deepEqual(emotionPayload.required, ["story_slug", "record"]);
+  assert.equal(emotionPayload.properties?.story_slug?.pattern, "^[a-z0-9-]+$");
+  assert.equal(emotionPayload.properties?.record?.$ref, "https://worldloom.local/schemas/story-emotion.schema.json");
+  assert.equal(
+    emotionManifest.referenced_schemas["https://worldloom.local/schemas/story-emotion.schema.json"]?.$id,
+    "https://worldloom.local/schemas/story-emotion.schema.json"
   );
 });
 
