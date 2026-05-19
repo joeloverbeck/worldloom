@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — audits and updates 3 docs surfaces (`describe-capabilities.ts`, `docs/CONTEXT-PACKET-CONTRACT.md`, `docs/MACHINE-FACING-LAYER.md`); audits `story-bundle-context.ts` (verified clean at reassess time per M4 finding)
-**Deps**: 009
+**Deps**: archive/tickets/SPEC48SESTRINT-009.md
 
 ## Problem
 
@@ -18,12 +18,12 @@ SPEC-48 §Phase D D-D2 + D-D3 + D-D4 specify auditing the world-mcp + documentat
 
 ## Architecture Check
 
-1. **Audit-and-update with sub-assertion fold-in**: this ticket consolidates four related audits (per SPEC-48 §Step 3 Cross-Cutting Docs Ticket Shape — "single cross-cutting docs ticket depending on the implementation tickets is a valid decomposition" — except the `story-bundle-context.ts` audit folds in as a sub-assertion confirmation since reassessment verified no change is needed there). Cleaner than 4 separate small audit tickets: docs/MCP surfaces share the same audit shape (grep for deprecated grammar references; update where present) and same dependency (parser deleted in ticket 009).
+1. **Audit-and-update with sub-assertion fold-in**: this ticket consolidates four related audits (per SPEC-48 §Step 3 Cross-Cutting Docs Ticket Shape — "single cross-cutting docs ticket depending on the implementation tickets is a valid decomposition" — except the `story-bundle-context.ts` audit folds in as a sub-assertion confirmation since reassessment verified no change is needed there). Cleaner than 4 separate small audit tickets: docs/MCP surfaces share the same audit shape (grep for deprecated grammar references; update where present) and same dependency (parser deleted in archive/tickets/SPEC48SESTRINT-009.md).
 2. **No backwards-compatibility aliasing**: the docs surfaces are updated to reference structured-field semantics directly; no "see also tag grammar" fallback prose is preserved (except in audit-trail prose explaining what the docs used to describe, scoped to retrospective explanation per ticket 002's §5a rewrite precedent).
 
 ## Verification Layers
 
-1. `story-bundle-context.ts` clean confirmation (sub-assertion) → grep proof: `grep -n "extractIntroTags\|intro-tag-parser\|intro:.*trigger=\|plan_relation:.*plan=\|non_propagation:.*group=" tools/world-mcp/src/context-packet/story-bundle-context.ts` returns zero matches. (M4 verified this at reassess-spec time; this ticket re-confirms in the post-ticket-009 tree.)
+1. `story-bundle-context.ts` clean confirmation (sub-assertion) → grep proof: `grep -n "extractIntroTags\|intro-tag-parser\|intro:.*trigger=\|plan_relation:.*plan=\|non_propagation:.*group=" tools/world-mcp/src/context-packet/story-bundle-context.ts` returns zero matches. (M4 verified this at reassess-spec time; this ticket re-confirms after archive/tickets/SPEC48SESTRINT-009.md.)
 2. `describe-capabilities.ts` updated → grep proof: `grep -n "intro:.*trigger=\|plan_relation:.*plan=\|non_propagation:.*group=" tools/world-mcp/src/tools/describe-capabilities.ts` returns zero matches AFTER refactor.
 3. `CONTEXT-PACKET-CONTRACT.md` updated → grep proof: `grep -n "intro:.*trigger=\|plan_relation:.*plan=\|non_propagation:.*group=\|parseable tag in world_logic_rationale" docs/CONTEXT-PACKET-CONTRACT.md` returns zero matches AFTER refactor.
 4. `MACHINE-FACING-LAYER.md` updated → grep proof: `grep -n "intro-tag-parser\|parseable tag in world_logic_rationale\|intro:.*trigger=\|plan_relation:.*plan=\|non_propagation:.*group=" docs/MACHINE-FACING-LAYER.md` returns zero matches AFTER refactor.
@@ -33,7 +33,7 @@ SPEC-48 §Phase D D-D2 + D-D3 + D-D4 specify auditing the world-mcp + documentat
 
 ### 1. Audit `tools/world-mcp/src/context-packet/story-bundle-context.ts` (sub-assertion; no change expected)
 
-Re-grep the file post-ticket-009 for any parser-import or tag-grammar reference. Expected outcome: zero matches (M4 verified at reassess-spec; this is a fresh confirmation against the post-clean-break tree). If a match is found that the audit missed, route it as a follow-up correction in this ticket; otherwise, document the audit's clean result in the ticket completion summary.
+Re-grep the file after archive/tickets/SPEC48SESTRINT-009.md for any parser-import or tag-grammar reference. Expected outcome: zero matches (M4 verified at reassess-spec; this is a fresh confirmation against the post-clean-break tree). If a match is found that the audit missed, route it as a follow-up correction in this ticket; otherwise, document the audit's clean result in the ticket completion summary.
 
 ### 2. Update `tools/world-mcp/src/tools/describe-capabilities.ts`
 
@@ -60,7 +60,7 @@ Grep for `intro-tag-parser` / parser-surface references / tag-grammar references
 - Contract document rewrite at `story-state-contract.md` / `story-record-schemas.md` (covered by ticket 002).
 - Validator refactor (covered by tickets 003-007).
 - World-index refactor (covered by archive/tickets/SPEC48SESTRINT-008.md).
-- Parser deletion (covered by ticket 009).
+- Parser deletion (covered by archive/tickets/SPEC48SESTRINT-009.md).
 - CI gates (covered by ticket 010).
 - Skill prose updates (covered by ticket 011).
 

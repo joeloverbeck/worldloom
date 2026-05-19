@@ -4,11 +4,11 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — adds 2 CI test files under `tools/validators/tests/structural/`
-**Deps**: 009
+**Deps**: archive/tickets/SPEC48SESTRINT-009.md
 
 ## Problem
 
-SPEC-48 §Phase C D-C3 + D-C4 specify two CI gates that prevent regression after the clean break: (i) a parser-deletion-completeness test asserting no source file under `tools/`, `.claude/skills/`, or `docs/` imports from the deleted `intro-tag-parser.ts` path (or its successor old path); (ii) a skill-prose tag-syntax-absence test asserting no `.claude/skills/**/*.md` file contains the closed list of deprecated tag-syntax substrings (`intro:<CLASS>`, `intro:CLK(`, ..., `plan_relation:`, `non_propagation:`). The reassessment M1 finding refined D-C4's grep scope from `**/SKILL.md` to `**/*.md` to catch shared-template drift symmetrically — the gates must therefore cover SKILL.md + references/ + shared templates under `_shared-templates/`. Without these gates, future edits could re-introduce parser imports or deprecated tag-syntax in skill prose silently; CI would not catch the regression.
+SPEC-48 §Phase C D-C3 + D-C4 specify two CI gates that prevent regression after the clean break: (i) a parser-deletion-completeness test asserting no source file under `tools/`, `.claude/skills/`, or `docs/` imports from the deleted `intro-tag-parser.ts` path (or its successor old path); (ii) a skill-prose tag-syntax-absence test asserting no `.claude/skills/**/*.md` file contains the closed list of deprecated tag-syntax substrings (`intro:<CLASS>`, `intro:CLK(`, ..., `plan_relation:`, `non_propagation:`). The parser deletion landed in archive/tickets/SPEC48SESTRINT-009.md. The reassessment M1 finding refined D-C4's grep scope from `**/SKILL.md` to `**/*.md` to catch shared-template drift symmetrically — the gates must therefore cover SKILL.md + references/ + shared templates under `_shared-templates/`. Without these gates, future edits could re-introduce parser imports or deprecated tag-syntax in skill prose silently; CI would not catch the regression.
 
 ## Assumption Reassessment (2026-05-19)
 
@@ -24,7 +24,7 @@ SPEC-48 §Phase C D-C3 + D-C4 specify two CI gates that prevent regression after
 ## Verification Layers
 
 1. Both test files exist at the corrected paths → `test -f tools/validators/tests/structural/parser-deletion-completeness.test.ts && test -f tools/validators/tests/structural/skill-prose-tag-syntax-absence.test.ts` returns success.
-2. Tests pass on the post-ticket-009 tree → `npm test --prefix tools/validators` includes the new test files; both report PASS (zero matches found for the closed grep patterns).
+2. Tests pass on the post-archive/tickets/SPEC48SESTRINT-009.md tree → `npm test --prefix tools/validators` includes the new test files; both report PASS (zero matches found for the closed grep patterns).
 3. Tests would fail if regression introduced → mutation-style test: temporarily add a deprecated import or tag-syntax substring in a test fixture; the corresponding CI gate fails. Revert. (Not landed; covered by manual verification during implementation.)
 
 ## What to Change
@@ -104,9 +104,9 @@ test("no skill prose (.claude/skills/**/*.md) contains deprecated tag-syntax sub
 
 The closed substring list is the M1-refined scope per SPEC-48 D-C4: covers the 9 `intro:<CLASS>(` patterns + `plan_relation:` + `non_propagation:` (11 substrings total).
 
-### 3. Verify gates pass on the post-ticket-009 tree
+### 3. Verify gates pass on the post-archive/tickets/SPEC48SESTRINT-009.md tree
 
-After both test files are created and `tools/world-index/src/parse/intro-tag-parser.ts` has been deleted (ticket 009 dependency), both gates report PASS. Any false-positive matches (e.g., the parser-deletion gate matching this very test file because it lists the patterns as test inputs) need careful exclusion logic — either exclude the test files themselves from the grep, or scope the test fixtures to clearly non-functional contexts so the substrings appear only in unambiguous test-data positions. **Implementation note**: the most robust exclusion is to grep with `--exclude-dir=tools/validators/tests/structural` and `--exclude tools/validators/tests/structural/parser-deletion-completeness.test.ts` etc., but care must be taken that the exclusion list itself doesn't grow unbounded; preferred alternative is to encode the patterns in the test file as base64 / split strings that don't textually match.
+After both test files are created and `tools/world-index/src/parse/intro-tag-parser.ts` has been deleted (archive/tickets/SPEC48SESTRINT-009.md dependency), both gates report PASS. Any false-positive matches (e.g., the parser-deletion gate matching this very test file because it lists the patterns as test inputs) need careful exclusion logic — either exclude the test files themselves from the grep, or scope the test fixtures to clearly non-functional contexts so the substrings appear only in unambiguous test-data positions. **Implementation note**: the most robust exclusion is to grep with `--exclude-dir=tools/validators/tests/structural` and `--exclude tools/validators/tests/structural/parser-deletion-completeness.test.ts` etc., but care must be taken that the exclusion list itself doesn't grow unbounded; preferred alternative is to encode the patterns in the test file as base64 / split strings that don't textually match.
 
 ## Files to Touch
 
@@ -115,7 +115,7 @@ After both test files are created and `tools/world-index/src/parse/intro-tag-par
 
 ## Out of Scope
 
-- Parser file deletion (covered by ticket 009 — this ticket's dependency).
+- Parser file deletion (covered by archive/tickets/SPEC48SESTRINT-009.md — this ticket's dependency).
 - Validator refactor (covered by tickets 003-007).
 - Schema field changes (covered by ticket 001).
 - Skill prose updates (deferred to ticket 011 — without the prose updates, the skill-prose gate would fail on landing this ticket; coordinate landing order with ticket 011).
@@ -125,7 +125,7 @@ After both test files are created and `tools/world-index/src/parse/intro-tag-par
 ### Tests That Must Pass
 
 1. `npm test --prefix tools/validators` — full validator test suite passes, including the 2 new CI gates.
-2. Both gates report PASS on the post-ticket-009 + post-ticket-011 tree (parser deleted + skill prose updated).
+2. Both gates report PASS on the post-archive/tickets/SPEC48SESTRINT-009.md + post-ticket-011 tree (parser deleted + skill prose updated).
 3. `test -f tools/validators/tests/structural/parser-deletion-completeness.test.ts && test -f tools/validators/tests/structural/skill-prose-tag-syntax-absence.test.ts` — both gate files exist at the corrected paths.
 
 ### Invariants

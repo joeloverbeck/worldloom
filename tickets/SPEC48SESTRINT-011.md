@@ -84,7 +84,7 @@ Replace the `non_propagation:event_leaves_no_accessible_trace(group=<label>, rec
 - Schema file extension (covered by ticket 001).
 - Validator refactor (covered by tickets 003-007).
 - World-index refactor (covered by archive/tickets/SPEC48SESTRINT-008.md).
-- Parser deletion (covered by ticket 009).
+- Parser deletion (covered by archive/tickets/SPEC48SESTRINT-009.md).
 - CI gate addition (covered by ticket 010).
 - MCP / docs surface updates (deferred to ticket 012).
 - Structural SKILL.md changes (HARD-GATE block, Pre-flight Check, Canon Safety Check, etc.) — this ticket is content-only edits; no structural surface is touched.

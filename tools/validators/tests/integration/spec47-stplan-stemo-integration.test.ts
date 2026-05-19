@@ -10,11 +10,6 @@ import Database from "better-sqlite3";
 
 import { build } from "@worldloom/world-index/commands/build";
 import { computePgStateHash } from "@worldloom/world-index/hash/content";
-import {
-  extractIntroTags,
-  parsePlanRelationTags,
-  PLAN_RELATIONS
-} from "@worldloom/world-index/parse/intro-tag-parser";
 import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
 
 import { replayActiveRecords } from "../../src/_helpers/state-snapshot-replay.js";
@@ -27,6 +22,11 @@ import {
   PRED_TYPES
 } from "../../src/rules/_shared/predicate-dsl-grammar.js";
 import { structuralValidators } from "../../src/public/registry.js";
+import {
+  MIDSTORY_TRIGGERS_STEMO,
+  MIDSTORY_TRIGGERS_STPLAN,
+  PLAN_RELATIONS
+} from "../../src/structural/midstory-introduction-utils.js";
 import { snapshotReplayEquality } from "../../src/structural/snapshot-replay-equality.js";
 import { context, record } from "../structural/helpers.js";
 
@@ -117,31 +117,19 @@ test("SPEC-47 T-4: predicate DSL exposes all plan/emotion predicates and rejects
   assert.equal(predicateSchema({ pred: "emotion_pressure", holder: "STENT-1", pressure: "teleport" }), false);
 });
 
-test("SPEC-47 T-5: intro and plan_relation tag grammar parses STPLAN/STEMO extensions", () => {
-  assert.deepEqual(
-    extractIntroTags("intro:STPLAN(id=STPLAN-1, trigger=tactical_approach_committed, evidence=[SE-1], distinct_from=[])"),
-    [
-      {
-        class: "STPLAN",
-        recordId: "STPLAN-1",
-        trigger: "tactical_approach_committed",
-        evidence: ["SE-1"],
-        distinctFrom: []
-      }
-    ]
-  );
-  assert.deepEqual(
-    extractIntroTags("intro:STEMO(id=STEMO-1, trigger=event_revealed_truth_to_actor, evidence=[SE-1], distinct_from=[])")[0]?.class,
-    "STEMO"
-  );
-  assert.deepEqual(
-    parsePlanRelationTags(PLAN_RELATIONS.map((relation) => `plan_relation:${relation}(plan=STPLAN-1)`).join(" ")).map((tag) => tag.relation),
-    [...PLAN_RELATIONS]
-  );
-  assert.throws(
-    () => extractIntroTags("intro:STPLAN(id=STPLAN-1, trigger=planned_resolution_reached, evidence=[], distinct_from=[])"),
-    /not valid for class STPLAN/
-  );
+test("SPEC-47 T-5: structured SE vocabularies preserve STPLAN/STEMO extensions", () => {
+  assert.ok(MIDSTORY_TRIGGERS_STPLAN.includes("tactical_approach_committed"));
+  assert.ok(MIDSTORY_TRIGGERS_STEMO.includes("event_revealed_truth_to_actor"));
+  assert.deepEqual([...PLAN_RELATIONS], [
+    "advances",
+    "tests",
+    "blocks",
+    "revises",
+    "fulfills",
+    "abandons",
+    "ignores"
+  ]);
+  assert.equal((MIDSTORY_TRIGGERS_STPLAN as readonly string[]).includes("planned_resolution_reached"), false);
 });
 
 test("SPEC-47 T-6/T-7: world-index build registers and emits all new STPLAN/STEMO edge types", () => {
@@ -203,10 +191,11 @@ test("SPEC-47 T-9: present-causal lint rejects narrative-shape framing in SPEC-4
   const surfaces = [
     readRepoFile("tools/validators/src/schemas/story-plan.schema.json"),
     readRepoFile("tools/validators/src/schemas/story-emotion.schema.json"),
+    readRepoFile("tools/validators/src/schemas/story-event.schema.json"),
     readRepoFile("tools/validators/src/public/registry.ts"),
     readRepoFile("tools/validators/src/rules/_shared/predicate-dsl-grammar.ts"),
+    readRepoFile("tools/validators/src/structural/midstory-introduction-utils.ts"),
     readRepoFile("tools/world-index/src/schema/types.ts"),
-    readRepoFile("tools/world-index/src/parse/intro-tag-parser.ts"),
     readRepoFile(".claude/skills/_shared-templates/story-state-contract.md")
   ].join("\n");
   const narrativeShapeTokens = [
