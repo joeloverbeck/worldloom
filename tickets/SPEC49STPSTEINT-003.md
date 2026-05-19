@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators/src/structural/state-snapshot-integrity.ts` (modify), `tools/validators/tests/structural/state-snapshot-integrity.test.ts` (modify)
-**Deps**: SPEC49STPSTEINT-001
+**Deps**: archive/tickets/SPEC49STPSTEINT-001.md
 
 ## Problem
 
@@ -14,7 +14,7 @@
 
 1. `tools/validators/src/structural/state-snapshot-integrity.ts:276` and lines 305-316 confirmed via codebase grep — the regex pattern literal `(CLK|STSEC|STQ)` and the `allowedActiveStatuses()` switch over the same 3 classes is the current state. Verified during reassess-spec session.
 2. SPEC-49 §Approach §A.3 (per the reassess-spec-updated spec) cites the audit report's Priority 0 must-do list item 2 *"Include STPLAN and STEMO in inactive-active-record lifecycle checks"*. Active lifecycle status sets defined: STPLAN active = `active`, `blocked`, `suspended`, `revised`; terminal = `fulfilled`, `failed`, `abandoned`. STEMO active = `active`, `suppressed`, `dissociated`; terminal = `settled`, `transformed`.
-3. Cross-skill boundary under audit: `state-snapshot-integrity` is a structural validator that runs at engine pre-apply time when `create_pg_record` is submitted. The validator gates story-bundle record writes; weakening it would silently admit lifecycle-violating PG records. Ticket 001 (SPEC49STPSTEINT-001) lands the PG schema extension that allows STPLAN/STEMO keys in active_records; this ticket lands the corresponding lifecycle check on those keys. Without 001's schema landing first, this ticket has no records to validate.
+3. Cross-skill boundary under audit: `state-snapshot-integrity` is a structural validator that runs at engine pre-apply time when `create_pg_record` is submitted. The validator gates story-bundle record writes; weakening it would silently admit lifecycle-violating PG records. Archived ticket `archive/tickets/SPEC49STPSTEINT-001.md` landed the PG schema extension that allows STPLAN/STEMO keys in active_records; this ticket lands the corresponding lifecycle check on those keys. Without 001's schema landing first, this ticket has no records to validate.
 4. FOUNDATIONS §Story Bundles §5 Rule 1 No Floating Facts: terminal-status records in active_records are a Rule 1 violation (the page claims the record is active when it isn't). The validator enforces the prerequisite "record is active" for active_records membership. SPEC-49 §FOUNDATIONS Alignment confirms this Rule 1 alignment.
 5. Canon Safety surface touched: `state-snapshot-integrity.ts` is a structural validator under `tools/validators/src/structural/`. The validator gates `create_pg_record` writes at engine pre-apply; weakening or skipping its lifecycle check would let pages claim active state for terminated records. The extension preserves the existing CLK/STSEC/STQ enforcement and adds STPLAN/STEMO at the same enforcement strength.
 

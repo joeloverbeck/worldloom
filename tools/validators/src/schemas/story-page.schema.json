@@ -63,7 +63,9 @@
             "STSTAT": { "type": "array", "items": { "type": "string", "pattern": "^STSTAT-[0-9]+$" } },
             "CLK": { "type": "array", "items": { "type": "string", "pattern": "^CLK-[0-9]+$" } },
             "STSEC": { "type": "array", "items": { "type": "string", "pattern": "^STSEC-[0-9]+$" } },
-            "STQ": { "type": "array", "items": { "type": "string", "pattern": "^STQ-[0-9]+$" } }
+            "STQ": { "type": "array", "items": { "type": "string", "pattern": "^STQ-[0-9]+$" } },
+            "STPLAN": { "type": "array", "items": { "type": "string", "pattern": "^STPLAN-[0-9]+$" } },
+            "STEMO": { "type": "array", "items": { "type": "string", "pattern": "^STEMO-[0-9]+$" } }
           },
           "additionalProperties": true
         },

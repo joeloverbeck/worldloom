@@ -75,6 +75,8 @@ state_snapshot:
     CLK: [CLK-<integer>]
     STSEC: [STSEC-<integer>]
     STQ: [STQ-<integer>]
+    STPLAN: [STPLAN-<integer>]         # active tactical plans on the branch at this page
+    STEMO: [STEMO-<integer>]           # active causal affective states on the branch at this page
   entity_status:                       # * derived projection of active STSTAT; one entry per active STENT
     STENT-<integer>:
       life: alive | dead | unknown
