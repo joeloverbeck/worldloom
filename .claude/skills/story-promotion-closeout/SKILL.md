@@ -206,7 +206,7 @@ For active `STPLAN` / `STEMO` records that cite the promotion source records or 
 - If an accepted or accepted-with-limits verdict confirms the basis and no STPLAN/STEMO schema field changes, record `ledger_only` or `unchanged_no_schema_field_changed`.
 - If the verdict invalidates a plan's `belief_basis`, `resource_basis`, or blocker assumptions, supersede the affected `STPLAN` with `plan_status: abandoned` or `revised` as appropriate, and cite the closeout evidence in the new record's `derived_from[]` / rationale surface allowed by §4.5.17.
 - If the verdict invalidates or transforms an emotion's `appraisal_basis`, supersede the affected `STEMO` with `status: transformed`, `settled`, `suppressed`, or `dissociated` as appropriate, using the §4.5.18 closed enums.
-- When `emit_closeout_event: true`, the closeout `SE.world_logic_rationale` should cite the affected records with `plan_relation:abandons(plan=STPLAN-<n>)`, `plan_relation:revises(plan=STPLAN-<n>)`, or a natural-language STEMO transition rationale. Do not invent a new promotion source class for STPLAN/STEMO.
+- When `emit_closeout_event: true`, the closeout `SE.state_relations[]` should cite the affected records with `{relation: abandons, target_record: STPLAN-<n>}` or `{relation: revises, target_record: STPLAN-<n>}`, while `SE.world_logic_rationale` carries the natural-language plan/STEMO transition rationale. Do not invent a new promotion source class for STPLAN/STEMO.
 
 ### `accepted_with_limits`
 

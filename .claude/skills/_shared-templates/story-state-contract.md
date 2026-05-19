@@ -423,7 +423,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
   - Resources/leverage (resource_basis projection):
   - Blockers:
   - Fallbacks currently available:
-  - This page's plan_relation: advances | tests | blocks | revises | fulfills | abandons | ignores
+  - This page's `SE.state_relations[]`: advances | tests | blocks | revises | fulfills | abandons | ignores
   - Prose must show:
   - Prose must not imply:
 ```

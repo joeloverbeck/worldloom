@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — adds 2 CI test files under `tools/validators/tests/structural/`
-**Deps**: archive/tickets/SPEC48SESTRINT-009.md, tickets/SPEC48SESTRINT-011.md
+**Deps**: archive/tickets/SPEC48SESTRINT-009.md, archive/tickets/SPEC48SESTRINT-011.md
 
 ## Problem
 
@@ -15,7 +15,7 @@ SPEC-48 §Phase C D-C3 + D-C4 specify two CI gates that prevent regression after
 1. **Test-path convention verified**: the actual test directory convention is `tools/validators/tests/structural/*.test.ts` (verified via `ls tools/validators/tests/structural/` at Pre-Write Files-to-Touch existence check). SPEC-48 D-C3 + D-C4 originally cited `tools/validators/src/structural/__tests__/*.test.ts` — this is mechanical drift per SPEC-30 precedent (the corrected `tests/` paths propagate silently per the §Codebase truth guardrail; the test files land under `tools/validators/tests/structural/`).
 2. **SPEC-48 D-C3 + D-C4 enumeration**: D-C3 grep target is the closed set of import patterns referencing the deleted parser (`intro-tag-parser`, `extractIntroTags`, `parsePlanRelationTags`, `parseIntroTag`). D-C4 grep target is the closed list of deprecated tag-syntax substrings (per reassessment M1, the scope expanded from `SKILL.md` to `**/*.md` to catch shared-template drift).
 3. **Cross-skill boundary**: the CI gates protect cross-skill conventions — the parser-deletion gate ensures no validator file or world-index file or skill reference file re-introduces a parser import; the skill-prose gate ensures no skill prose (SKILL.md or `_shared-templates/*.md` or `references/*.md`) re-introduces deprecated tag-syntax. Both gates are static-analysis CI tests, not runtime validators — they run as part of the validator-package test suite via `node --test`.
-4. **Retargeted dependency ordering (2026-05-19)**: live grep over `.claude/skills/**/*.md` still finds deprecated tag-syntax owned by tickets/SPEC48SESTRINT-011.md, including `plan_relation:` / `non_propagation:` / `intro:<CLASS>` references in story-pipeline skill prose and shared templates. Because this ticket's D-C4 gate is a strict zero-match test, it is not independently landable before ticket 011; the active dependency and harness queue are corrected to run ticket 011 first, then return to this gate ticket.
+4. **Retargeted dependency ordering (2026-05-19)**: live grep over `.claude/skills/**/*.md` found deprecated tag-syntax owned by archive/tickets/SPEC48SESTRINT-011.md, including `plan_relation:` / `non_propagation:` / `intro:<CLASS>` references in story-pipeline skill prose and shared templates. Because this ticket's D-C4 gate is a strict zero-match test, it was not independently landable before ticket 011; the active dependency and harness queue were corrected to run ticket 011 first, then return to this gate ticket.
 
 ## Architecture Check
 

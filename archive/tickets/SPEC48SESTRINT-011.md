@@ -1,10 +1,10 @@
 # SPEC48SESTRINT-011: Update 7 story-pipeline SKILL.md files + `da-authoring-reference.md` — replace tag-syntax with structured-field shape
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — updates SE-authoring prose in 7 story-pipeline SKILL.md files + 1 shared template (`da-authoring-reference.md`); content-only edits, no structural skill changes
-**Deps**: 002
+**Deps**: archive/tickets/SPEC48SESTRINT-002.md
 
 ## Problem
 
@@ -15,6 +15,7 @@ SPEC-48 §Phase E D-E1 + D-E1.5 specify content updates to all 8 surfaces that a
 1. **8 surface files verified**: `ls .claude/skills/branching-story-*/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md` returns 7 SKILL.md files matching the FOUNDATIONS §Story Bundles §7 enumeration (verified via Pre-Write Files-to-Touch existence check). `.claude/skills/_shared-templates/da-authoring-reference.md` exists; line 157 carries the `non_propagation:event_leaves_no_accessible_trace(group=<label>, records=[DA-<N>])` syntax example (verified via SPEC-48 reassess-spec I2 finding's grep).
 2. **SPEC-48 D-E1 + D-E1.5 enumeration**: D-E1 covers the 7 story-pipeline SKILL.md files — replace every tag-syntax occurrence with structured-field shape; rewrite skill-discipline statements that reference "parseable tag in `world_logic_rationale`". D-E1.5 covers `da-authoring-reference.md:157` — replace the `non_propagation:event_leaves_no_accessible_trace(group=<label>, records=[DA-<N>])` syntax example with the structured-field equivalent.
 3. **Cross-skill boundary**: 8 story-pipeline / authoring surfaces are coordinated by this ticket — the contract authority for the new structured-field syntax is established by ticket 002 (§5a rewrite); this ticket propagates the contract into the skills' prose. Per FOUNDATIONS §Story Bundles §7, the 7 SKILL.md files constitute Skill Category 2c (story-pipeline content-generation); the shared template at `_shared-templates/da-authoring-reference.md` is consumed by `diegetic-artifact-generation` (Skill Category 2b) per the canon-reading content-generation classification. Both categories' prose must reflect the post-clean-break authoring surface.
+4. **Same-seam expansion (2026-05-19)**: ticket 010's gate scans all `.claude/skills/**/*.md`, not just the 8 originally named files. Live reassessment found additional deprecated tag-syntax hits in `.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md`, `phase-4-5-belief-and-mystery.md`, `phase-9-validation-gates.md`, `mid-story-record-introduction.md`, and `.claude/skills/_shared-templates/story-state-contract.md`. These are same-seam operational guidance surfaces and must move with this ticket so ticket 010 can land green.
 
 ## Architecture Check
 
@@ -77,6 +78,11 @@ Replace the `non_propagation:event_leaves_no_accessible_trace(group=<label>, rec
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify)
 - `.claude/skills/story-promotion-closeout/SKILL.md` (modify)
 - `.claude/skills/_shared-templates/da-authoring-reference.md` (modify)
+- `.claude/skills/_shared-templates/story-state-contract.md` (modify — same-seam stale tag-syntax hit found during live reassessment)
+- `.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` (modify — same-seam stale tag-syntax hit found during live reassessment)
+- `.claude/skills/branching-story-turn-cycle/references/phase-4-5-belief-and-mystery.md` (modify — same-seam stale tag-syntax hit found during live reassessment)
+- `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` (modify — same-seam stale tag-syntax hit found during live reassessment)
+- `.claude/skills/branching-story-turn-cycle/references/mid-story-record-introduction.md` (modify — same-seam stale tag-syntax hit found during live reassessment)
 
 ## Out of Scope
 
@@ -95,7 +101,7 @@ Replace the `non_propagation:event_leaves_no_accessible_trace(group=<label>, rec
 
 1. Grep proof of tag-syntax absence: `grep -rn "intro:<CLASS>\|intro:CLK(\|intro:STSEC(\|intro:STQ(\|intro:THR(\|intro:STENT(\|intro:SREL(\|intro:STPLAN(\|intro:STEMO(\|plan_relation:\|non_propagation:" .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md .claude/skills/_shared-templates/da-authoring-reference.md` returns zero matches.
 2. Grep proof of structured-field-reference presence: `grep -rln "record_introductions\|state_relations\|non_propagation_facts" .claude/skills/branching-story-*/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md .claude/skills/_shared-templates/da-authoring-reference.md` returns ≥1 hit per file where SE-authoring examples are documented.
-3. The ticket-010 CI gate `skill-prose-tag-syntax-absence.test.ts` passes when run against the post-this-ticket tree.
+3. Gate-equivalent grep over `.claude/skills/**/*.md` returns zero matches for the ticket-010 closed deprecated substring list; the actual CI gate file is still created by tickets/SPEC48SESTRINT-010.md after this prerequisite lands.
 
 ### Invariants
 
@@ -111,4 +117,25 @@ Replace the `non_propagation:event_leaves_no_accessible_trace(group=<label>, rec
 ### Commands
 
 1. `grep -rcn "intro:CLK(\|intro:STSEC(\|intro:STQ(\|intro:THR(\|intro:STENT(\|intro:SREL(\|intro:STPLAN(\|intro:STEMO(\|plan_relation:\|non_propagation:" .claude/skills/branching-story-*/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md .claude/skills/_shared-templates/da-authoring-reference.md` — each file reports zero matches.
-2. `npm test --prefix tools/validators -- --test-name-pattern=skill-prose-tag-syntax-absence` — the ticket-010 CI gate passes against the post-update tree.
+2. `rg -n 'intro:<CLASS>|intro:CLK\(|intro:STSEC\(|intro:STQ\(|intro:THR\(|intro:STENT\(|intro:SREL\(|intro:STPLAN\(|intro:STEMO\(|plan_relation:|non_propagation:' .claude/skills -g '*.md'` — returns zero matches as the gate-equivalent proof until ticket 010 adds the CI test.
+
+## Outcome
+
+Completed: 2026-05-19
+
+The story-pipeline skill prose no longer instructs authors to encode structured SE facts as tags inside `world_logic_rationale`. The operational guidance now points authors and auditors at `SE.record_introductions[]`, `SE.state_relations[]`, and `SE.non_propagation_facts[]`; `world_logic_rationale` remains prose-only.
+
+Live reassessment widened the file set beyond the original 8 surfaces because ticket 010's CI gate scans all `.claude/skills/**/*.md`. The same-seam reference files under `branching-story-turn-cycle/references/` and the remaining `story-state-contract.md` page-plan wording were updated in the same pass so the gate-equivalent proof is clean.
+
+## Verification Result
+
+- `rg -n 'intro:<CLASS>|intro:CLK\(|intro:STSEC\(|intro:STQ\(|intro:THR\(|intro:STENT\(|intro:SREL\(|intro:STPLAN\(|intro:STEMO\(|plan_relation:|non_propagation:' .claude/skills -g '*.md'` returned no matches, the expected proof signal.
+- `rg -n 'parseable tag in.*world_logic_rationale|parseable tag in world_logic_rationale|parseable .*non-propagation tag|tag grammar|non-propagation tag|non_propagation_tag_shape|expected_witness_tag' ...` over the updated ticket-owned skill/template/reference surfaces returned no matches.
+- `rg -l 'record_introductions|state_relations|non_propagation_facts' ...` confirmed structured-field references in the files that actually carry SE authoring or audit guidance after this edit.
+- `git diff --check` passed.
+
+## Deviations
+
+- The original ticket named 7 SKILL.md files plus `da-authoring-reference.md`. Live proof showed ticket 010's gate would still fail on same-seam references outside those 8 files, so this ticket also updated `story-state-contract.md` and four turn-cycle reference files.
+- The actual ticket-010 CI test file does not exist yet because ticket 010 was retargeted behind this prerequisite. This ticket uses the same closed-pattern grep as gate-equivalent proof; ticket 010 owns turning that proof into CI.
+- `commitment-block-authoring` and `story-fact-promotion-to-canon` had no deprecated SE tag-syntax hits and no current SE-authoring examples that needed replacement, so they were inspected but not edited.

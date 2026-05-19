@@ -90,8 +90,8 @@ is who can access or receive it now.
 
 `circulation: public` and `circulation: factional` trigger the
 `expected_witness_coverage` propagation discipline: the same event must create
-BEL propagation through an indirect route, or `SE.world_logic_rationale` must
-include a parseable non-propagation tag.
+BEL propagation through an indirect route, or `SE.non_propagation_facts[]` must
+include a structured non-propagation rationale.
 
 ### `body`
 
@@ -153,9 +153,9 @@ For every new or superseded story-local DA:
 8. If `circulation` is `public` or `factional`, create same-event BEL
    propagation through an indirect route (`document`, `object_trace`,
    `location_trace`, `rumor`, `surveillance`, `institutional_channel`,
-   `magic_tech`) or include a parseable
-   `non_propagation:event_leaves_no_accessible_trace(group=<label>, records=[DA-<N>])`
-   tag in `SE.world_logic_rationale`. `expected_witness_coverage` enforces this.
+   `magic_tech`) or include an `SE.non_propagation_facts[]` item:
+   `{reason: event_leaves_no_accessible_trace, group: <label>, records: [DA-<N>]}`
+   `expected_witness_coverage` enforces this.
 9. If a future `SLT-*` or page plan requires access to the artifact, use
    `artifact_accessible(STENT-<integer>, DA-<integer>)` from
    `story-state-contract.md` §5, paired with `any_belief(...)` or
@@ -351,7 +351,7 @@ burned, stolen, sealed, or moved, supersede the `STOBJ-*` carrier.
 3. Using `truth_relation: true` without supporting `SF-*`, `CF-*`, or explicit
    event evidence.
 4. Creating `public` or `factional` DAs without same-event BEL propagation or a
-   valid non-propagation tag.
+   valid `SE.non_propagation_facts[]` entry.
 5. Grounding a choice, action, or `SLT-*` in a DA the acting entity cannot access.
 6. Modeling a physical letter, map, warrant, or recording only as `DA-*` when
    custody, damage, sealing, destruction, or trade matters; use `STOBJ-*` too.

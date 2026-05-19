@@ -38,9 +38,9 @@ Apply exactly one causal delta from parent snapshot. The delta may:
   record and that changes future eligibility, visibility, obligations,
   pressure, witness propagation, relationship constraints, affordances, or
   choice grounding. If yes, include the new id in `SE.state_delta.create[]`
-  and include a parseable
-  `intro:<CLASS>(id=..., trigger=..., evidence=[...], distinct_from=[...])`
-  tag in `SE.world_logic_rationale` per shared contract §5a.
+  and include a matching `SE.record_introductions[]` entry
+  `{record_id: <CLASS>-<N>, class: <CLASS>, trigger: <closed trigger>, evidence: [...], distinct_from: [...]}`
+  per shared contract §5a.
 - Prefer advancing, superseding, discovering, ticking, answering, revealing,
   changing status, or changing a relationship axis on an existing active record
   when the event is only a complication of that existing record. Fresh creation
