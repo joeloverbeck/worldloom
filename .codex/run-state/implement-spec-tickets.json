@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-48-se-structured-introduction-fields.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC48SESTRINT-004.md",
+  "last_ticket": "archive/tickets/SPEC48SESTRINT-005.md",
   "last_result": "completed_archived",
-  "last_work_commit": "459fcd7794dd8a8fde2cc043c40035221108605c",
+  "last_work_commit": "2e840d4b3e3e8b3171215215557a87a716429020",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC48SESTRINT-005.md",
+  "next_target": "tickets/SPEC48SESTRINT-006.md",
   "queue": [
-    "tickets/SPEC48SESTRINT-005.md",
     "tickets/SPEC48SESTRINT-006.md",
     "tickets/SPEC48SESTRINT-007.md",
     "tickets/SPEC48SESTRINT-008.md",
