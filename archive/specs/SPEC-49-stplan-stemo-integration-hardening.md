@@ -1,5 +1,5 @@
 ---
-status: drafted
+status: completed
 prior_specs: [SPEC-47-stplan-stemo, SPEC-44-story-state-append-only-lifecycle-and-schema-correctness]
 ---
 
@@ -285,6 +285,26 @@ The following items from the second-iteration audit report (reports/new-story-st
 **End-to-end test inherited from SPEC-47**: create → snapshot → replay → page plan → prose receipt round-trip for STPLAN and STEMO, extended to verify each new check fires correctly along the pipeline.
 
 ## Outcome
+
+Completed: 2026-05-19.
+
+Implemented through archived ticket family:
+
+- `archive/tickets/SPEC49STPSTEINT-001.md`
+- `archive/tickets/SPEC49STPSTEINT-002.md`
+- `archive/tickets/SPEC49STPSTEINT-003.md`
+- `archive/tickets/SPEC49STPSTEINT-004.md`
+- `archive/tickets/SPEC49STPSTEINT-005.md`
+- `archive/tickets/SPEC49STPSTEINT-006.md`
+- `archive/tickets/SPEC49STPSTEINT-007.md`
+- `archive/tickets/SPEC49STPSTEINT-008.md`
+- `archive/tickets/SPEC49STPSTEINT-009.md`
+- `archive/tickets/SPEC49STPSTEINT-010.md`
+- `archive/tickets/SPEC49STPSTEINT-011.md`
+
+Final verification:
+
+- `npm test` from `tools/validators` passed on 2026-05-19: 663 tests, 0 failures. This final suite includes the SPEC-49 capstone, the updated SPEC-47 edge-registry count, schema/validator fixtures, and the relevant world-index temp-build assertions exercised through validators integration tests.
 
 When SPEC-49 lands, the SPEC-47 STPLAN/STEMO implementation matches the SPEC-47 contract: schemas, validators, world-index, and health-audit Phase 2k all enforce the documented invariants without runtime/schema drift. The six classes of bug (silent-pass field-name mismatch, unconditional-vs-conditional schema requirement, empty-array under-enforcement, opaque-predicate gap, `advances`-only state-relations under-enforcement, existence-only orientation check) are closed. World-index edge coverage is symmetric across STPLAN and STEMO schema fields. The four Phase 2k deeper checks catch contradiction and starvation patterns that the original Phase 2k missed.
 
