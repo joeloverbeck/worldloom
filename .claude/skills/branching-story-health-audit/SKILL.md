@@ -1,6 +1,6 @@
 ---
 name: branching-story-health-audit
-description: "Use when diagnosing the health of a branching-story bundle. Five modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health + STPLAN/STEMO health), compatibility (schema-drift compatibility reporting), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
+description: "Use when diagnosing the health of a branching-story bundle. Five modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health + STPLAN/STEMO health + active-state underuse), compatibility (schema-drift compatibility reporting), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -32,7 +32,7 @@ Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/r
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 11 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health, 2k STPLAN / STEMO health) executed when `structural` in mode (default); compatibility-drift reporting executed when `compatibility` in mode; prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 12 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health, 2k STPLAN / STEMO health, 2l active-state underuse warnings) executed when `structural` in mode (default); compatibility-drift reporting executed when `compatibility` in mode; prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -51,7 +51,7 @@ Phase 1: Scope branches (build tree from BR + PG; apply
                          branch_path_filter)
         |
         v
-Phase 2 [structural; default]: 11 sub-phases executed sequentially
+Phase 2 [structural; default]: 12 sub-phases executed sequentially
   ├─ 2a: Replay events (snapshot hash comparison)
   ├─ 2b: Branch isolation
   ├─ 2c: Debt health
@@ -62,7 +62,8 @@ Phase 2 [structural; default]: 11 sub-phases executed sequentially
   ├─ 2g: Causal dependency health
   ├─ 2h: Canon baseline drift
   ├─ 2i: CLK / STSEC / STQ mechanism health
-  └─ 2k: STPLAN / STEMO health
+  ├─ 2k: STPLAN / STEMO health
+  └─ 2l: Active-state underuse warnings
         |
         v
 Phase 2j [conditional on `compatibility` in mode]: Compatibility drift
@@ -164,7 +165,7 @@ Output: a scoped branch list + per-branch metadata used by Phases 2-4.
 
 ## Phase 2: Structural checks (mandatory when `structural` in `mode`; default)
 
-Ten sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
+Twelve sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
 
 ### Phase 2a: Replay events
 
@@ -318,6 +319,21 @@ contradictory_affect_pairs:
 ```
 
 SPEC-49 migration notes: legacy bundles needing repair for the new STPLAN / STEMO constraints are identified through Phase 2k before hard enforcement. Use `bootstrap-drift` as the first migration triage surface for root-seeded or active STPLAN / STEMO records that are not represented in page snapshots, never used downstream, or likely need repair after SPEC-49 schema and validator tightening. In compatibility windows, classify legacy bundles with missing `PG.state_snapshot.active_records.STPLAN[]` / `STEMO[]` keys, active STPLANs with empty `belief_basis[]`, or STPLAN predicates that would fail parseability as WARN-mode migration findings with `repair_kind: bundle_advice`. After the one-revision compatibility cycle ends, the corresponding validators may fail closed; health-audit findings should then cite the validator failure and route the bundle to turn repair or migration patching rather than treating it as advisory only.
+
+### Phase 2l: Active-state underuse warnings
+
+These are retrospective WARN / INFO findings for present causal state that remains active but has not recently shaped available choices, selected storylets, or page-plan state. They are judgment-adjacent exploitation warnings, not deterministic story-quality gates. They MUST NOT emit ERROR, MUST NOT block page commits, and MUST NOT require future dramatic shape or payoff timing beyond the current active-state evidence. Thresholds are placeholders until sample-story evidence tunes them.
+
+For each scoped branch, walk the page chain and inspect the last `N=3` committed pages by default. A record counts as recently touched when any of the following cite it or a predicate alias bound to it: `CHC.grounded_in.records[]`, `CHC.likely_state_pressure`, selected `SLT.preconditions.*`, selected `SLT.effects.*`, `SLT.exit_options[].likely_effects`, page-plan §9b / §9c / §10 / §10b, `SE.commitment.alias_bindings`, `SE.state_delta`, `SE.state_relations[]`, or `SE.world_logic_rationale`. Do not count a generic class mention as a touch; cite the exact page ids and record ids considered.
+
+- `active_plan_underused` — active high-salience `STPLAN` records, especially `plan_status: blocked`, with no recent CHC / SLT / page-plan / event touch. Emit WARNING for blocked high-salience plans and INFO for other high-salience active plans. `repair_kind: commitment_block` when no author-pool move engages it, otherwise `turn_repair` when page-plan or rationale should acknowledge lawful non-use.
+- `active_emotion_underused` — agency-constraining active `STEMO` records (`intensity: high | extreme` or strong `behavioral_pressure[]`) with no recent CHC / SLT / page-plan / event touch. Emit WARNING when the emotion would plausibly bias agency and is absent from recent choice or page-plan grounding; otherwise INFO. `repair_kind: commitment_block` or `turn_repair` according to whether a new move or a rationale/prose repair is needed.
+- `urgent_clock_underused` — active high-salience or near-threshold `CLK` records with no recent tick, affordance, storylet predicate/effect, page-plan §10b mention, or consequence rationale. Emit WARNING; `repair_kind: branch_flag` when the clock may be intentionally parked, otherwise `commitment_block`.
+- `hidden_secret_underused` — active unrevealed high-salience `STSEC` records with no recent clue-carrier, predicate/effect, CHC grounding, page-plan §10b mention, or reveal-pressure rationale. Emit WARNING only when the secret is already high-salience and current branch state contains available clue or pressure surfaces; otherwise INFO. `repair_kind: commitment_block` or `branch_flag`.
+- `open_question_underused` — open or complicated high-salience `STQ` records with no recent CHC / SLT / page-plan §10b / event touch. Emit WARNING when the question remains active and branch-local state has recently presented related affordances without citing it; otherwise INFO. `repair_kind: commitment_block` or `branch_flag`.
+- `active_debt_underused` — open `OBL`, pending `CNSQ`, or active `THR` records with high urgency and no recent CHC / SLT / page-plan §10 / event touch beyond mere snapshot carry-forward. Emit WARNING. If Phase 2c already emitted `unactionable_debt`, `ignored_debt_beyond_urgency`, or `saliency_starvation` for the same record/window, link to that finding instead of duplicating the same concern.
+
+Every active-state-underuse finding cites the record id, class, branch id, page window, touch surfaces checked, severity rationale, and why the finding is present-state underuse rather than a narrative-shape demand. A no-underuse branch emits no Phase 2l finding.
 
 ## Phase 2j: Compatibility drift (conditional on `compatibility` in `mode`)
 
