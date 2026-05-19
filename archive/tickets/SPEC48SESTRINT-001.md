@@ -16,7 +16,7 @@ SPEC-48 replaces three parseable tag patterns currently riding on `SE.world_logi
 2. SPEC-48 D-A1/D-A2/D-A3 enumerate three new optional fields with closed-enum constraints; the 8 per-class trigger vocabularies (CLK/STSEC/STQ/THR/STENT/SREL/STPLAN/STEMO), 7 relation enum values (`advances | tests | blocks | revises | fulfills | abandons | ignores`), and 5 non-propagation reason enum values (`no_witness | witness_incapacitated | evidence_concealed | institution_suppresses_report | event_leaves_no_accessible_trace`) are migrated verbatim from the existing parser constants per `tools/world-index/src/parse/intro-tag-parser.ts:4-85` and the existing closed-reason set at `tools/validators/src/structural/non-propagation-tag-shape.ts:9-14`.
 3. Cross-skill boundary under audit: the SE schema is consumed by the patch-engine `create_se_record` op (`tools/patch-engine/src/ops/create-story-record.ts:104` STORY_RECORD_SPECS map) + structural validators in `tools/validators/src/structural/` + world-index parsers in `tools/world-index/src/parse/atomic.ts`. The new optional fields must not break any existing consumer; the additive-only shape (every new field carries no `required` marker at the schema level) is the contract.
 4. Extends existing output schema: `tools/validators/src/schemas/story-event.schema.json` is the host SE schema. The extension is **additive-only** — three new optional `properties` entries plus their per-property `oneOf` / `enum` / `pattern` constraints. No existing field is renamed, removed, or made required by this change. Consumers that don't yet emit the new fields continue to validate as-is.
-5. Reassessment correction: the drafted `uniqueItems on record_id` claim is not expressible with standard JSON Schema. JSON Schema `uniqueItems` rejects identical duplicate array objects only; duplicate `record_id` entries with differing bodies require validator-layer enforcement. This run updated `specs/SPEC-48-se-structured-introduction-fields.md`, created `tickets/SPEC48SESTRINT-014.md`, and added that ticket as a capstone dependency for `archive/tickets/SPEC48SESTRINT-013.md`.
+5. Reassessment correction: the drafted `uniqueItems on record_id` claim is not expressible with standard JSON Schema. JSON Schema `uniqueItems` rejects identical duplicate array objects only; duplicate `record_id` entries with differing bodies require validator-layer enforcement. This run updated `archive/specs/SPEC-48-se-structured-introduction-fields.md`, created `tickets/SPEC48SESTRINT-014.md`, and added that ticket as a capstone dependency for `archive/tickets/SPEC48SESTRINT-013.md`.
 
 ## Architecture Check
 
@@ -78,7 +78,7 @@ After the property insertions, run `npm test --prefix tools/validators` — `tsc
 
 - `tools/validators/src/schemas/story-event.schema.json` (modify)
 - `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` (modify — expected SE property set plus focused structured-field acceptance/rejection coverage)
-- `specs/SPEC-48-se-structured-introduction-fields.md` (modify — implementation note for JSON Schema keyed-uniqueness boundary)
+- `archive/specs/SPEC-48-se-structured-introduction-fields.md` (modify — implementation note for JSON Schema keyed-uniqueness boundary)
 - `archive/tickets/SPEC48SESTRINT-013.md` (modify — capstone dependency/proof boundary truthing)
 - `tickets/SPEC48SESTRINT-014.md` (new — validator-layer keyed-uniqueness follow-up)
 

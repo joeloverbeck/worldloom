@@ -1,6 +1,6 @@
 {
   "originating_spec": "specs/SPEC-48-se-structured-introduction-fields.md",
-  "archived_spec": null,
+  "archived_spec": "archive/specs/SPEC-48-se-structured-introduction-fields.md",
   "last_ticket": "archive/tickets/SPEC48SESTRINT-013.md",
   "last_result": "completed_archived",
   "last_work_commit": "eeedc5072e53a586b15fd81ccf7ad0a20c058a3d",

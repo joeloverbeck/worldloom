@@ -73,7 +73,7 @@ Grep for `intro-tag-parser` / parser-surface references / tag-grammar references
 
 1. `npm test --prefix tools/world-mcp` — world-mcp test suite passes (content-only edits don't change behavior; tests preserve all existing assertions).
 2. Grep proof of all four audit surfaces clean: `rg -n 'extractIntroTags|intro-tag-parser|intro:|plan_relation:|non_propagation:|tag grammar|parseable' tools/world-mcp/src/context-packet/story-bundle-context.ts tools/world-mcp/src/tools/describe-capabilities.ts docs/CONTEXT-PACKET-CONTRACT.md docs/MACHINE-FACING-LAYER.md` returns zero matches after refactor.
-3. Grep proof of structured-field wording: `rg -n 'SE.record_introductions\\[\\]|SE.state_relations\\[\\]|SE.non_propagation_facts\\[\\]' docs/MACHINE-FACING-LAYER.md specs/SPEC-48-se-structured-introduction-fields.md` confirms the canonical structured fields are documented.
+3. Grep proof of structured-field wording: `rg -n 'SE.record_introductions\\[\\]|SE.state_relations\\[\\]|SE.non_propagation_facts\\[\\]' docs/MACHINE-FACING-LAYER.md archive/specs/SPEC-48-se-structured-introduction-fields.md` confirms the canonical structured fields are documented.
 
 ### Invariants
 
@@ -104,7 +104,7 @@ What changed:
 ## Verification Result
 
 - `rg -n 'extractIntroTags|intro-tag-parser|intro:|plan_relation:|non_propagation:|tag grammar|parseable' tools/world-mcp/src/context-packet/story-bundle-context.ts tools/world-mcp/src/tools/describe-capabilities.ts docs/CONTEXT-PACKET-CONTRACT.md docs/MACHINE-FACING-LAYER.md` — passed with zero matches.
-- `rg -n 'SE.record_introductions\[\]|SE.state_relations\[\]|SE.non_propagation_facts\[\]' docs/MACHINE-FACING-LAYER.md specs/SPEC-48-se-structured-introduction-fields.md` — confirmed the structured-field terminology remains documented; `docs/MACHINE-FACING-LAYER.md` now names `SE.record_introductions[]`.
+- `rg -n 'SE.record_introductions\[\]|SE.state_relations\[\]|SE.non_propagation_facts\[\]' docs/MACHINE-FACING-LAYER.md archive/specs/SPEC-48-se-structured-introduction-fields.md` — confirmed the structured-field terminology remains documented; `docs/MACHINE-FACING-LAYER.md` now names `SE.record_introductions[]`.
 - `npm run build --prefix tools/world-mcp` — passed.
 - `node --test dist/tests/tools/describe-capabilities.test.js` from `tools/world-mcp` — passed, 2 tests.
 - `node --test dist/tests/server/dispatch.test.js --test-name-pattern 'describe_capabilities'` from `tools/world-mcp` — passed; the package wrapper ran the full dispatch file, 35 tests.

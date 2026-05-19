@@ -2,7 +2,7 @@
 
 # SPEC-48: `SE` Structured Introduction / Relation / Non-Propagation Fields (Tag-Grammar Replacement)
 
-**Status**: Draft (ready for `reassess-spec` + `spec-to-tickets`)
+**Status**: Completed (archived 2026-05-19)
 **Phase**: Wave 3 — supersedes the parseable-tag grammar with structured `SE` fields.
 **Depends on**: SPEC-43 (deterministic tag grammar baseline being replaced), SPEC-46 (story-pipeline machine-facing foundation), SPEC-47 (`STPLAN`/`STEMO` schemas + `plan_relation:` tag + per-class trigger vocabularies the structured fields will preserve verbatim).
 **Blocks**: All Priority 2 packet specs (present-causal-situation, dramatic-irony, reader-expectation/payoff, social-pressure, branch-possibility-space, pressure-texture, `get_page_render_packet`) — they must be drafted against the structured representation, not the deprecated tag grammar.
@@ -219,7 +219,32 @@ Test cases that the implementation must satisfy. Numbered for traceability with 
 
 ---
 
-## Outcome
+## Completion Result
+
+Completed: 2026-05-19
+
+SPEC-48 shipped through tickets `archive/tickets/SPEC48SESTRINT-001.md` through `archive/tickets/SPEC48SESTRINT-014.md`, with the capstone completed in `archive/tickets/SPEC48SESTRINT-013.md`.
+
+The live implementation preserves the spec's clean-break design:
+
+- `SE.record_introductions[]`, `SE.state_relations[]`, and `SE.non_propagation_facts[]` are schema-defined structured fields.
+- `SE.world_logic_rationale` is prose-only; parser/tag syntax is not consumed as structure.
+- The introduction tag parser is deleted and parser/tag-syntax regression gates are in place.
+- Validators, world-index edge extraction, MCP/docs surfaces, and story-authoring prose now use the structured fields.
+- Keyed `record_introductions[].record_id` uniqueness is enforced by `record_introduction_uniqueness` from `archive/tickets/SPEC48SESTRINT-014.md`, not by JSON Schema `uniqueItems`.
+
+The final capstone used mechanized package-level proof instead of the originally drafted interactive skill-flow dry-run because there is no executable `turn-cycle` / `prose-attach` / `health-audit` runner in the package harness. The capstone verifies schema/structural validator acceptance and rejection, `validatePatchPlan(...)` pre-apply materialization for `create_se_record`, world-index `creation_evidence` edge extraction, parser-deletion and skill-prose tag-syntax gates, and tag-like prose inertness.
+
+Verification completed:
+
+- `npm run build` in `tools/validators` — PASS.
+- `node --test dist/tests/integration/spec48-se-structured-introduction-fields.test.js` in `tools/validators` — PASS (4/4 tests).
+- `npm test` in `tools/validators` — PASS (626/626 tests).
+- `npm test` in `tools/world-index` — PASS (119/119 tests).
+- `npm test` in `tools/world-mcp` — PASS (407/407 tests).
+- `npm test` in `tools/patch-engine` — PASS (85/85 tests).
+
+## Intended Outcome
 
 After SPEC-48 ships:
 
