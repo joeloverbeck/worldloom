@@ -61,7 +61,7 @@ Grep for `intro-tag-parser` / parser-surface references / tag-grammar references
 - Validator refactor (covered by tickets 003-007).
 - World-index refactor (covered by archive/tickets/SPEC48SESTRINT-008.md).
 - Parser deletion (covered by archive/tickets/SPEC48SESTRINT-009.md).
-- CI gates (covered by ticket 010).
+- CI gates (covered by archive/tickets/SPEC48SESTRINT-010.md).
 - Skill prose updates (covered by archive/tickets/SPEC48SESTRINT-011.md).
 
 ## Acceptance Criteria
