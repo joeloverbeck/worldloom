@@ -1,6 +1,6 @@
 # SPEC50STPSTECHC-005: World-index choice + storylet exploitation edges; remove dead obligation extraction
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/world-index` (parser + edge-type registry), `tools/world-index` integration test (SPEC-46 obligation-edge assertions removed).
@@ -12,11 +12,11 @@
 
 ## Assumption Reassessment (2026-05-19)
 
-1. Codebase: no `edgesForChoice`/`edgesForStorylet` function in `tools/world-index/src/parse/atomic.ts` (verified this session); legacy obligation extraction confirmed at `atomic.ts:656-667`. The edge-type registry is `tools/world-index/src/schema/types.ts` + `tools/world-index/src/index/edges.ts`. New edge types are TEXT values; no SQL migration is expected (confirm `edge_type` column is free-text before assuming).
+1. Codebase: no `edgesForChoice`/`edgesForStorylet` function in `tools/world-index/src/parse/atomic.ts` (verified this session); legacy obligation extraction confirmed at `atomic.ts:656-667`. The edge-type registry is `tools/world-index/src/schema/types.ts`; `tools/world-index/src/index/edges.ts` persists free-text edge values and needed no edit. New edge types are TEXT values; no SQL migration is expected (confirmed by the existing free-text insert path).
 2. Specs/contract: SPEC-50 §C.1/§C.2; the new edge names follow the existing "read the field, emit one edge per resolved record reference" pattern — no new edge taxonomy semantics.
-3. Cross-artifact boundary: the parser (`atomic.ts`), the edge-type registry (`schema/types.ts` + `index/edges.ts`), and the SPEC-46 integration test all reference the storylet/choice edge surface; removing legacy obligation extraction requires removing its assertions in the SPEC-46 test.
+3. Cross-artifact boundary: the parser (`atomic.ts`), the edge-type registry (`schema/types.ts`), the machine-facing edge docs (`docs/MACHINE-FACING-LAYER.md`), and the SPEC-46 integration test all reference the storylet/choice edge surface; removing legacy obligation extraction requires removing its assertions in the SPEC-46 test and truthing the public edge inventory.
 4. FOUNDATIONS §Rule 6 (No Silent Retcons): removing the legacy obligation extraction changes behavior a SPEC-46 integration test asserts (`tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts:198-201,558-561`). The grep found **no production consumer** of `opens_obligation`/etc. edges — the SPEC-46 test exercises dead extraction (fields absent from the current SLT schema). The removal + test-assertion removal is the retcon, attributed here per Rule 6.
-5. Rename/remove blast radius: `grep -rn "opens_obligations|pays_off_obligations|complicates_obligations|transfers_obligations" tools/ .claude/skills/` (excl. node_modules/dist) returns only test fixtures + the SPEC-46 integration test's extraction/assertion (lines 198-201, 558-561) + benign fixture data. No production consumer. The SPEC-46 test's obligation-edge assertions are added to Files to Touch.
+5. Rename/remove blast radius: `rg -n "opens_obligations|pays_off_obligations|complicates_obligations|transfers_obligations|opens_obligation|pays_off_obligation|complicates_obligation|transfers_obligation" tools/world-index/src tools/world-index/tests docs/MACHINE-FACING-LAYER.md` returns the parser extraction, registry entries, SPEC-46 integration test extraction/assertions, legacy fixture data, and the machine-facing edge inventory. No production consumer outside the parser/registry. The SPEC-46 test and docs inventory are added to Files to Touch.
 
 ## Architecture Check
 
@@ -44,15 +44,15 @@
 
 Delete `atomic.ts:656-667` legacy obligation extraction; remove the obligation-edge extraction/assertions at `spec46-story-bundle-edges-integration.test.ts:198-201,558-561`; add a test asserting the four legacy edge types are no longer produced for current-schema SLT records.
 
-### 4. Edge-type registry
+### 4. Edge-type registry and docs
 
-Register the new edge-type names in `tools/world-index/src/schema/types.ts` + `tools/world-index/src/index/edges.ts`.
+Register the new edge-type names in `tools/world-index/src/schema/types.ts`; `tools/world-index/src/index/edges.ts` persists free-text edge types and needs no registry edit. Update `docs/MACHINE-FACING-LAYER.md` so the count and edge inventory reflect the removal/addition.
 
 ## Files to Touch
 
 - `tools/world-index/src/parse/atomic.ts` (modify)
 - `tools/world-index/src/schema/types.ts` (modify)
-- `tools/world-index/src/index/edges.ts` (modify)
+- `docs/MACHINE-FACING-LAYER.md` (modify)
 - `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts` (modify — remove obligation-edge assertions)
 - `tools/world-index/tests/` choice + storylet edge fixtures (new or modify)
 
@@ -86,3 +86,24 @@ Register the new edge-type names in `tools/world-index/src/schema/types.ts` + `t
 
 1. `npm run build --prefix tools/world-index`
 2. `npm test --prefix tools/world-index`
+
+## Outcome
+
+Completed: 2026-05-20
+
+- Added `edgesForChoice` and `edgesForStorylet` extraction in `tools/world-index/src/parse/atomic.ts`.
+- Registered `choice_grounded_in`, `choice_associated_storylet`, `choice_affordance_ordinal`, `storylet_predicate_ref`, `storylet_effect_ref`, and `storylet_exit_likely_effect_ref` in `tools/world-index/src/schema/types.ts`.
+- Removed legacy `SLT` obligation-edge extraction from the parser and from the SPEC-46 capstone's expected edge surface.
+- Added focused parser coverage for CHC/SLT exploitation edges, `bound:<alias>` skipping, and absence of the retired obligation edge types.
+- Updated registry-count tests and `docs/MACHINE-FACING-LAYER.md` to the new 58 story-edge contract.
+
+Verification:
+
+- `npm run build` in `tools/world-index` — PASS.
+- `node --test dist/tests/parse/atomic-edges-for-choice-and-storylet.test.js` in `tools/world-index` — PASS.
+- `npm test` in `tools/world-index` — PASS, 121 tests.
+
+Deviations:
+
+- `tools/world-index/src/index/edges.ts` was not edited because live reassessment confirmed it stores `edge_type` as free text and has no registry list to update.
+- The broad package suite initially failed on stale expected edge-count assertions in `spec47-stplan-stemo-edges-integration.test.ts` and `types.test.ts`; those were corrected as same-seam proof fallout and the suite then passed.

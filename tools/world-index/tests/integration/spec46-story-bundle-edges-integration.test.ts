@@ -45,10 +45,6 @@ const PRE_PHASE_C_EDGE_TYPES = [
   "state_delta_create",
   "state_delta_supersede",
   "creation_evidence",
-  "opens_obligation",
-  "pays_off_obligation",
-  "complicates_obligation",
-  "transfers_obligation",
   "parent_page",
   "leaf_page",
   "dependent_fact",
@@ -73,7 +69,7 @@ test("SPEC-46 story-bundle edge capstone builds all Phase C edge rows", () => {
     const sourceRoot = path.join(root, "worlds", WORLD_SLUG, "stories", STORY_SLUG, "_source");
     const expected = expectedCountsFromSource(sourceRoot);
 
-    assert.equal(STORY_EDGE_TYPES.length, 56);
+    assert.equal(STORY_EDGE_TYPES.length, 58);
     assert.equal(new Set(STORY_EDGE_TYPES).size, STORY_EDGE_TYPES.length);
     assert.equal(build(root, WORLD_SLUG, { quiet: true }), 0);
 
@@ -554,11 +550,6 @@ function expectedCountsFromSource(sourceRoot: string): Record<EdgeTypeUnderTest,
     addCount(counts, "created_at_page", hasString(record(sourceRoot, directory, fileName), "created_at_page"));
   }
 
-  const storylet = record(sourceRoot, "storylets", "SLT-1.yaml");
-  addCount(counts, "opens_obligation", fieldArray(storylet, "opens_obligations").length);
-  addCount(counts, "pays_off_obligation", fieldArray(storylet, "pays_off_obligations").length);
-  addCount(counts, "complicates_obligation", fieldArray(storylet, "complicates_obligations").length);
-  addCount(counts, "transfers_obligation", fieldArray(storylet, "transfers_obligations").length);
   addCount(counts, "parent_page", hasString(record(sourceRoot, "pages", "PG-2.yaml"), "parent_page_id"));
   addCount(counts, "parent_page", hasString(record(sourceRoot, "choices", "CHC-1.yaml"), "parent_page_id"));
   addCount(counts, "parent_page", hasString(record(sourceRoot, "branches", "BR-1.yaml"), "forked_from_page_id"));

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-index` test surface only (no production code).
-**Deps**: SPEC50STPSTECHC-005, SPEC50STPSTECHC-006
+**Deps**: archive/tickets/SPEC50STPSTECHC-005.md, SPEC50STPSTECHC-006
 
 ## Problem
 
@@ -12,7 +12,7 @@ The world-index extraction drift this spec corrects (the `trigger_predicates` fi
 
 ## Assumption Reassessment (2026-05-19)
 
-1. Codebase: the new edge functions land in `tools/world-index/src/parse/atomic.ts` via SPEC50STPSTECHC-005 (choice + storylet) and SPEC50STPSTECHC-006 (page + event); this ticket asserts parity over all of them plus the pre-existing STPLAN/STEMO edges. Verified the dependency tickets' scope this session.
+1. Codebase: the new edge functions land in `tools/world-index/src/parse/atomic.ts` via `archive/tickets/SPEC50STPSTECHC-005.md` (choice + storylet) and SPEC50STPSTECHC-006 (page + event); this ticket asserts parity over all of them plus the pre-existing STPLAN/STEMO edges. Verified the dependency tickets' scope this session.
 2. Specs/contract: SPEC-50 §C.5.
 3. Cross-artifact boundary: the parity test references every structured reference field across CHC / SLT / PG / SE / STPLAN / STEMO and the edge-type registry; it is the guard against future un-indexed fields.
 
@@ -38,7 +38,7 @@ Add a parser test that enumerates every structured reference field across the ne
 
 ## Out of Scope
 
-- The edge-extraction implementations themselves (SPEC50STPSTECHC-005, SPEC50STPSTECHC-006).
+- The edge-extraction implementations themselves (`archive/tickets/SPEC50STPSTECHC-005.md`, SPEC50STPSTECHC-006).
 - Any production parser change.
 
 ## Acceptance Criteria

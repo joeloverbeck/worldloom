@@ -18,7 +18,7 @@
 
 ## Architecture Check
 
-1. Mechanical extraction additions mirroring the existing `state_delta_create`/`state_delta_supersede` pattern; grouping page + event-completion edges (the "completion" set) in one ticket keeps it a coherent reviewable diff distinct from the CHC/SLT exploitation core (SPEC50STPSTECHC-005).
+1. Mechanical extraction additions mirroring the existing `state_delta_create`/`state_delta_supersede` pattern; grouping page + event-completion edges (the "completion" set) in one ticket keeps it a coherent reviewable diff distinct from the archived CHC/SLT exploitation core (`archive/tickets/SPEC50STPSTECHC-005.md`).
 2. No shim — purely additive edge extraction.
 
 ## Verification Layers
@@ -49,7 +49,7 @@ Register the new edge-type names in `tools/world-index/src/schema/types.ts` + `t
 
 ## Out of Scope
 
-- Choice + storylet exploitation edges + legacy obligation removal (SPEC50STPSTECHC-005).
+- Choice + storylet exploitation edges + legacy obligation removal (`archive/tickets/SPEC50STPSTECHC-005.md`).
 - The edge-parity test (SPEC50STPSTECHC-007).
 
 ## Acceptance Criteria
