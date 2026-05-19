@@ -1,6 +1,6 @@
 # SPEC49STPSTEINT-010: Add 4 deterministic Phase 2k checks + migration documentation to branching-story-health-audit SKILL.md
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
@@ -114,3 +114,25 @@ This ticket modifies skill prose only — no test code changes. The check implem
 2. Finding-code uniqueness grep: `grep -nE "(stplan_contradictory_cluster|stplan_long_blocked_no_fallback|stemo_contradictory_stack|stemo_suppression_render_conflict)" .claude/skills/branching-story-health-audit/SKILL.md` should return at least 4 matches (one per new finding code).
 3. Lookup table presence grep: `grep -n "contradictory_affect_pairs" .claude/skills/branching-story-health-audit/SKILL.md` should return at least 1 match.
 4. Migration documentation grep: `grep -n "legacy bundles needing repair" .claude/skills/branching-story-health-audit/SKILL.md` should return at least 1 match.
+
+## Outcome
+
+Completed: 2026-05-19.
+
+Implemented the SPEC-49 Phase 2k health-audit prose extension in `.claude/skills/branching-story-health-audit/SKILL.md`:
+
+- Added the four deterministic checks `stplan-contradictory-cluster`, `stplan-long-blocked-no-fallback`, `stemo-contradictory-stack`, and `stemo-suppression-render-conflict` alongside the four existing Phase 2k checks.
+- Added the inline `contradictory_affect_pairs` lookup table with five starting pairs and `same_target_required` flags.
+- Documented the default `N=3` threshold and `STORY_KERNEL.md` frontmatter override for long-blocked STPLAN checks.
+- Added SPEC-49 migration notes describing `bootstrap-drift` as the WARN-mode triage surface for legacy STPLAN/STEMO bundle repairs before validator fail-closed enforcement.
+
+Verification results:
+
+- `grep -nE '^- \`.*(bootstrap-drift|stale-active-plan|stale-active-emotion|SE-plan-relation|stplan-contradictory-cluster|stplan-long-blocked-no-fallback|stemo-contradictory-stack|stemo-suppression-render-conflict)' .claude/skills/branching-story-health-audit/SKILL.md` returned the eight Phase 2k check bullets at lines 300-307.
+- `grep -nE "(stplan_contradictory_cluster|stplan_long_blocked_no_fallback|stemo_contradictory_stack|stemo_suppression_render_conflict)" .claude/skills/branching-story-health-audit/SKILL.md` returned the four new canonical finding-code declarations at lines 304-307.
+- `grep -n "contradictory_affect_pairs" .claude/skills/branching-story-health-audit/SKILL.md` returned line 312.
+- `grep -n "legacy bundles needing repair" .claude/skills/branching-story-health-audit/SKILL.md` returned line 320.
+
+Deviations:
+
+- The original enumeration command in this ticket used double quotes around a pattern containing backticks; in `bash` that attempts command substitution and fails before `grep` runs. Verification used the same regex in single quotes, which is the copy-paste-safe form for this proof surface.
