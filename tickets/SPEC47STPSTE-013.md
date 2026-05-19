@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — extends `tools/world-index/src/schema/types.ts` STORY_EDGE_TYPES constant from 36 to 50 edge types; implements 2 new per-class edge extractor helpers (`edgesForStoryPlan`, `edgesForStoryEmotion`) in `tools/world-index/src/parse/atomic.ts`; wires both helpers into the existing `edgesForStoryRecord` dispatch
-**Deps**: 003
+**Deps**: `archive/tickets/SPEC47STPSTE-003.md`
 
 ## Problem
 
@@ -81,7 +81,7 @@ Add 2 new case arms to the central dispatch (matching on `node_type` string per 
 
 - world-index docs (MACHINE-FACING-LAYER.md story-edge enumeration) — covered by ticket 014.
 - Patch-engine wiring for STPLAN/STEMO node types — covered by ticket 004.
-- JSON schemas for STPLAN/STEMO — covered by ticket 003.
+- JSON schemas for STPLAN/STEMO — covered by `archive/tickets/SPEC47STPSTE-003.md`.
 - Capstone integration test (`world-index build` regression run on fixture world) — covered by ticket 017.
 
 ## Acceptance Criteria

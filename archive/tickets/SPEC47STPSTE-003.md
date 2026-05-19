@@ -1,9 +1,9 @@
 # SPEC47STPSTE-003: Add story-plan + story-emotion JSON schemas
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — adds two new JSON schemas under `tools/validators/src/schemas/` (story-plan.schema.json + story-emotion.schema.json); no other code changes
+**Engine Changes**: Yes — adds two new JSON schemas under `tools/validators/src/schemas/` (story-plan.schema.json + story-emotion.schema.json) plus focused package-local schema fixture tests; no validator registration or patch-engine wiring changes
 **Deps**: `archive/tickets/SPEC47STPSTE-001.md`
 
 ## Problem
@@ -18,6 +18,7 @@ SPEC-47 introduces STPLAN and STEMO record classes whose schema content lives in
 2. Verified SPEC-47 §Approach §A deliverable D-A4 specifies `tools/validators/src/schemas/story-plan.schema.json` with closed-enum / required-field discipline; D-A5 specifies `tools/validators/src/schemas/story-emotion.schema.json` with the closed 18-value `affect_kind` and 18-value `behavioral_pressure` enums plus the `dissociated` status conditional-null discipline.
 3. Cross-skill boundary under audit: JSON schemas are consumed by (a) the validator framework's schema-compliance validators (one per record class, registered in `tools/validators/src/public/registry.ts`); (b) the patch engine's pre-apply gate (via `tools/patch-engine/src/envelope/validate.ts`); (c) the MCP `describe_envelope_schema` capability tool. Adding two new schemas extends the surface those consumers iterate over; existing schemas are unchanged.
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism At Story Scope) — every field in every schema must be load-bearing. The JSON schemas materialize the strict-minimalist v1 STPLAN field list (11 fields; drops `risk_posture` / `visibility` / `current_step.rationale` / `fallback_steps[*].rationale`) and the §5b-disciplined STEMO field list (13 fields; drops `orientation.toward_claim`) per SPEC-47 §Key Design Decisions item 1.
+5. Reassessment correction: the drafted "full validator package test suite passes" acceptance line is broader than this ticket's owned schema slice in the current checkout. The new schemas compile and pass focused Ajv2020 fixture coverage; the broad `npm test` lane currently fails in the unrelated SPEC-43 red-bunny integration assertion `grandfathered_snapshot_shape missing from compatible_optional_absence`, reproduced by direct `node --test dist/tests/integration/spec43-midstory-introduction.test.js`. That failure does not exercise `story-plan.schema.json`, `story-emotion.schema.json`, or the new schema fixture tests.
 
 ## Architecture Check
 
@@ -28,14 +29,14 @@ SPEC-47 introduces STPLAN and STEMO record classes whose schema content lives in
 
 1. Schema files exist at canonical paths → codebase grep-proof `ls tools/validators/src/schemas/story-plan.schema.json tools/validators/src/schemas/story-emotion.schema.json` returns 2 files
 2. Schema content matches §4.5.17/§4.5.18 markdown field lists exactly → schema validation (load both schemas with AJV or equivalent; manually compare field-by-field to ticket 001's markdown content)
-3. Cross-skill boundary preserved: existing 16 story-*.schema.json files are unmodified → file-byte-equality check before/after
+3. Cross-skill boundary preserved: no existing story-*.schema.json file is modified → git status/diff review over `tools/validators/src/schemas/`
 4. Closed-enum discipline: `affect_kind` enum lists exactly 18 values + null; `behavioral_pressure` enum lists exactly 18 values; `plan_status` enum lists exactly 7 values; `status` enum lists exactly 5 values; `intensity` enum lists exactly 4 values; `agency_effect` enum lists exactly 2 values → manual count against SPEC-47 §Approach §A specifications
 
-## What to Change
+## Landed Changes
 
-### 1. Author `tools/validators/src/schemas/story-plan.schema.json`
+### 1. `tools/validators/src/schemas/story-plan.schema.json`
 
-Create new JSON schema mirroring story-record-schemas.md §4.5.17 STPLAN field list. Required fields (`required: [...]`): `id`, `story_id`, `created_at_page`, `created_by_event`, `holder`, `root_intention`, `objective`, `plan_status`, `belief_basis`, `current_step`, `expires_when`. Field types:
+Created a JSON schema mirroring story-record-schemas.md §4.5.17 STPLAN field list. Required fields (`required: [...]`): `id`, `story_id`, `created_at_page`, `created_by_event`, `holder`, `root_intention`, `objective`, `plan_status`, `belief_basis`, `current_step`, `expires_when`. Field types:
 
 - `id`: `string` pattern `^STPLAN-[0-9]+$`
 - `story_id`: `string` pattern `^STORY-[0-9]+$`
@@ -54,11 +55,11 @@ Create new JSON schema mirroring story-record-schemas.md §4.5.17 STPLAN field l
 - `expires_when`: `string`
 - `derived_from`: array of record-id strings (default `[]`)
 
-Use `additionalProperties: false` to enforce the strict-minimalist scope.
+Uses `additionalProperties: false` to enforce the strict-minimalist scope.
 
-### 2. Author `tools/validators/src/schemas/story-emotion.schema.json`
+### 2. `tools/validators/src/schemas/story-emotion.schema.json`
 
-Create new JSON schema mirroring story-record-schemas.md §4.5.18 STEMO field list. Required fields: `id`, `story_id`, `created_at_page`, `created_by_event`, `holder`, `status`, `trigger_event`, `agency_effect`, `expires_when`. Conditional required: when `status != dissociated`, `affect_kind` + `intensity` + `appraisal_basis` (non-empty) + `behavioral_pressure` (non-empty) are required; when `status == dissociated`, `affect_kind: null` is allowed. Field types:
+Created a JSON schema mirroring story-record-schemas.md §4.5.18 STEMO field list. Required fields: `id`, `story_id`, `created_at_page`, `created_by_event`, `holder`, `status`, `trigger_event`, `agency_effect`, `expires_when`. Conditional required: when `status != dissociated`, `affect_kind` + `intensity` + `appraisal_basis` (non-empty) + `behavioral_pressure` (non-empty) are required; when `status == dissociated`, `affect_kind: null` is allowed. Field types:
 
 - `id`: `string` pattern `^STEMO-[0-9]+$`
 - `story_id`: `string` pattern `^STORY-[0-9]+$`
@@ -77,12 +78,14 @@ Create new JSON schema mirroring story-record-schemas.md §4.5.18 STEMO field li
 - `expires_when`: `string`
 - `derived_from`: array of record-id strings (default `[]`)
 
-Use `additionalProperties: false` plus a JSON Schema conditional (`if`/`then`/`else` or `oneOf`) to enforce the dissociated-status null-allowed discipline.
+Uses `additionalProperties: false` plus a JSON Schema conditional (`if`/`then`/`else`) to enforce the dissociated-status null-allowed discipline.
 
 ## Files to Touch
 
 - `tools/validators/src/schemas/story-plan.schema.json` (new)
 - `tools/validators/src/schemas/story-emotion.schema.json` (new)
+- `tools/validators/tests/schemas/story-plan-schema-fixtures.test.ts` (new)
+- `tools/validators/tests/schemas/story-emotion-schema-fixtures.test.ts` (new)
 
 ## Out of Scope
 
@@ -95,8 +98,8 @@ Use `additionalProperties: false` plus a JSON Schema conditional (`if`/`then`/`e
 ### Tests That Must Pass
 
 1. `ls tools/validators/src/schemas/story-plan.schema.json tools/validators/src/schemas/story-emotion.schema.json` returns both file paths.
-2. Schema parses as valid JSON Schema draft-07 (or whatever version the existing story-*.schema.json files use) — JSON parse + schema-self-validation.
-3. Schema accepts well-formed STPLAN/STEMO records and rejects malformed ones (missing required fields, out-of-enum values, wrong type) — round-trip schema test against representative fixtures.
+2. The new schemas use the package's existing draft-2020-12 convention and compile under Ajv2020 strict mode.
+3. The focused schema fixture tests accept well-formed STPLAN/STEMO records and reject malformed ones (missing required fields, out-of-enum values, wrong ID shape, unknown narrative-shape fields, and STEMO dissociation/null-affect misuse).
 
 ### Invariants
 
@@ -114,4 +117,26 @@ Use `additionalProperties: false` plus a JSON Schema conditional (`if`/`then`/`e
 
 1. `node -e "JSON.parse(require('fs').readFileSync('tools/validators/src/schemas/story-plan.schema.json'))"` (parses without error)
 2. `node -e "JSON.parse(require('fs').readFileSync('tools/validators/src/schemas/story-emotion.schema.json'))"` (parses without error)
-3. `npm --prefix tools/validators run build && npm --prefix tools/validators test` (full validator package test suite passes)
+3. From `tools/validators`: `npm run build && node --test dist/tests/schemas/story-plan-schema-fixtures.test.js dist/tests/schemas/story-emotion-schema-fixtures.test.js`
+4. From `tools/validators`: `npm test` (broad package regression lane; see `## Deviations` for the unrelated current SPEC-43 failure observed during closeout)
+
+## Outcome
+
+Completed: 2026-05-19.
+
+- Added `tools/validators/src/schemas/story-plan.schema.json` with the SPEC-47 STPLAN field list, strict `additionalProperties: false`, the 7-value `plan_status` enum, the existing 20-value `action_family` enum, and structured `resource_basis`, `current_step`, `fallback_steps`, and record-reference validation.
+- Added `tools/validators/src/schemas/story-emotion.schema.json` with the SPEC-47 STEMO field list, strict `additionalProperties: false`, 5-value `status`, 18-value `affect_kind` plus null, 18-value `behavioral_pressure`, 4-value `intensity`, 2-value `agency_effect`, and a strict Ajv-compatible conditional that permits `affect_kind: null` only when `status: dissociated`.
+- Added focused Ajv2020 fixture tests for both schemas under `tools/validators/tests/schemas/`.
+
+## Verification Result
+
+Commands run from `tools/validators` unless noted:
+
+1. `npm run build` — passed.
+2. `node --test dist/tests/schemas/story-plan-schema-fixtures.test.js dist/tests/schemas/story-emotion-schema-fixtures.test.js` — initially failed because the STEMO conditional used branch-local `required` entries without branch-local `properties` definitions under Ajv strict mode; fixed the schema and reran successfully: 9 tests passed.
+3. `npm test` — build passed and 549/550 tests passed; the suite exits 1 on the unrelated SPEC-43 red-bunny integration assertion `grandfathered_snapshot_shape missing from compatible_optional_absence`.
+4. `node --test dist/tests/integration/spec43-midstory-introduction.test.js` — reproduced the same SPEC-43 assertion failure in isolation; classified as outside this ticket's STPLAN/STEMO schema slice.
+
+## Deviations
+
+- The drafted broad validator package acceptance line is not claimed green. The accepted proof for this ticket is the package build plus focused Ajv2020 schema fixture tests for the new schemas. The broad package lane remains red on an unrelated SPEC-43 red-bunny integration assertion that does not exercise these files.

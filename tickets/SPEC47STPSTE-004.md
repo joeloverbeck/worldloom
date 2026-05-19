@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends patch-engine `IdAllocations`, `OPERATION_KINDS`, `PatchOperation`, `STORY_RECORD_SPECS`; extends MCP `allocate_next_id` allocator + `describe_envelope_schema` capability
-**Deps**: 003
+**Deps**: `archive/tickets/SPEC47STPSTE-003.md`
 
 ## Problem
 
-SPEC-47's two new record classes need engine-routed write paths. The patch engine must recognize `create_stplan_record` and `create_stemo_record` op kinds (with corresponding `PatchOperation` discriminated-union entries), register the classes in `STORY_RECORD_SPECS` so the commit phase knows where to write `_source/plans/STPLAN-<integer>.yaml` and `_source/emotions/STEMO-<integer>.yaml`, allocate STPLAN-N / STEMO-N IDs per the FOUNDATIONS-002 unpadded natural-integer convention, and surface both ops in the MCP `describe_envelope_schema` capability so downstream skills can discover them via the schema-discovery surface. Without this wiring, the JSON schemas (ticket 003) exist but are unreachable from skill-issued patch plans.
+SPEC-47's two new record classes need engine-routed write paths. The patch engine must recognize `create_stplan_record` and `create_stemo_record` op kinds (with corresponding `PatchOperation` discriminated-union entries), register the classes in `STORY_RECORD_SPECS` so the commit phase knows where to write `_source/plans/STPLAN-<integer>.yaml` and `_source/emotions/STEMO-<integer>.yaml`, allocate STPLAN-N / STEMO-N IDs per the FOUNDATIONS-002 unpadded natural-integer convention, and surface both ops in the MCP `describe_envelope_schema` capability so downstream skills can discover them via the schema-discovery surface. Without this wiring, the JSON schemas (`archive/tickets/SPEC47STPSTE-003.md`) exist but are unreachable from skill-issued patch plans.
 
 ## Assumption Reassessment (2026-05-19)
 
@@ -66,7 +66,7 @@ Add STPLAN and STEMO to the MCP allocator's recognized story-bundle-scoped class
 
 ### 4. Extend `tools/world-mcp/src/tools/describe-envelope-schema.ts`
 
-Update the emitted schema description to enumerate `create_stplan_record` and `create_stemo_record` alongside existing story-record op kinds. Schema-discovery output should include the JSON-schema reference paths for both new ops (pointing at `tools/validators/src/schemas/story-plan.schema.json` and `tools/validators/src/schemas/story-emotion.schema.json` per ticket 003).
+Update the emitted schema description to enumerate `create_stplan_record` and `create_stemo_record` alongside existing story-record op kinds. Schema-discovery output should include the JSON-schema reference paths for both new ops (pointing at `tools/validators/src/schemas/story-plan.schema.json` and `tools/validators/src/schemas/story-emotion.schema.json` per `archive/tickets/SPEC47STPSTE-003.md`).
 
 ## Files to Touch
 
@@ -77,7 +77,7 @@ Update the emitted schema description to enumerate `create_stplan_record` and `c
 
 ## Out of Scope
 
-- JSON schema content for STPLAN and STEMO — covered by ticket 003 (this ticket only references the schema paths).
+- JSON schema content for STPLAN and STEMO — covered by `archive/tickets/SPEC47STPSTE-003.md` (this ticket only references the schema paths).
 - Validator framework registration of per-class deterministic validators — covered by tickets 005 (STPLAN) and 006 (STEMO).
 - Hook 3 path-blocking is automatic via the generic `**/stories/<slug>/_source/**/*.yaml` pattern at `tools/hooks/src/hook3-guard-direct-edit.ts:30-55` (verified during reassess-spec); no Hook 3 code change required (covered by ticket 017's integration-test verification per SPEC-47 D-A9).
 - Story-record source-directory creation at runtime — handled by patch-engine commit-phase file-write logic (which creates parent dirs lazily); no separate ticket needed.

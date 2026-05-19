@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `tools/world-mcp/src/context-packet/story-bundle-context.ts` with 2 new builder functions (`buildActiveActorPlans`, `buildActiveEmotionalStates`) wired into `buildStoryBundleContext`; extends `ContextPacketStoryBundleContext` type with 2 new optional summary fields; extends `ContextPacketStoryBundleContextSummary` partial with parallel id-list fields
-**Deps**: 003
+**Deps**: `archive/tickets/SPEC47STPSTE-003.md`
 
 ## Problem
 

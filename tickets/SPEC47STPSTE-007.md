@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `ACTIVE_RECORDS_CLASSES` constant + 5 named shared validators to recognize STPLAN and STEMO as valid active-record classes
-**Deps**: 003, 009
+**Deps**: `archive/tickets/SPEC47STPSTE-003.md`, 009
 
 ## Problem
 

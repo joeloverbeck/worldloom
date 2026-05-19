@@ -113,7 +113,7 @@ Added prose preamble explaining actor-owned transient affective state; the close
 
 - STPLAN extension fields (`risk_posture`, `visibility`, `current_step.rationale`, `fallback_steps[*].rationale`) — captured in SPEC-47 §Out of Scope item 1 as named extension list for follow-up spec.
 - STEMO `orientation.toward_claim` free-form string — captured in SPEC-47 §Out of Scope item 2 (no §5b consumer in v1).
-- JSON schema files (`story-plan.schema.json`, `story-emotion.schema.json`) — covered by ticket 003.
+- JSON schema files (`story-plan.schema.json`, `story-emotion.schema.json`) — covered by `archive/tickets/SPEC47STPSTE-003.md`.
 - Record-class inventory update (§3 of story-state-contract.md) and FOUNDATIONS §Story Bundles §6 backfill — covered by ticket 002.
 
 ## Acceptance Criteria

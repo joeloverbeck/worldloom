@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts` PREDICATE_NAMES + PREDICATE_ARG_SCHEMAS with 6 new predicates; extends `tools/validators/src/schemas/story-storylet.schema.json` predicate-discovery surface; extends `tools/validators/src/schemas/predicate-dsl-grammar.schema.json`
-**Deps**: 003
+**Deps**: `archive/tickets/SPEC47STPSTE-003.md`
 
 ## Problem
 
@@ -72,7 +72,7 @@ Update the meta-schema (if it enumerates valid predicate names) to include the 6
 
 ## Out of Scope
 
-- STPLAN/STEMO record schemas — covered by tickets 001/003.
+- STPLAN/STEMO record schemas — covered by `archive/tickets/SPEC47STPSTE-001.md` and `archive/tickets/SPEC47STPSTE-003.md`.
 - Per-class STPLAN/STEMO validators — covered by tickets 005/006.
 - Tag-grammar parser extension (`midstory-introduction-utils.ts`) — covered by ticket 009.
 - SLT records using the new predicates — author-side concern; not implemented in this spec.

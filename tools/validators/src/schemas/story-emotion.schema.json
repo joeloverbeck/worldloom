@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/story-emotion.schema.json",
+  "type": "object",
+  "required": [
+    "id",
+    "story_id",
+    "created_at_page",
+    "created_by_event",
+    "holder",
+    "status",
+    "trigger_event",
+    "agency_effect",
+    "expires_when"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^STEMO-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "created_by_event": { "type": "string", "pattern": "^SE-(0|[1-9][0-9]*)$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^STEMO-(0|[1-9][0-9]*)$" },
+    "holder": { "type": "string", "pattern": "^STENT-[0-9]+$" },
+    "status": {
+      "type": "string",
+      "enum": ["active", "suppressed", "settled", "transformed", "dissociated"]
+    },
+    "affect_kind": {
+      "type": ["string", "null"],
+      "enum": [
+        "fear",
+        "anxiety",
+        "anger",
+        "disgust",
+        "grief",
+        "shame",
+        "guilt",
+        "humiliation",
+        "hope",
+        "relief",
+        "joy",
+        "awe",
+        "tenderness",
+        "desire",
+        "envy",
+        "contempt",
+        "confusion",
+        "dread",
+        null
+      ]
+    },
+    "intensity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "extreme"]
+    },
+    "orientation": {
+      "type": "object",
+      "properties": {
+        "toward_records": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/recordId" },
+          "default": []
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "appraisal_basis": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^BEL-[0-9]+$" },
+      "default": []
+    },
+    "trigger_event": { "type": "string", "pattern": "^SE-(0|[1-9][0-9]*)$" },
+    "behavioral_pressure": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "approach",
+          "flee",
+          "freeze",
+          "attack",
+          "reject",
+          "dominate",
+          "submit",
+          "seek_contact",
+          "protect_other",
+          "seek_help",
+          "confess",
+          "conceal",
+          "withdraw_socially",
+          "plan",
+          "accommodate",
+          "self_soothe",
+          "ruminate",
+          "collapse"
+        ]
+      },
+      "default": []
+    },
+    "agency_effect": {
+      "type": "string",
+      "enum": ["none", "constraining"]
+    },
+    "expires_when": { "type": "string", "minLength": 1 },
+    "derived_from": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/recordId" },
+      "default": []
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "dissociated" } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["affect_kind"],
+        "properties": {
+          "affect_kind": { "type": "null" }
+        }
+      },
+      "else": {
+        "required": ["affect_kind", "intensity", "appraisal_basis", "behavioral_pressure"],
+        "properties": {
+          "affect_kind": {
+            "type": "string",
+            "enum": [
+              "fear",
+              "anxiety",
+              "anger",
+              "disgust",
+              "grief",
+              "shame",
+              "guilt",
+              "humiliation",
+              "hope",
+              "relief",
+              "joy",
+              "awe",
+              "tenderness",
+              "desire",
+              "envy",
+              "contempt",
+              "confusion",
+              "dread"
+            ]
+          },
+          "intensity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "extreme"]
+          },
+          "appraisal_basis": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "pattern": "^BEL-[0-9]+$" }
+          },
+          "behavioral_pressure": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "approach",
+                "flee",
+                "freeze",
+                "attack",
+                "reject",
+                "dominate",
+                "submit",
+                "seek_contact",
+                "protect_other",
+                "seek_help",
+                "confess",
+                "conceal",
+                "withdraw_socially",
+                "plan",
+                "accommodate",
+                "self_soothe",
+                "ruminate",
+                "collapse"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "recordId": {
+      "type": "string",
+      "pattern": "^(STENT|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT|STPLAN|STEMO|CF|CH|M|INV|SEC)-[0-9]+$"
+    }
+  }
+}

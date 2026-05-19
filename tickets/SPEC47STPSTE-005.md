@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds 12 new STPLAN structural validators under `tools/validators/src/structural/`; extends `tools/validators/src/public/registry.ts` with 12 new registrations
-**Deps**: 003
+**Deps**: `archive/tickets/SPEC47STPSTE-003.md`
 
 ## Problem
 
@@ -38,7 +38,7 @@ SPEC-47's STPLAN record class needs deterministic validators to enforce its sche
 
 Each file exports a validator object (matching the existing validator file convention). The 12 validators:
 
-1. `stplan-schema-compliance.ts` — JSON schema validation against `story-plan.schema.json` (from ticket 003); enforces field types, required fields, closed enums, `additionalProperties: false`.
+1. `stplan-schema-compliance.ts` — JSON schema validation against `story-plan.schema.json` (from `archive/tickets/SPEC47STPSTE-003.md`); enforces field types, required fields, closed enums, `additionalProperties: false`.
 2. `stplan-id-uniqueness-and-append-only.ts` — ID uniqueness across all STPLAN records in the bundle; append-only file-level lifecycle (no in-place mutation of prior records).
 3. `stplan-holder-exists-and-active.ts` — `holder` resolves to an STENT that is active in the current `PG.state_snapshot.active_records`.
 4. `stplan-root-intention-grounded.ts` — `root_intention` resolves to an STINT that is active, belongs to the same `holder`, and exists at or before `created_at_page`.

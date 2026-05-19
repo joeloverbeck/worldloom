@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds 8 new STEMO structural validators under `tools/validators/src/structural/`; extends `tools/validators/src/public/registry.ts` with 8 new registrations
-**Deps**: 003
+**Deps**: `archive/tickets/SPEC47STPSTE-003.md`
 
 ## Problem
 
@@ -38,7 +38,7 @@ SPEC-47's STEMO record class needs deterministic validators to enforce its schem
 
 Each file exports a validator object (parallel to ticket 005's pattern). The validators per SPEC-47 §Approach §B:
 
-1. `stemo-schema-compliance.ts` — JSON schema validation against `story-emotion.schema.json` (from ticket 003); enforces field types, required fields, closed enums, conditional null-allowed for `affect_kind` when `status: dissociated`, `additionalProperties: false`.
+1. `stemo-schema-compliance.ts` — JSON schema validation against `story-emotion.schema.json` (from `archive/tickets/SPEC47STPSTE-003.md`); enforces field types, required fields, closed enums, conditional null-allowed for `affect_kind` when `status: dissociated`, `additionalProperties: false`.
 2. `stemo-holder-exists-and-active.ts` — `holder` resolves to an STENT that is active in `PG.state_snapshot.active_records`.
 3. `stemo-trigger-event-on-branch-path.ts` — `trigger_event` resolves to an SE that exists on the branch path leading to `created_at_page` OR is the same SE as `created_by_event`.
 4. `stemo-appraisal-basis-accessible-to-holder.ts` — every `appraisal_basis[]` BEL is accessible to `holder` per the observer-firewall access-route check, UNLESS `status: dissociated` (which carves out the appraisal-basis access requirement).

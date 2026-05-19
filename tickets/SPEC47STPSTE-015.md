@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `.claude/skills/_shared-templates/story-state-contract.md` §8 page-plan minimum contract with §9b (STPLAN render) + §9c (STEMO render) per-page-computed sub-sections + preamble update (parallel to existing §10b "plus optional" framing)
-**Deps**: 003
+**Deps**: `archive/tickets/SPEC47STPSTE-003.md`
 
 ## Problem
 

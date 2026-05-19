@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `tools/validators/src/structural/midstory-introduction-utils.ts` parser with 2 new `intro:<CLASS>(...)` class values + 6 STPLAN triggers + 7 STEMO triggers + new `plan_relation:<relation>(plan=STPLAN-N)` tag pattern with 7 closed relations
-**Deps**: 003
+**Deps**: `archive/tickets/SPEC47STPSTE-003.md`
 
 ## Problem
 
