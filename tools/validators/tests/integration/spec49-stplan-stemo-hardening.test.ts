@@ -7,6 +7,7 @@ import test from "node:test";
 import Ajv2020Module from "ajv/dist/2020.js";
 import type { ValidateFunction } from "ajv";
 import Database from "better-sqlite3";
+import yaml from "js-yaml";
 import { build } from "@worldloom/world-index/commands/build";
 
 import { stateSnapshotIntegrity } from "../../src/structural/state-snapshot-integrity.js";
@@ -217,9 +218,50 @@ test("SPEC-49 capstone: Phase 2k health-audit prose names the four deterministic
   }
 });
 
+test("SPEC-50 D.1: health-audit contradictory affect table stays inside STEMO enum", () => {
+  const skill = readRepoFile(".claude/skills/branching-story-health-audit/SKILL.md");
+  const emotionSchema = JSON.parse(readRepoFile("tools/validators/src/schemas/story-emotion.schema.json")) as {
+    properties?: { affect_kind?: { enum?: unknown[] } };
+  };
+  const affectKinds = new Set(
+    (emotionSchema.properties?.affect_kind?.enum ?? []).filter((item): item is string => typeof item === "string")
+  );
+  const table = parseContradictoryAffectTable(skill);
+
+  assert.equal(table.length, 5);
+  for (const pair of table) {
+    assert.ok(affectKinds.has(pair.a), `${pair.a} should be a STEMO affect_kind`);
+    assert.ok(affectKinds.has(pair.b), `${pair.b} should be a STEMO affect_kind`);
+  }
+  assert.ok(table.some((pair) => pair.a === "tenderness" && pair.b === "contempt" && pair.same_target_required));
+  assert.ok(table.some((pair) => pair.a === "grief" && pair.b === "joy" && !pair.same_target_required));
+});
+
 function compileSchema(name: string): ValidateFunction {
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   return ajv.compile(JSON.parse(readFileSync(path.resolve(process.cwd(), "src", "schemas", `${name}.schema.json`), "utf8")));
+}
+
+function parseContradictoryAffectTable(skill: string): Array<{ a: string; b: string; same_target_required: boolean }> {
+  const match = skill.match(/```yaml\n(contradictory_affect_pairs:[\s\S]*?)\n```/);
+  assert.ok(match, "contradictory_affect_pairs YAML block should exist");
+  const yamlSource = match[1];
+  assert.ok(yamlSource, "contradictory_affect_pairs YAML source should be captured");
+  const parsed = yaml.load(yamlSource) as {
+    contradictory_affect_pairs?: Array<{ a?: unknown; b?: unknown; same_target_required?: unknown }>;
+  };
+  assert.ok(Array.isArray(parsed.contradictory_affect_pairs), "contradictory_affect_pairs should be an array");
+  return parsed.contradictory_affect_pairs.map((pair) => {
+    const { a, b, same_target_required: sameTargetRequired } = pair;
+    if (typeof a !== "string" || typeof b !== "string" || typeof sameTargetRequired !== "boolean") {
+      assert.fail("each contradictory_affect_pairs entry should have string a/b and boolean same_target_required");
+    }
+    return {
+      a,
+      b,
+      same_target_required: sameTargetRequired
+    };
+  });
 }
 
 function validPage(): Record<string, unknown> {

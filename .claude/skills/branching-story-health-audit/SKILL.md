@@ -310,11 +310,11 @@ Closed contradictory-affect lookup table for `stemo-contradictory-stack`:
 
 ```yaml
 contradictory_affect_pairs:
-  - { a: "affection", b: "hatred", same_target_required: true }
-  - { a: "trust", b: "betrayal-anger", same_target_required: true }
-  - { a: "hope", b: "despair", same_target_required: true }
+  - { a: "tenderness", b: "contempt", same_target_required: true }
+  - { a: "hope", b: "dread", same_target_required: true }
+  - { a: "relief", b: "anxiety", same_target_required: true }
   - { a: "grief", b: "joy", same_target_required: false }
-  - { a: "love", b: "contempt", same_target_required: true }
+  - { a: "desire", b: "disgust", same_target_required: true }
 ```
 
 SPEC-49 migration notes: legacy bundles needing repair for the new STPLAN / STEMO constraints are identified through Phase 2k before hard enforcement. Use `bootstrap-drift` as the first migration triage surface for root-seeded or active STPLAN / STEMO records that are not represented in page snapshots, never used downstream, or likely need repair after SPEC-49 schema and validator tightening. In compatibility windows, classify legacy bundles with missing `PG.state_snapshot.active_records.STPLAN[]` / `STEMO[]` keys, active STPLANs with empty `belief_basis[]`, or STPLAN predicates that would fail parseability as WARN-mode migration findings with `repair_kind: bundle_advice`. After the one-revision compatibility cycle ends, the corresponding validators may fail closed; health-audit findings should then cite the validator failure and route the bundle to turn repair or migration patching rather than treating it as advisory only.

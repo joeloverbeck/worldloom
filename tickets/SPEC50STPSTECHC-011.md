@@ -40,7 +40,7 @@ Add WARN/INFO-level checks for active high-salience `STPLAN` (blocked), agency-c
 
 ## Out of Scope
 
-- The contradictory-affect table fix (SPEC50STPSTECHC-008).
+- The contradictory-affect table fix (`archive/tickets/SPEC50STPSTECHC-008.md`).
 - Threshold tuning (deferred to sample-story evidence).
 - Any deterministic FAIL gate for underuse.
 
