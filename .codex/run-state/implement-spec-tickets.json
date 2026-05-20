@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-56-stchar-machine-foundation.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC56STCHARMACFOU-005.md",
+  "last_ticket": "archive/tickets/SPEC56STCHARMACFOU-007.md",
   "last_result": "completed_archived",
-  "last_work_commit": "1a30ccb67d6a29e926587d656324d12380fbd1f1",
+  "last_work_commit": "ad1a58b63a85fcecdef8ec8cfdb5811d858d28e5",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC56STCHARMACFOU-007.md",
+  "next_target": "tickets/SPEC56STCHARMACFOU-006.md",
   "queue": [
-    "tickets/SPEC56STCHARMACFOU-007.md",
     "tickets/SPEC56STCHARMACFOU-006.md"
   ],
   "phase": "ready_for_next_ticket",
