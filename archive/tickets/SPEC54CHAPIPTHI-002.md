@@ -51,7 +51,7 @@ No NCP body-section heading checks were added. The existing `## Rejected Directi
 - `tools/validators/tests/structural/record-schema-compliance.test.ts` (modify)
 - `tools/validators/tests/integration/spec04-verification.test.ts` (modify)
 - `tools/validators/tests/integration/spec09-verification.test.ts` (modify)
-- `specs/SPEC-54-character-pipeline-third-iteration-fixes.md` (modify)
+- `archive/specs/SPEC-54-character-pipeline-third-iteration-fixes.md` (modified before archival; formerly `specs/SPEC-54-character-pipeline-third-iteration-fixes.md`)
 
 ## Out of Scope
 

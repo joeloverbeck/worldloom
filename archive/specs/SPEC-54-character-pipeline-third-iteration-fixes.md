@@ -11,7 +11,7 @@ frontmatter-integrity slice of that finding is accepted (Phase 2).
 
 # SPEC-54: Character Pipeline — Third-Iteration Implementation Fixes
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-05-20
 **Predecessor:** SPEC-53 — Character Pipeline Second-Iteration Fixes (archived; this spec is a focused delta on its landed deliverables)
 **Source audit:** `reports/deepening-characters-third-iteration.md`
@@ -259,14 +259,41 @@ following are the genuinely-open, FOUNDATIONS-aligned residuals:
 
 ## Notes
 
+- 2026-05-20: Phase 1 landed via `archive/tickets/SPEC54CHAPIPTHI-001.md`. Batch-generated
+  NCP cards now conditionally require `batch_id`; upgraded/user-seed cards can still omit it.
 - 2026-05-20: Phase 2 landed via `archive/tickets/SPEC54CHAPIPTHI-002.md`. `yaml_parse_integrity` now covers
   malformed frontmatter in `character-proposals/`, `record_schema_compliance` now emits a
   `missing_frontmatter` verdict for NCP/NCB files with no frontmatter block, and the validators
   full-world legacy baseline now includes that additional known proposal gap.
+- 2026-05-20: Phase 3 landed via `archive/tickets/SPEC54CHAPIPTHI-003.md`. `get_record_schema` now
+  exposes `character_proposal_card` and `character_proposal_batch`, with package and public-doc proof.
+- 2026-05-20: Phase 4 landed via `archive/tickets/SPEC54CHAPIPTHI-004.md`. NCB fixtures now use
+  `card_ids`, the CHAR fixture uses `source_basis.source_proposal_id`, and Phase 15 skill prose labels
+  `institutional_embedding_checklist` / `repeated_forced_choice` as body / acceptance-test concepts.
 - This spec is the third focused delta in the SPEC-52 → SPEC-53 → SPEC-54 character-pipeline line. After
-  Phases 1–4 land, the audit's remaining items are either rejected-by-prior-decision (body-section
+  Phases 1–4 landed, the audit's remaining items are either rejected-by-prior-decision (body-section
   validation) or already-resolved (anti-flattening), and no further major character-system audit is
   anticipated.
 - Single-spec deliverable: `specs/IMPLEMENTATION-ORDER.md` is intentionally not created (one spec; the
   four phases are independently landable in any order, though Phase 1 → Phase 2 → Phase 3 → Phase 4 is
   the natural high-to-low severity sequence).
+
+## Outcome
+
+Completed: 2026-05-20
+
+SPEC-54 is complete. The third-iteration character-pipeline fixes landed across four archived tickets:
+conditional batch lineage enforcement for NCPs, frontmatter integrity for `character-proposals/` NCP/NCB
+records, additive NCP/NCB exposure through `get_record_schema`, and fixture/prose fidelity cleanup for
+NCB/CHAR proposal terminology. The intentionally rejected body-section validation and deterministic
+anti-flattening recommendations remain out of scope per the SPEC-52/SPEC-53 decision record.
+
+Final verification:
+
+- `npm test` from `tools/validators` passed in the Phase 1, Phase 2, and Phase 4 ticket runs; the final
+  Phase 4 run reported 741 passing checks after rebuilding `tools/validators/dist/`.
+- `npm test --prefix tools/world-mcp` passed in the Phase 3 ticket run, reporting 418 passing checks.
+- `cd tools/world-mcp && npm test` passed in the Phase 4 ticket run, reporting 418 passing checks after
+  rebuilding `tools/world-mcp/dist/`.
+- Phase-specific grep/manual-review proofs confirmed the public schema-discovery docs and Phase 15
+  body/acceptance-test terminology matched the landed contract.
