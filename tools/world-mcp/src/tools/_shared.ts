@@ -125,6 +125,8 @@ export const STORY_BUNDLE_ID_PREFIXES = [
   "CLK",
   "STSEC",
   "STQ",
+  "STPLAN",
+  "STEMO",
   "BR",
   "CHC",
   "SLT",
