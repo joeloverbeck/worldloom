@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-52-protagonist-grade-character-pipeline.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC52PROGRACHA-001.md",
+  "last_ticket": "archive/tickets/SPEC52PROGRACHA-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "e3fff8fb55b1daf43cbe4c4879d42e0f7b797b4f",
+  "last_work_commit": "55910e8a3b28bb7c5bca0531f809ae87325e1939",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC52PROGRACHA-002.md",
+  "next_target": "tickets/SPEC52PROGRACHA-003.md",
   "queue": [
-    "tickets/SPEC52PROGRACHA-002.md",
     "tickets/SPEC52PROGRACHA-003.md",
     "tickets/SPEC52PROGRACHA-004.md",
     "tickets/SPEC52PROGRACHA-005.md",
