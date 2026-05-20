@@ -1,22 +1,21 @@
 {
   "originating_spec": "specs/SPEC-54-character-pipeline-third-iteration-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC54CHAPIPTHI-002.md",
+  "last_ticket": "archive/tickets/SPEC54CHAPIPTHI-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "0a9396cec1fcfc070b46fdd3c4b5125acba71cce",
+  "last_work_commit": "be8af695f18aab1d8cf9a0b875bc8fac5aab10bd",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC54CHAPIPTHI-003.md",
+  "next_target": "tickets/SPEC54CHAPIPTHI-004.md",
   "queue": [
-    "tickets/SPEC54CHAPIPTHI-003.md",
     "tickets/SPEC54CHAPIPTHI-004.md"
   ],
   "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
-  "post_review_material_updates": true,
-  "post_review_audit_block": "emitted",
+  "post_review_material_updates": false,
+  "post_review_audit_block": "not_applicable",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "expected ignored artifacts: tools/validators/dist/ refreshed by npm test; tools/validators/node_modules/ pre-existing; unrelated pre-existing ignored artifacts: tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
+  "dirty_state": "expected ignored artifacts: tools/world-mcp/dist/ refreshed by npm test --prefix tools/world-mcp; pre-existing ignored artifacts: tools/world-mcp/.secret, tools/world-mcp/node_modules/, tools/validators/dist/, tools/validators/node_modules/",
   "updated_at": "2026-05-20"
 }
