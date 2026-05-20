@@ -238,7 +238,7 @@ function hasCorrectOriginatingReference(attestation: RetconAttestation, requires
 }
 
 function isStoryBundleRecordId(targetRecordId: string): boolean {
-  return /^(PG|SE|STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|CHC|SLT|BR|DA)-\d+$/.test(targetRecordId);
+  return /^(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/.test(targetRecordId);
 }
 
 function cloneRecord(record: Record<string, unknown>): Record<string, unknown> {
