@@ -65,6 +65,33 @@ Generate for the character:
 
 **FOUNDATIONS cross-ref**: World Kernel §Core Pressures — the character's tensions should instantiate the world's core pressures at individual scale.
 
+## Phase 4b: Protagonist-Grade Deepening / Preservation
+
+Populate the dossier frontmatter `dramatic_core` and the body sections that make the engine inspectable. Load `.claude/skills/_shared-references/protagonist-grade-character-engine.md` and use its 10 field names byte-for-byte.
+
+If Phase 0 produced `input_memorability_contract` from an NCP card, preserve every load-bearing element unless Phase 7 canon safety later forces a named repair. Preservation means translating the proposal's `memorability_profile` into a CHAR-shaped `dramatic_core`, not copying proposal prose blindly. Keep the proposal's engine, then specify it through the generated character's body, institution, date, knowledge, capability limits, and voice.
+
+If there is no NCP memorability contract, derive `dramatic_core` from the normalized brief and Phases 1-4. The derived engine must still be complete; a non-NCP brief is not allowed to produce a character without protagonist-grade density.
+
+Construct `dramatic_core` this way:
+
+- `world_produced_wound`: name the world mechanism that inflicted the durable hurt, exclusion, humiliation, debt, witnessed wrong, bodily constraint, or social wound.
+- `active_appetite`: convert desire into repeated behavior under material, status, bodily, kinship, belief, taboo, scarcity, or institutional pressure.
+- `self_mythology`: convert shame, guilt, obedience, ambition, or survival logic into the story the character tells about themselves.
+- `irreconcilable_contradiction`: convert the Phase 4 internal contradiction into a recurrent behavioral conflict where both sides are world-valid.
+- `pressure_behavior`: fill all five keys: `cornered`, `tempted`, `humiliated`, `offered_power`, and `protecting_attachment`; each response must be distinct and trained by world pressure.
+- `relational_charge`: add at least one charged relation or relation type with `target_or_relation_type`, `need`, `resentment_or_fear`, and `likely_harm_or_betrayal`.
+- `moral_psychological_edge`: name the uncomfortable line the character may cross, defend, rationalize, or refuse under real world pressure.
+- `signature_scene_behaviors`: add at least three visible repeated behaviors arising from body, work, status, fear, appetite, institution, taboo, or environment.
+- `voice_under_pressure`: fill all four keys matching the NCP `memorability_profile`: `lying`, `begging`, `threatening`, and `grieving_or_hiding_ignorance`; each must be grounded in education, region, class, craft, religion, body, or fear.
+- `cannot_be_swapped_out_because`: state why this person cannot be replaced by a generic member of their profession, species, class, or faction without losing the engine.
+
+Then draft the six body sections that expose the engine before `Likely Story Hooks`: `Protagonist-Grade Core`, `Pressure Behavior`, `Self-Mythology and Blind Spots`, `Relational Charge`, `Moral and Psychological Edge`, and `Signature Scene Behavior`. These are world-character sections, not story-system sections; do not add arc beats, act positions, plot destiny, companion quests, or story-bootstrap fields.
+
+**Anti-flattening rule**: If Phase 7 canon safety or Mystery Reserve firewall repair later requires weakening, rerouting, or deleting any `input_memorability_contract` element, record the tradeoff for Phase 9: `original element -> repaired element -> canon/Mystery reason`. Do not silently make the dossier safer and duller.
+
+**FOUNDATIONS cross-refs**: Rule 2 (No Pure Cosmetics) — every engine field must be world-produced; Rule 3 (No Specialness Inflation) — protagonist-grade density does not grant unearned capability; Rule 7 (Preserve Mystery Deliberately) — canon-forced flattening must be surfaced and approved, not hidden.
+
 ## Phase 5: Capability Validation
 
 For every skill, craft, knowledge, or ability declared in Phases 0-4 or added here, answer:

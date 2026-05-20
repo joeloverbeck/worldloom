@@ -187,6 +187,43 @@ test("record_schema_compliance validates adjudication frontmatter", async () => 
   assert.equal(result.length, 0);
 });
 
+test("record_schema_compliance validates character proposal card and batch frontmatter", async () => {
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        markdownWithFrontmatter("character-proposals/NCP-12-maren.md", validCharacterProposalCard()),
+        markdownWithFrontmatter("character-proposals/batches/NCB-3-batch.md", validCharacterProposalBatch())
+      ]
+    },
+    context([])
+  );
+
+  assert.equal(result.length, 0);
+});
+
+test("record_schema_compliance rejects invalid character proposal card frontmatter", async () => {
+  const card = validCharacterProposalCard();
+  delete card.memorability_profile;
+
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        markdownWithFrontmatter("character-proposals/NCP-12-maren.md", card)
+      ]
+    },
+    context([])
+  );
+
+  assert.ok(
+    result.some(
+      (verdict) =>
+        verdict.location.node_id === "NCP-12" &&
+        verdict.code === "record_schema_compliance.required" &&
+        verdict.message.includes("memorability_profile")
+    )
+  );
+});
+
 test("record_schema_compliance rejects legacy adjudication body-only Discovery blocks", async () => {
   const result = await recordSchemaCompliance.run(
     {
@@ -856,5 +893,133 @@ function choiceTemplate(operation: string): Record<string, unknown> {
     likely_effects: [],
     choice_mode: "strategic",
     poetic_effect: "obvious"
+  };
+}
+
+function markdownWithFrontmatter(path: string, frontmatter: Record<string, unknown>) {
+  return {
+    path,
+    content: [
+      "---",
+      yaml.dump(frontmatter, { lineWidth: -1 }).trimEnd(),
+      "---",
+      "# Test Record",
+      "",
+      "Body prose."
+    ].join("\n")
+  };
+}
+
+function validCharacterProposalCard(): Record<string, unknown> {
+  return {
+    current_location: "River Tollhouse",
+    place_of_origin: "Lower Ferry",
+    date: "rain season",
+    species: "human",
+    age_band: "adult",
+    social_position: "licensed confessor",
+    profession: "toll clerk",
+    kinship_situation: "estranged oath-sibling",
+    religious_ideological_environment: "ledger cult",
+    major_local_pressures: ["seasonal debt audit"],
+    intended_narrative_role: "protagonist",
+    proposal_id: "NCP-12",
+    slug: "maren-toll-confessor",
+    title: "Maren, Toll Confessor",
+    niche_summary: "A toll confessor whose mercy is inseparable from debt recordkeeping.",
+    depth_class: "protagonist_grade",
+    proposal_family: "beloved institutional monster",
+    diagnosis_target: "debt authority",
+    memorability_profile: {
+      seed_essence_preserved: ["Toll confession role"],
+      world_produced_wound: "Her office requires public mercy and private debt collection.",
+      active_appetite: "She wants one confessed debtor to name her as savior.",
+      self_mythology: "She calls herself the only honest mouth in a town of ledgers.",
+      irreconcilable_contradiction: "She protects debtors by making them permanently legible to creditors.",
+      pressure_behavior: {
+        cornered: "quotes receipt law",
+        tempted: "asks who benefits",
+        humiliated: "turns procedural",
+        offered_power: "demands a witness",
+        protecting_attachment: "lies by omission"
+      },
+      relational_charge: [
+        {
+          target_or_relation_type: "former debtor",
+          need: "forgiveness",
+          resentment_or_fear: "being exposed as sentimental",
+          likely_harm_or_betrayal: "records the debtor's secret anyway"
+        }
+      ],
+      moral_psychological_edge: "She believes rescue is valid only when it leaves a scar.",
+      signature_scene_behaviors: ["folds receipts into charms", "counts exits before speaking", "answers prayers with fee schedules"],
+      voice_under_pressure: {
+        lying: "precise and priestly",
+        begging: "transactional",
+        threatening: "softly bureaucratic",
+        grieving_or_hiding_ignorance: "recites doctrine"
+      },
+      cannot_be_swapped_out_because: "Only her confessional toll office makes mercy and audit the same act."
+    },
+    scores: {
+      validity: { world_rootedness: 5 },
+      memorability: { protagonist_grade_force: 5 }
+    },
+    canon_assumption_flags: {
+      status: "canon-safe",
+      edge_assumptions: [],
+      implied_new_facts: []
+    },
+    recommended_next_step: "generate_immediately",
+    critic_pass_trace: {
+      phase_1_continuity_archivist: "No duplicate office found.",
+      phase_2_essence_extractor: "Debt-confession essence preserved.",
+      phase_3_constellation_mosaic: "Occupies an open ledger-faith niche.",
+      phase_5_institutional_everyday: "Turns toll work into daily pressure.",
+      phase_8_epistemic_focalization: "Knows law, not metaphysics.",
+      phase_9_voice_critic: "Speech stays procedural under pressure.",
+      phase_9_artifact_authorship: "Could author receipt-prayers.",
+      phase_11_theme_tone: "Fresh but world-rooted.",
+      blandness_executioner: "Valid-but-dull version was rejected.",
+      protagonist_grade_critic: "Can carry story pressure without plot-destiny fields."
+    },
+    canon_safety_check: {
+      invariants_respected: ["SOC-1"],
+      mystery_reserve_firewall: ["M-1"],
+      distribution_discipline: { canon_facts_consulted: ["CF-1"] }
+    },
+    source_basis: {
+      world_slug: "animalia",
+      generated_date: "2026-05-20",
+      user_approved: false
+    }
+  };
+}
+
+function validCharacterProposalBatch(): Record<string, unknown> {
+  return {
+    batch_id: "NCB-3",
+    world_slug: "animalia",
+    generated_date: "2026-05-20",
+    parameters: {
+      batch_size: 7,
+      depth_mix: { emblematic: 1, elastic: 3, round_load_bearing: 3 },
+      spread_vs_focus: "spread",
+      density_rule_mode: "auto",
+      target_domains: ["river tolls"],
+      taboo_areas: ["sexual coercion"],
+      ordinary_vs_exceptional_mix: "balanced",
+      artifact_author_share: 0.25,
+      under_modeled_priority: ["debt law"],
+      max_overlap_allowed: "crowded_permitted",
+      story_scale_mix: { intimate: 2, local: 3, regional: 1, transregional: 1 },
+      mosaic_cluster_preference: "mixed",
+      upstream_audit_path: ""
+    },
+    registry_summary: "The registry has no toll-confessor figure.",
+    card_ids: ["NCP-12"],
+    dropped_card_ids: [],
+    user_approved: false,
+    notes: "No batch-level repairs."
   };
 }

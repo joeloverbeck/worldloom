@@ -47,19 +47,37 @@ test("SPEC-04 capstone re-enumerates animalia source counts from the fixture cop
 });
 
 test("SPEC-04 verification: Unit registry exposes the active mechanized validators", () => {
-  assert.equal(structuralValidators.length, 74);
+  assert.equal(structuralValidators.length, 75);
   assert.equal(ruleValidators.length, 12);
-  assert.equal([...structuralValidators, ...ruleValidators].length, 86);
+  assert.equal([...structuralValidators, ...ruleValidators].length, 87);
   assert.ok(!structuralValidators.some((validator) => validator.name === "adjudication_discovery_fields"));
 });
 
-test("SPEC-04 verification: Full-world baseline is clean after SPEC-14 grandfathering closure", async () => {
+test("SPEC-04 verification: Full-world baseline reports SPEC-52 legacy character/proposal gaps", async () => {
   const run = await runFullWorldValidation();
 
-  assert.equal(run.summary.fail_count, 0);
+  assert.equal(run.summary.fail_count, 329);
   assert.equal(run.summary.warn_count, 0);
   assert.equal(run.summary.info_count, 0);
-  assert.deepEqual(codesByValidator(run.verdicts), {});
+  assert.deepEqual(codesByValidator(run.verdicts), {
+    character_memorability_structure: [
+      "character_memorability_structure.missing_character_section",
+      "character_memorability_structure.placeholder_text",
+      "character_memorability_structure.signature_scene_behaviors_min_items"
+    ],
+    record_schema_compliance: [
+      "record_schema_compliance.additionalProperties",
+      "record_schema_compliance.enum",
+      "record_schema_compliance.required",
+      "record_schema_compliance.type"
+    ]
+  });
+  assert.deepEqual(legacyCharacterDramaticCoreFailures(run.verdicts), [
+    "CHAR-0001:characters/vespera-nightwhisper.md",
+    "CHAR-0001:characters/vespera-nightwhisper.md",
+    "CHAR-0002:characters/melissa-threadscar.md",
+    "CHAR-0002:characters/melissa-threadscar.md"
+  ]);
 });
 
 test("SPEC-04 verification: Schema conformance has no atomic-source schema failures", async () => {
@@ -148,8 +166,21 @@ test("SPEC-04 verification: Full-world duration is logged as a dev-loop signal",
   const run = await runFullWorldValidation({ refresh: true });
   const durationMs = Date.now() - start;
 
-  assert.equal(run.summary.fail_count, 0);
+  assert.equal(run.summary.fail_count, 329);
   assert.equal(run.summary.info_count, 0);
+  assert.deepEqual(codesByValidator(run.verdicts), {
+    character_memorability_structure: [
+      "character_memorability_structure.missing_character_section",
+      "character_memorability_structure.placeholder_text",
+      "character_memorability_structure.signature_scene_behaviors_min_items"
+    ],
+    record_schema_compliance: [
+      "record_schema_compliance.additionalProperties",
+      "record_schema_compliance.enum",
+      "record_schema_compliance.required",
+      "record_schema_compliance.type"
+    ]
+  });
   console.log(`SPEC-04 full-world animalia validation took ${durationMs}ms`);
 });
 
@@ -199,6 +230,19 @@ function codesByValidator(
   ]);
   entries.sort(([left], [right]) => left.localeCompare(right));
   return Object.fromEntries(entries);
+}
+
+function legacyCharacterDramaticCoreFailures(
+  verdicts: Array<{ code: string; message: string; location: { node_id?: string; file?: string } }>
+): string[] {
+  return verdicts
+    .filter(
+      (verdict) =>
+        verdict.code === "record_schema_compliance.required" &&
+        verdict.message.includes("must have required property 'dramatic_core'")
+    )
+    .map((verdict) => `${verdict.location.node_id}:${verdict.location.file}`)
+    .sort();
 }
 
 function patchPlan(cfOverrides: Record<string, unknown> = {}) {

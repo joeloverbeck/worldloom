@@ -3,6 +3,7 @@ import { activeRecordsFullShape } from "../structural/active-records-full-shape.
 import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
+import { characterMemorabilityStructure } from "../structural/character-memorability-structure.js";
 import { chcSltSelectedCommitmentTrace } from "../structural/chc-slt-selected-commitment-trace.js";
 import { clockFiringThresholdIntegrity } from "../structural/clock-firing-threshold-integrity.js";
 import { clockIntroductionGroundingIntegrity } from "../structural/clock-introduction-grounding-integrity.js";
@@ -91,6 +92,7 @@ export const structuralValidators: readonly Validator[] = [
   idUniqueness,
   crossFileReference,
   recordSchemaCompliance,
+  characterMemorabilityStructure,
   storyFactAuthority,
   liePromotedSilently,
   branchIsolation,

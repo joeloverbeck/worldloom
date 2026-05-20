@@ -26,6 +26,37 @@ Parse `character_brief_path` if provided; otherwise interview the user. Extract:
 - desired arc type
 - taboo or limit themes to avoid
 
+**NCP memorability preservation contract**: if `character_brief_path` points to a character proposal card carrying `memorability_profile`, parse that block before ordinary optional-input extraction and store it as `input_memorability_contract` for Phases 4b, 7, 8, and 9:
+
+```yaml
+input_memorability_contract:
+  source_proposal_id: <NCP-<integer>>
+  preserved_essence: []                 # from seed_essence_preserved[] when present
+  protagonist_grade_engine:
+    world_produced_wound: ""
+    active_appetite: ""
+    self_mythology: ""
+    irreconcilable_contradiction: ""
+    pressure_behavior:
+      cornered: ""
+      tempted: ""
+      humiliated: ""
+      offered_power: ""
+      protecting_attachment: ""
+    relational_charge: []
+    moral_psychological_edge: ""
+    signature_scene_behaviors: []
+    voice_under_pressure:
+      lying: ""
+      begging: ""
+      threatening: ""
+      grieving_or_hiding_ignorance: ""
+    cannot_be_swapped_out_because: ""
+  flattening_forbidden_without_user_approval: true
+```
+
+`preserved_essence` comes from `memorability_profile.seed_essence_preserved[]` when present; if the card omits that array, derive a compact essence list from the proposal title, `niche_summary`, and `cannot_be_swapped_out_because`. Do not treat the proposal card as canon. It is a preservation contract for the generated dossier: Phase 4b must carry its load-bearing engine into `dramatic_core`, and Phase 9 must surface any canon-safety repair that weakens, redirects, or drops an element before approval.
+
 **Conditional context-packet expansion**: if any declared input touches magical or technological capability (checked against `ONTOLOGY.md` magic-practice / technology categories or capability CFs in the packet), expand retrieval via `mcp__worldloom__search_nodes(node_type='section', filters={file_class: 'magic-or-tech-systems'})` and `get_record(sec_id)` for each relevant SEC-MTS record. Skip otherwise to avoid context bloat on ordinary-laborer characters.
 
 **Region/era descriptor binding fallback**: `find_named_entities` performs exact-match resolution against the entity registry. Region descriptors (e.g., `drylands`, `canal-heartland`) and era descriptors (e.g., `Charter-Era`, `Incident Wave`) that appear only inside compound tokens (`drylands south`, `Charter-Era integration`) may return empty canonical matches because they are not registered as standalone entities. When the response includes `hints[]`, prefer each hint's `matching_record_ids[]` (up to 10 SEC-GEO / SEC-TML source records) and bind the descriptor to those records by reference rather than to a single `ENT-<integer>` id. Use `mcp__worldloom__search_nodes(world_slug, query='<descriptor>')` only when `matching_record_ids[]` is empty, absent, or capped below `record_count`.

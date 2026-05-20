@@ -14,6 +14,8 @@ export const STRUCTURAL_NODE_TYPES = [
   "named_entity",
   "section",
   "character_record",
+  "character_proposal_card",
+  "character_proposal_batch",
   "diegetic_artifact_record",
   "adjudication_record",
   "story_entity_record",
@@ -82,6 +84,8 @@ export const RECORD_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
   section: "section",
   adjudication_record: "adjudication-frontmatter",
   character_record: "character-frontmatter",
+  character_proposal_card: "character-proposal-card",
+  character_proposal_batch: "character-proposal-batch",
   diegetic_artifact_record: "diegetic-artifact-frontmatter",
   story_entity_record: "story-entity",
   story_status_record: "story-status",
@@ -246,6 +250,12 @@ function isStructuralAuthorityRecord(record: IndexedRecord): boolean {
   if (record.node_type === "character_record") {
     return /^characters\/[^/]+\.md$/.test(filePath);
   }
+  if (record.node_type === "character_proposal_card") {
+    return /^character-proposals\/[^/]+\.md$/.test(filePath) && /^NCP-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "character_proposal_batch") {
+    return /^character-proposals\/batches\/[^/]+\.md$/.test(filePath) && /^NCB-\d+$/.test(nodeId);
+  }
   if (record.node_type === "diegetic_artifact_record") {
     return /^diegetic-artifacts\/[^/]+\.md$/.test(filePath);
   }
@@ -340,7 +350,7 @@ function listSupportedWorldFiles(worldRoot: string): string[] {
     }
   }
 
-  for (const dir of ["characters", "diegetic-artifacts", "adjudications"]) {
+  for (const dir of ["characters", "character-proposals", "character-proposals/batches", "diegetic-artifacts", "adjudications"]) {
     const absoluteDir = path.join(worldRoot, dir);
     if (!existsSync(absoluteDir)) {
       continue;

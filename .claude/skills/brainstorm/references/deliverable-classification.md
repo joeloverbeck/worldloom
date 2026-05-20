@@ -6,6 +6,8 @@ The full specification for Step 5's deliverable-classification rules. SKILL.md r
 
 (Also rendered in SKILL.md Step 5 for fast lookup; reproduced here for self-contained reference.)
 
+**Worktree-root anchoring (load-bearing)**: every output destination below is written relative — when invoked inside a git worktree, resolve each path (including `specs/<spec>.md` and the §Spec-ID assignment scan of `specs/` + `archive/specs/`) against the **worktree root**, not the main repository root (per SKILL.md Guardrails §Worktree discipline). After writing, confirm the file landed under the worktree root.
+
 | Deliverable shape | Output destination |
 |---|---|
 | Inline ops/setup task or mechanical-fix triage | execute inline + summary; no file persisted |

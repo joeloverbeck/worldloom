@@ -21,6 +21,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "canon_baseline_drift",
   "canon_drift_classification_evidence",
   "causal_dependency_threat_scan",
+  "character_memorability_structure",
   "chc_slt_selected_commitment_trace",
   "chc_grounded_in_artifact_accessible",
   "choice_set_noncollapse",

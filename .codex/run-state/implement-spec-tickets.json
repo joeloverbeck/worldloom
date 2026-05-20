@@ -1,9 +1,9 @@
 {
-  "originating_spec": null,
-  "archived_spec": "archive/specs/SPEC-51-chc-slt-selected-commitment-trace-closure.md",
-  "last_ticket": "archive/tickets/SPEC51CHCSLTSEL-005.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "9ed746bef8f65b133af6f7c69aae709b5e26299c",
+  "originating_spec": "archive/specs/SPEC-52-protagonist-grade-character-pipeline.md",
+  "archived_spec": "archive/specs/SPEC-52-protagonist-grade-character-pipeline.md",
+  "last_ticket": "archive/tickets/SPEC52PROGRACHA-007.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "c865dae85c93c932bc379cf3125553e6eafc1612",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -14,6 +14,6 @@
   "post_review_audit_block": "not_applicable",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "pre-existing unrelated dirty gitlink/worktree entry .claude/worktrees/deepening-characters; ignored package artifacts present under tools/world-index/dist/, tools/world-index/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
+  "dirty_state": "expected ignored artifacts after proof: .claude/settings.local.json, tools/validators/node_modules/, tools/validators/dist/, tools/world-index/node_modules/, tools/world-index/dist/, tools/patch-engine/node_modules/, tools/patch-engine/dist/",
   "updated_at": "2026-05-20"
 }

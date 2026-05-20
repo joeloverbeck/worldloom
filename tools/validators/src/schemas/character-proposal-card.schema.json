@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/character-proposal-card.schema.json",
+  "title": "CharacterProposalCardFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["current_location", "place_of_origin", "date", "species", "age_band", "social_position", "profession", "kinship_situation", "religious_ideological_environment", "major_local_pressures", "intended_narrative_role", "proposal_id", "slug", "title", "niche_summary", "depth_class", "proposal_family", "diagnosis_target", "memorability_profile", "scores", "canon_assumption_flags", "recommended_next_step", "critic_pass_trace", "canon_safety_check", "source_basis"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "pressureBehavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cornered", "tempted", "humiliated", "offered_power", "protecting_attachment"],
+      "properties": {
+        "cornered": { "$ref": "#/$defs/nonEmptyString" },
+        "tempted": { "$ref": "#/$defs/nonEmptyString" },
+        "humiliated": { "$ref": "#/$defs/nonEmptyString" },
+        "offered_power": { "$ref": "#/$defs/nonEmptyString" },
+        "protecting_attachment": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "voiceUnderPressure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lying", "begging", "threatening", "grieving_or_hiding_ignorance"],
+      "properties": {
+        "lying": { "$ref": "#/$defs/nonEmptyString" },
+        "begging": { "$ref": "#/$defs/nonEmptyString" },
+        "threatening": { "$ref": "#/$defs/nonEmptyString" },
+        "grieving_or_hiding_ignorance": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "relationalCharge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_or_relation_type", "need", "resentment_or_fear", "likely_harm_or_betrayal"],
+      "properties": {
+        "target_or_relation_type": { "$ref": "#/$defs/nonEmptyString" },
+        "need": { "$ref": "#/$defs/nonEmptyString" },
+        "resentment_or_fear": { "$ref": "#/$defs/nonEmptyString" },
+        "likely_harm_or_betrayal": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "memorabilityProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seed_essence_preserved", "world_produced_wound", "active_appetite", "self_mythology", "irreconcilable_contradiction", "pressure_behavior", "relational_charge", "moral_psychological_edge", "signature_scene_behaviors", "voice_under_pressure", "cannot_be_swapped_out_because"],
+      "properties": {
+        "seed_essence_preserved": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "world_produced_wound": { "$ref": "#/$defs/nonEmptyString" },
+        "active_appetite": { "$ref": "#/$defs/nonEmptyString" },
+        "self_mythology": { "$ref": "#/$defs/nonEmptyString" },
+        "irreconcilable_contradiction": { "$ref": "#/$defs/nonEmptyString" },
+        "pressure_behavior": { "$ref": "#/$defs/pressureBehavior" },
+        "relational_charge": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/relationalCharge" }
+        },
+        "moral_psychological_edge": { "$ref": "#/$defs/nonEmptyString" },
+        "signature_scene_behaviors": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "voice_under_pressure": { "$ref": "#/$defs/voiceUnderPressure" },
+        "cannot_be_swapped_out_because": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "upgradeLineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin_kind", "source_path", "source_proposal_id", "mutation_summary", "rejected_directions_audit"],
+      "properties": {
+        "origin_kind": { "type": "string", "enum": ["batch_generated", "upgraded_seed", "user_seed"] },
+        "source_path": { "type": "string" },
+        "source_proposal_id": { "type": "string" },
+        "mutation_summary": { "type": "string" },
+        "rejected_directions_audit": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "canonAssumptionFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["statement", "reason_needed", "preferred_route"],
+      "properties": {
+        "statement": { "$ref": "#/$defs/nonEmptyString" },
+        "reason_needed": { "$ref": "#/$defs/nonEmptyString" },
+        "preferred_route": { "type": "string", "enum": ["canon-addition", "propose-new-canon-facts"] }
+      }
+    },
+    "canonAssumptionFlags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "edge_assumptions", "implied_new_facts"],
+      "properties": {
+        "status": { "type": "string", "enum": ["canon-safe", "canon-edge", "canon-requiring"] },
+        "edge_assumptions": { "$ref": "#/$defs/stringArray" },
+        "implied_new_facts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/canonAssumptionFact" }
+        }
+      }
+    },
+    "criticPassTrace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase_1_continuity_archivist", "phase_2_essence_extractor", "phase_3_constellation_mosaic", "phase_5_institutional_everyday", "phase_8_epistemic_focalization", "phase_9_voice_critic", "phase_9_artifact_authorship", "phase_11_theme_tone", "blandness_executioner", "protagonist_grade_critic"],
+      "properties": {
+        "phase_1_continuity_archivist": { "$ref": "#/$defs/nonEmptyString" },
+        "phase_2_essence_extractor": { "$ref": "#/$defs/nonEmptyString" },
+        "phase_3_constellation_mosaic": { "$ref": "#/$defs/nonEmptyString" },
+        "phase_5_institutional_everyday": { "$ref": "#/$defs/nonEmptyString" },
+        "phase_8_epistemic_focalization": { "$ref": "#/$defs/nonEmptyString" },
+        "phase_9_voice_critic": { "$ref": "#/$defs/nonEmptyString" },
+        "phase_9_artifact_authorship": { "$ref": "#/$defs/nonEmptyString" },
+        "phase_11_theme_tone": { "$ref": "#/$defs/nonEmptyString" },
+        "blandness_executioner": { "$ref": "#/$defs/nonEmptyString" },
+        "protagonist_grade_critic": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    }
+  },
+  "properties": {
+    "current_location": { "$ref": "#/$defs/nonEmptyString" },
+    "place_of_origin": { "$ref": "#/$defs/nonEmptyString" },
+    "date": { "$ref": "#/$defs/nonEmptyString" },
+    "species": { "$ref": "#/$defs/nonEmptyString" },
+    "age_band": { "$ref": "#/$defs/nonEmptyString" },
+    "social_position": { "$ref": "#/$defs/nonEmptyString" },
+    "profession": { "$ref": "#/$defs/nonEmptyString" },
+    "kinship_situation": { "$ref": "#/$defs/nonEmptyString" },
+    "religious_ideological_environment": { "$ref": "#/$defs/nonEmptyString" },
+    "major_local_pressures": { "$ref": "#/$defs/stringArray" },
+    "intended_narrative_role": { "$ref": "#/$defs/nonEmptyString" },
+    "central_contradiction": { "type": "string" },
+    "desired_emotional_tone": { "type": "string" },
+    "desired_arc_type": { "type": "string" },
+    "taboo_limit_themes": { "$ref": "#/$defs/stringArray" },
+    "proposal_id": { "type": "string", "pattern": "^NCP-[0-9]+$" },
+    "batch_id": { "type": "string", "pattern": "^NCB-[0-9]+$" },
+    "slug": { "$ref": "#/$defs/nonEmptyString" },
+    "title": { "$ref": "#/$defs/nonEmptyString" },
+    "niche_summary": { "$ref": "#/$defs/nonEmptyString" },
+    "occupancy_strength": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "current_state": { "type": "string", "enum": ["open", "adjacent", "crowded", "filled"] },
+        "nearest_existing_occupants": { "$ref": "#/$defs/stringArray" },
+        "overlap_type": { "type": "string", "enum": ["", "none", "adjacent", "crowded", "hard_duplicate"] },
+        "decisive_differences": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "depth_class": { "type": "string", "enum": ["emblematic", "elastic", "round_load_bearing", "protagonist_grade"] },
+    "proposal_family": { "$ref": "#/$defs/nonEmptyString" },
+    "diagnosis_target": { "$ref": "#/$defs/nonEmptyString" },
+    "memorability_profile": { "$ref": "#/$defs/memorabilityProfile" },
+    "upgrade_lineage": { "$ref": "#/$defs/upgradeLineage" },
+    "scores": { "type": "object", "additionalProperties": true },
+    "score_aggregate": { "type": "number" },
+    "canon_assumption_flags": { "$ref": "#/$defs/canonAssumptionFlags" },
+    "recommended_next_step": { "type": "string", "enum": ["generate_immediately", "reserved_future_seed", "generate_after_canon_adjudication"] },
+    "critic_pass_trace": { "$ref": "#/$defs/criticPassTrace" },
+    "canon_safety_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["invariants_respected", "mystery_reserve_firewall", "distribution_discipline"],
+      "properties": {
+        "invariants_respected": { "$ref": "#/$defs/stringArray" },
+        "mystery_reserve_firewall": { "$ref": "#/$defs/stringArray" },
+        "distribution_discipline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["canon_facts_consulted"],
+          "properties": {
+            "canon_facts_consulted": { "$ref": "#/$defs/stringArray" }
+          }
+        }
+      }
+    },
+    "source_basis": { "type": "object", "additionalProperties": true },
+    "notes": { "type": "string" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "canon_assumption_flags": {
+            "type": "object",
+            "properties": {
+              "status": { "const": "canon-requiring" }
+            },
+            "required": ["status"]
+          }
+        },
+        "required": ["canon_assumption_flags"]
+      },
+      "then": {
+        "properties": {
+          "canon_assumption_flags": {
+            "type": "object",
+            "properties": {
+              "implied_new_facts": { "type": "array", "minItems": 1 }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

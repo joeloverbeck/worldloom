@@ -2,20 +2,35 @@
 
 ## Phase 11: Score and Select
 
-Score each canon-gate-surviving seed on 10 dimensions (1–5 each):
+Score each canon-gate-surviving seed on two layers.
+
+### Layer A: World Validity
 
 - `world_rootedness`
 - `niche_distinctiveness`
-- `pressure_richness`
-- `voice_distinctiveness`
+- `institutional_embedding`
 - `ordinary_life_relevance`
-- `artifact_utility`
-- `thematic_freshness`
-- `expansion_potential`
+- `capability_cost_integrity`
+- `canon_safety`
 - `canon_burden` — LOWER better
 - `overlap_risk` — LOWER better
 
-**Aggregate**: (`world_rootedness` + `niche_distinctiveness` + `pressure_richness` + `voice_distinctiveness` + `ordinary_life_relevance` + `artifact_utility` + `thematic_freshness` + `expansion_potential`) − (`canon_burden` + `overlap_risk`). Range [−10, +40].
+### Layer B: Memorability
+
+- `protagonist_grade_force`
+- `contradiction_irreconcilability`
+- `appetite_specificity`
+- `self_mythology_strength`
+- `pressure_behavior_distinctiveness`
+- `voice_pressure_distinction`
+- `relational_charge`
+- `moral_psychological_edge`
+- `world_specific_surprise`
+- `cannot_be_swapped_out`
+
+**Aggregate**: `validity_total + 1.5 * memorability_total - canon_burden - overlap_risk`.
+
+A canon-safe but weak-memorability proposal must not survive on validity alone. A canon-requiring proposal may survive only when the implied facts are precisely routed and the payoff is worth the burden.
 
 **Pairwise distance axes** against existing registry AND against other candidates:
 
@@ -29,11 +44,11 @@ geography / institution / species-body / power-relation / pressure-cluster / kno
 
 **Rule**: A slightly lower-scoring proposal may be preferable if it opens a genuinely new world window.
 
-**Mandatory critic pass**: Theme / Tone Critic.
+**Mandatory critic passes**: Theme / Tone Critic, Blandness Executioner, and Protagonist-Grade Critic. Each PASS requires a one-line rationale; a bare PASS is a FAIL.
 
 ## Phase 12: Filter Out Bad Proposals
 
-Apply 13 rejection triggers. Each triggered rejection logged to the batch manifest's Phase 12 Rejected-Candidate Log with trigger name + seed content + diagnosis target:
+Apply the original rejection triggers plus the protagonist-grade triggers. Each triggered rejection is logged to the batch manifest's Phase 12 Rejected-Candidate Log with trigger name + seed content + diagnosis target:
 
 1. Differs only cosmetically from an existing registry entry
 2. Profession clone
@@ -48,6 +63,18 @@ Apply 13 rejection triggers. Each triggered rejection logged to the batch manife
 11. Duplicates the same pressure cluster and voice family as another selected proposal
 12. Requires massive new canon for little gain
 13. Turns species or body into costume only
+14. Valid but dull: a good Worldloom citizen with no behaviorally memorable pressure engine
+15. Abstract contradiction that never becomes repeated behavior
+16. Generic, polite, missing, or merely noun-stated appetite
+17. Missing, generic, or slogan-only self-mythology
+18. Absent, interchangeable, or synonym-only pressure behavior
+19. Cosmetic weirdness not produced by a modeled world pressure
+20. Relationship-neutral card with no costly need, resentment, fear, debt, devotion, rivalry, dependence, or likely harm
+21. Moral or psychological edge sanded off to avoid discomfort
+22. Timid mutation that only restates the original premise
+23. Canon-requiring brilliance suppressed instead of routed to `canon-addition` or `propose-new-canon-facts`
+24. Vocabulary-only voice distinction
+25. Uncaused specialness by exception without cost, bottleneck, secrecy, taboo, distribution limit, or institutional mechanism
 
 ## Phase 13: Diversify the Final Batch
 
@@ -62,7 +89,7 @@ Fill 10 composition slots (left-to-right fill priority when X < 10):
 7. Ideological misreader or dissenter
 8. Regionally distant mosaic figure
 9. Body / species-differentiated lens
-10. Potentially load-bearing round character
+10. Protagonist-grade load-bearing character
 
 Also vary across 8 contrast axes:
 

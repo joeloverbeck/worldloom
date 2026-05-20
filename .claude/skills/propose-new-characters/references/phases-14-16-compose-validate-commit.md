@@ -8,7 +8,7 @@ Materialize each surviving seed into the `NCP-<integer>-<slug>.md` card schema. 
 
 - `character-generation`'s required inputs: `current_location`, `place_of_origin`, `date`, `species`, `age_band`, `social_position`, `profession`, `kinship_situation`, `religious_ideological_environment`, `major_local_pressures`, `intended_narrative_role`.
 - `character-generation`'s optional inputs: `central_contradiction`, `desired_emotional_tone`, `desired_arc_type`, `taboo_limit_themes`.
-- NCP-specific keys: `proposal_id`, `batch_id`, `slug`, `title`, `niche_summary`, `occupancy_strength` (`current_state`, `nearest_existing_occupants`, `overlap_type`, `decisive_differences`), `depth_class`, `proposal_family`, `diagnosis_target`, `scores`, `score_aggregate`, `canon_assumption_flags`, `recommended_next_step` (`generate_immediately` / `reserved_future_seed` / `generate_after_canon_adjudication`), `critic_pass_trace` (template slots: `phase_1_continuity_archivist`, `phase_2_essence_extractor`, `phase_3_constellation_mosaic`, `phase_5_institutional_everyday`, `phase_8_epistemic_focalization`, `phase_9_voice_critic`, `phase_9_artifact_authorship`, `phase_11_theme_tone`), `canon_safety_check`, `source_basis`, `notes`.
+- NCP-specific keys: `proposal_id`, `batch_id`, `slug`, `title`, `niche_summary`, `memorability_profile`, optional `upgrade_lineage`, `occupancy_strength` (`current_state`, `nearest_existing_occupants`, `overlap_type`, `decisive_differences`), `depth_class`, `proposal_family`, `diagnosis_target`, `scores`, `score_aggregate`, `canon_assumption_flags`, `recommended_next_step` (`generate_immediately` / `reserved_future_seed` / `generate_after_canon_adjudication`), `critic_pass_trace` (template slots: `phase_1_continuity_archivist`, `phase_2_essence_extractor`, `phase_3_constellation_mosaic`, `phase_5_institutional_everyday`, `phase_8_epistemic_focalization`, `phase_9_voice_critic`, `phase_9_artifact_authorship`, `phase_11_theme_tone`, `blandness_executioner`, `protagonist_grade_critic`), `canon_safety_check`, `source_basis`, `notes`.
 
 The first frontmatter block (character-generation compatibility fields) MUST mirror `character-generation`'s `character_brief_path` shape byte-for-byte so the card path is directly consumable downstream.
 
@@ -38,7 +38,7 @@ Both levels are required. Per-card slots provide seed-specific attribution; per-
 
 ## Phase 15: Final Validation Tests
 
-Run all 12 tests. Any FAIL halts and loops to the responsible phase. Record each as PASS / FAIL with one-line rationale in the batch manifest's Phase 15 Test Results section. **PASS without rationale = FAIL.**
+Run all 18 tests. Any FAIL halts and loops to the responsible phase. Record each as PASS / FAIL with one-line rationale in the batch manifest's Phase 15 Test Results section. **PASS without rationale = FAIL.**
 
 **Per-card** (run over every card):
 
@@ -51,12 +51,18 @@ Run all 12 tests. Any FAIL halts and loops to the responsible phase. Record each
 7. **(Phase 10a)** `canon_safety_check.invariants_respected` lists every invariant tested; no silent skips.
 8. **(Phase 14 schema completeness)** No card field left TODO / placeholder / empty where the schema requires content.
 9. **(Voice distinctiveness, Phase 9)** No two cards in the batch share the same voice family unless deliberate contrast is explicitly noted in the card's `notes`.
+10. **(Protagonist-grade engine, Phase 7)** `memorability_profile` is present and fully populated with all shared-reference fields.
+11. **(Rule 2, Phase 7)** `world_produced_wound`, `active_appetite`, and `self_mythology` are specific and world-produced, not generic biography or slogan.
+12. **(Pressure behavior, Phase 7)** `pressure_behavior` has at least four distinct responses across `cornered`, `tempted`, `humiliated`, `offered_power`, and `protecting_attachment`.
+13. **(Relational charge, Phase 7)** `relational_charge` has at least one charged relation with a named need and likely harm/betrayal risk.
+14. **(Cannot-swap test, Phase 7)** `cannot_be_swapped_out_because` names world-specific reasons, not profession/species/class alone.
+15. **(Critic rationale, Phase 11/12)** Blandness Executioner and Protagonist-Grade Critic both PASS with one-line rationales tied to concrete world-produced behavior.
 
 **Batch-level**:
 
-10. **(Phase 13 diversification)** Diversification audit table is complete; empty slots have rationale; no silent empties.
-11. **(Phase 10d)** Phase 10d check trace is complete for all pairs tested at generation time (including pairs involving seeds later dropped at Phase 10e).
-12. **(Phase 12 audit)** Rejected-candidate log complete; each rejection cites trigger + diagnosis target.
+16. **(Phase 13 diversification)** Diversification audit table is complete; empty slots have rationale; no silent empties.
+17. **(Phase 10d)** Phase 10d check trace is complete for all pairs tested at generation time (including pairs involving seeds later dropped at Phase 10e).
+18. **(Phase 12 audit)** Rejected-candidate log complete; each rejection cites trigger + diagnosis target.
 
 ## Phase 16: Commit
 
@@ -67,7 +73,7 @@ Present the deliverable summary:
 3. Niche-occupancy map (Phase 4 filled / crowded / open)
 4. Phase 5 Negative-Space Diagnosis (probes fired + remediation priorities)
 5. Full batch — every surviving card's frontmatter + body. Full body prose on disk is mandatory per Phase 14; review-presentation may compress prose when batch size makes full-prose unwieldy.
-6. Batch manifest (Phase 6 seed count + Phase 11 score matrix + Phase 12 rejected log + Phase 13 diversification audit + Phase 10d/e traces)
+6. Batch manifest (Phase 6 seed count + Phase 11 two-layer score matrix + Phase 12 rejected log + Phase 13 diversification audit + Phase 10d/e traces)
 7. Canon Safety Check traces per card (Phase 10 audit)
 8. Phase 15 test results with rationales
 9. Per-card `canon_assumption_flags.status` + `recommended_next_step` (so the user can decide routing before accepting)

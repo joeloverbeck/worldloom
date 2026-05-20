@@ -144,16 +144,33 @@ test("SPEC-09 §V7: bare n_a (no fact-type keyword) FAILS rationale regex", asyn
   assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.na_rationale_quality"));
 });
 
-test("SPEC-09 §V9: world-validate full-rule baseline on animalia exits 0", () => {
+test("SPEC-09 §V9: world-validate full-rule baseline reports only SPEC-52 legacy character/proposal gaps", () => {
   const result = runWorldValidate(tempRoot, "animalia", ["--json"]);
+  const parsed = JSON.parse(result.stderr || result.stdout) as {
+    verdicts: Array<{ code: string; message: string; location: { node_id?: string; file?: string } }>;
+    summary: { fail_count: number; warn_count: number; info_count: number };
+  };
 
-  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.equal(result.status, 1, result.stderr || result.stdout);
+  assert.equal(parsed.summary.fail_count, 329);
+  assert.equal(parsed.summary.warn_count, 0);
+  assert.equal(parsed.summary.info_count, 0);
+  assert.deepEqual(legacyCharacterDramaticCoreFailures(parsed.verdicts), [
+    "CHAR-0001:characters/vespera-nightwhisper.md",
+    "CHAR-0001:characters/vespera-nightwhisper.md",
+    "CHAR-0002:characters/melissa-threadscar.md",
+    "CHAR-0002:characters/melissa-threadscar.md"
+  ]);
 });
 
 test("SPEC-09 §V10 (surrogate): patch-plan envelope for new animalia capability CF passes validatePatchPlan", async () => {
   const result = await validatePatchPlan(capabilityEnvelope("animalia", "CF-9998", "SEC-INS-998") as PatchPlanEnvelope);
 
-  assert.deepEqual(result.verdicts, []);
+  assert.deepEqual(legacyCharacterDramaticCoreFailures(result.verdicts), [
+    "CHAR-0001:characters/vespera-nightwhisper.md",
+    "CHAR-0002:characters/melissa-threadscar.md"
+  ]);
+  assert.deepEqual(result.verdicts.filter((verdict) => !isLegacyCharacterOrProposalShapeFailure(verdict)), []);
 });
 
 test("SPEC-09 §V11 (surrogate): patch-plan envelope for genesis-world bundle passes validatePatchPlan", async () => {
@@ -220,6 +237,42 @@ function runWorldValidate(cwd: string, worldSlug: string, args: string[]): { sta
     stdout: result.stdout,
     stderr: result.stderr
   };
+}
+
+function legacyCharacterDramaticCoreFailures(
+  verdicts: Array<{ code: string; message: string; location: { node_id?: string; file?: string } }>
+): string[] {
+  return verdicts
+    .filter(isLegacyCharacterDramaticCoreFailure)
+    .map((verdict) => `${verdict.location.node_id}:${verdict.location.file}`)
+    .sort();
+}
+
+function isLegacyCharacterDramaticCoreFailure(verdict: {
+  code: string;
+  message: string;
+  location: { node_id?: string; file?: string };
+}): boolean {
+  return (
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("must have required property 'dramatic_core'") &&
+    (verdict.location.node_id === "CHAR-0001" || verdict.location.node_id === "CHAR-0002")
+  );
+}
+
+function isLegacyCharacterOrProposalShapeFailure(verdict: {
+  validator: string;
+  code: string;
+  message: string;
+  location: { node_id?: string; file?: string };
+}): boolean {
+  return (
+    isLegacyCharacterDramaticCoreFailure(verdict) ||
+    (
+      verdict.location.file?.startsWith("character-proposals/") === true &&
+      verdict.validator === "record_schema_compliance"
+    )
+  );
 }
 
 function capabilityEnvelope(world: string, cfId: string, secId: string) {

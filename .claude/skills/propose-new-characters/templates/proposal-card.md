@@ -65,29 +65,70 @@ occupancy_strength:
   overlap_type: ""                           # none | adjacent | crowded | hard_duplicate (hard_duplicate should have been filtered at Phase 4 or Phase 10d; if present here, see notes)
   decisive_differences: []                   # what makes THIS proposal distinct from the nearest occupants
 
-depth_class: elastic                         # emblematic | elastic | round_load_bearing
+depth_class: elastic                         # emblematic | elastic | round_load_bearing | protagonist_grade
 proposal_family: ""                          # one of the 16 families from Phase 6
 diagnosis_target: ""                         # which Phase 5 probe this seed addresses
 
+# ===== protagonist-grade engine (Phase 7, shared reference) =====
+
+memorability_profile:
+  seed_essence_preserved: []                 # non-negotiables preserved from prompt, audit, or seed
+  world_produced_wound: ""                   # world mechanism that produced the durable wound/humiliation/debt/loss
+  active_appetite: ""                        # behavioral wanting rooted in material, social, bodily, institutional, or belief pressure
+  self_mythology: ""                         # self-story made available by local values/institutions
+  irreconcilable_contradiction: ""           # recurring world-valid conflict, not generic virtue/flaw
+  pressure_behavior:
+    cornered: ""
+    tempted: ""
+    humiliated: ""
+    offered_power: ""
+    protecting_attachment: ""
+  relational_charge:
+    - target_or_relation_type: ""
+      need: ""
+      resentment_or_fear: ""
+      likely_harm_or_betrayal: ""
+  moral_psychological_edge: ""               # uncomfortable line tied to law, piety, hunger, rank, secrecy, survival, etc.
+  signature_scene_behaviors: []              # repeated visible behaviors arising from world pressure
+  voice_under_pressure:
+    lying: ""
+    begging: ""
+    threatening: ""
+    grieving_or_hiding_ignorance: ""
+  cannot_be_swapped_out_because: ""          # world-specific non-interchangeability reason
+
+upgrade_lineage:                             # optional for batch-generated cards; required for upgraded/user-seed cards
+  origin_kind: batch_generated               # batch_generated | upgraded_seed | user_seed
+  source_path: ""
+  source_proposal_id: ""
+  mutation_summary: ""
+  rejected_directions_audit: []
+
 # ===== scoring (Phase 11) =====
 
-scores:                                      # each 1-5 per Phase 11 rubric; canon_burden and overlap_risk are LOWER-is-better
-  world_rootedness: 0
-  niche_distinctiveness: 0
-  pressure_richness: 0
-  voice_distinctiveness: 0
-  ordinary_life_relevance: 0
-  artifact_utility: 0
-  thematic_freshness: 0
-  expansion_potential: 0
-  canon_burden: 0                            # LOWER is better (5 = requires massive new canon)
-  overlap_risk: 0                            # LOWER is better
+scores:                                      # each 1-5 per Phase 11; canon_burden and overlap_risk are LOWER-is-better
+  validity:
+    world_rootedness: 0
+    niche_distinctiveness: 0
+    institutional_embedding: 0
+    ordinary_life_relevance: 0
+    capability_cost_integrity: 0
+    canon_safety: 0
+    canon_burden: 0                          # LOWER is better (5 = requires massive new canon)
+    overlap_risk: 0                          # LOWER is better
+  memorability:
+    protagonist_grade_force: 0
+    contradiction_irreconcilability: 0
+    appetite_specificity: 0
+    self_mythology_strength: 0
+    pressure_behavior_distinctiveness: 0
+    voice_pressure_distinction: 0
+    relational_charge: 0
+    moral_psychological_edge: 0
+    world_specific_surprise: 0
+    cannot_be_swapped_out: 0
 
-score_aggregate: 0                           # (world_rootedness + niche_distinctiveness + pressure_richness
-                                             #  + voice_distinctiveness + ordinary_life_relevance + artifact_utility
-                                             #  + thematic_freshness + expansion_potential)
-                                             # − (canon_burden + overlap_risk)
-                                             # Range: [-10, +40]
+score_aggregate: 0                           # validity_total + 1.5 * memorability_total - canon_burden - overlap_risk
 
 # ===== canon routing (Phase 10c output) =====
 
@@ -95,7 +136,7 @@ canon_assumption_flags:
   status: canon-safe                         # canon-safe | canon-edge | canon-requiring
   edge_assumptions: []                       # populated when status=canon-edge; each entry names the leaning-point
   implied_new_facts: []                      # populated when status=canon-requiring; each entry is:
-                                             # { fact: "...", preferred_route: direct_to_canon_addition | first_through_propose_new_canon_facts }
+                                             # { statement: "...", reason_needed: "...", preferred_route: canon-addition | propose-new-canon-facts }
 
 recommended_next_step: generate_immediately  # generate_immediately | reserved_future_seed | generate_after_canon_adjudication
 
@@ -110,6 +151,8 @@ critic_pass_trace:
   phase_9_voice_critic: ""                   # one-line note on voice signature (incl. 5 voice tests)
   phase_9_artifact_authorship: ""            # one-line note on artifact-author register (if applicable)
   phase_11_theme_tone: ""                    # one-line note on thematic freshness / world-rootedness
+  blandness_executioner: ""                  # one-line rationale: valid-but-dull was not allowed through
+  protagonist_grade_critic: ""               # one-line rationale: can carry story pressure without story-specific fields
 
 # ===== Canon Safety Check audit trail (Phase 10 output) =====
 
