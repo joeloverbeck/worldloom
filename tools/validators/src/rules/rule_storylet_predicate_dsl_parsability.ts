@@ -29,7 +29,7 @@ const CLOCK_KINDS = new Set(["danger", "racing", "mission", "faction", "exposure
 const SECRET_KINDS = new Set(["identity", "motive", "location", "event_cause", "artifact_truth", "relationship", "institutional"]);
 const STORY_QUESTION_KINDS = new Set(["setup", "dramatic_question", "promise"]);
 const STORY_QUESTION_STATUSES = new Set(["open", "complicated", "answered", "paid_off", "abandoned", "inherited", "superseded"]);
-const STORY_ROLES = new Set([
+export const STORY_ROLES = [
   "viewpoint",
   "player_proxy",
   "primary_actor",
@@ -42,7 +42,8 @@ const STORY_ROLES = new Set([
   "pressure_source",
   "social_bridge",
   "background"
-]);
+] as const;
+const STORY_ROLE_SET = new Set<string>(STORY_ROLES);
 const TRUTH_RELATIONS = new Set(["true", "false", "partly_true", "unknown", "contested", "branch_counterfactual", "future_contingent"]);
 const BELIEF_VISIBILITIES = new Set(["private", "shared", "factional", "public", "rumored", "concealed", "suppressed"]);
 const RELATIONSHIP_COMPARATORS = new Set([">=", "<=", "==", "!="]);
@@ -624,7 +625,7 @@ function requireOptionalRole(state: ValidationState, value: unknown, path: strin
   if (value === undefined || value === null) {
     return;
   }
-  requireEnum(state, value, STORY_ROLES, path);
+  requireEnum(state, value, STORY_ROLE_SET, path);
 }
 
 function requireOptionalPattern(state: ValidationState, value: unknown, pattern: RegExp, path: string, expected: string): void {

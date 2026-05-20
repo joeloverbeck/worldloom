@@ -75,6 +75,8 @@ Describes the invocation context:
 - `delivery_status`, either `inline` for a normal packet or `persisted_with_summary` for the overflow-recovery summary shape
 - generation timestamp
 
+Unresolvable `seed_nodes` do not abort packet assembly. The packet skips each missing seed, preserves any resolvable seeds for `local_authority`, and adds a warning of the form `seed_node '<id>' not found in world '<slug>'; skipped`. If every seed is unresolvable, the packet still assembles seed-independent governing/world context and adds `all seed_nodes were unresolved; assembled seed-independent context only`.
+
 ### 2. Local authority
 
 The source-local authority core.
@@ -168,6 +170,7 @@ This layer remains optional and trim-first under budget pressure. It exists to h
 
 - Prefer exact ids, structured edges, and explicit scoped references before lexical expansion.
 - For story-pipeline task types (`story_bootstrap`, `story_turn_cycle`, `commitment_block_authoring`, `branching_story_health_audit`, `story_fact_promotion_to_canon`), `seed_nodes` should preferentially name world-canon or hybrid world records (CF / CH / M / OQ / INV / ENT / SEC / CHAR / world-scope DA / PA). Story-bundle records are supplied through `story_slug` and `story_bundle_context`; when exact story-local records are needed, use `get_records(record_ids, story_slug=<story_slug>)` or `list_records(record_type, story_slug=<story_slug>)`. Do not rely on world-scope `seed_nodes` expansion for story-local ids. If a story-pipeline request supplies story-local ids in `seed_nodes`, the packet returns `task_header.warnings: ["story_local_seed_nodes_ignored"]` so the caller can reroute through scoped targeted retrieval.
+- If any remaining world-scope seed does not resolve to an indexed node, packet assembly skips that seed and records a per-seed warning in `task_header.warnings`; missing seeds are never promoted to `local_authority` and do not prevent resolvable seeds or seed-independent governing context from being returned.
 - Preserve the distinction between `local_authority`, `exact_record_links`, and `scoped_local_context`; they are separate completeness classes, not synonyms.
 - Establish locality before governing background, and establish governing background before advisory impact surfaces.
 - If `local_authority` cannot fit inside budget, return structured insufficiency code `packet_incomplete_required_classes` instead of silently dropping required locality. The other content layers are droppable under budget pressure (see §Budget Enforcement) — completeness insufficiency now triggers only when even seed-local authority overflows the requested budget.

@@ -171,7 +171,7 @@ export function validateRecordId(recordId: string): McpError | null {
   return createMcpError("invalid_input", `record_id '${recordId}' is not a supported record id.`, {
     field: "record_id",
     expected:
-      "atomic (CF-<integer>, CH-<integer>, M-<integer>, OQ-<integer>, ENT-<integer>, invariant category id, SEC-<class>-<integer>), hybrid (CHAR-<integer>, DA-<integer>, PA-<integer>), or story-bundle (PG/SE/BEL/SF/OBL/CNSQ/THR/SREL/STINT/STENT/STSTAT/STLOC/STOBJ/CLK/STSEC/STQ/BR/CHC/SLT/SLB/SAU/SP/RSP-<integer>)"
+      "atomic (CF-<integer>, CH-<integer>, M-<integer>, OQ-<integer>, ENT-<integer>, invariant category id, SEC-<class>-<integer>), hybrid (CHAR-<integer>, DA-<integer>, PA-<integer>), or story-bundle (PG/SE/BEL/SF/OBL/CNSQ/THR/SREL/STINT/STENT/STSTAT/STLOC/STOBJ/CLK/STSEC/STQ/STPLAN/STEMO/BR/CHC/SLT/SLB/SAU/SP/RSP-<integer>)"
   });
 }
 

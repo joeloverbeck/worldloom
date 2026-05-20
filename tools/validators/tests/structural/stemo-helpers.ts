@@ -30,18 +30,42 @@ export function baseRecords(extra: IndexedRecord[] = []): IndexedRecord[] {
   return [
     page("PG-2", {
       STENT: ["STENT-1", "STENT-2"],
-      STSTAT: ["STSTAT-1"],
+      STSTAT: ["STSTAT-1", "STSTAT-2"],
       BEL: ["BEL-1"],
       SE: ["SE-1", "SE-2"],
       STEMO: ["STEMO-0"]
     }),
-    storyRecord("story_entity_record", "STENT-1", "entities", { id: "STENT-1", created_at_page: "PG-1" }),
-    storyRecord("story_entity_record", "STENT-2", "entities", { id: "STENT-2", created_at_page: "PG-1", holder: "public" }),
+    storyRecord("story_entity_record", "STENT-1", "entities", {
+      id: "STENT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      display_name: "Holder",
+      role_in_story: ["primary_actor"]
+    }),
+    storyRecord("story_entity_record", "STENT-2", "entities", {
+      id: "STENT-2",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      display_name: "Visible target",
+      role_in_story: ["witness"]
+    }),
     storyRecord("story_status_record", "STSTAT-1", "status", {
       id: "STSTAT-1",
+      story_id: "STORY-1",
       created_at_page: "PG-1",
-      holder: "STENT-1",
-      agency: "free"
+      entity: "STENT-1",
+      life: "alive",
+      agency: "free",
+      location: "STLOC-1"
+    }),
+    storyRecord("story_status_record", "STSTAT-2", "status", {
+      id: "STSTAT-2",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      entity: "STENT-2",
+      life: "alive",
+      agency: "free",
+      location: "STLOC-1"
     }),
     storyRecord("belief_record", "BEL-1", "beliefs", {
       id: "BEL-1",

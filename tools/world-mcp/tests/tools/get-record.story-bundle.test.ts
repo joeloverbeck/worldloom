@@ -125,6 +125,43 @@ test("getRecord resolves CLK, STSEC, and STQ story-bundle records through story_
   }
 });
 
+test("getRecord resolves STPLAN and STEMO story-bundle records through story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const plan = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "STPLAN-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG
+      })
+    );
+    const emotion = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "STEMO-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG
+      })
+    );
+
+    assert.ok("record" in plan);
+    assert.equal(plan.record.record_kind, "story_plan_record");
+    assert.equal(plan.record.id, "STPLAN-1");
+    assert.equal(plan.record.supersedes, "STPLAN-0");
+    assert.equal(plan.file_path, "stories/opening-bells/_source/plans/STPLAN-1.yaml");
+
+    assert.ok("record" in emotion);
+    assert.equal(emotion.record.record_kind, "story_emotion_record");
+    assert.equal(emotion.record.id, "STEMO-1");
+    assert.equal(emotion.record.supersedes, "STEMO-0");
+    assert.equal(emotion.file_path, "stories/opening-bells/_source/emotions/STEMO-1.yaml");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("getRecord rejects bundle-scoped ids without story_slug", async () => {
   const root = createTempRepoRoot();
 

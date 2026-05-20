@@ -27,6 +27,7 @@ import {
   MIDSTORY_TRIGGERS_STPLAN,
   PLAN_RELATIONS
 } from "../../src/structural/midstory-introduction-utils.js";
+import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
 import { snapshotReplayEquality } from "../../src/structural/snapshot-replay-equality.js";
 import { context, record } from "../structural/helpers.js";
 
@@ -216,12 +217,19 @@ test("SPEC-47 T-9: present-causal lint rejects narrative-shape framing in SPEC-4
 });
 
 test("SPEC-47 T-10/D-A9: no-regression surfaces and Hook 3 coverage remain wired", async () => {
+  const stemoFixtureRecords = stemoRecords();
   const validatorsRun = await runValidators(structuralValidators, undefined, context([
     ...stplanRecords(),
-    ...stemoRecords()
+    ...stemoFixtureRecords
   ]));
   assert.equal(validatorsRun.summary.validators_run.filter((name) => name.startsWith("stplan_")).length, 13);
   assert.equal(validatorsRun.summary.validators_run.filter((name) => name.startsWith("stemo_")).length, 9);
+
+  const orientationFixtureSchemaVerdicts = await recordSchemaCompliance.run(
+    undefined,
+    context(stemoFixtureRecords.filter((record) => ["STEMO-1", "STENT-2"].includes(record.parsed.id as string)))
+  );
+  assert.deepEqual(orientationFixtureSchemaVerdicts, []);
 
   const hook3 = readRepoFile("tools/hooks/src/hook3-guard-direct-edit.ts");
   assert.ok(hook3.includes("stories\\/[^/]+\\/_source\\/"));
@@ -597,15 +605,38 @@ function stemoRecords(): IndexedRecord[] {
       state_snapshot: {
         active_records: {
           STENT: ["STENT-1", "STENT-2"],
-          STSTAT: ["STSTAT-1"],
+          STSTAT: ["STSTAT-1", "STSTAT-2"],
           BEL: ["BEL-1"],
           SE: ["SE-1", "SE-2"],
           STEMO: ["STEMO-1"]
         }
       }
     }),
-    record("story_entity_record", "test-story:STENT-2", "stories/test-story/_source/entities/STENT-2.yaml", { id: "STENT-2", created_at_page: "PG-1" }),
-    record("story_status_record", "test-story:STSTAT-1", "stories/test-story/_source/status/STSTAT-1.yaml", { id: "STSTAT-1", created_at_page: "PG-1", holder: "STENT-1", agency: "constrained" }),
+    record("story_entity_record", "test-story:STENT-2", "stories/test-story/_source/entities/STENT-2.yaml", {
+      id: "STENT-2",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      display_name: "Visible target",
+      role_in_story: ["witness"]
+    }),
+    record("story_status_record", "test-story:STSTAT-1", "stories/test-story/_source/status/STSTAT-1.yaml", {
+      id: "STSTAT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      entity: "STENT-1",
+      life: "alive",
+      agency: "constrained",
+      location: "STLOC-1"
+    }),
+    record("story_status_record", "test-story:STSTAT-2", "stories/test-story/_source/status/STSTAT-2.yaml", {
+      id: "STSTAT-2",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      entity: "STENT-2",
+      life: "alive",
+      agency: "free",
+      location: "STLOC-1"
+    }),
     record("story_emotion_record", "test-story:STEMO-1", "stories/test-story/_source/emotions/STEMO-1.yaml", validEmotion())
   ];
 }

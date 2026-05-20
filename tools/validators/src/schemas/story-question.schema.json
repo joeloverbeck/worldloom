@@ -31,7 +31,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^(SF|BEL|DA|THR|OBL|CNSQ|STINT|SREL|STLOC|STOBJ|CLK|STSEC)-(0|[1-9][0-9]*)$"
+        "pattern": "^(SF|BEL|DA|THR|OBL|CNSQ|STINT|SREL|STLOC|STOBJ|CLK|STSEC|STSTAT|STPLAN|STEMO)-(0|[1-9][0-9]*)$"
       }
     },
     "payoff_of": { "type": ["string", "null"], "pattern": "^STQ-(0|[1-9][0-9]*)$" },

@@ -90,6 +90,72 @@ test("getContextPacket treats story_bootstrap story_slug as a target slug", asyn
   }
 });
 
+test("getContextPacket skips unresolvable seed_nodes and keeps resolvable local authority", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "story_bootstrap",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: "new-target-story",
+        seed_nodes: ["entity:marla-kern", "the park near the Leka Enea school"],
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result), "story_bootstrap should return a packet");
+    assert.deepEqual(result.task_header.warnings, [
+      `seed_node 'the park near the Leka Enea school' not found in world '${STORY_FIXTURE_WORLD}'; skipped`
+    ]);
+    assert.ok(
+      result.local_authority.nodes.some((node) => node.id === "entity:marla-kern"),
+      "resolvable world-scope seed should still populate local_authority"
+    );
+    assert.ok(
+      !result.local_authority.nodes.some(
+        (node) => node.id === "the park near the Leka Enea school"
+      ),
+      "unresolvable seed must not enter local_authority"
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getContextPacket accepts all-unresolvable seed_nodes with seed-independent context", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "story_bootstrap",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: "new-target-story",
+        seed_nodes: ["the park near the Leka Enea school"],
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result), "story_bootstrap should return a packet");
+    assert.deepEqual(result.task_header.warnings, [
+      `seed_node 'the park near the Leka Enea school' not found in world '${STORY_FIXTURE_WORLD}'; skipped`,
+      "all seed_nodes were unresolved; assembled seed-independent context only"
+    ]);
+    assert.deepEqual(result.local_authority.nodes, []);
+    assert.ok(
+      result.governing_world_context.active_rules.length > 0,
+      "governing context should still be assembled"
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("getContextPacket warns when story-pipeline seed_nodes contain story-local ids", async () => {
   const root = createTempRepoRoot();
 
@@ -259,6 +325,43 @@ test("getContextPacket ignores CLK, STSEC, and STQ seed nodes for story-pipeline
       storyNodeId(STORY_FIXTURE_SLUG, "CLK-1"),
       storyNodeId(STORY_FIXTURE_SLUG, "STSEC-1"),
       storyNodeId(STORY_FIXTURE_SLUG, "STQ-1")
+    ];
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "story_turn_cycle",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        seed_nodes: [...storyLocalSeeds, "CF-1"],
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result), "story_turn_cycle should return a packet");
+    assert.deepEqual(result.task_header.warnings, ["story_local_seed_nodes_ignored"]);
+    for (const seed of storyLocalSeeds) {
+      assert.ok(
+        !result.local_authority.nodes.some((node) => node.id === seed),
+        `${seed} seed must not enter world-scope local_authority`
+      );
+    }
+    assert.ok(
+      result.local_authority.nodes.some((node) => node.id === "CF-1"),
+      "world-canon seed should still populate local_authority"
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getContextPacket ignores STPLAN and STEMO seed nodes for story-pipeline task types", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+    const storyLocalSeeds = [
+      storyNodeId(STORY_FIXTURE_SLUG, "STPLAN-1"),
+      storyNodeId(STORY_FIXTURE_SLUG, "STEMO-1")
     ];
 
     const result = await withRepoRoot(root, () =>

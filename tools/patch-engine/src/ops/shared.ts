@@ -4,6 +4,7 @@ import path from "node:path";
 
 import YAML from "yaml";
 
+import { isBareStoryBundleRecordId } from "./story-record-specs.js";
 import type { IdAllocations, OperationKind } from "../envelope/schema.js";
 import { resolveHybridFilePath, type OpContext, type StagedWrite } from "./types.js";
 
@@ -261,9 +262,6 @@ export async function loadExistingRecord(params: {
 
 type ExistingRecordRow = { node_id: string; node_type: string; file_path: string };
 
-const BARE_STORY_BUNDLE_ID_PATTERN =
-  /^(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|DA|CLK|STSEC|STQ)-\d+$/;
-
 function findExistingRecordRow(params: {
   ctx: OpContext;
   targetWorld: string;
@@ -283,7 +281,7 @@ function findExistingRecordRow(params: {
     return exactRow;
   }
 
-  if (!BARE_STORY_BUNDLE_ID_PATTERN.test(params.targetRecordId)) {
+  if (!isBareStoryBundleRecordId(params.targetRecordId)) {
     return undefined;
   }
 

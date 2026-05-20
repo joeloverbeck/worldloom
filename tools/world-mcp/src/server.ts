@@ -354,7 +354,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record",
-    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-<integer>, CH-<integer>, INV-*, M-<integer>, OQ-<integer>, ENT-<integer>, SEC-*-<integer>) returning parsed YAML, hybrid records (CHAR-<integer>, world-level DA-<integer>, PA-<integer>) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-<integer>, BEL-<integer>, story-local DA-<integer>, or SLT-<integer>. ARC_TRACE is not a valid record class. Optional section_path projects parsed atomic/story records with dotted paths; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
+    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-<integer>, CH-<integer>, INV-*, M-<integer>, OQ-<integer>, ENT-<integer>, SEC-*-<integer>) returning parsed YAML, hybrid records (CHAR-<integer>, world-level DA-<integer>, PA-<integer>) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-<integer>, BEL-<integer>, CLK-<integer>, STSEC-<integer>, STQ-<integer>, STPLAN-<integer>, STEMO-<integer>, story-local DA-<integer>, or SLT-<integer>. ARC_TRACE is not a valid record class. Optional section_path projects parsed atomic/story records with dotted paths; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );
@@ -385,7 +385,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "list_records",
-    "list_records: Return indexed records of a supported atomic, hybrid, or story-bundle record type, with optional server-side filters by parsed body field path, field projection, or include_full_body metadata/body records. Filters accept scalar exact matches or array any-of matches, including dotted paths such as {shape: ['routine_disruption', 'reflection_dilemma'], content_intensity: ['mature', 'tame'], 'visibility.scope': 'global_author_pool'}. Fields are validated against response-shape top-level keys and unknown fields return invalid_input with accepted_projection_keys; include_full_body returns full bodies and ignores fields. Story-bundle record types require story_slug; bundle-scoped IDs are unique within (world_slug, story_slug).",
+    "list_records: Return indexed records of a supported atomic, hybrid, or story-bundle record type, with optional server-side filters by parsed body field path, field projection, or include_full_body metadata/body records. Story-bundle record types require story_slug and include story_plan_record, story_emotion_record, pressure_clock_record, story_secret_record, and story_question_record alongside the other supported story records. Filters accept scalar exact matches or array any-of matches, including dotted paths such as {shape: ['routine_disruption', 'reflection_dilemma'], content_intensity: ['mature', 'tame'], 'visibility.scope': 'global_author_pool'}. Fields are validated against response-shape top-level keys and unknown fields return invalid_input with accepted_projection_keys; include_full_body returns full bodies and ignores fields. Bundle-scoped IDs are unique within (world_slug, story_slug).",
     listRecordsInputSchema,
     async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0]),
     { record_type: SUPPORTED_LIST_RECORD_TYPES }
@@ -398,7 +398,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record_schema",
-    "get_record_schema: Return the validator JSON Schema and referenced schemas for a record node type, including schema-backed story-bundle node types such as belief_record.",
+    "get_record_schema: Return the validator JSON Schema and referenced schemas for a record node type, including schema-backed story-bundle node types such as belief_record, story_plan_record, and story_emotion_record.",
     getRecordSchemaInputSchema,
     async (args) => getRecordSchema(args as unknown as Parameters<typeof getRecordSchema>[0]),
     { node_type: SUPPORTED_RECORD_SCHEMA_NODE_TYPES }
@@ -411,7 +411,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_context_packet",
-    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug. story_bootstrap treats it as the target bundle slug and returns story_bundle_context: null; other story-pipeline task types populate story_bundle_context from indexed story-bundle records plus STORY_KERNEL.md frontmatter, including active_intentions, active_statuses, active_beliefs_by_holder, active_relationships_by_participant, active_locations_in_scope, active_objects_in_scope, active_story_diegetic_artifacts, active_actor_plans, and active_emotional_states. World-canon task types return story_bundle_context: null.",
+    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug. story_bootstrap treats it as the target bundle slug and returns story_bundle_context: null; other story-pipeline task types populate story_bundle_context from indexed story-bundle records plus STORY_KERNEL.md frontmatter, including active_intentions, active_statuses, active_beliefs_by_holder, active_relationships_by_participant, active_locations_in_scope, active_objects_in_scope, active_story_diegetic_artifacts, active_actor_plans, and active_emotional_states. World-canon task types return story_bundle_context: null. Unresolvable seed_nodes are skipped and surfaced in task_header.warnings; all-unresolved seed sets still return seed-independent context with an aggregate warning.",
     getContextPacketInputSchema,
     async (args) => getContextPacket(args as unknown as Parameters<typeof getContextPacket>[0]),
     { task_type: TASK_TYPES, delivery_mode: DELIVERY_MODES, node_classes: NODE_TYPES }

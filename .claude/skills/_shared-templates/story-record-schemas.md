@@ -29,12 +29,12 @@ basis:
   source_event: SE-<integer>*               # the event that established this belief
   access_route: direct_observation | testimony | document | object_trace | location_trace | inference | surveillance | institutional_channel | magic_tech | rumor | authorial_initialization*
   access_records: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer> | DA-<integer> | BEL-<integer> | SF-<integer> | SE-<integer>]
-consequences:
-  opens: [OBL-<integer> | THR-<integer> | CNSQ-<integer>]
-  constrains_choices: [CHC-<integer>]
+consequences:                          # *
+  opens: [OBL-<integer> | THR-<integer> | CNSQ-<integer>]   # * required list; may be empty ([])
+  constrains_choices: [CHC-<integer>]   # * required list; may be empty ([])
 ```
 
-The `belief_mode` field separates sincerity / epistemic stance from `confidence`, which is only the holder's subjective certainty axis. The `truth_relation` field distinguishes belief from truth; the `visibility` field is consumed by the social-state firewall. `basis.source_event` is the strongest replay anchor. `basis.access_route` records how the holder gained access to the belief, and `basis.access_records` cites the enabling story records when the route depends on a witness, location, object, artifact, prior belief, story fact, or event. `branching-story-health-audit` Phase 2d consumes these fields when reporting `observer_firewall_violation` findings, so the §6b observer firewall remains auditable after the turn lands.
+The `belief_mode` field separates sincerity / epistemic stance from `confidence`, which is only the holder's subjective certainty axis. The `truth_relation` field distinguishes belief from truth; the `visibility` field is consumed by the social-state firewall. `basis.source_event` is the strongest replay anchor. `basis.access_route` records how the holder gained access to the belief, and `basis.access_records` cites the enabling story records when the route depends on a witness, location, object, artifact, prior belief, story fact, or event. `branching-story-health-audit` Phase 2d consumes these fields when reporting `observer_firewall_violation` findings, so the §6b observer firewall remains auditable after the turn lands. `consequences` is **required** by `record_schema_compliance` (`tools/validators/src/schemas/story-belief.schema.json` lists it in `required`, and requires both `consequences.opens` and `consequences.constrains_choices`); the patch engine rejects a `BEL` that omits the block. Both lists are required but may be empty (`[]`), so a belief that opens nothing and constrains no choice still carries `consequences: {opens: [], constrains_choices: []}`.
 
 ### 4.2 `PG` (~22 sub-paths)
 
@@ -743,7 +743,7 @@ question_or_setup: string*
 salience: low | medium | high*
 audience_visibility: hidden | implied | explicit*
 source_event: SE-<integer>*
-source_records: [SF-<integer> | BEL-<integer> | DA-<integer> | THR-<integer> | OBL-<integer> | CNSQ-<integer> | STINT-<integer> | SREL-<integer> | STLOC-<integer> | STOBJ-<integer> | CLK-<integer> | STSEC-<integer>]*
+source_records: [SF-<integer> | BEL-<integer> | DA-<integer> | THR-<integer> | OBL-<integer> | CNSQ-<integer> | STINT-<integer> | SREL-<integer> | STLOC-<integer> | STOBJ-<integer> | CLK-<integer> | STSEC-<integer> | STSTAT-<integer> | STPLAN-<integer> | STEMO-<integer>]*
 payoff_of: STQ-<integer> | null
 status: open | complicated | answered | paid_off | abandoned | inherited | superseded*
 answer_event: SE-<integer> | null
@@ -837,7 +837,7 @@ expires_when: string*
 derived_from: [<record_id>]                   # default []
 ```
 
-`status`, `trigger_event`, `appraisal_basis`, and `behavioral_pressure` make the emotional state replayable and validator-readable. `orientation.toward_records` feeds observer-firewall checks without adding a free-form `toward_claim` field. `agency_effect` is intentionally binary in v1: either the affect constrains agency or it does not.
+`status`, `trigger_event`, `appraisal_basis`, and `behavioral_pressure` make the emotional state replayable and validator-readable. `orientation.toward_records` feeds observer-firewall checks without adding a free-form `toward_claim` field. Orientation targets must be accessible to the holder under FOUNDATIONS §6b: a `STENT` target is lawful when the holder can directly observe the entity through active co-location, `STSEC` is lawful only for its `holders[]` or another recorded access route, `SF`/`STLOC`/`THR`/`CNSQ` are branch-public active state, and `STQ` is accessible only when `audience_visibility` is `explicit` or `implied` unless another holder-grounded access route exists. `agency_effect` is intentionally binary in v1: either the affect constrains agency or it does not.
 
 ### 4.6 Prose receipt
 

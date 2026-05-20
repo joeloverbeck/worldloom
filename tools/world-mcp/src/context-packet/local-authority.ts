@@ -1,7 +1,5 @@
 import type Database from "better-sqlite3";
 
-import { createMcpError, type McpError } from "../errors.js";
-
 import {
   loadPacketNodes,
   uniqueStrings,
@@ -54,16 +52,6 @@ function loadSeedRows(
       `
     )
     .all(worldSlug, ...seedNodeIds) as SeedNodeRow[];
-}
-
-function findMissingSeedNodeId(
-  db: Database.Database,
-  worldSlug: string,
-  seedNodeIds: readonly string[]
-): string | null {
-  const rows = loadSeedRows(db, worldSlug, seedNodeIds);
-  const present = new Set(rows.map((row) => row.node_id));
-  return seedNodeIds.find((nodeId) => !present.has(nodeId)) ?? null;
 }
 
 function findAuthorityParentIds(
@@ -153,18 +141,24 @@ export async function findLocalAuthoritySourceNodeIds(
   db: Database.Database,
   worldSlug: string,
   seedNodeIds: readonly string[]
-): Promise<string[] | McpError> {
+): Promise<{
+  sourceNodeIds: string[];
+  unresolvedSeedNodeIds: string[];
+}> {
   const uniqueSeedNodeIds = uniqueStrings(seedNodeIds);
-  const missingSeedNodeId = findMissingSeedNodeId(db, worldSlug, uniqueSeedNodeIds);
-  if (missingSeedNodeId !== null) {
-    return createMcpError("node_not_found", `Node '${missingSeedNodeId}' does not exist.`, {
-      node_id: missingSeedNodeId,
-      world_slug: worldSlug
-    });
-  }
-
   const seedRows = loadSeedRows(db, worldSlug, uniqueSeedNodeIds);
-  return uniqueStrings([...uniqueSeedNodeIds, ...findAuthorityParentIds(db, worldSlug, seedRows)]);
+  const presentSeedNodeIds = new Set(seedRows.map((row) => row.node_id));
+  const unresolvedSeedNodeIds = uniqueSeedNodeIds.filter(
+    (nodeId) => !presentSeedNodeIds.has(nodeId)
+  );
+
+  return {
+    sourceNodeIds: uniqueStrings([
+      ...uniqueSeedNodeIds.filter((nodeId) => presentSeedNodeIds.has(nodeId)),
+      ...findAuthorityParentIds(db, worldSlug, seedRows)
+    ]),
+    unresolvedSeedNodeIds
+  };
 }
 
 export function buildLocalAuthority(
