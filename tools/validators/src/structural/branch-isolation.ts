@@ -1,5 +1,13 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
+  branchPath,
+  isBranchLocal,
+  isBundleGenesisRecord,
+  owningBranchId,
+  rootPageIdsForStory,
+  type BranchRecordMaps
+} from "./branch-locality-utils.js";
+import {
   asPlainRecord,
   locationFor,
   queryStructuralRecords,
@@ -44,7 +52,10 @@ export const branchIsolation: Validator = {
             continue;
           }
           const targetBranchId = owningBranchId(target, maps);
-          if (targetBranchId === undefined || pageBranchPath.has(targetBranchId) || isBundleGenesisRecord(target, rootPageIds)) {
+          if (targetBranchId === undefined) {
+            continue;
+          }
+          if (isBranchLocal(reference.id, { branchId: pageBranchId, maps, rootPageIds })) {
             continue;
           }
           verdicts.push(branchIsolationViolation(page, parsed, reference, targetBranchId));
@@ -82,7 +93,7 @@ interface StoryReference {
   path: string;
 }
 
-interface RecordMaps {
+interface RecordMaps extends BranchRecordMaps {
   byId: Map<string, IndexedRecord>;
   byType: Map<string, IndexedRecord[]>;
 }
@@ -125,64 +136,6 @@ function activeRecordReferences(page: Record<string, unknown>): StoryReference[]
   }
 
   return references;
-}
-
-function branchPath(branchId: string, maps: RecordMaps): Set<string> {
-  const path = new Set<string>();
-  let current: string | undefined = branchId;
-
-  while (current !== undefined && !path.has(current)) {
-    const branch = maps.byId.get(current);
-    if (branch === undefined || branch.node_type !== "branch_record") {
-      break;
-    }
-    path.add(current);
-    current = stringValue(asPlainRecord(branch.parsed).parent_branch_id);
-  }
-
-  return path;
-}
-
-function owningBranchId(record: IndexedRecord, maps: RecordMaps): string | undefined {
-  if (record.node_type === "branch_record") {
-    return stringValue(asPlainRecord(record.parsed).id);
-  }
-  if (record.node_type === "page_record") {
-    return stringValue(asPlainRecord(record.parsed).branch_id);
-  }
-  const createdAtPage = stringValue(asPlainRecord(record.parsed).created_at_page);
-  if (createdAtPage === undefined) {
-    return undefined;
-  }
-  return stringValue(asPlainRecord(maps.byId.get(createdAtPage)?.parsed).branch_id);
-}
-
-function rootPageIdsForStory(maps: RecordMaps): Set<string> {
-  const roots = new Set<string>();
-
-  for (const branch of maps.byType.get("branch_record") ?? []) {
-    const parsed = asPlainRecord(branch.parsed);
-    const parent = stringValue(parsed.parent_branch_id);
-    const rootPage = stringValue(parsed.root_page_id);
-    if ((parent === undefined || parent === "null") && rootPage !== undefined) {
-      roots.add(rootPage);
-    }
-  }
-
-  for (const page of maps.byType.get("page_record") ?? []) {
-    const parsed = asPlainRecord(page.parsed);
-    const id = stringValue(parsed.id);
-    if (parsed.parent_page_id === null && parsed.turn_index === 0 && id !== undefined) {
-      roots.add(id);
-    }
-  }
-
-  return roots;
-}
-
-function isBundleGenesisRecord(record: IndexedRecord, rootPageIds: ReadonlySet<string>): boolean {
-  const created = stringValue(asPlainRecord(record.parsed).created_at_page);
-  return created !== undefined && rootPageIds.has(created);
 }
 
 function globalStoryletStaticReferences(storylet: Record<string, unknown>): StoryReference[] {

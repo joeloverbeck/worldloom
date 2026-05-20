@@ -42,6 +42,8 @@ For every non-system character action, `SE.world_logic_rationale` MUST cite at l
 
 - an `STINT-<integer>` held by the actor;
 - a `BEL-<integer>` held by the actor with relevant content;
+- an `STPLAN-<integer>` held by the actor whose current step, blocker, fallback, or basis explains the action;
+- a `STEMO-<integer>` held by the actor whose affect kind, intensity, appraisal, or behavioral pressure explains the action;
 - an `OBL-<integer>`, `CNSQ-<integer>`, or `THR-<integer>` involving the actor;
 - an `SREL-<integer>` whose structured `direction.from` or `direction.to` includes the actor, or whose `participants[]` includes the actor for bidirectional/mutual relationships;
 - an immediate physical affordance available to the actor at the page location.

@@ -23,6 +23,8 @@ const EXPECTED_SCHEMA_IDS: Record<SupportedRecordSchemaNodeType, string> = {
   extension_entry: "https://worldloom.local/schemas/extension-entry.schema.json",
   story_entity_record: "https://worldloom.local/schemas/story-entity.schema.json",
   story_status_record: "https://worldloom.local/schemas/story-status.schema.json",
+  story_plan_record: "https://worldloom.local/schemas/story-plan.schema.json",
+  story_emotion_record: "https://worldloom.local/schemas/story-emotion.schema.json",
   story_fact_record: "https://worldloom.local/schemas/story-fact.schema.json",
   story_event_record: "https://worldloom.local/schemas/story-event.schema.json",
   obligation_record: "https://worldloom.local/schemas/story-obligation.schema.json",
@@ -57,6 +59,8 @@ const EXPECTED_SOURCE_PATHS: Record<SupportedRecordSchemaNodeType, string> = {
   extension_entry: "tools/validators/src/schemas/_shared/extension-entry.schema.json",
   story_entity_record: "tools/validators/src/schemas/story-entity.schema.json",
   story_status_record: "tools/validators/src/schemas/story-status.schema.json",
+  story_plan_record: "tools/validators/src/schemas/story-plan.schema.json",
+  story_emotion_record: "tools/validators/src/schemas/story-emotion.schema.json",
   story_fact_record: "tools/validators/src/schemas/story-fact.schema.json",
   story_event_record: "tools/validators/src/schemas/story-event.schema.json",
   obligation_record: "tools/validators/src/schemas/story-obligation.schema.json",
@@ -173,6 +177,8 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
   const question = await getRecordSchema({ node_type: "story_question_record" });
   const branch = await getRecordSchema({ node_type: "branch_record" });
   const status = await getRecordSchema({ node_type: "story_status_record" });
+  const plan = await getRecordSchema({ node_type: "story_plan_record" });
+  const emotion = await getRecordSchema({ node_type: "story_emotion_record" });
 
   assert.ok(!("code" in storylet));
   assert.ok(!("code" in storyFact));
@@ -183,6 +189,8 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
   assert.ok(!("code" in question));
   assert.ok(!("code" in branch));
   assert.ok(!("code" in status));
+  assert.ok(!("code" in plan));
+  assert.ok(!("code" in emotion));
 
   assert.equal(storylet.schema.additionalProperties, false);
   const storyletProperties = storylet.schema.properties as Record<
@@ -234,6 +242,13 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
     "agency",
     "location"
   ]);
+  assert.equal(plan.schema.$id, "https://worldloom.local/schemas/story-plan.schema.json");
+  assert.equal(emotion.schema.$id, "https://worldloom.local/schemas/story-emotion.schema.json");
+  assert.equal(plan.source_path, "tools/validators/src/schemas/story-plan.schema.json");
+  assert.equal(emotion.source_path, "tools/validators/src/schemas/story-emotion.schema.json");
+  assert.ok(plan.required_fields.includes("plan_status"));
+  assert.ok(emotion.required_fields.includes("status"));
+  assert.ok("affect_kind" in (emotion.schema.properties as Record<string, unknown>));
 });
 
 test("getRecordSchema exposes post-reset choice carrier fields", async () => {

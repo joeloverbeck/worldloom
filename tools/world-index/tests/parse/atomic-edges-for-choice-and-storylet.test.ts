@@ -13,7 +13,7 @@ test("CHC records emit grounded record, associated storylet, and affordance ordi
     writeStoryRecord(root, "harborwatch", "choices", "CHC-2", [
       "id: CHC-2",
       "story_id: STORY-50",
-      "parent_page_id: PG-4",
+      "created_at_page: PG-4",
       "surface_label: Ring the bell.",
       "player_visible_intent: Warn the quay.",
       "target_or_action_families: [signal]",
