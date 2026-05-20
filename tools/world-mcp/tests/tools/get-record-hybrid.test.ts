@@ -106,7 +106,7 @@ const NCB_FILE_BODY = [
   "batch_id: NCB-0001",
   "world_slug: seeded",
   "summary: Brinewick supporting cast proposals",
-  "proposal_ids:",
+  "card_ids:",
   "  - NCP-0001",
   "---",
   "# NCB-0001",
@@ -313,7 +313,7 @@ test("get-record-hybrid returns parsed shape for NCB records", async () => {
     assert.ok("frontmatter" in result, "expected hybrid full response shape");
     assert.equal(result.record_kind, "character_proposal_batch");
     assert.equal(result.frontmatter.batch_id, "NCB-0001");
-    assert.deepEqual(result.frontmatter.proposal_ids, ["NCP-0001"]);
+    assert.deepEqual(result.frontmatter.card_ids, ["NCP-0001"]);
     assert.ok(result.body_sections["Batch Brief"]?.includes("harbor characters"));
   } finally {
     destroyTempRepoRoot(root);

@@ -76,7 +76,7 @@ function validCharacter(overrides: Record<string, unknown> = {}): Record<string,
       distribution_exceptions: [],
       continuity_checked_with: []
     },
-    source_basis: { generated_from: "NCP-12" },
+    source_basis: { source_proposal_id: "NCP-12" },
     ...overrides
   };
 }
