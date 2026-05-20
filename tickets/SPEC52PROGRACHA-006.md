@@ -14,7 +14,7 @@ The world index treats `character_proposal_card`/`character_proposal_batch` as f
 
 1. `tools/validators/src/structural/utils.ts` defines `STRUCTURAL_NODE_TYPES`, `RECORD_TYPE_TO_SCHEMA`, `isStructuralAuthorityRecord`, and `listSupportedWorldFiles` — none include `character_proposal_card`/`character_proposal_batch`. `record-schema-compliance.ts` `hybridRecordsFromFiles` (line 312) scans only `characters/`, `diegetic-artifacts/`, `adjudications/`. `loadSchemaValidators()` (line 298) reads schema files named in `RECORD_TYPE_TO_SCHEMA`, so the two new schema files (005) must exist before this ticket adds their map entries (hence Deps: 005). `tools/validators/src/public/registry.ts` exports `structuralValidators` (line 89) as the registration array (75 existing structural-validator imports); `character-memorability-structure.ts` does NOT exist yet.
 2. SPEC-52 §Phase 5 items 4-6 + Deliverable 6 enumerate the work: add the two node types to `STRUCTURAL_NODE_TYPES`/`RECORD_TYPE_TO_SCHEMA`/`isStructuralAuthorityRecord`/`listSupportedWorldFiles`; add the `character-proposals/` + `character-proposals/batches/` scan branches to `hybridRecordsFromFiles`; create the body-structure validator and register it in `registry.ts` (the registry edit was added at SPEC-52 reassessment Improvement M1). SPEC-52 reassessment Issue I2 scoped the body-heading checks to CHAR only.
-3. Cross-artifact boundary: this ticket consumes the schema files (005, via `RECORD_TYPE_TO_SCHEMA`) and the world-index node types `character_proposal_card`/`character_proposal_batch` (already in `tools/world-index/src/schema/types.ts`). The new structural validator's CHAR body-heading list must match the six dossier sections emitted by 003; its NCP checks (`## Rejected Directions Audit`, canon-requiring implied facts) match the card shape emitted by 002/004.
+3. Cross-artifact boundary: this ticket consumes the schema files (005, via `RECORD_TYPE_TO_SCHEMA`) and the world-index node types `character_proposal_card`/`character_proposal_batch` (already in `tools/world-index/src/schema/types.ts`). The new structural validator's CHAR body-heading list must match the six dossier sections emitted by 003; its NCP checks (`## Rejected Directions Audit`, canon-requiring implied facts) match the card shape emitted by `archive/tickets/SPEC52PROGRACHA-002.md`/004.
 4. Canon-Safety surface (template item 5): this ticket modifies/creates surfaces under `tools/validators/src/structural/` that run at `world-validate` time. The new validator is additive and validates character/NCP body structure only — it does NOT touch the Mystery Reserve firewall or canon-record write paths, so it cannot silently resolve an M-record or weaken the firewall (Rule 7). Confirm the additions to `utils.ts` are append-only (no removal of existing node types — Rule 6).
 
 ## Architecture Check
@@ -53,7 +53,7 @@ Deterministic checks. **CHAR**: missing `## Protagonist-Grade Core` / `## Pressu
 ## Out of Scope
 
 - The schema files themselves (005).
-- The skill templates that produce the validated structure (002/003/004).
+- The skill templates that produce the validated structure (`archive/tickets/SPEC52PROGRACHA-002.md`/003/004).
 - World-index regex / CLAUDE.md (007).
 - Any change to the Mystery Reserve firewall or canon-record validators.
 

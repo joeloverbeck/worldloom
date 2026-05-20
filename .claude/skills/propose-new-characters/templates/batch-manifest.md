@@ -56,7 +56,7 @@ notes: >
   Free-form notes. Phase 10e repairs that fired at the batch level (e.g., 10d
   joint-closure forcing a card drop + slot-regeneration) may be summarized here.
   Also: user's stated routing preferences for canon-requiring cards, if any
-  (e.g., "user prefers first_through_propose_new_canon_facts for all implied
+  (e.g., "user prefers propose-new-canon-facts for all implied
   new institutions").
 ---
 
@@ -123,19 +123,31 @@ notes: >
  - story_scale_hint
  - one-sentence seed summary>
 
-## Phase 11 Score Matrix
+## Phase 11 Two-Layer Score Matrix
 
 <Table with one row per seed surviving Phase 10 canon gate:>
 
-| Seed | world_root | niche_dist | pressure | voice | ord_life | artifact | theme | expansion | canon_burden | overlap | aggregate |
-|------|-----------|-----------|----------|-------|----------|----------|-------|-----------|--------------|---------|-----------|
-| ...  | ...       | ...       | ...      | ...   | ...      | ...      | ...   | ...       | ...          | ...     | ...       |
+| Seed | validity_total | memorability_total | canon_burden | overlap_risk | aggregate |
+|------|----------------|--------------------|--------------|--------------|-----------|
+| ...  | ...            | ...                | ...          | ...          | ...       |
+
+### Score Components
+
+<For each surviving seed, record Layer A (`world_rootedness`, `niche_distinctiveness`,
+`institutional_embedding`, `ordinary_life_relevance`, `capability_cost_integrity`,
+`canon_safety`, `canon_burden`, `overlap_risk`) and Layer B
+(`protagonist_grade_force`, `contradiction_irreconcilability`,
+`appetite_specificity`, `self_mythology_strength`,
+`pressure_behavior_distinctiveness`, `voice_pressure_distinction`,
+`relational_charge`, `moral_psychological_edge`, `world_specific_surprise`,
+`cannot_be_swapped_out`). Aggregate formula:
+`validity_total + 1.5 * memorability_total - canon_burden - overlap_risk`.>
 
 ## Phase 12 Rejected-Candidate Log
 
 <For each seed rejected at Phase 12, a row:
  - seed-internal id
- - trigger fired (one of the 13 rejection triggers by number + name)
+ - trigger fired (one of the original or protagonist-grade rejection triggers by number + name)
  - one-sentence seed summary
  - diagnosis_target it addressed
  - whether the slot was later filled by another seed or left empty>
@@ -195,7 +207,7 @@ notes: >
 
 ## Phase 15 Test Results
 
-<One row per test; all 12 must PASS for Phase 16 HARD-GATE to fire.
+<One row per test; all 18 must PASS for Phase 16 HARD-GATE to fire.
  A PASS without rationale is treated as FAIL.>
 
 ### Per-card tests (run per card in card_ids)
@@ -209,9 +221,15 @@ notes: >
 - Test 7 (Phase 10a — invariants_respected lists every invariant tested): PASS / FAIL — <rationale>
 - Test 8 (Phase 14 schema completeness — no TODO/placeholder/empty-where-required): PASS / FAIL — <rationale>
 - Test 9 (Voice distinctiveness, Phase 9 — no duplicate voice families without explicit notes exemption): PASS / FAIL — <rationale>
+- Test 10 (Phase 7 — `memorability_profile` present and fully populated): PASS / FAIL — <rationale>
+- Test 11 (Rule 2, Phase 7 — wound/appetite/self-mythology are specific and world-produced): PASS / FAIL — <rationale>
+- Test 12 (Phase 7 — `pressure_behavior` has at least four distinct responses): PASS / FAIL — <rationale>
+- Test 13 (Phase 7 — `relational_charge` has need plus harm/betrayal risk): PASS / FAIL — <rationale>
+- Test 14 (Phase 7 — `cannot_be_swapped_out_because` names world-specific reasons): PASS / FAIL — <rationale>
+- Test 15 (Phase 11/12 — blandness and protagonist-grade critic passes recorded with rationales): PASS / FAIL — <rationale>
 
 ### Batch-level tests
 
-- Test 10 (Phase 13 diversification — audit table complete, empty slots rationalized): PASS / FAIL — <rationale>
-- Test 11 (Phase 10d — check trace complete for all pairs tested at generation time): PASS / FAIL — <rationale>
-- Test 12 (Phase 12 audit — rejected-candidate log complete with trigger + diagnosis target): PASS / FAIL — <rationale>
+- Test 16 (Phase 13 diversification — audit table complete, empty slots rationalized): PASS / FAIL — <rationale>
+- Test 17 (Phase 10d — check trace complete for all pairs tested at generation time): PASS / FAIL — <rationale>
+- Test 18 (Phase 12 audit — rejected-candidate log complete with trigger + diagnosis target): PASS / FAIL — <rationale>

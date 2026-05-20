@@ -14,7 +14,7 @@ There is no skill to deepen a single existing brief or NCP card into a stronger 
 
 1. `.claude/skills/deepen-character-proposal/` does not exist yet (created here). The id allocator supports the `NCP` class — confirmed at `tools/world-mcp/src/tools/allocate-next-id.ts:21` (`NCP: { width: 1, zeroPad: false, regex: /^NCP-(\d+)$/ }`), so `mcp__worldloom__allocate_next_id(world_slug, 'NCP')` is valid. The skill mutates only `worlds/<world_slug>/character-proposals/`.
 2. SPEC-52 §Phase 2 + Deliverable 2 specify the skill contract (args `world_slug`, `input_path`, `upgrade_intensity`, `canon_risk_tolerance`, `output_mode`), the HARD-GATE preconditions, the 14-step process, and the output (one NCP card + INDEX update; no NCB manifest required for single-seed upgrades). §Phase 6 mandates reusing `task_type='propose_new_characters'` — do NOT add a `character_proposal_upgrade` task type.
-3. Cross-skill boundary: the emitted NCP card's `memorability_profile` + `upgrade_lineage` blocks MUST match `.claude/skills/_shared-references/protagonist-grade-character-engine.md` (001) and the `propose-new-characters` proposal-card template (002); the card is directly consumable by `character-generation` via `character_brief_path` (003), and conforms to the NCP JSON schema (005). The skill reuses `propose_new_characters`'s ranking profile (`tools/world-mcp/src/ranking/profiles/canon-pipeline-adjacent.ts`).
+3. Cross-skill boundary: the emitted NCP card's `memorability_profile` + `upgrade_lineage` blocks MUST match `.claude/skills/_shared-references/protagonist-grade-character-engine.md` (001) and the `propose-new-characters` proposal-card template completed in `archive/tickets/SPEC52PROGRACHA-002.md`; the card is directly consumable by `character-generation` via `character_brief_path` (003), and conforms to the NCP JSON schema (005). The skill reuses `propose_new_characters`'s ranking profile (`tools/world-mcp/src/ranking/profiles/canon-pipeline-adjacent.ts`).
 4. FOUNDATIONS Rule 2 (No Pure Cosmetics): every mutation must be world-produced, not cosmetic. Rule 7 (Preserve Mystery): the HARD-GATE loads invariant + Mystery Reserve firewall surfaces; canon-requiring mutations list implied facts and route each to `canon-addition` (precise/local) or `propose-new-canon-facts` (systemic), NEVER writing canon — the skill is canon-reading and must not weaken the Mystery Reserve firewall.
 
 ## Architecture Check
@@ -26,7 +26,7 @@ There is no skill to deepen a single existing brief or NCP card into a stronger 
 
 1. SKILL.md frontmatter declares name/description/user-invocable/arguments; HARD-GATE block present → grep-proof + skill-structure review.
 2. Canon-routing classifies `canon-safe | canon-edge | canon-requiring` and never writes canon → manual review (Mystery Reserve firewall audit).
-3. Emitted-card `memorability_profile` / `upgrade_lineage` field names match 001/002 → grep-proof + cross-check.
+3. Emitted-card `memorability_profile` / `upgrade_lineage` field names match 001 and `archive/tickets/SPEC52PROGRACHA-002.md` → grep-proof + cross-check.
 4. Context loads via `task_type='propose_new_characters'` (Phase 6 no-op confirmed) → grep-proof (no new task type added).
 
 ## What to Change
@@ -62,7 +62,7 @@ NCP-compatible card template carrying `memorability_profile` + `upgrade_lineage`
 ### Invariants
 
 1. The skill mutates only `worlds/<world_slug>/character-proposals/`; never canon, never CHAR dossiers.
-2. Emitted-card field names match the shared reference (001) and the `propose-new-characters` proposal-card template (002).
+2. Emitted-card field names match the shared reference (001) and the `propose-new-characters` proposal-card template completed in `archive/tickets/SPEC52PROGRACHA-002.md`.
 3. No new MCP task type is introduced (Phase 6 no-op); the Mystery Reserve firewall is loaded and never weakened (Rule 7).
 
 ## Test Plan

@@ -2,7 +2,7 @@
 
 ## Phase 6: Generate Proposal Seeds
 
-Generate 3X–5X seeds before selection. Draw from 16 high-yield families:
+Generate 3X–5X seeds before selection. Draw from the 16 baseline high-yield families:
 
 1. institution insider
 2. institution dissenter
@@ -25,13 +25,53 @@ Each seed is tagged with `diagnosis_target` (which Phase 5 probe it addresses), 
 
 **Rule**: Prefer seeds that reveal existing world pressure over seeds that merely add eccentricity.
 
+Also generate mutation directions from the shared protagonist-grade families when they are world-valid and inside user taboo limits:
+
+1. self-mythologizer
+2. shame-defender
+3. corrupted caretaker
+4. sincere fanatic
+5. failed prodigy
+6. beloved institutional monster
+7. pathetic gatekeeper
+8. bodily taboo carrier
+9. erotic or status transgressor
+10. impossible witness
+11. humiliated expert
+12. dangerous innocent
+13. obsolete loyalist
+14. contaminating saint
+
+These are mutation prompts, not surface archetypes. Each candidate still needs Rule 2 grounding in a modeled pressure and may not become "special" without cost, bottleneck, secrecy, taboo, distribution limit, or institutional mechanism.
+
 **Floor semantics**: The 3X–5X count is a PRE-MERGE floor — the raw seed-generation output before Phase 6 pre-shortlist merges (redundant-candidate consolidation), Phase 7–9 engine rejections, Phase 10 canon-gate rejections, or Phase 12 trigger rejections reduce the active shortlist. If the post-rejection shortlist at Phase 11 entry falls below 3X (but at or above X — the requested batch size), continue; the max-min selection operates on the reduced shortlist without regeneration. Loop back to Phase 6 for regeneration ONLY if the post-rejection shortlist falls below X itself (cannot fill the requested batch size) OR if the remaining candidates fail to cover the Phase 13 composition slots adequately (empty slots must be diagnostic signals, not forced fills).
 
 ## Phase 7: Build Character Engine per Seed
 
-For each seed, specify:
+Load `.claude/skills/_shared-references/protagonist-grade-character-engine.md` before building the engine. For each seed, specify the canonical `protagonist_grade_engine` block:
 
-`short_term_goal` / `long_term_desire` / `unavoidable_obligation` / `external_pressure` / `public_mask` / `private_appetite` / `social_fear` / `private_shame` / `central_contradiction` / `capability_path` / `cost_of_competence` / `relation_to_law_taboo_debt` / `repeated_forced_choice`
+- `world_produced_wound`
+- `active_appetite`
+- `self_mythology`
+- `irreconcilable_contradiction`
+- `pressure_behavior` with `cornered`, `tempted`, `humiliated`, `offered_power`, `protecting_attachment`
+- `relational_charge[]` entries with `target_or_relation_type`, `need`, `resentment_or_fear`, `likely_harm_or_betrayal`
+- `moral_psychological_edge`
+- `signature_scene_behaviors[]`
+- `voice_under_pressure`
+- `cannot_be_swapped_out_because`
+
+Preserve the old engine information by consolidating it into the shared block:
+
+- `private_appetite` -> `active_appetite`
+- `private_shame` -> `world_produced_wound` plus `self_mythology`
+- `central_contradiction` -> `irreconcilable_contradiction`
+- `public_mask` -> `self_mythology` and `voice_under_pressure`
+- `external_pressure` / `unavoidable_obligation` -> `pressure_behavior`
+- `relation_to_law_taboo_debt` -> `relational_charge` and `moral_psychological_edge`
+- `repeated_forced_choice` -> `irreconcilable_contradiction` plus `pressure_behavior`
+
+Keep these working notes per seed even when the final NCP card records the consolidated engine: `short_term_goal`, `long_term_desire`, `unavoidable_obligation`, `external_pressure`, `capability_path`, `cost_of_competence`, and `repeated_forced_choice`.
 
 **Forced-Choice Rule**: Every strong proposal must answer "What choice does this person get forced into again and again by the world?" Draw from:
 
@@ -47,7 +87,7 @@ For each seed, specify:
 
 Or name a world-specific tension from `WORLD_KERNEL.md` core pressures.
 
-**Rule**: A proposal without repeatable choice pressure is a biography fragment, not a character niche.
+**Rule**: A proposal without repeatable choice pressure and a populated protagonist-grade engine is a biography fragment, not a character niche.
 
 **FOUNDATIONS cross-refs**: Rule 2 (world-produced pressures); Rule 3 (`capability_path` has `cost_of_competence`); World Kernel §Core Pressures.
 
