@@ -73,11 +73,44 @@ test("character_memorability_structure accepts NCP cards without CHAR-only body 
 
 test("character_memorability_structure rejects upgraded NCP cards without rejected-directions audit", async () => {
   const verdicts = await characterMemorabilityStructure.run(
-    inputFile("character-proposals/NCP-12-maren.md", validProposalCard({ includeAudit: false })),
+    inputFile("character-proposals/NCP-12-maren.md", validProposalCard({ includeAuditHeading: false })),
     context([])
   );
 
   assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.missing_rejected_directions_audit"));
+});
+
+test("character_memorability_structure rejects user-seed NCP cards without rejected-directions audit", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile("character-proposals/NCP-12-maren.md", validProposalCard({ includeAuditHeading: false, originKind: "user_seed" })),
+    context([])
+  );
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.missing_rejected_directions_audit"));
+});
+
+test("character_memorability_structure rejects upgraded and user-seed NCP cards with too few rejected directions", async () => {
+  for (const originKind of ["upgraded_seed", "user_seed"] as const) {
+    const verdicts = await characterMemorabilityStructure.run(
+      inputFile("character-proposals/NCP-12-maren.md", validProposalCard({ originKind, rejectedDirectionsCount: 2 })),
+      context([])
+    );
+
+    assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.rejected_directions_audit_min_items"));
+  }
+});
+
+test("character_memorability_structure leaves batch-generated NCP audit shape unaffected", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile("character-proposals/NCP-12-maren.md", validProposalCard({
+      includeAuditHeading: false,
+      originKind: "batch_generated",
+      rejectedDirectionsCount: 1
+    })),
+    context([])
+  );
+
+  assert.deepEqual(verdicts, []);
 });
 
 test("character_memorability_structure rejects canon-requiring NCP cards without implied facts", async () => {
@@ -221,21 +254,28 @@ dramatic_core:
 `;
 }
 
-function validProposalCard(options: { includeAudit?: boolean; canonRequiringWithoutFacts?: boolean } = {}): string {
-  const includeAudit = options.includeAudit ?? true;
+function validProposalCard(options: {
+  includeAuditHeading?: boolean;
+  canonRequiringWithoutFacts?: boolean;
+  originKind?: "batch_generated" | "upgraded_seed" | "user_seed";
+  rejectedDirectionsCount?: number;
+} = {}): string {
+  const includeAuditHeading = options.includeAuditHeading ?? true;
   const canonStatus = options.canonRequiringWithoutFacts ? "canon-requiring" : "canon-safe";
+  const originKind = options.originKind ?? "upgraded_seed";
+  const rejectedDirectionsCount = options.rejectedDirectionsCount ?? 3;
   return [
     "---",
     "proposal_id: NCP-12",
     "slug: maren-toll-confessor",
     "title: Maren, Toll Confessor",
     "upgrade_lineage:",
-    "  origin_kind: upgraded_seed",
+    `  origin_kind: ${originKind}`,
     "  source_path: briefs/maren.md",
     "  source_proposal_id: ''",
     "  mutation_summary: Kept the toll role and sharpened the debt appetite.",
     "  rejected_directions_audit:",
-    "    - pure monster",
+    ...Array.from({ length: rejectedDirectionsCount }, (_, index) => `    - rejected direction ${index + 1}`),
     "memorability_profile:",
     "  seed_essence_preserved: [Toll confession role]",
     "canon_assumption_flags:",
@@ -249,6 +289,6 @@ function validProposalCard(options: { includeAudit?: boolean; canonRequiringWith
     "",
     "World-rooted proposal prose.",
     "",
-    ...(includeAudit ? ["## Rejected Directions Audit", "", "- Pure monster flattened the office pressure.", ""] : [])
+    ...(includeAuditHeading ? ["## Rejected Directions Audit", "", "- Pure monster flattened the office pressure.", ""] : [])
   ].join("\n");
 }

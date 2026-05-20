@@ -62,7 +62,7 @@ The NCP→CHAR derivation has no persisted, auditable link: `character-generatio
 
 - An LLM-in-the-loop automated semantic-preservation test (no harness exists; semantic enforcement stays in Phase 8 Test 17 + Phase 9).
 - A `dramatic_core` presence/completeness deterministic check (already schema-enforced — redundant).
-- The NCP user_seed parity check (SPEC53CHAPIPSEC-003 — separate function `proposalVerdicts` in the same file).
+- The NCP user_seed parity check (archive/tickets/SPEC53CHAPIPSEC-003.md — separate function `proposalVerdicts` in the same file).
 
 ## Acceptance Criteria
 

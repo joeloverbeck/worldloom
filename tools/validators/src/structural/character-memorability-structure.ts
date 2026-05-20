@@ -119,13 +119,24 @@ function proposalVerdicts(filePath: string, content: string, parsed: Record<stri
   const verdicts: Verdict[] = [];
   const upgradeLineage = asPlainRecord(parsed.upgrade_lineage);
 
-  if (upgradeLineage.origin_kind === "upgraded_seed" && !hasHeading(content, "Rejected Directions Audit")) {
-    verdicts.push(verdict(
-      filePath,
-      nodeId,
-      "missing_rejected_directions_audit",
-      `${nodeId} upgraded NCP cards must include '## Rejected Directions Audit'.`
-    ));
+  if (requiresRejectedDirectionsAudit(upgradeLineage.origin_kind)) {
+    if (!hasHeading(content, "Rejected Directions Audit")) {
+      verdicts.push(verdict(
+        filePath,
+        nodeId,
+        "missing_rejected_directions_audit",
+        `${nodeId} upgraded/user-seed NCP cards must include '## Rejected Directions Audit'.`
+      ));
+    }
+
+    if (!Array.isArray(upgradeLineage.rejected_directions_audit) || upgradeLineage.rejected_directions_audit.length < 3) {
+      verdicts.push(verdict(
+        filePath,
+        nodeId,
+        "rejected_directions_audit_min_items",
+        `${nodeId} upgrade_lineage.rejected_directions_audit must contain at least 3 entries for upgraded/user-seed NCP cards.`
+      ));
+    }
   }
 
   const canonAssumptionFlags = asPlainRecord(parsed.canon_assumption_flags);
@@ -142,6 +153,10 @@ function proposalVerdicts(filePath: string, content: string, parsed: Record<stri
   }
 
   return verdicts;
+}
+
+function requiresRejectedDirectionsAudit(originKind: unknown): boolean {
+  return originKind === "upgraded_seed" || originKind === "user_seed";
 }
 
 function relevantPath(filePath: string): boolean {
