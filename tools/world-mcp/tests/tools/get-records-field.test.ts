@@ -85,6 +85,14 @@ function buildSeededWorld(root: string): void {
           "    body: Salt port routines changed.",
           ""
         ].join("\n")
+      },
+      {
+        node_id: "NCP-0001",
+        world_slug: "seeded",
+        file_path: "character-proposals/NCP-0001.md",
+        heading_path: "NCP-0001",
+        node_type: "character_proposal_card",
+        body: "---\nid: NCP-0001\n---\n\n## Proposal\nProposal body.\n"
       }
     ]
   });
@@ -155,6 +163,45 @@ test("getRecordsField keeps partial failures in request order", async () => {
     assert.equal(result.records[2]!.error.code, "invalid_input");
     assert.equal(result.records[3]!.found, true);
     assert.equal(result.records[3]!.field_value, "Brinewick Fact 2");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getRecordsField returns actionable hybrid errors alongside atomic successes", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getRecordsField({
+        record_ids: ["CF-0001", "NCP-0001", "CF-0002"],
+        field_path: ["title"],
+        world_slug: "seeded"
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.records.map((entry) => entry.record_id), [
+      "CF-0001",
+      "NCP-0001",
+      "CF-0002"
+    ]);
+    assert.equal(result.records[0]!.found, true);
+    assert.equal(result.records[0]!.field_value, "Brinewick Fact 1");
+    assert.equal(result.records[1]!.found, false);
+    assert.equal(result.records[1]!.error.code, "invalid_input");
+    assert.match(
+      result.records[1]!.error.message,
+      /get_record\(record_id, section_path='frontmatter\.<field>'\)/
+    );
+    assert.match(
+      result.records[1]!.error.message,
+      /get_record\(record_id, section_path='body\.<section>'\)/
+    );
+    assert.equal(result.records[2]!.found, true);
+    assert.equal(result.records[2]!.field_value, "Brinewick Fact 2");
   } finally {
     destroyTempRepoRoot(root);
   }

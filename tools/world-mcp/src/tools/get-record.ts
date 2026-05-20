@@ -153,6 +153,10 @@ export function getHybridKind(nodeType: NodeType): HybridRecordKind | null {
   return NODE_TYPE_TO_HYBRID_KIND[nodeType] ?? null;
 }
 
+export function isHybridRecordId(recordId: string): boolean {
+  return HYBRID_RECORD_ID_PATTERN.test(recordId);
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }

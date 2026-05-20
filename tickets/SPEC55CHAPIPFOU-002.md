@@ -49,7 +49,7 @@ Add a note: story-pipeline seed nodes must be realized `CHAR-<integer>` ids and 
 
 - Hard rejection of NCP/NCB seeds (the chosen mechanism is warn+drop, symmetric to the story-local guard).
 - Any change to the story-local pattern, the `story_bundle_context` assembly, or world-task seed handling.
-- The MCP field-tool error work (SPEC55CHAPIPFOU-001) and the schema-doc/regression-test work (SPEC55CHAPIPFOU-003).
+- The completed MCP field-tool error work (`archive/tickets/SPEC55CHAPIPFOU-001.md`) and the schema-doc/regression-test work (SPEC55CHAPIPFOU-003).
 
 ## Acceptance Criteria
 

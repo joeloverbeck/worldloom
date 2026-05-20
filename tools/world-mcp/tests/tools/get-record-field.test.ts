@@ -61,6 +61,50 @@ function buildSeededAtomicWorld(root: string): void {
   });
 }
 
+function buildSeededHybridWorld(root: string): void {
+  buildSeededAtomicWorld(root);
+  seedWorld(root, {
+    worldSlug: "hybrid",
+    nodes: [
+      {
+        node_id: "CHAR-0001",
+        world_slug: "hybrid",
+        file_path: "characters/CHAR-0001.md",
+        node_type: "character_record",
+        body: "---\nid: CHAR-0001\n---\n\n## Profile\nCharacter body.\n"
+      },
+      {
+        node_id: "DA-0001",
+        world_slug: "hybrid",
+        file_path: "diegetic-artifacts/DA-0001.md",
+        node_type: "diegetic_artifact_record",
+        body: "---\nid: DA-0001\n---\n\n## Artifact\nArtifact body.\n"
+      },
+      {
+        node_id: "PA-0001",
+        world_slug: "hybrid",
+        file_path: "adjudications/PA-0001.md",
+        node_type: "adjudication_record",
+        body: "---\nid: PA-0001\n---\n\n## Adjudication\nAdjudication body.\n"
+      },
+      {
+        node_id: "NCP-0001",
+        world_slug: "hybrid",
+        file_path: "character-proposals/NCP-0001.md",
+        node_type: "character_proposal_card",
+        body: "---\nid: NCP-0001\n---\n\n## Proposal\nProposal body.\n"
+      },
+      {
+        node_id: "NCB-0001",
+        world_slug: "hybrid",
+        file_path: "character-proposals/NCB-0001.md",
+        node_type: "character_proposal_batch",
+        body: "---\nid: NCB-0001\n---\n\n## Batch\nBatch body.\n"
+      }
+    ]
+  });
+}
+
 test("getRecordField returns a scalar field with record provenance", async () => {
   const root = createTempRepoRoot();
 
@@ -75,6 +119,32 @@ test("getRecordField returns a scalar field with record provenance", async () =>
     assert.equal(result.value, "Brinewick Fact");
     assert.equal(result.content_hash.length, 64);
     assert.equal(result.file_path, "_source/canon/CF-0001.yaml");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getRecordField points hybrid ids to get_record section projection", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededHybridWorld(root);
+
+    for (const recordId of ["CHAR-0001", "DA-0001", "PA-0001", "NCP-0001", "NCB-0001"]) {
+      const result = await withRepoRoot(root, () =>
+        getRecordField({ record_id: recordId, field_path: ["id"], world_slug: "hybrid" })
+      );
+
+      assert.ok("code" in result);
+      assert.equal(result.code, "invalid_input");
+      assert.match(result.message, /get_record\(record_id, section_path='frontmatter\.<field>'\)/);
+      assert.match(result.message, /get_record\(record_id, section_path='body\.<section>'\)/);
+      assert.match(result.message, /not get_record_field/);
+      assert.deepEqual(result.details?.supported_section_paths, [
+        "frontmatter.<field>",
+        "body.<section>"
+      ]);
+    }
   } finally {
     destroyTempRepoRoot(root);
   }

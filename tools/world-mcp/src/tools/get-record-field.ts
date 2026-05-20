@@ -3,6 +3,7 @@ import { createMcpError, type McpError } from "../errors.js";
 
 import {
   isMcpError,
+  isHybridRecordId,
   parseRecordBody,
   resolveRecordRow,
   validateRecordId
@@ -70,6 +71,19 @@ async function getRecordFieldImpl(
   const resolved = resolveRecordRow(args);
   if ("code" in resolved) {
     return resolved;
+  }
+
+  if (isHybridRecordId(args.record_id)) {
+    return createMcpError(
+      "invalid_input",
+      `Hybrid record '${args.record_id}' is projected through get_record(record_id, section_path='frontmatter.<field>') or get_record(record_id, section_path='body.<section>'), not get_record_field.`,
+      {
+        field: "record_id",
+        record_id: args.record_id,
+        recommended_tool: "get_record",
+        supported_section_paths: ["frontmatter.<field>", "body.<section>"]
+      }
+    );
   }
 
   const record = parseRecordBody(resolved.row);
