@@ -43,7 +43,7 @@ Tag the seed's `canon_assumption_flags.status` as one of:
 
 - **canon-safe** — every implied capability fits a CF's `who_can_do_it` OR is ordinary-person scope with no CF opposition; every institutional embedding is derivable from loaded world state.
 - **canon-edge** — the seed leans on interpretation / distribution assumptions / lightly implied lore; each leaning-point listed in `canon_assumption_flags.edge_assumptions`.
-- **canon-requiring** — the seed implies a new fact / institution / capability / law / taboo / resource pattern / historical residue not present in current canon. Each implied new fact listed in `canon_assumption_flags.implied_new_facts` with a preferred route (`direct_to_canon_addition` / `first_through_propose_new_canon_facts`).
+- **canon-requiring** — the seed implies a new fact / institution / capability / law / taboo / resource pattern / historical residue not present in current canon. Each implied new fact listed in `canon_assumption_flags.implied_new_facts` with a preferred route (`canon-addition` / `propose-new-canon-facts`).
 
 Fail triggers for 10c itself (NOT for canon-edge / canon-requiring tagging — those are routing metadata):
 

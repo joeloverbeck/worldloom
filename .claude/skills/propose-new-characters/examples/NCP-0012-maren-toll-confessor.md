@@ -10,6 +10,8 @@
 #   - canon_assumption_flags.status = canon-edge (the card leans on the
 #     assumption that confession is used informally for rumor flow in this
 #     world — a leaning-point, not a new canon claim).
+#   - memorability_profile shows the protagonist-grade engine fields added by
+#     SPEC-52, while preserving the first-block character-generation contract.
 #   - recommended_next_step = generate_immediately (the canon-edge
 #     assumption is minor enough that character-generation can run without
 #     first routing to canon-addition).
@@ -74,21 +76,72 @@ depth_class: elastic
 proposal_family: "boundary broker / translator"
 diagnosis_target: "Phase-5 probe 7 (pressures without translators / archivists)"
 
+# ===== protagonist-grade engine (Phase 7, shared reference) =====
+
+memorability_profile:
+  seed_essence_preserved:
+    - "low-chartered marsh clergy at a levy station"
+    - "tripartite temple/crown/clan access"
+    - "boundary-broker function with practical ledger voice"
+  world_produced_wound: "A seminary debt and a hidden drowning-abstention shame, both produced by temple-charter discipline and marsh survival pressure, bind him to a frontier station where abstention is never clean."
+  active_appetite: "He wants ritual respectability and inland transfer for Rill while repeatedly accepting the small marsh-clan courtesies that keep the station functioning."
+  self_mythology: "He tells himself that compromise is a higher form of order at a station where pure law would produce more suffering than it prevents."
+  irreconcilable_contradiction: "He believes order prevents suffering, yet his effective daily order depends on selective lawbreaking and confession-adjacent rumor flow."
+  pressure_behavior:
+    cornered: "Retreats into exact ledger categories, naming weights and dates until moral accusation becomes an accounting dispute."
+    tempted: "Accepts small courtesies first, then retroactively sanctifies them as station maintenance."
+    humiliated: "Quotes temple formulae too formally, then punishes himself with extra ledger corrections after the visitor leaves."
+    offered_power: "Uses it indirectly through paperwork and ferry timing rather than open command."
+    protecting_attachment: "Breaks his own rules quickest when Rill's future or safety is at stake, then records the deviation as if precision could cleanse it."
+  relational_charge:
+    - target_or_relation_type: "Rill, dependent niece"
+      need: "Her future justifies his hope for inland respectability."
+      resentment_or_fear: "He fears she will see the compromise economy as inheritance rather than contamination."
+      likely_harm_or_betrayal: "He may trade a smuggling family's trust or temple confidence to protect her marriage prospects."
+  moral_psychological_edge: "He may launder corruption as mercy when the law would hurt people he knows, especially if clean obedience would endanger Rill."
+  signature_scene_behaviors:
+    - "Touches the scar in his leg before deciding whether a barge weight is honest."
+    - "Leaves one ledger column too exact when he is lying orally."
+    - "Avoids the word 'clean' and substitutes river metaphors when speaking about guilt."
+  voice_under_pressure:
+    lying: "Over-exact weights, dates, and river terms."
+    begging: "Drops temple formulae and speaks in short kinship obligations."
+    threatening: "Uses ledger consequences and toll delays rather than direct menace."
+    grieving_or_hiding_ignorance: "Turns grief into maintenance instructions and ignorance into procedural delay."
+  cannot_be_swapped_out_because: "Only Maren combines low-chartered confession access, levy-ledger authority, scarred flood-path literacy, Rill as attachment, and a private theology of compromise at this exact marsh crossing."
+
+upgrade_lineage:
+  origin_kind: batch_generated
+  source_path: ""
+  source_proposal_id: ""
+  mutation_summary: "Example batch card; no single-seed upgrade was applied."
+  rejected_directions_audit: []
+
 # ===== scoring (Phase 11) =====
 
 scores:
-  world_rootedness: 5
-  niche_distinctiveness: 4
-  pressure_richness: 5
-  voice_distinctiveness: 4
-  ordinary_life_relevance: 5
-  artifact_utility: 5
-  thematic_freshness: 4
-  expansion_potential: 4
-  canon_burden: 2
-  overlap_risk: 2
+  validity:
+    world_rootedness: 5
+    niche_distinctiveness: 4
+    institutional_embedding: 5
+    ordinary_life_relevance: 5
+    capability_cost_integrity: 5
+    canon_safety: 4
+    canon_burden: 2
+    overlap_risk: 2
+  memorability:
+    protagonist_grade_force: 5
+    contradiction_irreconcilability: 5
+    appetite_specificity: 4
+    self_mythology_strength: 5
+    pressure_behavior_distinctiveness: 5
+    voice_pressure_distinction: 4
+    relational_charge: 4
+    moral_psychological_edge: 5
+    world_specific_surprise: 4
+    cannot_be_swapped_out: 5
 
-score_aggregate: 32
+score_aggregate: 110.5
 
 # ===== canon routing (Phase 10c output) =====
 
@@ -111,6 +164,8 @@ critic_pass_trace:
   phase_9_voice_critic: "Voice signature passes swap/motive/mode/quote/artifact-author tests. Distinct from DA-sermon-levy-season (pure ritual-purity register) through river-slang fraying and ledger-exactness on written register."
   phase_9_artifact_authorship: "Plausible authorship: toll ledgers, devotional notices, private warning letters, witness statements. Written register (ledger-exactness) distinct from oral register (evasive, indirect)."
   phase_11_theme_tone: "Thematic freshness 4/5: adds a new angle on the world's grim-compromise tonal contract — not rebellion against compromise, but daily inhabitation of it."
+  blandness_executioner: "PASS: his compromise appears as repeated ledger, confession, ferry, and kinship behavior under marsh-frontier pressure, not as a polite moral summary."
+  protagonist_grade_critic: "PASS: Rill, the ledger, the scarred flood-body, and tripartite authority naturally generate scenes without assigning plot destiny."
 
 # ===== Canon Safety Check audit trail (Phase 10 output) =====
 

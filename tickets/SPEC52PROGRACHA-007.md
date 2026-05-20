@@ -45,7 +45,7 @@ Add `NCP-<integer>` (character proposal cards, `worlds/<slug>/character-proposal
 ## Out of Scope
 
 - Any schema or validator change (005/006).
-- Any skill change (001/002/003/004).
+- Any skill change (001, `archive/tickets/SPEC52PROGRACHA-002.md`, 003, or 004).
 - Changing how NCP cards canonicalize (`proposal_id` is unchanged); changing `STRUCTURED_ID_REGEX` (already includes NCB).
 
 ## Acceptance Criteria

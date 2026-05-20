@@ -14,7 +14,7 @@
 
 1. `character-generation` runs Phases 0-9 (`.claude/skills/character-generation/SKILL.md`); Phase 0 normalize lives in `references/phase-0-normalize-brief.md`; Phases 1-6 construction in `references/phases-1-6-character-construction.md` (Phase 4 = Goal and Pressure Construction); Phase 8 tests in `references/phase-8-validation-tests.md` (10 tests, incl. "World-Grown Specificity"). The dossier template `templates/character-dossier.md` has 9 body sections and NO `dramatic_core` frontmatter or protagonist-grade body sections (confirmed at SPEC-52 reassessment).
 2. SPEC-52 §Phase 4 + Deliverable 4 enumerate: Phase 0 preservation contract (`input_memorability_contract`), Phase 4b deepening/preservation, required CHAR frontmatter `dramatic_core`, six new body sections before "Likely Story Hooks", and new Phase 8 validation tests.
-3. Cross-skill boundary: the CHAR `dramatic_core` frontmatter block field names MUST match `.claude/skills/_shared-references/protagonist-grade-character-engine.md` (001) and the NCP `memorability_profile` block (002); when `character_brief_path` is an NCP card, Phase 0 extracts its `memorability_profile` as the preservation contract. The `dramatic_core` schema is enforced by `character-frontmatter.schema.json` (005) and the body sections by the structural validator (006).
+3. Cross-skill boundary: the CHAR `dramatic_core` frontmatter block field names MUST match `.claude/skills/_shared-references/protagonist-grade-character-engine.md` (001) and the NCP `memorability_profile` block completed in `archive/tickets/SPEC52PROGRACHA-002.md`; when `character_brief_path` is an NCP card, Phase 0 extracts its `memorability_profile` as the preservation contract. The `dramatic_core` schema is enforced by `character-frontmatter.schema.json` (005) and the body sections by the structural validator (006).
 4. FOUNDATIONS Rule 2 (No Pure Cosmetics) + Rule 3 (No Specialness Inflation): `dramatic_core` is required on every CHAR because every dossier-pipeline character is a deliberately-kept world character (ephemeral cast are story-system STENT records, outside this spec) — "engine density, not theatrical loudness," not universal exceptional capability. Rule 7: the Phase 7 Canon Safety Check / Mystery Reserve firewall is unchanged; if canon repair must weaken a dramatic element, the anti-flattening contract surfaces the tradeoff before commit.
 5. Output-schema extension (character dossier): adding required `dramatic_core` frontmatter + six body sections extends the CHAR output shape. Consumers: `character-frontmatter.schema.json` (005), the structural validator (006), and `branching-story-bootstrap` (reads CHAR ids only — unaffected; no story-aware fields are added). The extension is required-breaking by design (existing animalia dossiers fail until manually edited) — Rule 6: this is the documented intended break (SPEC-52 §Key Design Decisions), not a silent retcon.
 
@@ -59,7 +59,7 @@ Add: `dramatic_core` required + complete; wound world-produced; contradiction be
 
 ## Out of Scope
 
-- The shared reference (001) and `propose-new-characters` (002).
+- The shared reference (001) and `propose-new-characters` (`archive/tickets/SPEC52PROGRACHA-002.md`).
 - `character-frontmatter.schema.json` / structural validator (005/006) — this ticket emits the dossier shape; the schema enforces it.
 - Any story-system-specific field (arc beat, act position, plot destiny, companion quest); "Likely Story Hooks" stays a pressure-surface description.
 
@@ -74,7 +74,7 @@ Add: `dramatic_core` required + complete; wound world-produced; contradiction be
 
 ### Invariants
 
-1. `dramatic_core` field names match the shared reference (001) and NCP `memorability_profile` (002) exactly.
+1. `dramatic_core` field names match the shared reference (001) and NCP `memorability_profile` from `archive/tickets/SPEC52PROGRACHA-002.md` exactly.
 2. No story-system-specific fields are added; `branching-story-bootstrap` CHAR-id resolution is unaffected.
 3. The Phase 7 Mystery Reserve firewall is unchanged (Rule 7).
 
