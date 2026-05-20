@@ -245,7 +245,7 @@ ERROR-severity findings here indicate actively-broken canon discipline.
 
 For each non-terminal leaf page:
 
-- `unactionable_leaf` — no eligible author-pool or JIT-eligible `SLT` against the page's `state_snapshot`. Author-pool eligibility uses the same bind-then-instantiate discipline as `branching-story-turn-cycle`: existential predicates (`any_obligation_open`, `any_consequence_pending`, `any_thread_active`, `any_relationship_axis`, `any_belief`, `any_intention`) must bind their aliases against active records before any `bound:<alias>` effect reference is considered satisfiable. ERROR; `repair_kind: commitment_block`.
+- `unactionable_leaf` — no eligible author-pool or JIT-eligible `SLT` against the page's `state_snapshot`. Author-pool eligibility uses the same bind-then-instantiate discipline as `branching-story-turn-cycle`: existential predicates from shared contract §5 (`any_obligation_open`, `any_consequence_pending`, `any_thread_active`, `any_relationship_axis`, `any_belief`, `any_intention`, `any_clock_active`, `any_secret_unrevealed`, `any_story_question_open`, `any_plan_active`, `any_emotion_active`) must bind their aliases against active records before any `bound:<alias>` effect reference is considered satisfiable. ERROR; `repair_kind: commitment_block`.
 - `leaf_without_choices` — the page emits zero `CHC` records but `continuation.terminal_status: open`. ERROR; `repair_kind: turn_repair`.
 
 For each terminal leaf (`continuation.terminal_status: terminal_closed`):
