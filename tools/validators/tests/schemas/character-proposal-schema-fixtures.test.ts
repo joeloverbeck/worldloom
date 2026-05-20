@@ -161,6 +161,15 @@ test("character proposal card schema accepts complete cards with optional templa
   assert.equal(validate(validCard()), true, JSON.stringify(validate.errors));
 });
 
+test("character proposal card schema rejects batch-generated cards without batch_id", () => {
+  const validate = compileSchema("character-proposal-card");
+  const card = validCard();
+  delete card.batch_id;
+
+  assert.equal(validate(card), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "required" && error.params.missingProperty === "batch_id"));
+});
+
 test("character proposal card schema accepts single-seed upgrades without batch_id", () => {
   const validate = compileSchema("character-proposal-card");
   const card = validCard({
@@ -175,6 +184,23 @@ test("character proposal card schema accepts single-seed upgrades without batch_
     critic_pass_trace: upgradeCriticPassTrace()
   });
   delete card.batch_id;
+
+  assert.equal(validate(card), true, JSON.stringify(validate.errors));
+});
+
+test("character proposal card schema accepts single-seed upgrades with batch_id", () => {
+  const validate = compileSchema("character-proposal-card");
+  const card = validCard({
+    batch_id: "NCB-3",
+    upgrade_lineage: {
+      origin_kind: "upgraded_seed",
+      source_path: "briefs/maren.md",
+      source_proposal_id: "",
+      mutation_summary: "Kept the toll role and sharpened the debt appetite.",
+      rejected_directions_audit: rejectedDirectionAuditEntries()
+    },
+    critic_pass_trace: upgradeCriticPassTrace()
+  });
 
   assert.equal(validate(card), true, JSON.stringify(validate.errors));
 });

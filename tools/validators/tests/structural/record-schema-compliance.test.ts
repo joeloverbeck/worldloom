@@ -924,6 +924,7 @@ function validCharacterProposalCard(): Record<string, unknown> {
     major_local_pressures: ["seasonal debt audit"],
     intended_narrative_role: "protagonist",
     proposal_id: "NCP-12",
+    batch_id: "NCB-3",
     slug: "maren-toll-confessor",
     title: "Maren, Toll Confessor",
     niche_summary: "A toll confessor whose mercy is inseparable from debt recordkeeping.",
@@ -990,6 +991,7 @@ function validCharacterProposalCard(): Record<string, unknown> {
     },
     source_basis: {
       world_slug: "animalia",
+      batch_id: "NCB-3",
       generated_date: "2026-05-20",
       user_approved: false
     }

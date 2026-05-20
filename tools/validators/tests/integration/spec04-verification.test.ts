@@ -53,10 +53,10 @@ test("SPEC-04 verification: Unit registry exposes the active mechanized validato
   assert.ok(!structuralValidators.some((validator) => validator.name === "adjudication_discovery_fields"));
 });
 
-test("SPEC-04 verification: Full-world baseline reports SPEC-52 legacy character/proposal gaps", async () => {
+test("SPEC-04 verification: Full-world baseline reports known legacy character/proposal gaps", async () => {
   const run = await runFullWorldValidation();
 
-  assert.equal(run.summary.fail_count, 459);
+  assert.equal(run.summary.fail_count, 473);
   assert.equal(run.summary.warn_count, 0);
   assert.equal(run.summary.info_count, 0);
   assert.deepEqual(codesByValidator(run.verdicts), {
@@ -167,7 +167,7 @@ test("SPEC-04 verification: Full-world duration is logged as a dev-loop signal",
   const run = await runFullWorldValidation({ refresh: true });
   const durationMs = Date.now() - start;
 
-  assert.equal(run.summary.fail_count, 459);
+  assert.equal(run.summary.fail_count, 473);
   assert.equal(run.summary.info_count, 0);
   assert.deepEqual(codesByValidator(run.verdicts), {
     character_memorability_structure: [
