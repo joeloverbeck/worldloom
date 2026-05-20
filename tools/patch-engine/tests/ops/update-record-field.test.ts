@@ -325,6 +325,118 @@ test("update_record_field accepts SE-attested story-bundle structural field repa
   assertYamlEquals(staged, { ...record, branch_id: "BR-2" });
 });
 
+test("update_record_field treats namespaced story-bundle ids as story retcons", async (t) => {
+  const world = createTestWorld(t);
+  const record = { ...pgRecord(), branch_id: "BR-1" };
+  const pgHash = seedRecord(
+    world,
+    "alpha:PG-1",
+    "page_record",
+    "stories/alpha/_source/pages/PG-1.yaml",
+    record,
+    "alpha"
+  );
+  const env = baseEnvelope();
+
+  const staged = await stageUpdateRecordField(
+    env,
+    createOp({
+      op: "update_record_field",
+      target_world: env.target_world,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "alpha:PG-1",
+        field_path: ["branch_id"],
+        operation: "set",
+        new_value: "BR-2",
+        retcon_attestation: {
+          retcon_type: "A",
+          originating_se: "SE-1",
+          rationale: "Story-event authorized namespaced story-bundle repair."
+        }
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>),
+    world.ctx
+  );
+
+  assertYamlEquals(staged, { ...record, branch_id: "BR-2" });
+
+  await assertOpError(
+    () => stageUpdateRecordField(env, createOp({
+      op: "update_record_field",
+      target_world: env.target_world,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "alpha:PG-1",
+        field_path: ["branch_id"],
+        operation: "set",
+        new_value: "BR-3",
+        retcon_attestation: {
+          retcon_type: "A",
+          originating_ch: "CH-1",
+          rationale: "World-canon references must not authorize story-bundle retcons."
+        }
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>), world.ctx),
+    "retcon_attestation_required"
+  );
+});
+
+test("stageAllOps preserves staged metadata for namespaced story-bundle updates", async (t) => {
+  const world = createTestWorld(t);
+  const record = { ...pgRecord(), branch_id: "BR-1" };
+  const pgHash = seedRecord(
+    world,
+    "alpha:PG-1",
+    "page_record",
+    "stories/alpha/_source/pages/PG-1.yaml",
+    record,
+    "alpha"
+  );
+  const patches: PatchOperation[] = [
+    createOp({
+      op: "update_record_field",
+      target_world: world.worldSlug,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "alpha:PG-1",
+        field_path: ["branch_id"],
+        operation: "set",
+        new_value: "BR-2",
+        retcon_attestation: {
+          retcon_type: "A",
+          originating_se: "SE-1",
+          rationale: "Story-event authorized namespaced story-bundle repair."
+        }
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>),
+    createOp({
+      op: "update_record_field",
+      target_world: world.worldSlug,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "alpha:PG-1",
+        field_path: ["prose_status"],
+        operation: "set",
+        new_value: "rendered"
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>)
+  ];
+
+  const result = await stageAllOps({ ...baseEnvelope(), patches }, patches, world.ctx);
+
+  assert.equal(result.ok, true);
+  if (!result.ok) {
+    return;
+  }
+  assert.equal(result.staged.length, 1);
+  assertYamlEquals(result.staged[0]!, {
+    ...record,
+    branch_id: "BR-2",
+    prose_status: "rendered"
+  });
+});
+
 test("update_record_field rejects originating_se for world-canon retcons", async (t) => {
   const world = createTestWorld(t);
   const { cfHash } = seedStandardRecords(world);

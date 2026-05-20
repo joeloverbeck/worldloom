@@ -6,6 +6,7 @@ import {
   requireTargetWorldMatch,
   stageExistingRecordFile
 } from "./shared.js";
+import { storyBundlePrefixForRecordId } from "./story-record-specs.js";
 import type { OpContext, StagedWrite } from "./types.js";
 
 type UpdateRecordFieldOperation = PatchOperation & { op: "update_record_field" };
@@ -238,7 +239,7 @@ function hasCorrectOriginatingReference(attestation: RetconAttestation, requires
 }
 
 function isStoryBundleRecordId(targetRecordId: string): boolean {
-  return /^(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/.test(targetRecordId);
+  return storyBundlePrefixForRecordId(targetRecordId) !== null;
 }
 
 function cloneRecord(record: Record<string, unknown>): Record<string, unknown> {

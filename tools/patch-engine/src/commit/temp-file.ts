@@ -13,9 +13,10 @@ import { stageCreateInvRecord } from "../ops/create-inv-record.js";
 import { stageCreateMRecord } from "../ops/create-m-record.js";
 import { stageCreateOqRecord } from "../ops/create-oq-record.js";
 import { stageCreateSecRecord } from "../ops/create-sec-record.js";
-import { stageCreateStoryRecord, STORY_RECORD_SPECS, storyRecordMetadata } from "../ops/create-story-record.js";
+import { stageCreateStoryRecord, storyRecordMetadata } from "../ops/create-story-record.js";
 import { stageRemoveChAffectedCfIds } from "../ops/remove-ch-affected-cf-ids.js";
 import { stageRepairSkippedChangeLogEntry } from "../ops/repair-skipped-change-log-entry.js";
+import { nodeTypeForStoryBundlePrefix, storyBundlePrefixForRecordId } from "../ops/story-record-specs.js";
 import { stageUpdateRecordField } from "../ops/update-record-field.js";
 import type { OpContext, StagedRecord, StagedWrite } from "../ops/types.js";
 import { unlinkAllTempFiles } from "./rename.js";
@@ -155,13 +156,6 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
   }
 }
 
-const STORY_BUNDLE_NODE_TYPE_BY_PREFIX: Readonly<Record<string, string>> = Object.fromEntries(
-  Object.values(STORY_RECORD_SPECS).map((spec) => [spec.prefix, spec.nodeType])
-);
-
-const STORY_BUNDLE_ID_PATTERN =
-  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/;
-
 function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType: string } | null {
   if (/^CF-\d+$/.test(recordId)) {
     return { nodeId: recordId, nodeType: "canon_fact_record" };
@@ -184,9 +178,9 @@ function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType
   if (/^SEC-[A-Z]{3}-\d+$/.test(recordId)) {
     return { nodeId: recordId, nodeType: "section" };
   }
-  const storyMatch = STORY_BUNDLE_ID_PATTERN.exec(recordId);
-  if (storyMatch && storyMatch[1] !== undefined) {
-    const nodeType = STORY_BUNDLE_NODE_TYPE_BY_PREFIX[storyMatch[1]];
+  const storyPrefix = storyBundlePrefixForRecordId(recordId);
+  if (storyPrefix !== null) {
+    const nodeType = nodeTypeForStoryBundlePrefix(storyPrefix);
     if (nodeType !== undefined) {
       return { nodeId: recordId, nodeType };
     }
