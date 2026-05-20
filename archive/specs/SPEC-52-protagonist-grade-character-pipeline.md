@@ -2,7 +2,7 @@
 
 # SPEC-52: Protagonist-Grade Character Pipeline
 
-**Status**: DRAFT
+**Status**: COMPLETED
 **Phase**: character-pipeline memorability hardening (one shared doctrine reference + one new skill + two skill revisions + schema/validator first-classing of NCP; no story-bundle record classes touched)
 **Depends on**: none (additive to the canon-reading character pipeline). Builds on the existing `propose-new-characters` / `character-generation` skills, the `character_proposal_card` / `character_proposal_batch` world-index node types, and the validator framework.
 **Blocks**: a possible future dedicated `character_proposal_upgrade` MCP task type + ranking profile (explicitly deferred — see §Key Design Decisions); a possible future `NCU-<integer>` upgrade-audit record class (explicitly deferred).
@@ -257,3 +257,29 @@ Six phases, sequenced so the doctrine reference and templates land first, the sk
 **Skill (manual / fixture)**: `deepen-character-proposal` consumes a markdown brief; consumes an existing NCP; produces a canon-safe output; produces a canon-requiring output with routes; records a rejected-directions audit (≥3). `propose-new-characters` rejects a bland seed and routes a canon-requiring strong seed. `character-generation` turns a strong NCP into a CHAR preserving load-bearing elements and surfaces any canon-forced flattening before approval.
 
 Every validation-test PASS entry requires a one-line rationale; a bare PASS is treated as FAIL.
+
+## Outcome
+
+Completed: 2026-05-20
+
+SPEC-52 landed through seven archived implementation tickets:
+
+1. `archive/tickets/SPEC52PROGRACHA-001.md` — shared protagonist-grade character engine reference.
+2. `archive/tickets/SPEC52PROGRACHA-002.md` — `propose-new-characters` protagonist-grade default and NCP template/example updates.
+3. `archive/tickets/SPEC52PROGRACHA-003.md` — `character-generation` `dramatic_core`, preservation contract, body sections, and anti-flattening validation guidance.
+4. `archive/tickets/SPEC52PROGRACHA-004.md` — new `deepen-character-proposal` skill and upgraded NCP template.
+5. `archive/tickets/SPEC52PROGRACHA-005.md` — CHAR/NCP/NCB schemas and schema fixture tests.
+6. `archive/tickets/SPEC52PROGRACHA-006.md` — validator structural wiring, NCP/NCB hybrid discovery, memorability structural validator, and validator inventory/test fallout.
+7. `archive/tickets/SPEC52PROGRACHA-007.md` — NCB canonical ID handling in world-index and NCP/NCB ID convention docs.
+
+Final verification rerun:
+
+1. From `tools/world-index`: `npm run build` — passed.
+2. From `tools/world-index`: `npm test` — passed, 124 tests.
+3. From `tools/validators`: `npm test` — passed, 695 tests.
+4. `grep -nE "CANONICAL_ID_REGEX|NCB" tools/world-index/src/parse/prose.ts` — passed.
+5. `grep -nE "NCP-<integer>|NCB-<integer>" CLAUDE.md` — passed.
+
+The skill-level dry-run bullets in the original test plan were superseded by the archived ticket proof boundary: this Codex context has no repo-local executable runner for `.claude/skills/*` preview generation, so tickets 002, 003, and 004 used grep-proof plus manual contract review against `docs/FOUNDATIONS.md`, `docs/HARD-GATE-DISCIPLINE.md`, SPEC-52, and the shared protagonist-grade reference. That deviation is recorded in the archived tickets.
+
+Known accepted break: existing legacy `animalia` CHAR/NCP content that lacks the new protagonist-grade fields now fails schema/structural validation as intended until manually migrated. The validator tests name that SPEC-52 legacy baseline explicitly so the break is actionable rather than silent.
