@@ -30,15 +30,25 @@ export interface GetContextPacketArgs {
 const STORY_LOCAL_SEED_NODE_PATTERN =
   /^(?:(?:[a-z0-9-]+):)?(?:SF|BEL|SE|DA|OBL|CNSQ|THR|SREL|STINT|STENT|STSTAT|STLOC|STOBJ|CLK|STSEC|STQ|STPLAN|STEMO|BR|PG|CHC|SLT|SLB|SAU|SP|RSP)-\d+$/;
 const STORY_LOCAL_SEED_NODE_WARNING = "story_local_seed_nodes_ignored";
+const AUTHORING_PROPOSAL_SEED_NODE_PATTERN = /^(?:[a-z0-9-]+:)?(?:NCP|NCB)-\d+$/;
+const AUTHORING_PROPOSAL_SEED_NODE_WARNING = "authoring_proposal_seed_nodes_ignored";
 
 function storyLocalSeedNodeWarnings(args: GetContextPacketArgs): string[] {
   if (!isStoryPipelineTaskType(args.task_type)) {
     return [];
   }
 
-  return args.seed_nodes.some((seedNode) => STORY_LOCAL_SEED_NODE_PATTERN.test(seedNode))
-    ? [STORY_LOCAL_SEED_NODE_WARNING]
-    : [];
+  const warnings: string[] = [];
+
+  if (args.seed_nodes.some((seedNode) => STORY_LOCAL_SEED_NODE_PATTERN.test(seedNode))) {
+    warnings.push(STORY_LOCAL_SEED_NODE_WARNING);
+  }
+
+  if (args.seed_nodes.some((seedNode) => AUTHORING_PROPOSAL_SEED_NODE_PATTERN.test(seedNode))) {
+    warnings.push(AUTHORING_PROPOSAL_SEED_NODE_WARNING);
+  }
+
+  return warnings;
 }
 
 function seedNodesForAssembly(args: GetContextPacketArgs): string[] {
@@ -46,7 +56,11 @@ function seedNodesForAssembly(args: GetContextPacketArgs): string[] {
     return args.seed_nodes;
   }
 
-  return args.seed_nodes.filter((seedNode) => !STORY_LOCAL_SEED_NODE_PATTERN.test(seedNode));
+  return args.seed_nodes.filter(
+    (seedNode) =>
+      !STORY_LOCAL_SEED_NODE_PATTERN.test(seedNode) &&
+      !AUTHORING_PROPOSAL_SEED_NODE_PATTERN.test(seedNode)
+  );
 }
 
 function assertValidArgs(args: GetContextPacketArgs): void {

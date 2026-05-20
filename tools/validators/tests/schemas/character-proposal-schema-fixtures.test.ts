@@ -188,6 +188,24 @@ test("character proposal card schema accepts single-seed upgrades without batch_
   assert.equal(validate(card), true, JSON.stringify(validate.errors));
 });
 
+test("character proposal card schema accepts user seeds without batch_id", () => {
+  const validate = compileSchema("character-proposal-card");
+  const card = validCard({
+    batch_id: undefined,
+    upgrade_lineage: {
+      origin_kind: "user_seed",
+      source_path: "briefs/maren.md",
+      source_proposal_id: "",
+      mutation_summary: "User-provided toll role preserved while sharpening the debt appetite.",
+      rejected_directions_audit: rejectedDirectionAuditEntries()
+    },
+    critic_pass_trace: upgradeCriticPassTrace()
+  });
+  delete card.batch_id;
+
+  assert.equal(validate(card), true, JSON.stringify(validate.errors));
+});
+
 test("character proposal card schema accepts single-seed upgrades with batch_id", () => {
   const validate = compileSchema("character-proposal-card");
   const card = validCard({
@@ -305,4 +323,37 @@ test("character proposal batch schema accepts the batch manifest frontmatter sha
   };
 
   assert.equal(validate(batch), true, JSON.stringify(validate.errors));
+});
+
+test("character proposal batch schema rejects stale proposal_ids without card_ids", () => {
+  const validate = compileSchema("character-proposal-batch");
+  const batch = {
+    batch_id: "NCB-3",
+    world_slug: "animalia",
+    generated_date: "2026-05-20",
+    parameters: {
+      batch_size: 7,
+      depth_mix: { emblematic: 1, elastic: 3, round_load_bearing: 3 },
+      spread_vs_focus: "spread",
+      density_rule_mode: "auto",
+      target_domains: ["river tolls"],
+      taboo_areas: ["sexual coercion"],
+      ordinary_vs_exceptional_mix: "balanced",
+      artifact_author_share: 0.25,
+      under_modeled_priority: ["debt law"],
+      max_overlap_allowed: "crowded_permitted",
+      story_scale_mix: { intimate: 2, local: 3, regional: 1, transregional: 1 },
+      mosaic_cluster_preference: "mixed",
+      upstream_audit_path: ""
+    },
+    registry_summary: "The registry has no toll-confessor figure.",
+    proposal_ids: ["NCP-12"],
+    dropped_card_ids: [],
+    user_approved: false,
+    notes: "No batch-level repairs."
+  };
+
+  assert.equal(validate(batch), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "required" && error.params.missingProperty === "card_ids"));
+  assert.ok(validate.errors?.some((error) => error.keyword === "additionalProperties" && error.params.additionalProperty === "proposal_ids"));
 });

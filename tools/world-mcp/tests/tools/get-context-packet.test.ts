@@ -48,6 +48,20 @@ function buildContextPacketWorld(root: string): void {
         body: "---\nname: Melissa Threadscar\n---\nMelissa lives in Brinewick.\n"
       },
       {
+        node_id: "NCP-0001",
+        world_slug: "seeded",
+        file_path: "character-proposals/NCP-0001.md",
+        node_type: "character_proposal_card",
+        body: "---\nproposal_id: NCP-0001\n---\nA proposal for Melissa.\n"
+      },
+      {
+        node_id: "NCB-0001",
+        world_slug: "seeded",
+        file_path: "character-proposals/batches/NCB-0001.md",
+        node_type: "character_proposal_batch",
+        body: "---\nbatch_id: NCB-0001\ncard_ids:\n  - NCP-0001\n---\nA proposal batch.\n"
+      },
+      {
         node_id: "M-1",
         world_slug: "seeded",
         file_path: "MYSTERY_RESERVE.md",
@@ -213,6 +227,36 @@ test("getContextPacket keeps the existing 8000 default for character_generation"
     assert.ok(!("code" in result));
     assert.equal(result.task_header.token_budget.requested, 8000);
     assert.ok(result.task_header.token_budget.allocated <= 8000);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getContextPacket keeps authoring-proposal seeds for world authoring task types", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildContextPacketWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "propose_new_characters",
+        world_slug: "seeded",
+        seed_nodes: ["NCP-0001", "NCB-0001"],
+        token_budget: 15000
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.task_header.warnings, []);
+    assert.ok(
+      result.local_authority.nodes.some((node) => node.id === "NCP-0001"),
+      "NCP seed should remain available to world authoring packets"
+    );
+    assert.ok(
+      result.local_authority.nodes.some((node) => node.id === "NCB-0001"),
+      "NCB seed should remain available to world authoring packets"
+    );
   } finally {
     destroyTempRepoRoot(root);
   }
