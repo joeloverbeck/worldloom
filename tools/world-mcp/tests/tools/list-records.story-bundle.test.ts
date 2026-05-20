@@ -219,6 +219,62 @@ test("listRecords returns CLK, STSEC, and STQ records scoped by story_slug", asy
   }
 });
 
+test("listRecords returns STPLAN and STEMO records scoped by story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const plans = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "story_plan_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        fields: ["id", "holder", "objective", "plan_status", "supersedes"]
+      })
+    );
+    const emotions = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "story_emotion_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        fields: ["id", "holder", "status", "affect_kind", "intensity", "supersedes"]
+      })
+    );
+
+    assert.ok(!("code" in plans));
+    assert.equal(plans.total, 2);
+    assert.deepEqual(plans.records.map((record) => record.record_id), ["STPLAN-0", "STPLAN-1"]);
+    assert.deepEqual(plans.records[1], {
+      record_id: "STPLAN-1",
+      id: "STPLAN-1",
+      holder: "STENT-2",
+      objective: "Reach the loft window by using the brass latch before the watcher arrives.",
+      plan_status: "active",
+      supersedes: "STPLAN-0"
+    });
+
+    assert.ok(!("code" in emotions));
+    assert.equal(emotions.total, 3);
+    assert.deepEqual(emotions.records.map((record) => record.record_id), [
+      "STEMO-0",
+      "STEMO-1",
+      "STEMO-2"
+    ]);
+    assert.deepEqual(emotions.records[1], {
+      record_id: "STEMO-1",
+      id: "STEMO-1",
+      holder: "STENT-2",
+      status: "active",
+      affect_kind: "anxiety",
+      intensity: "high",
+      supersedes: "STEMO-0"
+    });
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("listRecords requires story_slug for story-bundle record types", async () => {
   const root = createTempRepoRoot();
 

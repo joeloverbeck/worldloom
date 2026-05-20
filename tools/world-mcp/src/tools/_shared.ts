@@ -80,6 +80,8 @@ export const STORY_SLUG_PATTERN = /^[a-z0-9-]+$/;
 export const STORY_BUNDLE_NODE_TYPES = [
   "story_entity_record",
   "story_status_record",
+  "story_plan_record",
+  "story_emotion_record",
   "belief_record",
   "story_fact_record",
   "story_event_record",
