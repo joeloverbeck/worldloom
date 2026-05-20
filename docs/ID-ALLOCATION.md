@@ -27,6 +27,8 @@ Never reuse or overwrite an ID. If allocation would collide (concurrent plan), t
 - `DA-<integer>` — diegetic artifacts (same pattern as characters)
 - `PR-<integer>` — proposal cards (`worlds/<slug>/proposals/`)
 - `BATCH-<integer>` — proposal batch manifests (`worlds/<slug>/proposals/batches/`)
+- `NCP-<integer>` — character proposal cards (`worlds/<slug>/character-proposals/`)
+- `NCB-<integer>` — character proposal batch manifests (`worlds/<slug>/character-proposals/batches/`)
 - `AU-<integer>` — audit reports (`worlds/<slug>/audits/`)
 - `RP-<integer>` — retcon-proposal cards (emitted by `continuity-audit` under its audit sub-directory)
 
