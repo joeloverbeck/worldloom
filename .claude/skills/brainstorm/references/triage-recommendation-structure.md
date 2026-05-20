@@ -30,6 +30,8 @@ Each triage item has three fields (parallel to the per-approach `Name / How it w
 
 **`defer` vs `reject` distinction**: `reject` declines the proposal with no positive scheduling intent; `defer` carries a positive judgment with a scheduling delay. The `defer.deferred_to` sub-field names the follow-up deliverable shape (spec / ticket / brainstorm) plus the trigger condition for re-evaluation.
 
+**Cross-item fold / subsume disposition**: when a source-report item's premise is refuted or declined but it carries a valid residual best absorbed into another finding rather than actioned standalone, express it via the dominant verdict (`refuted-by-verification` / `reject` / `accept-with-modification` as the item's shape fits) PLUS a rationale cross-reference to the absorbing finding's ID (e.g., `refuted-by-verification; residual test coverage folded into R1`). Do NOT coin a new verdict bucket for the fold — the seven verdicts above are closed; the fold is a rationale cross-reference, not a disposition of its own.
+
 ## Rationale field content per verdict
 
 | Verdict | Rationale field content |
