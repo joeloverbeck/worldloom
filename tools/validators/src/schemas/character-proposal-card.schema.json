@@ -184,6 +184,7 @@
     "title": { "$ref": "#/$defs/nonEmptyString" },
     "niche_summary": { "$ref": "#/$defs/nonEmptyString" },
     "occupancy_strength": {
+      "description": "Authored guidance field for proposal selection and audit context; advisory and not schema-required.",
       "type": "object",
       "additionalProperties": true,
       "properties": {
@@ -199,7 +200,10 @@
     "memorability_profile": { "$ref": "#/$defs/memorabilityProfile" },
     "upgrade_lineage": { "$ref": "#/$defs/upgradeLineage" },
     "scores": { "type": "object", "additionalProperties": true },
-    "score_aggregate": { "type": "number" },
+    "score_aggregate": {
+      "description": "Authored guidance field for ranking and audit context; advisory and not schema-required.",
+      "type": "number"
+    },
     "canon_assumption_flags": { "$ref": "#/$defs/canonAssumptionFlags" },
     "recommended_next_step": { "type": "string", "enum": ["generate_immediately", "reserved_future_seed", "generate_after_canon_adjudication"] },
     "critic_pass_trace": {
@@ -225,7 +229,11 @@
         }
       }
     },
-    "source_basis": { "type": "object", "additionalProperties": true },
+    "source_basis": {
+      "description": "Authored provenance guidance; nested batch_id is advisory and not schema-required for upgraded_seed or user_seed proposal cards.",
+      "type": "object",
+      "additionalProperties": true
+    },
     "notes": { "type": "string" }
   },
   "allOf": [

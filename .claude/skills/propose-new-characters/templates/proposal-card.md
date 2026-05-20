@@ -21,6 +21,7 @@
 # The Option-A design depends on this structural-parity contract.
 #
 # Required fields must not be left as TODO or empty (enforced by Phase 15 Test 8).
+# NOTE: occupancy_strength, score_aggregate, and source_basis.batch_id are authored guidance fields, not schema-required for every proposal-card origin.
 
 ---
 # ===== character-generation compatibility block (first, so Phase 0 parses quickly) =====
