@@ -69,6 +69,14 @@ shim is therefore safe.
 
 ## Phase 1 — FOUNDATIONS + shared-contract amendments
 
+**Implementation note (2026-05-20):** Landed by `archive/tickets/SPEC56STCHARMACFOU-001.md`.
+`docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, and
+`.claude/skills/_shared-templates/story-record-schemas.md` now declare `STCHAR`, replace
+`STENT.bound_char_id` with `STENT.bound_stchar_id`, reserve the not-yet-mandatory STCHAR
+page-plan packet section, and keep `STCHAR` out of `BEL.basis.access_records` and
+`SE.promotion_claims[].source_record`. Remaining Phase 1 prose below is historical
+implementation scope for the ticket.
+
 **Files:**
 - `docs/FOUNDATIONS.md`
 - `.claude/skills/_shared-templates/story-state-contract.md`

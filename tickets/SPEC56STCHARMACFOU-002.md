@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/validators` (new `story-character-authority.schema.json`; edits to story-entity/page/choice/event schemas + tests).
-**Deps**: SPEC56STCHARMACFOU-001
+**Deps**: archive/tickets/SPEC56STCHARMACFOU-001.md
 
 ## Problem
 

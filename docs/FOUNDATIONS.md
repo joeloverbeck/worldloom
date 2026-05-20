@@ -639,9 +639,15 @@ The story engine is a present-causal-state machine. It tracks what is true now a
 
 ### 6. Story-Bundle ID Classes
 
-Story-bundle architecture uses world-scoped, story-bundle-scoped, and sub-audit-scoped ID classes. `STORY-<integer>` is per-world. Per-bundle records include STENT, STSTAT, SF, BEL, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, CLK, STSEC, STQ, DA (story-local), BR, PG, CHC, SLT, STPLAN, STEMO, and SLB. Per-bundle audit and promotion records include SAU and SP, with RSP scoped under a specific SAU audit. All of these classes use the unpadded natural-integer format defined in §Canonical Storage Layer.
+Story-bundle architecture uses world-scoped, story-bundle-scoped, and sub-audit-scoped ID classes. `STORY-<integer>` is per-world. Per-bundle records include STENT, STCHAR (story-local character authority profile; hybrid markdown artifact under `story-characters/`), STSTAT, SF, BEL, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, CLK, STSEC, STQ, DA (story-local), BR, PG, CHC, SLT, STPLAN, STEMO, and SLB. Per-bundle audit and promotion records include SAU and SP, with RSP scoped under a specific SAU audit. All of these classes use the unpadded natural-integer format defined in §Canonical Storage Layer.
 
 Allocation routes through `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`; RSP allocation also includes `audit_id`. The allocator is the same machine-facing allocation surface used for world-canon classes.
+
+### 6.1 Story-Local Character Authority
+
+World-level `CHAR-*` records remain story-agnostic. Story bundles that need character-specific behavior, voice, appraisal, or planning authority use story-local `STCHAR-*` profiles. Normal story runtime consumes active `STCHAR` profiles, not world `CHAR` dossiers.
+
+`CHAR` provenance may be recorded in `STCHAR` frontmatter, but it must not be used as an operational shortcut in `STENT`, `CHC`, page plans, or prose receipts. `STCHAR` shapes persona, voice, and pressure behavior; it is not an epistemic access route and must not be added to `BEL.basis.access_records[]`.
 
 ### 6a. Belief vs. Fact
 

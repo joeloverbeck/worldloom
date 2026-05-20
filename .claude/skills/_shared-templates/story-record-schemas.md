@@ -1,6 +1,6 @@
 # Story Record Schemas
 
-This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 20 story-bundle record classes plus the prose-receipt direct-write artifact. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the eight hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
+This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 21 story-bundle record classes plus the prose-receipt direct-write artifact. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the eight hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
 
 Subsection numbering matches the original `§4.X` form (e.g. `§4.6 prose receipt`, `§4.2 PG`, `§4.4 SLT`) so cross-references in skill prose, validator source, and other shared templates continue to resolve verbatim. The split is purely structural — §4 is overwhelmingly the bulk of the contract, and the bundled file exceeded the per-call read limit of bulk-loading tools at HEAD.
 
@@ -10,7 +10,7 @@ Authority and supersession discipline live in the main contract's §1; schema-mi
 
 ## 4. Record Schemas
 
-Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 20 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 16 additional classes, and §4.6 covers the prose receipt direct-write artifact.
+Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 21 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 17 additional classes, and §4.6 covers the prose receipt direct-write artifact.
 
 ### 4.1 `BEL` (13 fields)
 
@@ -61,6 +61,7 @@ state_snapshot:
   canon_revision: CH-<integer> | null  # latest governing world-canon change-log id loaded at page-plan commit; null only when no CH exists
   active_records:                      # *
     STENT: [STENT-<integer>]
+    STCHAR: [STCHAR-<integer>]
     STINT: [STINT-<integer>]
     SF: [SF-<integer>]
     BEL: [BEL-<integer>]
@@ -183,9 +184,9 @@ resolution:
   result: success | partial_success | failure | impossible | transformed | held_for_promotion
   player_visible_feedback: >          # * one-sentence player-legible consequence feedback
 world_logic_rationale: >               # * natural-language justification of why this route follows from world canon + branch state
-record_introductions:                  # optional; records newly introduced CLK/STSEC/STQ/THR/STENT/SREL/STPLAN/STEMO state
+record_introductions:                  # optional; records newly introduced CLK/STSEC/STQ/THR/STENT/STCHAR/SREL/STPLAN/STEMO state
   - record_id: CLK-<integer>
-    class: CLK | STSEC | STQ | THR | STENT | SREL | STPLAN | STEMO
+    class: CLK | STSEC | STQ | THR | STENT | STCHAR | SREL | STPLAN | STEMO
     trigger: <closed trigger for class, per story-state-contract §5a>
     evidence: [record_id]
     distinct_from: [record_id]
@@ -198,7 +199,7 @@ non_propagation_facts:                 # optional; records why expected witness 
     group: string
     records: [record_id]
 state_delta:
-  create: [record_id]                  # accepts the lifecycle-managed story-state classes, including STPLAN/STEMO
+  create: [record_id]                  # accepts the lifecycle-managed story-state classes, including STCHAR/STPLAN/STEMO
   supersede: [record_id]               # same class set as create
   close: [record_id]                   # same class set as create
 promotion_claims:
@@ -430,7 +431,7 @@ The following classes share the same append-only rule from §3: committed record
 
 #### 4.5.1 `STENT` (story-local entity)
 
-Mirrors a world-level `CHAR` dossier into the bundle for branch-local entity state, or defines a wholly story-local entity.
+Identifies a story-local entity and binds non-background cast members to story-local character authority. World-level `CHAR` provenance belongs on `STCHAR`, not directly on `STENT`.
 
 ```yaml
 id: STENT-<integer>*
@@ -438,11 +439,12 @@ story_id: STORY-<integer>*
 created_at_page: PG-<integer>*
 supersedes: STENT-<integer> | null            # default null
 display_name: string*                          # cast roster label
-bound_char_id: CHAR-<integer> | null          # null only for wholly story-local entities
+bound_stchar_id: STCHAR-<integer> | null      # null only when role_in_story is exactly [background]
 role_in_story: [<role>]*                       # closed list per §4.4b; one or more
 ```
 
 No `notes` field: authorial notes belong in the page plan or another load-bearing record.
+No direct world-character binding field: runtime character authority flows through `STCHAR`.
 
 #### 4.5.2 `STINT` (intention)
 
@@ -555,6 +557,8 @@ derived_from: [<record_id>]                    # default []
 
 If `direction.kind: directed`, both `direction.from` and `direction.to` MUST be non-null and reference STENT records in the bundle. If `direction.kind: bidirectional`, both endpoints MUST be null; the mutual participants are documented in `participants[]`.
 
+Use `STCHAR` in `derived_from[]` when a relationship's stable conduct, voice, pressure behavior, or appraisal pattern depends on story-local character authority rather than only on present-causal state.
+
 No `magnitude` or `trace_records` fields; use `value` and `derived_from`.
 
 #### 4.5.8 `STLOC` (story-local location)
@@ -637,12 +641,12 @@ target_or_action_families: [<action_family>]*  # non-empty list; §4.4a closed e
 likely_state_pressure: string*                 # natural-language pressure description
 associated_commitment_block: SLT-<integer> | null*   # SLT id if known, null if turn-cycle will JIT
 grounded_in:
-  records: [STENT-<integer> | STSTAT-<integer> | STLOC-<integer> | STOBJ-<integer> | BEL-<integer> | OBL-<integer> | CNSQ-<integer> | THR-<integer> | SREL-<integer> | DA-<integer> | STPLAN-<integer> | STEMO-<integer> | CLK-<integer> | STSEC-<integer> | STQ-<integer> | STINT-<integer> | SF-<integer>]*  # non-empty; active records grounding this choice
+  records: [STENT-<integer> | STCHAR-<integer> | STSTAT-<integer> | STLOC-<integer> | STOBJ-<integer> | BEL-<integer> | OBL-<integer> | CNSQ-<integer> | THR-<integer> | SREL-<integer> | DA-<integer> | STPLAN-<integer> | STEMO-<integer> | CLK-<integer> | STSEC-<integer> | STQ-<integer> | STINT-<integer> | SF-<integer>]*  # non-empty; active records grounding this choice
   affordance_ordinals: [integer]               # optional; ordinals from PG.state_snapshot.visible_affordances
 success_policy: string                         # optional; only present when the resolving SE.outcome_route is `attempt`
 ```
 
-Use `STSTAT` when the choice's availability, prohibition, risk, or transformation turns on life, agency, or location status. Use `STPLAN` when the choice's availability or salience materially depends on the actor's current tactical plan. Use `STEMO` when the choice exists because of active affective pressure. Use `CLK` for staged pressure, `STSEC` for hidden truth or clue-carrier grounding, `STQ` for an open setup or story question, `STINT` for an active desire/goal, and `SF` for a branch-local fact rather than a belief. Prefer `BEL` when the choice is grounded in the actor's belief, even if the belief is true.
+Use `STSTAT` when the choice's availability, prohibition, risk, or transformation turns on life, agency, or location status. Use `STCHAR` when the choice's surface, pressure behavior, or persona-specific salience materially depends on story-local character authority. Use `STPLAN` when the choice's availability or salience materially depends on the actor's current tactical plan. Use `STEMO` when the choice exists because of active affective pressure. Use `CLK` for staged pressure, `STSEC` for hidden truth or clue-carrier grounding, `STQ` for an open setup or story question, `STINT` for an active desire/goal, and `SF` for a branch-local fact rather than a belief. Prefer `BEL` when the choice is grounded in the actor's belief, even if the belief is true.
 
 No `target_or_action_family` singular field, `choice_contract`, `choice_worthiness`, `commitment_class`, `commitment_detail`, `commitment_family`, `continuation_capacity`, `likely_effects`, `record_version`, `strategy_cluster`, `emitted_at_branch`, or `emitted_by_page` fields.
 
@@ -662,7 +666,7 @@ location: STLOC-<integer> | unknown | concealed | offstage*
 derived_from: [SE-<integer> | <record_id>]     # default []
 ```
 
-No `display_name`, `role_in_story`, or `bound_char_id` fields: identity stays on `STENT`.
+No display-name, role, or character-authority binding fields: identity and character-authority binding stay on `STENT`.
 
 #### 4.5.14 `CLK` (pressure clock)
 
@@ -802,7 +806,7 @@ expires_when: string*                         # natural-language supersession tr
 derived_from: [<record_id>]                   # default []
 ```
 
-`objective` is present causal strategy, not future plot shape. `plan_status` has no climax, expected-outcome, act-position, or target-scene values. `belief_basis`, `resource_basis`, `blockers`, and `current_step` ground the plan in accessible branch state so validators and MCP summaries can distinguish an actor's medium-range agency from authorial plot planning.
+`objective` is present causal strategy, not future plot shape. `plan_status` has no climax, expected-outcome, act-position, or target-scene values. `belief_basis`, `resource_basis`, `blockers`, and `current_step` ground the plan in accessible branch state so validators and MCP summaries can distinguish an actor's medium-range agency from authorial plot planning. Use `STCHAR` in `derived_from[]` when stable persona authority shapes the plan's conduct pattern.
 
 #### 4.5.18 `STEMO` (actor-owned affective state)
 
@@ -837,7 +841,38 @@ expires_when: string*
 derived_from: [<record_id>]                   # default []
 ```
 
-`status`, `trigger_event`, `appraisal_basis`, and `behavioral_pressure` make the emotional state replayable and validator-readable. `orientation.toward_records` feeds observer-firewall checks without adding a free-form `toward_claim` field. Orientation targets must be accessible to the holder under FOUNDATIONS §6b: a `STENT` target is lawful when the holder can directly observe the entity through active co-location, `STSEC` is lawful only for its `holders[]` or another recorded access route, `SF`/`STLOC`/`THR`/`CNSQ` are branch-public active state, and `STQ` is accessible only when `audience_visibility` is `explicit` or `implied` unless another holder-grounded access route exists. `agency_effect` is intentionally binary in v1: either the affect constrains agency or it does not.
+`status`, `trigger_event`, `appraisal_basis`, and `behavioral_pressure` make the emotional state replayable and validator-readable. `orientation.toward_records` feeds observer-firewall checks without adding a free-form `toward_claim` field. Orientation targets must be accessible to the holder under FOUNDATIONS §6b: a `STENT` target is lawful when the holder can directly observe the entity through active co-location, `STSEC` is lawful only for its `holders[]` or another recorded access route, `SF`/`STLOC`/`THR`/`CNSQ` are branch-public active state, and `STQ` is accessible only when `audience_visibility` is `explicit` or `implied` unless another holder-grounded access route exists. Use `STCHAR` in `derived_from[]` when stable persona authority shapes the appraisal or behavioral pressure. `agency_effect` is intentionally binary in v1: either the affect constrains agency or it does not.
+
+#### 4.5.19 `STCHAR` (story-local character authority)
+
+Stores stable story-local character authority as a hybrid markdown artifact under `story-characters/`. `STCHAR` is not a belief, fact, or automatic canon-promotion source; it carries persona, voice, appraisal, and pressure-behavior authority for story runtime.
+
+```yaml
+id: STCHAR-<integer>*
+story_id: STORY-<integer>*
+story_slug: string*
+world_slug: string*
+source_kind: world_char | story_local | hybrid | regenerated*
+source_char_id: CHAR-<integer> | null
+source_char_hash: sha256:<64 lowercase hex> | null
+source_char_sections_used: [string]           # default []
+story_local_inputs_used: [<story-local record id>] # optional; required when source_kind needs story-local inputs
+generated_at_page: story_bootstrap | PG-<integer> | null
+created_by_skill: string*
+supersedes: STCHAR-<integer> | null
+superseded_by: STCHAR-<integer> | null
+status: active | superseded | retired*
+bound_stent_ids: [STENT-<integer>]*
+profile_revision: integer >= 1*
+body_schema_version: stchar.v1*
+profile_hash: sha256:<64 lowercase hex>*
+voice_block_hash: sha256:<64 lowercase hex>*
+page_packet_hash: sha256:<64 lowercase hex>*
+```
+
+When `source_kind: world_char`, `source_char_id` and `source_char_hash` are required and non-null. When `source_kind: story_local`, both are null. The three hash fields are the only required fidelity hashes: profile identity/drift, voice-block fidelity, and page-packet fidelity. There is no `section_hashes` map.
+
+Normal story runtime consumes active `STCHAR` through `STENT.bound_stchar_id`, `PG.state_snapshot.active_records.STCHAR`, and grounded or derived story records. `source_char_id` is provenance only; it is not an operational shortcut for `STENT`, `CHC`, page plans, or prose receipts.
 
 ### 4.6 Prose receipt
 

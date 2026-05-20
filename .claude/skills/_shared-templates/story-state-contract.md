@@ -29,6 +29,7 @@ Core page-cycle state records:
 | Class | Purpose |
 |---|---|
 | `STENT` | Story-local entity mirror or story-local entity. |
+| `STCHAR` | Stable story-local character authority profile; hybrid markdown artifact under `story-characters/`. |
 | `STSTAT` | Story-local entity life / agency / location status. |
 | `STINT` | Intention held by an entity. |
 | `SF` | Branch / story-local fact (what is true in the branch). |
@@ -60,13 +61,13 @@ Auxiliary story-bundle records:
 | `SP` | Story-promotion record. |
 | `RSP` | Remediation-storylet proposal card scoped under an audit. |
 
-`SF` records what *is* true in the branch. `BEL` records what a holder *believes / claims / witnesses / lies about*. The two classes are kept separate so that lies, secrets, betrayals, witness asymmetry, and contested public claims remain coherent without inventing plot rails.
+`SF` records what *is* true in the branch. `BEL` records what a holder *believes / claims / witnesses / lies about*. `STCHAR` records stable story-local persona authority, not knowledge. These classes are kept separate so that lies, secrets, betrayals, witness asymmetry, contested public claims, and character voice remain coherent without inventing plot rails.
 
-**Append-only / supersession discipline.** Once a record is committed it is not edited in place. Changes are expressed by writing a new record (next `<CLASS>-<integer>` id) whose `supersedes` field names the prior record. The patch engine enforces this at the file level for `_source/<class>/*.yaml`.
+**Append-only / supersession discipline.** Once a record is committed it is not edited in place. Changes are expressed by writing a new record (next `<CLASS>-<integer>` id) whose `supersedes` field names the prior record. The patch engine enforces this at the file level for `_source/<class>/*.yaml`. `STCHAR` is a hybrid story-bundle authority artifact, created/superseded by patch-engine hybrid operations and participating in `PG.state_snapshot.active_records`.
 
 ## 4. Record Schemas
 
-The full record-schema enumeration for all 20 story-bundle record classes plus the prose-receipt direct-write artifact lives in a sibling shared template at `.claude/skills/_shared-templates/story-record-schemas.md`. That file preserves §4.X subsection numbering verbatim (so existing citations to §4.1 `BEL`, §4.2 `PG`, §4.2a deterministic PG hash computation, §4.3 `SE`, §4.3a audit-only SE events, §4.4 `SLT`, §4.4a shared `action_family` taxonomy, §4.4b `STENT` role and `SREL` axis taxonomies, §4.5.1 through §4.5.13, and §4.6 prose receipt all resolve without rewording in consumer skills, validators, and other shared templates). SPEC-42 adds `CLK` as §4.5.14, `STSEC` as §4.5.15, and `STQ` as §4.5.16 in the schema file without renumbering the existing prose-receipt §4.6 section.
+The full record-schema enumeration for all 21 story-bundle record classes plus the prose-receipt direct-write artifact lives in a sibling shared template at `.claude/skills/_shared-templates/story-record-schemas.md`. That file preserves §4.X subsection numbering verbatim (so existing citations to §4.1 `BEL`, §4.2 `PG`, §4.2a deterministic PG hash computation, §4.3 `SE`, §4.3a audit-only SE events, §4.4 `SLT`, §4.4a shared `action_family` taxonomy, §4.4b `STENT` role and `SREL` axis taxonomies, §4.5.1 through §4.5.13, and §4.6 prose receipt all resolve without rewording in consumer skills, validators, and other shared templates). SPEC-42 adds `CLK` as §4.5.14, `STSEC` as §4.5.15, and `STQ` as §4.5.16 in the schema file without renumbering the existing prose-receipt §4.6 section; SPEC-56 adds `STCHAR` as §4.5.19.
 
 Consumers that need only the authority model (§1), schema-minimalism doctrine (§2), record class inventory (§3), closed predicate DSL (§5), action routing (§6), eight shared hard gates (§7), page-plan minimum contract (§8), branching procedure (§9), shared write order (§10), mystery and canon authority (§11), or skill-usage overview (§12) can read this main contract alone; consumers that need any record schema additionally load `story-record-schemas.md`.
 
@@ -184,7 +185,7 @@ preconditions:
 | `promise_due(STQ-<integer>, age_pages)` | Named promise-like `STQ` must be at least `age_pages` old in the evaluating branch path. | turn-cycle eligibility, debt-pressure maturation |
 | `location(STENT-<integer>, STLOC-<integer>)` | Entity must currently be at location. | turn-cycle eligibility |
 | `has_affordance(<action_family>)` | The current page's `visible_affordances` must include an affordance whose `action_families` contain the named family. | turn-cycle eligibility, plan grounding |
-| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / CLK / STSEC / STQ / SREL / STPLAN / STEMO / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
+| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STCHAR / STINT / SF / BEL / OBL / CNSQ / THR / CLK / STSEC / STQ / SREL / STPLAN / STEMO / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
 | `record_age(<record_id \| bound:<alias>>, >= \| <= \| == \| !=, <integer_pages>)` | Derived age check over the record's `created_at_page` and the evaluating page's position in `branch_path`; `bound:<alias>` may reference a same-block existential match. | turn-cycle eligibility, debt-pressure maturation |
 | `intention_active(STINT-<integer>)` | Named intention must be currently active. | turn-cycle eligibility |
 | `object_accessible(STENT-<integer>, STOBJ-<integer>)` | Entity must have page-state access to the named object. | turn-cycle eligibility, plan grounding |
@@ -210,9 +211,9 @@ When the selected block becomes an `SE`, `SE.commitment.alias_bindings` records 
 
 ### §5a. Mid-Story Introduction Structured Fields
 
-Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `SREL`, `STPLAN`, or `STEMO` records is recorded on `SE.record_introductions[]`. Relations from an event to an active plan are recorded on `SE.state_relations[]`. Explicit non-propagation assertions are recorded on `SE.non_propagation_facts[]`. These fields carry the machine-readable WHAT; `SE.world_logic_rationale` carries the human-readable WHY.
+Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `STCHAR`, `SREL`, `STPLAN`, or `STEMO` records is recorded on `SE.record_introductions[]`. Relations from an event to an active plan are recorded on `SE.state_relations[]`. Explicit non-propagation assertions are recorded on `SE.non_propagation_facts[]`. These fields carry the machine-readable WHAT; `SE.world_logic_rationale` carries the human-readable WHY.
 
-`SE.state_delta.create[]`, `SE.state_delta.supersede[]`, and `SE.state_delta.close[]` accept the same lifecycle-managed story-state class set, including `STPLAN` and `STEMO`; the event schema and `state_delta_class_integrity` validator must move together with this contract.
+`SE.state_delta.create[]`, `SE.state_delta.supersede[]`, and `SE.state_delta.close[]` accept the same lifecycle-managed story-state class set, including `STCHAR`, `STPLAN`, and `STEMO`; the event schema and `state_delta_class_integrity` validator must move together with this contract.
 
 `SE.world_logic_rationale` is prose-only. Validators MUST NOT attempt to parse `world_logic_rationale` for structural facts. The structured WHAT lives in `record_introductions[]`, `state_relations[]`, and `non_propagation_facts[]`; the prose WHY lives in `world_logic_rationale`.
 
@@ -229,7 +230,7 @@ distinct_from: [CLK-3]
 rationale: "Optional per-introduction prose context."
 ```
 
-The `class` field is one of `CLK | STSEC | STQ | THR | STENT | SREL | STPLAN | STEMO`. The `trigger` field MUST match the closed trigger vocabulary for that class below. `evidence[]` names story-local records that ground why the new record is lawful now. `distinct_from[]` names similar existing records that do not already cover the introduced record. `rationale` is optional prose and carries no structural meaning.
+The `class` field is one of `CLK | STSEC | STQ | THR | STENT | STCHAR | SREL | STPLAN | STEMO`. The `trigger` field MUST match the closed trigger vocabulary for that class below. `evidence[]` names story-local records that ground why the new record is lawful now. `distinct_from[]` names similar existing records that do not already cover the introduced record. `rationale` is optional prose and carries no structural meaning.
 
 ### CLK Triggers
 
@@ -408,6 +409,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 14 | Recent prose continuity (optional, when parent prose is rendered) | recent `pages-prose/*.md` |
 | 15 | Plan frontmatter (engine fields, hash, page id) | engine |
 | 16 | Cast material reality projection (optional) | per-skill |
+| 16a | STCHAR-derived character authority packets (reserved; not yet mandatory) | SPEC-57 |
 | 17 | Style and register notes (optional) | per-skill |
 | 18 | Anti-pathology checklist | per-skill |
 | 19 | **Render-time instruction block** | **inlined verbatim from `reports/prose-quality-instructions.md` §Render-Time Instruction Template** |
@@ -450,6 +452,8 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 ```
 
 §9c is omitted entirely when no active STEMOs exist on the current branch. `branching-story-turn-cycle` owns the rendering procedure for both §9b and §9c, parallel to its existing §10b rendering ownership.
+
+**§16a is reserved, not yet mandatory.** SPEC-57 will define and promote STCHAR-derived character authority packets once bootstrap, turn-cycle, and packet-presence enforcement land. Until then, skills must not fail a page plan solely because §16a is absent.
 
 **§10b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `CLK` records (value / max, nearest threshold, salience), active `STSEC` records (status, holders, discovered clue-carrier count), and active `STQ` records (status, salience, audience visibility). For any STQ touched by the selected event, §10b names what the rendered prose must show for the setup/payoff movement: opened, narrowed, answered, paid off via `payoff_of`, inherited/abandoned, or tied to `answer_records[]`. Subsections appear only for classes with relevant active records; when no `CLK`, `STSEC`, or `STQ` content matters for the render, §10b is omitted rather than emitted as an empty placeholder. `branching-story-turn-cycle` owns the rendering procedure for this section.
 
