@@ -43,7 +43,7 @@ Add: pre-flight loads active STCHAR summaries (full/projected only when behavior
 
 - Any predicate-DSL grammar change (`record_active(STCHAR-*)` already lawful; `any_story_character_active` explicitly deferred).
 - The STCHAR authoring skill (archive/tickets/SPEC57STCHARPIPINT-001.md).
-- Turn-cycle runtime SLT eligibility (SPEC57STCHARPIPINT-004).
+- Turn-cycle runtime SLT eligibility (archive/tickets/SPEC57STCHARPIPINT-004.md).
 
 ## Acceptance Criteria
 
