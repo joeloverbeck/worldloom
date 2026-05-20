@@ -30,6 +30,34 @@ religious_ideological_environment: ""        # bound to an institution / cult / 
 major_local_pressures: []                    # cross-ref GEOGRAPHY / ECONOMY / INSTITUTIONS / TIMELINE
 intended_narrative_role: ""                  # protagonist / witness / antagonist / foil / narrator / background
 
+# --- Protagonist-grade character engine (Phase 4b output) ---
+# Field names match .claude/skills/_shared-references/protagonist-grade-character-engine.md.
+# Every value must be world-produced, not cosmetic.
+dramatic_core:
+  world_produced_wound: ""                    # durable hurt/exclusion/debt/etc. plus the world mechanism that produced it
+  active_appetite: ""                         # recurring wanted behavior rooted in world pressure
+  self_mythology: ""                          # the self-story made available by local values/institutions
+  irreconcilable_contradiction: ""            # recurring behavioral conflict with two world-valid sides
+  pressure_behavior:
+    cornered: ""                              # distinct response under threat
+    tempted: ""                               # distinct response when desire is available
+    humiliated: ""                            # distinct response to shame/status injury
+    offered_power: ""                         # distinct response to leverage/authority
+    protecting_attachment: ""                 # distinct response when guarding a charged bond
+  relational_charge:
+    - target_or_relation_type: ""             # named person, group, institution, kin role, rival, debtor, etc.
+      need: ""                                # what they need from the relation
+      resentment_or_fear: ""                  # what makes the relation charged
+      likely_harm_or_betrayal: ""             # plausible harm/betrayal risk under pressure
+  moral_psychological_edge: ""                # uncomfortable line they may cross/defend/refuse
+  signature_scene_behaviors: []               # at least 3 visible behaviors from body/work/status/fear/appetite/institution/taboo/environment
+  voice_under_pressure:
+    lying: ""                                 # how speech changes when lying
+    begging: ""                               # how speech changes when pleading
+    threatening: ""                           # how speech changes when threatening
+    grieving_or_hiding_ignorance: ""          # how speech changes when grieving or concealing ignorance
+  cannot_be_swapped_out_because: ""           # world-specific reason this person is not role-interchangeable
+
 # --- Canon Safety Check audit trail (Phase 7 output) ---
 # These five lists ARE the audit trail. Empty lists are suspicious by default;
 # Phase 8 Tests 5 and 7 reject empty-where-non-empty-is-required.
@@ -150,6 +178,54 @@ notes: >
    obligations, fears, goals, and institutional embedding — a short map,
    not a list)>
 
+## Protagonist-Grade Core
+
+<Prose summarizing `dramatic_core` as world pressure made personal:
+ - world_produced_wound
+ - active_appetite
+ - irreconcilable_contradiction
+ - cannot_be_swapped_out_because
+ Cite the world mechanism behind each element. If the character came from an
+ NCP `memorability_profile`, state what load-bearing essence was preserved.>
+
+## Pressure Behavior
+
+<Prose or structured bullets covering all five `dramatic_core.pressure_behavior`
+ keys: cornered, tempted, humiliated, offered_power, protecting_attachment.
+ Each response must be distinct and rooted in world-trained habits, risks,
+ language, obligations, or bodily limits.>
+
+## Self-Mythology and Blind Spots
+
+<Prose covering:
+ - the self-story the character uses to survive guilt, desire, obedience,
+   ambition, shame, or failure
+ - which local values, institutions, beliefs, or social roles make that
+   self-story available
+ - the blind spots and misreadings this self-mythology creates>
+
+## Relational Charge
+
+<Prose covering each charged relation or relation type:
+ - what the character needs
+ - what they resent or fear
+ - what harm or betrayal becomes likely under pressure
+ Neutral or frictionless relationship description fails Phase 8 Test 15.>
+
+## Moral and Psychological Edge
+
+<Prose naming the uncomfortable line the character may cross, defend,
+ rationalize, or refuse. Tie the edge to law, piety, hunger, rank, grief,
+ inheritance, secrecy, contamination, survival, or another loaded world
+ pressure.>
+
+## Signature Scene Behavior
+
+<At least 3 visible repeated behaviors that reveal this character under
+ pressure. Each behavior should arise from body, work, status, fear, appetite,
+ institution, taboo, or environment, and should be specific enough that another
+ member of the same role/species/class would not do it the same way.>
+
 ## Likely Story Hooks
 
 <Bulleted list, 3-6 hooks. Each hook names:
@@ -184,8 +260,8 @@ notes: >
  `world_consistency.distribution_exceptions` in the frontmatter.>
 
 ### Phase 8 Validation Checklist
-<Record each of the 10 tests as one line in the form:
+<Record each of the 18 tests as one line in the form:
  `- Test N (Rule R / topic): PASS — <one-line rationale>`
  Test 10's rationale must enumerate at least 3 world-specificity axes with
- citations. A PASS without rationale is treated as FAIL. All 10 must PASS before
+ citations. A PASS without rationale is treated as FAIL. All 18 must PASS before
  Phase 9 HARD-GATE fires.>
