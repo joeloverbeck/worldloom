@@ -316,7 +316,7 @@ function hybridRecordsFromFiles(input: unknown, ctx: Context): SchemaTarget[] {
     if (!isInIncrementalScope(normalizedPath, ctx)) {
       continue;
     }
-    if (normalizedPath.startsWith("characters/")) {
+    if (/^characters\/[^/]+\.md$/.test(normalizedPath)) {
       const frontmatter = frontmatterFor(file.content);
       if (frontmatter !== null) {
         const parsed = parseYamlSurface(frontmatter);
@@ -331,7 +331,37 @@ function hybridRecordsFromFiles(input: unknown, ctx: Context): SchemaTarget[] {
         });
       }
     }
-    if (normalizedPath.startsWith("diegetic-artifacts/")) {
+    if (/^character-proposals\/batches\/[^/]+\.md$/.test(normalizedPath)) {
+      const frontmatter = frontmatterFor(file.content);
+      if (frontmatter !== null) {
+        const parsed = parseYamlSurface(frontmatter);
+        if (!parsed) {
+          continue;
+        }
+        records.push({
+          node_id: String(asPlainRecord(parsed).batch_id ?? normalizedPath),
+          node_type: "character_proposal_batch",
+          file_path: normalizedPath,
+          parsed
+        });
+      }
+    }
+    if (/^character-proposals\/[^/]+\.md$/.test(normalizedPath)) {
+      const frontmatter = frontmatterFor(file.content);
+      if (frontmatter !== null) {
+        const parsed = parseYamlSurface(frontmatter);
+        if (!parsed) {
+          continue;
+        }
+        records.push({
+          node_id: String(asPlainRecord(parsed).proposal_id ?? normalizedPath),
+          node_type: "character_proposal_card",
+          file_path: normalizedPath,
+          parsed
+        });
+      }
+    }
+    if (/^diegetic-artifacts\/[^/]+\.md$/.test(normalizedPath)) {
       const frontmatter = frontmatterFor(file.content);
       if (frontmatter !== null) {
         const parsed = parseYamlSurface(frontmatter);
@@ -346,7 +376,7 @@ function hybridRecordsFromFiles(input: unknown, ctx: Context): SchemaTarget[] {
         });
       }
     }
-    if (normalizedPath.startsWith("adjudications/")) {
+    if (/^adjudications\/[^/]+\.md$/.test(normalizedPath)) {
       const frontmatter = frontmatterFor(file.content);
       const parsed = frontmatter === null ? {} : parseYamlSurface(frontmatter);
       if (!parsed) {
