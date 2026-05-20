@@ -259,6 +259,10 @@ following are the genuinely-open, FOUNDATIONS-aligned residuals:
 
 ## Notes
 
+- 2026-05-20: Phase 2 landed via `archive/tickets/SPEC54CHAPIPTHI-002.md`. `yaml_parse_integrity` now covers
+  malformed frontmatter in `character-proposals/`, `record_schema_compliance` now emits a
+  `missing_frontmatter` verdict for NCP/NCB files with no frontmatter block, and the validators
+  full-world legacy baseline now includes that additional known proposal gap.
 - This spec is the third focused delta in the SPEC-52 → SPEC-53 → SPEC-54 character-pipeline line. After
   Phases 1–4 land, the audit's remaining items are either rejected-by-prior-decision (body-section
   validation) or already-resolved (anti-flattening), and no further major character-system audit is

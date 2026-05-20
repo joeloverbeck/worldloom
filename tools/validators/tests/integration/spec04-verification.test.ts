@@ -56,7 +56,7 @@ test("SPEC-04 verification: Unit registry exposes the active mechanized validato
 test("SPEC-04 verification: Full-world baseline reports known legacy character/proposal gaps", async () => {
   const run = await runFullWorldValidation();
 
-  assert.equal(run.summary.fail_count, 473);
+  assert.equal(run.summary.fail_count, 474);
   assert.equal(run.summary.warn_count, 0);
   assert.equal(run.summary.info_count, 0);
   assert.deepEqual(codesByValidator(run.verdicts), {
@@ -68,6 +68,7 @@ test("SPEC-04 verification: Full-world baseline reports known legacy character/p
       "record_schema_compliance.additionalProperties",
       "record_schema_compliance.enum",
       "record_schema_compliance.if",
+      "record_schema_compliance.missing_frontmatter",
       "record_schema_compliance.oneOf",
       "record_schema_compliance.required",
       "record_schema_compliance.type"
@@ -167,7 +168,7 @@ test("SPEC-04 verification: Full-world duration is logged as a dev-loop signal",
   const run = await runFullWorldValidation({ refresh: true });
   const durationMs = Date.now() - start;
 
-  assert.equal(run.summary.fail_count, 473);
+  assert.equal(run.summary.fail_count, 474);
   assert.equal(run.summary.info_count, 0);
   assert.deepEqual(codesByValidator(run.verdicts), {
     character_memorability_structure: [
@@ -178,6 +179,7 @@ test("SPEC-04 verification: Full-world duration is logged as a dev-loop signal",
       "record_schema_compliance.additionalProperties",
       "record_schema_compliance.enum",
       "record_schema_compliance.if",
+      "record_schema_compliance.missing_frontmatter",
       "record_schema_compliance.oneOf",
       "record_schema_compliance.required",
       "record_schema_compliance.type"

@@ -224,6 +224,29 @@ test("record_schema_compliance rejects invalid character proposal card frontmatt
   );
 });
 
+test("record_schema_compliance rejects missing character proposal frontmatter", async () => {
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        {
+          path: "character-proposals/NCP-12-maren.md",
+          content: ["# Test Proposal", "", "Body prose."].join("\n")
+        },
+        {
+          path: "character-proposals/batches/NCB-3-batch.md",
+          content: ["# Test Batch", "", "Body prose."].join("\n")
+        }
+      ]
+    },
+    context([])
+  );
+
+  assert.equal(result.length, 2);
+  assert.ok(result.every((verdict) => verdict.code === "record_schema_compliance.missing_frontmatter"));
+  assert.ok(result.some((verdict) => verdict.location.file === "character-proposals/NCP-12-maren.md"));
+  assert.ok(result.some((verdict) => verdict.location.file === "character-proposals/batches/NCB-3-batch.md"));
+});
+
 test("record_schema_compliance rejects legacy adjudication body-only Discovery blocks", async () => {
   const result = await recordSchemaCompliance.run(
     {

@@ -39,7 +39,11 @@ export function yamlContentForFile(filePath: string, content: string): string | 
     return content;
   }
   if (
-    (normalizedPath.startsWith("characters/") || normalizedPath.startsWith("diegetic-artifacts/")) &&
+    (
+      normalizedPath.startsWith("characters/") ||
+      normalizedPath.startsWith("character-proposals/") ||
+      normalizedPath.startsWith("diegetic-artifacts/")
+    ) &&
     normalizedPath.endsWith(".md")
   ) {
     return frontmatterFor(content);
