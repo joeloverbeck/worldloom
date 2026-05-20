@@ -55,6 +55,7 @@ Use this index to jump to the detailed reference without adding more one-off rul
 
 - Schema, JSON Schema, validator, live-corpus, exact field-set, or capstone work -> `references/validator-schema-migrations.md`.
 - Package, CLI, package docs/examples, generated `dist/`, ignored artifact, or package proof work -> `references/package-tooling.md`.
+- MCP tool behavior changes -> `references/package-tooling.md` MCP public-surface checklist: handler/tests, package README, `docs/MACHINE-FACING-LAYER.md`, and registered capability metadata in `src/server.ts` / `describe_capabilities`.
 - `validate_patch_plan` / `submit_patch_plan` response-shape or validation-signal changes -> `references/package-tooling.md` same-seam propagation checklist.
 - Cross-skill / shared-contract / explicit spec-reference truthing -> `references/reassessment-checks.md` plus `references/mismatch-handling.md`.
 - Prose-skill proof substitution when no executable runner exists -> `references/ticket-classification.md` for classification, then `references/verification-closeout.md` for manual-review + grep proof.

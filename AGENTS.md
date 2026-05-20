@@ -33,7 +33,7 @@ If a workflow or change conflicts with FOUNDATIONS, FOUNDATIONS wins.
 
 ## Write Boundaries
 
-Treat world-level canon files as high-trust surfaces. In normal flow, files such as `WORLD_KERNEL.md`, `INVARIANTS.md`, and `CANON_LEDGER.md` should only be changed by canon-mutating workflows designed for that purpose.
+Treat world-level canon as a high-trust surface. In normal flow, the world-level canon files — `WORLD_KERNEL.md`, `ONTOLOGY.md`, and the atomic canon records under `_source/` (`_source/canon/CF-<n>.yaml`, `_source/change-log/CH-<n>.yaml`, `_source/invariants/<ID>.yaml`, and the other `_source/` record classes) — should only be changed by canon-mutating workflows designed for that purpose, and the `_source/` records only through the patch engine.
 
 Content-generation and audit workflows should write to their scoped subdirectories, such as:
 

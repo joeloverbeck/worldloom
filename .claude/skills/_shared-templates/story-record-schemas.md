@@ -29,12 +29,12 @@ basis:
   source_event: SE-<integer>*               # the event that established this belief
   access_route: direct_observation | testimony | document | object_trace | location_trace | inference | surveillance | institutional_channel | magic_tech | rumor | authorial_initialization*
   access_records: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer> | DA-<integer> | BEL-<integer> | SF-<integer> | SE-<integer>]
-consequences:
-  opens: [OBL-<integer> | THR-<integer> | CNSQ-<integer>]
-  constrains_choices: [CHC-<integer>]
+consequences:                          # *
+  opens: [OBL-<integer> | THR-<integer> | CNSQ-<integer>]   # * required list; may be empty ([])
+  constrains_choices: [CHC-<integer>]   # * required list; may be empty ([])
 ```
 
-The `belief_mode` field separates sincerity / epistemic stance from `confidence`, which is only the holder's subjective certainty axis. The `truth_relation` field distinguishes belief from truth; the `visibility` field is consumed by the social-state firewall. `basis.source_event` is the strongest replay anchor. `basis.access_route` records how the holder gained access to the belief, and `basis.access_records` cites the enabling story records when the route depends on a witness, location, object, artifact, prior belief, story fact, or event. `branching-story-health-audit` Phase 2d consumes these fields when reporting `observer_firewall_violation` findings, so the §6b observer firewall remains auditable after the turn lands.
+The `belief_mode` field separates sincerity / epistemic stance from `confidence`, which is only the holder's subjective certainty axis. The `truth_relation` field distinguishes belief from truth; the `visibility` field is consumed by the social-state firewall. `basis.source_event` is the strongest replay anchor. `basis.access_route` records how the holder gained access to the belief, and `basis.access_records` cites the enabling story records when the route depends on a witness, location, object, artifact, prior belief, story fact, or event. `branching-story-health-audit` Phase 2d consumes these fields when reporting `observer_firewall_violation` findings, so the §6b observer firewall remains auditable after the turn lands. `consequences` is **required** by `record_schema_compliance` (`tools/validators/src/schemas/story-belief.schema.json` lists it in `required`, and requires both `consequences.opens` and `consequences.constrains_choices`); the patch engine rejects a `BEL` that omits the block. Both lists are required but may be empty (`[]`), so a belief that opens nothing and constrains no choice still carries `consequences: {opens: [], constrains_choices: []}`.
 
 ### 4.2 `PG` (~22 sub-paths)
 

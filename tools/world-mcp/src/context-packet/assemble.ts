@@ -394,8 +394,18 @@ export async function assembleContextPacket(args: {
       args.world_slug,
       args.seed_nodes
     );
-    if ("code" in localAuthoritySourceIds) {
-      return localAuthoritySourceIds;
+    for (const seedNodeId of localAuthoritySourceIds.unresolvedSeedNodeIds) {
+      packet.task_header.warnings.push(
+        `seed_node '${seedNodeId}' not found in world '${args.world_slug}'; skipped`
+      );
+    }
+    if (
+      localAuthoritySourceIds.sourceNodeIds.length === 0 &&
+      localAuthoritySourceIds.unresolvedSeedNodeIds.length > 0
+    ) {
+      packet.task_header.warnings.push(
+        "all seed_nodes were unresolved; assembled seed-independent context only"
+      );
     }
 
     const recordProjection =
@@ -403,21 +413,21 @@ export async function assembleContextPacket(args: {
         ? createCharacterGenerationRecordProjection(
             opened.db,
             args.world_slug,
-            localAuthoritySourceIds
+            localAuthoritySourceIds.sourceNodeIds
           )
         : undefined;
 
     packet.local_authority = buildLocalAuthority(
       opened.db,
       args.world_slug,
-      localAuthoritySourceIds,
+      localAuthoritySourceIds.sourceNodeIds,
       deliveryMode,
       recordProjection
     );
     packet.exact_record_links = buildExactRecordLinks(
       opened.db,
       args.world_slug,
-      localAuthoritySourceIds,
+      localAuthoritySourceIds.sourceNodeIds,
       packet.local_authority.nodes.map((node) => node.id),
       deliveryMode,
       recordProjection
@@ -425,7 +435,7 @@ export async function assembleContextPacket(args: {
     packet.scoped_local_context = buildScopedLocalContext(
       opened.db,
       args.world_slug,
-      localAuthoritySourceIds,
+      localAuthoritySourceIds.sourceNodeIds,
       [...packet.local_authority.nodes, ...packet.exact_record_links.nodes],
       deliveryMode,
       recordProjection
