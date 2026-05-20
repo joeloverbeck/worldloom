@@ -11,6 +11,7 @@ import {
 } from "./utils.js";
 
 const RECORD_REFERENCE_PATTERN = /^(CF|CH|M|OQ|ENT|SEC-[A-Z]{3})-[0-9]+$/;
+const CANON_FACT_REFERENCE_PATTERN = /^CF-[0-9]+$/;
 const INDEXED_REFERENCE_EDGE_TYPES = [
   "state_delta_create",
   "state_delta_supersede",
@@ -72,6 +73,14 @@ function referencesFor(record: IndexedRecord, parsed: Record<string, unknown>): 
   if (record.node_type === "change_log_entry") {
     for (const value of stringArray(parsed.affected_fact_ids)) {
       refs.push({ kind: "record", value, field: "affected_fact_ids" });
+    }
+  }
+
+  if (record.node_type === "story_fact_record") {
+    for (const value of stringArray(parsed.derived_from)) {
+      if (CANON_FACT_REFERENCE_PATTERN.test(value)) {
+        refs.push({ kind: "record", value, field: "derived_from" });
+      }
     }
   }
 
