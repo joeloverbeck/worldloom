@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new skill `.claude/skills/deepen-character-proposal/` (SKILL.md + templates/upgraded-proposal-card.md, new directory). No impact on existing skills; consumes the shared reference (001) and reuses the existing `propose_new_characters` MCP task type.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC52PROGRACHA-001.md
 
 ## Problem
 

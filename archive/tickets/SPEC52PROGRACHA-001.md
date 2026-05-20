@@ -1,6 +1,6 @@
 # SPEC52PROGRACHA-001: Shared protagonist-grade-character-engine reference
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new shared reference `.claude/skills/_shared-references/protagonist-grade-character-engine.md` (new directory). No impact on existing skills until they cite it (tickets 002/003/004).
@@ -67,3 +67,19 @@ Include: the protagonist-grade standard ("even a background figure feels like th
 
 1. `grep -nE "world_produced_wound|active_appetite|self_mythology|irreconcilable_contradiction|pressure_behavior|relational_charge|moral_psychological_edge|signature_scene_behaviors|voice_under_pressure|cannot_be_swapped_out_because" .claude/skills/_shared-references/protagonist-grade-character-engine.md`
 2. A narrower command is the correct boundary: this is a new-file reference ticket with no pipeline wiring; full-pipeline verification happens in the consuming tickets (002/003/004/006).
+
+## Outcome
+
+Completed: 2026-05-20
+
+Created `.claude/skills/_shared-references/protagonist-grade-character-engine.md` as the shared protagonist-grade doctrine for `propose-new-characters`, `character-generation`, and the planned `deepen-character-proposal` skill. The reference defines the protagonist-grade standard, Rule 2 world-producedness constraint, all 10 canonical engine fields, mutation rule, single-seed mutation spread, high-yield mutation families, rejection triggers, two-layer scoring rubric, critic prompts, and canon-routing discipline.
+
+## Verification Result
+
+1. `test -f .claude/skills/_shared-references/protagonist-grade-character-engine.md` — passed.
+2. `grep -nE "world_produced_wound|active_appetite|self_mythology|irreconcilable_contradiction|pressure_behavior|relational_charge|moral_psychological_edge|signature_scene_behaviors|voice_under_pressure|cannot_be_swapped_out_because" .claude/skills/_shared-references/protagonist-grade-character-engine.md` — passed; all 10 required field names appear in the reference.
+3. Manual FOUNDATIONS alignment review — passed; the reference explicitly requires world-producedness, rejects cosmetic eccentricity, and ties field definitions to modeled pressures such as institution, body/species condition, economy, geography, taboo, law, religion, history, material scarcity, craft, ecology, kinship, and epistemic limits.
+
+## Deviations
+
+None. This ticket intentionally did not edit consuming skills, templates, schemas, validators, or world content; those remain owned by the later SPEC-52 tickets.
