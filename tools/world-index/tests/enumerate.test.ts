@@ -5,6 +5,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { enumerate } from "../src/enumerate.js";
+import { STORY_SOURCE_DIRECTORIES } from "../src/parse/story-directories.js";
 
 function createFixtureWorldRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-index-enumerate-"));
@@ -81,17 +82,15 @@ test("unexpected markdown paths are reported while hidden files remain excluded"
 
 test("story-bundle paths are recognized as indexable closed inventory", () => {
   const worldRoot = createFixtureWorldRoot();
+  const storySourcePaths = STORY_SOURCE_DIRECTORIES.map(
+    (directory, index) =>
+      `stories/foo/_source/${directory}/STORY-SOURCE-${String(index + 1).padStart(4, "0")}.yaml`
+  );
 
   try {
     for (const relativeFilePath of [
       "stories/foo/STORY_KERNEL.md",
-      "stories/foo/_source/beliefs/BEL-0001.yaml",
-      "stories/foo/_source/status/STSTAT-0001.yaml",
-      "stories/foo/_source/clocks/CLK-0001.yaml",
-      "stories/foo/_source/secrets/STSEC-0001.yaml",
-      "stories/foo/_source/story-questions/STQ-0001.yaml",
-      "stories/foo/_source/plans/STPLAN-0001.yaml",
-      "stories/foo/_source/emotions/STEMO-0001.yaml",
+      ...storySourcePaths,
       "stories/foo/pages-prose/PG-0001.md",
       "stories/foo/pages-prose-plans/PG-0001.md",
       "stories/foo/pages-prose-receipts/PG-0001.yaml",
@@ -115,13 +114,7 @@ test("story-bundle paths are recognized as indexable closed inventory", () => {
 
     for (const expected of [
       "stories/foo/STORY_KERNEL.md",
-      "stories/foo/_source/beliefs/BEL-0001.yaml",
-      "stories/foo/_source/status/STSTAT-0001.yaml",
-      "stories/foo/_source/clocks/CLK-0001.yaml",
-      "stories/foo/_source/secrets/STSEC-0001.yaml",
-      "stories/foo/_source/story-questions/STQ-0001.yaml",
-      "stories/foo/_source/plans/STPLAN-0001.yaml",
-      "stories/foo/_source/emotions/STEMO-0001.yaml",
+      ...storySourcePaths,
       "stories/foo/pages-prose/PG-0001.md",
       "stories/foo/pages-prose-plans/PG-0001.md",
       "stories/foo/pages-prose-receipts/PG-0001.yaml",

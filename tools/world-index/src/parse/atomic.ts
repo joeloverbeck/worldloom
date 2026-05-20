@@ -7,6 +7,7 @@ import type { ParsedFileResult } from "../commands/shared.js";
 import { contentHashForProse, contentHashForYaml, anchorChecksum } from "./canonical.js";
 import { parseYamlWithRecovery } from "./yaml.js";
 import { domainFileNodeId } from "./prose.js";
+import { STORY_SOURCE_DIRECTORY_SPECS } from "./story-directories.js";
 import { CURRENT_INDEX_VERSION } from "../schema/version.js";
 import type { EdgeRow, NodeRow, NodeType, ValidationResultRow } from "../schema/types.js";
 import type { EntityRegistry, EntityRegistryEntry } from "./entities.js";
@@ -64,30 +65,12 @@ const ATOMIC_DIRS = new Map<string, AtomicRecordSpec>([
   ["peoples-and-species", recordSpec("section", "id", "^SEC-PAS-[0-9]+$")],
   ["timeline", recordSpec("section", "id", "^SEC-TML-[0-9]+$")]
 ]);
-const STORY_DIRS = new Map<string, AtomicRecordSpec>([
-  ["entities", recordSpec("story_entity_record", "id", "^STENT-[0-9]+$")],
-  ["status", recordSpec("story_status_record", "id", "^STSTAT-[0-9]+$")],
-  ["beliefs", recordSpec("belief_record", "id", "^BEL-[0-9]+$")],
-  ["facts", recordSpec("story_fact_record", "id", "^SF-[0-9]+$")],
-  ["obligations", recordSpec("obligation_record", "id", "^OBL-[0-9]+$")],
-  ["consequences", recordSpec("consequence_record", "id", "^CNSQ-[0-9]+$")],
-  ["threads", recordSpec("thread_record", "id", "^THR-[0-9]+$")],
-  ["relationships", recordSpec("relationship_record_story", "id", "^SREL-[0-9]+$")],
-  ["intentions", recordSpec("intention_record", "id", "^STINT-[0-9]+$")],
-  ["locations", recordSpec("story_location_record", "id", "^STLOC-[0-9]+$")],
-  ["objects", recordSpec("story_object_record", "id", "^STOBJ-[0-9]+$")],
-  ["branches", recordSpec("branch_record", "id", "^BR-[0-9]+$")],
-  ["pages", recordSpec("page_record", "id", "^PG-[0-9]+$")],
-  ["choices", recordSpec("choice_record", "id", "^CHC-[0-9]+$")],
-  ["storylets", recordSpec("storylet_record", "id", "^SLT-[0-9]+$")],
-  ["clocks", recordSpec("pressure_clock_record", "id", "^CLK-[0-9]+$")],
-  ["secrets", recordSpec("story_secret_record", "id", "^STSEC-[0-9]+$")],
-  ["story-questions", recordSpec("story_question_record", "id", "^STQ-[0-9]+$")],
-  ["artifacts", recordSpec("story_diegetic_artifact_record", "id", "^DA-[0-9]+$")],
-  ["plans", recordSpec("story_plan_record", "id", "^STPLAN-[0-9]+$")],
-  ["emotions", recordSpec("story_emotion_record", "id", "^STEMO-[0-9]+$")],
-  ["events", recordSpec("story_event_record", "id", "^SE-[0-9]+$")]
-]);
+const STORY_DIRS = new Map(
+  STORY_SOURCE_DIRECTORY_SPECS.map(({ directory, nodeType, idField, idPatternSource }) => [
+    directory,
+    recordSpec(nodeType, idField, idPatternSource)
+  ])
+);
 const STORY_DIR_ORDER = new Map(Array.from(STORY_DIRS.keys()).map((directory, index) => [directory, index]));
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
