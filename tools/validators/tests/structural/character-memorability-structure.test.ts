@@ -98,6 +98,38 @@ test("character_memorability_structure rejects placeholder text on character sur
   assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.placeholder_text"));
 });
 
+test("character_memorability_structure ignores absence statements about placeholder text", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile(
+      "character-proposals/NCP-12-maren.md",
+      `${validProposalCard()}\n- Test 9: PASS - no TODO / placeholder / empty-where-content-required fields.\n`
+    ),
+    context([])
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("character_memorability_structure ignores collection indexes", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    {
+      files: [
+        {
+          path: "characters/INDEX.md",
+          content: "TODO: maintain this index\n"
+        },
+        {
+          path: "character-proposals/INDEX.md",
+          content: "TODO: maintain this index\n"
+        }
+      ]
+    },
+    context([])
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
 function inputFile(path: string, content: string) {
   return {
     files: [

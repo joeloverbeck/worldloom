@@ -12,6 +12,7 @@ const CHARACTER_PATH = /^characters\/[^/]+\.md$/;
 const PROPOSAL_CARD_PATH = /^character-proposals\/[^/]+\.md$/;
 const PROPOSAL_BATCH_PATH = /^character-proposals\/batches\//;
 const PLACEHOLDER_PATTERN = /\b(?:TODO|TBD|PLACEHOLDER)\b/i;
+const PLACEHOLDER_ABSENCE_PATTERN = /\b(?:no|none|not|without)\b[^.\n]*(?:TODO|TBD|PLACEHOLDER)\b/i;
 
 const REQUIRED_CHARACTER_SECTIONS = [
   "Protagonist-Grade Core",
@@ -45,7 +46,7 @@ export const characterMemorabilityStructure: Validator = {
         continue;
       }
 
-      if (PLACEHOLDER_PATTERN.test(file.content)) {
+      if (hasPlaceholderText(file.content)) {
         verdicts.push(verdict(
           filePath,
           nodeIdFor(filePath, parsed),
@@ -145,6 +146,9 @@ function proposalVerdicts(filePath: string, content: string, parsed: Record<stri
 
 function relevantPath(filePath: string): boolean {
   const normalized = toPosixPath(filePath);
+  if (normalized.endsWith("/INDEX.md")) {
+    return false;
+  }
   return CHARACTER_PATH.test(normalized) || (PROPOSAL_CARD_PATH.test(normalized) && !PROPOSAL_BATCH_PATH.test(normalized));
 }
 
@@ -207,6 +211,12 @@ function isInIncrementalScope(filePath: string, ctx: Context): boolean {
 function hasHeading(content: string, heading: string): boolean {
   const pattern = new RegExp(`^## ${escapeRegExp(heading)}\\s*$`, "m");
   return pattern.test(content);
+}
+
+function hasPlaceholderText(content: string): boolean {
+  return content
+    .split(/\r?\n/)
+    .some((line) => PLACEHOLDER_PATTERN.test(line) && !PLACEHOLDER_ABSENCE_PATTERN.test(line));
 }
 
 function parseFrontmatter(content: string): Record<string, unknown> | null {
