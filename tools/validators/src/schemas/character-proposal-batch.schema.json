@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/character-proposal-batch.schema.json",
+  "title": "CharacterProposalBatchFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["batch_id", "world_slug", "generated_date", "parameters", "registry_summary", "card_ids", "dropped_card_ids", "user_approved"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "numberMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "emblematic": { "type": "number" },
+        "elastic": { "type": "number" },
+        "round_load_bearing": { "type": "number" },
+        "protagonist_grade": { "type": "number" },
+        "intimate": { "type": "number" },
+        "local": { "type": "number" },
+        "regional": { "type": "number" },
+        "transregional": { "type": "number" }
+      }
+    }
+  },
+  "properties": {
+    "batch_id": { "type": "string", "pattern": "^NCB-[0-9]+$" },
+    "world_slug": { "$ref": "#/$defs/nonEmptyString" },
+    "generated_date": { "$ref": "#/$defs/nonEmptyString" },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["batch_size", "depth_mix", "spread_vs_focus", "density_rule_mode", "target_domains", "taboo_areas", "ordinary_vs_exceptional_mix", "artifact_author_share", "under_modeled_priority", "max_overlap_allowed", "story_scale_mix", "mosaic_cluster_preference", "upstream_audit_path"],
+      "properties": {
+        "batch_size": { "type": "integer", "minimum": 1 },
+        "depth_mix": { "$ref": "#/$defs/numberMap" },
+        "spread_vs_focus": { "type": "string", "enum": ["spread", "focus", "mixed"] },
+        "density_rule_mode": { "type": "string", "enum": ["auto", "sparse", "balanced", "dense"] },
+        "target_domains": { "$ref": "#/$defs/stringArray" },
+        "taboo_areas": { "$ref": "#/$defs/stringArray" },
+        "ordinary_vs_exceptional_mix": { "$ref": "#/$defs/nonEmptyString" },
+        "artifact_author_share": { "type": "number", "minimum": 0, "maximum": 1 },
+        "under_modeled_priority": { "$ref": "#/$defs/stringArray" },
+        "max_overlap_allowed": { "type": "string", "enum": ["crowded_permitted", "adjacent_only", "open_only"] },
+        "story_scale_mix": { "$ref": "#/$defs/numberMap" },
+        "mosaic_cluster_preference": { "type": "string", "enum": ["cluster", "separate", "mixed"] },
+        "upstream_audit_path": { "type": "string" }
+      }
+    },
+    "registry_summary": { "$ref": "#/$defs/nonEmptyString" },
+    "card_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^NCP-[0-9]+$" }
+    },
+    "dropped_card_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^NCP-[0-9]+$" }
+    },
+    "user_approved": { "type": "boolean" },
+    "notes": { "type": "string" }
+  }
+}
