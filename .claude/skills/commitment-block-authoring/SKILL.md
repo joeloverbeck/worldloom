@@ -112,6 +112,8 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md` — source audit + RSP cards (`audit_repair` only; abort with audit-not-found or rsp-not-found error if any reference missing)
 - World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='commitment_block_authoring', story_slug=<story_slug>, seed_nodes=<Mystery Reserve forbidden-status entries + world INV records + other world-scope canon anchors>, token_budget=<default>)`. Load active cast and open obligations / threads in the bundle through `story_slug` + `story_bundle_context` or targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records`; do not pass story-local ids in world-scope `seed_nodes`.
 
+Targeted retrieval discipline: `story_bundle_context` is an index and summary surface, not full authoring authority. When it identifies a material `STPLAN` / `STEMO` / `STSEC` / `STQ` / `CLK` record, retrieve the full body with `mcp__worldloom__get_record`, `mcp__worldloom__get_records`, or a filtered `mcp__worldloom__list_records(..., include_full_body=true)` before authoring SLT predicates/effects, CHC grounding assumptions for remediation blocks, page-plan §9b / §9c / §10b expectations, prose-receipt expectations, or health-audit-style findings that depend on basis, blockers, appraisal, orientation, clue, payoff, or clock payload detail.
+
 The bundle MUST exist (non-bootstrap variant); for `audit_repair`, the audit + all named RSP cards MUST exist. For `direct_batch`, the current SLT pool MAY be empty (post-bootstrap with `seed_commitment_blocks: none`).
 
 ## Pre-flight Check

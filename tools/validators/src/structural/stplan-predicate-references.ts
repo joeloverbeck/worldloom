@@ -43,8 +43,8 @@ function predicatePaths(plan: IndexedRecord): PredicatePath[] {
   const fallbackSteps = parsed.fallback_steps;
   if (Array.isArray(fallbackSteps)) {
     fallbackSteps.forEach((step, stepIndex) => {
-      const triggerPredicates = nestedRecord(asPlainRecord(step), "trigger_condition").predicates;
-      collectPredicateList(triggerPredicates, `fallback_steps[${stepIndex}].trigger_condition.predicates`, paths);
+      const triggerPredicates = asPlainRecord(step).trigger_predicates;
+      collectPredicateList(triggerPredicates, `fallback_steps[${stepIndex}].trigger_predicates`, paths);
     });
   }
   return paths;

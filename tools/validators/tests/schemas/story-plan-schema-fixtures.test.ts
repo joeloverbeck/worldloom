@@ -18,6 +18,36 @@ test("story-plan schema accepts complete STPLAN records", () => {
   assert.equal(validate(validPlan()), true, JSON.stringify(validate.errors, null, 2));
 });
 
+test("story-plan schema accepts fallback trigger_predicates and rejects legacy trigger_condition", () => {
+  const validate = compileSchema();
+
+  assert.equal(validate(validPlan({
+    fallback_steps: [
+      {
+        action_family: "negotiate",
+        trigger_predicates: [
+          { pred: "record_active", record: "STPLAN-2" },
+          { pred: "emotion_active", entity: "STENT-1", affect: "fear" }
+        ],
+        target_records: ["STENT-2"]
+      }
+    ]
+  })), true, JSON.stringify(validate.errors, null, 2));
+
+  assert.equal(validate(validPlan({
+    fallback_steps: [
+      {
+        action_family: "negotiate",
+        trigger_condition: {
+          predicates: [{ pred: "record_active", record: "STPLAN-2" }]
+        },
+        target_records: ["STENT-2"]
+      }
+    ]
+  })), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "required" && error.instancePath === "/fallback_steps/0"));
+});
+
 test("story-plan schema requires current_step for active-lifecycle plans", () => {
   const validate = compileSchema();
   const parsed = validPlan();

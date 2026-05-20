@@ -357,6 +357,18 @@ test("story event records emit state-delta and creation-evidence edges", () => {
           story_slug: "harborwatch"
         },
         {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:OBL-1",
+          edge_type: "state_delta_close",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:CLK-1",
+          edge_type: "event_introduces_record",
+          story_slug: "harborwatch"
+        },
+        {
           source_node_id: "harborwatch:CLK-1",
           target_unresolved_ref: "harborwatch:PG-1",
           edge_type: "creation_evidence",
@@ -366,6 +378,12 @@ test("story event records emit state-delta and creation-evidence edges", () => {
           source_node_id: "harborwatch:CLK-1",
           target_unresolved_ref: "harborwatch:SF-1",
           edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STSEC-1",
+          edge_type: "event_introduces_record",
           story_slug: "harborwatch"
         },
         {
@@ -381,6 +399,12 @@ test("story event records emit state-delta and creation-evidence edges", () => {
           story_slug: "harborwatch"
         },
         {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STQ-1",
+          edge_type: "event_introduces_record",
+          story_slug: "harborwatch"
+        },
+        {
           source_node_id: "harborwatch:STQ-1",
           target_unresolved_ref: "harborwatch:BEL-1",
           edge_type: "creation_evidence",
@@ -390,6 +414,12 @@ test("story event records emit state-delta and creation-evidence edges", () => {
           source_node_id: "harborwatch:STQ-1",
           target_unresolved_ref: "harborwatch:SE-0",
           edge_type: "creation_evidence",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:THR-2",
+          edge_type: "event_introduces_record",
           story_slug: "harborwatch"
         },
         {
@@ -406,7 +436,7 @@ test("story event records emit state-delta and creation-evidence edges", () => {
         }
       ]
     );
-    assert.equal(parsed.edges.length, 14);
+    assert.equal(parsed.edges.length, 19);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

@@ -1077,6 +1077,18 @@ test("story event records emit actor, target, selected-storylet, and existing ev
           story_slug: "harborwatch"
         },
         {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STENT-1",
+          edge_type: "event_alias_binding",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:SE-1",
+          target_unresolved_ref: "harborwatch:STQ-4",
+          edge_type: "event_introduces_record",
+          story_slug: "harborwatch"
+        },
+        {
           source_node_id: "harborwatch:STQ-4",
           target_unresolved_ref: "harborwatch:PG-7",
           edge_type: "creation_evidence",

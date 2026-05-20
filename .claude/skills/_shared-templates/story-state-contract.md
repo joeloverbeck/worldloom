@@ -206,9 +206,13 @@ Closed grammar contains 39 individual predicates plus 3 combinators (`not`, `all
 
 An existential predicate binds its `alias` to the matched active record during block selection. `SLT.effects.create`, `SLT.effects.supersede`, `SLT.effects.close`, and `SLT.exit_options[].likely_effects` may reference that matched record as `bound:<alias>`. Every `bound:<alias>` reference must resolve to an alias bound by a hard or soft precondition on the same `SLT`.
 
+When the selected block becomes an `SE`, `SE.commitment.alias_bindings` records the exact matched ids. The event schema accepts `CLK`, `STSEC`, `STQ`, `STPLAN`, and `STEMO` for the corresponding `any_clock_active`, `any_secret_unrevealed`, `any_story_question_open`, `any_plan_active`, and `any_emotion_active` aliases, in addition to the pre-existing selected-move binding classes.
+
 ### §5a. Mid-Story Introduction Structured Fields
 
 Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `SREL`, `STPLAN`, or `STEMO` records is recorded on `SE.record_introductions[]`. Relations from an event to an active plan are recorded on `SE.state_relations[]`. Explicit non-propagation assertions are recorded on `SE.non_propagation_facts[]`. These fields carry the machine-readable WHAT; `SE.world_logic_rationale` carries the human-readable WHY.
+
+`SE.state_delta.create[]`, `SE.state_delta.supersede[]`, and `SE.state_delta.close[]` accept the same lifecycle-managed story-state class set, including `STPLAN` and `STEMO`; the event schema and `state_delta_class_integrity` validator must move together with this contract.
 
 `SE.world_logic_rationale` is prose-only. Validators MUST NOT attempt to parse `world_logic_rationale` for structural facts. The structured WHAT lives in `record_introductions[]`, `state_relations[]`, and `non_propagation_facts[]`; the prose WHY lives in `world_logic_rationale`.
 
@@ -447,7 +451,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 
 §9c is omitted entirely when no active STEMOs exist on the current branch. `branching-story-turn-cycle` owns the rendering procedure for both §9b and §9c, parallel to its existing §10b rendering ownership.
 
-**§10b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `CLK` records (value / max, nearest threshold, salience), active `STSEC` records (status, holders, discovered clue-carrier count), and active `STQ` records (status, salience, audience visibility). Subsections appear only for classes with relevant active records; when no `CLK`, `STSEC`, or `STQ` content matters for the render, §10b is omitted rather than emitted as an empty placeholder. `branching-story-turn-cycle` owns the rendering procedure for this section.
+**§10b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `CLK` records (value / max, nearest threshold, salience), active `STSEC` records (status, holders, discovered clue-carrier count), and active `STQ` records (status, salience, audience visibility). For any STQ touched by the selected event, §10b names what the rendered prose must show for the setup/payoff movement: opened, narrowed, answered, paid off via `payoff_of`, inherited/abandoned, or tied to `answer_records[]`. Subsections appear only for classes with relevant active records; when no `CLK`, `STSEC`, or `STQ` content matters for the render, §10b is omitted rather than emitted as an empty placeholder. `branching-story-turn-cycle` owns the rendering procedure for this section.
 
 The plan must not expose engine jargon to prose. Engine terms (record ids, gate names) may appear in §15 frontmatter only.
 

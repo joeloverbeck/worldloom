@@ -852,8 +852,11 @@ export function buildStoryBundleWorld(root: string): void {
           "summary: Marla Kern considers the loft window.",
           "provenance:",
           "  created_at_page: PG-1",
-          "opens_obligations:",
-          "  - OBL-1",
+          "effects:",
+          "  create:",
+          "    - OBL-1",
+          "  supersede: []",
+          "  close: []",
           ""
         ].join("\n")
       },
@@ -895,7 +898,7 @@ export function buildStoryBundleWorld(root: string): void {
         story_slug: STORY_FIXTURE_SLUG,
         source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-21"),
         target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "OBL-1"),
-        edge_type: "opens_obligation"
+        edge_type: "storylet_effect_ref"
       },
       {
         story_slug: STORY_FIXTURE_SLUG,

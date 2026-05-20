@@ -649,23 +649,26 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
-  pushStoryRef("created_at_page", stringField(record, "created_at_page"));
-  pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
-
-  if (node.node_type === "storylet_record") {
-    for (const target of storyRefsInField(record, "opens_obligations", "OBL")) {
-      pushStoryRef("opens_obligation", target);
-    }
-    for (const target of storyRefsInField(record, "pays_off_obligations", "OBL")) {
-      pushStoryRef("pays_off_obligation", target);
-    }
-    for (const target of storyRefsInField(record, "complicates_obligations", "OBL")) {
-      pushStoryRef("complicates_obligation", target);
-    }
-    for (const target of storyRefsInField(record, "transfers_obligations", "OBL")) {
-      pushStoryRef("transfers_obligation", target);
+  if (node.node_type === "choice_record") {
+    for (const edge of edgesForChoice(node, record, storySlug)) {
+      push(edge);
     }
   }
+
+  if (node.node_type === "storylet_record") {
+    for (const edge of edgesForStorylet(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
+  if (node.node_type === "page_record") {
+    for (const edge of edgesForPage(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
+  pushStoryRef("created_at_page", stringField(record, "created_at_page"));
+  pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
   if (node.node_type === "page_record" || node.node_type === "choice_record") {
     pushStoryRef("parent_page", stringField(record, "parent_page_id"));
@@ -686,6 +689,96 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     for (const target of stringArrayField(record, "obligations")) {
       pushStoryRef("thread_obligation", target);
     }
+  }
+
+  return edges;
+}
+
+function edgesForChoice(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  for (const target of stringArrayField(record, "records", ["grounded_in"])) {
+    pushStoryEdgeIfReference(edges, node.node_id, "choice_grounded_in", storySlug, target);
+  }
+
+  pushStoryEdgeIfReference(
+    edges,
+    node.node_id,
+    "choice_associated_storylet",
+    storySlug,
+    stringField(record, "associated_commitment_block")
+  );
+
+  const parentPageId = stringField(record, "parent_page_id");
+  const parentPageNodeId =
+    parentPageId && isStoryRecordReference(parentPageId) ? storyNodeId(storySlug, parentPageId) : node.node_id;
+  for (const ordinal of numberArrayField(record, "affordance_ordinals", ["grounded_in"])) {
+    edges.push(
+      createStoryAttributeEdge(
+        node.node_id,
+        "choice_affordance_ordinal",
+        storySlug,
+        `${parentPageNodeId}#affordance:${ordinal}`
+      )
+    );
+  }
+
+  return edges;
+}
+
+function edgesForStorylet(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  for (const target of storyRefsInRecordArrayField(record, "hard", ["preconditions"])) {
+    pushStoryEdgeIfReference(edges, node.node_id, "storylet_predicate_ref", storySlug, target);
+  }
+
+  for (const target of storyRefsInRecordArrayField(record, "soft", ["preconditions"])) {
+    pushStoryEdgeIfReference(edges, node.node_id, "storylet_predicate_ref", storySlug, target);
+  }
+
+  for (const field of ["create", "supersede", "close"]) {
+    for (const target of stringArrayField(record, field, ["effects"])) {
+      pushStoryEdgeIfReference(edges, node.node_id, "storylet_effect_ref", storySlug, target);
+    }
+  }
+
+  for (const exitOption of recordArrayField(record, "exit_options")) {
+    for (const target of stringArrayField(exitOption, "likely_effects")) {
+      pushStoryEdgeIfReference(edges, node.node_id, "storylet_exit_likely_effect_ref", storySlug, target);
+    }
+  }
+
+  return edges;
+}
+
+function edgesForPage(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  for (const target of stringArraysInRecordField(record, "active_records", ["state_snapshot"])) {
+    pushStoryEdgeIfReference(edges, node.node_id, "page_active_record", storySlug, target);
+  }
+
+  for (const affordance of recordArrayField(record, "visible_affordances", ["state_snapshot"])) {
+    for (const target of stringArrayField(affordance, "grounded_in")) {
+      pushStoryEdgeIfReference(edges, node.node_id, "page_visible_affordance_record", storySlug, target);
+    }
+  }
+
+  for (const target of stringArrayField(record, "emitted_choices")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "page_emitted_choice", storySlug, target);
   }
 
   return edges;
@@ -895,7 +988,7 @@ function edgesForStoryPlan(
     for (const target of stringArrayField(fallbackStep, "target_records")) {
       pushStoryEdgeIfReference(edges, node.node_id, "plan_fallback_step_target", storySlug, target);
     }
-    for (const target of storyRefsInRecordArrayField(fallbackStep, "predicates", ["trigger_condition"])) {
+    for (const target of storyRefsInRecordArrayField(fallbackStep, "trigger_predicates")) {
       pushStoryEdgeIfReference(edges, node.node_id, "plan_fallback_predicate_ref", storySlug, target);
     }
   }
@@ -992,11 +1085,30 @@ function edgesForStoryEvent(
     edges.push(createStoryRefEdge(node.node_id, "state_delta_supersede", storySlug, target));
   }
 
+  for (const target of stringArrayField(record, "close", ["state_delta"])) {
+    edges.push(createStoryRefEdge(node.node_id, "state_delta_close", storySlug, target));
+  }
+
+  for (const relation of recordArrayField(record, "state_relations")) {
+    pushStoryEdgeIfReference(
+      edges,
+      node.node_id,
+      "event_state_relation_target",
+      storySlug,
+      stringField(relation, "target_record")
+    );
+  }
+
+  for (const target of stringValuesInRecordField(record, "alias_bindings", ["commitment"])) {
+    pushStoryEdgeIfReference(edges, node.node_id, "event_alias_binding", storySlug, target);
+  }
+
   for (const introduction of recordArrayField(record, "record_introductions")) {
     const introducedRecordId = stringField(introduction, "record_id");
     if (!introducedRecordId) {
       continue;
     }
+    edges.push(createStoryRefEdge(node.node_id, "event_introduces_record", storySlug, introducedRecordId));
     const sourceNodeId = storyNodeId(storySlug, introducedRecordId);
     for (const evidenceId of stringArrayField(introduction, "evidence")) {
       edges.push(createStoryRefEdge(sourceNodeId, "creation_evidence", storySlug, evidenceId));
@@ -1056,6 +1168,21 @@ function createStoryRefEdge(
   };
 }
 
+function createStoryAttributeEdge(
+  sourceNodeId: string,
+  edgeType: EdgeRow["edge_type"],
+  storySlug: string,
+  targetRef: string
+): Omit<EdgeRow, "edge_id"> {
+  return {
+    source_node_id: sourceNodeId,
+    target_node_id: null,
+    target_unresolved_ref: targetRef,
+    edge_type: edgeType,
+    story_slug: storySlug
+  };
+}
+
 function pushStoryEdgeIfReference(
   edges: Array<Omit<EdgeRow, "edge_id">>,
   sourceNodeId: string,
@@ -1070,42 +1197,6 @@ function pushStoryEdgeIfReference(
 
 function storyNodeId(storySlug: string, recordId: string): string {
   return `${storySlug}:${recordId}`;
-}
-
-function storyRefsInField(
-  record: Record<string, unknown>,
-  field: string,
-  prefix: string
-): string[] {
-  const value = record[field];
-  const refs = new Set<string>();
-  collectStoryRefs(value, refs, prefix);
-  return [...refs].sort((left, right) => left.localeCompare(right, "en-US"));
-}
-
-function collectStoryRefs(value: unknown, refs: Set<string>, prefix: string): void {
-  if (typeof value === "string") {
-    for (const match of value.match(STORY_REF_REGEX) ?? []) {
-      if (match.startsWith(`${prefix}-`)) {
-        refs.add(match);
-      }
-    }
-    STORY_REF_REGEX.lastIndex = 0;
-    return;
-  }
-
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      collectStoryRefs(item, refs, prefix);
-    }
-    return;
-  }
-
-  if (isRecord(value)) {
-    for (const item of Object.values(value)) {
-      collectStoryRefs(item, refs, prefix);
-    }
-  }
 }
 
 function extractFirewallTargets(record: Record<string, unknown>): string[] {
@@ -1201,6 +1292,59 @@ function stringArrayField(record: Record<string, unknown>, field: string, nested
   }
   const value = container[field];
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function numberArrayField(record: Record<string, unknown>, field: string, nestedPath: string[] = []): number[] {
+  let container: unknown = record;
+  for (const segment of nestedPath) {
+    if (!isRecord(container)) {
+      return [];
+    }
+    container = container[segment];
+  }
+  if (!isRecord(container)) {
+    return [];
+  }
+  const value = container[field];
+  return Array.isArray(value) ? value.filter((item): item is number => typeof item === "number") : [];
+}
+
+function stringValuesInRecordField(
+  record: Record<string, unknown>,
+  field: string,
+  nestedPath: string[] = []
+): string[] {
+  let container: unknown = record;
+  for (const segment of nestedPath) {
+    if (!isRecord(container)) {
+      return [];
+    }
+    container = container[segment];
+  }
+  if (!isRecord(container) || !isRecord(container[field])) {
+    return [];
+  }
+  return Object.values(container[field]).filter((item): item is string => typeof item === "string");
+}
+
+function stringArraysInRecordField(
+  record: Record<string, unknown>,
+  field: string,
+  nestedPath: string[] = []
+): string[] {
+  let container: unknown = record;
+  for (const segment of nestedPath) {
+    if (!isRecord(container)) {
+      return [];
+    }
+    container = container[segment];
+  }
+  if (!isRecord(container) || !isRecord(container[field])) {
+    return [];
+  }
+  return Object.values(container[field]).flatMap((value) =>
+    Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
+  );
 }
 
 function recordArrayField(

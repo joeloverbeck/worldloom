@@ -167,7 +167,7 @@ export function fallbackTriggerRecordIds(plan: IndexedRecord): string[] {
   }
   const ids = new Set<string>();
   for (const step of fallbackSteps) {
-    for (const id of idsInValue(nestedRecord(asPlainRecord(step), "trigger_condition").predicates)) {
+    for (const id of idsInValue(asPlainRecord(step).trigger_predicates)) {
       ids.add(id);
     }
   }

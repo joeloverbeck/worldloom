@@ -63,7 +63,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(STENT|STLOC|STOBJ|BEL|OBL|CNSQ|THR|SREL|DA|STPLAN|STEMO|CLK|STSEC|STQ|STINT|SF)-[0-9]+$"
+            "pattern": "^(STENT|STSTAT|STLOC|STOBJ|BEL|OBL|CNSQ|THR|SREL|DA|STPLAN|STEMO|CLK|STSEC|STQ|STINT|SF)-[0-9]+$"
           }
         },
         "affordance_ordinals": {

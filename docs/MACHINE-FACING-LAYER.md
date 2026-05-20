@@ -60,15 +60,20 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 ## Story-Bundle Edge Types
 
-`world-index` emits 56 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, obligation/thread links, branch/page links, and SPEC-45 event provenance:
+`world-index` emits 65 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, thread links, branch/page links, and SPEC-45 event provenance:
 
 - `world_entity_binding` — `STENT.world_ent_id` to a world-canon entity id.
 - `story_fact_derived_from` — `SF.derived_from_cf` to the originating CF.
 - `created_at_page` — story records with `created_at_page` / `provenance.created_at_page` to the creating `PG`.
-- `state_delta_create`, `state_delta_supersede` — `SE.state_delta.create[]` / `SE.state_delta.supersede[]` to affected story records.
+- `state_delta_create`, `state_delta_supersede`, `state_delta_close` — `SE.state_delta.create[]` / `SE.state_delta.supersede[]` / `SE.state_delta.close[]` to affected story records.
 - `creation_evidence` — `SE.record_introductions[]` evidence links from the introduced record to its evidence records.
-- `opens_obligation`, `pays_off_obligation`, `complicates_obligation`, `transfers_obligation` — `SLT` obligation references to `OBL`.
+- `event_state_relation_target` — `SE.state_relations[].target_record` to the related story record.
+- `event_alias_binding` — each structured record id value in `SE.commitment.alias_bindings`.
+- `event_introduces_record` — `SE.record_introductions[].record_id` from the event to the introduced record.
 - `parent_page`, `leaf_page` — `PG` / `CHC` / `BR` page-tree links.
+- `page_active_record` — each record id listed in `PG.state_snapshot.active_records.<class>[]`.
+- `page_visible_affordance_record` — each record id named by `PG.state_snapshot.visible_affordances[].grounded_in[]`.
+- `page_emitted_choice` — each `CHC` id named by `PG.emitted_choices[]`.
 - `dependent_fact` — `OBL.dependent_facts[]` to fact records.
 - `thread_obligation` — `THR.obligations[]` to obligation records.
 
@@ -111,7 +116,7 @@ SPEC-47 and SPEC-49 extend that graph surface with 20 additional edge types for 
 | `STPLAN` | `plan_current_step_target` | record | Each record named by `current_step.target_records[]`. |
 | `STPLAN` | `plan_fallback_step_target` | record | Each record named by `fallback_steps[].target_records[]`. |
 | `STPLAN` | `plan_success_predicate_ref` | record | Record ids parsed from `current_step.success_condition.predicates[].pred`. |
-| `STPLAN` | `plan_fallback_predicate_ref` | record | Record ids parsed from `fallback_steps[].trigger_condition.predicates[].pred`. |
+| `STPLAN` | `plan_fallback_predicate_ref` | record | Record ids parsed from `fallback_steps[].trigger_predicates[].pred`. |
 | `STPLAN` | `plan_derived_from` | record | Each record named by `derived_from[]`. |
 | `STPLAN` | `plan_expires_when_ref` | record | Record ids parsed from scalar `expires_when`. |
 | `STPLAN` | `plan_created_by_event` | `SE` | The event named by `created_by_event`. |
@@ -123,6 +128,17 @@ SPEC-47 and SPEC-49 extend that graph surface with 20 additional edge types for 
 | `STEMO` | `emotion_supersedes` | `STEMO` | The prior emotion record named by scalar `supersedes`, when present. |
 | `STEMO` | `emotion_derived_from` | record | Each record named by `derived_from[]`. |
 | `STEMO` | `emotion_expires_when_ref` | record | Record ids parsed from scalar `expires_when`. |
+
+SPEC-50 removes the legacy `SLT` obligation-field edges (`opens_obligation`, `pays_off_obligation`, `complicates_obligation`, `transfers_obligation`) because the current `SLT` schema uses `effects` and `exit_options` instead of those fields. It adds six CHC/SLT exploitation edges, plus the page and event-completion edges listed above:
+
+| Source | Edge type | Target | Meaning |
+|---|---|---|---|
+| `CHC` | `choice_grounded_in` | record | Each record named by `grounded_in.records[]`. |
+| `CHC` | `choice_associated_storylet` | `SLT` | The source commitment block named by `associated_commitment_block`. |
+| `CHC` | `choice_affordance_ordinal` | page affordance attribute | Each ordinal named by `grounded_in.affordance_ordinals[]`, encoded as `story:PG#affordance:<ordinal>` when the parent page is known. |
+| `SLT` | `storylet_predicate_ref` | record | Record ids parsed from hard and soft precondition predicate strings. |
+| `SLT` | `storylet_effect_ref` | record | Concrete record ids named by `effects.create[]`, `effects.supersede[]`, and `effects.close[]`; `bound:<alias>` placeholders are skipped. |
+| `SLT` | `storylet_exit_likely_effect_ref` | record | Concrete record ids named by `exit_options[].likely_effects[]`; `bound:<alias>` placeholders are skipped. |
 
 ### Placeholder Skip Convention
 

@@ -41,7 +41,7 @@ test("SPEC-47/SPEC-49 STPLAN/STEMO edge integration builds all story edge rows",
   try {
     addSpec47Story(root);
 
-    assert.equal(STORY_EDGE_TYPES.length, 56);
+    assert.equal(STORY_EDGE_TYPES.length, 65);
     assert.equal(new Set(STORY_EDGE_TYPES).size, STORY_EDGE_TYPES.length);
     for (const edgeType of SPEC47_EDGE_TYPES) {
       assert.ok(STORY_EDGE_TYPES.includes(edgeType), `${edgeType} should be registered`);
@@ -131,10 +131,9 @@ function addSpec47Story(root: string): void {
     "fallback_steps:",
     "  - action_family: bargain",
     "    target_records: [OBL-2, group:watch]",
-    "    trigger_condition:",
-    "      predicates:",
-    "        - pred: record_active(STSEC-2)",
-    "        - pred: emotion_active(STENT-1, fear)",
+    "    trigger_predicates:",
+    "      - pred: record_active(STSEC-2)",
+    "      - pred: emotion_active(STENT-1, fear)",
     "expires_when: after STPLAN-4 fulfills",
     "derived_from: [SE-2]"
   ]);

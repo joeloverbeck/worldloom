@@ -198,9 +198,9 @@ non_propagation_facts:                 # optional; records why expected witness 
     group: string
     records: [record_id]
 state_delta:
-  create: [record_id]
-  supersede: [record_id]
-  close: [record_id]
+  create: [record_id]                  # accepts the lifecycle-managed story-state classes, including STPLAN/STEMO
+  supersede: [record_id]               # same class set as create
+  close: [record_id]                   # same class set as create
 promotion_claims:
   - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer> | STSTAT-<integer> | SREL-<integer>
     authority: apparent | branch_local_counterfactual | canon_candidate
@@ -218,6 +218,8 @@ Per-source-kind `promotion_claims[].source_record` requirements:
 | `other_branch_claim` | any `promotion_claims[].source_record` class | none |
 
 `world_logic_rationale` is required (no silent rejection — see §6) and is prose-only: validators MUST NOT parse it for structural facts. `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; all other event kinds name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
+
+`commitment.alias_bindings` accepts the existing selected-move binding classes plus the five existential-predicate-bindable classes `CLK`, `STSEC`, `STQ`, `STPLAN`, and `STEMO`, so author-pool prefilter aliases can become exact event bindings without bypassing branch-local validation.
 
 `record_introductions[]`, `state_relations[]`, and `non_propagation_facts[]` are optional structured fields. Their closed enums, per-class trigger vocabulary, and full validation shape are defined in `tools/validators/src/schemas/story-event.schema.json`; the authoring contract and trigger tables live in `story-state-contract.md` §5a.
 
@@ -635,12 +637,12 @@ target_or_action_families: [<action_family>]*  # non-empty list; §4.4a closed e
 likely_state_pressure: string*                 # natural-language pressure description
 associated_commitment_block: SLT-<integer> | null*   # SLT id if known, null if turn-cycle will JIT
 grounded_in:
-  records: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer> | BEL-<integer> | OBL-<integer> | CNSQ-<integer> | THR-<integer> | SREL-<integer> | DA-<integer> | STPLAN-<integer> | STEMO-<integer> | CLK-<integer> | STSEC-<integer> | STQ-<integer> | STINT-<integer> | SF-<integer>]*  # non-empty; active records grounding this choice
+  records: [STENT-<integer> | STSTAT-<integer> | STLOC-<integer> | STOBJ-<integer> | BEL-<integer> | OBL-<integer> | CNSQ-<integer> | THR-<integer> | SREL-<integer> | DA-<integer> | STPLAN-<integer> | STEMO-<integer> | CLK-<integer> | STSEC-<integer> | STQ-<integer> | STINT-<integer> | SF-<integer>]*  # non-empty; active records grounding this choice
   affordance_ordinals: [integer]               # optional; ordinals from PG.state_snapshot.visible_affordances
 success_policy: string                         # optional; only present when the resolving SE.outcome_route is `attempt`
 ```
 
-Use `STPLAN` when the choice's availability or salience materially depends on the actor's current tactical plan. Use `STEMO` when the choice exists because of active affective pressure. Use `CLK` for staged pressure, `STSEC` for hidden truth or clue-carrier grounding, `STQ` for an open setup or story question, `STINT` for an active desire/goal, and `SF` for a branch-local fact rather than a belief. Prefer `BEL` when the choice is grounded in the actor's belief, even if the belief is true.
+Use `STSTAT` when the choice's availability, prohibition, risk, or transformation turns on life, agency, or location status. Use `STPLAN` when the choice's availability or salience materially depends on the actor's current tactical plan. Use `STEMO` when the choice exists because of active affective pressure. Use `CLK` for staged pressure, `STSEC` for hidden truth or clue-carrier grounding, `STQ` for an open setup or story question, `STINT` for an active desire/goal, and `SF` for a branch-local fact rather than a belief. Prefer `BEL` when the choice is grounded in the actor's belief, even if the belief is true.
 
 No `target_or_action_family` singular field, `choice_contract`, `choice_worthiness`, `commitment_class`, `commitment_detail`, `commitment_family`, `continuation_capacity`, `likely_effects`, `record_version`, `strategy_cluster`, `emitted_at_branch`, or `emitted_by_page` fields.
 
@@ -866,7 +868,7 @@ notes: [<string>]
 repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_fact_promotion_to_canon
 ```
 
-The `checks` mapping contains eight deterministic prose/state checks plus the optional `craft_critic` result. `hash_integrity` is `PASS` when the recorded `PG.plan.plan_hash` and `PG.state_hash` are lowercase sha256-shaped and match the recomputed plan/state hashes, `WARN` when drift is accepted because `accept_plan_drift=true`, and `FAIL` when drift is not accepted or either PG hash field is missing, placeholder, or non-sha256. `choice_consequence_visibility` verifies that rendered prose realizes `SE.resolution.player_visible_feedback`; it does not mutate `PG` state or re-author the selected event.
+The `checks` mapping contains eight deterministic prose/state checks plus the optional `craft_critic` result. `hash_integrity` is `PASS` when the recorded `PG.plan.plan_hash` and `PG.state_hash` are lowercase sha256-shaped and match the recomputed plan/state hashes, `WARN` when drift is accepted because `accept_plan_drift=true`, and `FAIL` when drift is not accepted or either PG hash field is missing, placeholder, or non-sha256. `required_event_rendered` includes subordinate receipt observations for committed CLK ticks, STSEC reveals, STPLAN relation movement, STEMO affective transitions, and STQ setup/payoff transitions; the STQ subcheck reads committed `STQ.status` lifecycle changes, `payoff_of`, `answer_records[]`, and page-plan §10b render requirements, records omissions as `notes[]` entries beginning `story_question_payoff_undisclosed:`, and never mutates `PG` or any STQ record. `choice_consequence_visibility` verifies that rendered prose realizes the selected action's consequence without mutating `PG` state or re-authoring the selected event. For non-accept routes it reads `SE.resolution.player_visible_feedback`; for `accept` routes, where `SE.resolution` is absent, it reads the selected `CHC.likely_state_pressure`, `CHC.grounded_in.records[]`, page-plan §13, and committed `SE.state_delta` / `SE.state_relations[]` from plan §7.
 
 Receipt schema drift is checked by `prose_receipt_schema_compliance` in `tools/validators`. A receipt-specific structural smoke uses the compiled validator CLI after the receipt exists, for example:
 
