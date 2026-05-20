@@ -11,6 +11,21 @@
       "type": "array",
       "items": { "$ref": "#/$defs/nonEmptyString" }
     },
+    "rejectedDirectionAuditEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direction", "preserved_essence", "mutation_attempted", "rejection_reason"],
+      "properties": {
+        "direction": { "$ref": "#/$defs/nonEmptyString" },
+        "preserved_essence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "mutation_attempted": { "$ref": "#/$defs/nonEmptyString" },
+        "rejection_reason": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
     "pressureBehavior": {
       "type": "object",
       "additionalProperties": false,
@@ -84,7 +99,15 @@
         "source_path": { "type": "string" },
         "source_proposal_id": { "type": "string" },
         "mutation_summary": { "type": "string" },
-        "rejected_directions_audit": { "$ref": "#/$defs/stringArray" }
+        "rejected_directions_audit": {
+          "oneOf": [
+            { "$ref": "#/$defs/stringArray" },
+            {
+              "type": "array",
+              "items": { "$ref": "#/$defs/rejectedDirectionAuditEntry" }
+            }
+          ]
+        }
       }
     },
     "canonAssumptionFact": {
@@ -110,7 +133,7 @@
         }
       }
     },
-    "criticPassTrace": {
+    "batchCriticPassTrace": {
       "type": "object",
       "additionalProperties": false,
       "required": ["phase_1_continuity_archivist", "phase_2_essence_extractor", "phase_3_constellation_mosaic", "phase_5_institutional_everyday", "phase_8_epistemic_focalization", "phase_9_voice_critic", "phase_9_artifact_authorship", "phase_11_theme_tone", "blandness_executioner", "protagonist_grade_critic"],
@@ -123,6 +146,17 @@
         "phase_9_voice_critic": { "$ref": "#/$defs/nonEmptyString" },
         "phase_9_artifact_authorship": { "$ref": "#/$defs/nonEmptyString" },
         "phase_11_theme_tone": { "$ref": "#/$defs/nonEmptyString" },
+        "blandness_executioner": { "$ref": "#/$defs/nonEmptyString" },
+        "protagonist_grade_critic": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "upgradeCriticPassTrace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seed_essence_extractor", "world_pressure_mapper", "blandness_executioner", "protagonist_grade_critic"],
+      "properties": {
+        "seed_essence_extractor": { "$ref": "#/$defs/nonEmptyString" },
+        "world_pressure_mapper": { "$ref": "#/$defs/nonEmptyString" },
         "blandness_executioner": { "$ref": "#/$defs/nonEmptyString" },
         "protagonist_grade_critic": { "$ref": "#/$defs/nonEmptyString" }
       }
@@ -168,7 +202,12 @@
     "score_aggregate": { "type": "number" },
     "canon_assumption_flags": { "$ref": "#/$defs/canonAssumptionFlags" },
     "recommended_next_step": { "type": "string", "enum": ["generate_immediately", "reserved_future_seed", "generate_after_canon_adjudication"] },
-    "critic_pass_trace": { "$ref": "#/$defs/criticPassTrace" },
+    "critic_pass_trace": {
+      "oneOf": [
+        { "$ref": "#/$defs/batchCriticPassTrace" },
+        { "$ref": "#/$defs/upgradeCriticPassTrace" }
+      ]
+    },
     "canon_safety_check": {
       "type": "object",
       "additionalProperties": false,
@@ -190,6 +229,59 @@
     "notes": { "type": "string" }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "upgrade_lineage": {
+            "type": "object",
+            "properties": {
+              "origin_kind": { "enum": ["upgraded_seed", "user_seed"] }
+            },
+            "required": ["origin_kind"]
+          }
+        },
+        "required": ["upgrade_lineage"]
+      },
+      "then": {
+        "properties": {
+          "critic_pass_trace": { "$ref": "#/$defs/upgradeCriticPassTrace" },
+          "upgrade_lineage": {
+            "type": "object",
+            "properties": {
+              "rejected_directions_audit": {
+                "type": "array",
+                "minItems": 3,
+                "items": { "$ref": "#/$defs/rejectedDirectionAuditEntry" }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          { "not": { "required": ["upgrade_lineage"] } },
+          {
+            "properties": {
+              "upgrade_lineage": {
+                "type": "object",
+                "properties": {
+                  "origin_kind": { "const": "batch_generated" }
+                },
+                "required": ["origin_kind"]
+              }
+            },
+            "required": ["upgrade_lineage"]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "critic_pass_trace": { "$ref": "#/$defs/batchCriticPassTrace" }
+        }
+      }
+    },
     {
       "if": {
         "properties": {

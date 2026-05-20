@@ -76,6 +76,41 @@ const PA_FILE_BODY = [
   ""
 ].join("\n");
 
+const NCP_FILE_BODY = [
+  "---",
+  "proposal_id: NCP-0001",
+  "slug: brinewick-salt-apprentice",
+  "title: Brinewick Salt Apprentice",
+  "memorability_profile:",
+  "  niche_pressure: beloved institutional monster",
+  "  dramatic_hook: keeps the harbor's impossible ledgers",
+  "  signature_scene_behaviors:",
+  "    - recites tariff law to gulls",
+  "---",
+  "# Brinewick Salt Apprentice",
+  "",
+  "## Character Seed",
+  "",
+  "A ledger-keeper whose social power comes from making boring rules memorable.",
+  ""
+].join("\n");
+
+const NCB_FILE_BODY = [
+  "---",
+  "batch_id: NCB-0001",
+  "world_slug: seeded",
+  "summary: Brinewick supporting cast proposals",
+  "proposal_ids:",
+  "  - NCP-0001",
+  "---",
+  "# NCB-0001",
+  "",
+  "## Batch Brief",
+  "",
+  "Generate harbor characters whose pressures come from institutions.",
+  ""
+].join("\n");
+
 function buildSeededRecordWorld(root: string): void {
   seedWorld(root, {
     worldSlug: "seeded",
@@ -280,6 +315,20 @@ function buildSeededRecordWorld(root: string): void {
         file_path: "adjudications/PA-0001-accept.md",
         node_type: "adjudication_record",
         body: PA_FILE_BODY
+      },
+      {
+        node_id: "NCP-0001",
+        world_slug: "seeded",
+        file_path: "character-proposals/NCP-0001.md",
+        node_type: "character_proposal_card",
+        body: NCP_FILE_BODY
+      },
+      {
+        node_id: "NCB-0001",
+        world_slug: "seeded",
+        file_path: "character-proposals/batches/NCB-0001.md",
+        node_type: "character_proposal_batch",
+        body: NCB_FILE_BODY
       }
     ]
   });
@@ -674,6 +723,42 @@ test("listRecords returns compact metadata for supported hybrid record types", a
   }
 });
 
+test("listRecords returns compact metadata for proposal hybrid record types", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const cardResult = await withRepoRoot(root, () =>
+      listRecords({ world_slug: "seeded", record_type: "character_proposal_card" })
+    );
+    assert.ok("records" in cardResult);
+    assert.equal(cardResult.total, 1);
+    assert.deepEqual(cardResult.records[0], {
+      record_id: "NCP-0001",
+      record_kind: "character_proposal_card",
+      title: "Brinewick Salt Apprentice",
+      content_hash: cardResult.records[0]!.content_hash,
+      file_path: "character-proposals/NCP-0001.md"
+    });
+
+    const batchResult = await withRepoRoot(root, () =>
+      listRecords({ world_slug: "seeded", record_type: "character_proposal_batch" })
+    );
+    assert.ok("records" in batchResult);
+    assert.equal(batchResult.total, 1);
+    assert.deepEqual(batchResult.records[0], {
+      record_id: "NCB-0001",
+      record_kind: "character_proposal_batch",
+      title: "Brinewick supporting cast proposals",
+      content_hash: batchResult.records[0]!.content_hash,
+      file_path: "character-proposals/batches/NCB-0001.md"
+    });
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("listRecords filters hybrid records by frontmatter fields", async () => {
   const root = createTempRepoRoot();
 
@@ -897,7 +982,9 @@ test("listRecords include_full_body covers every supported hybrid record type", 
     const expectedKinds = new Map([
       ["character_record", "character"],
       ["diegetic_artifact_record", "diegetic_artifact"],
-      ["adjudication_record", "adjudication"]
+      ["adjudication_record", "adjudication"],
+      ["character_proposal_card", "character_proposal_card"],
+      ["character_proposal_batch", "character_proposal_batch"]
     ]);
 
     for (const [recordType, expectedKind] of expectedKinds) {
@@ -937,6 +1024,16 @@ test("listRecords returns typed errors for unsupported record types and missing 
     );
     assert.ok("code" in unsupported);
     assert.equal(unsupported.code, "invalid_input");
+    assert.ok(
+      (unsupported.details?.supported_record_types as string[] | undefined)?.includes(
+        "character_proposal_card"
+      )
+    );
+    assert.ok(
+      (unsupported.details?.supported_record_types as string[] | undefined)?.includes(
+        "character_proposal_batch"
+      )
+    );
 
     const missingWorld = await withRepoRoot(root, () =>
       listRecords({ world_slug: "missing", record_type: "invariant_record" })

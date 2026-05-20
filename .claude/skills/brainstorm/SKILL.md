@@ -217,6 +217,7 @@ After design approval, do NOT apply changes or implement the design until the us
 | Chat-only triage / routing recommendation (immediate consumption, optional persistence) | in-chat only; no file persisted by default; Step 6 menu offers `docs/plans/YYYY-MM-DD-<topic>-routing.md` as opt-in persistence — covers the shape where the brainstorm's output is consumed immediately by the next brainstorm cycle (Wave-pattern triage hand-off) rather than persisted as a durable artifact |
 | Triage producing 1 spec or <3 tickets | matching single-deliverable row above; triage file skipped by default — see input-complexity carve-out in `references/deliverable-classification.md` |
 | Triage producing ≥2 specs / ≥3 tickets | deliverables + `docs/triage/YYYY-MM-DD-<topic>-triage.md` |
+| Triage analysis, all deliverables deferred (durable decision record) | `docs/triage/YYYY-MM-DD-<topic>-triage.md` — full verdict content, no deliverables to reference |
 | Hybrid (code + spec) | plan file orchestrates sequence |
 | Data-gathering required first | pre-deliverable phase + final deliverable |
 | Implementation tickets | `tickets/<ID>.md` |

@@ -126,13 +126,13 @@ A canon-safe but weak-memorability candidate must not survive on validity alone.
 
 Question: "Is this merely valid, or is it behaviorally memorable under world pressure?"
 
-Fail the candidate if the answer is valid-but-dull, generic appetite, abstract contradiction, polite voice, neutral relationships, cosmetic weirdness, or no repeated forced choice. A PASS requires a one-line rationale naming the concrete world-produced behavior that prevents flattening.
+Fail the candidate if the answer is valid-but-dull, generic appetite, abstract contradiction, polite voice, neutral relationships, cosmetic weirdness, or no repeated forced choice. A PASS requires a one-line rationale naming all four evidence elements: one concrete world pressure, one scene behavior, one cannot-swap reason, and one rejected weaker alternative.
 
 ### Protagonist-Grade Critic
 
 Question: "Could this person carry a compelling story under the world's pressure without becoming story-system-specific?"
 
-Fail the candidate if they need plot destiny, act structure, authorial favoritism, or unexplained exceptionality to matter. A PASS requires a one-line rationale naming the engine field or relation that would generate scenes naturally.
+Fail the candidate if they need plot destiny, act structure, authorial favoritism, or unexplained exceptionality to matter. A PASS requires a one-line rationale naming all four evidence elements: one concrete world pressure, one scene behavior, one cannot-swap reason, and one rejected weaker alternative.
 
 ## Canon Routing Discipline
 

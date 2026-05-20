@@ -27,7 +27,7 @@ A single implementation may require cross-skill cascade, cross-skill sibling sca
 
 A finding affects a shared surface when it changes any of the following:
 - `docs/plans/*.md` design-doc output path or frontmatter conventions (produced by `brainstorm`)
-- `docs/triage/*.md` triage-file format (produced by `brainstorm` for multi-deliverable triages)
+- `docs/triage/*.md` triage-file format (produced by `brainstorm` for multi-deliverable triages and for standalone deferred-deliverable triage decision records)
 - `brainstorming/*.md` canon-pipeline proposal structure (produced by `skill-creator` in fresh mode; consumed by `skill-creator` in compile mode)
 - `archive/*/` archival destination paths or naming conventions
 - `specs/*.md` or `tickets/*.md` structure and numbering conventions — worldloom does not yet ship with these directories; check for presence before flagging, and if absent, skip this bullet

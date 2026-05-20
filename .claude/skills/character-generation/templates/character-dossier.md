@@ -72,6 +72,7 @@ source_basis:
   world_slug: ""                             # the world this character belongs to
   generated_date: ""                         # ISO date of generation, e.g. 2026-04-18
   user_approved: false                       # set true ONLY at Phase 9 atomic write, after HARD-GATE release
+  source_proposal_id: ""                     # optional; when generated from an NCP, copy input_memorability_contract.source_proposal_id (NCP-<integer>)
 
 notes: >
   Free-form notes: Phase 7d repair sub-passes that fired (form:

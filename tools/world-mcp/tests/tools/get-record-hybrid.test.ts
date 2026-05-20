@@ -78,6 +78,45 @@ const PA_FILE_BODY = [
   ""
 ].join("\n");
 
+const NCP_FILE_BODY = [
+  "---",
+  "proposal_id: NCP-0001",
+  "slug: brinewick-salt-apprentice",
+  "title: Brinewick Salt Apprentice",
+  "memorability_profile:",
+  "  niche_pressure: beloved institutional monster",
+  "  dramatic_hook: keeps the harbor's impossible ledgers",
+  "  signature_scene_behaviors:",
+  "    - recites tariff law to gulls",
+  "---",
+  "# Brinewick Salt Apprentice",
+  "",
+  "## Character Seed",
+  "",
+  "A ledger-keeper whose social power comes from making boring rules memorable.",
+  "",
+  "## Rejected Directions Audit",
+  "",
+  "- Generic orphan thief rejected because the harbor institution must stay load-bearing.",
+  ""
+].join("\n");
+
+const NCB_FILE_BODY = [
+  "---",
+  "batch_id: NCB-0001",
+  "world_slug: seeded",
+  "summary: Brinewick supporting cast proposals",
+  "proposal_ids:",
+  "  - NCP-0001",
+  "---",
+  "# NCB-0001",
+  "",
+  "## Batch Brief",
+  "",
+  "Generate harbor characters whose pressures come from institutions.",
+  ""
+].join("\n");
+
 const OVERSIZE_DA_FILE_BODY = [
   "---",
   "artifact_id: DA-0002",
@@ -132,6 +171,20 @@ function buildSeededHybridWorld(root: string): void {
         file_path: "adjudications/PA-0001-accept.md",
         node_type: "adjudication_record",
         body: PA_FILE_BODY
+      },
+      {
+        node_id: "NCP-0001",
+        world_slug: "seeded",
+        file_path: "character-proposals/NCP-0001.md",
+        node_type: "character_proposal_card",
+        body: NCP_FILE_BODY
+      },
+      {
+        node_id: "NCB-0001",
+        world_slug: "seeded",
+        file_path: "character-proposals/batches/NCB-0001.md",
+        node_type: "character_proposal_batch",
+        body: NCB_FILE_BODY
       }
     ]
   });
@@ -200,6 +253,68 @@ test("get-record-hybrid returns parsed shape for PA records", async () => {
     assert.equal(result.frontmatter.pa_id, "PA-0001");
     assert.equal(result.frontmatter.verdict, "accept");
     assert.ok(result.body_sections["Adjudication Notes"]?.includes("first pass"));
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("get-record-hybrid returns parsed shape and section projections for NCP records", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededHybridWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getRecord({ record_id: "NCP-0001", world_slug: "seeded" })
+    );
+
+    assert.ok("frontmatter" in result, "expected hybrid full response shape");
+    assert.equal(result.record_kind, "character_proposal_card");
+    assert.equal(result.record_id, "NCP-0001");
+    assert.equal(result.file_path, "character-proposals/NCP-0001.md");
+    assert.equal(result.content_hash, sha256(NCP_FILE_BODY));
+    assert.equal(result.frontmatter.proposal_id, "NCP-0001");
+    assert.equal(
+      (result.frontmatter.memorability_profile as Record<string, unknown>).niche_pressure,
+      "beloved institutional monster"
+    );
+    assert.ok(result.body_sections["Character Seed"]?.includes("ledger-keeper"));
+
+    const projected = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "NCP-0001",
+        world_slug: "seeded",
+        section_path: "frontmatter.memorability_profile"
+      })
+    );
+
+    assert.ok("section_path" in projected, "expected section response shape");
+    assert.equal(projected.record_kind, "character_proposal_card");
+    assert.deepEqual(projected.value, {
+      niche_pressure: "beloved institutional monster",
+      dramatic_hook: "keeps the harbor's impossible ledgers",
+      signature_scene_behaviors: ["recites tariff law to gulls"]
+    });
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("get-record-hybrid returns parsed shape for NCB records", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededHybridWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getRecord({ record_id: "NCB-0001", world_slug: "seeded" })
+    );
+
+    assert.ok("frontmatter" in result, "expected hybrid full response shape");
+    assert.equal(result.record_kind, "character_proposal_batch");
+    assert.equal(result.frontmatter.batch_id, "NCB-0001");
+    assert.deepEqual(result.frontmatter.proposal_ids, ["NCP-0001"]);
+    assert.ok(result.body_sections["Batch Brief"]?.includes("harbor characters"));
   } finally {
     destroyTempRepoRoot(root);
   }

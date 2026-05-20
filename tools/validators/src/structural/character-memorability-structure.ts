@@ -11,7 +11,9 @@ const VALIDATOR = "character_memorability_structure";
 const CHARACTER_PATH = /^characters\/[^/]+\.md$/;
 const PROPOSAL_CARD_PATH = /^character-proposals\/[^/]+\.md$/;
 const PROPOSAL_BATCH_PATH = /^character-proposals\/batches\//;
+const SOURCE_PROPOSAL_ID_PATTERN = /^NCP-[0-9]+$/;
 const PLACEHOLDER_PATTERN = /\b(?:TODO|TBD|PLACEHOLDER)\b/i;
+const PLACEHOLDER_ABSENCE_PATTERN = /\b(?:no|none|not|without)\b[^.\n]*(?:TODO|TBD|PLACEHOLDER)\b/i;
 
 const REQUIRED_CHARACTER_SECTIONS = [
   "Protagonist-Grade Core",
@@ -45,7 +47,7 @@ export const characterMemorabilityStructure: Validator = {
         continue;
       }
 
-      if (PLACEHOLDER_PATTERN.test(file.content)) {
+      if (hasPlaceholderText(file.content)) {
         verdicts.push(verdict(
           filePath,
           nodeIdFor(filePath, parsed),
@@ -110,6 +112,17 @@ function characterVerdicts(filePath: string, content: string, parsed: Record<str
     ));
   }
 
+  const sourceBasis = asPlainRecord(parsed.source_basis);
+  const sourceProposalId = sourceBasis.source_proposal_id;
+  if (sourceProposalId !== undefined && (typeof sourceProposalId !== "string" || !SOURCE_PROPOSAL_ID_PATTERN.test(sourceProposalId))) {
+    verdicts.push(verdict(
+      filePath,
+      nodeId,
+      "source_proposal_id_format",
+      `${nodeId} source_basis.source_proposal_id must match NCP-<integer> when present.`
+    ));
+  }
+
   return verdicts;
 }
 
@@ -118,13 +131,24 @@ function proposalVerdicts(filePath: string, content: string, parsed: Record<stri
   const verdicts: Verdict[] = [];
   const upgradeLineage = asPlainRecord(parsed.upgrade_lineage);
 
-  if (upgradeLineage.origin_kind === "upgraded_seed" && !hasHeading(content, "Rejected Directions Audit")) {
-    verdicts.push(verdict(
-      filePath,
-      nodeId,
-      "missing_rejected_directions_audit",
-      `${nodeId} upgraded NCP cards must include '## Rejected Directions Audit'.`
-    ));
+  if (requiresRejectedDirectionsAudit(upgradeLineage.origin_kind)) {
+    if (!hasHeading(content, "Rejected Directions Audit")) {
+      verdicts.push(verdict(
+        filePath,
+        nodeId,
+        "missing_rejected_directions_audit",
+        `${nodeId} upgraded/user-seed NCP cards must include '## Rejected Directions Audit'.`
+      ));
+    }
+
+    if (!Array.isArray(upgradeLineage.rejected_directions_audit) || upgradeLineage.rejected_directions_audit.length < 3) {
+      verdicts.push(verdict(
+        filePath,
+        nodeId,
+        "rejected_directions_audit_min_items",
+        `${nodeId} upgrade_lineage.rejected_directions_audit must contain at least 3 entries for upgraded/user-seed NCP cards.`
+      ));
+    }
   }
 
   const canonAssumptionFlags = asPlainRecord(parsed.canon_assumption_flags);
@@ -143,8 +167,15 @@ function proposalVerdicts(filePath: string, content: string, parsed: Record<stri
   return verdicts;
 }
 
+function requiresRejectedDirectionsAudit(originKind: unknown): boolean {
+  return originKind === "upgraded_seed" || originKind === "user_seed";
+}
+
 function relevantPath(filePath: string): boolean {
   const normalized = toPosixPath(filePath);
+  if (normalized.endsWith("/INDEX.md")) {
+    return false;
+  }
   return CHARACTER_PATH.test(normalized) || (PROPOSAL_CARD_PATH.test(normalized) && !PROPOSAL_BATCH_PATH.test(normalized));
 }
 
@@ -207,6 +238,12 @@ function isInIncrementalScope(filePath: string, ctx: Context): boolean {
 function hasHeading(content: string, heading: string): boolean {
   const pattern = new RegExp(`^## ${escapeRegExp(heading)}\\s*$`, "m");
   return pattern.test(content);
+}
+
+function hasPlaceholderText(content: string): boolean {
+  return content
+    .split(/\r?\n/)
+    .some((line) => PLACEHOLDER_PATTERN.test(line) && !PLACEHOLDER_ABSENCE_PATTERN.test(line));
 }
 
 function parseFrontmatter(content: string): Record<string, unknown> | null {
