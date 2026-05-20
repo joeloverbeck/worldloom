@@ -100,7 +100,7 @@ const NCB_FILE_BODY = [
   "batch_id: NCB-0001",
   "world_slug: seeded",
   "summary: Brinewick supporting cast proposals",
-  "proposal_ids:",
+  "card_ids:",
   "  - NCP-0001",
   "---",
   "# NCB-0001",

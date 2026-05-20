@@ -277,7 +277,9 @@
         ]
       },
       "then": {
+        "required": ["batch_id"],
         "properties": {
+          "batch_id": { "type": "string", "pattern": "^NCB-[0-9]+$" },
           "critic_pass_trace": { "$ref": "#/$defs/batchCriticPassTrace" }
         }
       }

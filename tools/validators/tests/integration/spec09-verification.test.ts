@@ -144,7 +144,7 @@ test("SPEC-09 §V7: bare n_a (no fact-type keyword) FAILS rationale regex", asyn
   assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.na_rationale_quality"));
 });
 
-test("SPEC-09 §V9: world-validate full-rule baseline reports only SPEC-52 legacy character/proposal gaps", () => {
+test("SPEC-09 §V9: world-validate full-rule baseline reports known legacy character/proposal gaps", () => {
   const result = runWorldValidate(tempRoot, "animalia", ["--json"]);
   const parsed = JSON.parse(result.stderr || result.stdout) as {
     verdicts: Array<{ code: string; message: string; location: { node_id?: string; file?: string } }>;
@@ -152,7 +152,7 @@ test("SPEC-09 §V9: world-validate full-rule baseline reports only SPEC-52 legac
   };
 
   assert.equal(result.status, 1, result.stderr || result.stdout);
-  assert.equal(parsed.summary.fail_count, 459);
+  assert.equal(parsed.summary.fail_count, 474);
   assert.equal(parsed.summary.warn_count, 0);
   assert.equal(parsed.summary.info_count, 0);
   assert.deepEqual(legacyCharacterDramaticCoreFailures(parsed.verdicts), [

@@ -42,8 +42,8 @@ Run all 18 tests. Any FAIL halts and loops to the responsible phase. Record each
 
 **Per-card** (run over every card):
 
-1. **(Rule 2, Phase 2 + 7)** Card has populated `institutional_embedding_checklist` with at least one non-"none" relation; card has non-empty `central_contradiction` tied to a world pressure.
-2. **(Rule 2, Phase 7)** Card has populated `repeated_forced_choice` — not a biography fragment.
+1. **(Rule 2, Phase 2 + 7)** Card body / acceptance-test review has populated `institutional_embedding_checklist` with at least one non-"none" relation; card has non-empty `central_contradiction` tied to a world pressure. `institutional_embedding_checklist` is not an NCP frontmatter field.
+2. **(Rule 2, Phase 7)** Card body / acceptance-test review has populated `repeated_forced_choice` — not a biography fragment. `repeated_forced_choice` is not an NCP frontmatter field.
 3. **(Rule 3, Phase 7)** Every capability has populated `how_learned` / `cost_to_acquire` / `teachers_institutions` / `unusual_or_ordinary` / `body_class_place_shape`.
 4. **(Rule 4, Phase 10c)** Card's `canon_assumption_flags.status` ∈ {canon-safe, canon-edge, canon-requiring}; if canon-requiring, `implied_new_facts` non-empty with routing tag.
 5. **(Rule 7, Phase 10b)** `canon_safety_check.mystery_reserve_firewall` lists every MR entry checked; non-empty MR with empty firewall list fails.

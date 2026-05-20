@@ -97,7 +97,10 @@ export const recordSchemaCompliance: Validator = {
       verdicts.push(...canonSafetyBlockVerdicts(record, ctx, preApplyTouchedFiles));
     }
 
-    for (const hybrid of hybridRecordsFromFiles(input, ctx)) {
+    const hybridResult = hybridRecordsFromFiles(input, ctx);
+    verdicts.push(...hybridResult.verdicts);
+
+    for (const hybrid of hybridResult.records) {
       const validate = validatorsByRecordType.get(hybrid.node_type);
       if (!validate) {
         continue;
@@ -116,6 +119,11 @@ export interface SchemaTarget {
   node_type: string;
   file_path: string;
   parsed: unknown;
+}
+
+interface HybridRecordsResult {
+  records: SchemaTarget[];
+  verdicts: Verdict[];
 }
 
 function schemaVerdicts(record: SchemaTarget, errors: ErrorObject[]): Verdict[] {
@@ -309,8 +317,9 @@ function loadSchemaValidators(): Map<string, ValidateFunction> {
   return validators;
 }
 
-function hybridRecordsFromFiles(input: unknown, ctx: Context): SchemaTarget[] {
+function hybridRecordsFromFiles(input: unknown, ctx: Context): HybridRecordsResult {
   const records: SchemaTarget[] = [];
+  const verdicts: Verdict[] = [];
   for (const file of fileInputsFrom(input, ctx)) {
     const normalizedPath = toPosixPath(file.path);
     if (!isInIncrementalScope(normalizedPath, ctx)) {
@@ -333,7 +342,9 @@ function hybridRecordsFromFiles(input: unknown, ctx: Context): SchemaTarget[] {
     }
     if (/^character-proposals\/batches\/[^/]+\.md$/.test(normalizedPath)) {
       const frontmatter = frontmatterFor(file.content);
-      if (frontmatter !== null) {
+      if (frontmatter === null) {
+        verdicts.push(missingFrontmatterVerdict(normalizedPath, "character_proposal_batch"));
+      } else {
         const parsed = parseYamlSurface(frontmatter);
         if (!parsed) {
           continue;
@@ -348,7 +359,9 @@ function hybridRecordsFromFiles(input: unknown, ctx: Context): SchemaTarget[] {
     }
     if (/^character-proposals\/[^/]+\.md$/.test(normalizedPath)) {
       const frontmatter = frontmatterFor(file.content);
-      if (frontmatter !== null) {
+      if (frontmatter === null) {
+        verdicts.push(missingFrontmatterVerdict(normalizedPath, "character_proposal_card"));
+      } else {
         const parsed = parseYamlSurface(frontmatter);
         if (!parsed) {
           continue;
@@ -390,7 +403,20 @@ function hybridRecordsFromFiles(input: unknown, ctx: Context): SchemaTarget[] {
       });
     }
   }
-  return records;
+  return { records, verdicts };
+}
+
+function missingFrontmatterVerdict(filePath: string, nodeType: string): Verdict {
+  return customSchemaVerdict(
+    {
+      node_id: filePath,
+      node_type: nodeType,
+      file_path: filePath,
+      parsed: {}
+    },
+    "record_schema_compliance.missing_frontmatter",
+    `${filePath} requires parseable YAML frontmatter for ${nodeType} schema validation`
+  );
 }
 
 function parseYamlSurface(content: string): unknown | null {
