@@ -53,13 +53,21 @@ test("SPEC-04 verification: Unit registry exposes the active mechanized validato
   assert.ok(!structuralValidators.some((validator) => validator.name === "adjudication_discovery_fields"));
 });
 
-test("SPEC-04 verification: Full-world baseline is clean after SPEC-14 grandfathering closure", async () => {
+test("SPEC-04 verification: Full-world baseline reports only legacy CHAR dramatic_core gaps", async () => {
   const run = await runFullWorldValidation();
 
-  assert.equal(run.summary.fail_count, 0);
+  assert.equal(run.summary.fail_count, 4);
   assert.equal(run.summary.warn_count, 0);
   assert.equal(run.summary.info_count, 0);
-  assert.deepEqual(codesByValidator(run.verdicts), {});
+  assert.deepEqual(codesByValidator(run.verdicts), {
+    record_schema_compliance: ["record_schema_compliance.required"]
+  });
+  assert.deepEqual(legacyCharacterDramaticCoreFailures(run.verdicts), [
+    "CHAR-0001:characters/vespera-nightwhisper.md",
+    "CHAR-0001:characters/vespera-nightwhisper.md",
+    "CHAR-0002:characters/melissa-threadscar.md",
+    "CHAR-0002:characters/melissa-threadscar.md"
+  ]);
 });
 
 test("SPEC-04 verification: Schema conformance has no atomic-source schema failures", async () => {
@@ -148,8 +156,11 @@ test("SPEC-04 verification: Full-world duration is logged as a dev-loop signal",
   const run = await runFullWorldValidation({ refresh: true });
   const durationMs = Date.now() - start;
 
-  assert.equal(run.summary.fail_count, 0);
+  assert.equal(run.summary.fail_count, 4);
   assert.equal(run.summary.info_count, 0);
+  assert.deepEqual(codesByValidator(run.verdicts), {
+    record_schema_compliance: ["record_schema_compliance.required"]
+  });
   console.log(`SPEC-04 full-world animalia validation took ${durationMs}ms`);
 });
 
@@ -199,6 +210,19 @@ function codesByValidator(
   ]);
   entries.sort(([left], [right]) => left.localeCompare(right));
   return Object.fromEntries(entries);
+}
+
+function legacyCharacterDramaticCoreFailures(
+  verdicts: Array<{ code: string; message: string; location: { node_id?: string; file?: string } }>
+): string[] {
+  return verdicts
+    .filter(
+      (verdict) =>
+        verdict.code === "record_schema_compliance.required" &&
+        verdict.message.includes("must have required property 'dramatic_core'")
+    )
+    .map((verdict) => `${verdict.location.node_id}:${verdict.location.file}`)
+    .sort();
 }
 
 function patchPlan(cfOverrides: Record<string, unknown> = {}) {

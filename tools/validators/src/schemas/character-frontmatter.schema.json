@@ -4,7 +4,69 @@
   "title": "CharacterFrontmatter",
   "type": "object",
   "additionalProperties": false,
-  "required": ["character_id", "slug", "name", "species", "age_band", "place_of_origin", "current_location", "date", "social_position", "profession", "kinship_situation", "religious_ideological_environment", "major_local_pressures", "intended_narrative_role", "world_consistency", "source_basis"],
+  "required": ["character_id", "slug", "name", "species", "age_band", "place_of_origin", "current_location", "date", "social_position", "profession", "kinship_situation", "religious_ideological_environment", "major_local_pressures", "intended_narrative_role", "dramatic_core", "world_consistency", "source_basis"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "pressureBehavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cornered", "tempted", "humiliated", "offered_power", "protecting_attachment"],
+      "properties": {
+        "cornered": { "$ref": "#/$defs/nonEmptyString" },
+        "tempted": { "$ref": "#/$defs/nonEmptyString" },
+        "humiliated": { "$ref": "#/$defs/nonEmptyString" },
+        "offered_power": { "$ref": "#/$defs/nonEmptyString" },
+        "protecting_attachment": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "voiceUnderPressure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lying", "begging", "threatening", "grieving_or_hiding_ignorance"],
+      "properties": {
+        "lying": { "$ref": "#/$defs/nonEmptyString" },
+        "begging": { "$ref": "#/$defs/nonEmptyString" },
+        "threatening": { "$ref": "#/$defs/nonEmptyString" },
+        "grieving_or_hiding_ignorance": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "relationalCharge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_or_relation_type", "need", "resentment_or_fear", "likely_harm_or_betrayal"],
+      "properties": {
+        "target_or_relation_type": { "$ref": "#/$defs/nonEmptyString" },
+        "need": { "$ref": "#/$defs/nonEmptyString" },
+        "resentment_or_fear": { "$ref": "#/$defs/nonEmptyString" },
+        "likely_harm_or_betrayal": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "dramaticCore": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["world_produced_wound", "active_appetite", "self_mythology", "irreconcilable_contradiction", "pressure_behavior", "relational_charge", "moral_psychological_edge", "signature_scene_behaviors", "voice_under_pressure", "cannot_be_swapped_out_because"],
+      "properties": {
+        "world_produced_wound": { "$ref": "#/$defs/nonEmptyString" },
+        "active_appetite": { "$ref": "#/$defs/nonEmptyString" },
+        "self_mythology": { "$ref": "#/$defs/nonEmptyString" },
+        "irreconcilable_contradiction": { "$ref": "#/$defs/nonEmptyString" },
+        "pressure_behavior": { "$ref": "#/$defs/pressureBehavior" },
+        "relational_charge": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/relationalCharge" }
+        },
+        "moral_psychological_edge": { "$ref": "#/$defs/nonEmptyString" },
+        "signature_scene_behaviors": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "voice_under_pressure": { "$ref": "#/$defs/voiceUnderPressure" },
+        "cannot_be_swapped_out_because": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    }
+  },
   "properties": {
     "character_id": { "type": "string", "pattern": "^CHAR-[0-9]+$" },
     "slug": { "type": "string", "minLength": 1 },
@@ -35,6 +97,7 @@
     "religious_ideological_environment": { "type": "string" },
     "major_local_pressures": { "type": "array", "items": { "type": "string" } },
     "intended_narrative_role": { "type": "string" },
+    "dramatic_core": { "$ref": "#/$defs/dramaticCore" },
     "world_consistency": {
       "type": "object",
       "additionalProperties": false,

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/structural/utils.ts` (modify), `record-schema-compliance.ts` (modify), `character-memorability-structure.ts` (new), `tools/validators/src/public/registry.ts` (modify).
-**Deps**: 005
+**Deps**: archive/tickets/SPEC52PROGRACHA-005.md
 
 ## Problem
 

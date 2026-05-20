@@ -1,6 +1,6 @@
 # SPEC52PROGRACHA-005: Schemas — CHAR dramatic_core + NCP/NCB first-class
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/schemas/character-frontmatter.schema.json` (modify); `character-proposal-card.schema.json` + `character-proposal-batch.schema.json` (new).
@@ -48,6 +48,10 @@ Validate the batch-manifest frontmatter shape (extend, do not replace, the exist
 - `tools/validators/src/schemas/character-frontmatter.schema.json` (modify)
 - `tools/validators/src/schemas/character-proposal-card.schema.json` (new)
 - `tools/validators/src/schemas/character-proposal-batch.schema.json` (new)
+- `tools/validators/tests/schemas/character-frontmatter-schema-fixtures.test.ts` (new)
+- `tools/validators/tests/schemas/character-proposal-schema-fixtures.test.ts` (new)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify)
+- `tools/validators/tests/integration/spec09-verification.test.ts` (modify)
 
 ## Out of Scope
 
@@ -72,10 +76,38 @@ Validate the batch-manifest frontmatter shape (extend, do not replace, the exist
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/**/character-proposal-card.test.ts` (or sibling location per the package's test layout) — AJV accept/reject cases for the NCP schema.
-2. `tools/validators/tests/**/character-frontmatter.test.ts` — `dramatic_core` required-rejection case.
+1. `tools/validators/tests/schemas/character-proposal-schema-fixtures.test.ts` — AJV accept/reject cases for the NCP schema plus NCB manifest acceptance.
+2. `tools/validators/tests/schemas/character-frontmatter-schema-fixtures.test.ts` — `dramatic_core` acceptance, required-rejection, and `signature_scene_behaviors` minItems rejection.
+3. `tools/validators/tests/integration/spec04-verification.test.ts` — updates the animalia full-world baseline to recognize the intended SPEC-52 legacy CHAR `dramatic_core` failures.
+4. `tools/validators/tests/integration/spec09-verification.test.ts` — updates the animalia full-rule and validate-patch-plan baselines to recognize the same intended legacy CHAR failures while preserving the SPEC-09 owned assertions.
 
 ### Commands
 
 1. `npm test --prefix tools/validators`
 2. `node -e "JSON.parse(require('fs').readFileSync('tools/validators/src/schemas/character-proposal-card.schema.json','utf8')); console.log('NCP schema parses')"`
+
+## Outcome
+
+Completed 2026-05-20.
+
+Implemented the SPEC-52 schema layer:
+
+- Added required CHAR `dramatic_core` to `tools/validators/src/schemas/character-frontmatter.schema.json`, including the shared protagonist-grade field names, five-key `pressure_behavior`, four-key `voice_under_pressure`, `relational_charge` minItems 1, and `signature_scene_behaviors` minItems 3.
+- Added `tools/validators/src/schemas/character-proposal-card.schema.json` for NCP cards. It requires `memorability_profile`, preserves optional template fields under `additionalProperties:false`, permits optional `batch_id`, keeps `scores` permissive, and requires non-empty `implied_new_facts` when `canon_assumption_flags.status` is `canon-requiring`.
+- Added `tools/validators/src/schemas/character-proposal-batch.schema.json` for NCB batch-manifest frontmatter.
+- Added direct AJV schema fixture tests for CHAR, NCP, and NCB shapes.
+- Updated existing full-world animalia validator baselines to truth the intended breaking posture: the two legacy CHAR dossiers currently fail for missing `dramatic_core`, and those failures are the expected post-SPEC-52 baseline until manual content migration.
+
+## Verification Result
+
+1. `npm test --prefix tools/validators` — passed; 686 tests passed.
+2. `node --test dist/tests/integration/spec04-verification.test.js dist/tests/integration/spec09-verification.test.js dist/tests/schemas/character-frontmatter-schema-fixtures.test.js dist/tests/schemas/character-proposal-schema-fixtures.test.js` from `tools/validators` after `npm run build --prefix tools/validators` — passed; 27 focused tests passed.
+3. `node -e "const fs=require('fs'); for (const p of ['tools/validators/src/schemas/character-proposal-card.schema.json','tools/validators/src/schemas/character-proposal-batch.schema.json','tools/validators/src/schemas/character-frontmatter.schema.json']) JSON.parse(fs.readFileSync(p,'utf8')); console.log('schemas parse')"` — passed.
+4. `grep -nE "world_produced_wound|active_appetite|self_mythology|irreconcilable_contradiction|pressure_behavior|relational_charge|moral_psychological_edge|signature_scene_behaviors|voice_under_pressure|cannot_be_swapped_out_because" .claude/skills/_shared-references/protagonist-grade-character-engine.md tools/validators/src/schemas/character-frontmatter.schema.json tools/validators/src/schemas/character-proposal-card.schema.json` — passed; all shared field names appear on the reference and schema surfaces.
+5. `git diff --check -- tools/validators/src/schemas/character-frontmatter.schema.json tools/validators/src/schemas/character-proposal-card.schema.json tools/validators/src/schemas/character-proposal-batch.schema.json tools/validators/tests/schemas/character-frontmatter-schema-fixtures.test.ts tools/validators/tests/schemas/character-proposal-schema-fixtures.test.ts tools/validators/tests/integration/spec04-verification.test.ts tools/validators/tests/integration/spec09-verification.test.ts` — passed.
+
+## Deviations
+
+- The draft test placeholders resolved to the package's actual schema-fixture test naming: `character-frontmatter-schema-fixtures.test.ts` and `character-proposal-schema-fixtures.test.ts`.
+- Existing SPEC-04/SPEC-09 full-world animalia tests had to move with the intended breaking schema. They now assert that the only current full-world failures are the two legacy CHAR records missing `dramatic_core` (duplicated where both indexed and hybrid-file paths report them), rather than preserving a stale zero-failure baseline.
+- Local dependency installation and producer-package builds were needed to run the validators package in this worktree. Lockfile drift from install was removed; ignored `node_modules/` and `dist/` artifacts remain local proof artifacts only.
