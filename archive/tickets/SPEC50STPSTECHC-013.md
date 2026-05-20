@@ -41,7 +41,7 @@ Each of the five skills now requires full-body targeted retrieval when an MCP `s
 - `.claude/skills/commitment-block-authoring/SKILL.md` (modify)
 - `.claude/skills/branching-story-prose-attach/SKILL.md` (modify)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
-- `specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify — implementation note for E.2)
+- `archive/specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify — implementation note for E.2)
 
 ## Out of Scope
 
@@ -91,4 +91,4 @@ Passed on 2026-05-20:
 1. `grep -ln "Targeted retrieval discipline" .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md` — returned all five target skill files.
 2. `grep -ln "mcp__worldloom__get_record\\|mcp__worldloom__get_records\\|include_full_body=true" .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md` — returned all five target skill files.
 3. `git diff --name-only -- tools/world-mcp` — returned no paths; no packet-builder or MCP source surface changed.
-4. `git diff --check -- .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md archive/tickets/SPEC50STPSTECHC-013.md` — passed.
+4. `git diff --check -- .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md archive/specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md archive/tickets/SPEC50STPSTECHC-013.md` — passed.

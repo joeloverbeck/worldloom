@@ -39,7 +39,7 @@ Added Phase 2l to `branching-story-health-audit`: WARN/INFO-level checks for act
 ## Files to Touch
 
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
-- `specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify — D.4 implementation note)
+- `archive/specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify — D.4 implementation note)
 
 ## Out of Scope
 
@@ -68,7 +68,7 @@ Added Phase 2l to `branching-story-health-audit`: WARN/INFO-level checks for act
 ### Commands
 
 1. `rg -n "Phase 2l|active-state underuse|active_plan_underused|active_emotion_underused|urgent_clock_underused|hidden_secret_underused|open_question_underused|active_debt_underused|MUST NOT emit ERROR|no Phase 2l finding" .claude/skills/branching-story-health-audit/SKILL.md` — confirm the new checks, warning-only boundary, and no-underuse behavior are documented.
-2. `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md archive/tickets/SPEC50STPSTECHC-011.md specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` — whitespace/hygiene over owned prose edits.
+2. `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md archive/tickets/SPEC50STPSTECHC-011.md archive/specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` — whitespace/hygiene over owned prose edits.
 
 ## Outcome
 
@@ -87,7 +87,7 @@ The landed check reads present branch state only: recent `CHC`, selected `SLT`, 
 
 1. `rg -n "Phase 2l|active-state underuse|active_plan_underused|active_emotion_underused|urgent_clock_underused|hidden_secret_underused|open_question_underused|active_debt_underused|MUST NOT emit ERROR|no Phase 2l finding" .claude/skills/branching-story-health-audit/SKILL.md` — passed; the new phase, all six finding codes, warning-only boundary, and no-underuse behavior are present.
 2. Manual FOUNDATIONS alignment review — passed; Phase 2l cites record ids, page windows, and touch surfaces and states why each finding is present-state underuse rather than a narrative-shape demand, preserving FOUNDATIONS §Story Bundles §5c.
-3. `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md archive/tickets/SPEC50STPSTECHC-011.md specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` — passed.
+3. `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md archive/tickets/SPEC50STPSTECHC-011.md archive/specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` — passed.
 
 ## Deviations
 

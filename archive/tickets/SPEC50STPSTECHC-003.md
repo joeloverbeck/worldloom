@@ -45,7 +45,7 @@ Mirrored the bounded alias-binding rule in `story-state-contract.md` §5 and `st
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify)
 - `.claude/skills/_shared-templates/story-record-schemas.md` (modify)
 - `tools/validators/tests/structural/record-schema-compliance-story-event.test.ts` (modify)
-- `specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify; implementation note)
+- `archive/specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify; implementation note)
 
 ## Out of Scope
 

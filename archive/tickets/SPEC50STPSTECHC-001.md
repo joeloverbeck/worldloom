@@ -51,7 +51,7 @@ Extend the existing `record_schema_compliance` story-event state-delta regressio
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify)
 - `.claude/skills/_shared-templates/story-record-schemas.md` (modify)
 - `tools/validators/tests/structural/record-schema-compliance-story-event.test.ts` (modify)
-- `specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify — dated implementation note)
+- `archive/specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify — dated implementation note)
 
 ## Out of Scope
 

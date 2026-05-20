@@ -59,7 +59,7 @@ Changed the five drifted fixtures to `trigger_predicates`; existing assertions n
 - `tools/world-index/tests/integration/spec47-stplan-stemo-edges-integration.test.ts` (modify)
 - `tools/validators/tests/schemas/story-plan-schema-fixtures.test.ts` (modify — schema-validated fallback regression)
 - `docs/MACHINE-FACING-LAYER.md` (modify — current edge-contract row repaired during post-ticket review)
-- `specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify — Phase B implementation note added during post-ticket review)
+- `archive/specs/SPEC-50-stplan-stemo-chc-slt-exploitation-parity.md` (modify — Phase B implementation note added during post-ticket review)
 
 ## Out of Scope
 
