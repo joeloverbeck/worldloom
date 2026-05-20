@@ -1,6 +1,6 @@
 # SPEC-51 — CHC/SLT Selected-Commitment Trace Closure
 
-Status: DRAFT
+Status: COMPLETED
 Supersedes: none
 Extends/corrects: SPEC-50 (STPLAN/STEMO/CHC/SLT exploitation parity) — corrects one SPEC-50 regression (C-series affordance-ordinal), closes the existential-predicate trace SPEC-50 D.2 left static-only, and aligns skill prose SPEC-50 left partially drifted.
 Source audit: `reports/ontology-exploitation-second-iteration.md` (2026-05-20)
@@ -144,4 +144,24 @@ Each PASS entry must carry a one-line rationale at implementation time (a bare P
 
 ## Outcome
 
-(Pending implementation.)
+Completed: 2026-05-20
+
+SPEC-51 landed through `SPEC51CHCSLTSEL-001` through `SPEC51CHCSLTSEL-005`:
+
+- Phase A extracted shared alias-resolution and branch-locality helpers, added the `chc_slt_selected_commitment_trace` structural validator, folded the static CHC/SLT grounding surface into that single validator family, and covered emitted-choice/write-in, existential binding, bound-effect, alias hygiene, branch-locality, and selected-CHC resolvability cases.
+- Phase B added STPLAN/STEMO parity to `list_records` and `get_record_schema`, with drift-guard tests against story-bundle node types.
+- Phase C corrected world-index CHC affordance-ordinal edge anchoring from the non-schema `parent_page_id` field to `created_at_page`, and schema-validated the masking fixtures.
+- Phase D aligned stale story-skill predicate and motivation prose to shared contract §5 and Phase-6 motivation grounding, adding the five SPEC-42/SPEC-47 existential predicates plus STPLAN/STEMO motivation sources.
+
+Deviations from the original plan:
+
+- No new record classes, schema fields, page-plan sections, MCP packet surfaces, or canon/world-content writes were introduced.
+- The representative live-world proof used `world-validate animalia --rules=all` as the available clean bundle validation lane.
+
+Final verification on 2026-05-20:
+
+- PASS — `npm run build` and `npm test` in `tools/validators` (`692` tests passed).
+- PASS — `npm run build` and `npm test` in `tools/world-index` (`125` tests passed).
+- PASS — `npm run build` and `npm test` in `tools/world-mcp` (`410` tests passed).
+- PASS — `npm run build` and `npm test` in `tools/patch-engine` (`85` tests passed).
+- PASS — `tools/validators/dist/src/cli/world-validate.js animalia --rules=all` ran `10` validators, skipped `2`, and emitted `0 fail, 0 warn, 0 info`.
