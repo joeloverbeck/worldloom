@@ -1,21 +1,19 @@
 {
   "originating_spec": "specs/SPEC-51-chc-slt-selected-commitment-trace-closure.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC51CHCSLTSEL-004.md",
+  "last_ticket": "archive/tickets/SPEC51CHCSLTSEL-005.md",
   "last_result": "completed_archived",
-  "last_work_commit": "912db005b378260341750154c4450dc2fedad97e",
+  "last_work_commit": "e21bd011668a8af8826d4bee6e683ff14fc675e0",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC51CHCSLTSEL-005.md",
-  "queue": [
-    "tickets/SPEC51CHCSLTSEL-005.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": "final_spec_archive",
+  "queue": [],
+  "phase": "final_spec_archive",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": false,
   "post_review_audit_block": "not_applicable",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "pre-existing unrelated dirty gitlink/worktree entry .claude/worktrees/deepening-characters; ignored package artifacts present under tools/world-index/dist/, tools/world-index/node_modules/, tools/validators/dist/, and tools/validators/node_modules/",
+  "dirty_state": "pre-existing unrelated dirty gitlink/worktree entry .claude/worktrees/deepening-characters; ignored package artifacts present under tools/world-index/dist/, tools/world-index/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
   "updated_at": "2026-05-20"
 }
