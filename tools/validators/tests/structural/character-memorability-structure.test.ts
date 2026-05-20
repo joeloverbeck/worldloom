@@ -1,0 +1,222 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { characterMemorabilityStructure } from "../../src/structural/character-memorability-structure.js";
+import { context } from "./helpers.js";
+
+test("character_memorability_structure accepts complete CHAR protagonist-grade surfaces", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile("characters/maren.md", validCharacter()),
+    context([])
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("character_memorability_structure rejects missing CHAR body headings", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile("characters/maren.md", validCharacter(["Protagonist-Grade Core"])),
+    context([])
+  );
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.missing_character_section"));
+  assert.ok(verdicts.some((verdict) => verdict.message.includes("Protagonist-Grade Core")));
+});
+
+test("character_memorability_structure rejects weak CHAR behavior lists", async () => {
+  const content = validCharacter(undefined, `
+dramatic_core:
+  world_produced_wound: "Her office makes rescue and audit the same act."
+  active_appetite: "She wants one debtor to bless the ledger."
+  self_mythology: "She is the only honest mouth at the tollhouse."
+  irreconcilable_contradiction: "She hides debtors by recording them."
+  pressure_behavior:
+    cornered: "quotes receipt law"
+    tempted: "quotes receipt law"
+    humiliated: ""
+    offered_power: "demands a witness"
+    protecting_attachment: "lies by omission"
+  relational_charge:
+    - target_or_relation_type: "former debtor"
+      need: "forgiveness"
+      resentment_or_fear: "being exposed as sentimental"
+      likely_harm_or_betrayal: "records the debtor's secret anyway"
+  moral_psychological_edge: "She believes rescue is valid only when it leaves a scar."
+  signature_scene_behaviors:
+    - "folds receipts into charms"
+  voice_under_pressure:
+    lying: "precise and priestly"
+    begging: "transactional"
+    threatening: "softly bureaucratic"
+    grieving_or_hiding_ignorance: "recites doctrine"
+  cannot_be_swapped_out_because: "Only her office makes mercy and audit the same act."
+`);
+
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile("characters/maren.md", content),
+    context([])
+  );
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.signature_scene_behaviors_min_items"));
+  assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.pressure_behavior_empty"));
+  assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.pressure_behavior_duplicate"));
+});
+
+test("character_memorability_structure accepts NCP cards without CHAR-only body headings", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile("character-proposals/NCP-12-maren.md", validProposalCard()),
+    context([])
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("character_memorability_structure rejects upgraded NCP cards without rejected-directions audit", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile("character-proposals/NCP-12-maren.md", validProposalCard({ includeAudit: false })),
+    context([])
+  );
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.missing_rejected_directions_audit"));
+});
+
+test("character_memorability_structure rejects canon-requiring NCP cards without implied facts", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile("character-proposals/NCP-12-maren.md", validProposalCard({ canonRequiringWithoutFacts: true })),
+    context([])
+  );
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.canon_requiring_missing_implied_facts"));
+});
+
+test("character_memorability_structure rejects placeholder text on character surfaces", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile("character-proposals/NCP-12-maren.md", `${validProposalCard()}\nTODO: sharpen later\n`),
+    context([])
+  );
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.placeholder_text"));
+});
+
+function inputFile(path: string, content: string) {
+  return {
+    files: [
+      {
+        path,
+        content
+      }
+    ]
+  };
+}
+
+function validCharacter(omitSections: readonly string[] = [], dramaticCore = validDramaticCoreYaml()): string {
+  const sections = [
+    "Material Reality",
+    "Institutional Embedding",
+    "Epistemic Position",
+    "Goals and Pressures",
+    "Capabilities",
+    "Voice and Perception",
+    "Contradictions and Tensions",
+    "Protagonist-Grade Core",
+    "Pressure Behavior",
+    "Self-Mythology and Blind Spots",
+    "Relational Charge",
+    "Moral and Psychological Edge",
+    "Signature Scene Behavior",
+    "Likely Story Hooks",
+    "Canon Safety Check Trace"
+  ].filter((section) => !omitSections.includes(section));
+
+  return [
+    "---",
+    "character_id: CHAR-12",
+    "slug: maren-toll-confessor",
+    "name: Maren",
+    "species: human",
+    "age_band: adult",
+    "place_of_origin: Lower Ferry",
+    "current_location: River Tollhouse",
+    "date: rain season",
+    "social_position: licensed confessor",
+    "profession: toll clerk",
+    "kinship_situation: estranged oath-sibling",
+    "religious_ideological_environment: ledger cult",
+    "major_local_pressures: [seasonal debt audit]",
+    "intended_narrative_role: protagonist",
+    dramaticCore.trimEnd(),
+    "world_consistency:",
+    "  canon_facts_consulted: [CF-1]",
+    "source_basis:",
+    "  world_slug: animalia",
+    "  source_paths: []",
+    "---",
+    "# Maren",
+    "",
+    ...sections.flatMap((section) => [`## ${section}`, "", "Grounded prose.", ""])
+  ].join("\n");
+}
+
+function validDramaticCoreYaml(): string {
+  return `
+dramatic_core:
+  world_produced_wound: "Her office makes rescue and audit the same act."
+  active_appetite: "She wants one debtor to bless the ledger."
+  self_mythology: "She is the only honest mouth at the tollhouse."
+  irreconcilable_contradiction: "She hides debtors by recording them."
+  pressure_behavior:
+    cornered: "quotes receipt law"
+    tempted: "asks who benefits"
+    humiliated: "turns procedural"
+    offered_power: "demands a witness"
+    protecting_attachment: "lies by omission"
+  relational_charge:
+    - target_or_relation_type: "former debtor"
+      need: "forgiveness"
+      resentment_or_fear: "being exposed as sentimental"
+      likely_harm_or_betrayal: "records the debtor's secret anyway"
+  moral_psychological_edge: "She believes rescue is valid only when it leaves a scar."
+  signature_scene_behaviors:
+    - "folds receipts into charms"
+    - "counts exits before speaking"
+    - "answers prayers with fee schedules"
+  voice_under_pressure:
+    lying: "precise and priestly"
+    begging: "transactional"
+    threatening: "softly bureaucratic"
+    grieving_or_hiding_ignorance: "recites doctrine"
+  cannot_be_swapped_out_because: "Only her office makes mercy and audit the same act."
+`;
+}
+
+function validProposalCard(options: { includeAudit?: boolean; canonRequiringWithoutFacts?: boolean } = {}): string {
+  const includeAudit = options.includeAudit ?? true;
+  const canonStatus = options.canonRequiringWithoutFacts ? "canon-requiring" : "canon-safe";
+  return [
+    "---",
+    "proposal_id: NCP-12",
+    "slug: maren-toll-confessor",
+    "title: Maren, Toll Confessor",
+    "upgrade_lineage:",
+    "  origin_kind: upgraded_seed",
+    "  source_path: briefs/maren.md",
+    "  source_proposal_id: ''",
+    "  mutation_summary: Kept the toll role and sharpened the debt appetite.",
+    "  rejected_directions_audit:",
+    "    - pure monster",
+    "memorability_profile:",
+    "  seed_essence_preserved: [Toll confession role]",
+    "canon_assumption_flags:",
+    `  status: ${canonStatus}`,
+    "  edge_assumptions: []",
+    "  implied_new_facts: []",
+    "---",
+    "# Maren, Toll Confessor",
+    "",
+    "## Proposal",
+    "",
+    "World-rooted proposal prose.",
+    "",
+    ...(includeAudit ? ["## Rejected Directions Audit", "", "- Pure monster flattened the office pressure.", ""] : [])
+  ].join("\n");
+}

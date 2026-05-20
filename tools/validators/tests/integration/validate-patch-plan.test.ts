@@ -109,6 +109,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "story_da_duplicate_heuristic"
     );
     assert.equal(storyDaDuplicateExecution?.status, "skipped");
+    const characterMemorabilityExecution = result.executions.find(
+      (execution) => execution.name === "character_memorability_structure"
+    );
+    assert.equal(characterMemorabilityExecution?.status, "skipped");
     assert.ok(!result.executions.some((execution) => execution.name === "arc_envelope_conformance"));
     const snapshotReplayExecution = result.executions.find(
       (execution) => execution.name === "snapshot_replay_equality"
@@ -246,6 +250,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== chcSltGroundingExecution &&
         row !== proseArtifactExecution &&
         row !== storyDaDuplicateExecution &&
+        row !== characterMemorabilityExecution &&
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
         row !== snapshotIntegrityExecution &&

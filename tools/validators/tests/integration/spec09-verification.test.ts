@@ -144,7 +144,7 @@ test("SPEC-09 §V7: bare n_a (no fact-type keyword) FAILS rationale regex", asyn
   assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.na_rationale_quality"));
 });
 
-test("SPEC-09 §V9: world-validate full-rule baseline reports only SPEC-52 legacy CHAR gaps", () => {
+test("SPEC-09 §V9: world-validate full-rule baseline reports only SPEC-52 legacy character/proposal gaps", () => {
   const result = runWorldValidate(tempRoot, "animalia", ["--json"]);
   const parsed = JSON.parse(result.stderr || result.stdout) as {
     verdicts: Array<{ code: string; message: string; location: { node_id?: string; file?: string } }>;
@@ -152,7 +152,7 @@ test("SPEC-09 §V9: world-validate full-rule baseline reports only SPEC-52 legac
   };
 
   assert.equal(result.status, 1, result.stderr || result.stdout);
-  assert.equal(parsed.summary.fail_count, 4);
+  assert.equal(parsed.summary.fail_count, 329);
   assert.equal(parsed.summary.warn_count, 0);
   assert.equal(parsed.summary.info_count, 0);
   assert.deepEqual(legacyCharacterDramaticCoreFailures(parsed.verdicts), [
@@ -170,7 +170,7 @@ test("SPEC-09 §V10 (surrogate): patch-plan envelope for new animalia capability
     "CHAR-0001:characters/vespera-nightwhisper.md",
     "CHAR-0002:characters/melissa-threadscar.md"
   ]);
-  assert.deepEqual(result.verdicts.filter((verdict) => !isLegacyCharacterDramaticCoreFailure(verdict)), []);
+  assert.deepEqual(result.verdicts.filter((verdict) => !isLegacyCharacterOrProposalShapeFailure(verdict)), []);
 });
 
 test("SPEC-09 §V11 (surrogate): patch-plan envelope for genesis-world bundle passes validatePatchPlan", async () => {
@@ -257,6 +257,21 @@ function isLegacyCharacterDramaticCoreFailure(verdict: {
     verdict.code === "record_schema_compliance.required" &&
     verdict.message.includes("must have required property 'dramatic_core'") &&
     (verdict.location.node_id === "CHAR-0001" || verdict.location.node_id === "CHAR-0002")
+  );
+}
+
+function isLegacyCharacterOrProposalShapeFailure(verdict: {
+  validator: string;
+  code: string;
+  message: string;
+  location: { node_id?: string; file?: string };
+}): boolean {
+  return (
+    isLegacyCharacterDramaticCoreFailure(verdict) ||
+    (
+      verdict.location.file?.startsWith("character-proposals/") === true &&
+      verdict.validator === "record_schema_compliance"
+    )
   );
 }
 
