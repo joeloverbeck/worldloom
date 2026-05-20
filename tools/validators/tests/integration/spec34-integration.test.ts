@@ -220,6 +220,7 @@ function entity(id: string, createdAtPage: string, displayName: string): Fixture
     story_id: "STORY-1",
     created_at_page: createdAtPage,
     display_name: displayName,
+    bound_stchar_id: `STCHAR-${id.split("-")[1] ?? "1"}`,
     role_in_story: ["primary_actor"]
   });
 }

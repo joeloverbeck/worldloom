@@ -26,8 +26,12 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     properties: ["id", "story_id", "supersedes", "scope", "created_at_page", "title", "move_family", "preconditions", "beats", "effects", "exit_options", "saliency", "mystery_policy", "provenance"]
   },
   "story-entity": {
-    required: ["id", "story_id", "created_at_page", "display_name", "role_in_story"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "display_name", "bound_char_id", "role_in_story"]
+    required: ["id", "story_id", "created_at_page", "display_name", "bound_stchar_id", "role_in_story"],
+    properties: ["id", "story_id", "created_at_page", "supersedes", "display_name", "bound_stchar_id", "role_in_story"]
+  },
+  "story-character-authority": {
+    required: ["id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_hash", "source_char_sections_used", "generated_at_page", "created_by_skill", "supersedes", "status", "bound_stent_ids", "profile_revision", "body_schema_version", "profile_hash", "voice_block_hash", "page_packet_hash"],
+    properties: ["id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_hash", "source_char_sections_used", "story_local_inputs_used", "generated_at_page", "created_by_skill", "supersedes", "superseded_by", "status", "bound_stent_ids", "profile_revision", "body_schema_version", "profile_hash", "voice_block_hash", "page_packet_hash"]
   },
   "story-status": {
     required: ["id", "story_id", "created_at_page", "entity", "life", "agency", "location"],
@@ -105,8 +109,10 @@ test("representative amended contract records validate against tightened schemas
       story_id: "STORY-1",
       created_at_page: "PG-1",
       display_name: "Mara",
+      bound_stchar_id: "STCHAR-1",
       role_in_story: ["primary_actor"]
     }),
+    storyRecord("story_character_authority_record", "STCHAR-1", "story-characters", validStoryCharacterAuthority()),
     storyRecord("story_status_record", "STSTAT-1", "status", {
       id: "STSTAT-1",
       story_id: "STORY-1",
@@ -358,7 +364,7 @@ test("story schemas accept padded legacy cross-references but keep malformed ref
       story_id: "STORY-1",
       created_at_page: "PG-1",
       display_name: "Mara",
-      bound_char_id: "CHAR-0005",
+      bound_stchar_id: "STCHAR-0005",
       role_in_story: ["primary_actor"]
     }),
     storyRecord("story_fact_record", "SF-1", "facts", {
@@ -474,7 +480,7 @@ test("story schemas accept padded legacy cross-references but keep malformed ref
       story_id: "STORY-1",
       created_at_page: "PG-1",
       display_name: "Mara",
-      bound_char_id: "CHAR-X",
+      bound_stchar_id: "STCHAR-X",
       role_in_story: ["primary_actor"]
     }),
     storyRecord("story_fact_record", "SF-1", "facts", {
@@ -489,7 +495,7 @@ test("story schemas accept padded legacy cross-references but keep malformed ref
 
   assert.ok(malformedResult.some((verdict) =>
     verdict.code === "record_schema_compliance.pattern" &&
-    verdict.message.includes("/bound_char_id")
+    verdict.message.includes("/bound_stchar_id")
   ));
   assert.ok(malformedResult.some((verdict) =>
     verdict.code === "record_schema_compliance.pattern" &&
@@ -499,6 +505,33 @@ test("story schemas accept padded legacy cross-references but keep malformed ref
 
 function readSchema(name: string): { required: string[]; properties: Record<string, unknown>; additionalProperties: unknown } {
   return JSON.parse(readFileSync(path.join(SCHEMA_ROOT, `${name}.schema.json`), "utf8"));
+}
+
+function validStoryCharacterAuthority(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  const hash = "sha256:0000000000000000000000000000000000000000000000000000000000000001";
+  return {
+    id: "STCHAR-1",
+    story_id: "STORY-1",
+    story_slug: "test-story",
+    world_slug: "test-world",
+    source_kind: "world_char",
+    source_char_id: "CHAR-1",
+    source_char_hash: hash,
+    source_char_sections_used: ["Voice", "Pressure Behavior"],
+    story_local_inputs_used: [],
+    generated_at_page: "story_bootstrap",
+    created_by_skill: "story-character-profile",
+    supersedes: null,
+    superseded_by: null,
+    status: "active",
+    bound_stent_ids: ["STENT-1"],
+    profile_revision: 1,
+    body_schema_version: "stchar.v1",
+    profile_hash: hash,
+    voice_block_hash: hash,
+    page_packet_hash: hash,
+    ...overrides
+  };
 }
 
 function storyRecord(nodeType: string, id: string, dir: string, parsed: Record<string, unknown>) {

@@ -90,6 +90,7 @@ cases:
         story_id: STORY-1
         created_at_page: PG-2
         display_name: Unlocated Stranger
+        bound_stchar_id: null
         role_in_story: [background]
   - case_id: stq-source-event-mismatch
     target_validator: story_question_introduction_grounding_integrity

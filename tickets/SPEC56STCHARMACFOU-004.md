@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/patch-engine` (new STORY_RECORD_SPECS entry + supersede op + `stchar_ids` allocation + stale-index); `tools/world-mcp` (`describe_envelope_schema` + patch-plan test).
-**Deps**: SPEC56STCHARMACFOU-002
+**Deps**: archive/tickets/SPEC56STCHARMACFOU-002.md
 
 ## Problem
 

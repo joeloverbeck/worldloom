@@ -334,6 +334,7 @@ function passRecords(): IndexedRecord[] {
       story_id: "STORY-1",
       created_at_page: "PG-1",
       display_name: "Mara",
+      bound_stchar_id: "STCHAR-1",
       role_in_story: ["primary_actor"]
     }),
     storyRecord("story_entity_record", "STENT-2", "entities", {
@@ -341,7 +342,8 @@ function passRecords(): IndexedRecord[] {
       story_id: "STORY-1",
       created_at_page: "PG-1",
       display_name: "Gate Watcher",
-      role_in_story: ["observer"]
+      bound_stchar_id: "STCHAR-2",
+      role_in_story: ["witness"]
     }),
     fixtureRecord(creatingEvent),
     ...records.map(fixtureRecord)

@@ -171,6 +171,7 @@ records:
       story_id: STORY-1
       created_at_page: PG-2
       display_name: Courier
+      bound_stchar_id: STCHAR-3
       role_in_story: [witness, information_source]
   - node_type: story_status_record
     node_id: midstory-introduction-test:STSTAT-3

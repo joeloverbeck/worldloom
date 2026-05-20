@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-index` (new node type + hybrid parse + 4 edge types + tests).
-**Deps**: SPEC56STCHARMACFOU-002
+**Deps**: archive/tickets/SPEC56STCHARMACFOU-002.md
 
 ## Problem
 

@@ -14,6 +14,38 @@ test("record_schema_compliance accepts STENT role_in_story contract values", asy
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts background STENT with null STCHAR binding", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    entityRecord(validEntity({ bound_stchar_id: null, role_in_story: ["background"] }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects non-background STENT with null STCHAR binding", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    entityRecord(validEntity({ bound_stchar_id: null, role_in_story: ["witness"] }))
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.type" &&
+    verdict.message.includes("/bound_stchar_id")
+  ));
+});
+
+test("record_schema_compliance rejects retired STENT bound_char_id", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    entityRecord({
+      ...validEntity(),
+      bound_char_id: "CHAR-1"
+    })
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.additionalProperties"
+  ));
+});
+
 test("record_schema_compliance rejects non-canonical STENT role_in_story values", async () => {
   const result = await recordSchemaCompliance.run({}, context([
     entityRecord(validEntity({ role_in_story: ["protagonist"] }))
@@ -52,6 +84,7 @@ function validEntity(overrides: Record<string, unknown> = {}): Record<string, un
     story_id: "STORY-1",
     created_at_page: "PG-1",
     display_name: "Mara",
+    bound_stchar_id: "STCHAR-1",
     role_in_story: ["primary_actor"],
     ...overrides
   };

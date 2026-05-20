@@ -79,15 +79,29 @@ test("record_schema_compliance accepts a PG record with contract-shaped snapshot
   assert.deepEqual(result, []);
 });
 
-test("record_schema_compliance accepts STPLAN and STEMO active_records entries", async () => {
+test("record_schema_compliance accepts STCHAR, STPLAN, and STEMO active_records entries", async () => {
   const parsed = validPagePayload();
   const stateSnapshot = parsed.state_snapshot as { active_records: Record<string, string[]> };
+  stateSnapshot.active_records.STCHAR = ["STCHAR-1"];
   stateSnapshot.active_records.STPLAN = ["STPLAN-1"];
   stateSnapshot.active_records.STEMO = ["STEMO-1"];
 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
 
   assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects invalid STCHAR active_records ids", async () => {
+  const parsed = validPagePayload();
+  const stateSnapshot = parsed.state_snapshot as { active_records: Record<string, string[]> };
+  stateSnapshot.active_records.STCHAR = ["INVALID-1"];
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/state_snapshot/active_records/STCHAR/0")
+  )));
 });
 
 test("record_schema_compliance rejects invalid STPLAN active_records ids", async () => {

@@ -142,6 +142,16 @@ implementation scope for the ticket.
 
 ## Phase 2 — STCHAR JSON schema + dependent schema edits
 
+**Implementation note (2026-05-20):** Landed by `archive/tickets/SPEC56STCHARMACFOU-002.md`
+before archival. `tools/validators` now has `story-character-authority.schema.json`,
+`record_schema_compliance` recognizes `story_character_authority_record` hybrid markdown
+under `stories/<slug>/story-characters/STCHAR-*.md`, `story-entity.schema.json` rejects
+`bound_char_id` and requires `bound_stchar_id` except for exactly-background entities, and
+page/choice/event schemas accept STCHAR on the scoped reference surfaces while still rejecting
+STCHAR as a promotion source. Same-package positive fixtures were updated to the new STENT
+shape so the validators package remains green. Remaining Phase 2 prose below is historical
+implementation scope for the ticket.
+
 **Files:**
 - `tools/validators/src/schemas/story-character-authority.schema.json` (new)
 - `tools/validators/src/schemas/story-entity.schema.json`

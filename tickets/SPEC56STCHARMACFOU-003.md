@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators` (6 new structural validators + registry registration + replay/closure validator updates + tests).
-**Deps**: SPEC56STCHARMACFOU-002
+**Deps**: archive/tickets/SPEC56STCHARMACFOU-002.md
 
 ## Problem
 

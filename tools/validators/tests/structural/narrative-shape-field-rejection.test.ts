@@ -83,6 +83,7 @@ test("narrative_shape_field_rejection accepts clean covered classes", async () =
       story_id: "STORY-1",
       created_at_page: "PG-2",
       display_name: "Courier",
+      bound_stchar_id: "STCHAR-500",
       role_in_story: ["witness"]
     })
   ];

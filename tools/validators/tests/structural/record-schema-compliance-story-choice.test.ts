@@ -26,6 +26,7 @@ function choiceRecord(groundedRecords: string[]) {
 test("record_schema_compliance accepts expanded CHC grounding record classes", async () => {
   const allowedClasses = [
     "STENT",
+    "STCHAR",
     "STSTAT",
     "STLOC",
     "STOBJ",
