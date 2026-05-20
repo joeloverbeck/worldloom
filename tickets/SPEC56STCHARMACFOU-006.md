@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-mcp` (`allocate_next_id`, `list_records`, `get_record` section_path, `story_bundle_context` + `cast_bind_list` parser; tests).
-**Deps**: archive/tickets/SPEC56STCHARMACFOU-005.md, SPEC56STCHARMACFOU-007
+**Deps**: archive/tickets/SPEC56STCHARMACFOU-005.md, archive/tickets/SPEC56STCHARMACFOU-007.md
 
 ## Problem
 

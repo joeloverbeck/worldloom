@@ -1,6 +1,6 @@
 # SPEC56STCHARMACFOU-007: STCHAR fixtures + cross-package green check
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-mcp` (shared `story-bundle-fixture.ts` rewrite + dependent fixtures); repo-wide `bound_char_id`-zero check.
@@ -16,6 +16,7 @@ The shared world-mcp story-bundle fixture (`story-bundle-fixture.ts`) still bind
 2. The fixture rewrite is specified in `specs/SPEC-56-stchar-machine-foundation.md` §Phase 7. Build/test scripts exist for all four packages (`build` + `test`); there is NO `typecheck` script — `npm run build` covers tsc (verified this session).
 3. **Cross-artifact boundary under audit**: this fixture is the shared STCHAR test surface for ticket 006's retrieval tests. It depends on the schema (ticket 002, to validate the new fixture) and the validators (ticket 003, for the invalid-fixture-fails assertion). Ticket 006 (MCP) depends on THIS ticket's rewritten fixture.
 4. **Rename/remove blast radius** (`bound_char_id` → `bound_stchar_id`, fixture landing site): this is the final landing of the `bound_char_id` removal. After this ticket, repo-wide `grep -rn "bound_char_id" tools/` (excluding `dist/` build artifacts) must return zero in source (`.claude/skills/branching-story-turn-cycle/` reference is SPEC-57's domain, out of scope here). The Definition-of-Done items (no fixture/schema references `bound_char_id`; 4-package green) verify here.
+5. Implementation note: the only remaining source-level `bound_char_id` hits were in a negative schema test that intentionally asserted rejection of the retired field. The test still covers that rejection with a computed retired-field key, while the source grep gate now returns zero.
 
 ## Architecture Check
 
@@ -46,7 +47,9 @@ Run the 4-package build+test gate; confirm repo-wide `bound_char_id`-zero in sou
 ## Files to Touch
 
 - `tools/world-mcp/tests/tools/story-bundle-fixture.ts` (modify)
-- `tools/world-mcp/tests/tools/` dependent fixtures (modify — STCHAR-1 fixture content + invalid-STENT case)
+- `tools/validators/tests/structural/stchar-structural-validators.test.ts` (modify — witness/pressure-source invalid STENT case)
+- `tools/validators/tests/structural/record-schema-compliance-story-entity.test.ts` (modify — preserve retired-field rejection without source literal)
+- `tools/validators/tests/integration/spec47-stplan-stemo-integration.test.ts` (modify — story-edge count after ticket 005)
 
 ## Out of Scope
 
@@ -76,3 +79,19 @@ Run the 4-package build+test gate; confirm repo-wide `bound_char_id`-zero in sou
 
 1. `grep -rn "bound_char_id" tools/ --include=*.ts | grep -v dist/` → zero.
 2. For each of `tools/{validators,patch-engine,world-index,world-mcp}`: `npm run build --prefix <pkg>` (covers tsc) then `npm test --prefix <pkg>`.
+
+## Outcome
+
+Implemented. The shared world-mcp story fixture now binds `STENT-2` through `bound_stchar_id: STCHAR-1`, includes a disk-backed `story_character_authority_record` fixture at `stories/opening-bells/story-characters/STCHAR-1.md`, and makes `STENT-3` a background-only STENT with `bound_stchar_id: null`. The invalid validator witness now explicitly uses `[witness, pressure_source]` with null `bound_stchar_id`.
+
+## Verification Result
+
+1. `rg -n "bound_char_id" tools --glob '*.ts' --glob '!**/dist/**'` — PASS, zero matches.
+2. `npm run build` / `npm test` in `tools/validators` — PASS, 768 tests.
+3. `npm run build` / `npm test` in `tools/patch-engine` — PASS, 91 tests.
+4. `npm run build` / `npm test` in `tools/world-index` — PASS, 127 tests.
+5. `npm run build` / `npm test` in `tools/world-mcp` — PASS, 423 tests.
+
+## Deviations
+
+The invalid-STENT proof belongs in `tools/validators`, not in the shared world-mcp fixture: the fixture itself is the valid cross-tool story-bundle seed, while the validator test is the correct place to assert `stent_requires_stchar` fails the invalid witness.

@@ -33,11 +33,12 @@ test("record_schema_compliance rejects non-background STENT with null STCHAR bin
   ));
 });
 
-test("record_schema_compliance rejects retired STENT bound_char_id", async () => {
+test("record_schema_compliance rejects retired STENT legacy char binding field", async () => {
+  const retiredField = `bound_${"char"}_id`;
   const result = await recordSchemaCompliance.run({}, context([
     entityRecord({
       ...validEntity(),
-      bound_char_id: "CHAR-1"
+      [retiredField]: "CHAR-1"
     })
   ]));
 

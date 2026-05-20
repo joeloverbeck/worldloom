@@ -20,7 +20,10 @@ test("stent_requires_stchar accepts background-only STENT and bound non-backgrou
 
 test("stent_requires_stchar rejects non-background STENT without STCHAR binding", async () => {
   const verdicts = await stentRequiresStchar.run(undefined, context([
-    storyRecord("story_entity_record", "STENT-1", "entities", stent("STENT-1", { bound_stchar_id: null }))
+    storyRecord("story_entity_record", "STENT-1", "entities", stent("STENT-1", {
+      role_in_story: ["witness", "pressure_source"],
+      bound_stchar_id: null
+    }))
   ]));
 
   assert.equal(verdicts[0]?.code, "stent_requires_stchar.missing_stchar_binding");
