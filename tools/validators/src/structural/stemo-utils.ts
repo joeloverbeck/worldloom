@@ -182,14 +182,29 @@ export function resolveRecord(source: IndexedRecord, id: string, maps: EmotionMa
 
 export function isRecordAccessibleToHolder(record: IndexedRecord, holder: string): boolean {
   const parsed = asPlainRecord(record.parsed);
-  if (record.node_type === "story_fact_record" || record.node_type === "story_location_record") {
+  // FOUNDATIONS §6b treats active branch-public state as already available to the holder.
+  if (
+    record.node_type === "story_fact_record" ||
+    record.node_type === "story_location_record" ||
+    record.node_type === "thread_record" ||
+    record.node_type === "consequence_record"
+  ) {
     return true;
   }
+
+  // Story questions expose audience-visible setup state, but hidden setups stay fail-closed.
+  if (record.node_type === "story_question_record" && stringValue(parsed.audience_visibility) !== "hidden") {
+    return true;
+  }
+
   const recordHolder = stringValue(parsed.holder);
   if (recordHolder === holder || recordHolder === "public" || recordHolder === "narrator") {
     return true;
   }
   if (stringArray(nestedRecord(parsed, "basis").access_records).includes(holder)) {
+    return true;
+  }
+  if (stringArray(parsed.holders).includes(holder)) {
     return true;
   }
   if (stringValue(parsed.owner) === holder || stringValue(parsed.current_location) === `carried_by:${holder}`) {

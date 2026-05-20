@@ -69,14 +69,14 @@ Use this compact index during closeout so common proof/story drifts do not hide 
 
 - Stale source citations or line numbers in the ticket -> `references/verification-closeout.md` ticket closeout rules.
 - Negative grep / no-hit acceptance commands -> record an explicit success-on-no-match command, or clearly label the nonzero no-match result as the expected proof signal.
-- Broad negative grep or stale-token sweeps over docs, specs, skills, templates, archives, reports, or tickets -> use `references/verification-closeout.md` to run the exact command safely, classify legitimate/historical hits, and split current-contract zero proof from broader discovery classification before closeout.
+- Broad negative grep or stale-token sweeps -> use `references/verification-closeout.md` to run the exact command safely, classify legitimate/historical hits, and split current-contract zero proof from broader discovery classification.
 - Explicit spec/doc references with status, implementation notes, counts, or current-state prose -> truth the same-seam reference before closeout, usually with a dated implementation note when broad row-by-row rewriting is out of scope.
 - Generated or ignored proof artifacts such as `dist/`, `_index/`, coverage output, or caches -> use `references/dirty-worktree-ledger.md` and package-specific ignored-artifact checks.
 - Untracked owned ticket/spec/skill/doc files -> plain `git diff --check` is not enough; use temporary `git add -N` with cleanup or an explicit whitespace check over the exact untracked files, then refresh status.
 - Post-proof prose-only closeout edits -> rerun `git diff --check` and any affected checked grep/manual-review proof instead of reflexively rerunning the broad package suite.
-- Post-closeout non-prose edits -> restart closeout truthing before final response; update the ticket's landed file set, test list, proof commands/results, proof counts, stale command fragments, and deviations before accepting the rerun proof.
+- Post-closeout non-prose edits -> restart closeout truthing through `references/verification-closeout.md` before accepting rerun proof.
 - Broad wrapper red but focused compiled proof green -> use `references/verification-closeout.md` to record baseline, direct-file diagnostics, focused proof, and deviation without forcing a synthetic full-suite green.
-- Proof-surface substitutions such as replacing an unavailable `skill dry-run` with manual review + grep -> sweep the active ticket for old proof labels (`dry-run`, `skill dry-run`) and old command fragments before final response.
+- Proof-surface substitutions such as replacing an unavailable `skill dry-run` -> use `references/verification-closeout.md` to sweep old proof labels and command fragments before final response.
 - Skill phase/check count drift -> when adding, removing, renaming, or reordering skill phases, gates, findings, or checks, grep nearby skill prose for numeric labels and old phase references such as `6 checks`, `7 sub-phases`, `Phase 2g`, or `Phase 9` before final proof. Update active operational labels; preserve old counts only when clearly marked historical.
 - Stale ticket/spec phase references -> when a ticket or spec names a phase/check as implementation authority, verify the live phase/check label before source edits and closeout even if the active change does not rename phases.
 

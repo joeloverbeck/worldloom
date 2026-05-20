@@ -56,6 +56,7 @@
       "type": "object",
       "properties": {
         "toward_records": {
+          "description": "Record ids the emotion is oriented toward. Targets must also be accessible to the holder under FOUNDATIONS §6b: direct-observed co-located entities, holder-accessible beliefs/secrets/objects/relationships/obligations/plans/emotions/intentions, branch-public SF/STLOC/THR/CNSQ state, or STQ records whose audience_visibility is not hidden.",
           "type": "array",
           "items": { "$ref": "#/$defs/recordId" },
           "default": []

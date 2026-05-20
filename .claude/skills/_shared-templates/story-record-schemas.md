@@ -837,7 +837,7 @@ expires_when: string*
 derived_from: [<record_id>]                   # default []
 ```
 
-`status`, `trigger_event`, `appraisal_basis`, and `behavioral_pressure` make the emotional state replayable and validator-readable. `orientation.toward_records` feeds observer-firewall checks without adding a free-form `toward_claim` field. `agency_effect` is intentionally binary in v1: either the affect constrains agency or it does not.
+`status`, `trigger_event`, `appraisal_basis`, and `behavioral_pressure` make the emotional state replayable and validator-readable. `orientation.toward_records` feeds observer-firewall checks without adding a free-form `toward_claim` field. Orientation targets must be accessible to the holder under FOUNDATIONS §6b: a `STENT` target is lawful when the holder can directly observe the entity through active co-location, `STSEC` is lawful only for its `holders[]` or another recorded access route, `SF`/`STLOC`/`THR`/`CNSQ` are branch-public active state, and `STQ` is accessible only when `audience_visibility` is `explicit` or `implied` unless another holder-grounded access route exists. `agency_effect` is intentionally binary in v1: either the affect constrains agency or it does not.
 
 ### 4.6 Prose receipt
 
