@@ -52,6 +52,14 @@ Phase 4: Goal and Pressure         (short-term goal, long-term desire,
                                     external pressure, internal contradiction)
       |
       v
+Phase 4b: Protagonist-Grade        (preserve NCP memorability_profile when
+          Deepening / Preservation  present; otherwise derive dramatic_core;
+                                    convert pressure into repeated behavior,
+                                    appetite, self-mythology, relational charge,
+                                    moral edge, signature scene behavior, and
+                                    voice under pressure)
+      |
+      v
 Phase 5: Capability Validation     (per skill: how learned / cost / teacher /
                                     unusual-or-ordinary / body-class-place shape)
       |
@@ -75,7 +83,8 @@ Phase 8: Validation and Rejection Tests
     pass
       |
       v
-Phase 9: Commit (HARD-GATE approval -->
+Phase 9: Commit (anti-flattening tradeoff surfaced;
+          HARD-GATE approval -->
           submit_patch_plan(plan, approval_token) carrying
           append_character_record op for <char-slug>.md;
           then skill-managed Edit of characters/INDEX.md)
@@ -83,7 +92,7 @@ Phase 9: Commit (HARD-GATE approval -->
 
 ## Output
 
-- **Character dossier** at `worlds/<world-slug>/characters/<char-slug>.md` — hybrid YAML frontmatter + markdown body. Frontmatter carries `character_id`, `slug`, `name`, `species`, `age_band`, `place_of_origin`, `current_location`, `date`, `social_position`, `profession`, `kinship_situation`, `religious_ideological_environment`, `major_local_pressures`, `intended_narrative_role`, `world_consistency` (with `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`, `continuity_checked_with` — each array's entries MUST be bare ids matching the engine's strict patterns: `^CF-[0-9]+$` for `canon_facts_consulted`, `^(ONT|CAU|DIS|SOC|AES)-[0-9]+$` for `invariants_respected`, `^M-[0-9]+$` for `mystery_reserve_firewall`, `^CHAR-[0-9]+$` for `continuity_checked_with`; `distribution_exceptions` is free-form strings of form `<CF-id>: <justification>`. Descriptive prose belongs in the Canon Safety Check Trace body section, not in these arrays — `record_schema_compliance` will reject mixed-format entries), `source_basis`, `notes`. Body sections: Material Reality, Institutional Embedding, Epistemic Position, Goals and Pressures, Capabilities, Voice and Perception, Contradictions and Tensions, Likely Story Hooks, Canon Safety Check Trace. Matches `templates/character-dossier.md`. Engine validates the frontmatter against `record_schema_compliance` post-write.
+- **Character dossier** at `worlds/<world-slug>/characters/<char-slug>.md` — hybrid YAML frontmatter + markdown body. Frontmatter carries `character_id`, `slug`, `name`, `species`, `age_band`, `place_of_origin`, `current_location`, `date`, `social_position`, `profession`, `kinship_situation`, `religious_ideological_environment`, `major_local_pressures`, `intended_narrative_role`, `dramatic_core` (the 10 protagonist-grade engine fields from `_shared-references/protagonist-grade-character-engine.md`, including 5-key `pressure_behavior`, 4-key `voice_under_pressure`, at least 1 `relational_charge`, and at least 3 `signature_scene_behaviors`), `world_consistency` (with `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`, `continuity_checked_with` — each array's entries MUST be bare ids matching the engine's strict patterns: `^CF-[0-9]+$` for `canon_facts_consulted`, `^(ONT|CAU|DIS|SOC|AES)-[0-9]+$` for `invariants_respected`, `^M-[0-9]+$` for `mystery_reserve_firewall`, `^CHAR-[0-9]+$` for `continuity_checked_with`; `distribution_exceptions` is free-form strings of form `<CF-id>: <justification>`. Descriptive prose belongs in the Canon Safety Check Trace body section, not in these arrays — `record_schema_compliance` will reject mixed-format entries), `source_basis`, `notes`. Body sections: Material Reality, Institutional Embedding, Epistemic Position, Goals and Pressures, Capabilities, Voice and Perception, Contradictions and Tensions, Protagonist-Grade Core, Pressure Behavior, Self-Mythology and Blind Spots, Relational Charge, Moral and Psychological Edge, Signature Scene Behavior, Likely Story Hooks, Canon Safety Check Trace. Matches `templates/character-dossier.md`. Engine validates the frontmatter against `record_schema_compliance` post-write.
 - **INDEX.md update** at `worlds/<world-slug>/characters/INDEX.md` — one line per character in the form `- [<name>](<slug>.md) — <age_band> <species> <social_position> / <profession>, <current_location>`, re-sorted alphabetically by slug on every write. Created if absent. **Field-style guidance**: prefer short forms in the placeholder fields — `<age_band>` renders as a compact form (bare numeric age for adult bands, e.g., `18` / `34` / `47`; short noun for non-numeric bands, e.g., `elderly` / `child` / `teen`); `<species>` is the bare species name (`human`, `Basque-cluster human`, `goblin`); `<social_position>` and `<profession>` are short noun phrases; `<current_location>` is settlement plus optional district in parens. Long descriptive context belongs in the dossier frontmatter, not in the INDEX line. The INDEX is for scanning; the dossier is for reading. Worked example: `- [Iker Aguirre](iker-aguirre.md) — 18 human working-class Donostia local / secondary-school student, Donostia (Gros)`.
 
 **No canon-file mutations.** This skill never writes to `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `_source/<subdir>/*.yaml` record. Hook 3 enforces. No CF, CH, INV, M, OQ, ENT, or SEC record is emitted. If the user later wants to canonize a specific NPC at the world level, that is a separate `canon-addition` run.
@@ -114,7 +123,7 @@ Load `references/phase-0-normalize-brief.md`. Parse `character_brief_path` if pr
 
 ### 3. Phases 1-6: Character Construction
 
-Load `references/phases-1-6-character-construction.md`. Build the dossier body across the six phases: Phase 1 Material Reality, Phase 2 Institutional Embedding, Phase 3 Epistemic Position, Phase 4 Goal and Pressure Construction, Phase 5 Capability Validation, Phase 6 Voice and Perception. Each phase cites the world-state nodes it draws from (CFs, INVs, SEC records, ENT records, M entries); every capability is first-pass-checked against capability CF distribution blocks at Phase 5.
+Load `references/phases-1-6-character-construction.md`. Build the dossier body across the six phases plus Phase 4b: Phase 1 Material Reality, Phase 2 Institutional Embedding, Phase 3 Epistemic Position, Phase 4 Goal and Pressure Construction, Phase 4b Protagonist-Grade Deepening / Preservation, Phase 5 Capability Validation, Phase 6 Voice and Perception. Each phase cites the world-state nodes it draws from (CFs, INVs, SEC records, ENT records, M entries); every capability is first-pass-checked against capability CF distribution blocks at Phase 5. Phase 4b populates `dramatic_core` and must preserve any Phase 0 `input_memorability_contract` unless a Phase 7 repair forces a named tradeoff.
 
 ### 4. Phase 7: Canon Safety Check
 
@@ -122,7 +131,7 @@ Load `references/phase-7-canon-safety-check.md`. Run all three sub-phases — 7a
 
 ### 5. Phase 8: Validation and Rejection Tests
 
-Load `references/phase-8-validation-tests.md`. Run all 10 tests and record each as PASS / FAIL with a one-line rationale into the dossier's Canon Safety Check Trace section. Any FAIL halts and loops back to the originating phase. Do NOT proceed to Phase 9 until every test records PASS with rationale.
+Load `references/phase-8-validation-tests.md`. Run every listed test and record each as PASS / FAIL with a one-line rationale into the dossier's Canon Safety Check Trace section. Any FAIL halts and loops back to the originating phase. Do NOT proceed to Phase 9 until every test records PASS with rationale.
 
 ### 6. Phase 9: Commit
 
@@ -133,7 +142,8 @@ Present the deliverable summary to the user:
 4. `world_consistency` audit fields: `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`, `continuity_checked_with`
 5. Continuity-constraint summary (if the Pre-flight continuity-preservation read loaded any existing dossiers): one line per dossier consulted, naming the CHAR-id and the specific commitments honored. If any Phase 1-6 work would have required contradicting a constraint, list it here as a named continuity-conflict item for user adjudication.
 6. Reframing-and-sensitive-content surfacing: any factual-claims pre-check reframings that fired in Phase 0 (per `references/phase-0-normalize-brief.md` §`Rule (factual claims pre-check against real-world-binding invariants)`), and any contested or ideologically loaded brief content for which the operator wants user confirmation on framing — name each item, the framing applied, the world-state record(s) the framing tracks (so the user can see whether the framing is canon-grounded or operator-judgment), and the alternative framing the user can request. This item exists because the Phase 0 reference creates a forward-pointer to Phase 9 surfacing that the deliverable item-list must echo for the operator to actually do the surfacing — silent operators omit it; explicit item ensures it.
-7. Target write paths: `worlds/<world-slug>/characters/<char-slug>.md` and `worlds/<world-slug>/characters/INDEX.md`
+7. Anti-flattening tradeoff summary: if `input_memorability_contract` existed, list every preserved engine field; if Phase 7 canon safety required weakening or rerouting a dramatic element, name the original element, the repaired form, and the canon/Mystery Reserve reason before asking for approval.
+8. Target write paths: `worlds/<world-slug>/characters/<char-slug>.md` and `worlds/<world-slug>/characters/INDEX.md`
 
 **HARD-GATE fires here**: no patch plan submits and no INDEX.md edit happens until the user explicitly approves. User may (a) approve, (b) request specific revisions (loop back to named phase), (c) reject and abort (no file written).
 

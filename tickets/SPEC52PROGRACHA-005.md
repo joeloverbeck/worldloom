@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/schemas/character-frontmatter.schema.json` (modify); `character-proposal-card.schema.json` + `character-proposal-batch.schema.json` (new).
-**Deps**: archive/tickets/SPEC52PROGRACHA-002.md, 003
+**Deps**: archive/tickets/SPEC52PROGRACHA-002.md, archive/tickets/SPEC52PROGRACHA-003.md
 
 ## Problem
 
