@@ -62,7 +62,7 @@ function unexpectedStoryPathRows(root: string): Array<{
   }
 }
 
-function unexpectedBeliefOrReceiptRows(root: string): Array<{
+function unexpectedSpec42Spec47Rows(root: string): Array<{
   code: string;
   file_path: string | null;
 }> {
@@ -78,8 +78,11 @@ function unexpectedBeliefOrReceiptRows(root: string): Array<{
             AND validator_name = 'enumeration'
             AND code = 'unexpected_path'
             AND (
-              file_path LIKE 'stories/%/_source/beliefs/%'
-              OR file_path LIKE 'stories/%/pages-prose-receipts/%'
+              file_path LIKE 'stories/%/_source/clocks/%'
+              OR file_path LIKE 'stories/%/_source/secrets/%'
+              OR file_path LIKE 'stories/%/_source/story-questions/%'
+              OR file_path LIKE 'stories/%/_source/emotions/%'
+              OR file_path LIKE 'stories/%/_source/plans/%'
             )
           ORDER BY file_path
         `
@@ -125,7 +128,7 @@ test("build, inspect, stats, sync, and verify work against an atomic fixture wor
     assert.equal(buildExit, 0);
     assert.deepEqual(unresolvedAttributionRows(root), []);
     assert.deepEqual(unexpectedStoryPathRows(root), []);
-    assert.deepEqual(unexpectedBeliefOrReceiptRows(root), []);
+    assert.deepEqual(unexpectedSpec42Spec47Rows(root), []);
 
     const dbPath = path.join(root, "worlds", "atomic-world", "_index", "world.db");
     const db = new Database(dbPath, { readonly: true });
