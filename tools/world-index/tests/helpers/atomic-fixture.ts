@@ -160,7 +160,7 @@ export function createAtomicRepoRoot(worldSlug = "atomic-world"): string {
     "object: salt gate",
     "epistemic_class: objective",
     "truth_value: true",
-    "derived_from_cf: CF-0001",
+    "derived_from: [CF-0001]",
     "notes: Brinewick knows the salt gate."
   ]);
   writeStory(world, "harborwatch", "obligations", "OBL-0001.yaml", [
@@ -231,6 +231,103 @@ export function createAtomicRepoRoot(worldSlug = "atomic-world"): string {
     "  origin: bootstrap_seed",
     "  created_at_page: null",
     "notes: Duplicate bare storylet ids are legal across stories."
+  ]);
+  writeStory(world, "harborwatch", "clocks", "CLK-1.yaml", [
+    "id: CLK-1",
+    "story_id: STORY-1",
+    "created_at_page: PG-1",
+    "supersedes: null",
+    "title: Gate deadline",
+    "clock_kind: deadline",
+    "driver: system",
+    "linked_records: []",
+    "value: 2",
+    "max: 6",
+    "salience: high",
+    "visibility: public",
+    "thresholds: []",
+    "tick_history: []",
+    "status: active",
+    "resolution_event: null"
+  ]);
+  writeStory(world, "harborwatch", "secrets", "STSEC-1.yaml", [
+    "id: STSEC-1",
+    "story_id: STORY-1",
+    "created_at_page: PG-1",
+    "supersedes: null",
+    "secret_kind: identity",
+    "secret_claim: The gate keeper has the old key.",
+    "truth_anchor: null",
+    "holders: []",
+    "salience: high",
+    "protected_mystery_refs: []",
+    "clue_carriers: []",
+    "reveal_records: []",
+    "status: hidden"
+  ]);
+  writeStory(world, "harborwatch", "story-questions", "STQ-1.yaml", [
+    "id: STQ-1",
+    "story_id: STORY-1",
+    "created_at_page: PG-1",
+    "supersedes: null",
+    "setup_kind: setup",
+    "question_or_setup: Who opens the gate?",
+    "salience: medium",
+    "audience_visibility: implied",
+    "source_event: null",
+    "source_records: []",
+    "payoff_of: null",
+    "status: open",
+    "answer_event: null",
+    "answer_records: []"
+  ]);
+  writeStory(world, "harborwatch", "plans", "STPLAN-1.yaml", [
+    "id: STPLAN-1",
+    "story_id: STORY-1",
+    "created_at_page: PG-1",
+    "created_by_event: null",
+    "supersedes: null",
+    "holder: STENT-0001",
+    "root_intention: null",
+    "objective: Keep the gate watched.",
+    "plan_status: active",
+    "belief_basis: [BEL-1]",
+    "resource_basis:",
+    "  facts: [SF-0001]",
+    "  objects: []",
+    "  locations: []",
+    "  artifacts: []",
+    "  relationships: []",
+    "  obligations: []",
+    "blockers: []",
+    "current_step:",
+    "  action_family: investigate",
+    "  target_records: [STQ-1]",
+    "  success_condition:",
+    "    predicates:",
+    "      - pred: record_active(STQ-1)",
+    "fallback_steps: []",
+    "expires_when: when the gate is secure",
+    "derived_from: []"
+  ]);
+  writeStory(world, "harborwatch", "emotions", "STEMO-1.yaml", [
+    "id: STEMO-1",
+    "story_id: STORY-1",
+    "created_at_page: PG-1",
+    "created_by_event: null",
+    "supersedes: null",
+    "holder: STENT-0001",
+    "status: active",
+    "affect_kind: worry",
+    "intensity: medium",
+    "orientation:",
+    "  toward_records: [STQ-1]",
+    "appraisal_basis: [BEL-1]",
+    "trigger_event: null",
+    "behavioral_pressure: [investigate]",
+    "agency_effect: constraining",
+    "expires_when: when the gate is secure",
+    "derived_from: []"
   ]);
   writeStoryMarkdown(world, "harborwatch", "STORY_KERNEL.md", [
     "---",

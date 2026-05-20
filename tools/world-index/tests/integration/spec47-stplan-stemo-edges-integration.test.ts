@@ -166,11 +166,12 @@ function edgeRows(root: string): Array<{ edge_type: (typeof SPEC47_EDGE_TYPES)[n
         `
           SELECT edge_type, target_unresolved_ref AS target_ref, story_slug
           FROM edges
-          WHERE edge_type IN (${SPEC47_EDGE_TYPES.map(() => "?").join(", ")})
+          WHERE story_slug = ?
+            AND edge_type IN (${SPEC47_EDGE_TYPES.map(() => "?").join(", ")})
           ORDER BY edge_type, target_ref
         `
       )
-      .all(...SPEC47_EDGE_TYPES) as Array<{
+      .all(STORY_SLUG, ...SPEC47_EDGE_TYPES) as Array<{
       edge_type: (typeof SPEC47_EDGE_TYPES)[number];
       target_ref: string | null;
       story_slug: string | null;

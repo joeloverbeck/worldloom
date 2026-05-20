@@ -1,6 +1,8 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
 
+import { STORY_SOURCE_DIRECTORIES } from "./parse/story-directories.js";
+
 export interface FileEnumeration {
   indexable: string[];
   unexpected: string[];
@@ -38,25 +40,7 @@ const ATOMIC_SOURCE_DIRECTORIES = new Set([
   "peoples-and-species",
   "timeline"
 ]);
-const STORY_SOURCE_DIRECTORIES = new Set([
-  "entities",
-  "status",
-  "beliefs",
-  "facts",
-  "events",
-  "obligations",
-  "consequences",
-  "threads",
-  "relationships",
-  "intentions",
-  "locations",
-  "objects",
-  "branches",
-  "pages",
-  "choices",
-  "storylets",
-  "artifacts"
-]);
+const STORY_SOURCE_DIRECTORY_SET = new Set(STORY_SOURCE_DIRECTORIES);
 const STORY_PRIMARY_AUTHORED_FILES = new Set(["STORY_KERNEL.md"]);
 const STORY_BUNDLE_MARKDOWN_DIRECTORIES = new Set([
   "pages-prose",
@@ -168,7 +152,7 @@ function isIndexablePath(relativePath: string): boolean {
     basename.endsWith(".yaml")
   ) {
     const sourceDirectory = segments[3];
-    return sourceDirectory ? STORY_SOURCE_DIRECTORIES.has(sourceDirectory) : false;
+    return sourceDirectory ? STORY_SOURCE_DIRECTORY_SET.has(sourceDirectory) : false;
   }
 
   if (

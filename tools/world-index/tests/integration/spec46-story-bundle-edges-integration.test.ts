@@ -81,6 +81,7 @@ test("SPEC-46 story-bundle edge capstone builds all Phase C edge rows", () => {
     assert.ok(rows.every((row) => row.story_slug === STORY_SLUG));
 
     assertNoEdgesFrom(rows, "BEL-2", ["belief_basis_event", "belief_access_record", "belief_opens"]);
+    assertNoStoryFactDerivedFrom(rows, "SF-1", "BEL-1");
     assertNoEdgesFrom(rows, "SREL-2", ["relationship_participant", "relationship_derived_from"]);
     assertNoEdgesFrom(rows, "CLK-2", ["clock_linked_record", "clock_driver", "clock_tick_event"]);
     assertNoEdgesFrom(rows, "STSEC-2", [
@@ -163,7 +164,7 @@ function addSpec46Story(root: string): void {
     "object: salt gate",
     "epistemic_class: objective",
     "truth_value: true",
-    "derived_from_cf: CF-0001"
+    "derived_from: [CF-0001, BEL-1]"
   ]);
   writeStoryRecord(root, "obligations", "OBL-1.yaml", [
     "id: OBL-1",
@@ -519,7 +520,11 @@ function expectedCountsFromSource(sourceRoot: string): Record<EdgeTypeUnderTest,
   ) as Record<EdgeTypeUnderTest, number>;
 
   addCount(counts, "world_entity_binding", hasString(record(sourceRoot, "entities", "STENT-1.yaml"), "world_ent_id"));
-  addCount(counts, "story_fact_derived_from", hasString(record(sourceRoot, "facts", "SF-1.yaml"), "derived_from_cf"));
+  addCount(
+    counts,
+    "story_fact_derived_from",
+    fieldArray(record(sourceRoot, "facts", "SF-1.yaml"), "derived_from").filter(isCanonFactReference).length
+  );
 
   const createdAtRecords: Array<[string, string]> = [
     ["entities", "STENT-1.yaml"],
@@ -656,6 +661,18 @@ function assertNoEdgesFrom(rows: EdgeRow[], recordId: string, edgeTypes: readonl
   );
 }
 
+function assertNoStoryFactDerivedFrom(rows: EdgeRow[], recordId: string, targetRef: string): void {
+  assert.deepEqual(
+    rows.filter(
+      (row) =>
+        row.source_node_id === storyNode(recordId) &&
+        row.edge_type === "story_fact_derived_from" &&
+        row.target_ref === targetRef
+    ),
+    []
+  );
+}
+
 function record(sourceRoot: string, directory: string, fileName: string): Record<string, unknown> {
   return YAML.parse(readFileSync(path.join(sourceRoot, directory, fileName), "utf8")) as Record<string, unknown>;
 }
@@ -686,6 +703,10 @@ function hasString(source: Record<string, unknown>, field: string): number {
 
 function isStoryRecordReference(value: string | null): value is string {
   return value !== null && /^[A-Z]+-[0-9]+$/.test(value);
+}
+
+function isCanonFactReference(value: string): boolean {
+  return /^CF-\d+$/.test(value);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

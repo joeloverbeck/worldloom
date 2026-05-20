@@ -79,6 +79,47 @@ function cleanPlan(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function storyFactParentPlan(parentCfId: string) {
+  return {
+    plan_id: "plan-story-fact-parent-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-bootstrap",
+    expected_id_allocations: {},
+    patches: [
+      {
+        op: "create_cf_record" as const,
+        target_world: "seeded",
+        target_file: "_source/canon/CF-0001.yaml",
+        payload: {
+          cf_record: {
+            ...completeCf,
+            id: "CF-0001",
+            required_world_updates: ["INSTITUTIONS"]
+          }
+        }
+      },
+      {
+        op: "create_sec_record" as const,
+        target_world: "seeded",
+        target_file: "_source/institutions/SEC-INS-001.yaml",
+        payload: {
+          sec_record: { ...validSection, id: "SEC-INS-001", touched_by_cf: ["CF-0001"] }
+        }
+      },
+      storyPatch("create_sf_record", "facts", {
+        id: "SF-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        statement: "A mirrored world fact is true inside the story branch.",
+        authority: "branch_local",
+        derived_from: [parentCfId]
+      })
+    ]
+  };
+}
+
 test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async () => {
   await withTempRoot(async () => {
     const result = await validatePatchPlan(cleanPlan() as unknown as PatchPlanEnvelope);
@@ -289,6 +330,35 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       assert.equal(typeof execution.name, "string");
       assert.ok(execution.duration_ms >= 0);
     }
+  });
+});
+
+test("validatePatchPlan rejects story facts derived from missing world canon", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(storyFactParentPlan("CF-1") as unknown as PatchPlanEnvelope);
+
+    assert.ok(
+      result.verdicts.some(
+        (verdict) =>
+          verdict.validator === "cross_file_reference" &&
+          verdict.code === "cross_file_reference.orphan_reference" &&
+          verdict.message === "marla-kern-seduction:SF-1 references missing CF-1 in derived_from"
+      )
+    );
+  });
+});
+
+test("validatePatchPlan accepts story facts derived from existing world canon", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(storyFactParentPlan("CF-0001") as unknown as PatchPlanEnvelope);
+
+    assert.ok(
+      !result.verdicts.some(
+        (verdict) =>
+          verdict.validator === "cross_file_reference" &&
+          verdict.location.node_id === "marla-kern-seduction:SF-1"
+      )
+    );
   });
 });
 

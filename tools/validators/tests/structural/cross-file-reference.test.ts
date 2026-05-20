@@ -27,6 +27,54 @@ test("cross_file_reference catches orphan record references and invalid file cla
   );
 });
 
+test("cross_file_reference rejects story facts derived from missing world canon", async () => {
+  const worldCf = record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+    ...validCf,
+    id: "CF-0001"
+  });
+  const storyFact = storyFactRecord("SF-1", {
+    derived_from: ["CF-1"]
+  });
+
+  const result = await crossFileReference.run({}, context([worldCf, storyFact], { story_slug: "red-bunny" }));
+
+  assert.equal(result.length, 1);
+  assert.deepEqual(result[0], {
+    validator: "cross_file_reference",
+    severity: "fail",
+    code: "cross_file_reference.orphan_reference",
+    message: "red-bunny:SF-1 references missing CF-1 in derived_from",
+    location: {
+      file: "stories/red-bunny/_source/facts/SF-1.yaml",
+      node_id: "red-bunny:SF-1"
+    }
+  });
+});
+
+test("cross_file_reference accepts story facts derived from existing world canon", async () => {
+  const worldCf = record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+    ...validCf,
+    id: "CF-0001"
+  });
+  const storyFact = storyFactRecord("SF-1", {
+    derived_from: ["CF-0001"]
+  });
+
+  const result = await crossFileReference.run({}, context([worldCf, storyFact], { story_slug: "red-bunny" }));
+
+  assert.deepEqual(result, []);
+});
+
+test("cross_file_reference leaves story-local story fact derivation to story-scope validators", async () => {
+  const storyFact = storyFactRecord("SF-1", {
+    derived_from: ["SE-404"]
+  });
+
+  const result = await crossFileReference.run({}, context([storyFact], { story_slug: "red-bunny" }));
+
+  assert.deepEqual(result, []);
+});
+
 test("cross_file_reference warns on dangling creation_evidence indexed edges", async () => {
   const sourceRecord = record("story_secret_record", "red-bunny:STSEC-1", "stories/red-bunny/_source/secrets/STSEC-1.yaml", {
     id: "STSEC-1"
@@ -181,3 +229,18 @@ test("cross_file_reference warns on dangling state_delta indexed edges", async (
   );
   assert.ok(result.every((verdict) => verdict.severity === "warn"));
 });
+
+function storyFactRecord(id: string, overrides: Record<string, unknown>) {
+  return {
+    ...record("story_fact_record", `red-bunny:${id}`, `stories/red-bunny/_source/facts/${id}.yaml`, {
+      id,
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      statement: "A mirrored story fact.",
+      authority: "branch_local",
+      derived_from: [],
+      ...overrides
+    }),
+    story_slug: "red-bunny"
+  };
+}
