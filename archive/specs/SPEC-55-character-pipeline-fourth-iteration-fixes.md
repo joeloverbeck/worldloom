@@ -1,6 +1,6 @@
 # SPEC-55 — Character Pipeline Fourth-Iteration Fixes
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Created:** 2026-05-20
 **Depends on:** SPEC-52 / SPEC-53 / SPEC-54 (all archived, completed 2026-05-20)
 
@@ -237,3 +237,27 @@ regression tests. The audit's headline body-section-validation and deterministic
 anti-flattening recommendations are rejected as re-proposals of the deliberate SPEC-52/53/54
 design decision that the protagonist-grade engine lives in AJV-validated frontmatter, not
 body prose, with literary judgment owned by the LLM critic.
+
+## Outcome
+
+Completed: 2026-05-20
+
+SPEC-55 landed through three archived tickets:
+
+- `archive/tickets/SPEC55CHAPIPFOU-001.md` implemented actionable hybrid-record errors for `get_record_field` / `get_records_field`.
+- `archive/tickets/SPEC55CHAPIPFOU-002.md` implemented the story-pipeline `NCP`/`NCB` authoring-proposal seed guard and context-packet contract note.
+- `archive/tickets/SPEC55CHAPIPFOU-003.md` documented advisory NCP drift fields and added regression coverage for stale NCB `proposal_ids` rejection plus `user_seed` no-`batch_id` acceptance.
+
+Deviations from the original plan:
+
+- No field was promoted to schema-required; this was an explicit design constraint, not an omission.
+- The package manifests for `tools/world-mcp` and `tools/validators` do not define lint scripts, so the lint lane named in Definition of Done was unavailable. Build and test lanes were run instead.
+
+Final verification:
+
+- `npm run build` from `tools/world-mcp` passed.
+- `npm test` from `tools/world-mcp` passed with 422 tests.
+- `npm run build` from `tools/validators` passed.
+- `node --test dist/tests/schemas/character-proposal-schema-fixtures.test.js` from `tools/validators` passed with 12 tests.
+- `npm test` from `tools/validators` passed with 743 tests.
+- Advisory-note grep found the schema and template annotations for `occupancy_strength`, `score_aggregate`, and `source_basis.batch_id`.
