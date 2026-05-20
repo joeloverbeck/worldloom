@@ -236,14 +236,50 @@ test("record_schema_compliance accepts state_delta references to every SPEC-44 s
   const result = await recordSchemaCompliance.run({}, context([
     eventRecord(validEvent({
       state_delta: {
-        create: ["STSTAT-1", "CLK-1", "STSEC-1", "STQ-1", "STPLAN-1", "STEMO-1"],
-        supersede: ["STSTAT-2", "CLK-2", "STSEC-2", "STQ-2", "STPLAN-2", "STEMO-2"],
-        close: ["STSTAT-3", "CLK-3", "STSEC-3", "STQ-3", "STPLAN-3", "STEMO-3"]
+        create: ["STCHAR-1", "STSTAT-1", "CLK-1", "STSEC-1", "STQ-1", "STPLAN-1", "STEMO-1"],
+        supersede: ["STCHAR-2", "STSTAT-2", "CLK-2", "STSEC-2", "STQ-2", "STPLAN-2", "STEMO-2"],
+        close: ["STCHAR-3", "STSTAT-3", "CLK-3", "STSEC-3", "STQ-3", "STPLAN-3", "STEMO-3"]
       }
     }))
   ]));
 
   assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance accepts STCHAR record introductions", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({
+      record_introductions: [
+        {
+          record_id: "STCHAR-1",
+          class: "STCHAR",
+          trigger: "story_character_authority_distilled",
+          evidence: ["SE-1"],
+          distinct_from: []
+        }
+      ]
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects STCHAR promotion claim source records", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({
+      promotion_claims: [
+        {
+          source_record: "STCHAR-1",
+          authority: "canon_candidate"
+        }
+      ]
+    }))
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/promotion_claims/0/source_record")
+  ));
 });
 
 function eventRecord(parsed: Record<string, unknown>) {

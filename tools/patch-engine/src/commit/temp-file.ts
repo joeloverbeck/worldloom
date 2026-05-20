@@ -13,7 +13,11 @@ import { stageCreateInvRecord } from "../ops/create-inv-record.js";
 import { stageCreateMRecord } from "../ops/create-m-record.js";
 import { stageCreateOqRecord } from "../ops/create-oq-record.js";
 import { stageCreateSecRecord } from "../ops/create-sec-record.js";
-import { stageCreateStoryRecord, storyRecordMetadata } from "../ops/create-story-record.js";
+import {
+  stageCreateStoryRecord,
+  stageStoryCharacterAuthorityRecord,
+  storyRecordMetadata
+} from "../ops/create-story-record.js";
 import { stageRemoveChAffectedCfIds } from "../ops/remove-ch-affected-cf-ids.js";
 import { stageRepairSkippedChangeLogEntry } from "../ops/repair-skipped-change-log-entry.js";
 import { nodeTypeForStoryBundlePrefix, storyBundlePrefixForRecordId } from "../ops/story-record-specs.js";
@@ -38,9 +42,11 @@ export async function stageAllOps(
 
   try {
     for (const patch of patches) {
-      const write = await stageOne(envelope, patch, ctx);
-      replaceStagedWrite(staged, write);
-      registerStagedRecord(envelope, patch, write, ctx);
+      const writes = await stageOne(envelope, patch, ctx);
+      for (const write of Array.isArray(writes) ? writes : [writes]) {
+        replaceStagedWrite(staged, write);
+        registerStagedRecord(envelope, patch, write, ctx);
+      }
     }
   } catch (error) {
     await unlinkAllTempFiles(staged);
@@ -75,7 +81,7 @@ function registerStagedRecord(
     return;
   }
 
-  const parsed = YAML.parse(write.new_content) as unknown;
+  const parsed = parseStagedRecordContent(write.new_content);
   if (!isRecord(parsed)) {
     return;
   }
@@ -136,6 +142,8 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "supersede_stq_record":
     case "create_stplan_record":
     case "create_stemo_record":
+    case "append_story_character_authority_record":
+    case "supersede_story_character_authority_record":
     case "append_story_diegetic_artifact_record": {
       const metadata = storyRecordMetadata(patch);
       return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
@@ -197,7 +205,7 @@ function stageOne(
   envelope: PatchPlanEnvelope,
   patch: PatchOperation,
   ctx: OpContext
-): Promise<StagedWrite> {
+): Promise<StagedWrite | StagedWrite[]> {
   switch (patch.op) {
     case "create_cf_record":
       return stageCreateCfRecord(envelope, patch, ctx);
@@ -255,7 +263,23 @@ function stageOne(
     case "supersede_stq_record":
     case "create_stplan_record":
     case "create_stemo_record":
+    case "append_story_character_authority_record":
+    case "supersede_story_character_authority_record":
     case "append_story_diegetic_artifact_record":
+      if (
+        patch.op === "append_story_character_authority_record" ||
+        patch.op === "supersede_story_character_authority_record"
+      ) {
+        return stageStoryCharacterAuthorityRecord(envelope, patch, ctx);
+      }
       return stageCreateStoryRecord(envelope, patch, ctx);
   }
+}
+
+function parseStagedRecordContent(content: string): unknown {
+  if (!content.startsWith("---\n")) {
+    return YAML.parse(content) as unknown;
+  }
+  const match = /^---\n([\s\S]*?)---\n?/.exec(content);
+  return YAML.parse(match?.[1] ?? "") as unknown;
 }

@@ -32,6 +32,8 @@ const TIER_ONE = new Set<PatchOperation["op"]>([
   "supersede_stq_record",
   "create_stplan_record",
   "create_stemo_record",
+  "append_story_character_authority_record",
+  "supersede_story_character_authority_record",
   "append_story_diegetic_artifact_record"
 ]);
 

@@ -65,7 +65,8 @@
             "STSEC": { "type": "array", "items": { "type": "string", "pattern": "^STSEC-[0-9]+$" } },
             "STQ": { "type": "array", "items": { "type": "string", "pattern": "^STQ-[0-9]+$" } },
             "STPLAN": { "type": "array", "items": { "type": "string", "pattern": "^STPLAN-[0-9]+$" } },
-            "STEMO": { "type": "array", "items": { "type": "string", "pattern": "^STEMO-[0-9]+$" } }
+            "STEMO": { "type": "array", "items": { "type": "string", "pattern": "^STEMO-[0-9]+$" } },
+            "STCHAR": { "type": "array", "items": { "type": "string", "pattern": "^STCHAR-[0-9]+$" } }
           },
           "additionalProperties": true
         },

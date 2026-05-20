@@ -69,6 +69,7 @@ const STORY_CLASS_CASES: Array<{
   { idClass: "CHC", subdir: "choices", fileName: "CHC-0007.yaml", expected: "CHC-8" },
   { idClass: "STENT", subdir: "entities", fileName: "STENT-0007.yaml", expected: "STENT-8" },
   { idClass: "STSTAT", subdir: "status", fileName: "STSTAT-0007.yaml", expected: "STSTAT-8" },
+  { idClass: "STCHAR", subdir: "story-characters", fileName: "STCHAR-0007.md", expected: "STCHAR-8" },
   { idClass: "CLK", subdir: "clocks", fileName: "CLK-0007.yaml", expected: "CLK-8" },
   { idClass: "STSEC", subdir: "secrets", fileName: "STSEC-0007.yaml", expected: "STSEC-8" },
   { idClass: "STQ", subdir: "story-questions", fileName: "STQ-0007.yaml", expected: "STQ-8" },
@@ -109,7 +110,10 @@ function writeStoryKernel(root: string, storySlug: string, content: string): voi
 
 function writeStoryRecord(root: string, storySlug: string, subdir: string, fileName: string): void {
   const directory =
-    subdir === "storylet-batches" || subdir === "audits" || subdir === "story-promotions"
+    subdir === "storylet-batches" ||
+    subdir === "audits" ||
+    subdir === "story-promotions" ||
+    subdir === "story-characters"
       ? path.join(root, "worlds", "seeded", "stories", storySlug, subdir)
       : path.join(root, "worlds", "seeded", "stories", storySlug, "_source", subdir);
   mkdirSync(directory, { recursive: true });
@@ -345,6 +349,9 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     const statusResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "STSTAT", story_slug: "empty-story" })
     );
+    const storyCharacterResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "STCHAR", story_slug: "empty-story" })
+    );
     const clockResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "CLK", story_slug: "empty-story" })
     );
@@ -368,6 +375,7 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     assert.ok(!("code" in spResult));
     assert.ok(!("code" in beliefResult));
     assert.ok(!("code" in statusResult));
+    assert.ok(!("code" in storyCharacterResult));
     assert.ok(!("code" in clockResult));
     assert.ok(!("code" in secretResult));
     assert.ok(!("code" in questionResult));
@@ -380,6 +388,7 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     assert.equal(spResult.next_id, "SP-1");
     assert.equal(beliefResult.next_id, "BEL-1");
     assert.equal(statusResult.next_id, "STSTAT-1");
+    assert.equal(storyCharacterResult.next_id, "STCHAR-1");
     assert.equal(clockResult.next_id, "CLK-1");
     assert.equal(secretResult.next_id, "STSEC-1");
     assert.equal(questionResult.next_id, "STQ-1");
@@ -759,7 +768,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
   }
 });
 
-test("allocateNextId exposes all 55 id classes with canonical unpadded formats", () => {
+test("allocateNextId exposes all 56 id classes with canonical unpadded formats", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -796,6 +805,7 @@ test("allocateNextId exposes all 55 id classes with canonical unpadded formats",
     "CHC",
     "STENT",
     "STSTAT",
+    "STCHAR",
     "CLK",
     "STSEC",
     "STQ",
@@ -817,7 +827,7 @@ test("allocateNextId exposes all 55 id classes with canonical unpadded formats",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 55);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 56);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, false);
   assert.match("STORY-8", ID_CLASS_FORMATS.STORY.regex);
@@ -825,6 +835,8 @@ test("allocateNextId exposes all 55 id classes with canonical unpadded formats",
   assert.match("BEL-8", ID_CLASS_FORMATS.BEL.regex);
   assert.equal(ID_CLASS_FORMATS.STSTAT.zeroPad, false);
   assert.match("STSTAT-8", ID_CLASS_FORMATS.STSTAT.regex);
+  assert.equal(ID_CLASS_FORMATS.STCHAR.zeroPad, false);
+  assert.match("STCHAR-8", ID_CLASS_FORMATS.STCHAR.regex);
   assert.equal(ID_CLASS_FORMATS.CLK.zeroPad, false);
   assert.match("CLK-8", ID_CLASS_FORMATS.CLK.regex);
   assert.equal(ID_CLASS_FORMATS.STSEC.zeroPad, false);

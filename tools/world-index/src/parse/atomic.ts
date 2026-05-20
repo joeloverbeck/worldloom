@@ -75,7 +75,7 @@ const STORY_DIR_ORDER = new Map(Array.from(STORY_DIRS.keys()).map((directory, in
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
 const STORY_REF_REGEX =
-  /\b(STENT|STSTAT|SF|SE|BEL|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|STPLAN|STEMO|DA)-[A-Za-z0-9-]+\b/g;
+  /\b(STENT|STCHAR|STSTAT|SF|SE|BEL|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|STPLAN|STEMO|DA)-[A-Za-z0-9-]+\b/g;
 const CANON_FACT_REF_REGEX = /^CF-\d+$/;
 
 export type AtomicSkipReason = "missing_id_field" | "schema_pattern_mismatch";
@@ -153,6 +153,21 @@ export function listStoryBundleSourceFiles(worldDirectory: string): string[] {
             toPosixPath(path.join("stories", storyEntry.name, "_source", directoryName, entry.name))
           );
         }
+      }
+    }
+  }
+
+  for (const storyEntry of readdirSync(storiesDirectory, { withFileTypes: true })) {
+    if (!storyEntry.isDirectory()) {
+      continue;
+    }
+    const stcharDirectory = path.join(storiesDirectory, storyEntry.name, "story-characters");
+    if (!existsSync(stcharDirectory)) {
+      continue;
+    }
+    for (const entry of readdirSync(stcharDirectory, { withFileTypes: true })) {
+      if (entry.isFile() && entry.name.endsWith(".md")) {
+        relativePaths.push(toPosixPath(path.join("stories", storyEntry.name, "story-characters", entry.name)));
       }
     }
   }
@@ -256,7 +271,7 @@ export function parseStoryBundleSourceFile(
   let yamlFailureCount = 0;
 
   try {
-    parsed = parseYamlWithRecovery(source);
+    parsed = spec.hybrid ? parseHybridFrontmatter(source) : parseYamlWithRecovery(source);
   } catch (error) {
     yamlFailureCount = 1;
     validationResults.push(
@@ -278,7 +293,7 @@ export function parseStoryBundleSourceFile(
       edges: [],
       validationResults,
       skippedRecords: [],
-      yamlBlockCount: 1,
+      yamlBlockCount: spec.hybrid ? 0 : 1,
       yamlFailureCount,
       tree: emptyTree()
     };
@@ -316,7 +331,7 @@ export function parseStoryBundleSourceFile(
     lineEnd: lines.length,
     body: source,
     lines,
-    contentHash: contentHashForYaml(parsed)
+    contentHash: spec.hybrid ? contentHashForProse(source) : contentHashForYaml(parsed)
   });
 
   edges.push(...edgesForStoryRecord(node, record, spec.storySlug));
@@ -328,7 +343,7 @@ export function parseStoryBundleSourceFile(
     edges,
     validationResults,
     skippedRecords: [],
-    yamlBlockCount: 1,
+    yamlBlockCount: spec.hybrid ? 0 : 1,
     yamlFailureCount,
     tree: emptyTree()
   };
@@ -435,15 +450,35 @@ function specForStoryPath(relativeFilePath: string): {
   idPattern: RegExp;
   idPatternSource: string;
   storySlug: string;
+  hybrid: boolean;
 } {
   const segments = relativeFilePath.split("/");
   const storySlug = segments[1];
+  if (storySlug && segments[2] === "story-characters") {
+    return {
+      ...recordSpec("story_character_authority_record", "id", "^STCHAR-[0-9]+$"),
+      storySlug,
+      hybrid: true
+    };
+  }
   const sourceDirectory = segments[3];
   const spec = sourceDirectory ? STORY_DIRS.get(sourceDirectory) : undefined;
   if (!storySlug || !spec) {
     throw new Error(`Unsupported story-bundle source path '${relativeFilePath}'.`);
   }
-  return { ...spec, storySlug };
+  return { ...spec, storySlug, hybrid: false };
+}
+
+function parseHybridFrontmatter(source: string): unknown {
+  const lines = source.split(/\r?\n/);
+  if (lines[0] !== "---") {
+    throw new Error("Hybrid story record is missing opening YAML frontmatter fence.");
+  }
+  const closingIndex = lines.findIndex((line, index) => index > 0 && line === "---");
+  if (closingIndex <= 0) {
+    throw new Error("Hybrid story record is missing closing YAML frontmatter fence.");
+  }
+  return parseYamlWithRecovery(lines.slice(1, closingIndex).join("\n"));
 }
 
 function compareStoryBundleSourcePaths(left: string, right: string): number {
@@ -564,6 +599,7 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     if (worldEntId) {
       push(createRefEdge(node.node_id, "world_entity_binding", worldEntId));
     }
+    pushStoryRef("stent_character_authority", stringField(record, "bound_stchar_id"));
   }
 
   if (node.node_type === "story_fact_record") {
@@ -634,6 +670,12 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "story_character_authority_record") {
+    for (const edge of edgesForStoryCharacterAuthority(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   if (node.node_type === "choice_record") {
     for (const edge of edgesForChoice(node, record, storySlug)) {
       push(edge);
@@ -674,6 +716,33 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     for (const target of stringArrayField(record, "obligations")) {
       pushStoryRef("thread_obligation", target);
     }
+  }
+
+  return edges;
+}
+
+function edgesForStoryCharacterAuthority(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  const sourceCharId = stringField(record, "source_char_id");
+  if (sourceCharId !== null) {
+    edges.push(createRefEdge(node.node_id, "stchar_source_character", sourceCharId));
+  }
+
+  pushStoryEdgeIfReference(
+    edges,
+    node.node_id,
+    "stchar_supersedes",
+    storySlug,
+    stringField(record, "supersedes")
+  );
+
+  for (const target of stringArrayField(record, "bound_stent_ids")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "stchar_bound_stent", storySlug, target);
   }
 
   return edges;

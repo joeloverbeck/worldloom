@@ -11,6 +11,10 @@ function storyPath(storySlug: string, subdir: string, fileName: string): string 
   return `stories/${storySlug}/_source/${subdir}/${fileName}`;
 }
 
+function storyCharacterPath(storySlug: string, fileName: string): string {
+  return `stories/${storySlug}/story-characters/${fileName}`;
+}
+
 export function storyNodeId(storySlug: string, recordId: string): string {
   return `${storySlug}:${recordId}`;
 }
@@ -65,7 +69,7 @@ export function buildStoryBundleWorld(root: string): void {
           "created_at_page: PG-1",
           "name: Marla Kern",
           "display_name: Marla Kern",
-          "bound_char_id: CHAR-1",
+          "bound_stchar_id: STCHAR-1",
           "role_in_story: [viewpoint, primary_actor]",
           ""
         ].join("\n")
@@ -82,8 +86,46 @@ export function buildStoryBundleWorld(root: string): void {
           "created_at_page: PG-1",
           "name: The stairwell watcher",
           "display_name: The stairwell watcher",
-          "bound_char_id: null",
-          "role_in_story: [witness, pressure_source]",
+          "bound_stchar_id: null",
+          "role_in_story: [background]",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STCHAR-1"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyCharacterPath(STORY_FIXTURE_SLUG, "STCHAR-1.md"),
+        node_type: "story_character_authority_record",
+        body: [
+          "---",
+          "id: STCHAR-1",
+          "story_id: STORY-1",
+          `story_slug: ${STORY_FIXTURE_SLUG}`,
+          `world_slug: ${STORY_FIXTURE_WORLD}`,
+          "source_kind: world_char",
+          "source_char_id: CHAR-1",
+          `source_char_hash: sha256:${"a".repeat(64)}`,
+          "source_char_sections_used: [frontmatter]",
+          "generated_at_page: story_bootstrap",
+          "created_by_skill: branching-story-bootstrap",
+          "supersedes: null",
+          "superseded_by: null",
+          "status: active",
+          "bound_stent_ids: [STENT-2]",
+          "profile_revision: 1",
+          "body_schema_version: stchar.v1",
+          `profile_hash: sha256:${"b".repeat(64)}`,
+          `voice_block_hash: sha256:${"c".repeat(64)}`,
+          `page_packet_hash: sha256:${"d".repeat(64)}`,
+          "---",
+          "## Profile",
+          "",
+          "Marla Kern keeps her fear below the surface while looking for a clean exit.",
+          "",
+          "## Page-Plan Voice Block",
+          "",
+          "Use clipped, observant phrasing and avoid direct world-character dossier text.",
           ""
         ].join("\n")
       },
@@ -878,6 +920,24 @@ export function buildStoryBundleWorld(root: string): void {
       },
       {
         story_slug: STORY_FIXTURE_SLUG,
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-2"),
+        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "STCHAR-1"),
+        edge_type: "stent_character_authority"
+      },
+      {
+        story_slug: STORY_FIXTURE_SLUG,
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "STCHAR-1"),
+        target_unresolved_ref: "CHAR-1",
+        edge_type: "stchar_source_character"
+      },
+      {
+        story_slug: STORY_FIXTURE_SLUG,
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "STCHAR-1"),
+        target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-2"),
+        edge_type: "stchar_bound_stent"
+      },
+      {
+        story_slug: STORY_FIXTURE_SLUG,
         source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SF-1"),
         target_node_id: "CF-1",
         edge_type: "story_fact_derived_from"
@@ -954,7 +1014,8 @@ export function buildStoryBundleWorld(root: string): void {
       "    future_resolution_safety: medium",
       "    domain_overlap: loft",
       "cast_bind_list:",
-      "  - char_id: CHAR-1",
+      "  - stchar_id: STCHAR-1",
+      "    source_char_id: CHAR-1",
       "    stent_id: STENT-2",
       "    role_in_story: [viewpoint, primary_actor]",
       "invariants_acknowledged:",

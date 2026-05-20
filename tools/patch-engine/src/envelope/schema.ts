@@ -39,6 +39,7 @@ export interface IdAllocations {
   chc_ids?: string[];
   slt_ids?: string[];
   bel_ids?: string[];
+  stchar_ids?: string[];
   story_da_ids?: string[];
   clk_ids?: string[];
   stsec_ids?: string[];
@@ -101,6 +102,8 @@ export const OPERATION_KINDS = [
   "supersede_stq_record",
   "create_stplan_record",
   "create_stemo_record",
+  "append_story_character_authority_record",
+  "supersede_story_character_authority_record",
   "append_story_diegetic_artifact_record"
 ] as const;
 
@@ -203,6 +206,10 @@ export interface StoryRecordPayload<TRecord = Record<string, unknown>> {
   record: TRecord;
 }
 
+export interface StoryCharacterAuthorityPayload<TRecord = Record<string, unknown>> extends StoryRecordPayload<TRecord> {
+  body_markdown: string;
+}
+
 export type PatchOperation =
   | OperationBase<"create_cf_record", { cf_record: CanonFactRecord }>
   | OperationBase<"create_ch_record", { ch_record: ChangeLogEntry }>
@@ -278,6 +285,8 @@ export type PatchOperation =
   | OperationBase<"supersede_stq_record", StoryRecordPayload>
   | OperationBase<"create_stplan_record", StoryRecordPayload>
   | OperationBase<"create_stemo_record", StoryRecordPayload>
+  | OperationBase<"append_story_character_authority_record", StoryCharacterAuthorityPayload>
+  | OperationBase<"supersede_story_character_authority_record", StoryCharacterAuthorityPayload>
   | OperationBase<"append_story_diegetic_artifact_record", StoryRecordPayload>;
 
 export type OperationPayload = PatchOperation["payload"];

@@ -140,7 +140,7 @@ test("SPEC-47 T-6/T-7: world-index build registers and emits all new STPLAN/STEM
     addSpec47Story(root);
 
     const registeredEdgeTypes = storyEdgeTypesFromSource();
-    assert.equal(registeredEdgeTypes.length, 65);
+    assert.equal(registeredEdgeTypes.length, 69);
     assert.equal(new Set(registeredEdgeTypes).size, registeredEdgeTypes.length);
     for (const edgeType of SPEC47_EDGE_TYPES) {
       assert.ok(registeredEdgeTypes.includes(edgeType), `${edgeType} should be registered`);
@@ -581,7 +581,14 @@ function stplanRecords(): IndexedRecord[] {
         }
       }
     }),
-    record("story_entity_record", "test-story:STENT-1", "stories/test-story/_source/entities/STENT-1.yaml", { id: "STENT-1", created_at_page: "PG-1" }),
+    record("story_entity_record", "test-story:STENT-1", "stories/test-story/_source/entities/STENT-1.yaml", {
+      id: "STENT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      display_name: "Holder",
+      bound_stchar_id: "STCHAR-1",
+      role_in_story: ["primary_actor"]
+    }),
     record("intention_record", "test-story:STINT-1", "stories/test-story/_source/intentions/STINT-1.yaml", { id: "STINT-1", created_at_page: "PG-1", holder: "STENT-1" }),
     record("belief_record", "test-story:BEL-1", "stories/test-story/_source/beliefs/BEL-1.yaml", { id: "BEL-1", created_at_page: "PG-1", holder: "STENT-1", basis: { access_records: ["STENT-1"] } }),
     record("story_fact_record", "test-story:SF-1", "stories/test-story/_source/facts/SF-1.yaml", { id: "SF-1", created_at_page: "PG-1" }),
@@ -617,6 +624,7 @@ function stemoRecords(): IndexedRecord[] {
       story_id: "STORY-1",
       created_at_page: "PG-1",
       display_name: "Visible target",
+      bound_stchar_id: "STCHAR-2",
       role_in_story: ["witness"]
     }),
     record("story_status_record", "test-story:STSTAT-1", "stories/test-story/_source/status/STSTAT-1.yaml", {

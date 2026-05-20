@@ -40,6 +40,7 @@ export function baseRecords(extra: IndexedRecord[] = []): IndexedRecord[] {
       story_id: "STORY-1",
       created_at_page: "PG-1",
       display_name: "Holder",
+      bound_stchar_id: "STCHAR-1",
       role_in_story: ["primary_actor"]
     }),
     storyRecord("story_entity_record", "STENT-2", "entities", {
@@ -47,6 +48,7 @@ export function baseRecords(extra: IndexedRecord[] = []): IndexedRecord[] {
       story_id: "STORY-1",
       created_at_page: "PG-1",
       display_name: "Visible target",
+      bound_stchar_id: "STCHAR-2",
       role_in_story: ["witness"]
     }),
     storyRecord("story_status_record", "STSTAT-1", "status", {

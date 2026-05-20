@@ -9,7 +9,7 @@ import {
 } from "./utils.js";
 
 // Includes STSTAT and SREL because SE.promotion_claims[].source_record can cite them.
-const STORY_LOCAL_ID = /^(?:STENT|STSTAT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
+const STORY_LOCAL_ID = /^(?:STENT|STCHAR|STSTAT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG|STPLAN|STEMO)-\d+$/;
 const PAGE_ID = /^PG-(0|[1-9][0-9]*)$/;
 const NON_EDGE_FIELDS = new Set([
   "id",
@@ -248,6 +248,13 @@ function createdAtPageFor(record: Record<string, unknown>): string | null | unde
     const value = record.created_at_page;
     return value === null ? null : stringValue(value);
   }
+  if ("generated_at_page" in record) {
+    const value = record.generated_at_page;
+    if (value === "story_bootstrap") {
+      return null;
+    }
+    return value === null ? null : stringValue(value);
+  }
   const provenance = asPlainRecord(record.provenance);
   if ("created_at_page" in provenance) {
     const value = provenance.created_at_page;
@@ -276,6 +283,9 @@ function isAllowedReference(
     return pageIdValue !== undefined && branchPathSet.has(pageIdValue);
   }
   if (createdAtPage === null) {
+    if (target.node_type === "story_character_authority_record") {
+      return true;
+    }
     if (target.node_type !== "storylet_record") {
       return false;
     }

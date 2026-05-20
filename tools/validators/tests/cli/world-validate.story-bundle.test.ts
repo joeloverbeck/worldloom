@@ -82,7 +82,14 @@ function insertStoryRecords(
 ): void {
   const basePath = `stories/${storySlug}/_source`;
   for (const [nodeType, id, subdir, parsed] of [
-    ["story_entity_record", "STENT-1", "entities", { id: "STENT-1" }],
+    ["story_entity_record", "STENT-1", "entities", {
+      id: "STENT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      display_name: "Entity",
+      bound_stchar_id: "STCHAR-1",
+      role_in_story: ["primary_actor"]
+    }],
     ["storylet_record", storyletId, "storylets", { id: storyletId, preconditions: { hard: [predicate] } }]
   ] as const) {
     insert.run(`${storySlug}:${id}`, storySlug, `${basePath}/${subdir}/${id}.yaml`, nodeType, yaml.dump(parsed));

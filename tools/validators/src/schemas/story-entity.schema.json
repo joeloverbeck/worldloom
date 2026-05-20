@@ -2,14 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-entity.schema.json",
   "type": "object",
-  "required": ["id", "story_id", "created_at_page", "display_name", "role_in_story"],
+  "required": ["id", "story_id", "created_at_page", "display_name", "bound_stchar_id", "role_in_story"],
   "properties": {
     "id": { "type": "string", "pattern": "^STENT-(0|[1-9][0-9]*)$" },
     "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
     "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
     "supersedes": { "type": ["string", "null"], "pattern": "^STENT-(0|[1-9][0-9]*)$" },
     "display_name": { "type": "string", "minLength": 1 },
-    "bound_char_id": { "type": ["string", "null"], "pattern": "^CHAR-[0-9]+$" },
+    "bound_stchar_id": { "type": ["string", "null"], "pattern": "^STCHAR-[0-9]+$" },
     "role_in_story": {
       "type": "array",
       "minItems": 1,
@@ -32,5 +32,28 @@
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "role_in_story": {
+            "not": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "items": { "const": "background" }
+            }
+          }
+        },
+        "required": ["role_in_story"]
+      },
+      "then": {
+        "properties": {
+          "bound_stchar_id": { "type": "string", "pattern": "^STCHAR-[0-9]+$" }
+        },
+        "required": ["bound_stchar_id"]
+      }
+    }
+  ]
 }

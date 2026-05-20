@@ -235,6 +235,17 @@ test("snapshot_replay_equality replays STPLAN and STEMO active records", async (
   assert.deepEqual(pageSnapshot.STEMO, ["STEMO-1"]);
 });
 
+test("snapshot_replay_equality replays STCHAR active records", async () => {
+  const parentSnapshot = newSchemaParentActiveRecords();
+  const pageSnapshot = replayActiveRecords(parentSnapshot, {
+    create: ["STCHAR-1"],
+    supersede: [],
+    close: []
+  });
+
+  assert.deepEqual(pageSnapshot.STCHAR, ["STCHAR-1"]);
+});
+
 test("snapshot_replay_equality reports new-schema canonical state_hash mismatches", async () => {
   const childPage = {
     ...newSchemaChildPage(newSchemaExpectedActiveRecords()),
@@ -534,6 +545,7 @@ function newSchemaChildPage(
 function newSchemaParentActiveRecords(): Record<string, string[]> {
   return {
     STENT: ["STENT-1"],
+    STCHAR: [],
     STINT: ["STINT-1"],
     SF: ["SF-1"],
     BEL: ["BEL-1"],
@@ -553,6 +565,7 @@ function newSchemaParentActiveRecords(): Record<string, string[]> {
 function newSchemaExpectedActiveRecords(): Record<string, string[]> {
   return {
     STENT: ["STENT-1"],
+    STCHAR: [],
     STINT: [],
     SF: ["SF-1", "SF-2"],
     BEL: [],

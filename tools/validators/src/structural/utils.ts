@@ -19,6 +19,7 @@ export const STRUCTURAL_NODE_TYPES = [
   "diegetic_artifact_record",
   "adjudication_record",
   "story_entity_record",
+  "story_character_authority_record",
   "story_status_record",
   "story_fact_record",
   "story_event_record",
@@ -88,6 +89,7 @@ export const RECORD_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
   character_proposal_batch: "character-proposal-batch",
   diegetic_artifact_record: "diegetic-artifact-frontmatter",
   story_entity_record: "story-entity",
+  story_character_authority_record: "story-character-authority",
   story_status_record: "story-status",
   story_fact_record: "story-fact",
   story_event_record: "story-event",
@@ -264,6 +266,9 @@ function isStructuralAuthorityRecord(record: IndexedRecord): boolean {
   }
   if (record.node_type === "story_entity_record") {
     return /^stories\/[^/]+\/_source\/entities\/STENT-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "story_character_authority_record") {
+    return /^stories\/[^/]+\/story-characters\/STCHAR-\d+\.md$/.test(filePath);
   }
   if (record.node_type === "story_status_record") {
     return /^stories\/[^/]+\/_source\/status\/STSTAT-\d+\.yaml$/.test(filePath);

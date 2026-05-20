@@ -194,6 +194,7 @@ function entity(id: string, overrides: Record<string, unknown> = {}): IndexedRec
     story_id: "STORY-1",
     created_at_page: "PG-2",
     display_name: "Courier",
+    bound_stchar_id: `STCHAR-${id.split("-")[1] ?? "1"}`,
     role_in_story: ["witness"],
     ...overrides
   });

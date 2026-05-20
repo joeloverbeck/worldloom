@@ -44,6 +44,7 @@ export const ID_CLASS_FORMATS = {
   CHC: { width: 1, zeroPad: false, regex: /^CHC-(\d+)$/ },
   STENT: { width: 1, zeroPad: false, regex: /^STENT-(\d+)$/ },
   STSTAT: { width: 1, zeroPad: false, regex: /^STSTAT-(\d+)$/ },
+  STCHAR: { width: 1, zeroPad: false, regex: /^STCHAR-(\d+)$/ },
   CLK: { width: 1, zeroPad: false, regex: /^CLK-(\d+)$/ },
   STSEC: { width: 1, zeroPad: false, regex: /^STSEC-(\d+)$/ },
   STQ: { width: 1, zeroPad: false, regex: /^STQ-(\d+)$/ },
@@ -103,6 +104,7 @@ const STORY_SCOPED_ID_CLASS_DIRECTORIES = {
   CHC: "choices",
   STENT: "entities",
   STSTAT: "status",
+  STCHAR: "story-characters",
   CLK: "clocks",
   STSEC: "secrets",
   STQ: "story-questions",
@@ -312,7 +314,7 @@ function findHighestStoryScopedId(
   }
 
   const format = ID_CLASS_FORMATS[idClass];
-  const directStoryDirectoryClasses = new Set<StoryScopedIdClass>(["SLB", "SAU", "SP"]);
+  const directStoryDirectoryClasses = new Set<StoryScopedIdClass>(["SLB", "SAU", "SP", "STCHAR"]);
   const directory =
     directStoryDirectoryClasses.has(idClass)
       ? path.join(storyDirectory, STORY_SCOPED_ID_CLASS_DIRECTORIES[idClass])

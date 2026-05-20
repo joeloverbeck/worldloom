@@ -282,6 +282,19 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     const stemoExecutions = result.executions.filter((execution) => execution.name.startsWith("stemo_"));
     assert.equal(stemoExecutions.length, 9);
     assert.ok(stemoExecutions.every((execution) => execution.status === "skipped"));
+    const stcharExecutions = result.executions.filter(
+      (execution) => execution.name.startsWith("stchar_") || execution.name === "stent_requires_stchar"
+    );
+    assert.equal(stcharExecutions.length, 4);
+    assert.ok(stcharExecutions.every((execution) => execution.status === "skipped"));
+    const characterRuntimeExecution = result.executions.find(
+      (execution) => execution.name === "no_char_authority_in_story_runtime"
+    );
+    assert.equal(characterRuntimeExecution?.status, "skipped");
+    const characterGroundingExecution = result.executions.find(
+      (execution) => execution.name === "character_grounding_consistency"
+    );
+    assert.equal(characterGroundingExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -324,7 +337,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== pageAffordanceExecution &&
         row !== activeRecordsFullShapeExecution &&
         !stplanExecutions.includes(row) &&
-        !stemoExecutions.includes(row)
+        !stemoExecutions.includes(row) &&
+        !stcharExecutions.includes(row) &&
+        row !== characterRuntimeExecution &&
+        row !== characterGroundingExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

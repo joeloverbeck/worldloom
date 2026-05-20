@@ -3,6 +3,7 @@ import { activeRecordsFullShape } from "../structural/active-records-full-shape.
 import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
+import { characterGroundingConsistency } from "../structural/character-grounding-consistency.js";
 import { characterMemorabilityStructure } from "../structural/character-memorability-structure.js";
 import { chcSltSelectedCommitmentTrace } from "../structural/chc-slt-selected-commitment-trace.js";
 import { clockFiringThresholdIntegrity } from "../structural/clock-firing-threshold-integrity.js";
@@ -23,6 +24,7 @@ import { idUniqueness } from "../structural/id-uniqueness.js";
 import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
 import { narrativeShapeFieldRejection } from "../structural/narrative-shape-field-rejection.js";
+import { noCharAuthorityInStoryRuntime } from "../structural/no-char-authority-in-story-runtime.js";
 import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-place-mutation.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
@@ -62,6 +64,10 @@ import { stemoOrientationRecordsExist } from "../structural/stemo-orientation-re
 import { stemoSchemaCompliance } from "../structural/stemo-schema-compliance.js";
 import { stemoSupersessionLifecycleValid } from "../structural/stemo-supersession-lifecycle-valid.js";
 import { stemoTriggerEventOnBranchPath } from "../structural/stemo-trigger-event-on-branch-path.js";
+import { stcharActiveForBoundStent } from "../structural/stchar-active-for-bound-stent.js";
+import { stcharResolves } from "../structural/stchar-resolves.js";
+import { stcharSupersessionIntegrity } from "../structural/stchar-supersession-integrity.js";
+import { stentRequiresStchar } from "../structural/stent-requires-stchar.js";
 import { storyQuestionIntroductionGroundingIntegrity } from "../structural/story-question-introduction-grounding-integrity.js";
 import { storyQuestionGroundingIntegrity } from "../structural/story-question-grounding-integrity.js";
 import { storyQuestionPayoffIntegrity } from "../structural/story-question-payoff-integrity.js";
@@ -110,6 +116,12 @@ export const structuralValidators: readonly Validator[] = [
   nonPropagationFactsCompleteness,
   snapshotReplayEquality,
   recursiveReferenceClosure,
+  stentRequiresStchar,
+  stcharResolves,
+  stcharActiveForBoundStent,
+  stcharSupersessionIntegrity,
+  noCharAuthorityInStoryRuntime,
+  characterGroundingConsistency,
   chcSltSelectedCommitmentTrace,
   stateSnapshotIntegrity,
   clockValueInRange,

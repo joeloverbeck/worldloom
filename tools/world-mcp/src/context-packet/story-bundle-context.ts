@@ -47,7 +47,7 @@ const CURRENT_PLAN_STATUSES = new Set(["active", "blocked", "suspended", "revise
 const CURRENT_EMOTION_STATUSES = new Set(["active", "suppressed", "dissociated"]);
 const MAX_VISIBLE_STORYLETS = 50;
 const MAX_RECENT_BRANCH_PAGES = 10;
-const STORY_RECORD_ID_REGEX = /\b(?:STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|DA|STPLAN|STEMO)-[A-Za-z0-9-]+\b/g;
+const STORY_RECORD_ID_REGEX = /\b(?:STENT|STCHAR|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|DA|STPLAN|STEMO)-[A-Za-z0-9-]+\b/g;
 const ROLE_IN_STORY_VALUES = new Set<RoleInStory>([
   "viewpoint",
   "player_proxy",
@@ -124,6 +124,27 @@ function asNullableString(value: unknown): string | null {
 
 function asNumber(value: unknown, fallback = 0): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function parseHybridFrontmatter(row: StoryNodeRow): Record<string, unknown> {
+  const lines = row.body.split(/\r?\n/);
+  if (lines[0] !== "---") {
+    return {};
+  }
+
+  const closingIndex = lines.findIndex((line, index) => index > 0 && line === "---");
+  if (closingIndex <= 0) {
+    return {};
+  }
+
+  try {
+    const parsed = YAML.parse(lines.slice(1, closingIndex).join("\n"));
+    return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : {};
+  } catch {
+    return {};
+  }
 }
 
 function asUrgency(value: unknown): "low" | "medium" | "high" {
@@ -435,6 +456,32 @@ function buildActiveStoryDiegeticArtifacts(
     });
 }
 
+function bodyPreview(row: StoryNodeRow): string {
+  const withoutFrontmatter = row.body.replace(/^---\n[\s\S]*?\n---\n?/, "");
+  const normalized = withoutFrontmatter.replace(/\s+/g, " ").trim();
+  return normalized.slice(0, 240);
+}
+
+function buildActiveStoryCharacters(
+  rows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["active_story_characters"] {
+  return rows
+    .map((row) => ({ row, record: parseHybridFrontmatter(row) }))
+    .filter(({ record }) => asString(record.status, "active") === "active")
+    .map(({ row, record }) => ({
+      id: asString(record.id, authoredId(row)),
+      status: asString(record.status, "active"),
+      bound_stent_ids: asStringArray(record.bound_stent_ids),
+      source_kind: asString(record.source_kind),
+      source_char_id: asNullableString(record.source_char_id),
+      profile_revision: asNumber(record.profile_revision),
+      profile_hash: asString(record.profile_hash),
+      voice_block_hash: asString(record.voice_block_hash),
+      page_packet_hash: asString(record.page_packet_hash),
+      packet_preview: bodyPreview(row)
+    }));
+}
+
 function supersededRecordIds(rows: StoryNodeRow[]): Set<string> {
   const ids = new Set<string>();
 
@@ -710,7 +757,8 @@ function buildMysteryEvidenceChains(
 
 function buildCastBindList(frontmatter: Record<string, unknown>): ContextPacketStoryBundleContext["cast_bind_list"] {
   return arrayOfObjects(frontmatter.cast_bind_list).map((entry) => ({
-    char_id: asNullableString(entry.char_id),
+    stchar_id: asNullableString(entry.stchar_id),
+    source_char_id: asNullableString(entry.source_char_id),
     stent_id: asString(entry.stent_id),
     role_in_story: asRoleInStoryList(entry.role_in_story)
   }));
@@ -737,6 +785,7 @@ export function summarizeStoryBundleContext(
     active_location_ids: context.active_locations_in_scope.map((location) => location.id),
     active_object_ids: context.active_objects_in_scope.map((object) => object.id),
     active_story_da_ids: context.active_story_diegetic_artifacts.map((artifact) => artifact.id),
+    active_story_character_ids: context.active_story_characters.map((character) => character.id),
     active_plan_ids: context.active_actor_plans.map((plan) => plan.id),
     active_plan_holders: context.active_actor_plans.map((plan) => plan.holder),
     active_emotion_ids: context.active_emotional_states.map((emotion) => emotion.id),
@@ -767,6 +816,7 @@ export function buildStoryBundleContext(
   const locationRows = rowsForNodeType(db, worldSlug, storySlug, "story_location_record");
   const objectRows = rowsForNodeType(db, worldSlug, storySlug, "story_object_record");
   const storyDaRows = rowsForNodeType(db, worldSlug, storySlug, "story_diegetic_artifact_record");
+  const storyCharacterRows = rowsForNodeType(db, worldSlug, storySlug, "story_character_authority_record");
   const planRows = rowsForNodeType(db, worldSlug, storySlug, "story_plan_record");
   const emotionRows = rowsForNodeType(db, worldSlug, storySlug, "story_emotion_record");
   const threadRows = rowsForNodeType(db, worldSlug, storySlug, "thread_record");
@@ -790,6 +840,7 @@ export function buildStoryBundleContext(
     active_locations_in_scope: buildActiveLocationsInScope(locationRows, allStoryRows),
     active_objects_in_scope: buildActiveObjectsInScope(objectRows, allStoryRows),
     active_story_diegetic_artifacts: buildActiveStoryDiegeticArtifacts(storyDaRows, allStoryRows),
+    active_story_characters: buildActiveStoryCharacters(storyCharacterRows),
     active_actor_plans: buildActiveActorPlans(planRows),
     active_emotional_states: buildActiveEmotionalStates(emotionRows),
     active_threads: buildActiveThreads(threadRows),

@@ -33,6 +33,8 @@ export type StoryRecordOperationKind =
   | "supersede_stq_record"
   | "create_stplan_record"
   | "create_stemo_record"
+  | "append_story_character_authority_record"
+  | "supersede_story_character_authority_record"
   | "append_story_diegetic_artifact_record";
 
 export const STORY_RECORD_OPERATION_KINDS: readonly StoryRecordOperationKind[] = [
@@ -60,6 +62,8 @@ export const STORY_RECORD_OPERATION_KINDS: readonly StoryRecordOperationKind[] =
   "supersede_stq_record",
   "create_stplan_record",
   "create_stemo_record",
+  "append_story_character_authority_record",
+  "supersede_story_character_authority_record",
   "append_story_diegetic_artifact_record"
 ];
 
@@ -233,6 +237,20 @@ export const STORY_RECORD_SPECS: Readonly<Record<StoryRecordOperationKind, Story
     nodeType: "story_emotion_record",
     prefix: "STEMO",
     sourceDir: "emotions"
+  },
+  append_story_character_authority_record: {
+    allocationKey: "stchar_ids",
+    idPattern: /^STCHAR-\d+$/,
+    nodeType: "story_character_authority_record",
+    prefix: "STCHAR",
+    sourceDir: "story-characters"
+  },
+  supersede_story_character_authority_record: {
+    allocationKey: "stchar_ids",
+    idPattern: /^STCHAR-\d+$/,
+    nodeType: "story_character_authority_record",
+    prefix: "STCHAR",
+    sourceDir: "story-characters"
   },
   append_story_diegetic_artifact_record: {
     allocationKey: "story_da_ids",

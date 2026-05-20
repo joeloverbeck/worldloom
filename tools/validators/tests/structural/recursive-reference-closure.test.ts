@@ -46,6 +46,34 @@ test("recursive_reference_closure accepts BEL records in active_records", async 
   assert.deepEqual(verdicts, []);
 });
 
+test("recursive_reference_closure accepts STCHAR records in active_records", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      state_snapshot: {
+        active_records: {
+          STCHAR: ["STCHAR-1"]
+        }
+      }
+    },
+    extra: [
+      {
+        ...record("story_character_authority_record", "test-story:STCHAR-1", "stories/test-story/story-characters/STCHAR-1.md", {
+          id: "STCHAR-1",
+          story_id: "STORY-1",
+          generated_at_page: "story_bootstrap",
+          source_char_id: "CHAR-1"
+        }),
+        story_slug: "test-story"
+      }
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("recursive_reference_closure fails for sibling-branch leakage at nested depth", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     factOverrides: {

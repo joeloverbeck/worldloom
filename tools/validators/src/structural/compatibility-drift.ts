@@ -15,6 +15,7 @@ import {
 } from "./utils.js";
 
 const OPTIONAL_SUBDIRECTORIES: Readonly<Record<OptionalActiveRecordsClass, string>> = {
+  STCHAR: "story-characters",
   CLK: "_source/clocks",
   STSEC: "_source/secrets",
   STQ: "_source/story-questions",
@@ -188,6 +189,8 @@ function classForRecord(record: IndexedRecord): ActiveRecordsClass | undefined {
       return "STEMO";
     case "story_diegetic_artifact_record":
       return "DA";
+    case "story_character_authority_record":
+      return "STCHAR";
     default:
       return undefined;
   }
