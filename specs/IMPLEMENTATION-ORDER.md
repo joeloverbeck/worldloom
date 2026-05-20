@@ -8,10 +8,11 @@ Derived from `reports/stchar-implementation-first-iteration.md` (ChatGPT-Pro), a
 modification. Both specs **supersede** the lean-fix decision in
 `docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md`.
 
-1. **SPEC-56 — STCHAR Machine-Facing Foundation** — FOUNDATIONS + shared-contract amendments,
-   `story-character-authority.schema.json` + dependent schema edits, structural validators,
-   patch-engine ops, world-index node/edges, MCP retrieval + `story_bundle_context`, fixtures.
-   *No dependencies.*
+1. **SPEC-56 — STCHAR Machine-Facing Foundation** — COMPLETED and archived at
+   `archive/specs/SPEC-56-stchar-machine-foundation.md`. Landed FOUNDATIONS +
+   shared-contract amendments, `story-character-authority.schema.json` + dependent schema edits,
+   structural validators, patch-engine ops, world-index node/edges, MCP retrieval +
+   `story_bundle_context`, and fixtures.
 
 2. **SPEC-57 — STCHAR Pipeline Integration** — new `story-character-profile` skill, bootstrap
    distillation, turn-cycle consumption + block-and-route, prose-attach voice-fidelity receipt,

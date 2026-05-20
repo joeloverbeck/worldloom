@@ -1,6 +1,6 @@
 # SPEC-56 — STCHAR Machine-Facing Foundation
 
-**Status:** DRAFT
+**Status:** COMPLETED 2026-05-20
 **Created:** 2026-05-20
 **Depends on:** nothing (machine-layer foundation; consumed by SPEC-57)
 **Consumed by:** SPEC-57 — STCHAR Pipeline Integration
@@ -408,6 +408,27 @@ STCHAR; at least one background-only STENT has null; invalid fixtures prove the 
 - The `cast_bind_list` parser update (Phase 6) is sequenced with SPEC-57's STORY_KERNEL.md
   `cast_bind_list` reshape — neither the field-drop nor the parser-change strands the other.
 - SPEC-57 can be implemented against the surfaces this spec lands.
+
+---
+
+## Outcome
+
+Completed and archived on 2026-05-20. All seven phase tickets landed and were archived:
+`SPEC56STCHARMACFOU-001` through `SPEC56STCHARMACFOU-007`.
+
+Final proof:
+- `npm run build` in `tools/validators` — PASS.
+- `npm test` in `tools/validators` — PASS, 768 tests.
+- `npm run build` in `tools/patch-engine` — PASS.
+- `npm test` in `tools/patch-engine` — PASS, 91 tests.
+- `npm run build` in `tools/world-index` — PASS.
+- `npm test` in `tools/world-index` — PASS, 127 tests.
+- `npm run build` in `tools/world-mcp` — PASS.
+- `npm test` in `tools/world-mcp` — PASS, 425 tests.
+- `rg -n "bound_char_id" tools --glob '*.ts' --glob '!**/dist/**'` — PASS, no matches.
+
+The prior triage file is marked superseded by this archived spec plus SPEC-57. SPEC-57's
+cross-spec notes now reference the archived Phase 6 ticket for the `cast_bind_list` parser side.
 
 ---
 

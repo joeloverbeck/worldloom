@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
-**Engine Changes**: Yes — `tools/validators` (new `story-character-authority.schema.json`; edits to story-entity/page/choice/event schemas, schema-compliance mapping, and tests/fixtures); `specs/SPEC-56-stchar-machine-foundation.md` Phase 2 status note.
+**Engine Changes**: Yes — `tools/validators` (new `story-character-authority.schema.json`; edits to story-entity/page/choice/event schemas, schema-compliance mapping, and tests/fixtures); `archive/specs/SPEC-56-stchar-machine-foundation.md` Phase 2 status note.
 **Deps**: archive/tickets/SPEC56STCHARMACFOU-001.md
 
 ## Problem
@@ -13,7 +13,7 @@ At intake, the contract (ticket 001) declared `STCHAR` and the `STENT.bound_char
 ## Assumption Reassessment (2026-05-20)
 
 1. **Historical intake evidence:** `tools/validators/src/schemas/story-entity.schema.json` had `bound_char_id` (pattern `^CHAR-[0-9]+$`), no `bound_stchar_id`, `additionalProperties: false`; `story-page.schema.json` `active_records` had 17 buckets, no STCHAR; `story-choice.schema.json` `grounded_in.records[]` pattern lacked STCHAR; `story-event.schema.json` `record_introductions[].class` enum + `state_delta` patterns lacked STCHAR; `promotion_claims[].source_record` was `^(SF|BEL|DA|STENT|STSTAT|SREL)-[0-9]+$`. No `story-character-authority.schema.json` existed.
-2. The schema field-set + conditional rules are specified in `specs/SPEC-56-stchar-machine-foundation.md` §Phase 2 (reassessed this session); the M1 trim (three hashes only, no `section_hashes` map) is authoritative — do not re-add the 13-section map.
+2. The schema field-set + conditional rules are specified in `archive/specs/SPEC-56-stchar-machine-foundation.md` §Phase 2 (reassessed this session); the M1 trim (three hashes only, no `section_hashes` map) is authoritative — do not re-add the 13-section map.
 3. **Cross-artifact boundary under audit**: these schemas encode the contract amended in ticket 001. The schema field set must match the contract's STCHAR definition exactly; `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` asserts contract↔schema parity and currently references `bound_char_id` — it must be updated in lockstep.
 4. **FOUNDATIONS principle restatement**: §5b Schema-Minimalism at story scope — STCHAR is a hybrid on-demand artifact (CHAR/DA precedent), so its frontmatter may be rich, but every field must be load-bearing; the M1 trim removed the only non-load-bearing surface. The new atomic-record references (`bound_stchar_id`, `active_records.STCHAR`, grounding patterns) are each load-bearing for resolution/replay.
 5. **Schema extension**: new `story-character-authority.schema.json` (frontmatter schema) + additive STCHAR entries to story-page/choice/event `active_records`/`grounded_in`/`record_introductions`/`state_delta`. The story-page/choice/event additions are additive-only (new optional bucket / widened pattern union); no existing consumer breaks. The new schema is consumed by the validators (003), world-index parser (005), and MCP (006).
@@ -65,7 +65,7 @@ Added required fields per spec §Phase 2 (id, story_id, story_slug, world_slug, 
 - `tools/validators/tests/structural/record-schema-compliance-story-character-authority.test.ts` (new)
 - `tools/validators/tests/structural/record-schema-compliance-story-{entity,page,choice,event}.test.ts` (modify)
 - `tools/validators/tests/{cli,fixtures,integration,structural}/**` (modify — same-package positive STENT fixtures/builders updated to `bound_stchar_id`)
-- `specs/SPEC-56-stchar-machine-foundation.md` (modify — Phase 2 implementation note)
+- `archive/specs/SPEC-56-stchar-machine-foundation.md` (modify — Phase 2 implementation note)
 
 ## Out of Scope
 

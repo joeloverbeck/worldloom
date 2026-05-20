@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, `.claude/skills/_shared-templates/story-record-schemas.md`, `specs/SPEC-56-stchar-machine-foundation.md` (contract/doc surfaces; no code).
+**Engine Changes**: Yes — `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, `.claude/skills/_shared-templates/story-record-schemas.md`, `archive/specs/SPEC-56-stchar-machine-foundation.md` (contract/doc surfaces; no code).
 **Deps**: None
 
 ## Problem
@@ -57,7 +57,7 @@ At intake, the story pipeline had no stable story-local character authority. `ST
 - `docs/FOUNDATIONS.md` (modify)
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify)
 - `.claude/skills/_shared-templates/story-record-schemas.md` (modify)
-- `specs/SPEC-56-stchar-machine-foundation.md` (modify — Phase 1 implementation note)
+- `archive/specs/SPEC-56-stchar-machine-foundation.md` (modify — Phase 1 implementation note)
 
 ## Out of Scope
 
@@ -102,7 +102,7 @@ The contract layer now declares `STCHAR` as a story-local character authority cl
 1. `grep -n "STCHAR" docs/FOUNDATIONS.md .claude/skills/_shared-templates/story-state-contract.md .claude/skills/_shared-templates/story-record-schemas.md` — PASS: found STCHAR in FOUNDATIONS §6/§6.1, story-state inventory/record_active/lifecycle/page-plan reservation, and story-record schema/grounding surfaces.
 2. `grep -rn "bound_char_id" .claude/skills/_shared-templates/` — PASS: returned no matches, confirming the shared templates no longer carry the removed field.
 3. `grep -n "BEL.basis.access_records\\|promotion_claims\\|source_record" .claude/skills/_shared-templates/story-record-schemas.md` — PASS: `promotion_claims[].source_record` still lists only `SF | BEL | DA | STENT | STSTAT | SREL`, and `STCHAR` is absent from epistemic/promotion source surfaces.
-4. Manual review of `specs/SPEC-56-stchar-machine-foundation.md` — PASS: Phase 1 now carries a dated implementation note, while the remaining Phase 1 prose is labelled as historical implementation scope.
+4. Manual review of `archive/specs/SPEC-56-stchar-machine-foundation.md` — PASS: Phase 1 now carries a dated implementation note, while the remaining Phase 1 prose is labelled as historical implementation scope.
 
 ## Deviations
 
