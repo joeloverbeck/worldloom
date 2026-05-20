@@ -63,7 +63,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 `world-index` emits 65 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, thread links, branch/page links, and SPEC-45 event provenance:
 
 - `world_entity_binding` — `STENT.world_ent_id` to a world-canon entity id.
-- `story_fact_derived_from` — `SF.derived_from_cf` to the originating CF.
+- `story_fact_derived_from` — CF-shaped entries in `SF.derived_from[]` to the originating CF.
 - `created_at_page` — story records with `created_at_page` / `provenance.created_at_page` to the creating `PG`.
 - `state_delta_create`, `state_delta_supersede`, `state_delta_close` — `SE.state_delta.create[]` / `SE.state_delta.supersede[]` / `SE.state_delta.close[]` to affected story records.
 - `creation_evidence` — `SE.record_introductions[]` evidence links from the introduced record to its evidence records.

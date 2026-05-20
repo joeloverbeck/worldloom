@@ -160,7 +160,7 @@ export function createAtomicRepoRoot(worldSlug = "atomic-world"): string {
     "object: salt gate",
     "epistemic_class: objective",
     "truth_value: true",
-    "derived_from_cf: CF-0001",
+    "derived_from: [CF-0001]",
     "notes: Brinewick knows the salt gate."
   ]);
   writeStory(world, "harborwatch", "obligations", "OBL-0001.yaml", [

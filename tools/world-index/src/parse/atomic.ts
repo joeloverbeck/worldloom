@@ -76,6 +76,7 @@ const STORY_DIR_ORDER = new Map(Array.from(STORY_DIRS.keys()).map((directory, in
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
 const STORY_REF_REGEX =
   /\b(STENT|STSTAT|SF|SE|BEL|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|STPLAN|STEMO|DA)-[A-Za-z0-9-]+\b/g;
+const CANON_FACT_REF_REGEX = /^CF-\d+$/;
 
 export type AtomicSkipReason = "missing_id_field" | "schema_pattern_mismatch";
 
@@ -566,9 +567,10 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
   }
 
   if (node.node_type === "story_fact_record") {
-    const derivedFromCf = stringField(record, "derived_from_cf");
-    if (derivedFromCf) {
-      push(createRefEdge(node.node_id, "story_fact_derived_from", derivedFromCf));
+    for (const target of stringArrayField(record, "derived_from")) {
+      if (CANON_FACT_REF_REGEX.test(target)) {
+        push(createRefEdge(node.node_id, "story_fact_derived_from", target));
+      }
     }
   }
 
