@@ -7,6 +7,7 @@ import Ajv2020Module from "ajv/dist/2020.js";
 import type { ErrorObject, ValidateFunction } from "ajv";
 
 import { PRED_TYPES, PREDICATE_ARG_SCHEMAS } from "../src/rules/_shared/predicate-dsl-grammar.js";
+import { STORY_ROLES } from "../src/rules/rule_storylet_predicate_dsl_parsability.js";
 
 type Ajv2020Instance = {
   compile(schema: unknown): ValidateFunction;
@@ -20,9 +21,19 @@ type PredicateSchema = {
   oneOf: Array<{
     title: string;
     required: string[];
-    properties: Record<string, unknown>;
+    properties: Record<string, { enum?: string[] } | unknown>;
   }>;
 };
+
+const EXISTENTIAL_ROLE_FILTER_FIELDS = [
+  ["any_plan_active", "holder_role"],
+  ["any_emotion_active", "holder_role"],
+  ["any_obligation_open", "owed_by_role"],
+  ["any_obligation_open", "owed_to_role"],
+  ["any_relationship_axis", "participant_role"],
+  ["any_belief", "holder_role"],
+  ["any_intention", "holder_role"]
+] as const;
 
 function readPredicateSchema(): PredicateSchema {
   return JSON.parse(
@@ -151,4 +162,25 @@ test("predicate DSL schema exposes runtime-derived ID patterns for representativ
   assert.equal(validate({ pred: "plan_active", holder: "STENT-1", plan: "STINT-1" }), false);
   assert.equal(validate({ pred: "emotion_active", holder: "STENT-1", kind: "surprise" }), false);
   assert.equal(validate({ pred: "emotion_pressure", holder: "STENT-1", pressure: "teleport" }), false);
+});
+
+test("predicate DSL schema exposes runtime role enum for existential role filters", () => {
+  const schema = readPredicateSchema();
+  const schemasByTitle = new Map(schema.oneOf.map((entry) => [entry.title, entry]));
+  const ajv = new Ajv2020({ strict: true });
+  const validate = ajv.compile(schema);
+
+  for (const [pred, field] of EXISTENTIAL_ROLE_FILTER_FIELDS) {
+    const entry = schemasByTitle.get(pred);
+    assert.ok(entry, `missing schema entry for ${pred}`);
+    const propertySchema = entry.properties[field] as { enum?: string[] };
+    assert.deepEqual(propertySchema.enum, [...STORY_ROLES], `${pred}.${field} should mirror runtime role enum`);
+
+    assert.equal(
+      validate({ ...sampleFor(pred), [field]: "viewpoint" }),
+      true,
+      `${pred}.${field} should accept bare role enum values: ${ajv.errorsText(validate.errors)}`
+    );
+    assert.equal(validate({ ...sampleFor(pred), [field]: "role:viewpoint" }), false, `${pred}.${field} should reject role: prefixes`);
+  }
 });

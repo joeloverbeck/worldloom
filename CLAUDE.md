@@ -1,147 +1,41 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) when working in this repository. Keep this file lean — it is read on every query. Only durable, repo-wide instructions worth loading every time belong here; route everything else to `docs/`.
 
 ## What This Repo Is
 
-Worldloom is a **prose-and-YAML worldbuilding pipeline backed by a TypeScript tools layer**. The pipeline is the skills in `.claude/skills/` (invoked via the `Skill` tool or `/<slug>` slash command); the machine layer lives under `tools/<package>/`, each shipping its own `npm run build` / `npm test`. Skill output is files on disk — read them to verify.
+Worldloom is a **prose-and-YAML worldbuilding pipeline backed by a TypeScript tools layer**. The pipeline is the skills in `.claude/skills/` (invoked via the `Skill` tool or `/<slug>`); the machine layer lives under `tools/<package>/`, each shipping its own `npm run build` / `npm test`. Skill output is files on disk — read them to verify. For the full directory layout, see `docs/REPOSITORY-MAP.md`.
 
-## Authoritative Source of Truth
+## Authoritative Contract
 
-`docs/FOUNDATIONS.md` is the **non-negotiable design contract**. It defines Canon Layers (hard / derived / soft / contested / mystery-reserve), the thirteen mandatory world concerns and their storage form (see §Mandatory World Files for the atomic-source classification per SPEC-13), the Canon Fact Record (`CF-<integer>`) and Change Log Entry (`CH-<integer>`) schemas, the Seven Validation Rules, and the §Canonical Storage Layer contract. Skills load it automatically in their pre-flight checks; if a workflow doesn't, the workflow is incomplete.
+`docs/FOUNDATIONS.md` is the **non-negotiable design contract** — Canon Layers, the mandatory world concerns and their storage form, the Canon Fact Record (`CF-<integer>`) and Change Log Entry (`CH-<integer>`) schemas, the Seven Validation Rules, and the Canonical Storage Layer contract. Read it before making or validating any workflow or world-content change. If a workflow's pre-flight doesn't load it, the workflow is incomplete. If a change conflicts with FOUNDATIONS, FOUNDATIONS wins.
 
-## Repository Layout
+## Core Rules
 
-```
-docs/FOUNDATIONS.md              ← project-wide design contract (read-only in normal flow)
-docs/WORKFLOWS.md                ← how to invoke each skill
-docs/HARD-GATE-DISCIPLINE.md     ← HARD-GATE execution pattern and partial-failure semantics
-docs/plans/                      ← design docs output by the brainstorm skill
-.claude/skills/<slug>/           ← runnable skills; each has SKILL.md + optional templates/references/
-tools/                           ← machine-facing layer (compiled dist/ gitignored)
-  ├── world-index/               ← SQLite-backed index builder + CLI
-  ├── world-mcp/                 ← retrieval MCP server + context packets
-  ├── patch-engine/              ← deterministic patch applier
-  ├── validators/                ← executable Rule 1-7 + structural validators
-  └── hooks/                     ← Claude Code hooks
-.claude/settings.json            ← local hook configuration
-brainstorming/                   ← user-authored proposals for new skills / pipelines
-briefs/                          ← user-authored briefs feeding content-generation skills (contents gitignored; folder preserved via .gitkeep)
-worlds/<world-slug>/             ← generated world bundles (contents gitignored; folder preserved)
-  ├── WORLD_KERNEL.md            ← primary-authored narrative summary (only narrative root file)
-  ├── ONTOLOGY.md                ← primary-authored (Categories + Relation Types + Notes); Named Entity Registry atomized to _source/entities/
-  ├── _source/                   ← canonical atomic-YAML storage (SPEC-13); tracked in git
-  │   ├── canon/                 ← CF-<integer>.yaml (one file per Canon Fact Record)
-  │   ├── change-log/            ← CH-<integer>.yaml
-  │   ├── invariants/            ← <ID>.yaml (ONT-N, CAU-N, SOC-N, AES-N, DIS-N)
-  │   ├── mystery-reserve/       ← M-<integer>.yaml
-  │   ├── open-questions/        ← OQ-<integer>.yaml
-  │   ├── entities/              ← ENT-<integer>.yaml (named entity registry)
-  │   ├── everyday-life/         ← SEC-ELF-<integer>.yaml (per-H2-section records)
-  │   ├── institutions/          ← SEC-INS-<integer>.yaml
-  │   ├── magic-or-tech-systems/ ← SEC-MTS-<integer>.yaml
-  │   ├── geography/             ← SEC-GEO-<integer>.yaml
-  │   ├── economy-and-resources/ ← SEC-ECR-<integer>.yaml
-  │   ├── peoples-and-species/   ← SEC-PAS-<integer>.yaml
-  │   └── timeline/              ← SEC-TML-<integer>.yaml (per-historical-Layer records)
-  ├── _index/world.db            ← derived index artifact (gitignored)
-  ├── characters/                ← CHAR-<integer> hybrid YAML-frontmatter + prose body per file + INDEX.md
-  ├── diegetic-artifacts/        ← DA-<integer> hybrid files + INDEX.md
-  ├── proposals/                 ← PR-<integer> proposal cards + batches/BATCH-<integer> manifests
-  ├── audits/                    ← AU-<integer> audit reports + retcon-proposal sub-dirs
-  ├── adjudications/             ← PA-<integer>-<verdict>.md canon-addition records
-  └── stories/<story-slug>/      ← branching-story bundles (per-bundle layout below)
-       ├── STORY_KERNEL.md        ← primary-authored narrative root for the bundle
-       ├── _source/               ← atomic-YAML story-bundle records (22 subdirs: entities/STENT, status/STSTAT, intentions/STINT, facts/SF, beliefs/BEL, events/SE, obligations/OBL, consequences/CNSQ, threads/THR, clocks/CLK, secrets/STSEC, story-questions/STQ, plans/STPLAN, emotions/STEMO, relationships/SREL, locations/STLOC, objects/STOBJ, artifacts/DA, branches/BR, pages/PG, choices/CHC, storylets/SLT) — schemas canonical at `.claude/skills/_shared-templates/story-state-contract.md` §4
-       ├── pages-prose-plans/     ← PG-<integer> comprehensive prose plans; written by branching-story-bootstrap and branching-story-turn-cycle
-       ├── pages-prose/           ← rendered prose; supplied externally (manual or LLM); validated by branching-story-prose-attach
-       ├── pages-prose-receipts/  ← PG-<integer>.yaml prose-validation receipts written by branching-story-prose-attach
-       ├── storylet-batches/      ← SLB-<integer> batch manifests written by commitment-block-authoring
-       ├── story-promotions/      ← SP-<integer>-proposal-package.yaml + SP-<integer>.md ledgers (story-fact-promotion-to-canon) + SP-<integer>-closeout.md ledgers (story-promotion-closeout)
-       ├── audits/                ← SAU-<integer>-<date>.md health-audit reports + SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-*.md sub-dirs (branching-story-health-audit)
-       └── INDEX.md
-archive/                         ← superseded brainstorming docs and plans
-```
-
-Only the pipeline (skills, foundations, docs) is version-controlled. Each user maintains their own `briefs/` and `worlds/` content.
-
-## Skill Architecture
-
-Skills divide into three categories, and these distinctions are load-bearing.
-
-**Canon-mutating** (write to world-level records under `_source/`; all begin with a `<HARD-GATE>` block requiring explicit user approval before any write):
-- `create-base-world` — bootstraps a new world's full `_source/` tree + WORLD_KERNEL.md + ONTOLOGY.md + genesis `CF-1` and `CH-1` records. Refuses to overwrite an existing world directory. Emits atomic `_source/` form directly (post-SPEC-13).
-- `canon-addition` — evaluates a proposed canon fact. On accept: creates a new `_source/canon/CF-<integer>.yaml` record, a new `_source/change-log/CH-<integer>.yaml` record, appends extensions to affected invariant / mystery / open-question / section records, auto-updates `touched_by_cf[]` on affected sections, writes an adjudication. On non-accept: writes only the adjudication record. Append-only — the only way to change an accepted fact is another run producing an explicit retcon entry with retcon attestation.
-
-**Canon-reading** (read world state; write only under sub-directories of `worlds/<slug>/` — never mutate `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `_source/*.yaml` record):
-- `character-generation` — writes `characters/<char-slug>.md` + updates `characters/INDEX.md`. Enforces a Mystery Reserve firewall and CF distribution conformance.
-- `diegetic-artifact-generation` — writes `diegetic-artifacts/<da-slug>.md` + updates `diegetic-artifacts/INDEX.md`. Same canon-safety posture.
-- `propose-new-canon-facts` — writes `proposals/PR-<integer>-*.md` + `proposals/batches/BATCH-<integer>.md` + updates `proposals/INDEX.md`. Each card's path is directly consumable as `canon-addition`'s `proposal_path`.
-- `canon-facts-from-diegetic-artifacts` — same output surface, but mines an existing diegetic artifact. Enforces a Diegetic-to-World laundering firewall; contradictions with existing canon are segregated and handed off to `continuity-audit`, not emitted as cards.
-- `continuity-audit` — writes `audits/AU-<integer>-<date>.md` + optional `audits/AU-<integer>/retcon-proposals/RP-<integer>-*.md` + updates `audits/INDEX.md`.
-- `branching-story-bootstrap` — bootstraps a new story bundle inside an existing world. Writes story-bundle records (STENT/STSTAT/STINT/SF/BEL/SE/OBL/CNSQ/THR/SREL/STLOC/STOBJ/optional CLK/STSEC/STQ/STPLAN/STEMO/optional DA/BR/PG/CHC/optional SLT) via the patch engine + `STORY_KERNEL.md` + `pages-prose-plans/PG-1.md` + per-bundle `INDEX.md` + per-world `stories/INDEX.md` first-run create-or-append. Rendered prose is supplied externally; no prose-rendering lifecycle.
-- `branching-story-turn-cycle` — advances a story bundle by one causal tick from any committed parent page (continuation or fork). Writes one `SE` event + new/superseding story-bundle records (STENT/STSTAT/STINT/SF/BEL/OBL/CNSQ/THR/CLK/STSEC/STQ/STPLAN/STEMO/SREL/STLOC/STOBJ/DA as needed) + optional new `BR` (fork) + new `PG` snapshot + optional JIT `SLT` + emitted `CHC` records via patch engine + `pages-prose-plans/PG-<integer>.md`. Parent rendered prose is optional per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary); silent action rejection is forbidden.
-- `branching-story-prose-attach` — validates user-supplied rendered prose at `pages-prose/PG-<integer>.md` against the page's plan + state and emits a `pages-prose-receipts/PG-<integer>.yaml` receipt. Six deterministic checks + optional craft critic. Never mutates the `PG` record; no ARC_TRACE.
-- `commitment-block-authoring` — creates reusable commitment blocks (`SLT` records) for a bundle's author pool. Two modes: `direct_batch` (fresh batch addressing 11 causal-function coverage targets) and `audit_repair` (consumes `RSP-<integer>` cards from health-audit). Writes via patch engine + `storylet-batches/SLB-<integer>.md` batch manifest. Enforces the closed 10-predicate DSL.
-- `branching-story-health-audit` — diagnoses bundle health via deterministic structural-replay checks. Four modes: `structural` (default; 6 sub-phases), `prose`, `remediation` (drafts `RSP-<integer>` cards consumed by commitment-block-authoring), `cross_story`. Writes `audits/SAU-<integer>-<date>.md` + optional RSP cards; never mutates story state or world canon.
-- `story-fact-promotion-to-canon` — the only lawful story-to-world canon-promotion path. Creates a proposal package for promoting a branch-local claim into world canon (six source kinds: story_fact / mystery_resolution / character_outcome / artifact_canonization / relationship_or_institutional_outcome / other_branch_claim). Writes `story-promotions/SP-<integer>-proposal-package.yaml` (CF-shaped candidate) + `SP-<integer>.md` ledger. Hands off to `canon-addition` for adjudication; never mutates world canon directly.
-- `story-promotion-closeout` — closes a story promotion after canon-addition has adjudicated. Supersedes story-local records with canon links (`accepted` / `accepted_with_limits`), rejection markers (`rejected`), or no changes (`deferred`). Writes `story-promotions/SP-<integer>-closeout.md` companion + bundle INDEX update + optional per-world `stories/INDEX.md` archive update. Never mutates world canon — records canon-addition's outputs read-only.
-
-**Meta** (operate on the pipeline, not on worlds):
-- `brainstorm` — confidence-driven interview producing a design doc at `docs/plans/`.
-- `skill-creator` — turns a `brainstorming/*.md` proposal into `.claude/skills/<slug>/SKILL.md` + templates. Structurally enforces FOUNDATIONS alignment at generation time.
-- `skill-audit`, `skill-consolidate`, `skill-extract-references` — maintenance on existing skills.
-
-### Machine-facing layer integration
-
-The three skill categories remain load-bearing, but the machine-facing retrieval and mutation contract sits beside the human-facing skill prose. Post-SPEC-13, canonical storage is atomic YAML under `_source/`; the machine layer reads and writes atomic records directly.
-
-- **Pre-flight**: `mcp__worldloom__allocate_next_id` replaces manual grep-and-scan allocation for world-scoped, story-bundle-scoped, sub-audit-scoped, and pipeline-scoped classes (including CF, CH, INV per-category, M, OQ, ENT, SEC per-file-class, PA, CHAR, DA, PR, BATCH, AU, RP, SAU, SP, and RSP); `mcp__worldloom__get_context_packet` replaces eager multi-file loading.
-- **Localization**: `mcp__worldloom__search_nodes`, `get_record`, `get_neighbors`, `find_named_entities`, `find_impacted_fragments`, `find_sections_touched_by` localize relevant world state via per-record retrieval, with scoped-reference middle tier between canonical entity retrieval and lexical evidence fallback for source-local names.
-- **Mutations**: `mcp__worldloom__submit_patch_plan` is the Phase 2 write path. Ops are record-ID-addressed: `create_cf_record`, `create_ch_record`, `create_inv_record`, `create_m_record`, `create_oq_record`, `create_ent_record`, `create_sec_record`, `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`, plus hybrid-file ops (`append_adjudication_record`, `append_character_record`, `append_diegetic_artifact_record`).
-- **Validation**: `tools/validators/` turns Rules 1 through 7 and structural checks (including `record_schema_compliance` and `touched_by_cf_completeness`) into executable gates; `world-validate` is the CLI surface.
-
-Meta skills (`brainstorm`, `skill-creator`, `skill-audit`, `skill-consolidate`, `skill-extract-references`) remain outside the world-index / patch-engine mutation path unless they are explicitly operating on those tool packages themselves.
-
-## HARD-GATE Discipline
-
-Every canon-mutating or content-generating skill begins with a `<HARD-GATE>` block. Gates are **absolute under Auto Mode** — invoking a skill is not approval of its deliverable. See `docs/HARD-GATE-DISCIPLINE.md` for the execution pattern, partial-failure semantics, and why write order matters.
-
-## ID Allocation Conventions
-
-IDs are append-only and use the FOUNDATIONS-002 unpadded natural-integer suffix convention: `M-1`, not `M-0001`. Filenames match the ID field exactly except where a hybrid markdown artifact appends a slug/date suffix after the ID. On machine-layer-enabled workflows, allocate at pre-flight via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug?, audit_id?)`, which scans the indexed world state or the class-specific direct filesystem surface for the highest id of that class and returns the next. Allocation is per-class-directory post-SPEC-13 (one file = one record = trivial scan); story-bundle-scoped classes require `story_slug`, and sub-audit-scoped classes require `story_slug` plus `audit_id`. Never reuse or overwrite an ID; if allocation would collide (concurrent plan), the patch engine's pre-apply validation or the workflow's final filename-collision check detects and aborts.
-
-- `CF-<integer>` — Canon Fact Records (`worlds/<slug>/_source/canon/CF-<integer>.yaml`)
-- `CH-<integer>` — Change Log Entries (`worlds/<slug>/_source/change-log/CH-<integer>.yaml`; `CH-1` is always the genesis entry)
-- `<INV-ID>` — Invariants (`worlds/<slug>/_source/invariants/<ID>.yaml`) — IDs follow category convention: `ONT-<integer>` (ontological), `CAU-<integer>` (causal), `DIS-<integer>` (distribution), `SOC-<integer>` (social), `AES-<integer>` (aesthetic/thematic). New worlds use category-prefix + 1-based counter per category.
-- `M-<integer>` — Mystery Reserve entries (`worlds/<slug>/_source/mystery-reserve/M-<integer>.yaml`)
-- `OQ-<integer>` — Open Questions (`worlds/<slug>/_source/open-questions/OQ-<integer>.yaml`)
-- `ENT-<integer>` — Named Entities (`worlds/<slug>/_source/entities/ENT-<integer>.yaml`)
-- `SEC-<PREFIX>-<integer>` — Prose Sections (`worlds/<slug>/_source/<file-subdir>/SEC-<PREFIX>-<integer>.yaml`); prefix per file class: `ELF` (everyday life), `INS` (institutions), `MTS` (magic or tech systems), `GEO` (geography), `ECR` (economy and resources), `PAS` (peoples and species), `TML` (timeline)
-- `PA-<integer>` — adjudication records (`worlds/<slug>/adjudications/`)
-- `CHAR-<integer>` — character dossiers (stored in the dossier's frontmatter `character_id`; filenames use kebab-case slugs)
-- `DA-<integer>` — diegetic artifacts (same pattern as characters)
-- `PR-<integer>` — proposal cards (`worlds/<slug>/proposals/`)
-- `BATCH-<integer>` — proposal batch manifests (`worlds/<slug>/proposals/batches/`)
-- `AU-<integer>` — audit reports (`worlds/<slug>/audits/`)
-- `RP-<integer>` — retcon-proposal cards (emitted by `continuity-audit` under its audit sub-directory)
-- `SAU-<integer>` — story-bundle health audit reports (`worlds/<slug>/stories/<story-slug>/audits/SAU-<integer>-<date>.md`; allocate with `story_slug`)
-- `SP-<integer>` — story promotion ledgers and proposal-package sidecars (`worlds/<slug>/stories/<story-slug>/story-promotions/SP-<integer>.md` and `SP-<integer>-proposal-package.yaml`; allocate with `story_slug`)
-- `RSP-<integer>` — remediation-storylet proposal cards (`worlds/<slug>/stories/<story-slug>/audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md`; allocate with `story_slug` and `audit_id: SAU-<integer>`)
-
-## Common Workflows
-
-See `docs/WORKFLOWS.md` for how to invoke each skill with arguments and expected outputs.
-
-## Non-Negotiables When Working Here
-
-- **Never bypass a HARD-GATE.** Structurally enforced for canon-mutating skills by Hook 3 (blocks raw `Edit`/`Write` on `_source/<subdir>/*.yaml` so canon records cannot land outside the engine) combined with approval-token discipline (`mcp__worldloom__submit_patch_plan` rejects plans without a valid signed token bound to the exact bytes the user approved). The prose non-negotiable remains authoritative everywhere mechanism is absent: skills under development, worlds without an index, repositories without `.claude/settings.json` hooks wired, or any flow Hook 3 doesn't cover (notably hybrid-file artifacts, where engine routing is prescriptive discipline rather than hook-enforced). Auto Mode does not override gates.
-- **Never bypass the patch engine for `_source/` writes.** Post-SPEC-13, `worlds/<slug>/_source/<subdir>/*.yaml` files are engine-only surfaces — Hook 3 structurally blocks raw `Edit`/`Write` on them. Hybrid per-file artifacts under `characters/`, `diegetic-artifacts/`, and `adjudications/` are also engine-routed by skill prescription (via `append_character_record` / `append_diegetic_artifact_record` / `append_adjudication_record`); Hook 3 does not block them, so the prescription is the discipline. `WORLD_KERNEL.md`, `ONTOLOGY.md`, `_source/<subdir>/README.md` files, `proposals/`, `audits/`, and the `INDEX.md` files of hybrid sub-directories remain directly editable.
-- **Never read `_source/` subdirectories in bulk.** Use `mcp__worldloom__get_record(record_id)` / `get_context_packet(task_type, seed_nodes, token_budget)` / `find_sections_touched_by(cf_id)` / other typed retrieval tools. Hook 2 redirects oversized `_source/` directory reads to MCP retrieval. The `ALLOW_FULL_READ` override exists for human-driven review sessions, not for skill convenience.
-- **Never write world-level canon records from a canon-reading skill.** Character dossiers, diegetic artifacts, proposals, audits, and adjudications live in their own sub-directories — the separation is what keeps Rule 6 (No Silent Retcons) enforceable. Only canon-mutating skills may create / update `_source/` records via the patch engine.
-- **Never delete or overwrite an existing atomic record.** `_source/*.yaml` files are append-only in structural fields (mutation happens in `notes`, `modification_history[]`, `extensions[]`); existing dossiers, artifacts, proposals, and audit records are treated as committed state. To change an accepted canon fact, run `canon-addition` again with an explicit retcon proposal + retcon attestation on the patch op.
-- **Never skip FOUNDATIONS.md.** If a workflow's pre-flight doesn't explicitly load it, the workflow is incomplete — stop and add the load before proceeding. Post-SPEC-13, FOUNDATIONS.md §Canonical Storage Layer + §Mandatory World Files (atomic-source classification) are authoritative alongside Rules 1-7 and the CF schema.
-- **Validation test PASS entries require a one-line rationale.** A bare "PASS" without justification is treated as FAIL per the skills' own contracts.
-- **Prose pages are author-supplied.** Rendered prose at `pages-prose/PG-<integer>.md` is supplied externally (manual or LLM) and validated by `branching-story-prose-attach`, which emits a `pages-prose-receipts/PG-<integer>.yaml` receipt without mutating the `PG` record. The page snapshot is the fork primitive per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary) — `branching-story-turn-cycle` may advance from any committed page snapshot without requiring rendered parent prose.
+- **Never bypass a HARD-GATE.** Every canon-mutating or content-generating skill begins with a `<HARD-GATE>` requiring explicit user approval before any write. Auto Mode never overrides gates. Invoking a skill is not approval of its deliverable.
+- **Never bypass the patch engine for `_source/` writes.** `worlds/<slug>/_source/<subdir>/*.yaml` are engine-only surfaces. Hybrid per-file artifacts under `characters/`, `diegetic-artifacts/`, and `adjudications/` are also engine-routed by skill prescription (`append_character_record` / `append_diegetic_artifact_record` / `append_adjudication_record`).
+- **Never read `_source/` subdirectories in bulk.** Use typed retrieval (`mcp__worldloom__get_record` / `get_context_packet` / `find_sections_touched_by` / etc.).
+- **Never write world-level canon from a canon-reading skill.** Character dossiers, diegetic artifacts, proposals, audits, and adjudications live in their own subdirectories — only canon-mutating skills create or update `_source/` records.
+- **Never delete or overwrite an existing atomic record.** `_source/*.yaml` files are append-only in structural fields; mutation happens in `notes`, `modification_history[]`, `extensions[]`. To change an accepted canon fact, run `canon-addition` again with an explicit retcon proposal + retcon attestation.
+- **Never allocate IDs by guesswork.** Scan first and keep IDs append-only; see `docs/ID-ALLOCATION.md`.
 - **Do not `git commit` from inside a skill.** Writes land in the working tree; the user reviews the diff and commits.
-- **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root, not the main repo root.
+- **Validation test PASS entries require a one-line rationale.** A bare "PASS" is treated as FAIL.
+- **Worktree discipline.** If invoked inside a git worktree, all paths resolve from the worktree root.
+
+## Write Boundaries
+
+Treat world-level canon as a high-trust surface. Engine-only (never edit directly): `worlds/<slug>/_source/<subdir>/*.yaml`. Skill-prescribed engine routing (not hook-blocked, but still engine-only by discipline): hybrid files under `characters/`, `diegetic-artifacts/`, `adjudications/`. Directly editable: `WORLD_KERNEL.md`, `ONTOLOGY.md`, `_source/<subdir>/README.md`, `proposals/`, `audits/`, and the `INDEX.md` files of hybrid sub-directories. Content-generation and audit workflows write only to their scoped subdirectories.
+
+## Where To Look
+
+- `docs/REPOSITORY-MAP.md` — directory layout and the canon-mutating / canon-reading / meta skill taxonomy
+- `docs/WORKFLOWS.md` — how to invoke each skill, with arguments and expected outputs
+- `docs/HARD-GATE-DISCIPLINE.md` — HARD-GATE execution pattern and partial-failure semantics
+- `docs/ID-ALLOCATION.md` — ID conventions and the per-class registry
+- `docs/MACHINE-FACING-LAYER.md` — retrieval / patch-engine / validator contract
+- `docs/CONTEXT-PACKET-CONTRACT.md` — context-packet assembly contract
+- `.claude/skills/<slug>/SKILL.md` — workflow-specific instructions and templates
+
+## Harness Notes (Claude Code)
+
+Several Core Rules are **structurally enforced** by Claude Code hooks configured in `.claude/settings.json`: Hook 3 blocks raw `Edit`/`Write` on `_source/<subdir>/*.yaml`, and Hook 2 redirects oversized `_source/` directory reads to MCP retrieval. Where a hook does not cover a surface (skills under development, worlds without an index, hybrid-file artifacts), the prose rule above is authoritative discipline. Skill descriptions are injected into context each session — invoke a skill via the `Skill` tool or `/<slug>` and read its `SKILL.md` for behavior.

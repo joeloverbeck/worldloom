@@ -254,8 +254,8 @@
         "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
         "kind": { "type": "string", "pattern": "^[a-z][a-z0-9_:-]*$" },
         "urgency": { "type": "string", "enum": ["low", "medium", "high"] },
-        "owed_by_role": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" },
-        "owed_to_role": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" }
+        "owed_by_role": { "type": "string", "enum": ["viewpoint", "player_proxy", "primary_actor", "opposing_actor", "allied_actor", "authority", "dependent", "witness", "information_source", "pressure_source", "social_bridge", "background"] },
+        "owed_to_role": { "type": "string", "enum": ["viewpoint", "player_proxy", "primary_actor", "opposing_actor", "allied_actor", "authority", "dependent", "witness", "information_source", "pressure_source", "social_bridge", "background"] }
       }
     },
     {
@@ -330,7 +330,7 @@
         "axis": { "type": "string", "enum": ["trust", "fear", "desire", "debt", "intimacy", "loyalty", "resentment", "power_imbalance", "attention", "familiarity", "approval", "respect", "obligation", "hostility"] },
         "comparator": { "type": "string", "enum": [">=", "<=", "==", "!="] },
         "value": {},
-        "participant_role": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" }
+        "participant_role": { "type": "string", "enum": ["viewpoint", "player_proxy", "primary_actor", "opposing_actor", "allied_actor", "authority", "dependent", "witness", "information_source", "pressure_source", "social_bridge", "background"] }
       }
     },
     {
@@ -341,7 +341,7 @@
       "properties": {
         "pred": { "const": "any_belief" },
         "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
-        "holder_role": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" },
+        "holder_role": { "type": "string", "enum": ["viewpoint", "player_proxy", "primary_actor", "opposing_actor", "allied_actor", "authority", "dependent", "witness", "information_source", "pressure_source", "social_bridge", "background"] },
         "mode": { "type": "string", "enum": ["knows", "believes", "suspects", "doubts", "denies", "reports", "claims", "deceives", "misremembers", "interprets"] },
         "truth_relation": { "type": "string", "enum": ["true", "false", "partly_true", "unknown", "contested", "branch_counterfactual", "future_contingent"] },
         "visibility": { "type": "string", "enum": ["private", "shared", "factional", "public", "rumored", "concealed", "suppressed"] }
@@ -355,7 +355,7 @@
       "properties": {
         "pred": { "const": "any_intention" },
         "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
-        "holder_role": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" },
+        "holder_role": { "type": "string", "enum": ["viewpoint", "player_proxy", "primary_actor", "opposing_actor", "allied_actor", "authority", "dependent", "witness", "information_source", "pressure_source", "social_bridge", "background"] },
         "urgency": { "type": "string", "enum": ["low", "medium", "high"] }
       }
     },
