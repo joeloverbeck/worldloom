@@ -1,9 +1,9 @@
 # SPEC54CHAPIPTHI-003: Expose NCP/NCB via get_record_schema
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — `tools/world-mcp` (`get-record-schema` node-type support + map) + its test. The `server.ts` capability enum is derived from the supported-types constant and updates automatically.
+**Engine Changes**: Yes — `tools/world-mcp` (`get-record-schema` node-type support + map), its test, and same-seam public docs. The `server.ts` capability enum is derived from the supported-types constant and updates automatically.
 **Deps**: None
 
 ## Problem
@@ -16,6 +16,7 @@ SPEC-53 added `get_record`/`list_records` hybrid support for `character_proposal
 2. SPEC-54 Phase 3. The two schema files `character-proposal-card.schema.json` + `character-proposal-batch.schema.json` exist in `tools/validators/src/schemas/` (confirmed). `server.ts`'s `get_record_schema` capability enum is registered as `{ node_type: SUPPORTED_RECORD_SCHEMA_NODE_TYPES }` — derived from the constant, so it picks up the additions with no separate `server.ts` edit.
 3. Cross-artifact boundary under audit: `get_record_schema` is the MCP describe surface; this completes the asymmetry with the `get_record`/`list_records` retrieve surface SPEC-53 landed. The schema files are owned by `tools/validators`; `get-record-schema` reads them cross-package via the existing, sanctioned `validatorsSchemaRoot()` mechanism (no boundary violation).
 4. FOUNDATIONS §Canonical Storage Layer — Read discipline (hybrid records retrievable; schema-backed describe surface). Making `get_record_schema` symmetric with `get_record`/`list_records` for the proposal types aligns with the documented read discipline.
+5. Same-seam public-surface check: `tools/world-mcp/README.md` lists the current `get_record_schema` `node_type` values and `docs/MACHINE-FACING-LAYER.md` describes the schema-discovery vocabulary, so those docs must move with the additive node-type support. `docs/WORKFLOWS.md` does not list the `get_record_schema` enum.
 
 ## Architecture Check
 
@@ -38,10 +39,16 @@ In `tools/world-mcp/src/tools/get-record-schema.ts`, add `"character_proposal_ca
 
 In `tools/world-mcp/tests/tools/get-record-schema.test.ts`, add explicit assertions that both node types resolve (no error code; `source_path` ends in the expected schema filename). The existing parametrized "every supported node type" test will also exercise them and would fail loudly if a mapped schema file could not be loaded.
 
+### 3. Public docs
+
+Update the `get_record_schema` node-type descriptions in `tools/world-mcp/README.md` and `docs/MACHINE-FACING-LAYER.md` so the public contract matches the derived capability enum.
+
 ## Files to Touch
 
 - `tools/world-mcp/src/tools/get-record-schema.ts` (modify)
 - `tools/world-mcp/tests/tools/get-record-schema.test.ts` (modify)
+- `tools/world-mcp/README.md` (modify)
+- `docs/MACHINE-FACING-LAYER.md` (modify)
 
 ## Out of Scope
 
@@ -55,7 +62,8 @@ In `tools/world-mcp/tests/tools/get-record-schema.test.ts`, add explicit asserti
 
 1. `get_record_schema({ node_type: "character_proposal_card" })` and `({ node_type: "character_proposal_batch" })` each return their schema payload with `source_path` = `tools/validators/src/schemas/<file>`.
 2. The parametrized "every supported node type" test passes with the two new entries.
-3. `npm test --prefix tools/world-mcp` passes.
+3. The public `get_record_schema` node-type docs include both proposal node types.
+4. `npm test --prefix tools/world-mcp` passes.
 
 ### Invariants
 
@@ -71,3 +79,23 @@ In `tools/world-mcp/tests/tools/get-record-schema.test.ts`, add explicit asserti
 ### Commands
 
 1. `npm test --prefix tools/world-mcp`
+2. `rg -n 'character_proposal_(card|batch)' tools/world-mcp/README.md docs/MACHINE-FACING-LAYER.md`
+
+## Outcome
+
+Completed: 2026-05-20.
+
+Implemented SPEC-54 Phase 3 by adding `character_proposal_card` and `character_proposal_batch` to `SUPPORTED_RECORD_SCHEMA_NODE_TYPES` and `NODE_TYPE_TO_SCHEMA_FILE` in `tools/world-mcp/src/tools/get-record-schema.ts`. Added explicit `getRecordSchema` assertions for both proposal node types in `tools/world-mcp/tests/tools/get-record-schema.test.ts`; the existing parametrized supported-node-type test also now exercises the new entries and the derived server capability enum.
+
+Same-seam public docs were truthed in `tools/world-mcp/README.md` and `docs/MACHINE-FACING-LAYER.md` because both describe the `get_record_schema` node-type contract. No retrieval behavior, task type, ranking profile, token budget, or context-packet entry changed.
+
+## Verification Result
+
+- `npm test --prefix tools/world-mcp` — PASS before implementation: 417 passed, 0 failed.
+- `npm test --prefix tools/world-mcp` — PASS after implementation: 418 passed, 0 failed.
+- `rg -n 'character_proposal_(card|batch)' tools/world-mcp/README.md docs/MACHINE-FACING-LAYER.md` — PASS; both proposal node types are present in the public `get_record_schema` docs.
+
+## Deviations
+
+- Expanded the drafted file list to include `tools/world-mcp/README.md` and `docs/MACHINE-FACING-LAYER.md`; this is same-seam public-surface truthing for the additive schema-discovery enum.
+- Ignored package artifacts remain present: `tools/world-mcp/dist/` was refreshed by `npm test --prefix tools/world-mcp`; `tools/world-mcp/.secret`, `tools/world-mcp/node_modules/`, `tools/validators/dist/`, and `tools/validators/node_modules/` were pre-existing ignored artifacts.

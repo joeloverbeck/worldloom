@@ -18,6 +18,8 @@ const EXPECTED_SCHEMA_IDS: Record<SupportedRecordSchemaNodeType, string> = {
   named_entity: "https://worldloom.local/schemas/entity.schema.json",
   section: "https://worldloom.local/schemas/section.schema.json",
   character_record: "https://worldloom.local/schemas/character-frontmatter.schema.json",
+  character_proposal_card: "https://worldloom.local/schemas/character-proposal-card.schema.json",
+  character_proposal_batch: "https://worldloom.local/schemas/character-proposal-batch.schema.json",
   diegetic_artifact_record: "https://worldloom.local/schemas/diegetic-artifact-frontmatter.schema.json",
   adjudication_record: "https://worldloom.local/schemas/adjudication-frontmatter.schema.json",
   extension_entry: "https://worldloom.local/schemas/extension-entry.schema.json",
@@ -54,6 +56,8 @@ const EXPECTED_SOURCE_PATHS: Record<SupportedRecordSchemaNodeType, string> = {
   named_entity: "tools/validators/src/schemas/entity.schema.json",
   section: "tools/validators/src/schemas/section.schema.json",
   character_record: "tools/validators/src/schemas/character-frontmatter.schema.json",
+  character_proposal_card: "tools/validators/src/schemas/character-proposal-card.schema.json",
+  character_proposal_batch: "tools/validators/src/schemas/character-proposal-batch.schema.json",
   diegetic_artifact_record: "tools/validators/src/schemas/diegetic-artifact-frontmatter.schema.json",
   adjudication_record: "tools/validators/src/schemas/adjudication-frontmatter.schema.json",
   extension_entry: "tools/validators/src/schemas/_shared/extension-entry.schema.json",
@@ -165,6 +169,32 @@ test("getRecordSchema returns shared extension entry schema as a first-class nod
   assert.deepEqual(result.referenced_schemas, {});
   assert.deepEqual(result.required_fields, ["originating_cf", "change_id", "date", "label", "body"]);
   assert.deepEqual(result.conditional_blocks, {});
+});
+
+test("getRecordSchema exposes character proposal schemas", async () => {
+  const proposalCard = await getRecordSchema({ node_type: "character_proposal_card" });
+  const proposalBatch = await getRecordSchema({ node_type: "character_proposal_batch" });
+
+  assert.ok(!("code" in proposalCard));
+  assert.ok(!("code" in proposalBatch));
+  assert.equal(
+    proposalCard.schema.$id,
+    "https://worldloom.local/schemas/character-proposal-card.schema.json"
+  );
+  assert.equal(
+    proposalBatch.schema.$id,
+    "https://worldloom.local/schemas/character-proposal-batch.schema.json"
+  );
+  assert.equal(
+    proposalCard.source_path,
+    "tools/validators/src/schemas/character-proposal-card.schema.json"
+  );
+  assert.equal(
+    proposalBatch.source_path,
+    "tools/validators/src/schemas/character-proposal-batch.schema.json"
+  );
+  assert.deepEqual(proposalCard.required_fields, readSourceSchema("character_proposal_card").required);
+  assert.deepEqual(proposalBatch.required_fields, readSourceSchema("character_proposal_batch").required);
 });
 
 test("getRecordSchema returns story-bundle schemas from validator sources", async () => {
