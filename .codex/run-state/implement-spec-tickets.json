@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-51-chc-slt-selected-commitment-trace-closure.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC51CHCSLTSEL-002.md",
+  "last_ticket": "archive/tickets/SPEC51CHCSLTSEL-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "4b05aef7fd49272c8fb316ff2f8964da239dfc02",
+  "last_work_commit": "5829ad4f17d6da3a71cf569112a03a911e20ad63",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC51CHCSLTSEL-003.md",
+  "next_target": "tickets/SPEC51CHCSLTSEL-004.md",
   "queue": [
-    "tickets/SPEC51CHCSLTSEL-003.md",
     "tickets/SPEC51CHCSLTSEL-004.md",
     "tickets/SPEC51CHCSLTSEL-005.md"
   ],
@@ -18,6 +17,6 @@
   "post_review_audit_block": "not_applicable",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "pre-existing unrelated dirty gitlink/worktree entry .claude/worktrees/deepening-characters; expected ignored artifacts tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
+  "dirty_state": "pre-existing unrelated dirty gitlink/worktree entry .claude/worktrees/deepening-characters; expected ignored artifacts tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
   "updated_at": "2026-05-20"
 }
