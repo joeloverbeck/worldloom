@@ -51,6 +51,43 @@ function validMemorabilityProfile(): Record<string, unknown> {
   };
 }
 
+function batchCriticPassTrace(): Record<string, unknown> {
+  return {
+    phase_1_continuity_archivist: "No duplicate office found.",
+    phase_2_essence_extractor: "Debt-confession essence preserved.",
+    phase_3_constellation_mosaic: "Occupies an open ledger-faith niche.",
+    phase_5_institutional_everyday: "Turns toll work into daily pressure.",
+    phase_8_epistemic_focalization: "Knows law, not metaphysics.",
+    phase_9_voice_critic: "Speech stays procedural under pressure.",
+    phase_9_artifact_authorship: "Could author receipt-prayers.",
+    phase_11_theme_tone: "Fresh but world-rooted.",
+    blandness_executioner: "Valid-but-dull version was rejected.",
+    protagonist_grade_critic: "Can carry story pressure without plot-destiny fields."
+  };
+}
+
+function upgradeCriticPassTrace(): Record<string, unknown> {
+  return {
+    seed_essence_extractor: "The toll-confessor seed keeps mercy tied to debt visibility.",
+    world_pressure_mapper: "Seasonal audit law pressures her to expose the people she wants to save.",
+    blandness_executioner: "Rejected a harmless clerk because the world pressure did not deform her choices.",
+    protagonist_grade_critic: "Her cannot-swap reason is the confessional toll office's fusion of mercy and audit."
+  };
+}
+
+function rejectedDirectionAuditEntry(direction: string): Record<string, unknown> {
+  return {
+    direction,
+    preserved_essence: ["confession and debt remain fused"],
+    mutation_attempted: `Pushed ${direction} into a sharper tollhouse pressure.`,
+    rejection_reason: `${direction} weakened the office-specific contradiction.`
+  };
+}
+
+function rejectedDirectionAuditEntries(count = 3): Record<string, unknown>[] {
+  return Array.from({ length: count }, (_, index) => rejectedDirectionAuditEntry(`rejected direction ${index + 1}`));
+}
+
 function validCard(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     current_location: "River Tollhouse",
@@ -101,18 +138,7 @@ function validCard(overrides: Record<string, unknown> = {}): Record<string, unkn
       implied_new_facts: []
     },
     recommended_next_step: "generate_immediately",
-    critic_pass_trace: {
-      phase_1_continuity_archivist: "No duplicate office found.",
-      phase_2_essence_extractor: "Debt-confession essence preserved.",
-      phase_3_constellation_mosaic: "Occupies an open ledger-faith niche.",
-      phase_5_institutional_everyday: "Turns toll work into daily pressure.",
-      phase_8_epistemic_focalization: "Knows law, not metaphysics.",
-      phase_9_voice_critic: "Speech stays procedural under pressure.",
-      phase_9_artifact_authorship: "Could author receipt-prayers.",
-      phase_11_theme_tone: "Fresh but world-rooted.",
-      blandness_executioner: "Valid-but-dull version was rejected.",
-      protagonist_grade_critic: "Can carry story pressure without plot-destiny fields."
-    },
+    critic_pass_trace: batchCriticPassTrace(),
     canon_safety_check: {
       invariants_respected: ["SOC-1"],
       mystery_reserve_firewall: ["M-1"],
@@ -144,12 +170,61 @@ test("character proposal card schema accepts single-seed upgrades without batch_
       source_path: "briefs/maren.md",
       source_proposal_id: "",
       mutation_summary: "Kept the toll role and sharpened the debt appetite.",
-      rejected_directions_audit: ["pure monster", "generic orphan", "harmless clerk"]
-    }
+      rejected_directions_audit: rejectedDirectionAuditEntries()
+    },
+    critic_pass_trace: upgradeCriticPassTrace()
   });
   delete card.batch_id;
 
   assert.equal(validate(card), true, JSON.stringify(validate.errors));
+});
+
+test("character proposal card schema rejects upgraded seeds with fewer than three rejected directions", () => {
+  const validate = compileSchema("character-proposal-card");
+  const card = validCard({
+    batch_id: undefined,
+    upgrade_lineage: {
+      origin_kind: "upgraded_seed",
+      source_path: "briefs/maren.md",
+      source_proposal_id: "",
+      mutation_summary: "Kept the toll role and sharpened the debt appetite.",
+      rejected_directions_audit: rejectedDirectionAuditEntries(2)
+    },
+    critic_pass_trace: upgradeCriticPassTrace()
+  });
+  delete card.batch_id;
+
+  assert.equal(validate(card), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "minItems" && error.instancePath.endsWith("/rejected_directions_audit")));
+});
+
+test("character proposal card schema rejects upgraded seeds carrying the batch critic trace", () => {
+  const validate = compileSchema("character-proposal-card");
+  const card = validCard({
+    batch_id: undefined,
+    upgrade_lineage: {
+      origin_kind: "upgraded_seed",
+      source_path: "briefs/maren.md",
+      source_proposal_id: "",
+      mutation_summary: "Kept the toll role and sharpened the debt appetite.",
+      rejected_directions_audit: rejectedDirectionAuditEntries()
+    },
+    critic_pass_trace: batchCriticPassTrace()
+  });
+  delete card.batch_id;
+
+  assert.equal(validate(card), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "required" && error.instancePath === "/critic_pass_trace"));
+});
+
+test("character proposal card schema rejects batch-generated cards carrying the upgrade critic trace", () => {
+  const validate = compileSchema("character-proposal-card");
+  const card = validCard({
+    critic_pass_trace: upgradeCriticPassTrace()
+  });
+
+  assert.equal(validate(card), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "required" && error.instancePath === "/critic_pass_trace"));
 });
 
 test("character proposal card schema rejects missing memorability_profile", () => {

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators/src/structural/character-memorability-structure.ts` (structural validator); no impact on the schema or MCP surface.
-**Deps**: SPEC53CHAPIPSEC-001
+**Deps**: archive/tickets/SPEC53CHAPIPSEC-001.md
 
 ## Problem
 
@@ -13,7 +13,7 @@
 ## Assumption Reassessment (2026-05-20)
 
 1. **Codebase**: `tools/validators/src/structural/character-memorability-structure.ts` `proposalVerdicts` (lines 117–145) — line 122 gates the `Rejected Directions Audit` heading check on `upgradeLineage.origin_kind === "upgraded_seed"` only; there is no `rejected_directions_audit` length check. The `origin_kind` enum (`character-proposal-card.schema.json` line 83) is `["batch_generated", "upgraded_seed", "user_seed"]`.
-2. **Spec/docs**: SPEC-53 Phase 3 (H1b); §Risks "Sequencing" requires Phase 1 (schema accepts the object audit) to land before this ticket's ≥3-object check so the two layers agree — hence `Deps: SPEC53CHAPIPSEC-001`. SPEC-53 §Key design decisions explicitly rejects broadening NCP body-section heading checks beyond `Rejected Directions Audit` (SPEC-52 Phase 5 item 6 deliberate decision).
+2. **Spec/docs**: SPEC-53 Phase 3 (H1b); §Risks "Sequencing" requires Phase 1 (schema accepts the object audit) to land before this ticket's ≥3-object check so the two layers agree — hence `Deps: archive/tickets/SPEC53CHAPIPSEC-001.md`. SPEC-53 §Key design decisions explicitly rejects broadening NCP body-section heading checks beyond `Rejected Directions Audit` (SPEC-52 Phase 5 item 6 deliberate decision).
 3. **Cross-artifact boundary under audit**: NCP schema (`character-proposal-card.schema.json`, post-001) ↔ structural validator (`proposalVerdicts`). The schema's `minItems: 3` conditional and this validator's length check are intentional defense-in-depth — the same pattern as the existing `canon-requiring` implied-facts check, which is enforced in BOTH the schema `allOf` and `proposalVerdicts` (lines 131–142).
 4. **Canon Safety surface (§Rule 7 firewall confirmation)**: `character-memorability-structure.ts` is a structural validator under `tools/validators/src/structural/` that gates hybrid-record writes at validation time. The change adds an NCP-shape check only; it does not touch Mystery Reserve firewall logic, does not resolve any `M-<integer>` entry, and does not weaken any canon-write ordering — confirmed: the validator reads frontmatter shape, never canon records.
 

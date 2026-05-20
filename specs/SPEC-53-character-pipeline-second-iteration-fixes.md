@@ -36,6 +36,8 @@ Three smaller items: the structural validator's rejected-directions-audit check 
 
 ### Phase 1 — Reconcile NCP schema with the deepening template (C1) — Critical
 
+**Implementation note (2026-05-20):** `archive/tickets/SPEC53CHAPIPSEC-001.md` landed this phase's schema/test seam. The NCP schema now accepts the deepening template's upgrade critic trace and object-shaped rejected-directions audit while preserving the batch trace path; validators package tests cover the upgraded positive fixture, origin-kind/trace mismatches, rejected-directions minimum, batch regression, and the updated legacy full-world baseline.
+
 **Files**
 - `tools/validators/src/schemas/character-proposal-card.schema.json` (edit)
 - `tools/validators/tests/schemas/character-proposal-schema-fixtures.test.ts` (edit — real upgraded fixtures)
