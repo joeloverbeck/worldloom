@@ -131,6 +131,8 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 
 Bundle MUST exist. For `cross_story`, sibling bundles are enumerated at Pre-flight (zero siblings is legitimate and produces a no-op for Phase 4).
 
+Targeted retrieval discipline: `story_bundle_context` is an index and summary surface, not full audit authority. When it identifies a material `STPLAN` / `STEMO` / `STSEC` / `STQ` / `CLK` record, retrieve the full body with `mcp__worldloom__get_record`, `mcp__worldloom__get_records`, or a filtered `mcp__worldloom__list_records(..., include_full_body=true)` before issuing CHC-grounding, SLT predicate/effect, page-plan §9b / §9c / §10b, prose-receipt, or health findings that depend on basis, blockers, appraisal, orientation, clue, payoff, or clock payload detail.
+
 ## Pre-flight Check
 
 Before Phase 1:

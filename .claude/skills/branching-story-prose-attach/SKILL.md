@@ -115,6 +115,8 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 
 The bundle MUST exist (non-bootstrap variant); the page MUST exist; the plan + prose pair MUST exist. No context-packet retrieval is normally needed because the plan body inlines the load-bearing canon per shared contract §8 §4. Targeted `mcp__worldloom__get_firewall_content` retrieval is required when plan §11 does not inline the Mystery Reserve firewall fields used by the `forbidden_mystery_resolution` check (Phase 3 check 3). Persisted-summary recovery still applies if retrieval returns `delivery_status: persisted_with_summary` (see `.claude/skills/_shared-templates/persisted-packet-recovery.md`).
 
+Targeted retrieval discipline: if optional retrieval or a persisted summary surfaces `story_bundle_context` entries for material `STPLAN` / `STEMO` / `STSEC` / `STQ` / `CLK` records, treat them as an index and summary surface, not full receipt authority. Retrieve the full body with `mcp__worldloom__get_record`, `mcp__worldloom__get_records`, or a filtered `mcp__worldloom__list_records(..., include_full_body=true)` before evaluating prose receipts, CHC grounding, page-plan §9b / §9c / §10b claims, or health-audit-style findings that depend on basis, blockers, appraisal, orientation, clue, payoff, or clock payload detail.
+
 ## Pre-flight Check
 
 Before Phase 1:
