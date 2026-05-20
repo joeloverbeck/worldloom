@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
+import YAML from "yaml";
+
 import { baseEnvelope, createTestWorld, assertOpError, assertYamlEquals } from "../harness.js";
 import type { PatchOperation } from "../../src/envelope/schema.js";
-import { stageCreateStoryRecord } from "../../src/ops/create-story-record.js";
+import { stageCreateStoryRecord, stageStoryCharacterAuthorityRecord } from "../../src/ops/create-story-record.js";
+import { contentHashForText, serializeStableYaml } from "../../src/ops/shared.js";
 
 test("create_slt_record writes story-bundle YAML under the story _source tree", async (t) => {
   const world = createTestWorld(t);
@@ -509,3 +513,138 @@ test("append_story_diegetic_artifact_record writes story-local artifact YAML", a
   );
   assertYamlEquals(staged, op.payload.record);
 });
+
+test("append_story_character_authority_record writes story-local STCHAR markdown", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ stchar_ids: ["STCHAR-1"] });
+  const op = {
+    op: "append_story_character_authority_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: stcharRecord("STCHAR-1"),
+      body_markdown: "## Profile\n\nMarla speaks with clipped certainty."
+    }
+  } satisfies Extract<PatchOperation, { op: "append_story_character_authority_record" }>;
+
+  const [staged] = await stageStoryCharacterAuthorityRecord(env, op, world.ctx);
+
+  assert.ok(staged);
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "story-characters",
+      "STCHAR-1.md"
+    )
+  );
+  const parsed = parseHybrid(fs.readFileSync(staged.temp_file_path, "utf8"));
+  assert.deepEqual(parsed.frontmatter, op.payload.record);
+  assert.equal(parsed.body.trim(), op.payload.body_markdown);
+});
+
+test("supersede_story_character_authority_record writes replacement and lifecycle-marks predecessor", async (t) => {
+  const world = createTestWorld(t);
+  const predecessor = stcharRecord("STCHAR-1");
+  seedStcharHybrid(world, "marla-kern-seduction", predecessor, "## Profile\n\nOriginal profile.");
+  const env = baseEnvelope({ stchar_ids: ["STCHAR-2"] });
+  const op = {
+    op: "supersede_story_character_authority_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        ...stcharRecord("STCHAR-2"),
+        supersedes: "STCHAR-1",
+        profile_revision: 2
+      },
+      body_markdown: "## Profile\n\nRevised profile."
+    }
+  } satisfies Extract<PatchOperation, { op: "supersede_story_character_authority_record" }>;
+
+  const staged = await stageStoryCharacterAuthorityRecord(env, op, world.ctx);
+
+  assert.equal(staged.length, 2);
+  const predecessorPatch = parseHybrid(fs.readFileSync(staged[0]!.temp_file_path, "utf8"));
+  assert.equal(predecessorPatch.frontmatter.status, "superseded");
+  assert.equal(predecessorPatch.frontmatter.superseded_by, "STCHAR-2");
+  assert.equal(predecessorPatch.body.trim(), "## Profile\n\nOriginal profile.");
+  const replacement = parseHybrid(fs.readFileSync(staged[1]!.temp_file_path, "utf8"));
+  assert.deepEqual(replacement.frontmatter, op.payload.record);
+  assert.equal(
+    staged[1]!.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "story-characters",
+      "STCHAR-2.md"
+    )
+  );
+});
+
+function stcharRecord(id: string): Record<string, unknown> {
+  return {
+    id,
+    story_id: "STORY-1",
+    story_slug: "marla-kern-seduction",
+    world_slug: "minimal-world",
+    source_kind: "world_char",
+    source_char_id: "CHAR-1",
+    source_char_hash: `sha256:${"a".repeat(64)}`,
+    source_char_sections_used: ["frontmatter"],
+    generated_at_page: "story_bootstrap",
+    created_by_skill: "unit-test",
+    supersedes: null,
+    superseded_by: null,
+    status: "active",
+    bound_stent_ids: ["STENT-1"],
+    profile_revision: 1,
+    body_schema_version: "stchar.v1",
+    profile_hash: `sha256:${"b".repeat(64)}`,
+    voice_block_hash: `sha256:${"c".repeat(64)}`,
+    page_packet_hash: `sha256:${"d".repeat(64)}`
+  };
+}
+
+function seedStcharHybrid(
+  world: ReturnType<typeof createTestWorld>,
+  storySlug: string,
+  frontmatter: Record<string, unknown>,
+  body: string
+): void {
+  const id = String(frontmatter.id);
+  const filePath = path.join("stories", storySlug, "story-characters", `${id}.md`);
+  const absolutePath = path.join(world.worldRoot, "worlds", world.worldSlug, filePath);
+  const content = `---\n${serializeStableYaml(frontmatter)}---\n${body}\n`;
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, content, "utf8");
+  const hash = contentHashForText(content);
+  world.db
+    .prepare(
+      `
+        INSERT INTO nodes (
+          node_id, world_slug, story_slug, file_path, heading_path, byte_start, byte_end,
+          line_start, line_end, node_type, body, content_hash, anchor_checksum,
+          summary, created_at_index_version
+        )
+        VALUES (?, ?, ?, ?, NULL, 0, 0, 1, 1, 'story_character_authority_record', ?, ?, ?, NULL, 1)
+      `
+    )
+    .run(`${storySlug}:${id}`, world.worldSlug, storySlug, filePath, serializeStableYaml(frontmatter), hash, hash);
+}
+
+function parseHybrid(content: string): { frontmatter: Record<string, unknown>; body: string } {
+  const match = /^---\n([\s\S]*?)---\n?([\s\S]*)$/.exec(content);
+  assert.ok(match);
+  return {
+    frontmatter: JSON.parse(JSON.stringify(YAML.parse(match[1] ?? ""))) as Record<string, unknown>,
+    body: match[2] ?? ""
+  };
+}

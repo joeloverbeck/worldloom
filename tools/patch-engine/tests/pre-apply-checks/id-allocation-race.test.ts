@@ -102,6 +102,18 @@ test("checkIdAllocationRace rejects duplicate BEL allocations in one story-bundl
   }
 });
 
+test("checkIdAllocationRace accepts STCHAR allocations for story-character authority ops", (t) => {
+  const world = createIndexedTestWorld(t);
+  seedStcharRecord(world, "red-bunny", "STCHAR-1");
+  const envelope = {
+    ...baseEnvelope({ stchar_ids: ["STCHAR-2"] }),
+    target_world: world.worldSlug,
+    patches: [createStcharPatch(world.worldSlug, "red-bunny", "STCHAR-2")]
+  };
+
+  assert.deepEqual(checkIdAllocationRace(world.db, envelope), { ok: true, failures: [] });
+});
+
 test("checkIdAllocationRace returns every mismatch while preserving the first message", (t) => {
   const world = createIndexedTestWorld(t);
   seedStoryRecord(world, "red-bunny", "OBL-12");
@@ -168,6 +180,37 @@ function createBelPatch(
       }
     }
   } satisfies Extract<PatchOperation, { op: "create_bel_record" }>);
+}
+
+function createStcharPatch(
+  worldSlug: string,
+  storySlug: string,
+  id: string
+): Extract<PatchOperation, { op: "append_story_character_authority_record" }> {
+  return createOp({
+    op: "append_story_character_authority_record",
+    target_world: worldSlug,
+    target_file: `stories/${storySlug}/story-characters/${id}.md`,
+    payload: {
+      story_slug: storySlug,
+      record: { id },
+      body_markdown: "## Profile\n\nA profile."
+    }
+  } satisfies Extract<PatchOperation, { op: "append_story_character_authority_record" }>);
+}
+
+function seedStcharRecord(
+  world: ReturnType<typeof createIndexedTestWorld>,
+  storySlug: string,
+  id: string
+): void {
+  seedRecord(world, `${storySlug}:${id}`, "story_character_authority_record", `stories/${storySlug}/story-characters/${id}.md`, {
+    id,
+    title: `Existing STCHAR ${id}`
+  });
+  world.db
+    .prepare("UPDATE nodes SET story_slug = ?, node_id = ? WHERE node_id = ?")
+    .run(storySlug, id, `${storySlug}:${id}`);
 }
 
 function seedStoryRecord(

@@ -76,6 +76,7 @@ const ID_ALLOCATION_KEYS = [
   "stq_ids",
   "stplan_ids",
   "stemo_ids",
+  "stchar_ids",
   "story_da_ids"
 ] as const;
 
@@ -111,6 +112,7 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   story_question_record: "story-question.schema.json",
   story_plan_record: "story-plan.schema.json",
   story_emotion_record: "story-emotion.schema.json",
+  story_character_authority_record: "story-character-authority.schema.json",
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 } as const;
 
@@ -268,6 +270,19 @@ function storyPayloadWithRecord(payloadKey: keyof typeof RECORD_SCHEMA_BY_PAYLOA
     properties: {
       story_slug: stringSchema("^[a-z0-9-]+$"),
       record: { $ref: schemaRef(payloadKey) }
+    }
+  };
+}
+
+function storyHybridPayloadWithRecord(payloadKey: keyof typeof RECORD_SCHEMA_BY_PAYLOAD_KEY): JsonObject {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: ["story_slug", "record", "body_markdown"],
+    properties: {
+      story_slug: stringSchema("^[a-z0-9-]+$"),
+      record: { $ref: schemaRef(payloadKey) },
+      body_markdown: stringSchema()
     }
   };
 }
@@ -451,6 +466,9 @@ function operationSchema(kind: OperationKind): JsonObject {
       return baseOperationProperties(kind, storyPayloadWithRecord("story_plan_record"));
     case "create_stemo_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_emotion_record"));
+    case "append_story_character_authority_record":
+    case "supersede_story_character_authority_record":
+      return baseOperationProperties(kind, storyHybridPayloadWithRecord("story_character_authority_record"));
     case "append_story_diegetic_artifact_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_diegetic_artifact_record"));
   }

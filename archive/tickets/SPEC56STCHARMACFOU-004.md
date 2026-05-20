@@ -1,6 +1,6 @@
 # SPEC56STCHARMACFOU-004: Patch-engine STCHAR write + supersede ops
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/patch-engine` (new STORY_RECORD_SPECS entry + supersede op + `stchar_ids` allocation + stale-index); `tools/world-mcp` (`describe_envelope_schema` + patch-plan test).
@@ -17,6 +17,8 @@ STCHAR records are engine-only write surfaces (hybrid markdown under `stories/<s
 3. **Cross-artifact boundary under audit**: the op's `STORY_RECORD_SPECS` entry must match the `append_story_diegetic_artifact_record` shape; `describe_envelope_schema` (world-mcp) must document the new ops; `validate-patch-plan.test.ts` (world-mcp) currently references `bound_char_id` in a patch-plan fixture and must be updated.
 4. **FOUNDATIONS principle restatement**: §Canonical Storage Layer — `_source`/hybrid story-bundle writes are engine-only; STCHAR routes through `submit_patch_plan`, never direct-written. The op preserves that guarantee.
 5. **Canon Safety surface** (`tools/patch-engine/src/`): the new ops gate STCHAR record writes at engine pre-apply time. Confirm the change does not weaken the Mystery Reserve firewall — STCHAR writes are character-authority writes, orthogonal to MR resolution; the engine's existing MR firewall and validator pre-apply gate are unchanged. **Implementer open-point**: STCHAR is the first *hybrid* story-bundle record needing supersession (story DA is append-only with no supersede op) — confirm/establish the hybrid-supersede path against the atomic `supersede_<class>_record` precedent and story DA's hybrid writer when implementing.
+6. Implementation correction: the existing story-record staging path only wrote YAML under `_source/`. STCHAR remains registered in `STORY_RECORD_SPECS`, but `create-story-record.ts` now has a narrow hybrid branch for only `append_story_character_authority_record` and `supersede_story_character_authority_record`.
+7. The stale-index detector is file-version based and already covers indexed hybrid paths generically, including `stories/*/story-characters/STCHAR-*.md` once world-index emits those file versions. No bespoke stale-index path filter was needed in this ticket.
 
 ## Architecture Check
 
@@ -50,6 +52,10 @@ Add stale-index detection covering `stories/*/story-characters/STCHAR-*.md`. Doc
 - `tools/patch-engine/src/ops/story-record-specs.ts` (modify)
 - `tools/patch-engine/src/ops/create-story-record.ts` (modify)
 - `tools/patch-engine/src/apply.ts` (modify)
+- `tools/patch-engine/src/commit/temp-file.ts` (modify)
+- `tools/patch-engine/src/commit/order.ts` (modify)
+- `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts` (modify)
+- `tools/world-mcp/tests/tools/_shared.ts` (modify)
 - `tools/world-mcp/src/tools/describe-envelope-schema.ts` (modify)
 - `tools/world-mcp/tests/tools/validate-patch-plan.test.ts` (modify)
 - `tools/patch-engine/tests/**` (new + modify — op apply + stale-index tests)
@@ -84,3 +90,25 @@ Add stale-index detection covering `stories/*/story-characters/STCHAR-*.md`. Doc
 
 1. `npm run build --prefix tools/patch-engine` (covers tsc).
 2. `npm test --prefix tools/patch-engine` then `npm test --prefix tools/world-mcp`.
+
+## Outcome
+
+Completed. Added `stchar_ids`, `append_story_character_authority_record`, and `supersede_story_character_authority_record` to the patch-engine operation surface. STCHAR write ops use the story-record registry for id allocation and node metadata, but route to hybrid markdown at `stories/<slug>/story-characters/STCHAR-<id>.md`.
+
+`supersede_story_character_authority_record` stages two writes: it lifecycle-marks the predecessor frontmatter as `status: superseded` with `superseded_by`, and writes the replacement STCHAR markdown file.
+
+World-mcp envelope schema now documents the two new ops and `stchar_ids`; validate-patch-plan coverage accepts an STCHAR append op and the STPLAN/STEMO fixture was updated from `bound_char_id` to `bound_stchar_id`.
+
+## Verification Result
+
+1. Baseline before edits: `npm test` from `tools/patch-engine` passed 88 tests.
+2. `npm run build` from `tools/patch-engine` passed.
+3. Focused patch-engine tests passed: `node --test dist/tests/pre-apply-checks/id-allocation-race.test.js dist/tests/ops/create-story-record.test.js`.
+4. `npm test` from `tools/patch-engine` passed: 91 tests, 91 pass.
+5. Focused world-mcp tests passed: `node --test dist/tests/tools/validate-patch-plan.test.js dist/tests/tools/describe-envelope-schema.test.js`.
+6. `npm test` from `tools/world-mcp` passed: 423 tests, 423 pass.
+
+## Deviations
+
+1. No separate stale-index implementation was required; the existing file-version freshness guard already covers STCHAR hybrid paths once indexed.
+2. The world-mcp shared test helper type needed to admit `story_character_authority_record` so seeded STCHAR fixtures could be represented truthfully.

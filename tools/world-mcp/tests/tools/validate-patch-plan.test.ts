@@ -200,6 +200,67 @@ test("validatePatchPlan accepts append_story_diegetic_artifact_record through pr
   }
 });
 
+test("validatePatchPlan accepts append_story_character_authority_record through pre-apply validation", async () => {
+  const root = createTempRepoRoot();
+  seedEmptyWorld(root);
+
+  try {
+    const plan = {
+      plan_id: "plan-stchar-001",
+      target_world: "seeded",
+      approval_token: "token-from-gate",
+      verdict: "ACCEPT",
+      originating_skill: "branching-story-bootstrap",
+      expected_id_allocations: { stchar_ids: ["STCHAR-1"] },
+      patches: [
+        {
+          op: "append_story_character_authority_record",
+          target_world: "seeded",
+          target_file: "stories/marla-kern-seduction/story-characters/STCHAR-1.md",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            record: {
+              id: "STCHAR-1",
+              story_id: "STORY-1",
+              story_slug: "marla-kern-seduction",
+              world_slug: "seeded",
+              source_kind: "world_char",
+              source_char_id: "CHAR-1",
+              source_char_hash: `sha256:${"a".repeat(64)}`,
+              source_char_sections_used: ["frontmatter"],
+              generated_at_page: "story_bootstrap",
+              created_by_skill: "branching-story-bootstrap",
+              supersedes: null,
+              superseded_by: null,
+              status: "active",
+              bound_stent_ids: ["STENT-1"],
+              profile_revision: 1,
+              body_schema_version: "stchar.v1",
+              profile_hash: `sha256:${"b".repeat(64)}`,
+              voice_block_hash: `sha256:${"c".repeat(64)}`,
+              page_packet_hash: `sha256:${"d".repeat(64)}`
+            },
+            body_markdown: "## Profile\n\nMarla acts with focused suspicion."
+          }
+        }
+      ]
+    };
+
+    const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
+
+    assert.ok("status" in result);
+    assert.equal(result.status, "pass", JSON.stringify(result, null, 2));
+    assert.deepEqual(result.verdicts, []);
+    assert.ok(
+      result.validators_run.some(
+        (entry) => entry.validator_name === "id_allocation_race" && entry.status === "pass"
+      )
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("validatePatchPlan accepts STPLAN and STEMO create ops through pre-apply validation", async () => {
   const root = createTempRepoRoot();
   seedStoryPlanPrereqs(root);
@@ -248,7 +309,7 @@ test("validatePatchPlan accepts STPLAN and STEMO create ops through pre-apply va
               },
               fallback_steps: [],
               expires_when: "The ledger is recovered or destroyed.",
-              derived_from: ["BEL-1"]
+              derived_from: ["BEL-1", "STCHAR-1"]
             }
           }
         },
@@ -273,7 +334,7 @@ test("validatePatchPlan accepts STPLAN and STEMO create ops through pre-apply va
               behavioral_pressure: ["flee"],
               agency_effect: "none",
               expires_when: "The actor reorients to the threat.",
-              derived_from: ["BEL-1"]
+              derived_from: ["BEL-1", "STCHAR-1"]
             }
           }
         }
@@ -321,6 +382,7 @@ function seedStoryPlanPrereqs(root: string): void {
         "state_snapshot:",
         "  active_records:",
         "    STENT: [STENT-1]",
+        "    STCHAR: [STCHAR-1]",
         "    STINT: [STINT-1]",
         "    BEL: [BEL-1]",
         "    STOBJ: [STOBJ-1]",
@@ -346,9 +408,30 @@ function seedStoryPlanPrereqs(root: string): void {
         "id: STENT-1",
         "story_id: STORY-1",
         "display_name: Marla",
-        "bound_char_id: null",
+        "bound_stchar_id: STCHAR-1",
         "role_in_story: [primary_actor]",
         "created_at_page: PG-1"
+      ]),
+      storyCharacterNode(storySlug, "STCHAR-1", [
+        "id: STCHAR-1",
+        "story_id: STORY-1",
+        "story_slug: marla-kern-seduction",
+        "world_slug: seeded",
+        "source_kind: world_char",
+        "source_char_id: CHAR-1",
+        `source_char_hash: sha256:${"a".repeat(64)}`,
+        "source_char_sections_used: [frontmatter]",
+        "generated_at_page: story_bootstrap",
+        "created_by_skill: unit-test",
+        "supersedes: null",
+        "superseded_by: null",
+        "status: active",
+        "bound_stent_ids: [STENT-1]",
+        "profile_revision: 1",
+        "body_schema_version: stchar.v1",
+        `profile_hash: sha256:${"b".repeat(64)}`,
+        `voice_block_hash: sha256:${"c".repeat(64)}`,
+        `page_packet_hash: sha256:${"d".repeat(64)}`
       ]),
       storyNode(storySlug, "intention_record", "STINT-1", "intentions", [
         "id: STINT-1",
@@ -406,6 +489,22 @@ function seedStoryPlanPrereqs(root: string): void {
       ])
     ]
   });
+}
+
+function storyCharacterNode(
+  storySlug: string,
+  id: string,
+  lines: string[]
+): Parameters<typeof seedWorld>[1]["nodes"][number] {
+  return {
+    node_id: `${storySlug}:${id}`,
+    world_slug: "seeded",
+    story_slug: storySlug,
+    file_path: `stories/${storySlug}/story-characters/${id}.md`,
+    heading_path: id,
+    node_type: "story_character_authority_record",
+    body: `${lines.join("\n")}\n`
+  };
 }
 
 function storyNode(
