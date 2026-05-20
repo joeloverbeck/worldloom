@@ -275,6 +275,54 @@ test("listRecords returns STPLAN and STEMO records scoped by story_slug", async 
   }
 });
 
+test("listRecords returns STCHAR hybrid records scoped by story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const compact = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "story_character_authority_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        fields: ["record_id", "record_kind", "title", "file_path"]
+      })
+    );
+    const fullBody = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "story_character_authority_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        include_full_body: true
+      })
+    );
+
+    assert.ok(!("code" in compact));
+    assert.equal(compact.total, 1);
+    assert.deepEqual(compact.records, [
+      {
+        record_id: "STCHAR-1",
+        record_kind: "story_character_authority_record",
+        title: "opening-bells:STCHAR-1",
+        file_path: "stories/opening-bells/story-characters/STCHAR-1.md"
+      }
+    ]);
+
+    assert.ok(!("code" in fullBody));
+    assert.equal(fullBody.total, 1);
+    const record = fullBody.records[0] as { body?: Record<string, unknown> };
+    assert.equal(record.body?.record_kind, "story_character_authority_record");
+    assert.deepEqual((record.body?.frontmatter as Record<string, unknown>).bound_stent_ids, ["STENT-2"]);
+    assert.match(
+      String((record.body?.body_sections as Record<string, unknown>)["Page-Plan Voice Block"]),
+      /clipped, observant phrasing/
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("listRecords requires story_slug for story-bundle record types", async () => {
   const root = createTempRepoRoot();
 

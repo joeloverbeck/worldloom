@@ -1,6 +1,6 @@
 # SPEC56STCHARMACFOU-006: MCP retrieval + context-packet STCHAR
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-mcp` (`allocate_next_id`, `list_records`, `get_record` section_path, `story_bundle_context` + `cast_bind_list` parser; tests).
@@ -17,6 +17,7 @@ Story skills must retrieve STCHAR authority on demand (section-projected) and se
 3. **Cross-artifact boundary under audit**: retrieval consumes the indexed STCHAR (ticket 005) and the schema (ticket 002). The `get_record` guard relaxation must be scoped to STCHAR specifically (story DA stays guarded — it has no body sections to project). The `cast_bind_list` reshape is coupled to SPEC-57's STORY_KERNEL.md change — this ticket lands the parser side; SPEC-57 lands the data side; they must be sequenced (neither strands the other, per Definition of Done).
 4. **FOUNDATIONS principle restatement**: §Tooling Recommendation — typed retrieval + section projection is the machine-facing delivery mechanism; STCHAR section-path projection (`body.Page-Plan Voice Block`) is what replaces the deferred packet tool (M3). Story-turn-cycle context must surface active STCHAR summaries and NOT deliver world `CHAR` full bodies.
 5. **Rename/remove blast radius** (`cast_bind_list.char_id`): the field is renamed to `stchar_id` + `source_char_id` in both the `buildCastBindList` parser (`story-bundle-context.ts`) and the `cast_bind_list` type (`shared.ts`). Pipeline grep: these two world-mcp sites are the only machine-layer consumers; the STORY_KERNEL.md producer is SPEC-57. Without this ticket, `cast_bind_list.char_id` parses as `null` once SPEC-57's reshape lands.
+6. Implementation note: STCHAR is the only story-scoped hybrid record that supports `get_record` section projection. Story DA remains story-bundle YAML and still routes through the existing story record path.
 
 ## Architecture Check
 
@@ -54,7 +55,10 @@ Add `active_story_characters[]` summary (id, status, bound_stent_ids, source_kin
 - `tools/world-mcp/src/tools/get-record-schema.ts` (modify)
 - `tools/world-mcp/src/context-packet/shared.ts` (modify)
 - `tools/world-mcp/src/context-packet/story-bundle-context.ts` (modify)
-- `tools/world-mcp/tests/tools/*` (new + modify — get-record/list-records/context-packet STCHAR tests)
+- `tools/world-mcp/src/tools/_shared.ts` (modify)
+- `tools/world-mcp/src/server.ts` (modify)
+- `tools/world-mcp/tests/tools/*` (modify — allocator/schema/get-record/list-records STCHAR tests)
+- `tools/world-mcp/tests/context-packet/*` (modify — active STCHAR summary/cast binding tests)
 
 ## Out of Scope
 
@@ -85,3 +89,17 @@ Add `active_story_characters[]` summary (id, status, bound_stent_ids, source_kin
 
 1. `npm run build --prefix tools/world-mcp` (covers tsc).
 2. `npm test --prefix tools/world-mcp`.
+
+## Outcome
+
+Implemented. World-mcp now exposes `STCHAR` allocation, `story_character_authority_record` list/schema support, `get_record(STCHAR, story_slug)` with hybrid frontmatter/body section projection, `story_bundle_context.active_story_characters`, and `cast_bind_list[]` entries shaped as `stchar_id` + `source_char_id` + `stent_id`.
+
+## Verification Result
+
+1. `npm run build --prefix tools/world-mcp` — PASS.
+2. `cd tools/world-mcp && node --test dist/tests/tools/allocate-next-id.test.js dist/tests/tools/get-record-schema.test.js dist/tests/tools/story-node-type-parity.test.js dist/tests/tools/get-record.story-bundle.test.js dist/tests/tools/list-records.story-bundle.test.js dist/tests/context-packet/story-bundle-context.test.js dist/tests/context-packet/story-bundle-budget.test.js dist/tests/tools/describe-capabilities.test.js` — PASS, 53 tests.
+3. `npm test --prefix tools/world-mcp` — PASS, 425 tests.
+
+## Deviations
+
+The shared fixture was updated to the new `cast_bind_list` test shape (`stchar_id` + `source_char_id`) so the parser has live coverage. No `get_story_character_packet` tool was added.

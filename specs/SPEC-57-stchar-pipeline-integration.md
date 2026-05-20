@@ -99,7 +99,7 @@ cast_bind_list:
 ```
 `char_id` is removed as operational authority.
 
-**Cross-spec coupling (`cast_bind_list` parser)**: this reshape is the *data-producer* side — bootstrap writes the new `cast_bind_list` shape into `STORY_KERNEL.md`. The *parser* side — `buildCastBindList` + the `cast_bind_list` type in `tools/world-mcp/src/context-packet/{story-bundle-context.ts,shared.ts}` — is landed by **SPEC-56 Phase 6** (ticket `SPEC56STCHARMACFOU-006`), which updates the parser to read `stchar_id` + `source_char_id` instead of `char_id`. Because SPEC-56 lands first (per the dependency header), the parser is ready before this reshape writes the new shape; the two are co-sequenced so neither strands the other (SPEC-56's Definition of Done carries the reciprocal note). When this spec is decomposed, the bootstrap ticket should reference `SPEC56STCHARMACFOU-006` as the parser-side counterpart.
+**Cross-spec coupling (`cast_bind_list` parser)**: this reshape is the *data-producer* side — bootstrap writes the new `cast_bind_list` shape into `STORY_KERNEL.md`. The *parser* side — `buildCastBindList` + the `cast_bind_list` type in `tools/world-mcp/src/context-packet/{story-bundle-context.ts,shared.ts}` — is landed by **SPEC-56 Phase 6** (ticket `archive/tickets/SPEC56STCHARMACFOU-006.md`), which updates the parser to read `stchar_id` + `source_char_id` instead of `char_id`. Because SPEC-56 lands first (per the dependency header), the parser is ready before this reshape writes the new shape; the two are co-sequenced so neither strands the other (SPEC-56's Definition of Done carries the reciprocal note). When this spec is decomposed, the bootstrap ticket should reference `archive/tickets/SPEC56STCHARMACFOU-006.md` as the parser-side counterpart.
 
 **Grounding rules for initial records:** `STINT` derives intent from STCHAR
 appetite/refusals/pressure behavior; `SREL`/`STPLAN`/`STEMO` include STCHAR in `derived_from`
@@ -277,7 +277,7 @@ and the optional source-drift mode is advisory.
 - All eight phases' acceptance criteria pass; all touched skills' FOUNDATIONS Alignment tables
   updated to reference STCHAR.
 - Build + typecheck + tests green across affected `tools/*` packages.
-- The Phase 2 `cast_bind_list` reshape is co-sequenced with SPEC-56 Phase 6's `buildCastBindList` parser update (ticket `SPEC56STCHARMACFOU-006`) — the data-producer (bootstrap) and the parser (world-mcp) land coherently; neither strands the other.
+- The Phase 2 `cast_bind_list` reshape is co-sequenced with SPEC-56 Phase 6's `buildCastBindList` parser update (ticket `archive/tickets/SPEC56STCHARMACFOU-006.md`) — the data-producer (bootstrap) and the parser (world-mcp) land coherently; neither strands the other.
 - A sample bootstrap → turn-cycle → prose-attach → health-audit pass over a small fixture cast
   demonstrates: STCHAR authored at bootstrap, voice packet in the page plan, prose-attach
   voice-fidelity receipt emitted, no `CHAR` read at runtime, health-audit phase 2m clean.

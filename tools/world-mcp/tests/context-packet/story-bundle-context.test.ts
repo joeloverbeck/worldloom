@@ -320,6 +320,21 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
         derived_from: ["SE-1"]
       }
     ]);
+    assert.deepEqual(result.story_bundle_context.active_story_characters, [
+      {
+        id: "STCHAR-1",
+        status: "active",
+        bound_stent_ids: ["STENT-2"],
+        source_kind: "world_char",
+        source_char_id: "CHAR-1",
+        profile_revision: 1,
+        profile_hash: `sha256:${"b".repeat(64)}`,
+        voice_block_hash: `sha256:${"c".repeat(64)}`,
+        page_packet_hash: `sha256:${"d".repeat(64)}`,
+        packet_preview:
+          "## Profile Marla Kern keeps her fear below the surface while looking for a clean exit. ## Page-Plan Voice Block Use clipped, observant phrasing and avoid direct world-character dossier text."
+      }
+    ]);
     assert.deepEqual(
       result.story_bundle_context.active_actor_plans.map((plan) => Object.keys(plan)),
       [
@@ -435,6 +450,8 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
       result.story_bundle_context.cast_bind_list.map((entry) => entry.stent_id),
       ["STENT-2"]
     );
+    assert.deepEqual(result.story_bundle_context.cast_bind_list[0]?.stchar_id, "STCHAR-1");
+    assert.deepEqual(result.story_bundle_context.cast_bind_list[0]?.source_char_id, "CHAR-1");
     assert.deepEqual(result.story_bundle_context.cast_bind_list[0]?.role_in_story, [
       "viewpoint",
       "primary_actor"
@@ -451,6 +468,7 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     assert.deepEqual(storyBundleContextSummary?.active_location_ids, ["STLOC-1"]);
     assert.deepEqual(storyBundleContextSummary?.active_object_ids, ["STOBJ-1"]);
     assert.deepEqual(storyBundleContextSummary?.active_story_da_ids, ["DA-1"]);
+    assert.deepEqual(storyBundleContextSummary?.active_story_character_ids, ["STCHAR-1"]);
     assert.deepEqual(storyBundleContextSummary?.active_plan_ids, ["STPLAN-1"]);
     assert.deepEqual(storyBundleContextSummary?.active_plan_holders, ["STENT-2"]);
     assert.deepEqual(storyBundleContextSummary?.active_emotion_ids, ["STEMO-1", "STEMO-2"]);

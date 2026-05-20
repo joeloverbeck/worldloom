@@ -162,6 +162,53 @@ test("getRecord resolves STPLAN and STEMO story-bundle records through story_slu
   }
 });
 
+test("getRecord resolves STCHAR and projects hybrid sections through story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const full = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "STCHAR-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG
+      })
+    );
+    const sourceChar = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "STCHAR-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG,
+        section_path: "frontmatter.source_char_id"
+      })
+    );
+    const voiceBlock = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "STCHAR-1",
+        world_slug: "seeded",
+        story_slug: STORY_FIXTURE_SLUG,
+        section_path: "body.Page-Plan Voice Block"
+      })
+    );
+
+    assert.ok("frontmatter" in full);
+    assert.equal(full.record_kind, "story_character_authority_record");
+    assert.equal(full.record_id, "opening-bells:STCHAR-1");
+    assert.equal(full.frontmatter.id, "STCHAR-1");
+    assert.deepEqual(full.frontmatter.bound_stent_ids, ["STENT-2"]);
+    assert.match(full.body_sections["Page-Plan Voice Block"] ?? "", /clipped, observant phrasing/);
+    assert.equal(full.file_path, "stories/opening-bells/story-characters/STCHAR-1.md");
+
+    assert.ok("value" in sourceChar);
+    assert.equal(sourceChar.value, "CHAR-1");
+    assert.ok("value" in voiceBlock);
+    assert.match(String(voiceBlock.value), /avoid direct world-character dossier text/);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("getRecord rejects bundle-scoped ids without story_slug", async () => {
   const root = createTempRepoRoot();
 

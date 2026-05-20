@@ -76,6 +76,7 @@ export interface ContextPacketStoryBundleContextSummary {
   active_location_ids: string[];
   active_object_ids: string[];
   active_story_da_ids: string[];
+  active_story_character_ids: string[];
   active_plan_ids: string[];
   active_plan_holders: string[];
   active_emotion_ids: string[];
@@ -198,6 +199,18 @@ export interface ContextPacketStoryBundleContext {
     truth_relation: string;
     derived_from: string[];
   }>;
+  active_story_characters: Array<{
+    id: string;
+    status: string;
+    bound_stent_ids: string[];
+    source_kind: string;
+    source_char_id: string | null;
+    profile_revision: number;
+    profile_hash: string;
+    voice_block_hash: string;
+    page_packet_hash: string;
+    packet_preview: string;
+  }>;
   active_actor_plans: Array<{
     id: string;
     holder: string;
@@ -278,7 +291,8 @@ export interface ContextPacketStoryBundleContext {
     }>;
   }>;
   cast_bind_list: Array<{
-    char_id: string | null;
+    stchar_id: string | null;
+    source_char_id: string | null;
     stent_id: string;
     role_in_story: RoleInStory[];
   }>;

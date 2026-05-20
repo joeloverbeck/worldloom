@@ -55,6 +55,7 @@ export type StoryParsedRecord = {
 export type HybridRecordKind =
   | "character"
   | "diegetic_artifact"
+  | "story_character_authority_record"
   | "adjudication"
   | "character_proposal_card"
   | "character_proposal_batch";
@@ -115,7 +116,7 @@ export interface RecordRow {
 const ATOMIC_RECORD_ID_PATTERN =
   /^(?:(?:CF|CH|M|OQ|ENT)-\d+|(?:ONT|CAU|DIS|SOC|AES)-\d+|SEC-(?:ELF|INS|MTS|GEO|ECR|PAS|TML)-\d+)$/;
 
-const HYBRID_RECORD_ID_PATTERN = /^(?:CHAR|DA|PA|NCP|NCB)-\d+$/;
+const HYBRID_RECORD_ID_PATTERN = /^(?:CHAR|STCHAR|DA|PA|NCP|NCB)-\d+$/;
 const STORY_DIEGETIC_ARTIFACT_ID_PATTERN = /^DA-\d+$/;
 
 const STORY_MARKDOWN_NODE_TYPES: readonly StoryBundleNodeType[] = [
@@ -136,6 +137,7 @@ const NODE_TYPE_TO_RECORD_KIND: Partial<Record<NodeType, ParsedRecord["record_ki
 const NODE_TYPE_TO_HYBRID_KIND: Partial<Record<NodeType, HybridRecordKind>> = {
   character_record: "character",
   diegetic_artifact_record: "diegetic_artifact",
+  story_character_authority_record: "story_character_authority_record",
   adjudication_record: "adjudication",
   character_proposal_card: "character_proposal_card",
   character_proposal_batch: "character_proposal_batch"
@@ -182,7 +184,7 @@ export function validateRecordId(recordId: string): McpError | null {
   return createMcpError("invalid_input", `record_id '${recordId}' is not a supported record id.`, {
     field: "record_id",
     expected:
-      "atomic (CF-<integer>, CH-<integer>, M-<integer>, OQ-<integer>, ENT-<integer>, invariant category id, SEC-<class>-<integer>), hybrid (CHAR-<integer>, DA-<integer>, PA-<integer>, NCP-<integer>, NCB-<integer>), or story-bundle (PG/SE/BEL/SF/OBL/CNSQ/THR/SREL/STINT/STENT/STSTAT/STLOC/STOBJ/CLK/STSEC/STQ/STPLAN/STEMO/BR/CHC/SLT/SLB/SAU/SP/RSP-<integer>)"
+      "atomic (CF-<integer>, CH-<integer>, M-<integer>, OQ-<integer>, ENT-<integer>, invariant category id, SEC-<class>-<integer>), hybrid (CHAR-<integer>, STCHAR-<integer>, DA-<integer>, PA-<integer>, NCP-<integer>, NCB-<integer>), or story-bundle (PG/SE/BEL/SF/OBL/CNSQ/THR/SREL/STINT/STENT/STSTAT/STCHAR/STLOC/STOBJ/CLK/STSEC/STQ/STPLAN/STEMO/BR/CHC/SLT/SLB/SAU/SP/RSP-<integer>)"
   });
 }
 
@@ -639,7 +641,12 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
 
   const isStoryBundleRecord = isStoryBundleRecordId(args.record_id) || isStoryScopedDiegeticArtifact;
 
-  if (args.section_path !== undefined && isHybrid && isStoryBundleRecord) {
+  if (
+    args.section_path !== undefined &&
+    isHybrid &&
+    isStoryBundleRecord &&
+    !/^STCHAR-\d+$/.test(args.record_id)
+  ) {
     return createMcpError(
       "invalid_input",
       `section_path is not valid for story-bundle records with hybrid ids.`,
