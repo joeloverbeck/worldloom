@@ -14,6 +14,31 @@ test("record_schema_compliance accepts complete CLK records", async () => {
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts STPLAN/STEMO targets in CLK threshold effects", async () => {
+  // SPEC-47 lifecycle classes: a clock crossing can fail an actor's plan or
+  // transition an emotion, and the threshold effects are materialized verbatim
+  // into SE.state_delta (which already accepts STPLAN/STEMO).
+  const parsed = validClock({
+    thresholds: [
+      {
+        at: 3,
+        label: "Deadline lands: escape plan collapses, dread spikes",
+        effects: {
+          create: ["STPLAN-2", "STEMO-2"],
+          supersede: ["STPLAN-1", "STEMO-1"],
+          close: ["STEMO-3"]
+        }
+      }
+    ]
+  });
+
+  const result = await recordSchemaCompliance.run({}, context([
+    clockRecord(parsed)
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
 test("record_schema_compliance rejects invalid CLK enum values", async () => {
   const result = await recordSchemaCompliance.run({}, context([
     clockRecord(validClock({ clock_kind: "front", visibility: "audience_only" }))
@@ -42,6 +67,17 @@ test("record_schema_compliance rejects zero tick deltas", async () => {
     verdict.code === "record_schema_compliance.not" &&
     verdict.message.includes("/tick_history/0/delta")
   ));
+});
+
+test("record_schema_compliance accepts STPLAN in CLK linked_records", async () => {
+  // A clock can pressure an actor's tactical plan (deadline forcing revision);
+  // STPLAN was missing from the curated linked_records set. STSEC stays excluded
+  // by design (SPEC-42 deliberately omitted it).
+  const result = await recordSchemaCompliance.run({}, context([
+    clockRecord(validClock({ linked_records: ["THR-1", "STPLAN-1"] }))
+  ]));
+
+  assert.deepEqual(result, []);
 });
 
 function clockRecord(parsed: Record<string, unknown>) {

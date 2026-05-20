@@ -24,7 +24,10 @@ export const SOURCE_RECORD_TYPES: Readonly<Record<string, string>> = {
   STLOC: "story_location_record",
   STOBJ: "story_object_record",
   CLK: "pressure_clock_record",
-  STSEC: "story_secret_record"
+  STSEC: "story_secret_record",
+  STSTAT: "story_status_record",
+  STPLAN: "story_plan_record",
+  STEMO: "story_emotion_record"
 };
 
 export function storyQuestionValidatorApplies(ctx: Context): boolean {
@@ -82,7 +85,10 @@ export async function loadStoryQuestionRecordSet(ctx: Context): Promise<StoryQue
     locations,
     objects,
     clocks,
-    secrets
+    secrets,
+    statuses,
+    plans,
+    emotions
   ] = await Promise.all([
     queryRecordsByType(ctx, "story_question_record"),
     queryRecordsByType(ctx, "story_event_record"),
@@ -98,7 +104,10 @@ export async function loadStoryQuestionRecordSet(ctx: Context): Promise<StoryQue
     queryRecordsByType(ctx, "story_location_record"),
     queryRecordsByType(ctx, "story_object_record"),
     queryRecordsByType(ctx, "pressure_clock_record"),
-    queryRecordsByType(ctx, "story_secret_record")
+    queryRecordsByType(ctx, "story_secret_record"),
+    queryRecordsByType(ctx, "story_status_record"),
+    queryRecordsByType(ctx, "story_plan_record"),
+    queryRecordsByType(ctx, "story_emotion_record")
   ]);
 
   const sourceRecordsByTypeAndId = new Map<string, IndexedRecord>();
@@ -114,7 +123,10 @@ export async function loadStoryQuestionRecordSet(ctx: Context): Promise<StoryQue
     ...locations,
     ...objects,
     ...clocks,
-    ...secrets
+    ...secrets,
+    ...statuses,
+    ...plans,
+    ...emotions
   ]) {
     const id = recordAuthoredId(record);
     if (id !== undefined) {

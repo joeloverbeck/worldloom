@@ -76,6 +76,17 @@ test("record_schema_compliance rejects malformed STQ source records", async () =
   ));
 });
 
+test("record_schema_compliance accepts STSTAT/STPLAN/STEMO STQ source records", async () => {
+  // A story question can be raised about an actor's life/agency state (STSTAT),
+  // their tactical plan (STPLAN), or their affective state (STEMO). These
+  // SPEC-42/47 classes were absent from the curated source_records set.
+  const result = await recordSchemaCompliance.run({}, context([
+    questionRecord(validQuestion({ source_records: ["STSTAT-1", "STPLAN-1", "STEMO-1"] }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
 function questionRecord(parsed: Record<string, unknown>) {
   return {
     ...record("story_question_record", "test-story:STQ-1", FILE_PATH, parsed),

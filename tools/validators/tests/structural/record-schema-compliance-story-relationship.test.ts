@@ -116,6 +116,20 @@ test("record_schema_compliance rejects illegal structured SREL direction variant
   }
 });
 
+test("record_schema_compliance accepts SPEC-42/47 classes in SREL derived_from", async () => {
+  // The 5 story-record derived_from unions (SREL/THR/CNSQ/SF/story-DA) shared a
+  // stale legacy union that omitted every active class added after the legacy
+  // set. They now converge on the canonical recordId used by STPLAN/STEMO, so a
+  // relationship can ground in the clock/secret/status/plan/emotion that reshaped it.
+  const result = await recordSchemaCompliance.run({}, context([
+    relationshipRecord(validRelationship({
+      derived_from: ["STSTAT-1", "CLK-1", "STSEC-1", "STQ-1", "STPLAN-1", "STEMO-1"]
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
 function relationshipRecord(parsed: Record<string, unknown>) {
   return {
     ...record("relationship_record_story", "test-story:SREL-1", FILE_PATH, parsed),

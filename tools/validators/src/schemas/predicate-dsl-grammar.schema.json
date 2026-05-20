@@ -268,7 +268,7 @@
         "alias": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
         "kind": { "type": "string", "pattern": "^[a-z][a-z0-9_:-]*$" },
         "urgency": { "type": "string", "enum": ["low", "medium", "high"] },
-        "derived_from": { "type": "string", "pattern": "^(?:SE|STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-[0-9]+$" }
+        "derived_from": { "type": "string", "pattern": "^(?:SE|STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|STPLAN|STEMO)-[0-9]+$" }
       }
     },
     {
@@ -387,7 +387,7 @@
       "required": ["pred", "record"],
       "properties": {
         "pred": { "const": "record_active" },
-        "record": { "type": "string", "pattern": "^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ)-[0-9]+$" }
+        "record": { "type": "string", "pattern": "^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|STPLAN|STEMO)-[0-9]+$" }
       }
     },
     {
@@ -397,7 +397,7 @@
       "required": ["pred", "record", "comparator", "pages"],
       "properties": {
         "pred": { "const": "record_age" },
-        "record": { "type": "string", "pattern": "^(?:(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ)-[0-9]+|[a-z][a-z0-9_-]*)$" },
+        "record": { "type": "string", "pattern": "^(?:(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|STPLAN|STEMO)-[0-9]+|[a-z][a-z0-9_-]*)$" },
         "comparator": { "type": "string", "enum": [">=", "<=", "==", "!="] },
         "pages": { "type": "integer", "minimum": 0 }
       }

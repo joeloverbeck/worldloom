@@ -204,7 +204,7 @@ After design approval, do NOT apply changes or implement the design until the us
 
 | Deliverable shape | Output destination |
 |---|---|
-| Inline ops/setup task | execute inline + summary; no file persisted |
+| Inline ops/setup task or mechanical-fix triage | execute inline + summary; no file persisted |
 | New skill design | `.claude/skills/<name>/SKILL.md` |
 | Modify existing skill file(s) | edit in place |
 | Project documentation (`CLAUDE.md`, `docs/*.md`, etc.) | edit/create in place |

@@ -57,6 +57,24 @@ test("branch_isolation rejects sibling-branch CLK/STSEC/STQ active records", asy
   );
 });
 
+test("branch_isolation rejects sibling-branch STPLAN/STEMO active records", async () => {
+  const verdicts = await branchIsolation.run(undefined, context([
+    branch("BR-1", null),
+    branch("BR-2", "BR-1"),
+    branch("BR-3", "BR-1"),
+    page("PG-1", "BR-1", { active_records: {} }),
+    page("PG-2", "BR-2", { active_records: { STPLAN: ["STPLAN-3"], STEMO: ["STEMO-3"] } }),
+    page("PG-3", "BR-3", { active_records: {} }),
+    storyStateRecord("story_plan_record", "STPLAN-3", "plans", "PG-3"),
+    storyStateRecord("story_emotion_record", "STEMO-3", "emotions", "PG-3")
+  ]));
+
+  assert.deepEqual(
+    verdicts.map((verdict) => (verdict.detail as { reference_id: string }).reference_id).sort(),
+    ["STEMO-3", "STPLAN-3"]
+  );
+});
+
 test("branch_isolation accepts global storylets with world-scope and bundle-genesis references", async () => {
   const verdicts = await branchIsolation.run(undefined, context([
     branch("BR-1", null, "PG-1"),

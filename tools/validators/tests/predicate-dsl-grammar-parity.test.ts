@@ -162,6 +162,10 @@ test("predicate DSL schema exposes runtime-derived ID patterns for representativ
   assert.equal(validate({ pred: "plan_active", holder: "STENT-1", plan: "STINT-1" }), false);
   assert.equal(validate({ pred: "emotion_active", holder: "STENT-1", kind: "surprise" }), false);
   assert.equal(validate({ pred: "emotion_pressure", holder: "STENT-1", pressure: "teleport" }), false);
+  // any_consequence_pending.derived_from now admits the SPEC-42/47 active classes
+  // a consequence can actually be derived from (CLK/STSEC/STQ/STPLAN/STEMO).
+  assert.equal(validate({ pred: "any_consequence_pending", alias: "fallout", derived_from: "CLK-1" }), true);
+  assert.equal(validate({ pred: "any_consequence_pending", alias: "fallout", derived_from: "STEMO-1" }), true);
 });
 
 test("predicate DSL schema exposes runtime role enum for existential role filters", () => {
@@ -183,4 +187,24 @@ test("predicate DSL schema exposes runtime role enum for existential role filter
     );
     assert.equal(validate({ ...sampleFor(pred), [field]: "role:viewpoint" }), false, `${pred}.${field} should reject role: prefixes`);
   }
+});
+
+test("predicate DSL schema accepts STPLAN/STEMO for record_active and record_age", () => {
+  // SPEC-47 lifecycle classes: the runtime RECORD_ACTIVE_PATTERN already accepts
+  // STPLAN/STEMO; the discoverable schema must mirror it.
+  const schema = readPredicateSchema();
+  const ajv = new Ajv2020({ strict: true });
+  const validate = ajv.compile(schema);
+
+  for (const cls of ["STPLAN-1", "STEMO-2"]) {
+    assert.equal(validate({ pred: "record_active", record: cls }), true, `record_active should accept ${cls}`);
+    assert.equal(
+      validate({ pred: "record_age", record: cls, comparator: ">=", pages: 1 }),
+      true,
+      `record_age should accept ${cls}`
+    );
+  }
+  // control: world-canon classes remain outside record_active / record_age
+  assert.equal(validate({ pred: "record_active", record: "CF-1" }), false);
+  assert.equal(validate({ pred: "record_age", record: "CF-1", comparator: ">=", pages: 1 }), false);
 });

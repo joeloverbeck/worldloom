@@ -1,6 +1,6 @@
 # BSBOOT-032: Resolve bootstrap initial-location seed-node prose to world-scope anchors
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-bootstrap/SKILL.md` skill prose only.
@@ -8,13 +8,13 @@
 
 ## Problem
 
-`branching-story-bootstrap` still instructs callers to request world canon context with `seed_nodes=<cast CHAR ids + initial_location label if provided>`. An `initial_location` argument is a proposed story-local `STLOC` label plus grounding canon, not necessarily an indexed world-scope node id. During the `red-bunny` bootstrap run, that exact prose caused `get_context_packet(... seed_nodes=["the park near the Leka Enea school"])` to fail before MCPENH-058 hardened the tool. After MCPENH-058, the packet no longer aborts, but the skill still teaches a lossy call shape: the free-text location label is skipped with a warning instead of anchoring local authority.
+At intake, `branching-story-bootstrap` still instructed callers to request world canon context with `seed_nodes=<cast CHAR ids + initial_location label if provided>`. An `initial_location` argument is a proposed story-local `STLOC` label plus grounding canon, not necessarily an indexed world-scope node id. During the `red-bunny` bootstrap run, that exact prose caused `get_context_packet(... seed_nodes=["the park near the Leka Enea school"])` to fail before MCPENH-058 hardened the tool. After MCPENH-058, the packet no longer aborts, but the skill still taught a lossy call shape: the free-text location label was skipped with a warning instead of anchoring local authority.
 
-This ticket owns the caller-side prose correction for bootstrap. The skill should resolve any location grounding to world-scope anchors before the packet call, or omit the location from `seed_nodes` when no such anchor exists.
+This ticket owns the caller-side prose correction for bootstrap. The skill now tells callers to resolve any location grounding to world-scope anchors before the packet call, or omit the location from `seed_nodes` when no such anchor exists.
 
 ## Assumption Reassessment (2026-05-20)
 
-1. Live skill prose still names the bad call shape in `.claude/skills/branching-story-bootstrap/SKILL.md`: the World-State Prerequisites bullet says `seed_nodes=<cast CHAR ids + initial_location label if provided>`, and Pre-flight step 6 repeats the same phrase.
+1. At intake, live skill prose still named the bad call shape in `.claude/skills/branching-story-bootstrap/SKILL.md`: the World-State Prerequisites bullet said `seed_nodes=<cast CHAR ids + initial_location label if provided>`, and Pre-flight step 6 repeated the same phrase. This ticket replaced both with `seed_nodes=<world-scope seed ids>` plus explicit world-anchor eligibility rules.
 2. MCPENH-058 landed the server-side robustness layer and public docs: unresolved seed nodes are skipped with `task_header.warnings[]`; they are not name-resolved to entities. That makes the bootstrap prose issue a remaining authoring-discipline problem, not an MCP behavior bug.
 3. Shared boundary under audit: `branching-story-bootstrap` is the story-pipeline caller, and `get_context_packet` is the retrieval consumer. The caller must pass only world-scope seed ids; story-local or free-text location material should use `story_slug` and targeted retrieval paths, not `seed_nodes`.
 4. FOUNDATIONS §Tooling Recommendation requires story-pipeline skills to depend on the MCP retrieval surface for world-canon reads. This ticket keeps bootstrap on that surface while making its seed-node guidance compatible with world-scope retrieval.
@@ -31,11 +31,11 @@ This ticket owns the caller-side prose correction for bootstrap. The skill shoul
 2. Bootstrap pre-flight explains the resolution path -> manual review confirms it says to derive location seeds from world-scope anchors such as existing `ENT`, `SEC`, `CF`, `M`, or `OQ` ids, and to omit the location seed when only a free-text label exists.
 3. MCP graceful degradation remains unchanged -> no MCP code changes; MCPENH-058's existing package tests remain the behavior proof.
 
-## What to Change
+## Landed Changes
 
 ### 1. World-State Prerequisites packet bullet
 
-Replace `seed_nodes=<cast CHAR ids + initial_location label if provided>` with wording that requires world-scope seed ids only. The wording should tell bootstrap callers to:
+Replaced `seed_nodes=<cast CHAR ids + initial_location label if provided>` with wording that requires world-scope seed ids only. The wording tells bootstrap callers to:
 
 - include selected cast `CHAR-<integer>` ids;
 - include location-related world-scope anchors only when `initial_location` grounding already identifies them;
@@ -44,7 +44,7 @@ Replace `seed_nodes=<cast CHAR ids + initial_location label if provided>` with w
 
 ### 2. Pre-flight Check step 6
 
-Mirror the same rule in the executable pre-flight checklist so the call shape and the checklist cannot drift.
+Mirrored the same rule in the executable pre-flight checklist so the call shape and the checklist cannot drift.
 
 ## Files to Touch
 
@@ -59,7 +59,7 @@ Mirror the same rule in the executable pre-flight checklist so the call shape an
 
 ## Acceptance Criteria
 
-### Tests That Must Pass
+### Tests That Passed
 
 1. `rg -n "initial_location label if provided" .claude/skills/branching-story-bootstrap/SKILL.md` returns no matches.
 2. `rg -n "world-scope.*seed" .claude/skills/branching-story-bootstrap/SKILL.md` returns matches in both World-State Prerequisites and Pre-flight Check.
@@ -82,3 +82,20 @@ Mirror the same rule in the executable pre-flight checklist so the call shape an
 1. `rg -n "initial_location label if provided" .claude/skills/branching-story-bootstrap/SKILL.md` (must return no matches)
 2. `rg -n "world-scope.*seed" .claude/skills/branching-story-bootstrap/SKILL.md`
 3. `rg -n "MCPENH-058|unresolved seed|warnings" .claude/skills/branching-story-bootstrap/SKILL.md`
+
+## Outcome
+
+Completed: 2026-05-20.
+
+`branching-story-bootstrap` now instructs callers to pass only world-scope seed ids to `get_context_packet` during bootstrap. Selected cast `CHAR-<integer>` ids remain valid seeds; location-related seeds must come from existing world anchors such as `ENT`, `SEC`, `CF`, `M`, or `OQ` ids. Proposed `STLOC` labels and free-text location labels are explicitly omitted from `seed_nodes` unless they have a world-scope anchor.
+
+## Verification Result
+
+1. `rg -n "initial_location label if provided" .claude/skills/branching-story-bootstrap/SKILL.md` returned no matches (exit 1 as the expected no-match proof).
+2. `rg -n "world-scope.*seed" .claude/skills/branching-story-bootstrap/SKILL.md` returned two matches: the World-State Prerequisites packet bullet and Pre-flight Check step 6.
+3. `rg -n "MCPENH-058|unresolved seed|warnings" .claude/skills/branching-story-bootstrap/SKILL.md` returned two matches: both edited surfaces now describe unresolved-seed warnings and the rule that missing labels are not local authority.
+4. Manual review of `.claude/skills/branching-story-bootstrap/SKILL.md` lines 202 and 218 confirmed the edit did not change the existing `<HARD-GATE>` block or any canon-writing order.
+
+## Deviations
+
+No source-code, MCP behavior, schema, validator, or world-content changes were made. A broader discovery grep still finds the old call shape in archived spec/report provenance and in this ticket's historical intake evidence; those are not live bootstrap caller guidance and were left unchanged.

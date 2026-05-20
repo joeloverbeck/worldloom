@@ -36,7 +36,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^(THR|OBL|CNSQ|STINT|SREL|STLOC|STOBJ|STQ)-(0|[1-9][0-9]*)$"
+        "pattern": "^(THR|OBL|CNSQ|STINT|SREL|STLOC|STOBJ|STQ|STPLAN)-(0|[1-9][0-9]*)$"
       }
     },
     "value": { "type": "integer", "minimum": 0 },
@@ -88,7 +88,7 @@
   "$defs": {
     "effectReference": {
       "type": "string",
-      "pattern": "^((STENT|STSTAT|SF|BEL|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|DA|CLK|STQ|STSEC)-(0|[1-9][0-9]*)|bound:[A-Za-z][A-Za-z0-9_-]*)$"
+      "pattern": "^((STENT|STSTAT|SF|BEL|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|DA|CLK|STQ|STSEC|STPLAN|STEMO)-(0|[1-9][0-9]*)|bound:[A-Za-z][A-Za-z0-9_-]*)$"
     }
   }
 }

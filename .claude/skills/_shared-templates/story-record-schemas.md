@@ -743,7 +743,7 @@ question_or_setup: string*
 salience: low | medium | high*
 audience_visibility: hidden | implied | explicit*
 source_event: SE-<integer>*
-source_records: [SF-<integer> | BEL-<integer> | DA-<integer> | THR-<integer> | OBL-<integer> | CNSQ-<integer> | STINT-<integer> | SREL-<integer> | STLOC-<integer> | STOBJ-<integer> | CLK-<integer> | STSEC-<integer>]*
+source_records: [SF-<integer> | BEL-<integer> | DA-<integer> | THR-<integer> | OBL-<integer> | CNSQ-<integer> | STINT-<integer> | SREL-<integer> | STLOC-<integer> | STOBJ-<integer> | CLK-<integer> | STSEC-<integer> | STSTAT-<integer> | STPLAN-<integer> | STEMO-<integer>]*
 payoff_of: STQ-<integer> | null
 status: open | complicated | answered | paid_off | abandoned | inherited | superseded*
 answer_event: SE-<integer> | null

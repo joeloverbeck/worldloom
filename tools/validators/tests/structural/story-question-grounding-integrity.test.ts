@@ -1,7 +1,11 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import assert from "node:assert/strict";
 import test from "node:test";
 
 import { storyQuestionGroundingIntegrity } from "../../src/structural/story-question-grounding-integrity.js";
+import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
+import { SOURCE_RECORD_TYPES } from "../../src/structural/story-question-utils.js";
 import { context, record } from "./helpers.js";
 
 test("story_question_grounding_integrity accepts source records active at created_at_page", async () => {
@@ -15,6 +19,25 @@ test("story_question_grounding_integrity accepts source records active at create
   ]));
 
   assert.deepEqual(verdicts, []);
+});
+
+test("story_question_grounding_integrity accepts schema-valid status, plan, and emotion sources", async () => {
+  const stq = question(["STPLAN-1", "STEMO-1", "STSTAT-1"]);
+  const schemaVerdicts = await recordSchemaCompliance.run(undefined, context([stq]));
+  const groundingVerdicts = await storyQuestionGroundingIntegrity.run(undefined, context([
+    page("PG-2", { STPLAN: ["STPLAN-1"], STEMO: ["STEMO-1"], STSTAT: ["STSTAT-1"] }),
+    source("story_plan_record", "STPLAN-1", "plans"),
+    source("story_emotion_record", "STEMO-1", "emotions"),
+    source("story_status_record", "STSTAT-1", "status"),
+    stq
+  ]));
+
+  assert.deepEqual(schemaVerdicts, []);
+  assert.deepEqual(groundingVerdicts, []);
+});
+
+test("story_question source record type map stays in parity with the schema pattern", () => {
+  assert.deepEqual(Object.keys(SOURCE_RECORD_TYPES).sort(), sourceRecordClassesFromSchema().sort());
 });
 
 test("story_question_grounding_integrity rejects missing and inactive source records", async () => {
@@ -54,4 +77,23 @@ function page(id: string, active_records: Record<string, string[]>) {
     id,
     state_snapshot: { active_records }
   });
+}
+
+function sourceRecordClassesFromSchema(): string[] {
+  const schema = JSON.parse(readFileSync(path.resolve(process.cwd(), "src/schemas/story-question.schema.json"), "utf8")) as {
+    properties?: {
+      source_records?: {
+        items?: {
+          pattern?: string;
+        };
+      };
+    };
+  };
+  const pattern = schema.properties?.source_records?.items?.pattern;
+  assert.ok(pattern, "story-question source_records schema pattern should exist");
+  const match = /^\^\(([^)]+)\)-/.exec(pattern);
+  assert.ok(match, `unexpected source_records pattern shape: ${pattern}`);
+  const classes = match[1];
+  assert.ok(classes, `missing source_records class group: ${pattern}`);
+  return classes.split("|");
 }
