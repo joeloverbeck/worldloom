@@ -41,7 +41,7 @@ test("SPEC-47/SPEC-49 STPLAN/STEMO edge integration builds all story edge rows",
   try {
     addSpec47Story(root);
 
-    assert.equal(STORY_EDGE_TYPES.length, 65);
+    assert.equal(STORY_EDGE_TYPES.length, 69);
     assert.equal(new Set(STORY_EDGE_TYPES).size, STORY_EDGE_TYPES.length);
     for (const edgeType of SPEC47_EDGE_TYPES) {
       assert.ok(STORY_EDGE_TYPES.includes(edgeType), `${edgeType} should be registered`);

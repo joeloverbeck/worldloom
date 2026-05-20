@@ -1,6 +1,6 @@
 # SPEC56STCHARMACFOU-005: World-index STCHAR node + edges
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-index` (new node type + hybrid parse + 4 edge types + tests).
@@ -16,6 +16,7 @@ STCHAR records must be indexed and resolvable for MCP retrieval and validator re
 2. The node type, hybrid-parse, and 4 edges are specified in `specs/SPEC-56-stchar-machine-foundation.md` §Phase 5 (reassessed this session). The hybrid parser is modeled on the existing `character_record` parser.
 3. **Cross-artifact boundary under audit**: the STCHAR node/edges consume the schema (ticket 002) and the contract's `STENT.bound_stchar_id` / `STCHAR.source_char_id` / `supersedes` / `bound_stent_ids` surfaces (ticket 001). The 4 new edges must resolve those reference fields; the existing generic edges (`page_active_record`, `choice_grounded_in`, `plan_derived_from`, `emotion_derived_from`) must accept STCHAR after ticket 002's union widening.
 4. **FOUNDATIONS principle restatement**: §4a Plan-Authority Boundary / "no floating facts" — indexing STCHAR as a resolvable, edge-connected node is what makes it a non-floating, referenceable authority (hash-backed, active in PG snapshots). The index is the mechanism that satisfies the no-floating-facts requirement for STCHAR references.
+5. Implementation note: story-bundle `_source/` enumeration did not naturally include hybrid STCHAR markdown because STCHAR lives under `stories/<slug>/story-characters/*.md`; this ticket added an explicit hybrid-path branch for that directory. Parse-only edge tests assert `target_unresolved_ref`, matching the existing story-edge parser tests before database resolution.
 
 ## Architecture Check
 
@@ -42,8 +43,10 @@ Parse STCHAR frontmatter + body sections (model on the `character_record` hybrid
 
 - `tools/world-index/src/schema/types.ts` (modify)
 - `tools/world-index/src/parse/atomic.ts` (modify)
-- `tools/world-index/src/parse/` hybrid-record parser (modify — STCHAR frontmatter+body, model on `character_record`)
-- `tools/world-index/tests/*` (new + modify — STCHAR index + edge-emission tests)
+- `tools/world-index/tests/types.test.ts` (modify — registry counts + STCHAR assertions)
+- `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts` (modify — story-edge count)
+- `tools/world-index/tests/integration/spec47-stplan-stemo-edges-integration.test.ts` (modify — story-edge count)
+- `tools/world-index/tests/parse/atomic-edges-for-story-character-authority.test.ts` (new — STCHAR index + edge-emission tests)
 
 ## Out of Scope
 
@@ -73,3 +76,17 @@ Parse STCHAR frontmatter + body sections (model on the `character_record` hybrid
 
 1. `npm run build --prefix tools/world-index` (covers tsc).
 2. `npm test --prefix tools/world-index`.
+
+## Outcome
+
+Implemented. World-index now recognizes `story_character_authority_record`, enumerates and frontmatter-parses `stories/<slug>/story-characters/STCHAR-*.md`, emits the four STCHAR edge types, and accepts `STCHAR-*` references in story-reference scanning and page active-record edges.
+
+## Verification Result
+
+1. `npm run build --prefix tools/world-index` — PASS.
+2. `cd tools/world-index && node --test dist/tests/parse/atomic-edges-for-story-character-authority.test.js dist/tests/types.test.js dist/tests/parse/atomic-edges-for-page-and-event.test.js dist/tests/parse/atomic-story-edge-parity.test.js dist/tests/integration/spec46-story-bundle-edges-integration.test.js dist/tests/integration/spec47-stplan-stemo-edges-integration.test.js` — PASS, 9 tests.
+3. `npm test --prefix tools/world-index` — PASS, 127 tests.
+
+## Deviations
+
+The spec/ticket wording said to model STCHAR on an existing hybrid parser. In the live world-index code, story-bundle parsing is centralized in `src/parse/atomic.ts`; there was no separate `src/parsers/` or `src/edges/` module to modify. The implementation keeps the change in that existing parser and adds a small frontmatter-only hybrid branch for STCHAR.
