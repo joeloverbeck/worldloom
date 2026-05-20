@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
+import { parse as parseYaml } from "yaml";
 
 import { parseStoryBundleSourceFile } from "../../src/parse/atomic.js";
 import { STORY_EDGE_TYPES } from "../../src/schema/types.js";
@@ -16,7 +18,7 @@ const EDGE_PARITY_CASES = [
     lines: [
       "id: CHC-2",
       "story_id: STORY-50",
-      "parent_page_id: PG-4",
+      "created_at_page: PG-4",
       "surface_label: Ring the bell.",
       "player_visible_intent: Warn the quay.",
       "target_or_action_families: [signal]",
@@ -26,7 +28,7 @@ const EDGE_PARITY_CASES = [
       "  records: [STENT-1, STSTAT-1]",
       "  affordance_ordinals: [1]"
     ],
-    expectedEdgeTypes: ["parent_page", "choice_grounded_in", "choice_associated_storylet", "choice_affordance_ordinal"]
+    expectedEdgeTypes: ["created_at_page", "choice_grounded_in", "choice_associated_storylet", "choice_affordance_ordinal"]
   },
   {
     directoryName: "storylets",
@@ -272,6 +274,17 @@ test("SPEC-50 story-edge parity fields emit registered edge types", () => {
   }
 });
 
+test("CHC parity fixtures satisfy the story-choice schema field contract", () => {
+  const choiceCase = EDGE_PARITY_CASES.find((parityCase) => parityCase.recordId === "CHC-2");
+  assert.ok(choiceCase, "CHC parity fixture exists");
+
+  const validRecord = parseYaml(choiceCase.lines.join("\n"));
+  assert.deepEqual(validateStoryChoiceTopLevel(validRecord), []);
+
+  const legacyRecord = { ...validRecord, parent_page_id: "PG-4" };
+  assert.deepEqual(validateStoryChoiceTopLevel(legacyRecord), ["additional property parent_page_id"]);
+});
+
 function writeStoryRecord(root: string, storySlug: string, directoryName: string, recordId: string, lines: readonly string[]): void {
   const directory = path.join(root, "worlds", "fixture-world", "stories", storySlug, "_source", directoryName);
   mkdirSync(directory, { recursive: true });
@@ -280,4 +293,47 @@ function writeStoryRecord(root: string, storySlug: string, directoryName: string
 
 function unique<T>(values: readonly T[]): T[] {
   return Array.from(new Set(values));
+}
+
+type JsonSchema = {
+  required?: string[];
+  properties?: Record<string, unknown>;
+  additionalProperties?: boolean;
+};
+
+function validateStoryChoiceTopLevel(record: unknown): string[] {
+  const schema = loadStoryChoiceSchema();
+  const errors: string[] = [];
+
+  if (!isRecord(record)) {
+    return ["record must be an object"];
+  }
+
+  for (const requiredKey of schema.required ?? []) {
+    if (!(requiredKey in record)) {
+      errors.push(`missing required property ${requiredKey}`);
+    }
+  }
+
+  if (schema.additionalProperties === false) {
+    const allowedKeys = new Set(Object.keys(schema.properties ?? {}));
+    for (const key of Object.keys(record)) {
+      if (!allowedKeys.has(key)) {
+        errors.push(`additional property ${key}`);
+      }
+    }
+  }
+
+  return errors;
+}
+
+function loadStoryChoiceSchema(): JsonSchema {
+  const testFile = fileURLToPath(import.meta.url);
+  const worldIndexRoot = path.resolve(path.dirname(testFile), "..", "..", "..");
+  const schemaPath = path.resolve(worldIndexRoot, "..", "validators", "src", "schemas", "story-choice.schema.json");
+  return JSON.parse(readFileSync(schemaPath, "utf8")) as JsonSchema;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

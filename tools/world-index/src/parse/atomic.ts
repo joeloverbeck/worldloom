@@ -713,7 +713,7 @@ function edgesForChoice(
     stringField(record, "associated_commitment_block")
   );
 
-  const parentPageId = stringField(record, "parent_page_id");
+  const parentPageId = stringField(record, "created_at_page");
   const parentPageNodeId =
     parentPageId && isStoryRecordReference(parentPageId) ? storyNodeId(storySlug, parentPageId) : node.node_id;
   for (const ordinal of numberArrayField(record, "affordance_ordinals", ["grounded_in"])) {
