@@ -50,7 +50,7 @@ No new logic; confirm the delegation surfaces the per-id actionable error in eac
 
 - Making `get_record_field` actually project hybrid sections (the documented design is that hybrid projection lives in `get_record`; this ticket only improves the rejection message).
 - Any NCP body-section validation, schema change, or anti-flattening work (rejected in SPEC-55 §Out of Scope).
-- The story-pipeline seed guard (SPEC55CHAPIPFOU-002) and schema-doc/regression-test work (SPEC55CHAPIPFOU-003).
+- The completed story-pipeline seed guard (`archive/tickets/SPEC55CHAPIPFOU-002.md`) and schema-doc/regression-test work (SPEC55CHAPIPFOU-003).
 
 ## Acceptance Criteria
 

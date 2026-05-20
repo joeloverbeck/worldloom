@@ -49,7 +49,7 @@ In `character-proposal-schema-fixtures.test.ts`: (a) an NCB fixture with `propos
 - Promoting `occupancy_strength`, `score_aggregate`, or `source_basis.batch_id` to schema-required (rejected in SPEC-55 §Out of Scope — would reject valid upgraded/user-seed cards).
 - `card_ids.minItems: 1` (rejected — an all-dropped batch can have empty `card_ids`).
 - Any NCP body-section validation or anti-flattening work (rejected in SPEC-55 §Out of Scope).
-- The completed MCP field-tool error work (`archive/tickets/SPEC55CHAPIPFOU-001.md`) and the story-seed guard (SPEC55CHAPIPFOU-002).
+- The completed MCP field-tool error work (`archive/tickets/SPEC55CHAPIPFOU-001.md`) and the completed story-seed guard (`archive/tickets/SPEC55CHAPIPFOU-002.md`).
 
 ## Acceptance Criteria
 
