@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds `chc_slt_selected_commitment_trace` to `tools/validators/src/structural/`; removes `chc_slt_eligibility_source_grounding` (folded in); updates the structural validator registry; updates `tools/world-mcp`'s capability-parity test to reflect the validator-set change.
-**Deps**: SPEC51CHCSLTSEL-001
+**Deps**: archive/tickets/SPEC51CHCSLTSEL-001.md
 
 ## Problem
 

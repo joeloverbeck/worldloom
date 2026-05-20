@@ -1,5 +1,9 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
+  resolveAliasBinding,
+  resolveStoryEntityAliasBinding
+} from "./alias-binding-utils.js";
+import {
   asPlainRecord,
   locationFor,
   queryStructuralRecords,
@@ -149,18 +153,10 @@ function actorForEvent(event: Record<string, unknown>): string | undefined {
   if (actor !== undefined && /^STENT-\d+$/.test(actor)) {
     return actor;
   }
-  if (actor?.startsWith("bound:")) {
-    return aliasBinding(event, actor.slice("bound:".length));
-  }
   if (actor !== undefined) {
-    return aliasBinding(event, actor);
+    return resolveStoryEntityAliasBinding(event, actor);
   }
   return undefined;
-}
-
-function aliasBinding(event: Record<string, unknown>, alias: string): string | undefined {
-  const bound = stringValue(asPlainRecord(asPlainRecord(event.commitment).alias_bindings)[alias]);
-  return bound !== undefined && /^STENT-\d+$/.test(bound) ? bound : undefined;
 }
 
 function selectedChoiceForEvent(event: Record<string, unknown>, maps: RecordMaps): IndexedRecord | undefined {
@@ -393,7 +389,7 @@ function resolvedPredicateHolder(holder: string, storylet: IndexedRecord, maps: 
     if (stringValue(asPlainRecord(parsed.commitment).selected_slt_id) !== storyletId) {
       continue;
     }
-    const bound = stringValue(asPlainRecord(asPlainRecord(parsed.commitment).alias_bindings)[holder]);
+    const bound = resolveAliasBinding(parsed, holder);
     if (bound !== undefined) {
       return bound;
     }
