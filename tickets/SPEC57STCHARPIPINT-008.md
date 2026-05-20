@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `story-fact-promotion-to-canon` and `story-promotion-closeout`; no new tool/schema.
-**Deps**: SPEC57STCHARPIPINT-001 (STCHAR records are the evidence subject).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (STCHAR records are the evidence subject).
 
 ## Problem
 
@@ -49,7 +49,7 @@ Document that STCHAR is superseded only when an amended-schema field actually ch
 
 - A story-local-character → world-`CHAR` promotion workflow (explicitly deferred).
 - Adding STCHAR as a promotion source kind.
-- The STCHAR authoring skill (SPEC57STCHARPIPINT-001).
+- The STCHAR authoring skill (archive/tickets/SPEC57STCHARPIPINT-001.md).
 
 ## Acceptance Criteria
 

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `commitment-block-authoring` to consume STCHAR via the predicate DSL; no new tool/schema (`record_active(STCHAR-*)` already lawful per SPEC-56).
-**Deps**: SPEC57STCHARPIPINT-001 (STCHAR must exist to be referenced).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (STCHAR must exist to be referenced).
 
 ## Problem
 
@@ -42,7 +42,7 @@ Add: pre-flight loads active STCHAR summaries (full/projected only when behavior
 ## Out of Scope
 
 - Any predicate-DSL grammar change (`record_active(STCHAR-*)` already lawful; `any_story_character_active` explicitly deferred).
-- The STCHAR authoring skill (SPEC57STCHARPIPINT-001).
+- The STCHAR authoring skill (archive/tickets/SPEC57STCHARPIPINT-001.md).
 - Turn-cycle runtime SLT eligibility (SPEC57STCHARPIPINT-004).
 
 ## Acceptance Criteria

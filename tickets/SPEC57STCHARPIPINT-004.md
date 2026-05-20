@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies `branching-story-turn-cycle` (SKILL.md + 4 reference files) to consume active STCHAR and to block-and-route mid-story complex characters; no new tool/schema.
-**Deps**: SPEC57STCHARPIPINT-001 (routes to the authoring skill), SPEC57STCHARPIPINT-002 (emits the §16a page-plan packet).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (routes to the authoring skill), SPEC57STCHARPIPINT-002 (emits the §16a page-plan packet).
 
 ## Problem
 
@@ -59,7 +59,7 @@ Update the alignment table to reference STCHAR (§6.1 runtime firewall; §7 skil
 
 ## Out of Scope
 
-- The STCHAR authoring skill (SPEC57STCHARPIPINT-001) — turn-cycle routes to it, does not author.
+- The STCHAR authoring skill (archive/tickets/SPEC57STCHARPIPINT-001.md) — turn-cycle routes to it, does not author.
 - The §16a contract definition (SPEC57STCHARPIPINT-002).
 - Prose-attach validation (SPEC57STCHARPIPINT-006).
 

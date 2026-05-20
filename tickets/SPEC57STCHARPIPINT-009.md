@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes (docs) — updates `docs/FOUNDATIONS.md` §7 and `.claude/skills/skill-audit/references/cross-skill-consistency.md`; no production code.
-**Deps**: SPEC57STCHARPIPINT-001 (the new skill must exist to be enumerated).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (the new skill must exist to be enumerated).
 
 ## Problem
 
@@ -45,7 +45,7 @@ Add `story-character-profile` to the §Skill Category Classification (2c) member
 
 ## Out of Scope
 
-- The new skill's content (SPEC57STCHARPIPINT-001).
+- The new skill's content (archive/tickets/SPEC57STCHARPIPINT-001.md).
 - Per-skill FOUNDATIONS Alignment tables (those land in each skill's own ticket: -003 through -008).
 - Any non-enumeration content of FOUNDATIONS or cross-skill-consistency.
 

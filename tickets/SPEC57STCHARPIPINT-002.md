@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — promotes the reserved §16a slot in the shared story-state contract to mandatory; consumed by bootstrap (-003), turn-cycle (-004), and prose-attach (-006).
-**Deps**: SPEC57STCHARPIPINT-001 (the packet projects STCHAR `§Page-Plan Voice Block` and other body-template sections the new skill defines).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (the packet projects STCHAR `§Page-Plan Voice Block` and other body-template sections the new skill defines).
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies `branching-story-bootstrap` to distill STCHAR for every selected cast member before story state and to write the reshaped `cast_bind_list`; no new tool/schema (machine layer landed in SPEC-56).
-**Deps**: SPEC57STCHARPIPINT-001 (STCHAR authoring shape mirrored inline), SPEC57STCHARPIPINT-002 (emits the §16a page-plan packet).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (STCHAR authoring shape mirrored inline), SPEC57STCHARPIPINT-002 (emits the §16a page-plan packet).
 
 ## Problem
 
@@ -49,7 +49,7 @@ Update the `cast_bind_list` block to `stchar_id` / `stent_id` / `source_char_id`
 
 ## Out of Scope
 
-- The STCHAR authoring skill itself (SPEC57STCHARPIPINT-001).
+- The STCHAR authoring skill itself (archive/tickets/SPEC57STCHARPIPINT-001.md).
 - The §16a contract definition (SPEC57STCHARPIPINT-002).
 - The parser side (`buildCastBindList`) — landed in SPEC-56.
 - Turn-cycle / prose-attach / health-audit consumption.

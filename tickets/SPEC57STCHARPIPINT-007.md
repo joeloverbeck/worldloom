@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — adds a structural phase 2m + an optional source-drift mode to `branching-story-health-audit`; no new tool/schema.
-**Deps**: SPEC57STCHARPIPINT-001 (audits STCHAR records), SPEC57STCHARPIPINT-002 (checks page-plan §16a packets).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (audits STCHAR records), SPEC57STCHARPIPINT-002 (checks page-plan §16a packets).
 
 ## Problem
 
@@ -47,7 +47,7 @@ Add an opt-in mode comparing `STCHAR.source_char_hash` to the current `CHAR-*` c
 
 - The `profile_fidelity` receipt block it consumes (SPEC57STCHARPIPINT-006).
 - Any automatic STCHAR regeneration on drift (advisory only; regeneration is `story-character-profile`'s `regenerate` mode).
-- The STCHAR authoring skill (SPEC57STCHARPIPINT-001).
+- The STCHAR authoring skill (archive/tickets/SPEC57STCHARPIPINT-001.md).
 
 ## Acceptance Criteria
 
