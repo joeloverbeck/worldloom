@@ -129,6 +129,7 @@ function passRecords(): FixtureRecord[] {
     branch("BR-1", null, "PG-1"),
     branch("BR-2", "BR-1", "PG-2"),
     entity("STENT-1", "PG-1", "Runner"),
+    stchar("STCHAR-1", "STENT-1"),
     storylet("SLT-1"),
     event("SE-1", "PG-1", "story_start", "system", null),
     event("SE-2", "PG-2", "selected_choice", "STENT-1", "SLT-1", "Drift classification compatible after reviewing CH-3 only."),
@@ -150,6 +151,8 @@ function failRecords(): FixtureRecord[] {
     branch("BR-3", "BR-1", "PG-3"),
     entity("STENT-1", "PG-1", "Borrower"),
     entity("STENT-2", "PG-1", "Keeper"),
+    stchar("STCHAR-1", "STENT-1"),
+    stchar("STCHAR-2", "STENT-2"),
     storylet("SLT-1"),
     event("SE-1", "PG-1", "story_start", "system", null),
     event("SE-2", "PG-2", "selected_choice", "STENT-1", "SLT-1", "Drift classification compatible after reviewing CH-3 only."),
@@ -192,6 +195,16 @@ function storyRecord(nodeType: string, id: string, sourceDir: string, body: Reco
   };
 }
 
+function storyHybridRecord(nodeType: string, id: string, sourceDir: string, body: Record<string, unknown>): FixtureRecord {
+  return {
+    node_id: id,
+    story_slug: "test-bundle",
+    file_path: `stories/test-bundle/${sourceDir}/${id}.md`,
+    node_type: nodeType,
+    body
+  };
+}
+
 function change(changeId: string, affectedFactIds: string[]): Record<string, unknown> {
   return {
     change_id: changeId,
@@ -222,6 +235,30 @@ function entity(id: string, createdAtPage: string, displayName: string): Fixture
     display_name: displayName,
     bound_stchar_id: `STCHAR-${id.split("-")[1] ?? "1"}`,
     role_in_story: ["primary_actor"]
+  });
+}
+
+function stchar(id: string, stentId: string): FixtureRecord {
+  return storyHybridRecord("story_character_authority_record", id, "story-characters", {
+    id,
+    story_id: "STORY-1",
+    story_slug: "test-bundle",
+    world_slug: "test",
+    source_kind: "story_local",
+    source_char_id: null,
+    source_char_hash: null,
+    source_char_sections_used: [],
+    story_local_inputs_used: [stentId],
+    generated_at_page: "story_bootstrap",
+    created_by_skill: "branching-story-bootstrap",
+    supersedes: null,
+    status: "active",
+    bound_stent_ids: [stentId],
+    profile_revision: 1,
+    body_schema_version: "stchar.v1",
+    profile_hash: "sha256:" + "a".repeat(64),
+    voice_block_hash: "sha256:" + "b".repeat(64),
+    page_packet_hash: "sha256:" + "c".repeat(64)
   });
 }
 

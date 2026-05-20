@@ -112,6 +112,43 @@ test("state_snapshot_integrity accepts active_records BEL references", async () 
   assert.deepEqual(verdicts, []);
 });
 
+test("state_snapshot_integrity accepts active_records STCHAR references", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context([
+    storyRecord("page_record", "PG-2", "pages", {
+      id: "PG-2",
+      story_id: "STORY-1",
+      input: {
+        choice_id: "CHC-1",
+        manual_action_text: null,
+        resolved_event_id: "SE-1"
+      },
+      state_snapshot: {
+        active_records: {
+          STCHAR: ["STCHAR-1"]
+        }
+      }
+    }),
+    storyRecord("story_event_record", "SE-1", "events", {
+      id: "SE-1",
+      story_id: "STORY-1",
+      event_kind: "selected_choice"
+    }),
+    {
+      ...record("story_character_authority_record", "test-story:STCHAR-1", "stories/test-story/story-characters/STCHAR-1.md", {
+        id: "STCHAR-1",
+        story_id: "STORY-1",
+        generated_at_page: "story_bootstrap"
+      }),
+      story_slug: "test-story"
+    }
+  ], {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("state_snapshot_integrity normalizes absent optional active-record keys", async () => {
   const verdicts = await stateSnapshotIntegrity.run(undefined, context([
     storyRecord("page_record", "PG-2", "pages", {

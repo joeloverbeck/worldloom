@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-mcp` (shared `story-bundle-fixture.ts` rewrite + dependent fixtures); repo-wide `bound_char_id`-zero check.
-**Deps**: archive/tickets/SPEC56STCHARMACFOU-002.md, SPEC56STCHARMACFOU-003
+**Deps**: archive/tickets/SPEC56STCHARMACFOU-002.md, archive/tickets/SPEC56STCHARMACFOU-003.md
 
 ## Problem
 

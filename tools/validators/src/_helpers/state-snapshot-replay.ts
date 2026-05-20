@@ -7,6 +7,7 @@ export type StoryRecordMap = ReadonlyMap<string, Record<string, unknown>>;
 // or as page-level metadata; they are not part of active_records.
 export const ACTIVE_RECORDS_CLASSES = [
   "STENT",
+  "STCHAR",
   "STINT",
   "SF",
   "BEL",
@@ -29,6 +30,7 @@ export type ActiveRecordsClass = (typeof ACTIVE_RECORDS_CLASSES)[number];
 
 export const OPTIONAL_ACTIVE_RECORDS_CLASSES = [
   "DA",
+  "STCHAR",
   "CLK",
   "STSEC",
   "STQ",
