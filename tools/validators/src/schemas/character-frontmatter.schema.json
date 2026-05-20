@@ -110,7 +110,10 @@
         "continuity_checked_with": { "type": "array", "items": { "type": "string", "pattern": "^CHAR-[0-9]+$" } }
       }
     },
-    "source_basis": { "type": "object" },
+    "source_basis": {
+      "type": "object",
+      "$comment": "Recognized optional key: source_proposal_id (NCP-<integer>) when generated from an NCP; format is enforced by character_memorability_structure."
+    },
     "notes": { "type": "string" }
   }
 }

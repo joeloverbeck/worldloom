@@ -96,6 +96,8 @@ Three smaller items: the structural validator's rejected-directions-audit check 
 
 ### Phase 4 — Anti-flattening provenance + fixtures (H2, scoped) — High
 
+**Implementation note (2026-05-20):** `archive/tickets/SPEC53CHAPIPSEC-004.md` landed this phase's provenance and validator seam. The character-generation Phase 0 / Phase 9 guidance now preserves `input_memorability_contract.source_proposal_id` into `source_basis.source_proposal_id`, the dossier template and governance reference name the optional field, the CHAR schema documents the recognized key while leaving `source_basis` open, and `character_memorability_structure` rejects malformed present values through focused tests. Semantic preservation remains Phase 8 Test 17 + Phase 9 skill discipline.
+
 **Files**
 - `.claude/skills/character-generation/references/phase-0-normalize-brief.md` and `SKILL.md` (edit — persist provenance; **load-bearing change**)
 - `tools/validators/src/schemas/character-frontmatter.schema.json` (optional / documentation-only — `source_basis` is already an open object, so the field is accepted without a schema change; edit only to document the recognized field)

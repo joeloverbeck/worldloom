@@ -11,6 +11,7 @@ const VALIDATOR = "character_memorability_structure";
 const CHARACTER_PATH = /^characters\/[^/]+\.md$/;
 const PROPOSAL_CARD_PATH = /^character-proposals\/[^/]+\.md$/;
 const PROPOSAL_BATCH_PATH = /^character-proposals\/batches\//;
+const SOURCE_PROPOSAL_ID_PATTERN = /^NCP-[0-9]+$/;
 const PLACEHOLDER_PATTERN = /\b(?:TODO|TBD|PLACEHOLDER)\b/i;
 const PLACEHOLDER_ABSENCE_PATTERN = /\b(?:no|none|not|without)\b[^.\n]*(?:TODO|TBD|PLACEHOLDER)\b/i;
 
@@ -108,6 +109,17 @@ function characterVerdicts(filePath: string, content: string, parsed: Record<str
       nodeId,
       "pressure_behavior_duplicate",
       `${nodeId} dramatic_core.pressure_behavior entries must describe distinct behaviors, not duplicate responses.`
+    ));
+  }
+
+  const sourceBasis = asPlainRecord(parsed.source_basis);
+  const sourceProposalId = sourceBasis.source_proposal_id;
+  if (sourceProposalId !== undefined && (typeof sourceProposalId !== "string" || !SOURCE_PROPOSAL_ID_PATTERN.test(sourceProposalId))) {
+    verdicts.push(verdict(
+      filePath,
+      nodeId,
+      "source_proposal_id_format",
+      `${nodeId} source_basis.source_proposal_id must match NCP-<integer> when present.`
     ));
   }
 

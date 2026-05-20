@@ -87,6 +87,12 @@ test("character frontmatter schema accepts complete dramatic_core", () => {
   assert.equal(validate(validCharacter()), true, JSON.stringify(validate.errors));
 });
 
+test("character frontmatter schema accepts NCP provenance in source_basis", () => {
+  const validate = compileCharacterSchema();
+
+  assert.equal(validate(validCharacter({ source_basis: { source_proposal_id: "NCP-7" } })), true, JSON.stringify(validate.errors));
+});
+
 test("character frontmatter schema rejects missing dramatic_core", () => {
   const validate = compileCharacterSchema();
   const character = validCharacter();

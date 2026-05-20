@@ -62,6 +62,15 @@ dramatic_core:
   assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.pressure_behavior_duplicate"));
 });
 
+test("character_memorability_structure rejects malformed source proposal ids on CHAR records", async () => {
+  const verdicts = await characterMemorabilityStructure.run(
+    inputFile("characters/maren.md", validCharacter(undefined, validDramaticCoreYaml(), "7")),
+    context([])
+  );
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "character_memorability_structure.source_proposal_id_format"));
+});
+
 test("character_memorability_structure accepts NCP cards without CHAR-only body headings", async () => {
   const verdicts = await characterMemorabilityStructure.run(
     inputFile("character-proposals/NCP-12-maren.md", validProposalCard()),
@@ -174,7 +183,11 @@ function inputFile(path: string, content: string) {
   };
 }
 
-function validCharacter(omitSections: readonly string[] = [], dramaticCore = validDramaticCoreYaml()): string {
+function validCharacter(
+  omitSections: readonly string[] = [],
+  dramaticCore = validDramaticCoreYaml(),
+  sourceProposalId = "NCP-7"
+): string {
   const sections = [
     "Material Reality",
     "Institutional Embedding",
@@ -215,6 +228,7 @@ function validCharacter(omitSections: readonly string[] = [], dramaticCore = val
     "source_basis:",
     "  world_slug: animalia",
     "  source_paths: []",
+    `  source_proposal_id: ${sourceProposalId}`,
     "---",
     "# Maren",
     "",
