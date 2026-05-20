@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `character-generation` SKILL.md, references (phase-0-normalize-brief, phases-1-6-character-construction, phase-8-validation-tests), and the dossier template.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC52PROGRACHA-001.md
 
 ## Problem
 

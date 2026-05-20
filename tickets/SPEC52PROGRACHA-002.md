@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `propose-new-characters` references (phases-6-9, phases-11-13, phases-14-16), SKILL.md, and templates (proposal-card.md, batch-manifest.md).
-**Deps**: 001
+**Deps**: archive/tickets/SPEC52PROGRACHA-001.md
 
 ## Problem
 
