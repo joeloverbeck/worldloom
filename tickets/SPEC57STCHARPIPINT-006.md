@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `tools/validators/src/schemas/prose-receipt.schema.json` and `tools/validators/src/structural/prose-receipt-schema-compliance.ts`; modifies `branching-story-prose-attach`.
-**Deps**: SPEC57STCHARPIPINT-002 (validates the §16a page-plan packet hashes).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-002.md (validates the §16a page-plan packet hashes).
 
 ## Problem
 
@@ -14,7 +14,7 @@ Prose-attach receipts carry no STCHAR-authority verification, so a page plan cou
 
 1. `tools/validators/src/schemas/prose-receipt.schema.json` currently has zero STCHAR fields (its `checks` object covers `hash_integrity`, `engine_jargon_leak`, `forbidden_mystery_resolution`, etc.). The schema is consumed by the structural validator `tools/validators/src/structural/prose-receipt-schema-compliance.ts` and STCHAR validator utilities exist at `tools/validators/src/structural/stchar-utils.ts` (SPEC-56) — reuse them rather than re-implementing hash/active-state checks.
 2. SPEC-57 §Phase 5 specifies the deterministic `stchar_authority` block (`packet_present`, `active_in_snapshot`, `{profile,voice_block,page_packet}_hash` expected-vs-observed → `deterministic_verdict`) and the judgment-assisted `profile_fidelity` block (`voice_fidelity` / `appraisal_fidelity` / `pressure_behavior_fidelity` / `relationship_conduct_fidelity` ∈ pass|minor_drift|major_drift|not_applicable, evidence, `repair_recommendation`). The CHAR-authority-leak verdict reuses the landed `no_char_authority_in_story_runtime` validator (its `TEXT_SURFACE_PATTERN` already scans page plans + prose receipts; error `char_authority_text_leak`).
-3. Cross-skill boundary under audit: the prose-receipt schema is the shared contract between `branching-story-prose-attach` (producer) and the `prose-receipt-schema-compliance` validator (consumer); the §16a packet hashes (SPEC57STCHARPIPINT-002) are the inputs the deterministic block validates.
+3. Cross-skill boundary under audit: the prose-receipt schema is the shared contract between `branching-story-prose-attach` (producer) and the `prose-receipt-schema-compliance` validator (consumer); the §16a packet hashes (archive/tickets/SPEC57STCHARPIPINT-002.md) are the inputs the deterministic block validates.
 4. FOUNDATIONS §4a (prose is a receipt validated against the plan) and §6.1 (no `CHAR` operational authority): the deterministic block enforces packet presence + hash fidelity; the leak verdict surfaces §6.1 violations via the existing validator.
 5. Canon Safety surface (per-ticket-type granularity): this ticket modifies the structural validator `prose-receipt-schema-compliance.ts` — a Canon Safety surface gating story-bundle prose-receipt conformance. The change must remain additive to the receipt contract and must not weaken the Mystery Reserve firewall (`forbidden_mystery_resolution` remains untouched).
 6. Output-schema extension: `prose-receipt.schema.json` gains the `stchar_authority` + `profile_fidelity` blocks. Consumers: `prose-attach` (producer) and `prose-receipt-schema-compliance.ts` (validator). The extension is additive — the blocks are required only per-required-packet; receipts for pages with no qualifying character carry empty/absent blocks per the schema's conditional requirement.
@@ -56,7 +56,7 @@ Document populating the `stchar_authority` (deterministic) and `profile_fidelity
 
 - Re-implementing the CHAR-authority leak scan (reuse `no_char_authority_in_story_runtime`).
 - Broader cross-surface integration tests (SPEC57STCHARPIPINT-010).
-- The §16a packet contract definition (SPEC57STCHARPIPINT-002).
+- The §16a packet contract definition (archive/tickets/SPEC57STCHARPIPINT-002.md).
 
 ## Acceptance Criteria
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies `branching-story-turn-cycle` (SKILL.md + 4 reference files) to consume active STCHAR and to block-and-route mid-story complex characters; no new tool/schema.
-**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (routes to the authoring skill), SPEC57STCHARPIPINT-002 (emits the §16a page-plan packet).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (routes to the authoring skill), archive/tickets/SPEC57STCHARPIPINT-002.md (emits the §16a page-plan packet).
 
 ## Problem
 
@@ -14,7 +14,7 @@ Turn-cycle currently derives world `CHAR` seeds from `STENT.bound_char_id` — a
 
 1. `.claude/skills/branching-story-turn-cycle/references/pre-flight-and-prerequisites.md` line 17 reads `active STENT.bound_char_id values when non-null` — but `bound_char_id` no longer exists on `story-entity.schema.json` (SPEC-56 replaced it with `bound_stchar_id`). The context packet exposes `story_bundle_context.active_story_characters` (id, status, bound_stent_ids, source_kind, source_char_id, profile_revision, three hashes, packet_preview) with full bodies via `get_record(section_path)`.
 2. SPEC-57 §Phase 3 specifies: pre-flight loads active STCHAR before resolving action / selecting-or-JIT storylets / creating-or-superseding BEL/STINT/SREL/STPLAN/STEMO / generating choices / writing page plans; derives authority from `bound_stchar_id` + `active_records.STCHAR`; the M6 `blocked_requires_stchar` routing result; trivial background entities commit with `role_in_story: [background]`, `bound_stchar_id: null`.
-3. Cross-skill boundary under audit: turn-cycle's FOUNDATIONS Alignment table lives in `references/governance-and-foundations.md` (not inline) — it must be updated to reference STCHAR per the spec's Definition of Done. The §16a packet contract (SPEC57STCHARPIPINT-002) and the `active_story_characters` context-packet surface (SPEC-56) are the shared boundaries consumed here.
+3. Cross-skill boundary under audit: turn-cycle's FOUNDATIONS Alignment table lives in `references/governance-and-foundations.md` (not inline) — it must be updated to reference STCHAR per the spec's Definition of Done. The §16a packet contract (archive/tickets/SPEC57STCHARPIPINT-002.md) and the `active_story_characters` context-packet surface (SPEC-56) are the shared boundaries consumed here.
 4. FOUNDATIONS §6.1: runtime characterization reads STCHAR, never world `CHAR`; the `no_char_authority_in_story_runtime` validator enforces this on page plans + receipts.
 5. Canon-write ordering: the M6 rule gates state creation — turn-cycle must not commit a meaningful STENT/SE/PG for a complex new individual without a bound active STCHAR; instead it emits a `blocked_requires_stchar` routing result (`required_skill: story-character-profile`, mode, proposed display name, emergence context, source records, intended roles). This gating must preserve the shared eight hard gates (esp. the mystery/invariant firewall).
 6. Field-rename blast radius: the `STENT.bound_char_id` → `STENT.bound_stchar_id` correction in `pre-flight-and-prerequisites.md` is a fix to a dangling reference (the field was already removed by SPEC-56). Pipeline grep: only turn-cycle's pre-flight prose still names `bound_char_id`; no production code reads it.
@@ -60,7 +60,7 @@ Update the alignment table to reference STCHAR (§6.1 runtime firewall; §7 skil
 ## Out of Scope
 
 - The STCHAR authoring skill (archive/tickets/SPEC57STCHARPIPINT-001.md) — turn-cycle routes to it, does not author.
-- The §16a contract definition (SPEC57STCHARPIPINT-002).
+- The §16a contract definition (archive/tickets/SPEC57STCHARPIPINT-002.md).
 - Prose-attach validation (SPEC57STCHARPIPINT-006).
 
 ## Acceptance Criteria

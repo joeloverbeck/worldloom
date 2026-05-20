@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — adds a structural phase 2m + an optional source-drift mode to `branching-story-health-audit`; no new tool/schema.
-**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (audits STCHAR records), SPEC57STCHARPIPINT-002 (checks page-plan §16a packets).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-001.md (audits STCHAR records), archive/tickets/SPEC57STCHARPIPINT-002.md (checks page-plan §16a packets).
 
 ## Problem
 
@@ -14,7 +14,7 @@ Health-audit has no STCHAR-authority checks, so stale/superseded/missing STCHAR,
 
 1. `.claude/skills/branching-story-health-audit/SKILL.md` currently defines structural phases 2a–2l (replay, branch isolation, debt, belief/visibility, DA, mystery/canon, continuation, causal dependency, canon baseline drift, CLK/STSEC/STQ, STPLAN/STEMO, active-state underuse); there is no 2m. `2m` is the next available slot.
 2. SPEC-57 §Phase 6 specifies the 2m checks (`stent_missing_required_stchar`, `stchar_unresolved`, `stchar_not_active_for_bound_stent`, `stchar_superseded_still_active`, `page_plan_missing_stchar_packet`, `page_plan_stchar_hash_mismatch`, `choice/plan/emotion_character_grounding_missing`, `split_character_authority`, `repeated_profile_fidelity_failure`) and the optional source-drift mode (compares `STCHAR.source_char_hash` against current `CHAR-*` content hash; advisory only). The STCHAR `source_char_hash` field exists in the SPEC-56 schema; the world-index `stchar_source_character` edge supports the drift comparison.
-3. Cross-skill boundary under audit: the §16a page-plan packet (SPEC57STCHARPIPINT-002) and the STCHAR record/hashes (SPEC-56) are the surfaces 2m inspects; the `profile_fidelity` receipt block (SPEC57STCHARPIPINT-006) is the source of `repeated_profile_fidelity_failure`.
+3. Cross-skill boundary under audit: the §16a page-plan packet (archive/tickets/SPEC57STCHARPIPINT-002.md) and the STCHAR record/hashes (SPEC-56) are the surfaces 2m inspects; the `profile_fidelity` receipt block (SPEC57STCHARPIPINT-006) is the source of `repeated_profile_fidelity_failure`.
 4. FOUNDATIONS §6.1 (default mode must not re-read world `CHAR` for drift) and Rule 7 (mystery firewall preserved — the audit reports, it does not resolve): the source-drift mode is advisory and never rewrites STCHAR; default mode stays firewalled from world `CHAR`.
 
 ## Architecture Check

@@ -409,7 +409,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 14 | Recent prose continuity (optional, when parent prose is rendered) | recent `pages-prose/*.md` |
 | 15 | Plan frontmatter (engine fields, hash, page id) | engine |
 | 16 | Cast material reality projection (optional) | per-skill |
-| 16a | STCHAR-derived character authority packets (reserved; not yet mandatory) | SPEC-57 |
+| 16a | STCHAR-derived character authority packets (mandatory when relevant) | STCHAR profile + page state |
 | 17 | Style and register notes (optional) | per-skill |
 | 18 | Anti-pathology checklist | per-skill |
 | 19 | **Render-time instruction block** | **inlined verbatim from `reports/prose-quality-instructions.md` §Render-Time Instruction Template** |
@@ -453,7 +453,29 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 
 §9c is omitted entirely when no active STEMOs exist on the current branch. `branching-story-turn-cycle` owns the rendering procedure for both §9b and §9c, parallel to its existing §10b rendering ownership.
 
-**§16a is reserved, not yet mandatory.** SPEC-57 will define and promote STCHAR-derived character authority packets once bootstrap, turn-cycle, and packet-presence enforcement land. Until then, skills must not fail a page plan solely because §16a is absent.
+**§16a is per-page-computed STCHAR voice authority, not inlined verbatim.** Every page plan MUST include one STCHAR-derived character authority packet for each viewpoint character, speaker, major actor, direct target, emotionally salient character, or any character whose behavior, voice, appraisal, relationship conduct, perception, embodiment, or agency materially shapes the page. Background-only entities whose behavior and voice do not shape the page may be omitted, but the omission must not ask the prose renderer to infer persona from an id.
+
+Each §16a packet includes:
+
+```markdown
+## 16a. STCHAR-derived character authority packets
+
+- STENT-<integer> / STCHAR-<integer> — <display name>.
+  - Required because: viewpoint | speaker | major_actor | direct_target | emotionally_salient | behavior_shapes_page | voice_shapes_page.
+  - Hashes: profile_hash=<hash>; voice_block_hash=<hash>; page_packet_hash=<hash>.
+  - Story-facing identity for this page:
+  - Voice/dialogue authority: <copy or project the STCHAR `Page-Plan Voice Block` for this page>.
+  - Relevant appraisal rules:
+  - Relevant pressure behavior:
+  - Relationship-specific conduct:
+  - Perception and embodiment constraints:
+  - Agency and planning tendency:
+  - Prose must show:
+  - Prose must not imply:
+  - Anti-generic warnings:
+```
+
+The three hashes are load-bearing: prose-attach uses them to validate the rendered receipt against the active STCHAR profile, its voice block, and this page-specific packet. §16a is the renderer's character voice and behavior authority; it does not replace §5 entity status, §9 relationship/belief context, §9b active plans, §9c emotional transition, §16 cast material reality projection, or §17 style/register notes. Page plans must not cite world `CHAR-*` as operational authority for characterization after STCHAR exists; world `CHAR` may appear only as non-operational provenance on the STCHAR itself or in explicit authoring/promotion/adjudication flows.
 
 **§10b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `CLK` records (value / max, nearest threshold, salience), active `STSEC` records (status, holders, discovered clue-carrier count), and active `STQ` records (status, salience, audience visibility). For any STQ touched by the selected event, §10b names what the rendered prose must show for the setup/payoff movement: opened, narrowed, answered, paid off via `payoff_of`, inherited/abandoned, or tied to `answer_records[]`. Subsections appear only for classes with relevant active records; when no `CLK`, `STSEC`, or `STQ` content matters for the render, §10b is omitted rather than emitted as an empty placeholder. `branching-story-turn-cycle` owns the rendering procedure for this section.
 
