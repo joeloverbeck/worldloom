@@ -6,7 +6,7 @@ Source audit: reports/deepening-characters-second-iteration.md (ChatGPT-Pro, sec
 
 # SPEC-53: Character Pipeline — Second-Iteration Implementation Fixes
 
-**Status:** proposed
+**Status:** COMPLETED
 **Date:** 2026-05-20
 **Predecessor:** SPEC-52 — Protagonist-Grade Character Pipeline (archived; this spec is a focused delta on its landed deliverables)
 **Source audit:** `reports/deepening-characters-second-iteration.md`
@@ -190,4 +190,26 @@ Every validation-test PASS entry requires a one-line rationale; a bare PASS is t
 
 ## Outcome
 
-_(pending implementation)_
+Completed: 2026-05-20
+
+SPEC-53 is fully implemented and archived. The five-ticket family landed:
+
+1. `archive/tickets/SPEC53CHAPIPSEC-001.md` — NCP schema and upgraded-card fixture reconciliation.
+2. `archive/tickets/SPEC53CHAPIPSEC-002.md` — MCP NCP/NCB hybrid get/list retrieval.
+3. `archive/tickets/SPEC53CHAPIPSEC-003.md` — `user_seed` rejected-directions structural parity and minimum-entry verdicts.
+4. `archive/tickets/SPEC53CHAPIPSEC-004.md` — NCP-to-CHAR provenance persistence and malformed `source_proposal_id` structural rejection.
+5. `archive/tickets/SPEC53CHAPIPSEC-005.md` — critic-rationale substance tightening and Phase 13 slot rename.
+
+Deviations from the original plan:
+
+- No deterministic validator was added for critic-rationale literary substance; Phase 5 remains a skill-prose / LLM-critic discipline as planned.
+- No NCP body-section validator was added beyond the rejected-directions audit surface; the SPEC-52/SPEC-53 boundary remains that NCP body prose is not broadly heading-checked.
+- The Phase 5 closeout added a dated implementation note to this spec so the active spec did not preserve stale "pending" prose after the final skill-prose ticket landed.
+
+Final verification:
+
+1. `npm test` from `tools/validators` — PASS; 738 tests passed, covering the schema, structural validator, and provenance-format surfaces for this spec family.
+2. `npm test` from `tools/world-mcp` — PASS; 417 tests passed, covering the NCP/NCB MCP get/list retrieval surface and broader MCP contract.
+3. `rg -n "Protagonist-grade load-bearing character" .claude/skills` — PASS; no live skill surface still uses the old Phase 13 slot label.
+4. `rg -n "Highest-intensity load-bearing anchor" .claude/skills/propose-new-characters/references/phases-11-13-score-filter-diversify.md` — PASS; the renamed slot is present.
+5. `rg -n "world pressure|scene behavior|cannot-swap reason|rejected weaker alternative" .claude/skills/_shared-references/protagonist-grade-character-engine.md .claude/skills/propose-new-characters/references/phases-11-13-score-filter-diversify.md` — PASS; the four-element critic-rationale requirement is present in shared doctrine and referenced by the proposal phase.

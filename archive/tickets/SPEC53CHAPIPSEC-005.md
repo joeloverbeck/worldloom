@@ -44,7 +44,7 @@ At intake, two skill-prose refinements from the source report's M1 and M2 remain
 
 - `.claude/skills/_shared-references/protagonist-grade-character-engine.md` (modify)
 - `.claude/skills/propose-new-characters/references/phases-11-13-score-filter-diversify.md` (modify)
-- `specs/SPEC-53-character-pipeline-second-iteration-fixes.md` (modify — Phase 5 implementation note)
+- `archive/specs/SPEC-53-character-pipeline-second-iteration-fixes.md` (modify — Phase 5 implementation note)
 
 ## Out of Scope
 
@@ -90,5 +90,5 @@ The shared protagonist-grade character engine now requires Blandness Executioner
 
 ## Deviations
 
-- Added `specs/SPEC-53-character-pipeline-second-iteration-fixes.md` to the touched files to keep the active originating spec truthful with a dated Phase 5 implementation note.
+- Added `archive/specs/SPEC-53-character-pipeline-second-iteration-fixes.md` to the touched files to keep the originating spec truthful with a dated Phase 5 implementation note.
 - No deterministic validator, schema, production code, or skill dry-run was added or run; this ticket is intentionally skill-prose discipline proved by grep and manual review.

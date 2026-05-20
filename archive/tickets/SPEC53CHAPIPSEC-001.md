@@ -56,7 +56,7 @@ At intake, `deepen-character-proposal/templates/upgraded-proposal-card.md` emitt
 - `tools/validators/tests/schemas/character-proposal-schema-fixtures.test.ts` (modify)
 - `tools/validators/tests/integration/spec04-verification.test.ts` (modify — legacy baseline count truthing)
 - `tools/validators/tests/integration/spec09-verification.test.ts` (modify — legacy baseline count truthing)
-- `specs/SPEC-53-character-pipeline-second-iteration-fixes.md` (modify — Phase 1 implementation note)
+- `archive/specs/SPEC-53-character-pipeline-second-iteration-fixes.md` (modify — Phase 1 implementation note)
 
 ## Out of Scope
 

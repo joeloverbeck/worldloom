@@ -60,7 +60,7 @@ At intake, the NCP→CHAR derivation had no persisted, auditable link: `characte
 - `tools/validators/src/structural/character-memorability-structure.ts` (modify)
 - `tools/validators/tests/structural/character-memorability-structure.test.ts` (modify)
 - `tools/validators/tests/schemas/character-frontmatter-schema-fixtures.test.ts` (modify)
-- `specs/SPEC-53-character-pipeline-second-iteration-fixes.md` (modify — Phase 4 implementation note)
+- `archive/specs/SPEC-53-character-pipeline-second-iteration-fixes.md` (modify — Phase 4 implementation note)
 
 ## Out of Scope
 
@@ -103,7 +103,7 @@ The character-generation workflow now carries NCP provenance through the final C
 
 1. `npm test` from `tools/validators` — PASS; rebuilt the package and ran 738 passing tests, including the new schema acceptance and structural malformed-id fixtures.
 2. `npm run build` from `tools/validators` — PASS; TypeScript compile completed after the final schema-boundary correction.
-3. `rg -n "source_proposal_id|NCP->CHAR|NCP-derived|input_memorability_contract.source_proposal_id" .claude/skills/character-generation tools/validators/src tools/validators/tests archive/tickets/SPEC53CHAPIPSEC-004.md specs/SPEC-53-character-pipeline-second-iteration-fixes.md` — PASS; confirmed the field is present in the load-bearing skill/template/governance/schema/test surfaces and remaining spec/ticket mentions are current or historical intake/closeout context.
+3. `rg -n "source_proposal_id|NCP->CHAR|NCP-derived|input_memorability_contract.source_proposal_id" .claude/skills/character-generation tools/validators/src tools/validators/tests archive/tickets/SPEC53CHAPIPSEC-004.md archive/specs/SPEC-53-character-pipeline-second-iteration-fixes.md` — PASS; confirmed the field is present in the load-bearing skill/template/governance/schema/test surfaces and remaining spec/ticket mentions are current or historical intake/closeout context.
 
 ## Deviations
 
