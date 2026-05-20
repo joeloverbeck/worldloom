@@ -115,6 +115,8 @@ Three smaller items: the structural validator's rejected-directions-audit check 
 
 ### Phase 5 — Critic-rationale substance + slot rename (M1, M2) — Medium
 
+**Implementation note (2026-05-20):** `archive/tickets/SPEC53CHAPIPSEC-005.md` landed this phase's skill-prose seam. The shared protagonist-grade character engine now requires Blandness Executioner and Protagonist-Grade Critic PASS rationales to name a concrete world pressure, scene behavior, cannot-swap reason, and rejected weaker alternative, while `propose-new-characters` Phase 13 renames the ambiguous single-card slot to `Highest-intensity load-bearing anchor`.
+
 **Files**
 - `.claude/skills/_shared-references/protagonist-grade-character-engine.md` and/or the proposal/deepening critic-pass references (edit — M1)
 - `.claude/skills/propose-new-characters/references/phases-11-13-score-filter-diversify.md` (edit — M2)

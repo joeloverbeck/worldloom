@@ -44,7 +44,7 @@ geography / institution / species-body / power-relation / pressure-cluster / kno
 
 **Rule**: A slightly lower-scoring proposal may be preferable if it opens a genuinely new world window.
 
-**Mandatory critic passes**: Theme / Tone Critic, Blandness Executioner, and Protagonist-Grade Critic. Each PASS requires a one-line rationale; a bare PASS is a FAIL.
+**Mandatory critic passes**: Theme / Tone Critic, Blandness Executioner, and Protagonist-Grade Critic. Each PASS requires a one-line rationale; Blandness Executioner and Protagonist-Grade Critic PASS rationales must satisfy the four-element evidence rule in the shared protagonist-grade character engine. A bare PASS is a FAIL.
 
 ## Phase 12: Filter Out Bad Proposals
 
@@ -89,7 +89,7 @@ Fill 10 composition slots (left-to-right fill priority when X < 10):
 7. Ideological misreader or dissenter
 8. Regionally distant mosaic figure
 9. Body / species-differentiated lens
-10. Protagonist-grade load-bearing character
+10. Highest-intensity load-bearing anchor
 
 Also vary across 8 contrast axes:
 
