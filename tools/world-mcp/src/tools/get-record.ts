@@ -52,7 +52,12 @@ export type StoryParsedRecord = {
   [key: string]: unknown;
 };
 
-export type HybridRecordKind = "character" | "diegetic_artifact" | "adjudication";
+export type HybridRecordKind =
+  | "character"
+  | "diegetic_artifact"
+  | "adjudication"
+  | "character_proposal_card"
+  | "character_proposal_batch";
 
 export interface GetRecordAtomicResponse {
   record: ParsedRecord;
@@ -110,7 +115,7 @@ export interface RecordRow {
 const ATOMIC_RECORD_ID_PATTERN =
   /^(?:(?:CF|CH|M|OQ|ENT)-\d+|(?:ONT|CAU|DIS|SOC|AES)-\d+|SEC-(?:ELF|INS|MTS|GEO|ECR|PAS|TML)-\d+)$/;
 
-const HYBRID_RECORD_ID_PATTERN = /^(?:CHAR|DA|PA)-\d+$/;
+const HYBRID_RECORD_ID_PATTERN = /^(?:CHAR|DA|PA|NCP|NCB)-\d+$/;
 const STORY_DIEGETIC_ARTIFACT_ID_PATTERN = /^DA-\d+$/;
 
 const STORY_MARKDOWN_NODE_TYPES: readonly StoryBundleNodeType[] = [
@@ -131,7 +136,9 @@ const NODE_TYPE_TO_RECORD_KIND: Partial<Record<NodeType, ParsedRecord["record_ki
 const NODE_TYPE_TO_HYBRID_KIND: Partial<Record<NodeType, HybridRecordKind>> = {
   character_record: "character",
   diegetic_artifact_record: "diegetic_artifact",
-  adjudication_record: "adjudication"
+  adjudication_record: "adjudication",
+  character_proposal_card: "character_proposal_card",
+  character_proposal_batch: "character_proposal_batch"
 };
 
 function getRecordKind(nodeType: NodeType): ParsedRecord["record_kind"] | null {
@@ -171,7 +178,7 @@ export function validateRecordId(recordId: string): McpError | null {
   return createMcpError("invalid_input", `record_id '${recordId}' is not a supported record id.`, {
     field: "record_id",
     expected:
-      "atomic (CF-<integer>, CH-<integer>, M-<integer>, OQ-<integer>, ENT-<integer>, invariant category id, SEC-<class>-<integer>), hybrid (CHAR-<integer>, DA-<integer>, PA-<integer>), or story-bundle (PG/SE/BEL/SF/OBL/CNSQ/THR/SREL/STINT/STENT/STSTAT/STLOC/STOBJ/CLK/STSEC/STQ/STPLAN/STEMO/BR/CHC/SLT/SLB/SAU/SP/RSP-<integer>)"
+      "atomic (CF-<integer>, CH-<integer>, M-<integer>, OQ-<integer>, ENT-<integer>, invariant category id, SEC-<class>-<integer>), hybrid (CHAR-<integer>, DA-<integer>, PA-<integer>, NCP-<integer>, NCB-<integer>), or story-bundle (PG/SE/BEL/SF/OBL/CNSQ/THR/SREL/STINT/STENT/STSTAT/STLOC/STOBJ/CLK/STSEC/STQ/STPLAN/STEMO/BR/CHC/SLT/SLB/SAU/SP/RSP-<integer>)"
   });
 }
 

@@ -61,6 +61,8 @@ Three smaller items: the structural validator's rejected-directions-audit check 
 
 ### Phase 2 — MCP NCP/NCB hybrid retrieval (C2) — High
 
+**Implementation note (2026-05-20):** `archive/tickets/SPEC53CHAPIPSEC-002.md` landed this phase's MCP retrieval seam. `get_record` now accepts NCP/NCB ids through the hybrid parser/projection path, `list_records` exposes `character_proposal_card` and `character_proposal_batch`, capability metadata and machine-facing docs name the proposal types, and `tools/world-mcp` tests cover NCP/NCB get/list behavior plus enum exposure.
+
 **Files**
 - `tools/world-mcp/src/tools/get-record.ts` (edit)
 - `tools/world-mcp/src/tools/list-records.ts` (edit)
