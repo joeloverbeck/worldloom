@@ -202,6 +202,8 @@ After design approval, do NOT apply changes or implement the design until the us
 
 **Quick triage** (find the matching shape, then read the corresponding bullet in `references/deliverable-classification.md` for the full rules):
 
+**Worktree-root anchoring (load-bearing)**: every output destination in the table below is written relative — when invoked inside a git worktree, resolve each path against the **worktree root**, not the main repository root (per Guardrails §Worktree discipline). Construct the write path from the worktree root at write time, and after writing, confirm the file landed under the worktree root before presenting the Step 6 menu. This is the point of need: the persistence step is where the path is built, so re-anchor here rather than relying on the Guardrails reminder alone.
+
 | Deliverable shape | Output destination |
 |---|---|
 | Inline ops/setup task | execute inline + summary; no file persisted |
