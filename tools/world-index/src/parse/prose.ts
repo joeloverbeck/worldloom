@@ -25,7 +25,7 @@ const WHOLE_FILE_ID_FIELDS = new Map<string, string>([
   ["audits", "audit_id"]
 ]);
 
-const CANONICAL_ID_REGEX = /^(DA|CHAR|PR|NCP|AU)-\d+$/;
+const CANONICAL_ID_REGEX = /^(DA|CHAR|PR|NCP|NCB|AU)-\d+$/;
 
 interface HeadingNode {
   depth: number;
@@ -119,6 +119,8 @@ function createWholeFileRecord(
         : firstSegment === "character-proposals"
           ? "character_proposal_batch"
           : "retcon_proposal_card";
+    const canonicalNodeId =
+      firstSegment === "character-proposals" ? canonicalFrontmatterNodeId(lines, "batch_id") : null;
 
     return createNodeRow({
       worldSlug,
@@ -129,7 +131,8 @@ function createWholeFileRecord(
       lineEnd: lines.length,
       body: lines.join("\n"),
       lines,
-      occurrenceIndex: 0
+      occurrenceIndex: 0,
+      preferredNodeId: canonicalNodeId
     });
   }
 
@@ -387,6 +390,10 @@ function canonicalWholeFileNodeId(lines: string[], firstSegment: string): string
     return null;
   }
 
+  return canonicalFrontmatterNodeId(lines, idField);
+}
+
+function canonicalFrontmatterNodeId(lines: string[], idField: string): string | null {
   const frontmatter = parseOpeningFrontmatter(lines);
   if (!frontmatter || typeof frontmatter !== "object") {
     return null;

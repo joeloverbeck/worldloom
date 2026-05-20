@@ -123,6 +123,8 @@ IDs are append-only and use the FOUNDATIONS-002 unpadded natural-integer suffix 
 - `DA-<integer>` — diegetic artifacts (same pattern as characters)
 - `PR-<integer>` — proposal cards (`worlds/<slug>/proposals/`)
 - `BATCH-<integer>` — proposal batch manifests (`worlds/<slug>/proposals/batches/`)
+- `NCP-<integer>` — character proposal cards (`worlds/<slug>/character-proposals/`)
+- `NCB-<integer>` — character proposal batch manifests (`worlds/<slug>/character-proposals/batches/`)
 - `AU-<integer>` — audit reports (`worlds/<slug>/audits/`)
 - `RP-<integer>` — retcon-proposal cards (emitted by `continuity-audit` under its audit sub-directory)
 - `SAU-<integer>` — story-bundle health audit reports (`worlds/<slug>/stories/<story-slug>/audits/SAU-<integer>-<date>.md`; allocate with `story_slug`)

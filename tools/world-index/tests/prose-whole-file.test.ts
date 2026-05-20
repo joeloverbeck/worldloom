@@ -36,6 +36,12 @@ test("whole-file record families prefer canonical frontmatter ids", () => {
       expectedNodeId: "NCP-0001"
     },
     {
+      relativePath: "character-proposals/batches/founding-round.md",
+      expectedNodeType: "character_proposal_batch",
+      source: ["---", "batch_id: NCB-0001", "---", "", "# Character Proposal Batch"].join("\n"),
+      expectedNodeId: "NCB-0001"
+    },
+    {
       relativePath: "audits/animalia-audit.md",
       expectedNodeType: "audit_record",
       source: ["---", "audit_id: AU-0001", "---", "", "# Audit"].join("\n"),
