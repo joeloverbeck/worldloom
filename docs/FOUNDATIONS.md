@@ -92,7 +92,9 @@ Mystery Reserve entries must define:
 - what kinds of answers are forbidden
 - whether future canon may resolve it
 
-> **Resolution-safety semantics (per SPEC-14)**: `future_resolution_safety` is coupled to `status`. Mysteries with `status: forbidden` take `future_resolution_safety: none` (no future canon may resolve them — they define the world's metaphysics by what stays unsaid). Mysteries with `status: active` or `status: passive` take `future_resolution_safety: low | medium | high` (rare-but-allowed → readily allowed). This coupling is enforced by the `rule7_mystery_reserve_preservation` validator.
+> **Resolution-safety semantics (per SPEC-14)**: `future_resolution_safety` is coupled to `status`. Mysteries with `status: forbidden` take `future_resolution_safety: none` (no future canon may resolve them — they define the world's metaphysics by what stays unsaid). Mysteries with `status: active`, `status: passive`, or `status: passive_depth` take `future_resolution_safety: low | medium | high` (rare-but-allowed → readily allowed). This coupling is enforced by the `rule7_mystery_reserve_preservation` validator.
+
+A forbidden mystery is a strong default, not a universal law. A world should preserve at least one bounded unknown, but when a central mystery is intended for eventual revelation, the world records that policy explicitly rather than forcing a permanent lock.
 
 ## Artifact Authority and Maturity
 

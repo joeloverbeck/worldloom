@@ -1,6 +1,6 @@
 # SPEC62FOUANDDOC-002: FOUNDATIONS — document `passive_depth` + relax forbidden-mystery absolutism
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `docs/FOUNDATIONS.md` §Mystery Reserve resolution-safety note; no code, schema, or validator change.
@@ -8,12 +8,12 @@
 
 ## Problem
 
-FOUNDATIONS line 95's resolution-safety note documents only `active` / `passive` / `forbidden`, but `MYSTERY_STATUS_ENUM` and `mystery-reserve.schema.json` both define **four** statuses including `passive_depth`, and `create-base-world/SKILL.md:171` references all four — a documentation drift. Separately, FOUNDATIONS Rule 7 mandates *deliberate, bounded unknowns* but does NOT require a permanently-unresolvable (`forbidden`) mystery in every world; discovery-driven worlds are crippled by treating a forbidden mystery as an absolute law. SPEC-62 §2.3 + §2.4 (FOUNDATIONS sentence) close both at the §Mystery Reserve note.
+At intake, FOUNDATIONS line 95's resolution-safety note documented only `active` / `passive` / `forbidden`, while `MYSTERY_STATUS_ENUM` and `mystery-reserve.schema.json` both defined **four** statuses including `passive_depth`, and `create-base-world/SKILL.md:171` referenced all four — a documentation drift. Separately, FOUNDATIONS Rule 7 mandated *deliberate, bounded unknowns* but did NOT require a permanently-unresolvable (`forbidden`) mystery in every world; discovery-driven worlds were crippled by treating a forbidden mystery as an absolute law. This ticket updated the §Mystery Reserve note to close both drift points.
 
 ## Assumption Reassessment (2026-05-21)
 
-1. Verified against current code: `MYSTERY_STATUS_ENUM = ["active", "passive", "passive_depth", "forbidden"]` at `tools/world-index/src/public/canonical-vocabularies.ts:43`; `mysteryResolutionSafetyForStatus(status)` (same file, ~line 211) returns `["none"]` only for `forbidden` and `["low","medium","high"]` for every other status (so `passive_depth` takes `low|medium|high`, exactly what §2.3 documents); `mystery-reserve.schema.json` enum includes `passive_depth`. The validator already enforces the coupling — this ticket is pure documentation catch-up.
-2. SPEC-62 §2.3 (lines 65–75) + §2.4 first bullet (lines 86–89) are the source deliverables; the edit target is the resolution-safety note at `docs/FOUNDATIONS.md:95` (verified: currently lists only `active`/`passive`/`forbidden`). Triage verdicts A3 (Fault, drift) + A4 (Fault 4, narrowed) route both here; the report's `resolution_intent` enum + `mystery_policy_validator` are dropped (YAGNI, no consumer).
+1. Verified against current code: `MYSTERY_STATUS_ENUM = ["active", "passive", "passive_depth", "forbidden"]` at `tools/world-index/src/public/canonical-vocabularies.ts:43`; `mysteryResolutionSafetyForStatus(status)` (same file, ~line 211) returns `["none"]` only for `forbidden` and `["low","medium","high"]` for every other status (so `passive_depth` takes `low|medium|high`, exactly what §2.3 now documents); `mystery-reserve.schema.json` enum includes `passive_depth`. The validator already enforced the coupling — this ticket was documentation catch-up.
+2. SPEC-62 §2.3 (lines 65–75) + §2.4 first bullet (lines 86–89) were the source deliverables; the edit target was the resolution-safety note at `docs/FOUNDATIONS.md:95`. At intake, that note listed only `active`/`passive`/`forbidden`; it now includes `passive_depth` on the non-forbidden arm and the separate strong-default sentence. Triage verdicts A3 (Fault, drift) + A4 (Fault 4, narrowed) route both here; the report's `resolution_intent` enum + `mystery_policy_validator` are dropped (YAGNI, no consumer).
 3. Single-artifact ticket (`docs/FOUNDATIONS.md`); the shared boundary under audit is the validator-enforced `status`↔`future_resolution_safety` coupling — this doc edit must stay consistent with `mysteryResolutionSafetyForStatus`, not redefine it.
 4. FOUNDATIONS principle restated: Rule 7 (Preserve Mystery Deliberately) — "Unknowns must be chosen, bounded, and tracked." The relaxation keeps unknowns deliberate and bounded (at least one bounded unknown is still expected) while removing the absolute that exceeds Rule 7's text. The existing line-95 note's `forbidden ⇒ none` coupling is preserved verbatim; `passive_depth` is added to the `active`/`passive` arm.
 5. Canon Safety surface named: the `rule7_mystery_reserve_preservation` validator (cited at line 95) and the `forbidden ⇒ future_resolution_safety: none` coupling are the enforcement surfaces. This ticket changes only FOUNDATIONS prose — it does NOT touch the validator, the coupling, or any Mystery Reserve firewall; the relaxation adds a "strong default, not universal law" framing that the validator does not enforce (the validator only enforces the safety-coupling, never forbidden-presence). Confirmed: no firewall weakening — `forbidden` mysteries still take `none`, and nothing here lets canon resolve a forbidden `M`.
@@ -30,15 +30,15 @@ FOUNDATIONS line 95's resolution-safety note documents only `active` / `passive`
 3. The `forbidden ⇒ future_resolution_safety: none` coupling and the `rule7_mystery_reserve_preservation` validator citation are unchanged → manual review against the pre-edit line 95.
 4. The documented coupling matches `mysteryResolutionSafetyForStatus` → FOUNDATIONS alignment check (doc `passive_depth → low|medium|high` equals the function's non-forbidden return).
 
-## What to Change
+## Landed Changes
 
-### 1. Add `passive_depth` to the resolution-safety note (§2.3)
+### 1. Added `passive_depth` to the resolution-safety note (§2.3)
 
-In the §Mystery Reserve resolution-safety note (line 95), extend the `active`/`passive` arm to include `passive_depth`: like `active`/`passive` it takes `future_resolution_safety: low | medium | high` (per `mysteryResolutionSafetyForStatus`). Leave the `forbidden ⇒ none` coupling and the validator citation unchanged.
+In the §Mystery Reserve resolution-safety note, the `active`/`passive` arm now includes `passive_depth`: like `active`/`passive` it takes `future_resolution_safety: low | medium | high` (per `mysteryResolutionSafetyForStatus`). The `forbidden ⇒ none` coupling and the validator citation remain unchanged.
 
-### 2. Add the forbidden-relaxation sentence (§2.4 FOUNDATIONS bullet)
+### 2. Added the forbidden-relaxation sentence (§2.4 FOUNDATIONS bullet)
 
-Add a sentence to §Mystery Reserve: a forbidden mystery is a **strong default**, not a universal law; a world should preserve at least one bounded unknown, but when a central mystery is intended for eventual revelation, the world records the policy explicitly rather than forcing a permanent lock.
+§Mystery Reserve now states that a forbidden mystery is a **strong default**, not a universal law; a world should preserve at least one bounded unknown, but when a central mystery is intended for eventual revelation, the world records the policy explicitly rather than forcing a permanent lock.
 
 ## Files to Touch
 
@@ -76,3 +76,21 @@ Add a sentence to §Mystery Reserve: a forbidden mystery is a **strong default**
 1. `grep -n "passive_depth\|strong default" docs/FOUNDATIONS.md`
 2. `grep -n "mysteryResolutionSafetyForStatus" tools/world-index/src/public/canonical-vocabularies.ts` — cross-check the documented coupling against the live function.
 3. Narrower-command rationale: a single-note doc edit whose only correctness contract is consistency with an existing validator-enforced coupling; grep-proof of the doc plus a read of the coupling function is the correct verification boundary.
+
+## Outcome
+
+Completed: 2026-05-21.
+
+`docs/FOUNDATIONS.md` now documents `status: passive_depth` as taking `future_resolution_safety: low | medium | high`, matching the live `mysteryResolutionSafetyForStatus` function. It also states that forbidden mysteries are a strong default rather than a universal law while preserving the rule that `status: forbidden` takes `future_resolution_safety: none`.
+
+No validator, schema, skill, or world-data change was made.
+
+## Verification Result
+
+1. `grep -n "passive_depth\|strong default" docs/FOUNDATIONS.md` — PASS; returned the updated resolution-safety note and the new strong-default sentence in §Mystery Reserve.
+2. `grep -n "forbidden.*future_resolution_safety: none\|status: forbidden" docs/FOUNDATIONS.md` — PASS; confirmed the forbidden-to-`none` coupling sentence remains present.
+3. `grep -n "mysteryResolutionSafetyForStatus" tools/world-index/src/public/canonical-vocabularies.ts` — PASS; confirmed the live function remains the coupling authority checked by this docs-only ticket.
+
+## Deviations
+
+None. The ticket landed as a docs-only FOUNDATIONS update; `resolution_intent`, `mystery_policy_validator`, skill/template edits, schemas, validators, and world data remained out of scope.

@@ -4,16 +4,16 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/propose-new-worlds-from-preferences/SKILL.md` (Phase 11b mandate + restatement sites) and `templates/proposal-card.md` (new optional field); no code, validator, or world-data change.
-**Deps**: SPEC62FOUANDDOC-002
+**Deps**: archive/tickets/SPEC62FOUANDDOC-002.md
 
 ## Problem
 
-`propose-new-worlds-from-preferences/SKILL.md:244` requires **every** card to declare at least one `forbidden` mystery (Phase 11b enforces it). FOUNDATIONS Rule 7 mandates deliberate, bounded unknowns — not a permanently-unresolvable mystery in every world — and discovery-driven worlds (an explicit target posture) are crippled by an absolute forbidden mandate. SPEC-62 §2.4 relaxes the per-card mandate to "at least one **bounded** mystery; forbidden strongly recommended; when omitted, populate `forbidden_mystery_absence_rationale`," consistent with the FOUNDATIONS relaxation landed in SPEC62FOUANDDOC-002.
+`propose-new-worlds-from-preferences/SKILL.md:244` requires **every** card to declare at least one `forbidden` mystery (Phase 11b enforces it). FOUNDATIONS Rule 7 mandates deliberate, bounded unknowns — not a permanently-unresolvable mystery in every world — and discovery-driven worlds (an explicit target posture) are crippled by an absolute forbidden mandate. SPEC-62 §2.4 relaxes the per-card mandate to "at least one **bounded** mystery; forbidden strongly recommended; when omitted, populate `forbidden_mystery_absence_rationale`," consistent with the FOUNDATIONS relaxation landed in `archive/tickets/SPEC62FOUANDDOC-002.md`.
 
 ## Assumption Reassessment (2026-05-21)
 
 1. The forbidden-mandate is restated across multiple sites in `propose-new-worlds-from-preferences/SKILL.md` (verified this session — 13 "forbidden" hits; the mandate-bearing ones): HARD-GATE gate-list (≈line 19, "11b per-card forbidden-mystery presence"), Phase 10 materialization rule (≈line 244, "every card MUST declare at least one `forbidden` mystery"), Phase 11b heading + body (≈lines 255–256), FOUNDATIONS-Alignment Rule-7 row (≈line 343), Final Rule (≈line 394); plus `templates/proposal-card.md` — `mystery_reserve_seeds.forbidden` comment (≈line 117, "MANDATORY at least one"), `forbidden_mystery_presence` block (≈lines 135–137), body checklist (≈line 297), validation checklist (≈line 340). ALL must change consistently or the skill is internally contradictory (relaxed Phase 11b vs HARD-GATE/Final Rule still demanding an absolute). Line numbers are informational — re-grep `forbidden` at implementation time and update every mandate-bearing site.
-2. SPEC-62 §2.4 (lines 77–113) is the source deliverable; it depends on the FOUNDATIONS relaxation sentence landed by SPEC62FOUANDDOC-002 (the skill must not relax its mandate before FOUNDATIONS sanctions it — Rule 6 / consistency). Triage A4 routes it here with `resolution_intent` dropped.
+2. SPEC-62 §2.4 (lines 77–113) is the source deliverable; it depends on the FOUNDATIONS relaxation sentence landed by `archive/tickets/SPEC62FOUANDDOC-002.md` (the skill must not relax its mandate before FOUNDATIONS sanctions it — Rule 6 / consistency). Triage A4 routes it here with `resolution_intent` dropped.
 3. Cross-artifact boundary under audit: the SKILL.md ↔ `templates/proposal-card.md` pair — the Phase 11b check (SKILL) and the `mystery_reserve_seeds` / `forbidden_mystery_presence` blocks (template) are paired surfaces; both must move together. The new `forbidden_mystery_absence_rationale` field is consumed by the relaxed Phase 11b check.
 4. FOUNDATIONS principle restated: Rule 7 (Preserve Mystery Deliberately) — bounded, tracked unknowns. The relaxation keeps "at least one **bounded** mystery" mandatory (Rule 7 satisfied) and requires an explicit `forbidden_mystery_absence_rationale` when forbidden is omitted (so the omission is deliberate and tracked, not weak design memory).
 5. Canon Safety surface named: the skill's Phase 11 Canon Safety Check, specifically Phase 11a (cross-world Mystery Reserve laundering firewall) and Phase 11b (per-card forbidden-mystery presence). **Only Phase 11b (presence) relaxes; Phase 11a (the load-bearing Rule-7 laundering firewall, SKILL.md ≈line 387) is preserved unchanged** — no card may transcribe/answer another world's forbidden `M` `unknowns`, before or after this change. Confirmed: the firewall is not weakened and no forbidden `M` becomes resolvable.
@@ -29,7 +29,7 @@
 1. No SKILL.md site still demands an absolute forbidden mystery → codebase grep-proof (`grep -n "MUST declare at least one .forbidden" .claude/skills/propose-new-worlds-from-preferences/SKILL.md` returns zero; the relaxed "bounded" wording is present at the former mandate sites).
 2. `forbidden_mystery_absence_rationale` is present in the template and referenced by the relaxed Phase 11b → codebase grep-proof across SKILL.md + `templates/proposal-card.md`.
 3. Phase 11a cross-world laundering firewall text (≈line 387) is byte-unchanged → codebase grep-proof / manual diff of the Phase 11a region.
-4. The relaxation matches the FOUNDATIONS authority → FOUNDATIONS alignment check against the SPEC62FOUANDDOC-002 §Mystery Reserve relaxation sentence.
+4. The relaxation matches the FOUNDATIONS authority → FOUNDATIONS alignment check against the `archive/tickets/SPEC62FOUANDDOC-002.md` §Mystery Reserve relaxation sentence.
 
 ## What to Change
 
@@ -55,7 +55,7 @@ Leave the Phase 11a cross-world Mystery Reserve laundering firewall (≈line 387
 - `create-base-world` — unchanged; its symmetric "at least one of each" genesis seeding is not the reported defect.
 - The `resolution_intent` enum + `mystery_policy_validator` — dropped (YAGNI).
 - Phase 11a (cross-world laundering firewall) — explicitly preserved, not modified.
-- Any FOUNDATIONS edit (that is SPEC62FOUANDDOC-002, this ticket's dependency).
+- Any FOUNDATIONS edit (that is `archive/tickets/SPEC62FOUANDDOC-002.md`, this ticket's dependency).
 - Any validator or `canonical-vocabularies.ts` change.
 
 ## Acceptance Criteria
