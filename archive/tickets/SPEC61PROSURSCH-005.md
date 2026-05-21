@@ -49,7 +49,7 @@ In `.claude/skills/continuity-audit/examples/post-canon-addition-audit.md`, upda
 - `.claude/skills/continuity-audit/templates/retcon-proposal-card.md` (modify)
 - `.claude/skills/continuity-audit/SKILL.md` (modify)
 - `.claude/skills/continuity-audit/examples/post-canon-addition-audit.md` (modify)
-- `specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md` (modify — dated implementation note only)
+- `archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md` (modify — dated implementation note only)
 
 ## Out of Scope
 

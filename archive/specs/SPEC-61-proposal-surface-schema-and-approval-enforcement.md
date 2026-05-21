@@ -1,6 +1,6 @@
 # SPEC-61 — Proposal-Surface Schema Coverage & Approval-Semantics Enforcement
 
-**Status:** proposed
+**Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** canon-related (validator + machine-facing coverage for canon-pipeline proposal/audit/pressure surfaces; no canon-semantics change)
 **Source:** `reports/world-system-consolidation-first-iteration.md` Fault 5 (verified) + the genuine sliver of Fault 2 (verified) — reassessed against `main`
@@ -194,3 +194,28 @@ therefore routes `proposals/batches/` to `proposal_batch` and `pressure-events/b
 - **Pressure-event batch schema — split resolved.** SPEC61PROSURSCH-001 confirmed
   `proposals/batches/BATCH-*.md` and `pressure-events/batches/BATCH-*.md` frontmatter diverge, so the
   implementation uses a ninth `pressure-event-batch.schema.json` + `pressure_event_batch` node type.
+
+## Outcome
+
+Completed on 2026-05-21.
+
+What changed:
+
+1. Added JSON-schema coverage and validator wiring for the nine proposal/audit/pressure/world-proposal surfaces: PR, proposal BATCH, EPE, EPE sidecar proposal, EPE batch, AU, RP, NWP, and NWB.
+2. Added world-index enumeration and node-type parsing for those proposal surfaces while preserving the intentionally absent EPE retrieval surface in `list_records`.
+3. Added the `approval-semantics` structural validator so non-CF records fail if they carry `source_basis.direct_user_approval`, while accepted CFs still require that field.
+4. Fixed the continuity-audit RP producer to use `source_basis.user_approved` instead of the CF-only `direct_user_approval` field.
+5. Added the SPEC-61 capstone integration test proving schema coverage, approval semantics, RP template output, CF no-regression, world-index node emission, and unchanged EPE retrieval together.
+
+Deviations:
+
+1. SPEC61PROSURSCH-001 proved proposal batches and pressure-event batches have divergent frontmatter, so the implementation landed nine schemas/node types rather than a shared batch schema.
+2. The capstone does not add a checked-in fixture subtree; it generates a minimal temp world under `/tmp` and removes it after the test.
+
+Verification:
+
+1. PASS — `cd tools/validators && npm test` (`808` tests passed).
+2. PASS — `cd tools/world-index && npm run build`.
+3. PASS — `cd tools/world-index && npm test` (`127` tests passed).
+4. PASS — `cd tools/world-mcp && npm run build`.
+5. PASS — `cd tools/world-mcp && node --test dist/tests/server/capability-parity.test.js` (`5` tests passed).
