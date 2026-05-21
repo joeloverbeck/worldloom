@@ -91,6 +91,42 @@ test("world-validate exits 1 and persists verdict rows for a deliberate violatio
   assert.ok(validationRowCount(path.join(repo, "worlds", "clean", "_index", "world.db")) > 0);
 });
 
+test("world-validate reports record_schema_compliance failures for malformed proposal surfaces", () => {
+  const repo = createIndexedWorld();
+  const proposalDir = path.join(repo, "worlds", "clean", "proposals");
+  mkdirSync(proposalDir, { recursive: true });
+  writeFileSync(
+    path.join(proposalDir, "PR-1-incomplete.md"),
+    [
+      "---",
+      yaml.dump({
+        proposal_id: "PR-1",
+        batch_id: "BATCH-1",
+        slug: "incomplete"
+      }).trimEnd(),
+      "---",
+      "# Incomplete Proposal",
+      ""
+    ].join("\n"),
+    "utf8"
+  );
+
+  const result = spawnSync(cliPath, ["clean", "--structural", "--json"], { cwd: repo, encoding: "utf8" });
+  const parsed = JSON.parse(result.stdout || result.stderr) as {
+    verdicts: Array<{ validator: string; code: string; location: { file?: string } }>;
+  };
+
+  assert.equal(result.status, 1, result.stderr + result.stdout);
+  assert.ok(
+    parsed.verdicts.some(
+      (verdict) =>
+        verdict.validator === "record_schema_compliance" &&
+        verdict.code === "record_schema_compliance.required" &&
+        verdict.location.file === "proposals/PR-1-incomplete.md"
+    )
+  );
+});
+
 test("world-validate downgrades exact grandfathered bootstrap findings to info", () => {
   const repo = createIndexedWorld({
     mysteryOverride: {
@@ -177,6 +213,7 @@ test("world-validate --since narrows selector applicability from the world's git
     "id_uniqueness",
     "cross_file_reference",
     "record_schema_compliance",
+    "approval_semantics",
     "story_fact_authority",
     "compatibility_drift",
     "rule7_mystery_reserve_preservation"

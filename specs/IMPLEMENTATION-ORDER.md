@@ -8,11 +8,11 @@ world-system (non-story) skills, whose proposal/audit/pressure surfaces had the 
 
 | Order | Spec | Scope | Depends on |
 |---|---|---|---|
-| 1 | **SPEC-61** — Proposal-surface schema coverage & approval-semantics enforcement | JSON schemas + structural validation for PR/BATCH/EPE/EPE-sidecar/AU/RP/NWP/NWB; hard-fail non-CF `direct_user_approval`; fix RP collision | none — foundational |
+| 1 | **SPEC-61** — Proposal-surface schema coverage & approval-semantics enforcement (`archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`) | Completed: JSON schemas + structural validation for PR/BATCH/EPE/EPE-sidecar/EPE-batch/AU/RP/NWP/NWB; hard-fail non-CF `direct_user_approval`; fix RP collision; add capstone proof | none — foundational |
 | 2 | **SPEC-62** — FOUNDATIONS & docs world-system reconciliation | FOUNDATIONS §Artifact Authority + §World Generativity paragraphs; document `passive_depth`; relax forbidden-mystery mandate; REPOSITORY-MAP + DA-prose fixes | none — independent; may run in parallel with SPEC-61 (docs-only; no schema/validator overlap) |
 
-Both are independent and may run in parallel. SPEC-61 is the executable coverage; SPEC-62 is
-docs/FOUNDATIONS only (touches no schema, validator, or world data). Deferred items (D3–D6:
+Both are independent and may run in parallel. SPEC-61 is now archived as completed executable coverage;
+SPEC-62 is docs/FOUNDATIONS only (touches no schema, validator, or world data). Deferred items (D3–D6:
 `taxonomy_authority_validator`, CF-1 split, continuity-audit compatibility checks, patch-engine
 routing of proposal direct-writes) await a concrete consumer or SPEC-61 landing — see the companion
 triage record.

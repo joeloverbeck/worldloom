@@ -30,6 +30,36 @@ test("whole-file record families prefer canonical frontmatter ids", () => {
       expectedNodeId: "PR-0010"
     },
     {
+      relativePath: "pressure-events/salt-caravan-collapse.md",
+      expectedNodeType: "pressure_event_card",
+      source: ["---", "event_id: EPE-0001", "---", "", "# Pressure Event"].join("\n"),
+      expectedNodeId: "EPE-0001"
+    },
+    {
+      relativePath: "pressure-events/salt-caravan-collapse.proposal.md",
+      expectedNodeType: "pressure_event_sidecar_proposal",
+      source: ["---", "proposal_id: PR-0011", "---", "", "# Pressure Event Proposal"].join("\n"),
+      expectedNodeId: "PR-0011"
+    },
+    {
+      relativePath: "pressure-events/batches/pressure-round.md",
+      expectedNodeType: "pressure_event_batch",
+      source: ["---", "batch_id: BATCH-0001", "---", "", "# Pressure Event Batch"].join("\n"),
+      expectedNodeId: "animalia:pressure-round.md:pressure-round:0"
+    },
+    {
+      relativePath: "world-proposals/unburied-calendar.md",
+      expectedNodeType: "world_proposal_card",
+      source: ["---", "proposal_id: NWP-0001", "---", "", "# World Proposal"].join("\n"),
+      expectedNodeId: "NWP-0001"
+    },
+    {
+      relativePath: "world-proposals/batches/origin-round.md",
+      expectedNodeType: "world_proposal_batch",
+      source: ["---", "batch_id: NWB-0001", "---", "", "# World Proposal Batch"].join("\n"),
+      expectedNodeId: "NWB-0001"
+    },
+    {
       relativePath: "character-proposals/bruenna-lockwash.md",
       expectedNodeType: "character_proposal_card",
       source: ["---", "proposal_id: NCP-0001", "---", "", "# Character Proposal"].join("\n"),

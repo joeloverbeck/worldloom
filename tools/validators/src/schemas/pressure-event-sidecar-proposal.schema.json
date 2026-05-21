@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/pressure-event-sidecar-proposal.schema.json",
+  "title": "PressureEventSidecarProposalFrontmatter",
+  "allOf": [
+    { "$ref": "https://worldloom.local/schemas/proposal-card.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "enrichment_category": { "const": "derived_from_epe" },
+        "proposal_family": { "const": 0 },
+        "source_basis": {
+          "type": "object",
+          "required": ["derived_from_epe"],
+          "properties": {
+            "derived_from_epe": { "type": "string", "pattern": "^EPE-[0-9]+$" }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -340,6 +340,33 @@ function hybridRecordsFromFiles(input: unknown, ctx: Context): HybridRecordsResu
         });
       }
     }
+    if (/^proposals\/batches\/[^/]+\.md$/.test(normalizedPath)) {
+      pushMarkdownFrontmatterRecord(records, verdicts, file, "proposal_batch", "batch_id");
+    }
+    if (/^proposals\/[^/]+\.md$/.test(normalizedPath)) {
+      pushMarkdownFrontmatterRecord(records, verdicts, file, "proposal_card", "proposal_id");
+    }
+    if (/^pressure-events\/batches\/[^/]+\.md$/.test(normalizedPath)) {
+      pushMarkdownFrontmatterRecord(records, verdicts, file, "pressure_event_batch", "batch_id");
+    }
+    if (/^pressure-events\/[^/]+\.proposal\.md$/.test(normalizedPath)) {
+      pushMarkdownFrontmatterRecord(records, verdicts, file, "pressure_event_sidecar_proposal", "proposal_id");
+    }
+    if (/^pressure-events\/[^/]+\.md$/.test(normalizedPath) && !normalizedPath.endsWith(".proposal.md")) {
+      pushMarkdownFrontmatterRecord(records, verdicts, file, "pressure_event_card", "event_id");
+    }
+    if (/^audits\/[^/]+\/retcon-proposals\/[^/]+\.md$/.test(normalizedPath)) {
+      pushMarkdownFrontmatterRecord(records, verdicts, file, "retcon_proposal_card", "id");
+    }
+    if (/^audits\/[^/]+\.md$/.test(normalizedPath)) {
+      pushMarkdownFrontmatterRecord(records, verdicts, file, "audit_record", "audit_id");
+    }
+    if (/^world-proposals\/batches\/[^/]+\.md$/.test(normalizedPath)) {
+      pushMarkdownFrontmatterRecord(records, verdicts, file, "world_proposal_batch", "batch_id");
+    }
+    if (/^world-proposals\/[^/]+\.md$/.test(normalizedPath)) {
+      pushMarkdownFrontmatterRecord(records, verdicts, file, "world_proposal_card", "proposal_id");
+    }
     if (/^character-proposals\/batches\/[^/]+\.md$/.test(normalizedPath)) {
       const frontmatter = frontmatterFor(file.content);
       if (frontmatter === null) {
@@ -404,6 +431,33 @@ function hybridRecordsFromFiles(input: unknown, ctx: Context): HybridRecordsResu
     }
   }
   return { records, verdicts };
+}
+
+function pushMarkdownFrontmatterRecord(
+  records: SchemaTarget[],
+  verdicts: Verdict[],
+  file: { path: string; content: string },
+  nodeType: string,
+  idField: string
+): void {
+  const normalizedPath = toPosixPath(file.path);
+  const frontmatter = frontmatterFor(file.content);
+  if (frontmatter === null) {
+    verdicts.push(missingFrontmatterVerdict(normalizedPath, nodeType));
+    return;
+  }
+
+  const parsed = parseYamlSurface(frontmatter);
+  if (!parsed) {
+    return;
+  }
+
+  records.push({
+    node_id: String(asPlainRecord(parsed)[idField] ?? normalizedPath),
+    node_type: nodeType,
+    file_path: normalizedPath,
+    parsed
+  });
 }
 
 function missingFrontmatterVerdict(filePath: string, nodeType: string): Verdict {

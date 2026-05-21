@@ -134,6 +134,7 @@ For `tools/world-mcp` tickets whose draft says a tool is absent or new, first ve
 - For JS/TS package-local tickets, treat missing declaration-package compile failures caused by newly typed code as package-manifest fallout when the runtime dependency is already part of the package contract. Add the narrow `@types/*` dependency and lockfile change, then record any package-manager audit/funding warnings in closeout when dependency remediation is outside scope.
 - If the ticket compares persisted hashes, checksums, canonical serialization, or drift markers, identify the producer of the stored value and reuse its canonicalization algorithm. If the implementation intentionally differs, record that difference in `Assumption Reassessment` before coding.
 - If a new dependency is needed only to preserve an existing package contract, treat the manifest and lockfile update as same-seam fallout. Record package-manager audit, funding, or deprecation output in closeout when remediation is outside scope.
+- After running a package install/update command for verification setup, inspect `package.json` and lockfile diffs before closeout. Keep intentional dependency or lockfile updates only when the active ticket owns them; remove incidental resolver/version churn caused by restoring local `node_modules/`, and classify the ignored installed dependencies as proof artifacts rather than tracked ticket edits.
 
 ## Closeout Hard Stop
 

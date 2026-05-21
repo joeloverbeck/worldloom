@@ -14,6 +14,15 @@ export const STRUCTURAL_NODE_TYPES = [
   "named_entity",
   "section",
   "character_record",
+  "proposal_card",
+  "proposal_batch",
+  "pressure_event_card",
+  "pressure_event_sidecar_proposal",
+  "pressure_event_batch",
+  "audit_record",
+  "retcon_proposal_card",
+  "world_proposal_card",
+  "world_proposal_batch",
   "character_proposal_card",
   "character_proposal_batch",
   "diegetic_artifact_record",
@@ -85,6 +94,15 @@ export const RECORD_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
   section: "section",
   adjudication_record: "adjudication-frontmatter",
   character_record: "character-frontmatter",
+  proposal_card: "proposal-card",
+  proposal_batch: "proposal-batch",
+  pressure_event_card: "pressure-event-card",
+  pressure_event_sidecar_proposal: "pressure-event-sidecar-proposal",
+  pressure_event_batch: "pressure-event-batch",
+  audit_record: "audit-report",
+  retcon_proposal_card: "retcon-proposal-card",
+  world_proposal_card: "world-proposal-card",
+  world_proposal_batch: "world-proposal-batch",
   character_proposal_card: "character-proposal-card",
   character_proposal_batch: "character-proposal-batch",
   diegetic_artifact_record: "diegetic-artifact-frontmatter",
@@ -252,6 +270,33 @@ function isStructuralAuthorityRecord(record: IndexedRecord): boolean {
   if (record.node_type === "character_record") {
     return /^characters\/[^/]+\.md$/.test(filePath);
   }
+  if (record.node_type === "proposal_card") {
+    return /^proposals\/[^/]+\.md$/.test(filePath) && /^PR-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "proposal_batch") {
+    return /^proposals\/batches\/[^/]+\.md$/.test(filePath) && /^BATCH-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "pressure_event_card") {
+    return /^pressure-events\/EPE-\d+[^/]*\.md$/.test(filePath) && !filePath.endsWith(".proposal.md") && /^EPE-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "pressure_event_sidecar_proposal") {
+    return /^pressure-events\/EPE-\d+[^/]*\.proposal\.md$/.test(filePath) && /^PR-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "pressure_event_batch") {
+    return /^pressure-events\/batches\/BATCH-\d+[^/]*\.md$/.test(filePath);
+  }
+  if (record.node_type === "audit_record") {
+    return /^audits\/AU-\d+[^/]*\.md$/.test(filePath) && /^AU-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "retcon_proposal_card") {
+    return /^audits\/AU-\d+[^/]*\/retcon-proposals\/RP-\d+[^/]*\.md$/.test(filePath) && /^RP-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "world_proposal_card") {
+    return /^world-proposals\/NWP-\d+[^/]*\.md$/.test(filePath) && /^NWP-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "world_proposal_batch") {
+    return /^world-proposals\/batches\/NWB-\d+[^/]*\.md$/.test(filePath) && /^NWB-\d+$/.test(nodeId);
+  }
   if (record.node_type === "character_proposal_card") {
     return /^character-proposals\/[^/]+\.md$/.test(filePath) && /^NCP-\d+$/.test(nodeId);
   }
@@ -355,7 +400,20 @@ function listSupportedWorldFiles(worldRoot: string): string[] {
     }
   }
 
-  for (const dir of ["characters", "character-proposals", "character-proposals/batches", "diegetic-artifacts", "adjudications"]) {
+  for (const dir of [
+    "characters",
+    "proposals",
+    "proposals/batches",
+    "pressure-events",
+    "pressure-events/batches",
+    "audits",
+    "world-proposals",
+    "world-proposals/batches",
+    "character-proposals",
+    "character-proposals/batches",
+    "diegetic-artifacts",
+    "adjudications"
+  ]) {
     const absoluteDir = path.join(worldRoot, dir);
     if (!existsSync(absoluteDir)) {
       continue;
@@ -363,6 +421,24 @@ function listSupportedWorldFiles(worldRoot: string): string[] {
     for (const entry of readdirSync(absoluteDir, { withFileTypes: true })) {
       if (entry.isFile() && entry.name.endsWith(".md")) {
         files.push(path.join(dir, entry.name));
+      }
+    }
+  }
+
+  const auditsDir = path.join(worldRoot, "audits");
+  if (existsSync(auditsDir)) {
+    for (const auditEntry of readdirSync(auditsDir, { withFileTypes: true })) {
+      if (!auditEntry.isDirectory()) {
+        continue;
+      }
+      const retconDir = path.join(auditsDir, auditEntry.name, "retcon-proposals");
+      if (!existsSync(retconDir)) {
+        continue;
+      }
+      for (const entry of readdirSync(retconDir, { withFileTypes: true })) {
+        if (entry.isFile() && entry.name.endsWith(".md")) {
+          files.push(path.join("audits", auditEntry.name, "retcon-proposals", entry.name));
+        }
       }
     }
   }

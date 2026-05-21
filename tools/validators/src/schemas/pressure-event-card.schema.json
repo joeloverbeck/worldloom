@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/pressure-event-card.schema.json",
+  "title": "PressureEventCardFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "batch_id", "slug", "title", "event_seed", "origin_type", "traceability", "actors_involved", "what_changes_immediately", "what_might_change_if_unchecked", "who_benefits", "who_suffers", "rumor_waves", "mysteries_touched", "scope", "downstream_routing", "routing_rationale", "proposal_card_extract", "canon_safety_flags", "recurrence_flag", "status", "source_basis", "notes"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" } },
+    "traceability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cited_canon_facts", "cited_institutions", "cited_material_conditions", "cited_pressures"],
+      "properties": {
+        "cited_canon_facts": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^CF-[0-9]+$" } },
+        "cited_institutions": { "$ref": "#/$defs/stringArray" },
+        "cited_material_conditions": { "$ref": "#/$defs/stringArray" },
+        "cited_pressures": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["geographic", "temporal", "why_not_universal"],
+      "properties": {
+        "geographic": { "type": "string", "enum": ["local", "regional", "global"] },
+        "temporal": { "type": "string", "enum": ["acute", "seasonal", "chronic", "cyclical"] },
+        "why_not_universal": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "proposalCardExtract": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["proposal_id", "canon_fact_statement", "proposed_status", "type", "domains_touched", "recommended_scope", "why_not_universal", "immediate_consequences", "longer_term_consequences", "enrichment_category", "proposal_family"],
+      "properties": {
+        "proposal_id": { "type": "string", "pattern": "^PR-[0-9]+$" },
+        "canon_fact_statement": { "$ref": "#/$defs/nonEmptyString" },
+        "proposed_status": { "type": "string", "enum": ["hard_canon", "soft_canon", "contested_canon"] },
+        "type": { "$ref": "#/$defs/nonEmptyString" },
+        "domains_touched": { "$ref": "#/$defs/stringArray" },
+        "recommended_scope": { "type": "object" },
+        "why_not_universal": { "$ref": "#/$defs/stringArray" },
+        "immediate_consequences": { "$ref": "#/$defs/stringArray" },
+        "longer_term_consequences": { "$ref": "#/$defs/stringArray" },
+        "enrichment_category": { "const": "derived_from_epe" },
+        "proposal_family": { "const": 0 }
+      }
+    },
+    "canonSafetyFlags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["invariants_tested", "mystery_reserve_firewall", "distribution_discipline", "invariant_conformance", "mystery_reserve_firewall_status", "distribution_discipline_status"],
+      "properties": {
+        "invariants_tested": { "$ref": "#/$defs/stringArray" },
+        "mystery_reserve_firewall": { "$ref": "#/$defs/stringArray" },
+        "distribution_discipline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["canon_facts_consulted"],
+          "properties": { "canon_facts_consulted": { "$ref": "#/$defs/stringArray" } }
+        },
+        "invariant_conformance": { "type": "string", "enum": ["pass", "needs_review"] },
+        "mystery_reserve_firewall_status": { "type": "string", "enum": ["pass", "needs_review"] },
+        "distribution_discipline_status": { "type": "string", "enum": ["pass", "needs_review"] }
+      }
+    },
+    "sourceBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "not": {
+        "required": ["direct_user_approval"],
+        "properties": { "direct_user_approval": true }
+      },
+      "required": ["world_slug", "batch_id", "generated_date", "user_approved"],
+      "properties": {
+        "world_slug": { "$ref": "#/$defs/nonEmptyString" },
+        "batch_id": { "type": "string", "pattern": "^BATCH-[0-9]+$" },
+        "generated_date": { "$ref": "#/$defs/nonEmptyString" },
+        "user_approved": { "type": "boolean" }
+      }
+    }
+  },
+  "properties": {
+    "event_id": { "type": "string", "pattern": "^EPE-[0-9]+$" },
+    "batch_id": { "type": "string", "pattern": "^BATCH-[0-9]+$" },
+    "slug": { "$ref": "#/$defs/nonEmptyString" },
+    "title": { "$ref": "#/$defs/nonEmptyString" },
+    "event_seed": { "$ref": "#/$defs/nonEmptyString" },
+    "origin_type": { "type": "string", "enum": ["scarcity", "succession", "ecological_disruption", "taboo_breach", "technology_leakage", "migration", "faction_rivalry", "disease", "black_market", "theological_dispute", "anniversary", "relic_discovery", "trade_collapse", "climate"] },
+    "traceability": { "$ref": "#/$defs/traceability" },
+    "actors_involved": { "$ref": "#/$defs/stringArray" },
+    "what_changes_immediately": { "$ref": "#/$defs/stringArray" },
+    "what_might_change_if_unchecked": { "$ref": "#/$defs/stringArray" },
+    "who_benefits": { "$ref": "#/$defs/stringArray" },
+    "who_suffers": { "$ref": "#/$defs/stringArray" },
+    "rumor_waves": { "$ref": "#/$defs/stringArray" },
+    "mysteries_touched": { "$ref": "#/$defs/stringArray" },
+    "scope": { "$ref": "#/$defs/scope" },
+    "downstream_routing": { "type": "string", "enum": ["canonize", "story_fuel", "ambient"] },
+    "routing_rationale": { "$ref": "#/$defs/nonEmptyString" },
+    "proposal_card_extract": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/proposalCardExtract" }] },
+    "canon_safety_flags": { "$ref": "#/$defs/canonSafetyFlags" },
+    "recurrence_flag": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "pattern": "^EPE-[0-9]+$" }
+      ]
+    },
+    "status": { "type": "string", "enum": ["active", "resolved", "superseded"] },
+    "source_basis": { "$ref": "#/$defs/sourceBasis" },
+    "notes": { "type": "string" }
+  }
+}

@@ -7,12 +7,14 @@ import { MANDATORY_WORLD_FILES } from "../enumerate.js";
 import { CURRENT_INDEX_VERSION } from "../schema/version.js";
 import type { NodeRow, NodeType } from "../schema/types.js";
 
-const STRUCTURED_ID_REGEX = /\b(CF|CH|PA|M|DA|CHAR|PR|BATCH|NCP|NCB|AU|RP)-\d+\b/;
+const STRUCTURED_ID_REGEX = /\b(CF|CH|PA|M|DA|CHAR|PR|BATCH|EPE|NWP|NWB|NCP|NCB|AU|RP)-\d+\b/;
 const FILE_RECORD_TYPES = new Map<string, NodeType>([
   ["adjudications", "adjudication_record"],
   ["characters", "character_record"],
   ["diegetic-artifacts", "diegetic_artifact_record"],
   ["proposals", "proposal_card"],
+  ["pressure-events", "pressure_event_card"],
+  ["world-proposals", "world_proposal_card"],
   ["character-proposals", "character_proposal_card"],
   ["audits", "audit_record"]
 ]);
@@ -21,11 +23,13 @@ const WHOLE_FILE_ID_FIELDS = new Map<string, string>([
   ["characters", "character_id"],
   ["diegetic-artifacts", "artifact_id"],
   ["proposals", "proposal_id"],
+  ["pressure-events", "event_id"],
+  ["world-proposals", "proposal_id"],
   ["character-proposals", "proposal_id"],
   ["audits", "audit_id"]
 ]);
 
-const CANONICAL_ID_REGEX = /^(DA|CHAR|PR|NCP|NCB|AU)-\d+$/;
+const CANONICAL_ID_REGEX = /^(DA|CHAR|PR|BATCH|EPE|NWP|NWB|NCP|NCB|AU)-\d+$/;
 
 interface HeadingNode {
   depth: number;
@@ -116,11 +120,24 @@ function createWholeFileRecord(
     const batchType =
       firstSegment === "proposals"
         ? "proposal_batch"
-        : firstSegment === "character-proposals"
-          ? "character_proposal_batch"
-          : "retcon_proposal_card";
-    const canonicalNodeId =
-      firstSegment === "character-proposals" ? canonicalFrontmatterNodeId(lines, "batch_id") : null;
+        : firstSegment === "pressure-events"
+          ? "pressure_event_batch"
+          : firstSegment === "world-proposals"
+            ? "world_proposal_batch"
+            : firstSegment === "character-proposals"
+              ? "character_proposal_batch"
+              : "retcon_proposal_card";
+    let canonicalNodeId: string | null = null;
+    if (firstSegment === "pressure-events") {
+      canonicalNodeId = syntheticNodeId(
+        worldSlug,
+        relativeFilePath,
+        [path.basename(relativeFilePath, ".md")],
+        0
+      );
+    } else if (firstSegment === "character-proposals" || firstSegment === "world-proposals") {
+      canonicalNodeId = canonicalFrontmatterNodeId(lines, "batch_id");
+    }
 
     return createNodeRow({
       worldSlug,
@@ -152,6 +169,23 @@ function createWholeFileRecord(
 
   if (segments.length !== 2) {
     return null;
+  }
+
+  if (firstSegment === "pressure-events" && relativeFilePath.endsWith(".proposal.md")) {
+    const canonicalNodeId = canonicalFrontmatterNodeId(lines, "proposal_id");
+
+    return createNodeRow({
+      worldSlug,
+      relativeFilePath,
+      nodeType: "pressure_event_sidecar_proposal",
+      headingPath: [path.basename(relativeFilePath, ".md")],
+      lineStart: 1,
+      lineEnd: lines.length,
+      body: lines.join("\n"),
+      lines,
+      occurrenceIndex: 0,
+      preferredNodeId: canonicalNodeId
+    });
   }
 
   const canonicalNodeId = canonicalWholeFileNodeId(lines, firstSegment);
