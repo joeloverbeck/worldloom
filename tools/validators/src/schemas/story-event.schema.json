@@ -53,7 +53,7 @@
           "propertyNames": { "pattern": "^[A-Za-z][A-Za-z0-9_-]*$" },
           "additionalProperties": {
             "type": "string",
-            "pattern": "^(STENT|STCHAR|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|STPLAN|STEMO|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$"
+            "pattern": "^(STENT|STSTAT|STINT|SF|BEL|OBL|CNSQ|THR|CLK|STSEC|STQ|STPLAN|STEMO|SREL|STLOC|STOBJ|DA)-[0-9]+$"
           }
         }
       },
@@ -306,15 +306,15 @@
       "properties": {
         "create": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(STENT|STCHAR|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|STPLAN|STEMO|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
+          "items": { "type": "string", "pattern": "^(STENT|STCHAR|STSTAT|STINT|SF|BEL|OBL|CNSQ|THR|CLK|STSEC|STQ|STPLAN|STEMO|SREL|STLOC|STOBJ|DA)-[0-9]+$" }
         },
         "supersede": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(STENT|STCHAR|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|STPLAN|STEMO|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
+          "items": { "type": "string", "pattern": "^(STENT|STCHAR|STSTAT|STINT|SF|BEL|OBL|CNSQ|THR|CLK|STSEC|STQ|STPLAN|STEMO|SREL|STLOC|STOBJ|DA)-[0-9]+$" }
         },
         "close": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(STENT|STCHAR|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|STPLAN|STEMO|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
+          "items": { "type": "string", "pattern": "^(STENT|STCHAR|STSTAT|STINT|SF|BEL|OBL|CNSQ|THR|CLK|STSEC|STQ|STPLAN|STEMO|SREL|STLOC|STOBJ|DA)-[0-9]+$" }
         }
       },
       "additionalProperties": false

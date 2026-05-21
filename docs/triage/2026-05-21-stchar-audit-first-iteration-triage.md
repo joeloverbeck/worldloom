@@ -1,3 +1,5 @@
+# Historical — superseded by the merged SPEC-58/59/60/63 STCHAR contracts; retained for audit trail
+
 # Triage — STCHAR Audit (First Iteration)
 
 **Date:** 2026-05-21

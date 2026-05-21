@@ -60,7 +60,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 ## Story-Bundle Edge Types
 
-`world-index` emits 65 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, thread links, branch/page links, and SPEC-45 event provenance:
+`world-index` emits 76 story-bundle edge types. The original story-edge surface covers world bindings, page provenance, thread links, branch/page links, and SPEC-45 event provenance:
 
 - `world_entity_binding` — `STENT.world_ent_id` to a world-canon entity id.
 - `story_fact_derived_from` — CF-shaped entries in `SF.derived_from[]` to the originating CF.
@@ -140,9 +140,34 @@ SPEC-50 removes the legacy `SLT` obligation-field edges (`opens_obligation`, `pa
 | `SLT` | `storylet_effect_ref` | record | Concrete record ids named by `effects.create[]`, `effects.supersede[]`, and `effects.close[]`; `bound:<alias>` placeholders are skipped. |
 | `SLT` | `storylet_exit_likely_effect_ref` | record | Concrete record ids named by `exit_options[].likely_effects[]`; `bound:<alias>` placeholders are skipped. |
 
+SPEC-67 adds seven consumer-backed edge types for story-world index parity. These support Mystery Reserve firewall traversal, debt-party lookup, provenance impact analysis, and STCHAR supersession integrity without indexing consumerless fields:
+
+| Source | Edge type | Target | Meaning |
+|---|---|---|---|
+| `STSEC` | `secret_protected_mystery` | world-canon `M-*` | Each valid `protected_mystery_refs[]` entry, left unprefixed so it resolves to the world Mystery Reserve node. |
+| `STSEC` | `secret_source_record` | record | Story records named by `source_records[]`. |
+| `OBL` | `obligation_owed_by` | `STENT` | The structured story entity named by `owed_by`, when the value is a record id rather than `group:<name>`, `public`, or `null`. |
+| `OBL` | `obligation_owed_to` | `STENT` | The structured story entity named by `owed_to`, when the value is a record id rather than `group:<name>`, `public`, or `null`. |
+| `CNSQ` | `consequence_derived_from` | record | Records named by `derived_from[]`. |
+| `THR` | `thread_derived_from` | record | Records named by `derived_from[]`. |
+| `STCHAR` | `stchar_superseded_by` | `STCHAR` | The newer STCHAR authority record named by `superseded_by`, complementing `stchar_supersedes`. |
+
+Intentionally non-indexed story-bundle fields are recorded here so future audits can distinguish
+consumerless omissions from accidental parser drift:
+
+- `STSTAT.location`, `STOBJ.owner`, `STOBJ.current_location`, and `STLOC.bound_ent` are spatial or
+  ownership fields with no current traversal consumer in health-audit, retrieval, or impact-analysis
+  paths.
+- `CLK.thresholds[].effects.create`, `CLK.thresholds[].effects.supersede`, and
+  `CLK.thresholds[].effects.close` references are resolved when a clock threshold is applied, not
+  traversed structurally; `clock_linked_record`, `clock_driver`, and `clock_tick_event` cover the
+  consumed clock graph surface.
+
+Re-indexing any intentionally non-indexed field requires naming the consumer that will read the edge.
+
 ### Placeholder Skip Convention
 
-Story-bundle edges represent record-to-record graph links. When a source field permits placeholders, `world-index` emits an edge only when the value resolves to a structured record id. Placeholder values such as `group:<name>`, `system`, `unknown`, and `narrator` are silently skipped for edge emission. This applies to `CLK.driver`, `STSEC.holders[]`, `SE.actor`, and any STPLAN/STEMO reference-bearing field that can carry placeholder prose rather than a structured record id. The skipped value remains on the source record and is retrievable with `get_record`.
+Story-bundle edges represent record-to-record graph links. When a source field permits placeholders, `world-index` emits an edge only when the value resolves to a structured record id. Placeholder values such as `group:<name>`, `public`, `system`, `unknown`, and `narrator` are silently skipped for edge emission. This applies to `CLK.driver`, `STSEC.holders[]`, `OBL.owed_by`, `OBL.owed_to`, `SE.actor`, and any STPLAN/STEMO reference-bearing field that can carry placeholder prose rather than a structured record id. The skipped value remains on the source record and is retrievable with `get_record`.
 
 ### Tick-History Granularity
 

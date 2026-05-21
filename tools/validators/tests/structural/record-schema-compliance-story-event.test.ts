@@ -125,6 +125,34 @@ test("record_schema_compliance rejects alias bindings outside the story-event bi
   ));
 });
 
+test("record_schema_compliance rejects structural and STCHAR alias binding payloads", async () => {
+  for (const [alias, id] of Object.entries({
+    character: "STCHAR-1",
+    event: "SE-1",
+    page: "PG-1",
+    branch: "BR-1",
+    choice: "CHC-1",
+    storylet: "SLT-1"
+  })) {
+    const result = await recordSchemaCompliance.run({}, context([
+      eventRecord(validEvent({
+        commitment: {
+          selected_slt_id: "SLT-7",
+          selection_source: "author_pool",
+          alias_bindings: {
+            [alias]: id
+          }
+        }
+      }))
+    ]));
+
+    assert.ok(result.some((verdict) =>
+      verdict.code === "record_schema_compliance.pattern" &&
+      verdict.message.includes(`/commitment/alias_bindings/${alias}`)
+    ), id);
+  }
+});
+
 test("record_schema_compliance rejects none source with selected SLT", async () => {
   const result = await recordSchemaCompliance.run({}, context([
     eventRecord(validEvent({
@@ -244,6 +272,32 @@ test("record_schema_compliance accepts state_delta references to every SPEC-44 s
   ]));
 
   assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects structural records in state_delta arrays", async () => {
+  for (const [key, id] of [
+    ["create", "PG-1"],
+    ["create", "SE-2"],
+    ["supersede", "BR-1"],
+    ["supersede", "CHC-3"],
+    ["close", "SLT-1"]
+  ] as const) {
+    const stateDelta: { create: string[]; supersede: string[]; close: string[] } = {
+      create: [],
+      supersede: [],
+      close: []
+    };
+    stateDelta[key] = [id];
+
+    const result = await recordSchemaCompliance.run({}, context([
+      eventRecord(validEvent({ state_delta: stateDelta }))
+    ]));
+
+    assert.ok(result.some((verdict) =>
+      verdict.code === "record_schema_compliance.pattern" &&
+      verdict.message.includes(`/state_delta/${key}/0`)
+    ), `${key}:${id}`);
+  }
 });
 
 test("record_schema_compliance accepts STCHAR record introductions", async () => {

@@ -41,6 +41,25 @@ test("state_delta_class_integrity rejects class-prefix drift", async () => {
   assert.match(verdicts[0]?.message ?? "", /outside the permitted story-state class set/);
 });
 
+test("state_delta_class_integrity rejects structural record classes in deltas", async () => {
+  const ctx = context([
+    event("marla", "SE-1", { create: ["PG-1", "SE-2"], supersede: ["BR-1", "CHC-1"], close: ["SLT-1"] }),
+    storyRecord("page_record", "marla", "PG-1", "pages"),
+    storyRecord("story_event_record", "marla", "SE-2", "events"),
+    storyRecord("branch_record", "marla", "BR-1", "branches"),
+    storyRecord("choice_record", "marla", "CHC-1", "choices"),
+    storyRecord("storylet_record", "marla", "SLT-1", "storylets")
+  ]);
+
+  const verdicts = await stateDeltaClassIntegrity.run({}, ctx);
+
+  assert.equal(verdicts.length, 5);
+  assert.deepEqual(
+    verdicts.map((verdict) => (verdict.detail as { failure_mode?: string }).failure_mode),
+    ["class_drift", "class_drift", "class_drift", "class_drift", "class_drift"]
+  );
+});
+
 test("state_delta_class_integrity rejects unresolvable create ids", async () => {
   const ctx = context([
     event("marla", "SE-1", { create: ["STSTAT-99"], supersede: [], close: [] })

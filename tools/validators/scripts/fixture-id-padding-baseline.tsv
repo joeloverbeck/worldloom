@@ -61,6 +61,12 @@ tools/patch-engine/tests/pre-apply-checks/id-allocation-race.test.ts	STENT-0001	
 tools/patch-engine/tests/receipt/index-stale-preapply.test.ts	CF-0001	1
 tools/patch-engine/tests/receipt/index-stale-preapply.test.ts	CH-0001	1
 tools/validators/tests/integration/spec04-verification.test.ts	CF-0001	1
+tools/validators/tests/integration/spec04-verification.test.ts	CHAR-0001	2
+tools/validators/tests/integration/spec04-verification.test.ts	CHAR-0002	2
+tools/validators/tests/integration/spec09-verification.test.ts	CHAR-0001	4
+tools/validators/tests/integration/spec09-verification.test.ts	CHAR-0002	4
+tools/validators/tests/integration/spec47-stplan-stemo-integration.test.ts	CF-0001	2
+tools/validators/tests/integration/validate-patch-plan.test.ts	CF-0001	4
 tools/validators/tests/structural/contract-schema-roundtrip.test.ts	BEL-0001	2
 tools/validators/tests/structural/contract-schema-roundtrip.test.ts	CF-0005	2
 tools/validators/tests/structural/contract-schema-roundtrip.test.ts	CHAR-0005	1
@@ -75,6 +81,7 @@ tools/validators/tests/structural/contract-schema-roundtrip.test.ts	STLOC-0001	3
 tools/validators/tests/structural/contract-schema-roundtrip.test.ts	STOBJ-0001	1
 tools/validators/tests/structural/contract-schema-roundtrip.test.ts	STSTAT-0001	1
 tools/validators/tests/structural/contract-schema-roundtrip.test.ts	THR-0001	2
+tools/validators/tests/structural/cross-file-reference.test.ts	CF-0001	7
 tools/validators/tests/structural/modification-history-retrofit.test.ts	CH-0006	3
 tools/validators/tests/structural/record-schema-compliance-bel.test.ts	BEL-0001	1
 tools/validators/tests/structural/record-schema-compliance-story-page.test.ts	PG-0001	1
@@ -105,8 +112,7 @@ tools/world-index/tests/entities.test.ts	CHAR-0002	3
 tools/world-index/tests/entities.test.ts	DA-0001	2
 tools/world-index/tests/entities.test.ts	M-0001	1
 tools/world-index/tests/enumerate.test.ts	AU-0001	4
-tools/world-index/tests/enumerate.test.ts	BEL-0001	2
-tools/world-index/tests/enumerate.test.ts	CH-0001	1
+tools/world-index/tests/enumerate.test.ts	CH-0001	2
 tools/world-index/tests/enumerate.test.ts	CHAR-0001	1
 tools/world-index/tests/enumerate.test.ts	DA-0001	1
 tools/world-index/tests/enumerate.test.ts	PA-0001	1
@@ -115,7 +121,6 @@ tools/world-index/tests/enumerate.test.ts	RP-0001	1
 tools/world-index/tests/enumerate.test.ts	RSP-0001	4
 tools/world-index/tests/enumerate.test.ts	SAU-0001	6
 tools/world-index/tests/enumerate.test.ts	SP-0001	2
-tools/world-index/tests/enumerate.test.ts	STSTAT-0001	2
 tools/world-index/tests/helpers/atomic-fixture.ts	BR-0001	3
 tools/world-index/tests/helpers/atomic-fixture.ts	CF-0001	9
 tools/world-index/tests/helpers/atomic-fixture.ts	CH-0001	3
@@ -126,10 +131,10 @@ tools/world-index/tests/helpers/atomic-fixture.ts	OQ-0001	2
 tools/world-index/tests/helpers/atomic-fixture.ts	PG-0001	13
 tools/world-index/tests/helpers/atomic-fixture.ts	RSP-0001	2
 tools/world-index/tests/helpers/atomic-fixture.ts	SAU-0001	3
-tools/world-index/tests/helpers/atomic-fixture.ts	SF-0001	4
+tools/world-index/tests/helpers/atomic-fixture.ts	SF-0001	5
 tools/world-index/tests/helpers/atomic-fixture.ts	SLT-0001	4
 tools/world-index/tests/helpers/atomic-fixture.ts	SP-0001	2
-tools/world-index/tests/helpers/atomic-fixture.ts	STENT-0001	6
+tools/world-index/tests/helpers/atomic-fixture.ts	STENT-0001	8
 tools/world-index/tests/helpers/atomic-fixture.ts	THR-0001	2
 tools/world-index/tests/integration/build-animalia.test.ts	CF-0029	1
 tools/world-index/tests/integration/build-animalia.test.ts	CH-0010	1
@@ -138,8 +143,12 @@ tools/world-index/tests/integration/build-animalia.test.ts	CH-0014	1
 tools/world-index/tests/integration/build-animalia.test.ts	CH-0015	1
 tools/world-index/tests/integration/build-animalia.test.ts	DA-0001	4
 tools/world-index/tests/integration/build-animalia.test.ts	PA-0001	1
+tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts	CF-0001	1
+tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts	ENT-0001	2
+tools/world-index/tests/integration/spec47-stplan-stemo-edges-integration.test.ts	ENT-0001	1
 tools/world-index/tests/prose-domain-file.test.ts	CF-0001	4
 tools/world-index/tests/prose-whole-file.test.ts	AU-0001	2
+tools/world-index/tests/prose-whole-file.test.ts	CH-0001	1
 tools/world-index/tests/prose-whole-file.test.ts	CHAR-0001	2
 tools/world-index/tests/prose-whole-file.test.ts	DA-0001	2
 tools/world-index/tests/scoped.test.ts	CHAR-0001	16
@@ -218,7 +227,7 @@ tools/world-mcp/tests/tools/allocate-next-id.test.ts	BR-0007	1
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	CF-0047	1
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	CH-0011	1
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	CH-0018	1
-tools/world-mcp/tests/tools/allocate-next-id.test.ts	CHAR-0007	1
+tools/world-mcp/tests/tools/allocate-next-id.test.ts	CHAR-0007	2
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	CHC-0007	1
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	CNSQ-0007	1
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	DA-0003	1
@@ -239,6 +248,7 @@ tools/world-mcp/tests/tools/allocate-next-id.test.ts	SAU-0003	5
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	SAU-0004	1
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	SAU-0007	2
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	SE-0007	1
+tools/world-mcp/tests/tools/allocate-next-id.test.ts	SEC-0007	1
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	SF-0007	1
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	SLT-0007	1
 tools/world-mcp/tests/tools/allocate-next-id.test.ts	SP-0001	1
@@ -272,6 +282,9 @@ tools/world-mcp/tests/tools/get-node.test.ts	CHAR-0002	18
 tools/world-mcp/tests/tools/get-node.test.ts	DA-0002	7
 tools/world-mcp/tests/tools/get-persisted-packet-slice.test.ts	CF-0001	4
 tools/world-mcp/tests/tools/get-record-field.test.ts	CF-0001	7
+tools/world-mcp/tests/tools/get-record-field.test.ts	CHAR-0001	4
+tools/world-mcp/tests/tools/get-record-field.test.ts	DA-0001	4
+tools/world-mcp/tests/tools/get-record-field.test.ts	PA-0001	4
 tools/world-mcp/tests/tools/get-record-hybrid.test.ts	CF-0001	7
 tools/world-mcp/tests/tools/get-record-hybrid.test.ts	CHAR-0001	7
 tools/world-mcp/tests/tools/get-record-hybrid.test.ts	DA-0001	4
@@ -286,8 +299,8 @@ tools/world-mcp/tests/tools/get-record.test.ts	CF-0001	9
 tools/world-mcp/tests/tools/get-record.test.ts	CH-0001	4
 tools/world-mcp/tests/tools/get-record.test.ts	ENT-0001	4
 tools/world-mcp/tests/tools/get-record.test.ts	OQ-0001	4
-tools/world-mcp/tests/tools/get-records-field.test.ts	CF-0001	7
-tools/world-mcp/tests/tools/get-records-field.test.ts	CF-0002	4
+tools/world-mcp/tests/tools/get-records-field.test.ts	CF-0001	9
+tools/world-mcp/tests/tools/get-records-field.test.ts	CF-0002	6
 tools/world-mcp/tests/tools/get-records-field.test.ts	CF-0003	2
 tools/world-mcp/tests/tools/get-records.test.ts	CF-0001	10
 tools/world-mcp/tests/tools/get-records.test.ts	CHAR-0001	6

@@ -386,7 +386,6 @@ function seedStoryPlanPrereqs(root: string): void {
         "    STINT: [STINT-1]",
         "    BEL: [BEL-1]",
         "    STOBJ: [STOBJ-1]",
-        "    SE: [SE-1]",
         "plan:",
         "  plan_hash: '1111111111111111111111111111111111111111111111111111111111111111'",
         "prose_plan_path: pages-prose-plans/PG-1.md",

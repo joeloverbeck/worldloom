@@ -23,7 +23,7 @@ test("STCHAR hybrid records index as story_character_authority_record and emit a
       "generated_at_page: PG-4",
       "created_by_skill: unit-test",
       "supersedes: STCHAR-1",
-      "superseded_by: null",
+      "superseded_by: STCHAR-3",
       "status: active",
       "bound_stent_ids: [STENT-1, STENT-2]",
       "profile_revision: 2",
@@ -54,6 +54,7 @@ test("STCHAR hybrid records index as story_character_authority_record and emit a
     assert.deepEqual(stcharEdges(parsed.edges), [
       edge("STCHAR-2", "CHAR-1", "stchar_source_character"),
       edge("STCHAR-2", "STCHAR-1", "stchar_supersedes"),
+      edge("STCHAR-2", "STCHAR-3", "stchar_superseded_by"),
       edge("STCHAR-2", "STENT-1", "stchar_bound_stent"),
       edge("STCHAR-2", "STENT-2", "stchar_bound_stent")
     ]);
