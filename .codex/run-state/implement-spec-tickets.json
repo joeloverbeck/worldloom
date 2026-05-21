@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-64-world-system-compatibility-and-artifact-maturity-validation.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC64WORSYSCOM-001.md",
+  "last_ticket": "archive/tickets/SPEC64WORSYSCOM-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "141713ed59101e4f611fe3e4863b1c70fbbcdd9b",
+  "last_work_commit": "2736b3516be852d9e7c8081fe480aa697886c857",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC64WORSYSCOM-002.md",
+  "next_target": "tickets/SPEC64WORSYSCOM-003.md",
   "queue": [
-    "tickets/SPEC64WORSYSCOM-002.md",
     "tickets/SPEC64WORSYSCOM-003.md",
     "tickets/SPEC64WORSYSCOM-004.md",
     "tickets/SPEC64WORSYSCOM-005.md"
@@ -19,6 +18,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "expected ignored artifacts after package proof: tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/dist/, tools/world-mcp/node_modules/; tracked worktree clean after final state-only commit succeeds",
+  "dirty_state": "expected ignored artifacts only: tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/dist/, tools/world-mcp/node_modules/; tracked worktree clean after state-only commit succeeds",
   "updated_at": "2026-05-21"
 }
