@@ -44,6 +44,8 @@ worlds/<world-slug>/             ← generated world bundles (gitignored; folder
   ├── proposals/                 ← PR-<integer> proposal cards + batches/BATCH-<integer> manifests
   ├── audits/                    ← AU-<integer> audit reports + retcon-proposal sub-dirs
   ├── adjudications/             ← PA-<integer>-<verdict>.md canon-addition records
+  ├── pressure-events/           ← EPE base cards + EPE-*.proposal.md sidecars + batches/
+  ├── character-proposals/       ← NCP-<integer> cards + batches/NCB-<integer> manifests
   └── stories/<story-slug>/      ← branching-story bundles (per-bundle layout below)
        ├── STORY_KERNEL.md        ← primary-authored narrative root for the bundle
        ├── _source/               ← atomic-YAML story-bundle records (22 subdirs: entities/STENT, status/STSTAT, intentions/STINT, facts/SF, beliefs/BEL, events/SE, obligations/OBL, consequences/CNSQ, threads/THR, clocks/CLK, secrets/STSEC, story-questions/STQ, plans/STPLAN, emotions/STEMO, relationships/SREL, locations/STLOC, objects/STOBJ, artifacts/DA, branches/BR, pages/PG, choices/CHC, storylets/SLT) — schemas canonical at `.claude/skills/_shared-templates/story-state-contract.md` §4
@@ -55,7 +57,10 @@ worlds/<world-slug>/             ← generated world bundles (gitignored; folder
        ├── audits/                ← SAU-<integer>-<date>.md reports + SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-*.md
        └── INDEX.md
 archive/                         ← superseded brainstorming docs and plans
+world-proposals/                 ← root-level NWP-<integer> cards + batches/NWB-<integer> manifests
 ```
+
+EPE base cards are allocator-tracked but intentionally not retrieval-indexed; they are file-scanned until canonized via `EPE-*.proposal.md` sidecars.
 
 ## Skill surface
 
