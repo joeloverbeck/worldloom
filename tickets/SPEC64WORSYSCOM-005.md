@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: None — integration test only; no production code.
-**Deps**: SPEC64WORSYSCOM-003
+**Deps**: archive/tickets/SPEC64WORSYSCOM-003.md
 
 ## Problem
 
@@ -12,7 +12,7 @@ SPEC-64 D5 requires a capstone integration test that exercises the full world-co
 
 ## Assumption Reassessment (2026-05-21)
 
-1. `tools/validators/tests/integration/spec61-proposal-surface-coverage.test.ts` is the model. The test exercises the `--compatibility` CLI mode (SPEC64WORSYSCOM-003), which composes `artifact_maturity` (SPEC64WORSYSCOM-001), `index_disk_consistency` (SPEC64WORSYSCOM-002), and the already-landed `approval_semantics` (SPEC-61) + `record_schema_compliance`. A fixture-world copy (e.g., `fs.cpSync` to a temp root) keeps the real `worlds/<slug>/` tree untouched; the fixture is indexed before validation.
+1. `tools/validators/tests/integration/spec61-proposal-surface-coverage.test.ts` is the model. The test exercises the `--compatibility` CLI mode (archive/tickets/SPEC64WORSYSCOM-003.md), which composes `artifact_maturity` (SPEC64WORSYSCOM-001), `index_disk_consistency` (SPEC64WORSYSCOM-002), and the already-landed `approval_semantics` (SPEC-61) + `record_schema_compliance`. A fixture-world copy (e.g., `fs.cpSync` to a temp root) keeps the real `worlds/<slug>/` tree untouched; the fixture is indexed before validation.
 2. SPEC-64 §D5 + §Acceptance enumerate the five assertions; the §Acceptance bullets are this ticket's test matrix.
 3. Cross-artifact boundary under audit: the test composes the pipeline built by SPEC64WORSYSCOM-001 / -002 / -003 via the compatibility CLI path; it must never mutate real canon (fixture-world copy) and must re-enumerate expected counts from the fixture at test start rather than hardcoding them.
 
@@ -41,7 +41,7 @@ Create `tools/validators/tests/integration/spec64-world-compatibility-coverage.t
 
 ## Out of Scope
 
-- The production validator logic (SPEC64WORSYSCOM-001 / -002) and CLI-mode implementation (SPEC64WORSYSCOM-003).
+- The production validator logic (SPEC64WORSYSCOM-001 / -002) and CLI-mode implementation (archive/tickets/SPEC64WORSYSCOM-003.md).
 - The continuity-audit reporting hook (SPEC64WORSYSCOM-004) — the skill is not exercised by this validators-package integration test.
 
 ## Acceptance Criteria

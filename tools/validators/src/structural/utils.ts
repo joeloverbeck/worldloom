@@ -419,7 +419,7 @@ function listSupportedWorldFiles(worldRoot: string): string[] {
       continue;
     }
     for (const entry of readdirSync(absoluteDir, { withFileTypes: true })) {
-      if (entry.isFile() && entry.name.endsWith(".md")) {
+      if (entry.isFile() && entry.name !== "INDEX.md" && entry.name.endsWith(".md")) {
         files.push(path.join(dir, entry.name));
       }
     }

@@ -12,7 +12,7 @@ const cliPath = path.resolve(process.cwd(), "dist/src/cli/world-validate.js");
 
 test("world-validate exposes help and version", () => {
   const help = execFileSync(cliPath, ["--help"], { encoding: "utf8" });
-  for (const flag of ["--rules", "--structural", "--json", "--file", "--since", "--help", "--version"]) {
+  for (const flag of ["--rules", "--structural", "--compatibility", "--json", "--file", "--since", "--help", "--version"]) {
     assert.match(help, new RegExp(flag));
   }
 
@@ -45,6 +45,13 @@ test("world-validate rejects mutually-exclusive validator selectors", () => {
 
   assert.equal(result.status, 2);
   assert.match(result.stderr, /mutually exclusive/);
+
+  const compatibilityWithStructural = spawnSync(cliPath, ["clean", "--compatibility", "--structural"], {
+    cwd: repo,
+    encoding: "utf8"
+  });
+  assert.equal(compatibilityWithStructural.status, 2);
+  assert.match(compatibilityWithStructural.stderr, /mutually exclusive/);
 
   const skillJudgmentRule = spawnSync(cliPath, ["clean", "--rules=3"], {
     cwd: repo,

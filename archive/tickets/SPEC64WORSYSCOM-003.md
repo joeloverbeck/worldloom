@@ -1,6 +1,6 @@
 # SPEC64WORSYSCOM-003: world-compatibility CLI mode
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new `--compatibility` CLI mode on `world-validate` (validator-subset selection). No new registered validator; no impact on the existing `--rules` / `--structural` modes.
@@ -16,6 +16,7 @@ SPEC-64 D2 calls for a high-level world-compatibility check that aggregates sche
 2. SPEC-64 §D2 + §Acceptance specify the CLI-mode shape and the subset; report §10.1 names the original `world_compatibility_validator`; the reassessed spec's I1 resolution mandates "CLI mode + validator subset, not meta-validator."
 3. Cross-artifact boundary under audit: the compatibility subset is a name set spanning four registry entries; it depends on `archive/tickets/SPEC64WORSYSCOM-001.md` and `archive/tickets/SPEC64WORSYSCOM-002.md` having registered `artifact_maturity` and `index_disk_consistency` respectively. The shared contract is the validator-name set the selection references.
 4. FOUNDATIONS §Tooling Recommendation / §Machine-Facing Layer restated: validators + CLI are the executable enforcement layer (Validator Framework, item 4); the mode also runs `approval_semantics`, which enforces the §Canon Fact Record Schema reservation that `source_basis.direct_user_approval` is accepted-CF-only.
+5. Implementation proof found a same-seam schema-scan conflict: shared structural file discovery treated hybrid `INDEX.md` renderings as record inputs, which made `record_schema_compliance` report `missing_frontmatter` during compatibility mode. SPEC-64 uses these `INDEX.md` files as derived listing surfaces for index consistency, not schema records, so the shared hybrid file discovery now excludes `INDEX.md`.
 
 ## Architecture Check
 
@@ -39,11 +40,19 @@ Add a `--compatibility` boolean option to `parseArgs`. When set, select the comp
 
 Extend `selectValidators` with the compatibility-subset branch; extend `validateOptions` to make `--compatibility` mutually exclusive with `--rules` / `--structural`; add a `--compatibility` line to `printHelp`.
 
+### 3. Hybrid INDEX.md schema-scan guard (`structural/utils.ts`)
+
+Exclude hybrid directory `INDEX.md` files from shared structural file discovery so the compatibility subset can read them through `index_disk_consistency` without `record_schema_compliance` treating them as frontmatter-bearing artifacts.
+
 ## Files to Touch
 
 - `tools/validators/src/cli/world-validate.ts` (modify)
 - `tools/validators/src/cli/_helpers.ts` (modify)
+- `tools/validators/src/structural/utils.ts` (modify)
+- `tools/validators/tests/cli/world-validate.test.ts` (modify)
 - `tools/validators/tests/integration/world-compatibility-cli.test.ts` (new)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify)
+- `tools/validators/tests/integration/spec09-verification.test.ts` (modify)
 
 ## Out of Scope
 
@@ -69,10 +78,24 @@ Extend `selectValidators` with the compatibility-subset branch; extend `validate
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/integration/world-compatibility-cli.test.ts` (new) — subset selection, consolidated-verdict aggregation, full-world warn behavior, mutual-exclusion option validation.
+1. `tools/validators/tests/integration/world-compatibility-cli.test.ts` (new) — exact subset selection, consolidated-verdict aggregation, and full-world warn/nonblocking behavior.
+2. `tools/validators/tests/cli/world-validate.test.ts` (modified) — help output includes `--compatibility`; `--compatibility --structural` is rejected as mutually exclusive.
+3. `tools/validators/tests/integration/spec04-verification.test.ts` and `tools/validators/tests/integration/spec09-verification.test.ts` (modified) — full-world baselines now exclude three noisy hybrid `INDEX.md` schema failures.
 
 ### Commands
 
-1. `npm test --prefix tools/validators`
-2. `npm run build --prefix tools/validators` (covers `tsc`)
-3. `node tools/validators/dist/src/cli/world-validate.js --help` (grep for `--compatibility` — narrow help-surface check after build)
+1. `npm run build --prefix tools/validators` — PASS.
+2. `cd tools/validators && node --test dist/tests/integration/world-compatibility-cli.test.js dist/tests/cli/world-validate.test.js` — PASS (10 tests).
+3. `npm test --prefix tools/validators` — PASS (824 tests).
+4. `node tools/validators/dist/src/cli/world-validate.js --help` — PASS; output lists `--compatibility`.
+
+## Outcome
+
+Implemented `world-validate --compatibility` as a read-only CLI selector over exactly `record_schema_compliance`, `approval_semantics`, `artifact_maturity`, and `index_disk_consistency`. The mode reuses the existing flat `runValidators` aggregation and does not register a meta-validator.
+
+The implementation also excludes hybrid `INDEX.md` files from shared structural schema scanning. This keeps derived listing pages available to `index_disk_consistency` while preventing `record_schema_compliance.missing_frontmatter` noise. The broad full-world validator baselines moved from 1084 to 1081 failures because those three stale `INDEX.md` schema findings disappeared.
+
+## Deviations
+
+1. Added the `tools/validators/src/structural/utils.ts` guard because focused compatibility proof exposed a same-seam conflict between derived `INDEX.md` listings and schema-record discovery.
+2. Added/updated CLI unit coverage alongside the integration test so help and mutual-exclusion behavior are covered where the existing CLI tests already exercise those surfaces.
