@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-57-stchar-pipeline-integration.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC57STCHARPIPINT-006.md",
+  "last_ticket": "archive/tickets/SPEC57STCHARPIPINT-007.md",
   "last_result": "completed_archived",
-  "last_work_commit": "5c0358f83cca61a63b1bb5d4fede6f3c040ee19d",
+  "last_work_commit": "ad3e0360cbb3b2feddb89f6cf18d112f7e482c9a",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC57STCHARPIPINT-007.md",
+  "next_target": "tickets/SPEC57STCHARPIPINT-008.md",
   "queue": [
-    "tickets/SPEC57STCHARPIPINT-007.md",
     "tickets/SPEC57STCHARPIPINT-008.md",
     "tickets/SPEC57STCHARPIPINT-009.md",
     "tickets/SPEC57STCHARPIPINT-010.md"
