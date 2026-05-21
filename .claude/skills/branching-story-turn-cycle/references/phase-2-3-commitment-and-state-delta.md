@@ -34,10 +34,11 @@ Apply exactly one causal delta from parent snapshot. The delta may:
 - Apply the mid-story introduction rule when the selected or
   JIT-created `SLT` makes that object true in this accepted event. After
   binding the `SLT`, ask whether the event creates a new `CLK`, `STSEC`,
-  `STQ`, `THR`, `STENT`, or `SREL` that is not reducible to an existing active
-  record and that changes future eligibility, visibility, obligations,
-  pressure, witness propagation, relationship constraints, affordances, or
-  choice grounding. If yes, include the new id in `SE.state_delta.create[]`
+  `STQ`, `THR`, `STENT`, `STCHAR`, `SREL`, `STPLAN`, or `STEMO` that is not
+  reducible to an existing active record and that changes future eligibility,
+  visibility, obligations, pressure, witness propagation, character authority,
+  relationship constraints, affordances, plans, emotional pressure, or choice
+  grounding. If yes, include the new id in `SE.state_delta.create[]`
   and include a matching `SE.record_introductions[]` entry
   `{record_id: <CLASS>-<N>, class: <CLASS>, trigger: <closed trigger>, evidence: [...], distinct_from: [...]}`
   per shared contract §5a.

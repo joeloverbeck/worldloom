@@ -90,6 +90,7 @@ test("state_snapshot_integrity accepts active_records BEL references", async () 
       },
       state_snapshot: {
         active_records: {
+          STCHAR: [],
           BEL: ["BEL-1"]
         }
       }
@@ -149,7 +150,51 @@ test("state_snapshot_integrity accepts active_records STCHAR references", async 
   assert.deepEqual(verdicts, []);
 });
 
-test("state_snapshot_integrity normalizes absent optional active-record keys", async () => {
+test("state_snapshot_integrity normalizes absent remaining optional active-record keys", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context([
+    storyRecord("page_record", "PG-2", "pages", {
+      id: "PG-2",
+      story_id: "STORY-1",
+      input: {
+        choice_id: "CHC-1",
+        manual_action_text: null,
+        resolved_event_id: "SE-1"
+      },
+      state_snapshot: {
+        active_records: {
+          STENT: ["STENT-1"],
+          STCHAR: [],
+          STSTAT: ["STSTAT-1"],
+          STLOC: ["STLOC-1"]
+        }
+      }
+    }),
+    storyRecord("story_event_record", "SE-1", "events", {
+      id: "SE-1",
+      story_id: "STORY-1",
+      event_kind: "selected_choice"
+    }),
+    storyRecord("story_entity_record", "STENT-1", "entities", {
+      id: "STENT-1",
+      story_id: "STORY-1"
+    }),
+    storyRecord("story_status_record", "STSTAT-1", "status", {
+      id: "STSTAT-1",
+      story_id: "STORY-1"
+    }),
+    storyRecord("story_location_record", "STLOC-1", "locations", {
+      id: "STLOC-1",
+      story_id: "STORY-1"
+    })
+  ], {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("state_snapshot_integrity fails when active_records omits STCHAR", async () => {
   const verdicts = await stateSnapshotIntegrity.run(undefined, context([
     storyRecord("page_record", "PG-2", "pages", {
       id: "PG-2",
@@ -189,7 +234,10 @@ test("state_snapshot_integrity normalizes absent optional active-record keys", a
     patch_plan: patchPlan()
   }));
 
-  assert.deepEqual(verdicts, []);
+  assert.ok(verdicts.some((verdict) => (
+    verdict.code === "state_snapshot_integrity.missing_required_field" &&
+    (verdict.detail as { field?: string }).field === "state_snapshot.active_records.STCHAR"
+  )));
 });
 
 test("state_snapshot_integrity validates CLK/STSEC/STQ active record statuses", async () => {
@@ -204,6 +252,7 @@ test("state_snapshot_integrity validates CLK/STSEC/STQ active record statuses", 
       },
       state_snapshot: {
         active_records: {
+          STCHAR: [],
           CLK: ["CLK-1", "CLK-2"],
           STSEC: ["STSEC-1", "STSEC-2"],
           STQ: ["STQ-1", "STQ-2"]
@@ -265,6 +314,7 @@ test("state_snapshot_integrity validates STPLAN and STEMO active record statuses
       },
       state_snapshot: {
         active_records: {
+          STCHAR: [],
           STPLAN: ["STPLAN-1", "STPLAN-2", "STPLAN-3", "STPLAN-4", "STPLAN-5", "STPLAN-6", "STPLAN-7"],
           STEMO: ["STEMO-1", "STEMO-2", "STEMO-3", "STEMO-4", "STEMO-5"]
         }

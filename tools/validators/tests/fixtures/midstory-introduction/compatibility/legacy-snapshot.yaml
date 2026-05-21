@@ -11,6 +11,8 @@ missing_optional_subdirectories:
   - _source/clocks
   - _source/secrets
   - _source/story-questions
+  - _source/plans
+  - _source/emotions
   - _source/artifacts
 records:
   - node_type: story_page_record
@@ -30,6 +32,7 @@ records:
         canon_revision: null
         active_records:
           STENT: [STENT-1]
+          STCHAR: []
           STSTAT: [STSTAT-1]
           STLOC: [STLOC-1]
           STINT: []
@@ -78,6 +81,7 @@ records:
         canon_revision: null
         active_records:
           STENT: [STENT-1]
+          STCHAR: []
           STSTAT: [STSTAT-1]
           STLOC: [STLOC-1]
           STINT: []
@@ -92,6 +96,8 @@ records:
           CLK: []
           STSEC: []
           STQ: []
+          STPLAN: []
+          STEMO: []
         entity_status:
           STENT-1: { life: alive, agency: free, location: STLOC-1 }
         continuation:

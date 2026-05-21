@@ -8,6 +8,8 @@ The `SE.record_introductions[]` structured-field schema and closed trigger
 vocabularies live in `.claude/skills/_shared-templates/story-state-contract.md`
 §5a. The typed reader lives at
 `tools/validators/src/structural/midstory-introduction-utils.ts`.
+The allowed introduction classes are `CLK`, `STSEC`, `STQ`, `THR`, `STENT`,
+`STCHAR`, `SREL`, `STPLAN`, and `STEMO`.
 
 Fresh creation is lawful only when the committed event or current branch state
 creates present causal state that is not reducible to an existing active record.
@@ -295,6 +297,61 @@ one-active-status-per-entity checks still apply.
 
 **§5c safety.** Entity representation is earned by present branch utility, not
 outline importance.
+
+## STCHAR — Story-Local Character Authority
+
+**Creation threshold.** Create `STCHAR` when the event makes story-local
+persona, voice, appraisal, or pressure-behavior authority necessary for a
+runtime character and that authority is not reducible to an already-active
+`STCHAR`. Lawful triggers include distilling authority from world character
+provenance, regenerating authority after a material persona/voice shift, or
+creating story-local character authority for a newly committed runtime actor.
+
+**Supersede/advance threshold.** Supersede an existing `STCHAR` when stable
+character authority materially changes while continuity remains clear. Do not
+create a parallel `STCHAR` for a momentary mood, belief, or status change; use
+`STEMO`, `BEL`, or `STSTAT` for those surfaces.
+
+**Minimum grounding.**
+
+- `created_at_page` is the new `PG`.
+- The profile carries story-local persona, voice, appraisal, and pressure
+  behavior authority sufficient for page-plan §16a packets.
+- World `CHAR-*` may appear only as provenance on the `STCHAR`, not as runtime
+  operational authority on `STENT`, choices, page plans, or prose receipts.
+- `SE.state_delta.create[]` includes the new character authority id.
+- `SE.record_introductions[]` includes
+  `{record_id: STCHAR-<N>, class: STCHAR, trigger: <closed trigger>, evidence: [...], distinct_from: [...]}`.
+
+**Required turn-cycle handling.** A fresh non-background `STENT` that needs
+character behavior or voice authority should be paired with an active `STCHAR`
+before page planning relies on that entity. Page-plan §16a renders from active
+`STCHAR`; do not ask prose to infer persona from a world `CHAR` id.
+
+**Validator checks.** `midstory_record_introduction_grounding` checks that
+mid-story-created `STCHAR` records are represented in `SE.record_introductions[]`
+and are grounded in parent-active or same-event-created evidence. STCHAR-specific
+validators check resolution, supersession, active-page binding, and the world
+`CHAR` authority firewall.
+
+**Anti-patterns.**
+
+- Creating `STCHAR` as a duplicate of an already-active profile.
+- Using world `CHAR-*` directly as runtime characterization authority.
+- Creating `STCHAR` for a passing emotion, location, injury, or belief.
+- Treating `STCHAR` as canon-promotion evidence by itself.
+
+**Examples.**
+
+- Lawful: "The masked courier becomes a recurring speaker whose voice and
+  pressure behavior now shape choices." Create or distill `STCHAR` and bind the
+  actor through `STENT.bound_stchar_id`.
+- Existing-record advance: "A betrayal permanently changes the actor's
+  pressure behavior and voice authority." Supersede the active `STCHAR`.
+- Rejected: "The character is angry this page." Use `STEMO`, not `STCHAR`.
+
+**§5c safety.** `STCHAR` records stable runtime character authority, not a
+future character arc or world-canon shortcut.
 
 ## SREL — Relationship
 

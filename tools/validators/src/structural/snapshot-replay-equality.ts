@@ -239,6 +239,14 @@ function runNewSchemaReplay(
   for (const cls of ACTIVE_RECORDS_CLASSES) {
     const expectedList = expectedActive[cls];
     const gotListRaw = gotActive[cls];
+    if (cls === "STCHAR" && !Array.isArray(gotListRaw)) {
+      drifts.push({
+        field: "active_records.STCHAR",
+        expected: expectedList,
+        got: null
+      });
+      continue;
+    }
     const gotList = Array.isArray(gotListRaw)
       ? gotListRaw.filter((item): item is string => typeof item === "string")
       : [];

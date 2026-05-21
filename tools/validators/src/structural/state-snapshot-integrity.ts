@@ -72,6 +72,9 @@ export const stateSnapshotIntegrity: Validator = {
       verdicts.push(...validateMysteryEvidence(page, snapshot, pageLabel, maps));
 
       if (Object.keys(activeRecords).length > 0) {
+        if (!Array.isArray(activeRecords.STCHAR)) {
+          verdicts.push(missingOrMalformed(page, pageLabel, "state_snapshot.active_records.STCHAR", "must be present as an array"));
+        }
         for (const [recordClass, ids] of Object.entries(activeRecords)) {
           if (!Array.isArray(ids)) {
             verdicts.push(missingOrMalformed(page, pageLabel, `state_snapshot.active_records.${recordClass}`, "must be present as an array"));

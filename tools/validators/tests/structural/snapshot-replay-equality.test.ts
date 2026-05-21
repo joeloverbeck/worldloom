@@ -119,6 +119,21 @@ test("snapshot_replay_equality normalizes missing optional parent active-record 
   assert.deepEqual(verdicts, []);
 });
 
+test("snapshot_replay_equality reports missing required STCHAR active-record key", async () => {
+  const { STCHAR: _stchar, ...activeRecordsWithoutStchar } = newSchemaExpectedActiveRecords();
+  const childPage = newSchemaChildPage(activeRecordsWithoutStchar);
+  const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const drift = verdicts.find((verdict) => verdict.code === "snapshot_replay_equality.snapshot_drift");
+  assert.ok(drift);
+  assert.deepEqual((drift.detail as { drifts: unknown[] }).drifts, [
+    { field: "active_records.STCHAR", expected: [], got: null }
+  ]);
+});
+
 test("snapshot_replay_equality ignores audit-only SE records that are not page inputs", async () => {
   const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords());
   const verdicts = await snapshotReplayEquality.run(undefined, context([

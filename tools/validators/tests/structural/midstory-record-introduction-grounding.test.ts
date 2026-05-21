@@ -12,7 +12,7 @@ import { context } from "./helpers.js";
 
 const STORY_SLUG = "midstory-introduction-test";
 
-test("midstory_record_introduction_grounding accepts all six creation-pass fixture classes", async () => {
+test("midstory_record_introduction_grounding accepts creation-pass fixture classes", async () => {
   const fixture = loadFixture("creation-pass/all-classes.yaml");
   const records = recordsFromPassFixture(fixture);
 
@@ -108,6 +108,36 @@ test("midstory_record_introduction_grounding accepts STPLAN and STEMO structured
   assert.deepEqual(verdicts, []);
 });
 
+test("midstory_record_introduction_grounding accepts grounded STCHAR structured introductions", async () => {
+  const records = baseRecords([
+    event("SE-2", {
+      create: ["STCHAR-1"],
+      introductions: [intro("STCHAR-1", "STCHAR", "story_character_authority_distilled", ["SE-2"])]
+    }),
+    introducedRecord("STCHAR-1", "story_character_authority_record", "story-characters", { created_at_page: "PG-2" })
+  ]);
+
+  const verdicts = await midstoryRecordIntroductionGrounding.run(undefined, testContext(records));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("midstory_record_introduction_grounding rejects STCHAR introductions with missing evidence", async () => {
+  const records = baseRecords([
+    event("SE-2", {
+      create: ["STCHAR-2"],
+      introductions: [intro("STCHAR-2", "STCHAR", "story_character_authority_distilled", ["CHAR-1"])]
+    }),
+    introducedRecord("STCHAR-2", "story_character_authority_record", "story-characters", { created_at_page: "PG-2" })
+  ]);
+
+  const verdicts = await midstoryRecordIntroductionGrounding.run(undefined, testContext(records));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "midstory_intro_evidence_missing");
+  assert.deepEqual(verdicts[0]?.detail, { event_id: "SE-2", record_id: "STCHAR-2", evidence_id: "CHAR-1" });
+});
+
 test("midstory_record_introduction_grounding is scoped to full-world, story-bundle patch plans, and touched story files", () => {
   assert.equal(midstoryRecordIntroductionGrounding.applies_to(testContext([])), true);
   assert.equal(
@@ -127,6 +157,10 @@ test("midstory_record_introduction_grounding is scoped to full-world, story-bund
     true
   );
   assert.equal(
+    midstoryRecordIntroductionGrounding.applies_to(testContext([], { run_mode: "pre-apply", patch_plan: patchPlan("append_story_character_authority_record") })),
+    true
+  );
+  assert.equal(
     midstoryRecordIntroductionGrounding.applies_to(testContext([], { run_mode: "pre-apply", patch_plan: patchPlan("create_cf_record") })),
     false
   );
@@ -134,6 +168,13 @@ test("midstory_record_introduction_grounding is scoped to full-world, story-bund
     midstoryRecordIntroductionGrounding.applies_to(testContext([], {
       run_mode: "incremental",
       touched_files: ["stories/test/_source/threads/THR-1.yaml"]
+    })),
+    true
+  );
+  assert.equal(
+    midstoryRecordIntroductionGrounding.applies_to(testContext([], {
+      run_mode: "incremental",
+      touched_files: ["stories/test/story-characters/STCHAR-1.md"]
     })),
     true
   );
@@ -204,6 +245,7 @@ function introEntries(ids: string[]): Record<string, unknown>[] {
       if (id.startsWith("STQ-")) return intro(id, "STQ", "explicit_question_raised", ["SE-2"]);
       if (id.startsWith("THR-")) return intro(id, "THR", "investigation_line_opened", ["SE-2"]);
       if (id.startsWith("STENT-")) return intro(id, "STENT", "actor_enters_branch", ["SE-2"]);
+      if (id.startsWith("STCHAR-")) return intro(id, "STCHAR", "story_character_authority_distilled", ["SE-2"]);
       if (id.startsWith("SREL-")) return intro(id, "SREL", "trust_axis_becomes_relevant", ["SE-2"]);
       if (id.startsWith("STPLAN-")) return intro(id, "STPLAN", "tactical_approach_committed", ["SE-2"]);
       if (id.startsWith("STEMO-")) return intro(id, "STEMO", "event_revealed_truth_to_actor", ["SE-2"]);
@@ -232,7 +274,10 @@ function page(id: string, activeRecords: Record<string, string[]>): IndexedRecor
 }
 
 function introducedRecord(id: string, nodeType: string, sourceDir: string, overrides: Record<string, unknown>): IndexedRecord {
-  return storyRecord(nodeType, id, `stories/${STORY_SLUG}/_source/${sourceDir}/${id}.yaml`, {
+  const filePath = sourceDir === "story-characters"
+    ? `stories/${STORY_SLUG}/story-characters/${id}.md`
+    : `stories/${STORY_SLUG}/_source/${sourceDir}/${id}.yaml`;
+  return storyRecord(nodeType, id, filePath, {
     id,
     story_id: "STORY-1",
     ...overrides
@@ -257,6 +302,7 @@ function nodeTypeForId(id: string): string {
   if (id.startsWith("STQ-")) return "story_question_record";
   if (id.startsWith("THR-")) return "thread_record";
   if (id.startsWith("STENT-")) return "story_entity_record";
+  if (id.startsWith("STCHAR-")) return "story_character_authority_record";
   if (id.startsWith("SREL-")) return "relationship_record_story";
   if (id.startsWith("STPLAN-")) return "story_plan_record";
   if (id.startsWith("STEMO-")) return "story_emotion_record";

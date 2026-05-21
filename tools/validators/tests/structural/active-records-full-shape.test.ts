@@ -12,14 +12,17 @@ test("active_records_full_shape is scoped to full-world only", () => {
   assert.equal(activeRecordsFullShape.applies_to(context([], { run_mode: "pre-apply" })), false);
 });
 
-test("active_records_full_shape warns once for each missing active-record class", async () => {
+test("active_records_full_shape fails missing STCHAR and warns for other missing active-record classes", async () => {
   const verdicts = await activeRecordsFullShape.run(undefined, context([
     storyPage("PG-1", activeRecordsWithout("DA", "STCHAR", "CLK", "STSEC", "STQ", "STPLAN", "STEMO"))
   ]));
 
   assert.equal(verdicts.length, 7);
   assert.ok(verdicts.every((verdict) => verdict.validator === "active_records_full_shape"));
-  assert.ok(verdicts.every((verdict) => verdict.severity === "warn"));
+  assert.equal(verdicts.find((verdict) => (verdict.detail as { missing_class: string }).missing_class === "STCHAR")?.severity, "fail");
+  assert.ok(verdicts
+    .filter((verdict) => (verdict.detail as { missing_class: string }).missing_class !== "STCHAR")
+    .every((verdict) => verdict.severity === "warn"));
   assert.deepEqual(missingClasses(verdicts), ["CLK", "DA", "STCHAR", "STEMO", "STPLAN", "STQ", "STSEC"]);
 });
 

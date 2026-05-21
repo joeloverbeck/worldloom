@@ -1,0 +1,126 @@
+# SPEC-60 — STCHAR Machine-Layer & Docs Completeness
+
+**Status:** proposed
+**Date:** 2026-05-21
+**Classification:** story-canon-related (machine-facing layer + docs for the Skill Category 2c pipeline)
+**Source:** `reports/stchar-audit-first-iteration.md` §13 I3/I4/I5 + §10 patch-engine/MCP findings (verified against `main`)
+**Depends on:** none — independent of SPEC-58/59; may proceed in parallel
+**Companion:** `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`
+
+## 1. Context
+
+STCHAR is well-supported in MCP record retrieval and world-index node/edge generation (verified:
+`get_record`/`get_records`/`list_records`/`get_record_schema` all route STCHAR; world-index emits
+`stchar_source_character` / `stchar_supersedes` / `stchar_bound_stent` / `stent_character_authority`
+/ `page_active_record` edges). Three machine-layer gaps and one docs gap remain after SPEC-57. None
+of these changes canon semantics; this is tooling and documentation completeness.
+
+## 2. Changes
+
+### 2.1 I3 — World-index extracts record refs from structured predicate args
+
+**Files:** `tools/world-index/src/parse/atomic.ts`
+
+- `storyRefsInRecordArrayField` (lines ~1422–1430) extracts record IDs only from the stringified
+  `pred` field (`storyRefsInString(stringField(item, "pred"))`). It misses **structured** predicate
+  argument fields such as `{ pred: "record_active", record: "STCHAR-1" }`.
+- Extend extraction to read record IDs from the structured argument fields the predicate DSL emits
+  (`record`, `holder`, `target`, and nested `predicate` for `not`/compound predicates), in addition
+  to the stringified form. Apply to SLT `preconditions.hard|soft` and STPLAN success/fallback
+  predicates so both edge sources are covered.
+
+**Scope reframing (from the report):** ChatGPT-Pro framed this as STCHAR-specific. It is **general**
+— *any* record ref carried in a structured predicate arg (SF, STSEC, STCHAR, …) currently produces
+no `storylet_predicate_ref` / plan-predicate edge. STCHAR is one beneficiary; the fix is class-agnostic.
+
+**Acceptance:**
+- Both `record_active(STCHAR-1)` (string form) and `{ pred: "record_active", record: "STCHAR-1" }`
+  (structured form) emit a `storylet_predicate_ref` edge.
+- STPLAN success/fallback structured predicates index their record refs.
+- Existing string-form edges are unchanged (no regression).
+
+### 2.2 I4 — `story_character_profile` MCP task profile
+
+**Files:**
+- `tools/world-mcp/src/ranking/profiles/index.ts`
+- context-packet docs/tests (see 2.4)
+
+- Add `"story_character_profile"` to `TASK_TYPES` (lines ~19–35; currently absent).
+- Add a ranking profile tuned for the `story-character-profile` skill's retrieval: targeted
+  full/section retrieval of the source `CHAR-*` dossier for `create_from_world_char` /
+  `regenerate`, and story-bundle context for `create_story_local`.
+
+**Basis:** `story-character-profile/SKILL.md:160` calls
+`get_context_packet(task_type='story_character_profile', …)`, which currently has no matching
+profile.
+
+**Acceptance:**
+- `get_context_packet(task_type="story_character_profile")` resolves against a defined profile
+  rather than falling back to `other`/erroring.
+- An oversize source `CHAR` returns section-projection suggestions.
+
+### 2.3 Patch-engine stale-index covers the STCHAR hybrid path
+
+**Files:** `tools/patch-engine/src/apply.ts`
+
+- `detectStaleIndex` (lines ~197–212) watches `characters/%.md`, `diegetic-artifacts/%.md`,
+  `adjudications/%.md` but **not** `stories/<story_slug>/story-characters/STCHAR-*.md`. Add a
+  `file_path LIKE 'stories/%/story-characters/%.md'` clause so an out-of-band edit to a STCHAR
+  hybrid file is detected as a stale index before patch application, matching the existing staging
+  support for STCHAR.
+
+**Acceptance:**
+- A modified `stories/<slug>/story-characters/STCHAR-*.md` whose hash differs from the indexed
+  version triggers the stale-index guard.
+- World-level hybrid path coverage is unchanged.
+
+### 2.4 I5 — Documentation reconciliation
+
+**Files:**
+- `docs/MACHINE-FACING-LAYER.md`
+- `docs/CONTEXT-PACKET-CONTRACT.md`
+- `reports/story-character-dossier-retrieval-concerns.md`
+
+- `MACHINE-FACING-LAYER.md`: add `story_character_authority_record` to the retrievable record-type
+  listings; clarify that story-pipeline `seed_nodes` use world-scope `CHAR` ids **only for
+  bootstrap / profile-source reads**, while normal turn-cycle/page-plan/prose runtime consumes
+  active STCHAR through story context and targeted STCHAR retrieval.
+- `CONTEXT-PACKET-CONTRACT.md`: document the `story_character_profile` task type and the STCHAR
+  components of `story_bundle_context` (`active_story_characters`).
+- `reports/story-character-dossier-retrieval-concerns.md`: this report is pervasively pre-STCHAR
+  (`STENT.bound_char_id`, turn-cycle re-seeding world `CHAR` dossiers). **Archive it** to
+  `archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md` (or prepend an
+  "OBSOLETE — superseded by STCHAR (SPEC-56/57)" banner if kept in-tree). Operators must not follow
+  contradictory pre-STCHAR guidance.
+
+**Explicit non-change:** `reports/stchar-implementation-first-iteration.md` and
+`reports/stchar-audit-first-iteration.md` legitimately contain `bound_char_id` as historical
+migration narrative — **do not edit them**.
+
+**Optional / secondary (defer if low value):** `story_bundle_context.active_story_characters` is
+currently status-based (filtered on STCHAR `status === "active"`), not page/branch-snapshot-bound.
+Either rename the field to `global_active_story_characters` for honesty, or add a page-scoped
+`active_story_character_ids_by_latest_page`. Low priority; include only if 2.2 work makes it cheap.
+
+### 2.5 Acceptance for docs
+
+- No active (non-archive, non-historical-report) doc states STENT uses `bound_char_id`.
+- Retrieval docs list `story_character_authority_record`.
+- Story-pipeline docs distinguish bootstrap/profile source reads from runtime STCHAR reads.
+
+## 3. Test requirements
+
+- World-index: `{ pred: "record_active", record: "STCHAR-1" }` and the string form both emit
+  `storylet_predicate_ref`; STPLAN success/fallback structured predicate refs index.
+- MCP: `story_character_profile` task type resolves to a profile;
+  `get_context_packet(task_type="story_character_profile")` no longer falls back.
+- Patch-engine: stale-index test for an edited `stories/<slug>/story-characters/STCHAR-*.md`.
+
+## 4. FOUNDATIONS alignment
+
+| Principle | Stance | Rationale |
+|---|---|---|
+| §Tooling Recommendation / Machine-Facing Layer | aligns | A `story_character_profile` task profile and complete predicate-edge extraction make STCHAR retrievable through the documented context-packet + targeted-retrieval pattern rather than ad hoc reads. |
+| §6.1 Story-Local Character Authority | aligns | Doc reconciliation removes pre-STCHAR `bound_char_id` guidance and states that runtime consumes STCHAR, not world `CHAR`. |
+| Rule 6 (No Silent Retcons) — analogue | aligns | Stale-index coverage for the STCHAR hybrid path prevents out-of-band STCHAR edits from being silently overwritten by a patch built on a stale index. |
+| §5b Schema-Minimalism | N/A | No schema fields are added; the optional `active_story_characters` rename (2.4) is a naming-honesty change, not a new field. |

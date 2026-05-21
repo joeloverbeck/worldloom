@@ -33,9 +33,10 @@ function missingClassVerdict(
   pageId: string,
   recordClass: string
 ): Verdict {
+  const severity = recordClass === "STCHAR" ? "fail" : "warn";
   return {
     validator: "active_records_full_shape",
-    severity: "warn",
+    severity,
     code: "active_records_class_key_missing",
     message: `${pageId} state_snapshot.active_records omits ${recordClass}; current-contract page snapshots should materialize every active-record class key, using [] when no records of that class are active.`,
     location: locationFor(page),
