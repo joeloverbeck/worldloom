@@ -65,6 +65,20 @@ test("state_delta_class_integrity rejects unresolvable supersede ids", async () 
   assert.match(verdicts[0]?.message ?? "", /CLK-99 which does not resolve/);
 });
 
+test("state_delta_class_integrity accepts STCHAR lifecycle deltas when they resolve", async () => {
+  const ctx = context([
+    event("marla", "SE-1", { create: ["STCHAR-2"], supersede: ["STCHAR-1"], close: ["STCHAR-3"] }),
+    storyRecord("story_character_authority_record", "marla", "STCHAR-1", "story-characters", { status: "superseded" }),
+    storyRecord("story_character_authority_record", "marla", "STCHAR-2", "story-characters", {
+      status: "active",
+      supersedes: "STCHAR-1"
+    }),
+    storyRecord("story_character_authority_record", "marla", "STCHAR-3", "story-characters", { status: "retired" })
+  ]);
+
+  assert.deepEqual(await stateDeltaClassIntegrity.run({}, ctx), []);
+});
+
 test("state_delta_class_integrity accepts all newly permitted SPEC-44 and SPEC-47 classes when they resolve", async () => {
   const ctx = context([
     event("marla", "SE-1", { create: ["STSTAT-1", "CLK-1", "STSEC-1", "STQ-1", "STPLAN-1", "STEMO-1"], supersede: [], close: [] }),
@@ -147,8 +161,11 @@ function storyRecord(
   sourceDir: string,
   overrides: Record<string, unknown> = {}
 ) {
+  const filePath = sourceDir === "story-characters"
+    ? `stories/${storySlug}/story-characters/${id}.md`
+    : `stories/${storySlug}/_source/${sourceDir}/${id}.yaml`;
   return {
-    ...record(nodeType, `${storySlug}:${id}`, `stories/${storySlug}/_source/${sourceDir}/${id}.yaml`, {
+    ...record(nodeType, `${storySlug}:${id}`, filePath, {
       id,
       ...overrides
     }),

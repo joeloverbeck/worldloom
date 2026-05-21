@@ -11,6 +11,7 @@ import {
 
 const STATE_DELTA_CLASSES = new Set([
   "STENT",
+  "STCHAR",
   "STSTAT",
   "STINT",
   "SF",
@@ -36,6 +37,7 @@ const STATE_DELTA_CLASSES = new Set([
 
 const STORY_RECORD_NODE_TYPES = new Set([
   "story_entity_record",
+  "story_character_authority_record",
   "story_status_record",
   "intention_record",
   "story_fact_record",
