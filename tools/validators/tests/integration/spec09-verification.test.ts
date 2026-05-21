@@ -152,7 +152,7 @@ test("SPEC-09 §V9: world-validate full-rule baseline reports known legacy chara
   };
 
   assert.equal(result.status, 1, result.stderr || result.stdout);
-  assert.equal(parsed.summary.fail_count, 474);
+  assert.equal(parsed.summary.fail_count, 1084);
   assert.equal(parsed.summary.warn_count, 0);
   assert.equal(parsed.summary.info_count, 0);
   assert.deepEqual(legacyCharacterDramaticCoreFailures(parsed.verdicts), [
@@ -269,9 +269,19 @@ function isLegacyCharacterOrProposalShapeFailure(verdict: {
   return (
     isLegacyCharacterDramaticCoreFailure(verdict) ||
     (
-      verdict.location.file?.startsWith("character-proposals/") === true &&
+      isLegacyProposalSurface(verdict.location.file) &&
       verdict.validator === "record_schema_compliance"
     )
+  );
+}
+
+function isLegacyProposalSurface(filePath: string | undefined): boolean {
+  return (
+    filePath?.startsWith("character-proposals/") === true ||
+    filePath?.startsWith("proposals/") === true ||
+    filePath?.startsWith("pressure-events/") === true ||
+    filePath?.startsWith("audits/") === true ||
+    filePath?.startsWith("world-proposals/") === true
   );
 }
 

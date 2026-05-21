@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — adds an integration test under `tools/validators/tests/`; no production code (exercises the pipeline composed by 001–005).
-**Deps**: SPEC61PROSURSCH-003, SPEC61PROSURSCH-004, archive/tickets/SPEC61PROSURSCH-005.md
+**Deps**: archive/tickets/SPEC61PROSURSCH-003.md, SPEC61PROSURSCH-004, archive/tickets/SPEC61PROSURSCH-005.md
 
 ## Problem
 

@@ -71,7 +71,8 @@
         "batch_id": { "type": "string", "pattern": "^BATCH-[0-9]+$" },
         "generated_date": { "$ref": "#/$defs/nonEmptyString" },
         "user_approved": { "type": "boolean" },
-        "derived_from_cfs": { "$ref": "#/$defs/stringArray" }
+        "derived_from_cfs": { "$ref": "#/$defs/stringArray" },
+        "derived_from_epe": { "type": "string", "pattern": "^EPE-[0-9]+$" }
       }
     }
   },
