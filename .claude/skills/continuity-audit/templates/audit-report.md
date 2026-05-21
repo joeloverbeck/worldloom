@@ -241,6 +241,30 @@ Populated after Phase 12 runs, before Phase 13 commit.
 9. retcon_card_ids matches card files: PASS — <rationale>
 10. categories_deferred accuracy: PASS — <rationale>
 11. Report body internal consistency: PASS — <rationale>
+12. Compatibility Appendix boundary: PASS — <rationale; if Phase 11b skipped, name the recorded reason>
+
+---
+
+## Compatibility Appendix
+
+Populated only when Phase 11b is enabled. If Phase 11b is disabled, record:
+"Compatibility reporting was not requested for this audit."
+
+- **Command**: `node tools/validators/dist/src/cli/world-validate.js <world-slug> --compatibility --json`
+- **Mode**: full-world read-only reporting; warnings do not block this audit.
+- **Validators run**: record_schema_compliance, approval_semantics, artifact_maturity, index_disk_consistency.
+- **Summary**: fail_count N; warn_count N; info_count N.
+- **No mutation statement**: Phase 11b wrote no world files and made no canon changes; the approved AU report under `worlds/<world-slug>/audits/` is the only eventual write.
+
+### Findings by Validator
+
+One subsection per compatibility validator that emitted verdicts. Group by severity
+and code. If no verdicts were emitted, record: "No compatibility findings emitted
+by the CLI."
+
+If the CLI could not run, JSON could not be parsed, or the world index was missing,
+record `Compatibility Appendix: not run` with the concrete reason and make the
+skip visible in the Phase 13 deliverable summary.
 
 ---
 

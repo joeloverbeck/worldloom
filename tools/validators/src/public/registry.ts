@@ -1,6 +1,7 @@
 import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { activeRecordsFullShape } from "../structural/active-records-full-shape.js";
 import { approvalSemantics } from "../structural/approval-semantics.js";
+import { artifactMaturity } from "../structural/artifact-maturity.js";
 import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
@@ -19,6 +20,7 @@ import { crossFileReference } from "../structural/cross-file-reference.js";
 import { entityIntroductionStatusPairing } from "../structural/entity-introduction-status-pairing.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { introductionObserverFirewall } from "../structural/introduction-observer-firewall.js";
+import { indexDiskConsistency } from "../structural/index-disk-consistency.js";
 import { midstoryRecordIntroductionGrounding } from "../structural/midstory-record-introduction-grounding.js";
 import { nonPropagationFactsCompleteness } from "../structural/non-propagation-facts-completeness.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
@@ -104,6 +106,8 @@ export const structuralValidators: readonly Validator[] = [
   crossFileReference,
   recordSchemaCompliance,
   approvalSemantics,
+  artifactMaturity,
+  indexDiskConsistency,
   characterMemorabilityStructure,
   storyFactAuthority,
   liePromotedSilently,

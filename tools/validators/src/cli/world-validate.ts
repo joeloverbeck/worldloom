@@ -29,6 +29,7 @@ async function main(): Promise<number> {
       options: {
         rules: { type: "string" },
         structural: { type: "boolean" },
+        compatibility: { type: "boolean" },
         json: { type: "boolean" },
         file: { type: "string" },
         story: { type: "string" },
