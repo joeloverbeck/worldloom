@@ -1,6 +1,7 @@
 import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { activeRecordsFullShape } from "../structural/active-records-full-shape.js";
 import { approvalSemantics } from "../structural/approval-semantics.js";
+import { artifactMaturity } from "../structural/artifact-maturity.js";
 import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
@@ -104,6 +105,7 @@ export const structuralValidators: readonly Validator[] = [
   crossFileReference,
   recordSchemaCompliance,
   approvalSemantics,
+  artifactMaturity,
   characterMemorabilityStructure,
   storyFactAuthority,
   liePromotedSilently,
