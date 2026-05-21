@@ -1,19 +1,25 @@
 {
-  "originating_spec": "archive/specs/SPEC-60-stchar-machine-layer-and-docs-completeness.md",
-  "archived_spec": "archive/specs/SPEC-60-stchar-machine-layer-and-docs-completeness.md",
-  "last_ticket": "archive/tickets/SPEC60STCHARMACLAY-004.md",
+  "originating_spec": "specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC61PROSURSCH-001.md",
   "last_result": "completed_archived",
-  "last_work_commit": "489dcecf1f13a6d34d1814c5e40963acd9e458de",
+  "last_work_commit": "b514c95692f736afd8b5fe361a799f2d43ff4703",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "completed",
+  "next_target": "tickets/SPEC61PROSURSCH-002.md",
+  "queue": [
+    "tickets/SPEC61PROSURSCH-002.md",
+    "tickets/SPEC61PROSURSCH-005.md",
+    "tickets/SPEC61PROSURSCH-003.md",
+    "tickets/SPEC61PROSURSCH-004.md",
+    "tickets/SPEC61PROSURSCH-006.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated untracked tickets/SPEC61PROSURSCH-*.md; expected ignored artifacts under tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/, tools/patch-engine/dist/, and tools/patch-engine/node_modules/",
+  "dirty_state": "expected ignored artifacts under tools/world-index/dist/, tools/world-index/node_modules/, tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/validators/dist/, and tools/validators/node_modules/",
   "updated_at": "2026-05-21"
 }
