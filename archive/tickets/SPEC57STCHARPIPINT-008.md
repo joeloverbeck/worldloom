@@ -1,6 +1,6 @@
 # SPEC57STCHARPIPINT-008: Promotion skills STCHAR evidence handling
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `story-fact-promotion-to-canon` and `story-promotion-closeout`; no new tool/schema.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The promotion skills have no STCHAR handling, leaving ambiguous whether a story-local character profile could become an automatic promotion source or silently reach world `CHAR`. SPEC-57 Phase 8 constrains STCHAR to supporting-evidence-only, keeps `character_outcome` rooted in STENT/STSTAT, and folds STCHAR supersession into the existing closeout discipline.
+At intake, the promotion skills had no STCHAR handling, leaving ambiguous whether a story-local character profile could become an automatic promotion source or silently reach world `CHAR`. SPEC-57 Phase 8 constrains STCHAR to supporting-evidence-only, keeps `character_outcome` rooted in STENT/STSTAT, and folds STCHAR supersession into the existing closeout discipline.
 
 ## Assumption Reassessment (2026-05-21)
 
@@ -30,15 +30,15 @@ The promotion skills have no STCHAR handling, leaving ambiguous whether a story-
 3. Story-to-world character promotion is out of scope → grep-proof of the Out-of-Scope statement in both skills.
 4. Single-layer note: these are skill-prose edits; the proof surfaces are grep + manual review.
 
-## What to Change
+## Landed Changes
 
 ### 1. story-fact-promotion-to-canon
 
-Add STCHAR to `proposal_evidence.supporting_story_character_profiles[]` as evidence context; explicitly forbid STCHAR in CF candidate `source_basis.derived_from[]` and `promotion_claims[].source_record`; keep `character_outcome` rooted in STENT/STSTAT; state story-local → world-`CHAR` promotion is out of scope. Update the FOUNDATIONS Alignment table to reference STCHAR.
+Added STCHAR to `proposal_evidence.supporting_story_character_profiles[]` as evidence context; explicitly forbids STCHAR in CF candidate `source_basis.derived_from[]`, `promotion_claims[].source_record`, and `source_record_ids`; keeps `character_outcome` rooted in STENT/STSTAT; states story-local-to-world-`CHAR` promotion is out of scope. The FOUNDATIONS Alignment table now references STCHAR.
 
 ### 2. story-promotion-closeout
 
-Document that STCHAR is superseded only when an amended-schema field actually changes (folds into the existing schema-agnostic discipline). Update the FOUNDATIONS Alignment table to reference STCHAR.
+Documented that STCHAR is superseded only when an amended STCHAR field actually changes. Closeout records STCHAR verdict relevance in the ledger when no profile field changes, keeps STCHAR out of promotion source records, and never turns it into world `CHAR`. The FOUNDATIONS Alignment table now references STCHAR.
 
 ## Files to Touch
 
@@ -75,3 +75,23 @@ Document that STCHAR is superseded only when an amended-schema field actually ch
 1. `grep -n "supporting_story_character_profiles\|source_basis.derived_from\|promotion_claims\|STCHAR" .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md`
 2. Manual review of the `character_outcome` source-kind definition and closeout supersession discipline.
 3. Grep + manual review is the correct boundary because both deliverables are skill-prose constraints with no executable surface.
+
+## Outcome
+
+Completed: 2026-05-21.
+
+Promotion skill prose now treats STCHAR as story-local evidence context only. `story-fact-promotion-to-canon` can include supporting profiles under `proposal_evidence.supporting_story_character_profiles[]`, but the skill now forbids STCHAR as a promotion source, as CF `source_basis.derived_from[]` authority, or as an automatic route to world `CHAR`. `story-promotion-closeout` now records STCHAR evidence dispositions separately from promotion source records and supersedes STCHAR only when an amended STCHAR field changes.
+
+No production code or schema changed; this ticket was a skill-prose contract update.
+
+## Verification Result
+
+- `grep -n "supporting_story_character_profiles\|source_basis.derived_from\|promotion_claims\|STCHAR" .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md` — PASS; the edited skills show the supporting evidence field plus explicit exclusions from CF authority and promotion source surfaces.
+- `grep -n "STCHAR\|out of scope" .claude/skills/story-promotion-closeout/SKILL.md` — PASS; closeout now names STCHAR supersession only when amended fields change and states it never becomes world `CHAR`.
+- `grep -n "§6.1 Story-Local Character Authority\|STCHAR" .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md` — PASS; both skills' FOUNDATIONS Alignment tables reference STCHAR.
+- Manual review — PASS; `character_outcome` remains rooted in `STENT`/`STSTAT`, and STCHAR stays supporting evidence only.
+- `git diff --check -- .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md archive/tickets/SPEC57STCHARPIPINT-008.md` — PASS.
+
+## Deviations
+
+- None.
