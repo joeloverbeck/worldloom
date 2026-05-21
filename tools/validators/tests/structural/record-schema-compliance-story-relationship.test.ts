@@ -130,6 +130,32 @@ test("record_schema_compliance accepts SPEC-42/47 classes in SREL derived_from",
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts STCHAR in SREL derived_from", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    relationshipRecord(validRelationship({
+      derived_from: ["STCHAR-1", "BEL-1", "SE-1"]
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects world CHAR in SREL derived_from", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    relationshipRecord(validRelationship({
+      derived_from: ["CHAR-1"]
+    }))
+  ]));
+
+  assert.ok(
+    result.some((verdict) =>
+      verdict.code === "record_schema_compliance.pattern" &&
+      verdict.message.includes("/derived_from/0")
+    ),
+    JSON.stringify(result)
+  );
+});
+
 function relationshipRecord(parsed: Record<string, unknown>) {
   return {
     ...record("relationship_record_story", "test-story:SREL-1", FILE_PATH, parsed),
