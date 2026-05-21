@@ -1,5 +1,26 @@
 # Implementation Order
 
+## World-system consolidation (first iteration)
+
+Specs derived from `reports/world-system-consolidation-first-iteration.md` (triage:
+`docs/triage/2026-05-21-world-system-consolidation-triage.md`). First consolidation pass over the
+world-system (non-story) skills, whose proposal/audit/pressure surfaces had the least prior iteration.
+
+| Order | Spec | Scope | Depends on |
+|---|---|---|---|
+| 1 | **SPEC-61** — Proposal-surface schema coverage & approval-semantics enforcement | JSON schemas + structural validation for PR/BATCH/EPE/EPE-sidecar/AU/RP/NWP/NWB; hard-fail non-CF `direct_user_approval`; fix RP collision | none — foundational |
+| 2 | **SPEC-62** — FOUNDATIONS & docs world-system reconciliation | FOUNDATIONS §Artifact Authority + §World Generativity paragraphs; document `passive_depth`; relax forbidden-mystery mandate; REPOSITORY-MAP + DA-prose fixes | none — independent; may run in parallel with SPEC-61 (docs-only; no schema/validator overlap) |
+
+Both are independent and may run in parallel. SPEC-61 is the executable coverage; SPEC-62 is
+docs/FOUNDATIONS only (touches no schema, validator, or world data). Deferred items (D3–D6:
+`taxonomy_authority_validator`, CF-1 split, continuity-audit compatibility checks, patch-engine
+routing of proposal direct-writes) await a concrete consumer or SPEC-61 landing — see the companion
+triage record.
+
+---
+
+## STCHAR audit (first iteration)
+
 Active specs derived from `reports/stchar-audit-first-iteration.md` (triage:
 `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`). These audit the gaps left by the
 just-merged SPEC-56 (stchar-machine-foundation) and SPEC-57 (stchar-pipeline-integration).
@@ -8,7 +29,7 @@ just-merged SPEC-56 (stchar-machine-foundation) and SPEC-57 (stchar-pipeline-int
 |---|---|---|---|
 | 1 | **SPEC-58** — STCHAR contract-to-enforcement reconciliation (`archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`) | Completed: fixed existing schemas/validators that rejected or under-required lawful STCHAR (C1 state-delta, C2 mid-story intro, C3 SREL.derived_from, C4 active_records key) | none — foundational |
 | 2 | **SPEC-59** — STCHAR authority-fidelity validators (`archive/specs/SPEC-59-stchar-authority-fidelity-validators.md`) | Completed: added executable validators for page-plan §16a packet integrity, prose-receipt STCHAR integrity, required `char_authority_leak`, STENT↔STCHAR reciprocity, and cast_bind_list integrity (C5 + reciprocity + kernel) | **SPEC-58** (`archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`; assumes schemas accept STCHAR and the active_records key is required) |
-| 3 | **SPEC-60** — STCHAR machine-layer & docs completeness | Structured-predicate edge extraction (I3), `story_character_profile` MCP task profile (I4), patch-engine stale-index STCHAR path, stale-doc reconciliation (I5) | none — independent; may run in parallel with 1/2 |
+| 3 | **SPEC-60** — STCHAR machine-layer & docs completeness (`archive/specs/SPEC-60-stchar-machine-layer-and-docs-completeness.md`) | Completed: structured-predicate edge extraction (I3), `story_character_profile` MCP task profile (I4), patch-engine stale-index STCHAR path, stale-doc reconciliation (I5) | none — independent; may run in parallel with 1/2 |
 
 ## Dependency rationale
 

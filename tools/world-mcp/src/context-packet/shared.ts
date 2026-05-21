@@ -384,6 +384,7 @@ export const GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE: Record<
   canon_facts_from_diegetic_artifacts: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
   emergent_pressure_events: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
   story_bootstrap: { invariants: "reserve", mystery_reserve: "reserve" },
+  story_character_profile: { invariants: "reserve", mystery_reserve: "reserve" },
   story_turn_cycle: { invariants: "reserve", mystery_reserve: "reserve" },
   commitment_block_authoring: { invariants: "reserve", mystery_reserve: "reserve" },
   branching_story_health_audit: { invariants: "reserve", mystery_reserve: "reserve" },
@@ -403,6 +404,7 @@ export const DEFAULT_BUDGET_SPLIT = {
 
 export const STORY_PIPELINE_TASK_TYPES = [
   "story_bootstrap",
+  "story_character_profile",
   "story_turn_cycle",
   "commitment_block_authoring",
   "branching_story_health_audit",

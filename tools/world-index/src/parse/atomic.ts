@@ -1422,11 +1422,27 @@ function recordArrayField(
 function storyRefsInRecordArrayField(record: Record<string, unknown>, field: string, nestedPath: string[] = []): string[] {
   const refs = new Set<string>();
   for (const item of recordArrayField(record, field, nestedPath)) {
-    for (const target of storyRefsInString(stringField(item, "pred"))) {
-      refs.add(target);
-    }
+    collectStoryRefsFromPredicateRecord(item, refs);
   }
   return [...refs].sort((left, right) => left.localeCompare(right, "en-US"));
+}
+
+function collectStoryRefsFromPredicateRecord(item: Record<string, unknown>, refs: Set<string>): void {
+  for (const value of Object.values(item)) {
+    if (typeof value === "string") {
+      for (const target of storyRefsInString(value)) {
+        refs.add(target);
+      }
+    }
+  }
+
+  if (isRecord(item.predicate)) {
+    collectStoryRefsFromPredicateRecord(item.predicate, refs);
+  }
+
+  for (const nested of arrayOfRecords(item.predicates)) {
+    collectStoryRefsFromPredicateRecord(nested, refs);
+  }
 }
 
 function storyRefsInString(value: string | null): string[] {

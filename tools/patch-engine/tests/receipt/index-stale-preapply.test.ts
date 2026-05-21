@@ -49,6 +49,42 @@ test("index-stale-preapply: stale hybrid file returns index_stale before validat
   assertOriginalSecFile(world);
 });
 
+test("index-stale-preapply: stale story-character hybrid file returns index_stale", async (t) => {
+  const world = createIndexedTestWorld(t);
+  const secret = Buffer.from("index-stale-stchar-secret");
+  const secretPath = writeSecret(world.worldRoot, secret);
+  const stcharPath = seedHybridFileVersion(
+    world,
+    "stories/ember-arc/story-characters/STCHAR-1.md",
+    "old indexed STCHAR body"
+  );
+  fs.writeFileSync(stcharPath, "new on-disk STCHAR body", "utf8");
+  const { envelope, token } = appendExtensionEnvelope(world, secret);
+  let validatorInvoked = false;
+
+  const result = await submitPatchPlan(envelope, token, {
+    worldRoot: world.worldRoot,
+    hmacSecretPath: secretPath,
+    preApplyValidator: async () => {
+      validatorInvoked = true;
+      return { ok: true };
+    }
+  });
+
+  assertEngineError(result, "index_stale");
+  assert.equal(validatorInvoked, false, "stale-index rejection must happen before validators run");
+  assert.deepEqual(result.detail, {
+    divergent_files: [
+      {
+        file_path: "stories/ember-arc/story-characters/STCHAR-1.md",
+        on_disk_content_hash: sha256Hex("new on-disk STCHAR body"),
+        indexed_content_hash: sha256Hex("old indexed STCHAR body")
+      }
+    ]
+  });
+  assertOriginalSecFile(world);
+});
+
 test("index-stale-preapply: fresh index preserves validator_failed response", async (t) => {
   const world = createIndexedTestWorld(t);
   const secret = Buffer.from("index-stale-validator-failed-secret");

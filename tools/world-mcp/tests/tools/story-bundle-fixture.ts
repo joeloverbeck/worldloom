@@ -58,6 +58,23 @@ export function buildStoryBundleWorld(root: string): void {
         body: "id: ENT-1\ncanonical_name: Marla Kern\nentity_kind: person\n"
       },
       {
+        node_id: "CHAR-1",
+        world_slug: STORY_FIXTURE_WORLD,
+        file_path: "characters/CHAR-1.md",
+        node_type: "character_record",
+        body: [
+          "---",
+          "character_id: CHAR-1",
+          "name: Marla Kern",
+          "status: active",
+          "---",
+          "## Profile",
+          "",
+          "Marla Kern is a canonical source character used to seed story-local profiles.",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "STENT-2"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,

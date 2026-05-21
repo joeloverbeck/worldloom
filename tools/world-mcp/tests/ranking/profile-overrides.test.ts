@@ -14,6 +14,7 @@ import {
   proposeNewCharactersRankingProfile,
   proposeNewWorldsFromPreferencesRankingProfile,
   storyBootstrapRankingProfile,
+  storyCharacterProfileRankingProfile,
   storyFactPromotionToCanonRankingProfile,
   storyTurnCycleRankingProfile,
   commitmentBlockAuthoringRankingProfile
@@ -57,6 +58,7 @@ test("canon-pipeline-adjacent task profiles do not reuse the other fallback", ()
     canonFactsFromDiegeticArtifactsRankingProfile,
     emergentPressureEventsRankingProfile,
     storyBootstrapRankingProfile,
+    storyCharacterProfileRankingProfile,
     storyTurnCycleRankingProfile,
     commitmentBlockAuthoringRankingProfile,
     branchingStoryHealthAuditRankingProfile,
@@ -102,6 +104,11 @@ test("canon-pipeline-adjacent task profiles do not reuse the other fallback", ()
       (defaultRankingProfile.file_class_priority.invariant ?? 0)
   );
   assert.ok((storyBootstrapRankingProfile.edge_type_boost?.references_scoped_name ?? 0) > 0);
+  assert.ok(
+    (storyCharacterProfileRankingProfile.file_class_priority.character_record ?? 0) >
+      (defaultRankingProfile.file_class_priority.character_record ?? 0)
+  );
+  assert.ok((storyCharacterProfileRankingProfile.edge_type_boost?.stchar_source_character ?? 0) > 0);
   assert.ok(
     (storyTurnCycleRankingProfile.file_class_priority.canon_fact_record ?? 0) >
       (defaultRankingProfile.file_class_priority.canon_fact_record ?? 0)
@@ -151,6 +158,7 @@ test("canon-pipeline-adjacent task types have task-specific default budgets", ()
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.canon_facts_from_diegetic_artifacts, 12000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.emergent_pressure_events, 15000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_bootstrap, 18000);
+  assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_character_profile, 12000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_turn_cycle, 18000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.commitment_block_authoring, 18000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.branching_story_health_audit, 12000);

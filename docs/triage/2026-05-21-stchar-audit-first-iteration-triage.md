@@ -49,7 +49,7 @@
 
 | Item | Verdict | Grounds |
 |---|---|---|
-| Patch-engine stale-index omits STCHAR path | accept → SPEC-60 | `patch-engine/src/apply.ts:197-212` watches world-level hybrids only, not `stories/%/story-characters/%.md`. |
+| Patch-engine stale-index omits STCHAR path | landed → `archive/tickets/SPEC60STCHARMACLAY-003.md` | `tools/patch-engine/src/apply.ts` now watches `stories/%/story-characters/%.md` in addition to world-level hybrids. |
 | I4 — `story_character_profile` MCP task profile | accept → SPEC-60 | `ranking/profiles/index.ts:19-35` omits it; `story-character-profile/SKILL.md:160` calls it. |
 | reciprocity + cast_bind_list validators | accept (small) → SPEC-59 | One-way STENT→STCHAR resolution only; no reciprocal check; no cast_bind_list validator. |
 

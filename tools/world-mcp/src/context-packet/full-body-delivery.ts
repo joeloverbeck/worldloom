@@ -69,6 +69,12 @@ const FULL_BODY_RULES_BY_TASK_TYPE: Record<TaskType, readonly FullBodyRule[]> = 
     { nodeType: "invariant" },
     { nodeType: "mystery_reserve_entry" }
   ],
+  story_character_profile: [
+    { nodeType: "character_record" },
+    { nodeType: "invariant" },
+    { nodeType: "mystery_reserve_entry" },
+    { nodeType: "section", sectionFileClasses: ["PEOPLES_AND_SPECIES", "EVERYDAY_LIFE"] }
+  ],
   story_turn_cycle: [
     { nodeType: "canon_fact_record" },
     { nodeType: "invariant" },
