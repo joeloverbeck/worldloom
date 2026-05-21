@@ -179,6 +179,8 @@ function isIndexablePath(relativePath: string): boolean {
       directory === "characters" ||
       directory === "diegetic-artifacts" ||
       directory === "proposals" ||
+      directory === "pressure-events" ||
+      directory === "world-proposals" ||
       directory === "character-proposals" ||
       directory === "audits"
     );
@@ -187,6 +189,8 @@ function isIndexablePath(relativePath: string): boolean {
   if (
     segments.length === 3 &&
     ((segments[0] === "proposals" && segments[1] === "batches") ||
+      (segments[0] === "pressure-events" && segments[1] === "batches") ||
+      (segments[0] === "world-proposals" && segments[1] === "batches") ||
       (segments[0] === "character-proposals" && segments[1] === "batches"))
   ) {
     return true;

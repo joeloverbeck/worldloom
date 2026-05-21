@@ -35,8 +35,13 @@ test("enumerate returns every expected indexable path and no unexpected paths fo
       "character-proposals/batches/NCB-0001.md",
       "characters/CHAR-0001-sample.md",
       "diegetic-artifacts/DA-0001-sample.md",
+      "pressure-events/EPE-0001-sample.md",
+      "pressure-events/EPE-0001-sample.proposal.md",
+      "pressure-events/batches/BATCH-0001.md",
       "proposals/PR-0001-sample.md",
-      "proposals/batches/BATCH-0001.md"
+      "proposals/batches/BATCH-0001.md",
+      "world-proposals/NWP-0001-sample.md",
+      "world-proposals/batches/NWB-0001.md"
     ]);
     assert.deepEqual(result.unexpected, [
       "CANON_LEDGER.md",

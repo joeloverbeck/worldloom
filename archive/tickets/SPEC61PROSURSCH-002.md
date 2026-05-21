@@ -1,6 +1,6 @@
 # SPEC61PROSURSCH-002: World-index node types + directory enumeration for pressure/world-proposal surfaces
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-index` (NODE_TYPES, directory enumeration, prose parse mapping); no impact on existing node types or enumerated directories.
@@ -15,6 +15,7 @@ For the proposal/audit/pressure surfaces to be structurally validated (SPEC61PRO
 1. Verified against the codebase (this session): `tools/world-index/src/schema/types.ts` NODE_TYPES already contains `proposal_card`, `proposal_batch`, `retcon_proposal_card`, `audit_record` (lines ~21–26). `tools/world-index/src/enumerate.ts` already walks `proposals/`, `proposals/batches/`, `audits/`, and `audits/AU-*/retcon-proposals/` (lines ~181–198). The genuinely-new work is therefore narrower than SPEC-61 §2.2's full directory list implies: add the five **new** node types (`pressure_event_card`, `pressure_event_sidecar_proposal`, `pressure_event_batch`, `world_proposal_card`, `world_proposal_batch`) and enumerate only `pressure-events/`, `pressure-events/batches/`, `world-proposals/`, and `world-proposals/batches/`.
 2. Verified against the spec and `archive/tickets/SPEC61PROSURSCH-001.md`: SPEC-61 §2.2 originally allowed `pressure-events/batches/` to reuse `proposal_batch` only if PR and EPE batch frontmatter aligned. `archive/tickets/SPEC61PROSURSCH-001.md` reassessment proved they diverge and added `pressure-event-batch.schema.json`, so this ticket must add `pressure_event_batch` as a new node type and enumerate `pressure-events/batches/` to that node type.
 3. Cross-artifact boundary under audit: the world-index parse contract (`enumerate.ts` directory walk → `parse/prose.ts` dir→node_type assignment). Before adding new mappings, confirm in `parse/prose.ts` how `proposals/` and `audits/` files are currently assigned node types (the `character-proposals` precedent lives at `prose.ts` lines ~16/24/119/123) so the new `pressure-events/`/`world-proposals/` mappings follow the same shape.
+4. Implementation correction: `BATCH-<integer>` is not a globally unique node id across proposal and pressure-event batch families. The `pressure_event_batch` parser therefore emits the new node type but uses the existing synthetic file-scoped node id instead of the bare `BATCH-<integer>` id, avoiding collisions with `proposals/batches/BATCH-*.md` while preserving validator-visible node typing.
 
 ## Architecture Check
 
@@ -23,15 +24,15 @@ For the proposal/audit/pressure surfaces to be structurally validated (SPEC61PRO
 
 ## Verification Layers
 
-1. The four new node types appear in NODE_TYPES -> codebase grep-proof (`grep pressure_event_card tools/world-index/src/schema/types.ts`).
+1. The five new node types appear in NODE_TYPES -> codebase grep-proof (`grep pressure_event_card tools/world-index/src/schema/types.ts`).
 2. Files under `pressure-events/` and `world-proposals/` parse to their assigned node types -> skill-dry-run equivalent: `world-index build <fixture-world>` over a fixture containing those surfaces, then inspect the index for the new node types.
 3. `pressure-events/batches/` files parse to `pressure_event_batch` after the SPEC61PROSURSCH-001 split -> codebase grep-proof + index inspection.
 
 ## What to Change
 
-### 1. Add four node types
+### 1. Add five node types
 
-In `tools/world-index/src/schema/types.ts` NODE_TYPES, add `pressure_event_card`, `pressure_event_sidecar_proposal`, `world_proposal_card`, `world_proposal_batch`.
+In `tools/world-index/src/schema/types.ts` NODE_TYPES, add `pressure_event_card`, `pressure_event_sidecar_proposal`, `pressure_event_batch`, `world_proposal_card`, `world_proposal_batch`.
 
 ### 2. Enumerate the new directories
 
@@ -70,9 +71,31 @@ In `tools/world-index/src/parse/prose.ts`, map each new directory + filename pat
 
 ### New/Modified Tests
 
-1. `tools/world-index/tests/` — add an enumeration test asserting the four new directory patterns parse to the four new node types. — covers What to Change §2/§3.
+1. `tools/world-index/tests/` — add an enumeration test asserting the five new directory patterns parse to the five new node types. — covers What to Change §2/§3.
 
 ### Commands
 
 1. `npm --prefix tools/world-index test`
 2. `npm --prefix tools/world-index run build`
+
+## Outcome
+
+Completed: 2026-05-21.
+
+Implemented the world-index parser/enumeration seam for the SPEC-61 proposal-surface family:
+
+- Added five node types to `tools/world-index/src/schema/types.ts`: `pressure_event_card`, `pressure_event_sidecar_proposal`, `pressure_event_batch`, `world_proposal_card`, and `world_proposal_batch`.
+- Added filesystem enumeration for `pressure-events/`, `pressure-events/batches/`, `world-proposals/`, and `world-proposals/batches/`.
+- Added whole-file parse mappings for the new pressure-event and world-proposal surfaces.
+- Added focused fixture/test coverage for enumeration, whole-file parsing, and the node-type registry count.
+
+Deviations from the original plan:
+
+- `pressure_event_batch` intentionally uses a file-scoped synthetic node id rather than the bare `BATCH-<integer>` id because `BATCH-<integer>` can collide across proposal and pressure-event batch families. The node type is still `pressure_event_batch`, which is the validator-facing contract needed by downstream tickets.
+- The direct CLI smoke needed a minimal SPEC-13 atomic CF/CH pair added to a temp copy of the legacy fixture before `world-index build` would run. The initial legacy-only fixture rejection was expected current behavior, not an implementation failure.
+
+Verification:
+
+- `npm run build` in `tools/world-index` passed.
+- `npm test` in `tools/world-index` passed: 127 tests, 127 pass.
+- Temp-fixture CLI smoke passed: `world-index build fixture-world` emitted one row each for `pressure_event_batch`, `pressure_event_card`, `pressure_event_sidecar_proposal`, `world_proposal_batch`, and `world_proposal_card`.

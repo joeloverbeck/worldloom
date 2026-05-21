@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/validators/src/structural/approval-semantics.ts` registered in `tools/validators/src/public/registry.ts`; no impact on existing validators (additive registry entry).
-**Deps**: SPEC61PROSURSCH-002
+**Deps**: archive/tickets/SPEC61PROSURSCH-002.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ FOUNDATIONS §Canon Fact Record Schema (lines 355–361) reserves `source_basis.
 
 1. Verified against the codebase (this session): `tools/validators/src/public/registry.ts` is the validator-framework registry (a new validator registered here is consumed by the run-loop — registry insertion is the consumer wiring, per the registry-registered structural-consumer model). `canon-fact-record.schema.json:69–71` requires `direct_user_approval: const true` — the CF carve-out this validator must respect. `diegetic-artifact-frontmatter.schema.json:66` confirms DA `source_basis` is permissive, so DA/NCP/NCB/CHAR are uncovered without this validator.
 2. Verified against the spec: SPEC-61 §2.3 second bullet (post-reassessment) names this validator as the **primary** mechanism, run over every non-CF record class; §4 acceptance bullet 3 requires a non-CF surface carrying `source_basis.direct_user_approval` to produce a blocking FAIL citing the CF-only reservation, and bullet 5 requires CF records to still require `direct_user_approval: true` (no regression).
-3. Cross-artifact boundary under audit: the validator reads `source_basis.direct_user_approval` across all non-CF parsed record classes (PR/BATCH/EPE/EPE-sidecar/EPE-batch/AU/RP/NWP/NWB once SPEC61PROSURSCH-002 indexes them, plus the pre-existing NCP/NCB/CHAR/DA). The shared contract is "which node_type is the canon-fact class" — the validator must skip exactly `canon_fact_record` and check everything else carrying a `source_basis`.
+3. Cross-artifact boundary under audit: the validator reads `source_basis.direct_user_approval` across all non-CF parsed record classes (PR/BATCH/EPE/EPE-sidecar/EPE-batch/AU/RP/NWP/NWB once `archive/tickets/SPEC61PROSURSCH-002.md` indexes them, plus the pre-existing NCP/NCB/CHAR/DA). The shared contract is "which node_type is the canon-fact class" — the validator must skip exactly `canon_fact_record` and check everything else carrying a `source_basis`.
 4. FOUNDATIONS Rule 6 (No Silent Retcons) / §Canon Fact Record Schema reservation: the validator enforces the proposal→accepted-canon approval boundary so a proposal surface cannot launder itself into looking canon-accepted. Restate that `direct_user_approval` means "user approved this fact's acceptance into world canon," reserved to accepted CFs only.
 5. Canon Safety surface: this is a new structural validator under `tools/validators/src/structural/` that gates record schema/semantics at the validator boundary. Confirm it does not weaken any Mystery Reserve firewall (it touches only `source_basis.direct_user_approval`, orthogonal to MR) and that the CF carve-out cannot be bypassed (CF must keep requiring the field).
 
