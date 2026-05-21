@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-64-world-system-compatibility-and-artifact-maturity-validation.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC64WORSYSCOM-002.md",
+  "last_ticket": "archive/tickets/SPEC64WORSYSCOM-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "2736b3516be852d9e7c8081fe480aa697886c857",
+  "last_work_commit": "c7a619b4b89728a0aa509ee553b8beb70b741b69",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC64WORSYSCOM-003.md",
+  "next_target": "tickets/SPEC64WORSYSCOM-004.md",
   "queue": [
-    "tickets/SPEC64WORSYSCOM-003.md",
     "tickets/SPEC64WORSYSCOM-004.md",
     "tickets/SPEC64WORSYSCOM-005.md"
   ],
