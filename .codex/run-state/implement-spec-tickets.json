@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC61PROSURSCH-003.md",
+  "last_ticket": "archive/tickets/SPEC61PROSURSCH-004.md",
   "last_result": "completed_archived",
-  "last_work_commit": "34240614473e4ee80dc51408c9c9b612588be310",
+  "last_work_commit": "b0728a62b66687f6347adeaae7395863433a31ff",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC61PROSURSCH-004.md",
+  "next_target": "tickets/SPEC61PROSURSCH-006.md",
   "queue": [
-    "tickets/SPEC61PROSURSCH-004.md",
     "tickets/SPEC61PROSURSCH-006.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -17,6 +16,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "expected ignored artifacts under tools/world-index/dist/, tools/world-index/node_modules/, tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/validators/dist/, and tools/validators/node_modules/",
+  "dirty_state": "expected ignored artifacts under tools/world-index/dist/, tools/world-index/node_modules/, tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
   "updated_at": "2026-05-21"
 }
