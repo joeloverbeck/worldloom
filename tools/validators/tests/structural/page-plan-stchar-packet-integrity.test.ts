@@ -22,6 +22,45 @@ test("page_plan_stchar_packet_integrity rejects a missing required packet", asyn
   assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.missing_packet");
 });
 
+test("page_plan_stchar_packet_integrity allows omitted packets for offstage characters", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({ includePacket: false })),
+    context(baseRecords({ location: "offstage" }))
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("page_plan_stchar_packet_integrity accepts offstage_causal packets without voice blocks", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({ requiredBecause: "offstage_causal", voiceLine: "" })),
+    context(baseRecords({ location: "offstage" }))
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("page_plan_stchar_packet_integrity rejects offstage_causal packets for present characters", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({ requiredBecause: "offstage_causal", voiceLine: "" })),
+    context(baseRecords())
+  );
+
+  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.offstage_packet_for_present_character");
+});
+
+test("page_plan_stchar_packet_integrity treats unknown and concealed locations as present", async () => {
+  for (const location of ["unknown", "concealed"]) {
+    const verdicts = await pagePlanStcharPacketIntegrity.run(
+      input(plan({ requiredBecause: "offstage_causal", voiceLine: "" })),
+      context(baseRecords({ location }))
+    );
+
+    assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.offstage_packet_for_present_character");
+    assert.equal((verdicts[0]?.detail as { location?: string }).location, location);
+  }
+});
+
 test("page_plan_stchar_packet_integrity rejects packets for inactive STCHAR ids", async () => {
   const verdicts = await pagePlanStcharPacketIntegrity.run(input(plan({ stcharId: "STCHAR-99" })), context(baseRecords()));
 
@@ -39,6 +78,19 @@ test("page_plan_stchar_packet_integrity rejects hash mismatches", async () => {
   assert.equal((verdicts[0]?.detail as { field?: string }).field, "profile_hash");
 });
 
+test("page_plan_stchar_packet_integrity rejects hash mismatches on offstage_causal packets", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({
+      requiredBecause: "offstage_causal",
+      profileHash: "sha256:" + "9".repeat(64),
+      voiceLine: ""
+    })),
+    context(baseRecords({ location: "offstage" }))
+  );
+
+  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.hash_mismatch");
+});
+
 test("page_plan_stchar_packet_integrity rejects speaker packets without voice block", async () => {
   const verdicts = await pagePlanStcharPacketIntegrity.run(
     input(plan({ voiceLine: "  - Voice/dialogue authority:" })),
@@ -54,7 +106,7 @@ function input(content: string) {
   };
 }
 
-function baseRecords() {
+function baseRecords(options: { location?: string } = {}) {
   return [
     storyRecord("story_entity_record", "STENT-1", "entities", {
       id: "STENT-1",
@@ -76,7 +128,16 @@ function baseRecords() {
     storyRecord("page_record", "PG-1", "pages", {
       id: "PG-1",
       story_id: "STORY-1",
-      state_snapshot: { active_records: { STENT: ["STENT-1"], STCHAR: ["STCHAR-1"] } }
+      state_snapshot: {
+        active_records: { STENT: ["STENT-1"], STCHAR: ["STCHAR-1"] },
+        entity_status: {
+          "STENT-1": {
+            life: "alive",
+            agency: "free",
+            location: options.location ?? "STLOC-1"
+          }
+        }
+      }
     })
   ];
 }
@@ -94,6 +155,7 @@ function storyRecord(nodeType: string, id: string, sourceDir: string, parsed: Re
 function plan(options: {
   includePacket?: boolean;
   stcharId?: string;
+  requiredBecause?: string;
   profileHash?: string;
   voiceLine?: string;
 } = {}): string {
@@ -105,7 +167,7 @@ function plan(options: {
     "",
     includePacket ? [
       `- STENT-1 / ${options.stcharId ?? "STCHAR-1"} - Test Character.`,
-      "  - Required because: speaker.",
+      `  - Required because: ${options.requiredBecause ?? "speaker"}.`,
       `  - Hashes: profile_hash=${options.profileHash ?? HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${HASH_C}.`,
       options.voiceLine ?? "  - Voice/dialogue authority: clipped STCHAR voice block.",
       "  - Relevant appraisal rules: protect the secret."

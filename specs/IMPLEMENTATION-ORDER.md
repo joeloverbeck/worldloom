@@ -30,6 +30,7 @@ just-merged SPEC-56 (stchar-machine-foundation) and SPEC-57 (stchar-pipeline-int
 | 1 | **SPEC-58** — STCHAR contract-to-enforcement reconciliation (`archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`) | Completed: fixed existing schemas/validators that rejected or under-required lawful STCHAR (C1 state-delta, C2 mid-story intro, C3 SREL.derived_from, C4 active_records key) | none — foundational |
 | 2 | **SPEC-59** — STCHAR authority-fidelity validators (`archive/specs/SPEC-59-stchar-authority-fidelity-validators.md`) | Completed: added executable validators for page-plan §16a packet integrity, prose-receipt STCHAR integrity, required `char_authority_leak`, STENT↔STCHAR reciprocity, and cast_bind_list integrity (C5 + reciprocity + kernel) | **SPEC-58** (`archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`; assumes schemas accept STCHAR and the active_records key is required) |
 | 3 | **SPEC-60** — STCHAR machine-layer & docs completeness (`archive/specs/SPEC-60-stchar-machine-layer-and-docs-completeness.md`) | Completed: structured-predicate edge extraction (I3), `story_character_profile` MCP task profile (I4), patch-engine stale-index STCHAR path, stale-doc reconciliation (I5) | none — independent; may run in parallel with 1/2 |
+| 4 | **SPEC-63** — Offstage-causal §16a packet tier (`archive/specs/SPEC-63-offstage-causal-packet-tier.md`) | Completed: added the reduced `offstage_causal` §16a packet tier deferred by SPEC-59 §5 — one new `required_because` value, reduced packet shape (no voice block), presence-aware `page_plan_stchar_packet_integrity`, and receipt fixture coverage; no schema change | **SPEC-59** (completed; extends `page_plan_stchar_packet_integrity` / `prose_receipt_stchar_integrity`) |
 
 ## Dependency rationale
 
@@ -41,6 +42,12 @@ just-merged SPEC-56 (stchar-machine-foundation) and SPEC-57 (stchar-pipeline-int
 - **SPEC-60 is independent.** It touches world-index, MCP ranking profiles, the patch-engine
   stale-index guard, and docs — none of which the validator-layer specs depend on, and vice versa.
   It can be scheduled in parallel.
+- **SPEC-63 depends on SPEC-59 (already completed) and is now archived at
+  `archive/specs/SPEC-63-offstage-causal-packet-tier.md`.** It extends the `page_plan_stchar_packet_integrity`
+  and `prose_receipt_stchar_integrity` validators SPEC-59 landed, and amends the §16a authoring contract
+  SPEC-59 validated against. Since SPEC-59 is archived/completed, SPEC-63 was unblocked and independent of
+  the active world-system specs (SPEC-61/62). It is a follow-on to the same STCHAR-audit deliberation
+  (the deferred item recorded in the companion triage record and SPEC-59 §5).
 
 ## Out of scope (rejected/deferred at triage — see companion triage record)
 
