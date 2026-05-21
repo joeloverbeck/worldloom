@@ -64,9 +64,8 @@ specs (SPEC-65/66/67).
 ## Deliverables
 
 - `archive/specs/SPEC-65-story-schema-contract-parity-hardening.md`
-- `specs/SPEC-66-stchar-body-integrity-validator.md`
+- `archive/specs/SPEC-66-stchar-body-integrity-validator.md`
 - `archive/specs/SPEC-67-story-world-index-edge-parity.md`
 - `specs/IMPLEMENTATION-ORDER.md` updated (new "STCHAR audit (second iteration)" section).
 
-All three are independent (no inter-spec build dependency); SPEC-65 and SPEC-67 are complete, while
-SPEC-66 remains active.
+All three are independent (no inter-spec build dependency) and are complete.

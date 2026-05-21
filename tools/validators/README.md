@@ -68,6 +68,7 @@ Structural validators:
 - `stchar_bound_stent_reciprocity`
 - `stchar_active_for_bound_stent`
 - `stchar_supersession_integrity`
+- `stchar_body_integrity`
 - `no_char_authority_in_story_runtime`
 - `character_grounding_consistency`
 - `state_snapshot_integrity`

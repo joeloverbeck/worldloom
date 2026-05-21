@@ -376,7 +376,12 @@ function tableHasColumn(db: Database.Database, table: string, column: string): b
 }
 
 function parsedBodyFor(row: NodeRow): Record<string, unknown> {
-  if (row.node_type === "character_record" || row.node_type === "diegetic_artifact_record" || row.node_type === "adjudication_record") {
+  if (
+    row.node_type === "character_record" ||
+    row.node_type === "diegetic_artifact_record" ||
+    row.node_type === "adjudication_record" ||
+    row.node_type === "story_character_authority_record"
+  ) {
     const frontmatter = frontmatterFor(row.body);
     return parseYamlRecord(frontmatter ?? "");
   }

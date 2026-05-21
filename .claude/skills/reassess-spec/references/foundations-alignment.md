@@ -14,6 +14,8 @@ If the spec has a FOUNDATIONS Alignment table (most worldloom specs do), verify 
 
 Flag mismatches as Issues.
 
+**No alignment table at all**: if the spec has no FOUNDATIONS Alignment table, do not treat its absence as a CRITICAL Issue by default. Surface adding one as an **Addition (severity MEDIUM)** for specs whose deliverables do not mutate canon-pipeline semantics (e.g., a story-scope read-only validator, a docs-only spec). Escalate to a **HIGH Issue** only when a canon-pipeline-mutating deliverable (patch-engine write path, validator threshold, hook enforcement, canon-safety expansion) ships with no alignment statement anywhere in the spec — there the missing alignment is a Rule-1 grounding gap, not a cosmetic omission. The presence-conditioned checks above (§4.1) still apply if even a partial table exists; this clause governs only the table-fully-absent case.
+
 ## 4.2 Missing Principles
 
 Identify FOUNDATIONS principles the spec should address but doesn't. Pay particular attention to:

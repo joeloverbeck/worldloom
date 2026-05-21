@@ -208,6 +208,7 @@ Classify whether each supplied `target_stent_id` is viewpoint, speaker, primary 
 ## Phase 3: Draft Full stchar.v1 Body From Zero
 
 Draft the body with exactly these 13 H2 sections in this order:
+This list is mirrored by `REQUIRED_STCHAR_SECTIONS` in `tools/validators/src/structural/stchar-body-integrity.ts`; update both surfaces together.
 
 1. `## Story-Facing Identity`
 2. `## Source Distillation`
