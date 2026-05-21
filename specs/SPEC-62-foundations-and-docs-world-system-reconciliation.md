@@ -129,6 +129,26 @@ existence, circulation, belief, disputed status, or truth.
 > name is already precise, and the skill's Phase 7 firewall already prevents claim→canon laundering.
 > Only the prose above is imprecise.
 
+### 2.7 ID-ALLOCATION — document the `EPE` / `NWP` / `NWB` prefixes
+
+**File:** `docs/ID-ALLOCATION.md`
+
+**Verified gap (surfaced by SPEC-61 reassessment; SPEC-61 §6 routes it here):** `docs/ID-ALLOCATION.md`
+§Per-class registry → §World-scoped hybrid / pipeline artifacts (lines 25–33) documents
+`PA` / `CHAR` / `DA` / `PR` / `BATCH` / `NCP` / `NCB` / `AU` / `RP`, but `EPE`, `NWP`, and `NWB` are
+absent (verified: zero hits each) even though they are live allocator-tracked prefixes. This is the
+same docs-gap class as §2.5's REPOSITORY-MAP omission, on a different doc surface.
+
+Add three entries to that list:
+
+- `EPE-<integer>` — pressure-event cards and their `EPE-*.proposal.md` sidecars (`worlds/<slug>/pressure-events/`)
+- `NWP-<integer>` — world-proposal cards (root-level `world-proposals/`, a pre-world surface)
+- `NWB-<integer>` — world-proposal batch manifests (root-level `world-proposals/batches/`)
+
+`NWP` / `NWB` are root-scoped pre-world artifacts, **not** under `worlds/<slug>/`; note the root-level
+path so they are not mistaken for world-scoped classes. Pure documentation — no allocator or schema
+change (the allocator already supports these prefixes; this records them in the registry).
+
 ## 3. FOUNDATIONS Alignment
 
 | Principle | Stance | Rationale |
@@ -148,6 +168,8 @@ existence, circulation, belief, disputed status, or truth.
   must carry `forbidden_mystery_absence_rationale` (template + Phase 11b updated consistently).
 - REPOSITORY-MAP lists `pressure-events/`, `world-proposals/`, `proposals/`, `audits/` with the EPE
   indexing-asymmetry note.
+- `docs/ID-ALLOCATION.md` §World-scoped hybrid / pipeline artifacts lists `EPE-<integer>`,
+  `NWP-<integer>`, and `NWB-<integer>` (closing the gap SPEC-61 §6 routes here).
 - `diegetic-artifact-generation` SKILL.md no longer equates DA claims with the Contested Canon layer;
   the `canon_status` field and Phase 7 firewall are unchanged.
 - No schema, validator, or world-data changes in this spec (all such work is SPEC-61); a
