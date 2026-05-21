@@ -1,10 +1,10 @@
 # SPEC-62 — FOUNDATIONS & Docs World-System Reconciliation
 
-**Status:** proposed
+**Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** canon-related (FOUNDATIONS amendments + canon-pipeline skill/doc reconciliation; no code-semantics change)
-**Source:** `reports/world-system-consolidation-first-iteration.md` Faults 1/3/4/9 (verified, narrowed) + §7 FOUNDATIONS recommendations — reassessed against `main`
-**Depends on:** none — independent of SPEC-61; may proceed in parallel
+**Source:** `reports/world-system-consolidation-first-iteration.md` Faults 1/3/4/6/9 (verified, narrowed) + §7 FOUNDATIONS recommendations — reassessed against `main`
+**Depends on:** none — independent of SPEC-61, which has **landed** (archived at `archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`); this is the doc-only complement
 **Companion:** `docs/triage/2026-05-21-world-system-consolidation-triage.md`
 
 ## 1. Context
@@ -13,7 +13,7 @@ The world-system pipeline is structurally disciplined (Hook 3 engine-only `_sour
 every mature surface, documented approval semantics), but verification surfaced a small set of genuine
 **documentation/drift** defects and two cheap FOUNDATIONS clarifications that close real boundary
 ambiguities without code or data migration. This spec is the lightweight, authoritative-doc complement
-to SPEC-61's executable coverage. Per user direction during triage, the report's elaborate
+to SPEC-61's executable coverage (which has since landed — `archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`). Per user direction during triage, the report's elaborate
 "World Artifact Maturity Ladder" shared-reference and its mass story-term renames are **replaced** by
 concise FOUNDATIONS paragraphs (§2.1, §2.2) — single source of truth, no per-skill citation churn, no
 schema/data migration.
@@ -43,7 +43,7 @@ reservation already at lines 355–361.
 **File:** `docs/FOUNDATIONS.md`
 
 **Verified context:** `Natural Story Engines` is already a FOUNDATIONS §World Kernel template field
-(line 146) and is legitimate world-generativity language. But `intended_narrative_role`,
+(line 154 after SPEC62FOUANDDOC-001) and is legitimate world-generativity language. But `intended_narrative_role`,
 `desired_arc_type`, `likely_story_scale`, `creates_new_story_engines`, and EPE `story_fuel` are
 story-facing terms used on world-system artifacts with no FOUNDATIONS statement of where world
 generativity ends and story-bundle execution state begins.
@@ -87,11 +87,21 @@ Discovery-driven worlds (an explicit target posture) are crippled by an absolute
   universal law; a world should preserve at least one bounded unknown, but when a central mystery is
   intended for eventual revelation, the world records the policy explicitly rather than forcing a
   permanent lock.
-- In `propose-new-worlds-from-preferences`, change the Phase 11b rule from "every card MUST declare at
-  least one `forbidden` mystery" to: every card MUST declare at least one **bounded** mystery; a
-  `forbidden` mystery is strongly recommended, and when omitted the card MUST populate
-  `forbidden_mystery_absence_rationale` explaining why discovery/eventual-revelation is structurally
-  necessary. Update the template's `mystery_reserve_seeds` block accordingly.
+- In `propose-new-worlds-from-preferences`, change the per-card forbidden-mystery mandate from "every
+  card MUST declare at least one `forbidden` mystery" to: every card MUST declare at least one
+  **bounded** mystery; a `forbidden` mystery is strongly recommended, and when omitted the card MUST
+  populate `forbidden_mystery_absence_rationale` explaining why discovery/eventual-revelation is
+  structurally necessary. **This mandate is restated across multiple sites that must all change
+  consistently** or the skill becomes internally contradictory (e.g. a relaxed Phase 11b while the
+  HARD-GATE gate-list and Final Rule still demand an absolute forbidden mystery): in `SKILL.md` — the
+  HARD-GATE gate-list (≈line 19, "11b per-card forbidden-mystery presence"), the Phase 10
+  materialization rule (≈line 244), the Phase 11b heading + body (≈lines 255–256), the
+  FOUNDATIONS-Alignment Rule-7 row (≈line 343), and the Final Rule (≈line 394); in
+  `templates/proposal-card.md` — the `mystery_reserve_seeds.forbidden` comment (≈line 117, "MANDATORY at
+  least one"), the `forbidden_mystery_presence` block (≈lines 135–137), the body checklist (≈line 297),
+  and the validation checklist (≈line 340). **Preserve unchanged the Phase 11a cross-world Mystery
+  Reserve laundering firewall** — it is the load-bearing Rule-7 safety check (`SKILL.md` ≈line 387),
+  independent of the per-card presence mandate; only Phase 11b (presence) relaxes.
 
 > **Narrowed from report.** The report's 7-value `resolution_intent` enum + `mystery_policy_validator`
 > are **dropped** (YAGNI — no current consumer; the existing `status` + `future_resolution_safety`
@@ -106,11 +116,22 @@ Discovery-driven worlds (an explicit target posture) are crippled by an absolute
 
 **File:** `docs/REPOSITORY-MAP.md`
 
-**Verified gap:** `pressure-events/` has zero mentions in REPOSITORY-MAP; `world-proposals/` and the
-proposal/audit surfaces are under-documented as standard world directories. Add `pressure-events/`,
-`world-proposals/`, `proposals/`, and `audits/` to the world-directory layout, and add a one-line note
-that EPE base cards are **allocator-tracked but intentionally not retrieval-indexed** (file-scanned
-until canonized via sidecar) so the asymmetry is documented rather than read as a bug.
+**Verified gap:** `pressure-events/` and `character-proposals/` have zero mentions in REPOSITORY-MAP's
+`worlds/<slug>/` layout, and root-level `world-proposals/` is undocumented. (`proposals/` and `audits/`
+are **already present** in the world-directory layout at REPOSITORY-MAP lines 44–45 with one-line
+descriptions matching every sibling — they need no addition; the earlier "under-documented" framing was
+incorrect.) Make these edits:
+
+- Add `pressure-events/` (EPE base cards + `EPE-*.proposal.md` sidecars + `batches/`) to the
+  `worlds/<slug>/` layout.
+- Add `character-proposals/` (`NCP-<integer>` cards + `batches/NCB-<integer>` manifests) to the
+  `worlds/<slug>/` layout.
+- Add `world-proposals/` (`NWP-<integer>` cards + `batches/NWB-<integer>` manifests) as a **root-level**
+  entry, sitting beside `archive/` — it is **not** a `worlds/<slug>/` directory (the same root-scoping
+  §2.7 documents for `NWP` / `NWB`).
+- Add a one-line note that EPE base cards are **allocator-tracked but intentionally not
+  retrieval-indexed** (file-scanned until canonized via sidecar) so the asymmetry is documented rather
+  than read as a bug.
 
 ### 2.6 diegetic-artifact-generation — prose precision fix
 
@@ -133,7 +154,7 @@ existence, circulation, belief, disputed status, or truth.
 
 **File:** `docs/ID-ALLOCATION.md`
 
-**Verified gap (surfaced by SPEC-61 reassessment; SPEC-61 §6 routes it here):** `docs/ID-ALLOCATION.md`
+**Verified gap (surfaced by SPEC-61 reassessment; SPEC-61 §6, now archived, routes it here):** `docs/ID-ALLOCATION.md`
 §Per-class registry → §World-scoped hybrid / pipeline artifacts (lines 25–33) documents
 `PA` / `CHAR` / `DA` / `PR` / `BATCH` / `NCP` / `NCB` / `AU` / `RP`, but `EPE`, `NWP`, and `NWB` are
 absent (verified: zero hits each) even though they are live allocator-tracked prefixes. This is the
@@ -156,7 +177,7 @@ change (the allocator already supports these prefixes; this records them in the 
 | §Canon Layers (Contested Canon) | aligns | §2.1/§2.6 sharpen the boundary between accepted Contested Canon and raw DA assertions without changing the layer definition |
 | Rule 7 — Preserve Mystery Deliberately | aligns | §2.4 keeps mystery deliberate/bounded while removing an absolute that exceeds the rule and blocks discovery-driven worlds |
 | §Mystery Reserve resolution-safety semantics (line 95) | aligns | §2.3 documents `passive_depth` to match the validator-enforced coupling |
-| §World Kernel — Natural Story Engines (line 146) | aligns | §2.2 promotes the existing sanctioned term to an explicit generativity-vs-execution boundary |
+| §World Kernel — Natural Story Engines (line 154 after SPEC62FOUANDDOC-001) | aligns | §2.2 promotes the existing sanctioned term to an explicit generativity-vs-execution boundary |
 | §Canon Fact Record Schema — `direct_user_approval` (355–361) | aligns | §2.1 cross-references rather than duplicates the reservation |
 
 ## 4. Acceptance
@@ -166,13 +187,14 @@ change (the allocator already supports these prefixes; this records them in the 
   forbidden-mystery relaxation sentence is present.
 - `propose-new-worlds-from-preferences` no longer hard-requires a forbidden mystery; a card omitting one
   must carry `forbidden_mystery_absence_rationale` (template + Phase 11b updated consistently).
-- REPOSITORY-MAP lists `pressure-events/`, `world-proposals/`, `proposals/`, `audits/` with the EPE
-  indexing-asymmetry note.
+- REPOSITORY-MAP lists `pressure-events/` and `character-proposals/` in the `worlds/<slug>/` layout and
+  root-level `world-proposals/`, with the EPE indexing-asymmetry note (`proposals/` and `audits/` were
+  already present at lines 44–45 and are unchanged).
 - `docs/ID-ALLOCATION.md` §World-scoped hybrid / pipeline artifacts lists `EPE-<integer>`,
-  `NWP-<integer>`, and `NWB-<integer>` (closing the gap SPEC-61 §6 routes here).
+  `NWP-<integer>`, and `NWB-<integer>` (closing the gap SPEC-61 §6, now archived, routes here).
 - `diegetic-artifact-generation` SKILL.md no longer equates DA claims with the Contested Canon layer;
   the `canon_status` field and Phase 7 firewall are unchanged.
-- No schema, validator, or world-data changes in this spec (all such work is SPEC-61); a
+- No schema, validator, or world-data changes in this spec (all such work was SPEC-61, now landed); a
   `git grep` confirms no `_source/` or schema file is touched.
 
 ## 5. Out of Scope
@@ -181,4 +203,28 @@ change (the allocator already supports these prefixes; this records them in the 
 - `resolution_intent` enum + `mystery_policy_validator` — dropped (YAGNI).
 - A separate shared-reference maturity-ladder file every skill cites — replaced by the FOUNDATIONS
   paragraph (§2.1) per user direction.
-- All executable validator/schema work — that is SPEC-61.
+- All executable validator/schema work — that was SPEC-61 (landed; archived).
+
+## Outcome
+
+Completed on 2026-05-21.
+
+What changed:
+
+1. Added FOUNDATIONS §Artifact Authority and Maturity and §World Generativity vs Story-Bundle State; documented `passive_depth`; relaxed forbidden-mystery absolutism to a strong default with bounded-unknown discipline.
+2. Updated `propose-new-worlds-from-preferences` skill/template wording so every proposal card requires at least one bounded mystery and records `forbidden_mystery_absence_rationale` when no forbidden mystery is present.
+3. Updated REPOSITORY-MAP with `pressure-events/`, `character-proposals/`, root-level `world-proposals/`, and the EPE allocator-tracked / non-retrieval-indexed note.
+4. Updated diegetic-artifact-generation prose so DA claims are described as in-world assertions, not Contested Canon.
+5. Updated ID-ALLOCATION with `EPE-<integer>`, root-scoped `NWP-<integer>`, and root-scoped `NWB-<integer>` registry entries.
+
+Deviations:
+
+- None. The spec stayed within the accepted docs/FOUNDATIONS/skill-prose boundary. No schema, validator, allocator, or world-content change was made by SPEC-62.
+
+Verification:
+
+1. `rg -n "Artifact Authority and Maturity|World Generativity vs Story-Bundle State|passive_depth|forbidden mystery is a strong default" docs/FOUNDATIONS.md` — passed.
+2. `rg -n "forbidden_mystery_absence_rationale|bounded mystery|forbidden mystery is strongly recommended|forbidden-mystery" .claude/skills/propose-new-worlds-from-preferences/SKILL.md .claude/skills/propose-new-worlds-from-preferences/templates/proposal-card.md` — passed.
+3. `rg -n "pressure-events|character-proposals|world-proposals|allocator-tracked|retrieval-indexed" docs/REPOSITORY-MAP.md` — passed.
+4. `rg -n "EPE-<integer>|NWP-<integer>|NWB-<integer>" docs/ID-ALLOCATION.md` — passed.
+5. `rg -n "in-world assertions|not canon|contested canon" .claude/skills/diegetic-artifact-generation/SKILL.md` — passed; the remaining hits are the corrected "in-world assertions, not canon" wording.

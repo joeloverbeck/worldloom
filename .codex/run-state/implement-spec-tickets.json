@@ -1,9 +1,9 @@
 {
-  "originating_spec": "archive/specs/SPEC-63-offstage-causal-packet-tier.md",
-  "archived_spec": "archive/specs/SPEC-63-offstage-causal-packet-tier.md",
-  "last_ticket": "archive/tickets/SPEC63OFFCAUPAC-003.md",
+  "originating_spec": "archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md",
+  "archived_spec": "archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md",
+  "last_ticket": "archive/tickets/SPEC62FOUANDDOC-006.md",
   "last_result": "spec_archived",
-  "last_work_commit": "77c333d23041f9f1f5fa4a8f1d29682637c566cb",
+  "last_work_commit": "5f35fdadc899a63603c287e6f62738a308ac5fb2",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -14,6 +14,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated dirty submodule/worktree marker at .claude/worktrees/spec-61-62; owned iteration paths committed",
+  "dirty_state": "clean after final state-only commit succeeds",
   "updated_at": "2026-05-21"
 }

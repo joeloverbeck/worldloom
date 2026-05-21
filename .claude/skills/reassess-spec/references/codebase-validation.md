@@ -2,6 +2,8 @@
 
 Validate every reference from Step 2. For specs with >10 references, consider parallel Explore agents (see Agent Delegation below).
 
+**Parallel grep-batch guard**: when validating references via direct `grep` / `find` / `test` calls batched in a single parallel tool-call turn (rather than via Explore agents), guard each command with `|| true` (or `; true`). A non-zero exit from any one call — `grep` finding no matches, `find` hitting a permission error, `test` on a missing path — cancels every sibling call in the same parallel batch, forcing a full re-run. Zero-match results are expected and valid during validation (a reference that *should* be absent, e.g., a prefix the docs don't yet document), so the non-zero exit is not an error condition worth propagating.
+
 Substep applicability is determined by the Pre-Process classification:
 
 | Substep | (a) new | (b) extension | (c) refactor | (d) retroactive |

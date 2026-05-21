@@ -27,10 +27,13 @@ Never reuse or overwrite an ID. If allocation would collide (concurrent plan), t
 - `DA-<integer>` — diegetic artifacts (same pattern as characters)
 - `PR-<integer>` — proposal cards (`worlds/<slug>/proposals/`)
 - `BATCH-<integer>` — proposal batch manifests (`worlds/<slug>/proposals/batches/`)
+- `EPE-<integer>` — pressure-event cards and their `EPE-*.proposal.md` sidecars (`worlds/<slug>/pressure-events/`)
 - `NCP-<integer>` — character proposal cards (`worlds/<slug>/character-proposals/`)
 - `NCB-<integer>` — character proposal batch manifests (`worlds/<slug>/character-proposals/batches/`)
 - `AU-<integer>` — audit reports (`worlds/<slug>/audits/`)
 - `RP-<integer>` — retcon-proposal cards (emitted by `continuity-audit` under its audit sub-directory)
+- `NWP-<integer>` — world-proposal cards (root-scoped pre-world artifacts under root-level `world-proposals/`, not under `worlds/<slug>/`)
+- `NWB-<integer>` — world-proposal batch manifests (root-scoped pre-world artifacts under root-level `world-proposals/batches/`, not under `worlds/<slug>/`)
 
 ### Story-bundle-scoped (allocate with `story_slug`)
 
