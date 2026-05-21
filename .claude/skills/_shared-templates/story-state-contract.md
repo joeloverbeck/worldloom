@@ -461,7 +461,7 @@ Each §16a packet includes:
 ## 16a. STCHAR-derived character authority packets
 
 - STENT-<integer> / STCHAR-<integer> — <display name>.
-  - Required because: viewpoint | speaker | major_actor | direct_target | emotionally_salient | behavior_shapes_page | voice_shapes_page.
+  - Required because: viewpoint | speaker | major_actor | direct_target | emotionally_salient | behavior_shapes_page | voice_shapes_page | offstage_causal.
   - Hashes: profile_hash=<hash>; voice_block_hash=<hash>; page_packet_hash=<hash>.
   - Story-facing identity for this page:
   - Voice/dialogue authority: <copy or project the STCHAR `Page-Plan Voice Block` for this page>.
@@ -474,6 +474,24 @@ Each §16a packet includes:
   - Prose must not imply:
   - Anti-generic warnings:
 ```
+
+For an active offstage character whose offstage activity causally bears on the page, §16a may use a reduced `offstage_causal` packet:
+
+```markdown
+- STENT-<integer> / STCHAR-<integer> — <display name>.
+  - Required because: offstage_causal.
+  - Hashes: profile_hash=<hash>; voice_block_hash=<hash>; page_packet_hash=<hash>.
+  - Story-facing identity for this page:
+  - Relevant appraisal rules:
+  - Relevant pressure behavior:
+  - Offstage causal relevance:
+  - Prose must not imply:
+  - Anti-generic warnings:
+```
+
+The reduced packet carries the same three STCHAR integrity hashes as a full packet, using the stored STCHAR frontmatter hashes for `profile_hash`, `voice_block_hash`, and `page_packet_hash`. It carries only the offstage operational authority needed for this page: relevant appraisal rules, relevant pressure behavior when applicable, and the offstage causal relevance that explains what the character is doing off page that bears on the page. It omits the `Voice/dialogue authority:` block and the on-page rendering lines for perception, embodiment, agency, and dialogue cues because the character is not rendered on the page.
+
+Emit/omit boundary: an active offstage character (`entity_status.location: offstage`) whose offstage activity causally bears on the page should carry an `offstage_causal` packet; an offstage character with no causal bearing on this page may be omitted as background-only. The omission must still not ask the prose renderer to infer persona from an id. Whether offstage activity causally bears on the page is authoring judgment, not validator-graded.
 
 The three hashes are load-bearing: prose-attach uses them to validate the rendered receipt against the active STCHAR profile, its voice block, and this page-specific packet. §16a is the renderer's character voice and behavior authority; it does not replace §5 entity status, §9 relationship/belief context, §9b active plans, §9c emotional transition, §16 cast material reality projection, or §17 style/register notes. Page plans must not cite world `CHAR-*` as operational authority for characterization after STCHAR exists; world `CHAR` may appear only as non-operational provenance on the STCHAR itself or in explicit authoring/promotion/adjudication flows.
 

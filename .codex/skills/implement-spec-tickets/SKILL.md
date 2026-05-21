@@ -101,6 +101,7 @@ If compaction, interruption, or resume recovery happens while a proof command or
    - ticket/spec family state for the active run
    - existing user work that the run must not absorb silently
    - unrelated noise
+   If `git status --short` reports a submodule/gitlink/worktree marker such as lowercase `m <path>`, inspect it separately with a path-scoped command such as `git diff -- <path>` or `git status --short <path>`. Classify it as owned, unrelated, or ambiguous submodule/worktree dirt; leave it unstaged unless explicitly owned or approved, and record the classification in `dirty_state`.
 4. If the initial snapshot shows staged/index entries, inspect `git diff --cached --name-status` and classify them separately from unstaged dirt. Pre-existing staged unrelated work must not be absorbed by a harness commit. Either leave it staged and avoid committing until it is explicitly approved for inclusion, or unstage it before the harness commit while leaving the working-tree content intact. Record the choice in the dirty-state classification.
 5. If `.codex/run-state/implement-spec-tickets.json` already exists, read and validate it even on a normal first invocation. If it conflicts with live repo state, trust the live repo and refresh the state file before invoking child skills.
 6. If unrelated dirty paths exist and the invocation expects this harness to stage and commit all uncommitted files, stop and ask whether those paths should be included in the harness commits. Do not silently commit unrelated user work.
@@ -275,7 +276,7 @@ After each iteration work commit, update `.codex/run-state/implement-spec-ticket
 - dirty-state classification
 - `updated_at`
 
-Normalize `dirty_state` after committing owned paths: refresh `git status --short` and record only remaining uncommitted paths. When package/tool commands ran, or prior state already names ignored artifacts, also refresh package-scoped ignored-aware status such as `git status --short --ignored <affected-package-dirs>` before writing `dirty_state`. Classify remaining paths as `unrelated dirty`, `expected ignored artifacts`, or `blocked owned leftovers`. Do not leave stale phrases such as `owned ticket-family edits` after those owned edits have already been committed. If blocked owned leftovers remain, set `next_target: "blocked"` and describe the blocker.
+Normalize `dirty_state` after committing owned paths: refresh `git status --short` and record only remaining uncommitted paths. When package/tool commands ran, or prior state already names ignored artifacts, also refresh package-scoped ignored-aware status such as `git status --short --ignored <affected-package-dirs>` before writing `dirty_state`. Classify remaining paths as `unrelated dirty`, `expected ignored artifacts`, or `blocked owned leftovers`. If remaining dirt is only a submodule/gitlink/worktree marker, name it explicitly as unrelated or owned submodule/worktree dirt rather than collapsing it into ordinary file edits. Do not leave stale phrases such as `owned ticket-family edits` after those owned edits have already been committed. If blocked owned leftovers remain, set `next_target: "blocked"` and describe the blocker.
 
 If the state file itself changes after the work commit, either:
 
