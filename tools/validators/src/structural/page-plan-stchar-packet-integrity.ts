@@ -25,6 +25,7 @@ import {
 const VALIDATOR = "page_plan_stchar_packet_integrity";
 const PLAN_PATH_PATTERN = /^stories\/([^/]+)\/pages-prose-plans\/(PG-(0|[1-9][0-9]*))\.md$/;
 const HASH_PATTERN = /profile_hash=(sha256:[0-9a-f]{64});\s*voice_block_hash=(sha256:[0-9a-f]{64});\s*page_packet_hash=(sha256:[0-9a-f]{64})/;
+const OFFSTAGE_REQUIRED_BECAUSE = "offstage_causal";
 const SPEAKER_VOICE_REQUIRED = new Set(["speaker", "viewpoint"]);
 
 interface PlanTarget {
@@ -84,7 +85,11 @@ export const pagePlanStcharPacketIntegrity: Validator = {
             continue;
           }
           const packet = byStchar.get(stcharId);
+          const location = entityLocation(page, stentId);
           if (!packet) {
+            if (location === "offstage") {
+              continue;
+            }
             verdicts.push(planFail(
               page,
               plan.path,
@@ -95,7 +100,7 @@ export const pagePlanStcharPacketIntegrity: Validator = {
             ));
             continue;
           }
-          verdicts.push(...packetVerdicts(page, plan.path, packet, activeStchars, maps.byId.get(packet.stcharId)));
+          verdicts.push(...packetVerdicts(page, plan.path, packet, location, activeStchars, maps.byId.get(packet.stcharId)));
         }
 
         for (const packet of packets) {
@@ -121,12 +126,24 @@ function packetVerdicts(
   page: IndexedRecord,
   planPath: string,
   packet: Packet,
+  stentLocation: string | undefined,
   activeStchars: Set<string>,
   stchar: IndexedRecord | undefined
 ): Verdict[] {
   const verdicts: Verdict[] = [];
   if (!activeStchars.has(packet.stcharId)) {
     return verdicts;
+  }
+
+  if (packet.requiredBecause === OFFSTAGE_REQUIRED_BECAUSE && stentLocation !== "offstage") {
+    verdicts.push(planFail(
+      page,
+      planPath,
+      "page_plan_stchar_packet_integrity.offstage_packet_for_present_character",
+      `${planPath} 16a offstage_causal packet for ${packet.stentId} / ${packet.stcharId} is not allowed when ${packet.stentId}.location is ${stentLocation ?? "<missing>"}.`,
+      { page_id: pageId(page), stent_id: packet.stentId, stchar_id: packet.stcharId, location: stentLocation ?? null },
+      `Use a present-character required_because value for ${packet.stentId} / ${packet.stcharId}, or set ${packet.stentId}.location to offstage when the reduced offstage tier is intended.`
+    ));
   }
 
   const parsed = asPlainRecord(stchar?.parsed);
@@ -160,6 +177,13 @@ function packetVerdicts(
   }
 
   return verdicts;
+}
+
+function entityLocation(page: IndexedRecord, stentId: string): string | undefined {
+  const snapshot = asPlainRecord(asPlainRecord(page.parsed).state_snapshot);
+  const statuses = asPlainRecord(snapshot.entity_status);
+  const status = asPlainRecord(statuses[stentId]);
+  return stringValue(status.location);
 }
 
 function parsePackets(content: string): Packet[] {

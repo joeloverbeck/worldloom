@@ -95,4 +95,4 @@ The emit/omit boundary is now explicit: offstage causal relevance is authoring j
 
 ## Deviations
 
-None. The change stayed within the single shared contract file. Validator enforcement remains owned by `tickets/SPEC63OFFCAUPAC-003.md`, and authoring-skill emission guidance is completed in `archive/tickets/SPEC63OFFCAUPAC-002.md`.
+None. The change stayed within the single shared contract file. Validator enforcement is completed in `archive/tickets/SPEC63OFFCAUPAC-003.md`, and authoring-skill emission guidance is completed in `archive/tickets/SPEC63OFFCAUPAC-002.md`.

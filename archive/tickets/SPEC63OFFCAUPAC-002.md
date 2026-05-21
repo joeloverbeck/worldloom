@@ -91,4 +91,4 @@ Turn-cycle phase-7 page planning now carries the same distinction for continuati
 
 ## Deviations
 
-None. The change stayed prose-only in the two authoring surfaces; validator enforcement remains owned by `tickets/SPEC63OFFCAUPAC-003.md`.
+None. The change stayed prose-only in the two authoring surfaces; validator enforcement is completed in `archive/tickets/SPEC63OFFCAUPAC-003.md`.

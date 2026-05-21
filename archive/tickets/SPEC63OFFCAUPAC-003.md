@@ -1,6 +1,6 @@
 # SPEC63OFFCAUPAC-003: Presence-aware page-plan validator + offstage fixtures
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` (presence-awareness logic + new verdict code) plus test fixtures in `tools/validators/tests/structural/`. No registry change (validator already registered); no prose-receipt validator code change; no schema change.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-`page_plan_stchar_packet_integrity` currently demands a full §16a packet for every active non-background STENT bound to an active STCHAR, with no presence-awareness — so an offstage-but-causal character forces a full packet or removal from `active_records`. With the offstage tier defined (001), the validator must (a) relax the missing-packet requirement for offstage characters, and (b) enforce the reduced packet's shape when it is present, while never auto-grading whether causal relevance warranted a packet.
+Before this ticket, `page_plan_stchar_packet_integrity` demanded a full §16a packet for every active non-background STENT bound to an active STCHAR, with no presence-awareness — so an offstage-but-causal character forced a full packet or removal from `active_records`. With the offstage tier defined (001), this ticket relaxed the missing-packet requirement for offstage characters and enforced the reduced packet's shape when it is present, while never auto-grading whether causal relevance warranted a packet.
 
 ## Assumption Reassessment (2026-05-21)
 
@@ -31,11 +31,11 @@
 4. `prose_receipt_stchar_integrity` accepts an offstage `stchar_authority` entry (free-string `required_because` + `voice_fidelity: not_applicable`) against the UNCHANGED schema -> validator unit test (`prose-receipt-stchar-integrity.test.ts`) — verifies §2.4 + §2.5.
 5. Judgment-vs-deterministic boundary preserved (no auto-grading of causal relevance) -> FOUNDATIONS alignment check + manual review of R1–R5.
 
-## What to Change
+## Landed Changes
 
 ### 1. Presence-awareness in `page-plan-stchar-packet-integrity.ts`
 
-Read `entity_status[<stent>].location` for each qualifying STENT and apply:
+The validator reads `entity_status[<stent>].location` for each qualifying STENT and applies:
 - **R1 (relax):** an offstage STENT (`location == offstage`) with no packet does not fail `missing_packet`; present STENTs unchanged.
 - **R2 (present-misuse):** new verdict `offstage_packet_for_present_character` — an `offstage_causal` packet whose STENT location ≠ offstage fails.
 - **R3 (voice-block exemption):** `offstage_causal` is naturally not a member of `SPEAKER_VOICE_REQUIRED`, so `missing_voice_block` does not apply (no special-casing needed).
@@ -44,11 +44,11 @@ Read `entity_status[<stent>].location` for each qualifying STENT and apply:
 
 ### 2. Page-plan validator fixtures
 
-Add to `page-plan-stchar-packet-integrity.test.ts`: offstage + no packet (pass, R1); offstage + conformant `offstage_causal` packet (pass, R1+R3+R4); `offstage_causal` packet on a present STENT (fail `offstage_packet_for_present_character`, R2); `offstage_causal` packet on a non-`offstage` location (`unknown`/`concealed`) (fail, R2+R5 default); `offstage_causal` + hash mismatch (fail `hash_mismatch`, R4); present + no packet (fail `missing_packet`, regression guard).
+`page-plan-stchar-packet-integrity.test.ts` covers: offstage + no packet (pass, R1); offstage + conformant `offstage_causal` packet (pass, R1+R3+R4); `offstage_causal` packet on a present STENT (fail `offstage_packet_for_present_character`, R2); `offstage_causal` packet on a non-`offstage` location (`unknown`/`concealed`) (fail, R2+R5 default); `offstage_causal` + hash mismatch (fail `hash_mismatch`, R4); present + no packet (fail `missing_packet`, regression guard).
 
 ### 3. Prose-receipt fixture (D2.4 — no validator code change)
 
-Add to `prose-receipt-stchar-integrity.test.ts`: a `stchar_authority[]` entry with `required_because: offstage_causal`, matching hashes, and a `profile_fidelity` entry present with `voice_fidelity: not_applicable` — passes against the unchanged validator + schema (verifies §2.4 + §2.5).
+`prose-receipt-stchar-integrity.test.ts` covers a `stchar_authority[]` entry with `required_because: offstage_causal`, matching hashes, and a `profile_fidelity` entry present with `voice_fidelity: not_applicable` — passing against the unchanged validator + schema (verifies §2.4 + §2.5).
 
 ## Files to Touch
 
@@ -88,5 +88,22 @@ Add to `prose-receipt-stchar-integrity.test.ts`: a `stchar_authority[]` entry wi
 ### Commands
 
 1. `cd tools/validators && npm run build && node --test dist/tests/structural/page-plan-stchar-packet-integrity.test.js`
-2. `npm test --prefix tools/validators`
-3. The validators package boundary is the correct verification scope — the change is contained in one structural validator plus its sibling test files; no cross-package surface is touched.
+2. `cd tools/validators && npm run build && node --test dist/tests/structural/prose-receipt-stchar-integrity.test.js`
+3. `npm test --prefix tools/validators`
+4. The validators package boundary is the correct verification scope — the change is contained in one structural validator plus its sibling test files; no cross-package surface is touched.
+
+## Outcome
+
+Completed: 2026-05-21
+
+Implemented presence-aware `page_plan_stchar_packet_integrity` behavior for the SPEC-63 offstage-causal §16a packet tier. The validator now reads `PG.state_snapshot.entity_status[STENT].location`, relaxes `missing_packet` only when the active STENT is explicitly `offstage`, and emits `page_plan_stchar_packet_integrity.offstage_packet_for_present_character` when an `offstage_causal` packet is used for a present, `unknown`, `concealed`, or missing-location character. Hash and inactive-STCHAR checks still apply to all packets, including offstage packets, and `offstage_causal` remains outside the speaker/viewpoint voice-block requirement.
+
+Added page-plan fixtures for R1-R5: offstage omitted packet pass, offstage `offstage_causal` no-voice pass, present misuse fail, `unknown`/`concealed` fail-closed misuse, offstage hash mismatch fail, and present missing packet regression coverage. Added a prose-receipt fixture proving unchanged receipt-validator/schema behavior accepts `required_because: offstage_causal` with `voice_fidelity: not_applicable`.
+
+Deviations: none. No prose-receipt validator code, schema, or registry changes were needed.
+
+## Verification Result
+
+1. `cd tools/validators && npm run build && node --test dist/tests/structural/page-plan-stchar-packet-integrity.test.js` — PASS.
+2. `cd tools/validators && npm run build && node --test dist/tests/structural/prose-receipt-stchar-integrity.test.js` — PASS.
+3. `npm test --prefix tools/validators` — PASS (810/810 tests).

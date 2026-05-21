@@ -21,6 +21,21 @@ test("prose_receipt_stchar_integrity accepts matching authority and judgment-ass
   assert.deepEqual(verdicts, []);
 });
 
+test("prose_receipt_stchar_integrity accepts offstage_causal authority with not_applicable voice fidelity", async () => {
+  const verdicts = await proseReceiptStcharIntegrity.run(
+    input(
+      plan({ requiredBecause: "offstage_causal", voiceLine: "" }),
+      receipt({
+        authority: { required_because: "offstage_causal" },
+        fidelity: { voice_fidelity: "not_applicable" }
+      })
+    ),
+    context(baseRecords())
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("prose_receipt_stchar_integrity rejects missing stchar_authority entries", async () => {
   const verdicts = await proseReceiptStcharIntegrity.run(
     input(plan(), receipt({ stcharAuthority: [] })),
@@ -104,16 +119,16 @@ function storyRecord(nodeType: string, id: string, sourceDir: string, parsed: Re
   };
 }
 
-function plan(): string {
+function plan(options: { requiredBecause?: string; voiceLine?: string } = {}): string {
   return [
     "# Page Plan",
     "",
     "## 16a. STCHAR-derived character authority packets",
     "",
     "- STENT-1 / STCHAR-1 - Test Character.",
-    "  - Required because: speaker.",
+    `  - Required because: ${options.requiredBecause ?? "speaker"}.`,
     `  - Hashes: profile_hash=${HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${HASH_C}.`,
-    "  - Voice/dialogue authority: clipped STCHAR voice block.",
+    options.voiceLine ?? "  - Voice/dialogue authority: clipped STCHAR voice block.",
     "  - Relevant appraisal rules: protect the secret.",
     "",
     "## 17. Style/register notes",
