@@ -205,6 +205,7 @@ function detectStaleIndex(db: OpContext["db"], worldRoot: string, worldSlug: str
             file_path LIKE 'characters/%.md'
             OR file_path LIKE 'diegetic-artifacts/%.md'
             OR file_path LIKE 'adjudications/%.md'
+            OR file_path LIKE 'stories/%/story-characters/%.md'
           )
         ORDER BY file_path
       `

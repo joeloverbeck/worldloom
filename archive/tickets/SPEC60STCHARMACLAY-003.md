@@ -1,6 +1,6 @@
 # SPEC60STCHARMACLAY-003: Patch-engine stale-index covers the STCHAR hybrid path
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/patch-engine` `detectStaleIndex` pre-apply guard; adds a `stories/%/story-characters/%.md` watch clause. No impact on world-level hybrid path coverage (additive).
@@ -8,11 +8,11 @@
 
 ## Problem
 
-`detectStaleIndex` (`tools/patch-engine/src/apply.ts:197`) detects out-of-band edits to hybrid markdown files before a patch applies, but its `file_versions` query (lines 205-207) watches only world-level hybrids — `characters/%.md`, `diegetic-artifacts/%.md`, `adjudications/%.md`. It does not watch `stories/<story_slug>/story-characters/STCHAR-*.md`. An out-of-band edit to a STCHAR hybrid file therefore is not caught as a stale index, so a patch built on a stale index could silently overwrite a hand-edited STCHAR profile — even though the engine already has staging support for the STCHAR hybrid path.
+At intake, `detectStaleIndex` (`tools/patch-engine/src/apply.ts`) detected out-of-band edits to hybrid markdown files before a patch applied, but its `file_versions` query watched only world-level hybrids — `characters/%.md`, `diegetic-artifacts/%.md`, `adjudications/%.md`. It did not watch `stories/<story_slug>/story-characters/STCHAR-*.md`. An out-of-band edit to a STCHAR hybrid file therefore was not caught as a stale index, so a patch built on a stale index could silently overwrite a hand-edited STCHAR profile — even though the engine already had staging support for the STCHAR hybrid path.
 
 ## Assumption Reassessment (2026-05-21)
 
-1. `detectStaleIndex` is at `tools/patch-engine/src/apply.ts:197`; the `file_versions` `WHERE` clause (lines 205-207) lists `characters/%.md`, `diegetic-artifacts/%.md`, `adjudications/%.md` and no `stories/%` clause (confirmed). The function compares on-disk content hash against the indexed hash and pushes divergent/missing files into `divergentFiles`.
+1. At intake, `detectStaleIndex` was at `tools/patch-engine/src/apply.ts`; the `file_versions` `WHERE` clause listed `characters/%.md`, `diegetic-artifacts/%.md`, `adjudications/%.md` and no `stories/%` clause (confirmed). The function compared on-disk content hash against the indexed hash and pushed divergent/missing files into `divergentFiles`. This ticket added `file_path LIKE 'stories/%/story-characters/%.md'` to that same query.
 2. STCHAR hybrid files live at `worlds/<slug>/stories/<story_slug>/story-characters/STCHAR-*.md` (per FOUNDATIONS §Story Bundles §6 and the `append_story_character_authority_record` / `supersede_story_character_authority_record` ops). The `file_versions` `file_path` column stores world-relative paths (e.g., `characters/CHAR-1.md`), so the STCHAR clause is `file_path LIKE 'stories/%/story-characters/%.md'`, matching the existing world-hybrid LIKE-clause style.
 3. **Cross-package boundary under audit**: this change is internal to `tools/patch-engine/src/apply.ts` (the SQL query string). No new dependency, no `world-index` parser reach-in; the `file_versions` table is patch-engine's own index read. The hash-comparison logic below the query is class-agnostic and needs no change — only the row-selection clause widens.
 4. **Rule 6 (No Silent Retcons)**: the stale-index guard is the engine's defense against a patch silently overwriting an out-of-band edit. Extending it to the STCHAR hybrid path preserves the append-only / no-silent-overwrite discipline for story-local character authority exactly as it already holds for world-level `characters/`. The change strengthens (never weakens) the guard.
@@ -29,11 +29,15 @@
 2. World-level hybrid path coverage (`characters/`, `diegetic-artifacts/`, `adjudications/`) is unchanged → existing `index-stale-preapply` test still passes.
 3. The clause matches the stored world-relative `file_path` form → codebase grep-proof of the LIKE pattern against `file_versions` path conventions.
 
-## What to Change
+## Landed Changes
 
-### 1. Widen the `detectStaleIndex` watch set
+### 1. Widened the `detectStaleIndex` watch set
 
-In `tools/patch-engine/src/apply.ts`, add `OR file_path LIKE 'stories/%/story-characters/%.md'` to the `WHERE` clause of the `file_versions` query in `detectStaleIndex` (after the `adjudications/%.md` clause at line 207). No other change.
+In `tools/patch-engine/src/apply.ts`, added `OR file_path LIKE 'stories/%/story-characters/%.md'` to the `WHERE` clause of the `file_versions` query in `detectStaleIndex`. No other engine behavior changed.
+
+### 2. Proved the STCHAR stale-index path
+
+In `tools/patch-engine/tests/receipt/index-stale-preapply.test.ts`, added a receipt test that seeds `file_versions` with `stories/ember-arc/story-characters/STCHAR-1.md`, edits the on-disk file, and asserts `submitPatchPlan` returns `index_stale` before invoking pre-apply validators or staging writes.
 
 ## Files to Touch
 
@@ -52,7 +56,7 @@ In `tools/patch-engine/src/apply.ts`, add `OR file_path LIKE 'stories/%/story-ch
 
 1. An edited `stories/<slug>/story-characters/STCHAR-*.md` whose hash differs from the indexed version triggers the stale-index guard (returns `EngineError`).
 2. Existing world-level hybrid stale-index detection (`characters/`, `diegetic-artifacts/`, `adjudications/`) is unchanged — `index-stale-preapply.test.ts` passes.
-3. `npm run build && npm test --prefix tools/patch-engine`.
+3. From `tools/patch-engine`, `npm test` passes.
 
 ### Invariants
 
@@ -67,5 +71,25 @@ In `tools/patch-engine/src/apply.ts`, add `OR file_path LIKE 'stories/%/story-ch
 
 ### Commands
 
-1. `npm run build --prefix tools/patch-engine && npm test --prefix tools/patch-engine`
-2. `grep -n "story-characters" tools/patch-engine/src/apply.ts` — confirm the STCHAR LIKE clause is present in `detectStaleIndex`.
+1. From `tools/patch-engine`: `npm run build`
+2. From `tools/patch-engine`: `node --test dist/tests/receipt/index-stale-preapply.test.js`
+3. From `tools/patch-engine`: `npm test`
+4. `grep -n "story-characters" tools/patch-engine/src/apply.ts` — confirm the STCHAR LIKE clause is present in `detectStaleIndex`.
+
+## Outcome
+
+Completed: 2026-05-21
+
+`detectStaleIndex` now includes STCHAR hybrid markdown paths stored in `file_versions` as `stories/%/story-characters/%.md`. The existing hash-comparison loop remains class-agnostic; the change only widens the guarded row set. A new receipt test proves that an edited story-character authority markdown file produces an `index_stale` `EngineError`, skips pre-apply validators, and leaves the target section file unchanged.
+
+## Verification Result
+
+1. Baseline before edits: from `tools/patch-engine`, `npm test` passed: 91 tests passed.
+2. After edits: from `tools/patch-engine`, `npm run build` passed.
+3. After edits: from `tools/patch-engine`, `node --test dist/tests/receipt/index-stale-preapply.test.js` passed: 4 tests passed, including the new STCHAR stale-index case.
+4. After edits: from `tools/patch-engine`, `npm test` passed: 92 tests passed.
+5. `grep -n "story-characters" tools/patch-engine/src/apply.ts` returned the STCHAR LIKE clause in `detectStaleIndex`.
+
+## Deviations
+
+None.
