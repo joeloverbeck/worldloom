@@ -76,6 +76,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "state_delta_class_integrity",
   "state_snapshot_integrity",
   "stchar_active_for_bound_stent",
+  "stchar_body_integrity",
   "stchar_bound_stent_reciprocity",
   "stchar_resolves",
   "stchar_supersession_integrity",
