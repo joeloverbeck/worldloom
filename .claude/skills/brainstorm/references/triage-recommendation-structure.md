@@ -92,6 +92,8 @@ Close the triage recommendation with:
 1. **Deliverable-shape recommendation** — one spec / N tickets / mixed batch / etc., per SKILL.md Step 5's deliverable classification rule.
 2. **Named assumptions** — any remaining gaps surfaced as named assumptions (per SKILL.md §The Protocol's worked-example format `(N) X — assuming Y`).
 
+**Deliverable assignment for multi-deliverable triages**: when the deliverable-shape recommendation produces ≥2 deliverables (≥2 specs or ≥3 tickets, per SKILL.md Step 5 / `deliverable-classification.md` §Triage producing ≥2 specs or ≥3 tickets), make the finding→deliverable mapping explicit in the in-chat recommendation rather than leaving the user to infer it — the in-chat recommendation is the artifact the user reviews to exercise (or confirm the pre-authorized) HARD-GATE, so which accepted finding lands in which deliverable is load-bearing at approval time. Use either (a) inline per-item annotation — append the target deliverable to each `accept` / `accept-with-modification` item (e.g., `R3 — <summary> → SPEC-58`), keeping verdict-bucket grouping as the primary axis; or (b) a `deliverable → findings` map placed beside the §Deliverable-shape recommendation (e.g., `SPEC-58: R1, R2, R4; SPEC-59: R5, R7`). This mirrors the item→path mapping `deliverable-classification.md` §Triage producing ≥2 specs or ≥3 tickets already requires for the durable companion triage file, keeping the live recommendation and the persisted file consistent. Single-deliverable triages omit this — no mapping is needed.
+
 ## Close-out decision tree — `AskUserQuestion` vs named-assumptions
 
 | Remaining-gap shape | Mode / pre-authorization state | Action |
@@ -120,7 +122,7 @@ Two operators triaging the same input arrive at comparable shape regardless of j
 
 ### Accept
 
-- **R<N>** — <item summary>. _Rationale_: <FOUNDATIONS / codebase grounds>.
+- **R<N>** — <item summary>[ → <target deliverable, when the triage produces ≥2 deliverables — per §Closing structure>]. _Rationale_: <FOUNDATIONS / codebase grounds>.
 - ...
 
 ### Confirms-existing-position
@@ -150,6 +152,7 @@ Two operators triaging the same input arrive at comparable shape regardless of j
 ## Deliverable-shape recommendation
 
 <one spec / N tickets / mixed batch — per SKILL.md Step 5's deliverable classification rule>
+[For ≥2 deliverables, make the finding→deliverable mapping explicit per §Closing structure — inline `→ <deliverable>` annotations in the verdict buckets above, or a `deliverable → findings` map here.]
 
 ## Named assumptions
 
