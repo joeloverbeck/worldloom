@@ -65,7 +65,7 @@ STCHAR is the load-bearing story-local character authority record — persona, v
 
 ## Out of Scope
 
-- The hash-recompute check (recomputing `profile_hash`/`voice_block_hash`/`page_packet_hash` from the body and comparing) — that is contingent and lands in SPEC66STCHARBODINT-002.
+- The hash-recompute check (recomputing `profile_hash`/`voice_block_hash`/`page_packet_hash` from the body and comparing) — that is contingent and lands in `archive/tickets/SPEC66STCHARBODINT-002.md`.
 - Grading whether section *content* is faithful to the source character (voice/appraisal fidelity) — judgment-assisted, housed in prose-attach `profile_fidelity[]` and health-audit advisories.
 - Exposing STCHAR section projections in `get_record_schema` (report §17 Nice-to-have #12) — deferred, no consumer.
 - Expanding `appliesToStcharStoryState`'s applicability (report §17 Critical #4) — the validator reuses the gate as-is.
@@ -102,4 +102,4 @@ STCHAR is the load-bearing story-local character authority record — persona, v
 
 Implemented `stchar_body_integrity` as a fail-mode structural validator registered with the STCHAR validator family. It validates all 13 required STCHAR H2 sections exactly once, rejects empty required sections and empty bodies, and defensively checks `profile_hash`, `voice_block_hash`, and `page_packet_hash` shape. The 13-section producer contract is cross-referenced from `.claude/skills/story-character-profile/SKILL.md`.
 
-The implementation also made the validators read surfaces STCHAR-hybrid aware for pre-apply and CLI validation so `append_story_character_authority_record` can be validated before commit. Hash recomputation remains out of scope for SPEC66STCHARBODINT-002.
+The implementation also made the validators read surfaces STCHAR-hybrid aware for pre-apply and CLI validation so `append_story_character_authority_record` can be validated before commit. Hash recomputation remains out of scope for `archive/tickets/SPEC66STCHARBODINT-002.md`.

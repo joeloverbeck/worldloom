@@ -1,6 +1,6 @@
 # SPEC66STCHARBODINT-002: Contingent hash-recompute check (profile_hash / voice_block_hash)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — extends the `stchar_body_integrity` validator (`tools/validators/src/structural/stchar-body-integrity.ts`) with a recompute-and-compare check; may add a shared canonicalization util under `tools/validators/src/structural/` consumed by the validator. No impact on existing validators.
@@ -12,11 +12,12 @@ The audit's strongest STCHAR-integrity claim ("frontmatter hashes match canonica
 
 ## Assumption Reassessment (2026-05-22)
 
-1. **Codebase**: the hash canonicalization is documented at `story-character-profile/SKILL.md` Phase 5 (lines 303-311): `profile_hash` = SHA-256 of the complete body markdown; `voice_block_hash` = SHA-256 of `## Page-Plan Voice Block`; `page_packet_hash` = SHA-256 of the *projected page-plan packet fields* the profile authorizes for section 16a. A `tools/` grep finds **no shared hashing util** — Phase 5 line 311 instructs the generator to "use a deterministic byte-for-byte SHA-256 over UTF-8 text and record the exact source slices in `## Validation / Audit Anchors`," so the exact byte boundaries are recorded per-record, not pinned in reusable code. `page_packet_hash` hashes a field projection, not a raw body slice, so it is **not** recomputable from the STCHAR body alone.
+1. **Codebase**: the hash canonicalization is documented at `story-character-profile/SKILL.md` Phase 5 (lines 303-312): `profile_hash` = SHA-256 of the complete body markdown; `voice_block_hash` = SHA-256 of `## Page-Plan Voice Block`; `page_packet_hash` = SHA-256 of the *projected page-plan packet fields* the profile authorizes for section 16a. A `tools/` grep finds **no shared profile-hashing util** — Phase 5 instructs the generator to use a deterministic byte-for-byte SHA-256 over UTF-8 text and record the exact source slices in `## Validation / Audit Anchors`, so the exact byte boundaries are recorded per-record, not pinned in reusable code. `page_packet_hash` hashes a field projection, not a raw body slice, so it is **not** recomputable from the STCHAR body alone.
 2. **Spec**: §2.2 frames the work as an ordered implementer task — (1) the canonicalization is at Phase 5 (no shared util exists); (2) decide whether a deterministic, reusable canonicalization can be extracted into a shared util consumed by BOTH the producer's hashing step and this validator, without changing the producer's output; (3) if yes, add recompute-and-compare for `profile_hash`/`voice_block_hash` + a stale-hash negative fixture; if not, record the gap in closeout.
 3. **Cross-skill boundary**: the recompute correctness depends on the producer (`story-character-profile` Phase 5) and this validator sharing the *exact same* canonicalization. The shared-util extraction is that boundary — if the validator's canonicalization diverges from the producer's by even a trailing newline or heading-line inclusion, every real record emits a false mismatch. The producer is an LLM-instruction skill (no existing code util to refactor), so "without changing the producer's output" means the extracted util must reproduce the byte boundaries Phase 5's instructions already produce.
 4. **FOUNDATIONS**: Rule 1 (No Floating Facts) — the recompute check, if shipped, declares its scope (`profile_hash`/`voice_block_hash` only), its limit (`page_packet_hash` excluded — field projection), and its failure consequence (`severity_mode: "fail"` on a stale hash). The contingent posture itself is Rule-1-aligned: a check that cannot be grounded in a pinned canonicalization is not shipped rather than shipped with floating (guessed) semantics.
 5. **Canon Safety surface**: this ticket modifies the `stchar_body_integrity` structural validator (created by SPEC66STCHARBODINT-001) — a story-scope validator firing at engine pre-apply. The recompute check resolves no Mystery Reserve entry and mediates no world-canon reads/writes (FOUNDATIONS §Rule 7 preserved; §3.9 story-scope-validator carve-out applies).
+6. **Closeout decision**: held-back branch taken. `profile_hash` is machine-recomputable only if the submitted body byte string is known to be exactly the producer's hashed byte string; `voice_block_hash` is not safely pinnable because Phase 5 does not specify whether the heading line, following blank lines, trailing newline, or next-heading delimiter are included in the recorded slice; and `page_packet_hash` is explicitly not a body-slice hash. Shipping a guessed recompute would create false mismatches on valid STCHAR records.
 
 ## Architecture Check
 
@@ -62,7 +63,7 @@ The audit's strongest STCHAR-integrity claim ("frontmatter hashes match canonica
 ### Tests That Must Pass
 
 1. **Recompute branch**: `node --test dist/tests/structural/stchar-body-integrity.test.js` — the stale-`profile_hash` and stale-`voice_block_hash` fixtures fail; a correctly-generated STCHAR fixture passes with no false mismatch.
-2. **Held-back branch**: this ticket's closeout records why the recompute was held back; `npm test` stays green with no recompute logic added.
+2. **Held-back branch**: this ticket's closeout records why the recompute was held back; `npm test` stays green with no recompute logic added. **Passed** on 2026-05-22.
 3. Either branch: `cd tools/validators && npm test` passes.
 
 ### Invariants
@@ -80,6 +81,10 @@ The audit's strongest STCHAR-integrity claim ("frontmatter hashes match canonica
 
 ### Commands
 
-1. `cd tools/validators && npm run build && node --test dist/tests/structural/stchar-body-integrity.test.js` — targeted: recompute fixtures (recompute branch).
-2. `cd tools/validators && npm test` — full validator suite (both branches).
-3. The targeted `node --test` is the correct narrow boundary for the recompute branch; for the held-back branch the verification is the closeout note plus a green `npm test` proving no recompute logic was added.
+1. `cd tools/validators && npm test` — passed, 833 tests. This is the held-back-branch proof: no recompute logic was added, and the existing §2.1 validator suite remains green.
+
+## Outcome
+
+Held back the recompute check. There is no pinned shared canonicalization for the STCHAR profile hash slices, and the producer skill records exact slices in prose rather than exposing machine-readable slice boundaries. `page_packet_hash` remains a field-projection hash and is covered downstream by `page-plan-stchar-packet-integrity`, not by a body-only recompute.
+
+No code changed for this ticket.
