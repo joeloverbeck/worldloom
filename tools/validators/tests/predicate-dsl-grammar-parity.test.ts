@@ -189,14 +189,13 @@ test("predicate DSL schema exposes runtime role enum for existential role filter
   }
 });
 
-test("predicate DSL schema accepts STPLAN/STEMO for record_active and record_age", () => {
-  // SPEC-47 lifecycle classes: the runtime RECORD_ACTIVE_PATTERN already accepts
-  // STPLAN/STEMO; the discoverable schema must mirror it.
+test("predicate DSL schema accepts STCHAR/STPLAN/STEMO for record_active and record_age", () => {
+  // The discoverable schema must mirror the runtime active-record vocabulary.
   const schema = readPredicateSchema();
   const ajv = new Ajv2020({ strict: true });
   const validate = ajv.compile(schema);
 
-  for (const cls of ["STPLAN-1", "STEMO-2"]) {
+  for (const cls of ["STCHAR-1", "STPLAN-1", "STEMO-2"]) {
     assert.equal(validate({ pred: "record_active", record: cls }), true, `record_active should accept ${cls}`);
     assert.equal(
       validate({ pred: "record_age", record: cls, comparator: ">=", pages: 1 }),
