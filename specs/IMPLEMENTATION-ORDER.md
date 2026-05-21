@@ -29,7 +29,7 @@ just-merged SPEC-56 (stchar-machine-foundation) and SPEC-57 (stchar-pipeline-int
 |---|---|---|---|
 | 1 | **SPEC-58** — STCHAR contract-to-enforcement reconciliation (`archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`) | Completed: fixed existing schemas/validators that rejected or under-required lawful STCHAR (C1 state-delta, C2 mid-story intro, C3 SREL.derived_from, C4 active_records key) | none — foundational |
 | 2 | **SPEC-59** — STCHAR authority-fidelity validators (`archive/specs/SPEC-59-stchar-authority-fidelity-validators.md`) | Completed: added executable validators for page-plan §16a packet integrity, prose-receipt STCHAR integrity, required `char_authority_leak`, STENT↔STCHAR reciprocity, and cast_bind_list integrity (C5 + reciprocity + kernel) | **SPEC-58** (`archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`; assumes schemas accept STCHAR and the active_records key is required) |
-| 3 | **SPEC-60** — STCHAR machine-layer & docs completeness | Structured-predicate edge extraction (I3), `story_character_profile` MCP task profile (I4), patch-engine stale-index STCHAR path, stale-doc reconciliation (I5) | none — independent; may run in parallel with 1/2 |
+| 3 | **SPEC-60** — STCHAR machine-layer & docs completeness (`archive/specs/SPEC-60-stchar-machine-layer-and-docs-completeness.md`) | Completed: structured-predicate edge extraction (I3), `story_character_profile` MCP task profile (I4), patch-engine stale-index STCHAR path, stale-doc reconciliation (I5) | none — independent; may run in parallel with 1/2 |
 
 ## Dependency rationale
 

@@ -1,6 +1,6 @@
 # SPEC-60 — STCHAR Machine-Layer & Docs Completeness
 
-**Status:** proposed
+**Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (machine-facing layer + docs for the Skill Category 2c pipeline)
 **Source:** `reports/stchar-audit-first-iteration.md` §13 I3/I4/I5 + §10 patch-engine/MCP findings (verified against `main`)
@@ -162,3 +162,27 @@ Either rename the field to `global_active_story_characters` for honesty, or add 
 | §6.1 Story-Local Character Authority | aligns | Doc reconciliation removes pre-STCHAR `bound_char_id` guidance and states that runtime consumes STCHAR, not world `CHAR`. |
 | Rule 6 (No Silent Retcons) — analogue | aligns | Stale-index coverage for the STCHAR hybrid path prevents out-of-band STCHAR edits from being silently overwritten by a patch built on a stale index. |
 | §5b Schema-Minimalism | N/A | No schema fields are added; the optional `active_story_characters` rename (2.4) is a naming-honesty change, not a new field. |
+
+## Outcome
+
+Completed: 2026-05-21
+
+SPEC-60 is complete across all four tickets:
+
+- I3 landed via `archive/tickets/SPEC60STCHARMACLAY-001.md`: `tools/world-index` extracts record refs from structured predicate argument fields and nested predicate combinators for SLT and STPLAN predicate sources.
+- I4 landed via `archive/tickets/SPEC60STCHARMACLAY-002.md`: `tools/world-mcp` registers `story_character_profile` as a first-class story-pipeline context-packet task type with ranking, budget, governing-world, full-body, README, and capability coverage.
+- Patch-engine stale-index coverage landed via `archive/tickets/SPEC60STCHARMACLAY-003.md`: STCHAR hybrid markdown paths are included in the pre-apply stale-index watch set.
+- I5 landed via `archive/tickets/SPEC60STCHARMACLAY-004.md`: active machine-facing docs now list `story_character_authority_record`, document `story_character_profile`, distinguish profile-source `CHAR` reads from runtime STCHAR authority, archive the stale dossier-retrieval report, and banner the stale 2026-05-20 triage.
+
+Deviations from the original plan:
+
+- The optional `story_bundle_context.active_story_characters` rename / page-scoped active-cast surface was deferred. The docs now explicitly label the current field as status-based instead of changing the runtime schema.
+- The `bound_char_id` proof is a classified historical/provenance sweep rather than a zero-hit sweep, because SPEC-60, archived reports, and historical triage records intentionally preserve the old term as evidence.
+
+Final verification:
+
+- `cd tools/world-index && npm run build` passed.
+- `cd tools/world-index && npm test` passed: 127 tests.
+- `cd tools/world-mcp && npm test` passed: 427 tests.
+- `cd tools/patch-engine && npm test` passed: 92 tests.
+- Docs/ticket proof for I5 passed: `story_character_authority_record` and `story_character_profile` / `active_story_characters` grep checks returned the expected active-doc hits; the stale report exists only under `archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md`; the source report path is gone; and the explicitly excluded STCHAR historical reports were unchanged.

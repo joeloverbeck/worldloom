@@ -111,7 +111,7 @@ Passed:
 3. `test -f archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md` and `test ! -f reports/story-character-dossier-retrieval-concerns.md` both passed.
 4. `head -6 docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md` showed the OBSOLETE banner immediately after the title.
 5. `git status --short reports/stchar-implementation-first-iteration.md reports/stchar-audit-first-iteration.md` returned no output, proving the explicit non-change reports stayed untouched.
-6. `rg -n "bound_char_id" docs reports archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md specs/SPEC-60-stchar-machine-layer-and-docs-completeness.md archive/tickets/SPEC60STCHARMACLAY-004.md` showed only historical/provenance or explicitly bannered hits: this ticket/spec, the archived report, the bannered 2026-05-20 triage, the explicitly excluded 2026-05-16 triage, and historical STCHAR reports.
+6. `rg -n "bound_char_id" docs reports archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md archive/specs/SPEC-60-stchar-machine-layer-and-docs-completeness.md archive/tickets/SPEC60STCHARMACLAY-004.md` showed only historical/provenance or explicitly bannered hits: this ticket/spec, the archived report, the bannered 2026-05-20 triage, the explicitly excluded 2026-05-16 triage, and historical STCHAR reports.
 
 ## Deviations
 
