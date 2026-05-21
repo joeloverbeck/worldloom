@@ -67,6 +67,7 @@ import { stemoSchemaCompliance } from "../structural/stemo-schema-compliance.js"
 import { stemoSupersessionLifecycleValid } from "../structural/stemo-supersession-lifecycle-valid.js";
 import { stemoTriggerEventOnBranchPath } from "../structural/stemo-trigger-event-on-branch-path.js";
 import { stcharActiveForBoundStent } from "../structural/stchar-active-for-bound-stent.js";
+import { stcharBoundStentReciprocity } from "../structural/stchar-bound-stent-reciprocity.js";
 import { stcharResolves } from "../structural/stchar-resolves.js";
 import { stcharSupersessionIntegrity } from "../structural/stchar-supersession-integrity.js";
 import { stentRequiresStchar } from "../structural/stent-requires-stchar.js";
@@ -120,6 +121,7 @@ export const structuralValidators: readonly Validator[] = [
   recursiveReferenceClosure,
   stentRequiresStchar,
   stcharResolves,
+  stcharBoundStentReciprocity,
   stcharActiveForBoundStent,
   stcharSupersessionIntegrity,
   noCharAuthorityInStoryRuntime,

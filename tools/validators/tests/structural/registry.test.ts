@@ -31,6 +31,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "recursive_reference_closure",
       "stent_requires_stchar",
       "stchar_resolves",
+      "stchar_bound_stent_reciprocity",
       "stchar_active_for_bound_stent",
       "stchar_supersession_integrity",
       "no_char_authority_in_story_runtime",

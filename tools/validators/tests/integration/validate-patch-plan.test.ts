@@ -293,7 +293,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     const stcharExecutions = result.executions.filter(
       (execution) => execution.name.startsWith("stchar_") || execution.name === "stent_requires_stchar"
     );
-    assert.equal(stcharExecutions.length, 4);
+    assert.equal(stcharExecutions.length, 5);
     assert.ok(stcharExecutions.every((execution) => execution.status === "skipped"));
     const characterRuntimeExecution = result.executions.find(
       (execution) => execution.name === "no_char_authority_in_story_runtime"
