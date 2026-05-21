@@ -1,7 +1,8 @@
 import type { IndexedRecord } from "../framework/types.js";
 import { asPlainRecord, stringArray, stringValue } from "./utils.js";
 
-export type MidstoryIntroductionClass = "CLK" | "STSEC" | "STQ" | "THR" | "STENT" | "SREL" | "STPLAN" | "STEMO";
+export type MidstoryIntroductionClass =
+  "CLK" | "STSEC" | "STQ" | "THR" | "STENT" | "STCHAR" | "SREL" | "STPLAN" | "STEMO";
 export type PlanRelation = typeof PLAN_RELATIONS[number];
 export type NonPropagationReason = typeof NON_PROPAGATION_REASONS[number];
 
@@ -47,6 +48,12 @@ const STENT_TRIGGERS = [
   "pressure_driver_enters",
   "counterparty_enters",
   "choice_target_enters"
+] as const;
+
+const STCHAR_TRIGGERS = [
+  "story_character_authority_distilled",
+  "story_character_authority_regenerated",
+  "story_local_character_authority_created"
 ] as const;
 
 const SREL_TRIGGERS = [
@@ -101,6 +108,7 @@ export const MIDSTORY_TRIGGERS_STSEC = STSEC_TRIGGERS;
 export const MIDSTORY_TRIGGERS_STQ = STQ_TRIGGERS;
 export const MIDSTORY_TRIGGERS_THR = THR_TRIGGERS;
 export const MIDSTORY_TRIGGERS_STENT = STENT_TRIGGERS;
+export const MIDSTORY_TRIGGERS_STCHAR = STCHAR_TRIGGERS;
 export const MIDSTORY_TRIGGERS_SREL = SREL_TRIGGERS;
 export const MIDSTORY_TRIGGERS_STPLAN = STPLAN_TRIGGERS;
 export const MIDSTORY_TRIGGERS_STEMO = STEMO_TRIGGERS;
@@ -111,6 +119,7 @@ export const MIDSTORY_TRIGGERS_BY_CLASS: Readonly<Record<MidstoryIntroductionCla
   STQ: STQ_TRIGGERS,
   THR: THR_TRIGGERS,
   STENT: STENT_TRIGGERS,
+  STCHAR: STCHAR_TRIGGERS,
   SREL: SREL_TRIGGERS,
   STPLAN: STPLAN_TRIGGERS,
   STEMO: STEMO_TRIGGERS
