@@ -1,6 +1,6 @@
 # SPEC62FOUANDDOC-006: ID-ALLOCATION — document the `EPE` / `NWP` / `NWB` prefixes
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/ID-ALLOCATION.md` (per-class registry documentation); no allocator or schema change.
@@ -8,11 +8,11 @@
 
 ## Problem
 
-`docs/ID-ALLOCATION.md` §Per-class registry → §World-scoped hybrid / pipeline artifacts documents `PA` / `CHAR` / `DA` / `PR` / `BATCH` / `NCP` / `NCB` / `AU` / `RP`, but `EPE`, `NWP`, and `NWB` are absent — even though they are live allocator-tracked prefixes. SPEC-62 §2.7 records them (closing the gap archived SPEC-61 §6 routes here). Pure documentation: the allocator already supports the prefixes.
+At intake, `docs/ID-ALLOCATION.md` §Per-class registry → §World-scoped hybrid / pipeline artifacts documented `PA` / `CHAR` / `DA` / `PR` / `BATCH` / `NCP` / `NCB` / `AU` / `RP`, but `EPE`, `NWP`, and `NWB` were absent — even though they were live allocator-tracked prefixes. SPEC-62 §2.7 recorded them (closing the gap archived SPEC-61 §6 routed here). Pure documentation: the allocator already supported the prefixes.
 
 ## Assumption Reassessment (2026-05-21)
 
-1. Verified against current code: `EPE` / `NWP` / `NWB` are live allocator prefixes — `tools/world-mcp/src/tools/allocate-next-id.ts:19-28` defines `NWB`, `NWP`, `EPE` id-class formats; `PIPELINE_ID_CLASSES = {NWB, NWP}` and `PRESSURE_EVENT_ID_CLASSES = {EPE}` (lines 84–85). Verified absent from `docs/ID-ALLOCATION.md`: `grep -c "EPE\|NWP\|NWB" docs/ID-ALLOCATION.md` returns 0 each this session. The §World-scoped hybrid / pipeline artifacts list is at line 23 onward.
+1. Verified against current code: `EPE` / `NWP` / `NWB` are live allocator prefixes — `tools/world-mcp/src/tools/allocate-next-id.ts:19-28` defines `NWB`, `NWP`, `EPE` id-class formats; `PIPELINE_ID_CLASSES = {NWB, NWP}` and `PRESSURE_EVENT_ID_CLASSES = {EPE}` (lines 84–85). At intake, `docs/ID-ALLOCATION.md` had zero hits for `EPE` / `NWP` / `NWB`; this ticket added them to the §World-scoped hybrid / pipeline artifacts list.
 2. SPEC-62 §2.7 (lines 153–171) is the source deliverable; archived SPEC-61 §6 (`archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`) explicitly routes this docs gap to SPEC-62 ("do not expand SPEC-61's scope to edit `docs/ID-ALLOCATION.md` directly"). Triage A3 (Fault 9, narrowed) confirms the docs-only scope.
 3. Single-artifact ticket (`docs/ID-ALLOCATION.md`); the boundary under audit is the §World-scoped hybrid / pipeline artifacts list — the three entries must record the live allocator prefixes and flag `NWP`/`NWB` as root-scoped (not `worlds/<slug>/`) so they are not mistaken for world-scoped classes.
 
@@ -28,15 +28,15 @@
 3. The documented prefixes match the allocator's id-class definitions → FOUNDATIONS/code alignment check against `allocate-next-id.ts` (no allocator change; the doc records existing support).
 4. Single-layer ticket: a documentation registry edit with no code path; grep-proof of the three entries plus a read of the allocator definitions is the complete verification surface.
 
-## What to Change
+## Landed Changes
 
-### 1. Add three entries to §World-scoped hybrid / pipeline artifacts
+### 1. Added three entries to §World-scoped hybrid / pipeline artifacts
 
 - `EPE-<integer>` — pressure-event cards and their `EPE-*.proposal.md` sidecars (`worlds/<slug>/pressure-events/`).
 - `NWP-<integer>` — world-proposal cards (root-level `world-proposals/`, a pre-world surface).
 - `NWB-<integer>` — world-proposal batch manifests (root-level `world-proposals/batches/`).
 
-Note the root-level path for `NWP` / `NWB` explicitly so they are not mistaken for world-scoped classes.
+The landed `NWP` / `NWB` entries explicitly use `root-scoped` / `root-level` wording so they are not mistaken for `worlds/<slug>/` classes.
 
 ## Files to Touch
 
@@ -72,3 +72,25 @@ Note the root-level path for `NWP` / `NWB` explicitly so they are not mistaken f
 1. `grep -n "EPE\|NWP\|NWB" docs/ID-ALLOCATION.md`
 2. `grep -n "NWB:\|NWP:\|EPE:" tools/world-mcp/src/tools/allocate-next-id.ts` — cross-check documented prefixes against the live allocator.
 3. Narrower-command rationale: a registry-list doc edit recording already-supported allocator prefixes; grep-proof of the three entries + an allocator cross-check is the complete verification boundary.
+
+## Outcome
+
+Completed on 2026-05-21.
+
+What changed:
+
+1. Added `EPE-<integer>` to `docs/ID-ALLOCATION.md` for pressure-event cards and `EPE-*.proposal.md` sidecars under `worlds/<slug>/pressure-events/`.
+2. Added `NWP-<integer>` for root-scoped world-proposal cards under root-level `world-proposals/`.
+3. Added `NWB-<integer>` for root-scoped world-proposal batch manifests under root-level `world-proposals/batches/`.
+
+Deviations:
+
+- None. This remained a documentation-only registry reconciliation; no allocator, schema, validator, or world-content files changed.
+
+## Verification Result
+
+Commands run on 2026-05-21:
+
+1. `grep -n "EPE-<integer>\\|NWP-<integer>\\|NWB-<integer>" docs/ID-ALLOCATION.md` — passed; returned the three new registry entries.
+2. `grep -n "root-level\\|root-scoped" docs/ID-ALLOCATION.md` — passed; returned the `NWP` and `NWB` root-scope entries.
+3. `grep -n "NWB:\\|NWP:\\|EPE:" tools/world-mcp/src/tools/allocate-next-id.ts` — passed; returned the live allocator definitions for all three prefixes.

@@ -50,7 +50,7 @@ Added a one-line note that EPE base cards are allocator-tracked but intentionall
 
 - `proposals/` and `audits/` entries — already present at lines 44–45; do not re-add or duplicate.
 - Any allocator, schema, or retrieval-surface change (the prefixes are already allocator-supported; EPE non-indexing is by design and preserved).
-- The ID-ALLOCATION registry entries for the same prefixes (SPEC62FOUANDDOC-006, a parallel docs-gap on a different surface).
+- The ID-ALLOCATION registry entries for the same prefixes (`archive/tickets/SPEC62FOUANDDOC-006.md`, a parallel docs-gap on a different surface).
 
 ## Acceptance Criteria
 
