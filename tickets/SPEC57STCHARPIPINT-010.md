@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes (tests only) — adds integration coverage under `tools/validators/tests/` (and `tools/world-mcp/tests/` where applicable); no production code.
-**Deps**: SPEC57STCHARPIPINT-006 (the prose-receipt schema extension is the principal new machine surface this ticket exercises).
+**Deps**: archive/tickets/SPEC57STCHARPIPINT-006.md (the prose-receipt schema extension is the principal new machine surface this ticket exercises).
 
 ## Problem
 
@@ -47,7 +47,7 @@ If the integration test needs an active-STCHAR context-packet projection, extend
 ## Out of Scope
 
 - Skill-behavior assertions (bootstrap abort, turn-cycle block, health-audit 2m) — verified by the DoD manual walkthrough.
-- The prose-receipt schema-compliance unit test (`prose-receipt-schema-compliance.test.ts`) — owned by SPEC57STCHARPIPINT-006.
+- The prose-receipt schema-compliance unit test (`prose-receipt-schema-compliance.test.ts`) — owned by archive/tickets/SPEC57STCHARPIPINT-006.md.
 - Any production code change.
 
 ## Acceptance Criteria

@@ -53,9 +53,18 @@
         "entity_status_consistency": { "type": "string", "enum": ["PASS", "WARN", "FAIL"] },
         "invented_structural_fact": { "type": "string", "enum": ["PASS", "WARN", "FAIL"] },
         "canon_claim_without_authority": { "type": "string", "enum": ["PASS", "FAIL"] },
+        "char_authority_leak": { "type": "string", "enum": ["PASS", "FAIL"] },
         "craft_critic": { "type": "string", "enum": ["PASS", "WARN", "FAIL", "NOT_RUN"] }
       },
       "additionalProperties": false
+    },
+    "stchar_authority": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/stcharAuthorityCheck" }
+    },
+    "profile_fidelity": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/profileFidelityCheck" }
     },
     "notes": {
       "type": "array",
@@ -69,6 +78,121 @@
         "run_turn_cycle_repair",
         "run_story_fact_promotion_to_canon"
       ]
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "hashComparison": {
+      "type": "object",
+      "required": ["expected", "observed", "verdict"],
+      "properties": {
+        "expected": { "$ref": "#/$defs/sha256" },
+        "observed": {
+          "anyOf": [
+            { "$ref": "#/$defs/sha256" },
+            { "type": "null" }
+          ]
+        },
+        "verdict": { "type": "string", "enum": ["PASS", "FAIL"] }
+      },
+      "additionalProperties": false
+    },
+    "stcharAuthorityCheck": {
+      "type": "object",
+      "required": [
+        "stchar_id",
+        "stent_id",
+        "display_name",
+        "required_because",
+        "packet_present",
+        "active_in_snapshot",
+        "profile_hash",
+        "voice_block_hash",
+        "page_packet_hash",
+        "deterministic_verdict"
+      ],
+      "properties": {
+        "stchar_id": { "type": "string", "pattern": "^STCHAR-(0|[1-9][0-9]*)$" },
+        "stent_id": { "type": "string", "pattern": "^STENT-(0|[1-9][0-9]*)$" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "required_because": { "type": "string", "minLength": 1 },
+        "packet_present": { "type": "boolean" },
+        "active_in_snapshot": { "type": "boolean" },
+        "profile_hash": { "$ref": "#/$defs/hashComparison" },
+        "voice_block_hash": { "$ref": "#/$defs/hashComparison" },
+        "page_packet_hash": { "$ref": "#/$defs/hashComparison" },
+        "deterministic_verdict": { "type": "string", "enum": ["PASS", "FAIL"] }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "packet_present": { "const": false } }, "required": ["packet_present"] },
+          "then": { "properties": { "deterministic_verdict": { "const": "FAIL" } } }
+        },
+        {
+          "if": { "properties": { "active_in_snapshot": { "const": false } }, "required": ["active_in_snapshot"] },
+          "then": { "properties": { "deterministic_verdict": { "const": "FAIL" } } }
+        },
+        {
+          "if": { "properties": { "profile_hash": { "type": "object", "properties": { "verdict": { "const": "FAIL" } }, "required": ["verdict"] } }, "required": ["profile_hash"] },
+          "then": { "properties": { "deterministic_verdict": { "const": "FAIL" } } }
+        },
+        {
+          "if": { "properties": { "voice_block_hash": { "type": "object", "properties": { "verdict": { "const": "FAIL" } }, "required": ["verdict"] } }, "required": ["voice_block_hash"] },
+          "then": { "properties": { "deterministic_verdict": { "const": "FAIL" } } }
+        },
+        {
+          "if": { "properties": { "page_packet_hash": { "type": "object", "properties": { "verdict": { "const": "FAIL" } }, "required": ["verdict"] } }, "required": ["page_packet_hash"] },
+          "then": { "properties": { "deterministic_verdict": { "const": "FAIL" } } }
+        },
+        {
+          "if": { "properties": { "deterministic_verdict": { "const": "PASS" } }, "required": ["deterministic_verdict"] },
+          "then": {
+            "properties": {
+              "packet_present": { "const": true },
+              "active_in_snapshot": { "const": true },
+              "profile_hash": { "type": "object", "properties": { "verdict": { "const": "PASS" } }, "required": ["verdict"] },
+              "voice_block_hash": { "type": "object", "properties": { "verdict": { "const": "PASS" } }, "required": ["verdict"] },
+              "page_packet_hash": { "type": "object", "properties": { "verdict": { "const": "PASS" } }, "required": ["verdict"] }
+            }
+          }
+        }
+      ]
+    },
+    "profileFidelityVerdict": {
+      "type": "string",
+      "enum": ["pass", "minor_drift", "major_drift", "not_applicable"]
+    },
+    "profileFidelityCheck": {
+      "type": "object",
+      "required": [
+        "stchar_id",
+        "voice_fidelity",
+        "appraisal_fidelity",
+        "pressure_behavior_fidelity",
+        "relationship_conduct_fidelity",
+        "evidence",
+        "repair_recommendation"
+      ],
+      "properties": {
+        "stchar_id": { "type": "string", "pattern": "^STCHAR-(0|[1-9][0-9]*)$" },
+        "voice_fidelity": { "$ref": "#/$defs/profileFidelityVerdict" },
+        "appraisal_fidelity": { "$ref": "#/$defs/profileFidelityVerdict" },
+        "pressure_behavior_fidelity": { "$ref": "#/$defs/profileFidelityVerdict" },
+        "relationship_conduct_fidelity": { "$ref": "#/$defs/profileFidelityVerdict" },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "repair_recommendation": {
+          "type": "string",
+          "enum": ["none", "revise_prose", "revise_page_plan", "regenerate_stchar", "run_turn_cycle_repair"]
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

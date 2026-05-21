@@ -898,12 +898,45 @@ checks:
   entity_status_consistency: PASS | WARN | FAIL
   invented_structural_fact: PASS | WARN | FAIL
   canon_claim_without_authority: PASS | FAIL
+  char_authority_leak: PASS | FAIL
   craft_critic: PASS | WARN | FAIL | NOT_RUN
+stchar_authority:
+  - stchar_id: STCHAR-<integer>
+    stent_id: STENT-<integer>
+    display_name: string
+    required_because: string
+    packet_present: true | false
+    active_in_snapshot: true | false
+    profile_hash:
+      expected: sha256:<64 lowercase hex>
+      observed: sha256:<64 lowercase hex> | null
+      verdict: PASS | FAIL
+    voice_block_hash:
+      expected: sha256:<64 lowercase hex>
+      observed: sha256:<64 lowercase hex> | null
+      verdict: PASS | FAIL
+    page_packet_hash:
+      expected: sha256:<64 lowercase hex>
+      observed: sha256:<64 lowercase hex> | null
+      verdict: PASS | FAIL
+    deterministic_verdict: PASS | FAIL
+profile_fidelity:
+  - stchar_id: STCHAR-<integer>
+    voice_fidelity: pass | minor_drift | major_drift | not_applicable
+    appraisal_fidelity: pass | minor_drift | major_drift | not_applicable
+    pressure_behavior_fidelity: pass | minor_drift | major_drift | not_applicable
+    relationship_conduct_fidelity: pass | minor_drift | major_drift | not_applicable
+    evidence: [<string>]
+    repair_recommendation: none | revise_prose | revise_page_plan | regenerate_stchar | run_turn_cycle_repair
 notes: [<string>]
 repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_fact_promotion_to_canon
 ```
 
-The `checks` mapping contains eight deterministic prose/state checks plus the optional `craft_critic` result. `hash_integrity` is `PASS` when the recorded `PG.plan.plan_hash` and `PG.state_hash` are lowercase sha256-shaped and match the recomputed plan/state hashes, `WARN` when drift is accepted because `accept_plan_drift=true`, and `FAIL` when drift is not accepted or either PG hash field is missing, placeholder, or non-sha256. `required_event_rendered` includes subordinate receipt observations for committed CLK ticks, STSEC reveals, STPLAN relation movement, STEMO affective transitions, and STQ setup/payoff transitions; the STQ subcheck reads committed `STQ.status` lifecycle changes, `payoff_of`, `answer_records[]`, and page-plan §10b render requirements, records omissions as `notes[]` entries beginning `story_question_payoff_undisclosed:`, and never mutates `PG` or any STQ record. `choice_consequence_visibility` verifies that rendered prose realizes the selected action's consequence without mutating `PG` state or re-authoring the selected event. For non-accept routes it reads `SE.resolution.player_visible_feedback`; for `accept` routes, where `SE.resolution` is absent, it reads the selected `CHC.likely_state_pressure`, `CHC.grounded_in.records[]`, page-plan §13, and committed `SE.state_delta` / `SE.state_relations[]` from plan §7.
+The `checks` mapping contains eight deterministic prose/state checks, the surfaced `char_authority_leak` verdict from `no_char_authority_in_story_runtime`, plus the optional `craft_critic` result. `hash_integrity` is `PASS` when the recorded `PG.plan.plan_hash` and `PG.state_hash` are lowercase sha256-shaped and match the recomputed plan/state hashes, `WARN` when drift is accepted because `accept_plan_drift=true`, and `FAIL` when drift is not accepted or either PG hash field is missing, placeholder, or non-sha256. `required_event_rendered` includes subordinate receipt observations for committed CLK ticks, STSEC reveals, STPLAN relation movement, STEMO affective transitions, and STQ setup/payoff transitions; the STQ subcheck reads committed `STQ.status` lifecycle changes, `payoff_of`, `answer_records[]`, and page-plan §10b render requirements, records omissions as `notes[]` entries beginning `story_question_payoff_undisclosed:`, and never mutates `PG` or any STQ record. `choice_consequence_visibility` verifies that rendered prose realizes the selected action's consequence without mutating `PG` state or re-authoring the selected event. For non-accept routes it reads `SE.resolution.player_visible_feedback`; for `accept` routes, where `SE.resolution` is absent, it reads the selected `CHC.likely_state_pressure`, `CHC.grounded_in.records[]`, page-plan §13, and committed `SE.state_delta` / `SE.state_relations[]` from plan §7.
+
+`stchar_authority` is optional only when no §16a STCHAR packet is required for the page. When a viewpoint, speaker, major actor, direct target, emotionally salient character, or otherwise behavior/voice-shaping character requires a packet, prose-attach emits one entry per required `STCHAR`. Missing packets, inactive `STCHAR` ids in the `PG.state_snapshot.active_records.STCHAR` snapshot, or any `profile_hash` / `voice_block_hash` / `page_packet_hash` mismatch force that entry's `deterministic_verdict: FAIL`. The receipt may carry an empty or absent `stchar_authority` list only when the page has no qualifying character.
+
+`profile_fidelity` is judgment-assisted and compares the rendered prose against the page-plan packet first. Retrieve the full STCHAR only when the packet is missing, hash-inconsistent, or insufficient for diagnosis. Each entry records the four fidelity axes, supporting evidence excerpts, and the local repair recommendation for that character (`revise_prose`, `revise_page_plan`, `regenerate_stchar`, or `run_turn_cycle_repair`).
 
 Receipt schema drift is checked by `prose_receipt_schema_compliance` in `tools/validators`. A receipt-specific structural smoke uses the compiled validator CLI after the receipt exists, for example:
 
