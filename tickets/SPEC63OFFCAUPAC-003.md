@@ -61,7 +61,7 @@ Add to `prose-receipt-stchar-integrity.test.ts`: a `stchar_authority[]` entry wi
 - `prose_receipt_stchar_integrity` validator logic (no code change — §2.4).
 - `prose-receipt.schema.json` (no change — §2.5).
 - `tools/validators/src/public/registry.ts` (validator already registered).
-- The §16a contract definition (`archive/tickets/SPEC63OFFCAUPAC-001.md`) and authoring guidance (SPEC63OFFCAUPAC-002).
+- The §16a contract definition (`archive/tickets/SPEC63OFFCAUPAC-001.md`) and authoring guidance (`archive/tickets/SPEC63OFFCAUPAC-002.md`).
 - Auto-grading whether offstage causal relevance warranted a packet (SPEC-63 §5 — authoring judgment, not deterministic).
 
 ## Acceptance Criteria

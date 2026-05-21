@@ -1,6 +1,6 @@
 # SPEC63OFFCAUPAC-002: Authoring-skill §16a guidance for the offstage tier
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `branching-story-bootstrap` SKILL.md §16a authoring guidance + `branching-story-turn-cycle` phase-7 reference. Prose-only; no code change.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-With the offstage-causal tier defined in the §16a contract (001), the two authoring skills that produce page plans must learn when to emit it. Without guidance, authors keep using the binary full-packet-or-omit posture, leaving offstage causal authority either over-authored (a full voice-bearing packet for a character not on the page) or lost (the character dropped from `active_records`).
+With the offstage-causal tier defined in the §16a contract (`archive/tickets/SPEC63OFFCAUPAC-001.md`), the two authoring skills that produce page plans needed to learn when to emit it. Before this ticket, authors still had the binary full-packet-or-omit posture, leaving offstage causal authority either over-authored (a full voice-bearing packet for a character not on the page) or lost (the character dropped from `active_records`).
 
 ## Assumption Reassessment (2026-05-21)
 
@@ -29,15 +29,15 @@ With the offstage-causal tier defined in the §16a contract (001), the two autho
 3. Cross-skill consistency: both sites describe the same reduced shape as the §16a contract (001) -> manual review against `story-state-contract.md` §16a.
 4. Present-character full-packet guidance is unchanged at both sites -> manual review.
 
-## What to Change
+## Landed Changes
 
 ### 1. bootstrap §16a authoring guidance
 
-In `branching-story-bootstrap/SKILL.md`, extend the §16a authoring guidance (and the Phase-10 self-contained-page-plan check that names §16a packets) to: emit an `offstage_causal` packet (reduced shape per 001) for an active offstage character whose activity causally bears on the page; omit non-causal offstage characters; keep present-character authoring unchanged.
+In `branching-story-bootstrap/SKILL.md`, extended the §16a root page-plan guidance and the Phase-10 self-contained-page-plan check to: emit an `offstage_causal` packet (reduced shape per `archive/tickets/SPEC63OFFCAUPAC-001.md`) for an active offstage character whose activity causally bears on the page; omit non-causal offstage characters; keep present-character authoring unchanged.
 
 ### 2. turn-cycle phase-7 §16a paragraph
 
-In `branching-story-turn-cycle/references/phase-7-page-plan.md`, extend the §16a authoring paragraph with the same offstage-tier guidance.
+In `branching-story-turn-cycle/references/phase-7-page-plan.md`, extended the §16a authoring paragraph with the same offstage-tier guidance for continuation pages.
 
 ## Files to Touch
 
@@ -74,3 +74,21 @@ In `branching-story-turn-cycle/references/phase-7-page-plan.md`, extend the §16
 1. `grep -n "offstage_causal\|offstage causal" .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md`
 2. `grep -n "offstage_causal" .claude/skills/_shared-templates/story-state-contract.md` (confirm the contract this guidance references — 001 — is in place)
 3. Skill-prose-only change; verification is grep-based — the offstage tier's runtime enforcement is tested in SPEC63OFFCAUPAC-003.
+
+## Outcome
+
+Completed: 2026-05-21
+
+The two page-plan authoring surfaces now consume the shared `offstage_causal` contract. Bootstrap root-page planning tells authors to emit the reduced packet for active offstage characters whose activity causally bears on the root page and to omit non-causal offstage characters as background-only without asking prose to infer persona from an id. Its self-contained-page-plan check now names reduced `offstage_causal` packets as relevant §16a packets.
+
+Turn-cycle phase-7 page planning now carries the same distinction for continuation pages: present characters keep the full packet, active causally relevant offstage characters use the reduced `offstage_causal` packet with all three hashes plus appraisal, pressure, and `Offstage causal relevance:`, and non-causal offstage characters may remain omitted.
+
+## Verification Result
+
+1. `grep -n "offstage_causal\|offstage causal" .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` — passed; returned bootstrap guidance, the bootstrap self-contained check, and turn-cycle phase-7 guidance.
+2. `grep -n "offstage_causal" .claude/skills/_shared-templates/story-state-contract.md` — passed; confirmed the archived `001` contract is present and defines the tier the authoring guidance references.
+3. Manual review — passed; both authoring surfaces keep full present-character packet guidance, describe the same reduced shape as the shared contract, and introduce no word-count budget.
+
+## Deviations
+
+None. The change stayed prose-only in the two authoring surfaces; validator enforcement remains owned by `tickets/SPEC63OFFCAUPAC-003.md`.

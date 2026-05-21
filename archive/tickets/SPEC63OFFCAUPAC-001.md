@@ -52,7 +52,7 @@ Stated that an active offstage character (`entity_status.location: offstage`) wh
 - A distinct `packet_scope` field (rejected per §5b — SPEC-63 §5).
 - The broader §8 packet-shape amendments (structured `page_relevant_projection`, `included_stchar_sections`, `omitted_sections_with_reason`, `active_in_pg_snapshot`) — SPEC-63 §5; not adopted here.
 - Validator enforcement of the new tier (SPEC63OFFCAUPAC-003).
-- Authoring-skill emission guidance (SPEC63OFFCAUPAC-002).
+- Authoring-skill emission guidance (`archive/tickets/SPEC63OFFCAUPAC-002.md`).
 
 ## Acceptance Criteria
 
@@ -95,4 +95,4 @@ The emit/omit boundary is now explicit: offstage causal relevance is authoring j
 
 ## Deviations
 
-None. The change stayed within the single shared contract file. Validator enforcement remains owned by `tickets/SPEC63OFFCAUPAC-003.md`, and authoring-skill emission guidance remains owned by `tickets/SPEC63OFFCAUPAC-002.md`.
+None. The change stayed within the single shared contract file. Validator enforcement remains owned by `tickets/SPEC63OFFCAUPAC-003.md`, and authoring-skill emission guidance is completed in `archive/tickets/SPEC63OFFCAUPAC-002.md`.
