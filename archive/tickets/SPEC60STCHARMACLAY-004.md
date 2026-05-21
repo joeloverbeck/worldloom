@@ -1,6 +1,6 @@
 # SPEC60STCHARMACLAY-004: Docs reconciliation for STCHAR machine-layer
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — documentation only (`docs/MACHINE-FACING-LAYER.md`, `docs/CONTEXT-PACKET-CONTRACT.md`) plus archival of a stale report and an OBSOLETE banner on a stale triage doc. No production code, tests, or schema files.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-Three documentation surfaces are out of date relative to landed STCHAR (SPEC-56/57) work:
+At intake, three documentation surfaces were out of date relative to landed STCHAR (SPEC-56/57) work:
 - `docs/MACHINE-FACING-LAYER.md` does not list `story_character_authority_record` among retrievable record types, and does not distinguish bootstrap/profile-source `CHAR` reads from runtime STCHAR consumption.
 - `docs/CONTEXT-PACKET-CONTRACT.md` does not document the `story_character_profile` task type or the STCHAR component of `story_bundle_context` (`active_story_characters`).
 - `reports/story-character-dossier-retrieval-concerns.md` and `docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md` give pre-STCHAR guidance (`STENT.bound_char_id`, turn-cycle re-seeding world `CHAR` dossiers) that operators must not follow.
@@ -32,23 +32,23 @@ Three documentation surfaces are out of date relative to landed STCHAR (SPEC-56/
 3. No active (non-archive, non-historical-report) doc states STENT uses `bound_char_id` → `grep -rn "bound_char_id" docs/` returns only the historical 2026-05-16 triage and the now-bannered 2026-05-20 triage (banner adjacent); the report is relocated under `archive/`.
 4. The `explicit non-change` reports are untouched → `git status` shows no modification to `reports/stchar-implementation-first-iteration.md` / `reports/stchar-audit-first-iteration.md`.
 
-## What to Change
+## Landed Changes
 
 ### 1. `docs/MACHINE-FACING-LAYER.md`
 
-Add `story_character_authority_record` to the retrievable record-type listings. Clarify that story-pipeline `seed_nodes` use world-scope `CHAR` ids **only for bootstrap / profile-source reads**, while normal turn-cycle / page-plan / prose runtime consumes active STCHAR through story context and targeted STCHAR retrieval.
+Added `story_character_authority_record` to the retrievable record-type listings. Clarified that story-pipeline `seed_nodes` use world-scope `CHAR` ids **only for bootstrap / profile-source reads**, while normal turn-cycle / page-plan / prose runtime consumes active STCHAR through story context and targeted STCHAR retrieval.
 
 ### 2. `docs/CONTEXT-PACKET-CONTRACT.md`
 
-Document the `story_character_profile` task type and the STCHAR component of `story_bundle_context` (`active_story_characters`, noting it is status-based per current code).
+Documented the `story_character_profile` task type and the STCHAR component of `story_bundle_context` (`active_story_characters`, noting it is status-based per current code).
 
 ### 3. Archive the stale report
 
-Archive `reports/story-character-dossier-retrieval-concerns.md` to `archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md` (`git mv` if tracked; plain `mv` fallback if untracked).
+Archived `reports/story-character-dossier-retrieval-concerns.md` to `archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md` with `git mv`.
 
 ### 4. Banner the stale triage doc
 
-Prepend an "OBSOLETE — superseded by STCHAR (SPEC-56/57)" banner to `docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md` so its Option-D `STENT.bound_char_id` detector guidance is not followed.
+Prepended an "OBSOLETE — superseded by STCHAR (SPEC-56/57)" banner to `docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md` so its Option-D `STENT.bound_char_id` detector guidance is not followed.
 
 ## Files to Touch
 
@@ -90,3 +90,30 @@ Prepend an "OBSOLETE — superseded by STCHAR (SPEC-56/57)" banner to `docs/tria
 1. `grep -n "story_character_authority_record" docs/MACHINE-FACING-LAYER.md && grep -nE "story_character_profile|active_story_characters" docs/CONTEXT-PACKET-CONTRACT.md`
 2. `test -f archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md && test ! -f reports/story-character-dossier-retrieval-concerns.md && head -3 docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md`
 3. `git status --short reports/stchar-implementation-first-iteration.md reports/stchar-audit-first-iteration.md` — must show no modification (explicit non-change guard).
+
+## Outcome
+
+Completed: 2026-05-21
+
+This ticket reconciled the active machine-facing docs with the landed STCHAR machine layer:
+
+- `docs/MACHINE-FACING-LAYER.md` now lists `story_character_authority_record` as a story-bundle retrieval type and distinguishes profile-source `CHAR` reads from runtime STCHAR authority.
+- `docs/CONTEXT-PACKET-CONTRACT.md` now documents `story_character_profile`, its 12000 default budget, source-`CHAR` full-body eligibility, and the status-based `story_bundle_context.active_story_characters` surface.
+- `reports/story-character-dossier-retrieval-concerns.md` was archived to `archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md`.
+- `docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md` now carries an OBSOLETE banner warning operators not to use its `STENT.bound_char_id` guidance as current authority.
+
+## Verification Result
+
+Passed:
+
+1. `grep -n "story_character_authority_record" docs/MACHINE-FACING-LAYER.md` returned matches in the `list_records` and `get_context_packet` rows.
+2. `grep -nE "story_character_profile|active_story_characters" docs/CONTEXT-PACKET-CONTRACT.md` returned matches in the task header, story-bundle context, assembly discipline, full-body tables, and the new profile section.
+3. `test -f archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md` and `test ! -f reports/story-character-dossier-retrieval-concerns.md` both passed.
+4. `head -6 docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md` showed the OBSOLETE banner immediately after the title.
+5. `git status --short reports/stchar-implementation-first-iteration.md reports/stchar-audit-first-iteration.md` returned no output, proving the explicit non-change reports stayed untouched.
+6. `rg -n "bound_char_id" docs reports archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md specs/SPEC-60-stchar-machine-layer-and-docs-completeness.md archive/tickets/SPEC60STCHARMACLAY-004.md` showed only historical/provenance or explicitly bannered hits: this ticket/spec, the archived report, the bannered 2026-05-20 triage, the explicitly excluded 2026-05-16 triage, and historical STCHAR reports.
+
+## Deviations
+
+- The negative `bound_char_id` proof is a classified discovery sweep, not a zero-hit command. Historical reports, the active SPEC-60/ticket evidence, and the bannered triage file intentionally preserve the old term as provenance.
+- No production code, tests, schemas, or `_source/` world-canon files changed.

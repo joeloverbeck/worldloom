@@ -1,5 +1,7 @@
 # Triage: Story Character Dossier Retrieval
 
+> **OBSOLETE — superseded by STCHAR (SPEC-56/57).** This file is retained as a historical decision record. Do not use its `STENT.bound_char_id`, turn-cycle CHAR-seeding, or Option-D detector guidance as current implementation authority; current story runtime authority uses STCHAR records.
+
 Date: 2026-05-20
 Source report: `reports/story-character-dossier-retrieval-concerns.md`
 Classification: story-canon-related (analysis / triage)

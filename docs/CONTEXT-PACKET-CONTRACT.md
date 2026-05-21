@@ -8,7 +8,7 @@ The packet is locality-first. It must secure seed-local authority and the govern
 
 ```yaml
 task_header:
-  task_type: canon_addition | character_generation | diegetic_artifact_generation | continuity_audit | propose_new_canon_facts | propose_new_characters | propose_new_worlds_from_preferences | canon_facts_from_diegetic_artifacts | emergent_pressure_events | story_bootstrap | story_turn_cycle | commitment_block_authoring | branching_story_health_audit | story_fact_promotion_to_canon | other
+  task_type: canon_addition | character_generation | diegetic_artifact_generation | continuity_audit | propose_new_canon_facts | propose_new_characters | propose_new_worlds_from_preferences | canon_facts_from_diegetic_artifacts | emergent_pressure_events | story_bootstrap | story_character_profile | story_turn_cycle | commitment_block_authoring | branching_story_health_audit | story_fact_promotion_to_canon | other
   world_slug: animalia
   story_slug: null
   generated_at: "2026-04-24T00:00:00Z"
@@ -126,7 +126,7 @@ This layer carries:
 
 The indexed story-bundle state required by story-pipeline task types.
 
-This layer is `null` for world-canon task types. For `story_turn_cycle`, `commitment_block_authoring`, `branching_story_health_audit`, and `story_fact_promotion_to_canon`, callers must supply `story_slug`; the layer is then populated from indexed story-bundle records plus `STORY_KERNEL.md` frontmatter. For `story_bootstrap`, callers supply `story_slug` as the target slug before the bundle exists; `story_bundle_context` is `null`, so the packet is world-canon-only.
+This layer is `null` for world-canon task types. For `story_character_profile`, `story_turn_cycle`, `commitment_block_authoring`, `branching_story_health_audit`, and `story_fact_promotion_to_canon`, callers must supply `story_slug`; the layer is then populated from indexed story-bundle records plus `STORY_KERNEL.md` frontmatter. For `story_bootstrap`, callers supply `story_slug` as the target slug before the bundle exists; `story_bundle_context` is `null`, so the packet is world-canon-only.
 
 This layer carries:
 
@@ -139,6 +139,7 @@ This layer carries:
 - active locations in scope, exposed as `active_locations_in_scope` entries with `id`, `label`, `description`, and `bound_ent`
 - active objects in scope, exposed as `active_objects_in_scope` entries with `id`, `label`, `description`, `owner`, and `current_location`
 - active story-local diegetic artifacts, exposed as `active_story_diegetic_artifacts` entries with `id`, `title`, `author`, `genre`, `intended_audience`, `circulation`, `truth_relation`, and `derived_from`
+- active story characters, exposed as `active_story_characters` entries with `id`, `status`, `bound_stent_ids`, `source_kind`, `source_char_id`, `profile_revision`, `profile_hash`, `voice_block_hash`, `page_packet_hash`, and `packet_preview`. This is a status-based active STCHAR inventory (`status === "active"`), not a page/branch snapshot of the exact current-page cast.
 - active actor plans, exposed as `active_actor_plans` entries with `id`, `holder`, `root_intention`, `objective`, `plan_status`, and `current_step_action_family` for plan-aware turn-cycle, commitment-block, and health-audit consumers. Summary fallback fields: `active_plan_ids` and `active_plan_holders`.
 - active emotional states, exposed as `active_emotional_states` entries with `id`, `holder`, `status`, `affect_kind`, `intensity`, `behavioral_pressure`, and `agency_effect` for emotion-aware turn-cycle, commitment-block, and health-audit consumers. `affect_kind` and `intensity` may be `null` for dissociated states. Summary fallback fields: `active_emotion_ids` and `active_emotion_holders`.
 - active / pressured / critical / dormant threads
@@ -169,7 +170,7 @@ This layer remains optional and trim-first under budget pressure. It exists to h
 ## Assembly Discipline
 
 - Prefer exact ids, structured edges, and explicit scoped references before lexical expansion.
-- For story-pipeline task types (`story_bootstrap`, `story_turn_cycle`, `commitment_block_authoring`, `branching_story_health_audit`, `story_fact_promotion_to_canon`), `seed_nodes` should preferentially name world-canon or hybrid realized-world records (CF / CH / M / OQ / INV / ENT / SEC / CHAR / world-scope DA / PA). Story-pipeline seed nodes must be realized `CHAR-<integer>` ids and world anchors; `NCP` / `NCB` authoring-proposal nodes are world-scope proposal records and are warned-and-dropped for story task types with `task_header.warnings: ["authoring_proposal_seed_nodes_ignored"]`. Story-bundle records are supplied through `story_slug` and `story_bundle_context`; when exact story-local records are needed, use `get_records(record_ids, story_slug=<story_slug>)` or `list_records(record_type, story_slug=<story_slug>)`. Do not rely on world-scope `seed_nodes` expansion for story-local ids. If a story-pipeline request supplies story-local ids in `seed_nodes`, the packet returns `task_header.warnings: ["story_local_seed_nodes_ignored"]` so the caller can reroute through scoped targeted retrieval.
+- For story-pipeline task types (`story_bootstrap`, `story_character_profile`, `story_turn_cycle`, `commitment_block_authoring`, `branching_story_health_audit`, `story_fact_promotion_to_canon`), `seed_nodes` should preferentially name world-canon or hybrid realized-world records (CF / CH / M / OQ / INV / ENT / SEC / CHAR / world-scope DA / PA). Story-pipeline `CHAR-<integer>` seed nodes are for bootstrap or story-character-profile source reads, not normal runtime authority. Turn-cycle, page-plan, prose, and audit consumers use `story_slug`, `story_bundle_context.active_story_characters`, and targeted STCHAR retrieval (`get_record`, `get_records`, or `list_records(record_type='story_character_authority_record')`) for story-local character authority. `NCP` / `NCB` authoring-proposal nodes are world-scope proposal records and are warned-and-dropped for story task types with `task_header.warnings: ["authoring_proposal_seed_nodes_ignored"]`. Story-bundle records are supplied through `story_slug` and `story_bundle_context`; when exact story-local records are needed, use `get_records(record_ids, story_slug=<story_slug>)` or `list_records(record_type, story_slug=<story_slug>)`. Do not rely on world-scope `seed_nodes` expansion for story-local ids. If a story-pipeline request supplies story-local ids in `seed_nodes`, the packet returns `task_header.warnings: ["story_local_seed_nodes_ignored"]` so the caller can reroute through scoped targeted retrieval.
 - If any remaining world-scope seed does not resolve to an indexed node, packet assembly skips that seed and records a per-seed warning in `task_header.warnings`; missing seeds are never promoted to `local_authority` and do not prevent resolvable seeds or seed-independent governing context from being returned.
 - Preserve the distinction between `local_authority`, `exact_record_links`, and `scoped_local_context`; they are separate completeness classes, not synonyms.
 - Establish locality before governing background, and establish governing background before advisory impact surfaces.
@@ -251,6 +252,7 @@ Full bodies are considered only for `local_authority`, `governing_world_context`
 | `propose_new_characters` | `canon_fact_record`, `invariant`, `section` records whose `file_class` is `PEOPLES_AND_SPECIES` |
 | `canon_facts_from_diegetic_artifacts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `diegetic_artifact_record` |
 | `story_bootstrap` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `open_question_entry` |
+| `story_character_profile` | `character_record`, `invariant`, `mystery_reserve_entry`, `section` records whose `file_class` is `PEOPLES_AND_SPECIES` or `EVERYDAY_LIFE` |
 | `story_turn_cycle` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `commitment_block_authoring` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `branching_story_health_audit` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
@@ -264,6 +266,7 @@ The assembler first fits the normal preview/summary packet under the requested t
 | `character_generation` | `reserve` | `reserve` |
 | `diegetic_artifact_generation` | `reserve` | `reserve` |
 | `story_bootstrap` | `reserve` | `reserve` |
+| `story_character_profile` | `reserve` | `reserve` |
 | `story_turn_cycle` | `reserve` | `reserve` |
 | `commitment_block_authoring` | `reserve` | `reserve` |
 | `branching_story_health_audit` | `reserve` | `reserve` |
@@ -277,6 +280,12 @@ The assembler first fits the normal preview/summary packet under the requested t
 `story_turn_cycle` is the registered context-packet profile for `branching-story-turn-cycle` Pre-flight. The skill derives `seed_nodes` from the parent page state: cast members' resolved world entity ids, current location, and active period. The profile uses an 18000 default budget and prioritizes seed-scoped canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, and a latest `change_log_entry` node in `governing_world_context`. The turn-cycle skill compares the parent page's `state_snapshot.canon_revision` against that latest change-log id, classifies canon-baseline drift, and persists the current id on the new page's `state_snapshot.canon_revision`.
 
 The profile remains world-canon read-only for world-level records and requires `story_slug`. `get_context_packet(task_type='story_turn_cycle', story_slug=...)` returns world-canon/indexed context, the governing audit trail needed to interpret the story-local turn safely, and `story_bundle_context` for the indexed bundle-local pool / obligation / thread / recent-page state.
+
+### Story Character Profile
+
+`story_character_profile` is the registered context-packet profile for `story-character-profile` authoring. The profile requires `story_slug`, uses a 12000 default budget, prioritizes source `character_record` authority, `story_character_authority_record` records, bound `STENT` links, and governing invariant / Mystery Reserve records, and can deliver a source `CHAR` full body when the budget and harness ceiling allow it. Oversize source `CHAR` records follow the normal targeted-retrieval recovery path through `get_record` section projection suggestions.
+
+The profile remains world-canon read-only for world-level records. `get_context_packet(task_type='story_character_profile', story_slug=...)` returns world-canon/indexed context plus `story_bundle_context.active_story_characters` so the skill can distinguish profile-source `CHAR` reads from story-local STCHAR runtime authority. The `active_story_characters` list is status-based over indexed STCHAR records; page-scoped active cast snapshots remain a separate future surface.
 
 ### Commitment Block Authoring Profile
 
