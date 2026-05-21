@@ -1,6 +1,6 @@
 # SPEC67STOWORIND-002: Document intentionally non-indexed story-bundle fields
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/MACHINE-FACING-LAYER.md` only (documentation). No code, no schema, no tests.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-Several documented story-bundle reference fields are deliberately NOT indexed as edges because no current consumer reads them. Without recording this as a conscious decision, a future audit (continuity-audit / branching-story-health-audit) will re-flag these omissions as accidental gaps and propose re-adding them, re-litigating a YAGNI decision SPEC-67 already made. SPEC-67 §2.2 requires a short "intentionally non-indexed story fields" note in the machine-facing-layer docs so the decision is durable and auditable.
+At intake, several documented story-bundle reference fields were deliberately NOT indexed as edges because no current consumer reads them, but `docs/MACHINE-FACING-LAYER.md` did not record that as a conscious decision. Without that note, a future audit (continuity-audit / branching-story-health-audit) could re-flag these omissions as accidental gaps and propose re-adding them, re-litigating a YAGNI decision SPEC-67 already made. SPEC-67 §2.2 required a short "intentionally non-indexed story fields" note in the machine-facing-layer docs so the decision is durable and auditable.
 
 ## Assumption Reassessment (2026-05-21)
 
@@ -27,15 +27,15 @@ Several documented story-bundle reference fields are deliberately NOT indexed as
 1. Note enumerates all five non-indexed field groups with rationale → codebase grep-proof: `grep` for each field name in `docs/MACHINE-FACING-LAYER.md` returns a match in the note.
 2. Single-layer ticket (documentation-only): no schema/dry-run layer applies because the change introduces no code, schema, or runtime behavior — verification is grep against the post-edit doc.
 
-## What to Change
+## Landed Changes
 
-### 1. Add an "intentionally non-indexed story fields" note to `docs/MACHINE-FACING-LAYER.md`
+### 1. Added an "intentionally non-indexed story fields" note to `docs/MACHINE-FACING-LAYER.md`
 
-Near the §Story-Bundle Edge Types catalog, add a short note listing:
+Near the §Story-Bundle Edge Types catalog, the new note lists:
 - `STSTAT.location`, `STOBJ.owner`, `STOBJ.current_location`, `STLOC.bound_ent` — spatial/ownership fields with no current traversal consumer.
 - `CLK.thresholds[].effects.create/supersede/close` references — clock threshold effects are resolved at tick time, not traversed structurally; existing `clock_linked_record`/`clock_driver`/`clock_tick_event` edges cover the consumed surface.
 
-State the one-line "no current consumer" rationale per group and the rule that re-indexing any of them later requires naming the consumer at that time.
+It states the one-line "no current consumer" rationale per group and the rule that re-indexing any of them later requires naming the consumer at that time.
 
 ## Files to Touch
 
@@ -69,3 +69,21 @@ State the one-line "no current consumer" rationale per group and the rule that r
 
 1. `grep -n "intentionally non-indexed\|no current consumer" docs/MACHINE-FACING-LAYER.md` — confirms the note landed.
 2. `grep -n "STSTAT.location\|STOBJ.owner\|STOBJ.current_location\|STLOC.bound_ent\|CLK.thresholds" docs/MACHINE-FACING-LAYER.md` — confirms all five field groups are enumerated.
+
+## Outcome
+
+Completed: 2026-05-21
+
+The Story-Bundle Edge Types catalog in `docs/MACHINE-FACING-LAYER.md` now has an intentionally non-indexed fields note covering the four spatial/ownership fields and the clock-threshold effects references named by SPEC-67 §2.2. The note records the no-current-consumer rationale and requires a named future consumer before any of those fields are indexed.
+
+No code, schema, parser, or runtime behavior changed.
+
+## Verification Result
+
+1. `grep -n "intentionally non-indexed\|no current consumer" docs/MACHINE-FACING-LAYER.md` — PASS; returned the new re-indexing rule / rationale line in the note.
+2. `grep -n "STSTAT.location\|STOBJ.owner\|STOBJ.current_location\|STLOC.bound_ent\|CLK.thresholds" docs/MACHINE-FACING-LAYER.md` — PASS; returned the spatial/ownership field group and the `CLK.thresholds` field group in the note.
+3. `rg -n "Re-indexing any intentionally non-indexed field requires naming the consumer" docs/MACHINE-FACING-LAYER.md` — PASS; returned the exact future-consumer rule.
+
+## Deviations
+
+None. The ticket remained documentation-only; `tools/world-index` code, schema, and tests were intentionally untouched.

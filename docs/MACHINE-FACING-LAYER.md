@@ -152,6 +152,19 @@ SPEC-67 adds seven consumer-backed edge types for story-world index parity. Thes
 | `THR` | `thread_derived_from` | record | Records named by `derived_from[]`. |
 | `STCHAR` | `stchar_superseded_by` | `STCHAR` | The newer STCHAR authority record named by `superseded_by`, complementing `stchar_supersedes`. |
 
+Intentionally non-indexed story-bundle fields are recorded here so future audits can distinguish
+consumerless omissions from accidental parser drift:
+
+- `STSTAT.location`, `STOBJ.owner`, `STOBJ.current_location`, and `STLOC.bound_ent` are spatial or
+  ownership fields with no current traversal consumer in health-audit, retrieval, or impact-analysis
+  paths.
+- `CLK.thresholds[].effects.create`, `CLK.thresholds[].effects.supersede`, and
+  `CLK.thresholds[].effects.close` references are resolved when a clock threshold is applied, not
+  traversed structurally; `clock_linked_record`, `clock_driver`, and `clock_tick_event` cover the
+  consumed clock graph surface.
+
+Re-indexing any intentionally non-indexed field requires naming the consumer that will read the edge.
+
 ### Placeholder Skip Convention
 
 Story-bundle edges represent record-to-record graph links. When a source field permits placeholders, `world-index` emits an edge only when the value resolves to a structured record id. Placeholder values such as `group:<name>`, `public`, `system`, `unknown`, and `narrator` are silently skipped for edge emission. This applies to `CLK.driver`, `STSEC.holders[]`, `OBL.owed_by`, `OBL.owed_to`, `SE.actor`, and any STPLAN/STEMO reference-bearing field that can carry placeholder prose rather than a structured record id. The skipped value remains on the source record and is retrievable with `get_record`.
