@@ -1,21 +1,19 @@
 {
-  "originating_spec": "specs/SPEC-59-stchar-authority-fidelity-validators.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC59STCHARAUTFID-004.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "3adb3ff3df1683e2b39a55f7eecaf679f99602ea",
+  "originating_spec": "archive/specs/SPEC-59-stchar-authority-fidelity-validators.md",
+  "archived_spec": "archive/specs/SPEC-59-stchar-authority-fidelity-validators.md",
+  "last_ticket": "archive/tickets/SPEC59STCHARAUTFID-005.md",
+  "last_result": "completed_archived_spec_archived",
+  "last_work_commit": "517bdc2a7a83dd51998352dad443de5eecf267eb",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC59STCHARAUTFID-005.md",
-  "queue": [
-    "tickets/SPEC59STCHARAUTFID-005.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "completed",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": false,
   "post_review_audit_block": "not_applicable",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree after state-only commit; expected ignored package artifacts under tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
+  "dirty_state": "clean tracked worktree after state-only commit; expected ignored package artifacts under tools/validators/dist/ and tools/validators/node_modules/",
   "updated_at": "2026-05-21"
 }
