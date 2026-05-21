@@ -42,6 +42,8 @@ Flag determinism violations as HIGH Issues referencing the relevant SPEC (SPEC-0
 
 If the spec modifies canon-pipeline semantics (patch-engine write paths, validator thresholds, hook enforcement, canon-safety expansions, MCP tools mediating canon reads/writes, skill HARD-GATE discipline), verify the following checklist:
 
+> **Story-scope-validator carve-out**: adding read-only structural validators that enforce *story-bundle* (Skill Category 2c) integrity is not "modifying canon-pipeline semantics" — such validators mediate no world-canon reads/writes and change no canon-validator thresholds. The `### Canon-Pipeline Impact Rule` section is N/A for a spec whose only pipeline touch is new story-scope read-only validators (parallels the §3.9 story-scope-validator carve-out in `references/codebase-validation.md`).
+
 1. **Write authority**: Who is authorized to commit the change? (HARD-GATE on canon-addition; HARD-GATE on create-base-world; implicit user approval on surgical-edit tools via patch-engine's approval flow.) Specs that bypass HARD-GATE are CRITICAL Issues.
 2. **Scope declaration**: Does the proposal respect world-scope {single-world, all-worlds, meta}? Silent cross-world writes are CRITICAL.
 3. **Audit trail**: Does the change emit a log entry (Change Log Entry, adjudication record, anchor-checksum record)? Missing audit trail is a Rule-6 violation.

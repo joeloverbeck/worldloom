@@ -28,8 +28,10 @@ import { noCharAuthorityInStoryRuntime } from "../structural/no-char-authority-i
 import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-place-mutation.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
+import { pagePlanStcharPacketIntegrity } from "../structural/page-plan-stchar-packet-integrity.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
+import { proseReceiptStcharIntegrity } from "../structural/prose-receipt-stchar-integrity.js";
 import { recordIntroductionUniqueness } from "../structural/record-introduction-uniqueness.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
@@ -65,6 +67,7 @@ import { stemoSchemaCompliance } from "../structural/stemo-schema-compliance.js"
 import { stemoSupersessionLifecycleValid } from "../structural/stemo-supersession-lifecycle-valid.js";
 import { stemoTriggerEventOnBranchPath } from "../structural/stemo-trigger-event-on-branch-path.js";
 import { stcharActiveForBoundStent } from "../structural/stchar-active-for-bound-stent.js";
+import { stcharBoundStentReciprocity } from "../structural/stchar-bound-stent-reciprocity.js";
 import { stcharResolves } from "../structural/stchar-resolves.js";
 import { stcharSupersessionIntegrity } from "../structural/stchar-supersession-integrity.js";
 import { stentRequiresStchar } from "../structural/stent-requires-stchar.js";
@@ -75,6 +78,7 @@ import { storyQuestionSetupPredatesPayoff } from "../structural/story-question-s
 import { storyQuestionTerminalDebt } from "../structural/story-question-terminal-debt.js";
 import { storyDaDuplicateHeuristic } from "../structural/story-da-duplicate-heuristic.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
+import { storyKernelCastBindListIntegrity } from "../structural/story-kernel-cast-bind-list-integrity.js";
 import { threadIntroductionGroundingIntegrity } from "../structural/thread-introduction-grounding-integrity.js";
 import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
@@ -118,6 +122,7 @@ export const structuralValidators: readonly Validator[] = [
   recursiveReferenceClosure,
   stentRequiresStchar,
   stcharResolves,
+  stcharBoundStentReciprocity,
   stcharActiveForBoundStent,
   stcharSupersessionIntegrity,
   noCharAuthorityInStoryRuntime,
@@ -143,6 +148,7 @@ export const structuralValidators: readonly Validator[] = [
   compatibilityDrift,
   activeRecordsFullShape,
   pageAffordanceIntegrity,
+  pagePlanStcharPacketIntegrity,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,
@@ -151,6 +157,8 @@ export const structuralValidators: readonly Validator[] = [
   touchedByCfCompleteness,
   proposalPackageShape,
   proseReceiptSchemaCompliance,
+  proseReceiptStcharIntegrity,
+  storyKernelCastBindListIntegrity,
   modificationHistoryRetrofit,
   validationTraceShapeCompliance,
   stplanSchemaCompliance,
