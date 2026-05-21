@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/world-proposal-batch.schema.json",
+  "title": "WorldProposalBatchFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["batch_id", "generated_date", "source_preference_document", "parameters_path", "parameters", "distinctness_enforced", "existing_worlds_scanned", "card_ids", "dropped_card_ids", "bootstrap_writes_required", "bootstrap_writes_performed", "user_approved", "deliverable_summary_distinctness_banner_surfaced"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" } }
+  },
+  "properties": {
+    "batch_id": { "type": "string", "pattern": "^NWB-[0-9]+$" },
+    "generated_date": { "$ref": "#/$defs/nonEmptyString" },
+    "source_preference_document": { "type": "string" },
+    "parameters_path": { "type": "string" },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_count_requested", "intended_use_case", "scale_preference", "inspiration_distance", "novelty_preference", "existing_world_policy", "content_boundaries", "genre_diversification", "inferred_defaults"],
+      "properties": {
+        "proposal_count_requested": { "type": "integer", "minimum": 1 },
+        "intended_use_case": { "type": "string", "enum": ["novel", "rpg", "open_world_game", "anthology", "transmedia", "lore_sandbox"] },
+        "scale_preference": { "type": "string", "enum": ["one_settlement", "region", "continent", "planet", "solar_system", "cosmology"] },
+        "inspiration_distance": { "type": "string", "enum": ["close", "moderate", "distant", "structural_only"] },
+        "novelty_preference": { "type": "string", "enum": ["low", "medium", "high"] },
+        "existing_world_policy": { "type": "string", "enum": ["strict_avoid", "no_repeat_niche", "not_applicable"] },
+        "content_boundaries": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sexual_content", "body_horror", "child_endangerment", "religion", "politics", "oppression"],
+          "properties": {
+            "sexual_content": { "type": "string", "enum": ["forbidden", "allowed_if_structural", "ask_or_tag"] },
+            "body_horror": { "type": "string" },
+            "child_endangerment": { "type": "string" },
+            "religion": { "type": "string" },
+            "politics": { "type": "string" },
+            "oppression": { "type": "string" }
+          }
+        },
+        "genre_diversification": { "type": "string", "enum": ["diversify", "single_family"] },
+        "inferred_defaults": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "distinctness_enforced": { "type": "boolean" },
+    "existing_worlds_scanned": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+    "card_ids": { "type": "array", "items": { "type": "string", "pattern": "^NWP-[0-9]+$" } },
+    "dropped_card_ids": { "type": "array", "items": { "type": "string", "pattern": "^NWP-[0-9]+$" } },
+    "bootstrap_writes_required": { "type": "boolean" },
+    "bootstrap_writes_performed": { "type": "array", "items": { "type": "string" } },
+    "user_approved": { "type": "boolean" },
+    "deliverable_summary_distinctness_banner_surfaced": { "type": "boolean" }
+  }
+}

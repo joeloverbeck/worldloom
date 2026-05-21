@@ -4,17 +4,17 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators` (`RECORD_TYPE_TO_SCHEMA`, scan-dir list, fixtures); `record-schema-compliance` validates the new surfaces automatically once wired.
-**Deps**: SPEC61PROSURSCH-001, SPEC61PROSURSCH-002
+**Deps**: archive/tickets/SPEC61PROSURSCH-001.md, SPEC61PROSURSCH-002
 
 ## Problem
 
-The eight schemas (SPEC61PROSURSCH-001) and the node types/enumeration (SPEC61PROSURSCH-002) are inert until the validator framework maps node types to schemas and scans the directories. This ticket wires `RECORD_TYPE_TO_SCHEMA` + the scan-dir list so `record-schema-compliance` validates PR/BATCH/EPE/EPE-sidecar/AU/RP/NWP/NWB frontmatter, and adds well-formed + malformed fixtures per surface.
+The nine schemas (`archive/tickets/SPEC61PROSURSCH-001.md`) and the node types/enumeration (SPEC61PROSURSCH-002) are inert until the validator framework maps node types to schemas and scans the directories. This ticket wires `RECORD_TYPE_TO_SCHEMA` + the scan-dir list so `record-schema-compliance` validates PR/BATCH/EPE/EPE-sidecar/EPE-batch/AU/RP/NWP/NWB frontmatter, and adds well-formed + malformed fixtures per surface.
 
 ## Assumption Reassessment (2026-05-21)
 
 1. Verified against the codebase (this session): `tools/validators/src/structural/utils.ts` carries `RECORD_TYPE_TO_SCHEMA` (lines ~78–114, node_type → schema-basename) and the directory scan list (line ~358); `record-schema-compliance.ts` consumes `RECORD_TYPE_TO_SCHEMA` and is the path NCP/NCB already use. Adding rows + scan dirs is the same shape as the NCP/NCB precedent.
 2. Verified against the spec: SPEC-61 §2.3 first bullet — add the eight node-type → schema-basename rows to `RECORD_TYPE_TO_SCHEMA` and the new directories to the scan list; record-schema-compliance then validates automatically. §4 requires one well-formed + one malformed fixture per surface.
-3. Cross-artifact boundary under audit: the schema↔node-type↔directory contract spanning SPEC61PROSURSCH-001 (schema basenames) and -002 (node types + enumerated dirs). Each `RECORD_TYPE_TO_SCHEMA` row's node_type must exist (from -002) and its schema basename must exist (from -001); the scan-dir entries must match the directories -002 enumerates. Confirm both before wiring.
+3. Cross-artifact boundary under audit: the schema↔node-type↔directory contract spanning `archive/tickets/SPEC61PROSURSCH-001.md` (schema basenames) and SPEC61PROSURSCH-002 (node types + enumerated dirs). Each `RECORD_TYPE_TO_SCHEMA` row's node_type must exist (from SPEC61PROSURSCH-002) and its schema basename must exist (from `archive/tickets/SPEC61PROSURSCH-001.md`); the scan-dir entries must match the directories SPEC61PROSURSCH-002 enumerates. `archive/tickets/SPEC61PROSURSCH-001.md` split `pressure-event-batch.schema.json`, so `pressure_event_batch` must map to `pressure-event-batch`.
 4. FOUNDATIONS §Machine-Facing Layer — Validator Framework: this ticket extends executable structural validation to the surfaces that lacked it, using the existing CLI + engine-pre-apply path rather than a new mechanism. Restate that the validator runs over parsed records, not raw files.
 5. Canon Safety surface: `utils.ts` drives `record-schema-compliance`, a structural validator under `tools/validators/src/structural/` that gates record schema conformance at the validator boundary. Confirm the new rows do not relax any existing surface's validation and that the additions are purely additive (new node_type keys; no edit to existing keys).
 
@@ -34,7 +34,7 @@ The eight schemas (SPEC61PROSURSCH-001) and the node types/enumeration (SPEC61PR
 
 ### 1. Add `RECORD_TYPE_TO_SCHEMA` rows
 
-In `tools/validators/src/structural/utils.ts`, add one row per surface mapping node_type → schema basename: `proposal_card`→`proposal-card`, `proposal_batch`→`proposal-batch`, `pressure_event_card`→`pressure-event-card`, `pressure_event_sidecar_proposal`→`pressure-event-sidecar-proposal`, `audit_record`→`audit-report`, `retcon_proposal_card`→`retcon-proposal-card`, `world_proposal_card`→`world-proposal-card`, `world_proposal_batch`→`world-proposal-batch`. (`pressure-events/batches/` maps via the `proposal_batch` node type per SPEC-61 §2.2, unless §6 split adds a ninth.)
+In `tools/validators/src/structural/utils.ts`, add one row per surface mapping node_type → schema basename: `proposal_card`→`proposal-card`, `proposal_batch`→`proposal-batch`, `pressure_event_card`→`pressure-event-card`, `pressure_event_sidecar_proposal`→`pressure-event-sidecar-proposal`, `pressure_event_batch`→`pressure-event-batch`, `audit_record`→`audit-report`, `retcon_proposal_card`→`retcon-proposal-card`, `world_proposal_card`→`world-proposal-card`, `world_proposal_batch`→`world-proposal-batch`.
 
 ### 2. Add scan directories
 
@@ -53,7 +53,7 @@ Under `tools/validators/tests/`, add one well-formed and one malformed (missing/
 ## Out of Scope
 
 - The `approval-semantics` `direct_user_approval` validator (SPEC61PROSURSCH-004).
-- Authoring the schema files (SPEC61PROSURSCH-001) or node types (SPEC61PROSURSCH-002).
+- Authoring the schema files (`archive/tickets/SPEC61PROSURSCH-001.md`) or node types (SPEC61PROSURSCH-002).
 - Promoting any surface to a retrieval (`list_records`) record.
 
 ## Acceptance Criteria

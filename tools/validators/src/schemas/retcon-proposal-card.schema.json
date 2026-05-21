@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/retcon-proposal-card.schema.json",
+  "title": "RetconProposalCardFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "proposed_status", "type", "statement", "retcon_type", "target_cf_ids", "severity_before_fix", "severity_after_fix", "audit_origin", "finding_id", "scope", "truth_scope", "domains_affected", "prerequisites", "distribution", "costs_and_limits", "visible_consequences", "required_world_updates", "source_basis", "contradiction_risk", "notes"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" } },
+    "canonicalDomain": {
+      "type": "string",
+      "enum": ["labor", "embodiment", "social_norms", "architecture", "mobility", "law", "trade", "war", "kinship", "religion", "language", "status_signaling", "ecology", "daily_routine", "institutions", "everyday_life", "economy", "settlement_life", "memory_and_myth", "magic", "technology", "medicine", "status_order", "warfare", "geography", "taboo_and_pollution"]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["geographic", "temporal", "social"],
+      "properties": {
+        "geographic": { "type": "string", "enum": ["local", "regional", "global", "cosmic"] },
+        "temporal": { "type": "string", "enum": ["ancient", "historical", "current", "future", "cyclical"] },
+        "social": { "type": "string", "enum": ["restricted_group", "public", "elite", "secret", "rumor"] }
+      }
+    },
+    "sourceBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "not": {
+        "required": ["direct_user_approval"],
+        "properties": { "direct_user_approval": true }
+      },
+      "required": ["derived_from"],
+      "properties": {
+        "user_approved": { "type": "boolean" },
+        "derived_from": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]+$" } }
+      }
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "pattern": "^RP-[0-9]+$" },
+    "title": { "$ref": "#/$defs/nonEmptyString" },
+    "proposed_status": { "type": "string", "enum": ["hard_canon", "derived_canon", "soft_canon", "contested_canon", "unchanged"] },
+    "type": { "$ref": "#/$defs/nonEmptyString" },
+    "statement": { "$ref": "#/$defs/nonEmptyString" },
+    "retcon_type": { "type": "string", "enum": ["A", "B", "C", "D", "E", "F"] },
+    "target_cf_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^CF-[0-9]+$" } },
+    "severity_before_fix": { "type": "integer", "minimum": 0, "maximum": 5 },
+    "severity_after_fix": { "type": "integer", "minimum": 0, "maximum": 5 },
+    "audit_origin": { "type": "string", "pattern": "^AU-[0-9]+$" },
+    "finding_id": { "type": "string", "pattern": "^F-[0-9A-Z]+$" },
+    "scope": { "$ref": "#/$defs/scope" },
+    "truth_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["world_level", "diegetic_status"],
+      "properties": {
+        "world_level": {
+          "oneOf": [
+            { "type": "boolean" },
+            { "type": "string", "enum": ["true", "false", "uncertain"] }
+          ]
+        },
+        "diegetic_status": { "type": "string", "enum": ["objective", "believed", "disputed", "propagandistic", "legendary"] }
+      }
+    },
+    "domains_affected": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/canonicalDomain" } },
+    "prerequisites": { "$ref": "#/$defs/stringArray" },
+    "distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["who_can_do_it", "who_cannot_easily_do_it", "why_not_universal"],
+      "properties": {
+        "who_can_do_it": { "$ref": "#/$defs/stringArray" },
+        "who_cannot_easily_do_it": { "$ref": "#/$defs/stringArray" },
+        "why_not_universal": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "costs_and_limits": { "$ref": "#/$defs/stringArray" },
+    "visible_consequences": { "$ref": "#/$defs/stringArray" },
+    "required_world_updates": { "$ref": "#/$defs/stringArray" },
+    "source_basis": { "$ref": "#/$defs/sourceBasis" },
+    "contradiction_risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hard", "soft"],
+      "properties": {
+        "hard": { "type": "boolean" },
+        "soft": { "type": "boolean" }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

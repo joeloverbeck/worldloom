@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/audit-report.schema.json",
+  "title": "AuditReportFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["audit_id", "world_slug", "date", "parameters", "trigger_context", "severity_floor", "categories_audited", "categories_deferred", "finding_count_by_severity", "retcon_card_ids", "dropped_finding_ids", "dropped_card_ids", "user_approved"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" } },
+    "severityCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity_1", "severity_2", "severity_3", "severity_4", "severity_5"],
+      "properties": {
+        "severity_1": { "type": "integer", "minimum": 0 },
+        "severity_2": { "type": "integer", "minimum": 0 },
+        "severity_3": { "type": "integer", "minimum": 0 },
+        "severity_4": { "type": "integer", "minimum": 0 },
+        "severity_5": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "properties": {
+    "audit_id": { "type": "string", "pattern": "^AU-[0-9]+$" },
+    "world_slug": { "$ref": "#/$defs/nonEmptyString" },
+    "date": { "$ref": "#/$defs/nonEmptyString" },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["audit_scope", "severity_floor", "focus_domains", "trigger_context", "recent_canon_addition_cutoff"],
+      "properties": {
+        "audit_scope": {},
+        "severity_floor": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "focus_domains": { "$ref": "#/$defs/stringArray" },
+        "trigger_context": { "type": "string", "enum": ["post-canon-addition", "pre-publication", "periodic", "user-suspected-contradiction"] },
+        "recent_canon_addition_cutoff": { "type": "string" }
+      }
+    },
+    "trigger_context": { "type": "string", "enum": ["post-canon-addition", "pre-publication", "periodic", "user-suspected-contradiction"] },
+    "severity_floor": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "categories_audited": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 10 } },
+    "categories_deferred": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+    "finding_count_by_severity": { "$ref": "#/$defs/severityCounts" },
+    "retcon_card_ids": { "type": "array", "items": { "type": "string", "pattern": "^RP-[0-9]+$" } },
+    "dropped_finding_ids": { "type": "array", "items": { "type": "string", "pattern": "^F-[0-9A-Z]+$" } },
+    "dropped_card_ids": { "type": "array", "items": { "type": "string", "pattern": "^RP-[0-9]+$" } },
+    "user_approved": { "type": "boolean" }
+  }
+}

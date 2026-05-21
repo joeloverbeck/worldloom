@@ -56,7 +56,9 @@ it from path — a redundant authored field would cost tokens at every card with
 
 ## 2. Changes
 
-### 2.1 JSON schemas for the eight uncovered surfaces
+### 2.1 JSON schemas for the uncovered surfaces
+
+**Implementation note (2026-05-21, SPEC61PROSURSCH-001):** the PR and EPE batch templates do not share frontmatter, so the optional split in §6 is now active. The schema set is nine files, with `pressure-event-batch.schema.json` separate from `proposal-batch.schema.json`; downstream node-type and validation tickets must include `pressure_event_batch`.
 
 **Files:** new `tools/validators/src/schemas/*.schema.json`
 
@@ -64,10 +66,10 @@ Add schemas modeled on the existing `character-proposal-card.schema.json` /
 `character-proposal-batch.schema.json` pair (the proven direct-write-proposal precedent):
 
 - `proposal-card.schema.json` (PR)
-- `proposal-batch.schema.json` (PR/EPE batch manifests — shared shape if frontmatter aligns; otherwise
-  split)
+- `proposal-batch.schema.json` (PR batch manifests)
 - `pressure-event-card.schema.json` (EPE base card)
 - `pressure-event-sidecar-proposal.schema.json` (EPE `*.proposal.md`)
+- `pressure-event-batch.schema.json` (EPE batch manifests)
 - `audit-report.schema.json` (AU)
 - `retcon-proposal-card.schema.json` (RP)
 - `world-proposal-card.schema.json` (NWP)
@@ -93,15 +95,13 @@ Mirror the `character-proposals` enumeration precedent (`enumerate.ts:51,182,190
 `pressure-events/`, `pressure-events/batches/`, `audits/`, `audits/AU-*/retcon-proposals/`,
 `world-proposals/`, `world-proposals/batches/`. Map each directory + filename pattern to a node type
 (`proposal_card`, `proposal_batch`, `pressure_event_card`, `pressure_event_sidecar_proposal`,
-`audit_record`, `retcon_proposal_card`, `world_proposal_card`, `world_proposal_batch` — node-type
+`pressure_event_batch`, `audit_record`, `retcon_proposal_card`, `world_proposal_card`, `world_proposal_batch` — node-type
 names already partially reserved in `tools/world-index/src/schema/types.ts`; reuse those that exist:
 `proposal_card`, `proposal_batch`, `retcon_proposal_card`, `audit_record` are already present in
-`NODE_TYPES`). The nine surfaces in §1 map to these **eight** node types because
-`pressure-events/batches/BATCH-*.md` reuses the `proposal_batch` node type +
-`proposal-batch.schema.json` (its frontmatter shares the PR-batch shape per §2.1); `enumerate.ts`
-therefore routes both `proposals/batches/` and `pressure-events/batches/` to `proposal_batch`. If
-§2.1's frontmatter-alignment check fails and the EPE batch is split into its own schema, add a ninth
-`pressure_event_batch` node type at that point (tracked in §6).
+`NODE_TYPES`). The nine surfaces in §1 now map to **nine** node types because
+SPEC61PROSURSCH-001 proved the PR and EPE batch frontmatter diverge; `enumerate.ts`
+therefore routes `proposals/batches/` to `proposal_batch` and `pressure-events/batches/` to
+`pressure_event_batch`.
 
 > **EPE non-indexing is deliberate and preserved.** Verified: EPE base cards are allocator-tracked
 > (`allocate-next-id.ts`) but file-scanned, not retrieval-indexed, by design (candidates until
@@ -114,7 +114,7 @@ therefore routes both `proposals/batches/` and `pressure-events/batches/` to `pr
 
 **Files:** `tools/validators/src/structural/utils.ts`, `tools/validators/src/structural/record-schema-compliance.ts`, and either an extension of an existing structural validator or a new `tools/validators/src/structural/approval-semantics.ts` wired into `tools/validators/src/public/registry.ts`
 
-- Add the eight new node-type → schema-basename rows to `RECORD_TYPE_TO_SCHEMA`
+- Add the nine new node-type → schema-basename rows to `RECORD_TYPE_TO_SCHEMA`
   (`utils.ts:78–114`) and add the new directories to the scan list (`utils.ts:358`).
   `record-schema-compliance.ts` then validates the new surfaces automatically (same path as NCP/NCB).
 - Add an **approval-semantics check** (mechanical, blocking): on every non-CF surface, the presence of
@@ -126,9 +126,9 @@ therefore routes both `proposals/batches/` and `pressure-events/batches/` to `pr
   satisfies §4's universal criterion. The existing NCP / NCB / CHAR / DA schemas do **not** prohibit
   `direct_user_approval` (verified: `diegetic-artifact-frontmatter.schema.json:66` declares
   `source_basis` as a permissive `{ "type": "object" }`), so a schema-only prohibition baked into the
-  eight new schemas alone would leave those pre-existing surfaces uncovered. The §2.1 per-schema
+  new schemas alone would leave those pre-existing surfaces uncovered. The §2.1 per-schema
   `"not": {"required": ["direct_user_approval"]}` prohibition is retained as **optional
-  defense-in-depth** on the eight new schemas, not as the sole enforcement path.
+  defense-in-depth** on the new schemas, not as the sole enforcement path.
 
 ### 2.4 Fix the RP `direct_user_approval` collision
 
@@ -156,14 +156,14 @@ therefore routes both `proposals/batches/` and `pressure-events/batches/` to `pr
 
 ## 4. Acceptance
 
-- `tools/validators/src/schemas/` contains the eight new schemas; `npm test` in `tools/validators`
+- `tools/validators/src/schemas/` contains the nine new schemas; `npm test` in `tools/validators`
   passes including new fixtures (one well-formed + one malformed per surface).
 - A PR/EPE/AU/RP/NWP/NWB card with a malformed/missing required frontmatter field produces a
   `record-schema-compliance` FAIL through the world-validate CLI.
 - A non-CF surface carrying `source_basis.direct_user_approval` produces a blocking FAIL with a message
   citing the CF-only reservation — enforced by the `approval-semantics` validator over **every** non-CF
-  record class (PR / BATCH / EPE / EPE-sidecar / AU / RP / NWP / NWB **and** the pre-existing
-  NCP / NCB / CHAR / DA surfaces), not only the eight new schemas.
+  record class (PR / BATCH / EPE / EPE-sidecar / EPE-batch / AU / RP / NWP / NWB **and** the pre-existing
+  NCP / NCB / CHAR / DA surfaces), not only the new schemas.
 - The RP template/skill no longer reference `direct_user_approval`; a freshly generated RP card carries
   `source_basis.user_approved`.
 - An accepted CF still requires `direct_user_approval: true` (no regression).
@@ -187,9 +187,6 @@ therefore routes both `proposals/batches/` and `pressure-events/batches/` to `pr
   schema/node-type coverage is the natural moment to surface it. Route the documentation fix to
   **SPEC-62** (which already amends `docs/REPOSITORY-MAP.md` and the FOUNDATIONS docs); do **not** expand
   this spec's scope to edit `docs/ID-ALLOCATION.md` directly.
-- **Pressure-event batch schema — shared vs split.** §2.1 folds PR and EPE batch manifests into one
-  `proposal-batch.schema.json` "if frontmatter aligns," and §2.2 routes both batch directories to the
-  `proposal_batch` node type on that basis. The implementer must confirm at ticket time that
-  `proposals/batches/BATCH-*.md` and `pressure-events/batches/BATCH-*.md` frontmatter actually align; if
-  they diverge, split into a ninth `pressure-event-batch.schema.json` + `pressure_event_batch` node type
-  and update the "eight" counts in §2.1 / §2.3 / §4 accordingly.
+- **Pressure-event batch schema — split resolved.** SPEC61PROSURSCH-001 confirmed
+  `proposals/batches/BATCH-*.md` and `pressure-events/batches/BATCH-*.md` frontmatter diverge, so the
+  implementation uses a ninth `pressure-event-batch.schema.json` + `pressure_event_batch` node type.

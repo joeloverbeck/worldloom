@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/world-proposal-card.schema.json",
+  "title": "WorldProposalCardFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["proposal_id", "batch_id", "slug", "title", "generated_date", "core_sentence", "intended_canon_layer", "niche_summary", "occupancy_strength", "distinctness_enforced", "distinctness_check_skipped_reason", "preference_fit", "scores", "score_aggregate", "domains_affected", "mystery_reserve_seeds", "canon_safety_check", "critic_pass_trace", "source_basis", "recommended_next_step", "notes"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" } },
+    "canonicalDomain": {
+      "type": "string",
+      "enum": ["labor", "embodiment", "social_norms", "architecture", "mobility", "law", "trade", "war", "kinship", "religion", "language", "status_signaling", "ecology", "daily_routine", "institutions", "everyday_life", "economy", "settlement_life", "memory_and_myth", "magic", "technology", "medicine", "status_order", "warfare", "geography", "taboo_and_pollution"]
+    },
+    "scoreMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preference_alignment", "novelty", "consequence_propagation", "ordinary_life_reach", "institution_generation", "faction_generation", "geography_as_law_strength", "deep_history_pressure", "mystery_reserve_quality", "diegetic_artifact_potential", "character_generation_potential", "native_story_procedure_strength", "tonal_aesthetic_specificity", "redundancy_risk", "pastiche_risk", "overcomplexity", "implementation_burden", "thematic_mismatch", "ethical_boundary_risk", "mystery_flattening_risk", "spectacle_without_society_risk"],
+      "properties": {
+        "preference_alignment": { "type": "number" },
+        "novelty": { "type": "number" },
+        "consequence_propagation": { "type": "number" },
+        "ordinary_life_reach": { "type": "number" },
+        "institution_generation": { "type": "number" },
+        "faction_generation": { "type": "number" },
+        "geography_as_law_strength": { "type": "number" },
+        "deep_history_pressure": { "type": "number" },
+        "mystery_reserve_quality": { "type": "number" },
+        "diegetic_artifact_potential": { "type": "number" },
+        "character_generation_potential": { "type": "number" },
+        "native_story_procedure_strength": { "type": "number" },
+        "tonal_aesthetic_specificity": { "type": "number" },
+        "redundancy_risk": { "type": "number" },
+        "pastiche_risk": { "type": "number" },
+        "overcomplexity": { "type": "number" },
+        "implementation_burden": { "type": "number" },
+        "thematic_mismatch": { "type": "number" },
+        "ethical_boundary_risk": { "type": "number" },
+        "mystery_flattening_risk": { "type": "number" },
+        "spectacle_without_society_risk": { "type": "number" }
+      }
+    },
+    "sourceBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "not": {
+        "required": ["direct_user_approval"],
+        "properties": { "direct_user_approval": true }
+      },
+      "required": ["preference_path", "parameters_path", "derived_from_seed_id", "user_approved"],
+      "properties": {
+        "preference_path": { "type": "string" },
+        "parameters_path": { "type": "string" },
+        "derived_from_seed_id": { "type": "string" },
+        "user_approved": { "type": "boolean" }
+      }
+    }
+  },
+  "properties": {
+    "proposal_id": { "type": "string", "pattern": "^NWP-[0-9]+$" },
+    "batch_id": { "type": "string", "pattern": "^NWB-[0-9]+$" },
+    "slug": { "$ref": "#/$defs/nonEmptyString" },
+    "title": { "$ref": "#/$defs/nonEmptyString" },
+    "generated_date": { "$ref": "#/$defs/nonEmptyString" },
+    "core_sentence": { "$ref": "#/$defs/nonEmptyString" },
+    "intended_canon_layer": { "type": "string", "enum": ["hard_canon", "derived_canon", "soft_canon", "contested_canon", "mystery_reserve"] },
+    "niche_summary": { "$ref": "#/$defs/nonEmptyString" },
+    "occupancy_strength": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_state", "nearest_existing_worlds", "decisive_differences"],
+      "properties": {
+        "current_state": { "type": "string", "enum": ["open", "adjacent", "crowded", "hard_duplicate"] },
+        "nearest_existing_worlds": { "$ref": "#/$defs/stringArray" },
+        "decisive_differences": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "distinctness_enforced": { "type": "boolean" },
+    "distinctness_check_skipped_reason": { "type": "string" },
+    "preference_fit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["matched_patterns", "rejected_patterns_avoided", "why_user_may_like_it"],
+      "properties": {
+        "matched_patterns": { "$ref": "#/$defs/stringArray" },
+        "rejected_patterns_avoided": { "$ref": "#/$defs/stringArray" },
+        "why_user_may_like_it": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "scores": { "$ref": "#/$defs/scoreMap" },
+    "score_aggregate": { "type": "number" },
+    "domains_affected": { "type": "array", "items": { "$ref": "#/$defs/canonicalDomain" } },
+    "mystery_reserve_seeds": { "type": "object", "additionalProperties": true },
+    "canon_safety_check": { "type": "object", "additionalProperties": true },
+    "critic_pass_trace": { "type": "object", "additionalProperties": { "type": "string" } },
+    "source_basis": { "$ref": "#/$defs/sourceBasis" },
+    "recommended_next_step": { "type": "string", "enum": ["route_to_create_base_world", "reserved_for_future_batch", "seed_for_other_pipeline"] },
+    "notes": { "type": "string" }
+  }
+}

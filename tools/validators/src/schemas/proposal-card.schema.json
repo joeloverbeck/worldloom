@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/proposal-card.schema.json",
+  "title": "ProposalCardFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["proposal_id", "batch_id", "slug", "title", "canon_fact_statement", "proposed_status", "type", "enrichment_category", "proposal_family", "domains_touched", "recommended_scope", "why_not_universal", "scores", "score_aggregate", "immediate_consequences", "longer_term_consequences", "likely_required_downstream_updates", "risks", "canon_safety_check", "source_basis", "notes"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" } },
+    "canonFactType": {
+      "type": "string",
+      "enum": ["capability", "artifact", "law", "belief", "event", "institution", "species", "ritual", "taboo", "technology", "resource_distribution", "hidden_truth", "local_anomaly", "metaphysical_rule", "historical_process", "text_tradition", "hazard", "craft", "place", "polity", "route", "social_role", "ecological_system", "bloodline", "magic_practice", "divine_action", "artifact_dependent_truth", "exception_introducing_fact", "institution_with_secrecy", "knowledge_asymmetric_fact"]
+    },
+    "canonicalDomain": {
+      "type": "string",
+      "enum": ["labor", "embodiment", "social_norms", "architecture", "mobility", "law", "trade", "war", "kinship", "religion", "language", "status_signaling", "ecology", "daily_routine", "institutions", "everyday_life", "economy", "settlement_life", "memory_and_myth", "magic", "technology", "medicine", "status_order", "warfare", "geography", "taboo_and_pollution"]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["geographic", "temporal", "social"],
+      "properties": {
+        "geographic": { "type": "string", "enum": ["local", "regional", "global", "cosmic"] },
+        "temporal": { "type": "string", "enum": ["ancient", "historical", "current", "future", "cyclical"] },
+        "social": { "type": "string", "enum": ["restricted_group", "public", "elite", "secret", "rumor"] }
+      }
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coherence", "propagation_value", "story_yield", "distinctiveness", "ordinary_life_relevance", "mystery_preservation", "integration_burden", "redundancy_risk"],
+      "properties": {
+        "coherence": { "type": "number" },
+        "propagation_value": { "type": "number" },
+        "story_yield": { "type": "number" },
+        "distinctiveness": { "type": "number" },
+        "ordinary_life_relevance": { "type": "number" },
+        "mystery_preservation": { "type": "number" },
+        "integration_burden": { "type": "number" },
+        "redundancy_risk": { "type": "number" }
+      }
+    },
+    "canonSafetyCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["invariants_respected", "mystery_reserve_firewall", "distribution_discipline"],
+      "properties": {
+        "invariants_respected": { "$ref": "#/$defs/stringArray" },
+        "mystery_reserve_firewall": { "$ref": "#/$defs/stringArray" },
+        "distribution_discipline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["canon_facts_consulted"],
+          "properties": {
+            "canon_facts_consulted": { "$ref": "#/$defs/stringArray" }
+          }
+        }
+      }
+    },
+    "sourceBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "not": {
+        "required": ["direct_user_approval"],
+        "properties": { "direct_user_approval": true }
+      },
+      "required": ["world_slug", "batch_id", "generated_date", "user_approved", "derived_from_cfs"],
+      "properties": {
+        "world_slug": { "$ref": "#/$defs/nonEmptyString" },
+        "batch_id": { "type": "string", "pattern": "^BATCH-[0-9]+$" },
+        "generated_date": { "$ref": "#/$defs/nonEmptyString" },
+        "user_approved": { "type": "boolean" },
+        "derived_from_cfs": { "$ref": "#/$defs/stringArray" }
+      }
+    }
+  },
+  "properties": {
+    "proposal_id": { "type": "string", "pattern": "^PR-[0-9]+$" },
+    "batch_id": { "type": "string", "pattern": "^BATCH-[0-9]+$" },
+    "slug": { "$ref": "#/$defs/nonEmptyString" },
+    "title": { "$ref": "#/$defs/nonEmptyString" },
+    "canon_fact_statement": { "$ref": "#/$defs/nonEmptyString" },
+    "proposed_status": { "type": "string", "enum": ["hard_canon", "soft_canon", "contested_canon", "mystery_reserve", "invariant_revision"] },
+    "type": { "$ref": "#/$defs/canonFactType" },
+    "enrichment_category": { "$ref": "#/$defs/nonEmptyString" },
+    "proposal_family": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0, "maximum": 10 },
+        { "type": "string", "minLength": 1 }
+      ]
+    },
+    "domains_touched": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/canonicalDomain" } },
+    "recommended_scope": { "$ref": "#/$defs/scope" },
+    "why_not_universal": { "$ref": "#/$defs/stringArray" },
+    "scores": { "$ref": "#/$defs/scores" },
+    "score_aggregate": { "type": "number" },
+    "immediate_consequences": { "$ref": "#/$defs/stringArray" },
+    "longer_term_consequences": { "$ref": "#/$defs/stringArray" },
+    "likely_required_downstream_updates": { "$ref": "#/$defs/stringArray" },
+    "risks": { "$ref": "#/$defs/stringArray" },
+    "canon_safety_check": { "$ref": "#/$defs/canonSafetyCheck" },
+    "source_basis": { "$ref": "#/$defs/sourceBasis" },
+    "notes": { "type": "string" }
+  }
+}

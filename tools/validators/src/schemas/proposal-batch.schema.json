@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/proposal-batch.schema.json",
+  "title": "ProposalBatchFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["batch_id", "world_slug", "generated_date", "parameters", "diagnosis_summary", "card_ids", "dropped_card_ids", "user_approved", "notes"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" } }
+  },
+  "properties": {
+    "batch_id": { "type": "string", "pattern": "^BATCH-[0-9]+$" },
+    "world_slug": { "$ref": "#/$defs/nonEmptyString" },
+    "generated_date": { "$ref": "#/$defs/nonEmptyString" },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["batch_size", "novelty_range", "enrichment_types", "taboo_areas", "upstream_audit_path"],
+      "properties": {
+        "batch_size": { "type": "integer", "minimum": 1 },
+        "novelty_range": { "type": "string", "enum": ["conservative", "moderate", "bold"] },
+        "enrichment_types": { "$ref": "#/$defs/stringArray" },
+        "taboo_areas": { "$ref": "#/$defs/stringArray" },
+        "upstream_audit_path": { "type": "string" }
+      }
+    },
+    "diagnosis_summary": { "$ref": "#/$defs/nonEmptyString" },
+    "card_ids": { "type": "array", "items": { "type": "string", "pattern": "^PR-[0-9]+$" } },
+    "dropped_card_ids": { "type": "array", "items": { "type": "string", "pattern": "^PR-[0-9]+$" } },
+    "user_approved": { "type": "boolean" },
+    "notes": { "type": "string" }
+  }
+}
