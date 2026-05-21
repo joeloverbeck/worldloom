@@ -47,7 +47,7 @@ In the §Mystery Reserve resolution-safety note, the `active`/`passive` arm now 
 ## Out of Scope
 
 - The `resolution_intent` 7-value enum + `mystery_policy_validator` — dropped (YAGNI; no current consumer).
-- The skill/template change implementing the relaxation (`propose-new-worlds-from-preferences`) — that is SPEC62FOUANDDOC-003, which depends on this ticket.
+- The skill/template change implementing the relaxation (`propose-new-worlds-from-preferences`) — that is `archive/tickets/SPEC62FOUANDDOC-003.md`, which depends on this ticket.
 - `create-base-world` — unchanged; its symmetric "at least one of each" genesis seeding is not the reported defect.
 - Any validator, schema, or `canonical-vocabularies.ts` change (the coupling is already enforced).
 - The two new FOUNDATIONS sections (SPEC62FOUANDDOC-001).

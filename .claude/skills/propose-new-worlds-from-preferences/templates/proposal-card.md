@@ -114,8 +114,9 @@ domains_affected: []                         # canonical domain enum from get_ca
 mystery_reserve_seeds:
   active: []                                 # list of {title, status: active, future_resolution_safety: low|medium|high}
   passive: []                                # list of {title, status: passive, future_resolution_safety: low|medium|high}
-  forbidden: []                              # MANDATORY at least one — list of {title, status: forbidden, future_resolution_safety: none}
-                                             # Phase 11b verifies presence + safety coupling
+  forbidden: []                              # strongly recommended — if omitted, populate forbidden_mystery_absence_rationale
+                                             # list of {title, status: forbidden, future_resolution_safety: none}
+                                             # Phase 11b verifies bounded-mystery presence, rationale when omitted, and safety coupling
                                              # forbidden mysteries' `unknowns` must be world-internal,
                                              # never lifted from any existing world's M record
 
@@ -133,8 +134,10 @@ canon_safety_check:
     skipped_reason: ""                       # populated when skipped=true
     overlap_findings: []                     # list of {world_slug, m_id, overlap_kind, repair_action}
   forbidden_mystery_presence:
-    has_forbidden_mystery: false             # MUST be true after Phase 11b
+    has_forbidden_mystery: false             # recommended after Phase 11b; false requires rationale below
     forbidden_count: 0
+    bounded_mystery_count: 0                 # active + passive + forbidden seed count; MUST be >=1 after Phase 11b
+    forbidden_mystery_absence_rationale: ""  # required when has_forbidden_mystery=false
   notes: ""                                  # one-line free notes on the safety check
 
 # ===== critic pass audit trail (Mandatory LLM Roles, fused inline) =====
@@ -294,7 +297,8 @@ What repeatedly creates conflict in this world?
 
 - **Active mystery (≥1)**: ... — `future_resolution_safety: low|medium|high`
 - **Passive depth (≥1)**: ... — `future_resolution_safety: low|medium|high`
-- **Forbidden mystery (≥1, MANDATORY)**: ... — `future_resolution_safety: none`
+- **Forbidden mystery (strongly recommended)**: ... — `future_resolution_safety: none`
+- **Forbidden-mystery absence rationale**: ... — required if this card omits a forbidden mystery; explain why discovery or eventual revelation is structurally necessary.
 
 The forbidden mystery's `unknowns` must be world-internal, NEVER lifted from any existing world's M record (Phase 11a cross-world firewall enforces).
 
@@ -324,7 +328,7 @@ Under Standard Path, name the nearest existing world niches and the decisive dif
 Phase 11 audit trail surfaced for human review:
 
 - **11a Cross-World MR Firewall**: checked vs `<list of M-ids per existing world>`; overlap findings: `<none | <list>>`. Skipped if Empty Worlds Path with reason.
-- **11b Forbidden-Mystery Presence**: `<count>` forbidden mysteries declared; resolution-safety coupling verified.
+- **11b Bounded-Mystery Presence**: `<count>` bounded mysteries declared; `<count>` forbidden mysteries declared; if zero forbidden mysteries, `forbidden_mystery_absence_rationale` explains why discovery or eventual revelation is structurally necessary; resolution-safety coupling verified.
 - **11c Batch Mutual Distinctness** (intra-batch): position in score matrix vs other finalists.
 - **11d Batch World-Grammar Fidelity**: which preference cluster this card represents.
 
@@ -337,7 +341,7 @@ When `create-base-world` ingests this proposal, it will need to compose:
 - CF-1 (the primary-difference fact)
 - CH-1 (genesis change-log entry)
 - ≥1 invariant per category (ontological / causal / distribution / social / aesthetic_thematic)
-- ≥1 mystery seed per status (active / passive / forbidden)
+- ≥1 bounded mystery seed; forbidden mystery strongly recommended unless the proposal records an explicit absence rationale
 - One initial section per prose concern (GEO / PAS / INS / ECR / MTS / ELF / TML)
 
 This list is **forward-looking guidance for create-base-world**, not a backward-looking record of mutations this skill performed. This skill performs no canon mutations.
