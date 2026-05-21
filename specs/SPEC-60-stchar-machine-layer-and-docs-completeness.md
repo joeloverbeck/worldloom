@@ -24,10 +24,20 @@ of these changes canon semantics; this is tooling and documentation completeness
 - `storyRefsInRecordArrayField` (lines ~1422–1430) extracts record IDs only from the stringified
   `pred` field (`storyRefsInString(stringField(item, "pred"))`). It misses **structured** predicate
   argument fields such as `{ pred: "record_active", record: "STCHAR-1" }`.
-- Extend extraction to read record IDs from the structured argument fields the predicate DSL emits
-  (`record`, `holder`, `target`, and nested `predicate` for `not`/compound predicates), in addition
-  to the stringified form. Apply to SLT `preconditions.hard|soft` and STPLAN success/fallback
-  predicates so both edge sources are covered.
+- Extend extraction to be **field-name-agnostic**: for each predicate object, scan every
+  string-valued argument for record-ID patterns using the existing `storyRefsInString` regex. The
+  record-ref-bearing arg field varies by predicate — `record` for `record_active`/`record_age`,
+  `holder` for `plan_*`/`emotion_*`, `belief_id` for `belief_record`, and
+  `obligation`/`consequence`/`thread`/`clock`/`secret`/`question`/`intention`/`object`/`artifact`/
+  `entity`/`from`/`to` for the remaining predicates (the authoritative arg-field grammar is
+  `PREDICATE_ARG_SCHEMAS` in `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`). Recurse
+  into **both** nested combinator wrappers: `predicate` (singular, used by `not`) and `predicates`
+  (plural list, used by `all`/`any`). Apply to SLT `preconditions.hard|soft` and STPLAN
+  success/fallback predicates so both edge sources are covered.
+
+  > A value scan keyed on `PREDICATE_ARG_SCHEMAS` is preferred over a hand-listed field set: the
+  > DSL emits no `target` arg field (that was the extraction-loop variable, not a predicate field),
+  > and a hand-list would silently under-extract the dozen-plus non-`record` arg fields above.
 
 **Scope reframing (from the report):** ChatGPT-Pro framed this as STCHAR-specific. It is **general**
 — *any* record ref carried in a structured predicate arg (SF, STSEC, STCHAR, …) currently produces
@@ -36,6 +46,11 @@ no `storylet_predicate_ref` / plan-predicate edge. STCHAR is one beneficiary; th
 **Acceptance:**
 - Both `record_active(STCHAR-1)` (string form) and `{ pred: "record_active", record: "STCHAR-1" }`
   (structured form) emit a `storylet_predicate_ref` edge.
+- A record ref nested inside a combinator — `{ pred: "not", predicate: { pred: "record_active",
+  record: "STCHAR-1" } }` and `{ pred: "any", predicates: [ … ] }` — is extracted via recursion
+  into both `predicate` and `predicates` wrappers.
+- A non-`record` arg field carrying a record ID (e.g., `{ pred: "obligation_open", obligation:
+  "OBL-1" }`) emits an edge.
 - STPLAN success/fallback structured predicates index their record refs.
 - Existing string-form edges are unchanged (no regression).
 
@@ -45,8 +60,14 @@ no `storylet_predicate_ref` / plan-predicate edge. STCHAR is one beneficiary; th
 - `tools/world-mcp/src/ranking/profiles/index.ts`
 - context-packet docs/tests (see 2.4)
 
-- Add `"story_character_profile"` to `TASK_TYPES` (lines ~19–35; currently absent).
-- Add a ranking profile tuned for the `story-character-profile` skill's retrieval: targeted
+- Add `"story_character_profile"` to `TASK_TYPES` (lines ~19–35; currently absent). Because
+  `rankingProfilesByTaskType` (`Record<TaskType, RankingWeights>`) and
+  `DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE` (`Record<TaskType, number>`) are exhaustive mapped types over
+  `TaskType`, both require a new `story_character_profile` entry in the same change or the package
+  fails to typecheck.
+- Add a ranking profile (defined in `tools/world-mcp/src/ranking/profiles/canon-pipeline-adjacent.ts`
+  alongside the other story-pipeline profiles, or a new sibling module, and wired into
+  `profiles/index.ts`) tuned for the `story-character-profile` skill's retrieval: targeted
   full/section retrieval of the source `CHAR-*` dossier for `create_from_world_char` /
   `regenerate`, and story-bundle context for `create_story_local`.
 
@@ -92,6 +113,14 @@ profile.
   `archive/reports/story-character-dossier-retrieval-concerns-2026-05-21.md` (or prepend an
   "OBSOLETE — superseded by STCHAR (SPEC-56/57)" banner if kept in-tree). Operators must not follow
   contradictory pre-STCHAR guidance.
+- `docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md`: the companion triage of the
+  report above. Lines 25 and 44 describe turn-cycle deriving `STENT.bound_char_id` and an Option-D
+  "durable detector" keyed on `STENT.bound_char_id` — a field the validator
+  `story-kernel-cast-bind-list-integrity.ts:84–90` now flags as legacy ("story runtime authority
+  must use STCHAR ids"). Prepend the same "OBSOLETE — superseded by STCHAR (SPEC-56/57)" banner so
+  operators do not build a detector on a removed field. (The `bound_char_id` mention in
+  `docs/triage/2026-05-16-story-related-improvements-seventh-iteration-triage.md` is a historical
+  record of a past contract state — leave it as-is.)
 
 **Explicit non-change:** `reports/stchar-implementation-first-iteration.md` and
 `reports/stchar-audit-first-iteration.md` legitimately contain `bound_char_id` as historical
@@ -111,7 +140,9 @@ Either rename the field to `global_active_story_characters` for honesty, or add 
 ## 3. Test requirements
 
 - World-index: `{ pred: "record_active", record: "STCHAR-1" }` and the string form both emit
-  `storylet_predicate_ref`; STPLAN success/fallback structured predicate refs index.
+  `storylet_predicate_ref`; a combinator-nested ref (`not[record_active(STCHAR-1)]`, `any[…]`) and a
+  non-`record` arg field (`{ pred: "obligation_open", obligation: "OBL-1" }`) both index; STPLAN
+  success/fallback structured predicate refs index.
 - MCP: `story_character_profile` task type resolves to a profile;
   `get_context_packet(task_type="story_character_profile")` no longer falls back.
 - Patch-engine: stale-index test for an edited `stories/<slug>/story-characters/STCHAR-*.md`.

@@ -1,5 +1,26 @@
 # Implementation Order
 
+## World-system consolidation (first iteration)
+
+Specs derived from `reports/world-system-consolidation-first-iteration.md` (triage:
+`docs/triage/2026-05-21-world-system-consolidation-triage.md`). First consolidation pass over the
+world-system (non-story) skills, whose proposal/audit/pressure surfaces had the least prior iteration.
+
+| Order | Spec | Scope | Depends on |
+|---|---|---|---|
+| 1 | **SPEC-61** — Proposal-surface schema coverage & approval-semantics enforcement | JSON schemas + structural validation for PR/BATCH/EPE/EPE-sidecar/AU/RP/NWP/NWB; hard-fail non-CF `direct_user_approval`; fix RP collision | none — foundational |
+| 2 | **SPEC-62** — FOUNDATIONS & docs world-system reconciliation | FOUNDATIONS §Artifact Authority + §World Generativity paragraphs; document `passive_depth`; relax forbidden-mystery mandate; REPOSITORY-MAP + DA-prose fixes | none — independent; may run in parallel with SPEC-61 (docs-only; no schema/validator overlap) |
+
+Both are independent and may run in parallel. SPEC-61 is the executable coverage; SPEC-62 is
+docs/FOUNDATIONS only (touches no schema, validator, or world data). Deferred items (D3–D6:
+`taxonomy_authority_validator`, CF-1 split, continuity-audit compatibility checks, patch-engine
+routing of proposal direct-writes) await a concrete consumer or SPEC-61 landing — see the companion
+triage record.
+
+---
+
+## STCHAR audit (first iteration)
+
 Active specs derived from `reports/stchar-audit-first-iteration.md` (triage:
 `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`). These audit the gaps left by the
 just-merged SPEC-56 (stchar-machine-foundation) and SPEC-57 (stchar-pipeline-integration).
