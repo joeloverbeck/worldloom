@@ -1,21 +1,19 @@
 {
-  "originating_spec": "specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC62FOUANDDOC-005.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "479b336a261ab23d90878b4b0af80c0389d1854a",
+  "originating_spec": "archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md",
+  "archived_spec": "archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md",
+  "last_ticket": "archive/tickets/SPEC62FOUANDDOC-006.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "5f35fdadc899a63603c287e6f62738a308ac5fb2",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC62FOUANDDOC-006.md",
-  "queue": [
-    "tickets/SPEC62FOUANDDOC-006.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
-  "post_review_material_updates": false,
-  "post_review_audit_block": "not_applicable",
+  "post_review_material_updates": true,
+  "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean after state-only commit succeeds",
+  "dirty_state": "clean after final state-only commit succeeds",
   "updated_at": "2026-05-21"
 }
