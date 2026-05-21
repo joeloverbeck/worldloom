@@ -28,6 +28,7 @@ import { noCharAuthorityInStoryRuntime } from "../structural/no-char-authority-i
 import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-place-mutation.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
+import { pagePlanStcharPacketIntegrity } from "../structural/page-plan-stchar-packet-integrity.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
 import { recordIntroductionUniqueness } from "../structural/record-introduction-uniqueness.js";
@@ -143,6 +144,7 @@ export const structuralValidators: readonly Validator[] = [
   compatibilityDrift,
   activeRecordsFullShape,
   pageAffordanceIntegrity,
+  pagePlanStcharPacketIntegrity,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,
