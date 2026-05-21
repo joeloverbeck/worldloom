@@ -1,19 +1,24 @@
 {
-  "originating_spec": "archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md",
-  "archived_spec": "archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md",
-  "last_ticket": "archive/tickets/SPEC62FOUANDDOC-006.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "5f35fdadc899a63603c287e6f62738a308ac5fb2",
+  "originating_spec": "specs/SPEC-64-world-system-compatibility-and-artifact-maturity-validation.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC64WORSYSCOM-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "141713ed59101e4f611fe3e4863b1c70fbbcdd9b",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "complete",
+  "next_target": "tickets/SPEC64WORSYSCOM-002.md",
+  "queue": [
+    "tickets/SPEC64WORSYSCOM-002.md",
+    "tickets/SPEC64WORSYSCOM-003.md",
+    "tickets/SPEC64WORSYSCOM-004.md",
+    "tickets/SPEC64WORSYSCOM-005.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean after final state-only commit succeeds",
+  "dirty_state": "expected ignored artifacts after package proof: tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/dist/, tools/world-mcp/node_modules/; tracked worktree clean after final state-only commit succeeds",
   "updated_at": "2026-05-21"
 }
