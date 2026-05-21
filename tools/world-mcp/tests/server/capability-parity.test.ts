@@ -17,6 +17,7 @@ const requireFromThisTest = createRequire(import.meta.url);
 const EXPECTED_VALIDATOR_NAMES = [
   "active_records_full_shape",
   "approval_semantics",
+  "artifact_maturity",
   "audit_only_se_shape",
   "branch_isolation",
   "canon_baseline_drift",
@@ -39,6 +40,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "entity_introduction_status_pairing",
   "expected_witness_coverage",
   "id_uniqueness",
+  "index_disk_consistency",
   "introduction_observer_firewall",
   "lie_promoted_silently",
   "midstory_record_introduction_grounding",

@@ -152,7 +152,7 @@ test("SPEC-09 §V9: world-validate full-rule baseline reports known legacy chara
   };
 
   assert.equal(result.status, 1, result.stderr || result.stdout);
-  assert.equal(parsed.summary.fail_count, 1084);
+  assert.equal(parsed.summary.fail_count, 1081);
   assert.equal(parsed.summary.warn_count, 0);
   assert.equal(parsed.summary.info_count, 0);
   assert.deepEqual(legacyCharacterDramaticCoreFailures(parsed.verdicts), [

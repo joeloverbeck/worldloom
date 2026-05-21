@@ -19,6 +19,7 @@ import { frontmatterFor } from "../structural/yaml-parse-integrity.js";
 export interface CliValues {
   rules?: string;
   structural?: boolean;
+  compatibility?: boolean;
   json?: boolean;
   file?: string;
   story?: string;
@@ -48,6 +49,12 @@ const NAMED_RULE_SELECTORS = new Set([
   "prose_load_bearing_artifact_mention",
   "storylet_predicate_dsl_parsability"
 ]);
+const COMPATIBILITY_VALIDATORS = new Set([
+  "record_schema_compliance",
+  "approval_semantics",
+  "artifact_maturity",
+  "index_disk_consistency"
+]);
 
 export function packageVersion(): string {
   const packageJsonPath = path.resolve(import.meta.dirname, "../../../package.json");
@@ -62,7 +69,8 @@ Run the SPEC-04 validator framework against a world's atomic-source tree.
 
 Options:
   --rules=<list>        Comma-separated rule numbers or validator names. Use all for every rule validator.
-  --structural          Run structural validators only. Mutually exclusive with --rules.
+  --structural          Run structural validators only. Mutually exclusive with --rules and --compatibility.
+  --compatibility       Run the world-system compatibility subset: schema, approval semantics, artifact maturity, and INDEX drift.
   --json                Emit machine-readable JSON output.
   --story <slug>        Narrow story-bundle validators to one indexed story bundle.
   --file <path>         Narrow scope to a single file within worlds/<slug>/.
@@ -81,6 +89,9 @@ Exit codes:
 export function validateOptions(values: CliValues): string | null {
   if (values.rules && values.structural) {
     return "--rules and --structural are mutually exclusive";
+  }
+  if (values.compatibility && (values.rules || values.structural)) {
+    return "--compatibility is mutually exclusive with --rules and --structural";
   }
   if (values.file && values.since) {
     return "--file and --since are mutually exclusive";
@@ -140,7 +151,14 @@ export function selectValidators(
 ): Validator[] {
   let selected: readonly Validator[];
 
-  if (values.structural) {
+  if (values.compatibility) {
+    selected = structuralValidators.filter((validator) => COMPATIBILITY_VALIDATORS.has(validator.name));
+    const selectedNames = new Set(selected.map((validator) => validator.name));
+    const missing = [...COMPATIBILITY_VALIDATORS].filter((name) => !selectedNames.has(name));
+    if (missing.length > 0) {
+      throw new Error(`compatibility validator subset is missing: ${missing.join(", ")}`);
+    }
+  } else if (values.structural) {
     selected = structuralValidators;
   } else if (values.rules) {
     if (values.rules === "all") {
