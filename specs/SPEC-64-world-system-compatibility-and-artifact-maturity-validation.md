@@ -7,7 +7,7 @@
 **Companion:** `docs/triage/2026-05-21-world-system-consolidation-triage.md` (D5)
 **Depends on:**
 - **SPEC-61** (landed; `archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`) — the proposal/audit/pressure/world-proposal JSON schemas and the `approval-semantics` structural validator this spec builds on. **Substrate landed.**
-- **SPEC-62 §2.1** (FOUNDATIONS §Artifact Authority and Maturity) — **ticketed but not yet landed** (`tickets/SPEC62FOUANDDOC-001.md`). **Carried debt:** D1's maturity-class vocabulary derives its authoritative tier list from that FOUNDATIONS section; SPEC-64 must not land D1 before SPEC62FOUANDDOC-001 lands, or the maturity classes have no authoritative source.
+- **SPEC-62 §2.1** (FOUNDATIONS §Artifact Authority and Maturity) — landed by `archive/tickets/SPEC62FOUANDDOC-001.md`. D1's maturity-class vocabulary derives its authoritative tier list from that FOUNDATIONS section.
 
 ## 1. Context
 
@@ -27,7 +27,7 @@ A structural validator that confirms each world-system artifact's claimed author
 
 Detects maturity collapse: e.g., a file under `character-proposals/` with id `NCP-9` may not present itself (in prose framing, frontmatter, or INDEX entry) as a realized character dossier — that tier belongs to `CHAR-*` under `characters/`. Error class `ARTIFACT_MATURITY_COLLAPSE` names the path, the prefix-implied tier, and the correct routing skill.
 
-**Carried-debt gate:** the maturity-class enum is sourced from FOUNDATIONS §Artifact Authority and Maturity (SPEC62FOUANDDOC-001). If that section is not yet present at implementation time, this deliverable blocks on it.
+The maturity-class enum is sourced from FOUNDATIONS §Artifact Authority and Maturity (landed by `archive/tickets/SPEC62FOUANDDOC-001.md`).
 
 ### D2 — `world_compatibility_validator` (orchestration validator + CLI mode)
 

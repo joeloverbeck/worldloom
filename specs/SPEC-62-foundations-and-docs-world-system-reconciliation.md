@@ -43,7 +43,7 @@ reservation already at lines 355–361.
 **File:** `docs/FOUNDATIONS.md`
 
 **Verified context:** `Natural Story Engines` is already a FOUNDATIONS §World Kernel template field
-(line 146) and is legitimate world-generativity language. But `intended_narrative_role`,
+(line 154 after SPEC62FOUANDDOC-001) and is legitimate world-generativity language. But `intended_narrative_role`,
 `desired_arc_type`, `likely_story_scale`, `creates_new_story_engines`, and EPE `story_fuel` are
 story-facing terms used on world-system artifacts with no FOUNDATIONS statement of where world
 generativity ends and story-bundle execution state begins.
@@ -177,7 +177,7 @@ change (the allocator already supports these prefixes; this records them in the 
 | §Canon Layers (Contested Canon) | aligns | §2.1/§2.6 sharpen the boundary between accepted Contested Canon and raw DA assertions without changing the layer definition |
 | Rule 7 — Preserve Mystery Deliberately | aligns | §2.4 keeps mystery deliberate/bounded while removing an absolute that exceeds the rule and blocks discovery-driven worlds |
 | §Mystery Reserve resolution-safety semantics (line 95) | aligns | §2.3 documents `passive_depth` to match the validator-enforced coupling |
-| §World Kernel — Natural Story Engines (line 146) | aligns | §2.2 promotes the existing sanctioned term to an explicit generativity-vs-execution boundary |
+| §World Kernel — Natural Story Engines (line 154 after SPEC62FOUANDDOC-001) | aligns | §2.2 promotes the existing sanctioned term to an explicit generativity-vs-execution boundary |
 | §Canon Fact Record Schema — `direct_user_approval` (355–361) | aligns | §2.1 cross-references rather than duplicates the reservation |
 
 ## 4. Acceptance

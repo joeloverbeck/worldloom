@@ -94,6 +94,14 @@ Mystery Reserve entries must define:
 
 > **Resolution-safety semantics (per SPEC-14)**: `future_resolution_safety` is coupled to `status`. Mysteries with `status: forbidden` take `future_resolution_safety: none` (no future canon may resolve them — they define the world's metaphysics by what stays unsaid). Mysteries with `status: active` or `status: passive` take `future_resolution_safety: low | medium | high` (rare-but-allowed → readily allowed). This coupling is enforced by the `rule7_mystery_reserve_preservation` validator.
 
+## Artifact Authority and Maturity
+
+Canon layer and artifact maturity are separate. A file may discuss canon, cite canon, propose canon, audit canon, or create an in-world artifact without itself becoming world canon. The world system recognizes these maturity classes: pre-world proposal (`NWP`), candidate canon proposal (`PR`, `RP`, and EPE sidecars), candidate character proposal (`NCP`), realized canon-reading hybrid (`CHAR`, `DA`), accepted world canon (`_source/` records), adjudication and provenance (`PA`), audit (`AU`), pressure affordance (`EPE`), and downstream story record. Only accepted world-canon records claim world-canon authority. Proposal review approval, artifact-write approval, audit recommendation approval, pressure-event approval, and story-bundle acceptance are not canon acceptance; accepted CF provenance remains governed by the Canon Fact Record Schema reservation for `source_basis.direct_user_approval`.
+
+## World Generativity vs Story-Bundle State
+
+Worldbuilding may describe the kinds of conflicts, procedures, pressures, revelations, and affordances a world structurally produces. `Natural Story Engines`, `Native Story Procedures`, `intended_narrative_role`, `desired_arc_type`, `likely_story_scale`, `creates_new_story_engines`, and EPE `story_fuel` are sanctioned world-generativity language when they describe world-level affordance, pressure, or use. World-canon and world-proposal artifacts must not encode downstream story-bundle execution state: page ids, choice ids, storylet ids, act beats, plot destiny, companion quests, story-local clocks, or story-local state transitions. Those belong to story-bundle records and story-pipeline workflows, not upstream world-canon authority.
+
 ---
 
 ## Mandatory World Files
