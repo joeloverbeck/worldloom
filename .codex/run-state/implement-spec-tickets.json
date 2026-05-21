@@ -1,19 +1,21 @@
 {
-  "originating_spec": null,
-  "archived_spec": "archive/specs/SPEC-67-story-world-index-edge-parity.md",
-  "last_ticket": "archive/tickets/SPEC67STOWORIND-002.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "ededfb00d62dd702fbe1bf14140732fb2ef7123e",
+  "originating_spec": "specs/SPEC-66-stchar-body-integrity-validator.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC66STCHARBODINT-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "f4e9f6538ec217fdf59168ba6bf318a588b644dc",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "complete",
+  "next_target": "tickets/SPEC66STCHARBODINT-002.md",
+  "queue": [
+    "tickets/SPEC66STCHARBODINT-002.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
-  "owned_dirty_summary": null,
-  "post_review_material_updates": false,
-  "post_review_audit_block": "not_applicable",
+  "owned_dirty_summary": "SPEC66STCHARBODINT-001 implemented, reviewed, archived, and committed; only harness state remains tracked-dirty",
+  "post_review_material_updates": true,
+  "post_review_audit_block": "emitted_no_findings",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "pre-existing unrelated submodule/worktree dirt: lowercase m .claude/worktrees/spec-61-62 (dirty marker only), left unstaged; expected ignored package artifacts: tools/world-index/dist/ refreshed by npm run build/npm test and pre-existing tools/world-index/node_modules/",
-  "updated_at": "2026-05-21"
+  "dirty_state": "tracked: .codex/run-state/implement-spec-tickets.json only; ignored build/cache/proposal/world artifact directories remain untracked/ignored",
+  "updated_at": "2026-05-22"
 }
