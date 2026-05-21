@@ -1,6 +1,6 @@
 # SPEC-57 — STCHAR Pipeline Integration
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Created:** 2026-05-20
 **Depends on:** SPEC-56 — STCHAR Machine-Facing Foundation (must land first)
 
@@ -362,3 +362,45 @@ prose-attach voice-fidelity receipts, health-audit phase 2m + optional source-dr
 promotion-evidence handling, and the mandatory page-plan voice packet (§16a) that carries
 character authority to the external renderer. Depends on SPEC-56. Together they replace the
 lean-fix triage of 2026-05-20 with the full story-local character authority layer.
+
+## Outcome
+
+Completed: 2026-05-21.
+
+SPEC-57 landed across `archive/tickets/SPEC57STCHARPIPINT-001.md` through
+`archive/tickets/SPEC57STCHARPIPINT-010.md`:
+
+- `story-character-profile` was added as the STCHAR authoring skill with the three v1 modes,
+  STCHAR body contract, hybrid patch-engine routing, hash discipline, and CHAR-provenance
+  firewall.
+- The shared page-plan contract now makes §16a STCHAR-derived character authority packets
+  mandatory when relevant, and bootstrap / turn-cycle consume or emit those packets at their
+  owned phases.
+- Bootstrap, turn-cycle, commitment-block-authoring, prose-attach, health-audit, and promotion
+  skills now route STCHAR as story-local character authority without normal runtime world
+  `CHAR-*` characterization reads.
+- FOUNDATIONS §7 and the cross-skill-consistency enumeration now include
+  `story-character-profile` as the eighth story-pipeline skill.
+- The validators package now has SPEC-57 integration coverage for prose-receipt STCHAR
+  authority blocks, CHAR-authority text leaks, and `record_active(STCHAR-*)` predicate parsing;
+  the predicate DSL runtime/discoverable schema was corrected so that parser surface matches the
+  shared story-state contract.
+
+Verification:
+
+- `npm test` from `tools/validators` — PASS before the final archive, 776 tests.
+- `node --test dist/tests/integration/spec57-stchar-pipeline-integration.test.js dist/tests/predicate-dsl-grammar-parity.test.js dist/tests/rules/rule_storylet_predicate_dsl_parsability.test.js`
+  from `tools/validators` — PASS before the final broad proof, 19 tests.
+- Archived ticket-level manual contract reviews cover the LLM-executed skill behavior named in
+  the original Definition of Done (`bootstrap -> turn-cycle -> prose-attach -> health-audit`).
+  The repo does not expose an executable dry-run harness for that sample walkthrough, so no live
+  end-to-end skill run is claimed here.
+
+Deviations:
+
+- Phase 9's drafted claim that `record_active(STCHAR-*)` was already machine-lawful was only
+  true in the shared prose contract. The final ticket corrected the validator runtime and
+  predicate schema as same-seam fallout.
+- The final proof boundary is package-local validators plus archived manual contract review.
+  This is the accepted boundary for LLM-executed skill changes in this repo; no world canon or
+  story bundle fixture was directly mutated during finalization.

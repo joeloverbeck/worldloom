@@ -3,7 +3,7 @@
 Date: 2026-05-20
 Source report: `reports/story-character-dossier-retrieval-concerns.md`
 Classification: story-canon-related (analysis / triage)
-Status: **SUPERSEDED** (2026-05-20) by `archive/specs/SPEC-56-stchar-machine-foundation.md` + `specs/SPEC-57-stchar-pipeline-integration.md`.
+Status: **SUPERSEDED** (2026-05-20) by `archive/specs/SPEC-56-stchar-machine-foundation.md` + `archive/specs/SPEC-57-stchar-pipeline-integration.md`.
 
 > **Superseded.** This triage chose a lean fix (Option A targeted CHAR retrieval + Option D drift audit + a single `bound_char_content_hash` field on `STENT`) and **rejected** a new `STCHAR` record class on FOUNDATIONS §5b grounds. A later reassessment of `reports/stchar-implementation-first-iteration.md` reversed that rejection: §5b governs the per-field token cost of *atomic state records*, but `STCHAR` is a **hybrid on-demand authority artifact** (CHAR/DA precedent), and the temporal records (`BEL`/`STINT`/`SREL`/`STEMO`) structurally cannot carry stable voice/persona/pressure-behavior — so faithful temporal-state retrieval cannot fix the character downgrade. This triage's accepted items are **subsumed** by the STCHAR specs (targeted retrieval → STCHAR distillation; `bound_char_content_hash` → `STCHAR.source_char_hash`; drift audit → health-audit source-drift mode). Retained below as the historical decision record.
 
