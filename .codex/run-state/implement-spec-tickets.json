@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-59-stchar-authority-fidelity-validators.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC59STCHARAUTFID-003.md",
+  "last_ticket": "archive/tickets/SPEC59STCHARAUTFID-004.md",
   "last_result": "completed_archived",
-  "last_work_commit": "78395448937192524dd049fbf8136a1f1121f515",
+  "last_work_commit": "3adb3ff3df1683e2b39a55f7eecaf679f99602ea",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC59STCHARAUTFID-004.md",
+  "next_target": "tickets/SPEC59STCHARAUTFID-005.md",
   "queue": [
-    "tickets/SPEC59STCHARAUTFID-004.md",
     "tickets/SPEC59STCHARAUTFID-005.md"
   ],
   "phase": "ready_for_next_ticket",
