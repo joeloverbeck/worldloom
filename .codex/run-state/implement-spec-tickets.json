@@ -1,21 +1,19 @@
 {
-  "originating_spec": "specs/SPEC-58-stchar-contract-enforcement-reconciliation.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC58STCHARCONENF-003.md",
+  "originating_spec": "archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md",
+  "archived_spec": "archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md",
+  "last_ticket": "archive/tickets/SPEC58STCHARCONENF-004.md",
   "last_result": "completed_archived",
-  "last_work_commit": "57f3ad9aebcef82614b5389521dbec3be4563c78",
+  "last_work_commit": "e6b5822003f00092750c508a4d59fc3dc85f44ae",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC58STCHARCONENF-004.md",
-  "queue": [
-    "tickets/SPEC58STCHARCONENF-004.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": false,
   "post_review_audit_block": "not_applicable",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked clean after state-only commit; expected ignored package artifacts under tools/validators/dist/ and tools/validators/node_modules/",
+  "dirty_state": "final spec archived; queue empty; state pending state-only commit; expected ignored package artifacts under tools/validators/dist/ and tools/validators/node_modules/",
   "updated_at": "2026-05-21"
 }
