@@ -475,6 +475,8 @@ function rowToIndexedRecord(row: NodeRow): IndexedRecord {
 function parsedBodyFor(row: NodeRow): MutableRecord {
   if (
     row.node_type === "character_record" ||
+    row.node_type === "proposal_card" ||
+    row.node_type === "proposal_batch" ||
     row.node_type === "diegetic_artifact_record" ||
     row.node_type === "adjudication_record" ||
     row.node_type === "story_character_authority_record"

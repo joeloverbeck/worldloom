@@ -1,5 +1,7 @@
 # Implementation Order
 
+**Status**: COMPLETED — archived 2026-05-22 as `archive/specs/IMPLEMENTATION-ORDER-2026-05-22.md`
+
 ## World-system consolidation (first iteration)
 
 Specs derived from `reports/world-system-consolidation-first-iteration.md` (triage:

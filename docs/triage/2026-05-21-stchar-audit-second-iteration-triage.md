@@ -66,6 +66,6 @@ specs (SPEC-65/66/67).
 - `archive/specs/SPEC-65-story-schema-contract-parity-hardening.md`
 - `archive/specs/SPEC-66-stchar-body-integrity-validator.md`
 - `archive/specs/SPEC-67-story-world-index-edge-parity.md`
-- `specs/IMPLEMENTATION-ORDER.md` updated (new "STCHAR audit (second iteration)" section).
+- `archive/specs/IMPLEMENTATION-ORDER-2026-05-22.md` includes the "STCHAR audit (second iteration)" section and was archived 2026-05-22.
 
 All three are independent (no inter-spec build dependency) and are complete.

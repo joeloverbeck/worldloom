@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/mined-proposal-batch.schema.json",
+  "title": "MinedProposalBatchFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["batch_id", "world_slug", "source_artifact_id", "source_artifact_path", "generated_date", "parameters", "claim_extraction_summary", "classification_counts", "flagged_contradictions", "mr_positional_flags", "single_narrator_concentration_flag", "card_ids", "dropped_card_ids", "user_approved", "notes"],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" } },
+    "proposalIdArray": { "type": "array", "items": { "type": "string", "pattern": "^PR-[0-9]+$" } }
+  },
+  "properties": {
+    "batch_id": { "type": "string", "pattern": "^BATCH-[0-9]+$" },
+    "world_slug": { "$ref": "#/$defs/nonEmptyString" },
+    "source_artifact_id": { "type": "string", "pattern": "^DA-[0-9]+$" },
+    "source_artifact_path": { "$ref": "#/$defs/nonEmptyString" },
+    "generated_date": { "$ref": "#/$defs/nonEmptyString" },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_cards", "novelty_range", "taboo_areas", "allow_soft_canon_only"],
+      "properties": {
+        "max_cards": { "type": "integer", "minimum": 0 },
+        "novelty_range": { "type": "string", "enum": ["conservative", "moderate", "bold"] },
+        "taboo_areas": { "$ref": "#/$defs/stringArray" },
+        "allow_soft_canon_only": { "type": "boolean" }
+      }
+    },
+    "claim_extraction_summary": { "$ref": "#/$defs/nonEmptyString" },
+    "classification_counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["grounded", "partially_grounded", "not_addressed", "contradicts", "extends_soft"],
+      "properties": {
+        "grounded": { "type": "integer", "minimum": 0 },
+        "partially_grounded": { "type": "integer", "minimum": 0 },
+        "not_addressed": { "type": "integer", "minimum": 0 },
+        "contradicts": { "type": "integer", "minimum": 0 },
+        "extends_soft": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "flagged_contradictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim_summary", "conflict_with", "conflict_type", "handoff_note"],
+        "properties": {
+          "claim_summary": { "$ref": "#/$defs/nonEmptyString" },
+          "conflict_with": { "$ref": "#/$defs/nonEmptyString" },
+          "conflict_type": { "type": "string", "enum": ["contradicts", "extends_soft"] },
+          "handoff_note": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "mr_positional_flags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["author_descriptor", "mr_id_overlap", "per_card_rejections", "session_warning"],
+        "properties": {
+          "author_descriptor": { "$ref": "#/$defs/nonEmptyString" },
+          "mr_id_overlap": { "type": "string", "pattern": "^M-[0-9]+$" },
+          "per_card_rejections": { "$ref": "#/$defs/proposalIdArray" },
+          "session_warning": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "single_narrator_concentration_flag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["triggered", "count", "affected_card_ids", "rationale"],
+      "properties": {
+        "triggered": { "type": "boolean" },
+        "count": { "type": "integer", "minimum": 0 },
+        "affected_card_ids": { "$ref": "#/$defs/proposalIdArray" },
+        "rationale": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "card_ids": { "$ref": "#/$defs/proposalIdArray" },
+    "dropped_card_ids": { "$ref": "#/$defs/proposalIdArray" },
+    "user_approved": { "type": "boolean" },
+    "notes": { "type": "string" }
+  }
+}

@@ -27,7 +27,12 @@ type Ajv2020Instance = {
 type Ajv2020Constructor = new (opts?: Record<string, unknown>) => Ajv2020Instance;
 const Ajv2020 = Ajv2020Module as unknown as Ajv2020Constructor;
 const ajv = new Ajv2020({ allErrors: true, strict: true, formats: { date: true } });
+const schemaRoot = path.resolve(import.meta.dirname, "../../../src/schemas");
+const sharedSchema = JSON.parse(readFileSync(path.join(schemaRoot, "_shared/extension-entry.schema.json"), "utf8")) as AnySchema;
+ajv.addSchema(sharedSchema);
 const validatorsByRecordType = loadSchemaValidators();
+const minedProposalCardValidator = loadSchemaValidator("mined-proposal-card");
+const minedProposalBatchValidator = loadSchemaValidator("mined-proposal-batch");
 
 export {
   CF_TYPE_EPISTEMIC_PROFILE_REQUIRED as EPISTEMIC_PROFILE_REQUIRED_TYPES,
@@ -86,7 +91,7 @@ export const recordSchemaCompliance: Validator = {
       if (!isInIncrementalScope(record.file_path, ctx)) {
         continue;
       }
-      const validate = validatorsByRecordType.get(String(record.node_type));
+      const validate = validatorForRecord(record);
       if (!validate) {
         continue;
       }
@@ -101,7 +106,7 @@ export const recordSchemaCompliance: Validator = {
     verdicts.push(...hybridResult.verdicts);
 
     for (const hybrid of hybridResult.records) {
-      const validate = validatorsByRecordType.get(hybrid.node_type);
+      const validate = validatorForRecord(hybrid);
       if (!validate) {
         continue;
       }
@@ -304,17 +309,48 @@ function normalizeType(type: string): string {
 }
 
 function loadSchemaValidators(): Map<string, ValidateFunction> {
-  const schemaRoot = path.resolve(import.meta.dirname, "../../../src/schemas");
-  const sharedSchema = JSON.parse(readFileSync(path.join(schemaRoot, "_shared/extension-entry.schema.json"), "utf8")) as AnySchema;
-  ajv.addSchema(sharedSchema);
-
   const validators = new Map<string, ValidateFunction>();
   for (const [recordType, schemaName] of Object.entries(RECORD_TYPE_TO_SCHEMA)) {
-    const schema = JSON.parse(readFileSync(path.join(schemaRoot, `${schemaName}.schema.json`), "utf8")) as AnySchema;
-    const validate = ajv.compile(schema);
-    validators.set(recordType, validate);
+    validators.set(recordType, loadSchemaValidator(schemaName));
   }
   return validators;
+}
+
+function loadSchemaValidator(schemaName: string): ValidateFunction {
+  const schema = JSON.parse(readFileSync(path.join(schemaRoot, `${schemaName}.schema.json`), "utf8")) as AnySchema;
+  return ajv.compile(schema);
+}
+
+function validatorForRecord(record: SchemaTarget): ValidateFunction | undefined {
+  if (record.node_type === "proposal_card" && isMinedProposalCard(record.parsed)) {
+    return minedProposalCardValidator;
+  }
+  if (record.node_type === "proposal_batch" && isMinedProposalBatch(record.parsed)) {
+    return minedProposalBatchValidator;
+  }
+  return validatorsByRecordType.get(record.node_type);
+}
+
+function isMinedProposalCard(value: unknown): boolean {
+  const parsed = asPlainRecord(value);
+  const sourceBasis = asPlainRecord(parsed.source_basis);
+  const canonSafetyCheck = asPlainRecord(parsed.canon_safety_check);
+  return (
+    typeof parsed.source_artifact_id === "string" ||
+    typeof sourceBasis.source_artifact_id === "string" ||
+    typeof sourceBasis.derived_from_artifact_path === "string" ||
+    Object.prototype.hasOwnProperty.call(canonSafetyCheck, "diegetic_to_world_laundering")
+  );
+}
+
+function isMinedProposalBatch(value: unknown): boolean {
+  const parsed = asPlainRecord(value);
+  return (
+    typeof parsed.source_artifact_id === "string" ||
+    typeof parsed.source_artifact_path === "string" ||
+    Object.prototype.hasOwnProperty.call(parsed, "classification_counts") ||
+    Object.prototype.hasOwnProperty.call(parsed, "single_narrator_concentration_flag")
+  );
 }
 
 function hybridRecordsFromFiles(input: unknown, ctx: Context): HybridRecordsResult {

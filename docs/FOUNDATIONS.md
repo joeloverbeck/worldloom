@@ -453,6 +453,8 @@ It must change at least one of:
 
 > The canonical-domain enum (`tools/world-index/src/public/canonical-vocabularies.ts`) extends this list with additional domains accumulated during implementation (`economy`, `settlement_life`, `memory_and_myth`, `magic`, `medicine`, `status_order`, `warfare`, `taboo_and_pollution`). The list above is the authoritative starting set; the validator's superset is queryable at runtime via `mcp__worldloom__get_canonical_vocabulary({class: "domain"})` (per SPEC-14).
 
+> **Three distinct domain taxonomies exist; do not conflate them.** (1) The Rule 2 list above is the authoritative *attachment* set — what a fact must change to avoid being pure cosmetics. (2) The runtime `canonical-domain` enum is its validator-enforced superset, and is the vocabulary for the CF `domains_affected` field. (3) `canon-addition` Phase 6 uses a separate **13-domain exposition investigation list** (everyday life, economy, law, religion, warfare, status order, kinship, architecture, mobility, environment, taboo/pollution, language/slang, memory/myth) that names *where to look* for consequences — an investigation guide, not a `domains_affected` vocabulary. A fact's `domains_affected` is drawn from (2); the Phase 6 list (3) guides the propagation sweep that discovers them.
+
 ### Rule 3: No Specialness Inflation
 Do not repeatedly add exceptional elements that behave as if they have no impact on the ordinary world.
 
@@ -500,6 +502,22 @@ A world model is not ready until all these can be answered cleanly:
 - What would a child, a laborer, a priest, a smuggler, and a ruler each think the world fundamentally is?
 
 ---
+
+## Grounds for Rejection
+
+A proposed canon addition is not merely scored for downstream work — it may be **rejected as incompatible** with the world. Rejection is a first-class outcome, not a pipeline failure: a world that cannot reject a fact has no identity to protect. This section synthesizes grounds already distributed across §Invariants, §Acceptance Tests, and Rule 6; it introduces no new doctrine and is **not** a numbered Validation Rule.
+
+An addition must be rejected — absent an explicit, user-approved world revision — when it does any of the following:
+
+- **Violates non-negotiable ontology** — contradicts an Ontological Invariant (what can and cannot exist). *Example: reprogrammable robots proposed for a world whose ontology has no machine substrate.*
+- **Collapses the genre or tonal contract** — breaks an Aesthetic/Thematic Invariant or the §World Kernel genre contract, so the world stops feeling like itself.
+- **Contradicts world-defining scarcity or distribution logic** — breaks a Distribution Invariant (who has access to what).
+- **Destabilizes the world at scale without a plausible stabilizer** — fails the §Acceptance Tests counterfactual ("Why have existing powers not optimized away the world's premise?") with no concrete limiting mechanism; relates to Rule 3 (No Specialness Inflation).
+- **Imposes excessive retroactive invalidation** — would silently overturn too much established canon, which Rule 6 (No Silent Retcons) forbids.
+
+A rejection must name the specific violated constraint (invariant id, genre-contract element, or Mystery Reserve entry) so the verdict is auditable and the proposer can repair toward a viable, narrower fact. Incompatibility is a property of the addition against *this* world's invariants and contract — the same fact may be canon-compatible in another world.
+
+Operationalized by `canon-addition` Phase 2 (hard-rejection triggers) and the Phase 11 `REJECT` verdict with its "Why This Cannot Be Repaired" section.
 
 ## Change Control Policy
 
