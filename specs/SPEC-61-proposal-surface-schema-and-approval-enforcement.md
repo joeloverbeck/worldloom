@@ -96,7 +96,12 @@ Mirror the `character-proposals` enumeration precedent (`enumerate.ts:51,182,190
 `audit_record`, `retcon_proposal_card`, `world_proposal_card`, `world_proposal_batch` — node-type
 names already partially reserved in `tools/world-index/src/schema/types.ts`; reuse those that exist:
 `proposal_card`, `proposal_batch`, `retcon_proposal_card`, `audit_record` are already present in
-`NODE_TYPES`).
+`NODE_TYPES`). The nine surfaces in §1 map to these **eight** node types because
+`pressure-events/batches/BATCH-*.md` reuses the `proposal_batch` node type +
+`proposal-batch.schema.json` (its frontmatter shares the PR-batch shape per §2.1); `enumerate.ts`
+therefore routes both `proposals/batches/` and `pressure-events/batches/` to `proposal_batch`. If
+§2.1's frontmatter-alignment check fails and the EPE batch is split into its own schema, add a ninth
+`pressure_event_batch` node type at that point (tracked in §6).
 
 > **EPE non-indexing is deliberate and preserved.** Verified: EPE base cards are allocator-tracked
 > (`allocate-next-id.ts`) but file-scanned, not retrieval-indexed, by design (candidates until
@@ -115,10 +120,15 @@ names already partially reserved in `tools/world-index/src/schema/types.ts`; reu
 - Add an **approval-semantics check** (mechanical, blocking): on every non-CF surface, the presence of
   `source_basis.direct_user_approval` is a hard `FAIL`. CF records keep their existing
   `direct_user_approval: const true` requirement (`canon-fact-record.schema.json:69–71`). Error
-  message names the reserved-field rule and points to the sibling `user_approved` field. Implement
-  either as the §2.1 schema property prohibition (preferred — `"not": {"required": ["direct_user_approval"]}`
-  on `source_basis`) plus a registry-level validator for surfaces not yet schema-bound, or as a
-  dedicated structural validator if the schema-only form proves insufficient.
+  message names the reserved-field rule and points to the sibling `user_approved` field. **Primary
+  mechanism: a dedicated `tools/validators/src/structural/approval-semantics.ts` validator wired into
+  `tools/validators/src/public/registry.ts`, run over _every_ non-CF record class** — this is what
+  satisfies §4's universal criterion. The existing NCP / NCB / CHAR / DA schemas do **not** prohibit
+  `direct_user_approval` (verified: `diegetic-artifact-frontmatter.schema.json:66` declares
+  `source_basis` as a permissive `{ "type": "object" }`), so a schema-only prohibition baked into the
+  eight new schemas alone would leave those pre-existing surfaces uncovered. The §2.1 per-schema
+  `"not": {"required": ["direct_user_approval"]}` prohibition is retained as **optional
+  defense-in-depth** on the eight new schemas, not as the sole enforcement path.
 
 ### 2.4 Fix the RP `direct_user_approval` collision
 
@@ -151,7 +161,9 @@ names already partially reserved in `tools/world-index/src/schema/types.ts`; reu
 - A PR/EPE/AU/RP/NWP/NWB card with a malformed/missing required frontmatter field produces a
   `record-schema-compliance` FAIL through the world-validate CLI.
 - A non-CF surface carrying `source_basis.direct_user_approval` produces a blocking FAIL with a message
-  citing the CF-only reservation.
+  citing the CF-only reservation — enforced by the `approval-semantics` validator over **every** non-CF
+  record class (PR / BATCH / EPE / EPE-sidecar / AU / RP / NWP / NWB **and** the pre-existing
+  NCP / NCB / CHAR / DA surfaces), not only the eight new schemas.
 - The RP template/skill no longer reference `direct_user_approval`; a freshly generated RP card carries
   `source_basis.user_approved`.
 - An accepted CF still requires `direct_user_approval: true` (no regression).
@@ -166,3 +178,18 @@ names already partially reserved in `tools/world-index/src/schema/types.ts`; reu
 - A standalone `taxonomy_authority_validator`, `mcp_contract_validator`, `world_compatibility_validator`,
   or continuity-audit compatibility appendix (deferred — see companion triage).
 - Routing proposal direct-writes through the patch engine (deferred per report §9.5).
+
+## 6. Risks & Open Questions
+
+- **`EPE` / `NWP` / `NWB` ID prefixes are undocumented in `docs/ID-ALLOCATION.md`** (verified at
+  reassessment: `PR` / `BATCH` / `AU` / `RP` are present; `EPE` / `NWP` / `NWB` return zero hits). This
+  pre-existing docs-gap is not introduced by this spec, but bringing these surfaces under
+  schema/node-type coverage is the natural moment to surface it. Route the documentation fix to
+  **SPEC-62** (which already amends `docs/REPOSITORY-MAP.md` and the FOUNDATIONS docs); do **not** expand
+  this spec's scope to edit `docs/ID-ALLOCATION.md` directly.
+- **Pressure-event batch schema — shared vs split.** §2.1 folds PR and EPE batch manifests into one
+  `proposal-batch.schema.json` "if frontmatter aligns," and §2.2 routes both batch directories to the
+  `proposal_batch` node type on that basis. The implementer must confirm at ticket time that
+  `proposals/batches/BATCH-*.md` and `pressure-events/batches/BATCH-*.md` frontmatter actually align; if
+  they diverge, split into a ninth `pressure-event-batch.schema.json` + `pressure_event_batch` node type
+  and update the "eight" counts in §2.1 / §2.3 / §4 accordingly.
