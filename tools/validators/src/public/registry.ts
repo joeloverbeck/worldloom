@@ -31,6 +31,7 @@ import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity
 import { pagePlanStcharPacketIntegrity } from "../structural/page-plan-stchar-packet-integrity.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
+import { proseReceiptStcharIntegrity } from "../structural/prose-receipt-stchar-integrity.js";
 import { recordIntroductionUniqueness } from "../structural/record-introduction-uniqueness.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
@@ -153,6 +154,7 @@ export const structuralValidators: readonly Validator[] = [
   touchedByCfCompleteness,
   proposalPackageShape,
   proseReceiptSchemaCompliance,
+  proseReceiptStcharIntegrity,
   modificationHistoryRetrofit,
   validationTraceShapeCompliance,
   stplanSchemaCompliance,

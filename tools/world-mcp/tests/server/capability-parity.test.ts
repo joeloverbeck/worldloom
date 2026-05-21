@@ -52,6 +52,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "proposal_package_shape",
   "prose_load_bearing_artifact_mention",
   "prose_receipt_schema_compliance",
+  "prose_receipt_stchar_integrity",
   "record_introduction_uniqueness",
   "record_schema_compliance",
   "recursive_reference_closure",

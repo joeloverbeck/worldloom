@@ -211,6 +211,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "prose_receipt_schema_compliance"
     );
     assert.equal(proseReceiptExecution?.status, "skipped");
+    const proseReceiptStcharExecution = result.executions.find(
+      (execution) => execution.name === "prose_receipt_stchar_integrity"
+    );
+    assert.equal(proseReceiptStcharExecution?.status, "skipped");
     const validationTraceExecution = result.executions.find(
       (execution) => execution.name === "validation_trace_shape_compliance"
     );
@@ -272,6 +276,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "page_affordance_integrity"
     );
     assert.equal(pageAffordanceExecution?.status, "skipped");
+    const pagePlanStcharExecution = result.executions.find(
+      (execution) => execution.name === "page_plan_stchar_packet_integrity"
+    );
+    assert.equal(pagePlanStcharExecution?.status, "skipped");
     const activeRecordsFullShapeExecution = result.executions.find(
       (execution) => execution.name === "active_records_full_shape"
     );
@@ -319,6 +327,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== recordIntroductionUniquenessExecution &&
         row !== proposalPackageExecution &&
         row !== proseReceiptExecution &&
+        row !== proseReceiptStcharExecution &&
         row !== validationTraceExecution &&
         row !== branchIsolationExecution &&
         row !== observerFirewallExecution &&
@@ -335,6 +344,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== narrativeShapeExecution &&
         row !== compatibilityDriftExecution &&
         row !== pageAffordanceExecution &&
+        row !== pagePlanStcharExecution &&
         row !== activeRecordsFullShapeExecution &&
         !stplanExecutions.includes(row) &&
         !stemoExecutions.includes(row) &&
