@@ -1,6 +1,6 @@
 # SPEC-66 — STCHAR Body-Integrity Validator
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — branching-story pipeline validators)
 **Source:** `reports/stchar-audit-second-iteration.md` §12 (deterministic validators to add, `stchar_body_integrity`), §17 Critical #5; triage `docs/triage/2026-05-21-stchar-audit-second-iteration-triage.md`
@@ -161,3 +161,16 @@ was held back. The §2.1 checks ship regardless.
   health-audit advisories (report §12 judgment-assisted checks).
 - Expanding `appliesToStcharStoryState`'s applicability (report §17 Critical #4) — a separate change;
   this validator reuses the gate as-is and inherits any future expansion automatically.
+
+## 6. Closeout (2026-05-22)
+
+Delivered §2.1 through `archive/tickets/SPEC66STCHARBODINT-001.md`: `stchar_body_integrity` is registered as a fail-mode structural validator, enforces the 13 required STCHAR H2 sections exactly once, rejects empty required sections and empty bodies, checks STCHAR hash shape defensively, and runs through the STCHAR pre-apply path after STCHAR hybrid overlay/read-surface support was added.
+
+Closed §2.2 through `archive/tickets/SPEC66STCHARBODINT-002.md` using the held-back branch. The recompute check did not ship because no pinned shared canonicalization exists for the producer's hash slices, `voice_block_hash` byte boundaries are not machine-specified, and `page_packet_hash` is a field projection rather than a body slice.
+
+Verification:
+- `cd tools/validators && npm run build` — passed.
+- `cd tools/validators && node --test dist/tests/structural/stchar-body-integrity.test.js` — passed.
+- `cd tools/validators && npm test` — passed, 833 tests.
+- `cd tools/world-mcp && npm run build` — passed.
+- `cd tools/world-mcp && node --test dist/tests/tools/validate-patch-plan.test.js` — passed, 11 tests.
