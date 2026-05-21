@@ -61,6 +61,7 @@ function validPagePayload(): Record<string, unknown> {
         }
       ],
       active_records: {
+        STCHAR: [],
         CLK: ["CLK-1"],
         STSEC: ["STSEC-1"],
         STQ: ["STQ-1"]
@@ -89,6 +90,19 @@ test("record_schema_compliance accepts STCHAR, STPLAN, and STEMO active_records 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
 
   assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects PG active_records without STCHAR", async () => {
+  const parsed = validPagePayload();
+  const stateSnapshot = parsed.state_snapshot as { active_records: Record<string, string[]> };
+  delete stateSnapshot.active_records.STCHAR;
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("/state_snapshot/active_records")
+  )));
 });
 
 test("record_schema_compliance rejects invalid STCHAR active_records ids", async () => {

@@ -48,6 +48,7 @@
         "canon_revision": { "type": ["string", "null"], "pattern": "^CH-[0-9]+$" },
         "active_records": {
           "type": "object",
+          "required": ["STCHAR"],
           "properties": {
             "STENT": { "type": "array", "items": { "type": "string", "pattern": "^STENT-[0-9]+$" } },
             "STINT": { "type": "array", "items": { "type": "string", "pattern": "^STINT-[0-9]+$" } },

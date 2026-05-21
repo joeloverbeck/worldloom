@@ -30,7 +30,6 @@ export type ActiveRecordsClass = (typeof ACTIVE_RECORDS_CLASSES)[number];
 
 export const OPTIONAL_ACTIVE_RECORDS_CLASSES = [
   "DA",
-  "STCHAR",
   "CLK",
   "STSEC",
   "STQ",

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  OPTIONAL_ACTIVE_RECORDS_CLASSES,
   projectUnresolvedMysteryClaims,
   replayStateSnapshot,
   replayUnresolvedMysteryClaims
@@ -123,6 +124,10 @@ test("state snapshot replay applies canon sync change_id fallback", () => {
   ], new Map());
 
   assert.equal(result.canon_revision, "CH-3");
+});
+
+test("active-record optional class set does not include required STCHAR", () => {
+  assert.ok(!(OPTIONAL_ACTIVE_RECORDS_CLASSES as readonly string[]).includes("STCHAR"));
 });
 
 test("mystery claim projection defaults omitted evidence_records to an empty list", () => {

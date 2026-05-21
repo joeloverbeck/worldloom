@@ -137,6 +137,7 @@ test("SPEC-49 capstone: structural validators compose the STPLAN/STEMO hardening
       input: { choice_id: "CHC-1", manual_action_text: null, resolved_event_id: "SE-1" },
       state_snapshot: {
         active_records: {
+          STCHAR: [],
           STPLAN: ["STPLAN-1"],
           STEMO: ["STEMO-1"]
         }
@@ -283,6 +284,7 @@ function validPage(): Record<string, unknown> {
       unresolved_mystery_claims: [],
       visible_affordances: [],
       active_records: {
+        STCHAR: [],
         STPLAN: ["STPLAN-1"],
         STEMO: ["STEMO-1"]
       }

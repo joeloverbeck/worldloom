@@ -1,6 +1,6 @@
 # SPEC58STCHARCONENF-004: Require active_records.STCHAR key (snapshot-shape hardening)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators` (`story-page.schema.json`, the `OPTIONAL_ACTIVE_RECORDS_CLASSES` helper, and its four consuming validators: `active_records_full_shape`, `state_snapshot_integrity`, `snapshot_replay_equality`, `compatibility_drift`); no impact on non-snapshot validators.
@@ -66,6 +66,11 @@ Review and adjust `snapshot-replay-equality.ts` (STCHAR now replayed as a non-op
 - `tools/validators/tests/structural/snapshot-replay-equality.test.ts` (modify)
 - `tools/validators/tests/structural/compatibility-drift.test.ts` (modify)
 - `tools/validators/tests/_helpers/state-snapshot-replay.test.ts` (modify)
+- `tools/validators/tests/integration/spec34-integration.test.ts` (modify — current-contract fixture truthing)
+- `tools/validators/tests/integration/spec43-midstory-introduction.test.ts` (modify — current-contract / legacy fixture truthing)
+- `tools/validators/tests/fixtures/midstory-introduction/compatibility/legacy-snapshot.yaml` (modify — compatibility fixture truthing)
+- `tools/validators/tests/integration/spec44-append-only-supersession.test.ts` (modify — current-contract expectation truthing)
+- `tools/validators/tests/integration/spec49-stplan-stemo-hardening.test.ts` (modify — current-contract fixture truthing)
 
 ## Out of Scope
 
@@ -99,5 +104,32 @@ Review and adjust `snapshot-replay-equality.ts` (STCHAR now replayed as a non-op
 
 ### Commands
 
-1. `npm --prefix tools/validators test -- snapshot` (targeted across snapshot/replay tests, after build).
-2. `npm --prefix tools/validators test` (build + full suite).
+1. `cd tools/validators && npm run build && node --test dist/tests/_helpers/state-snapshot-replay.test.js dist/tests/structural/active-records-full-shape.test.js dist/tests/structural/state-snapshot-integrity.test.js dist/tests/structural/snapshot-replay-equality.test.js dist/tests/structural/compatibility-drift.test.js dist/tests/structural/record-schema-compliance-story-page.test.js dist/tests/integration/spec43-midstory-introduction.test.js dist/tests/integration/spec44-append-only-supersession.test.js` (targeted snapshot/schema/compatibility proof).
+2. `cd tools/validators && node --test dist/tests/integration/spec34-integration.test.js` (targeted broad-fixture fallout proof after SPEC-34 current-contract fixture truthing).
+3. `cd tools/validators && node --test dist/tests/integration/spec49-stplan-stemo-hardening.test.js` (targeted broad-fixture fallout proof after SPEC-49 current-contract fixture truthing).
+4. `cd tools/validators && npm test` (build + full suite).
+
+## Outcome
+
+Completed: 2026-05-21.
+
+The validator package now treats `PG.state_snapshot.active_records.STCHAR` as required for current page snapshots:
+
+- `story-page.schema.json` requires `active_records.STCHAR`.
+- `OPTIONAL_ACTIVE_RECORDS_CLASSES` no longer includes `STCHAR`, so `compatibility_drift` no longer classifies missing STCHAR as optional drift.
+- `snapshot_replay_equality` now emits an explicit drift when the pre-page expected active-record shape omits the required `STCHAR` key, including the expected-empty case.
+- `state_snapshot_integrity` fails pre-apply page snapshots whose non-empty `active_records` map omits `STCHAR`.
+- `active_records_full_shape` now emits a fail-level missing-key verdict for `STCHAR` while preserving warn-level diagnostics for the remaining full-shape advisory keys.
+- Focused structural/schema tests now cover missing-STCHAR rejection, `STCHAR: []` acceptance, STCHAR replay as non-optional, and compatibility-drift exclusion from optional missing-key handling.
+- Current-contract integration fixtures in SPEC-34, SPEC-43, SPEC-44, and SPEC-49 were truthed to carry `STCHAR: []` where the page has no active STCHAR. Legacy compatibility coverage still omits only the remaining optional classes.
+
+## Verification Result
+
+- `cd tools/validators && npm run build` — passed.
+- `cd tools/validators && node --test dist/tests/_helpers/state-snapshot-replay.test.js dist/tests/structural/active-records-full-shape.test.js dist/tests/structural/state-snapshot-integrity.test.js dist/tests/structural/snapshot-replay-equality.test.js dist/tests/structural/compatibility-drift.test.js dist/tests/structural/record-schema-compliance-story-page.test.js dist/tests/integration/spec34-integration.test.js dist/tests/integration/spec43-midstory-introduction.test.js dist/tests/integration/spec44-append-only-supersession.test.js dist/tests/integration/spec49-stplan-stemo-hardening.test.js` — passed, 115 tests.
+- `cd tools/validators && npm test` — passed, 784 tests.
+
+## Deviations
+
+- The implementation initially relied on the shared optional-class helper for `snapshot_replay_equality`, then tightened `snapshot-replay-equality.ts` directly so a missing required `STCHAR` key is reported even when the expected active STCHAR list is empty. This matches SPEC-58's named replay proof surface.
+- Additional integration fixtures were updated beyond the original test list because the full package suite exposed current-contract positive fixtures that still omitted `STCHAR`. These were same-seam proof-surface truthing changes, not behavior expansion.

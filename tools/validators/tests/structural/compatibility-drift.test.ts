@@ -4,7 +4,7 @@ import test from "node:test";
 import { compatibilityDrift } from "../../src/structural/compatibility-drift.js";
 import { context, record } from "./helpers.js";
 
-test("compatibility_drift reports legacy optional directory and active-record key absence as info", async () => {
+test("compatibility_drift reports legacy optional directory and remaining optional active-record key absence as info", async () => {
   const verdicts = await compatibilityDrift.run(undefined, context([
     storyPage("PG-1", {
       STENT: ["STENT-1"],
@@ -21,7 +21,7 @@ test("compatibility_drift reports legacy optional directory and active-record ke
     })
   ]));
 
-  assert.equal(verdicts.filter((verdict) => verdict.code === "compat_optional_directory_absent").length, 7);
+  assert.equal(verdicts.filter((verdict) => verdict.code === "compat_optional_directory_absent").length, 6);
   assert.equal(verdicts.filter((verdict) => verdict.code === "compat_missing_active_record_key").length, 1);
   assert.ok(verdicts.every((verdict) => verdict.severity === "info"));
   const classification = verdicts.find((verdict) => verdict.code === "compatibility_drift.classification");
@@ -39,8 +39,7 @@ test("compatibility_drift classifies current-contract bundles with full optional
     optionalRecord("story_question_record", "STQ-1", "story-questions"),
     optionalRecord("story_plan_record", "STPLAN-1", "plans"),
     optionalRecord("story_emotion_record", "STEMO-1", "emotions"),
-    optionalRecord("story_diegetic_artifact_record", "DA-1", "artifacts"),
-    optionalRecord("story_character_authority_record", "STCHAR-1", "story-characters")
+    optionalRecord("story_diegetic_artifact_record", "DA-1", "artifacts")
   ]));
 
   assert.deepEqual(verdicts.map((verdict) => verdict.code), ["compatibility_drift.classification"]);
@@ -71,7 +70,7 @@ test("compatibility_drift warns when a new PG omits current optional active-reco
   const warning = verdicts.find((verdict) => verdict.code === "compat_requires_migration_patch");
   assert.ok(warning);
   assert.equal(warning.severity, "warn");
-  assert.deepEqual((warning.detail as { missing_keys: string[] }).missing_keys, ["DA", "STCHAR", "CLK", "STSEC", "STQ", "STPLAN", "STEMO"]);
+  assert.deepEqual((warning.detail as { missing_keys: string[] }).missing_keys, ["DA", "CLK", "STSEC", "STQ", "STPLAN", "STEMO"]);
 });
 
 test("compatibility_drift skips non-page pre-apply plans", () => {

@@ -386,7 +386,7 @@ function page(
     state_hash: "a".repeat(64),
     state_snapshot: {
       canon_revision: "CH-1",
-      active_records: { SF: activeFacts },
+      active_records: { STCHAR: [], SF: activeFacts },
       entity_status: {},
       unresolved_mystery_claims: [],
       visible_affordances: [],

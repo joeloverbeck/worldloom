@@ -112,7 +112,7 @@ test("SPEC-44 capstone preserves expected_witness_coverage as the semantic propa
   assertHas(verdicts, "expected_witness_coverage", "expected_witness_coverage_missing_public_bel", "fail");
 });
 
-test("SPEC-44 capstone reports active_records_full_shape gaps as warn-level diagnostics", async () => {
+test("SPEC-44 capstone reports non-STCHAR active_records_full_shape gaps as warn-level diagnostics", async () => {
   const verdicts = await activeRecordsFullShape.run(undefined, testContext([
     page("PG-9", {
       active_records: fullActiveRecords({ omit: ["CLK", "STSEC", "STQ", "DA"] })
