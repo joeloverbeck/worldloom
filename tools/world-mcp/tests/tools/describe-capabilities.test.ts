@@ -60,6 +60,11 @@ test("describeCapabilities returns build metadata and enum-valued input contract
   assert.ok(
     byName
       .get(MCP_TOOL_NAMES.get_context_packet)
+      ?.input_schema_enums.task_type?.includes("story_character_profile")
+  );
+  assert.ok(
+    byName
+      .get(MCP_TOOL_NAMES.get_context_packet)
       ?.input_schema_enums.task_type?.includes("story_fact_promotion_to_canon")
   );
   assert.deepEqual(byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type, [

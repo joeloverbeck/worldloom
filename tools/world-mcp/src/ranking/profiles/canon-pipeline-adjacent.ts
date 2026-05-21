@@ -238,3 +238,29 @@ export const storyFactPromotionToCanonRankingProfile: RankingWeights = {
     pressures: 8
   }
 };
+
+export const storyCharacterProfileRankingProfile: RankingWeights = {
+  ...defaultRankingProfile,
+  file_class_priority: {
+    ...defaultRankingProfile.file_class_priority,
+    character_record: 1.45,
+    story_character_authority_record: 1.35,
+    story_entity_record: 1.2,
+    canon_fact_record: 1.15,
+    invariant: 1.15,
+    mystery_reserve_entry: 1.1,
+    named_entity: 1.15,
+    section: 0.95,
+    narrative_section: 0.95
+  },
+  edge_type_boost: {
+    mentions_entity: 12,
+    references_record: 10,
+    references_scoped_name: 8,
+    stent_character_authority: 8,
+    stchar_source_character: 12,
+    stchar_bound_stent: 8,
+    stchar_supersedes: 6,
+    firewall_for: 8
+  }
+};

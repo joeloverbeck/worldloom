@@ -86,6 +86,13 @@ const EXPECTED_ACTIVE_RULES_BY_TASK_TYPE: Record<TaskType, string[]> = {
     "Rule 5: no consequence evasion - story-local consequences remain visible",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
+  story_character_profile: [
+    "Story character profile authoring is story-local; world canon remains read-only",
+    "Rule 1: no floating facts - profile claims must cite source CHAR and story authority",
+    "Rule 4: no globalization by accident - story-local characterization must not become world canon",
+    "Rule 6: no silent retcons - STCHAR changes remain append-only by supersession",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
   story_turn_cycle: [
     "Story turn cycle is story-local; world canon remains read-only",
     "Rule 1: no floating facts - imported facts must cite world authority",
@@ -127,6 +134,7 @@ const PRIOR_HARD_WRONG_RULE_STRINGS = [
 
 const STORY_PIPELINE_TASK_TYPES = new Set<TaskType>([
   "story_bootstrap",
+  "story_character_profile",
   "story_turn_cycle",
   "commitment_block_authoring",
   "branching_story_health_audit",

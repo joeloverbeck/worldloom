@@ -10,6 +10,7 @@
 ## Implementation Notes
 
 - 2026-05-21: I3 landed via `archive/tickets/SPEC60STCHARMACLAY-001.md`. `tools/world-index` now extracts record refs from structured predicate argument fields and nested `predicate` / `predicates` combinators for both SLT preconditions and STPLAN predicates. Verification: `cd tools/world-index && npm run build` and `cd tools/world-index && npm test` (`127` tests passed).
+- 2026-05-21: I4 landed via `archive/tickets/SPEC60STCHARMACLAY-002.md`. `tools/world-mcp` now registers `story_character_profile` as a first-class story-pipeline `get_context_packet` task type with a ranking profile, default budget, governing-world maps, reserve governing full-body policy, task-type full-body delivery for source `CHAR`, package README prose, and capability enum coverage. Verification: `cd tools/world-mcp && npm test` (`427` tests passed).
 
 ## 1. Context
 

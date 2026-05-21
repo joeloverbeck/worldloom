@@ -58,6 +58,17 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
     "ECONOMY_AND_RESOURCES.md",
     "EVERYDAY_LIFE.md"
   ],
+  story_character_profile: [
+    "WORLD_KERNEL.md",
+    "ONTOLOGY.md",
+    "TIMELINE.md",
+    "GEOGRAPHY.md",
+    "PEOPLES_AND_SPECIES.md",
+    "INSTITUTIONS.md",
+    "MAGIC_OR_TECH_SYSTEMS.md",
+    "ECONOMY_AND_RESOURCES.md",
+    "EVERYDAY_LIFE.md"
+  ],
   story_turn_cycle: [
     "WORLD_KERNEL.md",
     "ONTOLOGY.md",
@@ -166,6 +177,13 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
     "Rule 5: no consequence evasion - story-local consequences remain visible",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
+  story_character_profile: [
+    "Story character profile authoring is story-local; world canon remains read-only",
+    "Rule 1: no floating facts - profile claims must cite source CHAR and story authority",
+    "Rule 4: no globalization by accident - story-local characterization must not become world canon",
+    "Rule 6: no silent retcons - STCHAR changes remain append-only by supersession",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
   story_turn_cycle: [
     "Story turn cycle is story-local; world canon remains read-only",
     "Rule 1: no floating facts - imported facts must cite world authority",
@@ -220,6 +238,11 @@ const REQUIRED_OUTPUT_SCHEMA: Record<TaskType, string[]> = {
     "Story-local atomic records",
     "Per-bundle INDEX.md",
     "Per-world stories INDEX.md"
+  ],
+  story_character_profile: [
+    "Story character authority record",
+    "Story-local character profile markdown",
+    "Per-bundle story-characters INDEX.md"
   ],
   story_turn_cycle: [
     "Page record",
@@ -292,6 +315,13 @@ const PROHIBITED_MOVES: Record<TaskType, string[]> = {
     "Do not resolve or pre-empt forbidden Mystery Reserve answers",
     "Do not treat story-local facts as accepted world canon"
   ],
+  story_character_profile: [
+    "Do not write CF, CH, INV, M, OQ, ENT, or world-level SEC records",
+    "Do not mutate WORLD_KERNEL.md, ONTOLOGY.md, or mandatory world files",
+    "Do not resolve or pre-empt forbidden Mystery Reserve answers",
+    "Do not treat STCHAR profile claims as accepted world canon",
+    "Do not use world CHAR source material as turn-cycle runtime authority"
+  ],
   story_turn_cycle: [
     "Do not write CF, CH, INV, M, OQ, ENT, or world-level SEC records",
     "Do not mutate WORLD_KERNEL.md, ONTOLOGY.md, or mandatory world files",
@@ -351,6 +381,7 @@ const GOVERNING_ATOMIC_NODE_TYPES: Partial<Record<TaskType, readonly string[]>> 
   propose_new_characters: ["invariant"],
   canon_facts_from_diegetic_artifacts: ["invariant", "mystery_reserve_entry"],
   story_bootstrap: ["invariant", "mystery_reserve_entry"],
+  story_character_profile: ["invariant", "mystery_reserve_entry"],
   story_turn_cycle: ["invariant", "mystery_reserve_entry"],
   commitment_block_authoring: ["invariant", "mystery_reserve_entry"],
   branching_story_health_audit: ["invariant", "mystery_reserve_entry"],
