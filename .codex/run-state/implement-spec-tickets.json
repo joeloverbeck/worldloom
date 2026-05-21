@@ -1,19 +1,21 @@
 {
-  "originating_spec": "archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md",
-  "archived_spec": "archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md",
-  "last_ticket": "archive/tickets/SPEC62FOUANDDOC-006.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "5f35fdadc899a63603c287e6f62738a308ac5fb2",
+  "originating_spec": "specs/SPEC-67-story-world-index-edge-parity.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC67STOWORIND-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "332fd556058853a64ce80f668c7d56e267c9ee6a",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "complete",
+  "next_target": "tickets/SPEC67STOWORIND-002.md",
+  "queue": [
+    "tickets/SPEC67STOWORIND-002.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean after final state-only commit succeeds",
+  "dirty_state": "pre-existing unrelated submodule/worktree dirt: lowercase m .claude/worktrees/spec-61-62 (dirty marker only), left unstaged; expected ignored package artifacts: tools/world-index/dist/ refreshed by npm run build/npm test and pre-existing tools/world-index/node_modules/",
   "updated_at": "2026-05-21"
 }
