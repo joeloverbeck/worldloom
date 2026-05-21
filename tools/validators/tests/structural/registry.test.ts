@@ -13,6 +13,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "record_schema_compliance",
       "approval_semantics",
       "artifact_maturity",
+      "index_disk_consistency",
       "character_memorability_structure",
       "story_fact_authority",
       "lie_promoted_silently",

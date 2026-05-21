@@ -40,6 +40,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "entity_introduction_status_pairing",
   "expected_witness_coverage",
   "id_uniqueness",
+  "index_disk_consistency",
   "introduction_observer_firewall",
   "lie_promoted_silently",
   "midstory_record_introduction_grounding",

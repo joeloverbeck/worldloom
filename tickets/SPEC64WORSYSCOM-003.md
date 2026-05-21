@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new `--compatibility` CLI mode on `world-validate` (validator-subset selection). No new registered validator; no impact on the existing `--rules` / `--structural` modes.
-**Deps**: archive/tickets/SPEC64WORSYSCOM-001.md, SPEC64WORSYSCOM-002
+**Deps**: archive/tickets/SPEC64WORSYSCOM-001.md, archive/tickets/SPEC64WORSYSCOM-002.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ SPEC-64 D2 calls for a high-level world-compatibility check that aggregates sche
 
 1. `tools/validators/src/cli/world-validate.ts` parses options (`rules`, `structural`, `json`, `file`, `story`, `since`, `help`, `version`), hardcodes `run_mode: "full-world"` (line 89), and calls `selectValidators(structuralValidators, ruleValidators, values, ctx)` (line 95). `selectValidators` lives at `tools/validators/src/cli/_helpers.ts:135`; `validateOptions` enforces `--rules`/`--structural` mutual exclusion (line 83); `printHelp` documents flags. The compatibility subset names `record_schema_compliance` + `approval_semantics` (both already registered) + `artifact_maturity` (SPEC64WORSYSCOM-001) + `index_disk_consistency` (SPEC64WORSYSCOM-002).
 2. SPEC-64 §D2 + §Acceptance specify the CLI-mode shape and the subset; report §10.1 names the original `world_compatibility_validator`; the reassessed spec's I1 resolution mandates "CLI mode + validator subset, not meta-validator."
-3. Cross-artifact boundary under audit: the compatibility subset is a name set spanning four registry entries; it depends on `archive/tickets/SPEC64WORSYSCOM-001.md` and SPEC64WORSYSCOM-002 having registered `artifact_maturity` and `index_disk_consistency` respectively. The shared contract is the validator-name set the selection references.
+3. Cross-artifact boundary under audit: the compatibility subset is a name set spanning four registry entries; it depends on `archive/tickets/SPEC64WORSYSCOM-001.md` and `archive/tickets/SPEC64WORSYSCOM-002.md` having registered `artifact_maturity` and `index_disk_consistency` respectively. The shared contract is the validator-name set the selection references.
 4. FOUNDATIONS §Tooling Recommendation / §Machine-Facing Layer restated: validators + CLI are the executable enforcement layer (Validator Framework, item 4); the mode also runs `approval_semantics`, which enforces the §Canon Fact Record Schema reservation that `source_basis.direct_user_approval` is accepted-CF-only.
 
 ## Architecture Check
@@ -47,7 +47,7 @@ Extend `selectValidators` with the compatibility-subset branch; extend `validate
 
 ## Out of Scope
 
-- The `artifact_maturity` (SPEC64WORSYSCOM-001) and `index_disk_consistency` (SPEC64WORSYSCOM-002) validator implementations themselves.
+- The `artifact_maturity` (`archive/tickets/SPEC64WORSYSCOM-001.md`) and `index_disk_consistency` (`archive/tickets/SPEC64WORSYSCOM-002.md`) validator implementations themselves.
 - Patch-engine pre-apply wiring — the blocking behavior under `pre-apply` is emergent from the D1/D3 validators' run_mode-conditional severity once registered, not new CLI work.
 - The continuity-audit reporting hook (SPEC64WORSYSCOM-004).
 

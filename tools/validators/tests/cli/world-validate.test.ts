@@ -215,6 +215,7 @@ test("world-validate --since narrows selector applicability from the world's git
     "record_schema_compliance",
     "approval_semantics",
     "artifact_maturity",
+    "index_disk_consistency",
     "story_fact_authority",
     "compatibility_drift",
     "rule7_mystery_reserve_preservation"

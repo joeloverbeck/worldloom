@@ -1,6 +1,6 @@
 # SPEC64WORSYSCOM-002: `index_disk_consistency` structural validator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new structural validator `index_disk_consistency` in `tools/validators` (registry append); reads `INDEX.md` files from the world root and diffs against indexed records. No impact on existing validators (additive registry append).
@@ -17,6 +17,7 @@ There is no check for index drift between an `INDEX.md` and the artifacts on dis
 3. Cross-artifact boundary under audit: `INDEX.md` files are **derived renderings, not indexed records** — the validator reads each `INDEX.md` from the world root on disk (via `worldRootFrom`) and diffs its entries against the indexed `proposal_card` / `audit_record` / `pressure_event_card` / `character_proposal_card` records. The shared surface is the `INDEX.md` entry format produced by the proposal/audit/pressure/character-proposal skills.
 4. FOUNDATIONS Rule 6 (No Silent Retcons) restated: the posture is fail-fast validation + manual repair, with no silent migration or backwards-compatibility shim that would mutate artifacts (or rewrite an `INDEX.md`) without an audit trail.
 5. Canon Safety surface: `index_disk_consistency` is a structural validator under `tools/validators/src/structural/`; under `run_mode: "pre-apply"` it emits `fail` (gating canon/hybrid writes), under `full-world` it emits `warn`. Confirm `applies_to` scopes the validator to worlds carrying the relevant surfaces and that it touches no `M-<integer>` record (Rule 7 firewall intact).
+6. Reassessment widened the same-seam proof surface before source edits: registering a structural validator also requires the live inventory/count witnesses to move with the registry. `tools/validators/README.md`, `tools/validators/tests/cli/world-validate.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, and `tools/world-mcp/tests/server/capability-parity.test.ts` were included as owned registry witnesses, matching the precedent from `archive/tickets/SPEC64WORSYSCOM-001.md`.
 
 ## Architecture Check
 
@@ -44,12 +45,20 @@ Add the import and the `indexDiskConsistency` entry to the `structuralValidators
 
 Add `index_disk_consistency` to the structural-validator name-list assertion in `tools/validators/tests/structural/registry.test.ts`.
 
+### 4. Extend same-seam registry witnesses
+
+Update the validators README structural inventory/count, CLI selected-validator expectation, SPEC-04 validator-count assertion, and downstream `world-mcp` capability parity expected validator list to include `index_disk_consistency`.
+
 ## Files to Touch
 
 - `tools/validators/src/structural/index-disk-consistency.ts` (new)
 - `tools/validators/src/public/registry.ts` (modify)
 - `tools/validators/tests/structural/registry.test.ts` (modify)
 - `tools/validators/tests/structural/index-disk-consistency.test.ts` (new)
+- `tools/validators/tests/cli/world-validate.test.ts` (modify)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify)
+- `tools/validators/README.md` (modify)
+- `tools/world-mcp/tests/server/capability-parity.test.ts` (modify)
 
 ## Out of Scope
 
@@ -77,8 +86,33 @@ Add `index_disk_consistency` to the structural-validator name-list assertion in 
 
 1. `tools/validators/tests/structural/index-disk-consistency.test.ts` (new) — both-direction drift, clean-pass, and run_mode-severity cases.
 2. `tools/validators/tests/structural/registry.test.ts` (modify) — assert `index_disk_consistency` is registered.
+3. `tools/validators/tests/cli/world-validate.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, `tools/world-mcp/tests/server/capability-parity.test.ts` (modify) — registry/count/consumer witnesses updated for the new structural validator.
 
 ### Commands
 
 1. `npm test --prefix tools/validators`
 2. `npm run build --prefix tools/validators` (covers `tsc`; the package defines no separate `typecheck` script)
+3. `(cd tools/world-mcp && npm run build && node --test dist/tests/server/capability-parity.test.js)` — downstream registry parity proof
+
+## Outcome
+
+Completed: 2026-05-21
+
+Implemented `index_disk_consistency` as an additive structural validator over proposal, audit, pressure-event, and character-proposal INDEX surfaces. The validator reads each surface `INDEX.md` from the world root, compares markdown links against indexed records plus disk artifacts, reports `index_disk_drift` in both directions, emits `fail` outside `full-world` and `warn` in `full-world`, and never rewrites any `INDEX.md`.
+
+Registered the validator in the validators package and updated same-seam registry/count/inventory witnesses plus the downstream `world-mcp` validator-registry parity test.
+
+## Verification Result
+
+1. `npm run build` from `tools/validators` — PASS.
+2. `node --test dist/tests/structural/index-disk-consistency.test.js dist/tests/structural/registry.test.js dist/tests/cli/world-validate.test.js` from `tools/validators` — first run exposed a same-seam overreach where `.proposal.md` pressure sidecars were treated as `pressure_event_card` artifacts; after tightening the matcher, PASS (13 tests).
+3. `npm test` from `tools/validators` — PASS (822 tests).
+4. `npm run build` from `tools/world-mcp` — PASS.
+5. `node --test dist/tests/server/capability-parity.test.js` from `tools/world-mcp` — PASS (5 tests).
+6. Manual FOUNDATIONS alignment check — PASS: the validator enforces §Artifact Authority and Maturity / machine-facing validation discipline by detecting INDEX drift, adds no migration or auto-repair path, mutates no canon or hybrid artifact, and does not resolve Mystery Reserve content.
+
+## Deviations
+
+- Same-seam registry witnesses beyond the drafted file list were required and updated: `tools/validators/README.md`, `tools/validators/tests/cli/world-validate.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, and `tools/world-mcp/tests/server/capability-parity.test.ts`.
+- Pressure-event sidecar proposal files (`*.proposal.md`) are intentionally excluded from this validator's `pressure_event_card` surface; they are proposal-sidecar artifacts, not top-level `EPE-*` pressure-event cards.
+- Existing ignored package artifacts were present before verification (`tools/validators/dist/`, `tools/validators/node_modules/`, `tools/world-mcp/dist/`, `tools/world-mcp/node_modules/`). Builds refreshed `dist/`; ignored artifacts are not tracked source changes.
