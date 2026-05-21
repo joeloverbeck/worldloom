@@ -322,7 +322,7 @@ Report paths written. No git commit.
    the user runs `canon-addition` on each card separately:
    `/canon-addition ashen-dunes worlds/ashen-dunes/audits/AU-0001/retcon-proposals/RP-0001-guild-founding-timeline.md`
    canon-addition's Phase 0 Normalization treats the RP-<integer> card's
-   `source_basis.direct_user_approval: true` as "reviewed and kept in the
+   `source_basis.user_approved: true` as "reviewed and kept in the
    audit", NOT as canon acceptance — acceptance is canon-addition's Phase 11
    verdict.
 

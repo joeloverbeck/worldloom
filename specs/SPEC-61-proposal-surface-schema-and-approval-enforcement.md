@@ -132,6 +132,10 @@ therefore routes `proposals/batches/` to `proposal_batch` and `pressure-events/b
 
 ### 2.4 Fix the RP `direct_user_approval` collision
 
+**Implementation note (2026-05-21, SPEC61PROSURSCH-005):** the RP producer collision is fixed.
+`continuity-audit` now writes and documents `source_basis.user_approved` on RP cards, while
+`canon-addition` keeps the accepted-CF `source_basis.direct_user_approval: true` provenance path.
+
 **Files:** `.claude/skills/continuity-audit/templates/retcon-proposal-card.md`, `.claude/skills/continuity-audit/SKILL.md`
 
 - In the RP template, rename `source_basis.direct_user_approval` → `source_basis.user_approved`,
