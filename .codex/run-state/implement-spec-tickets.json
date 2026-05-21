@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC61PROSURSCH-005.md",
+  "last_ticket": "archive/tickets/SPEC61PROSURSCH-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "60bfc87ca261177d07c68e07628616e7f926c895",
+  "last_work_commit": "34240614473e4ee80dc51408c9c9b612588be310",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC61PROSURSCH-003.md",
+  "next_target": "tickets/SPEC61PROSURSCH-004.md",
   "queue": [
-    "tickets/SPEC61PROSURSCH-003.md",
     "tickets/SPEC61PROSURSCH-004.md",
     "tickets/SPEC61PROSURSCH-006.md"
   ],
