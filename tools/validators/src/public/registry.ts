@@ -78,6 +78,7 @@ import { storyQuestionSetupPredatesPayoff } from "../structural/story-question-s
 import { storyQuestionTerminalDebt } from "../structural/story-question-terminal-debt.js";
 import { storyDaDuplicateHeuristic } from "../structural/story-da-duplicate-heuristic.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
+import { storyKernelCastBindListIntegrity } from "../structural/story-kernel-cast-bind-list-integrity.js";
 import { threadIntroductionGroundingIntegrity } from "../structural/thread-introduction-grounding-integrity.js";
 import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
@@ -157,6 +158,7 @@ export const structuralValidators: readonly Validator[] = [
   proposalPackageShape,
   proseReceiptSchemaCompliance,
   proseReceiptStcharIntegrity,
+  storyKernelCastBindListIntegrity,
   modificationHistoryRetrofit,
   validationTraceShapeCompliance,
   stplanSchemaCompliance,
