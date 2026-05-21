@@ -42,6 +42,7 @@
         "entity_status_consistency",
         "invented_structural_fact",
         "canon_claim_without_authority",
+        "char_authority_leak",
         "craft_critic"
       ],
       "properties": {

@@ -96,13 +96,16 @@ test("prose_receipt_schema_compliance accepts absent STCHAR blocks when no quali
   assert.deepEqual(result, []);
 });
 
-test("prose_receipt_schema_compliance preserves additive compatibility for receipts without char leak field", async () => {
+test("prose_receipt_schema_compliance rejects receipts without char leak field", async () => {
   const payload = validReceiptPayload();
   delete (payload.checks as Record<string, unknown>).char_authority_leak;
 
   const result = await runReceipt(payload);
 
-  assert.deepEqual(result, []);
+  assert.ok(result.some((verdict) => (
+    verdict.code === "prose_receipt_schema_compliance.required" &&
+    verdict.message.includes("must have required property 'char_authority_leak'")
+  )));
 });
 
 test("prose_receipt_schema_compliance rejects missing-packet STCHAR entries marked pass", async () => {

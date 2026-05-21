@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new structural validator in `tools/validators` registered in `structuralValidators`; no impact on existing validators (additive registry entry). Reads prose receipts, page-plan §16a, STCHAR records, and `PG.state_snapshot`; mutates nothing.
-**Deps**: SPEC59STCHARAUTFID-001 (receipt fixtures rely on `char_authority_leak` being a required `checks` field)
+**Deps**: `archive/tickets/SPEC59STCHARAUTFID-001.md` (receipt fixtures rely on `char_authority_leak` being a required `checks` field)
 
 ## Problem
 
