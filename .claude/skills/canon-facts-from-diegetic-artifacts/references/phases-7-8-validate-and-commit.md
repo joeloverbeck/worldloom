@@ -10,7 +10,7 @@ Every test records **PASS with one-line rationale** OR **FAIL with specific gap*
 
 - **T1. Domain coverage.** At least one of the 14 Rule-2 domains listed in `domains_touched`. Enforces Rule 2.
 - **T2. Scope honesty.** `recommended_scope` explicitly declared; if `geographic: global`, 6c rationale exists. Enforces Rule 4.
-- **T3. Consequence completeness.** Both `immediate_consequences` and `longer_term_consequences` populated with ≥ 1 entry each; longer-term traces through ≥ 2 Rule-2 domains. Enforces Rule 5.
+- **T3. Consequence completeness.** Both `immediate_consequences` and `longer_term_consequences` populated with ≥ 1 entry each; longer-term traces through ≥ 2 Rule-2 domains. Consequence list items containing `:` must be quoted or written as folded block scalars (`- >`) so YAML parses each entry as a string rather than a mapping. Enforces Rule 5.
 - **T4. Stabilizer presence.** `why_not_universal` populated OR `social: rumor` scope declared. Enforces Rule 3.
 - **T5. CSC trace completeness.** `canon_safety_check` fields fully populated: `invariants_respected` or `invariants_violated` non-empty; `mystery_reserve_firewall` records every MR id; `distribution_discipline.canon_facts_consulted` non-empty; `diegetic_to_world_laundering` records all three sub-tests with `test_result` + rationale.
 - **T6. Source artifact binding.** `source_artifact_id` field populated with DA-<integer> id; `source_basis.derived_from_artifact_path` populated.

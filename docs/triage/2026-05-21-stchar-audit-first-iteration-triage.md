@@ -5,7 +5,7 @@
 **Date:** 2026-05-21
 **Source report:** `reports/stchar-audit-first-iteration.md` (ChatGPT-Pro, audit of merged SPEC-56/57 STCHAR work)
 **Method:** every codebase claim verified against `main` via parallel Explore agents (file:line evidence). ChatGPT-Pro inspected `main` by eye without cloning, so each "current implementation status" cell was treated as a hypothesis until confirmed.
-**Deliverables:** SPEC-58, SPEC-59, SPEC-60 + `specs/IMPLEMENTATION-ORDER.md`
+**Deliverables:** SPEC-58, SPEC-59, SPEC-60 + `archive/specs/IMPLEMENTATION-ORDER-2026-05-22.md` (implementation-order history archived 2026-05-22)
 
 ## Reframing corrections (verification overturned the report)
 

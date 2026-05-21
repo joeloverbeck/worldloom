@@ -96,10 +96,14 @@ score_aggregate: 0                           # sum(first 6) − sum(last 2). Ran
                                              # Threshold +6 unless high-value artifact signal.
 
 immediate_consequences: []                   # first-order — enforced by Phase 7 T3
+                                             # YAML scalar safety: list items containing ":" must be quoted
+                                             # or emitted as folded block scalars (`- >`) so they parse as
+                                             # strings, not one-key mappings.
   # - "if accepted, this festival gets named in EVERYDAY_LIFE.md"
   # - "monastic calendar annotations become a recognizable artifact class"
 
 longer_term_consequences: []                 # second-order and beyond — T3 requires ≥2 domains
+                                             # Same YAML scalar safety rule as immediate_consequences.
   # - "year-counting as a specialized skill alters clerical labor structure"
   # - "disputes over calendrical accuracy become a political axis"
 
