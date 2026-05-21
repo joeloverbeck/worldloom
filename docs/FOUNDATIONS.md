@@ -663,7 +663,7 @@ This firewall governs move and choice generation. The existing `expected_witness
 
 ### 7. Story-Pipeline Skill Category
 
-The seven story-pipeline skills constitute Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`: `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout`.
+The eight story-pipeline skills constitute Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`: `story-character-profile`, `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout`.
 
 FOUNDATIONS alignment applies per the story-scope validation rules above. Sibling-scan is recommended as a defensive default for inter-skill shared surfaces, including the shared predicate DSL, the STENT `role_in_story` enum, the `PG.state_snapshot` schema (per the shared story state contract), the RSP card schema, and page-plan content-policy / prose-craft / render-time instruction surfaces per the shared story state contract §8.
 
@@ -679,7 +679,7 @@ Story-pipeline LLM-facing surfaces must not impose word-count targets, floors, c
 
 **Why**: word-count quotas at the LLM-facing surface produced empirically observed prose-padding (the LLM extending scenes to reach the floor) and prose-truncation (the LLM compressing scenes to fit the ceiling) pathologies. Commit `b28aead` (2026-05-06) removed the word-per-page guidelines from the page-render instructions on that basis; the archived SPEC-20 §H reassessment (2026-05-07) dropped the old per-bundle word-target fields for the same reason.
 
-**Scope**: this discipline applies to LLM-facing prompts in the story-pipeline skills (Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`) — `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout`. The Prose Craft Contract is hosted at `reports/prose-quality-instructions.md` §Prose Craft Contract and inlined verbatim as page-plan §3 per `.claude/skills/_shared-templates/story-state-contract.md` §8.
+**Scope**: this discipline applies to LLM-facing prompts in the story-pipeline skills (Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`) — `story-character-profile`, `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout`. The Prose Craft Contract is hosted at `reports/prose-quality-instructions.md` §Prose Craft Contract and inlined verbatim as page-plan §3 per `.claude/skills/_shared-templates/story-state-contract.md` §8.
 
 **Out of scope**: choice-button text length budgets (e.g., "5-15 words" for individual CHC text), INDEX preview excerpts (`first ~300 words of PG-<integer>.md` for display), prose-quality-density metrics (e.g., `filter_word_saturation per 100 words` as a filter-verb-ratio quality axis), and unrelated word-choice / vocabulary guidance are not word-quota mechanisms and remain outside this discipline.
 

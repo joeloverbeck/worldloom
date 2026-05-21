@@ -120,6 +120,7 @@ Phase 5: HARD-GATE fires → patch (create_*_record per supersession +
 | `BEL-<integer>` (supersession) | `_source/beliefs/BEL-<integer>.yaml` | IF a source BEL needs an amended-schema update to `truth_relation`, `claim`, `basis`, or `consequences` (`source_record_dispositions[BEL-<integer>] = superseded`) |
 | `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF a source STENT needs an amended-schema update (`source_record_dispositions[STENT-<integer>] = superseded`) |
 | `STSTAT-<integer>` (supersession) | `_source/status/STSTAT-<integer>.yaml` | IF a source STSTAT in the promotion's source-record set needs an amended-schema update after becoming canon-linked, such as character-outcome supersession-chain evidence (`source_record_dispositions[STSTAT-<integer>] = superseded`) |
+| `STCHAR-<integer>` (supersession) | `story-characters/STCHAR-<integer>.md` | IF a supporting story-character profile needs an amended-schema update because the verdict changes one of its STCHAR fields; never because STCHAR became world `CHAR` |
 | `SREL-<integer>` (supersession) | `_source/relationships/SREL-<integer>.yaml` | IF a source SREL needs an amended-schema update (`source_record_dispositions[SREL-<integer>] = superseded`) |
 | `DA-<integer>` (supersession) | `_source/artifacts/DA-<integer>.yaml` | IF a source DA needs an amended-schema update (`source_record_dispositions[DA-<integer>] = superseded`; uses `append_story_diegetic_artifact_record`) |
 | `STPLAN-<integer>` (supersession) | `_source/plans/STPLAN-<integer>.yaml` | IF an accepted or rejected canon verdict invalidates an active plan's `belief_basis`, `resource_basis`, or blocker assumptions and the affected plan must be abandoned, revised, or fulfilled |
@@ -140,6 +141,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (SF, BEL, STENT, STSTAT, SREL, DA, SE — closeout output classes for superseded or audit-emitted records; BR — read-only branch lineage), §4.3a (audit-only SE events), §4.5.13 (STSTAT — character-outcome supersession-chain evidence)
 - `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.17 / §4.5.18, `.claude/skills/_shared-templates/story-state-contract.md` §5a / §8, `docs/CONTEXT-PACKET-CONTRACT.md`, and `docs/MACHINE-FACING-LAYER.md` — STPLAN/STEMO basis fallout and plan-relation closeout guidance
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml` — source of truth for the promotion's `proposal_evidence.source_records[]` / `proposal_evidence.source_kind` / `proposal_evidence.story_branch`, plus top-level `contradiction_preference` / `downstream_impact_report`
+- `proposal_evidence.supporting_story_character_profiles[]` entries when present — STCHAR evidence context only; these are not promotion source records and do not create world `CHAR` outputs
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>.md` — original ledger (read-only; cross-referenced in closeout ledger)
 - `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>, world_slug=<world_slug>)` — read-only linked CF and CH records for world-canon reference and Rule 6 audit-trail citation
 - `mcp__worldloom__get_record(record_id=<linked_pa_id>, world_slug=<world_slug>)` for each linked PA — read-only adjudication record lookup until hybrid PA batch retrieval is available in `get_records`
@@ -199,6 +201,7 @@ The candidate is now world canon. Record the canon link in the closeout ledger. 
   - **Triggered**: canon-addition accepts the DA's claim and clarifies a field the DA carried in an ambiguous state, such as `truth_relation` changing from `contested` to `true` per the accepted CF, or `circulation` shifting because closeout reveals factional propagation the original DA did not record. Supersede the DA via `append_story_diegetic_artifact_record` with `supersedes: DA-<old>` and the corrected fields; record the supersession cause in the closeout ledger.
   - **NOT triggered**: canon-addition rejects the DA's claim. The DA remains active with its original `truth_relation` (typically `contested` or `false`); the rejection is recorded in the closeout ledger. The DA continues to exist as branch-local in-world evidence even when its claim does not promote.
 - For `source_kind: character_outcome`, supersede `STENT` only if a §4.5.1 field changes; supersede `STSTAT` only if a source STSTAT in `proposal_evidence.source_records[]` needs an amended-schema update after the canon-addition verdict (e.g., character-outcome status evidence becoming canon-linked, or explicitly retained as branch-local after rejection).
+- For any `proposal_evidence.supporting_story_character_profiles[]` entry, supersede `STCHAR` only if the verdict changes an amended STCHAR field. A canon verdict can make the STCHAR ledger-relevant without changing the profile; in that case, record the verdict in `SP-<integer>-closeout.md` only. STCHAR is never converted into world `CHAR` by closeout, never added to `candidate.source_basis.derived_from[]`, and never treated as a `promotion_claims[].source_record`.
 - For `source_kind: relationship_or_institutional_outcome`, supersede `SREL` only if a §4.5.7 field changes.
 
 For active `STPLAN` / `STEMO` records that cite the promotion source records or verdict-linked evidence, decide whether the canon verdict changes their present-causal truth:
@@ -301,9 +304,13 @@ source_record_dispositions:
   STENT-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
   STSTAT-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
   SREL-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
+supporting_story_character_dispositions:
+  STCHAR-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
 ```
 
 The map is required. Its key set must exactly match the proposal package's `proposal_evidence.source_records[]` inventory. `superseded` means a new story-local record was written because an amended-schema field changed; `ledger_only` means the verdict or canon link is recorded only in this closeout ledger; `unchanged_no_schema_field_changed` means the source record remains unchanged because no amended-schema field needed updating.
+
+The optional `supporting_story_character_dispositions` map is present only when the proposal package has `proposal_evidence.supporting_story_character_profiles[]`. Its key set matches those supporting STCHAR ids, not `proposal_evidence.source_records[]`; the same closed disposition enum applies.
 
 ## Branch handling
 
@@ -383,6 +390,7 @@ The `SP-<integer>-closeout.md` ledger schema is defined inline in Phase 4's temp
 | Mystery Reserve | N/A at this skill | Story-fact-promotion-to-canon + canon-addition handled. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Closeout reads `PG` records as authoritative; never mutates them. Supersessions affect SF / BEL / STENT / SREL / DA, NOT branch or page records. |
 | §Story Bundles §5 (Validation Rules At Story Scope) | Phase 2 | On accepted verdicts, the closeout ledger records the canon link; story-local records are superseded only through amended-schema fields when their branch-local state changes. |
+| §6.1 Story-Local Character Authority | Phase 2 | `STCHAR` evidence remains story-local; closeout may supersede STCHAR only for amended field changes and never promotes it to world `CHAR`. |
 | Change Control Policy | Phase 1, Phase 3 gate 2 | Closeout reads canon-addition's CH Change Log Entry and cites it in the closeout ledger. |
 | Tooling Recommendation | Pre-flight | Linked canon-addition records are loaded read-only through `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>, world_slug=<world_slug>)` and per-PA `mcp__worldloom__get_record(record_id=<linked_pa_id>, world_slug=<world_slug>)`. No `get_context_packet` retrieval is needed because the accepted-output ids are known. Direct filesystem reads of `_source/canon/`, `_source/change-log/`, or `adjudications/` are not used for linked-output verification (see Pre-flight step 5). |
 
@@ -394,6 +402,7 @@ The `SP-<integer>-closeout.md` ledger schema is defined inline in Phase 4's temp
 - **Branch-handling actions only affect same-story branches.** Phase 3 gate 3. Cross-story branch modifications are forbidden; cross-story contradictions belong to `branching-story-health-audit` `cross_story` mode or a separate world-level workflow.
 - **The original SP-<integer>.md ledger stays unchanged.** Closeout writes a NEW `SP-<integer>-closeout.md` companion. This preserves the historical proposal-time record append-only at the markdown layer.
 - **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Superseding records must conform to the amended class schemas in shared contract §4. Ledger-only canon links, rejection disposition, archive disposition, and deferral notes stay in `SP-<integer>-closeout.md` / INDEX surfaces until a future contract amendment deliberately promotes a structured field.
+- **Story-local character profiles stay story-local.** STCHAR can be supporting evidence in the proposal package and can be superseded only when an amended STCHAR field changes. Closeout never writes world `CHAR`, never treats STCHAR as a promotion source, and never silently globalizes story-local character authority.
 - **Skills do not chain.** Closeout never invokes `canon-addition` (already ran), `story-fact-promotion-to-canon` (already ran), or any other sibling. The user invokes closeout separately after canon-addition adjudicates.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
 

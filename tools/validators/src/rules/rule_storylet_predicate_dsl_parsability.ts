@@ -72,7 +72,7 @@ const STORY_ID_PATTERNS = {
   plan: /^STPLAN-\d+$/,
   emotion: /^STEMO-\d+$/
 } as const;
-const RECORD_ACTIVE_PATTERN = /^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/;
+const RECORD_ACTIVE_PATTERN = /^(?:STENT|STCHAR|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/;
 const DERIVED_FROM_PATTERN = /^(?:SE|STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-\d+$/;
 const BOUND_EFFECT_PATTERN = /^bound:([a-z][a-z0-9_-]*)$/;
 
@@ -89,6 +89,7 @@ interface ReferenceSets {
   secrets: Map<string, Set<string>>;
   questions: Map<string, Set<string>>;
   relationships: Map<string, Set<string>>;
+  storyCharacters: Map<string, Set<string>>;
   locations: Map<string, Set<string>>;
   objects: Map<string, Set<string>>;
   artifacts: Map<string, Set<string>>;
@@ -172,6 +173,7 @@ async function loadReferenceSets(ctx: Context): Promise<ReferenceSets> {
     secrets: await query("story_secret_record"),
     questions: await query("story_question_record"),
     relationships: await query("relationship_record_story"),
+    storyCharacters: await query("story_character_authority_record"),
     locations: await query("story_location_record"),
     objects: await query("story_object_record"),
     artifacts: await query("story_diegetic_artifact_record"),
@@ -573,6 +575,7 @@ function activeRecordIds(state: ValidationState): Set<string> {
     ...idsFor(state.refs.secrets, state.record),
     ...idsFor(state.refs.questions, state.record),
     ...idsFor(state.refs.relationships, state.record),
+    ...idsFor(state.refs.storyCharacters, state.record),
     ...idsFor(state.refs.locations, state.record),
     ...idsFor(state.refs.objects, state.record),
     ...idsFor(state.refs.artifacts, state.record),

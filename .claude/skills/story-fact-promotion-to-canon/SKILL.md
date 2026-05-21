@@ -118,6 +118,8 @@ Phase 7: HARD-GATE fires → write SP-<integer>-proposal-package.yaml
 
 `STPLAN` and `STEMO` are evidence context only. They may be cited in `proposal_evidence` and rationale when they explain why a story fact, character outcome, artifact claim, relationship outcome, or other branch claim emerged, but they are not source-kind classes and do not extend the six-value `source_kind` enum. Tactical plans and transient affective states rarely promote directly; any world-canon candidate should be expressed through the resulting `SF`, `SREL`, `character_outcome`, `DA`, or other lawful source record.
 
+`STCHAR` is also evidence context only. It may be cited in `proposal_evidence.supporting_story_character_profiles[]` when a story-local character profile explains voice, appraisal, pressure behavior, or relationship conduct behind the promoted claim. It MUST NOT be added to `candidate.source_basis.derived_from[]`, MUST NOT appear as a `promotion_claims[].source_record`, and MUST NOT create a new source kind. `character_outcome` remains rooted in `STENT` plus `STSTAT` supersession-chain evidence. Story-local-character-to-world-`CHAR` promotion is out of scope and requires a future dedicated workflow if ever needed.
+
 **DA-to-CF routing rule (FOUNDATIONS line 365).** When `source_kind:
 artifact_canonization`, record the source `DA-<integer>` in
 `candidate.source_basis.derived_from[]` alongside any contributing CF parents.
@@ -328,6 +330,11 @@ proposal_evidence:
   authoring_events: [SE-<integer> ids]
   belief_witnesses: [BEL-<integer> ids]
   rendered_prose_receipts: [pages-prose-receipts/PG-<integer>.yaml]
+  supporting_story_character_profiles:
+    - stchar_id: STCHAR-<integer>
+      evidence_role: voice | appraisal | pressure_behavior | relationship_conduct | other
+      supporting_page_ids: [PG-<integer>]
+      note: <why this STCHAR is evidence context, not promotion authority>
   resolution_feedback_evidence:
     - event_id: SE-<integer>
       player_visible_feedback: <copied from SE.resolution.player_visible_feedback when result == held_for_promotion>
@@ -403,6 +410,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 | Canon Fact Record Schema | Phase 2, 6 | `candidate:` carries only CF fields; branch-local proposal evidence stays outside the candidate. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Skill reads `PG` records as authoritative state; never mutates. |
 | §Story Bundles §5 (Validation Rules At Story Scope) | Phase 2, 4 | Canon-candidate authority discipline + forbidden-mystery firewall. |
+| §6.1 Story-Local Character Authority | Phase 1, 6 | `STCHAR` may support proposal evidence only; it never becomes a promotion source, CF `derived_from` authority, or world `CHAR` automatically. |
 | Change Control Policy | N/A at this skill | Canon-addition writes the Change Log Entry. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |
 
@@ -412,10 +420,15 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 - **Output is NOT canon until canon-addition adjudicates.** The proposal package is a CANDIDATE. The skill explicitly instructs the user to invoke canon-addition separately. No automatic chaining; no implicit acceptance.
 - **Forbidden mysteries cannot be promoted.** Phase 4 ABORT-on-forbidden-resolution. The skill REFUSES to write a proposal package whose candidate would resolve a forbidden mystery.
 - **Branch-local truth is evidence, not authority.** Phase 2 keeps branch provenance in top-level `proposal_evidence`, NEVER in `candidate.source_basis` or `source_basis.derived_from`; `derived_from` carries world-authority provenance such as parent CFs and FOUNDATIONS line 365 DA/CHAR pre-figurement.
+- **Story-local character profiles are evidence, not authority.** Keep `STCHAR` in `proposal_evidence.supporting_story_character_profiles[]` only. Do not place `STCHAR-*` in `candidate.source_basis.derived_from[]`, `promotion_claims[].source_record`, or `source_record_ids`, and do not treat it as an automatic route to world `CHAR`.
 - **HARD-GATE is absolute.** Always show the proposal to the user. No execution-mode bypass; no Auto Mode override. Phase 7 always pauses for explicit user approval. World-canon promotion is too high-stakes for automation.
 - **No post-adjudication closeout in this skill.** After canon-addition adjudicates, the user runs `story-promotion-closeout` to write the verdict back onto story-local records (supersession of SF / BEL / DA / STENT / SREL records that the canon-addition outcome implicates, with branch disposition recorded in the closeout ledger / INDEX surfaces).
 - **Skills do not chain.** This skill never invokes `canon-addition` or `story-promotion-closeout`. Phase 7 surfaces the recommendation; the user separately invokes the named sibling.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
+
+## Out of scope
+
+- Story-local-character-to-world-`CHAR` promotion. If such a workflow becomes necessary, create a dedicated canon-facing workflow rather than routing it through generic story-fact promotion.
 
 ## Final Rule
 

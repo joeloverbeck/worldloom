@@ -35,7 +35,7 @@ Do NOT write `pages-prose-receipts/<page_id>.yaml`, update `worlds/<world_slug>/
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `STORY_KERNEL.md` loaded, including `## Player Agency Contract`; page loaded from `_source/pages/<page_id>.yaml`; plan + prose pair verified at `pages-prose-plans/<page_id>.md` + `pages-prose/<page_id>.md`; `pages-prose-receipts/` directory present (idempotent `mkdir -p` if absent); `SE` id allocated via `mcp__worldloom__allocate_next_id` only when `emit_attach_event: true`.
 
-(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + `STORY_KERNEL.md` Player Agency Contract + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `state_hash` + `prose_hash` derived; `hash_integrity` check applied per `accept_plan_drift`; 8 deterministic checks complete per `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 (hash_integrity, engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, choice_consequence_visibility, entity_status_consistency, invented_structural_fact, canon_claim_without_authority), including the required_event_rendered CLK tick, STSEC reveal, and STQ payoff / answer subchecks below; optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
+(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + `STORY_KERNEL.md` Player Agency Contract + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `state_hash` + `prose_hash` derived; `hash_integrity` check applied per `accept_plan_drift`; 8 deterministic prose/state checks complete per `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 (hash_integrity, engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, choice_consequence_visibility, entity_status_consistency, invented_structural_fact, canon_claim_without_authority), including the required_event_rendered CLK tick, STSEC reveal, and STQ payoff / answer subchecks below; the existing `no_char_authority_in_story_runtime` verdict surfaced as `checks.char_authority_leak`; STCHAR authority packet checks + profile-fidelity judgments complete for every required §16a packet; optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
 
 (c) The user has explicitly approved the deliverable summary (receipt path, per-check verdict table, roll-up verdict, repair_recommendation, strict-mode publication-blocking decision if applicable, optional SE-<integer> id + patch op preview when `emit_attach_event: true`).
 
@@ -63,7 +63,9 @@ Phase 2: Hash integrity check (computed vs recorded plan_hash + state_hash;
                                receipt notes, never in PG)
         |
         v
-Phase 3: Deterministic checks (8 checks per shared contract §4.6)
+Phase 3: Deterministic checks (8 prose/state checks, CHAR leak verdict,
+                               and STCHAR packet authority checks per shared
+                               contract §4.6)
         |
         v
 Phase 4: [optional] Craft critic (7 axes; only when run_craft_critic=true)
@@ -183,7 +185,7 @@ Hook 6 blocks direct `Edit` / `Write` drift on `pages-prose-plans/PG-<integer>.m
 
 ## Phase 3: Deterministic checks
 
-Run the 8 deterministic checks defined in shared contract §4.6, each producing `PASS | WARN | FAIL` (or `PASS | FAIL` where the schema names only two states):
+Run the 8 deterministic prose/state checks defined in shared contract §4.6, each producing `PASS | WARN | FAIL` (or `PASS | FAIL` where the schema names only two states). Also surface the existing `no_char_authority_in_story_runtime` text-surface verdict as `checks.char_authority_leak` and populate the STCHAR-specific receipt blocks for every required §16a packet.
 
 1. **`hash_integrity`** (`PASS | WARN | FAIL`) — produced by Phase 2. It is verdict-driving: `FAIL` forces the receipt `verdict: FAIL`; `WARN` contributes to `verdict: WARN`.
 
@@ -257,6 +259,12 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
 
 8. **`canon_claim_without_authority`** (`PASS | FAIL`) — scan prose for assertions that would make a world-level canon claim absent from plan §4. Examples: asserting a historical date that plan §4 does not list; stating a metaphysical rule (e.g., "magic is fundamentally entropic") that plan §4 does not include; declaring a faction's secret identity that plan §4 leaves to Mystery Reserve. Any such assertion without corresponding `SE.promotion_claims[]` evidence on the resolving event (loaded via `PG.input.resolved_event_id`) is `FAIL` and routes to `repair_recommendation: run_story_fact_promotion_to_canon`.
 
+9. **`char_authority_leak`** (`PASS | FAIL`) — run or consume the existing `no_char_authority_in_story_runtime` validator over the page plan and receipt-target text surface. Do not implement a second CHAR scan in prose-attach. If that validator reports `no_char_authority_in_story_runtime.char_authority_text_leak` for the page plan or planned receipt content, set `checks.char_authority_leak: FAIL`, add a `notes[]` entry naming the offending `CHAR-*`, and route to `revise_page_plan` or `run_turn_cycle_repair` in the STCHAR/profile-fidelity local recommendation as appropriate. Otherwise set `PASS`.
+
+10. **`stchar_authority` block** — for every §16a packet required by the shared story-state contract (viewpoint character, speaker, major actor, direct target, emotionally salient character, or any character whose behavior/voice materially shapes the page), emit one `stchar_authority[]` entry with `STENT` / `STCHAR` / display name, `required_because`, `packet_present`, `active_in_snapshot`, the expected-vs-observed `profile_hash`, `voice_block_hash`, and `page_packet_hash`, and a `deterministic_verdict`. Missing packets, inactive `STCHAR` ids in `PG.state_snapshot.active_records.STCHAR`, or any hash mismatch force `deterministic_verdict: FAIL`. Omit or leave the array empty only when no qualifying character exists for the page.
+
+11. **`profile_fidelity` block** — judge `voice_fidelity`, `appraisal_fidelity`, `pressure_behavior_fidelity`, and `relationship_conduct_fidelity` for each relevant STCHAR as `pass | minor_drift | major_drift | not_applicable`, with evidence excerpts and a local `repair_recommendation` of `none | revise_prose | revise_page_plan | regenerate_stchar | run_turn_cycle_repair`. Judge against the page-plan packet first. Retrieve the full STCHAR only when the packet is missing, hash-inconsistent, or insufficient for diagnosis.
+
 ## Phase 4: Optional craft critic
 
 Conditional on `run_craft_critic: true`. When `false`, set `checks.craft_critic: NOT_RUN` and skip to Phase 5.
@@ -293,6 +301,7 @@ Derive `repair_recommendation` per the shared contract §4.6 enum:
 | `verdict: FAIL` with `choice_consequence_visibility: FAIL` | `revise_prose` |
 | `verdict: FAIL` with `invented_structural_fact: FAIL` or `entity_status_consistency: FAIL` | `run_turn_cycle_repair` |
 | `verdict: FAIL` with `canon_claim_without_authority: FAIL` | `run_story_fact_promotion_to_canon` |
+| `verdict: FAIL` with `char_authority_leak: FAIL` or any `stchar_authority[].deterministic_verdict: FAIL` | preserve the top-level repair ladder above, and use the per-character `profile_fidelity[].repair_recommendation` to distinguish page-plan repair, STCHAR regeneration, turn-cycle repair, or prose revision |
 
 If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_fact_promotion_to_canon` > `run_turn_cycle_repair` > `revise_prose`), and record the additional repair signals in receipt `notes`.
 
@@ -320,7 +329,27 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
      entity_status_consistency: PASS | WARN | FAIL
      invented_structural_fact: PASS | WARN | FAIL
      canon_claim_without_authority: PASS | FAIL
+     char_authority_leak: PASS | FAIL
      craft_critic: PASS | WARN | FAIL | NOT_RUN
+   stchar_authority:
+     - stchar_id: STCHAR-<integer>
+       stent_id: STENT-<integer>
+       display_name: <name>
+       required_because: <reason>
+       packet_present: true | false
+       active_in_snapshot: true | false
+       profile_hash: { expected: sha256:<hex>, observed: sha256:<hex> | null, verdict: PASS | FAIL }
+       voice_block_hash: { expected: sha256:<hex>, observed: sha256:<hex> | null, verdict: PASS | FAIL }
+       page_packet_hash: { expected: sha256:<hex>, observed: sha256:<hex> | null, verdict: PASS | FAIL }
+       deterministic_verdict: PASS | FAIL
+   profile_fidelity:
+     - stchar_id: STCHAR-<integer>
+       voice_fidelity: pass | minor_drift | major_drift | not_applicable
+       appraisal_fidelity: pass | minor_drift | major_drift | not_applicable
+       pressure_behavior_fidelity: pass | minor_drift | major_drift | not_applicable
+       relationship_conduct_fidelity: pass | minor_drift | major_drift | not_applicable
+       evidence: [<short excerpt/rationale>]
+       repair_recommendation: none | revise_prose | revise_page_plan | regenerate_stchar | run_turn_cycle_repair
    notes: [<per-finding short string>]
    repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_fact_promotion_to_canon
    ```
@@ -372,6 +401,7 @@ No skill-local templates — the shared contract is the canonical reference per 
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Prose-attach NEVER mutates `PG`; drift is recorded in receipt only; no ARC_TRACE emitted; the page snapshot remains the authoritative state. |
 | §Story Bundles §5b (Schema-Minimalism) | Phase 6 | Receipt schema conforms strictly to shared contract §4.6; no extras beyond the canonical receipt schema. |
 | §Story Bundles §6a (Belief vs. Fact) | N/A | Prose-attach reads `PG.state_snapshot.active_records.BEL` references alongside the `STSTAT`-derived status projection for entity-status-consistency checks but does not create or supersede BEL or STSTAT records. |
+| §Story Bundles §6.1 (Story-Local Character Authority) | Phase 3 checks 9-11 | Page plans and prose receipts surface the existing `no_char_authority_in_story_runtime` verdict, validate §16a STCHAR packet presence/hashes, and judge rendered voice/behavior against STCHAR authority rather than world `CHAR`. |
 | §Story Bundles §9 (Prose Length Discipline) | Phase 4 craft critic | Craft critic uses 7 qualitative axes; no word-count enforcement. |
 | Change Control Policy | N/A | Canon-reading skill emits no Change Log Entries. |
 | Tooling Recommendation | N/A | No context-packet retrieval is normally needed because the plan body inlines the load-bearing canon per shared contract §8. Targeted `mcp__worldloom__get_firewall_content` retrieval is required when plan §11 does not inline the Mystery Reserve firewall fields used by the `forbidden_mystery_resolution` check (Phase 3 check 3). Persisted-summary recovery still applies if retrieval returns `delivery_status: persisted_with_summary` (see `.claude/skills/_shared-templates/persisted-packet-recovery.md`). |

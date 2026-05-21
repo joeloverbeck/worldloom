@@ -14,12 +14,12 @@ modification. Both specs **supersede** the lean-fix decision in
    structural validators, patch-engine ops, world-index node/edges, MCP retrieval +
    `story_bundle_context`, and fixtures.
 
-2. **SPEC-57 — STCHAR Pipeline Integration** — new `story-character-profile` skill, bootstrap
-   distillation, turn-cycle consumption + block-and-route, prose-attach voice-fidelity receipt,
-   health-audit phase 2m + source-drift mode, promotion-evidence handling, mandatory page-plan
-   voice packet, integration tests.
-   *Depends on SPEC-56 (must land first — skills consume the schema/validator/MCP/patch surfaces
-   SPEC-56 builds).*
+2. **SPEC-57 — STCHAR Pipeline Integration** — COMPLETED and archived at
+   `archive/specs/SPEC-57-stchar-pipeline-integration.md`. Landed the new
+   `story-character-profile` skill, bootstrap distillation, turn-cycle consumption +
+   block-and-route, prose-attach voice-fidelity receipt, health-audit phase 2m + source-drift
+   mode, promotion-evidence handling, mandatory page-plan voice packet, and validators
+   integration tests.
 
 **Rationale for the split:** the layering is real — the story skills cannot produce or consume
 `STCHAR` until it is storable (patch-engine), retrievable (MCP), indexable (world-index), and

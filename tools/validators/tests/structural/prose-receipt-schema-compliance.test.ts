@@ -29,6 +29,7 @@ function validReceiptPayload(): Record<string, unknown> {
       entity_status_consistency: "PASS",
       invented_structural_fact: "PASS",
       canon_claim_without_authority: "PASS",
+      char_authority_leak: "PASS",
       craft_critic: "NOT_RUN"
     },
     notes: ["Receipt validated."],
@@ -36,10 +37,123 @@ function validReceiptPayload(): Record<string, unknown> {
   };
 }
 
+function validHashComparison() {
+  return {
+    expected: "sha256:0000000000000000000000000000000000000000000000000000000000000004",
+    observed: "sha256:0000000000000000000000000000000000000000000000000000000000000004",
+    verdict: "PASS"
+  };
+}
+
+function validStcharAuthority() {
+  return {
+    stchar_id: "STCHAR-1",
+    stent_id: "STENT-1",
+    display_name: "Red Bunny",
+    required_because: "viewpoint character",
+    packet_present: true,
+    active_in_snapshot: true,
+    profile_hash: validHashComparison(),
+    voice_block_hash: validHashComparison(),
+    page_packet_hash: validHashComparison(),
+    deterministic_verdict: "PASS"
+  };
+}
+
+function validProfileFidelity() {
+  return {
+    stchar_id: "STCHAR-1",
+    voice_fidelity: "pass",
+    appraisal_fidelity: "pass",
+    pressure_behavior_fidelity: "minor_drift",
+    relationship_conduct_fidelity: "not_applicable",
+    evidence: ["Rendered voice follows the page-plan voice block."],
+    repair_recommendation: "revise_prose"
+  };
+}
+
 test("prose_receipt_schema_compliance accepts a contract-shaped prose receipt", async () => {
   const result = await runReceipt(validReceiptPayload());
 
   assert.deepEqual(result, []);
+});
+
+test("prose_receipt_schema_compliance accepts STCHAR authority and profile fidelity blocks", async () => {
+  const payload = validReceiptPayload();
+  payload.stchar_authority = [validStcharAuthority()];
+  payload.profile_fidelity = [validProfileFidelity()];
+
+  const result = await runReceipt(payload);
+
+  assert.deepEqual(result, []);
+});
+
+test("prose_receipt_schema_compliance accepts absent STCHAR blocks when no qualifying character is present", async () => {
+  const payload = validReceiptPayload();
+
+  const result = await runReceipt(payload);
+
+  assert.deepEqual(result, []);
+});
+
+test("prose_receipt_schema_compliance preserves additive compatibility for receipts without char leak field", async () => {
+  const payload = validReceiptPayload();
+  delete (payload.checks as Record<string, unknown>).char_authority_leak;
+
+  const result = await runReceipt(payload);
+
+  assert.deepEqual(result, []);
+});
+
+test("prose_receipt_schema_compliance rejects missing-packet STCHAR entries marked pass", async () => {
+  const payload = validReceiptPayload();
+  payload.stchar_authority = [{
+    ...validStcharAuthority(),
+    packet_present: false,
+    deterministic_verdict: "PASS"
+  }];
+
+  const result = await runReceipt(payload);
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "prose_receipt_schema_compliance.const" &&
+    verdict.message.includes("/stchar_authority/0/deterministic_verdict")
+  )));
+});
+
+test("prose_receipt_schema_compliance rejects hash-mismatch STCHAR entries marked pass", async () => {
+  const payload = validReceiptPayload();
+  payload.stchar_authority = [{
+    ...validStcharAuthority(),
+    page_packet_hash: {
+      ...validHashComparison(),
+      observed: "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      verdict: "FAIL"
+    },
+    deterministic_verdict: "PASS"
+  }];
+
+  const result = await runReceipt(payload);
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "prose_receipt_schema_compliance.const" &&
+    verdict.message.includes("/stchar_authority/0/deterministic_verdict")
+  )));
+});
+
+test("prose_receipt_schema_compliance rejects stale profile fidelity repair tokens", async () => {
+  const payload = validReceiptPayload();
+  payload.profile_fidelity = [{
+    ...validProfileFidelity(),
+    repair_recommendation: "invent_arc"
+  }];
+
+  const result = await runReceipt(payload);
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "prose_receipt_schema_compliance.enum" &&
+    verdict.message.includes("/profile_fidelity/0/repair_recommendation")
+  )));
 });
 
 test("prose_receipt_schema_compliance rejects receipts missing required fields", async () => {

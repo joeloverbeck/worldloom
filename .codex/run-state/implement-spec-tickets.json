@@ -1,19 +1,19 @@
 {
-  "originating_spec": "archive/specs/SPEC-56-stchar-machine-foundation.md",
-  "archived_spec": "archive/specs/SPEC-56-stchar-machine-foundation.md",
-  "last_ticket": "archive/tickets/SPEC56STCHARMACFOU-006.md",
+  "originating_spec": null,
+  "archived_spec": "archive/specs/SPEC-57-stchar-pipeline-integration.md",
+  "last_ticket": "archive/tickets/SPEC57STCHARPIPINT-010.md",
   "last_result": "spec_archived",
-  "last_work_commit": "d0e2e09f06c0169026969a59f8d1ee98a728a0b5",
+  "last_work_commit": "9b8cf5ba5bbcbb50337f90504bea3871e75f8459",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
-  "phase": "complete",
+  "phase": "completed",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean",
-  "updated_at": "2026-05-20"
+  "dirty_state": "tracked clean; expected ignored package artifacts present under tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
+  "updated_at": "2026-05-21"
 }
