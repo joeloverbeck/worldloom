@@ -38,6 +38,8 @@ jobs:
       - name: Install
         working-directory: tools/validators
         run: npm install
+      - name: Install lint dependencies
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
       - name: Lint fixture ID padding
         run: bash tools/validators/scripts/check-fixture-id-padding.sh
       - name: Lint archive-citation discipline

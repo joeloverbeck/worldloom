@@ -32,6 +32,11 @@ if [[ "${1:-}" == "--update-baseline" ]]; then
   update_baseline=true
 fi
 
+if ! command -v rg >/dev/null 2>&1; then
+  echo "Missing required command: rg. Install ripgrep before running fixture ID padding lint." >&2
+  exit 2
+fi
+
 make_counts() {
   local output_file="$1"
   shift

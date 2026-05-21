@@ -77,6 +77,7 @@ const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
 const STORY_REF_REGEX =
   /\b(STENT|STCHAR|STSTAT|SF|SE|BEL|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|STPLAN|STEMO|DA)-[A-Za-z0-9-]+\b/g;
 const CANON_FACT_REF_REGEX = /^CF-\d+$/;
+const MYSTERY_RESERVE_REF_REGEX = /^M-\d+$/;
 
 export type AtomicSkipReason = "missing_id_field" | "schema_pattern_mismatch";
 
@@ -710,11 +711,34 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     for (const target of stringArrayField(record, "dependent_facts")) {
       pushStoryRef("dependent_fact", target);
     }
+    pushStoryEdgeIfReference(
+      edges,
+      node.node_id,
+      "obligation_owed_by",
+      storySlug,
+      stringField(record, "owed_by")
+    );
+    pushStoryEdgeIfReference(
+      edges,
+      node.node_id,
+      "obligation_owed_to",
+      storySlug,
+      stringField(record, "owed_to")
+    );
+  }
+
+  if (node.node_type === "consequence_record") {
+    for (const target of stringArrayField(record, "derived_from")) {
+      pushStoryEdgeIfReference(edges, node.node_id, "consequence_derived_from", storySlug, target);
+    }
   }
 
   if (node.node_type === "thread_record") {
     for (const target of stringArrayField(record, "obligations")) {
       pushStoryRef("thread_obligation", target);
+    }
+    for (const target of stringArrayField(record, "derived_from")) {
+      pushStoryEdgeIfReference(edges, node.node_id, "thread_derived_from", storySlug, target);
     }
   }
 
@@ -739,6 +763,14 @@ function edgesForStoryCharacterAuthority(
     "stchar_supersedes",
     storySlug,
     stringField(record, "supersedes")
+  );
+
+  pushStoryEdgeIfReference(
+    edges,
+    node.node_id,
+    "stchar_superseded_by",
+    storySlug,
+    stringField(record, "superseded_by")
   );
 
   for (const target of stringArrayField(record, "bound_stent_ids")) {
@@ -972,6 +1004,16 @@ function edgesForStorySecret(
 
   for (const target of stringArrayField(record, "reveal_records")) {
     edges.push(createStoryRefEdge(node.node_id, "secret_reveal_record", storySlug, target));
+  }
+
+  for (const target of stringArrayField(record, "protected_mystery_refs")) {
+    if (MYSTERY_RESERVE_REF_REGEX.test(target)) {
+      edges.push(createRefEdge(node.node_id, "secret_protected_mystery", target));
+    }
+  }
+
+  for (const target of stringArrayField(record, "source_records")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "secret_source_record", storySlug, target);
   }
 
   return edges;

@@ -685,6 +685,12 @@ test("secret records emit truth-anchor, holder, clue-carrier, and reveal-record 
           target_unresolved_ref: "harborwatch:STQ-4",
           edge_type: "secret_reveal_record",
           story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-1",
+          target_unresolved_ref: "harborwatch:BEL-1",
+          edge_type: "secret_source_record",
+          story_slug: "harborwatch"
         }
       ]
     );
@@ -803,6 +809,203 @@ test("secret holder placeholders are skipped while STENT holders still emit", ()
         {
           target_unresolved_ref: "harborwatch:STENT-7",
           edge_type: "secret_holder"
+        }
+      ]
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("secret records emit protected mystery and source-record edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-secret-source-edges-"));
+
+  try {
+    writeStorySecret(root, "harborwatch", "STSEC-5", [
+      "id: STSEC-5",
+      "story_id: STORY-1",
+      "created_at_page: PG-5",
+      "supersedes: null",
+      "secret_kind: artifact_truth",
+      "secret_claim: The harbor bell preserves a forbidden provenance.",
+      "truth_anchor: null",
+      "holders: []",
+      "salience: high",
+      "protected_mystery_refs:",
+      "  - M-1",
+      "  - not-a-mystery",
+      "clue_carriers: []",
+      "source_records:",
+      "  - BEL-1",
+      "  - SF-2",
+      "  - group:foundlings",
+      "status: hidden",
+      "reveal_event: null",
+      "reveal_records: []"
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/secrets/STSEC-5.yaml"
+    );
+
+    assert.deepEqual(
+      secretEdges(parsed.edges),
+      [
+        {
+          source_node_id: "harborwatch:STSEC-5",
+          target_unresolved_ref: "M-1",
+          edge_type: "secret_protected_mystery",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-5",
+          target_unresolved_ref: "harborwatch:BEL-1",
+          edge_type: "secret_source_record",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:STSEC-5",
+          target_unresolved_ref: "harborwatch:SF-2",
+          edge_type: "secret_source_record",
+          story_slug: "harborwatch"
+        }
+      ]
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("obligation records emit debt-party edges only for story-record references", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-obligation-party-"));
+
+  try {
+    writeStoryObligation(root, "harborwatch", "OBL-1", [
+      "id: OBL-1",
+      "story_id: STORY-1",
+      "created_at_page: PG-2",
+      "supersedes: null",
+      "status: open",
+      "obligation_kind: promise",
+      "description: The gate keeper owes a witness an explanation.",
+      "owed_by: STENT-1",
+      "owed_to: STENT-2",
+      "dependent_facts: []",
+      "trigger_to_close: The witness receives an explanation.",
+      "urgency: high"
+    ]);
+    writeStoryObligation(root, "harborwatch", "OBL-2", [
+      "id: OBL-2",
+      "story_id: STORY-1",
+      "created_at_page: PG-2",
+      "supersedes: null",
+      "status: open",
+      "obligation_kind: public_debt",
+      "description: The watch owes the city notice.",
+      "owed_by: group:watch",
+      "owed_to: public",
+      "dependent_facts: []",
+      "trigger_to_close: The bell notice is posted.",
+      "urgency: medium"
+    ]);
+
+    const parsed = ["OBL-1", "OBL-2"].flatMap((obligationId) =>
+      parseStoryBundleSourceFile(
+        root,
+        "fixture-world",
+        `stories/harborwatch/_source/obligations/${obligationId}.yaml`
+      ).edges
+    );
+
+    assert.deepEqual(
+      storyEdges(parsed, ["obligation_owed_by", "obligation_owed_to"]),
+      [
+        {
+          source_node_id: "harborwatch:OBL-1",
+          target_unresolved_ref: "harborwatch:STENT-1",
+          edge_type: "obligation_owed_by",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:OBL-1",
+          target_unresolved_ref: "harborwatch:STENT-2",
+          edge_type: "obligation_owed_to",
+          story_slug: "harborwatch"
+        }
+      ]
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("consequence and thread records emit derived-from edges", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-derived-edges-"));
+
+  try {
+    writeStoryConsequence(root, "harborwatch", "CNSQ-1", [
+      "id: CNSQ-1",
+      "story_id: STORY-1",
+      "created_at_page: PG-3",
+      "supersedes: null",
+      "status: pending",
+      "consequence_kind: social",
+      "description: The watch now distrusts the gate keeper.",
+      "urgency: medium",
+      "resolves_when: The gate keeper restores trust.",
+      "derived_from:",
+      "  - SE-1",
+      "  - BEL-1"
+    ]);
+    writeStoryThread(root, "harborwatch", "THR-1", [
+      "id: THR-1",
+      "story_id: STORY-1",
+      "created_at_page: PG-3",
+      "supersedes: null",
+      "status: active",
+      "title: The harbor gate dispute",
+      "summary: The opened gate remains politically dangerous.",
+      "urgency: high",
+      "obligations: []",
+      "derived_from:",
+      "  - CNSQ-1",
+      "  - SE-2"
+    ]);
+
+    const parsed = [
+      parseStoryBundleSourceFile(root, "fixture-world", "stories/harborwatch/_source/consequences/CNSQ-1.yaml")
+        .edges,
+      parseStoryBundleSourceFile(root, "fixture-world", "stories/harborwatch/_source/threads/THR-1.yaml").edges
+    ].flat();
+
+    assert.deepEqual(
+      storyEdges(parsed, ["consequence_derived_from", "thread_derived_from"]),
+      [
+        {
+          source_node_id: "harborwatch:CNSQ-1",
+          target_unresolved_ref: "harborwatch:SE-1",
+          edge_type: "consequence_derived_from",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:CNSQ-1",
+          target_unresolved_ref: "harborwatch:BEL-1",
+          edge_type: "consequence_derived_from",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:THR-1",
+          target_unresolved_ref: "harborwatch:CNSQ-1",
+          edge_type: "thread_derived_from",
+          story_slug: "harborwatch"
+        },
+        {
+          source_node_id: "harborwatch:THR-1",
+          target_unresolved_ref: "harborwatch:SE-2",
+          edge_type: "thread_derived_from",
+          story_slug: "harborwatch"
         }
       ]
     );
@@ -1280,6 +1483,25 @@ function eventEdges(edges: Array<{ edge_type: string; source_node_id: string; ta
     }));
 }
 
+function storyEdges(
+  edges: Array<{ edge_type: string; source_node_id: string; target_unresolved_ref: string | null; story_slug?: string | null }>,
+  edgeTypes: string[]
+): Array<{
+  source_node_id: string;
+  target_unresolved_ref: string | null;
+  edge_type: string;
+  story_slug: string | null;
+}> {
+  return edges
+    .filter((edge) => edgeTypes.includes(edge.edge_type))
+    .map((edge) => ({
+      source_node_id: edge.source_node_id,
+      target_unresolved_ref: edge.target_unresolved_ref,
+      edge_type: edge.edge_type,
+      story_slug: edge.story_slug ?? null
+    }));
+}
+
 function writeStoryBelief(root: string, storySlug: string, beliefId: string, lines: string[]): void {
   const relativeDirectory = path.join(
     root,
@@ -1376,6 +1598,48 @@ function writeStoryQuestion(root: string, storySlug: string, questionId: string,
   );
   mkdirSync(relativeDirectory, { recursive: true });
   writeFileSync(path.join(relativeDirectory, `${questionId}.yaml`), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStoryObligation(root: string, storySlug: string, obligationId: string, lines: string[]): void {
+  const relativeDirectory = path.join(
+    root,
+    "worlds",
+    "fixture-world",
+    "stories",
+    storySlug,
+    "_source",
+    "obligations"
+  );
+  mkdirSync(relativeDirectory, { recursive: true });
+  writeFileSync(path.join(relativeDirectory, `${obligationId}.yaml`), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStoryConsequence(root: string, storySlug: string, consequenceId: string, lines: string[]): void {
+  const relativeDirectory = path.join(
+    root,
+    "worlds",
+    "fixture-world",
+    "stories",
+    storySlug,
+    "_source",
+    "consequences"
+  );
+  mkdirSync(relativeDirectory, { recursive: true });
+  writeFileSync(path.join(relativeDirectory, `${consequenceId}.yaml`), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStoryThread(root: string, storySlug: string, threadId: string, lines: string[]): void {
+  const relativeDirectory = path.join(
+    root,
+    "worlds",
+    "fixture-world",
+    "stories",
+    storySlug,
+    "_source",
+    "threads"
+  );
+  mkdirSync(relativeDirectory, { recursive: true });
+  writeFileSync(path.join(relativeDirectory, `${threadId}.yaml`), `${lines.join("\n")}\n`, "utf8");
 }
 
 function writeStoryEvent(root: string, storySlug: string, eventId: string, lines: string[]): void {
