@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-57-stchar-pipeline-integration.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC57STCHARPIPINT-004.md",
+  "last_ticket": "archive/tickets/SPEC57STCHARPIPINT-005.md",
   "last_result": "completed_archived",
-  "last_work_commit": "a3577fb8ecf09dc5398111fde34e9339d8eef545",
+  "last_work_commit": "50b5159faf7a944d4ac7df521a268ca586336a44",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC57STCHARPIPINT-005.md",
+  "next_target": "tickets/SPEC57STCHARPIPINT-006.md",
   "queue": [
-    "tickets/SPEC57STCHARPIPINT-005.md",
     "tickets/SPEC57STCHARPIPINT-006.md",
     "tickets/SPEC57STCHARPIPINT-007.md",
     "tickets/SPEC57STCHARPIPINT-008.md",
@@ -21,6 +20,6 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated dirty: .claude/skills/mcp-integration-audit/SKILL.md, .claude/skills/spec-to-tickets/SKILL.md",
+  "dirty_state": "clean",
   "updated_at": "2026-05-21"
 }
