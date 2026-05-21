@@ -4,7 +4,7 @@
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — branching-story pipeline)
 **Source:** `reports/stchar-audit-first-iteration.md` §13 C5 + §6 cast_bind_list + §9.6 reciprocity (verified against `main`)
-**Depends on:** SPEC-58 (assumes schemas accept STCHAR and `active_records.STCHAR` is a required, fail-level key)
+**Depends on:** SPEC-58 (`archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`; assumes schemas accept STCHAR and `active_records.STCHAR` is a required, fail-level key)
 **Companion:** `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`
 
 ## 1. Context

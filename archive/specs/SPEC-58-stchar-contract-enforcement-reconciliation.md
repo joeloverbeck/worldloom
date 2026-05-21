@@ -1,6 +1,6 @@
 # SPEC-58 — STCHAR Contract-to-Enforcement Reconciliation
 
-**Status:** proposed
+**Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — branching-story pipeline)
 **Source:** `reports/stchar-audit-first-iteration.md` §13 C1/C2/C3/C4 (verified against `main`)
@@ -173,3 +173,26 @@ exist; if a legacy bundle is found, the C4 required-key change must instead rout
 - All §3 test cases are added and green.
 - `tools/validators` build + test suite passes (`npm run build && npm test` in `tools/validators`).
 - No FOUNDATIONS Validation Rule is weakened — the changes only align enforcement to the existing shared story-state contract.
+
+## Outcome
+
+Completed: 2026-05-21.
+
+SPEC-58 is implemented and its ticket family is archived:
+
+- `archive/tickets/SPEC58STCHARCONENF-001.md` — `state_delta_class_integrity` accepts STCHAR lifecycle deltas and maps STCHAR story-record nodes.
+- `archive/tickets/SPEC58STCHARCONENF-002.md` — mid-story STCHAR introduction is validated through the grounding utilities and turn-cycle references.
+- `archive/tickets/SPEC58STCHARCONENF-003.md` — `SREL.derived_from[]` accepts STCHAR provenance while still rejecting world `CHAR-*` runtime authority.
+- `archive/tickets/SPEC58STCHARCONENF-004.md` — `PG.state_snapshot.active_records.STCHAR` is required for current page snapshots, missing STCHAR is fail-level, replay/compatibility consumers agree on STCHAR's non-optional status, and affected current-contract fixtures were truthed.
+
+Deviations:
+
+- C4 also updated the shared compatibility and integration fixtures that omitted `STCHAR: []` in current-contract positive examples. These were proof-surface corrections exposed by the full validator suite, not new behavior beyond the spec.
+- `snapshot_replay_equality` was tightened directly in addition to the shared optional-class helper change so a missing required `STCHAR` key is reported even when the expected active STCHAR list is empty.
+
+Verification:
+
+- Per-ticket focused proof is recorded in the archived tickets.
+- Final SPEC-58 validator proof: `cd tools/validators && npm run build` passed.
+- Final focused changed-file proof for C4: `cd tools/validators && node --test dist/tests/_helpers/state-snapshot-replay.test.js dist/tests/structural/active-records-full-shape.test.js dist/tests/structural/state-snapshot-integrity.test.js dist/tests/structural/snapshot-replay-equality.test.js dist/tests/structural/compatibility-drift.test.js dist/tests/structural/record-schema-compliance-story-page.test.js dist/tests/integration/spec34-integration.test.js dist/tests/integration/spec43-midstory-introduction.test.js dist/tests/integration/spec44-append-only-supersession.test.js dist/tests/integration/spec49-stplan-stemo-hardening.test.js` passed, 115 tests.
+- Final package proof after all C4 code/test changes: `cd tools/validators && npm test` passed, 784 tests.

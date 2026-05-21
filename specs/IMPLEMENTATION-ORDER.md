@@ -6,13 +6,14 @@ just-merged SPEC-56 (stchar-machine-foundation) and SPEC-57 (stchar-pipeline-int
 
 | Order | Spec | Scope | Depends on |
 |---|---|---|---|
-| 1 | **SPEC-58** — STCHAR contract-to-enforcement reconciliation | Fix existing schemas/validators that reject or under-require lawful STCHAR (C1 state-delta, C2 mid-story intro, C3 SREL.derived_from, C4 active_records key) | none — foundational |
-| 2 | **SPEC-59** — STCHAR authority-fidelity validators | New executable validators: page-plan §16a packet integrity, prose-receipt STCHAR integrity, require `char_authority_leak`, STENT↔STCHAR reciprocity, cast_bind_list integrity (C5 + reciprocity + kernel) | **SPEC-58** (assumes schemas accept STCHAR and the active_records key is required) |
+| 1 | **SPEC-58** — STCHAR contract-to-enforcement reconciliation (`archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`) | Completed: fixed existing schemas/validators that rejected or under-required lawful STCHAR (C1 state-delta, C2 mid-story intro, C3 SREL.derived_from, C4 active_records key) | none — foundational |
+| 2 | **SPEC-59** — STCHAR authority-fidelity validators | New executable validators: page-plan §16a packet integrity, prose-receipt STCHAR integrity, require `char_authority_leak`, STENT↔STCHAR reciprocity, cast_bind_list integrity (C5 + reciprocity + kernel) | **SPEC-58** (`archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`; assumes schemas accept STCHAR and the active_records key is required) |
 | 3 | **SPEC-60** — STCHAR machine-layer & docs completeness | Structured-predicate edge extraction (I3), `story_character_profile` MCP task profile (I4), patch-engine stale-index STCHAR path, stale-doc reconciliation (I5) | none — independent; may run in parallel with 1/2 |
 
 ## Dependency rationale
 
-- **SPEC-58 must precede SPEC-59.** SPEC-59's `page_plan_stchar_packet_integrity` and
+- **SPEC-58 must precede SPEC-59 and is now archived at
+  `archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`.** SPEC-59's `page_plan_stchar_packet_integrity` and
   `prose_receipt_stchar_integrity` validators assume the page schema requires `active_records.STCHAR`
   (SPEC-58 §2.4) and that the schema/validator layer accepts lawful STCHAR records (SPEC-58 §2.1–2.3).
   Building the new validators on the un-reconciled schemas would force rework.
