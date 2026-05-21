@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-58-stchar-contract-enforcement-reconciliation.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC58STCHARCONENF-001.md",
+  "last_ticket": "archive/tickets/SPEC58STCHARCONENF-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "a3b051e2ac788244a429a9857f7730db1cf155eb",
+  "last_work_commit": "595baabaf9ed33e3c76418c42732428596e7c28c",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC58STCHARCONENF-002.md",
+  "next_target": "tickets/SPEC58STCHARCONENF-003.md",
   "queue": [
-    "tickets/SPEC58STCHARCONENF-002.md",
     "tickets/SPEC58STCHARCONENF-003.md",
     "tickets/SPEC58STCHARCONENF-004.md"
   ],
