@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC62FOUANDDOC-002.md",
+  "last_ticket": "archive/tickets/SPEC62FOUANDDOC-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "1921e3b65bdadbc69341332616963216319e46ae",
+  "last_work_commit": "4cd15ffdb14cc6015be031d87a429f0c53f406e6",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC62FOUANDDOC-003.md",
+  "next_target": "tickets/SPEC62FOUANDDOC-004.md",
   "queue": [
-    "tickets/SPEC62FOUANDDOC-003.md",
     "tickets/SPEC62FOUANDDOC-004.md",
     "tickets/SPEC62FOUANDDOC-005.md",
     "tickets/SPEC62FOUANDDOC-006.md"
