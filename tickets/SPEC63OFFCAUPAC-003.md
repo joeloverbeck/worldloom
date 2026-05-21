@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` (presence-awareness logic + new verdict code) plus test fixtures in `tools/validators/tests/structural/`. No registry change (validator already registered); no prose-receipt validator code change; no schema change.
-**Deps**: SPEC63OFFCAUPAC-001
+**Deps**: `archive/tickets/SPEC63OFFCAUPAC-001.md`
 
 ## Problem
 
@@ -14,7 +14,7 @@
 
 1. `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` derives the qualifying set from active `STENT` → `bound_stchar_id` active in `active_records.STCHAR`, demands a packet per qualifying STENT (`missing_packet`), checks hashes (`hash_mismatch`), inactive STCHAR (`inactive_stchar`), and requires a voice block when `Required because ∈ {speaker, viewpoint}` (`SPEAKER_VOICE_REQUIRED` Set membership, line 28; `missing_voice_block`). It has NO entity-location logic today — confirmed: the only `location` reference is the verdict's file-location field. Presence is available via `PG.state_snapshot.entity_status[<stent>].location` (a derived projection from active STSTAT; enum `STLOC-<integer> | unknown | concealed | offstage`).
 2. Source: SPEC-63 §2.3 (R1–R5) + §2.4 (prose-receipt fixture, no code change) + §2.5 (no schema change). `required_because` is compared as a free string by `prose_receipt_stchar_integrity` and is `{ "type": "string", "minLength": 1 }` in `prose-receipt.schema.json` — adding `offstage_causal` breaks no consumer (verified at reassessment §3.6: no closed enum/switch on `required_because`).
-3. Cross-artifact boundary under audit: the validator parses §16a packets defined by the contract (SPEC63OFFCAUPAC-001) and reads `entity_status.location` from the `PG.state_snapshot` schema. The new verdict `offstage_packet_for_present_character` and R5's location-enum handling must match the contract's emit/omit boundary exactly.
+3. Cross-artifact boundary under audit: the validator parses §16a packets defined by the contract (`archive/tickets/SPEC63OFFCAUPAC-001.md`) and reads `entity_status.location` from the `PG.state_snapshot` schema. The new verdict `offstage_packet_for_present_character` and R5's location-enum handling must match the contract's emit/omit boundary exactly.
 4. FOUNDATIONS judgment-vs-deterministic boundary (§Tooling Recommendation): the validator checks reduced-shape conformance + present/offstage consistency deterministically; it never auto-grades whether offstage causal relevance *warranted* a packet. §6.1 — STCHAR remains the operational authority; no `CHAR-*` leak is introduced. Restated; both hold.
 5. Canon Safety surface: `page_plan_stchar_packet_integrity` is a structural validator under `tools/validators/src/structural/` with `severity_mode: "fail"` and `applies_to: appliesToStcharStoryState` — it gates story-bundle record writes at engine pre-apply. This change RELAXES enforcement for offstage characters (a missing packet no longer fails). Confirm this does not weaken the Mystery Reserve firewall: it does not — the relaxation is character-packet-presence-only, orthogonal to mystery resolution; no forbidden-status `M` is narrowed. Backward-compatible (a full packet for an offstage character stays valid).
 
@@ -61,7 +61,7 @@ Add to `prose-receipt-stchar-integrity.test.ts`: a `stchar_authority[]` entry wi
 - `prose_receipt_stchar_integrity` validator logic (no code change — §2.4).
 - `prose-receipt.schema.json` (no change — §2.5).
 - `tools/validators/src/public/registry.ts` (validator already registered).
-- The §16a contract definition (SPEC63OFFCAUPAC-001) and authoring guidance (SPEC63OFFCAUPAC-002).
+- The §16a contract definition (`archive/tickets/SPEC63OFFCAUPAC-001.md`) and authoring guidance (SPEC63OFFCAUPAC-002).
 - Auto-grading whether offstage causal relevance warranted a packet (SPEC-63 §5 — authoring judgment, not deterministic).
 
 ## Acceptance Criteria

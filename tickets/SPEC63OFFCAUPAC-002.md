@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `branching-story-bootstrap` SKILL.md §16a authoring guidance + `branching-story-turn-cycle` phase-7 reference. Prose-only; no code change.
-**Deps**: SPEC63OFFCAUPAC-001
+**Deps**: `archive/tickets/SPEC63OFFCAUPAC-001.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ With the offstage-causal tier defined in the §16a contract (001), the two autho
 ## Assumption Reassessment (2026-05-21)
 
 1. `branching-story-bootstrap/SKILL.md` documents §16a authoring (Phase 1-9 page-plan drafting + the Phase-10 §16a packet check, one of the 5 bootstrap-additional checks); `branching-story-turn-cycle/references/phase-7-page-plan.md` carries the §16a authoring paragraph. Both confirmed present this session.
-2. The packet shape these skills emit is defined by SPEC63OFFCAUPAC-001 (§16a contract §2.1). This ticket consumes that contract; it must not redefine the shape.
+2. The packet shape these skills emit is defined by `archive/tickets/SPEC63OFFCAUPAC-001.md` (§16a contract §2.1). This ticket consumes that contract; it must not redefine the shape.
 3. Cross-skill boundary under audit: both skills emit against the SAME §16a shared contract (`_shared-templates/story-state-contract.md`). The guidance added here must match the contract's reduced-shape definition (carries hashes + appraisal/pressure/causal-relevance; omits the voice block) so bootstrap, turn-cycle, and the validator (003) stay mutually consistent.
 4. FOUNDATIONS §6.1 (Story-Local Character Authority) — the emitted offstage packet keeps authority STCHAR-sourced with no `CHAR-*` leak. §9 (Prose Length Discipline) — the guidance must not introduce a word budget for the reduced packet. Restated; both hold.
 
@@ -46,7 +46,7 @@ In `branching-story-turn-cycle/references/phase-7-page-plan.md`, extend the §16
 
 ## Out of Scope
 
-- Defining the offstage packet shape (owned by SPEC63OFFCAUPAC-001).
+- Defining the offstage packet shape (owned by `archive/tickets/SPEC63OFFCAUPAC-001.md`).
 - Validator enforcement (SPEC63OFFCAUPAC-003).
 - Any change to present-character (full-packet) authoring.
 

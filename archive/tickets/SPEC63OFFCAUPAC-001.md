@@ -1,6 +1,6 @@
 # SPEC63OFFCAUPAC-001: §16a contract — add the offstage-causal packet tier
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md` §16a (shared page-plan contract consumed by branching-story-bootstrap, branching-story-turn-cycle, branching-story-prose-attach, and the page_plan_stchar_packet_integrity / prose_receipt_stchar_integrity validators). No code change.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The §16a STCHAR authority-packet contract offers only two postures: emit a full present packet, or omit a background-only entity. A causally-relevant offstage character — not present on the page but whose offstage activity bears on it — has no lawful reduced posture, so authoring must either over-author a full packet (including a voice block for someone who never speaks on-page) or drop the character from `active_records` and lose their offstage causal authority. SPEC-59 §5 deferred this gap as an authoring-contract extension. This ticket adds the contract tier that the validator (003) and authoring skills (002) then consume.
+At intake, the §16a STCHAR authority-packet contract offered only two postures: emit a full present packet, or omit a background-only entity. A causally-relevant offstage character — not present on the page but whose offstage activity bears on it — had no lawful reduced posture, so authoring had to either over-author a full packet (including a voice block for someone who never speaks on-page) or drop the character from `active_records` and lose their offstage causal authority. SPEC-59 §5 deferred this gap as an authoring-contract extension. This ticket added the contract tier that the validator (003) and authoring skills (002) consume.
 
 ## Assumption Reassessment (2026-05-21)
 
@@ -29,19 +29,19 @@ The §16a STCHAR authority-packet contract offers only two postures: emit a full
 3. The emit/omit boundary is stated as authoring judgment, not validator-graded -> manual review.
 4. FOUNDATIONS §5b alignment (no new schema field introduced) -> FOUNDATIONS alignment check.
 
-## What to Change
+## Landed Changes
 
 ### 1. Add `offstage_causal` to the §16a Required-because enum
 
-In `.claude/skills/_shared-templates/story-state-contract.md` §16a (line ~464), append `offstage_causal` to the `Required because:` value list.
+In `.claude/skills/_shared-templates/story-state-contract.md` §16a, appended `offstage_causal` to the `Required because:` value list.
 
 ### 2. Document the reduced offstage packet shape
 
-After the present-packet template block, add a sub-section describing the `offstage_causal` packet: it **carries** `profile_hash`/`voice_block_hash`/`page_packet_hash` (declared from the STCHAR's stored frontmatter hashes, exactly as the full packet), `Relevant appraisal rules`, `Relevant pressure behavior` (when applicable), and a new `Offstage causal relevance:` line; it **omits** the `Voice/dialogue authority:` block and the on-page rendering lines (perception/embodiment, agency rendering, prose-must-show dialogue cues).
+After the present-packet template block, added a sub-section describing the `offstage_causal` packet: it **carries** `profile_hash`/`voice_block_hash`/`page_packet_hash` (declared from the STCHAR's stored frontmatter hashes, exactly as the full packet), `Relevant appraisal rules`, `Relevant pressure behavior` (when applicable), and a new `Offstage causal relevance:` line; it **omits** the `Voice/dialogue authority:` block and the on-page rendering lines (perception/embodiment, agency rendering, prose-must-show dialogue cues).
 
 ### 3. Document the emit/omit boundary
 
-State that an active offstage character (`entity_status.location: offstage`) whose offstage activity causally bears on the page SHOULD carry an `offstage_causal` packet; one with no causal bearing MAY be omitted (the existing background-only omission), and the omission must not ask the prose renderer to infer persona from an id. Note the boundary is authoring judgment, not validator-graded.
+Stated that an active offstage character (`entity_status.location: offstage`) whose offstage activity causally bears on the page should carry an `offstage_causal` packet; one with no causal bearing may be omitted as background-only, and the omission must not ask the prose renderer to infer persona from an id. The boundary is authoring judgment, not validator-graded.
 
 ## Files to Touch
 
@@ -78,3 +78,21 @@ State that an active offstage character (`entity_status.location: offstage`) who
 1. `grep -n "offstage_causal\|Offstage causal relevance" .claude/skills/_shared-templates/story-state-contract.md`
 2. `grep -n "Required because:" .claude/skills/_shared-templates/story-state-contract.md` (confirm the enum line now includes `offstage_causal`)
 3. A narrower command is the correct verification boundary: this is a single-file contract amendment with no executable surface; validator enforcement is verified in SPEC63OFFCAUPAC-003's test suite.
+
+## Outcome
+
+Completed: 2026-05-21
+
+The shared §16a story-state contract now includes `offstage_causal` in the `Required because:` enum and documents a reduced offstage packet shape. The reduced packet carries the same three STCHAR integrity hashes as the full packet, carries offstage operational authority through appraisal, pressure behavior, and `Offstage causal relevance:`, and omits voice/dialogue plus on-page rendering lines because the character is not rendered on the page.
+
+The emit/omit boundary is now explicit: offstage causal relevance is authoring judgment, an active offstage character whose offstage activity bears on the page should carry the reduced packet, and non-causal offstage characters may still be omitted as background-only without asking prose to infer persona from an id.
+
+## Verification Result
+
+1. `grep -n "offstage_causal\|Offstage causal relevance" .claude/skills/_shared-templates/story-state-contract.md` — passed; returned the enum value, reduced-packet `Required because: offstage_causal`, `Offstage causal relevance:`, and the emit/omit boundary.
+2. `grep -n "Required because:" .claude/skills/_shared-templates/story-state-contract.md` — passed; the present-packet enum line includes `offstage_causal`, and the reduced packet has its own `Required because: offstage_causal` line.
+3. Manual review — passed; the present packet still carries `profile_hash=<hash>; voice_block_hash=<hash>; page_packet_hash=<hash>`, and no new schema field such as `packet_scope` was introduced.
+
+## Deviations
+
+None. The change stayed within the single shared contract file. Validator enforcement remains owned by `tickets/SPEC63OFFCAUPAC-003.md`, and authoring-skill emission guidance remains owned by `tickets/SPEC63OFFCAUPAC-002.md`.
