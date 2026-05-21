@@ -39,12 +39,12 @@ State the one-line "no current consumer" rationale per group and the rule that r
 
 ## Files to Touch
 
-- `docs/MACHINE-FACING-LAYER.md` (modify) — adds the "intentionally non-indexed story fields" note (a different section from SPEC67STOWORIND-001's edge-catalog subsection — mechanical, non-overlapping edits).
+- `docs/MACHINE-FACING-LAYER.md` (modify) — adds the "intentionally non-indexed story fields" note (a different section from archived `archive/tickets/SPEC67STOWORIND-001.md`'s edge-catalog subsection — mechanical, non-overlapping edits).
 
 ## Out of Scope
 
 - Emitting edges for any of the listed fields — that is precisely what this note records as deferred.
-- The 7 consumer-backed edges and the edge-catalog subsection — owned by SPEC67STOWORIND-001.
+- The 7 consumer-backed edges and the edge-catalog subsection — completed in `archive/tickets/SPEC67STOWORIND-001.md`.
 - Any code, schema, or test change.
 
 ## Acceptance Criteria

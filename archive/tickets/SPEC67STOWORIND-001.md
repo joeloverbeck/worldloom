@@ -1,6 +1,6 @@
 # SPEC67STOWORIND-001: Add 7 consumer-backed story-bundle edges to the world-index parser
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-index` parser (`atomic.ts`) + edge-type schema (`types.ts`); `docs/MACHINE-FACING-LAYER.md` edge catalog. No DB migration (the `edges.edge_type` column is free `TEXT`, no CHECK constraint). No impact on existing edge emission — purely additive.
@@ -25,17 +25,17 @@ The world-index parser (`tools/world-index/src/parse/atomic.ts`) emits no edges 
 ## Verification Layers
 
 1. New edge types registered → codebase grep-proof: `grep -c '"' STORY_EDGE_TYPES block` = 76; `grep -n "secret_protected_mystery\|secret_source_record\|obligation_owed_by\|obligation_owed_to\|consequence_derived_from\|thread_derived_from\|stchar_superseded_by" tools/world-index/src/schema/types.ts` returns 7.
-2. Edges emitted when fields populated → skill/parser dry-run via the positive test fixtures (one per new edge type) in `tools/world-index/tests/story-bundle-edges.test.ts`, asserted through the parse pipeline.
+2. Edges emitted when fields populated → parser dry-run via positive test fixtures: six YAML story-record edge types in `tools/world-index/tests/story-bundle-edges.test.ts` and the `STCHAR.superseded_by` hybrid edge in `tools/world-index/tests/parse/atomic-edges-for-story-character-authority.test.ts`, asserted through the parse pipeline.
 3. Cross-namespace edge resolves correctly → schema/codebase grep-proof: the `secret_protected_mystery` fixture asserts an unprefixed `M-<n>` target (`target_unresolved_ref` has no `<slug>:` prefix), distinguishing it from the slug-scoped story-local edges.
 4. Mystery Reserve firewall preserved → FOUNDATIONS alignment check: the edge is read-only graph structure; no parse/emit path resolves or narrows an `M` entry (Rule 7).
 
-## What to Change
+## Landed Changes
 
-### 1. Register 7 edge types in `STORY_EDGE_TYPES`
+### 1. Registered 7 edge types in `STORY_EDGE_TYPES`
 
-In `tools/world-index/src/schema/types.ts`, append to the `STORY_EDGE_TYPES` array: `secret_protected_mystery`, `secret_source_record`, `obligation_owed_by`, `obligation_owed_to`, `consequence_derived_from`, `thread_derived_from`, `stchar_superseded_by`. They flow into `EDGE_TYPES` and the public re-export automatically.
+In `tools/world-index/src/schema/types.ts`, appended `secret_protected_mystery`, `secret_source_record`, `obligation_owed_by`, `obligation_owed_to`, `consequence_derived_from`, `thread_derived_from`, and `stchar_superseded_by` to `STORY_EDGE_TYPES`. They flow into `EDGE_TYPES` and the public re-export automatically.
 
-### 2. Emit the six story-local-target edges in `atomic.ts`
+### 2. Emitted the six story-local-target edges in `atomic.ts`
 
 - `edgesForStorySecret`: emit `secret_source_record` for each `source_records[]` reference (story-scoped, via the existing `createStoryRefEdge` pattern).
 - `obligation_record` block: emit `obligation_owed_by` from `owed_by` and `obligation_owed_to` from `owed_to`, guarded by `isStoryRecordReference` (so `group:<name>`, `public`, `null` are skipped — only `STENT-<integer>` emits).
@@ -43,27 +43,29 @@ In `tools/world-index/src/schema/types.ts`, append to the `STORY_EDGE_TYPES` arr
 - `thread_record` block: emit `thread_derived_from` for each `derived_from[]` reference.
 - `edgesForStoryCharacterAuthority`: emit `stchar_superseded_by` from `superseded_by` (story-scoped), the reverse of the existing `stchar_supersedes`.
 
-### 3. Emit the one cross-namespace edge `secret_protected_mystery`
+### 3. Emitted the one cross-namespace edge `secret_protected_mystery`
 
-In `edgesForStorySecret`, emit `secret_protected_mystery` for each `protected_mystery_refs[]` entry using `createRefEdge` (NOT `createStoryRefEdge`) so the `M-*` target is left unprefixed, guarded by an `M-` ref regex (`/^M-\d+$/`, mirroring `CANON_FACT_REF_REGEX`). This matches the indexing of world-canon Mystery Reserve nodes (`mystery_reserve_entry`, id `^M-[0-9]+$`, no story-slug prefix).
+In `edgesForStorySecret`, `secret_protected_mystery` emits for each valid `protected_mystery_refs[]` entry using `createRefEdge` (NOT `createStoryRefEdge`) so the `M-*` target is left unprefixed, guarded by an `M-` ref regex (`/^M-\d+$/`, mirroring `CANON_FACT_REF_REGEX`). This matches the indexing of world-canon Mystery Reserve nodes (`mystery_reserve_entry`, id `^M-[0-9]+$`, no story-slug prefix).
 
-### 4. Add positive fixtures + update the count assertion
+### 4. Added positive fixtures + updated count assertions
 
-- Add one positive parser-test fixture per new edge type in `tools/world-index/tests/story-bundle-edges.test.ts` (the existing per-class story-edge fixture home).
-- Update `tools/world-index/tests/types.test.ts` line ~46: `assert.equal(STORY_EDGE_TYPES.length, 69)` → `76`.
-- The parity test `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts` asserts every emitted edge is registered in `STORY_EDGE_TYPES`; confirm it stays green with the new fixtures (no edits expected beyond fixture coverage).
+- Added positive parser-test fixtures for the six YAML story-record edge types in `tools/world-index/tests/story-bundle-edges.test.ts`; the `STCHAR.superseded_by` hybrid fixture landed in `tools/world-index/tests/parse/atomic-edges-for-story-character-authority.test.ts`.
+- Updated `tools/world-index/tests/types.test.ts` count assertions: `STORY_EDGE_TYPES.length` 69 → 76 and aggregate `EDGE_TYPES.length` 84 → 91.
+- Updated existing integration count assertions in `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts` and `tools/world-index/tests/integration/spec47-stplan-stemo-edges-integration.test.ts` from 69 to 76 after the first broad package run exposed the stale proof-surface counts.
 
-### 5. Update the `docs/MACHINE-FACING-LAYER.md` edge catalog
+### 5. Updated the `docs/MACHINE-FACING-LAYER.md` edge catalog
 
-Add a new edge-type subsection (one row per new edge, naming the source field and target shape — note `secret_protected_mystery` targets world-canon `M-*`). Reconcile the catalog's stated running total against the actual `STORY_EDGE_TYPES.length` rather than adding to the printed figure: the doc currently says "65 story-bundle edge types" but the constant already held 69 (pre-existing drift), so the correct post-change total is **76**.
+Added a new edge-type subsection (one row per new edge, naming the source field and target shape — note `secret_protected_mystery` targets world-canon `M-*`). Reconciled the catalog's stated running total against the actual `STORY_EDGE_TYPES.length` rather than adding to the printed figure: the doc previously said "65 story-bundle edge types" but the constant already held 69 (pre-existing drift), so the correct post-change total is **76**.
 
 ## Files to Touch
 
 - `tools/world-index/src/schema/types.ts` (modify) — 7 new `STORY_EDGE_TYPES` entries
 - `tools/world-index/src/parse/atomic.ts` (modify) — emission for STSEC ×2 (one cross-namespace), OBL ×2, CNSQ (new node_type case), THR, STCHAR
-- `tools/world-index/tests/story-bundle-edges.test.ts` (modify) — 7 positive fixtures
-- `tools/world-index/tests/types.test.ts` (modify) — `STORY_EDGE_TYPES.length` 69 → 76
-- `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts` (modify) — confirm parity assertion stays green (fixture coverage only)
+- `tools/world-index/tests/story-bundle-edges.test.ts` (modify) — positive fixtures for six YAML story-record edge types
+- `tools/world-index/tests/parse/atomic-edges-for-story-character-authority.test.ts` (modify) — `stchar_superseded_by` positive hybrid fixture
+- `tools/world-index/tests/types.test.ts` (modify) — `STORY_EDGE_TYPES.length` 69 → 76 and `EDGE_TYPES.length` 84 → 91
+- `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts` (modify) — story edge registry count 69 → 76
+- `tools/world-index/tests/integration/spec47-stplan-stemo-edges-integration.test.ts` (modify) — story edge registry count 69 → 76
 - `docs/MACHINE-FACING-LAYER.md` (modify) — edge-catalog subsection + total reconciliation (65→76)
 
 ## Out of Scope
@@ -79,7 +81,7 @@ Add a new edge-type subsection (one row per new edge, naming the source field an
 ### Tests That Must Pass
 
 1. `STORY_EDGE_TYPES` contains all 7 new edge types and `.length === 76` (`tools/world-index/tests/types.test.ts`).
-2. Each new edge type has a passing positive fixture in `tools/world-index/tests/story-bundle-edges.test.ts`; the `secret_protected_mystery` fixture asserts an unprefixed `M-<n>` target.
+2. Each new edge type has a passing positive fixture; the `secret_protected_mystery` fixture asserts an unprefixed `M-<n>` target.
 3. Full world-index build + test pass: `npm run build --prefix tools/world-index && npm test --prefix tools/world-index`.
 
 ### Invariants
@@ -92,12 +94,33 @@ Add a new edge-type subsection (one row per new edge, naming the source field an
 
 ### New/Modified Tests
 
-1. `tools/world-index/tests/story-bundle-edges.test.ts` — 7 positive fixtures, one per new edge type (the cross-namespace one asserts unprefixed `M-` target).
-2. `tools/world-index/tests/types.test.ts` — count assertion 69 → 76.
-3. `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts` — verify the every-emitted-edge-is-registered parity assertion stays green.
+1. `tools/world-index/tests/story-bundle-edges.test.ts` — positive fixtures for `secret_protected_mystery`, `secret_source_record`, `obligation_owed_by`, `obligation_owed_to`, `consequence_derived_from`, and `thread_derived_from`; the cross-namespace fixture asserts unprefixed `M-` target.
+2. `tools/world-index/tests/parse/atomic-edges-for-story-character-authority.test.ts` — positive fixture for `stchar_superseded_by`.
+3. `tools/world-index/tests/types.test.ts` — count assertions 69 → 76 for `STORY_EDGE_TYPES` and 84 → 91 for aggregate `EDGE_TYPES`.
+4. `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts` and `tools/world-index/tests/integration/spec47-stplan-stemo-edges-integration.test.ts` — count assertions 69 → 76.
 
 ### Commands
 
 1. `npm run build --prefix tools/world-index && node --test tools/world-index/dist/tests/story-bundle-edges.test.js` — targeted fixture verification.
 2. `npm run build --prefix tools/world-index && npm test --prefix tools/world-index` — full-package verification (build is required because `test` runs against compiled `dist/tests/**`).
 3. `grep -n "secret_protected_mystery\|secret_source_record\|obligation_owed_by\|obligation_owed_to\|consequence_derived_from\|thread_derived_from\|stchar_superseded_by" tools/world-index/src/schema/types.ts` — confirms 7 registered entries.
+
+## Outcome
+
+Completed 2026-05-21.
+
+- Added seven additive `STORY_EDGE_TYPES`: `secret_protected_mystery`, `secret_source_record`, `obligation_owed_by`, `obligation_owed_to`, `consequence_derived_from`, `thread_derived_from`, and `stchar_superseded_by`.
+- Emitted the six story-local-target edges through existing story-ref guards and emitted `secret_protected_mystery` as an unprefixed world-canon `M-*` target.
+- Added parser fixtures for the new edges, updated edge-count assertions to 76 story edges / 91 total edges, and updated `docs/MACHINE-FACING-LAYER.md` with the SPEC-67 edge catalog rows.
+
+## Verification Result
+
+- `npm run build` from `tools/world-index` — PASS.
+- `node --test dist/tests/story-bundle-edges.test.js dist/tests/parse/atomic-edges-for-story-character-authority.test.js dist/tests/types.test.js` from `tools/world-index` — PASS, 27 tests.
+- First `npm test` from `tools/world-index` exposed two stale same-seam integration count assertions still expecting 69 story edge types; those were updated to 76.
+- Final `npm test` from `tools/world-index` — PASS, 130 tests.
+
+## Deviations
+
+- The drafted fixture location was narrowed: the `STCHAR.superseded_by` positive fixture belongs with the existing hybrid STCHAR parser test, not `story-bundle-edges.test.ts`.
+- `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts` needed no edit; the full package suite covered the registered-edge parity after the new fixture emissions.
