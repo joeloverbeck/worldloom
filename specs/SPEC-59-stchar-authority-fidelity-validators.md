@@ -11,8 +11,11 @@
 
 The page-plan §16a STCHAR authority packet and the prose-receipt STCHAR/profile-fidelity blocks
 are **well-specified in the shared contract and the prose-receipt schema**, but their integrity is
-currently enforced only as skill-prose discipline in `branching-story-prose-attach`, not by
-executable validators.
+currently enforced only as skill-prose discipline in `branching-story-prose-attach` (which
+self-computes the receipt verdicts) and as an advisory audit-time finding
+(`page_plan_stchar_hash_mismatch` in `branching-story-health-audit`), not by executable validators
+that gate at validate-time / engine pre-apply / Hook 5. This spec adds those validators to
+complement — not replace — the existing audit-time check.
 
 Verification refined the actual gap (narrower than the report implies):
 
@@ -53,8 +56,8 @@ Parse page-plan §16a and verify, deterministically:
 - Each packet declares `profile_hash`, `voice_block_hash`, `page_packet_hash`, and those hashes
   match the referenced STCHAR record's frontmatter hashes (recompute-free: compare declared vs the
   STCHAR record's stored hashes).
-- A present speaker/viewpoint packet includes the voice block; an offstage packet names
-  `packet_scope: offstage_causal_packet`.
+- A present speaker/viewpoint packet (`required_because: speaker | viewpoint`) includes the voice
+  block.
 - No packet cites `CHAR-*` as authority (delegates to existing `no_char_authority_in_story_runtime`
   for the leak class; this validator asserts packet *presence/shape*).
 
@@ -92,6 +95,11 @@ actionability* only — never auto-graded PASS/FAIL on artistic merit.
 - Every `STCHAR.bound_stent_ids[]` entry must resolve to an STENT whose `bound_stchar_id` points
   back. `severity_mode: "fail"`.
 
+This validator reads STENT / STCHAR records directly. SPEC-60 (I3) adds a complementary world-index
+`stchar_bound_stent` edge for retrieval/ranking; the two are independent (no dependency — SPEC-60
+runs in parallel per `specs/IMPLEMENTATION-ORDER.md`) but formalize the same binding, and this
+validator may later consume that edge.
+
 ### 2.5 `story_kernel_cast_bind_list_integrity` (new validator)
 
 **Files:**
@@ -106,7 +114,7 @@ Parse `STORY_KERNEL.md.cast_bind_list` and verify:
 ## 3. Test requirements (fixtures)
 
 - `page_plan_stchar_packet_integrity`: missing packet (fail); inactive STCHAR (fail); hash mismatch
-  (fail); offstage packet with reduced scope (pass); speaker packet missing voice block (fail).
+  (fail); speaker packet missing voice block (fail).
 - `prose_receipt_stchar_integrity`: missing `char_authority_leak` (fail via 2.1); missing
   `profile_fidelity` entry (fail); hash mismatch (fail); active-snapshot mismatch (fail); allowed
   judgment-assisted drift values present and actionable (pass).
@@ -123,3 +131,16 @@ Parse `STORY_KERNEL.md.cast_bind_list` and verify:
 | §9 Prose Length Discipline | aligns | Validators check packet *presence, hashes, and shape* — never word counts or length budgets; packets have "no maximum length." |
 | §5b Schema-Minimalism | aligns | Each new validator targets a field already load-bearing in the contract / prose-receipt schema; no new schema fields are introduced. |
 | Judgment vs deterministic boundary (§Tooling Recommendation / HARD-GATE discipline) | aligns | Hashes, packet presence, active IDs, and required-field shape are deterministic; voice/appraisal/relationship fidelity remains judgment-assisted and is never auto-graded. |
+
+## 5. Out of scope
+
+- **`offstage_causal_packet` (reduced-scope §16a packet for causally-relevant offstage characters).**
+  Proposed in the source audit (`reports/stchar-audit-first-iteration.md` §426) as a smaller packet
+  for characters who are *not present* on the page but whose offstage activity causally bears on it —
+  carrying appraisal / pressure / causal-relevance authority while omitting the voice block. Deferred:
+  §16a has no offstage packet tier today (it offers only "emit a full packet" or "omit a
+  background-only entity"), so a validator cannot check a marker no authoring surface produces.
+  Introducing one is an authoring-contract extension — define the reduced packet shape, define its
+  emit trigger, update `branching-story-bootstrap` and `branching-story-turn-cycle` phase-7 to author
+  it, and possibly extend `prose-receipt.schema.json` — and belongs in its own spec, not this
+  validators spec. SPEC-59 validates only the present-character packets §16a specifies today.
