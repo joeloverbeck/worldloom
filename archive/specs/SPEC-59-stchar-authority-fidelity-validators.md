@@ -1,6 +1,6 @@
 # SPEC-59 — STCHAR Authority-Fidelity Validators
 
-**Status:** proposed
+**Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — branching-story pipeline)
 **Source:** `reports/stchar-audit-first-iteration.md` §13 C5 + §6 cast_bind_list + §9.6 reciprocity (verified against `main`)
@@ -144,3 +144,22 @@ Parse `STORY_KERNEL.md.cast_bind_list` and verify:
   emit trigger, update `branching-story-bootstrap` and `branching-story-turn-cycle` phase-7 to author
   it, and possibly extend `prose-receipt.schema.json` — and belongs in its own spec, not this
   validators spec. SPEC-59 validates only the present-character packets §16a specifies today.
+
+## Outcome
+
+Completed: 2026-05-21
+
+SPEC-59 landed as five archived implementation tickets:
+
+- `archive/tickets/SPEC59STCHARAUTFID-001.md` made `checks.char_authority_leak` required in the prose-receipt schema.
+- `archive/tickets/SPEC59STCHARAUTFID-002.md` added `page_plan_stchar_packet_integrity`.
+- `archive/tickets/SPEC59STCHARAUTFID-003.md` added `prose_receipt_stchar_integrity`.
+- `archive/tickets/SPEC59STCHARAUTFID-004.md` added `stchar_bound_stent_reciprocity`.
+- `archive/tickets/SPEC59STCHARAUTFID-005.md` added `story_kernel_cast_bind_list_integrity`.
+
+Final verification used the validators package boundary:
+
+- `npm run build` from `tools/validators` passed.
+- `node --test dist/tests/structural/story-kernel-cast-bind-list-integrity.test.js` from `tools/validators` passed, 5/5 tests.
+- `node --test dist/tests/integration/validate-patch-plan.test.js` from `tools/validators` passed, 20/20 tests.
+- `npm test` from `tools/validators` passed on the escalated rerun, 804/804 tests. The first sandboxed broad run failed because child-process tests hit `spawnSync /usr/local/bin/node EPERM`, not because of validator behavior.
