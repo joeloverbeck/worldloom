@@ -7,6 +7,10 @@
 **Depends on:** none — independent of SPEC-58/59; may proceed in parallel
 **Companion:** `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`
 
+## Implementation Notes
+
+- 2026-05-21: I3 landed via `archive/tickets/SPEC60STCHARMACLAY-001.md`. `tools/world-index` now extracts record refs from structured predicate argument fields and nested `predicate` / `predicates` combinators for both SLT preconditions and STPLAN predicates. Verification: `cd tools/world-index && npm run build` and `cd tools/world-index && npm test` (`127` tests passed).
+
 ## 1. Context
 
 STCHAR is well-supported in MCP record retrieval and world-index node/edge generation (verified:
