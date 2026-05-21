@@ -7,11 +7,11 @@
 **Companion:** `docs/triage/2026-05-21-world-system-consolidation-triage.md` (D5)
 **Depends on:**
 - **SPEC-61** (landed; `archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`) — the proposal/audit/pressure/world-proposal JSON schemas and the `approval-semantics` structural validator this spec builds on. **Substrate landed.**
-- **SPEC-62 §2.1** (FOUNDATIONS §Artifact Authority and Maturity) — landed by `archive/tickets/SPEC62FOUANDDOC-001.md`. D1's maturity-class vocabulary derives its authoritative tier list from that FOUNDATIONS section.
+- **SPEC-62 §2.1** (`archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md`; FOUNDATIONS §Artifact Authority and Maturity) — landed by `archive/tickets/SPEC62FOUANDDOC-001.md`. D1's maturity-class vocabulary derives its authoritative tier list from that FOUNDATIONS section.
 
 ## 1. Context
 
-SPEC-61 closed the strongest world-system gap — every proposal/audit/pressure/world-proposal surface (PR/BATCH/EPE/EPE-sidecar/EPE-batch/AU/RP/NWP/NWB) is now JSON-schema-backed and structurally validated, and non-CF `direct_user_approval` misuse hard-fails via `tools/validators/src/structural/approval-semantics.ts`. SPEC-62 adds the FOUNDATIONS §Artifact Authority and Maturity boundary that names each artifact's authority tier (proposal vs realized hybrid vs accepted canon vs adjudication vs audit vs pressure affordance).
+SPEC-61 closed the strongest world-system gap — every proposal/audit/pressure/world-proposal surface (PR/BATCH/EPE/EPE-sidecar/EPE-batch/AU/RP/NWP/NWB) is now JSON-schema-backed and structurally validated, and non-CF `direct_user_approval` misuse hard-fails via `tools/validators/src/structural/approval-semantics.ts`. SPEC-62 (archived at `archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md`) added the FOUNDATIONS §Artifact Authority and Maturity boundary that names each artifact's authority tier (proposal vs realized hybrid vs accepted canon vs adjudication vs audit vs pressure affordance).
 
 What remains from the consolidation report's §10 validation plan is the **compatibility layer** the triage deferred as D5 (Fault 11, major): a world cannot currently be checked, as a whole, for *maturity confusion* (an artifact claiming an authority tier its path/prefix doesn't grant) or for index drift between an `INDEX.md` and the artifacts on disk, and `continuity-audit` has no first-class compatibility reporting for these defect classes. The substrate the triage said D5 "depends on" — SPEC-61's schemas and the approval-semantics validator — has landed. This spec adds the maturity + compatibility validation layer on top of it.
 

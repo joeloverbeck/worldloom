@@ -3,7 +3,7 @@
 **Date:** 2026-05-21
 **Source report:** `reports/world-system-consolidation-first-iteration.md` (ChatGPT-Pro)
 **Method:** every load-bearing claim verified against `main` via parallel codebase exploration before triage.
-**Deliverables:** `archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`, `specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md`
+**Deliverables:** `archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`, `archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md`
 
 ## Headline
 

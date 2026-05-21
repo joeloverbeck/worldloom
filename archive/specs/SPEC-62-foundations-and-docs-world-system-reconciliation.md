@@ -1,6 +1,6 @@
 # SPEC-62 — FOUNDATIONS & Docs World-System Reconciliation
 
-**Status:** proposed
+**Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** canon-related (FOUNDATIONS amendments + canon-pipeline skill/doc reconciliation; no code-semantics change)
 **Source:** `reports/world-system-consolidation-first-iteration.md` Faults 1/3/4/6/9 (verified, narrowed) + §7 FOUNDATIONS recommendations — reassessed against `main`
@@ -204,3 +204,27 @@ change (the allocator already supports these prefixes; this records them in the 
 - A separate shared-reference maturity-ladder file every skill cites — replaced by the FOUNDATIONS
   paragraph (§2.1) per user direction.
 - All executable validator/schema work — that was SPEC-61 (landed; archived).
+
+## Outcome
+
+Completed on 2026-05-21.
+
+What changed:
+
+1. Added FOUNDATIONS §Artifact Authority and Maturity and §World Generativity vs Story-Bundle State; documented `passive_depth`; relaxed forbidden-mystery absolutism to a strong default with bounded-unknown discipline.
+2. Updated `propose-new-worlds-from-preferences` skill/template wording so every proposal card requires at least one bounded mystery and records `forbidden_mystery_absence_rationale` when no forbidden mystery is present.
+3. Updated REPOSITORY-MAP with `pressure-events/`, `character-proposals/`, root-level `world-proposals/`, and the EPE allocator-tracked / non-retrieval-indexed note.
+4. Updated diegetic-artifact-generation prose so DA claims are described as in-world assertions, not Contested Canon.
+5. Updated ID-ALLOCATION with `EPE-<integer>`, root-scoped `NWP-<integer>`, and root-scoped `NWB-<integer>` registry entries.
+
+Deviations:
+
+- None. The spec stayed within the accepted docs/FOUNDATIONS/skill-prose boundary. No schema, validator, allocator, or world-content change was made by SPEC-62.
+
+Verification:
+
+1. `rg -n "Artifact Authority and Maturity|World Generativity vs Story-Bundle State|passive_depth|forbidden mystery is a strong default" docs/FOUNDATIONS.md` — passed.
+2. `rg -n "forbidden_mystery_absence_rationale|bounded mystery|forbidden mystery is strongly recommended|forbidden-mystery" .claude/skills/propose-new-worlds-from-preferences/SKILL.md .claude/skills/propose-new-worlds-from-preferences/templates/proposal-card.md` — passed.
+3. `rg -n "pressure-events|character-proposals|world-proposals|allocator-tracked|retrieval-indexed" docs/REPOSITORY-MAP.md` — passed.
+4. `rg -n "EPE-<integer>|NWP-<integer>|NWB-<integer>" docs/ID-ALLOCATION.md` — passed.
+5. `rg -n "in-world assertions|not canon|contested canon" .claude/skills/diegetic-artifact-generation/SKILL.md` — passed; the remaining hits are the corrected "in-world assertions, not canon" wording.

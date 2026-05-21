@@ -42,7 +42,7 @@ Added a paragraph stating that worldbuilding may describe the kinds of conflicts
 ## Files to Touch
 
 - `docs/FOUNDATIONS.md` (modify)
-- `specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md` (modify — line-reference truthing after insertion shifted the `Natural Story Engines` anchor)
+- `archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md` (modified while active; line-reference truthing after insertion shifted the `Natural Story Engines` anchor)
 
 ## Out of Scope
 
@@ -83,7 +83,7 @@ Completed: 2026-05-21.
 
 `docs/FOUNDATIONS.md` now contains `## Artifact Authority and Maturity` and `## World Generativity vs Story-Bundle State` after the Canon Layers block. The first section separates canon authority from file/artifact maturity and points to the existing Canon Fact Record `direct_user_approval` reservation. The second section sanctions world-generativity language while forbidding story-bundle execution state in world-canon and world-proposal artifacts.
 
-`specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md` was also truthed for the shifted `Natural Story Engines` line anchor caused by the insertion.
+`archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md` was also truthed while active for the shifted `Natural Story Engines` line anchor caused by the insertion.
 
 ## Verification Result
 

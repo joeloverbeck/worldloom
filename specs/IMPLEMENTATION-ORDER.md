@@ -9,11 +9,12 @@ world-system (non-story) skills, whose proposal/audit/pressure surfaces had the 
 | Order | Spec | Scope | Depends on |
 |---|---|---|---|
 | 1 | **SPEC-61** — Proposal-surface schema coverage & approval-semantics enforcement (`archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`) | Completed: JSON schemas + structural validation for PR/BATCH/EPE/EPE-sidecar/EPE-batch/AU/RP/NWP/NWB; hard-fail non-CF `direct_user_approval`; fix RP collision; add capstone proof | none — foundational |
-| 2 | **SPEC-62** — FOUNDATIONS & docs world-system reconciliation | FOUNDATIONS §Artifact Authority + §World Generativity paragraphs; document `passive_depth`; relax forbidden-mystery mandate; REPOSITORY-MAP + DA-prose fixes | none — independent; may run in parallel with SPEC-61 (docs-only; no schema/validator overlap) |
-| 3 | **SPEC-64** — World-system compatibility & artifact-maturity validation | `artifact_maturity_validator` + `world_compatibility_validator` orchestration + index-consistency checks + `continuity-audit` compatibility reporting (triage D5 / Fault 11) | **SPEC-61** (landed schemas + `approval-semantics` validator) + **SPEC-62 §2.1** (FOUNDATIONS §Artifact Authority and Maturity — landed by `archive/tickets/SPEC62FOUANDDOC-001.md`) |
+| 2 | **SPEC-62** — FOUNDATIONS & docs world-system reconciliation (`archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md`) | Completed: FOUNDATIONS §Artifact Authority + §World Generativity paragraphs; documented `passive_depth`; relaxed forbidden-mystery mandate; REPOSITORY-MAP, ID-ALLOCATION, and DA-prose fixes | none — independent docs-only complement to SPEC-61 |
+| 3 | **SPEC-64** — World-system compatibility & artifact-maturity validation | `artifact_maturity_validator` + `world_compatibility_validator` orchestration + index-consistency checks + `continuity-audit` compatibility reporting (triage D5 / Fault 11) | **SPEC-61** (landed schemas + `approval-semantics` validator) + **SPEC-62 §2.1** (`archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md`; FOUNDATIONS §Artifact Authority and Maturity — landed by `archive/tickets/SPEC62FOUANDDOC-001.md`) |
 
-SPEC-61 (archived) and SPEC-62 are independent and may run in parallel; SPEC-62 is docs/FOUNDATIONS only.
+SPEC-61 and SPEC-62 are both archived. SPEC-62 was the docs/FOUNDATIONS-only complement to SPEC-61.
 SPEC-64 builds on SPEC-61's landed schemas + `approval-semantics` validator and **SPEC-62 §2.1**
+(`archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md`)
 (FOUNDATIONS §Artifact Authority and Maturity, landed by `archive/tickets/SPEC62FOUANDDOC-001.md`):
 its `artifact_maturity_validator` sources the maturity-tier vocabulary there. Triage **D5**
 (continuity-audit compatibility / Fault 11) is lifted into SPEC-64.
