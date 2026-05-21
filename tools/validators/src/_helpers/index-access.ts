@@ -86,10 +86,24 @@ export function buildPreApplyFileInputs(
   db: Database.Database,
   envelope: PatchPlanEnvelope
 ): FileInput[] {
-  return buildOverlayRecords(db, envelope, { changedOnly: true }).map((record) => ({
+  const files = buildOverlayRecords(db, envelope, { changedOnly: true }).map((record) => ({
     path: record.file_path,
     content: yaml.dump(record.parsed, { lineWidth: 100, sortKeys: false })
   }));
+
+  for (const patch of envelope.patches) {
+    const hybrid = storyCharacterAuthorityFileInput(patch);
+    if (hybrid !== null) {
+      const existingIndex = files.findIndex((file) => file.path === hybrid.path);
+      if (existingIndex >= 0) {
+        files[existingIndex] = hybrid;
+      } else {
+        files.push(hybrid);
+      }
+    }
+  }
+
+  return files;
 }
 
 export function buildPreApplyExistingFilePaths(
@@ -250,6 +264,11 @@ const STORY_CREATE_OPS: Readonly<Record<string, { nodeType: string; sourceDir: s
 };
 
 function storyRecordForCreatePatch(worldSlug: string, patch: PatchOperation): IndexedRecord | null {
+  const stchar = storyCharacterAuthorityRecordForPatch(worldSlug, patch);
+  if (stchar !== null) {
+    return stchar;
+  }
+
   const spec = STORY_CREATE_OPS[patch.op];
   if (spec === undefined) {
     return null;
@@ -269,6 +288,50 @@ function storyRecordForCreatePatch(worldSlug: string, patch: PatchOperation): In
     parsed,
     storySlug
   );
+}
+
+function storyCharacterAuthorityRecordForPatch(worldSlug: string, patch: PatchOperation): IndexedRecord | null {
+  if (patch.op !== "append_story_character_authority_record" && patch.op !== "supersede_story_character_authority_record") {
+    return null;
+  }
+
+  const payload = patch.payload;
+  const storySlug = typeof payload.story_slug === "string" ? payload.story_slug : "";
+  const parsed = asPlainRecord(payload.record);
+  const recordId = typeof parsed.id === "string" ? parsed.id : "";
+  if (storySlug.length === 0 || recordId.length === 0) {
+    return null;
+  }
+
+  return recordFromParsed(
+    worldSlug,
+    "story_character_authority_record",
+    `${storySlug}:${recordId}`,
+    `stories/${storySlug}/story-characters/${recordId}.md`,
+    parsed,
+    storySlug
+  );
+}
+
+function storyCharacterAuthorityFileInput(patch: PatchOperation): FileInput | null {
+  if (patch.op !== "append_story_character_authority_record" && patch.op !== "supersede_story_character_authority_record") {
+    return null;
+  }
+
+  const payload = patch.payload;
+  const storySlug = typeof payload.story_slug === "string" ? payload.story_slug : "";
+  const parsed = asPlainRecord(payload.record);
+  const recordId = typeof parsed.id === "string" ? parsed.id : "";
+  const body = typeof payload.body_markdown === "string" ? payload.body_markdown : "";
+  if (storySlug.length === 0 || recordId.length === 0) {
+    return null;
+  }
+
+  const frontmatter = yaml.dump(parsed, { lineWidth: 100, sortKeys: false }).trimEnd();
+  return {
+    path: `stories/${storySlug}/story-characters/${recordId}.md`,
+    content: `---\n${frontmatter}\n---\n\n${body}`
+  };
 }
 
 function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperation): string | null {
@@ -410,7 +473,12 @@ function rowToIndexedRecord(row: NodeRow): IndexedRecord {
 }
 
 function parsedBodyFor(row: NodeRow): MutableRecord {
-  if (row.node_type === "character_record" || row.node_type === "diegetic_artifact_record" || row.node_type === "adjudication_record") {
+  if (
+    row.node_type === "character_record" ||
+    row.node_type === "diegetic_artifact_record" ||
+    row.node_type === "adjudication_record" ||
+    row.node_type === "story_character_authority_record"
+  ) {
     return parseYamlRecord(frontmatterFor(row.body) ?? "");
   }
   return parseYamlRecord(row.body);

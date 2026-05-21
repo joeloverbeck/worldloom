@@ -1,6 +1,6 @@
 # SPEC66STCHARBODINT-001: stchar_body_integrity validator — section-presence + hash-shape
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds new structural validator `stchar_body_integrity` to `tools/validators`; registers it in `tools/validators/src/public/registry.ts` (`structuralValidators[]`). No impact on existing validators (new validator in isolation; reuses the existing `appliesToStcharStoryState` gate).
@@ -17,6 +17,7 @@ STCHAR is the load-bearing story-local character authority record — persona, v
 3. **Cross-skill boundary**: the 13-section list is a contract shared between this validator and `story-character-profile` (the producer). The authoritative list lives in `story-character-profile/SKILL.md` Phase 3; this validator sources it from a single canonical constant. Add a one-line cross-reference comment in both directions (validator constant ↔ Phase 3 list) so the list cannot silently drift.
 4. **FOUNDATIONS**: Rule 1 (No Floating Facts) — the validator declares its scope (STCHAR records under validation, gated by `appliesToStcharStoryState`), reads no world canon, and names its failure consequence (`severity_mode: "fail"` blocks the engine pre-apply gate / `world-validate`). FOUNDATIONS §Story Bundles §6.1 — guards the load-bearing story-local authority record.
 5. **Canon Safety surface**: this validator is a story-scope structural validator that fires at engine pre-apply time (`severity_mode: "fail"`) and gates STCHAR record writes. It does NOT touch the Mystery Reserve firewall — it checks section presence and hash *shape* only; no validator pass narrows a forbidden-status `M` (FOUNDATIONS §Rule 7 preserved; the §3.9 story-scope-validator carve-out applies — the validator mediates no world-canon reads/writes).
+6. **Same-seam implementation update**: the original ticket undercounted the pre-apply read-surface work needed for the acceptance claim. `append_story_character_authority_record` must materialize a hybrid STCHAR file input and overlay record before the new validator can run correctly through `validate_patch_plan`; the implementation therefore also updates `tools/validators/src/_helpers/index-access.ts`, `tools/validators/src/cli/_helpers.ts`, and the `tools/world-mcp` pre-apply fixture. Registry fallout also required README/inventory and validator-count updates.
 
 ## Architecture Check
 
@@ -51,7 +52,15 @@ STCHAR is the load-bearing story-local character authority record — persona, v
 
 - `tools/validators/src/structural/stchar-body-integrity.ts` (new)
 - `tools/validators/src/public/registry.ts` (modify)
+- `tools/validators/src/_helpers/index-access.ts` (modify — STCHAR hybrid pre-apply overlay/read surface)
+- `tools/validators/src/cli/_helpers.ts` (modify — STCHAR hybrid frontmatter parse for CLI read surface)
 - `tools/validators/tests/structural/stchar-body-integrity.test.ts` (new)
+- `tools/validators/tests/structural/registry.test.ts` (modify — registry inventory)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — validator counts)
+- `tools/validators/tests/integration/spec34-integration.test.ts` (modify — fixture STCHAR hybrid body)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — STCHAR execution count)
+- `tools/validators/README.md` (modify — validator inventory)
+- `tools/world-mcp/tests/tools/validate-patch-plan.test.ts` (modify — STCHAR pre-apply fixture)
 - `.claude/skills/story-character-profile/SKILL.md` (modify — add the one-line reciprocal cross-reference comment in Phase 3 pointing to the validator's canonical constant)
 
 ## Out of Scope
@@ -65,9 +74,9 @@ STCHAR is the load-bearing story-local character authority record — persona, v
 
 ### Tests That Must Pass
 
-1. `node --test dist/tests/structural/stchar-body-integrity.test.js` — all fixtures pass/fail as specified (complete passes; missing-section, duplicated-section, empty-section, empty-`Page-Plan Voice Block`, malformed-hash each fail).
-2. `npm test` (from `tools/validators`) — the full validator suite stays green with the new validator registered.
-3. `world-validate` against a fixture story bundle containing an STCHAR — `stchar_body_integrity` verdicts appear, confirming the `appliesToStcharStoryState` gate fires.
+1. `node --test dist/tests/structural/stchar-body-integrity.test.js` — passed. The complete fixture passes; missing-section, duplicated-section, empty `Voice Bible / Dialogue Authority`, empty `Page-Plan Voice Block`, and malformed-hash fixtures fail.
+2. `npm test` (from `tools/validators`) — passed, 833 tests.
+3. `node --test dist/tests/tools/validate-patch-plan.test.js` (from `tools/world-mcp` after build) — passed, confirming the MCP pre-apply path accepts a valid STCHAR hybrid patch and runs the validators package through the new STCHAR body gate.
 
 ### Invariants
 
@@ -83,6 +92,14 @@ STCHAR is the load-bearing story-local character authority record — persona, v
 
 ### Commands
 
-1. `cd tools/validators && npm run build && node --test dist/tests/structural/stchar-body-integrity.test.js` — targeted: the new validator's unit tests.
-2. `cd tools/validators && npm test` — full validator suite (build + all `node --test` cases) confirms registration didn't break siblings.
-3. The targeted `node --test` of the single test file is the correct narrow boundary for reviewing this ticket; the full `npm test` confirms the registry append composes cleanly with the rest of the suite.
+1. `cd tools/validators && npm run build` — passed.
+2. `cd tools/validators && node --test dist/tests/structural/stchar-body-integrity.test.js` — passed.
+3. `cd tools/validators && npm test` — passed, 833 tests.
+4. `cd tools/world-mcp && npm run build` — passed.
+5. `cd tools/world-mcp && node --test dist/tests/tools/validate-patch-plan.test.js` — passed, 11 tests.
+
+## Outcome
+
+Implemented `stchar_body_integrity` as a fail-mode structural validator registered with the STCHAR validator family. It validates all 13 required STCHAR H2 sections exactly once, rejects empty required sections and empty bodies, and defensively checks `profile_hash`, `voice_block_hash`, and `page_packet_hash` shape. The 13-section producer contract is cross-referenced from `.claude/skills/story-character-profile/SKILL.md`.
+
+The implementation also made the validators read surfaces STCHAR-hybrid aware for pre-apply and CLI validation so `append_story_character_authority_record` can be validated before commit. Hash recomputation remains out of scope for SPEC66STCHARBODINT-002.

@@ -68,6 +68,24 @@ function seedEmptyWorld(root: string): void {
   seedWorld(root, { worldSlug: "seeded", nodes: [] });
 }
 
+function stcharBody(): string {
+  return [
+    "Story-Facing Identity",
+    "Source Distillation",
+    "Stable Persona Core",
+    "Emotional Appraisal Map",
+    "Pressure Behavior",
+    "Voice Bible / Dialogue Authority",
+    "Page-Plan Voice Block",
+    "Perception and Embodiment",
+    "Agency and Planning Tendencies",
+    "Relationship-Specific Behavior",
+    "Story-State Derivation Guide",
+    "Prose Rendering Constraints",
+    "Validation / Audit Anchors"
+  ].map((section) => `## ${section}\n\n${section} authority prose.`).join("\n\n");
+}
+
 test("validatePatchPlan returns pass when validators run without failures", async () => {
   const root = createTempRepoRoot();
   seedEmptyWorld(root);
@@ -202,7 +220,7 @@ test("validatePatchPlan accepts append_story_diegetic_artifact_record through pr
 
 test("validatePatchPlan accepts append_story_character_authority_record through pre-apply validation", async () => {
   const root = createTempRepoRoot();
-  seedEmptyWorld(root);
+  seedStcharPrereqs(root);
 
   try {
     const plan = {
@@ -240,7 +258,7 @@ test("validatePatchPlan accepts append_story_character_authority_record through 
               voice_block_hash: `sha256:${"c".repeat(64)}`,
               page_packet_hash: `sha256:${"d".repeat(64)}`
             },
-            body_markdown: "## Profile\n\nMarla acts with focused suspicion."
+            body_markdown: stcharBody()
           }
         }
       ]
@@ -490,6 +508,23 @@ function seedStoryPlanPrereqs(root: string): void {
   });
 }
 
+function seedStcharPrereqs(root: string): void {
+  const storySlug = "marla-kern-seduction";
+  seedWorld(root, {
+    worldSlug: "seeded",
+    nodes: [
+      storyNode(storySlug, "story_entity_record", "STENT-1", "entities", [
+        "id: STENT-1",
+        "story_id: STORY-1",
+        "display_name: Marla",
+        "bound_stchar_id: STCHAR-1",
+        "role_in_story: [primary_actor]",
+        "created_at_page: PG-1"
+      ])
+    ]
+  });
+}
+
 function storyCharacterNode(
   storySlug: string,
   id: string,
@@ -502,7 +537,7 @@ function storyCharacterNode(
     file_path: `stories/${storySlug}/story-characters/${id}.md`,
     heading_path: id,
     node_type: "story_character_authority_record",
-    body: `${lines.join("\n")}\n`
+    body: `---\n${lines.join("\n")}\n---\n\n${stcharBody()}\n`
   };
 }
 

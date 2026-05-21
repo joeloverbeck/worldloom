@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — extends the `stchar_body_integrity` validator (`tools/validators/src/structural/stchar-body-integrity.ts`) with a recompute-and-compare check; may add a shared canonicalization util under `tools/validators/src/structural/` consumed by the validator. No impact on existing validators.
-**Deps**: SPEC66STCHARBODINT-001
+**Deps**: archive/tickets/SPEC66STCHARBODINT-001.md
 
 ## Problem
 

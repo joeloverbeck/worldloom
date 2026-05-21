@@ -64,6 +64,7 @@ interface FixtureRecord {
   file_path: string;
   node_type: string;
   body: Record<string, unknown>;
+  body_markdown?: string;
 }
 
 function runWorldValidate(repo: string, worldSlug: string): CliRun {
@@ -85,7 +86,7 @@ function createSpec34Repo(worldSlug: string, records: FixtureRecord[]): string {
   for (const record of records) {
     const fullPath = path.join(world, record.file_path);
     mkdirSync(path.dirname(fullPath), { recursive: true });
-    writeFileSync(fullPath, yaml.dump(record.body), "utf8");
+    writeFileSync(fullPath, serializedBody(record), "utf8");
   }
 
   const db = new Database(path.join(world, "_index", "world.db"));
@@ -116,7 +117,7 @@ function createSpec34Repo(worldSlug: string, records: FixtureRecord[]): string {
     "INSERT INTO nodes (node_id, world_slug, story_slug, file_path, node_type, body) VALUES (?, ?, ?, ?, ?, ?)"
   );
   for (const record of records) {
-    insert.run(record.node_id, worldSlug, record.story_slug ?? null, record.file_path, record.node_type, yaml.dump(record.body));
+    insert.run(record.node_id, worldSlug, record.story_slug ?? null, record.file_path, record.node_type, serializedBody(record));
   }
   db.close();
 
@@ -201,8 +202,34 @@ function storyHybridRecord(nodeType: string, id: string, sourceDir: string, body
     story_slug: "test-bundle",
     file_path: `stories/test-bundle/${sourceDir}/${id}.md`,
     node_type: nodeType,
-    body
+    body,
+    body_markdown: stcharBodyMarkdown()
   };
+}
+
+function serializedBody(record: FixtureRecord): string {
+  if (record.body_markdown === undefined) {
+    return yaml.dump(record.body);
+  }
+  return `---\n${yaml.dump(record.body).trimEnd()}\n---\n\n${record.body_markdown}`;
+}
+
+function stcharBodyMarkdown(): string {
+  return [
+    "Story-Facing Identity",
+    "Source Distillation",
+    "Stable Persona Core",
+    "Emotional Appraisal Map",
+    "Pressure Behavior",
+    "Voice Bible / Dialogue Authority",
+    "Page-Plan Voice Block",
+    "Perception and Embodiment",
+    "Agency and Planning Tendencies",
+    "Relationship-Specific Behavior",
+    "Story-State Derivation Guide",
+    "Prose Rendering Constraints",
+    "Validation / Audit Anchors"
+  ].map((section) => `## ${section}\n\n${section} authority prose.`).join("\n\n");
 }
 
 function change(changeId: string, affectedFactIds: string[]): Record<string, unknown> {
