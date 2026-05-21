@@ -1,17 +1,15 @@
 {
   "originating_spec": "specs/SPEC-66-stchar-body-integrity-validator.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC66STCHARBODINT-001.md",
+  "last_ticket": "archive/tickets/SPEC66STCHARBODINT-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "f4e9f6538ec217fdf59168ba6bf318a588b644dc",
+  "last_work_commit": "1546277ca7ddf331f313ad3127a88d191cd709d7",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC66STCHARBODINT-002.md",
-  "queue": [
-    "tickets/SPEC66STCHARBODINT-002.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": "specs/SPEC-66-stchar-body-integrity-validator.md",
+  "queue": [],
+  "phase": "ready_to_archive_spec",
   "in_progress_ticket": null,
-  "owned_dirty_summary": "SPEC66STCHARBODINT-001 implemented, reviewed, archived, and committed; only harness state remains tracked-dirty",
+  "owned_dirty_summary": "SPEC66STCHARBODINT-002 completed through held-back branch, reviewed, archived, and committed; only harness state remains tracked-dirty",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted_no_findings",
   "blocked": false,
