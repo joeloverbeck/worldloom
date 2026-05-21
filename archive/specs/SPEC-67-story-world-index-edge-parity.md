@@ -1,6 +1,6 @@
 # SPEC-67 — Story World-Index Edge Parity (Consumer-Scoped)
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — world-index over story-bundle records)
 **Source:** `reports/stchar-audit-second-iteration.md` §9.7 (edge parity drift), §13 (world-index required edge additions), §17 Important #7; triage `docs/triage/2026-05-21-stchar-audit-second-iteration-triage.md`
@@ -93,3 +93,25 @@ re-indexing any of them later requires naming the consumer at that time.
   rejected with the registry framework in SPEC-65; per-edge positive fixtures (§2.1) plus the
   non-indexed doc note (§2.2) are the proportionate guard.
 - Edges for the four non-indexed field groups in §2.2 — deferred until a consumer exists.
+
+## Outcome
+
+Completed: 2026-05-21
+
+SPEC-67 landed through two tickets:
+
+- `archive/tickets/SPEC67STOWORIND-001.md` added seven consumer-backed story-bundle edge types,
+  parser emissions, fixtures, count assertions, and the machine-facing edge catalog rows.
+- `archive/tickets/SPEC67STOWORIND-002.md` documented the intentionally non-indexed story fields in
+  `docs/MACHINE-FACING-LAYER.md`, including the rule that re-indexing any of those fields later
+  requires naming the consumer.
+
+Final verification:
+
+- `npm run build` from `tools/world-index` — PASS.
+- `npm test` from `tools/world-index` — PASS, 130 tests.
+- `grep -n "intentionally non-indexed\|no current consumer" docs/MACHINE-FACING-LAYER.md` — PASS.
+- `grep -n "STSTAT.location\|STOBJ.owner\|STOBJ.current_location\|STLOC.bound_ent\|CLK.thresholds" docs/MACHINE-FACING-LAYER.md` — PASS.
+
+No active SPEC-67 tickets remain. Consumerless fields remain deliberately unindexed until a future
+consumer is named.

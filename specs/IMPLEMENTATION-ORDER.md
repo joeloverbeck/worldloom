@@ -77,17 +77,17 @@ Active specs derived from `reports/stchar-audit-second-iteration.md` (triage:
 `docs/triage/2026-05-21-stchar-audit-second-iteration-triage.md`). The second-iteration audit was
 critically reassessed against the first-iteration triage and the merged SPEC-58/59/60/63; most of its
 13 proposals were already resolved, already rejected, or contradicted its own §18 anti-patterns. Three
-genuinely-new, FOUNDATIONS-aligned specs were selected. SPEC-65 is now complete and archived; two
-second-iteration specs remain active.
+genuinely-new, FOUNDATIONS-aligned specs were selected. SPEC-65 and SPEC-67 are now complete and
+archived; one second-iteration spec remains active.
 
 | Order | Spec | Scope | Depends on |
 |---|---|---|---|
 | done | **SPEC-65** — Story schema↔contract parity hardening (`archive/specs/SPEC-65-story-schema-contract-parity-hardening.md`) | Narrowed `SE.state_delta` and `SE.commitment.alias_bindings`; closed `PG.active_records`; added lightweight parity test; folded §16a packet-authority clarification + historical report headers | none — complete |
 | 1 | **SPEC-66** — STCHAR body-integrity validator (`specs/SPEC-66-stchar-body-integrity-validator.md`) | New `stchar_body_integrity` validator: 13 required H2 sections present + non-empty + hash-shape; hash-recompute check contingent on a pinned canonicalization. Reverses the first-iteration `stchar_body_contract` deferral (consumer now justified) | none — independent |
-| 2 | **SPEC-67** — Story world-index edge parity, consumer-scoped (`specs/SPEC-67-story-world-index-edge-parity.md`) | Add only consumer-backed story edges (`STSEC.protected_mystery_refs`/`source_records`, `OBL.owed_by/owed_to`, `OBL/CNSQ/THR.derived_from`, `STCHAR.superseded_by`); document the rest as intentionally non-indexed | none — independent |
+| done | **SPEC-67** — Story world-index edge parity, consumer-scoped (`archive/specs/SPEC-67-story-world-index-edge-parity.md`) | Added only consumer-backed story edges (`STSEC.protected_mystery_refs`/`source_records`, `OBL.owed_by/owed_to`, `CNSQ/THR.derived_from`, `STCHAR.superseded_by`); documented the rest as intentionally non-indexed | none — complete |
 
-SPEC-66 and SPEC-67 remain independent and may run in parallel; SPEC-65 is archived as the completed
-validator schema/state-delta validator slice.
+SPEC-66 remains the only active second-iteration implementation slice. SPEC-65 and SPEC-67 are
+archived as completed independent slices.
 
 ## Out of scope (second iteration — see companion triage record)
 
