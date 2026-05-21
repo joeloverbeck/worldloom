@@ -92,6 +92,30 @@ test("record_schema_compliance accepts STCHAR, STPLAN, and STEMO active_records 
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts PG active_records with only required STCHAR", async () => {
+  const parsed = validPagePayload();
+  const stateSnapshot = parsed.state_snapshot as { active_records: Record<string, string[]> };
+  stateSnapshot.active_records = { STCHAR: ["STCHAR-1"] };
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects unknown PG active_records keys", async () => {
+  const parsed = validPagePayload();
+  const stateSnapshot = parsed.state_snapshot as { active_records: Record<string, string[]> };
+  stateSnapshot.active_records.STEN = ["STEN-1"];
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.additionalProperties" &&
+    verdict.message.includes("/state_snapshot/active_records") &&
+    verdict.message.includes("must NOT have additional properties")
+  )));
+});
+
 test("record_schema_compliance rejects PG active_records without STCHAR", async () => {
   const parsed = validPagePayload();
   const stateSnapshot = parsed.state_snapshot as { active_records: Record<string, string[]> };

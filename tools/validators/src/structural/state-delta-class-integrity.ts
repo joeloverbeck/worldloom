@@ -9,14 +9,13 @@ import {
   toPosixPath
 } from "./utils.js";
 
-const STATE_DELTA_CLASSES = new Set([
+export const STATE_DELTA_CLASSES = new Set([
   "STENT",
   "STCHAR",
   "STSTAT",
   "STINT",
   "SF",
   "BEL",
-  "SE",
   "OBL",
   "CNSQ",
   "THR",
@@ -28,11 +27,7 @@ const STATE_DELTA_CLASSES = new Set([
   "SREL",
   "STLOC",
   "STOBJ",
-  "DA",
-  "BR",
-  "PG",
-  "CHC",
-  "SLT"
+  "DA"
 ]);
 
 const STORY_RECORD_NODE_TYPES = new Set([

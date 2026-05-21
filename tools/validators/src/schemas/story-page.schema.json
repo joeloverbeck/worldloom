@@ -69,7 +69,7 @@
             "STEMO": { "type": "array", "items": { "type": "string", "pattern": "^STEMO-[0-9]+$" } },
             "STCHAR": { "type": "array", "items": { "type": "string", "pattern": "^STCHAR-[0-9]+$" } }
           },
-          "additionalProperties": true
+          "additionalProperties": false
         },
         "entity_status": {
           "type": "object",
