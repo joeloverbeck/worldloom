@@ -1,6 +1,6 @@
 # SPEC-63 — Offstage-Causal §16a Packet Tier
 
-**Status:** NOT STARTED
+**Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — branching-story pipeline)
 **Source:** `archive/specs/SPEC-59-stchar-authority-fidelity-validators.md` §5 (Out of scope: `offstage_causal_packet`) + `reports/stchar-audit-first-iteration.md` §8 (§16a contract amendment, lines ~391–426) + §9.8 (offstage packet fixture)
@@ -179,3 +179,21 @@ needed for the offstage tier. (Documented here so a future reader does not re-op
   offstage tier from §8; the broader packet-shape amendments are not adopted here (they were implicitly
   not-adopted at SPEC-59 scope, which validated the present-packet shape §16a specifies today) and
   remain a separate §16a-shape concern.
+
+## Outcome
+
+Completed: 2026-05-21
+
+Implemented across three archived tickets:
+
+1. `archive/tickets/SPEC63OFFCAUPAC-001.md` updated the shared §16a contract with `offstage_causal`, the reduced offstage packet shape, and the emit/omit boundary.
+2. `archive/tickets/SPEC63OFFCAUPAC-002.md` updated the branching-story bootstrap and turn-cycle authoring guidance to emit or omit the offstage tier correctly while preserving present-character full-packet requirements.
+3. `archive/tickets/SPEC63OFFCAUPAC-003.md` made `page_plan_stchar_packet_integrity` presence-aware and added page-plan/prose-receipt fixtures for the offstage tier.
+
+Deviations from the original plan: none. The implementation kept the planned no-schema-change boundary; `prose_receipt_stchar_integrity` needed fixture coverage only, not code changes.
+
+Final verification:
+
+1. `cd tools/validators && npm run build && node --test dist/tests/structural/page-plan-stchar-packet-integrity.test.js` — PASS.
+2. `cd tools/validators && npm run build && node --test dist/tests/structural/prose-receipt-stchar-integrity.test.js` — PASS.
+3. `npm test --prefix tools/validators` — PASS (810/810 tests).
