@@ -1,6 +1,6 @@
 # SPEC64WORSYSCOM-004: continuity-audit compatibility reporting phase
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `continuity-audit` skill gains an optional, read-only compatibility-reporting phase plus a supporting reference file. No canon mutation; the skill remains audit-only.
@@ -12,7 +12,7 @@
 
 ## Assumption Reassessment (2026-05-21)
 
-1. `.claude/skills/continuity-audit/SKILL.md` carries a `<HARD-GATE>` (writes only to `audits/`), a `## Process Flow` with Phases 0–13, and a `references/` directory (`audit-categories.md`, `repair-and-retcon.md`, `retrieval-tool-tree.md`). The new phase invokes the `--compatibility` CLI mode delivered by archive/tickets/SPEC64WORSYSCOM-003.md.
+1. `.claude/skills/continuity-audit/SKILL.md` carries a `<HARD-GATE>` (writes only to `audits/`), a `## Process Flow` with Phases 0–13, and a `references/` directory (`audit-categories.md`, `repair-and-retcon.md`, `retrieval-tool-tree.md`). The new Phase 11b invokes the `--compatibility` CLI mode delivered by archive/tickets/SPEC64WORSYSCOM-003.md.
 2. SPEC-64 §D4 specifies an optional, read-only compatibility-reporting phase appended as an appendix to the `AU-<integer>` report; report Fault 11 names "optional continuity-audit reporting"; enforcement (blocking) stays in the pre-apply gate, not in the audit.
 3. Cross-skill boundary under audit: `continuity-audit` is the consumer; the world-compatibility CLI mode (archive/tickets/SPEC64WORSYSCOM-003.md) is the produced surface. The phase MUST preserve continuity-audit's audit-only write discipline — it writes only to `worlds/<slug>/audits/` and never mutates any surface the compatibility check inspects (proposals, audits, pressure-events, `_source/`). The existing HARD-GATE already scopes writes to `audits/`; the new phase must not widen it.
 
@@ -37,10 +37,15 @@ Add an optional, read-only compatibility-reporting phase to the existing Phase f
 
 Create `.claude/skills/continuity-audit/references/compatibility-reporting.md` describing how to invoke the world-compatibility CLI mode in `full-world` warn mode and fold its maturity / index / approval findings into the report appendix.
 
+### 3. Add the audit-report appendix slot
+
+Update `.claude/skills/continuity-audit/templates/audit-report.md` with a `## Compatibility Appendix` section and a Phase 12 boundary check so dry-run report assembly has a concrete section to emit.
+
 ## Files to Touch
 
 - `.claude/skills/continuity-audit/SKILL.md` (modify)
 - `.claude/skills/continuity-audit/references/compatibility-reporting.md` (new)
+- `.claude/skills/continuity-audit/templates/audit-report.md` (modify)
 
 ## Out of Scope
 
@@ -65,10 +70,22 @@ Create `.claude/skills/continuity-audit/references/compatibility-reporting.md` d
 
 ### New/Modified Tests
 
-1. `None — skill-prose ticket; verification is grep-proof against SKILL.md + the new reference file plus a continuity-audit dry-run. Existing pipeline coverage: the compatibility CLI mode is tested by archive/tickets/SPEC64WORSYSCOM-003.md and SPEC64WORSYSCOM-005.`
+1. `None — skill-prose ticket; verification is grep-proof against SKILL.md, the new reference file, and the report template. Existing pipeline coverage: the compatibility CLI mode is tested by archive/tickets/SPEC64WORSYSCOM-003.md and SPEC64WORSYSCOM-005.`
 
 ### Commands
 
-1. `grep -n "compatibility" .claude/skills/continuity-audit/SKILL.md`
-2. `test -f .claude/skills/continuity-audit/references/compatibility-reporting.md && grep -n "audits/" .claude/skills/continuity-audit/references/compatibility-reporting.md`
-3. A continuity-audit dry-run is the correct verification boundary here because the deliverable is skill prose, not production code — there is no validator binary to exercise.
+1. `grep -n "compatibility" .claude/skills/continuity-audit/SKILL.md` — PASS.
+2. `test -f .claude/skills/continuity-audit/references/compatibility-reporting.md` — PASS.
+3. `grep -n "worlds/<world-slug>/audits/" .claude/skills/continuity-audit/references/compatibility-reporting.md` — PASS.
+4. `grep -n "Compatibility Appendix" .claude/skills/continuity-audit/templates/audit-report.md` — PASS.
+
+## Outcome
+
+Added optional Phase 11b to `continuity-audit`: it runs `world-validate --compatibility --json` in full-world read-only mode, folds findings into a `## Compatibility Appendix`, and explicitly keeps blocking/enforcement outside the audit workflow. The HARD-GATE summary now includes the appendix when enabled, and Phase 12 validates the appendix boundary.
+
+Added `references/compatibility-reporting.md` with the command, expected four-validator subset, appendix shape, skip/failure semantics, and explicit non-mutation list. Updated the audit-report template with the appendix slot so report assembly has a concrete dry-run surface.
+
+## Deviations
+
+1. Added `.claude/skills/continuity-audit/templates/audit-report.md` even though the original file list did not name it; without the template slot, the acceptance criterion that a dry-run emits the appendix would depend on prose instead of the report assembly surface.
+2. Verification is grep/template proof rather than executing a full continuity-audit run, because the skill's real commit path is protected by HARD-GATE approval and this ticket must not create world audit artifacts.

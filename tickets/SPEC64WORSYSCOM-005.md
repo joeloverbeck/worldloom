@@ -42,7 +42,7 @@ Create `tools/validators/tests/integration/spec64-world-compatibility-coverage.t
 ## Out of Scope
 
 - The production validator logic (SPEC64WORSYSCOM-001 / -002) and CLI-mode implementation (archive/tickets/SPEC64WORSYSCOM-003.md).
-- The continuity-audit reporting hook (SPEC64WORSYSCOM-004) — the skill is not exercised by this validators-package integration test.
+- The continuity-audit reporting hook (archive/tickets/SPEC64WORSYSCOM-004.md) — the skill is not exercised by this validators-package integration test.
 
 ## Acceptance Criteria
 
