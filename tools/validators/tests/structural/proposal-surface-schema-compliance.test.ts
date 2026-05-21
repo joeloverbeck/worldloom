@@ -55,6 +55,58 @@ test("record_schema_compliance validates indexed proposal-surface records", asyn
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance validates mined-from-DA proposal cards and batches", async () => {
+  const fixtures = [minedProposalCardFixture(), minedProposalBatchFixture()];
+
+  const fileResult = await recordSchemaCompliance.run(
+    { files: fixtures.map((fixture) => markdownWithFrontmatter(fixture.path, fixture.frontmatter)) },
+    context([])
+  );
+  assert.deepEqual(fileResult, []);
+
+  const indexedResult = await recordSchemaCompliance.run(
+    {},
+    context(fixtures.map((fixture) => record(fixture.nodeType, fixture.id, fixture.path, fixture.frontmatter)))
+  );
+  assert.deepEqual(indexedResult, []);
+});
+
+test("record_schema_compliance keeps mined proposal variants strict", async () => {
+  const card = minedProposalCardFixture();
+  const batch = minedProposalBatchFixture();
+  const malformedCard = structuredClone(card.frontmatter) as Record<string, unknown>;
+  delete malformedCard.source_artifact_id;
+  const malformedBatch = structuredClone(batch.frontmatter) as Record<string, unknown>;
+  delete malformedBatch.source_artifact_id;
+
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        markdownWithFrontmatter(card.path, malformedCard),
+        markdownWithFrontmatter(batch.path, malformedBatch)
+      ]
+    },
+    context([])
+  );
+
+  assert.ok(
+    result.some((verdict) =>
+      verdict.location.file === card.path &&
+      verdict.code === "record_schema_compliance.required" &&
+      verdict.message.includes("source_artifact_id")
+    ),
+    "expected missing source_artifact_id failure for mined card"
+  );
+  assert.ok(
+    result.some((verdict) =>
+      verdict.location.file === batch.path &&
+      verdict.code === "record_schema_compliance.required" &&
+      verdict.message.includes("source_artifact_id")
+    ),
+    "expected missing source_artifact_id failure for mined batch"
+  );
+});
+
 function malformed(fixture: Fixture): Record<string, unknown> {
   const copy = structuredClone(fixture.frontmatter) as Record<string, unknown>;
   delete copy[fixture.idField];
@@ -179,6 +231,139 @@ function validProposalCard(overrides: Record<string, unknown> = {}): Record<stri
     },
     notes: "Fixture.",
     ...overrides
+  };
+}
+
+function minedProposalCardFixture(): Fixture {
+  return {
+    nodeType: "proposal_card",
+    idField: "proposal_id",
+    id: "PR-10",
+    path: "proposals/PR-10-mined-lease-pattern.md",
+    frontmatter: validMinedProposalCard()
+  };
+}
+
+function minedProposalBatchFixture(): Fixture {
+  return {
+    nodeType: "proposal_batch",
+    idField: "batch_id",
+    id: "BATCH-10",
+    path: "proposals/batches/BATCH-10.md",
+    frontmatter: validMinedProposalBatch()
+  };
+}
+
+function validMinedProposalCard(): Record<string, unknown> {
+  return {
+    proposal_id: "PR-10",
+    batch_id: "BATCH-10",
+    slug: "mined-lease-pattern",
+    title: "Mined Lease Pattern",
+    source_artifact_id: "DA-10",
+    mining_context: "A private journal names a lease pattern.",
+    canon_fact_statement: "Protected leases preserve some working-class tenancy pockets.",
+    proposed_status: "soft_canon",
+    type: "resource_distribution",
+    domains_touched: ["settlement_life", "economy"],
+    recommended_scope: { geographic: "regional", temporal: "current", social: "public" },
+    why_not_universal: ["Only protected pre-displacement tenancies qualify."],
+    narrator_reliability_basis: {
+      stance: "firsthand",
+      central_to_artifact: false,
+      cross_referenced_in_canon: false,
+      mapping_rationale: "The author observes a concrete building pattern, but canon only partially corroborates the mechanism."
+    },
+    scores: {
+      coherence: 5,
+      propagation_value: 4,
+      story_yield: 4,
+      distinctiveness: 4,
+      ordinary_life_relevance: 5,
+      mystery_preservation: 5,
+      integration_burden: 2,
+      redundancy_risk: 2
+    },
+    score_aggregate: 21,
+    immediate_consequences: ["Neighborhood tenancy politics remain visible."],
+    longer_term_consequences: ["Kinship and settlement continuity persist in bounded pockets."],
+    likely_required_downstream_updates: ["SEC-ECR-1"],
+    risks: ["Could over-soften displacement pressure if left unstabilized."],
+    canon_safety_check: {
+      invariants_respected: ["DIS-1"],
+      invariants_violated: [],
+      mystery_reserve_firewall: [
+        { mr_id: "M-1", overlap: false, note: "The card does not resolve the mystery." }
+      ],
+      distribution_discipline: {
+        canon_facts_consulted: ["CF-1"],
+        why_not_universal_basis: "The pattern is bounded by tenancy status."
+      },
+      diegetic_to_world_laundering: {
+        evidence_breadth: {
+          test_result: "partial",
+          independent_evidence: ["DIS-1"],
+          rationale: "Canon corroborates displacement but not this exact counter-pattern."
+        },
+        epistemic_horizon: {
+          test_result: "pass",
+          author_position_consulted: ["SEC-ECR-1"],
+          rationale: "The author can plausibly observe the building signal."
+        },
+        mr_positional: {
+          test_result: "pass",
+          mr_ids_checked_positionally: ["M-1"],
+          rationale: "The author's position does not grant access to a forbidden answer."
+        }
+      },
+      repairs_applied: []
+    },
+    source_basis: {
+      world_slug: "test",
+      batch_id: "BATCH-10",
+      source_artifact_id: "DA-10",
+      derived_from_artifact_path: "worlds/test/diegetic-artifacts/DA-10.md",
+      generated_date: "2026-05-22",
+      user_approved: true,
+      derived_from_cfs: ["CF-1"]
+    },
+    notes: "Fixture."
+  };
+}
+
+function validMinedProposalBatch(): Record<string, unknown> {
+  return {
+    batch_id: "BATCH-10",
+    world_slug: "test",
+    source_artifact_id: "DA-10",
+    source_artifact_path: "worlds/test/diegetic-artifacts/DA-10.md",
+    generated_date: "2026-05-22",
+    parameters: {
+      max_cards: 5,
+      novelty_range: "moderate",
+      taboo_areas: [],
+      allow_soft_canon_only: false
+    },
+    claim_extraction_summary: "One source artifact produced one surviving card.",
+    classification_counts: {
+      grounded: 1,
+      partially_grounded: 1,
+      not_addressed: 1,
+      contradicts: 0,
+      extends_soft: 0
+    },
+    flagged_contradictions: [],
+    mr_positional_flags: [],
+    single_narrator_concentration_flag: {
+      triggered: false,
+      count: 1,
+      affected_card_ids: ["PR-10"],
+      rationale: "Single-card batch stays below the flag threshold."
+    },
+    card_ids: ["PR-10"],
+    dropped_card_ids: [],
+    user_approved: true,
+    notes: "Fixture."
   };
 }
 

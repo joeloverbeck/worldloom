@@ -11,8 +11,9 @@ Historical note: `archive/specs/SPEC-04-validator-framework.md` is archived prio
 ## Schemas
 
 Static JSON Schemas live under `src/schemas/`. They cover the CF, CH, INV, M,
-OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, NCP proposal-card frontmatter,
-NCB proposal-batch frontmatter, DA frontmatter, and story-bundle
+OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, proposal-card/proposal-batch
+frontmatter (including mined-from-diegetic-artifact variants), NCP
+proposal-card frontmatter, NCB proposal-batch frontmatter, DA frontmatter, and story-bundle
 atomic YAML record classes (STENT, STSTAT, SF, SE, OBL, CNSQ, THR, CLK, STSEC, STQ,
 SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, BEL, STPLAN, STEMO, and story-local DA). The prose receipt schema covers
 direct-write `stories/<story-slug>/pages-prose-receipts/PG-*.yaml` artifacts. The PA

@@ -8,6 +8,7 @@ import { build as buildWorldIndex } from "@worldloom/world-index/commands/build"
 import { openExistingIndex } from "@worldloom/world-index/index/open";
 import yaml from "js-yaml";
 
+import { buildFullWorldReadSurface } from "../../src/_helpers/index-access.js";
 import { approvalSemantics } from "../../src/structural/approval-semantics.js";
 import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
 import { context, record, validCf } from "../structural/helpers.js";
@@ -108,7 +109,7 @@ test("SPEC-61 capstone confirms RP template and retrieval/index boundaries", () 
   assert.doesNotMatch(listRecordsSource, /"pressure_event_batch"/);
 });
 
-test("SPEC-61 capstone builds a temp indexed world with proposal-surface node types", () => {
+test("SPEC-61 capstone builds a temp indexed world with proposal-surface node types", async () => {
   const tempRoot = mkdtempSync(path.join(os.tmpdir(), "worldloom-spec61-capstone-"));
   const worldRoot = path.join(tempRoot, "worlds", "spec61");
 
@@ -126,6 +127,24 @@ test("SPEC-61 capstone builds a temp indexed world with proposal-surface node ty
       for (const nodeType of PROPOSAL_SURFACE_NODE_TYPES) {
         assert.equal(counts.get(nodeType), 1, `${nodeType} should be emitted by world-index build`);
       }
+
+      const indexedProposalSurface = buildFullWorldReadSurface(db, "spec61");
+      const indexedSchemaVerdicts = await recordSchemaCompliance.run(
+        {},
+        {
+          run_mode: "full-world",
+          world_slug: "spec61",
+          touched_files: [],
+          index: {
+            query: async (query) =>
+              query.record_type === "proposal_card" || query.record_type === "proposal_batch"
+                ? indexedProposalSurface.query(query)
+                : [],
+            queryEdges: async (query) => indexedProposalSurface.queryEdges?.(query) ?? []
+          }
+        }
+      );
+      assert.deepEqual(indexedSchemaVerdicts, []);
     } finally {
       db.close();
     }
