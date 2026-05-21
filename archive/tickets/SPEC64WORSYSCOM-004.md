@@ -70,7 +70,7 @@ Update `.claude/skills/continuity-audit/templates/audit-report.md` with a `## Co
 
 ### New/Modified Tests
 
-1. `None — skill-prose ticket; verification is grep-proof against SKILL.md, the new reference file, and the report template. Existing pipeline coverage: the compatibility CLI mode is tested by archive/tickets/SPEC64WORSYSCOM-003.md and SPEC64WORSYSCOM-005.`
+1. `None — skill-prose ticket; verification is grep-proof against SKILL.md, the new reference file, and the report template. Existing pipeline coverage: the compatibility CLI mode is tested by archive/tickets/SPEC64WORSYSCOM-003.md and archive/tickets/SPEC64WORSYSCOM-005.md.`
 
 ### Commands
 

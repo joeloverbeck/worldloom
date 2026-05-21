@@ -1,6 +1,6 @@
 # SPEC-64 — World-System Compatibility & Artifact-Maturity Validation
 
-**Status:** proposed
+**Status:** completed
 **Date:** 2026-05-21
 **Classification:** canon-related (executable validators over world-system proposal/audit/pressure/hybrid surfaces; no canon-record semantics change)
 **Source:** `reports/world-system-consolidation-first-iteration.md` §10 Validation-and-incompatibility plan (§10.1 `world_compatibility_validator`, §10.2 `artifact_maturity_validator`) + §9.5 steps 2–3 + Fault 11 — the deferred items (triage **D5**) now unblocked by SPEC-61's landed schemas + `approval-semantics` validator.
@@ -8,6 +8,8 @@
 **Depends on:**
 - **SPEC-61** (landed; `archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`) — the proposal/audit/pressure/world-proposal JSON schemas and the `approval-semantics` structural validator this spec builds on. **Substrate landed.**
 - **SPEC-62 §2.1** (`archive/specs/SPEC-62-foundations-and-docs-world-system-reconciliation.md`; FOUNDATIONS §Artifact Authority and Maturity) — landed by `archive/tickets/SPEC62FOUANDDOC-001.md`. D1's maturity-class vocabulary derives its authoritative tier list from that FOUNDATIONS section.
+
+**Implementation:** completed by `archive/tickets/SPEC64WORSYSCOM-001.md`, `archive/tickets/SPEC64WORSYSCOM-002.md`, `archive/tickets/SPEC64WORSYSCOM-003.md`, `archive/tickets/SPEC64WORSYSCOM-004.md`, and `archive/tickets/SPEC64WORSYSCOM-005.md`.
 
 ## 1. Context
 
