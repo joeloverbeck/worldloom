@@ -1,6 +1,6 @@
 ---
 name: branching-story-health-audit
-description: "Use when diagnosing the health of a branching-story bundle. Six modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health + STPLAN/STEMO health + active-state underuse + STCHAR authority health), compatibility (schema-drift compatibility reporting), prose (compare rendered prose + receipts against state), source_drift (advisory STCHAR source-CHAR hash drift only), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
+description: "Use when diagnosing the health of a branching-story bundle. Five modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health + STPLAN/STEMO health + active-state underuse + STCHAR authority health), compatibility (schema-drift compatibility reporting), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -10,7 +10,7 @@ arguments:
     description: "Existing story bundle slug under worlds/<world_slug>/stories/"
     required: true
   - name: mode
-    description: "Comma-separated list of modes; default 'structural'. Valid: structural, compatibility, prose, source_drift, remediation, cross_story. Modes can be combined, including structural,compatibility."
+    description: "Comma-separated list of modes; default 'structural'. Valid: structural, compatibility, prose, remediation, cross_story. Modes can be combined, including structural,compatibility."
     required: false
   - name: branch_path_filter
     description: "BR-<integer> or list; restricts structural checks to named branches + descendants. Default: all branches."
@@ -32,7 +32,7 @@ Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/r
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 13 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health, 2k STPLAN / STEMO health, 2l active-state underuse warnings, 2m STCHAR authority health) executed when `structural` in mode (default); compatibility-drift reporting executed when `compatibility` in mode; prose checks executed when `prose` in mode; source-drift reporting executed only when `source_drift` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 13 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health, 2k STPLAN / STEMO health, 2l active-state underuse warnings, 2m STCHAR authority health) executed when `structural` in mode (default); compatibility-drift reporting executed when `compatibility` in mode; prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -72,10 +72,6 @@ Phase 2j [conditional on `compatibility` in mode]: Compatibility drift
          emits a separate SAU section)
         |
         v
-Phase 2n [conditional on `source_drift` in mode]: STCHAR source-drift
-        (advisory only; never rewrites or supersedes STCHAR)
-        |
-        v
 Phase 3 [conditional on `prose` in mode]: Prose checks (5 finding
                                                         types over
                                                         prose + receipts)
@@ -105,7 +101,7 @@ Phase 7: HARD-GATE fires → write SAU report + RSP cards (if any)
 
 ### Optional
 
-- `mode` — comma-separated list — default `structural`. Valid values: `structural`, `compatibility`, `prose`, `source_drift`, `remediation`, `cross_story`. Modes can be combined, including `structural,compatibility` for structural checks plus compatibility-drift reporting in one SAU. `source_drift` is opt-in only; default structural mode never reads world `CHAR` for STCHAR drift.
+- `mode` — comma-separated list — default `structural`. Valid values: `structural`, `compatibility`, `prose`, `remediation`, `cross_story`. Modes can be combined, including `structural,compatibility` for structural checks plus compatibility-drift reporting in one SAU.
 - `branch_path_filter` — `BR-<integer>` or list — restricts structural checks to named branches + descendants. Default: all branches.
 - `severity_threshold` — enum — `error | warning | info`. Default: `info` (report everything).
 - `emit_remediation_requests` — `true | false` — default `false`. Forces RSP drafting even without explicit `remediation` mode.
@@ -144,7 +140,7 @@ Before Phase 1:
 
 1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md`. Abort with clear missing-file error on any unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
-3. Parse `mode` argument — comma-separated list of `structural | compatibility | prose | source_drift | remediation | cross_story`; default to `structural` if absent. Validate every named mode is in the valid set. `compatibility` may run alone for schema-drift reporting or as `structural,compatibility` to keep structural findings and compatibility findings in separate SAU sections. `source_drift` is opt-in only and reports advisory STCHAR source-hash drift without writing or superseding STCHAR.
+3. Parse `mode` argument — comma-separated list of `structural | compatibility | prose | remediation | cross_story`; default to `structural` if absent. Validate every named mode is in the valid set. `compatibility` may run alone for schema-drift reporting or as `structural,compatibility` to keep structural findings and compatibility findings in separate SAU sections.
 4. Allocate `SAU` id via `mcp__worldloom__allocate_next_id(world_slug, 'SAU', story_slug=<story_slug>)`. **`RSP` ids are allocated at Phase 5 per-finding** via `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id='SAU-<integer>')` — deferred-allocation pattern, since the count of fixable findings is unknown until phases complete.
 5. Load story-local audit inputs through `story_slug` scoped retrieval: use `story_bundle_context` and targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records` for active cast `STENT` ids (Phase 2d belief / visibility checks), mirrored `SF` records, and other bundle-local ids. Load the world canon context packet with `story_slug=<story_slug>` and seed it only with world-scope ids: every `M-<integer>` (whole-class for forbidden-resolution and cumulative-accretion checks in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), and parent `CF` records derived from mirrored `SF` records (for Phase 2e canon-authority classification). Extract the current world-canon revision from the latest `change_log_entry` in the context packet (`CH-<integer>`, or `null` only if no change log exists).
 6. If `cross_story` in `mode`: enumerate `worlds/<world_slug>/stories/*/` directories; for each sibling bundle, load its `_source/` record-index sufficient for Phase 4 contradiction checks (mirrored `SF` records keyed by CF ids in `derived_from`, `SE.promotion_claims[]` queue, terminal-closure inherited-debt notes).
@@ -344,7 +340,7 @@ Every active-state-underuse finding cites the record id, class, branch id, page 
 
 ### Phase 2m: STCHAR authority health
 
-These checks preserve Story-Local Character Authority. They read story-bundle records, page plans, prose receipts, and indexed story-character summaries; default structural mode does not read world `CHAR-*` dossiers. Use targeted `get_record` / `get_records` for full STCHAR, STENT, PG, CHC, STPLAN, STEMO, SREL, and receipt bodies when a finding depends on profile hashes, status, grounding, or page-plan packet content.
+These checks preserve Story-Local Character Authority. They read story-bundle records, page plans, prose receipts, and indexed story-character summaries; default structural mode does not read world `CHAR-*` dossiers. Use targeted `get_record` / `get_records` for full STCHAR, STENT, PG, CHC, STPLAN, STEMO, SREL, and receipt bodies when a finding depends on lifecycle status, grounding, or page-plan packet content.
 
 Flag:
 
@@ -353,23 +349,11 @@ Flag:
 - `stchar_not_active_for_bound_stent` — a bound STCHAR exists but is not active in the page or branch snapshot where the bound STENT is active. ERROR; `repair_kind: turn_repair`.
 - `stchar_superseded_still_active` — an STCHAR whose lifecycle status is `superseded` or `retired`, or which is named by another active STCHAR's `supersedes`, remains in `PG.state_snapshot.active_records.STCHAR[]` or remains bound to an active non-background STENT. ERROR; `repair_kind: turn_repair`.
 - `page_plan_missing_stchar_packet` — a page plan lacks the mandatory §16a packet for a viewpoint character, speaker, major actor, direct target, emotionally salient character, or otherwise behavior/voice-shaping character active on that page. ERROR; `repair_kind: prose_revision` when the plan must be revised, otherwise `turn_repair` when the page state must be repaired first.
-- `page_plan_stchar_hash_mismatch` — a §16a packet's `profile_hash` or `voice_block_hash` does not match the active STCHAR it cites, or its page-local `page_packet_hash` does not match the canonical hash of that exact packet projection. ERROR; `repair_kind: prose_revision` when the packet is stale, otherwise `turn_repair` when the active STCHAR state is wrong.
 - `choice_plan_emotion_character_grounding_missing` — CHC, STPLAN, STEMO, STINT, or SREL prose/fields are materially character-specific but do not cite the active STCHAR in `grounded_in.records`, `derived_from`, or the page-plan packet rationale. WARNING; `repair_kind: turn_repair` or `commitment_block` according to the owning surface.
 - `split_character_authority` — runtime characterization cites world `CHAR-*` as operational authority in page plans, CHC/STPLAN/STEMO/SREL grounding, prose receipts, or health-audit rationale instead of STCHAR. ERROR; `repair_kind: turn_repair` or `prose_revision`; cite the existing `no_char_authority_in_story_runtime` validator verdict when present.
 - `repeated_profile_fidelity_failure` — repeated prose receipts for the same active STCHAR show `profile_fidelity` values of `major_drift` or repeated `minor_drift` on voice, appraisal, pressure behavior, or relationship conduct without a subsequent page-plan repair, prose revision, turn repair, or STCHAR regeneration. WARNING; `repair_kind` follows the receipt's local `repair_recommendation` (`prose_revision`, `turn_repair`, or branch-flagged user attention for `regenerate_stchar`).
 
-Every Phase 2m finding cites the STCHAR id, affected STENT / PG / CHC / STPLAN / STEMO / SREL / receipt ids, branch/page scope, hash or lifecycle evidence when relevant, and whether the issue is missing authority, stale authority, split authority, or fidelity drift. A branch with complete STCHAR authority emits no Phase 2m finding.
-
-## Phase 2n: Source-drift mode (conditional on `source_drift` in `mode`)
-
-This mode is opt-in advisory drift reporting for STCHAR records whose `source_kind: world_char`. It compares `STCHAR.source_char_hash` against the current content hash of the referenced world `CHAR-*` dossier, using targeted retrieval of that one source character only after the operator requested `source_drift`. It never runs in default `structural` mode, never changes STCHAR, and never emits a supersession.
-
-Flag:
-
-- `stchar_source_drift` — the current source `CHAR-*` content hash differs from `STCHAR.source_char_hash`. WARNING; `repair_kind: branch_flag` unless the operator separately chooses to invoke `story-character-profile regenerate`.
-- `stchar_source_missing` — `source_kind: world_char` names a `source_char_id` that cannot be retrieved. WARNING; `repair_kind: branch_flag`.
-
-The SAU report must label these findings advisory and must state that `story-character-profile regenerate` is the lawful follow-up when the user wants a new STCHAR. The audit does not rewrite or supersede STCHAR automatically.
+Every Phase 2m finding cites the STCHAR id, affected STENT / PG / CHC / STPLAN / STEMO / SREL / receipt ids, branch/page scope, lifecycle evidence when relevant, and whether the issue is missing authority, stale authority, split authority, or fidelity drift. A branch with complete STCHAR authority emits no Phase 2m finding.
 
 ## Phase 2j: Compatibility drift (conditional on `compatibility` in `mode`)
 
@@ -461,7 +445,7 @@ story_id: STORY-<integer>
 story_slug: <story_slug>
 world_slug: <world_slug>
 created: <iso8601 date>
-modes_run: [structural, compatibility, prose, source_drift, remediation, cross_story]   # whichever ran
+modes_run: [structural, compatibility, prose, remediation, cross_story]   # whichever ran
 branch_path_filter: null | BR-<integer> | [BR-<integer>, ...]
 severity_threshold: error | warning | info
 findings_total: N
@@ -518,10 +502,6 @@ rsp_cards_emitted: N | 0
 
 (Phase 2m findings.)
 
-## STCHAR source drift (if `source_drift` in modes)
-
-(Phase 2n advisory findings; report only, never supersession.)
-
 ## Compatibility drift (if `compatibility` in modes)
 
 - **Classification**: one of `current_contract`, `compatible_optional_absence`, `grandfathered_snapshot_shape`, `compatible_with_advisory`, `requires_compatibility_audit`, `requires_migration_patch`, `manual_review`, or `blocked_contract_break`.
@@ -568,7 +548,7 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 - **Rule 7 (Preserve Mystery Deliberately)** — Phase 2e (mystery / canon safety). Mechanism: forbidden-mystery-resolution + cumulative mystery-accretion + counterfactual-promotion-to-canon + canon-candidate-without-promotion-hold checks against whole-class Mystery Reserve loaded at Pre-flight.
 - **Canon Baseline Drift** — Phase 2h. Mechanism: page `state_snapshot.canon_revision` values are compared against the latest governing `change_log_entry`; stale baselines are classified and routed without rewriting committed pages.
 - **Information / Observer Firewall** — Phase 2d. Mechanism: emitted choices and selected `SLT` actor-bindings are checked against actor-available knowledge and recorded access routes; non-system character actions are checked for motivation-grounding citations in `SE.world_logic_rationale`.
-- **Story-Local Character Authority** — Phase 2m + opt-in Phase 2n. Mechanism: default structural audit checks runtime STCHAR authority without world `CHAR` reads; `source_drift` compares source hashes only when explicitly requested and reports advisory drift without supersession.
+- **Story-Local Character Authority** — Phase 2m. Mechanism: default structural audit checks runtime STCHAR authority without world `CHAR` reads.
 
 ## Record Schemas
 
@@ -599,7 +579,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 | §Story Bundles §5b (Schema-Minimalism) | N/A | Audit reads records; does not draft schema-bearing records. |
 | §Story Bundles §6a (Belief vs. Fact) | Phase 2d | Belief / visibility health checks (7 finding types, including expected-witness completeness). |
 | §Story Bundles §6b (Information / Observer Firewall) | Phase 2d | Audit reports emitted choices and selected `SLT` actor-bindings that rely on unavailable actor knowledge without a valid recorded access route; it reads `BEL.basis.access_route` and `BEL.basis.access_records` for post-hoc route evidence. It also reports `motivation_ungrounded` when non-system character actions lack `world_logic_rationale` citations to actor-held intentions/beliefs, actor-involving obligations/consequences/threads/relationships, or immediate physical affordances. |
-| §Story Bundles §6.1 (Story-Local Character Authority) | Phase 2m, Phase 2n | Default structural audit consumes active STCHAR through story-bundle records, `STENT.bound_stchar_id`, `PG.state_snapshot.active_records.STCHAR`, §16a page-plan packets, and prose receipts; it flags split authority when runtime surfaces cite world `CHAR-*`. Optional `source_drift` mode reads source `CHAR-*` only to compare `STCHAR.source_char_hash`, reports advisory drift, and never supersedes STCHAR. |
+| §Story Bundles §6.1 (Story-Local Character Authority) | Phase 2m | Default structural audit consumes active STCHAR through story-bundle records, `STENT.bound_stchar_id`, `PG.state_snapshot.active_records.STCHAR`, §16a page-plan packets, and prose receipts; it flags split authority when runtime surfaces cite world `CHAR-*`. |
 | §Story Bundles §9 (Prose Length Discipline) | N/A | Audit reports no word-count metrics. |
 | Change Control Policy | N/A | Audit emits no Change Log Entries. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |

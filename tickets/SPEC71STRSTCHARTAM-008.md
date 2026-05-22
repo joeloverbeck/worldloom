@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — strips the four hashes from the `erotica-world/red-bunny` bundle (engine-routed STCHAR ops + direct edits to plans/receipts/INDEX); capstone verification of the full SPEC-71 teardown.
-**Deps**: archive/tickets/SPEC71STRSTCHARTAM-003.md, archive/tickets/SPEC71STRSTCHARTAM-004.md, archive/tickets/SPEC71STRSTCHARTAM-005.md, archive/tickets/SPEC71STRSTCHARTAM-006.md, tickets/SPEC71STRSTCHARTAM-007.md
+**Deps**: archive/tickets/SPEC71STRSTCHARTAM-003.md, archive/tickets/SPEC71STRSTCHARTAM-004.md, archive/tickets/SPEC71STRSTCHARTAM-005.md, archive/tickets/SPEC71STRSTCHARTAM-006.md, archive/tickets/SPEC71STRSTCHARTAM-007.md
 
 ## Problem
 
