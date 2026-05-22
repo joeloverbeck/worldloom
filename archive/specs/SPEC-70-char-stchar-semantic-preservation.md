@@ -1,6 +1,6 @@
 # SPEC-70 — CHAR → STCHAR Semantic Preservation & Structured-Fact Coverage
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-05-22
 **Classification:** story-canon-related (governs the `CHAR → STCHAR` story-character distillation seam: the `story-character-profile` skill, the STCHAR frontmatter schema, the STCHAR body validator, the §16a page-plan packet contract, and a new structural validator)
 **Source:** `reports/character-bridge-consolidation-first-iteration.md` (external ChatGPT-Pro analysis) — triaged against `main` (SHA `fb1eb37`) 2026-05-22. The report proposed 7 changes across a 7-phase program; this spec implements the **subset that survives verification** and drops the rest (see §1 and §4).
@@ -149,3 +149,25 @@ Golden fixtures (the P7 deliverable) for `stchar_source_fact_coverage`:
 `stchar-body-integrity.ts` regression: new §2.2 subsections required (present + non-empty) for new STCHAR; existing 13-section fixtures stay green; `profile_hash` recompute over migrated bodies confirmed.
 
 `npm run build` + `npm test` green in `tools/validators` (and `tools/world-mcp` if the schema or hash CLI surface is touched) before completion.
+
+## Outcome
+
+Completed 2026-05-22.
+
+Implemented through:
+
+- `archive/tickets/SPEC70CHASTCHARSEM-001.md` — added the additive `source_operational_fact_map` STCHAR frontmatter schema field and schema tests.
+- `archive/tickets/SPEC70CHASTCHARSEM-002.md` — added the STCHAR operational-home H3 subsections and `stchar-body-integrity` enforcement with the legacy warn window.
+- `archive/tickets/SPEC70CHASTCHARSEM-003.md` — added and registered `stchar_source_fact_coverage`, including golden fixtures for missing mappings, `Source Distillation` targeting, omission rationale, story-local exemption, legacy warn behavior, and source-hash drift.
+- `archive/tickets/SPEC70CHASTCHARSEM-004.md` — added the Semantic Preservation Contract prose to the STCHAR authoring skills/shared template and added the §16a relevant-capabilities line, including the conditional `offstage_causal` form.
+
+Verification:
+
+- `npm test --prefix tools/validators` — PASS on 2026-05-22; rebuilt `tools/validators` and ran 896/896 passing tests.
+- SPEC70CHASTCHARSEM-004 grep/manual-review proof — PASS on 2026-05-22; the contract text appears in all three prose surfaces, the source-section lists name `dramatic_core`, `## Capabilities`, and `## Signature Scene Behavior`, and the `Required because:` §16a vocabulary line remains unchanged in substance.
+
+Deviations from draft:
+
+- The `source_operational_fact_map` field remains additive at the JSON Schema level so legacy STCHAR records do not hard-fail before the dedicated validator's warn-until-touched migration window.
+- The final prose ticket added explicit `source_operational_fact_map` authoring instructions to the STCHAR-producing skills because the field and validator were real shipped surfaces by then.
+- `tools/world-mcp` was not rerun for final archival because no hash CLI or world-mcp implementation surface changed in this spec family; the final executable gate stayed on `tools/validators` plus the prose grep/manual-review proof.
