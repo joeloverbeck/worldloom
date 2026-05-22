@@ -23,6 +23,7 @@
     "page_packet_hash"
   ],
   "properties": {
+    "record_kind": { "type": "string", "const": "story_character_authority_record" },
     "id": { "type": "string", "pattern": "^STCHAR-(0|[1-9][0-9]*)$" },
     "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
     "story_slug": { "type": "string", "minLength": 1 },

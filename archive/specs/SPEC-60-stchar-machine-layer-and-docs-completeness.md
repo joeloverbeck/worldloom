@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (machine-facing layer + docs for the Skill Category 2c pipeline)
-**Source:** `reports/stchar-audit-first-iteration.md` §13 I3/I4/I5 + §10 patch-engine/MCP findings (verified against `main`)
+**Source:** `archive/reports/stchar-audit-first-iteration.md` §13 I3/I4/I5 + §10 patch-engine/MCP findings (verified against `main`)
 **Depends on:** none — independent of SPEC-58/59; may proceed in parallel
 **Companion:** `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`
 
@@ -129,8 +129,8 @@ profile.
   `docs/triage/2026-05-16-story-related-improvements-seventh-iteration-triage.md` is a historical
   record of a past contract state — leave it as-is.)
 
-**Explicit non-change:** `reports/stchar-implementation-first-iteration.md` and
-`reports/stchar-audit-first-iteration.md` legitimately contain `bound_char_id` as historical
+**Explicit non-change:** `archive/reports/stchar-implementation-first-iteration.md` and
+`archive/reports/stchar-audit-first-iteration.md` legitimately contain `bound_char_id` as historical
 migration narrative — **do not edit them**.
 
 **Optional / secondary (defer if low value):** `story_bundle_context.active_story_characters` is

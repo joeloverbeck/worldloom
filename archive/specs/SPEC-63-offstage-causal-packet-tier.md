@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — branching-story pipeline)
-**Source:** `archive/specs/SPEC-59-stchar-authority-fidelity-validators.md` §5 (Out of scope: `offstage_causal_packet`) + `reports/stchar-audit-first-iteration.md` §8 (§16a contract amendment, lines ~391–426) + §9.8 (offstage packet fixture)
+**Source:** `archive/specs/SPEC-59-stchar-authority-fidelity-validators.md` §5 (Out of scope: `offstage_causal_packet`) + `archive/reports/stchar-audit-first-iteration.md` §8 (§16a contract amendment, lines ~391–426) + §9.8 (offstage packet fixture)
 **Depends on:** SPEC-59 (`archive/specs/SPEC-59-stchar-authority-fidelity-validators.md`; completed — provides `page_plan_stchar_packet_integrity` and `prose_receipt_stchar_integrity`, the validators this spec extends) and transitively SPEC-58 (active_records.STCHAR required key)
 
 ## 1. Context
@@ -173,7 +173,7 @@ needed for the offstage tier. (Documented here so a future reader does not re-op
 - **A distinct `packet_scope` field.** Rejected in favor of the `required_because` enum value per §5b;
   recorded here so it is not re-proposed.
 - **The broader §8 packet-shape amendments.** The source audit's §16a amendment
-  (`reports/stchar-audit-first-iteration.md` §8, lines ~391–426) also proposes a full packet-shape
+  (`archive/reports/stchar-audit-first-iteration.md` §8, lines ~391–426) also proposes a full packet-shape
   redesign — a structured `page_relevant_projection`, an `included_stchar_sections` list,
   `omitted_sections_with_reason`, and an `active_in_pg_snapshot` field. This spec adopts **only** the
   offstage tier from §8; the broader packet-shape amendments are not adopted here (they were implicitly

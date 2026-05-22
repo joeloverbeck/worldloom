@@ -118,6 +118,7 @@ The validator is registered in `tools/validators`, listed in the validators READ
 3. Full package proof from `tools/validators`: `npm test` passed with 870 tests.
 4. Downstream proof from `tools/world-mcp`: `npm run build` passed, then `node --test dist/tests/server/capability-parity.test.js` passed with 5 tests.
 5. Manual contract review covered `.claude/skills/branching-story-turn-cycle/SKILL.md` Phase 4-5, the four target story record schemas, the patch-engine story ops, `tools/validators/README.md`, and the validator registry/capability parity surfaces.
+6. Post-ticket review rerun on 2026-05-22: `npm test` from `tools/validators` passed with 877 tests, and `npm run build` plus `node --test dist/tests/server/capability-parity.test.js` from `tools/world-mcp` passed with 5 tests.
 
 ## Deviations
 

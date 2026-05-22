@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — branching-story pipeline)
-**Source:** `reports/stchar-audit-first-iteration.md` §13 C5 + §6 cast_bind_list + §9.6 reciprocity (verified against `main`)
+**Source:** `archive/reports/stchar-audit-first-iteration.md` §13 C5 + §6 cast_bind_list + §9.6 reciprocity (verified against `main`)
 **Depends on:** SPEC-58 (`archive/specs/SPEC-58-stchar-contract-enforcement-reconciliation.md`; assumes schemas accept STCHAR and `active_records.STCHAR` is a required, fail-level key)
 **Companion:** `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`
 
@@ -135,7 +135,7 @@ Parse `STORY_KERNEL.md.cast_bind_list` and verify:
 ## 5. Out of scope
 
 - **`offstage_causal_packet` (reduced-scope §16a packet for causally-relevant offstage characters).**
-  Proposed in the source audit (`reports/stchar-audit-first-iteration.md` §426) as a smaller packet
+  Proposed in the source audit (`archive/reports/stchar-audit-first-iteration.md` §426) as a smaller packet
   for characters who are *not present* on the page but whose offstage activity causally bears on it —
   carrying appraisal / pressure / causal-relevance authority while omitting the voice block. Deferred:
   §16a has no offstage packet tier today (it offers only "emit a full packet" or "omit a

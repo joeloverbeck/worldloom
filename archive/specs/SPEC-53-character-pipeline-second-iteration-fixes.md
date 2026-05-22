@@ -1,7 +1,7 @@
 <!--
 SPEC-53: Character Pipeline — Second-Iteration Implementation Fixes
 Delta against SPEC-52 (Protagonist-Grade Character Pipeline, archived/implemented 2026-05-20).
-Source audit: reports/deepening-characters-second-iteration.md (ChatGPT-Pro, second iteration).
+Source audit: archive/reports/deepening-characters-second-iteration.md (ChatGPT-Pro, second iteration).
 -->
 
 # SPEC-53: Character Pipeline — Second-Iteration Implementation Fixes
@@ -9,7 +9,7 @@ Source audit: reports/deepening-characters-second-iteration.md (ChatGPT-Pro, sec
 **Status:** COMPLETED
 **Date:** 2026-05-20
 **Predecessor:** SPEC-52 — Protagonist-Grade Character Pipeline (archived; this spec is a focused delta on its landed deliverables)
-**Source audit:** `reports/deepening-characters-second-iteration.md`
+**Source audit:** `archive/reports/deepening-characters-second-iteration.md`
 
 ---
 

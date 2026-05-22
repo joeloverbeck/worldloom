@@ -11,75 +11,75 @@ const SCHEMA_ROOT = path.resolve(process.cwd(), "src", "schemas");
 const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: string[] }> = {
   "story-belief": {
     required: ["id", "story_id", "created_at_page", "holder", "claim", "belief_mode", "truth_relation", "confidence", "visibility", "basis", "consequences"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "holder", "claim", "belief_mode", "truth_relation", "confidence", "visibility", "basis", "consequences"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "holder", "claim", "belief_mode", "truth_relation", "confidence", "visibility", "basis", "consequences"]
   },
   "story-page": {
     required: ["id", "story_id", "branch_id", "parent_page_id", "branch_path", "turn_index", "input", "state_hash_parent", "state_hash", "state_snapshot", "plan", "prose_plan_path", "emitted_choices", "validation_trace"],
-    properties: ["id", "story_id", "branch_id", "parent_page_id", "branch_path", "turn_index", "input", "state_hash_parent", "state_hash", "state_snapshot", "plan", "prose_plan_path", "emitted_choices", "validation_trace"]
+    properties: ["record_kind", "id", "story_id", "branch_id", "parent_page_id", "branch_path", "turn_index", "input", "state_hash_parent", "state_hash", "state_snapshot", "plan", "prose_plan_path", "emitted_choices", "validation_trace"]
   },
   "story-event": {
     required: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "commitment", "outcome_route", "world_logic_rationale", "state_delta"],
-    properties: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "targets", "commitment", "outcome_route", "resolution", "world_logic_rationale", "record_introductions", "state_relations", "non_propagation_facts", "state_delta", "promotion_claims"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "targets", "commitment", "outcome_route", "resolution", "world_logic_rationale", "record_introductions", "state_relations", "non_propagation_facts", "state_delta", "promotion_claims"]
   },
   "story-storylet": {
     required: ["id", "story_id", "scope", "title", "move_family", "preconditions", "beats", "exit_options", "saliency", "mystery_policy", "provenance"],
-    properties: ["id", "story_id", "supersedes", "scope", "created_at_page", "title", "move_family", "preconditions", "beats", "effects", "exit_options", "saliency", "mystery_policy", "provenance"]
+    properties: ["record_kind", "id", "story_id", "supersedes", "scope", "created_at_page", "title", "move_family", "preconditions", "beats", "effects", "exit_options", "saliency", "mystery_policy", "provenance"]
   },
   "story-entity": {
     required: ["id", "story_id", "created_at_page", "display_name", "bound_stchar_id", "role_in_story"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "display_name", "bound_stchar_id", "role_in_story"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "display_name", "bound_stchar_id", "role_in_story"]
   },
   "story-character-authority": {
     required: ["id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_hash", "source_char_sections_used", "generated_at_page", "created_by_skill", "supersedes", "status", "bound_stent_ids", "profile_revision", "body_schema_version", "profile_hash", "voice_block_hash", "page_packet_hash"],
-    properties: ["id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_hash", "source_char_sections_used", "story_local_inputs_used", "generated_at_page", "created_by_skill", "supersedes", "superseded_by", "status", "bound_stent_ids", "profile_revision", "body_schema_version", "profile_hash", "voice_block_hash", "page_packet_hash"]
+    properties: ["record_kind", "id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_hash", "source_char_sections_used", "story_local_inputs_used", "generated_at_page", "created_by_skill", "supersedes", "superseded_by", "status", "bound_stent_ids", "profile_revision", "body_schema_version", "profile_hash", "voice_block_hash", "page_packet_hash"]
   },
   "story-status": {
     required: ["id", "story_id", "created_at_page", "entity", "life", "agency", "location"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "entity", "life", "agency", "location", "derived_from"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "entity", "life", "agency", "location", "derived_from"]
   },
   "story-intention": {
     required: ["id", "story_id", "created_at_page", "holder", "intent", "urgency", "expires_when"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "holder", "intent", "urgency", "expires_when"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "holder", "intent", "urgency", "expires_when"]
   },
   "story-fact": {
     required: ["id", "story_id", "created_at_page", "statement", "authority"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "statement", "authority", "derived_from"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "statement", "authority", "derived_from"]
   },
   "story-obligation": {
     required: ["id", "story_id", "created_at_page", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close", "urgency"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close", "urgency"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close", "urgency"]
   },
   "story-consequence": {
     required: ["id", "story_id", "created_at_page", "status", "consequence_kind", "description", "resolves_when", "urgency"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "consequence_kind", "description", "urgency", "resolves_when", "derived_from"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "status", "consequence_kind", "description", "urgency", "resolves_when", "derived_from"]
   },
   "story-thread": {
     required: ["id", "story_id", "created_at_page", "status", "title", "summary", "urgency"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "title", "summary", "urgency", "derived_from"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "status", "title", "summary", "urgency", "derived_from"]
   },
   "story-relationship": {
     required: ["id", "story_id", "created_at_page", "axis", "participants", "direction", "value", "valence", "description"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "axis", "participants", "direction", "value", "valence", "description", "derived_from"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "axis", "participants", "direction", "value", "valence", "description", "derived_from"]
   },
   "story-location": {
     required: ["id", "story_id", "created_at_page", "label", "description"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "label", "description", "bound_ent"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "label", "description", "bound_ent"]
   },
   "story-object": {
     required: ["id", "story_id", "created_at_page", "label", "description", "owner", "current_location"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "label", "description", "owner", "current_location"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "label", "description", "owner", "current_location"]
   },
   "story-diegetic-artifact": {
     required: ["id", "story_id", "created_at_page", "title", "author", "genre", "body", "intended_audience", "circulation", "truth_relation"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "title", "author", "genre", "body", "intended_audience", "circulation", "truth_relation", "derived_from"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "title", "author", "genre", "body", "intended_audience", "circulation", "truth_relation", "derived_from"]
   },
   "story-branch": {
     required: ["id", "story_id", "created_at_page", "label", "parent_branch_id", "forked_at_page_id", "root_page_id"],
-    properties: ["id", "story_id", "created_at_page", "label", "description", "parent_branch_id", "forked_at_page_id", "root_page_id"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "label", "description", "parent_branch_id", "forked_at_page_id", "root_page_id"]
   },
   "story-choice": {
     required: ["id", "story_id", "created_at_page", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "associated_commitment_block", "grounded_in"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "associated_commitment_block", "grounded_in", "success_policy"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "associated_commitment_block", "grounded_in", "success_policy"]
   }
 };
 

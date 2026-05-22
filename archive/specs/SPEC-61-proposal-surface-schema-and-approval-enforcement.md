@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** canon-related (validator + machine-facing coverage for canon-pipeline proposal/audit/pressure surfaces; no canon-semantics change)
-**Source:** `reports/world-system-consolidation-first-iteration.md` Fault 5 (verified) + the genuine sliver of Fault 2 (verified) — reassessed against `main`
+**Source:** `archive/reports/world-system-consolidation-first-iteration.md` Fault 5 (verified) + the genuine sliver of Fault 2 (verified) — reassessed against `main`
 **Depends on:** none — foundational; SPEC-62 may proceed in parallel
 **Companion:** `docs/triage/2026-05-21-world-system-consolidation-triage.md`
 

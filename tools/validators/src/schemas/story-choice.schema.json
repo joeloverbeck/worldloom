@@ -14,6 +14,7 @@
     "grounded_in"
   ],
   "properties": {
+    "record_kind": { "type": "string", "const": "choice_record" },
     "id": { "type": "string", "pattern": "^CHC-(0|[1-9][0-9]*)$" },
     "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
     "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },

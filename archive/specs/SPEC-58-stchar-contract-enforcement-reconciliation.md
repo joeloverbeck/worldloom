@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — branching-story pipeline)
-**Source:** `reports/stchar-audit-first-iteration.md` §13 C1/C2/C3/C4 (verified against `main`)
+**Source:** `archive/reports/stchar-audit-first-iteration.md` §13 C1/C2/C3/C4 (verified against `main`)
 **Depends on:** none — foundational; unblocks SPEC-59
 **Companion:** `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`
 
@@ -133,7 +133,7 @@ unconditional required key — confirm before implementing.
 ## 4. Out of Scope
 
 SPEC-58 covers only the C1–C4 contract-to-enforcement drift items from
-`reports/stchar-audit-first-iteration.md` §13. The report's remaining items are adjudicated in the
+`archive/reports/stchar-audit-first-iteration.md` §13. The report's remaining items are adjudicated in the
 companion triage record (`docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`) and routed
 as follows — none is silently dropped:
 

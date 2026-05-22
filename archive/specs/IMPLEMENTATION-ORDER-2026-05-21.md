@@ -4,7 +4,7 @@ Specs in the order they must be implemented. Later specs depend on surfaces land
 
 ## STCHAR — Story-Local Character Authority (2026-05-20)
 
-Derived from `reports/stchar-implementation-first-iteration.md` (ChatGPT-Pro), accepted-with-
+Derived from `archive/reports/stchar-implementation-first-iteration.md` (ChatGPT-Pro), accepted-with-
 modification. Both specs **supersede** the lean-fix decision in
 `docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md`.
 

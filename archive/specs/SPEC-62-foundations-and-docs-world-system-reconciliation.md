@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** canon-related (FOUNDATIONS amendments + canon-pipeline skill/doc reconciliation; no code-semantics change)
-**Source:** `reports/world-system-consolidation-first-iteration.md` Faults 1/3/4/6/9 (verified, narrowed) + §7 FOUNDATIONS recommendations — reassessed against `main`
+**Source:** `archive/reports/world-system-consolidation-first-iteration.md` Faults 1/3/4/6/9 (verified, narrowed) + §7 FOUNDATIONS recommendations — reassessed against `main`
 **Depends on:** none — independent of SPEC-61, which has **landed** (archived at `archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`); this is the doc-only complement
 **Companion:** `docs/triage/2026-05-21-world-system-consolidation-triage.md`
 

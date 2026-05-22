@@ -12,6 +12,25 @@ test("record_schema_compliance accepts complete contract-shaped BEL records", as
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts matching BEL record_kind and rejects mismatches", async () => {
+  const accepted = await recordSchemaCompliance.run(
+    {},
+    context([beliefRecord({ ...validBelief(), record_kind: "belief_record" })])
+  );
+
+  assert.deepEqual(accepted, []);
+
+  const rejected = await recordSchemaCompliance.run(
+    {},
+    context([beliefRecord({ ...validBelief(), record_kind: "story_fact_record" })])
+  );
+
+  assert.ok(rejected.some((verdict) =>
+    verdict.code === "record_schema_compliance.const" &&
+    verdict.message.includes("/record_kind")
+  ));
+});
+
 test("record_schema_compliance rejects padded BEL ids", async () => {
   const parsed = validBelief();
   parsed.id = "BEL-0001";

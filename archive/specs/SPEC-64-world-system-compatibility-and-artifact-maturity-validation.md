@@ -3,7 +3,7 @@
 **Status:** completed
 **Date:** 2026-05-21
 **Classification:** canon-related (executable validators over world-system proposal/audit/pressure/hybrid surfaces; no canon-record semantics change)
-**Source:** `reports/world-system-consolidation-first-iteration.md` §10 Validation-and-incompatibility plan (§10.1 `world_compatibility_validator`, §10.2 `artifact_maturity_validator`) + §9.5 steps 2–3 + Fault 11 — the deferred items (triage **D5**) now unblocked by SPEC-61's landed schemas + `approval-semantics` validator.
+**Source:** `archive/reports/world-system-consolidation-first-iteration.md` §10 Validation-and-incompatibility plan (§10.1 `world_compatibility_validator`, §10.2 `artifact_maturity_validator`) + §9.5 steps 2–3 + Fault 11 — the deferred items (triage **D5**) now unblocked by SPEC-61's landed schemas + `approval-semantics` validator.
 **Companion:** `docs/triage/2026-05-21-world-system-consolidation-triage.md` (D5)
 **Depends on:**
 - **SPEC-61** (landed; `archive/specs/SPEC-61-proposal-surface-schema-and-approval-enforcement.md`) — the proposal/audit/pressure/world-proposal JSON schemas and the `approval-semantics` structural validator this spec builds on. **Substrate landed.**

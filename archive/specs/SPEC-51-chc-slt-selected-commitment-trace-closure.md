@@ -3,7 +3,7 @@
 Status: COMPLETED
 Supersedes: none
 Extends/corrects: SPEC-50 (STPLAN/STEMO/CHC/SLT exploitation parity) — corrects one SPEC-50 regression (C-series affordance-ordinal), closes the existential-predicate trace SPEC-50 D.2 left static-only, and aligns skill prose SPEC-50 left partially drifted.
-Source audit: `reports/ontology-exploitation-second-iteration.md` (2026-05-20)
+Source audit: `archive/reports/ontology-exploitation-second-iteration.md` (2026-05-20)
 
 ## Problem Statement
 

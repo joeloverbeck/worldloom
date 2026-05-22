@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # Historical — superseded by the merged SPEC-58/59/60/63 STCHAR contracts; retained for audit trail
 
 ## **1\. Executive verdict**
@@ -346,7 +348,7 @@ Search for `bound_char_id` found active mentions in reports/triage plus the acti
 
 Required cleanup:
 
-* Add a “historical / superseded by current STCHAR contracts” header to active reports such as `reports/stchar-audit-first-iteration.md` and `reports/stchar-implementation-first-iteration.md` if they remain in active `reports/`.
+* Add a “historical / superseded by current STCHAR contracts” header to active reports such as `archive/reports/stchar-audit-first-iteration.md` and `archive/reports/stchar-implementation-first-iteration.md` if they remain in active `reports/`.
 * Do the same for `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md` if it mentions old assumptions.
 * Do not change the validator’s `bound_char_id` references; those are current enforcement, not stale advice.
 
@@ -458,3 +460,10 @@ Do **not** broaden every identifier union “just in case.” The correct repair
 | Commitment-block exact STCHAR scope rule | Prevents generic drift while avoiding persona rails in global author-pool blocks. |
 | Page-plan §16a no word ceiling | Aligns with prose length discipline and fictive-dream preservation. |
 | No act/arc/drama-manager additions | Preserves FOUNDATIONS schema minimalism and causal-move model. |
+
+
+---
+
+## Outcome
+
+Archived on 2026-05-22 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.

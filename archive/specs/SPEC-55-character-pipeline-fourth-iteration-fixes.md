@@ -5,7 +5,7 @@
 **Depends on:** SPEC-52 / SPEC-53 / SPEC-54 (all archived, completed 2026-05-20)
 
 Triage note: this spec is the warranted slice of the fourth-iteration audit
-`reports/deepening-characters-fourth-iteration.md` (produced by ChatGPT-Pro under
+`archive/reports/deepening-characters-fourth-iteration.md` (produced by ChatGPT-Pro under
 repository-only constraints). That report's headline "fix first" recommendation —
 broad NCP body-section heading validation — and its deterministic anti-flattening
 companion are **REJECTED** here, because they re-propose decisions deliberately made
@@ -166,7 +166,7 @@ regression tests are also missing.
 
 ## Out of Scope
 
-These items from `reports/deepening-characters-fourth-iteration.md` are **rejected** and
+These items from `archive/reports/deepening-characters-fourth-iteration.md` are **rejected** and
 recorded here so a future audit does not re-propose them:
 
 - **Broad NCP body-section heading validation** (audit High #1, the report's headline

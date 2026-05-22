@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # **1. Executive verdict**
 
 The world system is **structurally promising but dangerously under-validated and semantically overgrown**.
@@ -1231,3 +1233,10 @@ the card with a realized world.
 3. Decide whether EPE should become a fully indexed/schema-backed record type or remain a validated direct-write pressure-affordance surface.  
 4. Decide whether Mystery Reserve should add `resolution_intent` as a new field, or encode those distinctions by expanding `status`. My recommendation is a new field; it preserves the existing status/safety coupling while adding discovery semantics.
 
+
+
+---
+
+## Outcome
+
+Archived on 2026-05-22 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.
