@@ -1,21 +1,19 @@
 {
-  "originating_spec": "specs/SPEC-68-diegetic-artifact-claim-map-schema-hardening.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC68DIEARTCLA-001.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "ec0262994acfaef8781ac3b2d2c1e233be720240",
+  "originating_spec": "archive/specs/SPEC-68-diegetic-artifact-claim-map-schema-hardening.md",
+  "archived_spec": "archive/specs/SPEC-68-diegetic-artifact-claim-map-schema-hardening.md",
+  "last_ticket": "archive/tickets/SPEC68DIEARTCLA-002.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "02327daf0c1a31e164ec938c9a746ded9ab30ea7",
   "last_state_commit": "self",
-  "queue": [
-    "tickets/SPEC68DIEARTCLA-002.md"
-  ],
-  "next_target": "tickets/SPEC68DIEARTCLA-002.md",
-  "phase": "ready_for_next_ticket",
+  "queue": [],
+  "next_target": null,
+  "phase": "completed",
   "in_progress_ticket": null,
-  "owned_dirty_summary": "SPEC68DIEARTCLA-001 implemented, reviewed, archived, and committed; SPEC68DIEARTCLA-002 remains active and depends on archive/tickets/SPEC68DIEARTCLA-001.md",
+  "owned_dirty_summary": "SPEC68DIEARTCLA-001 and SPEC68DIEARTCLA-002 implemented, reviewed, archived, and committed; SPEC-68 archived",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted_no_findings",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "expected ignored artifacts from local npm install/build under tools/{world-index,patch-engine,validators}/{node_modules,dist}; tracked worktree otherwise clean after state commit",
+  "dirty_state": "expected ignored artifacts under tools/{world-index,patch-engine,validators}/{node_modules,dist}; tracked worktree clean after state commit",
   "updated_at": "2026-05-22"
 }
