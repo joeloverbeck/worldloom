@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators/src/schemas/diegetic-artifact-frontmatter.schema.json` (further tightened); extends the DA test file created by SPEC68DIEARTCLA-001. No change to `record-schema-compliance.ts`.
-**Deps**: SPEC68DIEARTCLA-001
+**Deps**: archive/tickets/SPEC68DIEARTCLA-001.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ Beyond `claim_map`, the DA frontmatter schema leaves four high-value blocks as u
 
 1. Current loose definitions in `diegetic-artifact-frontmatter.schema.json`: `author_profile` (line 60), `epistemic_horizon` (61), `world_consistency` (65), `source_basis` (66) — all `{ "type": "object" }`. `world_relation` (lines 40-49) is ALREADY strictly typed (CF-pattern arrays, `additionalProperties: false`) — not in scope. Template field shapes (`.claude/skills/diegetic-artifact-generation/templates/diegetic-artifact.md` lines 55-106): `author_profile` 15 fields (two nullable: `sex_or_gender`, `trauma_history_if_relevant`); `epistemic_horizon` 6 string-arrays; `world_consistency` `canon_facts_consulted[]` `^CF-[0-9]+$`, `invariants_respected[]` `^(ONT|CAU|DIS|SOC|AES)-[0-9]+$`, `mystery_reserve_firewall[]` `^M-[0-9]+$`, `distribution_exceptions[]` (free-string); `source_basis` `world_slug` / `brief_path` (strings), `character_path` (string|null), `generated_date` (string), `user_approved` (bool).
 2. SPEC-68 §2.3 specifies these four; §3 mandates a conformance check over on-disk DA files (report non-conformance, not auto-migrate); §6 names the regression. `user_approved` keeps its boolean shape — the report's approval-field rename was rejected at SPEC-61 triage and is out of scope.
-3. Cross-artifact boundary under audit: the conformance surface is the 4 on-disk DA files — `worlds/erotica-world/diegetic-artifacts/marla-kerns-journal-the-iker-entries.md` and `worlds/animalia/diegetic-artifacts/{after-action-report-harrowgate-contract,a-season-on-the-circuit,namahan-at-the-third-gate}.md`. Each must validate against the fully-tightened schema (001 + this ticket) or be flagged for hand-repair. World-data repair is NOT in this ticket's scope (it would edit `worlds/<slug>/`); the deliverable is the conformance *report*.
+3. Cross-artifact boundary under audit: the conformance surface includes live on-disk DA files discoverable in the active checkout under `worlds/<slug>/diegetic-artifacts/` plus checked-in validator fixture DAs under `tests/fixtures/animalia/diegetic-artifacts/`. SPEC68DIEARTCLA-001 normalized the checked-in fixture DA `claim_map` entries while leaving loose-object typing to this ticket. Each discovered DA must validate against the fully-tightened schema (archive/tickets/SPEC68DIEARTCLA-001.md + this ticket) or be flagged for hand-repair. World-data repair is NOT in this ticket's scope (it would edit `worlds/<slug>/`); the deliverable is the conformance *report*.
 4. FOUNDATIONS principle motivating this ticket: **Rule 6 (No Silent Retcons)** — typing `world_consistency.canon_facts_consulted[]` (and the invariant / MR-firewall arrays) with the id-format regex preserves the proof-of-check audit trail the DA skill records at Phase 7, mechanizing what the template comment already promises rather than leaving it prose-only.
 5. Existing output schema extended: the same DA frontmatter schema as 001; this ticket types four more blocks. Non-additive (existing DA files must conform); consumer is `record_schema_compliance`; the regression in this ticket is the conformance gate. No consumer code change.
 
@@ -51,7 +51,7 @@ Extend `record-schema-compliance-diegetic-artifact.test.ts` (created by SPEC68DI
 
 ## Out of Scope
 
-- `claim_map` typing + `if/then` (SPEC68DIEARTCLA-001).
+- `claim_map` typing + `if/then` (archive/tickets/SPEC68DIEARTCLA-001.md).
 - Hand-repairing non-conformant world DA data under `worlds/<slug>/diegetic-artifacts/` — flagged as a compatibility report; repaired by hand outside this pipeline.
 - The `user_approved` → semantic-rename taxonomy (rejected at SPEC-61 triage).
 - Any new validator.

@@ -7,6 +7,8 @@
 **Depends on:** none — independent of SPEC-69
 **Companion:** `docs/triage/2026-05-22-world-system-consolidation-second-iteration-triage.md`
 
+**Implementation note (2026-05-22, SPEC68DIEARTCLA-001):** `claim_map.items` and the `canonically_true ⇒ cf_id` / `mystery_adjacent ⇒ mr_id` schema rules landed in `tools/validators/src/schemas/diegetic-artifact-frontmatter.schema.json`. The first ticket also normalized checked-in validator/animalia DA fixtures that the package suite treats as current positive records. The remaining loose-object typing and live DA conformance regression stay with SPEC68DIEARTCLA-002.
+
 ## 1. Context
 
 `diegetic-artifact-generation` produces a richly-disciplined `claim_map`: every in-world claim
@@ -49,7 +51,7 @@ strict-clean (no unknown keywords, well-formed conditionals) or `ajv.compile` th
 
 ## 2. Changes
 
-Single file: `tools/validators/src/schemas/diegetic-artifact-frontmatter.schema.json`.
+Primary schema file: `tools/validators/src/schemas/diegetic-artifact-frontmatter.schema.json`. Implementing tickets may also update validator tests and checked-in fixture records required to prove the tightened schema.
 
 ### 2.1 Type `claim_map.items`
 

@@ -22,7 +22,17 @@ world_relation:
     - CF-0003
 author_profile: {}
 epistemic_horizon: {}
-claim_map: []
+claim_map:
+  - claim: Test author witnessed the Mudbrook audit.
+    canon_status: canonically_true
+    narrator_belief: "true"
+    source: witnessed
+    contradiction_risk: none
+    mode: direct
+    adaptive_behavior_preserved_under_wrong_ontology: false
+    cf_id: CF-0001
+    mr_id: null
+    repair_trace: null
 world_consistency: {}
 source_basis: {}
 ---

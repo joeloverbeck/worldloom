@@ -130,7 +130,7 @@ epistemic_horizon:
 claim_map:
   - claim: "I, Melissa known as 'Threadscar,' am contractor of record for this contract."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -139,7 +139,7 @@ claim_map:
     repair_trace: null
   - claim: "The contract was posted at the Harrowgate Charter Hall bounty-row at forty silver, re-posted after a second caravan-ambush."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -148,7 +148,7 @@ claim_map:
     repair_trace: null
   - claim: "Seven contractors were assembled and vouched at the Long Board at eight silver per share."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -157,7 +157,7 @@ claim_map:
     repair_trace: null
   - claim: "We tracked the trace five days through the Stone-Fork-to-Drynn corridor and found the camp in a Maker-Age ruin."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -166,7 +166,7 @@ claim_map:
     repair_trace: null
   - claim: "The ruin had been opened before; no ward markings at the lintel; no active guardian-sign on the approach — the subset bandits work from by preference."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -175,7 +175,7 @@ claim_map:
     repair_trace: null
   - claim: "Four sentries at the outer ring, all carnivore-folk, killed at the hour before dawn."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -184,7 +184,7 @@ claim_map:
     repair_trace: null
   - claim: "The first chamber was a preparation-floor with three bodies hung, three heads in display-line, one cooked body on side-slab, a scrap-pit; some victims bore restraint-marks indicating captive-held-before-killed."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: soft
     mode: direct
@@ -193,7 +193,7 @@ claim_map:
     repair_trace: null
   - claim: "Six bandits in the second chamber including the leader; Tulen and Auveth killed in the exchange."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -202,7 +202,7 @@ claim_map:
     repair_trace: null
   - claim: "I killed the bandit leader with the longsword on one exchange, stroke under the collarbone."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -211,25 +211,27 @@ claim_map:
     repair_trace: null
   - claim: "The leader shouted — thrice on the approach — that we were 'nothing to him but meat on a slow day.'"
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: soft
     mode: direct
     cf_id: CF-0036
     mr_id: null
-    repair_trace: "Register-discipline check: reported as direct speech-act observation (CF-0036 in-register 'eater-band' flat-named fringe speaker-attributed quote). NOT exposition of doctrine register. Phase 7d.4 check passed first-pass; no repair fired."
+    repair_trace:
+      note: "Register-discipline check: reported as direct speech-act observation (CF-0036 in-register 'eater-band' flat-named fringe speaker-attributed quote). NOT exposition of doctrine register. Phase 7d.4 check passed first-pass; no repair fired."
   - claim: "The band was composed exclusively of carnivore-folk. This is a fact of the band, not a fact about carnivore-folk."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: soft
     mode: direct
     cf_id: CF-0036
     mr_id: null
-    repair_trace: "Phase 7d.3 local-as-global check: author explicitly narrator-disclaims generalization ('fact of the band, not a fact about carnivore-folk'); SOC-1 firewall preserved at narrator-level as well as world-level."
+    repair_trace:
+      note: "Phase 7d.3 local-as-global check: author explicitly narrator-disclaims generalization ('fact of the band, not a fact about carnivore-folk'); SOC-1 firewall preserved at narrator-level as well as world-level."
   - claim: "The third chamber held mundane caravan-gear; no artifacts."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -238,7 +240,7 @@ claim_map:
     repair_trace: null
   - claim: "On return, the senior hunter-officer paused intake and dispatched a runner for the magistrate's second and clergy-witness."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -247,7 +249,7 @@ claim_map:
     repair_trace: null
   - claim: "The officials suspected the band's working-habit before my report — the re-classification notice was already on the magistrate's second's desk."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -256,7 +258,7 @@ claim_map:
     repair_trace: null
   - claim: "The classification was entered as grave-violation-of-person, sealed-access to magistrate-warrant only, civic-oath burial without public ceremony with family rites permitted privately, and the ruin-sign burned before thaw-moon close."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -265,7 +267,7 @@ claim_map:
     repair_trace: null
   - claim: "An additional sixteen-silver silent-settlement clause was added at delivery; total fifty-six silver, eight per share, shares for the two dead paid to kin-of-record per CF-0024 standard."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
@@ -274,13 +276,14 @@ claim_map:
     repair_trace: null
   - claim: "I do not agree with the public-silence order in all particulars, but I will keep it because the coin is fair and the cost of the alternative is what they said it is."
     canon_status: contested
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: soft
     mode: direct
     cf_id: null
     mr_id: null
-    repair_trace: "Phase 7d.4 tag: narrator's personal disagreement with institutional protocol = reasoned-position narrator-belief, not supremacist-register not conspiracy-register; silence-protocol IS canonically-applied standard practice (CF-0036); disagreement is narrator-level opinion not world-truth claim."
+    repair_trace:
+      note: "Phase 7d.4 tag: narrator's personal disagreement with institutional protocol = reasoned-position narrator-belief, not supremacist-register not conspiracy-register; silence-protocol IS canonically-applied standard practice (CF-0036); disagreement is narrator-level opinion not world-truth claim."
   - claim: "I am not equipped to say whether this band had picked the register up from a sectarian preacher, invented it themselves, or came to it along with the corridor-habit. I heard him shout what he shouted."
     canon_status: mystery_adjacent
     narrator_belief: uncertain
@@ -289,19 +292,21 @@ claim_map:
     mode: direct
     cf_id: null
     mr_id: M-16
-    repair_trace: "M-16 firewall observed by explicit narrator-decline of origin resolution (ancient / recent / perennial)."
+    repair_trace:
+      note: "M-16 firewall observed by explicit narrator-decline of origin resolution (ancient / recent / perennial)."
   - claim: "Bands of this working-habit do not survive in one corridor without having been recruited from a feeder, and the feeder does not close with one suppression."
     canon_status: partially_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: inherited_tradition
     contradiction_risk: soft
     mode: direct
     cf_id: CF-0034
     mr_id: null
-    repair_trace: "Scope-local per Phase 7d.3: the claim is corridor-local applied to Stone-Fork-to-Drynn stretch (M-17 firewall — no continent-wide prevalence claim). Source 'inherited_tradition' reflects contractor-stratum professional folklore accumulated over rotations."
+    repair_trace:
+      note: "Scope-local per Phase 7d.3: the claim is corridor-local applied to Stone-Fork-to-Drynn stretch (M-17 firewall — no continent-wide prevalence claim). Source 'inherited_tradition' reflects contractor-stratum professional folklore accumulated over rotations."
   - claim: "Hunter-contractors bought into future postings on this stretch should be vouched for corridor-familiarity — the work-register inside the ruin is not the register a first-rotation contractor should be asked to read."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: inherited_tradition
     contradiction_risk: none
     mode: direct
@@ -635,7 +640,7 @@ No distribution exceptions required. `world_consistency.distribution_exceptions:
 - **7d.1 No silent canon creation**: PASS — new entities introduced (Harrowgate, Stone-Fork crossroads, Upper Drynn pass, Drynn waterstation, Long Board tavern, the six contractor names Gresh/Tulen/Rennek/Morn/Auveth/Karn, the leader's belt-buckle) are all author-personal-scope or Harrowgate-local-scope per OPEN_QUESTIONS §Place and Polity Naming local-resolution allowance; no new gods, polities, rituals, species-clusters, or institutional-categories introduced.
 - **7d.2 No restricted-knowledge leakage**: PASS — "no ward markings at the lintel" is CAU-3 public-knowledge-layer only (wards are publicly recognized); no inscription pattern, no material composition, no maintenance schedule described. No CF-0021 guild-internal vessel-preparation vocabulary. No CF-0023 Maker-Age linguistic material. "grave-violation-of-person" is CF-0036 in-register euphemistic term she learned from the officials in the closed-room briefing — institutional access warranted.
 - **7d.3 No local-as-global by accident**: PASS — Melissa narrator-explicitly-disclaims species-generalization ("The composition of the band is a fact of the band. It is not a fact about carnivore-folk. Carnivore-folk made up four of the seven contractors who killed this band"). Recommendations explicitly corridor-scoped. No continent-wide claim. CF-0036 SOC-1 firewall reinforced at narrator-register.
-- **7d.4 No untagged intentional contradiction**: PASS — Melissa's disagreement with the silence-protocol is tagged in claim_map as `canon_status: contested, narrator_belief: true` — it is a narrator-level opinion on a world-level canonical procedure, not a world-level contradiction. The silence-protocol IS canonically-applied per CF-0036; she complies while personally disagreeing. No performed-falsehood, no propaganda, no world-level-negation.
+- **7d.4 No untagged intentional contradiction**: PASS — Melissa's disagreement with the silence-protocol is tagged in claim_map as `canon_status: contested, narrator_belief: "true"` — it is a narrator-level opinion on a world-level canonical procedure, not a world-level contradiction. The silence-protocol IS canonically-applied per CF-0036; she complies while personally disagreeing. No performed-falsehood, no propaganda, no world-level-negation.
 
 ### Phase 7e: Truth Discipline Sub-Check
 
