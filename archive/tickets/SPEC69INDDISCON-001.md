@@ -54,7 +54,7 @@ Added focused structural tests for slug-surface artifact-missing, slug-surface m
 
 - `tools/validators/src/structural/index-disk-consistency.ts` (modified)
 - `tools/validators/tests/structural/index-disk-consistency.test.ts` (modified)
-- `specs/SPEC-69-index-disk-consistency-coverage-extension.md` (modified with implementation note)
+- `archive/specs/SPEC-69-index-disk-consistency-coverage-extension.md` (modified with implementation note)
 
 ## Out of Scope
 

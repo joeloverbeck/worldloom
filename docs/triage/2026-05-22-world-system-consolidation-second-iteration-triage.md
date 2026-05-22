@@ -3,7 +3,7 @@
 **Date:** 2026-05-22
 **Source report:** `archive/reports/world-system-consolidation-second-iteration.md` (ChatGPT-Pro)
 **Triage method:** every claim verified against `main` via parallel codebase exploration; verdicts grounded in code/contract/FOUNDATIONS, not the report's self-assessment.
-**Deliverables:** `specs/SPEC-68` (Fault 3, corrected), `specs/SPEC-69` (Fault 6, corrected). `specs/IMPLEMENTATION-ORDER.md` created.
+**Deliverables:** `archive/specs/SPEC-68` (Fault 3, corrected), `archive/specs/SPEC-69` (Fault 6, corrected). `specs/IMPLEMENTATION-ORDER.md` created and now records the completed batch.
 
 ## Headline finding — the report is substantially stale
 
