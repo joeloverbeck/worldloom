@@ -7,6 +7,10 @@ import test from "node:test";
 
 import Database from "better-sqlite3";
 import yaml from "js-yaml";
+import {
+  computeStcharProfileHash,
+  computeStcharVoiceBlockHash
+} from "@worldloom/world-index/hash/content";
 
 const cliPath = path.resolve(process.cwd(), "dist/src/cli/world-validate.js");
 
@@ -196,14 +200,20 @@ function storyRecord(nodeType: string, id: string, sourceDir: string, body: Reco
   };
 }
 
-function storyHybridRecord(nodeType: string, id: string, sourceDir: string, body: Record<string, unknown>): FixtureRecord {
+function storyHybridRecord(
+  nodeType: string,
+  id: string,
+  sourceDir: string,
+  body: Record<string, unknown>,
+  bodyMarkdown = stcharBodyMarkdown()
+): FixtureRecord {
   return {
     node_id: id,
     story_slug: "test-bundle",
     file_path: `stories/test-bundle/${sourceDir}/${id}.md`,
     node_type: nodeType,
     body,
-    body_markdown: stcharBodyMarkdown()
+    body_markdown: bodyMarkdown
   };
 }
 
@@ -266,6 +276,7 @@ function entity(id: string, createdAtPage: string, displayName: string): Fixture
 }
 
 function stchar(id: string, stentId: string): FixtureRecord {
+  const bodyMarkdown = stcharBodyMarkdown();
   return storyHybridRecord("story_character_authority_record", id, "story-characters", {
     id,
     story_id: "STORY-1",
@@ -283,10 +294,10 @@ function stchar(id: string, stentId: string): FixtureRecord {
     bound_stent_ids: [stentId],
     profile_revision: 1,
     body_schema_version: "stchar.v1",
-    profile_hash: "sha256:" + "a".repeat(64),
-    voice_block_hash: "sha256:" + "b".repeat(64),
+    profile_hash: `sha256:${computeStcharProfileHash(bodyMarkdown)}`,
+    voice_block_hash: `sha256:${computeStcharVoiceBlockHash(bodyMarkdown)}`,
     page_packet_hash: "sha256:" + "c".repeat(64)
-  });
+  }, bodyMarkdown);
 }
 
 function storylet(id: string): FixtureRecord {
