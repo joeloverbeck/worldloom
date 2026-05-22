@@ -4,7 +4,22 @@ import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, string
 
 const VALIDATOR = "thread_introduction_grounding_integrity";
 const THREAD_CREATE_OPS = new Set(["create_se_record", "create_pg_record", "create_thr_record"]);
-const ALLOWED_GROUNDING_PREFIXES = new Set(["SE", "SF", "BEL", "OBL", "CNSQ", "STINT", "SREL", "DA"]);
+const ALLOWED_GROUNDING_PREFIXES = new Set([
+  "SE",
+  "SF",
+  "BEL",
+  "OBL",
+  "CNSQ",
+  "STINT",
+  "SREL",
+  "DA",
+  "CLK",
+  "STSEC",
+  "STQ",
+  "STSTAT",
+  "STPLAN",
+  "STEMO"
+]);
 
 export const threadIntroductionGroundingIntegrity: Validator = {
   name: VALIDATOR,

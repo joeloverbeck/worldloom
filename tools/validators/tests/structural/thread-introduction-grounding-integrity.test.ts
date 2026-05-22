@@ -59,10 +59,21 @@ test("thread_introduction_grounding_integrity rejects introduced THR with disall
   assert.deepEqual(verdicts.map((verdict) => verdict.code), ["thread_intro_grounding_missing"]);
 });
 
+test("thread_introduction_grounding_integrity accepts active SPEC-42 and SPEC-47 causal grounding records", async () => {
+  const records = baseRecords([
+    event("SE-2", { create: ["THR-93"] }),
+    thread("THR-93", { derived_from: ["CLK-1", "STSEC-1", "STQ-1", "STSTAT-1", "STPLAN-1", "STEMO-1"] })
+  ]);
+
+  const verdicts = await threadIntroductionGroundingIntegrity.run(undefined, testContext(records));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("thread_introduction_grounding_integrity accepts same-event-created grounding records", async () => {
   const records = baseRecords([
-    event("SE-2", { create: ["THR-92", "BEL-2", "DA-2"] }),
-    thread("THR-92", { derived_from: ["SE-2", "BEL-2", "DA-2"] }),
+    event("SE-2", { create: ["THR-92", "BEL-2", "DA-2", "CLK-2", "STSEC-2", "STQ-2", "STSTAT-2", "STPLAN-2", "STEMO-2"] }),
+    thread("THR-92", { derived_from: ["SE-2", "BEL-2", "DA-2", "CLK-2", "STSEC-2", "STQ-2", "STSTAT-2", "STPLAN-2", "STEMO-2"] }),
     belief("BEL-2"),
     artifact("DA-2")
   ]);
@@ -139,6 +150,12 @@ function baseRecords(records: IndexedRecord[]): IndexedRecord[] {
       STENT: ["STENT-1"],
       THR: ["THR-1"],
       BEL: ["BEL-1"],
+      CLK: ["CLK-1"],
+      STSEC: ["STSEC-1"],
+      STQ: ["STQ-1"],
+      STSTAT: ["STSTAT-1"],
+      STPLAN: ["STPLAN-1"],
+      STEMO: ["STEMO-1"],
       DA: ["DA-1"],
       OBL: [],
       CNSQ: [],
