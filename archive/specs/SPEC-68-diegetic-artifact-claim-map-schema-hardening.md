@@ -1,6 +1,6 @@
 # SPEC-68 — Diegetic-Artifact Claim-Map & Loose-Object Schema Hardening
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-05-22
 **Classification:** canon-related (tightens the schema consumed by `record_schema_compliance` over the DA realized-hybrid surface; mechanizes existing skill discipline; no canon-semantics change)
 **Source:** `reports/world-system-consolidation-second-iteration.md` Fault 3 + Recommendation 3 — **corrected** at triage against `main` (the report's proposed `DAC-*` schema is misaligned with the real artifact and is NOT adopted; see §Out of Scope)
@@ -139,3 +139,17 @@ as a boolean (no rename — see §Out of Scope). `genre_conventions` may also be
 - Regression: run `record_schema_compliance` over every existing on-disk DA file; all must pass or be
   reported for hand-repair (no green-by-relaxation).
 - `npm run build` + `npm test` in `tools/validators` green before completion.
+
+## Outcome
+
+Completed: 2026-05-22.
+
+SPEC-68 landed through `archive/tickets/SPEC68DIEARTCLA-001.md` and `archive/tickets/SPEC68DIEARTCLA-002.md`. The DA frontmatter schema now types `claim_map.items`, enforces `canonically_true ⇒ cf_id` and `mystery_adjacent ⇒ mr_id`, and tightens `genre_conventions`, `author_profile`, `epistemic_horizon`, `world_consistency`, and `source_basis` to the live diegetic-artifact template shape. The implementation stayed inside the existing `record_schema_compliance` Ajv path; no separate DA validator was added.
+
+Checked-in DA positive fixtures were truthed to the current template where the stricter schema exposed old drift. The final conformance regression covered the three visible checked-in DA markdown records in this worktree; no active `worlds/<slug>/diegetic-artifacts/*.md` files were present, and no private/live world data was edited.
+
+Verification:
+
+- `node --test dist/tests/structural/record-schema-compliance-diegetic-artifact.test.js` from `tools/validators` — PASS, 7/7 subtests.
+- `node --test dist/tests/structural/record-schema-compliance.test.js dist/tests/structural/record-schema-compliance-diegetic-artifact.test.js` from `tools/validators` — PASS, 41/41 subtests.
+- `npm test` from `tools/validators` — PASS, 861/861 tests.
