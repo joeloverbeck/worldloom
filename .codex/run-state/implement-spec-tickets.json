@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-71-strip-stchar-tamper-hashes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC71STRSTCHARTAM-004.md",
+  "last_ticket": "archive/tickets/SPEC71STRSTCHARTAM-005.md",
   "last_result": "completed_archived",
-  "last_work_commit": "adc9bd4ec3c9c05dc52217add5892d1c00a2b1cc",
+  "last_work_commit": "a6873e25d5876b0f539002f5c81a2a5cc36f1795",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC71STRSTCHARTAM-005.md",
+  "next_target": "tickets/SPEC71STRSTCHARTAM-006.md",
   "queue": [
-    "tickets/SPEC71STRSTCHARTAM-005.md",
     "tickets/SPEC71STRSTCHARTAM-006.md",
     "tickets/SPEC71STRSTCHARTAM-007.md",
     "tickets/SPEC71STRSTCHARTAM-008.md"
