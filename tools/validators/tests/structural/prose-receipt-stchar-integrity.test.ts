@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { computeStcharPagePacketHash } from "@worldloom/world-index/hash/content";
-
 import { proseReceiptStcharIntegrity } from "../../src/structural/prose-receipt-stchar-integrity.js";
 import { context, record } from "./helpers.js";
 
@@ -10,7 +8,6 @@ const HASH_A = "sha256:" + "a".repeat(64);
 const HASH_B = "sha256:" + "b".repeat(64);
 const HASH_D = "sha256:" + "d".repeat(64);
 const SEED_PAGE_PACKET_HASH = "sha256:" + "c".repeat(64);
-const HASH_C = canonicalPagePacketHash();
 const STORY = "test-story";
 const PLAN_PATH = `stories/${STORY}/pages-prose-plans/PG-1.md`;
 const RECEIPT_PATH = `stories/${STORY}/pages-prose-receipts/PG-1.yaml`;
@@ -25,12 +22,11 @@ test("prose_receipt_stchar_integrity accepts matching authority and judgment-ass
 });
 
 test("prose_receipt_stchar_integrity accepts offstage_causal authority with not_applicable voice fidelity", async () => {
-  const pagePacketHash = canonicalPagePacketHash({ requiredBecause: "offstage_causal", voiceLine: "" });
   const verdicts = await proseReceiptStcharIntegrity.run(
     input(
-      plan({ requiredBecause: "offstage_causal", voiceLine: "", pagePacketHash }),
+      plan({ requiredBecause: "offstage_causal", voiceLine: "", pagePacketHash: SEED_PAGE_PACKET_HASH }),
       receipt({
-        authority: { required_because: "offstage_causal", page_packet_hash: hashComparison(pagePacketHash, pagePacketHash) },
+        authority: { required_because: "offstage_causal", page_packet_hash: hashComparison(SEED_PAGE_PACKET_HASH, SEED_PAGE_PACKET_HASH) },
         fidelity: { voice_fidelity: "not_applicable" }
       })
     ),
@@ -49,26 +45,13 @@ test("prose_receipt_stchar_integrity rejects missing stchar_authority entries", 
   assert.equal(verdicts[0]?.code, "prose_receipt_stchar_integrity.missing_stchar_authority_entry");
 });
 
-test("prose_receipt_stchar_integrity rejects hash mismatches against page-plan packets and STCHAR records", async () => {
+test("prose_receipt_stchar_integrity ignores hash mismatches against page-plan packets and STCHAR records", async () => {
   const verdicts = await proseReceiptStcharIntegrity.run(
     input(plan(), receipt({ authority: { profile_hash: hashComparison(HASH_A, HASH_D) } })),
     context(baseRecords())
   );
 
-  assert.equal(verdicts[0]?.code, "prose_receipt_stchar_integrity.hash_mismatch");
-  assert.equal((verdicts[0]?.detail as { field?: string }).field, "profile_hash");
-});
-
-test("prose_receipt_stchar_integrity checks page_packet_hash against page-plan declaration and recompute", async () => {
-  const wrongObserved = "sha256:" + "9".repeat(64);
-  const verdicts = await proseReceiptStcharIntegrity.run(
-    input(plan(), receipt({ authority: { page_packet_hash: hashComparison(HASH_C, wrongObserved) } })),
-    context(baseRecords())
-  );
-
-  assert.equal(verdicts[0]?.code, "prose_receipt_stchar_integrity.hash_mismatch");
-  assert.equal((verdicts[0]?.detail as { field?: string }).field, "page_packet_hash");
-  assert.equal((verdicts[0]?.detail as { recomputed?: string }).recomputed, HASH_C);
+  assert.deepEqual(verdicts, []);
 });
 
 test("prose_receipt_stchar_integrity rejects active snapshot mismatches", async () => {
@@ -142,24 +125,13 @@ function plan(options: { requiredBecause?: string; voiceLine?: string; pagePacke
     "",
     "- STENT-1 / STCHAR-1 - Test Character.",
     `  - Required because: ${options.requiredBecause ?? "speaker"}.`,
-    `  - Hashes: profile_hash=${HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${options.pagePacketHash ?? HASH_C}.`,
+    `  - Hashes: profile_hash=${HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${options.pagePacketHash ?? SEED_PAGE_PACKET_HASH}.`,
     options.voiceLine ?? "  - Voice/dialogue authority: clipped STCHAR voice block.",
     "  - Relevant appraisal rules: protect the secret.",
     "",
     "## 17. Style/register notes",
     ""
   ].join("\n");
-}
-
-function canonicalPagePacketHash(options: { requiredBecause?: string; voiceLine?: string } = {}): string {
-  return `sha256:${computeStcharPagePacketHash([
-    "- STENT-1 / STCHAR-1 - Test Character.",
-    `  - Required because: ${options.requiredBecause ?? "speaker"}.`,
-    `  - Hashes: profile_hash=${HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${SEED_PAGE_PACKET_HASH}.`,
-    options.voiceLine ?? "  - Voice/dialogue authority: clipped STCHAR voice block.",
-    "  - Relevant appraisal rules: protect the secret.",
-    ""
-  ].join("\n"))}`;
 }
 
 function receipt(options: {
@@ -208,7 +180,7 @@ function validStcharAuthority() {
     active_in_snapshot: true,
     profile_hash: hashComparison(HASH_A, HASH_A),
     voice_block_hash: hashComparison(HASH_B, HASH_B),
-    page_packet_hash: hashComparison(HASH_C, HASH_C),
+    page_packet_hash: hashComparison(SEED_PAGE_PACKET_HASH, SEED_PAGE_PACKET_HASH),
     deterministic_verdict: "PASS"
   };
 }

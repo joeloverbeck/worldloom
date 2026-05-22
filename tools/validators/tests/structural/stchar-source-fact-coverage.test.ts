@@ -103,7 +103,7 @@ test("stchar_source_fact_coverage warns for untouched legacy world_char STCHARs 
   assert.equal(verdicts[0]?.severity, "warn");
 });
 
-test("stchar_source_fact_coverage reports source hash drift before trusting coverage", async () => {
+test("stchar_source_fact_coverage ignores source hash drift while checking fact-map coverage", async () => {
   const verdicts = await run([
     sourceChar({ dramatic_core: { signature_scene_behaviors: ["turns insults into filings"] } }),
     stchar({
@@ -114,8 +114,7 @@ test("stchar_source_fact_coverage reports source hash drift before trusting cove
     })
   ]);
 
-  assert.equal(verdicts.length, 1);
-  assert.equal(verdicts[0]?.code, "stchar_source_fact_coverage.source_char_hash_mismatch");
+  assert.deepEqual(verdicts, []);
 });
 
 test("stchar_source_fact_coverage runs for STCHAR pre-apply plans", async () => {

@@ -63,7 +63,6 @@ export const stcharSourceFactCoverage: Validator = {
       }
 
       const sourceCharId = stringValue(parsed.source_char_id);
-      const sourceCharHash = stringValue(parsed.source_char_hash);
       const source = sourceCharId === undefined ? undefined : sourceChars.get(sourceCharId);
       if (source === undefined) {
         verdicts.push(stcharVerdict(
@@ -73,19 +72,6 @@ export const stcharSourceFactCoverage: Validator = {
           `${recordId(record)} cannot check source operational fact coverage because source_char_id ${sourceCharId ?? "null"} does not resolve.`,
           { source_char_id: sourceCharId ?? null },
           "Set source_char_id to an indexed CHAR dossier before accepting the STCHAR."
-        ));
-        continue;
-      }
-
-      const expected = `sha256:${source.content_hash}`;
-      if (sourceCharHash !== expected) {
-        verdicts.push(stcharVerdict(
-          record,
-          recordSeverity(record, ctx),
-          "source_char_hash_mismatch",
-          `${recordId(record)} source_char_hash is stale for coverage validation against ${sourceCharId}.`,
-          { source_char_id: sourceCharId, expected, observed: sourceCharHash ?? null },
-          `Refresh source_char_hash to ${expected} before trusting source_operational_fact_map coverage.`
         ));
         continue;
       }

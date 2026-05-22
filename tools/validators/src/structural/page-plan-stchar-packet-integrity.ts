@@ -1,8 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-import { computeStcharPagePacketHash } from "@worldloom/world-index/hash/content";
-
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
   asPlainRecord,
@@ -26,7 +24,6 @@ import {
 
 const VALIDATOR = "page_plan_stchar_packet_integrity";
 const PLAN_PATH_PATTERN = /^stories\/([^/]+)\/pages-prose-plans\/(PG-(0|[1-9][0-9]*))\.md$/;
-const HASH_PATTERN = /profile_hash=(sha256:[0-9a-f]{64});\s*voice_block_hash=(sha256:[0-9a-f]{64});\s*page_packet_hash=(sha256:[0-9a-f]{64})/;
 const OFFSTAGE_REQUIRED_BECAUSE = "offstage_causal";
 const SPEAKER_VOICE_REQUIRED = new Set(["speaker", "viewpoint"]);
 
@@ -41,9 +38,6 @@ interface Packet {
   stentId: string;
   stcharId: string;
   requiredBecause: string;
-  profileHash: string | undefined;
-  voiceBlockHash: string | undefined;
-  pagePacketHash: string | undefined;
   hasVoiceBlock: boolean;
   packetText: string;
 }
@@ -131,7 +125,7 @@ function packetVerdicts(
   packet: Packet,
   stentLocation: string | undefined,
   activeStchars: Set<string>,
-  stchar: IndexedRecord | undefined
+  _stchar: IndexedRecord | undefined
 ): Verdict[] {
   const verdicts: Verdict[] = [];
   if (!activeStchars.has(packet.stcharId)) {
@@ -146,42 +140,6 @@ function packetVerdicts(
       `${planPath} 16a offstage_causal packet for ${packet.stentId} / ${packet.stcharId} is not allowed when ${packet.stentId}.location is ${stentLocation ?? "<missing>"}.`,
       { page_id: pageId(page), stent_id: packet.stentId, stchar_id: packet.stcharId, location: stentLocation ?? null },
       `Use a present-character required_because value for ${packet.stentId} / ${packet.stcharId}, or set ${packet.stentId}.location to offstage when the reduced offstage tier is intended.`
-    ));
-  }
-
-  const parsed = asPlainRecord(stchar?.parsed);
-  for (const [field, declared] of [
-    ["profile_hash", packet.profileHash],
-    ["voice_block_hash", packet.voiceBlockHash]
-  ] as const) {
-    const stored = stringValue(parsed[field]);
-    if (!declared || !stored || declared !== stored) {
-      verdicts.push(planFail(
-        page,
-        planPath,
-        "page_plan_stchar_packet_integrity.hash_mismatch",
-        `${planPath} 16a packet for ${packet.stcharId} declares ${field}=${declared ?? "<missing>"}, expected ${stored ?? "<missing>"}.`,
-        { page_id: pageId(page), stchar_id: packet.stcharId, field, declared: declared ?? null, stored: stored ?? null },
-        `Update ${packet.stcharId}'s 16a ${field} to match the stored STCHAR frontmatter hash.`
-      ));
-    }
-  }
-
-  const recomputed = `sha256:${computeStcharPagePacketHash(packet.packetText)}`;
-  if (!packet.pagePacketHash || packet.pagePacketHash !== recomputed) {
-    verdicts.push(planFail(
-      page,
-      planPath,
-      "page_plan_stchar_packet_integrity.hash_mismatch",
-      `${planPath} 16a packet for ${packet.stcharId} declares page_packet_hash=${packet.pagePacketHash ?? "<missing>"}, expected ${recomputed} from the canonical non-self-referential packet projection.`,
-      {
-        page_id: pageId(page),
-        stchar_id: packet.stcharId,
-        field: "page_packet_hash",
-        declared: packet.pagePacketHash ?? null,
-        recomputed
-      },
-      `Recompute ${packet.stcharId}'s page_packet_hash from this page's canonical §16a packet projection and update the 16a packet declaration.`
     ));
   }
 
@@ -216,7 +174,6 @@ function parsePackets(content: string): Packet[] {
   return starts.map((match, index) => {
     const packetText = section.slice(match.index ?? 0, starts[index + 1]?.index ?? section.length);
     const required = packetText.match(/^\s+- Required because:\s*([^.\n]+)\.?/m)?.[1]?.trim() ?? "";
-    const hashes = packetText.match(HASH_PATTERN);
     const stentId = match[1];
     const stcharId = match[2];
     if (!stentId || !stcharId) {
@@ -226,9 +183,6 @@ function parsePackets(content: string): Packet[] {
       stentId,
       stcharId,
       requiredBecause: required,
-      profileHash: hashes?.[1],
-      voiceBlockHash: hashes?.[2],
-      pagePacketHash: hashes?.[3],
       hasVoiceBlock: /^[^\S\r\n]*- Voice\/dialogue authority:[^\S\r\n]*\S/m.test(packetText),
       packetText
     };

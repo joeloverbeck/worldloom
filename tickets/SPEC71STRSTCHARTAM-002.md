@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/schemas` (STCHAR + prose-receipt), `prose-receipt-schema-compliance`, `tools/patch-engine` STCHAR ops + envelope schema, `tools/validators/src/_helpers/index-access.ts`.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC71STRSTCHARTAM-001.md
 
 ## Problem
 

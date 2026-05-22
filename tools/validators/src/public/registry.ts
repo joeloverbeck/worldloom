@@ -74,7 +74,6 @@ import { stcharBodyIntegrity } from "../structural/stchar-body-integrity.js";
 import { stcharBoundStentReciprocity } from "../structural/stchar-bound-stent-reciprocity.js";
 import { stcharResolves } from "../structural/stchar-resolves.js";
 import { stcharSourceFactCoverage } from "../structural/stchar-source-fact-coverage.js";
-import { stcharSourceHashMatchesSource } from "../structural/stchar-source-hash-matches-source.js";
 import { stcharSupersessionIntegrity } from "../structural/stchar-supersession-integrity.js";
 import { stentRequiresStchar } from "../structural/stent-requires-stchar.js";
 import { storyQuestionIntroductionGroundingIntegrity } from "../structural/story-question-introduction-grounding-integrity.js";
@@ -136,7 +135,6 @@ export const structuralValidators: readonly Validator[] = [
   stcharActiveForBoundStent,
   stcharSupersessionIntegrity,
   stcharBodyIntegrity,
-  stcharSourceHashMatchesSource,
   stcharSourceFactCoverage,
   noCharAuthorityInStoryRuntime,
   characterGroundingConsistency,

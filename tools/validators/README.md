@@ -70,7 +70,6 @@ Structural validators:
 - `stchar_active_for_bound_stent`
 - `stchar_supersession_integrity`
 - `stchar_body_integrity`
-- `stchar_source_hash_matches_source`
 - `stchar_source_fact_coverage`
 - `no_char_authority_in_story_runtime`
 - `character_grounding_consistency`
