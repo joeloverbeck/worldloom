@@ -6,12 +6,26 @@ import {
   computeStcharVoiceBlockHash
 } from "@worldloom/world-index/hash/content";
 
-import { REQUIRED_STCHAR_SECTIONS, stcharBodyIntegrity } from "../../src/structural/stchar-body-integrity.js";
+import type { PatchPlanEnvelope } from "../../src/framework/types.js";
+import {
+  REQUIRED_STCHAR_SECTIONS,
+  REQUIRED_STCHAR_SUBSECTIONS,
+  stcharBodyIntegrity
+} from "../../src/structural/stchar-body-integrity.js";
 import { context, record } from "./helpers.js";
 
 const STORY = "test-story";
 const HASH = `sha256:${"a".repeat(64)}`;
 const FILE_PATH = `stories/${STORY}/story-characters/STCHAR-1.md`;
+interface BodyOptions {
+  omit?: string;
+  duplicate?: string;
+  empty?: string;
+  omitSubsection?: string;
+  duplicateSubsection?: string;
+  emptySubsection?: string;
+  legacyNoSubsections?: boolean;
+}
 
 test("stchar_body_integrity accepts complete exactly-once STCHAR body sections", async () => {
   const verdicts = await run(body());
@@ -44,6 +58,50 @@ test("stchar_body_integrity rejects empty Page-Plan Voice Block", async () => {
 
   assert.ok(verdicts.some((verdict) => verdict.code === "stchar_body_integrity.empty_section"));
   assert.ok(verdicts.some((verdict) => verdict.message.includes("Page-Plan Voice Block")));
+});
+
+test("stchar_body_integrity rejects missing required STCHAR operational-home subsections for new records", async () => {
+  const verdicts = await run(body({ omitSubsection: "Operational capabilities and affordances" }), {}, {
+    run_mode: "pre-apply",
+    patch_plan: stcharPatchPlan()
+  });
+
+  const missing = verdicts.find((verdict) => verdict.code === "stchar_body_integrity.missing_subsection");
+  assert.ok(missing);
+  assert.equal(missing.severity, "fail");
+  assert.match(missing.message, /Operational capabilities and affordances/);
+});
+
+test("stchar_body_integrity warns for untouched legacy STCHAR bodies without operational-home subsections", async () => {
+  const verdicts = await run(body({ legacyNoSubsections: true }));
+
+  const missing = verdicts.filter((verdict) => verdict.code === "stchar_body_integrity.missing_subsection");
+  assert.equal(missing.length, 3);
+  assert.ok(missing.every((verdict) => verdict.severity === "warn"));
+});
+
+test("stchar_body_integrity rejects empty required operational-home subsections", async () => {
+  const verdicts = await run(body({ emptySubsection: "Signature scene behaviors to render" }), {}, {
+    run_mode: "pre-apply",
+    patch_plan: stcharPatchPlan()
+  });
+
+  const empty = verdicts.find((verdict) => verdict.code === "stchar_body_integrity.empty_subsection");
+  assert.ok(empty);
+  assert.equal(empty.severity, "fail");
+  assert.match(empty.message, /Signature scene behaviors to render/);
+});
+
+test("stchar_body_integrity accepts migrated body subsections with canonical profile hash", async () => {
+  const migratedBody = body();
+  const verdicts = await run(migratedBody, {
+    profile_hash: `sha256:${computeStcharProfileHash(migratedBody)}`
+  }, {
+    run_mode: "pre-apply",
+    patch_plan: stcharPatchPlan()
+  });
+
+  assert.deepEqual(verdicts, []);
 });
 
 test("stchar_body_integrity rejects malformed STCHAR hash frontmatter", async () => {
@@ -93,11 +151,15 @@ test("stchar_body_integrity runs for append_story_character_authority_record pre
   })), true);
 });
 
-async function run(markdownBody: string, overrides: Record<string, unknown> = {}) {
+async function run(
+  markdownBody: string,
+  overrides: Record<string, unknown> = {},
+  contextOverrides: Parameters<typeof context>[1] = {}
+) {
   const stchar = stcharRecord(markdownBody, overrides);
   return stcharBodyIntegrity.run({
     files: [{ path: FILE_PATH, content: hybrid(stchar.parsed as Record<string, unknown>, markdownBody) }]
-  }, context([stchar]));
+  }, context([stchar], contextOverrides));
 }
 
 function stcharRecord(markdownBody: string, overrides: Record<string, unknown> = {}) {
@@ -146,11 +208,48 @@ function formatYamlValue(value: unknown): string {
   return JSON.stringify(value);
 }
 
-function body(options: { omit?: string; duplicate?: string; empty?: string } = {}): string {
+function stcharPatchPlan(): PatchPlanEnvelope {
+  return {
+    plan_id: "plan-stchar-body-integrity",
+    target_world: "test",
+    approval_token: "token",
+    verdict: "ACCEPT",
+    originating_skill: "test",
+    expected_id_allocations: { stchar_ids: ["STCHAR-1"] },
+    patches: [{
+      op: "append_story_character_authority_record",
+      target_world: "test",
+      payload: { story_slug: STORY, record: stcharFrontmatter(), body_markdown: body() }
+    }]
+  } as PatchPlanEnvelope;
+}
+
+function body(options: BodyOptions = {}): string {
   const sections = REQUIRED_STCHAR_SECTIONS
     .filter((section) => section !== options.omit)
     .flatMap((section) => section === options.duplicate ? [section, section] : [section]);
   return sections
-    .map((section) => `## ${section}\n\n${section === options.empty ? "" : `${section} authority prose.`}`)
+    .map((section) => `## ${section}\n\n${sectionContent(section, options)}`)
     .join("\n\n");
+}
+
+function sectionContent(section: string, options: BodyOptions): string {
+  if (section === options.empty) {
+    return "";
+  }
+
+  const requirement = REQUIRED_STCHAR_SUBSECTIONS.find((item) => item.section === section);
+  if (requirement === undefined || options.legacyNoSubsections) {
+    return `${section} authority prose.`;
+  }
+
+  const subsections = requirement.subsections
+    .filter((subsection) => subsection !== options.omitSubsection)
+    .flatMap((subsection) => subsection === options.duplicateSubsection ? [subsection, subsection] : [subsection]);
+  return [
+    `${section} authority prose.`,
+    ...subsections.map((subsection) =>
+      `### ${subsection}\n\n${subsection === options.emptySubsection ? "" : `${subsection} authority prose.`}`
+    )
+  ].join("\n\n");
 }

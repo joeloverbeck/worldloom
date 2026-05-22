@@ -245,11 +245,17 @@ Template skeleton:
 
 ## Agency and Planning Tendencies
 
+### Operational capabilities and affordances
+
+### Capability limits, costs, and access constraints
+
 ## Relationship-Specific Behavior
 
 ## Story-State Derivation Guide
 
 ## Prose Rendering Constraints
+
+### Signature scene behaviors to render
 
 ## Validation / Audit Anchors
 ```

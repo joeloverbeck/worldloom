@@ -10,6 +10,7 @@ import type { Context, IndexedRecord, Validator, Verdict } from "../framework/ty
 import {
   asPlainRecord,
   fileInputsFrom,
+  locationFor,
   queryStructuralRecords,
   stringValue,
   toPosixPath,
@@ -38,6 +39,22 @@ export const REQUIRED_STCHAR_SECTIONS = [
   "Validation / Audit Anchors"
 ] as const;
 
+export const REQUIRED_STCHAR_SUBSECTIONS = [
+  {
+    section: "Agency and Planning Tendencies",
+    subsections: [
+      "Operational capabilities and affordances",
+      "Capability limits, costs, and access constraints"
+    ]
+  },
+  {
+    section: "Prose Rendering Constraints",
+    subsections: [
+      "Signature scene behaviors to render"
+    ]
+  }
+] as const;
+
 export const stcharBodyIntegrity: Validator = {
   name: VALIDATOR,
   severity_mode: "fail",
@@ -61,7 +78,7 @@ export const stcharBodyIntegrity: Validator = {
         continue;
       }
 
-      verdicts.push(...bodyVerdicts(record, content));
+      verdicts.push(...bodyVerdicts(record, content, ctx));
       verdicts.push(...hashVerdicts(record, content));
     }
 
@@ -69,7 +86,7 @@ export const stcharBodyIntegrity: Validator = {
   }
 };
 
-function bodyVerdicts(record: IndexedRecord, content: string): Verdict[] {
+function bodyVerdicts(record: IndexedRecord, content: string, ctx: Context): Verdict[] {
   const body = bodyMarkdown(content);
   const id = recordId(record);
   const verdicts: Verdict[] = [];
@@ -118,7 +135,76 @@ function bodyVerdicts(record: IndexedRecord, content: string): Verdict[] {
     }
   }
 
+  verdicts.push(...requiredSubsectionVerdicts(record, sections, subsectionSeverity(record, ctx)));
+
   return verdicts;
+}
+
+function requiredSubsectionVerdicts(
+  record: IndexedRecord,
+  sections: Map<string, string[]>,
+  severity: "fail" | "warn"
+): Verdict[] {
+  const id = recordId(record);
+  const verdicts: Verdict[] = [];
+
+  for (const requirement of REQUIRED_STCHAR_SUBSECTIONS) {
+    const parentBodies = sections.get(requirement.section) ?? [];
+    if (parentBodies.length === 0) {
+      continue;
+    }
+
+    for (const subsection of requirement.subsections) {
+      let count = 0;
+      let hasEmpty = false;
+      for (const sectionBody of parentBodies) {
+        const subsectionBodies = subsectionBodiesByHeading(sectionBody).get(subsection) ?? [];
+        count += subsectionBodies.length;
+        hasEmpty ||= subsectionBodies.some((subsectionBody) => subsectionBody.trim().length === 0);
+      }
+
+      if (count === 0) {
+        verdicts.push(stcharVerdict(
+          record,
+          severity,
+          "missing_subsection",
+          `${id} missing required STCHAR body subsection '### ${subsection}' under '## ${requirement.section}'.`,
+          { section: requirement.section, subsection },
+          `Add a non-empty '### ${subsection}' subsection under '## ${requirement.section}'.`
+        ));
+        continue;
+      }
+      if (count > 1) {
+        verdicts.push(stcharVerdict(
+          record,
+          severity,
+          "duplicate_subsection",
+          `${id} has duplicate STCHAR body subsection '### ${subsection}' under '## ${requirement.section}'.`,
+          { section: requirement.section, subsection, count },
+          `Collapse duplicate '### ${subsection}' subsections under '## ${requirement.section}' so the STCHAR body has exactly one.`
+        ));
+      }
+      if (hasEmpty) {
+        verdicts.push(stcharVerdict(
+          record,
+          severity,
+          "empty_subsection",
+          `${id} has an empty STCHAR body subsection '### ${subsection}' under '## ${requirement.section}'.`,
+          { section: requirement.section, subsection },
+          `Fill '### ${subsection}' with non-empty operational authority prose.`
+        ));
+      }
+    }
+  }
+
+  return verdicts;
+}
+
+function subsectionSeverity(record: IndexedRecord, ctx: Context): "fail" | "warn" {
+  if (ctx.run_mode === "pre-apply" || ctx.touched_files.some((file) => toPosixPath(file) === toPosixPath(record.file_path))) {
+    return "fail";
+  }
+  return "warn";
 }
 
 function hashVerdicts(record: IndexedRecord, content: string): Verdict[] {
@@ -236,6 +322,23 @@ function sectionBodies(body: string): Map<string, string[]> {
   return sections;
 }
 
+function subsectionBodiesByHeading(sectionBody: string): Map<string, string[]> {
+  const matches = [...sectionBody.matchAll(/^### (.+?)\s*$/gm)];
+  const subsections = new Map<string, string[]>();
+
+  for (const [index, match] of matches.entries()) {
+    const subsection = match[1] ?? "";
+    const bodyStart = (match.index ?? 0) + match[0].length;
+    const next = matches[index + 1];
+    const bodyEnd = next?.index ?? sectionBody.length;
+    const bucket = subsections.get(subsection) ?? [];
+    bucket.push(sectionBody.slice(bodyStart, bodyEnd));
+    subsections.set(subsection, bucket);
+  }
+
+  return subsections;
+}
+
 function stcharFail(
   record: IndexedRecord,
   code: string,
@@ -243,5 +346,27 @@ function stcharFail(
   detail?: unknown,
   suggested_fix?: string
 ): Verdict {
-  return fail(VALIDATOR, record, `${VALIDATOR}.${code}`, message, detail, suggested_fix);
+  return stcharVerdict(record, "fail", code, message, detail, suggested_fix);
+}
+
+function stcharVerdict(
+  record: IndexedRecord,
+  severity: "fail" | "warn",
+  code: string,
+  message: string,
+  detail?: unknown,
+  suggested_fix?: string
+): Verdict {
+  if (severity === "fail") {
+    return fail(VALIDATOR, record, `${VALIDATOR}.${code}`, message, detail, suggested_fix);
+  }
+  return {
+    validator: VALIDATOR,
+    severity,
+    code: `${VALIDATOR}.${code}`,
+    message,
+    location: locationFor(record),
+    ...(detail === undefined ? {} : { detail }),
+    ...(suggested_fix === undefined ? {} : { suggested_fix })
+  };
 }

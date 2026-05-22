@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/story-character-profile/SKILL.md`, `.claude/skills/branching-story-bootstrap/SKILL.md`, and `.claude/skills/_shared-templates/story-state-contract.md` (skill + shared-contract prose). No code/validator change.
-**Deps**: archive/tickets/SPEC70CHASTCHARSEM-001.md, SPEC70CHASTCHARSEM-002, SPEC70CHASTCHARSEM-003
+**Deps**: archive/tickets/SPEC70CHASTCHARSEM-001.md, archive/tickets/SPEC70CHASTCHARSEM-002.md, SPEC70CHASTCHARSEM-003
 
 ## Problem
 
@@ -67,7 +67,7 @@ In `story-state-contract.md` §16a, add `- Relevant capabilities / limits for th
 
 ### New/Modified Tests
 
-1. `None — documentation/skill-prose ticket; verification is grep-based against the post-edit skill + contract files, and the enforcement coverage is provided by archive/tickets/SPEC70CHASTCHARSEM-001.md, SPEC70CHASTCHARSEM-002, and SPEC70CHASTCHARSEM-003.`
+1. `None — documentation/skill-prose ticket; verification is grep-based against the post-edit skill + contract files, and the enforcement coverage is provided by archive/tickets/SPEC70CHASTCHARSEM-001.md, archive/tickets/SPEC70CHASTCHARSEM-002.md, and SPEC70CHASTCHARSEM-003.`
 
 ### Commands
 
