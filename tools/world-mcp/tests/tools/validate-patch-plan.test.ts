@@ -72,24 +72,66 @@ function seedEmptyWorld(root: string): void {
 
 function stcharBody(): string {
   return [
-    "Story-Facing Identity",
-    "Source Distillation",
-    "Stable Persona Core",
-    "Emotional Appraisal Map",
-    "Pressure Behavior",
-    "Voice Bible / Dialogue Authority",
-    "Page-Plan Voice Block",
-    "Perception and Embodiment",
-    "Agency and Planning Tendencies",
-    "Relationship-Specific Behavior",
-    "Story-State Derivation Guide",
-    "Prose Rendering Constraints",
-    "Validation / Audit Anchors"
-  ].map((section) => `## ${section}\n\n${section} authority prose.`).join("\n\n");
+    "## Story-Facing Identity\n\nStory-Facing Identity authority prose.",
+    "## Source Distillation\n\nSource Distillation authority prose.",
+    "## Stable Persona Core\n\nStable Persona Core authority prose.",
+    "## Emotional Appraisal Map\n\nEmotional Appraisal Map authority prose.",
+    "## Pressure Behavior\n\nPressure Behavior authority prose.",
+    "## Voice Bible / Dialogue Authority\n\nVoice Bible / Dialogue Authority authority prose.",
+    "## Page-Plan Voice Block\n\nPage-Plan Voice Block authority prose.",
+    "## Perception and Embodiment\n\nPerception and Embodiment authority prose.",
+    [
+      "## Agency and Planning Tendencies",
+      "",
+      "Agency and Planning Tendencies authority prose.",
+      "",
+      "### Operational capabilities and affordances",
+      "",
+      "Can read harbor ledgers, identify procedural leverage, and bargain with institutional knowledge.",
+      "",
+      "### Capability limits, costs, and access constraints",
+      "",
+      "Requires access to records, quiet review time, and protection from public exposure."
+    ].join("\n"),
+    "## Relationship-Specific Behavior\n\nRelationship-Specific Behavior authority prose.",
+    "## Story-State Derivation Guide\n\nStory-State Derivation Guide authority prose.",
+    [
+      "## Prose Rendering Constraints",
+      "",
+      "Prose Rendering Constraints authority prose.",
+      "",
+      "### Signature scene behaviors to render",
+      "",
+      "Show her checking seals, correcting dates, and withholding names when pressure rises."
+    ].join("\n"),
+    "## Validation / Audit Anchors\n\nValidation / Audit Anchors authority prose."
+  ].join("\n\n");
 }
 
 const VALID_STCHAR_PROFILE_HASH = `sha256:${computeStcharProfileHash(stcharBody())}`;
 const VALID_STCHAR_VOICE_BLOCK_HASH = `sha256:${computeStcharVoiceBlockHash(stcharBody())}`;
+
+const STCHAR_SOURCE_OPERATIONAL_FACT_MAP = [
+  { source_field: "world_produced_wound", disposition: "copied", target_section: "Stable Persona Core" },
+  { source_field: "active_appetite", disposition: "copied", target_section: "Agency and Planning Tendencies" },
+  { source_field: "self_mythology", disposition: "copied", target_section: "Stable Persona Core" },
+  { source_field: "irreconcilable_contradiction", disposition: "copied", target_section: "Stable Persona Core" },
+  { source_field: "pressure_behavior", disposition: "copied", target_section: "Pressure Behavior" },
+  { source_field: "relational_charge", disposition: "copied", target_section: "Relationship-Specific Behavior" },
+  { source_field: "moral_psychological_edge", disposition: "copied", target_section: "Emotional Appraisal Map" },
+  { source_field: "signature_scene_behaviors", disposition: "copied", target_section: "Prose Rendering Constraints" },
+  { source_field: "voice_under_pressure", disposition: "copied", target_section: "Voice Bible / Dialogue Authority" },
+  { source_field: "cannot_be_swapped_out_because", disposition: "copied", target_section: "Story-Facing Identity" }
+];
+
+function stcharSourceOperationalFactMapLines(): string[] {
+  return STCHAR_SOURCE_OPERATIONAL_FACT_MAP.flatMap((entry, index) => [
+    `${index === 0 ? "source_operational_fact_map:" : ""}`,
+    `  - source_field: ${entry.source_field}`,
+    `    disposition: ${entry.disposition}`,
+    `    target_section: ${entry.target_section}`
+  ]).filter((line) => line.length > 0);
+}
 
 const SOURCE_CHAR_BODY = [
   "---",
@@ -312,6 +354,7 @@ test("validatePatchPlan accepts append_story_character_authority_record through 
               source_char_id: "CHAR-1",
               source_char_hash: `sha256:${SOURCE_CHAR_HASH}`,
               source_char_sections_used: ["frontmatter"],
+              source_operational_fact_map: STCHAR_SOURCE_OPERATIONAL_FACT_MAP,
               generated_at_page: "story_bootstrap",
               created_by_skill: "branching-story-bootstrap",
               supersedes: null,
@@ -504,6 +547,7 @@ function seedStoryPlanPrereqs(root: string): void {
         "source_char_id: CHAR-1",
         `source_char_hash: sha256:${"a".repeat(64)}`,
         "source_char_sections_used: [frontmatter]",
+        ...stcharSourceOperationalFactMapLines(),
         "generated_at_page: story_bootstrap",
         "created_by_skill: unit-test",
         "supersedes: null",
