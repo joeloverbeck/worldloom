@@ -4,6 +4,22 @@ import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, string
 
 const VALIDATOR = "relationship_introduction_grounding_integrity";
 const RELATIONSHIP_CREATE_OPS = new Set(["create_se_record", "create_pg_record", "create_srel_record", "create_stent_record"]);
+const ALLOWED_GROUNDING_PREFIXES = new Set([
+  "SE",
+  "SF",
+  "BEL",
+  "OBL",
+  "CNSQ",
+  "STINT",
+  "SREL",
+  "DA",
+  "CLK",
+  "STSEC",
+  "STQ",
+  "STSTAT",
+  "STPLAN",
+  "STEMO"
+]);
 
 export const relationshipIntroductionGroundingIntegrity: Validator = {
   name: VALIDATOR,
@@ -38,11 +54,15 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   const stateDelta = asPlainRecord(parsed.state_delta);
   const createdIds = new Set(stringArray(stateDelta.create));
   const parentPageId = stringValue(parsed.parent_page_id);
+  const eventId = stringValue(parsed.id) ?? bareNodeId(event);
   const activeOrCreatedEntities = activeEntitiesForPage(parentPageId, maps);
+  const activeOrCreatedGroundingIds = activeIdsForPage(parentPageId, maps);
+  activeOrCreatedGroundingIds.add(eventId);
   for (const createdId of createdIds) {
     if (createdId.startsWith("STENT-")) {
       activeOrCreatedEntities.add(createdId);
     }
+    activeOrCreatedGroundingIds.add(createdId);
   }
 
   const verdicts: Verdict[] = [];
@@ -55,7 +75,7 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
     if (createdAtPage === "PG-1") {
       continue;
     }
-    verdicts.push(...validateRelationship(relationship, parentPageId, activeOrCreatedEntities, maps));
+    verdicts.push(...validateRelationship(relationship, parentPageId, activeOrCreatedEntities, activeOrCreatedGroundingIds, maps));
   }
 
   return verdicts;
@@ -67,7 +87,13 @@ function introducedRecordIds(event: IndexedRecord, recordClass: "SREL"): string[
     .map((intro) => intro.recordId);
 }
 
-function validateRelationship(relationship: IndexedRecord, parentPageId: string | undefined, activeOrCreatedEntities: Set<string>, maps: RecordMaps): Verdict[] {
+function validateRelationship(
+  relationship: IndexedRecord,
+  parentPageId: string | undefined,
+  activeOrCreatedEntities: Set<string>,
+  activeOrCreatedGroundingIds: Set<string>,
+  maps: RecordMaps
+): Verdict[] {
   const parsed = asPlainRecord(relationship.parsed);
   const relationshipId = stringValue(parsed.id) ?? bareNodeId(relationship);
   const participants = stringArray(parsed.participants);
@@ -87,6 +113,14 @@ function validateRelationship(relationship: IndexedRecord, parentPageId: string 
     verdicts.push(fail(relationship, "srel_intro_missing_derived_from", `${relationshipId}.derived_from must name at least one present causal grounding record.`, {
       relationship_id: relationshipId
     }));
+  }
+  for (const groundingId of derivedFrom) {
+    if (!isAllowedGroundingId(groundingId) || !activeOrCreatedGroundingIds.has(groundingId)) {
+      verdicts.push(fail(relationship, "srel_intro_grounding_missing", `${relationshipId}.derived_from entry ${groundingId} is not an allowed parent-active or same-event-created grounding record.`, {
+        relationship_id: relationshipId,
+        grounding_record: groundingId
+      }));
+    }
   }
 
   const duplicate = activeRelationshipDuplicate(relationship, parentPageId, maps);
@@ -137,6 +171,21 @@ function activeEntitiesForPage(pageId: string | undefined, maps: RecordMaps): Se
   return new Set(stringArray(activeRecords.STENT));
 }
 
+function activeIdsForPage(pageId: string | undefined, maps: RecordMaps): Set<string> {
+  if (pageId === undefined) {
+    return new Set();
+  }
+  const page = maps.byId.get(pageId);
+  const activeRecords = asPlainRecord(asPlainRecord(asPlainRecord(page?.parsed).state_snapshot).active_records);
+  const ids = new Set<string>();
+  for (const value of Object.values(activeRecords)) {
+    for (const id of stringArray(value)) {
+      ids.add(id);
+    }
+  }
+  return ids;
+}
+
 function activeRelationshipsForPage(pageId: string | undefined, maps: RecordMaps): IndexedRecord[] {
   if (pageId === undefined) {
     return [];
@@ -175,6 +224,11 @@ function activeRelationshipDuplicate(relationship: IndexedRecord, parentPageId: 
 
 function participantsIdentity(participants: string[]): string {
   return [...participants].sort().join("|");
+}
+
+function isAllowedGroundingId(id: string): boolean {
+  const prefix = id.split("-")[0];
+  return prefix !== undefined && ALLOWED_GROUNDING_PREFIXES.has(prefix);
 }
 
 function fail(record: IndexedRecord, code: string, message: string, detail: Record<string, unknown>): Verdict {

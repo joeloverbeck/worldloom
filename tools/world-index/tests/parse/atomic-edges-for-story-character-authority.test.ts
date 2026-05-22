@@ -3,39 +3,44 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import YAML from "yaml";
 
 import { listStoryBundleSourceFiles, parseStoryBundleSourceFile } from "../../src/parse/atomic.js";
+import { sha256Hex } from "../../src/hash/content.js";
+import { contentHashForProse, contentHashForYaml } from "../../src/parse/canonical.js";
 
 test("STCHAR hybrid records index as story_character_authority_record and emit authority edges", () => {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-index-stchar-edges-"));
+  const storyCharacterLines = [
+    "---",
+    "id: STCHAR-2",
+    "story_id: STORY-50",
+    "story_slug: harborwatch",
+    "world_slug: fixture-world",
+    "source_kind: world_char",
+    "source_char_id: CHAR-1",
+    `source_char_hash: sha256:${"a".repeat(64)}`,
+    "source_char_sections_used: [frontmatter]",
+    "generated_at_page: PG-4",
+    "created_by_skill: unit-test",
+    "supersedes: STCHAR-1",
+    "superseded_by: STCHAR-3",
+    "status: active",
+    "bound_stent_ids: [STENT-1, STENT-2]",
+    "profile_revision: 2",
+    "body_schema_version: stchar.v1",
+    `profile_hash: sha256:${"b".repeat(64)}`,
+    `voice_block_hash: sha256:${"c".repeat(64)}`,
+    `page_packet_hash: sha256:${"d".repeat(64)}`,
+    "---",
+    "## Profile",
+    "",
+    "Marla acts with focused suspicion.  "
+  ];
+  const storyCharacterSource = `${storyCharacterLines.join("\n")}\n`;
 
   try {
-    writeStoryCharacter(root, "harborwatch", "STCHAR-2", [
-      "---",
-      "id: STCHAR-2",
-      "story_id: STORY-50",
-      "story_slug: harborwatch",
-      "world_slug: fixture-world",
-      "source_kind: world_char",
-      "source_char_id: CHAR-1",
-      `source_char_hash: sha256:${"a".repeat(64)}`,
-      "source_char_sections_used: [frontmatter]",
-      "generated_at_page: PG-4",
-      "created_by_skill: unit-test",
-      "supersedes: STCHAR-1",
-      "superseded_by: STCHAR-3",
-      "status: active",
-      "bound_stent_ids: [STENT-1, STENT-2]",
-      "profile_revision: 2",
-      "body_schema_version: stchar.v1",
-      `profile_hash: sha256:${"b".repeat(64)}`,
-      `voice_block_hash: sha256:${"c".repeat(64)}`,
-      `page_packet_hash: sha256:${"d".repeat(64)}`,
-      "---",
-      "## Profile",
-      "",
-      "Marla acts with focused suspicion."
-    ]);
+    writeStoryCharacter(root, "harborwatch", "STCHAR-2", storyCharacterLines);
 
     assert.deepEqual(listStoryBundleSourceFiles(path.join(root, "worlds", "fixture-world")), [
       "stories/harborwatch/story-characters/STCHAR-2.md"
@@ -48,6 +53,9 @@ test("STCHAR hybrid records index as story_character_authority_record and emit a
     );
 
     assert.equal(parsed.nodes.length, 1);
+    assert.equal(parsed.contentHash, sha256Hex(storyCharacterSource));
+    assert.equal(parsed.nodes[0]?.content_hash, contentHashForProse(storyCharacterSource));
+    assert.notEqual(parsed.contentHash, parsed.nodes[0]?.content_hash);
     assert.equal(parsed.nodes[0]?.node_type, "story_character_authority_record");
     assert.equal(parsed.nodes[0]?.node_id, "harborwatch:STCHAR-2");
     assert.match(parsed.nodes[0]?.body ?? "", /## Profile/);
@@ -121,6 +129,33 @@ test("STENT bound_stchar_id and page active_records.STCHAR emit STCHAR edges", (
           item.edge_type === "page_active_record"
       )
     );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("non-hybrid story records keep prose source hashes for file versions", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-story-yaml-file-version-"));
+  const lines = [
+    "id: STENT-1",
+    "story_id: STORY-50",
+    "display_name: Marla",
+    "role_in_story: [primary_actor]",
+    "created_at_page: PG-1"
+  ];
+  const source = `${lines.join("\n")}\n`;
+
+  try {
+    writeStoryRecord(root, "harborwatch", "entities", "STENT-1", lines);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/entities/STENT-1.yaml"
+    );
+
+    assert.equal(parsed.contentHash, contentHashForProse(source));
+    assert.notEqual(parsed.contentHash, contentHashForYaml(YAML.parse(source)));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

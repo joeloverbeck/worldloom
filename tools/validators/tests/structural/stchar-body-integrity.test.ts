@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import {
+  computeStcharProfileHash,
+  computeStcharVoiceBlockHash
+} from "@worldloom/world-index/hash/content";
+
 import { REQUIRED_STCHAR_SECTIONS, stcharBodyIntegrity } from "../../src/structural/stchar-body-integrity.js";
 import { context, record } from "./helpers.js";
 
@@ -47,6 +52,28 @@ test("stchar_body_integrity rejects malformed STCHAR hash frontmatter", async ()
   assert.ok(verdicts.some((verdict) => verdict.code === "stchar_body_integrity.hash_shape"));
 });
 
+test("stchar_body_integrity rejects profile_hash that does not match the body recompute", async () => {
+  const verdicts = await run(body(), { profile_hash: HASH });
+  const mismatch = verdicts.find((verdict) =>
+    verdict.code === "stchar_body_integrity.hash_mismatch" &&
+    (verdict.detail as { field?: string }).field === "profile_hash"
+  );
+
+  assert.ok(mismatch);
+  assert.match((mismatch.detail as { expected?: string }).expected ?? "", /^sha256:[0-9a-f]{64}$/);
+});
+
+test("stchar_body_integrity rejects voice_block_hash that does not match the body recompute", async () => {
+  const verdicts = await run(body(), { voice_block_hash: HASH });
+  const mismatch = verdicts.find((verdict) =>
+    verdict.code === "stchar_body_integrity.hash_mismatch" &&
+    (verdict.detail as { field?: string }).field === "voice_block_hash"
+  );
+
+  assert.ok(mismatch);
+  assert.match((mismatch.detail as { expected?: string }).expected ?? "", /^sha256:[0-9a-f]{64}$/);
+});
+
 test("stchar_body_integrity runs for append_story_character_authority_record pre-apply plans", async () => {
   assert.equal(stcharBodyIntegrity.applies_to(context([], {
     run_mode: "pre-apply",
@@ -67,20 +94,20 @@ test("stchar_body_integrity runs for append_story_character_authority_record pre
 });
 
 async function run(markdownBody: string, overrides: Record<string, unknown> = {}) {
-  const stchar = stcharRecord(overrides);
+  const stchar = stcharRecord(markdownBody, overrides);
   return stcharBodyIntegrity.run({
     files: [{ path: FILE_PATH, content: hybrid(stchar.parsed as Record<string, unknown>, markdownBody) }]
   }, context([stchar]));
 }
 
-function stcharRecord(overrides: Record<string, unknown> = {}) {
+function stcharRecord(markdownBody: string, overrides: Record<string, unknown> = {}) {
   return {
-    ...record("story_character_authority_record", `${STORY}:STCHAR-1`, FILE_PATH, stcharFrontmatter(overrides)),
+    ...record("story_character_authority_record", `${STORY}:STCHAR-1`, FILE_PATH, stcharFrontmatter(overrides, markdownBody)),
     story_slug: STORY
   };
 }
 
-function stcharFrontmatter(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+function stcharFrontmatter(overrides: Record<string, unknown> = {}, markdownBody = body()): Record<string, unknown> {
   return {
     id: "STCHAR-1",
     story_id: "STORY-1",
@@ -99,8 +126,8 @@ function stcharFrontmatter(overrides: Record<string, unknown> = {}): Record<stri
     bound_stent_ids: ["STENT-1"],
     profile_revision: 1,
     body_schema_version: "stchar.v1",
-    profile_hash: HASH,
-    voice_block_hash: HASH,
+    profile_hash: `sha256:${computeStcharProfileHash(markdownBody)}`,
+    voice_block_hash: `sha256:${computeStcharVoiceBlockHash(markdownBody)}`,
     page_packet_hash: HASH,
     ...overrides
   };

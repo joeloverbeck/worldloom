@@ -1,9 +1,9 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
-import { readSeIntroductions } from "./midstory-introduction-utils.js";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, stringValue, touchedFilesInclude } from "./utils.js";
 
-const VALIDATOR = "thread_introduction_grounding_integrity";
-const THREAD_CREATE_OPS = new Set(["create_se_record", "create_pg_record", "create_thr_record"]);
+const VALIDATOR = "turn_cycle_output_grounding_integrity";
+const TARGET_CLASSES = new Set(["CNSQ", "SF", "DA"]);
+const EVENT_CREATE_OPS = new Set(["create_se_record", "create_pg_record"]);
 const ALLOWED_GROUNDING_PREFIXES = new Set([
   "SE",
   "SF",
@@ -21,13 +21,13 @@ const ALLOWED_GROUNDING_PREFIXES = new Set([
   "STEMO"
 ]);
 
-export const threadIntroductionGroundingIntegrity: Validator = {
+export const turnCycleOutputGroundingIntegrity: Validator = {
   name: VALIDATOR,
   severity_mode: "fail",
   applies_to: (ctx: Context) =>
     ctx.run_mode === "full-world" ||
-    ctx.patch_plan?.patches.some((patch) => THREAD_CREATE_OPS.has(patch.op)) === true ||
-    touchedFilesInclude(ctx, /^stories\/[^/]+\/_source\/(?:events|pages|threads)\/(?:SE|PG|THR)-\d+\.yaml$/),
+    ctx.patch_plan?.patches.some((patch) => EVENT_CREATE_OPS.has(patch.op)) === true ||
+    touchedFilesInclude(ctx, /^stories\/[^/]+\/_source\/(?:events|pages|consequences|facts|artifacts)\/(?:SE|PG|CNSQ|SF|DA)-\d+\.yaml$/),
   run: async (_input: unknown, ctx: Context): Promise<Verdict[]> => {
     const records = await queryStructuralRecords(ctx);
     const verdicts: Verdict[] = [];
@@ -54,49 +54,50 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   const stateDelta = asPlainRecord(parsed.state_delta);
   const createdIds = new Set(stringArray(stateDelta.create));
   const parentPageId = stringValue(parsed.parent_page_id);
+  const childPageId = stringValue(parsed.created_at_page);
   const eventId = stringValue(parsed.id) ?? bareNodeId(event);
-  const activeOrCreated = activeIdsForPage(parentPageId, maps);
-  activeOrCreated.add(eventId);
+
+  if (parentPageId === undefined || childPageId === undefined || childPageId === "PG-1" || stringValue(parsed.event_kind) === "story_start") {
+    return [];
+  }
+
+  const activeOrCreatedIds = activeIdsForPage(parentPageId, maps);
+  activeOrCreatedIds.add(eventId);
   for (const createdId of createdIds) {
-    activeOrCreated.add(createdId);
+    activeOrCreatedIds.add(createdId);
   }
 
   const verdicts: Verdict[] = [];
-  for (const createdId of introducedRecordIds(event, "THR")) {
-    const thread = maps.byId.get(createdId);
-    if (thread === undefined) {
+  for (const createdId of createdIds) {
+    if (!TARGET_CLASSES.has(recordClassForId(createdId) ?? "")) {
       continue;
     }
-    const createdAtPage = stringValue(asPlainRecord(thread.parsed).created_at_page);
-    if (createdAtPage === "PG-1") {
+    const record = maps.byId.get(createdId);
+    if (record === undefined) {
       continue;
     }
-    verdicts.push(...validateThread(thread, activeOrCreated));
+    verdicts.push(...validateCreatedOutput(record, activeOrCreatedIds));
   }
   return verdicts;
 }
 
-function introducedRecordIds(event: IndexedRecord, recordClass: "THR"): string[] {
-  return readSeIntroductions(event)
-    .filter((intro) => intro.class === recordClass)
-    .map((intro) => intro.recordId);
-}
-
-function validateThread(thread: IndexedRecord, activeOrCreatedIds: Set<string>): Verdict[] {
-  const parsed = asPlainRecord(thread.parsed);
-  const threadId = stringValue(parsed.id) ?? bareNodeId(thread);
+function validateCreatedOutput(record: IndexedRecord, activeOrCreatedIds: Set<string>): Verdict[] {
+  const parsed = asPlainRecord(record.parsed);
+  const recordId = stringValue(parsed.id) ?? bareNodeId(record);
   const derivedFrom = stringArray(parsed.derived_from);
   const verdicts: Verdict[] = [];
 
   if (derivedFrom.length === 0) {
-    verdicts.push(fail(thread, "thread_intro_missing_derived_from", `${threadId}.derived_from must name at least one parent-active or same-event-created grounding record.`, { thread_id: threadId }));
+    verdicts.push(fail(record, "turn_cycle_output_missing_derived_from", `${recordId}.derived_from must name at least one parent-active or same-event-created grounding record.`, {
+      record_id: recordId
+    }));
     return verdicts;
   }
 
   for (const groundingId of derivedFrom) {
     if (!isAllowedGroundingId(groundingId) || !activeOrCreatedIds.has(groundingId)) {
-      verdicts.push(fail(thread, "thread_intro_grounding_missing", `${threadId}.derived_from entry ${groundingId} is not an allowed parent-active or same-event-created grounding record.`, {
-        thread_id: threadId,
+      verdicts.push(fail(record, "turn_cycle_output_grounding_missing", `${recordId}.derived_from entry ${groundingId} is not an allowed parent-active or same-event-created grounding record.`, {
+        record_id: recordId,
         grounding_record: groundingId
       }));
     }
@@ -143,18 +144,22 @@ function activeIdsForPage(pageId: string | undefined, maps: RecordMaps): Set<str
   return ids;
 }
 
+function recordClassForId(id: string): string | undefined {
+  return id.split("-")[0];
+}
+
 function isAllowedGroundingId(id: string): boolean {
-  const prefix = id.split("-")[0];
+  const prefix = recordClassForId(id);
   return prefix !== undefined && ALLOWED_GROUNDING_PREFIXES.has(prefix);
 }
 
-function fail(thread: IndexedRecord, code: string, message: string, detail: Record<string, unknown>): Verdict {
+function fail(record: IndexedRecord, code: string, message: string, detail: Record<string, unknown>): Verdict {
   return {
     validator: VALIDATOR,
     severity: "fail",
     code,
     message,
-    location: locationFor(thread),
+    location: locationFor(record),
     detail
   };
 }

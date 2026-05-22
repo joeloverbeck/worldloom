@@ -85,6 +85,7 @@ import { storyDaDuplicateHeuristic } from "../structural/story-da-duplicate-heur
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
 import { storyKernelCastBindListIntegrity } from "../structural/story-kernel-cast-bind-list-integrity.js";
 import { threadIntroductionGroundingIntegrity } from "../structural/thread-introduction-grounding-integrity.js";
+import { turnCycleOutputGroundingIntegrity } from "../structural/turn-cycle-output-grounding-integrity.js";
 import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
 import { rule2NoPureCosmetics } from "../rules/rule2-no-pure-cosmetics.js";
@@ -164,6 +165,7 @@ export const structuralValidators: readonly Validator[] = [
   storyQuestionGroundingIntegrity,
   storyQuestionTerminalDebt,
   storyDaDuplicateHeuristic,
+  turnCycleOutputGroundingIntegrity,
   touchedByCfCompleteness,
   proposalPackageShape,
   proseReceiptSchemaCompliance,

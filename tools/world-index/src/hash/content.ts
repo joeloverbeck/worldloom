@@ -156,6 +156,16 @@ export function computeStcharVoiceBlockHash(fileOrBody: string): string {
   return sha256Hex(normalizeProseWhitespace(voiceBlock));
 }
 
+const PAGE_PACKET_HASH_PLACEHOLDER = "sha256:<page_packet_hash>";
+const PAGE_PACKET_HASH_FIELD_PATTERN = /page_packet_hash=sha256:[0-9a-f]{64}/g;
+
+export function canonicalizeStcharPagePacketForHash(packetText: string): string {
+  return packetText.replace(
+    PAGE_PACKET_HASH_FIELD_PATTERN,
+    `page_packet_hash=${PAGE_PACKET_HASH_PLACEHOLDER}`
+  );
+}
+
 export function computeStcharPagePacketHash(packetText: string): string {
-  return sha256Hex(normalizeProseWhitespace(packetText));
+  return sha256Hex(normalizeProseWhitespace(canonicalizeStcharPagePacketForHash(packetText)));
 }

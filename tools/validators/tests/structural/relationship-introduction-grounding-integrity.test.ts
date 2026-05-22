@@ -55,6 +55,62 @@ test("relationship_introduction_grounding_integrity rejects introduced SREL with
   assert.equal(verdicts[0]?.severity, "fail");
 });
 
+test("relationship_introduction_grounding_integrity accepts active and same-event causal grounding", async () => {
+  const records = baseRecords([
+    storyRecord("story_question_record", "STQ-1", `stories/${STORY_SLUG}/_source/story-questions/STQ-1.yaml`, {
+      id: "STQ-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1"
+    }),
+    page("PG-1", { STENT: ["STENT-1", "STENT-2"], STQ: ["STQ-1"], SREL: ["SREL-1"] }),
+    event("SE-2", { create: ["STEMO-1", "SREL-2"] }),
+    storyRecord("story_emotion_record", "STEMO-1", `stories/${STORY_SLUG}/_source/emotions/STEMO-1.yaml`, {
+      id: "STEMO-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-2"
+    }),
+    relationship("SREL-2", { derived_from: ["STQ-1", "STEMO-1"] }),
+    page("PG-2", { STENT: ["STENT-1", "STENT-2"], SREL: ["SREL-2"] })
+  ]);
+
+  const verdicts = await relationshipIntroductionGroundingIntegrity.run(undefined, testContext(records));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("relationship_introduction_grounding_integrity rejects inactive grounding", async () => {
+  const records = baseRecords([
+    event("SE-2", { create: ["SREL-2"] }),
+    relationship("SREL-2", { derived_from: ["STQ-404"] }),
+    page("PG-2", { STENT: ["STENT-1", "STENT-2"], SREL: ["SREL-2"] })
+  ]);
+
+  const verdicts = await relationshipIntroductionGroundingIntegrity.run(undefined, testContext(records));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "srel_intro_grounding_missing");
+  assert.deepEqual(verdicts[0]?.detail, { relationship_id: "SREL-2", grounding_record: "STQ-404" });
+});
+
+test("relationship_introduction_grounding_integrity rejects disallowed grounding class", async () => {
+  const records = baseRecords([
+    event("SE-2", { create: ["STCHAR-1", "SREL-2"] }),
+    storyRecord("story_character_authority_record", "STCHAR-1", `stories/${STORY_SLUG}/story-characters/STCHAR-1.md`, {
+      id: "STCHAR-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-2"
+    }),
+    relationship("SREL-2", { derived_from: ["STCHAR-1"] }),
+    page("PG-2", { STENT: ["STENT-1", "STENT-2"], SREL: ["SREL-2"] })
+  ]);
+
+  const verdicts = await relationshipIntroductionGroundingIntegrity.run(undefined, testContext(records));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "srel_intro_grounding_missing");
+  assert.deepEqual(verdicts[0]?.detail, { relationship_id: "SREL-2", grounding_record: "STCHAR-1" });
+});
+
 test("relationship_introduction_grounding_integrity fails on duplicate active relationship axis without supersedes", async () => {
   const records = baseRecords([
     relationship("SREL-1", { created_at_page: "PG-1", derived_from: ["SE-1"] }),

@@ -268,6 +268,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "relationship_introduction_grounding_integrity"
     );
     assert.equal(relationshipIntroExecution?.status, "skipped");
+    const turnCycleOutputExecution = result.executions.find(
+      (execution) => execution.name === "turn_cycle_output_grounding_integrity"
+    );
+    assert.equal(turnCycleOutputExecution?.status, "skipped");
     const narrativeShapeExecution = result.executions.find(
       (execution) => execution.name === "narrative_shape_field_rejection"
     );
@@ -346,6 +350,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== threadIntroExecution &&
         row !== entityIntroExecution &&
         row !== relationshipIntroExecution &&
+        row !== turnCycleOutputExecution &&
         row !== narrativeShapeExecution &&
         row !== compatibilityDriftExecution &&
         row !== pageAffordanceExecution &&

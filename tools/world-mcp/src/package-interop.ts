@@ -39,6 +39,7 @@ export const computePgStateHash = worldIndexHash.computePgStateHash;
 export const computePlanHash = worldIndexHash.computePlanHash;
 export const computeStcharProfileHash = worldIndexHash.computeStcharProfileHash;
 export const computeStcharVoiceBlockHash = worldIndexHash.computeStcharVoiceBlockHash;
+export const canonicalizeStcharPagePacketForHash = worldIndexHash.canonicalizeStcharPagePacketForHash;
 export const computeStcharPagePacketHash = worldIndexHash.computeStcharPagePacketHash;
 export const openExistingIndex = worldIndexOpen.openExistingIndex;
 

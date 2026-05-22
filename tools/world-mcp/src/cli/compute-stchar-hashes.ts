@@ -25,11 +25,20 @@ frontmatter and cite verbatim in the page-plan §16a packet and the prose receip
   profile_hash      = sha256 over the STCHAR body markdown (the 13 stchar.v1
                       sections; everything after the frontmatter).
   voice_block_hash  = sha256 over the '## Page-Plan Voice Block' section body.
-  page_packet_hash  = sha256 over the §16a page-plan packet projection text.
+  page_packet_hash  = sha256 over the §16a page-plan packet projection text,
+                      after replacing its own page_packet_hash value with the
+                      fixed placeholder sha256:<page_packet_hash>.
 
-All three use raw UTF-8 byte sha256 (no normalization), matching compute-pg-hashes
-plan_hash. Hand-rolling these per skill caused divergent implementations; this CLI
-is the single source of truth (it reuses the @worldloom/world-index/hash/content
+All three use sha256 over normalizeProseWhitespace-normalized content, not raw
+bytes: body markdown for profile_hash, the Page-Plan Voice Block section for
+voice_block_hash, and the canonicalized §16a packet projection for
+page_packet_hash. The page packet may be a full §16a packet that already
+contains a Hashes line; the helper masks only the page_packet_hash value before
+hashing, so the hash never includes itself while still covering the sibling
+profile_hash / voice_block_hash declarations and the authority prose. This is
+deliberately different from compute-pg-hashes plan_hash, which hashes raw page
+plan bytes. Hand-rolling these per skill caused divergent implementations; this
+CLI is the single source of truth (it reuses the @worldloom/world-index/hash/content
 helpers, the same module compute-pg-hashes uses).
 
 source_char_hash is NOT computed here. It is not a content-derived hash: it must
@@ -43,8 +52,10 @@ Arguments:
                      is extracted the same way the stchar_body_integrity
                      validator extracts it (after the closing '---', one leading
                      newline stripped). Drives profile_hash and voice_block_hash.
-  --packet <path>    Path to the §16a page-plan packet projection text (the
-                     authority-field bullets this profile authorizes for §16a).
+  --packet <path>    Path to the §16a page-plan packet projection text. This may
+                     include the full packet, including the Hashes line; any
+                     page_packet_hash=sha256:<hex> value is replaced with the
+                     fixed placeholder sha256:<page_packet_hash> before hashing.
                      Drives page_packet_hash.
 
 Options:

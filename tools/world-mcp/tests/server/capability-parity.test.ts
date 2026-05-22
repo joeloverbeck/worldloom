@@ -115,6 +115,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "stplan_supersession_chain_valid",
   "thread_introduction_grounding_integrity",
   "touched_by_cf_completeness",
+  "turn_cycle_output_grounding_integrity",
   "validation_trace_shape_compliance",
   "yaml_parse_integrity"
 ].sort((left, right) => left.localeCompare(right));

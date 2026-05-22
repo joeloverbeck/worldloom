@@ -9,6 +9,7 @@ import { parseYamlWithRecovery } from "./yaml.js";
 import { domainFileNodeId } from "./prose.js";
 import { STORY_SOURCE_DIRECTORY_SPECS } from "./story-directories.js";
 import { CURRENT_INDEX_VERSION } from "../schema/version.js";
+import { sha256Hex } from "../hash/content.js";
 import type { EdgeRow, NodeRow, NodeType, ValidationResultRow } from "../schema/types.js";
 import type { EntityRegistry, EntityRegistryEntry } from "./entities.js";
 
@@ -289,7 +290,7 @@ export function parseStoryBundleSourceFile(
 
     return {
       relativeFilePath,
-      contentHash: contentHashForProse(source),
+      contentHash: spec.hybrid ? sha256Hex(source) : contentHashForProse(source),
       nodes: [],
       edges: [],
       validationResults,
@@ -306,7 +307,7 @@ export function parseStoryBundleSourceFile(
   if (skip) {
     return {
       relativeFilePath,
-      contentHash: contentHashForProse(source),
+      contentHash: spec.hybrid ? sha256Hex(source) : contentHashForProse(source),
       nodes: [],
       edges: [],
       validationResults,
@@ -339,7 +340,7 @@ export function parseStoryBundleSourceFile(
 
   return {
     relativeFilePath,
-    contentHash: contentHashForProse(source),
+    contentHash: spec.hybrid ? sha256Hex(source) : contentHashForProse(source),
     nodes: [node],
     edges,
     validationResults,

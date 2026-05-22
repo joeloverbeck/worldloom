@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import test from "node:test";
 
 import {
+  canonicalizeStcharPagePacketForHash,
   canonicalJsonStringify,
   computePgStateHash,
   computePlanHash,
@@ -163,7 +164,53 @@ test("computeStcharVoiceBlockHash throws when the section is absent", () => {
   assert.throws(() => computeStcharVoiceBlockHash("# X\n\n## Other\n\nnope\n"), /Page-Plan Voice Block/);
 });
 
-test("computeStcharPagePacketHash is the normalized-prose sha256 of the packet text", () => {
-  const packet = "- Story-facing identity for this page: ...\n- Voice/dialogue authority: ...\n";
-  assert.equal(computeStcharPagePacketHash(packet), sha256Hex(normalizeProseWhitespace(packet)));
+test("canonicalizeStcharPagePacketForHash masks only the self-referential page_packet_hash value", () => {
+  const packet = [
+    "- STENT-1 / STCHAR-1 - Example.",
+    "  - Required because: speaker.",
+    `  - Hashes: profile_hash=sha256:${"a".repeat(64)}; voice_block_hash=sha256:${"b".repeat(64)}; page_packet_hash=sha256:${"c".repeat(64)}.`,
+    "  - Voice/dialogue authority: clipped.",
+    ""
+  ].join("\n");
+
+  assert.equal(
+    canonicalizeStcharPagePacketForHash(packet),
+    [
+      "- STENT-1 / STCHAR-1 - Example.",
+      "  - Required because: speaker.",
+      `  - Hashes: profile_hash=sha256:${"a".repeat(64)}; voice_block_hash=sha256:${"b".repeat(64)}; page_packet_hash=sha256:<page_packet_hash>.`,
+      "  - Voice/dialogue authority: clipped.",
+      ""
+    ].join("\n")
+  );
+});
+
+test("computeStcharPagePacketHash is stable when only its stored page hash changes", () => {
+  const packet = [
+    "- STENT-1 / STCHAR-1 - Example.",
+    "  - Required because: speaker.",
+    `  - Hashes: profile_hash=sha256:${"a".repeat(64)}; voice_block_hash=sha256:${"b".repeat(64)}; page_packet_hash=sha256:${"c".repeat(64)}.`,
+    "  - Voice/dialogue authority: clipped.",
+    ""
+  ].join("\n");
+  const restampedPacket = packet.replace(`sha256:${"c".repeat(64)}`, `sha256:${"d".repeat(64)}`);
+
+  assert.equal(computeStcharPagePacketHash(packet), computeStcharPagePacketHash(restampedPacket));
+});
+
+test("computeStcharPagePacketHash still changes when non-self packet authority changes", () => {
+  const packet = [
+    "- STENT-1 / STCHAR-1 - Example.",
+    "  - Required because: speaker.",
+    `  - Hashes: profile_hash=sha256:${"a".repeat(64)}; voice_block_hash=sha256:${"b".repeat(64)}; page_packet_hash=sha256:${"c".repeat(64)}.`,
+    "  - Voice/dialogue authority: clipped.",
+    ""
+  ].join("\n");
+  const changedProfileHashPacket = packet.replace(`sha256:${"a".repeat(64)}`, `sha256:${"e".repeat(64)}`);
+
+  assert.notEqual(computeStcharPagePacketHash(packet), computeStcharPagePacketHash(changedProfileHashPacket));
+  assert.equal(
+    computeStcharPagePacketHash(packet),
+    sha256Hex(normalizeProseWhitespace(canonicalizeStcharPagePacketForHash(packet)))
+  );
 });

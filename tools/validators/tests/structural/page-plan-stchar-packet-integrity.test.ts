@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { computeStcharPagePacketHash } from "@worldloom/world-index/hash/content";
+
 import { pagePlanStcharPacketIntegrity } from "../../src/structural/page-plan-stchar-packet-integrity.js";
 import { context, record } from "./helpers.js";
 
 const HASH_A = "sha256:" + "a".repeat(64);
 const HASH_B = "sha256:" + "b".repeat(64);
-const HASH_C = "sha256:" + "c".repeat(64);
+const SEED_PAGE_PACKET_HASH = "sha256:" + "c".repeat(64);
+const HASH_C = canonicalPagePacketHash();
 const STORY = "test-story";
 const PLAN_PATH = `stories/${STORY}/pages-prose-plans/PG-1.md`;
 
@@ -32,9 +35,10 @@ test("page_plan_stchar_packet_integrity allows omitted packets for offstage char
 });
 
 test("page_plan_stchar_packet_integrity accepts offstage_causal packets without voice blocks", async () => {
+  const pagePacketHash = canonicalPagePacketHash({ requiredBecause: "offstage_causal", voiceLine: "" });
   const verdicts = await pagePlanStcharPacketIntegrity.run(
-    input(plan({ requiredBecause: "offstage_causal", voiceLine: "" })),
-    context(baseRecords({ location: "offstage" }))
+    input(plan({ requiredBecause: "offstage_causal", pagePacketHash, voiceLine: "" })),
+    context(baseRecords({ location: "offstage", pagePacketHash }))
   );
 
   assert.deepEqual(verdicts, []);
@@ -78,6 +82,24 @@ test("page_plan_stchar_packet_integrity rejects hash mismatches", async () => {
   assert.equal((verdicts[0]?.detail as { field?: string }).field, "profile_hash");
 });
 
+test("page_plan_stchar_packet_integrity recomputes page_packet_hash from the canonical packet projection", async () => {
+  const wrongPagePacketHash = "sha256:" + "c".repeat(64);
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({ pagePacketHash: wrongPagePacketHash })),
+    context(baseRecords({ pagePacketHash: wrongPagePacketHash }))
+  );
+
+  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.hash_mismatch");
+  assert.equal((verdicts[0]?.detail as { field?: string }).field, "page_packet_hash");
+  assert.equal((verdicts[0]?.detail as { recomputed?: string }).recomputed, HASH_C);
+});
+
+test("page_plan_stchar_packet_integrity ignores the stored page_packet_hash value while recomputing the projection", async () => {
+  const alternatePageHash = `sha256:${computeStcharPagePacketHash(packetText({ pagePacketHash: "sha256:" + "d".repeat(64) }))}`;
+
+  assert.equal(alternatePageHash, HASH_C);
+});
+
 test("page_plan_stchar_packet_integrity rejects hash mismatches on offstage_causal packets", async () => {
   const verdicts = await pagePlanStcharPacketIntegrity.run(
     input(plan({
@@ -92,9 +114,10 @@ test("page_plan_stchar_packet_integrity rejects hash mismatches on offstage_caus
 });
 
 test("page_plan_stchar_packet_integrity rejects speaker packets without voice block", async () => {
+  const pagePacketHash = canonicalPagePacketHash({ voiceLine: "  - Voice/dialogue authority:" });
   const verdicts = await pagePlanStcharPacketIntegrity.run(
-    input(plan({ voiceLine: "  - Voice/dialogue authority:" })),
-    context(baseRecords())
+    input(plan({ pagePacketHash, voiceLine: "  - Voice/dialogue authority:" })),
+    context(baseRecords({ pagePacketHash }))
   );
 
   assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.missing_voice_block");
@@ -106,7 +129,7 @@ function input(content: string) {
   };
 }
 
-function baseRecords(options: { location?: string } = {}) {
+function baseRecords(options: { location?: string; pagePacketHash?: string } = {}) {
   return [
     storyRecord("story_entity_record", "STENT-1", "entities", {
       id: "STENT-1",
@@ -123,7 +146,7 @@ function baseRecords(options: { location?: string } = {}) {
       bound_stent_ids: ["STENT-1"],
       profile_hash: HASH_A,
       voice_block_hash: HASH_B,
-      page_packet_hash: HASH_C
+      page_packet_hash: options.pagePacketHash ?? HASH_C
     }),
     storyRecord("page_record", "PG-1", "pages", {
       id: "PG-1",
@@ -157,23 +180,47 @@ function plan(options: {
   stcharId?: string;
   requiredBecause?: string;
   profileHash?: string;
+  pagePacketHash?: string;
   voiceLine?: string;
 } = {}): string {
   const includePacket = options.includePacket ?? true;
+  const pagePacketHash = options.pagePacketHash ?? canonicalPagePacketHash(options);
   return [
     "# Page Plan",
     "",
     "## 16a. STCHAR-derived character authority packets",
     "",
     includePacket ? [
-      `- STENT-1 / ${options.stcharId ?? "STCHAR-1"} - Test Character.`,
-      `  - Required because: ${options.requiredBecause ?? "speaker"}.`,
-      `  - Hashes: profile_hash=${options.profileHash ?? HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${HASH_C}.`,
-      options.voiceLine ?? "  - Voice/dialogue authority: clipped STCHAR voice block.",
-      "  - Relevant appraisal rules: protect the secret."
+      packetText({ ...options, pagePacketHash }).replace(/\n$/, "")
     ].join("\n") : "",
     "",
     "## 17. Style/register notes",
     ""
   ].join("\n");
+}
+
+function packetText(options: {
+  stcharId?: string;
+  requiredBecause?: string;
+  profileHash?: string;
+  pagePacketHash?: string;
+  voiceLine?: string;
+} = {}): string {
+  return [
+    `- STENT-1 / ${options.stcharId ?? "STCHAR-1"} - Test Character.`,
+    `  - Required because: ${options.requiredBecause ?? "speaker"}.`,
+    `  - Hashes: profile_hash=${options.profileHash ?? HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${options.pagePacketHash ?? SEED_PAGE_PACKET_HASH}.`,
+    options.voiceLine ?? "  - Voice/dialogue authority: clipped STCHAR voice block.",
+    "  - Relevant appraisal rules: protect the secret.",
+    ""
+  ].join("\n");
+}
+
+function canonicalPagePacketHash(options: {
+  stcharId?: string;
+  requiredBecause?: string;
+  profileHash?: string;
+  voiceLine?: string;
+} = {}): string {
+  return `sha256:${computeStcharPagePacketHash(packetText({ ...options, pagePacketHash: SEED_PAGE_PACKET_HASH }))}`;
 }
