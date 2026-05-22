@@ -421,6 +421,39 @@ function operationSchema(kind: OperationKind): JsonObject {
           filename: stringSchema()
         }
       });
+    case "repair_diegetic_artifact_claim_map_metadata":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["target_record_id", "claim_map_updates"],
+        properties: {
+          target_record_id: stringSchema("^DA-[0-9]+$"),
+          claim_map_updates: {
+            type: "array",
+            minItems: 1,
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: [
+                "index",
+                "expected_canon_status",
+                "expected_cf_id",
+                "canon_status",
+                "cf_id",
+                "repair_trace_note"
+              ],
+              properties: {
+                index: { type: "integer", minimum: 0 },
+                expected_canon_status: { type: "string", const: "canonically_true" },
+                expected_cf_id: { type: "null" },
+                canon_status: { type: "string", enum: ["partially_true", "contested"] },
+                cf_id: { type: "null" },
+                repair_trace_note: stringSchema()
+              }
+            }
+          }
+        }
+      });
     case "create_stent_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_entity_record"));
     case "create_ststat_record":
@@ -469,9 +502,68 @@ function operationSchema(kind: OperationKind): JsonObject {
     case "append_story_character_authority_record":
     case "supersede_story_character_authority_record":
       return baseOperationProperties(kind, storyHybridPayloadWithRecord("story_character_authority_record"));
+    case "remove_story_character_authority_frontmatter_field":
+    case "remove_story_character_authority_body_hash_note_field":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_record_id", "field_name"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_record_id: stringSchema("^STCHAR-(0|[1-9][0-9]*)$"),
+          field_name: { type: "string", enum: ["page_packet_hash"] }
+        }
+      });
+    case "repair_story_character_authority_body_integrity":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_record_id", "body_markdown", "source_operational_fact_map"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_record_id: stringSchema("^STCHAR-(0|[1-9][0-9]*)$"),
+          body_markdown: stringSchema(),
+          source_operational_fact_map: {
+            type: "array",
+            minItems: 1,
+            items: sourceOperationalFactMapEntrySchema()
+          }
+        }
+      });
     case "append_story_diegetic_artifact_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_diegetic_artifact_record"));
   }
+}
+
+function sourceOperationalFactMapEntrySchema(): JsonObject {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: ["source_field", "disposition"],
+    properties: {
+      source_field: {
+        type: "string",
+        enum: [
+          "world_produced_wound",
+          "active_appetite",
+          "self_mythology",
+          "irreconcilable_contradiction",
+          "pressure_behavior",
+          "relational_charge",
+          "moral_psychological_edge",
+          "signature_scene_behaviors",
+          "voice_under_pressure",
+          "cannot_be_swapped_out_because"
+        ]
+      },
+      disposition: {
+        type: "string",
+        enum: ["copied", "transformed", "compressed", "omitted_with_rationale", "story_irrelevant"]
+      },
+      target_section: stringSchema(),
+      rationale: stringSchema()
+    }
+  };
 }
 
 export function createPatchOperationSchemaManifest(

@@ -152,8 +152,7 @@ function packetVerdicts(
   const parsed = asPlainRecord(stchar?.parsed);
   for (const [field, declared] of [
     ["profile_hash", packet.profileHash],
-    ["voice_block_hash", packet.voiceBlockHash],
-    ["page_packet_hash", packet.pagePacketHash]
+    ["voice_block_hash", packet.voiceBlockHash]
   ] as const) {
     const stored = stringValue(parsed[field]);
     if (!declared || !stored || declared !== stored) {
@@ -168,26 +167,22 @@ function packetVerdicts(
     }
   }
 
-  const storedPagePacketHash = stringValue(parsed.page_packet_hash);
-  if (packet.pagePacketHash && storedPagePacketHash) {
-    const recomputed = `sha256:${computeStcharPagePacketHash(packet.packetText)}`;
-    if (recomputed !== storedPagePacketHash) {
-      verdicts.push(planFail(
-        page,
-        planPath,
-        "page_plan_stchar_packet_integrity.hash_mismatch",
-        `${planPath} 16a packet for ${packet.stcharId} has page_packet_hash=${storedPagePacketHash}, expected ${recomputed} from the canonical non-self-referential packet projection.`,
-        {
-          page_id: pageId(page),
-          stchar_id: packet.stcharId,
-          field: "page_packet_hash",
-          declared: packet.pagePacketHash,
-          stored: storedPagePacketHash,
-          recomputed
-        },
-        `Recompute ${packet.stcharId}'s page_packet_hash from the canonical §16a packet projection and update both STCHAR frontmatter and the 16a packet declaration.`
-      ));
-    }
+  const recomputed = `sha256:${computeStcharPagePacketHash(packet.packetText)}`;
+  if (!packet.pagePacketHash || packet.pagePacketHash !== recomputed) {
+    verdicts.push(planFail(
+      page,
+      planPath,
+      "page_plan_stchar_packet_integrity.hash_mismatch",
+      `${planPath} 16a packet for ${packet.stcharId} declares page_packet_hash=${packet.pagePacketHash ?? "<missing>"}, expected ${recomputed} from the canonical non-self-referential packet projection.`,
+      {
+        page_id: pageId(page),
+        stchar_id: packet.stcharId,
+        field: "page_packet_hash",
+        declared: packet.pagePacketHash ?? null,
+        recomputed
+      },
+      `Recompute ${packet.stcharId}'s page_packet_hash from this page's canonical §16a packet projection and update the 16a packet declaration.`
+    ));
   }
 
   if (SPEAKER_VOICE_REQUIRED.has(packet.requiredBecause) && !packet.hasVoiceBlock) {

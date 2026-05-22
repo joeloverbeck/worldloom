@@ -4,10 +4,20 @@ import path from "node:path";
 import test from "node:test";
 
 import YAML from "yaml";
+import {
+  computeStcharProfileHash,
+  computeStcharVoiceBlockHash
+} from "@worldloom/world-index/hash/content";
 
-import { baseEnvelope, createTestWorld, assertOpError, assertYamlEquals } from "../harness.js";
+import { baseEnvelope, createTestWorld, assertOpError, assertYamlEquals, createOp } from "../harness.js";
 import type { PatchOperation } from "../../src/envelope/schema.js";
-import { stageCreateStoryRecord, stageStoryCharacterAuthorityRecord } from "../../src/ops/create-story-record.js";
+import {
+  stageCreateStoryRecord,
+  stageRepairStoryCharacterAuthorityBodyIntegrity,
+  stageRemoveStoryCharacterAuthorityBodyHashNoteField,
+  stageRemoveStoryCharacterAuthorityFrontmatterField,
+  stageStoryCharacterAuthorityRecord
+} from "../../src/ops/create-story-record.js";
 import { contentHashForText, serializeStableYaml } from "../../src/ops/shared.js";
 
 test("create_slt_record writes story-bundle YAML under the story _source tree", async (t) => {
@@ -589,6 +599,169 @@ test("supersede_story_character_authority_record writes replacement and lifecycl
   );
 });
 
+test("remove_story_character_authority_frontmatter_field removes only legacy page_packet_hash", async (t) => {
+  const world = createTestWorld(t);
+  const frontmatter = stcharRecord("STCHAR-1");
+  seedStcharHybrid(world, "marla-kern-seduction", frontmatter, "## Profile\n\nOriginal profile.");
+  const env = baseEnvelope();
+  const source = fs.readFileSync(
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "story-characters",
+      "STCHAR-1.md"
+    ),
+    "utf8"
+  );
+  const op = createOp({
+    op: "remove_story_character_authority_frontmatter_field",
+    target_world: env.target_world,
+    target_file: "stories/marla-kern-seduction/story-characters/STCHAR-1.md",
+    expected_content_hash: contentHashForText(source),
+    payload: {
+      story_slug: "marla-kern-seduction",
+      target_record_id: "STCHAR-1",
+      field_name: "page_packet_hash"
+    }
+  } satisfies Extract<PatchOperation, { op: "remove_story_character_authority_frontmatter_field" }>);
+
+  const staged = await stageRemoveStoryCharacterAuthorityFrontmatterField(env, op, world.ctx);
+  const parsed = parseHybrid(fs.readFileSync(staged.temp_file_path, "utf8"));
+
+  assert.equal(parsed.frontmatter.page_packet_hash, undefined);
+  assert.equal(parsed.frontmatter.profile_hash, frontmatter.profile_hash);
+  assert.equal(parsed.frontmatter.voice_block_hash, frontmatter.voice_block_hash);
+  assert.equal(parsed.body.trim(), "## Profile\n\nOriginal profile.");
+});
+
+test("remove_story_character_authority_frontmatter_field rejects unsupported frontmatter fields", async (t) => {
+  const world = createTestWorld(t);
+  seedStcharHybrid(world, "marla-kern-seduction", stcharRecord("STCHAR-1"), "## Profile\n\nOriginal profile.");
+  const env = baseEnvelope();
+
+  await assertOpError(
+    () =>
+      stageRemoveStoryCharacterAuthorityFrontmatterField(
+        env,
+        createOp({
+          op: "remove_story_character_authority_frontmatter_field",
+          target_world: env.target_world,
+          target_file: "stories/marla-kern-seduction/story-characters/STCHAR-1.md",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            target_record_id: "STCHAR-1",
+            field_name: "profile_hash"
+          }
+        } as unknown as Extract<PatchOperation, { op: "remove_story_character_authority_frontmatter_field" }>),
+        world.ctx
+      ),
+    "unsupported_operation"
+  );
+});
+
+test("remove_story_character_authority_body_hash_note_field removes only legacy page_packet_hash note clause", async (t) => {
+  const world = createTestWorld(t);
+  const frontmatter = stcharRecord("STCHAR-1");
+  const body = [
+    "## Validation / Audit Anchors",
+    "",
+    "- Hashes: profile_hash over the full body markdown; voice_block_hash over the `## Page-Plan Voice Block` section; page_packet_hash over the §16a packet projection authored for this bundle.",
+    "- Invariants respected: ONT-1."
+  ].join("\n");
+  seedStcharHybrid(world, "marla-kern-seduction", frontmatter, body);
+  const env = baseEnvelope();
+  const source = fs.readFileSync(
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "story-characters",
+      "STCHAR-1.md"
+    ),
+    "utf8"
+  );
+  const op = createOp({
+    op: "remove_story_character_authority_body_hash_note_field",
+    target_world: env.target_world,
+    target_file: "stories/marla-kern-seduction/story-characters/STCHAR-1.md",
+    expected_content_hash: contentHashForText(source),
+    payload: {
+      story_slug: "marla-kern-seduction",
+      target_record_id: "STCHAR-1",
+      field_name: "page_packet_hash"
+    }
+  } satisfies Extract<PatchOperation, { op: "remove_story_character_authority_body_hash_note_field" }>);
+
+  const staged = await stageRemoveStoryCharacterAuthorityBodyHashNoteField(env, op, world.ctx);
+  const parsed = parseHybrid(fs.readFileSync(staged.temp_file_path, "utf8"));
+
+  assert.equal(parsed.frontmatter.page_packet_hash, frontmatter.page_packet_hash);
+  assert.match(parsed.body, /profile_hash over the full body markdown/);
+  assert.match(parsed.body, /voice_block_hash over the `## Page-Plan Voice Block` section\./);
+  assert.doesNotMatch(parsed.body, /page_packet_hash/);
+  assert.match(parsed.body, /Invariants respected: ONT-1/);
+});
+
+test("repair_story_character_authority_body_integrity replaces body, source map, and stamps hashes", async (t) => {
+  const world = createTestWorld(t);
+  const frontmatter = stcharRecord("STCHAR-1");
+  seedStcharHybrid(world, "marla-kern-seduction", frontmatter, "## Profile\n\nOld profile.");
+  const env = baseEnvelope();
+  const source = fs.readFileSync(
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "story-characters",
+      "STCHAR-1.md"
+    ),
+    "utf8"
+  );
+  const body = stcharBody();
+  const sourceMap: Extract<
+    PatchOperation,
+    { op: "repair_story_character_authority_body_integrity" }
+  >["payload"]["source_operational_fact_map"] = [
+    {
+      source_field: "signature_scene_behaviors",
+      disposition: "compressed",
+      target_section: "Prose Rendering Constraints",
+      rationale: "Carried into the signature rendering constraints."
+    }
+  ];
+  const op = createOp({
+    op: "repair_story_character_authority_body_integrity",
+    target_world: env.target_world,
+    target_file: "stories/marla-kern-seduction/story-characters/STCHAR-1.md",
+    expected_content_hash: contentHashForText(source),
+    payload: {
+      story_slug: "marla-kern-seduction",
+      target_record_id: "STCHAR-1",
+      body_markdown: body,
+      source_operational_fact_map: sourceMap
+    }
+  } satisfies Extract<PatchOperation, { op: "repair_story_character_authority_body_integrity" }>) as Extract<
+    PatchOperation,
+    { op: "repair_story_character_authority_body_integrity" }
+  >;
+
+  const staged = await stageRepairStoryCharacterAuthorityBodyIntegrity(env, op, world.ctx);
+  const parsed = parseHybrid(fs.readFileSync(staged.temp_file_path, "utf8"));
+
+  assert.deepEqual(parsed.frontmatter.source_operational_fact_map, sourceMap);
+  assert.equal(parsed.frontmatter.profile_hash, `sha256:${computeStcharProfileHash(body)}`);
+  assert.equal(parsed.frontmatter.voice_block_hash, `sha256:${computeStcharVoiceBlockHash(body)}`);
+  assert.equal(parsed.frontmatter.id, "STCHAR-1");
+  assert.equal(parsed.body, body);
+});
+
 function stcharRecord(id: string): Record<string, unknown> {
   return {
     id,
@@ -611,6 +784,76 @@ function stcharRecord(id: string): Record<string, unknown> {
     voice_block_hash: `sha256:${"c".repeat(64)}`,
     page_packet_hash: `sha256:${"d".repeat(64)}`
   };
+}
+
+function stcharBody(): string {
+  return [
+    "# Test STCHAR",
+    "",
+    "## Story-Facing Identity",
+    "",
+    "Identity authority.",
+    "",
+    "## Source Distillation",
+    "",
+    "Source authority.",
+    "",
+    "## Stable Persona Core",
+    "",
+    "Stable persona.",
+    "",
+    "## Emotional Appraisal Map",
+    "",
+    "Emotional appraisals.",
+    "",
+    "## Pressure Behavior",
+    "",
+    "Pressure behavior.",
+    "",
+    "## Voice Bible / Dialogue Authority",
+    "",
+    "Voice authority.",
+    "",
+    "## Page-Plan Voice Block",
+    "",
+    "Page voice block.",
+    "",
+    "## Perception and Embodiment",
+    "",
+    "Perception authority.",
+    "",
+    "## Agency and Planning Tendencies",
+    "",
+    "Agency authority.",
+    "",
+    "### Operational capabilities and affordances",
+    "",
+    "Can act through known skills and available tools.",
+    "",
+    "### Capability limits, costs, and access constraints",
+    "",
+    "Limits and costs remain explicit.",
+    "",
+    "## Relationship-Specific Behavior",
+    "",
+    "Relationship behavior.",
+    "",
+    "## Story-State Derivation Guide",
+    "",
+    "Story-state guidance.",
+    "",
+    "## Prose Rendering Constraints",
+    "",
+    "Rendering constraints.",
+    "",
+    "### Signature scene behaviors to render",
+    "",
+    "Render the signature behavior.",
+    "",
+    "## Validation / Audit Anchors",
+    "",
+    "Audit anchors."
+  ].join("\n");
 }
 
 function seedStcharHybrid(

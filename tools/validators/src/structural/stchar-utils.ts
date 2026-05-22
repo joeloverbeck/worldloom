@@ -19,7 +19,10 @@ const STCHAR_RELEVANT_OPS = new Set([
   "create_stplan_record",
   "create_stemo_record",
   "append_story_character_authority_record",
-  "supersede_story_character_authority_record"
+  "supersede_story_character_authority_record",
+  "remove_story_character_authority_frontmatter_field",
+  "remove_story_character_authority_body_hash_note_field",
+  "repair_story_character_authority_body_integrity"
 ]);
 
 export interface StoryMaps {
@@ -48,7 +51,8 @@ export function shouldCheckRecordInPreApply(record: IndexedRecord, ctx: Context)
   return ctx.patch_plan?.patches.some((patch) => {
     const payload = asPlainRecord(patch.payload);
     const parsed = asPlainRecord(payload.record);
-    return stringValue(parsed.id) === stringValue(asPlainRecord(record.parsed).id);
+    return stringValue(parsed.id) === stringValue(asPlainRecord(record.parsed).id) ||
+      stringValue(payload.target_record_id) === stringValue(asPlainRecord(record.parsed).id);
   }) === true;
 }
 

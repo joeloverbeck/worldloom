@@ -295,8 +295,7 @@ function stchar(id: string, stentId: string): FixtureRecord {
     profile_revision: 1,
     body_schema_version: "stchar.v1",
     profile_hash: `sha256:${computeStcharProfileHash(bodyMarkdown)}`,
-    voice_block_hash: `sha256:${computeStcharVoiceBlockHash(bodyMarkdown)}`,
-    page_packet_hash: "sha256:" + "c".repeat(64)
+    voice_block_hash: `sha256:${computeStcharVoiceBlockHash(bodyMarkdown)}`
   }, bodyMarkdown);
 }
 

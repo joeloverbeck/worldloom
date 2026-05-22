@@ -19,8 +19,7 @@
     "profile_revision",
     "body_schema_version",
     "profile_hash",
-    "voice_block_hash",
-    "page_packet_hash"
+    "voice_block_hash"
   ],
   "properties": {
     "record_kind": { "type": "string", "const": "story_character_authority_record" },
@@ -94,8 +93,7 @@
     "profile_revision": { "type": "integer", "minimum": 1 },
     "body_schema_version": { "type": "string", "const": "stchar.v1" },
     "profile_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-    "voice_block_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-    "page_packet_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+    "voice_block_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
   },
   "additionalProperties": false,
   "allOf": [

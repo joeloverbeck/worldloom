@@ -78,6 +78,7 @@ export const OPERATION_KINDS = [
   "append_adjudication_record",
   "append_character_record",
   "append_diegetic_artifact_record",
+  "repair_diegetic_artifact_claim_map_metadata",
   "create_stent_record",
   "create_ststat_record",
   "create_sf_record",
@@ -104,6 +105,9 @@ export const OPERATION_KINDS = [
   "create_stemo_record",
   "append_story_character_authority_record",
   "supersede_story_character_authority_record",
+  "remove_story_character_authority_frontmatter_field",
+  "remove_story_character_authority_body_hash_note_field",
+  "repair_story_character_authority_body_integrity",
   "append_story_diegetic_artifact_record"
 ] as const;
 
@@ -210,6 +214,56 @@ export interface StoryCharacterAuthorityPayload<TRecord = Record<string, unknown
   body_markdown: string;
 }
 
+export interface RemoveStoryCharacterAuthorityFrontmatterFieldPayload {
+  story_slug: string;
+  target_record_id: string;
+  field_name: "page_packet_hash";
+}
+
+export interface RemoveStoryCharacterAuthorityBodyHashNoteFieldPayload {
+  story_slug: string;
+  target_record_id: string;
+  field_name: "page_packet_hash";
+}
+
+export interface StoryCharacterAuthoritySourceFactMapEntry {
+  source_field:
+    | "world_produced_wound"
+    | "active_appetite"
+    | "self_mythology"
+    | "irreconcilable_contradiction"
+    | "pressure_behavior"
+    | "relational_charge"
+    | "moral_psychological_edge"
+    | "signature_scene_behaviors"
+    | "voice_under_pressure"
+    | "cannot_be_swapped_out_because";
+  disposition: "copied" | "transformed" | "compressed" | "omitted_with_rationale" | "story_irrelevant";
+  target_section?: string;
+  rationale?: string;
+}
+
+export interface RepairStoryCharacterAuthorityBodyIntegrityPayload {
+  story_slug: string;
+  target_record_id: string;
+  body_markdown: string;
+  source_operational_fact_map: StoryCharacterAuthoritySourceFactMapEntry[];
+}
+
+export interface RepairDiegeticArtifactClaimMapEntry {
+  index: number;
+  expected_canon_status: "canonically_true";
+  expected_cf_id: null;
+  canon_status: "partially_true" | "contested";
+  cf_id: null;
+  repair_trace_note: string;
+}
+
+export interface RepairDiegeticArtifactClaimMapMetadataPayload {
+  target_record_id: string;
+  claim_map_updates: RepairDiegeticArtifactClaimMapEntry[];
+}
+
 export type PatchOperation =
   | OperationBase<"create_cf_record", { cf_record: CanonFactRecord }>
   | OperationBase<"create_ch_record", { ch_record: ChangeLogEntry }>
@@ -261,6 +315,7 @@ export type PatchOperation =
       "append_diegetic_artifact_record",
       { da_record: DiegeticArtifactFrontmatter; body_markdown: string; filename: string }
     >
+  | OperationBase<"repair_diegetic_artifact_claim_map_metadata", RepairDiegeticArtifactClaimMapMetadataPayload>
   | OperationBase<"create_stent_record", StoryRecordPayload>
   | OperationBase<"create_ststat_record", StoryRecordPayload>
   | OperationBase<"create_sf_record", StoryRecordPayload>
@@ -287,6 +342,18 @@ export type PatchOperation =
   | OperationBase<"create_stemo_record", StoryRecordPayload>
   | OperationBase<"append_story_character_authority_record", StoryCharacterAuthorityPayload>
   | OperationBase<"supersede_story_character_authority_record", StoryCharacterAuthorityPayload>
+  | OperationBase<
+      "remove_story_character_authority_frontmatter_field",
+      RemoveStoryCharacterAuthorityFrontmatterFieldPayload
+    >
+  | OperationBase<
+      "remove_story_character_authority_body_hash_note_field",
+      RemoveStoryCharacterAuthorityBodyHashNoteFieldPayload
+    >
+  | OperationBase<
+      "repair_story_character_authority_body_integrity",
+      RepairStoryCharacterAuthorityBodyIntegrityPayload
+    >
   | OperationBase<"append_story_diegetic_artifact_record", StoryRecordPayload>;
 
 export type OperationPayload = PatchOperation["payload"];

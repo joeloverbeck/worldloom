@@ -125,11 +125,59 @@ test("stchar_source_fact_coverage runs for STCHAR pre-apply plans", async () => 
   })), true);
 });
 
+test("stchar_source_fact_coverage checks repair_story_character_authority_body_integrity pre-apply plans", async () => {
+  const verdicts = await stcharSourceFactCoverage.run(undefined, context([
+    sourceChar({ dramatic_core: { signature_scene_behaviors: ["turns insults into filings"] } }),
+    stchar({
+      source_operational_fact_map: [
+        mapEntry("signature_scene_behaviors", "compressed", {
+          target_section: "Prose Rendering Constraints",
+          rationale: "Carried into rendering constraints."
+        })
+      ]
+    })
+  ], {
+    run_mode: "pre-apply",
+    patch_plan: stcharRepairPatchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 async function run(records: ReturnType<typeof record>[]) {
   return stcharSourceFactCoverage.run(undefined, context(records, {
     run_mode: "pre-apply",
     patch_plan: stcharPatchPlan()
   }));
+}
+
+function stcharRepairPatchPlan(): PatchPlanEnvelope {
+  return {
+    plan_id: "plan-stchar-source-fact-repair",
+    target_world: "test",
+    approval_token: "token",
+    verdict: "ACCEPT",
+    originating_skill: "test",
+    expected_id_allocations: {},
+    patches: [{
+      op: "repair_story_character_authority_body_integrity",
+      target_world: "test",
+      target_file: STCHAR_PATH,
+      payload: {
+        story_slug: STORY,
+        target_record_id: "STCHAR-1",
+        body_markdown: "## Profile\n\nBody.",
+        source_operational_fact_map: [
+          {
+            source_field: "signature_scene_behaviors",
+            disposition: "compressed",
+            target_section: "Prose Rendering Constraints",
+            rationale: "Carried into rendering constraints."
+          }
+        ]
+      }
+    }]
+  } as unknown as PatchPlanEnvelope;
 }
 
 function sourceChar(overrides: Record<string, unknown> = {}) {
@@ -175,7 +223,6 @@ function stcharFrontmatter(overrides: Record<string, unknown> = {}): Record<stri
     body_schema_version: "stchar.v1",
     profile_hash: `sha256:${"b".repeat(64)}`,
     voice_block_hash: `sha256:${"c".repeat(64)}`,
-    page_packet_hash: `sha256:${"d".repeat(64)}`,
     ...overrides
   };
 }

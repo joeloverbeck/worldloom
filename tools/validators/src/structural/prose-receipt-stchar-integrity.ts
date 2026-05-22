@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 import yaml from "js-yaml";
+import { computeStcharPagePacketHash } from "@worldloom/world-index/hash/content";
 
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
@@ -42,6 +43,7 @@ interface Packet {
   profileHash: string | undefined;
   voiceBlockHash: string | undefined;
   pagePacketHash: string | undefined;
+  packetText: string;
 }
 
 export const proseReceiptStcharIntegrity: Validator = {
@@ -202,8 +204,7 @@ function hashVerdicts(
   const stcharParsed = asPlainRecord(stchar?.parsed);
   for (const [field, packetHash] of [
     ["profile_hash", packet.profileHash],
-    ["voice_block_hash", packet.voiceBlockHash],
-    ["page_packet_hash", packet.pagePacketHash]
+    ["voice_block_hash", packet.voiceBlockHash]
   ] as const) {
     const comparison = asPlainRecord(entry[field]);
     const storedHash = stringValue(stcharParsed[field]);
@@ -230,6 +231,31 @@ function hashVerdicts(
       ));
     }
   }
+
+  const comparison = asPlainRecord(entry.page_packet_hash);
+  const expected = stringValue(comparison.expected);
+  const observed = stringValue(comparison.observed);
+  const verdict = stringValue(comparison.verdict);
+  const recomputed = `sha256:${computeStcharPagePacketHash(packet.packetText)}`;
+  if (expected !== packet.pagePacketHash || observed !== recomputed || verdict !== "PASS") {
+    verdicts.push(receiptFail(
+      receipt,
+      page,
+      "prose_receipt_stchar_integrity.hash_mismatch",
+      `${receipt.path} stchar_authority for ${packet.stcharId} records page_packet_hash expected=${expected ?? "<missing>"} observed=${observed ?? "<missing>"}, expected packet declaration=${packet.pagePacketHash ?? "<missing>"} and recomputed=${recomputed}.`,
+      {
+        page_id: pageId(page),
+        stchar_id: packet.stcharId,
+        field: "page_packet_hash",
+        receipt_expected: expected ?? null,
+        receipt_observed: observed ?? null,
+        packet_hash: packet.pagePacketHash ?? null,
+        recomputed,
+        receipt_verdict: verdict ?? null
+      },
+      `Update ${packet.stcharId}'s page_packet_hash comparison to expected=${packet.pagePacketHash ?? "<page-plan packet hash>"} and observed=${recomputed}.`
+    ));
+  }
   return verdicts;
 }
 
@@ -254,7 +280,8 @@ function parsePackets(content: string): Packet[] {
       requiredBecause: packetText.match(/^\s+- Required because:\s*([^.\n]+)\.?/m)?.[1]?.trim() ?? "",
       profileHash: hashes?.[1],
       voiceBlockHash: hashes?.[2],
-      pagePacketHash: hashes?.[3]
+      pagePacketHash: hashes?.[3],
+      packetText
     };
   });
 }

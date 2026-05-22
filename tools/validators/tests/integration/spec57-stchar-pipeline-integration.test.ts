@@ -75,8 +75,7 @@ function recordsWithStoryletPredicate(recordActiveId: string): IndexedRecord[] {
       profile_revision: 1,
       body_schema_version: "stchar.v1",
       profile_hash: "sha256:" + "b".repeat(64),
-      voice_block_hash: "sha256:" + "c".repeat(64),
-      page_packet_hash: "sha256:" + "d".repeat(64)
+      voice_block_hash: "sha256:" + "c".repeat(64)
     }),
     record("storylet_record", "SLT-1", "_source/storylets/SLT-1.yaml", {
       id: "SLT-1",

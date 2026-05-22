@@ -212,8 +212,8 @@ function hashVerdicts(record: IndexedRecord, content: string): Verdict[] {
   const id = recordId(record);
   const verdicts: Verdict[] = [];
 
-  const shapedHashes = new Map<"profile_hash" | "voice_block_hash" | "page_packet_hash", string>();
-  for (const field of ["profile_hash", "voice_block_hash", "page_packet_hash"] as const) {
+  const shapedHashes = new Map<"profile_hash" | "voice_block_hash", string>();
+  for (const field of ["profile_hash", "voice_block_hash"] as const) {
     const value = stringValue(parsed[field]);
     if (!value || !HASH_PATTERN.test(value)) {
       verdicts.push(stcharFail(

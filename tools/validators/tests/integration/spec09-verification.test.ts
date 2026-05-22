@@ -166,10 +166,7 @@ test("SPEC-09 §V9: world-validate full-rule baseline reports known legacy chara
 test("SPEC-09 §V10 (surrogate): patch-plan envelope for new animalia capability CF passes validatePatchPlan", async () => {
   const result = await validatePatchPlan(capabilityEnvelope("animalia", "CF-9998", "SEC-INS-998") as PatchPlanEnvelope);
 
-  assert.deepEqual(legacyCharacterDramaticCoreFailures(result.verdicts), [
-    "CHAR-0001:characters/vespera-nightwhisper.md",
-    "CHAR-0002:characters/melissa-threadscar.md"
-  ]);
+  assert.deepEqual(legacyCharacterDramaticCoreFailures(result.verdicts), []);
   assert.deepEqual(result.verdicts.filter((verdict) => !isLegacyCharacterOrProposalShapeFailure(verdict)), []);
 });
 

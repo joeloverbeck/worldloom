@@ -3,3 +3,9 @@ command = "node"
 args = ["tools/world-mcp/dist/src/server.js"]
 cwd = "/home/joeloverbeck/projects/worldloom"
 env = {}
+
+[mcp_servers.worldloom.tools.mcp__worldloom__describe_envelope_schema]
+approval_mode = "approve"
+
+[mcp_servers.worldloom.tools.mcp__worldloom__get_record]
+approval_mode = "approve"

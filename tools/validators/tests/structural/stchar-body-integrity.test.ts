@@ -151,6 +151,15 @@ test("stchar_body_integrity runs for append_story_character_authority_record pre
   })), true);
 });
 
+test("stchar_body_integrity checks repair_story_character_authority_body_integrity pre-apply plans", async () => {
+  const verdicts = await run(body(), {}, {
+    run_mode: "pre-apply",
+    patch_plan: stcharRepairPatchPlan(body())
+  });
+
+  assert.deepEqual(verdicts, []);
+});
+
 async function run(
   markdownBody: string,
   overrides: Record<string, unknown> = {},
@@ -160,6 +169,35 @@ async function run(
   return stcharBodyIntegrity.run({
     files: [{ path: FILE_PATH, content: hybrid(stchar.parsed as Record<string, unknown>, markdownBody) }]
   }, context([stchar], contextOverrides));
+}
+
+function stcharRepairPatchPlan(markdownBody: string): PatchPlanEnvelope {
+  return {
+    plan_id: "plan-stchar-body-repair",
+    target_world: "test",
+    approval_token: "token",
+    verdict: "ACCEPT",
+    originating_skill: "test",
+    expected_id_allocations: {},
+    patches: [{
+      op: "repair_story_character_authority_body_integrity",
+      target_world: "test",
+      target_file: FILE_PATH,
+      payload: {
+        story_slug: STORY,
+        target_record_id: "STCHAR-1",
+        body_markdown: markdownBody,
+        source_operational_fact_map: [
+          {
+            source_field: "signature_scene_behaviors",
+            disposition: "compressed",
+            target_section: "Prose Rendering Constraints",
+            rationale: "Carried into rendering constraints."
+          }
+        ]
+      }
+    }]
+  } as PatchPlanEnvelope;
 }
 
 function stcharRecord(markdownBody: string, overrides: Record<string, unknown> = {}) {
@@ -190,7 +228,6 @@ function stcharFrontmatter(overrides: Record<string, unknown> = {}, markdownBody
     body_schema_version: "stchar.v1",
     profile_hash: `sha256:${computeStcharProfileHash(markdownBody)}`,
     voice_block_hash: `sha256:${computeStcharVoiceBlockHash(markdownBody)}`,
-    page_packet_hash: HASH,
     ...overrides
   };
 }

@@ -38,7 +38,7 @@ test("page_plan_stchar_packet_integrity accepts offstage_causal packets without 
   const pagePacketHash = canonicalPagePacketHash({ requiredBecause: "offstage_causal", voiceLine: "" });
   const verdicts = await pagePlanStcharPacketIntegrity.run(
     input(plan({ requiredBecause: "offstage_causal", pagePacketHash, voiceLine: "" })),
-    context(baseRecords({ location: "offstage", pagePacketHash }))
+    context(baseRecords({ location: "offstage" }))
   );
 
   assert.deepEqual(verdicts, []);
@@ -86,7 +86,7 @@ test("page_plan_stchar_packet_integrity recomputes page_packet_hash from the can
   const wrongPagePacketHash = "sha256:" + "c".repeat(64);
   const verdicts = await pagePlanStcharPacketIntegrity.run(
     input(plan({ pagePacketHash: wrongPagePacketHash })),
-    context(baseRecords({ pagePacketHash: wrongPagePacketHash }))
+    context(baseRecords())
   );
 
   assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.hash_mismatch");
@@ -94,10 +94,34 @@ test("page_plan_stchar_packet_integrity recomputes page_packet_hash from the can
   assert.equal((verdicts[0]?.detail as { recomputed?: string }).recomputed, HASH_C);
 });
 
-test("page_plan_stchar_packet_integrity ignores the stored page_packet_hash value while recomputing the projection", async () => {
-  const alternatePageHash = `sha256:${computeStcharPagePacketHash(packetText({ pagePacketHash: "sha256:" + "d".repeat(64) }))}`;
+test("page_plan_stchar_packet_integrity accepts different page_packet_hash values for the same STCHAR on different pages", async () => {
+  const secondPlanPath = `stories/${STORY}/pages-prose-plans/PG-2.md`;
+  const secondPacketHash = canonicalPagePacketHash({ requiredBecause: "direct_target", voiceLine: "  - Voice/dialogue authority: page two voice block." });
+  const verdicts = await pagePlanStcharPacketIntegrity.run({
+    files: [
+      { path: PLAN_PATH, content: plan() },
+      { path: secondPlanPath, content: plan({ requiredBecause: "direct_target", pagePacketHash: secondPacketHash, voiceLine: "  - Voice/dialogue authority: page two voice block." }) }
+    ]
+  }, context([
+    ...baseRecords(),
+    storyRecord("page_record", "PG-2", "pages", {
+      id: "PG-2",
+      story_id: "STORY-1",
+      state_snapshot: {
+        active_records: { STENT: ["STENT-1"], STCHAR: ["STCHAR-1"] },
+        entity_status: {
+          "STENT-1": {
+            life: "alive",
+            agency: "free",
+            location: "STLOC-2"
+          }
+        }
+      }
+    })
+  ]));
 
-  assert.equal(alternatePageHash, HASH_C);
+  assert.notEqual(secondPacketHash, HASH_C);
+  assert.deepEqual(verdicts, []);
 });
 
 test("page_plan_stchar_packet_integrity rejects hash mismatches on offstage_causal packets", async () => {
@@ -117,7 +141,7 @@ test("page_plan_stchar_packet_integrity rejects speaker packets without voice bl
   const pagePacketHash = canonicalPagePacketHash({ voiceLine: "  - Voice/dialogue authority:" });
   const verdicts = await pagePlanStcharPacketIntegrity.run(
     input(plan({ pagePacketHash, voiceLine: "  - Voice/dialogue authority:" })),
-    context(baseRecords({ pagePacketHash }))
+    context(baseRecords())
   );
 
   assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.missing_voice_block");
@@ -129,7 +153,7 @@ function input(content: string) {
   };
 }
 
-function baseRecords(options: { location?: string; pagePacketHash?: string } = {}) {
+function baseRecords(options: { location?: string } = {}) {
   return [
     storyRecord("story_entity_record", "STENT-1", "entities", {
       id: "STENT-1",
@@ -145,8 +169,7 @@ function baseRecords(options: { location?: string; pagePacketHash?: string } = {
       status: "active",
       bound_stent_ids: ["STENT-1"],
       profile_hash: HASH_A,
-      voice_block_hash: HASH_B,
-      page_packet_hash: options.pagePacketHash ?? HASH_C
+      voice_block_hash: HASH_B
     }),
     storyRecord("page_record", "PG-1", "pages", {
       id: "PG-1",
