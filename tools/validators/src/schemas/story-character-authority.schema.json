@@ -35,6 +35,43 @@
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
     },
+    "source_operational_fact_map": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "required": ["source_field", "disposition"],
+        "properties": {
+          "source_field": {
+            "type": "string",
+            "enum": [
+              "world_produced_wound",
+              "active_appetite",
+              "self_mythology",
+              "irreconcilable_contradiction",
+              "pressure_behavior",
+              "relational_charge",
+              "moral_psychological_edge",
+              "signature_scene_behaviors",
+              "voice_under_pressure",
+              "cannot_be_swapped_out_because"
+            ]
+          },
+          "disposition": {
+            "type": "string",
+            "enum": [
+              "copied",
+              "transformed",
+              "compressed",
+              "omitted_with_rationale",
+              "story_irrelevant"
+            ]
+          },
+          "target_section": { "type": "string", "minLength": 1 },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
     "story_local_inputs_used": {
       "type": "array",
       "items": { "type": "string", "pattern": "^(STENT|SF|BEL|DA|SE|CHC|STPLAN|STEMO|SREL|STINT|STSTAT|STLOC|STOBJ|THR|OBL|CNSQ|CLK|STSEC|STQ|PG|BR|SLT)-(0|[1-9][0-9]*)$" }

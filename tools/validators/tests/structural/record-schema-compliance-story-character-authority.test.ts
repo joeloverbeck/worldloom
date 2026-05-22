@@ -15,6 +15,85 @@ test("record_schema_compliance accepts complete STCHAR frontmatter", async () =>
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts optional STCHAR source operational fact map", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    stcharRecord(validStchar({
+      source_operational_fact_map: [
+        {
+          source_field: "world_produced_wound",
+          disposition: "copied",
+          target_section: "Pressure Behavior"
+        },
+        {
+          source_field: "active_appetite",
+          disposition: "transformed",
+          target_section: "Agency and Planning Tendencies"
+        },
+        {
+          source_field: "self_mythology",
+          disposition: "compressed",
+          target_section: "Story-Facing Identity"
+        },
+        {
+          source_field: "irreconcilable_contradiction",
+          disposition: "omitted_with_rationale",
+          rationale: "Not relevant to this local story role."
+        },
+        {
+          source_field: "signature_scene_behaviors",
+          disposition: "story_irrelevant",
+          rationale: "The character is referenced only in a factual index entry."
+        }
+      ]
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance accepts STCHAR frontmatter without source operational fact map", async () => {
+  const parsed = validStchar();
+  delete parsed.source_operational_fact_map;
+
+  const result = await recordSchemaCompliance.run({}, context([
+    stcharRecord(parsed)
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance accepts story-local STCHAR with null source operational fact map", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    stcharRecord(validStchar({
+      source_kind: "story_local",
+      source_char_id: null,
+      source_char_hash: null,
+      source_operational_fact_map: null
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects unknown STCHAR source operational fact disposition", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    stcharRecord(validStchar({
+      source_operational_fact_map: [
+        {
+          source_field: "signature_scene_behaviors",
+          disposition: "left_in_source_distillation",
+          target_section: "Prose Rendering Constraints"
+        }
+      ]
+    }))
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.enum" &&
+    verdict.message.includes("/source_operational_fact_map/0/disposition")
+  ));
+});
+
 test("record_schema_compliance requires STCHAR hashes", async () => {
   const parsed = validStchar();
   delete parsed.voice_block_hash;
