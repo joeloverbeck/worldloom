@@ -313,7 +313,7 @@ node tools/world-mcp/dist/src/cli/compute-stchar-hashes.js \
 
 - `profile_hash`: emitted from the complete STCHAR body markdown.
 - `voice_block_hash`: emitted from the `## Page-Plan Voice Block` section.
-- `page_packet_hash`: emitted from the §16a page-plan packet projection.
+- `page_packet_hash`: emitted from the full §16a page-plan packet projection. If the packet already contains a `Hashes:` line, the canonical helper masks only `page_packet_hash=sha256:<64 lowercase hex>` to `page_packet_hash=sha256:<page_packet_hash>` before hashing; do not remove the sibling `profile_hash` / `voice_block_hash` declarations by hand.
 
 The CLI emits all three as `sha256:<64 lowercase hex>` (hashed with `sha256Hex ∘ normalizeProseWhitespace`, so they are invariant to a trailing newline the patch engine may add — author-time and any later recompute agree). `source_char_hash` is NOT produced by this CLI: for `source_kind: world_char` set it to `sha256:` + the `content_hash` returned by `mcp__worldloom__get_record(<CHAR-id>)`; for `source_kind: story_local` set it `null`. Record the source slices and the hash method in `## Validation / Audit Anchors`.
 

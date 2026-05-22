@@ -27,6 +27,7 @@ Net: the staleness guard's contract (`file_versions.content_hash` == raw sha256 
 4. **`build`/`sync` cannot self-heal** — `listStoryBundleSourceFiles` (`tools/world-index/src/parse/atomic.ts:128-176`) *does* enumerate `stories/<slug>/story-characters/*.md` (second loop, `:161-174`), so the files are indexed; the defect is the hash *basis*, not enumeration. A full `world-index build erotica-world` was run during diagnosis and left the rows at the normalized `aa4cf1e7…` value, confirming re-indexing reproduces the disagreeing hash rather than fixing it.
 5. **Adjacent contradiction (separate, pre-existing)** — the STCHAR frontmatter hashes (`profile_hash`/`voice_block_hash`/`page_packet_hash`) on red-bunny STCHAR-1/2/3 also do not reproduce under `compute-stchar-hashes` (the original bootstrap JIT-hasher drift). That is a **separate** non-blocking defect (no runtime validator recomputes those frontmatter hashes) and is **out of scope** here; this ticket addresses only the `file_versions`/guard hash-basis mismatch that blocks patch submission.
 6. **Temporary band-aid in place** — on 2026-05-22 the three red-bunny `file_versions` rows were hand-reconciled to raw sha256 to unblock one approved commit. Because `parseStoryBundleSourceFile` still returns the normalized hash, the next `world-index build`/`sync` of those files will revert the rows to `aa4cf1e7…` and re-block submission. This ticket is the durable fix; the band-aid must not be relied on.
+7. **Relationship to `archive/tickets/VALENH-030.md`** — `archive/tickets/VALENH-030.md` owns the STCHAR `page_packet_hash` projection and validator recompute contract. It is not a blocker for this ticket, and this ticket must not change `computeStcharPagePacketHash`, `profile_hash`, `voice_block_hash`, or STCHAR page-packet validation semantics. If this implementation splits story-character file-version hashes from node/prose identity hashes, keep that split local to the `file_versions`/stale-index boundary.
 
 ## Architecture Check
 
@@ -67,6 +68,7 @@ After the code change, `world-index build <world>` for every world with a story 
 - The STCHAR frontmatter `profile_hash`/`voice_block_hash`/`page_packet_hash` drift (Assumption Reassessment item 5) — separate ticket if it is ever to serve tamper-detection.
 - Changing `contentHashForProse`/`contentHashForYaml` semantics for node identity, anchors, or `_source/*.yaml` (not guarded by `detectStaleIndex`).
 - Any change to STCHAR generation in `story-character-profile` or `branching-story-bootstrap`.
+- Any change to the `archive/tickets/VALENH-030.md` page-packet projection contract; this ticket only aligns the persisted `file_versions.content_hash` value with the pre-apply stale-index guard.
 
 ## Acceptance Criteria
 

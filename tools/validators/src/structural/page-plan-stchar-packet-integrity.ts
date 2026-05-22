@@ -1,6 +1,8 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
+import { computeStcharPagePacketHash } from "@worldloom/world-index/hash/content";
+
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
   asPlainRecord,
@@ -43,6 +45,7 @@ interface Packet {
   voiceBlockHash: string | undefined;
   pagePacketHash: string | undefined;
   hasVoiceBlock: boolean;
+  packetText: string;
 }
 
 export const pagePlanStcharPacketIntegrity: Validator = {
@@ -165,6 +168,28 @@ function packetVerdicts(
     }
   }
 
+  const storedPagePacketHash = stringValue(parsed.page_packet_hash);
+  if (packet.pagePacketHash && storedPagePacketHash) {
+    const recomputed = `sha256:${computeStcharPagePacketHash(packet.packetText)}`;
+    if (recomputed !== storedPagePacketHash) {
+      verdicts.push(planFail(
+        page,
+        planPath,
+        "page_plan_stchar_packet_integrity.hash_mismatch",
+        `${planPath} 16a packet for ${packet.stcharId} has page_packet_hash=${storedPagePacketHash}, expected ${recomputed} from the canonical non-self-referential packet projection.`,
+        {
+          page_id: pageId(page),
+          stchar_id: packet.stcharId,
+          field: "page_packet_hash",
+          declared: packet.pagePacketHash,
+          stored: storedPagePacketHash,
+          recomputed
+        },
+        `Recompute ${packet.stcharId}'s page_packet_hash from the canonical §16a packet projection and update both STCHAR frontmatter and the 16a packet declaration.`
+      ));
+    }
+  }
+
   if (SPEAKER_VOICE_REQUIRED.has(packet.requiredBecause) && !packet.hasVoiceBlock) {
     verdicts.push(planFail(
       page,
@@ -209,7 +234,8 @@ function parsePackets(content: string): Packet[] {
       profileHash: hashes?.[1],
       voiceBlockHash: hashes?.[2],
       pagePacketHash: hashes?.[3],
-      hasVoiceBlock: /^[^\S\r\n]*- Voice\/dialogue authority:[^\S\r\n]*\S/m.test(packetText)
+      hasVoiceBlock: /^[^\S\r\n]*- Voice\/dialogue authority:[^\S\r\n]*\S/m.test(packetText),
+      packetText
     };
   });
 }
