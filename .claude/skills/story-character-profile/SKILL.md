@@ -41,7 +41,7 @@ Do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, do NOT writ
 
 (a) Pre-flight Check has completed: `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, and `tools/validators/src/schemas/story-character-authority.schema.json` are loaded; bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; mode validated; source `CHAR-*` resolved only for modes that need it; target `STCHAR-*` and bound `STENT-*` / story-local context records resolved when supplied; one new `STCHAR` id allocated via `mcp__worldloom__allocate_next_id`; relevant story-bundle context loaded via `mcp__worldloom__get_context_packet` and targeted `get_record` / `get_records` calls.
 
-(b) Phases 1-7 have completed in working memory: source authority packet assembled; story-local need diagnosed; full `stchar.v1` profile drafted from zero; frontmatter drafted against `story-character-authority.schema.json`; all 13 required body sections present; `profile_hash`, `voice_block_hash`, and `page_packet_hash` computed from the final body slices; append or supersession patch plan assembled with `append_story_character_authority_record` or `supersede_story_character_authority_record`; bundle `INDEX.md` update drafted.
+(b) Phases 1-7 have completed in working memory: source authority packet assembled; story-local need diagnosed; full `stchar.v1` profile drafted from zero; frontmatter drafted against `story-character-authority.schema.json`; all 13 required body sections present; `profile_hash` and `voice_block_hash` computed from the final body slices; append or supersession patch plan assembled with `append_story_character_authority_record` or `supersede_story_character_authority_record`; bundle `INDEX.md` update drafted.
 
 (c) Phase 7 has validated all 8 checks with a one-line PASS rationale per check: mode inputs complete; source authority lawful; no world mutation; no operational `CHAR-*` shortcut outside `source_char_id` provenance; `BEL.basis.access_records[]` is not given STCHAR as an epistemic route; frontmatter matches the schema; all 13 body sections are present; regeneration allocates a new id and links `supersedes` instead of rewriting the old profile's structural fields.
 
@@ -311,7 +311,6 @@ profile_revision: 1
 body_schema_version: stchar.v1
 profile_hash: sha256:<64 lowercase hex>
 voice_block_hash: sha256:<64 lowercase hex>
-page_packet_hash: sha256:<64 lowercase hex>
 ```
 
 Use `source_kind: regenerated` for regenerate mode even if the old profile had world provenance; preserve source `CHAR` only as provenance when it was actually read or inherited. Use `profile_revision: old + 1` for regeneration.
@@ -328,7 +327,7 @@ node tools/world-mcp/dist/src/cli/compute-stchar-hashes.js \
 
 - `profile_hash`: emitted from the complete STCHAR body markdown.
 - `voice_block_hash`: emitted from the `## Page-Plan Voice Block` section.
-- `page_packet_hash`: emitted from the full §16a page-plan packet projection. If the packet already contains a `Hashes:` line, the canonical helper masks only `page_packet_hash=sha256:<64 lowercase hex>` to `page_packet_hash=sha256:<page_packet_hash>` before hashing; do not remove the sibling `profile_hash` / `voice_block_hash` declarations by hand.
+- page-local `page_packet_hash`: emitted from the full §16a page-plan packet projection. If the packet already contains a `Hashes:` line, the canonical helper masks only `page_packet_hash=sha256:<64 lowercase hex>` to `page_packet_hash=sha256:<page_packet_hash>` before hashing; do not remove the sibling `profile_hash` / `voice_block_hash` declarations by hand. Do not stamp this value into STCHAR frontmatter.
 
 The CLI emits all three as `sha256:<64 lowercase hex>` (hashed with `sha256Hex ∘ normalizeProseWhitespace`, so they are invariant to a trailing newline the patch engine may add — author-time and any later recompute agree). `source_char_hash` is NOT produced by this CLI: for `source_kind: world_char` set it to `sha256:` + the `content_hash` returned by `mcp__worldloom__get_record(<CHAR-id>)`; for `source_kind: story_local` set it `null`. Record the source slices and the hash method in `## Validation / Audit Anchors`.
 
@@ -368,7 +367,7 @@ Present a concise deliverable summary before any write:
 - bound `STENT` ids
 - supersession link and profile revision when applicable
 - 13-section inventory
-- three hash values and their slices
+- STCHAR-global hash values and their slices
 - validation trace with 8 PASS/FAIL rows
 - patch operation names and `INDEX.md` update preview
 - any page-plan rebuild recommendation

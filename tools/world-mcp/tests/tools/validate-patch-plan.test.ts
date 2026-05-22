@@ -364,8 +364,7 @@ test("validatePatchPlan accepts append_story_character_authority_record through 
               profile_revision: 1,
               body_schema_version: "stchar.v1",
               profile_hash: VALID_STCHAR_PROFILE_HASH,
-              voice_block_hash: VALID_STCHAR_VOICE_BLOCK_HASH,
-              page_packet_hash: `sha256:${"d".repeat(64)}`
+              voice_block_hash: VALID_STCHAR_VOICE_BLOCK_HASH
             },
             body_markdown: stcharBody()
           }
@@ -557,8 +556,7 @@ function seedStoryPlanPrereqs(root: string): void {
         "profile_revision: 1",
         "body_schema_version: stchar.v1",
         `profile_hash: ${VALID_STCHAR_PROFILE_HASH}`,
-        `voice_block_hash: ${VALID_STCHAR_VOICE_BLOCK_HASH}`,
-        `page_packet_hash: sha256:${"d".repeat(64)}`
+        `voice_block_hash: ${VALID_STCHAR_VOICE_BLOCK_HASH}`
       ]),
       storyNode(storySlug, "intention_record", "STINT-1", "intentions", [
         "id: STINT-1",

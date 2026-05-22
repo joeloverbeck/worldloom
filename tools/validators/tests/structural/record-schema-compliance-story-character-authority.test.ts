@@ -169,7 +169,6 @@ function validStchar(overrides: Record<string, unknown> = {}): Record<string, un
     body_schema_version: "stchar.v1",
     profile_hash: HASH,
     voice_block_hash: HASH,
-    page_packet_hash: HASH,
     ...overrides
   };
 }

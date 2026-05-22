@@ -17,10 +17,11 @@ export interface CliResult {
 
 const HELP_TEXT = `Usage: compute-stchar-hashes --profile <body-md-path> --packet <packet-md-path>
 
-Computes the three content-derived sha256 hashes that every STCHAR record
-requires, per the story state contract / story-record-schemas §4.5.19. These are
-the canonical, reproducible values story-pipeline skills stamp onto the STCHAR
-frontmatter and cite verbatim in the page-plan §16a packet and the prose receipt:
+Computes the STCHAR-global profile/voice hashes plus the page-local §16a packet
+hash, per the story state contract / story-record-schemas §4.5.19. These are
+the canonical, reproducible values story-pipeline skills stamp onto STCHAR
+frontmatter (profile_hash / voice_block_hash) and page-local §16a packet /
+prose receipt surfaces (page_packet_hash):
 
   profile_hash      = sha256 over the STCHAR body markdown (the 13 stchar.v1
                       sections; everything after the frontmatter).
@@ -69,7 +70,7 @@ Output (stdout, JSON):
   }
 
 Exit codes:
-  0   All three hashes computed successfully.
+  0   All hashes computed successfully.
   1   I/O error, or the body has no '## Page-Plan Voice Block' section.
   2   CLI argument error.
 

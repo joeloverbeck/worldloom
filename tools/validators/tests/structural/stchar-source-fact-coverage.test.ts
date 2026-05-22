@@ -175,7 +175,6 @@ function stcharFrontmatter(overrides: Record<string, unknown> = {}): Record<stri
     body_schema_version: "stchar.v1",
     profile_hash: `sha256:${"b".repeat(64)}`,
     voice_block_hash: `sha256:${"c".repeat(64)}`,
-    page_packet_hash: `sha256:${"d".repeat(64)}`,
     ...overrides
   };
 }

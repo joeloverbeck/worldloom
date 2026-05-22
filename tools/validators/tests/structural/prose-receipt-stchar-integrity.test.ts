@@ -1,13 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { computeStcharPagePacketHash } from "@worldloom/world-index/hash/content";
+
 import { proseReceiptStcharIntegrity } from "../../src/structural/prose-receipt-stchar-integrity.js";
 import { context, record } from "./helpers.js";
 
 const HASH_A = "sha256:" + "a".repeat(64);
 const HASH_B = "sha256:" + "b".repeat(64);
-const HASH_C = "sha256:" + "c".repeat(64);
 const HASH_D = "sha256:" + "d".repeat(64);
+const SEED_PAGE_PACKET_HASH = "sha256:" + "c".repeat(64);
+const HASH_C = canonicalPagePacketHash();
 const STORY = "test-story";
 const PLAN_PATH = `stories/${STORY}/pages-prose-plans/PG-1.md`;
 const RECEIPT_PATH = `stories/${STORY}/pages-prose-receipts/PG-1.yaml`;
@@ -22,11 +25,12 @@ test("prose_receipt_stchar_integrity accepts matching authority and judgment-ass
 });
 
 test("prose_receipt_stchar_integrity accepts offstage_causal authority with not_applicable voice fidelity", async () => {
+  const pagePacketHash = canonicalPagePacketHash({ requiredBecause: "offstage_causal", voiceLine: "" });
   const verdicts = await proseReceiptStcharIntegrity.run(
     input(
-      plan({ requiredBecause: "offstage_causal", voiceLine: "" }),
+      plan({ requiredBecause: "offstage_causal", voiceLine: "", pagePacketHash }),
       receipt({
-        authority: { required_because: "offstage_causal" },
+        authority: { required_because: "offstage_causal", page_packet_hash: hashComparison(pagePacketHash, pagePacketHash) },
         fidelity: { voice_fidelity: "not_applicable" }
       })
     ),
@@ -53,6 +57,18 @@ test("prose_receipt_stchar_integrity rejects hash mismatches against page-plan p
 
   assert.equal(verdicts[0]?.code, "prose_receipt_stchar_integrity.hash_mismatch");
   assert.equal((verdicts[0]?.detail as { field?: string }).field, "profile_hash");
+});
+
+test("prose_receipt_stchar_integrity checks page_packet_hash against page-plan declaration and recompute", async () => {
+  const wrongObserved = "sha256:" + "9".repeat(64);
+  const verdicts = await proseReceiptStcharIntegrity.run(
+    input(plan(), receipt({ authority: { page_packet_hash: hashComparison(HASH_C, wrongObserved) } })),
+    context(baseRecords())
+  );
+
+  assert.equal(verdicts[0]?.code, "prose_receipt_stchar_integrity.hash_mismatch");
+  assert.equal((verdicts[0]?.detail as { field?: string }).field, "page_packet_hash");
+  assert.equal((verdicts[0]?.detail as { recomputed?: string }).recomputed, HASH_C);
 });
 
 test("prose_receipt_stchar_integrity rejects active snapshot mismatches", async () => {
@@ -98,8 +114,7 @@ function baseRecords() {
       status: "active",
       bound_stent_ids: ["STENT-1"],
       profile_hash: HASH_A,
-      voice_block_hash: HASH_B,
-      page_packet_hash: HASH_C
+      voice_block_hash: HASH_B
     }),
     storyRecord("page_record", "PG-1", "pages", {
       id: "PG-1",
@@ -119,7 +134,7 @@ function storyRecord(nodeType: string, id: string, sourceDir: string, parsed: Re
   };
 }
 
-function plan(options: { requiredBecause?: string; voiceLine?: string } = {}): string {
+function plan(options: { requiredBecause?: string; voiceLine?: string; pagePacketHash?: string } = {}): string {
   return [
     "# Page Plan",
     "",
@@ -127,13 +142,24 @@ function plan(options: { requiredBecause?: string; voiceLine?: string } = {}): s
     "",
     "- STENT-1 / STCHAR-1 - Test Character.",
     `  - Required because: ${options.requiredBecause ?? "speaker"}.`,
-    `  - Hashes: profile_hash=${HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${HASH_C}.`,
+    `  - Hashes: profile_hash=${HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${options.pagePacketHash ?? HASH_C}.`,
     options.voiceLine ?? "  - Voice/dialogue authority: clipped STCHAR voice block.",
     "  - Relevant appraisal rules: protect the secret.",
     "",
     "## 17. Style/register notes",
     ""
   ].join("\n");
+}
+
+function canonicalPagePacketHash(options: { requiredBecause?: string; voiceLine?: string } = {}): string {
+  return `sha256:${computeStcharPagePacketHash([
+    "- STENT-1 / STCHAR-1 - Test Character.",
+    `  - Required because: ${options.requiredBecause ?? "speaker"}.`,
+    `  - Hashes: profile_hash=${HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${SEED_PAGE_PACKET_HASH}.`,
+    options.voiceLine ?? "  - Voice/dialogue authority: clipped STCHAR voice block.",
+    "  - Relevant appraisal rules: protect the secret.",
+    ""
+  ].join("\n"))}`;
 }
 
 function receipt(options: {

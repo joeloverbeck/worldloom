@@ -208,7 +208,6 @@ export interface ContextPacketStoryBundleContext {
     profile_revision: number;
     profile_hash: string;
     voice_block_hash: string;
-    page_packet_hash: string;
     packet_preview: string;
   }>;
   active_actor_plans: Array<{

@@ -190,7 +190,6 @@ function stcharFrontmatter(overrides: Record<string, unknown> = {}, markdownBody
     body_schema_version: "stchar.v1",
     profile_hash: `sha256:${computeStcharProfileHash(markdownBody)}`,
     voice_block_hash: `sha256:${computeStcharVoiceBlockHash(markdownBody)}`,
-    page_packet_hash: HASH,
     ...overrides
   };
 }
