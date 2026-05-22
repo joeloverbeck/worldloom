@@ -27,9 +27,12 @@ frontmatter and cite verbatim in the page-plan §16a packet and the prose receip
   voice_block_hash  = sha256 over the '## Page-Plan Voice Block' section body.
   page_packet_hash  = sha256 over the §16a page-plan packet projection text.
 
-All three use raw UTF-8 byte sha256 (no normalization), matching compute-pg-hashes
-plan_hash. Hand-rolling these per skill caused divergent implementations; this CLI
-is the single source of truth (it reuses the @worldloom/world-index/hash/content
+All three use sha256 over normalizeProseWhitespace-normalized content, not raw
+bytes: body markdown for profile_hash, the Page-Plan Voice Block section for
+voice_block_hash, and the §16a packet projection for page_packet_hash. This is
+deliberately different from compute-pg-hashes plan_hash, which hashes raw page
+plan bytes. Hand-rolling these per skill caused divergent implementations; this
+CLI is the single source of truth (it reuses the @worldloom/world-index/hash/content
 helpers, the same module compute-pg-hashes uses).
 
 source_char_hash is NOT computed here. It is not a content-derived hash: it must
