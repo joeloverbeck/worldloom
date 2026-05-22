@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import test from "node:test";
 
+import { computeStcharProfileHash, computeStcharVoiceBlockHash } from "../../src/package-interop.js";
 import { validatePatchPlan } from "../../src/tools/validate-patch-plan.js";
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
@@ -86,6 +87,9 @@ function stcharBody(): string {
     "Validation / Audit Anchors"
   ].map((section) => `## ${section}\n\n${section} authority prose.`).join("\n\n");
 }
+
+const VALID_STCHAR_PROFILE_HASH = `sha256:${computeStcharProfileHash(stcharBody())}`;
+const VALID_STCHAR_VOICE_BLOCK_HASH = `sha256:${computeStcharVoiceBlockHash(stcharBody())}`;
 
 const SOURCE_CHAR_BODY = [
   "---",
@@ -316,8 +320,8 @@ test("validatePatchPlan accepts append_story_character_authority_record through 
               bound_stent_ids: ["STENT-1"],
               profile_revision: 1,
               body_schema_version: "stchar.v1",
-              profile_hash: `sha256:${"b".repeat(64)}`,
-              voice_block_hash: `sha256:${"c".repeat(64)}`,
+              profile_hash: VALID_STCHAR_PROFILE_HASH,
+              voice_block_hash: VALID_STCHAR_VOICE_BLOCK_HASH,
               page_packet_hash: `sha256:${"d".repeat(64)}`
             },
             body_markdown: stcharBody()
@@ -508,8 +512,8 @@ function seedStoryPlanPrereqs(root: string): void {
         "bound_stent_ids: [STENT-1]",
         "profile_revision: 1",
         "body_schema_version: stchar.v1",
-        `profile_hash: sha256:${"b".repeat(64)}`,
-        `voice_block_hash: sha256:${"c".repeat(64)}`,
+        `profile_hash: ${VALID_STCHAR_PROFILE_HASH}`,
+        `voice_block_hash: ${VALID_STCHAR_VOICE_BLOCK_HASH}`,
         `page_packet_hash: sha256:${"d".repeat(64)}`
       ]),
       storyNode(storySlug, "intention_record", "STINT-1", "intentions", [
