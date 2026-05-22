@@ -786,6 +786,31 @@ test("record_schema_compliance preserves historical full-world CFs without new s
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance pre-apply schema checks only touched indexed records when file inputs exist", async () => {
+  const invalidMr = record("mystery_reserve_entry", "M-1", "_source/mystery-reserve/M-1.yaml", {
+    id: "M-1",
+    title: "Mystery",
+    status: "active",
+    what_is_unknown: ["legacy prose field"],
+    forbidden_answers: ["legacy prose field"],
+    extensions: []
+  });
+  const section = record("section", "SEC-INS-001", "_source/institutions/SEC-INS-001.yaml", validSection);
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        {
+          path: section.file_path,
+          content: yaml.dump(validSection)
+        }
+      ]
+    },
+    context([invalidMr, section], { run_mode: "pre-apply" })
+  );
+
+  assert.deepEqual(result, []);
+});
+
 test("record_schema_compliance rejects n_a rationales without ontology category keywords", async () => {
   const result = await recordSchemaCompliance.run(
     {},

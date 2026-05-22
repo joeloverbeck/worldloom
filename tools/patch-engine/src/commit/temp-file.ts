@@ -15,6 +15,8 @@ import { stageCreateOqRecord } from "../ops/create-oq-record.js";
 import { stageCreateSecRecord } from "../ops/create-sec-record.js";
 import {
   stageCreateStoryRecord,
+  stageRemoveStoryCharacterAuthorityFrontmatterField,
+  stageRemoveStoryCharacterAuthorityBodyHashNoteField,
   stageStoryCharacterAuthorityRecord,
   storyRecordMetadata
 } from "../ops/create-story-record.js";
@@ -144,6 +146,8 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "create_stemo_record":
     case "append_story_character_authority_record":
     case "supersede_story_character_authority_record":
+    case "remove_story_character_authority_frontmatter_field":
+    case "remove_story_character_authority_body_hash_note_field":
     case "append_story_diegetic_artifact_record": {
       const metadata = storyRecordMetadata(patch);
       return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
@@ -265,12 +269,20 @@ function stageOne(
     case "create_stemo_record":
     case "append_story_character_authority_record":
     case "supersede_story_character_authority_record":
+    case "remove_story_character_authority_frontmatter_field":
+    case "remove_story_character_authority_body_hash_note_field":
     case "append_story_diegetic_artifact_record":
       if (
         patch.op === "append_story_character_authority_record" ||
         patch.op === "supersede_story_character_authority_record"
       ) {
         return stageStoryCharacterAuthorityRecord(envelope, patch, ctx);
+      }
+      if (patch.op === "remove_story_character_authority_frontmatter_field") {
+        return stageRemoveStoryCharacterAuthorityFrontmatterField(envelope, patch, ctx);
+      }
+      if (patch.op === "remove_story_character_authority_body_hash_note_field") {
+        return stageRemoveStoryCharacterAuthorityBodyHashNoteField(envelope, patch, ctx);
       }
       return stageCreateStoryRecord(envelope, patch, ctx);
   }

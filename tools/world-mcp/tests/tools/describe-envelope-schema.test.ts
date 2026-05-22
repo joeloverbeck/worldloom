@@ -248,6 +248,39 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
 
   const removeAliasManifest = await describeEnvelopeSchema({ op_kind: "remove_ch_affected_cf_ids" });
   assert.equal(removeAliasManifest.delivery_status, "inline");
+
+  const stcharMaintenanceManifest = await describeEnvelopeSchema({
+    op_kind: "remove_story_character_authority_frontmatter_field"
+  });
+  assert.equal(stcharMaintenanceManifest.delivery_status, "inline");
+  const stcharMaintenanceProperties = stcharMaintenanceManifest.op_schemas
+    .remove_story_character_authority_frontmatter_field!.properties as Record<string, unknown>;
+  const stcharMaintenancePayload = stcharMaintenanceProperties.payload as {
+    required?: string[];
+    properties?: {
+      target_record_id?: { pattern?: string };
+      field_name?: { enum?: string[] };
+    };
+  };
+  assert.deepEqual(stcharMaintenancePayload.required, ["story_slug", "target_record_id", "field_name"]);
+  assert.equal(stcharMaintenancePayload.properties?.target_record_id?.pattern, "^STCHAR-(0|[1-9][0-9]*)$");
+  assert.deepEqual(stcharMaintenancePayload.properties?.field_name?.enum, ["page_packet_hash"]);
+  const stcharBodyMaintenanceManifest = await describeEnvelopeSchema({
+    op_kind: "remove_story_character_authority_body_hash_note_field"
+  });
+  assert.equal(stcharBodyMaintenanceManifest.delivery_status, "inline");
+  const stcharBodyMaintenanceProperties = stcharBodyMaintenanceManifest.op_schemas
+    .remove_story_character_authority_body_hash_note_field!.properties as Record<string, unknown>;
+  const stcharBodyMaintenancePayload = stcharBodyMaintenanceProperties.payload as {
+    required?: string[];
+    properties?: {
+      target_record_id?: { pattern?: string };
+      field_name?: { enum?: string[] };
+    };
+  };
+  assert.deepEqual(stcharBodyMaintenancePayload.required, ["story_slug", "target_record_id", "field_name"]);
+  assert.equal(stcharBodyMaintenancePayload.properties?.target_record_id?.pattern, "^STCHAR-(0|[1-9][0-9]*)$");
+  assert.deepEqual(stcharBodyMaintenancePayload.properties?.field_name?.enum, ["page_packet_hash"]);
   const removeAliasProperties = removeAliasManifest.op_schemas.remove_ch_affected_cf_ids!.properties as Record<
     string,
     unknown

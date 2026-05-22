@@ -91,6 +91,13 @@ export const recordSchemaCompliance: Validator = {
       if (!isInIncrementalScope(record.file_path, ctx)) {
         continue;
       }
+      if (
+        ctx.run_mode === "pre-apply" &&
+        preApplyTouchedFiles.size > 0 &&
+        !preApplyTouchedFiles.has(toPosixPath(record.file_path))
+      ) {
+        continue;
+      }
       const validate = validatorForRecord(record);
       if (!validate) {
         continue;

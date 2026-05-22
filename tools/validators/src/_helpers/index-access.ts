@@ -94,12 +94,14 @@ export function buildPreApplyFileInputs(
 
   for (const patch of envelope.patches) {
     const hybrid = storyCharacterAuthorityFileInput(patch);
-    if (hybrid !== null) {
-      const existingIndex = files.findIndex((file) => file.path === hybrid.path);
+    const maintainedHybrid = storyCharacterAuthorityMaintenanceFileInput(envelope, patch);
+    const candidate = maintainedHybrid ?? hybrid;
+    if (candidate !== null) {
+      const existingIndex = files.findIndex((file) => file.path === candidate.path);
       if (existingIndex >= 0) {
-        files[existingIndex] = hybrid;
+        files[existingIndex] = candidate;
       } else {
-        files.push(hybrid);
+        files.push(candidate);
       }
     }
   }
@@ -336,6 +338,48 @@ function storyCharacterAuthorityFileInput(patch: PatchOperation): FileInput | nu
   };
 }
 
+function storyCharacterAuthorityMaintenanceFileInput(
+  envelope: PatchPlanEnvelope,
+  patch: PatchOperation
+): FileInput | null {
+  if (
+    patch.op !== "remove_story_character_authority_frontmatter_field" &&
+    patch.op !== "remove_story_character_authority_body_hash_note_field"
+  ) {
+    return null;
+  }
+
+  const { story_slug: storySlug, target_record_id: recordId, field_name: fieldName } = patch.payload;
+  if (fieldName !== "page_packet_hash") {
+    return null;
+  }
+
+  const filePath = patch.target_file || `stories/${storySlug}/story-characters/${recordId}.md`;
+  const absolutePath = path.join(resolveRepoRootForWorld(envelope.target_world), "worlds", envelope.target_world, filePath);
+  if (!existsSync(absolutePath)) {
+    return null;
+  }
+
+  const source = readFileSync(absolutePath, "utf8");
+  const match = /^---\n([\s\S]*?)---\n?([\s\S]*)$/.exec(source);
+  if (match === null) {
+    return null;
+  }
+
+  const frontmatter = asPlainRecord(yaml.load(match[1] ?? "", { schema: yaml.JSON_SCHEMA }));
+  if (patch.op === "remove_story_character_authority_frontmatter_field") {
+    delete frontmatter[fieldName];
+  }
+  const body = patch.op === "remove_story_character_authority_body_hash_note_field"
+    ? (match[2] ?? "").replace(`; ${fieldName} over the §16a packet projection authored for this bundle`, "")
+    : match[2] ?? "";
+  const nextFrontmatter = yaml.dump(frontmatter, { lineWidth: 100, sortKeys: false }).trimEnd();
+  return {
+    path: filePath,
+    content: `---\n${nextFrontmatter}\n---\n${body}`
+  };
+}
+
 function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperation): string | null {
   if (patch.op === "update_record_field") {
     const targetId = patch.payload.target_record_id;
@@ -345,6 +389,23 @@ function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperat
     }
     const parsed = cloneRecord(current.parsed);
     applyFieldUpdate(parsed, patch.payload.field_path, patch.payload.operation, patch.payload.new_value);
+    byId.set(targetId, { ...current, parsed });
+    return targetId;
+  }
+
+  if (
+    patch.op === "remove_story_character_authority_frontmatter_field" ||
+    patch.op === "remove_story_character_authority_body_hash_note_field"
+  ) {
+    const targetId = `${patch.payload.story_slug}:${patch.payload.target_record_id}`;
+    const current = byId.get(targetId);
+    if (!current || current.node_type !== "story_character_authority_record") {
+      return null;
+    }
+    const parsed = cloneRecord(current.parsed);
+    if (patch.op === "remove_story_character_authority_frontmatter_field") {
+      delete parsed[patch.payload.field_name];
+    }
     byId.set(targetId, { ...current, parsed });
     return targetId;
   }

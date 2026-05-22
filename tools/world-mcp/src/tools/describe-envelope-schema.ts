@@ -469,6 +469,18 @@ function operationSchema(kind: OperationKind): JsonObject {
     case "append_story_character_authority_record":
     case "supersede_story_character_authority_record":
       return baseOperationProperties(kind, storyHybridPayloadWithRecord("story_character_authority_record"));
+    case "remove_story_character_authority_frontmatter_field":
+    case "remove_story_character_authority_body_hash_note_field":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_record_id", "field_name"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_record_id: stringSchema("^STCHAR-(0|[1-9][0-9]*)$"),
+          field_name: { type: "string", enum: ["page_packet_hash"] }
+        }
+      });
     case "append_story_diegetic_artifact_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_diegetic_artifact_record"));
   }

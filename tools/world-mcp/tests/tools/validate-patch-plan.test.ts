@@ -387,6 +387,86 @@ test("validatePatchPlan accepts append_story_character_authority_record through 
   }
 });
 
+test("validatePatchPlan accepts STCHAR frontmatter maintenance through pre-apply validation", async () => {
+  const root = createTempRepoRoot();
+  const storySlug = "marla-kern-seduction";
+  seedWorld(root, {
+    worldSlug: "seeded",
+    nodes: [
+      storyNode(storySlug, "story_entity_record", "STENT-1", "entities", [
+        "id: STENT-1",
+        "story_id: STORY-1",
+        "display_name: Marla",
+        "bound_stchar_id: STCHAR-1",
+        "role_in_story: [primary_actor]",
+        "created_at_page: PG-1"
+      ]),
+      sourceCharacterNode(),
+      storyCharacterNode(storySlug, "STCHAR-1", [
+        "id: STCHAR-1",
+        "story_id: STORY-1",
+        `story_slug: ${storySlug}`,
+        "world_slug: seeded",
+        "source_kind: world_char",
+        "source_char_id: CHAR-1",
+        `source_char_hash: sha256:${SOURCE_CHAR_HASH}`,
+        "source_char_sections_used:",
+        "  - frontmatter",
+        "source_operational_fact_map:",
+        ...STCHAR_SOURCE_OPERATIONAL_FACT_MAP.flatMap((entry) => [
+          `  - source_field: ${entry.source_field}`,
+          `    disposition: ${entry.disposition}`,
+          `    target_section: ${entry.target_section}`,
+          "    rationale: Fixture maps the source field into the generated STCHAR body."
+        ]),
+        "generated_at_page: story_bootstrap",
+        "created_by_skill: branching-story-bootstrap",
+        "supersedes: null",
+        "superseded_by: null",
+        "status: active",
+        "bound_stent_ids:",
+        "  - STENT-1",
+        "profile_revision: 1",
+        "body_schema_version: stchar.v1",
+        `profile_hash: ${VALID_STCHAR_PROFILE_HASH}`,
+        `voice_block_hash: ${VALID_STCHAR_VOICE_BLOCK_HASH}`,
+        `page_packet_hash: sha256:${"d".repeat(64)}`
+      ])
+    ]
+  });
+
+  try {
+    const plan = {
+      plan_id: "plan-stchar-maint-001",
+      target_world: "seeded",
+      approval_token: "token-from-gate",
+      verdict: "ACCEPT",
+      originating_skill: "implement-ticket",
+      expected_id_allocations: {},
+      patches: [
+        {
+          op: "remove_story_character_authority_frontmatter_field",
+          target_world: "seeded",
+          target_file: "stories/marla-kern-seduction/story-characters/STCHAR-1.md",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            target_record_id: "STCHAR-1",
+            field_name: "page_packet_hash"
+          }
+        }
+      ]
+    };
+
+    const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
+
+    assert.ok("status" in result);
+    assert.equal(result.status, "pass", JSON.stringify(result, null, 2));
+    assert.deepEqual(result.verdicts, []);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("validatePatchPlan accepts STPLAN and STEMO create ops through pre-apply validation", async () => {
   const root = createTempRepoRoot();
   seedStoryPlanPrereqs(root);

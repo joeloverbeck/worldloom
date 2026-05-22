@@ -104,6 +104,8 @@ export const OPERATION_KINDS = [
   "create_stemo_record",
   "append_story_character_authority_record",
   "supersede_story_character_authority_record",
+  "remove_story_character_authority_frontmatter_field",
+  "remove_story_character_authority_body_hash_note_field",
   "append_story_diegetic_artifact_record"
 ] as const;
 
@@ -210,6 +212,18 @@ export interface StoryCharacterAuthorityPayload<TRecord = Record<string, unknown
   body_markdown: string;
 }
 
+export interface RemoveStoryCharacterAuthorityFrontmatterFieldPayload {
+  story_slug: string;
+  target_record_id: string;
+  field_name: "page_packet_hash";
+}
+
+export interface RemoveStoryCharacterAuthorityBodyHashNoteFieldPayload {
+  story_slug: string;
+  target_record_id: string;
+  field_name: "page_packet_hash";
+}
+
 export type PatchOperation =
   | OperationBase<"create_cf_record", { cf_record: CanonFactRecord }>
   | OperationBase<"create_ch_record", { ch_record: ChangeLogEntry }>
@@ -287,6 +301,14 @@ export type PatchOperation =
   | OperationBase<"create_stemo_record", StoryRecordPayload>
   | OperationBase<"append_story_character_authority_record", StoryCharacterAuthorityPayload>
   | OperationBase<"supersede_story_character_authority_record", StoryCharacterAuthorityPayload>
+  | OperationBase<
+      "remove_story_character_authority_frontmatter_field",
+      RemoveStoryCharacterAuthorityFrontmatterFieldPayload
+    >
+  | OperationBase<
+      "remove_story_character_authority_body_hash_note_field",
+      RemoveStoryCharacterAuthorityBodyHashNoteFieldPayload
+    >
   | OperationBase<"append_story_diegetic_artifact_record", StoryRecordPayload>;
 
 export type OperationPayload = PatchOperation["payload"];

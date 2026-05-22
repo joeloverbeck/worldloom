@@ -39,6 +39,8 @@ const TIER_ONE = new Set<PatchOperation["op"]>([
 
 const TIER_TWO = new Set<PatchOperation["op"]>([
   "update_record_field",
+  "remove_story_character_authority_frontmatter_field",
+  "remove_story_character_authority_body_hash_note_field",
   "repair_skipped_change_log_entry",
   "remove_ch_affected_cf_ids",
   "append_extension",
