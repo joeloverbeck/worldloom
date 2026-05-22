@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import test from "node:test";
 
-import { computeStcharProfileHash, computeStcharVoiceBlockHash } from "../../src/package-interop.js";
 import { validatePatchPlan } from "../../src/tools/validate-patch-plan.js";
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
 
@@ -108,9 +106,6 @@ function stcharBody(): string {
   ].join("\n\n");
 }
 
-const VALID_STCHAR_PROFILE_HASH = `sha256:${computeStcharProfileHash(stcharBody())}`;
-const VALID_STCHAR_VOICE_BLOCK_HASH = `sha256:${computeStcharVoiceBlockHash(stcharBody())}`;
-
 const STCHAR_SOURCE_OPERATIONAL_FACT_MAP = [
   { source_field: "world_produced_wound", disposition: "copied", target_section: "Stable Persona Core" },
   { source_field: "active_appetite", disposition: "copied", target_section: "Agency and Planning Tendencies" },
@@ -191,8 +186,6 @@ const SOURCE_CHAR_BODY = [
   "Marla Kern is the source dossier for the STCHAR fixture.",
   ""
 ].join("\n");
-
-const SOURCE_CHAR_HASH = createHash("sha256").update(SOURCE_CHAR_BODY.normalize("NFC"), "utf8").digest("hex");
 
 test("validatePatchPlan returns pass when validators run without failures", async () => {
   const root = createTempRepoRoot();
@@ -352,7 +345,6 @@ test("validatePatchPlan accepts append_story_character_authority_record through 
               world_slug: "seeded",
               source_kind: "world_char",
               source_char_id: "CHAR-1",
-              source_char_hash: `sha256:${SOURCE_CHAR_HASH}`,
               source_char_sections_used: ["frontmatter"],
               source_operational_fact_map: STCHAR_SOURCE_OPERATIONAL_FACT_MAP,
               generated_at_page: "story_bootstrap",
@@ -362,9 +354,7 @@ test("validatePatchPlan accepts append_story_character_authority_record through 
               status: "active",
               bound_stent_ids: ["STENT-1"],
               profile_revision: 1,
-              body_schema_version: "stchar.v1",
-              profile_hash: VALID_STCHAR_PROFILE_HASH,
-              voice_block_hash: VALID_STCHAR_VOICE_BLOCK_HASH
+              body_schema_version: "stchar.v1"
             },
             body_markdown: stcharBody()
           }
@@ -409,7 +399,6 @@ test("validatePatchPlan accepts STCHAR frontmatter maintenance through pre-apply
         "world_slug: seeded",
         "source_kind: world_char",
         "source_char_id: CHAR-1",
-        `source_char_hash: sha256:${SOURCE_CHAR_HASH}`,
         "source_char_sections_used:",
         "  - frontmatter",
         "source_operational_fact_map:",
@@ -428,8 +417,6 @@ test("validatePatchPlan accepts STCHAR frontmatter maintenance through pre-apply
         "  - STENT-1",
         "profile_revision: 1",
         "body_schema_version: stchar.v1",
-        `profile_hash: ${VALID_STCHAR_PROFILE_HASH}`,
-        `voice_block_hash: ${VALID_STCHAR_VOICE_BLOCK_HASH}`,
         `page_packet_hash: sha256:${"d".repeat(64)}`
       ])
     ]
@@ -624,7 +611,6 @@ function seedStoryPlanPrereqs(root: string): void {
         "world_slug: seeded",
         "source_kind: world_char",
         "source_char_id: CHAR-1",
-        `source_char_hash: sha256:${"a".repeat(64)}`,
         "source_char_sections_used: [frontmatter]",
         ...stcharSourceOperationalFactMapLines(),
         "generated_at_page: story_bootstrap",
@@ -634,9 +620,7 @@ function seedStoryPlanPrereqs(root: string): void {
         "status: active",
         "bound_stent_ids: [STENT-1]",
         "profile_revision: 1",
-        "body_schema_version: stchar.v1",
-        `profile_hash: ${VALID_STCHAR_PROFILE_HASH}`,
-        `voice_block_hash: ${VALID_STCHAR_VOICE_BLOCK_HASH}`
+        "body_schema_version: stchar.v1"
       ]),
       storyNode(storySlug, "intention_record", "STINT-1", "intentions", [
         "id: STINT-1",

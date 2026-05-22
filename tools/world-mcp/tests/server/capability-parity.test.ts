@@ -80,7 +80,6 @@ const EXPECTED_VALIDATOR_NAMES = [
   "stchar_bound_stent_reciprocity",
   "stchar_resolves",
   "stchar_source_fact_coverage",
-  "stchar_source_hash_matches_source",
   "stchar_supersession_integrity",
   "stemo_agency_effect_compatibility",
   "stemo_appraisal_basis_accessible_to_holder",

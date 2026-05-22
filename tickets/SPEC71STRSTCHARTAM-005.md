@@ -43,7 +43,7 @@ Remove the `Hashes: profile_hash=…; voice_block_hash=…; page_packet_hash=…
 ## Out of Scope
 
 - The skill SKILL.md edits (007) that author per these contracts.
-- Code schemas/validators (001/002); MCP (003).
+- Code schemas/validators (001/002); MCP (`archive/tickets/SPEC71STRSTCHARTAM-003.md`).
 
 ## Acceptance Criteria
 

@@ -475,8 +475,6 @@ function buildActiveStoryCharacters(
       source_kind: asString(record.source_kind),
       source_char_id: asNullableString(record.source_char_id),
       profile_revision: asNumber(record.profile_revision),
-      profile_hash: asString(record.profile_hash),
-      voice_block_hash: asString(record.voice_block_hash),
       packet_preview: bodyPreview(row)
     }));
 }

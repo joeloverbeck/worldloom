@@ -328,8 +328,6 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
         source_kind: "world_char",
         source_char_id: "CHAR-1",
         profile_revision: 1,
-        profile_hash: `sha256:${"b".repeat(64)}`,
-        voice_block_hash: `sha256:${"c".repeat(64)}`,
         packet_preview:
           "## Profile Marla Kern keeps her fear below the surface while looking for a clean exit. ## Page-Plan Voice Block Use clipped, observant phrasing and avoid direct world-character dossier text."
       }
