@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/story-character-profile/SKILL.md`, `.claude/skills/branching-story-bootstrap/SKILL.md`, and `.claude/skills/_shared-templates/story-state-contract.md` (skill + shared-contract prose). No code/validator change.
-**Deps**: archive/tickets/SPEC70CHASTCHARSEM-001.md, archive/tickets/SPEC70CHASTCHARSEM-002.md, SPEC70CHASTCHARSEM-003
+**Deps**: archive/tickets/SPEC70CHASTCHARSEM-001.md, archive/tickets/SPEC70CHASTCHARSEM-002.md, archive/tickets/SPEC70CHASTCHARSEM-003.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ SPEC-70 §2.1 + §2.5: the authoring surfaces must document the Semantic Preserv
 
 1. `.claude/skills/story-character-profile/SKILL.md` Phase 1 (line ~183) names the source material to distill at the concept level ("identity, embodied constraints, voice, stable dispositions, relevant relationships, pressure behavior, known canon limits") and does NOT name `dramatic_core`, `## Capabilities`, or `## Signature Scene Behavior` (verified at SPEC-70 reassessment). `.claude/skills/_shared-templates/story-state-contract.md` §16a full-packet template has the line `- Agency and planning tendency:` (verified at line 472) — the §2.5 capabilities line inserts after it. `branching-story-bootstrap/SKILL.md` exists and has a cast-distillation phase.
 2. Spec source: SPEC-70 §2.1 (contract text + the Phase 1 source-section update across `story-character-profile`, `branching-story-bootstrap`, and `story-state-contract.md`) and §2.5 (the single full-packet line + the offstage-causal conditional note). §4 explicitly rejects the broader §16a role taxonomy — only the one capabilities line is in scope; the closed `required_because` vocabulary stays unchanged.
-3. Cross-artifact boundary under audit: this prose references surfaces created by sibling tickets — `source_operational_fact_map` (`archive/tickets/SPEC70CHASTCHARSEM-001.md`), the H3 operational-home subsections (002), and the `stchar_source_fact_coverage` validator (003). Declare the archived 001 ticket plus active 002 and 003 as dependencies so the prose never references vaporware (Cross-Cutting Docs Ticket shape: enumerate every implementation ticket whose surface the docs reference). The §2.5 §16a line is itself contract-template content (not merely docs-about-other-tickets) and is independent of 001-003, but it is merged here because it shares `story-state-contract.md` with the §2.1 STCHAR-semantics contract edit.
+3. Cross-artifact boundary under audit: this prose references surfaces created by sibling tickets — `source_operational_fact_map` (`archive/tickets/SPEC70CHASTCHARSEM-001.md`), the H3 operational-home subsections (`archive/tickets/SPEC70CHASTCHARSEM-002.md`), and the `stchar_source_fact_coverage` validator (`archive/tickets/SPEC70CHASTCHARSEM-003.md`). Declare the archived 001/002/003 tickets as dependencies so the prose only references shipped surfaces (Cross-Cutting Docs Ticket shape: enumerate every implementation ticket whose surface the docs reference). The §2.5 §16a line is itself contract-template content (not merely docs-about-other-tickets) and is independent of 001-003, but it is merged here because it shares `story-state-contract.md` with the §2.1 STCHAR-semantics contract edit.
 4. FOUNDATIONS §Story Bundles §6.1 (Story-Local Character Authority) + §Tooling Recommendation: the contract restates §6.1 (STCHAR is runtime authority; operational facts must reach operational homes) and the deterministic/judgment split (§2.5's capabilities line is authoring judgment, not validator-graded — `page-plan-stchar-packet-integrity.ts` already governs §16a structure and capability-relevance-per-page is judgment, not deterministic). The prose must restate these principles accurately rather than trusting a paraphrase.
 
 ## Architecture Check
@@ -67,7 +67,7 @@ In `story-state-contract.md` §16a, add `- Relevant capabilities / limits for th
 
 ### New/Modified Tests
 
-1. `None — documentation/skill-prose ticket; verification is grep-based against the post-edit skill + contract files, and the enforcement coverage is provided by archive/tickets/SPEC70CHASTCHARSEM-001.md, archive/tickets/SPEC70CHASTCHARSEM-002.md, and SPEC70CHASTCHARSEM-003.`
+1. `None — documentation/skill-prose ticket; verification is grep-based against the post-edit skill + contract files, and the enforcement coverage is provided by archive/tickets/SPEC70CHASTCHARSEM-001.md, archive/tickets/SPEC70CHASTCHARSEM-002.md, and archive/tickets/SPEC70CHASTCHARSEM-003.md.`
 
 ### Commands
 
