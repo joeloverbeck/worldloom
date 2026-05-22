@@ -20,8 +20,32 @@ world_relation:
   mythologizes: []
   ritualizes:
     - CF-0003
-author_profile: {}
-epistemic_horizon: {}
+genre_conventions:
+  honors: []
+  breaks: []
+author_profile:
+  species: "human"
+  age_band: "adult"
+  sex_or_gender: null
+  class: "scribe"
+  literacy: "trade-tongue literate"
+  profession: "auditor"
+  religious_ideological_environment: "nominal"
+  political_dependency: "charter office"
+  bodily_limits: "human baseline"
+  mobility: "local"
+  archive_access: "office files"
+  rumor_access: "clerks"
+  speech_register: "formal"
+  likely_blind_spots: "court gossip"
+  trauma_history_if_relevant: null
+epistemic_horizon:
+  direct_knowledge: []
+  inferred_knowledge: []
+  secondhand_knowledge: []
+  wrongly_believed: []
+  concealable: []
+  impossible_knowledge: []
 claim_map:
   - claim: Test author witnessed the Mudbrook audit.
     canon_status: canonically_true
@@ -33,8 +57,18 @@ claim_map:
     cf_id: CF-0001
     mr_id: null
     repair_trace: null
-world_consistency: {}
-source_basis: {}
+world_consistency:
+  canon_facts_consulted:
+    - CF-0001
+  invariants_respected: []
+  mystery_reserve_firewall: []
+  distribution_exceptions: []
+source_basis:
+  world_slug: "test"
+  brief_path: "briefs/test-artifact.md"
+  character_path: null
+  generated_date: "2026-05-22"
+  user_approved: false
 ---
 # DA-0003
 

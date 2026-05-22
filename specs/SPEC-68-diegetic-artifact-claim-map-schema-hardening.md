@@ -9,6 +9,8 @@
 
 **Implementation note (2026-05-22, SPEC68DIEARTCLA-001):** `claim_map.items` and the `canonically_true ⇒ cf_id` / `mystery_adjacent ⇒ mr_id` schema rules landed in `tools/validators/src/schemas/diegetic-artifact-frontmatter.schema.json`. The first ticket also normalized checked-in validator/animalia DA fixtures that the package suite treats as current positive records. The remaining loose-object typing and live DA conformance regression stay with SPEC68DIEARTCLA-002.
 
+**Implementation note (2026-05-22, SPEC68DIEARTCLA-002):** The remaining DA loose-object schema hardening landed for `genre_conventions`, `author_profile`, `epistemic_horizon`, `world_consistency`, and `source_basis`, including the promised `world_consistency` id regexes and a visible DA markdown conformance regression. The active checkout exposed three checked-in DA markdown records and no active `worlds/<slug>/diegetic-artifacts/*.md` files; checked-in positive fixtures were truthed to the current template, while private/live world repair remains out of scope.
+
 ## 1. Context
 
 `diegetic-artifact-generation` produces a richly-disciplined `claim_map`: every in-world claim

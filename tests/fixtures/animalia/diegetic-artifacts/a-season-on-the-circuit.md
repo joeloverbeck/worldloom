@@ -14,10 +14,11 @@ desired_relation_to_truth: "Biased and deliberately false in places — she want
 author_profile:
   species: "cat-folk (Cluster A — Modern Mammalian Animal-Folk)"
   age_band: "mid-twenties (25–27) at writing; younger than dossier-present by ~1 year"
-  sex_gender: "female (dossier pronouns and internal references throughout)"
+  sex_or_gender: "female (dossier pronouns and internal references throughout)"
   class: "itinerant bardic-circuit performer + tavern-board contractor stratum, middle tier — above new-hire, below named-veteran portable-reputation grade"
   literacy: "trade-tongue literate; heartland regional dialects fluent; reads music notation; reads broadsheets. Self-taught after early-music apprenticeship. No monastic/charter-school seal. DIS-2 partial literacy."
-  ideology: "nominal common-pantheon adherent; light cultural relationship with the First Cat progenitor tradition (CF-0016); privately religion-agnostic, treats religion as composition material; not a principled refuser (CF-0026); not a progenitor-supremacist."
+  profession: "bardic-circuit performer and tavern-board contractor-auxiliary"
+  religious_ideological_environment: "nominal common-pantheon adherent; light cultural relationship with the First Cat progenitor tradition (CF-0016); privately religion-agnostic, treats religion as composition material; not a principled refuser (CF-0026); not a progenitor-supremacist."
   political_dependency: "no permanent employer; piecework; dependent on tavern-keeper vouch, prior-town reputation, and CF-0024 portable contractor reputation. No patron retainer. No guild seal."
   bodily_limits: "cat-folk obligate carnivore (requires meat access); excellent low-light vision; bright sunlight physically hurts and makes her feel exposed; heavy pale-cream fur (heat-stress on dryland legs); whisker-based spatial sense; tail/ears betray emotional state; species-typical claws (legal natural arms in some Cluster A codes); lean-medium frame (grappling-weak, ranged/defensive-favored)."
   mobility: "bardic circuit — canal-heartland mainline plus selected drylands and highland nodes (CF-0017 + GEOGRAPHY.md trade corridors). Foot, barge, occasional cart."
@@ -77,7 +78,7 @@ epistemic_horizon:
     - "OPEN_QUESTIONS §Common Pantheon Roster — no specific god named"
 
 genre_conventions:
-  honored:
+  honors:
     - "first-person travelogue voice; author inside the text"
     - "place-by-place loose-chronological structure"
     - "named local texture: tavern, lock-master, wharf, posting-wall, ward-inspector drill-bell"
@@ -85,7 +86,7 @@ genre_conventions:
     - "performer-ish asides to reader (feline tics as deliberate instrument)"
     - "showy opening hook and valedictory closing"
     - "embedded call to upcoming performance dates (self-promotional move legible in-world)"
-  calibrated_deviations:
+  breaks:
     - "inflation-bias in the narrator's self-presentation (the brief's design); travelogue neutrality replaced by ambitious-performer aggrandizement — legible as performer-genre within AES-1 'songs that romanticize battle exist'"
     - "coy-allusion of noble-adjacent matters (no Brinewick noble by name) — genre norm would name; she avoids for self-interest per her taboo_censorship conditions"
 
