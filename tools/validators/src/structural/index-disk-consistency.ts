@@ -13,7 +13,9 @@ interface IndexSurface {
   name: string;
   directory: string;
   nodeType: string;
-  filePattern: RegExp;
+  mode: "id-prefixed" | "slug";
+  filePattern?: RegExp;
+  idPattern?: RegExp;
 }
 
 interface SurfaceInventory {
@@ -25,10 +27,18 @@ interface SurfaceInventory {
 }
 
 const INDEX_SURFACES: readonly IndexSurface[] = [
-  { name: "proposals", directory: "proposals", nodeType: "proposal_card", filePattern: /^PR-\d+[^/]*\.md$/ },
-  { name: "audits", directory: "audits", nodeType: "audit_record", filePattern: /^AU-\d+[^/]*\.md$/ },
-  { name: "pressure-events", directory: "pressure-events", nodeType: "pressure_event_card", filePattern: /^EPE-\d+(?!.*\.proposal\.md$)[^/]*\.md$/ },
-  { name: "character-proposals", directory: "character-proposals", nodeType: "character_proposal_card", filePattern: /^NCP-\d+[^/]*\.md$/ }
+  idPrefixedSurface("proposals", "proposals", "proposal_card", /^PR-\d+[^/]*\.md$/, /^PR-\d+/),
+  idPrefixedSurface("audits", "audits", "audit_record", /^AU-\d+[^/]*\.md$/, /^AU-\d+/),
+  idPrefixedSurface(
+    "pressure-events",
+    "pressure-events",
+    "pressure_event_card",
+    /^EPE-\d+(?!.*\.proposal\.md$)[^/]*\.md$/,
+    /^EPE-\d+/
+  ),
+  idPrefixedSurface("character-proposals", "character-proposals", "character_proposal_card", /^NCP-\d+[^/]*\.md$/, /^NCP-\d+/),
+  slugSurface("characters", "characters", "character_record"),
+  slugSurface("diegetic-artifacts", "diegetic-artifacts", "diegetic_artifact_record")
 ];
 
 export const indexDiskConsistency: Validator = {
@@ -145,7 +155,7 @@ function parseIndexEntries(worldRoot: string, surface: IndexSurface): Set<string
     if (
       normalized.startsWith(`${surface.directory}/`) &&
       !normalized.includes("/../") &&
-      surface.filePattern.test(normalized.slice(surface.directory.length + 1))
+      isSurfaceArtifact(surface, normalized.slice(surface.directory.length + 1))
     ) {
       entries.add(normalized);
     }
@@ -161,7 +171,7 @@ function diskArtifactsFor(worldRoot: string, surface: IndexSurface): Set<string>
 
   const artifacts = new Set<string>();
   for (const entry of readdirSync(surfaceRoot, { withFileTypes: true })) {
-    if (!entry.isFile() || entry.name === "INDEX.md" || !surface.filePattern.test(entry.name)) {
+    if (!entry.isFile() || !isSurfaceArtifact(surface, entry.name)) {
       continue;
     }
     artifacts.add(`${surface.directory}/${entry.name}`);
@@ -174,7 +184,8 @@ function severityFor(ctx: Context): VerdictSeverity {
 }
 
 function syntheticRecord(filePath: string, surface: IndexSurface, ctx: Context): IndexedRecord {
-  const nodeId = path.basename(filePath, ".md").match(/^(?:PR|AU|EPE|NCP)-\d+/)?.[0] ?? filePath;
+  const fileName = path.basename(filePath);
+  const nodeId = surface.idPattern?.exec(fileName)?.[0] ?? path.basename(fileName, ".md");
   return {
     node_type: surface.nodeType,
     node_id: nodeId,
@@ -182,6 +193,30 @@ function syntheticRecord(filePath: string, surface: IndexSurface, ctx: Context):
     file_path: filePath,
     parsed: {}
   };
+}
+
+function idPrefixedSurface(
+  name: string,
+  directory: string,
+  nodeType: string,
+  filePattern: RegExp,
+  idPattern: RegExp
+): IndexSurface {
+  return { name, directory, nodeType, mode: "id-prefixed", filePattern, idPattern };
+}
+
+function slugSurface(name: string, directory: string, nodeType: string): IndexSurface {
+  return { name, directory, nodeType, mode: "slug" };
+}
+
+function isSurfaceArtifact(surface: IndexSurface, fileName: string): boolean {
+  if (fileName.includes("/") || fileName === "INDEX.md" || !fileName.endsWith(".md")) {
+    return false;
+  }
+  if (surface.mode === "slug") {
+    return true;
+  }
+  return surface.filePattern?.test(fileName) ?? false;
 }
 
 function compareEntries(left: [string, IndexedRecord], right: [string, IndexedRecord]): number {
