@@ -19,6 +19,7 @@
     "validation_trace"
   ],
   "properties": {
+    "record_kind": { "type": "string", "const": "page_record" },
     "id": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
     "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
     "branch_id": { "type": "string", "pattern": "^BR-(0|[1-9][0-9]*)$" },

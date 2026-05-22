@@ -16,6 +16,7 @@
     "provenance"
   ],
   "properties": {
+    "record_kind": { "type": "string", "const": "storylet_record" },
     "id": { "type": "string", "pattern": "^SLT-(0|[1-9][0-9]*)$" },
     "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
     "supersedes": {

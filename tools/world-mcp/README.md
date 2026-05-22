@@ -37,7 +37,7 @@ Explicit-world retrieval calls auto-sync and retry once when `openIndexDb()` det
 
 ### Retrieval metadata and patch payloads
 
-Atomic retrieval tools expose `record_kind` as response metadata on parsed records so clients can discriminate returned record classes. Atomic YAML records under `worlds/<slug>/_source/` do not store that field. Patch validation accepts a matching optional `record_kind` discriminator in authored-record payloads, which lets retrieval-shaped records be copied into patch-plan constructors without `additionalProperties` failures; mismatched discriminators still fail schema validation.
+Retrieval tools expose `record_kind` as response metadata on parsed atomic and story-bundle records so clients can discriminate returned record classes. YAML records under `worlds/<slug>/_source/` and story-bundle `_source/` directories do not store that field. Patch validation accepts a matching optional `record_kind` discriminator in authored-record payloads, which lets retrieval-shaped records be copied into patch-plan constructors without `additionalProperties` failures; mismatched discriminators still fail schema validation.
 
 ### Per-op payload-shape validation
 
