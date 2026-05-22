@@ -1,6 +1,6 @@
 # SPEC69INDDISCON-002: Pre-merge real-world INDEX drift remediation sweep
 
-**Status**: BLOCKED
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None — data remediation only; edits the directly-editable hybrid-subdir navigation indexes (`characters/INDEX.md`, `diegetic-artifacts/INDEX.md`) on existing worlds. No skill, tool, hook, or validator code changes.
@@ -12,7 +12,7 @@
 
 ## Assumption Reassessment (2026-05-22)
 
-1. **Codebase**: the new coverage from `archive/tickets/SPEC69INDDISCON-001.md` is exercised via `node tools/validators/dist/src/cli/world-validate.js <world-slug> --compatibility` (positional[0] = world slug; `--compatibility` flag confirmed in `tools/validators/src/cli/_helpers.ts` `COMPATIBILITY_VALIDATORS`, `world-validate` CLI at `tools/validators/src/cli/world-validate.ts`). Reassessment for this worktree found no real world content to remediate: `worlds/` contains only `.gitkeep`; `worlds/animalia/` and `worlds/erotica-world/` are absent. The checked-in `tests/fixtures/animalia/characters/INDEX.md` / `tests/fixtures/animalia/diegetic-artifacts/INDEX.md` are package fixtures, not the real-world targets named by SPEC-69 §6.
+1. **Codebase**: the new coverage from `archive/tickets/SPEC69INDDISCON-001.md` is exercised via `node tools/validators/dist/src/cli/world-validate.js <world-slug> --compatibility` (positional[0] = world slug; `--compatibility` flag confirmed in `tools/validators/src/cli/_helpers.ts` `COMPATIBILITY_VALIDATORS`, `world-validate` CLI at `tools/validators/src/cli/world-validate.ts`). Resume reassessment for this worktree found the real world-content directories now present under the nested `worlds/` repository: `worlds/animalia/characters/INDEX.md`, `worlds/animalia/diegetic-artifacts/INDEX.md`, `worlds/erotica-world/characters/INDEX.md`, and `worlds/erotica-world/diegetic-artifacts/INDEX.md`.
 2. **Spec/docs**: SPEC-69 §6 ("pre-merge real-world drift remediation (required, not report-only)") and CLAUDE.md §Write Boundaries — the `INDEX.md` files of hybrid sub-directories (`characters/`, `diegetic-artifacts/`) are **directly editable** (not engine-only `_source/` records, not Hook-3-blocked). `canon-addition`'s engine-envelope note confirms `INDEX.md` edits do not require an index sync (not under `record_schema_compliance` validator scope).
 3. **Cross-artifact boundary**: `characters/INDEX.md` is maintained by `character-generation` and `diegetic-artifacts/INDEX.md` by `diegetic-artifact-generation`. This ticket reconciles their on-disk state, not their generation logic — any drift found is an existing inconsistency between a prior skill run and disk, remediated by editing the index rows, not by re-running the skills.
 4. **FOUNDATIONS principle (Rule 5 + §Canonical Storage Layer)**: this ticket is the Rule 5 (No Consequence Evasion) discharge for SPEC-69 — the second-order effect of pre-apply `fail`/global-scope coverage is that unremediated drift blocks writes; the sweep closes it. §Canonical Storage Layer: INDEX surfaces are the navigation layer and must stay faithful to disk.
@@ -77,17 +77,19 @@ For each `artifact_missing_from_index` verdict, add the missing row to the surfa
 1. `npm --prefix tools/validators run build` — ensure the SPEC69INDDISCON-001 coverage is compiled before the sweep.
 2. `for w in animalia erotica-world; do node tools/validators/dist/src/cli/world-validate.js "$w" --compatibility; done` — full-pipeline verification: zero covered-surface drift across all real worlds.
 
-## Blocker
-
-Blocked: 2026-05-22.
-
-This ticket requires real world-content directories under `worlds/`, but this worktree has only `worlds/.gitkeep`. The intended remediation files under `worlds/animalia/` and `worlds/erotica-world/` are absent, so the sweep cannot run and no `characters/INDEX.md` or `diegetic-artifacts/INDEX.md` remediation can be truthfully applied here.
-
 ## Verification Result
 
-1. `find worlds -maxdepth 4 -type f | sort` — BLOCKED; output is only `worlds/.gitkeep`.
-2. `find . -path '*/characters/INDEX.md' -o -path '*/diegetic-artifacts/INDEX.md' | sort` — BLOCKED for ticket scope; only checked-in fixture indexes were found (`tests/fixtures/animalia/...` and `tools/world-index/tests/fixtures/fixture-world/...`), not real-world files under `worlds/<slug>/`.
+Completed: 2026-05-22.
 
-## Next Required Action
+1. `npm --prefix tools/validators run build` — PASS; compiled the post-001 validator coverage before the real-world sweep.
+2. `node tools/validators/dist/src/cli/world-validate.js animalia --compatibility --json` filtered to `code === "index_disk_drift"` and `characters/` / `diegetic-artifacts/` files — PASS for this ticket; `owned_index_disk_drift 0`. The broader compatibility run still reports 903 unrelated schema-compliance failures, which are outside this data-remediation ticket.
+3. `node tools/validators/dist/src/cli/world-validate.js erotica-world --compatibility --json` filtered to `code === "index_disk_drift"` and `characters/` / `diegetic-artifacts/` files — PASS for this ticket; `owned_index_disk_drift 0`. The broader compatibility run still reports 72 unrelated schema-compliance failures, which are outside this data-remediation ticket.
+4. No remediation diff was required: the four real-world `characters/INDEX.md` and `diegetic-artifacts/INDEX.md` surfaces already matched disk for the newly covered validator surface.
 
-Resume this ticket in a worktree/session where the private real-world content for `worlds/animalia/` and `worlds/erotica-world/` is present, then run the post-001 compatibility sweep and remediate any surfaced `characters/` / `diegetic-artifacts/` index drift.
+## Outcome
+
+Completed: 2026-05-22.
+
+The required pre-merge real-world sweep ran against the now-present `worlds/animalia` and `worlds/erotica-world` content after rebuilding `tools/validators`. Both worlds produced zero `index_disk_drift` verdicts for the newly covered `characters/` and `diegetic-artifacts/` surfaces, so no `INDEX.md` remediation was needed.
+
+Deviations from plan: the ticket had previously been blocked because the real world-content directories were absent. That blocker no longer applies in this checkout. The full `--compatibility` command remains red on unrelated schema-compliance failures; acceptance for this ticket is the filtered owned verdict class, not a global compatibility-green claim.

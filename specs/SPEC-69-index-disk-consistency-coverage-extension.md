@@ -7,9 +7,9 @@
 **Depends on:** none — independent of SPEC-68
 **Companion:** `docs/triage/2026-05-22-world-system-consolidation-second-iteration-triage.md`
 
-**Implementation note (2026-05-22):** `archive/tickets/SPEC69INDDISCON-001.md` landed the validator coverage extension for `characters/` and `diegetic-artifacts/` through the existing `index_disk_consistency` structural validator. The required real-world INDEX remediation remains active in `tickets/SPEC69INDDISCON-002.md`.
+**Implementation note (2026-05-22):** `archive/tickets/SPEC69INDDISCON-001.md` landed the validator coverage extension for `characters/` and `diegetic-artifacts/` through the existing `index_disk_consistency` structural validator. The required real-world INDEX remediation is closed in `archive/tickets/SPEC69INDDISCON-002.md`.
 
-**Blocker note (2026-05-22):** `tickets/SPEC69INDDISCON-002.md` could not run in this worktree because `worlds/` contains only `.gitkeep`; the real `worlds/animalia/` and `worlds/erotica-world/` content required for the remediation sweep is absent.
+**Implementation note (2026-05-22):** `archive/tickets/SPEC69INDDISCON-002.md` resumed after the private world-content directories became available in this checkout. The required sweep found zero `index_disk_drift` verdicts for `characters/` and `diegetic-artifacts/` in both `worlds/animalia` and `worlds/erotica-world`, so no real-world `INDEX.md` remediation was required. The broader compatibility runs still report unrelated schema-compliance failures outside SPEC-69.
 
 ## 1. Context
 
