@@ -38,7 +38,7 @@ test("append_diegetic_artifact_record rejects traversal and existing files", asy
 
 test("repair_diegetic_artifact_claim_map_metadata retags only unbacked canonically true DA claims", async (t) => {
   const world = createTestWorld(t);
-  const frontmatter = diegeticArtifact("DA-0001");
+  const frontmatter = diegeticArtifact("DA-1");
   frontmatter.claim_map = [
     {
       claim: "I saw the fixture event.",
@@ -58,7 +58,7 @@ test("repair_diegetic_artifact_claim_map_metadata retags only unbacked canonical
       source: "witnessed",
       contradiction_risk: "none",
       mode: "direct",
-      cf_id: "CF-0001",
+      cf_id: "CF-1",
       mr_id: null,
       repair_trace: null
     }
@@ -71,7 +71,7 @@ test("repair_diegetic_artifact_claim_map_metadata retags only unbacked canonical
     target_file: "diegetic-artifacts/test-artifact.md",
     expected_content_hash: contentHashForText(source),
     payload: {
-      target_record_id: "DA-0001",
+      target_record_id: "DA-1",
       claim_map_updates: [
         {
           index: 0,
@@ -97,13 +97,13 @@ test("repair_diegetic_artifact_claim_map_metadata retags only unbacked canonical
     "Retagged because no resolvable CF backs this local artifact claim."
   );
   assert.equal(claimMap[1]?.canon_status, "canonically_true");
-  assert.equal(claimMap[1]?.cf_id, "CF-0001");
+  assert.equal(claimMap[1]?.cf_id, "CF-1");
   assert.match(parsed.body, /Artifact prose stays intact/);
 });
 
 test("repair_diegetic_artifact_claim_map_metadata rejects unsupported claim-map changes", async (t) => {
   const world = createTestWorld(t);
-  const frontmatter = diegeticArtifact("DA-0001");
+  const frontmatter = diegeticArtifact("DA-1");
   frontmatter.claim_map = [
     {
       claim: "Already backed.",
@@ -112,7 +112,7 @@ test("repair_diegetic_artifact_claim_map_metadata rejects unsupported claim-map 
       source: "witnessed",
       contradiction_risk: "none",
       mode: "direct",
-      cf_id: "CF-0001",
+      cf_id: "CF-1",
       mr_id: null,
       repair_trace: null
     }
@@ -129,7 +129,7 @@ test("repair_diegetic_artifact_claim_map_metadata rejects unsupported claim-map 
           target_world: env.target_world,
           target_file: "diegetic-artifacts/test-artifact.md",
           payload: {
-            target_record_id: "DA-0001",
+            target_record_id: "DA-1",
             claim_map_updates: [
               {
                 index: 0,
