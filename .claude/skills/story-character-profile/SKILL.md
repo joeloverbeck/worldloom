@@ -303,13 +303,19 @@ Use `source_kind: regenerated` for regenerate mode even if the old profile had w
 
 ## Phase 5: Compute Hashes
 
-Compute hashes after the final body text is stable:
+Compute hashes after the final body text is stable, using the canonical CLI `tools/world-mcp/dist/src/cli/compute-stchar-hashes.js` (do NOT hand-roll the SHA-256 — see `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.19 "Tooling"). Write the finalized body markdown and the §16a packet projection to files, then:
 
-- `profile_hash`: hash the complete STCHAR body markdown.
-- `voice_block_hash`: hash only `## Page-Plan Voice Block`.
-- `page_packet_hash`: hash the projected page-plan packet fields this profile authorizes for section 16a.
+```
+node tools/world-mcp/dist/src/cli/compute-stchar-hashes.js \
+  --profile <STCHAR body markdown> \
+  --packet  <§16a packet projection text>
+```
 
-All hashes must use `sha256:<64 lowercase hex>`. If no helper tool exists for these profile hashes, use a deterministic byte-for-byte SHA-256 over UTF-8 text and record the exact source slices in `## Validation / Audit Anchors`.
+- `profile_hash`: emitted from the complete STCHAR body markdown.
+- `voice_block_hash`: emitted from the `## Page-Plan Voice Block` section.
+- `page_packet_hash`: emitted from the §16a page-plan packet projection.
+
+The CLI emits all three as `sha256:<64 lowercase hex>` (hashed with `sha256Hex ∘ normalizeProseWhitespace`, so they are invariant to a trailing newline the patch engine may add — author-time and any later recompute agree). `source_char_hash` is NOT produced by this CLI: for `source_kind: world_char` set it to `sha256:` + the `content_hash` returned by `mcp__worldloom__get_record(<CHAR-id>)`; for `source_kind: story_local` set it `null`. Record the source slices and the hash method in `## Validation / Audit Anchors`.
 
 ## Phase 6: Assemble Patch Plan and INDEX Update
 

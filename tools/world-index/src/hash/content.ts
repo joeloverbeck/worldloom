@@ -71,3 +71,66 @@ export function computePgStateHash(pgRecord: Record<string, unknown>): string {
 export function computePlanHash(planBytes: string | Buffer): string {
   return sha256OfUtf8(planBytes);
 }
+
+// --- STCHAR content hashes (per story state contract §4.5.19) --------------
+// Single source of truth for the three content-derived STCHAR hashes. They use
+// the same prose-hash primitive as the world index content_hash
+// (sha256Hex ∘ normalizeProseWhitespace, i.e. NFC + trailing-whitespace and
+// leading/trailing-newline normalization) rather than a raw byte hash. This is
+// deliberate: the patch engine may write a trailing newline the author did not
+// emit, so a raw whole-body byte hash drifts between author-time and the
+// on-disk artifact a later drift check reads. Normalizing makes the value
+// stable across both. These return bare 64-hex digests; callers that write
+// STCHAR frontmatter / page-plan §16a packets / prose receipts prefix the
+// `sha256:` form the schema requires. The fourth STCHAR hash, source_char_hash,
+// is NOT a content-derived hash: it must equal the world index content_hash of
+// the source CHAR dossier (the value get_record(CHAR) returns, itself a
+// sha256Hex ∘ normalizeProseWhitespace of the dossier body) so health-audit
+// source_drift is meaningful, and is therefore taken from retrieval, not
+// recomputed here.
+
+// Mirrors the body extraction in stchar-body-integrity.ts: everything after the
+// closing frontmatter `---`, with one leading newline stripped. Accepts either a
+// full STCHAR file (frontmatter + body) or a body-only document.
+export function extractStcharBodyMarkdown(fileContent: string): string {
+  const lines = fileContent.split(/\r?\n/);
+  if (lines[0] !== "---") {
+    return fileContent;
+  }
+  const closingIndex = lines.findIndex((line, index) => index > 0 && line === "---");
+  if (closingIndex <= 0) {
+    return fileContent;
+  }
+  return lines.slice(closingIndex + 1).join("\n").replace(/^\n/, "");
+}
+
+// Mirrors the `## <name>` section slicing in stchar-body-integrity.ts: the text
+// between the named H2 header and the next H2 (or end of body).
+export function extractStcharSection(body: string, sectionName: string): string | null {
+  const matches = [...body.matchAll(/^## (.+?)\s*$/gm)];
+  for (let i = 0; i < matches.length; i += 1) {
+    if ((matches[i]?.[1] ?? "").trim() === sectionName) {
+      const start = (matches[i]?.index ?? 0) + (matches[i]?.[0]?.length ?? 0);
+      const end = matches[i + 1]?.index ?? body.length;
+      return body.slice(start, end);
+    }
+  }
+  return null;
+}
+
+export function computeStcharProfileHash(fileOrBody: string): string {
+  return sha256Hex(normalizeProseWhitespace(extractStcharBodyMarkdown(fileOrBody)));
+}
+
+export function computeStcharVoiceBlockHash(fileOrBody: string): string {
+  const body = extractStcharBodyMarkdown(fileOrBody);
+  const voiceBlock = extractStcharSection(body, "Page-Plan Voice Block");
+  if (voiceBlock === null) {
+    throw new Error("STCHAR body has no '## Page-Plan Voice Block' section to hash.");
+  }
+  return sha256Hex(normalizeProseWhitespace(voiceBlock));
+}
+
+export function computeStcharPagePacketHash(packetText: string): string {
+  return sha256Hex(normalizeProseWhitespace(packetText));
+}
