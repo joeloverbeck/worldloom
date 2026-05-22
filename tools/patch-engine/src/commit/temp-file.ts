@@ -2,7 +2,10 @@ import type { PatchOperation, PatchPlanEnvelope } from "../envelope/schema.js";
 import { contentHashForYaml, isRecord } from "../ops/shared.js";
 import { stageAppendAdjudicationRecord } from "../ops/append-adjudication-record.js";
 import { stageAppendCharacterRecord } from "../ops/append-character-record.js";
-import { stageAppendDiegeticArtifactRecord } from "../ops/append-diegetic-artifact-record.js";
+import {
+  stageAppendDiegeticArtifactRecord,
+  stageRepairDiegeticArtifactClaimMapMetadata
+} from "../ops/append-diegetic-artifact-record.js";
 import { stageAppendExtension } from "../ops/append-extension.js";
 import { stageAppendModificationHistoryEntry } from "../ops/append-modification-history-entry.js";
 import { stageAppendTouchedByCf } from "../ops/append-touched-by-cf.js";
@@ -15,6 +18,7 @@ import { stageCreateOqRecord } from "../ops/create-oq-record.js";
 import { stageCreateSecRecord } from "../ops/create-sec-record.js";
 import {
   stageCreateStoryRecord,
+  stageRepairStoryCharacterAuthorityBodyIntegrity,
   stageRemoveStoryCharacterAuthorityFrontmatterField,
   stageRemoveStoryCharacterAuthorityBodyHashNoteField,
   stageStoryCharacterAuthorityRecord,
@@ -148,6 +152,7 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "supersede_story_character_authority_record":
     case "remove_story_character_authority_frontmatter_field":
     case "remove_story_character_authority_body_hash_note_field":
+    case "repair_story_character_authority_body_integrity":
     case "append_story_diegetic_artifact_record": {
       const metadata = storyRecordMetadata(patch);
       return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
@@ -163,6 +168,8 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
       return { nodeId: patch.payload.target_sec_id, nodeType: "section" };
     case "append_modification_history_entry":
       return { nodeId: patch.payload.target_cf_id, nodeType: "canon_fact_record" };
+    case "repair_diegetic_artifact_claim_map_metadata":
+      return { nodeId: patch.payload.target_record_id, nodeType: "diegetic_artifact_record" };
     default:
       return null;
   }
@@ -243,6 +250,8 @@ function stageOne(
       return stageAppendCharacterRecord(envelope, patch, ctx);
     case "append_diegetic_artifact_record":
       return stageAppendDiegeticArtifactRecord(envelope, patch, ctx);
+    case "repair_diegetic_artifact_claim_map_metadata":
+      return stageRepairDiegeticArtifactClaimMapMetadata(envelope, patch, ctx);
     case "create_stent_record":
     case "create_ststat_record":
     case "create_sf_record":
@@ -271,6 +280,7 @@ function stageOne(
     case "supersede_story_character_authority_record":
     case "remove_story_character_authority_frontmatter_field":
     case "remove_story_character_authority_body_hash_note_field":
+    case "repair_story_character_authority_body_integrity":
     case "append_story_diegetic_artifact_record":
       if (
         patch.op === "append_story_character_authority_record" ||
@@ -283,6 +293,9 @@ function stageOne(
       }
       if (patch.op === "remove_story_character_authority_body_hash_note_field") {
         return stageRemoveStoryCharacterAuthorityBodyHashNoteField(envelope, patch, ctx);
+      }
+      if (patch.op === "repair_story_character_authority_body_integrity") {
+        return stageRepairStoryCharacterAuthorityBodyIntegrity(envelope, patch, ctx);
       }
       return stageCreateStoryRecord(envelope, patch, ctx);
   }

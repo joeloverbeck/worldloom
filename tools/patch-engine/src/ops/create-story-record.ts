@@ -2,10 +2,15 @@ import path from "node:path";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 import YAML from "yaml";
+import {
+  computeStcharProfileHash,
+  computeStcharVoiceBlockHash
+} from "@worldloom/world-index/hash/content";
 
 import type {
   PatchOperation,
   PatchPlanEnvelope,
+  RepairStoryCharacterAuthorityBodyIntegrityPayload,
   RemoveStoryCharacterAuthorityBodyHashNoteFieldPayload,
   RemoveStoryCharacterAuthorityFrontmatterFieldPayload,
   StoryCharacterAuthorityPayload,
@@ -52,16 +57,25 @@ type RemoveStoryCharacterAuthorityBodyHashNoteFieldOperation = Extract<
   payload: RemoveStoryCharacterAuthorityBodyHashNoteFieldPayload;
 };
 
+type RepairStoryCharacterAuthorityBodyIntegrityOperation = Extract<
+  PatchOperation,
+  { op: "repair_story_character_authority_body_integrity" }
+> & {
+  payload: RepairStoryCharacterAuthorityBodyIntegrityPayload;
+};
+
 type StoryCharacterAuthorityMaintenanceOperation =
   | RemoveStoryCharacterAuthorityFrontmatterFieldOperation
-  | RemoveStoryCharacterAuthorityBodyHashNoteFieldOperation;
+  | RemoveStoryCharacterAuthorityBodyHashNoteFieldOperation
+  | RepairStoryCharacterAuthorityBodyIntegrityOperation;
 
 export function storyRecordMetadata(
   op: PatchOperation
 ): { storySlug: string; recordId: string; nodeId: string; nodeType: string; sourceDir: string } | null {
   if (
     op.op === "remove_story_character_authority_frontmatter_field" ||
-    op.op === "remove_story_character_authority_body_hash_note_field"
+    op.op === "remove_story_character_authority_body_hash_note_field" ||
+    op.op === "repair_story_character_authority_body_integrity"
   ) {
     const storySlug = op.payload.story_slug;
     const recordId = op.payload.target_record_id;
@@ -242,11 +256,80 @@ export async function stageRemoveStoryCharacterAuthorityBodyHashNoteField(
   };
 }
 
+export async function stageRepairStoryCharacterAuthorityBodyIntegrity(
+  env: PatchPlanEnvelope,
+  op: RepairStoryCharacterAuthorityBodyIntegrityOperation,
+  ctx: OpContext
+): Promise<StagedWrite> {
+  validateStcharBodyIntegrityRepairOperation(env, op);
+  const { body_markdown: bodyMarkdown, source_operational_fact_map: sourceOperationalFactMap } = op.payload;
+  const { source, targetFilePath } = await readStcharMaintenanceTarget(env, op, ctx);
+  const parsed = parseHybridMarkdown(source, op.op, op.payload.target_record_id);
+  const nextFrontmatter = {
+    ...parsed.frontmatter,
+    source_operational_fact_map: sourceOperationalFactMap,
+    profile_hash: `sha256:${computeStcharProfileHash(bodyMarkdown)}`,
+    voice_block_hash: `sha256:${computeStcharVoiceBlockHash(bodyMarkdown)}`
+  };
+  const newContent = `---\n${serializeStableYaml(nextFrontmatter)}---\n${bodyMarkdown}`;
+  const tempFilePath = tempPathForTarget(targetFilePath, env.plan_id);
+
+  await mkdir(path.dirname(tempFilePath), { recursive: true });
+  await writeFile(tempFilePath, newContent, "utf8");
+
+  return {
+    target_file_path: targetFilePath,
+    temp_file_path: tempFilePath,
+    new_content: newContent,
+    new_hash: contentHashForText(newContent),
+    op_kind: op.op
+  };
+}
+
 function validateStcharMaintenanceOperation(
+  env: PatchPlanEnvelope,
+  op: RemoveStoryCharacterAuthorityFrontmatterFieldOperation | RemoveStoryCharacterAuthorityBodyHashNoteFieldOperation
+): void {
+  validateStcharMaintenanceTarget(env, op);
+  const { target_record_id: recordId, field_name: fieldName } = op.payload;
+  if (fieldName !== "page_packet_hash") {
+    throw new PatchEngineOpError({
+      code: "unsupported_operation",
+      message: `${op.op} may only remove legacy page_packet_hash metadata`,
+      op_kind: op.op,
+      record_id: recordId
+    });
+  }
+}
+
+function validateStcharBodyIntegrityRepairOperation(
+  env: PatchPlanEnvelope,
+  op: RepairStoryCharacterAuthorityBodyIntegrityOperation
+): void {
+  validateStcharMaintenanceTarget(env, op);
+  if (typeof op.payload.body_markdown !== "string" || op.payload.body_markdown.trim().length === 0) {
+    throw new PatchEngineOpError({
+      code: "invalid_record_id",
+      message: `${op.op} requires non-empty payload.body_markdown`,
+      op_kind: op.op,
+      record_id: op.payload.target_record_id
+    });
+  }
+  if (!Array.isArray(op.payload.source_operational_fact_map) || op.payload.source_operational_fact_map.length === 0) {
+    throw new PatchEngineOpError({
+      code: "invalid_record_id",
+      message: `${op.op} requires non-empty payload.source_operational_fact_map`,
+      op_kind: op.op,
+      record_id: op.payload.target_record_id
+    });
+  }
+}
+
+function validateStcharMaintenanceTarget(
   env: PatchPlanEnvelope,
   op: StoryCharacterAuthorityMaintenanceOperation
 ): void {
-  const { story_slug: storySlug, target_record_id: recordId, field_name: fieldName } = op.payload;
+  const { story_slug: storySlug, target_record_id: recordId } = op.payload;
   if (!/^[a-z0-9-]+$/.test(storySlug)) {
     throw new PatchEngineOpError({
       code: "invalid_record_id",
@@ -259,14 +342,6 @@ function validateStcharMaintenanceOperation(
     throw new PatchEngineOpError({
       code: "invalid_record_id",
       message: `${recordId} is not a valid STCHAR id for ${op.op}`,
-      op_kind: op.op,
-      record_id: recordId
-    });
-  }
-  if (fieldName !== "page_packet_hash") {
-    throw new PatchEngineOpError({
-      code: "unsupported_operation",
-      message: `${op.op} may only remove legacy page_packet_hash metadata`,
       op_kind: op.op,
       record_id: recordId
     });

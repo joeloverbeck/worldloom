@@ -3,6 +3,10 @@ import path from "node:path";
 
 import Database from "better-sqlite3";
 import yaml from "js-yaml";
+import {
+  computeStcharProfileHash,
+  computeStcharVoiceBlockHash
+} from "@worldloom/world-index/hash/content";
 
 import type { PatchOperation, PatchPlanEnvelope } from "@worldloom/patch-engine";
 
@@ -95,7 +99,8 @@ export function buildPreApplyFileInputs(
   for (const patch of envelope.patches) {
     const hybrid = storyCharacterAuthorityFileInput(patch);
     const maintainedHybrid = storyCharacterAuthorityMaintenanceFileInput(envelope, patch);
-    const candidate = maintainedHybrid ?? hybrid;
+    const maintainedDaHybrid = diegeticArtifactClaimMapMaintenanceFileInput(envelope, patch);
+    const candidate = maintainedDaHybrid ?? maintainedHybrid ?? hybrid;
     if (candidate !== null) {
       const existingIndex = files.findIndex((file) => file.path === candidate.path);
       if (existingIndex >= 0) {
@@ -344,15 +349,13 @@ function storyCharacterAuthorityMaintenanceFileInput(
 ): FileInput | null {
   if (
     patch.op !== "remove_story_character_authority_frontmatter_field" &&
-    patch.op !== "remove_story_character_authority_body_hash_note_field"
+    patch.op !== "remove_story_character_authority_body_hash_note_field" &&
+    patch.op !== "repair_story_character_authority_body_integrity"
   ) {
     return null;
   }
 
-  const { story_slug: storySlug, target_record_id: recordId, field_name: fieldName } = patch.payload;
-  if (fieldName !== "page_packet_hash") {
-    return null;
-  }
+  const { story_slug: storySlug, target_record_id: recordId } = patch.payload;
 
   const filePath = patch.target_file || `stories/${storySlug}/story-characters/${recordId}.md`;
   const absolutePath = path.join(resolveRepoRootForWorld(envelope.target_world), "worlds", envelope.target_world, filePath);
@@ -368,15 +371,54 @@ function storyCharacterAuthorityMaintenanceFileInput(
 
   const frontmatter = asPlainRecord(yaml.load(match[1] ?? "", { schema: yaml.JSON_SCHEMA }));
   if (patch.op === "remove_story_character_authority_frontmatter_field") {
-    delete frontmatter[fieldName];
+    delete frontmatter[patch.payload.field_name];
+  }
+  if (patch.op === "repair_story_character_authority_body_integrity") {
+    frontmatter.source_operational_fact_map = patch.payload.source_operational_fact_map;
+    frontmatter.profile_hash = `sha256:${computeStcharProfileHash(patch.payload.body_markdown)}`;
+    frontmatter.voice_block_hash = `sha256:${computeStcharVoiceBlockHash(patch.payload.body_markdown)}`;
   }
   const body = patch.op === "remove_story_character_authority_body_hash_note_field"
-    ? (match[2] ?? "").replace(`; ${fieldName} over the §16a packet projection authored for this bundle`, "")
-    : match[2] ?? "";
+    ? (match[2] ?? "").replace(`; ${patch.payload.field_name} over the §16a packet projection authored for this bundle`, "")
+    : patch.op === "repair_story_character_authority_body_integrity"
+      ? patch.payload.body_markdown
+      : match[2] ?? "";
   const nextFrontmatter = yaml.dump(frontmatter, { lineWidth: 100, sortKeys: false }).trimEnd();
   return {
     path: filePath,
     content: `---\n${nextFrontmatter}\n---\n${body}`
+  };
+}
+
+function diegeticArtifactClaimMapMaintenanceFileInput(
+  envelope: PatchPlanEnvelope,
+  patch: PatchOperation
+): FileInput | null {
+  if (patch.op !== "repair_diegetic_artifact_claim_map_metadata") {
+    return null;
+  }
+
+  const filePath = patch.target_file || diegeticArtifactFilePath(envelope, patch.payload.target_record_id);
+  if (filePath === null) {
+    return null;
+  }
+  const absolutePath = path.join(resolveRepoRootForWorld(envelope.target_world), "worlds", envelope.target_world, filePath);
+  if (!existsSync(absolutePath)) {
+    return null;
+  }
+
+  const source = readFileSync(absolutePath, "utf8");
+  const match = /^---\n([\s\S]*?)---\n?([\s\S]*)$/.exec(source);
+  if (match === null) {
+    return null;
+  }
+
+  const frontmatter = asPlainRecord(yaml.load(match[1] ?? "", { schema: yaml.JSON_SCHEMA }));
+  applyDiegeticArtifactClaimMapUpdates(frontmatter, patch);
+  const nextFrontmatter = yaml.dump(frontmatter, { lineWidth: 100, sortKeys: false }).trimEnd();
+  return {
+    path: filePath,
+    content: `---\n${nextFrontmatter}\n---\n${match[2] ?? ""}`
   };
 }
 
@@ -395,7 +437,8 @@ function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperat
 
   if (
     patch.op === "remove_story_character_authority_frontmatter_field" ||
-    patch.op === "remove_story_character_authority_body_hash_note_field"
+    patch.op === "remove_story_character_authority_body_hash_note_field" ||
+    patch.op === "repair_story_character_authority_body_integrity"
   ) {
     const targetId = `${patch.payload.story_slug}:${patch.payload.target_record_id}`;
     const current = byId.get(targetId);
@@ -406,6 +449,23 @@ function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperat
     if (patch.op === "remove_story_character_authority_frontmatter_field") {
       delete parsed[patch.payload.field_name];
     }
+    if (patch.op === "repair_story_character_authority_body_integrity") {
+      parsed.source_operational_fact_map = patch.payload.source_operational_fact_map;
+      parsed.profile_hash = `sha256:${computeStcharProfileHash(patch.payload.body_markdown)}`;
+      parsed.voice_block_hash = `sha256:${computeStcharVoiceBlockHash(patch.payload.body_markdown)}`;
+    }
+    byId.set(targetId, { ...current, parsed });
+    return targetId;
+  }
+
+  if (patch.op === "repair_diegetic_artifact_claim_map_metadata") {
+    const targetId = patch.payload.target_record_id;
+    const current = byId.get(targetId);
+    if (!current || current.node_type !== "diegetic_artifact_record") {
+      return null;
+    }
+    const parsed = cloneRecord(current.parsed);
+    applyDiegeticArtifactClaimMapUpdates(parsed, patch);
     byId.set(targetId, { ...current, parsed });
     return targetId;
   }
@@ -483,6 +543,50 @@ function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperat
   }
 
   return null;
+}
+
+function applyDiegeticArtifactClaimMapUpdates(
+  parsed: MutableRecord,
+  patch: Extract<PatchOperation, { op: "repair_diegetic_artifact_claim_map_metadata" }>
+): void {
+  if (!Array.isArray(parsed.claim_map)) {
+    return;
+  }
+  for (const update of patch.payload.claim_map_updates) {
+    const entry = parsed.claim_map[update.index];
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      continue;
+    }
+    const mutable = entry as MutableRecord;
+    mutable.canon_status = update.canon_status;
+    mutable.cf_id = update.cf_id;
+    const existingTrace =
+      mutable.repair_trace && typeof mutable.repair_trace === "object" && !Array.isArray(mutable.repair_trace)
+        ? (mutable.repair_trace as MutableRecord)
+        : {};
+    mutable.repair_trace = { ...existingTrace, valda_004: update.repair_trace_note };
+  }
+}
+
+function diegeticArtifactFilePath(envelope: PatchPlanEnvelope, recordId: string): string | null {
+  const repoRoot = resolveRepoRootForWorld(envelope.target_world);
+  const db = openWorldIndex(envelope.target_world, repoRoot);
+  try {
+    const row = db
+      .prepare(
+        `
+          SELECT file_path
+          FROM nodes
+          WHERE world_slug = ?
+            AND node_id = ?
+            AND node_type = 'diegetic_artifact_record'
+        `
+      )
+      .get(envelope.target_world, recordId) as { file_path: string } | undefined;
+    return row?.file_path ?? null;
+  } finally {
+    db.close();
+  }
 }
 
 function applyFieldUpdate(

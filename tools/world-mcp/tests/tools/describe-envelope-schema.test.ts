@@ -281,6 +281,59 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
   assert.deepEqual(stcharBodyMaintenancePayload.required, ["story_slug", "target_record_id", "field_name"]);
   assert.equal(stcharBodyMaintenancePayload.properties?.target_record_id?.pattern, "^STCHAR-(0|[1-9][0-9]*)$");
   assert.deepEqual(stcharBodyMaintenancePayload.properties?.field_name?.enum, ["page_packet_hash"]);
+  const stcharBodyRepairManifest = await describeEnvelopeSchema({
+    op_kind: "repair_story_character_authority_body_integrity"
+  });
+  assert.equal(stcharBodyRepairManifest.delivery_status, "inline");
+  const stcharBodyRepairProperties = stcharBodyRepairManifest.op_schemas
+    .repair_story_character_authority_body_integrity!.properties as Record<string, unknown>;
+  const stcharBodyRepairPayload = stcharBodyRepairProperties.payload as {
+    required?: string[];
+    properties?: {
+      target_record_id?: { pattern?: string };
+      body_markdown?: { minLength?: number };
+      source_operational_fact_map?: {
+        minItems?: number;
+        items?: { properties?: Record<string, { enum?: string[] }> };
+      };
+    };
+  };
+  assert.deepEqual(stcharBodyRepairPayload.required, [
+    "story_slug",
+    "target_record_id",
+    "body_markdown",
+    "source_operational_fact_map"
+  ]);
+  assert.equal(stcharBodyRepairPayload.properties?.target_record_id?.pattern, "^STCHAR-(0|[1-9][0-9]*)$");
+  assert.equal(stcharBodyRepairPayload.properties?.body_markdown?.minLength, 1);
+  assert.equal(stcharBodyRepairPayload.properties?.source_operational_fact_map?.minItems, 1);
+  assert.ok(
+    stcharBodyRepairPayload.properties?.source_operational_fact_map?.items?.properties?.source_field?.enum?.includes(
+      "signature_scene_behaviors"
+    )
+  );
+  const daClaimMapMaintenanceManifest = await describeEnvelopeSchema({
+    op_kind: "repair_diegetic_artifact_claim_map_metadata"
+  });
+  assert.equal(daClaimMapMaintenanceManifest.delivery_status, "inline");
+  const daClaimMapMaintenanceProperties = daClaimMapMaintenanceManifest.op_schemas
+    .repair_diegetic_artifact_claim_map_metadata!.properties as Record<string, unknown>;
+  const daClaimMapMaintenancePayload = daClaimMapMaintenanceProperties.payload as {
+    required?: string[];
+    properties?: {
+      target_record_id?: { pattern?: string };
+      claim_map_updates?: { minItems?: number; items?: { properties?: Record<string, unknown> } };
+    };
+  };
+  assert.deepEqual(daClaimMapMaintenancePayload.required, ["target_record_id", "claim_map_updates"]);
+  assert.equal(daClaimMapMaintenancePayload.properties?.target_record_id?.pattern, "^DA-[0-9]+$");
+  const claimMapUpdateProperties = daClaimMapMaintenancePayload.properties?.claim_map_updates?.items?.properties as
+    | Record<string, { const?: string; enum?: string[]; type?: string }>
+    | undefined;
+  assert.equal(daClaimMapMaintenancePayload.properties?.claim_map_updates?.minItems, 1);
+  assert.equal(claimMapUpdateProperties?.expected_canon_status?.const, "canonically_true");
+  assert.deepEqual(claimMapUpdateProperties?.canon_status?.enum, ["partially_true", "contested"]);
+  assert.equal(claimMapUpdateProperties?.cf_id?.type, "null");
   const removeAliasProperties = removeAliasManifest.op_schemas.remove_ch_affected_cf_ids!.properties as Record<
     string,
     unknown
