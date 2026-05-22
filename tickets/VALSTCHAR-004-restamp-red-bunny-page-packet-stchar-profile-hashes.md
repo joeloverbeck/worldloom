@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — live `red-bunny` page prose-plan and prose-receipt hash surfaces
-**Deps**: `tickets/VALSTCHAR-003-repair-red-bunny-stchar-body-integrity.md`
+**Deps**: `archive/tickets/VALSTCHAR-003-repair-red-bunny-stchar-body-integrity.md`
 
 ## Problem
 
