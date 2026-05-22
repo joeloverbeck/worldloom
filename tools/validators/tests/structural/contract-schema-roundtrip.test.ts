@@ -31,7 +31,7 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
   },
   "story-character-authority": {
     required: ["id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_hash", "source_char_sections_used", "generated_at_page", "created_by_skill", "supersedes", "status", "bound_stent_ids", "profile_revision", "body_schema_version", "profile_hash", "voice_block_hash", "page_packet_hash"],
-    properties: ["record_kind", "id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_hash", "source_char_sections_used", "story_local_inputs_used", "generated_at_page", "created_by_skill", "supersedes", "superseded_by", "status", "bound_stent_ids", "profile_revision", "body_schema_version", "profile_hash", "voice_block_hash", "page_packet_hash"]
+    properties: ["record_kind", "id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_hash", "source_char_sections_used", "source_operational_fact_map", "story_local_inputs_used", "generated_at_page", "created_by_skill", "supersedes", "superseded_by", "status", "bound_stent_ids", "profile_revision", "body_schema_version", "profile_hash", "voice_block_hash", "page_packet_hash"]
   },
   "story-status": {
     required: ["id", "story_id", "created_at_page", "entity", "life", "agency", "location"],

@@ -87,7 +87,7 @@ Placement rationale: the map is consumed by the §2.4 validator on **every** `wo
 
 ### 2.4 New validator: `stchar_source_fact_coverage`
 
-New file `tools/validators/src/structural/stchar-source-fact-coverage.ts`, registered and threaded through the STCHAR-relevant pre-apply path (`STCHAR_RELEVANT_OPS` in `stchar-utils.ts` already covers `append_story_character_authority_record` / `supersede_story_character_authority_record`).
+New file `tools/validators/src/structural/stchar-source-fact-coverage.ts`, registered in `tools/validators/src/public/registry.ts` (one `import { stcharSourceFactCoverage }` line + a registry-array entry — the single-shared-registry-edit pattern every structural validator uses, e.g. `stcharBodyIntegrity` / `pagePlanStcharPacketIntegrity`) and threaded through the STCHAR-relevant pre-apply path (`STCHAR_RELEVANT_OPS` in `stchar-utils.ts` already covers `append_story_character_authority_record` / `supersede_story_character_authority_record`).
 
 For each STCHAR with `source_kind: world_char`:
 
@@ -111,7 +111,7 @@ For the **reduced `offstage_causal`** packet, add the same line only when the of
 
 ## 3. Edge cases / migration
 
-- **3 existing STCHAR records** (`worlds/erotica-world/stories/red-bunny/story-characters/STCHAR-1..3.md`) predate this contract. Migration policy: the new requirements (§2.2 subsections, §2.3 `source_operational_fact_map`) **fail for new and superseding STCHAR**, and **warn** for untouched legacy records during a one-release migration window. The `stchar_source_fact_coverage` validator must skip (or warn-only) legacy `world_char` STCHAR that lack the field rather than blocking unrelated story writes. Confirm at implementation whether all 3 red-bunny STCHAR are `world_char` or `story_local` (the latter are exempt by §2.3).
+- **3 existing STCHAR records** (`worlds/erotica-world/stories/red-bunny/story-characters/STCHAR-1..3.md`) predate this contract. All three are `source_kind: world_char` (verified at reassessment: `STCHAR-1.md:22`, `STCHAR-2.md:21`, `STCHAR-3.md:21`), so none are §2.3-exempt — the migration window covers all three. Migration policy: the new requirements (§2.2 subsections, §2.3 `source_operational_fact_map`) **fail for new and superseding STCHAR**, and **warn** for untouched legacy records during a one-release migration window. The `stchar_source_fact_coverage` validator must skip (or warn-only) legacy `world_char` STCHAR that lack the field rather than blocking unrelated story writes.
 - **`profile_hash` is over the full body**: adding the §2.2 subsections changes the body, so any migrated STCHAR needs `profile_hash` recomputation via `compute-stchar-hashes.ts`. The warn-until-touched window means this only bites when a legacy record is next regenerated/superseded.
 - `voice_block_hash` (Page-Plan Voice Block only) and `page_packet_hash` (§16a projection) are **unaffected** by the frontmatter `source_operational_fact_map` field and by subsections outside the voice block.
 - **Array fields**: `signature_scene_behaviors[]` and `relational_charge[]` take one field-level map entry each (disposition + target/rationale). Per-element mapping is explicitly not required — it would bloat the map against FOUNDATIONS §schema-minimalism.
@@ -130,8 +130,8 @@ For the **reduced `offstage_causal`** packet, add the same line only when the of
 | Principle | Stance | Rationale |
 |---|---|---|
 | §Story Bundles §6.1 (Story-Local Character Authority) | aligns | "STCHAR shapes persona, voice, and pressure behavior; normal runtime consumes active STCHAR, not world CHAR." The coverage contract strengthens this: operational source facts must land in STCHAR operational homes rather than being stranded in audit prose, so runtime authority is complete without reaching back to `CHAR`. |
-| §Tooling Recommendation / Validation Rules (deterministic vs judgment) | aligns | The validator gates only the closed, machine-parseable `dramatic_core` fields (deterministic); literary adequacy, per-page capability relevance, and free-prose capability coverage stay judgment (§2.5, §4). Mirrors the report's own schema-validates-shape-not-meaning point. |
-| §Schema-minimalism (story scope) | aligns | `source_operational_fact_map` is load-bearing — consumed by `stchar_source_fact_coverage` on every `world_char` STCHAR validation. Array fields take one entry each; no nice-to-have surface added. |
+| §Tooling Recommendation (deterministic gating vs judgment) | aligns | The validator gates only the closed, machine-parseable `dramatic_core` fields (deterministic); literary adequacy, per-page capability relevance, and free-prose capability coverage stay judgment (§2.5, §4), consistent with the Rule enforcement map's judgment-only rules. Mirrors the report's own schema-validates-shape-not-meaning point. |
+| §Story Bundles §5b (Schema-Minimalism At Story Scope) | aligns | `source_operational_fact_map` is load-bearing — consumed by `stchar_source_fact_coverage` on every `world_char` STCHAR validation. Array fields take one entry each; no nice-to-have surface added. |
 | Rule 6 (No Silent Retcons) | aligns | A retained-with-transformation disposition forces an explicit `target_section`; an omission forces a `rationale` — semantic loss becomes a logged, justified decision rather than a silent drop. |
 | Canon promotion boundary | N/A (defensive) | Adjacent surface (STCHAR derives from world `CHAR`), but nothing here promotes story-local facts to world canon; disclosed as intentionally out of scope. |
 
