@@ -225,7 +225,7 @@ function validClaimMap(): ClaimMapEntry {
     contradiction_risk: "none",
     mode: "direct",
     adaptive_behavior_preserved_under_wrong_ontology: false,
-    cf_id: "CF-0001",
+    cf_id: "CF-1",
     mr_id: null,
     repair_trace: null
   };
@@ -271,7 +271,7 @@ function validEpistemicHorizon(): LooseObject {
 
 function validWorldConsistency(): LooseObject {
   return {
-    canon_facts_consulted: ["CF-0001"],
+    canon_facts_consulted: ["CF-1"],
     invariants_respected: ["SOC-1"],
     mystery_reserve_firewall: ["M-1"],
     distribution_exceptions: []

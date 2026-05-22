@@ -313,7 +313,7 @@ test("record_schema_compliance accepts diegetic-artifact frontmatter with scoped
             "    contradiction_risk: none",
             "    mode: direct",
             "    adaptive_behavior_preserved_under_wrong_ontology: false",
-            "    cf_id: CF-0001",
+            "    cf_id: CF-1",
             "    mr_id: null",
             "    repair_trace: null",
             "---",
@@ -347,7 +347,7 @@ test("record_schema_compliance accepts diegetic-artifact frontmatter with explic
 });
 
 test("record_schema_compliance rejects diegetic-artifact world_relation entries that are not CF ids", async () => {
-  const fixture = readFixture("diegetic-artifact-with-new-fields.md").replace("    - CF-0001", "    - INV-0001");
+  const fixture = readFixture("diegetic-artifact-with-new-fields.md").replace("    - CF-1", "    - INV-0001");
   const result = await recordSchemaCompliance.run(
     {
       files: [
@@ -393,7 +393,7 @@ test("record_schema_compliance rejects diegetic-artifact scoped_references entri
             "    contradiction_risk: none",
             "    mode: direct",
             "    adaptive_behavior_preserved_under_wrong_ontology: false",
-            "    cf_id: CF-0001",
+            "    cf_id: CF-1",
             "    mr_id: null",
             "    repair_trace: null",
             "---",
@@ -977,7 +977,7 @@ function validDiegeticArtifactLooseObjectLines(): string[] {
     "  impossible_knowledge: []",
     "world_consistency:",
     "  canon_facts_consulted:",
-    "    - CF-0001",
+    "    - CF-1",
     "  invariants_respected: []",
     "  mystery_reserve_firewall: []",
     "  distribution_exceptions: []",

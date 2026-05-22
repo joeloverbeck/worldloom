@@ -13,13 +13,13 @@ communicative_purpose: narrate
 desired_relation_to_truth: accurate
 world_relation:
   corroborates:
-    - CF-0001
+    - CF-1
   contests:
-    - CF-0002
+    - CF-2
   conceals: []
   mythologizes: []
   ritualizes:
-    - CF-0003
+    - CF-3
 genre_conventions:
   honors: []
   breaks: []
@@ -54,12 +54,12 @@ claim_map:
     contradiction_risk: none
     mode: direct
     adaptive_behavior_preserved_under_wrong_ontology: false
-    cf_id: CF-0001
+    cf_id: CF-1
     mr_id: null
     repair_trace: null
 world_consistency:
   canon_facts_consulted:
-    - CF-0001
+    - CF-1
   invariants_respected: []
   mystery_reserve_firewall: []
   distribution_exceptions: []
