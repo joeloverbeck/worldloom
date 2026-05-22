@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — world-index over story-bundle records)
-**Source:** `reports/stchar-audit-second-iteration.md` §9.7 (edge parity drift), §13 (world-index required edge additions), §17 Important #7; triage `docs/triage/2026-05-21-stchar-audit-second-iteration-triage.md`
+**Source:** `archive/reports/stchar-audit-second-iteration.md` §9.7 (edge parity drift), §13 (world-index required edge additions), §17 Important #7; triage `docs/triage/2026-05-21-stchar-audit-second-iteration-triage.md`
 **Depends on:** none
 
 ## 1. Context
@@ -43,7 +43,7 @@ catalog), and world-index parser tests (one positive fixture per new edge type).
 | `STSEC.protected_mystery_refs[]` → `secret_protected_mystery` | ABSENT | `branching-story-health-audit` Mystery-Accretion firewall walk (Rule 7 / FOUNDATIONS §5 Mystery Accretion — must traverse which secrets protect which Mystery Reserve entries to detect cumulative narrowing). |
 | `STSEC.source_records[]` → `secret_source_record` | ABSENT | health-audit secret-provenance traversal; impact analysis when a source record is superseded. |
 | `OBL.owed_by`, `OBL.owed_to` → `obligation_owed_by`, `obligation_owed_to` | ABSENT (only `dependent_fact` exists) | health-audit dangling-obligation / debt-party traversal (Rule 5 — who still owes what to whom). |
-| `CNSQ.derived_from`, `THR.derived_from` → `consequence_derived_from`, `thread_derived_from` | ABSENT (CNSQ has zero edges) | Rule-5 consequence/debt provenance traversal; `find_impacted_fragments` when an upstream record changes. CNSQ is currently un-traversable at all. **OBL has no `derived_from` field** (verified against `tools/validators/src/schemas/story-obligation.schema.json`, a closed `additionalProperties: false` schema, and the `OBL` block in `.claude/skills/_shared-templates/story-record-schemas.md`); its provenance is captured by `dependent_facts` (already indexed as the `dependent_fact` edge) and by `supersedes`, so no `obligation_derived_from` edge applies. The report's `OBL.derived_from` listing (`reports/stchar-audit-second-iteration.md` §17 #7) is a source-document error, not a real field. |
+| `CNSQ.derived_from`, `THR.derived_from` → `consequence_derived_from`, `thread_derived_from` | ABSENT (CNSQ has zero edges) | Rule-5 consequence/debt provenance traversal; `find_impacted_fragments` when an upstream record changes. CNSQ is currently un-traversable at all. **OBL has no `derived_from` field** (verified against `tools/validators/src/schemas/story-obligation.schema.json`, a closed `additionalProperties: false` schema, and the `OBL` block in `.claude/skills/_shared-templates/story-record-schemas.md`); its provenance is captured by `dependent_facts` (already indexed as the `dependent_fact` edge) and by `supersedes`, so no `obligation_derived_from` edge applies. The report's `OBL.derived_from` listing (`archive/reports/stchar-audit-second-iteration.md` §17 #7) is a source-document error, not a real field. |
 | `STCHAR.superseded_by` → `stchar_superseded_by` | ABSENT (forward `stchar_supersedes` exists) | reverse-supersession lookup for `stchar-supersession-integrity` and health-audit stale-STCHAR detection; cheap parity with the existing forward edge. |
 
 For each **story-local-target** edge (`secret_source_record`, `obligation_owed_by`,

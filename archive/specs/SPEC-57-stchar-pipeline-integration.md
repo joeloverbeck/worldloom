@@ -5,7 +5,7 @@
 **Depends on:** SPEC-56 — STCHAR Machine-Facing Foundation (must land first)
 
 Triage note: this spec is the skill-integration half of the warranted slice of
-`reports/stchar-implementation-first-iteration.md` (ChatGPT-Pro). It assumes SPEC-56 has
+`archive/reports/stchar-implementation-first-iteration.md` (ChatGPT-Pro). It assumes SPEC-56 has
 landed the `STCHAR` schema, validators, patch-engine ops, world-index node/edges, and MCP
 retrieval surfaces. It applies the same trims (M1–M3, see SPEC-56 §Out of Scope) and the same
 supersession of `docs/triage/2026-05-20-story-character-dossier-retrieval-triage.md`. The

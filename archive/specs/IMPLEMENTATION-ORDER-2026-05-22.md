@@ -4,7 +4,7 @@
 
 ## World-system consolidation (first iteration)
 
-Specs derived from `reports/world-system-consolidation-first-iteration.md` (triage:
+Specs derived from `archive/reports/world-system-consolidation-first-iteration.md` (triage:
 `docs/triage/2026-05-21-world-system-consolidation-triage.md`). First consolidation pass over the
 world-system (non-story) skills, whose proposal/audit/pressure surfaces had the least prior iteration.
 
@@ -31,7 +31,7 @@ prerequisite index-consistency checks land in SPEC-64). See the companion triage
 
 ## STCHAR audit (first iteration)
 
-Active specs derived from `reports/stchar-audit-first-iteration.md` (triage:
+Active specs derived from `archive/reports/stchar-audit-first-iteration.md` (triage:
 `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`). These audit the gaps left by the
 just-merged SPEC-56 (stchar-machine-foundation) and SPEC-57 (stchar-pipeline-integration).
 
@@ -75,7 +75,7 @@ just-merged SPEC-56 (stchar-machine-foundation) and SPEC-57 (stchar-pipeline-int
 
 ## STCHAR audit (second iteration)
 
-Active specs derived from `reports/stchar-audit-second-iteration.md` (triage:
+Active specs derived from `archive/reports/stchar-audit-second-iteration.md` (triage:
 `docs/triage/2026-05-21-stchar-audit-second-iteration-triage.md`). The second-iteration audit was
 critically reassessed against the first-iteration triage and the merged SPEC-58/59/60/63; most of its
 13 proposals were already resolved, already rejected, or contradicted its own §18 anti-patterns. Three

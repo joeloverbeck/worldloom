@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # **1. Executive verdict**
 
 **Adopt STCHAR.** Worldloom needs a first-class story-local character authority layer, not better `CHAR-*` retrieval alone. The current story system has strong temporal state records—`BEL`, `STINT`, `SREL`, `STPLAN`, `STEMO`, `STSTAT`, `THR`, `OBL`, `CNSQ`, and friends—but no stable story-facing authority for persona, voice, appraisal, pressure behavior, perception, and relationship-specific conduct. The uploaded mission correctly identifies the gap and explicitly supersedes the earlier recommendation against a story-local character record.
@@ -1852,3 +1854,10 @@ Acceptance criteria:
 
 **Bottom line:** build STCHAR as a first-class, hybrid, story-local authority layer. Do not patch around the problem by fetching bigger chunks of `CHAR-*`. The existing repo already has the right machinery—story snapshots, patch engine, validators, context packets, prose receipts, health audits—but its character authority surface is missing. STCHAR fills that gap cleanly without violating `FOUNDATIONS.md`.
 
+
+
+---
+
+## Outcome
+
+Archived on 2026-05-22 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.

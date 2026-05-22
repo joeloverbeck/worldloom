@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-22
 **Classification:** canon-related (tightens the schema consumed by `record_schema_compliance` over the DA realized-hybrid surface; mechanizes existing skill discipline; no canon-semantics change)
-**Source:** `reports/world-system-consolidation-second-iteration.md` Fault 3 + Recommendation 3 — **corrected** at triage against `main` (the report's proposed `DAC-*` schema is misaligned with the real artifact and is NOT adopted; see §Out of Scope)
+**Source:** `archive/reports/world-system-consolidation-second-iteration.md` Fault 3 + Recommendation 3 — **corrected** at triage against `main` (the report's proposed `DAC-*` schema is misaligned with the real artifact and is NOT adopted; see §Out of Scope)
 **Depends on:** none — independent of SPEC-69
 **Companion:** `docs/triage/2026-05-22-world-system-consolidation-second-iteration-triage.md`
 

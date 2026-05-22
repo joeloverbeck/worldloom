@@ -6,7 +6,7 @@
 **Consumed by:** SPEC-57 — STCHAR Pipeline Integration
 
 Triage note: this spec is the machine-layer half of the warranted slice of
-`reports/stchar-implementation-first-iteration.md` (produced by ChatGPT-Pro). Every
+`archive/reports/stchar-implementation-first-iteration.md` (produced by ChatGPT-Pro). Every
 codebase claim in that report was verified across five parallel exploration passes and
 found accurate. The report's core thesis — that the story pipeline needs a first-class
 **story-local character authority** record (`STCHAR`) because stable voice / persona /

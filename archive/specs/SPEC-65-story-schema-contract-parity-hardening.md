@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — branching-story pipeline schemas/validators)
-**Source:** `reports/stchar-audit-second-iteration.md` §8 (identifier-set matrix), §9 (same-concept-different-union drift), §17 Critical #2/#3/#6; triage `docs/triage/2026-05-21-stchar-audit-second-iteration-triage.md`
+**Source:** `archive/reports/stchar-audit-second-iteration.md` §8 (identifier-set matrix), §9 (same-concept-different-union drift), §17 Critical #2/#3/#6; triage `docs/triage/2026-05-21-stchar-audit-second-iteration-triage.md`
 **Depends on:** none — operates on already-landed schemas (SPEC-58 reconciliation is upstream history, not a build dependency)
 
 ## 1. Context
@@ -115,7 +115,7 @@ surfaces is edited to diverge from the others.
 ### 2.5 Folded doc cleanup (report §10, §13, §15)
 
 **Files:** `.claude/skills/_shared-templates/story-state-contract.md`;
-`reports/stchar-audit-first-iteration.md`, `reports/stchar-audit-second-iteration.md`,
+`archive/reports/stchar-audit-first-iteration.md`, `archive/reports/stchar-audit-second-iteration.md`,
 `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md` (header only).
 
 - **§10 packet-authority boundary (one line):** in the §16a contract, state explicitly that a verified

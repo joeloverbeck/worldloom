@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # Red Bunny — manual edits to apply after STEMOACC-001 lands
 
 **Scope:** what, if anything, I would have authored differently in the `red-bunny` bootstrap had `stemo_orientation_records_exist` not had the accessibility defect captured in `tickets/STEMOACC-001.md`, and the exact manual change to bring the committed bundle to that better state once the ticket lands.
@@ -93,3 +95,10 @@ node tools/world-mcp/dist/src/cli/compute-pg-hashes.js \
 ## 7. Everything that does NOT change
 
 For the record, none of the following are affected by STEMOACC-001 and require no edit: all 3 `STENT`, 3 `STSTAT`, `STLOC-1`, `STOBJ-1`, 5 `SF`, 7 `BEL`, 3 `STINT`, `CNSQ-1`, 3 `THR`, 3 `SREL`, `CLK-1`, `STSEC-1` (its `holders: [STENT-2]` is correct; no STEMO orients toward it, so the `holders`-plural bug never bit this bundle), `STQ-1`, `STEMO-2`, `BR-1`, `SE-1`, `PG-1`, the 4 `CHC`, the 12 `SLT`, `STORY_KERNEL.md`, `pages-prose-plans/PG-1.md`, the bundle `INDEX.md`, and the per-world `stories/INDEX.md`. The `INDEX.md` "Active Emotions" table records affect/intensity only and needs no update either way.
+
+
+---
+
+## Outcome
+
+Archived on 2026-05-22 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.

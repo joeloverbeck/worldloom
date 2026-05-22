@@ -1,7 +1,7 @@
 # Triage — STCHAR audit (second iteration)
 
 **Date:** 2026-05-21
-**Source report:** `reports/stchar-audit-second-iteration.md` (ChatGPT-Pro, 19 sections, 13 proposed improvements)
+**Source report:** `archive/reports/stchar-audit-second-iteration.md` (ChatGPT-Pro, 19 sections, 13 proposed improvements)
 **Prior decision record:** `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md` (this triage is a delta against it)
 **Method:** every load-bearing codebase claim verified against actual schema/validator/parser source on `main`, against the first-iteration triage, and against the merged SPEC-58/59/60/63.
 

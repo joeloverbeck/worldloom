@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # Historical — superseded by the merged SPEC-58/59/60/63 STCHAR contracts; retained for audit trail
 
 # **1. Executive verdict**
@@ -853,3 +855,10 @@ Reject these:
 | Mark stale `bound_char_id` docs obsolete | Removes contradictory pre-STCHAR guidance and preserves the merged STCHAR direction. |
 | Add tests for every allowed/forbidden STCHAR surface | Converts prose discipline into deterministic enforcement where possible. |
 | Preserve judgment-assisted fidelity checks | Avoids pretending artistic voice/appraisal fidelity is a pure schema problem while still producing actionable findings. |
+
+
+---
+
+## Outcome
+
+Archived on 2026-05-22 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.

@@ -2,7 +2,7 @@
 SPEC-54: Character Pipeline — Third-Iteration Implementation Fixes
 Delta against SPEC-53 (Character Pipeline Second-Iteration Fixes, archived/implemented 2026-05-20)
 and SPEC-52 (Protagonist-Grade Character Pipeline, archived/implemented 2026-05-20).
-Source audit: reports/deepening-characters-third-iteration.md (ChatGPT-Pro, third iteration).
+Source audit: archive/reports/deepening-characters-third-iteration.md (ChatGPT-Pro, third iteration).
 Triage note: the source audit's #1 "fix first" item (broad NCP body-section validation) is
 REJECTED here as a re-proposal of a decision deliberately made in the opposite direction by
 SPEC-52 Phase 5 item 6 and re-affirmed by SPEC-53 (Out of Scope). Only the genuinely-warranted
@@ -14,7 +14,7 @@ frontmatter-integrity slice of that finding is accepted (Phase 2).
 **Status:** COMPLETED
 **Date:** 2026-05-20
 **Predecessor:** SPEC-53 — Character Pipeline Second-Iteration Fixes (archived; this spec is a focused delta on its landed deliverables)
-**Source audit:** `reports/deepening-characters-third-iteration.md`
+**Source audit:** `archive/reports/deepening-characters-third-iteration.md`
 
 ---
 

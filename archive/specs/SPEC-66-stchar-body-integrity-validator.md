@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-21
 **Classification:** story-canon-related (Skill Category 2c surface — branching-story pipeline validators)
-**Source:** `reports/stchar-audit-second-iteration.md` §12 (deterministic validators to add, `stchar_body_integrity`), §17 Critical #5; triage `docs/triage/2026-05-21-stchar-audit-second-iteration-triage.md`
+**Source:** `archive/reports/stchar-audit-second-iteration.md` §12 (deterministic validators to add, `stchar_body_integrity`), §17 Critical #5; triage `docs/triage/2026-05-21-stchar-audit-second-iteration-triage.md`
 **Depends on:** none — independent of SPEC-65/67
 
 ## 1. Context

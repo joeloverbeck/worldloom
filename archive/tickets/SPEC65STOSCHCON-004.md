@@ -16,7 +16,7 @@ At intake, two documentation gaps surfaced by the second-iteration STCHAR audit:
 ## Assumption Reassessment (2026-05-21)
 
 1. `.claude/skills/_shared-templates/story-state-contract.md` carries the §16a authority-packet contract (`required_because` enum / packet shape — 6 anchor matches verified this session). `tools/validators/src/structural/story-kernel-cast-bind-list-integrity.ts` hard-fails legacy `bound_char_id` — this is **current enforcement** and MUST NOT be altered by this docs ticket.
-2. The target docs exist (verified this session): `reports/stchar-audit-first-iteration.md`, `reports/stchar-audit-second-iteration.md`, `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`. SPEC-58/59/60/63 are archived/completed (the merged STCHAR contracts the headers reference).
+2. The target docs exist (verified this session): `archive/reports/stchar-audit-first-iteration.md`, `archive/reports/stchar-audit-second-iteration.md`, `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`. SPEC-58/59/60/63 are archived/completed (the merged STCHAR contracts the headers reference).
 3. **Cross-artifact boundary under audit**: the §16a contract sentence lands in the shared story-state contract (consumed by `branching-story-turn-cycle` / `branching-story-prose-attach`); the historical headers land in report/triage markdown. Neither touches validator code or schema.
 4. **FOUNDATIONS Rule 6 No Silent Retcons**: the historical headers are *additive* annotations preserving the audit trail (naming what was superseded and by which specs), not deletions — the reports stay readable as history. The §16a sentence documents existing behavior, not a behavior change.
 
@@ -39,13 +39,13 @@ At intake, two documentation gaps surfaced by the second-iteration STCHAR audit:
 
 ### 2. Historical headers
 
-`reports/stchar-audit-first-iteration.md`, `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`, and `reports/stchar-audit-second-iteration.md` now carry the header "Historical — superseded by the merged SPEC-58/59/60/63 STCHAR contracts; retained for audit trail". `story-kernel-cast-bind-list-integrity.ts` was not altered.
+`archive/reports/stchar-audit-first-iteration.md`, `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md`, and `archive/reports/stchar-audit-second-iteration.md` now carry the header "Historical — superseded by the merged SPEC-58/59/60/63 STCHAR contracts; retained for audit trail". `story-kernel-cast-bind-list-integrity.ts` was not altered.
 
 ## Files to Touch
 
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify)
-- `reports/stchar-audit-first-iteration.md` (modify)
-- `reports/stchar-audit-second-iteration.md` (modify)
+- `archive/reports/stchar-audit-first-iteration.md` (modify)
+- `archive/reports/stchar-audit-second-iteration.md` (modify)
 - `docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md` (modify)
 
 ## Out of Scope
@@ -96,7 +96,7 @@ Passed:
 1. `grep -n "not the default authority\|new character-dependent state" .claude/skills/_shared-templates/story-state-contract.md` — returned the new §16a sentence.
 2. `grep -rl "Historical — superseded by the merged SPEC-58/59/60/63" reports/ docs/triage/` — returned exactly the three target files.
 3. `git diff --stat tools/validators/src/structural/story-kernel-cast-bind-list-integrity.ts` — produced no output, proving the validator file stayed untouched.
-4. `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md reports/stchar-audit-first-iteration.md reports/stchar-audit-second-iteration.md docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md archive/tickets/SPEC65STOSCHCON-004.md` — passed after archival path repair.
+4. `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md archive/reports/stchar-audit-first-iteration.md archive/reports/stchar-audit-second-iteration.md docs/triage/2026-05-21-stchar-audit-first-iteration-triage.md archive/tickets/SPEC65STOSCHCON-004.md` — passed after archival path repair.
 
 ## Deviations
 
