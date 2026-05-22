@@ -95,7 +95,7 @@ function isAllowedCharReference(record: IndexedRecord, referencePath: string): b
 
 function textSurfaceCharLeaks(input: unknown, ctx: Context): Verdict[] {
   return textTargets(input, ctx).flatMap((target) => {
-    const matches = [...target.content.matchAll(/\bCHAR-(0|[1-9][0-9]*)\b/g)];
+    const matches = [...target.content.matchAll(new RegExp(CHAR_ID.source, "g"))];
     return matches.map((match) => ({
       validator: VALIDATOR,
       severity: "fail" as const,

@@ -9,7 +9,7 @@ import {
 
 export const STCHAR_ID = /^STCHAR-(0|[1-9][0-9]*)$/;
 export const STENT_ID = /^STENT-(0|[1-9][0-9]*)$/;
-export const CHAR_ID = /\bCHAR-(0|[1-9][0-9]*)\b/;
+export const CHAR_ID = /\bCHAR-[0-9]+\b/;
 
 const STCHAR_RELEVANT_OPS = new Set([
   "create_stent_record",
