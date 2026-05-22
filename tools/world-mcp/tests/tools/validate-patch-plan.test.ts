@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 
 import { validatePatchPlan } from "../../src/tools/validate-patch-plan.js";
@@ -85,6 +86,67 @@ function stcharBody(): string {
     "Validation / Audit Anchors"
   ].map((section) => `## ${section}\n\n${section} authority prose.`).join("\n\n");
 }
+
+const SOURCE_CHAR_BODY = [
+  "---",
+  "character_id: CHAR-1",
+  "slug: marla-kern",
+  "name: Marla Kern",
+  "species: human",
+  "age_band: adult",
+  "place_of_origin: Brinewick",
+  "current_location: Harbor office",
+  "date: current",
+  "social_position: clerk",
+  "profession: ledger keeper",
+  "kinship_situation: unmodeled in this fixture",
+  "religious_ideological_environment: civic pragmatism",
+  "major_local_pressures:",
+  "  - protect the harbor ledger",
+  "intended_narrative_role: source character for STCHAR validation",
+  "dramatic_core:",
+  "  world_produced_wound: Debt pressure shaped her caution.",
+  "  active_appetite: Keep control of the ledger.",
+  "  self_mythology: She is the only competent clerk.",
+  "  irreconcilable_contradiction: She needs trust but hides evidence.",
+  "  pressure_behavior:",
+  "    cornered: deflects into procedure",
+  "    tempted: bargains for time",
+  "    humiliated: becomes exacting",
+  "    offered_power: asks for guarantees",
+  "    protecting_attachment: hides the ledger",
+  "  relational_charge:",
+  "    - target_or_relation_type: harbor office",
+  "      need: institutional cover",
+  "      resentment_or_fear: exposure",
+  "      likely_harm_or_betrayal: falsified entries",
+  "  moral_psychological_edge: loyal to order over friends",
+  "  signature_scene_behaviors:",
+  "    - checks seals",
+  "    - corrects dates",
+  "    - withholds names",
+  "  voice_under_pressure:",
+  "    lying: overly precise",
+  "    begging: procedural",
+  "    threatening: quiet and formal",
+  "    grieving_or_hiding_ignorance: repeats the record",
+  "  cannot_be_swapped_out_because: Her ledger role anchors the fixture.",
+  "world_consistency:",
+  "  canon_facts_consulted: []",
+  "  invariants_respected: []",
+  "  mystery_reserve_firewall: []",
+  "  distribution_exceptions: []",
+  "  continuity_checked_with: []",
+  "source_basis: {}",
+  "---",
+  "",
+  "## Overview",
+  "",
+  "Marla Kern is the source dossier for the STCHAR fixture.",
+  ""
+].join("\n");
+
+const SOURCE_CHAR_HASH = createHash("sha256").update(SOURCE_CHAR_BODY.normalize("NFC"), "utf8").digest("hex");
 
 test("validatePatchPlan returns pass when validators run without failures", async () => {
   const root = createTempRepoRoot();
@@ -244,7 +306,7 @@ test("validatePatchPlan accepts append_story_character_authority_record through 
               world_slug: "seeded",
               source_kind: "world_char",
               source_char_id: "CHAR-1",
-              source_char_hash: `sha256:${"a".repeat(64)}`,
+              source_char_hash: `sha256:${SOURCE_CHAR_HASH}`,
               source_char_sections_used: ["frontmatter"],
               generated_at_page: "story_bootstrap",
               created_by_skill: "branching-story-bootstrap",
@@ -520,9 +582,21 @@ function seedStcharPrereqs(root: string): void {
         "bound_stchar_id: STCHAR-1",
         "role_in_story: [primary_actor]",
         "created_at_page: PG-1"
-      ])
+      ]),
+      sourceCharacterNode()
     ]
   });
+}
+
+function sourceCharacterNode(): Parameters<typeof seedWorld>[1]["nodes"][number] {
+  return {
+    node_id: "CHAR-1",
+    world_slug: "seeded",
+    file_path: "characters/CHAR-1.md",
+    heading_path: "CHAR-1",
+    node_type: "character_record",
+    body: SOURCE_CHAR_BODY
+  };
 }
 
 function storyCharacterNode(

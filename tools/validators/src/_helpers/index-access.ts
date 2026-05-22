@@ -23,6 +23,7 @@ interface NodeRow {
   story_slug?: string | null;
   file_path: string;
   body: string;
+  content_hash?: string | null;
 }
 
 type MutableRecord = Record<string, unknown>;
@@ -120,9 +121,10 @@ function queryRows(
   storySlug?: string | null
 ): IndexedRecord[] {
   const hasStorySlug = tableHasColumn(db, "nodes", "story_slug");
+  const contentHashColumn = tableHasColumn(db, "nodes", "content_hash") ? "content_hash" : "NULL AS content_hash";
   const selectedColumns = hasStorySlug
-    ? "node_id, node_type, world_slug, story_slug, file_path, body"
-    : "node_id, node_type, world_slug, NULL AS story_slug, file_path, body";
+    ? `node_id, node_type, world_slug, story_slug, file_path, body, ${contentHashColumn}`
+    : `node_id, node_type, world_slug, NULL AS story_slug, file_path, body, ${contentHashColumn}`;
   const predicates = ["world_slug = ?"];
   const params: unknown[] = [worldSlug];
   if (recordType !== undefined) {
@@ -468,6 +470,7 @@ function rowToIndexedRecord(row: NodeRow): IndexedRecord {
     world_slug: row.world_slug,
     story_slug: row.story_slug ?? null,
     file_path: toPosixPath(row.file_path),
+    ...(row.content_hash === undefined || row.content_hash === null ? {} : { content_hash: row.content_hash }),
     parsed: parsedBodyFor(row)
   };
 }

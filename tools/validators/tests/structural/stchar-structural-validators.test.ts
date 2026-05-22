@@ -89,6 +89,14 @@ test("no_char_authority_in_story_runtime allows STCHAR provenance and promotion 
   assert.deepEqual(verdicts, []);
 });
 
+test("no_char_authority_in_story_runtime allows CHAR provenance on STCHAR source_char_id", async () => {
+  const verdicts = await noCharAuthorityInStoryRuntime.run(undefined, context([
+    stchar("STCHAR-1", { source_char_id: "CHAR-3" })
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("no_char_authority_in_story_runtime rejects CHAR authority in story records and page-plan text", async () => {
   const verdicts = await noCharAuthorityInStoryRuntime.run({
     files: [
@@ -110,6 +118,34 @@ test("no_char_authority_in_story_runtime rejects CHAR authority in story records
       "no_char_authority_in_story_runtime.char_authority_leak",
       "no_char_authority_in_story_runtime.char_authority_text_leak"
     ]
+  );
+});
+
+test("no_char_authority_in_story_runtime rejects CHAR authority in story records and page-plan text", async () => {
+  const verdicts = await noCharAuthorityInStoryRuntime.run({
+    files: [
+      {
+        path: "stories/test-story/pages-prose-plans/PG-1.md",
+        content: "Use CHAR-3's dossier voice."
+      }
+    ]
+  }, context([
+    storyRecord("story_entity_record", "STENT-1", "entities", {
+      ...stent("STENT-1"),
+      authority_note: "Render as CHAR-4."
+    })
+  ]));
+
+  assert.deepEqual(
+    verdicts.map((verdict) => verdict.code).sort(),
+    [
+      "no_char_authority_in_story_runtime.char_authority_leak",
+      "no_char_authority_in_story_runtime.char_authority_text_leak"
+    ]
+  );
+  assert.deepEqual(
+    verdicts.map((verdict) => (verdict.detail as { reference_id: string }).reference_id).sort(),
+    ["CHAR-3", "CHAR-4"]
   );
 });
 

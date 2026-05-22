@@ -72,6 +72,7 @@ export interface IndexedRecord {
   world_slug: string;
   story_slug?: string | null;
   file_path: string;
+  content_hash?: string;
   parsed: IndexedRecordValue;
 }
 

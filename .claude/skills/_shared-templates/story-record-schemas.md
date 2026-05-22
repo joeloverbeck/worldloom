@@ -874,6 +874,16 @@ When `source_kind: world_char`, `source_char_id` and `source_char_hash` are requ
 
 Normal story runtime consumes active `STCHAR` through `STENT.bound_stchar_id`, `PG.state_snapshot.active_records.STCHAR`, and grounded or derived story records. `source_char_id` is provenance only; it is not an operational shortcut for `STENT`, `CHC`, page plans, or prose receipts.
 
+**Tooling (STCHAR hash computation).** The three content-derived hashes — `profile_hash`, `voice_block_hash`, `page_packet_hash` — MUST be computed with the canonical CLI `tools/world-mcp/dist/src/cli/compute-stchar-hashes.js`, not hand-rolled per skill. It reuses the shared `computeStcharProfileHash` / `computeStcharVoiceBlockHash` / `computeStcharPagePacketHash` helpers exported from `@worldloom/world-index/hash/content` (the same module `compute-pg-hashes` uses), so authoring-time and any later recompute are byte-identical by construction. The helpers hash with `sha256Hex ∘ normalizeProseWhitespace` (NFC + whitespace/newline normalization), making the values invariant to a trailing newline the patch engine may add — a raw byte hash of the whole body drifts between author-time and the on-disk artifact and is forbidden. Invocation:
+
+```
+node tools/world-mcp/dist/src/cli/compute-stchar-hashes.js \
+  --profile <STCHAR body markdown (full file or body-only)> \
+  --packet  <§16a page-plan packet projection text>
+```
+
+It emits `{profile_hash, voice_block_hash, page_packet_hash}` as `sha256:`-prefixed JSON to stdout. The fourth hash, `source_char_hash`, is NOT content-derived and is NOT produced by this CLI: for `source_kind: world_char` it MUST equal `sha256:` + the `content_hash` that `mcp__worldloom__get_record(<CHAR-id>)` returns (the world index `contentHashForProse` of the source dossier), so that `branching-story-health-audit` `source_drift` comparison is meaningful; for `source_kind: story_local` it is `null`.
+
 ### 4.6 Prose receipt
 
 Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record). The canonical schema below is mirrored by the structural validator `prose_receipt_schema_compliance`, which validates receipt YAML in full-world runs and receipt-file incremental runs.
