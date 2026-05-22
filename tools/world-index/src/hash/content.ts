@@ -107,12 +107,37 @@ export function extractStcharBodyMarkdown(fileContent: string): string {
 // Mirrors the `## <name>` section slicing in stchar-body-integrity.ts: the text
 // between the named H2 header and the next H2 (or end of body).
 export function extractStcharSection(body: string, sectionName: string): string | null {
-  const matches = [...body.matchAll(/^## (.+?)\s*$/gm)];
-  for (let i = 0; i < matches.length; i += 1) {
-    if ((matches[i]?.[1] ?? "").trim() === sectionName) {
-      const start = (matches[i]?.index ?? 0) + (matches[i]?.[0]?.length ?? 0);
-      const end = matches[i + 1]?.index ?? body.length;
-      return body.slice(start, end);
+  const headings: Array<{ name: string; lineStart: number; contentStart: number }> = [];
+  let lineStart = 0;
+
+  while (lineStart <= body.length) {
+    const newlineIndex = body.indexOf("\n", lineStart);
+    const lineEnd = newlineIndex === -1 ? body.length : newlineIndex;
+    const rawLine = body.slice(lineStart, lineEnd);
+    const line = rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine;
+
+    if (line.startsWith("## ")) {
+      const name = line.slice(3).trim();
+      if (name.length > 0) {
+        headings.push({
+          name,
+          lineStart,
+          contentStart: lineEnd
+        });
+      }
+    }
+
+    if (newlineIndex === -1) {
+      break;
+    }
+    lineStart = newlineIndex + 1;
+  }
+
+  for (let i = 0; i < headings.length; i += 1) {
+    const heading = headings[i];
+    if (heading?.name === sectionName) {
+      const end = headings[i + 1]?.lineStart ?? body.length;
+      return body.slice(heading.contentStart, end);
     }
   }
   return null;
