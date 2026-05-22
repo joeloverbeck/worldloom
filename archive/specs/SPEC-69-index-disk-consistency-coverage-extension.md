@@ -1,15 +1,15 @@
 # SPEC-69 — `index_disk_consistency` Coverage Extension to Slug-Named Hybrid Surfaces
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-05-22
 **Classification:** canon-related (extends a structural validator over canon-pipeline navigation surfaces; the validator gates patch plans pre-apply, so coverage is bounded to surfaces with producer-maintained indexes)
 **Source:** `archive/reports/world-system-consolidation-second-iteration.md` Fault 6 / §12.6 — **corrected** at triage against `main` (the validator already exists; this extends its surface coverage rather than adding a new validator). Reassessment 2026-05-22 further **narrowed** the surface set: triage F6 named `adjudications/`, `characters/`, `diegetic-artifacts/`; reassessment dropped `adjudications/` (see §4).
 **Depends on:** none — independent of SPEC-68
 **Companion:** `docs/triage/2026-05-22-world-system-consolidation-second-iteration-triage.md`
 
-**Implementation note (2026-05-22):** `archive/tickets/SPEC69INDDISCON-001.md` landed the validator coverage extension for `characters/` and `diegetic-artifacts/` through the existing `index_disk_consistency` structural validator. The required real-world INDEX remediation remains active in `tickets/SPEC69INDDISCON-002.md`.
+**Implementation note (2026-05-22):** `archive/tickets/SPEC69INDDISCON-001.md` landed the validator coverage extension for `characters/` and `diegetic-artifacts/` through the existing `index_disk_consistency` structural validator. The required real-world INDEX remediation is closed in `archive/tickets/SPEC69INDDISCON-002.md`.
 
-**Blocker note (2026-05-22):** `tickets/SPEC69INDDISCON-002.md` could not run in this worktree because `worlds/` contains only `.gitkeep`; the real `worlds/animalia/` and `worlds/erotica-world/` content required for the remediation sweep is absent.
+**Implementation note (2026-05-22):** `archive/tickets/SPEC69INDDISCON-002.md` resumed after the private world-content directories became available in this checkout. The required sweep found zero `index_disk_drift` verdicts for `characters/` and `diegetic-artifacts/` in both `worlds/animalia` and `worlds/erotica-world`, so no real-world `INDEX.md` remediation was required. The broader compatibility runs still report unrelated schema-compliance failures outside SPEC-69.
 
 ## 1. Context
 
@@ -146,3 +146,23 @@ coverage flows into `world-validate --compatibility` automatically. No CLI or re
   newly-covered surface would block the next canon/hybrid write world-wide regardless of which surface
   that write touches.
 - `npm run build` + `npm test` in `tools/validators` green before completion.
+
+## Outcome
+
+Completed: 2026-05-22.
+
+SPEC-69 landed through `archive/tickets/SPEC69INDDISCON-001.md` and `archive/tickets/SPEC69INDDISCON-002.md`. The validator now covers slug-named `characters/` and `diegetic-artifacts/` surfaces through `index_disk_consistency`, while `adjudications/` remains explicitly out of scope because no producer-maintained `adjudications/INDEX.md` exists.
+
+The required real-world remediation sweep found no `index_disk_drift` verdicts for the newly covered surfaces in `worlds/animalia` or `worlds/erotica-world`, so no private-world `INDEX.md` edit was needed.
+
+Verification:
+
+1. `npm --prefix tools/validators run build` — PASS.
+2. `node --test tools/validators/dist/tests/structural/index-disk-consistency.test.js` — PASS; 8 tests, including the slug-surface drift and no-drift cases.
+3. `node tools/validators/dist/src/cli/world-validate.js animalia --compatibility --json` filtered to `index_disk_drift` under `characters/` and `diegetic-artifacts/` — PASS; 0 owned drift verdicts.
+4. `node tools/validators/dist/src/cli/world-validate.js erotica-world --compatibility --json` filtered to `index_disk_drift` under `characters/` and `diegetic-artifacts/` — PASS; 0 owned drift verdicts.
+5. `npm --prefix tools/validators test` — PASS outside the Codex sandbox; 900/900 tests. The first sandboxed attempt failed because subprocess-based CLI tests could not spawn their child `node` commands in the sandbox.
+
+Deviations:
+
+- The full real-world `--compatibility` runs still report unrelated schema-compliance failures: 903 for `animalia`, 72 for `erotica-world`. Those are outside SPEC-69; this spec's required real-world gate is zero `index_disk_drift` for the newly covered surfaces.
