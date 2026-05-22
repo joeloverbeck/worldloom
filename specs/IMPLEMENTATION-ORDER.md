@@ -7,7 +7,8 @@ Specs derived from the triage of `archive/reports/world-system-consolidation-sec
 
 | Order | Spec | Scope | Depends on | Risk |
 |---|---|---|---|---|
-| _none_ | _none_ | _none_ | _none_ | _none_ |
+| 1 | `specs/SPEC-71-strip-stchar-tamper-hashes.md` | Remove the four Job-B content-tamper hashes (`profile_hash`/`voice_block_hash`/`page_packet_hash`/`source_char_hash`) from schemas, §16a contract, validators, CLI, and 5 skills; add the `forbidden_stchar_tamper_hash_fields` reintroduction guard | none | medium-high (broad surface) |
+| 2 | `specs/SPEC-72-plan-hash-advisory.md` | Downgrade `plan_hash` enforcement: Hook 6 → warn, prose-attach `hash_integrity` splits (plan drift = WARN, state_hash tamper = FAIL); `state_hash` chain untouched | none (sequence after SPEC-71 for shared prose-attach/receipt edits) | low-medium |
 
 ## Completed specs
 
@@ -19,7 +20,11 @@ Specs derived from the triage of `archive/reports/world-system-consolidation-sec
 
 ## Sequencing notes
 
-- No active specs remain from this triage batch.
 - SPEC-69 derives from the `world-system-consolidation-second-iteration` triage
   (`docs/triage/2026-05-22-world-system-consolidation-second-iteration-triage.md`).
 - SPEC-68, SPEC-69, and SPEC-70 are complete and archived.
+- SPEC-71 and SPEC-72 derive from the 2026-05-22 hash-integrity audit/determination
+  (in-chat brainstorm). They are logically independent — neither blocks the other —
+  but both edit `branching-story-prose-attach/SKILL.md` and the prose-receipt
+  schema/contract, so implement SPEC-71 before SPEC-72 to avoid edit conflicts.
+  SPEC-72 also resolves the live `red-bunny` PG-2 `hash_integrity: FAIL`.
