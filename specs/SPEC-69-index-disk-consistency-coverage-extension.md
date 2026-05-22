@@ -7,6 +7,8 @@
 **Depends on:** none — independent of SPEC-68
 **Companion:** `docs/triage/2026-05-22-world-system-consolidation-second-iteration-triage.md`
 
+**Implementation note (2026-05-22):** `archive/tickets/SPEC69INDDISCON-001.md` landed the validator coverage extension for `characters/` and `diegetic-artifacts/` through the existing `index_disk_consistency` structural validator. The required real-world INDEX remediation remains active in `tickets/SPEC69INDDISCON-002.md`.
+
 ## 1. Context
 
 The report proposes a **new** `index_surface_consistency` validator. Verified against `main`: the

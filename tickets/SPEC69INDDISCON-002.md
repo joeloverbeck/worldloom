@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None — data remediation only; edits the directly-editable hybrid-subdir navigation indexes (`characters/INDEX.md`, `diegetic-artifacts/INDEX.md`) on existing worlds. No skill, tool, hook, or validator code changes.
-**Deps**: SPEC69INDDISCON-001
+**Deps**: archive/tickets/SPEC69INDDISCON-001.md
 
 ## Problem
 
-`index_disk_consistency` runs in the patch-engine pre-apply gate at `fail` severity with global scope (it evaluates every covered surface regardless of which surface a patch touches). Once SPEC69INDDISCON-001 extends coverage to `characters/` and `diegetic-artifacts/`, any pre-existing drift in those navigation indexes — an artifact on disk missing its INDEX row, or an INDEX row pointing at a missing file — would `fail` the next canon/hybrid write on that world world-wide. SPEC-69 §6 therefore requires a pre-merge sweep that **remediates** (not merely reports) all surfaced drift before the new coverage lands. The sweep may be a no-op if the generation skills have kept the indexes consistent.
+`index_disk_consistency` runs in the patch-engine pre-apply gate at `fail` severity with global scope (it evaluates every covered surface regardless of which surface a patch touches). Now that `archive/tickets/SPEC69INDDISCON-001.md` extends coverage to `characters/` and `diegetic-artifacts/`, any pre-existing drift in those navigation indexes — an artifact on disk missing its INDEX row, or an INDEX row pointing at a missing file — would `fail` the next canon/hybrid write on that world world-wide. SPEC-69 §6 therefore requires a pre-merge sweep that **remediates** (not merely reports) all surfaced drift before the new coverage lands. The sweep may be a no-op if the generation skills have kept the indexes consistent.
 
 ## Assumption Reassessment (2026-05-22)
 
