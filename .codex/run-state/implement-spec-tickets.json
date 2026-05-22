@@ -1,19 +1,23 @@
 {
-  "originating_spec": "archive/specs/SPEC-68-diegetic-artifact-claim-map-schema-hardening.md",
-  "archived_spec": "archive/specs/SPEC-68-diegetic-artifact-claim-map-schema-hardening.md",
-  "last_ticket": "archive/tickets/SPEC68DIEARTCLA-002.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "02327daf0c1a31e164ec938c9a746ded9ab30ea7",
+  "originating_spec": "specs/SPEC-70-char-stchar-semantic-preservation.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC70CHASTCHARSEM-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "8f7cbd460bac5ccfdce1fcf2d9380ad027bb7fbc",
   "last_state_commit": "self",
-  "queue": [],
-  "next_target": null,
-  "phase": "completed",
+  "next_target": "tickets/SPEC70CHASTCHARSEM-002.md",
+  "queue": [
+    "tickets/SPEC70CHASTCHARSEM-002.md",
+    "tickets/SPEC70CHASTCHARSEM-003.md",
+    "tickets/SPEC70CHASTCHARSEM-004.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
-  "owned_dirty_summary": "SPEC68DIEARTCLA-001 and SPEC68DIEARTCLA-002 implemented, reviewed, archived, and committed; SPEC-68 archived",
+  "owned_dirty_summary": "SPEC70CHASTCHARSEM-001 implemented, reviewed, archived, and committed; same-family 002-004 active tickets are queued",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted_no_findings",
   "blocked": false,
   "blocker": null,
-  "dirty_state": "expected ignored artifacts under tools/{world-index,patch-engine,validators}/{node_modules,dist}; tracked worktree clean after state commit",
+  "dirty_state": "unrelated untracked .claude/worktrees/ remains; expected ignored artifacts under tools/validators/{dist,node_modules}; tracked owned work clean after state commit",
   "updated_at": "2026-05-22"
 }
