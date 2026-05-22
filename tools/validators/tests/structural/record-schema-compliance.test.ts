@@ -304,11 +304,18 @@ test("record_schema_compliance accepts diegetic-artifact frontmatter with scoped
             "      - Long Board tavern",
             "communicative_purpose: narrate",
             "desired_relation_to_truth: accurate",
-            "author_profile: {}",
-            "epistemic_horizon: {}",
-            "claim_map: []",
-            "world_consistency: {}",
-            "source_basis: {}",
+            ...validDiegeticArtifactLooseObjectLines(),
+            "claim_map:",
+            "  - claim: Test author witnessed the Mudbrook audit.",
+            "    canon_status: canonically_true",
+            "    narrator_belief: \"true\"",
+            "    source: witnessed",
+            "    contradiction_risk: none",
+            "    mode: direct",
+            "    adaptive_behavior_preserved_under_wrong_ontology: false",
+            "    cf_id: CF-1",
+            "    mr_id: null",
+            "    repair_trace: null",
             "---",
             "# DA-1",
             "",
@@ -340,7 +347,7 @@ test("record_schema_compliance accepts diegetic-artifact frontmatter with explic
 });
 
 test("record_schema_compliance rejects diegetic-artifact world_relation entries that are not CF ids", async () => {
-  const fixture = readFixture("diegetic-artifact-with-new-fields.md").replace("    - CF-0001", "    - INV-0001");
+  const fixture = readFixture("diegetic-artifact-with-new-fields.md").replace("    - CF-1", "    - INV-0001");
   const result = await recordSchemaCompliance.run(
     {
       files: [
@@ -377,11 +384,18 @@ test("record_schema_compliance rejects diegetic-artifact scoped_references entri
             "  - name: Mudbrook",
             "communicative_purpose: narrate",
             "desired_relation_to_truth: accurate",
-            "author_profile: {}",
-            "epistemic_horizon: {}",
-            "claim_map: []",
-            "world_consistency: {}",
-            "source_basis: {}",
+            ...validDiegeticArtifactLooseObjectLines(),
+            "claim_map:",
+            "  - claim: Test author witnessed the Mudbrook audit.",
+            "    canon_status: canonically_true",
+            "    narrator_belief: \"true\"",
+            "    source: witnessed",
+            "    contradiction_risk: none",
+            "    mode: direct",
+            "    adaptive_behavior_preserved_under_wrong_ontology: false",
+            "    cf_id: CF-1",
+            "    mr_id: null",
+            "    repair_trace: null",
             "---",
             "# DA-2",
             "",
@@ -931,6 +945,49 @@ function markdownWithFrontmatter(path: string, frontmatter: Record<string, unkno
       "Body prose."
     ].join("\n")
   };
+}
+
+function validDiegeticArtifactLooseObjectLines(): string[] {
+  return [
+    "genre_conventions:",
+    "  honors: []",
+    "  breaks: []",
+    "author_profile:",
+    "  species: human",
+    "  age_band: adult",
+    "  sex_or_gender: null",
+    "  class: scribe",
+    "  literacy: trade-tongue literate",
+    "  profession: auditor",
+    "  religious_ideological_environment: nominal",
+    "  political_dependency: charter office",
+    "  bodily_limits: human baseline",
+    "  mobility: local",
+    "  archive_access: office files",
+    "  rumor_access: clerks",
+    "  speech_register: formal",
+    "  likely_blind_spots: court gossip",
+    "  trauma_history_if_relevant: null",
+    "epistemic_horizon:",
+    "  direct_knowledge: []",
+    "  inferred_knowledge: []",
+    "  secondhand_knowledge: []",
+    "  wrongly_believed: []",
+    "  concealable: []",
+    "  impossible_knowledge: []",
+    "world_consistency:",
+    "  canon_facts_consulted:",
+    "    - CF-1",
+    "  invariants_respected: []",
+    "  mystery_reserve_firewall: []",
+    "  distribution_exceptions: []",
+    "source_basis:",
+    "  world_slug: test",
+    "  brief_path: briefs/test-artifact.md",
+    "  character_path: null",
+    "  generated_date: 2026-05-22",
+    "  user_approved: false"
+  ];
 }
 
 function validCharacterProposalCard(): Record<string, unknown> {

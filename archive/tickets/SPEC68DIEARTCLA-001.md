@@ -1,9 +1,9 @@
 # SPEC68DIEARTCLA-001: Type `claim_map.items` and add cross-field anti-laundering `if/then`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `tools/validators/src/schemas/diegetic-artifact-frontmatter.schema.json` (tightened, consumed by `record_schema_compliance`); new test file under `tools/validators/tests/structural/`. No change to `record-schema-compliance.ts` itself.
+**Engine Changes**: Yes — `tools/validators/src/schemas/diegetic-artifact-frontmatter.schema.json` (tightened, consumed by `record_schema_compliance`); new test file under `tools/validators/tests/structural/`; checked-in DA fixtures normalized to the new claim-map vocabulary. No change to `record-schema-compliance.ts` itself.
 **Deps**: None
 
 ## Problem
@@ -16,7 +16,7 @@ The diegetic-artifact (DA) frontmatter schema defines `claim_map` as an untyped 
 2. The authoritative `claim_map` vocabulary is `.claude/skills/diegetic-artifact-generation/templates/diegetic-artifact.md` (lines 80-90; the SKILL.md names this template "the authoritative schema"): `claim`; `canon_status` ∈ {canonically_true, canonically_false, partially_true, contested, mystery_adjacent, prohibited_for_this_artifact}; `narrator_belief` ∈ {true, false, uncertain, performed_belief}; `source` ∈ {witnessed, learned_from_authority, inherited_tradition, common_rumor, contested_scholarship, impossible_for_narrator_to_verify}; `contradiction_risk` ∈ {none, soft, hard}; `mode` ∈ {direct, implied, symbolic}; `adaptive_behavior_preserved_under_wrong_ontology` (bool); `cf_id` (`^CF-[0-9]+$`|null, required when `canonically_true`); `mr_id` (`^M-[0-9]+$`|null, required when `mystery_adjacent`); `repair_trace`. SPEC-68 §2.1/§2.2 specify exactly these; the report's invented `DAC-*` / `claim_kind` / `canonization_allowed` vocabulary is explicitly out of scope (would break the skill).
 3. Cross-artifact boundary under audit: the DA frontmatter schema is the contract between the producer (`diegetic-artifact-generation`, which writes `claim_map` per its template) and the consumers (`record_schema_compliance` at pre-apply; `canon-facts-from-diegetic-artifacts` which *reads* `claim_map` to mine candidates — `references/phase-1-claim-extraction.md`). Typing formalizes the shape the template already produces; the mining consumer reads claim entries and is unaffected (no field renamed or removed).
 4. FOUNDATIONS principles motivating this ticket: **Rule 1 (No Floating Facts)** — `canon_status: canonically_true ⇒ cf_id required` forces every canon-true claim to name the accepted CF it rests on, grounding the claim. **Rule 7 (Preserve Mystery Deliberately)** — `canon_status: mystery_adjacent ⇒ mr_id required` makes a mystery-touching claim name the M record, reinforcing (never resolving) the Mystery Reserve firewall the DA skill's Phase 7b enforces. Both rules are strengthened, not weakened. (DA is a non-canon realized hybrid per FOUNDATIONS §Artifact Authority + the §3.9/§4.4 non-canon-surface carve-out, so this is not a canon-pipeline-semantics change.)
-5. Existing output schema extended: the DA frontmatter schema is the realized-hybrid DA output schema. The change tightens `claim_map` (array → typed-items + `if/then`); it is **non-additive** (existing DA files must conform). Consumer is `record_schema_compliance`; on-disk DA conformance is verified in SPEC68DIEARTCLA-002's regression. No consumer code change.
+5. Existing output schema extended: the DA frontmatter schema is the realized-hybrid DA output schema. The change tightens `claim_map` (array → typed-items + `if/then`); it is **non-additive**. Consumer is `record_schema_compliance`; checked-in validator/animalia fixture DAs were normalized where needed so the package baseline stays green. Live/on-disk world DA conformance remains SPEC68DIEARTCLA-002's regression/reporting boundary. No consumer code change.
 
 ## Architecture Check
 
@@ -43,12 +43,16 @@ On `claim_map.items`: `if canon_status == canonically_true then cf_id required (
 
 ### 3. Fixtures
 
-New `record-schema-compliance-diegetic-artifact.test.ts`: positive (template-conformant `claim_map` passes) + negative (unknown enum; `canonically_true` w/o `cf_id`; `mystery_adjacent` w/o `mr_id`) cases, each asserting the precise ajv error path.
+New `record-schema-compliance-diegetic-artifact.test.ts`: positive (template-conformant `claim_map` passes) + negative (unknown enum; `canonically_true` w/o `cf_id`; `mystery_adjacent` w/o `mr_id`) cases, each asserting the precise ajv error path. Existing positive DA fixtures and checked-in animalia DA fixture records were normalized from legacy `cf_refs` / scalar `repair_trace` / boolean `narrator_belief` to the template-shaped `cf_id`, `mr_id`, object-or-null `repair_trace`, and string enum `narrator_belief` contract.
 
 ## Files to Touch
 
 - `tools/validators/src/schemas/diegetic-artifact-frontmatter.schema.json` (modify)
 - `tools/validators/tests/structural/record-schema-compliance-diegetic-artifact.test.ts` (new)
+- `tools/validators/tests/structural/record-schema-compliance.test.ts` (modify)
+- `tools/validators/tests/fixtures/diegetic-artifact-with-new-fields.md` (modify)
+- `tests/fixtures/animalia/diegetic-artifacts/a-season-on-the-circuit.md` (modify)
+- `tests/fixtures/animalia/diegetic-artifacts/after-action-report-harrowgate-contract.md` (modify)
 
 ## Out of Scope
 
@@ -76,8 +80,29 @@ New `record-schema-compliance-diegetic-artifact.test.ts`: positive (template-con
 ### New/Modified Tests
 
 1. `tools/validators/tests/structural/record-schema-compliance-diegetic-artifact.test.ts` (new) — `claim_map` typing + `if/then` positive/negative fixtures, following the existing `record-schema-compliance-story-*.test.ts` per-class pattern.
+2. Existing DA schema-compliance fixtures and checked-in animalia fixture DAs — normalized to the new claim-map item contract so broad validator baselines continue to exercise valid DA records.
 
 ### Commands
 
 1. `npm run build --prefix tools/validators` — tsc typecheck + schema-load (no `typecheck` script in `tools/validators/package.json`; `build` invokes `tsc` and covers it).
 2. `npm test --prefix tools/validators` — runs `build` then `node --test dist/tests/**/*.test.js`.
+
+## Outcome
+
+Completed: 2026-05-22.
+
+The DA frontmatter schema now types `claim_map.items` with the template vocabulary, rejects unknown per-claim enum values, and uses draft-2020-12 `if/then` rules to require a non-null `cf_id` for `canonically_true` claims and a non-null `mr_id` for `mystery_adjacent` claims. The implementation stayed in the existing `record_schema_compliance` Ajv path; no new validator or consumer-code change was added.
+
+Checked-in DA fixtures were updated to the new claim-map contract where the tighter schema made them part of the package proof surface. This was fixture truthing only; live `worlds/<slug>/` DA conformance remains owned by SPEC68DIEARTCLA-002.
+
+## Verification Result
+
+- `npm run build` from `tools/validators` — PASS after installing/building local package dependencies (`tools/world-index`, `tools/patch-engine`, `tools/validators`) in this worktree.
+- `node --test dist/tests/structural/record-schema-compliance-diegetic-artifact.test.js` from `tools/validators` — PASS, 4/4 subtests.
+- `node --test dist/tests/structural/record-schema-compliance-diegetic-artifact.test.js dist/tests/structural/record-schema-compliance.test.js` from `tools/validators` — PASS, 38/38 subtests.
+- `npm test` from `tools/validators` — PASS, 858/858 tests.
+
+## Deviations
+
+- The drafted file list did not name the checked-in animalia DA fixtures. The broad validators suite exposed them as same-seam package fixtures after the schema tightening; they were normalized to the new `claim_map` item shape so the existing validator baselines remain executable.
+- `npm run build` initially failed before the ticket seam because package dependencies were absent in this worktree, then local file dependencies had to be installed and built. No package manifest or lockfile changes are part of the ticket.

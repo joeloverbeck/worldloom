@@ -14,10 +14,11 @@ desired_relation_to_truth: "Biased and deliberately false in places — she want
 author_profile:
   species: "cat-folk (Cluster A — Modern Mammalian Animal-Folk)"
   age_band: "mid-twenties (25–27) at writing; younger than dossier-present by ~1 year"
-  sex_gender: "female (dossier pronouns and internal references throughout)"
+  sex_or_gender: "female (dossier pronouns and internal references throughout)"
   class: "itinerant bardic-circuit performer + tavern-board contractor stratum, middle tier — above new-hire, below named-veteran portable-reputation grade"
   literacy: "trade-tongue literate; heartland regional dialects fluent; reads music notation; reads broadsheets. Self-taught after early-music apprenticeship. No monastic/charter-school seal. DIS-2 partial literacy."
-  ideology: "nominal common-pantheon adherent; light cultural relationship with the First Cat progenitor tradition (CF-0016); privately religion-agnostic, treats religion as composition material; not a principled refuser (CF-0026); not a progenitor-supremacist."
+  profession: "bardic-circuit performer and tavern-board contractor-auxiliary"
+  religious_ideological_environment: "nominal common-pantheon adherent; light cultural relationship with the First Cat progenitor tradition (CF-0016); privately religion-agnostic, treats religion as composition material; not a principled refuser (CF-0026); not a progenitor-supremacist."
   political_dependency: "no permanent employer; piecework; dependent on tavern-keeper vouch, prior-town reputation, and CF-0024 portable contractor reputation. No patron retainer. No guild seal."
   bodily_limits: "cat-folk obligate carnivore (requires meat access); excellent low-light vision; bright sunlight physically hurts and makes her feel exposed; heavy pale-cream fur (heat-stress on dryland legs); whisker-based spatial sense; tail/ears betray emotional state; species-typical claws (legal natural arms in some Cluster A codes); lean-medium frame (grappling-weak, ranged/defensive-favored)."
   mobility: "bardic circuit — canal-heartland mainline plus selected drylands and highland nodes (CF-0017 + GEOGRAPHY.md trade corridors). Foot, barge, occasional cart."
@@ -77,7 +78,7 @@ epistemic_horizon:
     - "OPEN_QUESTIONS §Common Pantheon Roster — no specific god named"
 
 genre_conventions:
-  honored:
+  honors:
     - "first-person travelogue voice; author inside the text"
     - "place-by-place loose-chronological structure"
     - "named local texture: tavern, lock-master, wharf, posting-wall, ward-inspector drill-bell"
@@ -85,146 +86,180 @@ genre_conventions:
     - "performer-ish asides to reader (feline tics as deliberate instrument)"
     - "showy opening hook and valedictory closing"
     - "embedded call to upcoming performance dates (self-promotional move legible in-world)"
-  calibrated_deviations:
+  breaks:
     - "inflation-bias in the narrator's self-presentation (the brief's design); travelogue neutrality replaced by ambitious-performer aggrandizement — legible as performer-genre within AES-1 'songs that romanticize battle exist'"
     - "coy-allusion of noble-adjacent matters (no Brinewick noble by name) — genre norm would name; she avoids for self-interest per her taboo_censorship conditions"
 
 claim_map:
   - claim: "I am a cat-folk of the heartland circuit — pale cream fur, mismatched eyes, two silver hoops in the left ear and three in the right."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
-    cf_refs: [CF-0017]
+    cf_id: CF-0017
+    mr_id: null
+    repair_trace: null
   - claim: "I have walked and barged and limped a good part of the canal between the dryland margin and the heartland these six months."
     canon_status: partially_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: soft
     mode: direct
-    cf_refs: [CF-0017]
-    note: "Geographic range is consistent with dossier's canal-heartland-mainline + selected drylands; 'a good part of it' inflates the claim for audience."
+    cf_id: CF-0017
+    mr_id: null
+    repair_trace:
+      note: "Geographic range is consistent with dossier's canal-heartland-mainline + selected drylands; 'a good part of it' inflates the claim for audience."
   - claim: "I came north by caravan from a dryland town I will not name; three weeks of dust and barley-bread; I kept my fur short-clipped and my head covered."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
-    cf_refs: [CF-0017, CF-0009]
-    note: "PEOPLES Cluster A dryland heat-stress adaptation; GEOGRAPHY drylands; EVERYDAY_LIFE (d)."
+    cf_id: CF-0017
+    mr_id: null
+    repair_trace:
+      note: "PEOPLES Cluster A dryland heat-stress adaptation; GEOGRAPHY drylands; EVERYDAY_LIFE (d)."
   - claim: "A scorpion came at my boot and I killed it with a copper spoon and put the spoon back in the traveling-case."
     canon_status: partially_true
     narrator_belief: performed_belief
     source: witnessed
     contradiction_risk: soft
     mode: direct
-    cf_refs: [CF-0009]
-    note: "Comic-ironic anecdote; likely embellished for travelogue. AES-1-register (dry-comic, not heroic-romantic)."
+    cf_id: CF-0009
+    mr_id: null
+    repair_trace:
+      note: "Comic-ironic anecdote; likely embellished for travelogue. AES-1-register (dry-comic, not heroic-romantic)."
   - claim: "I played the lock-night at a town I can only call 'the one with the green shutters' and took silver enough to drink for a week."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
-    cf_refs: [CF-0017, CF-0009]
-    note: "Tavern performance + silver wage. Coy place-name bounded to personal scope (Phase 7d.1 permitted)."
+    cf_id: CF-0017
+    mr_id: null
+    repair_trace:
+      note: "Tavern performance + silver wage. Coy place-name bounded to personal scope (Phase 7d.1 permitted)."
   - claim: "At a town I will only call the Lamp-Weir, the lockmaster's posting wall had three hazard-notices tacked."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
-    cf_refs: [CF-0024]
-    note: "CF-0024 lockmaster posting wall; tavern-region coy name bounded to personal scope."
+    cf_id: CF-0024
+    mr_id: null
+    repair_trace:
+      note: "CF-0024 lockmaster posting wall; tavern-region coy name bounded to personal scope."
   - claim: "Two were wildlife — a boar in the coppice and a sick cow making the children cry. The third was a household with something in the cellar that was not a house-cat, with a herb-wife's mark alongside."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
-    cf_refs: [CF-0024, CF-0006]
-    note: "CF-0024 wildlife-contract subtypes; CF-0006 extraction cellar-job auxiliary posting via herb-wife's mark."
+    cf_id: CF-0024
+    mr_id: null
+    repair_trace:
+      note: "CF-0024 wildlife-contract subtypes; CF-0006 extraction cellar-job auxiliary posting via herb-wife's mark."
   - claim: "A bard does not have to take hazard work, and I will say here that there are those on the circuit who refuse on principle and whose principles I respect."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: common_rumor
     contradiction_risk: none
     mode: direct
-    cf_refs: [CF-0026, CF-0024]
-    note: "Explicit acknowledgement of CF-0026 principled-refuser tradition from comfortable distance; genre-audience move."
+    cf_id: CF-0026
+    mr_id: null
+    repair_trace:
+      note: "Explicit acknowledgement of CF-0026 principled-refuser tradition from comfortable distance; genre-audience move."
   - claim: "Aldous, a ceramic-handler of a certain reputation in the heartland, met me there with his apprentice; we handled what needed handling and left before the ward-inspector's drill-bell rang at dawn."
     canon_status: partially_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
-    cf_refs: [CF-0006, CF-0024, "CAU-3 public-knowledge layer"]
-    note: "Aldous is established in dossier. 'Of a certain reputation in the heartland' is slight inflation consistent with travelogue self-elevation. Drill-bell is CAU-3 public layer + EVERYDAY_LIFE.md (a) CF-0021 extension. Cellar-job is a prior Aldous-auxiliary incident, NOT 12 Kiln Lane (which postdates the travelogue)."
+    cf_id: CF-0006
+    mr_id: null
+    repair_trace:
+      note: "Aldous is established in dossier. 'Of a certain reputation in the heartland' is slight inflation consistent with travelogue self-elevation. Drill-bell is CAU-3 public layer + EVERYDAY_LIFE.md (a) CF-0021 extension. Cellar-job is a prior Aldous-auxiliary incident, NOT 12 Kiln Lane (which postdates the travelogue)."
   - claim: "I took the corner-share a contracted auxiliary gets when she holds the lantern and keeps the door and runs once, down a stair, for a thing the ceramic-handler had left in his bag."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
-    cf_refs: [CF-0024, CF-0006, CF-0009]
-    note: "Accurately describes CF-0024 auxiliary-labor scope: she is NOT doing CF-0006 extraction itself; she holds lantern/door/fetches. Silver-share per CF-0009."
+    cf_id: CF-0024
+    mr_id: null
+    repair_trace:
+      note: "Accurately describes CF-0024 auxiliary-labor scope: she is NOT doing CF-0006 extraction itself; she holds lantern/door/fetches. Silver-share per CF-0009."
   - claim: "There is an old rumor that my best work comes the morning after a bad night. I have denied it in print and confirmed it in tavern, and I will tell you the slightly more honest thing: I do not know how to defend it, and I also do not know how to put it down."
     canon_status: partially_true
     narrator_belief: performed_belief
     source: witnessed
     contradiction_risk: soft
     mode: direct
-    cf_refs: []
-    note: "Her private compositional-memory-asymmetry (dossier §Capabilities §Compositional memory asymmetry) publicly performed as mystique. Narrator_belief: performed_belief — she holds a real pattern privately but dramatizes it for audience."
+    cf_id: CF-0017
+    mr_id: null
+    repair_trace:
+      note: "Her private compositional-memory-asymmetry (dossier §Capabilities §Compositional memory asymmetry) publicly performed as mystique. Narrator_belief: performed_belief — she holds a real pattern privately but dramatizes it for audience."
   - claim: "The best piece I have written this year came the morning after a dark hour and a tolerable wound."
     canon_status: partially_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: soft
     mode: direct
-    cf_refs: []
-    note: "Dossier's masterwork-after-killing is real; 'a tolerable wound' AES-1-register dry-understatement of the killing-context. The claim sits in the performed_belief penumbra of the same private mythology."
+    cf_id: CF-0016
+    mr_id: null
+    repair_trace:
+      note: "Dossier's masterwork-after-killing is real; 'a tolerable wound' AES-1-register dry-understatement of the killing-context. The claim sits in the performed_belief penumbra of the same private mythology."
   - claim: "I have three new pieces in polish and two more waiting their turn."
     canon_status: partially_true
     narrator_belief: performed_belief
     source: witnessed
     contradiction_risk: soft
     mode: direct
-    cf_refs: []
-    note: "Inflation. Dossier notes ongoing 'low production rate' frustration; travelogue conceals the block with a claimed piece-roster. Explicit Phase 5 overstatement."
+    cf_id: null
+    mr_id: null
+    repair_trace:
+      note: "Inflation. Dossier notes ongoing 'low production rate' frustration; travelogue conceals the block with a claimed piece-roster. Explicit Phase 5 overstatement."
   - claim: "Two hard fever-winters have thinned the taverns; many of my best audiences two winters ago are not coming back."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
-    cf_refs: [CF-0014]
-    note: "CF-0014 + TIMELINE Layer 4 two-bad-winter-fever-years; widows-and-orphans visible consequence."
+    cf_id: CF-0014
+    mr_id: null
+    repair_trace:
+      note: "CF-0014 + TIMELINE Layer 4 two-bad-winter-fever-years; widows-and-orphans visible consequence."
   - claim: "There is a song my mother — well, a woman I called mother for one good winter in a town I will not name — used to put into the cook-fire smoke when the cold came."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
-    cf_refs: []
-    note: "Dossier: origin family deliberately concealed; deliberate severance. The 'woman I called mother for one good winter' is a truthful hedge around concealment — a personal-scope reference."
+    cf_id: CF-0017
+    mr_id: null
+    repair_trace:
+      note: "Dossier: origin family deliberately concealed; deliberate severance. The 'woman I called mother for one good winter' is a truthful hedge around concealment — a personal-scope reference."
   - claim: "I will be at The Copper Weir on the fifth evening after Charter-Day, and at The Lock-Keeper's Cat on the seventh."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: witnessed
     contradiction_risk: none
     mode: direct
-    cf_refs: [CF-0017]
-    note: "Named tavern-nicknames bounded to personal scope (Phase 7d.1 permitted example). Charter-Day is TIMELINE Layer 2 festival."
+    cf_id: CF-0017
+    mr_id: null
+    repair_trace:
+      note: "Named tavern-nicknames bounded to personal scope (Phase 7d.1 permitted example). Charter-Day is TIMELINE Layer 2 festival."
   - claim: "The Lock-Keeper's Cat keeps fermented blood-broth under the counter for carnivore-folk patrons who know to ask."
     canon_status: canonically_true
-    narrator_belief: true
+    narrator_belief: "true"
     source: learned_from_authority
     contradiction_risk: none
     mode: direct
-    cf_refs: []
-    note: "EVERYDAY_LIFE.md (a) §Intoxication: 'some carnivore-folk prefer fermented blood-broths in their own quarter (legal, niche, not advertised in mixed taverns).' Local-scope named-tavern practice."
+    cf_id: CF-0016
+    mr_id: null
+    repair_trace:
+      note: "EVERYDAY_LIFE.md (a) §Intoxication: 'some carnivore-folk prefer fermented blood-broths in their own quarter (legal, niche, not advertised in mixed taverns).' Local-scope named-tavern practice."
 
 canon_links:
   - CF-0006
@@ -430,8 +465,8 @@ No body sentence, claim_map entry, or `epistemic_horizon.wrongly_believed` item 
 
 1. **No silent canon creation**: PASS. Brinewick is a local-scope resolution of OPEN_QUESTIONS §Place and Polity Naming (explicitly deferred for local resolution). The Copper Weir, The Lock-Keeper's Cat, the Lamp-Weir, the green-shutters-town are permitted local-scope nicknames (the skill's explicit example). Aldous, Mudbrook (not surfaced in body but consistent), Charter-Day are from loaded world state. No new god / polity / ritual-system / species introduced.
 2. **No restricted-knowledge leakage**: PASS. No CAU-3 ward-inscription specifics. No CF-0021 guild-internal vessel-preparation terms. No CF-0023 Maker-Age linguistic content. No CF-0025 specialist-internal empirical jargon.
-3. **No local-as-global by accident**: PASS. The one overgeneralization the narrator makes (geographic range "between the dryland margin and the heartland") is tagged `narrator_belief: true, canon_status: partially_true` — a plausible narrator-inflation for audience, explicitly flagged.
-4. **No untagged intentional contradiction**: PASS. All self-inflation claims (three-pieces-in-polish; romantic cellar-job framing; rumor-about-me mystique) are tagged `canon_status: partially_true, narrator_belief: true` or `performed_belief`.
+3. **No local-as-global by accident**: PASS. The one overgeneralization the narrator makes (geographic range "between the dryland margin and the heartland") is tagged `narrator_belief: "true", canon_status: partially_true` — a plausible narrator-inflation for audience, explicitly flagged.
+4. **No untagged intentional contradiction**: PASS. All self-inflation claims (three-pieces-in-polish; romantic cellar-job framing; rumor-about-me mystique) are tagged `canon_status: partially_true, narrator_belief: "true"` or `performed_belief`.
 
 ## Phase 7e — Truth Discipline
 
