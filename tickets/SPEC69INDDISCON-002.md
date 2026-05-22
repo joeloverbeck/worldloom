@@ -1,18 +1,18 @@
 # SPEC69INDDISCON-002: Pre-merge real-world INDEX drift remediation sweep
 
-**Status**: PENDING
+**Status**: BLOCKED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None — data remediation only; edits the directly-editable hybrid-subdir navigation indexes (`characters/INDEX.md`, `diegetic-artifacts/INDEX.md`) on existing worlds. No skill, tool, hook, or validator code changes.
-**Deps**: SPEC69INDDISCON-001
+**Deps**: archive/tickets/SPEC69INDDISCON-001.md
 
 ## Problem
 
-`index_disk_consistency` runs in the patch-engine pre-apply gate at `fail` severity with global scope (it evaluates every covered surface regardless of which surface a patch touches). Once SPEC69INDDISCON-001 extends coverage to `characters/` and `diegetic-artifacts/`, any pre-existing drift in those navigation indexes — an artifact on disk missing its INDEX row, or an INDEX row pointing at a missing file — would `fail` the next canon/hybrid write on that world world-wide. SPEC-69 §6 therefore requires a pre-merge sweep that **remediates** (not merely reports) all surfaced drift before the new coverage lands. The sweep may be a no-op if the generation skills have kept the indexes consistent.
+`index_disk_consistency` runs in the patch-engine pre-apply gate at `fail` severity with global scope (it evaluates every covered surface regardless of which surface a patch touches). Now that `archive/tickets/SPEC69INDDISCON-001.md` extends coverage to `characters/` and `diegetic-artifacts/`, any pre-existing drift in those navigation indexes — an artifact on disk missing its INDEX row, or an INDEX row pointing at a missing file — would `fail` the next canon/hybrid write on that world world-wide. SPEC-69 §6 therefore requires a pre-merge sweep that **remediates** (not merely reports) all surfaced drift before the new coverage lands. The sweep may be a no-op if the generation skills have kept the indexes consistent.
 
 ## Assumption Reassessment (2026-05-22)
 
-1. **Codebase**: the new coverage from SPEC69INDDISCON-001 is exercised via `node tools/validators/dist/src/cli/world-validate.js <world-slug> --compatibility` (positional[0] = world slug; `--compatibility` flag confirmed in `tools/validators/src/cli/_helpers.ts` `COMPATIBILITY_VALIDATORS`, `world-validate` CLI at `tools/validators/src/cli/world-validate.ts`). Real worlds present: `worlds/animalia/`, `worlds/erotica-world/`, each with `characters/INDEX.md` and `diegetic-artifacts/INDEX.md` on disk (confirmed 2026-05-22).
+1. **Codebase**: the new coverage from `archive/tickets/SPEC69INDDISCON-001.md` is exercised via `node tools/validators/dist/src/cli/world-validate.js <world-slug> --compatibility` (positional[0] = world slug; `--compatibility` flag confirmed in `tools/validators/src/cli/_helpers.ts` `COMPATIBILITY_VALIDATORS`, `world-validate` CLI at `tools/validators/src/cli/world-validate.ts`). Reassessment for this worktree found no real world content to remediate: `worlds/` contains only `.gitkeep`; `worlds/animalia/` and `worlds/erotica-world/` are absent. The checked-in `tests/fixtures/animalia/characters/INDEX.md` / `tests/fixtures/animalia/diegetic-artifacts/INDEX.md` are package fixtures, not the real-world targets named by SPEC-69 §6.
 2. **Spec/docs**: SPEC-69 §6 ("pre-merge real-world drift remediation (required, not report-only)") and CLAUDE.md §Write Boundaries — the `INDEX.md` files of hybrid sub-directories (`characters/`, `diegetic-artifacts/`) are **directly editable** (not engine-only `_source/` records, not Hook-3-blocked). `canon-addition`'s engine-envelope note confirms `INDEX.md` edits do not require an index sync (not under `record_schema_compliance` validator scope).
 3. **Cross-artifact boundary**: `characters/INDEX.md` is maintained by `character-generation` and `diegetic-artifacts/INDEX.md` by `diegetic-artifact-generation`. This ticket reconciles their on-disk state, not their generation logic — any drift found is an existing inconsistency between a prior skill run and disk, remediated by editing the index rows, not by re-running the skills.
 4. **FOUNDATIONS principle (Rule 5 + §Canonical Storage Layer)**: this ticket is the Rule 5 (No Consequence Evasion) discharge for SPEC-69 — the second-order effect of pre-apply `fail`/global-scope coverage is that unremediated drift blocks writes; the sweep closes it. §Canonical Storage Layer: INDEX surfaces are the navigation layer and must stay faithful to disk.
@@ -76,3 +76,18 @@ For each `artifact_missing_from_index` verdict, add the missing row to the surfa
 
 1. `npm --prefix tools/validators run build` — ensure the SPEC69INDDISCON-001 coverage is compiled before the sweep.
 2. `for w in animalia erotica-world; do node tools/validators/dist/src/cli/world-validate.js "$w" --compatibility; done` — full-pipeline verification: zero covered-surface drift across all real worlds.
+
+## Blocker
+
+Blocked: 2026-05-22.
+
+This ticket requires real world-content directories under `worlds/`, but this worktree has only `worlds/.gitkeep`. The intended remediation files under `worlds/animalia/` and `worlds/erotica-world/` are absent, so the sweep cannot run and no `characters/INDEX.md` or `diegetic-artifacts/INDEX.md` remediation can be truthfully applied here.
+
+## Verification Result
+
+1. `find worlds -maxdepth 4 -type f | sort` — BLOCKED; output is only `worlds/.gitkeep`.
+2. `find . -path '*/characters/INDEX.md' -o -path '*/diegetic-artifacts/INDEX.md' | sort` — BLOCKED for ticket scope; only checked-in fixture indexes were found (`tests/fixtures/animalia/...` and `tools/world-index/tests/fixtures/fixture-world/...`), not real-world files under `worlds/<slug>/`.
+
+## Next Required Action
+
+Resume this ticket in a worktree/session where the private real-world content for `worlds/animalia/` and `worlds/erotica-world/` is present, then run the post-001 compatibility sweep and remediate any surfaced `characters/` / `diegetic-artifacts/` index drift.

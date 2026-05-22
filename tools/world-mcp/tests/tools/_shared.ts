@@ -142,6 +142,7 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
   const indexRoot = path.join(worldRoot, "_index");
   mkdirSync(indexRoot, { recursive: true });
   writeFileSync(path.join(indexRoot, "index_version.txt"), `${CURRENT_INDEX_VERSION}\n`, "utf8");
+  const hybridIndexRows = new Map<string, Map<string, string>>();
 
   const schemaRoot = path.join(
     REPO_ROOT,
@@ -205,6 +206,18 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
         node.summary ?? null,
         CURRENT_INDEX_VERSION
       );
+      const hybridSurface = hybridIndexSurfaceFor(node);
+      if (hybridSurface !== null) {
+        const rows = hybridIndexRows.get(hybridSurface.directory) ?? new Map<string, string>();
+        rows.set(hybridSurface.fileName, `- [${hybridSurface.label}](${hybridSurface.fileName}) - seeded fixture`);
+        hybridIndexRows.set(hybridSurface.directory, rows);
+      }
+    }
+
+    for (const [directory, rows] of hybridIndexRows) {
+      const surfaceRoot = path.join(worldRoot, directory);
+      mkdirSync(surfaceRoot, { recursive: true });
+      writeFileSync(path.join(surfaceRoot, "INDEX.md"), `${[...rows.values()].sort().join("\n")}\n`, "utf8");
     }
 
     for (const edge of input.edges ?? []) {
@@ -378,4 +391,24 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
   } finally {
     db.close();
   }
+}
+
+function hybridIndexSurfaceFor(node: SeedNodeInput): { directory: string; fileName: string; label: string } | null {
+  if (node.node_type !== "character_record" && node.node_type !== "diegetic_artifact_record") {
+    return null;
+  }
+  const normalizedPath = node.file_path.split(path.sep).join("/");
+  const parts = normalizedPath.split("/");
+  if (parts.length !== 2 || parts[1] === undefined || !parts[1].endsWith(".md")) {
+    return null;
+  }
+  const expectedDirectory = node.node_type === "character_record" ? "characters" : "diegetic-artifacts";
+  if (parts[0] !== expectedDirectory) {
+    return null;
+  }
+  return {
+    directory: expectedDirectory,
+    fileName: parts[1],
+    label: node.heading_path ?? node.node_id
+  };
 }
