@@ -180,7 +180,9 @@ If `get_context_packet`, `get_record`, or `get_records` returns `delivery_status
 
 ## Phase 1: Assemble Source Authority Packet
 
-For `create_from_world_char`, load only the targeted `CHAR-*` dossier and sections needed for story-local distillation: identity, embodied constraints, voice, stable dispositions, relevant relationships, pressure behavior, and known canon limits. Compute a deterministic `source_char_hash` over the exact source content used when the tool surface exposes one; otherwise record the hash method in the deliverable summary before approval.
+For `create_from_world_char`, load only the targeted `CHAR-*` dossier and sections needed for story-local distillation: identity, embodied constraints, voice, stable dispositions, relevant relationships, pressure behavior, known canon limits, `dramatic_core` (all 10 engine fields), `## Capabilities`, and `## Signature Scene Behavior`. Compute a deterministic `source_char_hash` over the exact source content used when the tool surface exposes one; otherwise record the hash method in the deliverable summary before approval.
+
+Semantic Preservation Contract: for any STCHAR derived from a world `CHAR` (`source_kind: world_char`), every structured operational source fact must be copied, transformed, compressed, intentionally omitted with rationale, or marked story-irrelevant. No structured operational source fact may survive only in `## Source Distillation` or other audit/commentary prose if page planning, choice grounding, state derivation, or prose rendering may need it.
 
 For `create_story_local`, assemble the operator brief and any story-local records used as evidence. Do not invent a world `CHAR` provenance field.
 
@@ -278,6 +280,8 @@ Section requirements:
 
 No section may ask a runtime skill or prose renderer to infer characterization from `CHAR-*`. If a `CHAR-*` id appears outside frontmatter provenance or the Source Distillation section's historical source note, explain why it is non-operational.
 
+For `world_char` profiles, the body and frontmatter must satisfy the Semantic Preservation Contract: each present structured `dramatic_core` source field needs a `source_operational_fact_map` entry, and retained facts must land in an operational STCHAR home such as the capability, agency, pressure, relationship, derivation, or prose-rendering sections. `Source Distillation` may document provenance and compression choices, but it is not an operational target for retained facts.
+
 ## Phase 4: Draft Schema Frontmatter
 
 Draft frontmatter that conforms to `story-character-authority.schema.json`:
@@ -291,6 +295,11 @@ source_kind: world_char | story_local | regenerated
 source_char_id: CHAR-<integer> | null
 source_char_hash: sha256:<64 lowercase hex> | null
 source_char_sections_used: []
+source_operational_fact_map:
+  - source_field: signature_scene_behaviors
+    disposition: copied | transformed | compressed | omitted_with_rationale | story_irrelevant
+    target_section: "Prose Rendering Constraints" | null
+    rationale: null | <required when omitted_with_rationale or story_irrelevant>
 story_local_inputs_used: []
 generated_at_page: story_bootstrap | PG-<integer> | null
 created_by_skill: story-character-profile

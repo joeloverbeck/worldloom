@@ -455,6 +455,8 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 
 **§16a is per-page-computed STCHAR voice authority, not inlined verbatim.** Every page plan MUST include one STCHAR-derived character authority packet for each viewpoint character, speaker, major actor, direct target, emotionally salient character, or any character whose behavior, voice, appraisal, relationship conduct, perception, embodiment, or agency materially shapes the page. Background-only entities whose behavior and voice do not shape the page may be omitted, but the omission must not ask the prose renderer to infer persona from an id.
 
+Semantic Preservation Contract: for any STCHAR derived from a world `CHAR` (`source_kind: world_char`), every structured operational source fact must be copied, transformed, compressed, intentionally omitted with rationale, or marked story-irrelevant. No structured operational source fact may survive only in `## Source Distillation` or other audit/commentary prose if page planning, choice grounding, state derivation, or prose rendering may need it. The STCHAR frontmatter `source_operational_fact_map` records this disposition for each present structured `dramatic_core` source field; retained facts target operational STCHAR homes, never `Source Distillation`.
+
 Each §16a packet includes:
 
 ```markdown
@@ -470,6 +472,7 @@ Each §16a packet includes:
   - Relationship-specific conduct:
   - Perception and embodiment constraints:
   - Agency and planning tendency:
+  - Relevant capabilities / limits for this page:
   - Prose must show:
   - Prose must not imply:
   - Anti-generic warnings:
@@ -485,11 +488,12 @@ For an active offstage character whose offstage activity causally bears on the p
   - Relevant appraisal rules:
   - Relevant pressure behavior:
   - Offstage causal relevance:
+  - Relevant capabilities / limits for this page: <include only when the offstage character's capability or limit is the mechanism of their causal bearing on this page>.
   - Prose must not imply:
   - Anti-generic warnings:
 ```
 
-The reduced packet carries the same three STCHAR integrity hashes as a full packet, using the stored STCHAR frontmatter hashes for `profile_hash`, `voice_block_hash`, and `page_packet_hash`. It carries only the offstage operational authority needed for this page: relevant appraisal rules, relevant pressure behavior when applicable, and the offstage causal relevance that explains what the character is doing off page that bears on the page. It omits the `Voice/dialogue authority:` block and the on-page rendering lines for perception, embodiment, agency, and dialogue cues because the character is not rendered on the page.
+The reduced packet carries the same three STCHAR integrity hashes as a full packet, using the stored STCHAR frontmatter hashes for `profile_hash`, `voice_block_hash`, and `page_packet_hash`. It carries only the offstage operational authority needed for this page: relevant appraisal rules, relevant pressure behavior when applicable, relevant capabilities or limits only when they are the mechanism of the offstage causal bearing, and the offstage causal relevance that explains what the character is doing off page that bears on the page. It omits the `Voice/dialogue authority:` block and the on-page rendering lines for perception, embodiment, agency, and dialogue cues because the character is not rendered on the page.
 
 Emit/omit boundary: an active offstage character (`entity_status.location: offstage`) whose offstage activity causally bears on the page should carry an `offstage_causal` packet; an offstage character with no causal bearing on this page may be omitted as background-only. The omission must still not ask the prose renderer to infer persona from an id. Whether offstage activity causally bears on the page is authoring judgment, not validator-graded.
 
