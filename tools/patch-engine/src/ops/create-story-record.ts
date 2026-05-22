@@ -8,6 +8,7 @@ import type {
   RepairStoryCharacterAuthorityBodyIntegrityPayload,
   RemoveStoryCharacterAuthorityBodyHashNoteFieldPayload,
   RemoveStoryCharacterAuthorityFrontmatterFieldPayload,
+  StoryCharacterAuthorityTamperHashField,
   StoryCharacterAuthorityPayload,
   StoryRecordPayload
 } from "../envelope/schema.js";
@@ -63,6 +64,13 @@ type StoryCharacterAuthorityMaintenanceOperation =
   | RemoveStoryCharacterAuthorityFrontmatterFieldOperation
   | RemoveStoryCharacterAuthorityBodyHashNoteFieldOperation
   | RepairStoryCharacterAuthorityBodyIntegrityOperation;
+
+const STCHAR_TAMPER_HASH_FIELDS = new Set<StoryCharacterAuthorityTamperHashField>([
+  "profile_hash",
+  "voice_block_hash",
+  "page_packet_hash",
+  "source_char_hash"
+]);
 
 export function storyRecordMetadata(
   op: PatchOperation
@@ -285,10 +293,10 @@ function validateStcharMaintenanceOperation(
 ): void {
   validateStcharMaintenanceTarget(env, op);
   const { target_record_id: recordId, field_name: fieldName } = op.payload;
-  if (fieldName !== "page_packet_hash") {
+  if (!STCHAR_TAMPER_HASH_FIELDS.has(fieldName)) {
     throw new PatchEngineOpError({
       code: "unsupported_operation",
-      message: `${op.op} may only remove legacy page_packet_hash metadata`,
+      message: `${op.op} may only remove legacy STCHAR tamper-hash metadata`,
       op_kind: op.op,
       record_id: recordId
     });
@@ -393,9 +401,10 @@ async function readStcharMaintenanceTarget(
   const targetFilePath = path.isAbsolute(row.file_path)
     ? row.file_path
     : path.join(ctx.worldRoot, "worlds", env.target_world, row.file_path);
-  const source = await readFile(targetFilePath, "utf8");
-  const currentHash = contentHashForText(source);
-  if (op.expected_content_hash !== undefined && op.expected_content_hash !== currentHash) {
+  const stagedSource = ctx.stagedFileContents?.get(targetFilePath);
+  const source = stagedSource ?? await readFile(targetFilePath, "utf8");
+  const diskHash = stagedSource === undefined ? contentHashForText(source) : undefined;
+  if (op.expected_content_hash !== undefined && op.expected_content_hash !== diskHash) {
     throw new PatchEngineOpError({
       code: "record_hash_drift",
       message: `${row.node_id} content hash drifted`,
@@ -410,22 +419,46 @@ async function readStcharMaintenanceTarget(
 
 function removeHashNoteField(
   bodyMarkdown: string,
-  fieldName: "page_packet_hash",
+  fieldName: StoryCharacterAuthorityTamperHashField,
   opKind: RemoveStoryCharacterAuthorityBodyHashNoteFieldOperation["op"],
   recordId: string,
   targetFilePath: string
 ): string {
-  const fieldClause = `; ${fieldName} over the §16a packet projection authored for this bundle`;
-  if (!bodyMarkdown.includes(fieldClause)) {
+  const nextBody = removeHashNoteLineOrClause(bodyMarkdown, fieldName);
+  if (nextBody === bodyMarkdown) {
     throw new PatchEngineOpError({
       code: "field_path_invalid",
-      message: `${recordId} body hash note does not contain legacy ${fieldName} clause`,
+      message: `${recordId} body hash note does not contain legacy ${fieldName} metadata`,
       target_file: targetFilePath,
       op_kind: opKind,
       record_id: recordId
     });
   }
-  return bodyMarkdown.replace(fieldClause, "");
+  return nextBody;
+}
+
+function removeHashNoteLineOrClause(bodyMarkdown: string, fieldName: StoryCharacterAuthorityTamperHashField): string {
+  if (fieldName === "source_char_hash") {
+    return bodyMarkdown.replace(/^- source_char_hash: .*(?:\n|$)/m, "");
+  }
+
+  const clausesByField: Record<Exclude<StoryCharacterAuthorityTamperHashField, "source_char_hash">, RegExp> = {
+    profile_hash: /profile_hash over the full body markdown/,
+    voice_block_hash: /voice_block_hash over the `## Page-Plan Voice Block` section/,
+    page_packet_hash: /page_packet_hash over the §16a packet projection authored for this bundle/
+  };
+  const linePattern = /^- Hashes: ([^\n]*)(?:\n|$)/m;
+  const match = bodyMarkdown.match(linePattern);
+  if (match === null || !clausesByField[fieldName].test(match[1] ?? "")) {
+    return bodyMarkdown;
+  }
+
+  const remainingClauses = (match[1] ?? "")
+    .replace(/\.$/, "")
+    .split("; ")
+    .filter((clause) => !clausesByField[fieldName].test(clause));
+  const replacement = remainingClauses.length === 0 ? "" : `- Hashes: ${remainingClauses.join("; ")}.\n`;
+  return bodyMarkdown.replace(linePattern, replacement);
 }
 
 function validateStoryRecordBasics(

@@ -39,6 +39,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "cross_file_reference",
   "entity_introduction_status_pairing",
   "expected_witness_coverage",
+  "forbidden_stchar_tamper_hash_fields",
   "id_uniqueness",
   "index_disk_consistency",
   "introduction_observer_firewall",

@@ -93,7 +93,15 @@ export function buildPreApplyFileInputs(
 
   for (const patch of envelope.patches) {
     const hybrid = storyCharacterAuthorityFileInput(patch);
-    const maintainedHybrid = storyCharacterAuthorityMaintenanceFileInput(envelope, patch);
+    const maintainedHybridPath = storyCharacterAuthorityMaintenancePath(patch);
+    const existingMaintenanceInput = maintainedHybridPath === null
+      ? undefined
+      : files.find((file) => file.path === maintainedHybridPath);
+    const maintainedHybrid = storyCharacterAuthorityMaintenanceFileInput(
+      envelope,
+      patch,
+      existingMaintenanceInput?.content.startsWith("---\n") === true ? existingMaintenanceInput.content : undefined
+    );
     const maintainedDaHybrid = diegeticArtifactClaimMapMaintenanceFileInput(envelope, patch);
     const candidate = maintainedDaHybrid ?? maintainedHybrid ?? hybrid;
     if (candidate !== null) {
@@ -340,7 +348,8 @@ function storyCharacterAuthorityFileInput(patch: PatchOperation): FileInput | nu
 
 function storyCharacterAuthorityMaintenanceFileInput(
   envelope: PatchPlanEnvelope,
-  patch: PatchOperation
+  patch: PatchOperation,
+  sourceOverride?: string
 ): FileInput | null {
   if (
     patch.op !== "remove_story_character_authority_frontmatter_field" &&
@@ -354,11 +363,11 @@ function storyCharacterAuthorityMaintenanceFileInput(
 
   const filePath = patch.target_file || `stories/${storySlug}/story-characters/${recordId}.md`;
   const absolutePath = path.join(resolveRepoRootForWorld(envelope.target_world), "worlds", envelope.target_world, filePath);
-  if (!existsSync(absolutePath)) {
+  if (sourceOverride === undefined && !existsSync(absolutePath)) {
     return null;
   }
 
-  const source = readFileSync(absolutePath, "utf8");
+  const source = sourceOverride ?? readFileSync(absolutePath, "utf8");
   const match = /^---\n([\s\S]*?)---\n?([\s\S]*)$/.exec(source);
   if (match === null) {
     return null;
@@ -372,7 +381,7 @@ function storyCharacterAuthorityMaintenanceFileInput(
     frontmatter.source_operational_fact_map = patch.payload.source_operational_fact_map;
   }
   const body = patch.op === "remove_story_character_authority_body_hash_note_field"
-    ? (match[2] ?? "").replace(`; ${patch.payload.field_name} over the §16a packet projection authored for this bundle`, "")
+    ? removeStcharHashNoteField(match[2] ?? "", patch.payload.field_name)
     : patch.op === "repair_story_character_authority_body_integrity"
       ? patch.payload.body_markdown
       : match[2] ?? "";
@@ -381,6 +390,45 @@ function storyCharacterAuthorityMaintenanceFileInput(
     path: filePath,
     content: `---\n${nextFrontmatter}\n---\n${body}`
   };
+}
+
+function storyCharacterAuthorityMaintenancePath(patch: PatchOperation): string | null {
+  if (
+    patch.op !== "remove_story_character_authority_frontmatter_field" &&
+    patch.op !== "remove_story_character_authority_body_hash_note_field" &&
+    patch.op !== "repair_story_character_authority_body_integrity"
+  ) {
+    return null;
+  }
+
+  return patch.target_file || `stories/${patch.payload.story_slug}/story-characters/${patch.payload.target_record_id}.md`;
+}
+
+function removeStcharHashNoteField(body: string, fieldName: string): string {
+  if (fieldName === "source_char_hash") {
+    return body.replace(/^- source_char_hash: .*(?:\n|$)/m, "");
+  }
+
+  const clausePatterns: Record<string, RegExp> = {
+    profile_hash: /profile_hash over the full body markdown/,
+    voice_block_hash: /voice_block_hash over the `## Page-Plan Voice Block` section/,
+    page_packet_hash: /page_packet_hash over the §16a packet projection authored for this bundle/
+  };
+  const clausePattern = clausePatterns[fieldName];
+  if (clausePattern === undefined) {
+    return body;
+  }
+
+  return body.replace(/^- Hashes: ([^\n]*)(?:\n|$)/m, (line, clauses: string) => {
+    if (!clausePattern.test(clauses)) {
+      return line;
+    }
+    const remaining = clauses
+      .replace(/\.$/, "")
+      .split("; ")
+      .filter((clause) => !clausePattern.test(clause));
+    return remaining.length === 0 ? "" : `- Hashes: ${remaining.join("; ")}.\n`;
+  });
 }
 
 function diegeticArtifactClaimMapMaintenanceFileInput(

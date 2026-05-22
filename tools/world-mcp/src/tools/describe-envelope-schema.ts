@@ -511,7 +511,10 @@ function operationSchema(kind: OperationKind): JsonObject {
         properties: {
           story_slug: stringSchema("^[a-z0-9-]+$"),
           target_record_id: stringSchema("^STCHAR-(0|[1-9][0-9]*)$"),
-          field_name: { type: "string", enum: ["page_packet_hash"] }
+          field_name: {
+            type: "string",
+            enum: ["profile_hash", "voice_block_hash", "page_packet_hash", "source_char_hash"]
+          }
         }
       });
     case "repair_story_character_authority_body_integrity":

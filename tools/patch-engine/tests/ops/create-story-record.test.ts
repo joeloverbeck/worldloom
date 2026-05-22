@@ -594,10 +594,13 @@ test("supersede_story_character_authority_record writes replacement and lifecycl
   );
 });
 
-test("remove_story_character_authority_frontmatter_field removes only legacy page_packet_hash", async (t) => {
+test("remove_story_character_authority_frontmatter_field removes legacy tamper hash fields", async (t) => {
   const world = createTestWorld(t);
   const frontmatter = {
     ...stcharRecord("STCHAR-1"),
+    profile_hash: `sha256:${"a".repeat(64)}`,
+    voice_block_hash: `sha256:${"b".repeat(64)}`,
+    source_char_hash: `sha256:${"c".repeat(64)}`,
     page_packet_hash: `sha256:${"d".repeat(64)}`
   };
   seedStcharHybrid(world, "marla-kern-seduction", frontmatter, "## Profile\n\nOriginal profile.");
@@ -622,15 +625,17 @@ test("remove_story_character_authority_frontmatter_field removes only legacy pag
     payload: {
       story_slug: "marla-kern-seduction",
       target_record_id: "STCHAR-1",
-      field_name: "page_packet_hash"
+      field_name: "profile_hash"
     }
   } satisfies Extract<PatchOperation, { op: "remove_story_character_authority_frontmatter_field" }>);
 
   const staged = await stageRemoveStoryCharacterAuthorityFrontmatterField(env, op, world.ctx);
   const parsed = parseHybrid(fs.readFileSync(staged.temp_file_path, "utf8"));
 
-  assert.equal(parsed.frontmatter.page_packet_hash, undefined);
-  assert.deepEqual(parsed.frontmatter, stcharRecord("STCHAR-1"));
+  assert.equal(parsed.frontmatter.profile_hash, undefined);
+  assert.equal(parsed.frontmatter.voice_block_hash, frontmatter.voice_block_hash);
+  assert.equal(parsed.frontmatter.source_char_hash, frontmatter.source_char_hash);
+  assert.equal(parsed.frontmatter.page_packet_hash, frontmatter.page_packet_hash);
   assert.equal(parsed.body.trim(), "## Profile\n\nOriginal profile.");
 });
 
@@ -650,7 +655,7 @@ test("remove_story_character_authority_frontmatter_field rejects unsupported fro
           payload: {
             story_slug: "marla-kern-seduction",
             target_record_id: "STCHAR-1",
-            field_name: "profile_hash"
+            field_name: "unknown_hash"
           }
         } as unknown as Extract<PatchOperation, { op: "remove_story_character_authority_frontmatter_field" }>),
         world.ctx
@@ -659,7 +664,7 @@ test("remove_story_character_authority_frontmatter_field rejects unsupported fro
   );
 });
 
-test("remove_story_character_authority_body_hash_note_field removes only legacy page_packet_hash note clause", async (t) => {
+test("remove_story_character_authority_body_hash_note_field removes legacy tamper hash note fields", async (t) => {
   const world = createTestWorld(t);
   const frontmatter = {
     ...stcharRecord("STCHAR-1"),
@@ -668,6 +673,7 @@ test("remove_story_character_authority_body_hash_note_field removes only legacy 
   const body = [
     "## Validation / Audit Anchors",
     "",
+    "- source_char_hash: deterministic sha256 over the full CHAR-1 dossier file bytes.",
     "- Hashes: profile_hash over the full body markdown; voice_block_hash over the `## Page-Plan Voice Block` section; page_packet_hash over the §16a packet projection authored for this bundle.",
     "- Invariants respected: ONT-1."
   ].join("\n");
@@ -693,7 +699,7 @@ test("remove_story_character_authority_body_hash_note_field removes only legacy 
     payload: {
       story_slug: "marla-kern-seduction",
       target_record_id: "STCHAR-1",
-      field_name: "page_packet_hash"
+      field_name: "profile_hash"
     }
   } satisfies Extract<PatchOperation, { op: "remove_story_character_authority_body_hash_note_field" }>);
 
@@ -701,10 +707,83 @@ test("remove_story_character_authority_body_hash_note_field removes only legacy 
   const parsed = parseHybrid(fs.readFileSync(staged.temp_file_path, "utf8"));
 
   assert.equal(parsed.frontmatter.page_packet_hash, frontmatter.page_packet_hash);
-  assert.match(parsed.body, /profile_hash over the full body markdown/);
-  assert.match(parsed.body, /voice_block_hash over the `## Page-Plan Voice Block` section\./);
-  assert.doesNotMatch(parsed.body, /page_packet_hash/);
+  assert.match(parsed.body, /source_char_hash/);
+  assert.doesNotMatch(parsed.body, /profile_hash over the full body markdown/);
+  assert.match(parsed.body, /voice_block_hash over the `## Page-Plan Voice Block` section/);
+  assert.match(parsed.body, /page_packet_hash/);
   assert.match(parsed.body, /Invariants respected: ONT-1/);
+});
+
+test("remove_story_character_authority_body_hash_note_field removes final hash note lines", async (t) => {
+  const world = createTestWorld(t);
+  seedStcharHybrid(
+    world,
+    "marla-kern-seduction",
+    stcharRecord("STCHAR-1"),
+    [
+      "## Validation / Audit Anchors",
+      "",
+      "- source_char_hash: deterministic sha256 over the full CHAR-1 dossier file bytes.",
+      "- Hashes: voice_block_hash over the `## Page-Plan Voice Block` section.",
+      "- Invariants respected: ONT-1."
+    ].join("\n")
+  );
+  const env = baseEnvelope();
+  const source = fs.readFileSync(
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "story-characters",
+      "STCHAR-1.md"
+    ),
+    "utf8"
+  );
+  const op = createOp({
+    op: "remove_story_character_authority_body_hash_note_field",
+    target_world: env.target_world,
+    target_file: "stories/marla-kern-seduction/story-characters/STCHAR-1.md",
+    expected_content_hash: contentHashForText(source),
+    payload: {
+      story_slug: "marla-kern-seduction",
+      target_record_id: "STCHAR-1",
+      field_name: "voice_block_hash"
+    }
+  } satisfies Extract<PatchOperation, { op: "remove_story_character_authority_body_hash_note_field" }>);
+
+  const stagedVoice = await stageRemoveStoryCharacterAuthorityBodyHashNoteField(env, op, world.ctx);
+  const parsedVoice = parseHybrid(fs.readFileSync(stagedVoice.temp_file_path, "utf8"));
+  assert.doesNotMatch(parsedVoice.body, /^- Hashes:/m);
+
+  fs.writeFileSync(
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "story-characters",
+      "STCHAR-1.md"
+    ),
+    fs.readFileSync(stagedVoice.temp_file_path, "utf8")
+  );
+
+  const opSource = createOp({
+    op: "remove_story_character_authority_body_hash_note_field",
+    target_world: env.target_world,
+    target_file: "stories/marla-kern-seduction/story-characters/STCHAR-1.md",
+    payload: {
+      story_slug: "marla-kern-seduction",
+      target_record_id: "STCHAR-1",
+      field_name: "source_char_hash"
+    }
+  } satisfies Extract<PatchOperation, { op: "remove_story_character_authority_body_hash_note_field" }>);
+  const stagedSource = await stageRemoveStoryCharacterAuthorityBodyHashNoteField(env, opSource, world.ctx);
+  const parsedSource = parseHybrid(fs.readFileSync(stagedSource.temp_file_path, "utf8"));
+  assert.doesNotMatch(parsedSource.body, /^- source_char_hash:/m);
+  assert.match(parsedSource.body, /Invariants respected: ONT-1/);
 });
 
 test("repair_story_character_authority_body_integrity replaces body and source map without stamping hashes", async (t) => {

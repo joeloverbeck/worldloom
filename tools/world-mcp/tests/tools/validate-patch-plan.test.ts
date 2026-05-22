@@ -417,6 +417,7 @@ test("validatePatchPlan accepts STCHAR frontmatter maintenance through pre-apply
         "  - STENT-1",
         "profile_revision: 1",
         "body_schema_version: stchar.v1",
+        `profile_hash: sha256:${"a".repeat(64)}`,
         `page_packet_hash: sha256:${"d".repeat(64)}`
       ])
     ]
@@ -431,6 +432,16 @@ test("validatePatchPlan accepts STCHAR frontmatter maintenance through pre-apply
       originating_skill: "implement-ticket",
       expected_id_allocations: {},
       patches: [
+        {
+          op: "remove_story_character_authority_frontmatter_field",
+          target_world: "seeded",
+          target_file: "stories/marla-kern-seduction/story-characters/STCHAR-1.md",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            target_record_id: "STCHAR-1",
+            field_name: "profile_hash"
+          }
+        },
         {
           op: "remove_story_character_authority_frontmatter_field",
           target_world: "seeded",

@@ -43,7 +43,9 @@ export async function stageAllOps(
   ctx: OpContext
 ): Promise<StageAllOpsResult> {
   const previousOverlay = ctx.stagedRecords;
+  const previousFileContents = ctx.stagedFileContents;
   ctx.stagedRecords = new Map(previousOverlay);
+  ctx.stagedFileContents = new Map(previousFileContents);
   const staged: StagedWrite[] = [];
 
   try {
@@ -51,16 +53,19 @@ export async function stageAllOps(
       const writes = await stageOne(envelope, patch, ctx);
       for (const write of Array.isArray(writes) ? writes : [writes]) {
         replaceStagedWrite(staged, write);
+        ctx.stagedFileContents.set(write.target_file_path, write.new_content);
         registerStagedRecord(envelope, patch, write, ctx);
       }
     }
   } catch (error) {
     await unlinkAllTempFiles(staged);
     ctx.stagedRecords = previousOverlay;
+    ctx.stagedFileContents = previousFileContents;
     return { ok: false, error, staged };
   }
 
   ctx.stagedRecords = previousOverlay;
+  ctx.stagedFileContents = previousFileContents;
   return { ok: true, staged };
 }
 
