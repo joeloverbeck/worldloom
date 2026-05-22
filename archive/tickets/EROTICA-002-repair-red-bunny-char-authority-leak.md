@@ -58,7 +58,7 @@ The first validation run after the file edit still reported the old `CHAR-0003` 
 ## Out of Scope
 
 - Validator code, tests, schemas, and package docs; completed by `archive/tickets/VALENH-027.md`.
-- STCHAR `source_char_hash` correctness; owned by `tickets/VALENH-028.md`.
+- STCHAR `source_char_hash` correctness; owned by `archive/tickets/VALENH-028.md`.
 - The three `compatibility_drift` info verdicts for optional directory absence.
 - Rebootstrapping or deleting the whole `red-bunny` story bundle.
 
