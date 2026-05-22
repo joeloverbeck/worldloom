@@ -1,22 +1,23 @@
 # SPEC71STRSTCHARTAM-006: Add the `forbidden_stchar_tamper_hash_fields` reintroduction guard
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — new `tools/validators/src/structural/forbidden-stchar-tamper-hash-fields.ts` + `registry.ts` register + meta-test.
+**Engine Changes**: Yes — new `tools/validators/src/structural/forbidden-stchar-tamper-hash-fields.ts` + `registry.ts` registration + focused tests/meta-test + validator inventory/test expectation updates.
 **Deps**: archive/tickets/SPEC71STRSTCHARTAM-002.md
 
 ## Problem
 
 Stripping the four hashes is pointless if a future "improvement" silently reintroduces them (SPEC-71 §2.2, the user's explicit requirement). This ticket adds a structural validator that FAILs if `profile_hash` / `voice_block_hash` / `page_packet_hash` / `source_char_hash` reappear in STCHAR frontmatter, prose-receipt YAML, or page-plan §16a packets, plus a repo-grep meta-test guarding the schema/contract files. The schema-layer `additionalProperties:false` (already present, confirmed in 002) is the complementary free guard for the schema surfaces.
 
-## Assumption Reassessment (2026-05-22)
+## Assumption Reassessment (2026-05-23)
 
 1. Codebase: `tools/validators/src/public/registry.ts:107 structuralValidators[]` is the registration array (structural-consumer model — registry insertion is the consumer wiring). The new validator follows the sibling shape of `stchar-body-integrity.ts` (reads STCHAR frontmatter), `prose-receipt-stchar-integrity.ts` (reads receipt YAML), and `page-plan-stchar-packet-integrity.ts` (reads §16a packets). After 002, the four fields are absent from `properties`, so a clean fixture reflects post-teardown state.
 2. Specs/docs: SPEC-71 §2.2 + §5 acceptance criterion 4.
 3. Cross-artifact boundary under audit: the validator reads three artifact surfaces (STCHAR frontmatter / prose-receipt YAML / §16a packet) — the same three the torn-down hashes inhabited; it must FAIL on any of the four names in any of the three.
 4. FOUNDATIONS Rule 6 (No Silent Retcons) + §5b (Schema-Minimalism): the guard makes a silent reintroduction a hard failure, preserving the spec's removal as a durable decision rather than a reversible one.
 5. Canon-Safety surface: this is a new structural validator under `tools/validators/src/structural/` registered in the framework run-loop (it participates in story-bundle pre-apply validation). Confirmed it adds a FAIL gate only on the forbidden field names; it reads no canon and resolves no Mystery Reserve entry — Rule 7 firewall unaffected.
+6. Reassessment correction: the meta-test's drafted `story-state-contract.md` shorthand resolves in the live checkout to `.claude/skills/_shared-templates/story-state-contract.md`; there is no standalone root-level `story-state-contract.md`. The guard therefore checks `tools/validators/src/schemas/story-character-authority.schema.json`, `tools/validators/src/schemas/prose-receipt.schema.json`, `.claude/skills/_shared-templates/story-state-contract.md`, and `.claude/skills/_shared-templates/story-record-schemas.md`.
 
 ## Architecture Check
 
@@ -43,7 +44,11 @@ Create `tools/validators/src/structural/forbidden-stchar-tamper-hash-fields.ts`:
 - `tools/validators/src/structural/forbidden-stchar-tamper-hash-fields.ts` (new)
 - `tools/validators/src/public/registry.ts` (modify)
 - `tools/validators/tests/structural/forbidden-stchar-tamper-hash-fields.test.ts` (new)
-- `tools/validators/tests/**` meta-test for schema/contract reintroduction (new or extend)
+- `tools/validators/tests/structural/forbidden-stchar-tamper-hash-meta.test.ts` (new)
+- `tools/validators/tests/structural/registry.test.ts` (modify)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify)
+- `tools/validators/README.md` (modify)
 
 ## Out of Scope
 
@@ -54,7 +59,7 @@ Create `tools/validators/src/structural/forbidden-stchar-tamper-hash-fields.ts`:
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/validators` — the new validator FAILs each of the three reintroduction fixtures and PASSes the clean fixture; meta-test passes against the post-teardown schema/contract files.
+1. `npm test --prefix tools/validators` — the new validator FAILs each of the three reintroduction fixtures and PASSes the clean fixture; meta-test passes against the post-teardown schema/contract files; validator registry and pre-apply skip expectations include the new guard.
 2. `grep -n "forbiddenStcharTamperHashFields\|forbidden_stchar_tamper_hash_fields" tools/validators/src/public/registry.ts` → registered.
 3. `npm run build --prefix tools/validators` (tsc).
 
@@ -68,9 +73,32 @@ Create `tools/validators/src/structural/forbidden-stchar-tamper-hash-fields.ts`:
 ### New/Modified Tests
 
 1. `tools/validators/tests/structural/forbidden-stchar-tamper-hash-fields.test.ts` — per-surface FAIL fixtures + clean PASS fixture.
-2. `tools/validators/tests/**` meta-test — grep schema + contract files for the four names → zero.
+2. `tools/validators/tests/structural/forbidden-stchar-tamper-hash-meta.test.ts` — schema + contract file scan for the four names → zero.
 
 ### Commands
 
 1. `npm test --prefix tools/validators`
 2. `npm run build --prefix tools/validators`
+
+## Outcome
+
+Completed: 2026-05-23
+
+Implemented the `forbidden_stchar_tamper_hash_fields` structural validator and registered it in `structuralValidators[]`. The guard checks three current artifact surfaces:
+
+- STCHAR hybrid frontmatter for forbidden top-level keys.
+- Prose-receipt YAML for forbidden nested keys, including `stchar_authority[]`.
+- Page-plan §16a packets for forbidden field mentions.
+
+Added focused PASS/FAIL fixtures for all four retired fields across those surfaces, a meta-test over the two schema files and two shared contract files, registry/count expectation updates, pre-apply skip expectation coverage, and the README validator inventory entry.
+
+Deviations from the original ticket:
+
+- The drafted `story-state-contract.md` path was corrected to `.claude/skills/_shared-templates/story-state-contract.md`.
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` and `tools/validators/README.md` were added to the touched surface because registering a new structural validator requires the pre-apply execution-status and validator-inventory consumers to move with it.
+
+## Verification Result
+
+1. `npm run build --prefix tools/validators` — passed.
+2. `node --test dist/tests/structural/forbidden-stchar-tamper-hash-fields.test.js dist/tests/structural/forbidden-stchar-tamper-hash-meta.test.js dist/tests/structural/registry.test.js dist/tests/integration/spec04-verification.test.js dist/tests/integration/validate-patch-plan.test.js` from `tools/validators` — passed, 36 tests.
+3. `npm test --prefix tools/validators` — passed, 893 tests.

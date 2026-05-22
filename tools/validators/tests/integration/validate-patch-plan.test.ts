@@ -288,6 +288,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "page_plan_stchar_packet_integrity"
     );
     assert.equal(pagePlanStcharExecution?.status, "skipped");
+    const forbiddenStcharHashExecution = result.executions.find(
+      (execution) => execution.name === "forbidden_stchar_tamper_hash_fields"
+    );
+    assert.equal(forbiddenStcharHashExecution?.status, "skipped");
     const activeRecordsFullShapeExecution = result.executions.find(
       (execution) => execution.name === "active_records_full_shape"
     );
@@ -355,6 +359,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== compatibilityDriftExecution &&
         row !== pageAffordanceExecution &&
         row !== pagePlanStcharExecution &&
+        row !== forbiddenStcharHashExecution &&
         row !== activeRecordsFullShapeExecution &&
         !stplanExecutions.includes(row) &&
         !stemoExecutions.includes(row) &&

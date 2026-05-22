@@ -39,6 +39,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "stchar_supersession_integrity",
       "stchar_body_integrity",
       "stchar_source_fact_coverage",
+      "forbidden_stchar_tamper_hash_fields",
       "no_char_authority_in_story_runtime",
       "character_grounding_consistency",
       "chc_slt_selected_commitment_trace",

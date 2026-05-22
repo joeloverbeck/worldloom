@@ -19,6 +19,7 @@ import { causalDependencyThreatScan } from "../structural/causal-dependency-thre
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { entityIntroductionStatusPairing } from "../structural/entity-introduction-status-pairing.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
+import { forbiddenStcharTamperHashFields } from "../structural/forbidden-stchar-tamper-hash-fields.js";
 import { introductionObserverFirewall } from "../structural/introduction-observer-firewall.js";
 import { indexDiskConsistency } from "../structural/index-disk-consistency.js";
 import { midstoryRecordIntroductionGrounding } from "../structural/midstory-record-introduction-grounding.js";
@@ -136,6 +137,7 @@ export const structuralValidators: readonly Validator[] = [
   stcharSupersessionIntegrity,
   stcharBodyIntegrity,
   stcharSourceFactCoverage,
+  forbiddenStcharTamperHashFields,
   noCharAuthorityInStoryRuntime,
   characterGroundingConsistency,
   chcSltSelectedCommitmentTrace,
