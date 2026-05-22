@@ -4,11 +4,6 @@ import path from "node:path";
 import test from "node:test";
 
 import YAML from "yaml";
-import {
-  computeStcharProfileHash,
-  computeStcharVoiceBlockHash
-} from "@worldloom/world-index/hash/content";
-
 import { baseEnvelope, createTestWorld, assertOpError, assertYamlEquals, createOp } from "../harness.js";
 import type { PatchOperation } from "../../src/envelope/schema.js";
 import {
@@ -601,7 +596,10 @@ test("supersede_story_character_authority_record writes replacement and lifecycl
 
 test("remove_story_character_authority_frontmatter_field removes only legacy page_packet_hash", async (t) => {
   const world = createTestWorld(t);
-  const frontmatter = stcharRecord("STCHAR-1");
+  const frontmatter = {
+    ...stcharRecord("STCHAR-1"),
+    page_packet_hash: `sha256:${"d".repeat(64)}`
+  };
   seedStcharHybrid(world, "marla-kern-seduction", frontmatter, "## Profile\n\nOriginal profile.");
   const env = baseEnvelope();
   const source = fs.readFileSync(
@@ -632,8 +630,7 @@ test("remove_story_character_authority_frontmatter_field removes only legacy pag
   const parsed = parseHybrid(fs.readFileSync(staged.temp_file_path, "utf8"));
 
   assert.equal(parsed.frontmatter.page_packet_hash, undefined);
-  assert.equal(parsed.frontmatter.profile_hash, frontmatter.profile_hash);
-  assert.equal(parsed.frontmatter.voice_block_hash, frontmatter.voice_block_hash);
+  assert.deepEqual(parsed.frontmatter, stcharRecord("STCHAR-1"));
   assert.equal(parsed.body.trim(), "## Profile\n\nOriginal profile.");
 });
 
@@ -664,7 +661,10 @@ test("remove_story_character_authority_frontmatter_field rejects unsupported fro
 
 test("remove_story_character_authority_body_hash_note_field removes only legacy page_packet_hash note clause", async (t) => {
   const world = createTestWorld(t);
-  const frontmatter = stcharRecord("STCHAR-1");
+  const frontmatter = {
+    ...stcharRecord("STCHAR-1"),
+    page_packet_hash: `sha256:${"d".repeat(64)}`
+  };
   const body = [
     "## Validation / Audit Anchors",
     "",
@@ -707,7 +707,7 @@ test("remove_story_character_authority_body_hash_note_field removes only legacy 
   assert.match(parsed.body, /Invariants respected: ONT-1/);
 });
 
-test("repair_story_character_authority_body_integrity replaces body, source map, and stamps hashes", async (t) => {
+test("repair_story_character_authority_body_integrity replaces body and source map without stamping hashes", async (t) => {
   const world = createTestWorld(t);
   const frontmatter = stcharRecord("STCHAR-1");
   seedStcharHybrid(world, "marla-kern-seduction", frontmatter, "## Profile\n\nOld profile.");
@@ -756,8 +756,8 @@ test("repair_story_character_authority_body_integrity replaces body, source map,
   const parsed = parseHybrid(fs.readFileSync(staged.temp_file_path, "utf8"));
 
   assert.deepEqual(parsed.frontmatter.source_operational_fact_map, sourceMap);
-  assert.equal(parsed.frontmatter.profile_hash, `sha256:${computeStcharProfileHash(body)}`);
-  assert.equal(parsed.frontmatter.voice_block_hash, `sha256:${computeStcharVoiceBlockHash(body)}`);
+  assert.equal(parsed.frontmatter.profile_hash, undefined);
+  assert.equal(parsed.frontmatter.voice_block_hash, undefined);
   assert.equal(parsed.frontmatter.id, "STCHAR-1");
   assert.equal(parsed.body, body);
 });
@@ -770,7 +770,6 @@ function stcharRecord(id: string): Record<string, unknown> {
     world_slug: "minimal-world",
     source_kind: "world_char",
     source_char_id: "CHAR-1",
-    source_char_hash: `sha256:${"a".repeat(64)}`,
     source_char_sections_used: ["frontmatter"],
     generated_at_page: "story_bootstrap",
     created_by_skill: "unit-test",
@@ -779,10 +778,7 @@ function stcharRecord(id: string): Record<string, unknown> {
     status: "active",
     bound_stent_ids: ["STENT-1"],
     profile_revision: 1,
-    body_schema_version: "stchar.v1",
-    profile_hash: `sha256:${"b".repeat(64)}`,
-    voice_block_hash: `sha256:${"c".repeat(64)}`,
-    page_packet_hash: `sha256:${"d".repeat(64)}`
+    body_schema_version: "stchar.v1"
   };
 }
 

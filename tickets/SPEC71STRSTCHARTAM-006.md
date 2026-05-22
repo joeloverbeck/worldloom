@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/validators/src/structural/forbidden-stchar-tamper-hash-fields.ts` + `registry.ts` register + meta-test.
-**Deps**: 002
+**Deps**: archive/tickets/SPEC71STRSTCHARTAM-002.md
 
 ## Problem
 

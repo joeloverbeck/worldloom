@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-index/src/hash/content.ts` (remove 3 helpers), `tools/world-mcp/src/package-interop.ts` (remove re-exports), delete `tools/world-mcp/src/cli/compute-stchar-hashes.ts`.
-**Deps**: 002
+**Deps**: archive/tickets/SPEC71STRSTCHARTAM-002.md
 
 ## Problem
 

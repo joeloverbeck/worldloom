@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-mcp` context-packet projection + envelope-schema description.
-**Deps**: 002
+**Deps**: archive/tickets/SPEC71STRSTCHARTAM-002.md
 
 ## Problem
 

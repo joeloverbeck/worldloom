@@ -3,11 +3,6 @@ import path from "node:path";
 
 import Database from "better-sqlite3";
 import yaml from "js-yaml";
-import {
-  computeStcharProfileHash,
-  computeStcharVoiceBlockHash
-} from "@worldloom/world-index/hash/content";
-
 import type { PatchOperation, PatchPlanEnvelope } from "@worldloom/patch-engine";
 
 import type { IndexedEdge, IndexedRecord, WorldIndexReadSurface } from "../framework/types.js";
@@ -375,8 +370,6 @@ function storyCharacterAuthorityMaintenanceFileInput(
   }
   if (patch.op === "repair_story_character_authority_body_integrity") {
     frontmatter.source_operational_fact_map = patch.payload.source_operational_fact_map;
-    frontmatter.profile_hash = `sha256:${computeStcharProfileHash(patch.payload.body_markdown)}`;
-    frontmatter.voice_block_hash = `sha256:${computeStcharVoiceBlockHash(patch.payload.body_markdown)}`;
   }
   const body = patch.op === "remove_story_character_authority_body_hash_note_field"
     ? (match[2] ?? "").replace(`; ${patch.payload.field_name} over the §16a packet projection authored for this bundle`, "")
@@ -451,8 +444,6 @@ function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperat
     }
     if (patch.op === "repair_story_character_authority_body_integrity") {
       parsed.source_operational_fact_map = patch.payload.source_operational_fact_map;
-      parsed.profile_hash = `sha256:${computeStcharProfileHash(patch.payload.body_markdown)}`;
-      parsed.voice_block_hash = `sha256:${computeStcharVoiceBlockHash(patch.payload.body_markdown)}`;
     }
     byId.set(targetId, { ...current, parsed });
     return targetId;

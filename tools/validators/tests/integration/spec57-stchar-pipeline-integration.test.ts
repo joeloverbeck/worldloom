@@ -65,7 +65,6 @@ function recordsWithStoryletPredicate(recordActiveId: string): IndexedRecord[] {
       world_slug: "test",
       source_kind: "world_char",
       source_char_id: "CHAR-1",
-      source_char_hash: "sha256:" + "a".repeat(64),
       source_char_sections_used: ["Overview"],
       generated_at_page: "story_bootstrap",
       created_by_skill: "story-character-profile",
@@ -73,9 +72,7 @@ function recordsWithStoryletPredicate(recordActiveId: string): IndexedRecord[] {
       status: "active",
       bound_stent_ids: ["STENT-1"],
       profile_revision: 1,
-      body_schema_version: "stchar.v1",
-      profile_hash: "sha256:" + "b".repeat(64),
-      voice_block_hash: "sha256:" + "c".repeat(64)
+      body_schema_version: "stchar.v1"
     }),
     record("storylet_record", "SLT-1", "_source/storylets/SLT-1.yaml", {
       id: "SLT-1",
@@ -133,11 +130,6 @@ function receiptWithInvalidStcharAuthority(): Record<string, unknown> {
     stchar_authority: [{
       ...validStcharAuthority(),
       packet_present: false,
-      page_packet_hash: {
-        ...validHashComparison("d"),
-        observed: "sha256:" + "e".repeat(64),
-        verdict: "FAIL"
-      },
       deterministic_verdict: "PASS"
     }]
   };
@@ -151,16 +143,8 @@ function validStcharAuthority(): Record<string, unknown> {
     required_because: "viewpoint character",
     packet_present: true,
     active_in_snapshot: true,
-    profile_hash: validHashComparison("b"),
-    voice_block_hash: validHashComparison("c"),
-    page_packet_hash: validHashComparison("d"),
     deterministic_verdict: "PASS"
   };
-}
-
-function validHashComparison(hex: string): Record<string, unknown> {
-  const value = "sha256:" + hex.repeat(64);
-  return { expected: value, observed: value, verdict: "PASS" };
 }
 
 function fileInputs(files: Array<{ path: string; content: string }>): { files: Array<{ path: string; content: string }> } {

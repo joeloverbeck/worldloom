@@ -67,7 +67,6 @@ test("record_schema_compliance accepts story-local STCHAR with null source opera
     stcharRecord(validStchar({
       source_kind: "story_local",
       source_char_id: null,
-      source_char_hash: null,
       source_operational_fact_map: null
     }))
   ]));
@@ -94,17 +93,17 @@ test("record_schema_compliance rejects unknown STCHAR source operational fact di
   ));
 });
 
-test("record_schema_compliance requires STCHAR hashes", async () => {
+test("record_schema_compliance rejects reintroduced STCHAR hashes", async () => {
   const parsed = validStchar();
-  delete parsed.voice_block_hash;
+  parsed.profile_hash = HASH;
 
   const result = await recordSchemaCompliance.run({}, context([
     stcharRecord(parsed)
   ]));
 
   assert.ok(result.some((verdict) =>
-    verdict.code === "record_schema_compliance.required" &&
-    verdict.message.includes("'voice_block_hash'")
+    verdict.code === "record_schema_compliance.additionalProperties" &&
+    verdict.message.includes("must NOT have additional properties")
   ));
 });
 
@@ -121,23 +120,22 @@ test("record_schema_compliance rejects malformed STCHAR ids", async () => {
 
 test("record_schema_compliance requires world-char STCHAR provenance", async () => {
   const result = await recordSchemaCompliance.run({}, context([
-    stcharRecord(validStchar({ source_char_id: null, source_char_hash: null }))
+    stcharRecord(validStchar({ source_char_id: null }))
   ]));
 
   assert.ok(result.some((verdict) =>
-    verdict.message.includes("/source_char_id") ||
-    verdict.message.includes("/source_char_hash")
+    verdict.message.includes("/source_char_id")
   ));
 });
 
 test("record_schema_compliance rejects story-local STCHAR with world CHAR provenance", async () => {
   const result = await recordSchemaCompliance.run({}, context([
-    stcharRecord(validStchar({ source_kind: "story_local", source_char_id: "CHAR-1", source_char_hash: HASH }))
+    stcharRecord(validStchar({ source_kind: "story_local", source_char_id: "CHAR-1" }))
   ]));
 
   assert.ok(result.some((verdict) =>
     verdict.code === "record_schema_compliance.type" &&
-    (verdict.message.includes("/source_char_id") || verdict.message.includes("/source_char_hash"))
+    verdict.message.includes("/source_char_id")
   ));
 });
 
@@ -156,7 +154,6 @@ function validStchar(overrides: Record<string, unknown> = {}): Record<string, un
     world_slug: "test-world",
     source_kind: "world_char",
     source_char_id: "CHAR-1",
-    source_char_hash: HASH,
     source_char_sections_used: ["Voice", "Pressure Behavior"],
     story_local_inputs_used: [],
     generated_at_page: "story_bootstrap",
@@ -167,8 +164,6 @@ function validStchar(overrides: Record<string, unknown> = {}): Record<string, un
     bound_stent_ids: ["STENT-1"],
     profile_revision: 1,
     body_schema_version: "stchar.v1",
-    profile_hash: HASH,
-    voice_block_hash: HASH,
     ...overrides
   };
 }

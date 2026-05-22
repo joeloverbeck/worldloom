@@ -7,11 +7,6 @@ import test from "node:test";
 
 import Database from "better-sqlite3";
 import yaml from "js-yaml";
-import {
-  computeStcharProfileHash,
-  computeStcharVoiceBlockHash
-} from "@worldloom/world-index/hash/content";
-
 const cliPath = path.resolve(process.cwd(), "dist/src/cli/world-validate.js");
 
 const SPEC34_VALIDATORS = [
@@ -284,7 +279,6 @@ function stchar(id: string, stentId: string): FixtureRecord {
     world_slug: "test",
     source_kind: "story_local",
     source_char_id: null,
-    source_char_hash: null,
     source_char_sections_used: [],
     story_local_inputs_used: [stentId],
     generated_at_page: "story_bootstrap",
@@ -293,9 +287,7 @@ function stchar(id: string, stentId: string): FixtureRecord {
     status: "active",
     bound_stent_ids: [stentId],
     profile_revision: 1,
-    body_schema_version: "stchar.v1",
-    profile_hash: `sha256:${computeStcharProfileHash(bodyMarkdown)}`,
-    voice_block_hash: `sha256:${computeStcharVoiceBlockHash(bodyMarkdown)}`
+    body_schema_version: "stchar.v1"
   }, bodyMarkdown);
 }
 

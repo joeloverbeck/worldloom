@@ -2,11 +2,6 @@ import path from "node:path";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 import YAML from "yaml";
-import {
-  computeStcharProfileHash,
-  computeStcharVoiceBlockHash
-} from "@worldloom/world-index/hash/content";
-
 import type {
   PatchOperation,
   PatchPlanEnvelope,
@@ -267,9 +262,7 @@ export async function stageRepairStoryCharacterAuthorityBodyIntegrity(
   const parsed = parseHybridMarkdown(source, op.op, op.payload.target_record_id);
   const nextFrontmatter = {
     ...parsed.frontmatter,
-    source_operational_fact_map: sourceOperationalFactMap,
-    profile_hash: `sha256:${computeStcharProfileHash(bodyMarkdown)}`,
-    voice_block_hash: `sha256:${computeStcharVoiceBlockHash(bodyMarkdown)}`
+    source_operational_fact_map: sourceOperationalFactMap
   };
   const newContent = `---\n${serializeStableYaml(nextFrontmatter)}---\n${bodyMarkdown}`;
   const tempFilePath = tempPathForTarget(targetFilePath, env.plan_id);
