@@ -211,7 +211,7 @@ When the selected block becomes an `SE`, `SE.commitment.alias_bindings` records 
 
 ### §5a. Mid-Story Introduction Structured Fields
 
-Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `STCHAR`, `SREL`, `STPLAN`, or `STEMO` records is recorded on `SE.record_introductions[]`. Relations from an event to an active plan are recorded on `SE.state_relations[]`. Explicit non-propagation assertions are recorded on `SE.non_propagation_facts[]`. These fields carry the machine-readable WHAT; `SE.world_logic_rationale` carries the human-readable WHY.
+Mid-story first introductions of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `STCHAR`, `SREL`, `STPLAN`, or `STEMO` records are recorded on `SE.record_introductions[]`. A supersession-create whose new record body carries `supersedes: <prior-id>` is a lifecycle transition, not a first introduction; its lineage is recorded by the new record's `supersedes` field plus `SE.state_delta.supersede[]`. Relations from an event to an active plan are recorded on `SE.state_relations[]`. Explicit non-propagation assertions are recorded on `SE.non_propagation_facts[]`. These fields carry the machine-readable WHAT; `SE.world_logic_rationale` carries the human-readable WHY.
 
 `SE.state_delta.create[]`, `SE.state_delta.supersede[]`, and `SE.state_delta.close[]` accept the same lifecycle-managed story-state class set, including `STCHAR`, `STPLAN`, and `STEMO`; the event schema and `state_delta_class_integrity` validator must move together with this contract.
 

@@ -110,6 +110,9 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
     if (createdClass === undefined) {
       continue;
     }
+    if (isSupersessionCreate(createdId, maps)) {
+      continue;
+    }
     const intro = introductionsByRecordId.get(createdId);
     if (intro === undefined || intro.class !== createdClass) {
       verdicts.push(missingIntroduction(event, createdId));
@@ -169,6 +172,14 @@ function isLegacyCompatibilityPage(pageId: string, maps: RecordMaps): boolean {
 function introClassForId(id: string): MidstoryIntroductionClass | undefined {
   const prefix = id.split("-", 1)[0] as MidstoryIntroductionClass | undefined;
   return prefix !== undefined && INTRO_CLASSES.has(prefix) ? prefix : undefined;
+}
+
+function isSupersessionCreate(id: string, maps: RecordMaps): boolean {
+  const record = maps.byId.get(id);
+  if (record === undefined) {
+    return false;
+  }
+  return stringValue(asPlainRecord(record.parsed).supersedes) !== undefined;
 }
 
 function bareNodeId(record: IndexedRecord): string {
