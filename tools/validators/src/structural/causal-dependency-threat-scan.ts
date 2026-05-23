@@ -10,7 +10,7 @@ import {
 
 const STORY_RECORD_ID = /^(?:STENT|STLOC|STOBJ|BEL|SF|SE|OBL|CNSQ|THR|SREL|DA|STSTAT|STINT|SLT|CHC|BR|PG)-\d+$/;
 const GROUNDED_DEPENDENCY = /^(?:STENT|STLOC|STOBJ|BEL|OBL|CNSQ|THR|SREL|DA)-\d+$/;
-const AFFORDANCE_DEPENDENCY = /^(?:STENT|STLOC|STOBJ)-\d+$/;
+const AFFORDANCE_DEPENDENCY = /^(?:STLOC|STOBJ)-\d+$/;
 const UNAVAILABLE_AGENCY = new Set(["incapacitated", "captive", "dead", "unconscious"]);
 const UNAVAILABLE_LOCATION = new Set(["unknown", "concealed", "offstage"]);
 const HIGH_SALIENCE_URGENCY = new Set(["high", "critical"]);

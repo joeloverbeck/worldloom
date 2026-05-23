@@ -20,6 +20,8 @@ Every field in every story-bundle record schema must be load-bearing — directl
 
 The field lists below are canonical. Skills must not add fields to these schemas without first amending this contract. A skill that needs a one-off field for its own workflow records the need in its `SKILL.md` and motivates the amendment.
 
+**`visible_affordances[].grounded_in[]` is STLOC/STOBJ-only.** Page affordance grounding names the physical scene referents that make an action available, so `grounded_in[]` accepts only active `STLOC-<integer>` or `STOBJ-<integer>` ids. Actors are carried by the same affordance's `available_to[]` field as active `STENT-<integer>` ids. Other actors' presence in the scene is represented through active `STENT` records plus their `STSTAT.location`; affordances whose label mentions another actor still ground in the relevant scene location or object, not in that actor's STENT. Interior or temporal state classes such as `STEMO`, `STPLAN`, `CLK`, `STSEC`, and `STQ` belong in choice grounding or page-plan prose, not in page-affordance grounding.
+
 ## 3. Record Class Inventory
 
 Story-bundle record classes allocate via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`.
