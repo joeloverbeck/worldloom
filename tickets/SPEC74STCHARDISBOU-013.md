@@ -1,6 +1,6 @@
 # SPEC74STCHARDISBOU-013: Capstone — red-bunny STCHAR migration + end-to-end validator verification
 
-**Status**: PENDING
+**Status**: BLOCKED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `worlds/erotica-world/stories/red-bunny/story-characters/STCHAR-{1,2,3}.md` (migration via patch engine; subject to Hook 3 engine-only mutation discipline + ENGINESYNC-005 hash-drift coordination); new capstone integration test file `tools/validators/tests/integration/spec74-stchar-end-to-end.test.ts` (or equivalent path) exercising the full STCHAR validator suite on the migrated red-bunny fixtures
@@ -18,6 +18,19 @@ After `archive/tickets/SPEC74STCHARDISBOU-001.md`, `archive/tickets/SPEC74STCHAR
 4. FOUNDATIONS principle restated: Rule 6 (No Silent Retcons) — the migration is itself a retcon of existing red-bunny STCHAR profiles; the retcon attribution MUST cite SPEC-74 as the motivating spec. Each migrated profile's modification_history (if the records schema supports it) or change-log entry must record the SPEC-74 attribution. §Story Bundles §6.1 — the migration preserves STCHAR's role as story-local character authority while bringing the profiles into compliance with the new structural gates.
 5. HARD-GATE / Canon Safety Check surface touched: the migration routes through the patch engine (`mcp__worldloom__submit_patch_plan`); Hook 3 blocks direct edits to `worlds/<slug>/stories/<slug>/_source/*.yaml` and to the hybrid character-authority markdown surface (engine-routed via prescribed skill operations). The implementing developer MUST verify ENGINESYNC-005's `file_versions` hash-basis mismatch disposition before any engine-routed STCHAR mutation: either (a) confirm SPEC-71 / SPEC-72 incidentally cleared the mismatch via a probe patch, OR (b) coordinate with ENGINESYNC-005 sequencing. The MEMORY.md entry `project_red_bunny_hash_drift.md` records the blocker; the band-aid hand-reconciliation it notes is NOT a load-bearing path for this spec.
 6. **Rename/remove blast radius**: this migration changes the content of existing `STCHAR-{1,2,3}.md` records — adding `Stable Source Material Inventory` subsection (per `archive/tickets/SPEC74STCHARDISBOU-007.md`), routing any embedded temporal-state references to STSTAT/STEMO/BEL/STPLAN/etc. (per `archive/tickets/SPEC74STCHARDISBOU-009.md` contamination detection), and adding `regeneration_reason_class` for any regenerated profiles (per SPEC74STCHARDISBOU-006 schema field). The blast radius is per-file (3 STCHAR files) plus per-page-plan files that cite the affected STCHAR profiles in §16a packets (if any cite stale current-state references per `archive/tickets/SPEC74STCHARDISBOU-010.md`, those packets need remediation too). Grep `worlds/erotica-world/stories/red-bunny/` for `STCHAR-{1,2,3}` references in page-plan / prose-receipt files to enumerate the full migration scope before patching.
+
+## Implementation Attempt (2026-05-23)
+
+Blocked before any world-content mutation.
+
+Live reassessment in this worktree refuted the ticket's fixture-existence assumption: `worlds/erotica-world/stories/red-bunny/` is absent, `find worlds -maxdepth 2 -print` returns only `worlds/` and `worlds/.gitkeep`, and `git ls-files 'worlds/**'` returns only `worlds/.gitkeep`. This matches the public pipeline repo contract in `README.md` / `.gitignore`: generated private world content under `worlds/*` is ignored and not version-controlled here.
+
+Because the owned capstone change requires patch-engine migration of `worlds/erotica-world/stories/red-bunny/story-characters/STCHAR-{1,2,3}.md`, there is no lawful local target for the required probe patch, migration receipts, or red-bunny validator pass in this checkout. Directly fabricating those fixtures or replacing the migration with synthetic tests would violate this ticket's stated architecture: "red-bunny IS the production fixture" and the fixture-world copy strategy is not applicable.
+
+Disposition:
+- No patch-engine mutation was attempted.
+- No STCHAR/profile/page-plan files were edited.
+- The ticket remains active but blocked pending availability of the private `worlds/erotica-world/stories/red-bunny/` bundle in the worktree, or a replacement spec/ticket that changes the capstone from production-fixture migration to synthetic-fixture validator coverage.
 
 ## Architecture Check
 
