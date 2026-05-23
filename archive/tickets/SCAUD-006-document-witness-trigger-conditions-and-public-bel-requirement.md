@@ -44,7 +44,7 @@ The rule itself is sound; it is load-bearing. The gap was purely documentation.
 
 8. **HARD-GATE discipline read**: `docs/HARD-GATE-DISCIPLINE.md` was read because this ticket touches content-generating story-skill validation-gate guidance and operator PASS/FAIL criteria. The change documents existing validation behavior only; it does not change HARD-GATE order, approval timing, `validation_trace` schema, Mystery Reserve firewall behavior, approval-token behavior, `validate_patch_plan`, `submit_patch_plan`, or pre-apply validator semantics.
 
-9. **Adjacent contradictions**: archived SCAUD-005 and this ticket together amend §5a.2 and a new §5a.3/§6a region of the contract. They are independent but share the witness-coverage subject area. SCAUD-005 is completed; this ticket preserves its legal-group-label wording while adding the trigger/public-BEL documentation. Active `tickets/ENGINESYNC-006-compute-pg-hashes-yaml-vs-json-input-parity.md` mentions SCAUD-006 only as independent context and is not a dependency or same-seam owner.
+9. **Adjacent contradictions**: archived SCAUD-005 and this ticket together amend §5a.2 and a new §5a.3/§6a region of the contract. They are independent but share the witness-coverage subject area. SCAUD-005 is completed; this ticket preserves its legal-group-label wording while adding the trigger/public-BEL documentation. Archived `archive/tickets/ENGINESYNC-006-compute-pg-hashes-yaml-vs-json-input-parity.md` mentions SCAUD-006 only as independent context and is not a dependency or same-seam owner.
 
 ## Architecture Check
 

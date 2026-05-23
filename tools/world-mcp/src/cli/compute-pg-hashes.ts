@@ -35,14 +35,18 @@ Arguments:
                           the hash binds the exact bytes that will land at
                           pages-prose-plans/PG-<integer>.md.
   --pg <path>             Path to a JSON or YAML file containing the PG
-                          record draft. Both formats are accepted (YAML is
-                          parsed with the standard 'yaml' package; JSON is a
-                          subset). The 'state_hash' field on the input is
-                          IGNORED (it is the value being computed); the
-                          'plan.plan_hash' field, if present, is REPLACED in
-                          the canonical payload by the value computed from
-                          --plan, so callers may pass a draft that has
-                          placeholders for both hashes.
+                          record draft. Both formats are accepted and produce
+                          identical hashes when they parse to the same PG
+                          object. JSON is a subset of YAML, and both are
+                          parsed through the same parser. The CLI does not
+                          reconcile content drift between separate draft
+                          files; the input must match the PG payload that will
+                          be validated/submitted. The 'state_hash' field on
+                          the input is IGNORED (it is the value being
+                          computed); the 'plan.plan_hash' field, if present,
+                          is REPLACED in the canonical payload by the value
+                          computed from --plan, so callers may pass a draft
+                          that has placeholders for both hashes.
 
 Options:
   --help                  Show this help and exit.
