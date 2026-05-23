@@ -167,14 +167,14 @@ test("page_plan_stchar_packet_integrity accepts legacy single-label offstage_cau
   assert.deepEqual(verdicts, []);
 });
 
-test("page_plan_stchar_packet_integrity warns for unknown role labels without failing structural checks", async () => {
+test("page_plan_stchar_packet_integrity fails for unknown role labels per SPEC-76 §3.2 closed-vocabulary contract", async () => {
   const verdicts = await pagePlanStcharPacketIntegrity.run(
     input(plan({ requiredBecause: "speaker, custom_unknown_label" })),
     context(baseRecords())
   );
 
   assert.equal(verdicts.length, 1);
-  assert.equal(verdicts[0]?.severity, "warn");
+  assert.equal(verdicts[0]?.severity, "fail");
   assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.unknown_role_label");
   assert.deepEqual((verdicts[0]?.detail as { unknown_labels?: string[] }).unknown_labels, ["custom_unknown_label"]);
 });

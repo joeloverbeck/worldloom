@@ -155,13 +155,13 @@ function packetVerdicts(
 
   const unknownLabels = [...packet.requiredBecauseLabels].filter((label) => !PACKET_ROLE_VOCABULARY.has(label));
   if (unknownLabels.length > 0) {
-    verdicts.push(planWarn(
+    verdicts.push(planFail(
       page,
       planPath,
       "page_plan_stchar_packet_integrity.unknown_role_label",
-      `${planPath} 16a packet for ${packet.stcharId} declares unknown role label(s): ${unknownLabels.join(", ")} (allowed: ${[...PACKET_ROLE_VOCABULARY].join(" | ")}). Promotion to FAIL deferred to a future spec.`,
+      `${planPath} 16a packet for ${packet.stcharId} declares unknown role label(s): ${unknownLabels.join(", ")} (allowed: ${[...PACKET_ROLE_VOCABULARY].join(" | ")}).`,
       { page_id: pageId(page), stchar_id: packet.stcharId, unknown_labels: unknownLabels },
-      `Use only documented Required because labels for ${packet.stcharId}, or update the closed vocabulary in a future schema-enforcement ticket.`
+      `Use only documented Required because labels for ${packet.stcharId}; the closed-vocabulary contract is enforced per SPEC-76 §3.2.`
     ));
   }
 
@@ -370,17 +370,3 @@ function planFail(
   };
 }
 
-function planWarn(
-  page: IndexedRecord,
-  planPath: string,
-  code: string,
-  message: string,
-  detail: unknown,
-  suggested_fix: string
-): Verdict {
-  return {
-    ...fail(VALIDATOR, page, code, message, detail, suggested_fix),
-    severity: "warn",
-    location: { file: planPath, node_id: recordId(page) }
-  };
-}
