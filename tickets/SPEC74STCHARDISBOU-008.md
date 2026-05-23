@@ -8,13 +8,13 @@
 
 ## Problem
 
-After SPEC74STCHARDISBOU-007 lands, `stchar-body-integrity.ts` requires the `Stable Source Material Inventory` subsection to be present, but does NOT validate its content. A `source_kind: world_char` STCHAR profile could include an empty inventory or an inventory with invalid rows (missing required fields, retained-disposition rows mapping to `Source Distillation` as operational home, `story_irrelevant` rationale using forbidden categories like `opening_not_relevant`). The semantic-loss gap closes structurally only when both shape (SPEC74STCHARDISBOU-007) AND content (this ticket) are validated.
+After `archive/tickets/SPEC74STCHARDISBOU-007.md` landed, `stchar-body-integrity.ts` requires the `Stable Source Material Inventory` subsection to be present, but does NOT validate its content. A `source_kind: world_char` STCHAR profile could include an empty inventory or an inventory with invalid rows (missing required fields, retained-disposition rows mapping to `Source Distillation` as operational home, `story_irrelevant` rationale using forbidden categories like `opening_not_relevant`). The semantic-loss gap closes structurally only when both shape (`archive/tickets/SPEC74STCHARDISBOU-007.md`) AND content (this ticket) are validated.
 
 ## Assumption Reassessment (2026-05-23)
 
 1. Verified `tools/validators/src/structural/stchar-source-fact-coverage.ts` exists at the cited path and exports the `OPERATIONAL_TARGET_SECTIONS` set at line 23 (currently `const`, not exported — see SPEC74STCHARDISBOU-009 for the extract-to-shared-module work that exposes the constant). This validator must reference the same 11-H2 set per SPEC-74 §4.11 rule 3. Until SPEC74STCHARDISBOU-009 lands, this ticket can either (a) inline-duplicate the constant with a comment pointing at the shared source, or (b) wait for SPEC74STCHARDISBOU-009 — choose (a) for independent landing per the no-Deps decomposition.
 2. Verified SPEC-74 §4.11 specifies the validator's 5 rules: non-empty subsection; row shape (`source_area`, `disposition`, `operational_home`, conditional `rationale`); operational-home restriction to the 11 H2s (Source Distillation NOT a retained home); bootstrap `story_irrelevant` rationale category enforcement (5 valid categories); forbidden-rationale-string check (`opening_not_relevant`, `not_needed_on_page_1`, `not_in_root_scene` case-insensitive substring match on the rationale field, not free prose).
-3. Cross-skill boundary under audit: this validator runs via the validator-framework run-loop (`tools/validators/src/public/registry.ts`); its diagnostic findings feed the health-audit Phase 2m `stchar_semantic_loss_risk` finding (SPEC74STCHARDISBOU-012); its content-validation contract complements `stchar-body-integrity.ts`'s structural-subsection check (SPEC74STCHARDISBOU-007).
+3. Cross-skill boundary under audit: this validator runs via the validator-framework run-loop (`tools/validators/src/public/registry.ts`); its diagnostic findings feed the health-audit Phase 2m `stchar_semantic_loss_risk` finding (SPEC74STCHARDISBOU-012); its content-validation contract complements `stchar-body-integrity.ts`'s structural-subsection check (`archive/tickets/SPEC74STCHARDISBOU-007.md`).
 4. FOUNDATIONS principle restated: §Tooling Recommendation ("LLM agents should never operate on prose alone" — structural validators on inventory row shape and rationale categories, not on free-prose semantics). The forbidden-rationale-string check is a case-insensitive substring match on the rationale field (a structured cell), NOT a regex scan of free prose elsewhere — this preserves the "no LLM judgment, no prose-semantic heuristics" discipline.
 5. HARD-GATE / Canon Safety Check surface touched: this is a new structural validator under `tools/validators/src/structural/`; per the per-ticket-type granularity in spec-to-tickets, a new structural validator engages this item. The validator gates STCHAR record writes by failing FAIL-everywhere on world_char STCHAR profiles with malformed inventories.
 
@@ -67,7 +67,7 @@ export const structuralValidators: readonly Validator[] = [
 Cases per SPEC-74 §7:
 - **Positive**: world-char STCHAR with non-empty inventory mapping retained material to operational H2s passes.
 - **Positive**: `story_irrelevant` with structured category `non_operational_trivia` passes when `operational_home` is null and rationale is explicit.
-- **Negative**: missing inventory subsection fails (covered by SPEC74STCHARDISBOU-007's `stchar-body-integrity` test surface; assert here that the inventory-integrity validator emits an additional finding citing the missing inventory shape).
+- **Negative**: missing inventory subsection fails (covered by `archive/tickets/SPEC74STCHARDISBOU-007.md`'s `stchar-body-integrity` test surface; assert here that the inventory-integrity validator emits an additional finding citing the missing inventory shape).
 - **Negative**: retained-disposition row with `operational_home: Source Distillation` fails (Source Distillation NOT a retained home).
 - **Negative**: `story_irrelevant` with rationale containing `not_needed_on_page_1` or `opening_not_relevant` fails (forbidden rationale categories).
 - **Positive**: story-local STCHAR (`source_kind: story_local`) MAY omit the inventory subsection — the validator is scoped to `source_kind: world_char` only.
@@ -80,7 +80,7 @@ Cases per SPEC-74 §7:
 
 ## Out of Scope
 
-- The body-integrity subsection-presence check (SPEC74STCHARDISBOU-007).
+- The body-integrity subsection-presence check (`archive/tickets/SPEC74STCHARDISBOU-007.md`).
 - Extracting `OPERATIONAL_TARGET_SECTIONS` to a shared module (SPEC74STCHARDISBOU-009 — independent ticket; until then, this validator inline-duplicates the constant with a comment pointing at the shared source).
 - The skill authoring instruction for the inventory subsection (`archive/tickets/SPEC74STCHARDISBOU-001.md`).
 - Migration of existing red-bunny STCHAR profiles that lack the inventory (SPEC74STCHARDISBOU-013).
