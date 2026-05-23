@@ -1,9 +1,9 @@
 {
-  "originating_spec": "archive/specs/SPEC-71-strip-stchar-tamper-hashes.md",
-  "archived_spec": "archive/specs/SPEC-71-strip-stchar-tamper-hashes.md",
-  "last_ticket": "archive/tickets/SPEC71STRSTCHARTAM-008.md",
+  "originating_spec": "archive/specs/SPEC-72-plan-hash-advisory.md",
+  "archived_spec": "archive/specs/SPEC-72-plan-hash-advisory.md",
+  "last_ticket": "archive/tickets/SPEC72PLAHASADV-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "e64e33c13bb732c393b79e0138d44d744e9057c5",
+  "last_work_commit": "5abc28e23dc816f36923afb582e32f8addfda01a",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -12,8 +12,8 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated untracked reports/manifest_2026-05-23.txt left untouched; expected ignored artifacts under tools/world-index/{dist,node_modules}, tools/patch-engine/{dist,node_modules}, tools/validators/{dist,node_modules}, and tools/world-mcp/{.secret,dist,node_modules}",
-  "post_review_material_updates": true,
-  "post_review_audit_block": "emitted",
+  "dirty_state": "unrelated edits left unstaged: .claude/skills/brainstorm/SKILL.md, .claude/skills/brainstorm/references/deliverable-classification.md, .claude/skills/branching-story-bootstrap/SKILL.md, docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md, specs/IMPLEMENTATION-ORDER.md, specs/SPEC-71-page-packet-required-because-label-parsing.md deletion, specs/SPEC-73-page-packet-required-because-label-parsing.md untracked; expected ignored artifacts under tools/hooks/{dist,logs,node_modules}, tools/validators/{dist,node_modules}, tools/world-mcp/{.secret,dist,node_modules}",
+  "post_review_material_updates": false,
+  "post_review_audit_block": "not_applicable",
   "updated_at": "2026-05-23"
 }

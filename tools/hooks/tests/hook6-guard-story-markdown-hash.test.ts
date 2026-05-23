@@ -54,7 +54,7 @@ function runHook(root: string, toolName: "Edit" | "Write", toolInput: Record<str
   );
 }
 
-test("hook6_blocks_pg_plan_write_when_hash_mismatches", () => {
+test("hook6_warns_on_pg_plan_write_when_hash_mismatches", () => {
   const root = createTempRepoRoot();
 
   try {
@@ -70,7 +70,8 @@ test("hook6_blocks_pg_plan_write_when_hash_mismatches", () => {
     });
 
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /"permissionDecision":"deny"/);
+    assert.match(result.stdout, /"permissionDecision":"allow"/);
+    assert.match(result.stdout, /Plan-hash enforcement is advisory per SPEC-72/);
     assert.match(result.stdout, /compute-pg-hashes\.js/);
     assert.match(result.stdout, new RegExp(hash(nextBody)));
   } finally {
@@ -116,7 +117,7 @@ test("hook6_allows_pg_plan_first_write_when_no_pg_record_exists", () => {
   }
 });
 
-test("hook6_blocks_index_update_when_referenced_plan_hash_mismatches", () => {
+test("hook6_warns_on_index_update_when_referenced_plan_hash_mismatches", () => {
   const root = createTempRepoRoot();
 
   try {
@@ -131,7 +132,8 @@ test("hook6_blocks_index_update_when_referenced_plan_hash_mismatches", () => {
     });
 
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /"permissionDecision":"deny"/);
+    assert.match(result.stdout, /"permissionDecision":"allow"/);
+    assert.match(result.stdout, /Plan-hash enforcement is advisory per SPEC-72/);
     assert.match(result.stdout, /PG-1/);
     assert.match(result.stdout, /compute-pg-hashes\.js/);
   } finally {
