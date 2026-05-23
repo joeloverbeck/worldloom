@@ -79,7 +79,7 @@ Explicit instruction that root §16a is the first page-local projection of STCHA
 
 ## Out of Scope
 
-- story-character-profile/SKILL.md durable-authority hardening (SPEC74STCHARDISBOU-001).
+- story-character-profile/SKILL.md durable-authority hardening (`archive/tickets/SPEC74STCHARDISBOU-001.md`).
 - §16a packet contract in shared templates (SPEC74STCHARDISBOU-003, -005).
 - Schema field or validator code (SPEC74STCHARDISBOU-006 through -011).
 - Health-audit Phase 2m findings (SPEC74STCHARDISBOU-012).

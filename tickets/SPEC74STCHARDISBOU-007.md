@@ -14,7 +14,7 @@
 
 1. Verified current `tools/validators/src/structural/stchar-body-integrity.ts` shape at lines 34-48: required-subsection list contains the three H3 subsections named above; no `Stable Source Material Inventory` requirement. Existing test file `tools/validators/tests/structural/stchar-body-integrity.test.ts` covers the existing three subsections.
 2. Verified SPEC-74 §4.8 specifies the required-subsection extension + the migration policy upgrade from "untouched-legacy-warn / touched-fail" to "fail-everywhere" per the triage-time policy in SPEC-74 §5.
-3. Cross-skill boundary under audit: this validator is the canonical structural check for STCHAR record body shape; it is invoked by the validator-framework run-loop (`tools/validators/src/public/registry.ts`) on every STCHAR record. The required-subsection list is the contract for what an STCHAR record body must contain. The new requirement enforces the authoring rule documented by SPEC74STCHARDISBOU-001 (story-character-profile/SKILL.md adds the `Stable Source Material Inventory` subsection authoring instruction).
+3. Cross-skill boundary under audit: this validator is the canonical structural check for STCHAR record body shape; it is invoked by the validator-framework run-loop (`tools/validators/src/public/registry.ts`) on every STCHAR record. The required-subsection list is the contract for what an STCHAR record body must contain. The new requirement enforces the authoring rule documented by `archive/tickets/SPEC74STCHARDISBOU-001.md` (story-character-profile/SKILL.md adds the `Stable Source Material Inventory` subsection authoring instruction).
 4. FOUNDATIONS principle restated: §Tooling Recommendation ("LLM agents should never operate on prose alone" — structural validators on the shape of authored records, not on prose semantics). The required-subsection check is structural — it asserts subsection presence by name, not the inventory's content semantics (which `stchar_source_material_inventory_integrity` per SPEC74STCHARDISBOU-008 handles).
 5. HARD-GATE / Canon Safety Check surface touched: this is a structural validator under `tools/validators/src/structural/` that the validator-framework's pre-apply run-loop invokes; per the per-ticket-type granularity in spec-to-tickets, modifying a structural validator engages this item. The change strengthens (not weakens) the STCHAR record gate by requiring the inventory subsection.
 
@@ -63,7 +63,7 @@ In `tools/validators/tests/structural/stchar-body-integrity.test.ts`, add:
 ## Out of Scope
 
 - The inventory's content-validation rules (SPEC74STCHARDISBOU-008 — `stchar_source_material_inventory_integrity` checks row shape and rationale categories).
-- The skill authoring instruction for the inventory subsection (SPEC74STCHARDISBOU-001).
+- The skill authoring instruction for the inventory subsection (`archive/tickets/SPEC74STCHARDISBOU-001.md`).
 - Migration of existing red-bunny STCHAR profiles that lack the subsection (SPEC74STCHARDISBOU-013).
 
 ## Acceptance Criteria

@@ -82,7 +82,7 @@ Cases per SPEC-74 §7:
 
 - The body-integrity subsection-presence check (SPEC74STCHARDISBOU-007).
 - Extracting `OPERATIONAL_TARGET_SECTIONS` to a shared module (SPEC74STCHARDISBOU-009 — independent ticket; until then, this validator inline-duplicates the constant with a comment pointing at the shared source).
-- The skill authoring instruction for the inventory subsection (SPEC74STCHARDISBOU-001).
+- The skill authoring instruction for the inventory subsection (`archive/tickets/SPEC74STCHARDISBOU-001.md`).
 - Migration of existing red-bunny STCHAR profiles that lack the inventory (SPEC74STCHARDISBOU-013).
 
 ## Acceptance Criteria

@@ -28,7 +28,7 @@ arguments:
     description: "create_story_local input: operator-authored story-local characterization brief"
     required: false
   - name: regeneration_reason
-    description: "regenerate input: fidelity failure, story-state drift, or other reason for a from-zero rebuild"
+    description: "regenerate input: one of source_world_char_material_change, durable_branch_transformation, profile_fidelity_failure, story_local_character_promotion, stable_source_material_omission_repair; ordinary STEMO, BEL, STPLAN, STINT, SREL, STSTAT, STOBJ, STLOC, THR, OBL, CNSQ, CLK, STSEC, STQ, PG, SE, or page-local prose updates are excluded unless durably consolidated"
     required: false
 ---
 
@@ -119,7 +119,15 @@ Set `source_kind: story_local`, `source_char_id: null`, and `source_char_section
 
 ### regenerate
 
-Supersede an existing `STCHAR-*` with a from-zero rebuild. Use this when page-plan/prose fidelity failures, changed story-local evidence, or a deliberate profile refresh makes the old profile stale.
+Supersede an existing `STCHAR-*` with a from-zero rebuild. Use this only when the reason class is one of:
+
+- `source_world_char_material_change` - the source world `CHAR-*` material changed and the story-local profile must be re-distilled.
+- `durable_branch_transformation` - story-local evidence has durably changed the character model across future branches.
+- `profile_fidelity_failure` - page-plan or prose evidence proves the active profile cannot support faithful rendering.
+- `story_local_character_promotion` - a story-local person has become persistent, speaking, viewpoint-bearing, action-driving, or otherwise character-authoritative.
+- `stable_source_material_omission_repair` - stable source material was omitted and must be restored to an operational STCHAR home.
+
+Ordinary updates to active `STEMO`, `BEL`, `STPLAN`, `STINT`, `SREL`, `STSTAT`, `STOBJ`, `STLOC`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `PG`, `SE`, or page-local prose are not regeneration reasons. They become regeneration-worthy only after evidence durably consolidates into a changed character model.
 
 Required inputs:
 
@@ -136,6 +144,22 @@ Optional inputs:
 - `emergence_context_records`
 
 Read the old `STCHAR`, bound `STENT` records, relevant active pages/plans/emotions/relationships/intentions/status records, and optional source `CHAR` if supplied or already recorded as provenance. Draft a new profile from zero; do not patch body sections or structural frontmatter in place. Set `source_kind: regenerated`, `supersedes: <old-STCHAR-id>`, increment `profile_revision`, and use `supersede_story_character_authority_record` so the predecessor is lifecycle-marked by the engine.
+
+## Durable-Authority Boundary
+
+`STCHAR` is a durable story-local character bible. It is not a root-page summary, opening-scene summary, compressed current-state packet, prose synopsis, or substitute for active story-state records.
+
+Inclusion rule: include stable material that can lawfully shape future voice, conduct, appraisal, pressure behavior, agency, relationship behavior, perception, embodiment, capabilities, limits, or choices across later pages and sibling branches.
+
+Exclusion rule: exclude any fact that would be false, stale, or branch-dependent after a different choice, later page, or sibling branch. Route current physical condition, current emotion, current belief, current plan, current relationship state, current location, current object possession, active threat, obligation, consequence, clock, secret, question, page event, and page-local presentation to the appropriate state records and page-plan packet.
+
+Paired examples:
+
+- Durable: under humiliation, she converts shame into bravado, contempt, or performative brightness. Transient: today her bravado is worn through after crying in the park.
+- Durable: he protects status by speaking in clipped refusals when cornered. Transient: in `PG-1`, he is hoarse, bruised, and unable to stand.
+- Durable: she treats debt as a relationship pressure that changes what requests she can refuse. Transient: after `SE-4`, she currently believes one creditor has found her hiding place.
+
+Opening-page relevance is never the inclusion test. At bootstrap, future branches are unknown; retain stable operational source material unless it is genuinely outside the story scope, premise-incompatible, content-constrained, non-operational trivia, or duplicate of retained material.
 
 ## Output
 
@@ -230,6 +254,8 @@ Template skeleton:
 
 ## Source Distillation
 
+### Stable Source Material Inventory
+
 ## Stable Persona Core
 
 ## Emotional Appraisal Map
@@ -262,12 +288,12 @@ Template skeleton:
 Section requirements:
 
 - `Story-Facing Identity`: display name, story role, active `STENT` bindings, viewpoint/speaker/actor status, and what this profile may authorize.
-- `Source Distillation`: source kind, source ids, source sections used, story-local evidence, and explicit statement that `CHAR` provenance is not operational authority.
+- `Source Distillation`: source kind, source ids, source sections used, story-local evidence, and explicit statement that `CHAR` provenance is not operational authority. For `source_kind: world_char`, include a `Stable Source Material Inventory` subsection with a body table inventorying every loaded source area carrying stable operational character material, not only the 10 `dramatic_core` fields. Use exactly these columns: `source_area`, `stable operational material`, `disposition`, `operational_home`, `rationale`. Disposition must be one of `copied`, `transformed`, `compressed`, `omitted_with_rationale`, or `story_irrelevant`. For bootstrap `story_irrelevant`, the rationale must use one of `outside_story_scope`, `content_constraint`, `premise_incompatible`, `non_operational_trivia`, or `duplicate_of_retained_material`; do not use `opening_not_relevant`, `not_needed_on_page_1`, `not_in_root_scene`, or equivalent opening-page relevance rationales. `Source Distillation` is a provenance and compression-trace surface, not a retained operational home for material that future page planning, choice grounding, state derivation, or prose rendering may need.
 - `Stable Persona Core`: durable motives, refusals, limits, values, contradictions, and non-goals.
 - `Emotional Appraisal Map`: how the character appraises threat, intimacy, status, risk, authority, debt, and uncertainty.
 - `Pressure Behavior`: behavior under fear, desire, shame, hunger, pain, loyalty, coercion, secrecy, or public scrutiny.
 - `Voice Bible / Dialogue Authority`: diction, rhythm, register, taboo words, silence behavior, direct-speech constraints, and anti-generic warnings.
-- `Page-Plan Voice Block`: compact projection suitable for page-plan section 16a.
+- `Page-Plan Voice Block`: stable, context-free reusable voice-authority seed for page-plan §16a. Describe durable voice behavior, dialogue constraints, silence behavior, pressure shifts, register, rhythm, taboo language, and anti-generic warnings that remain valid across branches until durable profile regeneration. Do not mention the current page, opening scene, current event, current emotional state, current physical status, active page ids, active event ids, or active belief, plan, emotion, status, or relationship records. Page-specific modulation belongs in page-plan §16a, grounded in active state records.
 - `Perception and Embodiment`: sensory access, bodily constraints, tells, physical affordances, and viewpoint-rendering limits.
 - `Agency and Planning Tendencies`: planning horizon, risk posture, preferred tactics, refusal patterns, and how this can shape `STPLAN` / `STINT`.
 - `Relationship-Specific Behavior`: named conduct differences by counterpart or role; do not globalize branch-local relationships.

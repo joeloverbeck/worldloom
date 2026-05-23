@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `worlds/erotica-world/stories/red-bunny/story-characters/STCHAR-{1,2,3}.md` (migration via patch engine; subject to Hook 3 engine-only mutation discipline + ENGINESYNC-005 hash-drift coordination); new capstone integration test file `tools/validators/tests/integration/spec74-stchar-end-to-end.test.ts` (or equivalent path) exercising the full STCHAR validator suite on the migrated red-bunny fixtures
-**Deps**: 001, 002, 004, 005, 007, 010, 012
+**Deps**: `archive/tickets/SPEC74STCHARDISBOU-001.md`, 002, 004, 005, 007, 010, 012
 
 ## Problem
 
-After tickets SPEC74STCHARDISBOU-001 through -012 land, the validator framework will FAIL-everywhere on STCHAR profiles that lack the `Stable Source Material Inventory` subsection, cite temporal-state records in operational sections, lack `regeneration_reason_class` for regenerated profiles, or carry §16a packets with stale current-state references. The 3 active red-bunny STCHAR profiles (`STCHAR-1.md`, `STCHAR-2.md`, `STCHAR-3.md`) were authored before this spec landed and almost certainly fail the new structural gates. The fail-everywhere policy chosen at SPEC-74 §5 triage requires a pre-landing remediation pass on red-bunny before the validators register. Additionally, the SPEC-74 capstone needs an end-to-end test exercising every new validator + extension against the migrated red-bunny fixtures + intentional negative fixtures, asserting expected pass/fail diagnostics.
+After `archive/tickets/SPEC74STCHARDISBOU-001.md` and active tickets SPEC74STCHARDISBOU-002 through -012 land, the validator framework will FAIL-everywhere on STCHAR profiles that lack the `Stable Source Material Inventory` subsection, cite temporal-state records in operational sections, lack `regeneration_reason_class` for regenerated profiles, or carry §16a packets with stale current-state references. The 3 active red-bunny STCHAR profiles (`STCHAR-1.md`, `STCHAR-2.md`, `STCHAR-3.md`) were authored before this spec landed and almost certainly fail the new structural gates. The fail-everywhere policy chosen at SPEC-74 §5 triage requires a pre-landing remediation pass on red-bunny before the validators register. Additionally, the SPEC-74 capstone needs an end-to-end test exercising every new validator + extension against the migrated red-bunny fixtures + intentional negative fixtures, asserting expected pass/fail diagnostics.
 
 ## Assumption Reassessment (2026-05-23)
 

@@ -87,7 +87,7 @@ Cases per SPEC-74 §7:
 ## Out of Scope
 
 - The JSON Schema field add (SPEC74STCHARDISBOU-006).
-- Skill regenerate-mode wording (SPEC74STCHARDISBOU-001).
+- Skill regenerate-mode wording (`archive/tickets/SPEC74STCHARDISBOU-001.md`).
 - Health-audit `stchar_regeneration_reason_invalid` finding registration (SPEC74STCHARDISBOU-012).
 - Any source_char_hash reintroduction or new source-drift mechanism (explicitly forbidden by SPEC-74 §4.10 reassess-spec correction).
 - Migration of existing red-bunny regenerated STCHAR profiles (SPEC74STCHARDISBOU-013).

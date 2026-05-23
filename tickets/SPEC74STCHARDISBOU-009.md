@@ -109,7 +109,7 @@ Cases per SPEC-74 §7:
 
 ## Out of Scope
 
-- The skill authoring instruction that motivates the validator (SPEC74STCHARDISBOU-001 — Durable-Authority Boundary section).
+- The skill authoring instruction that motivates the validator (`archive/tickets/SPEC74STCHARDISBOU-001.md` — Durable-Authority Boundary section).
 - Health-audit `stchar_temporal_authority_contamination` finding registration (SPEC74STCHARDISBOU-012).
 - Migration of existing red-bunny STCHAR profiles that fail the validator (SPEC74STCHARDISBOU-013).
 

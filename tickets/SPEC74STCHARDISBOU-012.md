@@ -57,7 +57,7 @@ Per /reassess-spec verification, the current code uses `Phase 2j: Compatibility 
 ## Out of Scope
 
 - The validators that emit the diagnostics the findings describe (SPEC74STCHARDISBOU-008 / -009 / -011).
-- The skill authoring discipline these findings describe violations of (SPEC74STCHARDISBOU-001).
+- The skill authoring discipline these findings describe violations of (`archive/tickets/SPEC74STCHARDISBOU-001.md`).
 - Migration of existing red-bunny STCHAR profiles that trigger the findings (SPEC74STCHARDISBOU-013).
 - Any modification to the existing Phase 2m findings or the Phase 2j (compatibility_drift) phase prose; this ticket only ADDS the 3 new findings.
 
