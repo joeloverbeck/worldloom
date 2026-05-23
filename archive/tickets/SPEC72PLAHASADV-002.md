@@ -1,6 +1,6 @@
 # SPEC72PLAHASADV-002: Shared contract — split-signal hash_integrity semantics + Tooling carve-out
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/_shared-templates/story-record-schemas.md` (canonical contract consumed by all 8 story-pipeline skills plus the `prose_receipt_schema_compliance` validator). No code changes.
@@ -18,7 +18,7 @@ This ticket lands SPEC-72 §2.3 contract updates: §4.6 hash_integrity semantics
 
 1. `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 lives at line 873-933 (the prose receipt schema definition). The `hash_integrity` semantics paragraph at line 919 cites `accept_plan_drift=true` and treats plan_hash drift as FAIL-by-default. §4.2a Deterministic PG hash computation lives at lines 141-165; the Tooling paragraph at line 157 mandates `compute-pg-hashes` CLI for both PG-authoring (`branching-story-bootstrap` Phase 7, `branching-story-turn-cycle` Phase 9) and PG-verifying (`branching-story-prose-attach` Phase 2) cases. Both anchor points were verified at audit time during `/reassess-spec` on SPEC-72.
 2. SPEC-72 §2.3 prescribes both edits in the same bullet list. The §4.6 wording target is given inline ("PASS when nothing drifted; WARN when only plan_hash drifted; FAIL only on state_hash drift or a missing/placeholder/non-sha256 state_hash"). The §4.2a edit was surfaced as a HIGH Issue (I1) at `/reassess-spec` time and added to the spec's §2.3 bullet list during the reassessment.
-3. Cross-skill boundary: the shared contract is consumed by all 8 story-pipeline skills (`story-character-profile`, `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) per FOUNDATIONS §Story Bundles §7, plus the `prose_receipt_schema_compliance` validator at `tools/validators` (named in §4.6 line 875). The §4.6 wording change affects how prose-attach Phase 2 computes the `hash_integrity` verdict; SPEC72PLAHASADV-003 lands that operational change. The §4.2a wording change affects which skills the CLI mandate covers; PG-authoring skills (bootstrap Phase 7, turn-cycle Phase 9) continue using the CLI unchanged, prose-attach Phase 2 stops using it for state_hash recomputation (also landed in -003). No other consumer of §4.2a exists in the pipeline.
+3. Cross-skill boundary: the shared contract is consumed by all 8 story-pipeline skills (`story-character-profile`, `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) per FOUNDATIONS §Story Bundles §7, plus the `prose_receipt_schema_compliance` validator at `tools/validators` (named in §4.6 line 875). The §4.6 wording change affects how prose-attach Phase 2 computes the `hash_integrity` verdict; SPEC72PLAHASADV-003 owns that operational change. The §4.2a wording change affects which skills the CLI mandate covers; PG-authoring skills (bootstrap Phase 7, turn-cycle Phase 9) continue using the CLI unchanged, while prose-attach Phase 2's operational recomputation will move in -003. No other consumer of §4.2a exists in the pipeline.
 4. FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary) and §5b (Schema-Minimalism) are the load-bearing principles. §4a: "Story state is authoritative at page-plan commit. Rendered prose is a rendering of that state, not a second state engine." The §4.6 split-signal semantics align the receipt verdict with §4a — plan_hash drift (a rendering-input mismatch) is advisory, while state_hash drift (a committed-state-tamper mismatch) stays FAIL. §5b: "Every field in every story-bundle record schema must be load-bearing." Removing the `accept_plan_drift` toggle from the §4.6 semantics (landed in -003 for the SKILL.md surface) aligns the receipt schema with §5b — the toggle is no longer load-bearing because advisory is now the default for plan_hash drift.
 
 ## Architecture Check
@@ -96,3 +96,22 @@ Preserve the rest of the §4.2a section (lines 158-165, the example invocation b
 1. `grep -n "accept_plan_drift\|PG-verifying\|computePgStateHash" .claude/skills/_shared-templates/story-record-schemas.md` — targeted grep confirming the three terminology shifts landed (zero `accept_plan_drift` and zero `PG-verifying` inside the affected sections; ≥1 `computePgStateHash` reference inside §4.2a).
 2. `npm test --prefix tools/validators` — full validator-suite verification confirming `prose_receipt_schema_compliance` still passes against unchanged schemas.
 3. `awk '/^### 4.6/,/^### 4\.7|^---$/' .claude/skills/_shared-templates/story-record-schemas.md | grep -n "hash_integrity"` — confirms the §4.6 `hash_integrity` description is the only remaining mention inside §4.6 (no orphan `accept_plan_drift` references).
+
+## Outcome
+
+Completed: 2026-05-23
+
+The shared story-record schema template now carries SPEC-72's split-signal `hash_integrity` contract. §4.6 says plan-only `plan_hash` drift is `WARN` and advisory, while `state_hash` drift or an invalid `state_hash` remains `FAIL`. It also records that prose-attach recomputes `state_hash` from the committed PG record with `computePgStateHash`, not by re-reading the plan file.
+
+The §4.2a Tooling paragraph now limits the `compute-pg-hashes` CLI mandate to PG-authoring skills (`branching-story-bootstrap` and `branching-story-turn-cycle`) and explicitly carves out `branching-story-prose-attach` Phase 2 for the direct `computePgStateHash` verification path. No schema files, validator code, CLI code, or operational prose-attach skill text changed in this ticket; SPEC72PLAHASADV-003 remains the owner for the prose-attach SKILL.md implementation.
+
+## Verification Result
+
+1. `grep -n "accept_plan_drift\|PG-verifying\|computePgStateHash" .claude/skills/_shared-templates/story-record-schemas.md` — PASS. The only hits are the new `computePgStateHash` references in §4.2a and §4.6; `accept_plan_drift` and `PG-verifying` are absent from the shared template.
+2. `awk '/^#### 4.2a/,/^### 4\.3/' .claude/skills/_shared-templates/story-record-schemas.md | grep -n "PG-verifying\|computePgStateHash\|PG-authoring"` — PASS by expected no `PG-verifying` hit and positive `PG-authoring` / `computePgStateHash` hits.
+3. `awk '/^### 4.6/,/^### 4\.7|^---$/' .claude/skills/_shared-templates/story-record-schemas.md | grep -n "accept_plan_drift\|hash_integrity"` — PASS. §4.6 contains the schema enum and the revised `hash_integrity` paragraph; no `accept_plan_drift` hit remains.
+4. `npm test --prefix tools/validators` — PASS. Validator tests remained green against unchanged receipt/page schemas.
+
+## Deviations
+
+- The original ticket command used `^### 4.6`, but the live heading is `### 4.6 Prose receipt`; that command remains effective for §4.6. For §4.2a, the live heading is `#### 4.2a Deterministic PG hash computation`, so verification used `^#### 4.2a`.
