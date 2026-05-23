@@ -1,7 +1,8 @@
 # SPEC-74 — STCHAR distillation boundary hardening
 
-**Status:** AUTHORED 2026-05-23
+**Status:** COMPLETED 2026-05-23
 **Authored:** 2026-05-23
+**Completed:** 2026-05-23 — all 12 implementation tickets (SPEC74STCHARDISBOU-001 through -012) landed; capstone -013 archived as superseded (red-bunny remediation handled manually on the user's private working copy; the synthetic-fixture portion of the capstone test was judged not worth the cost since per-validator unit tests already cover the negative diagnostics).
 **Source report:** `reports/stchar-distillation-rework.md` §§4–10
 **Companion triage:** [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../docs/triage/2026-05-23-stchar-distillation-rework-triage.md)
 **Prior lineage:** `archive/specs/SPEC-70-char-stchar-semantic-preservation.md` (introduced `source_operational_fact_map` + `stchar_source_fact_coverage` + operational-home subsections); `archive/specs/SPEC-71-strip-stchar-tamper-hashes.md` (removed `profile_hash`, `voice_block_hash`, `page_packet_hash`, `source_char_hash`); `archive/specs/SPEC-73-page-packet-required-because-label-parsing.md` (multi-label `Required because` parsing).

@@ -1,8 +1,18 @@
 # SPEC74STCHARDISBOU-013: Capstone — red-bunny STCHAR migration + end-to-end validator verification
 
-**Status**: BLOCKED
+**Status**: ARCHIVED 2026-05-23 — superseded by out-of-tree manual remediation
 **Priority**: HIGH
 **Effort**: Large
+
+## Archive Disposition (2026-05-23)
+
+The red-bunny STCHAR remediation pass (`What to Change §2`) was completed manually on the user's private `worlds/erotica-world/` working copy — the three profiles now pass the SPEC-74 validator suite. Remaining ticket scope is dropped:
+
+- **§1 ENGINESYNC-005 disposition** — moot: no patch-engine routing occurred; the hybrid markdown surface is not blocked by Hook 3, and `worlds/` is gitignored so no public-repo artifact records the migration.
+- **§3 Capstone integration test** — abandoned: (a) loading red-bunny fixtures is structurally impossible because `worlds/` is gitignored; (b) the six negative-fixture cases are already covered by the per-validator unit tests under `tools/validators/tests/structural/{stchar-temporal-reference-boundary,stchar-source-material-inventory-integrity,stchar-regeneration-reason-integrity,page-plan-stchar-packet-integrity}.test.ts`; (c) the SPEC-74 §7 bootstrap golden tests were judged not worth a standalone follow-up.
+- **Invariants 2 & 3 (patch-engine receipt + Rule 6 retcon attribution)** — unenforced for the same gitignore reason; the manual edits live only in the user's private working copy.
+
+The user-reported bug (temporal contamination + semantic loss on red-bunny) is closed.
 **Engine Changes**: Yes — `worlds/erotica-world/stories/red-bunny/story-characters/STCHAR-{1,2,3}.md` (migration via patch engine; subject to Hook 3 engine-only mutation discipline + ENGINESYNC-005 hash-drift coordination); new capstone integration test file `tools/validators/tests/integration/spec74-stchar-end-to-end.test.ts` (or equivalent path) exercising the full STCHAR validator suite on the migrated red-bunny fixtures
 **Deps**: `archive/tickets/SPEC74STCHARDISBOU-001.md`, `archive/tickets/SPEC74STCHARDISBOU-002.md`, `archive/tickets/SPEC74STCHARDISBOU-004.md`, `archive/tickets/SPEC74STCHARDISBOU-005.md`, `archive/tickets/SPEC74STCHARDISBOU-007.md`, `archive/tickets/SPEC74STCHARDISBOU-010.md`, `archive/tickets/SPEC74STCHARDISBOU-012.md`
 
