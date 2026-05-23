@@ -100,7 +100,7 @@ If the skill's SKILL.md contains a process-flow diagram (ascii or ordered list),
 - Health-audit Reactivity Inertness pass — ship in SPEC76TURDRIPRI-010.
 - Schema-level `turn_driver` shape constraints — ship in SPEC76TURDRIPRI-001.
 - Contract amendments (`_shared-templates/story-state-contract.md` §4/§7/§8/§16a) — ship in SPEC76TURDRIPRI-002.
-- New structural validators — ship in SPEC76TURDRIPRI-003 through 006.
+- New structural validators — shipped in SPEC76TURDRIPRI-003 through archive/tickets/SPEC76TURDRIPRI-006.md.
 - Existing-validator updates — ship in SPEC76TURDRIPRI-007.
 - Golden fixture (Red Kiln Ambush) — ship in SPEC76TURDRIPRI-011.
 

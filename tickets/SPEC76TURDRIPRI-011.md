@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new fixture directory at `tools/validators/tests/fixtures/red-kiln-ambush/`; new integration test exercising the full SPEC-76 pipeline end-to-end
-**Deps**: archive/tickets/SPEC76TURDRIPRI-003.md, archive/tickets/SPEC76TURDRIPRI-004.md, archive/tickets/SPEC76TURDRIPRI-005.md, SPEC76TURDRIPRI-006, SPEC76TURDRIPRI-007, SPEC76TURDRIPRI-008, SPEC76TURDRIPRI-009, SPEC76TURDRIPRI-010
+**Deps**: archive/tickets/SPEC76TURDRIPRI-003.md, archive/tickets/SPEC76TURDRIPRI-004.md, archive/tickets/SPEC76TURDRIPRI-005.md, archive/tickets/SPEC76TURDRIPRI-006.md, SPEC76TURDRIPRI-007, SPEC76TURDRIPRI-008, SPEC76TURDRIPRI-009, SPEC76TURDRIPRI-010
 
 ## Problem
 
@@ -28,7 +28,7 @@ SPEC-76's full pipeline — schema, contract, 4 new validators, 3 existing-valid
 2. **Invariant**: `turn_driver_schema_compliance` (SPEC76TURDRIPRI-003) passes — all per-kind constraints satisfied.
 3. **Invariant**: `turn_driver_pov_observer_firewall` (archive/tickets/SPEC76TURDRIPRI-004.md) passes — Jon's POV via window grants direct observation; no hidden state cited with `perceived_directly`.
 4. **Invariant**: `page_plan_turn_driver_consistency` (archive/tickets/SPEC76TURDRIPRI-005.md) passes — page plan §7a matches SE.turn_driver byte-for-byte.
-5. **Invariant**: `active_pressure_handling_discipline` (SPEC76TURDRIPRI-006) passes — all 4 high-urgency records (STPLAN-9, STEMO-12, CLK-3, THR-4) appear in §7a active-pressure table with valid dispositions.
+5. **Invariant**: `active_pressure_handling_discipline` (archive/tickets/SPEC76TURDRIPRI-006.md) passes — all 4 high-urgency records (STPLAN-9, STEMO-12, CLK-3, THR-4) appear in §7a active-pressure table with valid dispositions.
 6. **Invariant**: `observer_firewall` (extended in SPEC76TURDRIPRI-007) short-circuits — the event has non-player driver, delegated to `turn_driver_pov_observer_firewall`.
 7. **Invariant**: `turn_cycle_output_grounding_integrity` (extended in SPEC76TURDRIPRI-007) passes — at least one CHC carrying `player_response_mode: responds` includes a record from `SE.turn_driver.driver_records[]` in its `grounded_in.records[]`.
 8. **Invariant**: 5 failing variants per SPEC-76 §8 Slice E (no driver, hidden mind leak, missing pressure table, mismatched §7a, wrong response mode) each produce the expected verdict from the appropriate validator.

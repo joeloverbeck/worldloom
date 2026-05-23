@@ -1,6 +1,6 @@
 # SPEC76TURDRIPRI-006: Validator — `active_pressure_handling_discipline`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new structural validator at `tools/validators/src/structural/active-pressure-handling-discipline.ts`; new registry entry at `tools/validators/src/public/registry.ts`
@@ -17,6 +17,9 @@ Active high-urgency STPLAN / STEMO / CLK / THR / STSEC / STQ / OBL / CNSQ record
 3. **Cross-skill / cross-artifact boundary**: this validator consumes (a) PG.state_snapshot.active_records (per-class arrays of record ids), (b) the page-plan §7a active-pressure disposition table parsed via the shared parser introduced in archive/tickets/SPEC76TURDRIPRI-005.md, (c) the per-record-class urgency state on STPLAN / STEMO / CLK / THR / STSEC / STQ / OBL / CNSQ records (urgency criteria per SPEC-76 §3.6.4). The shape under audit is the active-pressure-table-vs-PG-state correlation. Per SPEC-76 §3.6.4 SREL / STCHAR scope clarification: SREL and STCHAR may appear in `turn_driver.driver_records[]` only as SUPPORTING records (the leading driver_record must be from the named 8 classes); SREL / STCHAR are excluded from this validator's urgency classification (they're not driver-eligible as the leading record).
 4. **FOUNDATIONS principle**: Rule 5 (No Consequence Evasion) governs this ticket. Per the spec's §FOUNDATIONS Alignment table, "active-pressure handling discipline ensures no high-urgency active record can be silently ignored; every record is selected, deferred-with-expiry, or rejected-with-reason. Inertness is structurally impossible." Rule 5's "if a new fact has obvious second-order effects, either integrate them or explicitly explain why they do not manifest" is the principle the active-pressure table operationalizes at the story-pipeline level: active pressures are second-order effects of prior turns' state changes, and this validator forces them to be either acted-on, deferred, or rejected — never silently ignored.
 5. **HARD-GATE / Canon Safety Check surface**: this is a new structural validator under `tools/validators/src/structural/`. Per the per-ticket-type granularity rule, item 5 fires because the structural validator gates story-bundle PG record writes at engine pre-apply time. The validator strengthens Rule 5 enforcement at the story-pipeline level; it does not touch the Mystery Reserve firewall (which remains the domain of `turn_driver_pov_observer_firewall` and `forbidden_mystery_resolution`).
+6. Live implementation shares the active-pressure table parser and high-urgency classifier with `page_plan_turn_driver_consistency` through `tools/validators/src/structural/page-plan-active-pressure.ts`, so §7a table presence and table-content validators do not drift on class eligibility.
+7. The validator follows the already-landed page-plan behavior: absent companion page-plan files are skipped, while an existing §7a with no table rows leaves every high-urgency parent active record unhandled. Missing §7a therefore fails through unhandled high-urgency records when a plan file exists, without taking over the section-presence code owned by archive/tickets/SPEC76TURDRIPRI-005.md.
+8. The STQ payoff-due criterion remains represented as a narrow `status: complicated` + `payoff_due: "true"` classifier because the current STQ schema does not yet expose a richer payoff-due field. This keeps the ticket's required class hook present without broadening the live schema.
 
 ## Architecture Check
 
@@ -90,8 +93,12 @@ Per SPEC-76 §6.2 and the established convention at `tools/validators/tests/stru
 ## Files to Touch
 
 - `tools/validators/src/structural/active-pressure-handling-discipline.ts` (new)
+- `tools/validators/src/structural/page-plan-active-pressure.ts` (new — shared table parser + high-urgency classifier)
+- `tools/validators/src/structural/page-plan-turn-driver-consistency.ts` (modify — consume shared active-pressure helper)
 - `tools/validators/src/public/registry.ts` (modify — single import + single array append)
 - `tools/validators/tests/structural/active-pressure-handling-discipline.test.ts` (new)
+- `tools/validators/tests/structural/registry.test.ts` (modify — registry expectation)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply skipped-execution expectation)
 
 ## Out of Scope
 
@@ -127,3 +134,19 @@ Per SPEC-76 §6.2 and the established convention at `tools/validators/tests/stru
 
 1. `cd tools/validators && npm test` — runs the validator package's full test suite including the new structural test file.
 2. `cd tools/validators && npm run build` — verifies TypeScript compilation of the new validator module and registry import.
+
+## Outcome
+
+Completed. Added `active_pressure_handling_discipline`, registered it, and added focused tests for pass cases, all four closed error codes, per-class high-urgency coverage, and selector scoping. The validator reads child page plans for turn-resolution pages, classifies high-urgency active records from the parent page snapshot, and requires each high-urgency record to appear in the §7a `Active-pressure disposition` table with a valid `selected`, `deferred`, or `rejected` disposition. Rejected rows require reasons; deferred rows require a PG expiry or explicit condition.
+
+The medium-tier warning path remains intentionally unreachable, matching SPEC-76 §9's deferral of the medium-tier criteria table. Red Kiln Ambush end-to-end proof remains owned by SPEC76TURDRIPRI-011.
+
+## Verification Result
+
+PASS:
+
+1. Pre-edit `cd tools/validators && npm test` — PASS, 987 tests.
+2. `cd tools/validators && npm run build` — PASS.
+3. `cd tools/validators && node --test dist/tests/structural/active-pressure-handling-discipline.test.js dist/tests/structural/page-plan-turn-driver-consistency.test.js dist/tests/structural/registry.test.js` — PASS, 15 tests.
+4. `cd tools/validators && npm run build && node --test dist/tests/integration/validate-patch-plan.test.js` — PASS.
+5. `cd tools/validators && npm test` — PASS, 994 tests.

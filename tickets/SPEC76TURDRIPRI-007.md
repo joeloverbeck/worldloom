@@ -105,7 +105,7 @@ Add to `tools/validators/tests/structural/observer-firewall.test.ts`:
 ## Out of Scope
 
 - Schema-level `turn_driver` shape constraints — ship in SPEC76TURDRIPRI-001.
-- New structural validators (`turn_driver_schema_compliance`, `turn_driver_pov_observer_firewall`, `page_plan_turn_driver_consistency`, `active_pressure_handling_discipline`) — ship in SPEC76TURDRIPRI-003 through 006.
+- New structural validators (`turn_driver_schema_compliance`, `turn_driver_pov_observer_firewall`, `page_plan_turn_driver_consistency`, `active_pressure_handling_discipline`) — shipped in SPEC76TURDRIPRI-003 through archive/tickets/SPEC76TURDRIPRI-006.md.
 - Skill SKILL.md edits — ship in SPEC76TURDRIPRI-008/009/010.
 - `page_plan_stchar_packet_integrity` warn → fail behavior change for §16a labels — covered by SPEC76TURDRIPRI-002 contract amendment; the validator source change is outside this ticket's scope.
 

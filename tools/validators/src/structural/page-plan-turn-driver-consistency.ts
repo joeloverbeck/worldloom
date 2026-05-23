@@ -8,13 +8,14 @@ import {
   touchedFilesInclude
 } from "./utils.js";
 import { markdownSection, pagePlanTargets, type PagePlanTarget } from "./page-plan-section-parser.js";
+import {
+  hasActivePressureDispositionTable,
+  highUrgencyActiveRecords
+} from "./page-plan-active-pressure.js";
 import { allStorySlugs, recordId, storyMaps } from "./stchar-utils.js";
 
 const VALIDATOR = "page_plan_turn_driver_consistency";
 const TURN_DRIVER_SECTION_HEADING = /^##\s+7a\.\s+Turn driver \/ initiative trace\s*$/m;
-const ACTIVE_PRESSURE_HEADER = /^Active-pressure disposition\b/im;
-const ACTIVE_PRESSURE_TABLE_HEADER = /^\|\s*Record\s*\|\s*Disposition\s*\|\s*Reason \/ expiry\s*\|/im;
-const HIGH_URGENCY_CLASSES = new Set(["STPLAN", "STEMO", "CLK", "THR", "STSEC", "STQ", "OBL", "CNSQ"]);
 
 export const pagePlanTurnDriverConsistency: Validator = {
   name: VALIDATOR,
@@ -137,7 +138,7 @@ function parseTurnDriverSection(section: string): ParsedTurnDriverSection {
   return {
     driverKind: section.match(/^\s*-\s*Driver kind:\s*(.+?)\s*$/im)?.[1]?.trim(),
     driverRecords: splitDriverRecords(section.match(/^\s*-\s*Driver records:\s*(.+?)\s*$/im)?.[1]),
-    hasActivePressureTable: ACTIVE_PRESSURE_HEADER.test(section) && ACTIVE_PRESSURE_TABLE_HEADER.test(section)
+    hasActivePressureTable: hasActivePressureDispositionTable(section)
   };
 }
 
@@ -152,63 +153,7 @@ function splitDriverRecords(value: string | undefined): string[] {
 }
 
 function hasHighUrgencyActiveRecord(page: IndexedRecord, maps: ReturnType<typeof storyMaps>): boolean {
-  const activeRecords = asPlainRecord(asPlainRecord(asPlainRecord(page.parsed).state_snapshot).active_records);
-  for (const [recordClass, rawIds] of Object.entries(activeRecords)) {
-    if (!HIGH_URGENCY_CLASSES.has(recordClass)) {
-      continue;
-    }
-    for (const id of stringArray(rawIds)) {
-      const record = maps.byId.get(id);
-      if (record === undefined || isHighUrgency(recordClass, asPlainRecord(record.parsed))) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function isHighUrgency(recordClass: string, parsed: Record<string, unknown>): boolean {
-  if (recordClass === "STPLAN") {
-    const status = stringValue(parsed.plan_status);
-    return (status === "active" || status === "blocked" || status === "suspended") &&
-      Object.keys(asPlainRecord(parsed.current_step)).length > 0;
-  }
-  if (recordClass === "STEMO") {
-    const intensity = stringValue(parsed.intensity);
-    return (intensity === "high" || intensity === "extreme") && stringArray(parsed.behavioral_pressure).length > 0;
-  }
-  if (recordClass === "CLK") {
-    const value = numberValue(parsed.value);
-    const thresholds = Array.isArray(parsed.thresholds) ? parsed.thresholds : [];
-    return stringValue(parsed.status) === "active" &&
-      value !== undefined &&
-      thresholds.some((threshold) => {
-        const at = numberValue(asPlainRecord(threshold).at);
-        return at !== undefined && value >= at;
-      });
-  }
-  if (recordClass === "THR") {
-    return stringValue(parsed.status) === "active" && stringValue(parsed.urgency) === "high";
-  }
-  if (recordClass === "STSEC") {
-    return stringValue(parsed.status) === "partially_revealed" || stringArray(parsed.reveal_records).length > 0;
-  }
-  if (recordClass === "STQ") {
-    return stringValue(parsed.status) === "complicated" && stringValue(parsed.payoff_due) === "true";
-  }
-  if (recordClass === "OBL") {
-    return (stringValue(parsed.status) === "open" || stringValue(parsed.status) === "escalated") &&
-      stringValue(parsed.urgency) === "high";
-  }
-  if (recordClass === "CNSQ") {
-    return (stringValue(parsed.status) === "pending" || stringValue(parsed.status) === "escalated") &&
-      stringValue(parsed.urgency) === "high";
-  }
-  return false;
-}
-
-function numberValue(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  return highUrgencyActiveRecords(page, maps).length > 0;
 }
 
 function planVerdict(

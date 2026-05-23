@@ -1,5 +1,6 @@
 import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { activeRecordsFullShape } from "../structural/active-records-full-shape.js";
+import { activePressureHandlingDiscipline } from "../structural/active-pressure-handling-discipline.js";
 import { approvalSemantics } from "../structural/approval-semantics.js";
 import { artifactMaturity } from "../structural/artifact-maturity.js";
 import { branchIsolation } from "../structural/branch-isolation.js";
@@ -173,6 +174,7 @@ export const structuralValidators: readonly Validator[] = [
   pageAffordanceIntegrity,
   pagePlanStcharPacketIntegrity,
   pagePlanTurnDriverConsistency,
+  activePressureHandlingDiscipline,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,
