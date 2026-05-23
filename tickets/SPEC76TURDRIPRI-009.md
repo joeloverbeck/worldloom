@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-bootstrap/SKILL.md` (minor SE-1 documentation + PG-1 page-plan §7a omission rule)
-**Deps**: SPEC76TURDRIPRI-002
+**Deps**: archive/tickets/SPEC76TURDRIPRI-002.md
 
 ## Problem
 

@@ -1,6 +1,6 @@
 # Story State Contract
 
-Shared by every state-changing skill in the worldloom story-skill family. This is the only place where the page lifecycle, branch snapshots, event deltas, record schemas, predicate DSL, action-routing semantics, eight hard gates, and shared write order are defined. Each skill's `SKILL.md` references this contract for those concerns; the contract does not describe per-skill workflows.
+Shared by every state-changing skill in the worldloom story-skill family. This is the only place where the page lifecycle, branch snapshots, event deltas, record schemas, predicate DSL, action-routing semantics, nine hard gates, and shared write order are defined. Each skill's `SKILL.md` references this contract for those concerns; the contract does not describe per-skill workflows.
 
 Authored to support the rebuilt story-skill family per `docs/plans/2026-05-13-streamlined-story-skills-greenfield-plan.md`.
 
@@ -71,7 +71,7 @@ Auxiliary story-bundle records:
 
 The full record-schema enumeration for all 21 story-bundle record classes plus the prose-receipt direct-write artifact lives in a sibling shared template at `.claude/skills/_shared-templates/story-record-schemas.md`. That file preserves §4.X subsection numbering verbatim (so existing citations to §4.1 `BEL`, §4.2 `PG`, §4.2a deterministic PG hash computation, §4.3 `SE`, §4.3a audit-only SE events, §4.4 `SLT`, §4.4a shared `action_family` taxonomy, §4.4b `STENT` role and `SREL` axis taxonomies, §4.5.1 through §4.5.13, and §4.6 prose receipt all resolve without rewording in consumer skills, validators, and other shared templates). SPEC-42 adds `CLK` as §4.5.14, `STSEC` as §4.5.15, and `STQ` as §4.5.16 in the schema file without renumbering the existing prose-receipt §4.6 section; SPEC-56 adds `STCHAR` as §4.5.19.
 
-Consumers that need only the authority model (§1), schema-minimalism doctrine (§2), record class inventory (§3), closed predicate DSL (§5), action routing (§6), eight shared hard gates (§7), page-plan minimum contract (§8), branching procedure (§9), shared write order (§10), mystery and canon authority (§11), or skill-usage overview (§12) can read this main contract alone; consumers that need any record schema additionally load `story-record-schemas.md`.
+Consumers that need only the authority model (§1), schema-minimalism doctrine (§2), record class inventory (§3), closed predicate DSL (§5), action routing (§6), nine shared hard gates (§7), page-plan minimum contract (§8), branching procedure (§9), shared write order (§10), mystery and canon authority (§11), or skill-usage overview (§12) can read this main contract alone; consumers that need any record schema additionally load `story-record-schemas.md`.
 
 The split is purely structural — §4 is overwhelmingly the bulk of the contract, and the bundled file exceeded the per-call read limit of bulk-loading tools at HEAD. No schema content changed in the move; this stub is the navigational pointer.
 
@@ -386,11 +386,11 @@ When a player selects a `CHC` or supplies a write-in, the turn-cycle resolves it
 
 **Choice Consequence Integrity.** An accepted `CHC` selection or accepted write-in must not be cosmetic-only. At page-plan commit, it must produce at least one grounded consequence: a non-empty `SE.state_delta`, a new / superseded / closed story-bundle record, a changed visibility or affordance state, or a recorded failure / refusal / block that is itself the consequence. A purely rhetorical or expressive choice is lawful only when the parent page plan explicitly marked that choice as rhetorical before selection.
 
-`outcome_route: world_block` is still the routing value for impossible actions. It no longer pairs with the retired event-kind value named `world_block`; the `SE.event_kind` records the event source (`selected_choice`, `write_in_attempt`, `system_repair`, or `audit_repair`) while the route records the impossibility.
+`outcome_route: world_block` is still the routing value for impossible actions. It does not pair with an event-kind value named `world_block`; `SE.event_kind: turn_resolution` records ordinary turn resolution while `SE.turn_driver.kind` distinguishes player selections, write-ins, and non-player drivers. Repair flows continue to use `system_repair` or `audit_repair`.
 
-## 7. Eight Shared Hard Gates
+## 7. Nine Shared Hard Gates
 
-Every PG-authoring story skill (`branching-story-bootstrap` and `branching-story-turn-cycle`) validates these eight hard gates at page-plan commit; gate results are recorded in the flat `PG.validation_trace` mapping using the eight schema keys defined in §4.2 (one entry per gate, keyed by the gate name), and each gate's pass entry requires a one-line rationale (per CLAUDE.md "PASS entries require a one-line rationale"). Gate FAIL produces a direct-artifact partial failure under HARD-GATE discipline (see `docs/HARD-GATE-DISCIPLINE.md`). Non-PG story skills (`branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) preserve the same invariants — branch isolation, Mystery Reserve firewall, observer firewall, schema compliance, replay consistency, choice-set non-collapse, motivation grounding, terminal proof — through their own skill-local validation phases and HARD-GATE discipline. When non-PG skills emit audit-only SE records, §4.3a applies.
+Every PG-authoring story skill (`branching-story-bootstrap` and `branching-story-turn-cycle`) validates these nine hard gates at page-plan commit; gate results are recorded in the flat `PG.validation_trace` mapping using the nine schema keys defined in §4.2 (one entry per gate, keyed by the gate name), and each gate's pass entry requires a one-line rationale (per AGENTS.md "Validation test PASS entries require a one-line rationale"). Gate FAIL produces a direct-artifact partial failure under HARD-GATE discipline (see `docs/HARD-GATE-DISCIPLINE.md`). Non-PG story skills (`branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) preserve the same invariants — branch isolation, Mystery Reserve firewall, observer firewall, schema compliance, replay consistency, choice-set non-collapse, motivation grounding, terminal proof, and turn-driver lawfulness when they emit or audit turn-resolution state — through their own skill-local validation phases and HARD-GATE discipline. When non-PG skills emit audit-only SE records, §4.3a applies.
 
 | # | Gate | Checks |
 |---|---|---|
@@ -402,12 +402,13 @@ Every PG-authoring story skill (`branching-story-bootstrap` and `branching-story
 | 6 | consequence capacity or terminal proof | The new page has at least one eligible commitment block OR `state_snapshot.continuation.terminal_status` is `branch_pause` / `terminal_closed` with a rationale that names how high-salience debts were closed, abandoned, or inherited. Debt salience reads `urgency` uniformly on active `OBL`, `CNSQ`, `THR`, and `STINT` records. Choice Consequence Integrity also applies here: accepted choices and accepted write-ins must produce a grounded consequence unless the parent page plan marked the choice as rhetorical. |
 | 7 | plan grounding | Every declared affordance, every required beat from the chosen commitment block, and every CHC emitted by this page is grounded in `state_snapshot.active_records` or world canon. Observer Firewall also applies here: selected `SLT` actor-bindings, emitted choices, and character actions must rely only on information available to the acting entity or record a valid access route. |
 | 8 | canon promotion hold | If `SE.outcome_route == promotion_hold` or any `promotion_claims[].authority == canon_candidate`, the world-level truth is held for promotion (not asserted in this page's state delta as if already canon). Marked `NOT_APPLICABLE` with rationale when no canon claim is in play. |
+| 9 | Turn-Driver Lawfulness | Every `turn_resolution` event carries a well-formed `turn_driver` whose driver records are active on the parent page snapshot, and whose `pov_visibility` is consistent with the actor's information access per §6b (Observer Firewall). Enforced by `turn_driver_schema_compliance` for cross-record-boundary constraints and `turn_driver_pov_observer_firewall` for POV access-route consistency at page-plan commit. Marked `NOT_APPLICABLE` with rationale for `story_start`, repair, prose-attach, and promotion-closeout events that lawfully omit `turn_driver`. |
 
 A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-engine-only writes to `worlds/<slug>/stories/<story-slug>/_source/<class>/*.yaml`, so a malformed plan is rejected at the patch engine before any record lands.
 
 ## 8. Page Plan Minimum Contract
 
-`pages-prose-plans/PG-<integer>.md` is a direct-write artifact (not an atomic `_source/` record). It is the prompt package for the external prose renderer. Each plan body has 19 numbered sections plus optional §9b, §9c, §10b when relevant story-state records are active or relevant:
+`pages-prose-plans/PG-<integer>.md` is a direct-write artifact (not an atomic `_source/` record). It is the prompt package for the external prose renderer. Each plan body has 19 numbered sections plus required §7a for `turn_resolution` events, and optional §9b, §9c, §10b when relevant story-state records are active or relevant:
 
 | § | Section | Source |
 |---|---|---|
@@ -418,6 +419,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 5 | Active cast and entity statuses | `state_snapshot.entity_status` |
 | 6 | Current location and affordances | `state_snapshot.visible_affordances` |
 | 7 | Selected event and state delta | `SE` |
+| 7a | Turn driver / initiative trace | `SE.turn_driver` + parent-page active pressure disposition |
 | 8 | Required beats from the commitment block | selected `SLT.beats` |
 | 9 | Relationship and belief context | active `SREL`, `BEL` |
 | 9b | Active actor plans / tactical agency (optional) | per-page-computed from active `STPLAN` records; omitted entirely when no active STPLANs exist |
@@ -436,6 +438,27 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 19 | **Render-time instruction block** | **inlined verbatim from `reports/prose-quality-instructions.md` §Render-Time Instruction Template** |
 
 **§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages.
+
+### 7a. Turn driver / initiative trace
+
+§7a is a render-side projection of `SE.turn_driver`, not a second state engine. It is required for every `SE.event_kind: turn_resolution` page plan and omitted when `SE-1` is `story_start` with no turn driver. Required content (all lines must appear; values are page-author-supplied):
+
+- Driver kind: <one of player_action | player_write_in | npc_action | offstage_action | world_pressure | clock_fire | secret_reveal | multi_actor_collision>
+- Initiator: <STENT-<integer> | player | world | system | unknown>
+- Driver records: <comma-separated record ids; matches SE.turn_driver.driver_records>
+- Player response mode: <initiates | responds | witnesses | chooses_continuation | none>
+- POV visibility: <perceived_directly | inferred_from_trace | reported | discovered_after | withheld>
+- Observer-firewall note: <one sentence on the access route for non-player drivers; "n/a" for player_action / player_write_in>
+
+The `SE.turn_resolution` event's `world_logic_rationale` is the carrier for driver justification; §7a's `Driver kind:` and `Driver records:` lines together with `world_logic_rationale` form the complete driver provenance. Do not add a separate `why_now` field.
+
+Active-pressure disposition appears in §7a whenever the parent `PG.state_snapshot` has high-urgency active records. Every high-urgency active record on the parent snapshot appears in exactly one row:
+
+| Record | Disposition | Reason / expiry |
+|---|---|---|
+| <ID> | selected | became this turn's driver |
+| <ID> | deferred | <expires after PG-<integer> or condition> |
+| <ID> | rejected | <one-sentence reason> |
 
 **§9b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `STPLAN` records — one entry per active plan with sub-bullets per the template below:
 
@@ -516,7 +539,7 @@ The canonical post-SPEC-71 §16a packet field set is:
 - `Prose must-not-imply`
 - `Anti-generic warnings`
 
-`Required because:` is parsed as a comma-separated label set drawn from the closed vocabulary above. The `page_plan_stchar_packet_integrity` validator requires voice authority in the stable seed and page-local projection when the set contains any of `speaker`, `viewpoint`, or `voice_shapes_page`, and forbids `offstage_causal` for any STENT whose `location` is not `offstage`. Labels outside the closed vocabulary emit a warning. The receipt-side verbatim-composite contract in `story-record-schemas.md` §4.6 is unchanged.
+`Required because:` is parsed as a comma-separated label set drawn from the closed vocabulary above. The `page_plan_stchar_packet_integrity` validator requires voice authority in the stable seed and page-local projection when the set contains any of `speaker`, `viewpoint`, or `voice_shapes_page`, and forbids `offstage_causal` for any STENT whose `location` is not `offstage`. Labels outside the closed vocabulary FAIL under the new contract. The receipt-side verbatim-composite contract in `story-record-schemas.md` §4.6 is unchanged.
 
 For an active offstage character whose offstage activity causally bears on the page, §16a may use a reduced `offstage_causal` packet:
 
@@ -595,14 +618,14 @@ Mysteries with `status: forbidden` are never resolved by any authority level. My
 
 ## 12. How Skills Use This Contract
 
-Each story-skill `SKILL.md` references this contract for: record schemas (§4), predicate DSL (§5), action-routing semantics (§6), the eight hard gates (§7), the page plan §19-section contract (§8), branching procedure (§9), shared write order (§10), and mystery/canon authority (§11).
+Each story-skill `SKILL.md` references this contract for: record schemas (§4), predicate DSL (§5), action-routing semantics (§6), the nine hard gates (§7), the page plan §19-section contract plus §7a turn-driver trace (§8), branching procedure (§9), shared write order (§10), and mystery/canon authority (§11).
 
 Skills must not duplicate the contract's content. They cite it. If a skill needs a deviation, the deviation is amended into this contract first.
 
 The contract does not describe:
 
 - Per-skill workflow phases (each skill's `SKILL.md` owns these).
-- Per-skill validation traces beyond the eight shared gates.
+- Per-skill validation traces beyond the nine shared gates.
 - Per-skill input / output specifications.
 - Mode-specific behavior (e.g., `commitment-block-authoring` modes).
 - Examples of skill invocations.

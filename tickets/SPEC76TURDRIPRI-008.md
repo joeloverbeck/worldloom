@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `.claude/skills/branching-story-turn-cycle/SKILL.md` (substantial Phase 0 addition + new orthogonal argument + Phase 1 carve-out + Phase 8 amendment)
-**Deps**: SPEC76TURDRIPRI-002
+**Deps**: archive/tickets/SPEC76TURDRIPRI-002.md
 
 ## Problem
 

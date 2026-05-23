@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-health-audit/SKILL.md` (new audit sub-phase distinct from existing Phase 2l "Active-state underuse warnings")
-**Deps**: SPEC76TURDRIPRI-002
+**Deps**: archive/tickets/SPEC76TURDRIPRI-002.md
 
 ## Problem
 

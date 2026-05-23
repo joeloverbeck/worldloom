@@ -170,7 +170,7 @@ Same posture as SPEC-76: no backwards-compat shims. SLT records without `groundi
 
 ## 8. Implementation Slices
 
-**Upstream tickets**: SPEC-77's slices run AFTER `archive/tickets/SPEC76TURDRIPRI-001.md` (schema introducing `turn_driver.kind`) and `tickets/SPEC76TURDRIPRI-002.md` (shared contract amendment) land — both exist as of the SPEC-76 decomposition on 2026-05-23. When SPEC-77 is decomposed by `/spec-to-tickets`, every ticket that references the `compatible_turn_drivers` enum should declare an explicit upstream `Deps:` on `archive/tickets/SPEC76TURDRIPRI-001.md`; see §9 Risk Reassessment for the byte-for-byte enum-match obligation.
+**Upstream tickets**: SPEC-77's slices run AFTER `archive/tickets/SPEC76TURDRIPRI-001.md` (schema introducing `turn_driver.kind`) and `archive/tickets/SPEC76TURDRIPRI-002.md` (shared contract amendment) land — both exist as of the SPEC-76 decomposition on 2026-05-23. When SPEC-77 is decomposed by `/spec-to-tickets`, every ticket that references the `compatible_turn_drivers` enum should declare an explicit upstream `Deps:` on `archive/tickets/SPEC76TURDRIPRI-001.md`; see §9 Risk Reassessment for the byte-for-byte enum-match obligation.
 
 Smaller than SPEC-76:
 

@@ -454,7 +454,8 @@ function page(
       append_only_delta: "PASS",
       consequence_or_terminal: "PASS",
       plan_grounding: "PASS",
-      canon_promotion_hold: "PASS"
+      canon_promotion_hold: "PASS",
+      turn_driver_lawfulness: "NOT_APPLICABLE: fixture uses repair and bootstrap events."
     }
   });
 }

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new structural validator at `tools/validators/src/structural/active-pressure-handling-discipline.ts`; new registry entry at `tools/validators/src/public/registry.ts`
-**Deps**: SPEC76TURDRIPRI-002
+**Deps**: archive/tickets/SPEC76TURDRIPRI-002.md
 
 ## Problem
 

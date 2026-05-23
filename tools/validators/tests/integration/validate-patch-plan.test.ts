@@ -995,7 +995,8 @@ function validPageFields(id: string): Record<string, unknown> {
       append_only_delta: "PASS: deltas create, supersede, or close records.",
       consequence_or_terminal: "PASS: consequence capacity is present.",
       plan_grounding: "PASS: plan is grounded in loaded state.",
-      canon_promotion_hold: "NOT_APPLICABLE: no promotion claim is present."
+      canon_promotion_hold: "NOT_APPLICABLE: no promotion claim is present.",
+      turn_driver_lawfulness: "NOT_APPLICABLE: fixture page does not exercise turn resolution."
     }
   };
 }
