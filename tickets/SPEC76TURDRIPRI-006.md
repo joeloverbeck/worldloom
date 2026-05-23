@@ -96,7 +96,7 @@ Per SPEC-76 §6.2 and the established convention at `tools/validators/tests/stru
 ## Out of Scope
 
 - Schema-level `turn_driver` shape constraints — ship in SPEC76TURDRIPRI-003.
-- Observer-firewall semantics for non-player drivers — ship in SPEC76TURDRIPRI-004.
+- Observer-firewall semantics for non-player drivers — ship in archive/tickets/SPEC76TURDRIPRI-004.md.
 - Page-plan §7a PRESENCE check + driver-key consistency with SE — ship in SPEC76TURDRIPRI-005. THIS validator only checks §7a's CONTENT (active-pressure disposition rows).
 - Medium-tier urgency table enumeration — deferred per SPEC-76 §9 Risk Reassessment; lands in a follow-up ticket once the per-class medium-tier criteria are specified.
 - Reactivity Inertness audit pass (chain-level scan for non-player driver absence across consecutive pages) — ship in SPEC76TURDRIPRI-010.

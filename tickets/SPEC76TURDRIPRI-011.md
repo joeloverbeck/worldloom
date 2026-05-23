@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new fixture directory at `tools/validators/tests/fixtures/red-kiln-ambush/`; new integration test exercising the full SPEC-76 pipeline end-to-end
-**Deps**: archive/tickets/SPEC76TURDRIPRI-003.md, SPEC76TURDRIPRI-004, SPEC76TURDRIPRI-005, SPEC76TURDRIPRI-006, SPEC76TURDRIPRI-007, SPEC76TURDRIPRI-008, SPEC76TURDRIPRI-009, SPEC76TURDRIPRI-010
+**Deps**: archive/tickets/SPEC76TURDRIPRI-003.md, archive/tickets/SPEC76TURDRIPRI-004.md, SPEC76TURDRIPRI-005, SPEC76TURDRIPRI-006, SPEC76TURDRIPRI-007, SPEC76TURDRIPRI-008, SPEC76TURDRIPRI-009, SPEC76TURDRIPRI-010
 
 ## Problem
 
@@ -26,7 +26,7 @@ SPEC-76's full pipeline — schema, contract, 4 new validators, 3 existing-valid
 
 1. **Invariant**: SE record carries `event_kind = turn_resolution` + `turn_driver.kind = npc_action` + 4 driver_records → schema validation (SPEC76TURDRIPRI-001's schema accepts the fixture).
 2. **Invariant**: `turn_driver_schema_compliance` (SPEC76TURDRIPRI-003) passes — all per-kind constraints satisfied.
-3. **Invariant**: `turn_driver_pov_observer_firewall` (SPEC76TURDRIPRI-004) passes — Jon's POV via window grants direct observation; no hidden state cited with `perceived_directly`.
+3. **Invariant**: `turn_driver_pov_observer_firewall` (archive/tickets/SPEC76TURDRIPRI-004.md) passes — Jon's POV via window grants direct observation; no hidden state cited with `perceived_directly`.
 4. **Invariant**: `page_plan_turn_driver_consistency` (SPEC76TURDRIPRI-005) passes — page plan §7a matches SE.turn_driver byte-for-byte.
 5. **Invariant**: `active_pressure_handling_discipline` (SPEC76TURDRIPRI-006) passes — all 4 high-urgency records (STPLAN-9, STEMO-12, CLK-3, THR-4) appear in §7a active-pressure table with valid dispositions.
 6. **Invariant**: `observer_firewall` (extended in SPEC76TURDRIPRI-007) short-circuits — the event has non-player driver, delegated to `turn_driver_pov_observer_firewall`.

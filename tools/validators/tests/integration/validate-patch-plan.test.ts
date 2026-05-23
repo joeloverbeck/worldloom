@@ -280,6 +280,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "turn_driver_schema_compliance"
     );
     assert.equal(turnDriverSchemaExecution?.status, "skipped");
+    const turnDriverPovExecution = result.executions.find(
+      (execution) => execution.name === "turn_driver_pov_observer_firewall"
+    );
+    assert.equal(turnDriverPovExecution?.status, "skipped");
     const narrativeShapeExecution = result.executions.find(
       (execution) => execution.name === "narrative_shape_field_rejection"
     );
@@ -373,6 +377,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== relationshipIntroExecution &&
         row !== turnCycleOutputExecution &&
         row !== turnDriverSchemaExecution &&
+        row !== turnDriverPovExecution &&
         row !== narrativeShapeExecution &&
         row !== compatibilityDriftExecution &&
         row !== pageAffordanceExecution &&

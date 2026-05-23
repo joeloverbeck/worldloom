@@ -16,7 +16,7 @@ Page-plan §7a (introduced by SPEC76TURDRIPRI-002 in the shared contract) is the
 2. SPEC-76 §3.6.3 prescribes the validator's severity (`fail`), inputs (`PG, SE (via PG.input.resolved_event_id), page-plan §7a (textual)`), and 4 error codes verbatim: `page_plan_driver_section_missing`, `page_plan_driver_kind_mismatch`, `page_plan_driver_record_omitted`, `page_plan_active_pressure_table_missing`. The validator parses page-plan §7a as structured text per the contract amendment in SPEC76TURDRIPRI-002; the parser is shared with §16a label parsing (already structured per SPEC-73).
 3. **Cross-skill / cross-artifact boundary**: this validator consumes (a) PG records, (b) the SE record referenced by `PG.input.resolved_event_id`, (c) the page-plan body at `pages-prose-plans/PG-<integer>.md` containing §7a. The shape under audit is the PG ↔ SE.turn_driver ↔ page-plan §7a triangle: all three must agree on driver kind, initiator, driver_records, response mode, POV visibility. The §7a parser is shared with the existing §16a parser at `page_plan_stchar_packet_integrity.ts`; this ticket's validator reuses the parser infrastructure for the new §7a section.
 4. **FOUNDATIONS principle**: §Story Bundles §4a (Plan-Authority Boundary) governs this ticket. Per §4a, "story state is authoritative at page-plan commit. Rendered prose is a rendering of that state, not a second state engine." The §7a section is a render-side projection of `SE.turn_driver`; this validator ensures the projection is faithful — the plan does not become a second state engine by allowing §7a content to drift from the SE record. This is the Rule 1 / Rule 6 grounding for the validator: page-plan §7a cites the SE record's driver shape, and the citation must be byte-correct.
-5. **HARD-GATE / Canon Safety Check surface**: this is a new structural validator under `tools/validators/src/structural/`. Per the per-ticket-type granularity rule, item 5 fires because the structural validator gates story-bundle PG record writes at engine pre-apply time. The validator does not weaken any Mystery Reserve firewall — its scope is plan-vs-SE consistency; the firewall remains the domain of `turn_driver_pov_observer_firewall` (SPEC76TURDRIPRI-004).
+5. **HARD-GATE / Canon Safety Check surface**: this is a new structural validator under `tools/validators/src/structural/`. Per the per-ticket-type granularity rule, item 5 fires because the structural validator gates story-bundle PG record writes at engine pre-apply time. The validator does not weaken any Mystery Reserve firewall — its scope is plan-vs-SE consistency; the firewall remains the domain of `turn_driver_pov_observer_firewall` (archive/tickets/SPEC76TURDRIPRI-004.md).
 
 ## Architecture Check
 
@@ -87,7 +87,7 @@ Per SPEC-76 §6.2 and the established convention at `tools/validators/tests/stru
 ## Out of Scope
 
 - Schema-level `turn_driver` shape constraints — ship in SPEC76TURDRIPRI-003.
-- Observer-firewall semantics for non-player drivers — ship in SPEC76TURDRIPRI-004.
+- Observer-firewall semantics for non-player drivers — ship in archive/tickets/SPEC76TURDRIPRI-004.md.
 - Active-pressure handling discipline (enforcement of the table's CONTENT — selected/deferred/rejected dispositions) — ship in SPEC76TURDRIPRI-006. THIS validator only checks the table's PRESENCE.
 - `page_plan_stchar_packet_integrity` validator's warn → fail behavior change for unknown §16a labels — covered by the contract amendment in SPEC76TURDRIPRI-002; the validator source-change for that behavior is outside this ticket's scope.
 
