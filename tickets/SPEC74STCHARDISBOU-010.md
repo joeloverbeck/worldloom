@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` (2 new checks + 2 new diagnostic ids); `tools/validators/tests/structural/page-plan-stchar-packet-integrity.test.ts` (extend with new cases)
-**Deps**: 003
+**Deps**: `archive/tickets/SPEC74STCHARDISBOU-003.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@
 ## Assumption Reassessment (2026-05-23)
 
 1. Verified current `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` shape: SPEC-73's `Required because:` multi-token parsing at lines 215, 222-229; voice-block requirement via set intersection at lines 169-184; `offstage_causal` locational guard via set membership; `unknown_role_label` WARN-only diagnostic. No `stale_current_state_reference` or `grounding_records_none_with_citations` checks currently exist (per SPEC-74 §4.12 these are net-new).
-2. Verified SPEC-74 §4.12 specifies the 2 new checks + their diagnostic ids; §3 Out of Scope explicitly drops the source-report's §6.12 (5) check (the hash-stability assertion is refuted by SPEC-71). The new checks depend on the `Current-state grounding records:` field convention established by SPEC74STCHARDISBOU-003 — without that contract in place, the new field is unrecognized and the second check has nothing to gate on. **This is the structural Dep on SPEC74STCHARDISBOU-003.**
+2. Verified SPEC-74 §4.12 specifies the 2 new checks + their diagnostic ids; §3 Out of Scope explicitly drops the source-report's §6.12 (5) check (the hash-stability assertion is refuted by SPEC-71). The new checks depend on the `Current-state grounding records:` field convention established by `archive/tickets/SPEC74STCHARDISBOU-003.md` — without that contract in place, the new field is unrecognized and the second check has nothing to gate on. **This structural dependency is now satisfied by `archive/tickets/SPEC74STCHARDISBOU-003.md`.**
 3. Cross-skill boundary under audit: this validator gates §16a packet integrity at the validator-framework run-loop; the new diagnostic ids (`stale_current_state_reference`, `grounding_records_none_with_citations`) feed downstream consumers (health-audit, prose-attach receipts). The packet contract being enforced IS the contract defined by `_shared-templates/story-state-contract.md` §16a (SPEC74STCHARDISBOU-003).
 4. FOUNDATIONS principle restated: §Tooling Recommendation ("LLM agents should never operate on prose alone") — both new checks are structural: check (1) resolves cited record ids against the bundle's known records and `PG.state_snapshot.active_records[]`; check (2) parses the explicit `Current-state grounding records:` field value and grep-checks for record-id references elsewhere in the packet text. Neither parses free-prose semantics.
 5. HARD-GATE / Canon Safety Check surface touched: this is a structural validator under `tools/validators/src/structural/`; modifying it engages this item. The new checks strengthen the §16a packet gate by enforcing the cited-current-state-records ⇄ bundle-records ⇄ page-active-records resolution chain.
@@ -59,7 +59,7 @@ STCHAR hashes do NOT exist (SPEC-71 stripped them). The source report's §6.12 (
 
 - Re-spec'ing SPEC-73's multi-token parsing (already-landed; SPEC-74 §3 Out of Scope explicitly drops §6.12 (1) and (2)).
 - Any STCHAR hash-stability assertion (refuted by SPEC-71; SPEC-74 §3 explicitly drops §6.12 (5)).
-- The `Current-state grounding records:` field convention itself (SPEC74STCHARDISBOU-003 — this ticket's Dep).
+- The `Current-state grounding records:` field convention itself (`archive/tickets/SPEC74STCHARDISBOU-003.md` — this ticket's completed dependency).
 - Migration of existing red-bunny prose-plans that don't yet carry the field (SPEC74STCHARDISBOU-013).
 
 ## Acceptance Criteria
