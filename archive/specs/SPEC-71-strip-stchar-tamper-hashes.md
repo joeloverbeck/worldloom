@@ -1,7 +1,7 @@
 <!-- spec-drafting-rules.md not present; using default structure. -->
 # SPEC-71 — Strip STCHAR / Page-Packet Content-Tamper Hashes + Reintroduction Guard
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-05-22
 **Classification:** story-canon-related (governs the STCHAR frontmatter schema, the prose-receipt schema, the §16a page-plan packet contract, the STCHAR/packet/receipt structural validators, the patch-engine STCHAR ops, the `compute-stchar-hashes` CLI, the MCP STCHAR retrieval surface, and five story-pipeline skills)
 **Source:** in-chat hash-integrity audit + determination, 2026-05-22 (frustration-triggered brainstorm; surface map verified across schemas, validators, hooks, CLIs, and the live `erotica-world/red-bunny` bundle), then reassessed 2026-05-22 (the reassessment completed the §1.3 removal map — adding the patch-engine stamping ops, the validators stamping helper, the STCHAR-body hash note, and the MCP projection/op-schema surfaces that the original map missed — and corrected the §2.3 migration mechanism).
@@ -77,7 +77,7 @@ A lightweight meta-test (repo-grep assertion) confirms the four field names do n
 
 ### 2.3 Migration of the existing `red-bunny` bundle
 
-`erotica-world/red-bunny` is the only existing bundle and currently carries the fields in 3 STCHAR frontmatter blocks, 3 STCHAR body `Hashes:` notes, 2 page-plan §16a `Hashes:` lines, and 2 prose receipts. Implementation includes a one-time strip:
+`erotica-world/red-bunny` was the only existing bundle carrying the fields. At implementation, the fields were present across 3 STCHAR frontmatter blocks, 2 STCHAR body hash/source notes (`STCHAR-1` and `STCHAR-3`; `STCHAR-2` no longer carried the body note after index sync), 2 page-plan §16a `Hashes:` lines, 2 prose receipts, and the INDEX Story Character Authority table. Implementation included a one-time strip:
 
 - STCHAR records are engine-routed by skill prescription (they live under `story-characters/`, not `_source/`, and are **not** Hook-3-blocked, but discipline keeps them engine-routed). Strip the now-de-schema'd frontmatter fields with the purpose-built `remove_story_character_authority_frontmatter_field` op, and the STCHAR-body `Hashes:` note with `remove_story_character_authority_body_hash_note_field` (both already exist — `tools/patch-engine/src/ops/create-story-record.ts:199,236`, `tools/patch-engine/src/commit/order.ts:43-44`). Regeneration via `story-character-profile` is the alternative when a full re-author is wanted. **Do not** use `update_record_field` — it updates a value, it does not remove a field.
 - Page plans, receipts, and INDEX are direct-write surfaces — strip directly.
@@ -118,3 +118,15 @@ After migration the new guard (§2.2) must pass clean on the bundle.
 - Schema: `additionalProperties: false` rejection fixtures for STCHAR frontmatter and prose-receipt `stchar_authority[]`.
 - Regression: a hand-edited STCHAR body no longer produces a validator FAIL.
 - Migration smoke: `red-bunny` validates clean post-strip.
+
+## 7. Implementation outcome
+
+Completed on 2026-05-23 through archived tickets `SPEC71STRSTCHARTAM-001` through `SPEC71STRSTCHARTAM-008`.
+
+The final capstone migrated the ignored/private `worlds/erotica-world/stories/red-bunny` bundle on disk and proved it with:
+
+- `rg -n "profile_hash|voice_block_hash|page_packet_hash|source_char_hash|Hashes:" worlds/erotica-world/stories/red-bunny` → no matches.
+- `node tools/validators/dist/src/cli/world-validate.js erotica-world --structural --json` → `fail_count: 0`, `warn_count: 0`, `info_count: 3` optional compatibility-drift info only.
+- `npm test` in `tools/patch-engine` (99/99), `tools/validators` (893/893), `tools/world-mcp` (428/428), and `tools/world-index` (131/131).
+
+Final-ticket implementation also widened the existing STCHAR maintenance ops to the full retired hash-field set and fixed cumulative same-file staging/pre-apply overlay behavior for multi-op maintenance plans.

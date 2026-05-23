@@ -1,15 +1,13 @@
 {
-  "originating_spec": "specs/SPEC-71-strip-stchar-tamper-hashes.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC71STRSTCHARTAM-007.md",
+  "originating_spec": "archive/specs/SPEC-71-strip-stchar-tamper-hashes.md",
+  "archived_spec": "archive/specs/SPEC-71-strip-stchar-tamper-hashes.md",
+  "last_ticket": "archive/tickets/SPEC71STRSTCHARTAM-008.md",
   "last_result": "completed_archived",
-  "last_work_commit": "f0206142ccd3c82906648eee7b47b70f468796b7",
+  "last_work_commit": "32598c6c51587196c6de170de9b5e995c3f656bd",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC71STRSTCHARTAM-008.md",
-  "queue": [
-    "tickets/SPEC71STRSTCHARTAM-008.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
