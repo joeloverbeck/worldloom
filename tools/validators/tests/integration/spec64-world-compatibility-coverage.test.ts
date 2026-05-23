@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -8,10 +7,10 @@ import test from "node:test";
 import { build as buildWorldIndex } from "@worldloom/world-index/commands/build";
 import yaml from "js-yaml";
 
+import { parseJsonOutput, runWorldValidate } from "../_helpers/cli.js";
 import { validCf } from "../structural/helpers.js";
 
 const WORLD_SLUG = "spec64";
-const cliPath = path.resolve(process.cwd(), "dist/src/cli/world-validate.js");
 
 type CompatibilityRun = {
   verdicts: Array<{
@@ -126,13 +125,12 @@ function runCompatibility(
   if (options.file) {
     args.push("--file", options.file);
   }
-  const result = spawnSync(cliPath, args, {
+  const result = runWorldValidate(args, {
     cwd: repoRoot,
-    encoding: "utf8"
+    expectedStatus: options.expectStatus ?? 0
   });
 
-  assert.equal(result.status, options.expectStatus ?? 0, result.stderr + result.stdout);
-  return JSON.parse(result.stdout) as CompatibilityRun;
+  return parseJsonOutput<CompatibilityRun>(result);
 }
 
 function assertHasVerdict(

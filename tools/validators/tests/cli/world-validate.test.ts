@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -8,15 +7,15 @@ import test from "node:test";
 import Database from "better-sqlite3";
 import yaml from "js-yaml";
 
-const cliPath = path.resolve(process.cwd(), "dist/src/cli/world-validate.js");
+import { execChecked, parseJsonOutput, runWorldValidate } from "../_helpers/cli.js";
 
 test("world-validate exposes help and version", () => {
-  const help = execFileSync(cliPath, ["--help"], { encoding: "utf8" });
+  const help = runWorldValidate(["--help"], { expectedStatus: 0 }).stdout;
   for (const flag of ["--rules", "--structural", "--compatibility", "--json", "--file", "--since", "--help", "--version"]) {
     assert.match(help, new RegExp(flag));
   }
 
-  const version = execFileSync(cliPath, ["--version"], { encoding: "utf8" }).trim();
+  const version = runWorldValidate(["--version"], { expectedStatus: 0 }).stdout.trim();
   const packageJson = JSON.parse(readFileSync(path.resolve(process.cwd(), "package.json"), "utf8")) as {
     version: string;
   };
@@ -27,57 +26,44 @@ test("world-validate reports invalid input and missing index with documented exi
   const repo = createRepo();
   mkdirSync(path.join(repo, "worlds", "no-index"), { recursive: true });
 
-  const invalidSlug = spawnSync(cliPath, ["missing-world"], { cwd: repo, encoding: "utf8" });
-  assert.equal(invalidSlug.status, 2);
+  const invalidSlug = runWorldValidate(["missing-world"], { cwd: repo, expectedStatus: 2 });
   assert.match(invalidSlug.stderr, /not found/);
 
-  const missingIndex = spawnSync(cliPath, ["no-index"], { cwd: repo, encoding: "utf8" });
-  assert.equal(missingIndex.status, 3);
+  const missingIndex = runWorldValidate(["no-index"], { cwd: repo, expectedStatus: 3 });
   assert.match(missingIndex.stderr, /index missing/);
 });
 
 test("world-validate rejects mutually-exclusive validator selectors", () => {
   const repo = createIndexedWorld();
-  const result = spawnSync(cliPath, ["clean", "--rules=1", "--structural"], {
-    cwd: repo,
-    encoding: "utf8"
-  });
+  const result = runWorldValidate(["clean", "--rules=1", "--structural"], { cwd: repo, expectedStatus: 2 });
 
-  assert.equal(result.status, 2);
   assert.match(result.stderr, /mutually exclusive/);
 
-  const compatibilityWithStructural = spawnSync(cliPath, ["clean", "--compatibility", "--structural"], {
+  const compatibilityWithStructural = runWorldValidate(["clean", "--compatibility", "--structural"], {
     cwd: repo,
-    encoding: "utf8"
+    expectedStatus: 2
   });
-  assert.equal(compatibilityWithStructural.status, 2);
   assert.match(compatibilityWithStructural.stderr, /mutually exclusive/);
 
-  const skillJudgmentRule = spawnSync(cliPath, ["clean", "--rules=3"], {
-    cwd: repo,
-    encoding: "utf8"
-  });
-  assert.equal(skillJudgmentRule.status, 2);
+  const skillJudgmentRule = runWorldValidate(["clean", "--rules=3"], { cwd: repo, expectedStatus: 2 });
   assert.match(skillJudgmentRule.stderr, /mechanized rule numbers/);
 });
 
 test("world-validate emits JSON and keeps clean-run persistence stable", () => {
   const repo = createIndexedWorld();
 
-  const first = spawnSync(cliPath, ["clean", "--json"], { cwd: repo, encoding: "utf8" });
-  assert.equal(first.status, 0, first.stderr + first.stdout);
-  const parsed = JSON.parse(first.stdout) as {
+  const first = runWorldValidate(["clean", "--json"], { cwd: repo, expectedStatus: 0 });
+  const parsed = parseJsonOutput<{
     summary: { fail_count: number; validators_run: string[] };
     run_mode: string;
-  };
+  }>(first);
   assert.equal(parsed.run_mode, "full-world");
   assert.equal(parsed.summary.fail_count, 0);
   assert.ok(!parsed.summary.validators_run.includes("adjudication_discovery_fields"));
 
   const dbPath = path.join(repo, "worlds", "clean", "_index", "world.db");
   const firstCount = validationRowCount(dbPath);
-  const second = spawnSync(cliPath, ["clean"], { cwd: repo, encoding: "utf8" });
-  assert.equal(second.status, 0, second.stderr + second.stdout);
+  runWorldValidate(["clean"], { cwd: repo, expectedStatus: 0 });
   assert.equal(validationRowCount(dbPath), firstCount);
 });
 
@@ -88,12 +74,11 @@ test("world-validate exits 1 and persists verdict rows for a deliberate violatio
     }
   });
 
-  const result = spawnSync(cliPath, ["clean", "--file", "worlds/clean/_source/mystery-reserve/M-1.yaml"], {
+  const result = runWorldValidate(["clean", "--file", "worlds/clean/_source/mystery-reserve/M-1.yaml"], {
     cwd: repo,
-    encoding: "utf8"
+    expectedStatus: 1
   });
 
-  assert.equal(result.status, 1, result.stderr + result.stdout);
   assert.match(result.stdout, /rule7\.missing_disallowed_cheap_answers/);
   assert.ok(validationRowCount(path.join(repo, "worlds", "clean", "_index", "world.db")) > 0);
 });
@@ -118,12 +103,11 @@ test("world-validate reports record_schema_compliance failures for malformed pro
     "utf8"
   );
 
-  const result = spawnSync(cliPath, ["clean", "--structural", "--json"], { cwd: repo, encoding: "utf8" });
-  const parsed = JSON.parse(result.stdout || result.stderr) as {
+  const result = runWorldValidate(["clean", "--structural", "--json"], { cwd: repo, expectedStatus: 1 });
+  const parsed = parseJsonOutput<{
     verdicts: Array<{ validator: string; code: string; location: { file?: string } }>;
-  };
+  }>(result);
 
-  assert.equal(result.status, 1, result.stderr + result.stdout);
   assert.ok(
     parsed.verdicts.some(
       (verdict) =>
@@ -168,13 +152,12 @@ test("world-validate downgrades exact grandfathered bootstrap findings to info",
     "utf8"
   );
 
-  const result = spawnSync(cliPath, ["clean", "--json"], { cwd: repo, encoding: "utf8" });
+  const result = runWorldValidate(["clean", "--json"], { cwd: repo, expectedStatus: 0 });
 
-  assert.equal(result.status, 0, result.stderr + result.stdout);
-  const parsed = JSON.parse(result.stdout) as {
+  const parsed = parseJsonOutput<{
     verdicts: Array<{ severity: string; code: string; message: string; suggested_fix?: string }>;
     summary: { fail_count: number; info_count: number };
-  };
+  }>(result);
   assert.equal(parsed.summary.fail_count, 0);
   assert.equal(parsed.summary.info_count, 1);
   assert.equal(parsed.verdicts[0]?.severity, "info");
@@ -185,13 +168,12 @@ test("world-validate downgrades exact grandfathered bootstrap findings to info",
 
 test("world-validate --since narrows selector applicability from the world's git repo", () => {
   const repo = createIndexedWorld();
-  execFileSync("git", ["init"], { cwd: repo });
-  execFileSync("git", ["add", "."], { cwd: repo });
-  execFileSync("git", ["-c", "user.name=Worldloom Test", "-c", "user.email=test@example.test", "commit", "-m", "base"], {
-    cwd: repo,
-    stdio: "ignore"
+  execChecked("git", ["init"], { cwd: repo });
+  execChecked("git", ["add", "."], { cwd: repo });
+  execChecked("git", ["-c", "user.name=Worldloom Test", "-c", "user.email=test@example.test", "commit", "-m", "base"], {
+    cwd: repo
   });
-  const base = execFileSync("git", ["rev-parse", "HEAD"], { cwd: repo, encoding: "utf8" }).trim();
+  const base = execChecked("git", ["rev-parse", "HEAD"], { cwd: repo });
   writeFileSync(
     path.join(repo, "worlds", "clean", "_source", "mystery-reserve", "M-1.yaml"),
     yaml.dump({ ...validMystery(), disallowed_cheap_answers: [] }),
@@ -202,19 +184,17 @@ test("world-validate --since narrows selector applicability from the world's git
     "M-1",
     { ...validMystery(), disallowed_cheap_answers: [] }
   );
-  execFileSync("git", ["add", "."], { cwd: repo });
-  execFileSync("git", ["-c", "user.name=Worldloom Test", "-c", "user.email=test@example.test", "commit", "-m", "break mr"], {
-    cwd: repo,
-    stdio: "ignore"
+  execChecked("git", ["add", "."], { cwd: repo });
+  execChecked("git", ["-c", "user.name=Worldloom Test", "-c", "user.email=test@example.test", "commit", "-m", "break mr"], {
+    cwd: repo
   });
 
-  const result = spawnSync(cliPath, ["clean", "--since", base, "--json"], {
+  const result = runWorldValidate(["clean", "--since", base, "--json"], {
     cwd: repo,
-    encoding: "utf8"
+    expectedStatus: 1
   });
 
-  assert.equal(result.status, 1, result.stderr + result.stdout);
-  const parsed = JSON.parse(result.stdout) as { summary: { validators_run: string[] } };
+  const parsed = parseJsonOutput<{ summary: { validators_run: string[] } }>(result);
   assert.deepEqual(parsed.summary.validators_run, [
     "yaml_parse_integrity",
     "id_uniqueness",

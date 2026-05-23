@@ -397,7 +397,7 @@
       "required": ["pred", "record", "comparator", "pages"],
       "properties": {
         "pred": { "const": "record_age" },
-        "record": { "type": "string", "pattern": "^(?:(?:STENT|STCHAR|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|STPLAN|STEMO)-[0-9]+|[a-z][a-z0-9_-]*)$" },
+        "record": { "type": "string", "pattern": "^(?:(?:STENT|STCHAR|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT|CLK|STSEC|STQ|STPLAN|STEMO)-[0-9]+|bound:[a-z][a-z0-9_-]*)$" },
         "comparator": { "type": "string", "enum": [">=", "<=", "==", "!="] },
         "pages": { "type": "integer", "minimum": 0 }
       }

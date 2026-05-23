@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import {
   mkdtempSync,
   readFileSync,
@@ -13,6 +12,7 @@ import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
 import { build } from "@worldloom/world-index/commands/build";
 import yaml from "js-yaml";
 
+import { parseJsonOutput, runWorldValidate } from "../_helpers/cli.js";
 import { replayActiveRecords } from "../../src/_helpers/state-snapshot-replay.js";
 import { runValidators } from "../../src/framework/run.js";
 import type { Context, IndexedRecord, Validator, Verdict } from "../../src/framework/types.js";
@@ -258,8 +258,7 @@ test("§Verification bullet 19: synthetic legacy bundle validates cleanly from a
   const fixture = materializeCompatibilityFixtureWorld(tempRepo, packageRoot());
   try {
     assert.equal(build(tempRepo, fixture.worldSlug, { quiet: true }), 0);
-    const run = spawnSync(process.execPath, [
-      path.resolve(packageRoot(), "dist", "src", "cli", "world-validate.js"),
+    const run = runWorldValidate([
       fixture.worldSlug,
       "--structural",
       "--story",
@@ -267,10 +266,9 @@ test("§Verification bullet 19: synthetic legacy bundle validates cleanly from a
       "--json"
     ], {
       cwd: tempRepo,
-      encoding: "utf8"
+      expectedStatus: 0
     });
-    assert.equal(run.status, 0, run.stderr + run.stdout);
-    const parsed = JSON.parse(run.stdout) as { verdicts: Verdict[]; summary: { fail_count: number } };
+    const parsed = parseJsonOutput<{ verdicts: Verdict[]; summary: { fail_count: number } }>(run);
     assert.equal(parsed.summary.fail_count, 0);
     assertClassifications(parsed.verdicts, ["compatible_optional_absence", "grandfathered_snapshot_shape"]);
   } finally {

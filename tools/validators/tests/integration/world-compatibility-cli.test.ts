@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -9,9 +8,8 @@ import Database from "better-sqlite3";
 
 import { selectValidators } from "../../src/cli/_helpers.js";
 import { structuralValidators, ruleValidators } from "../../src/public/registry.js";
+import { parseJsonOutput, runWorldValidate } from "../_helpers/cli.js";
 import { context } from "../structural/helpers.js";
-
-const cliPath = path.resolve(process.cwd(), "dist/src/cli/world-validate.js");
 
 test("world-validate --compatibility selects exactly the compatibility validator subset", () => {
   const selected = selectValidators(structuralValidators, ruleValidators, { compatibility: true }, context([]))
@@ -28,16 +26,15 @@ test("world-validate --compatibility selects exactly the compatibility validator
 test("world-validate --compatibility reports full-world warnings without failing", () => {
   const repo = createIndexedWorldWithIndexDrift();
   try {
-    const result = spawnSync(cliPath, ["compat", "--compatibility", "--json"], {
+    const result = runWorldValidate(["compat", "--compatibility", "--json"], {
       cwd: repo,
-      encoding: "utf8"
+      expectedStatus: 0
     });
 
-    assert.equal(result.status, 0, result.stderr + result.stdout);
-    const parsed = JSON.parse(result.stdout) as {
+    const parsed = parseJsonOutput<{
       verdicts: Array<{ validator: string; code: string; severity: string }>;
       summary: { fail_count: number; warn_count: number; validators_run: string[] };
-    };
+    }>(result);
 
     assert.deepEqual(parsed.summary.validators_run, [
       "record_schema_compliance",

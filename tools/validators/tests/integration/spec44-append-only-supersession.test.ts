@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -16,6 +15,7 @@ import { expectedWitnessCoverage } from "../../src/structural/expected-witness-c
 import { noStoryStateInPlaceMutation } from "../../src/structural/no-story-state-in-place-mutation.js";
 import { pageAffordanceIntegrity } from "../../src/structural/page-affordance-integrity.js";
 import { stateDeltaClassIntegrity } from "../../src/structural/state-delta-class-integrity.js";
+import { parseJsonOutput, runWorldValidate } from "../_helpers/cli.js";
 import { context, record } from "../structural/helpers.js";
 import { materializeCompatibilityFixtureWorld } from "./synthetic-compatibility-world.js";
 
@@ -133,8 +133,7 @@ test("SPEC-44 capstone synthetic story-bundle structural CLI smoke exits with no
   const fixture = materializeCompatibilityFixtureWorld(tempRepo, packageRoot());
   try {
     assert.equal(build(tempRepo, fixture.worldSlug, { quiet: true }), 0);
-    const run = spawnSync(process.execPath, [
-      path.join(packageRoot(), "dist", "src", "cli", "world-validate.js"),
+    const run = runWorldValidate([
       fixture.worldSlug,
       "--story",
       fixture.storySlug,
@@ -142,10 +141,9 @@ test("SPEC-44 capstone synthetic story-bundle structural CLI smoke exits with no
       "--json"
     ], {
       cwd: tempRepo,
-      encoding: "utf8"
+      expectedStatus: 0
     });
-    assert.equal(run.status, 0, run.stderr + run.stdout);
-    const parsed = JSON.parse(run.stdout) as { summary: { fail_count: number } };
+    const parsed = parseJsonOutput<{ summary: { fail_count: number } }>(run);
     assert.equal(parsed.summary.fail_count, 0);
   } finally {
     rmSync(tempRepo, { recursive: true, force: true });

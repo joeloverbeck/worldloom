@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -8,28 +7,24 @@ import test from "node:test";
 import Database from "better-sqlite3";
 import yaml from "js-yaml";
 
-const cliPath = path.resolve(process.cwd(), "dist/src/cli/world-validate.js");
+import { parseJsonOutput, runWorldValidate } from "../_helpers/cli.js";
 
 test("world-validate --story scopes storylet predicate validation to one bundle", () => {
   const repo = createIndexedStoryWorld();
 
-  const scoped = spawnSync(
-    process.execPath,
-    [cliPath, "clean", "--story", "alpha", "--rules", "storylet_predicate_dsl_parsability", "--json"],
-    { cwd: repo, encoding: "utf8" }
+  const scoped = runWorldValidate(
+    ["clean", "--story", "alpha", "--rules", "storylet_predicate_dsl_parsability", "--json"],
+    { cwd: repo, expectedStatus: 0 }
   );
-  assert.equal(scoped.status, 0, scoped.stderr + scoped.stdout);
-  const scopedRun = JSON.parse(scoped.stdout) as { summary: { validators_run: string[]; fail_count: number } };
+  const scopedRun = parseJsonOutput<{ summary: { validators_run: string[]; fail_count: number } }>(scoped);
   assert.deepEqual(scopedRun.summary.validators_run, ["storylet_predicate_dsl_parsability"]);
   assert.equal(scopedRun.summary.fail_count, 0);
 
-  const unscoped = spawnSync(
-    process.execPath,
-    [cliPath, "clean", "--rules", "storylet_predicate_dsl_parsability", "--json"],
-    { cwd: repo, encoding: "utf8" }
+  const unscoped = runWorldValidate(
+    ["clean", "--rules", "storylet_predicate_dsl_parsability", "--json"],
+    { cwd: repo, expectedStatus: 1 }
   );
-  assert.equal(unscoped.status, 1, unscoped.stderr + unscoped.stdout);
-  const unscopedRun = JSON.parse(unscoped.stdout) as { verdicts: Array<{ code: string; message: string }> };
+  const unscopedRun = parseJsonOutput<{ verdicts: Array<{ code: string; message: string }> }>(unscoped);
   assert.equal(unscopedRun.verdicts[0]?.code, "predicate.unknown_pred");
   assert.match(unscopedRun.verdicts[0]?.message ?? "", /SLT-2/);
 });

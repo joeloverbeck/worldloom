@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -14,6 +13,7 @@ import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
 import { validatePatchPlan } from "../../src/public/index.js";
 import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
 import { rule11ActionSpace } from "../../src/rules/rule11-action-space.js";
+import { assertExitStatus, parseJsonOutput, runWorldValidate } from "../_helpers/cli.js";
 import { completeCf } from "../rules/helpers.js";
 import { context, record, validSection } from "../structural/helpers.js";
 
@@ -27,7 +27,6 @@ const Ajv2020 = Ajv2020Module as unknown as Ajv2020Constructor;
 const packageRoot = resolvePackageRoot();
 const repoRoot = path.resolve(packageRoot, "../..");
 const realAnimaliaRoot = path.join(repoRoot, "tests", "fixtures", "animalia");
-const cliPath = path.join(packageRoot, "dist", "src", "cli", "world-validate.js");
 
 let tempRoot = "";
 let tempWorldRoot = "";
@@ -85,8 +84,8 @@ test("SPEC-09 §V3: world-validate exits 0 on animalia historical CFs (rules=11,
   assert.equal(cfCount, countAnimaliaCFs(realAnimaliaRoot));
   assert.ok(cfCount > 0, `expected animalia CF count to be re-enumerated, got ${cfCount}`);
 
-  const result = runWorldValidate(tempRoot, "animalia", ["--rules=11,12", "--json"]);
-  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const result = runWorldValidateFrom(tempRoot, "animalia", ["--rules=11,12", "--json"]);
+  assertExitStatus(result, 0);
 });
 
 test("SPEC-09 §V4: capability CF without exception_governance FAILS record_schema_compliance", async () => {
@@ -145,13 +144,13 @@ test("SPEC-09 §V7: bare n_a (no fact-type keyword) FAILS rationale regex", asyn
 });
 
 test("SPEC-09 §V9: world-validate full-rule baseline reports known legacy character/proposal gaps", () => {
-  const result = runWorldValidate(tempRoot, "animalia", ["--json"]);
-  const parsed = JSON.parse(result.stderr || result.stdout) as {
+  const result = runWorldValidateFrom(tempRoot, "animalia", ["--json"]);
+  const parsed = parseJsonOutput<{
     verdicts: Array<{ code: string; message: string; location: { node_id?: string; file?: string } }>;
     summary: { fail_count: number; warn_count: number; info_count: number };
-  };
+  }>(result);
 
-  assert.equal(result.status, 1, result.stderr || result.stdout);
+  assertExitStatus(result, 1);
   assert.equal(parsed.summary.fail_count, 540);
   assert.equal(parsed.summary.warn_count, 0);
   assert.equal(parsed.summary.info_count, 0);
@@ -224,16 +223,8 @@ function countAnimaliaCFs(worldRoot: string): number {
   return readdirSync(path.join(worldRoot, "_source", "canon")).filter((entry) => entry.endsWith(".yaml")).length;
 }
 
-function runWorldValidate(cwd: string, worldSlug: string, args: string[]): { status: number | null; stdout: string; stderr: string } {
-  const result = spawnSync(process.execPath, [cliPath, worldSlug, ...args], {
-    cwd,
-    encoding: "utf8"
-  });
-  return {
-    status: result.status,
-    stdout: result.stdout,
-    stderr: result.stderr
-  };
+function runWorldValidateFrom(cwd: string, worldSlug: string, args: string[]) {
+  return runWorldValidate([worldSlug, ...args], { cwd });
 }
 
 function legacyCharacterDramaticCoreFailures(

@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -7,7 +6,8 @@ import test from "node:test";
 
 import Database from "better-sqlite3";
 import yaml from "js-yaml";
-const cliPath = path.resolve(process.cwd(), "dist/src/cli/world-validate.js");
+
+import { assertExitStatus, parseJsonOutput, runWorldValidate as runWorldValidateCli, type CheckedRun } from "../_helpers/cli.js";
 
 const SPEC34_VALIDATORS = [
   "branch_isolation",
@@ -26,8 +26,8 @@ const SPEC34_FAIL_CODES = [
 test("SPEC-34 validators run together through world-validate CLI with pass and fail worlds", () => {
   const passRepo = createSpec34Repo("spec34-pass", passRecords());
   const passRun = runWorldValidate(passRepo, "spec34-pass");
-  assert.equal(passRun.status, 0, passRun.stderr + passRun.stdout);
-  const passJson = parseRun(passRun.stdout);
+  assertExitStatus(passRun, 0);
+  const passJson = parseRun(passRun);
   for (const validator of SPEC34_VALIDATORS) {
     assert.ok(passJson.summary.validators_run.includes(validator), `${validator} did not run in PASS fixture`);
   }
@@ -35,19 +35,13 @@ test("SPEC-34 validators run together through world-validate CLI with pass and f
 
   const failRepo = createSpec34Repo("spec34-fail", failRecords());
   const failRun = runWorldValidate(failRepo, "spec34-fail");
-  assert.equal(failRun.status, 1, failRun.stderr + failRun.stdout);
-  const failJson = parseRun(failRun.stdout);
+  assertExitStatus(failRun, 1);
+  const failJson = parseRun(failRun);
   const actualCodes = new Set(failJson.verdicts.map((verdict) => verdict.code));
   for (const expectedCode of SPEC34_FAIL_CODES) {
     assert.ok(actualCodes.has(expectedCode), `${expectedCode} did not appear in FAIL fixture: ${[...actualCodes].join(", ")}`);
   }
 });
-
-interface CliRun {
-  status: number | null;
-  stdout: string;
-  stderr: string;
-}
 
 interface ValidatorRunJson {
   verdicts: Array<{ code: string; validator: string; severity: string }>;
@@ -66,15 +60,12 @@ interface FixtureRecord {
   body_markdown?: string;
 }
 
-function runWorldValidate(repo: string, worldSlug: string): CliRun {
-  return spawnSync(process.execPath, [cliPath, worldSlug, "--structural", "--json"], {
-    cwd: repo,
-    encoding: "utf8"
-  });
+function runWorldValidate(repo: string, worldSlug: string): CheckedRun {
+  return runWorldValidateCli([worldSlug, "--structural", "--json"], { cwd: repo });
 }
 
-function parseRun(stdout: string): ValidatorRunJson {
-  return JSON.parse(stdout) as ValidatorRunJson;
+function parseRun(run: CheckedRun): ValidatorRunJson {
+  return parseJsonOutput<ValidatorRunJson>(run);
 }
 
 function createSpec34Repo(worldSlug: string, records: FixtureRecord[]): string {
