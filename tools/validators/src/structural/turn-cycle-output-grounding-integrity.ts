@@ -3,6 +3,7 @@ import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, string
 
 const VALIDATOR = "turn_cycle_output_grounding_integrity";
 const TARGET_CLASSES = new Set(["CNSQ", "SF", "DA"]);
+const PLAYER_DRIVER_KINDS = new Set(["player_action", "player_write_in"]);
 const EVENT_CREATE_OPS = new Set(["create_se_record", "create_pg_record"]);
 const ALLOWED_GROUNDING_PREFIXES = new Set([
   "SE",
@@ -27,7 +28,7 @@ export const turnCycleOutputGroundingIntegrity: Validator = {
   applies_to: (ctx: Context) =>
     ctx.run_mode === "full-world" ||
     ctx.patch_plan?.patches.some((patch) => EVENT_CREATE_OPS.has(patch.op)) === true ||
-    touchedFilesInclude(ctx, /^stories\/[^/]+\/_source\/(?:events|pages|consequences|facts|artifacts)\/(?:SE|PG|CNSQ|SF|DA)-\d+\.yaml$/),
+    touchedFilesInclude(ctx, /^stories\/[^/]+\/_source\/(?:events|pages|choices|consequences|facts|artifacts)\/(?:SE|PG|CHC|CNSQ|SF|DA)-\d+\.yaml$/),
   run: async (_input: unknown, ctx: Context): Promise<Verdict[]> => {
     const records = await queryStructuralRecords(ctx);
     const verdicts: Verdict[] = [];
@@ -78,6 +79,7 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
     }
     verdicts.push(...validateCreatedOutput(record, activeOrCreatedIds));
   }
+  verdicts.push(...validateResponseChoiceGrounding(event, parsed, createdIds, maps));
   return verdicts;
 }
 
@@ -104,6 +106,54 @@ function validateCreatedOutput(record: IndexedRecord, activeOrCreatedIds: Set<st
   }
 
   return verdicts;
+}
+
+function validateResponseChoiceGrounding(
+  event: IndexedRecord,
+  parsedEvent: Record<string, unknown>,
+  createdIds: ReadonlySet<string>,
+  maps: RecordMaps
+): Verdict[] {
+  const turnDriver = asPlainRecord(parsedEvent.turn_driver);
+  const driverKind = stringValue(turnDriver.kind);
+  const driverRecords = new Set(stringArray(turnDriver.driver_records));
+  if (driverKind === undefined || PLAYER_DRIVER_KINDS.has(driverKind) || driverRecords.size === 0) {
+    return [];
+  }
+
+  const verdicts: Verdict[] = [];
+  for (const createdId of createdIds) {
+    if (recordClassForId(createdId) !== "CHC") {
+      continue;
+    }
+    const choice = maps.byId.get(createdId);
+    if (choice === undefined) {
+      continue;
+    }
+    const parsedChoice = asPlainRecord(choice.parsed);
+    if (stringValue(parsedChoice.player_response_mode) !== "responds") {
+      continue;
+    }
+    const groundedRecords = new Set(stringArray(asPlainRecord(parsedChoice.grounded_in).records));
+    if (!hasIntersection(groundedRecords, driverRecords)) {
+      verdicts.push(fail(choice, "chc_response_topical_grounding_missing", `${createdId} responds to ${stringValue(parsedEvent.id) ?? bareNodeId(event)} but grounds in no turn_driver.driver_records entry.`, {
+        choice_id: createdId,
+        event_id: stringValue(parsedEvent.id) ?? bareNodeId(event),
+        driver_records: [...driverRecords].sort(),
+        grounded_records: [...groundedRecords].sort()
+      }));
+    }
+  }
+  return verdicts;
+}
+
+function hasIntersection(left: ReadonlySet<string>, right: ReadonlySet<string>): boolean {
+  for (const value of left) {
+    if (right.has(value)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function recordMapsForStory(records: readonly IndexedRecord[], storySlug: string): RecordMaps {

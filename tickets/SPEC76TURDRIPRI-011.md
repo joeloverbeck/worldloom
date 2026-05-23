@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new fixture directory at `tools/validators/tests/fixtures/red-kiln-ambush/`; new integration test exercising the full SPEC-76 pipeline end-to-end
-**Deps**: archive/tickets/SPEC76TURDRIPRI-003.md, archive/tickets/SPEC76TURDRIPRI-004.md, archive/tickets/SPEC76TURDRIPRI-005.md, archive/tickets/SPEC76TURDRIPRI-006.md, SPEC76TURDRIPRI-007, SPEC76TURDRIPRI-008, SPEC76TURDRIPRI-009, SPEC76TURDRIPRI-010
+**Deps**: archive/tickets/SPEC76TURDRIPRI-003.md, archive/tickets/SPEC76TURDRIPRI-004.md, archive/tickets/SPEC76TURDRIPRI-005.md, archive/tickets/SPEC76TURDRIPRI-006.md, archive/tickets/SPEC76TURDRIPRI-007.md, SPEC76TURDRIPRI-008, SPEC76TURDRIPRI-009, SPEC76TURDRIPRI-010
 
 ## Problem
 
@@ -14,7 +14,7 @@ SPEC-76's full pipeline — schema, contract, 4 new validators, 3 existing-valid
 
 1. `tools/validators/tests/fixtures/` exists and currently contains CF-test fixtures, patch-plan fixtures, and a `midstory-introduction/` subdirectory. No existing `red-kiln-ambush` directory (verified via the Pre-flight existence check earlier this session — no collision). Per SPEC-76 §6.3, the fixture path is `tools/validators/tests/fixtures/red-kiln-ambush/`. Inline-fixture-builder pattern (established by `chc-slt-selected-commitment-trace.test.ts` and sibling tests) is used for the per-validator structural tests in SPEC76TURDRIPRI-003 through 006; the golden fixture under `tests/fixtures/` is a separate convention used for end-to-end integration tests that exercise multiple validators against a shared fixture-world copy.
 2. SPEC-76 §6.3 prescribes the fixture content verbatim — NPC-initiated event with Varro's plan step + clock fire producing `turn_resolution` SE; page plan §7a renders the driver and the 4 driver_records; emitted CHCs all carry `responds` mode with at least one targeting a record in `driver_records`; observer firewall passes (no `Varro smiled because he knew Jon would choose Mara`-style hidden mind narration). Per SPEC-76 §8 Implementation Slice E: "Red Kiln Ambush + 5 failing variants (no driver, hidden mind leak, missing pressure table, mismatched §7a, wrong response mode)."
-3. **Cross-skill / cross-artifact boundary**: this fixture exercises the full SPEC-76 pipeline end-to-end — schema (SPEC76TURDRIPRI-001), contract (SPEC76TURDRIPRI-002), 4 new validators (SPEC76TURDRIPRI-003 through 006), 3 existing-validator updates (SPEC76TURDRIPRI-007), 3 skill amendments (SPEC76TURDRIPRI-008/009/010). The fixture's content (the SE record, the PG record, the page-plan body, the CHC records) must be coherent across all surfaces; the test asserts each validator's verdict on the fixture matches the expected pass/fail per the spec's verification matrix.
+3. **Cross-skill / cross-artifact boundary**: this fixture exercises the full SPEC-76 pipeline end-to-end — schema (SPEC76TURDRIPRI-001), contract (SPEC76TURDRIPRI-002), 4 new validators (SPEC76TURDRIPRI-003 through 006), 3 existing-validator updates (archive/tickets/SPEC76TURDRIPRI-007.md), 3 skill amendments (SPEC76TURDRIPRI-008/009/010). The fixture's content (the SE record, the PG record, the page-plan body, the CHC records) must be coherent across all surfaces; the test asserts each validator's verdict on the fixture matches the expected pass/fail per the spec's verification matrix.
 4. **FOUNDATIONS principle**: §FOUNDATIONS Alignment table validation. The fixture demonstrates the composed end-to-end behavior across the spec's named alignment: §Story Bundles §5b (Schema-Minimalism — every field load-bearing), §5c (Present Causal State — driver salience local), §6b (Observer Firewall — Jon's POV via window grants direct observation), §4a (Plan-Authority Boundary — §7a is render-side projection of SE.turn_driver), §5a (Commitment Blocks — narrative-shape-field-rejection backstop preserved), Rule 5 (No Consequence Evasion — active-pressure table accounts for all 4 high-urgency records), Rule 7 (Preserve Mystery — no hidden state leaked through `perceived_directly`).
 
 ## Architecture Check
@@ -29,8 +29,8 @@ SPEC-76's full pipeline — schema, contract, 4 new validators, 3 existing-valid
 3. **Invariant**: `turn_driver_pov_observer_firewall` (archive/tickets/SPEC76TURDRIPRI-004.md) passes — Jon's POV via window grants direct observation; no hidden state cited with `perceived_directly`.
 4. **Invariant**: `page_plan_turn_driver_consistency` (archive/tickets/SPEC76TURDRIPRI-005.md) passes — page plan §7a matches SE.turn_driver byte-for-byte.
 5. **Invariant**: `active_pressure_handling_discipline` (archive/tickets/SPEC76TURDRIPRI-006.md) passes — all 4 high-urgency records (STPLAN-9, STEMO-12, CLK-3, THR-4) appear in §7a active-pressure table with valid dispositions.
-6. **Invariant**: `observer_firewall` (extended in SPEC76TURDRIPRI-007) short-circuits — the event has non-player driver, delegated to `turn_driver_pov_observer_firewall`.
-7. **Invariant**: `turn_cycle_output_grounding_integrity` (extended in SPEC76TURDRIPRI-007) passes — at least one CHC carrying `player_response_mode: responds` includes a record from `SE.turn_driver.driver_records[]` in its `grounded_in.records[]`.
+6. **Invariant**: `observer_firewall` (extended in archive/tickets/SPEC76TURDRIPRI-007.md) short-circuits — the event has non-player driver, delegated to `turn_driver_pov_observer_firewall`.
+7. **Invariant**: `turn_cycle_output_grounding_integrity` (extended in archive/tickets/SPEC76TURDRIPRI-007.md) passes — at least one CHC carrying `player_response_mode: responds` includes a record from `SE.turn_driver.driver_records[]` in its `grounded_in.records[]`.
 8. **Invariant**: 5 failing variants per SPEC-76 §8 Slice E (no driver, hidden mind leak, missing pressure table, mismatched §7a, wrong response mode) each produce the expected verdict from the appropriate validator.
 
 ## What to Change
@@ -59,7 +59,7 @@ Per SPEC-76 §8 Slice E, add 5 failing-variant fixtures (each a small mutation o
 - **Hidden mind leak variant**: SE.turn_driver cites Varro's STPLAN-9 (offstage) with `pov_visibility = perceived_directly` → `turn_driver_pov_observer_firewall.turn_driver_hidden_state_leak`.
 - **Missing pressure table variant**: page-plan §7a omits the `Active-pressure disposition` table while parent PG has the 4 high-urgency records → `page_plan_turn_driver_consistency.page_plan_active_pressure_table_missing` and/or `active_pressure_handling_discipline.high_urgency_active_record_unhandled` per the validators' enforcement scopes.
 - **Mismatched §7a variant**: page-plan §7a's `Driver kind:` says `offstage_action` while SE.turn_driver.kind says `npc_action` → `page_plan_turn_driver_consistency.page_plan_driver_kind_mismatch`.
-- **Wrong response mode variant**: emitted CHCs all carry `player_response_mode: initiates` (instead of `responds`) → the Phase 8 amendment's response-mode requirement fails (enforced by `turn_cycle_output_grounding_integrity` or a related grounding check per the topical-grounding extension in SPEC76TURDRIPRI-007).
+- **Wrong response mode variant**: emitted CHCs all carry `player_response_mode: initiates` (instead of `responds`) → the Phase 8 amendment's response-mode requirement fails (enforced by `turn_cycle_output_grounding_integrity` or a related grounding check per the topical-grounding extension in archive/tickets/SPEC76TURDRIPRI-007.md).
 
 ### 4. Document the fixture's role
 

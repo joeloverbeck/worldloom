@@ -36,6 +36,29 @@ test("observer_firewall rejects private BEL leakage from another actor", async (
   });
 });
 
+test("observer_firewall delegates non-player turn drivers to the turn-driver POV firewall", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["BEL-2"]),
+    event("SE-1", "STENT-1", "PG-1", { selected_slt_id: null, alias_bindings: {} }, "npc_action"),
+    belief("BEL-2", "STENT-2", "private")
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("observer_firewall inspects player write-in turn drivers", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["BEL-2"]),
+    event("SE-1", "STENT-1", "PG-1", { selected_slt_id: null, alias_bindings: {} }, "player_write_in"),
+    belief("BEL-2", "STENT-2", "private")
+  ]));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "observer_firewall_violation_private_belief_leak");
+});
+
 test("observer_firewall accepts defensive SF grounding with a BEL access route", async () => {
   const verdicts = await observerFirewall.run(undefined, context([
     page("PG-1", "CHC-1"),
@@ -357,12 +380,14 @@ function event(
   id: string,
   actor: string,
   parentPageId: string,
-  commitment: Record<string, unknown> = { selected_slt_id: null, alias_bindings: {} }
+  commitment: Record<string, unknown> = { selected_slt_id: null, alias_bindings: {} },
+  driverKind = "player_action"
 ) {
   return storyRecord("story_event_record", id, "events", {
     id,
     story_id: "STORY-1",
-    event_kind: "selected_choice",
+    event_kind: "turn_resolution",
+    turn_driver: { kind: driverKind },
     actor,
     parent_page_id: parentPageId,
     commitment

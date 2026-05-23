@@ -101,7 +101,7 @@ If the skill's SKILL.md contains a process-flow diagram (ascii or ordered list),
 - Schema-level `turn_driver` shape constraints — ship in SPEC76TURDRIPRI-001.
 - Contract amendments (`_shared-templates/story-state-contract.md` §4/§7/§8/§16a) — ship in SPEC76TURDRIPRI-002.
 - New structural validators — shipped in SPEC76TURDRIPRI-003 through archive/tickets/SPEC76TURDRIPRI-006.md.
-- Existing-validator updates — ship in SPEC76TURDRIPRI-007.
+- Existing-validator updates — shipped in archive/tickets/SPEC76TURDRIPRI-007.md.
 - Golden fixture (Red Kiln Ambush) — ship in SPEC76TURDRIPRI-011.
 
 ## Acceptance Criteria

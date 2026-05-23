@@ -1,6 +1,6 @@
 # SPEC76TURDRIPRI-007: Existing-validator updates — `observer_firewall` extension, `chc_slt_*` code rename, `turn_cycle_output_grounding_integrity` extension
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/structural/observer-firewall.ts`, `tools/validators/src/structural/chc-slt-selected-commitment-trace.ts`, `tools/validators/src/structural/turn-cycle-output-grounding-integrity.ts`
@@ -138,3 +138,20 @@ Add to `tools/validators/tests/structural/observer-firewall.test.ts`:
 1. `cd tools/validators && npm test` — runs the validator package's full test suite including the three modified test files.
 2. `cd tools/validators && npm run build` — verifies TypeScript compilation of the three modified validator modules.
 3. `grep -rn "selected_choice_unresolvable" tools/validators/` — confirms rename complete (expect zero matches).
+
+## Outcome
+
+Completed. `observer_firewall` now inspects `turn_resolution` events only when `turn_driver.kind` is `player_action` or `player_write_in`, leaving non-player drivers to `turn_driver_pov_observer_firewall`. `chc_slt_selected_commitment_trace` now emits the neutral `turn_resolution_unresolvable` warning code. `turn_cycle_output_grounding_integrity` now checks created response CHCs on non-player-driver events and fails `chc_response_topical_grounding_missing` when the CHC grounds in no `SE.turn_driver.driver_records[]` entry.
+
+The topical-grounding extension is intentionally limited to created CHC records with `player_response_mode: responds`; continuation CHCs and player-driver events are unchanged.
+
+## Verification Result
+
+PASS:
+
+1. Pre-edit `cd tools/validators && npm test` — PASS, 994 tests.
+2. `cd tools/validators && npm run build` — PASS.
+3. `cd tools/validators && node --test dist/tests/structural/observer-firewall.test.js dist/tests/structural/chc-slt-selected-commitment-trace.test.js dist/tests/structural/turn-cycle-output-grounding-integrity.test.js` — PASS, 43 tests.
+4. `rg -n "selected_choice_unresolvable" tools/validators || true` — PASS, zero matches.
+5. `rg -n "turn_resolution_unresolvable" tools/validators/src/structural/chc-slt-selected-commitment-trace.ts tools/validators/tests/structural/chc-slt-selected-commitment-trace.test.ts` — PASS, source and test assertion present.
+6. `cd tools/validators && npm test` — PASS, 999 tests.
