@@ -1,6 +1,6 @@
 # SPEC74STCHARDISBOU-012: branching-story-health-audit/SKILL.md Phase 2m 3-finding registration
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2m (add 3 new findings: `stchar_temporal_authority_contamination`, `stchar_semantic_loss_risk`, `stchar_regeneration_reason_invalid`)
@@ -87,3 +87,21 @@ Per /reassess-spec verification, the current code uses `Phase 2j: Compatibility 
 1. `grep -nE 'stchar_temporal_authority_contamination|stchar_semantic_loss_risk|stchar_regeneration_reason_invalid' .claude/skills/branching-story-health-audit/SKILL.md` (confirms 3 new findings present)
 2. `grep -nE 'repair_kind: turn_repair|repair_kind: prose_revision|repair_kind: branch_flag' .claude/skills/branching-story-health-audit/SKILL.md` (confirms repair_kind guidance present near the new entries)
 3. Manual inspection: cross-check the 3 new entries against SPEC-74 §4.6 wording for bit-for-bit alignment (including the harmonized fail-everywhere phrasing).
+
+## Outcome
+
+Completed: 2026-05-23
+
+What changed:
+- Added the three SPEC-74 Phase 2m STCHAR authority health findings to `.claude/skills/branching-story-health-audit/SKILL.md`: `stchar_temporal_authority_contamination`, `stchar_semantic_loss_risk`, and `stchar_regeneration_reason_invalid`.
+- Preserved the current `Phase 2j: Compatibility drift` naming and did not propagate the stale source-report phrase `Phase 2n source_drift`.
+- Repaired this ticket's dependency references to cite `archive/tickets/SPEC74STCHARDISBOU-011.md` after the validator dependency was archived.
+
+Deviations from original plan:
+- None. This remained a skill-prose-only implementation.
+
+Verification:
+- `grep -nE 'stchar_temporal_authority_contamination|stchar_semantic_loss_risk|stchar_regeneration_reason_invalid' .claude/skills/branching-story-health-audit/SKILL.md` — PASS, all three new finding names present in Phase 2m.
+- `grep -nE 'repair_kind: turn_repair|repair_kind: prose_revision|repair_kind: branch_flag' .claude/skills/branching-story-health-audit/SKILL.md` — PASS, the new entries include the required repair-kind guidance.
+- `grep -nE 'Phase 2n source_drift|stchar source-drift mode' .claude/skills/branching-story-health-audit/SKILL.md` — PASS, no matches.
+- Manual inspection of Phase 2m — PASS, the three new entries align with SPEC-74 §4.6 and use fail-everywhere wording.
