@@ -239,7 +239,68 @@
       "additionalProperties": false
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "required": ["scope"],
+        "properties": {
+          "scope": {
+            "type": "object",
+            "required": ["visibility"],
+            "properties": {
+              "visibility": { "const": "branch_scoped" }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "preconditions": {
+            "type": "object",
+            "properties": {
+              "hard": {
+                "type": "array",
+                "items": {
+                  "not": { "$ref": "#/$defs/scopeRestrictedPrefilterPredicate" }
+                }
+              },
+              "soft": {
+                "type": "array",
+                "items": {
+                  "not": { "$ref": "#/$defs/scopeRestrictedPrefilterPredicate" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "$defs": {
+    "scopeRestrictedPrefilterPredicate": {
+      "type": "object",
+      "required": ["pred"],
+      "properties": {
+        "pred": {
+          "type": "string",
+          "enum": [
+            "any_plan_active",
+            "any_emotion_active",
+            "any_obligation_open",
+            "any_consequence_pending",
+            "any_thread_active",
+            "any_clock_active",
+            "any_secret_unrevealed",
+            "any_story_question_open",
+            "any_relationship_axis",
+            "any_belief",
+            "any_intention",
+            "has_affordance"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
     "predicateObject": {
       "$comment": "Predicate names mirror PRED_TYPES in tools/validators/src/rules/_shared/predicate-dsl-grammar.ts; per-predicate argument validation stays in rule_storylet_predicate_dsl_parsability.ts.",
       "type": "object",

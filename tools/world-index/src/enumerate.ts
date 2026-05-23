@@ -43,12 +43,13 @@ const ATOMIC_SOURCE_DIRECTORIES = new Set([
 const STORY_SOURCE_DIRECTORY_SET = new Set(STORY_SOURCE_DIRECTORIES);
 const STORY_PRIMARY_AUTHORED_FILES = new Set(["STORY_KERNEL.md"]);
 const STORY_BUNDLE_MARKDOWN_DIRECTORIES = new Set([
+  "audits",
+  "character-proposals",
   "pages-prose",
   "pages-prose-plans",
+  "story-characters",
   "storylet-batches",
-  "story-promotions",
-  "audits",
-  "character-proposals"
+  "story-promotions"
 ]);
 const STORY_BUNDLE_YAML_DIRECTORIES = new Set(["pages-prose-receipts"]);
 const STORY_BUNDLE_CHARACTER_PROPOSAL_SUBDIRECTORIES = new Set(["batches"]);

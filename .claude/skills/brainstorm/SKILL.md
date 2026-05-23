@@ -244,6 +244,16 @@ Do NOT commit the file. Leave it for user review.
 
 ## Step 6: Next Steps Menu
 
+**Quick reference — when must the menu fire?** (the prose below is authoritative; this table is a fast path to the categorize-first rule):
+
+| Deliverable category | Step 6 action |
+|---|---|
+| Plan mode active (any category) | Call `ExitPlanMode` — skip menu |
+| Spec/ticket/triage deliverable per the post-deliverable-phase enumeration (system spec; umbrella spec; triage producing ≥2 specs / ≥3 tickets; implementation tickets; new canon-pipeline proposal; deferred-deliverable triage decision record; or any deliverable whose menu options describe post-deliverable-writing NEXT phases — reassess / decompose / implement / done) | **MENU MANDATORY** even when the deliverable was written inline; prepend the mandatory summary-disposition lines as prose preceding the menu |
+| Inline-completion carve-out (deliverable OUTSIDE the post-deliverable-phase enumeration: skill-design; small inline ops/setup; reconcile-existing-spec/ticket/triage-in-place edits) | Skip menu and summarize what was done |
+
+**Categorize-first rule (load-bearing)**: the post-deliverable-phase enumeration and the inline-completion carve-out are mutually exclusive — categorize the deliverable by the post-deliverable-phase enumeration FIRST; the inline-completion skip fires ONLY when the categorization places the deliverable outside that enumeration. Skipping the menu for a deliverable that fits the post-deliverable-phase enumeration silently strips the user's named next-phase options.
+
 Present the user with options for what to do next:
 
 ```

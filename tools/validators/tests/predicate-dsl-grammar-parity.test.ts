@@ -25,6 +25,18 @@ type PredicateSchema = {
   }>;
 };
 
+type StoryletSchema = {
+  $defs: {
+    scopeRestrictedPrefilterPredicate: {
+      properties: {
+        pred: {
+          enum: string[];
+        };
+      };
+    };
+  };
+};
+
 const EXISTENTIAL_ROLE_FILTER_FIELDS = [
   ["any_plan_active", "holder_role"],
   ["any_emotion_active", "holder_role"],
@@ -35,10 +47,31 @@ const EXISTENTIAL_ROLE_FILTER_FIELDS = [
   ["any_intention", "holder_role"]
 ] as const;
 
+const SCOPE_RESTRICTED_PREFILTER_PREDICATES = [
+  "any_plan_active",
+  "any_emotion_active",
+  "any_obligation_open",
+  "any_consequence_pending",
+  "any_thread_active",
+  "any_clock_active",
+  "any_secret_unrevealed",
+  "any_story_question_open",
+  "any_relationship_axis",
+  "any_belief",
+  "any_intention",
+  "has_affordance"
+] as const;
+
 function readPredicateSchema(): PredicateSchema {
   return JSON.parse(
     readFileSync(path.resolve(process.cwd(), "src/schemas/predicate-dsl-grammar.schema.json"), "utf8")
   ) as PredicateSchema;
+}
+
+function readStoryletSchema(): StoryletSchema {
+  return JSON.parse(
+    readFileSync(path.resolve(process.cwd(), "src/schemas/story-storylet.schema.json"), "utf8")
+  ) as StoryletSchema;
 }
 
 function sampleFor(pred: (typeof PRED_TYPES)[number]): Record<string, unknown> {
@@ -119,6 +152,53 @@ function sampleFor(pred: (typeof PRED_TYPES)[number]): Record<string, unknown> {
   }
 }
 
+function storyletWithPredicate(
+  pred: (typeof SCOPE_RESTRICTED_PREFILTER_PREDICATES)[number],
+  visibility: "global_author_pool" | "branch_prefix_scoped" | "branch_scoped",
+  list: "hard" | "soft"
+): Record<string, unknown> {
+  const branchScoped = visibility === "branch_scoped";
+  const branchPrefixScoped = visibility === "branch_prefix_scoped";
+  return {
+    id: "SLT-1",
+    story_id: "STORY-1",
+    scope: {
+      visibility,
+      branch_id: branchScoped || branchPrefixScoped ? "BR-1" : null,
+      ...(branchPrefixScoped ? { visible_branch_path_prefix: ["PG-1"] } : {})
+    },
+    title: "Predicate scope parity fixture",
+    move_family: "investigation",
+    preconditions: {
+      hard: list === "hard" ? [sampleFor(pred)] : [{ pred: "record_active", record: "STENT-1" }],
+      ...(list === "soft" ? { soft: [sampleFor(pred)] } : { soft: [] })
+    },
+    beats: [
+      {
+        beat_id: "setup",
+        function: "setup",
+        instruction: "Hold the fixture shape stable."
+      }
+    ],
+    exit_options: [
+      {
+        action_family: "communicate",
+        surface_hint: "Continue."
+      }
+    ],
+    saliency: {
+      urgency: "medium",
+      cooldown_pages: 0
+    },
+    mystery_policy: {
+      allowed_authority: "none"
+    },
+    provenance: {
+      origin: "manual_authoring"
+    }
+  };
+}
+
 test("predicate DSL schema mirrors predicate names and required argument table", () => {
   const schema = readPredicateSchema();
   const schemasByTitle = new Map(schema.oneOf.map((entry) => [entry.title, entry]));
@@ -186,6 +266,45 @@ test("predicate DSL schema exposes runtime role enum for existential role filter
       `${pred}.${field} should accept bare role enum values: ${ajv.errorsText(validate.errors)}`
     );
     assert.equal(validate({ ...sampleFor(pred), [field]: "role:viewpoint" }), false, `${pred}.${field} should reject role: prefixes`);
+  }
+});
+
+test("storylet schema mirrors runtime branch-scoped restrictions for author-pool prefilter predicates", () => {
+  const schema = readStoryletSchema();
+  const restrictedPredicates = schema.$defs.scopeRestrictedPrefilterPredicate.properties.pred.enum;
+  const runtimeSource = readFileSync(
+    path.resolve(process.cwd(), "src/rules/rule_storylet_predicate_dsl_parsability.ts"),
+    "utf8"
+  );
+  const ajv = new Ajv2020({ strict: true });
+  const validate = ajv.compile(schema);
+
+  assert.deepEqual(restrictedPredicates, [...SCOPE_RESTRICTED_PREFILTER_PREDICATES]);
+
+  for (const pred of SCOPE_RESTRICTED_PREFILTER_PREDICATES) {
+    assert.match(
+      runtimeSource,
+      new RegExp(`case "${pred}":[\\s\\S]*?requireExistentialScope\\(state, value\\.pred, path\\);`),
+      `${pred} should still invoke requireExistentialScope at runtime`
+    );
+
+    for (const list of ["hard", "soft"] as const) {
+      assert.equal(
+        validate(storyletWithPredicate(pred, "branch_scoped", list)),
+        false,
+        `${pred} in preconditions.${list} should fail schema validation under branch_scoped`
+      );
+      assert.equal(
+        validate(storyletWithPredicate(pred, "global_author_pool", list)),
+        true,
+        `${pred} in preconditions.${list} should pass under global_author_pool: ${ajv.errorsText(validate.errors)}`
+      );
+      assert.equal(
+        validate(storyletWithPredicate(pred, "branch_prefix_scoped", list)),
+        true,
+        `${pred} in preconditions.${list} should pass under branch_prefix_scoped: ${ajv.errorsText(validate.errors)}`
+      );
+    }
   }
 });
 
