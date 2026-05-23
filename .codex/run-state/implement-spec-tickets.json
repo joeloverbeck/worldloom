@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC76TURDRIPRI-005.md",
+  "last_ticket": "archive/tickets/SPEC76TURDRIPRI-006.md",
   "last_result": "completed_archived",
-  "last_work_commit": "fddeb9b21c56c8b1092712a57aa74264f901ef99",
+  "last_work_commit": "fd115a2d76a23a275b07932d1d6aaf81258cc7dc",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC76TURDRIPRI-006.md",
+  "next_target": "tickets/SPEC76TURDRIPRI-007.md",
   "queue": [
-    "tickets/SPEC76TURDRIPRI-006.md",
     "tickets/SPEC76TURDRIPRI-007.md",
     "tickets/SPEC76TURDRIPRI-008.md",
     "tickets/SPEC76TURDRIPRI-009.md",
