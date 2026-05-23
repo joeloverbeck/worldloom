@@ -33,6 +33,7 @@ import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-pla
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
 import { pagePlanStcharPacketIntegrity } from "../structural/page-plan-stchar-packet-integrity.js";
+import { pagePlanTurnDriverConsistency } from "../structural/page-plan-turn-driver-consistency.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptHashIntegrity } from "../structural/prose-receipt-hash-integrity.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
@@ -171,6 +172,7 @@ export const structuralValidators: readonly Validator[] = [
   activeRecordsFullShape,
   pageAffordanceIntegrity,
   pagePlanStcharPacketIntegrity,
+  pagePlanTurnDriverConsistency,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,

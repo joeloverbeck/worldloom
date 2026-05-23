@@ -1,6 +1,6 @@
 # SPEC76TURDRIPRI-005: Validator — `page_plan_turn_driver_consistency`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new structural validator at `tools/validators/src/structural/page-plan-turn-driver-consistency.ts`; new registry entry at `tools/validators/src/public/registry.ts`
@@ -17,6 +17,8 @@ Page-plan §7a (introduced by SPEC76TURDRIPRI-002 in the shared contract) is the
 3. **Cross-skill / cross-artifact boundary**: this validator consumes (a) PG records, (b) the SE record referenced by `PG.input.resolved_event_id`, (c) the page-plan body at `pages-prose-plans/PG-<integer>.md` containing §7a. The shape under audit is the PG ↔ SE.turn_driver ↔ page-plan §7a triangle: all three must agree on driver kind, initiator, driver_records, response mode, POV visibility. The §7a parser is shared with the existing §16a parser at `page_plan_stchar_packet_integrity.ts`; this ticket's validator reuses the parser infrastructure for the new §7a section.
 4. **FOUNDATIONS principle**: §Story Bundles §4a (Plan-Authority Boundary) governs this ticket. Per §4a, "story state is authoritative at page-plan commit. Rendered prose is a rendering of that state, not a second state engine." The §7a section is a render-side projection of `SE.turn_driver`; this validator ensures the projection is faithful — the plan does not become a second state engine by allowing §7a content to drift from the SE record. This is the Rule 1 / Rule 6 grounding for the validator: page-plan §7a cites the SE record's driver shape, and the citation must be byte-correct.
 5. **HARD-GATE / Canon Safety Check surface**: this is a new structural validator under `tools/validators/src/structural/`. Per the per-ticket-type granularity rule, item 5 fires because the structural validator gates story-bundle PG record writes at engine pre-apply time. The validator does not weaken any Mystery Reserve firewall — its scope is plan-vs-SE consistency; the firewall remains the domain of `turn_driver_pov_observer_firewall` (archive/tickets/SPEC76TURDRIPRI-004.md).
+6. Implementation narrowed one draft ambiguity: absent page-plan files are skipped, matching the existing page-plan validator behavior and keeping missing companion artifacts out of this validator's ownership. Existing page-plan files that omit §7a for a `turn_resolution` event with a populated `SE.turn_driver` still fail with `page_plan_driver_section_missing`. Missing or malformed `turn_driver` objects remain owned by `record_schema_compliance` / `turn_driver_schema_compliance`.
+7. Registry integration exposed a same-seam pre-apply test expectation: clean pre-apply plans now see `page_plan_turn_driver_consistency` as an applicable registry member whose execution is skipped when no relevant event or page-plan file is touched. `tools/validators/tests/integration/validate-patch-plan.test.ts` was updated to record that skip explicitly.
 
 ## Architecture Check
 
@@ -83,6 +85,8 @@ Per SPEC-76 §6.2 and the established convention at `tools/validators/tests/stru
 - `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` (modify — refactor to consume the shared parser utility)
 - `tools/validators/src/public/registry.ts` (modify — single import + single array append)
 - `tools/validators/tests/structural/page-plan-turn-driver-consistency.test.ts` (new)
+- `tools/validators/tests/structural/registry.test.ts` (modify — registry expectation)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply skipped-execution expectation)
 
 ## Out of Scope
 
@@ -117,3 +121,24 @@ Per SPEC-76 §6.2 and the established convention at `tools/validators/tests/stru
 
 1. `cd tools/validators && npm test` — runs the validator package's full test suite including the new structural test file.
 2. `cd tools/validators && npm run build` — verifies TypeScript compilation of the new validator module, the shared parser utility, and the registry import.
+
+## Outcome
+
+Completed. Added the `page_plan_turn_driver_consistency` structural validator, registered it, factored shared page-plan section discovery/extraction into `page-plan-section-parser.ts`, and refactored `page_plan_stchar_packet_integrity` to consume that shared utility. The validator enforces the four SPEC-76 error codes against existing page-plan §7a projections for `turn_resolution` events with populated `SE.turn_driver`: missing §7a, driver-kind drift, omitted driver records, and missing active-pressure disposition table when the parent PG carries high-urgency active records.
+
+The implementation intentionally delegates malformed/missing `SE.turn_driver` to the schema validators and delegates active-pressure table content to SPEC76TURDRIPRI-006. It also leaves the Red Kiln Ambush fixture acceptance to SPEC76TURDRIPRI-011, where the capstone fixture is owned.
+
+## Verification Result
+
+PASS:
+
+1. Pre-edit `cd tools/validators && npm test` — PASS, 980 tests.
+2. `cd tools/validators && npm run build` — PASS.
+3. `cd tools/validators && node --test dist/tests/structural/page-plan-turn-driver-consistency.test.js dist/tests/structural/page-plan-stchar-packet-integrity.test.js dist/tests/structural/registry.test.js` — PASS, 32 tests.
+4. `cd tools/validators && node --test dist/tests/integration/validate-patch-plan.test.js` — PASS, 20 tests.
+5. `cd tools/validators && npm test` — PASS, 987 tests.
+
+Notes:
+
+- Sandboxed proof was sufficient for the final package test run; earlier CLI-spawning attempts that failed under sandbox were rerun after the integration expectation was corrected.
+- Red Kiln Ambush end-to-end fixture proof was not claimed here; it remains owned by SPEC76TURDRIPRI-011.
