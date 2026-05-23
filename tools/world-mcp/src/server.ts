@@ -111,6 +111,9 @@ const getRecordInputSchema = z.object({
   section_path: z.string().min(1).optional()
 });
 
+export const GET_RECORD_DESCRIPTION =
+  "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-<integer>, CH-<integer>, INV-*, M-<integer>, OQ-<integer>, ENT-<integer>, SEC-*-<integer>) returning parsed YAML, hybrid records (CHAR-<integer>, world-level DA-<integer>, PA-<integer>, NCP-<integer>, NCB-<integer>) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-<integer>, SE-<integer>, BEL-<integer>, SF-<integer>, OBL-<integer>, CNSQ-<integer>, THR-<integer>, SREL-<integer>, STINT-<integer>, STENT-<integer>, STSTAT-<integer>, STCHAR-<integer>, STLOC-<integer>, STOBJ-<integer>, CLK-<integer>, STSEC-<integer>, STQ-<integer>, STPLAN-<integer>, STEMO-<integer>, BR-<integer>, CHC-<integer>, story-local DA-<integer>, SLT-<integer>, SLB-<integer>, SAU-<integer>, SP-<integer>, RSP-<integer>. ARC_TRACE is not a valid record class. Optional section_path projects parsed atomic/story records with dotted paths; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.";
+
 const getRecordsInputSchema = z.object({
   record_ids: z.array(z.string().min(1)).min(1),
   world_slug: z.string().min(1).optional(),
@@ -355,7 +358,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record",
-    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-<integer>, CH-<integer>, INV-*, M-<integer>, OQ-<integer>, ENT-<integer>, SEC-*-<integer>) returning parsed YAML, hybrid records (CHAR-<integer>, world-level DA-<integer>, PA-<integer>, NCP-<integer>, NCB-<integer>) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-<integer>, BEL-<integer>, CLK-<integer>, STSEC-<integer>, STQ-<integer>, STPLAN-<integer>, STEMO-<integer>, story-local DA-<integer>, or SLT-<integer>. ARC_TRACE is not a valid record class. Optional section_path projects parsed atomic/story records with dotted paths; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
+    GET_RECORD_DESCRIPTION,
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );

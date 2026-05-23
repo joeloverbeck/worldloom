@@ -1,9 +1,33 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { GET_RECORD_DESCRIPTION } from "../../src/server.js";
+import { STORY_BUNDLE_ID_PREFIXES } from "../../src/tools/_shared.js";
 import { getRecord } from "../../src/tools/get-record.js";
 
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared.js";
+
+function extractStoryBundleDescriptionClasses(description: string): string[] {
+  const match = description.match(/bundle-scoped ids such as (?<list>[^.]+)\. ARC_TRACE/);
+  assert.ok(match?.groups?.list, "get_record description must include a story-bundle id list");
+
+  const classes: string[] = [];
+  for (const classMatch of match.groups.list.matchAll(/\b([A-Z]+)-<integer>/g)) {
+    assert.ok(classMatch[1]);
+    classes.push(classMatch[1]);
+  }
+
+  return classes.sort((left, right) => left.localeCompare(right));
+}
+
+test("get_record description enumerates every runtime-supported story-bundle id class", () => {
+  const describedClasses = extractStoryBundleDescriptionClasses(GET_RECORD_DESCRIPTION);
+  const runtimeClasses = [...STORY_BUNDLE_ID_PREFIXES, "DA"].sort((left, right) =>
+    left.localeCompare(right)
+  );
+
+  assert.deepEqual(describedClasses, runtimeClasses);
+});
 
 function buildSeededAtomicWorld(root: string): void {
   seedWorld(root, {
