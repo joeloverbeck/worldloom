@@ -79,6 +79,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "stchar_active_for_bound_stent",
   "stchar_body_integrity",
   "stchar_bound_stent_reciprocity",
+  "stchar_regeneration_reason_integrity",
   "stchar_resolves",
   "stchar_source_fact_coverage",
   "stchar_source_material_inventory_integrity",
