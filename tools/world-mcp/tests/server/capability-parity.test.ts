@@ -55,6 +55,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "page_plan_stchar_packet_integrity",
   "proposal_package_shape",
   "prose_load_bearing_artifact_mention",
+  "prose_receipt_hash_integrity",
   "prose_receipt_schema_compliance",
   "prose_receipt_stchar_integrity",
   "record_introduction_uniqueness",

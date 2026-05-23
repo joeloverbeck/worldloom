@@ -63,7 +63,7 @@
         },
         "access_records": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(STENT|STLOC|STOBJ|DA|BEL|SF|SE)-[0-9]+$" }
+          "items": { "type": "string", "pattern": "^(STENT|STSTAT|STLOC|STOBJ|DA|BEL|SF|SE|CLK|STSEC|STQ)-[0-9]+$" }
         }
       },
       "additionalProperties": false

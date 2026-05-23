@@ -34,6 +34,7 @@ import { observerFirewall } from "../structural/observer-firewall.js";
 import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
 import { pagePlanStcharPacketIntegrity } from "../structural/page-plan-stchar-packet-integrity.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
+import { proseReceiptHashIntegrity } from "../structural/prose-receipt-hash-integrity.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
 import { proseReceiptStcharIntegrity } from "../structural/prose-receipt-stchar-integrity.js";
 import { recordIntroductionUniqueness } from "../structural/record-introduction-uniqueness.js";
@@ -177,6 +178,7 @@ export const structuralValidators: readonly Validator[] = [
   touchedByCfCompleteness,
   proposalPackageShape,
   proseReceiptSchemaCompliance,
+  proseReceiptHashIntegrity,
   proseReceiptStcharIntegrity,
   storyKernelCastBindListIntegrity,
   modificationHistoryRetrofit,

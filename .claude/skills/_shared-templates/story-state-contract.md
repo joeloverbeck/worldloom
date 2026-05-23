@@ -20,6 +20,8 @@ Every field in every story-bundle record schema must be load-bearing — directl
 
 The field lists below are canonical. Skills must not add fields to these schemas without first amending this contract. A skill that needs a one-off field for its own workflow records the need in its `SKILL.md` and motivates the amendment.
 
+**`visible_affordances[].grounded_in[]` is STLOC/STOBJ-only.** Page affordance grounding names the physical scene referents that make an action available, so `grounded_in[]` accepts only active `STLOC-<integer>` or `STOBJ-<integer>` ids. Actors are carried by the same affordance's `available_to[]` field as active `STENT-<integer>` ids. Other actors' presence in the scene is represented through active `STENT` records plus their `STSTAT.location`; affordances whose label mentions another actor still ground in the relevant scene location or object, not in that actor's STENT. Interior or temporal state classes such as `STEMO`, `STPLAN`, `CLK`, `STSEC`, and `STQ` belong in choice grounding or page-plan prose, not in page-affordance grounding.
+
 ## 3. Record Class Inventory
 
 Story-bundle record classes allocate via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`.
@@ -211,7 +213,7 @@ When the selected block becomes an `SE`, `SE.commitment.alias_bindings` records 
 
 ### §5a. Mid-Story Introduction Structured Fields
 
-Mid-story creation of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `STCHAR`, `SREL`, `STPLAN`, or `STEMO` records is recorded on `SE.record_introductions[]`. Relations from an event to an active plan are recorded on `SE.state_relations[]`. Explicit non-propagation assertions are recorded on `SE.non_propagation_facts[]`. These fields carry the machine-readable WHAT; `SE.world_logic_rationale` carries the human-readable WHY.
+Mid-story first introductions of `CLK`, `STSEC`, `STQ`, `THR`, `STENT`, `STCHAR`, `SREL`, `STPLAN`, or `STEMO` records are recorded on `SE.record_introductions[]`. A supersession-create whose new record body carries `supersedes: <prior-id>` is a lifecycle transition, not a first introduction; its lineage is recorded by the new record's `supersedes` field plus `SE.state_delta.supersede[]`. Relations from an event to an active plan are recorded on `SE.state_relations[]`. Explicit non-propagation assertions are recorded on `SE.non_propagation_facts[]`. These fields carry the machine-readable WHAT; `SE.world_logic_rationale` carries the human-readable WHY.
 
 `SE.state_delta.create[]`, `SE.state_delta.supersede[]`, and `SE.state_delta.close[]` accept the same lifecycle-managed story-state class set, including `STCHAR`, `STPLAN`, and `STEMO`; the event schema and `state_delta_class_integrity` validator must move together with this contract.
 
@@ -555,7 +557,7 @@ Every state-changing skill follows this order at commit:
 6. Update bundle `INDEX.md` last.
 7. Update per-world `stories/INDEX.md` only when story visibility changed (new bundle, archived bundle).
 
-Hook 3 blocks raw `Edit` / `Write` on `_source/<class>/*.yaml`. Story-bundle markdown surfaces (`STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `pages-prose-plans/`, `audits/`, `storylet-batches/`, `story-promotions/`, `pages-prose-receipts/`) remain direct-write surfaces, with Hook 6 adding the plan-hash guard for `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md`.
+Hook 3 blocks raw `Edit` / `Write` on `_source/<class>/*.yaml`. Story-bundle markdown surfaces (`STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `pages-prose-plans/`, `audits/`, `storylet-batches/`, `story-promotions/`, `pages-prose-receipts/`) remain direct-write surfaces, with Hook 6 adding the plan-hash guard for `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md`, and Hook 7 adding the prose-hash guard for `pages-prose-receipts/PG-<integer>.yaml`.
 
 If patch submission succeeds but a direct-write artifact fails, the story `_source/` records are authoritative and the artifact should be repaired directly. The skill must surface the partial-failure state to the user; silent retry is forbidden.
 

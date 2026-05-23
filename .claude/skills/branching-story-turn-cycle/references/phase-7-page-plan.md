@@ -2,7 +2,7 @@
 
 Write `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/PG-<integer>.md` per shared contract §8 — 19 sections.
 
-The drafted plan bytes are the future direct-write artifact. Keep the complete UTF-8 bytes stable in working memory so Phase 9 can compute `PG-<integer>.plan.plan_hash` over exactly the bytes that will be written after patch submission.
+The drafted plan bytes are the future direct-write artifact. Keep the complete UTF-8 bytes stable in working memory AND persist them to a temporary path (e.g., `/tmp/PG-<integer>.md.draft`) at Phase 9 step 2 so the `compute-pg-hashes.js` CLI can hash them via `--plan <temp-path>`. Do NOT write to the bundle path `pages-prose-plans/PG-<integer>.md` until Phase 10 step 6 confirms patch success; the catch-22 between this byte-stability requirement and the post-success bundle-write order is bridged by the `/tmp/` scratch file.
 
 **§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-Time Instruction Template) are inlined verbatim from `reports/prose-quality-instructions.md`.** Operationally load-bearing — external prose renderer has no cross-plan state; every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
 

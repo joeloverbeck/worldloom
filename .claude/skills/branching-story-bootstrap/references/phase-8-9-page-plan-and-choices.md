@@ -6,7 +6,7 @@ Covers original §Phase 8 (Author the root page plan) and §Phase 9 (Generate fi
 
 Draft `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/PG-1.md` per shared contract §8 — the 19 numbered sections plus optional per-page §9b / §9c / §10b sections when relevant active story-state records exist.
 
-The drafted plan bytes are the future direct-write artifact. Keep the complete UTF-8 bytes stable in working memory so the validation phase can compute `PG-1.plan.plan_hash` over exactly the bytes that will be written after patch submission.
+The drafted plan bytes are the future direct-write artifact. Keep the complete UTF-8 bytes stable in working memory AND persist them to a temporary path (e.g., `/tmp/PG-1.md.draft`) at the validation phase so the `compute-pg-hashes.js` CLI can hash them via `--plan <temp-path>`. Do NOT write to the bundle path `pages-prose-plans/PG-1.md` until the post-patch-success write order confirms submission; the catch-22 between this byte-stability requirement and the post-success bundle-write order is bridged by the `/tmp/` scratch file.
 
 **§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-Time Instruction Template) are inlined verbatim from `reports/prose-quality-instructions.md`.** This is operationally load-bearing — the external prose renderer has no cross-plan state, so every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
 

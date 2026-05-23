@@ -14,9 +14,32 @@ import {
 
 const ACCESSIBLE_BEL_VISIBILITIES = new Set(["public", "rumored", "shared"]);
 const PRIVATE_BEL_VISIBILITIES = new Set(["private", "suppressed", "concealed"]);
-const STATIC_ACCESS_RECORD_ID = /^(?:STENT|STSTAT|STLOC|STOBJ|DA|BEL|SF|SE|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/;
+const OBSERVABILITY_ACCESS_ROUTES = new Set([
+  "direct_observation",
+  "testimony",
+  "document",
+  "object_trace",
+  "location_trace",
+  "surveillance",
+  "institutional_channel"
+]);
+export const STATIC_ACCESS_RECORD_PREFIXES = [
+  "STENT",
+  "STSTAT",
+  "STLOC",
+  "STOBJ",
+  "DA",
+  "BEL",
+  "SF",
+  "SE",
+  "CLK",
+  "STSEC",
+  "STQ"
+] as const;
+const STATIC_ACCESS_RECORD_ID = new RegExp(`^(?:${STATIC_ACCESS_RECORD_PREFIXES.join("|")})-\\d+$`);
 const PLAN_OR_EMOTION_RECORD_ID = /^(?:STPLAN|STEMO)-\d+$/;
 const STATUS_RECORD_ID = /^STSTAT-\d+$/;
+const STORY_ENTITY_RECORD_ID = /^STENT-\d+$/;
 
 export const observerFirewall: Validator = {
   name: "observer_firewall",
@@ -75,7 +98,7 @@ export const observerFirewall: Validator = {
           }
 
           if (PLAN_OR_EMOTION_RECORD_ID.test(referenceId) && !actorCanUsePlanOrEmotion(actor, referenceId, maps)) {
-            verdicts.push(noAccessRoute(event, parsed, actor, selectedChoice, referenceId, index));
+            verdicts.push(noObservabilityRoute(event, parsed, actor, selectedChoice, referenceId, index));
             return;
           }
 
@@ -217,8 +240,9 @@ function actorCanUsePlanOrEmotion(actor: string, referenceId: string, maps: Reco
   }
 
   const parsed = asPlainRecord(record.parsed);
-  if (stringValue(parsed.holder) !== actor) {
-    return false;
+  const holder = stringValue(parsed.holder);
+  if (holder !== actor) {
+    return holder !== undefined && STORY_ENTITY_RECORD_ID.test(holder) && actorHasObservabilityRouteTo(actor, holder, maps);
   }
 
   const basisIds = record.node_type === "story_plan_record"
@@ -251,6 +275,23 @@ function actorHasAccessRecord(actor: string, referenceId: string, maps: RecordMa
     }
     const accessRecords = stringArray(asPlainRecord(parsed.basis).access_records);
     if (accessRecords.some((id) => STATIC_ACCESS_RECORD_ID.test(id) && id === referenceId)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function actorHasObservabilityRouteTo(actor: string, holderStentId: string, maps: RecordMaps): boolean {
+  for (const belief of maps.byType.get("belief_record") ?? []) {
+    const parsed = asPlainRecord(belief.parsed);
+    if (stringValue(parsed.holder) !== actor) {
+      continue;
+    }
+    const basis = asPlainRecord(parsed.basis);
+    if (!OBSERVABILITY_ACCESS_ROUTES.has(stringValue(basis.access_route) ?? "")) {
+      continue;
+    }
+    if (stringArray(basis.access_records).includes(holderStentId)) {
       return true;
     }
   }
@@ -473,6 +514,30 @@ function noAccessRoute(
     severity: "fail",
     code: "observer_firewall_violation_no_access_route",
     message: `${eventId(parsedEvent)} actor ${actor} lacks BEL.basis.access_records route to ${referenceId} grounded in ${choiceId(choice)}`,
+    location: locationFor(event),
+    detail: {
+      event_id: eventId(parsedEvent),
+      actor,
+      choice_id: choiceId(choice),
+      reference_id: referenceId,
+      reference_path: `grounded_in.records[${index}]`
+    }
+  };
+}
+
+function noObservabilityRoute(
+  event: IndexedRecord,
+  parsedEvent: Record<string, unknown>,
+  actor: string,
+  choice: IndexedRecord,
+  referenceId: string,
+  index: number
+): Verdict {
+  return {
+    validator: "observer_firewall",
+    severity: "fail",
+    code: "observer_firewall_violation_no_access_route",
+    message: `${eventId(parsedEvent)} actor ${actor} lacks BEL.basis.access_records route via the holder entity of ${referenceId} grounded in ${choiceId(choice)}`,
     location: locationFor(event),
     detail: {
       event_id: eventId(parsedEvent),

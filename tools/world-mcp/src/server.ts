@@ -33,6 +33,7 @@ import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records.j
 import { searchNodes } from "./tools/search-nodes.js";
 import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan.js";
 import { validatePatchPlan } from "./tools/validate-patch-plan.js";
+import { verifyPgStateHash } from "./tools/verify-pg-state-hash.js";
 import {
   MCP_TOOL_NAMES,
   MCP_TOOL_ORDER,
@@ -111,6 +112,9 @@ const getRecordInputSchema = z.object({
   section_path: z.string().min(1).optional()
 });
 
+export const GET_RECORD_DESCRIPTION =
+  "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-<integer>, CH-<integer>, INV-*, M-<integer>, OQ-<integer>, ENT-<integer>, SEC-*-<integer>) returning parsed YAML, hybrid records (CHAR-<integer>, world-level DA-<integer>, PA-<integer>, NCP-<integer>, NCB-<integer>) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-<integer>, SE-<integer>, BEL-<integer>, SF-<integer>, OBL-<integer>, CNSQ-<integer>, THR-<integer>, SREL-<integer>, STINT-<integer>, STENT-<integer>, STSTAT-<integer>, STCHAR-<integer>, STLOC-<integer>, STOBJ-<integer>, CLK-<integer>, STSEC-<integer>, STQ-<integer>, STPLAN-<integer>, STEMO-<integer>, BR-<integer>, CHC-<integer>, story-local DA-<integer>, SLT-<integer>, SLB-<integer>, SAU-<integer>, SP-<integer>, RSP-<integer>. ARC_TRACE is not a valid record class. Optional section_path projects parsed atomic/story records with dotted paths; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.";
+
 const getRecordsInputSchema = z.object({
   record_ids: z.array(z.string().min(1)).min(1),
   world_slug: z.string().min(1).optional(),
@@ -128,6 +132,12 @@ const getStoryStateProvenanceInputSchema = z.object({
   record_id: z.string().min(1),
   world_slug: z.string().min(1).optional(),
   story_slug: z.string().regex(STORY_SLUG_PATTERN).optional()
+});
+
+const verifyPgStateHashInputSchema = z.object({
+  world_slug: z.string().min(1),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN),
+  page_id: z.string().regex(/^PG-\d+$/)
 });
 
 const getPersistedPacketSliceInputSchema = z.object({
@@ -355,7 +365,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record",
-    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-<integer>, CH-<integer>, INV-*, M-<integer>, OQ-<integer>, ENT-<integer>, SEC-*-<integer>) returning parsed YAML, hybrid records (CHAR-<integer>, world-level DA-<integer>, PA-<integer>, NCP-<integer>, NCB-<integer>) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-<integer>, BEL-<integer>, CLK-<integer>, STSEC-<integer>, STQ-<integer>, STPLAN-<integer>, STEMO-<integer>, story-local DA-<integer>, or SLT-<integer>. ARC_TRACE is not a valid record class. Optional section_path projects parsed atomic/story records with dotted paths; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
+    GET_RECORD_DESCRIPTION,
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );
@@ -377,6 +387,12 @@ export function createServer(): McpServer {
     getStoryStateProvenanceInputSchema,
     async (args) =>
       getStoryStateProvenance(args as unknown as Parameters<typeof getStoryStateProvenance>[0])
+  );
+  registerToolWithCapability(
+    "verify_pg_state_hash",
+    "verify_pg_state_hash: Prose-attach Phase 2 verifier for a committed PG page record. Recomputes state_hash from the parsed PG exactly as committed and does not modify plan.plan_hash before hashing; state_hash_match is verdict-driving, while plan_hash_match is SPEC-72 advisory drift against pages-prose-plans/<page_id>.md.",
+    verifyPgStateHashInputSchema,
+    async (args) => verifyPgStateHash(args as unknown as Parameters<typeof verifyPgStateHash>[0])
   );
   registerToolWithCapability(
     "get_persisted_packet_slice",

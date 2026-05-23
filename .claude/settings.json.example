@@ -1,5 +1,5 @@
 {
-  "_comment": "Worldloom hook configuration example. Copy or merge into .claude/settings.json. Hooks 1-5 are active as of SPEC-05 Part B (Phase 2); Hook 6 is active as of SPEC-40. Each hook's implementation lives at tools/hooks/dist/src/*.js, built from tools/hooks/src/*.ts (see archive/specs/SPEC-05-hooks-discipline.md and specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md).",
+  "_comment": "Worldloom hook configuration example. Copy or merge into .claude/settings.json. Hooks 1-5 are active as of SPEC-05 Part B (Phase 2); Hook 6 is active as of SPEC-40; Hook 7 is active as of HOOK-003. Each hook's implementation lives at tools/hooks/dist/src/*.js, built from tools/hooks/src/*.ts (see archive/specs/SPEC-05-hooks-discipline.md and specs/SPEC-40-story-pipeline-eleventh-iteration-fixes.md).",
 
   "hooks": {
     "UserPromptSubmit": [
@@ -51,6 +51,18 @@
           {
             "type": "command",
             "command": "node tools/hooks/dist/src/hook6-guard-story-markdown-hash.js"
+          }
+        ]
+      },
+      {
+        "_phase": 2,
+        "_spec": "HOOK-003 Hook 7",
+        "_purpose": "Block direct Edit/Write to pages-prose-receipts/PG-*.yaml when stamped prose_hash does not match on-disk prose-file SHA-256. Receipts are audit-trail artifacts; a mismatch indicates fabrication or tampering and must not land silently.",
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/hooks/dist/src/hook7-guard-prose-receipt-hash.js"
           }
         ]
       }

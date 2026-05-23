@@ -56,11 +56,11 @@ Phase 1: Pair plan + page + prose (load PG, STORY_KERNEL.md Player Agency
         v
 Phase 2: Hash integrity check (split signal: plan_hash drift -> WARN advisory
                                per SPEC-72 / FOUNDATIONS Story Bundles 4a;
-                               state_hash drift -> FAIL tamper; state_hash
-                               recomputed via computePgStateHash directly
-                               on the committed PG record's parsed fields,
-                               not via the CLI; record drift in receipt
-                               notes, never in PG)
+                               state_hash drift -> FAIL tamper; hashes
+                               verified via verify_pg_state_hash, which
+                               recomputes state_hash from the committed PG
+                               record without re-stamping plan_hash; record
+                               drift in receipt notes, never in PG)
         |
         v
 Phase 3: Deterministic checks (8 prose/state checks, CHAR leak verdict,
@@ -157,10 +157,9 @@ Load into working memory:
 - `PG.state_snapshot.active_records` — the at-commit state the prose must respect.
 - If `run_craft_critic: true`, optional prior 1-2 prose pages from `pages-prose/<recent-N>.md` for continuity checks.
 
-Compute fresh hashes:
-
-- `computed_plan_hash`: sha256 over the plan file's bytes.
-- `computed_state_hash`: recompute by calling `computePgStateHash` from `@worldloom/world-index/hash/content` directly on the parsed PG record (the `snapshot_replay_equality` basis per shared contract §4.2a Tooling carve-out). The validator package's `snapshot_replay_equality` at `tools/validators/src/structural/snapshot-replay-equality.ts:296` is the canonical pattern — invoke the same helper on the same parsed-PG input. Do NOT use the `compute-pg-hashes` CLI here: the CLI re-reads the plan file via `--plan` and overwrites `plan.plan_hash` in the PG payload before computing `state_hash` (see `tools/world-mcp/src/cli/compute-pg-hashes.ts:211` `applyComputedPlanHash`), which re-introduces the plan-file-to-state-hash coupling SPEC-72 §2.2 removes. The CLI remains correct for authoring-time use in `branching-story-bootstrap` Phase 7 and `branching-story-turn-cycle` Phase 9, where both hashes are stamped together at commit; it is not correct for verification-time use in prose-attach Phase 2.
+- Run `mcp__worldloom__verify_pg_state_hash(world_slug, story_slug, page_id)`. The tool returns `{recorded_state_hash, computed_state_hash, state_hash_match, recorded_plan_hash, computed_plan_hash, plan_hash_match}` plus provenance fields.
+- Use the tool's `computed_plan_hash` as the sha256 over the plan file's bytes. If it is `null`, treat the plan file as missing and classify the hash integrity check as at least WARN unless state hash also fails.
+- Use the tool's `computed_state_hash` as the verifier-time PG hash. The tool calls `computePgStateHash` from `@worldloom/world-index/hash/content` on the parsed PG record, the same `snapshot_replay_equality` basis per shared contract §4.2a Tooling carve-out, and does not modify `plan.plan_hash` before hashing. Do NOT use the `compute-pg-hashes` CLI here: the CLI re-reads the plan file via `--plan` and overwrites `plan.plan_hash` in the PG payload before computing `state_hash` (see `tools/world-mcp/src/cli/compute-pg-hashes.ts:211` `applyComputedPlanHash`), which re-introduces the plan-file-to-state-hash coupling SPEC-72 §2.2 removes. The CLI remains correct for authoring-time use in `branching-story-bootstrap` Phase 7 and `branching-story-turn-cycle` Phase 9, where both hashes are stamped together at commit; it is not correct for verification-time use in prose-attach Phase 2.
 - `computed_prose_hash`: sha256 over the prose file's bytes.
 
 ## Phase 2: Hash integrity check
@@ -358,7 +357,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
 
 4. On approval:
    a. If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach` conforming to story-state contract §4.3a (audit-only SE events); the op requires a `target_file` field (`worlds/<world_slug>/stories/<story_slug>/_source/events/SE-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record')` for the machine-readable shape. Dry-run validate via `mcp__worldloom__validate_patch_plan`, obtain the approval token, and submit via `mcp__worldloom__submit_patch_plan`. If this optional patch fails, abort: write no receipt and no INDEX update for this invocation; surface the patch failure and allow the user to re-run with `emit_attach_event=false` or repair the patch shape.
-   b. Write `pages-prose-receipts/<page_id>.yaml` (direct write, not patch-engine routed — the receipt is not a `_source/` record).
+   b. Write `pages-prose-receipts/<page_id>.yaml` (direct write, not patch-engine routed — the receipt is not a `_source/` record). Hook 7 blocks the write if the stamped `prose_hash` does not match the sha256 of the file at the receipt's `prose_path`.
    c. Update bundle `INDEX.md` to reflect prose status + receipt verdict. Append a `## Rendered Prose` section if not already present, with columns: `PG | Status | Receipt verdict | Receipt`. Status values per receipt outcome: `rendered` (verdict PASS or WARN; or non-strict FAIL); `rendered (FAILED receipt — publication blocked)` (strict=true AND verdict=FAIL only). The Receipt verdict column contains the receipt's roll-up verdict literally (PASS / WARN / FAIL). The Receipt column contains the relative path to the receipt file (e.g., `pages-prose-receipts/PG-<integer>.yaml`). When the section already exists from prior page attachments, add a new row under the existing header — do not duplicate the header.
 
 5. Report receipt path + verdict + `repair_recommendation` to the user. If `repair_recommendation` is non-`none`, surface the named lawful repair path (revise prose, invoke `branching-story-turn-cycle` with repair-action semantics, or invoke `story-fact-promotion-to-canon` with the asserted canon claim). Do NOT `git commit`.

@@ -38,6 +38,56 @@ test("midstory_record_introduction_grounding rejects mid-story creation without 
   assert.deepEqual(verdicts[0]?.detail, { event_id: "SE-2", record_id: "THR-91", reason: undefined });
 });
 
+test("midstory_record_introduction_grounding accepts supersession creates without a structured introduction", async () => {
+  const records = baseRecords([
+    event("SE-2", {
+      create: ["CLK-2"],
+      supersede: ["CLK-1"],
+      world_logic_rationale: "The existing pressure clock advances; no fresh introduction occurred.",
+      introductions: []
+    }),
+    introducedRecord("CLK-1", "pressure_clock_record", "clocks", { created_at_page: "PG-1" }),
+    introducedRecord("CLK-2", "pressure_clock_record", "clocks", { created_at_page: "PG-2", supersedes: "CLK-1" })
+  ]);
+
+  const verdicts = await midstoryRecordIntroductionGrounding.run(undefined, testContext(records));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("midstory_record_introduction_grounding accepts supersession creates with a structured introduction", async () => {
+  const records = baseRecords([
+    event("SE-2", {
+      create: ["CLK-2"],
+      supersede: ["CLK-1"],
+      introductions: [intro("CLK-2", "CLK", "deadline_declared", ["SE-2"])]
+    }),
+    introducedRecord("CLK-1", "pressure_clock_record", "clocks", { created_at_page: "PG-1" }),
+    introducedRecord("CLK-2", "pressure_clock_record", "clocks", { created_at_page: "PG-2", supersedes: "CLK-1" })
+  ]);
+
+  const verdicts = await midstoryRecordIntroductionGrounding.run(undefined, testContext(records));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("midstory_record_introduction_grounding still rejects fresh creates without a structured introduction", async () => {
+  const records = baseRecords([
+    event("SE-2", {
+      create: ["CLK-91"],
+      world_logic_rationale: "A new pressure clock starts, but no structured introduction entry is present.",
+      introductions: []
+    }),
+    introducedRecord("CLK-91", "pressure_clock_record", "clocks", { created_at_page: "PG-2" })
+  ]);
+
+  const verdicts = await midstoryRecordIntroductionGrounding.run(undefined, testContext(records));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "midstory_intro_missing_tag");
+  assert.deepEqual(verdicts[0]?.detail, { event_id: "SE-2", record_id: "CLK-91", reason: undefined });
+});
+
 test("midstory_record_introduction_grounding rejects structured introductions absent from state_delta.create", async () => {
   const records = baseRecords([
     event("SE-2", {
@@ -221,7 +271,7 @@ function baseRecords(records: IndexedRecord[]): IndexedRecord[] {
   ];
 }
 
-function event(id: string, overrides: Partial<{ create: string[]; world_logic_rationale: string; created_at_page: string; introductions: Record<string, unknown>[] }>): IndexedRecord {
+function event(id: string, overrides: Partial<{ create: string[]; supersede: string[]; world_logic_rationale: string; created_at_page: string; introductions: Record<string, unknown>[] }>): IndexedRecord {
   return storyRecord("story_event_record", id, `stories/${STORY_SLUG}/_source/events/${id}.yaml`, {
     id,
     story_id: "STORY-1",
@@ -233,7 +283,7 @@ function event(id: string, overrides: Partial<{ create: string[]; world_logic_ra
     outcome_route: "accept",
     world_logic_rationale: overrides.world_logic_rationale ?? "Structured introduction test.",
     record_introductions: overrides.introductions ?? introEntries(overrides.create ?? []),
-    state_delta: { create: overrides.create ?? [], supersede: [], close: [] }
+    state_delta: { create: overrides.create ?? [], supersede: overrides.supersede ?? [], close: [] }
   });
 }
 
