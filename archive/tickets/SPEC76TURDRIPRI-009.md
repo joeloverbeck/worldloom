@@ -48,7 +48,7 @@ Per SPEC-76 §3.4 final sentence, note that seeded SLTs become eligible for non-
 - Schema-level `turn_driver` shape constraints — ship in SPEC76TURDRIPRI-001.
 - Contract amendments (§7a section itself) — ship in SPEC76TURDRIPRI-002.
 - Turn-cycle skill Phase 0 — shipped in archive/tickets/SPEC76TURDRIPRI-008.md.
-- Health-audit Reactivity Inertness pass — ship in SPEC76TURDRIPRI-010.
+- Health-audit Reactivity Inertness pass — shipped in archive/tickets/SPEC76TURDRIPRI-010.md.
 - SPEC-77's `compatible_turn_drivers` SLT-seed-authoring change — out of scope; the bootstrap notes the future surface but does not implement it.
 
 ## Acceptance Criteria

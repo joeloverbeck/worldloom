@@ -1,6 +1,6 @@
 ---
 name: branching-story-health-audit
-description: "Use when diagnosing the health of a branching-story bundle. Five modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health + STPLAN/STEMO health + active-state underuse + STCHAR authority health), compatibility (schema-drift compatibility reporting), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
+description: "Use when diagnosing the health of a branching-story bundle. Five modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + DA health + mystery/canon + continuation + CLK/STSEC/STQ mechanism health + STPLAN/STEMO health + active-state underuse + STCHAR authority health + reactivity inertness), compatibility (schema-drift compatibility reporting), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -32,7 +32,7 @@ Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/r
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 13 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health, 2k STPLAN / STEMO health, 2l active-state underuse warnings, 2m STCHAR authority health) executed when `structural` in mode (default); compatibility-drift reporting executed when `compatibility` in mode; prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 14 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2x DA health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift, 2i CLK / STSEC / STQ mechanism health, 2k STPLAN / STEMO health, 2l active-state underuse warnings, 2m STCHAR authority health, 2n reactivity inertness) executed when `structural` in mode (default); compatibility-drift reporting executed when `compatibility` in mode; prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -51,7 +51,7 @@ Phase 1: Scope branches (build tree from BR + PG; apply
                          branch_path_filter)
         |
         v
-Phase 2 [structural; default]: 13 sub-phases executed sequentially
+Phase 2 [structural; default]: 14 sub-phases executed sequentially
   ├─ 2a: Replay events (snapshot hash comparison)
   ├─ 2b: Branch isolation
   ├─ 2c: Debt health
@@ -64,7 +64,8 @@ Phase 2 [structural; default]: 13 sub-phases executed sequentially
   ├─ 2i: CLK / STSEC / STQ mechanism health
   ├─ 2k: STPLAN / STEMO health
   ├─ 2l: Active-state underuse warnings
-  └─ 2m: STCHAR authority health
+  ├─ 2m: STCHAR authority health
+  └─ 2n: Reactivity Inertness
         |
         v
 Phase 2j [conditional on `compatibility` in mode]: Compatibility drift
@@ -119,7 +120,7 @@ All direct-write markdown. No patch-engine submissions — the audit is read-onl
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §4b / §5 / §5a / §5b / §6a govern the audit checks
-- `.claude/skills/_shared-templates/story-state-contract.md` — §5 closed predicate DSL, §7 eight hard gates, §9 branching procedure, §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-state-contract.md` — §5 closed predicate DSL, §7 nine hard gates, §9 branching procedure, §11 mystery and canon authority
 - `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (audit reads against)
 - `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.17 / §4.5.18, `.claude/skills/_shared-templates/story-state-contract.md` §5 / §5a / §8, `docs/CONTEXT-PACKET-CONTRACT.md`, and `docs/MACHINE-FACING-LAYER.md` — canonical STPLAN/STEMO schema, predicate/tag/page-plan, context summary, and edge surfaces for Phase 2k
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/BR-*.yaml` — branch tree
@@ -168,7 +169,7 @@ Output: a scoped branch list + per-branch metadata used by Phases 2-4.
 
 ## Phase 2: Structural checks (mandatory when `structural` in `mode`; default)
 
-Thirteen sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
+Fourteen sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
 
 ### Phase 2a: Replay events
 
@@ -358,6 +359,16 @@ Flag:
 
 Every Phase 2m finding cites the STCHAR id, affected STENT / PG / CHC / STPLAN / STEMO / SREL / receipt ids, branch/page scope, lifecycle evidence when relevant, and whether the issue is missing authority, stale authority, split authority, or fidelity drift. A branch with complete STCHAR authority emits no Phase 2m finding.
 
+### Phase 2n: Reactivity Inertness
+
+This chain-level pass scans each scoped PG chain for sequences of pages where every `turn_driver.kind = player_action | player_write_in` despite high-urgency active non-player records being available as lawful drivers. The scan treats the following as non-player pressure candidates: `STPLAN` with `current_step` due, `STEMO` at high intensity with behavioral pressure, `CLK` at threshold, active `THR`, and reveal-ready `STSEC`. A page counts for the inertness window when its §7a active-pressure disposition table shows one or more such records deferred, rejected, or displaced by player initiative while the committed `SE.turn_driver.kind` remains player-driven.
+
+Emit `reactivity_inertness_sequence` when 3+ consecutive pages match the pattern. Severity is WARNING, with `repair_kind: commitment_block` when a missing author-pool move would let the pressure act, or `repair_kind: turn_repair` when the page chain likely needs a repair turn or rationale repair. The finding cites the branch id, page window, player-driven SE ids, active non-player record ids, their §7a dispositions, and the reason the window is a pressure-inertness pattern rather than a normal player-led sequence.
+
+This pass is distinct from Phase 2l ("Active-state underuse warnings"): Phase 2l is per-page underuse detection, while Reactivity Inertness is a chain-level scan for consecutive non-player-driver absence. The two are orthogonal and run alongside each other. Phase 2l fires when an individual page has active records that are not being exercised; Reactivity Inertness fires when a multi-page chain shows the player driving every turn despite non-player pressure being available.
+
+When `remediation` is in mode or `emit_remediation_requests: true`, Reactivity Inertness findings draft `audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md` cards. The RSP card names the page range that triggered the pattern, the active non-player records not selected as drivers, and a suggested storylet or repair-turn shape such as an `audit_repair` candidate that lets the pressure become the turn driver or records a lawful deferral/expiry.
+
 ## Phase 2j: Compatibility drift (conditional on `compatibility` in `mode`)
 
 Run the `compatibility_drift` validator against the bundle structure and `PG.state_snapshot.active_records` maps. In Wave 2 this mode reports schema-drift compatibility findings; it does not hard-fail the audit and does not create or modify story records.
@@ -505,6 +516,10 @@ rsp_cards_emitted: N | 0
 
 (Phase 2m findings.)
 
+## Reactivity inertness
+
+(Phase 2n findings.)
+
 ## Compatibility drift (if `compatibility` in modes)
 
 - **Classification**: one of `current_contract`, `compatible_optional_absence`, `grandfathered_snapshot_shape`, `compatible_with_advisory`, `requires_compatibility_audit`, `requires_migration_patch`, `manual_review`, or `blocked_contract_break`.
@@ -547,7 +562,7 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 
 - **Rule 1 (No Floating Facts)** — Phase 2a (replay events). Mechanism: replay verifies every record referenced in `state_snapshot.active_records` corresponds to a real record file; missing references surface as `snapshot_replay_mismatch` findings.
 - **Rule 4 (No Globalization by Accident)** — Phase 2b (branch isolation) + Phase 2m (STCHAR authority health). Mechanism: flags sibling-branch records leaking into a branch's snapshot; flags author-pool blocks with branch-local dependencies; flags runtime world `CHAR-*` operational authority leaks in story-local characterization surfaces.
-- **Rule 5 (No Consequence Evasion)** — Phase 2a (Choice Consequence Integrity replay) + Phase 2c (debt and saliency health) + Phase 2f (continuation / terminal proof) + Phase 2g (causal dependency health). Mechanism: cosmetic accepted-choice findings + unactionable / invalidated / ignored / saliency-starved debt findings + terminal-without-rationale + orphan-debt-at-terminal findings + clobbered CHC / affordance / OBL / SLT dependency findings.
+- **Rule 5 (No Consequence Evasion)** — Phase 2a (Choice Consequence Integrity replay) + Phase 2c (debt and saliency health) + Phase 2f (continuation / terminal proof) + Phase 2g (causal dependency health) + Phase 2n (reactivity inertness). Mechanism: cosmetic accepted-choice findings + unactionable / invalidated / ignored / saliency-starved debt findings + terminal-without-rationale + orphan-debt-at-terminal findings + clobbered CHC / affordance / OBL / SLT dependency findings + 3+ consecutive player-driven pages despite available high-urgency non-player pressure.
 - **Rule 7 (Preserve Mystery Deliberately)** — Phase 2e (mystery / canon safety). Mechanism: forbidden-mystery-resolution + cumulative mystery-accretion + counterfactual-promotion-to-canon + canon-candidate-without-promotion-hold checks against whole-class Mystery Reserve loaded at Pre-flight.
 - **Canon Baseline Drift** — Phase 2h. Mechanism: page `state_snapshot.canon_revision` values are compared against the latest governing `change_log_entry`; stale baselines are classified and routed without rewriting committed pages.
 - **Information / Observer Firewall** — Phase 2d. Mechanism: emitted choices and selected `SLT` actor-bindings are checked against actor-available knowledge and recorded access routes; non-system character actions are checked for motivation-grounding citations in `SE.world_logic_rationale`.
@@ -569,7 +584,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 | Rule 2 (No Pure Cosmetics) | N/A | Story-bundle scope. World-canon principle. |
 | Rule 3 (No Specialness Inflation) | N/A | Same as Rule 2. |
 | Rule 4 (No Globalization by Accident) | Phase 2b, 2m | Branch-isolation enforcement (4 finding types) plus split-character-authority findings when runtime story surfaces cite world `CHAR-*` instead of STCHAR. |
-| Rule 5 (No Consequence Evasion) | Phase 2a, 2c, 2f, 2g | Choice Consequence Integrity replay findings + debt and saliency health + continuation-or-terminal-proof findings + causal dependency findings for clobbered CHC / affordance / OBL / SLT dependencies. |
+| Rule 5 (No Consequence Evasion) | Phase 2a, 2c, 2f, 2g, 2n | Choice Consequence Integrity replay findings + debt and saliency health + continuation-or-terminal-proof findings + causal dependency findings for clobbered CHC / affordance / OBL / SLT dependencies + chain-level reactivity inertness findings. |
 | Rule 6 (No Silent Retcons) | N/A | Audit reads only; emits no canon changes. |
 | Rule 7 (Preserve Mystery Deliberately) | Phase 2e | Mystery / canon safety checks (5 finding types). |
 | Rule 11 (No Spectator Castes) | N/A | World-canon-only principle. |

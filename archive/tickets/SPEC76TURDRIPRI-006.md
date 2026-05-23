@@ -106,7 +106,7 @@ Per SPEC-76 §6.2 and the established convention at `tools/validators/tests/stru
 - Observer-firewall semantics for non-player drivers — ship in archive/tickets/SPEC76TURDRIPRI-004.md.
 - Page-plan §7a PRESENCE check + driver-key consistency with SE — shipped in archive/tickets/SPEC76TURDRIPRI-005.md. THIS validator only checks §7a's CONTENT (active-pressure disposition rows).
 - Medium-tier urgency table enumeration — deferred per SPEC-76 §9 Risk Reassessment; lands in a follow-up ticket once the per-class medium-tier criteria are specified.
-- Reactivity Inertness audit pass (chain-level scan for non-player driver absence across consecutive pages) — ship in SPEC76TURDRIPRI-010.
+- Reactivity Inertness audit pass (chain-level scan for non-player driver absence across consecutive pages) — shipped in archive/tickets/SPEC76TURDRIPRI-010.md.
 
 ## Acceptance Criteria
 

@@ -1,6 +1,6 @@
 # SPEC76TURDRIPRI-010: Health-audit skill — Reactivity Inertness sub-phase
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-health-audit/SKILL.md` (new audit sub-phase distinct from existing Phase 2l "Active-state underuse warnings")
@@ -16,6 +16,7 @@ Even with the §7a active-pressure handling discipline structurally enforced by 
 2. SPEC-76 §3.5 prescribes the new sub-phase verbatim, including the explicit distinction from Phase 2l (added during the reassessment): "This pass is distinct from the existing Phase 2l ('Active-state underuse warnings'): Phase 2l is per-page underuse detection, while Reactivity Inertness is a chain-level scan for consecutive non-player-driver absence. The two are orthogonal and run alongside each other; Reactivity Inertness is named explicitly as a new sub-phase (the bundle-implementation slice may number it Phase 2n or sequence it after Phase 2m STCHAR-authority health)."
 3. **Cross-skill / cross-artifact boundary**: this skill consumes the shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` (knows the §7a section + active-pressure table semantics). The Reactivity Inertness pass produces a remediation-storylet-proposal card (RSP) at the existing path convention `worlds/<slug>/stories/<story-slug>/audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md`. RSP cards are consumed by `commitment-block-authoring`'s `audit_repair` mode per FOUNDATIONS §Story Bundles §6 / story-state-contract §4. The shape under audit is the audit-pass procedure — chain-level PG scan + RSP emission, distinct from Phase 2l's per-page underuse detection.
 4. **FOUNDATIONS principle**: Rule 5 (No Consequence Evasion) governs this ticket. The Reactivity Inertness pass is the audit-side safety net for chain-level non-player-driver absence; the structural fix is the active-pressure handling discipline (archive/tickets/SPEC76TURDRIPRI-006.md), and this audit pass complements it by detecting the chain-level pattern that per-page enforcement cannot see. Per the spec's §FOUNDATIONS Alignment table: "the audit emits a remediation-proposal, not a hard fail; the operator can dismiss with reason. The structural fix (active-pressure handling discipline) does not depend on the audit."
+5. Live implementation required one same-file contract hygiene update beyond the drafted Reactivity Inertness prose: the health-audit World-State Prerequisites still said the shared contract had "§7 eight hard gates" after archive/tickets/SPEC76TURDRIPRI-002.md introduced Gate 9. This ticket corrected that phrase to "§7 nine hard gates" in the same skill file. The HARD-GATE block was updated only to add the new Phase 2n completion requirement and the 13→14 sub-phase count; approval timing, write surfaces, and deliverable-summary approval semantics remain unchanged.
 
 ## Architecture Check
 
@@ -29,11 +30,11 @@ Even with the §7a active-pressure handling discipline structurally enforced by 
 3. **Invariant**: SKILL.md documents the 3+ consecutive pages threshold → grep-proof for "3+ consecutive pages" or equivalent phrasing.
 4. **Invariant**: SKILL.md documents the RSP card emission as the output (not a hard fail) → grep-proof for "remediation-storylet-proposal" or "RSP".
 
-## What to Change
+## Landed Changes
 
-### 1. Add the Reactivity Inertness sub-phase
+### 1. Added the Reactivity Inertness sub-phase
 
-Insert a new sub-phase in the audit's Phase 2 sequence (placement: after Phase 2m "STCHAR authority health", numbered Phase 2n or per the bundle-implementation's preferred numbering scheme). The sub-phase content follows SPEC-76 §3.5:
+Inserted Phase 2n after Phase 2m "STCHAR authority health". The new sub-phase follows SPEC-76 §3.5:
 
 ```
 Phase 2n: Reactivity Inertness — scan the PG chain for sequences of pages where every
@@ -46,19 +47,23 @@ active-pressure handling discipline (`active_pressure_handling_discipline` valid
 engine pre-apply time).
 ```
 
-### 2. Cite Phase 2l explicitly
+### 2. Cited Phase 2l explicitly
 
-Add an orthogonality paragraph immediately after the new sub-phase declaration:
+Added an orthogonality paragraph immediately after the new sub-phase declaration:
 
 > This pass is distinct from the existing Phase 2l ("Active-state underuse warnings"): Phase 2l is per-page underuse detection, while Reactivity Inertness is a chain-level scan for consecutive non-player-driver absence. The two are orthogonal and run alongside each other — Phase 2l fires when an individual page has active records that aren't being exercised; Reactivity Inertness fires when a multi-page chain shows the player driving every turn despite non-player pressure being available.
 
-### 3. Document the RSP card emission
+### 3. Documented the RSP card emission
 
-Document the RSP card output shape per the existing convention at `worlds/<slug>/stories/<story-slug>/audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md`. The RSP card's content should name the page range that triggered the pattern, the active non-player records that were not selected as drivers, and a suggested storylet shape that would respond to the inertness (e.g., a `commitment-block-authoring` `audit_repair` candidate).
+Documented the RSP card output shape per the existing convention at `worlds/<slug>/stories/<story-slug>/audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md`. The RSP card content names the page range that triggered the pattern, the active non-player records that were not selected as drivers, and a suggested storylet or repair-turn shape that responds to the inertness (for example, a `commitment-block-authoring` `audit_repair` candidate).
 
-### 4. Update the audit-pass count or summary table (if present)
+### 4. Updated the audit-pass count and summary surfaces
 
-If the SKILL.md contains a summary table listing all Phase 2 sub-phases, add the new Reactivity Inertness row. Update any prose mentioning the audit-pass count (e.g., "13 sub-phases" → "14 sub-phases" if a count is named).
+Updated the description, HARD-GATE phase-completion list, process-flow diagram, Phase 2 count prose, SAU report template, Rule 5 alignment prose, and FOUNDATIONS alignment table from the old 13-sub-phase surface to the new 14-sub-phase surface.
+
+### 5. Truthed the shared-gate count in the health-audit prerequisite list
+
+Updated the same skill's shared-contract prerequisite reference from "§7 eight hard gates" to "§7 nine hard gates" so the health-audit skill matches archive/tickets/SPEC76TURDRIPRI-002.md.
 
 ## Files to Touch
 
@@ -83,7 +88,7 @@ If the SKILL.md contains a summary table listing all Phase 2 sub-phases, add the
 2. `grep -nE "Phase 2l" .claude/skills/branching-story-health-audit/SKILL.md` returns at least 1 NEW match in the new Reactivity Inertness sub-phase context (orthogonality citation; the existing Phase 2l declaration is preserved).
 3. `grep -nE "3\+ consecutive pages" .claude/skills/branching-story-health-audit/SKILL.md` returns at least 1 match.
 4. `grep -nE "remediation-storylet-proposal|RSP-" .claude/skills/branching-story-health-audit/SKILL.md` returns at least 1 match (RSP emission documented).
-5. Manual review confirms the new sub-phase reads coherently in the Phase 2 sequence (placement after Phase 2m or per the bundle-implementation's chosen numbering).
+5. Manual review confirms the new sub-phase reads coherently in the Phase 2 sequence after Phase 2m.
 
 ### Invariants
 
@@ -100,4 +105,22 @@ If the SKILL.md contains a summary table listing all Phase 2 sub-phases, add the
 ### Commands
 
 1. The 4 grep-proofs enumerated in Acceptance Criteria, run as one batched command: `grep -nE "Reactivity Inertness|Phase 2l|3\+ consecutive pages|remediation-storylet-proposal|RSP-" .claude/skills/branching-story-health-audit/SKILL.md`
-2. Manual review of the new sub-phase prose for placement coherence and Phase 2l orthogonality framing.
+2. Stale-count/gate hygiene: `rg -n "13 structural|Thirteen sub-phases|Phase 2 \\[structural; default\\]: 13|§7 eight hard gates|eight hard gates|8 shared hard gates|eight shared" .claude/skills/branching-story-health-audit/SKILL.md` returns no matches.
+3. Manual review of the new sub-phase prose for placement coherence and Phase 2l orthogonality framing.
+
+## Outcome
+
+Completed: 2026-05-23
+
+Added Phase 2n: Reactivity Inertness to `.claude/skills/branching-story-health-audit/SKILL.md`. The health audit now checks for 3+ consecutive player-driven pages despite available high-urgency non-player pressure, records the branch/page/record evidence, and routes findings to RSP cards when remediation output is enabled. Updated the skill's structural phase count, process-flow diagram, SAU report template, Rule 5 alignment prose, and same-file shared-contract gate-count reference.
+
+## Verification Result
+
+- `grep -nE "Reactivity Inertness|Phase 2l|3\+ consecutive pages|remediation-storylet-proposal|RSP-" .claude/skills/branching-story-health-audit/SKILL.md` — PASS; found the Phase 2n listing and header, the Phase 2l orthogonality references, the 3+ consecutive pages threshold, and RSP/remediation-storylet-proposal output references.
+- `rg -n "13 structural|Thirteen sub-phases|Phase 2 \\[structural; default\\]: 13|§7 eight hard gates|eight hard gates|8 shared hard gates|eight shared" .claude/skills/branching-story-health-audit/SKILL.md` — PASS; no stale owned-surface count/gate hits.
+- Manual review — PASS; Phase 2n sits after Phase 2m, leaves Phase 2l's per-page underuse semantics unchanged, emits WARNING/RSP rather than hard fail, and preserves the health-audit HARD-GATE approval timing and write surfaces.
+
+## Deviations
+
+- Same-file hygiene widened the landed edit to update one stale "§7 eight hard gates" prerequisite phrase to "§7 nine hard gates"; this aligns the health-audit skill with archive/tickets/SPEC76TURDRIPRI-002.md and does not change this ticket's behavior beyond truthful guidance.
+- No executable skill dry-run exists for `.claude/skills/branching-story-health-audit/SKILL.md` in this repo context, so verification is grep-proof plus manual contract review as planned.
