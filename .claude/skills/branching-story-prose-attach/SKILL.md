@@ -122,7 +122,7 @@ Targeted retrieval discipline: if optional retrieval or a persisted summary surf
 
 Before Phase 1:
 
-1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md` into working context. Abort with clear missing-file error on unreadable path.
+1. Load `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, and `.claude/skills/_shared-templates/story-record-schemas.md` (for the §4.6 receipt schema) into working context. Skip the load only when the content is already in this session's context AND name the load mechanism explicitly (e.g., `FOUNDATIONS already in context via direct Read at message N` or `via system-reminder injection at message N reproducing the document verbatim`). CLAUDE.md system-reminder content does NOT satisfy the criterion unless it reproduces FOUNDATIONS.md verbatim, since references to FOUNDATIONS principles in CLAUDE.md are operator-summary, not the document itself. Abort with clear missing-file error on unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
 3. Load `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` and its `## Player Agency Contract` section. Abort with agency-contract-missing error if the section is absent or does not name the agency surface, write-in envelope, and viewpoint limits.
 4. Load `worlds/<world_slug>/stories/<story_slug>/_source/pages/<page_id>.yaml`. Abort with page-not-found error if missing.
@@ -160,7 +160,7 @@ Load into working memory:
 - Run `mcp__worldloom__verify_pg_state_hash(world_slug, story_slug, page_id)`. The tool returns `{recorded_state_hash, computed_state_hash, state_hash_match, recorded_plan_hash, computed_plan_hash, plan_hash_match}` plus provenance fields.
 - Use the tool's `computed_plan_hash` as the sha256 over the plan file's bytes. If it is `null`, treat the plan file as missing and classify the hash integrity check as at least WARN unless state hash also fails.
 - Use the tool's `computed_state_hash` as the verifier-time PG hash. The tool calls `computePgStateHash` from `@worldloom/world-index/hash/content` on the parsed PG record, the same `snapshot_replay_equality` basis per shared contract §4.2a Tooling carve-out, and does not modify `plan.plan_hash` before hashing. Do NOT use the `compute-pg-hashes` CLI here: the CLI re-reads the plan file via `--plan` and overwrites `plan.plan_hash` in the PG payload before computing `state_hash` (see `tools/world-mcp/src/cli/compute-pg-hashes.ts:211` `applyComputedPlanHash`), which re-introduces the plan-file-to-state-hash coupling SPEC-72 §2.2 removes. The CLI remains correct for authoring-time use in `branching-story-bootstrap` Phase 7 and `branching-story-turn-cycle` Phase 9, where both hashes are stamped together at commit; it is not correct for verification-time use in prose-attach Phase 2.
-- `computed_prose_hash`: sha256 over the prose file's bytes.
+- `computed_prose_hash`: sha256 over the prose file's bytes. Compute via `sha256sum worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` (or platform equivalent — e.g., `shasum -a 256`); the verifier MCP tool does not return this value, since the prose file is a story-bundle direct-write artifact rather than a PG-record-derived field. Do NOT fabricate a sha256-shaped placeholder — Hook 7 will block the receipt write if the stamped value does not match the on-disk prose-file sha256.
 
 ## Phase 2: Hash integrity check
 
@@ -259,7 +259,7 @@ Run the 8 deterministic prose/state checks defined in shared contract §4.6, eac
 
 9. **`char_authority_leak`** (`PASS | FAIL`) — run or consume the existing `no_char_authority_in_story_runtime` validator over the page plan and receipt-target text surface. Do not implement a second CHAR scan in prose-attach. If that validator reports `no_char_authority_in_story_runtime.char_authority_text_leak` for the page plan or planned receipt content, set `checks.char_authority_leak: FAIL`, add a `notes[]` entry naming the offending `CHAR-*`, and route to `revise_page_plan` or `run_turn_cycle_repair` in the STCHAR/profile-fidelity local recommendation as appropriate. Otherwise set `PASS`.
 
-10. **`stchar_authority` block** — for every §16a packet required by the shared story-state contract (viewpoint character, speaker, major actor, direct target, emotionally salient character, or any character whose behavior/voice materially shapes the page), emit one `stchar_authority[]` entry with `STENT` / `STCHAR` / display name, `required_because`, `packet_present`, `active_in_snapshot`, and a `deterministic_verdict`. `required_because` is the §16a packet's `Required because:` value copied **verbatim**, including every comma-separated qualifier (e.g. `direct_target, emotionally_salient, behavior_shapes_page`) — not an abbreviation to the first qualifier; `prose_receipt_stchar_integrity` FAILs on any divergence. Missing packets or inactive `STCHAR` ids in `PG.state_snapshot.active_records.STCHAR` force `deterministic_verdict: FAIL`; otherwise the deterministic verdict is driven by packet presence, active snapshot membership, and verbatim `required_because` consistency. Omit or leave the array empty only when no qualifying character exists for the page.
+10. **`stchar_authority` block** — for every §16a packet required by the shared story-state contract (e.g., `viewpoint`, `speaker`, `major_actor`, `direct_target`, `emotionally_salient`, `behavior_shapes_page`, `offstage_causal`, or any other qualifier defined in the canonical `Required because:` set at `.claude/skills/_shared-templates/story-state-contract.md`), emit one `stchar_authority[]` entry with `STENT` / `STCHAR` / display name, `required_because`, `packet_present`, `active_in_snapshot`, and a `deterministic_verdict`. `required_because` is the §16a packet's `Required because:` value **normalized to a comma-separated qualifier list**: (a) strip any parenthetical clarifiers; (b) replace inter-clause semicolons with commas; (c) reduce modal phrases (e.g., `possible speaker` → `speaker`) to the bare qualifier name. Every qualifier from the §16a packet must appear in the receipt; abbreviation to the first qualifier is forbidden; `prose_receipt_stchar_integrity` FAILs on missing qualifiers or on residual parenthetical / semicolon / modal-phrase syntax. Missing packets or inactive `STCHAR` ids in `PG.state_snapshot.active_records.STCHAR` force `deterministic_verdict: FAIL`; otherwise the deterministic verdict is driven by packet presence, active snapshot membership, and normalized `required_because` consistency. Omit or leave the array empty only when no qualifying character exists for the page.
 
 11. **`profile_fidelity` block** — judge `voice_fidelity`, `appraisal_fidelity`, `pressure_behavior_fidelity`, and `relationship_conduct_fidelity` for each relevant STCHAR as `pass | minor_drift | major_drift | not_applicable`, with evidence excerpts and a local `repair_recommendation` of `none | revise_prose | revise_page_plan | regenerate_stchar | run_turn_cycle_repair`. Judge against the page-plan packet first. Retrieve the full STCHAR only when the packet is missing or insufficient for diagnosis.
 
@@ -315,7 +315,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
    plan_path: pages-prose-plans/<page_id>.md
    prose_path: pages-prose/<page_id>.md
    plan_hash: <computed_plan_hash>
-   prose_hash: <computed_prose_hash>
+   prose_hash: <computed_prose_hash — sha256 of the prose file, computed at Phase 1 via `sha256sum`>
    state_hash_at_plan_time: <PG.state_hash>
    checked_at: <iso8601 now>
    strict: <input strict flag>
@@ -335,7 +335,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
      - stchar_id: STCHAR-<integer>
        stent_id: STENT-<integer>
        display_name: <name>
-       required_because: <§16a Required-because value, copied verbatim>
+       required_because: <§16a Required-because value, normalized per Phase 3 check 10>
        packet_present: true | false
        active_in_snapshot: true | false
        deterministic_verdict: PASS | FAIL
@@ -359,6 +359,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
    a. If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach` conforming to story-state contract §4.3a (audit-only SE events); the op requires a `target_file` field (`worlds/<world_slug>/stories/<story_slug>/_source/events/SE-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record')` for the machine-readable shape. Dry-run validate via `mcp__worldloom__validate_patch_plan`, obtain the approval token, and submit via `mcp__worldloom__submit_patch_plan`. If this optional patch fails, abort: write no receipt and no INDEX update for this invocation; surface the patch failure and allow the user to re-run with `emit_attach_event=false` or repair the patch shape.
    b. Write `pages-prose-receipts/<page_id>.yaml` (direct write, not patch-engine routed — the receipt is not a `_source/` record). Hook 7 blocks the write if the stamped `prose_hash` does not match the sha256 of the file at the receipt's `prose_path`.
    c. Update bundle `INDEX.md` to reflect prose status + receipt verdict. Append a `## Rendered Prose` section if not already present, with columns: `PG | Status | Receipt verdict | Receipt`. Status values per receipt outcome: `rendered` (verdict PASS or WARN; or non-strict FAIL); `rendered (FAILED receipt — publication blocked)` (strict=true AND verdict=FAIL only). The Receipt verdict column contains the receipt's roll-up verdict literally (PASS / WARN / FAIL). The Receipt column contains the relative path to the receipt file (e.g., `pages-prose-receipts/PG-<integer>.yaml`). When the section already exists from prior page attachments, add a new row under the existing header — do not duplicate the header.
+   d. Run the receipt-specific structural smoke: `node tools/validators/dist/src/cli/world-validate.js <world_slug> --structural --file worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/<page_id>.yaml --json`. If the smoke reports any `prose_receipt_schema_compliance` or `prose_receipt_stchar_integrity` issues, surface them to the user and offer to repair before reporting success at step 5.
 
 5. Report receipt path + verdict + `repair_recommendation` to the user. If `repair_recommendation` is non-`none`, surface the named lawful repair path (revise prose, invoke `branching-story-turn-cycle` with repair-action semantics, or invoke `story-fact-promotion-to-canon` with the asserted canon claim). Do NOT `git commit`.
 
@@ -372,7 +373,7 @@ Rules 1 / 4 / 5 are upstream-enforced at bootstrap and turn-cycle Phase 9 (the e
 
 ## Record Schemas
 
-The prose receipt schema lives in `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 (canonical; extracted from the main `story-state-contract.md` per its §4 pointer stub). The validator-side mirror is `prose_receipt_schema_compliance` in `tools/validators`; after a receipt exists, a receipt-specific structural smoke can run:
+The prose receipt schema lives in `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 (canonical; extracted from the main `story-state-contract.md` per its §4 pointer stub). The validator-side mirror is `prose_receipt_schema_compliance` in `tools/validators`; Phase 6 step 4 sub-step d invokes the receipt-specific structural smoke on every successful write:
 
 ```bash
 node tools/validators/dist/src/cli/world-validate.js <world_slug> --structural --file worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/<page_id>.yaml --json

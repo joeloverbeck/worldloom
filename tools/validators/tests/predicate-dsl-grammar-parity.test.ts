@@ -7,7 +7,11 @@ import Ajv2020Module from "ajv/dist/2020.js";
 import type { ErrorObject, ValidateFunction } from "ajv";
 
 import { PRED_TYPES, PREDICATE_ARG_SCHEMAS } from "../src/rules/_shared/predicate-dsl-grammar.js";
-import { STORY_ROLES } from "../src/rules/rule_storylet_predicate_dsl_parsability.js";
+import {
+  STORY_ROLES,
+  storyletPredicateDslParsability
+} from "../src/rules/rule_storylet_predicate_dsl_parsability.js";
+import { context, record } from "./structural/helpers.js";
 
 type Ajv2020Instance = {
   compile(schema: unknown): ValidateFunction;
@@ -199,6 +203,26 @@ function storyletWithPredicate(
   };
 }
 
+async function recordAgeRuntimeCodes(recordValue: string): Promise<string[]> {
+  const verdicts = await storyletPredicateDslParsability.run(null, context([
+    record("story_fact_record", "marla:SF-1", "stories/marla/_source/facts/SF-1.yaml", { id: "SF-1" }),
+    record("pressure_clock_record", "marla:CLK-1", "stories/marla/_source/clocks/CLK-1.yaml", { id: "CLK-1" }),
+    record("storylet_record", "marla:SLT-1", "stories/marla/_source/storylets/SLT-1.yaml", {
+      id: "SLT-1",
+      scope: { visibility: "global_author_pool", branch_id: null },
+      preconditions: {
+        hard: [
+          { pred: "any_clock_active", alias: "matured_clock" },
+          { pred: "record_age", record: recordValue, comparator: ">=", pages: 2 }
+        ],
+        soft: []
+      }
+    })
+  ]));
+
+  return verdicts.map((verdict) => verdict.code);
+}
+
 test("predicate DSL schema mirrors predicate names and required argument table", () => {
   const schema = readPredicateSchema();
   const schemasByTitle = new Map(schema.oneOf.map((entry) => [entry.title, entry]));
@@ -325,4 +349,30 @@ test("predicate DSL schema accepts STCHAR/STPLAN/STEMO for record_active and rec
   // control: world-canon classes remain outside record_active / record_age
   assert.equal(validate({ pred: "record_active", record: "CF-1" }), false);
   assert.equal(validate({ pred: "record_age", record: "CF-1", comparator: ">=", pages: 1 }), false);
+});
+
+test("predicate DSL schema mirrors runtime bound-alias form for record_age.record", async () => {
+  const schema = readPredicateSchema();
+  const ajv = new Ajv2020({ strict: true });
+  const validate = ajv.compile(schema);
+
+  assert.equal(validate({ pred: "record_age", record: "matured_clock", comparator: ">=", pages: 2 }), false);
+  assert.ok(
+    (await recordAgeRuntimeCodes("matured_clock")).includes("predicate.invalid_reference"),
+    "runtime should reject bare aliases as invalid active-record references"
+  );
+
+  assert.equal(
+    validate({ pred: "record_age", record: "bound:matured_clock", comparator: ">=", pages: 2 }),
+    true,
+    `bound alias should pass schema validation: ${ajv.errorsText(validate.errors)}`
+  );
+  assert.deepEqual(await recordAgeRuntimeCodes("bound:matured_clock"), []);
+
+  assert.equal(
+    validate({ pred: "record_age", record: "SF-1", comparator: ">=", pages: 2 }),
+    true,
+    `record id should pass schema validation: ${ajv.errorsText(validate.errors)}`
+  );
+  assert.deepEqual(await recordAgeRuntimeCodes("SF-1"), []);
 });
