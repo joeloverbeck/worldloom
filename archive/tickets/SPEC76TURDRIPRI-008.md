@@ -1,6 +1,6 @@
 # SPEC76TURDRIPRI-008: Turn-cycle skill — Phase 0 (Driver Evaluation) + `action_source_mode` argument
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `.claude/skills/branching-story-turn-cycle/SKILL.md` (substantial Phase 0 addition + new orthogonal argument + Phase 1 carve-out + Phase 8 amendment)
@@ -103,6 +103,24 @@ If the skill's SKILL.md contains a process-flow diagram (ascii or ordered list),
 - New structural validators — shipped in SPEC76TURDRIPRI-003 through archive/tickets/SPEC76TURDRIPRI-006.md.
 - Existing-validator updates — shipped in archive/tickets/SPEC76TURDRIPRI-007.md.
 - Golden fixture (Red Kiln Ambush) — ship in SPEC76TURDRIPRI-011.
+
+## Outcome
+
+Completed. Added the orthogonal `action_source_mode` argument, documented Gate 9 / §7a as the load-bearing turn-driver contract surfaces, inserted Phase 0 before Phase 1 in the process flow and procedure, documented Phase 1 skip-when-non-player, and amended Phase 8 so non-player-driver pages emit response / witness / continuation CHCs with at least one material response when appropriate.
+
+The change is limited to `.claude/skills/branching-story-turn-cycle/SKILL.md`; no runtime code or canon files were edited.
+
+## Verification Result
+
+PASS:
+
+1. `grep -nE "^Phase 0: Evaluate due drivers" .claude/skills/branching-story-turn-cycle/SKILL.md` — PASS, 1 match.
+2. `grep -nE "action_source_mode" .claude/skills/branching-story-turn-cycle/SKILL.md` — PASS, multiple matches.
+3. `grep -nE "advance_initiative|resolve_selected_choice|resolve_write_in|repair_turn" .claude/skills/branching-story-turn-cycle/SKILL.md` — PASS, enum values present.
+4. `grep -nE "Phase 1 is \*\*skipped\*\*|Phase 1 is skipped" .claude/skills/branching-story-turn-cycle/SKILL.md` — PASS.
+5. `grep -nE "player_response_mode: responds" .claude/skills/branching-story-turn-cycle/SKILL.md` — PASS.
+6. `grep -nE "Gate 9|Turn-Driver Lawfulness" .claude/skills/branching-story-turn-cycle/SKILL.md` — PASS.
+7. `grep -nE "world_logic_rationale" .claude/skills/branching-story-turn-cycle/SKILL.md` — PASS.
 
 ## Acceptance Criteria
 

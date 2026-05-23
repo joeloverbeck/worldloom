@@ -47,7 +47,7 @@ Per SPEC-76 §3.4 final sentence, note that seeded SLTs become eligible for non-
 
 - Schema-level `turn_driver` shape constraints — ship in SPEC76TURDRIPRI-001.
 - Contract amendments (§7a section itself) — ship in SPEC76TURDRIPRI-002.
-- Turn-cycle skill Phase 0 — ship in SPEC76TURDRIPRI-008.
+- Turn-cycle skill Phase 0 — shipped in archive/tickets/SPEC76TURDRIPRI-008.md.
 - Health-audit Reactivity Inertness pass — ship in SPEC76TURDRIPRI-010.
 - SPEC-77's `compatible_turn_drivers` SLT-seed-authoring change — out of scope; the bootstrap notes the future surface but does not implement it.
 
@@ -64,7 +64,7 @@ Per SPEC-76 §3.4 final sentence, note that seeded SLTs become eligible for non-
 
 1. Bootstrap continues to emit SE-1 = `story_start` (no behavioral change).
 2. PG-1's page plan omits §7a when SE-1 = `story_start` (documented carve-out).
-3. The advance_initiative edge case is documented but not implemented by the bootstrap — it falls under the turn-cycle skill's Phase 0 logic per SPEC76TURDRIPRI-008.
+3. The advance_initiative edge case is documented but not implemented by the bootstrap — it falls under the turn-cycle skill's Phase 0 logic per archive/tickets/SPEC76TURDRIPRI-008.md.
 
 ## Test Plan
 

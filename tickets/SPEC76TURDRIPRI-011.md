@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new fixture directory at `tools/validators/tests/fixtures/red-kiln-ambush/`; new integration test exercising the full SPEC-76 pipeline end-to-end
-**Deps**: archive/tickets/SPEC76TURDRIPRI-003.md, archive/tickets/SPEC76TURDRIPRI-004.md, archive/tickets/SPEC76TURDRIPRI-005.md, archive/tickets/SPEC76TURDRIPRI-006.md, archive/tickets/SPEC76TURDRIPRI-007.md, SPEC76TURDRIPRI-008, SPEC76TURDRIPRI-009, SPEC76TURDRIPRI-010
+**Deps**: archive/tickets/SPEC76TURDRIPRI-003.md, archive/tickets/SPEC76TURDRIPRI-004.md, archive/tickets/SPEC76TURDRIPRI-005.md, archive/tickets/SPEC76TURDRIPRI-006.md, archive/tickets/SPEC76TURDRIPRI-007.md, archive/tickets/SPEC76TURDRIPRI-008.md, SPEC76TURDRIPRI-009, SPEC76TURDRIPRI-010
 
 ## Problem
 
@@ -14,7 +14,7 @@ SPEC-76's full pipeline — schema, contract, 4 new validators, 3 existing-valid
 
 1. `tools/validators/tests/fixtures/` exists and currently contains CF-test fixtures, patch-plan fixtures, and a `midstory-introduction/` subdirectory. No existing `red-kiln-ambush` directory (verified via the Pre-flight existence check earlier this session — no collision). Per SPEC-76 §6.3, the fixture path is `tools/validators/tests/fixtures/red-kiln-ambush/`. Inline-fixture-builder pattern (established by `chc-slt-selected-commitment-trace.test.ts` and sibling tests) is used for the per-validator structural tests in SPEC76TURDRIPRI-003 through 006; the golden fixture under `tests/fixtures/` is a separate convention used for end-to-end integration tests that exercise multiple validators against a shared fixture-world copy.
 2. SPEC-76 §6.3 prescribes the fixture content verbatim — NPC-initiated event with Varro's plan step + clock fire producing `turn_resolution` SE; page plan §7a renders the driver and the 4 driver_records; emitted CHCs all carry `responds` mode with at least one targeting a record in `driver_records`; observer firewall passes (no `Varro smiled because he knew Jon would choose Mara`-style hidden mind narration). Per SPEC-76 §8 Implementation Slice E: "Red Kiln Ambush + 5 failing variants (no driver, hidden mind leak, missing pressure table, mismatched §7a, wrong response mode)."
-3. **Cross-skill / cross-artifact boundary**: this fixture exercises the full SPEC-76 pipeline end-to-end — schema (SPEC76TURDRIPRI-001), contract (SPEC76TURDRIPRI-002), 4 new validators (SPEC76TURDRIPRI-003 through 006), 3 existing-validator updates (archive/tickets/SPEC76TURDRIPRI-007.md), 3 skill amendments (SPEC76TURDRIPRI-008/009/010). The fixture's content (the SE record, the PG record, the page-plan body, the CHC records) must be coherent across all surfaces; the test asserts each validator's verdict on the fixture matches the expected pass/fail per the spec's verification matrix.
+3. **Cross-skill / cross-artifact boundary**: this fixture exercises the full SPEC-76 pipeline end-to-end — schema (SPEC76TURDRIPRI-001), contract (SPEC76TURDRIPRI-002), 4 new validators (SPEC76TURDRIPRI-003 through 006), 3 existing-validator updates (archive/tickets/SPEC76TURDRIPRI-007.md), 3 skill amendments (archive/tickets/SPEC76TURDRIPRI-008.md, SPEC76TURDRIPRI-009, SPEC76TURDRIPRI-010). The fixture's content (the SE record, the PG record, the page-plan body, the CHC records) must be coherent across all surfaces; the test asserts each validator's verdict on the fixture matches the expected pass/fail per the spec's verification matrix.
 4. **FOUNDATIONS principle**: §FOUNDATIONS Alignment table validation. The fixture demonstrates the composed end-to-end behavior across the spec's named alignment: §Story Bundles §5b (Schema-Minimalism — every field load-bearing), §5c (Present Causal State — driver salience local), §6b (Observer Firewall — Jon's POV via window grants direct observation), §4a (Plan-Authority Boundary — §7a is render-side projection of SE.turn_driver), §5a (Commitment Blocks — narrative-shape-field-rejection backstop preserved), Rule 5 (No Consequence Evasion — active-pressure table accounts for all 4 high-urgency records), Rule 7 (Preserve Mystery — no hidden state leaked through `perceived_directly`).
 
 ## Architecture Check
@@ -76,7 +76,7 @@ Add a brief README or top-of-fixture-directory comment naming the fixture's purp
 - Schema-level `turn_driver` shape constraints — ship in SPEC76TURDRIPRI-001.
 - Contract amendments — ship in SPEC76TURDRIPRI-002.
 - Per-validator structural tests (inline-fixture-builder shape) — ship in SPEC76TURDRIPRI-003 through 007.
-- Skill SKILL.md edits — ship in SPEC76TURDRIPRI-008/009/010.
+- Skill SKILL.md edits — ship in archive/tickets/SPEC76TURDRIPRI-008.md, SPEC76TURDRIPRI-009, and SPEC76TURDRIPRI-010.
 - Test-bundle rebuild (e.g., `red-bunny`) — documented in SPEC-76 §7 Migration; mechanical rebuild outside this fixture's scope.
 
 ## Acceptance Criteria
