@@ -536,7 +536,7 @@ Every state-changing skill follows this order at commit:
 6. Update bundle `INDEX.md` last.
 7. Update per-world `stories/INDEX.md` only when story visibility changed (new bundle, archived bundle).
 
-Hook 3 blocks raw `Edit` / `Write` on `_source/<class>/*.yaml`. Story-bundle markdown surfaces (`STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `pages-prose-plans/`, `audits/`, `storylet-batches/`, `story-promotions/`, `pages-prose-receipts/`) remain direct-write surfaces, with Hook 6 adding the plan-hash guard for `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md`.
+Hook 3 blocks raw `Edit` / `Write` on `_source/<class>/*.yaml`. Story-bundle markdown surfaces (`STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `pages-prose-plans/`, `audits/`, `storylet-batches/`, `story-promotions/`, `pages-prose-receipts/`) remain direct-write surfaces, with Hook 6 adding the plan-hash guard for `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md`, and Hook 7 adding the prose-hash guard for `pages-prose-receipts/PG-<integer>.yaml`.
 
 If patch submission succeeds but a direct-write artifact fails, the story `_source/` records are authoritative and the artifact should be repaired directly. The skill must surface the partial-failure state to the user; silent retry is forbidden.
 

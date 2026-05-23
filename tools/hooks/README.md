@@ -3,8 +3,8 @@
 Claude Code hooks that make retrieval and mutation discipline structural rather than prose-asserted. Compiled from TypeScript in `src/` to `dist/` (gitignored); registered via `.claude/settings.json`.
 
 **Design**: `specs/SPEC-05-hooks-discipline.md`
-**Phase**: 1 (Hooks 1, 2, 4) + Phase 2 (Hooks 3, 5, 6)
-**Status**: Six hooks implemented. Hooks 1, 2, and 4 landed 2026-04-24; Hooks 3 and 5 landed 2026-04-26 per SPEC-05 Part B; Hook 6 landed under SPEC-40. Built hook entrypoints land at `dist/src/*.js`.
+**Phase**: 1 (Hooks 1, 2, 4) + Phase 2 (Hooks 3, 5, 6, 7)
+**Status**: Seven hooks implemented. Hooks 1, 2, and 4 landed 2026-04-24; Hooks 3 and 5 landed 2026-04-26 per SPEC-05 Part B; Hook 6 landed under SPEC-40; Hook 7 landed under HOOK-003. Built hook entrypoints land at `dist/src/*.js`.
 
 ## Hook inventory
 
@@ -16,6 +16,7 @@ Claude Code hooks that make retrieval and mutation discipline structural rather 
 | 4 | `SubagentStart` | Bootstrap localization sub-agents with retrieval discipline | 1 |
 | 5 | `PostToolUse:submit_patch_plan` | Auto-run `record_schema_compliance` + `id_uniqueness` + `cross_file_reference` + `touched_by_cf_completeness` against the just-written world; surface drift via `<system-reminder>` | 2 |
 | 6 | `PreToolUse:Edit\|Write` | Block direct writes to story-bundle `pages-prose-plans/PG-*.md` when the pending plan bytes do not match stamped `PG.plan.plan_hash`, and block bundle `INDEX.md` updates while referenced PG plans are drifted. Redirect to `compute-pg-hashes.js` and patch-engine re-stamping. | 2 |
+| 7 | `PreToolUse:Edit\|Write` | Block direct writes to story-bundle `pages-prose-receipts/PG-*.yaml` when the stamped `prose_hash` does not match sha256 of the file at the receipt's `prose_path`. Receipts are direct-write audit-trail artifacts and must pin actual prose bytes; fabrication or post-write prose-file edits are caught here. | 2 |
 
 ## Graceful degrade
 
@@ -23,7 +24,7 @@ If world index missing or MCP server unavailable, hooks pass through silently (w
 
 ## Override
 
-Hook 2 has an `ALLOW_FULL_READ` prompt-level override for human-driven review. Hook 3 has no override — engine writes bypass naturally via `fs.writeFile`. Hook 6 has no override; fresh bootstrap writes with no PG record yet and already-stamped matching plan bytes pass through naturally.
+Hook 2 has an `ALLOW_FULL_READ` prompt-level override for human-driven review. Hook 3 has no override — engine writes bypass naturally via `fs.writeFile`. Hook 6 has no override; fresh bootstrap writes with no PG record yet and already-stamped matching plan bytes pass through naturally. Hook 7 has no override; matching `prose_hash` values pass through naturally.
 
 ## Logs
 
@@ -31,6 +32,6 @@ Hook 2 has an `ALLOW_FULL_READ` prompt-level override for human-driven review. H
 
 ## Testing
 
-`npm test` builds the package and runs compiled-script tests for Hooks 1 through 6 against synthetic hook payloads and fixture worlds. Hook 5 tests stub the `world-validate` CLI under a temp repo root so the validator runner is exercised without a real world index.
+`npm test` builds the package and runs compiled-script tests for Hooks 1 through 7 against synthetic hook payloads and fixture worlds. Hook 5 tests stub the `world-validate` CLI under a temp repo root so the validator runner is exercised without a real world index.
 
 `npm run check:dist-currency` verifies that an existing local `dist/` matches a fresh `npm run build` output. If `dist/` is absent, the command builds it.
