@@ -1,9 +1,9 @@
 # SPEC76TURDRIPRI-011: Golden fixture — Red Kiln Ambush end-to-end integration test
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — new fixture directory at `tools/validators/tests/fixtures/red-kiln-ambush/`; new integration test exercising the full SPEC-76 pipeline end-to-end
+**Engine Changes**: Yes — new fixture directory at `tools/validators/tests/fixtures/red-kiln-ambush/`; new integration test exercising the full SPEC-76 pipeline end-to-end; small same-seam repair to `turn_cycle_output_grounding_integrity`
 **Deps**: archive/tickets/SPEC76TURDRIPRI-003.md, archive/tickets/SPEC76TURDRIPRI-004.md, archive/tickets/SPEC76TURDRIPRI-005.md, archive/tickets/SPEC76TURDRIPRI-006.md, archive/tickets/SPEC76TURDRIPRI-007.md, archive/tickets/SPEC76TURDRIPRI-008.md, archive/tickets/SPEC76TURDRIPRI-009.md, archive/tickets/SPEC76TURDRIPRI-010.md
 
 ## Problem
@@ -16,10 +16,11 @@ SPEC-76's full pipeline — schema, contract, 4 new validators, 3 existing-valid
 2. SPEC-76 §6.3 prescribes the fixture content verbatim — NPC-initiated event with Varro's plan step + clock fire producing `turn_resolution` SE; page plan §7a renders the driver and the 4 driver_records; emitted CHCs all carry `responds` mode with at least one targeting a record in `driver_records`; observer firewall passes (no `Varro smiled because he knew Jon would choose Mara`-style hidden mind narration). Per SPEC-76 §8 Implementation Slice E: "Red Kiln Ambush + 5 failing variants (no driver, hidden mind leak, missing pressure table, mismatched §7a, wrong response mode)."
 3. **Cross-skill / cross-artifact boundary**: this fixture exercises the full SPEC-76 pipeline end-to-end — schema (SPEC76TURDRIPRI-001), contract (SPEC76TURDRIPRI-002), 4 new validators (SPEC76TURDRIPRI-003 through 006), 3 existing-validator updates (archive/tickets/SPEC76TURDRIPRI-007.md), 3 skill amendments (archive/tickets/SPEC76TURDRIPRI-008.md, archive/tickets/SPEC76TURDRIPRI-009.md, archive/tickets/SPEC76TURDRIPRI-010.md). The fixture's content (the SE record, the PG record, the page-plan body, the CHC records) must be coherent across all surfaces; the test asserts each validator's verdict on the fixture matches the expected pass/fail per the spec's verification matrix.
 4. **FOUNDATIONS principle**: §FOUNDATIONS Alignment table validation. The fixture demonstrates the composed end-to-end behavior across the spec's named alignment: §Story Bundles §5b (Schema-Minimalism — every field load-bearing), §5c (Present Causal State — driver salience local), §6b (Observer Firewall — Jon's POV via window grants direct observation), §4a (Plan-Authority Boundary — §7a is render-side projection of SE.turn_driver), §5a (Commitment Blocks — narrative-shape-field-rejection backstop preserved), Rule 5 (No Consequence Evasion — active-pressure table accounts for all 4 high-urgency records), Rule 7 (Preserve Mystery — no hidden state leaked through `perceived_directly`).
+5. **Same-seam validator repair discovered during capstone proof**: the pre-edit broad baseline `cd tools/validators && npm test` passed 999 tests. The initial Red Kiln Ambush capstone then proved `turn_cycle_output_grounding_integrity` only enforced topical grounding for CHCs already labelled `player_response_mode: responds`; it did not fail emitted CHCs labelled `initiates` under a non-player driver, contrary to SPEC-76 §3.3 Phase 8 and this ticket's wrong-response-mode variant. This ticket absorbs the small validator repair because the missing check is required for the capstone fixture to prove the full SPEC-76 pipeline truthfully. `docs/HARD-GATE-DISCIPLINE.md` was read before changing the validation signal; the change adds a fail-closed structural verdict and does not weaken pre-apply, approval, or canon-write discipline.
 
 ## Architecture Check
 
-1. **Capstone integration fixture, no new production code**: this ticket introduces no new production code; it composes existing validators (4 new + 3 modified) against a single fixture-world to prove the spec's end-to-end intent. Per the §Spec-Integration Ticket Shape from spec-to-tickets, the fixture-world copy strategy must use `fs.cpSync` to a temp root (or equivalent) so the test never mutates canon; expected counts must be re-enumerated at test start (not hardcoded) — though for this fixture the validator verdicts are the assertions, not counts; the spec §6.3 verification matrix is the test matrix. Alternatives considered and rejected: (a) skip the integration fixture and rely on per-validator structural tests alone — rejected, the source report's §15 explicitly names "Red Kiln Ambush" as a golden fixture; the composed behavior is what the spec proves; (b) merge with one of the per-validator structural-test files — rejected, the fixture exercises multiple validators; merging would obscure the fixture's role as the capstone integration test.
+1. **Capstone integration fixture plus minimal validator repair**: this ticket composes existing validators (4 new + 2 modified) against a single checked fixture to prove the spec's end-to-end intent, and it absorbs the small same-seam `turn_cycle_output_grounding_integrity` repair exposed by the wrong-response-mode variant. The test uses checked JSON fixture records plus explicit page-plan file input and materializes the page-plan body under a temp root to prove the path never targets live canon. Alternatives considered and rejected: (a) skip the integration fixture and rely on per-validator structural tests alone — rejected, the source report's §15 explicitly names "Red Kiln Ambush" as a golden fixture; the composed behavior is what the spec proves; (b) merge with one of the per-validator structural-test files — rejected, the fixture exercises multiple validators; merging would obscure the fixture's role as the capstone integration test.
 2. **No backwards-compatibility aliasing**: the fixture is composed entirely against the new contract (post-SPEC-76); no legacy `selected_choice` / `write_in_attempt` fixtures need accommodating per SPEC-76 §7 Migration.
 
 ## Verification Layers
@@ -33,43 +34,44 @@ SPEC-76's full pipeline — schema, contract, 4 new validators, 3 existing-valid
 7. **Invariant**: `turn_cycle_output_grounding_integrity` (extended in archive/tickets/SPEC76TURDRIPRI-007.md) passes — at least one CHC carrying `player_response_mode: responds` includes a record from `SE.turn_driver.driver_records[]` in its `grounded_in.records[]`.
 8. **Invariant**: 5 failing variants per SPEC-76 §8 Slice E (no driver, hidden mind leak, missing pressure table, mismatched §7a, wrong response mode) each produce the expected verdict from the appropriate validator.
 
-## What to Change
+## Landed Changes
 
-### 1. Create the fixture directory
+### 1. Created the fixture directory
 
-Create `tools/validators/tests/fixtures/red-kiln-ambush/` containing the fixture-world structure:
+Created `tools/validators/tests/fixtures/red-kiln-ambush/` containing the fixture data:
 
-- A minimal world directory tree (`worlds/red-kiln-ambush/`) with the SE-X (turn_resolution event with npc_action driver), parent PG snapshot (containing STPLAN-9, STEMO-12, CLK-3, THR-4 as high-urgency active records), STENT records for Varro and Jon, BEL records granting Jon access to the shot trace, page-plan body file with §7a section listing the driver records, CHC records with `player_response_mode: responds` and at least one CHC whose `grounded_in.records[]` includes a driver_record.
-- The fixture content reproduces the source report's §15 Red Kiln Ambush scenario verbatim.
+- `fixture.json` contains indexed-record-shaped data for `SE-2`, parent/child PG records, STENT records for Varro and Jon, BEL access, STPLAN-9, STEMO-12, CLK-3, THR-4, five response CHCs, and the page-plan body file content.
+- `README.md` documents the Red Kiln Ambush purpose and names the five failing variants.
 
-### 2. Create the integration test
+### 2. Created the integration test
 
-Create `tools/validators/tests/structural/red-kiln-ambush-integration.test.ts` (or under `tools/validators/tests/integration/` if the package's convention prefers a separate integration subdirectory). The test:
+Created `tools/validators/tests/integration/spec76-red-kiln-ambush.test.ts`. The test:
 
-1. Copies the fixture-world to a temp root via `fs.cpSync` (or equivalent) to avoid canon mutation.
-2. Loads the fixture-world's records into the validator framework's run context.
+1. Materializes the fixture page-plan file under a temp root and removes the temp root after the canonical pass, so no live canon path is mutated.
+2. Loads the fixture records into the validator framework's run context.
 3. Runs each of the 6 SPEC-76 validators (4 new + 2 modified-and-relevant — `observer_firewall` extended, `turn_cycle_output_grounding_integrity` extended) against the fixture.
 4. Asserts the positive Red Kiln Ambush fixture passes all validators (zero verdicts).
 
-### 3. Add the 5 failing variants
+### 3. Added the 5 failing variants
 
-Per SPEC-76 §8 Slice E, add 5 failing-variant fixtures (each a small mutation of the canonical Red Kiln Ambush fixture) and assert each produces the expected verdict:
+Per SPEC-76 §8 Slice E, the integration test mutates the canonical Red Kiln Ambush fixture and asserts each variant produces the expected verdict:
 
 - **No driver variant**: SE has `event_kind = turn_resolution` but no `turn_driver` object → `turn_driver_schema_compliance.turn_driver_missing`.
 - **Hidden mind leak variant**: SE.turn_driver cites Varro's STPLAN-9 (offstage) with `pov_visibility = perceived_directly` → `turn_driver_pov_observer_firewall.turn_driver_hidden_state_leak`.
 - **Missing pressure table variant**: page-plan §7a omits the `Active-pressure disposition` table while parent PG has the 4 high-urgency records → `page_plan_turn_driver_consistency.page_plan_active_pressure_table_missing` and/or `active_pressure_handling_discipline.high_urgency_active_record_unhandled` per the validators' enforcement scopes.
 - **Mismatched §7a variant**: page-plan §7a's `Driver kind:` says `offstage_action` while SE.turn_driver.kind says `npc_action` → `page_plan_turn_driver_consistency.page_plan_driver_kind_mismatch`.
-- **Wrong response mode variant**: emitted CHCs all carry `player_response_mode: initiates` (instead of `responds`) → the Phase 8 amendment's response-mode requirement fails (enforced by `turn_cycle_output_grounding_integrity` or a related grounding check per the topical-grounding extension in archive/tickets/SPEC76TURDRIPRI-007.md).
+- **Wrong response mode variant**: emitted CHCs all carry `player_response_mode: initiates` (instead of `responds`) → `turn_cycle_output_grounding_integrity.chc_non_player_driver_response_mode_invalid`.
 
-### 4. Document the fixture's role
+### 4. Repaired the response-mode validator seam
 
-Add a brief README or top-of-fixture-directory comment naming the fixture's purpose (Red Kiln Ambush, source report §15, SPEC-76 §6.3 + §8 Slice E) and the 5 failing variants' expected verdicts.
+`turn_cycle_output_grounding_integrity` now fails CHCs emitted by a non-player turn driver when `player_response_mode` is outside `responds | witnesses | chooses_continuation`. The existing topical-grounding check still applies to CHCs marked `responds`.
 
 ## Files to Touch
 
-- `tools/validators/tests/fixtures/red-kiln-ambush/` (new directory tree with fixture-world records)
-- `tools/validators/tests/structural/red-kiln-ambush-integration.test.ts` (new — or `tools/validators/tests/integration/red-kiln-ambush.test.ts` per the package's convention)
+- `tools/validators/tests/fixtures/red-kiln-ambush/fixture.json` (new — indexed-record fixture data plus page-plan file input)
 - `tools/validators/tests/fixtures/red-kiln-ambush/README.md` (new — names the fixture's role + 5 failing variants)
+- `tools/validators/tests/integration/spec76-red-kiln-ambush.test.ts` (new — canonical Red Kiln Ambush pass + five failing variants)
+- `tools/validators/src/structural/turn-cycle-output-grounding-integrity.ts` (modify — fail CHCs whose response mode is illegal for a non-player driver)
 
 ## Out of Scope
 
@@ -85,24 +87,44 @@ Add a brief README or top-of-fixture-directory comment naming the fixture's purp
 
 1. `cd tools/validators && npm test` — the new Red Kiln Ambush integration test passes; the 5 failing variants each produce the expected verdict.
 2. `cd tools/validators && npm run build` — TypeScript compilation succeeds.
-3. The fixture-world directory tree under `tools/validators/tests/fixtures/red-kiln-ambush/` is self-contained (no external file references) and reproduces the source report's §15 scenario verbatim.
-4. The integration test does not mutate canon — `fs.cpSync` (or equivalent) copies the fixture to a temp root before validator runs.
+3. The fixture data under `tools/validators/tests/fixtures/red-kiln-ambush/` is self-contained (no external file references) and reproduces the source report's §15 scenario as indexed records plus page-plan content.
+4. The integration test does not mutate canon — it materializes only temp page-plan file content under `/tmp` and removes the temp root after the canonical pass.
 
 ### Invariants
 
 1. The canonical Red Kiln Ambush fixture passes ALL 6 SPEC-76-relevant validators (zero verdicts).
-2. Each of the 5 failing variants produces EXACTLY the expected verdict (per the §3.6.x error codes); no incidental false positives from other validators.
+2. Each of the 5 failing variants produces exactly the expected verdict set; the wrong-response-mode variant produces one `chc_non_player_driver_response_mode_invalid` verdict per invalid emitted CHC.
 3. The fixture is the capstone integration test for SPEC-76; future spec changes that break the fixture indicate either a deliberate spec amendment (update the fixture) or a regression (fix the code).
 
 ## Test Plan
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/red-kiln-ambush-integration.test.ts` (new) — canonical Red Kiln Ambush passes + 5 failing variants assertions.
-2. `tools/validators/tests/fixtures/red-kiln-ambush/` (new) — fixture-world directory tree reproducing source report §15.
+1. `tools/validators/tests/integration/spec76-red-kiln-ambush.test.ts` (new) — canonical Red Kiln Ambush passes + 5 failing variants assertions.
+2. `tools/validators/tests/fixtures/red-kiln-ambush/` (new) — fixture data reproducing source report §15.
 
 ### Commands
 
 1. `cd tools/validators && npm test` — runs the full validator test suite including the new integration test.
 2. `cd tools/validators && npm run build` — verifies TypeScript compilation of the new integration test file.
-3. `cd tools/validators && npm test -- --test-name-pattern="red-kiln-ambush"` — targeted run of the integration test (or equivalent test-name filter per node:test runner conventions).
+3. `cd tools/validators && node --test dist/tests/integration/spec76-red-kiln-ambush.test.js` — targeted compiled integration test after `npm run build`.
+
+## Outcome
+
+Completed 2026-05-23.
+
+The Red Kiln Ambush capstone fixture now exists under `tools/validators/tests/fixtures/red-kiln-ambush/`, with a package integration test at `tools/validators/tests/integration/spec76-red-kiln-ambush.test.ts`. The canonical fixture passes the six SPEC-76 validator surfaces together. The five variants produce the expected failures: missing driver, hidden/offstage visibility leak, missing pressure table, mismatched §7a driver kind, and illegal response mode under a non-player driver.
+
+The capstone also exposed and repaired a same-seam omission in `turn_cycle_output_grounding_integrity`: non-player drivers now fail emitted CHCs whose `player_response_mode` is not one of `responds`, `witnesses`, or `chooses_continuation`. This is a fail-closed structural validation addition; no canon-write or approval-token behavior changed.
+
+## Verification Result
+
+1. `cd tools/validators && npm test` before edits — PASS, 999 tests. Baseline was green before the Red Kiln Ambush ticket changed anything.
+2. `cd tools/validators && npm run build` — PASS after implementation.
+3. `cd tools/validators && node --test dist/tests/integration/spec76-red-kiln-ambush.test.js` — PASS, 2 tests. Proved canonical fixture zero verdicts and all five failing variants.
+4. `cd tools/validators && npm test` — PASS, 1001 tests. Broad validators package lane passed after the capstone and validator repair.
+
+## Deviations
+
+- The checked fixture is represented as indexed-record JSON plus page-plan file content rather than a full copied `worlds/red-kiln-ambush/` tree. This matches the current structural validator test harness and keeps the fixture self-contained without mutating live canon paths.
+- The wrong-response-mode variant required a same-seam validator repair in `turn_cycle_output_grounding_integrity`; the drafted ticket expected fixture-only work, but the capstone proved the existing validator did not yet enforce SPEC-76 §3.3 Phase 8's response-mode constraint.

@@ -4,6 +4,7 @@ import { asPlainRecord, locationFor, queryStructuralRecords, stringArray, string
 const VALIDATOR = "turn_cycle_output_grounding_integrity";
 const TARGET_CLASSES = new Set(["CNSQ", "SF", "DA"]);
 const PLAYER_DRIVER_KINDS = new Set(["player_action", "player_write_in"]);
+const NON_PLAYER_RESPONSE_MODES = new Set(["responds", "witnesses", "chooses_continuation"]);
 const EVENT_CREATE_OPS = new Set(["create_se_record", "create_pg_record"]);
 const ALLOWED_GROUNDING_PREFIXES = new Set([
   "SE",
@@ -131,7 +132,17 @@ function validateResponseChoiceGrounding(
       continue;
     }
     const parsedChoice = asPlainRecord(choice.parsed);
-    if (stringValue(parsedChoice.player_response_mode) !== "responds") {
+    const responseMode = stringValue(parsedChoice.player_response_mode);
+    if (!NON_PLAYER_RESPONSE_MODES.has(responseMode ?? "")) {
+      verdicts.push(fail(choice, "chc_non_player_driver_response_mode_invalid", `${createdId} is emitted by a non-player turn driver but has invalid player_response_mode ${responseMode ?? "<missing>"}.`, {
+        choice_id: createdId,
+        event_id: stringValue(parsedEvent.id) ?? bareNodeId(event),
+        player_response_mode: responseMode,
+        allowed_response_modes: [...NON_PLAYER_RESPONSE_MODES].sort()
+      }));
+      continue;
+    }
+    if (responseMode !== "responds") {
       continue;
     }
     const groundedRecords = new Set(stringArray(asPlainRecord(parsedChoice.grounded_in).records));
