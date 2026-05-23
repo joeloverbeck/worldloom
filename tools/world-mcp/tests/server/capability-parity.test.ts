@@ -15,6 +15,7 @@ import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema
 const requireFromThisTest = createRequire(import.meta.url);
 
 const EXPECTED_VALIDATOR_NAMES = [
+  "active_pressure_handling_discipline",
   "active_records_full_shape",
   "approval_semantics",
   "artifact_maturity",
@@ -53,6 +54,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "observer_firewall",
   "page_affordance_integrity",
   "page_plan_stchar_packet_integrity",
+  "page_plan_turn_driver_consistency",
   "proposal_package_shape",
   "prose_load_bearing_artifact_mention",
   "prose_receipt_hash_integrity",
@@ -121,6 +123,8 @@ const EXPECTED_VALIDATOR_NAMES = [
   "thread_introduction_grounding_integrity",
   "touched_by_cf_completeness",
   "turn_cycle_output_grounding_integrity",
+  "turn_driver_pov_observer_firewall",
+  "turn_driver_schema_compliance",
   "validation_trace_shape_compliance",
   "yaml_parse_integrity"
 ].sort((left, right) => left.localeCompare(right));

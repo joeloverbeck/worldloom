@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -34,8 +33,11 @@ interface RedKilnFixture {
   files: FixtureFile[];
 }
 
-const require = createRequire(import.meta.url);
-const fixture = require("../fixtures/red-kiln-ambush/fixture.json") as RedKilnFixture;
+const FIXTURE_PATH = path.resolve(
+  import.meta.dirname,
+  "../../../tests/fixtures/red-kiln-ambush/fixture.json"
+);
+const fixture = JSON.parse(readFileSync(FIXTURE_PATH, "utf8")) as RedKilnFixture;
 
 const SPEC76_VALIDATORS: readonly Validator[] = [
   turnDriverSchemaCompliance,
