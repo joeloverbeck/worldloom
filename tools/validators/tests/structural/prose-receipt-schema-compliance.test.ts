@@ -37,14 +37,6 @@ function validReceiptPayload(): Record<string, unknown> {
   };
 }
 
-function validHashComparison() {
-  return {
-    expected: "sha256:0000000000000000000000000000000000000000000000000000000000000004",
-    observed: "sha256:0000000000000000000000000000000000000000000000000000000000000004",
-    verdict: "PASS"
-  };
-}
-
 function validStcharAuthority() {
   return {
     stchar_id: "STCHAR-1",
@@ -53,9 +45,6 @@ function validStcharAuthority() {
     required_because: "viewpoint character",
     packet_present: true,
     active_in_snapshot: true,
-    profile_hash: validHashComparison(),
-    voice_block_hash: validHashComparison(),
-    page_packet_hash: validHashComparison(),
     deterministic_verdict: "PASS"
   };
 }
@@ -124,23 +113,18 @@ test("prose_receipt_schema_compliance rejects missing-packet STCHAR entries mark
   )));
 });
 
-test("prose_receipt_schema_compliance rejects hash-mismatch STCHAR entries marked pass", async () => {
+test("prose_receipt_schema_compliance rejects reintroduced hash fields on STCHAR entries", async () => {
   const payload = validReceiptPayload();
   payload.stchar_authority = [{
     ...validStcharAuthority(),
-    page_packet_hash: {
-      ...validHashComparison(),
-      observed: "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-      verdict: "FAIL"
-    },
-    deterministic_verdict: "PASS"
+    page_packet_hash: "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
   }];
 
   const result = await runReceipt(payload);
 
   assert.ok(result.some((verdict) => (
-    verdict.code === "prose_receipt_schema_compliance.const" &&
-    verdict.message.includes("/stchar_authority/0/deterministic_verdict")
+    verdict.code === "prose_receipt_schema_compliance.additionalProperties" &&
+    verdict.message.includes("must NOT have additional properties")
   )));
 });
 

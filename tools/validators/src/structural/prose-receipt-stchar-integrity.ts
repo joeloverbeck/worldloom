@@ -2,7 +2,6 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 import yaml from "js-yaml";
-import { computeStcharPagePacketHash } from "@worldloom/world-index/hash/content";
 
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
@@ -27,7 +26,6 @@ import {
 const VALIDATOR = "prose_receipt_stchar_integrity";
 const PLAN_PATH_PATTERN = /^stories\/([^/]+)\/pages-prose-plans\/(PG-(0|[1-9][0-9]*))\.md$/;
 const RECEIPT_PATH_PATTERN = /^stories\/([^/]+)\/pages-prose-receipts\/(PG-(0|[1-9][0-9]*))\.yaml$/;
-const HASH_PATTERN = /profile_hash=(sha256:[0-9a-f]{64});\s*voice_block_hash=(sha256:[0-9a-f]{64});\s*page_packet_hash=(sha256:[0-9a-f]{64})/;
 
 interface PageTextTarget {
   storySlug: string;
@@ -40,9 +38,6 @@ interface Packet {
   stentId: string;
   stcharId: string;
   requiredBecause: string;
-  profileHash: string | undefined;
-  voiceBlockHash: string | undefined;
-  pagePacketHash: string | undefined;
   packetText: string;
 }
 
@@ -92,7 +87,7 @@ export const proseReceiptStcharIntegrity: Validator = {
         }
 
         const packets = parsePackets(plan.content);
-        verdicts.push(...receiptVerdicts(page, receipt, parsedReceipt, packets, maps.byId));
+        verdicts.push(...receiptVerdicts(page, receipt, parsedReceipt, packets));
       }
     }
 
@@ -104,8 +99,7 @@ function receiptVerdicts(
   page: IndexedRecord,
   receipt: PageTextTarget,
   parsedReceipt: Record<string, unknown>,
-  packets: Packet[],
-  recordsById: Map<string, IndexedRecord>
+  packets: Packet[]
 ): Verdict[] {
   const verdicts: Verdict[] = [];
   const activeStchars = new Set(activeIds(page, "STCHAR"));
@@ -162,8 +156,6 @@ function receiptVerdicts(
       ));
     }
 
-    verdicts.push(...hashVerdicts(receipt, page, entry, packet, recordsById.get(packet.stcharId)));
-
     if (!fidelityByStchar.has(packet.stcharId)) {
       verdicts.push(receiptFail(
         receipt,
@@ -193,72 +185,6 @@ function receiptVerdicts(
   return verdicts;
 }
 
-function hashVerdicts(
-  receipt: PageTextTarget,
-  page: IndexedRecord,
-  entry: Record<string, unknown>,
-  packet: Packet,
-  stchar: IndexedRecord | undefined
-): Verdict[] {
-  const verdicts: Verdict[] = [];
-  const stcharParsed = asPlainRecord(stchar?.parsed);
-  for (const [field, packetHash] of [
-    ["profile_hash", packet.profileHash],
-    ["voice_block_hash", packet.voiceBlockHash]
-  ] as const) {
-    const comparison = asPlainRecord(entry[field]);
-    const storedHash = stringValue(stcharParsed[field]);
-    const expected = stringValue(comparison.expected);
-    const observed = stringValue(comparison.observed);
-    const verdict = stringValue(comparison.verdict);
-    if (expected !== storedHash || observed !== packetHash || verdict !== "PASS") {
-      verdicts.push(receiptFail(
-        receipt,
-        page,
-        "prose_receipt_stchar_integrity.hash_mismatch",
-        `${receipt.path} stchar_authority for ${packet.stcharId} records ${field} expected=${expected ?? "<missing>"} observed=${observed ?? "<missing>"}, expected stored=${storedHash ?? "<missing>"} and packet=${packetHash ?? "<missing>"}.`,
-        {
-          page_id: pageId(page),
-          stchar_id: packet.stcharId,
-          field,
-          receipt_expected: expected ?? null,
-          receipt_observed: observed ?? null,
-          stored_hash: storedHash ?? null,
-          packet_hash: packetHash ?? null,
-          receipt_verdict: verdict ?? null
-        },
-        `Update ${packet.stcharId}'s ${field} comparison to expected=${storedHash ?? "<stored STCHAR hash>"} and observed=${packetHash ?? "<page-plan packet hash>"}.`
-      ));
-    }
-  }
-
-  const comparison = asPlainRecord(entry.page_packet_hash);
-  const expected = stringValue(comparison.expected);
-  const observed = stringValue(comparison.observed);
-  const verdict = stringValue(comparison.verdict);
-  const recomputed = `sha256:${computeStcharPagePacketHash(packet.packetText)}`;
-  if (expected !== packet.pagePacketHash || observed !== recomputed || verdict !== "PASS") {
-    verdicts.push(receiptFail(
-      receipt,
-      page,
-      "prose_receipt_stchar_integrity.hash_mismatch",
-      `${receipt.path} stchar_authority for ${packet.stcharId} records page_packet_hash expected=${expected ?? "<missing>"} observed=${observed ?? "<missing>"}, expected packet declaration=${packet.pagePacketHash ?? "<missing>"} and recomputed=${recomputed}.`,
-      {
-        page_id: pageId(page),
-        stchar_id: packet.stcharId,
-        field: "page_packet_hash",
-        receipt_expected: expected ?? null,
-        receipt_observed: observed ?? null,
-        packet_hash: packet.pagePacketHash ?? null,
-        recomputed,
-        receipt_verdict: verdict ?? null
-      },
-      `Update ${packet.stcharId}'s page_packet_hash comparison to expected=${packet.pagePacketHash ?? "<page-plan packet hash>"} and observed=${recomputed}.`
-    ));
-  }
-  return verdicts;
-}
-
 function parsePackets(content: string): Packet[] {
   const sectionStart = content.search(/^##\s+16a\.\s+STCHAR-derived character authority packets\s*$/m);
   if (sectionStart === -1) {
@@ -268,7 +194,6 @@ function parsePackets(content: string): Packet[] {
   const starts = [...section.matchAll(/^- (STENT-(?:0|[1-9][0-9]*)) \/ (STCHAR-(?:0|[1-9][0-9]*))\b.*$/gm)];
   return starts.map((match, index) => {
     const packetText = section.slice(match.index ?? 0, starts[index + 1]?.index ?? section.length);
-    const hashes = packetText.match(HASH_PATTERN);
     const stentId = match[1];
     const stcharId = match[2];
     if (!stentId || !stcharId) {
@@ -278,9 +203,6 @@ function parsePackets(content: string): Packet[] {
       stentId,
       stcharId,
       requiredBecause: packetText.match(/^\s+- Required because:\s*([^.\n]+)\.?/m)?.[1]?.trim() ?? "",
-      profileHash: hashes?.[1],
-      voiceBlockHash: hashes?.[2],
-      pagePacketHash: hashes?.[3],
       packetText
     };
   });

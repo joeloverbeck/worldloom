@@ -854,7 +854,6 @@ story_slug: string*
 world_slug: string*
 source_kind: world_char | story_local | hybrid | regenerated*
 source_char_id: CHAR-<integer> | null
-source_char_hash: sha256:<64 lowercase hex> | null
 source_char_sections_used: [string]           # default []
 story_local_inputs_used: [<story-local record id>] # optional; required when source_kind needs story-local inputs
 generated_at_page: story_bootstrap | PG-<integer> | null
@@ -865,23 +864,11 @@ status: active | superseded | retired*
 bound_stent_ids: [STENT-<integer>]*
 profile_revision: integer >= 1*
 body_schema_version: stchar.v1*
-profile_hash: sha256:<64 lowercase hex>*
-voice_block_hash: sha256:<64 lowercase hex>*
 ```
 
-When `source_kind: world_char`, `source_char_id` and `source_char_hash` are required and non-null. When `source_kind: story_local`, both are null. The two STCHAR frontmatter hash fields are the only required STCHAR-global fidelity hashes: profile identity/drift and voice-block fidelity. Page-specific `page_packet_hash` values belong to page-plan §16a packets and prose receipts. There is no `section_hashes` map.
+When `source_kind: world_char`, `source_char_id` is required and non-null. When `source_kind: story_local`, `source_char_id` is null. `source_char_sections_used` and `source_operational_fact_map` preserve source provenance and operational-fact coverage without byte-pinning source or STCHAR content. There is no `section_hashes` map.
 
 Normal story runtime consumes active `STCHAR` through `STENT.bound_stchar_id`, `PG.state_snapshot.active_records.STCHAR`, and grounded or derived story records. `source_char_id` is provenance only; it is not an operational shortcut for `STENT`, `CHC`, page plans, or prose receipts.
-
-**Tooling (STCHAR and page-packet hash computation).** The content-derived hashes — STCHAR-global `profile_hash` / `voice_block_hash` and page-local `page_packet_hash` — MUST be computed with the canonical CLI `tools/world-mcp/dist/src/cli/compute-stchar-hashes.js`, not hand-rolled per skill. It reuses the shared `computeStcharProfileHash` / `computeStcharVoiceBlockHash` / `computeStcharPagePacketHash` helpers exported from `@worldloom/world-index/hash/content` (the same module `compute-pg-hashes` uses), so authoring-time and any later recompute are byte-identical by construction. The helpers hash with `sha256Hex ∘ normalizeProseWhitespace` (NFC + whitespace/newline normalization), making the STCHAR-global values invariant to a trailing newline the patch engine may add — a raw byte hash of the whole body drifts between author-time and the on-disk artifact and is forbidden. For page-local `page_packet_hash`, pass the full §16a packet text, including the `Hashes:` line if present; the helper replaces only `page_packet_hash=sha256:<64 lowercase hex>` with the fixed placeholder `page_packet_hash=sha256:<page_packet_hash>` before hashing. This prevents the hash from including itself while still covering the sibling `profile_hash` / `voice_block_hash` declarations and the packet authority prose. Invocation:
-
-```
-node tools/world-mcp/dist/src/cli/compute-stchar-hashes.js \
-  --profile <STCHAR body markdown (full file or body-only)> \
-  --packet  <§16a page-plan packet projection text>
-```
-
-It emits `{profile_hash, voice_block_hash, page_packet_hash}` as `sha256:`-prefixed JSON to stdout. Stamp only `profile_hash` and `voice_block_hash` into STCHAR frontmatter; stamp `page_packet_hash` into the page-specific §16a packet and prose receipt. The fourth hash, `source_char_hash`, is NOT content-derived and is NOT produced by this CLI: for `source_kind: world_char` it MUST equal `sha256:` + the `content_hash` that `mcp__worldloom__get_record(<CHAR-id>)` returns (the world index `contentHashForProse` of the source dossier), so that `branching-story-health-audit` `source_drift` comparison is meaningful; for `source_kind: story_local` it is `null`.
 
 ### 4.6 Prose receipt
 
@@ -916,18 +903,6 @@ stchar_authority:
     required_because: string
     packet_present: true | false
     active_in_snapshot: true | false
-    profile_hash:
-      expected: sha256:<64 lowercase hex>
-      observed: sha256:<64 lowercase hex> | null
-      verdict: PASS | FAIL
-    voice_block_hash:
-      expected: sha256:<64 lowercase hex>
-      observed: sha256:<64 lowercase hex> | null
-      verdict: PASS | FAIL
-    page_packet_hash:
-      expected: sha256:<64 lowercase hex>
-      observed: sha256:<64 lowercase hex> | null
-      verdict: PASS | FAIL
     deterministic_verdict: PASS | FAIL
 profile_fidelity:
   - stchar_id: STCHAR-<integer>
@@ -943,11 +918,11 @@ repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_f
 
 The `checks` mapping contains eight deterministic prose/state checks, the surfaced `char_authority_leak` verdict from `no_char_authority_in_story_runtime`, plus the optional `craft_critic` result. `hash_integrity` is `PASS` when the recorded `PG.plan.plan_hash` and `PG.state_hash` are lowercase sha256-shaped and match the recomputed plan/state hashes, `WARN` when drift is accepted because `accept_plan_drift=true`, and `FAIL` when drift is not accepted or either PG hash field is missing, placeholder, or non-sha256. `required_event_rendered` includes subordinate receipt observations for committed CLK ticks, STSEC reveals, STPLAN relation movement, STEMO affective transitions, and STQ setup/payoff transitions; the STQ subcheck reads committed `STQ.status` lifecycle changes, `payoff_of`, `answer_records[]`, and page-plan §10b render requirements, records omissions as `notes[]` entries beginning `story_question_payoff_undisclosed:`, and never mutates `PG` or any STQ record. `choice_consequence_visibility` verifies that rendered prose realizes the selected action's consequence without mutating `PG` state or re-authoring the selected event. For non-accept routes it reads `SE.resolution.player_visible_feedback`; for `accept` routes, where `SE.resolution` is absent, it reads the selected `CHC.likely_state_pressure`, `CHC.grounded_in.records[]`, page-plan §13, and committed `SE.state_delta` / `SE.state_relations[]` from plan §7.
 
-`stchar_authority` is optional only when no §16a STCHAR packet is required for the page. When a viewpoint, speaker, major actor, direct target, emotionally salient character, or otherwise behavior/voice-shaping character requires a packet, prose-attach emits one entry per required `STCHAR`. Missing packets, inactive `STCHAR` ids in the `PG.state_snapshot.active_records.STCHAR` snapshot, any `profile_hash` / `voice_block_hash` mismatch against STCHAR frontmatter, or any page-local `page_packet_hash` mismatch against the page-plan packet declaration/recompute force that entry's `deterministic_verdict: FAIL`. The receipt may carry an empty or absent `stchar_authority` list only when the page has no qualifying character.
+`stchar_authority` is optional only when no §16a STCHAR packet is required for the page. When a viewpoint, speaker, major actor, direct target, emotionally salient character, or otherwise behavior/voice-shaping character requires a packet, prose-attach emits one entry per required `STCHAR`. Missing packets or inactive `STCHAR` ids in the `PG.state_snapshot.active_records.STCHAR` snapshot force that entry's `deterministic_verdict: FAIL`. The receipt may carry an empty or absent `stchar_authority` list only when the page has no qualifying character.
 
 Each entry's `required_because` must be the **verbatim** value the page-plan §16a packet declares for that `STCHAR`, including every comma-separated qualifier (e.g. `direct_target, emotionally_salient, behavior_shapes_page`), not an abbreviation to the first qualifier. The `prose_receipt_stchar_integrity` validator compares the receipt's `required_because` against the §16a packet's `Required because:` line and emits `prose_receipt_stchar_integrity.required_because_mismatch` (FAIL) on any divergence; a single-value abbreviation of a multi-value packet declaration fails this check.
 
-`profile_fidelity` is judgment-assisted and compares the rendered prose against the page-plan packet first. Retrieve the full STCHAR only when the packet is missing, hash-inconsistent, or insufficient for diagnosis. Each entry records the four fidelity axes, supporting evidence excerpts, and the local repair recommendation for that character (`revise_prose`, `revise_page_plan`, `regenerate_stchar`, or `run_turn_cycle_repair`).
+`profile_fidelity` is judgment-assisted and compares the rendered prose against the page-plan packet first. Retrieve the full STCHAR only when the packet is missing or insufficient for diagnosis. Each entry records the four fidelity axes, supporting evidence excerpts, and the local repair recommendation for that character (`revise_prose`, `revise_page_plan`, `regenerate_stchar`, or `run_turn_cycle_repair`).
 
 Receipt schema drift is checked by `prose_receipt_schema_compliance` in `tools/validators`. A receipt-specific structural smoke uses the compiled validator CLI after the receipt exists, for example:
 

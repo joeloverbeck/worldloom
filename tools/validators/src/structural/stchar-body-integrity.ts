@@ -1,18 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
-import {
-  computeStcharProfileHash,
-  computeStcharVoiceBlockHash
-} from "@worldloom/world-index/hash/content";
-
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
-  asPlainRecord,
   fileInputsFrom,
   locationFor,
   queryStructuralRecords,
-  stringValue,
   toPosixPath,
   worldRootFrom
 } from "./utils.js";
@@ -20,7 +13,6 @@ import { appliesToStcharStoryState, fail, recordId, shouldCheckRecordInPreApply 
 
 const VALIDATOR = "stchar_body_integrity";
 const STCHAR_PATH = /^stories\/[^/]+\/story-characters\/STCHAR-(0|[1-9][0-9]*)\.md$/;
-const HASH_PATTERN = /^sha256:[0-9a-f]{64}$/;
 
 // Keep this list in sync with .claude/skills/story-character-profile/SKILL.md Phase 3.
 export const REQUIRED_STCHAR_SECTIONS = [
@@ -79,7 +71,6 @@ export const stcharBodyIntegrity: Validator = {
       }
 
       verdicts.push(...bodyVerdicts(record, content, ctx));
-      verdicts.push(...hashVerdicts(record, content));
     }
 
     return verdicts;
@@ -205,64 +196,6 @@ function subsectionSeverity(record: IndexedRecord, ctx: Context): "fail" | "warn
     return "fail";
   }
   return "warn";
-}
-
-function hashVerdicts(record: IndexedRecord, content: string): Verdict[] {
-  const parsed = asPlainRecord(record.parsed);
-  const id = recordId(record);
-  const verdicts: Verdict[] = [];
-
-  const shapedHashes = new Map<"profile_hash" | "voice_block_hash", string>();
-  for (const field of ["profile_hash", "voice_block_hash"] as const) {
-    const value = stringValue(parsed[field]);
-    if (!value || !HASH_PATTERN.test(value)) {
-      verdicts.push(stcharFail(
-        record,
-        "hash_shape",
-        `${id}.${field} must match sha256:<64 lowercase hex>.`,
-        { field, observed: value ?? null },
-        `Set ${field} to a lowercase SHA-256 digest with the sha256: prefix.`
-      ));
-      continue;
-    }
-    shapedHashes.set(field, value);
-  }
-
-  const expectedProfileHash = `sha256:${computeStcharProfileHash(content)}`;
-  const storedProfileHash = shapedHashes.get("profile_hash");
-  if (storedProfileHash && storedProfileHash !== expectedProfileHash) {
-    verdicts.push(hashMismatchVerdict(record, "profile_hash", storedProfileHash, expectedProfileHash));
-  }
-
-  const storedVoiceBlockHash = shapedHashes.get("voice_block_hash");
-  if (storedVoiceBlockHash) {
-    const body = bodyMarkdown(content);
-    const sections = sectionBodies(body);
-    if ((sections.get("Page-Plan Voice Block") ?? []).length > 0) {
-      const expectedVoiceBlockHash = `sha256:${computeStcharVoiceBlockHash(content)}`;
-      if (storedVoiceBlockHash !== expectedVoiceBlockHash) {
-        verdicts.push(hashMismatchVerdict(record, "voice_block_hash", storedVoiceBlockHash, expectedVoiceBlockHash));
-      }
-    }
-  }
-
-  return verdicts;
-}
-
-function hashMismatchVerdict(
-  record: IndexedRecord,
-  field: "profile_hash" | "voice_block_hash",
-  stored: string,
-  expected: string
-): Verdict {
-  const id = recordId(record);
-  return stcharFail(
-    record,
-    "hash_mismatch",
-    `${id}.${field} must match the canonical recompute from the STCHAR body.`,
-    { field, stored, expected },
-    `Restamp ${field} with ${expected} after finalizing the STCHAR body.`
-  );
 }
 
 function stcharFilesByPath(input: unknown, ctx: Context, records: readonly IndexedRecord[]): Map<string, string> {

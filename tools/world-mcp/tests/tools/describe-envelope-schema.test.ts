@@ -264,7 +264,12 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
   };
   assert.deepEqual(stcharMaintenancePayload.required, ["story_slug", "target_record_id", "field_name"]);
   assert.equal(stcharMaintenancePayload.properties?.target_record_id?.pattern, "^STCHAR-(0|[1-9][0-9]*)$");
-  assert.deepEqual(stcharMaintenancePayload.properties?.field_name?.enum, ["page_packet_hash"]);
+  assert.deepEqual(stcharMaintenancePayload.properties?.field_name?.enum, [
+    "profile_hash",
+    "voice_block_hash",
+    "page_packet_hash",
+    "source_char_hash"
+  ]);
   const stcharBodyMaintenanceManifest = await describeEnvelopeSchema({
     op_kind: "remove_story_character_authority_body_hash_note_field"
   });
@@ -280,7 +285,12 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
   };
   assert.deepEqual(stcharBodyMaintenancePayload.required, ["story_slug", "target_record_id", "field_name"]);
   assert.equal(stcharBodyMaintenancePayload.properties?.target_record_id?.pattern, "^STCHAR-(0|[1-9][0-9]*)$");
-  assert.deepEqual(stcharBodyMaintenancePayload.properties?.field_name?.enum, ["page_packet_hash"]);
+  assert.deepEqual(stcharBodyMaintenancePayload.properties?.field_name?.enum, [
+    "profile_hash",
+    "voice_block_hash",
+    "page_packet_hash",
+    "source_char_hash"
+  ]);
   const stcharBodyRepairManifest = await describeEnvelopeSchema({
     op_kind: "repair_story_character_authority_body_integrity"
   });

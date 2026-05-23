@@ -30,8 +30,8 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "display_name", "bound_stchar_id", "role_in_story"]
   },
   "story-character-authority": {
-    required: ["id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_hash", "source_char_sections_used", "generated_at_page", "created_by_skill", "supersedes", "status", "bound_stent_ids", "profile_revision", "body_schema_version", "profile_hash", "voice_block_hash"],
-    properties: ["record_kind", "id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_hash", "source_char_sections_used", "source_operational_fact_map", "story_local_inputs_used", "generated_at_page", "created_by_skill", "supersedes", "superseded_by", "status", "bound_stent_ids", "profile_revision", "body_schema_version", "profile_hash", "voice_block_hash"]
+    required: ["id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_sections_used", "generated_at_page", "created_by_skill", "supersedes", "status", "bound_stent_ids", "profile_revision", "body_schema_version"],
+    properties: ["record_kind", "id", "story_id", "story_slug", "world_slug", "source_kind", "source_char_id", "source_char_sections_used", "source_operational_fact_map", "story_local_inputs_used", "generated_at_page", "created_by_skill", "supersedes", "superseded_by", "status", "bound_stent_ids", "profile_revision", "body_schema_version"]
   },
   "story-status": {
     required: ["id", "story_id", "created_at_page", "entity", "life", "agency", "location"],
@@ -508,7 +508,6 @@ function readSchema(name: string): { required: string[]; properties: Record<stri
 }
 
 function validStoryCharacterAuthority(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  const hash = "sha256:0000000000000000000000000000000000000000000000000000000000000001";
   return {
     id: "STCHAR-1",
     story_id: "STORY-1",
@@ -516,7 +515,6 @@ function validStoryCharacterAuthority(overrides: Record<string, unknown> = {}): 
     world_slug: "test-world",
     source_kind: "world_char",
     source_char_id: "CHAR-1",
-    source_char_hash: hash,
     source_char_sections_used: ["Voice", "Pressure Behavior"],
     story_local_inputs_used: [],
     generated_at_page: "story_bootstrap",
@@ -527,8 +525,6 @@ function validStoryCharacterAuthority(overrides: Record<string, unknown> = {}): 
     bound_stent_ids: ["STENT-1"],
     profile_revision: 1,
     body_schema_version: "stchar.v1",
-    profile_hash: hash,
-    voice_block_hash: hash,
     ...overrides
   };
 }

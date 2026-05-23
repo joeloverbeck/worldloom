@@ -19,6 +19,7 @@ import { causalDependencyThreatScan } from "../structural/causal-dependency-thre
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { entityIntroductionStatusPairing } from "../structural/entity-introduction-status-pairing.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
+import { forbiddenStcharTamperHashFields } from "../structural/forbidden-stchar-tamper-hash-fields.js";
 import { introductionObserverFirewall } from "../structural/introduction-observer-firewall.js";
 import { indexDiskConsistency } from "../structural/index-disk-consistency.js";
 import { midstoryRecordIntroductionGrounding } from "../structural/midstory-record-introduction-grounding.js";
@@ -74,7 +75,6 @@ import { stcharBodyIntegrity } from "../structural/stchar-body-integrity.js";
 import { stcharBoundStentReciprocity } from "../structural/stchar-bound-stent-reciprocity.js";
 import { stcharResolves } from "../structural/stchar-resolves.js";
 import { stcharSourceFactCoverage } from "../structural/stchar-source-fact-coverage.js";
-import { stcharSourceHashMatchesSource } from "../structural/stchar-source-hash-matches-source.js";
 import { stcharSupersessionIntegrity } from "../structural/stchar-supersession-integrity.js";
 import { stentRequiresStchar } from "../structural/stent-requires-stchar.js";
 import { storyQuestionIntroductionGroundingIntegrity } from "../structural/story-question-introduction-grounding-integrity.js";
@@ -136,8 +136,8 @@ export const structuralValidators: readonly Validator[] = [
   stcharActiveForBoundStent,
   stcharSupersessionIntegrity,
   stcharBodyIntegrity,
-  stcharSourceHashMatchesSource,
   stcharSourceFactCoverage,
+  forbiddenStcharTamperHashFields,
   noCharAuthorityInStoryRuntime,
   characterGroundingConsistency,
   chcSltSelectedCommitmentTrace,

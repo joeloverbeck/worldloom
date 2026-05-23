@@ -77,16 +77,13 @@ function baseRecords() {
       status: "active",
       source_kind: "world_char",
       source_char_id: "CHAR-1",
-      source_char_hash: "sha256:" + "a".repeat(64),
       source_char_sections_used: ["Overview"],
       generated_at_page: "story_bootstrap",
       created_by_skill: "branching-story-bootstrap",
       supersedes: null,
       bound_stent_ids: ["STENT-1"],
       profile_revision: 1,
-      body_schema_version: "stchar.v1",
-      profile_hash: "sha256:" + "b".repeat(64),
-      voice_block_hash: "sha256:" + "c".repeat(64)
+      body_schema_version: "stchar.v1"
     })
   ];
 }

@@ -217,14 +217,20 @@ export interface StoryCharacterAuthorityPayload<TRecord = Record<string, unknown
 export interface RemoveStoryCharacterAuthorityFrontmatterFieldPayload {
   story_slug: string;
   target_record_id: string;
-  field_name: "page_packet_hash";
+  field_name: StoryCharacterAuthorityTamperHashField;
 }
 
 export interface RemoveStoryCharacterAuthorityBodyHashNoteFieldPayload {
   story_slug: string;
   target_record_id: string;
-  field_name: "page_packet_hash";
+  field_name: StoryCharacterAuthorityTamperHashField;
 }
+
+export type StoryCharacterAuthorityTamperHashField =
+  | "profile_hash"
+  | "voice_block_hash"
+  | "page_packet_hash"
+  | "source_char_hash";
 
 export interface StoryCharacterAuthoritySourceFactMapEntry {
   source_field:

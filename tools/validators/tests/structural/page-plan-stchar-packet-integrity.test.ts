@@ -1,19 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { computeStcharPagePacketHash } from "@worldloom/world-index/hash/content";
-
 import { pagePlanStcharPacketIntegrity } from "../../src/structural/page-plan-stchar-packet-integrity.js";
 import { context, record } from "./helpers.js";
 
 const HASH_A = "sha256:" + "a".repeat(64);
 const HASH_B = "sha256:" + "b".repeat(64);
 const SEED_PAGE_PACKET_HASH = "sha256:" + "c".repeat(64);
-const HASH_C = canonicalPagePacketHash();
 const STORY = "test-story";
 const PLAN_PATH = `stories/${STORY}/pages-prose-plans/PG-1.md`;
 
-test("page_plan_stchar_packet_integrity accepts complete hash-matching 16a packets", async () => {
+test("page_plan_stchar_packet_integrity accepts complete 16a packets", async () => {
   const verdicts = await pagePlanStcharPacketIntegrity.run(input(plan()), context(baseRecords()));
 
   assert.deepEqual(verdicts, []);
@@ -35,9 +32,8 @@ test("page_plan_stchar_packet_integrity allows omitted packets for offstage char
 });
 
 test("page_plan_stchar_packet_integrity accepts offstage_causal packets without voice blocks", async () => {
-  const pagePacketHash = canonicalPagePacketHash({ requiredBecause: "offstage_causal", voiceLine: "" });
   const verdicts = await pagePlanStcharPacketIntegrity.run(
-    input(plan({ requiredBecause: "offstage_causal", pagePacketHash, voiceLine: "" })),
+    input(plan({ requiredBecause: "offstage_causal", voiceLine: "" })),
     context(baseRecords({ location: "offstage" }))
   );
 
@@ -72,59 +68,16 @@ test("page_plan_stchar_packet_integrity rejects packets for inactive STCHAR ids"
   assert.equal(verdicts[1]?.code, "page_plan_stchar_packet_integrity.inactive_stchar");
 });
 
-test("page_plan_stchar_packet_integrity rejects hash mismatches", async () => {
+test("page_plan_stchar_packet_integrity ignores tamper hash mismatches", async () => {
   const verdicts = await pagePlanStcharPacketIntegrity.run(
     input(plan({ profileHash: "sha256:" + "9".repeat(64) })),
     context(baseRecords())
   );
 
-  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.hash_mismatch");
-  assert.equal((verdicts[0]?.detail as { field?: string }).field, "profile_hash");
-});
-
-test("page_plan_stchar_packet_integrity recomputes page_packet_hash from the canonical packet projection", async () => {
-  const wrongPagePacketHash = "sha256:" + "c".repeat(64);
-  const verdicts = await pagePlanStcharPacketIntegrity.run(
-    input(plan({ pagePacketHash: wrongPagePacketHash })),
-    context(baseRecords())
-  );
-
-  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.hash_mismatch");
-  assert.equal((verdicts[0]?.detail as { field?: string }).field, "page_packet_hash");
-  assert.equal((verdicts[0]?.detail as { recomputed?: string }).recomputed, HASH_C);
-});
-
-test("page_plan_stchar_packet_integrity accepts different page_packet_hash values for the same STCHAR on different pages", async () => {
-  const secondPlanPath = `stories/${STORY}/pages-prose-plans/PG-2.md`;
-  const secondPacketHash = canonicalPagePacketHash({ requiredBecause: "direct_target", voiceLine: "  - Voice/dialogue authority: page two voice block." });
-  const verdicts = await pagePlanStcharPacketIntegrity.run({
-    files: [
-      { path: PLAN_PATH, content: plan() },
-      { path: secondPlanPath, content: plan({ requiredBecause: "direct_target", pagePacketHash: secondPacketHash, voiceLine: "  - Voice/dialogue authority: page two voice block." }) }
-    ]
-  }, context([
-    ...baseRecords(),
-    storyRecord("page_record", "PG-2", "pages", {
-      id: "PG-2",
-      story_id: "STORY-1",
-      state_snapshot: {
-        active_records: { STENT: ["STENT-1"], STCHAR: ["STCHAR-1"] },
-        entity_status: {
-          "STENT-1": {
-            life: "alive",
-            agency: "free",
-            location: "STLOC-2"
-          }
-        }
-      }
-    })
-  ]));
-
-  assert.notEqual(secondPacketHash, HASH_C);
   assert.deepEqual(verdicts, []);
 });
 
-test("page_plan_stchar_packet_integrity rejects hash mismatches on offstage_causal packets", async () => {
+test("page_plan_stchar_packet_integrity ignores tamper hash mismatches on offstage_causal packets", async () => {
   const verdicts = await pagePlanStcharPacketIntegrity.run(
     input(plan({
       requiredBecause: "offstage_causal",
@@ -134,13 +87,12 @@ test("page_plan_stchar_packet_integrity rejects hash mismatches on offstage_caus
     context(baseRecords({ location: "offstage" }))
   );
 
-  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.hash_mismatch");
+  assert.deepEqual(verdicts, []);
 });
 
 test("page_plan_stchar_packet_integrity rejects speaker packets without voice block", async () => {
-  const pagePacketHash = canonicalPagePacketHash({ voiceLine: "  - Voice/dialogue authority:" });
   const verdicts = await pagePlanStcharPacketIntegrity.run(
-    input(plan({ pagePacketHash, voiceLine: "  - Voice/dialogue authority:" })),
+    input(plan({ voiceLine: "  - Voice/dialogue authority:" })),
     context(baseRecords())
   );
 
@@ -207,7 +159,7 @@ function plan(options: {
   voiceLine?: string;
 } = {}): string {
   const includePacket = options.includePacket ?? true;
-  const pagePacketHash = options.pagePacketHash ?? canonicalPagePacketHash(options);
+  const pagePacketHash = options.pagePacketHash ?? SEED_PAGE_PACKET_HASH;
   return [
     "# Page Plan",
     "",
@@ -237,13 +189,4 @@ function packetText(options: {
     "  - Relevant appraisal rules: protect the secret.",
     ""
   ].join("\n");
-}
-
-function canonicalPagePacketHash(options: {
-  stcharId?: string;
-  requiredBecause?: string;
-  profileHash?: string;
-  voiceLine?: string;
-} = {}): string {
-  return `sha256:${computeStcharPagePacketHash(packetText({ ...options, pagePacketHash: SEED_PAGE_PACKET_HASH }))}`;
 }

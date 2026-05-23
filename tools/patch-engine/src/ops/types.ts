@@ -7,6 +7,7 @@ export interface OpContext {
   worldRoot: string;
   db: Database.Database;
   stagedRecords?: Map<string, StagedRecord> | undefined;
+  stagedFileContents?: Map<string, string> | undefined;
 }
 
 export interface StagedRecord {

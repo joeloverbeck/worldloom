@@ -1,11 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  computeStcharProfileHash,
-  computeStcharVoiceBlockHash
-} from "@worldloom/world-index/hash/content";
-
 import type { PatchPlanEnvelope } from "../../src/framework/types.js";
 import {
   REQUIRED_STCHAR_SECTIONS,
@@ -92,44 +87,16 @@ test("stchar_body_integrity rejects empty required operational-home subsections"
   assert.match(empty.message, /Signature scene behaviors to render/);
 });
 
-test("stchar_body_integrity accepts migrated body subsections with canonical profile hash", async () => {
-  const migratedBody = body();
-  const verdicts = await run(migratedBody, {
-    profile_hash: `sha256:${computeStcharProfileHash(migratedBody)}`
+test("stchar_body_integrity ignores legacy tamper hash frontmatter while enforcing body structure", async () => {
+  const verdicts = await run(body(), {
+    profile_hash: "sha256:ABC",
+    voice_block_hash: HASH
   }, {
     run_mode: "pre-apply",
     patch_plan: stcharPatchPlan()
   });
 
   assert.deepEqual(verdicts, []);
-});
-
-test("stchar_body_integrity rejects malformed STCHAR hash frontmatter", async () => {
-  const verdicts = await run(body(), { profile_hash: "sha256:ABC" });
-
-  assert.ok(verdicts.some((verdict) => verdict.code === "stchar_body_integrity.hash_shape"));
-});
-
-test("stchar_body_integrity rejects profile_hash that does not match the body recompute", async () => {
-  const verdicts = await run(body(), { profile_hash: HASH });
-  const mismatch = verdicts.find((verdict) =>
-    verdict.code === "stchar_body_integrity.hash_mismatch" &&
-    (verdict.detail as { field?: string }).field === "profile_hash"
-  );
-
-  assert.ok(mismatch);
-  assert.match((mismatch.detail as { expected?: string }).expected ?? "", /^sha256:[0-9a-f]{64}$/);
-});
-
-test("stchar_body_integrity rejects voice_block_hash that does not match the body recompute", async () => {
-  const verdicts = await run(body(), { voice_block_hash: HASH });
-  const mismatch = verdicts.find((verdict) =>
-    verdict.code === "stchar_body_integrity.hash_mismatch" &&
-    (verdict.detail as { field?: string }).field === "voice_block_hash"
-  );
-
-  assert.ok(mismatch);
-  assert.match((mismatch.detail as { expected?: string }).expected ?? "", /^sha256:[0-9a-f]{64}$/);
 });
 
 test("stchar_body_integrity runs for append_story_character_authority_record pre-apply plans", async () => {
@@ -226,8 +193,8 @@ function stcharFrontmatter(overrides: Record<string, unknown> = {}, markdownBody
     bound_stent_ids: ["STENT-1"],
     profile_revision: 1,
     body_schema_version: "stchar.v1",
-    profile_hash: `sha256:${computeStcharProfileHash(markdownBody)}`,
-    voice_block_hash: `sha256:${computeStcharVoiceBlockHash(markdownBody)}`,
+    profile_hash: HASH,
+    voice_block_hash: HASH,
     ...overrides
   };
 }

@@ -41,11 +41,11 @@ Do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, do NOT writ
 
 (a) Pre-flight Check has completed: `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, and `tools/validators/src/schemas/story-character-authority.schema.json` are loaded; bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; mode validated; source `CHAR-*` resolved only for modes that need it; target `STCHAR-*` and bound `STENT-*` / story-local context records resolved when supplied; one new `STCHAR` id allocated via `mcp__worldloom__allocate_next_id`; relevant story-bundle context loaded via `mcp__worldloom__get_context_packet` and targeted `get_record` / `get_records` calls.
 
-(b) Phases 1-7 have completed in working memory: source authority packet assembled; story-local need diagnosed; full `stchar.v1` profile drafted from zero; frontmatter drafted against `story-character-authority.schema.json`; all 13 required body sections present; `profile_hash` and `voice_block_hash` computed from the final body slices; append or supersession patch plan assembled with `append_story_character_authority_record` or `supersede_story_character_authority_record`; bundle `INDEX.md` update drafted.
+(b) Phases 1-7 have completed in working memory: source authority packet assembled; story-local need diagnosed; full `stchar.v1` profile drafted from zero; frontmatter drafted against `story-character-authority.schema.json`; all 13 required body sections present; append or supersession patch plan assembled with `append_story_character_authority_record` or `supersede_story_character_authority_record`; bundle `INDEX.md` update drafted.
 
 (c) Phase 7 has validated all 8 checks with a one-line PASS rationale per check: mode inputs complete; source authority lawful; no world mutation; no operational `CHAR-*` shortcut outside `source_char_id` provenance; `BEL.basis.access_records[]` is not given STCHAR as an epistemic route; frontmatter matches the schema; all 13 body sections are present; regeneration allocates a new id and links `supersedes` instead of rewriting the old profile's structural fields.
 
-(d) The user has explicitly approved the deliverable summary: mode, target bundle, new `STCHAR` id, source/provenance summary, bound `STENT` ids, supersession link when applicable, section inventory, hash summary, validation trace, patch operations, and `INDEX.md` update preview.
+(d) The user has explicitly approved the deliverable summary: mode, target bundle, new `STCHAR` id, source/provenance summary, bound `STENT` ids, supersession link when applicable, section inventory, validation trace, patch operations, and `INDEX.md` update preview.
 
 This gate is authoritative under Auto Mode or any autonomous-execution context. Invoking this skill does not constitute approval of the deliverable summary.
 </HARD-GATE>
@@ -70,16 +70,13 @@ Phase 3: Draft full stchar.v1 body from zero
 Phase 4: Draft schema frontmatter
         |
         v
-Phase 5: Compute profile, voice-block, and page-packet hashes
+Phase 5: Assemble patch plan + INDEX update
         |
         v
-Phase 6: Assemble patch plan + INDEX update
+Phase 6: Validate STCHAR firewall, schema, body, and lifecycle checks
         |
         v
-Phase 7: Validate STCHAR firewall, schema, body, and lifecycle checks
-        |
-        v
-Phase 8: HARD-GATE fires -> atomic patch + INDEX update
+Phase 7: HARD-GATE fires -> atomic patch + INDEX update
 ```
 
 ## Modes
@@ -100,7 +97,7 @@ Optional inputs:
 - `target_stent_ids`
 - `emergence_context_records`
 
-Set `source_kind: world_char`, `source_char_id: <CHAR-id>`, `source_char_hash` to the hash of the source dossier content used, and `source_char_sections_used[]` to the loaded source sections. `source_char_id` is provenance only; do not copy it into operational story records, page-plan authority, or body prose as a shortcut.
+Set `source_kind: world_char`, `source_char_id: <CHAR-id>`, and `source_char_sections_used[]` to the loaded source sections. `source_char_id` is provenance only; do not copy it into operational story records, page-plan authority, or body prose as a shortcut.
 
 ### create_story_local
 
@@ -118,7 +115,7 @@ Optional inputs:
 - `target_stent_ids`
 - `emergence_context_records`
 
-Set `source_kind: story_local`, `source_char_id: null`, `source_char_hash: null`, and `source_char_sections_used: []`. Populate `story_local_inputs_used[]` with the story-local records that actually informed the profile.
+Set `source_kind: story_local`, `source_char_id: null`, and `source_char_sections_used: []`. Populate `story_local_inputs_used[]` with the story-local records that actually informed the profile.
 
 ### regenerate
 
@@ -180,7 +177,7 @@ If `get_context_packet`, `get_record`, or `get_records` returns `delivery_status
 
 ## Phase 1: Assemble Source Authority Packet
 
-For `create_from_world_char`, load only the targeted `CHAR-*` dossier and sections needed for story-local distillation: identity, embodied constraints, voice, stable dispositions, relevant relationships, pressure behavior, known canon limits, `dramatic_core` (all 10 engine fields), `## Capabilities`, and `## Signature Scene Behavior`. Compute a deterministic `source_char_hash` over the exact source content used when the tool surface exposes one; otherwise record the hash method in the deliverable summary before approval.
+For `create_from_world_char`, load only the targeted `CHAR-*` dossier and sections needed for story-local distillation: identity, embodied constraints, voice, stable dispositions, relevant relationships, pressure behavior, known canon limits, `dramatic_core` (all 10 engine fields), `## Capabilities`, and `## Signature Scene Behavior`.
 
 Semantic Preservation Contract: for any STCHAR derived from a world `CHAR` (`source_kind: world_char`), every structured operational source fact must be copied, transformed, compressed, intentionally omitted with rationale, or marked story-irrelevant. No structured operational source fact may survive only in `## Source Distillation` or other audit/commentary prose if page planning, choice grounding, state derivation, or prose rendering may need it.
 
@@ -270,13 +267,13 @@ Section requirements:
 - `Emotional Appraisal Map`: how the character appraises threat, intimacy, status, risk, authority, debt, and uncertainty.
 - `Pressure Behavior`: behavior under fear, desire, shame, hunger, pain, loyalty, coercion, secrecy, or public scrutiny.
 - `Voice Bible / Dialogue Authority`: diction, rhythm, register, taboo words, silence behavior, direct-speech constraints, and anti-generic warnings.
-- `Page-Plan Voice Block`: compact projection suitable for page-plan section 16a; this is the source of `voice_block_hash`.
+- `Page-Plan Voice Block`: compact projection suitable for page-plan section 16a.
 - `Perception and Embodiment`: sensory access, bodily constraints, tells, physical affordances, and viewpoint-rendering limits.
 - `Agency and Planning Tendencies`: planning horizon, risk posture, preferred tactics, refusal patterns, and how this can shape `STPLAN` / `STINT`.
 - `Relationship-Specific Behavior`: named conduct differences by counterpart or role; do not globalize branch-local relationships.
 - `Story-State Derivation Guide`: how future skills may derive `STINT`, `STPLAN`, `STEMO`, `SREL`, `CHC`, and page-plan content from the profile.
 - `Prose Rendering Constraints`: must-show, must-not-imply, voice-fidelity checks, and repair recommendations.
-- `Validation / Audit Anchors`: source list, hashes, validation checks, known limits, and future regeneration triggers.
+- `Validation / Audit Anchors`: source list, validation checks, known limits, and future regeneration triggers.
 
 No section may ask a runtime skill or prose renderer to infer characterization from `CHAR-*`. If a `CHAR-*` id appears outside frontmatter provenance or the Source Distillation section's historical source note, explain why it is non-operational.
 
@@ -293,7 +290,6 @@ story_slug: <story_slug>
 world_slug: <world_slug>
 source_kind: world_char | story_local | regenerated
 source_char_id: CHAR-<integer> | null
-source_char_hash: sha256:<64 lowercase hex> | null
 source_char_sections_used: []
 source_operational_fact_map:
   - source_field: signature_scene_behaviors
@@ -309,29 +305,11 @@ status: active
 bound_stent_ids: []
 profile_revision: 1
 body_schema_version: stchar.v1
-profile_hash: sha256:<64 lowercase hex>
-voice_block_hash: sha256:<64 lowercase hex>
 ```
 
 Use `source_kind: regenerated` for regenerate mode even if the old profile had world provenance; preserve source `CHAR` only as provenance when it was actually read or inherited. Use `profile_revision: old + 1` for regeneration.
 
-## Phase 5: Compute Hashes
-
-Compute hashes after the final body text is stable, using the canonical CLI `tools/world-mcp/dist/src/cli/compute-stchar-hashes.js` (do NOT hand-roll the SHA-256 — see `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.19 "Tooling"). Write the finalized body markdown and the §16a packet projection to files, then:
-
-```
-node tools/world-mcp/dist/src/cli/compute-stchar-hashes.js \
-  --profile <STCHAR body markdown> \
-  --packet  <§16a packet projection text>
-```
-
-- `profile_hash`: emitted from the complete STCHAR body markdown.
-- `voice_block_hash`: emitted from the `## Page-Plan Voice Block` section.
-- page-local `page_packet_hash`: emitted from the full §16a page-plan packet projection. If the packet already contains a `Hashes:` line, the canonical helper masks only `page_packet_hash=sha256:<64 lowercase hex>` to `page_packet_hash=sha256:<page_packet_hash>` before hashing; do not remove the sibling `profile_hash` / `voice_block_hash` declarations by hand. Do not stamp this value into STCHAR frontmatter.
-
-The CLI emits all three as `sha256:<64 lowercase hex>` (hashed with `sha256Hex ∘ normalizeProseWhitespace`, so they are invariant to a trailing newline the patch engine may add — author-time and any later recompute agree). `source_char_hash` is NOT produced by this CLI: for `source_kind: world_char` set it to `sha256:` + the `content_hash` returned by `mcp__worldloom__get_record(<CHAR-id>)`; for `source_kind: story_local` set it `null`. Record the source slices and the hash method in `## Validation / Audit Anchors`.
-
-## Phase 6: Assemble Patch Plan and INDEX Update
+## Phase 5: Assemble Patch Plan and INDEX Update
 
 Use engine-routed story hybrid operations:
 
@@ -342,7 +320,7 @@ The patch payload contains `story_slug`, the schema frontmatter as `record`, and
 
 Draft the bundle `INDEX.md` update as a direct-write artifact after patch submission. The index entry should name the new `STCHAR`, status, source kind, source `CHAR` provenance when present, bound `STENT` ids, profile revision, and supersession link when applicable.
 
-## Phase 7: Validate
+## Phase 6: Validate
 
 Run these checks before presenting the deliverable summary:
 
@@ -351,13 +329,13 @@ Run these checks before presenting the deliverable summary:
 3. **No world mutation** - PASS only if the plan writes no world `CHAR`, `WORLD_KERNEL.md`, `ONTOLOGY.md`, or world `_source/` record.
 4. **No operational CHAR shortcut** - PASS only if `CHAR-*` appears only as STCHAR provenance/source evidence, not as runtime characterization authority.
 5. **Belief firewall preserved** - PASS only if `STCHAR` is not added to `BEL.basis.access_records[]` and is described as conduct/voice/appraisal authority only.
-6. **Schema frontmatter valid** - PASS only if required fields, source-kind conditionals, lifecycle fields, and hash patterns match `story-character-authority.schema.json`.
+6. **Schema frontmatter valid** - PASS only if required fields, source-kind conditionals, and lifecycle fields match `story-character-authority.schema.json`.
 7. **Body sections present** - PASS only if all 13 required H2 sections are present exactly once.
 8. **Lifecycle safe** - PASS only if regeneration creates a new `STCHAR` id with `supersedes` and leaves predecessor lifecycle marking to `supersede_story_character_authority_record`.
 
 Every PASS requires a one-line rationale citing the loaded record, schema field, section name, patch op, or FOUNDATIONS rule that supports it.
 
-## Phase 8: Present and Wait
+## Phase 7: Present and Wait
 
 Present a concise deliverable summary before any write:
 
@@ -367,7 +345,6 @@ Present a concise deliverable summary before any write:
 - bound `STENT` ids
 - supersession link and profile revision when applicable
 - 13-section inventory
-- STCHAR-global hash values and their slices
 - validation trace with 8 PASS/FAIL rows
 - patch operation names and `INDEX.md` update preview
 - any page-plan rebuild recommendation

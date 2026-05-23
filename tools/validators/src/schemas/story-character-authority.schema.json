@@ -9,7 +9,6 @@
     "world_slug",
     "source_kind",
     "source_char_id",
-    "source_char_hash",
     "source_char_sections_used",
     "generated_at_page",
     "created_by_skill",
@@ -17,9 +16,7 @@
     "status",
     "bound_stent_ids",
     "profile_revision",
-    "body_schema_version",
-    "profile_hash",
-    "voice_block_hash"
+    "body_schema_version"
   ],
   "properties": {
     "record_kind": { "type": "string", "const": "story_character_authority_record" },
@@ -29,7 +26,6 @@
     "world_slug": { "type": "string", "minLength": 1 },
     "source_kind": { "type": "string", "enum": ["world_char", "story_local", "hybrid", "regenerated"] },
     "source_char_id": { "type": ["string", "null"], "pattern": "^CHAR-[0-9]+$" },
-    "source_char_hash": { "type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$" },
     "source_char_sections_used": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
@@ -91,9 +87,7 @@
       "items": { "type": "string", "pattern": "^STENT-(0|[1-9][0-9]*)$" }
     },
     "profile_revision": { "type": "integer", "minimum": 1 },
-    "body_schema_version": { "type": "string", "const": "stchar.v1" },
-    "profile_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-    "voice_block_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+    "body_schema_version": { "type": "string", "const": "stchar.v1" }
   },
   "additionalProperties": false,
   "allOf": [
@@ -103,10 +97,9 @@
         "required": ["source_kind"]
       },
       "then": {
-        "required": ["source_char_id", "source_char_hash"],
+        "required": ["source_char_id"],
         "properties": {
-          "source_char_id": { "type": "string", "pattern": "^CHAR-[0-9]+$" },
-          "source_char_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+          "source_char_id": { "type": "string", "pattern": "^CHAR-[0-9]+$" }
         }
       }
     },
@@ -117,8 +110,7 @@
       },
       "then": {
         "properties": {
-          "source_char_id": { "type": "null" },
-          "source_char_hash": { "type": "null" }
+          "source_char_id": { "type": "null" }
         }
       }
     }

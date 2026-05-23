@@ -206,8 +206,6 @@ export interface ContextPacketStoryBundleContext {
     source_kind: string;
     source_char_id: string | null;
     profile_revision: number;
-    profile_hash: string;
-    voice_block_hash: string;
     packet_preview: string;
   }>;
   active_actor_plans: Array<{

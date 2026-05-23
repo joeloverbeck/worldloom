@@ -70,7 +70,6 @@ Structural validators:
 - `stchar_active_for_bound_stent`
 - `stchar_supersession_integrity`
 - `stchar_body_integrity`
-- `stchar_source_hash_matches_source`
 - `stchar_source_fact_coverage`
 - `no_char_authority_in_story_runtime`
 - `character_grounding_consistency`
@@ -94,6 +93,7 @@ Structural validators:
 - `compatibility_drift`
 - `active_records_full_shape`
 - `page_plan_stchar_packet_integrity`
+- `forbidden_stchar_tamper_hash_fields`
 - `story_question_payoff_integrity`
 - `story_question_setup_predates_payoff`
 - `story_question_grounding_integrity`

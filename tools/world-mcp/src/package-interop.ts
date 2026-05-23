@@ -37,10 +37,6 @@ export const EXCEPTION_GOVERNANCE_REQUIRED_TYPES = validators.EXCEPTION_GOVERNAN
 export const syncWorldIndex = worldIndexSync.sync;
 export const computePgStateHash = worldIndexHash.computePgStateHash;
 export const computePlanHash = worldIndexHash.computePlanHash;
-export const computeStcharProfileHash = worldIndexHash.computeStcharProfileHash;
-export const computeStcharVoiceBlockHash = worldIndexHash.computeStcharVoiceBlockHash;
-export const canonicalizeStcharPagePacketForHash = worldIndexHash.canonicalizeStcharPagePacketForHash;
-export const computeStcharPagePacketHash = worldIndexHash.computeStcharPagePacketHash;
 export const openExistingIndex = worldIndexOpen.openExistingIndex;
 
 export const ATOMIC_LOGICAL_WORLD_FILES = worldIndexTypes.ATOMIC_LOGICAL_WORLD_FILES;
