@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-74-stchar-distillation-boundary-hardening.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC74STCHARDISBOU-008.md",
+  "last_ticket": "archive/tickets/SPEC74STCHARDISBOU-009.md",
   "last_result": "completed_archived",
-  "last_work_commit": "b620a39bc10ef0b796733e3937847bb4c96c5741",
+  "last_work_commit": "94f81b471fd89314caebd37c9a38df120f8b425c",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC74STCHARDISBOU-009.md",
+  "next_target": "tickets/SPEC74STCHARDISBOU-010.md",
   "queue": [
-    "tickets/SPEC74STCHARDISBOU-009.md",
     "tickets/SPEC74STCHARDISBOU-010.md",
     "tickets/SPEC74STCHARDISBOU-011.md",
     "tickets/SPEC74STCHARDISBOU-012.md",
@@ -18,7 +17,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "expected ignored artifacts: tools/world-index/node_modules/, tools/world-index/dist/, tools/patch-engine/node_modules/, tools/patch-engine/dist/, tools/validators/node_modules/, tools/validators/dist/ from package install/build/test proof",
+  "dirty_state": "expected ignored artifacts: tools/world-index/node_modules/, tools/world-index/dist/, tools/patch-engine/node_modules/, tools/patch-engine/dist/, tools/validators/node_modules/, tools/validators/dist/, tools/world-mcp/node_modules/, tools/world-mcp/dist/ from package install/build/test proof",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "updated_at": "2026-05-23"
