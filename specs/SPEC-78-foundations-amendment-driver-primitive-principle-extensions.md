@@ -79,7 +79,7 @@ SPEC-76's §4 Out of Scope previously rejected "Updating `docs/FOUNDATIONS.md`";
 FOUNDATIONS amendment is docs-only. The "tests" are reader-facing:
 
 - A developer asking "does §6b cover event-level driver declaration?" should be able to answer "yes — see the second paragraph of §6b" by reading FOUNDATIONS alone, without needing to also read SPEC-76 or the shared story-state-contract. Verifiable by grep: `grep -A2 "firewall also governs event-level driver declaration" docs/FOUNDATIONS.md` returns the new paragraph.
-- A future operator considering a global driver planner should hit §5c's "Driver salience is local." paragraph and be blocked at principle level, not just at contract / validator level. Verifiable by grep: `grep -B1 -A4 "Driver salience is local" docs/FOUNDATIONS.md` returns the new paragraph within §5c.
+- A future operator considering a global driver planner should hit §5c's "Driver salience is local." paragraph and be blocked at principle level, not just at contract / validator level. Verifiable by grep: `grep -B2 -A4 "Driver salience is local" docs/FOUNDATIONS.md` returns the new paragraph within §5c with the preceding "No global drama manager." closer separated by normal Markdown paragraph spacing.
 
 No automated test harness changes.
 
