@@ -2,12 +2,12 @@
 
 **Status:** Draft (proposed 2026-05-23)
 **Spec ID:** SPEC-77
-**Depends on:** SPEC-76 (Turn-Driver Primitive — provides the closed `turn_driver.kind` enum that `compatible_turn_drivers[]` references)
+**Depends on:** [SPEC-76](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the closed `turn_driver.kind` enum that `compatible_turn_drivers[]` references)
 **Source report:** `reports/slt-chc-overhaul-first-iteration.md` (triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`)
 
 ## 1. Problem
 
-Once SPEC-76 lands, the turn-cycle can drive a turn from a non-player record (NPC action, clock fire, offstage action, world pressure). But two gaps remain at the SLT level:
+Now that SPEC-76 is archived, the turn-cycle can drive a turn from a non-player record (NPC action, clock fire, offstage action, world pressure). But two gaps remain at the SLT level:
 
 1. **No structural compatibility check between a driver and an SLT.** Nothing prevents a runtime_jit SLT created for `npc_action` from being selected on a `clock_fire` turn, or a pursuit-pattern SLT from being chosen when the active driver is a secret reveal. Eligibility is checked at the predicate level, but driver-kind compatibility is not.
 
@@ -194,4 +194,4 @@ Smaller than SPEC-76:
 - FOUNDATIONS §Story Bundles §5a / §5b / §5c: `docs/FOUNDATIONS.md:648-666`.
 - Existing schema: `tools/validators/src/schemas/story-storylet.schema.json`.
 - Existing skill: `.claude/skills/commitment-block-authoring/SKILL.md`.
-- Predecessor: SPEC-76 (Turn-Driver Primitive — provides the `turn_driver.kind` enum that `compatible_turn_drivers[]` references).
+- Predecessor: [SPEC-76](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the `turn_driver.kind` enum that `compatible_turn_drivers[]` references).

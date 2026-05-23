@@ -3,7 +3,7 @@
 **Status:** COMPLETED (2026-05-23)
 **Spec ID:** SPEC-78
 **Type:** FOUNDATIONS amendment (docs-only; no schema, no validator, no skill changes)
-**Successors:** [SPEC-76](../../specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [SPEC-77](../../specs/SPEC-77-slt-grounding-provenance-minimal.md) (downstream consumers — their FOUNDATIONS-citation surfaces reference the extended principles landed here)
+**Successors:** [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [SPEC-77](../../specs/SPEC-77-slt-grounding-provenance-minimal.md) (downstream consumers — their FOUNDATIONS-citation surfaces reference the extended principles landed here)
 **Source:** brainstorm continuation of `reports/slt-chc-overhaul-first-iteration.md` triage at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`. The user's question about FOUNDATIONS sufficiency for the driver primitive surfaced the two narrow principle extensions documented here.
 
 ## 1. Problem
@@ -94,7 +94,7 @@ Single slice:
 **Slice A — FOUNDATIONS prose additions.**
 1. `Edit` `docs/FOUNDATIONS.md` to insert §5c addition at the end of §5c (after the existing "No global drama manager." paragraph). Verify surrounding text untouched.
 2. `Edit` `docs/FOUNDATIONS.md` to insert §6b addition between the two existing paragraphs of §6b. Verify surrounding text untouched.
-3. `Edit` to `specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md` §4 Out of Scope — **already applied during the source brainstorm session (2026-05-23)**; the `Carried separately by [SPEC-78]` bullet is already present. Implementers should verify presence (`grep -c "Carried separately by \[SPEC-78\]" specs/SPEC-76-*.md` returns 1) rather than re-applying.
+3. `Edit` to `archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md` §4 Out of Scope — **already applied during the source brainstorm session (2026-05-23)**; the `Carried separately by [SPEC-78]` bullet is already present. Implementers should verify presence (`grep -c "Carried separately by \[SPEC-78\]" archive/specs/SPEC-76-*.md` returns 1) rather than re-applying.
 4. Grep verification: the two new principle paragraphs appear in FOUNDATIONS with the exact prose from §3.1 and §3.2; SPEC-76 §4 carries the SPEC-78-pointing bullet (already in place per step 3).
 
 `spec-to-tickets` will produce a single ticket for this slice.
@@ -110,7 +110,7 @@ Single slice:
 - Source: brainstorm continuation of `reports/slt-chc-overhaul-first-iteration.md` triage at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`.
 - FOUNDATIONS §Story Bundles §5c (existing prose to be extended): `docs/FOUNDATIONS.md:660-666`.
 - FOUNDATIONS §Story Bundles §6b (existing prose to be extended): `docs/FOUNDATIONS.md:686-690`.
-- Downstream consumers: [SPEC-76](../../specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (turn-driver primitive — relies on extended §5c for Phase 0 design and on extended §6b for `turn_driver_pov_observer_firewall` validator); [SPEC-77](../../specs/SPEC-77-slt-grounding-provenance-minimal.md) (minimal SLT grounding — relies on extended §5c indirectly via the compatible-turn-drivers filter).
+- Downstream consumers: [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (turn-driver primitive — relies on extended §5c for Phase 0 design and on extended §6b for `turn_driver_pov_observer_firewall` validator); [SPEC-77](../../specs/SPEC-77-slt-grounding-provenance-minimal.md) (minimal SLT grounding — relies on extended §5c indirectly via the compatible-turn-drivers filter).
 - Negative precedents (record-class additions that did not warrant FOUNDATIONS amendments): SPEC-47 (STPLAN + STEMO), SPEC-48 (SE `record_introductions[]` extension), SPEC-63 (offstage causal packet tier).
 
 ## Outcome
@@ -123,7 +123,7 @@ Verification:
 
 1. `grep -B2 -A4 "Driver salience is local" docs/FOUNDATIONS.md` — passed; the new §5c paragraph appears immediately after the "No global drama manager." paragraph with normal Markdown spacing.
 2. `grep -A2 "firewall also governs event-level driver declaration" docs/FOUNDATIONS.md` — passed; the new §6b event-level firewall paragraph appears before the existing "This firewall governs move and choice generation." paragraph.
-3. `grep -c "Carried separately by \[SPEC-78\]" specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md` — passed with output `1`.
+3. `grep -c "Carried separately by \[SPEC-78\]" specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md` — passed with output `1` before SPEC-76 archival; the current archived path is `archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`.
 4. `git diff -- docs/FOUNDATIONS.md` before the ticket commit showed exactly the two intended FOUNDATIONS paragraph insertions.
 
 Deviation: the drafted §5c proof used `grep -B1`, but normal Markdown paragraph spacing makes `-B1` show the blank separator line. The accepted proof was corrected to `grep -B2 -A4 "Driver salience is local" docs/FOUNDATIONS.md`.

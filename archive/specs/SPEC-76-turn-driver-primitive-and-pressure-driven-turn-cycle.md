@@ -1,6 +1,6 @@
 # SPEC-76 — Turn-Driver Primitive and Pressure-Driven Turn Cycle
 
-**Status:** Draft (proposed 2026-05-23)
+**Status:** COMPLETED (archived 2026-05-23)
 **Spec ID:** SPEC-76
 **Predecessors:** SPEC-47 (STPLAN + STEMO), SPEC-63 (offstage causal packet tier)
 **Source report:** `reports/slt-chc-overhaul-first-iteration.md` (triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`)
@@ -211,7 +211,7 @@ Register all four in `tools/validators/src/public/registry.ts`. Each runs in `fu
 
 - `observer_firewall` (`tools/validators/src/structural/observer-firewall.ts`): extend the event-kind filter to cover all `turn_resolution` events. The pre-existing inspection sites for `selected_choice` and `write_in_attempt` ports cleanly to the player-driver kinds.
 - `chc_slt_selected_commitment_trace` (`tools/validators/src/structural/chc-slt-selected-commitment-trace.ts`): no logic change needed; the validator already keys on `SE.commitment.selected_slt_id` and parent-page active-record predicates, not on the retired `event_kind` enum values. **Rename obligation:** the emitted verdict code `selected_choice_unresolvable` (line 216) references the retired `selected_choice` enum value as a string; rename to a turn-driver-neutral name (e.g., `turn_resolution_unresolvable`) when the new enum lands. Logic and call sites unchanged.
-- `turn_cycle_output_grounding_integrity`: extend to require `CHC.grounded_in.records[]` to include at least one record from `SE.turn_driver.driver_records` when emitted CHC carries `player_response_mode: responds`. Today the validator already requires grounding records; this adds a topical-grounding constraint when the page is driver-responsive.
+- `turn_cycle_output_grounding_integrity`: extend to require `CHC.grounded_in.records[]` to include at least one record from `SE.turn_driver.driver_records` when emitted CHC carries `player_response_mode: responds`, and fail CHCs emitted under a non-player driver when `player_response_mode` is outside `responds | witnesses | chooses_continuation`. Today the validator already requires grounding records; this adds topical-grounding and response-mode constraints when the page is driver-responsive.
 
 ## 4. Out of Scope
 
@@ -223,7 +223,7 @@ The following items from the source report are **rejected or deferred** per the 
 - **`choice_set_quality_axes` validator.** Rejected — the report's own §11.3 forbids hard-validating literary quality.
 - **STCHAR Operational Axis Index closed-vocabulary taxonomy.** Deferred — separate STCHAR-shape concern; reactivity fix doesn't depend on it.
 - **`branching-story-prose-attach` driver-fidelity receipt fields.** Deferred — add only after the turn-driver field is real and a playtest confirms prose-rendering surfaces need the receipt.
-- **FOUNDATIONS amendment.** Carried separately by [SPEC-78](../archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md), which landed before SPEC-76 (FOUNDATIONS is upstream). SPEC-78 extends §Story Bundles §5c with "Driver salience is local." (covering driver-selection as a prior local-salience-ranking pass) and §6b with event-level driver-declaration coverage (extending the Observer Firewall to `SE.turn_driver.driver_records[]` and `pov_visibility`). SPEC-76's `Validation Rules Upheld` table cites these *extended* principles.
+- **FOUNDATIONS amendment.** Carried separately by [SPEC-78](SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md), which landed before SPEC-76 (FOUNDATIONS is upstream). SPEC-78 extends §Story Bundles §5c with "Driver salience is local." (covering driver-selection as a prior local-salience-ranking pass) and §6b with event-level driver-declaration coverage (extending the Observer Firewall to `SE.turn_driver.driver_records[]` and `pov_visibility`). SPEC-76's `Validation Rules Upheld` table cites these *extended* principles.
 
 ## 5. Validation Rules Upheld
 
@@ -302,3 +302,28 @@ The spec lands as a single coordinated change because the schema, contract, skil
 - Existing validators: `tools/validators/src/structural/chc-slt-selected-commitment-trace.ts`, `observer-firewall.ts`, `narrative-shape-field-rejection.ts`, `page-plan-stchar-packet-integrity.ts`.
 - Predecessor SPECs: SPEC-47 (STPLAN + STEMO), SPEC-63 (offstage causal packet tier), SPEC-73 (page-plan §16a label parsing — establishes the §7a parser pattern).
 - Established inline-fixture-builder convention used in the test plan: `tools/validators/tests/structural/chc-slt-selected-commitment-trace.test.ts`, `branch-isolation.test.ts`, and sibling validator tests (not a SPEC-introduced contract).
+
+## Outcome
+
+Completed 2026-05-23.
+
+SPEC-76 landed through tickets `archive/tickets/SPEC76TURDRIPRI-001.md` through `archive/tickets/SPEC76TURDRIPRI-011.md`.
+
+What changed:
+
+- `story-event.schema.json` now carries the collapsed `event_kind` contract and required `turn_driver` shape for `turn_resolution` events.
+- `.claude/skills/_shared-templates/story-state-contract.md` documents Gate 9, page-plan §7a, active-pressure disposition, and the turn-driver record shape.
+- `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/branching-story-bootstrap/SKILL.md`, and `.claude/skills/branching-story-health-audit/SKILL.md` carry the Phase 0 / bootstrap carve-out / Reactivity Inertness updates.
+- The validators package includes the four new turn-driver / active-pressure validators, the existing-validator updates, and the Red Kiln Ambush capstone fixture.
+
+Verification:
+
+- `cd tools/validators && npm test` before the final capstone ticket passed 999 tests.
+- `cd tools/validators && npm run build` passed after the capstone implementation.
+- `cd tools/validators && node --test dist/tests/integration/spec76-red-kiln-ambush.test.js` passed 2 tests, proving the canonical Red Kiln Ambush fixture and five failing variants.
+- `cd tools/validators && npm test` passed 1001 tests after all SPEC-76 work.
+
+Deviation from draft:
+
+- The Red Kiln Ambush fixture is checked as indexed-record JSON plus page-plan file content rather than a full copied `worlds/red-kiln-ambush/` tree. This matches the current structural validator harness and avoids any live canon mutation.
+- The capstone exposed a missing same-seam response-mode check in `turn_cycle_output_grounding_integrity`; SPEC-76's existing-validator section and final implementation include that fail-closed repair.
