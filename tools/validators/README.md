@@ -71,6 +71,7 @@ Structural validators:
 - `stchar_supersession_integrity`
 - `stchar_body_integrity`
 - `stchar_source_fact_coverage`
+- `stchar_source_material_inventory_integrity`
 - `no_char_authority_in_story_runtime`
 - `character_grounding_consistency`
 - `state_snapshot_integrity`

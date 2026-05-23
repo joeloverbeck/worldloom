@@ -1,9 +1,9 @@
 # SPEC74STCHARDISBOU-008: New validator stchar_source_material_inventory_integrity
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — new validator file `tools/validators/src/structural/stchar-source-material-inventory-integrity.ts`; registry append at `tools/validators/src/public/registry.ts`; new test file `tools/validators/tests/structural/stchar-source-material-inventory-integrity.test.ts`
+**Engine Changes**: Yes — new validator file `tools/validators/src/structural/stchar-source-material-inventory-integrity.ts`; registry append at `tools/validators/src/public/registry.ts`; validator inventory/count updates in `tools/validators/README.md`, `tools/validators/tests/structural/registry.test.ts`, and `tools/validators/tests/integration/spec04-verification.test.ts`; new test file `tools/validators/tests/structural/stchar-source-material-inventory-integrity.test.ts`
 **Deps**: None
 
 ## Problem
@@ -17,17 +17,20 @@ After `archive/tickets/SPEC74STCHARDISBOU-007.md` landed, `stchar-body-integrity
 3. Cross-skill boundary under audit: this validator runs via the validator-framework run-loop (`tools/validators/src/public/registry.ts`); its diagnostic findings feed the health-audit Phase 2m `stchar_semantic_loss_risk` finding (SPEC74STCHARDISBOU-012); its content-validation contract complements `stchar-body-integrity.ts`'s structural-subsection check (`archive/tickets/SPEC74STCHARDISBOU-007.md`).
 4. FOUNDATIONS principle restated: §Tooling Recommendation ("LLM agents should never operate on prose alone" — structural validators on inventory row shape and rationale categories, not on free-prose semantics). The forbidden-rationale-string check is a case-insensitive substring match on the rationale field (a structured cell), NOT a regex scan of free prose elsewhere — this preserves the "no LLM judgment, no prose-semantic heuristics" discipline.
 5. HARD-GATE / Canon Safety Check surface touched: this is a new structural validator under `tools/validators/src/structural/`; per the per-ticket-type granularity in spec-to-tickets, a new structural validator engages this item. The validator gates STCHAR record writes by failing FAIL-everywhere on world_char STCHAR profiles with malformed inventories.
+6. Same-package registry inventory fallout: live reassessment found validator inventory/count surfaces that must move with a new registered structural validator: `tools/validators/README.md` lists STCHAR structural validators, `tools/validators/tests/structural/registry.test.ts` asserts the exact `structuralValidators` name list, and `tools/validators/tests/integration/spec04-verification.test.ts` asserts the structural validator count. These are same-seam proof surfaces, not separate feature work.
 
 ## Architecture Check
 
 1. The validator inspects inventory shape and rationale categories — both structural surfaces (the inventory is a body table with named columns; the rationale is a structured cell). It does NOT regex-detect semantic phrases in free prose; the forbidden-rationale-string check is scoped to the rationale field of inventory rows, not to STCHAR body prose. This preserves the FOUNDATIONS §Tooling Recommendation discipline of structural-only validators.
 2. The registry-append pattern matches existing STCHAR validators (`stcharBodyIntegrity`, `stcharSourceFactCoverage`, etc. at `tools/validators/src/public/registry.ts:74-78`): `import { stcharSourceMaterialInventoryIntegrity } from "../structural/stchar-source-material-inventory-integrity.js";` + array entry in `structuralValidators` (line 107). No new framework wiring; the validator is consumed by the framework's run-loop the moment it is registered.
+3. Updating the package README inventory and exact registry/count assertions keeps the public validator inventory aligned with the executable registry rather than letting broad package tests discover stale same-seam proof surfaces late.
 
 ## Verification Layers
 
 1. **Validator file present and exports the validator** → codebase grep-proof: `grep -n 'stcharSourceMaterialInventoryIntegrity\|stchar_source_material_inventory_integrity' tools/validators/src/structural/stchar-source-material-inventory-integrity.ts` returns ≥2 matches (camelCase export + snake_case validator name).
 2. **Registry append in place** → grep-proof: `grep -n 'stcharSourceMaterialInventoryIntegrity\|stchar-source-material-inventory-integrity' tools/validators/src/public/registry.ts` returns ≥2 matches (import statement + array entry).
 3. **Tests cover positive + negative cases** → `tools/validators/tests/structural/stchar-source-material-inventory-integrity.test.ts` extended with the cases enumerated in SPEC-74 §7.
+4. **Validator inventory/count surfaces updated** → grep/count proof: registry expected-name test and README include `stchar_source_material_inventory_integrity`; SPEC-04 structural validator count increments by 1.
 
 ## What to Change
 
@@ -77,6 +80,10 @@ Cases per SPEC-74 §7:
 - `tools/validators/src/structural/stchar-source-material-inventory-integrity.ts` (new)
 - `tools/validators/src/public/registry.ts` (modify — add import + array entry)
 - `tools/validators/tests/structural/stchar-source-material-inventory-integrity.test.ts` (new)
+- `tools/validators/tests/structural/registry.test.ts` (modify — exact registry-name assertion)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — structural and total validator counts)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply STCHAR validator execution-count assertion)
+- `tools/validators/README.md` (modify — structural validator inventory)
 
 ## Out of Scope
 
@@ -94,6 +101,7 @@ Cases per SPEC-74 §7:
 3. A representative world-char STCHAR with an empty inventory FAILS the validator.
 4. A representative world-char STCHAR with `story_irrelevant` rationale `not_needed_on_page_1` FAILS the validator.
 5. A representative story-local STCHAR without inventory PASSES the validator (scoping check).
+6. `tools/validators/tests/structural/registry.test.ts` and `tools/validators/tests/integration/spec04-verification.test.ts` remain truthful after the new validator registry entry.
 
 ### Invariants
 
@@ -106,9 +114,31 @@ Cases per SPEC-74 §7:
 ### New/Modified Tests
 
 1. `tools/validators/tests/structural/stchar-source-material-inventory-integrity.test.ts` (new) — positive/negative/scoping cases per Verification Layers item 3.
+2. `tools/validators/tests/structural/registry.test.ts` (modify) — exact registry-name list includes the new validator.
+3. `tools/validators/tests/integration/spec04-verification.test.ts` (modify) — package validator count assertions account for the new structural validator.
+4. `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify) — pre-apply execution inventory now accounts for eight STCHAR-family validators.
 
 ### Commands
 
 1. `npm test --prefix tools/validators` (confirms new test file passes)
 2. `grep -n 'stcharSourceMaterialInventoryIntegrity\|stchar-source-material-inventory-integrity' tools/validators/src/public/registry.ts` (confirms registry append)
-3. Dry-run the validator against the 5 fixtures named in §7 (positive valid inventory, story_irrelevant non_operational_trivia, missing subsection, Source-Distillation-as-home, opening-page-relevance rationale) to confirm expected pass/fail pattern.
+3. From `tools/validators`: `node --test dist/tests/structural/stchar-source-material-inventory-integrity.test.js dist/tests/structural/registry.test.js dist/tests/integration/spec04-verification.test.js dist/tests/integration/validate-patch-plan.test.js` after `npm run build` (focused compiled proof for validator behavior, registry/count surfaces, and pre-apply execution inventory).
+
+## Outcome
+
+Completed: 2026-05-23
+
+Implemented `stchar_source_material_inventory_integrity` as a new fail-severity structural validator for `source_kind: world_char` STCHAR records. The validator reads the hybrid STCHAR body, requires a non-empty `### Stable Source Material Inventory` subsection under `## Source Distillation`, parses the required inventory table columns, validates row dispositions and retained operational homes, rejects `Source Distillation` as a retained home, enforces the five structured `story_irrelevant` rationale categories, and rejects opening-page relevance rationales only inside the structured rationale cell.
+
+Registered the validator in `structuralValidators`, updated the package README inventory, updated exact registry/count assertions, and updated the clean pre-apply validator execution inventory to account for the eighth STCHAR-family validator. The implementation intentionally inline-duplicates the 11 operational STCHAR H2 names with a comment pointing to the future shared-module extraction owned by SPEC74STCHARDISBOU-009.
+
+## Verification Result
+
+1. From `tools/validators`: `npm run build` — passed.
+2. From `tools/validators`: `node --test dist/tests/structural/stchar-source-material-inventory-integrity.test.js dist/tests/structural/registry.test.js dist/tests/integration/spec04-verification.test.js dist/tests/integration/validate-patch-plan.test.js` — passed, 41 tests.
+3. From `tools/validators`: `npm test` — passed, 918 tests.
+
+## Deviations
+
+1. Same-seam proof fallout was added during reassessment: `tools/validators/README.md`, `tools/validators/tests/structural/registry.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, and `tools/validators/tests/integration/validate-patch-plan.test.ts` moved with the registry entry so package inventory/count and pre-apply execution assertions remained truthful.
+2. The focused compiled `spec04-verification` proof must run from the `tools/validators` package root; running the same compiled file from repo root derives the wrong fixture path from `process.cwd()`.
