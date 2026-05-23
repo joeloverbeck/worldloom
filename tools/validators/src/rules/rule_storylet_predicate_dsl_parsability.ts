@@ -379,6 +379,7 @@ function validatePredicate(state: ValidationState, value: unknown, path: string,
       requireLocationRef(state, value.location, `${path}.location`);
       return;
     case "has_affordance":
+      requireExistentialScope(state, value.pred, path);
       requireEnum(state, value.action_family, ACTION_FAMILY_SET, `${path}.action_family`);
       return;
     case "record_active":

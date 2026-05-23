@@ -252,13 +252,14 @@ test("storylet predicate DSL rejects bound effect aliases with no binding precon
   ));
 });
 
-test("storylet predicate DSL rejects existential predicates in branch-scoped execution blocks", async () => {
+test("storylet predicate DSL rejects author-pool prefilter predicates in branch-scoped execution blocks", async () => {
   const verdicts = await storyletPredicateDslParsability.run(null, context(validReferenceRecords().concat([
     storyletRecord("SLT-6", {
       scope: { visibility: "branch_scoped", branch_id: "BR-1" },
       preconditions: {
         hard: [
-          { pred: "any_obligation_open", alias: "debt" }
+          { pred: "any_obligation_open", alias: "debt" },
+          { pred: "has_affordance", action_family: "communicate" }
         ]
       }
     })
@@ -266,7 +267,13 @@ test("storylet predicate DSL rejects existential predicates in branch-scoped exe
 
   assert.ok(verdicts.some((verdict) =>
     verdict.code === "predicate.invalid_scope" &&
+    verdict.message.includes("preconditions.hard[0]") &&
     verdict.message.includes("global_author_pool or branch_prefix_scoped")
+  ));
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_scope" &&
+    verdict.message.includes("preconditions.hard[1]") &&
+    verdict.message.includes("has_affordance")
   ));
 });
 
