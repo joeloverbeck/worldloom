@@ -25,6 +25,9 @@ import {
 const VALIDATOR = "page_plan_stchar_packet_integrity";
 const PLAN_PATH_PATTERN = /^stories\/([^/]+)\/pages-prose-plans\/(PG-(0|[1-9][0-9]*))\.md$/;
 const OFFSTAGE_REQUIRED_BECAUSE = "offstage_causal";
+const CURRENT_STATE_ID = /\b(PG|SE|STEMO|BEL|STPLAN|SREL|STSTAT|STOBJ|STLOC|THR|OBL|CNSQ|CLK|STSEC|STQ)-(0|[1-9][0-9]*)\b/g;
+const DISALLOWED_AUTHORITY_ID = /\bCHAR-(0|[1-9][0-9]*)\b/g;
+const NONE_GROUNDING_VALUE = /^none\s*;\s*stable\s+STCHAR\s+authority\s+only\.?$/i;
 const PACKET_ROLE_VOCABULARY: ReadonlySet<string> = new Set([
   "viewpoint",
   "speaker",
@@ -49,8 +52,15 @@ interface Packet {
   stcharId: string;
   requiredBecause: string;
   requiredBecauseLabels: Set<string>;
+  currentStateGroundingRecords: string | null;
   hasVoiceBlock: boolean;
   packetText: string;
+}
+
+interface PacketReference {
+  id: string;
+  field: string;
+  disallowedAuthority: boolean;
 }
 
 export const pagePlanStcharPacketIntegrity: Validator = {
@@ -108,7 +118,7 @@ export const pagePlanStcharPacketIntegrity: Validator = {
             ));
             continue;
           }
-          verdicts.push(...packetVerdicts(page, plan.path, packet, location, activeStchars, maps.byId.get(packet.stcharId)));
+          verdicts.push(...packetVerdicts(page, plan.path, packet, location, activeStchars, maps));
         }
 
         for (const packet of packets) {
@@ -136,7 +146,7 @@ function packetVerdicts(
   packet: Packet,
   stentLocation: string | undefined,
   activeStchars: Set<string>,
-  _stchar: IndexedRecord | undefined
+  maps: ReturnType<typeof storyMaps>
 ): Verdict[] {
   const verdicts: Verdict[] = [];
   if (!activeStchars.has(packet.stcharId)) {
@@ -183,6 +193,34 @@ function packetVerdicts(
     ));
   }
 
+  const currentStateReferences = packetReferencesOutsideGrounding(packet);
+  if (isNoneGroundingDeclaration(packet.currentStateGroundingRecords) && currentStateReferences.some((reference) => !reference.disallowedAuthority)) {
+    const recordIds = unique(currentStateReferences
+      .filter((reference) => !reference.disallowedAuthority)
+      .map((reference) => reference.id));
+    verdicts.push(planFail(
+      page,
+      planPath,
+      "page_plan_stchar_packet_integrity.grounding_records_none_with_citations",
+      `${pageId(page)} 16a packet for ${packet.stcharId} declares "Current-state grounding records: none; stable STCHAR authority only" but cites current-state record(s) ${recordIds.join(", ")} elsewhere in the packet.`,
+      { page_id: pageId(page), stchar_id: packet.stcharId, record_ids: recordIds },
+      `Remove current-state citations from the 16a packet for ${packet.stcharId}, or name the active grounding records in Current-state grounding records.`
+    ));
+  }
+
+  for (const reference of currentStateReferences) {
+    if (reference.disallowedAuthority || !isPacketReferenceActive(page, reference.id, maps)) {
+      verdicts.push(planFail(
+        page,
+        planPath,
+        "page_plan_stchar_packet_integrity.stale_current_state_reference",
+        `${pageId(page)} 16a packet for ${packet.stcharId} cites ${reference.id} in ${reference.field}, which is not active in the page snapshot (or does not resolve in the bundle).`,
+        { page_id: pageId(page), stchar_id: packet.stcharId, record_id: reference.id, field: reference.field },
+        `Create or activate ${reference.id} in ${pageId(page)}.state_snapshot.active_records, cite the page's own PG/SE record, or remove the stale packet reference.`
+      ));
+    }
+  }
+
   return verdicts;
 }
 
@@ -213,10 +251,58 @@ function parsePackets(content: string): Packet[] {
       stcharId,
       requiredBecause: required,
       requiredBecauseLabels: parseRequiredBecauseLabels(required),
+      currentStateGroundingRecords: packetText.match(/^\s+- Current-state grounding records:\s*(.+?)\s*$/m)?.[1]?.trim() ?? null,
       hasVoiceBlock: /^[^\S\r\n]*- Voice\/dialogue authority:[^\S\r\n]*\S/m.test(packetText),
       packetText
     };
   });
+}
+
+function packetReferencesOutsideGrounding(packet: Packet): PacketReference[] {
+  const references: PacketReference[] = [];
+  let field = "packet";
+  for (const line of packet.packetText.split(/\r?\n/)) {
+    const fieldMatch = line.match(/^\s+- ([^:]+):/);
+    if (fieldMatch?.[1]) {
+      field = fieldMatch[1].trim();
+    }
+    if (/^\s+- Current-state grounding records:/i.test(line)) {
+      continue;
+    }
+    for (const match of line.matchAll(CURRENT_STATE_ID)) {
+      references.push({ id: match[0], field, disallowedAuthority: false });
+    }
+    for (const match of line.matchAll(DISALLOWED_AUTHORITY_ID)) {
+      references.push({ id: match[0], field, disallowedAuthority: true });
+    }
+  }
+  return references;
+}
+
+function isNoneGroundingDeclaration(value: string | null): boolean {
+  return value !== null && NONE_GROUNDING_VALUE.test(value);
+}
+
+function isPacketReferenceActive(page: IndexedRecord, referenceId: string, maps: ReturnType<typeof storyMaps>): boolean {
+  const recordClass = referenceId.split("-")[0];
+  if (!recordClass || !maps.byId.has(referenceId)) {
+    return false;
+  }
+  if (recordClass === "PG" && referenceId === pageId(page)) {
+    return true;
+  }
+  if (recordClass === "SE" && referenceId === pageResolvedEventId(page)) {
+    return true;
+  }
+  return activeIds(page, recordClass).includes(referenceId);
+}
+
+function pageResolvedEventId(page: IndexedRecord): string | undefined {
+  return stringValue(asPlainRecord(asPlainRecord(page.parsed).input).resolved_event_id);
+}
+
+function unique(values: string[]): string[] {
+  return [...new Set(values)];
 }
 
 function parseRequiredBecauseLabels(requiredBecause: string): Set<string> {
