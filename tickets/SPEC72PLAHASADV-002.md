@@ -68,7 +68,7 @@ Preserve the rest of the §4.2a section (lines 158-165, the example invocation b
 - `tools/world-mcp/src/cli/compute-pg-hashes.ts` — the CLI source is unchanged. SPEC-72 §3 Out of scope preserves CLI behavior; PG-authoring skills continue using it with the plan-file→state-hash coupling intact.
 - `tools/validators/src/structural/snapshot-replay-equality.ts` — the validator is unchanged. Its existing `computePgStateHash(parsed)` call at line 296 is the canonical pattern that prose-attach Phase 2 will adopt (landed in SPEC72PLAHASADV-003).
 - Operational SKILL.md updates in `branching-story-prose-attach` — those land in SPEC72PLAHASADV-003.
-- Hook 6 changes — land in SPEC72PLAHASADV-001.
+- Hook 6 changes — landed in `archive/tickets/SPEC72PLAHASADV-001.md`.
 
 ## Acceptance Criteria
 

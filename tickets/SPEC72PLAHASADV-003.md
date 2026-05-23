@@ -117,7 +117,7 @@ Modify the Phase 2 body at `.claude/skills/branching-story-prose-attach/SKILL.md
 >
 > *If `PG.state_hash` is missing, placeholder (`PLACEHOLDER_TO_BE_COMPUTED*`), or non-sha256-shaped: set `checks.hash_integrity: FAIL`. The receipt records the invalid value in `notes`; the repair path is upstream PG repair — `repair_recommendation: run_turn_cycle_repair` per Phase 5. Structurally-invalid `plan_hash` (missing, placeholder, non-sha256) is rejected at PG schema validation per `tools/validators/src/schemas/story-page.schema.json` (`plan_hash` is required with pattern `^[0-9a-f]{64}$`); prose-attach Phase 2 therefore sees only well-formed `plan_hash` values, whose drift is advisory per the rule above.*
 >
-> *Hook 6 surfaces a non-blocking drift notice (per SPEC72PLAHASADV-001) on direct `Edit` / `Write` to `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md` between prose-attach invocations when the stamped `PG.plan.plan_hash` does not match the plan body; this Phase 2 check still runs because receipt truth must not depend only on hook installation, and the WARN here is the receipt-side mirror of Hook 6's edit-time notice.*
+> *Hook 6 surfaces a non-blocking drift notice (per `archive/tickets/SPEC72PLAHASADV-001.md`) on direct `Edit` / `Write` to `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md` between prose-attach invocations when the stamped `PG.plan.plan_hash` does not match the plan body; this Phase 2 check still runs because receipt truth must not depend only on hook installation, and the WARN here is the receipt-side mirror of Hook 6's edit-time notice.*
 >
 > ***Drift is recorded in the receipt, NEVER in the `PG` record.** The PG is committed state per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary)."*
 
@@ -146,7 +146,7 @@ The World-State Prerequisites block at lines 106-118 cites the shared contract �
 
 ## Out of Scope
 
-- Hook 6 changes — landed in SPEC72PLAHASADV-001.
+- Hook 6 changes — landed in `archive/tickets/SPEC72PLAHASADV-001.md`.
 - Shared contract updates (`story-record-schemas.md` §4.6 + §4.2a) — landed in SPEC72PLAHASADV-002 (this ticket depends on -002 so the SKILL's references to the contract align with the contract's updated state).
 - `compute-pg-hashes` CLI source changes — SPEC-72 §3 Out of scope; the CLI is unchanged and continues to be used by `branching-story-bootstrap` Phase 7 and `branching-story-turn-cycle` Phase 9 with the plan-file→state-hash coupling intact.
 - `prose-receipt.schema.json` and `story-page.schema.json` — unchanged per SPEC-72 §2.3.
@@ -177,7 +177,7 @@ The World-State Prerequisites block at lines 106-118 cites the shared contract �
 
 ### New/Modified Tests
 
-1. `None — documentation-only ticket (prose-attach is an LLM-skill, not a TypeScript module; verification is grep-based on the SKILL.md plus manual / fixture verification of the live red-bunny PG-2 case). Existing pipeline coverage: tools/validators tests cover prose-receipt.schema.json conformance unchanged; tools/world-mcp tests cover compute-pg-hashes CLI behavior unchanged; tools/hooks tests cover Hook 6 in SPEC72PLAHASADV-001.`
+1. `None — documentation-only ticket (prose-attach is an LLM-skill, not a TypeScript module; verification is grep-based on the SKILL.md plus manual / fixture verification of the live red-bunny PG-2 case). Existing pipeline coverage: tools/validators tests cover prose-receipt.schema.json conformance unchanged; tools/world-mcp tests cover compute-pg-hashes CLI behavior unchanged; tools/hooks tests cover Hook 6 in archive/tickets/SPEC72PLAHASADV-001.md.`
 
 ### Commands
 

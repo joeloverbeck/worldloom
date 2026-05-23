@@ -1,6 +1,6 @@
 # SPEC72PLAHASADV-001: Hook 6 — deny → warn-only on page-plan and INDEX edits
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/hooks/src/hook6-guard-story-markdown-hash.ts`, `.claude/settings.json.example` Hook 6 commentary, `tools/hooks/tests/hook6-guard-story-markdown-hash.test.ts`. No impact on Hook 3 (engine-only `_source/*.yaml` guard) or any other PreToolUse hook.
@@ -8,9 +8,9 @@
 
 ## Problem
 
-Hook 6 currently denies any `Edit`/`Write` to `pages-prose-plans/PG-*.md` or bundle `INDEX.md` when the on-disk body no longer matches the stamped `PG.plan.plan_hash` (`tools/hooks/src/hook6-guard-story-markdown-hash.ts:297` — `emitPermissionDecision("deny", buildDenyReason(result))`). This blocks editing a committed page plan outright, even though the page plan is per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary) a *rendering* of committed state — not a second state engine. Plan/prose deviation is meant to be routed by `branching-story-prose-attach` (revise / repair / promote), not prevented by locking the plan bytes. Verified live on `red-bunny` PG-2: regenerating the plan post-commit caused Hook 6 to deny the rewrite, even though all content checks would have passed at prose-attach.
+At intake, Hook 6 denied any `Edit`/`Write` to `pages-prose-plans/PG-*.md` or bundle `INDEX.md` when the on-disk body no longer matched the stamped `PG.plan.plan_hash` (`tools/hooks/src/hook6-guard-story-markdown-hash.ts` — the drift branch emitted `permissionDecision: "deny"`). This blocked editing a committed page plan outright, even though the page plan is per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary) a *rendering* of committed state — not a second state engine. Plan/prose deviation is meant to be routed by `branching-story-prose-attach` (revise / repair / promote), not prevented by locking the plan bytes. Historical SPEC-72 evidence named `red-bunny` PG-2 as the motivating case: regenerating the plan post-commit caused Hook 6 to deny the rewrite, even though all content checks would have passed at prose-attach.
 
-This ticket lands SPEC-72 §2.1: Hook 6 becomes non-blocking — it allows the write and surfaces the drift as a notice rather than a denial.
+This ticket lands SPEC-72 §2.1: Hook 6 is non-blocking — it allows the write and surfaces the drift as a notice rather than a denial.
 
 ## Assumption Reassessment (2026-05-23)
 
@@ -32,32 +32,26 @@ This ticket lands SPEC-72 §2.1: Hook 6 becomes non-blocking — it allows the w
 3. `.claude/settings.json.example` Hook 6 `_purpose` commentary accurately describes the new warn shape → grep-proof: `grep -n "Block direct Edit" .claude/settings.json.example` returns zero matches for the Hook 6 entry post-edit; `grep -n "warn\|advisory\|allow with notice" .claude/settings.json.example` returns ≥1 match in the Hook 6 entry.
 4. The `tools/` build + test suites remain green → `npm test --prefix tools/hooks` passes (acceptance criterion #5 partial).
 
-## What to Change
+## Landed Changes
 
-### 1. Hook 6 implementation — flip deny to allow-with-notice
+### 1. Hook 6 implementation — flipped deny to allow-with-notice
 
-Modify `tools/hooks/src/hook6-guard-story-markdown-hash.ts:297` to emit a non-blocking notice instead of a denial when the drift check fails. Two shapes are acceptable; implementer chooses based on user-visibility preference:
+Modified `tools/hooks/src/hook6-guard-story-markdown-hash.ts` to emit a non-blocking notice instead of a denial when the drift check fails. This implementation uses Shape A: `emitPermissionDecision("allow", buildDriftNotice(result))`.
 
-- **Shape A (preferred — surfaces the notice)**: `emitPermissionDecision("allow", buildDriftNotice(result))` where the reason text is the existing repair guidance, optionally re-worded to read as advisory ("Plan body has drifted from stamped `PG.plan.plan_hash`; the write is allowed because plan-hash enforcement is advisory per SPEC-72. To re-stamp: `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js ...`. The PG-record itself remains the authoritative state — prose-attach's `hash_integrity` check will record the drift as a WARN, not a FAIL, when the receipt is emitted."). The `hookSpecificOutput.permissionDecisionReason` field surfaces in Claude's transcript and gives the user actionable context.
-- **Shape B (silent allow)**: do not call `emitPermissionDecision` at all when the drift check fails; rely on the existing `logDecision("info", ...)` call to capture the drift in hook logs. Simpler but loses the user-facing notice. Discouraged unless SPEC-72's "log/surface a drift notice" wording is interpreted as log-only.
-
-Whichever shape is chosen, update the `logDecision` call at lines 298-307 so the recorded `decision` field reflects warn semantics (e.g., `"warn"` or `"allow_with_notice"`) rather than `"deny"`. Optionally rename `buildDenyReason` (line 249) to `buildDriftNotice` for clarity; if renamed, update the test-suite assertions that match against the rendered prose accordingly.
+The helper was renamed from `buildDenyReason` to `buildDriftNotice`; the notice says the write is allowed, plan-hash enforcement is advisory per SPEC-72, prose-attach records plan-only drift as WARN, and any PG record update still routes through patch-engine approval. The `logDecision` payload now records `decision: "allow_with_notice"`.
 
 ### 2. `.claude/settings.json.example` Hook 6 commentary
 
-Update the Hook 6 entry at lines 44-55: rewrite the `_purpose` field from *"Block direct Edit/Write to pages-prose-plans/PG-*.md and bundle INDEX.md when stamped PG.plan.plan_hash does not match on-disk plan-body SHA-256. Redirect to compute-pg-hashes re-stamping CLI."* to reflect the warn semantics, for example: *"Warn on direct Edit/Write to pages-prose-plans/PG-*.md and bundle INDEX.md when stamped PG.plan.plan_hash does not match on-disk plan-body SHA-256. The write proceeds (plan-hash enforcement is advisory per SPEC-72); the notice surfaces the drift and points at the compute-pg-hashes re-stamping CLI."* Preserve the `_spec: "SPEC-40 Hook 6"` annotation and add an inline marker that SPEC-72 narrowed the enforcement (e.g., add `_spec_amendment: "SPEC-72 narrowed deny → warn-only"`), so an auditor can reconstruct the historical change-of-stance chain.
+Updated the Hook 6 `_purpose` field to describe warn semantics and added `_spec_amendment: "SPEC-72 narrowed deny to warn-only"` while preserving `_spec: "SPEC-40 Hook 6"`.
 
-### 3. Hook 6 test suite — rename `_blocks_` cases to `_warns_` / `_allows_with_notice_`
+### 3. Hook 6 test suite — renamed `_blocks_` cases to `_warns_`
 
-Modify `tools/hooks/tests/hook6-guard-story-markdown-hash.test.ts` two `hook6_blocks_*` cases:
+Modified the two `hook6_blocks_*` mismatch cases:
 
-- `hook6_blocks_pg_plan_write_when_hash_mismatches` (line 57) → rename to `hook6_warns_on_pg_plan_write_when_hash_mismatches` (or `hook6_allows_with_notice_on_pg_plan_write_when_hash_mismatches`). The test's setup (`seedPlan`, `seedPg`, `runHook`) is unchanged. The assertions flip:
-  - `assert.match(result.stdout, /"permissionDecision":"deny"/)` → `assert.match(result.stdout, /"permissionDecision":"allow"/)` (Shape A) OR `assert.equal(result.stdout, "")` (Shape B).
-  - `assert.match(result.stdout, /compute-pg-hashes\.js/)` stays for Shape A (the repair-CLI hint remains in the notice prose); drop for Shape B.
-  - `assert.match(result.stdout, new RegExp(hash(nextBody)))` stays for Shape A; drop for Shape B.
-- `hook6_blocks_index_update_when_referenced_plan_hash_mismatches` (line 119) → analogous rename + assertion flip.
+- `hook6_warns_on_pg_plan_write_when_hash_mismatches`
+- `hook6_warns_on_index_update_when_referenced_plan_hash_mismatches`
 
-The four `hook6_allows_*` pass-through cases (`hook6_allows_pg_plan_write_when_hash_matches` at line 81, `hook6_allows_pg_plan_first_write_when_no_pg_record_exists` at line 102, `hook6_allows_index_update_when_all_referenced_plan_hashes_match` at line 142, `hook6_allows_unrelated_markdown_writes` at line 166) stay unchanged — these test the pre-existing pass-through code paths Hook 6 still honors.
+Both now assert `permissionDecision: "allow"`, the SPEC-72 advisory notice text, and the surviving `compute-pg-hashes.js` hint. The four `hook6_allows_*` pass-through cases stayed unchanged.
 
 ## Files to Touch
 
@@ -77,9 +71,9 @@ The four `hook6_allows_*` pass-through cases (`hook6_allows_pg_plan_write_when_h
 
 ### Tests That Must Pass
 
-1. `npm test --prefix tools/hooks` — all hook tests pass after the two `hook6_blocks_*` cases are renamed and their assertions flipped to allow-with-notice.
-2. Manual verification on `red-bunny` PG-2: regenerate `worlds/animalia/stories/red-bunny/pages-prose-plans/PG-2.md` post-commit, attempt to `Edit` it via Claude Code — Hook 6 surfaces a drift notice and the edit proceeds (no `permissionDecision: deny` blocks the write).
-3. `npm run build --prefix tools/hooks` — TypeScript compiles cleanly (no signature drift between hook6 and `hook-io.ts`).
+1. `npm test --prefix tools/hooks` — all hook tests pass after the two `hook6_blocks_*` cases were renamed and their assertions flipped to allow-with-notice.
+2. `npm run build --prefix tools/hooks` — TypeScript compiles cleanly (no signature drift between hook6 and `hook-io.ts`).
+3. Manual Claude Code verification on `red-bunny` PG-2 was not run in this Codex session; the compiled Hook 6 tests exercise the same `Edit` and `Write` hook decision path with seeded drift fixtures.
 
 ### Invariants
 
@@ -91,10 +85,30 @@ The four `hook6_allows_*` pass-through cases (`hook6_allows_pg_plan_write_when_h
 
 ### New/Modified Tests
 
-1. `tools/hooks/tests/hook6-guard-story-markdown-hash.test.ts` — rename two `hook6_blocks_*` cases to `hook6_warns_*` / `hook6_allows_with_notice_*`; flip their `permissionDecision` assertions from `"deny"` to `"allow"` (Shape A) or to empty stdout (Shape B); preserve the four `hook6_allows_*` pass-through cases unchanged.
+1. `tools/hooks/tests/hook6-guard-story-markdown-hash.test.ts` — renamed two `hook6_blocks_*` cases to `hook6_warns_*`; flipped their `permissionDecision` assertions from `"deny"` to `"allow"`; preserved the four `hook6_allows_*` pass-through cases unchanged.
 
 ### Commands
 
 1. `npm test --prefix tools/hooks` — targeted Hook 6 test verification.
 2. `npm run build --prefix tools/hooks` — TypeScript build verification for the Hook 6 implementation change.
-3. `grep -n "Block direct Edit" .claude/settings.json.example` — confirm the Hook 6 `_purpose` block-language wording is gone (should return zero matches in the Hook 6 entry).
+3. `awk '/"_spec": "SPEC-40 Hook 6"/,/]/' .claude/settings.json.example | grep -n "Block direct Edit"` — confirm the Hook 6 `_purpose` block-language wording is gone (returns zero matches in the Hook 6 entry; Hook 3 still legitimately uses "Block direct Edit" for `_source` writes).
+
+## Outcome
+
+Completed: 2026-05-23
+
+Hook 6 now allows page-plan and bundle `INDEX.md` writes when the stamped `PG.plan.plan_hash` is drifted, while surfacing a user-visible advisory notice. The notice preserves the re-stamping CLI hint and the patch-engine routing reminder for any PG record update. Hook logs now classify this branch as `allow_with_notice` instead of `deny`.
+
+The Hook 6 settings example now describes the warning behavior and records SPEC-72 as the amendment that narrowed SPEC-40 Hook 6 from deny to warn-only. The two Hook 6 mismatch tests were renamed from `hook6_blocks_*` to `hook6_warns_*` and assert the allow-with-notice output. No Hook 3 behavior, `_source` write gate, `PG.state_hash` logic, prose-attach behavior, shared contract wording, or world content changed in this ticket.
+
+## Verification Result
+
+1. `npm run build --prefix tools/hooks` — PASS. TypeScript compiled Hook 6 and its tests.
+2. `npm test --prefix tools/hooks` — PASS. 28/28 hook tests passed, including both renamed Hook 6 warn tests and existing Hook 3 denial tests.
+3. `awk '/"_spec": "SPEC-40 Hook 6"/,/]/' .claude/settings.json.example | grep -n "Block direct Edit"` — PASS by expected no-match exit. The Hook 6 settings block no longer uses block-language wording.
+4. `rg -n 'hook6_blocks|permissionDecision":"deny|buildDenyReason|decision: "deny"' tools/hooks/src/hook6-guard-story-markdown-hash.ts tools/hooks/tests/hook6-guard-story-markdown-hash.test.ts .claude/settings.json.example` — PASS by expected no-match exit. The Hook 6 source/test/settings surfaces no longer carry the old deny/test-helper anchors.
+
+## Deviations
+
+- The manual Claude Code `red-bunny` PG-2 exercise was not run from Codex. The accepted proof is the compiled Hook 6 test fixture path, which invokes the same hook binary with representative `Edit` and `Write` payloads and seeded plan-hash drift.
+- The drafted settings grep `grep -n "Block direct Edit" .claude/settings.json.example` was narrowed to the Hook 6 block because Hook 3 still legitimately says "Block direct Edit" for engine-only `_source` writes.

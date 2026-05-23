@@ -246,15 +246,16 @@ function checkReferencedPlans(match: StoryPathMatch, indexBody: string): PlanChe
   return { ok: true };
 }
 
-function buildDenyReason(result: PlanCheckResult): string {
+function buildDriftNotice(result: PlanCheckResult): string {
   const planPath = result.planPath ?? "<plan-path>";
   const pgPath = result.pgPath ?? "<pg-record-path>";
   return [
-    "Direct Edit/Write would break the PG plan-hash bridge.",
+    "Direct Edit/Write is allowed, but the PG plan-hash bridge is already drifted.",
     result.reason ?? "The plan body does not match the stamped PG.plan.plan_hash.",
+    "Plan-hash enforcement is advisory per SPEC-72; prose-attach records plan-only drift as WARN, not FAIL.",
     "Re-stamp or repair with:",
     `  node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan ${planPath} --pg ${pgPath}`,
-    "Then route the PG record update through the patch-engine approval flow before updating the bundle INDEX."
+    "The PG record remains authoritative state; route any PG record update through the patch-engine approval flow."
   ].join("\n");
 }
 
@@ -294,12 +295,12 @@ async function main(): Promise<void> {
     return;
   }
 
-  emitPermissionDecision("deny", buildDenyReason(result));
+  emitPermissionDecision("allow", buildDriftNotice(result));
   logDecision(
     "info",
     "hook6-guard-story-markdown-hash",
     {
-      decision: "deny",
+      decision: "allow_with_notice",
       tool_name: input.tool_name,
       file_path: filePath,
       reason: result.reason

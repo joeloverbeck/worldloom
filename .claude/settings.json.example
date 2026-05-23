@@ -44,7 +44,8 @@
       {
         "_phase": 2,
         "_spec": "SPEC-40 Hook 6",
-        "_purpose": "Block direct Edit/Write to pages-prose-plans/PG-*.md and bundle INDEX.md when stamped PG.plan.plan_hash does not match on-disk plan-body SHA-256. Redirect to compute-pg-hashes re-stamping CLI.",
+        "_spec_amendment": "SPEC-72 narrowed deny to warn-only",
+        "_purpose": "Warn on direct Edit/Write to pages-prose-plans/PG-*.md and bundle INDEX.md when stamped PG.plan.plan_hash does not match on-disk plan-body SHA-256. The write proceeds because plan-hash enforcement is advisory per SPEC-72; the notice surfaces drift and points at the compute-pg-hashes re-stamping CLI.",
         "matcher": "Edit|Write",
         "hooks": [
           {
