@@ -89,6 +89,10 @@ export function pageId(page: IndexedRecord): string {
   return recordId(page);
 }
 
+export function branchPath(page: IndexedRecord): string[] {
+  return stringArray(asPlainRecord(page.parsed).branch_path);
+}
+
 export function isNonBackgroundEntity(parsed: Record<string, unknown>): boolean {
   const roles = stringArray(parsed.role_in_story);
   return roles.length !== 1 || roles[0] !== "background";

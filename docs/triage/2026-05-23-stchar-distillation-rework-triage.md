@@ -8,9 +8,9 @@
 
 ## Resulting deliverables
 
-- [`specs/SPEC-74-stchar-distillation-boundary-hardening.md`](../../specs/SPEC-74-stchar-distillation-boundary-hardening.md) — distillation-boundary work (skills + templates + 1 schema field + 1 body subsection + 3 new validators + page-packet validator extension + fail-everywhere migration for red-bunny STCHAR-{1,2,3}).
-- [`specs/SPEC-75-branch-aware-stchar-supersession.md`](../../specs/SPEC-75-branch-aware-stchar-supersession.md) — branch-ancestry traversal primitive + reachability rule replacement in `stchar_supersession_integrity`.
-- [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md) — recommended order SPEC-74 → SPEC-75; soft dependency only.
+- [`archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md`](../../archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md) — distillation-boundary work (skills + templates + 1 schema field + 1 body subsection + 3 new validators + page-packet validator extension + fail-everywhere migration for red-bunny STCHAR-{1,2,3}); completed 2026-05-23.
+- [`archive/specs/SPEC-75-branch-aware-stchar-supersession.md`](../../archive/specs/SPEC-75-branch-aware-stchar-supersession.md) — branch-ancestry reachability rule replacement in `stchar_supersession_integrity`; completed 2026-05-23 without adding a traversal primitive.
+- [`archive/specs/IMPLEMENTATION-ORDER-2026-05-23-3.md`](../../archive/specs/IMPLEMENTATION-ORDER-2026-05-23-3.md) — completed order SPEC-74 → SPEC-75; archived with a non-colliding date suffix.
 
 ## Lead — reframing corrections discovered during verification
 
@@ -18,7 +18,7 @@ The source report's author worked from a manifest stale enough to predate SPEC-7
 
 1. **All STCHAR tamper-hash references are stale.** SPEC-71 ("strip-stchar-tamper-hashes", merged 2026-05-23) removed `profile_hash`, `voice_block_hash`, `page_packet_hash`, and `source_char_hash` from the schema, §16a packet contract, skills, INDEX renderer, CLI, and patch-engine ops. The schema declares `additionalProperties: false`; the new `forbidden_stchar_tamper_hash_fields` validator structurally prevents reintroduction. The report's §6.3 / §6.5 / §6.12 verbatim text references these hashes — they are dropped from SPEC-74's adapted version of those proposals, and their non-hash substance is preserved in alternative form.
 2. **§6.12 sub-items (1) and (2) already landed via SPEC-73.** "Required because: multi-token parsing" and "voice block required when speaker/viewpoint in composite reason" are implemented at `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts:215, 169-184, 222-229`. The report's `Required because:` parsing proposal is duplicate work.
-3. **`specs/` directory was absent before this triage.** All 73 prior specs are archived under `archive/specs/`. The triage created `specs/` and `specs/IMPLEMENTATION-ORDER.md` from scratch.
+3. **`specs/` directory was absent before this triage.** All 73 prior specs were archived under `archive/specs/`. The triage created `specs/` and `specs/IMPLEMENTATION-ORDER.md` from scratch; after SPEC-74 and SPEC-75 completed, the new specs and implementation order were archived under `archive/specs/`.
 
 ## Per-item verdict
 
@@ -71,7 +71,7 @@ Item identifiers follow the source report's §6.N numbering.
 
 | # | Item | Deferred-to |
 |---|---|---|
-| §6.13 | Branch-aware STCHAR supersession (replace `stchar_supersession_integrity` ordinal-only reachability with branch-ancestry-aware reachability) | [`specs/SPEC-75-branch-aware-stchar-supersession.md`](../../specs/SPEC-75-branch-aware-stchar-supersession.md). Verified the current code IS ordinal-only at `tools/validators/src/structural/stchar-supersession-integrity.ts:33-42`. Spec-split rationale: orthogonal mechanism (branch-ancestry traversal vs body-subsection / record-class-id parsing), distinct test surface (multi-page multi-branch fixtures), source-report blast-radius ranking Medium-high vs SPEC-74's Low / Medium. |
+| §6.13 | Branch-aware STCHAR supersession (replace `stchar_supersession_integrity` ordinal-only reachability with branch-ancestry-aware reachability) | [`archive/specs/SPEC-75-branch-aware-stchar-supersession.md`](../../archive/specs/SPEC-75-branch-aware-stchar-supersession.md). At intake, verified the code was ordinal-only at `tools/validators/src/structural/stchar-supersession-integrity.ts:33-42`. Spec-split rationale: orthogonal mechanism (direct `branch_path` reachability vs body-subsection / record-class-id parsing), distinct test surface (multi-page multi-branch fixtures), source-report blast-radius ranking Medium-high vs SPEC-74's Low / Medium. |
 
 ### Out-of-report findings surfaced during verification
 
