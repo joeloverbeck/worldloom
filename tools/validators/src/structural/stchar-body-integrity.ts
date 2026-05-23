@@ -3,9 +3,10 @@ import path from "node:path";
 
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
+  asPlainRecord,
   fileInputsFrom,
-  locationFor,
   queryStructuralRecords,
+  stringValue,
   toPosixPath,
   worldRootFrom
 } from "./utils.js";
@@ -13,6 +14,11 @@ import { appliesToStcharStoryState, fail, recordId, shouldCheckRecordInPreApply 
 
 const VALIDATOR = "stchar_body_integrity";
 const STCHAR_PATH = /^stories\/[^/]+\/story-characters\/STCHAR-(0|[1-9][0-9]*)\.md$/;
+interface RequiredSubsectionRule {
+  section: string;
+  subsections: readonly string[];
+  source_kind?: string;
+}
 
 // Keep this list in sync with .claude/skills/story-character-profile/SKILL.md Phase 3.
 export const REQUIRED_STCHAR_SECTIONS = [
@@ -31,13 +37,18 @@ export const REQUIRED_STCHAR_SECTIONS = [
   "Validation / Audit Anchors"
 ] as const;
 
-export const REQUIRED_STCHAR_SUBSECTIONS = [
+export const REQUIRED_STCHAR_SUBSECTIONS: readonly RequiredSubsectionRule[] = [
   {
     section: "Agency and Planning Tendencies",
     subsections: [
       "Operational capabilities and affordances",
       "Capability limits, costs, and access constraints"
     ]
+  },
+  {
+    section: "Source Distillation",
+    subsections: ["Stable Source Material Inventory"],
+    source_kind: "world_char"
   },
   {
     section: "Prose Rendering Constraints",
@@ -126,20 +137,23 @@ function bodyVerdicts(record: IndexedRecord, content: string, ctx: Context): Ver
     }
   }
 
-  verdicts.push(...requiredSubsectionVerdicts(record, sections, subsectionSeverity(record, ctx)));
+  verdicts.push(...requiredSubsectionVerdicts(record, sections));
 
   return verdicts;
 }
 
 function requiredSubsectionVerdicts(
   record: IndexedRecord,
-  sections: Map<string, string[]>,
-  severity: "fail" | "warn"
+  sections: Map<string, string[]>
 ): Verdict[] {
   const id = recordId(record);
   const verdicts: Verdict[] = [];
 
   for (const requirement of REQUIRED_STCHAR_SUBSECTIONS) {
+    if (requirement.source_kind !== undefined && sourceKind(record) !== requirement.source_kind) {
+      continue;
+    }
+
     const parentBodies = sections.get(requirement.section) ?? [];
     if (parentBodies.length === 0) {
       continue;
@@ -155,9 +169,8 @@ function requiredSubsectionVerdicts(
       }
 
       if (count === 0) {
-        verdicts.push(stcharVerdict(
+        verdicts.push(stcharFail(
           record,
-          severity,
           "missing_subsection",
           `${id} missing required STCHAR body subsection '### ${subsection}' under '## ${requirement.section}'.`,
           { section: requirement.section, subsection },
@@ -166,9 +179,8 @@ function requiredSubsectionVerdicts(
         continue;
       }
       if (count > 1) {
-        verdicts.push(stcharVerdict(
+        verdicts.push(stcharFail(
           record,
-          severity,
           "duplicate_subsection",
           `${id} has duplicate STCHAR body subsection '### ${subsection}' under '## ${requirement.section}'.`,
           { section: requirement.section, subsection, count },
@@ -176,9 +188,8 @@ function requiredSubsectionVerdicts(
         ));
       }
       if (hasEmpty) {
-        verdicts.push(stcharVerdict(
+        verdicts.push(stcharFail(
           record,
-          severity,
           "empty_subsection",
           `${id} has an empty STCHAR body subsection '### ${subsection}' under '## ${requirement.section}'.`,
           { section: requirement.section, subsection },
@@ -191,11 +202,8 @@ function requiredSubsectionVerdicts(
   return verdicts;
 }
 
-function subsectionSeverity(record: IndexedRecord, ctx: Context): "fail" | "warn" {
-  if (ctx.run_mode === "pre-apply" || ctx.touched_files.some((file) => toPosixPath(file) === toPosixPath(record.file_path))) {
-    return "fail";
-  }
-  return "warn";
+function sourceKind(record: IndexedRecord): string | undefined {
+  return stringValue(asPlainRecord(record.parsed).source_kind);
 }
 
 function stcharFilesByPath(input: unknown, ctx: Context, records: readonly IndexedRecord[]): Map<string, string> {
@@ -279,27 +287,5 @@ function stcharFail(
   detail?: unknown,
   suggested_fix?: string
 ): Verdict {
-  return stcharVerdict(record, "fail", code, message, detail, suggested_fix);
-}
-
-function stcharVerdict(
-  record: IndexedRecord,
-  severity: "fail" | "warn",
-  code: string,
-  message: string,
-  detail?: unknown,
-  suggested_fix?: string
-): Verdict {
-  if (severity === "fail") {
-    return fail(VALIDATOR, record, `${VALIDATOR}.${code}`, message, detail, suggested_fix);
-  }
-  return {
-    validator: VALIDATOR,
-    severity,
-    code: `${VALIDATOR}.${code}`,
-    message,
-    location: locationFor(record),
-    ...(detail === undefined ? {} : { detail }),
-    ...(suggested_fix === undefined ? {} : { suggested_fix })
-  };
+  return fail(VALIDATOR, record, `${VALIDATOR}.${code}`, message, detail, suggested_fix);
 }

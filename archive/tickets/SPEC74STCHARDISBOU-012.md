@@ -1,20 +1,20 @@
 # SPEC74STCHARDISBOU-012: branching-story-health-audit/SKILL.md Phase 2m 3-finding registration
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2m (add 3 new findings: `stchar_temporal_authority_contamination`, `stchar_semantic_loss_risk`, `stchar_regeneration_reason_invalid`)
-**Deps**: 008, 009, 011
+**Deps**: `archive/tickets/SPEC74STCHARDISBOU-008.md`, `archive/tickets/SPEC74STCHARDISBOU-009.md`, `archive/tickets/SPEC74STCHARDISBOU-011.md`
 
 ## Problem
 
-`branching-story-health-audit/SKILL.md` Phase 2m ("STCHAR authority health") currently enumerates structural findings around STCHAR resolution, supersession, reciprocity, and packet hashes (the post-SPEC-71 set). It does NOT enumerate the 3 new structural findings emitted by SPEC74STCHARDISBOU-008 / -009 / -011: temporal-contamination, semantic-loss, and invalid-regeneration-reason. Without registering these findings in Phase 2m, the health-audit skill cannot surface them to operators running structural audits on red-bunny or any future bundle. The Stage 7 step in SPEC-74 §8 sequencing is this docs registration.
+`branching-story-health-audit/SKILL.md` Phase 2m ("STCHAR authority health") currently enumerates structural findings around STCHAR resolution, supersession, reciprocity, and packet hashes (the post-SPEC-71 set). It does NOT enumerate the 3 new structural findings emitted by `archive/tickets/SPEC74STCHARDISBOU-008.md` / `archive/tickets/SPEC74STCHARDISBOU-009.md` / `archive/tickets/SPEC74STCHARDISBOU-011.md`: temporal-contamination, semantic-loss, and invalid-regeneration-reason. Without registering these findings in Phase 2m, the health-audit skill cannot surface them to operators running structural audits on red-bunny or any future bundle. The Stage 7 step in SPEC-74 §8 sequencing is this docs registration.
 
 ## Assumption Reassessment (2026-05-23)
 
 1. Verified current `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2m at line 341 ("Phase 2m: STCHAR authority health"); existing findings enumerated at lines 347-355 (the post-SPEC-71 set including `stchar_unresolved`, `stchar_not_active_for_bound_stent`, `stchar_superseded_still_active`, `page_plan_missing_stchar_packet`, etc.). The 3 new findings from SPEC-74 §4.6 are NOT currently present (grep confirmed at reassess-spec verification time).
 2. Verified SPEC-74 §4.6 specifies the 3 new findings + the per-finding repair_kind / severity per the fail-everywhere policy chosen at SPEC-74 §5. The §4.6 first finding's wording was harmonized at /reassess-spec time to use the cleaner "FAIL on all profiles (fail-everywhere policy chosen at triage; see §5)" form matching the sibling entries.
-3. Cross-skill boundary under audit: the health-audit skill Phase 2m findings list IS the operator-facing surface for STCHAR validator diagnostics; the 3 new findings describe what the operator sees when SPEC74STCHARDISBOU-008 / -009 / -011 validators FAIL on red-bunny or other bundles. The findings depend on those validator names existing (which is why Deps lists 008, 009, 011) — documenting findings the validators don't emit would create a stale skill description.
+3. Cross-skill boundary under audit: the health-audit skill Phase 2m findings list IS the operator-facing surface for STCHAR validator diagnostics; the 3 new findings describe what the operator sees when the `archive/tickets/SPEC74STCHARDISBOU-008.md` / `archive/tickets/SPEC74STCHARDISBOU-009.md` / `archive/tickets/SPEC74STCHARDISBOU-011.md` validators FAIL on red-bunny or other bundles. The findings depend on those validator names existing (which is why Deps lists the archived 008, archived 009, and archived 011) — documenting findings the validators don't emit would create a stale skill description.
 4. FOUNDATIONS principle restated: §Story Bundles §6.1 ("Story-Local Character Authority") — the new findings operationalize the principle by surfacing structural violations of STCHAR's role as durable story-local authority (temporal contamination, semantic loss, invalid regeneration rationale).
 5. HARD-GATE / Canon Safety Check surface touched: the health-audit's Phase 2m findings feed operator decisions about STCHAR remediation (turn-cycle repair / prose revision / branch flag for regeneration); the 3 new findings cite STCHAR validator outputs and gate operator action on canon-adjacent surfaces (STCHAR records under `worlds/<slug>/stories/<slug>/_source/`). The docs change adds new findings to an existing skill phase; it does NOT weaken the Mystery Reserve firewall (STCHAR is story-local; MR firewall is canon-pipeline scope).
 
@@ -56,8 +56,8 @@ Per /reassess-spec verification, the current code uses `Phase 2j: Compatibility 
 
 ## Out of Scope
 
-- The validators that emit the diagnostics the findings describe (SPEC74STCHARDISBOU-008 / -009 / -011).
-- The skill authoring discipline these findings describe violations of (SPEC74STCHARDISBOU-001).
+- The validators that emit the diagnostics the findings describe (`archive/tickets/SPEC74STCHARDISBOU-008.md` / -009 / `archive/tickets/SPEC74STCHARDISBOU-011.md`).
+- The skill authoring discipline these findings describe violations of (`archive/tickets/SPEC74STCHARDISBOU-001.md`).
 - Migration of existing red-bunny STCHAR profiles that trigger the findings (SPEC74STCHARDISBOU-013).
 - Any modification to the existing Phase 2m findings or the Phase 2j (compatibility_drift) phase prose; this ticket only ADDS the 3 new findings.
 
@@ -87,3 +87,21 @@ Per /reassess-spec verification, the current code uses `Phase 2j: Compatibility 
 1. `grep -nE 'stchar_temporal_authority_contamination|stchar_semantic_loss_risk|stchar_regeneration_reason_invalid' .claude/skills/branching-story-health-audit/SKILL.md` (confirms 3 new findings present)
 2. `grep -nE 'repair_kind: turn_repair|repair_kind: prose_revision|repair_kind: branch_flag' .claude/skills/branching-story-health-audit/SKILL.md` (confirms repair_kind guidance present near the new entries)
 3. Manual inspection: cross-check the 3 new entries against SPEC-74 §4.6 wording for bit-for-bit alignment (including the harmonized fail-everywhere phrasing).
+
+## Outcome
+
+Completed: 2026-05-23
+
+What changed:
+- Added the three SPEC-74 Phase 2m STCHAR authority health findings to `.claude/skills/branching-story-health-audit/SKILL.md`: `stchar_temporal_authority_contamination`, `stchar_semantic_loss_risk`, and `stchar_regeneration_reason_invalid`.
+- Preserved the current `Phase 2j: Compatibility drift` naming and did not propagate the stale source-report phrase `Phase 2n source_drift`.
+- Repaired this ticket's dependency references to cite `archive/tickets/SPEC74STCHARDISBOU-011.md` after the validator dependency was archived.
+
+Deviations from original plan:
+- None. This remained a skill-prose-only implementation.
+
+Verification:
+- `grep -nE 'stchar_temporal_authority_contamination|stchar_semantic_loss_risk|stchar_regeneration_reason_invalid' .claude/skills/branching-story-health-audit/SKILL.md` — PASS, all three new finding names present in Phase 2m.
+- `grep -nE 'repair_kind: turn_repair|repair_kind: prose_revision|repair_kind: branch_flag' .claude/skills/branching-story-health-audit/SKILL.md` — PASS, the new entries include the required repair-kind guidance.
+- `grep -nE 'Phase 2n source_drift|stchar source-drift mode' .claude/skills/branching-story-health-audit/SKILL.md` — PASS, no matches.
+- Manual inspection of Phase 2m — PASS, the three new entries align with SPEC-74 §4.6 and use fail-everywhere wording.

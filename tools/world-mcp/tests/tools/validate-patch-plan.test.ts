@@ -71,7 +71,17 @@ function seedEmptyWorld(root: string): void {
 function stcharBody(): string {
   return [
     "## Story-Facing Identity\n\nStory-Facing Identity authority prose.",
-    "## Source Distillation\n\nSource Distillation authority prose.",
+    [
+      "## Source Distillation",
+      "",
+      "Source Distillation authority prose.",
+      "",
+      "### Stable Source Material Inventory",
+      "",
+      "| source_area | stable operational material | disposition | operational_home | rationale |",
+      "|---|---|---|---|---|",
+      "| Capabilities | Can read harbor ledgers, identify procedural leverage, and bargain with institutional knowledge. | copied | Agency and Planning Tendencies | Stable capability shapes future choices. |"
+    ].join("\n"),
     "## Stable Persona Core\n\nStable Persona Core authority prose.",
     "## Emotional Appraisal Map\n\nEmotional Appraisal Map authority prose.",
     "## Pressure Behavior\n\nPressure Behavior authority prose.",

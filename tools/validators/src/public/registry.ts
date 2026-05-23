@@ -75,8 +75,11 @@ import { stcharActiveForBoundStent } from "../structural/stchar-active-for-bound
 import { stcharBodyIntegrity } from "../structural/stchar-body-integrity.js";
 import { stcharBoundStentReciprocity } from "../structural/stchar-bound-stent-reciprocity.js";
 import { stcharResolves } from "../structural/stchar-resolves.js";
+import { stcharRegenerationReasonIntegrity } from "../structural/stchar-regeneration-reason-integrity.js";
 import { stcharSourceFactCoverage } from "../structural/stchar-source-fact-coverage.js";
+import { stcharSourceMaterialInventoryIntegrity } from "../structural/stchar-source-material-inventory-integrity.js";
 import { stcharSupersessionIntegrity } from "../structural/stchar-supersession-integrity.js";
+import { stcharTemporalReferenceBoundary } from "../structural/stchar-temporal-reference-boundary.js";
 import { stentRequiresStchar } from "../structural/stent-requires-stchar.js";
 import { storyQuestionIntroductionGroundingIntegrity } from "../structural/story-question-introduction-grounding-integrity.js";
 import { storyQuestionGroundingIntegrity } from "../structural/story-question-grounding-integrity.js";
@@ -138,6 +141,9 @@ export const structuralValidators: readonly Validator[] = [
   stcharSupersessionIntegrity,
   stcharBodyIntegrity,
   stcharSourceFactCoverage,
+  stcharSourceMaterialInventoryIntegrity,
+  stcharTemporalReferenceBoundary,
+  stcharRegenerationReasonIntegrity,
   forbiddenStcharTamperHashFields,
   noCharAuthorityInStoryRuntime,
   characterGroundingConsistency,

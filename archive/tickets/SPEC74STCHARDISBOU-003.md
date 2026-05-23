@@ -1,6 +1,6 @@
 # SPEC74STCHARDISBOU-003: _shared-templates/story-state-contract.md §16a projection-vs-authority rewrite + grounding-records field
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md` §16a section rewrite + new packet field (`Current-state grounding records:`)
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The shared `story-state-contract.md` §16a description does not currently frame §16a as a page-local projection of stable STCHAR authority through active current state — readers may interpret §16a as a place where current state lives inside STCHAR. There is no `Current-state grounding records:` packet field, so page-local modulations that depend on current state (e.g., a viewpoint character's current fear) cannot be structurally linked to the active STEMO/BEL/STPLAN/etc. records that ground them. SPEC74STCHARDISBOU-010 introduces a validator (`page_plan_stchar_packet_integrity` extension) that requires the new field; this ticket establishes the contract that validator enforces.
+At intake, the shared `story-state-contract.md` §16a description did not frame §16a as a page-local projection of stable STCHAR authority through active current state — readers could interpret §16a as a place where current state lives inside STCHAR. There was no `Current-state grounding records:` packet field, so page-local modulations that depend on current state (e.g., a viewpoint character's current fear) could not be structurally linked to the active STEMO/BEL/STPLAN/etc. records that ground them. SPEC74STCHARDISBOU-010 introduces a validator (`page_plan_stchar_packet_integrity` extension) that requires the new field; this ticket establishes the contract that validator enforces.
 
 ## Assumption Reassessment (2026-05-23)
 
@@ -28,19 +28,19 @@ The shared `story-state-contract.md` §16a description does not currently frame 
 1. **§16a projection-vs-authority framing present** → codebase grep-proof: `grep -n 'page-local projection' .claude/skills/_shared-templates/story-state-contract.md` returns ≥1 match in the §16a section.
 2. **`Current-state grounding records:` field added to per-character packet structure** → grep-proof: `grep -n 'Current-state grounding records:' .claude/skills/_shared-templates/story-state-contract.md` returns ≥1 match.
 3. **No hash-field reintroduction** → grep-proof: `grep -nE 'profile_hash|voice_block_hash|page_packet_hash' .claude/skills/_shared-templates/story-state-contract.md` returns 0 matches in the §16a section (per SPEC-71's strip + SPEC-74 §3 Out of Scope explicit drop).
-4. **Forbid-CHAR-as-page-plan-authority rule explicit** → grep-proof: `grep -n 'Forbid citing world `CHAR-\*` as operational page-plan characterization authority\|must not cite world `CHAR-\*` as operational page-plan' .claude/skills/_shared-templates/story-state-contract.md` returns ≥1 match.
+4. **Forbid-CHAR-as-page-plan-authority rule explicit** → grep-proof: ``grep -n 'must not cite world `CHAR-\*` as operational page-plan' .claude/skills/_shared-templates/story-state-contract.md`` returns ≥1 match.
 
-## What to Change
+## Landed Changes
 
-### 1. Replace §16a description
+### 1. Replaced §16a description
 
-The §16a section currently describes the packet's required fields; rewrite its preamble to make the projection-vs-authority framing explicit:
+The §16a section now makes the projection-vs-authority framing explicit:
 
 > §16a is a page-local projection composing (1) stable STCHAR authority, (2) active current story-state records in the page snapshot, and (3) this page's rendering needs. STCHAR supplies stable voice / conduct / appraisal / pressure behavior / relationship behavior / perception / embodiment / agency tendencies / capabilities / limits / anti-generic constraints. Active records supply current physical condition / belief / plan / emotion / relationship state / pressure / secret-question-clock state / location / objects / causal event. A §16a packet must not imply that current state lives inside STCHAR.
 
-### 2. Add new `Current-state grounding records:` field to the per-character packet structure
+### 2. Added new `Current-state grounding records:` field to the per-character packet structure
 
-Insert the new field into the per-character packet field list (immediately after `Stable STCHAR seed used` is the natural placement; choose the position that reads naturally in the surrounding field list). When page-local modulation depends on active state, the field names the active records that ground the modulation, cited by id — e.g., `STEMO-3, BEL-7, STPLAN-2`. When no current-state record is needed, the field reads:
+The new field appears after `Stable STCHAR seed used` in the full packet and in the reduced `offstage_causal` packet. When page-local modulation depends on active state, the field names the active records that ground the modulation, cited by id. When no current-state record is needed, the field reads:
 
 ```
 Current-state grounding records: none; stable STCHAR authority only.
@@ -48,9 +48,9 @@ Current-state grounding records: none; stable STCHAR authority only.
 
 Forbid citing world `CHAR-*` as operational page-plan characterization authority.
 
-### 3. Post-SPEC-71 packet field list (canonical reference)
+### 3. Recorded post-SPEC-71 packet field list
 
-State the canonical post-SPEC-71 / post-this-spec field list explicitly:
+The canonical post-SPEC-71 / post-this-spec field list is now explicit:
 - `STENT / STCHAR / display name`
 - `Required because:` (composite, per SPEC-73)
 - `Stable STCHAR seed used`
@@ -60,7 +60,7 @@ State the canonical post-SPEC-71 / post-this-spec field list explicitly:
 - `Prose must-not-imply`
 - `Anti-generic warnings`
 
-Do NOT reintroduce any hash fields. SPEC-71 removed `profile_hash`, `voice_block_hash`, `page_packet_hash`; the schema's `additionalProperties: false` + the `forbidden_stchar_tamper_hash_fields` validator structurally prevent reintroduction.
+No hash fields were reintroduced. SPEC-71 removed `profile_hash`, `voice_block_hash`, `page_packet_hash`; the schema's `additionalProperties: false` + the `forbidden_stchar_tamper_hash_fields` validator structurally prevent reintroduction.
 
 ## Files to Touch
 
@@ -101,3 +101,24 @@ Do NOT reintroduce any hash fields. SPEC-71 removed `profile_hash`, `voice_block
 1. `grep -n 'Current-state grounding records:\|page-local projection' .claude/skills/_shared-templates/story-state-contract.md` (confirms both new field + projection framing)
 2. `grep -nE 'profile_hash|voice_block_hash|page_packet_hash' .claude/skills/_shared-templates/story-state-contract.md` (confirms 0 hash-field reintroductions)
 3. Manual inspection of the §16a section's per-character packet field list to confirm the canonical post-SPEC-71 field set + new grounding-records field appears in the documented order.
+
+## Outcome
+
+Completed: 2026-05-23
+
+- Rewrote `.claude/skills/_shared-templates/story-state-contract.md` §16a to define it as a page-local projection of stable STCHAR authority plus active current story-state records plus this page's rendering needs.
+- Added `Current-state grounding records:` to both the full §16a packet template and the reduced `offstage_causal` packet template.
+- Added the explicit no-grounding form: `Current-state grounding records: none; stable STCHAR authority only.`
+- Added the forbid-world-CHAR-as-operational-page-plan-authority rule and the canonical post-SPEC-71 packet field list.
+
+## Verification Result
+
+1. `grep -n 'Current-state grounding records:\|page-local projection' .claude/skills/_shared-templates/story-state-contract.md` returned matches in §16a for the projection framing and the new grounding-records field.
+2. `grep -n 'none; stable STCHAR authority only' .claude/skills/_shared-templates/story-state-contract.md` returned matches in the full packet, explanatory prose, and reduced offstage packet.
+3. ``grep -n 'must not cite world `CHAR-\*` as operational page-plan' .claude/skills/_shared-templates/story-state-contract.md`` returned the forbid-world-CHAR authority rule in §16a.
+4. `grep -nE 'profile_hash|voice_block_hash|page_packet_hash' .claude/skills/_shared-templates/story-state-contract.md` returned no matches, which is the expected proof that hash fields were not reintroduced.
+5. `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md` passed.
+
+## Deviations
+
+- The implementation also added `Current-state grounding records:` to the reduced `offstage_causal` packet so the reduced packet stays aligned with the same §16a grounding contract.

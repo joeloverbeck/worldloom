@@ -856,6 +856,7 @@ source_kind: world_char | story_local | hybrid | regenerated*
 source_char_id: CHAR-<integer> | null
 source_char_sections_used: [string]           # default []
 story_local_inputs_used: [<story-local record id>] # optional; required when source_kind needs story-local inputs
+regeneration_reason_class: source_world_char_material_change | durable_branch_transformation | profile_fidelity_failure | story_local_character_promotion | stable_source_material_omission_repair | null
 generated_at_page: story_bootstrap | PG-<integer> | null
 created_by_skill: string*
 supersedes: STCHAR-<integer> | null
@@ -867,6 +868,12 @@ body_schema_version: stchar.v1*
 ```
 
 When `source_kind: world_char`, `source_char_id` is required and non-null. When `source_kind: story_local`, `source_char_id` is null. `source_char_sections_used` and `source_operational_fact_map` preserve source provenance and operational-fact coverage without byte-pinning source or STCHAR content. There is no `section_hashes` map.
+
+`STCHAR` is durable story-local character authority. It must not be used as a root-page summary, opening-scene summary, or compressed current-state packet. Opening or branch-current facts belong to `STSTAT`, `STOBJ`, `STLOC`, `SE`, `BEL`, `STPLAN`, `STINT`, `STEMO`, `SREL`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `PG`, and page-plan §16a.
+
+Stable source material that can lawfully shape future voice, conduct, appraisal, pressure behavior, agency, relationship behavior, perception, embodiment, capabilities, limits, or choices belongs in STCHAR operational sections, even if dormant at the story's opening page. "Not needed on page 1" is never the omission criterion.
+
+`regeneration_reason_class` records the durable profile-change reason. It is required and non-null when `source_kind: regenerated` or `supersedes` is non-null. The valid values are `source_world_char_material_change`, `durable_branch_transformation`, `profile_fidelity_failure`, `story_local_character_promotion`, and `stable_source_material_omission_repair`. Ordinary updates to active state records (`STEMO`, `BEL`, `STPLAN`, `SREL`, `STSTAT`, `STOBJ`, `STLOC`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `PG`, `SE`) or page-local prose are not valid reason classes unless evidence has durably consolidated into a changed character model.
 
 Normal story runtime consumes active `STCHAR` through `STENT.bound_stchar_id`, `PG.state_snapshot.active_records.STCHAR`, and grounded or derived story records. `source_char_id` is provenance only; it is not an operational shortcut for `STENT`, `CHC`, page plans, or prose receipts.
 

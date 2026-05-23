@@ -67,6 +67,17 @@
         "additionalProperties": false
       }
     },
+    "regeneration_reason_class": {
+      "type": ["string", "null"],
+      "enum": [
+        "source_world_char_material_change",
+        "durable_branch_transformation",
+        "profile_fidelity_failure",
+        "story_local_character_promotion",
+        "stable_source_material_omission_repair",
+        null
+      ]
+    },
     "story_local_inputs_used": {
       "type": "array",
       "items": { "type": "string", "pattern": "^(STENT|SF|BEL|DA|SE|CHC|STPLAN|STEMO|SREL|STINT|STSTAT|STLOC|STOBJ|THR|OBL|CNSQ|CLK|STSEC|STQ|PG|BR|SLT)-(0|[1-9][0-9]*)$" }
@@ -111,6 +122,35 @@
       "then": {
         "properties": {
           "source_char_id": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": { "source_kind": { "const": "regenerated" } },
+            "required": ["source_kind"]
+          },
+          {
+            "properties": { "supersedes": { "type": "string" } },
+            "required": ["supersedes"]
+          }
+        ]
+      },
+      "then": {
+        "required": ["regeneration_reason_class"],
+        "properties": {
+          "regeneration_reason_class": {
+            "type": "string",
+            "enum": [
+              "source_world_char_material_change",
+              "durable_branch_transformation",
+              "profile_fidelity_failure",
+              "story_local_character_promotion",
+              "stable_source_material_omission_repair"
+            ]
+          }
         }
       }
     }

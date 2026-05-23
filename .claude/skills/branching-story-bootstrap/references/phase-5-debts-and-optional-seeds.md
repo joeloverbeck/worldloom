@@ -4,6 +4,16 @@ Covers original §Phase 5 (Create initial debts).
 
 Create 1-3 `THR` records tracking the opening pressure. Create `OBL` / `CNSQ` records only when they constrain a choice, demand response, track promise / risk / threat / cost, or create a future consequence if ignored. Every `OBL`, `CNSQ`, and `THR` record must set `urgency: low | medium | high` so later debt-salience checks can rank them uniformly. Create `SREL` records for relationships that constrain opening choice. Each `SREL.direction` uses the structured form from shared contract §4.5.7: `kind: directed` requires non-null `from` and `to` STENT ids, while `kind: bidirectional` requires `from: null` and `to: null`.
 
+Consume the Distillation Boundary Ledger while seeding these records. Every opening-current fact routed to pressure, affect, plan, relationship, or staged debt must be represented before root `PG` and page-plan authoring:
+
+- recent pursuit / opening incident -> SE, THR, CNSQ, CLK when ongoing pressure exists
+- fear, shame, exhaustion, dissociation, or bravado failing under pressure -> STEMO
+- inability to work, go home, speak, flee, or approach -> STPLAN / STINT
+- active relationship change or counterpart-specific current stance -> SREL
+- active obligation, threat, consequence, debt, or staged pressure -> OBL / THR / CNSQ / CLK
+
+If a fact is not durable enough for STCHAR and no state record is created for it, it must not appear in the root page plan as an unexplained assertion.
+
 **Cross-class provenance for `THR` / `SREL` / `CNSQ` / `SF` / story-`DA`.** The `derived_from` of these classes is the canonical record-id set — it accepts the active state classes (`CLK`, `STSEC`, `STQ`, `STSTAT`, `STPLAN`, `STEMO`), not only the legacy `SF` / `SREL` / `CNSQ` / `BEL` set. When a record's existence is *caused by* a seeded active record, ground it there rather than routing around it: a `THR` whose tension **is** a pressure clock derives from that `CLK`; a `THR` or `SF` that exists because of a concealed truth derives from the `STSEC`; a `SREL` shift driven by a seeded affective state derives from the `STEMO`; a `CNSQ` set in motion by an actor's tactical plan derives from the `STPLAN`. Reach for the most direct cause — under-linking provenance to a legacy proxy (e.g., grounding a clock-driven thread in a downstream `CNSQ` because the clock "wasn't allowed") is the staleness this guidance closes.
 
 ```yaml

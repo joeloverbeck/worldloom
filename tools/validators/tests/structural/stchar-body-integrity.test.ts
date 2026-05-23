@@ -67,12 +67,37 @@ test("stchar_body_integrity rejects missing required STCHAR operational-home sub
   assert.match(missing.message, /Operational capabilities and affordances/);
 });
 
-test("stchar_body_integrity warns for untouched legacy STCHAR bodies without operational-home subsections", async () => {
+test("stchar_body_integrity fails everywhere for STCHAR bodies without operational-home subsections", async () => {
   const verdicts = await run(body({ legacyNoSubsections: true }));
 
   const missing = verdicts.filter((verdict) => verdict.code === "stchar_body_integrity.missing_subsection");
-  assert.equal(missing.length, 3);
-  assert.ok(missing.every((verdict) => verdict.severity === "warn"));
+  assert.equal(missing.length, 4);
+  assert.ok(missing.every((verdict) => verdict.severity === "fail"));
+});
+
+test("stchar_body_integrity requires Stable Source Material Inventory for world-char STCHAR records", async () => {
+  const verdicts = await run(body({ omitSubsection: "Stable Source Material Inventory" }));
+
+  const missing = verdicts.find((verdict) =>
+    verdict.code === "stchar_body_integrity.missing_subsection" &&
+    verdict.message.includes("Stable Source Material Inventory")
+  );
+  assert.ok(missing);
+  assert.equal(missing.severity, "fail");
+});
+
+test("stchar_body_integrity permits story-local STCHAR records without Stable Source Material Inventory", async () => {
+  const verdicts = await run(
+    body({ omitSubsection: "Stable Source Material Inventory" }),
+    {
+      source_kind: "story_local",
+      source_char_id: null,
+      source_char_hash: null,
+      source_char_sections_used: []
+    }
+  );
+
+  assert.ok(!verdicts.some((verdict) => verdict.message.includes("Stable Source Material Inventory")));
 });
 
 test("stchar_body_integrity rejects empty required operational-home subsections", async () => {

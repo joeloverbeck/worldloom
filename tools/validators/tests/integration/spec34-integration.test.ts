@@ -234,7 +234,27 @@ function stcharBodyMarkdown(): string {
     "Story-State Derivation Guide",
     "Prose Rendering Constraints",
     "Validation / Audit Anchors"
-  ].map((section) => `## ${section}\n\n${section} authority prose.`).join("\n\n");
+  ].map((section) => `## ${section}\n\n${stcharSectionBody(section)}`).join("\n\n");
+}
+
+function stcharSectionBody(section: string): string {
+  if (section === "Agency and Planning Tendencies") {
+    return [
+      "Agency and Planning Tendencies authority prose.",
+      "### Operational capabilities and affordances",
+      "Operational capabilities and affordances authority prose.",
+      "### Capability limits, costs, and access constraints",
+      "Capability limits, costs, and access constraints authority prose."
+    ].join("\n\n");
+  }
+  if (section === "Prose Rendering Constraints") {
+    return [
+      "Prose Rendering Constraints authority prose.",
+      "### Signature scene behaviors to render",
+      "Signature scene behaviors to render authority prose."
+    ].join("\n\n");
+  }
+  return `${section} authority prose.`;
 }
 
 function change(changeId: string, affectedFactIds: string[]): Record<string, unknown> {

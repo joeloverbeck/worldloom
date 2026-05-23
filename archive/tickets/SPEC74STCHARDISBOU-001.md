@@ -1,6 +1,6 @@
 # SPEC74STCHARDISBOU-001: story-character-profile/SKILL.md durable-authority hardening
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/story-character-profile/SKILL.md` (5 wording changes; no schema/validator code touched)
@@ -8,11 +8,11 @@
 
 ## Problem
 
-`story-character-profile/SKILL.md` lets the authoring model fold opening-page state into the durable STCHAR profile because (a) the `regeneration_reason` argument description allows "fidelity failure, story-state drift, or other reason" — the "or other reason" clause permits ordinary `STEMO`/`BEL`/`STPLAN`/`SREL` updates to trigger STCHAR regeneration; (b) `Page-Plan Voice Block` is described as a "compact projection suitable for page-plan section 16a" — readable as "put a page packet into STCHAR"; (c) the skill has no Durable-Authority Boundary section restating the rule that STCHAR holds stable persona, not current state; (d) the skill has no Stable Source Material Inventory authoring requirement, so stable operational material outside the 10 `dramatic_core` fields gets silently dropped when bootstrap distillation treats opening-page relevance as the filter; (e) the `regenerate` mode description doesn't constrain valid regeneration reasons. Empirically observed on `worlds/erotica-world/stories/red-bunny/story-characters/STCHAR-{1,2,3}.md` where opening-scene state contaminated durable profiles.
+Before this ticket, `story-character-profile/SKILL.md` let the authoring model fold opening-page state into the durable STCHAR profile because (a) the `regeneration_reason` argument description allowed "fidelity failure, story-state drift, or other reason" — the "or other reason" clause permitted ordinary `STEMO`/`BEL`/`STPLAN`/`SREL` updates to trigger STCHAR regeneration; (b) `Page-Plan Voice Block` was described as a "compact projection suitable for page-plan section 16a" — readable as "put a page packet into STCHAR"; (c) the skill had no Durable-Authority Boundary section restating the rule that STCHAR holds stable persona, not current state; (d) the skill had no Stable Source Material Inventory authoring requirement, so stable operational material outside the 10 `dramatic_core` fields could be silently dropped when bootstrap distillation treated opening-page relevance as the filter; (e) the `regenerate` mode description did not constrain valid regeneration reasons. Empirically observed on `worlds/erotica-world/stories/red-bunny/story-characters/STCHAR-{1,2,3}.md` where opening-scene state contaminated durable profiles.
 
 ## Assumption Reassessment (2026-05-23)
 
-1. Verified current SKILL.md content at `.claude/skills/story-character-profile/SKILL.md`: line 31 contains the current `regeneration_reason` argument description; line 270 describes Page-Plan Voice Block as "compact projection suitable for page-plan section 16a"; no Durable-Authority Boundary section currently exists; no Stable Source Material Inventory authoring subsection exists under `## Source Distillation`; current `regenerate` mode description allows broad regeneration reasons.
+1. At intake, `.claude/skills/story-character-profile/SKILL.md` contained the stale `regeneration_reason` argument description; described Page-Plan Voice Block as "compact projection suitable for page-plan section 16a"; had no Durable-Authority Boundary section; had no Stable Source Material Inventory authoring subsection under `## Source Distillation`; and allowed broad regeneration reasons in the `regenerate` mode description. This ticket replaced those surfaces.
 2. Verified SPEC-74 §4.1 lists 5 wording changes mapped to this ticket: regeneration_reason argument, Durable-Authority Boundary section, Page-Plan Voice Block characterization, Stable Source Material Inventory subsection, regenerate mode description.
 3. Cross-skill boundary under audit: the STCHAR authoring contract this skill defines IS consumed by `branching-story-bootstrap` (Phase 2 distillation) and `branching-story-turn-cycle` (regenerate flow); changes here propagate to those skills' authoring discipline without code changes (they reference STCHAR through retrieval, not by re-invoking this skill).
 4. FOUNDATIONS principle restated: §Story Bundles §6.1 ("STCHAR is durable story-local character authority") + §6b ("STCHAR shapes persona, voice, and pressure behavior; it is not an epistemic access route") are the load-bearing principles. The Durable-Authority Boundary section restates these as authoring hard gates.
@@ -29,31 +29,31 @@
 3. **Page-Plan Voice Block characterized as "stable, context-free reusable voice-authority seed"** → grep-proof: `grep -n 'stable, context-free reusable voice-authority seed' .claude/skills/story-character-profile/SKILL.md` returns 1 match; the prior "compact projection suitable for page-plan section 16a" wording returns 0 matches.
 4. **Stable Source Material Inventory subsection authored under Source Distillation** → grep-proof: `grep -n '### Stable Source Material Inventory' .claude/skills/story-character-profile/SKILL.md` returns 1 match, immediately preceded (within 50 lines) by `## Source Distillation`.
 
-## What to Change
+## Landed Changes
 
-### 1. Replace `regeneration_reason` argument description at SKILL.md line ~31
+### 1. Replaced `regeneration_reason` argument description at SKILL.md line ~31
 
-Replace the current description (which allows "fidelity failure, story-state drift, or other reason") with a constrained-vocabulary description naming the 5 valid reasons: `source_world_char_material_change`, `durable_branch_transformation`, `profile_fidelity_failure`, `story_local_character_promotion`, `stable_source_material_omission_repair`. Explicitly exclude ordinary state-record updates (`STEMO`, `BEL`, `STPLAN`, `STINT`, `SREL`, `STSTAT`, `STOBJ`, `STLOC`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `PG`, `SE`, page-local prose) unless durably consolidated.
+Replaced the current description (which allowed "fidelity failure, story-state drift, or other reason") with a constrained-vocabulary description naming the 5 valid reasons: `source_world_char_material_change`, `durable_branch_transformation`, `profile_fidelity_failure`, `story_local_character_promotion`, `stable_source_material_omission_repair`. It explicitly excludes ordinary state-record updates (`STEMO`, `BEL`, `STPLAN`, `STINT`, `SREL`, `STSTAT`, `STOBJ`, `STLOC`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `PG`, `SE`, page-local prose) unless durably consolidated.
 
-### 2. Add new `## Durable-Authority Boundary` section after `## Modes`
+### 2. Added new `## Durable-Authority Boundary` section after `## Modes`
 
-Authoring hard gate. State that STCHAR is a durable story-local character bible — not a root-page summary, opening-scene summary, compressed current-state packet, prose synopsis, or substitute for active story-state records. Include:
+Authoring hard gate. States that STCHAR is a durable story-local character bible — not a root-page summary, opening-scene summary, compressed current-state packet, prose synopsis, or substitute for active story-state records. Includes:
 - **Inclusion rule**: stable material that can lawfully shape future voice, conduct, appraisal, pressure behavior, agency, relationship behavior, perception, embodiment, capabilities, limits, or choices.
 - **Exclusion rule**: any fact that would be false, stale, or branch-dependent after a different choice, later page, or sibling branch.
 - **Three paired durable-vs-transient examples** (durable: "Under humiliation, she converts shame into bravado, contempt, or performative brightness." / transient: "Today her bravado is worn through after crying in the park.").
 - **Explicit rule**: "Opening-page relevance is never the inclusion test."
 
-### 3. Replace `Page-Plan Voice Block` section requirement at SKILL.md line ~270
+### 3. Replaced `Page-Plan Voice Block` section requirement at SKILL.md line ~270
 
-Replace "compact projection suitable for page-plan section 16a" with "stable, context-free reusable voice-authority seed for page-plan §16a" describing durable voice behavior, dialogue constraints, silence behavior, pressure shifts, register, rhythm, taboo language, and anti-generic warnings that remain valid across branches until durable profile regeneration. Explicitly forbid mentioning the current page, opening scene, current event, current emotional state, current physical status, active page ids, active event ids, or active belief/plan/emotion/status/relationship records. Note that page-specific modulation belongs in page-plan §16a, grounded in active state records.
+Replaced "compact projection suitable for page-plan section 16a" with "stable, context-free reusable voice-authority seed for page-plan §16a" describing durable voice behavior, dialogue constraints, silence behavior, pressure shifts, register, rhythm, taboo language, and anti-generic warnings that remain valid across branches until durable profile regeneration. Explicitly forbids mentioning the current page, opening scene, current event, current emotional state, current physical status, active page ids, active event ids, or active belief/plan/emotion/status/relationship records. Notes that page-specific modulation belongs in page-plan §16a, grounded in active state records.
 
-### 4. Add new `### Stable Source Material Inventory` subsection under `## Source Distillation`
+### 4. Added new `### Stable Source Material Inventory` subsection under `## Source Distillation`
 
-Authoring hard gate for `source_kind: world_char`. Body table with 5 columns (`source_area`, `stable operational material`, `disposition`, `operational_home`, `rationale`) covering every loaded source area carrying stable operational character material — not just the 10 `dramatic_core` fields. Disposition vocabulary mirrors the schema enum: `copied | transformed | compressed | omitted_with_rationale | story_irrelevant`. For bootstrap `story_irrelevant`, allowed rationale categories are `outside_story_scope`, `content_constraint`, `premise_incompatible`, `non_operational_trivia`, `duplicate_of_retained_material` — explicitly NOT `opening_not_relevant` or `not_needed_on_page_1`. State that `Source Distillation` is a provenance/compression-trace surface, NOT a retained operational home.
+Authoring hard gate for `source_kind: world_char`. Body table with 5 columns (`source_area`, `stable operational material`, `disposition`, `operational_home`, `rationale`) covering every loaded source area carrying stable operational character material — not just the 10 `dramatic_core` fields. Disposition vocabulary mirrors the schema enum: `copied | transformed | compressed | omitted_with_rationale | story_irrelevant`. For bootstrap `story_irrelevant`, allowed rationale categories are `outside_story_scope`, `content_constraint`, `premise_incompatible`, `non_operational_trivia`, `duplicate_of_retained_material` — explicitly NOT `opening_not_relevant` or `not_needed_on_page_1`. States that `Source Distillation` is a provenance/compression-trace surface, NOT a retained operational home.
 
-### 5. Replace `regenerate` mode description
+### 5. Replaced `regenerate` mode description
 
-Replace the broad current description with the 5-reason constrained list, the exclusion list of ordinary state-record updates, and the rule that those become regeneration-worthy only after durable consolidation changes the character model. Use the same vocabulary that the `regeneration_reason_class` schema field (SPEC74STCHARDISBOU-006) enforces.
+Replaced the broad current description with the 5-reason constrained list, the exclusion list of ordinary state-record updates, and the rule that those become regeneration-worthy only after durable consolidation changes the character model. Uses the same vocabulary that the `regeneration_reason_class` schema field (SPEC74STCHARDISBOU-006) enforces.
 
 ## Files to Touch
 
@@ -95,3 +95,24 @@ Replace the broad current description with the 5-reason constrained list, the ex
 1. `grep -n '## Durable-Authority Boundary\|### Stable Source Material Inventory' .claude/skills/story-character-profile/SKILL.md` (confirms both new sections present)
 2. `grep -nE 'source_world_char_material_change|durable_branch_transformation|profile_fidelity_failure|story_local_character_promotion|stable_source_material_omission_repair' .claude/skills/story-character-profile/SKILL.md | wc -l` (confirms ≥5 mentions of the 5 valid reasons across regeneration_reason description + regenerate mode + Durable-Authority Boundary)
 3. Manual inspection of the regeneration_reason argument block and the regenerate mode description to confirm the constrained-vocabulary phrasing is in place at both sites.
+
+## Outcome
+
+Completed: 2026-05-23.
+
+Implemented the story-character-profile durable-authority wording hardening in `.claude/skills/story-character-profile/SKILL.md`: constrained `regeneration_reason`, added the `Durable-Authority Boundary`, added the `Stable Source Material Inventory` template subsection and requirements, replaced the page-plan voice-block wording with stable voice-authority seed language, and narrowed regenerate mode to the 5 durable reason classes.
+
+No schema, validator, bootstrap, turn-cycle, health-audit, or red-bunny STCHAR migration work landed in this ticket; those remain owned by the later SPEC74STCHARDISBOU tickets named in `Out of Scope`.
+
+## Verification Result
+
+1. `grep -n '## Durable-Authority Boundary\|### Stable Source Material Inventory' .claude/skills/story-character-profile/SKILL.md` — PASS; returned the new Durable-Authority Boundary and Stable Source Material Inventory headings.
+2. `grep -nE 'source_world_char_material_change|durable_branch_transformation|profile_fidelity_failure|story_local_character_promotion|stable_source_material_omission_repair' .claude/skills/story-character-profile/SKILL.md | wc -l` — PASS; returned `6`, satisfying the ≥5 mention requirement.
+3. `grep -n 'stable, context-free reusable voice-authority seed' .claude/skills/story-character-profile/SKILL.md` — PASS; returned one Page-Plan Voice Block requirement hit.
+4. `grep -n 'compact projection suitable for page-plan section 16a' .claude/skills/story-character-profile/SKILL.md || true` — PASS; returned no stale wording hits.
+5. `grep -n 'or other reason' .claude/skills/story-character-profile/SKILL.md || true` — PASS; returned no stale regeneration-reason phrasing hits.
+6. Manual review — PASS; the `regeneration_reason` argument block and `regenerate` mode both use the constrained 5-reason vocabulary and exclude ordinary state-record/page-local updates unless durably consolidated.
+
+## Deviations
+
+None.

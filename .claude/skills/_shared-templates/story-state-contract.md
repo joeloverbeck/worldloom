@@ -455,7 +455,9 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 
 §9c is omitted entirely when no active STEMOs exist on the current branch. `branching-story-turn-cycle` owns the rendering procedure for both §9b and §9c, parallel to its existing §10b rendering ownership.
 
-**§16a is per-page-computed STCHAR voice authority, not inlined verbatim.** Every page plan MUST include one STCHAR-derived character authority packet for each viewpoint character, speaker, major actor, direct target, emotionally salient character, or any character whose behavior, voice, appraisal, relationship conduct, perception, embodiment, or agency materially shapes the page. Background-only entities whose behavior and voice do not shape the page may be omitted, but the omission must not ask the prose renderer to infer persona from an id.
+**§16a is a page-local projection, not inlined STCHAR or current-state storage.** Every page plan MUST include one STCHAR-derived character authority packet for each viewpoint character, speaker, major actor, direct target, emotionally salient character, or any character whose behavior, voice, appraisal, relationship conduct, perception, embodiment, or agency materially shapes the page. Background-only entities whose behavior and voice do not shape the page may be omitted, but the omission must not ask the prose renderer to infer persona from an id.
+
+§16a composes (1) stable STCHAR authority, (2) active current story-state records in the page snapshot, and (3) this page's rendering needs. STCHAR supplies stable voice, conduct, appraisal, pressure behavior, relationship behavior, perception, embodiment, agency tendencies, capabilities, limits, and anti-generic constraints. Active records supply current physical condition, belief, plan, emotion, relationship state, pressure, secret/question/clock state, location, objects, and causal event. A §16a packet must not imply that current state lives inside STCHAR.
 
 Semantic Preservation Contract: for any STCHAR derived from a world `CHAR` (`source_kind: world_char`), every structured operational source fact must be copied, transformed, compressed, intentionally omitted with rationale, or marked story-irrelevant. No structured operational source fact may survive only in `## Source Distillation` or other audit/commentary prose if page planning, choice grounding, state derivation, or prose rendering may need it. The STCHAR frontmatter `source_operational_fact_map` records this disposition for each present structured `dramatic_core` source field; retained facts target operational STCHAR homes, never `Source Distillation`.
 
@@ -467,7 +469,9 @@ Each §16a packet includes:
 - STENT-<integer> / STCHAR-<integer> — <display name>.
   - Required because: viewpoint | speaker | major_actor | direct_target | emotionally_salient | behavior_shapes_page | voice_shapes_page | offstage_causal.
   - Story-facing identity for this page:
-  - Voice/dialogue authority: <copy or project the STCHAR `Page-Plan Voice Block` for this page>.
+  - Stable STCHAR seed used:
+  - Current-state grounding records: <STEMO-<integer>, BEL-<integer>, STPLAN-<integer>, SREL-<integer>, STSTAT-<integer>, STOBJ-<integer>, STLOC-<integer>, THR-<integer>, OBL-<integer>, CNSQ-<integer>, CLK-<integer>, STSEC-<integer>, STQ-<integer>, SE-<integer>, PG-<integer>; or `none; stable STCHAR authority only.`>
+  - Page-local projection:
   - Relevant appraisal rules:
   - Relevant pressure behavior:
   - Relationship-specific conduct:
@@ -479,7 +483,21 @@ Each §16a packet includes:
   - Anti-generic warnings:
 ```
 
-`Required because:` is parsed as a comma-separated label set drawn from the closed vocabulary above. The `page_plan_stchar_packet_integrity` validator requires a voice/dialogue authority block when the set contains any of `speaker`, `viewpoint`, or `voice_shapes_page`, and forbids `offstage_causal` for any STENT whose `location` is not `offstage`. Labels outside the closed vocabulary emit a warning. The receipt-side verbatim-composite contract in `story-record-schemas.md` §4.6 is unchanged.
+When page-local modulation depends on active state, `Current-state grounding records:` names the active records that ground that modulation, cited by id. When no current-state record is needed, the field reads exactly: `Current-state grounding records: none; stable STCHAR authority only.` Page plans must not cite world `CHAR-*` as operational page-plan characterization authority.
+
+The canonical post-SPEC-71 §16a packet field set is:
+
+- `STENT / STCHAR / display name`
+- `Required because:`
+- `Story-facing identity for this page:`
+- `Stable STCHAR seed used`
+- `Current-state grounding records:`
+- `Page-local projection`
+- `Prose must-show`
+- `Prose must-not-imply`
+- `Anti-generic warnings`
+
+`Required because:` is parsed as a comma-separated label set drawn from the closed vocabulary above. The `page_plan_stchar_packet_integrity` validator requires voice authority in the stable seed and page-local projection when the set contains any of `speaker`, `viewpoint`, or `voice_shapes_page`, and forbids `offstage_causal` for any STENT whose `location` is not `offstage`. Labels outside the closed vocabulary emit a warning. The receipt-side verbatim-composite contract in `story-record-schemas.md` §4.6 is unchanged.
 
 For an active offstage character whose offstage activity causally bears on the page, §16a may use a reduced `offstage_causal` packet:
 
@@ -487,6 +505,9 @@ For an active offstage character whose offstage activity causally bears on the p
 - STENT-<integer> / STCHAR-<integer> — <display name>.
   - Required because: offstage_causal.
   - Story-facing identity for this page:
+  - Stable STCHAR seed used:
+  - Current-state grounding records: <grounding records for the offstage causal projection, or `none; stable STCHAR authority only.`>
+  - Page-local projection:
   - Relevant appraisal rules:
   - Relevant pressure behavior:
   - Offstage causal relevance:

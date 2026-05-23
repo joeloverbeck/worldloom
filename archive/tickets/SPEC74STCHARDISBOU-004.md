@@ -1,6 +1,6 @@
 # SPEC74STCHARDISBOU-004: _shared-templates/story-record-schemas.md STCHAR prose + regeneration_reason_class field rule
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/_shared-templates/story-record-schemas.md` STCHAR section prose extension + new frontmatter field rule
@@ -8,14 +8,14 @@
 
 ## Problem
 
-The shared `story-record-schemas.md` STCHAR schema prose does not currently include an explicit boundary statement clarifying that STCHAR is durable story-local character authority — not a root-page summary, opening-scene summary, or compressed current-state packet. The dormant-stable-material inclusion rule is implicit, scattered across `story-character-profile/SKILL.md` discipline rather than restated in the shared schema's normative prose. There is no `regeneration_reason_class` frontmatter field rule documented in the shared schema, so the JSON Schema add (SPEC74STCHARDISBOU-006) lacks its operator-facing contract.
+At intake, the shared `story-record-schemas.md` STCHAR schema prose did not include an explicit boundary statement clarifying that STCHAR is durable story-local character authority — not a root-page summary, opening-scene summary, or compressed current-state packet. The dormant-stable-material inclusion rule was implicit, scattered across `story-character-profile/SKILL.md` discipline rather than restated in the shared schema's normative prose. There was no `regeneration_reason_class` frontmatter field rule documented in the shared schema, so the JSON Schema add (SPEC74STCHARDISBOU-006) lacked its operator-facing contract.
 
 ## Assumption Reassessment (2026-05-23)
 
-1. Verified current `.claude/skills/_shared-templates/story-record-schemas.md` STCHAR section: contains the existing schema prose describing `source_kind`, `source_char_id`, `supersedes`/`superseded_by`; does not contain an explicit "STCHAR is durable story-local character authority; must not be used as a root-page summary" boundary statement; does not document `regeneration_reason_class` as a frontmatter field.
+1. At intake, `.claude/skills/_shared-templates/story-record-schemas.md` STCHAR section contained the existing schema prose describing `source_kind`, `source_char_id`, `supersedes`/`superseded_by`; it did not contain an explicit "STCHAR is durable story-local character authority; must not be used as a root-page summary" boundary statement and did not document `regeneration_reason_class` as a frontmatter field. This ticket added both surfaces.
 2. Verified SPEC-74 §4.4 specifies the prose extension (boundary statement + dormant-stable-material inclusion rule) + new frontmatter field rule for `regeneration_reason_class` matching the §4.7 schema enum (`source_world_char_material_change`, `durable_branch_transformation`, `profile_fidelity_failure`, `story_local_character_promotion`, `stable_source_material_omission_repair`).
 3. Cross-skill boundary under audit: the shared `story-record-schemas.md` IS the canonical reference for every story-bundle record class's normative prose; it is consumed by `story-character-profile`, `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `branching-story-health-audit` (all skills that produce, validate, or read story-bundle records); the new `regeneration_reason_class` field rule must align with the JSON Schema validator's enforcement (SPEC74STCHARDISBOU-006).
-4. FOUNDATIONS principle restated: §Story Bundles §5b ("Schema-Minimalism At Story Scope" — every field load-bearing, no nice-to-have fields) + Rule 6 (No Silent Retcons — `regeneration_reason_class` is itself a retcon-audit field) are the load-bearing principles. The new field passes §5b's load-bearing test because it is consumed by the `stchar_regeneration_reason_integrity` validator (SPEC74STCHARDISBOU-011), the regenerate-mode skill instructions (SPEC74STCHARDISBOU-001), and the health-audit Phase 2m `stchar_regeneration_reason_invalid` finding (SPEC74STCHARDISBOU-012).
+4. FOUNDATIONS principle restated: §Story Bundles §5b ("Schema-Minimalism At Story Scope" — every field load-bearing, no nice-to-have fields) + Rule 6 (No Silent Retcons — `regeneration_reason_class` is itself a retcon-audit field) are the load-bearing principles. The new field passes §5b's load-bearing test because it is consumed by the `stchar_regeneration_reason_integrity` validator (SPEC74STCHARDISBOU-011), the regenerate-mode skill instructions (`archive/tickets/SPEC74STCHARDISBOU-001.md`), and the health-audit Phase 2m `stchar_regeneration_reason_invalid` finding (SPEC74STCHARDISBOU-012).
 5. HARD-GATE / Canon Safety Check surface touched: the `regeneration_reason_class` field rule is the operator-facing contract for a retcon-audit field; the JSON Schema (SPEC74STCHARDISBOU-006) enforces it; the validator (SPEC74STCHARDISBOU-011) checks the field plus its evidence. The rule does NOT weaken the Mystery Reserve firewall (STCHAR is story-local; MR firewall is canon-pipeline scope).
 6. Schema extension: this ticket extends the documented STCHAR record schema by adding the `regeneration_reason_class` field rule (operator-facing prose form). Consumers of the schema are named above (Assumption Reassessment item 3); the extension is additive — existing STCHAR records without `regeneration_reason_class` remain valid until the JSON Schema (SPEC74STCHARDISBOU-006) requires non-null values for regenerated/superseding profiles, at which point the field becomes conditionally-required per the SPEC74STCHARDISBOU-011 validator's enforcement.
 
@@ -30,21 +30,21 @@ The shared `story-record-schemas.md` STCHAR schema prose does not currently incl
 2. **`regeneration_reason_class` field rule documented** → grep-proof: `grep -n 'regeneration_reason_class' .claude/skills/_shared-templates/story-record-schemas.md` returns ≥2 matches (the field rule statement + the vocabulary enumeration).
 3. **5-value vocabulary cited** → grep-proof: `grep -nE 'source_world_char_material_change|durable_branch_transformation|profile_fidelity_failure|story_local_character_promotion|stable_source_material_omission_repair' .claude/skills/_shared-templates/story-record-schemas.md` returns ≥5 matches.
 
-## What to Change
+## Landed Changes
 
-### 1. Add the STCHAR schema prose boundary statement
+### 1. Added the STCHAR schema prose boundary statement
 
-Insert into the existing STCHAR schema prose section:
+Inserted into the existing STCHAR schema prose section:
 
 > `STCHAR` is durable story-local character authority. It must not be used as a root-page summary, opening-scene summary, or compressed current-state packet. Opening or branch-current facts belong to `STSTAT`, `STOBJ`, `STLOC`, `SE`, `BEL`, `STPLAN`, `STINT`, `STEMO`, `SREL`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `PG`, and page-plan §16a.
 
-Add the dormant-stable-material inclusion rule restating the §4.1 Durable-Authority Boundary in schema-prose form:
+Added the dormant-stable-material inclusion rule restating the §4.1 Durable-Authority Boundary in schema-prose form:
 
 > Stable source material that can lawfully shape future voice, conduct, appraisal, pressure behavior, agency, relationship behavior, perception, embodiment, capabilities, limits, or choices belongs in STCHAR operational sections — even if dormant at the story's opening page. "Not needed on page 1" is never the omission criterion.
 
-### 2. Add new frontmatter field rule for `regeneration_reason_class`
+### 2. Added new frontmatter field rule for `regeneration_reason_class`
 
-Document the field rule in the STCHAR record schema prose section, matching the JSON Schema enum vocabulary (SPEC74STCHARDISBOU-006):
+Documented the field rule in the STCHAR record schema prose section, matching the JSON Schema enum vocabulary (SPEC74STCHARDISBOU-006):
 
 > `regeneration_reason_class` — durable profile-change reason classification. Field is required and non-null when `source_kind: regenerated` OR `supersedes` is non-null. Vocabulary: `source_world_char_material_change` | `durable_branch_transformation` | `profile_fidelity_failure` | `story_local_character_promotion` | `stable_source_material_omission_repair`. Ordinary updates to active state records (`STEMO`, `BEL`, `STPLAN`, `SREL`, `STSTAT`, `STOBJ`, `STLOC`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `PG`, `SE`) or page-local prose are NOT valid reason classes unless the evidence has durably consolidated into a changed character model.
 
@@ -56,7 +56,7 @@ Document the field rule in the STCHAR record schema prose section, matching the 
 
 - JSON Schema property add (SPEC74STCHARDISBOU-006 — `story-character-authority.schema.json`).
 - The validator that enforces the field rule (SPEC74STCHARDISBOU-011 — `stchar_regeneration_reason_integrity`).
-- Skill regenerate-mode wording (SPEC74STCHARDISBOU-001 — `story-character-profile/SKILL.md`).
+- Skill regenerate-mode wording (`archive/tickets/SPEC74STCHARDISBOU-001.md` — `story-character-profile/SKILL.md`).
 - Health-audit Phase 2m finding registration (SPEC74STCHARDISBOU-012).
 - Existing in-flight STCHAR records without `regeneration_reason_class` (covered by SPEC74STCHARDISBOU-013 migration).
 
@@ -85,3 +85,18 @@ Document the field rule in the STCHAR record schema prose section, matching the 
 
 1. `grep -n 'regeneration_reason_class\|durable story-local character authority' .claude/skills/_shared-templates/story-record-schemas.md` (confirms both surfaces are present)
 2. Cross-check the vocabulary against the SPEC74STCHARDISBOU-006 JSON Schema enum to confirm bit-for-bit alignment (manual review during code review).
+
+## Outcome
+
+Completed 2026-05-23. `.claude/skills/_shared-templates/story-record-schemas.md` now documents `regeneration_reason_class` in the STCHAR YAML schema example and adds the durable-authority boundary prose required by SPEC-74 §4.4. The new prose explicitly rejects STCHAR as a root-page summary, opening-scene summary, or compressed current-state packet; routes opening/branch-current facts to state records and page-plan §16a; preserves dormant stable source material in operational STCHAR sections; and names the exact five allowed `regeneration_reason_class` values.
+
+## Verification Result
+
+1. `grep -n 'STCHAR is durable story-local character authority\|must not be used as a root-page summary' .claude/skills/_shared-templates/story-record-schemas.md` — PASS: returned the STCHAR durable-authority boundary statement.
+2. `grep -n 'regeneration_reason_class' .claude/skills/_shared-templates/story-record-schemas.md` — PASS: returned the schema-example field and the prose field rule.
+3. `grep -nE 'source_world_char_material_change|durable_branch_transformation|profile_fidelity_failure|story_local_character_promotion|stable_source_material_omission_repair' .claude/skills/_shared-templates/story-record-schemas.md` — PASS: returned the five-value vocabulary in the schema example and prose rule.
+4. Manual review against SPEC74STCHARDISBOU-006 — PASS: the five field-rule values match the downstream JSON Schema ticket's enum vocabulary.
+
+## Deviations
+
+None. This remained a documentation-only shared-template change; JSON Schema implementation, validator enforcement, and red-bunny migration remain owned by the existing downstream tickets named in Out of Scope.
