@@ -1,15 +1,10 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import path from "node:path";
-
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
   asPlainRecord,
-  fileInputsFrom,
   queryStructuralRecords,
-  stringValue,
-  toPosixPath,
-  worldRootFrom
+  stringValue
 } from "./utils.js";
+import { markdownSection, pagePlanTargets } from "./page-plan-section-parser.js";
 import {
   activeIds,
   allStorySlugs,
@@ -23,8 +18,8 @@ import {
 } from "./stchar-utils.js";
 
 const VALIDATOR = "page_plan_stchar_packet_integrity";
-const PLAN_PATH_PATTERN = /^stories\/([^/]+)\/pages-prose-plans\/(PG-(0|[1-9][0-9]*))\.md$/;
 const OFFSTAGE_REQUIRED_BECAUSE = "offstage_causal";
+const STCHAR_SECTION_HEADING = /^##\s+16a\.\s+STCHAR-derived character authority packets\s*$/m;
 const CURRENT_STATE_ID = /\b(PG|SE|STEMO|BEL|STPLAN|SREL|STSTAT|STOBJ|STLOC|THR|OBL|CNSQ|CLK|STSEC|STQ)-(0|[1-9][0-9]*)\b/g;
 const DISALLOWED_AUTHORITY_ID = /\bCHAR-(0|[1-9][0-9]*)\b/g;
 const NONE_GROUNDING_VALUE = /^none\s*;\s*stable\s+STCHAR\s+authority\s+only\.?$/i;
@@ -39,13 +34,6 @@ const PACKET_ROLE_VOCABULARY: ReadonlySet<string> = new Set([
   OFFSTAGE_REQUIRED_BECAUSE
 ] as const);
 const VOICE_REQUIRING_LABELS = new Set(["speaker", "viewpoint", "voice_shapes_page"]);
-
-interface PlanTarget {
-  storySlug: string;
-  pageId: string;
-  path: string;
-  content: string;
-}
 
 interface Packet {
   stentId: string;
@@ -69,7 +57,7 @@ export const pagePlanStcharPacketIntegrity: Validator = {
   applies_to: appliesToStcharStoryState,
   run: async (input: unknown, ctx: Context): Promise<Verdict[]> => {
     const records = await queryStructuralRecords(ctx);
-    const plans = planTargets(input, ctx);
+    const plans = pagePlanTargets(input, ctx);
     const verdicts: Verdict[] = [];
 
     for (const storySlug of allStorySlugs(records)) {
@@ -155,13 +143,13 @@ function packetVerdicts(
 
   const unknownLabels = [...packet.requiredBecauseLabels].filter((label) => !PACKET_ROLE_VOCABULARY.has(label));
   if (unknownLabels.length > 0) {
-    verdicts.push(planWarn(
+    verdicts.push(planFail(
       page,
       planPath,
       "page_plan_stchar_packet_integrity.unknown_role_label",
-      `${planPath} 16a packet for ${packet.stcharId} declares unknown role label(s): ${unknownLabels.join(", ")} (allowed: ${[...PACKET_ROLE_VOCABULARY].join(" | ")}). Promotion to FAIL deferred to a future spec.`,
+      `${planPath} 16a packet for ${packet.stcharId} declares unknown role label(s): ${unknownLabels.join(", ")} (allowed: ${[...PACKET_ROLE_VOCABULARY].join(" | ")}).`,
       { page_id: pageId(page), stchar_id: packet.stcharId, unknown_labels: unknownLabels },
-      `Use only documented Required because labels for ${packet.stcharId}, or update the closed vocabulary in a future schema-enforcement ticket.`
+      `Use only documented Required because labels for ${packet.stcharId}; the closed-vocabulary contract is enforced per SPEC-76 §3.2.`
     ));
   }
 
@@ -232,11 +220,10 @@ function entityLocation(page: IndexedRecord, stentId: string): string | undefine
 }
 
 function parsePackets(content: string): Packet[] {
-  const sectionStart = content.search(/^##\s+16a\.\s+STCHAR-derived character authority packets\s*$/m);
-  if (sectionStart === -1) {
+  const section = markdownSection(content, STCHAR_SECTION_HEADING);
+  if (section === null) {
     return [];
   }
-  const section = content.slice(sectionStart).split(/\n(?=##\s+)/)[0] ?? "";
   const starts = [...section.matchAll(/^- (STENT-(?:0|[1-9][0-9]*)) \/ (STCHAR-(?:0|[1-9][0-9]*))\b.*$/gm)];
   return starts.map((match, index) => {
     const packetText = section.slice(match.index ?? 0, starts[index + 1]?.index ?? section.length);
@@ -314,48 +301,6 @@ function parseRequiredBecauseLabels(requiredBecause: string): Set<string> {
   );
 }
 
-function planTargets(input: unknown, ctx: Context): PlanTarget[] {
-  const explicit = fileInputsFrom(input, ctx).flatMap((file) => planTargetFromContent(file.path, file.content));
-  if (explicit.length > 0 || ctx.run_mode === "pre-apply") {
-    return explicit;
-  }
-
-  const worldRoot = worldRootFrom(input, ctx);
-  if (!worldRoot) {
-    return [];
-  }
-  const storiesRoot = path.join(worldRoot, "stories");
-  if (!existsSync(storiesRoot)) {
-    return [];
-  }
-  const targets: PlanTarget[] = [];
-  for (const storyEntry of readdirSync(storiesRoot, { withFileTypes: true })) {
-    if (!storyEntry.isDirectory() || (ctx.story_slug && storyEntry.name !== ctx.story_slug)) {
-      continue;
-    }
-    const plansRoot = path.join(storiesRoot, storyEntry.name, "pages-prose-plans");
-    if (!existsSync(plansRoot)) {
-      continue;
-    }
-    for (const file of readdirSync(plansRoot, { withFileTypes: true })) {
-      if (!file.isFile()) {
-        continue;
-      }
-      const relative = toPosixPath(path.join("stories", storyEntry.name, "pages-prose-plans", file.name));
-      targets.push(...planTargetFromContent(relative, readFileSync(path.join(plansRoot, file.name), "utf8")));
-    }
-  }
-  return targets;
-}
-
-function planTargetFromContent(filePath: string, content: string): PlanTarget[] {
-  const normalizedPath = toPosixPath(filePath);
-  const match = normalizedPath.match(PLAN_PATH_PATTERN);
-  const storySlug = match?.[1];
-  const planPageId = match?.[2];
-  return storySlug && planPageId ? [{ storySlug, pageId: planPageId, path: normalizedPath, content }] : [];
-}
-
 function planFail(
   page: IndexedRecord,
   planPath: string,
@@ -366,21 +311,6 @@ function planFail(
 ): Verdict {
   return {
     ...fail(VALIDATOR, page, code, message, detail, suggested_fix),
-    location: { file: planPath, node_id: recordId(page) }
-  };
-}
-
-function planWarn(
-  page: IndexedRecord,
-  planPath: string,
-  code: string,
-  message: string,
-  detail: unknown,
-  suggested_fix: string
-): Verdict {
-  return {
-    ...fail(VALIDATOR, page, code, message, detail, suggested_fix),
-    severity: "warn",
     location: { file: planPath, node_id: recordId(page) }
   };
 }

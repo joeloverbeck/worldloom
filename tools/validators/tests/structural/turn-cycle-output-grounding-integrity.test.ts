@@ -95,6 +95,58 @@ test("turn_cycle_output_grounding_integrity ignores bootstrap and non-target cre
   assert.deepEqual(verdicts, []);
 });
 
+test("turn_cycle_output_grounding_integrity accepts response CHCs grounded in driver records", async () => {
+  const records = baseRecords([
+    page("PG-1", { STENT: ["STENT-1"], STPLAN: ["STPLAN-1"] }),
+    event("SE-2", { create: ["CHC-1"], turn_driver: { kind: "npc_action", driver_records: ["STPLAN-1"] } }),
+    choice("CHC-1", { player_response_mode: "responds", grounded_in: { records: ["STPLAN-1"] } }),
+    page("PG-2", { STENT: ["STENT-1"], STPLAN: ["STPLAN-1"] })
+  ]);
+
+  const verdicts = await turnCycleOutputGroundingIntegrity.run(undefined, testContext(records));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("turn_cycle_output_grounding_integrity rejects response CHCs missing driver-record grounding", async () => {
+  const records = baseRecords([
+    page("PG-1", { STENT: ["STENT-1"], STPLAN: ["STPLAN-1"], BEL: ["BEL-1"] }),
+    event("SE-2", { create: ["CHC-1"], turn_driver: { kind: "npc_action", driver_records: ["STPLAN-1"] } }),
+    choice("CHC-1", { player_response_mode: "responds", grounded_in: { records: ["BEL-1"] } }),
+    page("PG-2", { STENT: ["STENT-1"], STPLAN: ["STPLAN-1"], BEL: ["BEL-1"] })
+  ]);
+
+  const verdicts = await turnCycleOutputGroundingIntegrity.run(undefined, testContext(records));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "chc_response_topical_grounding_missing");
+  assert.deepEqual(verdicts[0]?.detail, {
+    choice_id: "CHC-1",
+    event_id: "SE-2",
+    driver_records: ["STPLAN-1"],
+    grounded_records: ["BEL-1"]
+  });
+});
+
+test("turn_cycle_output_grounding_integrity skips topical grounding for continuation CHCs and player drivers", async () => {
+  const records = baseRecords([
+    event("SE-2", { create: ["CHC-1"], turn_driver: { kind: "npc_action", driver_records: ["STPLAN-1"] } }),
+    event("SE-3", {
+      create: ["CHC-2"],
+      created_at_page: "PG-3",
+      turn_driver: { kind: "player_action", driver_records: ["STPLAN-1"] }
+    }),
+    choice("CHC-1", { player_response_mode: "chooses_continuation", grounded_in: { records: ["BEL-1"] } }),
+    choice("CHC-2", { player_response_mode: "responds", grounded_in: { records: ["BEL-1"] } }),
+    page("PG-2", { STENT: ["STENT-1"] }),
+    page("PG-3", { STENT: ["STENT-1"] })
+  ]);
+
+  const verdicts = await turnCycleOutputGroundingIntegrity.run(undefined, testContext(records));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("turn_cycle_output_grounding_integrity is scoped to full-world, event/page patch plans, and touched target files", () => {
   assert.equal(turnCycleOutputGroundingIntegrity.applies_to(testContext([])), true);
   assert.equal(
@@ -113,6 +165,13 @@ test("turn_cycle_output_grounding_integrity is scoped to full-world, event/page 
     turnCycleOutputGroundingIntegrity.applies_to(testContext([], {
       run_mode: "incremental",
       touched_files: ["stories/test/_source/artifacts/DA-1.yaml"]
+    })),
+    true
+  );
+  assert.equal(
+    turnCycleOutputGroundingIntegrity.applies_to(testContext([], {
+      run_mode: "incremental",
+      touched_files: ["stories/test/_source/choices/CHC-1.yaml"]
     })),
     true
   );
@@ -135,13 +194,15 @@ function event(id: string, overrides: Partial<{
   created_at_page: string;
   parent_page_id: string;
   event_kind: string;
+  turn_driver: Record<string, unknown>;
 }>): IndexedRecord {
   return storyRecord("story_event_record", id, `stories/${STORY_SLUG}/_source/events/${id}.yaml`, {
     id,
     story_id: "STORY-1",
     created_at_page: overrides.created_at_page ?? "PG-2",
     parent_page_id: overrides.parent_page_id ?? "PG-1",
-    event_kind: overrides.event_kind ?? "selected_choice",
+    event_kind: overrides.event_kind ?? "turn_resolution",
+    turn_driver: overrides.turn_driver ?? { kind: "player_action", driver_records: [] },
     state_delta: { create: overrides.create ?? [], supersede: [], close: [] }
   });
 }
@@ -194,6 +255,17 @@ function artifact(id: string, overrides: Record<string, unknown> = {}): IndexedR
     circulation: "private",
     truth_relation: "true",
     derived_from: ["SE-2"],
+    ...overrides
+  });
+}
+
+function choice(id: string, overrides: Record<string, unknown> = {}): IndexedRecord {
+  return storyRecord("choice_record", id, `stories/${STORY_SLUG}/_source/choices/${id}.yaml`, {
+    id,
+    story_id: "STORY-1",
+    created_at_page: "PG-2",
+    player_response_mode: "responds",
+    grounded_in: { records: [] },
     ...overrides
   });
 }

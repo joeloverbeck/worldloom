@@ -1,8 +1,8 @@
 # SPEC-76 — Turn-Driver Primitive and Pressure-Driven Turn Cycle
 
-**Status:** Draft (proposed 2026-05-23)
+**Status:** COMPLETED (archived 2026-05-23)
 **Spec ID:** SPEC-76
-**Predecessors:** SPEC-47 (STPLAN), SPEC-48 (STEMO), SPEC-63 (offstage causal packet tier)
+**Predecessors:** SPEC-47 (STPLAN + STEMO), SPEC-63 (offstage causal packet tier)
 **Source report:** `reports/slt-chc-overhaul-first-iteration.md` (triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`)
 **Related:** SPEC-77 (Minimal SLT Grounding Provenance — depends on the turn_driver enum landed here)
 
@@ -83,6 +83,8 @@ Required content (all lines must appear; values are page-author-supplied):
 - POV visibility: <perceived_directly | inferred_from_trace | reported | discovered_after | withheld>
 - Observer-firewall note: <one sentence on the access route for non-player drivers; "n/a" for player_action / player_write_in>
 
+The SE.turn_resolution event's `world_logic_rationale` (an existing required field on SE) is the carrier for the driver-justification (the source-report `why_now` content folds into it per §3.1); §7a's `Driver kind:` and `Driver records:` lines together with `world_logic_rationale` form the complete driver provenance.
+
 Active-pressure disposition (every high-urgency active record on parent PG.state_snapshot must appear in exactly one row):
 
 | Record | Disposition | Reason / expiry |
@@ -92,7 +94,7 @@ Active-pressure disposition (every high-urgency active record on parent PG.state
 | <ID> | rejected | <one-sentence reason> |
 ```
 
-§16a STCHAR packet labels are tightened to a closed vocabulary: unknown `Required because:` labels fail (the current behavior warns). This was already a §16a hardening proposal in SPEC-63; SPEC-76 raises it from warn to fail under the new contract.
+§16a STCHAR packet labels are tightened to a closed vocabulary: unknown `Required because:` labels fail. The current behavior at `_shared-templates/story-state-contract.md:519` (the `page_plan_stchar_packet_integrity` validator) warns on unknown labels; this spec raises it to fail under the new contract.
 
 ### 3.3 Turn-cycle skill — `.claude/skills/branching-story-turn-cycle/SKILL.md`
 
@@ -111,6 +113,14 @@ Phase 0: Evaluate due drivers
     classify as multi_actor_collision and list all in driver_records.
   - Record selected / deferred / rejected dispositions for every active high-urgency record;
     these populate page-plan §7a active-pressure table.
+  - Player action does not exempt non-player records from disposition: when the driver is
+    player_action / player_write_in, any high-urgency non-player records active on parent
+    PG.state_snapshot must still appear in §7a's active-pressure table as `selected: no — player won`
+    (the implicit case when the player drives the turn), `deferred` (with expiry), or `rejected`
+    (with reason).
+  - Populate `world_logic_rationale` on the new SE.turn_resolution event to articulate why this
+    driver was selected this turn (the source-report `why_now` content folds into this existing
+    required field per §3.1).
 ```
 
 **Mode parameter** added to the skill: `execution_mode` already exists (`authoring | interactive_runtime | batch`); add a new orthogonal `action_source_mode`:
@@ -137,7 +147,9 @@ Seeded SLTs become eligible for non-player drivers per SPEC-77 (compatible_turn_
 
 ### 3.5 Health-audit skill — `.claude/skills/branching-story-health-audit/SKILL.md`
 
-Add a new audit pass: **Reactivity Inertness** — scan PG chain for sequences of pages where every `turn_driver.kind = player_action | player_write_in` despite the presence of high-urgency active non-player records (STPLAN with due step, STEMO at high intensity, CLK at threshold, THR active, STSEC reveal-ready). Emit a remediation-storylet-proposal card if 3+ consecutive pages match the pattern. This is the audit-side safety net; the structural fix is the active-pressure handling discipline (§3.2 page-plan §7a active-pressure table).
+Add a new audit sub-phase: **Reactivity Inertness** — scan PG chain for sequences of pages where every `turn_driver.kind = player_action | player_write_in` despite the presence of high-urgency active non-player records (STPLAN with due step, STEMO at high intensity, CLK at threshold, THR active, STSEC reveal-ready). Emit a remediation-storylet-proposal card if 3+ consecutive pages match the pattern. This is the audit-side safety net; the structural fix is the active-pressure handling discipline (§3.2 page-plan §7a active-pressure table).
+
+This pass is distinct from the existing Phase 2l ("Active-state underuse warnings"): Phase 2l is per-page underuse detection, while Reactivity Inertness is a chain-level scan for consecutive non-player-driver absence. The two are orthogonal and run alongside each other; Reactivity Inertness is named explicitly as a new sub-phase (the bundle-implementation slice may number it Phase 2n or sequence it after Phase 2m STCHAR-authority health).
 
 ### 3.6 New validators
 
@@ -191,13 +203,15 @@ Register all four in `tools/validators/src/public/registry.ts`. Each runs in `fu
 - `active_pressure_deferred_without_expiry` — table row marked `deferred` with no expiry (PG-id or condition).
 - `active_pressure_disposition_unknown` — table row disposition outside the closed set `{selected, deferred, rejected}`.
 
-**Urgency classification:** high = `saliency.urgency: high` for SLT-style records; for state records, high = STPLAN with `current_step` due-this-page, STEMO at `intensity: high` with non-empty `behavioral_pressure`, CLK at threshold, THR with active and ≥1 page-old escalation, STSEC reveal-ready, STQ with payoff-due, OBL/CNSQ with `urgency: high`. Medium is the analogous middle tier per existing schema enum values.
+**Urgency classification:** high = `saliency.urgency: high` for SLT-style records; for state records, high = STPLAN with `current_step` due-this-page, STEMO at `intensity: high` with non-empty `behavioral_pressure`, CLK at threshold, THR with active and ≥1 page-old escalation, STSEC reveal-ready, STQ with payoff-due, OBL/CNSQ with `urgency: high`. Medium is the analogous middle tier per existing schema enum values — the concrete per-class medium-tier table is deferred to ticket-time (see §9 Risk Reassessment).
+
+**SREL / STCHAR scope:** SREL and STCHAR are permitted in `turn_driver.driver_records[]` (per §3.1) only as supporting records, never as the leading high-urgency driver. The leading record must be one of the named 8 classes above (STPLAN / STEMO / CLK / THR / STSEC / STQ / OBL / CNSQ). This keeps SREL / STCHAR out of the urgency-tier ranking while preserving their role in the audit-trace (e.g., an `npc_action` driver whose leading record is STPLAN-9 may cite STCHAR-3 alongside as the actor-authority record).
 
 ### 3.7 Existing-validator updates
 
 - `observer_firewall` (`tools/validators/src/structural/observer-firewall.ts`): extend the event-kind filter to cover all `turn_resolution` events. The pre-existing inspection sites for `selected_choice` and `write_in_attempt` ports cleanly to the player-driver kinds.
-- `chc_slt_selected_commitment_trace` (`tools/validators/src/structural/chc-slt-selected-commitment-trace.ts`): no change needed; the validator already keys on `SE.commitment.selected_slt_id` and parent-page active-record predicates, not on the retired `event_kind` enum values.
-- `turn_cycle_output_grounding_integrity`: extend to require `CHC.grounded_in.records[]` to include at least one record from `SE.turn_driver.driver_records` when emitted CHC carries `player_response_mode: responds`. Today the validator already requires grounding records; this adds a topical-grounding constraint when the page is driver-responsive.
+- `chc_slt_selected_commitment_trace` (`tools/validators/src/structural/chc-slt-selected-commitment-trace.ts`): no logic change needed; the validator already keys on `SE.commitment.selected_slt_id` and parent-page active-record predicates, not on the retired `event_kind` enum values. **Rename obligation:** the emitted verdict code `selected_choice_unresolvable` (line 216) references the retired `selected_choice` enum value as a string; rename to a turn-driver-neutral name (e.g., `turn_resolution_unresolvable`) when the new enum lands. Logic and call sites unchanged.
+- `turn_cycle_output_grounding_integrity`: extend to require `CHC.grounded_in.records[]` to include at least one record from `SE.turn_driver.driver_records` when emitted CHC carries `player_response_mode: responds`, and fail CHCs emitted under a non-player driver when `player_response_mode` is outside `responds | witnesses | chooses_continuation`. Today the validator already requires grounding records; this adds topical-grounding and response-mode constraints when the page is driver-responsive.
 
 ## 4. Out of Scope
 
@@ -209,7 +223,7 @@ The following items from the source report are **rejected or deferred** per the 
 - **`choice_set_quality_axes` validator.** Rejected — the report's own §11.3 forbids hard-validating literary quality.
 - **STCHAR Operational Axis Index closed-vocabulary taxonomy.** Deferred — separate STCHAR-shape concern; reactivity fix doesn't depend on it.
 - **`branching-story-prose-attach` driver-fidelity receipt fields.** Deferred — add only after the turn-driver field is real and a playtest confirms prose-rendering surfaces need the receipt.
-- **FOUNDATIONS amendment.** Carried separately by [SPEC-78](../archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md), which landed before SPEC-76 (FOUNDATIONS is upstream). SPEC-78 extends §Story Bundles §5c with "Driver salience is local." (covering driver-selection as a prior local-salience-ranking pass) and §6b with event-level driver-declaration coverage (extending the Observer Firewall to `SE.turn_driver.driver_records[]` and `pov_visibility`). SPEC-76's `Validation Rules Upheld` table cites these *extended* principles.
+- **FOUNDATIONS amendment.** Carried separately by [SPEC-78](SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md), which landed before SPEC-76 (FOUNDATIONS is upstream). SPEC-78 extends §Story Bundles §5c with "Driver salience is local." (covering driver-selection as a prior local-salience-ranking pass) and §6b with event-level driver-declaration coverage (extending the Observer Firewall to `SE.turn_driver.driver_records[]` and `pov_visibility`). SPEC-76's `Validation Rules Upheld` table cites these *extended* principles.
 
 ## 5. Validation Rules Upheld
 
@@ -234,7 +248,7 @@ The following items from the source report are **rejected or deferred** per the 
 
 ### 6.2 Structural validator tests (`tools/validators/tests/structural/`)
 
-Per the inline-fixture-builder pattern established by SPEC-75:
+Per the established inline-fixture-builder convention (used in `tools/validators/tests/structural/chc-slt-selected-commitment-trace.test.ts`, `branch-isolation.test.ts`, and sibling validator tests):
 
 - `turn_driver_schema_compliance.test.ts` — six positive cases (one per non-player driver kind) + eight negative cases (one per failure code in §3.6.1).
 - `turn_driver_pov_observer_firewall.test.ts` — positive: NPC-fired-shot perceived via window with active BEL access route. Negative: offstage STPLAN cited as `perceived_directly` with no BEL access; page-plan §16a narrates NPC interiority for offstage_action.
@@ -265,7 +279,7 @@ The spec lands as a single coordinated change because the schema, contract, skil
 
 1. **Slice A — Schema + shared contract.** `story-event.schema.json` + `.claude/skills/_shared-templates/story-state-contract.md` §4 / §7 / §8. No skill changes. Failing fixture suite written first (TDD).
 2. **Slice B — Turn-cycle skill Phase 0 + bootstrap +  health-audit.** Skill SKILL.md updates + reference file updates. Slice A must land first so the schema enum exists.
-3. **Slice C — Four new validators + registry.** `turn_driver_schema_compliance`, `turn_driver_pov_observer_firewall`, `page_plan_turn_driver_consistency`, `active_pressure_handling_discipline`. Registered in `tools/validators/src/public/registry.ts`. Tests inline-fixture-builder pattern per SPEC-75.
+3. **Slice C — Four new validators + registry.** `turn_driver_schema_compliance`, `turn_driver_pov_observer_firewall`, `page_plan_turn_driver_consistency`, `active_pressure_handling_discipline`. Registered in `tools/validators/src/public/registry.ts`. Tests follow the established inline-fixture-builder convention (see `tools/validators/tests/structural/chc-slt-selected-commitment-trace.test.ts` and sibling tests).
 4. **Slice D — Existing-validator updates.** `observer_firewall` event-kind filter extension; `turn_cycle_output_grounding_integrity` topical-grounding extension. Slice C must land first so the new validator IDs exist for cross-reference.
 5. **Slice E — Golden fixture suite.** Red Kiln Ambush + 5 failing variants (no driver, hidden mind leak, missing pressure table, mismatched §7a, wrong response mode).
 
@@ -276,6 +290,7 @@ The spec lands as a single coordinated change because the schema, contract, skil
 - **Authoring overhead.** Each turn now requires authors to evaluate due drivers and populate §7a. Mitigation: Phase 0 enumeration is deterministic (active high-urgency records from parent PG snapshot); the table is computed, not invented. The actual choice (which driver becomes the turn) is the only authorial decision.
 - **False reactivity in audit.** A run of legitimately player-driven pages (the player is actively pursuing a goal with no offstage pressure due) would trip the new `Reactivity Inertness` audit pass. Mitigation: the audit emits a remediation-proposal, not a hard fail; the operator can dismiss with reason. The structural fix (active-pressure handling discipline) does not depend on the audit.
 - **Schema breaking change.** Acceptable per Source report §16 Non-goals; the test-bundle `red-bunny` is the only known consumer and must rebuild. Documented in §7 Migration.
+- **Medium-tier urgency concrete table deferred.** §3.6.4 defines high-tier urgency per record class but leaves medium as "the analogous middle tier per existing schema enum values." STPLAN, STEMO, CLK, THR, STSEC, STQ, OBL, CNSQ each carry their own urgency conventions; the concrete per-class medium-tier criteria require ticket-time enumeration alongside the `active_pressure_handling_discipline` validator implementation. Mitigation: ticket decomposition produces the medium-tier table as part of the validator's implementation; until then, the warn severity is unreachable (validator falls back to fail-on-unhandled-high-only).
 
 ## 10. References
 
@@ -285,4 +300,30 @@ The spec lands as a single coordinated change because the schema, contract, skil
 - Shared story state contract: `.claude/skills/_shared-templates/story-state-contract.md` (authoritative for story-record schemas per FOUNDATIONS §5b).
 - Existing schemas: `tools/validators/src/schemas/story-event.schema.json`, `story-choice.schema.json`, `story-storylet.schema.json`.
 - Existing validators: `tools/validators/src/structural/chc-slt-selected-commitment-trace.ts`, `observer-firewall.ts`, `narrative-shape-field-rejection.ts`, `page-plan-stchar-packet-integrity.ts`.
-- Predecessor SPECs: SPEC-47 (STPLAN), SPEC-48 (STEMO), SPEC-63 (offstage causal packet tier), SPEC-73 (page-plan §16a label parsing — establishes the §7a parser pattern), SPEC-75 (inline-fixture-builder test pattern).
+- Predecessor SPECs: SPEC-47 (STPLAN + STEMO), SPEC-63 (offstage causal packet tier), SPEC-73 (page-plan §16a label parsing — establishes the §7a parser pattern).
+- Established inline-fixture-builder convention used in the test plan: `tools/validators/tests/structural/chc-slt-selected-commitment-trace.test.ts`, `branch-isolation.test.ts`, and sibling validator tests (not a SPEC-introduced contract).
+
+## Outcome
+
+Completed 2026-05-23.
+
+SPEC-76 landed through tickets `archive/tickets/SPEC76TURDRIPRI-001.md` through `archive/tickets/SPEC76TURDRIPRI-011.md`.
+
+What changed:
+
+- `story-event.schema.json` now carries the collapsed `event_kind` contract and required `turn_driver` shape for `turn_resolution` events.
+- `.claude/skills/_shared-templates/story-state-contract.md` documents Gate 9, page-plan §7a, active-pressure disposition, and the turn-driver record shape.
+- `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/branching-story-bootstrap/SKILL.md`, and `.claude/skills/branching-story-health-audit/SKILL.md` carry the Phase 0 / bootstrap carve-out / Reactivity Inertness updates.
+- The validators package includes the four new turn-driver / active-pressure validators, the existing-validator updates, and the Red Kiln Ambush capstone fixture.
+
+Verification:
+
+- `cd tools/validators && npm test` before the final capstone ticket passed 999 tests.
+- `cd tools/validators && npm run build` passed after the capstone implementation.
+- `cd tools/validators && node --test dist/tests/integration/spec76-red-kiln-ambush.test.js` passed 2 tests, proving the canonical Red Kiln Ambush fixture and five failing variants.
+- `cd tools/validators && npm test` passed 1001 tests after all SPEC-76 work.
+
+Deviation from draft:
+
+- The Red Kiln Ambush fixture is checked as indexed-record JSON plus page-plan file content rather than a full copied `worlds/red-kiln-ambush/` tree. This matches the current structural validator harness and avoids any live canon mutation.
+- The capstone exposed a missing same-seam response-mode check in `turn_cycle_output_grounding_integrity`; SPEC-76's existing-validator section and final implementation include that fail-closed repair.

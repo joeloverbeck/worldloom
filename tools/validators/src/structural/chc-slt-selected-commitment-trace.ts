@@ -211,7 +211,7 @@ function validateGrounding(
 
   const selectedChoice = selectedChoiceForEvent(event, maps);
   if (selectedChoice === "ambiguous" || selectedChoice === undefined) {
-    return [eventVerdict(event, "warn", "selected_choice_unresolvable", `${recordId(event)} selected ${recordId(storylet)}, but the emitted CHC cannot be uniquely resolved for grounding validation.`, {
+    return [eventVerdict(event, "warn", "turn_resolution_unresolvable", `${recordId(event)} selected ${recordId(storylet)}, but the emitted CHC cannot be uniquely resolved for grounding validation.`, {
       event_id: recordId(event),
       selected_slt_id: recordId(storylet),
       selecting_records: [...selectingRecordIds].sort()

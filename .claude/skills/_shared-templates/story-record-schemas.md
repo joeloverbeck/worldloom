@@ -1,6 +1,6 @@
 # Story Record Schemas
 
-This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 21 story-bundle record classes plus the prose-receipt direct-write artifact. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the eight hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
+This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 21 story-bundle record classes plus the prose-receipt direct-write artifact. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the nine hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
 
 Subsection numbering matches the original `§4.X` form (e.g. `§4.6 prose receipt`, `§4.2 PG`, `§4.4 SLT`) so cross-references in skill prose, validator source, and other shared templates continue to resolve verbatim. The split is purely structural — §4 is overwhelmingly the bulk of the contract, and the bundled file exceeded the per-call read limit of bulk-loading tools at HEAD.
 
@@ -111,6 +111,7 @@ validation_trace:                      # * one entry per shared gate with PASS +
   consequence_or_terminal: "PASS: <rationale>"
   plan_grounding: "PASS: <rationale>"
   canon_promotion_hold: "PASS: <rationale>" | "NOT_APPLICABLE: <rationale>"
+  turn_driver_lawfulness: "PASS: <rationale>" | "NOT_APPLICABLE: <rationale>"
 ```
 
 Rendered prose and prose receipts are publication artifacts discovered by deterministic paths: `pages-prose/PG-<integer>.md` and `pages-prose-receipts/PG-<integer>.yaml`. They are not page-state fields and are not included in `PG`. `INDEX.md` may render publication status for human navigation; `PG` remains the authoritative fork-state record.
@@ -164,21 +165,27 @@ node tools/world-mcp/dist/src/cli/compute-pg-hashes.js \
 
 The CLI emits `{plan_hash, state_hash}` as JSON to stdout (exit 0 on success). Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`, so a single CLI invocation yields the pair the skill stamps onto the final record. JSON and YAML inputs are both supported and produce identical hashes when they parse to the same PG object. The CLI does not reconcile separate hash-only and submission-only drafts; if a patch envelope is assembled separately, hash the exact `patches[N].payload.record` object from the final envelope or build the envelope from the same file passed to `--pg`. Hand-rolling the canonical-JSON serializer is a known source of drift bugs (truncated strings, locale-sensitive sort orders, accidentally-included publication artifacts) and is forbidden; if the CLI does not fit a workflow, the workflow is incomplete — open a CLI-extension ticket before bypassing it.
 
-### 4.3 `SE` (~15 sub-paths)
+### 4.3 `SE` (~16 sub-paths)
 
 ```yaml
 id: SE-<integer>*
 story_id: STORY-<integer>*
 created_at_page: PG-<integer>*
 parent_page_id: PG-<integer> | null         # * null only for SE-1
-event_kind: story_start | selected_choice | write_in_attempt | system_repair | audit_repair | prose_attach | promotion_closeout   # *
+event_kind: story_start | turn_resolution | system_repair | audit_repair | prose_attach | promotion_closeout   # *
 actor: STENT-<integer> | system | unknown   # *
 targets: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer>]
 commitment:
   selected_slt_id: SLT-<integer> | null   # * null iff selection_source is none
-  selection_source: emitted_choice | author_pool | runtime_jit | system_repair | audit_repair | none   # *
+  selection_source: emitted_choice | author_pool | runtime_jit | npc_initiative | offstage_initiative | clock_fire | world_pressure | secret_reveal | system_repair | audit_repair | none   # *
   alias_bindings:
     <alias>: <record_id>
+turn_driver:                            # required iff event_kind is turn_resolution; forbidden otherwise
+  kind: player_action | player_write_in | npc_action | offstage_action | world_pressure | clock_fire | secret_reveal | multi_actor_collision
+  initiator: STENT-<integer> | player | world | system | unknown
+  driver_records: [STPLAN-<integer> | STEMO-<integer> | CLK-<integer> | THR-<integer> | STSEC-<integer> | STQ-<integer> | OBL-<integer> | CNSQ-<integer> | SREL-<integer> | STCHAR-<integer>]
+  player_response_mode: initiates | responds | witnesses | chooses_continuation | none
+  pov_visibility: perceived_directly | inferred_from_trace | reported | discovered_after | withheld
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal   # *
 resolution:
   result: success | partial_success | failure | impossible | transformed | held_for_promotion
@@ -218,7 +225,9 @@ Per-source-kind `promotion_claims[].source_record` requirements:
 | `relationship_or_institutional_outcome` | SREL | BEL, SF |
 | `other_branch_claim` | any `promotion_claims[].source_record` class | none |
 
-`world_logic_rationale` is required (no silent rejection — see §6) and is prose-only: validators MUST NOT parse it for structural facts. `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; all other event kinds name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
+`world_logic_rationale` is required (no silent rejection — see §6) and is prose-only: validators MUST NOT parse it for structural facts. `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; turn-resolution and repair events name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
+
+`turn_driver` is required exactly when `event_kind: turn_resolution` and forbidden for `story_start`, `system_repair`, `audit_repair`, `prose_attach`, and `promotion_closeout`. Player driver kinds (`player_action`, `player_write_in`) use `initiator: player`, empty `driver_records`, `player_response_mode: initiates`, and `pov_visibility: perceived_directly`. Non-player driver kinds cite active driver records on the parent `PG.state_snapshot`: `npc_action` and `offstage_action` use `STENT-<integer>` initiators; `clock_fire` uses `world` or `system` and cites a `CLK`; `world_pressure` uses `world`; `secret_reveal` cites a `STSEC`; `multi_actor_collision` uses `unknown` and cites multiple driver records. `offstage_action` never uses `pov_visibility: perceived_directly`. `world_logic_rationale` carries the driver-justification prose; do not add a separate `why_now` field.
 
 `commitment.alias_bindings` accepts the existing selected-move binding classes plus the five existential-predicate-bindable classes `CLK`, `STSEC`, `STQ`, `STPLAN`, and `STEMO`, so author-pool prefilter aliases can become exact event bindings without bypassing branch-local validation.
 

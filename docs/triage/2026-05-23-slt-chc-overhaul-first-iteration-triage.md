@@ -3,7 +3,7 @@
 **Date:** 2026-05-23
 **Source report:** [`reports/slt-chc-overhaul-first-iteration.md`](../../reports/slt-chc-overhaul-first-iteration.md) (2140 lines; research-driven STCHAR ↔ SLT ↔ CHC consolidation architecture proposal from ChatGPT-Pro)
 **Trigger:** Playtest concern — "the entire story was reactive upon what I as the player chose."
-**Deliverables produced:** [`specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](../../specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [`specs/SPEC-77-slt-grounding-provenance-minimal.md`](../../specs/SPEC-77-slt-grounding-provenance-minimal.md), [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md)
+**Deliverables produced:** [`archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](../../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [`specs/SPEC-77-slt-grounding-provenance-minimal.md`](../../specs/SPEC-77-slt-grounding-provenance-minimal.md), [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md)
 
 ## Triage summary
 
@@ -141,12 +141,12 @@ The user pre-authorized spec creation contingent on the verdict. Pre-authorizati
 
 ### D4 — `branching-story-prose-attach` driver-fidelity receipt fields (source report §9.6)
 **Verdict:** defer.
-**Re-evaluate when:** SPEC-76 lands and a playtest with rendered prose confirms the prose-receipt surface needs to record driver fidelity (e.g., did the prose render the driver, did it honor POV visibility, did it avoid offstage mind leak).
+**Re-evaluate when:** after SPEC-76's landing, a playtest with rendered prose confirms the prose-receipt surface needs to record driver fidelity (e.g., did the prose render the driver, did it honor POV visibility, did it avoid offstage mind leak).
 **Ground:** Adding receipt fields without the upstream `turn_driver` shape would land orphan surface. The prose-attach skill's existing STCHAR-fidelity discipline is the precedent — once the upstream shape is real, the receipt extension is mechanical.
 
 ### D5 — Candidate-commitment record (`SCOM` / `STCAND`) (source report §6 Alternative D, §17.1)
 **Verdict:** defer.
-**Re-evaluate when:** turn-cycle SPEC-76 lands and a playtest surfaces concrete need for cross-page candidate persistence.
+**Re-evaluate when:** after turn-cycle SPEC-76's landing, a playtest surfaces concrete need for cross-page candidate persistence.
 **Ground:** The report itself defers this in §17.1. The reactivity fix does not require it; candidate-driver evaluation lives ephemerally in Phase 0 + page-plan §7a's active-pressure table.
 
 ## Refuted by codebase verification
@@ -173,7 +173,7 @@ The report's structural test for SLT genericness — "fail if reason_to_exist is
 
 Per the User pre-authorization clause in the original request ("If changes are warranted, aligned with docs/FOUNDATIONS.md, create specs in specs/*. If more than one spec is warranted, create specs/IMPLEMENTATION-ORDER.md"), the triage recommendation was presented in chat and the spec deliverables (SPEC-76, SPEC-77, IMPLEMENTATION-ORDER.md) were written in the same turn. The user did not redirect during the presentation, activating the pre-authorization.
 
-`spec-to-tickets` is the next-phase decomposer; the user may invoke it on SPEC-78 first (FOUNDATIONS amendment), then SPEC-76 (depends on SPEC-78 for the principle citations), then SPEC-77 (depends on SPEC-76's `turn_driver.kind` enum).
+Historical triage next step: `spec-to-tickets` was the next-phase decomposer; SPEC-78 and SPEC-76 have since been implemented and archived, while SPEC-77 remains the active downstream spec depending on SPEC-76's `turn_driver.kind` enum.
 
 ## Update — 2026-05-23 — FOUNDATIONS amendment reversal
 

@@ -15,7 +15,8 @@ const REQUIRED_GATE_KEYS = [
   "append_only_delta",
   "consequence_or_terminal",
   "plan_grounding",
-  "canon_promotion_hold"
+  "canon_promotion_hold",
+  "turn_driver_lawfulness"
 ] as const;
 
 const REQUIRED_GATE_KEY_SET = new Set<string>(REQUIRED_GATE_KEYS);
@@ -48,7 +49,7 @@ function validatePageValidationTrace(page: IndexedRecord): Verdict[] {
     return [
       shapeViolation(
         page,
-        `${page.node_id} validation_trace must be a flat object keyed by the eight shared hard gate names.`,
+        `${page.node_id} validation_trace must be a flat object keyed by the nine shared hard gate names.`,
         { actual_type: Array.isArray(validationTrace) ? "array" : typeof validationTrace }
       )
     ];
@@ -58,7 +59,7 @@ function validatePageValidationTrace(page: IndexedRecord): Verdict[] {
     verdicts.push(
       shapeViolation(
         page,
-        `${page.node_id} validation_trace must not contain a gates array or gates key; use the flat eight-key mapping.`,
+        `${page.node_id} validation_trace must not contain a gates array or gates key; use the flat nine-key mapping.`,
         { key: "gates" }
       )
     );
@@ -95,6 +96,6 @@ function shapeViolation(page: IndexedRecord, message: string, detail?: unknown):
     message,
     location: locationFor(page),
     detail,
-    suggested_fix: "Conform PG.validation_trace to the flat eight-key mapping in story-state contract §4.2."
+    suggested_fix: "Conform PG.validation_trace to the flat nine-key mapping in story-state contract §4.2."
   };
 }

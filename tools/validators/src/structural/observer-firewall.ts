@@ -59,7 +59,11 @@ export const observerFirewall: Validator = {
       for (const event of maps.byType.get("story_event_record") ?? []) {
         const parsed = asPlainRecord(event.parsed);
         const eventKind = stringValue(parsed.event_kind);
-        if (eventKind !== "selected_choice" && eventKind !== "write_in_attempt") {
+        if (eventKind !== "turn_resolution") {
+          continue;
+        }
+        const driverKind = stringValue(asPlainRecord(parsed.turn_driver).kind);
+        if (driverKind !== "player_action" && driverKind !== "player_write_in") {
           continue;
         }
 

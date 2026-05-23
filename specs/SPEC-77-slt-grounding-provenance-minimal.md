@@ -2,12 +2,12 @@
 
 **Status:** Draft (proposed 2026-05-23)
 **Spec ID:** SPEC-77
-**Depends on:** SPEC-76 (Turn-Driver Primitive — provides the closed `turn_driver.kind` enum that `compatible_turn_drivers[]` references)
+**Depends on:** [SPEC-76](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the closed `turn_driver.kind` enum that `compatible_turn_drivers[]` references)
 **Source report:** `reports/slt-chc-overhaul-first-iteration.md` (triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`)
 
 ## 1. Problem
 
-Once SPEC-76 lands, the turn-cycle can drive a turn from a non-player record (NPC action, clock fire, offstage action, world pressure). But two gaps remain at the SLT level:
+Now that SPEC-76 is archived, the turn-cycle can drive a turn from a non-player record (NPC action, clock fire, offstage action, world pressure). But two gaps remain at the SLT level:
 
 1. **No structural compatibility check between a driver and an SLT.** Nothing prevents a runtime_jit SLT created for `npc_action` from being selected on a `clock_fire` turn, or a pursuit-pattern SLT from being chosen when the active driver is a secret reveal. Eligibility is checked at the predicate level, but driver-kind compatibility is not.
 
@@ -170,6 +170,8 @@ Same posture as SPEC-76: no backwards-compat shims. SLT records without `groundi
 
 ## 8. Implementation Slices
 
+**Upstream tickets**: SPEC-77's slices run AFTER `archive/tickets/SPEC76TURDRIPRI-001.md` (schema introducing `turn_driver.kind`) and `archive/tickets/SPEC76TURDRIPRI-002.md` (shared contract amendment) land — both exist as of the SPEC-76 decomposition on 2026-05-23. When SPEC-77 is decomposed by `/spec-to-tickets`, every ticket that references the `compatible_turn_drivers` enum should declare an explicit upstream `Deps:` on `archive/tickets/SPEC76TURDRIPRI-001.md`; see §9 Risk Reassessment for the byte-for-byte enum-match obligation.
+
 Smaller than SPEC-76:
 
 1. **Slice A — Schema + shared contract amendment + banned-phrase utility.** `story-storylet.schema.json` + `.claude/skills/_shared-templates/story-state-contract.md` §4 SLT subsection + new `tools/validators/src/structural/slt-grounding-utils.ts`. Schema tests written first (TDD).
@@ -183,6 +185,7 @@ Smaller than SPEC-76:
 
 - **Banned-phrase false positives.** A real authorial phrase might overlap "raise stakes" or "dramatic moment" in context. Mitigation: list is conservative; operator can rephrase at validation time. The validator emits a fail-fast diagnostic, not a silent suppression.
 - **Compatibility-array overload at authoring time.** Authors might list every driver kind reflexively. Mitigation: the commitment-block-authoring skill's amended Phase 4 includes guidance examples (pursuit pattern → `[npc_action, offstage_action]`; deadline pattern → `[clock_fire, world_pressure]`); the runtime_jit singleton constraint prevents JIT blocks from over-claiming.
+- **Upstream sequencing + enum-match dependency on SPEC-76.** SPEC-77's `compatible_turn_drivers` enum at §3.1 (lines 66-74) must match SPEC-76's `turn_driver.kind` enum (per SPEC-76 §3.1) byte-for-byte. At the SPEC-76 reassessment + decomposition session on 2026-05-23, both enums list the identical 8 values in the same order — `player_action`, `player_write_in`, `npc_action`, `offstage_action`, `world_pressure`, `clock_fire`, `secret_reveal`, `multi_actor_collision` — and the match was verified. The `additionalProperties: false` constraint on `grounding` (§3.1) plus the closed enum on `compatible_turn_drivers` make the cross-spec contract structurally enforceable, but the byte-for-byte values must match for the contract to compose. Mitigation: when SPEC-77 is decomposed by `/spec-to-tickets`, every ticket referencing the enum should declare upstream `Deps: archive/tickets/SPEC76TURDRIPRI-001.md` (the SPEC-76 schema ticket that lands the enum on `story-event.schema.json`) so the dependency is structurally enforced at implementation time. Any subsequent reassess-spec pass on SPEC-77 must re-verify the enum-match if either side is amended; a drift detected at reassess-spec time is cheaper than a drift detected at validator-runtime time when a real bundle's SLT fails compatibility-filtering.
 
 ## 10. References
 
@@ -191,4 +194,4 @@ Smaller than SPEC-76:
 - FOUNDATIONS §Story Bundles §5a / §5b / §5c: `docs/FOUNDATIONS.md:648-666`.
 - Existing schema: `tools/validators/src/schemas/story-storylet.schema.json`.
 - Existing skill: `.claude/skills/commitment-block-authoring/SKILL.md`.
-- Predecessor: SPEC-76 (Turn-Driver Primitive — provides the `turn_driver.kind` enum that `compatible_turn_drivers[]` references).
+- Predecessor: [SPEC-76](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the `turn_driver.kind` enum that `compatible_turn_drivers[]` references).

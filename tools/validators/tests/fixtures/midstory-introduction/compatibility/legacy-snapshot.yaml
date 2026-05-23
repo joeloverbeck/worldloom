@@ -61,6 +61,7 @@ records:
         consequence_or_terminal: "PASS: continuation remains open."
         plan_grounding: "PASS: synthetic plan hash present."
         canon_promotion_hold: "PASS: no canon promotion in fixture."
+        turn_driver_lawfulness: "NOT_APPLICABLE: synthetic root page uses story_start."
   - node_type: story_page_record
     node_id: midstory-introduction-test:PG-2
     file_path: stories/midstory-introduction-test/_source/pages/PG-2.yaml
@@ -116,3 +117,4 @@ records:
         consequence_or_terminal: "PASS: continuation remains open."
         plan_grounding: "PASS: synthetic plan hash present."
         canon_promotion_hold: "PASS: no canon promotion in fixture."
+        turn_driver_lawfulness: "NOT_APPLICABLE: legacy compatibility fixture predates turn-driver events."

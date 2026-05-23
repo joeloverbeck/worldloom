@@ -12,10 +12,11 @@ const VALIDATION_TRACE = {
   append_only_delta: "PASS: deltas create, supersede, or close records.",
   consequence_or_terminal: "PASS: consequence capacity is present.",
   plan_grounding: "PASS: plan is grounded in loaded state.",
-  canon_promotion_hold: "NOT_APPLICABLE: no promotion claim is present."
+  canon_promotion_hold: "NOT_APPLICABLE: no promotion claim is present.",
+  turn_driver_lawfulness: "PASS: turn-resolution driver is lawful."
 };
 
-test("validation_trace_shape_compliance accepts the flat eight-gate mapping", async () => {
+test("validation_trace_shape_compliance accepts the flat nine-gate mapping", async () => {
   const verdicts = await validationTraceShapeCompliance.run(
     undefined,
     context([pageRecord("PG-1", VALIDATION_TRACE)])

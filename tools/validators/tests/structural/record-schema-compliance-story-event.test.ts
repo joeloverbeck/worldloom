@@ -7,8 +7,7 @@ import { context, record } from "./helpers.js";
 const FILE_PATH = "stories/test-story/_source/events/SE-1.yaml";
 const VALID_EVENT_KINDS = [
   "story_start",
-  "selected_choice",
-  "write_in_attempt",
+  "turn_resolution",
   "system_repair",
   "audit_repair",
   "prose_attach",
@@ -17,11 +16,16 @@ const VALID_EVENT_KINDS = [
 
 test("record_schema_compliance accepts every contract SE event_kind value", async () => {
   for (const eventKind of VALID_EVENT_KINDS) {
+    const parsed = validEvent({
+      event_kind: eventKind,
+      commitment: commitmentForEventKind(eventKind)
+    });
+    if (eventKind !== "turn_resolution") {
+      delete parsed.turn_driver;
+    }
+
     const result = await recordSchemaCompliance.run({}, context([
-      eventRecord(validEvent({
-        event_kind: eventKind,
-        commitment: commitmentForEventKind(eventKind)
-      }))
+      eventRecord(parsed)
     ]));
 
     assert.deepEqual(result, [], eventKind);
@@ -29,7 +33,7 @@ test("record_schema_compliance accepts every contract SE event_kind value", asyn
 });
 
 test("record_schema_compliance rejects retired SE event_kind values", async () => {
-  for (const eventKind of ["world_block", "repair"]) {
+  for (const eventKind of ["selected_choice", "write_in_attempt", "world_block", "repair"]) {
     const result = await recordSchemaCompliance.run({}, context([
       eventRecord(validEvent({ event_kind: eventKind }))
     ]));
@@ -69,7 +73,7 @@ test("record_schema_compliance requires SE commitment", async () => {
   ));
 });
 
-test("record_schema_compliance accepts selected-choice SE commitment bindings", async () => {
+test("record_schema_compliance accepts turn-resolution SE commitment bindings", async () => {
   const result = await recordSchemaCompliance.run({}, context([
     eventRecord(validEvent({
       commitment: {
@@ -347,10 +351,17 @@ function validEvent(overrides: Record<string, unknown> = {}): Record<string, unk
   return {
     id: "SE-1",
     story_id: "STORY-1",
-    event_kind: "selected_choice",
+    event_kind: "turn_resolution",
     created_at_page: "PG-1",
     parent_page_id: null,
     actor: "STENT-1",
+    turn_driver: {
+      kind: "player_action",
+      initiator: "player",
+      driver_records: [],
+      player_response_mode: "initiates",
+      pov_visibility: "perceived_directly"
+    },
     commitment: {
       selected_slt_id: "SLT-1",
       selection_source: "emitted_choice",
@@ -393,9 +404,7 @@ function commitmentForEventKind(eventKind: string): Record<string, unknown> {
       ? "system_repair"
       : eventKind === "audit_repair"
         ? "audit_repair"
-        : eventKind === "write_in_attempt"
-          ? "runtime_jit"
-          : "emitted_choice",
+        : "emitted_choice",
     alias_bindings: {
       actor: "STENT-1"
     }

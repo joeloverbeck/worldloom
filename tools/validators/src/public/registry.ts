@@ -1,5 +1,6 @@
 import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { activeRecordsFullShape } from "../structural/active-records-full-shape.js";
+import { activePressureHandlingDiscipline } from "../structural/active-pressure-handling-discipline.js";
 import { approvalSemantics } from "../structural/approval-semantics.js";
 import { artifactMaturity } from "../structural/artifact-maturity.js";
 import { branchIsolation } from "../structural/branch-isolation.js";
@@ -33,6 +34,7 @@ import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-pla
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
 import { pagePlanStcharPacketIntegrity } from "../structural/page-plan-stchar-packet-integrity.js";
+import { pagePlanTurnDriverConsistency } from "../structural/page-plan-turn-driver-consistency.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { proseReceiptHashIntegrity } from "../structural/prose-receipt-hash-integrity.js";
 import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
@@ -90,6 +92,8 @@ import { storyDaDuplicateHeuristic } from "../structural/story-da-duplicate-heur
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
 import { storyKernelCastBindListIntegrity } from "../structural/story-kernel-cast-bind-list-integrity.js";
 import { threadIntroductionGroundingIntegrity } from "../structural/thread-introduction-grounding-integrity.js";
+import { turnDriverPovObserverFirewall } from "../structural/turn-driver-pov-observer-firewall.js";
+import { turnDriverSchemaCompliance } from "../structural/turn-driver-schema-compliance.js";
 import { turnCycleOutputGroundingIntegrity } from "../structural/turn-cycle-output-grounding-integrity.js";
 import { validationTraceShapeCompliance } from "../structural/validation-trace-shape-compliance.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
@@ -169,11 +173,15 @@ export const structuralValidators: readonly Validator[] = [
   activeRecordsFullShape,
   pageAffordanceIntegrity,
   pagePlanStcharPacketIntegrity,
+  pagePlanTurnDriverConsistency,
+  activePressureHandlingDiscipline,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,
   storyQuestionTerminalDebt,
   storyDaDuplicateHeuristic,
+  turnDriverSchemaCompliance,
+  turnDriverPovObserverFirewall,
   turnCycleOutputGroundingIntegrity,
   touchedByCfCompleteness,
   proposalPackageShape,

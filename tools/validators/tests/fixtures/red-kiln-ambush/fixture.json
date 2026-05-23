@@ -1,0 +1,261 @@
+{
+  "world_slug": "red-kiln-ambush-world",
+  "story_slug": "red-kiln-ambush",
+  "records": [
+    {
+      "node_type": "page_record",
+      "node_id": "red-kiln-ambush:PG-1",
+      "file_path": "stories/red-kiln-ambush/_source/pages/PG-1.yaml",
+      "parsed": {
+        "id": "PG-1",
+        "story_id": "STORY-76",
+        "state_snapshot": {
+          "active_records": {
+            "STENT": ["STENT-1", "STENT-2"],
+            "BEL": ["BEL-4"],
+            "STPLAN": ["STPLAN-9"],
+            "STEMO": ["STEMO-12"],
+            "CLK": ["CLK-3"],
+            "THR": ["THR-4"]
+          }
+        }
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "red-kiln-ambush:PG-2",
+      "file_path": "stories/red-kiln-ambush/_source/pages/PG-2.yaml",
+      "parsed": {
+        "id": "PG-2",
+        "story_id": "STORY-76",
+        "input": {
+          "resolved_event_id": "SE-2"
+        },
+        "state_snapshot": {
+          "active_records": {
+            "STENT": ["STENT-1", "STENT-2"],
+            "BEL": ["BEL-4"],
+            "STPLAN": ["STPLAN-9"],
+            "STEMO": ["STEMO-12"],
+            "CLK": ["CLK-3"],
+            "THR": ["THR-4"],
+            "CHC": ["CHC-21", "CHC-22", "CHC-23", "CHC-24", "CHC-25"]
+          }
+        }
+      }
+    },
+    {
+      "node_type": "story_entity_record",
+      "node_id": "red-kiln-ambush:STENT-1",
+      "file_path": "stories/red-kiln-ambush/_source/entities/STENT-1.yaml",
+      "parsed": {
+        "id": "STENT-1",
+        "story_id": "STORY-76",
+        "display_name": "Varro",
+        "status": "active"
+      }
+    },
+    {
+      "node_type": "story_entity_record",
+      "node_id": "red-kiln-ambush:STENT-2",
+      "file_path": "stories/red-kiln-ambush/_source/entities/STENT-2.yaml",
+      "parsed": {
+        "id": "STENT-2",
+        "story_id": "STORY-76",
+        "display_name": "Jon",
+        "status": "active"
+      }
+    },
+    {
+      "node_type": "belief_record",
+      "node_id": "red-kiln-ambush:BEL-4",
+      "file_path": "stories/red-kiln-ambush/_source/beliefs/BEL-4.yaml",
+      "parsed": {
+        "id": "BEL-4",
+        "story_id": "STORY-76",
+        "holder": "STENT-2",
+        "belief_mode": "observed",
+        "truth_relation": "true",
+        "confidence": "high",
+        "visibility": "shared",
+        "basis": {
+          "source_event": "SE-2",
+          "access_route": "direct_observation",
+          "access_records": ["STPLAN-9", "STEMO-12", "CLK-3", "THR-4"]
+        },
+        "consequences": {
+          "opens": [],
+          "constrains_choices": []
+        }
+      }
+    },
+    {
+      "node_type": "story_plan_record",
+      "node_id": "red-kiln-ambush:STPLAN-9",
+      "file_path": "stories/red-kiln-ambush/_source/plans/STPLAN-9.yaml",
+      "parsed": {
+        "id": "STPLAN-9",
+        "story_id": "STORY-76",
+        "holder": "STENT-1",
+        "plan_status": "active",
+        "scope": {
+          "visibility": "onscreen"
+        },
+        "current_step": {
+          "action_family": "harm",
+          "target_records": ["STENT-2"],
+          "success_condition": {
+            "predicates": []
+          }
+        }
+      }
+    },
+    {
+      "node_type": "story_emotion_record",
+      "node_id": "red-kiln-ambush:STEMO-12",
+      "file_path": "stories/red-kiln-ambush/_source/emotions/STEMO-12.yaml",
+      "parsed": {
+        "id": "STEMO-12",
+        "story_id": "STORY-76",
+        "holder": "STENT-1",
+        "intensity": "high",
+        "behavioral_pressure": ["attack"]
+      }
+    },
+    {
+      "node_type": "pressure_clock_record",
+      "node_id": "red-kiln-ambush:CLK-3",
+      "file_path": "stories/red-kiln-ambush/_source/pressure-clocks/CLK-3.yaml",
+      "parsed": {
+        "id": "CLK-3",
+        "story_id": "STORY-76",
+        "status": "active",
+        "value": 3,
+        "thresholds": [{ "at": 3 }]
+      }
+    },
+    {
+      "node_type": "thread_record",
+      "node_id": "red-kiln-ambush:THR-4",
+      "file_path": "stories/red-kiln-ambush/_source/threads/THR-4.yaml",
+      "parsed": {
+        "id": "THR-4",
+        "story_id": "STORY-76",
+        "status": "active",
+        "urgency": "high"
+      }
+    },
+    {
+      "node_type": "story_event_record",
+      "node_id": "red-kiln-ambush:SE-2",
+      "file_path": "stories/red-kiln-ambush/_source/events/SE-2.yaml",
+      "parsed": {
+        "id": "SE-2",
+        "story_id": "STORY-76",
+        "created_at_page": "PG-2",
+        "parent_page_id": "PG-1",
+        "event_kind": "turn_resolution",
+        "actor": "STENT-2",
+        "world_logic_rationale": "Varro's plan step and the kiln clock fire now; Jon sees the shot line through the west window.",
+        "commitment": {
+          "selected_slt_id": "SLT-ambush-response",
+          "selection_source": "npc_initiative",
+          "alias_bindings": {}
+        },
+        "turn_driver": {
+          "kind": "npc_action",
+          "initiator": "STENT-1",
+          "driver_records": ["STPLAN-9", "STEMO-12", "CLK-3", "THR-4"],
+          "player_response_mode": "responds",
+          "pov_visibility": "perceived_directly"
+        },
+        "state_delta": {
+          "create": ["CHC-21", "CHC-22", "CHC-23", "CHC-24", "CHC-25"],
+          "supersede": [],
+          "close": []
+        }
+      }
+    },
+    {
+      "node_type": "choice_record",
+      "node_id": "red-kiln-ambush:CHC-21",
+      "file_path": "stories/red-kiln-ambush/_source/choices/CHC-21.yaml",
+      "parsed": {
+        "id": "CHC-21",
+        "story_id": "STORY-76",
+        "created_at_page": "PG-2",
+        "choice_text": "Protect Mara from the shot line.",
+        "player_response_mode": "responds",
+        "grounded_in": {
+          "records": ["STPLAN-9"]
+        }
+      }
+    },
+    {
+      "node_type": "choice_record",
+      "node_id": "red-kiln-ambush:CHC-22",
+      "file_path": "stories/red-kiln-ambush/_source/choices/CHC-22.yaml",
+      "parsed": {
+        "id": "CHC-22",
+        "story_id": "STORY-76",
+        "created_at_page": "PG-2",
+        "choice_text": "Dive for the ledger before it burns.",
+        "player_response_mode": "responds",
+        "grounded_in": {
+          "records": ["CLK-3"]
+        }
+      }
+    },
+    {
+      "node_type": "choice_record",
+      "node_id": "red-kiln-ambush:CHC-23",
+      "file_path": "stories/red-kiln-ambush/_source/choices/CHC-23.yaml",
+      "parsed": {
+        "id": "CHC-23",
+        "story_id": "STORY-76",
+        "created_at_page": "PG-2",
+        "choice_text": "Call Varro out by name.",
+        "player_response_mode": "responds",
+        "grounded_in": {
+          "records": ["STEMO-12"]
+        }
+      }
+    },
+    {
+      "node_type": "choice_record",
+      "node_id": "red-kiln-ambush:CHC-24",
+      "file_path": "stories/red-kiln-ambush/_source/choices/CHC-24.yaml",
+      "parsed": {
+        "id": "CHC-24",
+        "story_id": "STORY-76",
+        "created_at_page": "PG-2",
+        "choice_text": "Retreat through the ash chute.",
+        "player_response_mode": "responds",
+        "grounded_in": {
+          "records": ["THR-4"]
+        }
+      }
+    },
+    {
+      "node_type": "choice_record",
+      "node_id": "red-kiln-ambush:CHC-25",
+      "file_path": "stories/red-kiln-ambush/_source/choices/CHC-25.yaml",
+      "parsed": {
+        "id": "CHC-25",
+        "story_id": "STORY-76",
+        "created_at_page": "PG-2",
+        "choice_text": "Write in a response to the ambush.",
+        "player_response_mode": "responds",
+        "grounded_in": {
+          "records": ["STPLAN-9"]
+        }
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "stories/red-kiln-ambush/pages-prose-plans/PG-2.md",
+      "content": "## 7a. Turn driver / initiative trace\n\n- Driver kind: npc_action\n- Initiator: STENT-1\n- Driver records: STPLAN-9, STEMO-12, CLK-3, THR-4\n- Player response mode: responds\n- POV visibility: perceived_directly\n- Observer-firewall note: Jon sees the shot line through the west window; no offstage interiority is narrated.\n\nActive-pressure disposition\n\n| Record | Disposition | Reason / expiry |\n|---|---|---|\n| STPLAN-9 | selected | became this turn's driver |\n| STEMO-12 | selected | emotional pressure supports Varro's attack |\n| CLK-3 | selected | kiln clock reached the ambush threshold |\n| THR-4 | deferred | until PG-3 if Jon escapes the window line |\n\n## 16a. STCHAR-derived character authority packets\n\n- STENT-1 / STCHAR-9\n  - Required because: page_local_behavior.\n  - Current-state grounding records: STPLAN-9\n  - Summary: The west window bursts inward and the shot line crosses the kiln room.\n"
+    }
+  ]
+}

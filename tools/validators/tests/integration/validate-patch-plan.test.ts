@@ -276,6 +276,14 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "turn_cycle_output_grounding_integrity"
     );
     assert.equal(turnCycleOutputExecution?.status, "skipped");
+    const turnDriverSchemaExecution = result.executions.find(
+      (execution) => execution.name === "turn_driver_schema_compliance"
+    );
+    assert.equal(turnDriverSchemaExecution?.status, "skipped");
+    const turnDriverPovExecution = result.executions.find(
+      (execution) => execution.name === "turn_driver_pov_observer_firewall"
+    );
+    assert.equal(turnDriverPovExecution?.status, "skipped");
     const narrativeShapeExecution = result.executions.find(
       (execution) => execution.name === "narrative_shape_field_rejection"
     );
@@ -292,6 +300,14 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "page_plan_stchar_packet_integrity"
     );
     assert.equal(pagePlanStcharExecution?.status, "skipped");
+    const pagePlanTurnDriverExecution = result.executions.find(
+      (execution) => execution.name === "page_plan_turn_driver_consistency"
+    );
+    assert.equal(pagePlanTurnDriverExecution?.status, "skipped");
+    const activePressureExecution = result.executions.find(
+      (execution) => execution.name === "active_pressure_handling_discipline"
+    );
+    assert.equal(activePressureExecution?.status, "skipped");
     const forbiddenStcharHashExecution = result.executions.find(
       (execution) => execution.name === "forbidden_stchar_tamper_hash_fields"
     );
@@ -368,10 +384,14 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== entityIntroExecution &&
         row !== relationshipIntroExecution &&
         row !== turnCycleOutputExecution &&
+        row !== turnDriverSchemaExecution &&
+        row !== turnDriverPovExecution &&
         row !== narrativeShapeExecution &&
         row !== compatibilityDriftExecution &&
         row !== pageAffordanceExecution &&
         row !== pagePlanStcharExecution &&
+        row !== pagePlanTurnDriverExecution &&
+        row !== activePressureExecution &&
         row !== forbiddenStcharHashExecution &&
         row !== stcharTemporalReferenceExecution &&
         row !== activeRecordsFullShapeExecution &&
@@ -995,7 +1015,8 @@ function validPageFields(id: string): Record<string, unknown> {
       append_only_delta: "PASS: deltas create, supersede, or close records.",
       consequence_or_terminal: "PASS: consequence capacity is present.",
       plan_grounding: "PASS: plan is grounded in loaded state.",
-      canon_promotion_hold: "NOT_APPLICABLE: no promotion claim is present."
+      canon_promotion_hold: "NOT_APPLICABLE: no promotion claim is present.",
+      turn_driver_lawfulness: "NOT_APPLICABLE: fixture page does not exercise turn resolution."
     }
   };
 }

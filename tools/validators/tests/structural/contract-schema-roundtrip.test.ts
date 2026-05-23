@@ -19,7 +19,7 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
   },
   "story-event": {
     required: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "commitment", "outcome_route", "world_logic_rationale", "state_delta"],
-    properties: ["record_kind", "id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "targets", "commitment", "outcome_route", "resolution", "world_logic_rationale", "record_introductions", "state_relations", "non_propagation_facts", "state_delta", "promotion_claims"]
+    properties: ["record_kind", "id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "targets", "commitment", "turn_driver", "outcome_route", "resolution", "world_logic_rationale", "record_introductions", "state_relations", "non_propagation_facts", "state_delta", "promotion_claims"]
   },
   "story-storylet": {
     required: ["id", "story_id", "scope", "title", "move_family", "preconditions", "beats", "exit_options", "saliency", "mystery_policy", "provenance"],
@@ -222,8 +222,15 @@ test("representative amended contract records validate against tightened schemas
       story_id: "STORY-1",
       created_at_page: "PG-1",
       parent_page_id: null,
-      event_kind: "selected_choice",
+      event_kind: "turn_resolution",
       actor: "STENT-1",
+      turn_driver: {
+        kind: "player_action",
+        initiator: "player",
+        driver_records: [],
+        player_response_mode: "initiates",
+        pov_visibility: "perceived_directly"
+      },
       commitment: {
         selected_slt_id: "SLT-1",
         selection_source: "author_pool",
@@ -390,8 +397,15 @@ test("story schemas accept padded legacy cross-references but keep malformed ref
       story_id: "STORY-1",
       created_at_page: "PG-1",
       parent_page_id: null,
-      event_kind: "selected_choice",
+      event_kind: "turn_resolution",
       actor: "STENT-0001",
+      turn_driver: {
+        kind: "player_action",
+        initiator: "player",
+        driver_records: [],
+        player_response_mode: "initiates",
+        pov_visibility: "perceived_directly"
+      },
       targets: ["STLOC-0001", "STOBJ-0001"],
       commitment: {
         selected_slt_id: "SLT-1",
@@ -543,8 +557,15 @@ function validEventRecord(): Record<string, unknown> {
     story_id: "STORY-1",
     created_at_page: "PG-1",
     parent_page_id: null,
-    event_kind: "selected_choice",
+    event_kind: "turn_resolution",
     actor: "STENT-1",
+    turn_driver: {
+      kind: "player_action",
+      initiator: "player",
+      driver_records: [],
+      player_response_mode: "initiates",
+      pov_visibility: "perceived_directly"
+    },
     commitment: {
       selected_slt_id: "SLT-1",
       selection_source: "author_pool",

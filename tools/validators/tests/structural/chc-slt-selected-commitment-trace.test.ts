@@ -187,7 +187,7 @@ test("chc_slt_selected_commitment_trace warns when the selected emitted choice i
     storyRecord("story_plan_record", "STPLAN-1", "plans")
   ])));
 
-  const verdict = verdicts.find((item) => item.code === "chc_slt_selected_commitment_trace.selected_choice_unresolvable");
+  const verdict = verdicts.find((item) => item.code === "chc_slt_selected_commitment_trace.turn_resolution_unresolvable");
   assert.ok(verdict);
   assert.equal(verdict.severity, "warn");
 });
