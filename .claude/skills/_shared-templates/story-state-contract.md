@@ -348,7 +348,7 @@ group: direct_witnesses
 records: [DA-4]
 ```
 
-`reason` is one of `no_witness | witness_incapacitated | evidence_concealed | institution_suppresses_report | event_leaves_no_accessible_trace`. `group` is a free-form witness-group label. `records[]` names the story-local records that justify or contextualize the non-propagation fact. `expected-witness-coverage` and `non_propagation_facts_completeness` consume this field directly.
+`reason` is one of `no_witness | witness_incapacitated | evidence_concealed | institution_suppresses_report | event_leaves_no_accessible_trace`. `group` is one of the computed direct-witness group labels accepted by `expected_witness_coverage`: `direct`, `direct_witnesses`, `direct:<STLOC-id>`, or `location:<STLOC-id>`. The `direct` and `direct_witnesses` forms are bundle-stable; the location-bearing forms are computed at validation time from the event actor's active `STSTAT.location`. Free-form descriptive labels are not accepted; put descriptive context in `records[]` and `world_logic_rationale`. `records[]` names the story-local records that justify or contextualize the non-propagation fact. `expected_witness_coverage` and `non_propagation_facts_completeness` consume this field directly.
 
 ## 6. Action Routing
 
