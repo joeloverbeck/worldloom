@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-74-stchar-distillation-boundary-hardening.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC74STCHARDISBOU-010.md",
+  "last_ticket": "archive/tickets/SPEC74STCHARDISBOU-011.md",
   "last_result": "completed_archived",
-  "last_work_commit": "bd08688fb71d4488443cbd6a751e7e0f7dd8c04a",
+  "last_work_commit": "bf20fe600cca1795527224666b7ef2129b53ca67",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC74STCHARDISBOU-011.md",
+  "next_target": "tickets/SPEC74STCHARDISBOU-012.md",
   "queue": [
-    "tickets/SPEC74STCHARDISBOU-011.md",
     "tickets/SPEC74STCHARDISBOU-012.md",
     "tickets/SPEC74STCHARDISBOU-013.md"
   ],
