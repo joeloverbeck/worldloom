@@ -209,7 +209,7 @@ The following items from the source report are **rejected or deferred** per the 
 - **`choice_set_quality_axes` validator.** Rejected — the report's own §11.3 forbids hard-validating literary quality.
 - **STCHAR Operational Axis Index closed-vocabulary taxonomy.** Deferred — separate STCHAR-shape concern; reactivity fix doesn't depend on it.
 - **`branching-story-prose-attach` driver-fidelity receipt fields.** Deferred — add only after the turn-driver field is real and a playtest confirms prose-rendering surfaces need the receipt.
-- **FOUNDATIONS amendment.** Carried separately by [SPEC-78](SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md), which lands before SPEC-76 (FOUNDATIONS is upstream). SPEC-78 extends §Story Bundles §5c with "Driver salience is local." (covering driver-selection as a prior local-salience-ranking pass) and §6b with event-level driver-declaration coverage (extending the Observer Firewall to `SE.turn_driver.driver_records[]` and `pov_visibility`). SPEC-76's `Validation Rules Upheld` table cites these *extended* principles.
+- **FOUNDATIONS amendment.** Carried separately by [SPEC-78](../archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md), which landed before SPEC-76 (FOUNDATIONS is upstream). SPEC-78 extends §Story Bundles §5c with "Driver salience is local." (covering driver-selection as a prior local-salience-ranking pass) and §6b with event-level driver-declaration coverage (extending the Observer Firewall to `SE.turn_driver.driver_records[]` and `pov_visibility`). SPEC-76's `Validation Rules Upheld` table cites these *extended* principles.
 
 ## 5. Validation Rules Upheld
 

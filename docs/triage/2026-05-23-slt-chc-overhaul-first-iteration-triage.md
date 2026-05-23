@@ -184,7 +184,7 @@ The initial triage placed **"Updating `docs/FOUNDATIONS.md` itself"** in **Out o
 
 **Verdict change:** "Updating `docs/FOUNDATIONS.md`" moves from **Out of Scope** to **accept-with-modification** (narrowed scope: two paragraph extensions; no new sub-section).
 
-**Carrier:** [`specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md`](../../specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md), inserted as row 1 in `specs/IMPLEMENTATION-ORDER.md` (FOUNDATIONS is upstream of contract and schema; the principles SPEC-76 cites are the extended ones).
+**Carrier:** [`archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md`](../../archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md), completed and archived after landing as row 1 in `specs/IMPLEMENTATION-ORDER.md` (FOUNDATIONS is upstream of contract and schema; the principles SPEC-76 cites are the extended ones).
 
 **What is *not* changed by the reversal:** SPEC-76 and SPEC-77 do not need re-drafting; their FOUNDATIONS-citation references remain valid against the extended principles. The only consequent edit is to SPEC-76 §4 Out of Scope (the FOUNDATIONS-rejection bullet is replaced with a forward reference to SPEC-78) and to `IMPLEMENTATION-ORDER.md` (SPEC-78 inserted as row 1; the FOUNDATIONS-rejection bullet is removed from the Out-of-Scope section). Both edits are in SPEC-78's Slice A scope.
 

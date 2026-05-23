@@ -69,7 +69,7 @@ Observed output: `1`.
 ## Files to Touch
 
 - `docs/FOUNDATIONS.md` (modify) — inserted two new paragraphs per §Landed Changes items 1 + 2.
-- `specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md` (modify) — corrected the §5c grep proof from `-B1` to `-B2` so the command matches normal Markdown paragraph spacing.
+- `archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md` (modify) — corrected the §5c grep proof from `-B1` to `-B2` so the command matches normal Markdown paragraph spacing.
 - `archive/tickets/SPEC78FOUAMEDRI-001.md` (modify) — closeout truthing and archival.
 
 ## Out of Scope

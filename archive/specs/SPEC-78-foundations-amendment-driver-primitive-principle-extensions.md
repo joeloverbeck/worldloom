@@ -1,9 +1,9 @@
 # SPEC-78 — FOUNDATIONS Amendment for Driver-Primitive Principle Extensions
 
-**Status:** Draft (proposed 2026-05-23)
+**Status:** COMPLETED (2026-05-23)
 **Spec ID:** SPEC-78
 **Type:** FOUNDATIONS amendment (docs-only; no schema, no validator, no skill changes)
-**Successors:** [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [SPEC-77](SPEC-77-slt-grounding-provenance-minimal.md) (downstream consumers — their FOUNDATIONS-citation surfaces reference the extended principles landed here)
+**Successors:** [SPEC-76](../../specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [SPEC-77](../../specs/SPEC-77-slt-grounding-provenance-minimal.md) (downstream consumers — their FOUNDATIONS-citation surfaces reference the extended principles landed here)
 **Source:** brainstorm continuation of `reports/slt-chc-overhaul-first-iteration.md` triage at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`. The user's question about FOUNDATIONS sufficiency for the driver primitive surfaced the two narrow principle extensions documented here.
 
 ## 1. Problem
@@ -63,7 +63,7 @@ SPEC-76's §4 Out of Scope previously rejected "Updating `docs/FOUNDATIONS.md`";
 - **Amending FOUNDATIONS §Validation Rules.** Rule 1 (No Floating Facts), Rule 4 (No Globalization by Accident), Rule 5 (No Consequence Evasion) all already cover the relevant surface; the driver primitive does not introduce new global-canon-mutation territory.
 - **Amending `.claude/skills/_shared-templates/story-state-contract.md`.** Contract amendments are in SPEC-76's scope; SPEC-78 is FOUNDATIONS-only.
 - **Updating skill descriptions, validators, or schemas.** SPEC-78 is docs-only. SPEC-76 and SPEC-77 carry all schema / validator / skill work.
-- **Amending `docs/CONTEXT-PACKET-CONTRACT.md` and `docs/MACHINE-FACING-LAYER.md`.** The source report's §8.5 enumerated these alongside FOUNDATIONS.md to document new turn-driver and binding concepts. The triage's rejections (full `CHC.binding` object, candidate commitments, `SLT.grounding.source_records` — see [triage R1, R2, R5, R6](../docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md)) eliminated the source-report concepts that would have driven those contract amendments. SPEC-76's narrowed-scope additions (`SE.turn_driver`, `SLT.grounding.compatible_turn_drivers`, `reason_to_exist`) are accommodated by the existing context-packet projection and machine-layer retrieval surfaces without contract amendment.
+- **Amending `docs/CONTEXT-PACKET-CONTRACT.md` and `docs/MACHINE-FACING-LAYER.md`.** The source report's §8.5 enumerated these alongside FOUNDATIONS.md to document new turn-driver and binding concepts. The triage's rejections (full `CHC.binding` object, candidate commitments, `SLT.grounding.source_records` — see [triage R1, R2, R5, R6](../../docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md)) eliminated the source-report concepts that would have driven those contract amendments. SPEC-76's narrowed-scope additions (`SE.turn_driver`, `SLT.grounding.compatible_turn_drivers`, `reason_to_exist`) are accommodated by the existing context-packet projection and machine-layer retrieval surfaces without contract amendment.
 
 ## 5. Validation Rules Upheld
 
@@ -110,5 +110,20 @@ Single slice:
 - Source: brainstorm continuation of `reports/slt-chc-overhaul-first-iteration.md` triage at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`.
 - FOUNDATIONS §Story Bundles §5c (existing prose to be extended): `docs/FOUNDATIONS.md:660-666`.
 - FOUNDATIONS §Story Bundles §6b (existing prose to be extended): `docs/FOUNDATIONS.md:686-690`.
-- Downstream consumers: [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (turn-driver primitive — relies on extended §5c for Phase 0 design and on extended §6b for `turn_driver_pov_observer_firewall` validator); [SPEC-77](SPEC-77-slt-grounding-provenance-minimal.md) (minimal SLT grounding — relies on extended §5c indirectly via the compatible-turn-drivers filter).
+- Downstream consumers: [SPEC-76](../../specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (turn-driver primitive — relies on extended §5c for Phase 0 design and on extended §6b for `turn_driver_pov_observer_firewall` validator); [SPEC-77](../../specs/SPEC-77-slt-grounding-provenance-minimal.md) (minimal SLT grounding — relies on extended §5c indirectly via the compatible-turn-drivers filter).
 - Negative precedents (record-class additions that did not warrant FOUNDATIONS amendments): SPEC-47 (STPLAN + STEMO), SPEC-48 (SE `record_introductions[]` extension), SPEC-63 (offstage causal packet tier).
+
+## Outcome
+
+Completed: 2026-05-23.
+
+SPEC78FOUAMEDRI-001 landed the two planned FOUNDATIONS prose amendments in `docs/FOUNDATIONS.md`: §Story Bundles §5c now states that driver salience is local, and §6b now explicitly governs event-level non-player driver declaration and `pov_visibility`. The pre-existing SPEC-76 forward reference to SPEC-78 was verified with output `1`; no schema, validator, skill, or package changes were made.
+
+Verification:
+
+1. `grep -B2 -A4 "Driver salience is local" docs/FOUNDATIONS.md` — passed; the new §5c paragraph appears immediately after the "No global drama manager." paragraph with normal Markdown spacing.
+2. `grep -A2 "firewall also governs event-level driver declaration" docs/FOUNDATIONS.md` — passed; the new §6b event-level firewall paragraph appears before the existing "This firewall governs move and choice generation." paragraph.
+3. `grep -c "Carried separately by \[SPEC-78\]" specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md` — passed with output `1`.
+4. `git diff -- docs/FOUNDATIONS.md` before the ticket commit showed exactly the two intended FOUNDATIONS paragraph insertions.
+
+Deviation: the drafted §5c proof used `grep -B1`, but normal Markdown paragraph spacing makes `-B1` show the blank separator line. The accepted proof was corrected to `grep -B2 -A4 "Driver salience is local" docs/FOUNDATIONS.md`.
