@@ -1,6 +1,6 @@
 # SPEC76TURDRIPRI-003: Validator — `turn_driver_schema_compliance`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new structural validator at `tools/validators/src/structural/turn-driver-schema-compliance.ts`; new registry entry at `tools/validators/src/public/registry.ts`
@@ -17,6 +17,7 @@ JSON Schema validation alone cannot express constraints that span SE record + pa
 3. **Cross-skill / cross-artifact boundary**: this validator is registered in the validator framework's registry (per registry.ts pattern) and consumed by the framework run-loop at `full-world` and `pre-apply` modes — both modes per existing convention. The shape under audit is the `Validator` interface contract (the validator must export a `Validator` object matching the existing sibling validators' shape). No skill consumes this validator directly; it runs as part of the framework's structural pass.
 4. **FOUNDATIONS principle**: §Story Bundles §5b (Schema-Minimalism At Story Scope) motivates this ticket — `turn_driver.kind` drives this validator's per-kind constraint check; `initiator` constrains driver-record patterns; `driver_records[]` is the audit-trace and validator input; `player_response_mode` and `pov_visibility` are enforced for closed-enum membership. Every field this validator inspects is load-bearing per §5b. The validator's existence is what makes the field shapes structurally enforceable across the SE/PG record boundary.
 5. **HARD-GATE / Canon Safety Check surface**: this is a new structural validator under `tools/validators/src/structural/`. Per the per-ticket-type granularity rule, item 5 fires because the structural validator gates story-bundle SE record writes at engine pre-apply time. The validator does not weaken any Mystery Reserve firewall — its scope is structural conformance, not Mystery resolution; the Mystery firewall remains the domain of `turn_driver_pov_observer_firewall` (SPEC76TURDRIPRI-004) and the existing `forbidden_mystery_resolution` deterministic check at `branching-story-prose-attach`.
+6. Implementation-time proof fallout: `tools/validators/tests/integration/validate-patch-plan.test.ts` has a clean canon-only pre-apply plan that enumerates expected skipped validators. Registering `turn_driver_schema_compliance` required adding that validator to the skipped set for non-story plans; this is same-package proof-surface upkeep, not a behavior expansion.
 
 ## Architecture Check
 
@@ -81,6 +82,8 @@ Per SPEC-76 §6.2 and the established convention at `tools/validators/tests/stru
 - `tools/validators/src/structural/turn-driver-schema-compliance.ts` (new)
 - `tools/validators/src/public/registry.ts` (modify — single import + single array append)
 - `tools/validators/tests/structural/turn-driver-schema-compliance.test.ts` (new)
+- `tools/validators/tests/structural/registry.test.ts` (modify — structural registry inventory includes the new validator)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean canon-only pre-apply plan expects the story-event/page-scoped validator to skip)
 
 ## Out of Scope
 
@@ -110,8 +113,29 @@ Per SPEC-76 §6.2 and the established convention at `tools/validators/tests/stru
 ### New/Modified Tests
 
 1. `tools/validators/tests/structural/turn-driver-schema-compliance.test.ts` (new) — inline-fixture-builder suite per SPEC-76 §6.2: 6 non-player positive + 2 player positive + 7 negative cases.
+2. `tools/validators/tests/structural/registry.test.ts` (modified) — confirms the registry exposes `turn_driver_schema_compliance`.
+3. `tools/validators/tests/integration/validate-patch-plan.test.ts` (modified) — confirms a canon-only clean pre-apply plan treats the story-event/page-scoped validator as skipped.
 
 ### Commands
 
 1. `cd tools/validators && npm test` — runs the validator package's full test suite including the new structural test file.
 2. `cd tools/validators && npm run build` — verifies TypeScript compilation of the new validator module and registry import.
+
+## Outcome
+
+Completed: 2026-05-23.
+
+Implemented `turn_driver_schema_compliance` as a structural validator registered in `tools/validators/src/public/registry.ts`. The validator runs in full-world mode, pre-apply mode for story event/page patch plans, and incremental mode for touched SE/PG files. It filters to `event_kind = turn_resolution`, enforces the closed `turn_driver.kind` set, validates per-kind initiator/driver-record constraints, checks non-player and player driver-record cardinality rules, rejects direct offstage visibility, and verifies every cited `driver_records[]` id appears in the parent page's `state_snapshot.active_records`.
+
+Added inline structural tests covering the eight positive driver shapes, the seven SPEC-76 error codes, non-turn short-circuit behavior, and applicability scoping. Updated the structural registry inventory and the clean pre-apply integration test so canon-only plans correctly expect this story-event/page-scoped validator to skip.
+
+## Verification Result
+
+1. `cd tools/validators && npm run build` — PASS; TypeScript compiled the new validator module, registry import, and tests.
+2. `cd tools/validators && node --test dist/tests/structural/turn-driver-schema-compliance.test.js dist/tests/structural/registry.test.js dist/tests/integration/validate-patch-plan.test.js` — PASS; 25 focused structural/registry/pre-apply tests passed.
+3. `cd tools/validators && npm test` — PASS on rerun; 976 tests passed, 0 failed. Initial broad run exposed the clean pre-apply integration expectation that needed the new validator listed as skipped on canon-only plans; after that same-package proof-surface update, the broad lane passed.
+
+## Deviations
+
+- Acceptance's `npm test -- --test-name-pattern="turn_driver_schema_compliance"` command is not a truthful Node test runner filter for this package. The focused equivalent used the compiled test files directly after `npm run build`.
+- `multi_actor_collision` distinct-actor enforcement uses available story-record ownership fields (`holder`, `actor`, `subject`, `entity_id`, `stent_id`, or relationship `direction.from/to`) to determine whether cited driver records represent at least two STENTs. Deeper observer-firewall semantics remain out of scope for SPEC76TURDRIPRI-004.
