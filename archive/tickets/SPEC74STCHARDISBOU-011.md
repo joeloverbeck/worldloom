@@ -1,6 +1,6 @@
 # SPEC74STCHARDISBOU-011: New validator stchar_regeneration_reason_integrity
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new validator file `tools/validators/src/structural/stchar-regeneration-reason-integrity.ts`; registry append at `tools/validators/src/public/registry.ts`; new test file `tools/validators/tests/structural/stchar-regeneration-reason-integrity.test.ts`
@@ -18,6 +18,7 @@ After `archive/tickets/SPEC74STCHARDISBOU-006.md` landed, the JSON Schema enforc
 4. FOUNDATIONS principle restated: Rule 6 (No Silent Retcons) — every STCHAR regeneration must classify its lifecycle event with a durable-consolidation rationale + structural evidence. §Story Bundles §5b (Schema-Minimalism) — `regeneration_reason_class` is load-bearing because this validator consumes it for the lifecycle classification gate.
 5. HARD-GATE / Canon Safety Check surface touched: this is a new structural validator under `tools/validators/src/structural/`; per the per-ticket-type granularity in spec-to-tickets, a new structural validator engages this item. The validator strengthens the STCHAR regeneration gate by enforcing the evidence requirement that the schema's conditional cannot reach.
 6. Schema extension consumed: this validator reads the `regeneration_reason_class` field added by `archive/tickets/SPEC74STCHARDISBOU-006.md` to `story-character-authority.schema.json`. The validator IS the structural consumer that makes the schema field load-bearing under FOUNDATIONS §Story Bundles §5b. The consumer-side schema dependency is satisfied by the archived prerequisite.
+7. Implementation-time inventory sweep found same-package registry and inventory fallout beyond the drafted three-file set: `tools/validators/tests/structural/registry.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, `tools/validators/tests/integration/validate-patch-plan.test.ts`, and `tools/validators/README.md` assert validator names/counts or STCHAR pre-apply skipped-validator counts. These are same-seam proof surfaces and were updated with the registry append.
 
 ## Architecture Check
 
@@ -83,6 +84,10 @@ Cases per SPEC-74 §7:
 - `tools/validators/src/structural/stchar-regeneration-reason-integrity.ts` (new)
 - `tools/validators/src/public/registry.ts` (modify — add import + array entry)
 - `tools/validators/tests/structural/stchar-regeneration-reason-integrity.test.ts` (new)
+- `tools/validators/tests/structural/registry.test.ts` (modify — registry expected-name list)
+- `tools/validators/tests/integration/spec04-verification.test.ts` (modify — structural/total validator counts)
+- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — STCHAR pre-apply skipped-validator inventory)
+- `tools/validators/README.md` (modify — structural validator inventory)
 
 ## Out of Scope
 
@@ -114,9 +119,30 @@ Cases per SPEC-74 §7:
 ### New/Modified Tests
 
 1. `tools/validators/tests/structural/stchar-regeneration-reason-integrity.test.ts` (new) — positive (3 valid reason-class + evidence combinations) + negative (missing field, null, no evidence, ordinary-state-only evidence) cases per Verification Layers item 4.
+2. `tools/validators/tests/structural/registry.test.ts` — expected structural validator list includes `stchar_regeneration_reason_integrity`.
+3. `tools/validators/tests/integration/spec04-verification.test.ts` — structural/total validator counts updated for the new registered validator.
+4. `tools/validators/tests/integration/validate-patch-plan.test.ts` — pre-apply skipped-validator inventory covers the new STCHAR validator.
 
 ### Commands
 
 1. `npm test --prefix tools/validators` (confirms new test file passes)
 2. `grep -n 'stcharRegenerationReasonIntegrity\|stchar-regeneration-reason-integrity' tools/validators/src/public/registry.ts` (confirms registry append)
 3. Dry-run the validator against a representative regenerated red-bunny STCHAR fixture (post-SPEC74STCHARDISBOU-013-migration) to confirm PASS with valid evidence and FAIL on hand-crafted negative fixtures.
+
+## Outcome
+
+Completed: 2026-05-23
+
+What changed:
+- Added `stchar_regeneration_reason_integrity` as a structural STCHAR validator. It runs on regenerated or superseding STCHAR records, enforces valid non-null `regeneration_reason_class`, checks per-reason structural evidence, requires `source_char_id` for `source_world_char_material_change`, and emits `ordinary_state_not_regeneration_reason` when the only cited evidence is ordinary active-state records without durable-consolidation rationale.
+- Registered the validator in `tools/validators/src/public/registry.ts` and updated registry/count/inventory surfaces in `tools/validators/tests/structural/registry.test.ts`, `tools/validators/tests/integration/spec04-verification.test.ts`, `tools/validators/tests/integration/validate-patch-plan.test.ts`, and `tools/validators/README.md`.
+- Added focused unit coverage in `tools/validators/tests/structural/stchar-regeneration-reason-integrity.test.ts` for valid evidence classes, missing/null reasons, missing story-local evidence, missing `source_char_id`, ordinary-state-only evidence, non-regenerated skip behavior, and pre-apply applicability.
+
+Deviations from original plan:
+- Same-seam validator inventory/count surfaces were added to `Files to Touch` after reassessment. Without them the package test lane would have retained stale expected validator lists/counts.
+- The representative red-bunny fixture dry-run remains a capstone/migration owner (`tickets/SPEC74STCHARDISBOU-013.md`) because this ticket intentionally uses synthetic structural records and does not mutate red-bunny.
+
+Verification:
+- `npm test --prefix tools/validators` — PASS (941 tests).
+- `rg -n "stcharRegenerationReasonIntegrity|stchar-regeneration-reason-integrity" tools/validators/src/public/registry.ts tools/validators/src/structural/stchar-regeneration-reason-integrity.ts` — PASS, registry import/entry and validator export found.
+- `rg -n "source_char_hash" tools/validators/src/structural/stchar-regeneration-reason-integrity.ts` — PASS, no matches.

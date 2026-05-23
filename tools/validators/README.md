@@ -73,6 +73,7 @@ Structural validators:
 - `stchar_source_fact_coverage`
 - `stchar_source_material_inventory_integrity`
 - `stchar_temporal_reference_boundary`
+- `stchar_regeneration_reason_integrity`
 - `no_char_authority_in_story_runtime`
 - `character_grounding_consistency`
 - `state_snapshot_integrity`
