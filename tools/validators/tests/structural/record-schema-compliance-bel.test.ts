@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
+import { STATIC_ACCESS_RECORD_PREFIXES } from "../../src/structural/observer-firewall.js";
 import { context, record } from "./helpers.js";
 
 const FILE_PATH = "stories/test-story/_source/beliefs/BEL-1.yaml";
@@ -82,6 +83,37 @@ test("record_schema_compliance accepts new BEL truth, confidence, and visibility
   const result = await recordSchemaCompliance.run({}, context([beliefRecord(parsed)]));
 
   assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance accepts observer-firewall direct BEL access-record ids", async () => {
+  const parsed = validBelief();
+  parsed.basis = {
+    source_event: "SE-1",
+    access_route: "direct_observation",
+    access_records: STATIC_ACCESS_RECORD_PREFIXES.map((prefix, index) => `${prefix}-${index + 1}`)
+  };
+
+  const result = await recordSchemaCompliance.run({}, context([beliefRecord(parsed)]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects direct STPLAN and STEMO BEL access-record ids", async () => {
+  for (const accessRecord of ["STPLAN-1", "STEMO-1"]) {
+    const parsed = validBelief();
+    parsed.basis = {
+      source_event: "SE-1",
+      access_route: "direct_observation",
+      access_records: [accessRecord]
+    };
+
+    const result = await recordSchemaCompliance.run({}, context([beliefRecord(parsed)]));
+
+    assert.ok(result.some((verdict) =>
+      verdict.code === "record_schema_compliance.pattern" &&
+      verdict.message.includes("/basis/access_records/0")
+    ), accessRecord);
+  }
 });
 
 test("record_schema_compliance rejects retired BEL confidence values", async () => {

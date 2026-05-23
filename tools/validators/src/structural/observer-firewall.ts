@@ -23,7 +23,20 @@ const OBSERVABILITY_ACCESS_ROUTES = new Set([
   "surveillance",
   "institutional_channel"
 ]);
-const STATIC_ACCESS_RECORD_ID = /^(?:STENT|STSTAT|STLOC|STOBJ|DA|BEL|SF|SE|CLK|STSEC|STQ|STPLAN|STEMO)-\d+$/;
+export const STATIC_ACCESS_RECORD_PREFIXES = [
+  "STENT",
+  "STSTAT",
+  "STLOC",
+  "STOBJ",
+  "DA",
+  "BEL",
+  "SF",
+  "SE",
+  "CLK",
+  "STSEC",
+  "STQ"
+] as const;
+const STATIC_ACCESS_RECORD_ID = new RegExp(`^(?:${STATIC_ACCESS_RECORD_PREFIXES.join("|")})-\\d+$`);
 const PLAN_OR_EMOTION_RECORD_ID = /^(?:STPLAN|STEMO)-\d+$/;
 const STATUS_RECORD_ID = /^STSTAT-\d+$/;
 const STORY_ENTITY_RECORD_ID = /^STENT-\d+$/;

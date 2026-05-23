@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { observerFirewall } from "../../src/structural/observer-firewall.js";
+import { observerFirewall, STATIC_ACCESS_RECORD_PREFIXES } from "../../src/structural/observer-firewall.js";
 import { context, record } from "./helpers.js";
 
 test("observer_firewall accepts choices grounded in the actor's own BEL", async () => {
@@ -155,6 +156,20 @@ test("observer_firewall rejects cross-actor STEMO grounding with a non-observabi
   assert.equal(verdicts[0]?.code, "observer_firewall_violation_no_access_route");
 });
 
+test("observer_firewall does not accept direct cross-actor STEMO access-record ids", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STEMO-2"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    emotion("STEMO-2", "STENT-2", ["BEL-2"]),
+    beliefWithRoute("BEL-1", "STENT-1", "private", "direct_observation", ["STEMO-2"])
+  ]));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "observer_firewall_violation_no_access_route");
+  assert.match(verdicts[0]?.message ?? "", /route via the holder entity of STEMO-2/);
+});
+
 test("observer_firewall accepts CHC status grounding for the actor's own active STSTAT", async () => {
   const verdicts = await observerFirewall.run(undefined, context([
     page("PG-1", "CHC-1"),
@@ -281,6 +296,13 @@ test("observer_firewall accepts SPEC-42 hidden preconditions with actor access r
   assert.deepEqual(verdicts, []);
 });
 
+test("observer_firewall direct BEL access prefixes stay in parity with the BEL schema", () => {
+  assert.deepEqual(
+    [...STATIC_ACCESS_RECORD_PREFIXES].sort(),
+    beliefSchemaAccessRecordPrefixes().sort()
+  );
+});
+
 test("observer_firewall uses child page input.choice_id, not parent page", async () => {
   const verdicts = await observerFirewall.run(undefined, context([
     page("PG-1", "CHC-1"),
@@ -365,6 +387,26 @@ function beliefWithRoute(id: string, holder: string, visibility: string, accessR
     visibility,
     basis: { access_route: accessRoute, access_records: accessRecords }
   });
+}
+
+function beliefSchemaAccessRecordPrefixes(): string[] {
+  const schema = JSON.parse(readFileSync("src/schemas/story-belief.schema.json", "utf8")) as {
+    properties?: {
+      basis?: {
+        properties?: {
+          access_records?: {
+            items?: {
+              pattern?: string;
+            };
+          };
+        };
+      };
+    };
+  };
+  const pattern = schema.properties?.basis?.properties?.access_records?.items?.pattern;
+  const match = pattern?.match(/^\^\(([^)]+)\)-/);
+  assert.ok(match?.[1], "BEL schema access_records pattern should be a grouped prefix regex");
+  return match[1].split("|");
 }
 
 function fact(id: string) {
