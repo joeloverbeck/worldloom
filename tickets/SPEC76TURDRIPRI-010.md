@@ -71,7 +71,7 @@ If the SKILL.md contains a summary table listing all Phase 2 sub-phases, add the
 - New structural validators (including `active_pressure_handling_discipline` per-page enforcement) — shipped in SPEC76TURDRIPRI-003 through archive/tickets/SPEC76TURDRIPRI-006.md.
 - Existing-validator updates — shipped in archive/tickets/SPEC76TURDRIPRI-007.md.
 - Turn-cycle skill Phase 0 — shipped in archive/tickets/SPEC76TURDRIPRI-008.md.
-- Bootstrap skill §7a carve-out — ship in SPEC76TURDRIPRI-009.
+- Bootstrap skill §7a carve-out — shipped in archive/tickets/SPEC76TURDRIPRI-009.md.
 - Phase 2l ("Active-state underuse warnings") modifications — explicitly NOT modified per Q3=(a) reassessment decision; Phase 2l remains as-is.
 - `commitment-block-authoring` audit_repair flow changes to consume the new RSP card — out of scope; the existing RSP consumption convention already handles this audit's RSP cards.
 

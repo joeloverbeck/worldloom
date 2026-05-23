@@ -1,6 +1,6 @@
 # SPEC76TURDRIPRI-009: Bootstrap skill — §7a carve-out for `story_start` SE-1
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-bootstrap/SKILL.md` (minor SE-1 documentation + PG-1 page-plan §7a omission rule)
@@ -76,3 +76,16 @@ Per SPEC-76 §3.4 final sentence, note that seeded SLTs become eligible for non-
 
 1. `grep -nE "§7a|advance_initiative|event_kind: story_start" .claude/skills/branching-story-bootstrap/SKILL.md` — covers all 3 Acceptance Criteria grep-proofs.
 2. Manual review of the inserted paragraph for prose coherence.
+
+## Outcome
+
+Completed: 2026-05-23.
+
+Implemented the bootstrap-skill documentation carve-out in `.claude/skills/branching-story-bootstrap/SKILL.md` near Phase 7. The new text states that standard PG-1 `SE-1` remains `event_kind: story_start`, that the root page plan omits shared-contract §7a because `story_start` forbids `turn_driver`, that the immediate-opening initiative edge case uses an `advance_initiative` continuation event carrying `turn_resolution` + `turn_driver`, and that SPEC-77 owns future `compatible_turn_drivers` seeded-SLT eligibility.
+
+Deviation: no behavior, schema, validator, or HARD-GATE semantics changed; this was a documentation-only skill update.
+
+Verification:
+
+1. `grep -nE "§7a|advance_initiative|event_kind: story_start" .claude/skills/branching-story-bootstrap/SKILL.md` — passed; matches the existing `event_kind: story_start` declaration and the new §7a / `advance_initiative` carve-out text.
+2. Manual review — passed; the new bullets sit under the Phase 7 root-event/page step and preserve the surrounding bootstrap procedure.
