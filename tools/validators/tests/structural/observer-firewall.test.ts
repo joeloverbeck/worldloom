@@ -110,6 +110,51 @@ test("observer_firewall accepts STEMO grounding through actor-accessible apprais
   assert.deepEqual(verdicts, []);
 });
 
+test("observer_firewall accepts cross-actor STEMO grounding with an observability BEL for the holder", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STEMO-2"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    emotion("STEMO-2", "STENT-2", ["BEL-2"]),
+    beliefWithRoute("BEL-1", "STENT-1", "private", "direct_observation", ["STENT-2"])
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("observer_firewall rejects cross-actor STEMO grounding without an observability BEL for the holder", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STEMO-2"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    emotion("STEMO-2", "STENT-2", ["BEL-2"])
+  ]));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "observer_firewall_violation_no_access_route");
+  assert.deepEqual(verdicts[0]?.detail, {
+    event_id: "SE-1",
+    actor: "STENT-1",
+    choice_id: "CHC-1",
+    reference_id: "STEMO-2",
+    reference_path: "grounded_in.records[0]"
+  });
+  assert.match(verdicts[0]?.message ?? "", /route via the holder entity of STEMO-2/);
+});
+
+test("observer_firewall rejects cross-actor STEMO grounding with a non-observability BEL route", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STEMO-2"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    emotion("STEMO-2", "STENT-2", ["BEL-2"]),
+    beliefWithRoute("BEL-1", "STENT-1", "private", "rumor", ["STENT-2"])
+  ]));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "observer_firewall_violation_no_access_route");
+});
+
 test("observer_firewall accepts CHC status grounding for the actor's own active STSTAT", async () => {
   const verdicts = await observerFirewall.run(undefined, context([
     page("PG-1", "CHC-1"),
@@ -309,6 +354,16 @@ function belief(id: string, holder: string, visibility: string, accessRecords: s
     holder,
     visibility,
     basis: { access_records: accessRecords }
+  });
+}
+
+function beliefWithRoute(id: string, holder: string, visibility: string, accessRoute: string, accessRecords: string[]) {
+  return storyRecord("belief_record", id, "beliefs", {
+    id,
+    story_id: "STORY-1",
+    holder,
+    visibility,
+    basis: { access_route: accessRoute, access_records: accessRecords }
   });
 }
 
