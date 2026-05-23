@@ -1,21 +1,19 @@
 {
   "originating_spec": "specs/SPEC-72-plan-hash-advisory.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC72PLAHASADV-002.md",
+  "last_ticket": "archive/tickets/SPEC72PLAHASADV-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "120476191a2ff1f5fc17cc2cef03d6c1b305b810",
+  "last_work_commit": "18ddf581cbb7e1519fd0f3c8aae592c03cea4684",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC72PLAHASADV-003.md",
-  "queue": [
-    "tickets/SPEC72PLAHASADV-003.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": "final_spec_archive",
+  "queue": [],
+  "phase": "final_spec_archive",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated edits left unstaged: .claude/skills/brainstorm/SKILL.md, .claude/skills/brainstorm/references/deliverable-classification.md; expected ignored artifacts under tools/hooks/{dist,logs,node_modules} and tools/validators/{dist,node_modules}",
-  "post_review_material_updates": true,
-  "post_review_audit_block": "emitted",
+  "dirty_state": "unrelated edits left unstaged: .claude/skills/brainstorm/SKILL.md, .claude/skills/brainstorm/references/deliverable-classification.md, .claude/skills/branching-story-bootstrap/SKILL.md, docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md, specs/IMPLEMENTATION-ORDER.md, specs/SPEC-71-page-packet-required-because-label-parsing.md deletion, specs/SPEC-73-page-packet-required-because-label-parsing.md untracked; expected ignored artifacts under tools/hooks/{dist,logs,node_modules}, tools/validators/{dist,node_modules}, tools/world-mcp/{.secret,dist,node_modules}",
+  "post_review_material_updates": false,
+  "post_review_audit_block": "not_applicable",
   "updated_at": "2026-05-23"
 }
