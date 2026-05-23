@@ -1,6 +1,6 @@
 # SPEC74STCHARDISBOU-006: story-character-authority.schema.json regeneration_reason_class field + conditional + patch-engine fixture updates
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/schemas/story-character-authority.schema.json` (new property + conditional rule); `tools/patch-engine/tests/ops/create-story-record.test.ts` (STCHAR-fixture updates to pass null/valid value per source_kind)
@@ -95,7 +95,8 @@ Grep for additional patch-engine test files that construct STCHAR records and ap
 
 - `tools/validators/src/schemas/story-character-authority.schema.json` (modify)
 - `tools/patch-engine/tests/ops/create-story-record.test.ts` (modify)
-- Any additional patch-engine fixture file that constructs STCHAR records (grep for `story_character_authority\|STCHAR` under `tools/patch-engine/tests/` and update each)
+- `tools/validators/tests/structural/record-schema-compliance-story-character-authority.test.ts` (modify)
+- `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` (modify)
 
 ## Out of Scope
 
@@ -124,11 +125,30 @@ Grep for additional patch-engine test files that construct STCHAR records and ap
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/schemas/story-character-authority.test.ts` (extend if exists; create if not) — add positive and negative cases for the conditional rule.
+1. `tools/validators/tests/structural/record-schema-compliance-story-character-authority.test.ts` — added positive and negative cases for the conditional rule through the live `record_schema_compliance` Ajv2020 path.
 2. `tools/patch-engine/tests/ops/create-story-record.test.ts` — update STCHAR fixtures to pass null/valid value per source_kind.
+3. `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` — updated the aggregate STCHAR property-set guard for the new schema field.
 
 ### Commands
 
 1. `npm test --prefix tools/validators` (confirms schema validation passes for all positive cases; fails for negative cases per the conditional)
 2. `npm test --prefix tools/patch-engine` (confirms patch-engine STCHAR ops produce schema-conforming records)
 3. Schema-validation dry-run on three representative records (positive: regenerated with valid enum value; negative: regenerated with null; positive: world_char with null) — confirms `if/then/anyOf` composes correctly with `additionalProperties: false`.
+
+## Outcome
+
+Completed 2026-05-23. `tools/validators/src/schemas/story-character-authority.schema.json` now declares `regeneration_reason_class` as the five-value nullable enum and conditionally requires a non-null string value when `source_kind: regenerated` or `supersedes` is non-null. The conditional keeps `additionalProperties: false` intact and declares the locally required property inside the `then.properties` block for Ajv strict-required compatibility.
+
+The validator tests now cover non-regenerated `null`, regenerated valid enum, regenerated `null` rejection, and superseding `null` rejection through `record_schema_compliance`. The aggregate schema roundtrip guard now includes the new property. Patch-engine STCHAR operation fixtures now emit `regeneration_reason_class: null` for ordinary world-char STCHAR records and a valid `durable_branch_transformation` value for the superseding regenerated fixture.
+
+## Verification Result
+
+1. `npm run build && node --test dist/tests/structural/record-schema-compliance-story-character-authority.test.js dist/tests/structural/contract-schema-roundtrip.test.js` from `tools/validators` — PASS after building local package dependencies; 2 focused compiled test files passed.
+2. `npm test` from `tools/patch-engine` — PASS; 99 tests passed.
+3. `npm test` from `tools/validators` — PASS; 905 tests passed.
+4. Manual grep/diff review — PASS: `regeneration_reason_class` appears in the schema property declaration, conditional rule, schema-compliance tests, aggregate property guard, and patch-engine STCHAR fixtures.
+
+## Deviations
+
+- The drafted `tools/validators/tests/schemas/story-character-authority.test.ts` surface did not exist. The landed proof uses the existing `tools/validators/tests/structural/record-schema-compliance-story-character-authority.test.ts` Ajv2020 path, which is the live schema-validation surface for STCHAR records.
+- Initial package proof failed before implementation verification because package-local `node_modules/` were absent. Installed local dependencies for `tools/world-index`, `tools/patch-engine`, and `tools/validators`, built dependency packages, restored incidental lockfile version churn, and classified `node_modules/` / `dist/` as ignored verification artifacts.

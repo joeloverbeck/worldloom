@@ -74,6 +74,60 @@ test("record_schema_compliance accepts story-local STCHAR with null source opera
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts non-regenerated STCHAR with null regeneration reason class", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    stcharRecord(validStchar({
+      regeneration_reason_class: null
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance accepts regenerated STCHAR with a durable regeneration reason class", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    stcharRecord(validStchar({
+      source_kind: "regenerated",
+      source_char_id: null,
+      supersedes: "STCHAR-0",
+      regeneration_reason_class: "durable_branch_transformation",
+      profile_revision: 2
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects regenerated STCHAR without a regeneration reason class", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    stcharRecord(validStchar({
+      source_kind: "regenerated",
+      source_char_id: null,
+      regeneration_reason_class: null
+    }))
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.type" &&
+    verdict.message.includes("/regeneration_reason_class")
+  ));
+});
+
+test("record_schema_compliance rejects superseding STCHAR without a regeneration reason class", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    stcharRecord(validStchar({
+      supersedes: "STCHAR-0",
+      regeneration_reason_class: null,
+      profile_revision: 2
+    }))
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.type" &&
+    verdict.message.includes("/regeneration_reason_class")
+  ));
+});
+
 test("record_schema_compliance rejects unknown STCHAR source operational fact disposition", async () => {
   const result = await recordSchemaCompliance.run({}, context([
     stcharRecord(validStchar({

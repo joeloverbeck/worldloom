@@ -4,20 +4,20 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new validator file `tools/validators/src/structural/stchar-regeneration-reason-integrity.ts`; registry append at `tools/validators/src/public/registry.ts`; new test file `tools/validators/tests/structural/stchar-regeneration-reason-integrity.test.ts`
-**Deps**: 006
+**Deps**: `archive/tickets/SPEC74STCHARDISBOU-006.md`
 
 ## Problem
 
-After SPEC74STCHARDISBOU-006 lands, the JSON Schema enforces that `regeneration_reason_class` is non-null with a valid enum value when `source_kind: regenerated` OR `supersedes` is non-null. But the schema does NOT enforce that the named reason is BACKED by appropriate evidence — a regenerated STCHAR could claim `regeneration_reason_class: durable_branch_transformation` without citing any story-local evidence, or claim `profile_fidelity_failure` without prose-receipt evidence. The Rule 6 (No Silent Retcons) discipline requires every regeneration to carry classified + evidenced rationale; this validator enforces the evidence side that the schema cannot reach structurally.
+After `archive/tickets/SPEC74STCHARDISBOU-006.md` landed, the JSON Schema enforces that `regeneration_reason_class` is non-null with a valid enum value when `source_kind: regenerated` OR `supersedes` is non-null. But the schema does NOT enforce that the named reason is BACKED by appropriate evidence — a regenerated STCHAR could claim `regeneration_reason_class: durable_branch_transformation` without citing any story-local evidence, or claim `profile_fidelity_failure` without prose-receipt evidence. The Rule 6 (No Silent Retcons) discipline requires every regeneration to carry classified + evidenced rationale; this validator enforces the evidence side that the schema cannot reach structurally.
 
 ## Assumption Reassessment (2026-05-23)
 
-1. Verified `tools/validators/src/schemas/story-character-authority.schema.json` will (after SPEC74STCHARDISBOU-006 lands) define `regeneration_reason_class` as the 5-value enum + conditional non-null requirement on regenerated/superseding profiles. This validator consumes that field.
+1. Verified `tools/validators/src/schemas/story-character-authority.schema.json` now defines `regeneration_reason_class` as the 5-value enum + conditional non-null requirement on regenerated/superseding profiles, as landed by `archive/tickets/SPEC74STCHARDISBOU-006.md`. This validator consumes that field.
 2. Verified SPEC-74 §4.10 specifies the 6 rules: enum-value check (per the 5 named reasons); per-reason evidence checks (`durable_branch_transformation` requires story-local evidence in `story_local_inputs_used[]` or `Validation / Audit Anchors`; `source_world_char_material_change` requires `source_char_id` non-null — note the post-reassess-spec-tightening that no broader source-drift mechanism exists in the codebase, so `source_char_id` non-null is the only structural evidence this validator can require, per the reassessment of §4.10 rule 3); `profile_fidelity_failure` requires prose-receipt or page-plan fidelity evidence; `stable_source_material_omission_repair` requires source-material-inventory evidence; an `ordinary_state_not_regeneration_reason` finding for regenerated profiles whose evidence is only active-state records without durable-consolidation rationale.
 3. Cross-skill boundary under audit: this validator runs via the validator-framework run-loop; its diagnostic findings feed the health-audit Phase 2m `stchar_regeneration_reason_invalid` finding (SPEC74STCHARDISBOU-012); it depends on the schema field defined in SPEC74STCHARDISBOU-006 to exist and be parseable.
 4. FOUNDATIONS principle restated: Rule 6 (No Silent Retcons) — every STCHAR regeneration must classify its lifecycle event with a durable-consolidation rationale + structural evidence. §Story Bundles §5b (Schema-Minimalism) — `regeneration_reason_class` is load-bearing because this validator consumes it for the lifecycle classification gate.
 5. HARD-GATE / Canon Safety Check surface touched: this is a new structural validator under `tools/validators/src/structural/`; per the per-ticket-type granularity in spec-to-tickets, a new structural validator engages this item. The validator strengthens the STCHAR regeneration gate by enforcing the evidence requirement that the schema's conditional cannot reach.
-6. Schema extension consumed: this validator reads the `regeneration_reason_class` field added by SPEC74STCHARDISBOU-006 to `story-character-authority.schema.json`. The validator IS the structural consumer that makes the schema field load-bearing under FOUNDATIONS §Story Bundles §5b. The consumer-side schema dependency is satisfied within this batch (SPEC74STCHARDISBOU-006 produces the field; this ticket consumes it).
+6. Schema extension consumed: this validator reads the `regeneration_reason_class` field added by `archive/tickets/SPEC74STCHARDISBOU-006.md` to `story-character-authority.schema.json`. The validator IS the structural consumer that makes the schema field load-bearing under FOUNDATIONS §Story Bundles §5b. The consumer-side schema dependency is satisfied by the archived prerequisite.
 
 ## Architecture Check
 
@@ -86,7 +86,7 @@ Cases per SPEC-74 §7:
 
 ## Out of Scope
 
-- The JSON Schema field add (SPEC74STCHARDISBOU-006).
+- The JSON Schema field add (`archive/tickets/SPEC74STCHARDISBOU-006.md`).
 - Skill regenerate-mode wording (`archive/tickets/SPEC74STCHARDISBOU-001.md`).
 - Health-audit `stchar_regeneration_reason_invalid` finding registration (SPEC74STCHARDISBOU-012).
 - Any source_char_hash reintroduction or new source-drift mechanism (explicitly forbidden by SPEC-74 §4.10 reassess-spec correction).

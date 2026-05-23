@@ -564,7 +564,9 @@ test("supersede_story_character_authority_record writes replacement and lifecycl
       story_slug: "marla-kern-seduction",
       record: {
         ...stcharRecord("STCHAR-2"),
+        source_kind: "regenerated",
         supersedes: "STCHAR-1",
+        regeneration_reason_class: "durable_branch_transformation",
         profile_revision: 2
       },
       body_markdown: "## Profile\n\nRevised profile."
@@ -850,6 +852,7 @@ function stcharRecord(id: string): Record<string, unknown> {
     source_kind: "world_char",
     source_char_id: "CHAR-1",
     source_char_sections_used: ["frontmatter"],
+    regeneration_reason_class: null,
     generated_at_page: "story_bootstrap",
     created_by_skill: "unit-test",
     supersedes: null,
