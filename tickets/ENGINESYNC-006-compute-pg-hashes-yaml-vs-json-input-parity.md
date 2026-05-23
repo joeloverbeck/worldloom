@@ -37,7 +37,7 @@ Author-time workaround used in the 2026-05-23 commit: extract the PG record from
 
 6. **No HARD-GATE semantics or Mystery Reserve firewall change**: the patch engine still rejects mismatched hashes via `snapshot_replay_equality`. This ticket cannot weaken HARD-GATE; it only fixes the authoring-path tool that pre-computes the values the engine will check.
 
-7. **Adjacent contradictions**: archived SCAUD-005 and active SCAUD-006 address contract-vs-validator drift in `expected_witness_coverage`; this ticket addresses tool-vs-engine drift in `compute-pg-hashes`. Independent. All three improve the validate-patch-plan first-pass success rate but each is its own concern.
+7. **Adjacent contradictions**: archived SCAUD-005 and archived `archive/tickets/SCAUD-006-document-witness-trigger-conditions-and-public-bel-requirement.md` address contract-vs-validator drift in `expected_witness_coverage`; this ticket addresses tool-vs-engine drift in `compute-pg-hashes`. Independent. All three improve the validate-patch-plan first-pass success rate but each is its own concern.
 
 ## Architecture Check
 
