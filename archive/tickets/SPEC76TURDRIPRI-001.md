@@ -1,6 +1,6 @@
 # SPEC76TURDRIPRI-001: Schema — `event_kind` collapse + `turn_driver` object + `selection_source` extension
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/validators/src/schemas/story-event.schema.json` (breaking schema change to existing SE record shape)
@@ -20,6 +20,7 @@ Per SPEC-76 §3.1: collapse `event_kind` to `story_start | turn_resolution | sys
 4. **FOUNDATIONS principle**: §Story Bundles §5b (Schema-Minimalism At Story Scope) governs this ticket. Every new field in `turn_driver` is load-bearing: `kind` drives the `turn_driver_schema_compliance` validator and is consumed by replay; `initiator` constrains per-kind driver-record patterns; `driver_records[]` is the audit-trace and validator input; `player_response_mode` constrains downstream CHC emission per SPEC76TURDRIPRI-008's Phase 8 amendment; `pov_visibility` drives observer-firewall checks (SPEC76TURDRIPRI-004). Free-text `why_now` from the source report is intentionally NOT added; per SPEC-76 §3.1 it folds into existing `world_logic_rationale`.
 5. **Existing output schema extended**: this ticket extends `story-event.schema.json` — the schema is consumed by the patch-engine validator pipeline, the structural-validator framework, and every story-pipeline skill that emits SE records. The extension is BREAKING by design (collapses `selected_choice | write_in_attempt` into `turn_resolution` + `turn_driver.kind`); per SPEC-76 §7 Migration, no backwards-compatibility shims are introduced and test bundles must rebuild from `branching-story-bootstrap`.
 6. **Rename/removal blast radius**: retired `event_kind` enum values are `selected_choice` and `write_in_attempt`. Grep pipeline-wide (per reassess-spec Agent 1 in this session): source code blast radius is `tools/validators/src/structural/observer-firewall.ts:62-64` (1 site — handled in SPEC76TURDRIPRI-007); other source validators (`audit-only-se-shape.ts`, `turn-cycle-output-grounding-integrity.ts`, `midstory-record-introduction-grounding.ts`, `expected-witness-coverage.ts`, `state-snapshot-integrity.ts`) reference preserved enum values (`story_start`, `prose_attach`, `promotion_closeout`) and continue to work unchanged. Test fixtures (~30+ sites across `tools/validators/tests/`, `tools/world-index/tests/`, `tools/world-mcp/tests/`) carrying the retired values need rebuild per §7 Migration.
+7. **Implementation-time fixture partition**: package proof exposed three same-package current-contract fixtures that had to move with the schema (`tools/validators/tests/integration/spec34-integration.test.ts`, `tools/validators/tests/integration/spec48-se-structured-introduction-fields.test.ts`, and schema-compliance roundtrip/event tests). The broader story-bundle rebuild remains out of scope and owned by later SPEC-76 slices.
 
 ## Architecture Check
 
@@ -110,6 +111,10 @@ Per SPEC-76 §6.1, add fixtures under `tools/validators/tests/schemas/` for each
 
 - `tools/validators/src/schemas/story-event.schema.json` (modify)
 - `tools/validators/tests/schemas/story-event-turn-driver-schema.test.ts` (new)
+- `tools/validators/tests/structural/record-schema-compliance-story-event.test.ts` (modify — current-contract story-event schema fixtures)
+- `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` (modify — schema field-set and representative SE fixture)
+- `tools/validators/tests/integration/spec34-integration.test.ts` (modify — current-contract SE event fixture; observer-firewall event-kind extension remains SPEC76TURDRIPRI-007)
+- `tools/validators/tests/integration/spec48-se-structured-introduction-fields.test.ts` (modify — current-contract SE event fixture)
 
 ## Out of Scope
 
@@ -144,3 +149,22 @@ Per SPEC-76 §6.1, add fixtures under `tools/validators/tests/schemas/` for each
 
 1. `cd tools/validators && npm test` — runs the validator package's full test suite including new schema tests.
 2. `cd tools/validators && npm run build` — verifies TypeScript compilation of the updated schema-fixture suite.
+
+## Outcome
+
+Completed: 2026-05-23
+
+Implemented the breaking `SE` schema change in `tools/validators/src/schemas/story-event.schema.json`: `event_kind` now uses `turn_resolution` instead of `selected_choice | write_in_attempt`; `turn_driver` is required only on `turn_resolution` and forbidden on the preserved non-turn event kinds; `selection_source` now includes the non-player initiative sources from SPEC-76.
+
+Added `tools/validators/tests/schemas/story-event-turn-driver-schema.test.ts` with strict Ajv2020 schema coverage for required/forbidden `turn_driver`, player/offstage/NPC rejection cases, representative valid driver kinds, and retired event-kind rejection. Updated current-contract schema-compliance and integration fixtures that are package proof surfaces to emit `turn_resolution` plus `turn_driver`.
+
+Deviation: JSON Schema enforces the multi-actor collision schema-level shape as `initiator = unknown` plus at least two driver records. It cannot prove that those records come from two distinct `STENT` actors because `driver_records[]` contains record ids, not actor attribution; that cross-record semantic check remains in the structural-validator slice.
+
+Deviation: `tools/validators/tests/integration/spec34-integration.test.ts` no longer expects the old `observer_firewall_violation_private_belief_leak` from a `selected_choice` fixture, because the old event kind is now invalid and the observer-firewall turn-resolution extension is explicitly owned by SPEC76TURDRIPRI-007.
+
+## Verification Result
+
+- `cd tools/validators && npm run build` — PASS; TypeScript compilation and CLI chmod completed.
+- `cd tools/validators && node --test dist/tests/schemas/story-event-turn-driver-schema.test.js dist/tests/structural/record-schema-compliance-story-event.test.js dist/tests/structural/contract-schema-roundtrip.test.js` — PASS; 30 focused schema/schema-compliance tests passed.
+- `cd tools/validators && node --test dist/tests/integration/spec34-integration.test.js dist/tests/integration/spec48-se-structured-introduction-fields.test.js` — PASS; 5 integration tests passed after current-contract fixture updates.
+- `cd tools/validators && npm test` — PASS; 972 package tests passed.

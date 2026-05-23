@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md` (shared story state contract, consumed by all 8 Skill Category 2c story-pipeline skills)
-**Deps**: SPEC76TURDRIPRI-001
+**Deps**: archive/tickets/SPEC76TURDRIPRI-001.md
 
 ## Problem
 

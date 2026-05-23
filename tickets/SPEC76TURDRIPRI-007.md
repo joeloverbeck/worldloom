@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/structural/observer-firewall.ts`, `tools/validators/src/structural/chc-slt-selected-commitment-trace.ts`, `tools/validators/src/structural/turn-cycle-output-grounding-integrity.ts`
-**Deps**: SPEC76TURDRIPRI-001
+**Deps**: archive/tickets/SPEC76TURDRIPRI-001.md
 
 ## Problem
 

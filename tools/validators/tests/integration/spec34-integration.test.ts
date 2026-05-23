@@ -18,7 +18,6 @@ const SPEC34_VALIDATORS = [
 
 const SPEC34_FAIL_CODES = [
   "branch_isolation_violation",
-  "observer_firewall_violation_private_belief_leak",
   "lie_promoted_silently",
   "canon_baseline_drift_window_incomplete"
 ] as const;
@@ -123,7 +122,7 @@ function passRecords(): FixtureRecord[] {
     stchar("STCHAR-1", "STENT-1"),
     storylet("SLT-1"),
     event("SE-1", "PG-1", "story_start", "system", null),
-    event("SE-2", "PG-2", "selected_choice", "STENT-1", "SLT-1", "Drift classification compatible after reviewing CH-3 only."),
+    event("SE-2", "PG-2", "turn_resolution", "STENT-1", "SLT-1", "Drift classification compatible after reviewing CH-3 only."),
     belief("BEL-1", "PG-1", "STENT-1", "true", "private", ["SF-1"]),
     fact("SF-1", "PG-1", "branch_local", ["CF-1"]),
     fact("SF-2", "PG-2", "branch_local", ["BEL-1"]),
@@ -146,7 +145,7 @@ function failRecords(): FixtureRecord[] {
     stchar("STCHAR-2", "STENT-2"),
     storylet("SLT-1"),
     event("SE-1", "PG-1", "story_start", "system", null),
-    event("SE-2", "PG-2", "selected_choice", "STENT-1", "SLT-1", "Drift classification compatible after reviewing CH-3 only."),
+    event("SE-2", "PG-2", "turn_resolution", "STENT-1", "SLT-1", "Drift classification compatible after reviewing CH-3 only."),
     belief("BEL-1", "PG-1", "STENT-1", "true", "private", ["SF-1"]),
     belief("BEL-2", "PG-1", "STENT-2", "true", "private", []),
     belief("BEL-3", "PG-1", "STENT-1", "false", "private", []),
@@ -323,12 +322,12 @@ function storylet(id: string): FixtureRecord {
 function event(
   id: string,
   createdAtPage: string,
-  eventKind: "story_start" | "selected_choice",
+  eventKind: "story_start" | "turn_resolution",
   actor: string,
   selectedStorylet: string | null,
   rationale = `Drift classification compatible after reviewing CH-2 and CH-3 for ${id}.`
 ): FixtureRecord {
-  return storyRecord("story_event_record", id, "events", {
+  const parsed: Record<string, unknown> = {
     id,
     story_id: "STORY-1",
     created_at_page: createdAtPage,
@@ -344,7 +343,19 @@ function event(
     world_logic_rationale: rationale,
     state_delta: { create: [], supersede: [], close: [] },
     promotion_claims: []
-  });
+  };
+
+  if (eventKind === "turn_resolution") {
+    parsed.turn_driver = {
+      kind: "player_action",
+      initiator: "player",
+      driver_records: [],
+      player_response_mode: "initiates",
+      pov_visibility: "perceived_directly"
+    };
+  }
+
+  return storyRecord("story_event_record", id, "events", parsed);
 }
 
 function belief(

@@ -27,8 +27,7 @@
       "type": "string",
       "enum": [
         "story_start",
-        "selected_choice",
-        "write_in_attempt",
+        "turn_resolution",
         "system_repair",
         "audit_repair",
         "prose_attach",
@@ -47,7 +46,19 @@
         "selected_slt_id": { "type": ["string", "null"], "pattern": "^SLT-(0|[1-9][0-9]*)$" },
         "selection_source": {
           "type": "string",
-          "enum": ["emitted_choice", "author_pool", "runtime_jit", "system_repair", "audit_repair", "none"]
+          "enum": [
+            "emitted_choice",
+            "author_pool",
+            "runtime_jit",
+            "npc_initiative",
+            "offstage_initiative",
+            "clock_fire",
+            "world_pressure",
+            "secret_reveal",
+            "system_repair",
+            "audit_repair",
+            "none"
+          ]
         },
         "alias_bindings": {
           "type": "object",
@@ -70,6 +81,159 @@
           },
           "else": {
             "properties": { "selected_slt_id": { "type": "string", "pattern": "^SLT-(0|[1-9][0-9]*)$" } }
+          }
+        }
+      ]
+    },
+    "turn_driver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "initiator", "driver_records", "player_response_mode", "pov_visibility"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "player_action",
+            "player_write_in",
+            "npc_action",
+            "offstage_action",
+            "world_pressure",
+            "clock_fire",
+            "secret_reveal",
+            "multi_actor_collision"
+          ]
+        },
+        "initiator": { "type": "string", "pattern": "^(STENT-[0-9]+|player|world|system|unknown)$" },
+        "driver_records": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(STPLAN|STEMO|CLK|THR|STSEC|STQ|OBL|CNSQ|SREL|STCHAR)-[0-9]+$"
+          }
+        },
+        "player_response_mode": {
+          "type": "string",
+          "enum": ["initiates", "responds", "witnesses", "chooses_continuation", "none"]
+        },
+        "pov_visibility": {
+          "type": "string",
+          "enum": ["perceived_directly", "inferred_from_trace", "reported", "discovered_after", "withheld"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "player_action" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "initiator": { "const": "player" },
+              "driver_records": { "type": "array", "maxItems": 0 },
+              "player_response_mode": { "const": "initiates" },
+              "pov_visibility": { "const": "perceived_directly" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "player_write_in" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "initiator": { "const": "player" },
+              "driver_records": { "type": "array", "maxItems": 0 },
+              "player_response_mode": { "const": "initiates" },
+              "pov_visibility": { "const": "perceived_directly" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "npc_action" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "initiator": { "type": "string", "pattern": "^STENT-[0-9]+$" },
+              "driver_records": {
+                "type": "array",
+                "minItems": 1,
+                "contains": {
+                  "type": "string",
+                  "pattern": "^(STPLAN|STEMO|CLK|THR|STCHAR)-[0-9]+$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "offstage_action" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "initiator": { "type": "string", "pattern": "^STENT-[0-9]+$" },
+              "driver_records": { "type": "array", "minItems": 1 },
+              "pov_visibility": { "enum": ["inferred_from_trace", "reported", "discovered_after", "withheld"] }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "clock_fire" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "initiator": { "enum": ["world", "system"] },
+              "driver_records": {
+                "type": "array",
+                "minItems": 1,
+                "contains": { "type": "string", "pattern": "^CLK-[0-9]+$" }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "world_pressure" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "initiator": { "const": "world" },
+              "driver_records": { "type": "array", "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "secret_reveal" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "driver_records": {
+                "type": "array",
+                "minItems": 1,
+                "contains": { "type": "string", "pattern": "^STSEC-[0-9]+$" }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "multi_actor_collision" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "initiator": { "const": "unknown" },
+              "driver_records": { "type": "array", "minItems": 2 }
+            }
           }
         }
       ]
@@ -337,6 +501,19 @@
   "allOf": [
     {
       "if": {
+        "properties": { "event_kind": { "const": "turn_resolution" } },
+        "required": ["event_kind"]
+      },
+      "then": {
+        "properties": { "turn_driver": {} },
+        "required": ["turn_driver"]
+      },
+      "else": {
+        "properties": { "turn_driver": false }
+      }
+    },
+    {
+      "if": {
         "properties": { "event_kind": { "enum": ["story_start", "prose_attach", "promotion_closeout"] } },
         "required": ["event_kind"]
       },
@@ -357,7 +534,20 @@
             "type": "object",
             "properties": {
               "selected_slt_id": { "type": "string", "pattern": "^SLT-(0|[1-9][0-9]*)$" },
-              "selection_source": { "enum": ["emitted_choice", "author_pool", "runtime_jit", "system_repair", "audit_repair"] }
+              "selection_source": {
+                "enum": [
+                  "emitted_choice",
+                  "author_pool",
+                  "runtime_jit",
+                  "npc_initiative",
+                  "offstage_initiative",
+                  "clock_fire",
+                  "world_pressure",
+                  "secret_reveal",
+                  "system_repair",
+                  "audit_repair"
+                ]
+              }
             }
           }
         }

@@ -140,9 +140,16 @@ function eventRecord(overrides: Record<string, unknown> = {}): IndexedRecord {
       story_id: "STORY-1",
       created_at_page: "PG-2",
       parent_page_id: "PG-1",
-      event_kind: "selected_choice",
+      event_kind: "turn_resolution",
       actor: "system",
       targets: [],
+      turn_driver: {
+        kind: "world_pressure",
+        initiator: "world",
+        driver_records: ["CLK-1"],
+        player_response_mode: "responds",
+        pov_visibility: "perceived_directly"
+      },
       commitment: {
         selected_slt_id: "SLT-1",
         selection_source: "system_repair",
@@ -238,6 +245,7 @@ function createPreApplySePatchPlan(): Record<string, unknown> {
       parent_page_id: null,
       event_kind: "story_start",
       actor: "system",
+      turn_driver: undefined,
       commitment: {
         selected_slt_id: null,
         selection_source: "none",
@@ -246,6 +254,7 @@ function createPreApplySePatchPlan(): Record<string, unknown> {
       state_delta: { create: ["CLK-1"], supersede: [], close: [] }
     }).parsed
   };
+  delete parsed.turn_driver;
   return {
     plan_id: "plan-spec48-capstone-preapply",
     target_world: "seeded",
