@@ -1,6 +1,6 @@
 # SPEC-72 — Make `plan_hash` Advisory (Free Page-Plan Editing)
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-05-22
 **Classification:** story-canon-related (governs Hook 6, the `branching-story-prose-attach` `hash_integrity` check, and the `PG.plan.plan_hash` enforcement semantics; does **not** alter the `state_hash` fork chain)
 **Source:** in-chat hash-integrity audit + determination, 2026-05-22 (same brainstorm as SPEC-71).
@@ -70,3 +70,24 @@ Structurally-invalid `plan_hash` (missing, placeholder, or non-sha256-shaped) is
 - prose-attach: plan-only drift → WARN + advisory `notes[]` + `repair_recommendation: none`; PG-record tamper → `state_hash` FAIL; clean page → PASS.
 - `compute-pg-hashes` CLI behavior unchanged: bootstrap Phase 7 and turn-cycle Phase 9 still produce coupled (`plan_hash`, `state_hash`) pairs from `--plan` + `--pg` inputs; no CLI source or test edits.
 - Regression: the live `red-bunny` PG-2 case attaches at WARN/PASS.
+
+## Outcome
+
+Completed: 2026-05-23
+
+SPEC-72 landed across three archived implementation tickets:
+
+1. `archive/tickets/SPEC72PLAHASADV-001.md` changed Hook 6 from deny-on-plan-drift to allow-with-notice for page-plan and bundle `INDEX.md` edits.
+2. `archive/tickets/SPEC72PLAHASADV-002.md` updated the shared story-record contract: `hash_integrity` is now split-signal, and the `compute-pg-hashes` CLI mandate is limited to PG-authoring skills with a prose-attach carve-out.
+3. `archive/tickets/SPEC72PLAHASADV-003.md` updated `branching-story-prose-attach` so plan-only drift is `WARN` + `repair_recommendation: none`, while `state_hash` drift or invalid `state_hash` remains `FAIL` and routes to `run_turn_cycle_repair`. The `accept_plan_drift` input is removed from the skill contract.
+
+Verification completed:
+
+- `npm test --prefix tools/hooks` — PASS, 28 tests.
+- `npm test --prefix tools/validators` — PASS, 893 tests.
+- `npm test --prefix tools/world-mcp` — PASS, 428 tests.
+- Grep/manual contract checks confirmed the old prose-attach `accept_plan_drift` branch and old operational `compute-pg-hashes --plan --pg` state-hash instruction are absent from `.claude/skills/branching-story-prose-attach/SKILL.md`, and the new `computePgStateHash` / plan-only-drift advisory wording is present.
+
+Deviations:
+
+- The live `red-bunny` PG-2 regression was not rerun in this checkout because `worlds/worldloom_animalia/stories/red-bunny` is absent and invoking `branching-story-prose-attach` would require a separate content-generation HARD-GATE run that writes receipt/INDEX artifacts. The accepted proof is the landed skill contract plus adjacent hook, validator, and world-mcp package suites.
