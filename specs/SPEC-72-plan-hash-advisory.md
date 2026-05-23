@@ -29,13 +29,16 @@ Change Hook 6 from `emitPermissionDecision("deny", …)` to a non-blocking warni
 Replace the single `plan_hash`+`state_hash` drift verdict with two independent signals:
 
 - **`plan_hash` drift → WARN** (advisory). Recorded in the receipt `notes[]` as a breadcrumb; never drives `verdict: FAIL`; `repair_recommendation` for plan-only drift is `none` (advisory note), **not** `run_turn_cycle_repair`.
-- **`state_hash` drift → FAIL** (PG-record tamper). `state_hash` is recomputed **from the committed PG record's own stored fields** (the `snapshot_replay_equality` basis), *not* re-derived from the plan file. A mismatch means the committed PG was hand-edited — genuine corruption that stays a hard FAIL.
+- **`state_hash` drift → FAIL** (PG-record tamper). `state_hash` is recomputed **from the committed PG record's own stored fields** (the `snapshot_replay_equality` basis — call `computePgStateHash` from `@worldloom/world-index/hash/content` directly on the parsed PG record; do **not** use the `compute-pg-hashes` CLI here, since the CLI re-reads the plan file and overwrites `plan.plan_hash` before computing `state_hash`, re-introducing the coupling this spec breaks). A mismatch means the committed PG was hand-edited — genuine corruption that stays a hard FAIL.
 
 `PG.plan.plan_hash` remains stamped (an advisory breadcrumb that lets the receipt report "the plan body changed since commit"). The `accept_plan_drift` input becomes redundant (advisory is now the default) and is removed.
+
+Structurally-invalid `plan_hash` (missing, placeholder, or non-sha256-shaped) is rejected at PG schema validation per `tools/validators/src/schemas/story-page.schema.json` (`plan_hash` is required with pattern `^[0-9a-f]{64}$`); prose-attach Phase 2 therefore sees only well-formed `plan_hash` values, whose drift is advisory per the rule above. No prose-attach branch handles plan_hash structural corruption — schema validation is the gate.
 
 ### 2.3 Contract + skill text
 
 - `story-record-schemas.md §4.6`: update the `hash_integrity` field semantics — `PASS` when nothing drifted; `WARN` when only `plan_hash` drifted; `FAIL` only on `state_hash` drift or a missing/placeholder/non-sha256 `state_hash`.
+- `story-record-schemas.md §4.2a` (Tooling paragraph at line 157): narrow the mandate so the `compute-pg-hashes` CLI is required only for PG-**authoring** skills (`branching-story-bootstrap` Phase 7, `branching-story-turn-cycle` Phase 9). Carve out `branching-story-prose-attach` Phase 2: it now recomputes `state_hash` via `computePgStateHash` from `@worldloom/world-index/hash/content` directly on the PG record's parsed contents (the `snapshot_replay_equality` basis). The CLI's plan-file→state-hash coupling is exactly the over-enforcement §2.2 removes, so the "PG-verifying" use of the CLI no longer holds — update the explanatory rationale accordingly.
 - `branching-story-prose-attach/SKILL.md`: Phase 2 (split computation, drop the plan-file `state_hash` derivation), Phase 5 repair table (plan_hash drift → advisory, not `run_turn_cycle_repair`), and the HARD-GATE/`accept_plan_drift` references.
 - `story-page.schema.json`: **unchanged** (`plan_hash` stays required-and-stamped).
 
@@ -65,4 +68,5 @@ Replace the single `plan_hash`+`state_hash` drift verdict with two independent s
 
 - Hook 6: warn-not-deny fixtures for plan-edit and INDEX-edit; allow-with-notice on mismatch; first-write (no PG) still allowed.
 - prose-attach: plan-only drift → WARN + advisory `notes[]` + `repair_recommendation: none`; PG-record tamper → `state_hash` FAIL; clean page → PASS.
+- `compute-pg-hashes` CLI behavior unchanged: bootstrap Phase 7 and turn-cycle Phase 9 still produce coupled (`plan_hash`, `state_hash`) pairs from `--plan` + `--pg` inputs; no CLI source or test edits.
 - Regression: the live `red-bunny` PG-2 case attaches at WARN/PASS.

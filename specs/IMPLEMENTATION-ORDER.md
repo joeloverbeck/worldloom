@@ -1,30 +1,25 @@
 # Implementation Order
 
-Specs derived from the triage of `archive/reports/world-system-consolidation-second-iteration.md`
-(see `docs/triage/2026-05-22-world-system-consolidation-second-iteration-triage.md`).
+Specs derived from the triage of `reports/character-bridge-consolidation-second-iteration.md`
+(see `docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md`).
+
+The prior sprint's `IMPLEMENTATION-ORDER.md` (world-system-consolidation-second-iteration triage,
+SPEC-68/69/70) was archived as `archive/specs/IMPLEMENTATION-ORDER-2026-05-23.md`.
 
 ## Active specs
 
 | Order | Spec | Scope | Depends on | Risk |
 |---|---|---|---|---|
-| 1 | `specs/SPEC-72-plan-hash-advisory.md` | Downgrade `plan_hash` enforcement: Hook 6 → warn, prose-attach `hash_integrity` splits (plan drift = WARN, state_hash tamper = FAIL); `state_hash` chain untouched | none (sequence after archived SPEC-71 for shared prose-attach/receipt edits) | low-medium |
+| 1 | [`specs/SPEC-71-page-packet-required-because-label-parsing.md`](SPEC-71-page-packet-required-because-label-parsing.md) | Multi-label parsing of §16a `Required because:` so composite values containing `speaker` / `viewpoint` / `voice_shapes_page` trigger the voice-block requirement; parallel fix for `offstage_causal` exact-match drift; closed-vocabulary warning for unknown labels. Validator-only change; no schema, no record mutation. | — | low — single validator change; legacy single-label packets unchanged; composite packets that newly FAIL are exactly the contract-drift cases the fix is designed to catch |
 
 ## Completed specs
 
 | Spec | Scope | Completed |
 |---|---|---|
-| `archive/specs/SPEC-69-index-disk-consistency-coverage-extension.md` | Extend the existing `index_disk_consistency` validator to `characters/`, `diegetic-artifacts/` | 2026-05-22 |
-| `archive/specs/SPEC-68-diegetic-artifact-claim-map-schema-hardening.md` | Typed DA `claim_map.items`, the loose DA frontmatter objects, and `if/then` anti-laundering rules | 2026-05-22 |
-| `archive/specs/SPEC-70-char-stchar-semantic-preservation.md` | `CHAR -> STCHAR` semantic-preservation contract, `source_operational_fact_map`, `stchar_source_fact_coverage`, STCHAR operational-home subsections, and §16a capabilities line | 2026-05-22 |
-| `archive/specs/SPEC-71-strip-stchar-tamper-hashes.md` | Remove Job-B STCHAR/page-packet content-tamper hashes and add the `forbidden_stchar_tamper_hash_fields` reintroduction guard | 2026-05-23 |
+| _none_ | _none_ | _none_ |
 
 ## Sequencing notes
 
-- SPEC-69 derives from the `world-system-consolidation-second-iteration` triage
-  (`docs/triage/2026-05-22-world-system-consolidation-second-iteration-triage.md`).
-- SPEC-68, SPEC-69, and SPEC-70 are complete and archived.
-- SPEC-71 and SPEC-72 derive from the 2026-05-22 hash-integrity audit/determination
-  (in-chat brainstorm). They are logically independent — neither blocks the other —
-  but both edit `branching-story-prose-attach/SKILL.md` and the prose-receipt
-  schema/contract, so SPEC-71 was implemented before SPEC-72 to avoid edit conflicts.
-  SPEC-72 also resolves the live `red-bunny` PG-2 `hash_integrity: FAIL`.
+- Single-spec sprint; no inter-spec dependency.
+- Migration: `unknown_role_label` warnings should clear before the next character-bridge audit iteration. Voice-block failures on composite packets must be repaired immediately — they indicate the packet was always supposed to carry a voice block under the documented `story-state-contract.md:466` vocabulary.
+- The five other proposals from the source report are explicitly **not** in this sprint — see the triage file for the verdict on each (Proposals 2 / 4 rejected as re-proposed deliberately-rejected scope; Proposal 5 already-resolved; Proposal 3 deferred pending a concrete consumer; Proposal 6 folded into SPEC-71's test plan).
