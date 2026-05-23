@@ -18,9 +18,6 @@ arguments:
   - name: run_craft_critic
     description: "true | false; default false. When true, runs an LLM-based qualitative craft critic over the prose; verdict contributes to receipt's craft_critic field."
     required: false
-  - name: accept_plan_drift
-    description: "true | false; default false. When false, a mismatch between PG.plan.plan_hash / state_hash and computed values fails the receipt; when true, drift is recorded in receipt notes without forcing fail. Drift is NEVER written to the PG record."
-    required: false
   - name: emit_attach_event
     description: "true | false; default false. When true, emits one SE-<integer> with event_kind: prose_attach. This is the ONLY way prose-attach mutates atomic story-bundle records, and it is opt-in."
     required: false
@@ -35,7 +32,7 @@ Do NOT write `pages-prose-receipts/<page_id>.yaml`, update `worlds/<world_slug>/
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `STORY_KERNEL.md` loaded, including `## Player Agency Contract`; page loaded from `_source/pages/<page_id>.yaml`; plan + prose pair verified at `pages-prose-plans/<page_id>.md` + `pages-prose/<page_id>.md`; `pages-prose-receipts/` directory present (idempotent `mkdir -p` if absent); `SE` id allocated via `mcp__worldloom__allocate_next_id` only when `emit_attach_event: true`.
 
-(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + `STORY_KERNEL.md` Player Agency Contract + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `state_hash` + `prose_hash` derived; `hash_integrity` check applied per `accept_plan_drift`; 8 deterministic prose/state checks complete per `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 (hash_integrity, engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, choice_consequence_visibility, entity_status_consistency, invented_structural_fact, canon_claim_without_authority), including the required_event_rendered CLK tick, STSEC reveal, and STQ payoff / answer subchecks below; the existing `no_char_authority_in_story_runtime` verdict surfaced as `checks.char_authority_leak`; STCHAR authority packet checks + profile-fidelity judgments complete for every required §16a packet; optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
+(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + `STORY_KERNEL.md` Player Agency Contract + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `state_hash` + `prose_hash` derived; `hash_integrity` check applied per the split-signal semantics in shared contract §4.6 (plan_hash drift -> WARN advisory; state_hash drift -> FAIL); 8 deterministic prose/state checks complete per `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 (hash_integrity, engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, choice_consequence_visibility, entity_status_consistency, invented_structural_fact, canon_claim_without_authority), including the required_event_rendered CLK tick, STSEC reveal, and STQ payoff / answer subchecks below; the existing `no_char_authority_in_story_runtime` verdict surfaced as `checks.char_authority_leak`; STCHAR authority packet checks + profile-fidelity judgments complete for every required §16a packet; optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
 
 (c) The user has explicitly approved the deliverable summary (receipt path, per-check verdict table, roll-up verdict, repair_recommendation, strict-mode publication-blocking decision if applicable, optional SE-<integer> id + patch op preview when `emit_attach_event: true`).
 
@@ -57,10 +54,13 @@ Phase 1: Pair plan + page + prose (load PG, STORY_KERNEL.md Player Agency
                                    compute fresh hashes)
         |
         v
-Phase 2: Hash integrity check (computed vs recorded plan_hash + state_hash;
-                               hash_integrity FAIL unless
-                               accept_plan_drift=true; record drift in
-                               receipt notes, never in PG)
+Phase 2: Hash integrity check (split signal: plan_hash drift -> WARN advisory
+                               per SPEC-72 / FOUNDATIONS Story Bundles 4a;
+                               state_hash drift -> FAIL tamper; state_hash
+                               recomputed via computePgStateHash directly
+                               on the committed PG record's parsed fields,
+                               not via the CLI; record drift in receipt
+                               notes, never in PG)
         |
         v
 Phase 3: Deterministic checks (8 prose/state checks, CHAR leak verdict,
@@ -90,7 +90,6 @@ Phase 6: HARD-GATE fires → write receipt + update INDEX
 
 - `strict` — `true | false` — default `false`. Blocks INDEX publication marker on FAIL.
 - `run_craft_critic` — `true | false` — default `false`. Engages qualitative craft critic.
-- `accept_plan_drift` — `true | false` — default `false`. Tolerates plan_hash / state_hash mismatch.
 - `emit_attach_event` — `true | false` — default `false`. Emits one `SE-<integer>` with `event_kind: prose_attach`.
 
 ## Output
@@ -161,25 +160,25 @@ Load into working memory:
 Compute fresh hashes:
 
 - `computed_plan_hash`: sha256 over the plan file's bytes.
-- `computed_state_hash`: produced by the canonical CLI per shared contract §4.2a — run `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan pages-prose-plans/<page_id>.md --pg _source/pages/<page_id>.yaml`, parse the JSON `{plan_hash, state_hash}` from stdout, and use the `state_hash` value as `computed_state_hash`. The CLI applies the canonical-JSON serializer the contract mandates (sorted keys, no insignificant whitespace, `state_hash` excluded from the payload by construction). Hand-rolling the serializer at verification time is forbidden — it produces drift that the receipt would misclassify as `hash_integrity: FAIL` when no actual drift exists. The same CLI invocation's `plan_hash` matches the `computed_plan_hash` above (sha256 over plan file bytes), so one CLI call can replace both the `computed_plan_hash` and `computed_state_hash` steps if preferred.
+- `computed_state_hash`: recompute by calling `computePgStateHash` from `@worldloom/world-index/hash/content` directly on the parsed PG record (the `snapshot_replay_equality` basis per shared contract §4.2a Tooling carve-out). The validator package's `snapshot_replay_equality` at `tools/validators/src/structural/snapshot-replay-equality.ts:296` is the canonical pattern — invoke the same helper on the same parsed-PG input. Do NOT use the `compute-pg-hashes` CLI here: the CLI re-reads the plan file via `--plan` and overwrites `plan.plan_hash` in the PG payload before computing `state_hash` (see `tools/world-mcp/src/cli/compute-pg-hashes.ts:211` `applyComputedPlanHash`), which re-introduces the plan-file-to-state-hash coupling SPEC-72 §2.2 removes. The CLI remains correct for authoring-time use in `branching-story-bootstrap` Phase 7 and `branching-story-turn-cycle` Phase 9, where both hashes are stamped together at commit; it is not correct for verification-time use in prose-attach Phase 2.
 - `computed_prose_hash`: sha256 over the prose file's bytes.
 
 ## Phase 2: Hash integrity check
 
 Compare:
 
-- `PG.plan.plan_hash` vs `computed_plan_hash`.
-- `PG.state_hash` vs `computed_state_hash`.
+- `PG.plan.plan_hash` vs `computed_plan_hash` (advisory).
+- `PG.state_hash` vs `computed_state_hash` (verdict-driving).
 
 If both recorded hash fields are lowercase sha256-shaped and both match their computed values: set `checks.hash_integrity: PASS`.
 
-If either hash differs AND `accept_plan_drift: false`: set `checks.hash_integrity: FAIL` and record the drift in the receipt's `notes` field, e.g. `"plan_hash drift: PG.plan.plan_hash=<recorded> computed=<computed>"` and/or `"state_hash drift: PG.state_hash=<recorded> computed=<computed>"`. The mismatch is verdict-driving through `hash_integrity: FAIL`.
+If `plan_hash` differs but `state_hash` matches: set `checks.hash_integrity: WARN` and record the drift in the receipt's `notes` field as `"plan_hash drift (advisory): PG.plan.plan_hash=<recorded> computed=<computed>"`. Plan-only drift is advisory per SPEC-72 / FOUNDATIONS §Story Bundles §4a — the page plan is a render input whose deviation is routed (revise / repair / promote), not blocked. The WARN does NOT drive `verdict: FAIL`; `repair_recommendation` for plan-only-drift WARNs is `none` (per Phase 5 table).
 
-If either hash differs AND `accept_plan_drift: true`: set `checks.hash_integrity: WARN`, record the drift in `notes`, and continue. The warning is still visible in the roll-up verdict.
+If `state_hash` differs: set `checks.hash_integrity: FAIL` and record the drift in the receipt's `notes` field as `"state_hash drift (PG-record tamper): PG.state_hash=<recorded> computed=<computed>"`. A `state_hash` mismatch means the committed PG record has been hand-edited — genuine corruption; this stays a hard FAIL and routes to `repair_recommendation: run_turn_cycle_repair` per Phase 5.
 
-If either `PG.plan.plan_hash` or `PG.state_hash` is missing, placeholder (`PLACEHOLDER_TO_BE_COMPUTED*`), or non-sha256-shaped: set `checks.hash_integrity: FAIL` regardless of `accept_plan_drift`. The receipt records the invalid value in `notes`; the repair path is upstream PG repair — `repair_recommendation: run_turn_cycle_repair` (re-commit / restamp the page), per the Phase 5 table — not silent acceptance.
+If `PG.state_hash` is missing, placeholder (`PLACEHOLDER_TO_BE_COMPUTED*`), or non-sha256-shaped: set `checks.hash_integrity: FAIL`. The receipt records the invalid value in `notes`; the repair path is upstream PG repair — `repair_recommendation: run_turn_cycle_repair` per Phase 5. Structurally-invalid `plan_hash` (missing, placeholder, non-sha256) is rejected at PG schema validation per `tools/validators/src/schemas/story-page.schema.json` (`plan_hash` is required with pattern `^[0-9a-f]{64}$`); prose-attach Phase 2 therefore sees only well-formed `plan_hash` values, whose drift is advisory per the rule above.
 
-Hook 6 blocks direct `Edit` / `Write` drift on `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md` between prose-attach invocations when the stamped `PG.plan.plan_hash` does not match the plan body; this Phase 2 check still runs because receipt truth must not depend only on hook installation.
+Hook 6 surfaces a non-blocking drift notice (per `archive/tickets/SPEC72PLAHASADV-001.md`) on direct `Edit` / `Write` to `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md` between prose-attach invocations when the stamped `PG.plan.plan_hash` does not match the plan body; this Phase 2 check still runs because receipt truth must not depend only on hook installation, and the WARN here is the receipt-side mirror of Hook 6's edit-time notice.
 
 **Drift is recorded in the receipt, NEVER in the `PG` record.** The PG is committed state per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary).
 
@@ -296,8 +295,9 @@ Derive `repair_recommendation` per the shared contract §4.6 enum:
 | Condition | `repair_recommendation` |
 |---|---|
 | `verdict: PASS` | `none` |
-| `verdict: WARN` only (no `FAIL`) | `revise_prose` |
-| `verdict: FAIL` with `hash_integrity: FAIL` (alone) | `run_turn_cycle_repair` (the page state is authoritative; the stamped PG hash is stale — re-commit / restamp the page upstream) |
+| `verdict: WARN` only from non-hash checks (no `FAIL`) | `revise_prose` |
+| `verdict: WARN` with `hash_integrity: WARN` (plan-only drift) | `none` (plan-only drift is advisory per SPEC-72 / FOUNDATIONS §Story Bundles §4a; the page state is authoritative, the plan file is a render input — the breadcrumb in `notes[]` is the audit trail) |
+| `verdict: FAIL` with `hash_integrity: FAIL` (state_hash drift or missing/placeholder/non-sha256 state_hash) | `run_turn_cycle_repair` (the page state is genuinely corrupt or unverifiable — re-commit / restamp the page upstream) |
 | `verdict: FAIL` with `forbidden_mystery_resolution: FAIL` | `revise_prose` (forbidden mysteries cannot be resolved by any path) |
 | `verdict: FAIL` with `choice_consequence_visibility: FAIL` | `revise_prose` |
 | `verdict: FAIL` with `invented_structural_fact: FAIL` or `entity_status_consistency: FAIL` | `run_turn_cycle_repair` |

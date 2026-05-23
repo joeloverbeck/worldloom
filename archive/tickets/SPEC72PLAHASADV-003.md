@@ -1,22 +1,22 @@
 # SPEC72PLAHASADV-003: prose-attach SKILL.md — split-signal hash_integrity + remove accept_plan_drift
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `.claude/skills/branching-story-prose-attach/SKILL.md` (frontmatter arguments, HARD-GATE block, Process Flow, Inputs, World-State Prerequisites context, Phase 1 hash-computation step, Phase 2 hash integrity check, Phase 5 repair table). No code changes.
+**Engine Changes**: Yes — `.claude/skills/branching-story-prose-attach/SKILL.md` (frontmatter arguments, HARD-GATE block, Process Flow, Inputs, Phase 1 hash-computation step, Phase 2 hash integrity check, Phase 5 repair table). No code changes.
 **Deps**: archive/tickets/SPEC72PLAHASADV-002.md
 
 ## Problem
 
-`branching-story-prose-attach` Phase 2 currently re-derives both `computed_plan_hash` (sha256 over plan bytes) AND `computed_state_hash` (via the `compute-pg-hashes` CLI which couples the plan_hash into the state_hash payload). When the plan file is edited post-commit, the CLI returns a state_hash that disagrees with the committed PG record's stored `state_hash` — even when the committed state itself is unchanged — and the skill emits `hash_integrity: FAIL` purely from the plan-file drift. Verified live on `red-bunny` PG-2: prose-attach returned `verdict: FAIL` from `hash_integrity` alone, despite every content check and all three STCHAR authority checks passing.
+At intake, `branching-story-prose-attach` Phase 2 re-derived both `computed_plan_hash` (sha256 over plan bytes) AND `computed_state_hash` (via the `compute-pg-hashes` CLI which couples the plan_hash into the state_hash payload). When the plan file was edited post-commit, the CLI returned a state_hash that disagreed with the committed PG record's stored `state_hash` — even when the committed state itself was unchanged — and the skill emitted `hash_integrity: FAIL` purely from the plan-file drift. Historical live evidence on `red-bunny` PG-2: prose-attach returned `verdict: FAIL` from `hash_integrity` alone, despite every content check and all three STCHAR authority checks passing.
 
 The `accept_plan_drift` input was the mitigation: setting it `true` downgraded the FAIL to WARN. But under FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary), the plan IS a render input whose deviation should be *routed* (revise / repair / promote), not blocked by a binary verdict.
 
-This ticket lands SPEC-72 §2.2 + §2.3 operational changes: the prose-attach SKILL.md updates to compute `state_hash` from the committed PG record's parsed fields (NOT via the CLI), to split `hash_integrity` into plan_hash drift (WARN advisory) and state_hash drift (FAIL tamper), to update the Phase 5 repair table so plan-only drift recommends `none` rather than `run_turn_cycle_repair`, to drop `accept_plan_drift` from the frontmatter arguments and HARD-GATE block (b) clause, and to update the World-State Prerequisites text so the `pre_apply_drift_handling` posture matches the new semantics.
+This ticket landed SPEC-72 §2.2 + §2.3 operational changes: the prose-attach SKILL.md now computes `state_hash` from the committed PG record's parsed fields (NOT via the CLI), splits `hash_integrity` into plan_hash drift (WARN advisory) and state_hash drift (FAIL tamper), updates the Phase 5 repair table so plan-only drift recommends `none` rather than `run_turn_cycle_repair`, and drops `accept_plan_drift` from the frontmatter arguments and HARD-GATE block (b) clause.
 
 ## Assumption Reassessment (2026-05-23)
 
-1. `.claude/skills/branching-story-prose-attach/SKILL.md` carries the `accept_plan_drift` input at 7 distinct sites: frontmatter arguments[] (lines 21-23), Process Flow Phase 2 box (lines 60-63), Inputs Optional list (line 93), Phase 2 body conditional A (line 176, `accept_plan_drift: false` -> FAIL branch), Phase 2 body conditional B (line 178, `accept_plan_drift: true` -> WARN branch), Phase 2 body unconditional clause (line 180, `regardless of accept_plan_drift` for missing/placeholder hash), and HARD-GATE block (b) clause (line 38, `hash_integrity check applied per accept_plan_drift`). Phase 1's hash-computation step (line 164) prescribes calling `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js` for `computed_state_hash`; under SPEC-72 §2.2 this changes to a direct `computePgStateHash` call on the parsed PG record. Phase 5's repair table at lines 295-307 has a `verdict: FAIL with hash_integrity: FAIL (alone) -> run_turn_cycle_repair` row that needs to be split: plan_hash drift alone produces WARN (not FAIL), so the table needs a `verdict: WARN with hash_integrity: WARN (plan-only) -> none` row, while the existing `run_turn_cycle_repair` row narrows to `hash_integrity: FAIL with state_hash drift or missing/placeholder state_hash`. Phase 6 receipt YAML schema at lines 311-353 already aligns with the split-signal enum (`hash_integrity: PASS | WARN | FAIL`); no schema change needed there. World-State Prerequisites at lines 106-118 references the shared contract §4.6 as load-bearing, which `archive/tickets/SPEC72PLAHASADV-002.md` updated first.
+1. At intake, `.claude/skills/branching-story-prose-attach/SKILL.md` carried the `accept_plan_drift` input at 7 distinct sites: frontmatter arguments[], Process Flow Phase 2 box, Inputs Optional list, Phase 2 body conditional A (`accept_plan_drift: false` -> FAIL branch), Phase 2 body conditional B (`accept_plan_drift: true` -> WARN branch), Phase 2 body unconditional clause (`regardless of accept_plan_drift` for missing/placeholder hash), and HARD-GATE block (b) clause (`hash_integrity check applied per accept_plan_drift`). Phase 1's hash-computation step prescribed calling `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js` for `computed_state_hash`; under SPEC-72 §2.2 this changed to a direct `computePgStateHash` call on the parsed PG record. Phase 5's repair table had a `verdict: FAIL with hash_integrity: FAIL (alone) -> run_turn_cycle_repair` row that has now been split: plan_hash drift alone produces WARN (not FAIL), so the table now has a `verdict: WARN with hash_integrity: WARN (plan-only) -> none` row, while the existing `run_turn_cycle_repair` row narrows to `hash_integrity: FAIL with state_hash drift or missing/placeholder/non-sha256 state_hash`. Phase 6 receipt YAML schema already aligned with the split-signal enum (`hash_integrity: PASS | WARN | FAIL`); no schema change was needed. World-State Prerequisites still reference the shared contract §4.6 as load-bearing, which `archive/tickets/SPEC72PLAHASADV-002.md` updated first.
 2. SPEC-72 §2.2 prescribes the split-signal design (plan_hash drift → WARN advisory; state_hash drift → FAIL tamper) and explicitly names the implementation pathway: *"call `computePgStateHash` from `@worldloom/world-index/hash/content` directly on the parsed PG record; do not use the `compute-pg-hashes` CLI here, since the CLI re-reads the plan file and overwrites `plan.plan_hash` before computing `state_hash`."* SPEC-72 §2.3 prescribes the SKILL.md surface updates: *"Phase 2 (split computation, drop the plan-file `state_hash` derivation), Phase 5 repair table (plan_hash drift → advisory, not `run_turn_cycle_repair`), and the HARD-GATE/`accept_plan_drift` references."* SPEC-72 §2.2 also clarifies (per `/reassess-spec` Q1 resolution) that structurally-invalid `plan_hash` is rejected at PG schema validation; prose-attach Phase 2 sees only well-formed `plan_hash` values, so the lines 180 conditional ("If either PG.plan.plan_hash or PG.state_hash is missing, placeholder ...") narrows to `state_hash` only.
 3. Cross-skill boundary: prose-attach Phase 2's new computation pathway imports `computePgStateHash` from `@worldloom/world-index/hash/content` — a cross-package boundary (`branching-story-prose-attach` runs at LLM-skill level; `@worldloom/world-index` is the validator's shared hash module). The validator's `snapshot_replay_equality` at `tools/validators/src/structural/snapshot-replay-equality.ts:1` already imports from this exact path; prose-attach Phase 2 will use the same import. The Phase 5 repair-table semantics are also a cross-skill boundary — the `repair_recommendation` enum is consumed by the receipt at the post-attach handoff (`branching-story-turn-cycle` for `run_turn_cycle_repair`, `story-fact-promotion-to-canon` for `run_story_fact_promotion_to_canon`, the user for `revise_prose`). Plan-only drift's recommendation becoming `none` means no downstream skill is invoked for that case; the breadcrumb in `notes[]` is the entire audit trail.
 4. FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary) and §5b (Schema-Minimalism) are the load-bearing principles. §4a: plan deviation is routed, not blocked — the split-signal semantics put the receipt verdict on the correct side of the boundary (state-tamper FAIL, render-input drift advisory). §5b: removing `accept_plan_drift` aligns the SKILL with schema-minimalism — the toggle is no longer load-bearing because advisory is now the default for plan_hash drift.
@@ -132,7 +132,7 @@ Replace it with two rows:
 | `verdict: WARN` with `hash_integrity: WARN` (plan-only drift) | `none` (plan-only drift is advisory per SPEC-72 / FOUNDATIONS §Story Bundles §4a; the page state is authoritative, the plan file is a render input — the breadcrumb in `notes[]` is the audit trail) |
 | `verdict: FAIL` with `hash_integrity: FAIL` (state_hash drift or missing/placeholder/non-sha256 state_hash) | `run_turn_cycle_repair` (the page state is genuinely corrupt or unverifiable — re-commit / restamp the page upstream) |
 
-The other table rows (verdict: PASS → none; verdict: WARN only → revise_prose; forbidden_mystery_resolution → revise_prose; choice_consequence_visibility → revise_prose; invented_structural_fact / entity_status_consistency → run_turn_cycle_repair; canon_claim_without_authority → run_story_fact_promotion_to_canon; char_authority_leak / stchar_authority → use profile_fidelity local recommendation) are unchanged.
+The other table rows remain unchanged except the generic `verdict: WARN` row, which now explicitly applies to non-hash checks so it does not conflict with the plan-only-drift `none` row.
 
 Adjacent prose: the *"If multiple FAIL conditions co-occur ..."* paragraph below the table stays unchanged — the precedence rule (`run_story_fact_promotion_to_canon > run_turn_cycle_repair > revise_prose`) still applies, and the new plan-only-drift WARN does not introduce a new repair precedent (its recommendation is `none`).
 
@@ -162,8 +162,8 @@ The World-State Prerequisites block at lines 106-118 cites the shared contract �
 2. `grep -n "computePgStateHash\|@worldloom/world-index/hash/content" .claude/skills/branching-story-prose-attach/SKILL.md` returns ≥1 match (Phase 1 hash-computation step cites the helper + module).
 3. `grep -n "compute-pg-hashes.*--plan.*--pg\|node tools/world-mcp/dist/src/cli/compute-pg-hashes" .claude/skills/branching-story-prose-attach/SKILL.md` returns zero matches inside Phase 1 / Phase 2 (the CLI is no longer invoked for state_hash recomputation; references in the Out of Scope discussion or in cross-spec context are acceptable but should not appear as an operational instruction).
 4. `grep -n "plan-only drift\|plan_hash drift.*WARN\|plan_hash drift.*advisory" .claude/skills/branching-story-prose-attach/SKILL.md` returns ≥1 match inside Phase 2 and Phase 5.
-5. Manual verification on `red-bunny` PG-2 (per SPEC-72 §5 acceptance criterion #4): re-run prose-attach on the regenerated PG-2 plan; receipt's `hash_integrity` field is `WARN` (not `FAIL`); receipt's `verdict` is `PASS` or `WARN` driven by content/STCHAR checks (not auto-`FAIL` from hash_integrity alone); receipt's `notes[]` contains the plan_hash drift breadcrumb; `repair_recommendation` is `none`.
-6. Manual or fixture-based verification that hand-editing a committed `_source/pages/PG-<integer>.yaml` state field still produces `hash_integrity: FAIL` (per SPEC-72 §5 acceptance criterion #3 — PG-record tamper detection is strengthened, not weakened).
+5. Manual verification on `red-bunny` PG-2 (per SPEC-72 §5 acceptance criterion #4): not exercised in this checkout; see `## Deviations`.
+6. Manual or fixture-based verification that hand-editing a committed `_source/pages/PG-<integer>.yaml` state field still produces `hash_integrity: FAIL`: covered by manual contract review of Phase 2 and package regression suites; no live prose-attach run was performed in this ticket.
 7. `tools/` build + test suites green (per SPEC-72 §5 acceptance criterion #5): `npm test --prefix tools/validators`, `npm test --prefix tools/world-mcp`, `npm test --prefix tools/hooks` all pass.
 
 ### Invariants
@@ -171,7 +171,7 @@ The World-State Prerequisites block at lines 106-118 cites the shared contract �
 1. prose-attach Phase 2 NEVER re-derives `state_hash` from the plan file. The state_hash recomputation source is exactly the committed PG record's parsed contents, via `computePgStateHash` from `@worldloom/world-index/hash/content` — the same helper `snapshot_replay_equality` uses.
 2. plan_hash drift alone NEVER produces `verdict: FAIL`. The receipt's roll-up verdict for plan-only drift is at most `WARN`, and `repair_recommendation` for plan-only-drift WARNs is `none`.
 3. state_hash drift, missing state_hash, placeholder state_hash, or non-sha256 state_hash ALWAYS produces `hash_integrity: FAIL` and `repair_recommendation: run_turn_cycle_repair` (subject to multi-FAIL precedence rules).
-4. The `accept_plan_drift` input is removed entirely from the skill's contract; any user invocation passing `accept_plan_drift: true` or `accept_plan_drift: false` is silently ignored (the frontmatter no longer declares it).
+4. The `accept_plan_drift` input is removed entirely from the skill's declared contract; the frontmatter no longer declares it, and current prose-attach instructions no longer branch on it.
 
 ## Test Plan
 
@@ -181,6 +181,32 @@ The World-State Prerequisites block at lines 106-118 cites the shared contract �
 
 ### Commands
 
-1. `grep -n "accept_plan_drift\|computePgStateHash\|plan-only drift\|plan_hash drift" .claude/skills/branching-story-prose-attach/SKILL.md` — targeted grep confirming the four terminology shifts landed (zero `accept_plan_drift`; ≥1 `computePgStateHash`; ≥1 `plan-only drift` or `plan_hash drift` in Phase 2 + Phase 5).
-2. `npm test --prefix tools/validators && npm test --prefix tools/world-mcp && npm test --prefix tools/hooks` — full pipeline verification confirming no regressions in adjacent surfaces.
-3. Manual: invoke `/branching-story-prose-attach worldloom_animalia red-bunny PG-2` against the regenerated PG-2 plan and inspect the emitted receipt's `hash_integrity` field, `verdict`, `notes[]`, and `repair_recommendation` per acceptance criterion #5.
+1. `grep -n "accept_plan_drift" .claude/skills/branching-story-prose-attach/SKILL.md` — expected zero matches.
+2. `grep -n "computePgStateHash\|@worldloom/world-index/hash/content" .claude/skills/branching-story-prose-attach/SKILL.md` — confirms the direct helper path landed.
+3. `grep -n "compute-pg-hashes.*--plan.*--pg\|node tools/world-mcp/dist/src/cli/compute-pg-hashes" .claude/skills/branching-story-prose-attach/SKILL.md` — expected zero matches for the old operational CLI invocation.
+4. `grep -n "plan-only drift\|plan_hash drift.*WARN\|plan_hash drift.*advisory" .claude/skills/branching-story-prose-attach/SKILL.md` — confirms Phase 2 and Phase 5 plan-drift advisory wording landed.
+5. `npm test --prefix tools/validators`
+6. `npm test --prefix tools/world-mcp`
+7. `npm test --prefix tools/hooks`
+
+## Outcome
+
+Completed: 2026-05-23
+
+`.claude/skills/branching-story-prose-attach/SKILL.md` now implements SPEC-72's prose-attach split-signal contract. The `accept_plan_drift` argument is removed from frontmatter and the optional inputs list. The HARD-GATE block now names shared-contract split-signal semantics rather than an input toggle. Phase 1 now instructs prose-attach to recompute `state_hash` with `computePgStateHash` from `@worldloom/world-index/hash/content` directly on the parsed PG record, not via the plan-reading CLI. Phase 2 now treats plan-only drift as `hash_integrity: WARN` with advisory notes and treats `state_hash` drift or invalid `state_hash` as `FAIL`. Phase 5 now maps plan-only `hash_integrity: WARN` to `repair_recommendation: none` and narrows `run_turn_cycle_repair` to state-hash corruption/unverifiability.
+
+## Verification Result
+
+1. `grep -n "accept_plan_drift" .claude/skills/branching-story-prose-attach/SKILL.md` — PASS by expected no matches.
+2. `grep -n "computePgStateHash\|@worldloom/world-index/hash/content" .claude/skills/branching-story-prose-attach/SKILL.md` — PASS; hits appear in the Process Flow and Phase 1 hash-computation step.
+3. `grep -n "compute-pg-hashes.*--plan.*--pg\|node tools/world-mcp/dist/src/cli/compute-pg-hashes" .claude/skills/branching-story-prose-attach/SKILL.md` — PASS by expected no matches.
+4. `grep -n "plan-only drift\|plan_hash drift.*WARN\|plan_hash drift.*advisory" .claude/skills/branching-story-prose-attach/SKILL.md` — PASS; hits appear in the HARD-GATE clause, Process Flow, Phase 2 body, and Phase 5 repair table.
+5. `git diff --check -- .claude/skills/branching-story-prose-attach/SKILL.md` — PASS.
+6. `npm test --prefix tools/validators` — PASS, 893 tests.
+7. `npm test --prefix tools/world-mcp` — PASS, 428 tests.
+8. `npm test --prefix tools/hooks` — PASS, 28 tests.
+
+## Deviations
+
+- The live `red-bunny` manual prose-attach regression was not run. `worlds/worldloom_animalia/stories/red-bunny` is absent in this checkout, and invoking `branching-story-prose-attach` would be a separate content-generation/HARD-GATE run that writes a receipt and INDEX update. This ticket instead proves the operational skill contract by grep/manual review plus the adjacent validator/world-mcp/hooks package suites.
+- The Phase 5 repair table needed one same-seam clarification beyond the literal ticket row replacement: the generic `verdict: WARN` row now says "from non-hash checks" so it does not conflict with the new plan-only-drift `none` row.
