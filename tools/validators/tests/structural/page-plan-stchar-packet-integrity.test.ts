@@ -99,6 +99,98 @@ test("page_plan_stchar_packet_integrity rejects speaker packets without voice bl
   assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.missing_voice_block");
 });
 
+test("page_plan_stchar_packet_integrity rejects composite speaker packets without voice block", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({
+      requiredBecause: "direct_target, speaker",
+      voiceLine: ""
+    })),
+    context(baseRecords())
+  );
+
+  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.missing_voice_block");
+  assert.deepEqual((verdicts[0]?.detail as { voice_requiring_labels?: string[] }).voice_requiring_labels, ["speaker"]);
+});
+
+test("page_plan_stchar_packet_integrity accepts composite voice-requiring packets with voice block", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({ requiredBecause: "viewpoint, behavior_shapes_page" })),
+    context(baseRecords())
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("page_plan_stchar_packet_integrity rejects voice_shapes_page packets without voice block", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({
+      requiredBecause: "voice_shapes_page",
+      voiceLine: ""
+    })),
+    context(baseRecords())
+  );
+
+  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.missing_voice_block");
+  assert.deepEqual((verdicts[0]?.detail as { voice_requiring_labels?: string[] }).voice_requiring_labels, ["voice_shapes_page"]);
+});
+
+test("page_plan_stchar_packet_integrity accepts legacy single-label speaker packets with voice block", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({ requiredBecause: "speaker" })),
+    context(baseRecords())
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("page_plan_stchar_packet_integrity rejects composite offstage_causal packets for present characters", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({
+      requiredBecause: "offstage_causal, direct_target",
+      voiceLine: ""
+    })),
+    context(baseRecords())
+  );
+
+  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.offstage_packet_for_present_character");
+});
+
+test("page_plan_stchar_packet_integrity accepts legacy single-label offstage_causal packets for offstage characters", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({
+      requiredBecause: "offstage_causal",
+      voiceLine: ""
+    })),
+    context(baseRecords({ location: "offstage" }))
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("page_plan_stchar_packet_integrity warns for unknown role labels without failing structural checks", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({ requiredBecause: "speaker, custom_unknown_label" })),
+    context(baseRecords())
+  );
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.severity, "warn");
+  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.unknown_role_label");
+  assert.deepEqual((verdicts[0]?.detail as { unknown_labels?: string[] }).unknown_labels, ["custom_unknown_label"]);
+});
+
+test("page_plan_stchar_packet_integrity accepts non-voice-requiring role labels without voice block", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({
+      requiredBecause: "emotionally_salient",
+      voiceLine: ""
+    })),
+    context(baseRecords())
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
 function input(content: string) {
   return {
     files: [{ path: PLAN_PATH, content }]

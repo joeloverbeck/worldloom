@@ -1,34 +1,36 @@
 # SPEC-73 — page-packet `required_because` multi-label parsing
 
-**Status:** active
+**Status:** COMPLETED 2026-05-23 via `archive/tickets/SPEC73PAGPACREQ-001.md`
 **Authored:** 2026-05-23
 **Source triage:** [`docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md`](../docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md)
 **Source report:** `reports/character-bridge-consolidation-second-iteration.md` §11 path #4, §15 Proposal 1 (parsing core only — the role-demand matrix is rejected; see Out of Scope §3)
 **Prior lineage:** `archive/specs/SPEC-70-char-stchar-semantic-preservation.md`, `archive/tickets/VALSTCHAR-001-fix-page-packet-hash-contract.md`
 
+**Implementation note (2026-05-23):** `SPEC73PAGPACREQ-001` landed the validator parser, WARN-only unknown-label diagnostic, shared contract note, and focused test coverage, then was archived at `archive/tickets/SPEC73PAGPACREQ-001.md`. The implementation preserved the live diagnostic id `page_plan_stchar_packet_integrity.missing_voice_block`; earlier draft references to `missing_voice_block_for_speaker` were corrected as spec drift because that id was not present in the live validator/test surface. The original drift evidence below is historical intake context.
+
 ## 1. Overview
 
 Align the `page_plan_stchar_packet_integrity` validator to the §16a packet contract's already-documented composite label vocabulary so that voice-requiring labels (`speaker`, `viewpoint`, `voice_shapes_page`) trigger the voice-block requirement even when they appear inside a comma-separated `Required because:` value. Also fix the parallel exact-match drift in the `offstage_causal` locational check. Add a closed-vocabulary warning for labels outside the documented set. No new vocabulary. No new role-demand matrix. No schema change.
 
-## 2. Context — verified contract drift
+## 2. Context — historical verified contract drift
 
-The §16a packet contract documents a composite pipe-vocabulary at `.claude/skills/_shared-templates/story-state-contract.md:466`:
+At intake, the §16a packet contract documented a composite pipe-vocabulary at `.claude/skills/_shared-templates/story-state-contract.md:466`:
 
 ```
 - Required because: viewpoint | speaker | major_actor | direct_target | emotionally_salient | behavior_shapes_page | voice_shapes_page | offstage_causal.
 ```
 
-VALSTCHAR-001 codified that prose receipts must carry the **verbatim composite** at `.claude/skills/_shared-templates/story-record-schemas.md`:
+VALSTCHAR-001 had codified that prose receipts must carry the **verbatim composite** at `.claude/skills/_shared-templates/story-record-schemas.md`:
 
 > the `required_because` must be the verbatim value the page-plan §16a packet declares for that STCHAR, including every comma-separated qualifier (e.g. `direct_target, emotionally_salient, behavior_shapes_page`), not an abbreviation to the first qualifier.
 
-But the page-plan validator never parses the composite. At `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` the value is captured as a single raw string (the `Required because:` regex match):
+Before this spec landed, the page-plan validator did not parse the composite. At intake, `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` captured the value as a single raw string (the `Required because:` regex match):
 
 ```ts
 const required = packetText.match(/^\s+- Required because:\s*([^.\n]+)\.?/m)?.[1]?.trim() ?? "";
 ```
 
-And the voice-block requirement is an exact-match Set membership (`SPEAKER_VOICE_REQUIRED.has(packet.requiredBecause)`):
+And the voice-block requirement was an exact-match Set membership (`SPEAKER_VOICE_REQUIRED.has(packet.requiredBecause)`):
 
 ```ts
 const SPEAKER_VOICE_REQUIRED = new Set(["speaker", "viewpoint"]);
@@ -36,13 +38,13 @@ const SPEAKER_VOICE_REQUIRED = new Set(["speaker", "viewpoint"]);
 if (SPEAKER_VOICE_REQUIRED.has(packet.requiredBecause) && !packet.hasVoiceBlock) { /* FAIL */ }
 ```
 
-Consequences (verified on `main`):
+Historical consequences verified at intake:
 
 - `Required because: speaker, direct_target` for an actual speaker → `requiredBecause = "speaker, direct_target"` ∉ `SPEAKER_VOICE_REQUIRED` → **voice-block requirement is silently skipped**.
 - `Required because: voice_shapes_page` (single label, fully in the documented vocabulary) → no validator ever checks for a voice block.
 - `Required because: offstage_causal, direct_target` for a non-offstage STENT → the exact-match `packet.requiredBecause === OFFSTAGE_REQUIRED_BECAUSE` evaluates false, so the locational guard against an offstage-causal label on a present character is silently skipped.
 
-This is the report's false-confidence path #4 — the only false-confidence path it rates "Preventable: yes" without caveat. The fix is contract-drift correctness: the validator should enforce the *already-documented* contract.
+This was the report's false-confidence path #4 — the only false-confidence path it rated "Preventable: yes" without caveat. The implemented fix is contract-drift correctness: the validator now enforces the already-documented contract.
 
 ## 3. Out of Scope (deliberate)
 
@@ -64,7 +66,7 @@ In `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts`:
 1. Parse `required_because` into a label set: split the captured string on commas, trim each entry, lowercase, drop empties. Store the set alongside the existing `requiredBecause` string field on the per-packet record (do **not** remove `requiredBecause` — downstream consumers still compare it verbatim against the receipt's `required_because`, per VALSTCHAR-001's contract).
 2. Change the voice-block requirement to set-membership intersection: voice block required when the parsed set ∩ `{speaker, viewpoint, voice_shapes_page}` ≠ ∅. Add `voice_shapes_page` to the requiring set (already in the documented vocabulary but never checked).
 3. Change the `offstage_causal` locational guard to set-membership: trigger when the parsed set contains `offstage_causal` (so composite `offstage_causal, direct_target` still trips for present STENTs).
-4. **Diagnostic ids unchanged.** Keep `page_plan_stchar_packet_integrity.missing_voice_block_for_speaker` and `page_plan_stchar_packet_integrity.offstage_packet_for_present_character` to avoid churning audit-trail data shape. Diagnostic message names the actual triggering label(s) found in the set (e.g., `"… omits the voice/dialogue authority block (voice-requiring labels in set: speaker, voice_shapes_page)."`).
+4. **Diagnostic ids unchanged.** Keep the live diagnostic ids `page_plan_stchar_packet_integrity.missing_voice_block` and `page_plan_stchar_packet_integrity.offstage_packet_for_present_character` to avoid churning audit-trail data shape. Diagnostic message names the actual triggering label(s) found in the set (e.g., `"… omits the voice/dialogue authority block (voice-requiring labels in set: speaker, voice_shapes_page)."`).
 
 ### 4.2 Closed-vocabulary warning
 
@@ -99,9 +101,9 @@ Add to `tools/validators/tests/structural/page-plan-stchar-packet-integrity.test
 
 | Test | Expected | Purpose |
 |---|---|---|
-| `Required because: direct_target, speaker` + no voice block | **FAIL** `missing_voice_block_for_speaker` | Composite containing `speaker` must trigger voice requirement (regression-pin for the verified bug). |
+| `Required because: direct_target, speaker` + no voice block | **FAIL** `missing_voice_block` | Composite containing `speaker` must trigger voice requirement (regression-pin for the verified bug). |
 | `Required because: viewpoint, behavior_shapes_page` + voice block | **PASS** | Composite voice-requiring label with proper voice block must not regress. |
-| `Required because: voice_shapes_page` (single label) + no voice block | **FAIL** `missing_voice_block_for_speaker` | The documented but previously-unchecked label now correctly gates voice. |
+| `Required because: voice_shapes_page` (single label) + no voice block | **FAIL** `missing_voice_block` | The documented but previously-unchecked label now correctly gates voice. |
 | `Required because: speaker` (single label, legacy) + voice block | **PASS** | Existing single-label packets unchanged. |
 | `Required because: offstage_causal, direct_target` for present (non-offstage) STENT | **FAIL** `offstage_packet_for_present_character` | Composite offstage-causal still trips locational guard. |
 | `Required because: offstage_causal` for offstage STENT + no voice block | **PASS** | Single-label legacy offstage path unchanged. |
@@ -131,11 +133,11 @@ No `page_packet_hash` recomputation needed — the parsing is internal to the va
 
 ## 7. Sequencing
 
-Single-spec sprint; no inter-spec dependency. Ticket decomposition via `spec-to-tickets` will likely produce two tickets (validator + parser; tests + contract one-liner) or one combined ticket depending on diff size.
+Single-spec sprint; no inter-spec dependency. Ticket decomposition produced one combined implementation ticket, `archive/tickets/SPEC73PAGPACREQ-001.md`, covering the validator parser, tests, shared contract note, and implementation-status truthing.
 
 ## 8. References
 
-- `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` (grep-stable anchors: `SPEAKER_VOICE_REQUIRED` constant, `OFFSTAGE_REQUIRED_BECAUSE` constant, the `Required because:` regex, the voice-block `if`-gate)
+- `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` (grep-stable anchors: `VOICE_REQUIRING_LABELS`, `PACKET_ROLE_VOCABULARY`, `OFFSTAGE_REQUIRED_BECAUSE`, the `Required because:` regex, and `requiredBecauseLabels`)
 - `.claude/skills/_shared-templates/story-state-contract.md:466`
 - `.claude/skills/_shared-templates/story-record-schemas.md` (grep-stable anchors: `required_because:` schema field; "verbatim … every comma-separated qualifier" receipt-contract clause)
 - `tools/validators/tests/structural/page-plan-stchar-packet-integrity.test.ts`
@@ -143,3 +145,13 @@ Single-spec sprint; no inter-spec dependency. Ticket decomposition via `spec-to-
 - `archive/tickets/VALSTCHAR-001-fix-page-packet-hash-contract.md` (receipt-side verbatim-composite contract)
 - `reports/character-bridge-consolidation-second-iteration.md` §11 path #4, §15 Proposal 1 (parsing core only)
 - `docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md`
+
+## Outcome
+
+Completed 2026-05-23 via `archive/tickets/SPEC73PAGPACREQ-001.md`.
+
+The implementation added comma-separated `Required because:` label parsing to `page_plan_stchar_packet_integrity`, enforced voice/dialogue blocks for `speaker`, `viewpoint`, and `voice_shapes_page` by parsed-label membership, applied the same parsed-label membership to `offstage_causal`, and added WARN-only `unknown_role_label` diagnostics for labels outside the documented vocabulary. The shared story-state contract now documents the parsed-label enforcement while preserving the receipt-side verbatim-composite contract.
+
+Deviations: the live validator diagnostic id was `page_plan_stchar_packet_integrity.missing_voice_block`, not the draft `missing_voice_block_for_speaker`; the implementation preserved the live id and truthed this spec accordingly. No schema enum enforcement, role-demand matrix, record mutation, or page-packet hash recomputation was added.
+
+Verification: from `tools/validators`, `npm run build` passed, the focused compiled `page-plan-stchar-packet-integrity` test file passed with 18 tests, and the final `npm test` run passed with 901 tests.
