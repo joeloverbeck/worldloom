@@ -145,7 +145,7 @@ For non-redundant instructions (those surviving Steps 2-5), tighten prose:
 
 ### Step 7: Rewrite
 
-Before writing, briefly summarize planned changes in the conversation so the user sees what will change before the file is overwritten. The pre-write summary is an abbreviated version of the Step 9 categories: one short bullet per category, optionally with sub-bullets when multiple distinct changes within the category warrant explicit listing. Match Step 9's zero-count convention — include any category with no findings as a brief one-line note so the reader sees the category was considered. Keep total pre-write summary under ~15 lines. Not the full diff summary.
+Before writing, briefly summarize planned changes in the conversation so the user sees what will change before the file is overwritten. The pre-write summary is an abbreviated version of the Step 9 categories: one short bullet per category, optionally with sub-bullets when multiple distinct changes within the category warrant explicit listing. Use the same `(N)` numeric-count format as Step 9 — include any category with no findings as `(0)` plus a one-line note so the reader sees the category was considered. Keep total pre-write summary under ~15 lines. Not the full diff summary.
 
 The summary is presentational, not approval-gating — proceed to writes immediately. The user can interrupt if they want changes (Auto Mode applies).
 
@@ -187,13 +187,14 @@ After writing, present a structured summary in the conversation:
 ### Topics Regrouped (<count>)
 - "<topic>" — consolidated from <source sections> into <target section>
 
-### Sections Restructured (<count>)
-- "<section>" — <what changed> (e.g., "53 bullets → 5 themed sub-groups")
+### Passages Restructured (<count>)
+- "<section or step>" — <what changed> (e.g., "53 bullets → 5 themed sub-groups" for a top-level section, or "Phase 11 step 5: single 15-instruction megaparagraph → 4 grouped sub-sections" for a restructured numbered-list step)
 
 ### Decision Paths Clarified (<count>)
 - "<topic>" — unified from <N> mentions into <structure type>
 
 ### Wording Tightened (<count>)
+- Counts *standalone* tightening edits — wording changes made independently of Passages-Restructured entries (e.g., shortening a sentence in an otherwise-untouched bullet, removing filler from a paragraph that wasn't restructured). Tightening that happens *inside* a restructured passage (e.g., a sentence within a megaparagraph that was reorganized into bullets) is implicitly described by that restructure's `<what changed>` and is NOT double-counted; in that case report `Wording Tightened (0) — bundled into Passages Restructured entries`. This differs from Cross-reference Hygiene below, which counts every introduced pointer regardless of which cluster prompted it; tightening is finer-grained and only counts when it stands alone.
 - Examples: 2-3 representative samples (no semantic changes) — literal "<before>" → "<after>" when the change is a single-string substitution, or descriptive ("<phrase> — <what changed and why>") when the change is a multi-sentence restructure.
 
 ### Cross-reference Hygiene (<count>)
