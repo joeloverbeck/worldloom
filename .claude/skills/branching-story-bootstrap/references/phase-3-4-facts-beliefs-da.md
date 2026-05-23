@@ -10,6 +10,8 @@ Do NOT mirror broad world background. The mirror exists so the turn-cycle does n
 
 ## Phase 4: Create initial belief state
 
+Consume the Distillation Boundary Ledger before root `PG` and page-plan authoring. Every opening-current fact identified as temporal state must be represented in the appropriate initial record class, omitted as genuinely non-load-bearing, or rejected as unsupported; it must not be smuggled into STCHAR as durable authority.
+
 For every cast member, create only the `BEL` records that affect immediate choice logic at the opening (per shared contract §4.1 schema, FOUNDATIONS §Story Bundles §6a Belief vs. Fact):
 
 - What they want (use `STINT` if active goal; `BEL` if felt belief about possibility).
@@ -22,5 +24,13 @@ Use `BEL` (not `SF`) for false beliefs, suspicions, rumors, lies, and private as
 For every cast-member `STENT`, set `role_in_story` as a list from the closed shared contract §4.4b values: `viewpoint`, `player_proxy`, `primary_actor`, `opposing_actor`, `allied_actor`, `authority`, `dependent`, `witness`, `information_source`, `pressure_source`, `social_bridge`, `background`. Use multiple values only when both are operationally true. Set `bound_stchar_id` to the cast member's validated `STCHAR-*` for every non-background cast member; only a cast member whose role list is exactly `[background]` may use `bound_stchar_id: null`.
 
 For every active cast-member `STENT`, create exactly one initial `STSTAT` record carrying the opening life / agency / location state per shared contract §4.5.13. Use `life: alive` unless the premise explicitly starts with a dead or unknown-status entity; choose `agency` from the contract enum; set `location` to the opening `STLOC` when known, otherwise `unknown` / `concealed` / `offstage` as appropriate. `PG-1.state_snapshot.entity_status` is derived from these active `STSTAT` records; do not author an independent status block.
+
+Ledger routing in this phase:
+
+- injury / fatigue / visibility / current location -> STSTAT, STOBJ, STLOC, PG.state_snapshot
+- distrust / suspicion / misunderstanding / knowledge / lie / witness access -> BEL
+- page-local "seen as" presentation and current voice modulation -> root page-plan §16a, grounded in active records
+
+If a fact is not durable enough for STCHAR and no state record is created for it, it must not appear in the root page plan as an unexplained assertion.
 
 **DA triage at opening.** Scan the user premise, opening scene, starting inventory, faction briefings, rumors, public notices, private letters, requested clues, maps, recordings, inscriptions, object-with-text, and existing world-level DA references. For each candidate, apply the triage rubric and decision matrix at `.claude/skills/_shared-templates/da-authoring-reference.md` §Triage and §Decision matrix. Create a DA only when content / authorship / circulation / truth relation has persistent state value. For every bootstrap DA, satisfy the patch obligations at `.claude/skills/_shared-templates/da-authoring-reference.md` §Patch obligations: allocate via `story_da_ids`; create via `append_story_diegetic_artifact_record`; include it in `SE-1.state_delta.create[]` and `PG-1.state_snapshot.active_records.DA[]`; create BEL for initial readers with an appropriate `basis.access_route`; create STOBJ when physical custody, location, damage, or sealing matters; and satisfy `expected_witness_coverage` for `public` / `factional` circulation with same-event indirect-route BEL propagation or an `SE-1.non_propagation_facts[]` entry such as `{reason: event_leaves_no_accessible_trace, group: <label>, records: [DA-<N>]}`.
