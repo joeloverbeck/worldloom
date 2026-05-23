@@ -45,8 +45,8 @@ The report audits the "current merged implementation" at base SHA `1c51393b` but
 
 ## Deliverables
 
-- `specs/SPEC-73-page-packet-required-because-label-parsing.md`
-- `specs/IMPLEMENTATION-ORDER.md` rewritten for the new sprint (SPEC-73 is the sole active spec); prior file archived as `archive/specs/IMPLEMENTATION-ORDER-2026-05-23.md`.
+- `archive/specs/SPEC-73-page-packet-required-because-label-parsing.md`
+- `archive/specs/IMPLEMENTATION-ORDER-2026-05-23-2.md` records the completed single-spec sprint; prior file archived as `archive/specs/IMPLEMENTATION-ORDER-2026-05-23.md`.
 
 ## Named assumptions (state if invalidated)
 

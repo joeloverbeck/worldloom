@@ -25,7 +25,17 @@ import {
 const VALIDATOR = "page_plan_stchar_packet_integrity";
 const PLAN_PATH_PATTERN = /^stories\/([^/]+)\/pages-prose-plans\/(PG-(0|[1-9][0-9]*))\.md$/;
 const OFFSTAGE_REQUIRED_BECAUSE = "offstage_causal";
-const SPEAKER_VOICE_REQUIRED = new Set(["speaker", "viewpoint"]);
+const PACKET_ROLE_VOCABULARY: ReadonlySet<string> = new Set([
+  "viewpoint",
+  "speaker",
+  "major_actor",
+  "direct_target",
+  "emotionally_salient",
+  "behavior_shapes_page",
+  "voice_shapes_page",
+  OFFSTAGE_REQUIRED_BECAUSE
+] as const);
+const VOICE_REQUIRING_LABELS = new Set(["speaker", "viewpoint", "voice_shapes_page"]);
 
 interface PlanTarget {
   storySlug: string;
@@ -38,6 +48,7 @@ interface Packet {
   stentId: string;
   stcharId: string;
   requiredBecause: string;
+  requiredBecauseLabels: Set<string>;
   hasVoiceBlock: boolean;
   packetText: string;
 }
@@ -132,7 +143,19 @@ function packetVerdicts(
     return verdicts;
   }
 
-  if (packet.requiredBecause === OFFSTAGE_REQUIRED_BECAUSE && stentLocation !== "offstage") {
+  const unknownLabels = [...packet.requiredBecauseLabels].filter((label) => !PACKET_ROLE_VOCABULARY.has(label));
+  if (unknownLabels.length > 0) {
+    verdicts.push(planWarn(
+      page,
+      planPath,
+      "page_plan_stchar_packet_integrity.unknown_role_label",
+      `${planPath} 16a packet for ${packet.stcharId} declares unknown role label(s): ${unknownLabels.join(", ")} (allowed: ${[...PACKET_ROLE_VOCABULARY].join(" | ")}). Promotion to FAIL deferred to a future spec.`,
+      { page_id: pageId(page), stchar_id: packet.stcharId, unknown_labels: unknownLabels },
+      `Use only documented Required because labels for ${packet.stcharId}, or update the closed vocabulary in a future schema-enforcement ticket.`
+    ));
+  }
+
+  if (packet.requiredBecauseLabels.has(OFFSTAGE_REQUIRED_BECAUSE) && stentLocation !== "offstage") {
     verdicts.push(planFail(
       page,
       planPath,
@@ -143,13 +166,19 @@ function packetVerdicts(
     ));
   }
 
-  if (SPEAKER_VOICE_REQUIRED.has(packet.requiredBecause) && !packet.hasVoiceBlock) {
+  const voiceRequiringLabels = [...packet.requiredBecauseLabels].filter((label) => VOICE_REQUIRING_LABELS.has(label));
+  if (voiceRequiringLabels.length > 0 && !packet.hasVoiceBlock) {
     verdicts.push(planFail(
       page,
       planPath,
       "page_plan_stchar_packet_integrity.missing_voice_block",
-      `${planPath} 16a ${packet.requiredBecause} packet for ${packet.stcharId} omits the voice/dialogue authority block.`,
-      { page_id: pageId(page), stchar_id: packet.stcharId, required_because: packet.requiredBecause },
+      `${planPath} 16a packet for ${packet.stcharId} omits the voice/dialogue authority block (voice-requiring labels in set: ${voiceRequiringLabels.join(", ")}).`,
+      {
+        page_id: pageId(page),
+        stchar_id: packet.stcharId,
+        required_because: packet.requiredBecause,
+        voice_requiring_labels: voiceRequiringLabels
+      },
       `Add the STCHAR Page-Plan Voice Block projection to the 16a packet for ${packet.stcharId}.`
     ));
   }
@@ -183,10 +212,20 @@ function parsePackets(content: string): Packet[] {
       stentId,
       stcharId,
       requiredBecause: required,
+      requiredBecauseLabels: parseRequiredBecauseLabels(required),
       hasVoiceBlock: /^[^\S\r\n]*- Voice\/dialogue authority:[^\S\r\n]*\S/m.test(packetText),
       packetText
     };
   });
+}
+
+function parseRequiredBecauseLabels(requiredBecause: string): Set<string> {
+  return new Set(
+    requiredBecause
+      .split(",")
+      .map((label) => label.trim().toLowerCase())
+      .filter((label) => label.length > 0)
+  );
 }
 
 function planTargets(input: unknown, ctx: Context): PlanTarget[] {
@@ -241,6 +280,21 @@ function planFail(
 ): Verdict {
   return {
     ...fail(VALIDATOR, page, code, message, detail, suggested_fix),
+    location: { file: planPath, node_id: recordId(page) }
+  };
+}
+
+function planWarn(
+  page: IndexedRecord,
+  planPath: string,
+  code: string,
+  message: string,
+  detail: unknown,
+  suggested_fix: string
+): Verdict {
+  return {
+    ...fail(VALIDATOR, page, code, message, detail, suggested_fix),
+    severity: "warn",
     location: { file: planPath, node_id: recordId(page) }
   };
 }

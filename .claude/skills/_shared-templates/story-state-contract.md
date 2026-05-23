@@ -477,6 +477,8 @@ Each §16a packet includes:
   - Anti-generic warnings:
 ```
 
+`Required because:` is parsed as a comma-separated label set drawn from the closed vocabulary above. The `page_plan_stchar_packet_integrity` validator requires a voice/dialogue authority block when the set contains any of `speaker`, `viewpoint`, or `voice_shapes_page`, and forbids `offstage_causal` for any STENT whose `location` is not `offstage`. Labels outside the closed vocabulary emit a warning. The receipt-side verbatim-composite contract in `story-record-schemas.md` §4.6 is unchanged.
+
 For an active offstage character whose offstage activity causally bears on the page, §16a may use a reduced `offstage_causal` packet:
 
 ```markdown
