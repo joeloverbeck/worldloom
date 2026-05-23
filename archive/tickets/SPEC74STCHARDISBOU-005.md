@@ -1,6 +1,6 @@
 # SPEC74STCHARDISBOU-005: branching-story-turn-cycle/references/phase-7-page-plan.md §16a paragraph rewrite
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` §16a paragraph rewrite (drops post-SPEC-71-stale hash citations)
@@ -8,11 +8,11 @@
 
 ## Problem
 
-The `phase-7-page-plan.md` §16a paragraph still describes the per-character packet shape with hash citations (`profile_hash`, `voice_block_hash`, `page_packet_hash`) that no longer exist post-SPEC-71. The paragraph must be rewritten against the post-SPEC-71 / post-this-spec packet field set, including the new `Current-state grounding records:` field convention from SPEC74STCHARDISBOU-003. Per SPEC-74 §4.5 + §3 Out of Scope, the source report's hash-citation text is dropped — the rewrite replaces the field list with the canonical post-SPEC-71 set.
+At intake, the `phase-7-page-plan.md` §16a paragraph still described the per-character packet shape without the post-SPEC-71 / post-SPEC-74 `Current-state grounding records:` field convention from SPEC74STCHARDISBOU-003. The paragraph has been rewritten against the canonical post-SPEC-71 packet field set. Per SPEC-74 §4.5 + §3 Out of Scope, no STCHAR hash fields are part of the landed §16a contract.
 
 ## Assumption Reassessment (2026-05-23)
 
-1. Verified current `.claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` §16a paragraph: still references `profile_hash`, `voice_block_hash`, `page_packet_hash` in the per-character packet field list — stale post-SPEC-71. Confirms SPEC-74 §4.5's premise that the rewrite must drop these references and replace with the post-SPEC-71 field set.
+1. At intake, `.claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` §16a lacked the post-SPEC-74 `Current-state grounding records:` packet field and still used the older per-character packet shape. SPEC-74 §4.5 required replacing that paragraph with the post-SPEC-71 / post-this-spec field set and preserving the drop of `profile_hash`, `voice_block_hash`, and `page_packet_hash`.
 2. Verified SPEC-74 §4.5 specifies the rewrite content + the explicit drop of `profile_hash`, `voice_block_hash`, `page_packet_hash` references (per SPEC-71 + SPEC-74 §3 Out of Scope).
 3. Cross-skill boundary under audit: the §16a paragraph in this reference IS the per-page authoring instruction that `branching-story-turn-cycle`'s page-plan authoring phase reads; it must align with the shared §16a contract in `story-state-contract.md` (SPEC74STCHARDISBOU-003). The two files restate the same contract in different procedural registers — turn-cycle's reference file gives the per-page authoring procedure; the shared template gives the canonical contract.
 4. FOUNDATIONS principle restated: §Story Bundles §5c ("Present Causal State, Not Narrative Shape") — §16a current-state mentions MUST cite active state records as their grounding, not present current state as if it were durable STCHAR content. The new `Current-state grounding records:` field is the structural anchor.
@@ -27,13 +27,13 @@ The `phase-7-page-plan.md` §16a paragraph still describes the per-character pac
 1. **No hash-field references in §16a paragraph** → grep-proof: `grep -nE 'profile_hash|voice_block_hash|page_packet_hash' .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` returns 0 matches.
 2. **`Current-state grounding records:` field cited in the §16a paragraph** → grep-proof: `grep -n 'Current-state grounding records:' .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` returns ≥1 match.
 3. **Multi-token `Required because:` (SPEC-73 vocabulary) cited as part of the packet field list** → grep-proof: `grep -n 'Required because' .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` returns ≥1 match in the §16a paragraph.
-4. **Forbid-world-CHAR-as-page-plan-authority rule explicit** → grep-proof: `grep -n 'Do not cite world `CHAR-\*`\|must not cite world `CHAR-\*`' .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` returns ≥1 match.
+4. **Forbid-world-CHAR-as-page-plan-authority rule explicit** → grep-proof: ``grep -n 'Do not cite world `CHAR-\*`' .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md`` returns ≥1 match.
 
-## What to Change
+## Landed Changes
 
-### 1. Replace the §16a paragraph
+### 1. Replaced the §16a paragraph
 
-Rewrite the §16a paragraph with the post-SPEC-71 / post-this-spec packet shape. Mandatory when any viewpoint character / speaker / major actor / direct target / emotionally salient character / behavior-shaping or offstage-causal character is present. Per-character packet projects stable STCHAR authority through active current state. Required fields:
+Rewrote the §16a paragraph with the post-SPEC-71 / post-this-spec packet shape. It is mandatory when any viewpoint character / speaker / major actor / direct target / emotionally salient character / behavior-shaping or offstage-causal character is present. Per-character packets project stable STCHAR authority through active current state and do not store current state inside STCHAR. Required fields now include:
 
 - `STENT / STCHAR / display name`
 - Multi-token `Required because:` (SPEC-73 vocabulary)
@@ -46,9 +46,9 @@ Rewrite the §16a paragraph with the post-SPEC-71 / post-this-spec packet shape.
 
 Closing rule: "Use the active STCHAR profile as stable authority. Use active story-state records for current state. Do not cite world `CHAR-*` as operational page-plan characterization authority. Do not imply that current state lives inside STCHAR."
 
-### 2. Drop all references to `profile_hash`, `voice_block_hash`, `page_packet_hash`
+### 2. Preserved SPEC-71 hash removal
 
-These fields do NOT exist post-SPEC-71. The rewrite must not reintroduce them in any form (verbatim citation, paraphrase, or example).
+The rewritten paragraph does not reintroduce `profile_hash`, `voice_block_hash`, or `page_packet_hash` in any form.
 
 ## Files to Touch
 
@@ -86,4 +86,24 @@ These fields do NOT exist post-SPEC-71. The rewrite must not reintroduce them in
 
 1. `grep -nE 'profile_hash|voice_block_hash|page_packet_hash' .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` (confirms 0 hash references)
 2. `grep -n 'Current-state grounding records:\|Required because' .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` (confirms both new + retained convention citations)
-3. Manual inspection: cross-check the §16a paragraph's field list against the canonical list in `story-state-contract.md` (SPEC74STCHARDISBOU-003) for bit-for-bit alignment.
+3. Manual inspection: cross-check the §16a paragraph's field list against the canonical list in `story-state-contract.md` (SPEC74STCHARDISBOU-003) for contract alignment.
+
+## Outcome
+
+Completed: 2026-05-23
+
+- Rewrote `.claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` §16a to use the post-SPEC-71 / post-SPEC-74 packet shape.
+- Added the explicit `Current-state grounding records:` convention for both full and reduced `offstage_causal` §16a packets.
+- Restated the projection boundary: stable STCHAR authority supplies durable character authority, active story-state records supply current state, and page plans must not cite world `CHAR-*` as operational page-plan characterization authority.
+- Preserved SPEC-71's hash-field removal; no `profile_hash`, `voice_block_hash`, or `page_packet_hash` references remain in the turn-cycle reference.
+
+## Verification Result
+
+1. `grep -nE 'profile_hash|voice_block_hash|page_packet_hash' .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` returned no matches, as expected for the negative stale-hash proof.
+2. `grep -n 'Current-state grounding records:\|Required because' .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` returned matches in the rewritten §16a full and reduced packet paragraphs.
+3. ``grep -n 'Do not cite world `CHAR-\*`' .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md`` returned the world-CHAR prohibition in the rewritten §16a paragraph.
+4. Manual review compared the rewritten field list against `.claude/skills/_shared-templates/story-state-contract.md` §16a and `archive/tickets/SPEC74STCHARDISBOU-003.md`; the turn-cycle reference now carries the same packet fields and projection-vs-authority boundary in procedural form.
+
+## Deviations
+
+- None.
