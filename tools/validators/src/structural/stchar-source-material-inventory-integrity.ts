@@ -12,6 +12,7 @@ import {
   worldRootFrom
 } from "./utils.js";
 import { appliesToStcharStoryState, fail, recordId, shouldCheckRecordInPreApply } from "./stchar-utils.js";
+import { OPERATIONAL_TARGET_SECTIONS } from "./_stchar-operational-sections.js";
 
 const VALIDATOR = "stchar_source_material_inventory_integrity";
 const STCHAR_PATH = /^stories\/[^/]+\/story-characters\/STCHAR-(0|[1-9][0-9]*)\.md$/;
@@ -19,20 +20,6 @@ const STCHAR_PATH = /^stories\/[^/]+\/story-characters\/STCHAR-(0|[1-9][0-9]*)\.
 const RETAINED_DISPOSITIONS = new Set(["copied", "transformed", "compressed"]);
 const OMITTED_DISPOSITIONS = new Set(["omitted_with_rationale", "story_irrelevant"]);
 const VALID_DISPOSITIONS = new Set([...RETAINED_DISPOSITIONS, ...OMITTED_DISPOSITIONS]);
-// Keep in sync with stchar-source-fact-coverage.ts until SPEC74STCHARDISBOU-009 extracts the shared module.
-const OPERATIONAL_TARGET_SECTIONS = new Set([
-  "Story-Facing Identity",
-  "Stable Persona Core",
-  "Emotional Appraisal Map",
-  "Pressure Behavior",
-  "Voice Bible / Dialogue Authority",
-  "Page-Plan Voice Block",
-  "Perception and Embodiment",
-  "Agency and Planning Tendencies",
-  "Relationship-Specific Behavior",
-  "Story-State Derivation Guide",
-  "Prose Rendering Constraints"
-]);
 const BOOTSTRAP_STORY_IRRELEVANT_RATIONALES = new Set([
   "outside_story_scope",
   "content_constraint",

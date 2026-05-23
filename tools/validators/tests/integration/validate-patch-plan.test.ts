@@ -292,6 +292,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "forbidden_stchar_tamper_hash_fields"
     );
     assert.equal(forbiddenStcharHashExecution?.status, "skipped");
+    const stcharTemporalReferenceExecution = result.executions.find(
+      (execution) => execution.name === "stchar_temporal_reference_boundary"
+    );
+    assert.equal(stcharTemporalReferenceExecution?.status, "skipped");
     const activeRecordsFullShapeExecution = result.executions.find(
       (execution) => execution.name === "active_records_full_shape"
     );
@@ -305,7 +309,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     const stcharExecutions = result.executions.filter(
       (execution) => execution.name.startsWith("stchar_") || execution.name === "stent_requires_stchar"
     );
-    assert.equal(stcharExecutions.length, 8);
+    assert.equal(stcharExecutions.length, 9);
     assert.ok(stcharExecutions.every((execution) => execution.status === "skipped"));
     const characterRuntimeExecution = result.executions.find(
       (execution) => execution.name === "no_char_authority_in_story_runtime"
@@ -360,6 +364,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== pageAffordanceExecution &&
         row !== pagePlanStcharExecution &&
         row !== forbiddenStcharHashExecution &&
+        row !== stcharTemporalReferenceExecution &&
         row !== activeRecordsFullShapeExecution &&
         !stplanExecutions.includes(row) &&
         !stemoExecutions.includes(row) &&

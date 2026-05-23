@@ -1,6 +1,7 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import { asPlainRecord, locationFor, queryStructuralRecords, stringValue, toPosixPath } from "./utils.js";
 import { appliesToStcharStoryState, fail, recordId, shouldCheckRecordInPreApply } from "./stchar-utils.js";
+import { OPERATIONAL_TARGET_SECTIONS } from "./_stchar-operational-sections.js";
 
 const VALIDATOR = "stchar_source_fact_coverage";
 
@@ -20,19 +21,6 @@ const OPERATIONAL_SOURCE_FIELDS = [
 const RETAINED_DISPOSITIONS = new Set(["copied", "transformed", "compressed"]);
 const OMITTED_DISPOSITIONS = new Set(["omitted_with_rationale", "story_irrelevant"]);
 const VALID_DISPOSITIONS = new Set([...RETAINED_DISPOSITIONS, ...OMITTED_DISPOSITIONS]);
-const OPERATIONAL_TARGET_SECTIONS = new Set([
-  "Story-Facing Identity",
-  "Stable Persona Core",
-  "Emotional Appraisal Map",
-  "Pressure Behavior",
-  "Voice Bible / Dialogue Authority",
-  "Page-Plan Voice Block",
-  "Perception and Embodiment",
-  "Agency and Planning Tendencies",
-  "Relationship-Specific Behavior",
-  "Story-State Derivation Guide",
-  "Prose Rendering Constraints"
-]);
 
 type Severity = "fail" | "warn";
 
