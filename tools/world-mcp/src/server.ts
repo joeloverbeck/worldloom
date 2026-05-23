@@ -33,6 +33,7 @@ import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records.j
 import { searchNodes } from "./tools/search-nodes.js";
 import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan.js";
 import { validatePatchPlan } from "./tools/validate-patch-plan.js";
+import { verifyPgStateHash } from "./tools/verify-pg-state-hash.js";
 import {
   MCP_TOOL_NAMES,
   MCP_TOOL_ORDER,
@@ -131,6 +132,12 @@ const getStoryStateProvenanceInputSchema = z.object({
   record_id: z.string().min(1),
   world_slug: z.string().min(1).optional(),
   story_slug: z.string().regex(STORY_SLUG_PATTERN).optional()
+});
+
+const verifyPgStateHashInputSchema = z.object({
+  world_slug: z.string().min(1),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN),
+  page_id: z.string().regex(/^PG-\d+$/)
 });
 
 const getPersistedPacketSliceInputSchema = z.object({
@@ -380,6 +387,12 @@ export function createServer(): McpServer {
     getStoryStateProvenanceInputSchema,
     async (args) =>
       getStoryStateProvenance(args as unknown as Parameters<typeof getStoryStateProvenance>[0])
+  );
+  registerToolWithCapability(
+    "verify_pg_state_hash",
+    "verify_pg_state_hash: Prose-attach Phase 2 verifier for a committed PG page record. Recomputes state_hash from the parsed PG exactly as committed and does not modify plan.plan_hash before hashing; state_hash_match is verdict-driving, while plan_hash_match is SPEC-72 advisory drift against pages-prose-plans/<page_id>.md.",
+    verifyPgStateHashInputSchema,
+    async (args) => verifyPgStateHash(args as unknown as Parameters<typeof verifyPgStateHash>[0])
   );
   registerToolWithCapability(
     "get_persisted_packet_slice",

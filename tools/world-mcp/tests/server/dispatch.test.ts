@@ -5,7 +5,7 @@ import test from "node:test";
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { OPERATION_KINDS } from "../../src/package-interop.js";
+import { computePgStateHash, computePlanHash, OPERATION_KINDS } from "../../src/package-interop.js";
 
 import { TASK_TYPES } from "../../src/ranking/profiles/index.js";
 import { createServer, ID_CLASSES } from "../../src/server.js";
@@ -190,6 +190,42 @@ function storyPatch(op: string, sourceDir: string, record: Record<string, unknow
 }
 
 function seedServerWorld(root: string): void {
+  const planBody = "Seeded prose plan bytes.\n";
+  const planHash = computePlanHash(Buffer.from(planBody, "utf8"));
+  const pgRecord = {
+    id: "PG-3",
+    story_id: "STORY-3",
+    parent_page_id: null,
+    turn_index: 3,
+    input: { choice_id: null, manual_action_text: null, resolved_event_id: null },
+    plan: { plan_hash: planHash },
+    emitted_choices: [],
+    state_snapshot: {
+      active_records: { BEL: ["BEL-1"] },
+      visible_affordances: []
+    }
+  };
+  const pgBody = [
+    "id: PG-3",
+    "story_id: STORY-3",
+    "parent_page_id: null",
+    "turn_index: 3",
+    "input:",
+    "  choice_id: null",
+    "  manual_action_text: null",
+    "  resolved_event_id: null",
+    "plan:",
+    `  plan_hash: ${planHash}`,
+    "emitted_choices: []",
+    "state_snapshot:",
+    "  active_records:",
+    "    BEL:",
+    "      - BEL-1",
+    "  visible_affordances: []",
+    `state_hash: ${computePgStateHash(pgRecord)}`,
+    ""
+  ].join("\n");
+
   seedWorld(root, {
     worldSlug: "seeded",
     nodes: [
@@ -313,6 +349,15 @@ function seedServerWorld(root: string): void {
           "  source_event: SE-1",
           ""
         ].join("\n")
+      },
+      {
+        node_id: "opening-bells:PG-3",
+        world_slug: "seeded",
+        story_slug: "opening-bells",
+        file_path: "stories/opening-bells/_source/pages/PG-3.yaml",
+        heading_path: "PG-3",
+        node_type: "page_record",
+        body: pgBody
       }
     ],
     edges: [
@@ -392,6 +437,9 @@ function seedServerWorld(root: string): void {
   const pagesDirectory = path.join(storiesDirectory, "_source", "pages");
   mkdirSync(pagesDirectory, { recursive: true });
   writeFileSync(path.join(pagesDirectory, "PG-0003.yaml"), "id: PG-0003\n", "utf8");
+  const prosePlansDirectory = path.join(storiesDirectory, "pages-prose-plans");
+  mkdirSync(prosePlansDirectory, { recursive: true });
+  writeFileSync(path.join(prosePlansDirectory, "PG-3.md"), planBody, "utf8");
   const storyletBatchesDirectory = path.join(storiesDirectory, "storylet-batches");
   mkdirSync(storyletBatchesDirectory, { recursive: true });
   writeFileSync(path.join(storyletBatchesDirectory, "SLB-0003.md"), "# SLB-0003\n", "utf8");
@@ -476,6 +524,11 @@ test("registered tools dispatch with either a success payload or the documented 
       {
         name: MCP_TOOL_NAMES.get_story_state_provenance,
         args: { record_id: "BEL-1", world_slug: "seeded", story_slug: "opening-bells" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.verify_pg_state_hash,
+        args: { world_slug: "seeded", story_slug: "opening-bells", page_id: "PG-3" },
         expectError: false
       },
       {
@@ -650,6 +703,7 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       { name: MCP_TOOL_NAMES.get_records, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.get_records_field, args: { record_ids: ["CF-0001"], world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.get_story_state_provenance, args: { record_id: "BEL-1", world_slug: "seeded" } },
+      { name: MCP_TOOL_NAMES.verify_pg_state_hash, args: { world_slug: "seeded", story_slug: "opening-bells" } },
       { name: MCP_TOOL_NAMES.get_persisted_packet_slice, args: { slice_path: "governing_world_context.nodes" } },
       { name: MCP_TOOL_NAMES.list_records, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.get_record_field, args: { record_id: "SEC-GEO-001", world_slug: "seeded" } },

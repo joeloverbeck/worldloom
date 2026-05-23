@@ -56,11 +56,11 @@ Phase 1: Pair plan + page + prose (load PG, STORY_KERNEL.md Player Agency
         v
 Phase 2: Hash integrity check (split signal: plan_hash drift -> WARN advisory
                                per SPEC-72 / FOUNDATIONS Story Bundles 4a;
-                               state_hash drift -> FAIL tamper; state_hash
-                               recomputed via computePgStateHash directly
-                               on the committed PG record's parsed fields,
-                               not via the CLI; record drift in receipt
-                               notes, never in PG)
+                               state_hash drift -> FAIL tamper; hashes
+                               verified via verify_pg_state_hash, which
+                               recomputes state_hash from the committed PG
+                               record without re-stamping plan_hash; record
+                               drift in receipt notes, never in PG)
         |
         v
 Phase 3: Deterministic checks (8 prose/state checks, CHAR leak verdict,
@@ -157,10 +157,9 @@ Load into working memory:
 - `PG.state_snapshot.active_records` — the at-commit state the prose must respect.
 - If `run_craft_critic: true`, optional prior 1-2 prose pages from `pages-prose/<recent-N>.md` for continuity checks.
 
-Compute fresh hashes:
-
-- `computed_plan_hash`: sha256 over the plan file's bytes.
-- `computed_state_hash`: recompute by calling `computePgStateHash` from `@worldloom/world-index/hash/content` directly on the parsed PG record (the `snapshot_replay_equality` basis per shared contract §4.2a Tooling carve-out). The validator package's `snapshot_replay_equality` at `tools/validators/src/structural/snapshot-replay-equality.ts:296` is the canonical pattern — invoke the same helper on the same parsed-PG input. Do NOT use the `compute-pg-hashes` CLI here: the CLI re-reads the plan file via `--plan` and overwrites `plan.plan_hash` in the PG payload before computing `state_hash` (see `tools/world-mcp/src/cli/compute-pg-hashes.ts:211` `applyComputedPlanHash`), which re-introduces the plan-file-to-state-hash coupling SPEC-72 §2.2 removes. The CLI remains correct for authoring-time use in `branching-story-bootstrap` Phase 7 and `branching-story-turn-cycle` Phase 9, where both hashes are stamped together at commit; it is not correct for verification-time use in prose-attach Phase 2.
+- Run `mcp__worldloom__verify_pg_state_hash(world_slug, story_slug, page_id)`. The tool returns `{recorded_state_hash, computed_state_hash, state_hash_match, recorded_plan_hash, computed_plan_hash, plan_hash_match}` plus provenance fields.
+- Use the tool's `computed_plan_hash` as the sha256 over the plan file's bytes. If it is `null`, treat the plan file as missing and classify the hash integrity check as at least WARN unless state hash also fails.
+- Use the tool's `computed_state_hash` as the verifier-time PG hash. The tool calls `computePgStateHash` from `@worldloom/world-index/hash/content` on the parsed PG record, the same `snapshot_replay_equality` basis per shared contract §4.2a Tooling carve-out, and does not modify `plan.plan_hash` before hashing. Do NOT use the `compute-pg-hashes` CLI here: the CLI re-reads the plan file via `--plan` and overwrites `plan.plan_hash` in the PG payload before computing `state_hash` (see `tools/world-mcp/src/cli/compute-pg-hashes.ts:211` `applyComputedPlanHash`), which re-introduces the plan-file-to-state-hash coupling SPEC-72 §2.2 removes. The CLI remains correct for authoring-time use in `branching-story-bootstrap` Phase 7 and `branching-story-turn-cycle` Phase 9, where both hashes are stamped together at commit; it is not correct for verification-time use in prose-attach Phase 2.
 - `computed_prose_hash`: sha256 over the prose file's bytes.
 
 ## Phase 2: Hash integrity check
