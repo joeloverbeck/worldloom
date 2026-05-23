@@ -84,7 +84,7 @@ Phase 7: Author page plan → pages-prose-plans/PG-<integer>.md (in memory)
 Phase 8: Generate next choices → CHC records (in memory; 0 for terminal)
         |
         v
-Phase 9: Validate against shared 8 hard gates + 11 turn-cycle-additional;
+Phase 9: Validate against shared 8 hard gates + 15 turn-cycle-additional;
   compute final PG hashes per shared contract §4.2a
         |
         v
