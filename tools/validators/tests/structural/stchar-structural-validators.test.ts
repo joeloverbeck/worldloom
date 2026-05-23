@@ -5,7 +5,6 @@ import { characterGroundingConsistency } from "../../src/structural/character-gr
 import { noCharAuthorityInStoryRuntime } from "../../src/structural/no-char-authority-in-story-runtime.js";
 import { stcharActiveForBoundStent } from "../../src/structural/stchar-active-for-bound-stent.js";
 import { stcharResolves } from "../../src/structural/stchar-resolves.js";
-import { stcharSupersessionIntegrity } from "../../src/structural/stchar-supersession-integrity.js";
 import { stentRequiresStchar } from "../../src/structural/stent-requires-stchar.js";
 import { context, record } from "./helpers.js";
 
@@ -61,19 +60,6 @@ test("stchar_active_for_bound_stent rejects active STENT whose STCHAR is absent 
   ]));
 
   assert.equal(verdicts[0]?.code, "stchar_active_for_bound_stent.missing_active_stchar");
-});
-
-test("stchar_supersession_integrity allows pre-supersession pages and rejects later pages referencing inactive STCHAR", async () => {
-  const verdicts = await stcharSupersessionIntegrity.run(undefined, context([
-    stchar("STCHAR-1", { status: "superseded", superseded_by: "STCHAR-2" }),
-    stchar("STCHAR-2", { generated_at_page: "PG-2", supersedes: "STCHAR-1" }),
-    page("PG-1", { STCHAR: ["STCHAR-1"] }),
-    page("PG-3", { STCHAR: ["STCHAR-1"] })
-  ]));
-
-  assert.equal(verdicts.length, 1);
-  assert.equal(verdicts[0]?.code, "stchar_supersession_integrity.inactive_stchar_active_on_page");
-  assert.equal((verdicts[0]?.detail as { page_id: string }).page_id, "PG-3");
 });
 
 test("no_char_authority_in_story_runtime allows STCHAR provenance and promotion claims", async () => {

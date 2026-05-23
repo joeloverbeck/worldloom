@@ -98,7 +98,8 @@ does not add or remove schema fields.
   `location_trace`, `rumor`, `surveillance`, `institutional_channel`, or
   `magic_tech`) or `SE.non_propagation_facts[]` must include a structured
   entry with `reason: event_leaves_no_accessible_trace`, a witness-group
-  `group`, and supporting `records[]`.
+  `group`, and supporting `records[]`. See §5a.3 for the complete
+  `expected_witness_coverage` trigger set and the public-BEL requirement.
 - `derived_from: [DA-N]` is ambiguous between world-level diegetic artifacts
   (`worlds/<slug>/diegetic-artifacts/DA-N.md`) and story-local artifact records
   (`worlds/<slug>/stories/<story>/_source/artifacts/DA-N.yaml`). Until namespace
@@ -348,7 +349,25 @@ group: direct_witnesses
 records: [DA-4]
 ```
 
-`reason` is one of `no_witness | witness_incapacitated | evidence_concealed | institution_suppresses_report | event_leaves_no_accessible_trace`. `group` is a free-form witness-group label. `records[]` names the story-local records that justify or contextualize the non-propagation fact. `expected-witness-coverage` and `non_propagation_facts_completeness` consume this field directly.
+`reason` is one of `no_witness | witness_incapacitated | evidence_concealed | institution_suppresses_report | event_leaves_no_accessible_trace`. `group` is one of the computed direct-witness group labels accepted by `expected_witness_coverage`: `direct`, `direct_witnesses`, `direct:<STLOC-id>`, or `location:<STLOC-id>`. The `direct` and `direct_witnesses` forms are bundle-stable; the location-bearing forms are computed at validation time from the event actor's active `STSTAT.location`. Free-form descriptive labels are not accepted; put descriptive context in `records[]` and `world_logic_rationale`. `records[]` names the story-local records that justify or contextualize the non-propagation fact. `expected_witness_coverage` and `non_propagation_facts_completeness` consume this field directly.
+
+#### §5a.3 Witness Trigger Conditions and Public BEL Requirement
+
+The `expected_witness_coverage` validator activates for an `SE` record when any of these conditions holds:
+
+1. The event creates a `BEL` whose `basis.source_event` is that `SE` and whose `visibility` is in the validator's `PUBLIC_BEL_VISIBILITIES` public-coverage set: `public`, `shared`, `factional`, or `rumored`.
+2. The event creates a story-local `DA` with `circulation: public` or `circulation: factional`.
+3. The event creates or supersedes an active `STENT`.
+4. The event supersedes a `STSTAT` whose `entity` is not the event's `actor`.
+
+The validator computes the direct-witness group from active `STENT` records at the actor's active `STSTAT.location`, excluding the actor and excluding entities whose active status is unavailable (`unconscious`, `dead`, or `incapacitated`). When the validator is active and direct witnesses exist, every direct witness must be covered by one of two lawful discharge paths:
+
+- A same-event public-coverage `BEL` with `visibility` in `public`, `shared`, `factional`, or `rumored`, whose `holder` is that witness, `public`, or `group:direct_witnesses`.
+- An `SE.non_propagation_facts[]` entry whose `reason` is closed-set per §5a.2, whose `group` is one of the computed direct-witness group labels from §5a.2, and whose `records[]` contains every direct witness in the computed group.
+
+Private, concealed, and suppressed `BEL` records do not discharge `expected_witness_coverage`, even when their `holder` is one of the direct witnesses. A private interior belief can satisfy FOUNDATIONS §Story Bundles §6a (Belief vs. Fact) because it records what a character believes; it does not prove public or shared witness propagation. The layers are intentionally separate: FOUNDATIONS §Story Bundles §6a says what epistemic state must be recorded, while this validator-level rule says whether observable witness coverage has been discharged.
+
+For a non-actor status-supersession with no plausible external observation, such as an interior-state-only update or a relocation whose public trace is intentionally absent, use `SE.non_propagation_facts[]` with `reason: event_leaves_no_accessible_trace`, a legal computed direct-witness `group`, and `records[]` containing every computed direct witness. Do not rely on a private `BEL` to discharge this validator path.
 
 ## 6. Action Routing
 

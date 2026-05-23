@@ -1,21 +1,23 @@
 {
-  "originating_spec": "specs/SPEC-74-stchar-distillation-boundary-hardening.md",
-  "archived_spec": null,
-  "last_ticket": "tickets/SPEC74STCHARDISBOU-013.md",
-  "last_result": "blocked",
-  "last_work_commit": "899a572dea77f9da533963630a427d1a48ecf108",
+  "originating_spec": "archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md",
+  "archived_spec": "archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md",
+  "last_ticket": "archive/tickets/SPEC78FOUAMEDRI-001.md",
+  "last_result": "completed_archived_spec_archived",
+  "last_work_commit": "10d9d2f59ff6a0ade878e9b903b768cdd11278c7",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC74STCHARDISBOU-013.md",
-  "queue": [
-    "tickets/SPEC74STCHARDISBOU-013.md"
-  ],
-  "phase": "blocked",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
-  "blocked": true,
-  "blocker": "SPEC74STCHARDISBOU-013 requires patch-engine migration of private red-bunny world content, but this public pipeline worktree contains only worlds/.gitkeep; worlds/erotica-world/stories/red-bunny is absent and ignored by repo policy.",
-  "dirty_state": "expected ignored artifacts: tools/world-index/node_modules/, tools/world-index/dist/, tools/patch-engine/node_modules/, tools/patch-engine/dist/, tools/validators/node_modules/, tools/validators/dist/, tools/world-mcp/node_modules/, tools/world-mcp/dist/ from package install/build/test proof",
+  "blocked": false,
+  "blocker": null,
+  "dirty_state": "clean",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
+  "commits": {
+    "ticket_iteration": "f1199cf550bf3ea29df10b7359cc549532b87fec",
+    "spec_archive": "10d9d2f59ff6a0ade878e9b903b768cdd11278c7"
+  },
   "updated_at": "2026-05-23"
 }

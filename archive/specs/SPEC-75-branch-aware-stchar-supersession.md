@@ -1,11 +1,13 @@
 # SPEC-75 — Branch-aware STCHAR supersession
 
-**Status:** AUTHORED 2026-05-23
+**Status:** COMPLETED 2026-05-23
 **Authored:** 2026-05-23
 **Source report:** `reports/stchar-distillation-rework.md` §6.13
-**Companion triage:** [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../docs/triage/2026-05-23-stchar-distillation-rework-triage.md)
+**Companion triage:** [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../../docs/triage/2026-05-23-stchar-distillation-rework-triage.md)
 **Prior lineage:** `archive/specs/SPEC-59-stchar-authority-fidelity-validators.md` (introduced reciprocity + supersession surfaces).
-**Related:** [`archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md`](../archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md) (STCHAR distillation boundary hardening — orthogonal scope split out of this spec at triage time; landed 2026-05-23, archived same day).
+**Related:** [`archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md`](SPEC-74-stchar-distillation-boundary-hardening.md) (STCHAR distillation boundary hardening — orthogonal scope split out of this spec at triage time; landed 2026-05-23, archived same day).
+
+**Implementation note (2026-05-23):** Landed via `archive/tickets/SPEC75BRAAWASTCHAR-001.md`. The implementation consumes the existing PG `branch_path` field through a small `branchPath(page)` accessor; it does not add a traversal primitive or ancestry walker. Current validator/test proof lives in `tools/validators/src/structural/stchar-supersession-integrity.ts` and `tools/validators/tests/structural/stchar-supersession-integrity.test.ts`; remaining pre-implementation failure prose below is historical design context.
 
 ## 1. Overview
 
@@ -158,12 +160,12 @@ No separate ancestry-primitive unit-test file is needed: `branch_path` is a seri
 ## 9. References
 
 - Source report: `reports/stchar-distillation-rework.md` §6.13 (the supersession concern).
-- Companion triage: [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../docs/triage/2026-05-23-stchar-distillation-rework-triage.md).
-- Related: [`archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md`](../archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md) (established the `regeneration_reason_class: durable_branch_transformation` enum value that names the branch-local-transformation reason class).
+- Companion triage: [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../../docs/triage/2026-05-23-stchar-distillation-rework-triage.md).
+- Related: [`archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md`](SPEC-74-stchar-distillation-boundary-hardening.md) (established the `regeneration_reason_class: durable_branch_transformation` enum value that names the branch-local-transformation reason class).
 - Verified validator surface: `tools/validators/src/structural/stchar-supersession-integrity.ts:33-44` (ordinal-only reachability).
 - Existing `branch_path` consumers (sibling-validator pattern this spec follows): `tools/validators/src/structural/stemo-utils.ts:232`, `stplan-utils.ts:225`, `secret-utils.ts:156-167`, `recursive-reference-closure.ts:19-39`, `story-question-utils.ts:159`.
 - FOUNDATIONS: Rule 4, Rule 6, §Story Bundles §6.1.
 
 ## Outcome
 
-When this spec lands, a branch-local STCHAR regeneration (e.g., `regeneration_reason_class: durable_branch_transformation` on branch A at PG-6) no longer silently forces sibling branches to use the regenerated profile. The supersession validator distinguishes descendant pages (PG-6 ∈ target.branch_path → must use the successor) from non-descendant pages (PG-6 ∉ target.branch_path → may continue using the predecessor). A global supersession is achieved operationally by regenerating on the bundle's root branch, where every page is a descendant by construction — no new schema discriminator is needed. The implementation reuses the already-serialized `branch_path` PG field that 7+ sibling validators already consume, avoiding any new traversal primitive.
+With this spec implemented, a branch-local STCHAR regeneration (e.g., `regeneration_reason_class: durable_branch_transformation` on branch A at PG-6) no longer silently forces sibling branches to use the regenerated profile. The supersession validator distinguishes descendant pages (PG-6 ∈ target.branch_path → must use the successor) from non-descendant pages (PG-6 ∉ target.branch_path → may continue using the predecessor). A global supersession is achieved operationally by regenerating on the bundle's root branch, where every page is a descendant by construction — no new schema discriminator is needed. The implementation reuses the already-serialized `branch_path` PG field that 7+ sibling validators already consume, avoiding any new traversal primitive.

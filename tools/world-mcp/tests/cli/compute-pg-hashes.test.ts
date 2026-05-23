@@ -115,6 +115,119 @@ test("cli-compute-pg-hashes: computes plan_hash and state_hash from a YAML PG dr
   }
 });
 
+test("cli-compute-pg-hashes: equivalent YAML and JSON PG drafts produce identical hashes", async () => {
+  const tmp = makeTmpDir();
+  try {
+    const planBody = "Final PG-5 plan bytes.\nKeep every byte stable.\n";
+    const planPath = writeText(tmp, "PG-5.md", planBody);
+    const yamlPath = writeText(
+      tmp,
+      "PG-5.yaml",
+      [
+        "record_kind: page_record",
+        "id: PG-5",
+        "story_id: STORY-1",
+        "branch_id: BR-1",
+        "parent_page_id: PG-4",
+        "branch_path:",
+        "  - PG-1",
+        "  - PG-4",
+        "  - PG-5",
+        "turn_index: 4",
+        "input:",
+        "  choice_id: CHC-16",
+        "  manual_action_text: null",
+        "  resolved_event_id: SE-5",
+        "state_hash_parent: 2a0047483b2b87c63fef1b6cf107e0750cdbddc24d22c7655cd567d578754049",
+        "state_hash: placeholder",
+        "state_snapshot:",
+        "  canon_revision: CH-9",
+        "  active_records:",
+        "    BEL:",
+        "      - BEL-1",
+        "      - BEL-12",
+        "    CLK:",
+        "      - CLK-3",
+        "  visible_affordances:",
+        "    - ordinal: 0",
+        "      label: \"Ane at the cafetería threshold — speak again or wait\"",
+        "      grounded_in:",
+        "        - STLOC-2",
+        "      available_to:",
+        "        - STENT-1",
+        "      action_families:",
+        "        - communicate",
+        "        - wait",
+        "plan:",
+        "  plan_hash: placeholder",
+        "prose_plan_path: pages-prose-plans/PG-5.md",
+        "emitted_choices:",
+        "  - CHC-17",
+        "validation_trace:",
+        "  branch_isolation: \"PASS: kept observer scope; CLK-2 -> CLK-3 remains grounded.\"",
+        "  world_logic_rationale: |",
+        "    PASS: multi-line rationale keeps exact JSON newline bytes.",
+        "    Unicode stays authored: → and — are not normalized.",
+        ""
+      ].join("\n")
+    );
+    const pgObject = {
+      record_kind: "page_record",
+      id: "PG-5",
+      story_id: "STORY-1",
+      branch_id: "BR-1",
+      parent_page_id: "PG-4",
+      branch_path: ["PG-1", "PG-4", "PG-5"],
+      turn_index: 4,
+      input: {
+        choice_id: "CHC-16",
+        manual_action_text: null,
+        resolved_event_id: "SE-5"
+      },
+      state_hash_parent: "2a0047483b2b87c63fef1b6cf107e0750cdbddc24d22c7655cd567d578754049",
+      state_hash: "placeholder",
+      state_snapshot: {
+        canon_revision: "CH-9",
+        active_records: {
+          BEL: ["BEL-1", "BEL-12"],
+          CLK: ["CLK-3"]
+        },
+        visible_affordances: [
+          {
+            ordinal: 0,
+            label: "Ane at the cafetería threshold — speak again or wait",
+            grounded_in: ["STLOC-2"],
+            available_to: ["STENT-1"],
+            action_families: ["communicate", "wait"]
+          }
+        ]
+      },
+      plan: {
+        plan_hash: "placeholder"
+      },
+      prose_plan_path: "pages-prose-plans/PG-5.md",
+      emitted_choices: ["CHC-17"],
+      validation_trace: {
+        branch_isolation: "PASS: kept observer scope; CLK-2 -> CLK-3 remains grounded.",
+        world_logic_rationale:
+          "PASS: multi-line rationale keeps exact JSON newline bytes.\nUnicode stays authored: → and — are not normalized.\n"
+      }
+    };
+    const jsonPath = writeText(tmp, "PG-5.json", `${JSON.stringify(pgObject, null, 2)}\n`);
+
+    const yamlResult = await runComputePgHashesCli(["--plan", planPath, "--pg", yamlPath]);
+    const jsonResult = await runComputePgHashesCli(["--plan", planPath, "--pg", jsonPath]);
+
+    assert.equal(yamlResult.exitCode, 0);
+    assert.equal(yamlResult.stderr, "");
+    assert.equal(jsonResult.exitCode, 0);
+    assert.equal(jsonResult.stderr, "");
+    assert.deepEqual(JSON.parse(yamlResult.stdout), JSON.parse(jsonResult.stdout));
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 test("cli-compute-pg-hashes: post-write re-hash detects plan-file drift", async () => {
   const tmp = makeTmpDir();
   try {

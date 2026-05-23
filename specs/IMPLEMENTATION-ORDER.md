@@ -1,36 +1,37 @@
 # Implementation Order
 
-**Status:** ACTIVE 2026-05-23
+**Last updated:** 2026-05-23
+**Source brainstorm:** `reports/slt-chc-overhaul-first-iteration.md` triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`.
 
-Specs derived from the triage of `reports/stchar-distillation-rework.md`
-(see [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../docs/triage/2026-05-23-stchar-distillation-rework-triage.md)).
+This file sequences the live specs under `specs/`. Each row records the spec, the change shape, dependency, and gating risk. Once a spec ships, its row is archived alongside the spec file at `archive/specs/IMPLEMENTATION-ORDER-<date>.md`.
 
-The prior sprint's `IMPLEMENTATION-ORDER.md` (SPEC-73 single-spec sprint from the character-bridge-consolidation-second-iteration triage) was archived as `archive/specs/IMPLEMENTATION-ORDER-2026-05-23-2.md`.
+## Active sequence
 
-## Active specs
-
-| Order | Spec | Scope | Depends on | Risk |
+| Order | Spec | Change shape | Depends on | Notes / gating risk |
 |---|---|---|---|---|
-| 1 | [`SPEC-75-branch-aware-stchar-supersession.md`](SPEC-75-branch-aware-stchar-supersession.md) | Replaces the page-ordinal-only reachability check in `stchar_supersession_integrity` with branch-ancestry-aware reachability so a branch-local STCHAR regeneration on one branch does not silently force sibling branches to use the regenerated profile. Adds a branch-ancestry traversal primitive available for any future cross-branch validator. | _none_ — SPEC-74 has landed; the §4.4 doc-gate reference to `regeneration_reason_class: durable_branch_transformation` is unconditional. | Medium-high — new traversal primitive, multi-branch test fixtures, strict relaxation of an existing validator. No fixture remediation required (no current red-bunny sibling-branch regeneration). |
+| 1 | [`SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) | Schema (`story-event.schema.json` — collapse `event_kind`, add `turn_driver` object, extend `selection_source`); shared story-state-contract §4 / §7 / §8; turn-cycle skill Phase 0; bootstrap; health-audit; 4 new validators; page-plan §7a + active-pressure handling discipline | [`SPEC-78`](../archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md) (FOUNDATIONS principles SPEC-76 cites are now landed and archived) | Breaking schema change; existing test bundles (`red-bunny`) must rebuild. New §7a parser shares the §16a SPEC-73 label-parsing pattern. |
+| 2 | [`SPEC-77-slt-grounding-provenance-minimal.md`](SPEC-77-slt-grounding-provenance-minimal.md) | Schema (`story-storylet.schema.json` — required `grounding.compatible_turn_drivers[]` + `reason_to_exist`); shared contract §4 SLT subsection; commitment-block-authoring skill Phase 4; 1 new validator (`slt_grounding_minimal_integrity`); turn-cycle Phase 2 compatible-driver filter | SPEC-76 | `compatible_turn_drivers[]` enum values come from SPEC-76's `turn_driver.kind`. The turn-cycle Phase 2 filter slice may be folded into SPEC-76 Slice B if implementation prefers a single skill-update pass. |
 
-## Sequencing notes
+## Dependency rationale
 
-- **No re-spec of already-landed work.** SPEC-73 already landed the multi-label `Required because:` parsing and the voice-block-requirement extension to composite packets — those proposals from the source report's §6.12 are not re-specified here (see the companion triage file).
-- **No re-introduction of STCHAR hashes.** SPEC-71 removed all four tamper hashes (`profile_hash`, `voice_block_hash`, `page_packet_hash`, `source_char_hash`); the source report's verbatim text references them in §6.3 / §6.5 / §6.12. The hash references stayed out of SPEC-74's adapted proposals and remain out of scope for SPEC-75.
+- **SPEC-78 landed first (FOUNDATIONS is upstream).** [`SPEC-78`](../archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md) is archived; SPEC-76's `Validation Rules Upheld` table cites the extended §5c ("Driver salience is local.") and the extended §6b (event-level driver declaration), so those citations are factual before SPEC-76 implementation begins.
+- **SPEC-77 → SPEC-76 (required).** SPEC-77's `compatible_turn_drivers[]` field references the closed enum `[player_action, player_write_in, npc_action, offstage_action, world_pressure, clock_fire, secret_reveal, multi_actor_collision]` that SPEC-76 introduces. Shipping SPEC-77 without SPEC-76 lands a field with no consumer and an enum no validator can validate against.
 
-## Out of scope for this sprint
+## Out of scope for this implementation pass
 
-- Schema-structured `story_irrelevant` rationale categories (currently structured via validator inspection of the body inventory rationale field; would be a separate schema-extension proposal).
-- Cross-bundle or cross-world STCHAR supersession (STCHAR is per-bundle by FOUNDATIONS §Story Bundles §6.1; cross-bundle is not a defined operation).
-- LLM-judgment semantic validators of STCHAR body prose (FOUNDATIONS §Tooling Recommendation rejects prose-only operation; all validators in this sprint are structural).
-- Any reintroduction of STCHAR hash fields (SPEC-71 + the schema's `additionalProperties: false` + the `forbidden_stchar_tamper_hash_fields` validator structurally prevent it).
+Both source-report items below were considered and **rejected or deferred** at triage. They are listed here so future operators do not silently re-propose them. The full per-item rationale lives in `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`.
 
-## Completed specs
+- **Full `CHC.binding` object replacing scalar `associated_commitment_block`** (source report §8.2). Rejected — `chc_slt_selected_commitment_trace` already validates the selected SLT's preconditions against parent-page active records, not a strict ID match. The "stale binding" problem the report frames is partly mitigated by the existing validator. Re-evaluate only if a future playtest surfaces concrete stale-binding pain that the active-pressure handling discipline (SPEC-76) does not absorb.
+- **`SE.commitment.binding_resolution` + `instantiated_commitment` trace** (source report §8.1). Rejected — `alias_bindings` + SPEC-76's new `turn_driver.driver_records[]` covers the audit need.
+- **`choice_set_quality_axes` validator** (source report §10.11). Rejected — the report's own §11.3 forbids hard-validating literary quality.
+- **Candidate-commitment record (`SCOM` / `STCAND`)** (source report §6 Alternative D). Deferred per the report's own §17.1.
+- **STCHAR Operational Axis Index closed-vocabulary taxonomy** (source report §9.4). Deferred — separate STCHAR-shape concern; not on the reactivity-fix critical path.
+- **`branching-story-prose-attach` driver-fidelity receipt fields** (source report §9.6). Deferred — add only after the turn-driver field is real and a playtest confirms the prose-receipt surface needs it.
+- **`SLT.reuse_mode` enum + 5 dropped `grounding.*` fields** (source report §8.3). Rejected as duplicative — derivable from existing `scope.visibility` × `provenance.origin` × `preconditions.hard[]` × `alias_bindings`. See SPEC-77 §4 Out of Scope for the per-field rejection grounds.
+- **New FOUNDATIONS sub-section §5d "Driver Authority".** Rejected — would inflate FOUNDATIONS for what is fundamentally a clarification of two existing principles. SPEC-78 handles the narrower §5c / §6b extensions in place.
 
-| Spec | Scope | Completed |
-|---|---|---|
-| [`archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md`](../archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md) | STCHAR distillation boundary hardening: skill/template wording + `regeneration_reason_class` schema field + `Stable Source Material Inventory` body subsection + 3 new structural validators + page-packet validator extension. Capstone -013 archived as superseded — red-bunny remediation handled manually; synthetic capstone test judged not worth standalone implementation. | 2026-05-23 |
+## Notes
 
-## Outcome
-
-When both specs land, STCHAR profiles structurally cannot carry opening-scene state in operational sections, structurally must inventory stable source material beyond `dramatic_core` for `source_kind: world_char` profiles, structurally must classify every regeneration's lifecycle reason, and structurally must declare and ground page-packet projections against active `PG.state_snapshot.active_records[]` — without any reintroduction of removed hash machinery. Branch-local STCHAR regeneration becomes safe to use without silently mutating sibling branch character authority.
+- Spec IDs continue from SPEC-75 (archived 2026-05-23 — branch-aware STCHAR supersession).
+- The shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` is the authoritative surface for story-record schemas per FOUNDATIONS §Story Bundles §5b; both specs amend it.
+- No `git commit` is performed by spec writers; the user reviews the diff and commits.

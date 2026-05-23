@@ -4,11 +4,10 @@ import {
   activeIds,
   allStorySlugs,
   appliesToStcharStoryState,
+  branchPath,
   fail,
-  generatedAtPageOrdinal,
   pageId,
   recordId,
-  recordPageOrdinal,
   shouldCheckRecordInPreApply,
   storyMaps
 } from "./stchar-utils.js";
@@ -30,7 +29,6 @@ export const stcharSupersessionIntegrity: Validator = {
         if (!shouldCheckRecordInPreApply(page, ctx)) {
           continue;
         }
-        const pageOrdinal = recordPageOrdinal(page);
         for (const [index, id] of activeIds(page, "STCHAR").entries()) {
           const stchar = maps.byId.get(id);
           const parsed = asPlainRecord(stchar?.parsed);
@@ -38,23 +36,33 @@ export const stcharSupersessionIntegrity: Validator = {
           if (stchar?.node_type !== "story_character_authority_record" || !INACTIVE_STATUSES.has(status ?? "")) {
             continue;
           }
-          const supersededAt = supersessionOrdinal(parsed, maps.byId);
-          if (pageOrdinal !== null && supersededAt !== null && pageOrdinal < supersededAt) {
+          const successorId = stringValue(parsed.superseded_by);
+          const successorRecord = maps.byId.get(successorId ?? "");
+          const supersessionPageId = stringValue(asPlainRecord(successorRecord?.parsed).generated_at_page) ??
+            stringValue(parsed.retired_at_page) ??
+            null;
+          if (supersessionPageId === null || !branchPath(page).includes(supersessionPageId)) {
             continue;
           }
+          const successorPhrase = successorId === undefined
+            ? "No successor STCHAR is recorded for this retired STCHAR."
+            : `The successor STCHAR ${successorId} must be active here.`;
           verdicts.push(fail(
             VALIDATOR,
             page,
-            "stchar_supersession_integrity.inactive_stchar_active_on_page",
-            `${pageId(page)} active_records.STCHAR[${index}] references ${id}, but that STCHAR is ${status}.`,
+            "stchar_supersession_integrity.inactive_stchar_active_on_descendant",
+            `${pageId(page)} active_records.STCHAR[${index}] references ${id}, but that STCHAR is ${status} and ${pageId(page)} is a descendant of supersession page ${supersessionPageId}. ${successorPhrase}`,
             {
               page_id: pageId(page),
               stchar_id: id,
               status,
               reference_path: `state_snapshot.active_records.STCHAR[${index}]`,
-              superseded_at_page: supersededAt
+              supersession_page_id: supersessionPageId,
+              successor_stchar_id: successorId ?? null
             },
-            `Replace ${id} with its active successor in ${pageId(page)}.state_snapshot.active_records.STCHAR.`
+            successorId === undefined
+              ? `Remove retired ${id} from ${pageId(page)}.state_snapshot.active_records.STCHAR.`
+              : `Replace ${id} with ${successorId} in ${pageId(page)}.state_snapshot.active_records.STCHAR.`
           ));
         }
       }
@@ -63,12 +71,3 @@ export const stcharSupersessionIntegrity: Validator = {
     return verdicts;
   }
 };
-
-function supersessionOrdinal(stchar: Record<string, unknown>, byId: ReadonlyMap<string, { parsed: unknown }>): number | null {
-  const supersededBy = stringValue(stchar.superseded_by);
-  if (supersededBy !== undefined) {
-    const successor = asPlainRecord(byId.get(supersededBy)?.parsed);
-    return generatedAtPageOrdinal(successor.generated_at_page);
-  }
-  return generatedAtPageOrdinal(stchar.retired_at_page);
-}

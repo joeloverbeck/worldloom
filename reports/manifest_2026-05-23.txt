@@ -444,6 +444,7 @@ archive/tickets/FOUNDATIONS-002.md
 archive/tickets/FOUNDATIONS-003.md
 archive/tickets/FOUNDATIONS-004.md
 archive/tickets/FOUNDATIONS-005.md
+archive/tickets/FOUNDATIONS-006.md
 archive/tickets/HOOK-001.md
 archive/tickets/HOOK-002-extend-hook2-coverage-to-post-spec13-atomic-source-yaml.md
 archive/tickets/HOOK-003.md
@@ -1231,6 +1232,7 @@ docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md
 docs/triage/2026-05-23-stchar-distillation-rework-triage.md
 reports/character-bridge-consolidation-first-iteration.md
 reports/character-bridge-consolidation-second-iteration.md
+reports/manifest_2026-05-23.txt
 reports/prose-quality-instructions.md
 reports/stchar-distillation-rework.md
 reports/worldbuilding-patterns.md
@@ -1523,7 +1525,6 @@ tests/fixtures/animalia/proposals/PR-0017-drylander-short-poetry-stranger-hospit
 tests/fixtures/animalia/proposals/batches/BATCH-0001.md
 tests/fixtures/animalia/proposals/batches/BATCH-0002.md
 tests/fixtures/animalia/proposals/batches/BATCH-0003.md
-tickets/FOUNDATIONS-006.md
 tickets/README.md
 tickets/SPEC75BRAAWASTCHAR-001.md
 tickets/_TEMPLATE.md
