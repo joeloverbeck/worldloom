@@ -208,6 +208,8 @@ For classification (d) retroactive, apply a stronger variant: verify each "accep
 - (c) refactor classification — refactors typically have no external source document.
 - No external source document is cited in the spec's Problem Statement, Motivating Evidence, or Approach. Self-originating specs (those whose findings come from operator analysis of the codebase rather than from a separate document) are scoped by §3.0-§3.11 alone.
 
+**Engagement-evidence checkpoint**: `SKILL.md` Step 2 requires emitting a one-line `Source-document engagement: <doc-path>: N claims enumerated, M adjudicated, (N-M) unadjudicated flagged` note before Step 3 begins (parallel to §Reference-count checkpoint; format documented at `SKILL.md` §Step 2 §Source-document engagement-evidence checkpoint). The emission makes step 2 (claim enumeration) auditable from the user-facing report — without it, a future reviewer cannot confirm §3.12 was actually engaged rather than silently skipped via a "trust the source flow" judgment. When this substep is skip-eligible per the Skip conditions above, the checkpoint still emits a one-line `Source-document engagement: N/A — <reason>` so the skip itself is recorded in the audit trail.
+
 This substep is the symmetric backward-direction complement to §3.8 (Upstream Spec References), which checks FORWARD cross-spec references (other specs that reference this spec's deliverables); §3.12 checks BACKWARD source-document references (claims this spec inherits from a prior document) for adjudication completeness.
 
 ## Conditional Deliverable Validation
