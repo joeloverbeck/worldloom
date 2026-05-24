@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-81-indexed-storylet-candidate-retrieval.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC81INDSTOCAN-004.md",
+  "last_ticket": "archive/tickets/SPEC81INDSTOCAN-005.md",
   "last_result": "completed_archived",
-  "last_work_commit": "cfb007c1bb466365de91f5ae9f91ade0ed4ddac4",
+  "last_work_commit": "ed9935e904936dd68dcdcd04d4cf74864a8b8f57",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC81INDSTOCAN-005.md",
+  "next_target": "tickets/SPEC81INDSTOCAN-006.md",
   "queue": [
-    "tickets/SPEC81INDSTOCAN-005.md",
     "tickets/SPEC81INDSTOCAN-006.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -15,7 +14,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: grep proof, manual HARD-GATE review, stale-reference sweep, and git diff --check passed",
+  "proof_state": "clean: npm test, focused compiled tests, grep/manual review, stale-reference sweep, and git diff --check passed",
   "dirty_state": "expected ignored artifacts: tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
   "updated_at": "2026-05-24"
 }
