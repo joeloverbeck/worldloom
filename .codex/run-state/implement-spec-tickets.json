@@ -1,9 +1,9 @@
 {
-  "originating_spec": "archive/specs/SPEC-77-slt-grounding-provenance-minimal.md",
-  "archived_spec": "archive/specs/SPEC-77-slt-grounding-provenance-minimal.md",
-  "last_ticket": "archive/tickets/SPEC77SLTGROPRO-004.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "491099c6227d49784834f984bd650e36fcb36ef3",
+  "originating_spec": "archive/specs/SPEC-82-remaining-schema-drift-repairs.md",
+  "archived_spec": "archive/specs/SPEC-82-remaining-schema-drift-repairs.md",
+  "last_ticket": "archive/tickets/SPEC82REMSCHDRI-002.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "ad4a9900360cd935f5c0cf23d514238687dd20d3",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -13,8 +13,8 @@
   "blocked": false,
   "blocker": null,
   "proof_state": "clean",
-  "dirty_state": "tracked worktree expected clean after state-file commit; expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
-  "post_review_material_updates": false,
-  "post_review_audit_block": "not_applicable",
+  "dirty_state": "tracked worktree clean after final state-file commit; expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/",
+  "post_review_material_updates": null,
+  "post_review_audit_block": null,
   "updated_at": "2026-05-24"
 }

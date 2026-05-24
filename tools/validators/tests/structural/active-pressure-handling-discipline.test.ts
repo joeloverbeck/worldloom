@@ -52,6 +52,15 @@ test("active_pressure_handling_discipline reports each unhandled high-urgency re
   );
 });
 
+test("active_pressure_handling_discipline ignores medium-salience complicated story questions", async () => {
+  const verdicts = await activePressureHandlingDiscipline.run(
+    input(plan("")),
+    context(records({ active: ["STQ-1"], storyQuestion: { salience: "medium" } }))
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("active_pressure_handling_discipline reports rejected rows without reasons", async () => {
   const verdicts = await activePressureHandlingDiscipline.run(
     input(plan(rows({ "STPLAN-1": ["rejected", ""] }))),
@@ -125,10 +134,12 @@ function rows(entries: Record<string, [string, string]>) {
 
 function records({
   active,
-  event_kind = "turn_resolution"
+  event_kind = "turn_resolution",
+  storyQuestion = {}
 }: {
   active: string[];
   event_kind?: string;
+  storyQuestion?: Record<string, unknown>;
 }): IndexedRecord[] {
   return [
     page("PG-0", { active_records: activeRecords(active) }),
@@ -154,9 +165,10 @@ function records({
     storyRecord("story_secret_record", "STSEC-1", "secrets", {
       status: "partially_revealed"
     }),
-    storyRecord("story_question_record", "STQ-1", "questions", {
+    storyRecord("story_question_record", "STQ-1", "story-questions", {
       status: "complicated",
-      payoff_due: "true"
+      salience: "high",
+      ...storyQuestion
     }),
     storyRecord("story_obligation_record", "OBL-1", "obligations", {
       status: "open",

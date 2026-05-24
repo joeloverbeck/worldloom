@@ -99,7 +99,7 @@ function isHighUrgency(recordClass: string, parsed: Record<string, unknown>): bo
     return stringValue(parsed.status) === "partially_revealed" || stringArray(parsed.reveal_records).length > 0;
   }
   if (recordClass === "STQ") {
-    return stringValue(parsed.status) === "complicated" && stringValue(parsed.payoff_due) === "true";
+    return stringValue(parsed.status) === "complicated" && stringValue(parsed.salience) === "high";
   }
   if (recordClass === "OBL") {
     return (stringValue(parsed.status) === "open" || stringValue(parsed.status) === "escalated") &&
