@@ -98,8 +98,8 @@ test("turn_cycle_output_grounding_integrity ignores bootstrap and non-target cre
 test("turn_cycle_output_grounding_integrity accepts response CHCs grounded in driver records", async () => {
   const records = baseRecords([
     page("PG-1", { STENT: ["STENT-1"], STPLAN: ["STPLAN-1"] }),
-    event("SE-2", { create: ["CHC-1"], turn_driver: { kind: "npc_action", driver_records: ["STPLAN-1"] } }),
-    choice("CHC-1", { player_response_mode: "responds", grounded_in: { records: ["STPLAN-1"] } }),
+    event("SE-2", { create: ["CHC-1"], turn_driver: { kind: "npc_action", driver_records: ["STPLAN-1"], player_response_mode: "responds" } }),
+    choice("CHC-1", { grounded_in: { records: ["STPLAN-1"] } }),
     page("PG-2", { STENT: ["STENT-1"], STPLAN: ["STPLAN-1"] })
   ]);
 
@@ -111,8 +111,8 @@ test("turn_cycle_output_grounding_integrity accepts response CHCs grounded in dr
 test("turn_cycle_output_grounding_integrity rejects response CHCs missing driver-record grounding", async () => {
   const records = baseRecords([
     page("PG-1", { STENT: ["STENT-1"], STPLAN: ["STPLAN-1"], BEL: ["BEL-1"] }),
-    event("SE-2", { create: ["CHC-1"], turn_driver: { kind: "npc_action", driver_records: ["STPLAN-1"] } }),
-    choice("CHC-1", { player_response_mode: "responds", grounded_in: { records: ["BEL-1"] } }),
+    event("SE-2", { create: ["CHC-1"], turn_driver: { kind: "npc_action", driver_records: ["STPLAN-1"], player_response_mode: "responds" } }),
+    choice("CHC-1", { grounded_in: { records: ["BEL-1"] } }),
     page("PG-2", { STENT: ["STENT-1"], STPLAN: ["STPLAN-1"], BEL: ["BEL-1"] })
   ]);
 
@@ -130,14 +130,14 @@ test("turn_cycle_output_grounding_integrity rejects response CHCs missing driver
 
 test("turn_cycle_output_grounding_integrity skips topical grounding for continuation CHCs and player drivers", async () => {
   const records = baseRecords([
-    event("SE-2", { create: ["CHC-1"], turn_driver: { kind: "npc_action", driver_records: ["STPLAN-1"] } }),
+    event("SE-2", { create: ["CHC-1"], turn_driver: { kind: "npc_action", driver_records: ["STPLAN-1"], player_response_mode: "chooses_continuation" } }),
     event("SE-3", {
       create: ["CHC-2"],
       created_at_page: "PG-3",
-      turn_driver: { kind: "player_action", driver_records: ["STPLAN-1"] }
+      turn_driver: { kind: "player_action", driver_records: ["STPLAN-1"], player_response_mode: "initiates" }
     }),
-    choice("CHC-1", { player_response_mode: "chooses_continuation", grounded_in: { records: ["BEL-1"] } }),
-    choice("CHC-2", { player_response_mode: "responds", grounded_in: { records: ["BEL-1"] } }),
+    choice("CHC-1", { grounded_in: { records: ["BEL-1"] } }),
+    choice("CHC-2", { grounded_in: { records: ["BEL-1"] } }),
     page("PG-2", { STENT: ["STENT-1"] }),
     page("PG-3", { STENT: ["STENT-1"] })
   ]);
@@ -202,7 +202,7 @@ function event(id: string, overrides: Partial<{
     created_at_page: overrides.created_at_page ?? "PG-2",
     parent_page_id: overrides.parent_page_id ?? "PG-1",
     event_kind: overrides.event_kind ?? "turn_resolution",
-    turn_driver: overrides.turn_driver ?? { kind: "player_action", driver_records: [] },
+    turn_driver: overrides.turn_driver ?? { kind: "player_action", driver_records: [], player_response_mode: "initiates" },
     state_delta: { create: overrides.create ?? [], supersede: [], close: [] }
   });
 }
@@ -264,7 +264,10 @@ function choice(id: string, overrides: Record<string, unknown> = {}): IndexedRec
     id,
     story_id: "STORY-1",
     created_at_page: "PG-2",
-    player_response_mode: "responds",
+    surface_label: "Choose a response",
+    player_visible_intent: "Respond to the current pressure.",
+    target_or_action_families: ["decide"],
+    likely_state_pressure: "The choice answers the current turn pressure.",
     grounded_in: { records: [] },
     ...overrides
   });

@@ -184,8 +184,10 @@
         "id": "CHC-21",
         "story_id": "STORY-76",
         "created_at_page": "PG-2",
-        "choice_text": "Protect Mara from the shot line.",
-        "player_response_mode": "responds",
+        "surface_label": "Protect Mara from the shot line.",
+        "player_visible_intent": "Intervene to absorb or redirect the incoming shot.",
+        "target_or_action_families": ["protect"],
+        "likely_state_pressure": "Jon reacts to Varro's shot line under STPLAN-9 pressure.",
         "grounded_in": {
           "records": ["STPLAN-9"]
         }
@@ -199,8 +201,10 @@
         "id": "CHC-22",
         "story_id": "STORY-76",
         "created_at_page": "PG-2",
-        "choice_text": "Dive for the ledger before it burns.",
-        "player_response_mode": "responds",
+        "surface_label": "Dive for the ledger before it burns.",
+        "player_visible_intent": "Move through the ambush pressure to recover the exposed ledger.",
+        "target_or_action_families": ["recover", "move"],
+        "likely_state_pressure": "Jon chooses whether the CLK-3 threshold costs the ledger or preserves the evidence.",
         "grounded_in": {
           "records": ["CLK-3"]
         }
@@ -214,8 +218,10 @@
         "id": "CHC-23",
         "story_id": "STORY-76",
         "created_at_page": "PG-2",
-        "choice_text": "Call Varro out by name.",
-        "player_response_mode": "responds",
+        "surface_label": "Call Varro out by name.",
+        "player_visible_intent": "Confront Varro directly and try to break the attack's momentum.",
+        "target_or_action_families": ["oppose", "communicate"],
+        "likely_state_pressure": "Jon answers STEMO-12 by naming Varro and forcing the ambush into the open.",
         "grounded_in": {
           "records": ["STEMO-12"]
         }
@@ -229,8 +235,10 @@
         "id": "CHC-24",
         "story_id": "STORY-76",
         "created_at_page": "PG-2",
-        "choice_text": "Retreat through the ash chute.",
-        "player_response_mode": "responds",
+        "surface_label": "Retreat through the ash chute.",
+        "player_visible_intent": "Escape the window line before the ambush can close around the kiln room.",
+        "target_or_action_families": ["evade", "move"],
+        "likely_state_pressure": "Jon can defer THR-4 by fleeing through the ash chute before Varro's shot pins him.",
         "grounded_in": {
           "records": ["THR-4"]
         }
@@ -244,8 +252,10 @@
         "id": "CHC-25",
         "story_id": "STORY-76",
         "created_at_page": "PG-2",
-        "choice_text": "Write in a response to the ambush.",
-        "player_response_mode": "responds",
+        "surface_label": "Write in a response to the ambush.",
+        "player_visible_intent": "Take an unlisted action that still responds to the shot-line crisis.",
+        "target_or_action_families": ["decide"],
+        "likely_state_pressure": "Jon improvises under STPLAN-9 pressure rather than choosing one listed tactic.",
         "grounded_in": {
           "records": ["STPLAN-9"]
         }

@@ -105,16 +105,10 @@ test("SPEC-76 Red Kiln Ambush variants produce the expected capstone verdicts", 
   await assertCodes(
     "wrong response mode",
     (records) => {
-      for (const choice of records.filter((record) => record.node_type === "choice_record")) {
-        (choice.parsed as Record<string, unknown>).player_response_mode = "initiates";
-      }
+      (event(records).parsed as { turn_driver: { player_response_mode: string } }).turn_driver.player_response_mode = "initiates";
     },
     [
-      "chc_non_player_driver_response_mode_invalid",
-      "chc_non_player_driver_response_mode_invalid",
-      "chc_non_player_driver_response_mode_invalid",
-      "chc_non_player_driver_response_mode_invalid",
-      "chc_non_player_driver_response_mode_invalid"
+      "turn_driver_response_mode_invalid"
     ]
   );
 });

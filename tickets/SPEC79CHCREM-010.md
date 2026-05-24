@@ -68,7 +68,7 @@ The other test files that carry the field are handled by sibling tickets: schema
 - World-index changes (handled in 004).
 - Skill-side documentation updates (handled in 005, 006, 007).
 - Docs update (handled in 008).
-- The Red Kiln Ambush fixture (handled in 009 — that fixture has a more complex repair pattern).
+- The Red Kiln Ambush fixture (handled in archive/tickets/SPEC79CHCREM-009.md — that fixture has a more complex repair pattern).
 - Other test files that the SPEC-79 reassessment identified as having complex repair patterns (schema-shape assertions at 001; validator regression at 002; rule fixture at 003; world-index parser tests at 004).
 
 ## Acceptance Criteria

@@ -193,7 +193,9 @@ No direct change required.
 
 Apply the same shape to CHC-22 through CHC-25 with their respective `target_or_action_families` and `likely_state_pressure` derived from the existing `grounded_in.records` and the surrounding fixture context (Varro ambush at the kiln). Drop `player_response_mode` from every CHC entry. Drop `choice_text` (replaced by `surface_label`).
 
-The fixture's `pages-prose-plans/PG-2.md` content at JSON line 258 (which contains the §7a turn-driver trace including "Player response mode: responds") is page-plan content, not CHC content; it remains unchanged because `player_response_mode` IS canonical on the page-level turn-driver trace per SPEC-76.
+The fixture's `pages-prose-plans/PG-2.md` content (which contains the §7a turn-driver trace including "Player response mode: responds") is page-plan content, not CHC content; it remains unchanged because `player_response_mode` is canonical on the page-level turn-driver trace per SPEC-76.
+
+**Implementation note (SPEC79CHCREM-009):** Red Kiln closeout exposed one same-seam validator consumer of the old per-CHC response-mode placement: `turn-cycle-output-grounding-integrity` checked response mode on CHC records before deciding whether to enforce CHC topical grounding. The landed repair moved response-mode authority to `SE.turn_driver.player_response_mode` while leaving the CHC grounding check on `grounded_in.records`.
 
 ### §6.2 Other fixtures
 
@@ -231,7 +233,7 @@ Eleven non-fixture test files include CHC objects carrying `associated_commitmen
 - **Replay/fork live global pool as a separate spec** (iteration-2 SPEC-83). Subsumed by this removal — the live global pool semantics is automatic once the field is gone.
 - **Storylet generation matrix** (iteration-2 SPEC-85). Narrowed and reassigned to SPEC-80 (storylet pool coverage diagnostics) per the iteration-2 redirection.
 - **Indexed candidate retrieval** (iteration-2 SPEC-82). Reassigned to SPEC-81 per the iteration-2 redirection.
-- **Per-CHC `player_response_mode` schema field**. The Red Kiln fixture's misuse of this field on CHC is repaired by §6.1; adding it to the CHC schema is out of scope. If a future consumer surfaces, that is a schema-change spec.
+- **Per-CHC `player_response_mode` schema field**. The Red Kiln fixture's misuse of this field on CHC is repaired by §6.1, and SPEC79CHCREM-009 repaired the same-seam validator consumer to read `SE.turn_driver.player_response_mode`. Adding it to the CHC schema remains out of scope. If a future consumer truly needs per-CHC response-mode authority, that is a schema-change spec.
 - **Migration of legacy story bundles** containing `associated_commitment_block`. No production story bundles exist (per the user's redirection note that the prior production story was deleted before this overhaul); the only consumers of the field in the repo are the test fixtures repaired in §6.
 
 ## §8 FOUNDATIONS Alignment

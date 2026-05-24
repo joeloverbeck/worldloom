@@ -117,12 +117,26 @@ function validateResponseChoiceGrounding(
 ): Verdict[] {
   const turnDriver = asPlainRecord(parsedEvent.turn_driver);
   const driverKind = stringValue(turnDriver.kind);
+  const responseMode = stringValue(turnDriver.player_response_mode);
   const driverRecords = new Set(stringArray(turnDriver.driver_records));
   if (driverKind === undefined || PLAYER_DRIVER_KINDS.has(driverKind) || driverRecords.size === 0) {
     return [];
   }
 
   const verdicts: Verdict[] = [];
+  if (!NON_PLAYER_RESPONSE_MODES.has(responseMode ?? "")) {
+    verdicts.push(fail(event, "turn_driver_response_mode_invalid", `${stringValue(parsedEvent.id) ?? bareNodeId(event)} has invalid turn_driver.player_response_mode ${responseMode ?? "<missing>"} for non-player driver ${driverKind}.`, {
+      event_id: stringValue(parsedEvent.id) ?? bareNodeId(event),
+      driver_kind: driverKind,
+      player_response_mode: responseMode,
+      allowed_response_modes: [...NON_PLAYER_RESPONSE_MODES].sort()
+    }));
+    return verdicts;
+  }
+  if (responseMode !== "responds") {
+    return verdicts;
+  }
+
   for (const createdId of createdIds) {
     if (recordClassForId(createdId) !== "CHC") {
       continue;
@@ -132,19 +146,6 @@ function validateResponseChoiceGrounding(
       continue;
     }
     const parsedChoice = asPlainRecord(choice.parsed);
-    const responseMode = stringValue(parsedChoice.player_response_mode);
-    if (!NON_PLAYER_RESPONSE_MODES.has(responseMode ?? "")) {
-      verdicts.push(fail(choice, "chc_non_player_driver_response_mode_invalid", `${createdId} is emitted by a non-player turn driver but has invalid player_response_mode ${responseMode ?? "<missing>"}.`, {
-        choice_id: createdId,
-        event_id: stringValue(parsedEvent.id) ?? bareNodeId(event),
-        player_response_mode: responseMode,
-        allowed_response_modes: [...NON_PLAYER_RESPONSE_MODES].sort()
-      }));
-      continue;
-    }
-    if (responseMode !== "responds") {
-      continue;
-    }
     const groundedRecords = new Set(stringArray(asPlainRecord(parsedChoice.grounded_in).records));
     if (!hasIntersection(groundedRecords, driverRecords)) {
       verdicts.push(fail(choice, "chc_response_topical_grounding_missing", `${createdId} responds to ${stringValue(parsedEvent.id) ?? bareNodeId(event)} but grounds in no turn_driver.driver_records entry.`, {
