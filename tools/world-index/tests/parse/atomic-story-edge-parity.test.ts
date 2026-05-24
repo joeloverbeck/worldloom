@@ -23,12 +23,11 @@ const EDGE_PARITY_CASES = [
       "player_visible_intent: Warn the quay.",
       "target_or_action_families: [signal]",
       "likely_state_pressure: Raises alarm before the gate opens.",
-      "associated_commitment_block: SLT-3",
       "grounded_in:",
       "  records: [STENT-1, STSTAT-1]",
       "  affordance_ordinals: [1]"
     ],
-    expectedEdgeTypes: ["created_at_page", "choice_grounded_in", "choice_associated_storylet", "choice_affordance_ordinal"]
+    expectedEdgeTypes: ["created_at_page", "choice_grounded_in", "choice_affordance_ordinal"]
   },
   {
     directoryName: "storylets",

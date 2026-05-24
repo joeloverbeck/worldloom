@@ -6,7 +6,7 @@ import test from "node:test";
 
 import { parseStoryBundleSourceFile } from "../../src/parse/atomic.js";
 
-test("CHC records emit grounded record, associated storylet, and affordance ordinal edges", () => {
+test("CHC records emit grounded record and affordance ordinal edges", () => {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-index-choice-edges-"));
 
   try {
@@ -18,7 +18,6 @@ test("CHC records emit grounded record, associated storylet, and affordance ordi
       "player_visible_intent: Warn the quay.",
       "target_or_action_families: [signal]",
       "likely_state_pressure: Raises alarm before the gate opens.",
-      "associated_commitment_block: SLT-3",
       "grounded_in:",
       "  records:",
       "    - STENT-1",
@@ -37,7 +36,6 @@ test("CHC records emit grounded record, associated storylet, and affordance ordi
     assert.deepEqual(choiceEdges(parsed.edges), [
       edge("CHC-2", "STENT-1", "choice_grounded_in"),
       edge("CHC-2", "STSTAT-1", "choice_grounded_in"),
-      edge("CHC-2", "SLT-3", "choice_associated_storylet"),
       attributeEdge("CHC-2", "harborwatch:PG-4#affordance:1", "choice_affordance_ordinal"),
       attributeEdge("CHC-2", "harborwatch:PG-4#affordance:3", "choice_affordance_ordinal")
     ]);

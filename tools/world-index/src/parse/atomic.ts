@@ -792,14 +792,6 @@ function edgesForChoice(
     pushStoryEdgeIfReference(edges, node.node_id, "choice_grounded_in", storySlug, target);
   }
 
-  pushStoryEdgeIfReference(
-    edges,
-    node.node_id,
-    "choice_associated_storylet",
-    storySlug,
-    stringField(record, "associated_commitment_block")
-  );
-
   const parentPageId = stringField(record, "created_at_page");
   const parentPageNodeId =
     parentPageId && isStoryRecordReference(parentPageId) ? storyNodeId(storySlug, parentPageId) : node.node_id;

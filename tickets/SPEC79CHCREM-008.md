@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/MACHINE-FACING-LAYER.md` (world-index story-edge table row deletion).
-**Deps**: SPEC79CHCREM-004
+**Deps**: archive/tickets/SPEC79CHCREM-004.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ The `docs/MACHINE-FACING-LAYER.md` world-index story-edge table at line 137 incl
 
 1. Confirmed `docs/MACHINE-FACING-LAYER.md:137` carries the table row for the `choice_associated_storylet` edge with the description naming `associated_commitment_block`. Verified via grep at reassessment time.
 2. Confirmed SPEC-79 §5.6 prescribes the table-row deletion. The ticket is documented as a documentation edit included under §5 (Skill Changes) for atomic-landing convenience per the SPEC-79 reassessment's M1 Improvement (the spec's §5.6 inline note: *"Not a skill — included here under §5 for atomic-landing convenience; this is a documentation edit"*).
-3. Cross-skill boundary: this docs edit must land after 004 (which removes the edge type from the world-index) so the docs surface accurately reflects the post-removal edge enumeration. The Deps on 004 enforces ordering.
+3. Cross-skill boundary: this docs edit must land after archive/tickets/SPEC79CHCREM-004.md (which removes the edge type from the world-index) so the docs surface accurately reflects the post-removal edge enumeration. The archived dependency path enforces ordering.
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism) applies indirectly — the docs surface mirrors the schema's actual edge enumeration. Once the edge is removed from the enum (handled in 004), the docs must remove the corresponding documentation row.
 5. Removal blast radius (was template item 7): this ticket deletes one table row in one docs file. No other docs surface references the `choice_associated_storylet` edge type (verified via reassessment-time grep of `docs/` for the edge name).
 

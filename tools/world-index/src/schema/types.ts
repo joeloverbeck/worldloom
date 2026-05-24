@@ -108,7 +108,6 @@ export const STORY_EDGE_TYPES = [
   "page_visible_affordance_record",
   "page_emitted_choice",
   "choice_grounded_in",
-  "choice_associated_storylet",
   "choice_affordance_ordinal",
   "storylet_predicate_ref",
   "storylet_effect_ref",
