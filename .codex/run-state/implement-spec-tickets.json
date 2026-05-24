@@ -1,19 +1,23 @@
 {
-  "originating_spec": null,
-  "archived_spec": "archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md",
-  "last_ticket": "archive/tickets/SPEC76TURDRIPRI-011.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "432316d6c7526c09768c6c2371de479c08f8dce7",
+  "originating_spec": "specs/SPEC-77-slt-grounding-provenance-minimal.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC77SLTGROPRO-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "030e180f84714d7f26244ad59f24305a696afb67",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "complete",
+  "next_target": "tickets/SPEC77SLTGROPRO-002.md",
+  "queue": [
+    "tickets/SPEC77SLTGROPRO-002.md",
+    "tickets/SPEC77SLTGROPRO-003.md",
+    "tickets/SPEC77SLTGROPRO-004.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked worktree clean; expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/",
-  "post_review_material_updates": false,
-  "post_review_audit_block": "not_applicable",
-  "updated_at": "2026-05-23"
+  "dirty_state": "tracked worktree clean after pending state-file commit; expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/",
+  "post_review_material_updates": true,
+  "post_review_audit_block": "emitted",
+  "updated_at": "2026-05-24"
 }
