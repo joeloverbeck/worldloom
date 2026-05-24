@@ -80,7 +80,7 @@ Where the SAU report's Phase 2 findings section assembles (Phase 6 Author SAU re
 - Auto-generation of SLTs to close the surfaced coverage gaps (SPEC-80 §6 explicit non-goal — Phase 2o INFORMS authoring via the actionable hint; the commit-block-authoring direct_batch flow is the explicit follow-up).
 - Hard-failing the audit on Phase 2o gaps (audits are read-only diagnostic; gaps are WARNINGS, not blockers).
 - Emitting `RSP-<integer>` remediation cards from Phase 2o findings in this ticket (existing Phase 5 remediation drafting at `SKILL.md:404` may be extended to consume Phase 2o findings as a follow-up; out of scope here unless trivially absorbed).
-- Editing `branching-story-bootstrap/` or `commitment-block-authoring/` — those surfaces are owned by SPEC80STOPOODRI-001 and SPEC80STOPOODRI-002 respectively.
+- Editing `branching-story-bootstrap/` or `commitment-block-authoring/` — those surfaces are owned by `archive/tickets/SPEC80STOPOODRI-001.md` and SPEC80STOPOODRI-002 respectively.
 - Modifying the Mystery Reserve firewall (story state contract §7 gate 3 or Phase 2e); Phase 2o is read-only and does not gate any reveal.
 
 ## Acceptance Criteria
@@ -97,7 +97,7 @@ Where the SAU report's Phase 2 findings section assembles (Phase 6 Author SAU re
 1. Phase 2o emits WARNINGS, not hard fails. The audit's read-only diagnostic posture is preserved.
 2. Phase 2o is read-only: it reads bundle active records (via Phase 2l reuse) and the SLT pool (via `list_records`) but mutates nothing. No record write, no reveal event, no firewall bypass.
 3. Mystery Reserve firewall (story state contract §7 gate 3 + Phase 2e) continues to gate every actual STSEC reveal against forbidden-status M overlap independently of Phase 2o. The coverage check tests EXPRESSIVE CAPACITY of the pool; it does not enable, weaken, or bypass any reveal-time gate (SPEC-80 §7 Rule 7 row).
-4. Phase 2o uses SPEC-80 §3 trigger maps as the single source of truth — identical to the maps consumed by SPEC80STOPOODRI-001's bootstrap-author-side Phase 10 HARD-GATE and SPEC80STOPOODRI-002's commitment-block-authoring Phase 1 targets #16/#17.
+4. Phase 2o uses SPEC-80 §3 trigger maps as the single source of truth — identical to the maps consumed by `archive/tickets/SPEC80STOPOODRI-001.md`'s bootstrap-author-side Phase 10 HARD-GATE and SPEC80STOPOODRI-002's commitment-block-authoring Phase 1 targets #16/#17.
 5. Phase 2o reuses Phase 2l's per-page active-record enumeration; it does not introduce a third independent active-record walk.
 
 ## Test Plan
