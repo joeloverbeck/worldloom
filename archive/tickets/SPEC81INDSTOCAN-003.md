@@ -19,7 +19,7 @@ Wire Phase 2 to call `mcp__worldloom__select_storylet_candidates` (post-002) to 
 3. Cross-skill boundary under audit: skill prose (Phase 2 procedural steps) ↔ MCP tool (`select_storylet_candidates` per 002). The skill's procedural step changes from "filter all SLTs in-process" to "call MCP tool for shortlist, then filter shortlist in-process". The MCP tool's input contract (003 reads `world_slug` / `story_slug` / `parent_page_id` / `turn_driver` / `intent_signature` from the in-flight turn-cycle state) becomes the new shared interface.
 4. FOUNDATIONS §Story Bundles §5c ("Driver salience is local"; §4.4 step 10's salience+diversity ranking is local-salience-narrowing, not global drama management) + §Story Bundles §6b (Information / Observer Firewall — full predicate evaluation including the firewall remains in the in-process evaluator running on the shortlist; the firewall is NOT delegated to the MCP tool).
 5. `docs/HARD-GATE-DISCIPLINE.md` was read because `branching-story-turn-cycle` is a gated story-bundle workflow. This ticket does not edit the `<HARD-GATE>` block, approval timing, submit flow, validator semantics, or PASS/FAIL criteria; it only changes the read-side Phase 2 retrieval path before the existing local evaluator.
-6. The drafted separate SPEC-81 §10 follow-up for the phase-2-3 `branch_id` lineage wording became same-seam fallout because the stale wording lived inside the Phase 2 eligibility section this ticket rewrote. The updated reference delegates branch visibility to `select_storylet_candidates`, whose projection filter uses schema-grounded `visible_branch_path_prefix` semantics. `specs/SPEC-81-indexed-storylet-candidate-retrieval.md` and `archive/tickets/SPEC81INDSTOCAN-006.md` were truthed so they no longer point at a separate reconciliation ticket.
+6. The drafted separate SPEC-81 §10 follow-up for the phase-2-3 `branch_id` lineage wording became same-seam fallout because the stale wording lived inside the Phase 2 eligibility section this ticket rewrote. The updated reference delegates branch visibility to `select_storylet_candidates`, whose projection filter uses schema-grounded `visible_branch_path_prefix` semantics. `archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md` and `archive/tickets/SPEC81INDSTOCAN-006.md` were truthed so they no longer point at a separate reconciliation ticket.
 
 ## Architecture Check
 
@@ -58,7 +58,7 @@ The reference now explains how the skill derives the `intent_signature` input to
 
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify)
 - `.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` (modify)
-- `specs/SPEC-81-indexed-storylet-candidate-retrieval.md` (modify — implementation note truthing)
+- `archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md` (modify — implementation note truthing)
 - `archive/tickets/SPEC81INDSTOCAN-006.md` (modify — capstone handoff truthing)
 
 ## Out of Scope
@@ -90,13 +90,13 @@ The reference now explains how the skill derives the `intent_signature` input to
 
 1. `grep -n select_storylet_candidates .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` — confirms the new tool call is named in both files.
 2. Manual review of `.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` — confirms the local evaluator, Observer Firewall, Mystery Reserve firewall, and cooldown re-check run on the shortlist.
-3. `rg -n 'scope\.branch_id.*lineage|phase-2-3 doc reconciliation.*follow-up|separate spec/ticket|scan the entire SLT pool' .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md specs/SPEC-81-indexed-storylet-candidate-retrieval.md archive/tickets/SPEC81INDSTOCAN-003.md archive/tickets/SPEC81INDSTOCAN-006.md` — confirms the stale branch-lineage follow-up and full-pool-scan anchors are absent from current operational surfaces; remaining "full pool" mentions are historical/spec context or acceptance wording.
+3. `rg -n 'scope\.branch_id.*lineage|phase-2-3 doc reconciliation.*follow-up|separate spec/ticket|scan the entire SLT pool' .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md archive/tickets/SPEC81INDSTOCAN-003.md archive/tickets/SPEC81INDSTOCAN-006.md` — confirms the stale branch-lineage follow-up and full-pool-scan anchors are absent from current operational surfaces; remaining "full pool" mentions are historical/spec context or acceptance wording.
 
 ## Outcome
 
 Completed 2026-05-24. Phase 2 of `branching-story-turn-cycle` now uses `mcp__worldloom__select_storylet_candidates` as the projection pre-filter before shortlist-scoped local predicate evaluation and SLT selection. The Phase 2 reference now derives `intent_signature`, fetches full bodies only for `requires_full_body_ids`, preserves local alias binding, Observer Firewall, Mystery Reserve firewall, cooldown, and ranking checks on the shortlist, and records Phase 2.1 driver-kind filtering as server-side projection filtering.
 
-The same rewrite removed the old `branch_prefix_scoped` `scope.branch_id` lineage wording from the operational Phase 2 reference. `specs/SPEC-81-indexed-storylet-candidate-retrieval.md` and the capstone ticket were updated so they no longer point at a separate phase-2-3 reconciliation follow-up.
+The same rewrite removed the old `branch_prefix_scoped` `scope.branch_id` lineage wording from the operational Phase 2 reference. `archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md` and the capstone ticket were updated so they no longer point at a separate phase-2-3 reconciliation follow-up.
 
 ## Verification Result
 
@@ -108,7 +108,7 @@ PASS — manual FOUNDATIONS alignment check confirmed §Story Bundles §5c and �
 
 PASS — stale-anchor sweep for `scope.branch_id` lineage and separate phase-2-3 follow-up wording found no stale operational hit; remaining "full pool" mentions are historical/spec context or this ticket's accepted proof wording, not live skill instructions.
 
-PASS — `git diff --check -- .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md specs/SPEC-81-indexed-storylet-candidate-retrieval.md archive/tickets/SPEC81INDSTOCAN-003.md archive/tickets/SPEC81INDSTOCAN-006.md`
+PASS — `git diff --check -- .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md archive/tickets/SPEC81INDSTOCAN-003.md archive/tickets/SPEC81INDSTOCAN-006.md`
 
 ## Deviations
 

@@ -3,7 +3,7 @@
 **Spec ID:** SPEC-81
 **Date:** 2026-05-24
 **Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
-**Status:** active
+**Status:** COMPLETED
 
 ## §1 Goal
 
@@ -33,7 +33,7 @@ What this spec is NOT:
 
 SPEC-79 (`CHC.associated_commitment_block` removal) and SPEC-82 (remaining schema-drift repairs) have already shipped (2026-05-24) and are archived at `archive/specs/SPEC-79-chc-associated-commitment-block-removal.md` and `archive/specs/SPEC-82-remaining-schema-drift-repairs.md` respectively. Both were independent of this spec in mechanics.
 
-The remaining active sibling is SPEC-80 (`SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`), which has a soft dependency on this spec: its coverage diagnostic operates against SLT projection records and benefits from this spec's projection API (the coverage check becomes a single projection query instead of a full-body scan), but ships independently against the existing `list_records(include_full_body=true)` path until SPEC-81 Phase 2 lands. Per `specs/IMPLEMENTATION-ORDER.md`, the recommended sequence is SPEC-81 → SPEC-80.
+The remaining active sibling is SPEC-80 (`SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`), which has a soft dependency on this spec: its coverage diagnostic operates against SLT projection records and benefits from this spec's projection API (the coverage check becomes a single projection query instead of a full-body scan). SPEC-81 is complete, so SPEC-80 can now use `select_storylet_candidates` as its projection read path.
 
 ## §3 World-Index Changes
 
@@ -219,6 +219,29 @@ None. `select_storylet_candidates` is a read-only MCP tool. SLT mutation continu
 - **Sequencing**: The implementation has three phases that can ship as separate tickets within this single spec. (1) World-index projection columns and edges. (2) MCP tool implementation against the new columns. (3) Consumer wiring in turn-cycle Phase 2.1, commitment-block-authoring Phase 1, and story_bundle_context. Phase 1 ships without consumer impact; Phase 2 lets consumers opt in; Phase 3 makes the migration active. Intermediate states are safe: consumers using `list_records(record_type='storylet_record', include_full_body=true)` continue to work throughout phases 1-2 and remain on that path until they explicitly opt in at phase 3.
 - **Cost estimate**: ~3,000-5,000 LOC across `tools/world-index/src/parse/atomic.ts`, `tools/world-index/src/schema/types.ts`, a new SQL migration in `tools/world-index/src/schema/migrations/` (to add the projection columns and new edge-type allowances), `tools/world-mcp/src/tools/select-storylet-candidates.ts` (new), `tools/world-mcp/src/tool-names.ts`, `tools/world-mcp/src/context-packet/story-bundle-context.ts`, plus integration tests. Lower than ChatGPT-Pro's iteration-2 estimate (5,000-8,000 LOC) because this spec does NOT introduce a new persistent record class, new patch-engine ops, or server-side predicate evaluation.
 - **Phase-2-3 doc reconciliation**: Implemented by archive/tickets/SPEC81INDSTOCAN-003.md on 2026-05-24 as part of the Phase 2 shortlist rewrite. The old `branch_prefix_scoped` wording that described "`scope.branch_id` is in the active branch's lineage" was removed from `.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md`; branch visibility is now delegated to `select_storylet_candidates`, whose §4.4 step 2 uses schema-grounded `visible_branch_path_prefix` PG-array-prefix semantics.
-- **SPEC-80 unblocking**: Once SPEC-81 Phase 2 ships, SPEC-80's coverage diagnostics can call `select_storylet_candidates` with `max_candidates: pool_size` to obtain projection records for the coverage check. Until then, SPEC-80 uses the existing `list_records` path as documented in SPEC-80 §9 Implementation Notes.
+- **SPEC-80 unblocking**: SPEC-81 shipped the projection API, so SPEC-80's coverage diagnostics can call `select_storylet_candidates` with `max_candidates: pool_size` to obtain projection records for the coverage check. SPEC-80 retains `list_records` only as a local fallback if projection access is unavailable.
 - **`SLT.grounding.compatible_turn_drivers[]` is already indexed via the SPEC-77 schema field**; this spec adds the typed-edge surface (`storylet_compatible_driver`) for symbolic filtering. The schema field is unchanged.
 - **Replay correctness**: `select_storylet_candidates` is a pure projection-of-current-state query; replaying from a parent PG snapshot uses that snapshot's `active_records` as the predicate-class filter input. There is no read-time drift; the projection columns are recomputed per index build, and replay does not require historical projections.
+
+## Outcome
+
+Completed on 2026-05-24.
+
+SPEC-81 landed as six archived tickets:
+
+- `archive/tickets/SPEC81INDSTOCAN-001.md` — world-index SLT projection columns and coarse filter edges.
+- `archive/tickets/SPEC81INDSTOCAN-002.md` — `select_storylet_candidates` MCP tool and docs.
+- `archive/tickets/SPEC81INDSTOCAN-003.md` — `branching-story-turn-cycle` Phase 2.1 shortlist wiring and Phase 2 reference reconciliation.
+- `archive/tickets/SPEC81INDSTOCAN-004.md` — `commitment-block-authoring` Phase 1 projection-read wiring.
+- `archive/tickets/SPEC81INDSTOCAN-005.md` — context-packet `story_bundle_context.selection_shortlist` embedding.
+- `archive/tickets/SPEC81INDSTOCAN-006.md` — capstone integration tests for SPEC-81 §9.2, §9.3, §9.6, and §9.7, plus manual runbook documentation for §9.4 and §9.5.
+
+Final verification:
+
+- PASS — `cd tools/world-mcp && npm run build`
+- PASS — `cd tools/world-mcp && node --test dist/tests/integration/spec81-storylet-candidate-retrieval.test.js` (4 tests passed)
+- PASS — `cd tools/world-mcp && npm test` (442 tests passed)
+- PASS — `cd tools/world-index && npm run build`
+- PASS — `cd tools/world-index && npm test` (132 tests passed)
+
+Deviation: the capstone documents the interactive Claude skill dry-runs for turn-cycle and commitment-block-authoring as manual operator runbooks rather than executing them in Codex. The package-level automated tests prove the indexed projection, MCP tool, batched full-body retrieval, backward-compatible `list_records` path, and context-packet shortlist surfaces those skills consume.
