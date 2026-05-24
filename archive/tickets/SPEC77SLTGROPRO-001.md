@@ -183,7 +183,7 @@ Shared helper call sites were updated where that was the smallest current-contra
 ## Out of Scope
 
 - The `slt_grounding_minimal_integrity` structural validator itself + its registry registration + its inline-fixture-builder test (covered by SPEC77SLTGROPRO-002, Slice B). This ticket lands the banned-phrase list utility the validator will consume, but not the validator.
-- Commitment-block-authoring SKILL.md Phase 4 amendment (covered by SPEC77SLTGROPRO-003, Slice C). This ticket lands the schema field the skill will require, but not the skill amendment.
+- Commitment-block-authoring SKILL.md Phase 4 amendment (covered by `archive/tickets/SPEC77SLTGROPRO-003.md`, Slice C). This ticket lands the schema field the skill will require, but not the skill amendment.
 - Turn-cycle Phase 2.1 compatible-driver filter (covered by SPEC77SLTGROPRO-004, Slice D). This ticket lands the schema field the filter will read, but not the filter prose.
 - Any `worlds/*/stories/*/_source/storylets/` record migration — no live SLT records exist in the worktree per reassess-spec time enumeration; migration scope is the test surface only.
 

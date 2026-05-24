@@ -183,7 +183,7 @@ The test file should also import `SLT_GROUNDING_BANNED_PHRASES` directly from `s
 ### Invariants
 
 1. **Validator-level enforcement of FOUNDATIONS §Story Bundles §5a** — banned-phrase list rejects authorial laziness patterns at validation time; the SLT's `reason_to_exist` field is functionally enforced, not decorative.
-2. **Single source of truth for banned-phrase list** — `SLT_GROUNDING_BANNED_PHRASES` exported from `slt-grounding-utils.ts` is the only place the 9-entry list is defined; the validator imports from it; the test suite imports from it; the skill prose at SPEC77SLTGROPRO-003 cross-references it.
+2. **Single source of truth for banned-phrase list** — `SLT_GROUNDING_BANNED_PHRASES` exported from `slt-grounding-utils.ts` is the only place the 9-entry list is defined; the validator imports from it; the test suite imports from it; the skill prose archived at `archive/tickets/SPEC77SLTGROPRO-003.md` cross-references it.
 3. **Responsibility split with Slice D** — this validator enforces singleton-length on runtime_jit `compatible_turn_drivers` at storage time; the Phase 2.1 filter (SPEC77SLTGROPRO-004) enforces the singleton-value match against `SE.turn_driver.kind` at selection time.
 4. **Pre-apply gate strengthens canon-write discipline** — the validator runs against `create_slt_record` patches submitted via the patch engine; failing diagnostics block the patch plan from landing.
 

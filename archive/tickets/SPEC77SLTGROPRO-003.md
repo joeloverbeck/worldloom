@@ -1,14 +1,14 @@
 # SPEC77SLTGROPRO-003: commitment-block-authoring Phase 4 amendment
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — amends `.claude/skills/commitment-block-authoring/SKILL.md` Phase 4 with new authoring preamble, per-field requirements for the new `grounding` sub-paths, and the inlined banned-phrase list reference
+**Engine Changes**: Yes — amends `.claude/skills/commitment-block-authoring/SKILL.md` Phase 3 required-field validation and Phase 4 with new authoring preamble, per-field requirements for the new `grounding` sub-paths, and the inlined banned-phrase list reference
 **Deps**: archive/tickets/SPEC77SLTGROPRO-001.md
 
 ## Problem
 
-The commitment-block-authoring skill at `.claude/skills/commitment-block-authoring/SKILL.md` Phase 4 (block-shape authoring) currently produces SLT records that satisfy the schema but can omit `grounding` because the schema has not yet required it. Once SPEC77SLTGROPRO-001's schema change lands (Slice A) making `grounding.compatible_turn_drivers` and `grounding.reason_to_exist` required, every block authored by this skill must populate both. The skill needs (a) the authoring preamble explaining what `reason_to_exist` must name and which phrasings are structurally rejected, (b) per-field requirements for the two new sub-paths with concrete examples, and (c) the inlined banned-phrase list mirroring the validator's enforcement so authors see at authoring time what the validator will reject at validation time.
+At intake, the commitment-block-authoring skill at `.claude/skills/commitment-block-authoring/SKILL.md` did not teach authors to populate SPEC-77's required SLT `grounding` fields. `archive/tickets/SPEC77SLTGROPRO-001.md` has now made `grounding.compatible_turn_drivers` and `grounding.reason_to_exist` required, so every block authored by this skill must populate both. This ticket landed (a) the authoring preamble explaining what `reason_to_exist` must name and which phrasings are structurally rejected, (b) per-field requirements for the two new sub-paths with concrete examples, (c) the inlined banned-phrase list mirroring the validator's enforcement, and (d) Phase 3 required-field validation alignment.
 
 The reassessed SPEC-77 §3.2 relocated the authoring guideline from the shared-record-schemas surface (which is schema-only) into this skill's Phase 4 — this ticket lands that relocation.
 
@@ -18,6 +18,8 @@ The reassessed SPEC-77 §3.2 relocated the authoring guideline from the shared-r
 2. SPEC-77 §3.3 (post-reassess-spec) specifies a Phase 4 preamble (the authoring guideline blockquote relocated from the original §3.2), per-field requirements for `grounding.compatible_turn_drivers[]` and `grounding.reason_to_exist`, and the 9-entry banned-phrase list with concrete examples (pursuit pattern, deadline pattern, runtime_jit). The banned-phrase list cross-references the utility at `tools/validators/src/structural/slt-grounding-utils.ts` (introduced by SPEC77SLTGROPRO-001) as the source-of-truth.
 3. Cross-skill boundary: this ticket amends the commitment-block-authoring skill. The skill is a Story-Pipeline (Category 2c) skill per `.claude/skills/_shared-templates/story-state-contract.md` §12 / FOUNDATIONS §Story Bundles §7. The amendment introduces no new cross-skill contract — it operationalizes SPEC77SLTGROPRO-001's schema field at authoring time within this skill's own Phase 4. Sibling Category 2c skills (`branching-story-bootstrap`, `branching-story-turn-cycle`) also produce SLT records and will need parallel authoring guidance; that scope is out for this ticket (those skills' bootstrap-seeded and JIT-created SLTs will satisfy the schema via SPEC77SLTGROPRO-001's atomic schema + fixture migration, with the runtime-JIT singleton constraint operationalized by SPEC77SLTGROPRO-004's Phase 2.1 filter).
 4. FOUNDATIONS §Story Bundles §5a (Commitment Blocks Are Causal Moves) at `docs/FOUNDATIONS.md:648-652`: the authoring guideline preamble operationalizes §5a's "a good block says: when these conditions hold, this kind of action can happen, these beats dramatize it, and these state effects follow" requirement. The banned-phrase list rejects the exact failure modes §5a names ("advance Act II", "raise stakes before midpoint"). The skill amendment makes the failure modes visible at authoring time rather than only at validation time.
+5. Live reassessment on 2026-05-24 found one same-seam stale surface in the same skill: Phase 3 gate 1's schema-completeness field list still enumerates the pre-SPEC-77 SLT required fields and omits `grounding`. Because Phase 3 is the per-block validation gate that authors run before Phase 4, this ticket also owns adding `grounding` to that required-field list; otherwise Phase 4 would require the field while Phase 3's completeness checklist still implied the old shape.
+6. The drafted grep-count proof for the 9 banned phrases used `grep -cE`, which counts matching lines rather than phrase occurrences; because the Phase 4 preamble legitimately repeats six of the phrases before the full 9-entry list, the truthful proof is a source-of-truth comparison that reads `SLT_GROUNDING_BANNED_PHRASES` from `slt-grounding-utils.ts` and verifies every utility phrase appears in the skill prose.
 
 ## Architecture Check
 
@@ -31,18 +33,23 @@ The reassessed SPEC-77 §3.2 relocated the authoring guideline from the shared-r
 1. **Skill prose documents both new sub-paths** → codebase grep-proof: `grep -n 'compatible_turn_drivers\|reason_to_exist' .claude/skills/commitment-block-authoring/SKILL.md` returns both field names in the new Phase 4 preamble + per-field requirements.
 2. **Authoring guideline preamble matches the reassess-spec resolution** → codebase grep-proof: `grep -n 'reason_to_exist must name\|active or reusable pressure logic' .claude/skills/commitment-block-authoring/SKILL.md` returns the preamble blockquote with the canonical language from SPEC-77 §3.3.
 3. **Banned-phrase list mirrors the utility** → codebase grep-proof: the 9 entries in the skill prose match `SLT_GROUNDING_BANNED_PHRASES` in `tools/validators/src/structural/slt-grounding-utils.ts` (SPEC77SLTGROPRO-001).
-4. **FOUNDATIONS §Story Bundles §5a alignment** → FOUNDATIONS alignment check: the authoring guideline operationalizes §5a's good-block / bad-block contract by making the bad-block patterns visible at authoring time.
+4. **Phase 3 completeness gate requires the same field** → codebase grep-proof: `grep -n 'all required fields.*grounding' .claude/skills/commitment-block-authoring/SKILL.md` returns the schema-completeness checklist with `grounding`.
+5. **FOUNDATIONS §Story Bundles §5a alignment** → FOUNDATIONS alignment check: the authoring guideline operationalizes §5a's good-block / bad-block contract by making the bad-block patterns visible at authoring time.
 
-## What to Change
+## Landed Changes
 
-### 1. Phase 4 amendment — `.claude/skills/commitment-block-authoring/SKILL.md`
+### 1. Phase 3 required-field alignment — `.claude/skills/commitment-block-authoring/SKILL.md`
 
-Amend the Phase 4 section to add (a) the authoring-guideline preamble blockquote, and (b) the per-field requirements section. Position the changes within Phase 4 such that the preamble appears before the existing batch-diversity checks (so authors read the per-block guideline before the batch-level checks fire).
+Updated Phase 3 gate 1's schema-completeness checklist so all required fields per shared contract §4.4 include `grounding`. This keeps the per-block validation gate aligned with the SPEC-77 schema field landed by `archive/tickets/SPEC77SLTGROPRO-001.md`.
+
+### 2. Phase 4 amendment — `.claude/skills/commitment-block-authoring/SKILL.md`
+
+Added a `### Grounding (SPEC-77)` subsection before the existing `direct_batch` batch-diversity checks. The subsection now contains (a) the authoring-guideline preamble, (b) per-field requirements for `grounding.compatible_turn_drivers[]` and `grounding.reason_to_exist`, (c) global-pattern / deadline-pattern / runtime_jit examples, and (d) the 9-entry banned-phrase list mirrored from `tools/validators/src/structural/slt-grounding-utils.ts`.
 
 **(a) Preamble blockquote**:
 
 ```markdown
-> An SLT's `reason_to_exist` must name the active or reusable pressure logic the storylet captures — what causal state makes it eligible, and what kind of move it represents. Generic phrases like "dramatic variety," "good conflict," "advance the plot," "raise stakes," "create tension," and "for pacing" are structurally rejected (see `slt_grounding_minimal_integrity` banned-phrase list below).
+> An SLT's reason_to_exist must name the active or reusable pressure logic the storylet captures: what causal state makes it eligible, and what kind of move it represents. Generic phrases like "dramatic variety," "good conflict," "advance the plot," "raise stakes," "create tension," and "for pacing" are structurally rejected (see `slt_grounding_minimal_integrity` banned-phrase list below).
 ```
 
 **(b) Per-field requirements**:
@@ -57,7 +64,7 @@ Per-field requirements (new under SPEC-77):
 - Banned-phrase list (rejected by `slt_grounding_minimal_integrity`): "dramatic variety", "good conflict", "advance the plot", "raise stakes", "create tension", "for pacing", "dramatic moment", "story beat", "narrative momentum". This list is amendable via the shared utility at `tools/validators/src/structural/slt-grounding-utils.ts`; mirror amendments here when the utility changes.
 ```
 
-The exact placement within Phase 4 should preserve the existing batch-diversity-check structure — the new content slots in as a logical precondition (per-block grounding) before the batch-level checks (which inspect across multiple blocks). If Phase 4 already has a structured sub-section list, append a new sub-section titled "Grounding (SPEC-77)" at an appropriate position.
+The content was placed before the existing batch-diversity-check structure as a logical precondition (per-block grounding before batch-level checks).
 
 ## Files to Touch
 
@@ -78,6 +85,8 @@ The exact placement within Phase 4 should preserve the existing batch-diversity-
 2. `grep -n 'reason_to_exist must name' .claude/skills/commitment-block-authoring/SKILL.md` returns the preamble blockquote.
 3. `grep -nE '"dramatic variety"|"good conflict"|"narrative momentum"' .claude/skills/commitment-block-authoring/SKILL.md` returns the inlined banned-phrase list entries.
 4. `grep -n 'slt-grounding-utils.ts' .claude/skills/commitment-block-authoring/SKILL.md` returns the cross-reference to the utility's source-of-truth location.
+5. `grep -n 'all required fields.*grounding' .claude/skills/commitment-block-authoring/SKILL.md` confirms Phase 3's schema-completeness checklist includes the new required field.
+6. `node -e 'const fs=require("fs"); const skill=fs.readFileSync(".claude/skills/commitment-block-authoring/SKILL.md","utf8"); const util=fs.readFileSync("tools/validators/src/structural/slt-grounding-utils.ts","utf8"); const phrases=[...util.matchAll(/"([^"]+)"/g)].map(m=>m[1]); const missing=phrases.filter(p=>!skill.includes("\""+p+"\"")); if(missing.length){ console.error(missing.join("\n")); process.exit(1); } console.log(phrases.length);'` prints `9`, proving every utility phrase is mirrored in the skill prose.
 
 ### Invariants
 
@@ -94,4 +103,24 @@ The exact placement within Phase 4 should preserve the existing batch-diversity-
 ### Commands
 
 1. `grep -nE 'compatible_turn_drivers|reason_to_exist|slt-grounding-utils' .claude/skills/commitment-block-authoring/SKILL.md` — confirms all required cross-references and field names are present.
-2. `grep -cE '"dramatic variety"|"good conflict"|"advance the plot"|"raise stakes"|"create tension"|"for pacing"|"dramatic moment"|"story beat"|"narrative momentum"' .claude/skills/commitment-block-authoring/SKILL.md` — confirms all 9 banned phrases are inlined (expected count: 9).
+2. `node -e 'const fs=require("fs"); const skill=fs.readFileSync(".claude/skills/commitment-block-authoring/SKILL.md","utf8"); const util=fs.readFileSync("tools/validators/src/structural/slt-grounding-utils.ts","utf8"); const phrases=[...util.matchAll(/"([^"]+)"/g)].map(m=>m[1]); const missing=phrases.filter(p=>!skill.includes("\""+p+"\"")); if(missing.length){ console.error(missing.join("\n")); process.exit(1); } console.log(phrases.length);'` — confirms all 9 utility-defined banned phrases are inlined in the skill prose.
+3. `grep -n 'all required fields.*grounding' .claude/skills/commitment-block-authoring/SKILL.md` — confirms the per-block validation gate has the same required-field shape as the Phase 4 authoring guidance.
+
+## Outcome
+
+Completed 2026-05-24. The commitment-block-authoring skill now requires SPEC-77 SLT grounding at authoring time: Phase 3's schema-completeness gate names `grounding`, and Phase 4 has a new `Grounding (SPEC-77)` subsection explaining `compatible_turn_drivers[]`, `reason_to_exist`, examples, and the banned-phrase list.
+
+## Verification Result
+
+Commands run from repo root on 2026-05-24:
+
+1. `grep -nE 'compatible_turn_drivers|reason_to_exist|slt-grounding-utils' .claude/skills/commitment-block-authoring/SKILL.md` — passed; returned the Phase 4 preamble, per-field rows, and utility cross-reference.
+2. `grep -n 'reason_to_exist must name' .claude/skills/commitment-block-authoring/SKILL.md` — passed; returned the Phase 4 preamble.
+3. `grep -n 'all required fields.*grounding' .claude/skills/commitment-block-authoring/SKILL.md` — passed; returned Phase 3 gate 1's required-field checklist with `grounding`.
+4. `node -e 'const fs=require("fs"); const skill=fs.readFileSync(".claude/skills/commitment-block-authoring/SKILL.md","utf8"); const util=fs.readFileSync("tools/validators/src/structural/slt-grounding-utils.ts","utf8"); const phrases=[...util.matchAll(/"([^"]+)"/g)].map(m=>m[1]); const missing=phrases.filter(p=>!skill.includes("\""+p+"\"")); if(missing.length){ console.error(missing.join("\n")); process.exit(1); } console.log(phrases.length);'` — passed; printed `9`, proving every utility-defined banned phrase is mirrored in the skill prose.
+5. `git diff --check -- .claude/skills/commitment-block-authoring/SKILL.md tickets/SPEC77SLTGROPRO-003.md` — passed with no whitespace errors before archival; the archived ticket path is `archive/tickets/SPEC77SLTGROPRO-003.md`.
+
+## Deviations
+
+- Same-seam widening: Phase 3 gate 1's required-field list also needed `grounding`; this was not in the original ticket's Phase 4-only scope but is required for the skill's per-block validation gate to agree with SPEC-77.
+- Proof correction: the original `grep -cE` banned-phrase command counted matching lines, not phrase occurrences. The closeout proof uses a source-of-truth comparison against `SLT_GROUNDING_BANNED_PHRASES` instead.

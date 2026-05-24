@@ -61,7 +61,7 @@ The 8 driver-kind values referenced in the filter (`player_action | player_write
 
 - The schema change at `tools/validators/src/schemas/story-storylet.schema.json` (covered by SPEC77SLTGROPRO-001). This ticket assumes the schema field exists; the filter reads from it.
 - The validator at `tools/validators/src/structural/slt-grounding-minimal-integrity.ts` (covered by SPEC77SLTGROPRO-002). This ticket's prose cross-references the validator's singleton-length code by name but does not implement it.
-- The commitment-block-authoring Phase 4 amendment (covered by SPEC77SLTGROPRO-003). That skill amendment is the authoring-time complement to this skill's selection-time filter.
+- The commitment-block-authoring Phase 4 amendment (covered by `archive/tickets/SPEC77SLTGROPRO-003.md`). That skill amendment is the authoring-time complement to this skill's selection-time filter.
 - Implementation of the Phase 2.1 filter logic in the skill body itself (the reference file is the contract; the skill body that consumes it at runtime is a separate operator-time concern when the skill is invoked).
 - Any changes to Phase 0 (driver evaluation) or Phase 3 (state delta) — Phase 2.1 is positioned as a Phase 2 sub-step refinement; the surrounding phases are untouched.
 
