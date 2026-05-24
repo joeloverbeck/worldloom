@@ -3,7 +3,7 @@
 **Spec ID:** SPEC-80
 **Date:** 2026-05-24
 **Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
-**Status:** active
+**Status:** completed
 **Depends on:** `archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md` (indexed candidate retrieval) for the projection-driven coverage diagnostics. SPEC-81 is complete, so implementation should prefer the projection API; the existing `list_records(include_full_body=true)` path remains a fallback only where the projection API is unavailable.
 
 ## §1 Goal
@@ -47,8 +47,10 @@ For each driver-kind value in the closed enum `[player_action, player_write_in, 
 | `offstage_action` | any STENT with `entity_status.location: offstage` plus an active STPLAN or STEMO held by that STENT |
 | `world_pressure` | any active THR or open OBL/CNSQ with non-player owner |
 | `clock_fire` | any active CLK record |
-| `secret_reveal` | any STSEC record with `status` in {`active`, `partially_revealed`} |
+| `secret_reveal` | any STSEC record with `status` in {`hidden`, `partially_revealed`} |
 | `multi_actor_collision` | any ≥2 simultaneously-active STPLAN records held by different STENT |
+
+STQ has no dedicated driver-kind; STQ-driven pressure surfaces through composition (driver_kind ∈ {`world_pressure`, `npc_action`}, source_class=STQ — see §3.3). The §1 Goal naming of STQ as a natural pressure routes through this composition rather than through a standalone driver-kind row above.
 
 ### §3.2 Pressure-source-class coverage
 
@@ -88,15 +90,33 @@ The two coverage axes compose: for each (driver-kind, source-class) pair the tri
 
 > **Composition**: for each (driver-kind, source-class) pair the bundle demands, at least one seed block must satisfy both axes simultaneously. The simplest case: bundles with active NPC STPLAN records need at least one seed block with `compatible_turn_drivers` containing `npc_action` AND a precondition referencing STPLAN.
 
-These additions extend the existing cast-role coverage rule; they do not replace it. The bootstrap HARD-GATE flow at Phase 10 fails if any of the three coverage axes is unmet at minimal-or-standard `seed_commitment_blocks`. The `none` mode bypasses the coverage check because runtime JIT is the explicit alternative.
+**Relation to SPEC-77 per-block driver-kind authoring discipline.** SPEC-77 §3.4 (already prescribed at `phase-6-commitment-blocks.md:15`) requires every seeded SLT to populate `grounding.compatible_turn_drivers[]` with the closed driver-kind enum entries the block's predicates structurally support, mapping per-predicate (e.g., `npc_action` for blocks gated by `any_plan_active` / `any_emotion_active`; `clock_fire` for `any_clock_active`; `secret_reveal` for `any_secret_unrevealed`). That is the *per-block* correctness rule. The §3.1 trigger map above is the *pool-level* coverage rule — the inverse direction: which active-record class implies which driver-kind must be expressible *somewhere* in the seeded pool. The two compose: per-block SPEC-77 authoring ensures each seed declares the right drivers; pool-level SPEC-80 coverage ensures the union of seeds covers every driver-kind the bundle's active records demand.
+
+These additions extend the existing cast-role coverage rule; they do not replace it. The bootstrap HARD-GATE flow at Phase 10 fails if any of the **four coverage axes** (cast-role + driver-kind + pressure-source-class + composition) is unmet at minimal-or-standard `seed_commitment_blocks`. The `none` mode bypasses the coverage check because runtime JIT is the explicit alternative.
+
+**Phase 10 enumeration extension (implementer commitment).** Bootstrap SKILL.md line 49 currently enumerates 5 bootstrap-additional Phase 10 checks alongside the 8 shared hard gates. With this spec, cast-role coverage is escalated from a Phase 6 authoring rule to a Phase 10 HARD-GATE check, joined by the three new axes (driver-kind, pressure-source-class, composition). The implementer must extend the bootstrap SKILL.md line 49 enumeration with a new bootstrap-additional check named *"pool coverage (cast-role + driver-kind + pressure-source-class + composition per SPEC-80 §3) — fails when any axis is unmet at `seed_commitment_blocks: minimal | standard`."* This is a single combined check (the four axes are validated as one pool-coverage gate), not four separate checks.
 
 ### §4.2 `commitment-block-authoring` Phase 1
 
 **File:** `.claude/skills/commitment-block-authoring/SKILL.md` Phase 1 (gap-diagnosis).
 
-**Addition:** Phase 1's current gap-diagnosis output enumerates move-family and causal-function gaps. Add per-axis coverage diagnostics for driver-kind and pressure-source-class using the §3 trigger maps applied to the CURRENT bundle state (loaded via the SPEC-81 `select_storylet_candidates(max_candidates=pool_size)` projection path; use `list_records(... include_full_body=true)` only as a fallback if the projection API is unavailable).
+**Context — what Phase 1 already does.** Phase 1 currently enumerates 15 coverage targets at `SKILL.md:143-159` (14 causal-function targets plus target #15 cast-role coverage with the same pressure-bearing role list and offstage handling that this spec extends at §4.1). Phase 1 also already names projection-field-based gap diagnosis at `SKILL.md:161` — *"`move_family` for causal-function coverage, `compatible_turn_drivers` for driver-kind coverage, `predicate_classes` for active-record-class coverage, and `action_families` for exit-option coverage."* What is missing is the structured trigger maps (§3.1, §3.2), the joint composition rule (§3.3), and a structured YAML output that the Phase 2-4 block generators can read.
 
-**Output shape** (additive to existing Phase 1 output):
+**Addition.** Extend Phase 1's coverage targets with two new entries:
+
+> **#16 Driver-kind composition coverage** — for each driver-kind value triggered by the bundle's active records per §3.1's trigger map, the pool must contain at least one SLT whose `grounding.compatible_turn_drivers[]` includes that value.
+>
+> **#17 Pressure-source-class composition coverage** — for each load-bearing active-record class triggered per §3.2's trigger map, the pool must contain at least one SLT whose `preconditions.hard[]` or `preconditions.soft[]` references that class via the appropriate existential predicate or literal record-id.
+>
+> The joint composition rule (§3.3) applies: for each (driver-kind, source-class) pair the bundle demands, at least one SLT must satisfy BOTH.
+
+**Read paths.** Two distinct reads cover this check:
+
+> (a) **Bundle-state load** (the DEMAND side — enumeration of active records that trigger the §3.1 / §3.2 maps): use `story_bundle_context` plus targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records` per `commitment-block-authoring/SKILL.md:131`, which already enumerates active cast STENT ids and currently-open obligations / consequences / threads.
+>
+> (b) **SLT-pool load** (the SUPPLY side — projection of current pool storylets to check coverage against demand): use the SPEC-81 projection path `mcp__worldloom__select_storylet_candidates(max_candidates=pool_size)` already invoked at `commitment-block-authoring/SKILL.md:128`. Use `list_records(... include_full_body=true)` only as a fallback where the projection API is unavailable.
+
+**Output shape** (enrichment of existing Phase 1 gap-diagnosis output — does not replace move-family / causal-function gap reporting):
 
 ```yaml
 driver_kind_coverage:
@@ -117,6 +137,8 @@ Phase 1 diagnoses gaps; Phase 2-4 of `commitment-block-authoring` (existing) gen
 **File:** `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2 (audit surfaces).
 
 **Addition:** New sub-phase `Phase 2o — Storylet Pool Coverage`. Runs the §3 coverage check against the current bundle state. Emits warnings (not hard fails) for uncovered driver-kind, pressure-source-class, and composition gaps. Aligns with the existing reactivity-inertness audit (Phase 2n) — that audit detects DOWNSTREAM symptoms (active records sitting inert); this audit detects UPSTREAM cause (pool can't express).
+
+**Read paths.** Phase 2o reuses the per-page active-record enumeration already performed by Phase 2l (active-state underuse warnings at `branching-story-health-audit/SKILL.md:327`) and Phase 2n (reactivity inertness at line 362) for its trigger-map DEMAND side — both phases already walk active non-player records (STPLAN with `current_step` due, STEMO at high intensity, CLK at threshold, active THR, reveal-ready STSEC). The SLT-pool SUPPLY side is loaded independently via `mcp__worldloom__list_records(record_type='story_storylet', story_slug=<story_slug>, include_full_body=true)` — `select_storylet_candidates` requires `parent_page_id` + `turn_driver` filters that are inappropriate for whole-pool coverage diagnostics (a coverage check needs every author-pool SLT regardless of any single page's driver context).
 
 Emission shape parallel to existing Phase 2 audits; warnings carry the gap shape from §4.2 with the actionable hint "extend the pool via `commitment-block-authoring` direct_batch addressing these gaps."
 
@@ -140,6 +162,7 @@ None. The coverage diagnostics operate over existing SLT fields (`grounding.comp
 | §Story Bundles §5c (Present Causal State, Not Narrative Shape) | aligns | The coverage check is structurally local — it asks "for each present causal-state element X, can the pool express a move whose driver/source includes X?" This is the §5c local-salience pattern applied at authoring time, not a target-narrative-shape planner. The distinction from drama-manager scoring is the load-bearing one; this spec sits firmly on the §5c side because the diagnostic decides presence/absence only, never relative weighting. |
 | §Story Bundles §6b (Information / Observer Firewall) | aligns | Coverage check is over predicate references and grounding fields; it does not introspect any record's hidden state. No firewall surface is touched. |
 | Validation Rule 5 (No Consequence Evasion) | aligns | The check directly serves Rule 5 at the pool level — an active high-urgency consequence record without any pool storylet that can resolve through it is a consequence-evasion risk. The diagnostic surfaces the upstream cause of the iteration-1 reactivity problem. |
+| Validation Rule 7 (Preserve Mystery Deliberately) | aligns | The `secret_reveal` driver-kind trigger in §3.1 references story-local STSEC records, distinct from world-level `M-<integer>` Mystery Reserve entries. The coverage diagnostic surfaces expressive capacity only (does the pool contain at least one `secret_reveal`-compatible SLT when an unrevealed STSEC is active?); it does not enable any reveal. The existing mystery firewall — story state contract §7 gate 3 enforced at page-plan commit, plus `branching-story-health-audit` Phase 2e (Mystery / canon safety) — continues to gate every actual STSEC reveal against forbidden-status M overlap. SPEC-80 does not weaken Rule 7. |
 
 ## §8 Validation Tests
 
@@ -155,3 +178,24 @@ None. The coverage diagnostics operate over existing SLT fields (`grounding.comp
 - The trigger maps in §3.1 and §3.2 are closed enumerations tied to currently-landed FOUNDATIONS surfaces. If a future spec adds a new driver kind or active record class, this spec's trigger maps must be extended — list this dependency in any such future spec's "Affects" section.
 - The composition coverage at §3.3 is the strictest check; bundles with many active records will produce many composition pairs. The Phase 1 / Phase 2o output should be readable — emit at most the top-N gaps by triggering-record count if the gap list exceeds a presentation limit (suggest N=20).
 - This spec is implementable independently of SPEC-79 (CHC field removal) and SPEC-82 (drift repairs). It depends on archived SPEC-81 only for the projection-driven read path; the fallback path makes that dependency soft.
+
+## Outcome
+
+Completed: 2026-05-25
+
+SPEC-80 landed across three archived implementation tickets:
+
+1. `archive/tickets/SPEC80STOPOODRI-001.md` — updated `branching-story-bootstrap` Phase 6/Phase 10 so seeded pools must satisfy one combined pool-coverage gate covering cast-role, driver-kind, pressure-source-class, and composition axes at `seed_commitment_blocks: minimal | standard`, with `none` explicitly bypassing because runtime JIT is the alternative.
+2. `archive/tickets/SPEC80STOPOODRI-002.md` — updated `commitment-block-authoring` Phase 1 with coverage targets #16/#17, distinct demand/supply read paths, additive `driver_kind_coverage`, `pressure_source_coverage`, and `composition_gaps` YAML, and manual contract proof that the diagnostic remains authoring-time only.
+3. `archive/tickets/SPEC80STOPOODRI-003.md` — updated `branching-story-health-audit` with Phase 2o `Storylet Pool Coverage`, warning-only `storylet_pool_coverage_gap` findings, whole-pool `list_records(... include_full_body=true)` supply reads, SAU report sectioning, and Rule 5 / Rule 7 alignment notes.
+
+Verification:
+
+1. Bootstrap coverage grep/manual review passed per `archive/tickets/SPEC80STOPOODRI-001.md`.
+2. Commitment-block-authoring coverage grep/manual review passed per `archive/tickets/SPEC80STOPOODRI-002.md`.
+3. Health-audit coverage grep/manual review passed per `archive/tickets/SPEC80STOPOODRI-003.md`.
+4. Final archive check confirmed no active `tickets/SPEC80STOPOODRI-*.md` remain.
+
+Deviations:
+
+- The drafted Claude-skill dry-run fixtures in §8 remain future/operator validation examples because this Codex context has no executable runner for those `.claude/skills/` workflows. The completed proof boundary is grep proof plus manual contract review over the edited skill surfaces.

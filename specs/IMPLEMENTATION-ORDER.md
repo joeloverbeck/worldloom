@@ -1,22 +1,20 @@
 # Implementation Order
 
-**Last updated:** 2026-05-24
+**Last updated:** 2026-05-25
 **Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
 
 This file sequences the live specs under `specs/`. Each row records the spec, the change shape, dependency, and gating risk. Once a spec ships, its row is archived alongside the spec file at `archive/specs/IMPLEMENTATION-ORDER-<date>.md`.
 
-**Completed sequence rows:** SPEC-82 shipped on 2026-05-24 and is archived at `archive/specs/SPEC-82-remaining-schema-drift-repairs.md`; its completed row is archived at `archive/specs/IMPLEMENTATION-ORDER-2026-05-24-3.md`. SPEC-81 shipped on 2026-05-24 and is archived at `archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md`; its completed row is archived at `archive/specs/IMPLEMENTATION-ORDER-2026-05-24-4.md`.
+**Completed sequence rows:** SPEC-82 shipped on 2026-05-24 and is archived at `archive/specs/SPEC-82-remaining-schema-drift-repairs.md`; its completed row is archived at `archive/specs/IMPLEMENTATION-ORDER-2026-05-24-3.md`. SPEC-81 shipped on 2026-05-24 and is archived at `archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md`; its completed row is archived at `archive/specs/IMPLEMENTATION-ORDER-2026-05-24-4.md`. SPEC-80 shipped on 2026-05-25 and is archived at `archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`; its completed row is archived at `archive/specs/IMPLEMENTATION-ORDER-2026-05-25.md`.
 
 ## Active sequence
 
-| Order | Spec | Change shape | Depends on | Notes / gating risk |
-|---|---|---|---|---|
-| 1 | [`SPEC-80`](SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md) | Authoring-time driver-kind × pressure-source-class coverage diagnostic in bootstrap Phase 6 + commitment-block-authoring Phase 1 + optional health-audit Phase 2o | archived SPEC-81 (soft) | Closes the iteration-1 reactivity loop at the pool-coverage layer (the upstream cause that SPEC-76's active-pressure handling discipline could only mitigate downstream). Prefer SPEC-81 projection API; fallback to `list_records(include_full_body=true)` only if projection access is unavailable. |
+No active specs remain in this iteration-2 sequence.
 
 ## Dependency rationale
 
-- **SPEC-79 and SPEC-81 are complete and archived.** The remaining recommended next spec is **SPEC-80**.
-- **SPEC-80 has a soft dependency on archived SPEC-81**. SPEC-80's coverage diagnostic operates against SLT projection records through `select_storylet_candidates(max_candidates=pool_size)`, while retaining `list_records(include_full_body=true)` as a fallback path when projection access is unavailable.
+- **SPEC-79, SPEC-80, SPEC-81, and SPEC-82 are complete and archived.** No recommended next spec remains in this iteration-2 sequence.
+- **SPEC-80 had a soft dependency on archived SPEC-81**. The landed coverage diagnostics use SPEC-81 projection records where appropriate and retain `list_records(include_full_body=true)` for whole-pool health-audit coverage where parent-page / turn-driver filters would be wrong.
 
 ## Out of scope for this implementation pass
 
@@ -28,7 +26,7 @@ The items below were considered during iteration-2 triage and **rejected or defe
 - **`SSEL` persistent selection-trace record class** (iteration-2 SPEC-81 original framing). Rejected — re-tread of iteration-1 D5 plus conflict with SPEC-51 §FOUNDATIONS Alignment §5b ("Zero new record classes, fields, MCP packets"). Trace lives in `SE.commitment.alias_bindings` + `SE.state_delta` + `SLT.effects.bound:<alias>` + `CHC.grounded_in`. The filter trace that SPEC-81's `select_storylet_candidates` emits is a per-call diagnostic, not a persistent record.
 - **Replay/fork live global pool as separate spec** (iteration-2 SPEC-83). Subsumed by SPEC-79 — the live global pool semantics is automatic once `CHC.associated_commitment_block` is removed.
 - **Non-player driver semantics expansion / prose-attach hidden-mind-leak check** (iteration-2 SPEC-84). Deferred — re-tread of iteration-1 D4. The page-commit-time `turn_driver_pov_observer_firewall` validator absorbs the structural risk; the prose-attach pass is the remaining theoretical gap, deferred until a real renderer emits non-player-driver prose. The other components of SPEC-84 (NPC / offstage / clock / secret / multi-actor fixtures) are already covered by SPEC-76's per-kind `contains` constraints and the Red Kiln Ambush fixture verifies `npc_action`.
-- **8-axis storylet generation matrix** (iteration-2 SPEC-85 original framing). Narrowed to the 2-axis driver-kind × pressure-source-class coverage in active SPEC-80. The other 6 axes (move family, response/action family, actor role lane, onstage/offstage, mystery/canon authority, aftermath/recovery/de-escalation) are either already covered by existing diagnostics, already a per-SLT schema field without consumer demand for pool-level coverage, or speculative without consumer.
+- **8-axis storylet generation matrix** (iteration-2 SPEC-85 original framing). Narrowed to the 2-axis driver-kind × pressure-source-class coverage in archived SPEC-80. The other 6 axes (move family, response/action family, actor role lane, onstage/offstage, mystery/canon authority, aftermath/recovery/de-escalation) are either already covered by existing diagnostics, already a per-SLT schema field without consumer demand for pool-level coverage, or speculative without consumer.
 - **Pool-level pressure-distribution scoring / drama-manager pattern**. Rejected per SPEC-50 D.2 and FOUNDATIONS §Story Bundles §5c. SPEC-80's coverage diagnostic decides presence/absence only, never relative weighting; this is the load-bearing distinction.
 - **Embeddings as legality filters**. Rejected per FOUNDATIONS §5c. SPEC-81's filtering is fully symbolic; embeddings, if ever added, sit above the symbolic shortlist as a diversification pass.
 - **Server-side predicate evaluation** (moving the turn-cycle Phase 2 evaluator into the MCP tool). Out of scope for SPEC-81. The MCP tool runs a cheap structural opcode/class check; full predicate evaluation with alias substitution stays in the turn-cycle evaluator. Moving evaluation server-side is a separate spec contingent on profiling evidence.

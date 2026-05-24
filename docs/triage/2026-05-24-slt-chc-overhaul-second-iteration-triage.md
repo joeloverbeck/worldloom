@@ -195,7 +195,7 @@ After the initial triage was presented in chat with a 1-spec deliverable plan (t
 
 **Architectural ground for the reversal:** The existing bootstrap `references/phase-6-commitment-blocks.md` already prescribes cast-role coverage — "ensure at least one seed block engages each pressure-bearing role". This is the same structural pattern. Extending to driver-kind coverage (NPC / clock / secret-reveal compatibility) and pressure-source-class coverage (SLTs binding to STPLAN / STEMO / CLK pressures) is the natural complement, and directly closes the iteration-1 reactivity loop UPSTREAM of where SPEC-76's active-pressure handling discipline could only mitigate downstream. SPEC-50 D.2's prohibition is on "pool-level pressure distribution / aggregate-salience target" — runtime ranking, not authoring-time coverage. SPEC-80 §3 is explicit about the distinction.
 
-**Lands in:** [`specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`](../../specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md). The spec narrows ChatGPT-Pro's 8-axis matrix to the two axes the user named (driver-kind, pressure-source-class). The remaining 6 axes are either already covered by existing diagnostics, already per-SLT schema fields without consumer demand for pool-level coverage, or speculative.
+**Lands in:** [`archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`](../../archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md). The spec narrows ChatGPT-Pro's 8-axis matrix to the two axes the user named (driver-kind, pressure-source-class). The remaining 6 axes are either already covered by existing diagnostics, already per-SLT schema fields without consumer demand for pool-level coverage, or speculative.
 
 ### Reversal 3 — SPEC-82 (indexed candidate retrieval) moves from defer (YAGNI) to **accept**
 
@@ -212,7 +212,7 @@ After the initial triage was presented in chat with a 1-spec deliverable plan (t
 The single-spec plan from the initial triage is superseded by a **four-spec plan plus `specs/IMPLEMENTATION-ORDER.md`**:
 
 - [`archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`](../../archive/specs/SPEC-79-chc-associated-commitment-block-removal.md) — CHC field removal (user's named operational priority; completed 2026-05-24).
-- [`specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`](../../specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md) — authoring-time pool coverage diagnostics (closes the iteration-1 reactivity loop upstream).
+- [`archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`](../../archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md) — authoring-time pool coverage diagnostics (closes the iteration-1 reactivity loop upstream; completed 2026-05-25).
 - [`archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md`](../../archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md) — indexed projection + new MCP tool (scaling).
 - [`archive/specs/SPEC-82-remaining-schema-drift-repairs.md`](../../archive/specs/SPEC-82-remaining-schema-drift-repairs.md) — STQ active-pressure dead-branch fix + bootstrap stale-comment repair (the Red Kiln CHC fixture repair migrated to SPEC-79).
 - [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md) — sequencing (SPEC-82 → SPEC-79 → SPEC-81 → SPEC-80) and the rejected/deferred Out-of-Scope list for iteration-3 visibility.
