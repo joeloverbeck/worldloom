@@ -185,7 +185,7 @@ After the initial triage was presented in chat with a 1-spec deliverable plan (t
 
 **Architectural ground for the reversal:** Verification confirmed that `PG.input.choice_id` already carries the authoritative "which CHC was selected" information (`story-page.schema.json` lines 13, 36, 38), and the `chc_slt_selected_commitment_trace` validator already falls back to a `parent_page.emitted_choices` scan when `associated_commitment_block` lookup fails. The fallback path is the load-bearing one. The field therefore fails FOUNDATIONS §Story Bundles §5b's load-bearing test: removing it does not break any validation gate, replay primitive, predicate, fork operation, or audit-trail discipline.
 
-**Lands in:** [`specs/SPEC-79-chc-associated-commitment-block-removal.md`](../../specs/SPEC-79-chc-associated-commitment-block-removal.md). The spec rewrites the schema to drop the field, switches the validator to `PG.input.choice_id` resolution, updates bootstrap to stop emitting the field, updates turn-cycle Phase 8 to emit CHCs without it, and absorbs the Red Kiln Ambush fixture CHC repair (since the fixture must be schema-conformant under the post-removal CHC shape regardless).
+**Landed in:** [`archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`](../../archive/specs/SPEC-79-chc-associated-commitment-block-removal.md). The spec rewrote the schema to drop the field, switched the validator to `PG.input.choice_id` resolution, updated bootstrap to stop emitting the field, updated turn-cycle Phase 8 to emit CHCs without it, and absorbed the Red Kiln Ambush fixture CHC repair (since the fixture must be schema-conformant under the post-removal CHC shape regardless).
 
 ### Reversal 2 — SPEC-85 (storylet generation matrix) moves from reject (drama-manager-adjacent) to **accept-with-modification (narrow to driver-kind × pressure-source-class coverage at authoring time)**
 
@@ -211,7 +211,7 @@ After the initial triage was presented in chat with a 1-spec deliverable plan (t
 
 The single-spec plan from the initial triage is superseded by a **four-spec plan plus `specs/IMPLEMENTATION-ORDER.md`**:
 
-- [`specs/SPEC-79-chc-associated-commitment-block-removal.md`](../../specs/SPEC-79-chc-associated-commitment-block-removal.md) — CHC field removal (user's named operational priority).
+- [`archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`](../../archive/specs/SPEC-79-chc-associated-commitment-block-removal.md) — CHC field removal (user's named operational priority; completed 2026-05-24).
 - [`specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`](../../specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md) — authoring-time pool coverage diagnostics (closes the iteration-1 reactivity loop upstream).
 - [`specs/SPEC-81-indexed-storylet-candidate-retrieval.md`](../../specs/SPEC-81-indexed-storylet-candidate-retrieval.md) — indexed projection + new MCP tool (scaling).
 - [`archive/specs/SPEC-82-remaining-schema-drift-repairs.md`](../../archive/specs/SPEC-82-remaining-schema-drift-repairs.md) — STQ active-pressure dead-branch fix + bootstrap stale-comment repair (the Red Kiln CHC fixture repair migrated to SPEC-79).

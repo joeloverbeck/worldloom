@@ -2,7 +2,7 @@
 
 **Status:** COMPLETED 2026-05-24
 
-This snapshot archives the completed SPEC-82 row from `specs/IMPLEMENTATION-ORDER.md`. The live implementation order continues with SPEC-79, SPEC-81, and SPEC-80.
+This snapshot archives the completed SPEC-82 row from `specs/IMPLEMENTATION-ORDER.md`. Outcome amended 2026-05-24: SPEC-79 subsequently completed and moved to `archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`; the live implementation order now continues with SPEC-81 and SPEC-80.
 
 ## Completed Specs
 
@@ -12,6 +12,6 @@ This snapshot archives the completed SPEC-82 row from `specs/IMPLEMENTATION-ORDE
 
 ## Remaining Active Specs
 
-- `specs/SPEC-79-chc-associated-commitment-block-removal.md`
+- `archive/specs/SPEC-79-chc-associated-commitment-block-removal.md` (completed after this snapshot)
 - `specs/SPEC-81-indexed-storylet-candidate-retrieval.md`
 - `specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`

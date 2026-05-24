@@ -27,15 +27,15 @@ const SEARCH_PATHS = [
   "tools",
   ".claude/skills",
   "docs",
-  "specs/SPEC-79-chc-associated-commitment-block-removal.md",
+  "archive/specs/SPEC-79-chc-associated-commitment-block-removal.md",
   "reports/slt-chc-overhaul-second-iteration.md"
 ] as const;
 
 const ALLOWED_HISTORICAL_PATHS = new Set([
   "docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md",
   "docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md",
+  "archive/specs/SPEC-79-chc-associated-commitment-block-removal.md",
   "reports/slt-chc-overhaul-second-iteration.md",
-  "specs/SPEC-79-chc-associated-commitment-block-removal.md"
 ]);
 
 test("SPEC-79 capstone: tracked operational surfaces do not retain the retired CHC-to-SLT field", () => {

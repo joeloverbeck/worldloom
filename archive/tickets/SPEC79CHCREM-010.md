@@ -122,4 +122,4 @@ The four remaining placeholder `associated_commitment_block` keys named by this 
 
 ## Deviations
 
-- The drafted broad acceptance gate `cd tools/validators && npm test` did not finish green. It rebuilt `dist/` and ran the suite, but the only reported failure was the SPEC-47 edge-count assertion (`75 !== 76`), which is outside this ticket's four fixture-key removal seam. This ticket accepts the focused compiled test files plus zero-hit grep as the truthful proof boundary; the broader atomic-landing verification remains with the queued capstone `tickets/SPEC79CHCREM-011.md`.
+- The drafted broad acceptance gate `cd tools/validators && npm test` did not finish green. It rebuilt `dist/` and ran the suite, but the only reported failure was the SPEC-47 edge-count assertion (`75 !== 76`), which is outside this ticket's four fixture-key removal seam. This ticket accepts the focused compiled test files plus zero-hit grep as the truthful proof boundary; the broader atomic-landing verification was carried by archived capstone `archive/tickets/SPEC79CHCREM-011.md`.

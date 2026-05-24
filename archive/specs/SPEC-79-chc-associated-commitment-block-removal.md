@@ -3,7 +3,7 @@
 **Spec ID:** SPEC-79
 **Date:** 2026-05-24
 **Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
-**Status:** active
+**Status:** COMPLETED
 **Supersedes:** the original SPEC-79 draft (story-bundle schema drift repairs) — the schema-drift content other than the Red Kiln CHC repair migrates to SPEC-82. The Red Kiln CHC repair is absorbed here because the fixture must be schema-conformant under the post-removal CHC shape regardless.
 
 ## §1 Goal
@@ -261,3 +261,19 @@ Eleven non-fixture test files include CHC objects carrying `associated_commitmen
 - Ship as a single atomic landing: schema + validator + bootstrap + turn-cycle + fixtures + contract. Splitting the surfaces risks a window where the schema rejects the field but consumers still emit it (or vice versa).
 - After landing, the iteration-1 R1 alternative path (`CHC.late_bound: bool` flag) is closed permanently — its prerequisite was that the field remained.
 - The iteration-2 SPEC-83 "live global pool replay" framing is automatically operationalized by this removal; SPEC-83 does not need to be written as a separate spec.
+
+## Outcome
+
+Completed on 2026-05-24.
+
+- Removed `CHC.associated_commitment_block` from the story-choice schema, validator consumers, world-index CHC edge emission, skill/shared-template guidance, docs, and test fixtures.
+- Replaced selected-CHC resolution with the `PG.input.choice_id` to parent-page `emitted_choices` path and renamed validator output detail to `selected_slt_id`.
+- Reduced `choice_set_noncollapse` to the remaining 3 material axes: `target_or_action_families`, `grounded_in.records`, and `likely_state_pressure`.
+- Rewrote Red Kiln Ambush CHC entries to the post-removal schema and repaired the same-seam turn-cycle output grounding validator to read response mode from `SE.turn_driver`.
+- Added the SPEC-79 capstone test at `tools/validators/tests/integration/spec79-chc-removal.test.ts`. The capstone automates the tracked-source grep negative assertion and preserves a temp-world manual runbook for the LLM-driven bootstrap/turn-cycle dry-run portions.
+- Deviation: SPEC-79 §9 tests 4-5 were not executed as live skill dry-runs in Codex because those skills are LLM-driven/content-generating, have HARD-GATE implications, and have no executable package harness. The accepted close boundary is the documented temp-world runbook plus manual contract review of current bootstrap/turn-cycle surfaces.
+- Final verification:
+  - `cd tools/validators && npm run build` — PASS.
+  - `cd tools/validators && node --test dist/tests/integration/spec79-chc-removal.test.js` — PASS.
+  - `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md reports/slt-chc-overhaul-second-iteration.md` — PASS after classification: remaining hits are SPEC-79 documentation/provenance only, with no `tools/` or `.claude/skills/` consumer hits.
+  - Manual contract review — PASS: bootstrap and turn-cycle guidance no longer names a per-CHC SLT field; health-audit, validator, world-index, shared-template, and MACHINE-FACING-LAYER surfaces match the post-removal contract.
