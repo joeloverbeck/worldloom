@@ -117,10 +117,6 @@ function materialSignature(choice: Record<string, unknown>): string {
   return stableStringify({
     target_or_action_families: sortedStrings(choice.target_or_action_families),
     grounded_in_records: sortedStrings(groundedIn.records),
-    associated_commitment_block:
-      typeof choice.associated_commitment_block === "string"
-        ? choice.associated_commitment_block
-        : null,
     likely_state_pressure:
       typeof choice.likely_state_pressure === "string"
         ? choice.likely_state_pressure.trim()
@@ -200,7 +196,7 @@ function collapseVerdict(page: IndexedRecord, choices: ChoiceInfo[]): Verdict {
     validator: VALIDATOR,
     severity: "fail",
     code: COLLAPSE_CODE,
-    message: `${pageId} emits ${choices.length} choices with no material difference across target_or_action_families, grounded_in.records, associated_commitment_block, or likely_state_pressure.`,
+    message: `${pageId} emits ${choices.length} choices with no material difference across target_or_action_families, grounded_in.records, or likely_state_pressure.`,
     location: {
       file: page.file_path,
       node_id: page.node_id

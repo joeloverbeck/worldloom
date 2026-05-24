@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-health-audit/SKILL.md` (Phase 2 step 8 `choice_set_collapse_observed` finding).
-**Deps**: SPEC79CHCREM-003
+**Deps**: archive/tickets/SPEC79CHCREM-003.md
 
 ## Problem
 
