@@ -76,6 +76,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "secret_introduction_anchor_integrity",
   "secret_mystery_firewall_compliance",
   "slt_created_at_page_origin_consistency",
+  "slt_grounding_minimal_integrity",
   "snapshot_replay_equality",
   "state_delta_class_integrity",
   "state_snapshot_integrity",

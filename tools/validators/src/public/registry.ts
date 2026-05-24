@@ -49,6 +49,7 @@ import { secretCarrierExistence } from "../structural/secret-carrier-existence.j
 import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-firewall-compliance.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
+import { sltGroundingMinimalIntegrity } from "../structural/slt-grounding-minimal-integrity.js";
 import { stateDeltaClassIntegrity } from "../structural/state-delta-class-integrity.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
 import { stplanBeliefBasisGrounded } from "../structural/stplan-belief-basis-grounded.js";
@@ -180,6 +181,7 @@ export const structuralValidators: readonly Validator[] = [
   storyQuestionGroundingIntegrity,
   storyQuestionTerminalDebt,
   storyDaDuplicateHeuristic,
+  sltGroundingMinimalIntegrity,
   turnDriverSchemaCompliance,
   turnDriverPovObserverFirewall,
   turnCycleOutputGroundingIntegrity,

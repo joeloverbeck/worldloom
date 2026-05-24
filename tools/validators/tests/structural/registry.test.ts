@@ -74,6 +74,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "story_question_grounding_integrity",
       "story_question_terminal_debt",
       "story_da_duplicate_heuristic",
+      "slt_grounding_minimal_integrity",
       "turn_driver_schema_compliance",
       "turn_driver_pov_observer_firewall",
       "turn_cycle_output_grounding_integrity",
