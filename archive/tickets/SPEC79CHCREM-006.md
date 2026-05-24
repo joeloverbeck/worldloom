@@ -33,7 +33,7 @@ Phase 1's change is the only non-mechanical edit: per the SPEC-79 reassessment Q
 1. The three reference files no longer mention `associated_commitment_block` → codebase grep-proof: `grep -rn "associated_commitment_block" .claude/skills/branching-story-turn-cycle/` returns zero matches.
 2. Phase 1's routing guidance reads as prescribed in SPEC-79 §5.2 (routes on `action_family + grounded_in.records`) → manual review of the updated `phase-1-action-resolution.md:3` paragraph.
 3. Phase 8's CHC enumeration mirrors bootstrap's updated enumeration → manual review against `phase-8-9-page-plan-and-choices.md` (post-005).
-4. Phase 9's validator-gate description matches the rule's 3-axis signature → manual review against `rule_choice_set_noncollapse.ts` (post-003). The matching health-audit update remains queued in `tickets/SPEC79CHCREM-007.md`.
+4. Phase 9's validator-gate description matches the rule's 3-axis signature → manual review against `rule_choice_set_noncollapse.ts` (post-003). The matching health-audit update is complete in `archive/tickets/SPEC79CHCREM-007.md`.
 
 ## Landed Changes
 
