@@ -51,7 +51,7 @@ In the gap-diagnostic discussion (Phase 1 sub-steps), update field references to
 
 ## Out of Scope
 
-- Phase 2.1 wiring for `branching-story-turn-cycle` — landed in SPEC81INDSTOCAN-003.
+- Phase 2.1 wiring for `branching-story-turn-cycle` — landed in archive/tickets/SPEC81INDSTOCAN-003.md.
 - Context-packet shortlist embedding — landed in SPEC81INDSTOCAN-005.
 - Coverage-diagnostic algorithm changes (SPEC-80 territory) — the algorithm reads the same data, just via a different retrieval mechanism.
 - End-to-end commitment-block-authoring test against 1000-SLT pool (§9.5) — landed in SPEC81INDSTOCAN-006.

@@ -53,7 +53,7 @@ If `tools/world-mcp/README.md` or `docs/CONTEXT-PACKET-CONTRACT.md` enumerates t
 
 ## Out of Scope
 
-- Phase 2.1 wiring for `branching-story-turn-cycle` — landed in SPEC81INDSTOCAN-003.
+- Phase 2.1 wiring for `branching-story-turn-cycle` — landed in archive/tickets/SPEC81INDSTOCAN-003.md.
 - Phase 1 wiring for `commitment-block-authoring` — landed in SPEC81INDSTOCAN-004.
 - Lowering or removing the 50-cap visible-storylets summary — per SPEC-81 §7 explicitly out-of-scope (the 50-cap is preserved; the shortlist is additive).
 - Performance benchmarking — landed in SPEC81INDSTOCAN-006 (capstone).

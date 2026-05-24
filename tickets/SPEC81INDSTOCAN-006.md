@@ -3,8 +3,8 @@
 **Status**: PENDING
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: None — integration test ticket; no production code. Exercises the pipeline composed by archive/tickets/SPEC81INDSTOCAN-001.md, archive/tickets/SPEC81INDSTOCAN-002.md, and active tickets 003 through 005.
-**Deps**: SPEC81INDSTOCAN-003, SPEC81INDSTOCAN-004, SPEC81INDSTOCAN-005
+**Engine Changes**: None — integration test ticket; no production code. Exercises the pipeline composed by archive/tickets/SPEC81INDSTOCAN-001.md, archive/tickets/SPEC81INDSTOCAN-002.md, archive/tickets/SPEC81INDSTOCAN-003.md, and active tickets 004 through 005.
+**Deps**: archive/tickets/SPEC81INDSTOCAN-003.md, SPEC81INDSTOCAN-004, SPEC81INDSTOCAN-005
 
 ## Problem
 
@@ -77,8 +77,8 @@ The test file uses `fs.cpSync` (or equivalent) to copy the 1000-SLT fixture to a
 
 - World-index foundational changes — landed in archive/tickets/SPEC81INDSTOCAN-001.md (and §9.1 verified there).
 - MCP tool implementation — landed in archive/tickets/SPEC81INDSTOCAN-002.md.
-- Consumer skill wiring (turn-cycle, commitment-block-authoring, context packet) — landed in SPEC81INDSTOCAN-003/004/005.
-- Phase-2-3 doc reconciliation (SPEC-81 §10 follow-up; cross-spec follow-up per Step 6 routing pattern (c)).
+- Consumer skill wiring (turn-cycle, commitment-block-authoring, context packet) — turn-cycle landed in archive/tickets/SPEC81INDSTOCAN-003.md; commitment-block-authoring and context packet remain active in SPEC81INDSTOCAN-004/005.
+- Phase-2-3 doc reconciliation — landed in archive/tickets/SPEC81INDSTOCAN-003.md as part of the shortlist rewrite; no separate capstone-owned follow-up remains.
 
 ## Acceptance Criteria
 
