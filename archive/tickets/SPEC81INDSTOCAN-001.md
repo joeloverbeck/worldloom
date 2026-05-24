@@ -1,6 +1,6 @@
 # SPEC81INDSTOCAN-001: World-index SLT projection columns and edges
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/world-index/` parse layer + SQLite schema. No impact on existing edge types or node types; additions are additive.
@@ -14,8 +14,8 @@ This ticket lands the foundational layer that unlocks indexed predicate-shape re
 
 ## Assumption Reassessment (2026-05-24)
 
-1. `tools/world-index/src/schema/types.ts` defines `STORY_EDGE_TYPES` (lines 92-168) as the closed registry of story-bundle edge type literals; appending 4 new entries is the canonical additive registration site. `tools/world-index/src/parse/atomic.ts` defines `edgesForStorylet` (lines 812-840) as the parser emission site for existing SLT edges (`storylet_predicate_ref`, `storylet_effect_ref`, `storylet_exit_likely_effect_ref`); extending it is the canonical place to emit the new edge kinds and project the new SLT fields.
-2. SPEC-81 §3.1 (projection columns table, 13 rows after the reassessment dropped 3 orphan columns), §3.2 (4 new edge types), §3.3 (build invalidation via existing per-node anchor-hash discipline — no new invalidation surface).
+1. `tools/world-index/src/schema/types.ts` defines `STORY_EDGE_TYPES` as the closed registry of story-bundle edge type literals; appending 4 new entries is the canonical additive registration site. `tools/world-index/src/parse/atomic.ts` defines `edgesForStorylet` as the parser emission site for existing SLT edges (`storylet_predicate_ref`, `storylet_effect_ref`, `storylet_exit_likely_effect_ref`); extending it is the canonical place to emit the new edge kinds and project the new SLT fields.
+2. SPEC-81 §3.1 (projection fields table: 8 scalar/single-value fields in `slt_projections`, 4 new coarse edge families, and source-record ids resolved through existing `storylet_predicate_ref`), §3.2 (4 new edge types), §3.3 (build invalidation via existing per-node anchor-hash discipline — no new invalidation surface).
 3. Cross-skill boundary under audit: parser (`tools/world-index/src/parse/atomic.ts`) ↔ schema (`tools/world-index/src/schema/types.ts` + `migrations/`) ↔ downstream MCP retrieval surface (`tools/world-mcp/`, in SPEC81INDSTOCAN-002). The parser produces what schema defines; downstream MCP retrieval reads what the parser produces. Edge-type and projection-column additions stay strictly within `tools/world-index/`'s public API surface; no cross-package coupling changes.
 4. FOUNDATIONS §Tooling Recommendation ("LLM agents should never operate on prose alone... directly or via the documented context-packet + targeted-retrieval pattern") motivates indexed projection — this ticket lands the index half of the retrieval pattern that SPEC81INDSTOCAN-002 then exposes through MCP.
 5. HARD-GATE: world-index build path. The SQL migration adds new columns / typed edges that the build process recomputes per affected SLT row; no canon-write ordering change; no Mystery Reserve firewall weakening (the build is read-only over `_source/<class>/*.yaml` records).
@@ -46,7 +46,7 @@ In `tools/world-index/src/schema/types.ts`, append to the `STORY_EDGE_TYPES` con
 
 ### 2. New SQL migration: 007_slt_projection_columns.sql
 
-Create `tools/world-index/src/schema/migrations/007_slt_projection_columns.sql` adding the projection columns named in SPEC-81 §3.1 to the appropriate table (likely `nodes` or a new `slt_projections` derived table — choose based on existing schema conventions; columns are SLT-specific so a derived table may be cleaner). Columns to add (10 total, after the reassessment dropped 3 orphans):
+Create `tools/world-index/src/schema/migrations/007_slt_projection_columns.sql` adding a new `slt_projections` derived table. Columns to add (8 scalar/single-value projection fields, plus `node_id`, `world_slug`, `story_slug`, and `candidate_projection_hash`):
 
 - `slt_scope_visibility` TEXT (enum: `global_author_pool | branch_prefix_scoped | branch_scoped`)
 - `slt_scope_branch_id` TEXT NULL
@@ -57,7 +57,7 @@ Create `tools/world-index/src/schema/migrations/007_slt_projection_columns.sql` 
 - `slt_saliency_cooldown_pages` INTEGER NULL
 - `slt_mystery_policy_allowed_authority` TEXT (enum: `apparent | branch_local_counterfactual | canon_candidate | none`)
 
-The remaining columns named in §3.1 (`slt_exit_action_families`, `slt_grounding_compatible_turn_drivers`, `slt_predicate_pred`, `slt_predicate_referenced_class`, `slt_source_record_id`) are 0-N cardinality and are projected as edges via §3.2's new edge types, NOT as columns.
+The remaining fields named in §3.1 (`slt_exit_action_families`, `slt_grounding_compatible_turn_drivers`, `slt_predicate_pred`, `slt_predicate_referenced_class`) are 0-N cardinality and are projected as edges via §3.2's new edge types, NOT as columns. `slt_source_record_id` is resolved through the existing `storylet_predicate_ref` literal-record edge surface rather than a new fifth edge type, because SPEC-81 §3.2 defines only four new edges.
 
 ### 3. Extend `edgesForStorylet` in `tools/world-index/src/parse/atomic.ts`
 
@@ -68,7 +68,7 @@ After the existing exit-option likely_effects loop (around line 837), add edge e
 - Iterate predicate arguments (`record_class` / `holder_role` / `kind`) across the same predicate arrays and emit `storylet_predicate_class` edges per distinct referenced class.
 - Iterate `record.exit_options[].action_family` and emit `storylet_action_family` edges per distinct action-family enum value.
 
-### 4. Extend the parser's node-row population to project the 10 scalar/single-value columns
+### 4. Extend the parser's node-row population to project the 8 scalar/single-value fields
 
 In the same SLT parsing pass (sibling to `edgesForStorylet`), extract the scalar projection columns from the parsed SLT record body and write them to the corresponding columns in the migration-defined table. This is the read-side complement to the migration; both must land together.
 
@@ -81,7 +81,17 @@ Create `tools/world-index/tests/storylet-projection-roundtrip.test.ts` covering 
 - `tools/world-index/src/schema/types.ts` (modify)
 - `tools/world-index/src/schema/migrations/007_slt_projection_columns.sql` (new)
 - `tools/world-index/src/parse/atomic.ts` (modify)
+- `tools/world-index/src/index/nodes.ts` (modify)
+- `tools/world-index/src/schema/version.ts` (modify)
 - `tools/world-index/tests/storylet-projection-roundtrip.test.ts` (new)
+- `tools/world-index/tests/schema.test.ts` (modify)
+- `tools/world-index/tests/parse/atomic-edges-for-choice-and-storylet.test.ts` (modify)
+- `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts` (modify)
+- `tools/world-index/tests/integration/spec46-story-bundle-edges-integration.test.ts` (modify)
+- `tools/world-index/tests/integration/spec47-stplan-stemo-edges-integration.test.ts` (modify)
+- `tools/world-index/tests/types.test.ts` (modify)
+- `docs/MACHINE-FACING-LAYER.md` (modify)
+- `tickets/SPEC81INDSTOCAN-002.md` (modify dependency handoff note)
 
 ## Out of Scope
 
@@ -109,8 +119,31 @@ Create `tools/world-index/tests/storylet-projection-roundtrip.test.ts` covering 
 ### New/Modified Tests
 
 1. `tools/world-index/tests/storylet-projection-roundtrip.test.ts` (new) — covers SPEC §9.1 by re-deriving projection columns from parsed full bodies and asserting equality against the persisted columns; asserts edge emission counts per kind match source-field values.
+2. Existing parser/schema/count tests updated to recognize the four new edge types and the `slt_projections` table.
 
 ### Commands
 
 1. `cd tools/world-index && npm test` — runs all world-index tests including the new roundtrip test.
 2. `cd tools/world-index && npm run build` — confirms TypeScript compiles cleanly with the new edge-type entries and projection-column writes.
+
+## Outcome
+
+Completed: 2026-05-24
+
+What changed:
+- Added world-index schema version 7 with `slt_projections`, including indexed story/scope/move/saliency columns and `candidate_projection_hash`.
+- Added `SltProjectionRow` persistence, parser emission, and cleanup on file reparse/delete.
+- Appended four new storylet projection edge types: `storylet_compatible_driver`, `storylet_predicate_pred`, `storylet_predicate_class`, and `storylet_action_family`.
+- Added a roundtrip test proving persisted projection rows and coarse filter edges match source SLT YAML, plus schema/count/parity test updates and `docs/MACHINE-FACING-LAYER.md` edge documentation.
+- Updated `tickets/SPEC81INDSTOCAN-002.md` to state that source-record-id filtering uses existing `storylet_predicate_ref` edges, not a new fifth edge.
+
+Deviations from original plan:
+- Implemented the scalar projections as a dedicated `slt_projections` table rather than widening `nodes`.
+- The scalar projection field count is 8, not 10; the ticket's earlier count was stale. The table also carries `node_id`, `world_slug`, `story_slug`, and `candidate_projection_hash`.
+- The new fixture uses one representative SLT with varied scalar/edge fields instead of a 10-SLT fixture; it directly asserts the source-to-DB roundtrip for every owned projection field and edge family. Broader pool-size and trace-count coverage remains in downstream/capstone tickets.
+
+Verification Result:
+- PASS — `cd tools/world-index && npm run build` completed successfully after the implementation.
+- PASS — `cd tools/world-index && node --test dist/tests/storylet-projection-roundtrip.test.js dist/tests/parse/atomic-edges-for-choice-and-storylet.test.js dist/tests/schema.test.js` passed 9/9 focused subtests.
+- PASS — `cd tools/world-index && npm test` passed 132/132 subtests.
+- PASS — `grep -n 'storylet_compatible_driver\|storylet_predicate_pred\|storylet_predicate_class\|storylet_action_family' tools/world-index/src/schema/types.ts` returned exactly four registry hits.

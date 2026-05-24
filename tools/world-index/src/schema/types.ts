@@ -164,7 +164,11 @@ export const STORY_EDGE_TYPES = [
   "emotion_expires_when_ref",
   "event_actor",
   "event_target",
-  "event_selected_storylet"
+  "event_selected_storylet",
+  "storylet_compatible_driver",
+  "storylet_predicate_pred",
+  "storylet_predicate_class",
+  "storylet_action_family"
 ] as const;
 
 export type StoryEdgeType = (typeof STORY_EDGE_TYPES)[number];
@@ -447,6 +451,21 @@ export interface NodeRow {
   anchor_checksum: string;
   summary: string | null;
   created_at_index_version: number;
+}
+
+export interface SltProjectionRow {
+  node_id: string;
+  world_slug: string;
+  story_slug: string;
+  slt_scope_visibility: string | null;
+  slt_scope_branch_id: string | null;
+  slt_scope_branch_path_prefix: string | null;
+  slt_provenance_origin: string | null;
+  slt_move_family: string | null;
+  slt_saliency_urgency: string | null;
+  slt_saliency_cooldown_pages: number | null;
+  slt_mystery_policy_allowed_authority: string | null;
+  candidate_projection_hash: string;
 }
 
 export interface EdgeRow {

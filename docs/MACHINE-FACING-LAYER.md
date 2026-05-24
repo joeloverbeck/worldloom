@@ -138,6 +138,10 @@ SPEC-50 removes the legacy `SLT` obligation-field edges (`opens_obligation`, `pa
 | `SLT` | `storylet_predicate_ref` | record | Record ids parsed from hard and soft precondition predicate strings. |
 | `SLT` | `storylet_effect_ref` | record | Concrete record ids named by `effects.create[]`, `effects.supersede[]`, and `effects.close[]`; `bound:<alias>` placeholders are skipped. |
 | `SLT` | `storylet_exit_likely_effect_ref` | record | Concrete record ids named by `exit_options[].likely_effects[]`; `bound:<alias>` placeholders are skipped. |
+| `SLT` | `storylet_compatible_driver` | driver-kind enum value | Each `grounding.compatible_turn_drivers[]` value projected for indexed shortlist filtering. |
+| `SLT` | `storylet_predicate_pred` | predicate enum value | Each distinct hard/soft precondition `pred` value projected for predicate-shape filtering. |
+| `SLT` | `storylet_predicate_class` | record-class enum value | Each distinct predicate `record_class`, `holder_role`, or `kind` argument projected for referenced-class filtering. |
+| `SLT` | `storylet_action_family` | action-family enum value | Each distinct `exit_options[].action_family` value projected for intent/action-family filtering. |
 
 SPEC-67 adds seven consumer-backed edge types for story-world index parity. These support Mystery Reserve firewall traversal, debt-party lookup, provenance impact analysis, and STCHAR supersession integrity without indexing consumerless fields:
 

@@ -3,12 +3,12 @@
 **Status**: PENDING
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: None — integration test ticket; no production code. Exercises the pipeline composed by SPEC81INDSTOCAN-001 through 005.
+**Engine Changes**: None — integration test ticket; no production code. Exercises the pipeline composed by archive/tickets/SPEC81INDSTOCAN-001.md plus SPEC81INDSTOCAN-002 through 005.
 **Deps**: SPEC81INDSTOCAN-003, SPEC81INDSTOCAN-004, SPEC81INDSTOCAN-005
 
 ## Problem
 
-SPEC-81 §9 declares 7 validation tests. §9.1 (index-build roundtrip correctness) is folded into SPEC81INDSTOCAN-001's acceptance criteria + test plan since it directly verifies the world-index changes. §9.2-§9.7 require the full pipeline (world-index + MCP tool + consumer wiring + context packet) to be in place; they exercise the end-to-end retrieval surface on a synthetic 1000-SLT pool.
+SPEC-81 §9 declares 7 validation tests. §9.1 (index-build roundtrip correctness) is folded into archive/tickets/SPEC81INDSTOCAN-001.md's acceptance criteria + test plan since it directly verifies the world-index changes. §9.2-§9.7 require the full pipeline (world-index + MCP tool + consumer wiring + context packet) to be in place; they exercise the end-to-end retrieval surface on a synthetic 1000-SLT pool.
 
 This capstone ticket lands the integration test suite covering §9.2-§9.7 plus a manual dry-run runbook for the skill-level verification tests (§9.4, §9.5) that require LLM-driven skill invocations not runnable from test-suite code.
 
@@ -16,7 +16,7 @@ This capstone ticket lands the integration test suite covering §9.2-§9.7 plus 
 
 1. `tools/world-mcp/tests/` is the existing integration-test root for cross-tool tests (per the test-shape patterns in sibling integration tests under `tests/integration/`). Synthetic story-bundle fixtures live at the `tests/fixtures/` level (existing pattern, e.g., for context-packet tests).
 2. SPEC-81 §9 validation tests:
-   - §9.1: Index-build correctness (folded into SPEC81INDSTOCAN-001).
+   - §9.1: Index-build correctness (folded into archive/tickets/SPEC81INDSTOCAN-001.md).
    - §9.2: Synthetic 1000-SLT pool — `select_storylet_candidates(turn_driver=player_action)` returns ≤24; consumer's full-body read count is ≤24.
    - §9.3: Filter-trace counts — hand-crafted 100-SLT bundle with known per-stage counts; assert `filter_trace` matches.
    - §9.4: Turn-cycle end-to-end (skill dry-run; manual runbook).
@@ -75,7 +75,7 @@ The test file uses `fs.cpSync` (or equivalent) to copy the 1000-SLT fixture to a
 
 ## Out of Scope
 
-- World-index foundational changes — landed in SPEC81INDSTOCAN-001 (and §9.1 verified there).
+- World-index foundational changes — landed in archive/tickets/SPEC81INDSTOCAN-001.md (and §9.1 verified there).
 - MCP tool implementation — landed in SPEC81INDSTOCAN-002.
 - Consumer skill wiring (turn-cycle, commitment-block-authoring, context packet) — landed in SPEC81INDSTOCAN-003/004/005.
 - Phase-2-3 doc reconciliation (SPEC-81 §10 follow-up; cross-spec follow-up per Step 6 routing pattern (c)).

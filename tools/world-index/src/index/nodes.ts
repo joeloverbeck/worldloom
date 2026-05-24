@@ -8,6 +8,7 @@ import type {
   NodeRow,
   ScopedReferenceAliasRow,
   ScopedReferenceRow,
+  SltProjectionRow,
   ValidationResultRow
 } from "../schema/types.js";
 
@@ -79,6 +80,7 @@ export function deleteNodesByFile(
 
     const placeholders = nodeIds.map(() => "?").join(", ");
 
+    db.prepare(`DELETE FROM slt_projections WHERE node_id IN (${placeholders})`).run(...nodeIds);
     db.prepare(`DELETE FROM anchor_checksums WHERE node_id IN (${placeholders})`).run(...nodeIds);
     db.prepare(`DELETE FROM entity_mentions WHERE node_id IN (${placeholders})`).run(...nodeIds);
     db.prepare(`DELETE FROM entity_aliases WHERE source_node_id IN (${placeholders})`).run(...nodeIds);
@@ -119,6 +121,44 @@ export function insertAnchorChecksums(
         @node_id,
         @anchor_form,
         @checksum
+      )
+    `);
+
+    for (const row of batch) {
+      statement.run(row);
+    }
+  })(rows);
+}
+
+export function insertSltProjections(db: Database.Database, rows: SltProjectionRow[]): void {
+  db.transaction((batch: SltProjectionRow[]) => {
+    const statement = db.prepare(`
+      INSERT INTO slt_projections (
+        node_id,
+        world_slug,
+        story_slug,
+        slt_scope_visibility,
+        slt_scope_branch_id,
+        slt_scope_branch_path_prefix,
+        slt_provenance_origin,
+        slt_move_family,
+        slt_saliency_urgency,
+        slt_saliency_cooldown_pages,
+        slt_mystery_policy_allowed_authority,
+        candidate_projection_hash
+      ) VALUES (
+        @node_id,
+        @world_slug,
+        @story_slug,
+        @slt_scope_visibility,
+        @slt_scope_branch_id,
+        @slt_scope_branch_path_prefix,
+        @slt_provenance_origin,
+        @slt_move_family,
+        @slt_saliency_urgency,
+        @slt_saliency_cooldown_pages,
+        @slt_mystery_policy_allowed_authority,
+        @candidate_projection_hash
       )
     `);
 

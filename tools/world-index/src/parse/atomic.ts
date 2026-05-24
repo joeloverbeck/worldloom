@@ -10,7 +10,7 @@ import { domainFileNodeId } from "./prose.js";
 import { STORY_SOURCE_DIRECTORY_SPECS } from "./story-directories.js";
 import { CURRENT_INDEX_VERSION } from "../schema/version.js";
 import { sha256Hex } from "../hash/content.js";
-import type { EdgeRow, NodeRow, NodeType, ValidationResultRow } from "../schema/types.js";
+import type { EdgeRow, NodeRow, NodeType, SltProjectionRow, ValidationResultRow } from "../schema/types.js";
 import type { EntityRegistry, EntityRegistryEntry } from "./entities.js";
 
 export const ATOMIC_LOGICAL_WORLD_FILES = [
@@ -218,6 +218,7 @@ export function parseAtomicSourceFile(
       contentHash: contentHashForProse(source),
       nodes: [],
       edges: [],
+      sltProjections: [],
       validationResults,
       skippedRecords: [skip],
       yamlBlockCount: 1,
@@ -250,6 +251,7 @@ export function parseAtomicSourceFile(
     contentHash: contentHashForProse(source),
     nodes: [node],
     edges,
+    sltProjections: [],
     validationResults,
     skippedRecords: [],
     yamlBlockCount: 1,
@@ -293,6 +295,7 @@ export function parseStoryBundleSourceFile(
       contentHash: spec.hybrid ? sha256Hex(source) : contentHashForProse(source),
       nodes: [],
       edges: [],
+      sltProjections: [],
       validationResults,
       skippedRecords: [],
       yamlBlockCount: spec.hybrid ? 0 : 1,
@@ -310,6 +313,7 @@ export function parseStoryBundleSourceFile(
       contentHash: spec.hybrid ? sha256Hex(source) : contentHashForProse(source),
       nodes: [],
       edges: [],
+      sltProjections: [],
       validationResults,
       skippedRecords: [skip],
       yamlBlockCount: 1,
@@ -343,6 +347,8 @@ export function parseStoryBundleSourceFile(
     contentHash: spec.hybrid ? sha256Hex(source) : contentHashForProse(source),
     nodes: [node],
     edges,
+    sltProjections:
+      spec.nodeType === "storylet_record" ? [sltProjectionForStorylet(node, record, spec.storySlug)] : [],
     validationResults,
     skippedRecords: [],
     yamlBlockCount: spec.hybrid ? 0 : 1,
@@ -372,6 +378,7 @@ export function createAtomicLogicalFileResults(worldSlug: string): ParsedFileRes
       contentHash: node.content_hash,
       nodes: [node],
       edges: [],
+      sltProjections: [],
       validationResults: [],
       skippedRecords: [],
       yamlBlockCount: 0,
@@ -836,7 +843,61 @@ function edgesForStorylet(
     }
   }
 
+  for (const driver of uniqueSortedStrings(stringArrayField(record, "compatible_turn_drivers", ["grounding"]))) {
+    edges.push(createStoryAttributeEdge(node.node_id, "storylet_compatible_driver", storySlug, driver));
+  }
+
+  for (const pred of predicatePreds(record)) {
+    edges.push(createStoryAttributeEdge(node.node_id, "storylet_predicate_pred", storySlug, pred));
+  }
+
+  for (const referencedClass of predicateReferencedClasses(record)) {
+    edges.push(createStoryAttributeEdge(node.node_id, "storylet_predicate_class", storySlug, referencedClass));
+  }
+
+  for (const actionFamily of uniqueSortedStrings(
+    recordArrayField(record, "exit_options").flatMap((exitOption) =>
+      stringField(exitOption, "action_family") ? [stringField(exitOption, "action_family") as string] : []
+    )
+  )) {
+    edges.push(createStoryAttributeEdge(node.node_id, "storylet_action_family", storySlug, actionFamily));
+  }
+
   return edges;
+}
+
+function sltProjectionForStorylet(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): SltProjectionRow {
+  const branchPathPrefix = stringArrayField(record, "visible_branch_path_prefix", ["scope"]);
+  const cooldownPages = numberField(record, "cooldown_pages", ["saliency"]);
+  const projectionPayload = {
+    slt_scope_visibility: stringField(record, "visibility", ["scope"]),
+    slt_scope_branch_id: stringField(record, "branch_id", ["scope"]),
+    slt_scope_branch_path_prefix: branchPathPrefix,
+    slt_provenance_origin: stringField(record, "origin", ["provenance"]),
+    slt_move_family: stringField(record, "move_family"),
+    slt_saliency_urgency: stringField(record, "urgency", ["saliency"]),
+    slt_saliency_cooldown_pages: cooldownPages,
+    slt_mystery_policy_allowed_authority: stringField(record, "allowed_authority", ["mystery_policy"])
+  };
+
+  return {
+    node_id: node.node_id,
+    world_slug: node.world_slug,
+    story_slug: storySlug,
+    slt_scope_visibility: projectionPayload.slt_scope_visibility,
+    slt_scope_branch_id: projectionPayload.slt_scope_branch_id,
+    slt_scope_branch_path_prefix: branchPathPrefix.length > 0 ? JSON.stringify(branchPathPrefix) : null,
+    slt_provenance_origin: projectionPayload.slt_provenance_origin,
+    slt_move_family: projectionPayload.slt_move_family,
+    slt_saliency_urgency: projectionPayload.slt_saliency_urgency,
+    slt_saliency_cooldown_pages: cooldownPages,
+    slt_mystery_policy_allowed_authority: projectionPayload.slt_mystery_policy_allowed_authority,
+    candidate_projection_hash: sha256Hex(JSON.stringify(projectionPayload))
+  };
 }
 
 function edgesForPage(
@@ -1383,6 +1444,21 @@ function stringArrayField(record: Record<string, unknown>, field: string, nested
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
+function numberField(record: Record<string, unknown>, field: string, nestedPath: string[] = []): number | null {
+  let container: unknown = record;
+  for (const segment of nestedPath) {
+    if (!isRecord(container)) {
+      return null;
+    }
+    container = container[segment];
+  }
+  if (!isRecord(container)) {
+    return null;
+  }
+  const value = container[field];
+  return typeof value === "number" ? value : null;
+}
+
 function numberArrayField(record: Record<string, unknown>, field: string, nestedPath: string[] = []): number[] {
   let container: unknown = record;
   for (const segment of nestedPath) {
@@ -1460,6 +1536,72 @@ function storyRefsInRecordArrayField(record: Record<string, unknown>, field: str
     collectStoryRefsFromPredicateRecord(item, refs);
   }
   return [...refs].sort((left, right) => left.localeCompare(right, "en-US"));
+}
+
+function predicatePreds(record: Record<string, unknown>): string[] {
+  const preds = new Set<string>();
+  for (const predicate of predicateRecords(record)) {
+    collectPredicatePreds(predicate, preds);
+  }
+  return uniqueSortedStrings([...preds]);
+}
+
+function collectPredicatePreds(predicate: Record<string, unknown>, preds: Set<string>): void {
+  const pred = predicate.pred;
+  if (typeof pred === "string") {
+    preds.add(predicateName(pred));
+  }
+
+  if (isRecord(predicate.predicate)) {
+    collectPredicatePreds(predicate.predicate, preds);
+  }
+
+  for (const nested of arrayOfRecords(predicate.predicates)) {
+    collectPredicatePreds(nested, preds);
+  }
+}
+
+function predicateReferencedClasses(record: Record<string, unknown>): string[] {
+  const classes = new Set<string>();
+  for (const predicate of predicateRecords(record)) {
+    collectPredicateReferencedClasses(predicate, classes);
+  }
+  return uniqueSortedStrings([...classes]);
+}
+
+function collectPredicateReferencedClasses(predicate: Record<string, unknown>, classes: Set<string>): void {
+  for (const field of ["record_class", "holder_role", "kind"]) {
+    const value = predicate[field];
+    if (typeof value === "string" && value.trim().length > 0) {
+      classes.add(value.trim());
+    }
+  }
+
+  if (isRecord(predicate.predicate)) {
+    collectPredicateReferencedClasses(predicate.predicate, classes);
+  }
+
+  for (const nested of arrayOfRecords(predicate.predicates)) {
+    collectPredicateReferencedClasses(nested, classes);
+  }
+}
+
+function predicateRecords(record: Record<string, unknown>): Array<Record<string, unknown>> {
+  return [
+    ...recordArrayField(record, "hard", ["preconditions"]),
+    ...recordArrayField(record, "soft", ["preconditions"])
+  ];
+}
+
+function predicateName(pred: string): string {
+  const match = /^([A-Za-z_][A-Za-z0-9_]*)/.exec(pred.trim());
+  return match?.[1] ?? pred.trim();
+}
+
+function uniqueSortedStrings(values: string[]): string[] {
+  return [...new Set(values.filter((value) => value.trim().length > 0).map((value) => value.trim()))].sort(
+    (left, right) => left.localeCompare(right, "en-US")
+  );
 }
 
 function collectStoryRefsFromPredicateRecord(item: Record<string, unknown>, refs: Set<string>): void {
