@@ -18,4 +18,4 @@ This snapshot archives the completed SPEC-78 row from `specs/IMPLEMENTATION-ORDE
 | Order | Spec | Depends on |
 |---|---|---|
 | 1 | [`SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) | SPEC-78 archived; SPEC-76 later implemented and archived |
-| 2 | [`SPEC-77-slt-grounding-provenance-minimal.md`](../../specs/SPEC-77-slt-grounding-provenance-minimal.md) | SPEC-76 |
+| 2 | [`SPEC-77-slt-grounding-provenance-minimal.md`](SPEC-77-slt-grounding-provenance-minimal.md) | SPEC-76; later implemented and archived |

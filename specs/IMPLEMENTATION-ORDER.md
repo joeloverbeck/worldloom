@@ -1,16 +1,17 @@
 # Implementation Order
 
-**Last updated:** 2026-05-23
+**Last updated:** 2026-05-24
 **Source brainstorm:** `reports/slt-chc-overhaul-first-iteration.md` triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`.
 
 This file sequences the live specs under `specs/`. Each row records the spec, the change shape, dependency, and gating risk. Once a spec ships, its row is archived alongside the spec file at `archive/specs/IMPLEMENTATION-ORDER-<date>.md`.
+
+All specs from this triage sequence are completed and archived as of 2026-05-24. The final snapshot is `archive/specs/IMPLEMENTATION-ORDER-2026-05-24.md`.
 
 ## Active sequence
 
 | Order | Spec | Change shape | Depends on | Notes / gating risk |
 |---|---|---|---|---|
-| 1 | [`SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) | COMPLETED 2026-05-23. Schema (`story-event.schema.json` — collapse `event_kind`, add `turn_driver` object, extend `selection_source`); shared story-state-contract §4 / §7 / §8; turn-cycle skill Phase 0; bootstrap; health-audit; 4 new validators; page-plan §7a + active-pressure handling discipline; Red Kiln Ambush capstone | [`SPEC-78`](../archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md) (FOUNDATIONS principles SPEC-76 cites are now landed and archived) | Archived after `archive/tickets/SPEC76TURDRIPRI-001.md` through `archive/tickets/SPEC76TURDRIPRI-011.md`; final `cd tools/validators && npm test` passed 1001 tests. |
-| 2 | [`SPEC-77-slt-grounding-provenance-minimal.md`](SPEC-77-slt-grounding-provenance-minimal.md) | Schema (`story-storylet.schema.json` — required `grounding.compatible_turn_drivers[]` + `reason_to_exist`); shared-record-schemas §4.4 SLT subsection (`story-record-schemas.md`); commitment-block-authoring skill Phase 4; 1 new validator (`slt_grounding_minimal_integrity`); turn-cycle Phase 2.1 compatible-driver filter (standalone slice — SPEC-76 archived) | SPEC-76 | `compatible_turn_drivers[]` enum values come from SPEC-76's `turn_driver.kind`. |
+| - | No active specs remain. | - | - | SPEC-76, SPEC-77, and SPEC-78 are archived. |
 
 ## Dependency rationale
 

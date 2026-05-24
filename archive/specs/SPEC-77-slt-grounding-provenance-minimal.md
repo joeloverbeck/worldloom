@@ -1,8 +1,8 @@
 # SPEC-77 — Minimal SLT Grounding Provenance
 
-**Status:** Draft (proposed 2026-05-23)
+**Status:** COMPLETED 2026-05-24
 **Spec ID:** SPEC-77
-**Depends on:** [SPEC-76](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the closed `turn_driver.kind` enum that `compatible_turn_drivers[]` references)
+**Depends on:** [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the closed `turn_driver.kind` enum that `compatible_turn_drivers[]` references)
 **Source report:** `reports/slt-chc-overhaul-first-iteration.md` (triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`)
 
 ## 1. Problem
@@ -210,4 +210,27 @@ Smaller than SPEC-76:
 - FOUNDATIONS §Story Bundles §5a / §5b / §5c: `docs/FOUNDATIONS.md:648-666`.
 - Existing schema: `tools/validators/src/schemas/story-storylet.schema.json`.
 - Existing skill: `.claude/skills/commitment-block-authoring/SKILL.md`.
-- Predecessor: [SPEC-76](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the `turn_driver.kind` enum that `compatible_turn_drivers[]` references).
+- Predecessor: [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the `turn_driver.kind` enum that `compatible_turn_drivers[]` references).
+
+## Outcome
+
+Completed 2026-05-24. SPEC-77 landed all four slices:
+
+- Slice A: `story-storylet.schema.json` now requires the minimal two-field `grounding` object; the shared SLT schema contract documents `grounding.compatible_turn_drivers[]` and `grounding.reason_to_exist`; validator fixtures were migrated; `slt-grounding-utils.ts` owns the banned-phrase list.
+- Slice B: `slt_grounding_minimal_integrity` is registered and enforces missing/empty/unknown driver values, short/generic reasons, and runtime-JIT singleton-length.
+- Slice C: `commitment-block-authoring` now requires SPEC-77 grounding at authoring time and mirrors the banned-phrase list from the utility.
+- Slice D: the turn-cycle Phase 2/3 reference now documents Phase 2.1 driver-kind compatibility filtering and the singleton-length versus singleton-value responsibility split.
+
+Verification completed at final archival:
+
+- `cd tools/validators && npm run build` — passed.
+- `cd tools/validators && node --test dist/tests/schemas/story-storylet-grounding.test.js` — passed, 6/6 tests.
+- `cd tools/validators && node --test dist/tests/structural/slt-grounding-minimal-integrity.test.js` — passed, 4/4 tests.
+- `cd tools/validators && node --test dist/tests/structural/registry.test.js` — passed.
+- `cd tools/world-mcp && npm run build` — passed.
+- `cd tools/world-mcp && node --test dist/tests/server/capability-parity.test.js` — passed, 5/5 tests.
+- `grep -nE 'compatible_turn_drivers|reason_to_exist|slt-grounding-utils' .claude/skills/commitment-block-authoring/SKILL.md` — passed.
+- `grep -nE 'Phase 2.1|compatible_turn_drivers|slt_grounding_runtime_jit' .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` — passed.
+- Node enum parity probes confirmed `story-event.schema.json` and `story-storylet.schema.json` share the same 8 driver kinds in order, and the Phase 2.1 reference lists them in that order.
+
+Deviation: the broad `cd tools/validators && npm test` lane was not used as final archival proof because SPEC77SLTGROPRO-002 documented existing Codex-runner wrapper noise outside this spec's owned seam. The final archival proof used the focused schema, structural-validator, registry, and downstream parity lanes that exercise the landed SPEC-77 surfaces directly.
