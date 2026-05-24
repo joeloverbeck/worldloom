@@ -55,7 +55,7 @@ The gap-diagnostic discussion now names projection columns/edges (`move_family`,
 - Phase 2.1 wiring for `branching-story-turn-cycle` — landed in archive/tickets/SPEC81INDSTOCAN-003.md.
 - Context-packet shortlist embedding — landed in archive/tickets/SPEC81INDSTOCAN-005.md.
 - Coverage-diagnostic algorithm changes (SPEC-80 territory) — the algorithm reads the same data, just via a different retrieval mechanism.
-- End-to-end commitment-block-authoring test against 1000-SLT pool (§9.5) — owned by active `tickets/SPEC81INDSTOCAN-006.md`.
+- End-to-end commitment-block-authoring test against 1000-SLT pool (§9.5) — landed in `archive/tickets/SPEC81INDSTOCAN-006.md`.
 
 ## Acceptance Criteria
 
@@ -106,4 +106,4 @@ PASS — `git diff --check -- .claude/skills/commitment-block-authoring/SKILL.md
 
 The drafted ticket incorrectly described `audit_repair` as part of the full-body SLT pool load; live reassessment showed `audit_repair` loads audit + RSP cards. The implementation updates only the `direct_batch` pool-retrieval path.
 
-The capstone end-to-end dry-runs remain owned by active `tickets/SPEC81INDSTOCAN-006.md`; this ticket used manual skill-prose review and grep proof, which is the truthful boundary for a documentation-only skill wiring change.
+The capstone end-to-end dry-runs landed in `archive/tickets/SPEC81INDSTOCAN-006.md`; this ticket used manual skill-prose review and grep proof, which is the truthful boundary for a documentation-only skill wiring change.
