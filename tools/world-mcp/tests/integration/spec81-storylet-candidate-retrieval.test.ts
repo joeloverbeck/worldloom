@@ -55,7 +55,7 @@ function worldNode(recordId: string, nodeType: NodeType, body: string, filePath:
 }
 
 function storyletId(index: number): string {
-  return `SLT-${index.toString().padStart(4, "0")}`;
+  return `SLT-${index}`;
 }
 
 function storyletBody(id: string, fields: {
@@ -227,7 +227,7 @@ function buildGeneratedPoolWorld(root: string): { storyletIds: string[] } {
 
 function buildHandCountedWorld(root: string): void {
   const storyletIds = Array.from({ length: 100 }, (_, index) => storyletId(index + 1));
-  const selectedCooldownIds = new Set(["SLT-0009", "SLT-0010"]);
+  const selectedCooldownIds = new Set(["SLT-9", "SLT-10"]);
 
   seedWorld(root, {
     worldSlug: WORLD,
@@ -239,7 +239,7 @@ function buildHandCountedWorld(root: string): void {
         [
           "id: SE-1",
           "commitment:",
-          "  selected_slt_id: SLT-0009",
+          "  selected_slt_id: SLT-9",
           ""
         ].join("\n"),
         "events"
@@ -250,7 +250,7 @@ function buildHandCountedWorld(root: string): void {
         [
           "id: SE-2",
           "commitment:",
-          "  selected_slt_id: SLT-0010",
+          "  selected_slt_id: SLT-10",
           ""
         ].join("\n"),
         "events"
