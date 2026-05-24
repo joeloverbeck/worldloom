@@ -183,6 +183,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "slt_created_at_page_origin_consistency"
     );
     assert.equal(sltCreatedAtPageExecution?.status, "skipped");
+    const sltGroundingMinimalExecution = result.executions.find(
+      (execution) => execution.name === "slt_grounding_minimal_integrity"
+    );
+    assert.equal(sltGroundingMinimalExecution?.status, "skipped");
     const canonDriftEvidenceExecution = result.executions.find(
       (execution) => execution.name === "canon_drift_classification_evidence"
     );
@@ -359,6 +363,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== auditOnlyExecution &&
         row !== causalDependencyExecution &&
         row !== sltCreatedAtPageExecution &&
+        row !== sltGroundingMinimalExecution &&
         row !== canonDriftEvidenceExecution &&
         row !== canonBaselineDriftExecution &&
         row !== expectedWitnessExecution &&
