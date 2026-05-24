@@ -123,5 +123,6 @@ A reassessment-time read of `.claude/skills/branching-story-bootstrap/references
 ## §7 Implementation Notes
 
 - The two repairs are independent and small; ship together or separately as convenient. §3.1 has two parallel sites (helper + test fixture) that MUST land in the same commit — the helper edit without the fixture update breaks the consumer test; the fixture update without the helper edit is a no-op that diverges fixture intent from helper behavior.
+- SPEC82REMSCHDRI-001 implementation also corrected the `active-pressure-handling-discipline.test.ts` STQ fixture path from `_source/questions/STQ-1.yaml` to `_source/story-questions/STQ-1.yaml`, matching the live `story_question_record` structural authority path. This was same-seam proof fallout: without it, the positive STQ fixture could pass through the missing-record fallback instead of exercising the parsed STQ predicate.
 - §3.2's Phase 6 amendment scope was determined at reassessment time (see §3.2 preamble): Phase 6 does not currently prescribe SPEC-77's grounding fields, so the Phase 6 reference file IS extended as part of this spec — not just the SKILL.md stale comment.
 - This is the smallest spec in the iteration-2 family and is sequenced first in `IMPLEMENTATION-ORDER.md` for that reason — it carries near-zero risk and unblocks reviewer confidence in the larger SPEC-79 / SPEC-81 work.
