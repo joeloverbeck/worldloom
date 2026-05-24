@@ -1319,6 +1319,16 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type, [
       ...SUPPORTED_LIST_RECORD_TYPES
     ]);
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.select_storylet_candidates)?.input_schema_enums?.["turn_driver.kind"], [
+      "player_action",
+      "player_write_in",
+      "npc_action",
+      "offstage_action",
+      "world_pressure",
+      "clock_fire",
+      "secret_reveal",
+      "multi_actor_collision"
+    ]);
     assert.ok(
       byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type?.includes("storylet_record")
     );

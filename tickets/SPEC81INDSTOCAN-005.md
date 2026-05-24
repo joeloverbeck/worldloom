@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/world-mcp/src/context-packet/story-bundle-context.ts`. No impact on other context-packet layers.
-**Deps**: SPEC81INDSTOCAN-002
+**Deps**: archive/tickets/SPEC81INDSTOCAN-002.md
 
 ## Problem
 

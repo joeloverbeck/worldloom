@@ -1,6 +1,6 @@
 # SPEC81INDSTOCAN-002: New MCP tool `select_storylet_candidates` + docs
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — new MCP tool in `tools/world-mcp/`; new registration site in `server.ts`; documentation updates in `tools/world-mcp/README.md` and `docs/MACHINE-FACING-LAYER.md`. No impact on existing MCP tools.
@@ -18,6 +18,7 @@ With SPEC81INDSTOCAN-001's projection columns and edges in place, consumers need
 4. FOUNDATIONS §Tooling Recommendation (the canonical *context-packet + targeted-retrieval pattern* applied to SLT pools that exceed the packet's full-body envelope) + §Story Bundles §6b (Information / Observer Firewall — the new tool operates over fully-derived indexed columns and does NOT introspect hidden state; full predicate evaluation including the firewall remains in the existing turn-cycle Phase 2 evaluator running on the shortlist).
 5. HARD-GATE: MCP retrieval surface + Mystery Reserve firewall preservation. The mystery-policy filter (§4.4 step 8) is a coarse pre-filter using projected `mystery_policy.allowed_authority`; full MR firewall enforcement (forbidden-mystery prevention) continues in the existing turn-cycle Phase 2 evaluator on the shortlist. The tool's response payload contains no canon-write authority; it is purely a read.
 6. Adds new MCP tool name `mcp__worldloom__select_storylet_candidates` to `MCP_TOOL_NAMES` and `MCP_TOOL_ORDER`; the addition is additive to the existing 24-tool registry.
+7. Live package test fixture helper `tools/world-mcp/tests/tools/_shared.ts` writes `index_version.txt` at `CURRENT_INDEX_VERSION` but currently applies only migrations 001-004. This was harmless for existing tests because they did not query version-7 `slt_projections`; this ticket's handler tests do. Same-seam correction: update the helper to apply every migration through the current version before inserting seeded rows, so package-local tests exercise the same derived-index schema that `world-index build` creates.
 
 ## Architecture Check
 
@@ -27,8 +28,8 @@ With SPEC81INDSTOCAN-001's projection columns and edges in place, consumers need
 ## Verification Layers
 
 1. New tool registered in `MCP_TOOL_NAMES`, `MCP_TOOL_ORDER`, and `server.ts` → codebase grep-proof (`grep -n select_storylet_candidates tools/world-mcp/src/tool-names.ts tools/world-mcp/src/server.ts` returns ≥3 hits).
-2. Tool's 11-step filter pipeline produces exact filter-trace counts on hand-crafted fixtures → schema validation + unit tests covering §9.3 (filter-trace counts match hand-counted values for a 100-SLT bundle).
-3. Tool's response shape never contains full SLT bodies → codebase grep-proof (`grep -n 'body\|full_body\|record.body' tools/world-mcp/src/tools/select-storylet-candidates.ts` shows no production code path emits a body field; only `requires_full_body_ids[]` for consumer-side retrieval).
+2. Tool's 11-step filter pipeline produces exact filter-trace counts on hand-crafted fixtures → schema validation + unit tests covering the ticket-level hand-counted fixture.
+3. Tool's response shape never contains full SLT bodies → response-shape test asserts `shortlisted_projection_records[]` has no `body` or `full_body` field. The handler legitimately parses parent page and story-event record bodies internally for state/cooldown, so broad `body` grep is not a valid proof for this invariant.
 4. Observer firewall preservation → FOUNDATIONS alignment check (§Story Bundles §6b — confirm the tool's documentation explicitly states the firewall is preserved at the shortlist evaluator and that the pre-filter operates over derived columns).
 5. Docs surfaces updated → codebase grep-proof (`grep -n select_storylet_candidates tools/world-mcp/README.md docs/MACHINE-FACING-LAYER.md` returns ≥2 hits).
 
@@ -87,6 +88,9 @@ Integration-level §9.3 filter-trace count test on a 100-SLT bundle moves to the
 - `tools/world-mcp/README.md` (modify)
 - `docs/MACHINE-FACING-LAYER.md` (modify)
 - `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts` (new)
+- `tools/world-mcp/tests/tools/_shared.ts` (modify — fixture DB helper applies current migrations including `slt_projections`)
+- `tools/world-mcp/tests/server/dispatch.test.ts` (modify — capability enum exposure)
+- `tools/world-mcp/tests/server/list-tools.test.ts` (modify — registered-tool inventory count)
 
 ## Out of Scope
 
@@ -116,8 +120,33 @@ Integration-level §9.3 filter-trace count test on a 100-SLT bundle moves to the
 ### New/Modified Tests
 
 1. `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts` (new) — covers input-shape validation, per-stage filter-trace counts on hand-crafted small bundles, mystery-policy per-value semantics, source-record-id filter combination, response-shape invariants (no full bodies).
+2. `tools/world-mcp/tests/tools/_shared.ts` (modify) — keeps seeded package-local fixture databases schema-current for the new projection table.
+3. `tools/world-mcp/tests/server/dispatch.test.ts` (modify) — asserts `describe_capabilities` exposes the `turn_driver.kind` enum for the new tool.
+4. `tools/world-mcp/tests/server/list-tools.test.ts` (modify) — keeps the exact MCP tool inventory count current at 25.
 
 ### Commands
 
 1. `cd tools/world-mcp && npm test` — runs all world-mcp tests including the new tool's unit tests.
 2. `cd tools/world-mcp && npm run build` — confirms TypeScript compiles cleanly with the new tool registration.
+
+## Outcome
+
+Implemented `mcp__worldloom__select_storylet_candidates` as a projection-only `tools/world-mcp` read tool over `slt_projections` and storylet edge projections. The handler applies story scope, branch visibility, driver kind, optional action family, predicate shape/class, source-record-id, mystery-policy, cooldown, and salience/diversity ranking before returning `filter_trace`, `shortlisted_candidate_ids`, compact `shortlisted_projection_records`, and `requires_full_body_ids`.
+
+Registered the tool in `MCP_TOOL_NAMES`, `MCP_TOOL_ORDER`, and `server.ts`; exposed the `turn_driver.kind` enum through capabilities; updated the exact tool inventory from 24 to 25; and documented the retrieval surface in `tools/world-mcp/README.md` and `docs/MACHINE-FACING-LAYER.md`.
+
+The same-seam fixture helper correction landed in `tools/world-mcp/tests/tools/_shared.ts`: seeded package-local index databases now apply all migrations through `CURRENT_INDEX_VERSION`, so tests exercise the live `slt_projections` schema before inserting projection rows.
+
+## Verification Result
+
+PASS — `cd tools/world-mcp && npm run build`
+
+PASS — `cd tools/world-mcp && npm test` (`437` passing tests, `0` failures)
+
+PASS — `rg -n "select_storylet_candidates|mcp__worldloom__select_storylet_candidates|turn_driver.kind" tools/world-mcp/src/tool-names.ts tools/world-mcp/src/server.ts tools/world-mcp/README.md docs/MACHINE-FACING-LAYER.md tools/world-mcp/tests/server/dispatch.test.ts`
+
+PASS — `git diff --check`
+
+## Deviations
+
+The ticket's planned broad grep proof for "no full SLT bodies" was replaced with a response-shape test because the implementation must parse the parent page body and story-event bodies to derive branch state and cooldown history. The externally observable invariant remains enforced: `shortlisted_projection_records[]` contains projection fields only and the consumer follows `requires_full_body_ids[]` for deliberate full-body retrieval.

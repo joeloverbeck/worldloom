@@ -31,6 +31,10 @@ import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get
 import { getStoryStateProvenance } from "./tools/get-story-state-provenance.js";
 import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records.js";
 import { searchNodes } from "./tools/search-nodes.js";
+import {
+  selectStoryletCandidates,
+  TURN_DRIVER_KINDS
+} from "./tools/select-storylet-candidates.js";
 import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan.js";
 import { validatePatchPlan } from "./tools/validate-patch-plan.js";
 import { verifyPgStateHash } from "./tools/verify-pg-state-hash.js";
@@ -159,6 +163,26 @@ const listRecordsInputSchema = z.object({
   fields: z.array(z.string().min(1)).optional(),
   include_full_body: z.boolean().optional(),
   filters: z.record(z.string().min(1), listRecordFilterValueSchema).optional()
+});
+
+const selectStoryletCandidatesInputSchema = z.object({
+  world_slug: z.string().min(1),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN),
+  parent_page_id: z.string().regex(/^PG-\d+$/),
+  turn_driver: z.object({
+    kind: z.enum(TURN_DRIVER_KINDS),
+    initiator: z.string().min(1).nullable().optional(),
+    driver_records: z.array(z.string().min(1))
+  }),
+  intent_signature: z
+    .object({
+      action_families: z.array(z.string().min(1)).optional(),
+      grounding_record_classes: z.array(z.string().min(1)).optional(),
+      grounding_record_ids: z.array(z.string().min(1)).optional()
+    })
+    .optional(),
+  max_candidates: z.number().int().min(1).default(24),
+  include_rejection_summary: z.boolean().default(true)
 });
 
 const getRecordFieldInputSchema = z.object({
@@ -406,6 +430,14 @@ export function createServer(): McpServer {
     listRecordsInputSchema,
     async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0]),
     { record_type: SUPPORTED_LIST_RECORD_TYPES }
+  );
+  registerToolWithCapability(
+    "select_storylet_candidates",
+    "select_storylet_candidates: Return a projection-only storylet shortlist for a parent page and turn driver from indexed SLT projection columns and edges. The response includes filter_trace counts, shortlisted_candidate_ids, compact projection records, and requires_full_body_ids for follow-up get_records calls; it never returns full SLT bodies.",
+    selectStoryletCandidatesInputSchema,
+    async (args) =>
+      selectStoryletCandidates(args as unknown as Parameters<typeof selectStoryletCandidates>[0]),
+    { "turn_driver.kind": TURN_DRIVER_KINDS }
   );
   registerToolWithCapability(
     "get_record_field",

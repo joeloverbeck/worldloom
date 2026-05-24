@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-turn-cycle/SKILL.md` and `references/phase-2-3-commitment-and-state-delta.md`. No impact on the skill's other phases.
-**Deps**: SPEC81INDSTOCAN-002
+**Deps**: archive/tickets/SPEC81INDSTOCAN-002.md
 
 ## Problem
 

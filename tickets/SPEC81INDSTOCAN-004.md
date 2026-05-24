@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `.claude/skills/commitment-block-authoring/SKILL.md`. No impact on the skill's other phases.
-**Deps**: SPEC81INDSTOCAN-002
+**Deps**: archive/tickets/SPEC81INDSTOCAN-002.md
 
 ## Problem
 
