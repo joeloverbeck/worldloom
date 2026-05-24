@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
@@ -94,6 +94,21 @@ interface SeedValidationResultInput {
   created_at?: string;
 }
 
+interface SeedSltProjectionInput {
+  node_id: string;
+  world_slug: string;
+  story_slug: string;
+  slt_scope_visibility?: string | null;
+  slt_scope_branch_id?: string | null;
+  slt_scope_branch_path_prefix?: string | null;
+  slt_provenance_origin?: string | null;
+  slt_move_family?: string | null;
+  slt_saliency_urgency?: string | null;
+  slt_saliency_cooldown_pages?: number | null;
+  slt_mystery_policy_allowed_authority?: string | null;
+  candidate_projection_hash?: string;
+}
+
 export interface SeedWorldInput {
   worldSlug: string;
   nodes: SeedNodeInput[];
@@ -105,6 +120,7 @@ export interface SeedWorldInput {
   mentions?: SeedMentionInput[];
   anchors?: SeedAnchorInput[];
   validationResults?: SeedValidationResultInput[];
+  sltProjections?: SeedSltProjectionInput[];
 }
 
 export function createTempRepoRoot(): string {
@@ -155,10 +171,17 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
   const db = new Database(path.join(indexRoot, "world.db"));
 
   try {
-    db.exec(readFileSync(path.join(schemaRoot, "001_initial.sql"), "utf8"));
-    db.exec(readFileSync(path.join(schemaRoot, "002_scoped_references.sql"), "utf8"));
-    db.exec(readFileSync(path.join(schemaRoot, "003_approval_tokens_consumed.sql"), "utf8"));
-    db.exec(readFileSync(path.join(schemaRoot, "004_story_bundle_scope.sql"), "utf8"));
+    for (let version = 1; version <= CURRENT_INDEX_VERSION; version += 1) {
+      const prefix = `${version.toString().padStart(3, "0")}_`;
+      const migration = readFileSync(
+        path.join(
+          schemaRoot,
+          readdirSync(schemaRoot).find((entry) => entry.startsWith(prefix)) ?? ""
+        ),
+        "utf8"
+      );
+      db.exec(migration);
+    }
 
     for (const node of input.nodes) {
       const absolutePath = path.join(worldRoot, node.file_path);
@@ -386,6 +409,40 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
         result.line_range_start ?? null,
         result.line_range_end ?? null,
         result.created_at ?? "2026-04-23T00:00:00Z"
+      );
+    }
+
+    for (const projection of input.sltProjections ?? []) {
+      db.prepare(
+        `
+          INSERT INTO slt_projections (
+            node_id,
+            world_slug,
+            story_slug,
+            slt_scope_visibility,
+            slt_scope_branch_id,
+            slt_scope_branch_path_prefix,
+            slt_provenance_origin,
+            slt_move_family,
+            slt_saliency_urgency,
+            slt_saliency_cooldown_pages,
+            slt_mystery_policy_allowed_authority,
+            candidate_projection_hash
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `
+      ).run(
+        projection.node_id,
+        projection.world_slug,
+        projection.story_slug,
+        projection.slt_scope_visibility ?? null,
+        projection.slt_scope_branch_id ?? null,
+        projection.slt_scope_branch_path_prefix ?? null,
+        projection.slt_provenance_origin ?? null,
+        projection.slt_move_family ?? null,
+        projection.slt_saliency_urgency ?? null,
+        projection.slt_saliency_cooldown_pages ?? null,
+        projection.slt_mystery_policy_allowed_authority ?? null,
+        projection.candidate_projection_hash ?? hashValue(JSON.stringify(projection))
       );
     }
   } finally {

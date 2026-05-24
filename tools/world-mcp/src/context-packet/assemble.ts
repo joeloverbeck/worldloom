@@ -369,6 +369,7 @@ export async function assembleContextPacket(args: {
   token_budget: number;
   delivery_mode?: DeliveryMode;
   node_classes?: NodeType[];
+  parent_page_id?: string;
 }): Promise<ContextPacket | McpError> {
   const opened = openIndexDb(args.world_slug);
   if (!("db" in opened)) {
@@ -452,12 +453,24 @@ export async function assembleContextPacket(args: {
       deliveryMode,
       recordProjection
     );
-    packet.story_bundle_context =
+    if (
       isStoryPipelineTaskType(args.task_type) &&
       args.task_type !== "story_bootstrap" &&
       args.story_slug !== undefined
-        ? buildStoryBundleContext(opened.db, args.world_slug, args.story_slug)
-        : null;
+    ) {
+      const storyBundleContext = await buildStoryBundleContext(
+        opened.db,
+        args.world_slug,
+        args.story_slug,
+        args.parent_page_id === undefined ? {} : { parentPageId: args.parent_page_id }
+      );
+      if ("code" in storyBundleContext) {
+        return storyBundleContext;
+      }
+      packet.story_bundle_context = storyBundleContext;
+    } else {
+      packet.story_bundle_context = null;
+    }
     packet.impact_surfaces = await buildImpactSurfaces(
       opened.db,
       args.world_slug,

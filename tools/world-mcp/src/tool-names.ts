@@ -22,7 +22,8 @@ export const MCP_TOOL_NAMES = {
   allocate_next_id: "mcp__worldloom__allocate_next_id",
   get_firewall_content: "mcp__worldloom__get_firewall_content",
   describe_capabilities: "mcp__worldloom__describe_capabilities",
-  describe_envelope_schema: "mcp__worldloom__describe_envelope_schema"
+  describe_envelope_schema: "mcp__worldloom__describe_envelope_schema",
+  select_storylet_candidates: "mcp__worldloom__select_storylet_candidates"
 } as const;
 
 export type ToolKey = keyof typeof MCP_TOOL_NAMES;
@@ -52,5 +53,6 @@ export const MCP_TOOL_ORDER: McpToolName[] = [
   MCP_TOOL_NAMES.allocate_next_id,
   MCP_TOOL_NAMES.get_firewall_content,
   MCP_TOOL_NAMES.describe_capabilities,
-  MCP_TOOL_NAMES.describe_envelope_schema
+  MCP_TOOL_NAMES.describe_envelope_schema,
+  MCP_TOOL_NAMES.select_storylet_candidates
 ];

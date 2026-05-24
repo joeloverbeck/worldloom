@@ -4,7 +4,7 @@
 **Date:** 2026-05-24
 **Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
 **Status:** active
-**Depends on:** SPEC-81 (indexed candidate retrieval) for the projection-driven coverage diagnostics. Implementable against the existing `list_records(include_full_body=true)` path as a fallback while SPEC-81 lands.
+**Depends on:** `archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md` (indexed candidate retrieval) for the projection-driven coverage diagnostics. SPEC-81 is complete, so implementation should prefer the projection API; the existing `list_records(include_full_body=true)` path remains a fallback only where the projection API is unavailable.
 
 ## §1 Goal
 
@@ -94,7 +94,7 @@ These additions extend the existing cast-role coverage rule; they do not replace
 
 **File:** `.claude/skills/commitment-block-authoring/SKILL.md` Phase 1 (gap-diagnosis).
 
-**Addition:** Phase 1's current gap-diagnosis output enumerates move-family and causal-function gaps. Add per-axis coverage diagnostics for driver-kind and pressure-source-class using the §3 trigger maps applied to the CURRENT bundle state (loaded via the existing `list_records(... include_full_body=true)` path; SPEC-81 wires this to the indexed projection once landed).
+**Addition:** Phase 1's current gap-diagnosis output enumerates move-family and causal-function gaps. Add per-axis coverage diagnostics for driver-kind and pressure-source-class using the §3 trigger maps applied to the CURRENT bundle state (loaded via the SPEC-81 `select_storylet_candidates(max_candidates=pool_size)` projection path; use `list_records(... include_full_body=true)` only as a fallback if the projection API is unavailable).
 
 **Output shape** (additive to existing Phase 1 output):
 
@@ -151,7 +151,7 @@ None. The coverage diagnostics operate over existing SLT fields (`grounding.comp
 
 ## §9 Implementation Notes
 
-- The implementation can ship without SPEC-81 by reading the SLT pool via the existing `list_records(... include_full_body=true)` path. Coverage extraction over a 25-100-SLT pool is single-pass linear scan; performance is acceptable. Once SPEC-81 lands, swap the read path to the projection API in `select_storylet_candidates`; the diagnostic code is unchanged because the relevant fields (`grounding.compatible_turn_drivers[]`, `preconditions.hard[]`) are projected in SPEC-81.
+- SPEC-81 is complete and archived, so the preferred read path is `select_storylet_candidates(max_candidates=pool_size)`. The diagnostic code is unchanged because the relevant fields (`grounding.compatible_turn_drivers[]`, `preconditions.hard[]`) are projected by SPEC-81. The existing `list_records(... include_full_body=true)` path remains a fallback if the projection API is unavailable in a local operator context.
 - The trigger maps in §3.1 and §3.2 are closed enumerations tied to currently-landed FOUNDATIONS surfaces. If a future spec adds a new driver kind or active record class, this spec's trigger maps must be extended — list this dependency in any such future spec's "Affects" section.
 - The composition coverage at §3.3 is the strictest check; bundles with many active records will produce many composition pairs. The Phase 1 / Phase 2o output should be readable — emit at most the top-N gaps by triggering-record count if the gap list exceeds a presentation limit (suggest N=20).
-- This spec is implementable independently of SPEC-79 (CHC field removal) and SPEC-82 (drift repairs). It depends on SPEC-81 only for the projection-driven read path; the fallback path makes that dependency soft.
+- This spec is implementable independently of SPEC-79 (CHC field removal) and SPEC-82 (drift repairs). It depends on archived SPEC-81 only for the projection-driven read path; the fallback path makes that dependency soft.

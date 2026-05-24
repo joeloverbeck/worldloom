@@ -51,8 +51,10 @@ test("SLT records emit predicate, effect, and exit likely-effect edges without l
     writeStoryRecord(root, "harborwatch", "storylets", "SLT-3", [
       "id: SLT-3",
       "story_id: STORY-50",
+      "title: Ring the bell",
       "scope:",
       "  visibility: global_author_pool",
+      "move_family: disclosure",
       "preconditions:",
       "  hard:",
       "    - pred: any_plan_active(plan_axis, STPLAN-2)",
@@ -69,6 +71,10 @@ test("SLT records emit predicate, effect, and exit likely-effect edges without l
       "            record: STSEC-3",
       "  soft:",
       "    - pred: secret_unrevealed(STSEC-1)",
+      "beats:",
+      "  - beat_id: setup",
+      "    function: setup",
+      "    instruction: Surface the bell pressure.",
       "effects:",
       "  create:",
       "    - STQ-1",
@@ -87,7 +93,17 @@ test("SLT records emit predicate, effect, and exit likely-effect edges without l
       "opens_obligations: [OBL-2]",
       "pays_off_obligations: [OBL-3]",
       "complicates_obligations: [OBL-4]",
-      "transfers_obligations: [OBL-5]"
+      "transfers_obligations: [OBL-5]",
+      "saliency:",
+      "  urgency: medium",
+      "  cooldown_pages: 0",
+      "mystery_policy:",
+      "  allowed_authority: none",
+      "provenance:",
+      "  origin: manual_authoring",
+      "grounding:",
+      "  compatible_turn_drivers: [player_action]",
+      "  reason_to_exist: Keeps the bell pressure in the pool."
     ]);
 
     const parsed = parseStoryBundleSourceFile(
@@ -108,7 +124,16 @@ test("SLT records emit predicate, effect, and exit likely-effect edges without l
       edge("SLT-3", "STPLAN-3", "storylet_effect_ref"),
       edge("SLT-3", "CLK-1", "storylet_effect_ref"),
       edge("SLT-3", "STSEC-2", "storylet_exit_likely_effect_ref"),
-      edge("SLT-3", "OBL-1", "storylet_exit_likely_effect_ref")
+      edge("SLT-3", "OBL-1", "storylet_exit_likely_effect_ref"),
+      attributeEdge("SLT-3", "player_action", "storylet_compatible_driver"),
+      attributeEdge("SLT-3", "any", "storylet_predicate_pred"),
+      attributeEdge("SLT-3", "any_plan_active", "storylet_predicate_pred"),
+      attributeEdge("SLT-3", "emotion_active", "storylet_predicate_pred"),
+      attributeEdge("SLT-3", "not", "storylet_predicate_pred"),
+      attributeEdge("SLT-3", "obligation_open", "storylet_predicate_pred"),
+      attributeEdge("SLT-3", "record_active", "storylet_predicate_pred"),
+      attributeEdge("SLT-3", "secret_unrevealed", "storylet_predicate_pred"),
+      attributeEdge("SLT-3", "signal", "storylet_action_family")
     ]);
 
     const legacyEdgeTypes = new Set([

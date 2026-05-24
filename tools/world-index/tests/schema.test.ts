@@ -180,6 +180,7 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
           "nodes",
           "scoped_reference_aliases",
           "scoped_references",
+          "slt_projections",
           "sqlite_sequence",
           "summaries",
           "validation_results"
@@ -211,7 +212,10 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
           "idx_scoped_reference_alias_text",
           "idx_scoped_reference_alias_unique",
           "idx_scoped_references_name",
-          "idx_scoped_references_source"
+          "idx_scoped_references_source",
+          "idx_slt_projections_story_move",
+          "idx_slt_projections_story_saliency",
+          "idx_slt_projections_story_scope"
         ]
       );
 
@@ -231,6 +235,24 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
       assert.equal(edgeColumns.some((column) => column.name === "story_slug"), true);
       const mentionColumns = db.pragma("table_info(entity_mentions)") as Array<{ name: string }>;
       assert.equal(mentionColumns.some((column) => column.name === "story_slug"), true);
+      const sltProjectionColumns = db.pragma("table_info(slt_projections)") as Array<{ name: string }>;
+      assert.deepEqual(
+        sltProjectionColumns.map((column) => column.name),
+        [
+          "node_id",
+          "world_slug",
+          "story_slug",
+          "slt_scope_visibility",
+          "slt_scope_branch_id",
+          "slt_scope_branch_path_prefix",
+          "slt_provenance_origin",
+          "slt_move_family",
+          "slt_saliency_urgency",
+          "slt_saliency_cooldown_pages",
+          "slt_mystery_policy_allowed_authority",
+          "candidate_projection_hash"
+        ]
+      );
 
       const foreignKeys = db.pragma("foreign_keys", { simple: true }) as number;
       assert.equal(foreignKeys, 1);

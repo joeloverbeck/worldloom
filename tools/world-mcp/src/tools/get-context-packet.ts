@@ -25,10 +25,12 @@ export interface GetContextPacketArgs {
   token_budget?: number;
   delivery_mode?: DeliveryMode;
   node_classes?: NodeType[];
+  parent_page_id?: string;
 }
 
 const STORY_LOCAL_SEED_NODE_PATTERN =
   /^(?:(?:[a-z0-9-]+):)?(?:SF|BEL|SE|DA|OBL|CNSQ|THR|SREL|STINT|STENT|STSTAT|STLOC|STOBJ|CLK|STSEC|STQ|STPLAN|STEMO|BR|PG|CHC|SLT|SLB|SAU|SP|RSP)-\d+$/;
+const PARENT_PAGE_ID_PATTERN = /^(?:(?:[a-z0-9-]+):)?(PG-\d+)$/;
 const STORY_LOCAL_SEED_NODE_WARNING = "story_local_seed_nodes_ignored";
 const AUTHORING_PROPOSAL_SEED_NODE_PATTERN = /^(?:[a-z0-9-]+:)?(?:NCP|NCB)-\d+$/;
 const AUTHORING_PROPOSAL_SEED_NODE_WARNING = "authoring_proposal_seed_nodes_ignored";
@@ -61,6 +63,25 @@ function seedNodesForAssembly(args: GetContextPacketArgs): string[] {
       !STORY_LOCAL_SEED_NODE_PATTERN.test(seedNode) &&
       !AUTHORING_PROPOSAL_SEED_NODE_PATTERN.test(seedNode)
   );
+}
+
+function parentPageIdForAssembly(args: GetContextPacketArgs): string | undefined {
+  if (!isStoryPipelineTaskType(args.task_type)) {
+    return undefined;
+  }
+
+  if (args.parent_page_id !== undefined) {
+    return args.parent_page_id;
+  }
+
+  for (const seedNode of args.seed_nodes) {
+    const match = PARENT_PAGE_ID_PATTERN.exec(seedNode);
+    if (match !== null) {
+      return match[1];
+    }
+  }
+
+  return undefined;
 }
 
 function assertValidArgs(args: GetContextPacketArgs): void {
@@ -99,6 +120,10 @@ function assertValidArgs(args: GetContextPacketArgs): void {
       }
     }
   }
+
+  if (args.parent_page_id !== undefined && !/^PG-\d+$/.test(args.parent_page_id)) {
+    throw new Error("parent_page_id must use PG-<integer> format.");
+  }
 }
 
 async function getContextPacketImpl(
@@ -106,6 +131,7 @@ async function getContextPacketImpl(
 ): Promise<ContextPacket | McpError> {
   assertValidArgs(args);
   const seedNodes = seedNodesForAssembly(args);
+  const parentPageId = parentPageIdForAssembly(args);
 
   const result = await assembleContextPacket({
     task_type: args.task_type,
@@ -114,7 +140,8 @@ async function getContextPacketImpl(
     seed_nodes: seedNodes,
     token_budget: args.token_budget ?? DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE[args.task_type],
     delivery_mode: args.delivery_mode ?? DEFAULT_DELIVERY_MODE,
-    ...(args.node_classes === undefined ? {} : { node_classes: args.node_classes })
+    ...(args.node_classes === undefined ? {} : { node_classes: args.node_classes }),
+    ...(parentPageId === undefined ? {} : { parent_page_id: parentPageId })
   });
 
   if (!("code" in result)) {

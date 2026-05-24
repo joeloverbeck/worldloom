@@ -1,9 +1,9 @@
 {
-  "originating_spec": "archive/specs/SPEC-79-chc-associated-commitment-block-removal.md",
-  "archived_spec": "archive/specs/SPEC-79-chc-associated-commitment-block-removal.md",
-  "last_ticket": "archive/tickets/SPEC79CHCREM-011.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "53be33f24935c76d3a987d5d08e7213b4d019715",
+  "originating_spec": "archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md",
+  "archived_spec": "archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md",
+  "last_ticket": "archive/tickets/SPEC81INDSTOCAN-006.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "b62f4e3750d6a22568fd7aeeeb0fa303871395fd",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -12,7 +12,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean focused capstone proof; bootstrap/turn-cycle LLM dry-runs documented as manual runbook and not executed in Codex",
-  "dirty_state": "expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/",
+  "proof_state": "clean: tools/world-mcp build + focused capstone + npm test passed; tools/world-index build + npm test passed; stale-reference sweeps and git diff --check passed",
+  "dirty_state": "expected ignored artifacts: tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
   "updated_at": "2026-05-24"
 }

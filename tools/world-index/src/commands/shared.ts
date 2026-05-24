@@ -16,6 +16,7 @@ import {
   insertNodes,
   insertScopedReferenceAliases,
   insertScopedReferences,
+  insertSltProjections,
   insertValidationResults
 } from "../index/nodes.js";
 import { getFileVersion, listIndexedFiles, removeFileVersion, upsertFileVersion } from "../index/file-versions.js";
@@ -43,7 +44,7 @@ import {
   parseStoryBundleSourceFile
 } from "../parse/atomic.js";
 import type { AtomicSkippedRecord } from "../parse/atomic.js";
-import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types.js";
+import type { AnchorChecksumRow, EdgeRow, NodeRow, SltProjectionRow, ValidationResultRow } from "../schema/types.js";
 
 export const ENTITY_SOURCE_NODE_TYPES = new Set([
   "ontology_category",
@@ -88,6 +89,7 @@ export interface ParsedFileResult {
   contentHash: string;
   nodes: NodeRow[];
   edges: EdgeRow[];
+  sltProjections: SltProjectionRow[];
   validationResults: ValidationResultRow[];
   skippedRecords: AtomicSkippedRecord[];
   yamlBlockCount: number;
@@ -158,6 +160,7 @@ export function parseWorldFile(
     contentHash: sha256Hex(source),
     nodes: [...yamlNodes, ...proseNodes],
     edges,
+    sltProjections: [],
     validationResults: [...yamlIssues, ...normalizedSemanticIssues],
     skippedRecords: [],
     yamlBlockCount: yamlNodes.length,
@@ -275,6 +278,10 @@ export function insertParsedFile(db: Database.Database, worldSlug: string, parse
 
   if (parsed.edges.length > 0) {
     insertEdges(db, parsed.edges);
+  }
+
+  if (parsed.sltProjections.length > 0) {
+    insertSltProjections(db, parsed.sltProjections);
   }
 
   if (parsed.validationResults.length > 0) {

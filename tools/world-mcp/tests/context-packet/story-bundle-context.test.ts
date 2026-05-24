@@ -31,6 +31,7 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     assert.equal(result.task_header.story_slug, STORY_FIXTURE_SLUG);
     assert.ok(result.story_bundle_context !== null);
     assert.equal(result.story_bundle_context.story_slug, STORY_FIXTURE_SLUG);
+    assert.equal(result.story_bundle_context.selection_shortlist, null);
     assert.equal(result.story_bundle_context.storylet_pool_summary.total, 1);
     assert.equal(result.story_bundle_context.storylet_pool_summary.by_move_family.decision, 1);
     assert.equal(result.story_bundle_context.storylet_pool_summary.by_urgency.high, 1);
@@ -470,6 +471,73 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     assert.deepEqual(storyBundleContextSummary?.active_plan_holders, ["STENT-2"]);
     assert.deepEqual(storyBundleContextSummary?.active_emotion_ids, ["STEMO-1", "STEMO-2"]);
     assert.deepEqual(storyBundleContextSummary?.active_emotion_holders, ["STENT-2", "STENT-3"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("story-pipeline context packets include a projection-only selection shortlist when parent_page_id is supplied", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      assembleContextPacket({
+        task_type: "story_turn_cycle",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        seed_nodes: ["entity:marla-kern"],
+        parent_page_id: "PG-1",
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.ok(result.story_bundle_context !== null);
+    assert.deepEqual(
+      result.story_bundle_context.storylet_pool_summary.visible_records.map((record) => record.id),
+      ["SLT-21"]
+    );
+    assert.ok(result.story_bundle_context.selection_shortlist !== null);
+    assert.match(
+      result.story_bundle_context.selection_shortlist.label,
+      /candidates already filtered by driver-kind \+ active-class compatibility/
+    );
+    assert.equal(result.story_bundle_context.selection_shortlist.parent_page_id, "PG-1");
+    assert.equal(result.story_bundle_context.selection_shortlist.turn_driver_kind, "player_action");
+    assert.equal(result.story_bundle_context.selection_shortlist.max_candidates, 24);
+    assert.deepEqual(
+      result.story_bundle_context.selection_shortlist.shortlisted_candidate_ids,
+      ["SLT-21"]
+    );
+    assert.deepEqual(
+      result.story_bundle_context.selection_shortlist.shortlisted_projection_records.map((record) => ({
+        id: record.id,
+        move_family: record.move_family,
+        scope_visibility: record.scope_visibility,
+        saliency_urgency: record.saliency_urgency,
+        compatible_turn_drivers: record.compatible_turn_drivers
+      })),
+      [
+        {
+          id: "SLT-21",
+          move_family: "decision",
+          scope_visibility: "global_author_pool",
+          saliency_urgency: "high",
+          compatible_turn_drivers: ["player_action"]
+        }
+      ]
+    );
+    assert.equal(
+      result.story_bundle_context.selection_shortlist.shortlisted_projection_records.some(
+        (record) => "body" in record || "full_body" in record
+      ),
+      false
+    );
+    assert.deepEqual(result.story_bundle_context.selection_shortlist.requires_full_body_ids, [
+      "SLT-21"
+    ]);
   } finally {
     destroyTempRepoRoot(root);
   }

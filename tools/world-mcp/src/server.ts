@@ -31,6 +31,10 @@ import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get
 import { getStoryStateProvenance } from "./tools/get-story-state-provenance.js";
 import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records.js";
 import { searchNodes } from "./tools/search-nodes.js";
+import {
+  selectStoryletCandidates,
+  TURN_DRIVER_KINDS
+} from "./tools/select-storylet-candidates.js";
 import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan.js";
 import { validatePatchPlan } from "./tools/validate-patch-plan.js";
 import { verifyPgStateHash } from "./tools/verify-pg-state-hash.js";
@@ -161,6 +165,26 @@ const listRecordsInputSchema = z.object({
   filters: z.record(z.string().min(1), listRecordFilterValueSchema).optional()
 });
 
+const selectStoryletCandidatesInputSchema = z.object({
+  world_slug: z.string().min(1),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN),
+  parent_page_id: z.string().regex(/^PG-\d+$/),
+  turn_driver: z.object({
+    kind: z.enum(TURN_DRIVER_KINDS),
+    initiator: z.string().min(1).nullable().optional(),
+    driver_records: z.array(z.string().min(1))
+  }),
+  intent_signature: z
+    .object({
+      action_families: z.array(z.string().min(1)).optional(),
+      grounding_record_classes: z.array(z.string().min(1)).optional(),
+      grounding_record_ids: z.array(z.string().min(1)).optional()
+    })
+    .optional(),
+  max_candidates: z.number().int().min(1).default(24),
+  include_rejection_summary: z.boolean().default(true)
+});
+
 const getRecordFieldInputSchema = z.object({
   record_id: z.string().min(1),
   field_path: z.array(z.union([z.string(), z.number().int()])).min(1),
@@ -187,7 +211,8 @@ const getContextPacketInputSchema = z.object({
   seed_nodes: z.array(z.string().min(1)).min(1),
   token_budget: z.number().int().positive().optional(),
   delivery_mode: z.enum(DELIVERY_MODES).optional(),
-  node_classes: z.array(z.enum(NODE_TYPES)).optional()
+  node_classes: z.array(z.enum(NODE_TYPES)).optional(),
+  parent_page_id: z.string().regex(/^PG-\d+$/).optional()
 });
 
 const findImpactedFragmentsInputSchema = z.object({
@@ -408,6 +433,14 @@ export function createServer(): McpServer {
     { record_type: SUPPORTED_LIST_RECORD_TYPES }
   );
   registerToolWithCapability(
+    "select_storylet_candidates",
+    "select_storylet_candidates: Return a projection-only storylet shortlist for a parent page and turn driver from indexed SLT projection columns and edges. The response includes filter_trace counts, shortlisted_candidate_ids, compact projection records, and requires_full_body_ids for follow-up get_records calls; it never returns full SLT bodies.",
+    selectStoryletCandidatesInputSchema,
+    async (args) =>
+      selectStoryletCandidates(args as unknown as Parameters<typeof selectStoryletCandidates>[0]),
+    { "turn_driver.kind": TURN_DRIVER_KINDS }
+  );
+  registerToolWithCapability(
     "get_record_field",
     "get_record_field: Fetch one field from an atomic or story-bundle record without returning the full parsed record. Story-bundle ids require story_slug.",
     getRecordFieldInputSchema,
@@ -428,7 +461,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_context_packet",
-    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug. story_bootstrap treats it as the target bundle slug and returns story_bundle_context: null; other story-pipeline task types populate story_bundle_context from indexed story-bundle records plus STORY_KERNEL.md frontmatter, including active_intentions, active_statuses, active_beliefs_by_holder, active_relationships_by_participant, active_locations_in_scope, active_objects_in_scope, active_story_diegetic_artifacts, active_story_characters, active_actor_plans, and active_emotional_states. World-canon task types return story_bundle_context: null. Unresolvable seed_nodes are skipped and surfaced in task_header.warnings; all-unresolved seed sets still return seed-independent context with an aggregate warning.",
+    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug. story_bootstrap treats it as the target bundle slug and returns story_bundle_context: null; other story-pipeline task types populate story_bundle_context from indexed story-bundle records plus STORY_KERNEL.md frontmatter, including active_intentions, active_statuses, active_beliefs_by_holder, active_relationships_by_participant, active_locations_in_scope, active_objects_in_scope, active_story_diegetic_artifacts, active_story_characters, active_actor_plans, active_emotional_states, and a projection-only selection_shortlist when parent_page_id is supplied or a PG seed is present. World-canon task types return story_bundle_context: null. Unresolvable seed_nodes are skipped and surfaced in task_header.warnings; all-unresolved seed sets still return seed-independent context with an aggregate warning.",
     getContextPacketInputSchema,
     async (args) => getContextPacket(args as unknown as Parameters<typeof getContextPacket>[0]),
     { task_type: TASK_TYPES, delivery_mode: DELIVERY_MODES, node_classes: NODE_TYPES }

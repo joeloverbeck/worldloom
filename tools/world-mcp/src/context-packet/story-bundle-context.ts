@@ -5,6 +5,8 @@ import type Database from "better-sqlite3";
 import YAML from "yaml";
 
 import { resolveWorldDirectory } from "../db/index.js";
+import { type McpError } from "../errors.js";
+import { selectStoryletCandidates } from "../tools/select-storylet-candidates.js";
 
 import type {
   ContextPacketStoryBundleContext,
@@ -46,6 +48,9 @@ const OPEN_STORY_QUESTION_STATUSES = new Set(["open", "complicated", "inherited"
 const CURRENT_PLAN_STATUSES = new Set(["active", "blocked", "suspended", "revised"]);
 const CURRENT_EMOTION_STATUSES = new Set(["active", "suppressed", "dissociated"]);
 const MAX_VISIBLE_STORYLETS = 50;
+const STORY_BUNDLE_SHORTLIST_MAX_CANDIDATES = 24;
+const STORY_BUNDLE_SHORTLIST_LABEL =
+  "candidates already filtered by driver-kind + active-class compatibility per SPEC-81; full SLT bodies for the shortlist are retrievable via get_records(record_ids=requires_full_body_ids, story_slug=...).";
 const MAX_RECENT_BRANCH_PAGES = 10;
 const STORY_RECORD_ID_REGEX = /\b(?:STENT|STCHAR|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|DA|STPLAN|STEMO)-[A-Za-z0-9-]+\b/g;
 const ROLE_IN_STORY_VALUES = new Set<RoleInStory>([
@@ -799,11 +804,14 @@ export function summarizeStoryBundleContext(
   };
 }
 
-export function buildStoryBundleContext(
+export async function buildStoryBundleContext(
   db: Database.Database,
   worldSlug: string,
-  storySlug: string
-): ContextPacketStoryBundleContext {
+  storySlug: string,
+  options: {
+    parentPageId?: string;
+  } = {}
+): Promise<ContextPacketStoryBundleContext | McpError> {
   const storyletRows = rowsForNodeType(db, worldSlug, storySlug, "storylet_record");
   const obligationRows = rowsForNodeType(db, worldSlug, storySlug, "obligation_record");
   const intentionRows = rowsForNodeType(db, worldSlug, storySlug, "intention_record");
@@ -824,9 +832,42 @@ export function buildStoryBundleContext(
   const allStoryRows = rowsForStory(db, worldSlug, storySlug);
   const frontmatter = parseStoryKernelFrontmatter(worldSlug, storySlug);
   const branchContext = buildBranchContext(pageRows);
+  const selectionShortlist =
+    options.parentPageId === undefined
+      ? null
+      : await selectStoryletCandidates({
+          world_slug: worldSlug,
+          story_slug: storySlug,
+          parent_page_id: options.parentPageId,
+          turn_driver: {
+            kind: "player_action",
+            initiator: null,
+            driver_records: []
+          },
+          max_candidates: STORY_BUNDLE_SHORTLIST_MAX_CANDIDATES,
+          include_rejection_summary: true
+        });
+
+  if (selectionShortlist !== null && "code" in selectionShortlist) {
+    return selectionShortlist;
+  }
 
   return {
     story_slug: storySlug,
+    selection_shortlist:
+      selectionShortlist === null
+        ? null
+        : {
+            label: STORY_BUNDLE_SHORTLIST_LABEL,
+            parent_page_id: options.parentPageId!,
+            turn_driver_kind: "player_action",
+            max_candidates: STORY_BUNDLE_SHORTLIST_MAX_CANDIDATES,
+            candidate_projection_hash: selectionShortlist.candidate_projection_hash,
+            filter_trace: selectionShortlist.filter_trace,
+            shortlisted_candidate_ids: selectionShortlist.shortlisted_candidate_ids,
+            shortlisted_projection_records: selectionShortlist.shortlisted_projection_records,
+            requires_full_body_ids: selectionShortlist.requires_full_body_ids
+          },
     storylet_pool_summary: buildStoryletPoolSummary(storyletRows),
     open_obligations: buildOpenObligations(obligationRows),
     active_intentions: buildActiveIntentions(intentionRows),

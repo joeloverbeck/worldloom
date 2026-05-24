@@ -5,20 +5,18 @@
 
 This file sequences the live specs under `specs/`. Each row records the spec, the change shape, dependency, and gating risk. Once a spec ships, its row is archived alongside the spec file at `archive/specs/IMPLEMENTATION-ORDER-<date>.md`.
 
-**Completed sequence rows:** SPEC-82 shipped on 2026-05-24 and is archived at `archive/specs/SPEC-82-remaining-schema-drift-repairs.md`; its completed row is archived at `archive/specs/IMPLEMENTATION-ORDER-2026-05-24-3.md`.
+**Completed sequence rows:** SPEC-82 shipped on 2026-05-24 and is archived at `archive/specs/SPEC-82-remaining-schema-drift-repairs.md`; its completed row is archived at `archive/specs/IMPLEMENTATION-ORDER-2026-05-24-3.md`. SPEC-81 shipped on 2026-05-24 and is archived at `archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md`; its completed row is archived at `archive/specs/IMPLEMENTATION-ORDER-2026-05-24-4.md`.
 
 ## Active sequence
 
 | Order | Spec | Change shape | Depends on | Notes / gating risk |
 |---|---|---|---|---|
-| 1 | [`SPEC-79`](../archive/specs/SPEC-79-chc-associated-commitment-block-removal.md) | COMPLETED 2026-05-24: removed `CHC.associated_commitment_block`; switched validator to `PG.input.choice_id` resolution; updated bootstrap, turn-cycle, Red Kiln fixture | — | Archived. Atomic landing completed across schema + validator + bootstrap + turn-cycle + fixtures + contract. No production stories exist (per the iteration-2 user redirection); zero migration burden outside in-repo fixtures. Operationalizes branch-safe live-global-pool semantics as the unconditional default. |
-| 2 | [`SPEC-81`](SPEC-81-indexed-storylet-candidate-retrieval.md) | New MCP tool `select_storylet_candidates`; SLT projection columns + edges in world-index; turn-cycle Phase 2.1 + commitment-block-authoring Phase 1 + story_bundle_context wiring | — | Infrastructure spec. The largest of the remaining specs (estimated 3,000-5,000 LOC). Independent of completed SPEC-79 in mechanics. Unblocks SPEC-80 once Phase 2 (the MCP tool itself) lands. |
-| 3 | [`SPEC-80`](SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md) | Authoring-time driver-kind × pressure-source-class coverage diagnostic in bootstrap Phase 6 + commitment-block-authoring Phase 1 + optional health-audit Phase 2o | SPEC-81 (soft) | Closes the iteration-1 reactivity loop at the pool-coverage layer (the upstream cause that SPEC-76's active-pressure handling discipline could only mitigate downstream). Can implement against existing `list_records(include_full_body=true)` path before SPEC-81 Phase 2 lands; swap to projection API once available without changing diagnostic code. |
+| 1 | [`SPEC-80`](SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md) | Authoring-time driver-kind × pressure-source-class coverage diagnostic in bootstrap Phase 6 + commitment-block-authoring Phase 1 + optional health-audit Phase 2o | archived SPEC-81 (soft) | Closes the iteration-1 reactivity loop at the pool-coverage layer (the upstream cause that SPEC-76's active-pressure handling discipline could only mitigate downstream). Prefer SPEC-81 projection API; fallback to `list_records(include_full_body=true)` only if projection access is unavailable. |
 
 ## Dependency rationale
 
-- **SPEC-79 is complete and archived.** The remaining recommended order is **SPEC-81 → SPEC-80**. SPEC-81 is infrastructure that SPEC-80 leverages; SPEC-81 can ship without SPEC-80 (the new MCP tool benefits turn-cycle Phase 2 immediately), but SPEC-80 benefits from SPEC-81's projection API even though it can ship against the fallback path.
-- **SPEC-80 has a soft dependency on SPEC-81**. SPEC-80's coverage diagnostic operates against SLT projection records; without SPEC-81, the diagnostic reads via `list_records(include_full_body=true)` (the existing path). SPEC-80 documents this dual-path discipline in its §9 Implementation Notes.
+- **SPEC-79 and SPEC-81 are complete and archived.** The remaining recommended next spec is **SPEC-80**.
+- **SPEC-80 has a soft dependency on archived SPEC-81**. SPEC-80's coverage diagnostic operates against SLT projection records through `select_storylet_candidates(max_candidates=pool_size)`, while retaining `list_records(include_full_body=true)` as a fallback path when projection access is unavailable.
 
 ## Out of scope for this implementation pass
 

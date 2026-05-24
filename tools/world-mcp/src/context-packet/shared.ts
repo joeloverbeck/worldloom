@@ -16,6 +16,7 @@ export interface ContextPacketArgs {
   token_budget: number;
   delivery_mode?: DeliveryMode;
   node_classes?: NodeType[];
+  parent_page_id?: string;
 }
 
 export interface ContextPacketNode {
@@ -108,6 +109,35 @@ export type RoleInStory =
 
 export interface ContextPacketStoryBundleContext {
   story_slug: string;
+  selection_shortlist: {
+    label: string;
+    parent_page_id: string;
+    turn_driver_kind: string;
+    max_candidates: number;
+    candidate_projection_hash: string;
+    filter_trace: {
+      pool_total: number;
+      after_scope: number;
+      after_driver_kind: number;
+      after_action_family: number;
+      after_predicate_shape: number;
+      after_predicate_class: number;
+      after_source_record_id: number;
+      after_mystery_policy: number;
+      after_cooldown: number;
+    };
+    shortlisted_candidate_ids: string[];
+    shortlisted_projection_records: Array<{
+      id: string;
+      move_family: string | null;
+      scope_visibility: string | null;
+      saliency_urgency: string | null;
+      compatible_turn_drivers: string[];
+      predicate_classes: string[];
+      action_families: string[];
+    }>;
+    requires_full_body_ids: string[];
+  } | null;
   storylet_pool_summary: {
     total: number;
     visibility_filtered_count: number;

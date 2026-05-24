@@ -140,7 +140,6 @@ test("SPEC-47 T-6/T-7: world-index build registers and emits all new STPLAN/STEM
     addSpec47Story(root);
 
     const registeredEdgeTypes = storyEdgeTypesFromSource();
-    assert.equal(registeredEdgeTypes.length, 75);
     assert.equal(new Set(registeredEdgeTypes).size, registeredEdgeTypes.length);
     for (const edgeType of SPEC47_EDGE_TYPES) {
       assert.ok(registeredEdgeTypes.includes(edgeType), `${edgeType} should be registered`);

@@ -205,7 +205,7 @@ After the initial triage was presented in chat with a 1-spec deliverable plan (t
 
 **Architectural ground for the reversal:** Iteration-2 verification confirmed the scaling pressure points: `tools/world-mcp/src/tools/list-records.ts:414-507` is a linear scan with per-row YAML parse + in-process filter (no indexed predicate columns), and `tools/world-mcp/src/context-packet/story-bundle-context.ts:48` caps `MAX_VISIBLE_STORYLETS = 50`. At 25 SLTs both are acceptable; at 100-200+ SLTs the parse cost dominates and the LLM-facing context loses visibility above the cap. SPEC-81 closes both pressure points with indexed projection columns + a new `select_storylet_candidates` MCP tool, while preserving the existing `list_records` path as backward-compatible fallback.
 
-**Lands in:** [`specs/SPEC-81-indexed-storylet-candidate-retrieval.md`](../../specs/SPEC-81-indexed-storylet-candidate-retrieval.md). The spec deliberately does NOT include the persistent SSEL trace record class from ChatGPT-Pro's original proposal (SPEC-51 §FOUNDATIONS Alignment §5b's "zero new record classes" commitment is preserved); the filter trace is a per-call diagnostic, not a persistent record.
+**Lands in:** [`archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md`](../../archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md). The spec deliberately does NOT include the persistent SSEL trace record class from ChatGPT-Pro's original proposal (SPEC-51 §FOUNDATIONS Alignment §5b's "zero new record classes" commitment is preserved); the filter trace is a per-call diagnostic, not a persistent record.
 
 ### Revised deliverable
 
@@ -213,7 +213,7 @@ The single-spec plan from the initial triage is superseded by a **four-spec plan
 
 - [`archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`](../../archive/specs/SPEC-79-chc-associated-commitment-block-removal.md) — CHC field removal (user's named operational priority; completed 2026-05-24).
 - [`specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`](../../specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md) — authoring-time pool coverage diagnostics (closes the iteration-1 reactivity loop upstream).
-- [`specs/SPEC-81-indexed-storylet-candidate-retrieval.md`](../../specs/SPEC-81-indexed-storylet-candidate-retrieval.md) — indexed projection + new MCP tool (scaling).
+- [`archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md`](../../archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md) — indexed projection + new MCP tool (scaling).
 - [`archive/specs/SPEC-82-remaining-schema-drift-repairs.md`](../../archive/specs/SPEC-82-remaining-schema-drift-repairs.md) — STQ active-pressure dead-branch fix + bootstrap stale-comment repair (the Red Kiln CHC fixture repair migrated to SPEC-79).
 - [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md) — sequencing (SPEC-82 → SPEC-79 → SPEC-81 → SPEC-80) and the rejected/deferred Out-of-Scope list for iteration-3 visibility.
 

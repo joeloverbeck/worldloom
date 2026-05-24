@@ -51,7 +51,13 @@ const EDGE_PARITY_CASES = [
       "    surface_hint: Ring the watch bell.",
       "    likely_effects: [STSEC-2]"
     ],
-    expectedEdgeTypes: ["storylet_predicate_ref", "storylet_effect_ref", "storylet_exit_likely_effect_ref"]
+    expectedEdgeTypes: [
+      "storylet_predicate_ref",
+      "storylet_effect_ref",
+      "storylet_exit_likely_effect_ref",
+      "storylet_predicate_pred",
+      "storylet_action_family"
+    ]
   },
   {
     directoryName: "pages",

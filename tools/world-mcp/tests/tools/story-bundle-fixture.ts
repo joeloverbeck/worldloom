@@ -978,6 +978,12 @@ export function buildStoryBundleWorld(root: string): void {
       },
       {
         story_slug: STORY_FIXTURE_SLUG,
+        source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-21"),
+        target_unresolved_ref: "player_action",
+        edge_type: "storylet_compatible_driver"
+      },
+      {
+        story_slug: STORY_FIXTURE_SLUG,
         source_node_id: storyNodeId(STORY_FIXTURE_SLUG, "CHC-1"),
         target_node_id: storyNodeId(STORY_FIXTURE_SLUG, "PG-1"),
         edge_type: "parent_page"
@@ -1014,6 +1020,19 @@ export function buildStoryBundleWorld(root: string): void {
         resolved_entity_id: "entity:marla-kern",
         resolution_kind: "canonical",
         extraction_method: "exact_canonical"
+      }
+    ],
+    sltProjections: [
+      {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "SLT-21"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        slt_scope_visibility: "global_author_pool",
+        slt_provenance_origin: "seed",
+        slt_move_family: "decision",
+        slt_saliency_urgency: "high",
+        slt_saliency_cooldown_pages: 0,
+        slt_mystery_policy_allowed_authority: "none"
       }
     ]
   });
