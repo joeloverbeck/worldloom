@@ -1,22 +1,18 @@
 {
-  "originating_spec": "specs/SPEC-79-chc-associated-commitment-block-removal.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC79CHCREM-010.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "6ec9c5edbd1df27549d8501ce52ae2d54e5eb1b6",
+  "originating_spec": "archive/specs/SPEC-79-chc-associated-commitment-block-removal.md",
+  "archived_spec": "archive/specs/SPEC-79-chc-associated-commitment-block-removal.md",
+  "last_ticket": "archive/tickets/SPEC79CHCREM-011.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "53be33f24935c76d3a987d5d08e7213b4d019715",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC79CHCREM-011.md",
-  "queue": [
-    "tickets/SPEC79CHCREM-011.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean for SPEC79CHCREM-010 focused fixture proof; broad validators npm test remains red on SPEC-47 edge-count drift and is carried to SPEC79CHCREM-011 capstone",
+  "proof_state": "clean focused capstone proof; bootstrap/turn-cycle LLM dry-runs documented as manual runbook and not executed in Codex",
   "dirty_state": "expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/",
-  "post_review_material_updates": true,
-  "post_review_audit_block": "emitted",
   "updated_at": "2026-05-24"
 }
