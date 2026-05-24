@@ -18,7 +18,7 @@ Before this ticket, the `rule_choice_set_noncollapse` validator built a per-choi
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism): the dropped axis was load-bearing for choice-set-collapse detection only because the field was present in the schema; once removed, the remaining 3 axes preserve the rule's discrimination power for any well-formed bundle. `grounded_in.records` is required on every CHC per `story-choice.schema.json` (after 001 lands) and carries the storylet-grounding intent the dropped axis formerly hinted at.
 5. HARD-GATE / rule-validator surface: this ticket modifies a rule validator under `tools/validators/src/rules/` — the pre-apply gate that blocks invalid patch plans. The change does NOT weaken the Mystery Reserve firewall; the rule's discrimination power is reduced from 4 axes to 3 but the remaining axes preserve the structural integrity of the check.
 6. Removal blast radius (was template item 7): the axis is removed from this validator's source (this ticket) and from its regression test (this ticket). Sibling tickets 006 (turn-cycle) and 007 (audit) mirror the axis-list change in their respective skill-side documentation; both have explicit Deps on this ticket to keep the discrimination-power story coherent across surfaces.
-7. Implementation-time proof correction: the drafted `npm test -- --test-name-pattern='rule_choice_set_noncollapse'` wrapper does not narrow to the rule test in this package; it rebuilds and runs the full validators suite. The accepted focused proof is therefore `npm run build` followed by `node --test dist/tests/rules/rule_choice_set_noncollapse.test.js`. The broad wrapper remains red on sibling-owned stale CHC fixture keys assigned to SPEC79CHCREM-010.
+7. Implementation-time proof correction: the drafted `npm test -- --test-name-pattern='rule_choice_set_noncollapse'` wrapper did not narrow to the rule test in this package; it rebuilt and ran the full validators suite. The accepted focused proof was therefore `npm run build` followed by `node --test dist/tests/rules/rule_choice_set_noncollapse.test.js`. At this ticket's close, the broad wrapper remained red on sibling-owned stale CHC fixture keys later completed by archive/tickets/SPEC79CHCREM-010.md.
 
 ## Architecture Check
 
@@ -81,7 +81,7 @@ Before this ticket, the `rule_choice_set_noncollapse` validator built a per-choi
 1. `cd tools/validators && npm run build`
 2. `cd tools/validators && node --test dist/tests/rules/rule_choice_set_noncollapse.test.js`
 3. `rg -n "associated_commitment_block" tools/validators/src/rules/rule_choice_set_noncollapse.ts tools/validators/tests/rules/rule_choice_set_noncollapse.test.ts` returns zero matches.
-4. `cd tools/validators && npm test -- --test-name-pattern='rule_choice_set_noncollapse'` is a broad wrapper in this package; it is expected to remain red until SPEC79CHCREM-010 repairs the remaining stale fixtures.
+4. `cd tools/validators && npm test -- --test-name-pattern='rule_choice_set_noncollapse'` was a broad wrapper in this package; at this ticket's close it was expected to remain red until the remaining stale fixtures were repaired by archive/tickets/SPEC79CHCREM-010.md.
 
 ## Outcome
 
@@ -101,4 +101,4 @@ The `choice_set_noncollapse` rule now computes CHC material signatures from 3 ax
 
 The drafted wrapper proof `npm test -- --test-name-pattern='rule_choice_set_noncollapse'` is not a focused rule-test proof in this package; it runs the full validators suite. The focused accepted proof is the direct compiled rule test after `npm run build`.
 
-The broad validators suite still fails on stale CHC fixture keys outside this ticket's owner boundary. Current discovery shows the remaining hits in `tools/validators/tests/integration/spec34-integration.test.ts`, `tools/validators/tests/integration/spec49-stplan-stemo-hardening.test.ts`, `tools/validators/tests/structural/stchar-structural-validators.test.ts`, and `tools/validators/tests/rules/rule_chc_grounded_in_artifact_accessible.test.ts`; SPEC79CHCREM-010 owns those fixture-key drops.
+At this ticket's close, the broad validators suite still failed on stale CHC fixture keys outside this ticket's owner boundary. That discovery showed remaining hits in `tools/validators/tests/integration/spec34-integration.test.ts`, `tools/validators/tests/integration/spec49-stplan-stemo-hardening.test.ts`, `tools/validators/tests/structural/stchar-structural-validators.test.ts`, and `tools/validators/tests/rules/rule_chc_grounded_in_artifact_accessible.test.ts`; archive/tickets/SPEC79CHCREM-010.md later completed those fixture-key drops.

@@ -233,7 +233,6 @@ function choice(id: string, groundedRecords: string[]) {
     player_visible_intent: "Ask the witness what they know.",
     target_or_action_families: ["communicate"],
     likely_state_pressure: "Character-specific social pressure.",
-    associated_commitment_block: null,
     grounded_in: { records: groundedRecords }
   });
 }

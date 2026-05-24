@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new integration test at `tools/validators/tests/integration/spec79-chc-removal.test.ts`; verification of bootstrap + turn-cycle dry-runs; grep negative test as automated assertion.
-**Deps**: archive/tickets/SPEC79CHCREM-002.md, archive/tickets/SPEC79CHCREM-005.md, archive/tickets/SPEC79CHCREM-006.md, archive/tickets/SPEC79CHCREM-007.md, archive/tickets/SPEC79CHCREM-008.md, archive/tickets/SPEC79CHCREM-009.md, SPEC79CHCREM-010
+**Deps**: archive/tickets/SPEC79CHCREM-002.md, archive/tickets/SPEC79CHCREM-005.md, archive/tickets/SPEC79CHCREM-006.md, archive/tickets/SPEC79CHCREM-007.md, archive/tickets/SPEC79CHCREM-008.md, archive/tickets/SPEC79CHCREM-009.md, archive/tickets/SPEC79CHCREM-010.md
 
 ## Problem
 

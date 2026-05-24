@@ -303,7 +303,6 @@ function validChoice(): Record<string, unknown> {
     player_visible_intent: "Act from the current plan and emotion.",
     target_or_action_families: ["decide"],
     likely_state_pressure: "plan and emotion pressure",
-    associated_commitment_block: null,
     grounded_in: {
       records: ["STPLAN-1", "STEMO-1", "CLK-1", "STSEC-1", "STQ-1", "STINT-1", "SF-1"]
     }

@@ -409,7 +409,6 @@ function choice(id: string, createdAtPage: string, groundedRecords: string[]): F
     player_visible_intent: "Proceed with the known option.",
     target_or_action_families: ["decide"],
     likely_state_pressure: "A decision is made.",
-    associated_commitment_block: "SLT-1",
     grounded_in: { records: groundedRecords, affordance_ordinals: [] },
     success_policy: "Accept the choice."
   });
