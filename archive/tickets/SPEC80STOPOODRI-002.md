@@ -1,6 +1,6 @@
 # SPEC80STOPOODRI-002: commitment-block-authoring Phase 1 coverage targets #16/#17 + structured YAML
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/commitment-block-authoring/` (SKILL.md Phase 1 extended with new coverage targets #16 + #17, new Read paths paragraph, and new structured YAML output enrichment)
@@ -8,16 +8,17 @@
 
 ## Problem
 
-`commitment-block-authoring` Phase 1 currently enumerates 15 causal-function + cast-role coverage targets at `SKILL.md:143-159` (target #15 is cast-role coverage parallel to the bootstrap-author-side rule), and names projection-field-based gap diagnosis at line 161 using `compatible_turn_drivers` and `predicate_classes` as gap-diagnostic surfaces — but the existing surface stops at field-level prose: it does not encode the structured trigger maps (which active-record classes IMPLY which driver-kinds must be expressible; which active-record classes IMPLY which existential predicates must reference them), does not encode the joint composition rule (each demanded (driver-kind, source-class) pair must be covered by at least one SLT), and does not emit a structured YAML output that downstream Phase 2-4 block generators can read to author gap-closing blocks systematically.
+At intake, `commitment-block-authoring` Phase 1 enumerated 15 causal-function + cast-role coverage targets at `SKILL.md:143-159` (target #15 is cast-role coverage parallel to the bootstrap-author-side rule), and named projection-field-based gap diagnosis using `compatible_turn_drivers` and `predicate_classes` as gap-diagnostic surfaces — but the existing surface stopped at field-level prose: it did not encode the structured trigger maps (which active-record classes IMPLY which driver-kinds must be expressible; which active-record classes IMPLY which existential predicates must reference them), did not encode the joint composition rule (each demanded (driver-kind, source-class) pair must be covered by at least one SLT), and did not emit a structured YAML output that downstream Phase 2-4 block generators can read to author gap-closing blocks systematically.
 
-This ticket extends Phase 1 with two new coverage targets (#16 driver-kind composition coverage; #17 pressure-source-class composition coverage), a Read paths paragraph naming the two distinct reads the trigger maps require (bundle-state for the demand side; SLT-pool for the supply side), and a structured YAML output (`driver_kind_coverage`, `pressure_source_coverage`, `composition_gaps`) that enriches — does not replace — the existing move-family / causal-function gap-diagnosis output.
+This completed ticket extends Phase 1 with two new coverage targets (#16 driver-kind composition coverage; #17 pressure-source-class composition coverage), a Read paths paragraph naming the two distinct reads the trigger maps require (bundle-state for the demand side; SLT-pool for the supply side), and a structured YAML output (`driver_kind_coverage`, `pressure_source_coverage`, `composition_gaps`) that enriches — does not replace — the existing move-family / causal-function gap-diagnosis output.
 
 ## Assumption Reassessment (2026-05-24)
 
-1. Verified `commitment-block-authoring/SKILL.md:143-159` enumerates exactly 15 coverage targets (14 causal-function + 1 cast-role at line 159); verified line 161 names the projection-field gap-diagnosis surface ("`compatible_turn_drivers` for driver-kind coverage, `predicate_classes` for active-record-class coverage"). Verified Phase 1's existing output shape at line 165 emits "a list of `target_count` planned blocks, each with a `move_family` value … and a brief draft scope (preconditions sketch, beat outline, effects shape)." The new structured YAML output (`driver_kind_coverage` etc.) enriches this; it does not replace.
+1. At intake, verified `commitment-block-authoring/SKILL.md:143-159` enumerated exactly 15 coverage targets (14 causal-function + 1 cast-role at line 159); verified the nearby projection-field gap-diagnosis surface named "`compatible_turn_drivers` for driver-kind coverage, `predicate_classes` for active-record-class coverage". Verified Phase 1's existing output shape emitted "a list of `target_count` planned blocks, each with a `move_family` value … and a brief draft scope (preconditions sketch, beat outline, effects shape)." The new structured YAML output (`driver_kind_coverage` etc.) enriches this; it does not replace.
 2. Verified SPEC-80 §3.1 driver-kind enum and §3.2 existential-predicate set match the schemas at `tools/validators/src/schemas/story-event.schema.json:96-103`, `story-storylet.schema.json:254-261, 317-327, 360-372`, `story-secret.schema.json:88`, and `.claude/skills/_shared-templates/story-state-contract.md:171-201` (predicate DSL). The trigger maps cite live schema/contract values, not aspirational ones.
 3. **Cross-skill boundary under audit**: this ticket's Phase 1 coverage targets #16/#17 must use the same SPEC-80 §3.1/§3.2/§3.3 trigger maps that `archive/tickets/SPEC80STOPOODRI-001.md` wires into the bootstrap-author-side Phase 10 HARD-GATE. The two enforcement points (bootstrap genesis + commitment-block-authoring direct_batch additions) MUST share one source of truth so cast-role / driver-kind / pressure-source / composition coverage stays consistent across genesis and pool evolution. The shared contract surface: SPEC-80 §3 trigger maps (single source of truth, cited by both skill references rather than restated in either).
 4. **FOUNDATIONS principles under audit**: Validation Rule 5 (No Consequence Evasion) — active records without expressive SLTs in the pool are a pool-level consequence-evasion risk; the Phase 1 gap diagnosis surfaces this. §Story Bundles §5c (Present Causal State, Not Narrative Shape) — the coverage check is structurally local (does the pool contain at least one SLT capable of expressing X?), not a global drama-manager planner; per SPEC-80 §2.1 and §3 framing, this is the load-bearing distinction.
+5. Reassessment corrected the proof boundary: no executable `/commitment-block-authoring` dry-run runner is available in this Codex context. The accepted verification surface is manual contract review of Phase 1's direct_batch diagnostic prose plus grep proof over `.claude/skills/commitment-block-authoring/SKILL.md`. The drafted dry-run scenario remains a SPEC-80 future/operator validation example, not a command run by this ticket.
 
 ## Architecture Check
 
@@ -29,22 +30,24 @@ This ticket extends Phase 1 with two new coverage targets (#16 driver-kind compo
 ## Verification Layers
 
 1. New coverage targets #16 and #17 added after the existing #15 cast-role coverage in `commitment-block-authoring/SKILL.md` Phase 1 → codebase grep-proof: `grep -n "^16\.\|^17\." .claude/skills/commitment-block-authoring/SKILL.md` returns the new target lines within the Phase 1 enumeration.
-2. New context paragraph naming existing Phase 1 #15 + line 161 projection-field framing added → codebase grep-proof: `grep -n "Context — what Phase 1 already does" .claude/skills/commitment-block-authoring/SKILL.md` returns 1 match.
+2. New context paragraph naming existing Phase 1 #15 + projection-field framing added → codebase grep-proof: `grep -n "Context - what Phase 1 already does" .claude/skills/commitment-block-authoring/SKILL.md` returns 1 match.
 3. New Read paths paragraph naming both bundle-state and SLT-pool reads added → codebase grep-proof: `grep -n "Read paths\." .claude/skills/commitment-block-authoring/SKILL.md` returns ≥1 match (the §4.2 Read paths block).
 4. New structured YAML output enrichment present and framed as additive → codebase grep-proof: `grep -n "driver_kind_coverage:\|pressure_source_coverage:\|composition_gaps:" .claude/skills/commitment-block-authoring/SKILL.md` returns 3 matches inside the Phase 1 output section.
-5. Phase 1 emits the coverage YAML in §4.2's shape against a synthetic bundle → skill dry-run: invoke `/commitment-block-authoring` with `mode: direct_batch` against a fixture bundle matching SPEC-80 §8 test 1 shape (two NPC STENT + one STPLAN + one STEMO + one CLK); verify the Phase 1 output contains `driver_kind_coverage`, `pressure_source_coverage`, and `composition_gaps` keys with values matching the expected triggered/uncovered sets (SPEC-80 §8 test 3).
+5. Phase 1's manual contract surface emits the coverage YAML in SPEC-80 §4.2's shape and preserves the existing `target_count` planned-block list → manual contract review: inspect the edited Phase 1 prose and verify it still emits the existing planned-block output plus the additive `driver_kind_coverage`, `pressure_source_coverage`, and `composition_gaps` keys. The SPEC-80 §8 test 3 synthetic-bundle dry-run remains a future/operator validation example because this Codex context has no executable Claude-skill runner.
 
-## What to Change
+## Landed Changes
 
-### 1. Add context paragraph naming existing Phase 1 #15 + line 161 projection-field framing
+### 1. Added context paragraph naming existing Phase 1 #15 + projection-field framing
 
-Insert a paragraph immediately after Phase 1's existing 15-target enumeration (around line 159-161) and before the "Identify which coverage targets are absent" sentence:
+Inserted a paragraph immediately after Phase 1's existing 15-target enumeration and before the "Identify which coverage targets are absent" sentence:
 
-> **Context — what Phase 1 already does.** Phase 1 currently enumerates 15 coverage targets (14 causal-function + target #15 cast-role coverage) and names projection-field-based gap diagnosis at line 161 (`compatible_turn_drivers` for driver-kind coverage; `predicate_classes` for active-record-class coverage). What is missing is the structured trigger maps (SPEC-80 §3.1, §3.2), the joint composition rule (SPEC-80 §3.3), and a structured YAML output that the Phase 2-4 block generators can read.
+> **Context - what Phase 1 already does.** Phase 1 currently enumerates 15 coverage targets (14 causal-function + target #15 cast-role coverage) and names projection-field-based gap diagnosis below (`compatible_turn_drivers` for driver-kind coverage; `predicate_classes` for active-record-class coverage). What is missing is the structured trigger maps (SPEC-80 §3.1, §3.2), the joint composition rule (SPEC-80 §3.3), and a structured YAML output that the Phase 2-4 block generators can read.
 
-### 2. Add new coverage targets #16 and #17
+The landed skill prose uses an ASCII heading so the verification grep is shell-safe and stable.
 
-Append after target #15 (cast-role coverage at `SKILL.md:159`):
+### 2. Added new coverage targets #16 and #17
+
+Appended after target #15 (cast-role coverage):
 
 > 16. **Driver-kind composition coverage** — for each driver-kind value triggered by the bundle's active records per SPEC-80 §3.1's trigger map, the pool must contain at least one SLT whose `grounding.compatible_turn_drivers[]` includes that value.
 >
@@ -52,9 +55,9 @@ Append after target #15 (cast-role coverage at `SKILL.md:159`):
 >
 > The joint composition rule (SPEC-80 §3.3) applies: for each (driver-kind, source-class) pair the bundle demands, at least one SLT must satisfy BOTH.
 
-### 3. Add Read paths paragraph
+### 3. Added Read paths paragraph
 
-After the new targets #16/#17 and before the "Identify which coverage targets" output paragraph, add:
+After the new targets #16/#17 and before the "Identify which coverage targets" output paragraph, added:
 
 > **Read paths.** Two distinct reads cover this check:
 >
@@ -62,9 +65,9 @@ After the new targets #16/#17 and before the "Identify which coverage targets" o
 >
 > (b) **SLT-pool load** (the SUPPLY side — projection of current pool storylets to check coverage against demand): use the SPEC-81 projection path `mcp__worldloom__select_storylet_candidates(max_candidates=pool_size)` already invoked at `commitment-block-authoring/SKILL.md:128`. Use `list_records(... include_full_body=true)` only as a fallback where the projection API is unavailable.
 
-### 4. Add structured YAML output enrichment
+### 4. Added structured YAML output enrichment
 
-In the Phase 1 output section (around `SKILL.md:165`), add the structured YAML enrichment as an additive output to the existing move-family / causal-function gap diagnosis (verbatim from SPEC-80 §4.2):
+In the Phase 1 output section, added the structured YAML enrichment as an additive output to the existing move-family / causal-function gap diagnosis (from SPEC-80 §4.2):
 
 > **Output shape** (enrichment of existing Phase 1 gap-diagnosis output — does not replace move-family / causal-function gap reporting):
 >
@@ -80,20 +83,20 @@ In the Phase 1 output section (around `SKILL.md:165`), add the structured YAML e
 >   - {driver: npc_action, source: STEMO}
 > ```
 
-### 5. Implement the Phase 1 coverage diagnostics
+### 5. Implemented the Phase 1 coverage diagnostics
 
-Wire the new targets #16/#17 + composition rule into the Phase 1 gap-diagnosis flow. The diagnostics:
+Wired the new targets #16/#17 + composition rule into the Phase 1 gap-diagnosis flow. The diagnostics:
 
 - Load bundle state per the Read paths paragraph (a).
 - Load SLT pool per the Read paths paragraph (b).
 - Apply SPEC-80 §3.1 trigger map to the bundle state → derived demanded driver-kinds.
 - Apply SPEC-80 §3.2 trigger map to the bundle state → derived demanded source-classes.
 - Walk the SLT pool's `grounding.compatible_turn_drivers[]` (from projection records) to compute covered driver-kinds.
-- Walk the SLT pool's `preconditions.hard[]` / `preconditions.soft[]` (from projection records' `predicate_classes`) to compute covered source-classes.
+- Walk the SLT pool's projected `predicate_classes` or full-body `preconditions.hard[]` / `preconditions.soft[]` to compute covered source-classes.
 - Compute composition gaps as the set difference between demanded (driver-kind × source-class) pairs and covered pairs.
 - Emit the YAML output enrichment per §4.
 
-When the composition gap list exceeds a presentation limit (suggest N=20 per SPEC-80 §9), emit the top-N gaps by triggering-record count.
+When the composition gap list exceeds a presentation limit, the landed prose emits the top 20 gaps by triggering-record count.
 
 ## Files to Touch
 
@@ -111,9 +114,9 @@ When the composition gap list exceeds a presentation limit (suggest N=20 per SPE
 
 ### Tests That Must Pass
 
-1. Skill dry-run: `/commitment-block-authoring` with `mode: direct_batch` against a fixture bundle matching SPEC-80 §8 test 1 shape; Phase 1 output emits the coverage YAML with `driver_kind_coverage / pressure_source_coverage / composition_gaps` keys populated correctly (triggered sets match the trigger maps applied to the fixture; uncovered sets match the absence in the seeded pool); composition gap list correctly enumerates demanded-but-uncovered pairs (SPEC-80 §8 test 3).
-2. Codebase grep-proof: `grep -n "Context — what Phase 1 already does\|^16\.\|^17\.\|Read paths\.\|driver_kind_coverage:\|pressure_source_coverage:\|composition_gaps:" .claude/skills/commitment-block-authoring/SKILL.md` returns ≥7 matches across the Phase 1 section (1 context paragraph + 2 target lines + 1 read-paths heading + 3 YAML keys).
-3. Existing Phase 1 output (move-family / causal-function gap diagnosis from line 165) continues to emit; new YAML is additive only — verified via skill dry-run inspection of Phase 1 output containing BOTH the existing target_count blocks list AND the new YAML enrichment.
+1. Codebase grep-proof: `grep -n "Context - what Phase 1 already does\|^16\.\|^17\.\|Read paths\.\|driver_kind_coverage:\|pressure_source_coverage:\|composition_gaps:" .claude/skills/commitment-block-authoring/SKILL.md` returns ≥7 matches across the Phase 1 section (1 context paragraph + 2 target lines + 1 read-paths heading + 3 YAML keys).
+2. Manual contract review: Phase 1's output prose continues to require the existing move-family / causal-function `target_count` planned-block list and adds the SPEC-80 YAML enrichment without replacing that existing output.
+3. Not run: `/commitment-block-authoring` with `mode: direct_batch` against a fixture bundle matching SPEC-80 §8 test 1 shape. No executable Claude-skill runner is available in this Codex context; the synthetic-bundle dry-run remains a future/operator validation example.
 
 ### Invariants
 
@@ -127,9 +130,24 @@ When the composition gap list exceeds a presentation limit (suggest N=20 per SPE
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket; verification is skill-dry-run based and existing pipeline coverage is named in Assumption Reassessment.
+1. None — documentation-only ticket; verification is grep-proof plus manual contract review because no executable Claude-skill dry-run runner is available in this Codex context.
 
 ### Commands
 
-1. `grep -n "Context — what Phase 1 already does\|^16\.\|^17\.\|Read paths\.\|driver_kind_coverage:\|pressure_source_coverage:\|composition_gaps:" .claude/skills/commitment-block-authoring/SKILL.md` — verify all new context paragraph + targets + Read paths + YAML keys landed.
-2. `/commitment-block-authoring` skill dry-run with `mode: direct_batch` against the SPEC-80 §8 test 3 fixture — verifies Phase 1 emits the structured YAML enrichment alongside the existing target_count blocks list. The skill is LLM-driven and not invokable from test-suite code; manual dry-run is the verification surface per `tickets/README.md` §3 valid verification surfaces (skill dry-run).
+1. `grep -n "Context - what Phase 1 already does\|^16\.\|^17\.\|Read paths\.\|driver_kind_coverage:\|pressure_source_coverage:\|composition_gaps:" .claude/skills/commitment-block-authoring/SKILL.md` — verify all new context paragraph + targets + Read paths + YAML keys landed.
+2. Manual contract review against SPEC-80 §3/§4.2 and `docs/FOUNDATIONS.md` §Story Bundles §5c / Validation Rule 5 — verify the Phase 1 diagnostic remains an additive authoring-time coverage diagnosis and does not become runtime ranking or auto-generation.
+
+## Outcome
+
+Completed: 2026-05-24
+
+This ticket landed the commitment-block-authoring side of SPEC-80. Phase 1 now appends driver-kind composition coverage and pressure-source-class composition coverage after the existing cast-role coverage target, names distinct demand-side and supply-side read paths, preserves the existing `target_count` planned-block output, and adds the structured `driver_kind_coverage`, `pressure_source_coverage`, and `composition_gaps` YAML enrichment. The diagnostic is explicitly authoring-time only: it informs Phase 2-4 block drafting and does not auto-generate SLTs or change runtime ranking.
+
+## Verification Result
+
+1. `grep -n "Context - what Phase 1 already does\|^16\.\|^17\.\|Read paths\.\|driver_kind_coverage:\|pressure_source_coverage:\|composition_gaps:" .claude/skills/commitment-block-authoring/SKILL.md` — passed; returned the expected 7 Phase 1 hits for the context paragraph, targets #16/#17, read-paths heading, and YAML keys.
+2. Manual contract review against SPEC-80 §3/§4.2 and `docs/FOUNDATIONS.md` §Story Bundles §5c / Validation Rule 5 — passed; the landed prose diagnoses expressive pool capacity against present active records, preserves additive output, and does not introduce runtime weighting, auto-generation, record mutation, or HARD-GATE semantic changes.
+
+## Deviations
+
+The drafted acceptance listed a `/commitment-block-authoring` dry-run against a synthetic fixture bundle. That was not run because this Codex context has no executable Claude-skill runner. The accepted proof boundary is grep proof plus manual contract review over the edited skill surface; the SPEC-80 §8 synthetic-bundle scenario remains a future/operator validation example.
