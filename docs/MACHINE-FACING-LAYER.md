@@ -134,7 +134,6 @@ SPEC-50 removes the legacy `SLT` obligation-field edges (`opens_obligation`, `pa
 | Source | Edge type | Target | Meaning |
 |---|---|---|---|
 | `CHC` | `choice_grounded_in` | record | Each record named by `grounded_in.records[]`. |
-| `CHC` | `choice_associated_storylet` | `SLT` | The source commitment block named by `associated_commitment_block`. |
 | `CHC` | `choice_affordance_ordinal` | page affordance attribute | Each ordinal named by `grounded_in.affordance_ordinals[]`, encoded as `story:PG#affordance:<ordinal>` when the parent page is known. |
 | `SLT` | `storylet_predicate_ref` | record | Record ids parsed from hard and soft precondition predicate strings. |
 | `SLT` | `storylet_effect_ref` | record | Concrete record ids named by `effects.create[]`, `effects.supersede[]`, and `effects.close[]`; `bound:<alias>` placeholders are skipped. |

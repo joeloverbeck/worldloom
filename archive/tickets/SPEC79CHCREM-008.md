@@ -1,6 +1,6 @@
 # SPEC79CHCREM-008: Docs — delete `choice_associated_storylet` table row from MACHINE-FACING-LAYER.md
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/MACHINE-FACING-LAYER.md` (world-index story-edge table row deletion).
@@ -8,15 +8,15 @@
 
 ## Problem
 
-The `docs/MACHINE-FACING-LAYER.md` world-index story-edge table at line 137 includes a row documenting the `choice_associated_storylet` edge type: *"| `CHC` | `choice_associated_storylet` | `SLT` | The source commitment block named by `associated_commitment_block`. |"*. Once SPEC79CHCREM-004 removes the edge type from the world-index `STORY_EDGE_TYPES` enum and the parser, this table row documents an edge type that no longer exists; leaving the row would mislead downstream readers about the world-index's actual edge surface.
+Before this ticket, the `docs/MACHINE-FACING-LAYER.md` world-index story-edge table included a row documenting the `choice_associated_storylet` edge type: *"| `CHC` | `choice_associated_storylet` | `SLT` | The source commitment block named by `associated_commitment_block`. |"*. SPEC79CHCREM-004 had already removed the edge type from the world-index `STORY_EDGE_TYPES` enum and parser; this ticket removed the stale docs row so the table no longer advertises an edge type that does not exist.
 
 ## Assumption Reassessment (2026-05-24)
 
-1. Confirmed `docs/MACHINE-FACING-LAYER.md:137` carries the table row for the `choice_associated_storylet` edge with the description naming `associated_commitment_block`. Verified via grep at reassessment time.
+1. Before this ticket, confirmed `docs/MACHINE-FACING-LAYER.md:137` carried the table row for the `choice_associated_storylet` edge with the description naming `associated_commitment_block`. Verified via grep at reassessment time.
 2. Confirmed SPEC-79 §5.6 prescribes the table-row deletion. The ticket is documented as a documentation edit included under §5 (Skill Changes) for atomic-landing convenience per the SPEC-79 reassessment's M1 Improvement (the spec's §5.6 inline note: *"Not a skill — included here under §5 for atomic-landing convenience; this is a documentation edit"*).
 3. Cross-skill boundary: this docs edit must land after archive/tickets/SPEC79CHCREM-004.md (which removes the edge type from the world-index) so the docs surface accurately reflects the post-removal edge enumeration. The archived dependency path enforces ordering.
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism) applies indirectly — the docs surface mirrors the schema's actual edge enumeration. Once the edge is removed from the enum (handled in 004), the docs must remove the corresponding documentation row.
-5. Removal blast radius (was template item 7): this ticket deletes one table row in one docs file. No other docs surface references the `choice_associated_storylet` edge type (verified via reassessment-time grep of `docs/` for the edge name).
+5. Removal blast radius (was template item 7): this ticket deletes one table row in one current-state machine-facing docs file. Historical/provenance references in `docs/triage/` remain intentionally out of scope; no other current machine-facing docs surface needs a row-level update.
 
 ## Architecture Check
 
@@ -29,11 +29,11 @@ The `docs/MACHINE-FACING-LAYER.md` world-index story-edge table at line 137 incl
 2. The other rows in the world-index story-edge table remain unchanged → manual review of the table's surrounding rows (page_emitted_choice, choice_grounded_in, choice_affordance_ordinal, storylet_predicate_ref, storylet_effect_ref, storylet_exit_likely_effect_ref, event_selected_storylet).
 3. The MACHINE-FACING-LAYER.md table's overall structure (header, separator, surrounding prose) is unchanged → manual review of the surrounding content.
 
-## What to Change
+## Landed Changes
 
 ### 1. `docs/MACHINE-FACING-LAYER.md`
 
-- At line 137, delete the entire table row: `| \`CHC\` | \`choice_associated_storylet\` | \`SLT\` | The source commitment block named by \`associated_commitment_block\`. |`. The row's surrounding rows (the table header, the table separator, and the other CHC and SLT edge rows) remain unchanged.
+- Deleted the entire table row: `| \`CHC\` | \`choice_associated_storylet\` | \`SLT\` | The source commitment block named by \`associated_commitment_block\`. |`. The row's surrounding rows (the table header, the table separator, and the other CHC and SLT edge rows) remain unchanged.
 
 ## Files to Touch
 
@@ -42,7 +42,7 @@ The `docs/MACHINE-FACING-LAYER.md` world-index story-edge table at line 137 incl
 ## Out of Scope
 
 - The world-index schema/parser changes (handled in 004).
-- Other docs surfaces that reference the world-index edge enumeration — none exist (verified via reassessment-time grep).
+- Historical/provenance mentions in `docs/triage/` — intentionally retained as triage evidence, not current machine-facing contract rows.
 - Other CHC-related rows in the same table (page_emitted_choice, choice_grounded_in, choice_affordance_ordinal remain).
 - Adding a changelog entry to `docs/MACHINE-FACING-LAYER.md` — git log provides change attribution.
 
@@ -57,7 +57,7 @@ The `docs/MACHINE-FACING-LAYER.md` world-index story-edge table at line 137 incl
 ### Invariants
 
 1. The MACHINE-FACING-LAYER.md docs surface mirrors the world-index's actual edge enumeration post-landing.
-2. No docs surface in the repo documents the `choice_associated_storylet` edge type after this ticket lands.
+2. No current machine-facing docs surface in the repo documents the `choice_associated_storylet` edge type after this ticket lands; historical/provenance mentions remain allowed in `docs/triage/`.
 
 ## Test Plan
 
@@ -69,3 +69,18 @@ The `docs/MACHINE-FACING-LAYER.md` world-index story-edge table at line 137 incl
 
 1. `grep -n "choice_associated_storylet\|associated_commitment_block" docs/MACHINE-FACING-LAYER.md`
 2. Visual inspection of the world-index story-edge table to confirm markdown integrity (header, separator, remaining rows).
+
+## Outcome
+
+Completed on 2026-05-24. The obsolete `choice_associated_storylet` row was removed from `docs/MACHINE-FACING-LAYER.md`; the story-edge table now lists only the surviving CHC edge rows (`choice_grounded_in` and `choice_affordance_ordinal`) plus the SLT rows.
+
+## Verification Result
+
+1. `! grep -n 'choice_associated_storylet' docs/MACHINE-FACING-LAYER.md` — PASS; no matches remain in the docs file.
+2. `! grep -n 'associated_commitment_block' docs/MACHINE-FACING-LAYER.md` — PASS; no matches remain in the docs file.
+3. Manual review of `docs/MACHINE-FACING-LAYER.md` table around the edit — PASS; the table header, separator, and surrounding rows remain intact.
+4. `rg -n 'choice_associated_storylet|associated_commitment_block' docs/triage` — PASS as historical classification, not a zero-hit proof; remaining docs hits are triage/provenance context outside this ticket's current machine-facing docs boundary.
+
+## Deviations
+
+- None.

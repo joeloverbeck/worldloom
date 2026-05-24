@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new integration test at `tools/validators/tests/integration/spec79-chc-removal.test.ts`; verification of bootstrap + turn-cycle dry-runs; grep negative test as automated assertion.
-**Deps**: archive/tickets/SPEC79CHCREM-002.md, archive/tickets/SPEC79CHCREM-005.md, archive/tickets/SPEC79CHCREM-006.md, archive/tickets/SPEC79CHCREM-007.md, SPEC79CHCREM-008, SPEC79CHCREM-009, SPEC79CHCREM-010
+**Deps**: archive/tickets/SPEC79CHCREM-002.md, archive/tickets/SPEC79CHCREM-005.md, archive/tickets/SPEC79CHCREM-006.md, archive/tickets/SPEC79CHCREM-007.md, archive/tickets/SPEC79CHCREM-008.md, SPEC79CHCREM-009, SPEC79CHCREM-010
 
 ## Problem
 
@@ -16,7 +16,7 @@ The capstone's primary value is operational: it gives the implementer a single v
 
 1. Confirmed §9 tests 4-6 are end-to-end assertions requiring all upstream tickets to have landed: test 4 (bootstrap dry-run producing CHCs without the field) requires 001 (schema) + 005 (bootstrap skill); test 5 (turn-cycle dry-run with replay-equivalent state under `snapshot_replay_equality`) requires 001 + 002 (validator) + 003 (rule) + 006 (turn-cycle skill); test 6 (grep negative across `tools/ .claude/skills/ docs/ specs/SPEC-79*.md` returning matches only inside SPEC-79's own documentation) requires every upstream ticket (002, 005, 006, 007, 008, 009, 010 transitively reaching 001, 003, 004).
 2. Confirmed SPEC-79 §9 enumerates 6 validation tests and §10 mandates atomic landing. The capstone makes the atomic-landing intent operational: tests 4-6 are the holistic verifications that prove every surface is consistent post-landing.
-3. Cross-skill boundary: this capstone integration test exercises the full pipeline composed by tickets 001-010. Its `Deps` enumerate the leaf set (002, 005, 006, 007, 008, 009, 010) per §Spec-Integration Ticket Shape parallel-branch DAGs rule — the transitive `Deps` from these 7 leaves collectively cover the full upstream chain (001, 003, 004).
+3. Cross-skill boundary: this capstone integration test exercises the full pipeline composed by tickets 001-010. Its `Deps` enumerate the leaf set (002, 005, 006, 007, archived 008, 009, 010) per §Spec-Integration Ticket Shape parallel-branch DAGs rule — the transitive `Deps` from these 7 leaves collectively cover the full upstream chain (001, 003, 004).
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism): the capstone test verifies that the removal preserves bundle integrity — bootstrap produces schema-conformant CHCs, turn-cycle's selection works against the live pool without consulting the removed field, and `snapshot_replay_equality` confirms replay-equivalent state per spec §9 test 5. The capstone is the operational evidence that §5b's load-bearing test passed post-landing — the field was non-load-bearing, and its removal broke no validation gate, replay primitive, predicate, fork operation, or audit-trail discipline.
 
 ## Architecture Check
