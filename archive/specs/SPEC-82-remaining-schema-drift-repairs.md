@@ -3,7 +3,7 @@
 **Spec ID:** SPEC-82
 **Date:** 2026-05-24
 **Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
-**Status:** active
+**Status:** COMPLETED
 
 ## §1 Goal
 
@@ -126,3 +126,16 @@ A reassessment-time read of `.claude/skills/branching-story-bootstrap/references
 - SPEC82REMSCHDRI-001 implementation also corrected the `active-pressure-handling-discipline.test.ts` STQ fixture path from `_source/questions/STQ-1.yaml` to `_source/story-questions/STQ-1.yaml`, matching the live `story_question_record` structural authority path. This was same-seam proof fallout: without it, the positive STQ fixture could pass through the missing-record fallback instead of exercising the parsed STQ predicate.
 - §3.2's Phase 6 amendment scope was determined at reassessment time (see §3.2 preamble): Phase 6 does not currently prescribe SPEC-77's grounding fields, so the Phase 6 reference file IS extended as part of this spec — not just the SKILL.md stale comment.
 - This is the smallest spec in the iteration-2 family and is sequenced first in `IMPLEMENTATION-ORDER.md` for that reason — it carries near-zero risk and unblocks reviewer confidence in the larger SPEC-79 / SPEC-81 work.
+
+## Outcome
+
+Completed: 2026-05-24
+
+- `SPEC82REMSCHDRI-001` repaired the STQ active-pressure helper to use the schema-valid `salience: "high"` signal, updated the STQ fixture, added the medium-salience negative case, and archived the ticket at `archive/tickets/SPEC82REMSCHDRI-001.md`.
+- `SPEC82REMSCHDRI-002` replaced the stale bootstrap SPEC-77 "future field" comment, added Phase 6 grounding-population guidance for seeded `SLT` records, and archived the ticket at `archive/tickets/SPEC82REMSCHDRI-002.md`.
+- Final verification on 2026-05-24 passed:
+  - `if rg -n 'payoff_due' tools/validators/src tools/validators/tests; then exit 1; fi`
+  - `if grep -n "future field\|may become eligible for non-player drivers when SPEC-77" .claude/skills/branching-story-bootstrap/SKILL.md; then exit 1; fi`
+  - `grep -n "compatible_turn_drivers\|reason_to_exist\|FOUNDATIONS.*5b\|SPEC-77.*3.4" .claude/skills/branching-story-bootstrap/references/phase-6-commitment-blocks.md`
+  - `npm test` from `tools/validators` (`1012` tests passed, `0` failed).
+- Deviation: the drafted bootstrap end-to-end dry-run was not executed because this Codex checkout exposes no executable runner for invoking the `.claude` skill through a full HARD-GATE bootstrap flow. `SPEC82REMSCHDRI-002` substituted manual contract review plus grep proof and recorded that boundary in its archived closeout.
