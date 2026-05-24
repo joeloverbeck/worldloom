@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — four test fixtures: `tools/validators/tests/integration/spec49-stplan-stemo-hardening.test.ts`, `tools/validators/tests/structural/stchar-structural-validators.test.ts`, `tools/validators/tests/rules/rule_chc_grounded_in_artifact_accessible.test.ts`, `tools/validators/tests/integration/spec34-integration.test.ts`.
-**Deps**: SPEC79CHCREM-001
+**Deps**: archive/tickets/SPEC79CHCREM-001.md
 
 ## Problem
 

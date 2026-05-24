@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md` (Phase 9 CHC emission guidance).
-**Deps**: SPEC79CHCREM-001
+**Deps**: archive/tickets/SPEC79CHCREM-001.md
 
 ## Problem
 

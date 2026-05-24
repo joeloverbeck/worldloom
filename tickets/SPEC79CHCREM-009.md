@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/tests/fixtures/red-kiln-ambush/fixture.json` (Red Kiln Ambush test fixture, CHC entries CHC-21 through CHC-25).
-**Deps**: SPEC79CHCREM-001
+**Deps**: archive/tickets/SPEC79CHCREM-001.md
 
 ## Problem
 

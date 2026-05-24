@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-index/src/schema/types.ts` (STORY_EDGE_TYPES enum); `tools/world-index/src/parse/atomic.ts` (CHC parser); three world-index regression tests.
-**Deps**: SPEC79CHCREM-001
+**Deps**: archive/tickets/SPEC79CHCREM-001.md
 
 ## Problem
 

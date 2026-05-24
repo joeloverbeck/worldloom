@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/structural/chc-slt-selected-commitment-trace.ts` (structural validator); `tools/validators/tests/structural/chc-slt-selected-commitment-trace.test.ts` (validator regression test).
-**Deps**: SPEC79CHCREM-001
+**Deps**: archive/tickets/SPEC79CHCREM-001.md
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — three turn-cycle reference files: `.claude/skills/branching-story-turn-cycle/references/phase-1-action-resolution.md` (Phase 1 routing change), `.claude/skills/branching-story-turn-cycle/references/phase-8-choice-generation.md` (CHC enumeration + axis list), `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` (validator gate axis list).
-**Deps**: SPEC79CHCREM-001, SPEC79CHCREM-003
+**Deps**: archive/tickets/SPEC79CHCREM-001.md, SPEC79CHCREM-003
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators/src/rules/rule_choice_set_noncollapse.ts` (rule validator); `tools/validators/tests/rules/rule_choice_set_noncollapse.test.ts` (rule test fixture).
-**Deps**: SPEC79CHCREM-001
+**Deps**: archive/tickets/SPEC79CHCREM-001.md
 
 ## Problem
 
