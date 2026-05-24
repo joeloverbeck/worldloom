@@ -1,8 +1,8 @@
 # SPEC-77 — Minimal SLT Grounding Provenance
 
-**Status:** Draft (proposed 2026-05-23)
+**Status:** COMPLETED 2026-05-24
 **Spec ID:** SPEC-77
-**Depends on:** [SPEC-76](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the closed `turn_driver.kind` enum that `compatible_turn_drivers[]` references)
+**Depends on:** [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the closed `turn_driver.kind` enum that `compatible_turn_drivers[]` references)
 **Source report:** `reports/slt-chc-overhaul-first-iteration.md` (triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`)
 
 ## 1. Problem
@@ -79,20 +79,25 @@ grounding:
 
 The `additionalProperties: false` constraint on `grounding` is intentional: it forbids the dropped fields from creeping back. To add a field later, this schema must be amended via a successor spec.
 
-### 3.2 Shared story state contract — `.claude/skills/_shared-templates/story-state-contract.md`
+### 3.2 Shared story-record schemas — `.claude/skills/_shared-templates/story-record-schemas.md`
 
-Amend §4 (SLT schema canonical field list) to document `grounding.compatible_turn_drivers` and `grounding.reason_to_exist`. Cite SPEC-77 in the change note. Add an authoring guideline at §4 SLT subsection:
+Amend §4.4 (`SLT` commitment block canonical field list) to document `grounding.compatible_turn_drivers` and `grounding.reason_to_exist` as required sub-paths of a new required top-level `grounding` object. Cite SPEC-77 in the change note. Schema content authority: `story-record-schemas.md` §4.4 is the canonical home of the SLT field list per `story-state-contract.md` §4 (which is now a navigational stub redirecting to the sibling file); the matching JSON Schema source of truth remains `tools/validators/src/schemas/story-storylet.schema.json` per §3.1.
 
-> An SLT's `reason_to_exist` must name the active or reusable pressure logic the storylet captures — what causal state makes it eligible, and what kind of move it represents. Generic phrases like "dramatic variety," "good conflict," "advance the plot," "raise stakes," "create tension," and "for pacing" are structurally rejected (see `slt_grounding_minimal_integrity` banned-phrase list).
+The companion authoring guideline (what `reason_to_exist` must name and which phrasings are structurally rejected) lands in the commitment-block-authoring skill — see §3.3 Phase 4 preamble — not in the schema field-list file, because authoring guidance is out of scope for `story-record-schemas.md`.
 
 ### 3.3 Commitment-block-authoring skill — `.claude/skills/commitment-block-authoring/SKILL.md`
 
-Amend Phase 4 (block-shape authoring) to:
+Amend Phase 4 (block-shape authoring) with the following preamble + per-field requirements:
+
+> An SLT's `reason_to_exist` must name the active or reusable pressure logic the storylet captures — what causal state makes it eligible, and what kind of move it represents. Generic phrases like "dramatic variety," "good conflict," "advance the plot," "raise stakes," "create tension," and "for pacing" are structurally rejected (see `slt_grounding_minimal_integrity` banned-phrase list below).
+
+Per-field requirements:
+
 - Require `grounding.compatible_turn_drivers[]` to be set per block. For a global-author-pool / branch-prefix pattern, list every driver kind the pattern can serve (commonly: `[player_action, player_write_in, npc_action, offstage_action]` for a pursuit pattern; `[clock_fire, world_pressure]` for a deadline-pressure pattern). For a branch-scoped runtime_jit block, list the single driver kind the JIT was created for.
 - Require `grounding.reason_to_exist` per block. Provide a 1-2 sentence statement naming the active pressure record(s) or reusable pressure class. Examples:
   - "Covers offstage or onstage pursuit pressure from an active opposing actor." (global pattern)
   - "Varro's active plan (STPLAN-9) and ambush clock (CLK-3) became due; Jon and Mara must react in POV." (runtime_jit)
-- Banned-phrase list (rejected by `slt_grounding_minimal_integrity`): "dramatic variety", "good conflict", "advance the plot", "raise stakes", "create tension", "for pacing", "dramatic moment", "story beat", "narrative momentum". This list is amendable via the shared contract.
+- Banned-phrase list (rejected by `slt_grounding_minimal_integrity`): "dramatic variety", "good conflict", "advance the plot", "raise stakes", "create tension", "for pacing", "dramatic moment", "story beat", "narrative momentum". This list is amendable via the shared utility at `tools/validators/src/structural/slt-grounding-utils.ts` (§3.4 Notes).
 
 ### 3.4 New validator — `slt_grounding_minimal_integrity`
 
@@ -110,14 +115,16 @@ Register in `tools/validators/src/public/registry.ts`. Runs in `full-world` and 
 
 **Notes:** The banned-phrase list lives in `tools/validators/src/structural/slt-grounding-utils.ts` (new file) so the test suite can import it. The list is intentionally small (~9 entries) and conservative — the goal is to catch the cheapest authorial laziness, not to enforce literary quality. False positives (an author meaningfully writes "raise stakes" as part of a richer sentence) can be revisited with the operator at validation time; the operator can rephrase rather than override.
 
+**Schema-overlap diagnostic semantics:** Two codes (`slt_grounding_missing`, `slt_grounding_compatible_turn_drivers_empty`) overlap JSON-Schema `required` checks at the `grounding` object level. The structural validator emits these codes regardless of whether the JSON Schema pre-apply pass also flagged the record — no early-return on schema fail. The intent is unified, named diagnostics in the structural validator surface (consumers parse codes, not schema messages); deduplication is the framework's responsibility, not the validator's. An author-time fail produces both a schema "required" violation and the structural code; downstream reporting concatenates or dedupes per its UX needs.
+
 ### 3.5 Validator interaction with turn-cycle Phase 2
 
-The turn-cycle skill's Phase 2 (commitment-block selection) is amended (small change, may be folded into SPEC-76 Slice B implementation):
+The turn-cycle skill's Phase 2 (commitment-block selection) is amended:
 
-- When `SE.turn_driver.kind` is set, Phase 2 filters the author-pool SLT candidates by `SLT.grounding.compatible_turn_drivers[]` containing the driver kind. SLTs without a matching compatible driver are excluded from selection.
-- A runtime_jit SLT created in Phase 2 must declare its `compatible_turn_drivers` as `[<the kind matching the current SE.turn_driver.kind>]` — singleton, validated by `slt_grounding_runtime_jit_driver_kind_singleton`.
+- **Phase 2.1 driver-kind compatibility filter** — when `SE.turn_driver.kind` is set, Phase 2.1 filters the author-pool SLT candidates by `SLT.grounding.compatible_turn_drivers[]` containing the driver kind. SLTs without a matching compatible driver are excluded from selection. The filter rejection site lives in the existing turn-cycle Phase 2 reference file (`.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md`); ticket decomposition writes a new sub-section there.
+- A runtime_jit SLT created in Phase 2 must declare its `compatible_turn_drivers` as `[<the kind matching the current SE.turn_driver.kind>]` — singleton, validated by `slt_grounding_runtime_jit_driver_kind_singleton` for the singleton-length constraint at storage time.
 
-This is the runtime side of the structural compatibility check. The validator enforces the schema-level promise; the skill operationalizes it at selection time.
+**Responsibility split:** the `slt_grounding_runtime_jit_driver_kind_singleton` validator enforces only that a runtime_jit SLT's `compatible_turn_drivers` is length-1 at storage time. Match between the JIT's singleton value and the resolved `SE.turn_driver.kind` is enforced by Phase 2.1's compatible-driver filter at selection time, not by the storage-time validator; a stored-singleton mismatch would only surface as a Phase 2.1 selection rejection (no SLT-record-level cross-reference check). This is intentional — Phase 2 creates the JIT from the resolved `SE.turn_driver.kind`, so the stored mismatch shape is structurally improbable; adding a cross-record validator for it would over-couple the validator to SE/PG retrieval. The runtime side is Phase 2.1; the schema side is `slt_grounding_runtime_jit_driver_kind_singleton`.
 
 ## 4. Out of Scope
 
@@ -162,7 +169,15 @@ Per the inline-fixture-builder pattern (SPEC-75 precedent):
 
 ### 6.3 Existing-fixture migration
 
-If any test bundle (e.g., `red-bunny`) carries SLT records, each must gain `grounding.compatible_turn_drivers` and `grounding.reason_to_exist`. Document this in the implementation ticket's Assumption Reassessment.
+Schema-bearing SLT-construction sites in the validator package must be migrated to populate `grounding.compatible_turn_drivers` and `grounding.reason_to_exist`. A reassessment-time grep (`record_kind: storylet_record` + `create_slt_record`) finds the live consumer surface concentrated in `tools/validators/tests/{integration,structural,cli,rules,fixtures}/`:
+
+- integration tests: `validate-patch-plan.test.ts`, `spec34-integration.test.ts`, `spec57-stchar-pipeline-integration.test.ts`
+- structural tests: `chc-slt-selected-commitment-trace.test.ts`, `state-delta-class-integrity.test.ts`, `branch-isolation.test.ts`, `recursive-reference-closure.test.ts`, `record-schema-compliance.test.ts`
+- cli tests: `world-validate.story-bundle.test.ts`
+- rules tests: `rule_storylet_predicate_dsl_parsability.test.ts`
+- JSON fixtures: `patch-plan-complete-slt.json`, `patch-plan-missing-mystery-safety-slt.json`
+
+No live `worlds/<world>/stories/<story>/_source/storylets/` records exist in the worktree; migration scope is the test surface only. Inline-fixture-builder helpers that construct `storylet_record` should be updated in one pass to supply the new fields with realistic defaults; per-test overrides target only those tests whose assertions depend on the grounding shape. Document this in the implementation ticket's Assumption Reassessment.
 
 ## 7. Migration
 
@@ -174,16 +189,17 @@ Same posture as SPEC-76: no backwards-compat shims. SLT records without `groundi
 
 Smaller than SPEC-76:
 
-1. **Slice A — Schema + shared contract amendment + banned-phrase utility.** `story-storylet.schema.json` + `.claude/skills/_shared-templates/story-state-contract.md` §4 SLT subsection + new `tools/validators/src/structural/slt-grounding-utils.ts`. Schema tests written first (TDD).
+1. **Slice A — Schema + shared-record-schemas amendment + banned-phrase utility.** `story-storylet.schema.json` + `.claude/skills/_shared-templates/story-record-schemas.md` §4.4 SLT subsection + new `tools/validators/src/structural/slt-grounding-utils.ts`. Schema tests written first (TDD).
 2. **Slice B — `slt_grounding_minimal_integrity` validator + registry.** Tests inline-fixture-builder pattern.
-3. **Slice C — Commitment-block-authoring skill amendment.** Phase 4 changes + banned-phrase list inlined into the skill's reference file.
-4. **Slice D — Turn-cycle Phase 2 compatible-driver filter.** Small change; may be folded into SPEC-76 Slice B (Phase 0 + bootstrap + health-audit) rather than a separate slice.
+3. **Slice C — Commitment-block-authoring skill amendment.** Phase 4 preamble (authoring guideline) + per-field requirements + banned-phrase list inlined into the skill (per §3.3). The authoring guideline lives here rather than in the schema field-list file (`story-record-schemas.md` is schema-only).
+4. **Slice D — Turn-cycle Phase 2.1 compatible-driver filter (standalone).** Phase 2.1 filter + responsibility-split prose in the existing turn-cycle Phase 2 reference file (per §3.5). Standalone slice — SPEC-76 has completed and archived, so the prior "may be folded into SPEC-76 Slice B" option no longer applies.
 
 `spec-to-tickets` will materialize these when the spec is decomposed.
 
 ## 9. Risk Reassessment
 
 - **Banned-phrase false positives.** A real authorial phrase might overlap "raise stakes" or "dramatic moment" in context. Mitigation: list is conservative; operator can rephrase at validation time. The validator emits a fail-fast diagnostic, not a silent suppression.
+- **Banned-phrase substring-precision limitation.** The validator uses case-insensitive substring matching against the closed list. This catches the canonical phrasing of laziness (e.g., "raise stakes" inside "raise stakes considerably") but does NOT catch near-paraphrases that break the substring (e.g., "raise the stakes", "raised stakes", "stakes get raised"). This is acceptable for a conservative-by-design list — the intent is to catch the cheapest authorial laziness, not to enforce literary quality (per §3.4 Notes). If linguistically-creative laziness becomes a problem in practice, a word-boundary or fuzzy-match upgrade to `slt-grounding-utils.ts` can be considered in a successor spec; today's mitigation is judgment-assisted review at audit time.
 - **Compatibility-array overload at authoring time.** Authors might list every driver kind reflexively. Mitigation: the commitment-block-authoring skill's amended Phase 4 includes guidance examples (pursuit pattern → `[npc_action, offstage_action]`; deadline pattern → `[clock_fire, world_pressure]`); the runtime_jit singleton constraint prevents JIT blocks from over-claiming.
 - **Upstream sequencing + enum-match dependency on SPEC-76.** SPEC-77's `compatible_turn_drivers` enum at §3.1 (lines 66-74) must match SPEC-76's `turn_driver.kind` enum (per SPEC-76 §3.1) byte-for-byte. At the SPEC-76 reassessment + decomposition session on 2026-05-23, both enums list the identical 8 values in the same order — `player_action`, `player_write_in`, `npc_action`, `offstage_action`, `world_pressure`, `clock_fire`, `secret_reveal`, `multi_actor_collision` — and the match was verified. The `additionalProperties: false` constraint on `grounding` (§3.1) plus the closed enum on `compatible_turn_drivers` make the cross-spec contract structurally enforceable, but the byte-for-byte values must match for the contract to compose. Mitigation: when SPEC-77 is decomposed by `/spec-to-tickets`, every ticket referencing the enum should declare upstream `Deps: archive/tickets/SPEC76TURDRIPRI-001.md` (the SPEC-76 schema ticket that lands the enum on `story-event.schema.json`) so the dependency is structurally enforced at implementation time. Any subsequent reassess-spec pass on SPEC-77 must re-verify the enum-match if either side is amended; a drift detected at reassess-spec time is cheaper than a drift detected at validator-runtime time when a real bundle's SLT fails compatibility-filtering.
 
@@ -194,4 +210,27 @@ Smaller than SPEC-76:
 - FOUNDATIONS §Story Bundles §5a / §5b / §5c: `docs/FOUNDATIONS.md:648-666`.
 - Existing schema: `tools/validators/src/schemas/story-storylet.schema.json`.
 - Existing skill: `.claude/skills/commitment-block-authoring/SKILL.md`.
-- Predecessor: [SPEC-76](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the `turn_driver.kind` enum that `compatible_turn_drivers[]` references).
+- Predecessor: [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the `turn_driver.kind` enum that `compatible_turn_drivers[]` references).
+
+## Outcome
+
+Completed 2026-05-24. SPEC-77 landed all four slices:
+
+- Slice A: `story-storylet.schema.json` now requires the minimal two-field `grounding` object; the shared SLT schema contract documents `grounding.compatible_turn_drivers[]` and `grounding.reason_to_exist`; validator fixtures were migrated; `slt-grounding-utils.ts` owns the banned-phrase list.
+- Slice B: `slt_grounding_minimal_integrity` is registered and enforces missing/empty/unknown driver values, short/generic reasons, and runtime-JIT singleton-length.
+- Slice C: `commitment-block-authoring` now requires SPEC-77 grounding at authoring time and mirrors the banned-phrase list from the utility.
+- Slice D: the turn-cycle Phase 2/3 reference now documents Phase 2.1 driver-kind compatibility filtering and the singleton-length versus singleton-value responsibility split.
+
+Verification completed at final archival:
+
+- `cd tools/validators && npm run build` — passed.
+- `cd tools/validators && node --test dist/tests/schemas/story-storylet-grounding.test.js` — passed, 6/6 tests.
+- `cd tools/validators && node --test dist/tests/structural/slt-grounding-minimal-integrity.test.js` — passed, 4/4 tests.
+- `cd tools/validators && node --test dist/tests/structural/registry.test.js` — passed.
+- `cd tools/world-mcp && npm run build` — passed.
+- `cd tools/world-mcp && node --test dist/tests/server/capability-parity.test.js` — passed, 5/5 tests.
+- `grep -nE 'compatible_turn_drivers|reason_to_exist|slt-grounding-utils' .claude/skills/commitment-block-authoring/SKILL.md` — passed.
+- `grep -nE 'Phase 2.1|compatible_turn_drivers|slt_grounding_runtime_jit' .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` — passed.
+- Node enum parity probes confirmed `story-event.schema.json` and `story-storylet.schema.json` share the same 8 driver kinds in order, and the Phase 2.1 reference lists them in that order.
+
+Deviation: the broad `cd tools/validators && npm test` lane was not used as final archival proof because SPEC77SLTGROPRO-002 documented existing Codex-runner wrapper noise outside this spec's owned seam. The final archival proof used the focused schema, structural-validator, registry, and downstream parity lanes that exercise the landed SPEC-77 surfaces directly.

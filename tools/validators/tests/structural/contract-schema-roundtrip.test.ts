@@ -22,8 +22,8 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     properties: ["record_kind", "id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "targets", "commitment", "turn_driver", "outcome_route", "resolution", "world_logic_rationale", "record_introductions", "state_relations", "non_propagation_facts", "state_delta", "promotion_claims"]
   },
   "story-storylet": {
-    required: ["id", "story_id", "scope", "title", "move_family", "preconditions", "beats", "exit_options", "saliency", "mystery_policy", "provenance"],
-    properties: ["record_kind", "id", "story_id", "supersedes", "scope", "created_at_page", "title", "move_family", "preconditions", "beats", "effects", "exit_options", "saliency", "mystery_policy", "provenance"]
+    required: ["id", "story_id", "scope", "title", "move_family", "preconditions", "beats", "exit_options", "saliency", "mystery_policy", "provenance", "grounding"],
+    properties: ["record_kind", "id", "story_id", "supersedes", "scope", "created_at_page", "title", "move_family", "preconditions", "beats", "effects", "exit_options", "saliency", "mystery_policy", "provenance", "grounding"]
   },
   "story-entity": {
     required: ["id", "story_id", "created_at_page", "display_name", "bound_stchar_id", "role_in_story"],
@@ -481,7 +481,11 @@ test("story schemas accept padded legacy cross-references but keep malformed ref
       ],
       saliency: { urgency: "medium", cooldown_pages: 0 },
       mystery_policy: { allowed_authority: "apparent", forbidden_resolutions: ["M-0001"] },
-      provenance: { origin: "bootstrap_seed" }
+      provenance: { origin: "bootstrap_seed" },
+      grounding: {
+        compatible_turn_drivers: ["player_action"],
+        reason_to_exist: "Supports the repair-choice schema roundtrip fixture."
+      }
     })
   ];
 

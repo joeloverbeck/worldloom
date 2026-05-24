@@ -27,6 +27,25 @@ If no eligible block exists, create one branch-scoped JIT block:
 
 Avoid pre-emptive JIT creation. If a flexible author-pool block fits with slight reframing, prefer that block. JIT blocks follow FOUNDATIONS §Story Bundles §5a (commitment blocks are causal moves, not dramatic acts or arcs) — no `arc_contract` / `dramatic_unit` / `execution_envelope` / `stop_policy` / shape discriminators.
 
+### Phase 2.1: Driver-kind compatibility filter
+
+When `SE.turn_driver.kind` is set on a `turn_resolution` event, Phase 2 first filters author-pool `SLT` candidates by `SLT.grounding.compatible_turn_drivers[]` containing the resolved driver kind. SLTs without a matching compatible driver are excluded before further salience ranking, predicate eligibility checks, alias binding, or instantiation. This is a local-salience-narrowing pass per FOUNDATIONS §Story Bundles §5c ("Driver salience is local"), and it composes with the shared hard gates in `_shared-templates/story-state-contract.md` §7 by running before those gates validate the narrowed eligible pool.
+
+The compatible driver-kind vocabulary is the SPEC-76 `SE.turn_driver.kind` enum, in this exact order:
+
+1. `player_action`
+2. `player_write_in`
+3. `npc_action`
+4. `offstage_action`
+5. `world_pressure`
+6. `clock_fire`
+7. `secret_reveal`
+8. `multi_actor_collision`
+
+A `runtime_jit`-origin SLT created during Phase 2 must declare `grounding.compatible_turn_drivers` as a singleton list containing the current `SE.turn_driver.kind`, for example `[npc_action]` when the selected driver is `npc_action`.
+
+**Responsibility split with `slt_grounding_minimal_integrity` (SPEC-77 §3.4)**: the validator enforces singleton-length at storage time via the `slt_grounding_runtime_jit_driver_kind_singleton` code; a `runtime_jit` SLT with `compatible_turn_drivers.length > 1` fails the storage-time gate. The validator does not enforce singleton-value match, meaning it does not cross-check that the stored singleton equals the resolved `SE.turn_driver.kind` for the event that created the JIT. That match is enforced by this Phase 2.1 filter at selection time: a stored singleton-value mismatch makes the JIT ineligible because its `compatible_turn_drivers` does not contain the current driver kind. This split is intentional; Phase 2 creates the JIT from the resolved `SE.turn_driver.kind`, so a stored mismatch would indicate Phase 2 authoring drift, while a cross-record validator would over-couple SLT validation to SE/PG retrieval.
+
 ## Phase 3: Apply the state delta
 
 Apply exactly one causal delta from parent snapshot. The delta may:

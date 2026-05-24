@@ -239,7 +239,7 @@ For DA-grounded eligibility, use the `artifact_accessible(STENT-<integer>, DA-<i
 
 Run 6 per-block gates on each drafted SLT record:
 
-1. **Schema and origin completeness** — all required fields per shared contract §4.4 are present (`id`, `story_id`, `scope.visibility`, `title`, `move_family`, `preconditions.hard` with ≥1 entry, `beats[]` with ≥1 entry, `exit_options[]` with ≥1 entry, `saliency.urgency`, `saliency.cooldown_pages`, `mystery_policy.allowed_authority`, `provenance.origin`). `provenance.origin` MUST be `author_batch` for `direct_batch` and `audit_repair` for `audit_repair`; this skill never emits `runtime_jit`, so `created_at_page` MAY be null per shared contract §4.4. The presence of ANY of the explicitly-forbidden legacy fields (`arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, `record_version > 1`, `shape:`) is `FAIL` per FOUNDATIONS §Story Bundles §5a. Missing required field, wrong origin, or presence of forbidden field → `FAIL`.
+1. **Schema and origin completeness** — all required fields per shared contract §4.4 are present (`id`, `story_id`, `scope.visibility`, `title`, `move_family`, `preconditions.hard` with ≥1 entry, `beats[]` with ≥1 entry, `exit_options[]` with ≥1 entry, `saliency.urgency`, `saliency.cooldown_pages`, `mystery_policy.allowed_authority`, `provenance.origin`, `grounding`). `provenance.origin` MUST be `author_batch` for `direct_batch` and `audit_repair` for `audit_repair`; this skill never emits `runtime_jit`, so `created_at_page` MAY be null per shared contract §4.4. The presence of ANY of the explicitly-forbidden legacy fields (`arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, `record_version > 1`, `shape:`) is `FAIL` per FOUNDATIONS §Story Bundles §5a. Missing required field, wrong origin, or presence of forbidden field → `FAIL`.
 
 2. **Predicate parse** — every predicate in `preconditions.hard` and `preconditions.soft` is one of the closed-DSL predicates, with valid argument shapes, record-id references, and `bound:<alias>` references backed by same-`SLT` existential bindings. Free-form prose, undefined predicates, ill-formed combinator syntax, or unbound aliases → `FAIL`.
 
@@ -256,6 +256,18 @@ Blocks that fail any gate are removed from the batch with a logged rejection rea
 ## Phase 4: Batch-diversity validation (`direct_batch` only)
 
 `audit_repair` skips this phase — its blocks are RSP-driven and may legitimately concentrate on one repair theme.
+
+### Grounding (SPEC-77)
+
+> An SLT's reason_to_exist must name the active or reusable pressure logic the storylet captures: what causal state makes it eligible, and what kind of move it represents. Generic phrases like "dramatic variety," "good conflict," "advance the plot," "raise stakes," "create tension," and "for pacing" are structurally rejected (see `slt_grounding_minimal_integrity` banned-phrase list below).
+
+Per-field requirements:
+
+- Require `grounding.compatible_turn_drivers[]` to be set per block. For a global-author-pool / branch-prefix pattern, list every driver kind the pattern can serve (commonly: `[player_action, player_write_in, npc_action, offstage_action]` for a pursuit pattern; `[clock_fire, world_pressure]` for a deadline-pressure pattern). For a branch-scoped runtime_jit block, list the single driver kind the JIT was created for.
+- Require `grounding.reason_to_exist` per block. Provide a 1-2 sentence statement naming the active pressure record(s) or reusable pressure class. Examples:
+  - "Covers offstage or onstage pursuit pressure from an active opposing actor." (global pattern)
+  - "Varro's active plan (STPLAN-9) and ambush clock (CLK-3) became due; Jon and Mara must react in POV." (runtime_jit)
+- Banned-phrase list (rejected by `slt_grounding_minimal_integrity`): "dramatic variety", "good conflict", "advance the plot", "raise stakes", "create tension", "for pacing", "dramatic moment", "story beat", "narrative momentum". This list is amendable via the shared utility at `tools/validators/src/structural/slt-grounding-utils.ts`; mirror amendments here when the utility changes.
 
 For `direct_batch`, verify across the surviving blocks:
 

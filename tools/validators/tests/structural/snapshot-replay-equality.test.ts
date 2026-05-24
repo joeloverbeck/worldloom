@@ -450,6 +450,10 @@ function recordsFor(pageSnapshot: Record<string, unknown>, pageHash: string) {
             ]
           }
         ]
+      },
+      grounding: {
+        compatible_turn_drivers: ["npc_action"],
+        reason_to_exist: "Supports snapshot replay effect-model comparison."
       }
     })
   ];

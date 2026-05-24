@@ -3,7 +3,7 @@
 **Date:** 2026-05-23
 **Source report:** [`reports/slt-chc-overhaul-first-iteration.md`](../../reports/slt-chc-overhaul-first-iteration.md) (2140 lines; research-driven STCHAR ↔ SLT ↔ CHC consolidation architecture proposal from ChatGPT-Pro)
 **Trigger:** Playtest concern — "the entire story was reactive upon what I as the player chose."
-**Deliverables produced:** [`archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](../../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [`specs/SPEC-77-slt-grounding-provenance-minimal.md`](../../specs/SPEC-77-slt-grounding-provenance-minimal.md), [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md)
+**Deliverables produced:** [`archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](../../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [`archive/specs/SPEC-77-slt-grounding-provenance-minimal.md`](../../archive/specs/SPEC-77-slt-grounding-provenance-minimal.md), [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md)
 
 ## Triage summary
 
@@ -173,7 +173,7 @@ The report's structural test for SLT genericness — "fail if reason_to_exist is
 
 Per the User pre-authorization clause in the original request ("If changes are warranted, aligned with docs/FOUNDATIONS.md, create specs in specs/*. If more than one spec is warranted, create specs/IMPLEMENTATION-ORDER.md"), the triage recommendation was presented in chat and the spec deliverables (SPEC-76, SPEC-77, IMPLEMENTATION-ORDER.md) were written in the same turn. The user did not redirect during the presentation, activating the pre-authorization.
 
-Historical triage next step: `spec-to-tickets` was the next-phase decomposer; SPEC-78 and SPEC-76 have since been implemented and archived, while SPEC-77 remains the active downstream spec depending on SPEC-76's `turn_driver.kind` enum.
+Historical triage next step: `spec-to-tickets` was the next-phase decomposer; SPEC-78, SPEC-76, and SPEC-77 have since been implemented and archived.
 
 ## Update — 2026-05-23 — FOUNDATIONS amendment reversal
 

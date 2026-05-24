@@ -13,7 +13,8 @@
     "exit_options",
     "saliency",
     "mystery_policy",
-    "provenance"
+    "provenance",
+    "grounding"
   ],
   "properties": {
     "record_kind": { "type": "string", "const": "storylet_record" },
@@ -237,6 +238,35 @@
         }
       },
       "additionalProperties": false
+    },
+    "grounding": {
+      "type": "object",
+      "required": ["compatible_turn_drivers", "reason_to_exist"],
+      "additionalProperties": false,
+      "properties": {
+        "compatible_turn_drivers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "player_action",
+              "player_write_in",
+              "npc_action",
+              "offstage_action",
+              "world_pressure",
+              "clock_fire",
+              "secret_reveal",
+              "multi_actor_collision"
+            ]
+          }
+        },
+        "reason_to_exist": {
+          "type": "string",
+          "minLength": 16
+        }
+      }
     }
   },
   "allOf": [

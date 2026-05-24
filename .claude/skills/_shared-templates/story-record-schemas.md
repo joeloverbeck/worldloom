@@ -333,7 +333,12 @@ mystery_policy:
   allowed_authority: apparent | branch_local_counterfactual | canon_candidate | none   # *
 provenance:
   origin: bootstrap_seed | manual_authoring | author_batch | audit_repair | runtime_jit   # *
+grounding:                              # * Added in SPEC-77; exactly two sub-paths.
+  compatible_turn_drivers: [<turn-driver-kind>]*  # closed 8-value enum matching SPEC-76 SE.turn_driver.kind byte-for-byte; minItems: 1; uniqueItems: true
+  reason_to_exist: string*              # minLength: 16; rejected by slt_grounding_minimal_integrity banned-phrase list
 ```
+
+Change note: Added in SPEC-77: `grounding` object (`compatible_turn_drivers` + `reason_to_exist`). The five dropped grounding fields are documented in SPEC-77 §4 Out of Scope and remain forbidden by the schema's `additionalProperties: false` constraint.
 
 `created_at_page` is provenance for page-local creation, not branch scope. For
 `provenance.origin: runtime_jit`, it MUST name the page whose turn created the

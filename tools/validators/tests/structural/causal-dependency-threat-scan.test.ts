@@ -212,7 +212,11 @@ function storylet(id: string, hardPreconditions: unknown[], urgency: string) {
     story_id: "STORY-1",
     scope: { visibility: "global_author_pool", branch_id: null },
     preconditions: { hard: hardPreconditions },
-    saliency: { urgency }
+    saliency: { urgency },
+    grounding: {
+      compatible_turn_drivers: ["npc_action"],
+      reason_to_exist: "Exercises causal dependency pressure in storylet fixtures."
+    }
   });
 }
 

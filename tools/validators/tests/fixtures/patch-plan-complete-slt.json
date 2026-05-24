@@ -81,6 +81,10 @@
             "source_rsp": null,
             "created_at_page": null
           },
+          "grounding": {
+            "compatible_turn_drivers": ["npc_action"],
+            "reason_to_exist": "Default fixture grounding for complete patch-plan SLT."
+          },
           "visibility": {
             "scope": "global_author_pool",
             "visible_from_page": null,

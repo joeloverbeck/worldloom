@@ -396,7 +396,14 @@ function validReferenceRecords(): IndexedRecord[] {
 }
 
 function storyletRecord(id: string, parsed: Record<string, unknown>): IndexedRecord {
-  return record("storylet_record", `marla:${id}`, `stories/marla/_source/storylets/${id}.yaml`, { id, ...parsed });
+  return record("storylet_record", `marla:${id}`, `stories/marla/_source/storylets/${id}.yaml`, {
+    id,
+    grounding: {
+      compatible_turn_drivers: ["npc_action"],
+      reason_to_exist: "Exercises predicate DSL parsing for storylet fixture records."
+    },
+    ...parsed
+  });
 }
 
 function nestedNot(depth: number): Record<string, unknown> {

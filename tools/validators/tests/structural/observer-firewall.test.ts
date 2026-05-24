@@ -504,7 +504,11 @@ function storylet(id: string, hardPreconditions: unknown[]) {
   return storyRecord("storylet_record", id, "storylets", {
     id,
     story_id: "STORY-1",
-    preconditions: { hard: hardPreconditions, soft: [] }
+    preconditions: { hard: hardPreconditions, soft: [] },
+    grounding: {
+      compatible_turn_drivers: ["npc_action"],
+      reason_to_exist: "Exercises observer-firewall predicate access in storylets."
+    }
   });
 }
 

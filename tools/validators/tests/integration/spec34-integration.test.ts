@@ -315,7 +315,11 @@ function storylet(id: string): FixtureRecord {
     exit_options: [{ action_family: "decide", surface_hint: "Choose" }],
     saliency: { urgency: "medium", cooldown_pages: 0 },
     mystery_policy: { allowed_authority: "none" },
-    provenance: { origin: "author_batch" }
+    provenance: { origin: "author_batch" },
+    grounding: {
+      compatible_turn_drivers: ["player_action", "player_write_in"],
+      reason_to_exist: "Supports player decision pressure in the integration fixture."
+    }
   });
 }
 

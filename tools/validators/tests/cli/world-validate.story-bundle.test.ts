@@ -85,7 +85,14 @@ function insertStoryRecords(
       bound_stchar_id: "STCHAR-1",
       role_in_story: ["primary_actor"]
     }],
-    ["storylet_record", storyletId, "storylets", { id: storyletId, preconditions: { hard: [predicate] } }]
+    ["storylet_record", storyletId, "storylets", {
+      id: storyletId,
+      preconditions: { hard: [predicate] },
+      grounding: {
+        compatible_turn_drivers: ["npc_action"],
+        reason_to_exist: "Exercises story-bundle predicate parsing in CLI fixtures."
+      }
+    }]
   ] as const) {
     insert.run(`${storySlug}:${id}`, storySlug, `${basePath}/${subdir}/${id}.yaml`, nodeType, yaml.dump(parsed));
   }

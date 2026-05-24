@@ -115,7 +115,11 @@ test("recursive_reference_closure allows global author-pool storylets", async ()
         story_id: "STORY-1",
         scope: { visibility: "global_author_pool", branch_id: null },
         created_at_page: null,
-        provenance: { origin: "bootstrap_seed" }
+        provenance: { origin: "bootstrap_seed" },
+        grounding: {
+          compatible_turn_drivers: ["player_action"],
+          reason_to_exist: "Supports global author-pool reference closure checks."
+        }
       })
     ]
   }), {
@@ -843,7 +847,11 @@ function branchPrefixStorylet(id: string, visible_branch_path_prefix?: unknown) 
       ...(visible_branch_path_prefix === undefined ? {} : { visible_branch_path_prefix })
     },
     created_at_page: null,
-    provenance: { origin: "focus_authoring" }
+    provenance: { origin: "manual_authoring" },
+    grounding: {
+      compatible_turn_drivers: ["npc_action"],
+      reason_to_exist: "Supports branch-prefix reference closure checks."
+    }
   });
 }
 

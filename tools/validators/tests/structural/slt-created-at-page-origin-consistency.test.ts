@@ -83,6 +83,10 @@ function storylet(id: string, overrides: Record<string, unknown> = {}) {
       provenance: {
         origin: "author_batch"
       },
+      grounding: {
+        compatible_turn_drivers: ["player_action"],
+        reason_to_exist: "Supports authored orientation pressure in the fixture."
+      },
       ...overrides
     }),
     story_slug: "test-story"

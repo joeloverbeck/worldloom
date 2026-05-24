@@ -1,9 +1,9 @@
 {
-  "originating_spec": null,
-  "archived_spec": "archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md",
-  "last_ticket": "archive/tickets/SPEC76TURDRIPRI-011.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "432316d6c7526c09768c6c2371de479c08f8dce7",
+  "originating_spec": "archive/specs/SPEC-77-slt-grounding-provenance-minimal.md",
+  "archived_spec": "archive/specs/SPEC-77-slt-grounding-provenance-minimal.md",
+  "last_ticket": "archive/tickets/SPEC77SLTGROPRO-004.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "491099c6227d49784834f984bd650e36fcb36ef3",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -12,8 +12,9 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked worktree clean; expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/",
+  "proof_state": "clean",
+  "dirty_state": "tracked worktree expected clean after state-file commit; expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
   "post_review_material_updates": false,
   "post_review_audit_block": "not_applicable",
-  "updated_at": "2026-05-23"
+  "updated_at": "2026-05-24"
 }

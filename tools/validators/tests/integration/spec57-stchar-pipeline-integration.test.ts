@@ -80,6 +80,10 @@ function recordsWithStoryletPredicate(recordActiveId: string): IndexedRecord[] {
       preconditions: {
         hard: [{ pred: "record_active", record: recordActiveId }],
         soft: []
+      },
+      grounding: {
+        compatible_turn_drivers: ["npc_action"],
+        reason_to_exist: "Exercises STCHAR-backed predicate grounding in the fixture."
       }
     })
   ];
