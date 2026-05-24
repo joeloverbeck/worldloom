@@ -1,6 +1,6 @@
 # SPEC77SLTGROPRO-004: turn-cycle Phase 2.1 compatible-driver filter (standalone)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` with a new Phase 2.1 sub-section documenting the driver-kind compatibility filter and the responsibility-split prose
@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC-76 landed the `SE.turn_driver.kind` enum and the Phase 0 driver evaluation in `branching-story-turn-cycle`. SPEC-77's Slice D operationalizes the schema's promise — once the new `SLT.grounding.compatible_turn_drivers[]` field is required (SPEC77SLTGROPRO-001), Phase 2 must filter the author-pool SLT candidates by driver-kind compatibility at selection time, and runtime_jit SLTs must be created with a singleton-kind matching the resolved `SE.turn_driver.kind`. Without the filter, the schema field is documented but unenforced at runtime: a `pursuit`-pattern SLT declaring `compatible_turn_drivers: [npc_action, offstage_action]` could still be selected on a `clock_fire`-driven turn, defeating the structural compatibility promise the schema makes.
+At intake, SPEC-76 had landed the `SE.turn_driver.kind` enum and the Phase 0 driver evaluation in `branching-story-turn-cycle`, while SPEC-77's required `SLT.grounding.compatible_turn_drivers[]` field still lacked a Phase 2 selection-time filter. Without that filter, a `pursuit`-pattern SLT declaring `compatible_turn_drivers: [npc_action, offstage_action]` could still be selected on a `clock_fire`-driven turn, defeating the structural compatibility promise the schema makes.
 
 The reassessed SPEC-77 §3.5 names the rejection site explicitly: `.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` — the existing Phase 2/3 reference file is where the new Phase 2.1 sub-section lands, alongside the Phase 2 commitment-block selection prose it refines. The reassessment also documented the responsibility split with SPEC77SLTGROPRO-002's validator: the storage-time validator enforces only length-1 on runtime_jit `compatible_turn_drivers`; the selection-time filter (this ticket) enforces the singleton-VALUE match against `SE.turn_driver.kind`.
 
@@ -18,6 +18,8 @@ The reassessed SPEC-77 §3.5 names the rejection site explicitly: `.claude/skill
 2. SPEC-77 §3.5 (post-reassess-spec) specifies the Phase 2.1 filter mechanism (filter author-pool SLT candidates by `SLT.grounding.compatible_turn_drivers[]` containing the current `SE.turn_driver.kind`) and the responsibility-split prose (singleton-LENGTH validated by `slt_grounding_runtime_jit_driver_kind_singleton` at storage time; singleton-VALUE match enforced by Phase 2.1 at selection time). SPEC-76's `turn_driver.kind` enum (`player_action | player_write_in | npc_action | offstage_action | world_pressure | clock_fire | secret_reveal | multi_actor_collision`) is the byte-for-byte source for the filter values.
 3. Cross-skill boundary: this ticket amends `branching-story-turn-cycle`'s Phase 2/3 reference. The skill is a Story-Pipeline (Category 2c) skill per FOUNDATIONS §Story Bundles §7. The filter mechanism is documented in the reference file (this ticket); runtime-side enforcement lives in the skill's actual Phase 2 implementation which an implementer of the reference file's prose will encode at skill-invocation time (the reference file is the contract; the skill body consumes the contract). The validator at SPEC77SLTGROPRO-002 enforces storage-time singleton-length; this ticket's filter enforces selection-time singleton-value-match — the two-surface responsibility split is named in the reference prose so a future operator reading either surface sees the full picture.
 4. FOUNDATIONS §Story Bundles §5c (Present Causal State, Not Narrative Shape) at `docs/FOUNDATIONS.md:660-666`, specifically the "Driver salience is local" paragraph extended by SPEC-78: driver selection is a prior local-salience-ranking pass before SLT selection. Phase 2.1 operationalizes this — the compatibility filter is a local salience-narrowing pass (excluding SLTs whose `compatible_turn_drivers` does not include the resolved `SE.turn_driver.kind`), not a global narrative-shape planner. The filter composes with the nine shared hard gates (`_shared-templates/story-state-contract.md` §7) — it narrows the eligible pool before §7's gates run, preserving the local-salience-then-hard-gates architecture.
+5. Live reassessment on 2026-05-24 confirmed the parent `.claude/skills/branching-story-turn-cycle/SKILL.md` already delegates Phase 2 details to this reference file, so no parent-skill body edit was needed. The owned surface remains the reference file only.
+6. Live enum check on 2026-05-24 confirmed `tools/validators/src/schemas/story-event.schema.json` and `tools/validators/src/schemas/story-storylet.schema.json` expose the same 8 driver-kind values in the same order.
 
 ## Architecture Check
 
@@ -33,25 +35,16 @@ The reassessed SPEC-77 §3.5 names the rejection site explicitly: `.claude/skill
 3. **Filter values match the SPEC-76 enum byte-for-byte** → codebase grep-proof: the 8 driver-kind values cited in the Phase 2.1 prose match `tools/validators/src/schemas/story-event.schema.json`'s `turn_driver.kind` enum (the same 8 values introduced by SPEC-76 and reused by SPEC77SLTGROPRO-001's schema change).
 4. **FOUNDATIONS §Story Bundles §5c alignment** → FOUNDATIONS alignment check: Phase 2.1 is a local-salience-narrowing pass (excluding incompatible SLTs), not a global narrative-shape planner; the prose explicitly cites this composition with the nine shared hard gates.
 
-## What to Change
+## Landed Changes
 
 ### 1. Phase 2.1 sub-section — `.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md`
 
-Append a new sub-section within the existing Phase 2 prose (or immediately after, before Phase 3 begins). The exact insertion point should preserve the file's existing structure — locate the Phase 2 commitment-block selection prose, find the natural end of the bind-then-instantiate step, and insert Phase 2.1 as a refinement before any Phase 3 prose begins.
+Inserted a new Phase 2.1 subsection between the existing JIT-block prose and Phase 3. The section now documents:
 
-**Recommended content** (adapted from SPEC-77 §3.5):
-
-```markdown
-### Phase 2.1: Driver-kind compatibility filter
-
-When `SE.turn_driver.kind` is set (every `turn_resolution` event per SPEC-76), Phase 2's selection pass first filters the author-pool SLT candidates by `SLT.grounding.compatible_turn_drivers[]` containing the resolved driver kind. SLTs without a matching compatible driver are excluded from selection before any further salience ranking, predicate eligibility checks, or alias binding. This is a local-salience-narrowing pass per FOUNDATIONS §Story Bundles §5c ("Driver salience is local") — it composes with the nine shared hard gates (`_shared-templates/story-state-contract.md` §7) which run on the narrowed eligible pool.
-
-A `runtime_jit`-origin SLT created at Phase 2 must declare its `compatible_turn_drivers` as `[<the kind matching the current SE.turn_driver.kind>]` — singleton.
-
-**Responsibility split with `slt_grounding_minimal_integrity` (SPEC-77 §3.4)**: the validator enforces singleton-LENGTH at storage time via the `slt_grounding_runtime_jit_driver_kind_singleton` code — a `runtime_jit` SLT with `compatible_turn_drivers.length > 1` fails the storage-time gate. The validator does NOT enforce singleton-VALUE match — i.e., that the stored singleton equals the resolved `SE.turn_driver.kind` for the SE the JIT was created against. The match is enforced by this Phase 2.1 filter at selection time: a stored-singleton-value mismatch surfaces as a Phase 2.1 selection rejection (the JIT becomes ineligible for selection because its `compatible_turn_drivers` does not contain the current driver kind). This responsibility split is intentional — Phase 2 creates the JIT from the resolved `SE.turn_driver.kind`, so the stored mismatch shape is structurally improbable; adding a cross-record validator for it would over-couple the validator to SE/PG retrieval. The runtime side is Phase 2.1; the schema side is `slt_grounding_runtime_jit_driver_kind_singleton`.
-```
-
-The 8 driver-kind values referenced in the filter (`player_action | player_write_in | npc_action | offstage_action | world_pressure | clock_fire | secret_reveal | multi_actor_collision`) match the SPEC-76 enum byte-for-byte — preserve the spelling and order exactly.
+- author-pool filtering by `SLT.grounding.compatible_turn_drivers[]` before salience ranking, predicate checks, alias binding, or instantiation;
+- the exact SPEC-76 driver-kind vocabulary in byte-for-byte order;
+- runtime-JIT `grounding.compatible_turn_drivers` singleton authoring;
+- the responsibility split where `slt_grounding_minimal_integrity` enforces singleton-length at storage time and Phase 2.1 enforces singleton-value match at selection time.
 
 ## Files to Touch
 
@@ -90,3 +83,21 @@ The 8 driver-kind values referenced in the filter (`player_action | player_write
 
 1. `grep -nE 'Phase 2.1|compatible_turn_drivers|slt_grounding_runtime_jit' .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` — confirms all three required cross-references are present in the new sub-section.
 2. `grep -cE 'player_action|player_write_in|npc_action|offstage_action|world_pressure|clock_fire|secret_reveal|multi_actor_collision' .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` — confirms the 8 driver-kind values appear in the file (expected count ≥8; existing Phase 0 prose may already cite them, so the count is a floor).
+3. `node -e 'const fs=require("fs"); const ref=fs.readFileSync(".claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md","utf8"); const event=JSON.parse(fs.readFileSync("tools/validators/src/schemas/story-event.schema.json","utf8")).properties.turn_driver.properties.kind.enum; const storylet=JSON.parse(fs.readFileSync("tools/validators/src/schemas/story-storylet.schema.json","utf8")).properties.grounding.properties.compatible_turn_drivers.items.enum; if (event.join("|") !== storylet.join("|")) throw new Error("schema enum mismatch"); const positions=event.map(v=>ref.indexOf(v)); if (positions.some(p=>p<0)) throw new Error("missing enum in reference"); const sorted=[...positions].sort((a,b)=>a-b); if (positions.some((p,i)=>p!==sorted[i])) throw new Error("reference enum order mismatch"); console.log(event.length);'` — confirms schema enum parity and reference-order parity.
+
+## Outcome
+
+Completed 2026-05-24. The turn-cycle Phase 2/3 reference now has a Phase 2.1 driver-kind compatibility filter. The filter excludes author-pool SLTs whose `grounding.compatible_turn_drivers[]` does not contain the current `SE.turn_driver.kind`, documents runtime-JIT singleton authoring, and names the singleton-length versus singleton-value responsibility split with `slt_grounding_minimal_integrity`.
+
+## Verification Result
+
+Commands run from repo root on 2026-05-24:
+
+1. `grep -nE 'Phase 2.1|compatible_turn_drivers|slt_grounding_runtime_jit' .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` — passed; returned the Phase 2.1 heading, filter mechanic, runtime-JIT singleton row, and validator cross-reference.
+2. `grep -cE 'player_action|player_write_in|npc_action|offstage_action|world_pressure|clock_fire|secret_reveal|multi_actor_collision' .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` — passed; printed `9`, which is above the expected floor because `npc_action` also appears in the runtime-JIT example.
+3. `node -e 'const fs=require("fs"); const ref=fs.readFileSync(".claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md","utf8"); const event=JSON.parse(fs.readFileSync("tools/validators/src/schemas/story-event.schema.json","utf8")).properties.turn_driver.properties.kind.enum; const storylet=JSON.parse(fs.readFileSync("tools/validators/src/schemas/story-storylet.schema.json","utf8")).properties.grounding.properties.compatible_turn_drivers.items.enum; if (event.join("|") !== storylet.join("|")) throw new Error("schema enum mismatch"); const positions=event.map(v=>ref.indexOf(v)); if (positions.some(p=>p<0)) throw new Error("missing enum in reference"); const sorted=[...positions].sort((a,b)=>a-b); if (positions.some((p,i)=>p!==sorted[i])) throw new Error("reference enum order mismatch"); console.log(event.length);'` — passed; printed `8`.
+4. `git diff --check -- .claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` — passed with no whitespace errors before ticket closeout.
+
+## Deviations
+
+- Proof strengthening: the drafted grep-count command proves presence but not byte-for-byte enum order. I kept it as a floor-count smoke and added a Node parity probe that compares the two schema enums and checks the reference list order.
