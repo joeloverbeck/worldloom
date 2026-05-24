@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-79-chc-associated-commitment-block-removal.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC79CHCREM-008.md",
+  "last_ticket": "archive/tickets/SPEC79CHCREM-009.md",
   "last_result": "completed_archived",
-  "last_work_commit": "5261ca7d61d93c130b29d0bfddadea9dc129e81b",
+  "last_work_commit": "e8cd985b4c4aac02e4631d2af962ffe6633c21ba",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC79CHCREM-009.md",
+  "next_target": "tickets/SPEC79CHCREM-010.md",
   "queue": [
-    "tickets/SPEC79CHCREM-009.md",
     "tickets/SPEC79CHCREM-010.md",
     "tickets/SPEC79CHCREM-011.md"
   ],
@@ -16,7 +15,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean for SPEC79CHCREM-008 docs grep/manual-review proof",
+  "proof_state": "clean for SPEC79CHCREM-009 focused validators proof; broad validators package lane remains sibling-owned by SPEC79CHCREM-010/SPEC79CHCREM-011",
   "dirty_state": "expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
