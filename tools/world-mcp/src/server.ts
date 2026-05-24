@@ -211,7 +211,8 @@ const getContextPacketInputSchema = z.object({
   seed_nodes: z.array(z.string().min(1)).min(1),
   token_budget: z.number().int().positive().optional(),
   delivery_mode: z.enum(DELIVERY_MODES).optional(),
-  node_classes: z.array(z.enum(NODE_TYPES)).optional()
+  node_classes: z.array(z.enum(NODE_TYPES)).optional(),
+  parent_page_id: z.string().regex(/^PG-\d+$/).optional()
 });
 
 const findImpactedFragmentsInputSchema = z.object({
@@ -460,7 +461,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_context_packet",
-    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug. story_bootstrap treats it as the target bundle slug and returns story_bundle_context: null; other story-pipeline task types populate story_bundle_context from indexed story-bundle records plus STORY_KERNEL.md frontmatter, including active_intentions, active_statuses, active_beliefs_by_holder, active_relationships_by_participant, active_locations_in_scope, active_objects_in_scope, active_story_diegetic_artifacts, active_story_characters, active_actor_plans, and active_emotional_states. World-canon task types return story_bundle_context: null. Unresolvable seed_nodes are skipped and surfaced in task_header.warnings; all-unresolved seed sets still return seed-independent context with an aggregate warning.",
+    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug. story_bootstrap treats it as the target bundle slug and returns story_bundle_context: null; other story-pipeline task types populate story_bundle_context from indexed story-bundle records plus STORY_KERNEL.md frontmatter, including active_intentions, active_statuses, active_beliefs_by_holder, active_relationships_by_participant, active_locations_in_scope, active_objects_in_scope, active_story_diegetic_artifacts, active_story_characters, active_actor_plans, active_emotional_states, and a projection-only selection_shortlist when parent_page_id is supplied or a PG seed is present. World-canon task types return story_bundle_context: null. Unresolvable seed_nodes are skipped and surfaced in task_header.warnings; all-unresolved seed sets still return seed-independent context with an aggregate warning.",
     getContextPacketInputSchema,
     async (args) => getContextPacket(args as unknown as Parameters<typeof getContextPacket>[0]),
     { task_type: TASK_TYPES, delivery_mode: DELIVERY_MODES, node_classes: NODE_TYPES }

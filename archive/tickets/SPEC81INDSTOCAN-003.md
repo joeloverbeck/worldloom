@@ -64,7 +64,7 @@ The reference now explains how the skill derives the `intent_signature` input to
 ## Out of Scope
 
 - Phase 1 of `commitment-block-authoring` — owned by active follow-up SPEC81INDSTOCAN-004.
-- Context-packet shortlist embedding — owned by active follow-up SPEC81INDSTOCAN-005.
+- Context-packet shortlist embedding — landed in archive/tickets/SPEC81INDSTOCAN-005.md.
 - End-to-end turn-cycle test against 1000-SLT pool (§9.4) — owned by active capstone SPEC81INDSTOCAN-006.
 
 ## Acceptance Criteria

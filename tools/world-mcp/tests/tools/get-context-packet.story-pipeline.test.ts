@@ -215,6 +215,10 @@ test("getContextPacket ignores PG seed nodes for story-pipeline task types", asy
       result.local_authority.nodes.some((node) => node.id === "CF-1"),
       "world-canon seed should still populate local_authority"
     );
+    assert.deepEqual(result.story_bundle_context?.selection_shortlist?.shortlisted_candidate_ids, [
+      "SLT-21"
+    ]);
+    assert.equal(result.story_bundle_context?.selection_shortlist?.parent_page_id, "PG-1");
   } finally {
     destroyTempRepoRoot(root);
   }
