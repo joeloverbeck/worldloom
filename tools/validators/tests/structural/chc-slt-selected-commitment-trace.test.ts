@@ -62,7 +62,7 @@ test("chc_slt_selected_commitment_trace fails missing static eligibility-source 
   assert.equal(verdict.severity, "fail");
   assert.deepEqual(verdict.detail, {
     choice_id: "CHC-1",
-    associated_commitment_block: "SLT-1",
+    selected_slt_id: "SLT-1",
     grounded_records: ["STENT-1"],
     selecting_records: ["CLK-1"]
   });
@@ -176,10 +176,10 @@ test("chc_slt_selected_commitment_trace reconciles bound and static effects with
   assert.ok(unresolved.some((item) => item.code === "chc_slt_selected_commitment_trace.bound_effect_unresolved"));
 });
 
-test("chc_slt_selected_commitment_trace warns when the selected emitted choice is ambiguous", async () => {
+test("chc_slt_selected_commitment_trace fails when input choice is not parent-emitted", async () => {
   const verdicts = await chcSltSelectedCommitmentTrace.run(undefined, context(records([
-    parentPage(["STPLAN-1"], { emitted_choices: ["CHC-1", "CHC-2"] }),
-    childPage({ input: { choice_id: null, manual_action_text: "Write in.", resolved_event_id: "SE-1" } }),
+    parentPage(["STPLAN-1"], { emitted_choices: ["CHC-1"] }),
+    childPage({ input: { choice_id: "CHC-2", manual_action_text: null, resolved_event_id: "SE-1" } }),
     event({ commitment: commitment({ alias_bindings: { plan: "STPLAN-1" } }) }),
     storylet("SLT-1", [{ pred: "any_plan_active", alias: "plan" }]),
     choice("CHC-1", { grounded_in: { records: ["STPLAN-1"] } }),
@@ -187,9 +187,16 @@ test("chc_slt_selected_commitment_trace warns when the selected emitted choice i
     storyRecord("story_plan_record", "STPLAN-1", "plans")
   ])));
 
-  const verdict = verdicts.find((item) => item.code === "chc_slt_selected_commitment_trace.turn_resolution_unresolvable");
+  const verdict = verdicts.find((item) => item.code === "chc_slt_selected_commitment_trace.selected_choice_unresolvable");
   assert.ok(verdict);
-  assert.equal(verdict.severity, "warn");
+  assert.equal(verdict.severity, "fail");
+  assert.deepEqual(verdict.detail, {
+    event_id: "SE-1",
+    selected_slt_id: "SLT-1",
+    input_choice_id: "CHC-2",
+    parent_page_id: "PG-0",
+    selecting_records: ["STPLAN-1"]
+  });
 });
 
 test("chc_slt_selected_commitment_trace reports orphan aliases and cross-branch bindings", async () => {
@@ -344,7 +351,6 @@ function choice(id: string, overrides: Record<string, unknown>) {
     player_visible_intent: "Test the branch.",
     target_or_action_families: ["investigate"],
     likely_state_pressure: "The choice pressure is visible.",
-    associated_commitment_block: "SLT-1",
     grounded_in: { records: ["STENT-1"] },
     ...overrides
   });

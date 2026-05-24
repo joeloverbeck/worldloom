@@ -6,9 +6,10 @@ The canonical fixture models Varro firing through the west window at the Red Kil
 
 - `SE-2` is a `turn_resolution` driven by `turn_driver.kind: npc_action`.
 - `turn_driver.driver_records` cites `STPLAN-9`, `STEMO-12`, `CLK-3`, and `THR-4`.
+- `turn_driver.player_response_mode` is `responds`; emitted CHCs carry no per-choice response-mode field.
 - Jon directly sees the shot line, so `pov_visibility: perceived_directly` is lawful.
 - Page plan section `7a` projects the driver and accounts for every high-urgency active pressure.
-- Emitted CHCs all use `player_response_mode: responds`; at least one is grounded in a driver record.
+- Emitted CHCs use the post-SPEC-79 choice schema and at least one is grounded in a driver record.
 
 The integration test mutates this fixture into five failure variants:
 
@@ -16,4 +17,4 @@ The integration test mutates this fixture into five failure variants:
 - hidden mind leak -> `turn_driver_hidden_state_leak`
 - missing pressure table -> `page_plan_active_pressure_table_missing` and high-urgency unhandled verdicts
 - mismatched section 7a -> `page_plan_driver_kind_mismatch`
-- wrong response mode -> `chc_non_player_driver_response_mode_invalid` for each invalid emitted CHC
+- wrong response mode -> `turn_driver_response_mode_invalid` on the driving SE record

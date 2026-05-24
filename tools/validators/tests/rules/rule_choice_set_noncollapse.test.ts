@@ -16,7 +16,7 @@ test("choice_set_noncollapse accepts CHCs that differ by target_or_action_famili
   assert.deepEqual(verdicts, []);
 });
 
-test("choice_set_noncollapse fails when all emitted CHCs share the four material axes", async () => {
+test("choice_set_noncollapse fails when all emitted CHCs share the three material axes", async () => {
   const verdicts = await runChoiceSet([
     choice("CHC-1"),
     choice("CHC-2"),
@@ -173,7 +173,6 @@ function choice(id: string, overrides: Record<string, unknown> = {}) {
     player_visible_intent: "Act on the visible pressure.",
     target_or_action_families: ["communicate"],
     likely_state_pressure: "relationship pressure",
-    associated_commitment_block: "SLT-1",
     grounded_in: {
       records: ["STENT-1", "STLOC-1"],
       affordance_ordinals: []

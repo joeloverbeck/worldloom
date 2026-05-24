@@ -653,12 +653,13 @@ surface_label: string*                         # short display label
 player_visible_intent: string*                 # natural-language statement of what the player commits to
 target_or_action_families: [<action_family>]*  # non-empty list; §4.4a closed enum
 likely_state_pressure: string*                 # natural-language pressure description
-associated_commitment_block: SLT-<integer> | null*   # SLT id if known, null if turn-cycle will JIT
 grounded_in:
   records: [STENT-<integer> | STCHAR-<integer> | STSTAT-<integer> | STLOC-<integer> | STOBJ-<integer> | BEL-<integer> | OBL-<integer> | CNSQ-<integer> | THR-<integer> | SREL-<integer> | DA-<integer> | STPLAN-<integer> | STEMO-<integer> | CLK-<integer> | STSEC-<integer> | STQ-<integer> | STINT-<integer> | SF-<integer>]*  # non-empty; active records grounding this choice
   affordance_ordinals: [integer]               # optional; ordinals from PG.state_snapshot.visible_affordances
 success_policy: string                         # optional; only present when the resolving SE.outcome_route is `attempt`
 ```
+
+CHCs do not name a specific SLT. Selection happens at resolution time against the live pool filtered by `grounded_in.records`, `target_or_action_families`, and parent PG active records.
 
 Use `STSTAT` when the choice's availability, prohibition, risk, or transformation turns on life, agency, or location status. Use `STCHAR` when the choice's surface, pressure behavior, or persona-specific salience materially depends on story-local character authority. Use `STPLAN` when the choice's availability or salience materially depends on the actor's current tactical plan. Use `STEMO` when the choice exists because of active affective pressure. Use `CLK` for staged pressure, `STSEC` for hidden truth or clue-carrier grounding, `STQ` for an open setup or story question, `STINT` for an active desire/goal, and `SF` for a branch-local fact rather than a belief. Prefer `BEL` when the choice is grounded in the actor's belief, even if the belief is true.
 

@@ -78,8 +78,8 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     properties: ["record_kind", "id", "story_id", "created_at_page", "label", "description", "parent_branch_id", "forked_at_page_id", "root_page_id"]
   },
   "story-choice": {
-    required: ["id", "story_id", "created_at_page", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "associated_commitment_block", "grounded_in"],
-    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "associated_commitment_block", "grounded_in", "success_policy"]
+    required: ["id", "story_id", "created_at_page", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "grounded_in"],
+    properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "grounded_in", "success_policy"]
   }
 };
 
@@ -307,7 +307,6 @@ test("representative amended contract records validate against tightened schemas
       player_visible_intent: "Repair the gate before anyone comes through.",
       target_or_action_families: ["make_change", "protect"],
       likely_state_pressure: "safety and obligation",
-      associated_commitment_block: null,
       grounded_in: {
         records: ["STENT-1", "STLOC-1"],
         affordance_ordinals: [0]
@@ -457,7 +456,6 @@ test("story schemas accept padded legacy cross-references but keep malformed ref
       player_visible_intent: "Repair the gate before anyone comes through.",
       target_or_action_families: ["make_change"],
       likely_state_pressure: "safety and obligation",
-      associated_commitment_block: null,
       grounded_in: {
         records: ["STENT-0001", "STLOC-0001"],
         affordance_ordinals: [0]

@@ -147,7 +147,6 @@ function choice(id: string, groundedRecords: string[]) {
     player_visible_intent: "Use the available record.",
     target_or_action_families: ["investigate"],
     likely_state_pressure: "information pressure",
-    associated_commitment_block: "SLT-1",
     grounded_in: {
       records: groundedRecords,
       affordance_ordinals: []

@@ -10,7 +10,6 @@
     "player_visible_intent",
     "target_or_action_families",
     "likely_state_pressure",
-    "associated_commitment_block",
     "grounded_in"
   ],
   "properties": {
@@ -51,10 +50,6 @@
       }
     },
     "likely_state_pressure": { "type": "string", "minLength": 1 },
-    "associated_commitment_block": {
-      "type": ["string", "null"],
-      "pattern": "^SLT-(0|[1-9][0-9]*)$"
-    },
     "grounded_in": {
       "type": "object",
       "required": ["records"],

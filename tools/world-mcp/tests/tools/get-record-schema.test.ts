@@ -296,14 +296,12 @@ test("getRecordSchema exposes post-reset choice carrier fields", async () => {
     "player_visible_intent",
     "target_or_action_families",
     "likely_state_pressure",
-    "associated_commitment_block",
     "grounded_in"
   ]);
   assert.ok(properties.surface_label);
   assert.ok(properties.player_visible_intent);
   assert.ok(properties.target_or_action_families);
   assert.ok(properties.likely_state_pressure);
-  assert.ok(properties.associated_commitment_block);
   assert.ok(properties.success_policy);
 });
 

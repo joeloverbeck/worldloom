@@ -210,10 +210,12 @@ function validateGrounding(
   }
 
   const selectedChoice = selectedChoiceForEvent(event, maps);
-  if (selectedChoice === "ambiguous" || selectedChoice === undefined) {
-    return [eventVerdict(event, "warn", "turn_resolution_unresolvable", `${recordId(event)} selected ${recordId(storylet)}, but the emitted CHC cannot be uniquely resolved for grounding validation.`, {
+  if (selectedChoice === undefined) {
+    return [eventVerdict(event, "fail", "selected_choice_unresolvable", `${recordId(event)} selected ${recordId(storylet)}, but PG.input.choice_id does not resolve to a parent-emitted CHC for grounding validation.`, {
       event_id: recordId(event),
       selected_slt_id: recordId(storylet),
+      input_choice_id: selectedChoiceIdForEvent(event, maps),
+      parent_page_id: stringValue(parsedEvent.parent_page_id),
       selecting_records: [...selectingRecordIds].sort()
     })];
   }
@@ -227,7 +229,7 @@ function validateGrounding(
   if (hasClassOverlap(groundedIds, selectingRecordIds)) {
     return [choiceVerdict(selectedChoice, storylet, "warn", "weak_incidental_grounding", `${recordId(selectedChoice)} grounds in the same record class as a selecting predicate, but not the exact selected record.`, groundedIds, selectingRecordIds)];
   }
-  return [choiceVerdict(selectedChoice, storylet, "fail", "missing_eligibility_source", `${recordId(selectedChoice)} is associated with ${recordId(storylet)} but grounds in no selecting predicate record and carries no eligibility_background_only rationale.`, groundedIds, selectingRecordIds)];
+  return [choiceVerdict(selectedChoice, storylet, "fail", "missing_eligibility_source", `${recordId(selectedChoice)} is selected with ${recordId(storylet)} but grounds in no selecting predicate record and carries no eligibility_background_only rationale.`, groundedIds, selectingRecordIds)];
 }
 
 function validateAliasHygiene(
@@ -374,32 +376,25 @@ function activeRecordIds(page: IndexedRecord | undefined): Set<string> {
   return ids;
 }
 
-function selectedChoiceForEvent(event: IndexedRecord, maps: RecordMaps): IndexedRecord | "ambiguous" | undefined {
+function selectedChoiceForEvent(event: IndexedRecord, maps: RecordMaps): IndexedRecord | undefined {
   const parsedEvent = asPlainRecord(event.parsed);
-  const selectedSltId = stringValue(asPlainRecord(parsedEvent.commitment).selected_slt_id);
-  if (selectedSltId === undefined) {
+  const inputChoiceId = selectedChoiceIdForEvent(event, maps);
+  if (inputChoiceId === undefined) {
     return undefined;
   }
 
-  const createdPage = maps.byId.get(stringValue(parsedEvent.created_at_page) ?? "");
-  const inputChoiceId = stringValue(asPlainRecord(asPlainRecord(createdPage?.parsed).input).choice_id);
-  if (inputChoiceId !== undefined) {
-    const inputChoice = maps.byId.get(inputChoiceId);
-    if (inputChoice !== undefined && stringValue(asPlainRecord(inputChoice.parsed).associated_commitment_block) === selectedSltId) {
-      return inputChoice;
-    }
-  }
-
   const parentPage = maps.byId.get(stringValue(parsedEvent.parent_page_id) ?? "");
-  const emittedChoices = stringArray(asPlainRecord(parentPage?.parsed).emitted_choices)
-    .map((id) => maps.byId.get(id))
-    .filter((choice): choice is IndexedRecord => choice !== undefined)
-    .filter((choice) => stringValue(asPlainRecord(choice.parsed).associated_commitment_block) === selectedSltId);
-
-  if (emittedChoices.length === 1) {
-    return emittedChoices[0];
+  if (!stringArray(asPlainRecord(parentPage?.parsed).emitted_choices).includes(inputChoiceId)) {
+    return undefined;
   }
-  return emittedChoices.length > 1 ? "ambiguous" : undefined;
+
+  return maps.byId.get(inputChoiceId);
+}
+
+function selectedChoiceIdForEvent(event: IndexedRecord, maps: RecordMaps): string | undefined {
+  const parsedEvent = asPlainRecord(event.parsed);
+  const createdPage = maps.byId.get(stringValue(parsedEvent.created_at_page) ?? "");
+  return stringValue(asPlainRecord(asPlainRecord(createdPage?.parsed).input).choice_id);
 }
 
 function eventBranchId(event: IndexedRecord, maps: RecordMaps): string | undefined {
@@ -498,7 +493,7 @@ function choiceVerdict(
     location: locationFor(choice),
     detail: {
       choice_id: recordId(choice),
-      associated_commitment_block: recordId(storylet),
+      selected_slt_id: recordId(storylet),
       grounded_records: [...groundedIds].sort(),
       selecting_records: [...eligibilityIds].sort()
     },

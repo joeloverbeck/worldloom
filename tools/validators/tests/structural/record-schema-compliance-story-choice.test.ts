@@ -15,7 +15,6 @@ function choiceRecord(groundedRecords: string[]) {
     player_visible_intent: "Act on the current branch pressure.",
     target_or_action_families: ["decide"],
     likely_state_pressure: "The active story state makes this option meaningful.",
-    associated_commitment_block: null,
     grounded_in: {
       records: groundedRecords,
       affordance_ordinals: []

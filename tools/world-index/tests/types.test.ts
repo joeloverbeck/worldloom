@@ -43,7 +43,7 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.equal(ATTRIBUTION_EDGE_TYPES.length, 2);
   assert.equal(ENTITY_EDGE_TYPES.length, 1);
   assert.equal(SCOPED_EDGE_TYPES.length, 2);
-  assert.equal(STORY_EDGE_TYPES.length, 76);
+  assert.equal(STORY_EDGE_TYPES.length, 75);
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_create"));
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_supersede"));
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_close"));
@@ -85,7 +85,6 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.ok(STORY_EDGE_TYPES.includes("consequence_derived_from"));
   assert.ok(STORY_EDGE_TYPES.includes("thread_derived_from"));
   assert.ok(STORY_EDGE_TYPES.includes("choice_grounded_in"));
-  assert.ok(STORY_EDGE_TYPES.includes("choice_associated_storylet"));
   assert.ok(STORY_EDGE_TYPES.includes("choice_affordance_ordinal"));
   assert.ok(STORY_EDGE_TYPES.includes("storylet_predicate_ref"));
   assert.ok(STORY_EDGE_TYPES.includes("storylet_effect_ref"));
@@ -118,6 +117,6 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.equal(storyEdgeNames.has("pays_off_obligation"), false);
   assert.equal(storyEdgeNames.has("complicates_obligation"), false);
   assert.equal(storyEdgeNames.has("transfers_obligation"), false);
-  assert.equal(edgeTypes.length, 91);
+  assert.equal(edgeTypes.length, 90);
   assert.equal(new Set(edgeTypes).size, edgeTypes.length);
 });
