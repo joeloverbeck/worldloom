@@ -33,7 +33,7 @@ What this spec is NOT:
 
 SPEC-79 (`CHC.associated_commitment_block` removal) and SPEC-82 (remaining schema-drift repairs) have already shipped (2026-05-24) and are archived at `archive/specs/SPEC-79-chc-associated-commitment-block-removal.md` and `archive/specs/SPEC-82-remaining-schema-drift-repairs.md` respectively. Both were independent of this spec in mechanics.
 
-The remaining active sibling is SPEC-80 (`SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`), which has a soft dependency on this spec: its coverage diagnostic operates against SLT projection records and benefits from this spec's projection API (the coverage check becomes a single projection query instead of a full-body scan). SPEC-81 is complete, so SPEC-80 can now use `select_storylet_candidates` as its projection read path.
+Outcome amended 2026-05-25: the former active sibling SPEC-80 is now archived at `archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`. It had a soft dependency on this spec: its coverage diagnostic operates against SLT projection records and benefits from this spec's projection API where a projection path is appropriate. SPEC-81 is complete, so SPEC-80 uses `select_storylet_candidates` for projection-backed consumers and `list_records(include_full_body=true)` where a whole-pool health-audit read would make parent-page / turn-driver filters inappropriate.
 
 ## §3 World-Index Changes
 

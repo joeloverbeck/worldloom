@@ -3,7 +3,7 @@
 **Spec ID:** SPEC-80
 **Date:** 2026-05-24
 **Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
-**Status:** active
+**Status:** completed
 **Depends on:** `archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md` (indexed candidate retrieval) for the projection-driven coverage diagnostics. SPEC-81 is complete, so implementation should prefer the projection API; the existing `list_records(include_full_body=true)` path remains a fallback only where the projection API is unavailable.
 
 ## §1 Goal
@@ -178,3 +178,24 @@ None. The coverage diagnostics operate over existing SLT fields (`grounding.comp
 - The trigger maps in §3.1 and §3.2 are closed enumerations tied to currently-landed FOUNDATIONS surfaces. If a future spec adds a new driver kind or active record class, this spec's trigger maps must be extended — list this dependency in any such future spec's "Affects" section.
 - The composition coverage at §3.3 is the strictest check; bundles with many active records will produce many composition pairs. The Phase 1 / Phase 2o output should be readable — emit at most the top-N gaps by triggering-record count if the gap list exceeds a presentation limit (suggest N=20).
 - This spec is implementable independently of SPEC-79 (CHC field removal) and SPEC-82 (drift repairs). It depends on archived SPEC-81 only for the projection-driven read path; the fallback path makes that dependency soft.
+
+## Outcome
+
+Completed: 2026-05-25
+
+SPEC-80 landed across three archived implementation tickets:
+
+1. `archive/tickets/SPEC80STOPOODRI-001.md` — updated `branching-story-bootstrap` Phase 6/Phase 10 so seeded pools must satisfy one combined pool-coverage gate covering cast-role, driver-kind, pressure-source-class, and composition axes at `seed_commitment_blocks: minimal | standard`, with `none` explicitly bypassing because runtime JIT is the alternative.
+2. `archive/tickets/SPEC80STOPOODRI-002.md` — updated `commitment-block-authoring` Phase 1 with coverage targets #16/#17, distinct demand/supply read paths, additive `driver_kind_coverage`, `pressure_source_coverage`, and `composition_gaps` YAML, and manual contract proof that the diagnostic remains authoring-time only.
+3. `archive/tickets/SPEC80STOPOODRI-003.md` — updated `branching-story-health-audit` with Phase 2o `Storylet Pool Coverage`, warning-only `storylet_pool_coverage_gap` findings, whole-pool `list_records(... include_full_body=true)` supply reads, SAU report sectioning, and Rule 5 / Rule 7 alignment notes.
+
+Verification:
+
+1. Bootstrap coverage grep/manual review passed per `archive/tickets/SPEC80STOPOODRI-001.md`.
+2. Commitment-block-authoring coverage grep/manual review passed per `archive/tickets/SPEC80STOPOODRI-002.md`.
+3. Health-audit coverage grep/manual review passed per `archive/tickets/SPEC80STOPOODRI-003.md`.
+4. Final archive check confirmed no active `tickets/SPEC80STOPOODRI-*.md` remain.
+
+Deviations:
+
+- The drafted Claude-skill dry-run fixtures in §8 remain future/operator validation examples because this Codex context has no executable runner for those `.claude/skills/` workflows. The completed proof boundary is grep proof plus manual contract review over the edited skill surfaces.
