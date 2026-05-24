@@ -1,21 +1,20 @@
 {
-  "originating_spec": "specs/SPEC-77-slt-grounding-provenance-minimal.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC77SLTGROPRO-003.md",
+  "originating_spec": "archive/specs/SPEC-77-slt-grounding-provenance-minimal.md",
+  "archived_spec": "archive/specs/SPEC-77-slt-grounding-provenance-minimal.md",
+  "last_ticket": "archive/tickets/SPEC77SLTGROPRO-004.md",
   "last_result": "completed_archived",
-  "last_work_commit": "549d9101140ab9da73d0065b7cd5d9f1145b3825",
+  "last_work_commit": "491099c6227d49784834f984bd650e36fcb36ef3",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC77SLTGROPRO-004.md",
-  "queue": [
-    "tickets/SPEC77SLTGROPRO-004.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "tracked worktree clean after state-file commit; expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
-  "post_review_material_updates": true,
-  "post_review_audit_block": "emitted",
+  "proof_state": "clean",
+  "dirty_state": "tracked worktree expected clean after state-file commit; expected ignored artifacts: tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
+  "post_review_material_updates": false,
+  "post_review_audit_block": "not_applicable",
   "updated_at": "2026-05-24"
 }
