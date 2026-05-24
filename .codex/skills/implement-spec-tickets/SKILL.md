@@ -21,6 +21,13 @@ Prefer a fresh context boundary between ticket iterations. The manual workflow u
 
 The persisted state file is the source of truth for resuming after `/new`; the printed handoff is only a readable mirror.
 
+Non-follow-up reset boundary checklist:
+
+1. Finish the iteration work commit and any separate state-file-only commit.
+2. Read the committed state JSON back from `HEAD` and verify the chosen `last_state_commit` mode.
+3. Confirm `last_work_commit` is reachable, collect the actual state commit sha when `last_state_commit` is `"self"`, and refresh tracked plus relevant ignored-aware status.
+4. Emit the exact `Harness handoff:` block from this skill before any prose summary or final response.
+
 ## Required Reads
 
 Before the first loop iteration, read:
@@ -60,12 +67,15 @@ Keep the file small and machine-readable. Update it after intake, after every it
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
+  "proof_state": null,
   "dirty_state": "clean",
   "updated_at": "YYYY-MM-DD"
 }
 ```
 
 `phase`, `in_progress_ticket`, and `owned_dirty_summary` are optional but useful when a long implementation, proof, review, or archive step may be interrupted before the iteration commit. Use concise values such as `implementing`, `implementation_done_review_pending`, `review_done_commit_pending`, `ready_for_next_ticket`, `final_spec_archive`, or `blocked`. If substantial owned dirty work exists before a long proof or review boundary, refresh these fields before continuing; do not commit only to checkpoint them.
+
+`proof_state` is optional and should stay concise. Use it when a broad proof lane remains red, unavailable, or superseded while the ticket is still truthfully complete on focused proof. Name the lane, its classification, and where the durable closeout records the detail. Leave it `null` when all relevant proof lanes passed or no special resume-facing proof context exists.
 
 On resume after `/new`, read this state file first, then verify every important field against live repo state before continuing:
 
@@ -273,6 +283,7 @@ After each iteration work commit, update `.codex/run-state/implement-spec-ticket
 - next target, or `"final_spec_archive"` / `"blocked"`
 - remaining queue
 - blocker summary when blocked
+- proof-state summary when a known non-blocking proof deviation remains
 - dirty-state classification
 - `updated_at`
 
@@ -304,6 +315,8 @@ Before creating a state-file-only commit, re-read the staged JSON or run `git di
 
 Do not create a chain of state-only commits just to update the previous state-only commit sha. A commit cannot embed its own final sha without changing that sha again, so do not try to make `last_state_commit` self-referential. One state-only commit per iteration is enough; if exact current `HEAD` matters, use the handoff's `State commit` line.
 
+The helper `node .codex/skills/implement-spec-tickets/scripts/validate-state-handoff.mjs` can be run from the repo root after the state-file persistence step to print the committed state summary, validate reachable commit fields, and identify the actual state commit sha for handoff. Treat it as a convenience check; still inspect the output before reporting.
+
 Then print a short handoff in the conversation that mirrors the state file:
 
 ```text
@@ -314,6 +327,7 @@ Harness handoff:
 - State commit: <sha or "none" | same as work commit>
 - Next target: <follow-up ticket path | next queued ticket path | final spec archive | blocked>
 - Queue: <remaining active ticket paths>
+- Proof state: <clean | known non-blocking deviation with lane and closeout path | blocked>
 - Dirty state: <clean | expected ignored artifacts | owned/unrelated paths still present>
 - State file: .codex/run-state/implement-spec-tickets.json
 - Required next invocation: $implement-spec-tickets <spec> <next-target-if-any>
