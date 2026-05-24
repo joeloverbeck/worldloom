@@ -1,6 +1,6 @@
 # Confidence Emission Discipline
 
-Confidence-emission rules fire at five interlocking sites across Steps 1, 2, and 3. This file consolidates them into one firing matrix so the cluster is scannable in one place rather than reconstructable from five sites in SKILL.md.
+Confidence-emission rules fire at six interlocking sites across Steps 1, 2, and 3. This file consolidates them into one firing matrix so the cluster is scannable in one place rather than reconstructable from six sites in SKILL.md.
 
 ## Firing matrix
 
@@ -12,6 +12,7 @@ Confidence-emission rules fire at five interlocking sites across Steps 1, 2, and
 | **Step 2 §The Protocol — Auto-mode prose alternative** | 0-2-question interview in auto mode | Inline prose ("Confidence: ~90% — gaps listed as named assumptions in the approach proposal below") | Auto mode AND interview ≤2 questions (provided gaps are surfaced in the very next message as named assumptions per §Canonical-format) |
 | **Step 2 §Plan Mode Interview — Transition marker** | Moving from interview to approach proposal in plan mode | Confidence + gaps statement with visually distinct transition marker (bold heading, horizontal rule, or "I'm at 95% confidence. Moving to approaches.") | Plan mode active AND confidence reaches 95%; may be folded into approach-proposal message when the interview question IS the approach-selection question |
 | **Step 3 §Pre-recommendation confidence anchor** | Before emitting the triage recommendation | Standalone sentence on its own line (Step 1 sub-step 8's post-exploration announcement) | Triage brainstorm (every Step 3 triage emission, regardless of auto-mode / pre-authorization) |
+| **Post-redirection re-recommendation anchor** | When a user redirection causes a re-triage (verdicts reversed, deliverable shape changed, scope adjusted) | Standalone sentence on its own line, format unchanged: `Post-exploration confidence: ~X% — [revised basis naming what changed]` | Re-triage cycle (fires once per redirection-triggered re-triage, not once per individual verdict reversal); the original Step 3 §Pre-recommendation confidence anchor's audit-trail role is stale once user-identified errors surface, and this row records the operator's updated confidence in the corrected position |
 
 ## Interaction matrix
 
@@ -19,6 +20,7 @@ Confidence-emission rules fire at five interlocking sites across Steps 1, 2, and
 - **Step 2 §The Protocol fires (interview runs)** → per-answer blocks intervene; Step 2 §Plan Mode Interview's transition marker is the closing confidence emission for the interview.
 - **Step 2 fully skipped via Step 1 sub-step 5** → no per-answer block to format; Step 1 sub-step 8's one-sentence post-exploration announcement, paired with named-gap assumptions in the next message, IS the confidence announcement in every mode. No separate formal block is additionally required.
 - **Auto mode with 0-question interview** → Step 2 §Auto mode prose alternative applies provided gaps surface as named assumptions. The Step 2 prose alternative is the auto-mode form of the per-answer block format; the Step 1 sub-step 8 anchor and any Step 3 anchor still fire independently.
+- **User redirection triggers re-triage** → The post-redirection re-recommendation anchor row of §Firing matrix fires; the original Step 3 §Pre-recommendation confidence anchor becomes stale once user-identified errors surface, and the re-anchor records the operator's updated confidence in the corrected position. The format is identical to the Step 3 anchor (Step 1 sub-step 8 post-exploration sentence); the trigger is the redirection event, not a routine triage emission. Fires once per redirection-triggered re-triage cycle, regardless of how many individual verdicts within the re-triage shifted.
 
 ## Canonical format for named-gap assumptions
 
@@ -44,7 +46,7 @@ Confidence increases from **both user answers AND research findings**. If extern
 
 ## Why these rules cluster
 
-The five sites are mutually-reinforcing rather than redundant — they cover distinct lifecycle moments: pre-interview calibration (sub-step 5), pre-Step-2-decision anchor (sub-step 8), per-answer progression (Protocol block), mode-adapted alternative (Auto-mode prose), and gate transition (Plan Mode Interview marker + Pre-recommendation anchor). The cluster preserves audit-trail anchors at every gate the user might want to redirect from. The shared discipline: confidence is visibly recorded at each branch point so the user can see what drove the next action.
+The six sites are mutually-reinforcing rather than redundant — they cover distinct lifecycle moments: pre-interview calibration (sub-step 5), pre-Step-2-decision anchor (sub-step 8), per-answer progression (Protocol block), mode-adapted alternative (Auto-mode prose), gate transition (Plan Mode Interview marker + Pre-recommendation anchor), and post-redirection re-anchor (Post-redirection re-recommendation anchor — refresh of the Pre-recommendation anchor when user redirection invalidates a prior triage). The cluster preserves audit-trail anchors at every gate the user might want to redirect from. The shared discipline: confidence is visibly recorded at each branch point so the user can see what drove the next action.
 
 ## Plan-mode fast-track interactions
 
