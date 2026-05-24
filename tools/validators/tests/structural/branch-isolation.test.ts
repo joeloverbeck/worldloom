@@ -209,6 +209,10 @@ function storylet(id: string, overrides: Record<string, unknown>) {
     id,
     story_id: "STORY-1",
     scope: { visibility: "global_author_pool" },
+    grounding: {
+      compatible_turn_drivers: ["npc_action"],
+      reason_to_exist: "Exercises branch-isolation visibility for storylet fixtures."
+    },
     ...overrides
   });
 }

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `.claude/skills/branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` with a new Phase 2.1 sub-section documenting the driver-kind compatibility filter and the responsibility-split prose
-**Deps**: SPEC77SLTGROPRO-001
+**Deps**: archive/tickets/SPEC77SLTGROPRO-001.md
 
 ## Problem
 

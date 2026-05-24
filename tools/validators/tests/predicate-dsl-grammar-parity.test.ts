@@ -216,6 +216,10 @@ async function recordAgeRuntimeCodes(recordValue: string): Promise<string[]> {
           { pred: "record_age", record: recordValue, comparator: ">=", pages: 2 }
         ],
         soft: []
+      },
+      grounding: {
+        compatible_turn_drivers: ["clock_fire"],
+        reason_to_exist: "Exercises clock-age predicate parsing in parity tests."
       }
     })
   ]));

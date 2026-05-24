@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — amends `.claude/skills/commitment-block-authoring/SKILL.md` Phase 4 with new authoring preamble, per-field requirements for the new `grounding` sub-paths, and the inlined banned-phrase list reference
-**Deps**: SPEC77SLTGROPRO-001
+**Deps**: archive/tickets/SPEC77SLTGROPRO-001.md
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds new structural validator under `tools/validators/src/structural/`; appends new entry to the validator framework registry at `tools/validators/src/public/registry.ts`
-**Deps**: SPEC77SLTGROPRO-001
+**Deps**: archive/tickets/SPEC77SLTGROPRO-001.md
 
 ## Problem
 

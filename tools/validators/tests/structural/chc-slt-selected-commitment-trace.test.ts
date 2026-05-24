@@ -327,6 +327,10 @@ function storylet(id: string, hardPreconditions: unknown[], overrides: Record<st
     story_id: "STORY-1",
     preconditions: { hard: hardPreconditions, soft: [] },
     effects: { create: [], supersede: [], close: [] },
+    grounding: {
+      compatible_turn_drivers: ["npc_action"],
+      reason_to_exist: "Exercises commitment trace grounding through active predicates."
+    },
     ...overrides
   });
 }

@@ -1076,6 +1076,10 @@ function completeStoryletRecord(): Record<string, unknown> {
     },
     provenance: {
       origin: "manual_authoring"
+    },
+    grounding: {
+      compatible_turn_drivers: ["npc_action"],
+      reason_to_exist: "Default fixture grounding for validator patch-plan tests."
     }
   };
 }

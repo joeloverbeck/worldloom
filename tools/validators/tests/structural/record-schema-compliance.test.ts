@@ -896,6 +896,10 @@ function completeStorylet(): Record<string, unknown> {
     },
     provenance: {
       origin: "manual_authoring"
+    },
+    grounding: {
+      compatible_turn_drivers: ["npc_action"],
+      reason_to_exist: "Default fixture grounding for record schema tests."
     }
   };
 }
