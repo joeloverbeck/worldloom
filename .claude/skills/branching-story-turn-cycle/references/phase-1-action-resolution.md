@@ -1,6 +1,6 @@
 # Phase 1: Resolve the action
 
-If `chosen_choice_id` is supplied, load the `CHC` record; its action-family list, `associated_commitment_block`, and `success_policy` (if any) drive the routing.
+If `chosen_choice_id` is supplied, load the `CHC` record; its action-family list, `grounded_in.records`, and `success_policy` (if any) drive the routing.
 
 If `manual_action_text` is supplied, parse it into a structured `proposed_action`:
 

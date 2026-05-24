@@ -1,6 +1,6 @@
 # SPEC79CHCREM-006: Turn-cycle skill — Phase 1 routing change + Phase 8/9 axis-list edits
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — three turn-cycle reference files: `.claude/skills/branching-story-turn-cycle/references/phase-1-action-resolution.md` (Phase 1 routing change), `.claude/skills/branching-story-turn-cycle/references/phase-8-choice-generation.md` (CHC enumeration + axis list), `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` (validator gate axis list).
@@ -8,7 +8,7 @@
 
 ## Problem
 
-Three turn-cycle reference files document the pre-removal CHC contract: Phase 1 reads `associated_commitment_block` as one of the action-routing inputs; Phase 8 enumerates the §4.5.12 CHC shape including the field; Phase 9 documents the `choice_set_collapse` ERROR check with all 4 material axes including the field. Once 001 drops the field from the schema and 003 reduces the noncollapse axes to 3, all three reference files must be updated so the turn-cycle skill's operator guidance matches the post-removal contract.
+At intake, three turn-cycle reference files documented the pre-removal CHC contract: Phase 1 read `associated_commitment_block` as one of the action-routing inputs; Phase 8 enumerated the §4.5.12 CHC shape including the field; Phase 9 documented the `choice_set_collapse` ERROR check with all 4 material axes including the field. Since 001 dropped the field from the schema and 003 reduced the noncollapse axes to 3, all three reference files had to be updated so the turn-cycle skill's operator guidance matches the post-removal contract.
 
 Phase 1's change is the only non-mechanical edit: per the SPEC-79 reassessment Q2=(a), Phase 1 routes on `action_family + grounded_in.records` rather than on the SLT identity carried by the dropped field. This cleaner separation treats Phase 1 as intent-routing and Phase 2 as commitment-block-selection; SLT identity is no longer carried across the phase boundary.
 
@@ -19,6 +19,7 @@ Phase 1's change is the only non-mechanical edit: per the SPEC-79 reassessment Q
 3. Cross-skill boundary: these reference files document the turn-cycle skill's CHC consumption (Phase 1 routing) and emission (Phase 8 generation) contracts. The edits must land alongside the schema change (001) so the skill's documented behavior matches the schema's accepted CHC shape, AND alongside the rule_choice_set_noncollapse axis reduction (003) so the documented validator gate's axis list matches the rule validator's actual signature axes. The Deps on 001 + 003 enforces both orderings.
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism): the turn-cycle skill is both a CHC consumer (Phase 1) and a CHC producer (Phase 8); its documented contracts must match the post-removal shared-contract template (handled in 001). The Phase 1 routing change preserves the routing semantics (action_family + grounded_in.records carry the same intent the removed SLT-name formerly hinted at, plus `grounded_in.records` is now required per the schema post-001).
 5. Removal blast radius (was template item 7): this ticket updates three reference files in the turn-cycle skill. The operational consequence is that turn-cycle Phase 8 CHC-emission patch payloads stop emitting the field (enforced by 001's schema rejection); Phase 1's routing logic switches inputs (operator-applied per the updated guidance); Phase 9's validator-gate description matches the rule validator's 3-axis signature.
+6. The drafted turn-cycle dry-run is not executable in Codex because no `/branching-story-turn-cycle` runner is exposed in this environment. The truthful proof surface for this docs-only skill-reference ticket is negative grep plus manual contract review; end-to-end turn-cycle validation remains queued in `tickets/SPEC79CHCREM-011.md`.
 
 ## Architecture Check
 
@@ -32,25 +33,23 @@ Phase 1's change is the only non-mechanical edit: per the SPEC-79 reassessment Q
 1. The three reference files no longer mention `associated_commitment_block` → codebase grep-proof: `grep -rn "associated_commitment_block" .claude/skills/branching-story-turn-cycle/` returns zero matches.
 2. Phase 1's routing guidance reads as prescribed in SPEC-79 §5.2 (routes on `action_family + grounded_in.records`) → manual review of the updated `phase-1-action-resolution.md:3` paragraph.
 3. Phase 8's CHC enumeration mirrors bootstrap's updated enumeration → manual review against `phase-8-9-page-plan-and-choices.md` (post-005).
-4. Phase 9's validator-gate description matches the rule's 3-axis signature → manual review against `rule_choice_set_noncollapse.ts` (post-003) and against `branching-story-health-audit/SKILL.md:185` (post-007).
+4. Phase 9's validator-gate description matches the rule's 3-axis signature → manual review against `rule_choice_set_noncollapse.ts` (post-003). The matching health-audit update remains queued in `tickets/SPEC79CHCREM-007.md`.
 
-## What to Change
+## Landed Changes
 
 ### 1. `.claude/skills/branching-story-turn-cycle/references/phase-1-action-resolution.md`
 
-- At line 3, rewrite the action-resolution routing input list:
-  - **Old**: *"If `chosen_choice_id` is supplied, load the `CHC` record; its action-family list, `associated_commitment_block`, and `success_policy` (if any) drive the routing."*
-  - **New**: *"If `chosen_choice_id` is supplied, load the `CHC` record; its action-family list, `grounded_in.records`, and `success_policy` (if any) drive the routing."*
+- The action-resolution routing input list now says selected CHCs route by action-family list, `grounded_in.records`, and optional `success_policy`.
 - The cleaner separation treats Phase 1 as intent-routing and Phase 2 as commitment-block-selection. SLT identity is no longer carried across the phase boundary — Phase 2 selects the commitment block from the live pool filtered against `grounded_in.records`, `target_or_action_families`, and parent PG active records per §Phase 2 commitment-block selection.
 
 ### 2. `.claude/skills/branching-story-turn-cycle/references/phase-8-choice-generation.md`
 
-- At line 7, drop the `associated_commitment_block (SLT-<integer> or null — turn-cycle will JIT next turn if null)` clause from the §4.5.12 CHC-shape enumeration. The corrected paragraph reads: *"Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `grounded_in`, and optional `success_policy` when this choice later resolves through `outcome_route: attempt`."* Add the same one-line FOUNDATIONS-aligned note as 005 (and 001's shared-contract update): *"CHCs do not name a specific SLT; selection happens at turn-cycle resolution time against the live pool filtered by `grounded_in.records`, `target_or_action_families`, and parent PG active records."*
-- At line 19, drop `associated_commitment_block` from the material-axes list in the `choice_set_noncollapse` validator description. The corrected sentence reads: *"…a non-terminal page with more than one emitted choice must have at least two choices that differ materially in `target_or_action_families`, `grounded_in.records`, or `likely_state_pressure`, unless at least two intentionally expressive variants are marked in the page plan as rhetorical or expressive."*
+- The §4.5.12 CHC-shape enumeration now lists the post-removal fields and adds the same resolution-time SLT-selection note as bootstrap and the shared contract update.
+- The `choice_set_noncollapse` description now names the 3 surviving material axes: `target_or_action_families`, `grounded_in.records`, and `likely_state_pressure`.
 
 ### 3. `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md`
 
-- At line 28, drop `associated_commitment_block` from the material-axes enumeration in the `choice_set_noncollapse` gate description. The corrected sentence reads: *"ERROR `choice_set_collapse` rejects a page whose choices all share the same `target_or_action_families`, `grounded_in.records`, and `likely_state_pressure`, unless the page plan explicitly marks at least two named CHCs as rhetorical or expressive variants."*
+- The `choice_set_noncollapse` gate description now rejects collapse across the same 3 material axes implemented by the validator: `target_or_action_families`, `grounded_in.records`, and `likely_state_pressure`.
 
 ## Files to Touch
 
@@ -72,9 +71,9 @@ Phase 1's change is the only non-mechanical edit: per the SPEC-79 reassessment Q
 ### Tests That Must Pass
 
 1. `grep -rn "associated_commitment_block" .claude/skills/branching-story-turn-cycle/` returns zero matches.
-2. A turn-cycle dry-run from a synthetic bundle: Phase 2 selects an SLT from the live pool without consulting any per-CHC SLT hint; Phase 8 emits CHCs without the field; the resulting state is replay-equivalent under `snapshot_replay_equality`.
-3. The Phase 1 routing guidance reads as prescribed in SPEC-79 §5.2 (Q2=(a)).
-4. The Phase 9 validator-gate description matches the rule_choice_set_noncollapse signature (3-axis).
+2. Manual review confirms the Phase 1 routing guidance reads as prescribed in SPEC-79 §5.2 (Q2=(a)).
+3. Manual review confirms Phase 8's CHC enumeration mirrors bootstrap's updated enumeration and names resolution-time SLT selection.
+4. Manual review confirms the Phase 9 validator-gate description matches the `rule_choice_set_noncollapse` signature (3-axis).
 
 ### Invariants
 
@@ -91,4 +90,24 @@ Phase 1's change is the only non-mechanical edit: per the SPEC-79 reassessment Q
 ### Commands
 
 1. `grep -rn "associated_commitment_block" .claude/skills/branching-story-turn-cycle/`
-2. Turn-cycle dry-run (manual): invoke `/branching-story-turn-cycle` against a test bundle and verify the produced CHCs lack the field; verify Phase 2's selection traces don't reference the field.
+2. Manual review of `.claude/skills/branching-story-turn-cycle/references/phase-1-action-resolution.md`, `.claude/skills/branching-story-turn-cycle/references/phase-8-choice-generation.md`, and `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` against SPEC-79 §5.2, `.claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md`, and `tools/validators/src/rules/rule_choice_set_noncollapse.ts`.
+
+## Outcome
+
+Completed: 2026-05-24
+
+Updated the three turn-cycle reference files:
+
+1. `.claude/skills/branching-story-turn-cycle/references/phase-1-action-resolution.md` now routes selected CHCs by action-family list, `grounded_in.records`, and optional `success_policy`, with no SLT identity carried through `associated_commitment_block`.
+2. `.claude/skills/branching-story-turn-cycle/references/phase-8-choice-generation.md` now lists the post-removal CHC shape, adds the resolution-time SLT-selection note, and describes `choice_set_noncollapse` with the 3 surviving axes.
+3. `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` now documents the same 3-axis `choice_set_noncollapse` gate.
+
+## Verification Result
+
+1. `grep -rn "associated_commitment_block" .claude/skills/branching-story-turn-cycle/` returned zero matches.
+2. Manual review confirmed Phase 1 now routes on `grounded_in.records`, Phase 8 mirrors the already-updated bootstrap CHC enumeration and resolution-time selection note, and Phase 9 mirrors the 3-axis `rule_choice_set_noncollapse` implementation.
+3. `git diff --check -- .claude/skills/branching-story-turn-cycle/references/phase-1-action-resolution.md .claude/skills/branching-story-turn-cycle/references/phase-8-choice-generation.md .claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md archive/tickets/SPEC79CHCREM-006.md` passed.
+
+## Deviations
+
+The drafted turn-cycle dry-run was not exercised because Codex has no executable `/branching-story-turn-cycle` runner in this environment. The accepted proof boundary is grep plus manual contract review over the changed skill references and their already-landed producer/validator counterparts. End-to-end turn-cycle validation remains owned by capstone `tickets/SPEC79CHCREM-011.md`.
