@@ -3,7 +3,7 @@
 **Status:** COMPLETED 2026-05-23 via `archive/tickets/SPEC73PAGPACREQ-001.md`
 **Authored:** 2026-05-23
 **Source triage:** [`docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md`](../docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md)
-**Source report:** `reports/character-bridge-consolidation-second-iteration.md` §11 path #4, §15 Proposal 1 (parsing core only — the role-demand matrix is rejected; see Out of Scope §3)
+**Source report:** `archive/reports/character-bridge-consolidation-second-iteration.md` §11 path #4, §15 Proposal 1 (parsing core only — the role-demand matrix is rejected; see Out of Scope §3)
 **Prior lineage:** `archive/specs/SPEC-70-char-stchar-semantic-preservation.md`, `archive/tickets/VALSTCHAR-001-fix-page-packet-hash-contract.md`
 
 **Implementation note (2026-05-23):** `SPEC73PAGPACREQ-001` landed the validator parser, WARN-only unknown-label diagnostic, shared contract note, and focused test coverage, then was archived at `archive/tickets/SPEC73PAGPACREQ-001.md`. The implementation preserved the live diagnostic id `page_plan_stchar_packet_integrity.missing_voice_block`; earlier draft references to `missing_voice_block_for_speaker` were corrected as spec drift because that id was not present in the live validator/test surface. The original drift evidence below is historical intake context.
@@ -143,7 +143,7 @@ Single-spec sprint; no inter-spec dependency. Ticket decomposition produced one 
 - `tools/validators/tests/structural/page-plan-stchar-packet-integrity.test.ts`
 - `archive/specs/SPEC-70-char-stchar-semantic-preservation.md` §4 (lineage of deliberately out-of-scope items)
 - `archive/tickets/VALSTCHAR-001-fix-page-packet-hash-contract.md` (receipt-side verbatim-composite contract)
-- `reports/character-bridge-consolidation-second-iteration.md` §11 path #4, §15 Proposal 1 (parsing core only)
+- `archive/reports/character-bridge-consolidation-second-iteration.md` §11 path #4, §15 Proposal 1 (parsing core only)
 - `docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md`
 
 ## Outcome

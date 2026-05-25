@@ -4,7 +4,7 @@
 **Spec ID:** SPEC-78
 **Type:** FOUNDATIONS amendment (docs-only; no schema, no validator, no skill changes)
 **Successors:** [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [SPEC-77](SPEC-77-slt-grounding-provenance-minimal.md) (downstream consumers — their FOUNDATIONS-citation surfaces reference the extended principles landed here)
-**Source:** brainstorm continuation of `reports/slt-chc-overhaul-first-iteration.md` triage at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`. The user's question about FOUNDATIONS sufficiency for the driver primitive surfaced the two narrow principle extensions documented here.
+**Source:** brainstorm continuation of `archive/reports/slt-chc-overhaul-first-iteration.md` triage at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`. The user's question about FOUNDATIONS sufficiency for the driver primitive surfaced the two narrow principle extensions documented here.
 
 ## 1. Problem
 
@@ -107,7 +107,7 @@ Single slice:
 
 ## 10. References
 
-- Source: brainstorm continuation of `reports/slt-chc-overhaul-first-iteration.md` triage at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`.
+- Source: brainstorm continuation of `archive/reports/slt-chc-overhaul-first-iteration.md` triage at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`.
 - FOUNDATIONS §Story Bundles §5c (existing prose to be extended): `docs/FOUNDATIONS.md:660-666`.
 - FOUNDATIONS §Story Bundles §6b (existing prose to be extended): `docs/FOUNDATIONS.md:686-690`.
 - Downstream consumers: [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (turn-driver primitive — relies on extended §5c for Phase 0 design and on extended §6b for `turn_driver_pov_observer_firewall` validator); [SPEC-77](SPEC-77-slt-grounding-provenance-minimal.md) (minimal SLT grounding — relies on extended §5c indirectly via the compatible-turn-drivers filter).

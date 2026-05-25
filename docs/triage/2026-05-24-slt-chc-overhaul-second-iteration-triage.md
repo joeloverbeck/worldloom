@@ -1,7 +1,7 @@
-# Triage — `reports/slt-chc-overhaul-second-iteration.md`
+# Triage — `archive/reports/slt-chc-overhaul-second-iteration.md`
 
 **Date:** 2026-05-24
-**Source report:** [`reports/slt-chc-overhaul-second-iteration.md`](../../reports/slt-chc-overhaul-second-iteration.md) (1128 lines; research-driven storylet-selection / CHC binding / driver-aware narrative causality proposal from ChatGPT-Pro, iteration 2 of the SLT/CHC overhaul brainstorm)
+**Source report:** [`archive/reports/slt-chc-overhaul-second-iteration.md`](../../archive/reports/slt-chc-overhaul-second-iteration.md) (1128 lines; research-driven storylet-selection / CHC binding / driver-aware narrative causality proposal from ChatGPT-Pro, iteration 2 of the SLT/CHC overhaul brainstorm)
 **Prior iteration:** [`docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`](2026-05-23-slt-chc-overhaul-first-iteration-triage.md); iteration-1 deliverables [`archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](../../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [`archive/specs/SPEC-77-slt-grounding-provenance-minimal.md`](../../archive/specs/SPEC-77-slt-grounding-provenance-minimal.md), [`archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md`](../../archive/specs/SPEC-78-foundations-amendment-driver-primitive-principle-extensions.md), all archived 2026-05-24.
 **Trigger:** Originating user concern, "the first iteration left some issues that worried me, for example the declaration in CHC of what SLT was bound." ChatGPT-Pro produced iteration 2 in response.
 **Deliverables produced:** [`specs/SPEC-79-story-bundle-schema-drift-repairs.md`](../../specs/SPEC-79-story-bundle-schema-drift-repairs.md). No `IMPLEMENTATION-ORDER.md` (single spec).

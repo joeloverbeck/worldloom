@@ -3,7 +3,7 @@
 **Status:** COMPLETED 2026-05-24
 **Spec ID:** SPEC-77
 **Depends on:** [SPEC-76](SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (Turn-Driver Primitive — provides the closed `turn_driver.kind` enum that `compatible_turn_drivers[]` references)
-**Source report:** `reports/slt-chc-overhaul-first-iteration.md` (triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`)
+**Source report:** `archive/reports/slt-chc-overhaul-first-iteration.md` (triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`)
 
 ## 1. Problem
 
@@ -205,7 +205,7 @@ Smaller than SPEC-76:
 
 ## 10. References
 
-- Source report: `reports/slt-chc-overhaul-first-iteration.md` (pain points §5.3 / §13.1 / §13.4; schema change §8.3; commitment-block-authoring change §9.3; validators §10.7).
+- Source report: `archive/reports/slt-chc-overhaul-first-iteration.md` (pain points §5.3 / §13.1 / §13.4; schema change §8.3; commitment-block-authoring change §9.3; validators §10.7).
 - Triage decision record: `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`.
 - FOUNDATIONS §Story Bundles §5a / §5b / §5c: `docs/FOUNDATIONS.md:648-666`.
 - Existing schema: `tools/validators/src/schemas/story-storylet.schema.json`.

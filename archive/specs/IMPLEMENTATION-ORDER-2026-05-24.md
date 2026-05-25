@@ -2,7 +2,7 @@
 
 **Status:** COMPLETED 2026-05-24
 
-Specs derived from the triage of `reports/slt-chc-overhaul-first-iteration.md`
+Specs derived from the triage of `archive/reports/slt-chc-overhaul-first-iteration.md`
 (see [`docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`](../../docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md)).
 
 This snapshot archives the completed SPEC-77 row from `specs/IMPLEMENTATION-ORDER.md`. The live implementation order has no remaining active specs from this triage sequence.

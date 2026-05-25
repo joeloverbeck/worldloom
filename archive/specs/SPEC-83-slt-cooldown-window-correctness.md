@@ -2,7 +2,7 @@
 
 **Status:** completed
 **Date:** 2026-05-25
-**Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../../reports/slt-chc-overhaul-third-iteration.md) §6 "Repo-specific bugs or mismatches found" and §17 SPEC-83.
+**Source brainstorm:** [`archive/reports/slt-chc-overhaul-third-iteration.md`](../../archive/reports/slt-chc-overhaul-third-iteration.md) §6 "Repo-specific bugs or mismatches found" and §17 SPEC-83.
 **Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md) §ACCEPT.
 **Predecessors:** archived [`SPEC-81-indexed-storylet-candidate-retrieval.md`](SPEC-81-indexed-storylet-candidate-retrieval.md) (introduced `select_storylet_candidates` and `slt_projections.slt_saliency_cooldown_pages`).
 

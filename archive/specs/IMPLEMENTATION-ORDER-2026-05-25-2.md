@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-05-25
 **Status:** COMPLETED - archived 2026-05-25 as `archive/specs/IMPLEMENTATION-ORDER-2026-05-25-2.md`
-**Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
+**Source brainstorm:** `archive/reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
 
 This file sequences the live specs under `specs/`. Each row records the spec, the change shape, dependency, and gating risk. Once a spec ships, its row is archived alongside the spec file at `archive/specs/IMPLEMENTATION-ORDER-<date>.md`.
 

@@ -2,7 +2,7 @@
 
 **Status:** COMPLETED
 **Date:** 2026-05-25
-**Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) §17 SPEC-86 (renumbered to SPEC-85 here per sequential continuation from archived SPEC-82).
+**Source brainstorm:** [`archive/reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) §17 SPEC-86 (renumbered to SPEC-85 here per sequential continuation from archived SPEC-82).
 **Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md) §ACCEPT.
 **Predecessors:** archived [`SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (introduced the 8-driver-kind enum and per-kind schema constraints); the Red Kiln Ambush fixture at `tools/validators/tests/fixtures/red-kiln-ambush/` (rich `npc_action` proof — the pattern this spec mirrors for the other four non-player kinds).
 

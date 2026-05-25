@@ -2,7 +2,7 @@
 
 **Spec ID:** SPEC-82
 **Date:** 2026-05-24
-**Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
+**Source brainstorm:** `archive/reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
 **Status:** COMPLETED
 
 ## §1 Goal

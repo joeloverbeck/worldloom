@@ -14,7 +14,7 @@ At intake, the §16a packet contract at `.claude/skills/_shared-templates/story-
 - `Required because: voice_shapes_page` (single label, fully in the documented vocabulary at `story-state-contract.md:466`) → no validator ever checks for a voice block.
 - `Required because: offstage_causal, direct_target` for a non-offstage STENT → exact-match `packet.requiredBecause === OFFSTAGE_REQUIRED_BECAUSE` evaluates false → locational guard silently skipped.
 
-This was contract-drift correctness: the validator now enforces the already-documented contract. The source report (`reports/character-bridge-consolidation-second-iteration.md` §11 path #4) rated this the only false-confidence path *"Preventable: yes"* without caveat. SPEC-73 (this ticket's source spec) is the validator-side closure.
+This was contract-drift correctness: the validator now enforces the already-documented contract. The source report (`archive/reports/character-bridge-consolidation-second-iteration.md` §11 path #4) rated this the only false-confidence path *"Preventable: yes"* without caveat. SPEC-73 (this ticket's source spec) is the validator-side closure.
 
 ## Assumption Reassessment (2026-05-23)
 

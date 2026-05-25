@@ -1,7 +1,7 @@
 # Triage — character-bridge consolidation (second iteration)
 
 **Date:** 2026-05-23
-**Source report:** `reports/character-bridge-consolidation-second-iteration.md` (ChatGPT-Pro, 18 sections, 6 prioritized proposals + 7 false-confidence paths + 4 open questions)
+**Source report:** `archive/reports/character-bridge-consolidation-second-iteration.md` (ChatGPT-Pro, 18 sections, 6 prioritized proposals + 7 false-confidence paths + 4 open questions)
 **Prior decision record:** first-iteration character-bridge triage, materialized as `archive/specs/SPEC-70-char-stchar-semantic-preservation.md` (completed 2026-05-22). This triage is a delta against that spec and the just-merged VALSTCHAR-001..004 tickets.
 **Method:** every load-bearing codebase claim verified against actual schema/validator source on `main` via parallel `Explore` agents; cross-checked against the SPEC-70 first-iteration lineage and the post-base-SHA ticket merges (VALSTCHAR-001..004).
 

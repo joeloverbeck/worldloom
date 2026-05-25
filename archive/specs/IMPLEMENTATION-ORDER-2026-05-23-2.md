@@ -2,7 +2,7 @@
 
 **Status:** COMPLETED 2026-05-23
 
-Specs derived from the triage of `reports/character-bridge-consolidation-second-iteration.md`
+Specs derived from the triage of `archive/reports/character-bridge-consolidation-second-iteration.md`
 (see `docs/triage/2026-05-23-character-bridge-consolidation-second-iteration-triage.md`).
 
 The prior sprint's `IMPLEMENTATION-ORDER.md` (world-system-consolidation-second-iteration triage,

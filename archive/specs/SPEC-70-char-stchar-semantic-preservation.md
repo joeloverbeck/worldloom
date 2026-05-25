@@ -3,7 +3,7 @@
 **Status:** COMPLETED
 **Date:** 2026-05-22
 **Classification:** story-canon-related (governs the `CHAR → STCHAR` story-character distillation seam: the `story-character-profile` skill, the STCHAR frontmatter schema, the STCHAR body validator, the §16a page-plan packet contract, and a new structural validator)
-**Source:** `reports/character-bridge-consolidation-first-iteration.md` (external ChatGPT-Pro analysis) — triaged against `main` (SHA `fb1eb37`) 2026-05-22. The report proposed 7 changes across a 7-phase program; this spec implements the **subset that survives verification** and drops the rest (see §1 and §4).
+**Source:** `archive/reports/character-bridge-consolidation-first-iteration.md` (external ChatGPT-Pro analysis) — triaged against `main` (SHA `fb1eb37`) 2026-05-22. The report proposed 7 changes across a 7-phase program; this spec implements the **subset that survives verification** and drops the rest (see §1 and §4).
 **Depends on:** none — the STCHAR machine foundation, pipeline integration, body-integrity validator, and §16a packet integrity validator already landed (`archive/specs/SPEC-56`, `SPEC-57`, `SPEC-59`, `SPEC-63`, `SPEC-66`). This spec adds the one missing layer on top of them.
 **Companion triage file:** none — single-deliverable triage below the ≥8-item carve-out threshold (7 proposals evaluated); verdicts are recorded inline in §1 + §4 and in the originating in-chat triage.
 

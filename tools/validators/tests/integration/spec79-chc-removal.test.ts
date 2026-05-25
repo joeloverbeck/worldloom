@@ -28,12 +28,12 @@ const SEARCH_PATHS = [
   ".claude/skills",
   "docs",
   "archive/specs/SPEC-79-chc-associated-commitment-block-removal.md",
-  "reports/slt-chc-overhaul-second-iteration.md"
+  "archive/reports/slt-chc-overhaul-second-iteration.md"
 ] as const;
 
 const ALLOWED_HISTORICAL_PATHS = new Set([
   "archive/specs/SPEC-79-chc-associated-commitment-block-removal.md",
-  "reports/slt-chc-overhaul-second-iteration.md",
+  "archive/reports/slt-chc-overhaul-second-iteration.md",
 ]);
 
 function isAllowedHistoricalPath(pathName: string): boolean {

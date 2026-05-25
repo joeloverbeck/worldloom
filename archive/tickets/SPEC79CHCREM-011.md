@@ -19,7 +19,7 @@ The capstone's primary value is operational: it gives the implementer a single v
 3. Cross-skill boundary: this capstone integration test exercises the full pipeline composed by tickets 001-010. Its `Deps` enumerate the leaf set (002, 005, 006, 007, archived 008, 009, 010) per §Spec-Integration Ticket Shape parallel-branch DAGs rule — the transitive `Deps` from these 7 leaves collectively cover the full upstream chain (001, 003, 004).
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism): the capstone test verifies that the removal preserves current tracked operational surfaces — bootstrap and turn-cycle guidance no longer instructs CHCs to carry a specific SLT, the validator/schema surfaces have no operational field reference, and remaining tracked-source hits are SPEC-79 documentation/provenance. The field was non-load-bearing, and its removal left no current consumer surface depending on it.
 5. Reassessment corrected the drafted command shape: `tools/validators/package.json` runs `npm test` as `npm run build && node --test dist/tests/**/*.test.js`, and the wrapper has no `--test-name-pattern` passthrough. The truthful focused proof is `npm run build` followed by `node --test dist/tests/integration/spec79-chc-removal.test.js` from `tools/validators`.
-6. Reassessment corrected the negative grep boundary: ignored `dist/` and `node_modules/` artifacts under `tools/` are not current contract surfaces, so the automated assertion uses `git grep` over tracked files. Historical/provenance matches are allowed only in `archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`, `reports/slt-chc-overhaul-second-iteration.md`, and the two SLT/CHC triage docs under `docs/triage/`; any match in `tools/`, `.claude/skills/`, or other current docs is a failure. The first-iteration source report remains historical provenance but is intentionally outside the capstone grep path because SPEC-79's source brainstorm is the second-iteration report.
+6. Reassessment corrected the negative grep boundary: ignored `dist/` and `node_modules/` artifacts under `tools/` are not current contract surfaces, so the automated assertion uses `git grep` over tracked files. Historical/provenance matches are allowed only in `archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`, `archive/reports/slt-chc-overhaul-second-iteration.md`, and the two SLT/CHC triage docs under `docs/triage/`; any match in `tools/`, `.claude/skills/`, or other current docs is a failure. The first-iteration source report remains historical provenance but is intentionally outside the capstone grep path because SPEC-79's source brainstorm is the second-iteration report.
 
 ## Architecture Check
 
@@ -31,7 +31,7 @@ The capstone's primary value is operational: it gives the implementer a single v
 
 1. Bootstrap end-to-end dry-run boundary → manual runbook + contract review: the new test file documents the temp-world runbook, and live bootstrap guidance emits CHCs without the retired CHC-to-SLT field. The dry-run itself was not executed in Codex because the skill is LLM-driven/content-generating and has no executable package harness.
 2. Turn-cycle end-to-end dry-run boundary → manual runbook + contract review: the new test file documents the temp-world runbook, and live turn-cycle guidance routes on selected PG input, `grounded_in.records`, and `target_or_action_families` without consulting a per-CHC SLT hint. The dry-run itself was not executed in Codex for the same runner/HARD-GATE reason.
-3. Grep negative test passes → codebase grep-proof: `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md reports/slt-chc-overhaul-second-iteration.md` returns matches only inside SPEC-79 documentation and provenance (per §9 test 6).
+3. Grep negative test passes → codebase grep-proof: `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md archive/reports/slt-chc-overhaul-second-iteration.md` returns matches only inside SPEC-79 documentation and provenance (per §9 test 6).
 4. Atomic landing is preserved → manual review across the dependency graph: every upstream ticket (001-010) is landed before this capstone runs; the leaf-set Deps (002, 005, 006, 007, 008, 009, 010) transitively cover the full upstream chain.
 
 ## What to Change
@@ -41,7 +41,7 @@ The capstone's primary value is operational: it gives the implementer a single v
 - Landed integration test exercising §9 test 6 as an automated assertion plus runbook coverage for §9 tests 4-5:
   - **§9 test 4 (Bootstrap end-to-end)**: documented as a manual skill dry-run in the test file's setup comment (skills are not invokable from test code; the implementer runs `/branching-story-bootstrap` once against a fixture world and verifies the produced CHCs lack the retired field; a synthetic verification of the produced bundle's CHC entries reads them via `world-index render` or equivalent and asserts zero retired-field keys appear).
   - **§9 test 5 (Turn-cycle end-to-end)**: same manual-dry-run pattern; the test file documents the implementer's verification steps (invoke `/branching-story-turn-cycle` against the bootstrapped page; verify Phase 2 selects an SLT from the live pool without consulting any per-CHC SLT hint; Phase 8 emits CHCs without the field; the resulting state is replay-equivalent under `snapshot_replay_equality`).
-  - **§9 test 6 (Grep negative test)**: automated assertion in the test file — spawn a `git grep` subprocess across tracked `tools/`, `.claude/skills/`, `docs/`, `archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`, and `reports/slt-chc-overhaul-second-iteration.md`; assert that all matches are inside SPEC-79's own documentation/provenance (the spec file itself, the source-brainstorm report, and SLT/CHC triage docs) and no consumer surface retains the reference. Other archived-spec matches are excluded by construction.
+  - **§9 test 6 (Grep negative test)**: automated assertion in the test file — spawn a `git grep` subprocess across tracked `tools/`, `.claude/skills/`, `docs/`, `archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`, and `archive/reports/slt-chc-overhaul-second-iteration.md`; assert that all matches are inside SPEC-79's own documentation/provenance (the spec file itself, the source-brainstorm report, and SLT/CHC triage docs) and no consumer surface retains the reference. Other archived-spec matches are excluded by construction.
 
 ### 2. Implementer-runbook content
 
@@ -72,7 +72,7 @@ The capstone's primary value is operational: it gives the implementer a single v
 1. `cd tools/validators && npm run build && node --test dist/tests/integration/spec79-chc-removal.test.js` passes; the automated tracked-source grep negative assertion returns zero matches outside SPEC-79 documentation and provenance.
 2. Manual contract review confirms bootstrap guidance emits CHCs without the retired CHC-to-SLT field and keeps the manual dry-run runbook in the capstone test header.
 3. Manual contract review confirms turn-cycle guidance routes on selected PG input, `grounded_in.records`, and `target_or_action_families`; Phase 8 emits CHCs without the field; the manual dry-run runbook is preserved in the capstone test header.
-4. `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md reports/slt-chc-overhaul-second-iteration.md` returns matches only inside SPEC-79 documentation and provenance — no consumer surface retains the reference.
+4. `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md archive/reports/slt-chc-overhaul-second-iteration.md` returns matches only inside SPEC-79 documentation and provenance — no consumer surface retains the reference.
 
 ### Invariants
 
@@ -88,7 +88,7 @@ The capstone's primary value is operational: it gives the implementer a single v
 ### Commands
 
 1. `cd tools/validators && npm run build && node --test dist/tests/integration/spec79-chc-removal.test.js`
-2. `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md reports/slt-chc-overhaul-second-iteration.md`
+2. `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md archive/reports/slt-chc-overhaul-second-iteration.md`
 3. Manual contract review of `.claude/skills/branching-story-bootstrap`, `.claude/skills/branching-story-turn-cycle`, `.claude/skills/branching-story-health-audit`, shared templates, `docs/MACHINE-FACING-LAYER.md`, `tools/validators`, and `tools/world-index` for retained operational references.
 
 ## Outcome
@@ -104,7 +104,7 @@ Completed on 2026-05-24.
 
 1. `cd tools/validators && npm run build` — PASS. TypeScript compiled the new test and refreshed `tools/validators/dist/`.
 2. `cd tools/validators && node --test dist/tests/integration/spec79-chc-removal.test.js` — PASS. One subtest passed: tracked operational surfaces do not retain the retired CHC-to-SLT field.
-3. `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md reports/slt-chc-overhaul-second-iteration.md` — PASS after classification. Hits remain only in SPEC-79 spec/provenance paths: the archived spec, the second-iteration report, and the two SLT/CHC triage docs under `docs/triage/`; no `tools/` or `.claude/skills/` consumer surface hit remains.
+3. `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md archive/reports/slt-chc-overhaul-second-iteration.md` — PASS after classification. Hits remain only in SPEC-79 spec/provenance paths: the archived spec, the second-iteration report, and the two SLT/CHC triage docs under `docs/triage/`; no `tools/` or `.claude/skills/` consumer surface hit remains.
 4. Manual contract review — PASS. Bootstrap and turn-cycle guidance now describe CHCs without a specific SLT field and route selection through live pool inputs; health-audit and validator prose use the 3-axis noncollapse signature; `docs/MACHINE-FACING-LAYER.md` no longer documents `choice_associated_storylet`.
 
 ## Deviations

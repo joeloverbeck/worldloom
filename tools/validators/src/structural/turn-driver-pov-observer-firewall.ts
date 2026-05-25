@@ -230,7 +230,7 @@ function activeRecordIds(page: IndexedRecord, className: string): string[] {
 
 function offstageDriverText(content: string): string {
   const turnDriverSection = content.match(/^##\s+7a\.\s+Turn driver \/ initiative trace\s*$(.*?)(?=^##\s+|$)/ms)?.[1] ?? "";
-  const stcharSection = content.match(/^##\s+16a\.\s+STCHAR-derived character authority packets\s*$(.*?)(?=^##\s+|$)/ms)?.[1] ?? "";
+  const stcharSection = content.match(/^##\s+16a\.\s+STCHAR-derived character authority packets\s*$(.*?)(?=^##\s+|$)/mis)?.[1] ?? "";
   return `${turnDriverSection}\n${stcharSection}\n${content}`;
 }
 

@@ -2,7 +2,7 @@
 
 **Status:** COMPLETE 2026-05-23
 
-Specs derived from the triage of `reports/stchar-distillation-rework.md`
+Specs derived from the triage of `archive/reports/stchar-distillation-rework.md`
 (see [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../../docs/triage/2026-05-23-stchar-distillation-rework-triage.md)).
 
 The prior sprint's `IMPLEMENTATION-ORDER.md` (SPEC-73 single-spec sprint from the character-bridge-consolidation-second-iteration triage) was archived as `archive/specs/IMPLEMENTATION-ORDER-2026-05-23-2.md`.

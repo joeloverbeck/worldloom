@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # **STCHAR Stable Character Authority vs. Temporal State Projection — Requirements-First Architecture Proposal**
 
 ## **Repository basis**
@@ -818,3 +820,6 @@ The decisive fix is:
 
 Do that with skill/template hardening first, then structural validators based on record references, lifecycle reason classes, provenance inventory, and page-plan grounding. Do not use brittle word/phrase temporal-leakage validators.
 
+## Outcome
+
+Archived on 2026-05-25 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.
