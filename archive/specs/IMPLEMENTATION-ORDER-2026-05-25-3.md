@@ -1,29 +1,30 @@
 # Implementation Order
 
 **Last updated:** 2026-05-25
-**Status:** active
+**Status:** COMPLETED - archived 2026-05-25 as `archive/specs/IMPLEMENTATION-ORDER-2026-05-25-3.md`
 **Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) triaged at [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md).
+**Deferred-items reassessment** (post-completion): [`docs/triage/2026-05-25-implementation-order-deferred-items-reassessment.md`](../docs/triage/2026-05-25-implementation-order-deferred-items-reassessment.md) — re-verified every §Out-of-Scope lift-condition remains unmet; no new specs warranted.
 
-This file sequences the live specs under `specs/`. Each row records the spec, the change shape, dependency, and gating risk. Completed rows are moved to the shipped section with archived paths while the remaining active specs continue here.
+This file sequences the live specs under `specs/`. Each row records the spec, the change shape, dependency, and gating risk. Once a spec ships, its row is archived alongside the spec file at `archive/specs/IMPLEMENTATION-ORDER-<date>.md`.
 
 ## Active sequence
 
-| Order | Spec | Shape | Depends on | Gating risk |
-|---|---|---|---|---|
-| 1 | [SPEC-84 — Replay/Fork and Branch-Scope Golden Fixtures](../archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md) | completed: fixture + integration tests; test-only | none structurally; benefits from archived SPEC-83's landed cooldown fix so the cooldown bug does not perturb the fixture's filter_trace assertions | archived via `archive/tickets/SPEC84REPBRASCO-001.md` and `archive/tickets/SPEC84REPBRASCO-002.md`; no source code change. |
-| 2 | [SPEC-85 — Non-Player Driver Golden Fixtures](../archive/specs/SPEC-85-non-player-driver-golden-fixtures.md) | completed: four fixtures + four integration tests; test-only | none structurally | archived via `archive/tickets/SPEC85NONPLADRI-001.md` through `archive/tickets/SPEC85NONPLADRI-004.md`; no source code change. |
+No active specs remain in this iteration-3 sequence.
 
 ## Shipped in this sequence
 
-| Spec | Ticket | Result |
+| Spec | Ticket(s) | Result |
 |---|---|---|
 | [SPEC-83 — SLT Cooldown Window Correctness](../archive/specs/SPEC-83-slt-cooldown-window-correctness.md) | [SPEC83SLTCOOWIN-001](../archive/tickets/SPEC83SLTCOOWIN-001.md) | Completed 2026-05-25; fixed numeric cooldown windows, branch-isolated prior-selection lookup, and additive `filter_trace.cooldown_active_samples` diagnostics in `tools/world-mcp/`. |
+| [SPEC-84 — Replay/Fork and Branch-Scope Golden Fixtures](../archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md) | [SPEC84REPBRASCO-001](../archive/tickets/SPEC84REPBRASCO-001.md), [SPEC84REPBRASCO-002](../archive/tickets/SPEC84REPBRASCO-002.md) | Completed 2026-05-25; fixture + integration tests proving replay-time SLT visibility correctness across replay/fork and branch-scope dimensions; test-only, no source code change. |
+| [SPEC-85 — Non-Player Driver Golden Fixtures](../archive/specs/SPEC-85-non-player-driver-golden-fixtures.md) | [SPEC85NONPLADRI-001](../archive/tickets/SPEC85NONPLADRI-001.md) through [SPEC85NONPLADRI-004](../archive/tickets/SPEC85NONPLADRI-004.md) | Completed 2026-05-25; four authored fixtures + four integration tests (clock_fire, offstage_action, secret_reveal, multi_actor_collision); test-only, no source code change. |
 
 ## Dependency rationale
 
-- **SPEC-83 shipped first** because it was the only behavioral bug fix in the iteration. Its blast radius was contained to `select-storylet-candidates.ts`, the embedded context-packet trace type, and tests. SPEC-84 and SPEC-85 fixtures can now rely on correct cooldown semantics without working around the bug.
-- **SPEC-84 sequences before SPEC-85** because the replay/branch-scope fixture is smaller (one bundle, one test file) and exercises the same MCP retrieval surface SPEC-83 touched; landing it second confirms SPEC-83's filter_trace shape is stable before the larger non-player-driver fixture suite consumes it. There is no hard dependency — SPEC-84 and SPEC-85 could swap order without breaking either.
-- **SPEC-85 is the largest piece** of fixture authoring in this iteration (four bundles + four integration tests, each mirroring the Red Kiln Ambush pattern). It ships last so the smaller specs are not blocked behind it.
+- **SPEC-83, SPEC-84, and SPEC-85 are complete and archived.** The iteration-3 sequence shipped in the recorded order without dependency surprises.
+- **SPEC-83 shipped first** because it was the only behavioral bug fix in the iteration. Its blast radius was contained to `select-storylet-candidates.ts`, the embedded context-packet trace type, and tests. SPEC-84 and SPEC-85 fixtures relied on correct cooldown semantics without working around the bug.
+- **SPEC-84 sequenced before SPEC-85** because the replay/branch-scope fixture was smaller (one bundle, one test file) and exercised the same MCP retrieval surface SPEC-83 touched; landing it second confirmed SPEC-83's filter_trace shape was stable before the larger non-player-driver fixture suite consumed it. There was no hard dependency — SPEC-84 and SPEC-85 could have swapped order without breaking either.
+- **SPEC-85 was the largest piece** of fixture authoring in this iteration (four bundles + four integration tests, each mirroring the Red Kiln Ambush pattern). It shipped last so the smaller specs were not blocked behind it.
 
 ## Out of scope for this implementation pass
 
@@ -66,7 +67,8 @@ These items from iteration 2 remain out of scope and were NOT re-proposed by the
 
 ## Notes
 
-- Spec IDs continue from archived SPEC-82.
-- The shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` and the shared record schemas at `.claude/skills/_shared-templates/story-record-schemas.md` are the authoritative surfaces for story-record schemas per FOUNDATIONS §Story Bundles §5b. None of the three active specs in this iteration amend either contract — all three are test/bugfix only.
-- This sequence is the third iteration of SLT/CHC overhaul work. The first iteration's IMPLEMENTATION-ORDER (now at `archive/specs/IMPLEMENTATION-ORDER-2026-05-24.md`) shipped SPEC-76 / SPEC-77 / SPEC-78. The second iteration's IMPLEMENTATION-ORDER (now at `archive/specs/IMPLEMENTATION-ORDER-2026-05-25-2.md`) shipped SPEC-79 / SPEC-80 / SPEC-81 / SPEC-82. This iteration adds SPEC-83 / SPEC-84 / SPEC-85 — a hardening pass around the landed architecture (one bug fix, five golden fixtures across three test specs).
+- Spec IDs continue from archived SPEC-85 (next available: SPEC-86).
+- The shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` and the shared record schemas at `.claude/skills/_shared-templates/story-record-schemas.md` are the authoritative surfaces for story-record schemas per FOUNDATIONS §Story Bundles §5b. None of the three specs in this iteration amended either contract — all three were test/bugfix only.
+- This sequence is the third iteration of SLT/CHC overhaul work. The first iteration's IMPLEMENTATION-ORDER (now at `archive/specs/IMPLEMENTATION-ORDER-2026-05-24.md`) shipped SPEC-76 / SPEC-77 / SPEC-78. The second iteration's IMPLEMENTATION-ORDER (now at `archive/specs/IMPLEMENTATION-ORDER-2026-05-25-2.md`) shipped SPEC-79 / SPEC-80 / SPEC-81 / SPEC-82. This iteration shipped SPEC-83 / SPEC-84 / SPEC-85 — a hardening pass around the landed architecture (one bug fix, five golden fixtures across three test specs).
+- Post-completion reassessment of the §Out-of-Scope deferred and rejected items is recorded at [`docs/triage/2026-05-25-implementation-order-deferred-items-reassessment.md`](../docs/triage/2026-05-25-implementation-order-deferred-items-reassessment.md). Every lift-condition remained measurably unmet; no iteration-4 spec is queued at archive time.
 - No `git commit` is performed by spec writers; the user reviews the diff and commits.
