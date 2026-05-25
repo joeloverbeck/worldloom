@@ -8,7 +8,7 @@
 **Trigger:** User-supplied request: "Please analyze carefully reports/slt-chc-overhaul-third-iteration.md . It was produced by ChatGPT-Pro after the second iteration made significant structural changes. I need you to be critical of ChatGPT-Pro's report: reassess for correctness and benefit. If changes aligned with docs/FOUNDATIONS.md are warranted, create specs in specs/* with the specifications. If more than one spec is created, create specs/IMPLEMENTATION-ORDER.md"
 **Deliverables produced:**
 - [`archive/specs/SPEC-83-slt-cooldown-window-correctness.md`](../../archive/specs/SPEC-83-slt-cooldown-window-correctness.md)
-- [`specs/SPEC-84-replay-and-branch-scope-fixtures.md`](../../specs/SPEC-84-replay-and-branch-scope-fixtures.md)
+- [`archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md`](../../archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md)
 - [`specs/SPEC-85-non-player-driver-golden-fixtures.md`](../../specs/SPEC-85-non-player-driver-golden-fixtures.md)
 - [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md)
 
@@ -75,7 +75,7 @@ Iteration 3 makes ~25-30 codebase claims. The verification pass below condenses 
 #### SPEC-84 (Replay/fork + branch-scope golden fixtures) — combined
 
 **Verdict:** accept (combined; test-only, no schema change).
-**Lands in:** [`specs/SPEC-84-replay-and-branch-scope-fixtures.md`](../../specs/SPEC-84-replay-and-branch-scope-fixtures.md).
+**Lands in:** [`archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md`](../../archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md).
 **Ground:** Verified absence of replay-with-newer-global-SLT golden fixture and replay-context branch-scope/branch-prefix fixture. Iteration-2 §Out-of-Scope rejected replay as a **separate structural spec** ("Subsumed by SPEC-79 — the live global pool semantics is automatic"); a **test-only** fixture spec is consistent with the iteration-2 record — the behavior IS automatic but unproven, and replay/fork is the exact place the pre-SPEC-79 stale-binding bug manifested. Combining report SPEC-84 (replay) + report SPEC-85 (branch-scope) into one spec keeps fixture authoring coherent — both prove replay-time SLT visibility correctness across scope dimensions.
 
 #### SPEC-85 (Non-player driver golden fixtures) — verified per-kind fixture gap

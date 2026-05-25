@@ -1,0 +1,549 @@
+{
+  "world_slug": "spec84-replay-and-branch-scope-world",
+  "story_slug": "spec84-replay-and-branch-scope",
+  "records": [
+    {
+      "node_type": "canon_fact_record",
+      "node_id": "CF-84",
+      "file_path": "_source/canon/CF-84.yaml",
+      "parsed": {
+        "record_kind": "canon_fact",
+        "id": "CF-84",
+        "title": "SPEC-84 Fixture World",
+        "status": "hard_canon",
+        "type": "story_test_fixture",
+        "statement": "SPEC-84 fixture worlds support replay and branch-scope retrieval tests.",
+        "scope": {
+          "geographic": "local",
+          "temporal": "current",
+          "social": "public"
+        },
+        "truth_scope": {
+          "world_level": true,
+          "diegetic_status": "objective"
+        },
+        "domains_affected": ["story_bundles"],
+        "required_world_updates": ["SPEC-84 fixture only"],
+        "source_basis": {
+          "direct_user_approval": true
+        },
+        "contradiction_risk": {
+          "hard": false,
+          "soft": false
+        },
+        "notes": "Minimal canon fact used only by the SPEC-84 replay and branch-scope golden fixture."
+      }
+    },
+    {
+      "node_type": "branch_record",
+      "node_id": "spec84-replay-and-branch-scope:BR-1",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/branches/BR-1.yaml",
+      "parsed": {
+        "record_kind": "branch_record",
+        "id": "BR-1",
+        "story_id": "STORY-84",
+        "created_at_page": "PG-1",
+        "label": "Branch one replay line",
+        "description": "Replay line that forks through PG-3 to PG-5.",
+        "parent_branch_id": null,
+        "forked_at_page_id": null,
+        "root_page_id": "PG-1"
+      }
+    },
+    {
+      "node_type": "branch_record",
+      "node_id": "spec84-replay-and-branch-scope:BR-2",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/branches/BR-2.yaml",
+      "parsed": {
+        "record_kind": "branch_record",
+        "id": "BR-2",
+        "story_id": "STORY-84",
+        "created_at_page": "PG-2",
+        "label": "Branch two sibling line",
+        "description": "Sibling line that forks through PG-2 to PG-4.",
+        "parent_branch_id": null,
+        "forked_at_page_id": "PG-1",
+        "root_page_id": "PG-1"
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "spec84-replay-and-branch-scope:PG-1",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/pages/PG-1.yaml",
+      "parsed": {
+        "record_kind": "page_record",
+        "id": "PG-1",
+        "story_id": "STORY-84",
+        "branch_id": "BR-1",
+        "parent_page_id": null,
+        "branch_path": ["PG-1"],
+        "turn_index": 0,
+        "input": {
+          "choice_id": null,
+          "manual_action_text": null,
+          "resolved_event_id": "SE-1"
+        },
+        "state_hash_parent": null,
+        "state_hash": "0000000000000000000000000000000000000000000000000000000000000084",
+        "state_snapshot": {
+          "active_records": {
+            "STCHAR": ["STCHAR-1"]
+          },
+          "unresolved_mystery_claims": []
+        },
+        "plan": {
+          "plan_hash": "1000000000000000000000000000000000000000000000000000000000000084"
+        },
+        "prose_plan_path": "pages-prose-plans/PG-1.md",
+        "emitted_choices": [],
+        "validation_trace": {
+          "fixture_scope": "PASS: root page carries the shared replay baseline."
+        }
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "spec84-replay-and-branch-scope:PG-2",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/pages/PG-2.yaml",
+      "parsed": {
+        "record_kind": "page_record",
+        "id": "PG-2",
+        "story_id": "STORY-84",
+        "branch_id": "BR-2",
+        "parent_page_id": "PG-1",
+        "branch_path": ["PG-1", "PG-2"],
+        "turn_index": 1,
+        "input": {
+          "choice_id": null,
+          "manual_action_text": null,
+          "resolved_event_id": "SE-2"
+        },
+        "state_hash_parent": "0000000000000000000000000000000000000000000000000000000000000084",
+        "state_hash": "2000000000000000000000000000000000000000000000000000000000000084",
+        "state_snapshot": {
+          "active_records": {
+            "STCHAR": ["STCHAR-1"]
+          },
+          "unresolved_mystery_claims": []
+        },
+        "plan": {
+          "plan_hash": "2100000000000000000000000000000000000000000000000000000000000084"
+        },
+        "prose_plan_path": "pages-prose-plans/PG-2.md",
+        "emitted_choices": [],
+        "validation_trace": {
+          "fixture_scope": "PASS: sibling branch page preserves the BR-2 prefix."
+        }
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "spec84-replay-and-branch-scope:PG-3",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/pages/PG-3.yaml",
+      "parsed": {
+        "record_kind": "page_record",
+        "id": "PG-3",
+        "story_id": "STORY-84",
+        "branch_id": "BR-1",
+        "parent_page_id": "PG-1",
+        "branch_path": ["PG-1", "PG-3"],
+        "turn_index": 1,
+        "input": {
+          "choice_id": null,
+          "manual_action_text": null,
+          "resolved_event_id": "SE-3"
+        },
+        "state_hash_parent": "0000000000000000000000000000000000000000000000000000000000000084",
+        "state_hash": "3000000000000000000000000000000000000000000000000000000000000084",
+        "state_snapshot": {
+          "active_records": {
+            "STCHAR": ["STCHAR-1"]
+          },
+          "unresolved_mystery_claims": []
+        },
+        "plan": {
+          "plan_hash": "3100000000000000000000000000000000000000000000000000000000000084"
+        },
+        "prose_plan_path": "pages-prose-plans/PG-3.md",
+        "emitted_choices": [],
+        "validation_trace": {
+          "fixture_scope": "PASS: branch-one page establishes the target prefix."
+        }
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "spec84-replay-and-branch-scope:PG-4",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/pages/PG-4.yaml",
+      "parsed": {
+        "record_kind": "page_record",
+        "id": "PG-4",
+        "story_id": "STORY-84",
+        "branch_id": "BR-2",
+        "parent_page_id": "PG-2",
+        "branch_path": ["PG-1", "PG-2", "PG-4"],
+        "turn_index": 2,
+        "input": {
+          "choice_id": null,
+          "manual_action_text": null,
+          "resolved_event_id": "SE-4"
+        },
+        "state_hash_parent": "2000000000000000000000000000000000000000000000000000000000000084",
+        "state_hash": "4000000000000000000000000000000000000000000000000000000000000084",
+        "state_snapshot": {
+          "active_records": {
+            "STCHAR": ["STCHAR-1"],
+            "STPLAN": ["STPLAN-99"]
+          },
+          "unresolved_mystery_claims": []
+        },
+        "plan": {
+          "plan_hash": "4100000000000000000000000000000000000000000000000000000000000084"
+        },
+        "prose_plan_path": "pages-prose-plans/PG-4.md",
+        "emitted_choices": [],
+        "validation_trace": {
+          "fixture_scope": "PASS: sibling branch page owns STPLAN-99 and the wrong prefix."
+        }
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "spec84-replay-and-branch-scope:PG-5",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/pages/PG-5.yaml",
+      "parsed": {
+        "record_kind": "page_record",
+        "id": "PG-5",
+        "story_id": "STORY-84",
+        "branch_id": "BR-1",
+        "parent_page_id": "PG-3",
+        "branch_path": ["PG-1", "PG-3", "PG-5"],
+        "turn_index": 2,
+        "input": {
+          "choice_id": null,
+          "manual_action_text": null,
+          "resolved_event_id": "SE-5"
+        },
+        "state_hash_parent": "3000000000000000000000000000000000000000000000000000000000000084",
+        "state_hash": "5000000000000000000000000000000000000000000000000000000000000084",
+        "state_snapshot": {
+          "active_records": {
+            "STCHAR": ["STCHAR-1"]
+          },
+          "unresolved_mystery_claims": []
+        },
+        "plan": {
+          "plan_hash": "5100000000000000000000000000000000000000000000000000000000000084"
+        },
+        "prose_plan_path": "pages-prose-plans/PG-5.md",
+        "emitted_choices": [],
+        "validation_trace": {
+          "fixture_scope": "PASS: branch-one replay parent carries the matching prefix."
+        }
+      }
+    },
+    {
+      "node_type": "story_plan_record",
+      "node_id": "spec84-replay-and-branch-scope:STPLAN-99",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/plans/STPLAN-99.yaml",
+      "parsed": {
+        "record_kind": "story_plan_record",
+        "id": "STPLAN-99",
+        "story_id": "STORY-84",
+        "created_at_page": "PG-4",
+        "created_by_event": "SE-4",
+        "holder": "STENT-1",
+        "root_intention": "STINT-1",
+        "objective": "Keep the sibling branch plan isolated from BR-1 replay selection.",
+        "plan_status": "active",
+        "belief_basis": ["BEL-1"],
+        "current_step": {
+          "action_family": "decide",
+          "target_records": ["PG-4"],
+          "success_condition": {
+            "predicates": []
+          }
+        },
+        "expires_when": "The BR-2 sibling branch is no longer being tested."
+      }
+    },
+    {
+      "node_type": "storylet_record",
+      "node_id": "spec84-replay-and-branch-scope:SLT-1",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/storylets/SLT-1.yaml",
+      "parsed": {
+        "record_kind": "storylet_record",
+        "id": "SLT-1",
+        "story_id": "STORY-84",
+        "scope": {
+          "visibility": "global_author_pool",
+          "branch_id": null
+        },
+        "title": "Baseline global replay candidate",
+        "move_family": "investigation",
+        "preconditions": {
+          "hard": [],
+          "soft": []
+        },
+        "beats": [
+          {
+            "beat_id": "setup",
+            "function": "setup",
+            "instruction": "Offer a baseline global candidate for either branch."
+          }
+        ],
+        "effects": {
+          "create": [],
+          "supersede": [],
+          "close": []
+        },
+        "exit_options": [
+          {
+            "action_family": "investigate",
+            "surface_hint": "Inspect the replay fixture baseline."
+          }
+        ],
+        "saliency": {
+          "urgency": "medium",
+          "cooldown_pages": 0
+        },
+        "mystery_policy": {
+          "allowed_authority": "none"
+        },
+        "provenance": {
+          "origin": "manual_authoring"
+        },
+        "grounding": {
+          "compatible_turn_drivers": ["player_action"],
+          "reason_to_exist": "Baseline candidate for SPEC-84 replay fixture assertions."
+        }
+      }
+    },
+    {
+      "node_type": "storylet_record",
+      "node_id": "spec84-replay-and-branch-scope:SLT-2",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/storylets/SLT-2.yaml",
+      "parsed": {
+        "record_kind": "storylet_record",
+        "id": "SLT-2",
+        "story_id": "STORY-84",
+        "created_at_page": "PG-4",
+        "scope": {
+          "visibility": "global_author_pool",
+          "branch_id": null
+        },
+        "title": "Newer global replay candidate",
+        "move_family": "investigation",
+        "preconditions": {
+          "hard": [],
+          "soft": []
+        },
+        "beats": [
+          {
+            "beat_id": "setup",
+            "function": "setup",
+            "instruction": "Prove replay selection sees current global-pool storylets."
+          }
+        ],
+        "effects": {
+          "create": [],
+          "supersede": [],
+          "close": []
+        },
+        "exit_options": [
+          {
+            "action_family": "investigate",
+            "surface_hint": "Investigate the newly authored global candidate."
+          }
+        ],
+        "saliency": {
+          "urgency": "high",
+          "cooldown_pages": 0
+        },
+        "mystery_policy": {
+          "allowed_authority": "none"
+        },
+        "provenance": {
+          "origin": "manual_authoring"
+        },
+        "grounding": {
+          "compatible_turn_drivers": ["player_action"],
+          "reason_to_exist": "Positive replay candidate for SPEC-84 global-pool visibility."
+        }
+      }
+    },
+    {
+      "node_type": "storylet_record",
+      "node_id": "spec84-replay-and-branch-scope:SLT-3",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/storylets/SLT-3.yaml",
+      "parsed": {
+        "record_kind": "storylet_record",
+        "id": "SLT-3",
+        "story_id": "STORY-84",
+        "created_at_page": "PG-4",
+        "scope": {
+          "visibility": "global_author_pool",
+          "branch_id": null
+        },
+        "title": "Global candidate with story-local plan ref",
+        "move_family": "decision",
+        "preconditions": {
+          "hard": [
+            {
+              "pred": "plan_active",
+              "plan": "STPLAN-99"
+            }
+          ],
+          "soft": []
+        },
+        "beats": [
+          {
+            "beat_id": "setup",
+            "function": "setup",
+            "instruction": "Exercise source-record rejection for story-bundle plan references."
+          }
+        ],
+        "effects": {
+          "create": [],
+          "supersede": [],
+          "close": []
+        },
+        "exit_options": [
+          {
+            "action_family": "decide",
+            "surface_hint": "Follow the BR-2-only sibling plan."
+          }
+        ],
+        "saliency": {
+          "urgency": "high",
+          "cooldown_pages": 0
+        },
+        "mystery_policy": {
+          "allowed_authority": "none"
+        },
+        "provenance": {
+          "origin": "manual_authoring"
+        },
+        "grounding": {
+          "compatible_turn_drivers": ["player_action"],
+          "reason_to_exist": "Negative replay candidate for SPEC-84 source-record filtering."
+        }
+      }
+    },
+    {
+      "node_type": "storylet_record",
+      "node_id": "spec84-replay-and-branch-scope:SLT-4",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/storylets/SLT-4.yaml",
+      "parsed": {
+        "record_kind": "storylet_record",
+        "id": "SLT-4",
+        "story_id": "STORY-84",
+        "scope": {
+          "visibility": "branch_scoped",
+          "branch_id": "BR-2"
+        },
+        "title": "Sibling branch scoped candidate",
+        "move_family": "world_pressure",
+        "preconditions": {
+          "hard": [],
+          "soft": []
+        },
+        "beats": [
+          {
+            "beat_id": "setup",
+            "function": "setup",
+            "instruction": "Remain visible only to the BR-2 sibling branch."
+          }
+        ],
+        "effects": {
+          "create": [],
+          "supersede": [],
+          "close": []
+        },
+        "exit_options": [
+          {
+            "action_family": "wait",
+            "surface_hint": "Let the sibling branch pressure continue."
+          }
+        ],
+        "saliency": {
+          "urgency": "medium",
+          "cooldown_pages": 0
+        },
+        "mystery_policy": {
+          "allowed_authority": "none"
+        },
+        "provenance": {
+          "origin": "manual_authoring"
+        },
+        "grounding": {
+          "compatible_turn_drivers": ["player_action"],
+          "reason_to_exist": "Sibling branch-scoped candidate for SPEC-84 scope rejection."
+        }
+      }
+    },
+    {
+      "node_type": "storylet_record",
+      "node_id": "spec84-replay-and-branch-scope:SLT-5",
+      "file_path": "stories/spec84-replay-and-branch-scope/_source/storylets/SLT-5.yaml",
+      "parsed": {
+        "record_kind": "storylet_record",
+        "id": "SLT-5",
+        "story_id": "STORY-84",
+        "scope": {
+          "visibility": "branch_prefix_scoped",
+          "branch_id": "BR-1",
+          "visible_branch_path_prefix": ["PG-1", "PG-3"]
+        },
+        "title": "Branch prefix scoped candidate",
+        "move_family": "disclosure",
+        "preconditions": {
+          "hard": [],
+          "soft": []
+        },
+        "beats": [
+          {
+            "beat_id": "setup",
+            "function": "setup",
+            "instruction": "Follow only pages whose branch path begins with PG-1 then PG-3."
+          }
+        ],
+        "effects": {
+          "create": [],
+          "supersede": [],
+          "close": []
+        },
+        "exit_options": [
+          {
+            "action_family": "perceive",
+            "surface_hint": "Notice the branch-one prefix consequence."
+          }
+        ],
+        "saliency": {
+          "urgency": "medium",
+          "cooldown_pages": 0
+        },
+        "mystery_policy": {
+          "allowed_authority": "none"
+        },
+        "provenance": {
+          "origin": "manual_authoring"
+        },
+        "grounding": {
+          "compatible_turn_drivers": ["player_action"],
+          "reason_to_exist": "Prefix-scoped candidate for SPEC-84 branch-path assertions."
+        }
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "WORLD_KERNEL.md",
+      "content": "# SPEC-84 Fixture World\n\nA minimal fixture world for replay and branch-scope retrieval tests.\n"
+    },
+    {
+      "path": "ONTOLOGY.md",
+      "content": "# Ontology\n\n## Categories in Use\n- story_test_fixture\n\n## Relation Types in Use\n- references\n\n## Notes on Use\nSPEC-84 fixture only.\n"
+    }
+  ]
+}

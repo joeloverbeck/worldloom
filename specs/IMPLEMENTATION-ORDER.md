@@ -10,7 +10,7 @@ This file sequences the live specs under `specs/`. Each row records the spec, th
 
 | Order | Spec | Shape | Depends on | Gating risk |
 |---|---|---|---|---|
-| 1 | [SPEC-84 — Replay/Fork and Branch-Scope Golden Fixtures](SPEC-84-replay-and-branch-scope-fixtures.md) | new fixture + integration tests; test-only | none structurally; benefits from archived SPEC-83's landed cooldown fix so the cooldown bug does not perturb the fixture's filter_trace assertions | moderate fixture-authoring effort; no source code change. |
+| 1 | [SPEC-84 — Replay/Fork and Branch-Scope Golden Fixtures](../archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md) | completed: fixture + integration tests; test-only | none structurally; benefits from archived SPEC-83's landed cooldown fix so the cooldown bug does not perturb the fixture's filter_trace assertions | archived via `archive/tickets/SPEC84REPBRASCO-001.md` and `archive/tickets/SPEC84REPBRASCO-002.md`; no source code change. |
 | 2 | [SPEC-85 — Non-Player Driver Golden Fixtures](SPEC-85-non-player-driver-golden-fixtures.md) | four new fixtures + four integration tests; test-only | none structurally | largest fixture-authoring effort (four bundles + four test files); no source code change. |
 
 ## Shipped in this sequence
@@ -35,7 +35,7 @@ The items below were considered during iteration-3 triage and **rejected, deferr
 
 ### Combined into SPEC-84
 
-- **Report SPEC-85 — Branch-scoped / branch-prefix-scoped exclusion fixtures**. Combined with report SPEC-84 (replay/fork live global pool fixtures) into the single SPEC-84 here, because both prove replay-time SLT visibility correctness across scope dimensions. Splitting would over-fragment fixture authoring. See [SPEC-84 §1](SPEC-84-replay-and-branch-scope-fixtures.md) for the combined design.
+- **Report SPEC-85 — Branch-scoped / branch-prefix-scoped exclusion fixtures**. Combined with report SPEC-84 (replay/fork live global pool fixtures) into the single SPEC-84 here, because both prove replay-time SLT visibility correctness across scope dimensions. Splitting would over-fragment fixture authoring. See [SPEC-84 §1](../archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md) for the combined design.
 
 ### Deferred (consumer-thin / lift-condition unmet)
 
