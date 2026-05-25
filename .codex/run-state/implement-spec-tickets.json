@@ -1,20 +1,22 @@
 {
-  "originating_spec": null,
-  "archived_spec": "archive/specs/SPEC-85-non-player-driver-golden-fixtures.md",
-  "last_ticket": "archive/tickets/SPEC85NONPLADRI-004.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "2fa75b6edbfd626a2f44f20af59e61e8e124f629",
+  "originating_spec": "specs/SPEC-86-character-fit-selection-contract.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC86CHAFITSEL-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "86aa2eca8fd2387d54cdb92da2ea68bbbe65dcc7",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "complete",
+  "next_target": "tickets/SPEC86CHAFITSEL-002.md",
+  "queue": [
+    "tickets/SPEC86CHAFITSEL-002.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "tools/validators SPEC85 compiled integration lane passed 8/8; SPEC76 Red Kiln compiled integration test passed 2/2; tools/validators npm test passed 1021/1021",
+  "proof_state": "tools/validators npm test passed 1021/1021; grep/order checks and diff hygiene passed for SPEC86CHAFITSEL-001",
   "dirty_state": "expected clean tracked state after state commit; ignored artifacts present: tools/validators/dist/ and tools/validators/node_modules/ from verification",
-  "post_review_material_updates": false,
-  "post_review_audit_block": "not_applicable",
+  "post_review_material_updates": true,
+  "post_review_audit_block": "emitted",
   "updated_at": "2026-05-25"
 }
