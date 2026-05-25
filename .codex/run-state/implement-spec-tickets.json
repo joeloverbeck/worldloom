@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-85-non-player-driver-golden-fixtures.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC85NONPLADRI-002.md",
+  "last_ticket": "archive/tickets/SPEC85NONPLADRI-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "b3aeb93a09d0e4924726f9cebf2320051d134dc3",
+  "last_work_commit": "d79eba0f4399cf1b0e8b9325d28ddb3c67a37796",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC85NONPLADRI-003.md",
+  "next_target": "tickets/SPEC85NONPLADRI-004.md",
   "queue": [
-    "tickets/SPEC85NONPLADRI-003.md",
     "tickets/SPEC85NONPLADRI-004.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -15,7 +14,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "tools/validators targeted SPEC85 offstage + SPEC76 Red Kiln compiled integration tests passed; tools/validators npm test passed 1017/1017",
+  "proof_state": "tools/validators targeted SPEC85 secret-reveal compiled integration test passed; SPEC76 Red Kiln compiled integration test passed; tools/validators npm test passed 1019/1019",
   "dirty_state": "tracked clean after state commit; ignored artifacts present, including tools/validators/dist/ and tools/validators/node_modules/ from verification",
   "post_review_material_updates": false,
   "post_review_audit_block": "not_applicable",
