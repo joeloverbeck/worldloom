@@ -190,7 +190,7 @@ test("SPEC-42 capstone covers story-skill contract surfaces as executable surrog
     "create_stsec_record",
     "create_stq_record",
     "expected_id_allocations.story_da_ids",
-    "id_class=\"CLK\"|\"STSEC\"|\"STQ\""
+    "allocate_many_ids(world_slug, allocations=[...])"
   ]);
   assertContains(readRepoFile(".claude/skills/branching-story-turn-cycle/SKILL.md"), [
     "create_clk_record",

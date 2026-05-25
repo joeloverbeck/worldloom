@@ -661,6 +661,18 @@ test("registered tools dispatch with either a success payload or the documented 
         expectError: false
       },
       {
+        name: MCP_TOOL_NAMES.allocate_many_ids,
+        args: {
+          world_slug: "seeded",
+          allocations: [
+            { id_class: "BEL", story_slug: "opening-bells" },
+            { id_class: "BEL", story_slug: "opening-bells" },
+            { id_class: "SEC-GEO" }
+          ]
+        },
+        expectError: false
+      },
+      {
         name: MCP_TOOL_NAMES.describe_capabilities,
         args: {},
         expectError: false
@@ -717,7 +729,8 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       { name: MCP_TOOL_NAMES.get_canonical_vocabulary, args: {} },
       { name: MCP_TOOL_NAMES.validate_patch_plan, args: {} },
       { name: MCP_TOOL_NAMES.submit_patch_plan, args: { patch_plan: buildValidPatchPlan() } },
-      { name: MCP_TOOL_NAMES.allocate_next_id, args: { world_slug: "seeded" } }
+      { name: MCP_TOOL_NAMES.allocate_next_id, args: { world_slug: "seeded" } },
+      { name: MCP_TOOL_NAMES.allocate_many_ids, args: { world_slug: "seeded" } }
     ] as const;
 
     for (const invalid of invalidCalls) {
@@ -760,6 +773,17 @@ test("unsupported id classes fail at the MCP validation boundary", async () => {
 
     assert.equal(result.isError, true);
     assert.match(textContent(result), /invalid/i);
+
+    const batchResult = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_many_ids,
+      arguments: {
+        world_slug: "seeded",
+        allocations: [{ id_class: "NOT_A_CLASS", story_slug: "opening-bells" }]
+      }
+    });
+
+    assert.equal(batchResult.isError, true);
+    assert.match(textContent(batchResult), /invalid/i);
   });
 });
 
@@ -969,6 +993,33 @@ test("story-scoped id_class dispatches first-run ids for fresh missing story bun
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
     assert.equal(structured.next_id, "STENT-1");
+  });
+});
+
+test("allocate_many_ids dispatches ordered monotonic batches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_many_ids,
+      arguments: {
+        world_slug: "seeded",
+        allocations: [
+          { id_class: "BEL", story_slug: "fresh-bundle" },
+          { id_class: "BEL", story_slug: "fresh-bundle" },
+          { id_class: "SEC-GEO" }
+        ]
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      allocations?: Array<{ id_class?: string; allocated_id?: string }>;
+    };
+
+    assert.deepEqual(structured.allocations, [
+      { id_class: "BEL", allocated_id: "BEL-1" },
+      { id_class: "BEL", allocated_id: "BEL-2" },
+      { id_class: "SEC-GEO", allocated_id: "SEC-GEO-2" }
+    ]);
   });
 });
 

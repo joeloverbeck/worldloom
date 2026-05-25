@@ -305,7 +305,7 @@ story_id: STORY-<integer>*
 scope:
   visibility: global_author_pool | branch_prefix_scoped | branch_scoped   # *
   branch_id: BR-<integer> | null            # * null only for global_author_pool
-  visible_branch_path_prefix: [PG-<integer>] # * branch_prefix_scoped only; non-empty ordered prefix of PG.branch_path
+  visible_branch_path_prefix: [PG-<integer>] # * branch_prefix_scoped ONLY; non-empty ordered prefix of PG.branch_path. MUST be OMITTED ENTIRELY (not null, not []) for `global_author_pool` and `branch_scoped`; the schema's allOf/if/then enforces this via `not: required: [visible_branch_path_prefix]` for both non-prefix visibilities, so callers presenting the field with any value (including null or []) under `visibility: global_author_pool` fail validation with a three-layer error stack (`scope must NOT be valid` + `must match "then" schema` + `minItems: 1` or `must be array`).
 created_at_page: PG-<integer> | null        # required for provenance.origin: runtime_jit; nullable for page-independent authoring origins
 title: string*
 move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery   # *
