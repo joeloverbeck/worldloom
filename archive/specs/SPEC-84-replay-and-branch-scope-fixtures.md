@@ -1,6 +1,6 @@
 # SPEC-84: Replay/Fork and Branch-Scope Golden Fixtures
 
-**Status:** active
+**Status:** COMPLETED
 **Date:** 2026-05-25
 **Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) §17 SPEC-84 (replay live global pool) + §17 SPEC-85 (branch-scope exclusion). Combined here because both prove replay-time SLT visibility correctness across scope dimensions.
 **Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md) §ACCEPT (assumption A — combined).
@@ -22,7 +22,7 @@ This is a **fixture-and-test spec only**. No schema change, no skill prose chang
 
 ## 2. Goals
 
-Author one new compact authored bundle and three integration tests covering:
+Author one new compact authored bundle and five integration tests covering:
 
 1. **Replay sees newer global SLT (positive)** — fork from old PG-3 selects an SLT added to the global author pool after PG-3 was committed, when the SLT passes all lawfulness gates against PG-3's snapshot.
 2. **Replay rejects newer global SLT with story-bundle record ref (negative)** — same setup, but the new global SLT's hard predicate references a `STPLAN-*` record; from BR-1's fork the SLT is rejected at the `after_source_record_id` stage because `matchesSourceRecordIds` rejects any global-pool SLT whose source-record edges include a story-bundle record class (per `isStoryLocalRecordId`). See §9 Risks entry on the FOUNDATIONS §5 Rule 4 vs. code divergence — current code rejects all story-bundle refs uniformly, but FOUNDATIONS allows `bundle_genesis_record` refs.
@@ -110,3 +110,13 @@ Run on a worktree containing the new fixture and tests:
 ## 9. Risks & Open Questions
 
 1. **FOUNDATIONS §5 Rule 4 vs. `isStoryLocalRecordId` divergence (pre-existing)**: FOUNDATIONS §5 Rule 4 explicitly allows global author-pool storylets to reference `bundle_genesis_record` IDs ("`bundle_genesis_record` IDs remain globally visible unless later superseded or closed"). The current `matchesSourceRecordIds` in `tools/world-mcp/src/tools/select-storylet-candidates.ts` rejects ALL story-bundle record references from global SLTs uniformly — it checks against the full `RECORD_PREFIX_TO_CLASS` map via `isStoryLocalRecordId` without distinguishing branch-local from bundle-genesis records. SPEC-84 fixtures test current code behavior; they cannot detect this divergence. A future spec should adjudicate: either (a) relax the check to honor the bundle-genesis exception (requires a branch-vs-genesis classifier at retrieval time), or (b) strengthen FOUNDATIONS §5 Rule 4 to forbid all story-bundle references from global SLTs uniformly (codifying current behavior). Surfacing here so the question is not lost between iterations.
+
+## Outcome
+
+Completed: 2026-05-25
+
+- Added the authored fixture bundle at `tools/validators/tests/fixtures/spec84-replay-and-branch-scope/` through `archive/tickets/SPEC84REPBRASCO-001.md`.
+- Added the capstone integration test at `tools/world-mcp/tests/integration/spec84-replay-and-branch-scope.test.ts` through `archive/tickets/SPEC84REPBRASCO-002.md`.
+- The capstone materializes the fixture into a temp world tree, runs `world-index build`, and verifies the five replay/branch-scope cases against `selectStoryletCandidates`.
+- Deviations: the fixture uses the live authored field name `scope.visible_branch_path_prefix` while preserving the projected DB column `slt_scope_branch_path_prefix`; package-local npm commands replaced the draft `pnpm turbo` command because this repo's tooling layer has package manifests rather than a root turbo workspace command.
+- Verification: `(cd tools/world-index && npm run build)` passed; `(cd tools/world-mcp && npm run build)` passed; `(cd tools/world-mcp && node --test dist/tests/integration/spec84-replay-and-branch-scope.test.js)` passed all five SPEC-84 cases; `(cd tools/world-mcp && npm test)` passed with 452 tests / 448 TAP top-level subtests.
