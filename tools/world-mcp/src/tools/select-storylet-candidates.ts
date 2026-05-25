@@ -48,6 +48,7 @@ export interface StoryletCandidateFilterTrace {
   after_source_record_id: number;
   after_mystery_policy: number;
   after_cooldown: number;
+  cooldown_active_samples: ReadonlyArray<CooldownActiveSample>;
 }
 
 export interface StoryletCandidateProjectionRecord {
@@ -97,6 +98,13 @@ interface Candidate {
   predicateClasses: string[];
   actionFamilies: string[];
   sourceRecordIds: string[];
+}
+
+interface CooldownActiveSample {
+  slt_id: string;
+  last_selected_on_page: string;
+  distance: number;
+  cooldown_pages: number;
 }
 
 const RECORD_PREFIX_TO_CLASS: Record<string, string> = {
@@ -405,7 +413,12 @@ function matchesMysteryPolicy(candidate: Candidate, page: PageState): boolean {
   return authority === null || authority === "none" || page.unresolvedMysteryAuthorities.has(authority);
 }
 
-function loadSelectedStoryletIds(db: Database.Database, worldSlug: string, storySlug: string): Set<string> {
+function loadSelectedStoryletPagesByBranch(
+  db: Database.Database,
+  worldSlug: string,
+  storySlug: string,
+  parentPage: PageState
+): Map<string, string> {
   const rows = db
     .prepare(
       `
@@ -417,18 +430,34 @@ function loadSelectedStoryletIds(db: Database.Database, worldSlug: string, story
       `
     )
     .all(worldSlug, storySlug) as RecordRow[];
-  const selected = new Set<string>();
+  const branchPageIndexes = new Map<string, number>();
+  parentPage.branchPath.forEach((pageId, index) => branchPageIndexes.set(pageId, index));
+  const selected = new Map<string, string>();
+  const selectedIndexes = new Map<string, number>();
 
   for (const row of rows) {
     const parsed = parseRecordBody(row);
     if (isMcpError(parsed)) {
       continue;
     }
+    const createdAtPage = parsed.created_at_page;
+    if (typeof createdAtPage !== "string") {
+      continue;
+    }
+    const createdAtBranchIndex = branchPageIndexes.get(createdAtPage);
+    if (createdAtBranchIndex === undefined) {
+      continue;
+    }
     const commitment = parsed.commitment;
     if (commitment !== null && typeof commitment === "object" && !Array.isArray(commitment)) {
       const selectedSltId = (commitment as Record<string, unknown>).selected_slt_id;
       if (typeof selectedSltId === "string") {
-        selected.add(selectedSltId);
+        const displaySltId = displayStoryRecordId(selectedSltId, storySlug);
+        const existingIndex = selectedIndexes.get(displaySltId);
+        if (existingIndex === undefined || createdAtBranchIndex > existingIndex) {
+          selected.set(displaySltId, createdAtPage);
+          selectedIndexes.set(displaySltId, createdAtBranchIndex);
+        }
       }
     }
   }
@@ -436,13 +465,46 @@ function loadSelectedStoryletIds(db: Database.Database, worldSlug: string, story
   return selected;
 }
 
-function matchesCooldown(candidate: Candidate, selectedStoryletIds: ReadonlySet<string>, storySlug: string): boolean {
+function cooldownRejectionSample(
+  candidate: Candidate,
+  lastSelectedPagesByBranch: ReadonlyMap<string, string>,
+  parentPage: PageState,
+  storySlug: string
+): CooldownActiveSample | null {
   const cooldown = candidate.row.slt_saliency_cooldown_pages ?? 0;
   if (cooldown <= 0) {
-    return true;
+    return null;
+  }
+  const sltId = displayStoryRecordId(candidate.row.node_id, storySlug);
+  const lastSelectedPageId = lastSelectedPagesByBranch.get(sltId);
+  if (lastSelectedPageId === undefined) {
+    return null;
+  }
+  const parentBranchIndex = parentPage.branchPath.length - 1;
+  const lastSelectedBranchIndex = parentPage.branchPath.indexOf(lastSelectedPageId);
+  if (lastSelectedBranchIndex === -1) {
+    return null;
+  }
+  const distance = parentBranchIndex - lastSelectedBranchIndex;
+  if (distance > cooldown) {
+    return null;
   }
 
-  return !selectedStoryletIds.has(displayStoryRecordId(candidate.row.node_id, storySlug));
+  return {
+    slt_id: sltId,
+    last_selected_on_page: lastSelectedPageId,
+    distance,
+    cooldown_pages: cooldown
+  };
+}
+
+function matchesCooldown(
+  candidate: Candidate,
+  lastSelectedPagesByBranch: ReadonlyMap<string, string>,
+  parentPage: PageState,
+  storySlug: string
+): boolean {
+  return cooldownRejectionSample(candidate, lastSelectedPagesByBranch, parentPage, storySlug) === null;
 }
 
 function rankCandidates(candidates: Candidate[]): Candidate[] {
@@ -531,7 +593,8 @@ async function selectStoryletCandidatesImpl(
       after_predicate_class: 0,
       after_source_record_id: 0,
       after_mystery_policy: 0,
-      after_cooldown: 0
+      after_cooldown: 0,
+      cooldown_active_samples: []
     };
 
     const allCandidates = buildCandidates(opened.db, args.world_slug, args.story_slug);
@@ -570,11 +633,25 @@ async function selectStoryletCandidatesImpl(
     );
     trace.after_mystery_policy = afterMysteryPolicy.length;
 
-    const selectedStoryletIds = loadSelectedStoryletIds(opened.db, args.world_slug, args.story_slug);
-    const afterCooldown = afterMysteryPolicy.filter((candidate) =>
-      matchesCooldown(candidate, selectedStoryletIds, args.story_slug)
+    const lastSelectedPagesByBranch = loadSelectedStoryletPagesByBranch(
+      opened.db,
+      args.world_slug,
+      args.story_slug,
+      page
     );
+    const cooldownActiveSamples: CooldownActiveSample[] = [];
+    const afterCooldown = afterMysteryPolicy.filter((candidate) => {
+      const sample = cooldownRejectionSample(candidate, lastSelectedPagesByBranch, page, args.story_slug);
+      if (sample !== null) {
+        if (cooldownActiveSamples.length < 3) {
+          cooldownActiveSamples.push(sample);
+        }
+        return false;
+      }
+      return matchesCooldown(candidate, lastSelectedPagesByBranch, page, args.story_slug);
+    });
     trace.after_cooldown = afterCooldown.length;
+    trace.cooldown_active_samples = cooldownActiveSamples;
 
     const shortlist = rankCandidates(afterCooldown).slice(0, maxCandidates);
     const shortlistedCandidateIds = shortlist.map((candidate) =>

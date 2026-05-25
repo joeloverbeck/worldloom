@@ -1,9 +1,9 @@
 {
-  "originating_spec": "archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md",
-  "archived_spec": "archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md",
-  "last_ticket": "archive/tickets/SPEC80STOPOODRI-003.md",
+  "originating_spec": "archive/specs/SPEC-83-slt-cooldown-window-correctness.md",
+  "archived_spec": "archive/specs/SPEC-83-slt-cooldown-window-correctness.md",
+  "last_ticket": "archive/tickets/SPEC83SLTCOOWIN-001.md",
   "last_result": "final_spec_archived",
-  "last_work_commit": "02ec8fd1b1ccfa86e9123d3fd5f81cfb7140ac3e",
+  "last_work_commit": "4b286b19bd18e201fd5bb568c997ff744fbd4bf9",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -12,9 +12,9 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: SPEC80STOPOODRI-003 grep/manual contract proof passed; ticket archived; final spec archive/reference sweep and git diff --check passed",
+  "proof_state": "clean: SPEC83SLTCOOWIN-001 focused cooldown tests, SPEC-81 regression tests, npm test full world-mcp suite, spec archive/reference sweep, and git diff --check passed",
   "dirty_state": "expected ignored artifacts: tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/",
-  "post_review_material_updates": false,
-  "post_review_audit_block": "not_applicable",
+  "post_review_material_updates": true,
+  "post_review_audit_block": "emitted",
   "updated_at": "2026-05-25"
 }

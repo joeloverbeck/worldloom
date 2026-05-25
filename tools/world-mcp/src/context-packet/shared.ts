@@ -125,6 +125,12 @@ export interface ContextPacketStoryBundleContext {
       after_source_record_id: number;
       after_mystery_policy: number;
       after_cooldown: number;
+      cooldown_active_samples: ReadonlyArray<{
+        slt_id: string;
+        last_selected_on_page: string;
+        distance: number;
+        cooldown_pages: number;
+      }>;
     };
     shortlisted_candidate_ids: string[];
     shortlisted_projection_records: Array<{

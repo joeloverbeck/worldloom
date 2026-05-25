@@ -209,13 +209,13 @@ After the initial triage was presented in chat with a 1-spec deliverable plan (t
 
 ### Revised deliverable
 
-The single-spec plan from the initial triage is superseded by a **four-spec plan plus `specs/IMPLEMENTATION-ORDER.md`**:
+The single-spec plan from the initial triage is superseded by a **four-spec plan plus archived implementation-order history**:
 
 - [`archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`](../../archive/specs/SPEC-79-chc-associated-commitment-block-removal.md) — CHC field removal (user's named operational priority; completed 2026-05-24).
 - [`archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`](../../archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md) — authoring-time pool coverage diagnostics (closes the iteration-1 reactivity loop upstream; completed 2026-05-25).
 - [`archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md`](../../archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md) — indexed projection + new MCP tool (scaling).
 - [`archive/specs/SPEC-82-remaining-schema-drift-repairs.md`](../../archive/specs/SPEC-82-remaining-schema-drift-repairs.md) — STQ active-pressure dead-branch fix + bootstrap stale-comment repair (the Red Kiln CHC fixture repair migrated to SPEC-79).
-- [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md) — sequencing (SPEC-82 → SPEC-79 → SPEC-81 → SPEC-80) and the rejected/deferred Out-of-Scope list for iteration-3 visibility.
+- [`archive/specs/IMPLEMENTATION-ORDER-2026-05-25-2.md`](../../archive/specs/IMPLEMENTATION-ORDER-2026-05-25-2.md) — sequencing (SPEC-82 -> SPEC-79 -> SPEC-81 -> SPEC-80) and the rejected/deferred Out-of-Scope list for iteration-3 visibility.
 
 The initial triage's verdicts on the other five iteration-2 items (SPEC-80 rich grounding → reject; SPEC-81 SSEL record class → reject; SPEC-83 live global pool replay → reject and now subsumed by SPEC-79; SPEC-84 non-player-driver semantics → defer per unchanged iteration-1 D4 rationale; SPEC-86 schema drift repairs → accept, expanded as SPEC-82 here) are unchanged.
 
