@@ -155,4 +155,4 @@ Post-edit verification:
 
 1. The draft examples used padded IDs (`ENT-0001`, `SEC-GEO-001`) while `docs/FOUNDATIONS.md` and `docs/ID-ALLOCATION.md` define unpadded IDs. The implemented tests use unpadded examples (`ENT-1`, `SEC-GEO-1`) for the new prefixes, but the schemas preserve the existing `[0-9]+` suffix grammar because `contract-schema-roundtrip.test.ts` intentionally asserts legacy padded cross-reference acceptance. Retiring that compatibility is a separate package-wide decision.
 2. `story-status.schema.json`, `story-plan.schema.json`, and `story-emotion.schema.json` still have adjacent derived-from / recordId pattern drift. They were left out of this ticket by the scoped reassessment; uniform story-record provenance remains follow-up cleanup.
-3. Post-ticket review created `tickets/VALENH-044.md` for the adjacent `story-status`, `story-plan`, and `story-emotion` provenance-pattern cleanup.
+3. Post-ticket review created `archive/tickets/VALENH-044.md` for the adjacent `story-status`, `story-plan`, and `story-emotion` provenance-pattern cleanup; that follow-up has since landed and been archived.

@@ -88,6 +88,37 @@ test("story-plan schema rejects invalid enum and ID shapes", () => {
   assert.ok(validate.errors?.some((error) => error.keyword === "pattern" && error.instancePath === "/root_intention"));
 });
 
+test("story-plan schema accepts world-record provenance and rejects dead provenance prefixes", () => {
+  const validate = compileSchema();
+
+  assert.equal(validate(validPlan({
+    derived_from: ["ONT-1", "CAU-2", "ENT-1", "OQ-1", "SEC-GEO-1"]
+  })), true, JSON.stringify(validate.errors, null, 2));
+
+  assert.equal(validate(validPlan({ derived_from: ["INV-1"] })), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "pattern" && error.instancePath === "/derived_from/0"));
+
+  assert.equal(validate(validPlan({ derived_from: ["SEC-1"] })), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "pattern" && error.instancePath === "/derived_from/0"));
+});
+
+test("story-plan schema keeps operational record references story-scoped", () => {
+  const validate = compileSchema();
+
+  assert.equal(validate(validPlan({
+    current_step: {
+      action_family: "investigate",
+      target_records: ["SEC-GEO-1"],
+      success_condition: {
+        predicates: [{ pred: "record_active", record: "SF-1" }]
+      }
+    }
+  })), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "pattern" && error.instancePath === "/current_step/target_records/0"));
+
+  assert.equal(validate(validPlan({ blockers: ["STCHAR-1"] })), true, JSON.stringify(validate.errors, null, 2));
+});
+
 test("story-plan schema rejects unknown narrative-shape fields", () => {
   const validate = compileSchema();
 
