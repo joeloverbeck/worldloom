@@ -1,9 +1,9 @@
 # SPEC83SLTCOOWIN-001: Fix SLT cooldown filter — numeric-window + branch-isolation correctness
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `tools/world-mcp/src/tools/select-storylet-candidates.ts` (cooldown filter algorithm rewrite + helper replacement + additive `StoryletCandidateFilterTrace` field); 3 test files in `tools/world-mcp/tests/` extended (unit cooldown coverage + new cooldown-window cases + integration fixture). No new MCP tool, no schema changes, no validator-registry changes, no world-index changes, no skill changes.
+**Engine Changes**: Yes — `tools/world-mcp/src/tools/select-storylet-candidates.ts` (cooldown filter algorithm rewrite + helper replacement + additive `StoryletCandidateFilterTrace` field); `tools/world-mcp/src/context-packet/shared.ts` (embedded selection-shortlist trace type kept in sync); 3 test files in `tools/world-mcp/tests/` extended (unit cooldown coverage + new cooldown-window cases + integration fixture). No new MCP tool, no schema changes, no validator-registry changes, no world-index changes, no skill changes.
 **Deps**: None
 
 ## Problem
@@ -25,6 +25,7 @@ The third-iteration source report (`reports/slt-chc-overhaul-third-iteration.md`
 4. FOUNDATIONS principles under audit per spec §7: §Story Bundles §5 Rule 4 (No Globalization by Accident — story-scope branch isolation; the cross-branch leak is the Rule-4 violation this fix closes); §Story Bundles §5 Rule 5 (No Consequence Evasion — per-page consequence capacity; the bug REDUCES capacity by forever-blocking eligible SLTs after one use, and the fix restores authoring intent encoded by `cooldown_pages`); §Story Bundles §5b "Schema-minimalism at story scope" (preserved: the `cooldown_active_samples` field is a per-call diagnostic on the response contract, not a persisted field on any record class); §Story Bundles §5c "Driver salience is local" (N/A — cooldown applies uniformly across driver kinds via the same `matchesCooldown` check; the fix touches retrieval-time eligibility, not driver salience ranking).
 5. `StoryletCandidateFilterTrace` is the response-shape schema being extended. The extension is additive-only: a new `cooldown_active_samples: ReadonlyArray<{slt_id, last_selected_on_page, distance, cooldown_pages}>` field is added. Consumer-side compatibility — sibling skills (`branching-story-turn-cycle`, `commitment-block-authoring`) read `filter_trace.pool_total` through `filter_trace.after_cooldown` for stage-count diagnostics; they do not destructure or shape-validate the trace beyond field-access patterns, so a new field is backwards-compatible. No persisted-state schema is modified (per FOUNDATIONS §Story Bundles §5b).
 6. Helper rename: `loadSelectedStoryletIds` → `loadSelectedStoryletPagesByBranch` (per spec §4.1). Blast radius is internal-only — grep across `tools/*/src/`, `tools/*/tests/`, and `.claude/skills/` for `loadSelectedStoryletIds` returns matches only inside `tools/world-mcp/src/tools/select-storylet-candidates.ts` itself (the function definition at line 408 and the single call site at line 573). The helper is not exported; the rename has zero cross-file consumers. Test files do not reference the helper by name (they invoke `selectStoryletCandidates` as the entry point).
+7. Build baseline before source edits: `(workdir tools/world-mcp) npm run build` passed on 2026-05-25. Reassessment also found `tools/world-mcp/src/context-packet/shared.ts` embeds the `filter_trace` type for `story_bundle_context.selection_shortlist`; this is same-seam type fallout of the additive response-shape change and must be updated with the tool interface so `get_context_packet` remains type-truthful when it passes through `selectionShortlist.filter_trace`.
 
 ## Architecture Check
 
@@ -45,11 +46,11 @@ The third-iteration source report (`reports/slt-chc-overhaul-third-iteration.md`
 9. FOUNDATIONS §Story Bundles §5b (schema-minimalism: no persisted-record schema change) → codebase grep-proof (`grep -r "cooldown_active_samples" tools/validators/src/schemas/` returns zero matches; the field exists only in the MCP tool's TypeScript interface, not in any YAML schema)
 10. Cross-skill MCP response contract additive-compatibility → codebase grep-proof (sibling skills' usage of `filter_trace` reads stage-count fields by name without shape-validating; the new field is invisible to them)
 
-## What to Change
+## Landed Changes
 
-### 1. Replace `loadSelectedStoryletIds` with `loadSelectedStoryletPagesByBranch`
+### 1. Replaced `loadSelectedStoryletIds` with `loadSelectedStoryletPagesByBranch`
 
-In `tools/world-mcp/src/tools/select-storylet-candidates.ts`, replace the existing helper (lines 408-437) with `loadSelectedStoryletPagesByBranch(db, worldSlug, storySlug, parentPage)`. The new helper:
+In `tools/world-mcp/src/tools/select-storylet-candidates.ts`, the old helper was replaced with `loadSelectedStoryletPagesByBranch(db, worldSlug, storySlug, parentPage)`. The helper:
 
 - Accepts the parent `PageState` (specifically its `branchPath`) so it can scope the scan.
 - Builds `branchPagesSet = new Set(parentPage.branchPath)` (O(branchPath.length)).
@@ -57,9 +58,9 @@ In `tools/world-mcp/src/tools/select-storylet-candidates.ts`, replace the existi
 - For each row: parse the body via `parseRecordBody(row)`; skip on parse error; read `parsed.created_at_page` and `parsed.commitment?.selected_slt_id`; skip events whose `created_at_page` is not in `branchPagesSet` (this naturally excludes sibling-branch events because their child PG isn't in the current branch's path) AND skip events whose body lacks `created_at_page` (defensive default for malformed records).
 - For each surviving (slt_id, created_at_page) pair: record the page-id with the maximum branch-path index at which the SLT appears (later index = more recent selection); store as `Map<sltId, lastSelectedPageId>` (page-id form, not index form — index is computed at filter-call time so the helper's return shape matches the `cooldown_active_samples` sample field shape and avoids carrying two derivable forms).
 
-### 2. Rewrite `matchesCooldown` to use page-distance against `branchPath`
+### 2. Rewrote `matchesCooldown` to use page-distance against `branchPath`
 
-Replace the existing function (lines 439-446) with a signature that takes the new helper's output plus the parent `PageState`:
+The function now takes the new helper's output plus the parent `PageState`:
 
 ```ts
 function matchesCooldown(
@@ -68,22 +69,7 @@ function matchesCooldown(
   parentPage: PageState,
   storySlug: string
 ): boolean {
-  const cooldown = candidate.row.slt_saliency_cooldown_pages ?? 0;
-  if (cooldown <= 0) {
-    return true;
-  }
-  const sltId = displayStoryRecordId(candidate.row.node_id, storySlug);
-  const lastSelectedPageId = lastSelectedPagesByBranch.get(sltId);
-  if (lastSelectedPageId === undefined) {
-    return true;
-  }
-  const parentBranchIndex = parentPage.branchPath.length - 1;
-  const lastSelectedBranchIndex = parentPage.branchPath.indexOf(lastSelectedPageId);
-  if (lastSelectedBranchIndex === -1) {
-    return true; // defensive: page-id in map but not in branchPath (should not happen after the helper's filter, but guard the indexOf result)
-  }
-  const distance = parentBranchIndex - lastSelectedBranchIndex;
-  return distance > cooldown;
+  return cooldownRejectionSample(candidate, lastSelectedPagesByBranch, parentPage, storySlug) === null;
 }
 ```
 
@@ -93,9 +79,9 @@ Edge cases (per spec §4.1):
 - `cooldown === 0` or `null`: pass (preserved behavior).
 - Events whose body lacks `created_at_page`: skipped at the helper (cannot be mapped to a branch-path index); defensive default for legacy fixtures or malformed records. Valid SE records authored against the current schema always carry `created_at_page` (required per `tools/validators/src/schemas/story-event.schema.json:11`).
 
-### 3. Extend `StoryletCandidateFilterTrace` with `cooldown_active_samples`
+### 3. Extended `StoryletCandidateFilterTrace` with `cooldown_active_samples`
 
-In the interface at line 41, add the new field (preserve all 9 existing fields, append the new one):
+The interface preserves all 9 existing fields and appends the new field:
 
 ```ts
 export interface StoryletCandidateFilterTrace {
@@ -117,27 +103,31 @@ export interface StoryletCandidateFilterTrace {
 }
 ```
 
-Initialize as `cooldown_active_samples: []` at trace construction (line 525) so the field is always present in the response.
+The trace initializes `cooldown_active_samples: []` so the field is always present in the response.
 
-### 4. Populate `cooldown_active_samples` during the cooldown filter pass
+### 4. Populated `cooldown_active_samples` during the cooldown filter pass
 
-At the filter-pass site (lines 573-577), rewrite the `afterCooldown` step to:
+The `afterCooldown` step now:
 
-- Call the new helper: `const lastSelectedPagesByBranch = loadSelectedStoryletPagesByBranch(opened.db, args.world_slug, args.story_slug, page)`.
-- Compute the filter result AND collect samples in the same iteration: for each candidate in `afterMysteryPolicy`, evaluate `matchesCooldown`; when it returns false AND the helper's map has the SLT (i.e., the rejection IS an in-window block, not a malformed-record skip), append a sample `{slt_id, last_selected_on_page, distance, cooldown_pages}` to a local sample-collection array, capped at 3 entries.
-- Assign `trace.cooldown_active_samples = samples` after the filter.
+- Calls the new helper: `const lastSelectedPagesByBranch = loadSelectedStoryletPagesByBranch(opened.db, args.world_slug, args.story_slug, page)`.
+- Computes the filter result and collects samples in the same pass: for each candidate in `afterMysteryPolicy`, `cooldownRejectionSample` returns either `null` for eligible candidates or a sample `{slt_id, last_selected_on_page, distance, cooldown_pages}` for an in-window block; sample collection is capped at 3 entries.
+- Assigns `trace.cooldown_active_samples = samples` after the filter.
 
 Determinism: take the first 3 in iteration order over `afterMysteryPolicy` (which is already deterministic per the upstream filters — the spec's §4.2 last paragraph confirms this).
 
-### 5. Update SE-1 fixture in `select-storylet-candidates.test.ts`
+### 5. Kept embedded context-packet selection-shortlist trace type in sync
 
-In `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts`, modify the SE-1 fixture body at lines 124-128. Current body:
+`tools/world-mcp/src/context-packet/shared.ts` now includes the additive `cooldown_active_samples` array on `ContextPacketStoryBundleContext.selection_shortlist.filter_trace`. This is a type-only propagation of the same response contract; `story-bundle-context.ts` already passes through `selectionShortlist.filter_trace`.
+
+### 6. Updated SE-1 fixture in `select-storylet-candidates.test.ts`
+
+In `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts`, the SE-1 fixture body changed from:
 
 ```
 "id: SE-1\ncommitment:\n  selected_slt_id: SLT-9\n"
 ```
 
-New body must add `created_at_page: PG-1` so the new helper can map SE-1's selection to PG-1 in `branchPath: [PG-1, PG-2]`:
+to:
 
 ```
 "id: SE-1\ncreated_at_page: PG-1\ncommitment:\n  selected_slt_id: SLT-9\n"
@@ -145,11 +135,11 @@ New body must add `created_at_page: PG-1` so the new helper can map SE-1's selec
 
 This preserves the existing `after_cooldown: 2` assertion at lines 199-209 because PG-1 IS in the test's `branch_path: [PG-1, PG-2]` and the SLT-9 selection (cooldown_pages: 2, last_selected at PG-1, parent at PG-2) computes `distance = 1 < 2` → blocked. Without this fixture update, the new helper would skip SE-1 (missing `created_at_page`), SLT-9 would no longer be blocked, and `after_cooldown` would become 3.
 
-Also update the deepEqual assertion at line 199-209 to include `cooldown_active_samples: [{slt_id: "SLT-9", last_selected_on_page: "PG-1", distance: 1, cooldown_pages: 2}]` (one sample because SLT-9 is the only in-window cooldown rejection).
+The deepEqual assertion now includes `cooldown_active_samples: [{slt_id: "SLT-9", last_selected_on_page: "PG-1", distance: 1, cooldown_pages: 2}]` (one sample because SLT-9 is the only in-window cooldown rejection).
 
-### 6. Add new test file `select-storylet-candidates-cooldown-window.test.ts`
+### 7. Added new test file `select-storylet-candidates-cooldown-window.test.ts`
 
-Create `tools/world-mcp/tests/tools/select-storylet-candidates-cooldown-window.test.ts` with five test cases. Each case seeds a multi-PG fixture using the test patterns from the existing `select-storylet-candidates.test.ts` (`createTempRepoRoot`, `seedWorld`, `selectStoryletCandidates`, `storyNode`, `sltProjection`, `edge` helpers — re-import from `_shared.ts` and the existing test file's helper functions; copy the helper definitions if cleaner than importing).
+`tools/world-mcp/tests/tools/select-storylet-candidates-cooldown-window.test.ts` now has five test cases. Each case seeds a multi-PG fixture using the temp indexed-world helpers from `_shared.ts`.
 
 Test cases:
 
@@ -159,11 +149,11 @@ Test cases:
 - **(d) Zero-cooldown pass**: cooldown_pages: 0 (and a second sub-assertion for `null`), SLT selected in the recent past on the current branch; assert the SLT is in the shortlist AND `cooldown_active_samples` is empty (the cooldown check short-circuits at `cooldown <= 0` and emits no sample).
 - **(e) Fork-scenario shared-ancestor isolation**: PG-5 forks into PG-6a (BR-1) and PG-6b (BR-2); SE-b selects an SLT to create PG-6b on BR-2; current branch is BR-1 with parent PG-6a; both events share `parent_page_id: PG-5` but only PG-6a is in BR-1's `branch_path`; SE-b's `created_at_page: PG-6b` is NOT in BR-1's `branch_path`, so the new helper excludes SE-b naturally; assert the SLT is eligible on BR-1 AND `cooldown_active_samples` is empty for this SLT. This is the case the `created_at_page` choice — rather than `parent_page_id` — specifically protects against; using `parent_page_id` would have admitted SE-b's selection into BR-1's cooldown bookkeeping because PG-5 IS in BR-1's branch_path.
 
-Each SE fixture in the new test file MUST include `created_at_page: <PG-id>` per the new helper's required-field expectation.
+Each SE fixture in the new test file includes `created_at_page: <PG-id>` per the new helper's required-field expectation.
 
-### 7. Update SE-1 / SE-2 fixtures in `spec81-storylet-candidate-retrieval.test.ts`
+### 8. Updated SE-1 / SE-2 fixtures in `spec81-storylet-candidate-retrieval.test.ts`
 
-In `tools/world-mcp/tests/integration/spec81-storylet-candidate-retrieval.test.ts`, modify the SE-1 fixture at lines 237-246 and the SE-2 fixture at lines 247-257. Current SE-1 body:
+In `tools/world-mcp/tests/integration/spec81-storylet-candidate-retrieval.test.ts`, the SE-1 fixture changed from:
 
 ```
 "id: SE-1",
@@ -172,7 +162,7 @@ In `tools/world-mcp/tests/integration/spec81-storylet-candidate-retrieval.test.t
 ""
 ```
 
-New SE-1 body adds `created_at_page: PG-1` so the new helper maps SE-1's selection to PG-1 in the hand-counted-pool fixture's branch_path:
+to:
 
 ```
 "id: SE-1",
@@ -182,18 +172,19 @@ New SE-1 body adds `created_at_page: PG-1` so the new helper maps SE-1's selecti
 ""
 ```
 
-Apply the same `created_at_page: PG-1` insertion to SE-2 (which selects SLT-10 per lines 250-254). Both selections sit at PG-1 in the fixture's single-page branch_path, so both are within-window blocks at parent PG-1 (distance 0 → blocked when cooldown_pages > 0).
+The same `created_at_page: PG-1` insertion landed on SE-2. Both selections sit at PG-1 in the inherited fixture's `branch_path: [PG-1, PG-2]`, so both are within-window blocks under the implemented parent-index calculation (distance 1 → blocked when cooldown_pages > 0).
 
-Update the deepEqual at lines 358-369 to include `cooldown_active_samples` as a 2-entry array (SLT-9 and SLT-10, both with `last_selected_on_page: "PG-1"`, `distance: 0`, `cooldown_pages: 2`) — capped at 3 per the spec's determinism rule; only 2 in-window rejections exist in this fixture so the cap doesn't bite.
+The deepEqual now includes `cooldown_active_samples` as a 2-entry array in filtered candidate iteration order (`SLT-10` then `SLT-9`, because `node_id` ordering is lexical), both with `last_selected_on_page: "PG-1"`, `distance: 1`, `cooldown_pages: 2` — capped at 3 per the spec's determinism rule; only 2 in-window rejections exist in this fixture so the cap doesn't bite.
 
-This preserves the existing `after_cooldown: 8` assertion because the fixture's single-page branch_path means both prior selections sit on the current branch and the numeric-window semantics (distance 0 < cooldown 2) agree with the old binary check.
+This preserves the existing `after_cooldown: 8` assertion because both prior selections sit on the fixture's current branch path and the numeric-window semantics (distance 1 < cooldown 2) agree with the old binary check for this fixture.
 
 ## Files to Touch
 
 - `tools/world-mcp/src/tools/select-storylet-candidates.ts` (modify) — helper replacement (§1), `matchesCooldown` rewrite (§2), `StoryletCandidateFilterTrace` interface extension (§3), sample collection in filter pass (§4)
-- `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts` (modify) — SE-1 fixture extension with `created_at_page` (§5); assertion update for `cooldown_active_samples`
-- `tools/world-mcp/tests/tools/select-storylet-candidates-cooldown-window.test.ts` (new) — 5 new cooldown-window test cases (§6)
-- `tools/world-mcp/tests/integration/spec81-storylet-candidate-retrieval.test.ts` (modify) — SE-1 + SE-2 fixture extension with `created_at_page` (§7); assertion update for `cooldown_active_samples`
+- `tools/world-mcp/src/context-packet/shared.ts` (modify) — embedded `selection_shortlist.filter_trace` type extension (§5)
+- `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts` (modify) — SE-1 fixture extension with `created_at_page` (§6); assertion update for `cooldown_active_samples`
+- `tools/world-mcp/tests/tools/select-storylet-candidates-cooldown-window.test.ts` (new) — 5 new cooldown-window test cases (§7)
+- `tools/world-mcp/tests/integration/spec81-storylet-candidate-retrieval.test.ts` (modify) — SE-1 + SE-2 fixture extension with `created_at_page` (§8); assertion update for `cooldown_active_samples`
 
 ## Out of Scope
 
@@ -236,3 +227,32 @@ This preserves the existing `after_cooldown: 8` assertion because the fixture's 
 1. `(cd tools/world-mcp && npm run build && node --test "dist/tests/tools/select-storylet-candidates-cooldown-window.test.js")` — targeted run of the new cooldown-window test file (primary correctness gate).
 2. `(cd tools/world-mcp && npm test)` — full world-mcp suite (runs build + every dist/tests/**/*.test.js); verifies the implementation change, the SE-1 fixture update in the existing unit test, and the SE-1/SE-2 fixture updates in the integration test all land cleanly together.
 3. `(cd tools/world-mcp && npm run build)` — clean TypeScript build (covers typecheck via tsc). The worldloom tooling layer has no separate `lint` script (no eslint config exists across the repo); `npm run build` is the closest substitute for the spec's `pnpm turbo lint typecheck` Verification command — build verification covers the typecheck portion; the lint portion drops as no-such-tooling.
+
+## Outcome
+
+Completed: 2026-05-25
+
+What changed:
+
+- Replaced the global binary cooldown scan in `tools/world-mcp/src/tools/select-storylet-candidates.ts` with branch-path-aware prior-selection lookup keyed by `SE.created_at_page`, preserving the most recent selected page per SLT on the current branch.
+- Reworked cooldown filtering to compare page distance against `slt_saliency_cooldown_pages` and emit additive `filter_trace.cooldown_active_samples` diagnostics capped at three rejection samples.
+- Updated the embedded context-packet selection-shortlist trace type in `tools/world-mcp/src/context-packet/shared.ts`.
+- Added `tools/world-mcp/tests/tools/select-storylet-candidates-cooldown-window.test.ts` covering within-window block, expired-window pass, sibling-branch isolation, zero/null cooldown bypass, and shared-ancestor fork isolation.
+- Updated existing unit and SPEC-81 integration fixtures to include `created_at_page` on seeded SE records and assert the additive cooldown samples.
+
+Deviations from original plan:
+
+- Same-seam type fallout added `tools/world-mcp/src/context-packet/shared.ts` to the touched file set because `get_context_packet` passes through `selectionShortlist.filter_trace`.
+- The SPEC-81 hand-counted fixture's deterministic sample order is lexical candidate iteration order (`SLT-10`, then `SLT-9`), not numeric id order.
+- The SPEC-81 fixture retained its existing `branch_path: [PG-1, PG-2]`; the seeded selections therefore report distance `1` in samples.
+
+## Verification Result
+
+Passed on 2026-05-25:
+
+1. `(workdir tools/world-mcp) npm run build` — passed before source edits as baseline.
+2. `(workdir tools/world-mcp) npm run build` — passed after implementation.
+3. `(workdir tools/world-mcp) node --test dist/tests/tools/select-storylet-candidates-cooldown-window.test.js` — 5 tests passed.
+4. `(workdir tools/world-mcp) node --test dist/tests/tools/select-storylet-candidates.test.js` — 2 tests passed.
+5. `(workdir tools/world-mcp) node --test dist/tests/integration/spec81-storylet-candidate-retrieval.test.js` — initially failed only on expected `cooldown_active_samples` order; after updating the assertion to lexical order, 4 tests passed.
+6. `(workdir tools/world-mcp) npm test` — full package suite passed: 447 tests, 0 failures.

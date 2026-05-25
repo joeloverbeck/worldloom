@@ -124,7 +124,7 @@ function buildCandidateWorld(root: string): void {
       storyNode(
         "SE-1",
         "story_event_record",
-        "id: SE-1\ncommitment:\n  selected_slt_id: SLT-9\n"
+        "id: SE-1\ncreated_at_page: PG-1\ncommitment:\n  selected_slt_id: SLT-9\n"
       ),
       ...storylets
     ],
@@ -205,7 +205,15 @@ test("selectStoryletCandidates filters indexed SLT projections and returns only 
       after_predicate_class: 5,
       after_source_record_id: 4,
       after_mystery_policy: 3,
-      after_cooldown: 2
+      after_cooldown: 2,
+      cooldown_active_samples: [
+        {
+          slt_id: "SLT-9",
+          last_selected_on_page: "PG-1",
+          distance: 1,
+          cooldown_pages: 2
+        }
+      ]
     });
     assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-1", "SLT-2"]);
     assert.deepEqual(result.requires_full_body_ids, ["SLT-1", "SLT-2"]);

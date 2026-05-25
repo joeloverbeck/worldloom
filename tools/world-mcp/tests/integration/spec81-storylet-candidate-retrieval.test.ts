@@ -238,6 +238,7 @@ function buildHandCountedWorld(root: string): void {
         "story_event_record",
         [
           "id: SE-1",
+          "created_at_page: PG-1",
           "commitment:",
           "  selected_slt_id: SLT-9",
           ""
@@ -249,6 +250,7 @@ function buildHandCountedWorld(root: string): void {
         "story_event_record",
         [
           "id: SE-2",
+          "created_at_page: PG-1",
           "commitment:",
           "  selected_slt_id: SLT-10",
           ""
@@ -365,7 +367,21 @@ test("SPEC-81 §9.3 reports deterministic filter-trace counts for a hand-counted
       after_predicate_class: 20,
       after_source_record_id: 15,
       after_mystery_policy: 10,
-      after_cooldown: 8
+      after_cooldown: 8,
+      cooldown_active_samples: [
+        {
+          slt_id: "SLT-10",
+          last_selected_on_page: "PG-1",
+          distance: 1,
+          cooldown_pages: 2
+        },
+        {
+          slt_id: "SLT-9",
+          last_selected_on_page: "PG-1",
+          distance: 1,
+          cooldown_pages: 2
+        }
+      ]
     });
     assert.equal(result.shortlisted_candidate_ids.length, 8);
   } finally {
