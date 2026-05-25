@@ -1,0 +1,207 @@
+{
+  "world_slug": "multi-actor-collision-confrontation-world",
+  "story_slug": "multi-actor-collision-confrontation",
+  "records": [
+    {
+      "node_type": "page_record",
+      "node_id": "multi-actor-collision-confrontation:PG-1",
+      "file_path": "stories/multi-actor-collision-confrontation/_source/pages/PG-1.yaml",
+      "parsed": {
+        "id": "PG-1",
+        "story_id": "STORY-85",
+        "state_snapshot": {
+          "active_records": {
+            "STPLAN": ["STPLAN-1", "STPLAN-2"],
+            "OBL": ["OBL-1"],
+            "CLK": ["CLK-1"],
+            "BEL": ["BEL-1"]
+          }
+        }
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "multi-actor-collision-confrontation:PG-2",
+      "file_path": "stories/multi-actor-collision-confrontation/_source/pages/PG-2.yaml",
+      "parsed": {
+        "id": "PG-2",
+        "story_id": "STORY-85",
+        "input": {
+          "resolved_event_id": "SE-1"
+        },
+        "state_snapshot": {
+          "active_records": {
+            "STPLAN": ["STPLAN-1", "STPLAN-2"],
+            "OBL": ["OBL-1"],
+            "CLK": ["CLK-1"],
+            "BEL": ["BEL-1"],
+            "CHC": ["CHC-1"]
+          }
+        }
+      }
+    },
+    {
+      "node_type": "story_plan_record",
+      "node_id": "multi-actor-collision-confrontation:STPLAN-1",
+      "file_path": "stories/multi-actor-collision-confrontation/_source/plans/STPLAN-1.yaml",
+      "parsed": {
+        "id": "STPLAN-1",
+        "story_id": "STORY-85",
+        "holder": "STENT-2",
+        "plan_status": "active",
+        "current_step": {
+          "summary": "Corner the player at the dock stairs and demand the debt payment now."
+        },
+        "scope": {
+          "visibility": "public"
+        }
+      }
+    },
+    {
+      "node_type": "story_plan_record",
+      "node_id": "multi-actor-collision-confrontation:STPLAN-2",
+      "file_path": "stories/multi-actor-collision-confrontation/_source/plans/STPLAN-2.yaml",
+      "parsed": {
+        "id": "STPLAN-2",
+        "story_id": "STORY-85",
+        "holder": "STENT-3",
+        "plan_status": "active",
+        "current_step": {
+          "summary": "Deliver the contraband crate before the harbor patrol sweep reaches the pier."
+        },
+        "scope": {
+          "visibility": "public"
+        }
+      }
+    },
+    {
+      "node_type": "obligation_record",
+      "node_id": "multi-actor-collision-confrontation:OBL-1",
+      "file_path": "stories/multi-actor-collision-confrontation/_source/obligations/OBL-1.yaml",
+      "parsed": {
+        "id": "OBL-1",
+        "story_id": "STORY-85",
+        "subject": "STENT-1",
+        "holder": "STENT-2",
+        "status": "open",
+        "urgency": "high",
+        "trigger_to_close": "Pay the harbor debt or publicly refuse it."
+      }
+    },
+    {
+      "node_type": "pressure_clock_record",
+      "node_id": "multi-actor-collision-confrontation:CLK-1",
+      "file_path": "stories/multi-actor-collision-confrontation/_source/pressure-clocks/CLK-1.yaml",
+      "parsed": {
+        "id": "CLK-1",
+        "story_id": "STORY-85",
+        "status": "active",
+        "value": 3,
+        "thresholds": [
+          {
+            "at": 3
+          }
+        ]
+      }
+    },
+    {
+      "node_type": "belief_record",
+      "node_id": "multi-actor-collision-confrontation:BEL-1",
+      "file_path": "stories/multi-actor-collision-confrontation/_source/beliefs/BEL-1.yaml",
+      "parsed": {
+        "id": "BEL-1",
+        "story_id": "STORY-85",
+        "holder": "STENT-1",
+        "belief_mode": "observed",
+        "truth_relation": "true",
+        "confidence": "high",
+        "visibility": "shared",
+        "basis": {
+          "source_event": "SE-0",
+          "access_route": "direct_observation",
+          "access_records": ["STPLAN-1", "STPLAN-2", "OBL-1", "CLK-1"]
+        },
+        "consequences": {
+          "opens": ["CHC-1"],
+          "constrains_choices": []
+        }
+      }
+    },
+    {
+      "node_type": "story_event_record",
+      "node_id": "multi-actor-collision-confrontation:SE-1",
+      "file_path": "stories/multi-actor-collision-confrontation/_source/events/SE-1.yaml",
+      "parsed": {
+        "id": "SE-1",
+        "story_id": "STORY-85",
+        "created_at_page": "PG-2",
+        "parent_page_id": "PG-1",
+        "event_kind": "turn_resolution",
+        "actor": "STENT-1",
+        "world_logic_rationale": "The creditor's demand and the smuggler's delivery collide in the same dockside moment as the patrol clock reaches its threshold.",
+        "commitment": {
+          "selected_slt_id": "SLT-dockside-collision",
+          "selection_source": "multi_actor_collision",
+          "alias_bindings": {
+            "creditor_pressure": "STPLAN-1",
+            "smuggler_pressure": "STPLAN-2",
+            "patrol_clock": "CLK-1"
+          }
+        },
+        "turn_driver": {
+          "kind": "multi_actor_collision",
+          "initiator": "unknown",
+          "driver_records": ["STPLAN-1", "STPLAN-2", "OBL-1"],
+          "player_response_mode": "responds",
+          "pov_visibility": "perceived_directly"
+        },
+        "state_delta": {
+          "create": ["CHC-1"],
+          "supersede": [],
+          "close": []
+        }
+      }
+    },
+    {
+      "node_type": "storylet_record",
+      "node_id": "multi-actor-collision-confrontation:SLT-dockside-collision",
+      "file_path": "stories/multi-actor-collision-confrontation/_source/storylets/SLT-dockside-collision.yaml",
+      "parsed": {
+        "id": "SLT-dockside-collision",
+        "story_id": "STORY-85",
+        "compatible_turn_drivers": ["multi_actor_collision"],
+        "reason_to_exist": "Resolve the local dockside collision between the creditor's demand, the smuggler's delivery, and the patrol clock threshold.",
+        "effects": [
+          {
+            "kind": "bound",
+            "target": "dockside_collision_forces_side_choice",
+            "grounded_in": ["STPLAN-1", "STPLAN-2", "OBL-1", "CLK-1"]
+          }
+        ]
+      }
+    },
+    {
+      "node_type": "choice_record",
+      "node_id": "multi-actor-collision-confrontation:CHC-1",
+      "file_path": "stories/multi-actor-collision-confrontation/_source/choices/CHC-1.yaml",
+      "parsed": {
+        "id": "CHC-1",
+        "story_id": "STORY-85",
+        "created_at_page": "PG-2",
+        "surface_label": "Choose which pressure to answer before the patrol arrives.",
+        "player_visible_intent": "Respond to the visible collision by siding with the creditor, the smuggler, or neither.",
+        "target_or_action_families": ["social", "risk", "resource"],
+        "likely_state_pressure": "The rival plans and open debt force an immediate local decision.",
+        "grounded_in": {
+          "records": ["STPLAN-1", "STPLAN-2", "OBL-1"]
+        }
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "stories/multi-actor-collision-confrontation/pages-prose-plans/PG-2.md",
+      "content": "## 7a. Turn driver / initiative trace\n\n- Driver kind: multi_actor_collision\n- Initiator: unknown\n- Driver records: STPLAN-1, STPLAN-2, OBL-1\n- Player response mode: responds\n- POV visibility: perceived_directly\n- Observer-firewall note: BEL-1 records direct observation of the creditor demand, smuggler delivery, open obligation, and patrol clock in the same dockside scene; no hidden interiority is used.\n\nActive-pressure disposition\n\n| Record | Disposition | Reason / expiry |\n|---|---|---|\n| STPLAN-1 | selected | creditor presses the debt demand in the visible confrontation |\n| STPLAN-2 | selected | smuggler arrives with contraband in the same visible confrontation |\n| OBL-1 | selected | open debt is the player-facing stakes of the confrontation |\n| CLK-1 | deferred | patrol clock remains active until PG-3 unless the player resolves it first |\n\n## 16a. STCHAR-derived character authority packets\n\n- No STCHAR packet required; the driver is a collision between active story pressure records already visible in the scene.\n"
+    }
+  ]
+}

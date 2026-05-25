@@ -397,6 +397,9 @@ function matchesSourceRecordIds(
     return false;
   }
 
+  // Defensive belt-and-suspenders: rejects all story-bundle prefixes rather than
+  // honoring bundle_genesis_record per validator-layer isBranchLocal; tracked in
+  // specs/IMPLEMENTATION-ORDER.md §Out-of-scope until a real fixture trips it.
   if (
     candidate.row.slt_scope_visibility === "global_author_pool" &&
     candidate.sourceRecordIds.some((recordId) => isStoryLocalRecordId(recordId))

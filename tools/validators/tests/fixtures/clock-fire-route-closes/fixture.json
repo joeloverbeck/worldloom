@@ -1,0 +1,108 @@
+{
+  "world_slug": "clock-fire-route-closes-world",
+  "story_slug": "clock-fire-route-closes",
+  "records": [
+    {
+      "node_type": "page_record",
+      "node_id": "clock-fire-route-closes:PG-1",
+      "file_path": "stories/clock-fire-route-closes/_source/pages/PG-1.yaml",
+      "parsed": {
+        "id": "PG-1",
+        "story_id": "STORY-85",
+        "state_snapshot": {
+          "active_records": {
+            "CLK": ["CLK-1"]
+          }
+        }
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "clock-fire-route-closes:PG-2",
+      "file_path": "stories/clock-fire-route-closes/_source/pages/PG-2.yaml",
+      "parsed": {
+        "id": "PG-2",
+        "story_id": "STORY-85",
+        "input": {
+          "resolved_event_id": "SE-1"
+        },
+        "state_snapshot": {
+          "active_records": {
+            "CLK": ["CLK-1"],
+            "CHC": ["CHC-1"]
+          }
+        }
+      }
+    },
+    {
+      "node_type": "pressure_clock_record",
+      "node_id": "clock-fire-route-closes:CLK-1",
+      "file_path": "stories/clock-fire-route-closes/_source/pressure-clocks/CLK-1.yaml",
+      "parsed": {
+        "id": "CLK-1",
+        "story_id": "STORY-85",
+        "status": "active",
+        "value": 3,
+        "thresholds": [
+          {
+            "at": 3
+          }
+        ]
+      }
+    },
+    {
+      "node_type": "story_event_record",
+      "node_id": "clock-fire-route-closes:SE-1",
+      "file_path": "stories/clock-fire-route-closes/_source/events/SE-1.yaml",
+      "parsed": {
+        "id": "SE-1",
+        "story_id": "STORY-85",
+        "created_at_page": "PG-2",
+        "parent_page_id": "PG-1",
+        "event_kind": "turn_resolution",
+        "actor": "STENT-1",
+        "world_logic_rationale": "The toll-gate clock reaches its closing threshold while the player is still at the crossing.",
+        "commitment": {
+          "selected_slt_id": "SLT-route-closure",
+          "selection_source": "clock_fire",
+          "alias_bindings": {}
+        },
+        "turn_driver": {
+          "kind": "clock_fire",
+          "initiator": "world",
+          "driver_records": ["CLK-1"],
+          "player_response_mode": "responds",
+          "pov_visibility": "perceived_directly"
+        },
+        "state_delta": {
+          "create": ["CHC-1"],
+          "supersede": [],
+          "close": []
+        }
+      }
+    },
+    {
+      "node_type": "choice_record",
+      "node_id": "clock-fire-route-closes:CHC-1",
+      "file_path": "stories/clock-fire-route-closes/_source/choices/CHC-1.yaml",
+      "parsed": {
+        "id": "CHC-1",
+        "story_id": "STORY-85",
+        "created_at_page": "PG-2",
+        "surface_label": "Rush the gate before the chain drops.",
+        "player_visible_intent": "Respond to the closing route by trying to cross before the toll chain locks.",
+        "target_or_action_families": ["move", "risk"],
+        "likely_state_pressure": "The route-closing clock forces an immediate crossing decision.",
+        "grounded_in": {
+          "records": ["CLK-1"]
+        }
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "stories/clock-fire-route-closes/pages-prose-plans/PG-2.md",
+      "content": "## 7a. Turn driver / initiative trace\n\n- Driver kind: clock_fire\n- Initiator: world\n- Driver records: CLK-1\n- Player response mode: responds\n- POV visibility: perceived_directly\n- Observer-firewall note: The gate chain drops in the player's sightline; no hidden actor state is referenced.\n\nActive-pressure disposition\n\n| Record | Disposition | Reason / expiry |\n|---|---|---|\n| CLK-1 | selected | toll-gate clock reached the route-closing threshold |\n\n## 16a. STCHAR-derived character authority packets\n\n- No STCHAR packet required; the driver is a visible route-clock threshold consequence.\n"
+    }
+  ]
+}

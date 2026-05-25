@@ -1,0 +1,209 @@
+{
+  "world_slug": "secret-reveal-ledger-clue-world",
+  "story_slug": "secret-reveal-ledger-clue",
+  "records": [
+    {
+      "node_type": "mystery_reserve_entry",
+      "node_id": "secret-reveal-ledger-clue:M-85",
+      "file_path": "_source/mystery-reserve/M-85.yaml",
+      "parsed": {
+        "id": "M-85",
+        "record_kind": "mystery_reserve",
+        "title": "Who holds the chamberlain's debt?",
+        "status": "active",
+        "future_resolution_safety": "medium",
+        "known_around_it": "A ledger page proves the debt exists but not who owns it.",
+        "unknown": "The creditor's identity remains unrevealed.",
+        "forbidden_answers": [],
+        "notes": ["SPEC-85 secret-reveal fixture uses this as a bounded mystery reference."]
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "secret-reveal-ledger-clue:PG-1",
+      "file_path": "stories/secret-reveal-ledger-clue/_source/pages/PG-1.yaml",
+      "parsed": {
+        "id": "PG-1",
+        "story_id": "STORY-85",
+        "state_snapshot": {
+          "active_records": {
+            "STSEC": ["STSEC-1"],
+            "DA": ["DA-1"],
+            "BEL": ["BEL-1"]
+          },
+          "unresolved_mystery_claims": [
+            {
+              "mystery_id": "M-85",
+              "authority": "apparent",
+              "status": "preserved",
+              "evidence_records": ["DA-1"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "secret-reveal-ledger-clue:PG-2",
+      "file_path": "stories/secret-reveal-ledger-clue/_source/pages/PG-2.yaml",
+      "parsed": {
+        "id": "PG-2",
+        "story_id": "STORY-85",
+        "input": {
+          "resolved_event_id": "SE-1"
+        },
+        "state_snapshot": {
+          "active_records": {
+            "STSEC": ["STSEC-1"],
+            "DA": ["DA-1"],
+            "BEL": ["BEL-1"],
+            "CHC": ["CHC-1"]
+          },
+          "unresolved_mystery_claims": [
+            {
+              "mystery_id": "M-85",
+              "authority": "apparent",
+              "status": "narrowed",
+              "evidence_records": ["DA-1", "SE-1"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "node_type": "story_secret_record",
+      "node_id": "secret-reveal-ledger-clue:STSEC-1",
+      "file_path": "stories/secret-reveal-ledger-clue/_source/secrets/STSEC-1.yaml",
+      "parsed": {
+        "id": "STSEC-1",
+        "story_id": "STORY-85",
+        "holder": "STENT-2",
+        "status": "hidden",
+        "audience_visibility": "hidden",
+        "protected_mystery_refs": ["M-85"],
+        "secret": "The chamberlain's ledger proves a secret debt, but not the creditor's identity."
+      }
+    },
+    {
+      "node_type": "story_artifact_record",
+      "node_id": "secret-reveal-ledger-clue:DA-1",
+      "file_path": "stories/secret-reveal-ledger-clue/_source/artifacts/DA-1.yaml",
+      "parsed": {
+        "id": "DA-1",
+        "story_id": "STORY-85",
+        "created_at_page": "PG-1",
+        "surface": "Ledger page with erased interest marks",
+        "derived_from": ["STSEC-1"],
+        "player_visible_summary": "The ledger proves the chamberlain hides a debt, but the creditor's name is scratched away."
+      }
+    },
+    {
+      "node_type": "belief_record",
+      "node_id": "secret-reveal-ledger-clue:BEL-1",
+      "file_path": "stories/secret-reveal-ledger-clue/_source/beliefs/BEL-1.yaml",
+      "parsed": {
+        "id": "BEL-1",
+        "story_id": "STORY-85",
+        "holder": "STENT-1",
+        "belief_mode": "inferred",
+        "truth_relation": "true",
+        "confidence": "medium",
+        "visibility": "shared",
+        "basis": {
+          "source_event": "SE-0",
+          "access_route": "document",
+          "access_records": ["STSEC-1", "DA-1"]
+        },
+        "consequences": {
+          "opens": ["CHC-1"],
+          "constrains_choices": []
+        }
+      }
+    },
+    {
+      "node_type": "story_event_record",
+      "node_id": "secret-reveal-ledger-clue:SE-1",
+      "file_path": "stories/secret-reveal-ledger-clue/_source/events/SE-1.yaml",
+      "parsed": {
+        "id": "SE-1",
+        "story_id": "STORY-85",
+        "created_at_page": "PG-2",
+        "parent_page_id": "PG-1",
+        "event_kind": "turn_resolution",
+        "actor": "STENT-1",
+        "world_logic_rationale": "The ledger clue licenses a partial reveal of the chamberlain's debt without naming the creditor.",
+        "commitment": {
+          "selected_slt_id": "SLT-ledger-debt-reveal",
+          "selection_source": "secret_reveal",
+          "alias_bindings": {
+            "ledger_clue": "DA-1"
+          }
+        },
+        "turn_driver": {
+          "kind": "secret_reveal",
+          "initiator": "world",
+          "driver_records": ["STSEC-1"],
+          "player_response_mode": "responds",
+          "pov_visibility": "reported"
+        },
+        "state_delta": {
+          "create": ["CHC-1"],
+          "supersede": [],
+          "close": []
+        }
+      }
+    },
+    {
+      "node_type": "storylet_record",
+      "node_id": "secret-reveal-ledger-clue:SLT-ledger-debt-reveal",
+      "file_path": "stories/secret-reveal-ledger-clue/_source/storylets/SLT-ledger-debt-reveal.yaml",
+      "parsed": {
+        "id": "SLT-ledger-debt-reveal",
+        "story_id": "STORY-85",
+        "compatible_turn_drivers": ["secret_reveal"],
+        "reason_to_exist": "Resolve the ledger clue into a bounded reveal: the chamberlain has a hidden debt, while the creditor remains unknown.",
+        "predicates": [
+          {
+            "pred": "secret_revealed",
+            "secret": "STSEC-1"
+          }
+        ],
+        "effects": [
+          {
+            "kind": "bound",
+            "target": "chamberlain_debt_partially_revealed",
+            "grounded_in": ["STSEC-1", "DA-1"]
+          }
+        ],
+        "mystery_policy": {
+          "forbidden_resolutions": [],
+          "allowed_reveals": ["debt_exists"],
+          "still_unknown": ["creditor_identity"]
+        }
+      }
+    },
+    {
+      "node_type": "choice_record",
+      "node_id": "secret-reveal-ledger-clue:CHC-1",
+      "file_path": "stories/secret-reveal-ledger-clue/_source/choices/CHC-1.yaml",
+      "parsed": {
+        "id": "CHC-1",
+        "story_id": "STORY-85",
+        "created_at_page": "PG-2",
+        "surface_label": "Confront the chamberlain about the hidden debt.",
+        "player_visible_intent": "Respond to the partial debt reveal without claiming knowledge of the creditor.",
+        "target_or_action_families": ["social", "investigate"],
+        "likely_state_pressure": "The ledger clue forces a choice about how openly to use the partial reveal.",
+        "grounded_in": {
+          "records": ["STSEC-1", "DA-1"]
+        }
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "stories/secret-reveal-ledger-clue/pages-prose-plans/PG-2.md",
+      "content": "## 7a. Turn driver / initiative trace\n\n- Driver kind: secret_reveal\n- Initiator: world\n- Driver records: STSEC-1\n- Player response mode: responds\n- POV visibility: reported\n- Observer-firewall note: BEL-1 grants the player access to STSEC-1 through DA-1, so the reveal is limited to the chamberlain's secret debt and does not expose the creditor's identity.\n\nActive-pressure disposition\n\n| Record | Disposition | Reason / expiry |\n|---|---|---|\n| STSEC-1 | selected | ledger clue licenses the partial debt reveal |\n\n## 16a. STCHAR-derived character authority packets\n\n- No STCHAR packet required; the driver is a story-secret reveal surfaced through DA-1 and BEL-1 access.\n"
+    }
+  ]
+}
