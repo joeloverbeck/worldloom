@@ -31,6 +31,10 @@ import { getRecordsField } from "./tools/get-records-field.js";
 import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get-record-schema.js";
 import { getStoryStateProvenance } from "./tools/get-story-state-provenance.js";
 import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records.js";
+import {
+  planStoryStateMaintenance,
+  STORY_STATE_MAINTENANCE_RECORD_TYPES
+} from "./tools/plan-story-state-maintenance.js";
 import { searchNodes } from "./tools/search-nodes.js";
 import {
   selectStoryletCandidates,
@@ -252,6 +256,23 @@ const validatePatchPlanInputSchema = z.object({
 const submitPatchPlanInputSchema = z.object({
   patch_plan: patchPlanInputSchema,
   approval_token: z.string().min(1)
+});
+
+const planStoryStateMaintenanceInputSchema = z.object({
+  world_slug: z.string().min(1),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN),
+  reason: z.string().min(1),
+  source_ticket: z.string().min(1),
+  operations: z
+    .array(
+      z.object({
+        action: z.enum(["create", "supersede"]),
+        record_type: z.enum(STORY_STATE_MAINTENANCE_RECORD_TYPES),
+        supersedes: z.string().min(1).optional(),
+        record: z.record(z.string(), z.unknown())
+      })
+    )
+    .min(1)
 });
 
 export const ID_CLASSES = [
@@ -523,6 +544,14 @@ export function createServer(): McpServer {
     "Submit a patch plan using an approval token through the patch engine.",
     submitPatchPlanInputSchema,
     async (args) => handleSubmitPatchPlanTool(args as unknown as Parameters<typeof handleSubmitPatchPlanTool>[0])
+  );
+  registerToolWithCapability(
+    "plan_story_state_maintenance",
+    "plan_story_state_maintenance: Build a review-only patch-plan envelope for bounded story-bundle state maintenance. It allocates fresh story-scoped IDs, verifies superseded source records through indexed retrieval, emits existing create_* story-record ops for STEMO/STPLAN/SREL/CHC maintenance, and never submits or writes the plan. Validate the returned patch_plan, then require explicit approval plus submit_patch_plan with an approval token.",
+    planStoryStateMaintenanceInputSchema,
+    async (args) =>
+      planStoryStateMaintenance(args as unknown as Parameters<typeof planStoryStateMaintenance>[0]),
+    { "operations[].record_type": STORY_STATE_MAINTENANCE_RECORD_TYPES }
   );
   registerToolWithCapability(
     "allocate_next_id",

@@ -36,6 +36,8 @@ arguments:
 
 Advance a branching-story bundle by one causal tick from any committed parent page — continuation or fork. Evaluates a chosen `CHC`, write-in, or non-player initiative source, applies world logic to route the selected driver, commits the resulting state delta, materializes the next page snapshot, authors the comprehensive prose plan for the next page, and emits the next choices. Parent rendered prose is optional. Gate 9 (Turn-Driver Lawfulness) and page-plan §7a are the shared-contract surfaces that make the selected `SE.turn_driver` and its active-pressure dispositions load-bearing.
 
+This skill's `repair_turn` mode is for repairs that are themselves a causal tick and therefore need a new `SE`, `PG`, page plan, and choice/state continuity work. For bounded append-only story-state maintenance where no fictional turn occurred, use `mcp__worldloom__plan_story_state_maintenance` to produce a review-only patch plan, then validate, approve, sign, and submit that plan through the normal patch-engine flow.
+
 <HARD-GATE>
 Do NOT write `pages-prose-plans/PG-<integer>.md` or update `worlds/<world_slug>/stories/<story_slug>/INDEX.md`, AND do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, until:
 
