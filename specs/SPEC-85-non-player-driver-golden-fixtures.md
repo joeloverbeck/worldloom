@@ -2,7 +2,7 @@
 
 **Status:** active
 **Date:** 2026-05-25
-**Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) §17 SPEC-86 (renumbered to SPEC-85 here per sequential continuation from archived SPEC-82; see triage assumption C).
+**Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) §17 SPEC-86 (renumbered to SPEC-85 here per sequential continuation from archived SPEC-82).
 **Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md) §ACCEPT.
 **Predecessors:** archived [`SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md) (introduced the 8-driver-kind enum and per-kind schema constraints); the Red Kiln Ambush fixture at `tools/validators/tests/fixtures/red-kiln-ambush/` (rich `npc_action` proof — the pattern this spec mirrors for the other four non-player kinds).
 
@@ -18,7 +18,7 @@ A "rich golden fixture" in the third-iteration report's sense is a complete auth
 1. Phase-2 storylet selection against the parent PG snapshot.
 2. Phase-7a page-plan trace (driver kind / initiator / driver records / POV visibility / observer-firewall note / active-pressure disposition).
 3. Alias binding through `SE.commitment.alias_bindings`.
-4. Composition of all 6 driver-primitive validators (`turn_driver_schema_compliance`, `turn_driver_pov_observer_firewall`, `page_plan_turn_driver_consistency`, `active_pressure_handling_discipline`, `slt_grounding_minimal_integrity`, `chc_slt_selected_commitment_trace`).
+4. Composition of all 6 driver-primitive validators (`turn_driver_schema_compliance`, `turn_driver_pov_observer_firewall`, `page_plan_turn_driver_consistency`, `active_pressure_handling_discipline`, `observer_firewall`, `turn_cycle_output_grounding_integrity`) — the exact composition exercised by the Red Kiln Ambush capstone test at `tools/validators/tests/integration/spec76-red-kiln-ambush.test.ts:42-49`.
 5. The CHC emission discipline for the responder/witness/continuation surface that follows a non-player initiative.
 
 Without authored bundles for the four remaining kinds, regressions in any cross-validator composition would surface only when a real consumer (production story bundle) exercised the kind in the wild.
@@ -104,11 +104,11 @@ No source-code changes, no schema changes, no skill prose changes, no validator-
 
 ## 6. Acceptance Criteria
 
-1. Each of the four fixtures loads cleanly through `world-index build`.
+1. Each of the four `fixture.json` files parses cleanly via `JSON.parse(readFileSync(...))` at integration-test load time, matching the Red Kiln Ambush fixture-load pattern (`tools/validators/tests/integration/spec76-red-kiln-ambush.test.ts:35-41`). Fixtures live under `tools/validators/tests/fixtures/`, not under `worlds/<slug>/`; no `world-index build` invocation is required (fixtures are JSON bundles materialized to a temp directory by the test via `mkdtempSync`, not authored world trees).
 2. Each of the four integration tests passes with all 6 driver-primitive validators returning PASS for the unmutated fixture.
 3. Each integration test demonstrates ≥3 driver-specific FAIL mutations (e.g., dropping a driver record, swapping POV visibility to `perceived_directly` for an offstage driver, removing the response CHC, citing a hidden state without an access route) — each mutation produces the expected validator failure code from the SPEC-76 codes.
 4. The Red Kiln Ambush regression test (`spec76-red-kiln-ambush.test.ts`) continues to pass unchanged.
-5. `pnpm turbo lint typecheck test` passes.
+5. `cd tools/validators && npm test` passes (the package's `npm test` script runs `tsc` build + the full `node --test` suite, which serves as both typecheck and test for this package; no `lint` script exists in the repo).
 
 ## 7. FOUNDATIONS Alignment
 
@@ -124,7 +124,7 @@ No source-code changes, no schema changes, no skill prose changes, no validator-
 
 Run on a worktree containing the new fixtures and tests:
 
-1. **Fixture parse (each)**: `pnpm --filter world-index build -- <each fixture-world>` — loads cleanly. *(rationale: a malformed fixture would mask the test's intent)*
-2. **Integration (each)**: `pnpm --filter validators test -- spec85-offstage-bridge-sabotage`, `spec85-clock-fire-route-closes`, `spec85-secret-reveal-ledger-clue`, `spec85-multi-actor-collision-confrontation` — each passes including the FAIL-mutation cases. *(rationale: the primary acceptance gate is per-kind end-to-end composition)*
-3. **Regression**: `pnpm --filter validators test -- spec76-red-kiln-ambush` — unchanged. *(rationale: the new fixtures must not perturb the existing `npc_action` golden test)*
-4. **Lint + typecheck**: `pnpm turbo lint typecheck` — clean. *(rationale: pre-completion verification per global CLAUDE.md)*
+1. **Fixture parse (each)**: each integration test's load step (`JSON.parse(readFileSync(FIXTURE_PATH, "utf8"))` — Red Kiln pattern at `spec76-red-kiln-ambush.test.ts:35-41`) succeeds without throw. A standalone smoke check is `cd tools/validators && node -e "JSON.parse(require('fs').readFileSync('tests/fixtures/<fixture-dir>/fixture.json','utf8'))"` per fixture. *(rationale: a malformed fixture would mask the test's intent and the integration-test load failure would surface as an opaque ENOENT/SyntaxError rather than a structural finding)*
+2. **Integration (each)**: `cd tools/validators && npm run build && node --test dist/tests/integration/spec85-offstage-bridge-sabotage.test.js dist/tests/integration/spec85-clock-fire-route-closes.test.js dist/tests/integration/spec85-secret-reveal-ledger-clue.test.js dist/tests/integration/spec85-multi-actor-collision-confrontation.test.js` — each passes including the FAIL-mutation cases. *(rationale: the primary acceptance gate is per-kind end-to-end composition; the package uses `node --test` against the built `dist/` tree per `tools/validators/package.json`'s `test` script)*
+3. **Regression**: `cd tools/validators && node --test dist/tests/integration/spec76-red-kiln-ambush.test.js` — unchanged. *(rationale: the new fixtures must not perturb the existing `npc_action` golden test)*
+4. **Typecheck + full suite**: `cd tools/validators && npm test` — clean. *(rationale: pre-completion verification per global CLAUDE.md; the package's `npm test` runs `tsc -p tsconfig.json` build then the full `node --test dist/tests/**/*.test.js` suite, which serves as both typecheck and full-test gate. No `lint` script exists in `tools/*/package.json`; SPEC-84 outcome §Deviations already documented the same drift from the global `pnpm turbo` example)*
