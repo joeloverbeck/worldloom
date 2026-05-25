@@ -59,6 +59,10 @@ The docs describe the intended steady-state contract, but any workflow should st
 | Inspect the patch-plan envelope and per-op payload contract before assembly | `describe_envelope_schema`, optionally filtered by `op_kind` |
 | Prove structural integrity | `world-validate <world> --structural` |
 
+### World Root Resolution For `world-index`
+
+`world-index init`, `build`, `sync`, `inspect`, `render`, `stats`, and `verify` resolve the worldloom project root deterministically before opening or mutating `_index/` state: explicit `--world-root <path>` wins, then `WORLDLOOM_ROOT`, then auto-discovery walks upward from cwd looking for both `docs/FOUNDATIONS.md` and `worlds/`. On success, the CLI emits `[world-root] <path> (source: explicit_flag|env_var|auto_discovery)` to stderr. Resolution failures exit 2 and list every attempted path.
+
 ### World Root Resolution For MCP CLIs
 
 `validate-patch-plan`, `submit-patch-plan`, and `sign-approval-token` resolve the worldloom project root deterministically: explicit `--world-root <path>` wins, then `WORLDLOOM_ROOT`, then auto-discovery walks upward from cwd looking for both `docs/FOUNDATIONS.md` and `worlds/`. On success, each CLI emits `[world-root] <path> (source: explicit_flag|env_var|auto_discovery)` to stderr before any status/error JSON. Resolution failures exit 2 and list every attempted path.

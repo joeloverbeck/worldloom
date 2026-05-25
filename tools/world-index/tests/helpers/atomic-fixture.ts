@@ -4,6 +4,8 @@ import path from "node:path";
 
 export function createAtomicRepoRoot(worldSlug = "atomic-world"): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-index-atomic-"));
+  mkdirSync(path.join(root, "docs"), { recursive: true });
+  writeFileSync(path.join(root, "docs", "FOUNDATIONS.md"), "# Foundations\n", "utf8");
   const world = path.join(root, "worlds", worldSlug);
   mkdirSync(world, { recursive: true });
 
