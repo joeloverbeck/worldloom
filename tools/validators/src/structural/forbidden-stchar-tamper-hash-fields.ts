@@ -60,7 +60,7 @@ function receiptVerdicts(filePath: string, content: string): Verdict[] {
 }
 
 function pagePlanVerdicts(filePath: string, content: string): Verdict[] {
-  const sectionStart = content.search(/^##\s+16a\.\s+STCHAR-derived character authority packets\s*$/m);
+  const sectionStart = content.search(/^##\s+16a\.\s+STCHAR-derived character authority packets\s*$/mi);
   if (sectionStart === -1) {
     return [];
   }

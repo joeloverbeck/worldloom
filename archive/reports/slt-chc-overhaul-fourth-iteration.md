@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # **Final STCHAR ⇄ SLT ⇄ CHC Character-Specificity Architecture Audit for Worldloom**
 
 ## **1. Executive verdict**
@@ -71,7 +73,7 @@ SPEC-85 non-player-driver integration tests for offstage bridge sabotage, clock-
 
 **Reports / implementation order**
 
-`reports/slt-chc-overhaul-third-iteration.md`; `reports/stchar-distillation-rework.md`; `specs/IMPLEMENTATION-ORDER.md`. These reports were treated as context only. Live schemas, validators, skills, MCP/index code, tests, and shared contracts win whenever there is tension.
+`archive/reports/slt-chc-overhaul-third-iteration.md`; `archive/reports/stchar-distillation-rework.md`; `specs/IMPLEMENTATION-ORDER.md`. These reports were treated as context only. Live schemas, validators, skills, MCP/index code, tests, and shared contracts win whenever there is tension.
 
 ---
 
@@ -1369,3 +1371,6 @@ but “this is the right causal move for this actor, under this pressure, with t
 
 That is the missing layer between structural validity and story that feels alive.
 
+## Outcome
+
+Archived on 2026-05-25 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.

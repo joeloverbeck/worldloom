@@ -16,6 +16,15 @@ test("page_plan_stchar_packet_integrity accepts complete 16a packets", async () 
   assert.deepEqual(verdicts, []);
 });
 
+test("page_plan_stchar_packet_integrity accepts title-case 16a section headings", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({ sectionHeading: "## 16a. STCHAR-Derived Character Authority Packets" })),
+    context(baseRecords())
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("page_plan_stchar_packet_integrity rejects a missing required packet", async () => {
   const verdicts = await pagePlanStcharPacketIntegrity.run(input(plan({ includePacket: false })), context(baseRecords()));
 
@@ -115,6 +124,19 @@ test("page_plan_stchar_packet_integrity rejects composite speaker packets withou
 test("page_plan_stchar_packet_integrity accepts composite voice-requiring packets with voice block", async () => {
   const verdicts = await pagePlanStcharPacketIntegrity.run(
     input(plan({ requiredBecause: "viewpoint, behavior_shapes_page" })),
+    context(baseRecords())
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("page_plan_stchar_packet_integrity accepts inline Voice Bible authority for voice-requiring packets", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({
+      requiredBecause: "viewpoint, speaker, voice_shapes_page",
+      stableSeedLine: "  - Stable STCHAR seed used: STCHAR-1 Voice Bible / Dialogue Authority (clipped register; local pressure logic).",
+      voiceLine: ""
+    })),
     context(baseRecords())
   );
 
@@ -381,6 +403,8 @@ function plan(options: {
   includePacket?: boolean;
   stcharId?: string;
   requiredBecause?: string;
+  sectionHeading?: string;
+  stableSeedLine?: string;
   profileHash?: string;
   pagePacketHash?: string;
   voiceLine?: string;
@@ -393,7 +417,7 @@ function plan(options: {
   return [
     "# Page Plan",
     "",
-    "## 16a. STCHAR-derived character authority packets",
+    options.sectionHeading ?? "## 16a. STCHAR-derived character authority packets",
     "",
     includePacket ? [
       packetText({ ...options, pagePacketHash }).replace(/\n$/, "")
@@ -407,6 +431,7 @@ function plan(options: {
 function packetText(options: {
   stcharId?: string;
   requiredBecause?: string;
+  stableSeedLine?: string;
   profileHash?: string;
   pagePacketHash?: string;
   voiceLine?: string;
@@ -418,6 +443,7 @@ function packetText(options: {
     `- STENT-1 / ${options.stcharId ?? "STCHAR-1"} - Test Character.`,
     `  - Required because: ${options.requiredBecause ?? "speaker"}.`,
     `  - Hashes: profile_hash=${options.profileHash ?? HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${options.pagePacketHash ?? SEED_PAGE_PACKET_HASH}.`,
+    options.stableSeedLine ?? "  - Stable STCHAR seed used: STCHAR-1 stable authority.",
     options.groundingLine ?? "  - Current-state grounding records: none; stable STCHAR authority only.",
     options.voiceLine ?? "  - Voice/dialogue authority: clipped STCHAR voice block.",
     options.appraisalLine ?? "  - Relevant appraisal rules: protect the secret.",

@@ -2,7 +2,7 @@
 
 **Spec ID:** SPEC-80
 **Date:** 2026-05-24
-**Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
+**Source brainstorm:** `archive/reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
 **Status:** completed
 **Depends on:** `archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md` (indexed candidate retrieval) for the projection-driven coverage diagnostics. SPEC-81 is complete, so implementation should prefer the projection API; the existing `list_records(include_full_body=true)` path remains a fallback only where the projection API is unavailable.
 

@@ -1,7 +1,7 @@
-# Triage — `reports/slt-chc-overhaul-first-iteration.md`
+# Triage — `archive/reports/slt-chc-overhaul-first-iteration.md`
 
 **Date:** 2026-05-23
-**Source report:** [`reports/slt-chc-overhaul-first-iteration.md`](../../reports/slt-chc-overhaul-first-iteration.md) (2140 lines; research-driven STCHAR ↔ SLT ↔ CHC consolidation architecture proposal from ChatGPT-Pro)
+**Source report:** [`archive/reports/slt-chc-overhaul-first-iteration.md`](../../archive/reports/slt-chc-overhaul-first-iteration.md) (2140 lines; research-driven STCHAR ↔ SLT ↔ CHC consolidation architecture proposal from ChatGPT-Pro)
 **Trigger:** Playtest concern — "the entire story was reactive upon what I as the player chose."
 **Deliverables produced:** [`archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md`](../../archive/specs/SPEC-76-turn-driver-primitive-and-pressure-driven-turn-cycle.md), [`archive/specs/SPEC-77-slt-grounding-provenance-minimal.md`](../../archive/specs/SPEC-77-slt-grounding-provenance-minimal.md), [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md)
 

@@ -2,7 +2,7 @@
 
 **Spec ID:** SPEC-79
 **Date:** 2026-05-24
-**Source brainstorm:** `reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
+**Source brainstorm:** `archive/reports/slt-chc-overhaul-second-iteration.md` triaged at `docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`.
 **Status:** COMPLETED
 **Supersedes:** the original SPEC-79 draft (story-bundle schema drift repairs) — the schema-drift content other than the Red Kiln CHC repair migrates to SPEC-82. The Red Kiln CHC repair is absorbed here because the fixture must be schema-conformant under the post-removal CHC shape regardless.
 
@@ -275,5 +275,5 @@ Completed on 2026-05-24.
 - Final verification:
   - `cd tools/validators && npm run build` — PASS.
   - `cd tools/validators && node --test dist/tests/integration/spec79-chc-removal.test.js` — PASS.
-  - `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md reports/slt-chc-overhaul-second-iteration.md` — PASS after classification: remaining hits are SPEC-79 documentation/provenance only, with no `tools/` or `.claude/skills/` consumer hits.
+  - `git grep -n associated_commitment_block -- tools .claude/skills docs archive/specs/SPEC-79-chc-associated-commitment-block-removal.md archive/reports/slt-chc-overhaul-second-iteration.md` — PASS after classification: remaining hits are SPEC-79 documentation/provenance only, with no `tools/` or `.claude/skills/` consumer hits.
   - Manual contract review — PASS: bootstrap and turn-cycle guidance no longer names a per-CHC SLT field; health-audit, validator, world-index, shared-template, and MACHINE-FACING-LAYER surfaces match the post-removal contract.

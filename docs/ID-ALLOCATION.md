@@ -4,7 +4,7 @@ IDs are **append-only** and use the FOUNDATIONS-002 unpadded natural-integer suf
 
 ## Allocation discipline
 
-On machine-layer-enabled workflows, allocate at pre-flight via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug?, audit_id?)`, which scans the indexed world state or the class-specific filesystem surface for the highest id of that class and returns the next. Allocation is per-class-directory post-SPEC-13 (one file = one record = trivial scan). Story-bundle-scoped classes require `story_slug`; sub-audit-scoped classes require `story_slug` plus `audit_id`.
+On machine-layer-enabled workflows, allocate at pre-flight via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug?, audit_id?)`, which scans the indexed world state or the class-specific filesystem surface for the highest id of that class and returns the next. Bootstrap or reservation workflows that need multiple classes in one round trip may use `mcp__worldloom__allocate_many_ids(world_slug, allocations=[{id_class, story_slug?, audit_id?}, ...])`; each entry follows the same scope rules, the response preserves request order, and repeated entries for the same scope increment monotonically inside the batch. Allocation is per-class-directory post-SPEC-13 (one file = one record = trivial scan). Story-bundle-scoped classes require `story_slug`; sub-audit-scoped classes require `story_slug` plus `audit_id`.
 
 Never reuse or overwrite an ID. If allocation would collide (concurrent plan), the patch engine's pre-apply validation or the workflow's final filename-collision check detects and aborts.
 

@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-05-25
 **Status:** COMPLETED - archived 2026-05-25 as `archive/specs/IMPLEMENTATION-ORDER-2026-05-25-3.md`
-**Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) triaged at [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md).
+**Source brainstorm:** [`archive/reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) triaged at [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md).
 **Deferred-items reassessment** (post-completion): [`docs/triage/2026-05-25-implementation-order-deferred-items-reassessment.md`](../docs/triage/2026-05-25-implementation-order-deferred-items-reassessment.md) — re-verified every §Out-of-Scope lift-condition remains unmet; no new specs warranted.
 
 This file sequences the live specs under `specs/`. Each row records the spec, the change shape, dependency, and gating risk. Once a spec ships, its row is archived alongside the spec file at `archive/specs/IMPLEMENTATION-ORDER-<date>.md`.

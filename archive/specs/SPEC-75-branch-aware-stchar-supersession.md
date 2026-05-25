@@ -2,7 +2,7 @@
 
 **Status:** COMPLETED 2026-05-23
 **Authored:** 2026-05-23
-**Source report:** `reports/stchar-distillation-rework.md` §6.13
+**Source report:** `archive/reports/stchar-distillation-rework.md` §6.13
 **Companion triage:** [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../../docs/triage/2026-05-23-stchar-distillation-rework-triage.md)
 **Prior lineage:** `archive/specs/SPEC-59-stchar-authority-fidelity-validators.md` (introduced reciprocity + supersession surfaces).
 **Related:** [`archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md`](SPEC-74-stchar-distillation-boundary-hardening.md) (STCHAR distillation boundary hardening — orthogonal scope split out of this spec at triage time; landed 2026-05-23, archived same day).
@@ -159,7 +159,7 @@ No separate ancestry-primitive unit-test file is needed: `branch_path` is a seri
 
 ## 9. References
 
-- Source report: `reports/stchar-distillation-rework.md` §6.13 (the supersession concern).
+- Source report: `archive/reports/stchar-distillation-rework.md` §6.13 (the supersession concern).
 - Companion triage: [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../../docs/triage/2026-05-23-stchar-distillation-rework-triage.md).
 - Related: [`archive/specs/SPEC-74-stchar-distillation-boundary-hardening.md`](SPEC-74-stchar-distillation-boundary-hardening.md) (established the `regeneration_reason_class: durable_branch_transformation` enum value that names the branch-local-transformation reason class).
 - Verified validator surface: `tools/validators/src/structural/stchar-supersession-integrity.ts:33-44` (ordinal-only reachability).

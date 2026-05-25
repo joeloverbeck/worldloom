@@ -3,7 +3,7 @@
 **Status:** COMPLETED 2026-05-23
 **Authored:** 2026-05-23
 **Completed:** 2026-05-23 — all 12 implementation tickets (SPEC74STCHARDISBOU-001 through -012) landed; capstone -013 archived as superseded (red-bunny remediation handled manually on the user's private working copy; the synthetic-fixture portion of the capstone test was judged not worth the cost since per-validator unit tests already cover the negative diagnostics).
-**Source report:** `reports/stchar-distillation-rework.md` §§4–10
+**Source report:** `archive/reports/stchar-distillation-rework.md` §§4–10
 **Companion triage:** [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../docs/triage/2026-05-23-stchar-distillation-rework-triage.md)
 **Prior lineage:** `archive/specs/SPEC-70-char-stchar-semantic-preservation.md` (introduced `source_operational_fact_map` + `stchar_source_fact_coverage` + operational-home subsections); `archive/specs/SPEC-71-strip-stchar-tamper-hashes.md` (removed `profile_hash`, `voice_block_hash`, `page_packet_hash`, `source_char_hash`); `archive/specs/SPEC-73-page-packet-required-because-label-parsing.md` (multi-label `Required because` parsing).
 **Related:** SPEC-75 (branch-aware STCHAR supersession — orthogonal scope split from this spec at triage time).
@@ -251,7 +251,7 @@ SPEC-75 (branch-aware supersession) is independently sequenced and does not bloc
 
 ## 9. References
 
-- Source report: `reports/stchar-distillation-rework.md` (the source proposal; §6.3 / §6.5 / §6.12 hash-citation text dropped per Out of Scope; §6.12 sub-items (1)(2) dropped as already-landed by SPEC-73; §6.13 deferred to SPEC-75).
+- Source report: `archive/reports/stchar-distillation-rework.md` (the source proposal; §6.3 / §6.5 / §6.12 hash-citation text dropped per Out of Scope; §6.12 sub-items (1)(2) dropped as already-landed by SPEC-73; §6.13 deferred to SPEC-75).
 - Companion triage: [`docs/triage/2026-05-23-stchar-distillation-rework-triage.md`](../docs/triage/2026-05-23-stchar-distillation-rework-triage.md) (per-item verdicts, refuted-by-verification list, deferral rationale).
 - Prior lineage: `archive/specs/SPEC-70-char-stchar-semantic-preservation.md`, `archive/specs/SPEC-71-strip-stchar-tamper-hashes.md`, `archive/specs/SPEC-73-page-packet-required-because-label-parsing.md`.
 - FOUNDATIONS: §Story Bundles §5b, §5c, §6.1, §6a, §6b; §Tooling Recommendation; Rule 6.

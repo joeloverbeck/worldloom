@@ -305,7 +305,7 @@ story_id: STORY-<integer>*
 scope:
   visibility: global_author_pool | branch_prefix_scoped | branch_scoped   # *
   branch_id: BR-<integer> | null            # * null only for global_author_pool
-  visible_branch_path_prefix: [PG-<integer>] # * branch_prefix_scoped only; non-empty ordered prefix of PG.branch_path
+  visible_branch_path_prefix: [PG-<integer>] # * branch_prefix_scoped ONLY; non-empty ordered prefix of PG.branch_path. MUST be OMITTED ENTIRELY (not null, not []) for `global_author_pool` and `branch_scoped`; the schema's allOf/if/then enforces this via `not: required: [visible_branch_path_prefix]` for both non-prefix visibilities, so callers presenting the field with any value (including null or []) under `visibility: global_author_pool` fail validation with a three-layer error stack (`scope must NOT be valid` + `must match "then" schema` + `minItems: 1` or `must be array`).
 created_at_page: PG-<integer> | null        # required for provenance.origin: runtime_jit; nullable for page-independent authoring origins
 title: string*
 move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery   # *
@@ -856,7 +856,18 @@ expires_when: string*
 derived_from: [<record_id>]                   # default []
 ```
 
-`status`, `trigger_event`, `appraisal_basis`, and `behavioral_pressure` make the emotional state replayable and validator-readable. `orientation.toward_records` feeds observer-firewall checks without adding a free-form `toward_claim` field. Orientation targets must be accessible to the holder under FOUNDATIONS §6b: a `STENT` target is lawful when the holder can directly observe the entity through active co-location, `STSEC` is lawful only for its `holders[]` or another recorded access route, `SF`/`STLOC`/`THR`/`CNSQ` are branch-public active state, and `STQ` is accessible only when `audience_visibility` is `explicit` or `implied` unless another holder-grounded access route exists. Use `STCHAR` in `derived_from[]` when stable persona authority shapes the appraisal or behavioral pressure. `agency_effect` is intentionally binary in v1: either the affect constrains agency or it does not.
+`status`, `trigger_event`, `appraisal_basis`, and `behavioral_pressure` make the emotional state replayable and validator-readable. `orientation.toward_records` feeds observer-firewall checks without adding a free-form `toward_claim` field. Orientation targets must be accessible to the holder under FOUNDATIONS §6b. The per-class access rules (as enforced by `stemo_orientation_records_exist` via `isRecordAccessibleToHolder` in `tools/validators/src/structural/stemo-utils.ts`):
+
+- `STENT` is lawful when the holder can directly observe the entity through active co-location at a non-`unknown`/`concealed`/`offstage` `STSTAT.location`. A bare-resolvable STENT id without co-location is NOT sufficient.
+- `STSEC` is lawful only when the holder appears in the secret's `holders[]` (or via another holder-grounded access route the validator recognizes through the shared helper).
+- `STOBJ` is lawful only when the holder is the object's `owner` OR the object's `current_location` is exactly `carried_by:<holder-id>` (i.e., the holder is carrying the object). Co-location-with-carrier is NOT currently a lawful access route for STOBJ — feelings about an observed-but-not-owned-and-not-carried object should orient through the carrying `STENT` (subject to STENT direct-observation rules above) or through an `SF`/`BEL`/`THR` that captures the object's situational meaning.
+- `SF`, `STLOC`, `THR`, `CNSQ` are branch-public active state and are auto-accessible.
+- `STQ` is accessible only when `audience_visibility` is `explicit` or `implied` (the validator checks `audience_visibility !== "hidden"`).
+- `BEL` is accessible when the belief's `holder` matches the STEMO holder, OR `holder` is `public` / `narrator`, OR the STEMO holder appears in the BEL's `basis.access_records[]`.
+- `OBL` is accessible when the STEMO holder matches `owed_by` or `owed_to`.
+- `SREL` is accessible when the STEMO holder appears in `participants[]`.
+
+Use `STCHAR` in `derived_from[]` when stable persona authority shapes the appraisal or behavioral pressure. `agency_effect` is intentionally binary in v1: either the affect constrains agency or it does not.
 
 #### 4.5.19 `STCHAR` (story-local character authority)
 

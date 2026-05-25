@@ -425,8 +425,9 @@ function findHighestSubAuditScopedId(
   return maxValue;
 }
 
-export async function allocateNextId(
-  args: AllocateNextIdArgs
+export async function allocateNextIdWithOffset(
+  args: AllocateNextIdArgs,
+  offset = 0
 ): Promise<AllocateNextIdResponse | McpError> {
   if (!isIdClass(args.id_class)) {
     throw new Error(`Unsupported id_class '${args.id_class}'.`);
@@ -501,7 +502,7 @@ export async function allocateNextId(
   }
 
   if (pipelineIdClass) {
-    const nextValue = findHighestPipelineId(args.id_class) + 1;
+    const nextValue = findHighestPipelineId(args.id_class) + 1 + offset;
     return {
       next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
     };
@@ -513,7 +514,7 @@ export async function allocateNextId(
       return highestValue;
     }
 
-    const nextValue = highestValue + 1;
+    const nextValue = highestValue + 1 + offset;
     return {
       next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
     };
@@ -525,7 +526,7 @@ export async function allocateNextId(
       return highestValue;
     }
 
-    const nextValue = highestValue + 1;
+    const nextValue = highestValue + 1 + offset;
     return {
       next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
     };
@@ -537,7 +538,7 @@ export async function allocateNextId(
       return highestValue;
     }
 
-    const nextValue = highestValue + 1;
+    const nextValue = highestValue + 1 + offset;
     return {
       next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
     };
@@ -554,7 +555,7 @@ export async function allocateNextId(
       return highestValue;
     }
 
-    const nextValue = highestValue + 1;
+    const nextValue = highestValue + 1 + offset;
     return {
       next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
     };
@@ -593,11 +594,17 @@ export async function allocateNextId(
       maxValue = Math.max(maxValue, parsedValue);
     }
 
-    const nextValue = maxValue + 1;
+    const nextValue = maxValue + 1 + offset;
     return {
       next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
     };
   } finally {
     opened.db.close();
   }
+}
+
+export async function allocateNextId(
+  args: AllocateNextIdArgs
+): Promise<AllocateNextIdResponse | McpError> {
+  return allocateNextIdWithOffset(args, 0);
 }

@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # **1. Executive verdict**
 
 **Verdict: the character-to-story bridge is architecturally sound but semantically fragile.** The current system has the right major architecture: world-level `CHAR-*` dossiers are not supposed to remain runtime characterization authority; `STCHAR-*` is the story-local authority; page plans must carry STCHAR-derived §16a character packets; prose attach checks §16a packet presence and hash consistency. That is the right shape, and it aligns with `FOUNDATIONS.md`’s insistence that Worldloom state be modeled, constrained, retrievable, and validated rather than treated as loose prose memory.
@@ -775,3 +777,6 @@ Add:
 3. **Should `page_packet_hash` remain a STCHAR frontmatter field?**  
     My recommendation: keep it only if a canonical packet projection is stored or reproducible; otherwise move page-specific packet hashes fully to page plans/receipts to avoid ambiguous authority.
 
+## Outcome
+
+Archived on 2026-05-25 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.

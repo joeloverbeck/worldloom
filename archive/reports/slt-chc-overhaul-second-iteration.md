@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # **Research-Driven Storylet Selection, CHC Binding, and Driver-Aware Narrative Causality Proposal**
 
 ## **1. Executive verdict**
@@ -1126,3 +1128,6 @@ Reject:
 3. Should `source_records` be required for all SLTs or only runtime/audit/branch-scoped SLTs? I recommend required for runtime/audit/branch-scoped and optional for global patterns, but this should be tested against bootstrap authoring burden.  
 4. Should pattern/instance split be introduced after SPEC-85? It is probably useful later, but not before the binding and indexed candidate pipeline proves its limits.
 
+## Outcome
+
+Archived on 2026-05-25 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.

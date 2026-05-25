@@ -19,7 +19,7 @@ import {
 
 const VALIDATOR = "page_plan_stchar_packet_integrity";
 const OFFSTAGE_REQUIRED_BECAUSE = "offstage_causal";
-const STCHAR_SECTION_HEADING = /^##\s+16a\.\s+STCHAR-derived character authority packets\s*$/m;
+const STCHAR_SECTION_HEADING = /^##\s+16a\.\s+STCHAR-derived character authority packets\s*$/mi;
 const CURRENT_STATE_ID = /\b(PG|SE|STEMO|BEL|STPLAN|SREL|STSTAT|STOBJ|STLOC|THR|OBL|CNSQ|CLK|STSEC|STQ)-(0|[1-9][0-9]*)\b/g;
 const DISALLOWED_AUTHORITY_ID = /\bCHAR-(0|[1-9][0-9]*)\b/g;
 const NONE_GROUNDING_VALUE = /^none\s*;\s*stable\s+STCHAR\s+authority\s+only\.?$/i;
@@ -239,7 +239,9 @@ function parsePackets(content: string): Packet[] {
       requiredBecause: required,
       requiredBecauseLabels: parseRequiredBecauseLabels(required),
       currentStateGroundingRecords: packetText.match(/^\s+- Current-state grounding records:\s*(.+?)\s*$/m)?.[1]?.trim() ?? null,
-      hasVoiceBlock: /^[^\S\r\n]*- Voice\/dialogue authority:[^\S\r\n]*\S/m.test(packetText),
+      hasVoiceBlock:
+        /^[^\S\r\n]*- Voice\/dialogue authority:[^\S\r\n]*\S/mi.test(packetText)
+        || /\bvoice\s+bible\b/i.test(packetText),
       packetText
     };
   });

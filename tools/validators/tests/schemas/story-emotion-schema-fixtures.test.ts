@@ -49,6 +49,37 @@ test("story-emotion schema rejects invalid enum values and non-dissociated null 
   assert.ok(validate.errors?.some((error) => error.keyword === "type" && error.instancePath === "/affect_kind"));
 });
 
+test("story-emotion schema accepts world-record provenance and rejects dead provenance prefixes", () => {
+  const validate = compileSchema();
+
+  assert.equal(validate(validEmotion({
+    derived_from: ["ONT-1", "CAU-2", "ENT-1", "OQ-1", "SEC-GEO-1"]
+  })), true, JSON.stringify(validate.errors, null, 2));
+
+  assert.equal(validate(validEmotion({ derived_from: ["INV-1"] })), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "pattern" && error.instancePath === "/derived_from/0"));
+
+  assert.equal(validate(validEmotion({ derived_from: ["SEC-1"] })), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "pattern" && error.instancePath === "/derived_from/0"));
+});
+
+test("story-emotion schema keeps orientation targets story-scoped", () => {
+  const validate = compileSchema();
+
+  assert.equal(validate(validEmotion({
+    orientation: {
+      toward_records: ["SEC-GEO-1"]
+    }
+  })), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "pattern" && error.instancePath === "/orientation/toward_records/0"));
+
+  assert.equal(validate(validEmotion({
+    orientation: {
+      toward_records: ["STCHAR-1"]
+    }
+  })), true, JSON.stringify(validate.errors, null, 2));
+});
+
 test("story-emotion schema rejects unknown narrative-shape fields", () => {
   const validate = compileSchema();
 

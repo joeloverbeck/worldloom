@@ -1,7 +1,7 @@
-# Triage — `reports/stchar-distillation-rework.md`
+# Triage — `archive/reports/stchar-distillation-rework.md`
 
 **Date:** 2026-05-23
-**Source report:** `reports/stchar-distillation-rework.md` (ChatGPT-Pro proposal, 820 lines, §§1–12)
+**Source report:** `archive/reports/stchar-distillation-rework.md` (ChatGPT-Pro proposal, 820 lines, §§1–12)
 **Triage authority:** User-pre-authorized in the request ("If changes aligned with `docs/FOUNDATIONS.md` are warranted, create specs in `specs/*` with the specifications. If more than one spec is created, create `specs/IMPLEMENTATION-ORDER.md`.")
 **Spec partitioning chosen at triage:** Two specs.
 **Migration severity chosen at triage:** Fail-everywhere on landing (more aggressive than the report's warn-legacy / fail-touched recommendation).
@@ -88,4 +88,4 @@ The bundle aligns with FOUNDATIONS §Story Bundles §5b (Schema-Minimalism — `
 
 ## Closeout
 
-This triage closes evaluation of `reports/stchar-distillation-rework.md`. Both specs are AUTHORED 2026-05-23 and await ticket decomposition.
+This triage closes evaluation of `archive/reports/stchar-distillation-rework.md`. Both specs are AUTHORED 2026-05-23 and await ticket decomposition.

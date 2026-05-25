@@ -106,7 +106,7 @@
     "expires_when": { "type": "string", "minLength": 1 },
     "derived_from": {
       "type": "array",
-      "items": { "$ref": "#/$defs/recordId" },
+      "items": { "$ref": "#/$defs/provenanceRecordId" },
       "default": []
     }
   },
@@ -192,7 +192,11 @@
   "$defs": {
     "recordId": {
       "type": "string",
-      "pattern": "^(STENT|STCHAR|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT|STPLAN|STEMO|CF|CH|M|INV|SEC)-[0-9]+$"
+      "pattern": "^(STENT|STCHAR|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT|STPLAN|STEMO|CF|CH|M)-[0-9]+$"
+    },
+    "provenanceRecordId": {
+      "type": "string",
+      "pattern": "^((STENT|STCHAR|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT|STPLAN|STEMO|CF|CH|M|OQ|ENT|ONT|CAU|DIS|SOC|AES)-[0-9]+|SEC-(GEO|INS|MTS|ECR|PAS|TML|ELF)-[0-9]+)$"
     }
   }
 }

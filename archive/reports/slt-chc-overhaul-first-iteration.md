@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # **Research-Driven STCHAR ↔ SLT ↔ CHC Consolidation Architecture Proposal**
 
 ## **1. Executive verdict**
@@ -117,9 +119,9 @@ Validators and registry:
 
 Active reports consulted only as context:
 
-* `reports/character-bridge-consolidation-first-iteration.md`  
-* `reports/character-bridge-consolidation-second-iteration.md`  
-* `reports/stchar-distillation-rework.md`
+* `archive/reports/character-bridge-consolidation-first-iteration.md`  
+* `archive/reports/character-bridge-consolidation-second-iteration.md`  
+* `archive/reports/stchar-distillation-rework.md`
 
 ---
 
@@ -2138,3 +2140,6 @@ Replacing judgment-assisted prose/choice review with mechanical checklists.
 
 **Bottom line:** preserve Worldloom’s mature STCHAR/STPLAN/STEMO/SLT/CHC foundation, but break the CHC/SLT/SE boundary cleanly. Add explicit turn drivers, hybrid choice binding, SLT grounding provenance, and instantiated commitment traces. This gives NPCs and offstage actors real causal agency while keeping the story in player POV and preserving meaningful player choice.
 
+## Outcome
+
+Archived on 2026-05-25 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.

@@ -671,7 +671,7 @@ The story engine is a present-causal-state machine. It tracks what is true now a
 
 Story-bundle architecture uses world-scoped, story-bundle-scoped, and sub-audit-scoped ID classes. `STORY-<integer>` is per-world. Per-bundle records include STENT, STCHAR (story-local character authority profile; hybrid markdown artifact under `story-characters/`), STSTAT, SF, BEL, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, CLK, STSEC, STQ, DA (story-local), BR, PG, CHC, SLT, STPLAN, STEMO, and SLB. Per-bundle audit and promotion records include SAU and SP, with RSP scoped under a specific SAU audit. All of these classes use the unpadded natural-integer format defined in §Canonical Storage Layer.
 
-Allocation routes through `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`; RSP allocation also includes `audit_id`. The allocator is the same machine-facing allocation surface used for world-canon classes.
+Allocation routes through `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`, or through the ordered batch equivalent `mcp__worldloom__allocate_many_ids(world_slug, allocations=[{id_class, story_slug, audit_id?}, ...])` when a bootstrap/reservation workflow needs several IDs in one round trip. RSP allocation also includes `audit_id`. The allocator is the same machine-facing allocation surface used for world-canon classes.
 
 ### 6.1 Story-Local Character Authority
 

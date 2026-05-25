@@ -3,7 +3,7 @@
 **Status:** COMPLETED (archived 2026-05-23)
 **Spec ID:** SPEC-76
 **Predecessors:** SPEC-47 (STPLAN + STEMO), SPEC-63 (offstage causal packet tier)
-**Source report:** `reports/slt-chc-overhaul-first-iteration.md` (triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`)
+**Source report:** `archive/reports/slt-chc-overhaul-first-iteration.md` (triaged at `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`)
 **Related:** SPEC-77 (Minimal SLT Grounding Provenance — depends on the turn_driver enum landed here)
 
 ## 1. Problem
@@ -294,7 +294,7 @@ The spec lands as a single coordinated change because the schema, contract, skil
 
 ## 10. References
 
-- Source report: `reports/slt-chc-overhaul-first-iteration.md` (executive verdict §1; pain points §5.1 / §5.5 / §5.7; recommended architecture Alternative E §6; schema changes §8.1 / §8.4; skill changes §9.1 / §9.2 / §9.5; validators §10.1 / §10.2 / §10.3 / §10.12).
+- Source report: `archive/reports/slt-chc-overhaul-first-iteration.md` (executive verdict §1; pain points §5.1 / §5.5 / §5.7; recommended architecture Alternative E §6; schema changes §8.1 / §8.4; skill changes §9.1 / §9.2 / §9.5; validators §10.1 / §10.2 / §10.3 / §10.12).
 - Triage decision record: `docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md`.
 - FOUNDATIONS §Story Bundles §4a / §5a / §5b / §5c / §6a / §6b: `docs/FOUNDATIONS.md:618-690`.
 - Shared story state contract: `.claude/skills/_shared-templates/story-state-contract.md` (authoritative for story-record schemas per FOUNDATIONS §5b).

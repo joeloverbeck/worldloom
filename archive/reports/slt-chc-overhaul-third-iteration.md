@@ -1,3 +1,5 @@
+**Status**: COMPLETED
+
 # **1. Executive verdict**
 
 The post-SPEC-79/80/81/82 architecture is **basically right**. The major conceptual flaw from the previous iteration—direct CHC-to-SLT coupling through `CHC.associated_commitment_block`—has been removed. Current `CHC` records are player-facing affordance/intent/grounding records; the actual selected storylet now lives in `SE.commitment.selected_slt_id`, with `selection_source` and `alias_bindings` carrying trace closure. The current implementation is much closer to the architecture Worldloom should keep.
@@ -98,7 +100,7 @@ tools/validators/tests/integration/spec79-chc-removal.test.ts
 tools/validators/tests/schemas/story-event-turn-driver-schema.test.ts  
 tools/validators/tests/schemas/story-storylet-grounding.test.ts
 
-reports/slt-chc-overhaul-second-iteration.md  
+archive/reports/slt-chc-overhaul-second-iteration.md  
 specs/IMPLEMENTATION-ORDER.md
 
 Active reports were treated as context only. Live contracts, schemas, validators, MCP/index code, skills, and tests won whenever there was a conflict.
@@ -1525,3 +1527,6 @@ Reject explicitly:
 4. Should pool diversity warnings expand beyond SPEC-80’s driver-kind × pressure-source coverage? Yes, but only in health audit, not schema. Recovery, aftermath, and de-escalation diversity are valuable, but not hard law.  
 5. Should authored large-pool testing use 300, 1,000, or more SLTs? The current synthetic proof covers 1,000; the authored fixture should start at 300 because authored YAML richness matters more than raw count.
 
+## Outcome
+
+Archived on 2026-05-25 as an exploited source report. The report remains preserved as provenance, but it is no longer active intake material; current specs, tickets, triage records, and docs govern accepted, rejected, modified, and deferred outcomes.

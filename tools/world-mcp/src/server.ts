@@ -10,6 +10,7 @@ import { DELIVERY_MODES } from "./context-packet/shared.js";
 import { isMainModule } from "./esm-main.js";
 import { NODE_TYPES, OPERATION_KINDS } from "./package-interop.js";
 import { TASK_TYPES } from "./ranking/profiles/index.js";
+import { allocateManyIds } from "./tools/allocate-many-ids.js";
 import { allocateNextId } from "./tools/allocate-next-id.js";
 import { describeCapabilities, type ToolCapability } from "./tools/describe-capabilities.js";
 import { describeEnvelopeSchema } from "./tools/describe-envelope-schema.js";
@@ -319,6 +320,19 @@ const allocateNextIdInputSchema = z.object({
   audit_id: z.string().min(1).optional()
 });
 
+const allocateManyIdsInputSchema = z.object({
+  world_slug: z.string().min(1),
+  allocations: z
+    .array(
+      z.object({
+        id_class: z.enum(ID_CLASSES),
+        story_slug: z.string().min(1).optional(),
+        audit_id: z.string().min(1).optional()
+      })
+    )
+    .min(1)
+});
+
 const getFirewallContentInputSchema = z.object({
   world_slug: z.string().min(1),
   m_ids: z.array(z.string().min(1)).optional()
@@ -516,6 +530,13 @@ export function createServer(): McpServer {
     allocateNextIdInputSchema,
     async (args) => allocateNextId(args as unknown as Parameters<typeof allocateNextId>[0]),
     { id_class: ID_CLASSES }
+  );
+  registerToolWithCapability(
+    "allocate_many_ids",
+    "allocate_many_ids: Allocate multiple append-only ids for one world in a single ordered response. Each allocation entry uses the same id_class, story_slug, and audit_id rules as allocate_next_id; repeated entries for the same scope increment monotonically within the batch, and errors include successful_allocations for reconciliation.",
+    allocateManyIdsInputSchema,
+    async (args) => allocateManyIds(args as unknown as Parameters<typeof allocateManyIds>[0]),
+    { "allocations[].id_class": ID_CLASSES }
   );
   registerToolWithCapability(
     "get_firewall_content",

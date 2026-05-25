@@ -50,6 +50,29 @@ test("record_schema_compliance rejects invalid STSTAT enum values", async () => 
   ));
 });
 
+test("record_schema_compliance accepts world-record provenance in STSTAT derived_from", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    statusRecord(validStatus({ derived_from: ["ONT-1", "CAU-2", "ENT-1", "OQ-1", "SEC-GEO-1"] }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects dead STSTAT provenance prefixes", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    statusRecord(validStatus({ derived_from: ["INV-1", "SEC-1"] }))
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/derived_from/0")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/derived_from/1")
+  ));
+});
+
 function statusRecord(parsed: Record<string, unknown>) {
   return {
     ...record("story_status_record", "test-story:STSTAT-1", FILE_PATH, parsed),

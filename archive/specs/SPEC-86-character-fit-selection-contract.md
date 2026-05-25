@@ -2,7 +2,7 @@
 
 **Status:** COMPLETED
 **Date:** 2026-05-25
-**Source brainstorm:** [`reports/slt-chc-overhaul-fourth-iteration.md`](../../reports/slt-chc-overhaul-fourth-iteration.md) §1 "Executive verdict", §8 "Recommended architecture", §16 "STCHAR ⇄ current-state mediation model", §18 SPEC-A.
+**Source brainstorm:** [`archive/reports/slt-chc-overhaul-fourth-iteration.md`](../../archive/reports/slt-chc-overhaul-fourth-iteration.md) §1 "Executive verdict", §8 "Recommended architecture", §16 "STCHAR ⇄ current-state mediation model", §18 SPEC-A.
 **Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-fourth-iteration-triage.md`](../../docs/triage/2026-05-25-slt-chc-overhaul-fourth-iteration-triage.md) §ACCEPT — SPEC-A folded into SPEC-86.
 **Predecessors:** archived [`SPEC-79-chc-associated-commitment-block-removal.md`](SPEC-79-chc-associated-commitment-block-removal.md) (late-binding established), archived [`SPEC-81-indexed-storylet-candidate-retrieval.md`](SPEC-81-indexed-storylet-candidate-retrieval.md) (projection-based filtering established), archived [`SPEC-85-non-player-driver-golden-fixtures.md`](SPEC-85-non-player-driver-golden-fixtures.md) (driver-kind selection coverage established).
 
