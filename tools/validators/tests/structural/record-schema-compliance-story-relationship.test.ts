@@ -140,6 +140,32 @@ test("record_schema_compliance accepts STCHAR in SREL derived_from", async () =>
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts world-record prefixes in SREL derived_from", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    relationshipRecord(validRelationship({
+      derived_from: ["STCHAR-1", "ONT-1", "CAU-2", "DIS-1", "SOC-2", "AES-1", "ENT-2", "OQ-1", "SEC-GEO-1"]
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects dead INV references in SREL derived_from", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    relationshipRecord(validRelationship({
+      derived_from: ["INV-1"]
+    }))
+  ]));
+
+  assert.ok(
+    result.some((verdict) =>
+      verdict.code === "record_schema_compliance.pattern" &&
+      verdict.message.includes("/derived_from/0")
+    ),
+    JSON.stringify(result)
+  );
+});
+
 test("record_schema_compliance rejects world CHAR in SREL derived_from", async () => {
   const result = await recordSchemaCompliance.run({}, context([
     relationshipRecord(validRelationship({

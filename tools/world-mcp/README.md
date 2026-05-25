@@ -6,7 +6,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 **Phase**: 2 (read side plus SPEC-03 patch-engine delegation)
 **Status**: Stdio MCP entrypoint registers 25 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators`, also checks patch-engine ID allocation races, and returns an explicit validation status; `submit_patch_plan` delegates to `@worldloom/patch-engine`; `describe_capabilities` exposes server-start build metadata plus the deployed tool/enum contract for schema-currency checks; `get_record_schema` exposes world-canon, hybrid, and schema-backed story-bundle JSON schemas plus validator-sourced conditional block requirements; `describe_envelope_schema` exposes the patch-plan envelope and per-op payload schema contract for envelope assembly.
 
-Explicit-world retrieval calls auto-sync and retry once when `openIndexDb()` detects `stale_index`. Recovered responses include `freshness_audit.pre_call_index_was_stale: true`; persistent staleness still returns `stale_index` with recovery details. Patch-plan submit-time `index_stale` remains a separate fail-closed engine result.
+Explicit-world index-backed calls auto-recover and retry when `openIndexDb()` detects an index lifecycle error: `index_version_mismatch` runs `world-index build` in-process, and `stale_index` runs `world-index sync` in-process. Recovered responses include `freshness_audit.pre_call_index_version_was_old: true` and/or `freshness_audit.pre_call_index_was_stale: true`; persistent failures still return the original error code with recovery details. Patch-plan submit-time `index_stale` remains a separate fail-closed engine result.
 
 ## Tools
 

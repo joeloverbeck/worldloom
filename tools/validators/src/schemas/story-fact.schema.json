@@ -18,7 +18,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^(STENT|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT|STPLAN|STEMO|CF|CH|M|INV|SEC)-[0-9]+$"
+        "pattern": "^((STENT|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|CLK|STSEC|STQ|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT|STPLAN|STEMO|CF|CH|M|OQ|ENT|ONT|CAU|DIS|SOC|AES)-[0-9]+|SEC-(GEO|INS|MTS|ECR|PAS|TML|ELF)-[0-9]+)$"
       }
     }
   },

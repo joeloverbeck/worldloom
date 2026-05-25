@@ -138,6 +138,46 @@ test("record_schema_compliance accepts CHAR pre-figurement in source_basis but k
   );
 });
 
+test("record_schema_compliance accepts world-record prefixes in STCHAR-free story derived_from schemas", async () => {
+  const derivedFrom = ["ONT-1", "CAU-2", "DIS-1", "SOC-2", "AES-1", "ENT-2", "OQ-1", "SEC-GEO-1"];
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      derivedFromStoryFactRecord({ derived_from: derivedFrom }),
+      derivedFromThreadRecord({ derived_from: derivedFrom }),
+      derivedFromConsequenceRecord({ derived_from: derivedFrom }),
+      derivedFromStoryDiegeticArtifactRecord({ derived_from: derivedFrom })
+    ])
+  );
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects dead INV references in STCHAR-free story derived_from schemas", async () => {
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      derivedFromStoryFactRecord({ derived_from: ["INV-1"] }),
+      derivedFromThreadRecord({ derived_from: ["INV-1"] }),
+      derivedFromConsequenceRecord({ derived_from: ["INV-1"] }),
+      derivedFromStoryDiegeticArtifactRecord({ derived_from: ["INV-1"] })
+    ])
+  );
+
+  for (const nodeId of ["test-story:SF-1", "test-story:THR-1", "test-story:CNSQ-1", "test-story:DA-1"]) {
+    assert.ok(
+      result.some(
+        (verdict) =>
+          verdict.location.node_id === nodeId &&
+          verdict.code === "record_schema_compliance.pattern" &&
+          verdict.message.includes("/derived_from/0")
+      ),
+      JSON.stringify({ nodeId, result })
+    );
+  }
+});
+
 test("record_schema_compliance rejects removed affected_cf_ids alias on change logs", async () => {
   const result = await recordSchemaCompliance.run(
     {},
@@ -1132,5 +1172,66 @@ function validCharacterProposalBatch(): Record<string, unknown> {
     dropped_card_ids: [],
     user_approved: false,
     notes: "No batch-level repairs."
+  };
+}
+
+function derivedFromStoryFactRecord(overrides: Record<string, unknown> = {}) {
+  return derivedFromStoryRecord("story_fact_record", "SF-1", "facts", {
+    id: "SF-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    statement: "The gate law shapes the scene.",
+    authority: "branch_local",
+    ...overrides
+  });
+}
+
+function derivedFromThreadRecord(overrides: Record<string, unknown> = {}) {
+  return derivedFromStoryRecord("thread_record", "THR-1", "threads", {
+    id: "THR-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    status: "active",
+    title: "Gate pressure",
+    summary: "The gate law creates immediate pressure.",
+    urgency: "medium",
+    ...overrides
+  });
+}
+
+function derivedFromConsequenceRecord(overrides: Record<string, unknown> = {}) {
+  return derivedFromStoryRecord("consequence_record", "CNSQ-1", "consequences", {
+    id: "CNSQ-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    status: "pending",
+    consequence_kind: "legal_pressure",
+    description: "The law changes what the actor can risk.",
+    urgency: "medium",
+    resolves_when: "The actor resolves the legal exposure.",
+    ...overrides
+  });
+}
+
+function derivedFromStoryDiegeticArtifactRecord(overrides: Record<string, unknown> = {}) {
+  return derivedFromStoryRecord("story_diegetic_artifact_record", "DA-1", "artifacts", {
+    id: "DA-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    title: "Gate Notice",
+    author: "STENT-1",
+    genre: "notice",
+    body: "The notice repeats the governing rule.",
+    intended_audience: "public",
+    circulation: "public",
+    truth_relation: "true",
+    ...overrides
+  });
+}
+
+function derivedFromStoryRecord(nodeType: string, id: string, sourceDir: string, parsed: Record<string, unknown>) {
+  return {
+    ...record(nodeType, `test-story:${id}`, `stories/test-story/_source/${sourceDir}/${id}.yaml`, parsed),
+    story_slug: "test-story"
   };
 }

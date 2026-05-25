@@ -309,7 +309,7 @@ test("SPEC-02 capstone: server returns stale_index when tracked source files dri
   }
 });
 
-test("SPEC-02 capstone: server returns index_version_mismatch when the sidecar version drifts", async () => {
+test("SPEC-02 capstone: server returns recovery details when version rebuild cannot run", async () => {
   const root = createSpec02FixtureRoot();
   buildVersionMismatchFixture(root, "skewed-world");
 
@@ -324,7 +324,13 @@ test("SPEC-02 capstone: server returns index_version_mismatch when the sidecar v
       });
 
       assert.equal(result.isError, true);
-      assert.equal((result.structuredContent as { code: string }).code, "index_version_mismatch");
+      const structured = result.structuredContent as {
+        code: string;
+        details?: { recovery_attempted?: string; recovery_outcome?: string };
+      };
+      assert.equal(structured.code, "index_version_mismatch");
+      assert.equal(structured.details?.recovery_attempted, "build");
+      assert.equal(structured.details?.recovery_outcome, "build_failed");
     });
   } finally {
     destroyTempRepoRoot(root);

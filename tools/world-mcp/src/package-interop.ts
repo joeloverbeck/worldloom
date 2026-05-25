@@ -2,6 +2,7 @@ import { createRequire } from "node:module";
 
 import type * as PatchEngineModule from "@worldloom/patch-engine";
 import type * as ValidatorsModule from "@worldloom/validators";
+import type * as WorldIndexBuildModule from "@worldloom/world-index/commands/build";
 import type * as WorldIndexSyncModule from "@worldloom/world-index/commands/sync";
 import type * as WorldIndexHashModule from "@worldloom/world-index/hash/content";
 import type * as WorldIndexOpenModule from "@worldloom/world-index/index/open";
@@ -16,6 +17,7 @@ function loadPackage<T>(specifier: string): T {
 
 const patchEngine = loadPackage<typeof PatchEngineModule>("@worldloom/patch-engine");
 const validators = loadPackage<typeof ValidatorsModule>("@worldloom/validators");
+const worldIndexBuild = loadPackage<typeof WorldIndexBuildModule>("@worldloom/world-index/commands/build");
 const worldIndexSync = loadPackage<typeof WorldIndexSyncModule>("@worldloom/world-index/commands/sync");
 const worldIndexHash = loadPackage<typeof WorldIndexHashModule>("@worldloom/world-index/hash/content");
 const worldIndexOpen = loadPackage<typeof WorldIndexOpenModule>("@worldloom/world-index/index/open");
@@ -34,6 +36,7 @@ export const validatePatchPlan = validators.validatePatchPlan;
 export const EPISTEMIC_PROFILE_REQUIRED_TYPES = validators.EPISTEMIC_PROFILE_REQUIRED_TYPES;
 export const EXCEPTION_GOVERNANCE_REQUIRED_TYPES = validators.EXCEPTION_GOVERNANCE_REQUIRED_TYPES;
 
+export const buildWorldIndex = worldIndexBuild.build;
 export const syncWorldIndex = worldIndexSync.sync;
 export const computePgStateHash = worldIndexHash.computePgStateHash;
 export const computePlanHash = worldIndexHash.computePlanHash;
