@@ -529,6 +529,29 @@ test("validatePatchPlan runs CLK validators over same-envelope pressure clock re
   });
 });
 
+test("validatePatchPlan runs STEMO agency-effect compatibility over same-envelope downstream grounding", async () => {
+  await withTempRoot(async () => {
+    seedStemoAgencyBaseRecords();
+    const ungrounded = await validatePatchPlan(stemoAgencyPlan());
+    assert.ok(ungrounded.verdicts.some((verdict) => verdict.code === "stemo_agency_effect_compatibility.unexplained_constraining_effect"));
+
+    const grounded = await validatePatchPlan({
+      ...stemoAgencyPlan(),
+      plan_id: "stemo-agency-grounded-001",
+      patches: [
+        ...stemoAgencyPlan().patches,
+        storyPatch("create_chc_record", "choices", {
+          id: "CHC-1",
+          story_id: "STORY-1",
+          created_at_page: "PG-1",
+          grounded_in: { records: ["STEMO-1"], affordance_ordinals: [] }
+        })
+      ]
+    } as unknown as PatchPlanEnvelope);
+    assert.ok(!grounded.verdicts.some((verdict) => verdict.code === "stemo_agency_effect_compatibility.unexplained_constraining_effect"));
+  });
+});
+
 test("validatePatchPlan rejects story-state patch plans that target existing files", async () => {
   await withTempRoot(async () => {
     seedIndexedStoryRecord("CLK-2", "pressure_clock_record", "clocks", {
@@ -1207,4 +1230,83 @@ function seedIndexedStoryRecord(
   } finally {
     db.close();
   }
+}
+
+function seedStemoAgencyBaseRecords(): void {
+  seedIndexedStoryRecord("PG-1", "page_record", "pages", {
+    id: "PG-1",
+    story_id: "STORY-1",
+    parent_page_id: null,
+    branch_path: ["PG-1"],
+    state_snapshot: {
+      active_records: {
+        STENT: ["STENT-1"],
+        STSTAT: ["STSTAT-1"],
+        BEL: ["BEL-1"],
+        SE: ["SE-1"]
+      }
+    }
+  });
+  seedIndexedStoryRecord("STENT-1", "story_entity_record", "entities", {
+    id: "STENT-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    display_name: "Holder",
+    bound_stchar_id: null,
+    role_in_story: ["primary_actor"]
+  });
+  seedIndexedStoryRecord("STSTAT-1", "story_status_record", "status", {
+    id: "STSTAT-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    entity: "STENT-1",
+    life: "alive",
+    agency: "free",
+    location: null
+  });
+  seedIndexedStoryRecord("BEL-1", "belief_record", "beliefs", {
+    id: "BEL-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    holder: "STENT-1",
+    basis: { access_records: ["STENT-1"] }
+  });
+  seedIndexedStoryRecord("SE-1", "story_event_record", "events", {
+    id: "SE-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    world_logic_rationale: "The opening event creates the affective pressure.",
+    state_delta: { create: [], supersede: [], close: [] }
+  });
+}
+
+function stemoAgencyPlan(): PatchPlanEnvelope {
+  return {
+    plan_id: "stemo-agency-ungrounded-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-turn-cycle",
+    expected_id_allocations: {},
+    patches: [
+      storyPatch("create_stemo_record", "emotions", {
+        id: "STEMO-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1",
+        created_by_event: "SE-1",
+        supersedes: null,
+        holder: "STENT-1",
+        status: "active",
+        affect_kind: "fear",
+        intensity: "high",
+        orientation: { toward_records: [] },
+        appraisal_basis: ["BEL-1"],
+        trigger_event: "SE-1",
+        behavioral_pressure: ["flee"],
+        agency_effect: "constraining",
+        expires_when: "The threat is resolved.",
+        derived_from: []
+      })
+    ]
+  } as unknown as PatchPlanEnvelope;
 }

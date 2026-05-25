@@ -1,5 +1,5 @@
 import type { Verdict } from "../framework/types.js";
-import { defineStemoValidator, emotionField, emotionId, fail, hasTransitionEvent, isActiveAtEmotionPage, resolveRecord, statusRequiresTransitionEvent } from "./stemo-utils.js";
+import { defineStemoValidator, emotionField, emotionId, fail, hasTransitionEvent, isActiveBeforeEmotionPage, resolveRecord, statusRequiresTransitionEvent } from "./stemo-utils.js";
 
 const VALIDATOR = "stemo_supersession_lifecycle_valid";
 
@@ -7,8 +7,12 @@ export const stemoSupersessionLifecycleValid = defineStemoValidator(VALIDATOR, (
   const verdicts: Verdict[] = [];
   const seen = new Set([emotionId(emotion)]);
   let cursor = emotionField(emotion, "supersedes");
-  if (cursor !== undefined && !isActiveAtEmotionPage(emotion, cursor, maps)) {
-    verdicts.push(fail(emotion, VALIDATOR, "stemo_supersession_lifecycle_valid.prior_not_active", `supersedes target ${cursor} must be active at created_at_page.`));
+  // The prior must be active in the snapshot IMMEDIATELY BEFORE this emotion's
+  // created_at_page — i.e., in the parent page's active_records. The same-page
+  // check would conflict with snapshot_replay_equality, which lawfully drops the
+  // prior from the new page's active_records via state_delta.supersede.
+  if (cursor !== undefined && !isActiveBeforeEmotionPage(emotion, cursor, maps)) {
+    verdicts.push(fail(emotion, VALIDATOR, "stemo_supersession_lifecycle_valid.prior_not_active", `supersedes target ${cursor} must be active in the snapshot immediately before created_at_page (parent page's active_records).`));
   }
   while (cursor !== undefined) {
     if (seen.has(cursor)) {
