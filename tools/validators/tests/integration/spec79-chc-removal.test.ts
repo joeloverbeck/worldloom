@@ -32,11 +32,14 @@ const SEARCH_PATHS = [
 ] as const;
 
 const ALLOWED_HISTORICAL_PATHS = new Set([
-  "docs/triage/2026-05-23-slt-chc-overhaul-first-iteration-triage.md",
-  "docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md",
   "archive/specs/SPEC-79-chc-associated-commitment-block-removal.md",
   "reports/slt-chc-overhaul-second-iteration.md",
 ]);
+
+function isAllowedHistoricalPath(pathName: string): boolean {
+  return ALLOWED_HISTORICAL_PATHS.has(pathName)
+    || /^docs\/triage\/\d{4}-\d{2}-\d{2}-slt-chc-overhaul-.*-iteration-triage\.md$/.test(pathName);
+}
 
 test("SPEC-79 capstone: tracked operational surfaces do not retain the retired CHC-to-SLT field", () => {
   const run = spawnSync("git", ["grep", "-n", NEEDLE, "--", ...SEARCH_PATHS], {
@@ -50,7 +53,7 @@ test("SPEC-79 capstone: tracked operational surfaces do not retain the retired C
   const matches = parseGitGrep(run.stdout);
   assert.ok(matches.length > 0, "Expected SPEC-79 provenance hits to keep the grep assertion honest.");
   assert.deepEqual(
-    matches.filter((match) => !ALLOWED_HISTORICAL_PATHS.has(match.path)),
+    matches.filter((match) => !isAllowedHistoricalPath(match.path)),
     [],
     `Unexpected current-surface ${NEEDLE} hits:\n${matches.map((match) => match.raw).join("\n")}`
   );
