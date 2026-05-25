@@ -1,0 +1,169 @@
+{
+  "world_slug": "offstage-bridge-sabotage-world",
+  "story_slug": "offstage-bridge-sabotage",
+  "records": [
+    {
+      "node_type": "page_record",
+      "node_id": "offstage-bridge-sabotage:PG-1",
+      "file_path": "stories/offstage-bridge-sabotage/_source/pages/PG-1.yaml",
+      "parsed": {
+        "id": "PG-1",
+        "story_id": "STORY-85",
+        "state_snapshot": {
+          "active_records": {
+            "STPLAN": ["STPLAN-1"],
+            "DA": ["DA-1"],
+            "BEL": ["BEL-1"]
+          }
+        }
+      }
+    },
+    {
+      "node_type": "page_record",
+      "node_id": "offstage-bridge-sabotage:PG-2",
+      "file_path": "stories/offstage-bridge-sabotage/_source/pages/PG-2.yaml",
+      "parsed": {
+        "id": "PG-2",
+        "story_id": "STORY-85",
+        "input": {
+          "resolved_event_id": "SE-1"
+        },
+        "state_snapshot": {
+          "active_records": {
+            "STPLAN": ["STPLAN-1"],
+            "DA": ["DA-1"],
+            "BEL": ["BEL-1"],
+            "CHC": ["CHC-1"]
+          }
+        }
+      }
+    },
+    {
+      "node_type": "story_plan_record",
+      "node_id": "offstage-bridge-sabotage:STPLAN-1",
+      "file_path": "stories/offstage-bridge-sabotage/_source/plans/STPLAN-1.yaml",
+      "parsed": {
+        "id": "STPLAN-1",
+        "story_id": "STORY-85",
+        "holder": "STENT-2",
+        "plan_status": "active",
+        "current_step": {
+          "summary": "Cut the bridge stays before the player reaches the ravine crossing."
+        },
+        "scope": {
+          "visibility": "offstage"
+        }
+      }
+    },
+    {
+      "node_type": "story_artifact_record",
+      "node_id": "offstage-bridge-sabotage:DA-1",
+      "file_path": "stories/offstage-bridge-sabotage/_source/artifacts/DA-1.yaml",
+      "parsed": {
+        "id": "DA-1",
+        "story_id": "STORY-85",
+        "created_at_page": "PG-1",
+        "surface": "Mason's bridge-collapse report",
+        "derived_from": ["STPLAN-1"],
+        "player_visible_summary": "A mud-spattered mason reports fresh saw marks and a collapsed span."
+      }
+    },
+    {
+      "node_type": "belief_record",
+      "node_id": "offstage-bridge-sabotage:BEL-1",
+      "file_path": "stories/offstage-bridge-sabotage/_source/beliefs/BEL-1.yaml",
+      "parsed": {
+        "id": "BEL-1",
+        "story_id": "STORY-85",
+        "holder": "STENT-1",
+        "belief_mode": "reported",
+        "truth_relation": "true",
+        "confidence": "medium",
+        "visibility": "shared",
+        "basis": {
+          "source_event": "SE-0",
+          "access_route": "witness_report",
+          "access_records": ["STPLAN-1", "DA-1"]
+        },
+        "consequences": {
+          "opens": ["CHC-1"],
+          "constrains_choices": []
+        }
+      }
+    },
+    {
+      "node_type": "story_event_record",
+      "node_id": "offstage-bridge-sabotage:SE-1",
+      "file_path": "stories/offstage-bridge-sabotage/_source/events/SE-1.yaml",
+      "parsed": {
+        "id": "SE-1",
+        "story_id": "STORY-85",
+        "created_at_page": "PG-2",
+        "parent_page_id": "PG-1",
+        "event_kind": "turn_resolution",
+        "actor": "STENT-1",
+        "world_logic_rationale": "The enemy's offstage sabotage resolves into a visible bridge-collapse report before the player reaches the crossing.",
+        "commitment": {
+          "selected_slt_id": "SLT-bridge-collapse-report",
+          "selection_source": "offstage_action",
+          "alias_bindings": {
+            "sabotaged_bridge": "DA-1"
+          }
+        },
+        "turn_driver": {
+          "kind": "offstage_action",
+          "initiator": "STENT-2",
+          "driver_records": ["STPLAN-1", "DA-1"],
+          "player_response_mode": "responds",
+          "pov_visibility": "reported"
+        },
+        "state_delta": {
+          "create": ["CHC-1"],
+          "supersede": [],
+          "close": []
+        }
+      }
+    },
+    {
+      "node_type": "storylet_record",
+      "node_id": "offstage-bridge-sabotage:SLT-bridge-collapse-report",
+      "file_path": "stories/offstage-bridge-sabotage/_source/storylets/SLT-bridge-collapse-report.yaml",
+      "parsed": {
+        "id": "SLT-bridge-collapse-report",
+        "story_id": "STORY-85",
+        "compatible_turn_drivers": ["offstage_action"],
+        "reason_to_exist": "Resolve the offstage sabotage plan into a player-visible witness report about the bridge collapse.",
+        "effects": [
+          {
+            "kind": "bound",
+            "target": "bridge_destroyed",
+            "grounded_in": ["STPLAN-1", "DA-1"]
+          }
+        ]
+      }
+    },
+    {
+      "node_type": "choice_record",
+      "node_id": "offstage-bridge-sabotage:CHC-1",
+      "file_path": "stories/offstage-bridge-sabotage/_source/choices/CHC-1.yaml",
+      "parsed": {
+        "id": "CHC-1",
+        "story_id": "STORY-85",
+        "created_at_page": "PG-2",
+        "surface_label": "Question the mason about the saw marks.",
+        "player_visible_intent": "Respond to the bridge collapse through the witness report rather than direct knowledge of the saboteur.",
+        "target_or_action_families": ["investigate", "social"],
+        "likely_state_pressure": "The reported sabotage forces an immediate investigation before the trail goes cold.",
+        "grounded_in": {
+          "records": ["DA-1"]
+        }
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "stories/offstage-bridge-sabotage/pages-prose-plans/PG-2.md",
+      "content": "## 7a. Turn driver / initiative trace\n\n- Driver kind: offstage_action\n- Initiator: STENT-2\n- Driver records: STPLAN-1, DA-1\n- Player response mode: responds\n- POV visibility: reported\n- Observer-firewall note: The player receives DA-1 as a witness report and BEL-1 grants access to the offstage STPLAN-1 only through that report; no hidden actor interiority is narrated.\n\nActive-pressure disposition\n\n| Record | Disposition | Reason / expiry |\n|---|---|---|\n| STPLAN-1 | selected | offstage bridge sabotage resolves into the reported collapse |\n\n## 16a. STCHAR-derived character authority packets\n\n- No STCHAR packet required; the driver is an offstage plan surfaced by DA-1 evidence.\n"
+    }
+  ]
+}
