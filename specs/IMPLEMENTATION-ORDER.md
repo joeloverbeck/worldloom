@@ -4,20 +4,25 @@
 **Status:** active
 **Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) triaged at [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md).
 
-This file sequences the live specs under `specs/`. Each row records the spec, the change shape, dependency, and gating risk. Once a spec ships, its row is archived alongside the spec file at `archive/specs/IMPLEMENTATION-ORDER-<date>.md`.
+This file sequences the live specs under `specs/`. Each row records the spec, the change shape, dependency, and gating risk. Completed rows are moved to the shipped section with archived paths while the remaining active specs continue here.
 
 ## Active sequence
 
 | Order | Spec | Shape | Depends on | Gating risk |
 |---|---|---|---|---|
-| 1 | [SPEC-83 — SLT Cooldown Window Correctness](SPEC-83-slt-cooldown-window-correctness.md) | bug fix + diagnostic extension in `tools/world-mcp/` | none | small blast radius; isolated to one MCP tool + its tests. |
-| 2 | [SPEC-84 — Replay/Fork and Branch-Scope Golden Fixtures](SPEC-84-replay-and-branch-scope-fixtures.md) | new fixture + integration tests; test-only | none structurally; benefits from SPEC-83 landing first so the cooldown bug doesn't perturb the fixture's filter_trace assertions | moderate fixture-authoring effort; no source code change. |
-| 3 | [SPEC-85 — Non-Player Driver Golden Fixtures](SPEC-85-non-player-driver-golden-fixtures.md) | four new fixtures + four integration tests; test-only | none structurally | largest fixture-authoring effort (four bundles + four test files); no source code change. |
+| 1 | [SPEC-84 — Replay/Fork and Branch-Scope Golden Fixtures](SPEC-84-replay-and-branch-scope-fixtures.md) | new fixture + integration tests; test-only | none structurally; benefits from archived SPEC-83's landed cooldown fix so the cooldown bug does not perturb the fixture's filter_trace assertions | moderate fixture-authoring effort; no source code change. |
+| 2 | [SPEC-85 — Non-Player Driver Golden Fixtures](SPEC-85-non-player-driver-golden-fixtures.md) | four new fixtures + four integration tests; test-only | none structurally | largest fixture-authoring effort (four bundles + four test files); no source code change. |
+
+## Shipped in this sequence
+
+| Spec | Ticket | Result |
+|---|---|---|
+| [SPEC-83 — SLT Cooldown Window Correctness](../archive/specs/SPEC-83-slt-cooldown-window-correctness.md) | [SPEC83SLTCOOWIN-001](../archive/tickets/SPEC83SLTCOOWIN-001.md) | Completed 2026-05-25; fixed numeric cooldown windows, branch-isolated prior-selection lookup, and additive `filter_trace.cooldown_active_samples` diagnostics in `tools/world-mcp/`. |
 
 ## Dependency rationale
 
-- **SPEC-83 ships first** because it is the only behavioral bug fix in the iteration. Its blast radius is contained to `select-storylet-candidates.ts` and its tests. Landing it before the new fixtures means SPEC-84 and SPEC-85 fixtures can rely on correct cooldown semantics without working around the bug.
-- **SPEC-84 sequences before SPEC-85** because the replay/branch-scope fixture is smaller (one bundle, one test file) and exercises the same MCP retrieval surface SPEC-83 touches; landing it second confirms SPEC-83's filter_trace shape is stable before the larger non-player-driver fixture suite consumes it. There is no hard dependency — SPEC-84 and SPEC-85 could swap order without breaking either.
+- **SPEC-83 shipped first** because it was the only behavioral bug fix in the iteration. Its blast radius was contained to `select-storylet-candidates.ts`, the embedded context-packet trace type, and tests. SPEC-84 and SPEC-85 fixtures can now rely on correct cooldown semantics without working around the bug.
+- **SPEC-84 sequences before SPEC-85** because the replay/branch-scope fixture is smaller (one bundle, one test file) and exercises the same MCP retrieval surface SPEC-83 touched; landing it second confirms SPEC-83's filter_trace shape is stable before the larger non-player-driver fixture suite consumes it. There is no hard dependency — SPEC-84 and SPEC-85 could swap order without breaking either.
 - **SPEC-85 is the largest piece** of fixture authoring in this iteration (four bundles + four integration tests, each mirroring the Red Kiln Ambush pattern). It ships last so the smaller specs are not blocked behind it.
 
 ## Out of scope for this implementation pass
@@ -26,7 +31,7 @@ The items below were considered during iteration-3 triage and **rejected, deferr
 
 ### Folded into SPEC-83
 
-- **Report SPEC-87 — Candidate filter trace diagnostics** (cooldown-specific portion). The `filter_trace.cooldown_active_samples` extension lands as part of SPEC-83 §4.2. The broader §7a-prose-extension portion of report SPEC-87 is deferred (see below).
+- **Report SPEC-87 — Candidate filter trace diagnostics** (cooldown-specific portion). The `filter_trace.cooldown_active_samples` extension landed as part of archived SPEC-83 §4.2. The broader §7a-prose-extension portion of report SPEC-87 is deferred (see below).
 
 ### Combined into SPEC-84
 

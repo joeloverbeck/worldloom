@@ -7,7 +7,7 @@
 - [`docs/triage/2026-05-24-slt-chc-overhaul-second-iteration-triage.md`](2026-05-24-slt-chc-overhaul-second-iteration-triage.md); iteration-2 deliverables [`archive/specs/SPEC-79-chc-associated-commitment-block-removal.md`](../../archive/specs/SPEC-79-chc-associated-commitment-block-removal.md), [`archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md`](../../archive/specs/SPEC-80-storylet-pool-driver-kind-pressure-source-coverage.md), [`archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md`](../../archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md), [`archive/specs/SPEC-82-remaining-schema-drift-repairs.md`](../../archive/specs/SPEC-82-remaining-schema-drift-repairs.md), all archived 2026-05-24 / 2026-05-25.
 **Trigger:** User-supplied request: "Please analyze carefully reports/slt-chc-overhaul-third-iteration.md . It was produced by ChatGPT-Pro after the second iteration made significant structural changes. I need you to be critical of ChatGPT-Pro's report: reassess for correctness and benefit. If changes aligned with docs/FOUNDATIONS.md are warranted, create specs in specs/* with the specifications. If more than one spec is created, create specs/IMPLEMENTATION-ORDER.md"
 **Deliverables produced:**
-- [`specs/SPEC-83-slt-cooldown-window-correctness.md`](../../specs/SPEC-83-slt-cooldown-window-correctness.md)
+- [`archive/specs/SPEC-83-slt-cooldown-window-correctness.md`](../../archive/specs/SPEC-83-slt-cooldown-window-correctness.md)
 - [`specs/SPEC-84-replay-and-branch-scope-fixtures.md`](../../specs/SPEC-84-replay-and-branch-scope-fixtures.md)
 - [`specs/SPEC-85-non-player-driver-golden-fixtures.md`](../../specs/SPEC-85-non-player-driver-golden-fixtures.md)
 - [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md)
@@ -69,7 +69,7 @@ Iteration 3 makes ~25-30 codebase claims. The verification pass below condenses 
 #### SPEC-83 (Cooldown window correctness) — verified bug
 
 **Verdict:** accept.
-**Lands in:** [`specs/SPEC-83-slt-cooldown-window-correctness.md`](../../specs/SPEC-83-slt-cooldown-window-correctness.md).
+**Landed in:** [`archive/specs/SPEC-83-slt-cooldown-window-correctness.md`](../../archive/specs/SPEC-83-slt-cooldown-window-correctness.md).
 **Ground:** Verified bug at `tools/world-mcp/src/tools/select-storylet-candidates.ts:439-446`. The fix is small (one function rewrite + one helper update + interface extension), single-file, well-covered by new + existing tests. Aligns with FOUNDATIONS §Story Bundles §5b (schema-minimalism — no schema change), Rule 4 at story scope (branch isolation), Rule 5 at story scope (consequence capacity restored). The fold-in of report SPEC-87's `cooldown_active_samples` diagnostic is small and sits on the response contract, not on persisted records.
 
 #### SPEC-84 (Replay/fork + branch-scope golden fixtures) — combined

@@ -4,7 +4,7 @@
 **Date:** 2026-05-25
 **Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) §17 SPEC-84 (replay live global pool) + §17 SPEC-85 (branch-scope exclusion). Combined here because both prove replay-time SLT visibility correctness across scope dimensions.
 **Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md) §ACCEPT (assumption A — combined).
-**Predecessors:** archived [`SPEC-79-chc-associated-commitment-block-removal.md`](../archive/specs/SPEC-79-chc-associated-commitment-block-removal.md) (made the live-global-pool semantics structural by removing CHC→SLT pinning); archived [`SPEC-81-indexed-storylet-candidate-retrieval.md`](../archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md) (proves branch-scope filtering at the projection layer with 9 synthetic rows, no replay context).
+**Predecessors:** archived [`SPEC-79-chc-associated-commitment-block-removal.md`](../archive/specs/SPEC-79-chc-associated-commitment-block-removal.md) (made the live-global-pool semantics structural by removing CHC→SLT pinning); archived [`SPEC-81-indexed-storylet-candidate-retrieval.md`](../archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md) (proves branch-scope filtering at the projection layer with 9 synthetic rows, no replay context); archived [`SPEC-83-slt-cooldown-window-correctness.md`](../archive/specs/SPEC-83-slt-cooldown-window-correctness.md) (fixes branch-restricted cooldown scanning before this fixture family relies on stable `filter_trace` semantics).
 
 ## 1. Problem
 
@@ -35,7 +35,7 @@ Author one new compact authored bundle and three integration tests covering:
 - New schema fields, new MCP tools, new validators.
 - New skill prose (turn-cycle Phase 2 already prescribes `select_storylet_candidates`; bootstrap already prescribes the null-default for absent SLT pinning post-SPEC-79).
 - A "replay policy" record class or carrier (rejected per iteration-2 IMPLEMENTATION-ORDER §Out-of-Scope; the policy is the implementation, not a persisted artifact).
-- Cooldown semantics across replay (covered by SPEC-83's branch-restricted cooldown scan).
+- Cooldown semantics across replay (covered by archived SPEC-83's branch-restricted cooldown scan).
 - Authored large-pool fixtures (deferred per triage §DEFER on report SPEC-89; the synthetic SPEC-81 proof + this spec's small authored fixture are sufficient).
 
 ## 4. Design

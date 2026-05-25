@@ -1,10 +1,10 @@
 # SPEC-83: SLT Cooldown Window Correctness
 
-**Status:** active
+**Status:** completed
 **Date:** 2026-05-25
-**Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) §6 "Repo-specific bugs or mismatches found" and §17 SPEC-83.
-**Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md) §ACCEPT.
-**Predecessors:** archived [`SPEC-81-indexed-storylet-candidate-retrieval.md`](../archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md) (introduced `select_storylet_candidates` and `slt_projections.slt_saliency_cooldown_pages`).
+**Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../../reports/slt-chc-overhaul-third-iteration.md) §6 "Repo-specific bugs or mismatches found" and §17 SPEC-83.
+**Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md) §ACCEPT.
+**Predecessors:** archived [`SPEC-81-indexed-storylet-candidate-retrieval.md`](SPEC-81-indexed-storylet-candidate-retrieval.md) (introduced `select_storylet_candidates` and `slt_projections.slt_saliency_cooldown_pages`).
 
 ## 1. Problem
 
@@ -42,9 +42,9 @@ The `filter_trace.after_cooldown` counter is emitted, but no per-SLT rejection s
 
 ## 3. Non-goals
 
-- Persistent cooldown trace records (rejected — see [`archive/specs/IMPLEMENTATION-ORDER-2026-05-25-2.md`](../archive/specs/IMPLEMENTATION-ORDER-2026-05-25-2.md) §Out-of-Scope SSEL rejection at line 27, and the third-iteration report itself §7 Alternative C rejection).
+- Persistent cooldown trace records (rejected — see [`archive/specs/IMPLEMENTATION-ORDER-2026-05-25-2.md`](IMPLEMENTATION-ORDER-2026-05-25-2.md) §Out-of-Scope SSEL rejection at line 27, and the third-iteration report itself §7 Alternative C rejection).
 - Schema changes to `SE.commitment` or `PG.state_snapshot` (the existing `SE.created_at_page` + `PG.branch_path` schema fields carry the necessary info — both already required per `tools/validators/src/schemas/story-event.schema.json` and `tools/validators/src/schemas/story-page.schema.json`).
-- Page-plan §7a candidate-filter summary lines (folds out to the triage's DEFER bucket — see [triage](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md) §DEFER on report SPEC-87; no consumer beyond the per-call `filter_trace`).
+- Page-plan §7a candidate-filter summary lines (folds out to the triage's DEFER bucket — see [triage](../../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md) §DEFER on report SPEC-87; no consumer beyond the per-call `filter_trace`).
 - Server-side full predicate evaluation (out of scope; iteration-2 §Out-of-Scope holds).
 - Cooldown semantics for branch-prefix-scoped or branch-scoped SLTs (their visibility filter already isolates them — the cooldown fix applies uniformly to all surviving candidates after `matchesScope`).
 
@@ -145,3 +145,29 @@ Run on a worktree containing the fix:
 2. **Unit (regression)**: `pnpm --filter world-mcp test -- select-storylet-candidates.test` — existing cooldown assertions continue to pass with the updated `filter_trace` shape and the updated SE-1 fixture. *(rationale: SPEC-81's existing coverage must not regress)*
 3. **Integration**: `pnpm --filter world-mcp test -- spec81-storylet-candidate-retrieval` — 1,000-SLT synthetic pool behavior preserved after SE-1 / SE-2 fixture updates. *(rationale: SPEC-81's scaling proof must remain intact)*
 4. **Lint + typecheck**: `pnpm turbo lint typecheck` — clean. *(rationale: pre-completion verification per global CLAUDE.md)*
+
+## Outcome
+
+Completed: 2026-05-25
+
+Implemented by archived ticket [`SPEC83SLTCOOWIN-001`](../tickets/SPEC83SLTCOOWIN-001.md).
+
+What changed:
+
+- `tools/world-mcp/src/tools/select-storylet-candidates.ts` now scopes prior SLT selections to events whose `SE.created_at_page` appears on the parent page's `branch_path`, removing the previous global scan.
+- Cooldown eligibility now compares branch-path distance against `slt_saliency_cooldown_pages` instead of treating any prior selection as a permanent block.
+- `SelectStoryletCandidatesResponse.filter_trace` now includes additive `cooldown_active_samples` diagnostics with `slt_id`, `last_selected_on_page`, `distance`, and `cooldown_pages`.
+- `tools/world-mcp/src/context-packet/shared.ts` now mirrors the additive selection-shortlist trace shape used by `get_context_packet`.
+- New and existing world-mcp tests cover numeric-window expiry, in-window blocking, sibling-branch isolation, shared-ancestor fork isolation, zero/null cooldown bypass, and SPEC-81 regression counts.
+
+Verification:
+
+- `(workdir tools/world-mcp) node --test dist/tests/tools/select-storylet-candidates-cooldown-window.test.js` — 5 tests passed.
+- `(workdir tools/world-mcp) node --test dist/tests/tools/select-storylet-candidates.test.js` — 2 tests passed.
+- `(workdir tools/world-mcp) node --test dist/tests/integration/spec81-storylet-candidate-retrieval.test.js` — 4 tests passed after correcting the expected diagnostic sample order to lexical candidate iteration order.
+- `(workdir tools/world-mcp) npm test` — full package suite passed: 447 tests, 0 failures.
+
+Deviations:
+
+- `tools/world-mcp/src/context-packet/shared.ts` was added to the landed file set as same-seam type propagation for the additive trace shape.
+- The originally drafted `pnpm turbo lint typecheck test` lane was replaced with the repo-local `tools/world-mcp` build and test scripts; this package has no lint script or root turbo workspace lane.
