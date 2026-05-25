@@ -23,7 +23,7 @@ function staleIndexError(worldSlug = "seeded"): McpError {
     message: "World index is stale.",
     details: {
       world_slug: worldSlug,
-      drifted_files: ["_source/entities/ENT-0002.yaml"],
+      drifted_files: ["_source/entities/ENT-2.yaml"],
       remedy: "run world-index sync"
     }
   };
@@ -96,7 +96,7 @@ test("withIndexFreshnessGuard syncs and retries once for recoverable stale_index
 
     const audited = result as HandlerResponse & FreshnessAuditedResponse;
     assert.deepEqual(audited.freshness_audit.drifted_files_synced, [
-      "_source/entities/ENT-0002.yaml"
+      "_source/entities/ENT-2.yaml"
     ]);
     assert.equal(audited.freshness_audit.pre_call_index_was_stale, true);
     assert.equal(Number.isInteger(audited.freshness_audit.sync_duration_ms), true);
@@ -216,7 +216,7 @@ test("withIndexFreshnessGuard can annotate version rebuild and stale sync on one
     assert.equal(audited.freshness_audit.index_version_rebuilt_to, "7");
     assert.equal(audited.freshness_audit.pre_call_index_was_stale, true);
     assert.deepEqual(audited.freshness_audit.drifted_files_synced, [
-      "_source/entities/ENT-0002.yaml"
+      "_source/entities/ENT-2.yaml"
     ]);
     assert.equal(Number.isInteger(audited.freshness_audit.build_duration_ms), true);
     assert.equal(Number.isInteger(audited.freshness_audit.sync_duration_ms), true);
