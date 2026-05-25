@@ -69,7 +69,7 @@ The story-skill family selects `SLT` records for a turn through a four-layer med
 
 `SLT.preconditions[].hard[]` may use `record_active(STCHAR-<integer>)` **only** when the SLT's `scope.visibility` is `branch_scoped` or `branch_prefix_scoped`. Global-author-pool SLTs (`scope.visibility: global_author_pool`) must express character relevance through:
 
-- existential predicates over current-state classes (`any_plan_active`, `any_emotion_active`, `any_relationship_axis`, `any_belief`, `affordance_available_to`, `any_obligation_active`, etc.); or
+- existential predicates over current-state classes (`any_plan_active`, `any_emotion_active`, `any_relationship_axis`, `any_belief`, `affordance_available_to`, `any_obligation_open`, etc.); or
 - role-keyed predicates referencing `holder_role: primary_actor` / `holder_role: relevant_actor` plus a current-state class; or
 - driver-record overlap (`SE.turn_driver.driver_records[]` is the universal current-state hook that crosses driver kinds).
 

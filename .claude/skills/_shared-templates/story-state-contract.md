@@ -616,9 +616,55 @@ Story-local resolution-like claims are classified into four authority levels:
 
 Mysteries with `status: forbidden` are never resolved by any authority level. Mysteries with `status: active | passive` may be resolved per the `future_resolution_safety` coupling in FOUNDATIONS §Canon Layers.
 
+## 11a. Character-Fit Selection Contract
+
+The story-skill family selects `SLT` records for a turn through a four-layer mediation model anchored on the durable / current-state separation between `STCHAR` and the temporal record classes (`STPLAN`, `STEMO`, `BEL`, `SREL`, `STINT`, `STSTAT`, `OBL`, `CNSQ`, `THR`, `CLK`, `STSEC`, `STQ`, `DA`, `STOBJ`, `STLOC`). This section codifies the contract; per-phase mechanics live in each skill.
+
+### Four-layer mediation model
+
+1. **Stable constraint layer (STCHAR).** A character's stable persona core, emotional appraisal map, pressure behavior, voice bible, perception/embodiment, agency/planning tendencies, relationship-specific behavior, capability/limit, and refusal patterns are durable authority. They do not change page-to-page; they shape *how* current state arises and is surfaced.
+
+2. **Current-state derivation layer (`STPLAN` / `STEMO` / `BEL` / `SREL` / `STINT` / `STSTAT` / `OBL` / `CNSQ` / `THR` / `CLK` / `STSEC` / `STQ` / `DA` / `STOBJ` / `STLOC`).** Active records on the parent PG snapshot are the *operational surface* through which character specificity enters selection. STCHAR explains *why* a plan is blocked, *why* an emotion arose, *why* a relationship is fragile; the current records carry *that it is so right now*.
+
+3. **Eligibility / ranking layer (`SLT` predicates + MCP filter pipeline).** Symbolic legality is decided by the predicate DSL against active records (see §5). Character specificity enters here as **predicate / edge overlap with current state**, not as direct STCHAR predicates in the global pool.
+
+4. **Rendering / surface layer (page plan §16a + `CHC` wording).** The character-specific surface — viewpoint voice, refusal phrasing, relationship pressure, stance — is expressed at page-plan compose time and CHC authoring. §16a's `required_because` vocabulary is the authoring-time discipline for STCHAR packet inclusion.
+
+### Global-pool vs branch-scoped STCHAR predicate discipline
+
+`SLT.preconditions[].hard[]` may use `record_active(STCHAR-<integer>)` **only** when the SLT's `scope.visibility` is `branch_scoped` or `branch_prefix_scoped`. Global-author-pool SLTs (`scope.visibility: global_author_pool`) must express character relevance through:
+
+- existential predicates over current-state classes (`any_plan_active`, `any_emotion_active`, `any_relationship_axis`, `any_belief`, `affordance_available_to`, `any_obligation_open`, etc.); or
+- role-keyed predicates referencing `holder_role: primary_actor` / `holder_role: relevant_actor` plus a current-state class; or
+- driver-record overlap (`SE.turn_driver.driver_records[]` is the universal current-state hook that crosses driver kinds).
+
+This is a discipline contract, not a schema contract. The predicate DSL technically accepts `record_active(STCHAR-X)` at any visibility; the discipline above is operational. The `stchar-temporal-reference-boundary` validator enforces the inverse direction (STCHAR body cannot reference temporal records); the in-direction discipline lives here.
+
+### What belongs in STCHAR
+
+Stable persona core; stable appraisal patterns; pressure behavior; voice / dialogue authority; perception / embodiment; agency / planning tendencies; capability limits and costs; relationship-specific conduct; derivation guide; prose-rendering constraints.
+
+### What belongs in current-state records
+
+Current emotion (`STEMO`); current plan (`STPLAN`); current belief / knowledge / access route (`BEL`); current relation state (`SREL`); current intention (`STINT`); current status / location / agency (`STSTAT`); current obligation / consequence / thread (`OBL` / `CNSQ` / `THR`); current clock / secret / question (`CLK` / `STSEC` / `STQ`); current artifact / object / location affordance (`DA` / `STOBJ` / `STLOC`).
+
+### CHC quality discipline (judgment-territory)
+
+A `CHC` freezes intent, stance, accessible grounding, and likely pressure direction (see §4.5.12 in `story-record-schemas.md`). It does not promise exact outcome, hidden truth, success, selected storylet, state delta, NPC inner state without access route, or canonical promotion. Where a CHC's surface depends on character-specific refusal / appetite / fear / relationship pressure / voice / plan / belief / emotion, it cites the active `STCHAR` and the active temporal record(s) that make the choice available now. The `character-grounding-consistency` validator enforces the STCHAR-citation requirement when a CHC's text indicates a persona-specific surface. Deeper judgment criteria (whether choices reveal character, whether alternatives are morally / relationally distinct, whether the menu feels like agency rather than verbs) belong to health-audit and human / LLM review, not hard schema law.
+
+### Non-player driver discipline
+
+Under non-player initiative (`npc_action`, `offstage_action`, `world_pressure`, `clock_fire`, `secret_reveal`, `multi_actor_collision`), the selected SLT represents the initiator's character-specific committed move grounded in active driver records. Emitted CHCs for the player's response side must offer agency through stance variation (oppose, protect, question, withhold, redirect, interpret, refuse, expose, conceal, stay-silent, constrained write-in) and ground in driver records when the response mode is `responds`. The `turn-cycle-output-grounding-integrity.chc_response_topical_grounding_missing` validator enforces the driver-record grounding requirement; stance-variation richness is health-audit / judgment territory.
+
+### Hard discipline vs warning vs judgment
+
+- **Hard discipline (validator-enforced)**: STCHAR body cannot store temporal state (`stchar-temporal-reference-boundary`); persona-specific CHCs must cite STCHAR (`character-grounding-consistency`); `responds`-mode CHCs must cite driver records (`turn-cycle-output-grounding-integrity`); SLT.grounding must name a reason to exist and avoid banned narrative-shape phrases (`slt-grounding-minimal-integrity`); CHC ↔ selected SLT trace closure (`chc-slt-selected-commitment-trace`); choice-set material noncollapse on the three deterministic axes (`rule_choice_set_noncollapse`).
+- **Authoring discipline (skill-prose-enforced)**: the four-layer model above; the global-vs-branch-scoped STCHAR predicate rule above; CHC quality criteria; non-player driver stance variation richness.
+- **Judgment territory (health-audit / human / LLM)**: whether a selection is dramatically alive given the active state; whether STCHAR is being operationalized through current state vs. being absorbed by current state; whether a non-player response choice set offers genuine agency vs. topical-but-passive options. The `branching-story-health-audit` structural mode's Phase 2m ("STCHAR authority health") is the current consumer site; deeper character-specificity audits live there if and when validator support lands.
+
 ## 12. How Skills Use This Contract
 
-Each story-skill `SKILL.md` references this contract for: record schemas (§4), predicate DSL (§5), action-routing semantics (§6), the nine hard gates (§7), the page plan §19-section contract plus §7a turn-driver trace (§8), branching procedure (§9), shared write order (§10), and mystery/canon authority (§11).
+Each story-skill `SKILL.md` references this contract for: record schemas (§4), predicate DSL (§5), action-routing semantics (§6), the nine hard gates (§7), the page plan §19-section contract plus §7a turn-driver trace (§8), branching procedure (§9), shared write order (§10), mystery/canon authority (§11), and the character-fit selection contract (§11a).
 
 Skills must not duplicate the contract's content. They cite it. If a skill needs a deviation, the deviation is amended into this contract first.
 

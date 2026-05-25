@@ -1,6 +1,6 @@
 # SPEC86CHAFITSEL-001: Add §11a Character-Fit Selection Contract + §12 enumeration update
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds a new section §11a to `.claude/skills/_shared-templates/story-state-contract.md` (shared by all story-pipeline skills); updates §12 first paragraph to enumerate §11a; no engine code changes; no schema / MCP / validator / fixture changes.
@@ -23,6 +23,7 @@ This ticket codifies the discipline as a new §11a Character-Fit Selection Contr
 2. **Spec reference**: SPEC-86 §4.1 (verbatim §11a body) + §4.2 (verbatim §12 first-paragraph replacement). Companion triage file at `docs/triage/2026-05-25-slt-chc-overhaul-fourth-iteration-triage.md` records the SPEC-A → SPEC-86 acceptance plus the SPEC-B/C/D/E deferrals and SPEC-F confirms-existing-position.
 3. **Cross-skill boundary**: `.claude/skills/_shared-templates/story-state-contract.md` is the shared contract template referenced by every story-pipeline skill (`story-character-profile`, `branching-story-bootstrap`, `branching-story-turn-cycle`, `commitment-block-authoring`, `branching-story-prose-attach`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, `story-promotion-closeout`). The new §11a is a contract addition with consumer surface = every story-pipeline skill that cites the shared contract. Ticket SPEC86CHAFITSEL-002 follows this one and updates 4 skill anchors to cite the new §11a.
 4. **FOUNDATIONS principle**: motivated by FOUNDATIONS §Story Bundles §6.1 (Story-Local Character Authority — STCHAR is the runtime authority; world `CHAR-*` is not consumed at story runtime), Rule 4 at story scope (branch isolation — global-vs-branch-scoped STCHAR predicate discipline prevents global-author-pool SLTs from acquiring branch-local exact-STCHAR dependencies that would silently apply across branches at replay/fork), and §Story Bundles §5b (schema-minimalism — §11a adds zero schema fields; it documents authoring and judgment discipline that the existing validators already partially enforce, without expanding the schema surface). The contract section codifies the implicit discipline as canonical text, satisfying Rule 1 (No Floating Facts) for the discipline itself by giving it scope (story-pipeline skills) / prerequisites (existing validators + record schemas) / limits (judgment territory) / consequences (drift prevention).
+5. **Predicate-name correction**: SPEC-86 §4.1's drafted existential predicate list named `any_obligation_active`, but the live closed predicate DSL names the OBL existential predicate `any_obligation_open` in `.claude/skills/_shared-templates/story-state-contract.md` and `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`. This ticket lands the live predicate name in §11a and amends SPEC-86's embedded contract text accordingly; this is a factual correction, not a behavior change.
 
 ## Architecture Check
 
@@ -52,7 +53,7 @@ Insert the §11a body verbatim from SPEC-86 §4.1 between the existing §11 Myst
 - **Non-player driver discipline**: selected SLT under non-player initiative; response CHC stance-variation; `chc_response_topical_grounding_missing` validator enforces driver-record grounding.
 - **Hard discipline / Authoring discipline / Judgment territory** three-tier classification.
 
-Use the verbatim text from SPEC-86 §4.1 (the section between the opening ` ```markdown ` fence and the closing fence). Do not modify wording during insertion. The cross-reference to story-record-schemas.md uses `§4.5.12` (per SPEC-86 reassessment fix M1), not `§4.5`. The `required_because` vocabulary is cited generically (`§16a's required_because vocabulary is the authoring-time discipline for STCHAR packet inclusion.`), not enumerated verbatim (per SPEC-86 reassessment fix M2).
+Use the text from SPEC-86 §4.1 (the section between the opening ` ```markdown ` fence and the closing fence), with the live predicate-name correction recorded in Assumption Reassessment item 5: `any_obligation_active` is corrected to `any_obligation_open`. The cross-reference to story-record-schemas.md uses `§4.5.12` (per SPEC-86 reassessment fix M1), not `§4.5`. The `required_because` vocabulary is cited generically (`§16a's required_because vocabulary is the authoring-time discipline for STCHAR packet inclusion.`), not enumerated verbatim (per SPEC-86 reassessment fix M2).
 
 ### 2. Update §12 first paragraph to enumerate §11a
 
@@ -61,6 +62,7 @@ Replace the existing first paragraph of §12 (which currently enumerates §4, §
 ## Files to Touch
 
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify)
+- `specs/SPEC-86-character-fit-selection-contract.md` (modify — same-seam factual predicate-name correction)
 
 ## Out of Scope
 
@@ -98,3 +100,25 @@ Replace the existing first paragraph of §12 (which currently enumerates §4, §
 1. `grep -nE "^## 11a" .claude/skills/_shared-templates/story-state-contract.md` (presence of new §11a header)
 2. `grep -nE "§11a" .claude/skills/_shared-templates/story-state-contract.md` (§12 enumeration update + any cross-reference)
 3. `cd tools/validators && npm test` (regression sanity check — documentation-only change should not affect validator behavior; a regression here would indicate accidental scope expansion beyond the §11a + §12 edit)
+
+## Outcome
+
+Completed: 2026-05-25
+
+- Added `## 11a. Character-Fit Selection Contract` to `.claude/skills/_shared-templates/story-state-contract.md` between §11 and §12.
+- Updated §12's first paragraph to enumerate the character-fit selection contract (§11a).
+- Amended `specs/SPEC-86-character-fit-selection-contract.md` so the embedded §11a text uses the live predicate DSL name `any_obligation_open`.
+- No schema, validator, MCP, fixture, or package source files were changed.
+
+## Verification Result
+
+- `grep -nE "^## 11a\. Character-Fit Selection Contract" .claude/skills/_shared-templates/story-state-contract.md` -> one match at line 619.
+- `grep -nE "and the character-fit selection contract \(§11a\)" .claude/skills/_shared-templates/story-state-contract.md` -> one match at line 667.
+- `grep -nE "^## (11\. Mystery|11a\. Character|12\. How)" .claude/skills/_shared-templates/story-state-contract.md` -> §11 at line 606, §11a at line 619, §12 at line 665.
+- `rg -n "any_obligation_active" .claude/skills/_shared-templates/story-state-contract.md specs/SPEC-86-character-fit-selection-contract.md` -> no matches.
+- `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md specs/SPEC-86-character-fit-selection-contract.md archive/tickets/SPEC86CHAFITSEL-001.md` -> PASS.
+- `npm test` in `tools/validators/` -> PASS, 1021/1021 tests.
+
+## Deviations
+
+- SPEC-86 §4.1 originally said to insert the §11a body verbatim, but live predicate verification showed `any_obligation_active` is not a valid predicate. The landed contract and the active spec use `any_obligation_open`, matching `.claude/skills/_shared-templates/story-state-contract.md`'s predicate table and `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`.

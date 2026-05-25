@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds one-paragraph §11a citation to each of 4 skill files: `story-character-profile/SKILL.md` (Story-State Derivation Guide section), `commitment-block-authoring/SKILL.md` (eligibility-predicate authoring section), `branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md` (first-choice-generation section), `branching-story-turn-cycle/references/phase-2-3-commitment-and-state-delta.md` (selection-rationale prose). Where pre-existing prose duplicates §11a content, the anchor REPLACES that prose verbatim per SPEC-86 §4.3 preamble; otherwise inserts at the section's start.
-**Deps**: SPEC86CHAFITSEL-001
+**Deps**: archive/tickets/SPEC86CHAFITSEL-001.md
 
 ## Problem
 
