@@ -62,7 +62,7 @@ Replace the existing first paragraph of §12 (which currently enumerates §4, §
 ## Files to Touch
 
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify)
-- `specs/SPEC-86-character-fit-selection-contract.md` (modify — same-seam factual predicate-name correction)
+- `archive/specs/SPEC-86-character-fit-selection-contract.md` (modify — same-seam factual predicate-name correction; archived after SPEC-86 completion)
 
 ## Out of Scope
 
@@ -107,7 +107,7 @@ Completed: 2026-05-25
 
 - Added `## 11a. Character-Fit Selection Contract` to `.claude/skills/_shared-templates/story-state-contract.md` between §11 and §12.
 - Updated §12's first paragraph to enumerate the character-fit selection contract (§11a).
-- Amended `specs/SPEC-86-character-fit-selection-contract.md` so the embedded §11a text uses the live predicate DSL name `any_obligation_open`.
+- Amended `archive/specs/SPEC-86-character-fit-selection-contract.md` so the embedded §11a text uses the live predicate DSL name `any_obligation_open`; at ticket closeout time this file still lived under `specs/` and was archived after SPEC-86 completion.
 - No schema, validator, MCP, fixture, or package source files were changed.
 
 ## Verification Result
@@ -115,8 +115,8 @@ Completed: 2026-05-25
 - `grep -nE "^## 11a\. Character-Fit Selection Contract" .claude/skills/_shared-templates/story-state-contract.md` -> one match at line 619.
 - `grep -nE "and the character-fit selection contract \(§11a\)" .claude/skills/_shared-templates/story-state-contract.md` -> one match at line 667.
 - `grep -nE "^## (11\. Mystery|11a\. Character|12\. How)" .claude/skills/_shared-templates/story-state-contract.md` -> §11 at line 606, §11a at line 619, §12 at line 665.
-- `rg -n "any_obligation_active" .claude/skills/_shared-templates/story-state-contract.md specs/SPEC-86-character-fit-selection-contract.md` -> no matches.
-- `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md specs/SPEC-86-character-fit-selection-contract.md archive/tickets/SPEC86CHAFITSEL-001.md` -> PASS.
+- `rg -n "any_obligation_active" .claude/skills/_shared-templates/story-state-contract.md archive/specs/SPEC-86-character-fit-selection-contract.md` -> no matches after spec archival.
+- `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md archive/specs/SPEC-86-character-fit-selection-contract.md archive/tickets/SPEC86CHAFITSEL-001.md` -> PASS after spec archival.
 - `npm test` in `tools/validators/` -> PASS, 1021/1021 tests.
 
 ## Deviations

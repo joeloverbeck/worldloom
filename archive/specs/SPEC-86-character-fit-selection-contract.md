@@ -1,10 +1,10 @@
 # SPEC-86: Character-Fit Selection Contract
 
-**Status:** ready
+**Status:** COMPLETED
 **Date:** 2026-05-25
-**Source brainstorm:** [`reports/slt-chc-overhaul-fourth-iteration.md`](../reports/slt-chc-overhaul-fourth-iteration.md) §1 "Executive verdict", §8 "Recommended architecture", §16 "STCHAR ⇄ current-state mediation model", §18 SPEC-A.
-**Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-fourth-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-fourth-iteration-triage.md) §ACCEPT — SPEC-A folded into SPEC-86.
-**Predecessors:** archived [`SPEC-79-chc-associated-commitment-block-removal.md`](../archive/specs/SPEC-79-chc-associated-commitment-block-removal.md) (late-binding established), archived [`SPEC-81-indexed-storylet-candidate-retrieval.md`](../archive/specs/SPEC-81-indexed-storylet-candidate-retrieval.md) (projection-based filtering established), archived [`SPEC-85-non-player-driver-golden-fixtures.md`](../archive/specs/SPEC-85-non-player-driver-golden-fixtures.md) (driver-kind selection coverage established).
+**Source brainstorm:** [`reports/slt-chc-overhaul-fourth-iteration.md`](../../reports/slt-chc-overhaul-fourth-iteration.md) §1 "Executive verdict", §8 "Recommended architecture", §16 "STCHAR ⇄ current-state mediation model", §18 SPEC-A.
+**Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-fourth-iteration-triage.md`](../../docs/triage/2026-05-25-slt-chc-overhaul-fourth-iteration-triage.md) §ACCEPT — SPEC-A folded into SPEC-86.
+**Predecessors:** archived [`SPEC-79-chc-associated-commitment-block-removal.md`](SPEC-79-chc-associated-commitment-block-removal.md) (late-binding established), archived [`SPEC-81-indexed-storylet-candidate-retrieval.md`](SPEC-81-indexed-storylet-candidate-retrieval.md) (projection-based filtering established), archived [`SPEC-85-non-player-driver-golden-fixtures.md`](SPEC-85-non-player-driver-golden-fixtures.md) (driver-kind selection coverage established).
 
 ## 1. Problem
 
@@ -179,3 +179,21 @@ This is a documentation-only spec; no code-level validation tests are added. The
 1. **Skill-anchor scope creep risk**: future iterations may pressure the four skill anchors to grow back into duplicate-content forms. The §11a contract is the canonical source; any future content addition to character-fit selection should land in §11a first, then anchors update. This discipline is captured implicitly in §12's general rule ("Skills must not duplicate the contract's content. They cite it.") and does not need a separate enforcement.
 2. **§11a vs §13 numbering**: §11a inserts under the §11 cluster pattern (alongside the existing §5a / §7a / §9b / §9c / §16a sub-numbered sections elsewhere in the contract). A future restructure could renumber §11a to a top-level §13; this spec uses §11a to minimize renumbering pressure on the existing §12 reference text.
 3. **Lift conditions for the four iter-4 deferrals** are recorded in the companion triage file's §DEFER bucket. Re-evaluation should happen at the next iteration boundary or when concrete playtest / scaling evidence materializes — whichever comes first. The triage file is the authoritative re-evaluation register.
+
+## Outcome
+
+Completed: 2026-05-25
+
+- Added `## 11a. Character-Fit Selection Contract` to `.claude/skills/_shared-templates/story-state-contract.md` between §11 and §12 through archived ticket `archive/tickets/SPEC86CHAFITSEL-001.md`.
+- Updated §12's first paragraph to enumerate the character-fit selection contract (§11a).
+- Amended the embedded §11a text to use the live predicate DSL name `any_obligation_open`.
+- Added the four §11a citation anchors to `story-character-profile`, `commitment-block-authoring`, `branching-story-bootstrap`, and `branching-story-turn-cycle` through archived ticket `archive/tickets/SPEC86CHAFITSEL-002.md`.
+- No schema, validator, MCP, world-index, fixture, or story/world content changes were made.
+
+Verification:
+
+- `grep -nE "^## (11\. Mystery|11a\. Character|12\. How)" .claude/skills/_shared-templates/story-state-contract.md` -> §11, §11a, and §12 appear in order.
+- Four touched story-pipeline skill files each contain one `§11a.*Character-Fit Selection Contract` citation paragraph.
+- `npm test` in `tools/validators/` -> PASS, 1021/1021 tests.
+- `npm test` in `tools/world-index/` -> PASS, 132/132 tests.
+- `npm test` in `tools/world-mcp/` -> PASS, 452/452 tests.

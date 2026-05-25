@@ -8,7 +8,7 @@
 - [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](2026-05-25-slt-chc-overhaul-third-iteration-triage.md); iter-3 deliverables [`archive/specs/SPEC-83-slt-cooldown-window-correctness.md`](../../archive/specs/SPEC-83-slt-cooldown-window-correctness.md), [`archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md`](../../archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md), [`archive/specs/SPEC-85-non-player-driver-golden-fixtures.md`](../../archive/specs/SPEC-85-non-player-driver-golden-fixtures.md).
 **Trigger:** User-supplied request: *"Please analyze reports/slt-chc-overhaul-fourth-iteration.md . It's the fourth iteration of this process, that ChatGPT-Pro has produced. I intended for this to be the last one, given that the architecture seems quite mature now. Please be critical of ChatGPT-Pro's proposals: reassess them for correctness and benefit. If changes aligned with docs/FOUNDATIONS.md are warranted, create specs in specs/* . IF more than one spec is warranted, create specs/IMPLEMENTATION-ORDER.md"*
 **Deliverables produced:**
-- [`specs/SPEC-86-character-fit-selection-contract.md`](../../specs/SPEC-86-character-fit-selection-contract.md)
+- [`archive/specs/SPEC-86-character-fit-selection-contract.md`](../../archive/specs/SPEC-86-character-fit-selection-contract.md)
 
 ## Triage summary
 
@@ -101,7 +101,7 @@ Iter-4 makes ~40 codebase claims. The verification pass below condenses the load
 #### SPEC-A (Character-Fit Selection Contract) — verified gap, documentation-only
 
 **Verdict:** accept.
-**Lands in:** [`specs/SPEC-86-character-fit-selection-contract.md`](../../specs/SPEC-86-character-fit-selection-contract.md).
+**Lands in:** [`archive/specs/SPEC-86-character-fit-selection-contract.md`](../../archive/specs/SPEC-86-character-fit-selection-contract.md).
 **Ground:** Verified absence of the Character-Fit Selection Contract section from `.claude/skills/_shared-templates/story-state-contract.md`. The four-layer mediation model (stable constraint → current-state derivation → eligibility/ranking → rendering/surface) and the global-vs-branch-scoped STCHAR predicate discipline are **operationally implicit** across existing validators (`stchar-temporal-reference-boundary`, `character-grounding-consistency`, `turn-cycle-output-grounding-integrity`, `slt-grounding-minimal-integrity`) and skill prose, but uncodified as a contract anchor. Codifying it as §11a + minimal skill-prose anchors in 4 skills closes the drift risk without touching schemas, MCP, validators, or fixtures. Aligns with FOUNDATIONS §Story Bundles §5a (causal-move framing reinforced), §5b (zero schema additions — explicitly load-bearing as a discipline contract), §5c (current-state centrality), §6.1 (story-local character authority), and Rule 4 at story scope (branch isolation via global-vs-branch-scoped predicate discipline).
 
 ### DEFER — consumer-thin / lift-condition unmet
