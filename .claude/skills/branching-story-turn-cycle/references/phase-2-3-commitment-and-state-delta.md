@@ -2,6 +2,8 @@
 
 ## Phase 2: Select or JIT-create a commitment block
 
+Selection rationale follows §11a "Character-Fit Selection Contract" in `.claude/skills/_shared-templates/story-state-contract.md`. The selected `SLT` is justified through the active current-state records that make it specific to this actor on this branch right now — `STPLAN` blockage, `STEMO` appraisal, `BEL` knowledge, `SREL` axis pressure, `OBL` / `CLK` / `STSEC` / `STQ` pressure, or `DA` / `STOBJ` / `STLOC` affordance. Where STCHAR appears in the rationale, it explains *why* the current-state record matters to this actor — not as a replacement for the current-state record. Branch-scoped SLTs with direct `record_active(STCHAR-<integer>)` predicates are the one lawful exception: there the STCHAR identity is the eligibility predicate itself.
+
 Call `mcp__worldloom__select_storylet_candidates(world_slug, story_slug, parent_page_id, turn_driver, intent_signature)` to obtain the projection-filtered shortlist (24 candidates by default, bounded by `max_candidates`) plus `filter_trace`. The MCP pipeline applies story scope, branch visibility, driver kind, optional action family, predicate shape/class, source-record-id, mystery-policy, cooldown, and salience/diversity filters against indexed projection columns. The shortlist's full bodies are retrieved deliberately through `mcp__worldloom__get_records(record_ids=requires_full_body_ids, story_slug=...)`; those full bodies plus `filter_trace` are the LLM-facing SLT-selection input. Do not scan or expose the entire author-pool `SLT` body set on the hot path.
 
 Derive the MCP `intent_signature` before the call:

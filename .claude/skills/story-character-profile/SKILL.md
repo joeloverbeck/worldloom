@@ -287,6 +287,8 @@ Template skeleton:
 
 Section requirements:
 
+When drafting the Story-State Derivation Guide, follow §11a "Character-Fit Selection Contract" in `.claude/skills/_shared-templates/story-state-contract.md`. The guide names *how* this character's stable authority generates or constrains current-state records (`STPLAN`, `STEMO`, `BEL`, `SREL`, `STINT`, `STSTAT`, `OBL` / `CNSQ` / `THR`, `CLK` / `STSEC` / `STQ`, `DA` / `STOBJ` / `STLOC`). Runtime selection skills consume those current-state records, not STCHAR vibes — the derivation guide is the bridge.
+
 - `Story-Facing Identity`: display name, story role, active `STENT` bindings, viewpoint/speaker/actor status, and what this profile may authorize.
 - `Source Distillation`: source kind, source ids, source sections used, story-local evidence, and explicit statement that `CHAR` provenance is not operational authority. For `source_kind: world_char`, include a `Stable Source Material Inventory` subsection with a body table inventorying every loaded source area carrying stable operational character material, not only the 10 `dramatic_core` fields. Use exactly these columns: `source_area`, `stable operational material`, `disposition`, `operational_home`, `rationale`. Disposition must be one of `copied`, `transformed`, `compressed`, `omitted_with_rationale`, or `story_irrelevant`. For bootstrap `story_irrelevant`, the rationale must use one of `outside_story_scope`, `content_constraint`, `premise_incompatible`, `non_operational_trivia`, or `duplicate_of_retained_material`; do not use `opening_not_relevant`, `not_needed_on_page_1`, `not_in_root_scene`, or equivalent opening-page relevance rationales. `Source Distillation` is a provenance and compression-trace surface, not a retained operational home for material that future page planning, choice grounding, state derivation, or prose rendering may need.
 - `Stable Persona Core`: durable motives, refusals, limits, values, contradictions, and non-goals.
@@ -297,7 +299,6 @@ Section requirements:
 - `Perception and Embodiment`: sensory access, bodily constraints, tells, physical affordances, and viewpoint-rendering limits.
 - `Agency and Planning Tendencies`: planning horizon, risk posture, preferred tactics, refusal patterns, and how this can shape `STPLAN` / `STINT`.
 - `Relationship-Specific Behavior`: named conduct differences by counterpart or role; do not globalize branch-local relationships.
-- `Story-State Derivation Guide`: how future skills may derive `STINT`, `STPLAN`, `STEMO`, `SREL`, `CHC`, and page-plan content from the profile.
 - `Prose Rendering Constraints`: must-show, must-not-imply, voice-fidelity checks, and repair recommendations.
 - `Validation / Audit Anchors`: source list, validation checks, known limits, and future regeneration triggers.
 
