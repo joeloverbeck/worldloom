@@ -1,6 +1,6 @@
 # SPEC84REPBRASCO-002: Author capstone integration test for replay + branch-scope correctness
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new integration test at `tools/world-mcp/tests/integration/spec84-replay-and-branch-scope.test.ts` exercising existing `selectStoryletCandidates` MCP tool + `@worldloom/world-index/commands/build` API; no impact on production code.
@@ -8,12 +8,12 @@
 
 ## Problem
 
-SPEC-84 §2 enumerates five replay-time correctness cases that no current test covers end-to-end against a real materialized world-index DB: (1) replay sees newer global SLT (positive); (2) replay rejects newer global SLT with story-bundle record ref (negative — `STPLAN-99` predicate ref triggers `after_source_record_id` rejection); (3) branch-scoped sibling exclusion (BR-2's SLT-4 invisible from BR-1 fork); (4) branch-prefix prefix-match positive (SLT-5's `[PG-1, PG-3]` prefix matches BR-1 fork at PG-5); (5) branch-prefix wrong-prefix negative (SLT-5 invisible from BR-2 fork at PG-4). The behaviors are structurally automatic post-SPEC-79 (live-pool semantics) and per the existing `matchesScope` + `matchesSourceRecordIds` logic in `tools/world-mcp/src/tools/select-storylet-candidates.ts`, but lack golden-fixture verification. This is the spec-integration capstone (per `spec-to-tickets` SKILL.md §Spec-Integration Ticket Shape) — its scope IS SPEC-84 §6 Acceptance Criteria 1-7 plus §8 Verification Test Plan, exercising SPEC84REPBRASCO-001's fixture end-to-end against the existing `selectStoryletCandidates` retrieval pipeline.
+At intake, SPEC-84 §2 enumerated five replay-time correctness cases that no test covered end-to-end against a real materialized world-index DB: (1) replay sees newer global SLT (positive); (2) replay rejects newer global SLT with story-bundle record ref (negative — `STPLAN-99` predicate ref triggers `after_source_record_id` rejection); (3) branch-scoped sibling exclusion (BR-2's SLT-4 invisible from BR-1 fork); (4) branch-prefix prefix-match positive (SLT-5's `[PG-1, PG-3]` prefix matches BR-1 fork at PG-5); (5) branch-prefix wrong-prefix negative (SLT-5 invisible from BR-2 fork at PG-4). The behaviors are structurally automatic post-SPEC-79 (live-pool semantics) and per the existing `matchesScope` + `matchesSourceRecordIds` logic in `tools/world-mcp/src/tools/select-storylet-candidates.ts`, but lacked golden-fixture verification. This spec-integration capstone (per `spec-to-tickets` SKILL.md §Spec-Integration Ticket Shape) now exercises SPEC84REPBRASCO-001's fixture end-to-end against the existing `selectStoryletCandidates` retrieval pipeline.
 
 ## Assumption Reassessment (2026-05-25)
 
 1. The materialize-and-build pattern at `tools/world-mcp/tests/integration/spec45-provenance-e2e.test.ts:226-236` is the established convention for testing MCP retrieval against a programmatically-built world-index DB: `createTempRepoRoot()` → write fixture records to disk → `build(root, WORLD_SLUG, { quiet: true })` (imported from `@worldloom/world-index/commands/build`) → `withRepoRoot(root, () => selectStoryletCandidates({...}))`. The retrieval logic under test lives at `tools/world-mcp/src/tools/select-storylet-candidates.ts` — specifically `matchesScope` (around lines 326-352) which handles `global_author_pool` / `branch_scoped` / `branch_prefix_scoped` cases, and `matchesSourceRecordIds` (around lines 391-409) which rejects global SLTs whose source-record edges include any story-bundle record class via `isStoryLocalRecordId` against the `RECORD_PREFIX_TO_CLASS` map (STENT/STPLAN/BEL/etc.). SPEC-84 §4.2 specifies that test assertions should target `filter_trace.after_scope` for scope-exclusion cases and `filter_trace.after_source_record_id` for the case-2 story-bundle-record-ref rejection — the existing per-stage counters in the returned trace suffice without a new rejection-sample mechanism.
-2. The fixture at `tools/validators/tests/fixtures/spec84-replay-and-branch-scope/fixture.json` (created by `archive/tickets/SPEC84REPBRASCO-001.md`) carries world canon + 2 branches + 5 PGs + 5 SLTs per SPEC-84 §4.1; consumed via cross-package path resolution from `tools/world-mcp/tests/integration/` analogous to how `tools/validators/tests/integration/spec76-red-kiln-ambush.test.ts:36-40` resolves its sibling fixture path. From `tools/world-mcp/tests/integration/`, the cross-package fixture lives at `path.resolve(import.meta.dirname, "../../../validators/tests/fixtures/spec84-replay-and-branch-scope/fixture.json")` (up three levels from `tools/world-mcp/tests/integration/` to `tools/`, then into `validators/tests/fixtures/...`).
+2. The fixture at `tools/validators/tests/fixtures/spec84-replay-and-branch-scope/fixture.json` (created by `archive/tickets/SPEC84REPBRASCO-001.md`) carries world canon + 2 branches + 5 PGs + 5 SLTs per SPEC-84 §4.1. The first compiled proof run showed that source-relative `import.meta.dirname` pathing resolves under `tools/world-mcp/dist/tests/integration/` after build, so the landed test anchors fixture lookup from the package root with `path.resolve(process.cwd(), "../validators/tests/fixtures/spec84-replay-and-branch-scope/fixture.json")`. This matches the package-local proof contract: the compiled test is run from `tools/world-mcp`.
 3. Cross-artifact boundary under audit: this test composes three packages — (a) `@worldloom/world-index/commands/build` for materializing the temp DB (resolved via the `file:../world-index` workspace dependency in `tools/world-mcp/package.json`; the package exports `./commands/build` from `./dist/src/commands/build.js` per the world-index `package.json` exports map); (b) `tools/world-mcp/src/tools/select-storylet-candidates.ts` for the retrieval invocation; (c) `tools/validators/tests/fixtures/spec84-replay-and-branch-scope/fixture.json` for the input data. The build-order requirement: `(cd tools/world-index && npm run build)` must precede `(cd tools/world-mcp && npm run build)` because the world-mcp compiled test code imports from `@worldloom/world-index/commands/build` and the resolved path (`tools/world-index/dist/src/commands/build.js`) only exists after the world-index build. The `_shared.ts` test helpers under `tools/world-mcp/tests/tools/` provide `createTempRepoRoot()`, `destroyTempRepoRoot()`, and `withRepoRoot()` per SPEC-45 / SPEC-81 conventions.
 4. FOUNDATIONS principles motivating this ticket: §Story Bundles §5 Rule 4 (story-scope branch isolation) is the primary principle the assertions exercise — cases 3, 4, 5 directly prove branch-scoped + branch-prefix-scoped isolation gates, and case 2 proves global-pool SLTs are subject to story-bundle-record-ref rejection at retrieval-time eligibility (preventing inadvertent cross-branch coupling through predicate refs). §Story Bundles §5c (no global drama manager) is preserved trivially — the test exercises the local-salience selection model, not a global planning pass. SPEC-84 §9 Risks #1 names a pre-existing FOUNDATIONS-vs-code divergence on the `bundle_genesis_record` exception (current `isStoryLocalRecordId` rejects ALL story-bundle refs uniformly; FOUNDATIONS §5 Rule 4 allows `bundle_genesis_record` refs); this test asserts current code behavior and does not adjudicate the divergence — a future spec routes per pattern (b) "Draft a NEW spec file" for adjudication.
 
@@ -30,11 +30,11 @@ SPEC-84 §2 enumerates five replay-time correctness cases that no current test c
 4. Branch_prefix_scoped prefix-match positive (SLT-5 with live-schema `visible_branch_path_prefix: [PG-1, PG-3]` visible from BR-1 fork at PG-5 whose `branch_path` is `[PG-1, PG-3, PG-5]`) → test case 4: SLT-5 present in `shortlisted_candidate_ids`.
 5. Branch_prefix_scoped wrong-prefix negative (SLT-5 invisible from BR-2 fork at PG-4 whose `branch_path` is `[PG-1, PG-2, PG-4]`, no `[PG-1, PG-3]` prefix) → test case 5: assertion on `filter_trace.after_scope` count delta + SLT-5 absent.
 
-## What to Change
+## Landed Changes
 
-### 1. Create test file
+### 1. Created test file
 
-Create `tools/world-mcp/tests/integration/spec84-replay-and-branch-scope.test.ts` following the established test framework conventions (Node's built-in `test` runner via `node:test` + `node:assert/strict`).
+Created `tools/world-mcp/tests/integration/spec84-replay-and-branch-scope.test.ts` following the established test framework conventions (Node's built-in `test` runner via `node:test` + `node:assert/strict`).
 
 ### 2. Imports
 
@@ -45,6 +45,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { build } from "@worldloom/world-index/commands/build";
+import YAML from "yaml";
 
 import { selectStoryletCandidates } from "../../src/tools/select-storylet-candidates.js";
 import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/_shared.js";
@@ -52,7 +53,7 @@ import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/
 
 ### 3. Fixture interface + load helper
 
-A `Spec84Fixture` interface modeled on `tools/validators/tests/integration/spec76-red-kiln-ambush.test.ts`'s `RedKilnFixture` shape:
+Added a `Spec84Fixture` interface modeled on `tools/validators/tests/integration/spec76-red-kiln-ambush.test.ts`'s `RedKilnFixture` shape:
 
 ```typescript
 interface FixtureFile {
@@ -75,8 +76,8 @@ interface Spec84Fixture {
 }
 
 const FIXTURE_PATH = path.resolve(
-  import.meta.dirname,
-  "../../../validators/tests/fixtures/spec84-replay-and-branch-scope/fixture.json"
+  process.cwd(),
+  "../validators/tests/fixtures/spec84-replay-and-branch-scope/fixture.json"
 );
 
 function loadFixture(): Spec84Fixture {
@@ -86,21 +87,20 @@ function loadFixture(): Spec84Fixture {
 
 ### 4. Materialize-and-build helper
 
-A per-test setup function paralleling `withSpec45World` from `spec45-provenance-e2e.test.ts:226-236`:
+Added a per-test setup function paralleling `withSpec45World` from `spec45-provenance-e2e.test.ts:226-236`:
 
 ```typescript
 function materializeFixture(root: string, fixture: Spec84Fixture): void {
-  for (const record of fixture.records) {
-    const absolutePath = path.join(root, "worlds", fixture.world_slug, record.file_path);
-    mkdirSync(path.dirname(absolutePath), { recursive: true });
-    // Write the parsed record as YAML per the file_path's expected shape; reuse
-    // the same serialization helper red-kiln-ambush.test.ts uses, or inline a
-    // minimal YAML emitter for the structurally-flat shapes in this fixture.
-  }
   for (const file of fixture.files ?? []) {
     const absolutePath = path.join(root, "worlds", fixture.world_slug, file.path);
     mkdirSync(path.dirname(absolutePath), { recursive: true });
     writeFileSync(absolutePath, file.content, "utf8");
+  }
+
+  for (const record of fixture.records) {
+    const absolutePath = path.join(root, "worlds", fixture.world_slug, record.file_path);
+    mkdirSync(path.dirname(absolutePath), { recursive: true });
+    writeFileSync(absolutePath, YAML.stringify(record.parsed), "utf8");
   }
 }
 
@@ -129,7 +129,7 @@ Each case calls `selectStoryletCandidates` under `withRepoRoot` and asserts on `
 - **Case 4 (branch_prefix prefix-match positive; spec §6 ac 5)**: BR-1 fork at PG-5, player driver → assert SLT-5 present in `shortlisted_candidate_ids`.
 - **Case 5 (branch_prefix wrong-prefix negative; spec §6 ac 6)**: BR-2 fork at PG-4, player driver → assert SLT-5 absent + `filter_trace.after_scope` count drop attributable to SLT-5.
 
-### 6. Optional sanity assertion for spec §6 ac 1
+### 6. Build sanity assertion for spec §6 ac 1
 
 The "fixture parses through `world-index build` cleanly" criterion is verified implicitly by the `build(root, fixture.world_slug, { quiet: true })` call returning 0 inside `withSpec84World` — a schema-rejection would surface as a non-zero exit code and trip the `assert.equal(..., 0)` at setup time before any case runs.
 
@@ -171,3 +171,24 @@ The "fixture parses through `world-index build` cleanly" criterion is verified i
 1. `(cd tools/world-index && npm run build) && (cd tools/world-mcp && npm run build && node --test "dist/tests/integration/spec84-replay-and-branch-scope.test.js")` — targeted run of the new capstone test file (primary correctness gate per SPEC-84 §8 step 1; the world-index build precedes because the test imports `@worldloom/world-index/commands/build` whose compiled path requires the world-index dist tree).
 2. `(cd tools/world-mcp && npm test)` — full world-mcp suite (runs build + every `dist/tests/**/*.test.js`); verifies the new capstone passes alongside SPEC-81's existing `spec81-storylet-candidate-retrieval.test.ts` (per SPEC-84 §8 step 2 regression check).
 3. `(cd tools/world-mcp && npm run build)` — clean TypeScript build (covers typecheck via tsc). The worldloom tooling layer has no separate `lint` script (no eslint config exists across the repo); `npm run build` is the closest substitute for the spec's `pnpm turbo lint typecheck` Verification command per SPEC-83 ticket precedent — build verification covers the typecheck portion; the lint portion drops as no-such-tooling.
+
+## Outcome
+
+Completed: 2026-05-25
+
+- Added `tools/world-mcp/tests/integration/spec84-replay-and-branch-scope.test.ts`.
+- The test materializes `tools/validators/tests/fixtures/spec84-replay-and-branch-scope/fixture.json` into a temp world tree, serializes fixture `records[].parsed` objects as YAML, runs `world-index build`, and invokes `selectStoryletCandidates` under `withRepoRoot`.
+- Added five node:test cases covering SPEC-84's replay/newer-global positive, global story-bundle-ref rejection at `after_source_record_id`, branch-scoped sibling rejection at `after_scope`, branch-prefix positive, and branch-prefix wrong-prefix rejection.
+
+## Verification Result
+
+1. Pre-edit baseline `(cd tools/world-index && npm run build)` — passed.
+2. Pre-edit baseline `(cd tools/world-mcp && npm test)` — passed, 447 tests / 443 TAP top-level subtests.
+3. `(cd tools/world-index && npm run build)` — passed after the new test was added.
+4. `(cd tools/world-mcp && npm run build)` — passed after the new test was added.
+5. `(cd tools/world-mcp && node --test dist/tests/integration/spec84-replay-and-branch-scope.test.js)` — passed; all five SPEC-84 capstone cases green.
+6. `(cd tools/world-mcp && npm test)` — passed after the new test was added, 452 tests / 448 TAP top-level subtests; SPEC-84 appears as subtests 128-132 in the broad run.
+
+## Deviations
+
+- The drafted fixture path used `import.meta.dirname` from the source test directory. The first compiled proof run failed with `ENOENT` because the emitted test runs under `dist/tests/integration`; the landed test uses `process.cwd()` from the package root instead.
