@@ -1,6 +1,6 @@
 # SPEC-85: Non-Player Driver Golden Fixtures
 
-**Status:** active
+**Status:** COMPLETED
 **Date:** 2026-05-25
 **Source brainstorm:** [`reports/slt-chc-overhaul-third-iteration.md`](../reports/slt-chc-overhaul-third-iteration.md) §17 SPEC-86 (renumbered to SPEC-85 here per sequential continuation from archived SPEC-82).
 **Triage:** [`docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md`](../docs/triage/2026-05-25-slt-chc-overhaul-third-iteration-triage.md) §ACCEPT.
@@ -128,3 +128,27 @@ Run on a worktree containing the new fixtures and tests:
 2. **Integration (each)**: `cd tools/validators && npm run build && node --test dist/tests/integration/spec85-offstage-bridge-sabotage.test.js dist/tests/integration/spec85-clock-fire-route-closes.test.js dist/tests/integration/spec85-secret-reveal-ledger-clue.test.js dist/tests/integration/spec85-multi-actor-collision-confrontation.test.js` — each passes including the FAIL-mutation cases. *(rationale: the primary acceptance gate is per-kind end-to-end composition; the package uses `node --test` against the built `dist/` tree per `tools/validators/package.json`'s `test` script)*
 3. **Regression**: `cd tools/validators && node --test dist/tests/integration/spec76-red-kiln-ambush.test.js` — unchanged. *(rationale: the new fixtures must not perturb the existing `npc_action` golden test)*
 4. **Typecheck + full suite**: `cd tools/validators && npm test` — clean. *(rationale: pre-completion verification per global CLAUDE.md; the package's `npm test` runs `tsc -p tsconfig.json` build then the full `node --test dist/tests/**/*.test.js` suite, which serves as both typecheck and full-test gate. No `lint` script exists in `tools/*/package.json`; SPEC-84 outcome §Deviations already documented the same drift from the global `pnpm turbo` example)*
+
+## Outcome
+
+Completed: 2026-05-25
+
+SPEC-85 landed the four non-player driver golden fixtures and their per-kind integration tests:
+
+- `clock_fire`: `tools/validators/tests/fixtures/clock-fire-route-closes/` and `tools/validators/tests/integration/spec85-clock-fire-route-closes.test.ts`
+- `offstage_action`: `tools/validators/tests/fixtures/offstage-bridge-sabotage/` and `tools/validators/tests/integration/spec85-offstage-bridge-sabotage.test.ts`
+- `secret_reveal`: `tools/validators/tests/fixtures/secret-reveal-ledger-clue/` and `tools/validators/tests/integration/spec85-secret-reveal-ledger-clue.test.ts`
+- `multi_actor_collision`: `tools/validators/tests/fixtures/multi-actor-collision-confrontation/` and `tools/validators/tests/integration/spec85-multi-actor-collision-confrontation.test.ts`
+
+Each fixture follows the compact Red Kiln/SPEC-85 sibling convention: checked-in JSON records plus page-plan content consumed by the existing six driver-primitive validators. No schema, validator, registry, source-code behavior, or skill-prose change was introduced.
+
+Deviations from original design:
+
+- The fixtures use compact structural records rather than full STORY/BR/world-canon bundles. This matches the landed sibling convention and still proves the owned six-validator composition.
+- The multi-actor-collision ticket corrected a drafted narrative-shape mutation: `narrative_shape_field_rejection` does not cover SLT records and is not part of the six-driver composition, so the local-salience invariant is asserted directly over the unmutated SLT while mutations stay on live driver-validator surfaces.
+
+Final verification:
+
+1. `cd tools/validators && node --test dist/tests/integration/spec85-offstage-bridge-sabotage.test.js dist/tests/integration/spec85-clock-fire-route-closes.test.js dist/tests/integration/spec85-secret-reveal-ledger-clue.test.js dist/tests/integration/spec85-multi-actor-collision-confrontation.test.js` — PASS, 8/8 SPEC-85 integration subtests.
+2. `cd tools/validators && node --test dist/tests/integration/spec76-red-kiln-ambush.test.js` — PASS, 2/2 Red Kiln regression subtests.
+3. `cd tools/validators && npm test` — PASS, 1021/1021 tests.

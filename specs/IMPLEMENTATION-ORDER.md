@@ -11,7 +11,7 @@ This file sequences the live specs under `specs/`. Each row records the spec, th
 | Order | Spec | Shape | Depends on | Gating risk |
 |---|---|---|---|---|
 | 1 | [SPEC-84 — Replay/Fork and Branch-Scope Golden Fixtures](../archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md) | completed: fixture + integration tests; test-only | none structurally; benefits from archived SPEC-83's landed cooldown fix so the cooldown bug does not perturb the fixture's filter_trace assertions | archived via `archive/tickets/SPEC84REPBRASCO-001.md` and `archive/tickets/SPEC84REPBRASCO-002.md`; no source code change. |
-| 2 | [SPEC-85 — Non-Player Driver Golden Fixtures](SPEC-85-non-player-driver-golden-fixtures.md) | four new fixtures + four integration tests; test-only | none structurally | largest fixture-authoring effort (four bundles + four test files); no source code change. |
+| 2 | [SPEC-85 — Non-Player Driver Golden Fixtures](../archive/specs/SPEC-85-non-player-driver-golden-fixtures.md) | completed: four fixtures + four integration tests; test-only | none structurally | archived via `archive/tickets/SPEC85NONPLADRI-001.md` through `archive/tickets/SPEC85NONPLADRI-004.md`; no source code change. |
 
 ## Shipped in this sequence
 

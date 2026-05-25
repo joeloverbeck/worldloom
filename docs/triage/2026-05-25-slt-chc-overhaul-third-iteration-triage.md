@@ -9,7 +9,7 @@
 **Deliverables produced:**
 - [`archive/specs/SPEC-83-slt-cooldown-window-correctness.md`](../../archive/specs/SPEC-83-slt-cooldown-window-correctness.md)
 - [`archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md`](../../archive/specs/SPEC-84-replay-and-branch-scope-fixtures.md)
-- [`specs/SPEC-85-non-player-driver-golden-fixtures.md`](../../specs/SPEC-85-non-player-driver-golden-fixtures.md)
+- [`archive/specs/SPEC-85-non-player-driver-golden-fixtures.md`](../../archive/specs/SPEC-85-non-player-driver-golden-fixtures.md)
 - [`specs/IMPLEMENTATION-ORDER.md`](../../specs/IMPLEMENTATION-ORDER.md)
 
 ## Triage summary
@@ -81,7 +81,7 @@ Iteration 3 makes ~25-30 codebase claims. The verification pass below condenses 
 #### SPEC-85 (Non-player driver golden fixtures) — verified per-kind fixture gap
 
 **Verdict:** accept (renumbered from report SPEC-86 for sequential continuation from archived SPEC-82; test-only, no schema change).
-**Lands in:** [`specs/SPEC-85-non-player-driver-golden-fixtures.md`](../../specs/SPEC-85-non-player-driver-golden-fixtures.md).
+**Landed in:** [`archive/specs/SPEC-85-non-player-driver-golden-fixtures.md`](../../archive/specs/SPEC-85-non-player-driver-golden-fixtures.md).
 **Ground:** Verified fixture-coverage gap: only `npc_action` has a rich authored bundle (Red Kiln Ambush); `offstage_action`, `clock_fire`, `secret_reveal`, `multi_actor_collision` have only schema-level + structural-unit coverage. The iteration-2 IMPLEMENTATION-ORDER §Out-of-Scope deferral on "Non-player driver semantics expansion" specifically targets the **prose-attach hidden-mind-leak validator** (no rendered-prose consumer), explicitly NOT the fixtures themselves — the iteration-2 record actually understated the fixture gap. A fixture-only spec (no prose-attach validator, no new schema) is consistent with iteration-2's scope discipline.
 
 ### DEFER — consumer-thin / lift-condition unmet
