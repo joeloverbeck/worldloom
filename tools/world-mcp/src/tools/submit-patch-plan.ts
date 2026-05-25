@@ -17,6 +17,7 @@ type EnginePatchPlanEnvelope = Parameters<typeof submitPatchPlan>[0];
 export interface SubmitPatchPlanArgs {
   patch_plan: PatchPlanEnvelope;
   approval_token: string;
+  worldRoot?: string;
 }
 
 function invalidInput(message: string, field: string): McpError {
@@ -42,9 +43,13 @@ export async function handleSubmitPatchPlanTool(
   const envelope = args.patch_plan as unknown as EnginePatchPlanEnvelope;
 
   return submitPatchPlan(envelope, args.approval_token, {
+    ...(args.worldRoot === undefined ? {} : { worldRoot: args.worldRoot }),
     preApplyValidator: async () => {
       try {
-        const { verdicts, executions } = await runPreApplyValidators(envelope);
+        const { verdicts, executions } = await runPreApplyValidators(
+          envelope,
+          args.worldRoot === undefined ? {} : { worldRoot: args.worldRoot }
+        );
         const validators_run = projectExecutionsToReceipt(executions);
         const failures = verdicts.filter((verdict) => verdict.severity === "fail");
         if (failures.length > 0) {

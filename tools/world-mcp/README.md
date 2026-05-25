@@ -58,23 +58,23 @@ HMAC-signed; single-use; default 20-minute expiry (configurable). Secret at `too
 Skills issue tokens via the canonical CLI:
 
 ```bash
-node dist/src/cli/sign-approval-token.js <plan-path> [--expiry-minutes <n>]
+node dist/src/cli/sign-approval-token.js [--world-root <path>] <plan-path> [--expiry-minutes <n>]
 ```
 
 The CLI reads a JSON patch-plan envelope, computes `canonicalOpHash` for every `patches[]` entry, and emits the base64 token to stdout. The token binds `plan_id + world_slug + patch_hashes + issued_at + expires_at`. See `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token for the full skill-side flow.
 
-`--expiry-minutes` defaults to 20, accommodating the 50KB+ envelopes typical of full canon-addition submissions; the engine's verifier only checks `expires_at <= now` and accepts longer windows. Override via flag or `WORLD_MCP_TOKEN_EXPIRY_MIN` env var.
+`--expiry-minutes` defaults to 20, accommodating the 50KB+ envelopes typical of full canon-addition submissions; the engine's verifier only checks `expires_at <= now` and accepts longer windows. Override via flag or `WORLD_MCP_TOKEN_EXPIRY_MIN` env var. The signer uses the same world-root resolution contract as the patch-plan CLIs for locating `tools/world-mcp/.secret`: explicit `--world-root` > `WORLDLOOM_ROOT` > auto-discovery from cwd.
 
 ## Patch-plan CLIs
 
 Large patch-plan envelopes can bypass MCP transport while still using the same handler code as the MCP tools:
 
 ```bash
-node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>
-node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>
+node tools/world-mcp/dist/src/cli/validate-patch-plan.js [--world-root <path>] <plan-path>
+node tools/world-mcp/dist/src/cli/submit-patch-plan.js [--world-root <path>] <plan-path> <token-path>
 ```
 
-Invoke both patch-plan CLIs from the project root or active git worktree root (the directory containing `worlds/`, `tools/`, and `docs/`). The CLI/engine path resolves world state from `process.cwd()` and opens the index at `worlds/<slug>/_index/world.db` via `tools/world-index/src/index/open.ts` `indexDirectoryForWorld`; running from another cwd can surface as `Index missing for world '<slug>'` even when the index exists under the repo root.
+World-root resolution is deterministic: explicit `--world-root <path>` wins, then `WORLDLOOM_ROOT`, then auto-discovery walks upward from cwd looking for both `docs/FOUNDATIONS.md` and `worlds/`. Successful CLI calls emit `[world-root] <path> (source: <source>)` to stderr before any status/error JSON; failed resolution exits 2 and lists attempted paths. This lets operators invoke the CLIs from package subdirectories after builds without misdirecting into `Index missing for world '<slug>'` when the repo root is discoverable.
 
 `validate-patch-plan` prints the same status object as `mcp__worldloom__validate_patch_plan`, including `validators_run[]`: `pass` exits 0 on stdout; `fail` and `skipped` exit 1 on stderr. When a malformed envelope has multiple shape errors, `skipped.details.field` names the first offending path and `skipped.details.additional_errors[]` lists the remaining invalid-input errors. `submit-patch-plan` prints the same `PatchReceipt` / error family as `mcp__worldloom__submit_patch_plan`; it requires a signed approval token file.
 

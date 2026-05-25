@@ -24,8 +24,8 @@ export interface ApprovalTokenPayload {
   expires_at: string;
 }
 
-function resolveSecretPath(): string {
-  return path.join(resolveRepoRoot(), "tools", "world-mcp", SECRET_FILENAME);
+function resolveSecretPath(worldRoot?: string): string {
+  return path.join(worldRoot ?? resolveRepoRoot(), "tools", "world-mcp", SECRET_FILENAME);
 }
 
 function serializePayload(payload: ApprovalTokenPayload): string {
@@ -58,8 +58,8 @@ function materializePayload(input: ApprovalTokenInput): ApprovalTokenPayload {
   };
 }
 
-export function readOrCreateSecret(): Buffer {
-  const secretPath = resolveSecretPath();
+export function readOrCreateSecret(worldRoot?: string): Buffer {
+  const secretPath = resolveSecretPath(worldRoot);
 
   if (existsSync(secretPath)) {
     return readFileSync(secretPath);

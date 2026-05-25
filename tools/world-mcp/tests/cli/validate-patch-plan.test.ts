@@ -92,6 +92,12 @@ function writeJson(dir: string, name: string, value: unknown): string {
   return filePath;
 }
 
+function parseCliStderrJson(stderr: string): unknown {
+  const lines = stderr.split("\n").filter((line) => line.length > 0);
+  assert.match(lines[0] ?? "", /^\[world-root\] /);
+  return JSON.parse(lines.slice(1).join("\n"));
+}
+
 function seedEmptyWorld(root: string): void {
   seedWorld(root, { worldSlug: "seeded", nodes: [] });
 }
@@ -110,7 +116,7 @@ test("cli-validate-patch-plan: CLI delegates pass results to the same validate h
     const cliPayload = JSON.parse(cliResult.stdout);
 
     assert.equal(cliResult.exitCode, 0);
-    assert.equal(cliResult.stderr, "");
+    assert.match(cliResult.stderr, /^\[world-root\] /);
     assert.ok("status" in mcpResult);
     assert.equal(cliPayload.status, mcpResult.status);
     assert.deepEqual(cliPayload.verdicts, mcpResult.verdicts);
@@ -136,7 +142,11 @@ test("cli-validate-patch-plan: CLI exits 1 and prints fail status on validator f
 
     const cliResult = await withRepoRoot(root, () => runValidatePatchPlanCli([planPath]));
     const mcpResult = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
-    const cliPayload = JSON.parse(cliResult.stderr);
+    const cliPayload = parseCliStderrJson(cliResult.stderr) as {
+      status: string;
+      verdicts: unknown[];
+      validators_run: Array<{ validator_name: string; status: string; duration_ms: number; detail?: string }>;
+    };
 
     assert.equal(cliResult.exitCode, 1);
     assert.equal(cliResult.stdout, "");
@@ -164,7 +174,11 @@ test("cli-validate-patch-plan: CLI exits 1 and prints fail status on id allocati
     const planPath = writeJson(tmp, "plan.json", plan);
 
     const cliResult = await withRepoRoot(root, () => runValidatePatchPlanCli([planPath]));
-    const cliPayload = JSON.parse(cliResult.stderr);
+    const cliPayload = parseCliStderrJson(cliResult.stderr) as {
+      status: string;
+      validators_run: Array<{ validator_name: string; status: string }>;
+      verdicts: Array<{ validator: string; code: string; message: string }>;
+    };
 
     assert.equal(cliResult.exitCode, 1);
     assert.equal(cliResult.stdout, "");
@@ -199,7 +213,7 @@ test("cli-validate-patch-plan: CLI exits 1 and prints skipped status for malform
 
     assert.equal(cliResult.exitCode, 1);
     assert.equal(cliResult.stdout, "");
-    const status = JSON.parse(cliResult.stderr) as { status: string; reason?: string };
+    const status = parseCliStderrJson(cliResult.stderr) as { status: string; reason?: string };
     assert.equal(status.status, "skipped");
     assert.match(status.reason ?? "", /patch_plan\.patches\[0\]\.target_file/);
     assert.deepEqual((status as { validators_run?: unknown[] }).validators_run, []);

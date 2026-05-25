@@ -125,8 +125,10 @@ export interface SeedWorldInput {
 
 export function createTempRepoRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-mcp-tools-"));
+  mkdirSync(path.join(root, "docs"), { recursive: true });
   mkdirSync(path.join(root, "tools", "world-mcp"), { recursive: true });
   mkdirSync(path.join(root, "worlds"), { recursive: true });
+  writeFileSync(path.join(root, "docs", "FOUNDATIONS.md"), "# Foundations\n", "utf8");
   writeFileSync(path.join(root, "tools", "world-mcp", "package.json"), "{\n}\n", "utf8");
   return root;
 }

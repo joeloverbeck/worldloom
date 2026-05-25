@@ -51,6 +51,12 @@ Arguments:
 Options:
   --help                  Show this help and exit.
 
+World root:
+  This CLI reads only the --plan and --pg files and does not require a
+  worldloom project root. The patch-plan CLIs and sign-approval-token support
+  --world-root / WORLDLOOM_ROOT because they open the world index or HMAC
+  secret; compute-pg-hashes intentionally has no --world-root option.
+
 Output (stdout, JSON):
   {
     "plan_hash":  "<64 lowercase hex chars>",
