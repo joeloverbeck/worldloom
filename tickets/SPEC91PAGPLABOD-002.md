@@ -8,7 +8,7 @@
 
 ## Problem
 
-Page-plan §9 ("Relationship and Belief Context"), §9b ("Active actor plans / tactical agency"), §9c ("Emotional causality / affective transition"), and §10b ("Open Setups, Active Clocks, Hidden Secrets") currently allow body content that enumerates raw record-IDs and engine-style ledger language: §9 lists `SREL-N` / `BEL-N` pairs without prose translation; §9b's sub-bullets cite `This page's SE.state_relations[]: advances` verb-list and `action_family: investigation` engine vocabulary; §9c cites `Behavioral pressure: conceal, freeze` closed-enum tokens; §10b prints `CLK-N value: 2/4, salience: high, threshold at 3` numeric-engine summaries. The external prose renderer reads cold and orbits these abstract tokens in the rendered prose. This ticket extends the PPLAN-005/006 + SPEC91PAGPLABOD-001 translation pattern to §9 / §9b / §9c / §10b: structural sub-bullet templates remain validator-enforced (per shared-contract §8 lines covering §9b / §9c required sub-bullet sets), only the per-bullet content shape changes to prose-direction language; numeric values and closed-enum tokens move to §15 frontmatter where validators read them.
+Page-plan §9 ("Relationship and Belief Context"), §9b ("Active actor plans / tactical agency"), §9c ("Emotional causality / affective transition"), and §10b ("Open Setups, Active Clocks, Hidden Secrets") currently allow body content that enumerates raw record-IDs and engine-style ledger language: §9 lists `SREL-N` / `BEL-N` pairs without prose translation; §9b's sub-bullets cite `This page's SE.state_relations[]: advances` verb-list and `action_family: investigation` engine vocabulary; §9c cites `Behavioral pressure: conceal, freeze` closed-enum tokens; §10b prints `CLK-N value: 2/4, salience: high, threshold at 3` numeric-engine summaries. The external prose renderer reads cold and orbits these abstract tokens in the rendered prose. This ticket extends the PPLAN-005/006 + archived `archive/tickets/SPEC91PAGPLABOD-001.md` translation pattern to §9 / §9b / §9c / §10b: structural sub-bullet templates remain validator-enforced (per shared-contract §8 lines covering §9b / §9c required sub-bullet sets), only the per-bullet content shape changes to prose-direction language; numeric values and closed-enum tokens move to §15 frontmatter where validators read them.
 
 ## Assumption Reassessment (2026-05-26)
 
@@ -57,7 +57,7 @@ Same treatment as bootstrap: add §9 / §9b / §9c / §10b body-translation guid
 
 - Modifying the structural sub-bullet label sets for §9b / §9c — those are validator-enforced; this ticket changes only per-bullet content.
 - Rewriting existing PG-1 through PG-5 in `worlds/erotica-world/stories/red-bunny/pages-prose-plans/` — per SPEC-91 §9 Migration / scope, forward-only.
-- §7 / §7a body translation — covered by SPEC91PAGPLABOD-001.
+- §7 / §7a body translation — covered by `archive/tickets/SPEC91PAGPLABOD-001.md`.
 - §14 restructure — covered by SPEC91PAGPLABOD-003.
 - Touching `tools/validators/src/structural/page-plan-stchar-packet-integrity.ts` or related validators — the validator surface stays stable under this ticket.
 - Modifying the closed enums (`affect_kind`, `behavioral_pressure`, `action_family`, `clock_kind`, `salience`, etc.) — body rendering changes; underlying enums do not.

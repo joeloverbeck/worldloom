@@ -430,8 +430,8 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 4 | Relevant world-canon excerpt | context packet |
 | 5 | Active cast and entity statuses | `state_snapshot.entity_status` |
 | 6 | Current location and affordances | `state_snapshot.visible_affordances` |
-| 7 | Selected event and state delta | `SE` |
-| 7a | Turn driver / initiative trace | `SE.turn_driver` + parent-page active pressure disposition |
+| 7 | Selected event and state delta | `SE` translated into renderer-facing prose direction; engine state-delta arrays and lifecycle bookkeeping live in §15 frontmatter |
+| 7a | Turn driver / initiative trace | `SE.turn_driver` + parent-page active pressure disposition; fixed driver rows and disposition cell shape stay validator-enforced, while reason prose avoids bare record-id rationale where possible |
 | 8 | Required beats from the commitment block | selected `SLT.beats` |
 | 9 | Relationship and belief context | active `SREL`, `BEL` |
 | 9b | Active actor plans / tactical agency (optional) | per-page-computed from active `STPLAN` records; omitted entirely when no active STPLANs exist |
@@ -450,6 +450,21 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 19 | **Render-time instruction block** | **inlined verbatim from `reports/prose-quality-instructions.md` §Render-Time Instruction Template** |
 
 **§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages.
+
+### 7. Selected event and state delta
+
+§7 is the renderer-facing translation of the selected event and its state movement. It must tell the prose renderer what changed in the scene, pressure field, and relevant interior state in human prose. Do not expose the engine ledger as §7 body text: `state_delta.create[]`, `state_delta.supersede[]`, `state_delta.close[]`, `record_introductions[]`, `state_relations[]`, `non_propagation_facts[]`, and record-id-dense `world_logic_rationale` belong in §15 frontmatter or the underlying `SE` record, not in the body read by the external renderer.
+
+Preferred §7 body shape is a short prose-direction packet such as:
+
+```markdown
+What changed in <actor>'s interior this page:
+- <The actor's intent, appraisal, or pressure changed in story terms.>
+- <A new belief, observation, obligation, clock, or consequence becomes renderable as situation, behavior, or perception.>
+- <Any non-propagation or witness limit is expressed as what the prose may or may not show, not as YAML.>
+```
+
+The body can mention the selected event, route, rationale, and player-visible outcome in prose, but the machine-readable record ids, lifecycle transitions, introduction triggers, relation verbs, and non-propagation arrays remain greppable from §15 frontmatter for plan grounding and validation.
 
 ### 7a. Turn driver / initiative trace
 
@@ -471,6 +486,8 @@ Active-pressure disposition appears in §7a whenever the parent `PG.state_snapsh
 | <ID> | selected | became this turn's driver |
 | <ID> | deferred | <expires after PG-<integer> or condition> |
 | <ID> | rejected | <one-sentence reason> |
+
+The table keeps the closed `Disposition` vocabulary and `Reason / expiry` cell shape enforced by `active_pressure_handling_discipline`. Within that shape, write the reason as prose-facing pressure or scene logic rather than bare record-id rationale where possible. A deferred row may say `until the actor has a private opening to decide whether to approach`, and a selected row may say `became this turn's driver after the observed risk crossed the action threshold`; it must still satisfy the literal `PG-<integer>` or conditional-connective rule when the validator requires it.
 
 **§9b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `STPLAN` records — one entry per active plan with sub-bullets per the template below:
 

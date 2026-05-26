@@ -53,7 +53,7 @@ Add §14 authoring procedure: when parent prose has been rendered (`PG-(N-1).pro
 
 - `.claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md` — bootstrap PG-1 has no parent and unconditionally omits §14; no bootstrap-side edit needed.
 - Rewriting existing PG-2 through PG-5 in `worlds/erotica-world/stories/red-bunny/pages-prose-plans/` — per SPEC-91 §9 Migration / scope, forward-only.
-- §7 / §7a / §9 / §9b / §9c / §10b body translation — covered by SPEC91PAGPLABOD-001 and SPEC91PAGPLABOD-002.
+- §7 / §7a / §9 / §9b / §9c / §10b body translation — §7 / §7a is covered by `archive/tickets/SPEC91PAGPLABOD-001.md`; §9 / §9b / §9c / §10b remains covered by `tickets/SPEC91PAGPLABOD-002.md`.
 - Modifying the `pages-prose/PG-<integer>.md` artifact shape or location — only the §14 authoring procedure changes; the parent-prose artifact stays where it is.
 - New validator scanning §14 for compliance with the 4-subsection shape — out of scope for this ticket (a future ticket may add structural validation if §14 drift becomes a recurring issue; the spec §10 test plan does not name a §14-specific validator for SPEC-91).
 
