@@ -6,7 +6,7 @@ The drafted plan bytes are the future direct-write artifact. Keep the complete U
 
 **§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-Time Instruction Template) are inlined verbatim from `reports/prose-quality-instructions.md`.** Operationally load-bearing — external prose renderer has no cross-plan state; every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
 
-Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event as prose-facing scene, pressure, outcome, and state-change direction; §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` with `urgency` so debts that must be honored are visible to the prose renderer; §10b optionally lists active CLK / STSEC / STQ records after Phase 4; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) inlines recent rendered prose continuity from `pages-prose/<recent>.md` when available.
+Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event as prose-facing scene, pressure, outcome, and state-change direction; §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` with `urgency` so debts that must be honored are visible to the prose renderer; §10b optionally lists active CLK / STSEC / STQ records after Phase 4; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) carries a structured continuity packet derived from parent rendered prose when `pages-prose/PG-<parent>.md` exists on disk.
 
 **§7 state-delta body translation.** The §7 body is the renderer-facing explanation of the selected event and state movement: what changed in the actor, scene, or pressure field this page. It may name the chosen CHC or write-in interpretation, `outcome_route`, `world_logic_rationale`, and `resolution.player_visible_feedback` in prose, but it must not dump the engine ledger. Engine state-delta arrays, `record_introductions[]`, `state_relations[]`, `non_propagation_facts[]`, lifecycle bookkeeping, and record-id-heavy rationale move to §15 frontmatter and the underlying `SE` record.
 
@@ -20,6 +20,26 @@ What changed in <actor>'s interior this page:
 ```
 
 For non-accept routes, render `resolution.player_visible_feedback` as the player-legible story consequence. For accept routes, render the selected event, route, rationale, and state delta as scene movement without a `resolution` block.
+
+**§14 Recent prose continuity.** §14 is omitted when the parent rendered-prose file is absent. When `pages-prose/PG-<parent>.md` exists on disk, read it for continuity but do not inline it as a full verbatim dump. Instead, author this structured packet:
+
+```markdown
+## 14. Recent prose continuity
+
+### Where the previous page ended
+- <Several concise continuity bullets: what happened, where the cast is, what is held.>
+
+### Facts to preserve
+- <Object, position, body, relationship, or state facts the next page must honor.>
+
+### Do not reuse these exact prior phrases, anchors, or metaphor stocks
+- <Prior phrase, sensory anchor, image, or metaphor stock to avoid repeating.>
+
+### Fresh anchor opportunities
+- <Concrete sensory, material, behavioral, dialogue, or subtext opportunity for this page.>
+```
+
+Verbatim prior-prose quotation is allowed only when an exact line must be answered in a mid-dialogue continuation, a clue phrase carries legal or social weight, or the renderer must preserve a precise lie, promise, accusation, or question. If one of those triggers applies, quote only 1-3 lines and say which trigger justifies the quote. The cap applies only to quoted parent prose; it is not a length target for the page or for §14's own bullet lists.
 
 **§7a Active-pressure disposition table — closed-set Reason / expiry form.** Every high-urgency active record on the parent `PG.state_snapshot` MUST appear in exactly one `| Record | Disposition | Reason / expiry |` row (per shared contract §7a). The `active_pressure_handling_discipline` validator enforces the cell shape:
 - `disposition` is exactly one of `selected`, `deferred`, `rejected`. Any other token fails (`active_pressure_disposition_unknown`).

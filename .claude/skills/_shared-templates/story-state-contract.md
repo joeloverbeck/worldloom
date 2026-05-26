@@ -441,7 +441,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 11 | Forbidden mystery resolutions | `mystery_policy.forbidden_resolutions` |
 | 12 | Stopping point | from commitment block + author judgment |
 | 13 | Next choices to foreshadow or make available | emitted `CHC[]` |
-| 14 | Recent prose continuity (optional, when parent prose is rendered) | recent `pages-prose/*.md` |
+| 14 | Recent prose continuity (optional, when parent rendered prose exists) | structured packet derived from parent `pages-prose/PG-<integer>.md` |
 | 15 | Plan frontmatter (engine fields, hash, page id) | engine |
 | 16 | Cast material reality projection (optional) | per-skill |
 | 16a | STCHAR-derived character authority packets (mandatory when relevant) | STCHAR profile + page state |
@@ -450,6 +450,30 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 19 | **Render-time instruction block** | **inlined verbatim from `reports/prose-quality-instructions.md` §Render-Time Instruction Template** |
 
 **§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages.
+
+### 14. Recent prose continuity
+
+§14 is optional and appears only when a parent rendered-prose artifact exists on disk at `pages-prose/PG-<parent>.md`. Bootstrap PG-1 omits §14 because it has no parent. A turn-cycle page whose parent prose has not yet been rendered also omits §14; parent page snapshots remain valid fork points with or without rendered prose.
+
+When §14 is present, do not inline full parent prose. Author a structured continuity packet:
+
+```markdown
+## 14. Recent prose continuity
+
+### Where the previous page ended
+- <Several concise continuity bullets: what happened, where the cast is, what is held.>
+
+### Facts to preserve
+- <Object, position, body, relationship, or state facts the next page must honor.>
+
+### Do not reuse these exact prior phrases, anchors, or metaphor stocks
+- <Prior phrase, sensory anchor, image, or metaphor stock to avoid repeating.>
+
+### Fresh anchor opportunities
+- <Concrete sensory, material, behavioral, dialogue, or subtext opportunity for this page.>
+```
+
+Verbatim prior-prose quotation is permitted only when an exact line must be answered in a mid-dialogue continuation, a clue phrase carries legal or social weight, or the renderer must preserve a precise lie, promise, accusation, or question. When quotation is permitted, quote only 1-3 lines and name the trigger condition in the packet. The cap is a leakage-prevention rule for quoted parent prose, not a rendered-prose length target.
 
 ### 7. Selected event and state delta
 
