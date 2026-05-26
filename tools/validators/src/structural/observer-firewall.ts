@@ -268,7 +268,10 @@ function actorCanUseStatus(actor: string, referenceId: string, maps: RecordMaps)
     return false;
   }
   const entity = stringValue(asPlainRecord(record.parsed).entity);
-  return entity === actor || actorHasAccessRecord(actor, referenceId, maps);
+  if (entity === actor || actorHasAccessRecord(actor, referenceId, maps)) {
+    return true;
+  }
+  return entity !== undefined && actorHasObservabilityRouteTo(actor, entity, maps);
 }
 
 function actorHasAccessRecord(actor: string, referenceId: string, maps: RecordMaps): boolean {

@@ -76,11 +76,107 @@ records that prove the closure.
 To abandon a question, create `STQ-<N+1>` with `supersedes: STQ-<N>`,
 `status: abandoned`, and a non-empty `abandonment_rationale`.
 
+## Closed Enums Quick Reference
+
+The lifecycle-managed classes carry closed enums for `status` / `plan_status` /
+`affect_kind` / `behavioral_pressure` / `intensity` / `agency_effect`.
+Validators (`record_schema_compliance`, `stemo_enum_compliance`,
+`state_snapshot_integrity`) reject any value outside the closed set, and the
+**active set** (records lawful in `PG.state_snapshot.active_records[<class>]`)
+is narrower than the full status enum. Use this table at draft time so a typo
+or invented verb does not surface as a validator failure at submit.
+
+Schema source of truth lives at `tools/validators/src/schemas/story-*.schema.json`;
+this table is a copy maintained at the same revision and must stay in sync.
+
+### STEMO
+
+- `status`: `active` | `suppressed` | `settled` | `transformed` | `dissociated`
+  - **active set**: `active`, `suppressed`, `dissociated`
+- `affect_kind` (18, required unless `status: dissociated`):
+  `fear` | `anxiety` | `anger` | `disgust` | `grief` | `shame` | `guilt` |
+  `humiliation` | `hope` | `relief` | `joy` | `awe` | `tenderness` | `desire` |
+  `envy` | `contempt` | `confusion` | `dread`. Set to `null` only when
+  `status: dissociated`. `surprise` is intentionally NOT in the enum (surface
+  it at the event/appraisal layer); `numbness` is `status: dissociated` plus
+  `affect_kind: null`.
+- `behavioral_pressure` (18, required non-empty unless `status: dissociated`):
+  `approach` | `flee` | `freeze` | `attack` | `reject` | `dominate` | `submit` |
+  `seek_contact` | `protect_other` | `seek_help` | `confess` | `conceal` |
+  `withdraw_socially` | `plan` | `accommodate` | `self_soothe` | `ruminate` |
+  `collapse`. Common author trap: there is no `communicate`, no `engage`, no
+  `comfort`, no `reach_out` — `seek_contact` is the relational-engagement
+  pressure; `protect_other` is the protective-action pressure.
+- `intensity`: `low` | `medium` | `high` | `extreme` (required when
+  `affect_kind != null`).
+- `agency_effect`: `none` | `constraining`. `constraining` triggers Rule 1 /
+  Rule 5 downstream-artifact coverage per phase-4-5 guidance.
+
+### CLK
+
+- `status`: `active` | `paused` | `resolved` | `fired` | `abandoned` |
+  `superseded`
+  - **active set**: `active`, `paused`, `fired`
+  - Author trap: supersede-to-`resolved` is the prescribed pattern for
+    threshold-fire resolution, but a resolved CLK is inactive and must NOT
+    appear in `PG.state_snapshot.active_records.CLK`. If the resolution is
+    action-driven (the driving condition ended without a threshold firing),
+    `status: paused` is the semantically correct choice and keeps the CLK in
+    active_records pending possible resumption.
+
+### STSEC
+
+- `status`: `hidden` | `partially_revealed` | `revealed` | `disproven` |
+  `abandoned`
+  - **active set**: `hidden`, `partially_revealed`
+- `clue_carriers[].status`: `available` | `discovered` | `destroyed` |
+  `suppressed` | `superseded`
+
+### STQ
+
+- `status`: `open` | `complicated` | `answered` | `paid_off` | `abandoned` |
+  `inherited` | `superseded`
+  - **active set**: `open`, `complicated`
+  - Partial answer + newly-introduced complexity → `complicated`, not
+    `answered` (`answered` requires the question to be fully closed).
+
+### STPLAN
+
+- `plan_status`: `active` | `blocked` | `suspended` | `fulfilled` | `failed` |
+  `abandoned` | `revised`
+  - **active set**: `active`, `blocked`, `suspended`, `revised`
+
+### Inactive-status submission pattern
+
+When a supersession sets the new record to an inactive-set status (e.g.,
+`CLK status: resolved`, `STQ status: answered`, `STSEC status: revealed`,
+`STPLAN plan_status: fulfilled`, `STEMO status: settled`), `state_snapshot_integrity`
+requires the new record to be EXCLUDED from `PG.state_snapshot.active_records[<class>]`.
+`snapshot_replay_equality` currently demands the new record's INCLUSION because
+its replay algorithm does not consult lifecycle status. This validator-pair
+contradiction is tracked in `tickets/REPLAYSTATUSFILT-001.md`. Until that
+ticket lands, the lawful workarounds are:
+
+- Use the closest active-set status that matches the narrative semantics
+  (e.g., `CLK status: paused` instead of `resolved` when the driving condition
+  ended without a threshold firing).
+- Or accept the `state_snapshot_integrity.inactive_active_record` failure and
+  route through a follow-up repair turn.
+
+Do NOT silently drop the record from `active_records[<class>]` while keeping
+it created in `state_delta.create` — that path fails `snapshot_replay_equality`
+under the current algorithm.
+
 ## Cross-References
 
 - `docs/FOUNDATIONS.md` §Story Bundles §8: story-bundle atomic records remain
   append-only at the filesystem level.
+- `.claude/skills/_shared-templates/story-record-schemas.md` §4.5.14 (CLK),
+  §4.5.15 (STSEC), §4.5.16 (STQ), §4.5.17 (STPLAN), §4.5.18 (STEMO): canonical
+  field-list and enum definitions; this reference's quick-table mirrors them.
 - `.claude/skills/branching-story-turn-cycle/references/phase-4-5-belief-and-mystery.md`:
   phase-local lifecycle and belief propagation guidance.
 - `archive/tickets/SPEC44STOSTAAPP-003.md`: structural enforcement through
   `no_story_state_in_place_mutation`.
+- `tickets/REPLAYSTATUSFILT-001.md`: pending fix for the inactive-status
+  replay/integrity validator-pair contradiction.
