@@ -37,7 +37,6 @@ const RECORD_SOURCE_DIRS: Record<string, string> = {
   SE: "events",
   SF: "facts",
   SLT: "storylets",
-  STCHAR: "characters",
   STEMO: "emotions",
   STENT: "entities",
   STINT: "intentions",
@@ -55,6 +54,7 @@ const DIRECT_MARKDOWN_DIRS: Record<string, string> = {
   SAU: "audits",
   SLB: "storylet-batches",
   SP: "story-promotions",
+  STCHAR: "story-characters",
 };
 
 export function storyDirectory(repoRoot: string, worldSlug: string, storySlug: string): string {

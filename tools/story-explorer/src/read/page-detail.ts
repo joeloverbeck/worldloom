@@ -380,15 +380,25 @@ async function rawSources(
   const uniqueIds = [...new Set(ids)].filter(Boolean);
   const sources = await Promise.all(
     uniqueIds.map(async (recordId) => {
-      const raw = await readRecord(worldSlug, storySlug, recordId, repoRoot);
-      return {
-        recordId,
-        sourcePath: raw.sourcePath,
-        contentHash: raw.contentHash,
-      };
+      try {
+        const raw = await readRecord(worldSlug, storySlug, recordId, repoRoot);
+        return {
+          recordId,
+          sourcePath: raw.sourcePath,
+          contentHash: raw.contentHash,
+        };
+      } catch (error) {
+        const candidate = error as NodeJS.ErrnoException;
+        if (candidate.code === "ENOENT") {
+          return null;
+        }
+        throw error;
+      }
     })
   );
-  return sources.sort((left, right) => left.recordId.localeCompare(right.recordId, undefined, { numeric: true }));
+  return sources
+    .filter((source): source is RawSourceReference => source !== null)
+    .sort((left, right) => left.recordId.localeCompare(right.recordId, undefined, { numeric: true }));
 }
 
 export async function getPageDetail(

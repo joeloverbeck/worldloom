@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
@@ -25,6 +25,7 @@ function createFixture(): Fixture {
   for (const subdir of ["pages", "choices", "events", "entities"]) {
     mkdirSync(path.join(storyRoot, "_source", subdir), { recursive: true });
   }
+  mkdirSync(path.join(storyRoot, "story-characters"), { recursive: true });
   mkdirSync(path.join(storyRoot, "pages-prose"), { recursive: true });
   mkdirSync(path.join(storyRoot, "pages-prose-plans"), { recursive: true });
   mkdirSync(path.join(storyRoot, "pages-prose-receipts"), { recursive: true });
@@ -42,13 +43,19 @@ function writeRecord(storyRoot: string, sourceDir: string, recordId: string, bod
   return serialized;
 }
 
+function writeMarkdownRecord(storyRoot: string, sourceDir: string, recordId: string, body: string): string {
+  writeFileSync(path.join(storyRoot, sourceDir, `${recordId}.md`), body, "utf8");
+  return body;
+}
+
 function pageRecord(args: {
   id: string;
   parentPageId?: string | null;
   turnIndex?: number;
   choiceId?: string | null;
-  resolvedEventId: string;
+  resolvedEventId: string | null;
   emittedChoices?: string[];
+  activeRecords?: Record<string, string[]>;
 }): Record<string, unknown> {
   return {
     id: args.id,
@@ -63,7 +70,7 @@ function pageRecord(args: {
       resolved_event_id: args.resolvedEventId,
     },
     state_snapshot: {
-      active_records: {
+      active_records: args.activeRecords ?? {
         STENT: ["STENT-1"],
       },
       continuation: {
@@ -138,6 +145,15 @@ function insertNode(db: Database.Database, nodeId: string, filePath: string, nod
       VALUES ('fixture-world', ?, 'hash', '2026-05-26T00:00:00.000Z')
     `
   ).run(filePath);
+}
+
+function markIndexStale(db: Database.Database): void {
+  db.prepare(
+    `
+      INSERT INTO file_versions (world_slug, file_path, content_hash, last_indexed_at)
+      VALUES ('fixture-world', 'stories/red-bunny/missing-stale-marker.md', 'hash', '2026-05-26T00:00:00.000Z')
+    `
+  ).run();
 }
 
 function insertEdge(db: Database.Database, source: string, target: string, edgeType: string): void {
@@ -233,6 +249,81 @@ test("getPageDetail assembles page, prose, receipt, choices, variants, event del
   assert.deepEqual(
     detail.rawSources.map((source) => source.recordId),
     ["PG-1", "STENT-1"]
+  );
+});
+
+test("getPageDetail includes STCHAR markdown raw sources when the index is fresh", async () => {
+  const fixture = createFixture();
+  const root = writeRecord(
+    fixture.storyRoot,
+    "pages",
+    "PG-1",
+    pageRecord({ id: "PG-1", resolvedEventId: null, activeRecords: { STCHAR: ["STCHAR-1"] } })
+  );
+  const stchar = writeMarkdownRecord(
+    fixture.storyRoot,
+    "story-characters",
+    "STCHAR-1",
+    ["---", "id: STCHAR-1", "story_id: STORY-1", "title: Red Bunny", "---", "", "## Voice", "Careful and bright.", ""].join("\n")
+  );
+  insertPageNode(fixture.db, "PG-1", root);
+  insertNode(fixture.db, "red-bunny:STCHAR-1", "stories/red-bunny/story-characters/STCHAR-1.md", "story_character_record", stchar);
+  fixture.db.close();
+
+  const detail = await getPageDetail("fixture-world", "red-bunny", "PG-1", fixture.repoRoot);
+
+  assert.deepEqual(detail.validationIntegrity.skippedRecords, []);
+  assert.deepEqual(
+    detail.rawSources.map((source) => [source.recordId, path.relative(fixture.storyRoot, source.sourcePath)]),
+    [
+      ["PG-1", "_source/pages/PG-1.yaml"],
+      ["STCHAR-1", "story-characters/STCHAR-1.md"],
+    ]
+  );
+});
+
+test("getPageDetail includes STCHAR markdown raw sources when the index is stale", async () => {
+  const fixture = createFixture();
+  const root = writeRecord(
+    fixture.storyRoot,
+    "pages",
+    "PG-1",
+    pageRecord({ id: "PG-1", resolvedEventId: null, activeRecords: { STCHAR: ["STCHAR-1"] } })
+  );
+  writeMarkdownRecord(
+    fixture.storyRoot,
+    "story-characters",
+    "STCHAR-1",
+    ["---", "id: STCHAR-1", "story_id: STORY-1", "title: Red Bunny", "---", "", "## Voice", "Careful and bright.", ""].join("\n")
+  );
+  insertPageNode(fixture.db, "PG-1", root);
+  markIndexStale(fixture.db);
+  fixture.db.close();
+
+  const detail = await getPageDetail("fixture-world", "red-bunny", "PG-1", fixture.repoRoot);
+
+  assert.deepEqual(detail.validationIntegrity.skippedRecords, []);
+  assert.deepEqual(
+    detail.rawSources.map((source) => [source.recordId, path.relative(fixture.storyRoot, source.sourcePath)]),
+    [
+      ["PG-1", "_source/pages/PG-1.yaml"],
+      ["STCHAR-1", "story-characters/STCHAR-1.md"],
+    ]
+  );
+});
+
+test("getPageDetail omits missing active record raw sources and reports skipped records", async () => {
+  const fixture = seedPageDetailFixture();
+  markIndexStale(fixture.db);
+  fixture.db.close();
+  rmSync(path.join(fixture.storyRoot, "_source", "entities", "STENT-1.yaml"));
+
+  const detail = await getPageDetail("fixture-world", "red-bunny", "PG-1", fixture.repoRoot);
+
+  assert.deepEqual(detail.validationIntegrity.skippedRecords, ["STENT-1"]);
+  assert.deepEqual(
+    detail.rawSources.map((source) => source.recordId),
+    ["PG-1"]
   );
 });
 
