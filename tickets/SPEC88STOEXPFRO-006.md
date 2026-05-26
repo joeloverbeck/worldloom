@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — wires `web/src/routes/stories.tsx` as the `/worlds/:slug/stories` route, replacing T001's placeholder.
-**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md, archive/tickets/SPEC88STOEXPFRO-002.md, SPEC88STOEXPFRO-004
+**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md, archive/tickets/SPEC88STOEXPFRO-002.md, archive/tickets/SPEC88STOEXPFRO-004.md
 
 ## Problem
 
