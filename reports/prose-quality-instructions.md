@@ -8,6 +8,8 @@ This is the canonical source bundle for the plan-authoring skills of the story-s
 
 The plan-authoring skills inline §Content Policy, §Prose Craft Contract, and §Render-Time Instruction Template from this file into the per-page plan as §2, §3, and §19 respectively. The external renderer reads only the per-page plan body (`pages-prose-plans/PG-NNNN.md` §1-§19) and produces continuous prose; no part of this report is concatenated at render time. No commentary, no markdown headers, no engine vocabulary.
 
+Revision note: 2026-05-26 SPEC-91 cleanup replaced renderer-facing diagnostic enumeration, engine-vocabulary enumeration, and axis-name checklist framing with plain-language craft guidance. The Diagnostic Vocabulary table remains the internal prose-attach citation vocabulary.
+
 ---
 
 ## Content Policy
@@ -112,9 +114,9 @@ Self-narrating-self ("I noticed I was noticing", "I clocked it as I said it", "I
 
 ## 9. No ledger-jargon in prose, ever
 
-`CF-NNNN`, `M-N`, `CAU-N`, `SOC-N`, `AES-N`, `ONT-N`, `DIS-N`, `OBL-NNNN`, `SF-NNNN`, `STENT-NNNN`, `SE-NNNN`, `THR-NNNN`, `CHC-NNNN`, `INV-N`, `SLT-NNNN`, `STINT-NNNN`, `SREL-NNNN`, `CNSQ-NNNN`, `STLOC-NNNN`, `STOBJ-NNNN`, `DA-NNNN`, `BR-NNNN`, `PG-NNNN`, `ENT-NNNN`, `SEC-*`, `ARCTRACE-NNNN`, `SAU-NNNN`, `RSP-NNNN`, `SP-NNNN`, `SLB-NNNN`, `PA-NNNN`, `CHAR-NNNN`, `STORY-NNNN` are engine vocabulary. They never appear in narration, dialogue, or interiority — not as labels, not as references, not as hyphenated phrasings like "the secrecy-compounding-CAU-2 register" or "the M-3 substrate".
+No record-id-shaped tokens (uppercase class prefix followed by a hyphen and digits), no schema field names, no validator vocabulary, no hash language, no append-only / supersession / lifecycle terminology, no patch / engine / op vocabulary. The character does not know they live inside a ledger.
 
-The POV's interior may name a *secret*, a *taboo*, a *promise*, a *threat*, a *bruise* — never a record id. The character does not know they live inside a ledger.
+The POV's interior may name a *secret*, a *taboo*, a *promise*, a *threat*, a *bruise* — never a record id.
 
 ## 10. Sentence rhythm rotates
 
@@ -211,10 +213,10 @@ execution_envelope. Do not resolve any mystery declared as forbidden in the
 plan's forbidden_resolutions list or in mysteries_in_play[].
 Do not use internal record-identifier vocabulary in the prose.
 
-Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag
-filter_word_saturation, recurring_metaphor_across_pages,
-identical_anchor_recurrence, self_narrating_self, bracket_paraphrasing_dialogue,
-ledger_jargon_leakage, abstract_noun_saturation, and padding_or_truncation.
+Honor the Prose Craft Contract above. Stay in close POV; cut filter words; put
+action in the verb; anchor abstraction to concrete sensory specifics; vary
+anchors and metaphor stocks across pages; trust subtext; use record-id-free
+language throughout.
 
 Output continuous prose only. No commentary. No markdown headers. No engine
 vocabulary.
@@ -224,23 +226,23 @@ vocabulary.
 
 ## Anti-Pathology Checklist
 
-Reformatted from the Diagnostic Vocabulary table above as "what to avoid" prose. The eight axis names are the verbatim citation tokens — preserve them when flagging issues, since the prose critic and re-prompt routing cite by these exact strings.
+Reformatted from the Diagnostic Vocabulary table above as renderer-facing "what to avoid" prose. The Diagnostic Vocabulary table remains the internal citation vocabulary for prose-attach verdicts and re-prompt routing.
 
-- **Avoid `filter_word_saturation`.** High density of `I saw / heard / felt / noticed / knew / realized / clocked / named` constructions per 100 words. Cut filter words (Rule 3); use free indirect discourse instead of labeled interiority (Rule 2). Keep a filter only when the perceiving IS the load-bearing event.
+- Avoid high density of `I saw / heard / felt / noticed / knew / realized / clocked / named` constructions. Cut filter words (Rule 3); use free indirect discourse instead of labeled interiority (Rule 2). Keep a filter only when the perceiving IS the load-bearing event.
 
-- **Avoid `recurring_metaphor_across_pages`.** Any metaphor token from the prior 1-2 pages reused verbatim or near-verbatim. Voice persists across pages; phrasings rotate (Rules 6 and 7). If the prior page used a metaphor for indecision, this page uses something else, or names the indecision plainly.
+- Avoid reusing a metaphor token from the prior 1-2 pages verbatim or near-verbatim. Voice persists across pages; phrasings rotate (Rules 6 and 7). If the prior page used a metaphor for indecision, this page uses something else, or names the indecision plainly.
 
-- **Avoid `identical_anchor_recurrence`.** A specific concrete anchor — named object + sensory predicate — reused verbatim from a prior page. Find a different sensory anchor each page; the splinter at the edge of the bench is not "the bench wood was grey" recycled (Rule 6).
+- Avoid reusing a specific concrete anchor — named object plus sensory predicate — verbatim from a prior page. Find a different sensory anchor each page; the splinter at the edge of the bench is not "the bench wood was grey" recycled (Rule 6).
 
-- **Avoid `self_narrating_self`.** Constructions like "I noticed I was noticing", "I clocked it as I said it", or "I heard myself say it before I knew I would" — narrating the act of narrating (Rule 8). Cut these every time.
+- Avoid narrating the act of narrating: constructions like "I noticed I was noticing", "I clocked it as I said it", or "I heard myself say it before I knew I would" (Rule 8). Cut these every time.
 
-- **Avoid `bracket_paraphrasing_dialogue`.** An italicized or non-italicized analytical paragraph following a dialogue turn or gesture that paraphrases its subtext. Apply the deletion test: cut the meta-clause; if the scene survives, it was deadweight (Rule 8).
+- Avoid analytical paragraphs after a dialogue turn or gesture that paraphrase the subtext. Apply the deletion test: cut the meta-clause; if the scene survives, it was deadweight (Rule 8).
 
-- **Avoid `ledger_jargon_leakage`.** Engine vocabulary tokens (`CF-NNNN`, `M-N`, `CAU-N`, `SOC-N`, `OBL-NNNN`, `SF-NNNN`, `STENT-NNNN`, `SE-NNNN`, `THR-NNNN`, `CHC-NNNN`, `INV-N`, `SLT-NNNN`, `STINT-NNNN`, `SREL-NNNN`, `CNSQ-NNNN`, `STLOC-NNNN`, `STOBJ-NNNN`, `DA-NNNN`, `BR-NNNN`, `PG-NNNN`, `ENT-NNNN`, `SEC-*`, etc.) anywhere in narration, dialogue, or interiority — including hyphenated compounds like "the CAU-2 register" or "the M-3 substrate". The character does not know they live inside a ledger (Rule 9). This axis is a HARD-FAIL trigger.
+- Avoid record-id-shaped tokens, schema field names, validator vocabulary, hash language, append-only / supersession / lifecycle terminology, and patch / engine / op vocabulary anywhere in narration, dialogue, or interiority. The character does not know they live inside a ledger (Rule 9).
 
-- **Avoid `abstract_noun_saturation`.** A high ratio of nominalizations (`-tion / -ment / -ance / -ness`-suffix nouns) to vigorous action verbs, with `was/were/had + noun` constructions clustering. Put the action in the verb (Rule 4); anchor abstraction to sensory specifics (Rule 5).
+- Avoid a high ratio of nominalizations (`-tion / -ment / -ance / -ness`-suffix nouns) to vigorous action verbs, especially with `was/were/had + noun` constructions clustering. Put the action in the verb (Rule 4); anchor abstraction to sensory specifics (Rule 5).
 
-- **Avoid `padding_or_truncation`.** Filler sentences with no new information; content-summarizing closers ("she would think about this later") that exist to hit a length rather than to land a beat; premature exit before the storylet's beat completes or before the next decision point is naturally available; stretched-out moments without new information per paragraph. Length follows content (Rule 11).
+- Avoid filler sentences with no new information; content-summarizing closers ("she would think about this later") that exist to hit a length rather than to land a beat; premature exit before the storylet's beat completes or before the next decision point is naturally available; stretched-out moments without new information per paragraph. Length follows content (Rule 11).
 
 ---
 

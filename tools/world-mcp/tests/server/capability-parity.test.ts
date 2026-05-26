@@ -53,6 +53,7 @@ const EXPECTED_VALIDATOR_NAMES = [
   "non_propagation_facts_completeness",
   "observer_firewall",
   "page_affordance_integrity",
+  "page_plan_body_engine_vocabulary_cleanliness",
   "page_plan_stchar_packet_integrity",
   "page_plan_turn_driver_consistency",
   "proposal_package_shape",

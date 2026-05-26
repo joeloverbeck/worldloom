@@ -1,6 +1,6 @@
 # SPEC91PAGPLABOD-004: `reports/prose-quality-instructions.md` cleanup (§Render-Time Instruction Template + Anti-Pathology Checklist + Prose Craft Contract Rule 9)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `reports/prose-quality-instructions.md` (the canonical source bundle for plan §2 / §3 / §19 inlined verbatim into every page plan).
@@ -8,22 +8,23 @@
 
 ## Problem
 
-`reports/prose-quality-instructions.md` is the canonical source for the Content Policy (plan §2), Prose Craft Contract (plan §3), and Render-Time Instruction Template (plan §19), inlined verbatim every page per the user-confirmed operationally-load-bearing constraint (feedback memory `page_plan_verbatim_sections`, dated 2026-05-12). Three renderer-prompt pathologies live in the canonical source:
+`reports/prose-quality-instructions.md` is the canonical source for the Content Policy (plan §2), Prose Craft Contract (plan §3), and Render-Time Instruction Template (plan §19), inlined verbatim every page per the user-confirmed operationally-load-bearing constraint (feedback memory `page_plan_verbatim_sections`, dated 2026-05-12). At intake, three renderer-prompt pathologies lived in the canonical source:
 
-1. **§Render-Time Instruction Template** (currently at lines 214-217) contains the paragraph "Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag `filter_word_saturation`, `recurring_metaphor_across_pages`, `identical_anchor_recurrence`, `self_narrating_self`, `bracket_paraphrasing_dialogue`, `ledger_jargon_leakage`, `abstract_noun_saturation`, and `padding_or_truncation`." — this trains the external renderer to think about being judged by a rubric rather than to write fiction.
-2. **§Prose Craft Contract Rule 9** (currently at line 115) enumerates 30+ engine-vocabulary prefixes verbatim — `CF-NNNN`, `M-N`, `CAU-N`, `SOC-N`, `AES-N`, `ONT-N`, `DIS-N`, `OBL-NNNN`, `SF-NNNN`, `STENT-NNNN`, `SE-NNNN`, `THR-NNNN`, `CHC-NNNN`, `INV-N`, `SLT-NNNN`, `STINT-NNNN`, `SREL-NNNN`, `CNSQ-NNNN`, `STLOC-NNNN`, `STOBJ-NNNN`, `DA-NNNN`, `BR-NNNN`, `PG-NNNN`, `ENT-NNNN`, `SEC-*`, `ARCTRACE-NNNN`, `SAU-NNNN`, `RSP-NNNN`, `SP-NNNN`, `SLB-NNNN`, `PA-NNNN`, `CHAR-NNNN`, `STORY-NNNN` — paradoxically teaching the model the very engine vocabulary it is supposed to avoid.
-3. **§Anti-Pathology Checklist** (currently at lines 229+) repeats the same axis-name-as-citation-token framing in the renderer-facing prose, re-introducing the same rubric-thinking pathology pattern (1) addresses.
+1. **§Render-Time Instruction Template** carried the paragraph "Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag `filter_word_saturation`, `recurring_metaphor_across_pages`, `identical_anchor_recurrence`, `self_narrating_self`, `bracket_paraphrasing_dialogue`, `ledger_jargon_leakage`, `abstract_noun_saturation`, and `padding_or_truncation`." — this trained the external renderer to think about being judged by a rubric rather than to write fiction.
+2. **§Prose Craft Contract Rule 9** enumerated 30+ engine-vocabulary prefixes verbatim — `CF-NNNN`, `M-N`, `CAU-N`, `SOC-N`, `AES-N`, `ONT-N`, `DIS-N`, `OBL-NNNN`, `SF-NNNN`, `STENT-NNNN`, `SE-NNNN`, `THR-NNNN`, `CHC-NNNN`, `INV-N`, `SLT-NNNN`, `STINT-NNNN`, `SREL-NNNN`, `CNSQ-NNNN`, `STLOC-NNNN`, `STOBJ-NNNN`, `DA-NNNN`, `BR-NNNN`, `PG-NNNN`, `ENT-NNNN`, `SEC-*`, `ARCTRACE-NNNN`, `SAU-NNNN`, `RSP-NNNN`, `SP-NNNN`, `SLB-NNNN`, `PA-NNNN`, `CHAR-NNNN`, `STORY-NNNN` — paradoxically teaching the model the very engine vocabulary it is supposed to avoid.
+3. **§Anti-Pathology Checklist** repeated the same axis-name-as-citation-token framing in the renderer-facing prose, re-introducing the same rubric-thinking pathology pattern (1) addressed.
 
-This ticket reworks all three sites so the renderer-facing prompt carries craft guidance in plain language; the diagnostic axis names and the full engine-vocabulary token enumeration remain prose-attach internal validator vocabulary (no behavior change at the validator side). The §External-Renderer Usage Guide stale section-numbering cleanup was already landed inline on 2026-05-26 per SPEC-91 §7.4 and is OUT of scope for this ticket.
+This ticket reworked all three sites so the renderer-facing prompt carries craft guidance in plain language; the diagnostic axis names and the full engine-vocabulary token enumeration remain prose-attach internal validator vocabulary (no behavior change at the validator side). The §External-Renderer Usage Guide stale section-numbering cleanup was already landed inline on 2026-05-26 per SPEC-91 §7.4 and is OUT of scope for this ticket.
 
 ## Assumption Reassessment (2026-05-26)
 
 <!-- Items 1-3 always required. Items 4+ from menu, renumbered sequentially. -->
 
-1. **Codebase reference check**: `reports/prose-quality-instructions.md` exists (277 lines as of the SPEC-91 reassessment, post-§7.4 inline cleanup). Line 115 still contains the 30+-prefix engine-vocabulary enumeration in Rule 9 (verified via `grep -n "CF-NNNN" reports/prose-quality-instructions.md`); lines 214-217 still contain the "post-render prose critic will flag" diagnostic enumeration paragraph; line 229+ still contains the Anti-Pathology Checklist axis-name-as-citation-token framing. The §External-Renderer Usage Guide at line 261+ has already been cleaned per SPEC-91 §7.4's inline-landed fix — that section is NOT touched by this ticket.
+1. **Codebase reference check**: At intake, `reports/prose-quality-instructions.md` existed and still contained the three owned renderer-facing defects: Rule 9 carried the 30+-prefix engine-vocabulary enumeration, the Render-Time Instruction Template carried the "post-render prose critic will flag" diagnostic enumeration paragraph, and the Anti-Pathology Checklist carried axis-name-as-citation-token bullet leaders. After this ticket, those three renderer-facing sites use plain-language craft guidance; the Diagnostic Vocabulary table remains intact for prose-attach's internal citation vocabulary. The §External-Renderer Usage Guide had already been cleaned per SPEC-91 §7.4's inline-landed fix and was not touched by this ticket.
 2. **Spec reference**: SPEC-91 §7.1 (Render-Time Instruction Template cleanup), §7.2 (Rule 9 enumeration replacement), and §7.3 (Anti-Pathology Checklist axis-name rewrite) specify the three edits with verbatim replacement text. The full engine-vocabulary token enumeration is preserved and moves to a validator-only source file (`tools/validators/src/structural/_engine-vocabulary-tokens.ts`) created by SPEC91PAGPLABOD-005 — this ticket does NOT create that file; it only references SPEC-91's design that the enumeration will live there once 005 lands.
 3. **Cross-skill boundary**: `reports/prose-quality-instructions.md` is the SINGLE canonical source consumed by `branching-story-bootstrap` Phase 8 and `branching-story-turn-cycle` Phase 7 for inlining as plan §2 / §3 / §19. Per the user-confirmed §2/§3/§19 verbatim-inlining contract (feedback memory `page_plan_verbatim_sections`), edits to this file propagate to every subsequently-authored plan via the next bootstrap/turn-cycle invocation. No cross-page compaction is permissible (user decision 2026-05-12) — these sections stay inlined verbatim every page.
 4. **FOUNDATIONS principle restatement**: §Tooling Recommendation (LLM agents should receive comprehensive context for the task) governs this ticket — the renderer's cold-context prompt should carry render-useful guidance, not validator-vocabulary that trains the renderer to think about a critic rubric. Rewording the renderer-facing prose to use plain "avoid X" language preserves the prompt's instructional payload while removing the rubric-thinking pathology.
+5. **Revision-note correction**: The ticket drafted "Update file's revision history (top of file)", but the live report has no dedicated revision-history section. The truthful implementation added a top-of-file `Revision note:` immediately after the report's canonical-source introduction.
 
 ## Architecture Check
 
@@ -37,39 +38,39 @@ This ticket reworks all three sites so the renderer-facing prompt carries craft 
 3. **§Anti-Pathology Checklist axis-name framing reworded** → manual review confirming the per-bullet form changes from "Avoid `filter_word_saturation`. High density of..." to plain-language "Avoid high density of `I saw / heard / felt / noticed / knew / realized / clocked / named` constructions..."; axis names remain in the internal-facing Diagnostic Vocabulary table.
 4. **Internal validator-vocabulary preservation** → codebase grep-proof: the Diagnostic Vocabulary table (lines ~149-160) and the eight axis names remain unchanged for prose-attach's `craft_critic` consumption.
 
-## What to Change
+## Landed Changes
 
-### 1. Rewrite §Render-Time Instruction Template (currently lines 214-217)
+### 1. Rewrote §Render-Time Instruction Template
 
-Remove the paragraph beginning "Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag..." and replace with the SPEC-91 §7.1 verbatim replacement:
+Removed the paragraph beginning "Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag..." and replaced it with the SPEC-91 §7.1 plain-language craft guidance:
 
 > Honor the Prose Craft Contract above. Stay in close POV; cut filter words; put action in the verb; anchor abstraction to concrete sensory specifics; vary anchors and metaphor stocks across pages; trust subtext; use record-id-free language throughout.
 
-The eight axis names (`filter_word_saturation` etc.) remain in the internal Diagnostic Vocabulary table for prose-attach's consumption; the renderer does not see them.
+The eight axis names (`filter_word_saturation` etc.) remain in the internal Diagnostic Vocabulary table for prose-attach's consumption.
 
-### 2. Rewrite §Prose Craft Contract Rule 9 (currently line 115)
+### 2. Rewrote §Prose Craft Contract Rule 9
 
-Replace the 30+-prefix engine-vocabulary enumeration (`CF-NNNN, M-N, CAU-N, SOC-N, AES-N, ONT-N, DIS-N, OBL-NNNN, SF-NNNN, STENT-NNNN, SE-NNNN, THR-NNNN, CHC-NNNN, INV-N, SLT-NNNN, STINT-NNNN, SREL-NNNN, CNSQ-NNNN, STLOC-NNNN, STOBJ-NNNN, DA-NNNN, BR-NNNN, PG-NNNN, ENT-NNNN, SEC-*, ARCTRACE-NNNN, SAU-NNNN, RSP-NNNN, SP-NNNN, SLB-NNNN, PA-NNNN, CHAR-NNNN, STORY-NNNN`) with the SPEC-91 §7.2 verbatim replacement:
+Replaced the 30+-prefix engine-vocabulary enumeration (`CF-NNNN, M-N, CAU-N, SOC-N, AES-N, ONT-N, DIS-N, OBL-NNNN, SF-NNNN, STENT-NNNN, SE-NNNN, THR-NNNN, CHC-NNNN, INV-N, SLT-NNNN, STINT-NNNN, SREL-NNNN, CNSQ-NNNN, STLOC-NNNN, STOBJ-NNNN, DA-NNNN, BR-NNNN, PG-NNNN, ENT-NNNN, SEC-*, ARCTRACE-NNNN, SAU-NNNN, RSP-NNNN, SP-NNNN, SLB-NNNN, PA-NNNN, CHAR-NNNN, STORY-NNNN`) with the SPEC-91 §7.2 category-level wording:
 
 > No record-id-shaped tokens (uppercase class prefix followed by a hyphen and digits), no schema field names, no validator vocabulary, no hash language, no append-only / supersession / lifecycle terminology, no patch / engine / op vocabulary. The character does not know they live inside a ledger.
 
-The full token enumeration will land in `tools/validators/src/structural/_engine-vocabulary-tokens.ts` per SPEC91PAGPLABOD-005 (out of scope for this ticket; this ticket only removes the inline enumeration from the renderer-facing prompt).
+The full token enumeration remains planned for `tools/validators/src/structural/_engine-vocabulary-tokens.ts` per SPEC91PAGPLABOD-005 (out of scope for this ticket; this ticket only removes the inline enumeration from the renderer-facing prompt).
 
-### 3. Rewrite §Anti-Pathology Checklist axis-name framing (currently lines 229+)
+### 3. Rewrote §Anti-Pathology Checklist axis-name framing
 
-Replace each "Avoid `filter_word_saturation`..."-style bullet with the SPEC-91 §7.3 plain-language rewording. Example for the filter-word bullet:
+Replaced each "Avoid `filter_word_saturation`..."-style bullet with plain-language "Avoid X" prose. The filter-word bullet now leads:
 
 > Avoid high density of `I saw / heard / felt / noticed / knew / realized / clocked / named` constructions. Cut filter words and use free indirect discourse. Keep a filter only when the perceiving IS the load-bearing event.
 
-Apply the same rewording pattern to each axis-name-prefixed bullet — the axis names remain in the Diagnostic Vocabulary table (which is internal-facing) and as prose-attach validator output tokens.
+The same pattern landed for all eight checklist bullets. The axis names remain in the Diagnostic Vocabulary table (which is internal-facing) and as prose-attach validator output tokens.
 
-### 4. Update file's revision history (top of file)
+### 4. Added top-of-file revision note
 
-Add a line to the file's revision history at the top noting "2026-05-26: SPEC-91 cleanup — renderer-facing diagnostic-enumeration / engine-vocabulary-enumeration / axis-name-citation framing replaced with plain-language equivalents; internal Diagnostic Vocabulary table preserved for prose-attach consumption."
+Added a top-of-file `Revision note:` because the live report has no dedicated revision-history section.
 
-### 5. Verify no other skill or doc references the removed phrasings
+### 5. Verified no current skill/doc consumer depends on the removed phrasings
 
-Grep `.claude/skills/` and `docs/` for the removed phrasings (`post-render prose critic will flag`, the verbatim 30+-prefix list, the `Avoid \`filter_word_saturation\`` form). If any sibling consumer references these phrasings, surface the cross-spec follow-up at Step 6 per SPEC-91's spec-level scope; do not silently break sibling references.
+Grep over `.claude/skills/` and `docs/` found no current skill consumer references to the removed phrasings. The only remaining `post-render prose critic will flag` / `the prose critic will flag` hit is `docs/triage/2026-05-26-page-plans-improvements-first-iteration-triage.md`, a historical triage record.
 
 ## Files to Touch
 
@@ -106,7 +107,36 @@ Grep `.claude/skills/` and `docs/` for the removed phrasings (`post-render prose
 ### Commands
 
 1. `grep -n "post-render prose critic will flag" reports/prose-quality-instructions.md` — should return ZERO matches.
-2. `grep -n "CF-NNNN.*M-N.*CAU-N" reports/prose-quality-instructions.md` — should return ZERO matches (the Diagnostic Vocabulary table's smaller `CF-NNNN, M-N, CAU-N, SOC-N, OBL-NNNN, etc.` example set at line ~158 is internal-facing and remains; the renderer-facing Rule 9 prose's 30+-prefix enumeration is gone).
+2. `sed -n '113,118p' reports/prose-quality-instructions.md | grep -n "CF-NNNN.*M-N.*CAU-N"` — should return ZERO matches for Rule 9 specifically. A broader `grep -n "CF-NNNN.*M-N.*CAU-N" reports/prose-quality-instructions.md` intentionally returns the Diagnostic Vocabulary row only.
 3. `grep -nE "^- \\*\\*Avoid \`(filter_word_saturation|recurring_metaphor_across_pages|identical_anchor_recurrence|self_narrating_self|bracket_paraphrasing_dialogue|ledger_jargon_leakage|abstract_noun_saturation|padding_or_truncation)\`" reports/prose-quality-instructions.md` — should return ZERO matches (axis-name-as-bullet-leader framing replaced with plain-language leaders).
 4. `grep -B1 -A2 "filter_word_saturation\|recurring_metaphor_across_pages\|padding_or_truncation" reports/prose-quality-instructions.md` — should return Diagnostic Vocabulary table rows intact (internal validator vocabulary preserved).
 5. `grep -rl "post-render prose critic will flag\|the prose critic will flag" .claude/skills/ docs/` — verifies no sibling consumer breaks when the renderer-facing phrasing is removed.
+
+## Outcome
+
+Completed 2026-05-26.
+
+`reports/prose-quality-instructions.md` now carries the SPEC-91 prompt-cleanliness update:
+
+- Rule 9 no longer enumerates the 30+-prefix engine-vocabulary list in the renderer-facing Prose Craft Contract.
+- The Render-Time Instruction Template no longer enumerates prose-critic diagnostic tokens.
+- The Anti-Pathology Checklist no longer uses axis names as bullet-leader citation tokens.
+- The Diagnostic Vocabulary table remains intact as internal prose-attach vocabulary.
+- A top-of-file revision note records the SPEC-91 cleanup.
+
+No validator code, skill wiring, or world/story content changed.
+
+## Verification Result
+
+1. `grep -n "post-render prose critic will flag" reports/prose-quality-instructions.md` — PASS: zero matches.
+2. `sed -n '113,118p' reports/prose-quality-instructions.md | grep -n "CF-NNNN.*M-N.*CAU-N"` — PASS: zero matches in Rule 9.
+3. `sed -n '226,244p' reports/prose-quality-instructions.md | grep -n "CF-NNNN.*M-N.*CAU-N"` — PASS: zero matches in the Anti-Pathology Checklist.
+4. `grep -n "CF-NNNN.*M-N.*CAU-N" reports/prose-quality-instructions.md` — PASS with expected scoped exception: one remaining match in the Diagnostic Vocabulary table only, preserving internal validator vocabulary.
+5. `grep -nE "^- \\*\\*Avoid \`(filter_word_saturation|recurring_metaphor_across_pages|identical_anchor_recurrence|self_narrating_self|bracket_paraphrasing_dialogue|ledger_jargon_leakage|abstract_noun_saturation|padding_or_truncation)\`" reports/prose-quality-instructions.md` — PASS: zero matches.
+6. `grep -B1 -A2 "filter_word_saturation\|recurring_metaphor_across_pages\|padding_or_truncation" reports/prose-quality-instructions.md` — PASS: Diagnostic Vocabulary rows remain present; the command also reports the pre-existing Rule 11 `padding_or_truncation` anti-pattern heading and the voice/register guidance's legitimate `recurring_metaphor_across_pages` citation.
+7. `grep -rl "post-render prose critic will flag\|the prose critic will flag" .claude/skills/ docs/` — PASS with historical exception: no `.claude/skills/` hit; the only `docs/` hit is historical triage at `docs/triage/2026-05-26-page-plans-improvements-first-iteration-triage.md`.
+
+## Deviations
+
+- The drafted "Update file's revision history" step became a top-of-file `Revision note:` because the live report has no dedicated revision-history section.
+- The broad `CF-NNNN.*M-N.*CAU-N` grep is intentionally not a zero-hit proof over the whole file because the internal Diagnostic Vocabulary table preserves a small example token set. Scoped Rule 9 and checklist greps prove the renderer-facing enumeration was removed from the owned sections.

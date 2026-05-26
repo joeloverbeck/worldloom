@@ -10,7 +10,7 @@ User directive: "Please be critical of ChatGPT-Pro's proposals: reassess them fo
 
 Diagnosis correct; remedy over-engineered. The single-artifact architecture is preserved (per FOUNDATIONS §Story Bundles §4 and the 2026-05-10 PROSESPLIT decision); the engine-vocabulary cleanup pattern PPLAN-005/006 started is extended to the remaining sections; a new structural validator enforces the existing "engine jargon only in §15" contract rule. The two-artifact split is rejected.
 
-**Deliverable**: `specs/SPEC-91-page-plan-body-renderer-cleanliness.md`. Five ticket-sized chunks; estimated mid-sized scope.
+**Deliverable**: `archive/specs/SPEC-91-page-plan-body-renderer-cleanliness.md`. Five ticket-sized chunks; estimated mid-sized scope.
 
 ## Prior decisions this triage extends
 
