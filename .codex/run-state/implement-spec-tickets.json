@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-88-story-explorer-frontend-foundation.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC88STOEXPFRO-002.md",
+  "last_ticket": "archive/tickets/SPEC88STOEXPFRO-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "347920a6e6d51d5ef49dfa640829b4e3fe79fb1d",
+  "last_work_commit": "eb3c4194a2fa5c3257e325af542dc545a0231200",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC88STOEXPFRO-003.md",
+  "next_target": "tickets/SPEC88STOEXPFRO-004.md",
   "queue": [
-    "tickets/SPEC88STOEXPFRO-003.md",
     "tickets/SPEC88STOEXPFRO-004.md",
     "tickets/SPEC88STOEXPFRO-005.md",
     "tickets/SPEC88STOEXPFRO-006.md",
@@ -24,8 +23,8 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean focused proof: tools/story-explorer/web npm test passed 4/4 files and 10/10 tests; npm run build passed; backend-import grep returned no matches; sanitizer and local-storage prefix greps matched expected surfaces.",
-  "dirty_state": "expected ignored artifacts present after state commit: tools/story-explorer/web/dist/ and tools/story-explorer/web/node_modules/",
+  "proof_state": "clean focused proof: tools/story-explorer npm test passed backend compiled tests 70/70 and web vitest 4 files/10 tests; npm run test:backend passed 12 compiled test files; focused static-serve/read-only proof passed 9/9; read-only fence grep returned no matches.",
+  "dirty_state": "expected ignored artifacts present after state commit: tools/story-explorer/dist/, tools/story-explorer/node_modules/, tools/story-explorer/web/dist/, tools/story-explorer/web/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "updated_at": "2026-05-26"
