@@ -76,20 +76,23 @@ test("Layer 1: story-explorer manifest excludes mutation-surface packages", asyn
   assert.equal(dependencyNames.has("@worldloom/world-mcp"), false);
 });
 
-test("Layer 2: read-only guard allows GET route registrations", () => {
+test("Layer 2: read-only guard allows GET and HEAD route registrations", () => {
   const router = wrapRouterReadOnly(createMockRouter());
 
   router.route({ method: "GET", url: "/api/health" });
+  router.route({ method: "HEAD", url: "/api/health" });
   router.addRoute("GET", "/api/worlds");
+  router.addRoute("HEAD", "/api/worlds");
   router.get("/api/worlds/:slug");
+  router.route({ method: ["GET", "HEAD"], url: "/index.html" });
 
   assert.deepEqual(
     router.registered.map((route) => route.method),
-    ["GET", "GET", "GET"],
+    ["GET", "HEAD", "GET", "HEAD", "GET", ["GET", "HEAD"]],
   );
 });
 
-test("Layer 2: read-only guard rejects non-GET route registrations", () => {
+test("Layer 2: read-only guard rejects non-read route registrations", () => {
   const directCases: Array<[MockRoute, RegExp]> = [
     [{ method: "POST", url: "/api/write" }, /read-only fence violation: POST \/api\/write/],
     [{ method: "PUT", url: "/api/write" }, /read-only fence violation: PUT \/api\/write/],

@@ -1,0 +1,51 @@
+.prose {
+  max-width: var(--max-width-prose);
+  margin: 0 auto;
+  color: var(--color-text);
+  font-family: var(--font-family-prose);
+  font-size: var(--font-size-prose);
+  line-height: var(--line-height-prose);
+}
+
+.prose > * + * {
+  margin-block-start: var(--space-4);
+}
+
+.prose h1,
+.prose h2,
+.prose h3 {
+  color: var(--color-text);
+  font-family: var(--font-family-ui);
+  line-height: var(--line-height-heading);
+}
+
+.prose h1 {
+  font-size: var(--font-size-h1);
+}
+
+.prose h2 {
+  font-size: var(--font-size-h2);
+}
+
+.prose h3 {
+  font-size: var(--font-size-h3);
+}
+
+.prose blockquote {
+  margin-inline: 0;
+  padding-inline-start: var(--space-4);
+  border-inline-start: 4px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.prose code,
+.prose pre {
+  font-family: var(--font-family-mono);
+}
+
+.prose pre {
+  overflow-x: auto;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-elevated);
+}

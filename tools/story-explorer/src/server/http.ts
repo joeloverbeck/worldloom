@@ -1,6 +1,7 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
+import fastifyStatic from "@fastify/static";
 import Fastify, {
   type FastifyInstance,
   type FastifyReply,
@@ -85,6 +86,29 @@ function installEnvelopeHook(server: FastifyInstance, repoRoot: string, serverVe
   );
 }
 
+async function registerStaticServe(server: FastifyInstance, repoRoot: string): Promise<void> {
+  const webDistPath = path.resolve(repoRoot, "tools/story-explorer/web/dist");
+  const indexPath = path.join(webDistPath, "index.html");
+
+  if (!existsSync(indexPath)) {
+    return;
+  }
+
+  await server.register(fastifyStatic, {
+    root: webDistPath,
+    prefix: "/",
+    wildcard: false,
+  });
+
+  server.setNotFoundHandler((request, reply) => {
+    if (request.url.startsWith("/api")) {
+      return reply.code(404).send({ error: "not_found" });
+    }
+
+    return reply.sendFile("index.html");
+  });
+}
+
 export async function createServer(options: CreateServerOptions): Promise<FastifyInstance> {
   const server = wrapRouterReadOnly(
     Fastify({
@@ -94,6 +118,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   );
   const serverVersion = packageVersion();
 
+  await registerStaticServe(server, options.repoRoot);
   installEnvelopeHook(server, options.repoRoot, serverVersion);
 
   await registerHealthRoute(server, { serverVersion });
