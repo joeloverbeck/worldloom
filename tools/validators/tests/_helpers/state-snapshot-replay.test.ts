@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   OPTIONAL_ACTIVE_RECORDS_CLASSES,
   projectUnresolvedMysteryClaims,
+  replayActiveRecords,
   replayStateSnapshot,
   replayUnresolvedMysteryClaims
 } from "../../src/_helpers/state-snapshot-replay.js";
@@ -130,6 +131,37 @@ test("active-record optional class set does not include required STCHAR", () => 
   assert.ok(!(OPTIONAL_ACTIVE_RECORDS_CLASSES as readonly string[]).includes("STCHAR"));
 });
 
+test("active-record replay includes only active lifecycle statuses", () => {
+  const parentActiveRecords = emptyActiveRecords();
+  const records = new Map<string, Record<string, unknown>>([
+    ["CLK-1", { id: "CLK-1", status: "active" }],
+    ["CLK-2", { id: "CLK-2", status: "paused" }],
+    ["CLK-3", { id: "CLK-3", status: "fired" }],
+    ["CLK-4", { id: "CLK-4", status: "resolved" }],
+    ["CLK-5", { id: "CLK-5", status: "abandoned" }],
+    ["STEMO-1", { id: "STEMO-1", status: "settled" }]
+  ]);
+
+  const result = replayActiveRecords(parentActiveRecords, {
+    create: ["CLK-1", "CLK-2", "CLK-3", "CLK-4", "CLK-5", "STEMO-1"],
+    supersede: [],
+    close: []
+  }, records);
+
+  assert.deepEqual(result.CLK, ["CLK-1", "CLK-2", "CLK-3"]);
+  assert.deepEqual(result.STEMO, []);
+});
+
+test("active-record replay preserves current fallback when created record body is unavailable", () => {
+  const result = replayActiveRecords(emptyActiveRecords(), {
+    create: ["CLK-99"],
+    supersede: [],
+    close: []
+  }, new Map());
+
+  assert.deepEqual(result.CLK, ["CLK-99"]);
+});
+
 test("mystery claim projection defaults omitted evidence_records to an empty list", () => {
   assert.deepEqual(projectUnresolvedMysteryClaims([
     { mystery_id: "M-1", authority: "apparent", status: "preserved" }
@@ -163,3 +195,26 @@ test("mystery claim replay rejects status changes without event evidence", () =>
     }
   ]);
 });
+
+function emptyActiveRecords(): Record<string, string[]> {
+  return {
+    STENT: [],
+    STCHAR: [],
+    STINT: [],
+    SF: [],
+    BEL: [],
+    OBL: [],
+    CNSQ: [],
+    THR: [],
+    SREL: [],
+    STLOC: [],
+    STOBJ: [],
+    DA: [],
+    STSTAT: [],
+    CLK: [],
+    STSEC: [],
+    STQ: [],
+    STPLAN: [],
+    STEMO: []
+  };
+}

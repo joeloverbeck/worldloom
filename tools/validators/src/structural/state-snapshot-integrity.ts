@@ -1,4 +1,5 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { allowedActiveStatuses, lifecycleStatus } from "../_helpers/lifecycle-status.js";
 import { OPTIONAL_ACTIVE_RECORDS_CLASSES } from "../_helpers/state-snapshot-replay.js";
 import {
   asPlainRecord,
@@ -303,30 +304,6 @@ function inactiveActiveRecordVerdict(
     },
     suggested_fix: `Remove ${reference.id} from ${pageLabel}.state_snapshot.active_records.${recordClass} or update its lifecycle status before submit.`
   };
-}
-
-function lifecycleStatus(record: Record<string, unknown>, recordClass: string): string | undefined {
-  if (recordClass === "STPLAN") {
-    return stringValue(record.plan_status);
-  }
-  return stringValue(record.status);
-}
-
-function allowedActiveStatuses(recordClass: string): ReadonlySet<string> {
-  switch (recordClass) {
-    case "CLK":
-      return new Set(["active", "paused", "fired"]);
-    case "STSEC":
-      return new Set(["hidden", "partially_revealed"]);
-    case "STQ":
-      return new Set(["open", "complicated"]);
-    case "STPLAN":
-      return new Set(["active", "blocked", "suspended", "revised"]);
-    case "STEMO":
-      return new Set(["active", "suppressed", "dissociated"]);
-    default:
-      return new Set();
-  }
 }
 
 function missingOrMalformed(page: IndexedRecord, pageLabel: string, field: string, reason: string): Verdict {

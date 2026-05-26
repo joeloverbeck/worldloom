@@ -87,7 +87,10 @@ test("SPEC-47 T-3: snapshot replay carries STPLAN/STEMO active records through p
     create: ["STPLAN-1", "STEMO-1"],
     supersede: [],
     close: []
-  });
+  }, new Map([
+    ["STPLAN-1", { id: "STPLAN-1", plan_status: "active" }],
+    ["STEMO-1", { id: "STEMO-1", status: "active" }]
+  ]));
   assert.deepEqual(childActiveRecords.STPLAN, ["STPLAN-1"]);
   assert.deepEqual(childActiveRecords.STEMO, ["STEMO-1"]);
 
