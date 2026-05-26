@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { RouteLoading } from './components/RouteLoading';
+import { StoriesRoute, storyListLoader } from './routes/stories';
 import { WorldsRoute, worldListLoader } from './routes/worlds';
 
 function RouteFallback({ error, retry }: { error: Error; retry: () => void }): JSX.Element {
@@ -45,7 +46,12 @@ const router = createBrowserRouter([
   },
   {
     path: '/worlds/:slug/stories',
-    element: <RoutePlaceholder label="Route: /worlds/:slug/stories" />,
+    loader: storyListLoader,
+    element: (
+      <RouteFrame loadingLabel="Loading stories...">
+        <StoriesRoute />
+      </RouteFrame>
+    ),
   },
   {
     path: '/worlds/:slug/stories/:storySlug/entry',
