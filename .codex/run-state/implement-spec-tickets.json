@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-91-page-plan-body-renderer-cleanliness.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC91PAGPLABOD-001.md",
+  "last_ticket": "archive/tickets/SPEC91PAGPLABOD-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "92adbee9924d35bbde97c2009beaf5fcb70138b6",
+  "last_work_commit": "31a340f9c84d179a10ee48e22ce9ff021835652e",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC91PAGPLABOD-002.md",
+  "next_target": "tickets/SPEC91PAGPLABOD-003.md",
   "queue": [
-    "tickets/SPEC91PAGPLABOD-002.md",
     "tickets/SPEC91PAGPLABOD-003.md",
     "tickets/SPEC91PAGPLABOD-004.md",
     "tickets/SPEC91PAGPLABOD-005.md"
@@ -17,8 +16,8 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean focused docs proof: three grep checks passed; git diff --check passed",
-  "dirty_state": "unrelated dirty: deleted .claude/worktrees/spec88-stoexpfro",
+  "proof_state": "clean focused docs proof: four grep checks passed; git diff --check passed",
+  "dirty_state": "unrelated dirty: deleted .claude/worktrees/spec88-stoexpfro; modified specs/SPEC-89-story-explorer-state-xray-layer.md",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "updated_at": "2026-05-26"
