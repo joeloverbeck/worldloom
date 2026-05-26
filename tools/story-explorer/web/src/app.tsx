@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { RouteLoading } from './components/RouteLoading';
 import { PageEntryRoute, pageEntryLoader } from './routes/page-entry';
+import { PageReadRoute, pageReadLoader } from './routes/page-read';
 import { StoriesRoute, storyListLoader } from './routes/stories';
 import { WorldsRoute, worldListLoader } from './routes/worlds';
 
@@ -24,14 +25,6 @@ function RouteFrame({ children, loadingLabel }: { children: React.ReactNode; loa
     <ErrorBoundary renderFallback={(error, retry) => <RouteFallback error={error} retry={retry} />}>
       <Suspense fallback={<RouteLoading label={loadingLabel} />}>{children}</Suspense>
     </ErrorBoundary>
-  );
-}
-
-function RoutePlaceholder({ label }: { label: string }): JSX.Element {
-  return (
-    <main className="app-shell" aria-label={label}>
-      <p>{label}</p>
-    </main>
   );
 }
 
@@ -65,7 +58,12 @@ const router = createBrowserRouter([
   },
   {
     path: '/worlds/:slug/stories/:storySlug/pages/:pageId',
-    element: <RoutePlaceholder label="Route: /worlds/:slug/stories/:storySlug/pages/:pageId" />,
+    loader: pageReadLoader,
+    element: (
+      <RouteFrame loadingLabel="Loading page...">
+        <PageReadRoute />
+      </RouteFrame>
+    ),
   },
 ]);
 

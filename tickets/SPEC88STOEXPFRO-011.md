@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies T005/T006/T008 routes to integrate `<IndexStatusBanner>` for all 6 IndexStatus kinds; adds 404 and backend-unreachable global error surfaces.
-**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md, archive/tickets/SPEC88STOEXPFRO-005.md, archive/tickets/SPEC88STOEXPFRO-006.md, SPEC88STOEXPFRO-008
+**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md, archive/tickets/SPEC88STOEXPFRO-005.md, archive/tickets/SPEC88STOEXPFRO-006.md, archive/tickets/SPEC88STOEXPFRO-008.md
 
 ## Problem
 

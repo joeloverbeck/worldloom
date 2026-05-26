@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `web/src/components/{ProsePanel, ProseMissingPlaceholder}.tsx`; fills T008's prose-section slot.
-**Deps**: SPEC88STOEXPFRO-008
+**Deps**: archive/tickets/SPEC88STOEXPFRO-008.md
 
 ## Problem
 
