@@ -1,10 +1,12 @@
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router-dom';
 
-import type { EnvelopedResult, PageDetail, StorySummary, WorldSummary } from '../api/client';
+import type { EnvelopedResult, PageDetail, StorySummary, TerminalReason, WorldSummary } from '../api/client';
 import { getPageDetail, getStory, getWorld } from '../api/client';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { ChoiceCard } from '../components/ChoiceCard';
 import { PageHeader } from '../components/PageHeader';
 import { ProsePanel } from '../components/ProsePanel';
+import { TerminalCard } from '../components/TerminalCard';
 
 interface PageReadResult {
   world: EnvelopedResult<WorldSummary>;
@@ -19,8 +21,14 @@ function pageRecordId(page: Record<string, unknown>, fallback: string): string {
   return typeof page.id === 'string' && page.id.length > 0 ? page.id : fallback;
 }
 
-function hasNavigableChoice(pageDetail: PageDetail): boolean {
-  return pageDetail.choiceNavigation.some((choice) => choice.isNavigable);
+function pageIsLeaf(page: Record<string, unknown>): boolean {
+  return page.isLeaf === true;
+}
+
+function pageTerminalReason(page: Record<string, unknown>): TerminalReason {
+  return page.terminalReason === 'no_children' || page.terminalReason === 'paused' || page.terminalReason === 'terminal'
+    ? page.terminalReason
+    : null;
 }
 
 export async function pageReadLoader({ params }: LoaderFunctionArgs): Promise<PageReadResult> {
@@ -52,7 +60,8 @@ export function PageReadRoute(): JSX.Element {
   } = useLoaderData() as PageReadResult;
   const storyTitle = story.title ?? story.storySlug;
   const pageId = pageRecordId(pageDetail.page, routePageId);
-  const showTerminalSlot = !hasNavigableChoice(pageDetail);
+  const navigableChoices = pageDetail.choiceNavigation.filter((choice) => choice.isNavigable);
+  const showTerminal = pageIsLeaf(pageDetail.page) && navigableChoices.length === 0;
 
   return (
     <main className="app-shell page-read-route" aria-labelledby="page-title">
@@ -84,12 +93,20 @@ export function PageReadRoute(): JSX.Element {
           </section>
           <section className="reading-section choices-section" aria-labelledby="choices-section-title">
             <h2 id="choices-section-title">Choices</h2>
-            <p>Choice cards slot (T010 fills)</p>
+            {navigableChoices.length > 0 ? (
+              <div className="choice-list">
+                {navigableChoices.map((choice) => (
+                  <ChoiceCard key={choice.choiceId} choice={choice} worldSlug={worldSlug} storySlug={storySlug} />
+                ))}
+              </div>
+            ) : (
+              <p>No navigable choices from this page.</p>
+            )}
           </section>
-          {showTerminalSlot ? (
+          {showTerminal ? (
             <section className="reading-section terminal-section" aria-labelledby="terminal-section-title">
               <h2 id="terminal-section-title">Continuation</h2>
-              <p>Terminal card slot (T010 fills)</p>
+              <TerminalCard terminalReason={pageTerminalReason(pageDetail.page)} />
             </section>
           ) : null}
           <section className="reading-section xray-section" aria-labelledby="xray-section-title">

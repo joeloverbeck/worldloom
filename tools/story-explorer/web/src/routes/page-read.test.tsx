@@ -60,7 +60,7 @@ function story(overrides: Partial<StorySummary> = {}): StorySummary {
 
 function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
   return {
-    page: { id: 'PG-12' },
+    page: { id: 'PG-12', isLeaf: true, terminalReason: 'no_children' },
     prose: null,
     proseStatus: 'missing',
     pagePlanSummary: null,
@@ -136,15 +136,16 @@ describe('PageReadRoute', () => {
     expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
     expect(sectionHeadings).toEqual(['Prose', 'Choices', 'Continuation', 'State X-Ray', 'Summary']);
     expect(screen.getByText('Rendered prose not attached yet.')).toBeInTheDocument();
-    expect(screen.getByText('Choice cards slot (T010 fills)')).toBeInTheDocument();
-    expect(screen.getByText('Terminal card slot (T010 fills)')).toBeInTheDocument();
+    expect(screen.getByText('No navigable choices from this page.')).toBeInTheDocument();
+    expect(screen.getByText('No committed continuation from this page.')).toBeInTheDocument();
     expect(screen.getByText('State X-Ray slot (SPEC-89 fills)')).toBeInTheDocument();
     expect(screen.getByText('Summary rail slot (SPEC-89 fills)')).toBeInTheDocument();
   });
 
-  it('omits the terminal slot when a navigable child choice exists', async () => {
+  it('renders only navigable choices and omits terminal card when a child exists', async () => {
     await renderPageReadRoute(
       pageDetail({
+        page: { id: 'PG-12', isLeaf: false, terminalReason: null },
         choiceNavigation: [
           {
             choiceId: 'CHC-1',
@@ -167,10 +168,24 @@ describe('PageReadRoute', () => {
             ],
             isNavigable: true,
           },
+          {
+            choiceId: 'CHC-2',
+            surfaceLabel: 'Wait for a sign',
+            playerVisibleIntent: 'Hold position',
+            pressure: [],
+            groundedInCount: 0,
+            childOutcomeVariants: [],
+            isNavigable: false,
+          },
         ],
       }),
     );
 
-    expect(screen.queryByText('Terminal card slot (T010 fills)')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Follow the trail/i })).toHaveAttribute(
+      'href',
+      '/worlds/fixture-world/stories/red-bunny/pages/PG-13',
+    );
+    expect(screen.queryByText('Wait for a sign')).not.toBeInTheDocument();
+    expect(screen.queryByText('No committed continuation from this page.')).not.toBeInTheDocument();
   });
 });

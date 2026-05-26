@@ -7,6 +7,8 @@
 
 **Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-003` landed the backend integration slice: package-root build/test now chains the web bundle and backend compile, `@fastify/static` serves `web/dist/` when present, and the read-only fence permits only `GET`/`HEAD` route methods while rejecting mutation methods. Remaining §10 bullets are historical plan context until their tickets land.
 
+**Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-010` landed the under-prose choice navigation and terminal-card slice: `ChoiceCard`, `ChildOutcomeVariant`, and `TerminalCard` now render committed child-page navigation, multi-outcome variants, non-navigable CHC filtering, and the no-continuation terminal state. Remaining §6/§7 bullets are historical plan context unless they name later SPEC-89/SPEC-90 surfaces.
+
 ---
 
 ## 1. Purpose
