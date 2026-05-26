@@ -1,6 +1,6 @@
 # PROSESPLIT2-003: Update `docs/FOUNDATIONS.md`, `specs/IMPLEMENTATION-ORDER.md`, brainstorm worked precedent — propagate new canonical paths
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `docs/FOUNDATIONS.md` §Prose Length Discipline At Story Scope hosting reference; modifies `specs/IMPLEMENTATION-ORDER.md` SPEC-91 row; modifies `.claude/skills/brainstorm/references/triage-workflow-rules.md` worked-precedent narrative
@@ -8,13 +8,13 @@
 
 ## Problem
 
-After PROSESPLIT2-001/002 land, the canonical-source files exist at `docs/prose-renderer-contract/*` and all skill-side references point at the new paths. Three non-skill live references still point at the old `reports/prose-quality-instructions.md` path:
+At intake, after PROSESPLIT2-001/002 landed, the canonical-source files existed at `docs/prose-renderer-contract/*` and all skill-side references pointed at the new paths. Three non-skill live references still pointed at the old `reports/prose-quality-instructions.md` path:
 
 1. **`docs/FOUNDATIONS.md:714`** — the canonical hosting reference for the Prose Craft Contract under §9 Prose Length Discipline At Story Scope. This is the FOUNDATIONS-level audit-trail anchor that every canon-mutating story-pipeline skill audit cites.
 2. **`specs/IMPLEMENTATION-ORDER.md:18`** — the SPEC-91 row notes "`reports/prose-quality-instructions.md` cleanup" as part of SPEC-91's scope. Updating to the new path preserves traceability after the file moves.
 3. **`.claude/skills/brainstorm/references/triage-workflow-rules.md:92`** — a worked precedent narrative that cites both a non-existent `.claude/skills/_shared-templates/page-plan.md:11-14` (stale; the actual canonical template is `_shared-templates/story-state-contract.md` §8) AND `reports/prose-quality-instructions.md`. The lesson is forever-relevant (don't propose compacting §3 across page plans); the citations need pointer-updates so future readers can follow them.
 
-References in `docs/triage/*`, `docs/plans/*`, `archive/*`, and `reports/page-plans-improvements-first-iteration.md` are **historical decision records** documenting past work at the file's prior path — they are NOT updated by this ticket (out of scope). After PROSESPLIT2-001..004 the report at `reports/prose-quality-instructions.md` will be deleted; historical references will still resolve via git history for anyone investigating the path lineage.
+References in `docs/triage/*`, `docs/plans/*`, `archive/*`, and `reports/page-plans-improvements-first-iteration.md` are **historical decision records** documenting past work at the file's prior path — they were NOT updated by this ticket (out of scope). After PROSESPLIT2-004 the report at `reports/prose-quality-instructions.md` will be deleted; historical references will still resolve via git history for anyone investigating the path lineage.
 
 ## Assumption Reassessment (2026-05-26)
 
@@ -25,6 +25,9 @@ References in `docs/triage/*`, `docs/plans/*`, `archive/*`, and `reports/page-pl
 5. FOUNDATIONS principle motivating the rewire: §9 Prose Length Discipline At Story Scope explicitly hosts the contract path. Updating the path is mechanical; the principle's content is unchanged.
 6. **Historical-reference preservation policy**: `docs/triage/2026-05-10-...md`, `docs/triage/2026-05-12-...md`, `docs/triage/2026-05-15-...md`, `docs/triage/2026-05-26-...md`, `docs/plans/2026-05-10-prose-rendering-out-of-skill-design.md`, and `reports/page-plans-improvements-first-iteration.md` are dated decision records and analysis artifacts. Their references record the file's location at the time of writing and must NOT be retroactively updated — doing so misrepresents the historical state. PROSESPLIT2-003 updates only the three live-canon references above.
 7. `AGENTS.md` does NOT contain a literal `reports/prose-quality-instructions` reference (verified via `grep -n "prose-quality" AGENTS.md` returning empty). The mgrep-style semantic match scored 37.75% similarity but the file holds no literal citation. AGENTS.md is removed from the ticket scope.
+8. Root `pnpm turbo lint && pnpm turbo typecheck` is not a valid proof command in this checkout because there is no root `package.json` or `pnpm-workspace.yaml`; PROSESPLIT2-002 already recorded the same package-boundary deviation. The accepted proof for this markdown-only ticket is focused grep/manual review plus `git diff --check`.
+9. A repository-wide `_shared-templates/page-plan.md` sweep is intentionally too broad for this ticket: `.claude/skills/skill-streamlining-audit/SKILL.md` contains a generic example using that path, and historical `docs/plans/*` / `docs/triage/*` hits also remain by design. The owned stale-template proof is scoped to `.claude/skills/brainstorm/references/triage-workflow-rules.md`.
+10. `reports/prose-quality-instructions.md` exists but does not contain a self-reference to its own path, so the post-ticket broad old-path sweep returns only the SPEC-91 historical note outside excluded historical/ticket surfaces, not the source report itself.
 
 ## Architecture Check
 
@@ -36,13 +39,13 @@ References in `docs/triage/*`, `docs/plans/*`, `archive/*`, and `reports/page-pl
 1. `docs/FOUNDATIONS.md:714` hosting reference now names the three new canonical files → manual review + codebase grep-proof.
 2. `specs/IMPLEMENTATION-ORDER.md:18` SPEC-91 row description column references the new path → manual review.
 3. `.claude/skills/brainstorm/references/triage-workflow-rules.md:92` worked precedent now cites `.claude/skills/_shared-templates/story-state-contract.md` §8 (correct canonical template) AND `docs/prose-renderer-contract/prose-craft-contract.md` → manual review + grep-proof on the corrected citations.
-4. After PROSESPLIT2-001..003 land, all live-canon-document references resolve to `docs/prose-renderer-contract/*`; remaining `reports/prose-quality-instructions.md` references live only in dated `docs/triage/*` / `docs/plans/*` / `archive/*` / `reports/page-plans-improvements-first-iteration.md` decision records → codebase grep-proof: `grep -rn "reports/prose-quality-instructions" /home/joeloverbeck/projects/worldloom --include="*.md" --include="*.ts" | grep -v "/archive/" | grep -v "/docs/triage/" | grep -v "/docs/plans/" | grep -v "/reports/page-plans-improvements"` returns only the report itself (which is deleted by PROSESPLIT2-004).
+4. With PROSESPLIT2-003 completed, all live-canon-document references resolve to `docs/prose-renderer-contract/*`; remaining `reports/prose-quality-instructions.md` references live only in dated `docs/triage/*` / `docs/plans/*` / `archive/*` / `reports/page-plans-improvements-first-iteration.md` decision records, the source report's own content if it ever self-references, and the SPEC-91 historical note → codebase grep-proof excluding historical/ticket/worktree surfaces returns only the SPEC-91 historical note in `specs/IMPLEMENTATION-ORDER.md`.
 
-## What to Change
+## Landed Changes
 
 ### 1. `docs/FOUNDATIONS.md` line 714
 
-Replace the hosting reference cell:
+Replaced the hosting reference cell:
 
 **Old (line 714 tail)**: `The Prose Craft Contract is hosted at reports/prose-quality-instructions.md §Prose Craft Contract and inlined verbatim as page-plan §3 per .claude/skills/_shared-templates/story-state-contract.md §8.`
 
@@ -52,7 +55,7 @@ The expanded form names all three canonical-source files so the FOUNDATIONS audi
 
 ### 2. `specs/IMPLEMENTATION-ORDER.md` line 18 SPEC-91 row
 
-Replace the description cell's `reports/prose-quality-instructions.md` reference with the new location, preserving historical accuracy by noting the path migration:
+Replaced the description cell's `reports/prose-quality-instructions.md` reference with the new location, preserving historical accuracy by noting the path migration:
 
 **Old (line 18 cell)**: `Page-plan body renderer cleanliness & structural enforcement (extends PPLAN-005/006 to §7/§7a/§9/§9b/§9c/§10b/§14; new plan-body engine-vocabulary validator; reports/prose-quality-instructions.md cleanup)`
 
@@ -62,7 +65,7 @@ The parenthetical preserves SPEC-91's historical scope (it cleaned the file at t
 
 ### 3. `.claude/skills/brainstorm/references/triage-workflow-rules.md` line 92
 
-Replace both stale citations in the worked precedent narrative:
+Replaced both stale citations in the worked precedent narrative:
 
 **Old (line 92)**: `Worked precedent: a brainstorm proposed compacting §3 Prose Craft Contract across page plans, contradicting .claude/skills/_shared-templates/page-plan.md:11-14 which explicitly commits §2 / §3 / §19 as inlined verbatim from reports/prose-quality-instructions.md; the operator had read the canonical template during exploration but did not run an upstream-commitment check at approach-proposal time, so the contradiction reached the user who pushed back with the operational constraint (the external prose renderer has no cross-plan state). Catching this at approach-proposal time would have prevented the round-trip.`
 
@@ -92,7 +95,7 @@ The correction simultaneously fixes the stale `_shared-templates/page-plan.md:11
 2. `grep -n "reports/prose-quality-instructions" specs/IMPLEMENTATION-ORDER.md` returns one line containing the parenthetical historical note `(file since relocated to docs/prose-renderer-contract/ by PROSESPLIT2-001..004)` — the verbatim historical-reference + forward pointer is preserved.
 3. `grep -n "reports/prose-quality-instructions\|_shared-templates/page-plan.md" .claude/skills/brainstorm/references/triage-workflow-rules.md` returns empty after this ticket lands (both stale citations replaced).
 4. `grep -rn "docs/prose-renderer-contract" docs/FOUNDATIONS.md specs/IMPLEMENTATION-ORDER.md .claude/skills/brainstorm/references/triage-workflow-rules.md` returns the three new citations.
-5. Post-PROSESPLIT2-003 codebase-wide audit: `grep -rn "reports/prose-quality-instructions" /home/joeloverbeck/projects/worldloom --include="*.md" --include="*.ts" | grep -v "/archive/" | grep -v "/docs/triage/" | grep -v "/docs/plans/" | grep -v "/reports/page-plans-improvements" | grep -v "/tickets/PROSESPLIT2-"` returns only `/home/joeloverbeck/projects/worldloom/reports/prose-quality-instructions.md` itself (the file deleted by PROSESPLIT2-004) and possibly the historical-note line in `specs/IMPLEMENTATION-ORDER.md`. No live-canon reference remains.
+5. Post-PROSESPLIT2-003 codebase-wide audit: `grep -rn "reports/prose-quality-instructions" /home/joeloverbeck/projects/worldloom --include="*.md" --include="*.ts" --exclude-dir=worktrees | grep -v "/archive/" | grep -v "/docs/triage/" | grep -v "/docs/plans/" | grep -v "/reports/page-plans-improvements" | grep -v "/tickets/PROSESPLIT2-"` returns only the historical-note line in `specs/IMPLEMENTATION-ORDER.md`. No live-canon reference remains.
 
 ### Invariants
 
@@ -108,5 +111,35 @@ The correction simultaneously fixes the stale `_shared-templates/page-plan.md:11
 
 ### Commands
 
-1. `grep -rn "reports/prose-quality-instructions\|_shared-templates/page-plan.md" /home/joeloverbeck/projects/worldloom --include="*.md" --include="*.ts" | grep -v "/archive/" | grep -v "/docs/triage/" | grep -v "/docs/plans/" | grep -v "/reports/page-plans-improvements" | grep -v "/tickets/PROSESPLIT2-"` — should return only the deleted-by-PROSESPLIT2-004 source file + IMPL-ORDER's preserved historical note.
-2. `pnpm turbo lint && pnpm turbo typecheck` — full-pipeline confirmation that the markdown-only changes break nothing.
+1. `grep -n "reports/prose-quality-instructions" docs/FOUNDATIONS.md` — returns empty.
+2. `grep -n "reports/prose-quality-instructions" specs/IMPLEMENTATION-ORDER.md` — returns the SPEC-91 historical-note row.
+3. `grep -n "reports/prose-quality-instructions\|_shared-templates/page-plan.md" .claude/skills/brainstorm/references/triage-workflow-rules.md` — returns empty.
+4. `grep -rn "docs/prose-renderer-contract" docs/FOUNDATIONS.md specs/IMPLEMENTATION-ORDER.md .claude/skills/brainstorm/references/triage-workflow-rules.md` — returns the three new citations.
+5. `grep -rn "reports/prose-quality-instructions" /home/joeloverbeck/projects/worldloom --include="*.md" --include="*.ts" --exclude-dir=worktrees | grep -v "/archive/" | grep -v "/docs/triage/" | grep -v "/docs/plans/" | grep -v "/reports/page-plans-improvements" | grep -v "/tickets/PROSESPLIT2-"` — returns only the SPEC-91 historical-note row.
+6. `git diff --check -- docs/FOUNDATIONS.md specs/IMPLEMENTATION-ORDER.md .claude/skills/brainstorm/references/triage-workflow-rules.md archive/tickets/PROSESPLIT2-003.md` — whitespace/patch hygiene.
+
+## Outcome
+
+Completion date: 2026-05-26.
+
+Updated the three live non-skill prose-renderer contract references:
+
+- `docs/FOUNDATIONS.md` now names the split canonical files for page-plan §2 / §3 / §19.
+- `specs/IMPLEMENTATION-ORDER.md` preserves SPEC-91's historical old-path cleanup note while pointing readers to `docs/prose-renderer-contract/`.
+- `.claude/skills/brainstorm/references/triage-workflow-rules.md` now cites `.claude/skills/_shared-templates/story-state-contract.md` §8 and the split renderer-contract files.
+
+No historical decision records, archive files, active/future sibling tickets, or the old report file were edited.
+
+## Verification Result
+
+1. `grep -n "reports/prose-quality-instructions" docs/FOUNDATIONS.md` — PASS; command returned no matches (exit 1 from grep is the expected no-match signal).
+2. `grep -n "reports/prose-quality-instructions" specs/IMPLEMENTATION-ORDER.md` — PASS; returned only the SPEC-91 historical-note row with `file since relocated to docs/prose-renderer-contract/ by PROSESPLIT2-001..004`.
+3. `grep -n "reports/prose-quality-instructions\|_shared-templates/page-plan.md" .claude/skills/brainstorm/references/triage-workflow-rules.md` — PASS; command returned no matches (exit 1 from grep is the expected no-match signal).
+4. `grep -rn "docs/prose-renderer-contract" docs/FOUNDATIONS.md specs/IMPLEMENTATION-ORDER.md .claude/skills/brainstorm/references/triage-workflow-rules.md` — PASS; returned the three updated live citations.
+5. `grep -rn "reports/prose-quality-instructions" /home/joeloverbeck/projects/worldloom --include="*.md" --include="*.ts" --exclude-dir=worktrees | grep -v "/archive/" | grep -v "/docs/triage/" | grep -v "/docs/plans/" | grep -v "/reports/page-plans-improvements" | grep -v "/tickets/PROSESPLIT2-"` — PASS; returned only `specs/IMPLEMENTATION-ORDER.md:18`, the preserved historical-note row.
+6. `git diff --check -- docs/FOUNDATIONS.md specs/IMPLEMENTATION-ORDER.md .claude/skills/brainstorm/references/triage-workflow-rules.md archive/tickets/PROSESPLIT2-003.md` — PASS; no whitespace errors.
+
+## Deviations
+
+- The drafted full-pipeline `pnpm turbo lint && pnpm turbo typecheck` proof is not available in this checkout because there is no root `package.json` or `pnpm-workspace.yaml`. This markdown-only ticket uses focused grep/manual review and `git diff --check` instead.
+- The drafted broad combined sweep for `_shared-templates/page-plan.md` was narrowed to the owned brainstorm worked-precedent file. A wider discovery sweep still finds a generic example in `.claude/skills/skill-streamlining-audit/SKILL.md` and historical docs/triage/plans hits, which are outside this ticket's owner boundary.
