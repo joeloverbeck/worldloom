@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — wires `web/src/routes/page-read.tsx` as the `/worlds/:slug/stories/:storySlug/pages/:pageId` route, replacing T001's placeholder; adds 4 chrome components.
-**Deps**: SPEC88STOEXPFRO-001, SPEC88STOEXPFRO-002, SPEC88STOEXPFRO-004
+**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md, SPEC88STOEXPFRO-002, SPEC88STOEXPFRO-004
 
 ## Problem
 

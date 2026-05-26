@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `web/src/components/{ErrorBoundary, RouteLoading, IndexStatusBanner, disclosure/}.tsx` under T001's scaffold; no backend changes.
-**Deps**: SPEC88STOEXPFRO-001
+**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md
 
 ## Problem
 

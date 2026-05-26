@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `web/src/api/`, `web/src/prefs/`, `web/src/lib/` modules under T001's scaffold; no backend changes.
-**Deps**: SPEC88STOEXPFRO-001
+**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md
 
 ## Problem
 
