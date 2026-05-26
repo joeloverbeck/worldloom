@@ -4,6 +4,7 @@ import type { EnvelopedResult, PageDetail, StorySummary, WorldSummary } from '..
 import { getPageDetail, getStory, getWorld } from '../api/client';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { PageHeader } from '../components/PageHeader';
+import { ProsePanel } from '../components/ProsePanel';
 
 interface PageReadResult {
   world: EnvelopedResult<WorldSummary>;
@@ -70,7 +71,16 @@ export function PageReadRoute(): JSX.Element {
         <div className="reading-layout__main">
           <section className="reading-section prose-section" aria-labelledby="prose-section-title">
             <h2 id="prose-section-title">Prose</h2>
-            <p>Prose panel slot (T009 fills)</p>
+            <ProsePanel
+              proseStatus={pageDetail.proseStatus}
+              eagerProseBody={pageDetail.prose}
+              pageId={pageId}
+              branchId={pageDetail.branchContext.branchId}
+              turnIndex={pageDetail.branchContext.turnIndex}
+              worldSlug={worldSlug}
+              storySlug={storySlug}
+              pagePlanSummary={pageDetail.pagePlanSummary}
+            />
           </section>
           <section className="reading-section choices-section" aria-labelledby="choices-section-title">
             <h2 id="choices-section-title">Choices</h2>

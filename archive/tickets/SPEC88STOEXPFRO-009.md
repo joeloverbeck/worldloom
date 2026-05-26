@@ -1,14 +1,14 @@
 # SPEC88STOEXPFRO-009: Prose panel + missing-prose placeholder + lazy-fetch composition
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — adds `web/src/components/{ProsePanel, ProseMissingPlaceholder}.tsx`; fills T008's prose-section slot.
+**Engine Changes**: Yes — adds `web/src/components/{ProsePanel, ProseMissingPlaceholder}.tsx`, component tests, prose placeholder styles, and fills T008's prose-section slot.
 **Deps**: archive/tickets/SPEC88STOEXPFRO-008.md
 
 ## Problem
 
-The prose panel is the emotional center of the reading page — literary typography, generous reading column, sanitized markdown rendering, and a polished placeholder when prose hasn't been attached. SPEC-88 §5 (post-reassessment) commits to specific behaviors: typography rules, an eager-when-`present` / lazy-via-`/prose/:pageId` fetch composition per SPEC-87 §5's separate route, and three distinct missing-states (`missing`, `unreadable`, `hash_mismatch`) each with its own placeholder copy. Without this ticket, T008's prose-section slot remains a placeholder and the explorer cannot show prose at all.
+The prose panel is the emotional center of the reading page — literary typography, generous reading column, sanitized markdown rendering, and a polished placeholder when prose hasn't been attached. SPEC-88 §5 (post-reassessment) commits to specific behaviors: typography rules, an eager-when-`present` / lazy-via-`/prose/:pageId` fetch composition per SPEC-87 §5's separate route, and three distinct missing-states (`missing`, `unreadable`, `hash_mismatch`) each with its own placeholder copy. At intake, T008's prose-section slot remained a placeholder and the explorer could not show prose.
 
 ## Assumption Reassessment (2026-05-26)
 
@@ -35,11 +35,11 @@ The prose panel is the emotional center of the reading page — literary typogra
 5. **Sanitization rejects script tags** → unit test: pass `proseStatus: 'present'` + `eagerProseBody: '<script>alert(1)</script>'`; assert script is stripped before DOM injection.
 6. **Page-status strip renders only when prose is present** → unit test: present → strip renders; missing → strip absent.
 
-## What to Change
+## Landed Changes
 
 ### 1. Create `tools/story-explorer/web/src/components/ProsePanel.tsx`
 
-Functional component. Props:
+Created a functional component with props:
 ```ts
 interface ProsePanelProps {
   proseStatus: ProseStatus;
@@ -49,24 +49,25 @@ interface ProsePanelProps {
   turnIndex: number;
   worldSlug: string;
   storySlug: string;
+  pagePlanSummary?: PagePlanSummary | null;
 }
 ```
-Logic:
-- If `proseStatus !== 'present'` → render `<ProseMissingPlaceholder status={proseStatus} />`.
-- Else if `eagerProseBody !== null` → render sanitized markdown directly.
-- Else → wrap in `<Suspense>` and fetch via `getProseBody(worldSlug, storySlug, pageId)`; render sanitized result.
-- When prose is present (eager or lazy), render the page-status strip below: `PG-{pageId.split('-')[1]} · Branch {branchId} · Turn {turnIndex}` (using T002's `format.ts` helpers).
-- Markdown rendering uses T002's `sanitizeMarkdown()` then `dangerouslySetInnerHTML` on a `<div className="prose">` (the prose class is styled by T001's `prose.css`).
+Landed behavior:
+- If `proseStatus !== 'present'`, renders `<ProseMissingPlaceholder status={proseStatus} />`.
+- If `eagerProseBody !== null`, renders sanitized markdown directly.
+- If `eagerProseBody === null`, wraps a lazy prose resource in `<Suspense>` with `<RouteLoading label="Loading prose..." />`, fetches via `getProseBody(worldSlug, storySlug, pageId)`, and renders the sanitized result.
+- When prose is present, renders the page-status strip below as `{pageId} · Branch {branchId} · Turn {turnIndex}` using `formatPageStatusStrip()`.
+- Markdown rendering uses T002's `sanitizeMarkdown()` before `dangerouslySetInnerHTML` on a `<div className="prose">`.
 
 ### 2. Create `tools/story-explorer/web/src/components/ProseMissingPlaceholder.tsx`
 
-Functional component. Props:
+Created a functional component with props:
 ```ts
 interface ProseMissingPlaceholderProps {
   status: 'missing' | 'unreadable' | 'hash_mismatch';
 }
 ```
-Renders a polished placeholder per the §5 copy specification:
+Landed behavior renders a polished placeholder per the §5 copy specification:
 - `missing` → header "Rendered prose not attached yet." + subtitle "This page's state, choices, event delta, and records are available below."
 - `unreadable` → header "Prose file present but unreadable." + subtitle "See Validation & Integrity in State X-Ray."
 - `hash_mismatch` → header "Prose receipt indicates hash mismatch." + subtitle "See Validation & Integrity."
@@ -77,17 +78,18 @@ The placeholder uses a designed visual treatment (centered, restrained, calm —
 
 ### 3. Update `tools/story-explorer/web/src/routes/page-read.tsx`
 
-Replace the prose-section placeholder with:
+Replaced the prose-section placeholder with:
 ```tsx
 <section className="prose-section">
   <ProsePanel
     proseStatus={pageDetail.proseStatus}
     eagerProseBody={pageDetail.prose}
-    pageId={pageDetail.page.id}
+    pageId={pageId}
     branchId={pageDetail.branchContext.branchId}
     turnIndex={pageDetail.branchContext.turnIndex}
     worldSlug={worldSlug}
     storySlug={storySlug}
+    pagePlanSummary={pageDetail.pagePlanSummary}
   />
 </section>
 ```
@@ -96,6 +98,11 @@ Replace the prose-section placeholder with:
 
 - `tools/story-explorer/web/src/components/ProsePanel.test.tsx` — verifies Verification Layers 1, 2, 4, 5, 6.
 - `tools/story-explorer/web/src/components/ProseMissingPlaceholder.test.tsx` — verifies Verification Layer 3 (each state's copy).
+- `tools/story-explorer/web/src/routes/page-read.test.tsx` — updated route integration proof so the prose section now renders the missing-prose placeholder instead of the T009 placeholder text.
+
+### 5. Add styles
+
+- `tools/story-explorer/web/src/styles/app.css` — added prose panel status strip and missing-prose placeholder styles.
 
 ## Files to Touch
 
@@ -104,6 +111,8 @@ Replace the prose-section placeholder with:
 - `tools/story-explorer/web/src/components/ProseMissingPlaceholder.tsx` (new)
 - `tools/story-explorer/web/src/components/ProseMissingPlaceholder.test.tsx` (new)
 - `tools/story-explorer/web/src/routes/page-read.tsx` (modify — fills prose-section slot)
+- `tools/story-explorer/web/src/routes/page-read.test.tsx` (modify — proves the route now renders the prose placeholder state)
+- `tools/story-explorer/web/src/styles/app.css` (modify — prose panel and missing-prose placeholder styles)
 
 ## Out of Scope
 
@@ -134,9 +143,35 @@ Replace the prose-section placeholder with:
 
 1. `tools/story-explorer/web/src/components/ProsePanel.test.tsx` (new) — verifies eager/lazy composition, sanitization, plan-never-substitutes, page-status strip conditional.
 2. `tools/story-explorer/web/src/components/ProseMissingPlaceholder.test.tsx` (new) — verifies each placeholder state's copy.
+3. `tools/story-explorer/web/src/routes/page-read.test.tsx` (modified) — verifies the reading route renders the prose placeholder state in the prose section.
 
 ### Commands
 
 1. `cd tools/story-explorer/web && npm test` — full vitest suite.
 2. `cd tools/story-explorer/web && npm run build` — TypeScript verification.
 3. `grep -n "dangerouslySetInnerHTML" tools/story-explorer/web/src/components/ProsePanel.tsx` — XSS-safety audit (every match must be preceded by sanitizeMarkdown call).
+
+## Outcome
+
+Completed on 2026-05-26. The reading page now renders a real prose surface instead of the T009 slot placeholder:
+
+- Added `<ProsePanel>` with eager prose rendering, lazy deferred prose fetch via `getProseBody()`, `RouteLoading` Suspense fallback, sanitized markdown output, and a page-status strip.
+- Added `<ProseMissingPlaceholder>` with the three SPEC-88 §5 degraded prose states and disabled SPEC-89 x-ray target.
+- Integrated `<ProsePanel>` into `page-read.tsx`.
+- Added focused component tests and updated the route integration test.
+- Added matching CSS for the prose panel status strip and missing-prose placeholder.
+
+## Verification Result
+
+Passed:
+
+1. Baseline before edits: `cd tools/story-explorer/web && npm test -- page-read.test` — 1 file / 3 tests passed.
+2. Focused proof after edits: `cd tools/story-explorer/web && npm test -- ProsePanel.test ProseMissingPlaceholder.test page-read.test` — 3 files / 11 tests passed.
+3. Build proof: `cd tools/story-explorer/web && npm run build` — TypeScript and Vite production build passed.
+4. Full web suite: `cd tools/story-explorer/web && npm test` — 17 files / 57 tests passed.
+5. XSS audit: `grep -n "dangerouslySetInnerHTML" tools/story-explorer/web/src/components/ProsePanel.tsx` returned the single render site; source inspection confirmed the same function assigns `const sanitized = sanitizeMarkdown(markdown);` before injection.
+
+## Deviations
+
+- The route integration test and `app.css` were added to the landed file set because replacing T008's prose slot required route-level proof and visible placeholder/status-strip styling. This is same-seam fallout inside the SPEC-88 §5 prose panel boundary.
+- The lazy prose implementation uses a small resource cache keyed by world/story/page so React Suspense can retry the fetch without reissuing the same request. The cache is internal to the component module and does not write browser or repo state.

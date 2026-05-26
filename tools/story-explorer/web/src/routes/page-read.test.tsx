@@ -135,7 +135,7 @@ describe('PageReadRoute', () => {
 
     expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
     expect(sectionHeadings).toEqual(['Prose', 'Choices', 'Continuation', 'State X-Ray', 'Summary']);
-    expect(screen.getByText('Prose panel slot (T009 fills)')).toBeInTheDocument();
+    expect(screen.getByText('Rendered prose not attached yet.')).toBeInTheDocument();
     expect(screen.getByText('Choice cards slot (T010 fills)')).toBeInTheDocument();
     expect(screen.getByText('Terminal card slot (T010 fills)')).toBeInTheDocument();
     expect(screen.getByText('State X-Ray slot (SPEC-89 fills)')).toBeInTheDocument();
