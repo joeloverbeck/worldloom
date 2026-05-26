@@ -53,8 +53,13 @@ const GROUP_BY_CLASS_PREFIX: Record<string, RecordGroup> = {
 
 type RecordLoadState =
   | { kind: 'loading' }
-  | { kind: 'loaded'; recordCard: RecordCard }
+  | { body: string | null; kind: 'loaded'; recordCard: RecordCard }
   | { kind: 'error'; recordId: string };
+
+interface LoadedRecord {
+  body: string | null;
+  recordCard: RecordCard;
+}
 
 function recordClassPrefix(recordId: string): string {
   return recordId.split('-')[0] ?? recordId;
@@ -64,8 +69,8 @@ function groupForRecordId(recordId: string): RecordGroup {
   return GROUP_BY_CLASS_PREFIX[recordClassPrefix(recordId)] ?? 'Validation & Integrity';
 }
 
-function emptyGroups(): Record<RecordGroup, RecordCard[]> {
-  const groups = {} as Record<RecordGroup, RecordCard[]>;
+function emptyGroups<T>(): Record<RecordGroup, T[]> {
+  const groups = {} as Record<RecordGroup, T[]>;
   for (const group of CURRENT_STATE_GROUPS) {
     groups[group] = [];
   }
@@ -73,11 +78,12 @@ function emptyGroups(): Record<RecordGroup, RecordCard[]> {
   return groups;
 }
 
-function groupRecords(recordCards: RecordCard[]): Record<RecordGroup, RecordCard[]> {
-  return recordCards.reduce((groups, recordCard) => {
-    groups[groupForRecordId(recordCard.recordId)].push(recordCard);
+function groupRecords(records: LoadedRecord[]): Record<RecordGroup, LoadedRecord[]> {
+  return records.reduce((groups, record) => {
+    const recordCard = record.recordCard;
+    groups[groupForRecordId(recordCard.recordId)].push(record);
     return groups;
-  }, emptyGroups());
+  }, emptyGroups<LoadedRecord>());
 }
 
 function visibleAffordances(page: Record<string, unknown>): string[] {
@@ -97,7 +103,7 @@ function RecordList({
   worldSlug,
 }: {
   onRecordLinkClick?: (link: RecordLink | string) => void;
-  records: RecordCard[];
+  records: LoadedRecord[];
   storySlug: string;
   worldSlug: string;
 }): JSX.Element | null {
@@ -116,10 +122,11 @@ function RecordList({
   if (records.length < VIRTUALIZATION_THRESHOLD) {
     return (
       <div className="xray-record-list">
-        {records.map((recordCard) => (
+        {records.map(({ body, recordCard }) => (
           <RecordCardExpanded
             key={recordCard.recordId}
             onRecordLinkClick={onRecordLinkClick}
+            recordBody={body}
             recordCard={recordCard}
             storyContext={{ storySlug, worldSlug }}
           />
@@ -132,7 +139,7 @@ function RecordList({
   const windowedItems =
     virtualItems.length > 0
       ? virtualItems
-      : records.slice(0, 12).map((_, index) => ({ index, key: records[index]?.recordId ?? index, start: index * 168, size: 168 }));
+      : records.slice(0, 12).map((_, index) => ({ index, key: records[index]?.recordCard.recordId ?? index, start: index * 168, size: 168 }));
 
   return (
     <div
@@ -142,8 +149,8 @@ function RecordList({
     >
       <div className="xray-record-list__spacer" style={{ height: `${Math.max(virtualizer.getTotalSize(), records.length * 168)}px` }}>
         {windowedItems.map((virtualItem) => {
-          const recordCard = records[virtualItem.index];
-          if (!recordCard) {
+          const record = records[virtualItem.index];
+          if (!record) {
             return null;
           }
 
@@ -154,7 +161,7 @@ function RecordList({
               key={virtualItem.key}
               style={{ transform: `translateY(${virtualItem.start}px)`, height: `${virtualItem.size}px` }}
             >
-              <RecordCardCompact recordCard={recordCard} />
+              <RecordCardCompact recordCard={record.recordCard} />
             </div>
           );
         })}
@@ -184,7 +191,8 @@ export function CurrentStateTab({ onRecordLinkClick, pageDetail, storySlug, worl
       pageDetail.currentStateRecordIds.map(async (recordId): Promise<RecordLoadState> => {
         try {
           const { payload } = await getRecord(worldSlug, storySlug, recordId);
-          return { kind: 'loaded', recordCard: payload.recordCard };
+          const body = typeof payload.record.body === 'string' ? payload.record.body : null;
+          return { body, kind: 'loaded', recordCard: payload.recordCard };
         } catch {
           return { kind: 'error', recordId };
         }
@@ -200,10 +208,10 @@ export function CurrentStateTab({ onRecordLinkClick, pageDetail, storySlug, worl
     };
   }, [pageDetail.currentStateRecordIds, storySlug, worldSlug]);
 
-  const loadedRecordCards = records.flatMap((record) => (record.kind === 'loaded' ? [record.recordCard] : []));
+  const loadedRecords = records.flatMap((record) => (record.kind === 'loaded' ? [record] : []));
   const failedRecordIds = records.flatMap((record) => (record.kind === 'error' ? [record.recordId] : []));
   const loadingCount = records.filter((record) => record.kind === 'loading').length;
-  const groupedRecords = groupRecords(loadedRecordCards);
+  const groupedRecords = groupRecords(loadedRecords);
 
   return (
     <section className="xray-tab-panel__body" aria-labelledby="xray-current-state-title">
@@ -216,10 +224,11 @@ export function CurrentStateTab({ onRecordLinkClick, pageDetail, storySlug, worl
       <div className="xray-current-state-groups">
         {CURRENT_STATE_GROUPS.map((group) => {
           const groupRecordsForDisplay = groupedRecords[group];
+          const groupRecordCards = groupRecordsForDisplay.map((record) => record.recordCard);
           const showAffordances = group === 'Scene & Affordances' && affordances.length > 0;
 
           return (
-            <XRayGroup group={group} key={group} records={groupRecordsForDisplay}>
+            <XRayGroup group={group} key={group} records={groupRecordCards}>
               {showAffordances ? (
                 <div className="xray-affordances" aria-label="Visible affordances">
                   {affordances.map((affordance) => (

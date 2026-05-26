@@ -818,9 +818,21 @@ a:hover {
 
 .record-card-expanded__body,
 .raw-record__body,
-.provenance-trail {
+.provenance-trail,
+.hybrid-sections {
   display: grid;
   gap: var(--space-3);
+}
+
+.hybrid-section {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.hybrid-section summary {
+  cursor: pointer;
+  font-weight: 700;
 }
 
 .record-card__fields,

@@ -81,7 +81,7 @@ Created the stub module exporting `renderCompactLine(recordCard: RecordCard): JS
 - Tab-specific assembly of these primitives (SPEC89STOEXPSTA-004 through -007).
 - Provenance trail content (SPEC89STOEXPSTA-009 fills the slot).
 - Linked-record navigation behavior (`archive/tickets/SPEC89STOEXPSTA-008.md`).
-- Hybrid-record body parsing (SPEC89STOEXPSTA-010 — the expanded card renders raw body until the parser lands).
+- Hybrid-record body parsing (completed at `archive/tickets/SPEC89STOEXPSTA-010.md`; this expanded-card ticket rendered raw body until that parser landed).
 - Accessibility tests (SPEC89STOEXPSTA-012).
 
 ## Acceptance Criteria

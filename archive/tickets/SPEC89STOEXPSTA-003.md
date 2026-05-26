@@ -82,7 +82,7 @@ Added per-class render tests with fixtures for each of the 22 classes. The tests
 
 - Modifying the backend's `RecordCard` view-model shape or `tools/story-explorer/src/read/record-card.ts` — that's SPEC-87's data-path surface, not SPEC-89's.
 - Per-class expanded-view field rendering beyond the compact line (SPEC89STOEXPSTA-002's RecordCardExpanded handles deterministic grouping; per-class expanded fields are out of scope for this ticket).
-- Hybrid-record section parsing for STCHAR/DA expanded view (SPEC89STOEXPSTA-010).
+- Hybrid-record section parsing for STCHAR/DA expanded view (completed at `archive/tickets/SPEC89STOEXPSTA-010.md`).
 - Accessibility verification (SPEC89STOEXPSTA-012).
 
 ## Acceptance Criteria

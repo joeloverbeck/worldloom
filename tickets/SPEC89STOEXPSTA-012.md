@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new `.a11y.test.tsx` files covering each X-Ray surface, plus a cross-tab a11y test verifying the WAI-ARIA tabs pattern across all four tabs simultaneously
-**Deps**: archive/tickets/SPEC89STOEXPSTA-004.md, archive/tickets/SPEC89STOEXPSTA-005.md, archive/tickets/SPEC89STOEXPSTA-006.md, archive/tickets/SPEC89STOEXPSTA-007.md, archive/tickets/SPEC89STOEXPSTA-008.md, archive/tickets/SPEC89STOEXPSTA-009.md, SPEC89STOEXPSTA-010, SPEC89STOEXPSTA-011
+**Deps**: archive/tickets/SPEC89STOEXPSTA-004.md, archive/tickets/SPEC89STOEXPSTA-005.md, archive/tickets/SPEC89STOEXPSTA-006.md, archive/tickets/SPEC89STOEXPSTA-007.md, archive/tickets/SPEC89STOEXPSTA-008.md, archive/tickets/SPEC89STOEXPSTA-009.md, archive/tickets/SPEC89STOEXPSTA-010.md, SPEC89STOEXPSTA-011
 
 ## Problem
 

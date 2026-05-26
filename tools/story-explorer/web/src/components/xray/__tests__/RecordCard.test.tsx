@@ -41,4 +41,30 @@ describe('RecordCard primitives', () => {
     expect(within(screen.getByLabelText('Related records')).getByText('Gate watch fact')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'View raw record' })).toBeInTheDocument();
   });
+
+  it('renders hybrid record body sections only after expansion', () => {
+    render(
+      <RecordCardExpanded
+        provenanceSlot={<p>Created by SE-1 at PG-1</p>}
+        recordBody={['## Capabilities', 'Can read gate marks.', '## Voice', '**Quiet** and direct.'].join('\n')}
+        recordCard={recordCard({
+          contentHash: 'sha256-stchar',
+          recordClass: 'STCHAR',
+          recordId: 'STCHAR-1',
+          summaryLine: 'Mara',
+        })}
+        storyContext={{ worldSlug: 'demo-world', storySlug: 'demo-story' }}
+      />,
+    );
+
+    expect(screen.queryByText('Body Sections')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Expand record' }));
+
+    expect(screen.getByText('Body Sections')).toBeInTheDocument();
+    expect(screen.getByText('Capabilities')).toBeInTheDocument();
+    expect(screen.getByText('Can read gate marks.')).toBeInTheDocument();
+    expect(screen.getByText('Voice')).toBeInTheDocument();
+    expect(screen.getByText('Quiet')).toBeInTheDocument();
+  });
 });

@@ -1,11 +1,13 @@
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 
 import type { RecordCard, RecordField, RecordLink } from '../../api/client';
+import { sanitizeMarkdown } from '../../lib/sanitize-markdown';
 import { useDisclosure } from '../disclosure/use-disclosure';
 import { RecordCardCompact } from './RecordCardCompact';
 import { RawRecordDisclosure } from './RawRecordDisclosure';
 import { BrokenReferenceChip } from './BrokenReferenceChip';
 import { ProvenanceTrail } from './ProvenanceTrail';
+import { parseSectionsForRecord } from './HybridSectionParser';
 
 interface StoryContext {
   worldSlug: string;
@@ -17,6 +19,7 @@ interface RecordCardExpandedProps {
   storyContext: StoryContext;
   onRecordLinkClick?: (link: RecordLink | string) => void;
   provenanceSlot?: ReactNode;
+  recordBody?: string | null;
 }
 
 function FieldList({ fields }: { fields: RecordField[] }): JSX.Element | null {
@@ -56,8 +59,41 @@ function RelatedLinks({ links, onRecordLinkClick }: { links: RecordLink[]; onRec
   );
 }
 
-export function RecordCardExpanded({ recordCard, storyContext, onRecordLinkClick, provenanceSlot }: RecordCardExpandedProps): JSX.Element {
+const HYBRID_RECORD_CLASSES = new Set(['STCHAR', 'DA', 'SAU', 'SP', 'RSP']);
+
+function HybridSections({ body, recordCard }: { body: string; recordCard: RecordCard }): JSX.Element | null {
+  const sections = useMemo(
+    () => parseSectionsForRecord({ body, contentHash: recordCard.contentHash, recordId: recordCard.recordId }),
+    [body, recordCard.contentHash, recordCard.recordId],
+  );
+  const sectionEntries = Object.entries(sections);
+
+  if (sectionEntries.length === 0) {
+    return null;
+  }
+
+  return (
+    <section aria-label="Hybrid body sections">
+      <h5>Body Sections</h5>
+      <div className="hybrid-sections">
+        {sectionEntries.map(([title, markdown]) => (
+          <details className="hybrid-section" key={title}>
+            <summary>{title}</summary>
+            {markdown.length > 0 ? (
+              <div className="xray-markdown-body" dangerouslySetInnerHTML={{ __html: sanitizeMarkdown(markdown) }} />
+            ) : (
+              <p className="xray-empty-note">No body text in this section.</p>
+            )}
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function RecordCardExpanded({ recordBody, recordCard, storyContext, onRecordLinkClick, provenanceSlot }: RecordCardExpandedProps): JSX.Element {
   const disclosure = useDisclosure(false);
+  const isHybridRecord = HYBRID_RECORD_CLASSES.has(recordCard.recordClass);
 
   return (
     <article className="record-card-expanded" data-xray-record-id={recordCard.recordId} tabIndex={-1}>
@@ -74,6 +110,9 @@ export function RecordCardExpanded({ recordCard, storyContext, onRecordLinkClick
           <h5>Secondary Fields</h5>
           <FieldList fields={recordCard.secondaryFields} />
         </section>
+        {disclosure.isOpen && isHybridRecord && typeof recordBody === 'string' ? (
+          <HybridSections body={recordBody} recordCard={recordCard} />
+        ) : null}
         <section aria-label="Related record chips">
           <h5>Related Records</h5>
           <RelatedLinks links={recordCard.links} onRecordLinkClick={onRecordLinkClick} />
