@@ -1,6 +1,6 @@
 # SPEC89STOEXPSTA-006: Plan & Prose tab — page plan + receipt + 10 validation surfaces
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies the `tabs/PlanProseTab.tsx` stub created by SPEC89STOEXPSTA-001 to render the page plan body, the prose receipt summary, and the ten prose-attach validation surfaces
@@ -14,10 +14,11 @@ This tab honors the FOUNDATIONS §Story Bundles §4a Plan-Authority Boundary: th
 
 ## Assumption Reassessment (2026-05-26)
 
-1. `tabs/PlanProseTab.tsx` exists as a stub after SPEC89STOEXPSTA-001 lands (intra-batch dependency). SPEC-87 `/api/.../page-plans/:pageId` route exists per `tools/story-explorer/src/server/routes/prose.ts:35` (verified). SPEC-87 `/api/.../prose-receipts/:pageId` route exists per `tools/story-explorer/src/server/routes/prose.ts:48` (verified). The receipt response includes verdict, state-hash status, and per-check verdicts per the prose-attach skill's receipt schema at `.claude/skills/branching-story-prose-attach/SKILL.md:325-332`.
+1. `tabs/PlanProseTab.tsx` exists as a stub after SPEC89STOEXPSTA-001 lands (intra-batch dependency). SPEC-87 `/api/.../page-plans/:pageId` route exists per `tools/story-explorer/src/server/routes/prose.ts:35` (verified). SPEC-87 `/api/.../prose-receipts/:pageId` route exists per `tools/story-explorer/src/server/routes/prose.ts:48` (verified). The receipt response includes the parsed receipt body per `tools/story-explorer/src/server/routes/prose.ts`; the tab derives verdict, hash-status chips, per-check verdicts, and profile-fidelity rows from that body.
 2. SPEC-89 §4.3 (Plan & Prose tab specification, updated 2026-05-26 to clarify "ten validation surfaces" — 8 deterministic checks + `char_authority_leak` verdict + STCHAR `profile_fidelity[]` blocks). SPEC-88's `lib/sanitize-markdown.ts` per `tools/story-explorer/web/src/lib/sanitize-markdown.ts` is the canonical markdown sanitization surface.
 3. Cross-skill boundary: SPEC-87's two routes are the data sources. `branching-story-prose-attach`'s receipt schema is the authoritative shape for the per-check verdicts; the skill's SKILL.md §Phase 3 + Phase 6 define the ten validation surfaces' names (`hash_integrity`, `engine_jargon_leak`, `forbidden_mystery_resolution`, `required_event_rendered`, `choice_consequence_visibility`, `entity_status_consistency`, `invented_structural_fact`, `canon_claim_without_authority`, `char_authority_leak`, `stchar_authority[].profile_fidelity[]`). The tab consumes whichever verdicts the receipt records and displays them with their PASS/WARN/FAIL chips.
 4. FOUNDATIONS principle restatement: §Story Bundles §4a — Plan-Authority Boundary. The page plan is engine-readable engine artifact, not reader prose; SPEC-89 §4.3's "labeled clearly as 'Page Plan (rendering instructions, not reader prose)'" and "Plan body is NEVER rendered as prose anywhere else in the UI" rules enforce this boundary at the X-Ray layer. The Plan & Prose tab is the ONLY place the plan body appears; SPEC-88's `<ProseMissingPlaceholder>` never substitutes the plan for missing prose.
+5. Live-route drift corrected before implementation: `/page-plans/:pageId` returns `body` and `sourcePath` only, not a computed plan-hash comparison. The implemented Plan & Prose tab displays receipt-recorded plan-hash presence when the receipt has `plan_hash`, and `missing` otherwise. It does not fabricate a computed-vs-recorded plan-hash status client-side.
 
 ## Architecture Check
 
@@ -38,15 +39,15 @@ This tab honors the FOUNDATIONS §Story Bundles §4a Plan-Authority Boundary: th
 Replace the placeholder with the real implementation:
 
 - Accept `pageDetail: PageDetail` as a prop.
-- On mount: fetch `/api/.../page-plans/{pageId}` and `/api/.../prose-receipts/{pageId}` in parallel via Promise.all.
+- On mount: fetch `/api/.../page-plans/{pageId}` and `/api/.../prose-receipts/{pageId}` independently so a missing receipt does not suppress a present page plan.
 - Render the **boundaries banner** at the top: `<aside>Plan, prose, and receipt are distinct artifacts. PG is the authoritative page snapshot.</aside>` (visually styled but textually verbatim).
 - Render the **plan section**:
   - Header: `<h3>Page Plan (rendering instructions, not reader prose)</h3>` (label is verbatim per §4.3 + SPEC-89 §13 §Story Bundles §4a row).
   - Body: sanitized markdown of the response body via SPEC-88's `lib/sanitize-markdown.ts`.
-  - Plan-hash advisory chip: `{computed-vs-recorded}` status (per SPEC-89 §4.3 "Plan hash present / missing — advisory chip"); fetched alongside the body.
+  - Plan-hash advisory chip: `present | missing`, derived from the receipt body's `plan_hash` field because the live page-plan route does not return a hash comparison.
 - Render the **receipt section**:
-  - Header: `<h3>Prose Receipt</h3>` with the verdict chip (`accept` / `reject` / `revise` / etc.).
-  - State-hash status: `match | mismatch | not-checked` chip (verdict-driving per prose-attach contract).
+  - Header: `<h3>Prose Receipt</h3>` with the verdict chip (`PASS` / `WARN` / `FAIL` / equivalent live receipt value).
+  - State-hash status chip: prefer `checks.hash_integrity` when present; otherwise display `recorded` when `state_hash_at_plan_time` exists or `not-checked` when absent.
   - **Per-check results table**: one row per validation surface, with the surface name and a PASS/WARN/FAIL chip:
     1. hash_integrity
     2. engine_jargon_leak
@@ -66,8 +67,12 @@ Render tests covering: (a) full plan + full receipt fixture; (b) missing receipt
 
 ## Files to Touch
 
+- `tools/story-explorer/web/src/api/client.ts` (modify — type the page-plan and prose-receipt route helpers)
+- `tools/story-explorer/web/src/components/xray/XRayPanel.tsx` (modify — pass story/world slugs into the Plan & Prose tab)
+- `tools/story-explorer/web/src/components/xray/__tests__/XRayPanel.test.tsx` (modify — mock lazy Plan & Prose route fetches when tab navigation selects the tab)
 - `tools/story-explorer/web/src/components/xray/tabs/PlanProseTab.tsx` (modify — replace stub from SPEC89STOEXPSTA-001)
 - `tools/story-explorer/web/src/components/xray/tabs/__tests__/PlanProseTab.test.tsx` (new)
+- `tools/story-explorer/web/src/styles/app.css` (modify — style the boundary banner, markdown body, validation table, and status chips)
 
 ## Out of Scope
 
@@ -83,7 +88,7 @@ Render tests covering: (a) full plan + full receipt fixture; (b) missing receipt
 
 1. `cd tools/story-explorer/web && npm test -- PlanProseTab.test` — full plan + receipt + missing-receipt + plan-hash mismatch fixtures all pass.
 2. `cd tools/story-explorer && npm run build` — build succeeds.
-3. Visual smoke in dev mode: open PG-1 with a known plan + receipt fixture; tab renders the boundaries banner + plan body + 10-row receipt table.
+3. `cd tools/story-explorer && npm test` — full package suite succeeds, including backend route tests and all web tests.
 
 ### Invariants
 
@@ -101,3 +106,22 @@ Render tests covering: (a) full plan + full receipt fixture; (b) missing receipt
 1. `cd tools/story-explorer/web && npm test -- PlanProseTab.test` — targeted.
 2. `cd tools/story-explorer && npm test` — full package suite.
 3. `cd tools/story-explorer && npm run build` — chained build.
+
+## Outcome
+
+Completed on 2026-05-26.
+
+Implemented the Plan & Prose tab as a lazy X-Ray surface. The tab now fetches the page plan and prose receipt on mount, renders the boundary banner verbatim, sanitizes and displays the page-plan markdown, renders receipt verdict/state-hash/plan-hash chips, and shows the nine named receipt checks plus the STCHAR `profile_fidelity[]` block as the tenth validation surface. Missing receipts and missing plans render explicit empty states instead of fabricating data.
+
+Added typed frontend API helper responses for `getPagePlan` and `getProseReceipt`, passed the world/story slugs from `XRayPanel`, mocked those lazy fetches in the X-Ray panel tab-navigation test, and added focused `PlanProseTab` render coverage.
+
+## Verification Result
+
+- `cd tools/story-explorer/web && npm test -- PlanProseTab.test` — PASS; 3 tests passed.
+- `cd tools/story-explorer && npm run build` — PASS; web TypeScript/Vite build and backend TypeScript build succeeded.
+- `cd tools/story-explorer && npm test` — PASS; backend `node --test` reported 74 passing tests and web vitest reported 52 passing files / 141 passing tests.
+
+## Deviations
+
+- The drafted `{computed-vs-recorded}` plan-hash chip was narrowed to receipt-recorded `present | missing` because the live SPEC-87 page-plan route returns only `body` and `sourcePath`. The tab does not compute or invent a plan-hash comparison client-side.
+- The receipt route returns a parsed receipt body rather than a normalized receipt view-model. The tab preserves that boundary and derives display rows from the live receipt fields.

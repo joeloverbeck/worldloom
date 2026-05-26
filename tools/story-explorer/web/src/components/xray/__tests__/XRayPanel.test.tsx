@@ -1,8 +1,29 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PageDetail } from '../../../api/client';
+import { getPagePlan, getProseReceipt } from '../../../api/client';
 import { XRayPanel } from '../XRayPanel';
+
+vi.mock('../../../api/client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../api/client')>();
+  return {
+    ...actual,
+    getPagePlan: vi.fn(),
+    getProseReceipt: vi.fn(),
+  };
+});
+
+beforeEach(() => {
+  vi.mocked(getPagePlan).mockResolvedValue({
+    envelope: null,
+    payload: { body: 'Plan body', sourcePath: 'pages-prose-plans/PG-12.md' },
+  });
+  vi.mocked(getProseReceipt).mockResolvedValue({
+    envelope: null,
+    payload: { body: { verdict: 'PASS', checks: {} }, sourcePath: 'pages-prose-receipts/PG-12.yaml' },
+  });
+});
 
 function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
   return {

@@ -267,6 +267,16 @@ export interface ProseBody {
   status: ProseStatus;
 }
 
+export interface PagePlanBody {
+  body: string;
+  sourcePath: string;
+}
+
+export interface ProseReceiptBody {
+  body: Record<string, unknown>;
+  sourcePath: string;
+}
+
 function encodeSegment(value: string): string {
   return encodeURIComponent(value);
 }
@@ -356,13 +366,13 @@ export function searchPages(slug: string, storySlug: string, q: string): Promise
   return fetchEnveloped(`/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/search?${query}`);
 }
 
-export function getPagePlan(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<unknown>> {
+export function getPagePlan(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<PagePlanBody>> {
   return fetchEnveloped(
     `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/page-plans/${encodeSegment(pageId)}`,
   );
 }
 
-export function getProseReceipt(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<unknown>> {
+export function getProseReceipt(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<ProseReceiptBody>> {
   return fetchEnveloped(
     `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/prose-receipts/${encodeSegment(pageId)}`,
   );
