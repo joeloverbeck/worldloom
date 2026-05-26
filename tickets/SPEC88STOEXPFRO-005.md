@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — wires `web/src/routes/worlds.tsx` as the `/` route, replacing T001's placeholder.
-**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md, SPEC88STOEXPFRO-002, SPEC88STOEXPFRO-004
+**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md, archive/tickets/SPEC88STOEXPFRO-002.md, SPEC88STOEXPFRO-004
 
 ## Problem
 
