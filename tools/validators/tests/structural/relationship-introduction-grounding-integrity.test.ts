@@ -170,6 +170,21 @@ test("relationship_introduction_grounding_integrity treats same-event STENT part
   assert.deepEqual(verdicts, []);
 });
 
+test("relationship_introduction_grounding_integrity accepts a new SREL axis trigger with matching relationship axis", async () => {
+  const records = baseRecords([
+    event("SE-2", { create: ["SREL-2"], srelTrigger: "attention_axis_becomes_relevant" }),
+    relationship("SREL-2", {
+      axis: "attention",
+      description: "Attention becomes an objective branch-local relation."
+    }),
+    page("PG-2", { STENT: ["STENT-1", "STENT-2"], SREL: ["SREL-2"] })
+  ]);
+
+  const verdicts = await relationshipIntroductionGroundingIntegrity.run(undefined, testContext(records));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("relationship_introduction_grounding_integrity is scoped to full-world, SREL/STENT patch plans, and touched relationship/entity files", () => {
   assert.equal(relationshipIntroductionGroundingIntegrity.applies_to(testContext([])), true);
   assert.equal(
@@ -224,7 +239,7 @@ function baseRecords(records: IndexedRecord[]): IndexedRecord[] {
   ];
 }
 
-function event(id: string, overrides: Partial<{ create: string[]; supersede: string[]; world_logic_rationale: string; created_at_page: string }>): IndexedRecord {
+function event(id: string, overrides: Partial<{ create: string[]; supersede: string[]; world_logic_rationale: string; created_at_page: string; srelTrigger: string }>): IndexedRecord {
   return storyRecord("story_event_record", id, `stories/${STORY_SLUG}/_source/events/${id}.yaml`, {
     id,
     story_id: "STORY-1",
@@ -235,18 +250,18 @@ function event(id: string, overrides: Partial<{ create: string[]; supersede: str
     commitment: { selected_slt_id: "SLT-1", selection_source: "runtime_jit", alias_bindings: {} },
     outcome_route: "accept",
     world_logic_rationale: overrides.world_logic_rationale ?? "Structured relationship introduction.",
-    record_introductions: introEntries(overrides.create ?? []),
+    record_introductions: introEntries(overrides.create ?? [], overrides.srelTrigger ?? "trust_axis_becomes_relevant"),
     state_delta: { create: overrides.create ?? [], supersede: overrides.supersede ?? [], close: [] }
   });
 }
 
-function introEntries(ids: string[]): Record<string, unknown>[] {
+function introEntries(ids: string[], trigger: string): Record<string, unknown>[] {
   return ids
     .filter((id) => id.startsWith("SREL-"))
     .map((record_id) => ({
       record_id,
       class: "SREL",
-      trigger: "trust_axis_becomes_relevant",
+      trigger,
       evidence: ["SE-2"],
       distinct_from: []
     }));

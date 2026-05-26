@@ -13,6 +13,18 @@ const VALID_EVENT_KINDS = [
   "prose_attach",
   "promotion_closeout"
 ];
+const NEW_SREL_AXIS_TRIGGERS = [
+  "fear_axis_becomes_relevant",
+  "desire_axis_becomes_relevant",
+  "loyalty_axis_becomes_relevant",
+  "resentment_axis_becomes_relevant",
+  "power_imbalance_axis_becomes_relevant",
+  "attention_axis_becomes_relevant",
+  "familiarity_axis_becomes_relevant",
+  "approval_axis_becomes_relevant",
+  "respect_axis_becomes_relevant",
+  "obligation_axis_becomes_relevant"
+] as const;
 
 test("record_schema_compliance accepts every contract SE event_kind value", async () => {
   for (const eventKind of VALID_EVENT_KINDS) {
@@ -320,6 +332,26 @@ test("record_schema_compliance accepts STCHAR record introductions", async () =>
   ]));
 
   assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance accepts new SREL axis-relevance record introduction triggers", async () => {
+  for (const trigger of NEW_SREL_AXIS_TRIGGERS) {
+    const result = await recordSchemaCompliance.run({}, context([
+      eventRecord(validEvent({
+        record_introductions: [
+          {
+            record_id: "SREL-1",
+            class: "SREL",
+            trigger,
+            evidence: ["SE-1"],
+            distinct_from: []
+          }
+        ]
+      }))
+    ]));
+
+    assert.deepEqual(result, [], trigger);
+  }
 });
 
 test("record_schema_compliance rejects STCHAR promotion claim source records", async () => {

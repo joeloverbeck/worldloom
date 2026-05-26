@@ -6,7 +6,7 @@ Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus story-scope predi
 
 Historical note: `archive/specs/SPEC-04-validator-framework.md` is archived prior art only. It is not current design authority.
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 94 structural validators, the 12 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 101 structural validators, the 12 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
@@ -54,11 +54,11 @@ Structural validators:
 - `no_story_state_in_place_mutation`
 - `state_delta_class_integrity`
 - `audit_only_se_shape`
-- `slt_created_at_page_origin_consistency`
 - `causal_dependency_threat_scan`
 - `expected_witness_coverage`
 - `midstory_record_introduction_grounding`
 - `clock_introduction_grounding_integrity`
+- `slt_created_at_page_origin_consistency`
 - `canon_baseline_drift`
 - `canon_drift_classification_evidence`
 - `non_propagation_facts_completeness`
@@ -74,8 +74,10 @@ Structural validators:
 - `stchar_source_material_inventory_integrity`
 - `stchar_temporal_reference_boundary`
 - `stchar_regeneration_reason_integrity`
+- `forbidden_stchar_tamper_hash_fields`
 - `no_char_authority_in_story_runtime`
 - `character_grounding_consistency`
+- `chc_slt_selected_commitment_trace`
 - `state_snapshot_integrity`
 - `clock_value_in_range`
 - `clock_threshold_ordering`
@@ -95,14 +97,18 @@ Structural validators:
 - `narrative_shape_field_rejection`
 - `compatibility_drift`
 - `active_records_full_shape`
+- `page_affordance_integrity`
 - `page_plan_stchar_packet_integrity`
-- `forbidden_stchar_tamper_hash_fields`
+- `page_plan_turn_driver_consistency`
+- `active_pressure_handling_discipline`
 - `story_question_payoff_integrity`
 - `story_question_setup_predates_payoff`
 - `story_question_grounding_integrity`
 - `story_question_terminal_debt`
 - `story_da_duplicate_heuristic`
 - `slt_grounding_minimal_integrity`
+- `turn_driver_schema_compliance`
+- `turn_driver_pov_observer_firewall`
 - `turn_cycle_output_grounding_integrity`
 - `touched_by_cf_completeness`
 - `proposal_package_shape`
@@ -120,6 +126,7 @@ Structural validators:
 - `stplan_resource_basis_grounded`
 - `stplan_blockers_grounded`
 - `stplan_current_step_targets_grounded`
+- `stplan_predicate_references`
 - `stplan_no_future_page_ids`
 - `stplan_supersession_chain_valid`
 - `stplan_closure_status_requires_closure_event`

@@ -2,7 +2,7 @@
 
 Run the 8 shared hard gates per shared contract §7 against the drafted records. Populate `PG-<integer>.validation_trace` with one-line PASS rationale per gate:
 
-1. **input legality** — XOR action source enforced; chosen CHC belongs to parent and is not retired; bundle + parent exist.
+1. **input legality** — action source matches `action_source_mode`: selected-choice and write-in turns use exactly one source action; `advance_initiative` uses both player-action fields absent and a non-player `SE.turn_driver.kind`; repair/start events use both-null input; chosen CHC belongs to parent and is not retired when present; bundle + parent exist.
 2. **parent snapshot compatibility** — `parent.state_hash` matches `PG-<integer>.state_hash_parent`; `parent.state_snapshot.canon_revision` has been compared against the current world-canon revision and canon-baseline drift is classified as `compatible` or `grandfathered` before proceeding.
 3. **mystery / invariant firewall** — no forbidden `M-<integer>` resolved; INV honored; selected SLT's `mystery_policy.forbidden_resolutions` respected.
 4. **branch isolation** — no sibling-branch records in new snapshot's `active_records`; no author-pool SLT references branch-local record ids.
@@ -13,7 +13,7 @@ Run the 8 shared hard gates per shared contract §7 against the drafted records.
 
 Plus 15 turn-cycle-additional checks (recorded in working memory):
 
-1. **Action source legality** — XOR enforced; chosen CHC not retired. When `manual_action_text` is the source, the action has been parsed against `STORY_KERNEL.md` `## Player Agency Contract`: agency surface, write-in envelope, and viewpoint limits all support the route or the route records the exact agency-contract reason it was blocked/held.
+1. **Action source legality** — selected-choice and write-in turns use exactly one source action; `advance_initiative` uses both player-action fields absent and a non-player `SE.turn_driver.kind`; repair/start events use both-null input. Chosen CHC is not retired when present. When `manual_action_text` is the source, the action has been parsed against `STORY_KERNEL.md` `## Player Agency Contract`: agency surface, write-in envelope, and viewpoint limits all support the route or the route records the exact agency-contract reason it was blocked/held.
 2. **Entity death / incapacity reconciliation** — when Phase 3 applied death/incapacity, the open intentions / obligations / relationships / object-controlled / belief-witness consequences are in the same delta.
 3. **Belief / visibility coverage** — every action involving secrecy / betrayal / deception / violence / sex / law / status / public ritual has complete `expected_witnesses` coverage: each relevant direct or indirect witness group from Phase 4 is accounted for by a created/superseded `BEL` (`knows`, `suspects`, `misremembers`, `reports`, or `deceives`) or by a recorded non-propagation rationale from the closed set (`no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, `event_leaves_no_accessible_trace`). Mere existence of some `BEL` record is not sufficient. For direct-witness coverage under `expected_witness_coverage`, only public-coverage `BEL.visibility` values (`public`, `shared`, `factional`, `rumored`) discharge the validator; `private`, `concealed`, and `suppressed` BEL records can be semantically correct under FOUNDATIONS §Story Bundles §6a but still fail the validator. See shared contract §5a.3.
 4. **Expected witness structured non-propagation presence** — for each Phase 4 expected witness group that receives no public-coverage `BEL` create/supersession, `SE.non_propagation_facts[]` contains an item with a closed-set `reason`, a `group` label from shared contract §5a.2 (`direct`, `direct_witnesses`, `direct:<STLOC-id>`, or `location:<STLOC-id>`), and supporting `records[]` covering every computed direct witness when direct coverage is being discharged. The deployed structural validators are `non_propagation_facts_completeness` and `expected_witness_coverage` (semantic STLOC + STSTAT co-location coverage check; see SPEC-36 D2). `expected_witness_coverage` activates for the four trigger families in shared contract §5a.3, including non-actor `STSTAT` supersession. Authors may rely on either public-coverage BEL creation or a valid non-propagation fact for the computed witness group.
@@ -42,3 +42,35 @@ After all gates and additional checks pass, compute final PG hashes per shared c
 3. Verify both new hash values are 64-character lowercase hex sha256 strings. Missing, placeholder, uppercase, non-hex, or stale values are hard-stop authoring errors before Phase 10.
 
 If any gate, ERROR-severity additional check, parent-hash copy check, or new-hash check fails, abort before Phase 10 — write nothing. WARNING-severity additional checks must be recorded in the deliverable summary and either resolved before approval or explicitly accepted by the user as known story-health debt.
+
+## Page-plan draft pre-commit validation (via Phase 10 step 2)
+
+Phase 9 finishes by stamping hashes and finalizing the envelope. The actual page-plan structural validators (`page_plan_stchar_packet_integrity`, `active_pressure_handling_discipline`, `page_plan_turn_driver_consistency`, etc.) run at Phase 10 step 2 — but ONLY when the dry-run is invoked with the `page_plan_drafts` arg supplying the candidate plan bytes. Without that arg, those validators are inert in pre-apply mode because the patch envelope carries no `.md` content. Make this the default Phase 10 step 2 incantation, not an optional add-on.
+
+Mechanized call (MCP):
+```
+mcp__worldloom__validate_patch_plan(
+  patch_plan=<envelope>,
+  page_plan_drafts=[{path: "stories/<story_slug>/pages-prose-plans/PG-<integer>.md",
+                     content: "<exact UTF-8 bytes of the finalized draft, identical to what compute-pg-hashes.js --plan consumed>"}]
+)
+```
+
+CLI equivalent for larger envelopes:
+```
+node tools/world-mcp/dist/src/cli/validate-patch-plan.js \
+  [--world-root <path>] \
+  --page-plan-drafts /tmp/page-plan-drafts.json \
+  <plan-path>
+```
+where `/tmp/page-plan-drafts.json` is `[{"path": "stories/<story_slug>/pages-prose-plans/PG-<integer>.md", "content": "<draft-bytes>"}]`.
+
+The `path` MUST match `stories/<story-slug>/pages-prose-plans/PG-<integer>.md` exactly; the MCP arg validator rejects any other shape with `invalid_input`. The patch's `PG-<integer>` record is overlaid onto the world index in pre-apply mode, so the validators see the new `state_snapshot.active_records` (not the parent's). Common failures this gate catches that today's enumeration cannot:
+
+- `page_plan_stchar_packet_integrity.stale_current_state_reference` — a §16a packet cites a record id (typically a prior `PG-<integer>`, the just-superseded `STEMO-<integer>`, or a `BEL-<integer>` no longer in the new snapshot) that isn't active in the new page. See `references/phase-7-page-plan.md` §16a record-id token discipline.
+- `page_plan_stchar_packet_integrity.missing_packet` / `.inactive_stchar` / `.missing_voice_block` / `.unknown_role_label` — §16a packet inventory or per-packet shape failures.
+- `active_pressure_deferred_without_expiry` / `active_pressure_disposition_unknown` / `active_pressure_rejection_reason_missing` — §7a Active-pressure disposition row shape failures. See `references/phase-7-page-plan.md` §7a closed-set form.
+- `high_urgency_active_record_unhandled` — a high-urgency record from the parent's snapshot is missing from §7a.
+- `page_plan_turn_driver_consistency` failures — §7a turn driver / initiative trace lines disagree with `SE.turn_driver`.
+
+Any `fail` verdict aborts Phase 10 (do not proceed to deliverable summary or HARD-GATE approval). Repair the draft (re-running Phase 7 if necessary), recompute hashes against the new bytes, then re-run the dry-run with the updated `page_plan_drafts`.

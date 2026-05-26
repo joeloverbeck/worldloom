@@ -21,6 +21,7 @@ const OPERATION_KIND_SET = new Set<string>(OPERATION_KINDS);
 export interface ValidatePatchPlanArgs {
   patch_plan: PatchPlanEnvelope;
   worldRoot?: string;
+  page_plan_drafts?: ReadonlyArray<{ path: string; content: string }>;
 }
 
 export type ValidatePatchPlanResponse =
@@ -63,9 +64,22 @@ export async function validatePatchPlan(
     };
   }
 
+  const draftsShapeError = validatePagePlanDraftsShape(args.page_plan_drafts);
+  if (draftsShapeError !== null) {
+    return invalidInput(draftsShapeError, "page_plan_drafts");
+  }
+
+  const runOpts: { worldRoot?: string; pagePlanDrafts?: ReadonlyArray<{ path: string; content: string }> } = {};
+  if (args.worldRoot !== undefined) {
+    runOpts.worldRoot = args.worldRoot;
+  }
+  if (args.page_plan_drafts !== undefined && args.page_plan_drafts.length > 0) {
+    runOpts.pagePlanDrafts = args.page_plan_drafts;
+  }
+
   const result = await runValidatePatchPlan(
     args.patch_plan as unknown as Parameters<typeof runValidatePatchPlan>[0],
-    args.worldRoot === undefined ? {} : { worldRoot: args.worldRoot }
+    runOpts
   );
   const allocationRace = runIdAllocationRaceCheck(args.patch_plan, args.worldRoot);
   const verdicts = allocationRace.ok
@@ -154,6 +168,39 @@ function allocationRaceFailureToVerdict(failure: {
     },
     suggested_fix: "Re-run allocate_next_id for the offending id class, update the envelope, then re-validate and re-sign."
   };
+}
+
+const PAGE_PLAN_DRAFT_PATH = /^stories\/[^/]+\/pages-prose-plans\/PG-(0|[1-9][0-9]*)\.md$/;
+
+function validatePagePlanDraftsShape(value: unknown): string | null {
+  if (value === undefined) {
+    return null;
+  }
+  if (!Array.isArray(value)) {
+    return "page_plan_drafts must be an array of {path, content} objects when provided.";
+  }
+  const seenPaths = new Set<string>();
+  for (let index = 0; index < value.length; index += 1) {
+    const entry = value[index];
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+      return `page_plan_drafts[${index}] must be an object with string fields path and content.`;
+    }
+    const record = entry as Record<string, unknown>;
+    if (typeof record.path !== "string" || record.path.length === 0) {
+      return `page_plan_drafts[${index}].path must be a non-empty string.`;
+    }
+    if (typeof record.content !== "string") {
+      return `page_plan_drafts[${index}].content must be a string.`;
+    }
+    if (!PAGE_PLAN_DRAFT_PATH.test(record.path)) {
+      return `page_plan_drafts[${index}].path must match stories/<slug>/pages-prose-plans/PG-<integer>.md (got '${record.path}').`;
+    }
+    if (seenPaths.has(record.path)) {
+      return `page_plan_drafts contains duplicate path '${record.path}'.`;
+    }
+    seenPaths.add(record.path);
+  }
+  return null;
 }
 
 function resolveRepoRootForWorld(worldSlug: string): string {

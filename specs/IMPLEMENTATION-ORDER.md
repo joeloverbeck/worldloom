@@ -1,9 +1,9 @@
-# Implementation Order — Story Explorer (SPEC-87 → SPEC-90)
+# Implementation Order — Story Explorer (SPEC-87 → SPEC-90) + Page-Plan Cleanliness (SPEC-91)
 
-**Origin**: triage of `reports/website-proposal.md` (2026-05-25)
-**Companion triage**: `docs/triage/2026-05-25-website-proposal-triage.md`
+**Origin**: triage of `reports/website-proposal.md` (2026-05-25) — SPEC-87..90; triage of `reports/page-plans-improvements-first-iteration.md` (2026-05-26) — SPEC-91
+**Companion triage (SPEC-87..90)**: `docs/triage/2026-05-25-website-proposal-triage.md`
 
-This file orders the four Story Explorer specs and records the named assumptions and "Should Wait" backlog that came out of the triage. All four specs together implement the v1 viewer the proposal calls for.
+This file orders the four Story Explorer specs and records the named assumptions and "Should Wait" backlog that came out of the triage. All four specs together implement the v1 viewer the proposal calls for. SPEC-91 is an orthogonal page-plan body-cleanup track added 2026-05-26; it has no dependency on SPEC-87..90 and vice versa.
 
 ---
 
@@ -15,6 +15,7 @@ This file orders the four Story Explorer specs and records the named assumptions
 | 2 | SPEC-88 | Frontend foundation & page reading surface (React/Vite scaffold, pickers, prose panel, choice navigation, accessibility baseline) | SPEC-87 |
 | 3 | SPEC-89 | State X-Ray layer (8 record groups, 4 tabs, deterministic summaries, raw YAML escape hatch, linked-record navigation) | SPEC-87, SPEC-88 |
 | 4 | SPEC-90 | Branch map drawer & page search (focus-trapped drawer overlay, FTS-backed search) | SPEC-87, SPEC-88, SPEC-89 |
+| — | SPEC-91 | Page-plan body renderer cleanliness & structural enforcement (extends PPLAN-005/006 to §7/§7a/§9/§9b/§9c/§10b/§14; new plan-body engine-vocabulary validator; `reports/prose-quality-instructions.md` cleanup) | — (orthogonal to SPEC-87..90; extends PROSESPLIT + PPLAN) |
 
 SPEC-87 is the structural base; nothing else compiles or renders without it.
 

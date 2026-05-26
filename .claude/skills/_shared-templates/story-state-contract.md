@@ -298,7 +298,17 @@ The `class` field is one of `CLK | STSEC | STQ | THR | STENT | STCHAR | SREL | S
 | `debt_relation_forms` | A debt relation between participants becomes active. |
 | `authority_relation_forms` | Authority between participants becomes active. |
 | `trust_axis_becomes_relevant` | Trust becomes a load-bearing relationship axis. |
+| `fear_axis_becomes_relevant` | Fear becomes a load-bearing relationship axis. |
+| `desire_axis_becomes_relevant` | Desire becomes a load-bearing relationship axis. |
 | `intimacy_axis_becomes_relevant` | Intimacy becomes a load-bearing relationship axis. |
+| `loyalty_axis_becomes_relevant` | Loyalty becomes a load-bearing relationship axis. |
+| `resentment_axis_becomes_relevant` | Resentment becomes a load-bearing relationship axis. |
+| `power_imbalance_axis_becomes_relevant` | Power imbalance becomes a load-bearing relationship axis. |
+| `attention_axis_becomes_relevant` | Attention becomes a load-bearing relationship axis. |
+| `familiarity_axis_becomes_relevant` | Familiarity becomes a load-bearing relationship axis. |
+| `approval_axis_becomes_relevant` | Approval becomes a load-bearing relationship axis. |
+| `respect_axis_becomes_relevant` | Respect becomes a load-bearing relationship axis. |
+| `obligation_axis_becomes_relevant` | Obligation becomes a load-bearing relationship axis. |
 | `hostility_axis_becomes_relevant` | Hostility becomes a load-bearing relationship axis. |
 
 ### STPLAN Triggers
