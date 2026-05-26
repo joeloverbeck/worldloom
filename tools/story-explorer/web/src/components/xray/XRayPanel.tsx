@@ -18,7 +18,7 @@ function renderTabPanel(tabId: XRayTabId, pageDetail: PageDetail, worldSlug: str
     case 'current-state':
       return <CurrentStateTab pageDetail={pageDetail} storySlug={storySlug} worldSlug={worldSlug} />;
     case 'what-changed':
-      return <WhatChangedHereTab pageDetail={pageDetail} />;
+      return <WhatChangedHereTab pageDetail={pageDetail} storySlug={storySlug} worldSlug={worldSlug} />;
     case 'plan-prose':
       return <PlanProseTab pageDetail={pageDetail} />;
     case 'validation':

@@ -56,15 +56,28 @@ describe('XRayPanel', () => {
   });
 
   it('cycles keyboard focus and selection through the tabs', () => {
-    render(<XRayPanel pageDetail={pageDetail()} storySlug="red-bunny" worldSlug="fixture-world" />);
+    render(
+      <XRayPanel
+        pageDetail={pageDetail({
+          eventDelta: {
+            eventId: null,
+            createCount: 0,
+            supersedeCount: 0,
+            closeCount: 0,
+            introducedRecordIds: [],
+            relationCount: 0,
+          },
+        })}
+        storySlug="red-bunny"
+        worldSlug="fixture-world"
+      />,
+    );
 
     const currentState = screen.getByRole('tab', { name: 'Current State' });
     fireEvent.keyDown(currentState, { key: 'ArrowRight' });
 
     expect(screen.getByRole('tab', { name: 'What Changed Here' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByRole('tabpanel', { name: 'What Changed Here' })).toHaveTextContent(
-      'Tab content to be filled by SPEC89STOEXPSTA-005',
-    );
+    expect(screen.getByRole('tabpanel', { name: 'What Changed Here' })).toHaveTextContent('No causal event for this page');
 
     fireEvent.keyDown(screen.getByRole('tab', { name: 'What Changed Here' }), { key: 'End' });
     expect(screen.getByRole('tab', { name: 'Validation & Integrity' })).toHaveAttribute('aria-selected', 'true');

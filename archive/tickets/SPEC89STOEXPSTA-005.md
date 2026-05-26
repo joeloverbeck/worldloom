@@ -1,6 +1,6 @@
 # SPEC89STOEXPSTA-005: What Changed Here tab — SE rendering with state delta
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies the `tabs/WhatChangedHereTab.tsx` stub created by SPEC89STOEXPSTA-001 to render the SE that caused the current page, with its state delta and related fields
@@ -12,7 +12,7 @@ SPEC-89 §4.2 defines What Changed Here as the tab that answers "What caused thi
 
 ## Assumption Reassessment (2026-05-26)
 
-1. `tabs/WhatChangedHereTab.tsx` exists as a stub after SPEC89STOEXPSTA-001 lands (intra-batch dependency). SE schema fields cited in §4.2 — `actor`, `targets`, `driver.kind` (turn driver), `outcome_route`, `commitment.selected_slt_id`, `world_logic_rationale`, `state_delta.{create,supersede,close}`, `record_introductions`, `state_relations`, `non_propagation_facts`, `promotion_claims` — all verified on `tools/validators/src/schemas/story-event.schema.json` during the 2026-05-26 reassessment. `PG.input.resolved_event_id` exists on the PG schema per `tools/validators/src/schemas/story-page.schema.json:40` (verified).
+1. `tabs/WhatChangedHereTab.tsx` exists as a stub after SPEC89STOEXPSTA-001 lands (intra-batch dependency). SE schema fields cited in §4.2 — `actor`, `targets`, `turn_driver.kind` (turn driver), `outcome_route`, `commitment.selected_slt_id`, `world_logic_rationale`, `state_delta.{create,supersede,close}`, `record_introductions`, `state_relations`, `non_propagation_facts`, `promotion_claims` — all verified on `tools/validators/src/schemas/story-event.schema.json` during the 2026-05-26 reassessment. The draft's `driver.kind` wording was stale; the live field is `turn_driver`. `PG.input.resolved_event_id` exists on the PG schema per `tools/validators/src/schemas/story-page.schema.json:40` (verified).
 2. SPEC-89 §4.2 (What Changed Here tab specification). SPEC-87 `/records/:recordId` route returns the parsed SE body + recordCard view-model; this tab fetches the SE corresponding to `PG.input.resolved_event_id`.
 3. Cross-skill boundary: SPEC-87's `/records/:recordId` route is the data source for the SE; SPEC-87 §5 confirms the route signature. This tab uses RecordCardCompact (from SPEC89STOEXPSTA-002) for the SE summary line at the top, then renders the structured fields below per §4.2's bullets. Cross-record links in the state-delta lists are rendered as chips that trigger the linked-record navigation primitives from SPEC89STOEXPSTA-008 (when those primitives land).
 
@@ -28,43 +28,46 @@ SPEC-89 §4.2 defines What Changed Here as the tab that answers "What caused thi
 3. When `commitment.selected_slt_id` is null, the SLT row is omitted → fixture test with `commitment.selected_slt_id: null`.
 4. When `PG.input.resolved_event_id` is null (root page), the tab renders the "no causal event" message rather than fetching → mock-fetch test asserts no fetch happens.
 
-## What to Change
+## Landed Changes
 
-### 1. Modify `tabs/WhatChangedHereTab.tsx`
+### 1. Modified `tabs/WhatChangedHereTab.tsx`
 
-Replace the placeholder with the real implementation:
+Replaced the placeholder with the real implementation:
 
-- Accept `pageDetail: PageDetail` as a prop.
+- Accept `pageDetail: PageDetail`, `worldSlug: string`, and `storySlug: string` as props.
 - On mount: if `pageDetail.page.input.resolved_event_id` is null, render the "no causal event for this page" message and exit. Otherwise fetch `/api/.../records/{resolved_event_id}` via the SPEC-88 API client; render the response.
 - Top section: `<RecordCardCompact recordCard={seResponse.recordCard}>` followed by the structured field display.
 - Structured field display:
   - **Selected event**: `{se.id} · {se.event_kind}`
   - **Actor → Targets**: `{se.actor} → {se.targets.join(", ")}`
-  - **Turn driver**: `{se.driver.kind} · initiator {se.driver.initiator} · POV {se.driver.pov_visibility}`
+  - **Turn driver**: `{se.turn_driver.kind} · initiator {se.turn_driver.initiator} · POV {se.turn_driver.pov_visibility}`
   - **Outcome route**: `{se.outcome_route}` + when non-accept: `· resolution: {se.resolution}`
   - **Selected storylet**: when `se.commitment.selected_slt_id` is non-null, render `<RecordCardCompact recordCard={sltRecordCard}>` for the SLT (fetched in parallel with the SE).
   - **World-logic rationale**: `{se.world_logic_rationale}` (prose paragraph).
   - **State delta**:
     - **Created**: list of records from `se.state_delta.create[]` as compact chips (`{record_id} - {recordClass}`), each clickable per SPEC89STOEXPSTA-008.
-    - **Superseded**: list of pre→post supersession pairs from `se.state_delta.supersede[]`.
+    - **Superseded**: list of superseded record IDs from `se.state_delta.supersede[]`.
     - **Closed**: list of records from `se.state_delta.close[]`.
   - **Record introductions**: list from `se.record_introductions[]`.
   - **State relations**: list from `se.state_relations[]`.
   - **Non-propagation facts**: list from `se.non_propagation_facts[]`.
-  - **Promotion claims**: list from `se.promotion_claims[]`, each with a link to the story-promotion record when present.
+  - **Promotion claims**: list from `se.promotion_claims[]` showing source record and authority.
 
 ### 2. Visual styling
 
-Apply a section/border treatment that distinguishes What Changed Here from Current State (per SPEC-89 §4.2's "must be visually distinct" rule). Reuse tokens.css from SPEC-88; the distinction can be a left-border accent or a tinted background.
+Applied a section/border treatment that distinguishes What Changed Here from Current State (per SPEC-89 §4.2's "must be visually distinct" rule), plus structured-list and state-delta grid styles using existing tokens.
 
-### 3. Add `tabs/__tests__/WhatChangedHereTab.test.tsx`
+### 3. Added `tabs/__tests__/WhatChangedHereTab.test.tsx`
 
-Render tests with: (a) full-featured SE fixture (all fields populated, all state_delta categories non-empty); (b) null-resolved-event-id fixture (root page); (c) null-SLT fixture (write-in event).
+Added render tests with: (a) full-featured SE fixture (all fields populated, all state_delta categories non-empty); (b) null-resolved-event-id fixture (root page); (c) null-SLT fixture (write-in event). Updated `XRayPanel.test.tsx` so tab cycling expects the real no-event body instead of the old placeholder text.
 
 ## Files to Touch
 
 - `tools/story-explorer/web/src/components/xray/tabs/WhatChangedHereTab.tsx` (modify — replace stub from SPEC89STOEXPSTA-001)
+- `tools/story-explorer/web/src/components/xray/XRayPanel.tsx` (modify — pass `worldSlug` / `storySlug` into What Changed Here)
 - `tools/story-explorer/web/src/components/xray/tabs/__tests__/WhatChangedHereTab.test.tsx` (new)
+- `tools/story-explorer/web/src/components/xray/__tests__/XRayPanel.test.tsx` (modify — update the tab-cycling assertion for the real no-event body)
+- `tools/story-explorer/web/src/styles/app.css` (modify — What Changed Here section/list styling)
 
 ## Out of Scope
 
@@ -79,7 +82,7 @@ Render tests with: (a) full-featured SE fixture (all fields populated, all state
 
 1. `cd tools/story-explorer/web && npm test -- WhatChangedHereTab.test` — full-featured + null-event + null-SLT cases pass.
 2. `cd tools/story-explorer && npm run build` — build succeeds.
-3. Visual smoke in dev mode against the red-bunny fixture: What Changed Here tab on PG-2 renders the SE-2 causal event with non-empty state_delta lists.
+3. Automated route/component smoke covers the visual contract: `WhatChangedHereTab.test.tsx` renders the SE-2-style causal event with non-empty state_delta lists, and `XRayPanel.test.tsx` proves the tab wiring reaches the real body.
 
 ### Invariants
 
@@ -91,9 +94,31 @@ Render tests with: (a) full-featured SE fixture (all fields populated, all state
 ### New/Modified Tests
 
 1. `tools/story-explorer/web/src/components/xray/tabs/__tests__/WhatChangedHereTab.test.tsx` — fixture-driven render tests covering the three primary cases.
+2. `tools/story-explorer/web/src/components/xray/__tests__/XRayPanel.test.tsx` — updated tab-cycling expectation for the real What Changed Here body.
 
 ### Commands
 
 1. `cd tools/story-explorer/web && npm test -- WhatChangedHereTab.test` — targeted.
 2. `cd tools/story-explorer && npm test` — full package suite.
 3. `cd tools/story-explorer && npm run build` — chained build.
+
+## Outcome
+
+Completed on 2026-05-26.
+
+- Replaced the What Changed Here placeholder with a lazy record-route fetch for the page's resolved SE, rendering the server-built compact card plus selected event, actor/targets, turn driver, outcome, resolution, world-logic rationale, selected SLT, state_delta create/supersede/close lists, introductions, state relations, non-propagation facts, and promotion claims.
+- Passed `worldSlug` / `storySlug` from `XRayPanel` into the tab so it can use the existing `getRecord` client helper.
+- Added focused What Changed Here render coverage and updated the shell tab-cycling test.
+- Added a distinct event-delta visual treatment, structured-list styling, and a three-column state-delta grid on wider viewports.
+
+## Verification Result
+
+- `cd tools/story-explorer/web && npm test -- WhatChangedHereTab.test XRayPanel.test` — PASS, 2 files / 5 tests.
+- `cd tools/story-explorer && npm run build` — PASS; web TypeScript + Vite build and backend TypeScript build succeeded.
+- `cd tools/story-explorer && npm test` — PASS; backend node tests passed 74/74 and web Vitest passed 51 files / 138 tests. The suite emitted existing React Router future-flag warnings and the intentional ErrorBoundary stderr from the existing a11y test.
+
+## Deviations
+
+- The drafted ticket used `driver.kind`; the live SE schema field is `turn_driver.kind`, so the implementation and ticket text use `turn_driver`.
+- The drafted text described `state_delta.supersede[]` as pre/post pairs, but the live story-event schema stores superseded record IDs as strings. The tab renders those IDs as the truthful current contract.
+- A separate dev-server visual smoke was not run. The checkout already uses temp-seeded red-bunny-shaped fixtures for Story Explorer proof, and this ticket follows the SPEC89STOEXPSTA-004 precedent: focused render tests plus the route/panel shell tests cover the visual smoke boundary for this tab.

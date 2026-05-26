@@ -38,7 +38,7 @@ Desktop right-rail component. Accepts `pageDetail: PageDetail` as a prop. Render
 - **Current page chip**: `{PG-N} · {BR-N}` (extracted from `pageDetail.page.id` + `pageDetail.page.branch_id`).
 - **Prose/receipt status icons**: a row of small icons indicating prose presence (from `pageDetail.proseStatus`) and receipt presence (from `pageDetail.receiptSummary`).
 - **Active record counts by group**: list of 8 group names with counts (derived from the same classification SPEC89STOEXPSTA-004 uses; consider extracting the classification logic into a shared helper `groupActiveRecords.ts` to avoid duplication).
-- **What Changed counts**: `Created N · Superseded M · Closed K` (from the SE's state_delta lengths; fetched the same way SPEC89STOEXPSTA-005 fetches the SE — or via a lightweight selector if PageDetail already includes the SE).
+- **What Changed counts**: `Created N · Superseded M · Closed K` (from the SE's state_delta lengths; fetched the same way `archive/tickets/SPEC89STOEXPSTA-005.md` fetches the SE — or via a lightweight selector if PageDetail already includes the SE).
 - **Mini ToC**: list of group names as anchor links scrolling to each group in the Current State tab.
 
 The rail uses CSS `position: sticky` with `top: <header-height>` so it stays visible as the user scrolls the X-Ray content.
