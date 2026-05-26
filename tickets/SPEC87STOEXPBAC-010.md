@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/story-explorer/test/capstone-smoke.test.ts` (end-to-end smoke test against `red-bunny` fixture).
-**Deps**: archive/tickets/SPEC87STOEXPBAC-008.md, SPEC87STOEXPBAC-009
+**Deps**: archive/tickets/SPEC87STOEXPBAC-008.md, archive/tickets/SPEC87STOEXPBAC-009.md
 
 ## Problem
 
