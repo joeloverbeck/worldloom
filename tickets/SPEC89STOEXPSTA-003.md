@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies the `RecordCardRenderers.tsx` stub created by SPEC89STOEXPSTA-002 to implement per-class compact-line rendering for the 22 record classes named in SPEC-89 §7
-**Deps**: SPEC89STOEXPSTA-002
+**Deps**: archive/tickets/SPEC89STOEXPSTA-002.md
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new `LinkedRecordPeek.tsx` + `BrokenReferenceChip.tsx` components plus navigation-semantics integration with SPEC-88's routing and (eventually) SPEC-90's branch-map drawer
-**Deps**: SPEC89STOEXPSTA-002
+**Deps**: archive/tickets/SPEC89STOEXPSTA-002.md
 
 ## Problem
 

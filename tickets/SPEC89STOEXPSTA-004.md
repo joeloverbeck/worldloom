@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies the `tabs/CurrentStateTab.tsx` stub created by SPEC89STOEXPSTA-001 to implement the 8-group taxonomy assembly with virtualization for ≥50-record groups
-**Deps**: archive/tickets/SPEC89STOEXPSTA-001.md, SPEC89STOEXPSTA-002, SPEC89STOEXPSTA-003
+**Deps**: archive/tickets/SPEC89STOEXPSTA-001.md, archive/tickets/SPEC89STOEXPSTA-002.md, SPEC89STOEXPSTA-003
 
 ## Problem
 

@@ -228,6 +228,17 @@ export interface RecordCard {
   contentHash: string | null;
 }
 
+export interface RecordDetail {
+  record: Record<string, unknown>;
+  recordCard: RecordCard;
+}
+
+export interface RawRecordSource {
+  body: string;
+  sourcePath: string;
+  contentHash: string;
+}
+
 // Frontend mirrors of tools/story-explorer/src/view-models/branch-map-node.ts and branch-map-edge.ts.
 export interface BranchMapNode {
   pageId: string;
@@ -323,9 +334,15 @@ export function getProseBody(slug: string, storySlug: string, pageId: string): P
 }
 
 // SPEC-89/90 routes are declared here so downstream route tickets share one URL surface.
-export function getRecord(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<Record<string, unknown>>> {
+export function getRecord(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<RecordDetail>> {
   return fetchEnveloped(
     `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/records/${encodeSegment(recordId)}`,
+  );
+}
+
+export function getRawRecord(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<RawRecordSource>> {
+  return fetchEnveloped(
+    `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/records/${encodeSegment(recordId)}/raw`,
   );
 }
 

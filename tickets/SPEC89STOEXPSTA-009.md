@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new `ProvenanceTrail.tsx` component that fetches the SPEC-87 provenance route and resolves the SE → PG attribution chain via per-SE record fetches
-**Deps**: SPEC89STOEXPSTA-002
+**Deps**: archive/tickets/SPEC89STOEXPSTA-002.md
 
 ## Problem
 

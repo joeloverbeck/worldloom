@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new `HybridSectionParser.ts` module + integration with `RecordCardExpanded` for hybrid record-class section splitting
-**Deps**: SPEC89STOEXPSTA-002
+**Deps**: archive/tickets/SPEC89STOEXPSTA-002.md
 
 ## Problem
 

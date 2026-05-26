@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies the `tabs/PlanProseTab.tsx` stub created by SPEC89STOEXPSTA-001 to render the page plan body, the prose receipt summary, and the ten prose-attach validation surfaces
-**Deps**: archive/tickets/SPEC89STOEXPSTA-001.md, SPEC89STOEXPSTA-002
+**Deps**: archive/tickets/SPEC89STOEXPSTA-001.md, archive/tickets/SPEC89STOEXPSTA-002.md
 
 ## Problem
 
