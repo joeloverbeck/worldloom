@@ -26,6 +26,14 @@ test("record_schema_compliance accepts a THR derived from the clock that is its 
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts STCHAR in THR derived_from", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    threadRecord(validThread({ derived_from: ["STCHAR-1", "STENT-1", "STEMO-1"] }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
 test("record_schema_compliance still rejects unknown classes in THR derived_from", async () => {
   const result = await recordSchemaCompliance.run({}, context([
     threadRecord(validThread({ derived_from: ["NOPE-1"] }))
