@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/story-explorer/src/server/routes/pages.ts` + `records.ts` + `prose.ts` + `provenance.ts`.
-**Deps**: archive/tickets/SPEC87STOEXPBAC-005.md, SPEC87STOEXPBAC-006, SPEC87STOEXPBAC-007
+**Deps**: archive/tickets/SPEC87STOEXPBAC-005.md, archive/tickets/SPEC87STOEXPBAC-006.md, tickets/SPEC87STOEXPBAC-007.md
 
 ## Problem
 
