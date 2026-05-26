@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `docs/FOUNDATIONS.md` §Prose Length Discipline At Story Scope hosting reference; modifies `specs/IMPLEMENTATION-ORDER.md` SPEC-91 row; modifies `.claude/skills/brainstorm/references/triage-workflow-rules.md` worked-precedent narrative
-**Deps**: PROSESPLIT2-001 (canonical paths must exist), PROSESPLIT2-002 (skill-side refs migrated; this ticket completes the non-skill propagation)
+**Deps**: archive/tickets/PROSESPLIT2-001.md (canonical paths must exist), PROSESPLIT2-002 (skill-side refs migrated; this ticket completes the non-skill propagation)
 
 ## Problem
 

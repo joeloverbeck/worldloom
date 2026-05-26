@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `.claude/skills/_shared-templates/story-state-contract.md` §8 page-plan table; modifies `.claude/skills/branching-story-bootstrap/SKILL.md` + `references/pre-flight-and-prerequisites.md` + `references/phase-8-9-page-plan-and-choices.md` + `references/governance-and-foundations.md`; modifies `.claude/skills/branching-story-turn-cycle/SKILL.md` + `references/pre-flight-and-prerequisites.md` + `references/phase-7-page-plan.md` + `references/governance-and-foundations.md`
-**Deps**: PROSESPLIT2-001 (new canonical-source files must exist at `docs/prose-renderer-contract/*` before references can point at them)
+**Deps**: archive/tickets/PROSESPLIT2-001.md (new canonical-source files must exist at `docs/prose-renderer-contract/*` before references can point at them)
 
 ## Problem
 

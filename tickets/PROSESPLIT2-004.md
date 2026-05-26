@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — deletes `reports/prose-quality-instructions.md`; appends a verification-basis note to `docs/prose-renderer-contract/README.md` recording which sections were dropped and why
-**Deps**: PROSESPLIT2-001 (canonical-source files in place), PROSESPLIT2-002 (skill-side references migrated), PROSESPLIT2-003 (FOUNDATIONS / IMPL-ORDER / brainstorm refs migrated). All three must land first or this ticket leaves dangling references.
+**Deps**: archive/tickets/PROSESPLIT2-001.md (canonical-source files in place), PROSESPLIT2-002 (skill-side references migrated), PROSESPLIT2-003 (FOUNDATIONS / IMPL-ORDER / brainstorm refs migrated). All three must land first or this ticket leaves dangling references.
 
 ## Problem
 
