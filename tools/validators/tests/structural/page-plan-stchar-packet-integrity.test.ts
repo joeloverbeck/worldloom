@@ -29,6 +29,32 @@ test("page_plan_stchar_packet_integrity rejects a missing required packet", asyn
   const verdicts = await pagePlanStcharPacketIntegrity.run(input(plan({ includePacket: false })), context(baseRecords()));
 
   assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.missing_packet");
+  assert.match(verdicts[0]?.message ?? "", /omits a 16a STCHAR packet/);
+  assert.match(verdicts[0]?.message ?? "", /Expected a bullet starting `- STENT-1 \/ STCHAR-1`/);
+  assert.deepEqual(
+    verdicts[0]?.detail,
+    {
+      page_id: "PG-1",
+      stent_id: "STENT-1",
+      stchar_id: "STCHAR-1",
+      format_expectation: "- STENT-1 / STCHAR-1"
+    }
+  );
+});
+
+test("page_plan_stchar_packet_integrity reports format drift for bold-wrapped 16a packet bullets", async () => {
+  const verdicts = await pagePlanStcharPacketIntegrity.run(
+    input(plan({ packetPrefix: "- **STENT-1 / STCHAR-1 — Test Character.**" })),
+    context(baseRecords())
+  );
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.missing_packet");
+  assert.match(verdicts[0]?.message ?? "", /16a section is present but no parseable packet bullet/);
+  assert.match(verdicts[0]?.message ?? "", /no bold wrap or extra prefix characters/);
+  assert.equal((verdicts[0]?.detail as { format_drift_detected?: boolean }).format_drift_detected, true);
+  assert.equal((verdicts[0]?.detail as { format_expectation?: string }).format_expectation, "- STENT-1 / STCHAR-1");
+  assert.match(verdicts[0]?.suggested_fix ?? "", /common drifts/);
 });
 
 test("page_plan_stchar_packet_integrity allows omitted packets for offstage characters", async () => {
@@ -106,6 +132,17 @@ test("page_plan_stchar_packet_integrity rejects speaker packets without voice bl
   );
 
   assert.equal(verdicts[0]?.code, "page_plan_stchar_packet_integrity.missing_voice_block");
+  assert.match(verdicts[0]?.message ?? "", /Two equivalent forms are accepted/);
+  assert.match(verdicts[0]?.message ?? "", /`- Voice\/dialogue authority:` bullet/);
+  assert.match(verdicts[0]?.message ?? "", /inline `Voice Bible` phrasing/);
+  assert.deepEqual(
+    (verdicts[0]?.detail as { accepted_forms?: string[] }).accepted_forms,
+    [
+      "Dedicated `- Voice/dialogue authority:` bullet with substantive content",
+      "Inline `Voice Bible` phrasing within `- Stable STCHAR seed used:` or `- Page-local projection:` bullets"
+    ]
+  );
+  assert.match(verdicts[0]?.suggested_fix ?? "", /literal phrase `Voice Bible`/);
 });
 
 test("page_plan_stchar_packet_integrity rejects composite speaker packets without voice block", async () => {
@@ -402,6 +439,7 @@ function storyRecord(nodeType: string, id: string, sourceDir: string, parsed: Re
 function plan(options: {
   includePacket?: boolean;
   stcharId?: string;
+  packetPrefix?: string;
   requiredBecause?: string;
   sectionHeading?: string;
   stableSeedLine?: string;
@@ -430,6 +468,7 @@ function plan(options: {
 
 function packetText(options: {
   stcharId?: string;
+  packetPrefix?: string;
   requiredBecause?: string;
   stableSeedLine?: string;
   profileHash?: string;
@@ -440,7 +479,7 @@ function packetText(options: {
   projectionLine?: string;
 } = {}): string {
   return [
-    `- STENT-1 / ${options.stcharId ?? "STCHAR-1"} - Test Character.`,
+    options.packetPrefix ?? `- STENT-1 / ${options.stcharId ?? "STCHAR-1"} - Test Character.`,
     `  - Required because: ${options.requiredBecause ?? "speaker"}.`,
     `  - Hashes: profile_hash=${options.profileHash ?? HASH_A}; voice_block_hash=${HASH_B}; page_packet_hash=${options.pagePacketHash ?? SEED_PAGE_PACKET_HASH}.`,
     options.stableSeedLine ?? "  - Stable STCHAR seed used: STCHAR-1 stable authority.",

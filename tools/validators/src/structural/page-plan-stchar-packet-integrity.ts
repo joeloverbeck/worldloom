@@ -96,13 +96,24 @@ export const pagePlanStcharPacketIntegrity: Validator = {
             if (location === "offstage") {
               continue;
             }
+            const formatDriftDetected = formatDriftDetectedInSection(plan.content, stcharId);
             verdicts.push(planFail(
               page,
               plan.path,
               "page_plan_stchar_packet_integrity.missing_packet",
-              `${plan.path} omits a 16a STCHAR packet for active ${stentId} / ${stcharId}.`,
-              { page_id: pageId(page), stent_id: stentId, stchar_id: stcharId },
-              `Add a 16a packet for ${stentId} / ${stcharId}, or remove the character from the page's active STENT/STCHAR set.`
+              formatDriftDetected
+                ? `${plan.path} 16a section is present but no parseable packet bullet was found for active ${stentId} / ${stcharId}. The parser expects the packet bullet to start \`- ${stentId} / ${stcharId}\` at the beginning of the bullet line (no bold wrap or extra prefix characters).`
+                : `${plan.path} omits a 16a STCHAR packet for active ${stentId} / ${stcharId}. Expected a bullet starting \`- ${stentId} / ${stcharId}\` under the \`## 16a. STCHAR-derived character authority packets\` heading.`,
+              {
+                page_id: pageId(page),
+                stent_id: stentId,
+                stchar_id: stcharId,
+                format_expectation: `- ${stentId} / ${stcharId}`,
+                ...(formatDriftDetected ? { format_drift_detected: true } : {})
+              },
+              formatDriftDetected
+                ? `Repair the 16a packet bullet for ${stentId} / ${stcharId} so the line starts \`- ${stentId} / ${stcharId}\` — common drifts: \`- **${stentId} / ${stcharId} — ...**\` (bold wrap), \`### ${stentId} / ${stcharId} — ...\` (heading instead of bullet), or extra prefix characters.`
+                : `Add a 16a packet for ${stentId} / ${stcharId} (canonical prefix: \`- ${stentId} / ${stcharId}\`), or remove the character from the page's active STENT/STCHAR set.`
             ));
             continue;
           }
@@ -170,14 +181,19 @@ function packetVerdicts(
       page,
       planPath,
       "page_plan_stchar_packet_integrity.missing_voice_block",
-      `${planPath} 16a packet for ${packet.stcharId} omits the voice/dialogue authority block (voice-requiring labels in set: ${voiceRequiringLabels.join(", ")}).`,
+      `${planPath} 16a packet for ${packet.stcharId} omits the voice/dialogue authority block (voice-requiring labels in set: ${voiceRequiringLabels.join(", ")}). Two equivalent forms are accepted: (1) a dedicated \`- Voice/dialogue authority:\` bullet with substantive content under the packet, OR (2) substantive inline \`Voice Bible\` phrasing within the \`- Stable STCHAR seed used:\` or \`- Page-local projection:\` bullets.`,
       {
         page_id: pageId(page),
         stchar_id: packet.stcharId,
         required_because: packet.requiredBecause,
-        voice_requiring_labels: voiceRequiringLabels
+        voice_requiring_labels: voiceRequiringLabels,
+        accepted_forms: [
+          "Dedicated `- Voice/dialogue authority:` bullet with substantive content",
+          "Inline `Voice Bible` phrasing within `- Stable STCHAR seed used:` or `- Page-local projection:` bullets"
+        ],
+        format_expectation: "`- Voice/dialogue authority:` bullet OR inline `Voice Bible` phrasing"
       },
-      `Add the STCHAR Page-Plan Voice Block projection to the 16a packet for ${packet.stcharId}.`
+      `Add either form for ${packet.stcharId}: (1) a \`- Voice/dialogue authority:\` bullet, OR (2) the literal phrase \`Voice Bible\` inside the Stable STCHAR seed or Page-local projection bullet.`
     ));
   }
 
@@ -245,6 +261,11 @@ function parsePackets(content: string): Packet[] {
       packetText
     };
   });
+}
+
+function formatDriftDetectedInSection(content: string, expectedStcharId: string): boolean {
+  const section = markdownSection(content, STCHAR_SECTION_HEADING);
+  return section !== null && new RegExp(`\\b${expectedStcharId}\\b`).test(section);
 }
 
 function packetReferencesOutsideGrounding(packet: Packet): PacketReference[] {

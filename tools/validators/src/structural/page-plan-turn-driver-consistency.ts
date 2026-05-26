@@ -79,9 +79,14 @@ function validatePage(
       page,
       plan.path,
       "page_plan_driver_section_missing",
-      `${recordId(page)} resolves ${recordId(event)}, but its page plan omits section 7a Turn driver / initiative trace.`,
-      { page_id: recordId(page), event_id: recordId(event) },
-      `Add page-plan section 7a projecting ${recordId(event)}.turn_driver.`
+      `${recordId(page)} resolves ${recordId(event)}, but its page plan omits section 7a Turn driver / initiative trace. Expected heading exactly: \`## 7a. Turn driver / initiative trace\` (case-sensitive; common drifts include Title Case, a missing period after \`7a\`, or a different heading level).`,
+      {
+        page_id: recordId(page),
+        event_id: recordId(event),
+        expected_heading: "## 7a. Turn driver / initiative trace",
+        format_expectation: "## 7a. Turn driver / initiative trace"
+      },
+      `Add or correct page-plan section 7a heading to exactly \`## 7a. Turn driver / initiative trace\` (lowercase t/d/i/t after the 7a. prefix). The section must project ${recordId(event)}.turn_driver.`
     )];
   }
 

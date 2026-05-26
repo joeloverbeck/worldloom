@@ -26,6 +26,24 @@ test("page_plan_turn_driver_consistency reports a missing section", async () => 
   assert.equal(verdicts.length, 1);
   assert.equal(verdicts[0]?.code, "page_plan_driver_section_missing");
   assert.equal(verdicts[0]?.location.file, PLAN_PATH);
+  assert.match(verdicts[0]?.message ?? "", /Expected heading exactly: `## 7a\. Turn driver \/ initiative trace`/);
+  assert.equal(
+    (verdicts[0]?.detail as { expected_heading?: string }).expected_heading,
+    "## 7a. Turn driver / initiative trace"
+  );
+  assert.match(verdicts[0]?.suggested_fix ?? "", /lowercase t\/d\/i\/t/);
+});
+
+test("page_plan_turn_driver_consistency reports Title Case section heading drift", async () => {
+  const verdicts = await pagePlanTurnDriverConsistency.run(
+    input(plan({ heading: "## 7a. Turn Driver / Initiative Trace", table: true })),
+    context(records({ active: [] }))
+  );
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "page_plan_driver_section_missing");
+  assert.match(verdicts[0]?.message ?? "", /Title Case/);
+  assert.match(verdicts[0]?.message ?? "", /`## 7a\. Turn driver \/ initiative trace`/);
 });
 
 test("page_plan_turn_driver_consistency reports driver kind mismatches", async () => {
@@ -69,13 +87,15 @@ function input(content: string) {
 function plan({
   driverKind = "npc_action",
   driverRecords = "STPLAN-1",
+  heading = "## 7a. Turn driver / initiative trace",
   table = true
 }: {
   driverKind?: string;
   driverRecords?: string;
+  heading?: string;
   table?: boolean;
 }) {
-  return `## 7a. Turn driver / initiative trace
+  return `${heading}
 
 - Driver kind: ${driverKind}
 - Initiator: STENT-1
