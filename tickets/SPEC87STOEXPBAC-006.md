@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/story-explorer/src/view-models/record-card.ts` + `record-link.ts` + `src/read/record-card.ts` (per-class summary data path).
-**Deps**: archive/tickets/SPEC87STOEXPBAC-001.md, SPEC87STOEXPBAC-005
+**Deps**: archive/tickets/SPEC87STOEXPBAC-001.md, archive/tickets/SPEC87STOEXPBAC-005.md
 
 ## Problem
 
