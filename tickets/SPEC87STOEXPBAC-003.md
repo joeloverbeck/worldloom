@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/story-explorer/src/read/index-status.ts` + `src/config/repo-root.ts` + supporting types.
-**Deps**: SPEC87STOEXPBAC-001
+**Deps**: archive/tickets/SPEC87STOEXPBAC-001.md
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/story-explorer/src/server/http.ts` + `src/cli.ts` wiring + `src/server/routes/health.ts` + `worlds.ts` + `stories.ts`.
-**Deps**: SPEC87STOEXPBAC-001, SPEC87STOEXPBAC-002, SPEC87STOEXPBAC-004
+**Deps**: archive/tickets/SPEC87STOEXPBAC-001.md, SPEC87STOEXPBAC-002, SPEC87STOEXPBAC-004
 
 ## Problem
 

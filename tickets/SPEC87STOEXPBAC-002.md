@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/story-explorer/src/server/readonly-guard.ts` + fence-enforcement tests.
-**Deps**: SPEC87STOEXPBAC-001
+**Deps**: archive/tickets/SPEC87STOEXPBAC-001.md
 
 ## Problem
 
