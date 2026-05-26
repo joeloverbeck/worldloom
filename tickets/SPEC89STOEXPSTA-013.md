@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/story-explorer/test/capstone-spec89-smoke.test.ts` parallel to SPEC-88's landed capstone-spec88-smoke.test.ts pattern
-**Deps**: SPEC89STOEXPSTA-012
+**Deps**: archive/tickets/SPEC89STOEXPSTA-012.md
 
 ## Problem
 

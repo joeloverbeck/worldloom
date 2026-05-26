@@ -8,7 +8,7 @@ import { LinkedRecordPeek } from './LinkedRecordPeek';
 import { PlanProseTab } from './tabs/PlanProseTab';
 import { ValidationIntegrityTab } from './tabs/ValidationIntegrityTab';
 import { WhatChangedHereTab } from './tabs/WhatChangedHereTab';
-import { XRayTabs, type XRayTabId } from './XRayTabs';
+import { XRayTabs, XRAY_TABS, type XRayTabId } from './XRayTabs';
 
 interface XRayPanelProps {
   pageDetail: PageDetail;
@@ -55,15 +55,23 @@ export function XRayPanel({ pageDetail, storySlug, worldIndexStatus = null, worl
   return (
     <div className="xray-panel">
       <XRayTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      <div
-        aria-labelledby={`xray-tab-${activeTab}`}
-        className="xray-tab-panel"
-        id={`xray-panel-${activeTab}`}
-        role="tabpanel"
-        tabIndex={0}
-      >
-        {renderTabPanel(activeTab, handleRecordLinkClick, pageDetail, worldSlug, storySlug, worldIndexStatus)}
-      </div>
+      {XRAY_TABS.map((tab) => {
+        const selected = tab.id === activeTab;
+
+        return (
+          <div
+            aria-labelledby={`xray-tab-${tab.id}`}
+            className="xray-tab-panel"
+            hidden={!selected}
+            id={`xray-panel-${tab.id}`}
+            key={tab.id}
+            role="tabpanel"
+            tabIndex={selected ? 0 : -1}
+          >
+            {selected ? renderTabPanel(tab.id, handleRecordLinkClick, pageDetail, worldSlug, storySlug, worldIndexStatus) : null}
+          </div>
+        );
+      })}
       <LinkedRecordPeek
         onClose={() => setPeekRecordId(null)}
         recordId={peekRecordId}

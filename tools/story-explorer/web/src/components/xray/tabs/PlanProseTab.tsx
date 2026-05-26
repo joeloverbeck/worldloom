@@ -69,7 +69,7 @@ function verdictClass(value: string | null): string {
 }
 
 function PlanSection({ plan }: { plan: PagePlanBody }): JSX.Element {
-  const sanitizedPlan = useMemo(() => sanitizeMarkdown(plan.body), [plan.body]);
+  const sanitizedPlan = useMemo(() => normalizeEmbeddedHeadingLevels(sanitizeMarkdown(plan.body)), [plan.body]);
 
   return (
     <section className="xray-event-section" aria-labelledby="xray-plan-body-title">
@@ -78,6 +78,13 @@ function PlanSection({ plan }: { plan: PagePlanBody }): JSX.Element {
       <div className="xray-markdown-body" dangerouslySetInnerHTML={{ __html: sanitizedPlan }} />
     </section>
   );
+}
+
+function normalizeEmbeddedHeadingLevels(html: string): string {
+  return html.replace(/<\/?h([1-6])(\s[^>]*)?>/g, (tag, level: string, attributes = '') => {
+    const normalizedLevel = Math.min(Number(level) + 3, 6);
+    return tag.startsWith('</') ? `</h${normalizedLevel}>` : `<h${normalizedLevel}${attributes}>`;
+  });
 }
 
 function ValidationRows({ receipt }: { receipt: Record<string, unknown> }): JSX.Element {
@@ -194,7 +201,7 @@ export function PlanProseTab({ pageDetail, storySlug, worldSlug }: PlanProseTabP
   return (
     <section className="xray-tab-panel__body" aria-labelledby="xray-plan-prose-title">
       <h3 id="xray-plan-prose-title">Plan & Prose</h3>
-      <aside className="xray-boundary-banner">Plan, prose, and receipt are distinct artifacts. PG is the authoritative page snapshot.</aside>
+      <div className="xray-boundary-banner" role="note">Plan, prose, and receipt are distinct artifacts. PG is the authoritative page snapshot.</div>
 
       {planState.status === 'loading' ? <p role="status">Loading page plan for {currentPageId}.</p> : null}
       {planState.status === 'missing' ? <p className="xray-empty-note">No page plan for this page.</p> : null}
