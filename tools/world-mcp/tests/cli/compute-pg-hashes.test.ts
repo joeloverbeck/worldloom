@@ -41,7 +41,7 @@ test("cli-compute-pg-hashes: reports missing plan and PG files", async () => {
     "--plan",
     "/tmp/worldloom-missing-plan.md",
     "--pg",
-    "/tmp/worldloom-missing-pg.yaml"
+    "/tmp/worldloom-missing-pg.json"
   ]);
 
   assert.equal(result.exitCode, 1);
@@ -49,42 +49,45 @@ test("cli-compute-pg-hashes: reports missing plan and PG files", async () => {
   assert.match(result.stderr, /Failed to read plan file/);
 });
 
-test("cli-compute-pg-hashes: reports malformed YAML", async () => {
+test("cli-compute-pg-hashes: reports malformed JSON", async () => {
   const tmp = makeTmpDir();
   try {
     const planPath = writeText(tmp, "PG-2.md", "Plan bytes\n");
-    const pgPath = writeText(tmp, "PG-2.yaml", "id: [unterminated\n");
+    const pgPath = writeText(tmp, "PG-2.json", '{"id": "PG-2", "plan": ');
 
     const result = await runComputePgHashesCli(["--plan", planPath, "--pg", pgPath]);
 
     assert.equal(result.exitCode, 1);
     assert.equal(result.stdout, "");
-    assert.match(result.stderr, /not valid YAML or JSON/);
+    assert.match(result.stderr, /must be valid JSON/);
+    assert.match(result.stderr, /no longer accepts YAML input/);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
 });
 
-test("cli-compute-pg-hashes: computes plan_hash and state_hash from a YAML PG draft", async () => {
+test("cli-compute-pg-hashes: computes plan_hash and state_hash from a JSON PG draft", async () => {
   const tmp = makeTmpDir();
   try {
     const planBody = "Final page plan bytes.\nDo not normalize.\n";
     const planPath = writeText(tmp, "PG-2.md", planBody);
+    const pgObject = {
+      id: "PG-2",
+      story_id: "STORY-1",
+      state_hash: "placeholder",
+      prose_plan_path: "pages-prose-plans/PG-2.md",
+      plan: {
+        plan_hash: "placeholder"
+      },
+      validation_trace: {
+        input_legality: "PASS: checked",
+        branch_isolation: "PASS: checked"
+      }
+    };
     const pgPath = writeText(
       tmp,
-      "PG-2.yaml",
-      [
-        "id: PG-2",
-        "story_id: STORY-1",
-        "state_hash: placeholder",
-        "prose_plan_path: pages-prose-plans/PG-2.md",
-        "plan:",
-        "  plan_hash: placeholder",
-        "validation_trace:",
-        "  input_legality: 'PASS: checked'",
-        "  branch_isolation: 'PASS: checked'",
-        ""
-      ].join("\n")
+      "PG-2.json",
+      `${JSON.stringify(pgObject, null, 2)}\n`
     );
 
     const result = await runComputePgHashesCli(["--plan", planPath, "--pg", pgPath]);
@@ -115,7 +118,7 @@ test("cli-compute-pg-hashes: computes plan_hash and state_hash from a YAML PG dr
   }
 });
 
-test("cli-compute-pg-hashes: equivalent YAML and JSON PG drafts produce identical hashes", async () => {
+test("cli-compute-pg-hashes: rejects YAML PG drafts before hashing", async () => {
   const tmp = makeTmpDir();
   try {
     const planBody = "Final PG-5 plan bytes.\nKeep every byte stable.\n";
@@ -171,6 +174,22 @@ test("cli-compute-pg-hashes: equivalent YAML and JSON PG drafts produce identica
         ""
       ].join("\n")
     );
+    const yamlResult = await runComputePgHashesCli(["--plan", planPath, "--pg", yamlPath]);
+
+    assert.equal(yamlResult.exitCode, 1);
+    assert.equal(yamlResult.stdout, "");
+    assert.match(yamlResult.stderr, /must be valid JSON/);
+    assert.match(yamlResult.stderr, /no longer accepts YAML input/);
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test("cli-compute-pg-hashes: equivalent envelope JSON produces direct helper hashes", async () => {
+  const tmp = makeTmpDir();
+  try {
+    const planBody = "Final PG-5 plan bytes.\nKeep every byte stable.\n";
+    const planPath = writeText(tmp, "PG-5.md", planBody);
     const pgObject = {
       record_kind: "page_record",
       id: "PG-5",
@@ -213,16 +232,46 @@ test("cli-compute-pg-hashes: equivalent YAML and JSON PG drafts produce identica
           "PASS: multi-line rationale keeps exact JSON newline bytes.\nUnicode stays authored: → and — are not normalized.\n"
       }
     };
-    const jsonPath = writeText(tmp, "PG-5.json", `${JSON.stringify(pgObject, null, 2)}\n`);
+    const jsonPath = writeText(tmp, "PG-5-from-envelope.json", `${JSON.stringify(pgObject, null, 2)}\n`);
 
-    const yamlResult = await runComputePgHashesCli(["--plan", planPath, "--pg", yamlPath]);
-    const jsonResult = await runComputePgHashesCli(["--plan", planPath, "--pg", jsonPath]);
+    const result = await runComputePgHashesCli(["--plan", planPath, "--pg", jsonPath]);
+    const output = JSON.parse(result.stdout) as { plan_hash: string; state_hash: string };
+    const expectedPlanHash = createHash("sha256")
+      .update(Buffer.from(planBody, "utf8"))
+      .digest("hex");
 
-    assert.equal(yamlResult.exitCode, 0);
-    assert.equal(yamlResult.stderr, "");
-    assert.equal(jsonResult.exitCode, 0);
-    assert.equal(jsonResult.stderr, "");
-    assert.deepEqual(JSON.parse(yamlResult.stdout), JSON.parse(jsonResult.stdout));
+    assert.equal(result.exitCode, 0);
+    assert.equal(result.stderr, "");
+    assert.equal(output.plan_hash, expectedPlanHash);
+    assert.equal(
+      output.state_hash,
+      computePgStateHash({
+        ...pgObject,
+        plan: {
+          plan_hash: expectedPlanHash
+        }
+      })
+    );
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test("cli-compute-pg-hashes: reports missing plan block", async () => {
+  const tmp = makeTmpDir();
+  try {
+    const planPath = writeText(tmp, "PG-7.md", "Plan bytes\n");
+    const pgPath = writeText(
+      tmp,
+      "PG-7.json",
+      `${JSON.stringify({ id: "PG-7", state_hash: "placeholder" }, null, 2)}\n`
+    );
+
+    const result = await runComputePgHashesCli(["--plan", planPath, "--pg", pgPath]);
+
+    assert.equal(result.exitCode, 1);
+    assert.equal(result.stdout, "");
+    assert.match(result.stderr, /must contain a top-level plan object/);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
@@ -234,21 +283,23 @@ test("cli-compute-pg-hashes: post-write re-hash detects plan-file drift", async 
     const cleanPlanBody = "Final page plan bytes.\nDo not normalize.\n";
     const driftedPlanBody = "Final page plan bytes.\nDo not normalize.\nPost-write drift.\n";
     const planPath = writeText(tmp, "PG-2.md", cleanPlanBody);
+    const pgObject = {
+      id: "PG-2",
+      story_id: "STORY-1",
+      state_hash: "placeholder",
+      prose_plan_path: "pages-prose-plans/PG-2.md",
+      plan: {
+        plan_hash: "placeholder"
+      },
+      validation_trace: {
+        input_legality: "PASS: checked",
+        branch_isolation: "PASS: checked"
+      }
+    };
     const pgPath = writeText(
       tmp,
-      "PG-2.yaml",
-      [
-        "id: PG-2",
-        "story_id: STORY-1",
-        "state_hash: placeholder",
-        "prose_plan_path: pages-prose-plans/PG-2.md",
-        "plan:",
-        "  plan_hash: placeholder",
-        "validation_trace:",
-        "  input_legality: 'PASS: checked'",
-        "  branch_isolation: 'PASS: checked'",
-        ""
-      ].join("\n")
+      "PG-2.json",
+      `${JSON.stringify(pgObject, null, 2)}\n`
     );
 
     const clean = await runComputePgHashesCli(["--plan", planPath, "--pg", pgPath]);

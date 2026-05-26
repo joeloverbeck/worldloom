@@ -2,8 +2,6 @@
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
-import YAML from "yaml";
-
 import { isMainModule } from "../esm-main.js";
 import { computePgStateHash, computePlanHash } from "../package-interop.js";
 export interface CliResult {
@@ -12,7 +10,7 @@ export interface CliResult {
   exitCode: number;
 }
 
-const HELP_TEXT = `Usage: compute-pg-hashes --plan <plan-md-path> --pg <pg-record-path>
+const HELP_TEXT = `Usage: compute-pg-hashes --plan <plan-md-path> --pg <pg-record-json-path>
 
 Computes the canonical sha256 hashes that every PG record requires before its
 patch plan is validated or submitted, per the story state contract §4.2a:
@@ -34,19 +32,18 @@ Arguments:
                           read as raw bytes (no normalization, no trimming);
                           the hash binds the exact bytes that will land at
                           pages-prose-plans/PG-<integer>.md.
-  --pg <path>             Path to a JSON or YAML file containing the PG
-                          record draft. Both formats are accepted and produce
-                          identical hashes when they parse to the same PG
-                          object. JSON is a subset of YAML, and both are
-                          parsed through the same parser. The CLI does not
-                          reconcile content drift between separate draft
-                          files; the input must match the PG payload that will
-                          be validated/submitted. The 'state_hash' field on
-                          the input is IGNORED (it is the value being
+  --pg <path>             Path to a JSON file containing the PG record draft.
+                          YAML input is rejected: the patch engine validates
+                          JSON, so the CLI must hash the same JSON payload the
+                          engine will validate. Recommended workflow: build
+                          the patch envelope first; extract the PG record with
+                            jq '.patches[N].payload.record' envelope.json > PG-record.json
+                          and pass PG-record.json as --pg. The 'state_hash'
+                          field on the input is IGNORED (it is the value being
                           computed); the 'plan.plan_hash' field, if present,
                           is REPLACED in the canonical payload by the value
                           computed from --plan, so callers may pass a draft
-                          that has placeholders for both hashes.
+                          whose plan block has a placeholder or omitted hash.
 
 Options:
   --help                  Show this help and exit.
@@ -71,7 +68,7 @@ Exit codes:
 Example:
   node tools/world-mcp/dist/src/cli/compute-pg-hashes.js \\
     --plan /tmp/PG-2-plan.md \\
-    --pg   /tmp/PG-2-draft.yaml
+    --pg   /tmp/PG-2-from-envelope.json
 `;
 
 interface CliArgs {
@@ -153,12 +150,12 @@ function readPgRecord(filePath: string): { ok: true; record: Record<string, unkn
 
   let parsed: unknown;
   try {
-    parsed = YAML.parse(raw);
+    parsed = JSON.parse(raw);
   } catch (err) {
     const cause = err instanceof Error ? err.message : String(err);
     return {
       ok: false,
-      message: `PG file ${filePath} is not valid YAML or JSON: ${cause}`
+      message: `PG file ${filePath} must be valid JSON. ${cause}. The CLI no longer accepts YAML input: build your patch envelope first, extract the PG record via \`jq '.patches[N].payload.record' envelope.json > PG-record.json\`, then pass that file as --pg. See .claude/skills/_shared-templates/story-record-schemas.md §4.2a.`
     };
   }
 
@@ -169,7 +166,16 @@ function readPgRecord(filePath: string): { ok: true; record: Record<string, unkn
     };
   }
 
-  return { ok: true, record: parsed as Record<string, unknown> };
+  const record = parsed as Record<string, unknown>;
+  const planBlock = record.plan;
+  if (planBlock === null || typeof planBlock !== "object" || Array.isArray(planBlock)) {
+    return {
+      ok: false,
+      message: `PG file ${filePath} must contain a top-level plan object; got ${describeKind(planBlock)}.`
+    };
+  }
+
+  return { ok: true, record };
 }
 
 function describeKind(value: unknown): string {
