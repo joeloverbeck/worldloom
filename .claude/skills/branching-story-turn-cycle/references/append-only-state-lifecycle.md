@@ -8,6 +8,19 @@ create-new plus `supersedes: <prior_id>`, not as edits to the prior record.
 This preserves FOUNDATIONS §Story Bundles §8 and keeps `SE.state_delta`
 expressed as creates / supersessions / closes.
 
+## Active Records Consequence
+
+Supersession is reflected in `PG.state_snapshot.active_records` per shared
+contract §4.2a `replayActiveRecords` (`parent.active_records + state_delta.create
+− state_delta.supersede − state_delta.close`): the new record id is ADDED to the
+relevant class list AND the prior record id is DROPPED. The lineage from prior
+to new lives only in the new record's `supersedes:<prior-id>` body field; the
+`active_records` list itself reflects post-event state, not a transition window.
+This convention applies uniformly to every class that participates in
+`state_delta` (STENT / STCHAR / STSTAT / STINT / SF / BEL / OBL / CNSQ / THR /
+CLK / STSEC / STQ / STPLAN / STEMO / SREL / STLOC / STOBJ / DA), not only the
+CLK / STSEC / STQ classes whose lifecycle is described below.
+
 ## Op-Naming Clarification
 
 `supersede_clk_record`, `supersede_stsec_record`, and
