@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new `tools/validators/src/structural/page-plan-verbatim-section-integrity.ts` validator + new `tools/validators/tests/structural/page-plan-verbatim-section-integrity.test.ts` test; validator registered in `tools/validators/src/registry.ts` (or equivalent registration site)
-**Deps**: archive/tickets/PROSESPLIT2-001.md (canonical-source paths must exist), PROSESPLIT2-002 (skill-side refs migrated so new plans author from the new path), PROSESPLIT2-003 (FOUNDATIONS reference migrated), PROSESPLIT2-004 (legacy report deleted; only the new canonical files remain as authoritative source). All four must land first or the test points at a moving target.
+**Deps**: archive/tickets/PROSESPLIT2-001.md (canonical-source paths must exist), archive/tickets/PROSESPLIT2-002.md (skill-side refs migrated so new plans author from the new path), PROSESPLIT2-003 (FOUNDATIONS reference migrated), PROSESPLIT2-004 (legacy report deleted; only the new canonical files remain as authoritative source). All four must land first or the test points at a moving target.
 
 ## Problem
 

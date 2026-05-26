@@ -7,7 +7,9 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `docs/FOUNDATIONS.md` — §Story Bundles (especially §4a Plan-Authority Boundary, §4b Canon Baseline Drift, §5 / §5a / §5b, §6a Belief vs. Fact) governs this skill
 - `.claude/skills/_shared-templates/story-state-contract.md` — predicate DSL (§5), action routing (§6), eight hard gates (§7), page-plan minimum contract (§8), branching procedure (§9), shared write order (§10)
 - `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas (BEL §4.1, PG §4.2, SE §4.3, SLT §4.4, plus §4.4a/§4.4b taxonomies, §4.5.X additional classes, §4.6 receipt)
-- `reports/prose-quality-instructions.md` — canonical source for verbatim §2 / §3 / §19 of the page plan
+- `docs/prose-renderer-contract/content-policy.md` — canonical source for the page plan's verbatim §2 (Content Policy)
+- `docs/prose-renderer-contract/prose-craft-contract.md` — canonical source for the page plan's verbatim §3 (Prose Craft Contract)
+- `docs/prose-renderer-contract/render-time-instruction.md` — canonical source for the page plan's verbatim §19 (Render-Time Instruction Template)
 - `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` and `INDEX.md` — bundle root context
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml` — parent page; MUST exist
 - Parent's `state_snapshot.active_records` resolved via `mcp__worldloom__get_records(record_ids=<active record id list>, story_slug=<story_slug>)` per FOUNDATIONS §Tooling Recommendation; direct `Read` of individual `_source/<class>/*.yaml` files is permissible but does not exercise the indexed retrieval surface
@@ -29,7 +31,7 @@ The bundle MUST exist (non-bootstrap variant); parent page MUST exist; the new `
 
 Before Phase 1:
 
-1. Load `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, and `reports/prose-quality-instructions.md` into working context. Abort with clear missing-file error on any unreadable path.
+1. Load `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, `docs/prose-renderer-contract/content-policy.md`, `docs/prose-renderer-contract/prose-craft-contract.md`, and `docs/prose-renderer-contract/render-time-instruction.md` into working context. Abort with clear missing-file error on any unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if the directory does not exist or is missing `STORY_KERNEL.md` / `_source/`.
 3. Load `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` and its `## Player Agency Contract` section. Abort with agency-contract-missing error if the section is absent or does not name the agency surface, write-in envelope, and viewpoint limits.
 4. Load `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml`. Abort with parent-not-found error if missing.

@@ -425,8 +425,8 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | § | Section | Source |
 |---|---|---|
 | 1 | Story kernel excerpt | `STORY_KERNEL.md` slice |
-| 2 | **Content Policy** | **inlined verbatim from `reports/prose-quality-instructions.md` §Content Policy** |
-| 3 | **Prose Craft Contract** | **inlined verbatim from `reports/prose-quality-instructions.md` §Prose Craft Contract** |
+| 2 | **Content Policy** | **inlined verbatim from `docs/prose-renderer-contract/content-policy.md`** |
+| 3 | **Prose Craft Contract** | **inlined verbatim from `docs/prose-renderer-contract/prose-craft-contract.md`** |
 | 4 | Relevant world-canon excerpt | context packet |
 | 5 | Active cast and entity statuses | `state_snapshot.entity_status` |
 | 6 | Current location and affordances | `state_snapshot.visible_affordances` |
@@ -447,7 +447,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 16a | STCHAR-derived character authority packets (mandatory when relevant) | STCHAR profile + page state |
 | 17 | Style and register notes (optional) | per-skill |
 | 18 | Anti-pathology checklist | per-skill |
-| 19 | **Render-time instruction block** | **inlined verbatim from `reports/prose-quality-instructions.md` §Render-Time Instruction Template** |
+| 19 | **Render-time instruction block** | **inlined verbatim from `docs/prose-renderer-contract/render-time-instruction.md`** |
 
 **§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages.
 
