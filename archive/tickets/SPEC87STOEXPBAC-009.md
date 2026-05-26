@@ -1,20 +1,21 @@
 # SPEC87STOEXPBAC-009: Search + branch-map route sketches
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/story-explorer/src/server/routes/search.ts` + `branch-map.ts` (stubs) + `src/view-models/branch-map-node.ts` + `branch-map-edge.ts` (types).
-**Deps**: SPEC87STOEXPBAC-007
+**Deps**: archive/tickets/SPEC87STOEXPBAC-007.md
 
 ## Problem
 
-SPEC-87 §5 lists the search and branch-map endpoints as sketch-only placeholders that SPEC-90 will fully implement. This ticket lands the route file stubs with sketch-only handler bodies (returning structured "not yet implemented; full implementation in SPEC-90" envelope responses) plus the BranchMapNode / BranchMapEdge type definitions that SPEC-87 §4 declares as type-only deliverables here. Landing the stubs in SPEC-87's scope keeps the HTTP API surface complete (every endpoint per §5 is registered) so SPEC-88's frontend can wire UI affordances (the Branch Map button, the page-search modal) without depending on SPEC-90 having shipped.
+SPEC-87 §5 lists the search and branch-map endpoints as sketch-only placeholders that SPEC-90 will fully implement. This ticket landed the route file stubs with sketch-only handler bodies (returning structured "not yet implemented; full implementation in SPEC-90" envelope responses) plus the BranchMapNode / BranchMapEdge type definitions that SPEC-87 §4 declares as type-only deliverables here. Landing the stubs in SPEC-87's scope keeps the HTTP API surface complete (every endpoint per §5 is registered) so SPEC-88's frontend can wire UI affordances (the Branch Map button, the page-search modal) without depending on SPEC-90 having shipped.
 
 ## Assumption Reassessment (2026-05-25)
 
 1. SPEC-90 is the spec that fully implements search + branch-map; this ticket's stubs are the placeholders that SPEC-90 replaces. SPEC-87 §5 explicitly names them as sketch-only with the qualifier "full impl SPEC-90". Brainstorm-verified + reassess-verified that the SPEC-90 spec file exists at `specs/SPEC-90-story-explorer-branch-map-and-search.md` and describes the full implementation contract.
 2. SPEC-87 §4 declares `BranchMapNode` and `BranchMapEdge` as type-only deliverables (the renderer lives in SPEC-90). This ticket creates the type files; SPEC-90 will consume them when implementing the actual route handlers.
 3. Cross-skill boundary: this ticket creates a forward-compat contract for SPEC-90. The stub endpoint paths + the BranchMapNode/BranchMapEdge type shapes form the contract; SPEC-90's implementation must conform to the type shapes (or amend them via a separate SPEC-87 amendment if SPEC-90 surfaces a type-shape gap during implementation). The boundary is unidirectional: this ticket establishes the contract; SPEC-90 implements against it.
+4. Implementation reassessment (2026-05-26): live `tools/story-explorer/package.json` runs `npm test` as `npm run build && node --test "dist/test/**/*.test.js"`, so the drafted `npm test -- sketch-routes` target is not the truthful focused selector for this package. The accepted narrow proof is `npm run build` followed by `node --test dist/test/sketch-routes.test.js`; the full package proof remains `npm test`.
 
 ## Architecture Check
 
@@ -23,11 +24,11 @@ SPEC-87 §5 lists the search and branch-map endpoints as sketch-only placeholder
 
 ## Verification Layers
 
-1. Sketch routes registered → vitest test (issues `GET /api/.../search?q=foo`; asserts response contains the structured "not_implemented" envelope; same for `/branch-map`)
+1. Sketch routes registered → compiled `node:test` test (issues `GET /api/.../search?q=foo`; asserts response contains the structured "not_implemented" envelope; same for `/branch-map`)
 2. Type definitions match SPEC-87 §4 shape → tsc type-check (BranchMapNode + BranchMapEdge fields match `pageId`, `branchId`, `turnIndex`, `label`, `hasProse`, `isCurrent`, `isLeaf`, `isTerminal`, `eventKind`, `outcomeRoute` for nodes; `fromPageId`, `toPageId`, `choiceId`, `choiceLabel`, `variantLabel`, `branchId` for edges)
 3. Cross-skill SPEC-90 forward-compat contract → codebase grep-proof (`grep -E "(search|branch-map)" specs/SPEC-90-story-explorer-branch-map-and-search.md` returns matches naming both endpoint paths; the SPEC-90 spec § HTTP backend specifications align with these stub paths)
 
-## What to Change
+## Landed Changes
 
 ### 1. Implement BranchMapNode + BranchMapEdge types
 
@@ -67,7 +68,7 @@ SPEC-87 §5 lists the search and branch-map endpoints as sketch-only placeholder
 
 ### Tests That Must Pass
 
-1. `cd tools/story-explorer && npm test -- sketch-routes` — both endpoints return the structured "not_implemented" envelope with the SPEC-90 forward reference.
+1. `cd tools/story-explorer && npm run build && node --test dist/test/sketch-routes.test.js` — both endpoints return the structured "not_implemented" envelope with the SPEC-90 forward reference.
 2. Query-param validation rejects malformed requests (missing `q` for search; missing `focus` for branch-map) with structured envelope errors.
 
 ### Invariants
@@ -83,5 +84,23 @@ SPEC-87 §5 lists the search and branch-map endpoints as sketch-only placeholder
 
 ### Commands
 
-1. `cd tools/story-explorer && npm test -- sketch-routes` (targeted)
+1. `cd tools/story-explorer && npm run build && node --test dist/test/sketch-routes.test.js` (targeted)
 2. `cd tools/story-explorer && npm test` (full-pipeline)
+
+## Outcome
+
+Completed: 2026-05-26
+
+Implemented the SPEC-87 sketch-only search and branch-map backend surface. Added `BranchMapNode` and `BranchMapEdge` type files, added GET-only `search` and `branch-map` route modules that return structured `not_implemented` envelopes with `SPEC-90` forward references, registered both routes in the HTTP server, and added `sketch-routes.test.ts` coverage for type shape, route registration, successful sketch responses, and malformed query handling.
+
+## Verification Result
+
+1. `cd tools/story-explorer && npm test` pre-edit baseline — passed: 62 tests, 62 pass.
+2. `cd tools/story-explorer && npm run build` — passed.
+3. `cd tools/story-explorer && node --test dist/test/sketch-routes.test.js` — passed: 3 tests, 3 pass.
+4. `cd tools/story-explorer && npm test` — passed: 65 tests, 65 pass.
+5. SPEC-90 forward-compat grep proof — `rg -n "search|branch-map|BranchMap" specs/SPEC-90-story-explorer-branch-map-and-search.md` confirmed the full SPEC-90 endpoint and type contract names both routes and `BranchMapNode` / `BranchMapEdge`.
+
+## Deviations
+
+1. The drafted targeted command `cd tools/story-explorer && npm test -- sketch-routes` was corrected to the compiled Node test boundary because the package `npm test` script runs the full compiled glob and does not provide a reliable file selector. The full package proof still ran via `npm test`.

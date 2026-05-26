@@ -1,10 +1,10 @@
 # SPEC87STOEXPBAC-004: World + Story enumeration view models
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/story-explorer/src/view-models/world-summary.ts` + `story-summary.ts` + `src/read/world-list.ts` + `src/read/story-list.ts`.
-**Deps**: SPEC87STOEXPBAC-001, SPEC87STOEXPBAC-003
+**Deps**: archive/tickets/SPEC87STOEXPBAC-001.md, archive/tickets/SPEC87STOEXPBAC-003.md
 
 ## Problem
 
@@ -15,6 +15,7 @@ SPEC-87 §4 specifies the `WorldSummary` and `StorySummary` view models the SPEC
 1. `tools/world-index/src/parse/story-directories.ts` (brainstorm-verified) maps the 22 indexed story record classes; brainstorm-time + reassess-time agent verification confirmed `worlds/<slug>/stories/<story-slug>/_source/<class>/` is the per-bundle path convention and `worlds/<slug>/_index/world.db` is the per-world index path. This ticket's enumeration code reads `worlds/<slug>/` via `repo-root.ts` from ticket 003 + filesystem `readdir`, then optionally consults the index via ticket 003's `resolveIndexStatus`. The terminalReason derivation logic reads the parent PG's `state_snapshot` to infer whether a leaf page is terminal-by-no-children, paused-per-metadata, or terminal-per-metadata.
 2. SPEC-87 §4 specifies `WorldSummary` and `StorySummary` field sets; the SPEC-87 reassessment M3 added `terminalReason: 'no_children' | 'paused' | 'terminal' | null` to `PageSummary`. The PageSummary type itself is defined here (it's a sub-shape returned by `StorySummary.leafPageIds` resolution); the full PageSummary read implementation lives in ticket 005's page-detail.ts.
 3. Cross-skill boundary: the story-bundle artifact-path contract is the shared boundary under audit. SPEC-87 §3 layout names `STORY_KERNEL.md`, `_source/<class>/<ID>.yaml`, `pages-prose/PG-<n>.md`, `pages-prose-plans/PG-<n>.md`, `pages-prose-receipts/PG-<n>.yaml`, `story-characters/STCHAR-<n>.md`, `INDEX.md`. This ticket's enumeration reads `STORY_KERNEL.md` (for title), counts `_source/pages/PG-*.yaml` files (for PG count), counts `pages-prose/PG-*.md` files (for rendered-prose count). The contract is the path convention; deviation in this ticket would break SPEC-88's display.
+4. Reassessment correction (2026-05-26): the package uses TypeScript plus Node's built-in test runner, not vitest. The drafted `npm test -- enumeration` command does not filter this package's compiled Node test glob, so the truthful targeted lane is `npm run build` followed by `node --test dist/test/enumeration.test.js`. The live checkout also has only `worlds/.gitkeep`, so live-world cardinality is not a valid acceptance assertion; enumeration proof uses temp repository fixtures that model the required story-bundle paths.
 
 ## Architecture Check
 
@@ -23,9 +24,9 @@ SPEC-87 §4 specifies the `WorldSummary` and `StorySummary` view models the SPEC
 
 ## Verification Layers
 
-1. World enumeration without index → vitest test (creates a temp `worlds/` tree with no `_index/` subdirectory; asserts `enumerateWorlds()` returns the worlds with `indexStatus.kind: 'missing'`)
-2. Story enumeration with index → vitest test (uses the `worlds/erotica-world/stories/red-bunny/` fixture; asserts PG count, leaf count, rendered-prose count match the filesystem)
-3. terminalReason discrimination → vitest test (asserts a leaf-by-no-children page receives `terminalReason: 'no_children'`; mocks paused / terminal metadata for the other variants)
+1. World enumeration without index → Node test (creates a temp `worlds/` tree with no `_index/` subdirectory; asserts `enumerateWorlds()` returns the worlds with `indexStatus.kind: 'missing'`)
+2. Story enumeration with index → Node test (creates a temp story-bundle fixture with `STORY_KERNEL.md`, `_source/pages/PG-*.yaml`, `pages-prose/PG-*.md`, and a fresh index; asserts PG count, leaf count, rendered-prose count match the fixture)
+3. terminalReason discrimination → Node test (asserts a leaf-by-no-children page receives `terminalReason: 'no_children'`; fixture pages cover paused / terminal metadata for the other variants)
 4. Cross-skill story-bundle path contract → codebase grep-proof (story-list.ts reads `pages-prose/PG-*.md`, `_source/pages/PG-*.yaml`, `STORY_KERNEL.md` — matches the SPEC-87 §3 path convention exactly)
 
 ## What to Change
@@ -51,8 +52,8 @@ SPEC-87 §4 specifies the `WorldSummary` and `StorySummary` view models the SPEC
 
 - `tools/story-explorer/test/enumeration.test.ts`:
   - World enumeration with no `_index/` subdirectory → all worlds return `indexStatus.kind: 'missing'`.
-  - World enumeration with fresh index → `indexStatus.kind: 'fresh'`, `storyCount` matches filesystem.
-  - Story enumeration on red-bunny fixture → PG count = 1, leaf count = 1, rendered-prose count = 1, root = `PG-1`.
+  - World enumeration with fresh temp index → `indexStatus.kind: 'fresh'`, `storyCount` matches filesystem.
+  - Story enumeration on a temp story-bundle fixture → PG count, leaf count, rendered-prose count, root, and latest page values match the fixture.
   - terminalReason discrimination on a leaf page with no children → `terminalReason: 'no_children'`.
 
 ## Files to Touch
@@ -74,8 +75,8 @@ SPEC-87 §4 specifies the `WorldSummary` and `StorySummary` view models the SPEC
 
 ### Tests That Must Pass
 
-1. `cd tools/story-explorer && npm test -- enumeration` — World + Story enumeration paths covered for both indexed and missing-index cases.
-2. `enumerateWorlds()` on the live `worlds/` tree returns ≥1 world (the test asserts existence + shape, not specific slugs).
+1. `cd tools/story-explorer && npm run build && node --test dist/test/enumeration.test.js` — World + Story enumeration paths covered for both indexed and missing-index cases.
+2. `enumerateWorlds()` on a temp `worlds/` tree returns the fixture worlds with correct shape; the live checkout currently has only `worlds/.gitkeep`, so no live-world cardinality assertion is truthful here.
 3. `terminalReason` discrimination produces the correct discriminator for each variant per the SPEC-87 §4 enum.
 
 ### Invariants
@@ -91,5 +92,24 @@ SPEC-87 §4 specifies the `WorldSummary` and `StorySummary` view models the SPEC
 
 ### Commands
 
-1. `cd tools/story-explorer && npm test -- enumeration` (targeted)
+1. `cd tools/story-explorer && npm run build && node --test dist/test/enumeration.test.js` (targeted; `npm test -- enumeration` is not a real filter for this package's compiled Node test glob)
 2. `cd tools/story-explorer && npm test` (full-pipeline)
+
+## Outcome
+
+Completed 2026-05-26. Added the `WorldSummary`, `StorySummary`, and `PageSummary` view-model types. Added `enumerateWorlds()`, `enumerateStories()`, and `getPageSummaries()` read primitives. World enumeration is filesystem-first and surfaces `IndexStatus`; story/page enumeration uses a fresh index when available and falls back to direct story-bundle files when the index is missing or not fresh.
+
+The implementation reads the SPEC-87 path contract directly: `STORY_KERNEL.md`, `_source/pages/PG-*.yaml`, `pages-prose/PG-*.md`, `pages-prose-plans/PG-*.md`, and `pages-prose-receipts/PG-*.yaml`. `terminalReason` is derived as `paused` for `branch_pause`, `terminal` for `terminal_closed`, `no_children` for leaf pages without terminal metadata, and `null` for non-leaf open pages.
+
+## Verification Result
+
+1. `cd tools/story-explorer && npm run build` — passed.
+2. `cd tools/story-explorer && node --test dist/test/enumeration.test.js` — passed: 4 tests, 4 pass.
+3. `cd tools/story-explorer && npm test` — passed: 18 tests, 18 pass.
+4. `rg -n "WorldSummary|StorySummary|PageSummary|terminalReason|pages-prose|_source/pages|STORY_KERNEL" tools/story-explorer/src tools/story-explorer/test/enumeration.test.ts` — confirmed the view-model exports and story-bundle path-contract reads are present.
+
+## Deviations
+
+1. The drafted proof labels said vitest; the live package uses Node's built-in test runner.
+2. The drafted targeted command `npm test -- enumeration` was replaced with `npm run build && node --test dist/test/enumeration.test.js` because the package's `npm test` script runs the compiled Node glob and does not expose an enumeration filter.
+3. The drafted live-world assertion was replaced with temp-repo fixture assertions because this public checkout has no live world directories beyond `worlds/.gitkeep`.

@@ -99,7 +99,7 @@ Captured in `specs/IMPLEMENTATION-ORDER.md` § "Future Enhancements".
 
 | # | File | Purpose |
 |---|---|---|
-| 1 | `specs/SPEC-87-story-explorer-backend-foundation.md` | Backend package, read-only HTTP API, view models, source priority, index freshness |
+| 1 | `archive/specs/SPEC-87-story-explorer-backend-foundation.md` | Backend package, read-only HTTP API, view models, source priority, index freshness |
 | 2 | `specs/SPEC-88-story-explorer-frontend-foundation.md` | React/Vite scaffold, World/Story/Page pickers, page reading surface (prose panel + choices), accessibility baseline |
 | 3 | `specs/SPEC-89-story-explorer-state-xray-layer.md` | 8 record groups, 4 X-Ray tabs, deterministic summaries, raw YAML escape hatch, linked-record navigation |
 | 4 | `specs/SPEC-90-story-explorer-branch-map-and-search.md` | Branch map drawer + page search modal (FTS-backed) |

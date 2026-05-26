@@ -3,10 +3,10 @@ set -euo pipefail
 
 # Build every tools/ package in dependency order.
 # Manual invocation: ./scripts/build-all.sh
-# Dependency order is: world-index → patch-engine → validators → (hooks, world-mcp).
+# Dependency order is: world-index → patch-engine → validators → hooks → world-mcp → story-explorer.
 
 ROOT="$(git rev-parse --show-toplevel)"
-PACKAGES=(world-index patch-engine validators hooks world-mcp)
+PACKAGES=(world-index patch-engine validators hooks world-mcp story-explorer)
 
 for pkg in "${PACKAGES[@]}"; do
   dir="$ROOT/tools/$pkg"

@@ -18,6 +18,8 @@ This file orders the four Story Explorer specs and records the named assumptions
 
 SPEC-87 is the structural base; nothing else compiles or renders without it.
 
+**Implementation status (2026-05-26):** SPEC-87 is completed and archived at `archive/specs/SPEC-87-story-explorer-backend-foundation.md`; downstream SPEC-88/SPEC-89/SPEC-90 dependencies should treat that archived backend foundation as the active prerequisite.
+
 SPEC-88 must land before SPEC-89 or SPEC-90 because both reuse the disclosure primitive, the modal/drawer pattern, the API client, and the accessibility baseline that SPEC-88 establishes.
 
 SPEC-89 should land before SPEC-90 because SPEC-90's branch-map node click navigates into pages that SPEC-89 fully populates with X-Ray content. SPEC-90 can technically land in parallel with SPEC-89 if the team prefers — they touch independent UI surfaces — but the user experience is more coherent landing SPEC-89 first.
@@ -90,10 +92,10 @@ A future spec that picks up any of these should start with a brainstorm reassess
 
 ---
 
-## Open decisions surfaced for user review
+## Resolved SPEC-87 decisions
 
-These are not blockers but are worth user-eye before implementation begins:
+These were open decisions before SPEC-87 implementation. Final SPEC-87 state:
 
-1. **Default port** for the local server (SPEC-87 proposes `5174` — adjust if it conflicts with another local dev tool you run).
-2. **Story bundle for first manual smoke test** — SPEC-87 §9 names `worlds/erotica-world/stories/red-bunny/` based on the pre-spec audit (one prose page, one plan, one receipt, complete artifact set). Confirm this is acceptable as a test target.
-3. **Whether the bin command should be `story-explorer` or shorter** (e.g. `wl-view`) — SPEC-87 uses `story-explorer` for clarity.
+1. **Default port**: `5174`.
+2. **Capstone smoke fixture**: the checkout-local `worlds/erotica-world/stories/red-bunny/` path was absent in this worktree, so the archived SPEC-87 capstone uses a temp-seeded red-bunny-shaped fixture and verifies no checkout-local world path is created.
+3. **Bin command**: `story-explorer`.
