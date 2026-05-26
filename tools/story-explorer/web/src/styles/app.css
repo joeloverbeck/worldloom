@@ -807,7 +807,9 @@ a:hover {
 }
 
 .record-card__chips,
-.record-card__related {
+.record-card__related,
+.provenance-trail__evidence,
+.provenance-trail__chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -815,7 +817,8 @@ a:hover {
 }
 
 .record-card-expanded__body,
-.raw-record__body {
+.raw-record__body,
+.provenance-trail {
   display: grid;
   gap: var(--space-3);
 }

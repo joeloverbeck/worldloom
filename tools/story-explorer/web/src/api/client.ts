@@ -245,6 +245,12 @@ export interface RawRecordSource {
   contentHash: string;
 }
 
+export interface RecordProvenance {
+  creatingSeId: string | null;
+  modifyingSeIds: string[];
+  evidenceRecords: string[];
+}
+
 // Frontend mirrors of tools/story-explorer/src/view-models/branch-map-node.ts and branch-map-edge.ts.
 export interface BranchMapNode {
   pageId: string;
@@ -384,7 +390,7 @@ export function getProseReceipt(slug: string, storySlug: string, pageId: string)
   );
 }
 
-export function getProvenance(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<unknown>> {
+export function getProvenance(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<RecordProvenance>> {
   return fetchEnveloped(
     `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/provenance/${encodeSegment(recordId)}`,
   );

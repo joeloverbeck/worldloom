@@ -1,9 +1,9 @@
 # SPEC89STOEXPSTA-009: Provenance trail — N+1 SE→PG.created_at_page lookup
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — new `ProvenanceTrail.tsx` component that fetches the SPEC-87 provenance route and resolves the SE → PG attribution chain via per-SE record fetches
+**Engine Changes**: Yes — new `ProvenanceTrail.tsx` component that fetches the SPEC-87 provenance route, resolves the SE → PG attribution chain via per-SE record fetches, and wires provenance chips through the existing X-Ray record-link dispatcher
 **Deps**: archive/tickets/SPEC89STOEXPSTA-002.md
 
 ## Problem
@@ -28,30 +28,37 @@ SPEC-89 §5.2 prescribes the provenance trail inside the expanded record card: "
 3. Renders "Created by SE-N at PG-M" + per-modifying-SE rows + evidence records → render test with a multi-SE fixture.
 4. When `creatingSeId` is null (a story-bundle record created at bootstrap with no per-SE provenance), render "Bootstrap provenance" rather than fabricating an SE attribution.
 
-## What to Change
+## Landed Changes
 
-### 1. Create `ProvenanceTrail.tsx`
+### 1. Created `ProvenanceTrail.tsx`
 
-Accepts `recordId: string` and `storyContext: { worldSlug, storySlug }` as props. On mount, fires `/api/worlds/:worldSlug/stories/:storySlug/provenance/:recordId`. After the response resolves, fires per-SE record fetches in parallel via `Promise.all` to resolve each SE's `created_at_page`.
+Accepts `recordId: string`, `storyContext: { worldSlug, storySlug }`, and an optional `onRecordLinkClick` callback. On mount, fires `/api/worlds/:worldSlug/stories/:storySlug/provenance/:recordId`. After the response resolves, it fetches the creating SE and all modifying SE records in parallel via `Promise.all` to resolve each SE's `created_at_page`.
 
 Rendering:
-- **Created by**: `{creatingSeId}` at `{creatingSe.created_at_page}` — both clickable per `archive/tickets/SPEC89STOEXPSTA-008.md` navigation rules.
-- **Modified by**: per modifying SE: `{seId}` at `{se.created_at_page}` — comma-separated list of N entries.
-- **Evidence records**: list of `evidenceRecords[]` as clickable chips.
+- **Created by**: `{creatingSeId}` at `{creatingSe.created_at_page}` as a linked-record button per `archive/tickets/SPEC89STOEXPSTA-008.md` navigation rules.
+- **Modified by**: per modifying SE: `{seId}` at `{se.created_at_page}` as linked-record buttons.
+- **Evidence records**: list of `evidenceRecords[]` as linked-record buttons.
 
-When the creating SE response is loading, render a brief skeleton; when an individual modifying-SE fetch fails (e.g., the SE was deleted out-of-band), render `{seId} at <unknown>` with a small warning indicator rather than blocking the whole panel.
+When the provenance response is loading, renders a status line. When an individual SE fetch fails, renders `{seId} at <unknown>` with a warning chip rather than blocking the whole panel.
 
-### 2. Integration with RecordCardExpanded
+### 2. Integrated with `RecordCardExpanded`
 
-`<RecordCardExpanded>` (from SPEC89STOEXPSTA-002) renders `<ProvenanceTrail recordId={...} storyContext={...} />` in its provenance slot. The slot exists in -002's contract; this ticket fills it.
+`<RecordCardExpanded>` (from `archive/tickets/SPEC89STOEXPSTA-002.md`) now renders `<ProvenanceTrail recordId={...} storyContext={...} />` in the expanded-card provenance section. The component mounts only after the record disclosure opens, so the provenance route and per-SE N+1 lookups are lazy relative to collapsed active-record lists.
 
-### 3. Add `__tests__/ProvenanceTrail.test.tsx`
+### 3. Typed the frontend provenance API
 
-Render tests covering: (a) full provenance fixture (creating SE + 3 modifying SEs + 2 evidence records); (b) bootstrap-only fixture (creatingSeId: null, modifyingSeIds: []); (c) one-modifying-SE-fetch-fails fixture (partial render with warning).
+`tools/story-explorer/web/src/api/client.ts` now mirrors the SPEC-87 provenance route response shape as `RecordProvenance` instead of returning `unknown` from `getProvenance`.
+
+### 4. Added `__tests__/ProvenanceTrail.test.tsx`
+
+Render tests cover: (a) full provenance fixture (creating SE + 3 modifying SEs + 2 evidence records); (b) bootstrap-only fixture (creatingSeId: null, modifyingSeIds: []); (c) one-modifying-SE-fetch-fails fixture (partial render with warning); (d) record-link callback wiring for SE/evidence chips; and (e) lazy integration with `RecordCardExpanded`.
 
 ## Files to Touch
 
 - `tools/story-explorer/web/src/components/xray/ProvenanceTrail.tsx` (new)
+- `tools/story-explorer/web/src/components/xray/RecordCardExpanded.tsx` (modify — lazy provenance integration and callback passthrough)
+- `tools/story-explorer/web/src/api/client.ts` (modify — typed provenance response)
+- `tools/story-explorer/web/src/styles/app.css` (modify — provenance chip layout)
 - `tools/story-explorer/web/src/components/xray/__tests__/ProvenanceTrail.test.tsx` (new)
 
 ## Out of Scope
@@ -67,7 +74,7 @@ Render tests covering: (a) full provenance fixture (creating SE + 3 modifying SE
 
 1. `cd tools/story-explorer/web && npm test -- ProvenanceTrail.test` — full + bootstrap + partial-fail fixtures all pass.
 2. `cd tools/story-explorer && npm run build` — build succeeds.
-3. Visual smoke in dev mode: expand a record with multiple modifying SEs; the provenance trail renders Created-by + Modified-by lines with PG attributions.
+3. `cd tools/story-explorer && npm test` — full backend + web package suite passes.
 
 ### Invariants
 
@@ -85,3 +92,23 @@ Render tests covering: (a) full provenance fixture (creating SE + 3 modifying SE
 1. `cd tools/story-explorer/web && npm test -- ProvenanceTrail.test` — targeted.
 2. `cd tools/story-explorer && npm test` — full package suite.
 3. `cd tools/story-explorer && npm run build` — chained build.
+
+## Outcome
+
+Completed on 2026-05-26.
+
+- Added the expanded-card provenance trail for SPEC-89, consuming SPEC-87's read-only `/provenance/:recordId` and `/records/:recordId` routes.
+- Resolved creating/modifying SE ids to `created_at_page` values through parallel per-SE record fetches, with bootstrap and partial-failure rendering.
+- Wired created-by, modified-by, and evidence-record chips through the existing X-Ray linked-record navigation callback.
+- Kept the provenance route lazy relative to collapsed record cards by mounting `ProvenanceTrail` only after `RecordCardExpanded` opens.
+
+## Verification Result
+
+1. `cd tools/story-explorer/web && npm test -- ProvenanceTrail.test RecordCard.test` — PASS after final navigation-callback wiring; 2 files / 7 tests passed.
+2. `cd tools/story-explorer && npm run build` — PASS; web TypeScript compile, Vite bundle, and backend TypeScript compile succeeded.
+3. `cd tools/story-explorer && npm test` — PASS; backend node tests passed 74/74 and web Vitest passed 57 files / 157 tests. The suite still emits existing React Router v7 future-flag warnings and intentional ErrorBoundary stderr; no failures.
+
+## Deviations
+
+- The landed file set includes `RecordCardExpanded.tsx`, `api/client.ts`, and `styles/app.css` in addition to the new component/test because the provenance component needs lazy expanded-card mounting, typed route access, and chip layout.
+- The drafted dev-mode visual smoke was not claimed. The accepted proof is focused component/callback coverage, the chained build, and the full package suite.

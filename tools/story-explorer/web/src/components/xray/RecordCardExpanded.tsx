@@ -5,6 +5,7 @@ import { useDisclosure } from '../disclosure/use-disclosure';
 import { RecordCardCompact } from './RecordCardCompact';
 import { RawRecordDisclosure } from './RawRecordDisclosure';
 import { BrokenReferenceChip } from './BrokenReferenceChip';
+import { ProvenanceTrail } from './ProvenanceTrail';
 
 interface StoryContext {
   worldSlug: string;
@@ -14,7 +15,7 @@ interface StoryContext {
 interface RecordCardExpandedProps {
   recordCard: RecordCard;
   storyContext: StoryContext;
-  onRecordLinkClick?: (link: RecordLink) => void;
+  onRecordLinkClick?: (link: RecordLink | string) => void;
   provenanceSlot?: ReactNode;
 }
 
@@ -35,7 +36,7 @@ function FieldList({ fields }: { fields: RecordField[] }): JSX.Element | null {
   );
 }
 
-function RelatedLinks({ links, onRecordLinkClick }: { links: RecordLink[]; onRecordLinkClick?: (link: RecordLink) => void }): JSX.Element | null {
+function RelatedLinks({ links, onRecordLinkClick }: { links: RecordLink[]; onRecordLinkClick?: (link: RecordLink | string) => void }): JSX.Element | null {
   if (links.length === 0) {
     return null;
   }
@@ -77,10 +78,16 @@ export function RecordCardExpanded({ recordCard, storyContext, onRecordLinkClick
           <h5>Related Records</h5>
           <RelatedLinks links={recordCard.links} onRecordLinkClick={onRecordLinkClick} />
         </section>
-        {provenanceSlot ? (
+        {disclosure.isOpen ? (
           <section aria-label="Provenance">
             <h5>Provenance</h5>
-            {provenanceSlot}
+            {provenanceSlot ?? (
+              <ProvenanceTrail
+                onRecordLinkClick={onRecordLinkClick}
+                recordId={recordCard.recordId}
+                storyContext={storyContext}
+              />
+            )}
           </section>
         ) : null}
         {recordCard.rawAvailable ? (
