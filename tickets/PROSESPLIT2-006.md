@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — existing `worlds/<slug>/stories/<story-slug>/pages-prose-plans/PG-<integer>.md` artifacts must be refreshed directly or a validator grandfather policy must be added
-**Deps**: tickets/PROSESPLIT2-005.md
+**Deps**: archive/tickets/PROSESPLIT2-005.md
 
 ## Problem
 
