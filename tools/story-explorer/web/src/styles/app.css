@@ -89,6 +89,23 @@ a:hover {
   list-style: none;
 }
 
+.page-entry-panel {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 46rem;
+}
+
+.page-entry-panel h2 {
+  margin: 0;
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-heading);
+}
+
+.page-entry-actions {
+  display: grid;
+  gap: var(--space-3);
+}
+
 .world-card {
   display: grid;
   min-height: 9rem;
@@ -118,11 +135,44 @@ a:hover {
     box-shadow var(--motion-duration) ease;
 }
 
+.page-entry-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 4.5rem;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  color: var(--color-text);
+  text-decoration: none;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition:
+    border-color var(--motion-duration) ease,
+    box-shadow var(--motion-duration) ease;
+}
+
+.page-entry-action--primary {
+  border-color: var(--color-accent);
+}
+
+.page-entry-action--disabled {
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+}
+
 .world-card:hover,
-.story-card:hover {
+.story-card:hover,
+.page-entry-action:hover {
   color: var(--color-text);
   border-color: var(--color-accent);
   box-shadow: 0 8px 20px rgb(31 37 40 / 10%);
+}
+
+.page-entry-action--disabled:hover {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+  box-shadow: none;
 }
 
 .world-card__topline,
@@ -170,6 +220,7 @@ a:hover {
 }
 
 .story-card__stats span,
+.page-entry-action span:last-child,
 .story-card__warning,
 .story-status-badge {
   display: inline-flex;
@@ -181,6 +232,64 @@ a:hover {
   line-height: 1;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
+}
+
+.page-entry-action span:first-child {
+  font-weight: 700;
+}
+
+.page-entry-action span:last-child {
+  flex: 0 0 auto;
+  font-family: var(--font-family-mono);
+}
+
+.page-entry-jump {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.page-entry-jump label {
+  font-weight: 700;
+}
+
+.page-entry-jump__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.page-entry-jump input {
+  min-width: min(100%, 14rem);
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  color: var(--color-text);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.page-entry-jump button,
+.route-error button {
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  color: var(--color-surface-elevated);
+  font-weight: 700;
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.page-entry-jump button:hover,
+.route-error button:hover {
+  background: var(--color-accent-strong);
+  border-color: var(--color-accent-strong);
+}
+
+.page-entry-jump__error {
+  margin: 0;
+  color: var(--color-error);
+  font-weight: 700;
 }
 
 .story-status-badge--success {

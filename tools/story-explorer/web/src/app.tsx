@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { RouteLoading } from './components/RouteLoading';
+import { PageEntryRoute, pageEntryLoader } from './routes/page-entry';
 import { StoriesRoute, storyListLoader } from './routes/stories';
 import { WorldsRoute, worldListLoader } from './routes/worlds';
 
@@ -55,7 +56,12 @@ const router = createBrowserRouter([
   },
   {
     path: '/worlds/:slug/stories/:storySlug/entry',
-    element: <RoutePlaceholder label="Route: /worlds/:slug/stories/:storySlug/entry" />,
+    loader: pageEntryLoader,
+    element: (
+      <RouteFrame loadingLabel="Loading page entry...">
+        <PageEntryRoute />
+      </RouteFrame>
+    ),
   },
   {
     path: '/worlds/:slug/stories/:storySlug/pages/:pageId',
