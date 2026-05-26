@@ -140,6 +140,12 @@ export interface ValidationIntegritySummary {
   validationTrace: Record<string, unknown>;
   receiptVerdict: string | null;
   proseStatus: ProseStatus;
+  receiptPresence?: 'present' | 'missing' | 'unreadable';
+  stateHashStatus?: 'match' | 'mismatch' | 'not_checked';
+  planHashStatus?: 'present' | 'missing' | 'not_checked';
+  malformedYamlWarnings?: string[];
+  skippedRecords?: string[];
+  brokenRefs?: string[];
 }
 
 export interface BranchContext {
@@ -228,6 +234,23 @@ export interface RecordCard {
   contentHash: string | null;
 }
 
+export interface RecordDetail {
+  record: Record<string, unknown>;
+  recordCard: RecordCard;
+}
+
+export interface RawRecordSource {
+  body: string;
+  sourcePath: string;
+  contentHash: string;
+}
+
+export interface RecordProvenance {
+  creatingSeId: string | null;
+  modifyingSeIds: string[];
+  evidenceRecords: string[];
+}
+
 // Frontend mirrors of tools/story-explorer/src/view-models/branch-map-node.ts and branch-map-edge.ts.
 export interface BranchMapNode {
   pageId: string;
@@ -254,6 +277,16 @@ export interface BranchMapEdge {
 export interface ProseBody {
   body: string | null;
   status: ProseStatus;
+}
+
+export interface PagePlanBody {
+  body: string;
+  sourcePath: string;
+}
+
+export interface ProseReceiptBody {
+  body: Record<string, unknown>;
+  sourcePath: string;
 }
 
 function encodeSegment(value: string): string {
@@ -323,9 +356,15 @@ export function getProseBody(slug: string, storySlug: string, pageId: string): P
 }
 
 // SPEC-89/90 routes are declared here so downstream route tickets share one URL surface.
-export function getRecord(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<Record<string, unknown>>> {
+export function getRecord(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<RecordDetail>> {
   return fetchEnveloped(
     `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/records/${encodeSegment(recordId)}`,
+  );
+}
+
+export function getRawRecord(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<RawRecordSource>> {
+  return fetchEnveloped(
+    `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/records/${encodeSegment(recordId)}/raw`,
   );
 }
 
@@ -339,19 +378,19 @@ export function searchPages(slug: string, storySlug: string, q: string): Promise
   return fetchEnveloped(`/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/search?${query}`);
 }
 
-export function getPagePlan(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<unknown>> {
+export function getPagePlan(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<PagePlanBody>> {
   return fetchEnveloped(
     `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/page-plans/${encodeSegment(pageId)}`,
   );
 }
 
-export function getProseReceipt(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<unknown>> {
+export function getProseReceipt(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<ProseReceiptBody>> {
   return fetchEnveloped(
     `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/prose-receipts/${encodeSegment(pageId)}`,
   );
 }
 
-export function getProvenance(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<unknown>> {
+export function getProvenance(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<RecordProvenance>> {
   return fetchEnveloped(
     `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/provenance/${encodeSegment(recordId)}`,
   );

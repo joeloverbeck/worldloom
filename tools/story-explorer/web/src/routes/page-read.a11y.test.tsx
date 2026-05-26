@@ -82,7 +82,7 @@ function pageDetail(): PageDetail {
         isNavigable: true,
       },
     ],
-    currentStateRecordIds: ['CAST-1'],
+    currentStateRecordIds: [],
     eventDelta: {
       eventId: null,
       createCount: 0,

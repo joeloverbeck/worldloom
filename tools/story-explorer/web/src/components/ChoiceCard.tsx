@@ -43,14 +43,14 @@ export function ChoiceCard({ choice, worldSlug, storySlug }: ChoiceCardProps): J
 
   if (singleVariant && choice.childOutcomeVariants.length === 1) {
     return (
-      <Link className="choice-card choice-card--link" to={pageHref(worldSlug, storySlug, singleVariant.pageId)}>
+      <Link className="choice-card choice-card--link" data-choice-id={choice.choiceId} to={pageHref(worldSlug, storySlug, singleVariant.pageId)}>
         <ChoiceSurface choice={choice} />
       </Link>
     );
   }
 
   return (
-    <article className="choice-card-wrap">
+    <article className="choice-card-wrap" data-choice-id={choice.choiceId} tabIndex={-1}>
       <button type="button" className="choice-card choice-card--button" {...disclosure.triggerProps}>
         <ChoiceSurface choice={choice} />
         <span className="choice-card__variant-count">
