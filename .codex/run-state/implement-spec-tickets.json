@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-88-story-explorer-frontend-foundation.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC88STOEXPFRO-011.md",
+  "last_ticket": "archive/tickets/SPEC88STOEXPFRO-012.md",
   "last_result": "completed_archived",
-  "last_work_commit": "6965707eeef0590c6e072c53d536cb13aefbd4f2",
+  "last_work_commit": "df98aec5849621fc222b58f47c76e255784ecdd0",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC88STOEXPFRO-012.md",
+  "next_target": "tickets/SPEC88STOEXPFRO-013.md",
   "queue": [
-    "tickets/SPEC88STOEXPFRO-012.md",
     "tickets/SPEC88STOEXPFRO-013.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -15,7 +14,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean focused proof: tools/story-explorer/web npm test -- NotFoundPage BackendUnreachablePage use-index-status-banner app worlds.test stories.test page-entry.test page-read.test passed 8 files/31 tests; npm test passed 24 files/78 tests; npm run build passed. React Router emitted v7 future-flag warnings only. Post-review archive/spec/dependency edits did not require rerunning after final source proof.",
+  "proof_state": "clean focused proof: tools/story-explorer/web npm test -- a11y.test passed 19 files/22 tests; npm test passed 44 files/103 tests; npm run build passed. React Router emitted existing v7 future-flag warnings; ErrorBoundary a11y test intentionally threw a child error while passing. Post-review archive/spec/dependency edits were prose-only and covered by git diff --check.",
   "dirty_state": "expected ignored artifacts present after state commit: tools/story-explorer/dist/, tools/story-explorer/node_modules/, tools/story-explorer/web/dist/, tools/story-explorer/web/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
