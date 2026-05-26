@@ -408,7 +408,17 @@ function matchesSourceRecordIds(
   }
 
   const groundingRecordIds = args.intent_signature?.grounding_record_ids ?? [];
-  return groundingRecordIds.length === 0 || intersects(candidate.sourceRecordIds, groundingRecordIds);
+  if (groundingRecordIds.length === 0) {
+    return true;
+  }
+
+  // Existential-predicate SLTs carry no exact record refs at authoring time; the
+  // turn-cycle evaluator binds those aliases against active records later.
+  if (candidate.sourceRecordIds.length === 0) {
+    return true;
+  }
+
+  return intersects(candidate.sourceRecordIds, groundingRecordIds);
 }
 
 function matchesMysteryPolicy(candidate: Candidate, page: PageState): boolean {

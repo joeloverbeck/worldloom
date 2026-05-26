@@ -230,6 +230,95 @@ test("selectStoryletCandidates filters indexed SLT projections and returns only 
   }
 });
 
+test("selectStoryletCandidates wildcard-passes existential SLTs when grounding ids are supplied", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildCandidateWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-1",
+        turn_driver: {
+          kind: "player_action",
+          initiator: "STENT-1",
+          driver_records: ["STCHAR-1"]
+        },
+        intent_signature: {
+          action_families: ["investigate"],
+          grounding_record_ids: ["STEMO-1"]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.filter_trace.after_predicate_class, 4);
+    assert.equal(result.filter_trace.after_source_record_id, 3);
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-1"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates preserves exact source-record-id narrowing", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildCandidateWorld(root);
+
+    const nonIntersecting = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-1",
+        turn_driver: {
+          kind: "player_action",
+          initiator: "STENT-1",
+          driver_records: ["STCHAR-1"]
+        },
+        intent_signature: {
+          action_families: ["communicate"],
+          grounding_record_ids: ["STCHAR-1"]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok(!("code" in nonIntersecting));
+    assert.equal(nonIntersecting.filter_trace.after_predicate_class, 1);
+    assert.equal(nonIntersecting.filter_trace.after_source_record_id, 0);
+    assert.deepEqual(nonIntersecting.shortlisted_candidate_ids, []);
+
+    const intersecting = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-1",
+        turn_driver: {
+          kind: "player_action",
+          initiator: "STENT-1",
+          driver_records: ["STCHAR-1"]
+        },
+        intent_signature: {
+          action_families: ["communicate"],
+          grounding_record_ids: ["STEMO-1"]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok(!("code" in intersecting));
+    assert.equal(intersecting.filter_trace.after_predicate_class, 1);
+    assert.equal(intersecting.filter_trace.after_source_record_id, 1);
+    assert.deepEqual(intersecting.shortlisted_candidate_ids, ["SLT-2"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("selectStoryletCandidates rejects invalid max_candidates", async () => {
   const root = createTempRepoRoot();
 
