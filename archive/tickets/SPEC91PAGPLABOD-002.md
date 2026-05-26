@@ -1,6 +1,6 @@
 # SPEC91PAGPLABOD-002: §9 / §9b / §9c / §10b body translation in bootstrap + turn-cycle phase references
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md`, `.claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md`, `.claude/skills/_shared-templates/story-state-contract.md` §8 rows for §9 / §9b / §9c / §10b.
@@ -8,13 +8,13 @@
 
 ## Problem
 
-Page-plan §9 ("Relationship and Belief Context"), §9b ("Active actor plans / tactical agency"), §9c ("Emotional causality / affective transition"), and §10b ("Open Setups, Active Clocks, Hidden Secrets") currently allow body content that enumerates raw record-IDs and engine-style ledger language: §9 lists `SREL-N` / `BEL-N` pairs without prose translation; §9b's sub-bullets cite `This page's SE.state_relations[]: advances` verb-list and `action_family: investigation` engine vocabulary; §9c cites `Behavioral pressure: conceal, freeze` closed-enum tokens; §10b prints `CLK-N value: 2/4, salience: high, threshold at 3` numeric-engine summaries. The external prose renderer reads cold and orbits these abstract tokens in the rendered prose. This ticket extends the PPLAN-005/006 + archived `archive/tickets/SPEC91PAGPLABOD-001.md` translation pattern to §9 / §9b / §9c / §10b: structural sub-bullet templates remain validator-enforced (per shared-contract §8 lines covering §9b / §9c required sub-bullet sets), only the per-bullet content shape changes to prose-direction language; numeric values and closed-enum tokens move to §15 frontmatter where validators read them.
+At intake, page-plan §9 ("Relationship and Belief Context"), §9b ("Active actor plans / tactical agency"), §9c ("Emotional causality / affective transition"), and §10b ("Open Setups, Active Clocks, Hidden Secrets") allowed body content that enumerated raw record-IDs and engine-style ledger language: §9 listed `SREL-N` / `BEL-N` pairs without prose translation; §9b's sub-bullets cited `This page's SE.state_relations[]: advances` verb-list and `action_family: investigation` engine vocabulary; §9c cited `Behavioral pressure: conceal, freeze` closed-enum tokens; §10b printed `CLK-N value: 2/4, salience: high, threshold at 3` numeric-engine summaries. The external prose renderer reads cold and can orbit these abstract tokens in the rendered prose. This ticket extends the PPLAN-005/006 + archived `archive/tickets/SPEC91PAGPLABOD-001.md` translation pattern to §9 / §9b / §9c / §10b: structural sub-bullet templates remain validator-enforced (per shared-contract §8 rows covering §9b / §9c required sub-bullet sets), only the per-bullet content shape changes to prose-direction language; numeric values and closed-enum tokens move to §15 frontmatter where validators read them.
 
 ## Assumption Reassessment (2026-05-26)
 
 <!-- Items 1-3 always required. Items 4+ from menu, renumbered sequentially. -->
 
-1. **Codebase reference check**: `.claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md` exists (31 lines); `.claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` exists (52 lines); `.claude/skills/_shared-templates/story-state-contract.md` exists (681 lines, with §9b template at lines 467-484, §9c template at lines 485-500, §10b prose at lines 569+). Sample plans at `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-2.md` §9b/§9c/§10b confirm the pathology — engine vocabulary surfaces in body bullet content even though the structural templates are correctly populated.
+1. **Codebase reference check**: At intake, `.claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md`, `.claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md`, and `.claude/skills/_shared-templates/story-state-contract.md` existed with §9b / §9c / §10b guidance still exposing engine-field wording in renderer-facing section bodies. After this ticket, those same files carry the SPEC-91 body-translation guidance while preserving the validator-enforced §9b / §9c heading and sub-bullet label shapes. Sample plans at `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-2.md` §9b/§9c/§10b remain historical pathology evidence only; existing plans are out of scope for rewrite per SPEC-91 §9.
 2. **Spec reference**: SPEC-91 §6 §9 / §9b / §9c / §10b subsections specify the body-translation contract per-section, with worked-example before/after pairs. SPEC91-002 ticket scope at §11 enumerates the four sections and the structural-sub-bullet preservation rule.
 3. **Cross-skill boundary**: shared `.claude/skills/_shared-templates/story-state-contract.md` §8 is the canonical authority for §9 / §9b / §9c / §10b structure. §9b and §9c templates at lines 467-498 are validator-enforced via `page_plan_stchar_packet_integrity` and related validators — those templates' sub-bullet labels (`Objective:`, `Root intention:`, `Current step:`, `Belief basis:`, `Resources/leverage:`, `Blockers:`, `Fallbacks currently available:` for §9b; `Affect (kind + intensity):`, `Trigger event:`, `Appraisal basis:`, `Behavioral pressure:`, `Transition this page (if any):`, `Prose must render:`, `Prose must avoid:` for §9c) MUST be preserved; only the per-bullet content shape changes.
 4. **FOUNDATIONS principle restatement**: §Story Bundles §4 (Pipeline shape: plan-as-renderer-prompt single-artifact) and §5b (Schema-Minimalism — every field load-bearing) together govern this ticket. §4 preserves the renderer's cold-context shape; §5b ensures the structural sub-bullet labels stay because each label is consumed by a validator gate. The body-translation contract changes only the prose content WITHIN each label's bullet — not the label set, not the schema fields the labels project from.
@@ -27,25 +27,23 @@ Page-plan §9 ("Relationship and Belief Context"), §9b ("Active actor plans / t
 ## Verification Layers
 
 1. **§9 body content shape (post-translation)** → manual review of new authoring guidance + grep-proof that updated phase references describe the "Jon and Ane have no prior shared history; she has still not noticed him" prose form rather than `SREL-N` / `BEL-N` enumeration.
-2. **§9b / §9c structural sub-bullet preservation** → schema validation: `page_plan_stchar_packet_integrity` continues to pass on a sample plan rewritten under the new contract (the sub-bullet labels and the `STPLAN-<integer>` / `STEMO-<integer>` / `Holder: STENT-<integer>` patterns the validator greps for stay intact; only per-bullet content shape changes).
+2. **§9b / §9c structural sub-bullet preservation** → codebase grep-proof + manual review: the sub-bullet labels and the `STPLAN-<integer>` / `STEMO-<integer>` / `Holder: STENT-<integer>` heading patterns the validator greps for stay intact; only per-bullet content shape changes.
 3. **§10b numeric value preservation in §15** → manual review confirming `value`, `max`, `threshold`, `salience` numeric fields relocated from §10b body prose to §15 frontmatter remain greppable for validator readback.
 4. **Contract-to-phase-reference alignment** → codebase grep-proof that story-state-contract.md §8 rows for §9 / §9b / §9c / §10b match the body-translation framing in both phase reference files.
 
-## What to Change
+## Landed Changes
 
-### 1. Update `.claude/skills/_shared-templates/story-state-contract.md` §8
+### 1. Updated `.claude/skills/_shared-templates/story-state-contract.md` §8
 
-Update §8 row content for §9, §9b, §9c, §10b to reflect the body-translation contract per SPEC-91 §6 §9 / §9b / §9c / §10b subsections. The existing per-section templates at lines 467-498 (§9b) and 485-500 (§9c) stay structurally intact — the validator-enforced sub-bullet label sets are preserved. Append per-section authoring discipline notes explaining the prose-direction content shape inside each bullet (e.g., `Behavioral pressure: conceal, freeze` → "the actor pulls toward staying out of notice and toward physical stillness").
+Updated §8 row content for §9, §9b, §9c, and §10b to reflect the body-translation contract per SPEC-91 §6 §9 / §9b / §9c / §10b subsections. The structural §9b / §9c headings and sub-bullet labels remain intact, while the body guidance now says record ids and engine-field values live in §15 frontmatter or §16a `Current-state grounding records:` and renderer-facing bodies carry prose-direction content. Added §9 authoring guidance and per-section discipline notes, including `Behavioral pressure:` prose translation and numeric §10b value relocation to §15.
 
-For §10b, similarly update the existing "**§10b is per-page-computed, not inlined verbatim.**" sub-section (currently at line 569) to clarify per-class content rewriting: numeric `value` / `max` / `threshold` / `salience` move to §15 frontmatter for validator readback; §10b body uses prose pressure descriptions ("the observation-window pressure has reached the halfway mark; the next noticeable shift comes when a third party enters the privacy of the scene").
+### 2. Updated `.claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md`
 
-### 2. Update `.claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md`
+Added bootstrap §9 / §9b / §9c / §10b authoring guidance per SPEC-91 §6, including worked §9 relationship/belief prose, preserved §9b / §9c structural labels, behavior-prose translation for §9c pressure, §10b numeric-field relocation to §15, and the §16a current-state-grounding exception.
 
-Add §9 / §9b / §9c / §10b authoring guidance per SPEC-91 §6: include per-section worked examples showing the prose-direction body shape; explicitly note that structural sub-bullet labels stay (validator-enforced) and that engine-vocabulary content moves to §15 frontmatter or §16a `Current-state grounding records:` (the latter is the lawful in-body location for record-ID lists per the existing §16a contract).
+### 3. Updated `.claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md`
 
-### 3. Update `.claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md`
-
-Same treatment as bootstrap: add §9 / §9b / §9c / §10b body-translation guidance per SPEC-91 §6.
+Added turn-cycle §9 / §9b / §9c body-translation guidance and rewrote the existing §10b procedure so clocks, secrets, and story questions are described as renderable pressure/setup movement while numeric and link fields remain in §15 frontmatter.
 
 ## Files to Touch
 
@@ -86,3 +84,26 @@ Same treatment as bootstrap: add §9 / §9b / §9c / §10b body-translation guid
 1. `grep -B1 -A3 "Relationship and belief context\|Active actor plans\|Emotional causality\|Open Setups" .claude/skills/_shared-templates/story-state-contract.md` — confirms contract §8 row treatment for all four sections.
 2. `grep -E "Objective:|Root intention:|Affect \(kind \+ intensity\)|Behavioral pressure:" .claude/skills/_shared-templates/story-state-contract.md` — confirms structural sub-bullet labels preserved.
 3. `grep -E "what (an actor|a holder)|the actor pulls toward|the pressure has reached" .claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` — confirms both phase references carry prose-direction worked examples.
+
+## Outcome
+
+Completed 2026-05-26.
+
+SPEC91PAGPLABOD-002 landed the §9 / §9b / §9c / §10b body-translation contract in the shared story-state contract and the bootstrap / turn-cycle phase references. §9 now uses relationship/belief prose instead of active-record enumeration; §9b and §9c keep their validator-visible headings and labels while translating field contents into prose direction; §10b keeps numeric and closed-field values in §15 frontmatter while the body describes pressure, secrecy, and setup/payoff movement.
+
+No validator code changed. Existing PG-1 through PG-5 artifacts remain historical and untouched per SPEC-91's forward-only migration scope.
+
+## Verification Result
+
+Commands run 2026-05-26:
+
+1. `grep -B1 -A3 "Relationship and belief context\|Active actor plans\|Emotional causality\|Open Setups" .claude/skills/_shared-templates/story-state-contract.md` — PASS; the §8 rows now state the body-translation framing for §9 / §9b / §9c / §10b.
+2. `grep -E "Objective:|Root intention:|Affect \(kind \+ intensity\)|Behavioral pressure:" .claude/skills/_shared-templates/story-state-contract.md` — PASS; the structural §9b / §9c labels remain present.
+3. `grep -E "what (an actor|a holder)|the actor pulls toward|the pressure has reached|Jon and Ane" .claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md .claude/skills/_shared-templates/story-state-contract.md` — PASS; both phase references and the shared contract carry prose-direction examples.
+4. `grep -E "numeric.*§15|value.*max.*frontmatter" .claude/skills/_shared-templates/story-state-contract.md` — PASS; §10b numeric-field relocation to §15 is documented.
+5. `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md .claude/skills/branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md .claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` — PASS; no whitespace errors in the edited guidance files.
+
+## Deviations
+
+- No executable skill dry-run was available for these prose workflow references, so verification stayed at the ticket's intended documentation boundary: manual contract review, grep-proof, and diff hygiene.
+- Pre-existing unrelated dirty path `.claude/worktrees/spec88-stoexpfro` was left untouched. During the run, unrelated edits appeared in `specs/SPEC-89-story-explorer-state-xray-layer.md`; they are outside this Spec 91 ticket and were left unstaged.

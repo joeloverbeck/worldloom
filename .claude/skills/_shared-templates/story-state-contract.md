@@ -433,11 +433,11 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 7 | Selected event and state delta | `SE` translated into renderer-facing prose direction; engine state-delta arrays and lifecycle bookkeeping live in §15 frontmatter |
 | 7a | Turn driver / initiative trace | `SE.turn_driver` + parent-page active pressure disposition; fixed driver rows and disposition cell shape stay validator-enforced, while reason prose avoids bare record-id rationale where possible |
 | 8 | Required beats from the commitment block | selected `SLT.beats` |
-| 9 | Relationship and belief context | active `SREL`, `BEL` |
-| 9b | Active actor plans / tactical agency (optional) | per-page-computed from active `STPLAN` records; omitted entirely when no active STPLANs exist |
-| 9c | Emotional causality / affective transition (optional) | per-page-computed from active `STEMO` records; omitted entirely when no active STEMOs exist |
+| 9 | Relationship and belief context | active `SREL`, `BEL` translated into renderer-facing relationship and knowledge prose; record ids live in §15 or §16a grounding |
+| 9b | Active actor plans / tactical agency (optional) | per-page-computed from active `STPLAN` records; preserve the structural labels, but write each field as prose-direction content |
+| 9c | Emotional causality / affective transition (optional) | per-page-computed from active `STEMO` records; preserve the structural labels, but translate affect and pressure enums into behavior prose |
 | 10 | Open obligations, consequences, threads | active `OBL`, `CNSQ`, `THR`, including each record's `urgency` |
-| 10b | Open Setups, Active Clocks, Hidden Secrets (optional) | per-page-computed from active `STQ`, `CLK`, and `STSEC`; omitted entirely when all three sets are empty or irrelevant |
+| 10b | Open Setups, Active Clocks, Hidden Secrets (optional) | per-page-computed from active `STQ`, `CLK`, and `STSEC`; body uses prose pressure/setup descriptions while numeric fields stay in §15 |
 | 11 | Forbidden mystery resolutions | `mystery_policy.forbidden_resolutions` |
 | 12 | Stopping point | from commitment block + author judgment |
 | 13 | Next choices to foreshadow or make available | emitted `CHC[]` |
@@ -489,6 +489,16 @@ Active-pressure disposition appears in §7a whenever the parent `PG.state_snapsh
 
 The table keeps the closed `Disposition` vocabulary and `Reason / expiry` cell shape enforced by `active_pressure_handling_discipline`. Within that shape, write the reason as prose-facing pressure or scene logic rather than bare record-id rationale where possible. A deferred row may say `until the actor has a private opening to decide whether to approach`, and a selected row may say `became this turn's driver after the observed risk crossed the action threshold`; it must still satisfy the literal `PG-<integer>` or conditional-connective rule when the validator requires it.
 
+### 9. Relationship and belief context
+
+§9 is the renderer-facing account of the relationships, beliefs, suspicions, lies, witness memories, and access routes that matter on this page. Do not enumerate active `SREL` / `BEL` records as the body text. Write the relationship or knowledge state in prose, such as:
+
+```markdown
+Jon and Ane have no prior shared history; she has still not noticed him. Jon privately believes she has been on the bench for hours, and Ane believes she is alone in the park.
+```
+
+The record ids that ground the statement belong in §15 frontmatter and, when they modulate a character authority packet, in §16a `Current-state grounding records:`. §9 may refer to a relationship, belief, lie, suspicion, or public claim by its story meaning, but it must not make the prose renderer parse id lists as shorthand for human context.
+
 **§9b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `STPLAN` records — one entry per active plan with sub-bullets per the template below:
 
 ```markdown
@@ -497,17 +507,17 @@ The table keeps the closed `Disposition` vocabulary and `Reason / expiry` cell s
 - STPLAN-<integer> — Holder: STENT-<integer>.
   - Objective:
   - Root intention:
-  - Current step (action_family + target_records):
+  - Current step:
   - Belief basis:
-  - Resources/leverage (resource_basis projection):
+  - Resources/leverage:
   - Blockers:
   - Fallbacks currently available:
-  - This page's `SE.state_relations[]`: advances | tests | blocks | revises | fulfills | abandons | ignores
+  - This page's plan movement:
   - Prose must show:
   - Prose must not imply:
 ```
 
-§9b is omitted entirely when no active STPLANs exist on the current branch.
+§9b is omitted entirely when no active STPLANs exist on the current branch. Preserve the `STPLAN-<integer> — Holder: STENT-<integer>` heading and the sub-bullet labels above because validators and reviewer discipline depend on the shape. Inside those labels, translate engine fields into prose: `Current step:` describes what the holder is trying next rather than naming an `action_family`; `This page's plan movement:` says how the page advances, tests, blocks, revises, fulfills, abandons, or ignores the plan in story terms rather than exposing `SE.state_relations[]`.
 
 **§9c is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `STEMO` records — one entry per active emotion with sub-bullets per the template below:
 
@@ -524,7 +534,7 @@ The table keeps the closed `Disposition` vocabulary and `Reason / expiry` cell s
   - Prose must avoid:
 ```
 
-§9c is omitted entirely when no active STEMOs exist on the current branch. `branching-story-turn-cycle` owns the rendering procedure for both §9b and §9c, parallel to its existing §10b rendering ownership.
+§9c is omitted entirely when no active STEMOs exist on the current branch. Preserve the `STEMO-<integer> — Holder: STENT-<integer>` heading and the sub-bullet labels above. Inside those labels, translate enum-like content into behavior and appraisal prose: `Affect (kind + intensity):` may say "an extreme moral dread"; `Behavioral pressure:` may say "the actor pulls toward staying out of notice and toward physical stillness" rather than `conceal, freeze`; `Transition this page:` names the felt or behavioral change the prose must render. `branching-story-turn-cycle` owns the rendering procedure for both §9b and §9c, parallel to its existing §10b rendering ownership.
 
 **§16a is a page-local projection, not inlined STCHAR or current-state storage.** Every page plan MUST include one STCHAR-derived character authority packet for each viewpoint character, speaker, major actor, direct target, emotionally salient character, or any character whose behavior, voice, appraisal, relationship conduct, perception, embodiment, or agency materially shapes the page. Background-only entities whose behavior and voice do not shape the page may be omitted, but the omission must not ask the prose renderer to infer persona from an id.
 
@@ -593,9 +603,9 @@ Emit/omit boundary: an active offstage character (`entity_status.location: offst
 
 A §16a packet is sufficient page-local authority for prose and prose-attach validation when it names why the character is required, is active in the snapshot, and carries the relevant voice/behavior authority for the page. It is not the default authority for new character-dependent state creation; that requires full or projected STCHAR section retrieval. §16a is the renderer's character voice and behavior authority; it does not replace §5 entity status, §9 relationship/belief context, §9b active plans, §9c emotional transition, §16 cast material reality projection, or §17 style/register notes. Page plans must not cite world `CHAR-*` as operational authority for characterization after STCHAR exists; world `CHAR` may appear only as non-operational provenance on the STCHAR itself or in explicit authoring/promotion/adjudication flows.
 
-**§10b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `CLK` records (value / max, nearest threshold, salience), active `STSEC` records (status, holders, discovered clue-carrier count), and active `STQ` records (status, salience, audience visibility). For any STQ touched by the selected event, §10b names what the rendered prose must show for the setup/payoff movement: opened, narrowed, answered, paid off via `payoff_of`, inherited/abandoned, or tied to `answer_records[]`. Subsections appear only for classes with relevant active records; when no `CLK`, `STSEC`, or `STQ` content matters for the render, §10b is omitted rather than emitted as an empty placeholder. `branching-story-turn-cycle` owns the rendering procedure for this section.
+**§10b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `CLK` records, active `STSEC` records, and active `STQ` records as prose pressure, secrecy, and setup/payoff direction. Numeric or closed-field details such as clock `value` / `max`, thresholds, salience, secret status, holder lists, clue-carrier counts, audience visibility, `payoff_of`, and `answer_records[]` stay greppable in §15 frontmatter and the underlying records; the §10b body translates them for the external renderer. For example: "the observation-window pressure has reached the halfway mark; the next noticeable shift comes when a third party enters the privacy of the scene." Subsections appear only for classes with relevant active records; when no `CLK`, `STSEC`, or `STQ` content matters for the render, §10b is omitted rather than emitted as an empty placeholder. `branching-story-turn-cycle` owns the rendering procedure for this section.
 
-The plan must not expose engine jargon to prose. Engine terms (record ids, gate names) may appear in §15 frontmatter only.
+The plan must not expose engine jargon to prose. Engine terms (record ids, gate names) may appear in §15 frontmatter and in the §16a `Current-state grounding records:` field; renderer-facing prose sections translate those records into human-readable direction.
 
 For non-accept routes, §7 must include `SE.resolution.player_visible_feedback` so the prose renderer has the player-legible outcome receipt it must realize. For `accept`, §7 carries the selected event, route, rationale, and state delta without a `resolution` block.
 

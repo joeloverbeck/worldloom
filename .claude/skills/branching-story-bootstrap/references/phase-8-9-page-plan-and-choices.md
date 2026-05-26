@@ -27,11 +27,25 @@ For `story_start`, translate genesis state into the scene's opening pressures an
 
 **§7a turn-driver and active-pressure prose.** When §7a exists, keep the fixed driver rows and the `| Record | Disposition | Reason / expiry |` table shape from the shared contract. The `active_pressure_handling_discipline` validator still owns the closed `selected | deferred | rejected` disposition vocabulary and the `Reason / expiry` connective / `PG-<integer>` requirement. Inside that shape, prefer prose anchors for the reason rather than bare record-id rationale where possible.
 
+**§9 / §9b / §9c / §10b body translation.** These sections are renderer-facing prose direction, not a second copy of the state ledger. Record ids, raw state-relation verbs, numeric clock fields, and enum-style pressure labels stay in §15 frontmatter or in §16a `Current-state grounding records:` when they ground a character packet.
+
+Use §9 to state relationship and belief context in human terms:
+
+```markdown
+Jon and Ane have no prior shared history; she has still not noticed him. Jon privately believes she has been on the bench for hours, and Ane believes she is alone in the park.
+```
+
+When §9b is present, preserve the shared-contract heading and labels (`STPLAN-<integer> — Holder: STENT-<integer>`, `Objective:`, `Root intention:`, `Current step:`, `Belief basis:`, `Resources/leverage:`, `Blockers:`, `Fallbacks currently available:`, `This page's plan movement:`, `Prose must show:`, `Prose must not imply:`). Write the contents as plan pressure the prose can render: what an actor is trying now, why they think it can work, what blocks them, and how this page advances, tests, revises, fulfills, abandons, or ignores the plan.
+
+When §9c is present, preserve the shared-contract heading and labels (`STEMO-<integer> — Holder: STENT-<integer>`, `Affect (kind + intensity):`, `Trigger event:`, `Appraisal basis:`, `Behavioral pressure:`, `Transition this page (if any):`, `Prose must render:`, `Prose must avoid:`). Translate enum pressure into behavior prose: "the actor pulls toward staying out of notice and toward physical stillness" instead of `conceal, freeze`.
+
+When §10b is present, describe clocks, secrets, and story questions as renderable pressure or setup/payoff movement. Numeric details such as clock `value` / `max`, thresholds, salience, hidden status, holder lists, clue-carrier counts, and answer/payoff record links remain in §15. The body should say, for example, "the pressure has reached the point where the next noticeable shift is a third party entering the scene's privacy," not `CLK-1 value: 2/4, salience: high, threshold at 3`.
+
 Root §16a is the first page-local projection of STCHAR + active opening state. It may mention current fear, bruises, exhaustion, location, tactical blockage, current distrust, page-specific voice fracture, or any other current-state modulation only when grounded in active `STEMO`, `BEL`, `STPLAN`, `STSTAT`, `STOBJ`, `SREL`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `SE`, or `PG` records. Do not repair missing state by copying temporal prose into STCHAR. Create the state record or omit the claim.
 
 Each full present-character §16a packet cites the bound `STENT-*` / `STCHAR-*` / display name, the required-because reason, stable STCHAR seed used, `Current-state grounding records:` (`none; stable STCHAR authority only` when no active current-state record is needed), page-local projection, prose must-show / must-not-imply, and anti-generic warnings. A reduced `offstage_causal` packet still cites the bound `STENT-*` / `STCHAR-*` / display name, `Required because: offstage_causal`, story-facing identity, relevant appraisal rules, relevant pressure behavior when applicable, `Offstage causal relevance:`, prose must-not-imply, and anti-generic warnings; it omits the voice/dialogue authority and on-page rendering lines because the character is not rendered on the page. Do not cite world `CHAR-*` as runtime voice authority in the page plan.
 
-No word-count target anywhere in the plan. Engine jargon (record ids, gate names) confined to §15 frontmatter only.
+No word-count target anywhere in the plan. Engine jargon (record ids, gate names) is confined to §15 frontmatter and the §16a `Current-state grounding records:` field; renderer-facing bodies translate it into prose direction.
 
 ## Phase 9: Generate first choices
 
