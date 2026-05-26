@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/story-explorer/src/server/routes/search.ts` + `branch-map.ts` (stubs) + `src/view-models/branch-map-node.ts` + `branch-map-edge.ts` (types).
-**Deps**: SPEC87STOEXPBAC-007
+**Deps**: archive/tickets/SPEC87STOEXPBAC-007.md
 
 ## Problem
 

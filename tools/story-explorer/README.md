@@ -12,6 +12,8 @@ node dist/src/cli.js --port 5174
 
 The package also exposes the built CLI as `story-explorer`.
 
+Use `--repo-root <path>` to point the server at a specific Worldloom checkout. When omitted, the CLI resolves the nearest repository root from the current working directory.
+
 ## Read-Only Contract
 
 - No `POST`, `PUT`, `PATCH`, or `DELETE` routes are registered.

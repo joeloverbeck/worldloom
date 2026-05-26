@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import { resolveRepoRoot } from "./config/repo-root.js";
+import { createServer } from "./server/http.js";
+
 const DEFAULT_PORT = 5174;
 
 function parsePort(args: string[]): number {
@@ -17,9 +20,42 @@ function parsePort(args: string[]): number {
   return port;
 }
 
-try {
+function parseRepoRoot(args: string[]): string {
+  const repoRootFlagIndex = args.findIndex((arg) => arg === "--repo-root");
+  if (repoRootFlagIndex === -1) {
+    return resolveRepoRoot();
+  }
+
+  const repoRoot = args[repoRootFlagIndex + 1];
+  if (repoRoot === undefined || repoRoot.trim() === "") {
+    throw new Error("Invalid repo root: <missing>");
+  }
+
+  return repoRoot;
+}
+
+async function main(): Promise<void> {
+  const args = process.argv.slice(2);
   const port = parsePort(process.argv.slice(2));
-  console.log(`story-explorer v0.1 - server scaffold not yet wired (lands in ticket 007); default port ${port}`);
+  const repoRoot = parseRepoRoot(args);
+  const server = await createServer({ port, repoRoot });
+
+  const shutdown = async () => {
+    await server.close();
+  };
+  process.once("SIGINT", () => {
+    shutdown().finally(() => process.exit(0));
+  });
+  process.once("SIGTERM", () => {
+    shutdown().finally(() => process.exit(0));
+  });
+
+  await server.listen({ host: "127.0.0.1", port });
+  console.log(`story-explorer v0.1 listening on http://127.0.0.1:${port}`);
+}
+
+try {
+  await main();
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   console.error(message);
