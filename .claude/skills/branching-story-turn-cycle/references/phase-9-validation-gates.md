@@ -42,3 +42,35 @@ After all gates and additional checks pass, compute final PG hashes per shared c
 3. Verify both new hash values are 64-character lowercase hex sha256 strings. Missing, placeholder, uppercase, non-hex, or stale values are hard-stop authoring errors before Phase 10.
 
 If any gate, ERROR-severity additional check, parent-hash copy check, or new-hash check fails, abort before Phase 10 — write nothing. WARNING-severity additional checks must be recorded in the deliverable summary and either resolved before approval or explicitly accepted by the user as known story-health debt.
+
+## Page-plan draft pre-commit validation (via Phase 10 step 2)
+
+Phase 9 finishes by stamping hashes and finalizing the envelope. The actual page-plan structural validators (`page_plan_stchar_packet_integrity`, `active_pressure_handling_discipline`, `page_plan_turn_driver_consistency`, etc.) run at Phase 10 step 2 — but ONLY when the dry-run is invoked with the `page_plan_drafts` arg supplying the candidate plan bytes. Without that arg, those validators are inert in pre-apply mode because the patch envelope carries no `.md` content. Make this the default Phase 10 step 2 incantation, not an optional add-on.
+
+Mechanized call (MCP):
+```
+mcp__worldloom__validate_patch_plan(
+  patch_plan=<envelope>,
+  page_plan_drafts=[{path: "stories/<story_slug>/pages-prose-plans/PG-<integer>.md",
+                     content: "<exact UTF-8 bytes of the finalized draft, identical to what compute-pg-hashes.js --plan consumed>"}]
+)
+```
+
+CLI equivalent for larger envelopes:
+```
+node tools/world-mcp/dist/src/cli/validate-patch-plan.js \
+  [--world-root <path>] \
+  --page-plan-drafts /tmp/page-plan-drafts.json \
+  <plan-path>
+```
+where `/tmp/page-plan-drafts.json` is `[{"path": "stories/<story_slug>/pages-prose-plans/PG-<integer>.md", "content": "<draft-bytes>"}]`.
+
+The `path` MUST match `stories/<story-slug>/pages-prose-plans/PG-<integer>.md` exactly; the MCP arg validator rejects any other shape with `invalid_input`. The patch's `PG-<integer>` record is overlaid onto the world index in pre-apply mode, so the validators see the new `state_snapshot.active_records` (not the parent's). Common failures this gate catches that today's enumeration cannot:
+
+- `page_plan_stchar_packet_integrity.stale_current_state_reference` — a §16a packet cites a record id (typically a prior `PG-<integer>`, the just-superseded `STEMO-<integer>`, or a `BEL-<integer>` no longer in the new snapshot) that isn't active in the new page. See `references/phase-7-page-plan.md` §16a record-id token discipline.
+- `page_plan_stchar_packet_integrity.missing_packet` / `.inactive_stchar` / `.missing_voice_block` / `.unknown_role_label` — §16a packet inventory or per-packet shape failures.
+- `active_pressure_deferred_without_expiry` / `active_pressure_disposition_unknown` / `active_pressure_rejection_reason_missing` — §7a Active-pressure disposition row shape failures. See `references/phase-7-page-plan.md` §7a closed-set form.
+- `high_urgency_active_record_unhandled` — a high-urgency record from the parent's snapshot is missing from §7a.
+- `page_plan_turn_driver_consistency` failures — §7a turn driver / initiative trace lines disagree with `SE.turn_driver`.
+
+Any `fail` verdict aborts Phase 10 (do not proceed to deliverable summary or HARD-GATE approval). Repair the draft (re-running Phase 7 if necessary), recompute hashes against the new bytes, then re-run the dry-run with the updated `page_plan_drafts`.

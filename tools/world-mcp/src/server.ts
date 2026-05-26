@@ -250,7 +250,15 @@ const getCanonicalVocabularyInputSchema = z.object({
 const patchPlanInputSchema = z.object({}).passthrough();
 
 const validatePatchPlanInputSchema = z.object({
-  patch_plan: patchPlanInputSchema
+  patch_plan: patchPlanInputSchema,
+  page_plan_drafts: z
+    .array(
+      z.object({
+        path: z.string().min(1),
+        content: z.string()
+      })
+    )
+    .optional()
 });
 
 const submitPatchPlanInputSchema = z.object({

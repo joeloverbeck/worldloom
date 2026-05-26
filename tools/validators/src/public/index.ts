@@ -29,17 +29,30 @@ export {
   EXCEPTION_GOVERNANCE_REQUIRED_TYPES
 } from "../structural/record-schema-compliance.js";
 
-export async function validatePatchPlan(envelope: PatchPlanEnvelope, opts: { worldRoot?: string } = {}): Promise<{
+export async function validatePatchPlan(
+  envelope: PatchPlanEnvelope,
+  opts: {
+    worldRoot?: string;
+    pagePlanDrafts?: ReadonlyArray<{ path: string; content: string }>;
+  } = {}
+): Promise<{
   verdicts: import("./types.js").Verdict[];
   executions: import("./types.js").ValidatorExecution[];
 }> {
   const db = openWorldIndex(envelope.target_world, opts.worldRoot);
   try {
+    const preApplyFiles = buildPreApplyFileInputs(db, envelope);
+    const drafts = (opts.pagePlanDrafts ?? []).map((draft) => ({ path: draft.path, content: draft.content }));
+    const draftPaths = new Set(drafts.map((draft) => draft.path));
+    const mergedFiles = [
+      ...preApplyFiles.filter((file) => !draftPaths.has(file.path)),
+      ...drafts
+    ];
     const run = await runValidators(
       [...structuralValidators, ...ruleValidators],
       {
         world_slug: envelope.target_world,
-        files: buildPreApplyFileInputs(db, envelope)
+        files: mergedFiles
       },
       {
         run_mode: "pre-apply",
