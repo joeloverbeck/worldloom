@@ -177,6 +177,7 @@ function seedPageDetailFixture(): Fixture {
     id: "STENT-1",
     story_id: "STORY-1",
     name: "Red Bunny",
+    observed_pressure: "Missing obligation OBL-404",
   });
   insertNode(fixture.db, "red-bunny:STENT-1", "stories/red-bunny/_source/entities/STENT-1.yaml", "story_entity_record", entityBody);
   const proseBody = "Rendered prose for PG-1.\n";
@@ -222,6 +223,12 @@ test("getPageDetail assembles page, prose, receipt, choices, variants, event del
   assert.equal(detail.eventDelta.createCount, 1);
   assert.equal(detail.eventDelta.relationCount, 1);
   assert.equal(detail.validationIntegrity.proseStatus, "present");
+  assert.equal(detail.validationIntegrity.receiptPresence, "present");
+  assert.equal(detail.validationIntegrity.stateHashStatus, "match");
+  assert.equal(detail.validationIntegrity.planHashStatus, "missing");
+  assert.deepEqual(detail.validationIntegrity.brokenRefs, ["OBL-404"]);
+  assert.deepEqual(detail.validationIntegrity.malformedYamlWarnings, []);
+  assert.deepEqual(detail.validationIntegrity.skippedRecords, []);
   assert.equal(detail.branchContext.branchId, "BR-1");
   assert.deepEqual(
     detail.rawSources.map((source) => source.recordId),

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { PageDetail } from '../../api/client';
+import type { IndexStatus, PageDetail } from '../../api/client';
 import { CurrentStateTab } from './tabs/CurrentStateTab';
 import { PlanProseTab } from './tabs/PlanProseTab';
 import { ValidationIntegrityTab } from './tabs/ValidationIntegrityTab';
@@ -10,10 +10,17 @@ import { XRayTabs, type XRayTabId } from './XRayTabs';
 interface XRayPanelProps {
   pageDetail: PageDetail;
   storySlug: string;
+  worldIndexStatus?: IndexStatus | null;
   worldSlug: string;
 }
 
-function renderTabPanel(tabId: XRayTabId, pageDetail: PageDetail, worldSlug: string, storySlug: string): JSX.Element {
+function renderTabPanel(
+  tabId: XRayTabId,
+  pageDetail: PageDetail,
+  worldSlug: string,
+  storySlug: string,
+  worldIndexStatus: IndexStatus | null,
+): JSX.Element {
   switch (tabId) {
     case 'current-state':
       return <CurrentStateTab pageDetail={pageDetail} storySlug={storySlug} worldSlug={worldSlug} />;
@@ -22,11 +29,11 @@ function renderTabPanel(tabId: XRayTabId, pageDetail: PageDetail, worldSlug: str
     case 'plan-prose':
       return <PlanProseTab pageDetail={pageDetail} storySlug={storySlug} worldSlug={worldSlug} />;
     case 'validation':
-      return <ValidationIntegrityTab pageDetail={pageDetail} />;
+      return <ValidationIntegrityTab pageDetail={pageDetail} worldIndexStatus={worldIndexStatus} />;
   }
 }
 
-export function XRayPanel({ pageDetail, storySlug, worldSlug }: XRayPanelProps): JSX.Element {
+export function XRayPanel({ pageDetail, storySlug, worldIndexStatus = null, worldSlug }: XRayPanelProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<XRayTabId>('current-state');
 
   return (
@@ -39,7 +46,7 @@ export function XRayPanel({ pageDetail, storySlug, worldSlug }: XRayPanelProps):
         role="tabpanel"
         tabIndex={0}
       >
-        {renderTabPanel(activeTab, pageDetail, worldSlug, storySlug)}
+        {renderTabPanel(activeTab, pageDetail, worldSlug, storySlug, worldIndexStatus)}
       </div>
     </div>
   );

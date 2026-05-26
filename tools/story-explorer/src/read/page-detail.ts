@@ -39,6 +39,60 @@ function stringList(value: unknown): string[] {
   return stringArray(value);
 }
 
+const STORY_RECORD_CLASSES = new Set([
+  "BEL",
+  "BR",
+  "CHC",
+  "CLK",
+  "CNSQ",
+  "DA",
+  "OBL",
+  "PG",
+  "RSP",
+  "SAU",
+  "SE",
+  "SF",
+  "SLB",
+  "SLT",
+  "SP",
+  "STCHAR",
+  "STEMO",
+  "STENT",
+  "STINT",
+  "STLOC",
+  "STOBJ",
+  "STPLAN",
+  "STQ",
+  "SREL",
+  "STSEC",
+  "STSTAT",
+  "THR",
+]);
+
+const RECORD_ID_PATTERN = /\b([A-Z]+-\d+)\b/g;
+
+function storyRecordClass(recordId: string): string {
+  return recordId.split("-", 1)[0] ?? recordId;
+}
+
+function linkedRecordIdsFrom(value: unknown, key: string | null = null): string[] {
+  if (key === "id" || key === "story_id" || key === "created_at_page") {
+    return [];
+  }
+  if (typeof value === "string") {
+    return [...value.matchAll(RECORD_ID_PATTERN)]
+      .map((match) => match[1])
+      .filter((recordId): recordId is string => recordId !== undefined && STORY_RECORD_CLASSES.has(storyRecordClass(recordId)));
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((entry) => linkedRecordIdsFrom(entry));
+  }
+  if (value !== null && typeof value === "object") {
+    return Object.entries(value as Record<string, unknown>).flatMap(([childKey, childValue]) => linkedRecordIdsFrom(childValue, childKey));
+  }
+  return [];
+}
+
 function recordIdArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
@@ -223,15 +277,87 @@ function eventDeltaSummary(eventId: string | null, event: Record<string, unknown
   };
 }
 
-function validationIntegritySummary(
+async function activeRecordDiagnostics(
+  worldSlug: string,
+  storySlug: string,
+  page: Record<string, unknown>,
+  repoRoot: string
+): Promise<{ brokenRefs: string[]; malformedYamlWarnings: string[]; skippedRecords: string[] }> {
+  const activeIds = activeRecordIds(page);
+  const linkedIds = new Set<string>();
+  const malformedYamlWarnings: string[] = [];
+  const skippedRecords: string[] = [];
+
+  for (const activeId of activeIds) {
+    try {
+      const activeRecord = await readRecord(worldSlug, storySlug, activeId, repoRoot);
+      for (const linkedId of linkedRecordIdsFrom(activeRecord.parsed)) {
+        linkedIds.add(linkedId);
+      }
+    } catch (error) {
+      const candidate = error as NodeJS.ErrnoException;
+      if (candidate.code === "ENOENT") {
+        skippedRecords.push(activeId);
+      } else {
+        malformedYamlWarnings.push(activeId);
+      }
+    }
+  }
+
+  const brokenRefs: string[] = [];
+  for (const linkedId of [...linkedIds].sort((left, right) => left.localeCompare(right, undefined, { numeric: true }))) {
+    if (activeIds.includes(linkedId)) {
+      continue;
+    }
+    try {
+      await readRecord(worldSlug, storySlug, linkedId, repoRoot);
+    } catch (error) {
+      const candidate = error as NodeJS.ErrnoException;
+      if (candidate.code === "ENOENT") {
+        brokenRefs.push(linkedId);
+      }
+    }
+  }
+
+  return { brokenRefs, malformedYamlWarnings, skippedRecords };
+}
+
+function planHashStatus(receipt: ReceiptSummary | null): ValidationIntegritySummary["planHashStatus"] {
+  if (receipt === null) {
+    return "not_checked";
+  }
+  return stringValue(receipt.body.plan_hash) === null ? "missing" : "present";
+}
+
+function stateHashStatus(receipt: ReceiptSummary | null, proseStatus: PageDetail["proseStatus"]): ValidationIntegritySummary["stateHashStatus"] {
+  if (proseStatus === "hash_mismatch") {
+    return "mismatch";
+  }
+  if (receipt?.stateHash !== null && receipt?.stateHash !== undefined && proseStatus === "present") {
+    return "match";
+  }
+  return "not_checked";
+}
+
+async function validationIntegritySummary(
+  worldSlug: string,
+  storySlug: string,
   page: Record<string, unknown>,
   receipt: ReceiptSummary | null,
-  proseStatus: PageDetail["proseStatus"]
-): ValidationIntegritySummary {
+  proseStatus: PageDetail["proseStatus"],
+  repoRoot: string
+): Promise<ValidationIntegritySummary> {
+  const diagnostics = await activeRecordDiagnostics(worldSlug, storySlug, page, repoRoot);
   return {
     validationTrace: record(page.validation_trace),
     receiptVerdict: receipt?.verdict ?? null,
     proseStatus,
+    receiptPresence: receipt === null ? "missing" : "present",
+    stateHashStatus: stateHashStatus(receipt, proseStatus),
+    planHashStatus: planHashStatus(receipt),
+    malformedYamlWarnings: diagnostics.malformedYamlWarnings,
+    skippedRecords: diagnostics.skippedRecords,
+    brokenRefs: diagnostics.brokenRefs,
   };
 }
 
@@ -293,7 +419,7 @@ export async function getPageDetail(
     choiceNavigation: await choiceNavigation(worldSlug, storySlug, page, pages, repoRoot),
     currentStateRecordIds: activeRecordIds(page),
     eventDelta: eventDeltaSummary(eventId, event),
-    validationIntegrity: validationIntegritySummary(page, receipt, prose.status),
+    validationIntegrity: await validationIntegritySummary(worldSlug, storySlug, page, receipt, prose.status, repoRoot),
     branchContext: branchContext(page),
     rawSources: await rawSources(worldSlug, storySlug, page, repoRoot),
   };

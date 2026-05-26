@@ -115,7 +115,12 @@ export function PageReadRoute(): JSX.Element {
           ) : null}
           <section className="reading-section xray-section" aria-labelledby="xray-section-title">
             <h2 id="xray-section-title">State X-Ray</h2>
-            <XRayPanel pageDetail={pageDetail} storySlug={storySlug} worldSlug={worldSlug} />
+            <XRayPanel
+              pageDetail={pageDetail}
+              storySlug={storySlug}
+              worldIndexStatus={pageDetailEnvelope?.worldIndexStatus ?? null}
+              worldSlug={worldSlug}
+            />
           </section>
         </div>
         <aside className="summary-rail" aria-labelledby="summary-rail-title">

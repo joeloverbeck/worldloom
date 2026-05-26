@@ -1,16 +1,181 @@
-import type { PageDetail } from '../../../api/client';
+import type { IndexStatus, PageDetail } from '../../../api/client';
 
 interface ValidationIntegrityTabProps {
   pageDetail: PageDetail;
+  worldIndexStatus: IndexStatus | null;
 }
 
-export function ValidationIntegrityTab({ pageDetail }: ValidationIntegrityTabProps): JSX.Element {
-  const receiptVerdict = pageDetail.validationIntegrity.receiptVerdict ?? 'No receipt verdict';
+type Tone = 'success' | 'warning' | 'broken' | 'neutral';
+
+function chipClass(tone: Tone): string {
+  switch (tone) {
+    case 'success':
+      return 'record-chip record-chip--success';
+    case 'warning':
+      return 'record-chip record-chip--warning';
+    case 'broken':
+      return 'record-chip record-chip--broken';
+    case 'neutral':
+      return 'record-chip';
+  }
+}
+
+function verdictTone(value: string | null): Tone {
+  const normalized = value?.toLowerCase();
+  if (normalized === 'pass' || normalized === 'accept' || normalized === 'match' || normalized === 'present' || normalized === 'fresh') {
+    return 'success';
+  }
+  if (normalized === 'warn' || normalized === 'revise' || normalized === 'not_checked' || normalized === 'missing' || normalized === 'stale') {
+    return 'warning';
+  }
+  if (normalized === 'fail' || normalized === 'reject' || normalized === 'mismatch' || normalized === 'unreadable' || normalized === 'open_failed') {
+    return 'broken';
+  }
+  return 'neutral';
+}
+
+function statusChip(label: string, value: string | null): JSX.Element {
+  return <span className={chipClass(verdictTone(value))}>{label}: {value?.replaceAll('_', '-') ?? 'not available'}</span>;
+}
+
+function stringValue(value: unknown): string | null {
+  if (typeof value === 'string' && value.length > 0) {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  return null;
+}
+
+function flattenTraceEntries(trace: Record<string, unknown>): Array<{ key: string; verdict: string; notes: string | null }> {
+  const checks = Array.isArray(trace.checks) ? trace.checks : null;
+  if (checks !== null) {
+    return checks.map((entry, index) => {
+      const block = typeof entry === 'object' && entry !== null ? entry as Record<string, unknown> : {};
+      const key = stringValue(block.name) ?? stringValue(block.check) ?? `check-${index + 1}`;
+      const verdict = stringValue(block.verdict) ?? stringValue(block.status) ?? 'not available';
+      const notes = stringValue(block.rationale) ?? stringValue(block.notes) ?? stringValue(block.message);
+      return { key, verdict, notes };
+    });
+  }
+
+  return Object.entries(trace).map(([key, value]) => {
+    const block = typeof value === 'object' && value !== null ? value as Record<string, unknown> : null;
+    return {
+      key,
+      verdict: block ? stringValue(block.verdict) ?? stringValue(block.status) ?? 'present' : stringValue(value) ?? 'present',
+      notes: block ? stringValue(block.rationale) ?? stringValue(block.notes) ?? stringValue(block.message) : null,
+    };
+  });
+}
+
+function ValidationTrace({ trace }: { trace: Record<string, unknown> }): JSX.Element {
+  const rows = flattenTraceEntries(trace);
+
+  return (
+    <section className="xray-event-section" aria-labelledby="xray-validation-trace-title">
+      <h4 id="xray-validation-trace-title">Validation trace</h4>
+      {rows.length === 0 ? (
+        <p className="xray-empty-note">All checks passed.</p>
+      ) : (
+        <table className="xray-validation-table">
+          <thead>
+            <tr>
+              <th scope="col">Check</th>
+              <th scope="col">Verdict</th>
+              <th scope="col">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.key}>
+                <th scope="row">{row.key}</th>
+                <td><span className={chipClass(verdictTone(row.verdict))}>{row.verdict}</span></td>
+                <td>{row.notes ?? 'All checks passed.'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+}
+
+function indexRemedy(status: IndexStatus): string | null {
+  switch (status.kind) {
+    case 'fresh':
+      return null;
+    case 'version_mismatch':
+      return status.remedy;
+    case 'missing':
+    case 'empty':
+    case 'stale':
+      return status.remedy;
+    case 'open_failed':
+      return status.error;
+  }
+}
+
+function IndexState({ worldIndexStatus }: { worldIndexStatus: IndexStatus | null }): JSX.Element {
+  const label = worldIndexStatus?.kind ?? 'not available';
+  const remedy = worldIndexStatus === null ? null : indexRemedy(worldIndexStatus);
+  const driftedFiles = worldIndexStatus?.kind === 'stale' ? worldIndexStatus.driftedFiles : [];
+
+  return (
+    <section className="xray-event-section" aria-labelledby="xray-index-state-title">
+      <h4 id="xray-index-state-title">Index state</h4>
+      <div className="record-card__chips" aria-label="Index status">
+        {statusChip('World index', label)}
+      </div>
+      {remedy !== null ? <p className="xray-empty-note">{remedy}</p> : <p className="xray-empty-note">All checks passed.</p>}
+      {driftedFiles.length > 0 ? (
+        <ul className="xray-structured-list">
+          {driftedFiles.map((file) => <li key={file}>{file}</li>)}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
+function IntegrityList({ emptyLabel, items, title }: { emptyLabel: string; items: string[]; title: string }): JSX.Element {
+  const id = `xray-${title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')}`;
+
+  return (
+    <section className="xray-event-section" aria-labelledby={id}>
+      <h4 id={id}>{title}</h4>
+      {items.length === 0 ? (
+        <p className="xray-empty-note">{emptyLabel}</p>
+      ) : (
+        <ul className="xray-structured-list">
+          {items.map((item) => (
+            <li key={item}><span className="record-chip record-chip--broken">{item}</span></li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+export function ValidationIntegrityTab({ pageDetail, worldIndexStatus }: ValidationIntegrityTabProps): JSX.Element {
+  const integrity = pageDetail.validationIntegrity;
 
   return (
     <section className="xray-tab-panel__body" aria-labelledby="xray-validation-title">
       <h3 id="xray-validation-title">Validation & Integrity</h3>
-      <p>{receiptVerdict}. Tab content to be filled by SPEC89STOEXPSTA-007.</p>
+      <div className="record-card__chips" aria-label="Integrity summary">
+        {statusChip('Receipt presence', integrity.receiptPresence ?? (integrity.receiptVerdict === null ? 'missing' : 'present'))}
+        {statusChip('Receipt verdict', integrity.receiptVerdict)}
+        {statusChip('Prose status', integrity.proseStatus)}
+        {statusChip('State hash', integrity.stateHashStatus ?? 'not_checked')}
+        {statusChip('Plan hash', integrity.planHashStatus ?? 'not_checked')}
+      </div>
+
+      <ValidationTrace trace={integrity.validationTrace} />
+      <IndexState worldIndexStatus={worldIndexStatus} />
+      <IntegrityList emptyLabel="All checks passed." items={integrity.malformedYamlWarnings ?? []} title="Malformed YAML warnings" />
+      <IntegrityList emptyLabel="All checks passed." items={integrity.skippedRecords ?? []} title="Skipped records" />
+      <IntegrityList emptyLabel="All checks passed." items={integrity.brokenRefs ?? []} title="Broken references" />
     </section>
   );
 }

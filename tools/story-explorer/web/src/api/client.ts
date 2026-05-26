@@ -140,6 +140,12 @@ export interface ValidationIntegritySummary {
   validationTrace: Record<string, unknown>;
   receiptVerdict: string | null;
   proseStatus: ProseStatus;
+  receiptPresence?: 'present' | 'missing' | 'unreadable';
+  stateHashStatus?: 'match' | 'mismatch' | 'not_checked';
+  planHashStatus?: 'present' | 'missing' | 'not_checked';
+  malformedYamlWarnings?: string[];
+  skippedRecords?: string[];
+  brokenRefs?: string[];
 }
 
 export interface BranchContext {
