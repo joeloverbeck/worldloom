@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-89-story-explorer-state-xray-layer.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC89STOEXPSTA-009.md",
+  "last_ticket": "archive/tickets/SPEC89STOEXPSTA-010.md",
   "last_result": "completed_archived",
-  "last_work_commit": "369c04ac6352b492910b491c93f8c215d3d17287",
+  "last_work_commit": "40f2a358f28261383886eef550c7712aa30ce6e4",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC89STOEXPSTA-010.md",
+  "next_target": "tickets/SPEC89STOEXPSTA-011.md",
   "queue": [
-    "tickets/SPEC89STOEXPSTA-010.md",
     "tickets/SPEC89STOEXPSTA-011.md",
     "tickets/SPEC89STOEXPSTA-012.md",
     "tickets/SPEC89STOEXPSTA-013.md"
