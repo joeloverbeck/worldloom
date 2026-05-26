@@ -1,0 +1,152 @@
+# SPEC88STOEXPFRO-010: Choice navigation + variants + Terminal card
+
+**Status**: PENDING
+**Priority**: HIGH
+**Effort**: Medium
+**Engine Changes**: Yes — adds `web/src/components/{ChoiceCard, ChildOutcomeVariant, TerminalCard}.tsx`; fills T008's choices-section + terminal-section slots.
+**Deps**: SPEC88STOEXPFRO-008
+
+## Problem
+
+Below the prose, the reader needs choice cards to navigate forward — one card per emitted choice with surface label, player-visible intent, pressure chips, grounded-in count, and inline expansion when multiple committed child PGs match. When no navigable children exist (leaf or branch-pause), a terminal card replaces the choice list with "No committed continuation from this page." Without this ticket, T008's choices-section and terminal-section slots remain placeholders — the explorer can show prose but offers no way to navigate forward, defeating the reading-flow contract. SPEC-88 §6 + §7 define the exact rendering; this ticket implements both as adjacent under-prose surfaces.
+
+## Assumption Reassessment (2026-05-26)
+
+1. T008 created `web/src/routes/page-read.tsx` with placeholder choices-section + terminal-section slots. SPEC-87's `ChoiceNavigation` type at `tools/story-explorer/src/view-models/choice-navigation.ts` declares: `choiceId`, `surfaceLabel`, `playerVisibleIntent`, `pressure[]`, `groundedInCount`, `childOutcomeVariants[]`, `isNavigable`. SPEC-87's `ChildOutcomeVariant` at `child-outcome-variant.ts` declares: `pageId`, `branchId`, `turnIndex`, `resolvedEventId`, `outcomeRoute`, `resolutionPreview`, `selectedStoryletId`, `hasRenderedProse`, `stateDeltaCounts`. SPEC-87's `PageSummary` declares `isLeaf`, `isTerminalOrPaused`, `terminalReason: 'no_children' | 'paused' | 'terminal' | null` — the discriminator for §7's body sub-line.
+2. SPEC-88 §6 (post-reassessment) names the contract: "For each `ChoiceNavigation` where `isNavigable === true`: `<ChoiceCard>` renders surface label (primary text), player-visible intent (secondary line), pressure chips (when present), and a subtle grounded-in count. If `childOutcomeVariants.length === 1`: clicking the card navigates to that child PG. If `childOutcomeVariants.length > 1`: the card expands inline to show `<ChildOutcomeVariant>` rows beneath it. Each row shows `PG-<n> · BR-<n> · <outcomeRoute|resolutionPreview>` and is individually clickable. CHCs with `isNavigable === false` (no committed child PG yet) are NOT shown in the choice list. They appear in SPEC-89's X-Ray as emitted-but-uncontinued, with appropriate chips." SPEC-88 §7 (post-reassessment) names the terminal card: "When `pageSummary.isLeaf === true` AND `choiceNavigation.every(c => !c.isNavigable)`: Render `<TerminalCard>` beneath the prose panel with copy: Header: 'No committed continuation from this page.' Body sub-line that adapts to context: 'All emitted choices currently have no continued child page.' OR 'Branch has reached a paused state per PG metadata.' OR 'Terminal page per PG metadata.' (SPEC-87 surfaces the discriminator on `PageSummary.isTerminalOrPaused` + reason if available.) Never offer a 'continue story' or 'generate next page' action."
+3. Cross-skill boundary: this ticket consumes T002's API client types + T004's disclosure primitive (used for the inline-expansion of multi-variant choice cards). The "never offer continue story" prohibition is structural — the components have no "next page" button at all; they're purely navigation surfaces. This honors SPEC-87 §6 read-only fence at the UI level (explorer never invokes story-pipeline writes).
+
+## Architecture Check
+
+1. **`<ChoiceCard>` as a discriminated component** — internally branches on `childOutcomeVariants.length`. Single-variant → renders a `<Link>` for full-card navigation. Multi-variant → renders a `<button>` (using T004's `useDisclosure()` hook) that expands inline to show `<ChildOutcomeVariant>` rows. The hook gives the multi-variant case proper ARIA `aria-expanded` semantics.
+2. **`<ChildOutcomeVariant>` as a clickable `<Link>` row** — each variant carries its own pageId, so each row links independently. No "back" affordance from inside the expansion — Esc could close the expansion (handled by T012's a11y verification), but click-outside is not implemented in v1 (keep simple).
+3. **`<TerminalCard>` as a static designed card** — no actions, no "generate next" button. Body sub-line dispatched on `terminalReason`: `'no_children'` → "All emitted choices currently have no continued child page."; `'paused'` → "Branch has reached a paused state per PG metadata."; `'terminal'` → "Terminal page per PG metadata."; `null` → fallback "No further pages from this point." (defensive when discriminator absent).
+4. **Choice filtering happens in the parent route**, not in the component — `page-read.tsx` filters `choiceNavigation` to `isNavigable === true` before passing to ChoiceCard list. The components never see non-navigable CHCs; SPEC-89 surfaces those in X-Ray.
+5. **No backwards-compatibility aliasing/shims introduced** — greenfield components.
+6. **Pressure chips and grounded-in count are small inline indicators** — not full sub-cards. Grounded-in count: "Grounded in 3 records" (subtle, low-emphasis); pressure chips: small colored pills (e.g., "scarcity", "rivalry") inline at the card's bottom edge.
+
+## Verification Layers
+
+1. **Single-variant card navigates on click** → unit test: pass a ChoiceNavigation with 1 variant; click card; assert navigation event fires with the variant's pageId path.
+2. **Multi-variant card expands inline** → unit test: pass a ChoiceNavigation with 2+ variants; click card; assert disclosure opens; assert each variant row is clickable and navigates to its own pageId.
+3. **Non-navigable CHCs absent from choice list** → unit test in route's test file: pass mixed navigable + non-navigable CHCs; assert only navigable cards render.
+4. **TerminalCard renders correct sub-line per terminalReason** → unit test: each of the 4 reason values renders the corresponding copy.
+5. **TerminalCard has no "next page" button** → unit test: render TerminalCard; assert no `<button>` or `<Link>` with text matching `/continue|next|generate/i` exists.
+
+## What to Change
+
+### 1. Create `tools/story-explorer/web/src/components/ChoiceCard.tsx`
+
+Functional component. Props:
+```ts
+interface ChoiceCardProps {
+  choice: ChoiceNavigation; // assumes choice.isNavigable === true (filter upstream)
+  worldSlug: string;
+  storySlug: string;
+}
+```
+Render structure:
+- Card surface containing: surfaceLabel (primary), playerVisibleIntent (secondary), grounded-in count + pressure chips (footer)
+- Branch on `choice.childOutcomeVariants.length`:
+  - `=== 1` → wrap surface in `<Link to={`/worlds/${worldSlug}/stories/${storySlug}/pages/${variant.pageId}`}>`
+  - `> 1` → wrap surface in `<button>` (via T004's `useDisclosure()`); when expanded, render the variant list below the card using a `<ChildOutcomeVariant>` row per variant
+
+### 2. Create `tools/story-explorer/web/src/components/ChildOutcomeVariant.tsx`
+
+Functional component. Props:
+```ts
+interface ChildOutcomeVariantProps {
+  variant: ChildOutcomeVariant; // imported from T002's client.ts
+  worldSlug: string;
+  storySlug: string;
+}
+```
+Renders a clickable `<Link>` row: `PG-<n> · BR-<n> · <outcomeRoute || resolutionPreview || 'Outcome'>`. Compact horizontal layout. No nested expansion (variants don't have further depth).
+
+### 3. Create `tools/story-explorer/web/src/components/TerminalCard.tsx`
+
+Functional component. Props:
+```ts
+interface TerminalCardProps {
+  terminalReason: 'no_children' | 'paused' | 'terminal' | null;
+}
+```
+Renders a designed card with:
+- Header: "No committed continuation from this page."
+- Body sub-line dispatched on `terminalReason` per Architecture Check #3
+- No action buttons. Defensive comment in code: "Per SPEC-88 §7, the explorer NEVER offers continue/next/generate — this card is purely informational."
+
+### 4. Update `tools/story-explorer/web/src/routes/page-read.tsx`
+
+Replace choices-section + terminal-section placeholders with:
+```tsx
+{(() => {
+  const navigableChoices = pageDetail.choiceNavigation.filter(c => c.isNavigable);
+  const showTerminal = pageDetail.page.isLeaf && navigableChoices.length === 0;
+  return (
+    <>
+      <section className="choices-section">
+        {navigableChoices.map(choice => (
+          <ChoiceCard key={choice.choiceId} choice={choice} worldSlug={worldSlug} storySlug={storySlug} />
+        ))}
+      </section>
+      {showTerminal && (
+        <section className="terminal-section">
+          <TerminalCard terminalReason={pageDetail.page.terminalReason} />
+        </section>
+      )}
+    </>
+  );
+})()}
+```
+
+### 5. Create tests
+
+- `tools/story-explorer/web/src/components/ChoiceCard.test.tsx` — verifies single-variant link, multi-variant expansion, pressure chips + grounded-in count.
+- `tools/story-explorer/web/src/components/ChildOutcomeVariant.test.tsx` — verifies row rendering and click navigation.
+- `tools/story-explorer/web/src/components/TerminalCard.test.tsx` — verifies all 4 terminalReason variants + no-action invariant.
+
+## Files to Touch
+
+- `tools/story-explorer/web/src/components/ChoiceCard.tsx` (new)
+- `tools/story-explorer/web/src/components/ChoiceCard.test.tsx` (new)
+- `tools/story-explorer/web/src/components/ChildOutcomeVariant.tsx` (new)
+- `tools/story-explorer/web/src/components/ChildOutcomeVariant.test.tsx` (new)
+- `tools/story-explorer/web/src/components/TerminalCard.tsx` (new)
+- `tools/story-explorer/web/src/components/TerminalCard.test.tsx` (new)
+- `tools/story-explorer/web/src/routes/page-read.tsx` (modify — fills choices-section + terminal-section slots)
+
+## Out of Scope
+
+- Non-navigable CHC display (SPEC-89's X-Ray surface).
+- Choice generation / continuation (read-only explorer; explicitly forbidden per §7).
+- Branch-map drawer interaction triggered from a variant row (SPEC-90).
+- Hover-preview of child page prose (out of v1 scope).
+
+## Acceptance Criteria
+
+### Tests That Must Pass
+
+1. `cd tools/story-explorer/web && npm test -- ChoiceCard.test ChildOutcomeVariant.test TerminalCard.test` — all tests pass.
+2. `cd tools/story-explorer/web && npm run build` — TypeScript compiles.
+
+### Invariants
+
+1. ChoiceCard never renders a "continue story" / "generate next" / "create page" button. Audited by grep against the component file.
+2. TerminalCard has zero action buttons — purely informational.
+3. Multi-variant expansion uses T004's `useDisclosure()` hook (preserves WAI-ARIA disclosure semantics).
+4. Non-navigable CHCs never appear in the choices section (filtered by the route, not by the component).
+
+## Test Plan
+
+### New/Modified Tests
+
+1. `tools/story-explorer/web/src/components/ChoiceCard.test.tsx` (new) — verifies §6 contract.
+2. `tools/story-explorer/web/src/components/ChildOutcomeVariant.test.tsx` (new) — verifies variant row rendering.
+3. `tools/story-explorer/web/src/components/TerminalCard.test.tsx` (new) — verifies §7 contract.
+
+### Commands
+
+1. `cd tools/story-explorer/web && npm test` — full vitest suite.
+2. `cd tools/story-explorer/web && npm run build` — TypeScript verification.
+3. `grep -nE "continue|next page|generate" tools/story-explorer/web/src/components/{ChoiceCard,TerminalCard}.tsx` — invariant audit (expect zero action-button matches; only defensive comments).

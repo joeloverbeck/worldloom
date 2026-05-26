@@ -143,12 +143,29 @@ function schemaVerdicts(record: SchemaTarget, errors: ErrorObject[]): Verdict[] 
     validator: "record_schema_compliance",
     severity: "fail",
     code: `record_schema_compliance.${error.keyword}`,
-    message: `${record.node_id} schema violation at ${error.instancePath || "/"}: ${error.message ?? error.keyword}`,
+    message: `${record.node_id} schema violation at ${error.instancePath || "/"}: ${formatSchemaErrorMessage(error)}`,
     location: {
       file: record.file_path,
       node_id: record.node_id
     }
   }));
+}
+
+function formatSchemaErrorMessage(error: ErrorObject): string {
+  const baseMessage = error.message ?? error.keyword;
+  const allowedValues = enumAllowedValues(error);
+  if (!allowedValues) {
+    return baseMessage;
+  }
+  return `${baseMessage} (allowed: ${JSON.stringify(allowedValues)})`;
+}
+
+function enumAllowedValues(error: ErrorObject): unknown[] | undefined {
+  if (error.keyword !== "enum") {
+    return undefined;
+  }
+  const allowedValues = (error.params as { allowedValues?: unknown }).allowedValues;
+  return Array.isArray(allowedValues) && allowedValues.length > 0 ? allowedValues : undefined;
 }
 
 function canonSafetyBlockVerdicts(

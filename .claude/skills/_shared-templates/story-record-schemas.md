@@ -229,6 +229,22 @@ Per-source-kind `promotion_claims[].source_record` requirements:
 
 `turn_driver` is required exactly when `event_kind: turn_resolution` and forbidden for `story_start`, `system_repair`, `audit_repair`, `prose_attach`, and `promotion_closeout`. Player driver kinds (`player_action`, `player_write_in`) use `initiator: player`, empty `driver_records`, `player_response_mode: initiates`, and `pov_visibility: perceived_directly`. Non-player driver kinds cite active driver records on the parent `PG.state_snapshot`: `npc_action` and `offstage_action` use `STENT-<integer>` initiators; `clock_fire` uses `world` or `system` and cites a `CLK`; `world_pressure` uses `world`; `secret_reveal` cites a `STSEC`; `multi_actor_collision` uses `unknown` and cites multiple driver records. `offstage_action` never uses `pov_visibility: perceived_directly`. `world_logic_rationale` carries the driver-justification prose; do not add a separate `why_now` field.
 
+**Canonical `turn_driver.kind` → `commitment.selection_source` mapping.** `selection_source` records *where the SLT came from* (its provenance), not what drove the action — the two fields are orthogonal. The natural default per driver kind, when an existing SLT is selected from the pool, is:
+
+| `turn_driver.kind` | Default `selection_source` | Notes |
+|---|---|---|
+| `player_action` with chosen `CHC` | `emitted_choice` | The chosen `CHC`'s commitment trace gives provenance. |
+| `player_action` without chosen `CHC` | `author_pool` | Rare; SLT pulled from the global pool without a CHC-trace anchor. |
+| `player_write_in` | `author_pool` | No CHC was chosen; the SLT is pulled from the global author pool to match the write-in's intent. The non-obvious case — `selection_source` has no `write_in` value because the field records SLT provenance, not driver kind. |
+| `npc_action` | `npc_initiative` | |
+| `offstage_action` | `offstage_initiative` | |
+| `clock_fire` | `clock_fire` | Name matches the driver kind. |
+| `world_pressure` | `world_pressure` | Name matches the driver kind. |
+| `secret_reveal` | `secret_reveal` | Name matches the driver kind. |
+| `multi_actor_collision` | `author_pool` or `npc_initiative` | `author_pool` when a generic multi-actor SLT covers both initiators; `npc_initiative` when a single NPC's move dominates the collision. |
+
+Two override paths apply on top of the default mapping. First, when a branch-scoped JIT SLT is created for the event (provenance `runtime_jit`), `selection_source: runtime_jit` regardless of driver kind. Second, audit-only event kinds bypass the table entirely: `event_kind: system_repair` uses `selection_source: system_repair`; `event_kind: audit_repair` uses `selection_source: audit_repair`; `event_kind: story_start | prose_attach | promotion_closeout` uses `selection_source: none` with `selected_slt_id: null` (per the §4.3 sentence above and §4.3a).
+
 `commitment.alias_bindings` accepts the existing selected-move binding classes plus the five existential-predicate-bindable classes `CLK`, `STSEC`, `STQ`, `STPLAN`, and `STEMO`, so author-pool prefilter aliases can become exact event bindings without bypassing branch-local validation.
 
 `record_introductions[]`, `state_relations[]`, and `non_propagation_facts[]` are optional structured fields. Their closed enums, per-class trigger vocabulary, and full validation shape are defined in `tools/validators/src/schemas/story-event.schema.json`; the authoring contract and trigger tables live in `story-state-contract.md` §5a.

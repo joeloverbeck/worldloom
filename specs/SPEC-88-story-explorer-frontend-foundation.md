@@ -1,7 +1,7 @@
 # SPEC-88 — Story Explorer Frontend Foundation & Page Reading Surface
 
 **Status**: draft
-**Depends on**: SPEC-87 (backend foundation)
+**Depends on**: SPEC-87 (backend foundation; landed and archived at `archive/specs/SPEC-87-story-explorer-backend-foundation.md`)
 **Related**: SPEC-89 (state x-ray), SPEC-90 (branch map & search), `specs/IMPLEMENTATION-ORDER.md`
 **Companion triage**: `docs/triage/2026-05-25-website-proposal-triage.md`
 
@@ -15,7 +15,7 @@ Deliver the visible product surface of the Story Explorer: framework scaffolding
 
 ### In scope
 
-- React + Vite scaffolding under `tools/story-explorer/web/` (sub-tree of the backend package; served by the backend in `dev` proxy mode and by static build in production mode).
+- React + Vite scaffolding under `tools/story-explorer/web/` (sub-tree of the backend package; served by Vite in dev mode with `/api/*` proxied to the backend, and by the backend in production mode as static assets from `web/dist/`).
 - Top-level routing: `World Picker → Story Picker → Page Entry Choice → Reading Page`.
 - Page chrome: cinematic-but-compact header (story title, current page ID, branch chip, turn index, parent/back, branch-map button placeholder, page-jump placeholder, integrity chip).
 - Prose panel: literary typography, generous reading column, sanitized markdown rendering, optional small page-status strip.
@@ -39,7 +39,7 @@ Deliver the visible product surface of the Story Explorer: framework scaffolding
 
 ## 3. Frontend package layout
 
-The frontend lives inside the backend package as a sub-tree, so a single `npm install` + `npm run build` produces both halves.
+The frontend lives inside the backend package as a sub-tree. The backend's `tools/story-explorer/package.json` `build` and `test` scripts (currently `tsc -p tsconfig.json` and the existing `node --test` runner per landed SPEC-87) are extended by this spec to chain the web sub-tree build/test ahead of the backend build (see §10 deliverables) so a single `npm install` followed by `npm run build` from the package root produces both halves. The web sub-tree has its own `package.json` (`@worldloom/story-explorer-web`, private) so a sub-tree-only build remains possible during development via `npm --prefix web run build`.
 
 ```
 tools/story-explorer/
@@ -57,6 +57,8 @@ tools/story-explorer/
 │   │   │   ├── page-entry.tsx     # PG-1 / Latest Leaf / Choose Page
 │   │   │   └── page-read.tsx       # primary Reading Page
 │   │   ├── components/
+│   │   │   ├── ErrorBoundary.tsx   # route-wrapping React error boundary; renders polished fallback on subtree throw
+│   │   │   ├── RouteLoading.tsx    # Suspense fallback while PageDetail / list fetches resolve
 │   │   │   ├── PageHeader.tsx
 │   │   │   ├── ProsePanel.tsx
 │   │   │   ├── ProseMissingPlaceholder.tsx
@@ -132,6 +134,8 @@ Route: `/worlds/:slug/stories/:storySlug/pages/:pageId`. Loads `GET /api/.../pag
 6. State X-Ray section (slot — SPEC-89 fills).
 7. Right-rail summary on desktop (slot — SPEC-89 fills); inline summary bar above x-ray on mobile (slot — SPEC-89 fills).
 
+Every route is wrapped in `<ErrorBoundary>` rendering a polished fallback (API failure, sub-tree throw, unexpected exception) — distinct from the §9 Empty / degraded states table, which covers backend-reported degraded states. Initial page-fetch and list-fetch latency is covered by `<RouteLoading>` (a Suspense fallback) so route transitions never render a blank screen.
+
 ## 5. Prose panel
 
 `<ProsePanel>` receives a sanitized markdown body and renders with:
@@ -143,9 +147,11 @@ Route: `/worlds/:slug/stories/:storySlug/pages/:pageId`. Loads `GET /api/.../pag
 - Optional page-status strip below: `PG-12 · Branch BR-3 · Turn 7` — single line, muted.
 - Markdown sanitization (no embedded HTML; safe link handling — links to other PG/CHC/SE IDs are detected and routed; external links are external).
 
+Fetch pattern: `<ProsePanel>` reads the prose body eagerly from `PageDetail.prose` when `proseStatus === 'present'` and the body is included in the initial PageDetail payload from `GET /api/.../pages/:pageId`. When the backend omits the body (large prose deferred) or when `proseStatus !== 'present'` (placeholder doesn't need the body), the panel uses the separate `GET /api/.../prose/:pageId` route per SPEC-87 §5. This composition keeps initial PageDetail responses bounded while supporting incremental render for large pages.
+
 When `proseStatus !== 'present'`:
 
-- `proseStatus === 'missing'` → `<ProseMissingPlaceholder>` with "Rendered prose not attached yet." and the secondary "The page state exists; prose has not been attached." subtitle. Includes "View page plan in State X-Ray" anchor (target lands in SPEC-89).
+- `proseStatus === 'missing'` → `<ProseMissingPlaceholder>` with "Rendered prose not attached yet." and the secondary "This page's state, choices, event delta, and records are available below." subtitle (per source proposal §6 "designed placeholder, not a file-not-found dump"). Includes "View page plan in State X-Ray" anchor (target lands in SPEC-89).
 - `proseStatus === 'unreadable'` → placeholder with "Prose file present but unreadable. See Validation & Integrity in State X-Ray." (target lands in SPEC-89).
 - `proseStatus === 'hash_mismatch'` → placeholder with "Prose receipt indicates hash mismatch. See Validation & Integrity." (SPEC-89 surfaces detail).
 
@@ -179,7 +185,7 @@ When `pageSummary.isLeaf === true` AND `choiceNavigation.every(c => !c.isNavigab
 | Parent/back, branch-map (when SPEC-90 lands), search (SPEC-90), x-ray tabs (SPEC-89) reachable by keyboard | semantic native elements |
 | Disclosure pattern for collapsible regions | `aria-expanded`, Enter/Space toggles, `aria-controls` where helpful — primitive shipped here, reused by SPEC-89/90 |
 | Branch-map drawer focus trap | SPEC-90 (chrome lays the disclosure primitive here) |
-| Color contrast | tokens enforce 4.5:1 body text, 3:1 large text; tested with axe-core in CI |
+| Color contrast | tokens enforce 4.5:1 body text, 3:1 large text; tested with axe-core in the package test suite (alongside React Testing Library; per §10) |
 | Responsive | single-column on mobile, no two-dim scrolling for prose/cards |
 | Reduced motion | all transitions gated on `prefers-reduced-motion: no-preference`; no motion-only state change signals |
 | Semantic headings | one `<h1>` for story/page, `<h2>` for Prose / Choices / State X-Ray, `<h3>` for x-ray groups (SPEC-89) |
@@ -195,14 +201,16 @@ When `pageSummary.isLeaf === true` AND `choiceNavigation.every(c => !c.isNavigab
 | `indexStatus.kind === 'stale'` | Banner with drifted file count + "Run `world-index sync <world-slug>` to refresh." Story list and page detail continue to function in degraded direct-read mode where SPEC-87 enables it. |
 | `indexStatus.kind === 'empty'` | Banner: "Index built but contains no records." |
 | `indexStatus.kind === 'version_mismatch'` | Banner with expected/found versions + "Run `world-index build <world-slug>` to rebuild." Read attempts are blocked. |
+| `indexStatus.kind === 'open_failed'` | Polished error banner: "Index could not be opened." showing the backend's `error` string (from the `IndexStatus.open_failed` variant per SPEC-87 §4); world/story listings degrade to filesystem-only mode where possible. |
 | Page not found (404) | Polished 404 with link to story root |
 | Backend unreachable | Polished error with retry button |
 
 ## 10. Build & test
 
-- `npm run build --workspace=web` builds the frontend bundle.
-- The backend's `npm run build` (per SPEC-87) first builds the backend then the web sub-tree.
-- Frontend tests via vitest + React Testing Library: render tests per route, accessibility tests via axe-core, missing-prose placeholder visual snapshot, choice-card multi-variant rendering, breadcrumb anchor correctness.
+- `npm --prefix web run build` (from the `tools/story-explorer/` package root) builds the frontend bundle into `web/dist/`.
+- Modify `tools/story-explorer/package.json`: replace `build` with a chained script that builds the web sub-tree first then the backend (e.g. `npm --prefix web run build && tsc -p tsconfig.json`); chain `test` to run the web vitest suite alongside the existing `node --test` backend suite. This extends landed SPEC-87 backend code as new SPEC-88 work — not a SPEC-87 amendment, since SPEC-87 is COMPLETED+archived and this spec authors the integration explicitly.
+- Add `@fastify/static` as a `tools/story-explorer/package.json` dependency; register a read-only `web/dist/` static-serve in `tools/story-explorer/src/server/http.ts` for production mode (guarded by build-presence check; falls back gracefully when `web/dist/` is absent, e.g. backend-only test runs). This preserves SPEC-87 §6 four-layer read-only fence — static-serve is read-only by construction and adds no write surface. A new test (`test/static-serve-readonly.test.ts`) asserts the static-serve handler responds only to GET and that no `POST`/`PUT`/`PATCH`/`DELETE` registration is introduced under the `web/dist/` route.
+- Frontend tests via vitest + React Testing Library (declared in `web/package.json` devDependencies): render tests per route, accessibility tests via axe-core, missing-prose placeholder visual snapshot, choice-card multi-variant rendering, breadcrumb anchor correctness.
 - Manual smoke test in `dev` mode against the `worlds/erotica-world/stories/red-bunny/` bundle (one prose page, one plan, one receipt confirmed present per pre-spec audit).
 
 ## 11. FOUNDATIONS alignment

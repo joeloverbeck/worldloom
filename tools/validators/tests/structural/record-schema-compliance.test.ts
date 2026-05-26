@@ -5,6 +5,7 @@ import test from "node:test";
 
 import yaml from "js-yaml";
 
+import type { Verdict } from "../../src/framework/types.js";
 import { PRED_TYPES } from "../../src/rules/_shared/predicate-dsl-grammar.js";
 import {
   recordSchemaCompliance,
@@ -12,6 +13,12 @@ import {
   requiresExceptionGovernance
 } from "../../src/structural/record-schema-compliance.js";
 import { context, record, validCf, validSection } from "./helpers.js";
+
+function findVerdict(verdicts: Verdict[], nodeId: string, code: string): Verdict {
+  const verdict = verdicts.find((item) => item.location.node_id === nodeId && item.code === code);
+  assert.ok(verdict, `${code} not emitted for ${nodeId}: ${verdicts.map((item) => item.code).join(", ")}`);
+  return verdict;
+}
 
 test("record_schema_compliance rejects prose-sourced MR fields and accepts data-layer MR fields", async () => {
   const invalidMr = record("mystery_reserve_entry", "M-1", "_source/mystery-reserve/M-1.yaml", {
@@ -83,14 +90,82 @@ test("record_schema_compliance accepts derived_canon and rejects mystery_reserve
   const result = await recordSchemaCompliance.run({}, context([accepted, rejected]));
 
   assert.ok(!result.some((verdict) => verdict.location.node_id === "CF-1"));
-  assert.ok(
-    result.some(
-      (verdict) =>
-        verdict.location.node_id === "CF-2" &&
-        verdict.code === "record_schema_compliance.enum" &&
-        verdict.message.includes("/status")
-    )
+  const verdict = findVerdict(result, "CF-2", "record_schema_compliance.enum");
+  assert.deepEqual(verdict, {
+    validator: "record_schema_compliance",
+    severity: "fail",
+    code: "record_schema_compliance.enum",
+    message: "CF-2 schema violation at /status: must be equal to one of the allowed values (allowed: [\"hard_canon\",\"derived_canon\",\"soft_canon\",\"contested_canon\"])",
+    location: {
+      file: "_source/canon/CF-2.yaml",
+      node_id: "CF-2"
+    }
+  });
+});
+
+test("record_schema_compliance keeps non-enum AJV verdict messages unchanged", async () => {
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      record("change_log_entry", "CH-1", "_source/change-log/CH-1.yaml", {
+        change_id: "CH-1",
+        date: "2026-05-03",
+        change_type: "addition",
+        affected_cf_ids: ["CF-1"]
+      }),
+      record("section", "SEC-GEO-001", "_source/peoples-and-species/SEC-GEO-001.yaml", {
+        ...validSection,
+        id: "SEC-GEO-001",
+        file_class: "PEOPLES_AND_SPECIES"
+      }),
+      record("canon_fact_record", "CF-3", "_source/canon/CF-3.yaml", {
+        ...validCf,
+        id: "CF-3",
+        domains_affected: "law"
+      })
+    ])
   );
+
+  assert.deepEqual(findVerdict(result, "CH-1", "record_schema_compliance.required"), {
+    validator: "record_schema_compliance",
+    severity: "fail",
+    code: "record_schema_compliance.required",
+    message: "CH-1 schema violation at /: must have required property 'affected_fact_ids'",
+    location: {
+      file: "_source/change-log/CH-1.yaml",
+      node_id: "CH-1"
+    }
+  });
+  assert.deepEqual(findVerdict(result, "CH-1", "record_schema_compliance.additionalProperties"), {
+    validator: "record_schema_compliance",
+    severity: "fail",
+    code: "record_schema_compliance.additionalProperties",
+    message: "CH-1 schema violation at /: must NOT have additional properties",
+    location: {
+      file: "_source/change-log/CH-1.yaml",
+      node_id: "CH-1"
+    }
+  });
+  assert.deepEqual(findVerdict(result, "SEC-GEO-001", "record_schema_compliance.pattern"), {
+    validator: "record_schema_compliance",
+    severity: "fail",
+    code: "record_schema_compliance.pattern",
+    message: "SEC-GEO-001 schema violation at /id: must match pattern \"^SEC-PAS-[0-9]+$\"",
+    location: {
+      file: "_source/peoples-and-species/SEC-GEO-001.yaml",
+      node_id: "SEC-GEO-001"
+    }
+  });
+  assert.deepEqual(findVerdict(result, "CF-3", "record_schema_compliance.type"), {
+    validator: "record_schema_compliance",
+    severity: "fail",
+    code: "record_schema_compliance.type",
+    message: "CF-3 schema violation at /domains_affected: must be array",
+    location: {
+      file: "_source/canon/CF-3.yaml",
+      node_id: "CF-3"
+    }
+  });
 });
 
 test("record_schema_compliance rejects accepted CFs without direct user approval provenance", async () => {
