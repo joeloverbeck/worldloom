@@ -527,7 +527,7 @@ Each §16a packet includes:
   - Anti-generic warnings:
 ```
 
-When page-local modulation depends on active state, `Current-state grounding records:` names the active records that ground that modulation, cited by id. When no current-state record is needed, the field reads exactly: `Current-state grounding records: none; stable STCHAR authority only.` Page plans must not cite world `CHAR-*` as operational page-plan characterization authority.
+When page-local modulation depends on active state, `Current-state grounding records:` names the active records that ground that modulation, cited by id. When no current-state record is needed, the field reads exactly: `Current-state grounding records: none; stable STCHAR authority only.` Page plans must not cite world `CHAR-*` as operational page-plan characterization authority. In §16a packet fields, any `PG-<integer>` or `SE-<integer>` token is treated as an operational current-state citation: cite only the current page's own `PG` or resolved `SE` id there. To discuss earlier pages or events as history, use prose such as "the prior observation beat" or "the parent-page action" rather than a literal page/event id unless that id is deliberately active/current for the packet.
 
 The canonical post-SPEC-71 §16a packet field set is:
 
