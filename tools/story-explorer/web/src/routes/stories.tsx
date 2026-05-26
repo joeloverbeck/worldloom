@@ -2,7 +2,7 @@ import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router-dom';
 
 import type { EnvelopedResult, StorySummary, WorldSummary } from '../api/client';
 import { getWorld, listStories } from '../api/client';
-import { IndexStatusBanner } from '../components/IndexStatusBanner';
+import { useIndexStatusBanner } from '../hooks/use-index-status-banner';
 
 interface StoryListResult {
   world: EnvelopedResult<WorldSummary>;
@@ -98,9 +98,10 @@ function EmptyStoryList(): JSX.Element {
 
 export function StoriesRoute(): JSX.Element {
   const {
-    world: { payload: world },
-    stories: { payload: stories },
+    world: { envelope: worldEnvelope, payload: world },
+    stories: { envelope: storiesEnvelope, payload: stories },
   } = useLoaderData() as StoryListResult;
+  const indexStatusBanner = useIndexStatusBanner(storiesEnvelope?.worldIndexStatus ? storiesEnvelope : worldEnvelope);
 
   return (
     <main className="app-shell stories-route" aria-labelledby="stories-title">
@@ -108,7 +109,7 @@ export function StoriesRoute(): JSX.Element {
         <p className="route-kicker">{world.worldSlug}</p>
         <h1 id="stories-title">{world.displayName} Stories</h1>
       </header>
-      <IndexStatusBanner status={world.indexStatus} />
+      {indexStatusBanner}
       {stories.length === 0 ? (
         <EmptyStoryList />
       ) : (

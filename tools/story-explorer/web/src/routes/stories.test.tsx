@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { IndexStatus, StorySummary, WorldSummary } from '../api/client';
+import type { IndexStatus, ResponseEnvelope, StorySummary, WorldSummary } from '../api/client';
 import { getWorld, listStories } from '../api/client';
 import { StoriesRoute, storyListLoader, storyStatusBadge } from './stories';
 
@@ -69,13 +69,26 @@ function story(overrides: Partial<StorySummary>): StorySummary {
   };
 }
 
-async function renderStoriesRoute(stories: StorySummary[], selectedWorld = world()): Promise<void> {
+function envelope(worldIndexStatus: ResponseEnvelope['worldIndexStatus']): ResponseEnvelope {
+  return {
+    requestId: 'req-1',
+    serverVersion: 'test',
+    worldIndexStatus,
+  };
+}
+
+async function renderStoriesRoute(
+  stories: StorySummary[],
+  selectedWorld = world(),
+  storiesEnvelope: ResponseEnvelope | null = null,
+  worldEnvelope: ResponseEnvelope | null = null,
+): Promise<void> {
   mockedGetWorld.mockResolvedValue({
-    envelope: null,
+    envelope: worldEnvelope,
     payload: selectedWorld,
   });
   mockedListStories.mockResolvedValue({
-    envelope: null,
+    envelope: storiesEnvelope,
     payload: stories,
   });
 
@@ -153,13 +166,19 @@ describe('StoriesRoute', () => {
   });
 
   it('renders the world-level index status banner before the story list', async () => {
-    await renderStoriesRoute([story({})], world({ indexStatus: indexStatus('stale') }));
+    await renderStoriesRoute([story({})], world(), envelope(indexStatus('stale')));
 
     const banner = await screen.findByRole('status');
     const list = screen.getByRole('list', { name: 'Stories in Fixture World' });
 
     expect(banner).toHaveTextContent('1 file(s) drifted. Run world-index sync fixture-world.');
     expect(banner.compareDocumentPosition(list)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('falls back to the world envelope when the story-list envelope has no index status', async () => {
+    await renderStoriesRoute([story({})], world(), envelope(null), envelope(indexStatus('open_failed')));
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Index could not be opened. database is locked');
   });
 
   it('uses links to navigate to the selected story entry route', async () => {

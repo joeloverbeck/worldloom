@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { IndexStatus, PageSummary, StorySummary } from '../api/client';
+import type { IndexStatus, PageSummary, ResponseEnvelope, StorySummary } from '../api/client';
 import { getLatestPage, getRootPage, getStory } from '../api/client';
 import { getLastViewedPage } from '../prefs/local-storage';
 import { PageEntryRoute, pageEntryLoader } from './page-entry';
@@ -26,8 +26,21 @@ const mockedGetRootPage = vi.mocked(getRootPage);
 const mockedGetLatestPage = vi.mocked(getLatestPage);
 const mockedGetLastViewedPage = vi.mocked(getLastViewedPage);
 
-function indexStatus(): IndexStatus {
-  return { kind: 'fresh', version: 1 };
+function indexStatus(kind: IndexStatus['kind'] = 'fresh'): IndexStatus {
+  switch (kind) {
+    case 'fresh':
+      return { kind, version: 1 };
+    case 'missing':
+      return { kind, remedy: 'Run world-index build fixture-world.' };
+    case 'version_mismatch':
+      return { kind, expected: 2, found: 1, remedy: 'Rebuild the index.' };
+    case 'empty':
+      return { kind, remedy: 'Add story records.' };
+    case 'stale':
+      return { kind, driftedFiles: ['PG-1.yaml'], remedy: 'Run world-index sync fixture-world.' };
+    case 'open_failed':
+      return { kind, error: 'database is locked' };
+  }
 }
 
 function story(overrides: Partial<StorySummary> = {}): StorySummary {
@@ -74,17 +87,20 @@ async function renderPageEntryRoute(options: {
   latestPage?: PageSummary | null;
   lastViewedPageId?: string | null;
   selectedStory?: StorySummary;
+  storyEnvelope?: ResponseEnvelope | null;
+  rootPageEnvelope?: ResponseEnvelope | null;
+  latestPageEnvelope?: ResponseEnvelope | null;
 } = {}): Promise<ReturnType<typeof createMemoryRouter>> {
   mockedGetStory.mockResolvedValue({
-    envelope: null,
+    envelope: options.storyEnvelope ?? null,
     payload: options.selectedStory ?? story(),
   });
   mockedGetRootPage.mockResolvedValue({
-    envelope: null,
+    envelope: options.rootPageEnvelope ?? null,
     payload: options.rootPage ?? page({ pageId: 'PG-1' }),
   });
   mockedGetLatestPage.mockResolvedValue({
-    envelope: null,
+    envelope: options.latestPageEnvelope ?? null,
     payload: options.latestPage ?? page({ pageId: 'PG-12', isLeaf: true }),
   });
   mockedGetLastViewedPage.mockReturnValue(options.lastViewedPageId ?? null);
@@ -107,6 +123,14 @@ async function renderPageEntryRoute(options: {
   render(<RouterProvider router={router} />);
   await waitFor(() => expect(mockedGetStory).toHaveBeenCalledOnce());
   return router;
+}
+
+function envelope(worldIndexStatus: ResponseEnvelope['worldIndexStatus']): ResponseEnvelope {
+  return {
+    requestId: 'req-1',
+    serverVersion: 'test',
+    worldIndexStatus,
+  };
 }
 
 beforeEach(() => {
@@ -150,6 +174,16 @@ describe('PageEntryRoute', () => {
 
     expect(await screen.findByRole('heading', { name: 'Red Bunny' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Open last viewed/ })).not.toBeInTheDocument();
+  });
+
+  it('renders the page-entry index status banner before the entry actions', async () => {
+    await renderPageEntryRoute({ rootPageEnvelope: envelope(indexStatus('stale')) });
+
+    const banner = await screen.findByRole('status');
+    const actionGroup = screen.getByLabelText('Entry points for Red Bunny');
+
+    expect(banner).toHaveTextContent('1 file(s) drifted. Run world-index sync fixture-world.');
+    expect(banner.compareDocumentPosition(actionGroup)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('renders open-last-viewed only when a local preference exists', async () => {

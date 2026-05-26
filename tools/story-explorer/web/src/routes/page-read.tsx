@@ -7,6 +7,7 @@ import { ChoiceCard } from '../components/ChoiceCard';
 import { PageHeader } from '../components/PageHeader';
 import { ProsePanel } from '../components/ProsePanel';
 import { TerminalCard } from '../components/TerminalCard';
+import { useIndexStatusBanner } from '../hooks/use-index-status-banner';
 
 interface PageReadResult {
   world: EnvelopedResult<WorldSummary>;
@@ -53,7 +54,7 @@ export function PageReadRoute(): JSX.Element {
   const {
     world: { payload: world },
     story: { payload: story },
-    pageDetail: { payload: pageDetail },
+    pageDetail: { envelope: pageDetailEnvelope, payload: pageDetail },
     worldSlug,
     storySlug,
     pageId: routePageId,
@@ -62,6 +63,7 @@ export function PageReadRoute(): JSX.Element {
   const pageId = pageRecordId(pageDetail.page, routePageId);
   const navigableChoices = pageDetail.choiceNavigation.filter((choice) => choice.isNavigable);
   const showTerminal = pageIsLeaf(pageDetail.page) && navigableChoices.length === 0;
+  const indexStatusBanner = useIndexStatusBanner(pageDetailEnvelope);
 
   return (
     <main className="app-shell page-read-route" aria-labelledby="page-title">
@@ -75,6 +77,7 @@ export function PageReadRoute(): JSX.Element {
         pageId={pageId}
         parentPageId={pageDetail.branchContext.parentPageId}
       />
+      {indexStatusBanner}
 
       <div className="reading-layout">
         <div className="reading-layout__main">

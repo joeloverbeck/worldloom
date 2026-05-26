@@ -9,6 +9,8 @@
 
 **Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-010` landed the under-prose choice navigation and terminal-card slice: `ChoiceCard`, `ChildOutcomeVariant`, and `TerminalCard` now render committed child-page navigation, multi-outcome variants, non-navigable CHC filtering, and the no-continuation terminal state. Remaining §6/§7 bullets are historical plan context unless they name later SPEC-89/SPEC-90 surfaces.
 
+**Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-011` landed the empty/degraded backend-state slice: envelope-level non-fresh index banners render on the world picker, story picker, page entry route, and reading page; React Router loader errors now dispatch 404 misses to a route-aware not-found page and backend-unreachable failures to a retryable revalidation surface. Remaining §9 accessibility/verification hardening belongs to `SPEC88STOEXPFRO-012` and final capstone proof to `SPEC88STOEXPFRO-013`.
+
 ---
 
 ## 1. Purpose

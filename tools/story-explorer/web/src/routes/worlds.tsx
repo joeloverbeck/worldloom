@@ -1,11 +1,10 @@
 import { Link, useLoaderData } from 'react-router-dom';
 
-import type { IndexStatus, WorldSummary } from '../api/client';
+import type { EnvelopedResult, IndexStatus, WorldSummary } from '../api/client';
 import { listWorlds } from '../api/client';
+import { useIndexStatusBanner } from '../hooks/use-index-status-banner';
 
-interface WorldListResult {
-  payload: WorldSummary[];
-}
+type WorldListResult = EnvelopedResult<WorldSummary[]>;
 
 type BadgeTone = 'success' | 'warning' | 'error' | 'info';
 
@@ -78,13 +77,15 @@ function WorldCard({ world }: { world: WorldSummary }): JSX.Element {
 }
 
 export function WorldsRoute(): JSX.Element {
-  const { payload: worlds } = useLoaderData() as WorldListResult;
+  const { envelope, payload: worlds } = useLoaderData() as WorldListResult;
+  const indexStatusBanner = useIndexStatusBanner(envelope);
 
   return (
     <main className="app-shell worlds-route" aria-labelledby="worlds-title">
       <header className="route-header">
         <h1 id="worlds-title">Worlds</h1>
       </header>
+      {indexStatusBanner}
       {worlds.length === 0 ? (
         <EmptyWorldList />
       ) : (

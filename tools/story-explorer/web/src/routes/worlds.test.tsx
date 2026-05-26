@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { IndexStatus, WorldSummary } from '../api/client';
+import type { IndexStatus, ResponseEnvelope, WorldSummary } from '../api/client';
 import { listWorlds } from '../api/client';
 import { WorldsRoute, worldListLoader, worldStatusBadge } from './worlds';
 
@@ -48,9 +48,17 @@ function world(overrides: Partial<WorldSummary>): WorldSummary {
   };
 }
 
-async function renderWorldsRoute(worlds: WorldSummary[]): Promise<void> {
+function envelope(worldIndexStatus: ResponseEnvelope['worldIndexStatus']): ResponseEnvelope {
+  return {
+    requestId: 'req-1',
+    serverVersion: 'test',
+    worldIndexStatus,
+  };
+}
+
+async function renderWorldsRoute(worlds: WorldSummary[], responseEnvelope: ResponseEnvelope | null = null): Promise<void> {
   mockedListWorlds.mockResolvedValue({
-    envelope: null,
+    envelope: responseEnvelope,
     payload: worlds,
   });
 
@@ -97,6 +105,19 @@ describe('WorldsRoute', () => {
 
     expect(await screen.findByText('No worlds found in this repository.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Repository map' })).toHaveAttribute('href', '/docs/REPOSITORY-MAP.md');
+  });
+
+  it('renders an envelope-level index status banner before the world grid', async () => {
+    await renderWorldsRoute(
+      [world({ worldSlug: 'alpha', displayName: 'Alpha' })],
+      envelope(indexStatus('open_failed')),
+    );
+
+    const banner = await screen.findByRole('status');
+    const list = screen.getByRole('list', { name: 'Available worlds' });
+
+    expect(banner).toHaveTextContent('Index could not be opened. database is locked');
+    expect(banner.compareDocumentPosition(list)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('maps every index status and world error to the picker badge labels', () => {

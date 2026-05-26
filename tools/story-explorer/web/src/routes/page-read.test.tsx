@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { IndexStatus, PageDetail, StorySummary, WorldSummary } from '../api/client';
+import type { IndexStatus, PageDetail, ResponseEnvelope, StorySummary, WorldSummary } from '../api/client';
 import { getPageDetail, getStory, getWorld } from '../api/client';
 import { PageReadRoute, pageReadLoader } from './page-read';
 
@@ -20,8 +20,21 @@ const mockedGetWorld = vi.mocked(getWorld);
 const mockedGetStory = vi.mocked(getStory);
 const mockedGetPageDetail = vi.mocked(getPageDetail);
 
-function indexStatus(): IndexStatus {
-  return { kind: 'fresh', version: 1 };
+function indexStatus(kind: IndexStatus['kind'] = 'fresh'): IndexStatus {
+  switch (kind) {
+    case 'fresh':
+      return { kind, version: 1 };
+    case 'missing':
+      return { kind, remedy: 'Run world-index build fixture-world.' };
+    case 'version_mismatch':
+      return { kind, expected: 2, found: 1, remedy: 'Rebuild the index.' };
+    case 'empty':
+      return { kind, remedy: 'Add story records.' };
+    case 'stale':
+      return { kind, driftedFiles: ['PG-12.yaml'], remedy: 'Run world-index sync fixture-world.' };
+    case 'open_failed':
+      return { kind, error: 'database is locked' };
+  }
 }
 
 function world(overrides: Partial<WorldSummary> = {}): WorldSummary {
@@ -91,10 +104,21 @@ function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
   };
 }
 
-async function renderPageReadRoute(detail = pageDetail()): Promise<void> {
+function envelope(worldIndexStatus: ResponseEnvelope['worldIndexStatus']): ResponseEnvelope {
+  return {
+    requestId: 'req-1',
+    serverVersion: 'test',
+    worldIndexStatus,
+  };
+}
+
+async function renderPageReadRoute(
+  detail = pageDetail(),
+  pageDetailEnvelope: ResponseEnvelope | null = null,
+): Promise<void> {
   mockedGetWorld.mockResolvedValue({ envelope: null, payload: world() });
   mockedGetStory.mockResolvedValue({ envelope: null, payload: story() });
-  mockedGetPageDetail.mockResolvedValue({ envelope: null, payload: detail });
+  mockedGetPageDetail.mockResolvedValue({ envelope: pageDetailEnvelope, payload: detail });
 
   const router = createMemoryRouter(
     [
@@ -140,6 +164,17 @@ describe('PageReadRoute', () => {
     expect(screen.getByText('No committed continuation from this page.')).toBeInTheDocument();
     expect(screen.getByText('State X-Ray slot (SPEC-89 fills)')).toBeInTheDocument();
     expect(screen.getByText('Summary rail slot (SPEC-89 fills)')).toBeInTheDocument();
+  });
+
+  it('renders the page-detail index status banner before the reading layout', async () => {
+    await renderPageReadRoute(pageDetail(), envelope(indexStatus('open_failed')));
+
+    const banner = await screen.findByRole('status');
+    const layout = document.querySelector('.reading-layout');
+
+    expect(banner).toHaveTextContent('Index could not be opened. database is locked');
+    expect(layout).not.toBeNull();
+    expect(banner.compareDocumentPosition(layout as Element)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('renders only navigable choices and omits terminal card when a child exists', async () => {

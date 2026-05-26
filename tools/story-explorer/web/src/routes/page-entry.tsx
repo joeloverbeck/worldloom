@@ -3,6 +3,7 @@ import { Link, useLoaderData, useNavigate, type LoaderFunctionArgs } from 'react
 
 import type { EnvelopedResult, PageSummary, StorySummary } from '../api/client';
 import { getLatestPage, getRootPage, getStory } from '../api/client';
+import { useIndexStatusBanner } from '../hooks/use-index-status-banner';
 import { getLastViewedPage } from '../prefs/local-storage';
 
 interface PageEntryResult {
@@ -44,9 +45,9 @@ function pageHref(worldSlug: string, storySlug: string, pageId: string): string 
 
 export function PageEntryRoute(): JSX.Element {
   const {
-    story: { payload: story },
-    rootPage: { payload: rootPage },
-    latestPage: { payload: latestPage },
+    story: { envelope: storyEnvelope, payload: story },
+    rootPage: { envelope: rootPageEnvelope, payload: rootPage },
+    latestPage: { envelope: latestPageEnvelope, payload: latestPage },
     lastViewedPageId,
   } = useLoaderData() as PageEntryResult;
   const [chosenPageId, setChosenPageId] = useState('');
@@ -57,6 +58,9 @@ export function PageEntryRoute(): JSX.Element {
   const rootPageId = rootPage?.pageId ?? story.rootPageId ?? 'PG-1';
   const latestPageId = latestPage?.pageId ?? story.latestPageId;
   const storyTitle = story.title ?? story.storySlug;
+  const indexStatusBanner = useIndexStatusBanner(
+    rootPageEnvelope?.worldIndexStatus ? rootPageEnvelope : latestPageEnvelope?.worldIndexStatus ? latestPageEnvelope : storyEnvelope,
+  );
 
   function submitChosenPage(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -77,6 +81,7 @@ export function PageEntryRoute(): JSX.Element {
         <p className="route-kicker">{story.storySlug}</p>
         <h1 id="page-entry-title">{storyTitle}</h1>
       </header>
+      {indexStatusBanner}
 
       <section className="page-entry-panel" aria-labelledby="page-entry-actions-title">
         <h2 id="page-entry-actions-title">Choose a page entry point</h2>
