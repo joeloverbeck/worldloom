@@ -34,12 +34,17 @@ function buildLargeStoryletWorld(root: string): void {
       body: [
         `id: ${id}`,
         `title: Storylet ${ordinal}`,
+        "move_family: decision",
         `shape: ${shape}`,
         `content_intensity: ${contentIntensity}`,
         "visibility:",
         `  scope: ${visibilityScope}`,
         "  allowed_branch_ids:",
         selected ? "    - BR-0001" : "    - BR-9999",
+        "grounding:",
+        selected
+          ? "  compatible_turn_drivers: [player_action, player_write_in]"
+          : "  compatible_turn_drivers: [npc_action]",
         "hard_preconds:",
         "  - protagonist_present",
         "cast_requirements:",
@@ -427,6 +432,96 @@ test("listRecords filters story-bundle records by dotted paths and reduces respo
         "routine_disruption"
       ]
     );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords projects story-bundle fields through dotted parsed-body paths", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildLargeStoryletWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "storylet_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        filters: {
+          "visibility.scope": "global_author_pool"
+        },
+        fields: ["grounding.compatible_turn_drivers"]
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.total, 8);
+    assert.deepEqual(Object.keys(result.records[0]!).sort(), [
+      "grounding.compatible_turn_drivers",
+      "record_id"
+    ]);
+    assert.deepEqual((result.records[0] as Record<string, unknown>)["grounding.compatible_turn_drivers"], [
+      "player_action",
+      "player_write_in"
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords preserves mixed flat and dotted story-bundle projection fields", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildLargeStoryletWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "storylet_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        filters: {
+          id: "SLT-0001"
+        },
+        fields: ["move_family", "grounding.compatible_turn_drivers"]
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.records, [
+      {
+        record_id: "SLT-0001",
+        move_family: "decision",
+        "grounding.compatible_turn_drivers": ["player_action", "player_write_in"]
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords rejects unknown dotted story-bundle projection fields", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildLargeStoryletWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: STORY_FIXTURE_WORLD,
+        record_type: "storylet_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        fields: ["grounding.nonexistent_leaf"]
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "invalid_input");
+    assert.equal(result.details?.field, "fields");
+    assert.deepEqual(result.details?.unknown_projection_keys, ["grounding.nonexistent_leaf"]);
+    assert.ok((result.details?.accepted_projection_keys as string[]).includes("grounding"));
+    assert.match(String(result.message), /dotted parsed-body paths/);
   } finally {
     destroyTempRepoRoot(root);
   }

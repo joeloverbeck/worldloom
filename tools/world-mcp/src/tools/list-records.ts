@@ -192,8 +192,9 @@ function projectRecord(record: ListedRecord, fields: string[] | undefined): List
     if (field === "record_id") {
       continue;
     }
-    if (Object.prototype.hasOwnProperty.call(record, field)) {
-      projected[field] = record[field];
+    const value = valueAtDottedPath(record, field);
+    if (value !== undefined) {
+      projected[field] = value;
     }
   }
 
@@ -309,8 +310,13 @@ function projectionFieldValidation(
 
   const acceptedKeys = acceptedProjectionKeys(recordType, projectionSources, includeFullBody);
   const accepted = new Set(acceptedKeys);
-  const unknownKeys =
-    acceptedKeys.length === 0 ? [...fields] : fields.filter((field) => !accepted.has(field));
+  const unknownKeys = acceptedKeys.length === 0
+    ? [...fields]
+    : fields.filter(
+        (field) =>
+          !accepted.has(field) &&
+          projectionSources.every((record) => valueAtDottedPath(record, field) === undefined)
+      );
 
   return {
     acceptedKeys,
@@ -489,7 +495,7 @@ async function listRecordsImpl(args: ListRecordsArgs): Promise<ListRecordsRespon
     if (projectionValidation.unknownKeys.length > 0) {
       return createMcpError(
         "invalid_input",
-        `Unknown list_records fields key '${projectionValidation.unknownKeys[0]}'.`,
+        `Unknown list_records fields key '${projectionValidation.unknownKeys[0]}'; fields may be top-level response keys or dotted parsed-body paths that resolve on at least one matched record.`,
         {
           field: "fields",
           unknown_projection_keys: projectionValidation.unknownKeys,
