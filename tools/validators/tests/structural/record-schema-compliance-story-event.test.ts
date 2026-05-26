@@ -390,7 +390,7 @@ function resolution(result: string): Record<string, unknown> {
 }
 
 function commitmentForEventKind(eventKind: string): Record<string, unknown> {
-  if (["story_start", "prose_attach", "promotion_closeout"].includes(eventKind)) {
+  if (["story_start", "system_repair", "audit_repair", "prose_attach", "promotion_closeout"].includes(eventKind)) {
     return {
       selected_slt_id: null,
       selection_source: "none",
@@ -400,11 +400,7 @@ function commitmentForEventKind(eventKind: string): Record<string, unknown> {
 
   return {
     selected_slt_id: "SLT-1",
-    selection_source: eventKind === "system_repair"
-      ? "system_repair"
-      : eventKind === "audit_repair"
-        ? "audit_repair"
-        : "emitted_choice",
+    selection_source: "emitted_choice",
     alias_bindings: {
       actor: "STENT-1"
     }

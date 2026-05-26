@@ -389,6 +389,40 @@ test("SPEC-81 §9.3 reports deterministic filter-trace counts for a hand-counted
   }
 });
 
+test("select_storylet_candidates keeps existential seed-pool SLTs with grounding ids", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildHandCountedWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-1",
+        turn_driver: {
+          kind: PLAYER_DRIVER,
+          initiator: "STCHAR-1",
+          driver_records: ["STCHAR-1"]
+        },
+        intent_signature: {
+          action_families: ["investigate"],
+          grounding_record_ids: ["STEMO-1", "BEL-1", "THR-1"]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.filter_trace.after_predicate_class, 20);
+    assert.equal(result.filter_trace.after_source_record_id, 15);
+    assert.ok(result.shortlisted_candidate_ids.length > 0);
+    assert.ok(result.shortlisted_candidate_ids.includes("SLT-1"));
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("SPEC-81 §9.6 keeps list_records(include_full_body=true) backward compatible", async () => {
   const root = createTempRepoRoot();
 

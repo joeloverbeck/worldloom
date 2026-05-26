@@ -42,7 +42,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test:spec10-verification": "bash tests/integration/spec10-verification.sh",
-    "test": "node --test \"dist/tests/**/*.test.js\"",
+    "test": "node scripts/run-tests.mjs",
     "clean": "rm -rf dist"
   },
   "dependencies": {

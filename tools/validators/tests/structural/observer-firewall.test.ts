@@ -235,6 +235,18 @@ test("observer_firewall accepts CHC status grounding through a BEL access route"
   assert.deepEqual(verdicts, []);
 });
 
+test("observer_firewall accepts CHC status grounding through direct observation of the status entity", async () => {
+  const verdicts = await observerFirewall.run(undefined, context([
+    page("PG-1", "CHC-1"),
+    choice("CHC-1", ["STSTAT-2"]),
+    event("SE-1", "STENT-1", "PG-1"),
+    status("STSTAT-2", "STENT-2"),
+    beliefWithRoute("BEL-1", "STENT-1", "private", "direct_observation", ["STENT-2"])
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("observer_firewall rejects SLT belief_record holder mismatches after alias resolution", async () => {
   const verdicts = await observerFirewall.run(undefined, context([
     storylet("SLT-1", ["belief_record(role_protagonist, BEL-1, knows)"]),

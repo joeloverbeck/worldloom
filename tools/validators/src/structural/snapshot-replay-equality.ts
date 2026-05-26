@@ -224,7 +224,7 @@ function runNewSchemaReplay(
 
   const parentSnapshot = asPlainRecord(parent.state_snapshot);
   const parentActive = normalizeOptionalActiveRecordKeys(asPlainRecord(parentSnapshot.active_records));
-  const expectedActive = replayActiveRecords(parentActive, delta);
+  const expectedActive = replayActiveRecords(parentActive, delta, byId);
   const expectedEntityStatus = deriveEntityStatus(expectedActive.STSTAT, byId);
   const gotSnapshot = asPlainRecord(parsed.state_snapshot);
   const mysteryClaimsReplay = replayUnresolvedMysteryClaims(

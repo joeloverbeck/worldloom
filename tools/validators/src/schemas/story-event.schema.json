@@ -514,7 +514,7 @@
     },
     {
       "if": {
-        "properties": { "event_kind": { "enum": ["story_start", "prose_attach", "promotion_closeout"] } },
+        "properties": { "event_kind": { "enum": ["story_start", "system_repair", "audit_repair", "prose_attach", "promotion_closeout"] } },
         "required": ["event_kind"]
       },
       "then": {

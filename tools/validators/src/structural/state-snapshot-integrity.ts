@@ -1,4 +1,5 @@
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
+import { allowedActiveStatuses, lifecycleStatus } from "../_helpers/lifecycle-status.js";
 import { OPTIONAL_ACTIVE_RECORDS_CLASSES } from "../_helpers/state-snapshot-replay.js";
 import {
   asPlainRecord,
@@ -195,7 +196,7 @@ function validateInputLegality(
   const hasChoice = choiceId !== null && choiceId !== undefined;
   const hasManualAction = manualActionText !== null && manualActionText !== undefined;
 
-  if (resolvedEventKind === "story_start") {
+  if (["story_start", "system_repair", "audit_repair"].includes(resolvedEventKind)) {
     if (!hasChoice && !hasManualAction) {
       return undefined;
     }
@@ -305,30 +306,6 @@ function inactiveActiveRecordVerdict(
   };
 }
 
-function lifecycleStatus(record: Record<string, unknown>, recordClass: string): string | undefined {
-  if (recordClass === "STPLAN") {
-    return stringValue(record.plan_status);
-  }
-  return stringValue(record.status);
-}
-
-function allowedActiveStatuses(recordClass: string): ReadonlySet<string> {
-  switch (recordClass) {
-    case "CLK":
-      return new Set(["active", "paused", "fired"]);
-    case "STSEC":
-      return new Set(["hidden", "partially_revealed"]);
-    case "STQ":
-      return new Set(["open", "complicated"]);
-    case "STPLAN":
-      return new Set(["active", "blocked", "suspended", "revised"]);
-    case "STEMO":
-      return new Set(["active", "suppressed", "dissociated"]);
-    default:
-      return new Set();
-  }
-}
-
 function missingOrMalformed(page: IndexedRecord, pageLabel: string, field: string, reason: string): Verdict {
   return {
     validator: "state_snapshot_integrity",
@@ -377,7 +354,7 @@ function inputLegalityViolation(
       choice_id: choiceId ?? null,
       manual_action_text: manualActionText ?? null
     },
-    suggested_fix: "Follow shared story state contract §4.2 input legality: story_start pages use both-null input fields; all other pages use exactly one source action."
+    suggested_fix: "Follow shared story state contract §4.2 input legality: story_start and repair pages use both-null input fields; turn-resolution pages use exactly one source action."
   };
 }
 

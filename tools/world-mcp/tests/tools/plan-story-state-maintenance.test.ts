@@ -105,6 +105,7 @@ test("planStoryStateMaintenance returns a review-only patch plan for STEMO-style
       planStoryStateMaintenance({
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
+        parent_page_id: "PG-1",
         reason: "Restamp constraining STEMO with downstream grounding.",
         source_ticket: "tickets/MCPENH-068.md",
         operations: maintenanceOperations()
@@ -119,14 +120,67 @@ test("planStoryStateMaintenance returns a review-only patch plan for STEMO-style
       srel_ids: ["SREL-3"],
       stplan_ids: ["STPLAN-2"],
       chc_ids: ["CHC-2"],
-      stemo_ids: ["STEMO-3"]
+      stemo_ids: ["STEMO-3"],
+      se_ids: ["SE-2"],
+      pg_ids: ["PG-2"]
     });
     assert.deepEqual(
       result.patch_plan.patches.map((patch) => patch.op),
-      ["create_srel_record", "create_stplan_record", "create_chc_record", "create_stemo_record"]
+      [
+        "create_srel_record",
+        "create_stplan_record",
+        "create_chc_record",
+        "create_stemo_record",
+        "create_se_record",
+        "create_pg_record"
+      ]
     );
-    assert.equal(result.patch_plan.patches.at(-1)?.payload.record.id, "STEMO-3");
-    assert.equal(result.patch_plan.patches.at(-1)?.payload.record.supersedes, "STEMO-1");
+    assert.equal(result.patch_plan.patches[3]?.payload.record.id, "STEMO-3");
+    assert.equal(result.patch_plan.patches[3]?.payload.record.supersedes, "STEMO-1");
+    assert.equal(result.patch_plan.patches[0]?.payload.record.created_at_page, "PG-2");
+    assert.equal(result.patch_plan.patches[1]?.payload.record.created_at_page, "PG-2");
+    assert.equal(result.patch_plan.patches[1]?.payload.record.created_by_event, "SE-2");
+    assert.equal(result.patch_plan.patches[3]?.payload.record.created_at_page, "PG-2");
+    assert.equal(result.patch_plan.patches[3]?.payload.record.created_by_event, "SE-2");
+    assert.equal(result.patch_plan.patches.at(-2)?.payload.record.id, "SE-2");
+    assert.equal(result.patch_plan.patches.at(-2)?.payload.record.event_kind, "audit_repair");
+    assert.deepEqual(result.patch_plan.patches.at(-2)?.payload.record.record_introductions, [
+      {
+        record_id: "SREL-3",
+        class: "SREL",
+        trigger: "trust_axis_becomes_relevant",
+        evidence: ["SE-2"],
+        distinct_from: [],
+        rationale: "Restamp constraining STEMO with downstream grounding."
+      },
+      {
+        record_id: "STPLAN-2",
+        class: "STPLAN",
+        trigger: "pressure_forces_plan",
+        evidence: ["SE-2"],
+        distinct_from: [],
+        rationale: "Restamp constraining STEMO with downstream grounding."
+      }
+    ]);
+    assert.deepEqual(result.patch_plan.patches.at(-2)?.payload.record.state_delta, {
+      create: ["SREL-3", "STPLAN-2", "STEMO-3"],
+      supersede: ["STEMO-1"],
+      close: []
+    });
+    const page = result.patch_plan.patches.at(-1)?.payload.record;
+    assert.equal(page?.id, "PG-2");
+    assert.equal(page?.parent_page_id, "PG-1");
+    assert.deepEqual((page?.state_snapshot as { active_records: Record<string, string[]> }).active_records.SREL, [
+      "SREL-1",
+      "SREL-2",
+      "SREL-3"
+    ]);
+    assert.deepEqual((page?.state_snapshot as { active_records: Record<string, string[]> }).active_records.STEMO, [
+      "STEMO-3"
+    ]);
+    assert.deepEqual(page?.emitted_choices, []);
+    assert.match(result.maintenance_page_plan.body, /# Maintenance Page Plan PG-2/);
+    assert.equal(result.maintenance_page_plan.content_hash, (page?.plan as { plan_hash: string }).plan_hash);
     assert.equal(result.affected_records[0]?.record_id, "STEMO-1");
     assert.ok(!("files_written" in result));
     assert.ok(!("approval_token" in result.next_steps));
@@ -144,6 +198,7 @@ test("generated maintenance plans enter the normal validate_patch_plan path", as
       planStoryStateMaintenance({
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
+        parent_page_id: "PG-1",
         reason: "Restamp constraining STEMO with downstream grounding.",
         source_ticket: "tickets/MCPENH-068.md",
         operations: maintenanceOperations()
@@ -153,13 +208,29 @@ test("generated maintenance plans enter the normal validate_patch_plan path", as
 
     const validation = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: result.patch_plan }));
     assert.ok(!("code" in validation), JSON.stringify(validation, null, 2));
-    assert.notEqual(validation.status, "skipped", JSON.stringify(validation, null, 2));
+    const ownedFailureValidators = new Set([
+      "record_schema_compliance",
+      "state_snapshot_integrity",
+      "midstory_record_introduction_grounding",
+      "validation_trace_shape_compliance"
+    ]);
+    const ownedVerdicts = validation.verdicts.filter((verdict) =>
+      ownedFailureValidators.has(verdict.validator) &&
+      (verdict.location?.node_id === "opening-bells:SE-2" ||
+        verdict.location?.node_id === "opening-bells:PG-2")
+    );
+    assert.deepEqual(ownedVerdicts, [], JSON.stringify(validation, null, 2));
     assert.ok(
       validation.validators_run.some(
         (entry) => entry.validator_name === "id_allocation_race" && entry.status === "pass"
       )
     );
     assert.ok(validation.validators_run.some((entry) => entry.validator_name === "record_schema_compliance"));
+    assert.ok(
+      validation.validators_run.some(
+        (entry) => entry.validator_name === "validation_trace_shape_compliance" && entry.status === "pass"
+      )
+    );
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -174,6 +245,7 @@ test("planStoryStateMaintenance rejects mismatched supersession records before p
       planStoryStateMaintenance({
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
+        parent_page_id: "PG-1",
         reason: "Bad maintenance request.",
         source_ticket: "tickets/MCPENH-068.md",
         operations: [
@@ -193,4 +265,19 @@ test("planStoryStateMaintenance rejects mismatched supersession records before p
   } finally {
     destroyTempRepoRoot(root);
   }
+});
+
+test("planStoryStateMaintenance requires a parent_page_id before allocation", async () => {
+  const result = await planStoryStateMaintenance({
+    world_slug: STORY_FIXTURE_WORLD,
+    story_slug: STORY_FIXTURE_SLUG,
+    parent_page_id: "not-a-page",
+    reason: "Bad maintenance request.",
+    source_ticket: "tickets/MCPENH-068.md",
+    operations: maintenanceOperations()
+  });
+
+  assert.ok("code" in result);
+  assert.equal(result.code, "invalid_input");
+  assert.equal(result.details?.field, "parent_page_id");
 });

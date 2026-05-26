@@ -241,7 +241,7 @@ test("§Verification bullet 17: absence of remaining optional CLK/STSEC/STQ/STPL
 test("§Verification bullet 18: old-style PG compatibility drift is info; replay normalizes; child PG emits full map", async () => {
   const records = compatibilityRecords();
   const driftVerdicts = await compatibilityDrift.run(undefined, testContext(records));
-  const replayed = replayActiveRecords(legacyActiveRecords(), { create: [], supersede: [], close: [] });
+  const replayed = replayActiveRecords(legacyActiveRecords(), { create: [], supersede: [], close: [] }, new Map());
 
   assertClassifications(driftVerdicts, ["compatible_optional_absence", "grandfathered_snapshot_shape"]);
   assertHasCode(driftVerdicts, "compat_missing_active_record_key");

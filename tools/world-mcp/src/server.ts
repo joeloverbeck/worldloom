@@ -261,8 +261,10 @@ const submitPatchPlanInputSchema = z.object({
 const planStoryStateMaintenanceInputSchema = z.object({
   world_slug: z.string().min(1),
   story_slug: z.string().regex(STORY_SLUG_PATTERN),
+  parent_page_id: z.string().regex(/^PG-\d+$/),
   reason: z.string().min(1),
   source_ticket: z.string().min(1),
+  event_kind: z.enum(["audit_repair", "system_repair"]).optional(),
   operations: z
     .array(
       z.object({
@@ -469,7 +471,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "select_storylet_candidates",
-    "select_storylet_candidates: Return a projection-only storylet shortlist for a parent page and turn driver from indexed SLT projection columns and edges. The response includes filter_trace counts, shortlisted_candidate_ids, compact projection records, and requires_full_body_ids for follow-up get_records calls; it never returns full SLT bodies.",
+    "select_storylet_candidates: Return a projection-only storylet shortlist for a parent page and turn driver from indexed SLT projection columns and edges. The response includes filter_trace counts, shortlisted_candidate_ids, compact projection records, and requires_full_body_ids for follow-up get_records calls; it never returns full SLT bodies. intent_signature.grounding_record_ids narrows SLTs with exact-id predicate refs to intersecting records; SLTs with only existential predicates have no exact refs and wildcard-pass this stage because alias binding is resolved later against active records.",
     selectStoryletCandidatesInputSchema,
     async (args) =>
       selectStoryletCandidates(args as unknown as Parameters<typeof selectStoryletCandidates>[0]),
@@ -496,7 +498,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_context_packet",
-    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug. story_bootstrap treats it as the target bundle slug and returns story_bundle_context: null; other story-pipeline task types populate story_bundle_context from indexed story-bundle records plus STORY_KERNEL.md frontmatter, including active_intentions, active_statuses, active_beliefs_by_holder, active_relationships_by_participant, active_locations_in_scope, active_objects_in_scope, active_story_diegetic_artifacts, active_story_characters, active_actor_plans, active_emotional_states, and a projection-only selection_shortlist when parent_page_id is supplied or a PG seed is present. World-canon task types return story_bundle_context: null. Unresolvable seed_nodes are skipped and surfaced in task_header.warnings; all-unresolved seed sets still return seed-independent context with an aggregate warning.",
+    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug. story_bootstrap treats it as the target bundle slug and returns story_bundle_context: null; other story-pipeline task types populate story_bundle_context from indexed story-bundle records plus STORY_KERNEL.md frontmatter, including active_intentions, active_statuses, active_beliefs_by_holder, active_relationships_by_participant, active_locations_in_scope, active_objects_in_scope, active_story_diegetic_artifacts, active_story_characters, active_actor_plans, active_emotional_states, and a projection-only selection_shortlist when parent_page_id is supplied or a PG seed is present. World-canon task types return story_bundle_context: null. Unresolvable seed_nodes are skipped and surfaced in task_header.warnings; all-unresolved seed sets still return seed-independent context with an aggregate warning. Over-budget responses return task_header.delivery_status='persisted_with_summary' with story_bundle_context: null and governing_summary.story_bundle_context_summary populated for story-pipeline packets; the full packet is persisted to task_header.persisted_output_path for recovery via get_persisted_packet_slice(persisted_path, slice_path), get_records(record_ids, story_slug?), or list_records(record_type, story_slug?). See docs/CONTEXT-PACKET-CONTRACT.md §Fast-Summary Inline Delivery for the complete recovery shape.",
     getContextPacketInputSchema,
     async (args) => getContextPacket(args as unknown as Parameters<typeof getContextPacket>[0]),
     { task_type: TASK_TYPES, delivery_mode: DELIVERY_MODES, node_classes: NODE_TYPES }
@@ -547,7 +549,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "plan_story_state_maintenance",
-    "plan_story_state_maintenance: Build a review-only patch-plan envelope for bounded story-bundle state maintenance. It allocates fresh story-scoped IDs, verifies superseded source records through indexed retrieval, emits existing create_* story-record ops for STEMO/STPLAN/SREL/CHC maintenance, and never submits or writes the plan. Validate the returned patch_plan, then require explicit approval plus submit_patch_plan with an approval token.",
+    "plan_story_state_maintenance: Build a review-only patch-plan envelope for bounded story-bundle state maintenance from a required parent_page_id. It allocates fresh story-scoped IDs, verifies superseded source records through indexed retrieval, emits create_* story-record ops for STEMO/STPLAN/SREL/CHC maintenance, appends an audit/system repair SE plus forkable maintenance PG, and returns the matching maintenance page-plan body without submitting or writing. Validate the returned patch_plan, write the returned page plan exactly, then require explicit approval plus submit_patch_plan with an approval token.",
     planStoryStateMaintenanceInputSchema,
     async (args) =>
       planStoryStateMaintenance(args as unknown as Parameters<typeof planStoryStateMaintenance>[0]),

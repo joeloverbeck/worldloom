@@ -195,7 +195,9 @@ function seedServerWorld(root: string): void {
   const pgRecord = {
     id: "PG-3",
     story_id: "STORY-3",
+    branch_id: "BR-1",
     parent_page_id: null,
+    branch_path: ["PG-3"],
     turn_index: 3,
     input: { choice_id: null, manual_action_text: null, resolved_event_id: null },
     plan: { plan_hash: planHash },
@@ -208,7 +210,10 @@ function seedServerWorld(root: string): void {
   const pgBody = [
     "id: PG-3",
     "story_id: STORY-3",
+    "branch_id: BR-1",
     "parent_page_id: null",
+    "branch_path:",
+    "  - PG-3",
     "turn_index: 3",
     "input:",
     "  choice_id: null",
@@ -610,6 +615,7 @@ test("registered tools dispatch with either a success payload or the documented 
         args: {
           world_slug: "seeded",
           story_slug: "opening-bells",
+          parent_page_id: "PG-3",
           reason: "Dispatch smoke for review-only maintenance planning.",
           source_ticket: "tickets/MCPENH-068.md",
           operations: [
@@ -725,7 +731,7 @@ test("registered tools dispatch with either a success payload or the documented 
         continue;
       }
 
-      assert.notEqual(result.isError, true);
+      assert.notEqual(result.isError, true, `${call.name} returned error: ${textContent(result)}`);
       assert.ok(result.structuredContent);
     }
   });

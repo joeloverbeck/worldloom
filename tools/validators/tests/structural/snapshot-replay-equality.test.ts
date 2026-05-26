@@ -5,6 +5,7 @@ import { computePgStateHash } from "@worldloom/world-index/hash/content";
 
 import { replayActiveRecords } from "../../src/_helpers/state-snapshot-replay.js";
 import { snapshotReplayEquality } from "../../src/structural/snapshot-replay-equality.js";
+import { stateSnapshotIntegrity } from "../../src/structural/state-snapshot-integrity.js";
 import { context, record } from "./helpers.js";
 
 const parentSnapshot = {
@@ -96,6 +97,148 @@ test("snapshot_replay_equality compares active_records snapshots with BEL entrie
 test("snapshot_replay_equality replays new-schema SE state_delta active_records", async () => {
   const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords());
   const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("snapshot_replay_equality and state_snapshot_integrity both accept inactive created CLK outside active_records", async () => {
+  const activeRecords = { STCHAR: [], CLK: [] };
+  const page: Record<string, unknown> = {
+    id: "PG-3",
+    story_id: "STORY-1",
+    parent_page_id: "PG-2",
+    input: {
+      choice_id: null,
+      manual_action_text: null,
+      resolved_event_id: "SE-3"
+    },
+    state_snapshot: {
+      active_records: activeRecords,
+      entity_status: {},
+      unresolved_mystery_claims: []
+    },
+    plan: { plan_hash: "1".repeat(64) },
+    emitted_choices: [],
+    validation_trace: {
+      input_legality: "PASS: audit repair event is system-authored."
+    }
+  };
+  const records = [
+    record("page_record", "test-story:PG-2", "stories/test-story/_source/pages/PG-2.yaml", {
+      id: "PG-2",
+      story_id: "STORY-1",
+      state_snapshot: {
+        active_records: activeRecords,
+        unresolved_mystery_claims: []
+      }
+    }),
+    record("story_event_record", "test-story:SE-3", "stories/test-story/_source/events/SE-3.yaml", {
+      id: "SE-3",
+      story_id: "STORY-1",
+      event_kind: "audit_repair",
+      state_delta: {
+        create: ["CLK-2"],
+        supersede: [],
+        close: []
+      }
+    }),
+    record("pressure_clock_record", "test-story:CLK-2", "stories/test-story/_source/clocks/CLK-2.yaml", {
+      id: "CLK-2",
+      story_id: "STORY-1",
+      created_at_page: "PG-3",
+      status: "resolved",
+      resolution_event: "SE-3"
+    }),
+    record("page_record", "test-story:PG-3", "stories/test-story/_source/pages/PG-3.yaml", page)
+  ];
+  const ctx = context(records, {
+    run_mode: "pre-apply",
+    patch_plan: {
+      ...patchPlan(),
+      expected_id_allocations: { pg_ids: ["PG-3"] },
+      patches: [
+        {
+          op: "create_pg_record" as const,
+          target_world: "test",
+          payload: {
+            story_slug: "test-story",
+            record: { id: "PG-3", story_id: "STORY-1" }
+          }
+        }
+      ]
+    }
+  });
+
+  assert.deepEqual(await snapshotReplayEquality.run(undefined, ctx), []);
+  assert.deepEqual(await stateSnapshotIntegrity.run(undefined, ctx), []);
+});
+
+test("snapshot_replay_equality accepts maintenance PGs grounded by audit-only SE state_delta", async () => {
+  const parentActiveRecords = {
+    ...newSchemaParentActiveRecords(),
+    SREL: ["SREL-1"],
+    STPLAN: ["STPLAN-1"],
+    STEMO: ["STEMO-1"]
+  };
+  const maintenanceActiveRecords = replayActiveRecords(parentActiveRecords, {
+    create: ["SREL-2", "STPLAN-2", "STEMO-2"],
+    supersede: ["STEMO-1"],
+    close: []
+  }, new Map());
+  const page: Record<string, unknown> = {
+    id: "PG-2",
+    story_id: "STORY-1",
+    parent_page_id: "PG-1",
+    input: {
+      choice_id: null,
+      manual_action_text: null,
+      resolved_event_id: "SE-2"
+    },
+    state_hash_parent: "0".repeat(64),
+    state_snapshot: {
+      active_records: maintenanceActiveRecords,
+      visible_affordances: [],
+      entity_status: {},
+      unresolved_mystery_claims: [],
+      continuation: { has_eligible_commitment_block: true, terminal_status: "open", terminal_rationale: null }
+    },
+    plan: {
+      plan_hash: "1".repeat(64)
+    },
+    emitted_choices: [],
+    validation_trace: {
+      input_legality: "PASS: maintenance event is system-authored."
+    }
+  };
+
+  const verdicts = await snapshotReplayEquality.run(undefined, context([
+    record("page_record", "test-story:PG-1", "stories/test-story/_source/pages/PG-1.yaml", {
+      id: "PG-1",
+      story_id: "STORY-1",
+      state_snapshot: {
+        active_records: parentActiveRecords,
+        unresolved_mystery_claims: []
+      },
+      state_hash: "0".repeat(64)
+    }),
+    record("story_event_record", "test-story:SE-2", "stories/test-story/_source/events/SE-2.yaml", {
+      id: "SE-2",
+      story_id: "STORY-1",
+      event_kind: "audit_repair",
+      state_delta: {
+        create: ["SREL-2", "STPLAN-2", "STEMO-2"],
+        supersede: ["STEMO-1"],
+        close: []
+      }
+    }),
+    record("page_record", "test-story:PG-2", "stories/test-story/_source/pages/PG-2.yaml", {
+      ...page,
+      state_hash: computePgStateHash(page)
+    })
+  ], {
     run_mode: "pre-apply",
     patch_plan: patchPlan()
   }));
@@ -211,7 +354,7 @@ test("snapshot_replay_equality replays CLK active records", async () => {
     create: ["CLK-1"],
     supersede: [],
     close: []
-  });
+  }, new Map([["CLK-1", { id: "CLK-1", status: "active" }]]));
 
   assert.deepEqual(pageSnapshot.CLK, ["CLK-1"]);
 });
@@ -222,7 +365,7 @@ test("snapshot_replay_equality replays STSEC active records", async () => {
     create: ["STSEC-1"],
     supersede: [],
     close: []
-  });
+  }, new Map([["STSEC-1", { id: "STSEC-1", status: "hidden" }]]));
 
   assert.deepEqual(pageSnapshot.STSEC, ["STSEC-1"]);
 });
@@ -233,7 +376,7 @@ test("snapshot_replay_equality replays STQ active records", async () => {
     create: ["STQ-1"],
     supersede: [],
     close: []
-  });
+  }, new Map([["STQ-1", { id: "STQ-1", status: "open" }]]));
 
   assert.deepEqual(pageSnapshot.STQ, ["STQ-1"]);
 });
@@ -244,7 +387,10 @@ test("snapshot_replay_equality replays STPLAN and STEMO active records", async (
     create: ["STPLAN-1", "STEMO-1"],
     supersede: [],
     close: []
-  });
+  }, new Map([
+    ["STPLAN-1", { id: "STPLAN-1", plan_status: "active" }],
+    ["STEMO-1", { id: "STEMO-1", status: "active" }]
+  ]));
 
   assert.deepEqual(pageSnapshot.STPLAN, ["STPLAN-1"]);
   assert.deepEqual(pageSnapshot.STEMO, ["STEMO-1"]);
@@ -256,7 +402,7 @@ test("snapshot_replay_equality replays STCHAR active records", async () => {
     create: ["STCHAR-1"],
     supersede: [],
     close: []
-  });
+  }, new Map());
 
   assert.deepEqual(pageSnapshot.STCHAR, ["STCHAR-1"]);
 });

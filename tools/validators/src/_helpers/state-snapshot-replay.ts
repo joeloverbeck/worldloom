@@ -1,3 +1,5 @@
+import { allowedActiveStatuses, lifecycleStatus } from "./lifecycle-status.js";
+
 export type StateSnapshot = Record<string, unknown>;
 export type StoryEventOp = Record<string, unknown>;
 export type StoryRecordMap = ReadonlyMap<string, Record<string, unknown>>;
@@ -61,7 +63,8 @@ export function activeRecordsClassOf(id: string): ActiveRecordsClass | null {
 
 export function replayActiveRecords(
   parentActiveRecords: Record<string, readonly string[]>,
-  delta: StateDelta
+  delta: StateDelta,
+  recordsById: StoryRecordMap
 ): Record<ActiveRecordsClass, string[]> {
   const next = {} as Record<ActiveRecordsClass, string[]>;
   for (const cls of ACTIVE_RECORDS_CLASSES) {
@@ -83,6 +86,16 @@ export function replayActiveRecords(
     const cls = activeRecordsClassOf(id);
     if (cls === null) {
       continue;
+    }
+    const allowed = allowedActiveStatuses(cls);
+    if (allowed.size > 0) {
+      const record = recordsById.get(id);
+      if (record !== undefined) {
+        const status = lifecycleStatus(record, cls);
+        if (status !== undefined && !allowed.has(status)) {
+          continue;
+        }
+      }
     }
     const list = next[cls];
     if (!list.includes(id)) {
