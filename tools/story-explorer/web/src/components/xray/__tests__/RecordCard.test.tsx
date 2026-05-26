@@ -9,7 +9,9 @@ describe('RecordCard primitives', () => {
   it('renders compact fallback summary, chips, provenance, and related-record count', () => {
     render(<RecordCardCompact recordCard={recordCard()} />);
 
-    expect(screen.getByRole('article', { name: 'BEL-1 · BEL' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('article', { name: 'BEL-1 · holder STCHAR-1 · "The gate is watched" · low · hidden' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Lyra believes the gate is watched')).toBeInTheDocument();
     expect(screen.getByText('Status: active')).toBeInTheDocument();
     expect(screen.getByText('Visibility: hidden')).toBeInTheDocument();
