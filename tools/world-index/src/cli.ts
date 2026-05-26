@@ -163,4 +163,24 @@ function main(argv: string[]): number {
   }
 }
 
-process.exitCode = main(process.argv);
+async function flushStream(stream: NodeJS.WriteStream): Promise<void> {
+  await new Promise<void>((resolve) => {
+    stream.write("", () => resolve());
+  });
+}
+
+async function runCli(argv: string[]): Promise<number> {
+  const exitCode = main(argv);
+  await flushStream(process.stdout);
+  await flushStream(process.stderr);
+  return exitCode;
+}
+
+runCli(process.argv).then(
+  (exitCode) => {
+    process.exitCode = exitCode;
+  },
+  (error: unknown) => {
+    process.exitCode = cliErrorHandler(error);
+  }
+);

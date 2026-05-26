@@ -177,7 +177,7 @@ If `state_hash` differs: set `checks.hash_integrity: FAIL` and record the drift 
 
 If `PG.state_hash` is missing, placeholder (`PLACEHOLDER_TO_BE_COMPUTED*`), or non-sha256-shaped: set `checks.hash_integrity: FAIL`. The receipt records the invalid value in `notes`; the repair path is upstream PG repair — `repair_recommendation: run_turn_cycle_repair` per Phase 5. Structurally-invalid `plan_hash` (missing, placeholder, non-sha256) is rejected at PG schema validation per `tools/validators/src/schemas/story-page.schema.json` (`plan_hash` is required with pattern `^[0-9a-f]{64}$`); prose-attach Phase 2 therefore sees only well-formed `plan_hash` values, whose drift is advisory per the rule above.
 
-Hook 6 surfaces a non-blocking drift notice (per `archive/tickets/SPEC72PLAHASADV-001.md`) on direct `Edit` / `Write` to `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md` between prose-attach invocations when the stamped `PG.plan.plan_hash` does not match the plan body; this Phase 2 check still runs because receipt truth must not depend only on hook installation, and the WARN here is the receipt-side mirror of Hook 6's edit-time notice.
+Hook 6 surfaces a non-blocking drift notice on direct `Edit` / `Write` to `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md` between prose-attach invocations when the stamped `PG.plan.plan_hash` does not match the plan body; this Phase 2 check still runs because receipt truth must not depend only on hook installation, and the WARN here is the receipt-side mirror of Hook 6's edit-time notice.
 
 **Drift is recorded in the receipt, NEVER in the `PG` record.** The PG is committed state per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary).
 

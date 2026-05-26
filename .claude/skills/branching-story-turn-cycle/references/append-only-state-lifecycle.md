@@ -117,12 +117,10 @@ this table is a copy maintained at the same revision and must stay in sync.
 - `status`: `active` | `paused` | `resolved` | `fired` | `abandoned` |
   `superseded`
   - **active set**: `active`, `paused`, `fired`
-  - Author trap: supersede-to-`resolved` is the prescribed pattern for
-    threshold-fire resolution, but a resolved CLK is inactive and must NOT
-    appear in `PG.state_snapshot.active_records.CLK`. If the resolution is
-    action-driven (the driving condition ended without a threshold firing),
-    `status: paused` is the semantically correct choice and keeps the CLK in
-    active_records pending possible resumption.
+  - Semantic guidance: use `paused` when the driving condition ended without
+    a threshold firing (clock could resume if the condition returns); use
+    `resolved` when the clock concluded through threshold-fire payoff or
+    canonical closure; use `abandoned` when the clock is given up unresolved.
 
 ### STSEC
 
@@ -146,26 +144,16 @@ this table is a copy maintained at the same revision and must stay in sync.
   `abandoned` | `revised`
   - **active set**: `active`, `blocked`, `suspended`, `revised`
 
-### Inactive-status submission pattern
+### Inactive-status supersession pattern
 
 When a supersession sets the new record to an inactive-set status (e.g.,
 `CLK status: resolved`, `STQ status: answered`, `STSEC status: revealed`,
-`STPLAN plan_status: fulfilled`, `STEMO status: settled`), `state_snapshot_integrity`
-requires the new record to be EXCLUDED from `PG.state_snapshot.active_records[<class>]`.
-`snapshot_replay_equality` currently demands the new record's INCLUSION because
-its replay algorithm does not consult lifecycle status. This validator-pair
-contradiction is tracked in `tickets/REPLAYSTATUSFILT-001.md`. Until that
-ticket lands, the lawful workarounds are:
-
-- Use the closest active-set status that matches the narrative semantics
-  (e.g., `CLK status: paused` instead of `resolved` when the driving condition
-  ended without a threshold firing).
-- Or accept the `state_snapshot_integrity.inactive_active_record` failure and
-  route through a follow-up repair turn.
-
-Do NOT silently drop the record from `active_records[<class>]` while keeping
-it created in `state_delta.create` — that path fails `snapshot_replay_equality`
-under the current algorithm.
+`STPLAN plan_status: fulfilled`, `STEMO status: settled`), the new record is
+EXCLUDED from `PG.state_snapshot.active_records[<class>]`. Both
+`state_snapshot_integrity` and `snapshot_replay_equality` consult lifecycle
+status when computing the expected active set, so authoring an inactive-status
+successor and omitting it from `active_records[<class>]` is the canonical
+pattern — no special routing or workaround is required.
 
 ## Cross-References
 
@@ -178,5 +166,3 @@ under the current algorithm.
   phase-local lifecycle and belief propagation guidance.
 - `archive/tickets/SPEC44STOSTAAPP-003.md`: structural enforcement through
   `no_story_state_in_place_mutation`.
-- `tickets/REPLAYSTATUSFILT-001.md`: pending fix for the inactive-status
-  replay/integrity validator-pair contradiction.
