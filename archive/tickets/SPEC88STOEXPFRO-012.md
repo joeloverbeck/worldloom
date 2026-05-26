@@ -1,6 +1,6 @@
 # SPEC88STOEXPFRO-012: Accessibility baseline verification + axe-core integration
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds axe-core integration to vitest setup and per-component a11y assertions; modifies T001's test-setup.ts.
@@ -8,18 +8,20 @@
 
 ## Problem
 
-SPEC-88 §8 (post-reassessment) commits to WCAG AA across the entire explorer surface: keyboard Tab order following visual flow, focus states, ARIA disclosure pattern for collapsibles, semantic headings (`<h1>` page/story, `<h2>` prose / choices / x-ray, `<h3>` x-ray groups), reduced-motion respect, color contrast (4.5:1 body, 3:1 large). Per-component tickets (T004-T011) each follow these rules but verify them ad-hoc. Without a cross-cutting verification ticket that runs axe-core against every component AND every route as an integrated test suite, regressions slip through — a component might pass its individual tests but fail when composed into a route due to heading-level conflicts, focus-trap interactions, or color-contrast inheritance issues. This ticket adds the axe-core verification surface and the per-component a11y test files.
+At intake, SPEC-88 §8 committed to WCAG AA across the entire explorer surface: keyboard Tab order following visual flow, focus states, ARIA disclosure pattern for collapsibles, semantic headings (`<h1>` page/story, `<h2>` prose / choices / x-ray, `<h3>` x-ray groups), reduced-motion respect, color contrast (4.5:1 body, 3:1 large). Per-component tickets (T004-T011) followed these rules but verified them ad-hoc. Without a cross-cutting verification ticket that runs axe-core against every component and every route as an integrated test suite, regressions could slip through. This ticket added that axe-core verification surface and the per-component / per-route a11y test files.
 
 ## Assumption Reassessment (2026-05-26)
 
 1. T001 created `web/src/test-setup.ts` with `@testing-library/jest-dom` extensions; this ticket extends it with axe-core (`vitest-axe` or equivalent). T004-T011 created the components and routes that this ticket verifies. SPEC-88 §10 (post-reassessment) names: "Frontend tests via vitest + React Testing Library (declared in `web/package.json` devDependencies): render tests per route, accessibility tests via axe-core, missing-prose placeholder visual snapshot, choice-card multi-variant rendering, breadcrumb anchor correctness." Per the SPEC-88 reassessment session's M3 wording fix, the a11y tests run in the package test suite (per §10), not in a separate CI configuration.
 2. SPEC-88 §8 (post-reassessment) names the WCAG AA discipline distributed across T004-T011: T004 (disclosure ARIA, ErrorBoundary keyboard reachability), T005 (semantic card grid, badge contrast), T006 (story-card semantic structure), T007 (page-entry form a11y, choose-page input label), T008 (Breadcrumb semantic `<nav>`, PageHeader Tab order, IntegrityChip popover ARIA), T009 (prose semantic headings, reduced-motion gating), T010 (ChoiceCard button-vs-link semantics, TerminalCard contrast), T011 (ErrorBoundary fallback keyboard reachability, retry-button focus management). This ticket VERIFIES the discipline holistically — runs axe-core against rendered route trees, asserts heading-level continuity, verifies Tab order, asserts contrast.
 3. Cross-skill boundary: this is the consumer-side verification of every component/route ticket's a11y contract. Drift in any single component's ARIA / heading semantics surfaces here as a vitest failure. The axe-core integration is the gate that converts the spec's prose commitment into structural enforcement.
+4. Live package reassessment corrected three implementation details before source edits: the package uses `vite.config.ts` with inline vitest config rather than `vitest.config.ts`; the shared helper landed as `.tsx` because it renders JSX; and `vitest-axe`'s `matchers` type surface is not directly value-importable in this package's TypeScript lane, so `test-setup.ts` imports `vitest-axe/extend-expect` and helper tests assert the concrete `axe(container).violations` array.
+5. The first axe run exposed real same-seam ARIA role issues: `role="alert"` was incorrectly placed on `<main>` in route error surfaces, and `role="status"` was incorrectly placed on `<aside>` in `IndexStatusBanner`. This ticket absorbed those semantics fixes because the new a11y gate could not close truthfully without them.
 
 ## Architecture Check
 
-1. **axe-core via `vitest-axe` integration** — extends vitest's `expect` with `toHaveNoViolations()` matcher; per-test setup is `await axe(container)`. Lightweight, plays well with React Testing Library, no separate Playwright/browser dependency.
-2. **Per-component axe assertions** — every component gets a sibling `.a11y.test.tsx` file that renders it in isolation and asserts `expect(await axe(container)).toHaveNoViolations()`. This catches per-component violations.
+1. **axe-core via `vitest-axe` integration** — extends vitest with the axe matcher and uses helper-driven `await axe(container)` assertions. Lightweight, plays well with React Testing Library, no separate Playwright/browser dependency.
+2. **Per-component axe assertions** — every component gets a sibling `.a11y.test.tsx` file that renders it in isolation and asserts the helper-reported axe result has no violations. This catches per-component violations.
 3. **Per-route axe assertions** — every route gets a sibling `.a11y.test.tsx` file that renders the route (with mocked data) and asserts no violations across the composed tree. This catches composition-level violations (e.g., a route's `<h1>` conflicting with a sub-component's `<h1>`).
 4. **Heading-level continuity check** — a custom helper `assertHeadingHierarchy(container)` that walks the rendered tree, extracts heading levels, and asserts `<h1>` precedes `<h2>` precedes `<h3>` without level skips. Catches the common pitfall of jumping from `<h1>` to `<h3>` without an intervening `<h2>`.
 5. **Reduced-motion test** — a small test sets `prefers-reduced-motion: reduce` via `matchMedia` mock and asserts that motion-gated CSS classes are not applied. Verifies the §8 commitment that "no motion-only state change signals" exist.
@@ -34,36 +36,29 @@ SPEC-88 §8 (post-reassessment) commits to WCAG AA across the entire explorer su
 5. **Color contrast (4.5:1 body, 3:1 large)** → axe-core covers this automatically; the per-component / per-route tests catch contrast violations as part of `toHaveNoViolations()`.
 6. **Reduced-motion gating** → unit test: set `prefers-reduced-motion: reduce`; render a component with motion CSS; assert the motion class isn't applied OR assert the transition is 0ms.
 
-## What to Change
+## Landed Changes
 
-### 1. Add axe-core dependencies to `tools/story-explorer/web/package.json`
+### 1. Added axe-core dependencies to `tools/story-explorer/web/package.json`
 
-Append to `devDependencies`:
+Added to `devDependencies` and lockfile:
 ```json
 "vitest-axe": "^0.1.0",
-"axe-core": "^4.10.0"
-```
-(Pin to latest stable at implementation time.)
-
-### 2. Modify `tools/story-explorer/web/src/test-setup.ts`
-
-Extend with axe-core integration:
-```ts
-import '@testing-library/jest-dom';
-import { expect } from 'vitest';
-import { toHaveNoViolations } from 'vitest-axe/matchers';
-
-expect.extend({ toHaveNoViolations });
+"axe-core": "^4.11.4"
 ```
 
-### 3. Create `tools/story-explorer/web/src/lib/a11y-test-helpers.ts`
+### 2. Modified `tools/story-explorer/web/src/test-setup.ts`
+
+The setup now imports `vitest-axe/extend-expect` and stubs `HTMLCanvasElement.prototype.getContext` enough for axe-core's jsdom color-contrast path to run without the jsdom `getContext` not-implemented diagnostic.
+
+### 3. Created `tools/story-explorer/web/src/lib/a11y-test-helpers.tsx`
 
 Shared helpers:
 - `renderForAxe(ui)` — wraps RTL's `render` with `<MemoryRouter>` and any required providers; returns the rendered container ready for axe.
 - `assertHeadingHierarchy(container)` — walks DOM, extracts heading levels, asserts no level-skip violations.
 - `withReducedMotion(test)` — wraps a test function with `matchMedia` mock setting `prefers-reduced-motion: reduce`.
+- `expectNoAxeViolations(container)` — runs axe-core and fails the test on any returned violation.
 
-### 4. Create per-component a11y test files (10 files)
+### 4. Created per-component a11y test files (15 files)
 
 One sibling `.a11y.test.tsx` per component:
 - `web/src/components/ErrorBoundary.a11y.test.tsx`
@@ -82,22 +77,33 @@ One sibling `.a11y.test.tsx` per component:
 - `web/src/components/NotFoundPage.a11y.test.tsx`
 - `web/src/components/BackendUnreachablePage.a11y.test.tsx`
 
-Each file: render component in isolation with representative props; assert `await axe(container)` returns no violations.
+Each file renders the component in isolation with representative props and asserts no axe violations. The disclosure, integrity, choice-card, route-loading, and error-state tests also assert the relevant ARIA or keyboard-reachable affordance before running axe.
 
-### 5. Create per-route a11y test files (4 files)
+### 5. Created per-route a11y test files (4 files)
 
 - `web/src/routes/worlds.a11y.test.tsx`
 - `web/src/routes/stories.a11y.test.tsx`
 - `web/src/routes/page-entry.a11y.test.tsx`
 - `web/src/routes/page-read.a11y.test.tsx`
 
-Each file: render route with mocked data; assert composed tree passes axe; assert `assertHeadingHierarchy(container)` passes; assert reduced-motion gating works.
+Each file renders the route with mocked data and asserts the composed tree passes axe. Route tests assert `assertHeadingHierarchy(container)`; the world and page-read routes also run under the reduced-motion media-query mock.
+
+### 6. Fixed a11y semantics exposed by axe
+
+- Moved alert roles from `<main>` to nested alert regions in `RouteFallback`, `BackendUnreachablePage`, and `NotFoundPage`.
+- Moved `IndexStatusBanner`'s status role from the `<aside>` landmark to a nested status region.
 
 ## Files to Touch
 
 - `tools/story-explorer/web/package.json` (modify — adds vitest-axe + axe-core)
+- `tools/story-explorer/web/package-lock.json` (modify — locks vitest-axe + axe-core)
+- `tools/story-explorer/web/src/app.tsx` (modify — route error alert semantics)
+- `tools/story-explorer/web/src/components/BackendUnreachablePage.tsx` (modify — alert semantics)
+- `tools/story-explorer/web/src/components/IndexStatusBanner.tsx` (modify — status semantics)
+- `tools/story-explorer/web/src/components/NotFoundPage.tsx` (modify — alert semantics)
 - `tools/story-explorer/web/src/test-setup.ts` (modify — extends with axe matcher)
-- `tools/story-explorer/web/src/lib/a11y-test-helpers.ts` (new)
+- `tools/story-explorer/web/src/lib/a11y-test-helpers.tsx` (new)
+- `tools/story-explorer/web/src/lib/a11y-test-helpers.test.tsx` (new)
 - Per-component a11y test files (15 new files — see §4)
 - Per-route a11y test files (4 new files — see §5)
 
@@ -118,7 +124,7 @@ Each file: render route with mocked data; assert composed tree passes axe; asser
 ### Invariants
 
 1. Every component and every route has a sibling a11y test file — no component lacks coverage.
-2. axe-core violations are tested errors (CI-failing), not warnings — `toHaveNoViolations()` returns assertion failure on any violation.
+2. axe-core violations are tested errors (CI-failing), not warnings — `expectNoAxeViolations()` fails on any violation.
 3. Heading-level continuity is enforced — no h1→h3 skips anywhere in the composed UI.
 
 ## Test Plan
@@ -127,10 +133,27 @@ Each file: render route with mocked data; assert composed tree passes axe; asser
 
 1. 15 per-component a11y test files (see §4).
 2. 4 per-route a11y test files (see §5).
-3. Shared helper `web/src/lib/a11y-test-helpers.ts` covering renderForAxe, assertHeadingHierarchy, withReducedMotion.
+3. Shared helper `web/src/lib/a11y-test-helpers.tsx` covering renderForAxe, expectNoAxeViolations, assertHeadingHierarchy, and withReducedMotion.
 
 ### Commands
 
 1. `cd tools/story-explorer/web && npm test -- a11y.test` — targeted a11y verification.
 2. `cd tools/story-explorer/web && npm test` — full vitest suite (includes a11y tests).
 3. `cd tools/story-explorer/web && npm run build` — TypeScript verification.
+
+## Verification Result
+
+1. `cd tools/story-explorer/web && npm test -- a11y.test` — PASS. 19 a11y test files / 22 tests passed with zero axe violations. React Router emitted existing v7 future-flag warnings; the ErrorBoundary a11y test intentionally throws a child error to exercise the fallback and still passes.
+2. `cd tools/story-explorer/web && npm test` — PASS. 44 files / 103 tests passed. React Router emitted existing v7 future-flag warnings; the intentional ErrorBoundary child throw appears in stderr while the test passes.
+3. `cd tools/story-explorer/web && npm run build` — PASS. TypeScript and Vite production build succeeded; Vite built 60 modules.
+
+## Deviations
+
+1. `axe-core` resolved to `^4.11.4` rather than the drafted `^4.10.0`; `vitest-axe` remained `^0.1.0`.
+2. The helper file landed as `a11y-test-helpers.tsx` because `renderForAxe` renders JSX.
+3. `test-setup.ts` imports `vitest-axe/extend-expect` instead of value-importing `toHaveNoViolations` from `vitest-axe/matchers`; the latter is not compatible with this package's TypeScript build surface. The tests still fail on any axe-core violation through `expectNoAxeViolations`.
+4. The package-manager install reported 5 moderate `npm audit` findings. Dependency vulnerability remediation is outside this a11y-verification ticket.
+
+## Outcome
+
+Completed on 2026-05-26. The web package now has axe-core/vitest-axe installed, shared a11y helpers, 15 component a11y test files, 4 route a11y test files, and helper coverage for axe smoke, heading hierarchy, and reduced-motion media-query mocking. The first axe run exposed and this ticket fixed same-seam ARIA role placement issues in route error surfaces and index-status banners. The targeted a11y lane, full vitest lane, and production build all pass.

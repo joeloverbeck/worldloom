@@ -17,12 +17,14 @@ export function NotFoundPage({ worldSlug, storySlug, resourceLabel = 'page' }: N
   const label = hasStoryTarget ? 'Back to story root' : 'Back to worlds';
 
   return (
-    <main className="app-shell route-error" role="alert" aria-labelledby="not-found-title">
-      <h1 id="not-found-title">{title}</h1>
-      <p>The requested Story Explorer resource is not available from this backend.</p>
-      <Link className="route-error__link" to={target}>
-        {label}
-      </Link>
+    <main className="app-shell route-error" aria-labelledby="not-found-title">
+      <div role="alert" aria-labelledby="not-found-title">
+        <h1 id="not-found-title">{title}</h1>
+        <p>The requested Story Explorer resource is not available from this backend.</p>
+        <Link className="route-error__link" to={target}>
+          {label}
+        </Link>
+      </div>
     </main>
   );
 }

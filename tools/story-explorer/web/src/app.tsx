@@ -13,12 +13,14 @@ import { WorldsRoute, worldListLoader } from './routes/worlds';
 
 function RouteFallback({ error, retry }: { error: Error; retry: () => void }): JSX.Element {
   return (
-    <main className="app-shell route-error" role="alert" aria-labelledby="route-error-title">
-      <h1 id="route-error-title">Story Explorer could not load this route.</h1>
-      <p>{error.message}</p>
-      <button type="button" onClick={retry}>
-        Retry
-      </button>
+    <main className="app-shell route-error" aria-labelledby="route-error-title">
+      <div role="alert" aria-labelledby="route-error-title">
+        <h1 id="route-error-title">Story Explorer could not load this route.</h1>
+        <p>{error.message}</p>
+        <button type="button" onClick={retry}>
+          Retry
+        </button>
+      </div>
     </main>
   );
 }

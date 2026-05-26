@@ -8,8 +8,8 @@ type BannerSeverity = 'info' | 'warning' | 'error';
 
 function Banner({ severity, children }: { severity: BannerSeverity; children: React.ReactNode }): JSX.Element {
   return (
-    <aside className={`index-status-banner index-status-banner--${severity}`} role="status">
-      {children}
+    <aside className={`index-status-banner index-status-banner--${severity}`}>
+      <div role="status">{children}</div>
     </aside>
   );
 }
