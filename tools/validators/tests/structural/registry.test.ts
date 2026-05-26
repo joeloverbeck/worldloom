@@ -1,7 +1,24 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { structuralValidators } from "../../src/public/registry.js";
+
+function readReadmeStructuralInventory(): string[] {
+  const readme = readFileSync(new URL("../../../README.md", import.meta.url), "utf8");
+  const section = readme.match(/Structural validators:\n\n(?<body>[\s\S]*?)\n\nSkill-judgment rule:/)
+    ?.groups?.body;
+
+  assert.ok(section, "README structural validator inventory section should exist");
+  const names: string[] = [];
+  for (const match of section.matchAll(/^- `([^`]+)`$/gm)) {
+    const name = match[1];
+    assert.ok(name, "README structural validator inventory entry should have a name");
+    names.push(name);
+  }
+
+  return names;
+}
 
 test("structural registry omits the retired adjudication Discovery validator", () => {
   assert.deepEqual(
@@ -110,4 +127,12 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "stemo_agency_effect_compatibility"
     ]
   );
+});
+
+test("README structural validator inventory matches the public registry", () => {
+  const registryNames = structuralValidators.map((validator) => validator.name);
+  const readmeNames = readReadmeStructuralInventory();
+
+  assert.equal(readmeNames.length, registryNames.length);
+  assert.deepEqual(readmeNames, registryNames);
 });
