@@ -11,7 +11,9 @@
 
 **Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-011` landed the empty/degraded backend-state slice: envelope-level non-fresh index banners render on the world picker, story picker, page entry route, and reading page; React Router loader errors now dispatch 404 misses to a route-aware not-found page and backend-unreachable failures to a retryable revalidation surface. At that point, remaining §9 accessibility/verification hardening belonged to `SPEC88STOEXPFRO-012`; after the note below, only final capstone proof remains in `SPEC88STOEXPFRO-013`.
 
-**Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-012` landed the accessibility verification baseline: axe-core/vitest-axe are wired into the web package, component and route `.a11y.test.tsx` files cover the SPEC-88 surface, helper tests enforce heading hierarchy and reduced-motion media-query behavior, and axe-found alert/status role placement issues were corrected. Remaining final proof belongs to `SPEC88STOEXPFRO-013`.
+**Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-012` landed the accessibility verification baseline: axe-core/vitest-axe are wired into the web package, component and route `.a11y.test.tsx` files cover the SPEC-88 surface, helper tests enforce heading hierarchy and reduced-motion media-query behavior, and axe-found alert/status role placement issues were corrected. At that point, remaining final proof belonged to `SPEC88STOEXPFRO-013`.
+
+**Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-013` landed the capstone proof: `tools/story-explorer/test/capstone-spec88-smoke.test.ts` records the manual dry-run runbook and adds portable automated coverage for built web bundle artifacts, SPEC-88 reading-surface source-map membership, static serving from `web/dist/`, API route envelope coexistence, and the absent-`web/dist` guard. The checkout-local `worlds/erotica-world/stories/red-bunny/` bundle is absent in this worktree, so red-bunny browser steps remain conditional runbook steps for checkouts where that private fixture exists.
 
 ---
 
