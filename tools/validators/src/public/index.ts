@@ -29,11 +29,11 @@ export {
   EXCEPTION_GOVERNANCE_REQUIRED_TYPES
 } from "../structural/record-schema-compliance.js";
 
-export async function validatePatchPlan(envelope: PatchPlanEnvelope): Promise<{
+export async function validatePatchPlan(envelope: PatchPlanEnvelope, opts: { worldRoot?: string } = {}): Promise<{
   verdicts: import("./types.js").Verdict[];
   executions: import("./types.js").ValidatorExecution[];
 }> {
-  const db = openWorldIndex(envelope.target_world);
+  const db = openWorldIndex(envelope.target_world, opts.worldRoot);
   try {
     const run = await runValidators(
       [...structuralValidators, ...ruleValidators],

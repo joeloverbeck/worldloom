@@ -5,7 +5,6 @@ import Ajv2020Module from "ajv/dist/2020.js";
 import type { AnySchema, ErrorObject, ValidateFunction } from "ajv";
 
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
-import { readSeNonPropagationFacts, readSeStateRelations } from "./midstory-introduction-utils.js";
 import {
   asPlainRecord,
   locationFor,
@@ -38,7 +37,7 @@ const BEHAVIORAL_PRESSURES = new Set([
   "accommodate", "self_soothe", "ruminate", "collapse"
 ]);
 const AGENCY_EFFECTS = new Set(["none", "constraining"]);
-const COMPATIBLE_AGENCY = new Set(["constrained", "coerced"]);
+const COMPATIBLE_AGENCY = new Set(["constrained", "coerced", "captive", "incapacitated", "unconscious", "dead"]);
 
 let storyEmotionSchemaValidator: ValidateFunction | null = null;
 
@@ -170,6 +169,36 @@ export function activeRecordIdsAt(emotion: IndexedRecord, maps: EmotionMaps): Re
 
 export function isActiveAtEmotionPage(emotion: IndexedRecord, id: string, maps: EmotionMaps): boolean {
   return activeRecordIdsAt(emotion, maps).has(id);
+}
+
+// activeRecordIdsBeforeEmotionPage returns the active records of the page snapshot
+// immediately preceding this emotion's created_at_page — i.e., the parent page's
+// active_records. Used by the supersession lifecycle check, which must verify the
+// prior was active in the pre-event snapshot (the post-event snapshot would have
+// already dropped the prior via snapshot_replay_equality's parent + create -
+// supersede - close algorithm).
+// PG-1 (bootstrap genesis) has parent_page_id: null and therefore no pre-event
+// snapshot — fall back to the page's own active_records (which at genesis carry
+// the post-event state because there is no parent to inherit from).
+export function activeRecordIdsBeforeEmotionPage(emotion: IndexedRecord, maps: EmotionMaps): ReadonlySet<string> {
+  const pageId = emotionField(emotion, "created_at_page");
+  if (pageId === undefined) {
+    return new Set();
+  }
+  const page = maps.pagesById.get(scopedId(emotion, pageId)) ?? maps.pagesById.get(pageId);
+  if (page === undefined) {
+    return new Set();
+  }
+  const parentPageId = stringValue(asPlainRecord(page.parsed).parent_page_id);
+  if (parentPageId === undefined) {
+    return activeIdsFromPage(page);
+  }
+  const parentPage = maps.pagesById.get(scopedId(emotion, parentPageId)) ?? maps.pagesById.get(parentPageId);
+  return activeIdsFromPage(parentPage);
+}
+
+export function isActiveBeforeEmotionPage(emotion: IndexedRecord, id: string, maps: EmotionMaps): boolean {
+  return activeRecordIdsBeforeEmotionPage(emotion, maps).has(id);
 }
 
 export function scopedId(source: IndexedRecord, id: string): string {
@@ -335,16 +364,41 @@ export function holderHasCompatibleAgency(emotion: IndexedRecord, maps: EmotionM
   return false;
 }
 
-export function sameEventExplainsConstrainedAgency(emotion: IndexedRecord, maps: EmotionMaps): boolean {
-  const createdBy = emotionField(emotion, "created_by_event");
-  if (createdBy === undefined) {
+export function constrainingEffectHasDownstreamGrounding(emotion: IndexedRecord, maps: EmotionMaps): boolean {
+  const emotionRecordId = recordId(emotion);
+  if (emotionRecordId === undefined) {
     return false;
   }
-  const event = resolveRecord(emotion, createdBy, maps);
-  if (event?.node_type !== "story_event_record") {
+  const holder = emotionField(emotion, "holder");
+  if (holder === undefined) {
     return false;
   }
-  return readSeStateRelations(event).length > 0 || readSeNonPropagationFacts(event).length > 0;
+
+  for (const record of maps.all) {
+    if (!sameStoryScope(emotion, record)) {
+      continue;
+    }
+    const parsed = asPlainRecord(record.parsed);
+    if (record.node_type === "choice_record") {
+      const groundedIn = asPlainRecord(parsed.grounded_in);
+      if (stringArray(groundedIn.records).includes(emotionRecordId)) {
+        return true;
+      }
+    } else if (record.node_type === "story_plan_record") {
+      const derivedFrom = stringArray(parsed.derived_from);
+      const planHolder = stringValue(parsed.holder);
+      if (planHolder === holder && derivedFrom.includes(emotionRecordId)) {
+        return true;
+      }
+    } else if (record.node_type === "relationship_record_story") {
+      const derivedFrom = stringArray(parsed.derived_from);
+      const participants = stringArray(parsed.participants);
+      if (participants.includes(holder) && derivedFrom.includes(emotionRecordId)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 export function fail(emotion: IndexedRecord, validator: string, code: string, message: string, detail?: unknown): Verdict {
@@ -367,6 +421,10 @@ function activeIdsFromPage(page: IndexedRecord | undefined): ReadonlySet<string>
     }
   }
   return ids;
+}
+
+function sameStoryScope(left: IndexedRecord, right: IndexedRecord): boolean {
+  return (left.story_slug ?? null) === (right.story_slug ?? null);
 }
 
 function getStoryEmotionSchemaValidator(): ValidateFunction {

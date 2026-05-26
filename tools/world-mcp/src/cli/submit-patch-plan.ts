@@ -4,12 +4,18 @@ import { parseArgs } from "node:util";
 
 import { isMainModule } from "../esm-main.js";
 import { handleSubmitPatchPlanTool } from "../tools/submit-patch-plan.js";
+import {
+  formatWorldRootFailure,
+  formatWorldRootTrace,
+  resolveWorldRoot
+} from "./_resolve-world-root.js";
 
 import type { PatchPlanEnvelope } from "../tools/_shared.js";
 
 interface CliArgs {
   planPath: string;
   tokenPath: string;
+  worldRoot?: string;
 }
 
 export interface CliResult {
@@ -18,7 +24,7 @@ export interface CliResult {
   exitCode: number;
 }
 
-const HELP_TEXT = `Usage: submit-patch-plan <plan-path> <token-path>
+const HELP_TEXT = `Usage: submit-patch-plan [--world-root <path>] <plan-path> <token-path>
 
 Submits a patch-plan envelope plus a signed approval token to the worldloom
 patch engine, bypassing MCP transport. Functionally equivalent to the
@@ -35,6 +41,8 @@ Arguments:
                           line, base64; trailing whitespace ignored).
 
 Options:
+  --world-root <path>    Explicit worldloom project root. Overrides
+                          WORLDLOOM_ROOT and auto-discovery.
   --help                  Show this help and exit.
 
 Output:
@@ -43,6 +51,7 @@ Output:
 
 Example:
   node tools/world-mcp/dist/src/cli/submit-patch-plan.js /tmp/plan.json /tmp/token.txt
+  node tools/world-mcp/dist/src/cli/submit-patch-plan.js --world-root /path/to/worldloom /tmp/plan.json /tmp/token.txt
 `;
 
 type ParseOutcome =
@@ -51,11 +60,14 @@ type ParseOutcome =
   | { kind: "error"; message: string };
 
 function parseCli(argv: string[]): ParseOutcome {
-  let parsed: ReturnType<typeof parseArgs<{ options: { help: { type: "boolean" } }; allowPositionals: true; strict: true }>>;
+  let parsed: ReturnType<typeof parseArgs<{ options: { help: { type: "boolean" }; "world-root": { type: "string" } }; allowPositionals: true; strict: true }>>;
   try {
     parsed = parseArgs({
       args: argv,
-      options: { help: { type: "boolean" } },
+      options: {
+        help: { type: "boolean" },
+        "world-root": { type: "string" }
+      },
       allowPositionals: true,
       strict: true
     });
@@ -77,7 +89,11 @@ function parseCli(argv: string[]): ParseOutcome {
     return { kind: "error", message: "<token-path> is required." };
   }
 
-  return { kind: "args", args: { planPath, tokenPath } };
+  const worldRoot = parsed.values["world-root"];
+  return {
+    kind: "args",
+    args: worldRoot === undefined ? { planPath, tokenPath } : { planPath, tokenPath, worldRoot }
+  };
 }
 
 function readJsonFile(filePath: string): { ok: true; value: unknown } | { ok: false; message: string } {
@@ -139,22 +155,33 @@ export async function runSubmitPatchPlanCli(argv: string[]): Promise<CliResult> 
     return { stdout: "", stderr: `${tokenResult.message}\n`, exitCode: 1 };
   }
 
+  const root = resolveWorldRoot({
+    flag: parsed.args.worldRoot,
+    envVar: process.env.WORLDLOOM_ROOT,
+    cwd: process.cwd()
+  });
+  if (!root.ok) {
+    return { stdout: "", stderr: `${formatWorldRootFailure(root)}\n`, exitCode: 2 };
+  }
+  const trace = `${formatWorldRootTrace(root)}\n`;
+
   const result = await handleSubmitPatchPlanTool({
     patch_plan: planResult.value as PatchPlanEnvelope,
-    approval_token: tokenResult.value
+    approval_token: tokenResult.value,
+    worldRoot: root.worldRoot
   });
 
   if ("code" in result) {
     return {
       stdout: "",
-      stderr: `${JSON.stringify(result, null, 2)}\n`,
+      stderr: `${trace}${JSON.stringify(result, null, 2)}\n`,
       exitCode: 1
     };
   }
 
   return {
     stdout: `${JSON.stringify(result, null, 2)}\n`,
-    stderr: "",
+    stderr: trace,
     exitCode: 0
   };
 }

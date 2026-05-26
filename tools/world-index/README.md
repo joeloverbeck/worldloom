@@ -20,6 +20,8 @@ world-index stats <world-slug>           # counts by node_type; file freshness
 world-index verify <world-slug>          # re-parse disk-backed indexed files; skip synthetic atomic logical rows; flag drift
 ```
 
+All world-scoped commands resolve the worldloom project root before touching `_index/` state. Resolution precedence is explicit `--world-root <path>`, then `WORLDLOOM_ROOT`, then auto-discovery by walking upward from cwd until a directory containing both `docs/FOUNDATIONS.md` and `worlds/` is found. Successful command execution emits `[world-root] <path> (source: explicit_flag|env_var|auto_discovery)` to stderr so stdout stays reserved for command output. Resolution failure exits 2 and lists attempted paths.
+
 `verify` flags drift between disk-backed indexed rows and current source files, but it does not rewrite stale parser-emitted vocabulary in place. If a schema-version migration changes what `node_type` the parser emits for unchanged source content, recovery belongs in the migration file plus a subsequent `world-index sync`; for severe local drift, `world-index init <world-slug>` deletes the DB and rebuilds from scratch.
 
 ## Migration authoring discipline

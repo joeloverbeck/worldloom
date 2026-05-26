@@ -53,6 +53,12 @@ function writeText(dir: string, name: string, value: string): string {
   return filePath;
 }
 
+function parseCliStderrJson(stderr: string): unknown {
+  const lines = stderr.split("\n").filter((line) => line.length > 0);
+  assert.match(lines[0] ?? "", /^\[world-root\] /);
+  return JSON.parse(lines.slice(1).join("\n"));
+}
+
 test("cli-submit-patch-plan: CLI delegates a malformed envelope to the same engine path as MCP submission", async () => {
   const tmp = makeTmpDir();
   try {
@@ -70,7 +76,7 @@ test("cli-submit-patch-plan: CLI delegates a malformed envelope to the same engi
     assert.ok(cliResult.stderr.length > 0);
 
     assert.ok("code" in mcpResult);
-    const cliErr = JSON.parse(cliResult.stderr) as { code: string; message?: string };
+    const cliErr = parseCliStderrJson(cliResult.stderr) as { code: string; message?: string };
     assert.equal(cliErr.code, mcpResult.code);
     assert.equal(cliErr.code, "envelope_shape_invalid");
   } finally {
@@ -94,7 +100,7 @@ test("cli-submit-patch-plan-errors: CLI surfaces the same invalid_input field wh
     assert.ok("code" in mcpResult);
     assert.equal(mcpResult.code, "invalid_input");
 
-    const cliErr = JSON.parse(cliResult.stderr) as { code: string; details?: { field?: string } };
+    const cliErr = parseCliStderrJson(cliResult.stderr) as { code: string; details?: { field?: string } };
     const mcpErr = mcpResult as { code: string; details?: { field?: string } };
     assert.equal(cliErr.code, "invalid_input");
     assert.equal(cliErr.details?.field, "patch_plan.patches[0].op");
@@ -134,7 +140,7 @@ test("cli-submit-patch-plan-errors: CLI strips trailing whitespace from the appr
 
     assert.equal(cliResult.exitCode, 1);
     assert.ok("code" in mcpResult);
-    const cliErr = JSON.parse(cliResult.stderr) as { code: string };
+    const cliErr = parseCliStderrJson(cliResult.stderr) as { code: string };
     assert.equal(cliErr.code, mcpResult.code);
   } finally {
     rmSync(tmp, { recursive: true, force: true });

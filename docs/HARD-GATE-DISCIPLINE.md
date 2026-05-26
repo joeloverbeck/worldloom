@@ -39,6 +39,9 @@ node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path> --expiry-mi
 
 # Equivalently, via env var
 WORLD_MCP_TOKEN_EXPIRY_MIN=30 node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>
+
+# Explicit world root when cwd is outside the target checkout
+node tools/world-mcp/dist/src/cli/sign-approval-token.js --world-root <path> <plan-path>
 ```
 
 **Inputs**:
@@ -68,7 +71,7 @@ WORLD_MCP_TOKEN_EXPIRY_MIN=30 node tools/world-mcp/dist/src/cli/sign-approval-to
 - Token returned but submit returns `approval_replayed` — token already consumed by a prior successful submit. This is structural single-use enforcement; do not attempt to re-submit the same plan.
 - Submit returns `index_stale` — the world index has diverged from on-disk hybrid-file content before pre-apply validators ran. Run `node tools/world-index/dist/src/cli.js sync <world-slug>`, then resubmit the unchanged patch plan with the same approval token if it has not expired. The token remains plan-valid because the patch plan content did not change.
 
-The HMAC secret lives at `tools/world-mcp/.secret` (gitignored, generated on first signer invocation if absent).
+The HMAC secret lives at `tools/world-mcp/.secret` (gitignored, generated on first signer invocation if absent). The signer resolves the project root by explicit `--world-root <path>` > `WORLDLOOM_ROOT` > auto-discovery from cwd (both `docs/FOUNDATIONS.md` and `worlds/` markers required), and emits `[world-root] <path> (source: <source>)` to stderr.
 
 ### Validating and submitting the plan: MCP path (default) and CLI path (exception path)
 
@@ -79,10 +82,10 @@ Before approval, a patch plan can be validated through either the MCP tool or th
 **Validate CLI path (exception path)** — for plans whose envelope strains MCP transport, or for the stale-validators-bundle case where the running MCP server holds a pre-rebuild `@worldloom/validators` bundle and a full session restart is not immediately available, persist the envelope JSON and invoke:
 
 ```bash
-node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>
+node tools/world-mcp/dist/src/cli/validate-patch-plan.js [--world-root <path>] <plan-path>
 ```
 
-Invoke the validate and submit patch-plan CLIs from the project root or active git worktree root (the directory containing `worlds/`, `tools/`, and `docs/`). The CLI/engine path resolves world state from `process.cwd()` and opens the index at `worlds/<slug>/_index/world.db` via `tools/world-index/src/index/open.ts` `indexDirectoryForWorld`; running from another cwd can surface as `Index missing for world '<slug>'` even when the index exists under the repo root.
+The validate, submit, and signer CLIs resolve the project root by explicit `--world-root <path>` > `WORLDLOOM_ROOT` > auto-discovery from cwd (both `docs/FOUNDATIONS.md` and `worlds/` markers required). This supports invocations from package subdirectories after a build. Every successful invocation emits `[world-root] <path> (source: <source>)` to stderr; root-resolution failures exit 2 and list attempted paths.
 
 On `pass`, the CLI prints the validate status object, including `validators_run[]`, to stdout and exits 0. On `fail` or `skipped`, it prints the same status object to stderr and exits 1. `skipped` means the envelope could not be validated structurally; fix the `reason` before signing or submitting.
 
@@ -91,10 +94,10 @@ On `pass`, the CLI prints the validate status object, including `validators_run[
 **CLI path (exception path)** — for plans whose envelope strains MCP transport (typical threshold: tens of KB; e.g., diegetic-artifact submissions with rich frontmatter and ~5K-word bodies, or canon-addition accept-paths with many ops), or for the stale-validators-bundle case when a full MCP server/client restart is not immediately available, invoke the CLI parallel to the signer:
 
 ```bash
-node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>
+node tools/world-mcp/dist/src/cli/submit-patch-plan.js [--world-root <path>] <plan-path> <token-path>
 ```
 
-The CLI requires the plan to be persisted to a JSON file (skills already do this per §Issuing a token guidance — `/tmp/<plan-id>.json`) and the token to be persisted to a text file (single line, base64). Invoke it from the same project-root / active-worktree-root cwd described above. On success it prints the `PatchReceipt` to stdout as JSON and exits 0; on failure it prints the engine or MCP error object to stderr as JSON and exits 1 (or 2 for argv errors).
+The CLI requires the plan to be persisted to a JSON file (skills already do this per §Issuing a token guidance — `/tmp/<plan-id>.json`) and the token to be persisted to a text file (single line, base64). On success it prints the `PatchReceipt` to stdout as JSON and exits 0; on failure it prints the engine or MCP error object to stderr as JSON after the world-root trace and exits 1 (or 2 for argv/root-resolution errors).
 
 **Submit equivalence guarantees**:
 

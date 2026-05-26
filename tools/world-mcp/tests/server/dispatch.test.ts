@@ -606,6 +606,31 @@ test("registered tools dispatch with either a success payload or the documented 
         expectedCode: "envelope_shape_invalid"
       },
       {
+        name: MCP_TOOL_NAMES.plan_story_state_maintenance,
+        args: {
+          world_slug: "seeded",
+          story_slug: "opening-bells",
+          reason: "Dispatch smoke for review-only maintenance planning.",
+          source_ticket: "tickets/MCPENH-068.md",
+          operations: [
+            {
+              action: "create",
+              record_type: "choice_record",
+              record: {
+                story_id: "STORY-1",
+                created_at_page: "PG-3",
+                surface_label: "Keep moving",
+                player_visible_intent: "Use a visible pressure to keep the scene moving.",
+                target_or_action_families: ["evade"],
+                likely_state_pressure: "Creates a bounded maintenance choice.",
+                grounded_in: { records: ["STPLAN-1"] }
+              }
+            }
+          ]
+        },
+        expectError: false
+      },
+      {
         name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "seeded", id_class: "SEC-GEO" },
         expectError: false
@@ -729,6 +754,7 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       { name: MCP_TOOL_NAMES.get_canonical_vocabulary, args: {} },
       { name: MCP_TOOL_NAMES.validate_patch_plan, args: {} },
       { name: MCP_TOOL_NAMES.submit_patch_plan, args: { patch_plan: buildValidPatchPlan() } },
+      { name: MCP_TOOL_NAMES.plan_story_state_maintenance, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.allocate_next_id, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.allocate_many_ids, args: { world_slug: "seeded" } }
     ] as const;

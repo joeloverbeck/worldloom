@@ -53,8 +53,10 @@ tools/story-explorer/
 │   │   │   ├── stories.ts          # GET /api/worlds/:slug/stories, GET /api/worlds/:slug/stories/:storySlug
 │   │   │   ├── pages.ts            # GET /api/worlds/:slug/stories/:storySlug/pages/:pageId
 │   │   │   ├── records.ts          # GET /api/worlds/:slug/stories/:storySlug/records/:recordId
-│   │   │   ├── prose.ts            # GET /api/worlds/:slug/stories/:storySlug/prose/:pageId
+│   │   │   ├── prose.ts            # GET /api/worlds/:slug/stories/:storySlug/prose/:pageId (+ page-plans, prose-receipts)
 │   │   │   ├── search.ts           # GET /api/worlds/:slug/stories/:storySlug/search (sketch only here; full impl SPEC-90)
+│   │   │   ├── branch-map.ts       # GET /api/worlds/:slug/stories/:storySlug/branch-map (sketch only here; full impl SPEC-90)
+│   │   │   ├── provenance.ts       # GET /api/worlds/:slug/stories/:storySlug/provenance/:recordId
 │   │   │   └── health.ts           # GET /api/health (process-level, no world dependency)
 │   │   └── readonly-guard.ts       # asserts no POST/PUT/PATCH/DELETE handlers registered
 │   ├── read/
@@ -86,7 +88,7 @@ tools/story-explorer/
 │   ├── record-card.test.ts
 │   ├── deterministic-summaries.test.ts
 │   ├── missing-prose.test.ts
-│   └── fixtures/                   # symlinks / copies of small story bundles
+│   └── fixtures/                   # in-repo committed copies of minimal story bundles; first smoke target: a trimmed copy of worlds/erotica-world/stories/red-bunny/ (one PG, one prose, one plan, one receipt — complete artifact shape per brainstorm-time exploration)
 └── dist/                           # gitignored build output
 ```
 
@@ -137,6 +139,7 @@ interface PageSummary {
   childCount: number;               // derived: PG records whose parent_page_id matches
   isLeaf: boolean;
   isTerminalOrPaused: boolean;
+  terminalReason: 'no_children' | 'paused' | 'terminal' | null;  // discriminator for SPEC-88's <TerminalCard> body sub-line; null when isTerminalOrPaused is false
 }
 
 interface PageDetail {
@@ -201,9 +204,9 @@ All routes are GET. The router must structurally reject any non-GET method regis
 | `GET /api/worlds/:slug/stories/:storySlug/pages/:pageId` | `PageDetail` | combined index + direct reads |
 | `GET /api/worlds/:slug/stories/:storySlug/records/:recordId` | full record body (parsed YAML / hybrid frontmatter+sections) | indexed node body or direct file read |
 | `GET /api/worlds/:slug/stories/:storySlug/records/:recordId/raw` | raw YAML/markdown source + content hash + source path | direct file read |
-| `GET /api/worlds/:slug/stories/:storySlug/prose/:pageId` | rendered markdown body + proseStatus | direct file read with hash check |
-| `GET /api/worlds/:slug/stories/:storySlug/page-plans/:pageId` | page plan body | direct file read |
-| `GET /api/worlds/:slug/stories/:storySlug/prose-receipts/:pageId` | parsed receipt YAML | direct file read |
+| `GET /api/worlds/:slug/stories/:storySlug/prose/:pageId` | rendered markdown body + proseStatus | direct file read with hash check — separate from PageDetail so SPEC-88's `<ProsePanel>` can lazy-fetch the body when only PageSummary chrome has been rendered |
+| `GET /api/worlds/:slug/stories/:storySlug/page-plans/:pageId` | page plan body | direct file read — PageDetail returns only `pagePlanSummary`; the full plan body is fetched on-demand when SPEC-89's Plan & Prose tab opens |
+| `GET /api/worlds/:slug/stories/:storySlug/prose-receipts/:pageId` | parsed receipt YAML | direct file read — PageDetail returns only `receiptSummary`; the full receipt is fetched on-demand when SPEC-89's Validation & Integrity tab opens or when a hash-mismatch warning expands |
 | `GET /api/worlds/:slug/stories/:storySlug/search?q=...&kinds=...` | sketch endpoint (SPEC-90 owns full implementation) | FTS via `fts_nodes` + parsed-field filters |
 | `GET /api/worlds/:slug/stories/:storySlug/branch-map?focus=:pageId` | sketch endpoint (SPEC-90 owns) | indexed PG/CHC nodes + parent-child edges |
 | `GET /api/worlds/:slug/stories/:storySlug/provenance/:recordId` | creating SE + modifying SE list + evidence records | `state_delta_create`, `state_delta_supersede`, `creation_evidence` edge walks (mirrors `get_story_state_provenance` logic from `tools/world-mcp/src/tools/get-story-state-provenance.ts`) |
@@ -212,13 +215,13 @@ All responses include an `_envelope` object with `requestId`, `serverVersion`, a
 
 ### Story-bundle ID `story_slug` scoping
 
-All `/api/worlds/:slug/stories/:storySlug/records/:recordId` lookups validate that `recordId` is a story-bundle ID class (`PG`, `SE`, `BEL`, `SF`, `OBL`, `CNSQ`, `THR`, `SREL`, `STINT`, `STENT`, `STSTAT`, `STCHAR`, `STLOC`, `STOBJ`, `CLK`, `STSEC`, `STQ`, `STPLAN`, `STEMO`, `BR`, `CHC`, `SLT`, `DA`) and that the resolution path passes `story_slug`. This mirrors the gate at `tools/world-mcp/src/tools/get-record.ts:244-252`. Cross-bundle ID collisions return a structured `invalid_input` envelope error.
+All `/api/worlds/:slug/stories/:storySlug/records/:recordId` lookups validate that `recordId` is a story-bundle ID class per FOUNDATIONS §Story Bundles §6 — the full per-bundle class set (`PG`, `SE`, `BEL`, `SF`, `OBL`, `CNSQ`, `THR`, `SREL`, `STINT`, `STENT`, `STSTAT`, `STCHAR`, `STLOC`, `STOBJ`, `CLK`, `STSEC`, `STQ`, `STPLAN`, `STEMO`, `BR`, `CHC`, `SLT`, `DA`, `SLB`) plus the audit / promotion classes (`SAU`, `SP`, `RSP`) — and that the resolution path passes `story_slug`. This mirrors the gate at `tools/world-mcp/src/tools/get-record.ts:244-252`. The first 23 classes route to indexed-node retrieval where the indexer's parser layer covers them; `SLB`, `SAU`, `SP`, `RSP` route to direct-file-read code paths per §7 (the indexer's parser layer does not currently parse them). Cross-bundle ID collisions return a structured `invalid_input` envelope error.
 
 ## 6. Read-only fencing (structural)
 
 The backend must enforce read-only at multiple layers — being read-only by convention is insufficient.
 
-**Layer 1 — package dependencies.** `tools/story-explorer/package.json` MUST NOT depend on `@worldloom/patch-engine`. It MAY depend on `@worldloom/world-index` (public exports + types) and on `better-sqlite3`. It MUST NOT depend on `@worldloom/world-mcp` (which transitively pulls in patch-engine and exposes mutation tools).
+**Layer 1 — package dependencies.** `tools/story-explorer/package.json` MUST NOT depend on `@worldloom/patch-engine`. It MAY depend on `@worldloom/world-index` (public exports + types) and on `better-sqlite3`. It MUST NOT depend on `@worldloom/world-mcp` (which transitively pulls in patch-engine and exposes mutation tools). **DB-connection acquisition**: use `openExistingIndex()` (from `@worldloom/world-index/index/open`) as the canonical surface for opening `_index/world.db` — this keeps the explorer's schema-version checking and stale-detection semantics consistent with `world-index sync`. Direct `better-sqlite3` use in `tools/story-explorer/src/` is limited to type references for the returned `Database` instance and to read-only query primitives (`db.prepare(...).all(...)`); the explorer MUST NOT open a separate `better-sqlite3.Database` handle to `_index/world.db` outside the `openExistingIndex` API, since a parallel connection would bypass the version-check side effects the world-index helper enforces.
 
 **Layer 2 — route registrar.** `src/server/readonly-guard.ts` wraps the HTTP router and throws at startup if any handler is registered for `POST`/`PUT`/`PATCH`/`DELETE`. A test (`test/readonly-guard.test.ts`) verifies this by attempting to register a `POST` route and asserting the wrap rejects it.
 

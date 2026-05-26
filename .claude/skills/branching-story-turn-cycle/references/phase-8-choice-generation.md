@@ -2,7 +2,9 @@
 
 Emit 3–5 `CHC` records if the new page stops at a real commitment hinge. Emit a single continue-or-pause `CHC` if continuing into the next beat without a meaningful commitment surface. Emit zero `CHC` if the branch is terminal — in that case, set `PG-<integer>.state_snapshot.continuation.terminal_status: terminal_closed` with `terminal_rationale` naming how high-salience debts were closed, abandoned, inherited, or intentionally left unresolved.
 
-The next choice set should include different axes (action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire). Always allow a write-in slot unless the branch is terminal.
+The next choice set should include different axes (action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire).
+
+Do not emit a placeholder "write-in" CHC. The player write-in path is a first-class skill input (`manual_action_text` + `action_source_mode: resolve_write_in`, parsed against `STORY_KERNEL.md` `## Player Agency Contract` in Phase 1) that is orthogonal to the CHC pool. A CHC slot that says "the player supplies the action" is structurally unselectable — a write-in invocation bypasses `chosen_choice_id` entirely — and pollutes the choice pool with a non-actionable record that grounds in no specific active state. Emit only concrete, selectable choices materially grounded in active records.
 
 Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `grounded_in`, and optional `success_policy` when this choice later resolves through `outcome_route: attempt`. CHCs do not name a specific SLT; selection happens at turn-cycle resolution time against the live pool filtered by `grounded_in.records`, `target_or_action_families`, and parent PG active records.
 

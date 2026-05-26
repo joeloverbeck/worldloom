@@ -4,11 +4,17 @@ import { parseArgs } from "node:util";
 
 import { isMainModule } from "../esm-main.js";
 import { validatePatchPlan } from "../tools/validate-patch-plan.js";
+import {
+  formatWorldRootFailure,
+  formatWorldRootTrace,
+  resolveWorldRoot
+} from "./_resolve-world-root.js";
 
 import type { PatchPlanEnvelope } from "../tools/_shared.js";
 
 interface CliArgs {
   planPath: string;
+  worldRoot?: string;
 }
 
 export interface CliResult {
@@ -17,7 +23,7 @@ export interface CliResult {
   exitCode: number;
 }
 
-const HELP_TEXT = `Usage: validate-patch-plan <plan-path>
+const HELP_TEXT = `Usage: validate-patch-plan [--world-root <path>] <plan-path>
 
 Validates a patch-plan envelope through the same read-only pre-apply validator
 path as mcp__worldloom__validate_patch_plan, bypassing MCP transport for large
@@ -31,6 +37,8 @@ Arguments:
                           ({plan_id, target_world, patches[], ...}).
 
 Options:
+  --world-root <path>    Explicit worldloom project root. Overrides
+                          WORLDLOOM_ROOT and auto-discovery.
   --help                  Show this help and exit.
 
 Output:
@@ -39,6 +47,7 @@ Output:
 
 Example:
   node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/plan.json
+  node tools/world-mcp/dist/src/cli/validate-patch-plan.js --world-root /path/to/worldloom /tmp/plan.json
 `;
 
 type ParseOutcome =
@@ -47,11 +56,14 @@ type ParseOutcome =
   | { kind: "error"; message: string };
 
 function parseCli(argv: string[]): ParseOutcome {
-  let parsed: ReturnType<typeof parseArgs<{ options: { help: { type: "boolean" } }; allowPositionals: true; strict: true }>>;
+  let parsed: ReturnType<typeof parseArgs<{ options: { help: { type: "boolean" }; "world-root": { type: "string" } }; allowPositionals: true; strict: true }>>;
   try {
     parsed = parseArgs({
       args: argv,
-      options: { help: { type: "boolean" } },
+      options: {
+        help: { type: "boolean" },
+        "world-root": { type: "string" }
+      },
       allowPositionals: true,
       strict: true
     });
@@ -68,7 +80,11 @@ function parseCli(argv: string[]): ParseOutcome {
     return { kind: "error", message: "<plan-path> is required." };
   }
 
-  return { kind: "args", args: { planPath } };
+  const worldRoot = parsed.values["world-root"];
+  return {
+    kind: "args",
+    args: worldRoot === undefined ? { planPath } : { planPath, worldRoot }
+  };
 }
 
 function readJsonFile(filePath: string): { ok: true; value: unknown } | { ok: false; message: string } {
@@ -108,22 +124,33 @@ export async function runValidatePatchPlanCli(argv: string[]): Promise<CliResult
     return { stdout: "", stderr: `${planResult.message}\n`, exitCode: 1 };
   }
 
+  const root = resolveWorldRoot({
+    flag: parsed.args.worldRoot,
+    envVar: process.env.WORLDLOOM_ROOT,
+    cwd: process.cwd()
+  });
+  if (!root.ok) {
+    return { stdout: "", stderr: `${formatWorldRootFailure(root)}\n`, exitCode: 2 };
+  }
+  const trace = `${formatWorldRootTrace(root)}\n`;
+
   const result = await validatePatchPlan({
-    patch_plan: planResult.value as PatchPlanEnvelope
+    patch_plan: planResult.value as PatchPlanEnvelope,
+    worldRoot: root.worldRoot
   });
   const output = `${JSON.stringify(result, null, 2)}\n`;
 
   if ("status" in result && result.status === "pass") {
     return {
       stdout: output,
-      stderr: "",
+      stderr: trace,
       exitCode: 0
     };
   }
 
   return {
     stdout: "",
-    stderr: output,
+    stderr: `${trace}${output}`,
     exitCode: 1
   };
 }

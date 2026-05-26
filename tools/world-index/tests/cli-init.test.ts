@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
@@ -10,7 +10,11 @@ import Database from "better-sqlite3";
 const cliPath = path.resolve(import.meta.dirname, "..", "src", "cli.js");
 
 function createTempRepo(): string {
-  return mkdtempSync(path.join(os.tmpdir(), "world-index-init-"));
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-init-"));
+  mkdirSync(path.join(root, "docs"), { recursive: true });
+  mkdirSync(path.join(root, "worlds"), { recursive: true });
+  writeFileSync(path.join(root, "docs", "FOUNDATIONS.md"), "# Foundations\n", "utf8");
+  return root;
 }
 
 function cleanup(root: string): void {
@@ -20,6 +24,7 @@ function cleanup(root: string): void {
 function runCli(root: string, args: string[]) {
   return spawnSync(process.execPath, [cliPath, ...args], {
     cwd: root,
+    env: { ...process.env, WORLDLOOM_ROOT: "" },
     encoding: "utf8"
   });
 }
@@ -30,7 +35,7 @@ test("init creates an empty schema-applied world index", () => {
   try {
     const result = runCli(root, ["init", "test-slug"]);
     assert.equal(result.status, 0);
-    assert.equal(result.stderr.trim(), "");
+    assert.match(result.stderr, new RegExp(`^\\[world-root\\] ${escapeRegExp(root)} \\(source: auto_discovery\\)\\n?$`));
     assert.match(
       result.stdout,
       /Initialized empty world index at worlds[/\\]test-slug[/\\]_index[/\\]world\.db/
@@ -64,6 +69,7 @@ test("init rejects an existing world index", () => {
 
     const result = runCli(root, ["init", "test-slug"]);
     assert.equal(result.status, 1);
+    assert.match(result.stderr, new RegExp(`^\\[world-root\\] ${escapeRegExp(root)} \\(source: auto_discovery\\)\\n`));
     assert.match(result.stderr, /world_index_already_exists/);
     assert.equal(result.stdout.trim(), "");
   } finally {
@@ -77,12 +83,17 @@ test("init rejects invalid world slugs", () => {
   try {
     const result = runCli(root, ["init", "Invalid_Slug"]);
     assert.equal(result.status, 2);
+    assert.match(result.stderr, new RegExp(`^\\[world-root\\] ${escapeRegExp(root)} \\(source: auto_discovery\\)\\n`));
     assert.match(result.stderr, /invalid_world_slug/);
     assert.equal(result.stdout.trim(), "");
   } finally {
     cleanup(root);
   }
 });
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 test("help lists init", () => {
   const root = createTempRepo();

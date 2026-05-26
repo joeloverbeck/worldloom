@@ -8,6 +8,7 @@ import { MCP_TOOL_NAMES } from "../../src/tool-names.js";
 import { describeCapabilities, type ToolCapability } from "../../src/tools/describe-capabilities.js";
 import { SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "../../src/tools/get-record-schema.js";
 import { SUPPORTED_LIST_RECORD_TYPES } from "../../src/tools/list-records.js";
+import { STORY_STATE_MAINTENANCE_RECORD_TYPES } from "../../src/tools/plan-story-state-maintenance.js";
 
 const CAPABILITIES: ToolCapability[] = [
   {
@@ -39,6 +40,11 @@ const CAPABILITIES: ToolCapability[] = [
     name: MCP_TOOL_NAMES.describe_capabilities,
     description: "Return this MCP server's startup build metadata, registered tool names, and enum-valued input contracts.",
     input_schema_enums: {}
+  },
+  {
+    name: MCP_TOOL_NAMES.plan_story_state_maintenance,
+    description: "Build a review-only patch-plan envelope for bounded story-bundle state maintenance.",
+    input_schema_enums: { "operations[].record_type": STORY_STATE_MAINTENANCE_RECORD_TYPES }
   }
 ];
 
@@ -111,6 +117,15 @@ test("describeCapabilities returns build metadata and enum-valued input contract
     byName.get(MCP_TOOL_NAMES.get_record_schema)?.input_schema_enums.node_type?.includes("story_fact_record")
   );
   assert.ok(byName.has(MCP_TOOL_NAMES.describe_capabilities));
+  assert.deepEqual(
+    byName.get(MCP_TOOL_NAMES.plan_story_state_maintenance)?.input_schema_enums["operations[].record_type"],
+    [...STORY_STATE_MAINTENANCE_RECORD_TYPES]
+  );
+  assert.ok(
+    byName
+      .get(MCP_TOOL_NAMES.plan_story_state_maintenance)
+      ?.input_schema_enums["operations[].record_type"]?.includes("story_emotion_record")
+  );
 });
 
 test("build info is stable for one captured server capability set", () => {

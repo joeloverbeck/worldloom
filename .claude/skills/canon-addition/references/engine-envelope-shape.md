@@ -142,9 +142,9 @@ Allocate each ID via `mcp__worldloom__allocate_next_id(world_slug, id_class)` at
 The envelope JSON itself carries an `approval_token` field, but its value at envelope-construction time is a **placeholder string** (e.g., `"placeholder"` or `"pending"`). The real signed approval token is computed from the envelope bytes by the `sign-approval-token` CLI and passed alongside the envelope at submit time:
 
 ```bash
-node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/<plan-id>.json
-node tools/world-mcp/dist/src/cli/sign-approval-token.js /tmp/<plan-id>.json > /tmp/<plan-id>.token
-node tools/world-mcp/dist/src/cli/submit-patch-plan.js /tmp/<plan-id>.json /tmp/<plan-id>.token > /tmp/<plan-id>.receipt.json
+node tools/world-mcp/dist/src/cli/validate-patch-plan.js [--world-root <path>] /tmp/<plan-id>.json
+node tools/world-mcp/dist/src/cli/sign-approval-token.js [--world-root <path>] /tmp/<plan-id>.json > /tmp/<plan-id>.token
+node tools/world-mcp/dist/src/cli/submit-patch-plan.js [--world-root <path>] /tmp/<plan-id>.json /tmp/<plan-id>.token > /tmp/<plan-id>.receipt.json
 ```
 
 Or via MCP:
@@ -162,13 +162,13 @@ The envelope-shape validator requires `approval_token` to be a non-empty string,
 | Envelope size | Validate path | Submit path |
 |---|---|---|
 | ≤ 50KB (small accept branches, all non-accept branches) | MCP path: `mcp__worldloom__validate_patch_plan(envelope)` | MCP path: `mcp__worldloom__submit_patch_plan(envelope, approval_token)` |
-| > 50KB (typical accept branches with many section updates, modification-history appends, or the full PA `body_markdown` carrying verbatim critic reports) | CLI path: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>` | CLI path: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` |
+| > 50KB (typical accept branches with many section updates, modification-history appends, or the full PA `body_markdown` carrying verbatim critic reports) | CLI path: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js [--world-root <path>] <plan-path>` | CLI path: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js [--world-root <path>] <plan-path> <token-path>` |
 
 Both validate paths route through the same `validate_patch_plan` handler and return the same `pass` / `fail` / `skipped` status object. Pass/fail responses include `validators_run[]` entries (`validator_name`, `status`, `duration_ms`, optional `detail`); skipped responses use `validators_run: []` because no validator ran. Both submit paths route through the same `submitPatchPlan` engine code (`tools/patch-engine/src/apply.ts`) and produce the same `PatchReceipt`. The CLIs exist to bypass MCP transport size constraints for large envelopes; canon-addition accept-branch envelopes carrying a verbatim six-critic-report PA `body_markdown` typically land at 60-80KB, so the CLI paths are the default for accept-branch validation and submit. See `docs/HARD-GATE-DISCIPLINE.md` §Validating and submitting the plan: MCP path (default) and CLI path (size-constrained bypass) for the canonical write-up.
 
 When using the submit CLI path, persist the envelope JSON to `/tmp/<plan-id>.json` and the signed token to `/tmp/<plan-id>.token` (single line, base64) before invoking the CLI. The validate CLI requires only the envelope JSON.
 
-Invoke both patch-plan CLIs from the project root or active git worktree root (the directory containing `worlds/`, `tools/`, and `docs/`). The CLI/engine path resolves world state from `process.cwd()` and opens the index at `worlds/<slug>/_index/world.db` via `tools/world-index/src/index/open.ts` `indexDirectoryForWorld`; running from another cwd can surface as `Index missing for world '<slug>'` even when the index exists under the repo root.
+The signer and patch-plan CLIs resolve the project root by explicit `--world-root <path>` > `WORLDLOOM_ROOT` > auto-discovery from cwd (both `docs/FOUNDATIONS.md` and `worlds/` markers required), then emit a `[world-root] ...` stderr trace. Pass `--world-root` when intentionally targeting a different checkout than the cwd-discovered root.
 
 ---
 
@@ -202,7 +202,7 @@ The patch engine and retrieval tools surface these failure modes; map each to th
 |---|---|---|
 | `index_stale` (submit-time) | Engine detected the world index has diverged from on-disk content (typically a prior direct-`Edit` to hybrid-file frontmatter without index sync). `detail.divergent_files[].file_path` names the divergent files. | Run `node tools/world-index/dist/src/cli.js sync <world-slug>`; resubmit with the same approval token if it has not expired. |
 | `validator_failed` | A pre-apply validator (Rule 1-7 + 11-12 + structural) returned a failing verdict. `detail.verdicts[].location.file` names the offending file. Common canon-addition cases: `rule5_no_consequence_evasion` (see §7 — non-SEC entries in `required_world_updates`); `record_schema_compliance` (CF schema violation, often missing `epistemic_profile` / `exception_governance` for taxonomy types); `touched_by_cf_completeness` (bidirectional pointer mismatch — see §8). | If the cited file is one of the records this plan is creating or extending (per `expected_id_allocations`, extension targets, or the PA target), the violation is in this skill's output — fix and resubmit. **If the cited file is unrelated existing world state, pause and escalate to the user — this skill must not silently modify other canon-adjacent files.** |
-| `Index missing for world '<slug>'` | The validate/submit CLI was likely invoked from the wrong cwd. The CLI/engine path derives `worldRoot` from `process.cwd()` before opening `worlds/<slug>/_index/world.db`. | Re-invoke from the project root or active git worktree root. If it still fails from that cwd, rebuild or inspect the world index. |
+| `Index missing for world '<slug>'` | The resolved world root exists but its target world index is absent or stale. This should no longer be caused by merely invoking the MCP CLI from a package subdirectory because the CLI resolves by `--world-root`, `WORLDLOOM_ROOT`, then marker auto-discovery. | Check the emitted `[world-root] ...` trace. If it points at the wrong checkout, re-run with `--world-root <path>` or set `WORLDLOOM_ROOT`. If it points at the intended checkout, rebuild or inspect the world index. |
 
 After any user-authorized direct-`Edit` to a hybrid-file frontmatter under `worlds/<slug>/characters/`, `diegetic-artifacts/`, or `adjudications/` (the surfaces under `record_schema_compliance` validator scope), run `node tools/world-index/dist/src/cli.js sync <world-slug>` before resubmitting — the validator runs against the indexed world state, not against on-disk content. INDEX.md edits do not require sync (not under validator scope).
 

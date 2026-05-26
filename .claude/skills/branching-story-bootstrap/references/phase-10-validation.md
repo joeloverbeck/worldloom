@@ -24,12 +24,12 @@ Plus 6 bootstrap-additional checks (recorded in working memory; not on `PG.valid
 
 After all gates and additional checks pass, compute final PG hashes per shared contract §4.2a:
 
-1. Invoke `tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-path> --pg <pg-draft-path>`. The CLI emits `{plan_hash, state_hash}` as JSON to stdout:
+1. Assemble the patch envelope JSON first, extract the final `PG-1` payload with `jq '.patches[<PG-OP-INDEX>].payload.record' envelope.json > PG-1-record.json`, then invoke `tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-path> --pg PG-1-record.json`. The CLI emits `{plan_hash, state_hash}` as JSON to stdout:
    - **`plan_hash`** — stamp onto `PG-1.plan.plan_hash`; covers the exact UTF-8 bytes of the finalized `pages-prose-plans/PG-1.md` draft.
    - **`state_hash`** — stamp onto `PG-1.state_hash`; covers the deterministic canonical JSON fork-state payload after `plan.plan_hash` and `validation_trace` are final, excluding only `state_hash` itself.
-   - **Input PG draft** — may carry placeholder values for both hashes (or omit them); the CLI ignores `state_hash` and overwrites `plan.plan_hash` in the canonical payload with the value computed from `--plan`.
+   - **Input PG record** — MUST be JSON extracted from the patch envelope record that will be validated/submitted. It may carry placeholder values for both hashes (or omit the hash values); the CLI ignores `state_hash` and overwrites `plan.plan_hash` in the canonical payload with the value computed from `--plan`.
    - **No hand-rolled serializer.** The CLI reuses the shared `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers from `@worldloom/world-index/hash/content` that the validator's `snapshot_replay_equality` consumes, so authoring-time and validation-time hashes are byte-identical when `--pg` parses to the same PG object that will be submitted.
-   - **No duplicate drafts.** JSON and YAML inputs are both supported, but do not keep a separate hash-only PG draft that can drift from the patch envelope. Either build the envelope from the same PG file passed to `--pg`, or extract the final envelope's `patches[N].payload.record` to a JSON scratch file and hash that exact payload.
+   - **No duplicate drafts / no YAML.** YAML input is rejected. Do not keep a separate hash-only PG draft that can drift from the patch envelope; hash the exact JSON payload from `patches[N].payload.record` and stamp the returned hashes back into that envelope record.
 2. Verify both values are 64-character lowercase hex sha256 strings. Missing, placeholder, uppercase, non-hex, or stale values are hard-stop authoring errors before the commit phase.
 
 If any gate, additional check, or hash check fails, abort before the commit phase — write nothing.

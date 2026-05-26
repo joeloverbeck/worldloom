@@ -4,6 +4,11 @@ import { readFileSync, writeSync } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 
+import {
+  formatWorldRootFailure,
+  formatWorldRootTrace,
+  resolveWorldRoot
+} from "./cli-world-root.js";
 import { build } from "./commands/build.js";
 import { init } from "./commands/init.js";
 import { inspect } from "./commands/inspect.js";
@@ -42,11 +47,14 @@ function renderHelp(): string {
     "Options:",
     "  --help     Show this help message",
     "  --version  Print the package version",
+    "  --world-root <path>",
+    "             Use an explicit worldloom project root; otherwise WORLDLOOM_ROOT",
+    "             then marker auto-discovery from cwd are used",
     "",
     "Exit codes:",
     "  0  success",
     "  1  generic failure",
-    "  2  invalid world slug",
+    "  2  invalid world slug or world-root resolution failure",
     "  3  missing mandatory file",
     "  4  parse failure threshold exceeded"
   ].join("\n");
@@ -82,6 +90,7 @@ function main(argv: string[]): number {
     options: {
       help: { type: "boolean", short: "h" },
       version: { type: "boolean", short: "v" },
+      "world-root": { type: "string" },
       story: { type: "string" },
       quiet: { type: "boolean" }
     },
@@ -103,35 +112,52 @@ function main(argv: string[]): number {
     return printUsage(1);
   }
 
-  const worldRoot = process.cwd();
+  const commandNeedsWorldRoot = new Set(["build", "init", "sync", "inspect", "render", "stats", "verify"]);
+  if (!commandNeedsWorldRoot.has(command)) {
+    writeFd(2, `Unknown command '${command}'.\n`);
+    return printUsage(1);
+  }
+
+  if (typeof argument !== "string") {
+    return printUsage(1);
+  }
+
+  const resolution = resolveWorldRoot({
+    flag: typeof parsed.values["world-root"] === "string" ? parsed.values["world-root"] : undefined,
+    envVar: process.env.WORLDLOOM_ROOT,
+    cwd: process.cwd()
+  });
+  if (!resolution.ok) {
+    writeFd(2, `${formatWorldRootFailure(resolution)}\n`);
+    return 2;
+  }
+
+  writeFd(2, `${formatWorldRootTrace(resolution)}\n`);
+  const worldRoot = resolution.worldRoot;
 
   try {
     switch (command) {
       case "build":
-        return typeof argument === "string" ? build(worldRoot, argument) : printUsage(1);
+        return build(worldRoot, argument);
       case "init":
-        return typeof argument === "string" ? init(worldRoot, argument) : printUsage(1);
+        return init(worldRoot, argument);
       case "sync":
-        return typeof argument === "string" ? sync(worldRoot, argument, { quiet: parsed.values.quiet === true }) : printUsage(1);
+        return sync(worldRoot, argument, { quiet: parsed.values.quiet === true });
       case "inspect":
-        return typeof argument === "string" ? inspect(worldRoot, argument) : printUsage(1);
+        return inspect(worldRoot, argument);
       case "render":
-        if (typeof argument !== "string") {
-          return printUsage(1);
-        }
         return typeof parsed.values.story === "string"
           ? render(worldRoot, argument, {
               storySlug: parsed.values.story
             })
           : render(worldRoot, argument, {});
       case "stats":
-        return typeof argument === "string" ? stats(worldRoot, argument) : printUsage(1);
+        return stats(worldRoot, argument);
       case "verify":
-        return typeof argument === "string" ? verify(worldRoot, argument) : printUsage(1);
-      default:
-        writeFd(2, `Unknown command '${command}'.\n`);
-        return printUsage(1);
+        return verify(worldRoot, argument);
     }
+
+    return printUsage(1);
   } catch (error) {
     return cliErrorHandler(error);
   }

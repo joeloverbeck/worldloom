@@ -20,6 +20,7 @@ const OPERATION_KIND_SET = new Set<string>(OPERATION_KINDS);
 
 export interface ValidatePatchPlanArgs {
   patch_plan: PatchPlanEnvelope;
+  worldRoot?: string;
 }
 
 export type ValidatePatchPlanResponse =
@@ -63,9 +64,10 @@ export async function validatePatchPlan(
   }
 
   const result = await runValidatePatchPlan(
-    args.patch_plan as unknown as Parameters<typeof runValidatePatchPlan>[0]
+    args.patch_plan as unknown as Parameters<typeof runValidatePatchPlan>[0],
+    args.worldRoot === undefined ? {} : { worldRoot: args.worldRoot }
   );
-  const allocationRace = runIdAllocationRaceCheck(args.patch_plan);
+  const allocationRace = runIdAllocationRaceCheck(args.patch_plan, args.worldRoot);
   const verdicts = allocationRace.ok
     ? result.verdicts
     : [...result.verdicts, ...allocationRace.failures.map(allocationRaceFailureToVerdict)];
@@ -96,7 +98,7 @@ function projectExecutionsToReceipt(executions: ValidatorExecution[]): Validator
   });
 }
 
-function runIdAllocationRaceCheck(envelope: PatchPlanEnvelope): {
+function runIdAllocationRaceCheck(envelope: PatchPlanEnvelope, worldRoot?: string): {
   ok: boolean;
   failures: Array<{
     key: string;
@@ -108,7 +110,7 @@ function runIdAllocationRaceCheck(envelope: PatchPlanEnvelope): {
   execution: ValidatorRunReceipt;
 } {
   const startedAt = Date.now();
-  const db = openExistingIndex(resolveRepoRootForWorld(envelope.target_world), envelope.target_world);
+  const db = openExistingIndex(worldRoot ?? resolveRepoRootForWorld(envelope.target_world), envelope.target_world);
   try {
     const result = checkIdAllocationRace(
       db,
