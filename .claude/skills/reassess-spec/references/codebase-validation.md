@@ -21,6 +21,7 @@ Substep applicability is determined by the Pre-Process classification:
 | 3.10 Project-convention drift (CLAUDE.md) | ✓ | if new ID conventions or project-level conventions introduced | skip | if the landed work introduced new conventions |
 | 3.11 New-deliverable consumer verification | ✓ | ✓ | skip | skip |
 | 3.12 Source-document completeness check | ✓ | ✓ | skip | ✓ (rigorous — verify landing) |
+| 3.13 Spec structural completeness check | ✓ | ✓ | skip | skip |
 
 ## 3.0 Cross-Package Scope Establishment
 
@@ -214,6 +215,25 @@ For classification (d) retroactive, apply a stronger variant: verify each "accep
 **Engagement-evidence checkpoint**: `SKILL.md` Step 2 requires emitting a one-line `Source-document engagement: <doc-path>: N claims enumerated, M adjudicated, (N-M) unadjudicated flagged` note before Step 3 begins (parallel to §Reference-count checkpoint; format documented at `SKILL.md` §Step 2 §Source-document engagement-evidence checkpoint). The emission makes Step 2's claim enumeration auditable from the user-facing report — without it, a future reviewer cannot confirm §3.12 was actually engaged rather than silently skipped via a "trust the source flow" judgment. When this substep is skip-eligible per the Skip conditions above, the checkpoint still emits a one-line `Source-document engagement: N/A — <reason>` so the skip itself is recorded in the audit trail.
 
 This substep is the symmetric backward-direction complement to §3.8 (Upstream Spec References), which checks FORWARD cross-spec references (other specs that reference this spec's deliverables); §3.12 checks BACKWARD source-document references (claims this spec inherits from a prior document) for adjudication completeness.
+
+## 3.13 Spec Structural Completeness Check
+
+For specs that introduce new code, tooling, or implementation work (classifications (a) new component and (b) extension), verify the spec carries the worldloom-convention sections that downstream ticket decomposition needs to slice work into reviewable diffs:
+
+- **§Deliverables (or §Approach with named file targets)**: each deliverable names a concrete target — a file path, a package directory, a function signature, or a CLI-flag spec — that the implementer can grep against the spec text. Specs whose §Approach reads as feature description ("the X-Ray renders eight record groups") without naming target files / packages / functions are §3.13-incomplete on this axis; the implementer cannot determine *where* the new code lives without inferring from sibling-spec convention.
+- **§Verification (or §Acceptance Tests)**: re-runnable commands (`npm test`, `pnpm turbo lint`, `world-validate <world-slug>`, `node --test dist/test/foo.test.js`) that confirm the implementation works. A §Verification section listing only manual smoke tests without programmatic confirmation is §3.13-partial; a spec with no Verification section at all is §3.13-incomplete.
+- **§Build & test (for tooling specs)**: how the new code integrates with the existing build (`scripts/build-all.sh` order, `scripts/check-all.sh` order, package-root `npm run build` / `npm test` shapes). Applicable when the spec creates or modifies a `tools/<name>/` package; not required for skill-only or docs-only specs.
+- **§Risks & Open Questions**: known limitations, deferred decisions, and gotchas the implementer should be aware of. Worldloom specs by convention surface these explicitly rather than letting them be discovered at ticket-time.
+
+**Severity assignment**: a tooling/code spec (classifications (a) or (b) with new code deliverables) missing §Deliverables or §Verification entirely is a HIGH Issue — ticket decomposition cannot proceed without these. A spec missing §Build & test (when tooling-relevant) or §Risks & Open Questions is a MEDIUM Improvement. A docs-only or process spec (no code deliverables) missing these sections is a LOW finding or N/A depending on whether the spec's content actually depends on implementer follow-up.
+
+**Why it fits with §3.11**: §3.11 (New-deliverable consumer verification) covers consumer-side existence (do consumers exist for what the spec proposes?); §3.13 covers spec-side completeness (does the spec name where its deliverables live and how they get verified?). Together they bracket the spec's deliverable surface: §3.11 looks outward to the consumer landscape, §3.13 looks inward to the spec's own scaffolding.
+
+**Why it fits with §3.12**: §3.12 (Source-document completeness check) is the BACKWARD check — verifies the spec adjudicates every claim in the source document(s) it cites; §3.13 is the SPEC-SIDE check — verifies the spec carries enough scaffolding to be decomposed into tickets. The two are independent (a spec can carry rich source-document adjudication while still missing a Deliverables section, and vice versa).
+
+**Worked precedent**: SPEC-89 (Story Explorer State X-Ray Layer) reassessment (2026-05-26) — the spec lacked §Deliverables, §Verification, §Build & test, and §Risks sections; sibling specs SPEC-87 (§3 Package layout + §9 Build & test) and SPEC-88 (§3 Frontend package layout + §10 Build & test) carried these as named-file-targets + chained-build/test commands. The reassessment surfaced this as Issue I4 HIGH and added new §14 Frontend component layout + §15 Build & test + §16 Risks sections; the cascade landed §3.13 to make the check explicit in future reassessments rather than relying on operator pattern recognition.
+
+**Skip**: this substep is N/A for classifications (c) refactor (refactors don't introduce new deliverables) and (d) retroactive (the spec's structural-completeness shape is the Outcome section's responsibility per Step 7 retroactive branch, not §3.13's).
 
 ## Conditional Deliverable Validation
 

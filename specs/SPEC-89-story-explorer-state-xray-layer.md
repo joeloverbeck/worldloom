@@ -31,7 +31,7 @@ Plus **Plan & Prose** (rendering plan + receipt boundaries) and **Validation & I
 - Mobile inline summary bar above x-ray groups.
 - Provenance display ("created by SE-N", "modified by SE-M, SE-K", "evidence records") consuming SPEC-87's `/provenance/:recordId` route.
 - Hidden / secret / author-only chips on records that carry visibility flags (no spoiler masking — author-x-ray stance per proposal §7 and Named Assumption D).
-- Hybrid-record rendering for STCHAR (frontmatter blocks + body sections via SPEC-87's record route with `section_path`-style projection).
+- Hybrid-record rendering for STCHAR (frontmatter blocks plus client-side-parsed body sections from the raw markdown body returned by SPEC-87's record route).
 - SLB / SAU / SP / RSP rendering from direct file reads (per SPEC-87 §7; not currently parsed at indexer parser layer).
 
 ### Out of scope
@@ -49,13 +49,13 @@ The 8 groups (proposal §7) — human-meaningful, not raw folder names:
 
 | Group | Classes |
 |---|---|
-| Cast & Status | `STENT`, `STCHAR`, `STSTAT` |
+| Cast & Status | `STENT`, `STCHAR`, `STSTAT`, `BR` |
 | Scene & Affordances | `STLOC`, `STOBJ`, `DA`, visible affordances (from `PG.state_snapshot.visible_affordances`) |
 | Knowledge & Truth | `BEL`, `SF`, `STSEC`, `STQ` |
 | Plans & Emotion | `STPLAN`, `STEMO`, `STINT` |
 | Relationships & Debts | `SREL`, `OBL` |
 | Pressure & Open Loops | `CNSQ`, `THR`, `CLK`, `SLT` (when relevant to this page) |
-| Event Delta | `SE`, state delta, record introductions, state relations, promotion claims |
+| Event Delta | `SE`, `CHC` (including emitted-but-uncontinued from SPEC-88 §6), state delta, record introductions, state relations, promotion claims |
 | Validation & Integrity | PG validation trace, prose receipt, hash status, missing/stale index, broken refs |
 
 Group headers render counts and important chips: e.g. `Knowledge & Truth · 8 active · 2 hidden · 1 low-confidence`.
@@ -66,7 +66,7 @@ Group headers render counts and important chips: e.g. `Knowledge & Truth · 8 ac
 
 Source: `PG.state_snapshot.active_records[]` from SPEC-87's `PageDetail.currentStateRecordIds`.
 
-For each active record ID, the frontend issues `GET /api/.../records/:recordId` to fetch the parsed body, then assembles a `RecordCard` view-model and renders it in its group.
+For each active record ID, the frontend issues `GET /api/.../records/:recordId` and consumes the `recordCard` field that SPEC-87 already builds server-side (per SPEC-87 §8: SPEC-87 owns the data path; SPEC-89 owns the field rendering). The X-Ray does NOT re-assemble a `RecordCard` client-side — the server-side card is the canonical view-model, and SPEC-89 renders its fields as JSX.
 
 Recommended group ordering (proposal §7):
 
@@ -113,7 +113,7 @@ Surfaces:
 - Prose receipt summary from `pages-prose-receipts/PG-<n>.yaml`:
   - Receipt verdict (`accept` / `reject` / `revise` etc. — whatever the receipt records)
   - State hash status (match / mismatch / not-checked) — verdict-driving per prose-attach contract
-  - Per-check results from the prose-attach skill's nine validation gates: hash integrity, engine-jargon leak, mystery resolution, required event rendering, choice visibility, status consistency, invented structural fact, canon authority, character authority leak, STCHAR fidelity
+  - Per-check results from the prose-attach skill's ten validation surfaces (8 deterministic prose/state checks per `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 plus the `char_authority_leak` verdict surfaced from `no_char_authority_in_story_runtime` plus the per-§16a-packet STCHAR `profile_fidelity[]` blocks): hash integrity, engine-jargon leak, mystery resolution, required event rendering, choice visibility, status consistency, invented structural fact, canon authority, character authority leak, STCHAR fidelity
 - Boundaries banner: "Plan, prose, and receipt are distinct artifacts. PG is the authoritative page snapshot."
 
 Plan body is NEVER rendered as prose anywhere else in the UI; the Plan & Prose tab is the only place the plan appears.
@@ -154,9 +154,9 @@ Triggered by clicking the compact card. Shows:
 
 - all deterministic fields grouped by human labels
 - related records as clickable chips (navigate per §6 below)
-- provenance trail (rendered from SPEC-87's `/provenance/:recordId` route):
-  - "Created by SE-N at PG-M"
-  - "Modified by SE-X (PG-Y), SE-Z (PG-W)"
+- provenance trail (rendered from SPEC-87's `/provenance/:recordId` route, which returns `{creatingSeId, modifyingSeIds[], evidenceRecords[]}` — SE ids only, no PG attribution):
+  - "Created by SE-N at PG-M" — the X-Ray fetches the creating SE via `/records/:recordId` to derive `SE.created_at_page`, then renders the attribution.
+  - "Modified by SE-X (PG-Y), SE-Z (PG-W)" — same lookup pattern per modifying SE; the parallel-fetch budget per §10 keeps the N+1 footprint bounded since `modifyingSeIds` typically contains < 5 entries.
   - "Evidence records: [chips]"
 - "View raw record" button → disclosure panel with source path, content hash, raw YAML/markdown body, copy button. NEVER editable.
 
@@ -186,7 +186,7 @@ Per proposal §8 — the canonical table. Each row is the compact-card primary-l
 | BEL | id · holder · claim · belief mode · truth relation · confidence · visibility · source event/basis · opens consequences |
 | SF | id · fact/claim/title · truth/canon derivation · derived-from CF/SF refs · scope/visibility · created-at page |
 | SE | id · event kind · actor → targets · outcome route · selected SLT · state delta counts · world-logic rationale preview |
-| CHC | id · surface label · player-visible intent · created-at page · pressure chips · grounded-in record count · child outcome count |
+| CHC | id · surface label · player-visible intent · created-at page · pressure chip (from `likely_state_pressure` — singular string per schema) · grounded-in record count · child outcome count |
 | OBL | id · owed_by → owed_to · obligation text/objective · status · urgency/due condition · dependent facts |
 | CNSQ | id · consequence statement · status · severity/urgency · derived-from · linked thread/clock if present |
 | THR | id · thread title/name · status · active pressure · obligations count · derived-from |
@@ -241,7 +241,7 @@ Record cards use the disclosure primitive from SPEC-88. Group headers are tappab
 Per proposal §10:
 
 - Record-card body fetches are lazy: a group is rendered with compact cards first; clicking an expand triggers the body fetch.
-- Active-record body fetches are batched (e.g. up to 25 per request) via `GET /api/.../records?ids=...`.
+- Active-record body fetches use the single-record route `GET /api/.../records/:recordId` (SPEC-87 ships only this route; no batched `?ids=` variant exists). The browser's HTTP/1.1 6-per-origin parallel-fetch budget plus HTTP keep-alive amortizes per-record latency at the X-Ray's typical scale (< 50 active records per page); larger pages rely on the lazy-expansion rule above so only opened cards trigger body fetches.
 - Huge groups (≥ threshold, e.g. 50 active records) virtualize the list.
 - Deterministic summaries are memoized in-memory per session.
 - The X-Ray does NOT re-parse YAML on every navigation; SPEC-87's record route serves parsed bodies.
@@ -261,12 +261,13 @@ Inherits SPEC-88 §8 baseline. Specific to X-Ray:
 
 For STCHAR records (which are hybrid frontmatter+body markdown per FOUNDATIONS §Story Bundles §6.1):
 
-- SPEC-87's `/records/:recordId` route returns parsed frontmatter (as object) + body sections (as map of section header → markdown body).
-- The compact card renders the frontmatter summary (name, bound STENT, source CHAR, supersession status, regeneration reason).
-- The expanded card adds body sections (collapsible per-section).
+- SPEC-87's `/records/:recordId` route returns parsed frontmatter (spread as top-level fields on the `record` object) plus the raw markdown body string under the `body` field (per `tools/story-explorer/src/read/record-io.ts` `parseRecordBody`). It does NOT split the body into sections; there is no `section_path` projection on this route (the MCP `get_record` projection is a different surface, deliberately bypassed per IMPLEMENTATION-ORDER Named Assumption C).
+- The X-Ray frontend uses a remark/mdast-based section parser to split the body string by `##` (or comparable depth) headers into a `Record<string, string>` for the expanded-card per-section disclosure. The parser is shared between hybrid record classes.
+- The compact card renders the frontmatter summary (name, bound STENT, source CHAR, supersession status, regeneration reason) — no body parse needed.
+- The expanded card runs the client-side section parser once on first expand, memoizes the result, and renders each section as a collapsible disclosure.
 - Raw view shows the full markdown source.
 
-The same pattern applies to DA hybrid records and to SAU / SP / RSP records when they appear in scope (per SPEC-87 §7, these come from direct file reads in v1).
+The same client-side section-parsing pattern applies to DA hybrid records and to SAU / SP / RSP records when they appear in scope (per SPEC-87 §7, these come from direct file reads in v1).
 
 ## 13. FOUNDATIONS alignment
 
@@ -279,3 +280,50 @@ The same pattern applies to DA hybrid records and to SAU / SP / RSP records when
 | §Story Bundles §5b — Schema-Minimalism (every field load-bearing) | aligns @ field rendering | The compact-card field selection per class mirrors the load-bearing fields documented in the shared story state contract; no decorative-only fields render in compact view. |
 | §Story Bundles §9 — Prose Length Discipline | N/A @ X-Ray | The X-Ray renders records, not prose; word-count discipline does not apply. |
 | §Tooling Recommendation — agents never operate on prose alone | N/A @ this surface | The X-Ray is a human-facing surface, not an LLM agent surface. |
+
+## 14. Frontend component layout
+
+The X-Ray adds the following components to the SPEC-88 frontend sub-tree at `tools/story-explorer/web/src/components/xray/`. The directory is new; existing SPEC-88 components under `tools/story-explorer/web/src/components/` (PageHeader, ProsePanel, ChoiceCard, disclosure primitive, etc.) are reused as-is.
+
+```
+tools/story-explorer/web/src/components/xray/
+├── XRayPanel.tsx            # top-level slot (filling SPEC-88 §4.4 reading-page item 6); owns the four-tab structure
+├── XRayTabs.tsx             # WAI-ARIA tablist + tab + tabpanel; arrow-key navigation per §11
+├── tabs/
+│   ├── CurrentStateTab.tsx  # default tab; renders the 8 record groups (per §3 / §4.1)
+│   ├── WhatChangedHereTab.tsx  # SE + state delta + record introductions (per §4.2)
+│   ├── PlanProseTab.tsx     # page plan + receipt + per-check results (per §4.3)
+│   └── ValidationIntegrityTab.tsx  # validation trace + hash status + broken refs (per §4.4)
+├── XRayGroup.tsx            # collapsible group header with deterministic summary chips (per §3)
+├── RecordCardCompact.tsx    # consumes the response's `recordCard` view-model (per §4.1, §5.1)
+├── RecordCardExpanded.tsx   # expanded view with deterministic field grouping (per §5.2)
+├── ProvenanceTrail.tsx      # creating-SE + modifying-SE + evidence-records (per §5.2; runs N+1 SE lookups for PG attribution per §5.2 note)
+├── RawRecordDisclosure.tsx  # "View raw record" → fetches /records/:recordId/raw (per §5.2)
+├── LinkedRecordPeek.tsx     # right-side peek panel for not-active linked records (per §6)
+├── BrokenReferenceChip.tsx  # cited-but-unresolved record IDs (per §6, §4.4)
+├── HybridSectionParser.ts   # client-side remark/mdast section splitter for STCHAR / DA / SAU / SP / RSP (per §12); memoized per record
+├── StickyRail.tsx           # desktop right-rail (per §8); hidden < ~1200px
+└── MobileSummaryBar.tsx     # inline summary above x-ray groups on mobile (per §9)
+```
+
+The `/api/.../page-plans/:pageId` and `/api/.../prose-receipts/:pageId` fetches per §4.3 are made on-demand when the Plan & Prose tab opens (not eagerly on page load). The `/provenance/:recordId` fetch per §5.2 is made on-demand when a record card is expanded.
+
+## 15. Build & test
+
+The X-Ray tests integrate with the SPEC-88-established vitest + axe-core suite under `tools/story-explorer/web/`. No new build infrastructure is introduced; the X-Ray components are added to the existing chained `tools/story-explorer/package.json` `build` and `test` scripts (per SPEC-88 §10).
+
+- Frontend tests via vitest + React Testing Library:
+  - Render tests per tab: `XRayPanel` switches between four tabs preserving each tab's state; collapsed/expanded group state persists within tab switches.
+  - `RecordCardCompact` rendering covers all 22 classes from §7 with valid + minimal fixtures (use the `record-card.ts` server-side fixtures from SPEC-87 as inputs).
+  - `RecordCardExpanded` lazy-fetch behavior: body fetch fires once on expand, not on initial render.
+  - `HybridSectionParser` splits a representative STCHAR markdown body into the expected section map; idempotent on second call (memoization).
+  - `LinkedRecordPeek` opens for cross-active references; `BrokenReferenceChip` renders for unresolved IDs.
+  - `ProvenanceTrail` renders the SE→PG attribution after the per-SE fetch resolves.
+- Accessibility tests via axe-core (vitest-axe per landed SPEC-88 §10): tab list arrow-key navigation, group disclosure ARIA contract, raw-YAML disclosure `<pre><code>` semantics, `prefers-reduced-motion` respected on every animation, contrast tokens for visibility chips.
+- Capstone proof (extension of SPEC-88's `tools/story-explorer/test/capstone-spec88-smoke.test.ts` pattern): a new `tools/story-explorer/test/capstone-spec89-smoke.test.ts` records the manual X-Ray runbook (open each tab, expand a card, follow a linked-record chip, expand a hybrid STCHAR card, observe a broken-reference chip) and adds portable automated coverage for the X-Ray's built bundle membership.
+
+## 16. Risks & Open Questions
+
+1. **Virtualization threshold for very-large pages** — §10 names a "≥ threshold, e.g. 50 active records" virtualization cut. The actual threshold may need tuning against real story bundles (a deeply branched late-game page can have 100+ active records). Risk: low — the threshold is a tunable constant, and the typical X-Ray load (per the red-bunny smoke fixture) sits well below it.
+2. **`HybridSectionParser` resilience to malformed bodies** — STCHAR / DA bodies sometimes carry non-standard heading depths, bold-wrapped headings, or non-heading anchors. The client-side parser must degrade gracefully: when no `##` (or comparable) headers are present, the expanded card falls back to rendering the entire body as a single "Body" section. The parser must not throw.
+3. **SLB / SAU / SP / RSP rendering coverage limits** — SPEC-87 §7 reads these classes directly from their hybrid markdown files; the indexer's parser layer does not yet parse them, so cross-class linking from these records to other story-bundle records is bounded by what the markdown body explicitly cites. The X-Ray surfaces this as a "limited cross-link coverage" disclosure on the expanded card for these classes; future indexer extension (out of scope for SPEC-89) can broaden the coverage.
