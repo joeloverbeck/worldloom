@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import type { RecordCard, RecordGroup } from '../../api/client';
 import { useDisclosure } from '../disclosure/use-disclosure';
+import { groupAnchorId } from './groupActiveRecords';
 
 interface XRayGroupProps {
   group: RecordGroup;
@@ -36,13 +37,14 @@ function groupChipLabels(group: RecordGroup, records: RecordCard[]): string[] {
 export function XRayGroup({ group, records, children, initialOpen = true }: XRayGroupProps): JSX.Element {
   const disclosure = useDisclosure(initialOpen);
   const headerLabel = groupChipLabels(group, records)[0];
+  const headingId = groupAnchorId(group);
 
   return (
-    <section className="xray-group" aria-labelledby={`xray-group-${group.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}>
+    <section className="xray-group" aria-labelledby={headingId}>
       <h3 className="xray-group__heading">
         <button
           className="xray-group__trigger"
-          id={`xray-group-${group.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
+          id={headingId}
           type="button"
           {...disclosure.triggerProps}
         >

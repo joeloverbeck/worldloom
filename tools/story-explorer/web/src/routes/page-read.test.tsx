@@ -164,7 +164,9 @@ describe('PageReadRoute', () => {
     expect(screen.getByText('No committed continuation from this page.')).toBeInTheDocument();
     expect(screen.getByRole('tablist', { name: 'State X-Ray tabs' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Current State' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByText('Summary rail slot (SPEC-89 fills)')).toBeInTheDocument();
+    expect(screen.getAllByText('PG-12 · BR-3')).toHaveLength(1);
+    expect(screen.getByLabelText('State X-Ray summary')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Cast & Status' })).toHaveAttribute('href', '#xray-group-cast-status');
   });
 
   it('renders the page-detail index status banner before the reading layout', async () => {

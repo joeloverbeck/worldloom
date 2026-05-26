@@ -1,6 +1,6 @@
 # SPEC89STOEXPSTA-011: Sticky rail (desktop) + Mobile summary bar
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new `StickyRail.tsx` (desktop right rail) + `MobileSummaryBar.tsx` (mobile inline summary) components, mounted in the appropriate slot established by SPEC-88 §4.4
@@ -30,32 +30,32 @@ SPEC-88 §4.4 already names the right-rail slot ("Right-rail summary on desktop 
 3. Group counts mirror the SPEC89STOEXPSTA-004 classification logic → fixture test with a known `currentStateRecordIds` set; assert the rail's counts match the tab's group sizes.
 4. ToC anchor scroll: clicking a group name in the rail scrolls to that group in the Current State tab → DOM scroll test.
 
-## What to Change
+## Landed Changes
 
-### 1. Create `StickyRail.tsx`
+### 1. Created `StickyRail.tsx`
 
 Desktop right-rail component. Accepts `pageDetail: PageDetail` as a prop. Renders:
-- **Current page chip**: `{PG-N} · {BR-N}` (extracted from `pageDetail.page.id` + `pageDetail.page.branch_id`).
+- **Current page chip**: `{PG-N} · {BR-N}` (extracted from `pageDetail.page.id` + `pageDetail.branchContext.branchId`).
 - **Prose/receipt status icons**: a row of small icons indicating prose presence (from `pageDetail.proseStatus`) and receipt presence (from `pageDetail.receiptSummary`).
-- **Active record counts by group**: list of 8 group names with counts (derived from the same classification SPEC89STOEXPSTA-004 uses; consider extracting the classification logic into a shared helper `groupActiveRecords.ts` to avoid duplication).
-- **What Changed counts**: `Created N · Superseded M · Closed K` (from the SE's state_delta lengths; fetched the same way `archive/tickets/SPEC89STOEXPSTA-005.md` fetches the SE — or via a lightweight selector if PageDetail already includes the SE).
+- **Active record counts by group**: list of 8 group names with counts, derived from shared `groupActiveRecords.ts` classification.
+- **What Changed counts**: `Created N · Superseded M · Closed K` from `pageDetail.eventDelta`.
 - **Mini ToC**: list of group names as anchor links scrolling to each group in the Current State tab.
 
 The rail uses CSS `position: sticky` with `top: <header-height>` so it stays visible as the user scrolls the X-Ray content.
 
-### 2. Create `MobileSummaryBar.tsx`
+### 2. Created `MobileSummaryBar.tsx`
 
 Mobile inline-bar component. Renders the same logical content as the rail but compressed into a single horizontal bar above the X-Ray groups (per SPEC-88 §8 mobile flow item 4). On mobile the ToC is collapsed into a "Jump to group" select element rather than a vertical list.
 
-### 3. Mount both in `routes/page-read.tsx`
+### 3. Mounted both in `routes/page-read.tsx`
 
-Update the slots at SPEC-88-reserved positions. The mount logic uses CSS media queries; both components are rendered in the DOM but the appropriate one is shown via `display: none` on the inactive viewport.
+The route now renders `MobileSummaryBar` directly above `XRayPanel` and `StickyRail` inside the reserved summary aside. CSS media queries switch the visible component at the ~1200px desktop threshold.
 
-### 4. Extract shared classification helper
+### 4. Extracted shared classification helper
 
-If SPEC89STOEXPSTA-004 inlined the group classification, refactor into `tools/story-explorer/web/src/components/xray/groupActiveRecords.ts` so both the Current State tab AND the rail/bar consume the same logic (DRY against drift). This is a small refactor; flag in the post-implementation summary if it expands SPEC89STOEXPSTA-004's scope.
+`tools/story-explorer/web/src/components/xray/groupActiveRecords.ts` now owns the group ordering, class-prefix-to-group mapping, anchor IDs, and record-id count helpers. `CurrentStateTab`, `XRayGroup`, `StickyRail`, and `MobileSummaryBar` consume that helper.
 
-### 5. Add tests
+### 5. Added tests
 
 - `__tests__/StickyRail.test.tsx` — desktop viewport render test.
 - `__tests__/MobileSummaryBar.test.tsx` — mobile viewport render test.
@@ -83,7 +83,7 @@ If SPEC89STOEXPSTA-004 inlined the group classification, refactor into `tools/st
 
 1. `cd tools/story-explorer/web && npm test -- StickyRail.test MobileSummaryBar.test` — both pass.
 2. `cd tools/story-explorer && npm run build` — build succeeds.
-3. Visual smoke in dev mode: desktop viewport shows the rail to the right of the X-Ray; resizing to mobile collapses to the inline bar.
+3. Manual visual smoke in dev mode is not part of the accepted automated close boundary for this Codex pass; see `## Deviations`.
 
 ### Invariants
 
@@ -102,3 +102,28 @@ If SPEC89STOEXPSTA-004 inlined the group classification, refactor into `tools/st
 1. `cd tools/story-explorer/web && npm test -- StickyRail.test MobileSummaryBar.test` — targeted.
 2. `cd tools/story-explorer && npm test` — full package suite.
 3. `cd tools/story-explorer && npm run build` — chained build.
+
+## Outcome
+
+Completed 2026-05-26.
+
+Implemented the SPEC-89 summary layer for the Story Explorer reading page:
+
+- Added `StickyRail` for the desktop right rail and `MobileSummaryBar` for the inline mobile summary.
+- Mounted the rail/bar in `page-read.tsx` using the SPEC-88 reserved slots.
+- Extracted group classification and group anchor IDs into `groupActiveRecords.ts` so the Current State tab, rail, and mobile summary share the same grouping logic.
+- Updated responsive CSS so the reading page widens for the rail, the desktop rail appears at the ~1200px threshold, and the mobile bar is hidden at that threshold.
+- Added focused render/interaction tests for the new components and updated the page-read route test.
+
+## Verification Result
+
+Commands run on 2026-05-26:
+
+1. `npm --prefix tools/story-explorer/web test -- CurrentStateTab.test page-read.test XRayPanel.test` — PASS before edits; 3 files / 8 tests passed. This established the pre-edit focused baseline.
+2. `npm --prefix tools/story-explorer/web test -- StickyRail.test MobileSummaryBar.test CurrentStateTab.test page-read.test XRayPanel.test` — PASS after edits; 5 files / 11 tests passed.
+3. `npm --prefix tools/story-explorer run build` — PASS; web TypeScript/Vite build and backend TypeScript build completed.
+4. `npm --prefix tools/story-explorer test` — PASS; backend `node:test` lane passed 13/13 compiled test files and web vitest passed 60/60 files, 166/166 tests.
+
+## Deviations
+
+- The drafted visual smoke in a live dev browser was not run in this Codex pass because the harness did not start a paired Story Explorer backend/API with a real story bundle. The route/component tests and full package suite verify the DOM placement, group-count logic, responsive component presence, and build integration.

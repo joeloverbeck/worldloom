@@ -2,9 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import { getRecord, type PageDetail, type RecordCard, type RecordGroup, type RecordLink } from '../../../api/client';
+import { CURRENT_STATE_GROUPS, emptyGroups, groupForRecordId } from '../groupActiveRecords';
 import { RecordCardCompact } from '../RecordCardCompact';
 import { RecordCardExpanded } from '../RecordCardExpanded';
 import { XRayGroup } from '../XRayGroup';
+
+export { CURRENT_STATE_GROUPS } from '../groupActiveRecords';
 
 interface CurrentStateTabProps {
   onRecordLinkClick?: (link: RecordLink | string) => void;
@@ -13,43 +16,7 @@ interface CurrentStateTabProps {
   worldSlug: string;
 }
 
-export const CURRENT_STATE_GROUPS: RecordGroup[] = [
-  'Cast & Status',
-  'Scene & Affordances',
-  'Knowledge & Truth',
-  'Plans & Emotion',
-  'Relationships & Debts',
-  'Pressure & Open Loops',
-  'Event Delta',
-  'Validation & Integrity',
-];
-
 export const VIRTUALIZATION_THRESHOLD = 50;
-
-const GROUP_BY_CLASS_PREFIX: Record<string, RecordGroup> = {
-  STENT: 'Cast & Status',
-  STCHAR: 'Cast & Status',
-  STSTAT: 'Cast & Status',
-  BR: 'Cast & Status',
-  STLOC: 'Scene & Affordances',
-  STOBJ: 'Scene & Affordances',
-  DA: 'Scene & Affordances',
-  BEL: 'Knowledge & Truth',
-  SF: 'Knowledge & Truth',
-  STSEC: 'Knowledge & Truth',
-  STQ: 'Knowledge & Truth',
-  STPLAN: 'Plans & Emotion',
-  STEMO: 'Plans & Emotion',
-  STINT: 'Plans & Emotion',
-  SREL: 'Relationships & Debts',
-  OBL: 'Relationships & Debts',
-  CNSQ: 'Pressure & Open Loops',
-  THR: 'Pressure & Open Loops',
-  CLK: 'Pressure & Open Loops',
-  SLT: 'Pressure & Open Loops',
-  SE: 'Event Delta',
-  CHC: 'Event Delta',
-};
 
 type RecordLoadState =
   | { kind: 'loading' }
@@ -59,23 +26,6 @@ type RecordLoadState =
 interface LoadedRecord {
   body: string | null;
   recordCard: RecordCard;
-}
-
-function recordClassPrefix(recordId: string): string {
-  return recordId.split('-')[0] ?? recordId;
-}
-
-function groupForRecordId(recordId: string): RecordGroup {
-  return GROUP_BY_CLASS_PREFIX[recordClassPrefix(recordId)] ?? 'Validation & Integrity';
-}
-
-function emptyGroups<T>(): Record<RecordGroup, T[]> {
-  const groups = {} as Record<RecordGroup, T[]>;
-  for (const group of CURRENT_STATE_GROUPS) {
-    groups[group] = [];
-  }
-
-  return groups;
 }
 
 function groupRecords(records: LoadedRecord[]): Record<RecordGroup, LoadedRecord[]> {
