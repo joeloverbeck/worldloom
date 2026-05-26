@@ -1,6 +1,6 @@
 # SPEC-87 — Story Explorer Backend Foundation
 
-**Status**: draft
+**Status**: COMPLETED
 **Origin**: `reports/website-proposal.md` triage (2026-05-25)
 **Related**: SPEC-88 (frontend), SPEC-89 (state x-ray), SPEC-90 (branch map & search), `specs/IMPLEMENTATION-ORDER.md`
 **Companion triage**: `docs/triage/2026-05-25-website-proposal-triage.md`
@@ -260,7 +260,7 @@ Never fabricate text not present in the record.
 ## 9. Build & test
 
 - `npm run build` compiles `src/` to `dist/`.
-- `npm test` runs vitest (or the existing repo standard) with fixtures covering: fresh-index happy path, missing-prose first-class state, stale-index degraded mode, broken-reference detection, hash mismatch detection, story-bundle `story_slug` scoping gate, read-only fencing (all four layers).
+- `npm test` runs the package's compiled `node:test` suite with fixtures covering: fresh-index happy path, missing-prose first-class state, stale-index degraded mode, broken-reference detection, hash mismatch detection, story-bundle `story_slug` scoping gate, read-only fencing (all four layers), sketch routes, and the capstone HTTP smoke.
 - `scripts/build-all.sh` is extended to append `tools/story-explorer/` after `tools/world-mcp/` in the dependency-ordered build list.
 - `scripts/check-all.sh` runs the test suite for `tools/story-explorer/` after upstream packages.
 
@@ -274,3 +274,29 @@ Never fabricate text not present in the record.
 | §Story Bundles §4 — Write Discipline (story-bundle writes are engine-routed) | aligns @ structural fencing | Four-layer fence ensures no story-bundle mutation path exists from the explorer. |
 | §Story Bundles §6.1 — Story-Local Character Authority | aligns @ record retrieval | STCHAR is fetched as story-local (hybrid frontmatter+body); world `CHAR` is not substituted as a runtime shortcut. |
 | §Tooling Recommendation — agents never operate on prose alone | N/A @ this surface | The explorer is a human-facing reader/x-ray, not an LLM agent surface; the principle's audience does not apply. (Defensive disclosure: principle is in the canon-reading cluster, so the row is included.) |
+
+## Outcome
+
+Completed: 2026-05-26
+
+SPEC-87 landed the read-only Story Explorer backend package at `tools/story-explorer/`. The package includes the ESM/TypeScript package skeleton, CLI/server bootstrap, read-only route guard, universal response envelopes, world/story/page/record/prose/provenance route families, search and branch-map sketch routes for SPEC-90, IndexStatus assembly over `world-index`, deterministic record-card summaries, direct prose/plan/receipt/raw-source reads, and a capstone HTTP smoke test.
+
+Archived ticket evidence:
+
+1. `archive/tickets/SPEC87STOEXPBAC-001.md` through `archive/tickets/SPEC87STOEXPBAC-010.md` are completed and archived.
+2. `archive/tickets/SPEC87STOEXPBAC-009.md` completed the search and branch-map sketch routes and type-only branch-map view models.
+3. `archive/tickets/SPEC87STOEXPBAC-010.md` completed the capstone HTTP smoke test.
+
+Final verification:
+
+1. `cd tools/story-explorer && npm run build` — passed.
+2. `cd tools/story-explorer && node --test dist/test/capstone-smoke.test.js` — passed: 1 test, 1 pass.
+3. `cd tools/story-explorer && npm test` — passed: 66 tests, 66 pass.
+4. `./scripts/build-all.sh` — passed for `world-index`, `patch-engine`, `validators`, `hooks`, `world-mcp`, and `story-explorer`.
+5. `./scripts/check-all.sh` — red before reaching `story-explorer`: under the wrapper, `world-index` reported `dist/tests/cli-init.test.js` and `dist/tests/cli-smoke.test.js` as failed while 30 other `world-index` top-level test files passed. Follow-up diagnostics showed `node --test dist/tests/cli-init.test.js dist/tests/cli-smoke.test.js` passed 9/9, and a direct `cd tools/world-index && npm test` passed 139/139. This is recorded as an upstream wrapper/concurrency deviation, not a SPEC-87 package failure.
+
+Deviations from the draft:
+
+1. The capstone did not copy `worlds/erotica-world/stories/red-bunny/` because that checkout-local path is absent in this worktree. It uses a temp-seeded red-bunny-shaped story fixture and verifies temp `_source` hash stability plus absence of checkout-local world creation.
+2. The package test runner is compiled `node:test`, not Vitest.
+3. `tools/story-explorer/test/fixtures/` was not created; fixture data is temp-seeded inside package tests so no world-content fixture is committed to this pipeline repository.
