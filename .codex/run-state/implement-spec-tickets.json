@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-88-story-explorer-frontend-foundation.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC88STOEXPFRO-009.md",
+  "last_ticket": "archive/tickets/SPEC88STOEXPFRO-010.md",
   "last_result": "completed_archived",
-  "last_work_commit": "e1b37387431877e6513a3a77eabea21093848c46",
+  "last_work_commit": "cd4fe1b0d70e35a6b7f13f26a565d8b8960f5d7b",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC88STOEXPFRO-010.md",
+  "next_target": "tickets/SPEC88STOEXPFRO-011.md",
   "queue": [
-    "tickets/SPEC88STOEXPFRO-010.md",
     "tickets/SPEC88STOEXPFRO-011.md",
     "tickets/SPEC88STOEXPFRO-012.md",
     "tickets/SPEC88STOEXPFRO-013.md"
@@ -17,7 +16,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean focused proof: tools/story-explorer/web npm test -- ProsePanel.test ProseMissingPlaceholder.test page-read.test passed 3 files/11 tests, npm run build passed, npm test passed 17 files/57 tests, and XSS grep confirmed the single dangerouslySetInnerHTML site follows sanitizeMarkdown after T009 prose panel implementation; post-review archive/dependency edits did not require rerunning implementation proof.",
+  "proof_state": "clean focused proof: tools/story-explorer/web npm test -- page-read.test baseline passed 1 file/3 tests; npm test -- ChoiceCard.test ChildOutcomeVariant.test TerminalCard.test page-read.test passed 4 files/13 tests; npm run build passed; npm test passed 20 files/67 tests; action-label grep for continue story|next page|generate|create page returned no matches after T010 choice-navigation implementation; post-review archive/dependency/spec edits did not require rerunning implementation proof.",
   "dirty_state": "expected ignored artifacts present after state commit: tools/story-explorer/dist/, tools/story-explorer/node_modules/, tools/story-explorer/web/dist/, tools/story-explorer/web/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
