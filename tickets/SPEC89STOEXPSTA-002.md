@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — new primitive components under `tools/story-explorer/web/src/components/xray/`: XRayGroup, RecordCardCompact, RecordCardExpanded, RawRecordDisclosure, plus a stub RecordCardRenderers module that SPEC89STOEXPSTA-003 fills with per-class dispatch
-**Deps**: SPEC89STOEXPSTA-001
+**Deps**: archive/tickets/SPEC89STOEXPSTA-001.md
 
 ## Problem
 

@@ -162,7 +162,8 @@ describe('PageReadRoute', () => {
     expect(screen.getByText('Rendered prose not attached yet.')).toBeInTheDocument();
     expect(screen.getByText('No navigable choices from this page.')).toBeInTheDocument();
     expect(screen.getByText('No committed continuation from this page.')).toBeInTheDocument();
-    expect(screen.getByText('State X-Ray slot (SPEC-89 fills)')).toBeInTheDocument();
+    expect(screen.getByRole('tablist', { name: 'State X-Ray tabs' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Current State' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByText('Summary rail slot (SPEC-89 fills)')).toBeInTheDocument();
   });
 
