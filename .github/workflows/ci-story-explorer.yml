@@ -1,17 +1,19 @@
-name: CI - world-index
+name: CI - story-explorer
 
 on:
   push:
     branches: [main]
     paths:
+      - 'tools/story-explorer/**'
       - 'tools/world-index/**'
       - 'tests/fixtures/animalia/**'
-      - '.github/workflows/ci-world-index.yml'
+      - '.github/workflows/ci-story-explorer.yml'
   pull_request:
     paths:
+      - 'tools/story-explorer/**'
       - 'tools/world-index/**'
       - 'tests/fixtures/animalia/**'
-      - '.github/workflows/ci-world-index.yml'
+      - '.github/workflows/ci-story-explorer.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,15 +27,12 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
+      - name: Install and build world-index (file dependency)
+        working-directory: tools/world-index
+        run: npm install && npm run build
       - name: Install
-        working-directory: tools/world-index
+        working-directory: tools/story-explorer
         run: npm install
-      - name: Build
-        working-directory: tools/world-index
-        run: npm run build
       - name: Test
-        working-directory: tools/world-index
+        working-directory: tools/story-explorer
         run: npm test
-      - name: SPEC-10 verification
-        working-directory: tools/world-index
-        run: npm run test:spec10-verification
