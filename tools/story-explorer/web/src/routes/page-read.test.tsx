@@ -79,7 +79,7 @@ function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
     pagePlanSummary: null,
     receiptSummary: null,
     choiceNavigation: [],
-    currentStateRecordIds: ['CAST-1'],
+    currentStateRecordIds: [],
     eventDelta: {
       eventId: null,
       createCount: 0,

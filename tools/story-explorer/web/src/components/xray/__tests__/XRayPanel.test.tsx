@@ -12,7 +12,7 @@ function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
     pagePlanSummary: null,
     receiptSummary: null,
     choiceNavigation: [],
-    currentStateRecordIds: ['STENT-1', 'BEL-1'],
+    currentStateRecordIds: [],
     eventDelta: {
       eventId: 'SE-12',
       createCount: 1,
@@ -39,7 +39,7 @@ function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
 
 describe('XRayPanel', () => {
   it('renders the four X-Ray tabs with Current State selected by default', () => {
-    render(<XRayPanel pageDetail={pageDetail()} />);
+    render(<XRayPanel pageDetail={pageDetail()} storySlug="red-bunny" worldSlug="fixture-world" />);
 
     const tablist = screen.getByRole('tablist', { name: 'State X-Ray tabs' });
     const tabs = within(tablist).getAllByRole('tab');
@@ -52,13 +52,11 @@ describe('XRayPanel', () => {
       'Validation & Integrity',
     ]);
     expect(screen.getByRole('tab', { name: 'Current State' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByRole('tabpanel', { name: 'Current State' })).toHaveTextContent(
-      'Tab content to be filled by SPEC89STOEXPSTA-004',
-    );
+    expect(screen.getByRole('tabpanel', { name: 'Current State' })).toHaveTextContent('0 active records.');
   });
 
   it('cycles keyboard focus and selection through the tabs', () => {
-    render(<XRayPanel pageDetail={pageDetail()} />);
+    render(<XRayPanel pageDetail={pageDetail()} storySlug="red-bunny" worldSlug="fixture-world" />);
 
     const currentState = screen.getByRole('tab', { name: 'Current State' });
     fireEvent.keyDown(currentState, { key: 'ArrowRight' });

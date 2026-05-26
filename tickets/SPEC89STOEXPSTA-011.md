@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new `StickyRail.tsx` (desktop right rail) + `MobileSummaryBar.tsx` (mobile inline summary) components, mounted in the appropriate slot established by SPEC-88 §4.4
-**Deps**: SPEC89STOEXPSTA-004
+**Deps**: archive/tickets/SPEC89STOEXPSTA-004.md
 
 ## Problem
 

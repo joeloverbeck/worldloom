@@ -9,12 +9,14 @@ import { XRayTabs, type XRayTabId } from './XRayTabs';
 
 interface XRayPanelProps {
   pageDetail: PageDetail;
+  storySlug: string;
+  worldSlug: string;
 }
 
-function renderTabPanel(tabId: XRayTabId, pageDetail: PageDetail): JSX.Element {
+function renderTabPanel(tabId: XRayTabId, pageDetail: PageDetail, worldSlug: string, storySlug: string): JSX.Element {
   switch (tabId) {
     case 'current-state':
-      return <CurrentStateTab pageDetail={pageDetail} />;
+      return <CurrentStateTab pageDetail={pageDetail} storySlug={storySlug} worldSlug={worldSlug} />;
     case 'what-changed':
       return <WhatChangedHereTab pageDetail={pageDetail} />;
     case 'plan-prose':
@@ -24,7 +26,7 @@ function renderTabPanel(tabId: XRayTabId, pageDetail: PageDetail): JSX.Element {
   }
 }
 
-export function XRayPanel({ pageDetail }: XRayPanelProps): JSX.Element {
+export function XRayPanel({ pageDetail, storySlug, worldSlug }: XRayPanelProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<XRayTabId>('current-state');
 
   return (
@@ -37,7 +39,7 @@ export function XRayPanel({ pageDetail }: XRayPanelProps): JSX.Element {
         role="tabpanel"
         tabIndex={0}
       >
-        {renderTabPanel(activeTab, pageDetail)}
+        {renderTabPanel(activeTab, pageDetail, worldSlug, storySlug)}
       </div>
     </div>
   );
