@@ -15,11 +15,6 @@ export interface RecordField {
   value: string;
 }
 
-export interface RecordChip {
-  label: string;
-  value: string;
-}
-
 export interface RecordProvenanceSummary {
   createdAtPage: string | null;
   creatingEventId: string | null;
@@ -32,7 +27,6 @@ export interface RecordCard {
   recordClass: string;
   group: RecordGroup;
   summaryLine: string;
-  chips: RecordChip[];
   primaryFields: RecordField[];
   secondaryFields: RecordField[];
   status: string | null;

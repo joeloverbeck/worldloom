@@ -52,7 +52,6 @@ function recordCard(
     recordClass,
     group: GROUP_BY_CLASS[recordClass] ?? 'Validation & Integrity',
     summaryLine: `${recordClass} fallback summary`,
-    chips: [],
     primaryFields: fields,
     secondaryFields: [],
     status: null,

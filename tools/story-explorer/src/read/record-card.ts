@@ -1,5 +1,5 @@
 import { recordClass } from "./record-io.js";
-import type { RecordCard, RecordChip, RecordField, RecordGroup, RecordProvenanceSummary } from "../view-models/record-card.js";
+import type { RecordCard, RecordField, RecordGroup, RecordProvenanceSummary } from "../view-models/record-card.js";
 import type { RecordLink } from "../view-models/record-link.js";
 
 type ParsedRecord = Record<string, unknown>;
@@ -310,23 +310,6 @@ function summaryLine(recordId: string, body: ParsedRecord, rule: SummaryRule): s
   return `Untitled ${recordClass(recordId)} record`;
 }
 
-function chips(body: ParsedRecord, rule: SummaryRule): RecordChip[] {
-  const chipFields = [
-    ["status", rule.statusField],
-    ["visibility", rule.visibilityField],
-    ["confidence", rule.confidenceField],
-    ["urgency", rule.urgencyField],
-  ] as const;
-
-  return chipFields.flatMap(([label, field]) => {
-    if (field === undefined) {
-      return [];
-    }
-    const value = stringifyValue(nestedValue(body, field));
-    return value === null ? [] : [{ label, value }];
-  });
-}
-
 function recordIdsFrom(value: unknown): string[] {
   if (typeof value === "string") {
     return RECORD_ID_PATTERN.test(value) ? [value] : [];
@@ -408,7 +391,6 @@ export function buildRecordCard(
     recordClass: recordClass(recordId),
     group: rule.group,
     summaryLine: summaryLine(recordId, parsedBody, rule),
-    chips: chips(parsedBody, rule),
     primaryFields: fieldList(parsedBody, rule.primaryFields),
     secondaryFields: fieldList(parsedBody, rule.secondaryFields),
     status: rule.statusField === undefined ? null : stringifyValue(nestedValue(parsedBody, rule.statusField)),

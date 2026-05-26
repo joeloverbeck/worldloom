@@ -177,7 +177,7 @@ for (const [recordClass, fixture] of Object.entries(REPRESENTATIVE_RECORDS)) {
   });
 }
 
-test("buildRecordCard computes chips, participants, links, and provenance", () => {
+test("buildRecordCard computes participants, links, and provenance", () => {
   const card = buildRecordCard(
     "OBL-1",
     REPRESENTATIVE_RECORDS.OBL!.body,
@@ -185,10 +185,6 @@ test("buildRecordCard computes chips, participants, links, and provenance", () =
     { provenance: { creatingEventId: "SE-1", modifyingEventIds: ["SE-2"], evidenceRecordIds: ["BEL-1"] } }
   );
 
-  assert.deepEqual(card.chips, [
-    { label: "status", value: "open" },
-    { label: "urgency", value: "medium" },
-  ]);
   assert.deepEqual(card.participants, ["STENT-1", "STENT-2"]);
   assert.deepEqual(
     card.links.map((link) => [link.recordId, link.activeOnCurrentPage]),

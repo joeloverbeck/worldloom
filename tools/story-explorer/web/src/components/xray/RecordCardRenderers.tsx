@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import type { RecordCard, RecordChip, RecordField } from '../../api/client';
+import type { RecordCard, RecordField } from '../../api/client';
 
 interface CompactLineProps {
   recordCard: RecordCard;
@@ -92,11 +92,6 @@ function fieldValue(recordCard: RecordCard, aliasKey: keyof typeof FIELD_ALIASES
   return match?.value ?? null;
 }
 
-function chipValue(chips: RecordChip[], label: string): string | null {
-  const normalized = normalizeName(label);
-  return chips.find((chip) => normalizeName(chip.label) === normalized)?.value ?? null;
-}
-
 function maybe(label: string, value: string | null | undefined): string | null {
   if (value === null || value === undefined || value.trim().length === 0) {
     return null;
@@ -126,10 +121,9 @@ function countFromFieldOrLinks(recordCard: RecordCard, aliasKey: keyof typeof FI
 }
 
 function deltaSummary(recordCard: RecordCard): string | null {
-  const create = fieldValue(recordCard, 'clueCount') ?? chipValue(recordCard.chips, 'create');
-  const supersede = fieldValue(recordCard, 'supersedes') ?? chipValue(recordCard.chips, 'supersede');
-  const close = chipValue(recordCard.chips, 'close');
-  return create ?? supersede ?? close ? `delta ${create ?? 0} / ${supersede ?? 0} / ${close ?? 0}` : null;
+  const create = fieldValue(recordCard, 'clueCount');
+  const supersede = fieldValue(recordCard, 'supersedes');
+  return (create ?? supersede) !== null ? `delta ${create ?? 0} / ${supersede ?? 0} / 0` : null;
 }
 
 function renderParts(...parts: Array<string | null | undefined>): string[] {
