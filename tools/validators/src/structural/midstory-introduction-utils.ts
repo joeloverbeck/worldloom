@@ -62,7 +62,17 @@ const SREL_TRIGGERS = [
   "debt_relation_forms",
   "authority_relation_forms",
   "trust_axis_becomes_relevant",
+  "fear_axis_becomes_relevant",
+  "desire_axis_becomes_relevant",
   "intimacy_axis_becomes_relevant",
+  "loyalty_axis_becomes_relevant",
+  "resentment_axis_becomes_relevant",
+  "power_imbalance_axis_becomes_relevant",
+  "attention_axis_becomes_relevant",
+  "familiarity_axis_becomes_relevant",
+  "approval_axis_becomes_relevant",
+  "respect_axis_becomes_relevant",
+  "obligation_axis_becomes_relevant",
   "hostility_axis_becomes_relevant"
 ] as const;
 
