@@ -51,7 +51,7 @@ The single-artifact architecture (one `pages-prose-plans/PG-<integer>.md` that s
 | Date | Decision | Reference |
 |---|---|---|
 | 2026-05-10 | The plan IS the renderer prompt (single artifact). Plan rendering is OUT of skill; external renderer reads `pages-prose-plans/PG-<integer>.md` cold. | PROSESPLIT-001..009; `docs/triage/2026-05-10-prose-rendering-out-of-skill-triage.md`; FOUNDATIONS §Story Bundles §4 |
-| 2026-05-12 | Translate SLT schema (§15) and OBL/CNSQ/THR (§10) engine vocabulary into prose direction. Drop `forbidden_engine_vocabulary[]` enumeration from §18/§19 body. Add Cast Material Reality projection + clothing consistency gate. | PPLAN-001..007; `docs/triage/2026-05-12-page-plan-engine-vocabulary-cleanup-triage.md` |
+| 2026-05-12 | Translate SLT schema (§15) and OBL/CNSQ/THR (§10) engine vocabulary into prose direction. Drop `forbidden_engine_vocabulary[]` enumeration from §18/§19 body. Add Cast Material Reality projection + clothing consistency gate. | PPLAN-001..007; `docs/triage/2026-05-12-page-plan-engine-vocabulary-cleanup-triage.md` (PPLAN-008 is repair work on red-bunny PG-2, not pattern extension; tangentially related but out of SPEC-91 scope) |
 | 2026-05-12 | §2 / §3 / §19 stay inlined verbatim every page. Cross-page compaction rejected — external LLM has no cross-plan state, every render is cold context. | User decision; feedback memory `page_plan_verbatim_sections` |
 
 This spec extends the 2026-05-12 translation pattern to the sections PPLAN didn't reach (§7, §7a, §9, §9b, §9c, §10b, §14) and adds the structural enforcement (validator) that the engine-jargon contract rule has lacked.
@@ -203,7 +203,7 @@ SPEC91-004 (per §11 below) is therefore reduced to the §Render-Time Instructio
 
 ## 8. New structural validator — `page_plan_body_engine_vocabulary_cleanliness`
 
-A new validator at `tools/validators/src/structural/page-plan-body-engine-vocabulary-cleanliness.ts` (file path follows the existing structural-validator convention). Consumed by `branching-story-bootstrap` Phase 9 and `branching-story-turn-cycle` Phase 9 as a deterministic gate at page-plan commit (alongside the existing nine shared hard gates).
+A new validator at `tools/validators/src/structural/page-plan-body-engine-vocabulary-cleanliness.ts` (file path follows the existing structural-validator convention). Consumed by `branching-story-bootstrap` Phase 10 and `branching-story-turn-cycle` Phase 9 as a deterministic gate at page-plan commit (alongside the existing nine shared hard gates).
 
 ### 8.1 Scan target
 
@@ -240,7 +240,7 @@ The token source file (`_engine-vocabulary-tokens.ts`) is shared with prose-atta
 ## 9. Migration / scope
 
 - **No retroactive plan rewrite.** Existing PG-1 through PG-5 in `worlds/erotica-world/stories/red-bunny/pages-prose-plans/` remain as-is. The new contract applies to plans authored after the spec lands.
-- **Forward-only enforcement.** The new validator runs on plans authored at bootstrap Phase 9 and turn-cycle Phase 9. Pre-existing plans do not pass through this validator (they pre-date the contract change).
+- **Forward-only enforcement.** The new validator runs on plans authored at bootstrap Phase 10 and turn-cycle Phase 9. Pre-existing plans do not pass through this validator (they pre-date the contract change).
 - **Mid-bundle continuation works.** A bundle whose PG-1 through PG-N were authored under the old contract can author PG-(N+1) under the new contract; the §14 "Where the previous page ended" subsection summarizes the parent prose in structured form regardless of the parent plan's own §7 / §9 / §10b shape.
 
 ## 10. Test plan
@@ -252,7 +252,7 @@ The token source file (`_engine-vocabulary-tokens.ts`) is shared with prose-atta
 | Validator unit (negative — FAIL) | A plan body with ≥3 engine-vocabulary tokens in §7 body produces `verdict: FAIL`. |
 | Validator unit (allow-list) | Engine-vocabulary tokens in §15 / §16a `Current-state grounding records:` / §2 / §3 / §19 do NOT contribute to the verdict. |
 | Validator unit (token-source sync) | The `_engine-vocabulary-tokens.ts` token list contains every record class in the §Story Bundles §6 enumeration (regression test against future schema additions). |
-| Skill integration (bootstrap) | `branching-story-bootstrap` Phase 9 invokes the new validator and reports a FAIL as a structural gate before patch submission. |
+| Skill integration (bootstrap) | `branching-story-bootstrap` Phase 10 invokes the new validator and reports a FAIL as a structural gate before patch submission. |
 | Skill integration (turn-cycle) | `branching-story-turn-cycle` Phase 9 invokes the new validator and reports a FAIL as a structural gate before patch submission. |
 | Skill integration (prose-attach) | `branching-story-prose-attach` Phase 3 check 2 `engine_jargon_leak` continues to scan rendered prose (unchanged surface), now using the shared `_engine-vocabulary-tokens.ts` token source instead of an inline list. |
 | Contract sync | `.claude/skills/_shared-templates/story-state-contract.md` §8 updated to reference the new validator alongside the existing `page_plan_stchar_packet_integrity` and `active_pressure_handling_discipline` validators; the existing line 571 prose rule ("engine jargon to prose; engine terms confined to §15 frontmatter only") is preserved verbatim and a parenthetical names the structural enforcement. |
@@ -288,12 +288,10 @@ Five ticket-sized chunks. Each is reviewable independently; they should land rou
 5. **SPEC91-005 — New `page_plan_body_engine_vocabulary_cleanliness` validator + shared token source**
    - Create `tools/validators/src/structural/_engine-vocabulary-tokens.ts` with the three token classes (record-ID regex, schema field names, predicate-DSL terms) per §8.2.
    - Create `tools/validators/src/structural/page-plan-body-engine-vocabulary-cleanliness.ts` implementing the scan, the allow-list, and the WARN/FAIL thresholds per §8.3.
-   - Wire the new validator into bootstrap Phase 9 and turn-cycle Phase 9 deterministic gates.
+   - Wire the new validator into bootstrap Phase 10 and turn-cycle Phase 9 deterministic gates.
    - Update prose-attach Phase 3 check 2 `engine_jargon_leak` to import from the shared token source (replaces the inline list in `branching-story-prose-attach/SKILL.md` Phase 3 check 2).
    - Add validator unit tests per §10.
    - Update `.claude/skills/_shared-templates/story-state-contract.md` §8 to name the new validator alongside `page_plan_stchar_packet_integrity` and `active_pressure_handling_discipline`.
-
-A separate companion triage file is NOT created — single-deliverable triage flow producing one spec from a single-source report; the §Input-complexity carve-out threshold (≥8 evaluated items) is not met (the report collapses to ~6 distinct proposals after grouping).
 
 ## 12. FOUNDATIONS alignment
 
