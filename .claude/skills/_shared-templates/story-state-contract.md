@@ -449,7 +449,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 18 | Anti-pathology checklist | per-skill |
 | 19 | **Render-time instruction block** | **inlined verbatim from `docs/prose-renderer-contract/render-time-instruction.md`** |
 
-**§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages.
+**§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages. Byte-equality between canonical source and inlined section is enforced by the `page_plan_verbatim_section_integrity` structural validator (`tools/validators/src/structural/page-plan-verbatim-section-integrity.ts`); drift fails the gate.
 
 ### 14. Recent prose continuity
 

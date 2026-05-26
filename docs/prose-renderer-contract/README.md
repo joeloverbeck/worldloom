@@ -30,7 +30,7 @@ Per-story `forbidden_resolutions[]` are inlined into each plan file at plan-auth
 
 ## Forbidden compaction
 
-§2, §3, and §19 are inlined verbatim on every page plan. This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages.
+§2, §3, and §19 are inlined verbatim on every page plan. This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages. Byte-equality between the post-framing payloads in this folder and the inlined page-plan sections is enforced by the `page_plan_verbatim_section_integrity` structural validator.
 
 ## Diagnostic Vocabulary dual-purpose note
 
