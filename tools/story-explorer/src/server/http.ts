@@ -11,6 +11,10 @@ import { resolveIndexStatus } from "../read/index-status.js";
 import type { IndexStatus } from "../view-models/index-status.js";
 import { wrapRouterReadOnly } from "./readonly-guard.js";
 import { registerHealthRoute } from "./routes/health.js";
+import { registerPageRoutes } from "./routes/pages.js";
+import { registerProseRoutes } from "./routes/prose.js";
+import { registerProvenanceRoutes } from "./routes/provenance.js";
+import { registerRecordRoutes } from "./routes/records.js";
 import { registerStoriesRoutes } from "./routes/stories.js";
 import { registerWorldsRoutes } from "./routes/worlds.js";
 
@@ -93,6 +97,10 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerHealthRoute(server, { serverVersion });
   await registerWorldsRoutes(server, { repoRoot: options.repoRoot });
   await registerStoriesRoutes(server, { repoRoot: options.repoRoot });
+  await registerPageRoutes(server, { repoRoot: options.repoRoot });
+  await registerRecordRoutes(server, { repoRoot: options.repoRoot });
+  await registerProseRoutes(server, { repoRoot: options.repoRoot });
+  await registerProvenanceRoutes(server, { repoRoot: options.repoRoot });
 
   return server;
 }

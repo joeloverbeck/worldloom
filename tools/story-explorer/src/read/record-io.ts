@@ -51,6 +51,12 @@ const RECORD_SOURCE_DIRS: Record<string, string> = {
   THR: "threads",
 };
 
+const DIRECT_MARKDOWN_DIRS: Record<string, string> = {
+  SAU: "audits",
+  SLB: "storylet-batches",
+  SP: "story-promotions",
+};
+
 export function storyDirectory(repoRoot: string, worldSlug: string, storySlug: string): string {
   return path.join(repoRoot, "worlds", worldSlug, "stories", storySlug);
 }
@@ -77,11 +83,108 @@ export function recordSourcePath(
 }
 
 export function parseRecordBody(body: string): ParsedRecord {
+  if (body.startsWith("---\n") || body.startsWith("---\r\n")) {
+    const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(body);
+    if (match !== null) {
+      const frontmatter = YAML.parse(match[1] ?? "") as unknown;
+      return {
+        ...(frontmatter !== null && typeof frontmatter === "object" && !Array.isArray(frontmatter)
+          ? (frontmatter as ParsedRecord)
+          : {}),
+        body: match[2] ?? "",
+      };
+    }
+  }
+
   const parsed = YAML.parse(body) as unknown;
   if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
     return parsed as ParsedRecord;
   }
+
+  const heading = /^#\s+(.+)$/m.exec(body);
+  if (heading !== null) {
+    return {
+      title: heading[1],
+      body,
+    };
+  }
+
   throw new Error("Record body did not parse to an object");
+}
+
+async function findRecordByPrefix(directory: string, recordId: string): Promise<string | null> {
+  try {
+    const entries = await readdir(directory, { withFileTypes: true });
+    const matched = entries
+      .filter((entry) => entry.isFile())
+      .map((entry) => entry.name)
+      .filter(
+        (name) =>
+          name === `${recordId}.md` ||
+          name === `${recordId}.yaml` ||
+          name.startsWith(`${recordId}-`) && (name.endsWith(".md") || name.endsWith(".yaml")),
+      )
+      .sort((left, right) => left.localeCompare(right, undefined, { numeric: true }))[0];
+    return matched === undefined ? null : path.join(directory, matched);
+  } catch (error) {
+    const candidate = error as NodeJS.ErrnoException;
+    if (candidate.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function findRspPath(base: string, recordId: string): Promise<string | null> {
+  const auditsRoot = path.join(base, "audits");
+  try {
+    const audits = await readdir(auditsRoot, { withFileTypes: true });
+    for (const audit of audits.sort((left, right) => left.name.localeCompare(right.name, undefined, { numeric: true }))) {
+      if (!audit.isDirectory() || !audit.name.startsWith("SAU-")) {
+        continue;
+      }
+      const candidate = await findRecordByPrefix(
+        path.join(auditsRoot, audit.name, "remediation-storylet-proposals"),
+        recordId,
+      );
+      if (candidate !== null) {
+        return candidate;
+      }
+    }
+    return null;
+  } catch (error) {
+    const candidate = error as NodeJS.ErrnoException;
+    if (candidate.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function directRecordPath(
+  worldSlug: string,
+  storySlug: string,
+  recordId: string,
+  repoRoot: string,
+): Promise<string> {
+  const base = storyDirectory(repoRoot, worldSlug, storySlug);
+  const klass = recordClass(recordId);
+  if (klass === "RSP") {
+    const rspPath = await findRspPath(base, recordId);
+    if (rspPath !== null) {
+      return rspPath;
+    }
+  }
+
+  const markdownDir = DIRECT_MARKDOWN_DIRS[klass];
+  if (markdownDir !== undefined) {
+    const sourcePath = await findRecordByPrefix(path.join(base, markdownDir), recordId);
+    if (sourcePath !== null) {
+      return sourcePath;
+    }
+  }
+
+  return recordSourcePath(worldSlug, storySlug, recordId, repoRoot);
 }
 
 export async function readRawRecord(
@@ -90,7 +193,7 @@ export async function readRawRecord(
   recordId: string,
   repoRoot = resolveRepoRoot()
 ): Promise<RawRecord> {
-  const sourcePath = recordSourcePath(worldSlug, storySlug, recordId, repoRoot);
+  const sourcePath = await directRecordPath(worldSlug, storySlug, recordId, repoRoot);
   const body = await readFile(sourcePath, "utf8");
   return {
     body,
