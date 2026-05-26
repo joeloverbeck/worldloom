@@ -10,6 +10,8 @@ FIXTURE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/world-index-spec10-XXXXXX")"
 trap 'rm -rf "$FIXTURE_ROOT"' EXIT
 
 mkdir -p "$FIXTURE_ROOT/worlds"
+mkdir -p "$FIXTURE_ROOT/docs"
+cp "$REPO_ROOT/docs/FOUNDATIONS.md" "$FIXTURE_ROOT/docs/FOUNDATIONS.md"
 cp -R "$FIXTURE_SOURCE" "$FIXTURE_ROOT/worlds/$WORLD_SLUG"
 rm -rf "$FIXTURE_ROOT/worlds/$WORLD_SLUG/_index"
 
@@ -17,8 +19,8 @@ cd "$PACKAGE_ROOT"
 npm run build
 
 cd "$FIXTURE_ROOT"
-node "$REPO_ROOT/tools/world-index/dist/src/cli.js" build "$WORLD_SLUG"
-node "$REPO_ROOT/tools/world-index/dist/src/cli.js" verify "$WORLD_SLUG"
+node "$REPO_ROOT/tools/world-index/dist/src/cli.js" build "$WORLD_SLUG" --world-root "$FIXTURE_ROOT"
+node "$REPO_ROOT/tools/world-index/dist/src/cli.js" verify "$WORLD_SLUG" --world-root "$FIXTURE_ROOT"
 
 cd "$PACKAGE_ROOT"
 REPO_ROOT="$FIXTURE_ROOT" WORLD_SLUG="$WORLD_SLUG" node <<'EOF'

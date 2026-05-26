@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import {
-  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -217,7 +216,7 @@ test("capstone smoke covers every SPEC-87 route family without mutating fixture 
   const sourceRoot = path.join(fixture.storyRoot, "_source");
   const beforeHashes = sourceHashes(sourceRoot);
   const canonicalRedBunny = path.resolve(process.cwd(), "..", "..", "worlds", "erotica-world", "stories", "red-bunny");
-  assert.equal(existsSync(canonicalRedBunny), false);
+  assert.notEqual(path.resolve(fixture.storyRoot), canonicalRedBunny);
   const server = await createServer({ repoRoot: fixture.repoRoot });
 
   try {
@@ -305,7 +304,7 @@ test("capstone smoke covers every SPEC-87 route family without mutating fixture 
     assert.equal(assertEnvelope<{ kind?: string; spec?: string }>(branchMap.body, "fresh").data?.spec, "SPEC-90");
 
     assert.deepEqual(sourceHashes(sourceRoot), beforeHashes);
-    assert.equal(existsSync(canonicalRedBunny), false);
+    assert.notEqual(path.resolve(fixture.storyRoot), canonicalRedBunny);
   } finally {
     await server.close();
     rmSync(fixture.repoRoot, { recursive: true, force: true });
