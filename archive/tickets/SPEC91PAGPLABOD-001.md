@@ -99,4 +99,4 @@ Completed 2026-05-26. The shared story-state contract and both page-plan authori
 
 ## Deviations
 
-- No executable validator sample plan was authored for this documentation-only ticket. The full validator-side PG-6 proof remains owned by `tickets/SPEC91PAGPLABOD-005.md`.
+- No executable validator sample plan was authored for this documentation-only ticket. The full validator-side PG-6 proof was later closed by `archive/tickets/SPEC91PAGPLABOD-005.md`.
