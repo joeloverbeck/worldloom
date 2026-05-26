@@ -47,10 +47,15 @@ branch_path: [PG-<integer>]*           # * ordered list of pages from root to he
 turn_index: 0*
 input:
   # Input legality:
-  # - If resolved_event.event_kind == story_start (i.e., parent_page_id == null, only PG-1):
+  # - If resolved_event.event_kind is story_start, system_repair, audit_repair, prose_attach, or promotion_closeout:
   #     choice_id == null
   #     manual_action_text == null
-  # - Otherwise:
+  # - If resolved_event.event_kind == turn_resolution and resolved_event.turn_driver.kind is
+  #   npc_action, offstage_action, world_pressure, clock_fire, secret_reveal, or multi_actor_collision:
+  #     choice_id == null and manual_action_text == null is lawful for advance_initiative;
+  #     exactly one source action is also lawful when a player source co-fires with the non-player driver.
+  # - If resolved_event.event_kind == turn_resolution and resolved_event.turn_driver.kind is
+  #   player_action or player_write_in:
   #     exactly one of choice_id / manual_action_text is non-null
   choice_id: CHC-<integer> | null
   manual_action_text: null | string

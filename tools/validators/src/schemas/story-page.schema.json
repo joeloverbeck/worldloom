@@ -32,7 +32,7 @@
     "turn_index": { "type": "integer", "minimum": 0 },
     "input": {
       "type": "object",
-      "description": "Exactly-one legality is enforced by state_snapshot_integrity conditional on the resolved event kind, with a carve-out for event_kind: story_start.",
+      "description": "Exactly-one legality is enforced by state_snapshot_integrity conditional on the resolved event kind and turn_driver.kind. Both-null input is required for event_kind values story_start, system_repair, audit_repair, prose_attach, and promotion_closeout, and is also valid for event_kind: turn_resolution with non-player turn_driver.kind values npc_action, offstage_action, world_pressure, clock_fire, secret_reveal, or multi_actor_collision. Player-driver turns (event_kind: turn_resolution with turn_driver.kind player_action or player_write_in) require exactly one source action.",
       "required": ["choice_id", "manual_action_text", "resolved_event_id"],
       "properties": {
         "choice_id": { "type": ["string", "null"], "pattern": "^CHC-(0|[1-9][0-9]*)$" },

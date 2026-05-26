@@ -17,6 +17,22 @@ const MYSTERY_EVIDENCE_REQUIRED_STATUSES = new Set([
   "apparent_resolution",
   "held_for_promotion"
 ]);
+const AUDIT_ONLY_EVENT_KINDS = new Set([
+  "story_start",
+  "system_repair",
+  "audit_repair",
+  "prose_attach",
+  "promotion_closeout"
+]);
+const NON_PLAYER_DRIVER_KINDS = new Set([
+  "npc_action",
+  "offstage_action",
+  "world_pressure",
+  "clock_fire",
+  "secret_reveal",
+  "multi_actor_collision"
+]);
+const PLAYER_DRIVER_KINDS = new Set(["player_action", "player_write_in"]);
 
 const ARRAY_FIELDS = [
   "objective_facts",
@@ -188,7 +204,8 @@ function validateInputLegality(
   }
 
   const resolvedEvent = maps.byId.get(resolvedEventId);
-  const resolvedEventKind = stringValue(asPlainRecord(resolvedEvent?.parsed).event_kind);
+  const eventParsed = asPlainRecord(resolvedEvent?.parsed);
+  const resolvedEventKind = stringValue(eventParsed.event_kind);
   if (resolvedEvent === undefined || resolvedEventKind === undefined) {
     return inputLegalityViolation(page, pageLabel, resolvedEventId, "<unresolved>", choiceId, manualActionText);
   }
@@ -196,11 +213,28 @@ function validateInputLegality(
   const hasChoice = choiceId !== null && choiceId !== undefined;
   const hasManualAction = manualActionText !== null && manualActionText !== undefined;
 
-  if (["story_start", "system_repair", "audit_repair"].includes(resolvedEventKind)) {
+  if (AUDIT_ONLY_EVENT_KINDS.has(resolvedEventKind)) {
     if (!hasChoice && !hasManualAction) {
       return undefined;
     }
     return inputLegalityViolation(page, pageLabel, resolvedEventId, resolvedEventKind, choiceId, manualActionText);
+  }
+
+  if (resolvedEventKind === "turn_resolution") {
+    const driverKind = stringValue(asPlainRecord(eventParsed.turn_driver).kind);
+    if (driverKind !== undefined && NON_PLAYER_DRIVER_KINDS.has(driverKind)) {
+      if (hasChoice && hasManualAction) {
+        return inputLegalityViolation(page, pageLabel, resolvedEventId, resolvedEventKind, choiceId, manualActionText);
+      }
+      return undefined;
+    }
+
+    if (driverKind !== undefined && PLAYER_DRIVER_KINDS.has(driverKind)) {
+      if (hasChoice !== hasManualAction) {
+        return undefined;
+      }
+      return inputLegalityViolation(page, pageLabel, resolvedEventId, resolvedEventKind, choiceId, manualActionText);
+    }
   }
 
   if (hasChoice !== hasManualAction) {
@@ -354,7 +388,7 @@ function inputLegalityViolation(
       choice_id: choiceId ?? null,
       manual_action_text: manualActionText ?? null
     },
-    suggested_fix: "Follow shared story state contract §4.2 input legality: story_start and repair pages use both-null input fields; turn-resolution pages use exactly one source action."
+    suggested_fix: "Follow shared story state contract §4.2 input legality: story_start, audit-only events (system_repair, audit_repair, prose_attach, promotion_closeout), and turn_resolution events with non-player turn_driver.kind use both-null input fields; turn_resolution events with player_action / player_write_in driver kind use exactly one source action."
   };
 }
 

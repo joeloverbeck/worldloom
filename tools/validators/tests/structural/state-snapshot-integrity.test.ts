@@ -4,6 +4,15 @@ import test from "node:test";
 import { stateSnapshotIntegrity } from "../../src/structural/state-snapshot-integrity.js";
 import { context, record } from "./helpers.js";
 
+const NON_PLAYER_DRIVER_KINDS = [
+  "npc_action",
+  "offstage_action",
+  "world_pressure",
+  "clock_fire",
+  "secret_reveal",
+  "multi_actor_collision"
+] as const;
+
 test("state_snapshot_integrity passes for a complete page snapshot", async () => {
   const verdicts = await stateSnapshotIntegrity.run(undefined, context(records(), {
     run_mode: "pre-apply",
@@ -97,6 +106,89 @@ test("state_snapshot_integrity rejects missing source input for non-story_start 
   }));
 
   assertPgInputLegalityViolation(verdicts, "PG-2", "SE-1", "selected_choice");
+});
+
+for (const driverKind of NON_PLAYER_DRIVER_KINDS) {
+  test(`state_snapshot_integrity accepts both-null input for ${driverKind} turn_resolution`, async () => {
+    const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+      pageRecord: pageWithInput(null, null),
+      eventKind: "turn_resolution",
+      turnDriverKind: driverKind
+    }), {
+      run_mode: "pre-apply",
+      patch_plan: patchPlan()
+    }));
+
+    assert.deepEqual(verdicts, []);
+  });
+}
+
+test("state_snapshot_integrity rejects both source inputs for non-player turn_resolution", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageRecord: pageWithInput("CHC-1", "Push the scene forward."),
+    eventKind: "turn_resolution",
+    turnDriverKind: "npc_action"
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assertPgInputLegalityViolation(verdicts, "PG-2", "SE-1", "turn_resolution", {
+    choice_id: "CHC-1",
+    manual_action_text: "Push the scene forward."
+  });
+});
+
+test("state_snapshot_integrity accepts choice input for non-player turn_resolution", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageRecord: pageWithInput("CHC-1", null),
+    eventKind: "turn_resolution",
+    turnDriverKind: "clock_fire"
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("state_snapshot_integrity accepts manual input for non-player turn_resolution", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageRecord: pageWithInput(null, "Hold position while the clock fires."),
+    eventKind: "turn_resolution",
+    turnDriverKind: "secret_reveal"
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("state_snapshot_integrity rejects both-null input for player_action turn_resolution", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageRecord: pageWithInput(null, null),
+    eventKind: "turn_resolution",
+    turnDriverKind: "player_action"
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assertPgInputLegalityViolation(verdicts, "PG-2", "SE-1", "turn_resolution");
+});
+
+test("state_snapshot_integrity rejects both-null input for player_write_in turn_resolution", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageRecord: pageWithInput(null, null),
+    eventKind: "turn_resolution",
+    turnDriverKind: "player_write_in"
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assertPgInputLegalityViolation(verdicts, "PG-2", "SE-1", "turn_resolution");
 });
 
 test("state_snapshot_integrity accepts active_records BEL references", async () => {
@@ -564,6 +656,7 @@ function records(options: {
   pageSnapshot?: Record<string, unknown>;
   includeFact?: boolean;
   eventKind?: string;
+  turnDriverKind?: string;
   pageId?: string;
 } = {}) {
   const pageId = options.pageId ?? "PG-2";
@@ -581,7 +674,8 @@ function records(options: {
     storyRecord("story_event_record", "SE-1", "events", {
       id: "SE-1",
       story_id: "STORY-1",
-      event_kind: options.eventKind ?? "selected_choice"
+      event_kind: options.eventKind ?? "selected_choice",
+      ...(options.turnDriverKind === undefined ? {} : { turn_driver: turnDriver(options.turnDriverKind) })
     }),
     ...(options.includeFact === false ? [] : [
       storyRecord("story_fact_record", "SF-1", "facts", {
@@ -643,6 +737,39 @@ function records(options: {
   ];
 }
 
+function pageWithInput(choiceId: string | null, manualActionText: string | null): Record<string, unknown> {
+  return {
+    id: "PG-2",
+    story_id: "STORY-1",
+    input: {
+      choice_id: choiceId,
+      manual_action_text: manualActionText,
+      resolved_event_id: "SE-1"
+    },
+    state_snapshot: completeStateSnapshot()
+  };
+}
+
+function turnDriver(kind: string): Record<string, unknown> {
+  if (kind === "player_action" || kind === "player_write_in") {
+    return {
+      kind,
+      initiator: "player",
+      driver_records: [],
+      player_response_mode: "initiates",
+      pov_visibility: "perceived_directly"
+    };
+  }
+
+  return {
+    kind,
+    initiator: kind === "multi_actor_collision" ? "unknown" : "world",
+    driver_records: ["STPLAN-1"],
+    player_response_mode: "responds",
+    pov_visibility: "reported"
+  };
+}
+
 function completeStateSnapshot(): Record<string, unknown> {
   return {
     canon_revision: "CH-1",
@@ -686,7 +813,8 @@ function assertPgInputLegalityViolation(
   verdicts: readonly { code: string; detail?: unknown }[],
   pageId: string,
   resolvedEventId: string,
-  eventKind: string
+  eventKind: string,
+  expectedInput?: { choice_id: unknown; manual_action_text: unknown }
 ) {
   const violation = verdicts.find((verdict) => verdict.code === "state_snapshot_integrity.pg_input_legality_violation");
 
@@ -695,8 +823,8 @@ function assertPgInputLegalityViolation(
     page_id: pageId,
     resolved_event_id: resolvedEventId,
     event_kind: eventKind,
-    choice_id: eventKind === "story_start" ? "CHC-1" : null,
-    manual_action_text: null
+    choice_id: expectedInput?.choice_id ?? (eventKind === "story_start" ? "CHC-1" : null),
+    manual_action_text: expectedInput?.manual_action_text ?? null
   });
 }
 

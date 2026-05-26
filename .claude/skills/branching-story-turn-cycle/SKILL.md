@@ -13,10 +13,10 @@ arguments:
     description: "PG-<integer>; any committed page in the bundle. Continuation is implicit when parent is the active branch leaf; fork is implicit when parent is any non-leaf page or a sibling-branch leaf."
     required: true
   - name: chosen_choice_id
-    description: "CHC-<integer> emitted by parent_page_id. Exactly one of chosen_choice_id / manual_action_text must be supplied (XOR enforced at Pre-flight step 5)."
+    description: "CHC-<integer> emitted by parent_page_id. Required only for action_source_mode: resolve_selected_choice; forbidden for resolve_write_in and advance_initiative."
     required: false
   - name: manual_action_text
-    description: "Natural-language player write-in. Exactly one of chosen_choice_id / manual_action_text must be supplied (XOR enforced at Pre-flight step 5)."
+    description: "Natural-language player write-in. Required only for action_source_mode: resolve_write_in; forbidden for resolve_selected_choice and advance_initiative."
     required: false
   - name: execution_mode
     description: "authoring | interactive_runtime | batch; default: authoring"
