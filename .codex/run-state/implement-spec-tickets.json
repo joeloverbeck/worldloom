@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-91-page-plan-body-renderer-cleanliness.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC91PAGPLABOD-003.md",
+  "last_ticket": "archive/tickets/SPEC91PAGPLABOD-004.md",
   "last_result": "completed_archived",
-  "last_work_commit": "8e0a80a0d60f93364e4bd5087ad39a0ce455d770",
+  "last_work_commit": "b0955a8da4e89716067d63c4aaf805aacfb69bfc",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC91PAGPLABOD-004.md",
+  "next_target": "tickets/SPEC91PAGPLABOD-005.md",
   "queue": [
-    "tickets/SPEC91PAGPLABOD-004.md",
     "tickets/SPEC91PAGPLABOD-005.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -15,9 +14,9 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean focused docs proof: four grep checks plus post-archive git diff --check passed",
-  "dirty_state": "unrelated dirty: deleted .claude/worktrees/spec88-stoexpfro; modified specs/SPEC-89-story-explorer-state-xray-layer.md",
-  "post_review_material_updates": true,
-  "post_review_audit_block": "emitted",
+  "proof_state": "clean focused docs proof: report grep checks plus git diff --check passed; broad token grep has documented Diagnostic Vocabulary exception",
+  "dirty_state": "unrelated dirty: modified .claude/skills/reassess-spec/SKILL.md; modified .claude/skills/reassess-spec/references/codebase-validation.md; deleted .claude/worktrees/spec88-stoexpfro; modified specs/SPEC-89-story-explorer-state-xray-layer.md",
+  "post_review_material_updates": false,
+  "post_review_audit_block": "not_applicable",
   "updated_at": "2026-05-26"
 }
