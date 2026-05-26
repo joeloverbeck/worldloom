@@ -1,6 +1,6 @@
 # SPEC-91 — Page-Plan Body Renderer Cleanliness & Structural Enforcement
 
-**Status**: draft
+**Status**: COMPLETED
 **Depends on**: PROSESPLIT-001..009 (landed 2026-05-10), PPLAN-001..007 (landed 2026-05-12)
 **Related**: `reports/page-plans-improvements-first-iteration.md`, `docs/triage/2026-05-12-page-plan-engine-vocabulary-cleanup-triage.md`
 **Source brainstorm**: 2026-05-26 — triage of the ChatGPT-Pro first-iteration page-plan analysis
@@ -308,3 +308,27 @@ Five ticket-sized chunks. Each is reviewable independently; they should land rou
 | §Story Bundles §6b — Information / Observer Firewall | N/A @ this spec | Firewall enforcement happens at SLT selection / CHC emission / page-plan commit through the existing predicate DSL and §7 gates. This spec changes presentation register only; it does not change firewall mechanics. |
 | §Canon Layers — Hard Canon / Derived Canon / Soft Canon / Mystery Reserve | N/A @ this spec | No canon mutation; no canon-record schema change. |
 | Change Control Policy | N/A @ this spec | Not a canon-mutating change; no CH-<integer> required. |
+
+## Outcome
+
+Completed 2026-05-26.
+
+Implemented through archived tickets `archive/tickets/SPEC91PAGPLABOD-001.md` through `archive/tickets/SPEC91PAGPLABOD-005.md`. The family landed:
+
+- §7 / §7a / §9 / §9b / §9c / §10b / §14 page-plan body translation guidance in bootstrap, turn-cycle, and shared story-state contract surfaces.
+- `reports/prose-quality-instructions.md` renderer-facing cleanup for the render-time instruction template, anti-pathology checklist, and Prose Craft Contract Rule 9.
+- `page_plan_body_engine_vocabulary_cleanliness` plus the shared `_engine-vocabulary-tokens.ts` source, validator registry/inventory coverage, pre-apply skip proof, prose-attach token-source reference, bootstrap/turn-cycle validation wiring, and world-mcp capability parity coverage.
+
+Verification:
+
+- `cd tools/validators && npm run build` — PASS.
+- `cd tools/validators && node --test dist/tests/structural/page-plan-body-engine-vocabulary-cleanliness.test.js` — PASS.
+- `cd tools/validators && node --test dist/tests/structural/registry.test.js dist/tests/integration/validate-patch-plan.test.js` — PASS.
+- `cd tools/world-mcp && npm run build` — PASS.
+- `cd tools/world-mcp && node --test dist/tests/server/capability-parity.test.js` — PASS.
+- SPEC-91 contract grep checks for `page_plan_body_engine_vocabulary_cleanliness`, shared `_engine-vocabulary-tokens`, prose-attach inline-list removal, bootstrap/turn-cycle wiring, and story-state contract naming — PASS.
+
+Deviations:
+
+- The original end-to-end PG-6 red-bunny dry-run remains unexecuted because it requires an interactive story workflow invocation and fixture-world copy; the accepted final boundary is package-local validator proof plus contract wiring proof.
+- `cd tools/validators && npm test` was attempted during SPEC91PAGPLABOD-005 closeout but remained red in the broad wrapper. The direct owned validator, registry, pre-apply integration, and world-mcp parity files passed; broad-wrapper failures were classified as package-runner/concurrency noise and not the final acceptance lane.
