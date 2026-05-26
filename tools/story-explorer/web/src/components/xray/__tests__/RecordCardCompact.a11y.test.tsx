@@ -20,6 +20,8 @@ describe('RecordCardCompact a11y', () => {
     expect(screen.getByRole('article')).toHaveAccessibleName(/BEL-1/);
     expect(screen.getByLabelText('BEL-1 summary chips')).toHaveTextContent('Visibility: hidden');
     expect(screen.getByLabelText('BEL-1 summary chips')).toHaveTextContent('Confidence: low');
+    expect(screen.getByLabelText('BEL-1 summary chips')).not.toHaveTextContent(/\bvisibility: hidden\b/);
+    expect(screen.getByLabelText('BEL-1 summary chips')).not.toHaveTextContent(/\bconfidence: low\b/);
 
     await expectNoAxeViolations(container);
   });
