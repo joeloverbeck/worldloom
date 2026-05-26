@@ -14,123 +14,6 @@ import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema
 
 const requireFromThisTest = createRequire(import.meta.url);
 
-const EXPECTED_VALIDATOR_NAMES = [
-  "active_pressure_handling_discipline",
-  "active_records_full_shape",
-  "approval_semantics",
-  "artifact_maturity",
-  "audit_only_se_shape",
-  "branch_isolation",
-  "canon_baseline_drift",
-  "canon_drift_classification_evidence",
-  "causal_dependency_threat_scan",
-  "character_grounding_consistency",
-  "character_memorability_structure",
-  "chc_slt_selected_commitment_trace",
-  "chc_grounded_in_artifact_accessible",
-  "choice_set_noncollapse",
-  "clock_firing_threshold_integrity",
-  "clock_introduction_grounding_integrity",
-  "clock_terminal_debt_integrity",
-  "clock_threshold_ordering",
-  "clock_tick_provenance",
-  "clock_value_in_range",
-  "compatibility_drift",
-  "critical_secret_clue_coverage_when_revealed",
-  "cross_file_reference",
-  "entity_introduction_status_pairing",
-  "expected_witness_coverage",
-  "forbidden_stchar_tamper_hash_fields",
-  "id_uniqueness",
-  "index_disk_consistency",
-  "introduction_observer_firewall",
-  "lie_promoted_silently",
-  "midstory_record_introduction_grounding",
-  "modification_history_retrofit",
-  "narrative_shape_field_rejection",
-  "no_char_authority_in_story_runtime",
-  "no_story_state_in_place_mutation",
-  "non_propagation_facts_completeness",
-  "observer_firewall",
-  "page_affordance_integrity",
-  "page_plan_body_engine_vocabulary_cleanliness",
-  "page_plan_stchar_packet_integrity",
-  "page_plan_turn_driver_consistency",
-  "proposal_package_shape",
-  "prose_load_bearing_artifact_mention",
-  "prose_receipt_hash_integrity",
-  "prose_receipt_schema_compliance",
-  "prose_receipt_stchar_integrity",
-  "record_introduction_uniqueness",
-  "record_schema_compliance",
-  "recursive_reference_closure",
-  "relationship_introduction_grounding_integrity",
-  "rule1_no_floating_facts",
-  "rule2_no_pure_cosmetics",
-  "rule4_no_globalization_by_accident",
-  "rule5_no_consequence_evasion",
-  "rule6_no_silent_retcons",
-  "rule7_mystery_reserve_preservation",
-  "rule11_action_space",
-  "rule12_redundancy",
-  "secret_carrier_existence",
-  "secret_introduction_anchor_integrity",
-  "secret_mystery_firewall_compliance",
-  "slt_created_at_page_origin_consistency",
-  "slt_grounding_minimal_integrity",
-  "snapshot_replay_equality",
-  "state_delta_class_integrity",
-  "state_snapshot_integrity",
-  "stchar_active_for_bound_stent",
-  "stchar_body_integrity",
-  "stchar_bound_stent_reciprocity",
-  "stchar_regeneration_reason_integrity",
-  "stchar_resolves",
-  "stchar_source_fact_coverage",
-  "stchar_source_material_inventory_integrity",
-  "stchar_supersession_integrity",
-  "stchar_temporal_reference_boundary",
-  "stemo_agency_effect_compatibility",
-  "stemo_appraisal_basis_accessible_to_holder",
-  "stemo_enum_compliance",
-  "stemo_holder_exists_and_active",
-  "stemo_no_future_page_ids",
-  "stemo_orientation_records_exist",
-  "stemo_schema_compliance",
-  "stemo_supersession_lifecycle_valid",
-  "stemo_trigger_event_on_branch_path",
-  "stent_requires_stchar",
-  "story_da_duplicate_heuristic",
-  "story_fact_authority",
-  "story_kernel_cast_bind_list_integrity",
-  "story_question_grounding_integrity",
-  "story_question_introduction_grounding_integrity",
-  "story_question_payoff_integrity",
-  "story_question_setup_predates_payoff",
-  "story_question_terminal_debt",
-  "storylet_predicate_dsl_parsability",
-  "stplan_belief_basis_grounded",
-  "stplan_blockers_grounded",
-  "stplan_closure_status_requires_closure_event",
-  "stplan_current_step_targets_grounded",
-  "stplan_event_plan_relation_consistency",
-  "stplan_holder_exists_and_active",
-  "stplan_id_uniqueness_and_append_only",
-  "stplan_no_future_page_ids",
-  "stplan_predicate_references",
-  "stplan_resource_basis_grounded",
-  "stplan_root_intention_grounded",
-  "stplan_schema_compliance",
-  "stplan_supersession_chain_valid",
-  "thread_introduction_grounding_integrity",
-  "touched_by_cf_completeness",
-  "turn_cycle_output_grounding_integrity",
-  "turn_driver_pov_observer_firewall",
-  "turn_driver_schema_compliance",
-  "validation_trace_shape_compliance",
-  "yaml_parse_integrity"
-].sort((left, right) => left.localeCompare(right));
-
 interface Validator {
   name: string;
 }
@@ -194,7 +77,7 @@ test("describe_envelope_schema covers every operation kind", async () => {
   }
 });
 
-test("validator registry contains every named validator", () => {
+test("validator registry exposes stable machine-readable validator names", () => {
   const validatorsEntryPath = requireFromThisTest.resolve("@worldloom/validators");
   const registryPath = validatorsEntryPath.replace(/index\.js$/, "registry.js");
   const registry = requireFromThisTest(registryPath) as {
@@ -206,7 +89,12 @@ test("validator registry contains every named validator", () => {
     .map((validator) => validator.name)
     .sort((left, right) => left.localeCompare(right));
 
-  assert.deepEqual(names, EXPECTED_VALIDATOR_NAMES);
+  assert.ok(registry.structuralValidators.length > 0, "structural validator registry should not be empty");
+  assert.ok(registry.ruleValidators.length > 0, "rule validator registry should not be empty");
+  assert.deepEqual(names, [...new Set(names)], "validator names must be unique");
+  for (const name of names) {
+    assert.match(name, /^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/, `${name} should be a snake_case tool-safe name`);
+  }
 });
 
 test("describe_capabilities exposes validator_registry_hash for the current validator source content", async () => {

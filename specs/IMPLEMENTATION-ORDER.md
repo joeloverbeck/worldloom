@@ -15,7 +15,7 @@ This file orders the four Story Explorer specs and records the named assumptions
 | 2 | SPEC-88 | Frontend foundation & page reading surface (React/Vite scaffold, pickers, prose panel, choice navigation, accessibility baseline) | SPEC-87 |
 | 3 | SPEC-89 | State X-Ray layer (8 record groups, 4 tabs, deterministic summaries, raw YAML escape hatch, linked-record navigation) | SPEC-87, SPEC-88 |
 | 4 | SPEC-90 | Branch map drawer & page search (focus-trapped drawer overlay, FTS-backed search) | SPEC-87, SPEC-88, SPEC-89 |
-| — | SPEC-91 | Page-plan body renderer cleanliness & structural enforcement (extends PPLAN-005/006 to §7/§7a/§9/§9b/§9c/§10b/§14; new plan-body engine-vocabulary validator; `reports/prose-quality-instructions.md` cleanup) | — (orthogonal to SPEC-87..90; extends PROSESPLIT + PPLAN) |
+| — | SPEC-91 | Page-plan body renderer cleanliness & structural enforcement (extends PPLAN-005/006 to §7/§7a/§9/§9b/§9c/§10b/§14; new plan-body engine-vocabulary validator; `reports/prose-quality-instructions.md` cleanup — file since relocated to `docs/prose-renderer-contract/` by PROSESPLIT2-001..004) | — (orthogonal to SPEC-87..90; extends PROSESPLIT + PPLAN) |
 
 SPEC-87 is the structural base; nothing else compiles or renders without it.
 

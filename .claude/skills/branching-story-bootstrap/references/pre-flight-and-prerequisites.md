@@ -11,7 +11,9 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `.claude/skills/_shared-templates/story-record-schemas.md` — §4 record schemas, including §4.5.17 `STPLAN`, §4.5.18 `STEMO`, §4.5.19 `STCHAR`, and §4.6 prose receipt
 - `tools/validators/src/schemas/story-character-authority.schema.json` — canonical STCHAR frontmatter fields and hash requirements
 - `docs/CONTEXT-PACKET-CONTRACT.md` and `docs/MACHINE-FACING-LAYER.md` — machine-facing retrieval / edge surfaces for story-bundle context, including SPEC-47 STPLAN/STEMO summaries and graph edges when the bundle later becomes indexed
-- `reports/prose-quality-instructions.md` — canonical source for the page plan's verbatim §2 (Content Policy), §3 (Prose Craft Contract), §19 (Render-Time Instruction Template)
+- `docs/prose-renderer-contract/content-policy.md` — canonical source for the page plan's verbatim §2 (Content Policy)
+- `docs/prose-renderer-contract/prose-craft-contract.md` — canonical source for the page plan's verbatim §3 (Prose Craft Contract)
+- `docs/prose-renderer-contract/render-time-instruction.md` — canonical source for the page plan's verbatim §19 (Render-Time Instruction Template)
 - `worlds/<world_slug>/WORLD_KERNEL.md` and `worlds/<world_slug>/ONTOLOGY.md` — world identity, invariants, ontology categories the bundle's records must respect
 - `worlds/<world_slug>/characters/INDEX.md` — every entry in `selected_cast[]` must resolve to an existing `CHAR-<integer>` dossier; bootstrap reads these only to distill STCHAR before story runtime state exists
 - World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_bootstrap', story_slug=<story_slug>, seed_nodes=<world-scope seed ids>, token_budget=<default>)` — relevant CF / INV / M / OQ / ENT / SEC records bearing on the cast and opening situation. `seed_nodes` may include selected cast `CHAR-<integer>` ids and any location-related world-scope anchors already identified by `initial_location` grounding, such as existing `ENT`, `SEC`, `CF`, `M`, or `OQ` ids. Do not pass a proposed `STLOC` label or free-text location label as a seed; omit the location seed when no world-scope anchor exists. If a supplied world-scope seed is unresolved, MCPENH-058 behavior skips it and reports the unresolved seed in `task_header.warnings` rather than treating it as local authority. The `story_slug` is the target bundle slug; `story_bundle_context` is `null` because the bundle does not exist yet.
@@ -25,7 +27,7 @@ Bundle-target collision discipline (per-nested-scope bootstrap variant): `worlds
 
 Before the state-seed step:
 
-1. Load `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, and `reports/prose-quality-instructions.md` into working context. Abort with clear missing-file error on any unreadable path.
+1. Load `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, `docs/prose-renderer-contract/content-policy.md`, `docs/prose-renderer-contract/prose-craft-contract.md`, and `docs/prose-renderer-contract/render-time-instruction.md` into working context. Abort with clear missing-file error on any unreadable path.
 2. Resolve `worlds/<world_slug>/`. Abort if the directory does not exist, or if `WORLD_KERNEL.md` / `ONTOLOGY.md` are absent.
 3. Verify `worlds/<world_slug>/stories/<story_slug>/` does NOT exist. Abort with a slug-collision error if it does.
 4. Load `worlds/<world_slug>/characters/INDEX.md`. For every entry in `selected_cast[]`, verify it resolves to an existing `CHAR` dossier in the world. Abort with a cast-resolution error on any miss.

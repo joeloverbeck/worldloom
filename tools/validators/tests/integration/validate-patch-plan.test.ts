@@ -304,6 +304,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "page_plan_body_engine_vocabulary_cleanliness"
     );
     assert.equal(pagePlanBodyCleanlinessExecution?.status, "skipped");
+    const pagePlanVerbatimExecution = result.executions.find(
+      (execution) => execution.name === "page_plan_verbatim_section_integrity"
+    );
+    assert.equal(pagePlanVerbatimExecution?.status, "skipped");
     const pagePlanStcharExecution = result.executions.find(
       (execution) => execution.name === "page_plan_stchar_packet_integrity"
     );
@@ -399,6 +403,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== compatibilityDriftExecution &&
         row !== pageAffordanceExecution &&
         row !== pagePlanBodyCleanlinessExecution &&
+        row !== pagePlanVerbatimExecution &&
         row !== pagePlanStcharExecution &&
         row !== pagePlanTurnDriverExecution &&
         row !== activePressureExecution &&

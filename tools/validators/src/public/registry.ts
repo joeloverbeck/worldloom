@@ -34,6 +34,7 @@ import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-pla
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
 import { pagePlanBodyEngineVocabularyCleanliness } from "../structural/page-plan-body-engine-vocabulary-cleanliness.js";
+import { pagePlanVerbatimSectionIntegrity } from "../structural/page-plan-verbatim-section-integrity.js";
 import { pagePlanStcharPacketIntegrity } from "../structural/page-plan-stchar-packet-integrity.js";
 import { pagePlanTurnDriverConsistency } from "../structural/page-plan-turn-driver-consistency.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
@@ -175,6 +176,7 @@ export const structuralValidators: readonly Validator[] = [
   activeRecordsFullShape,
   pageAffordanceIntegrity,
   pagePlanBodyEngineVocabularyCleanliness, // page_plan_body_engine_vocabulary_cleanliness
+  pagePlanVerbatimSectionIntegrity, // page_plan_verbatim_section_integrity
   pagePlanStcharPacketIntegrity,
   pagePlanTurnDriverConsistency,
   activePressureHandlingDiscipline,

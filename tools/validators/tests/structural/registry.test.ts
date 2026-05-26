@@ -84,6 +84,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "active_records_full_shape",
       "page_affordance_integrity",
       "page_plan_body_engine_vocabulary_cleanliness",
+      "page_plan_verbatim_section_integrity",
       "page_plan_stchar_packet_integrity",
       "page_plan_turn_driver_consistency",
       "active_pressure_handling_discipline",
