@@ -1,4 +1,29 @@
+import { Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { RouteLoading } from './components/RouteLoading';
+import { WorldsRoute, worldListLoader } from './routes/worlds';
+
+function RouteFallback({ error, retry }: { error: Error; retry: () => void }): JSX.Element {
+  return (
+    <main className="app-shell route-error" role="alert" aria-labelledby="route-error-title">
+      <h1 id="route-error-title">Story Explorer could not load this route.</h1>
+      <p>{error.message}</p>
+      <button type="button" onClick={retry}>
+        Retry
+      </button>
+    </main>
+  );
+}
+
+function RouteFrame({ children, loadingLabel }: { children: React.ReactNode; loadingLabel: string }): JSX.Element {
+  return (
+    <ErrorBoundary renderFallback={(error, retry) => <RouteFallback error={error} retry={retry} />}>
+      <Suspense fallback={<RouteLoading label={loadingLabel} />}>{children}</Suspense>
+    </ErrorBoundary>
+  );
+}
 
 function RoutePlaceholder({ label }: { label: string }): JSX.Element {
   return (
@@ -11,7 +36,12 @@ function RoutePlaceholder({ label }: { label: string }): JSX.Element {
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <RoutePlaceholder label="Route: /" />,
+    loader: worldListLoader,
+    element: (
+      <RouteFrame loadingLabel="Loading worlds...">
+        <WorldsRoute />
+      </RouteFrame>
+    ),
   },
   {
     path: '/worlds/:slug/stories',

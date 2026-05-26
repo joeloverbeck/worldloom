@@ -50,3 +50,118 @@ a:hover {
   margin: 0 auto;
   padding: var(--space-8) 0;
 }
+
+.route-header {
+  margin-bottom: var(--space-6);
+}
+
+.route-header h1,
+.empty-state h2,
+.route-error h1 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-h1);
+  line-height: var(--line-height-heading);
+}
+
+.world-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-4);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.world-card {
+  display: grid;
+  min-height: 9rem;
+  padding: var(--space-4);
+  color: var(--color-text);
+  text-decoration: none;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition:
+    border-color var(--motion-duration) ease,
+    box-shadow var(--motion-duration) ease;
+}
+
+.world-card:hover {
+  color: var(--color-text);
+  border-color: var(--color-accent);
+  box-shadow: 0 8px 20px rgb(31 37 40 / 10%);
+}
+
+.world-card__topline {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.world-card__display-name {
+  font-weight: 700;
+  line-height: var(--line-height-heading);
+}
+
+.world-card__slug,
+.world-card__meta {
+  color: var(--color-text-secondary);
+}
+
+.world-card__slug {
+  align-self: end;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+.world-card__meta {
+  align-self: end;
+}
+
+.world-status-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+}
+
+.world-status-badge--success {
+  color: var(--color-success);
+}
+
+.world-status-badge--warning {
+  color: var(--color-warning);
+}
+
+.world-status-badge--error {
+  color: var(--color-error);
+}
+
+.world-status-badge--info {
+  color: var(--color-accent-strong);
+}
+
+.empty-state,
+.route-error {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 42rem;
+  padding: var(--space-6);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.empty-state p,
+.route-error p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}

@@ -1,6 +1,6 @@
 # SPEC88STOEXPFRO-005: World Picker route
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — wires `web/src/routes/worlds.tsx` as the `/` route, replacing T001's placeholder.
@@ -31,28 +31,32 @@ The World Picker is the explorer's entry point — landing on `/` shows a list o
 3. **Card click navigates to `/worlds/:slug/stories`** → unit test: click a card; assert react-router navigation event fires with the correct path. T013 capstone re-verifies in the live integrated build.
 4. **Empty-world-list state per §9** → unit test: client returns `[]`; assert the "No worlds found in this repository." message renders with a link to docs.
 
-## What to Change
+## Landed Changes
 
-### 1. Create `tools/story-explorer/web/src/routes/worlds.tsx`
+### 1. Created `tools/story-explorer/web/src/routes/worlds.tsx`
 
-Functional component implementing §4.1's contract. Structure:
-- Use react-router-dom v6 `useLoaderData()` (data fetched via the route's loader) OR a `useEffect` + `useState` pattern (simpler but less idiomatic for v6 — implementer's choice; both are acceptable).
-- Renders `<h1>Worlds</h1>` plus a grid/list of world cards.
-- Empty state: when `worlds.length === 0`, renders "No worlds found in this repository." plus a documentation link per §9.
-- Each card: world slug, display name, status badge (per the §4.1 enumeration), story count, click handler navigating to `/worlds/${worldSlug}/stories`.
-- Inline `<WorldStatusBadge>` helper component (or sub-module) maps `IndexStatus.kind` + `errors[]` → badge label + severity.
+Functional component implementing §4.1's contract. The route:
+- Uses react-router-dom v6 `useLoaderData()` with `worldListLoader()` for data fetched through `listWorlds()`.
+- Renders `<h1>Worlds</h1>` plus a responsive world-card grid.
+- Renders the empty state "No worlds found in this repository." with a repository-map link when `worlds.length === 0`.
+- Renders each card as a `<Link>` to `/worlds/${worldSlug}/stories`, preserving browser navigation affordances.
+- Provides `WorldStatusBadge` and exported `worldStatusBadge()` helpers mapping `IndexStatus.kind` + `errors[]` to the §4.1 badge labels: `Indexed`, `Stale index`, `Missing index`, `Empty world`, `Error`.
 
-### 2. Update `tools/story-explorer/web/src/app.tsx`
+### 2. Updated `tools/story-explorer/web/src/app.tsx`
 
-Replace the placeholder `/` route with the imported `routes/worlds.tsx`. If using the loader API, attach `loader: () => listWorlds()` to the route definition.
+Replaced the placeholder `/` route with the real `WorldsRoute` and attached `worldListLoader`. Added a route frame using T004's `ErrorBoundary` and `RouteLoading` primitives so the root route has a polished error fallback and loading fallback while preserving the existing placeholder routes for downstream tickets.
 
-### 3. Create `tools/story-explorer/web/src/routes/worlds.test.tsx`
+### 3. Created `tools/story-explorer/web/src/routes/worlds.test.tsx`
 
-Tests covering:
-- Mocked `listWorlds()` returns 3 worlds → 3 cards render with correct content.
-- Mocked `listWorlds()` returns empty array → "No worlds found" message renders.
+Tests cover:
+- Mocked `listWorlds()` returns 3 worlds -> 3 cards render with correct content.
+- Mocked `listWorlds()` returns empty array -> "No worlds found" message renders.
 - Each of 6 `IndexStatus.kind` values + `errors`-non-empty case produces the expected badge label.
 - Card click navigates to `/worlds/:slug/stories`.
+
+### 4. Extended `tools/story-explorer/web/src/styles/app.css`
+
+Added route header, world grid/card, compact badge, empty-state, and route-error styles using the existing token system. No new color tokens were introduced.
 
 ## Files to Touch
 
@@ -91,3 +95,19 @@ Tests covering:
 1. `cd tools/story-explorer/web && npm test -- worlds.test` — targeted route test.
 2. `cd tools/story-explorer/web && npm test` — full vitest suite.
 3. `cd tools/story-explorer/web && npm run build` — TypeScript verification.
+
+## Verification Result
+
+Completed on 2026-05-26.
+
+1. `npm test -- worlds.test` from `tools/story-explorer/web/` passed 1 file / 4 tests.
+2. `npm test` from `tools/story-explorer/web/` passed 9 files / 27 tests.
+3. `npm run build` from `tools/story-explorer/web/` passed; TypeScript compiled the new route and Vite produced `web/dist/`.
+
+## Outcome
+
+Completed on 2026-05-26.
+
+The explorer root route now renders the World Picker from SPEC-88 §4.1: it loads worlds through the existing API client, renders world cards with display name, slug, story count, and deterministic index/error badges, handles an empty repository as designed UI, and navigates via links to `/worlds/:slug/stories`. The app root wires this route through the existing loading/error primitives from T004.
+
+Deviations from the original plan: none. The implemented route uses the loader API option named by the ticket. Ignored web build artifacts were refreshed by `npm run build`; they remain generated artifacts, not tracked ticket-owned source.

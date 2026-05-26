@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds axe-core integration to vitest setup and per-component a11y assertions; modifies T001's test-setup.ts.
-**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md, archive/tickets/SPEC88STOEXPFRO-004.md, SPEC88STOEXPFRO-005, SPEC88STOEXPFRO-006, SPEC88STOEXPFRO-007, SPEC88STOEXPFRO-008, SPEC88STOEXPFRO-009, SPEC88STOEXPFRO-010, SPEC88STOEXPFRO-011
+**Deps**: archive/tickets/SPEC88STOEXPFRO-001.md, archive/tickets/SPEC88STOEXPFRO-004.md, archive/tickets/SPEC88STOEXPFRO-005.md, SPEC88STOEXPFRO-006, SPEC88STOEXPFRO-007, SPEC88STOEXPFRO-008, SPEC88STOEXPFRO-009, SPEC88STOEXPFRO-010, SPEC88STOEXPFRO-011
 
 ## Problem
 
