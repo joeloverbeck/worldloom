@@ -40,3 +40,13 @@ The Diagnostic Vocabulary table at the end of `prose-craft-contract.md` is consu
 2. As the internal citation vocabulary for `branching-story-prose-attach` Phase 4's qualitative craft critic. The eight axis names are the citation tokens used in verdicts.
 
 Edits to the table must preserve both consumption modes.
+
+## Sections dropped from the pre-2026-05-26 bundle
+
+The pre-relocation bundle at `reports/prose-quality-instructions.md` (deleted 2026-05-26 by PROSESPLIT2-004) contained three additional sub-sections that were dropped in the relocation as redundant duplicates of content elsewhere in this folder:
+
+- **§Anti-Pathology Checklist**: reformulation of the Diagnostic Vocabulary table at the end of `prose-craft-contract.md`. Page-plan §18 ("Anti-pathology checklist") is per-skill populated; no live consumer cited the bundle's §Anti-Pathology Checklist by file path. SPEC-91 (archived 2026-05-26) already directed plain-language craft framing rather than axis-name enumeration in renderer prompts.
+- **§Voice and Register Guidance**: standalone restatement of Prose Craft Contract Rule 7. The substance lives verbatim at `prose-craft-contract.md` §Rule 7; no live consumer cited the bundle's §Voice and Register Guidance by file path.
+- **§External-Renderer Usage Guide**: operator documentation for how the rendered plan body is consumed. Absorbed into this README's earlier section by PROSESPLIT2-001.
+
+The bytes of all three sections remain recoverable via `git show b0955a8da4e89716067d63c4aaf805aacfb69bfc:reports/prose-quality-instructions.md`. If a future workflow surfaces a need for any dropped section as a standalone file, recovery is a follow-up ticket, not a backwards-compatibility concern of this folder's contract.
