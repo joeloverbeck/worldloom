@@ -35,6 +35,27 @@ test("state_snapshot_integrity accepts PG-1 null inputs for story_start", async 
   assert.deepEqual(verdicts, []);
 });
 
+test("state_snapshot_integrity accepts null inputs for repair pages", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageRecord: {
+      id: "PG-2",
+      story_id: "STORY-1",
+      input: {
+        choice_id: null,
+        manual_action_text: null,
+        resolved_event_id: "SE-1"
+      },
+      state_snapshot: completeStateSnapshot()
+    },
+    eventKind: "audit_repair"
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("state_snapshot_integrity rejects non-null choice input for story_start", async () => {
   const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
     pageRecord: {

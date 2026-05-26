@@ -195,7 +195,7 @@ function validateInputLegality(
   const hasChoice = choiceId !== null && choiceId !== undefined;
   const hasManualAction = manualActionText !== null && manualActionText !== undefined;
 
-  if (resolvedEventKind === "story_start") {
+  if (["story_start", "system_repair", "audit_repair"].includes(resolvedEventKind)) {
     if (!hasChoice && !hasManualAction) {
       return undefined;
     }
@@ -377,7 +377,7 @@ function inputLegalityViolation(
       choice_id: choiceId ?? null,
       manual_action_text: manualActionText ?? null
     },
-    suggested_fix: "Follow shared story state contract §4.2 input legality: story_start pages use both-null input fields; all other pages use exactly one source action."
+    suggested_fix: "Follow shared story state contract §4.2 input legality: story_start and repair pages use both-null input fields; turn-resolution pages use exactly one source action."
   };
 }
 

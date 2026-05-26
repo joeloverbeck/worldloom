@@ -103,6 +103,76 @@ test("snapshot_replay_equality replays new-schema SE state_delta active_records"
   assert.deepEqual(verdicts, []);
 });
 
+test("snapshot_replay_equality accepts maintenance PGs grounded by audit-only SE state_delta", async () => {
+  const parentActiveRecords = {
+    ...newSchemaParentActiveRecords(),
+    SREL: ["SREL-1"],
+    STPLAN: ["STPLAN-1"],
+    STEMO: ["STEMO-1"]
+  };
+  const maintenanceActiveRecords = replayActiveRecords(parentActiveRecords, {
+    create: ["SREL-2", "STPLAN-2", "STEMO-2"],
+    supersede: ["STEMO-1"],
+    close: []
+  });
+  const page: Record<string, unknown> = {
+    id: "PG-2",
+    story_id: "STORY-1",
+    parent_page_id: "PG-1",
+    input: {
+      choice_id: null,
+      manual_action_text: null,
+      resolved_event_id: "SE-2"
+    },
+    state_hash_parent: "0".repeat(64),
+    state_snapshot: {
+      active_records: maintenanceActiveRecords,
+      visible_affordances: [],
+      entity_status: {},
+      unresolved_mystery_claims: [],
+      continuation: { has_eligible_commitment_block: true, terminal_status: "open", terminal_rationale: null }
+    },
+    plan: {
+      plan_hash: "1".repeat(64)
+    },
+    emitted_choices: [],
+    validation_trace: {
+      input_legality: "PASS: maintenance event is system-authored."
+    }
+  };
+
+  const verdicts = await snapshotReplayEquality.run(undefined, context([
+    record("page_record", "test-story:PG-1", "stories/test-story/_source/pages/PG-1.yaml", {
+      id: "PG-1",
+      story_id: "STORY-1",
+      state_snapshot: {
+        active_records: parentActiveRecords,
+        unresolved_mystery_claims: []
+      },
+      state_hash: "0".repeat(64)
+    }),
+    record("story_event_record", "test-story:SE-2", "stories/test-story/_source/events/SE-2.yaml", {
+      id: "SE-2",
+      story_id: "STORY-1",
+      event_kind: "audit_repair",
+      state_delta: {
+        create: ["SREL-2", "STPLAN-2", "STEMO-2"],
+        supersede: ["STEMO-1"],
+        close: []
+      }
+    }),
+    record("page_record", "test-story:PG-2", "stories/test-story/_source/pages/PG-2.yaml", {
+      ...page,
+      state_hash: computePgStateHash(page)
+    })
+  ], {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("snapshot_replay_equality normalizes missing optional parent active-record keys", async () => {
   const childPage = newSchemaChildPage({
     ...newSchemaExpectedActiveRecords(),

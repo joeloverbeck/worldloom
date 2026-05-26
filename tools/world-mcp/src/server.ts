@@ -261,8 +261,10 @@ const submitPatchPlanInputSchema = z.object({
 const planStoryStateMaintenanceInputSchema = z.object({
   world_slug: z.string().min(1),
   story_slug: z.string().regex(STORY_SLUG_PATTERN),
+  parent_page_id: z.string().regex(/^PG-\d+$/),
   reason: z.string().min(1),
   source_ticket: z.string().min(1),
+  event_kind: z.enum(["audit_repair", "system_repair"]).optional(),
   operations: z
     .array(
       z.object({
@@ -547,7 +549,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "plan_story_state_maintenance",
-    "plan_story_state_maintenance: Build a review-only patch-plan envelope for bounded story-bundle state maintenance. It allocates fresh story-scoped IDs, verifies superseded source records through indexed retrieval, emits existing create_* story-record ops for STEMO/STPLAN/SREL/CHC maintenance, and never submits or writes the plan. Validate the returned patch_plan, then require explicit approval plus submit_patch_plan with an approval token.",
+    "plan_story_state_maintenance: Build a review-only patch-plan envelope for bounded story-bundle state maintenance from a required parent_page_id. It allocates fresh story-scoped IDs, verifies superseded source records through indexed retrieval, emits create_* story-record ops for STEMO/STPLAN/SREL/CHC maintenance, appends an audit/system repair SE plus forkable maintenance PG, and returns the matching maintenance page-plan body without submitting or writing. Validate the returned patch_plan, write the returned page plan exactly, then require explicit approval plus submit_patch_plan with an approval token.",
     planStoryStateMaintenanceInputSchema,
     async (args) =>
       planStoryStateMaintenance(args as unknown as Parameters<typeof planStoryStateMaintenance>[0]),
