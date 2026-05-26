@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/story-explorer/src/view-models/world-summary.ts` + `story-summary.ts` + `src/read/world-list.ts` + `src/read/story-list.ts`.
-**Deps**: archive/tickets/SPEC87STOEXPBAC-001.md, SPEC87STOEXPBAC-003
+**Deps**: archive/tickets/SPEC87STOEXPBAC-001.md, archive/tickets/SPEC87STOEXPBAC-003.md
 
 ## Problem
 

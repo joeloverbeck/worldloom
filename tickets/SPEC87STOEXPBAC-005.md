@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/story-explorer/src/view-models/page-detail.ts` + `choice-navigation.ts` + `child-outcome-variant.ts` + `src/read/page-detail.ts` + `prose-direct.ts` + `raw-yaml.ts` + `provenance.ts`.
-**Deps**: archive/tickets/SPEC87STOEXPBAC-001.md, SPEC87STOEXPBAC-003, SPEC87STOEXPBAC-004
+**Deps**: archive/tickets/SPEC87STOEXPBAC-001.md, archive/tickets/SPEC87STOEXPBAC-003.md, SPEC87STOEXPBAC-004
 
 ## Problem
 
