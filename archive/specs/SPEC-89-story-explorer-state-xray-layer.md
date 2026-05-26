@@ -1,6 +1,6 @@
 # SPEC-89 — Story Explorer State X-Ray Layer
 
-**Status**: draft
+**Status**: COMPLETED
 **Depends on**: SPEC-87 (backend foundation; archived at `archive/specs/SPEC-87-story-explorer-backend-foundation.md`), SPEC-88 (frontend foundation & page reading surface; archived at `archive/specs/SPEC-88-story-explorer-frontend-foundation.md`)
 **Related**: SPEC-90 (branch map & search), `specs/IMPLEMENTATION-ORDER.md`
 **Companion triage**: `docs/triage/2026-05-25-website-proposal-triage.md`
@@ -327,3 +327,12 @@ The X-Ray tests integrate with the SPEC-88-established vitest + axe-core suite u
 1. **Virtualization threshold for very-large pages** — §10 names a "≥ threshold, e.g. 50 active records" virtualization cut. The actual threshold may need tuning against real story bundles (a deeply branched late-game page can have 100+ active records). Risk: low — the threshold is a tunable constant, and the typical X-Ray load (per the red-bunny smoke fixture) sits well below it.
 2. **`HybridSectionParser` resilience to malformed bodies** — STCHAR / DA bodies sometimes carry non-standard heading depths, bold-wrapped headings, or non-heading anchors. The client-side parser must degrade gracefully: when no `##` (or comparable) headers are present, the expanded card falls back to rendering the entire body as a single "Body" section. The parser must not throw.
 3. **SLB / SAU / SP / RSP rendering coverage limits** — SPEC-87 §7 reads these classes directly from their hybrid markdown files; the indexer's parser layer does not yet parse them, so cross-class linking from these records to other story-bundle records is bounded by what the markdown body explicitly cites. The X-Ray surfaces this as a "limited cross-link coverage" disclosure on the expanded card for these classes; future indexer extension (out of scope for SPEC-89) can broaden the coverage.
+
+## Outcome
+
+Completed: 2026-05-26
+
+- Implemented the Story Explorer State X-Ray surface across the SPEC89STOEXPSTA ticket family: tab shell, grouped current-state records, deterministic compact/expanded cards, raw record disclosure, event-delta tab, plan/prose and validation tabs, linked-record navigation, provenance trail, hybrid body section parsing, responsive summary surfaces, accessibility coverage, and the capstone smoke test.
+- Final capstone proof landed in `archive/tickets/SPEC89STOEXPSTA-013.md` with `tools/story-explorer/test/capstone-spec89-smoke.test.ts`.
+- Verification: `cd tools/story-explorer && npm run build && node --test dist/test/capstone-spec89-smoke.test.js` passed 4/4 capstone subtests, and `cd tools/story-explorer && npm test` passed backend `node --test` 78/78 plus web vitest 76 files / 184 tests.
+- Deviation: this worktree has no checkout-local `worlds/*/stories/*` story bundle, so the capstone's human browser checklist is recorded in the test header but was not executed against a real story bundle during final package proof. The CI-runnable package and component/a11y proof is complete.
