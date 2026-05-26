@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
-import { getRecord, type PageDetail, type RecordCard, type RecordGroup } from '../../../api/client';
+import { getRecord, type PageDetail, type RecordCard, type RecordGroup, type RecordLink } from '../../../api/client';
 import { RecordCardCompact } from '../RecordCardCompact';
 import { RecordCardExpanded } from '../RecordCardExpanded';
 import { XRayGroup } from '../XRayGroup';
 
 interface CurrentStateTabProps {
+  onRecordLinkClick?: (link: RecordLink | string) => void;
   pageDetail: PageDetail;
   storySlug: string;
   worldSlug: string;
@@ -91,9 +92,11 @@ function visibleAffordances(page: Record<string, unknown>): string[] {
 
 function RecordList({
   records,
+  onRecordLinkClick,
   storySlug,
   worldSlug,
 }: {
+  onRecordLinkClick?: (link: RecordLink | string) => void;
   records: RecordCard[];
   storySlug: string;
   worldSlug: string;
@@ -116,6 +119,7 @@ function RecordList({
         {records.map((recordCard) => (
           <RecordCardExpanded
             key={recordCard.recordId}
+            onRecordLinkClick={onRecordLinkClick}
             recordCard={recordCard}
             storyContext={{ storySlug, worldSlug }}
           />
@@ -159,7 +163,7 @@ function RecordList({
   );
 }
 
-export function CurrentStateTab({ pageDetail, storySlug, worldSlug }: CurrentStateTabProps): JSX.Element {
+export function CurrentStateTab({ onRecordLinkClick, pageDetail, storySlug, worldSlug }: CurrentStateTabProps): JSX.Element {
   const [records, setRecords] = useState<RecordLoadState[]>(() =>
     pageDetail.currentStateRecordIds.map(() => ({ kind: 'loading' })),
   );
@@ -225,7 +229,12 @@ export function CurrentStateTab({ pageDetail, storySlug, worldSlug }: CurrentSta
                   ))}
                 </div>
               ) : null}
-              <RecordList records={groupRecordsForDisplay} storySlug={storySlug} worldSlug={worldSlug} />
+              <RecordList
+                onRecordLinkClick={onRecordLinkClick}
+                records={groupRecordsForDisplay}
+                storySlug={storySlug}
+                worldSlug={worldSlug}
+              />
             </XRayGroup>
           );
         })}

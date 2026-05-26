@@ -4,6 +4,7 @@ import type { RecordCard, RecordField, RecordLink } from '../../api/client';
 import { useDisclosure } from '../disclosure/use-disclosure';
 import { RecordCardCompact } from './RecordCardCompact';
 import { RawRecordDisclosure } from './RawRecordDisclosure';
+import { BrokenReferenceChip } from './BrokenReferenceChip';
 
 interface StoryContext {
   worldSlug: string;
@@ -13,6 +14,7 @@ interface StoryContext {
 interface RecordCardExpandedProps {
   recordCard: RecordCard;
   storyContext: StoryContext;
+  onRecordLinkClick?: (link: RecordLink) => void;
   provenanceSlot?: ReactNode;
 }
 
@@ -33,7 +35,7 @@ function FieldList({ fields }: { fields: RecordField[] }): JSX.Element | null {
   );
 }
 
-function RelatedLinks({ links }: { links: RecordLink[] }): JSX.Element | null {
+function RelatedLinks({ links, onRecordLinkClick }: { links: RecordLink[]; onRecordLinkClick?: (link: RecordLink) => void }): JSX.Element | null {
   if (links.length === 0) {
     return null;
   }
@@ -41,19 +43,23 @@ function RelatedLinks({ links }: { links: RecordLink[] }): JSX.Element | null {
   return (
     <div className="record-card__related" aria-label="Related records">
       {links.map((link) => (
-        <span className={link.targetExists ? 'record-chip' : 'record-chip record-chip--broken'} key={link.recordId}>
-          {link.label || link.recordId}
-        </span>
+        link.targetExists ? (
+          <button className="record-chip record-chip--button" key={link.recordId} onClick={() => onRecordLinkClick?.(link)} type="button">
+            {link.label || link.recordId}
+          </button>
+        ) : (
+          <BrokenReferenceChip key={link.recordId} recordId={link.recordId} />
+        )
       ))}
     </div>
   );
 }
 
-export function RecordCardExpanded({ recordCard, storyContext, provenanceSlot }: RecordCardExpandedProps): JSX.Element {
+export function RecordCardExpanded({ recordCard, storyContext, onRecordLinkClick, provenanceSlot }: RecordCardExpandedProps): JSX.Element {
   const disclosure = useDisclosure(false);
 
   return (
-    <article className="record-card-expanded">
+    <article className="record-card-expanded" data-xray-record-id={recordCard.recordId} tabIndex={-1}>
       <RecordCardCompact recordCard={recordCard} />
       <button className="record-card-expanded__trigger" type="button" {...disclosure.triggerProps}>
         {disclosure.isOpen ? 'Collapse record' : 'Expand record'}
@@ -69,7 +75,7 @@ export function RecordCardExpanded({ recordCard, storyContext, provenanceSlot }:
         </section>
         <section aria-label="Related record chips">
           <h5>Related Records</h5>
-          <RelatedLinks links={recordCard.links} />
+          <RelatedLinks links={recordCard.links} onRecordLinkClick={onRecordLinkClick} />
         </section>
         {provenanceSlot ? (
           <section aria-label="Provenance">

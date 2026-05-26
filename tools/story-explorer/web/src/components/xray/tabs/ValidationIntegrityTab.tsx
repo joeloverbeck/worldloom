@@ -1,4 +1,5 @@
 import type { IndexStatus, PageDetail } from '../../../api/client';
+import { BrokenReferenceChip } from '../BrokenReferenceChip';
 
 interface ValidationIntegrityTabProps {
   pageDetail: PageDetail;
@@ -138,7 +139,17 @@ function IndexState({ worldIndexStatus }: { worldIndexStatus: IndexStatus | null
   );
 }
 
-function IntegrityList({ emptyLabel, items, title }: { emptyLabel: string; items: string[]; title: string }): JSX.Element {
+function IntegrityList({
+  brokenReferences = false,
+  emptyLabel,
+  items,
+  title,
+}: {
+  brokenReferences?: boolean;
+  emptyLabel: string;
+  items: string[];
+  title: string;
+}): JSX.Element {
   const id = `xray-${title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')}`;
 
   return (
@@ -149,7 +160,7 @@ function IntegrityList({ emptyLabel, items, title }: { emptyLabel: string; items
       ) : (
         <ul className="xray-structured-list">
           {items.map((item) => (
-            <li key={item}><span className="record-chip record-chip--broken">{item}</span></li>
+            <li key={item}>{brokenReferences ? <BrokenReferenceChip recordId={item} /> : <span className="record-chip record-chip--broken">{item}</span>}</li>
           ))}
         </ul>
       )}
@@ -175,7 +186,7 @@ export function ValidationIntegrityTab({ pageDetail, worldIndexStatus }: Validat
       <IndexState worldIndexStatus={worldIndexStatus} />
       <IntegrityList emptyLabel="All checks passed." items={integrity.malformedYamlWarnings ?? []} title="Malformed YAML warnings" />
       <IntegrityList emptyLabel="All checks passed." items={integrity.skippedRecords ?? []} title="Skipped records" />
-      <IntegrityList emptyLabel="All checks passed." items={integrity.brokenRefs ?? []} title="Broken references" />
+      <IntegrityList brokenReferences emptyLabel="All checks passed." items={integrity.brokenRefs ?? []} title="Broken references" />
     </section>
   );
 }

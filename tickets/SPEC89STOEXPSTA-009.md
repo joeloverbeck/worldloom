@@ -35,7 +35,7 @@ SPEC-89 §5.2 prescribes the provenance trail inside the expanded record card: "
 Accepts `recordId: string` and `storyContext: { worldSlug, storySlug }` as props. On mount, fires `/api/worlds/:worldSlug/stories/:storySlug/provenance/:recordId`. After the response resolves, fires per-SE record fetches in parallel via `Promise.all` to resolve each SE's `created_at_page`.
 
 Rendering:
-- **Created by**: `{creatingSeId}` at `{creatingSe.created_at_page}` — both clickable per SPEC89STOEXPSTA-008 navigation rules.
+- **Created by**: `{creatingSeId}` at `{creatingSe.created_at_page}` — both clickable per `archive/tickets/SPEC89STOEXPSTA-008.md` navigation rules.
 - **Modified by**: per modifying SE: `{seId}` at `{se.created_at_page}` — comma-separated list of N entries.
 - **Evidence records**: list of `evidenceRecords[]` as clickable chips.
 

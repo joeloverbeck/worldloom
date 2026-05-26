@@ -12,7 +12,12 @@ function visibleChipValue(value: string | null): boolean {
 
 export function RecordCardCompact({ recordCard, onExpand }: RecordCardCompactProps): JSX.Element {
   return (
-    <article className="record-card record-card--compact" aria-labelledby={`record-card-${recordCard.recordId}`}>
+    <article
+      className="record-card record-card--compact"
+      aria-labelledby={`record-card-${recordCard.recordId}`}
+      data-xray-record-id={recordCard.recordId}
+      tabIndex={-1}
+    >
       <div className="record-card__header">
         <span className="record-card__class">{recordCard.recordClass}</span>
         <h4 className="record-card__title" id={`record-card-${recordCard.recordId}`}>

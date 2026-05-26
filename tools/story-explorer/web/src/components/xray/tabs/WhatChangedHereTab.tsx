@@ -4,6 +4,7 @@ import { getRecord, type PageDetail, type RecordCard, type RecordDetail } from '
 import { RecordCardCompact } from '../RecordCardCompact';
 
 interface WhatChangedHereTabProps {
+  onRecordLinkClick?: (recordId: string) => void;
   pageDetail: PageDetail;
   storySlug: string;
   worldSlug: string;
@@ -99,7 +100,15 @@ function FieldRow({ label, value }: { label: string; value: string }): JSX.Eleme
   );
 }
 
-function RecordChipList({ emptyLabel, ids }: { emptyLabel: string; ids: string[] }): JSX.Element {
+function RecordChipList({
+  emptyLabel,
+  ids,
+  onRecordLinkClick,
+}: {
+  emptyLabel: string;
+  ids: string[];
+  onRecordLinkClick?: (recordId: string) => void;
+}): JSX.Element {
   if (ids.length === 0) {
     return <p className="xray-empty-note">{emptyLabel}</p>;
   }
@@ -107,7 +116,7 @@ function RecordChipList({ emptyLabel, ids }: { emptyLabel: string; ids: string[]
   return (
     <div className="record-card__chips">
       {ids.map((recordId) => (
-        <button className="record-chip record-chip--button" key={recordId} type="button">
+        <button className="record-chip record-chip--button" key={recordId} onClick={() => onRecordLinkClick?.(recordId)} type="button">
           {formatRecordChip(recordId)}
         </button>
       ))}
@@ -139,7 +148,7 @@ function ObjectList({
   );
 }
 
-export function WhatChangedHereTab({ pageDetail, storySlug, worldSlug }: WhatChangedHereTabProps): JSX.Element {
+export function WhatChangedHereTab({ onRecordLinkClick, pageDetail, storySlug, worldSlug }: WhatChangedHereTabProps): JSX.Element {
   const eventId = useMemo(() => resolvedEventId(pageDetail), [pageDetail]);
   const [eventState, setEventState] = useState<EventLoadState>(() =>
     eventId ? { kind: 'loading', eventId } : { kind: 'idle' },
@@ -265,15 +274,15 @@ export function WhatChangedHereTab({ pageDetail, storySlug, worldSlug }: WhatCha
         <div className="xray-state-delta-grid">
           <div>
             <h5>Created</h5>
-            <RecordChipList emptyLabel="No records created." ids={created} />
+            <RecordChipList emptyLabel="No records created." ids={created} onRecordLinkClick={onRecordLinkClick} />
           </div>
           <div>
             <h5>Superseded</h5>
-            <RecordChipList emptyLabel="No records superseded." ids={superseded} />
+            <RecordChipList emptyLabel="No records superseded." ids={superseded} onRecordLinkClick={onRecordLinkClick} />
           </div>
           <div>
             <h5>Closed</h5>
-            <RecordChipList emptyLabel="No records closed." ids={closed} />
+            <RecordChipList emptyLabel="No records closed." ids={closed} onRecordLinkClick={onRecordLinkClick} />
           </div>
         </div>
       </section>

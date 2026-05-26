@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PageDetail } from '../../../api/client';
@@ -59,8 +60,16 @@ function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
 }
 
 describe('XRayPanel', () => {
+  function renderPanel(detail: PageDetail): void {
+    render(
+      <MemoryRouter>
+        <XRayPanel pageDetail={detail} storySlug="red-bunny" worldSlug="fixture-world" />
+      </MemoryRouter>,
+    );
+  }
+
   it('renders the four X-Ray tabs with Current State selected by default', () => {
-    render(<XRayPanel pageDetail={pageDetail()} storySlug="red-bunny" worldSlug="fixture-world" />);
+    renderPanel(pageDetail());
 
     const tablist = screen.getByRole('tablist', { name: 'State X-Ray tabs' });
     const tabs = within(tablist).getAllByRole('tab');
@@ -77,9 +86,8 @@ describe('XRayPanel', () => {
   });
 
   it('cycles keyboard focus and selection through the tabs', () => {
-    render(
-      <XRayPanel
-        pageDetail={pageDetail({
+    renderPanel(
+      pageDetail({
           eventDelta: {
             eventId: null,
             createCount: 0,
@@ -88,10 +96,7 @@ describe('XRayPanel', () => {
             introducedRecordIds: [],
             relationCount: 0,
           },
-        })}
-        storySlug="red-bunny"
-        worldSlug="fixture-world"
-      />,
+        }),
     );
 
     const currentState = screen.getByRole('tab', { name: 'Current State' });

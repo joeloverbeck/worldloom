@@ -43,7 +43,7 @@ Created the compact card surface for the recordCard's single-line summary per SP
 
 ### 3. Create `RecordCardExpanded.tsx`
 
-Created the expanded card per SPEC-89 §5.2: deterministic primary/secondary fields grouped by human labels, related-record chips, a provenance slot for SPEC89STOEXPSTA-009, and a lazy-mounted "View raw record" disclosure. Link navigation remains visual chip rendering only; SPEC89STOEXPSTA-008 owns active-page scroll / peek behavior.
+Created the expanded card per SPEC-89 §5.2: deterministic primary/secondary fields grouped by human labels, related-record chips, a provenance slot for SPEC89STOEXPSTA-009, and a lazy-mounted "View raw record" disclosure. Link navigation remained visual chip rendering only until `archive/tickets/SPEC89STOEXPSTA-008.md` landed active-page scroll / peek behavior.
 
 ### 4. Create `RawRecordDisclosure.tsx`
 
@@ -80,7 +80,7 @@ Created the stub module exporting `renderCompactLine(recordCard: RecordCard): JS
 - Per-class rendering logic for the 22 record classes (SPEC89STOEXPSTA-003).
 - Tab-specific assembly of these primitives (SPEC89STOEXPSTA-004 through -007).
 - Provenance trail content (SPEC89STOEXPSTA-009 fills the slot).
-- Linked-record navigation behavior (SPEC89STOEXPSTA-008).
+- Linked-record navigation behavior (`archive/tickets/SPEC89STOEXPSTA-008.md`).
 - Hybrid-record body parsing (SPEC89STOEXPSTA-010 — the expanded card renders raw body until the parser lands).
 - Accessibility tests (SPEC89STOEXPSTA-012).
 
@@ -129,4 +129,4 @@ Completed on 2026-05-26.
 ## Deviations
 
 - The landed file set includes `tools/story-explorer/web/src/api/client.ts`, `tools/story-explorer/web/src/styles/app.css`, and a shared test fixture because the primitive components need typed raw-route access, local styling, and stable fixture data. These are same-seam support surfaces.
-- `RecordCardExpanded` renders related records as chips only. The active/peek/broken navigation behavior remains intentionally out of scope for SPEC89STOEXPSTA-008.
+- At this ticket's closeout, `RecordCardExpanded` rendered related records as chips only. The active/peek/broken navigation behavior later landed in `archive/tickets/SPEC89STOEXPSTA-008.md`.

@@ -78,7 +78,7 @@ Render tests covering: (a) full plan + full receipt fixture; (b) missing receipt
 
 - Modifying SPEC-87's `/page-plans/:pageId` or `/prose-receipts/:pageId` route shapes — those are landed and the SPEC-87 fence forbids edits without an explicit SPEC-87 amendment.
 - Re-validating the prose against the receipt's per-check rules client-side — the receipt's verdicts are authoritative; the X-Ray displays them.
-- Linked-record navigation behavior (SPEC89STOEXPSTA-008).
+- Linked-record navigation behavior (`archive/tickets/SPEC89STOEXPSTA-008.md`).
 - Rendering the plan body in the prose panel (SPEC-88's `<ProsePanel>` never does this; the Plan & Prose tab is the only allowed surface).
 - Accessibility verification (SPEC89STOEXPSTA-012).
 

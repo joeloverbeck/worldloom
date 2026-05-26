@@ -85,7 +85,7 @@ Added Current State group, affordance-chip, and virtualized-list styles to `tool
 ## Out of Scope
 
 - Per-tab content for What Changed Here, Plan & Prose, Validation & Integrity (their own tickets: 005-007).
-- Linked-record navigation behavior — that's SPEC89STOEXPSTA-008.
+- Linked-record navigation behavior — that's `archive/tickets/SPEC89STOEXPSTA-008.md`.
 - Sticky rail counts that mirror this tab's group counts (SPEC89STOEXPSTA-011).
 - Accessibility verification (SPEC89STOEXPSTA-012).
 

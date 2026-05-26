@@ -26,7 +26,7 @@ SPEC-89 §4.4 defines Validation & Integrity as the X-Ray's integrity audit surf
 
 1. The validation_trace renders as a structured list (each entry naming the check + verdict) → render test with a fixture trace → vitest + RTL.
 2. Hash status rows render the right chip per state (match / mismatch / not-checked) → snapshot test with three fixtures.
-3. Broken references render as plain text chips with class `record-chip--broken` before SPEC89STOEXPSTA-008 lands → fixture test with a sample broken-ref list.
+3. At this ticket's closeout, broken references rendered as plain text chips with class `record-chip--broken`; `archive/tickets/SPEC89STOEXPSTA-008.md` later replaced that interim rendering with `<BrokenReferenceChip>`.
 4. The tab MUST NOT register any mutation route or button → grep-proof on the rendered DOM for absence of `<button onClick={...mutation}>`.
 
 ## Landed Changes
@@ -71,7 +71,7 @@ Added `ValidationIntegrityTab.test.tsx` for clean, failing, and stale-index fixt
 - Re-running validators client-side (the server-side `validation_trace` is authoritative).
 - Auto-remediation buttons (read-only fence per SPEC-87 §6 forbids this).
 - Cross-event validation diff (Future Enhancements per spec §Out of scope).
-- Linked-record navigation behavior — when SPEC89STOEXPSTA-008 lands, broken refs will route through `<BrokenReferenceChip>`; this ticket can render them as plain text in the interim.
+- Linked-record navigation behavior — `archive/tickets/SPEC89STOEXPSTA-008.md` later routed broken refs through `<BrokenReferenceChip>`; this ticket rendered them as plain text in the interim.
 - Accessibility verification (SPEC89STOEXPSTA-012).
 
 ## Acceptance Criteria
@@ -120,5 +120,5 @@ Completed 2026-05-26.
 ## Deviations
 
 - The original ticket assumed `PageDetail.validationIntegrity` already included hash statuses and broken references. Live reassessment showed only `validationTrace`, `receiptVerdict`, and `proseStatus`; this ticket therefore added the missing integrity fields at the page-detail view-model boundary before rendering them.
-- The original ticket described `BrokenReferenceChip` as the future final rendering. SPEC89STOEXPSTA-008 owns that primitive, so this ticket renders broken refs as `record-chip--broken` text chips until -008 lands.
+- The original ticket described `BrokenReferenceChip` as the future final rendering. `archive/tickets/SPEC89STOEXPSTA-008.md` now owns that primitive; this ticket rendered broken refs as `record-chip--broken` text chips until -008 landed.
 - The original ticket listed a manual visual smoke. The accepted closeout used focused frontend/backend tests plus the full package suite instead, because the diagnostic surface is fixture-proven and no dev-server-only behavior was added.

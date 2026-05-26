@@ -89,7 +89,7 @@ describe('ValidationIntegrityTab', () => {
     expect(screen.getByText('Plan hash: missing')).toBeInTheDocument();
     expect(screen.getByText('STENT-9')).toBeInTheDocument();
     expect(screen.getByText('BEL-2')).toBeInTheDocument();
-    expect(screen.getByText('OBL-404')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Unresolved reference OBL-404. Copy record ID.' })).toBeInTheDocument();
     expect(screen.getByText('World index: not available')).toBeInTheDocument();
   });
 

@@ -14,7 +14,7 @@ SPEC-89 §4.2 defines What Changed Here as the tab that answers "What caused thi
 
 1. `tabs/WhatChangedHereTab.tsx` exists as a stub after SPEC89STOEXPSTA-001 lands (intra-batch dependency). SE schema fields cited in §4.2 — `actor`, `targets`, `turn_driver.kind` (turn driver), `outcome_route`, `commitment.selected_slt_id`, `world_logic_rationale`, `state_delta.{create,supersede,close}`, `record_introductions`, `state_relations`, `non_propagation_facts`, `promotion_claims` — all verified on `tools/validators/src/schemas/story-event.schema.json` during the 2026-05-26 reassessment. The draft's `driver.kind` wording was stale; the live field is `turn_driver`. `PG.input.resolved_event_id` exists on the PG schema per `tools/validators/src/schemas/story-page.schema.json:40` (verified).
 2. SPEC-89 §4.2 (What Changed Here tab specification). SPEC-87 `/records/:recordId` route returns the parsed SE body + recordCard view-model; this tab fetches the SE corresponding to `PG.input.resolved_event_id`.
-3. Cross-skill boundary: SPEC-87's `/records/:recordId` route is the data source for the SE; SPEC-87 §5 confirms the route signature. This tab uses RecordCardCompact (from SPEC89STOEXPSTA-002) for the SE summary line at the top, then renders the structured fields below per §4.2's bullets. Cross-record links in the state-delta lists are rendered as chips that trigger the linked-record navigation primitives from SPEC89STOEXPSTA-008 (when those primitives land).
+3. Cross-skill boundary: SPEC-87's `/records/:recordId` route is the data source for the SE; SPEC-87 §5 confirms the route signature. This tab uses RecordCardCompact (from SPEC89STOEXPSTA-002) for the SE summary line at the top, then renders the structured fields below per §4.2's bullets. Cross-record links in the state-delta lists are rendered as chips that trigger the linked-record navigation primitives from `archive/tickets/SPEC89STOEXPSTA-008.md`.
 
 ## Architecture Check
 
@@ -45,7 +45,7 @@ Replaced the placeholder with the real implementation:
   - **Selected storylet**: when `se.commitment.selected_slt_id` is non-null, render `<RecordCardCompact recordCard={sltRecordCard}>` for the SLT (fetched in parallel with the SE).
   - **World-logic rationale**: `{se.world_logic_rationale}` (prose paragraph).
   - **State delta**:
-    - **Created**: list of records from `se.state_delta.create[]` as compact chips (`{record_id} - {recordClass}`), each clickable per SPEC89STOEXPSTA-008.
+    - **Created**: list of records from `se.state_delta.create[]` as compact chips (`{record_id} - {recordClass}`), each clickable per `archive/tickets/SPEC89STOEXPSTA-008.md`.
     - **Superseded**: list of superseded record IDs from `se.state_delta.supersede[]`.
     - **Closed**: list of records from `se.state_delta.close[]`.
   - **Record introductions**: list from `se.record_introductions[]`.
@@ -71,7 +71,7 @@ Added render tests with: (a) full-featured SE fixture (all fields populated, all
 
 ## Out of Scope
 
-- Linked-record navigation behavior (SPEC89STOEXPSTA-008 wires the chip clicks to peek panels / page navigation).
+- Linked-record navigation behavior (`archive/tickets/SPEC89STOEXPSTA-008.md` wires the chip clicks to peek panels / page navigation).
 - The "Created by SE / Modified by SE" provenance trail on individual records — that's SPEC89STOEXPSTA-009 inside the expanded card, not this tab.
 - Cross-event diff (Future Enhancements per spec §Out of scope).
 - Accessibility verification (SPEC89STOEXPSTA-012).
