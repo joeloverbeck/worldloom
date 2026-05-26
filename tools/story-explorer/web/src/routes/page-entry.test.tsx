@@ -31,13 +31,17 @@ function indexStatus(kind: IndexStatus['kind'] = 'fresh'): IndexStatus {
     case 'fresh':
       return { kind, version: 1 };
     case 'missing':
-      return { kind, remedy: 'Run world-index build fixture-world.' };
+      return { kind, remedy: 'Run npm exec --prefix tools/story-explorer -- world-index build fixture-world.' };
     case 'version_mismatch':
       return { kind, expected: 2, found: 1, remedy: 'Rebuild the index.' };
     case 'empty':
       return { kind, remedy: 'Add story records.' };
     case 'stale':
-      return { kind, driftedFiles: ['PG-1.yaml'], remedy: 'Run world-index sync fixture-world.' };
+      return {
+        kind,
+        driftedFiles: ['PG-1.yaml'],
+        remedy: 'Run npm exec --prefix tools/story-explorer -- world-index sync fixture-world --quiet.',
+      };
     case 'open_failed':
       return { kind, error: 'database is locked' };
   }
@@ -182,7 +186,9 @@ describe('PageEntryRoute', () => {
     const banner = await screen.findByRole('status');
     const actionGroup = screen.getByLabelText('Entry points for Red Bunny');
 
-    expect(banner).toHaveTextContent('1 file(s) drifted. Run world-index sync fixture-world.');
+    expect(banner).toHaveTextContent(
+      '1 file(s) drifted. Run npm exec --prefix tools/story-explorer -- world-index sync fixture-world --quiet.',
+    );
     expect(banner.compareDocumentPosition(actionGroup)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 

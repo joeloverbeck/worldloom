@@ -97,13 +97,13 @@ describe('ValidationIntegrityTab', () => {
     const staleIndex: IndexStatus = {
       kind: 'stale',
       driftedFiles: ['stories/red-bunny/_source/pages/PG-1.yaml'],
-      remedy: 'Run world-index sync fixture-world.',
+      remedy: 'Run npm exec --prefix tools/story-explorer -- world-index sync fixture-world --quiet.',
     };
 
     render(<ValidationIntegrityTab pageDetail={pageDetail()} worldIndexStatus={staleIndex} />);
 
     expect(screen.getByText('World index: stale')).toBeInTheDocument();
-    expect(screen.getByText('Run world-index sync fixture-world.')).toBeInTheDocument();
+    expect(screen.getByText('Run npm exec --prefix tools/story-explorer -- world-index sync fixture-world --quiet.')).toBeInTheDocument();
     expect(screen.getByText('stories/red-bunny/_source/pages/PG-1.yaml')).toBeInTheDocument();
   });
 });

@@ -162,11 +162,16 @@ Before Phase 1:
 6. Load all source records from the proposal package's `proposal_evidence.source_records[]` for Phase 2 supersession drafting and disposition classification.
 7. Allocate one `SE-<integer>` when `emit_closeout_event: true`.
 
-Persisted-summary recovery: see
-`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
-`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
-`delivery_status: persisted_with_summary`, retrieve required slices via
-`mcp__worldloom__get_persisted_packet_slice` before continuing.
+Packet recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. Two failure
+modes are covered there — if `get_context_packet` (or `get_records` /
+`describe_envelope_schema`) returns `delivery_status: persisted_with_summary`,
+retrieve required slices via `mcp__worldloom__get_persisted_packet_slice`
+before continuing; if `get_context_packet` errors with
+`code: packet_incomplete_required_classes` (required full bodies exceed the
+harness ceiling), follow the shared template's §When Required Classes Cannot
+Fit fallback (per-class `list_records(..., include_full_body=true)` plus
+targeted `get_records` for named seeds).
 
 If any precondition fails, the skill aborts before Phase 1.
 

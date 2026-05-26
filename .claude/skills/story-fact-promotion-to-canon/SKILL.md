@@ -169,11 +169,16 @@ Before Phase 1:
 6. Allocate `SP-<integer>` id via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`.
 7. Load `source_record_ids`, related authoring `SE` events, and witness `BEL` records through `story_slug` scoped targeted retrieval (or direct story-bundle reads allowed by the current workflow). Load the world canon context packet with `story_slug=<story_slug>` and world-scope seeds only: whole-class Mystery Reserve (for Phase 4 firewall), whole-class INV (for invariant check), and parent CFs of any mirrored `SF` sources (for Phase 2 candidate's `source_basis.derived_from`).
 
-Persisted-summary recovery: see
-`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
-`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
-`delivery_status: persisted_with_summary`, retrieve required slices via
-`mcp__worldloom__get_persisted_packet_slice` before continuing.
+Packet recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. Two failure
+modes are covered there — if `get_context_packet` (or `get_records` /
+`describe_envelope_schema`) returns `delivery_status: persisted_with_summary`,
+retrieve required slices via `mcp__worldloom__get_persisted_packet_slice`
+before continuing; if `get_context_packet` errors with
+`code: packet_incomplete_required_classes` (required full bodies exceed the
+harness ceiling), follow the shared template's §When Required Classes Cannot
+Fit fallback (per-class `list_records(..., include_full_body=true)` plus
+targeted `get_records` for named seeds).
 
 If any precondition fails, the skill aborts before Phase 1.
 
