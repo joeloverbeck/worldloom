@@ -565,14 +565,14 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "allocate_next_id",
-    "Allocate the next append-only id for a world-specific, story-bundle-scoped, sub-audit-scoped, or pipeline-scoped record class. Story-bundle-scoped classes return unpadded natural-integer IDs such as <CLASS>-1 for a fresh missing bundle under an existing world (per FOUNDATIONS-002). RSP requires story_slug and audit_id.",
+    "Preview the next append-only id for a world-specific, story-bundle-scoped, sub-audit-scoped, or pipeline-scoped record class. The call is read-only: repeated invocations return the same id until a patch plan consuming that id lands via submit_patch_plan with the id named in envelope.expected_id_allocations. For multi-id needs, prefer allocate_many_ids in a single call. Story-bundle-scoped classes return unpadded natural-integer IDs such as <CLASS>-1 for a fresh missing bundle under an existing world (per FOUNDATIONS-002). RSP requires story_slug and audit_id.",
     allocateNextIdInputSchema,
     async (args) => allocateNextId(args as unknown as Parameters<typeof allocateNextId>[0]),
     { id_class: ID_CLASSES }
   );
   registerToolWithCapability(
     "allocate_many_ids",
-    "allocate_many_ids: Allocate multiple append-only ids for one world in a single ordered response. Each allocation entry uses the same id_class, story_slug, and audit_id rules as allocate_next_id; repeated entries for the same scope increment monotonically within the batch, and errors include successful_allocations for reconciliation.",
+    "allocate_many_ids: Preview multiple append-only ids for one world in a single ordered response. The call is read-only: ids increment monotonically within the batch, but across separate MCP calls the baseline does not advance until a patch plan consuming the ids lands via submit_patch_plan with envelope.expected_id_allocations naming them. Each allocation entry uses the same id_class, story_slug, and audit_id rules as allocate_next_id; errors include successful_allocations for reconciliation.",
     allocateManyIdsInputSchema,
     async (args) => allocateManyIds(args as unknown as Parameters<typeof allocateManyIds>[0]),
     { "allocations[].id_class": ID_CLASSES }
