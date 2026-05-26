@@ -119,7 +119,7 @@ The build chain `world-index → patch-engine → validators → hooks → world
 - `tools/story-explorer/test/readonly-guard.test.ts` (modify) — verifies `GET`/`HEAD` allowance and non-read rejection
 - `tools/story-explorer/test/static-serve-readonly.test.ts` (new) — read-only Layer verification test
 - `tools/story-explorer/README.md` (modify) — documents package-root build and production static serving
-- `specs/SPEC-88-story-explorer-frontend-foundation.md` (modify) — records the T003 implementation note and `GET`/`HEAD` correction
+- `archive/specs/SPEC-88-story-explorer-frontend-foundation.md` (modify) — records the T003 implementation note and `GET`/`HEAD` correction
 
 ## Out of Scope
 

@@ -1,7 +1,7 @@
 # SPEC-89 — Story Explorer State X-Ray Layer
 
 **Status**: draft
-**Depends on**: SPEC-87 (backend foundation), SPEC-88 (frontend foundation & page reading surface)
+**Depends on**: SPEC-87 (backend foundation; archived at `archive/specs/SPEC-87-story-explorer-backend-foundation.md`), SPEC-88 (frontend foundation & page reading surface; archived at `archive/specs/SPEC-88-story-explorer-frontend-foundation.md`)
 **Related**: SPEC-90 (branch map & search), `specs/IMPLEMENTATION-ORDER.md`
 **Companion triage**: `docs/triage/2026-05-25-website-proposal-triage.md`
 

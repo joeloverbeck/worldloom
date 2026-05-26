@@ -67,7 +67,7 @@ The capstone test runs as part of the existing `npm test` script (which T003 cha
 ## Files to Touch
 
 - `tools/story-explorer/test/capstone-spec88-smoke.test.ts` (new) — hybrid runbook + automated capstone
-- `specs/SPEC-88-story-explorer-frontend-foundation.md` (modify) — dated implementation note for the final capstone proof and checkout-local red-bunny boundary
+- `archive/specs/SPEC-88-story-explorer-frontend-foundation.md` (modify) — dated implementation note for the final capstone proof and checkout-local red-bunny boundary
 
 ## Out of Scope
 

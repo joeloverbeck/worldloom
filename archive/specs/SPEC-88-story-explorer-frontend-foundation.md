@@ -1,6 +1,6 @@
 # SPEC-88 — Story Explorer Frontend Foundation & Page Reading Surface
 
-**Status**: draft
+**Status**: COMPLETED
 **Depends on**: SPEC-87 (backend foundation; landed and archived at `archive/specs/SPEC-87-story-explorer-backend-foundation.md`)
 **Related**: SPEC-89 (state x-ray), SPEC-90 (branch map & search), `specs/IMPLEMENTATION-ORDER.md`
 **Companion triage**: `docs/triage/2026-05-25-website-proposal-triage.md`
@@ -9,7 +9,7 @@
 
 **Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-010` landed the under-prose choice navigation and terminal-card slice: `ChoiceCard`, `ChildOutcomeVariant`, and `TerminalCard` now render committed child-page navigation, multi-outcome variants, non-navigable CHC filtering, and the no-continuation terminal state. Remaining §6/§7 bullets are historical plan context unless they name later SPEC-89/SPEC-90 surfaces.
 
-**Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-011` landed the empty/degraded backend-state slice: envelope-level non-fresh index banners render on the world picker, story picker, page entry route, and reading page; React Router loader errors now dispatch 404 misses to a route-aware not-found page and backend-unreachable failures to a retryable revalidation surface. At that point, remaining §9 accessibility/verification hardening belonged to `SPEC88STOEXPFRO-012`; after the note below, only final capstone proof remains in `SPEC88STOEXPFRO-013`.
+**Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-011` landed the empty/degraded backend-state slice: envelope-level non-fresh index banners render on the world picker, story picker, page entry route, and reading page; React Router loader errors now dispatch 404 misses to a route-aware not-found page and backend-unreachable failures to a retryable revalidation surface. At that point, remaining §9 accessibility/verification hardening belonged to `SPEC88STOEXPFRO-012`, and the final capstone proof belonged to `SPEC88STOEXPFRO-013`.
 
 **Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-012` landed the accessibility verification baseline: axe-core/vitest-axe are wired into the web package, component and route `.a11y.test.tsx` files cover the SPEC-88 surface, helper tests enforce heading hierarchy and reduced-motion media-query behavior, and axe-found alert/status role placement issues were corrected. At that point, remaining final proof belonged to `SPEC88STOEXPFRO-013`.
 
@@ -231,3 +231,19 @@ When `pageSummary.isLeaf === true` AND `choiceNavigation.every(c => !c.isNavigab
 | §Story Bundles §9 — Prose Length Discipline (no word quotas) | aligns @ UI typography | Prose is rendered at the content-defined length; no word-count chrome / progress bar / per-page word indicator in the UI. |
 | §Tooling Recommendation — agents never operate on prose alone | N/A @ this surface | The frontend is a human-facing reader, not an LLM agent surface. (Defensive disclosure: principle is in the canon-reading cluster.) |
 | §Story Bundles §6b — Information / Observer Firewall | N/A @ this surface | Firewall enforcement happens at story-pipeline authoring time, not at viewer time. The explorer is explicitly an author-x-ray surface (proposal §4 / §7); spoiler protection is out of scope for v1 per Named Assumption D. Defensive disclosure: an adjacent reader might expect spoiler masking; this row records the deliberate non-engagement. |
+
+## Outcome
+
+Completed 2026-05-26.
+
+SPEC-88 landed the Story Explorer frontend foundation under `tools/story-explorer/web/` and the package-root integration needed to serve it from the read-only backend. The final surface includes React/Vite routing for world picker, story picker, page entry, and reading page; reader chrome, prose and missing-prose panels, choice navigation, child outcome variants, terminal-card handling, degraded backend-state handling, local-storage preferences, and the accessibility baseline.
+
+The backend package now builds and tests both halves through `tools/story-explorer` package scripts, serves `web/dist/` when present, preserves enveloped `/api/*` routes, and remains usable when the web bundle is absent. The final capstone added `tools/story-explorer/test/capstone-spec88-smoke.test.ts`, which records the manual dry-run runbook and verifies built web artifacts, reading-surface source-map membership, static serving, API coexistence, and absent-bundle guard behavior.
+
+Deviations from the draft: the checkout-local `worlds/erotica-world/stories/red-bunny/` bundle is absent in this worktree, so the red-bunny browser smoke is documented as conditional runbook coverage for checkouts where that private fixture exists. Portable automated proof covers the package integration boundary with built artifacts, Fastify injection, route/component tests, and axe coverage.
+
+Verification:
+
+1. `cd tools/story-explorer && npm test` — PASS. Backend compiled tests passed 74/74, including the four SPEC-88 capstone subtests; web vitest passed 44 files / 103 tests.
+2. `cd tools/story-explorer && npm run build:backend && node --test dist/test/capstone-spec88-smoke.test.js` — PASS. Targeted capstone passed 4/4 subtests.
+3. `cd tools/story-explorer/web && npm test -- a11y.test` — PASS. 19 a11y test files / 22 tests passed with zero axe violations.

@@ -18,7 +18,7 @@ This file orders the four Story Explorer specs and records the named assumptions
 
 SPEC-87 is the structural base; nothing else compiles or renders without it.
 
-**Implementation status (2026-05-26):** SPEC-87 is completed and archived at `archive/specs/SPEC-87-story-explorer-backend-foundation.md`; downstream SPEC-88/SPEC-89/SPEC-90 dependencies should treat that archived backend foundation as the active prerequisite.
+**Implementation status (2026-05-26):** SPEC-87 is completed and archived at `archive/specs/SPEC-87-story-explorer-backend-foundation.md`; SPEC-88 is completed and archived at `archive/specs/SPEC-88-story-explorer-frontend-foundation.md`. Downstream SPEC-89/SPEC-90 dependencies should treat those archived foundations as active prerequisites.
 
 SPEC-88 must land before SPEC-89 or SPEC-90 because both reuse the disclosure primitive, the modal/drawer pattern, the API client, and the accessibility baseline that SPEC-88 establishes.
 

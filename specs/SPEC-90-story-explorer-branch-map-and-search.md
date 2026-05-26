@@ -1,7 +1,7 @@
 # SPEC-90 — Story Explorer Branch Map & Search
 
 **Status**: draft
-**Depends on**: SPEC-87 (backend foundation), SPEC-88 (frontend foundation), SPEC-89 (state x-ray)
+**Depends on**: SPEC-87 (backend foundation; archived at `archive/specs/SPEC-87-story-explorer-backend-foundation.md`), SPEC-88 (frontend foundation; archived at `archive/specs/SPEC-88-story-explorer-frontend-foundation.md`), SPEC-89 (state x-ray)
 **Related**: `specs/IMPLEMENTATION-ORDER.md`
 **Companion triage**: `docs/triage/2026-05-25-website-proposal-triage.md`
 
