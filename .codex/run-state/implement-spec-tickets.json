@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-87-story-explorer-backend-foundation.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC87STOEXPBAC-008.md",
+  "last_ticket": "archive/tickets/SPEC87STOEXPBAC-009.md",
   "last_result": "completed_archived",
-  "last_work_commit": "81333147122356a555d4d18d805b71b5a240613f",
+  "last_work_commit": "fe971622679e5fcc40cc5e3164e295ee15252394",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC87STOEXPBAC-009.md",
+  "next_target": "tickets/SPEC87STOEXPBAC-010.md",
   "queue": [
-    "tickets/SPEC87STOEXPBAC-009.md",
     "tickets/SPEC87STOEXPBAC-010.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -15,7 +14,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC87STOEXPBAC-008 archived; npm run build passed, compiled routes test passed 3/3, final npm test passed 62/62, active-path sweep repaired SPEC87STOEXPBAC-010 dependency, staged diff hygiene passed. Drafted npm test -- routes proof was corrected to the package's compiled Node route test boundary.",
+  "proof_state": "SPEC87STOEXPBAC-009 archived; pre-edit npm test passed 62/62, npm run build passed, node --test dist/test/sketch-routes.test.js passed 3/3, final npm test passed 65/65, SPEC-90 grep proof confirmed route/type contract, active-path sweep repaired SPEC87STOEXPBAC-010 dependency, staged diff hygiene passed. Drafted npm test -- sketch-routes proof was corrected to the package's compiled Node test boundary.",
   "dirty_state": "expected clean tracked state after state commit; expected ignored artifacts present from package proof: tools/story-explorer/dist/, tools/story-explorer/node_modules/",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
