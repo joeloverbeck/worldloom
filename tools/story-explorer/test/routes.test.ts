@@ -10,6 +10,8 @@ import type Database from "better-sqlite3";
 import YAML from "yaml";
 
 import { createServer } from "../src/server/http.js";
+import { PageDetailNotFoundError } from "../src/read/page-detail.js";
+import { pageDetailNotFoundMessage } from "../src/server/routes/pages.js";
 
 interface RouteFixture {
   repoRoot: string;
@@ -211,6 +213,30 @@ test("page routes return page summaries and PageDetail through the HTTP envelope
     assert.equal(detailResponse.statusCode, 200);
     assert.equal(detailBody.data?.proseStatus, "present");
     assert.equal(detailBody.data?.choiceNavigation?.[0]?.childOutcomeVariants?.length, 1);
+  } finally {
+    await server.close();
+  }
+});
+
+test("page detail route returns 404 only for the typed target-page missing error", async () => {
+  const fixture = seedFixture();
+  const server = await createServer({ repoRoot: fixture.repoRoot });
+
+  try {
+    const missingPageResponse = await server.inject({
+      method: "GET",
+      url: "/api/worlds/fixture-world/stories/red-bunny/pages/PG-404",
+    });
+    const missingPageBody = JSON.parse(missingPageResponse.body) as { data?: { error?: string; message?: string } };
+    assert.equal(missingPageResponse.statusCode, 404);
+    assert.equal(missingPageBody.data?.error, "not_found");
+    assert.equal(missingPageBody.data?.message, "Page PG-404 not found in fixture-world/red-bunny");
+
+    assert.equal(
+      pageDetailNotFoundMessage(new PageDetailNotFoundError("fixture-world", "red-bunny", "PG-404")),
+      "Page PG-404 not found in fixture-world/red-bunny"
+    );
+    assert.equal(pageDetailNotFoundMessage(new Error("Record not found while resolving page detail")), null);
   } finally {
     await server.close();
   }

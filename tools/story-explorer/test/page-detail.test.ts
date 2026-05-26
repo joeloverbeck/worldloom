@@ -327,6 +327,26 @@ test("getPageDetail omits missing active record raw sources and reports skipped 
   );
 });
 
+test("getPageDetail degrades missing emitted choice records without rejecting the page", async () => {
+  const fixture = seedPageDetailFixture();
+  fixture.db.close();
+  rmSync(path.join(fixture.storyRoot, "_source", "choices", "CHC-1.yaml"));
+
+  const detail = await getPageDetail("fixture-world", "red-bunny", "PG-1", fixture.repoRoot);
+
+  assert.equal(detail.choiceNavigation.length, 1);
+  assert.equal(detail.choiceNavigation[0]?.choiceId, "CHC-1");
+  assert.equal(detail.choiceNavigation[0]?.surfaceLabel, "CHC-1");
+  assert.equal(detail.choiceNavigation[0]?.playerVisibleIntent, "");
+  assert.deepEqual(detail.choiceNavigation[0]?.pressure, []);
+  assert.equal(detail.choiceNavigation[0]?.groundedInCount, 0);
+  assert.equal(detail.choiceNavigation[0]?.isNavigable, true);
+  assert.deepEqual(
+    detail.choiceNavigation[0]?.childOutcomeVariants.map((variant) => variant.pageId),
+    ["PG-2", "PG-3", "PG-4"]
+  );
+});
+
 test("getRecordProvenance mirrors indexed state-delta and creation-evidence edge walks", async () => {
   const fixture = seedPageDetailFixture();
   fixture.db.close();
