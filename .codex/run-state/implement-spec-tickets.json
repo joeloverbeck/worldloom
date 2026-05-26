@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-89-story-explorer-state-xray-layer.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC89STOEXPSTA-007.md",
+  "last_ticket": "archive/tickets/SPEC89STOEXPSTA-008.md",
   "last_result": "completed_archived",
-  "last_work_commit": "d9a02f0779a43d6265c47ca2b06e58b32a0d5d7a",
+  "last_work_commit": "73d2e5d5936dff4c052feb60f178aae29297d068",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC89STOEXPSTA-008.md",
+  "next_target": "tickets/SPEC89STOEXPSTA-009.md",
   "queue": [
-    "tickets/SPEC89STOEXPSTA-008.md",
     "tickets/SPEC89STOEXPSTA-009.md",
     "tickets/SPEC89STOEXPSTA-010.md",
     "tickets/SPEC89STOEXPSTA-011.md",
@@ -22,6 +21,6 @@
   "blocked": false,
   "blocker": null,
   "proof_state": null,
-  "dirty_state": "clean tracked worktree after state-only commit; ignored package artifacts remain under tools/story-explorer/dist, tools/story-explorer/node_modules, tools/story-explorer/web/dist, tools/story-explorer/web/node_modules",
+  "dirty_state": "clean tracked worktree after work commit; ignored package artifacts remain under tools/story-explorer/dist, tools/story-explorer/node_modules, tools/story-explorer/web/dist, tools/story-explorer/web/node_modules",
   "updated_at": "2026-05-26"
 }
