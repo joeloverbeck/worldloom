@@ -14,9 +14,12 @@ The package also exposes the built CLI as `story-explorer`.
 
 Use `--repo-root <path>` to point the server at a specific Worldloom checkout. When omitted, the CLI resolves the nearest repository root from the current working directory.
 
+`npm run build` builds both the `web/` Vite bundle and the backend. When `web/dist/index.html` is present under the resolved repo root, the backend serves the bundle at `/` and keeps `/api/*` routes enveloped for frontend API calls. When the bundle is absent, the backend still starts and serves only the API routes.
+
 ## Read-Only Contract
 
 - No `POST`, `PUT`, `PATCH`, or `DELETE` routes are registered.
+- `GET` and `HEAD` are the only allowed read-route methods.
 - No dependency on `@worldloom/patch-engine`.
 - No dependency on `@worldloom/world-mcp`.
 - No repository writes through `fs.writeFile`, `fs.appendFile`, `fs.mkdir`, or equivalents.

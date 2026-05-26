@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds capstone integration test under `tools/story-explorer/test/`; exercises the full SPEC-88 surface end-to-end against the red-bunny fixture bundle.
-**Deps**: SPEC88STOEXPFRO-003, SPEC88STOEXPFRO-012
+**Deps**: archive/tickets/SPEC88STOEXPFRO-003.md, SPEC88STOEXPFRO-012
 
 ## Problem
 

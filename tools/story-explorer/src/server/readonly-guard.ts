@@ -21,7 +21,8 @@ const ROUTE_METHODS = [
   "put",
 ] as const;
 
-const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]);
+const READ_METHODS = new Set(["GET", "HEAD"]);
+const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
 
 function normalizeMethods(method: unknown): string[] {
   if (Array.isArray(method)) {
@@ -41,7 +42,7 @@ function pathFromOptions(options: RouteOptions): string {
 
 function assertGetOnly(method: unknown, routePath: string): void {
   for (const normalized of normalizeMethods(method)) {
-    if (WRITE_METHODS.has(normalized) || normalized !== "GET") {
+    if (WRITE_METHODS.has(normalized) || !READ_METHODS.has(normalized)) {
       throw new Error(`read-only fence violation: ${normalized} ${routePath}`);
     }
   }

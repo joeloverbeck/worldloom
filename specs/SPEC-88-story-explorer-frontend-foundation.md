@@ -5,6 +5,8 @@
 **Related**: SPEC-89 (state x-ray), SPEC-90 (branch map & search), `specs/IMPLEMENTATION-ORDER.md`
 **Companion triage**: `docs/triage/2026-05-25-website-proposal-triage.md`
 
+**Implementation note (2026-05-26)**: `SPEC88STOEXPFRO-003` landed the backend integration slice: package-root build/test now chains the web bundle and backend compile, `@fastify/static` serves `web/dist/` when present, and the read-only fence permits only `GET`/`HEAD` route methods while rejecting mutation methods. Remaining §10 bullets are historical plan context until their tickets land.
+
 ---
 
 ## 1. Purpose
@@ -209,7 +211,7 @@ When `pageSummary.isLeaf === true` AND `choiceNavigation.every(c => !c.isNavigab
 
 - `npm --prefix web run build` (from the `tools/story-explorer/` package root) builds the frontend bundle into `web/dist/`.
 - Modify `tools/story-explorer/package.json`: replace `build` with a chained script that builds the web sub-tree first then the backend (e.g. `npm --prefix web run build && tsc -p tsconfig.json`); chain `test` to run the web vitest suite alongside the existing `node --test` backend suite. This extends landed SPEC-87 backend code as new SPEC-88 work — not a SPEC-87 amendment, since SPEC-87 is COMPLETED+archived and this spec authors the integration explicitly.
-- Add `@fastify/static` as a `tools/story-explorer/package.json` dependency; register a read-only `web/dist/` static-serve in `tools/story-explorer/src/server/http.ts` for production mode (guarded by build-presence check; falls back gracefully when `web/dist/` is absent, e.g. backend-only test runs). This preserves SPEC-87 §6 four-layer read-only fence — static-serve is read-only by construction and adds no write surface. A new test (`test/static-serve-readonly.test.ts`) asserts the static-serve handler responds only to GET and that no `POST`/`PUT`/`PATCH`/`DELETE` registration is introduced under the `web/dist/` route.
+- Add `@fastify/static` as a `tools/story-explorer/package.json` dependency; register a read-only `web/dist/` static-serve in `tools/story-explorer/src/server/http.ts` for production mode (guarded by build-presence check; falls back gracefully when `web/dist/` is absent, e.g. backend-only test runs). This preserves SPEC-87 §6 four-layer read-only fence — static-serve is read-only by construction and adds no write surface. A new test (`test/static-serve-readonly.test.ts`) asserts the static-serve handler responds only to `GET`/`HEAD` and that no `POST`/`PUT`/`PATCH`/`DELETE` registration is introduced under the `web/dist/` route.
 - Frontend tests via vitest + React Testing Library (declared in `web/package.json` devDependencies): render tests per route, accessibility tests via axe-core, missing-prose placeholder visual snapshot, choice-card multi-variant rendering, breadcrumb anchor correctness.
 - Manual smoke test in `dev` mode against the `worlds/erotica-world/stories/red-bunny/` bundle (one prose page, one plan, one receipt confirmed present per pre-spec audit).
 
