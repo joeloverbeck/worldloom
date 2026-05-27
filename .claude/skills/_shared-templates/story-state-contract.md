@@ -605,6 +605,20 @@ Each §16a packet includes:
 
 When page-local modulation depends on active state, `Current-state grounding records:` names the active records that ground that modulation, cited by id. When no current-state record is needed, the field reads exactly: `Current-state grounding records: none; stable STCHAR authority only.` Page plans must not cite world `CHAR-*` as operational page-plan characterization authority. In §16a packet fields, any `PG-<integer>` or `SE-<integer>` token is treated as an operational current-state citation: cite only the current page's own `PG` or resolved `SE` id there. To discuss earlier pages or events as history, use prose such as "the prior observation beat" or "the parent-page action" rather than a literal page/event id unless that id is deliberately active/current for the packet.
 
+**DO / DON'T examples for prior-page / prior-event references in §16a:**
+
+| DON'T (validator FAIL) | DO (validator PASS) |
+|---|---|
+| "the disclosure from PG-6 compounds the desire" | "the disclosure on the parent page compounds the desire" |
+| "Jon's posture from PG-6 must now hold against new pressure" | "Jon's posture from the prior page must now hold against new pressure" |
+| "the trade-coded register reads back to him as evidence the PG-5 probe was about pricing" | "the trade-coded register reads back to him as evidence the earlier probe was about pricing" |
+| "the SE-6 act has paid its cost into the air" | "the parent-page act has paid its cost into the air" |
+| "the dread is sharper than at PG-6" | "the dread is sharper than on the prior page" |
+| "Current-state grounding records: STEMO-13, STEMO-14, PG-6" | "Current-state grounding records: STEMO-17, STEMO-18, PG-7" — cite the current page's own PG, not a prior page. |
+| "Trigger event: SE-6" when SE-6 is the prior resolved event | "Trigger event: SE-7" — cite the current page's resolved SE, or use prose such as "the parent-page event" for history. |
+
+The validator's strict rule is that any `PG-<integer>` or `SE-<integer>` token in a §16a packet field MUST resolve to an active record in the current page's snapshot. The current page's own `PG-<integer>` and the current page's resolved `SE-<integer>` are lawful citations; earlier page/event ids need prose substitution unless they are deliberately active/current for the packet.
+
 The canonical post-SPEC-71 §16a packet field set is:
 
 - `STENT / STCHAR / display name`

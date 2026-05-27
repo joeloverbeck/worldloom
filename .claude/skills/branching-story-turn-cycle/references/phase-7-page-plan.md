@@ -75,6 +75,8 @@ Use the active STCHAR profile as stable authority. Use active story-state record
 
 Common ways authors trip the rule: differential-discipline language like "unchanged from PG-3", "different from PG-3's anchors", "as PG-3", "Limits as PG-3"; carrying a prior page's grounding cite forward verbatim; referencing the just-superseded record (STEMO-N) when only its successor (STEMO-M) is active. Rewrite each such phrase in prose, drop the literal id, or replace it with the active successor id. The `Current-state grounding records:` field is the ONE exception — it is parsed as a comma-separated id list, never as prose.
 
+When authoring §16a packets, use the DO/DON'T table in the shared contract §16a for prior-page/prior-event reference patterns; the common failure is prose-style references like "from PG-X" that trip `page_plan_stchar_packet_integrity.stale_current_state_reference`.
+
 Use §10b "Open Setups, Active Clocks, Hidden Secrets" only when at least one post-delta active CLK, STSEC, or STQ record is relevant to the page render. It is per-page computed from the current `PG.state_snapshot.active_records`, not inlined verbatim from the shared contract and not copied from a prior page.
 
 - Active clocks: describe the clock as renderable pressure, horizon, and next noticeable shift. Keep current `value` / `max`, thresholds, salience, visibility, and tick effects in §15 frontmatter for validator readback.
