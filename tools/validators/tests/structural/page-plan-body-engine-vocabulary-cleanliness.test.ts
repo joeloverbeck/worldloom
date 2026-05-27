@@ -4,7 +4,10 @@ import test from "node:test";
 import {
   RECORD_ID_PREFIXES
 } from "../../src/structural/_engine-vocabulary-tokens.js";
-import { pagePlanBodyEngineVocabularyCleanliness } from "../../src/structural/page-plan-body-engine-vocabulary-cleanliness.js";
+import {
+  ENGINE_SECTION_NUMBERS,
+  pagePlanBodyEngineVocabularyCleanliness
+} from "../../src/structural/page-plan-body-engine-vocabulary-cleanliness.js";
 import { context } from "./helpers.js";
 
 const STORY = "test-story";
@@ -16,12 +19,46 @@ test("page_plan_body_engine_vocabulary_cleanliness passes clean prose body secti
   assert.deepEqual(verdicts, []);
 });
 
-test("page_plan_body_engine_vocabulary_cleanliness warns on one or two body hits in a section", async () => {
+test("page_plan_body_engine_vocabulary_cleanliness allows record IDs and schema-field literals in engine sections", async () => {
   const verdicts = await run(plan({
     section7: [
       "## 7. Selected Event and State Delta",
       "",
-      "Jon's interior shifts from hesitation to focused attention.",
+      "The page creates STINT-4, STEMO-5, BEL-9, THR-2, and OBL-3.",
+      "THR-2 supersedes THR-1 as the open pressure carrier."
+    ].join("\n")
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("page_plan_body_engine_vocabulary_cleanliness still warns on predicate DSL tokens in engine sections", async () => {
+  const verdicts = await run(plan({
+    section7: [
+      "## 7. Selected Event and State Delta",
+      "",
+      "The state movement depends on pred: pressure rather than a prose explanation."
+    ].join("\n")
+  }));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.severity, "warn");
+  assert.equal(verdicts[0]?.code, "page_plan_body_engine_vocabulary_cleanliness.warn");
+  assert.deepEqual((verdicts[0]?.detail as { hit_count?: number }).hit_count, 1);
+  assert.deepEqual(
+    (verdicts[0]?.detail as { hits?: Array<{ token: string; token_class: string }> }).hits?.map((hit) => ({
+      token: hit.token,
+      token_class: hit.token_class
+    })),
+    [{ token: "pred:", token_class: "predicate_dsl" }]
+  );
+});
+
+test("page_plan_body_engine_vocabulary_cleanliness warns on one or two prose-facing body hits in a section", async () => {
+  const verdicts = await run(plan({
+    section1: [
+      "## 1. Story Kernel Excerpt",
+      "",
       "A stray STINT-4 citation is an isolated authoring slip."
     ].join("\n")
   }));
@@ -32,10 +69,10 @@ test("page_plan_body_engine_vocabulary_cleanliness warns on one or two body hits
   assert.deepEqual((verdicts[0]?.detail as { hit_count?: number }).hit_count, 1);
 });
 
-test("page_plan_body_engine_vocabulary_cleanliness fails on three or more body hits in a section", async () => {
+test("page_plan_body_engine_vocabulary_cleanliness fails on three or more prose-facing body hits in a section", async () => {
   const verdicts = await run(plan({
-    section7: [
-      "## 7. Selected Event and State Delta",
+    section1: [
+      "## 1. Story Kernel Excerpt",
       "",
       "The page creates STINT-4, STEMO-5, and BEL-9 as visible bookkeeping."
     ].join("\n")
@@ -135,6 +172,13 @@ test("engine vocabulary token source covers SPEC-91 record class prefixes", () =
   );
 });
 
+test("page plan body engine vocabulary policy names the current engine sections", () => {
+  assert.deepEqual(
+    [...ENGINE_SECTION_NUMBERS],
+    ["5", "6", "7", "7a", "8", "9", "9b", "9c", "10", "10b", "13", "14"]
+  );
+});
+
 async function run(content: string) {
   return pagePlanBodyEngineVocabularyCleanliness.run(
     { files: [{ path: PLAN_PATH, content }] },
@@ -142,8 +186,14 @@ async function run(content: string) {
   );
 }
 
-function plan(overrides: { section7?: string; section16a?: string } = {}): string {
+function plan(overrides: { section1?: string; section7?: string; section16a?: string } = {}): string {
   return [
+    overrides.section1 ?? [
+      "## 1. Story Kernel Excerpt",
+      "",
+      "The story kernel remains plain prose."
+    ].join("\n"),
+    "",
     "## 2. Content Policy",
     "PG-1 and state_delta are allowed here because this section is verbatim-inlined policy.",
     "",

@@ -8,7 +8,7 @@ The drafted plan bytes are the future direct-write artifact. Keep the complete U
 
 Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event as prose-facing scene, pressure, outcome, and state-change direction; §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` with `urgency` so debts that must be honored are visible to the prose renderer; §10b optionally lists active CLK / STSEC / STQ records after Phase 4; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) carries a structured continuity packet derived from parent rendered prose when `pages-prose/PG-<parent>.md` exists on disk.
 
-**§7 state-delta body translation.** The §7 body is the renderer-facing explanation of the selected event and state movement: what changed in the actor, scene, or pressure field this page. It may name the chosen CHC or write-in interpretation, `outcome_route`, `world_logic_rationale`, and `resolution.player_visible_feedback` in prose, but it must not dump the engine ledger. Engine state-delta arrays, `record_introductions[]`, `state_relations[]`, `non_propagation_facts[]`, lifecycle bookkeeping, and record-id-heavy rationale move to §15 frontmatter and the underlying `SE` record.
+**§7 state-delta body translation.** The §7 body is the renderer-facing explanation of the selected event and state movement: what changed in the actor, scene, or pressure field this page. It may name the chosen CHC or write-in interpretation, `outcome_route`, `world_logic_rationale`, `resolution.player_visible_feedback`, and load-bearing record IDs needed to ground state movement, but it must not dump the engine ledger. Engine state-delta arrays, `record_introductions[]`, `state_relations[]`, `non_propagation_facts[]`, lifecycle bookkeeping, and raw field arrays move to §15 frontmatter and the underlying `SE` record.
 
 Use a prose packet like:
 
@@ -48,7 +48,7 @@ Verbatim prior-prose quotation is allowed only when an exact line must be answer
 
 Recommended forms: `expires after PG-<N>`, `until PG-<N>`, `remains active at PG-<N+1>` (the new page itself), `once <condition>`, `if <condition>`, `when <condition>`. When the record genuinely stays active across the new page without a known horizon, prefer `remains active at PG-<N+1>` over freeform prose — naming the new page satisfies the rule and accurately states the state. Within the required cell shape, write the reason as prose-facing pressure or scene logic rather than bare record-id rationale where possible.
 
-**§9 / §9b / §9c body translation.** These sections should tell the external renderer what relationship, knowledge, agency, and emotion mean in the scene. Do not make the body read like active-record inventory. Record ids and raw machine fields remain in §15 frontmatter or in §16a `Current-state grounding records:` when they ground character authority.
+**§9 / §9b / §9c body translation.** These sections should tell the external renderer what relationship, knowledge, agency, and emotion mean in the scene. Do not make the body read like active-record inventory. Record IDs may appear when they disambiguate load-bearing state, while raw machine fields remain in §15 frontmatter or in §16a `Current-state grounding records:` when they ground character authority.
 
 §9 should render active relationship and belief state as prose, for example:
 
@@ -94,4 +94,4 @@ distinguish newly introduced records from records that were already active:
 
 Omit empty subsections. If no CLK, STSEC, or STQ is active or relevant, omit §10b entirely rather than emitting a placeholder.
 
-The plan must not expose engine jargon to prose. Engine terms are confined to §15 frontmatter and the §16a `Current-state grounding records:` field. No word-count targets (per FOUNDATIONS §Story Bundles §9).
+The plan must not expose engine jargon to prose-facing sections. Record IDs and schema-field vocabulary may appear in engine-output body sections (§5, §6, §7, §7a, §8, §9, §9b, §9c, §10, §10b, §13, §14) when they are load-bearing grounding; predicate DSL terms remain prohibited outside excluded verbatim/frontmatter sections. No word-count targets (per FOUNDATIONS §Story Bundles §9).
