@@ -107,7 +107,7 @@ plan:
   plan_hash: sha256*
 prose_plan_path: pages-prose-plans/PG-<integer>.md*   # stable plan address; included in state_hash payload
 emitted_choices: [CHC-<integer>]*
-validation_trace:                      # * one entry per shared gate with PASS + one-line rationale
+validation_trace:                      # * one entry per shared gate with PASS + one concise-sentence rationale
   input_legality: "PASS: <rationale>"
   parent_snapshot_compatibility: "PASS: <rationale>"
   mystery_invariant_firewall: "PASS: <rationale>"
