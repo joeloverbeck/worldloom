@@ -66,6 +66,14 @@ interface PredicateBinding {
   pred: string;
   alias: string;
   expectedClass: string;
+  source: PredicateSource;
+}
+
+type PredicateSource = "hard" | "soft";
+
+interface PredicateWithSource {
+  value: unknown;
+  source: PredicateSource;
 }
 
 interface StaticPredicateRecord {
@@ -98,6 +106,7 @@ function validateEvent(
   const predicates = predicatesFor(storylet);
   const staticPredicates = staticPredicateRecords(predicates);
   const existentialPredicates = existentialBindings(predicates);
+  const downstreamBoundAliases = downstreamBoundAliasReferences(storylet);
   const selectingRecordIds = new Set<string>(staticPredicates.map((predicate) => predicate.id));
   const verdicts: Verdict[] = [];
 
@@ -114,11 +123,15 @@ function validateEvent(
   for (const predicate of existentialPredicates) {
     const bound = resolveAliasBinding(event, predicate.alias);
     if (bound === undefined) {
+      if (predicate.source === "soft" && !downstreamBoundAliases.has(predicate.alias)) {
+        continue;
+      }
       verdicts.push(eventVerdict(event, "fail", "alias_binding_missing", `${eventId} selects ${selectedSltId}, but ${predicate.pred} alias ${predicate.alias} has no commitment.alias_bindings entry.`, {
         event_id: eventId,
         selected_slt_id: selectedSltId,
         predicate: predicate.pred,
-        alias: predicate.alias
+        alias: predicate.alias,
+        predicate_source: predicate.source
       }));
       continue;
     }
@@ -242,14 +255,8 @@ function validateAliasHygiene(
   const eventId = recordId(event);
   const storyletId = recordId(storylet);
   const usedAliases = new Set(existentialPredicates.map((predicate) => predicate.alias));
-  const effects = asPlainRecord(asPlainRecord(storylet.parsed).effects);
-  for (const key of ["create", "supersede", "close"] as const) {
-    for (const effect of stringArray(effects[key])) {
-      const match = BOUND_EFFECT.exec(effect);
-      if (match !== null) {
-        usedAliases.add(match[1] ?? "");
-      }
-    }
+  for (const alias of downstreamBoundAliasReferences(storylet)) {
+    usedAliases.add(alias);
   }
 
   const verdicts: Verdict[] = [];
@@ -303,43 +310,76 @@ function recordMapsForStory(records: readonly IndexedRecord[], storySlug: string
   return { byId, byType };
 }
 
-function predicatesFor(storylet: IndexedRecord): unknown[] {
+function predicatesFor(storylet: IndexedRecord): PredicateWithSource[] {
   const preconditions = asPlainRecord(asPlainRecord(storylet.parsed).preconditions);
-  return [...arrayValue(preconditions.hard), ...arrayValue(preconditions.soft)];
+  return [
+    ...arrayValue(preconditions.hard).map((value) => ({ value, source: "hard" as const })),
+    ...arrayValue(preconditions.soft).map((value) => ({ value, source: "soft" as const }))
+  ];
 }
 
-function staticPredicateRecords(predicates: readonly unknown[]): StaticPredicateRecord[] {
+function staticPredicateRecords(predicates: readonly PredicateWithSource[]): StaticPredicateRecord[] {
   const ids = new Set<string>();
   for (const predicate of predicates) {
-    collectRecordIds(predicate, ids);
+    collectRecordIds(predicate.value, ids);
   }
   return [...ids].map((id) => ({ id }));
 }
 
-function existentialBindings(predicates: readonly unknown[]): PredicateBinding[] {
+function existentialBindings(predicates: readonly PredicateWithSource[]): PredicateBinding[] {
   const bindings: PredicateBinding[] = [];
   for (const predicate of predicates) {
-    collectExistentialBindings(predicate, bindings);
+    collectExistentialBindings(predicate.value, predicate.source, bindings);
   }
   return bindings;
 }
 
-function collectExistentialBindings(value: unknown, bindings: PredicateBinding[]): void {
+function collectExistentialBindings(value: unknown, source: PredicateSource, bindings: PredicateBinding[]): void {
   const record = asPlainRecord(value);
   const pred = stringValue(record.pred);
   const alias = stringValue(record.alias);
   const expectedClass = pred === undefined ? undefined : EXISTENTIAL_CLASS_BY_PREDICATE.get(pred);
   if (pred !== undefined && alias !== undefined && expectedClass !== undefined) {
-    bindings.push({ pred, alias, expectedClass });
+    bindings.push({ pred, alias, expectedClass, source });
   }
   for (const nested of Object.values(record)) {
     if (Array.isArray(nested)) {
       for (const item of nested) {
-        collectExistentialBindings(item, bindings);
+        collectExistentialBindings(item, source, bindings);
       }
     } else if (typeof nested === "object" && nested !== null) {
-      collectExistentialBindings(nested, bindings);
+      collectExistentialBindings(nested, source, bindings);
     }
+  }
+}
+
+function downstreamBoundAliasReferences(storylet: IndexedRecord): Set<string> {
+  const parsedStorylet = asPlainRecord(storylet.parsed);
+  const aliases = new Set<string>();
+  collectBoundAliases(asPlainRecord(parsedStorylet.effects), aliases);
+  for (const exitOption of arrayValue(parsedStorylet.exit_options)) {
+    collectBoundAliases(asPlainRecord(exitOption).likely_effects, aliases);
+  }
+  return aliases;
+}
+
+function collectBoundAliases(value: unknown, aliases: Set<string>): void {
+  if (typeof value === "string") {
+    const match = BOUND_EFFECT.exec(value);
+    if (match !== null) {
+      aliases.add(match[1] ?? "");
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectBoundAliases(item, aliases);
+    }
+    return;
+  }
+  const record = asPlainRecord(value);
+  for (const item of Object.values(record)) {
+    collectBoundAliases(item, aliases);
   }
 }
 

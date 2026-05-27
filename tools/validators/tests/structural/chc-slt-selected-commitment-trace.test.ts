@@ -102,6 +102,64 @@ test("chc_slt_selected_commitment_trace validates every existential family bindi
   }
 });
 
+test("chc_slt_selected_commitment_trace allows advisory unmatched soft existential aliases", async () => {
+  const verdicts = await chcSltSelectedCommitmentTrace.run(undefined, context(records([
+    parentPage(["SREL-7"]),
+    childPage(),
+    event(),
+    storylet("SLT-42", [], {
+      preconditions: {
+        hard: [],
+        soft: [{ pred: "any_relationship_axis", alias: "attention_edge", axis: "attention", comparator: ">=", value: "medium" }]
+      },
+      effects: { create: [], supersede: [], close: [] },
+      exit_options: [{ action_family: "communicate", surface_hint: "Answer.", likely_effects: [] }]
+    }),
+    choice("CHC-1", { grounded_in: { records: ["SREL-7"] } }),
+    storyRecord("relationship_record_story", "SREL-7", "relationships", { axis: "desire" })
+  ])));
+
+  assert.equal(verdicts.some((item) => item.code === "chc_slt_selected_commitment_trace.alias_binding_missing"), false);
+});
+
+test("chc_slt_selected_commitment_trace still requires soft aliases referenced downstream", async () => {
+  const effectReference = await chcSltSelectedCommitmentTrace.run(undefined, context(records([
+    parentPage([]),
+    childPage(),
+    event(),
+    storylet("SLT-1", [], {
+      preconditions: { hard: [], soft: [{ pred: "any_plan_active", alias: "plan" }] },
+      effects: { create: ["bound:plan"], supersede: [], close: [] }
+    }),
+    choice("CHC-1", { grounded_in: { records: ["STENT-1"] } })
+  ])));
+  assert.ok(effectReference.some((item) => item.code === "chc_slt_selected_commitment_trace.alias_binding_missing"));
+
+  const exitPreviewReference = await chcSltSelectedCommitmentTrace.run(undefined, context(records([
+    parentPage([]),
+    childPage(),
+    event(),
+    storylet("SLT-1", [], {
+      preconditions: { hard: [], soft: [{ pred: "any_plan_active", alias: "plan" }] },
+      exit_options: [{ action_family: "decide", surface_hint: "Choose.", likely_effects: ["bound:plan"] }]
+    }),
+    choice("CHC-1", { grounded_in: { records: ["STENT-1"] } })
+  ])));
+  assert.ok(exitPreviewReference.some((item) => item.code === "chc_slt_selected_commitment_trace.alias_binding_missing"));
+});
+
+test("chc_slt_selected_commitment_trace keeps hard existential aliases mandatory", async () => {
+  const verdicts = await chcSltSelectedCommitmentTrace.run(undefined, context(records([
+    parentPage([]),
+    childPage(),
+    event(),
+    storylet("SLT-1", [{ pred: "any_plan_active", alias: "plan" }]),
+    choice("CHC-1", { grounded_in: { records: ["STENT-1"] } })
+  ])));
+
+  assert.ok(verdicts.some((item) => item.code === "chc_slt_selected_commitment_trace.alias_binding_missing"));
+});
+
 test("chc_slt_selected_commitment_trace fails wrong-class, missing, and inactive existential bindings", async () => {
   const wrongClass = await chcSltSelectedCommitmentTrace.run(undefined, context(records([
     parentPage(["BEL-1"]),
@@ -220,6 +278,21 @@ test("chc_slt_selected_commitment_trace reports orphan aliases and cross-branch 
 
   assert.ok(verdicts.some((item) => item.code === "chc_slt_selected_commitment_trace.orphan_alias_binding"));
   assert.ok(verdicts.some((item) => item.code === "chc_slt_selected_commitment_trace.alias_binding_cross_branch"));
+});
+
+test("chc_slt_selected_commitment_trace treats exit-option bound aliases as used aliases", async () => {
+  const verdicts = await chcSltSelectedCommitmentTrace.run(undefined, context(records([
+    parentPage(["BEL-1"]),
+    childPage(),
+    event({ commitment: commitment({ alias_bindings: { preview: "BEL-1" } }) }),
+    storylet("SLT-1", [], {
+      exit_options: [{ action_family: "decide", surface_hint: "Preview.", likely_effects: ["bound:preview"] }]
+    }),
+    choice("CHC-1", { grounded_in: { records: ["BEL-1"] } }),
+    storyRecord("belief_record", "BEL-1", "beliefs")
+  ])));
+
+  assert.equal(verdicts.some((item) => item.code === "chc_slt_selected_commitment_trace.orphan_alias_binding"), false);
 });
 
 test("chc_slt_selected_commitment_trace validates write-in events through the same path", async () => {
