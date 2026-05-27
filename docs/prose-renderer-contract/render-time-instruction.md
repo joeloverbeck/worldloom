@@ -10,50 +10,45 @@ INSTRUCTION:
 
 Render the page described by the plan above as continuous prose.
 
-Honor the POV named in the plan's §4 (Story kernel context). When §4 commits to a
-specific POV — first-person, third-person close, alternating, or any other
-treatment — render in that POV throughout; the Prose Craft Contract's Rule 1
-defaults apply only when §4 leaves POV unspecified. (Prose Craft Contract Rule 1.)
+Honor the POV named in the plan, especially §1 Story Kernel Excerpt and any §17
+Style and Register Notes. When the plan commits to a specific POV —
+first-person, third-person close, alternating, or any other treatment — render
+in that POV throughout; otherwise apply the Prose Craft Contract's Rule 1
+defaults.
 
-For a root page (PG-0001), render the entry pressure framing as a scene-setter:
+For the root page (PG-1), render the entry pressure framing as a scene-setter:
 establish the opening pressure, expose the first commitment surface, and end at a
 moment where 4-6 distinct commitment-class next moves would be natural. There is
-no arc to close; do not apply an arc effect variant.
+no prior page movement to close.
 
-For any subsequent page, render the selected scene-commitment arc as one
-continuous prose unit. The unit of render is the arc, not a beat. The beat plan
-in the plan body is the structural sketch — embody the beats as scene movement,
-NOT as a beat-headered enumeration. Do not emit beat headers (no `# Beat 1`, no
-`## Beat 2`, no equivalent section-heading enumeration). The arc closes when one
-of stop_policy.normal_exits[] fires; arrange the prose to drive toward exactly
-one exit, and the chosen variant determines which exit family the render should
-satisfy. Render the chosen variant's required_effects as realized scene
-consequences, not as ledger jargon.
+For any subsequent page, render the selected page movement as one continuous
+prose unit. The beats in §8 are the structural sketch — embody them as scene
+movement, NOT as a beat-headered enumeration. Do not emit beat headers (no
+`# Beat 1`, no `## Beat 2`, no equivalent section-heading enumeration). Drive
+the prose toward the stopping point declared in §12, and make the consequences
+of the selected event legible as lived scene action rather than ledger jargon.
 
-Length follows content. The page is as long as the beat (or entry pressure), the
-cast's reactions, and the natural end-where-the-next-decision-becomes-available
-require — no longer, no shorter. No padding to fill space; no truncation to fit a
-budget. There is no words-per-page target, no minimum to clear, no maximum to
-honor. Stop when the beat is complete and the next decision point is naturally
-available, and not a sentence sooner or later. (Prose Craft Contract Rule 11.)
+Length follows content. Use §8 and §12 with the Prose Craft Contract's Rule 11:
+render the page only as long as the beat movement, cast reactions, and natural
+next-decision point require. No padding to fill space; no truncation to fit a
+budget; no words-per-page target, minimum, or maximum.
 
 Render through what happens — what characters do, say, perceive, and attend to.
-Avoid narrating meaning, summarizing reactions, labeling subtext, or naming the
-significance of the moment. Action, dialogue, interiority, and sensory anchor
-are modalities available to the page; the beat and the scene's natural shape
-decide which appear and in what mix. A page that is mostly one modality is
-legitimate when the beat calls for it; do not deploy all four modalities for
-completeness. (Prose Craft Contract Rule 7.)
+Use the Prose Craft Contract's Rule 7 to choose the page's modality mix from the
+beat and the scene's natural shape. Do not narrate meaning, summarize reactions,
+label subtext, or deploy action, dialogue, interiority, and sensory anchor merely
+for checklist completeness.
 
-Respect content_intensity_baseline. Do not invent facts beyond the state context
-supplied in the plan. Do not violate any prohibited_actions listed in the
-execution_envelope. Do not resolve any mystery declared as forbidden in the
-plan's forbidden_resolutions list or in mysteries_in_play[].
-Do not use internal record-identifier vocabulary in the prose.
+Honor the content intensity declared in §15 Plan Frontmatter. Do not invent
+facts beyond the state context supplied in the plan. Do not resolve any mystery
+declared forbidden in §11 Forbidden Mystery Resolutions. Respect the "Prose must
+not imply" and "Anti-generic warnings" material in §16a STCHAR packets, plus the
+Anti-Pathology Checklist at §18. Do not use internal record-identifier
+vocabulary in the prose.
 
-Honor the Prose Craft Contract above. Stay in close POV; cut filter words; put
-action in the verb; anchor abstraction to concrete sensory specifics; vary
-anchors and metaphor stocks across pages; trust subtext; use record-id-free
+Honor the Prose Craft Contract above. Keep POV discipline, cut filter words, put
+action in the verb, anchor abstraction to concrete sensory specifics, vary
+anchors and metaphor stocks across pages, trust subtext, and use record-id-free
 language throughout.
 
 Output continuous prose only. No commentary. No markdown headers. No engine
