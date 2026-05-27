@@ -292,12 +292,14 @@ function summaryLine(recordId: string, body: ParsedRecord, rule: SummaryRule): s
     return explicit;
   }
 
-  const classSpecific = firstMeaningfulString(body, [...rule.primaryFields, ...DEFAULT_MEANINGFUL_FIELDS]);
+  const primarySummaryFields = rule.primaryFields.filter((field) => field !== "status");
+  const classSpecificFields = [...primarySummaryFields, ...DEFAULT_MEANINGFUL_FIELDS].filter((field) => field !== "status");
+  const classSpecific = firstMeaningfulString(body, classSpecificFields);
   if (classSpecific !== null) {
     return classSpecific;
   }
 
-  const classSpecificReference = firstFieldValue(body, rule.primaryFields);
+  const classSpecificReference = firstFieldValue(body, primarySummaryFields);
   if (classSpecificReference !== null) {
     return classSpecificReference;
   }

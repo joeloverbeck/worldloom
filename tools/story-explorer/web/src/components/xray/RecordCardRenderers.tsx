@@ -243,7 +243,6 @@ const RENDERERS: Record<string, Renderer> = {
   STCHAR: (recordCard) =>
     renderParts(
       recordCard.recordId,
-      title(recordCard),
       maybe('STENT', linkCount(recordCard, 'STENT')),
       maybe('CHAR', fieldValue(recordCard, 'sourceChar')),
       fieldValue(recordCard, 'supersessionStatus'),

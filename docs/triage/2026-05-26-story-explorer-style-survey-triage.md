@@ -9,7 +9,7 @@
 **Deliverables**:
 
 - `archive/tickets/STOEXPFIX-006-collapse-hidden-xray-tab-panels.md`
-- `tickets/STOEXPFIX-007-prevent-uninformative-duplicated-stchar-summary.md`
+- `archive/tickets/STOEXPFIX-007-prevent-uninformative-duplicated-stchar-summary.md`
 - `tickets/STOEXPFIX-008-differentiate-groups-toc-from-active-records-metrics.md`
 - `tickets/STOEXPFIX-009-style-route-loading-and-not-found-back-link.md`
 
@@ -29,7 +29,7 @@
 - **Surface**: `tools/story-explorer/src/read/record-card.ts:289-310` (summaryLine walker) + `tools/story-explorer/web/src/components/xray/RecordCardRenderers.tsx:243-251` (STCHAR CompactLine)
 - **Mechanism**: The summaryLine walker selects `status` as a fallback summary string when title/name/display_name are absent (because STCHAR's `primaryFields[3] === "status"`), producing the bare enum value `active` as the summary. The CompactLine renderer then composes `[recordId, title(recordCard), maybe('STENT', ...), maybe('CHAR', ...), fieldValue('supersessionStatus'), ...]` where `title()` falls back to the summaryLine (= `active`) AND `supersessionStatus` is independently `active` for status-active STCHAR records — producing `STCHAR-1 · active · STENT 1 · CHAR CHAR-0003 · active`. The `<p class="record-card__line">` below the title renders the same summaryLine, a third visible `active`.
 - **Verdict**: accept — two coupled causes, two surgical fixes, single ticket.
-- **Modification scope**: (a) `summaryLine` walker filters `rule.statusField` out of the second-pass scan; (b) STCHAR CompactLine drops the `title()` slot at position 2.
+- **Modification scope**: (a) `summaryLine` walker filters literal `status` fields out of both fallback summary passes; (b) STCHAR CompactLine drops the `title()` slot at position 2. Post-implementation review narrowed the drafted `rule.statusField`-wide wording because existing STSTAT `life` summaries are intentional.
 
 ### A3 (→ STOEXPFIX-008): Summary rail's "Active Records" and "Groups" lists look duplicated
 

@@ -76,7 +76,7 @@ function recordCard(
 describe('RecordCardRenderers', () => {
   it.each([
     ['STENT', [{ name: 'display_name', value: 'Lyra' }, { name: 'world_ent_id', value: 'ENT-1' }], { links: [link('STCHAR')] }, ['STENT-1', 'Lyra', 'world-bound ENT-1', 'STCHAR 1']],
-    ['STCHAR', [{ name: 'title', value: 'Lyra of Ash' }, { name: 'source_char_id', value: 'CHAR-1' }], { links: [link('STENT')] }, ['STCHAR-1', 'Lyra of Ash', 'STENT 1', 'CHAR CHAR-1']],
+    ['STCHAR', [{ name: 'title', value: 'Lyra of Ash' }, { name: 'source_char_id', value: 'CHAR-1' }], { links: [link('STENT')] }, ['STCHAR-1', 'STENT 1', 'CHAR CHAR-1']],
     ['STSTAT', [{ name: 'entity', value: 'STENT-1' }, { name: 'status_label', value: 'wounded' }], { visibility: 'hidden', urgency: 'severe' }, ['STSTAT-1', 'STENT-1', 'wounded', 'severe/hidden']],
     ['BEL', [{ name: 'holder', value: 'STCHAR-1' }, { name: 'claim', value: 'The gate is watched' }, { name: 'truth_relation', value: 'uncertain' }], { confidence: 'low', visibility: 'hidden' }, ['BEL-1', 'holder STCHAR-1', '"The gate is watched"', 'uncertain', 'low', 'hidden']],
     ['SF', [{ name: 'claim', value: 'Gate guards rotate nightly' }, { name: 'authority', value: 'derived' }, { name: 'derived_from', value: 'CF-1' }], {}, ['SF-1', '"Gate guards rotate nightly"', 'derived', 'derived-from CF-1']],
@@ -108,6 +108,27 @@ describe('RecordCardRenderers', () => {
     render(<CompactLine recordCard={recordCard('MISC', [], { summaryLine: 'Server fallback' })} />);
 
     expect(screen.getByText('MISC-1 · MISC · Server fallback')).toBeInTheDocument();
+  });
+
+  it('does not duplicate STCHAR status through the summary fallback', () => {
+    render(
+      <CompactLine
+        recordCard={recordCard(
+          'STCHAR',
+          [
+            { name: 'source_char_id', value: 'CHAR-1' },
+            { name: 'supersession_status', value: 'active' },
+          ],
+          {
+            links: [link('STENT')],
+            summaryLine: 'STCHAR-1 (STCHAR)',
+          },
+        )}
+      />,
+    );
+
+    expect(screen.getByText('STCHAR-1 · STENT 1 · CHAR CHAR-1 · active')).toBeInTheDocument();
+    expect(screen.queryByText(/STCHAR-1 · STCHAR-1 \(STCHAR\) · STENT 1/)).not.toBeInTheDocument();
   });
 
   it('keys memoization by record ID and content hash', () => {
