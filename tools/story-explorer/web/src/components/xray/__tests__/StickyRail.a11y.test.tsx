@@ -10,7 +10,7 @@ describe('StickyRail a11y', () => {
     const { container } = render(<StickyRail pageDetail={demoPageDetail({ currentStateRecordIds: ['BEL-1', 'STCHAR-1'] })} />);
 
     expect(screen.getByLabelText('Prose and receipt status')).toHaveTextContent('Prose missing');
-    expect(screen.getByRole('navigation', { name: 'Groups' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Jump to group' })).toBeInTheDocument();
 
     await expectNoAxeViolations(container);
   });

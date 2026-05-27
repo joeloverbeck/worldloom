@@ -10,7 +10,7 @@
 
 - `archive/tickets/STOEXPFIX-006-collapse-hidden-xray-tab-panels.md`
 - `archive/tickets/STOEXPFIX-007-prevent-uninformative-duplicated-stchar-summary.md`
-- `tickets/STOEXPFIX-008-differentiate-groups-toc-from-active-records-metrics.md`
+- `archive/tickets/STOEXPFIX-008-differentiate-groups-toc-from-active-records-metrics.md`
 - `tickets/STOEXPFIX-009-style-route-loading-and-not-found-back-link.md`
 
 **Triage origin**: triage flow producing 4 tickets (≥3 → companion triage file is mandatory per `references/deliverable-classification.md` §Triage-file composition). **Source-item count**: 11 evaluated findings (5 accepts grouped into 4 tickets, 2 already-resolved, 1 defer, 2 out-of-report — see breakdown below). Above the ≥8-item carve-out threshold even without that threshold mandate.
