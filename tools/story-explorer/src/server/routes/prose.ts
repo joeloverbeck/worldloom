@@ -5,6 +5,7 @@ import type { FastifyInstance } from "fastify";
 
 import { readProse } from "../../read/prose-direct.js";
 import { parseRecordBody, storyDirectory } from "../../read/record-io.js";
+import { invalidRouteParam, isValidPageId, isValidRouteSlug } from "./params.js";
 
 export interface ProseRouteOptions {
   repoRoot: string;
@@ -28,12 +29,22 @@ export async function registerProseRoutes(
 ): Promise<void> {
   server.get<{ Params: { slug: string; storySlug: string; pageId: string } }>(
     "/api/worlds/:slug/stories/:storySlug/prose/:pageId",
-    async (request) => readProse(request.params.slug, request.params.storySlug, request.params.pageId, options.repoRoot),
+    async (request, reply) => {
+      const routeError = validateStoryPageParams(request.params);
+      if (routeError !== null) {
+        return reply.code(400).send(routeError);
+      }
+      return readProse(request.params.slug, request.params.storySlug, request.params.pageId, options.repoRoot);
+    },
   );
 
   server.get<{ Params: { slug: string; storySlug: string; pageId: string } }>(
     "/api/worlds/:slug/stories/:storySlug/page-plans/:pageId",
     async (request, reply) => {
+      const routeError = validateStoryPageParams(request.params);
+      if (routeError !== null) {
+        return reply.code(400).send(routeError);
+      }
       const sourcePath = path.join(
         storyDirectory(options.repoRoot, request.params.slug, request.params.storySlug),
         "pages-prose-plans",
@@ -47,6 +58,10 @@ export async function registerProseRoutes(
   server.get<{ Params: { slug: string; storySlug: string; pageId: string } }>(
     "/api/worlds/:slug/stories/:storySlug/prose-receipts/:pageId",
     async (request, reply) => {
+      const routeError = validateStoryPageParams(request.params);
+      if (routeError !== null) {
+        return reply.code(400).send(routeError);
+      }
       const sourcePath = path.join(
         storyDirectory(options.repoRoot, request.params.slug, request.params.storySlug),
         "pages-prose-receipts",
@@ -62,4 +77,17 @@ export async function registerProseRoutes(
       };
     },
   );
+}
+
+function validateStoryPageParams(params: { slug: string; storySlug: string; pageId: string }) {
+  if (!isValidRouteSlug(params.slug)) {
+    return invalidRouteParam("slug", params.slug, "a lowercase world slug");
+  }
+  if (!isValidRouteSlug(params.storySlug)) {
+    return invalidRouteParam("storySlug", params.storySlug, "a lowercase story slug");
+  }
+  if (!isValidPageId(params.pageId)) {
+    return invalidRouteParam("pageId", params.pageId, "a page id like PG-12");
+  }
+  return null;
 }

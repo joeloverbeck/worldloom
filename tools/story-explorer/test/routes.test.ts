@@ -242,6 +242,28 @@ test("page detail route returns 404 only for the typed target-page missing error
   }
 });
 
+test("page and prose routes reject traversal-shaped page ids before filesystem reads", async () => {
+  const fixture = seedFixture();
+  const server = await createServer({ repoRoot: fixture.repoRoot });
+
+  try {
+    for (const url of [
+      "/api/worlds/fixture-world/stories/red-bunny/pages/..%2F..%2Fpackage",
+      "/api/worlds/fixture-world/stories/red-bunny/prose/PG-1%2F..%2F..%2Fpackage",
+      "/api/worlds/fixture-world/stories/red-bunny/page-plans/PG-1%2F..%2F..%2Fpackage",
+      "/api/worlds/fixture-world/stories/red-bunny/prose-receipts/PG-1%2F..%2F..%2Fpackage",
+    ]) {
+      const response = await server.inject({ method: "GET", url });
+      const body = JSON.parse(response.body) as { data?: { error?: string; field?: string } };
+      assert.equal(response.statusCode, 400);
+      assert.equal(body.data?.error, "invalid_input");
+      assert.equal(body.data?.field, "pageId");
+    }
+  } finally {
+    await server.close();
+  }
+});
+
 test("record routes validate all story classes and direct-read markdown classes", async () => {
   const fixture = seedFixture();
   const server = await createServer({ repoRoot: fixture.repoRoot });

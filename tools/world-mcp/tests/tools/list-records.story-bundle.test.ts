@@ -15,7 +15,7 @@ import {
 function buildLargeStoryletWorld(root: string): void {
   const nodes = Array.from({ length: 40 }, (_, index) => {
     const ordinal = index + 1;
-    const id = `SLT-${ordinal.toString().padStart(4, "0")}`;
+    const id = `SLT-${ordinal}`;
     const selected = ordinal <= 8;
     const shape = selected
       ? ordinal % 2 === 0
@@ -482,7 +482,7 @@ test("listRecords preserves mixed flat and dotted story-bundle projection fields
         record_type: "storylet_record",
         story_slug: STORY_FIXTURE_SLUG,
         filters: {
-          id: "SLT-0001"
+          id: "SLT-1"
         },
         fields: ["move_family", "grounding.compatible_turn_drivers"]
       })
@@ -491,7 +491,7 @@ test("listRecords preserves mixed flat and dotted story-bundle projection fields
     assert.ok(!("code" in result));
     assert.deepEqual(result.records, [
       {
-        record_id: "SLT-0001",
+        record_id: "SLT-1",
         move_family: "decision",
         "grounding.compatible_turn_drivers": ["player_action", "player_write_in"]
       }

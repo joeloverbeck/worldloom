@@ -67,7 +67,7 @@ If the brainstorm topic produces a system spec (architectural change, new subsys
 
 Adjust the Step 6 menu accordingly — omit the "create a spec" option and use this template:
 
-**This menu is MANDATORY** per Step 6's post-deliverable-phase rule (see `.claude/skills/brainstorm/SKILL.md` §Step 6's "Quick reference — when must the menu fire?" table) — do not skip even when the deliverable was written inline; the inline-completion carve-out applies only to deliverables OUTSIDE the post-deliverable-phase enumeration.
+**This menu is MANDATORY** per Step 6's post-deliverable-phase rule (see `.claude/skills/brainstorm/SKILL.md` §Step 6's "Quick reference — when must the menu fire?" table) — do not skip even when the deliverable was written in this same turn; the inline-completion carve-out applies only to deliverables OUTSIDE the post-deliverable-phase enumeration.
 
 ```
 Spec(s) written: <list each produced spec with its full path>
