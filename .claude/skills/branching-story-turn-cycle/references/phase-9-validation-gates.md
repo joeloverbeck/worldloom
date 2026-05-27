@@ -75,7 +75,7 @@ The `path` MUST match `stories/<story-slug>/pages-prose-plans/PG-<integer>.md` e
 - `page_plan_stchar_packet_integrity.stale_current_state_reference` — a §16a packet cites a record id (typically a prior `PG-<integer>`, the just-superseded `STEMO-<integer>`, or a `BEL-<integer>` no longer in the new snapshot) that isn't active in the new page. See `references/phase-7-page-plan.md` §16a record-id token discipline.
 - `page_plan_stchar_packet_integrity.missing_packet` / `.inactive_stchar` / `.missing_voice_block` / `.unknown_role_label` — §16a packet inventory or per-packet shape failures.
 - `active_pressure_deferred_without_expiry` / `active_pressure_disposition_unknown` / `active_pressure_rejection_reason_missing` — §7a Active-pressure disposition row shape failures. See `references/phase-7-page-plan.md` §7a closed-set form.
-- `high_urgency_active_record_unhandled` — a high-urgency record from the parent's snapshot is missing from §7a.
+- `high_urgency_active_record_unhandled` — a record from the shared contract §7a actively-pressuring set is missing from §7a; the historical diagnostic code name uses "high_urgency", but the enforced set is class-specific.
 - `page_plan_turn_driver_consistency` failures — §7a turn driver / initiative trace lines disagree with `SE.turn_driver`.
 
 Any `fail` verdict aborts Phase 10 (do not proceed to deliverable summary or HARD-GATE approval). Repair the draft (re-running Phase 7 if necessary), recompute hashes against the new bytes, then re-run the dry-run with the updated `page_plan_drafts`.

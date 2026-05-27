@@ -505,7 +505,20 @@ The `SE.turn_resolution` event's `world_logic_rationale` is the carrier for driv
 
 For non-player turns, prefer `STINT` in `Driver records` when the actor's active intention fires the act, and prefer `BEL` when the actor's knowing grounds the act. `BEL` may strengthen provenance, but an `npc_action` still needs at least one pressure or stable-authority driver record such as `STPLAN`, `STEMO`, `CLK`, `THR`, `STCHAR`, or `STINT`.
 
-Active-pressure disposition appears in §7a whenever the parent `PG.state_snapshot` has high-urgency active records. Every high-urgency active record on the parent snapshot appears in exactly one row:
+Active-pressure disposition appears in §7a whenever the parent `PG.state_snapshot` has actively-pressuring records. Every actively-pressuring record on the parent snapshot appears in exactly one row. The class-specific criteria for "actively-pressuring" are:
+
+| Class | Criterion |
+|---|---|
+| STPLAN | `plan_status` is `active`, `blocked`, or `suspended`, and `current_step` has content |
+| STEMO | `intensity` is `high` or `extreme`, and `behavioral_pressure` is non-empty |
+| CLK | `status = active`, and `value` is at or above any `thresholds[].at` value |
+| THR | `status = active` and `urgency = high` |
+| STSEC | `status = partially_revealed` or `reveal_records` is non-empty |
+| STQ | `status = complicated` and `salience = high` |
+| OBL | `status` is `open` or `escalated`, and `urgency = high` |
+| CNSQ | `status` is `pending` or `escalated`, and `urgency = high` |
+
+The `active_pressure_handling_discipline` structural validator enforces this set; the table reproduces its per-class criteria for authoring reference.
 
 | Record | Disposition | Reason / expiry |
 |---|---|---|
