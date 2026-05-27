@@ -22,7 +22,7 @@ The bundle MUST exist (non-bootstrap variant); for `audit_repair`, the audit + a
 
 Before Phase 1:
 
-1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md` into working context. Abort with clear missing-file error on unreadable path.
+1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md` into working context — skip only if read earlier in this session (fully or via partial reads that cumulatively covered the documents), not from memory or training knowledge. When skipping because content was loaded earlier in the session, name the load mechanism explicitly in the user-facing skip announcement (e.g., `FOUNDATIONS already in context via direct Read at <Nth-message-or-tool-call>` / `via <sibling-skill-name>'s pre-flight at message N which executed the Read`). Abort with clear missing-file error on unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
 3. Validate `mode`: must be `direct_batch` or `audit_repair`; for `direct_batch`, validate `target_count` (1–12 inclusive, default 6); for `audit_repair`, validate `audit_id` matches the `SAU-<integer>` pattern and `finding_ids` is non-empty.
 4. Mode-specific load:
