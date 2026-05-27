@@ -35,6 +35,10 @@ export const submitPatchPlan = patchEngine.submitPatchPlan;
 export const validatePatchPlan = validators.validatePatchPlan;
 export const EPISTEMIC_PROFILE_REQUIRED_TYPES = validators.EPISTEMIC_PROFILE_REQUIRED_TYPES;
 export const EXCEPTION_GOVERNANCE_REQUIRED_TYPES = validators.EXCEPTION_GOVERNANCE_REQUIRED_TYPES;
+export const PAGE_PLAN_VERBATIM_CANONICAL_SOURCES = validators.PAGE_PLAN_VERBATIM_CANONICAL_SOURCES;
+export const stripPagePlanVerbatimFramingHeader = validators.stripPagePlanVerbatimFramingHeader;
+export const trimPagePlanVerbatimTrailingWhitespace =
+  validators.trimPagePlanVerbatimTrailingWhitespace;
 
 export const buildWorldIndex = worldIndexBuild.build;
 export const syncWorldIndex = worldIndexSync.sync;

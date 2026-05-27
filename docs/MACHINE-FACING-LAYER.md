@@ -65,9 +65,11 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 ### World Root Resolution For MCP CLIs
 
-`validate-patch-plan`, `submit-patch-plan`, and `sign-approval-token` resolve the worldloom project root deterministically: explicit `--world-root <path>` wins, then `WORLDLOOM_ROOT`, then auto-discovery walks upward from cwd looking for both `docs/FOUNDATIONS.md` and `worlds/`. On success, each CLI emits `[world-root] <path> (source: explicit_flag|env_var|auto_discovery)` to stderr before any status/error JSON. Resolution failures exit 2 and list every attempted path.
+`validate-patch-plan`, `submit-patch-plan`, `sign-approval-token`, and `inline-canonical-prose-sections` resolve the worldloom project root deterministically: explicit `--world-root <path>` wins, then `WORLDLOOM_ROOT`, then auto-discovery walks upward from cwd looking for both `docs/FOUNDATIONS.md` and `worlds/`. On success, each CLI emits `[world-root] <path> (source: explicit_flag|env_var|auto_discovery)` to stderr before any status/error JSON. Resolution failures exit 2 and list every attempted path.
 
 `compute-pg-hashes` is intentionally excluded because it reads only `--plan` and `--pg` files and does not open a world index, patch-engine secret, or world-root-relative state.
+
+`inline-canonical-prose-sections` is the story-pipeline authoring helper for page-plan §2 / §3 / §19 byte equality. Run `node tools/world-mcp/dist/src/cli/inline-canonical-prose-sections.js --plan <page-plan-draft.md>` before `compute-pg-hashes` so the bytes hashed into `PG.plan.plan_hash` already contain the canonical content-policy, prose-craft, and render-time-instruction bodies.
 
 ## Story-Bundle Edge Types
 

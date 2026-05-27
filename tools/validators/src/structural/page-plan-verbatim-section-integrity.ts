@@ -5,16 +5,15 @@ import path from "node:path";
 import type { Context, Validator, Verdict } from "../framework/types.js";
 import { asPlainRecord, stringValue, touchedFilesInclude } from "./utils.js";
 import { pagePlanTargets, type PagePlanTarget } from "./page-plan-section-parser.js";
+import {
+  CANONICAL_SOURCES,
+  stripFramingHeader,
+  trimTrailingWhitespace,
+  type VerbatimSectionNumber
+} from "./page-plan-verbatim-canonical-sources.js";
 
 const VALIDATOR = "page_plan_verbatim_section_integrity";
 
-const CANONICAL_SOURCES = {
-  "2": "docs/prose-renderer-contract/content-policy.md",
-  "3": "docs/prose-renderer-contract/prose-craft-contract.md",
-  "19": "docs/prose-renderer-contract/render-time-instruction.md"
-} as const;
-
-type VerbatimSectionNumber = keyof typeof CANONICAL_SOURCES;
 type CanonicalContents = Record<VerbatimSectionNumber, string>;
 
 export const pagePlanVerbatimSectionIntegrity: Validator = {
@@ -70,15 +69,6 @@ function repoRootFrom(input: unknown): string {
     current = parent;
   }
   return path.resolve(process.cwd(), "../..");
-}
-
-function stripFramingHeader(content: string): string {
-  const lines = content.split(/\r?\n/);
-  const separatorIndex = lines.findIndex((line) => line.trim() === "---");
-  if (separatorIndex < 0) {
-    throw new Error("Canonical source file lacks the required `---` separator line.");
-  }
-  return trimTrailingWhitespace(lines.slice(separatorIndex + 1).join("\n"));
 }
 
 function validatePlan(plan: PagePlanTarget, canonical: CanonicalContents): Verdict[] {
@@ -178,8 +168,4 @@ function trimSectionBody(value: string): string {
     lines.shift();
   }
   return trimTrailingWhitespace(lines.join("\n"));
-}
-
-function trimTrailingWhitespace(value: string): string {
-  return value.replace(/[ \t\r\n]+$/, "");
 }

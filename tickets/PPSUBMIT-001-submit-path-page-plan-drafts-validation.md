@@ -19,7 +19,7 @@ That leaves a validation asymmetry at the HARD-GATE boundary: a dry-run can fail
 3. Shared boundary under audit: `validate_patch_plan` and `submit_patch_plan` should run the same page-plan-content validators over the same attached draft bytes when page-plan direct-write artifacts are part of the HARD-GATE deliverable. This is a `tools/world-mcp` public input/handler/CLI contract, not a validators-package policy change.
 4. FOUNDATIONS alignment: FOUNDATIONS §Story Bundles treats the plan as engine-readable and validation-bearing. `docs/HARD-GATE-DISCIPLINE.md` says validation includes structural validators before submit. The submit path must not silently drop a validator input surface that the dry-run path used to approve the deliverable.
 5. HARD-GATE / validation signal surface: this ticket strengthens submit-time pre-apply validation by making already-supported page-plan draft inputs available to submit. It must preserve approval-token verification, single-use semantics, and fail-closed behavior; no Mystery Reserve rule or canon-write discipline is weakened.
-6. Adjacent active ticket `tickets/PPCANONINL-001-canonical-prose-sections-inliner-cli.md` explicitly excludes submit-path tightening. That ticket owns an authoring helper for §2/§3/§19 byte equality, not submit/validate parity.
+6. Archived adjacent ticket `archive/tickets/PPCANONINL-001-canonical-prose-sections-inliner-cli.md` explicitly excludes submit-path tightening. That ticket owns an authoring helper for §2/§3/§19 byte equality, not submit/validate parity.
 
 ## Architecture Check
 
@@ -89,7 +89,7 @@ Update same-seam docs and guidance that currently describe page-plan drafts only
 - Making page-plan markdown an atomic `_source` patch-engine operation.
 - Requiring page-plan drafts for every submit call. Non-page-plan patch plans remain valid without `page_plan_drafts`.
 - Retrofitting existing historical envelopes such as `/tmp/red-bunny-pg-6-envelope.json`.
-- Implementing the canonical prose-section inliner from `PPCANONINL-001`.
+- Implementing the canonical prose-section inliner from `archive/tickets/PPCANONINL-001-canonical-prose-sections-inliner-cli.md`.
 
 ## Acceptance Criteria
 

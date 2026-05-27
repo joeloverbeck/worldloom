@@ -82,6 +82,17 @@ World-root resolution is deterministic: explicit `--world-root <path>` wins, the
 
 The patch-plan CLIs also serve as a fresh-process workaround for the stale-validators-bundle case documented in `docs/MACHINE-FACING-LAYER.md`: when the running MCP server holds a pre-rebuild `@worldloom/validators` bundle in memory and a full session restart is not immediately available, invoke the corresponding CLI directly. Same handler wiring, same validation status object, same `PatchReceipt` / error family.
 
+## Page-plan canonical prose inliner
+
+Story-pipeline operators can refresh the verbatim page-plan §2 / §3 / §19 bodies before hashing:
+
+```bash
+node tools/world-mcp/dist/src/cli/inline-canonical-prose-sections.js --plan <page-plan-draft.md>
+node tools/world-mcp/dist/src/cli/inline-canonical-prose-sections.js --plan <page-plan-draft.md> --out <inlined-copy.md>
+```
+
+The CLI reads the same canonical source mapping and framing-header normalization as `page_plan_verbatim_section_integrity`, replaces only existing `## 2. ...`, `## 3. ...`, and `## 19. ...` sections, and refuses to invent missing section headings. It resolves the worldloom root by explicit `--world-root`, then `WORLDLOOM_ROOT`, then marker auto-discovery, and emits the `[world-root] ...` trace to stderr before its JSON status object. In-place rewrite is the default; `--out` leaves the input unchanged.
+
 ## Configuration
 
 Registered via `.mcp.json`. For historical prior art, see `archive/specs/SPEC-02-retrieval-mcp-server.md` §`.mcp.json` (example).
