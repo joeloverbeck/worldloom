@@ -77,24 +77,24 @@ The HMAC secret lives at `tools/world-mcp/.secret` (gitignored, generated on fir
 
 Before approval, a patch plan can be validated through either the MCP tool or the CLI exception path. After a token is issued, the patch plan + token can be submitted to the engine via either of two functionally equivalent paths. The validate paths both route through the same `validate_patch_plan` handler and return the same `{ status: "pass" | "fail" | "skipped", verdicts, validators_run, reason?, details? }` object; `validators_run[]` carries per-validator `{ validator_name, status, duration_ms, detail? }` telemetry and is empty on `skipped` because the envelope never reached validation. Validation includes structural validators and the patch-engine `id_allocation_race` check for `expected_id_allocations`; approval-token verification remains submit-only. Malformed envelopes with multiple shape errors include `details.additional_errors[]` on the `skipped` response. World-canon `create_*_record` payloads also fail at this envelope-shape stage when the canonical record-id field is missing or malformed; for example, `create_ch_record` requires `patch_plan.patches[N].payload.ch_record.change_id`, while the other world-canon create ops require their payload record's `id`. The submit paths both route through the same `submitPatchPlan` engine code in `tools/patch-engine/src/apply.ts` and produce the same `PatchReceipt`.
 
-**Validate MCP path (default)** — call `mcp__worldloom__validate_patch_plan(plan)` with the plan envelope. This is the canonical pre-apply validation path for ordinary plan sizes.
+**Validate MCP path (default)** — call `mcp__worldloom__validate_patch_plan(plan)` with the plan envelope. When the deliverable includes a candidate story page-plan draft, pass `page_plan_drafts=[{path: "stories/<story-slug>/pages-prose-plans/PG-<integer>.md", content: "<exact draft bytes>"}]` so page-plan structural validators inspect the same bytes the operator reviewed. This is the canonical pre-apply validation path for ordinary plan sizes.
 
 **Validate CLI path (exception path)** — for plans whose envelope strains MCP transport, or for the stale-validators-bundle case where the running MCP server holds a pre-rebuild `@worldloom/validators` bundle and a full session restart is not immediately available, persist the envelope JSON and invoke:
 
 ```bash
-node tools/world-mcp/dist/src/cli/validate-patch-plan.js [--world-root <path>] <plan-path>
+node tools/world-mcp/dist/src/cli/validate-patch-plan.js [--world-root <path>] [--page-plan-drafts <drafts-json-path>] <plan-path>
 ```
 
 The validate, submit, and signer CLIs resolve the project root by explicit `--world-root <path>` > `WORLDLOOM_ROOT` > auto-discovery from cwd (both `docs/FOUNDATIONS.md` and `worlds/` markers required). This supports invocations from package subdirectories after a build. Every successful invocation emits `[world-root] <path> (source: <source>)` to stderr; root-resolution failures exit 2 and list attempted paths.
 
 On `pass`, the CLI prints the validate status object, including `validators_run[]`, to stdout and exits 0. On `fail` or `skipped`, it prints the same status object to stderr and exits 1. `skipped` means the envelope could not be validated structurally; fix the `reason` before signing or submitting.
 
-**MCP path (default)** — call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the plan envelope and the issued token. This is the canonical submission path for ordinary plan sizes.
+**MCP path (default)** — call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the plan envelope and the issued token. When validation used `page_plan_drafts`, submit must pass the same draft array so submit-time pre-apply validators inspect the approved bytes before any write. This is the canonical submission path for ordinary plan sizes.
 
 **CLI path (exception path)** — for plans whose envelope strains MCP transport (typical threshold: tens of KB; e.g., diegetic-artifact submissions with rich frontmatter and ~5K-word bodies, or canon-addition accept-paths with many ops), or for the stale-validators-bundle case when a full MCP server/client restart is not immediately available, invoke the CLI parallel to the signer:
 
 ```bash
-node tools/world-mcp/dist/src/cli/submit-patch-plan.js [--world-root <path>] <plan-path> <token-path>
+node tools/world-mcp/dist/src/cli/submit-patch-plan.js [--world-root <path>] [--page-plan-drafts <drafts-json-path>] <plan-path> <token-path>
 ```
 
 The CLI requires the plan to be persisted to a JSON file (skills already do this per §Issuing a token guidance — `/tmp/<plan-id>.json`) and the token to be persisted to a text file (single line, base64). On success it prints the `PatchReceipt` to stdout as JSON and exits 0; on failure it prints the engine or MCP error object to stderr as JSON after the world-root trace and exits 1 (or 2 for argv/root-resolution errors).
@@ -102,6 +102,7 @@ The CLI requires the plan to be persisted to a JSON file (skills already do this
 **Submit equivalence guarantees**:
 
 - Same envelope shape validation, same approval-token verification, same expected-id-allocation race check, same pre-apply validators (Rule 1-7 + structural), same per-world write lock, same two-phase atomic commit, same index sync.
+- Same page-plan draft side-channel when supplied: validate and submit both accept the same `page_plan_drafts` array / `--page-plan-drafts` JSON file and route those bytes into pre-apply validators.
 - Same failure-mode codes: `approval_expired`, `approval_replayed`, `index_stale`, `validator_failed`, `id_allocation_race`, `envelope_shape_invalid`, `invalid_input`, etc. — surfaced on stderr as JSON instead of MCP error fields.
 - The CLI is a thin delegator over `handleSubmitPatchPlanTool`; it is not a separate engine implementation.
 

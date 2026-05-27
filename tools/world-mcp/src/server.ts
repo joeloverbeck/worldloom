@@ -263,7 +263,15 @@ const validatePatchPlanInputSchema = z.object({
 
 const submitPatchPlanInputSchema = z.object({
   patch_plan: patchPlanInputSchema,
-  approval_token: z.string().min(1)
+  approval_token: z.string().min(1),
+  page_plan_drafts: z
+    .array(
+      z.object({
+        path: z.string().min(1),
+        content: z.string()
+      })
+    )
+    .optional()
 });
 
 const planStoryStateMaintenanceInputSchema = z.object({

@@ -21,7 +21,7 @@ const OPERATION_KIND_SET = new Set<string>(OPERATION_KINDS);
 export interface ValidatePatchPlanArgs {
   patch_plan: PatchPlanEnvelope;
   worldRoot?: string;
-  page_plan_drafts?: ReadonlyArray<{ path: string; content: string }>;
+  page_plan_drafts?: ReadonlyArray<PagePlanDraft>;
 }
 
 export type ValidatePatchPlanResponse =
@@ -69,7 +69,7 @@ export async function validatePatchPlan(
     return invalidInput(draftsShapeError, "page_plan_drafts");
   }
 
-  const runOpts: { worldRoot?: string; pagePlanDrafts?: ReadonlyArray<{ path: string; content: string }> } = {};
+  const runOpts: { worldRoot?: string; pagePlanDrafts?: ReadonlyArray<PagePlanDraft> } = {};
   if (args.worldRoot !== undefined) {
     runOpts.worldRoot = args.worldRoot;
   }
@@ -172,7 +172,12 @@ function allocationRaceFailureToVerdict(failure: {
 
 const PAGE_PLAN_DRAFT_PATH = /^stories\/[^/]+\/pages-prose-plans\/PG-(0|[1-9][0-9]*)\.md$/;
 
-function validatePagePlanDraftsShape(value: unknown): string | null {
+export interface PagePlanDraft {
+  path: string;
+  content: string;
+}
+
+export function validatePagePlanDraftsShape(value: unknown): string | null {
   if (value === undefined) {
     return null;
   }

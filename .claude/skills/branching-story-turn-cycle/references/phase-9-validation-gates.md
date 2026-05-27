@@ -77,3 +77,26 @@ The `path` MUST match `stories/<story-slug>/pages-prose-plans/PG-<integer>.md` e
 - `page_plan_turn_driver_consistency` failures — §7a turn driver / initiative trace lines disagree with `SE.turn_driver`.
 
 Any `fail` verdict aborts Phase 10 (do not proceed to deliverable summary or HARD-GATE approval). Repair the draft (re-running Phase 7 if necessary), recompute hashes against the new bytes, then re-run the dry-run with the updated `page_plan_drafts`.
+
+After approval, submit with the same draft bytes used for this validation run:
+
+MCP:
+```
+mcp__worldloom__submit_patch_plan(
+  patch_plan=<envelope>,
+  approval_token=<issued-token>,
+  page_plan_drafts=[{path: "stories/<story_slug>/pages-prose-plans/PG-<integer>.md",
+                     content: "<same exact UTF-8 draft bytes validated above>"}]
+)
+```
+
+CLI:
+```
+node tools/world-mcp/dist/src/cli/submit-patch-plan.js \
+  [--world-root <path>] \
+  --page-plan-drafts /tmp/page-plan-drafts.json \
+  <plan-path> \
+  <token-path>
+```
+
+Do not validate one page-plan draft and submit without it; submit-time pre-apply validators consume this side-channel and fail closed on validator errors before any write.
