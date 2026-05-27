@@ -199,6 +199,10 @@ test("SPEC-42 capstone covers story-skill contract surfaces as executable surrog
     "§10b new-class visibility block"
   ]);
   assertContains(readRepoFile(".claude/skills/commitment-block-authoring/SKILL.md"), [
+    "references/phase-1-coverage-diagnosis.md",
+    "17 coverage targets"
+  ]);
+  assertContains(readRepoFile(".claude/skills/commitment-block-authoring/references/phase-1-coverage-diagnosis.md"), [
     "clock_advancing",
     "clue_discovering",
     "setup_paying_off"
