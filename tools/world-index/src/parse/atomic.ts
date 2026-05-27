@@ -2,6 +2,10 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
 import type { Root } from "mdast";
+import {
+  PREDICATE_REFERENCED_CLASSES,
+  predicateRecordClassForRecordId
+} from "@worldloom/validators/predicate-dsl-grammar";
 
 import type { ParsedFileResult } from "../commands/shared.js";
 import { contentHashForProse, contentHashForYaml, anchorChecksum } from "./canonical.js";
@@ -1570,10 +1574,21 @@ function predicateReferencedClasses(record: Record<string, unknown>): string[] {
 }
 
 function collectPredicateReferencedClasses(predicate: Record<string, unknown>, classes: Set<string>): void {
-  for (const field of ["record_class", "holder_role", "kind"]) {
+  const pred = predicate.pred;
+  if (typeof pred === "string") {
+    const predicateClass = PREDICATE_REFERENCED_CLASSES[predicateName(pred) as keyof typeof PREDICATE_REFERENCED_CLASSES];
+    for (const referencedClass of predicateClass ?? []) {
+      classes.add(referencedClass);
+    }
+  }
+
+  for (const field of ["record", "fact", "belief_id", "entity", "from", "to", "obligation", "consequence", "thread", "clock", "secret", "question", "holder", "location", "intention", "object", "artifact", "plan"]) {
     const value = predicate[field];
-    if (typeof value === "string" && value.trim().length > 0) {
-      classes.add(value.trim());
+    if (typeof value === "string") {
+      const referencedClass = predicateRecordClassForRecordId(value.trim());
+      if (referencedClass !== null) {
+        classes.add(referencedClass);
+      }
     }
   }
 

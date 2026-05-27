@@ -94,13 +94,13 @@ test("SPEC-84 replay from BR-1 sees newer global SLT-2", async () => {
   assert.ok(result.shortlisted_candidate_ids.includes("SLT-2"));
 });
 
-test("SPEC-84 replay rejects global SLT-3 with a story-bundle record ref at source-record stage", async () => {
+test("SPEC-84 replay rejects global SLT-3 with a story-bundle record ref at predicate-class stage", async () => {
   const result = await candidatesFor("PG-5");
 
   assert.ok(!("code" in result));
   assert.ok(!result.shortlisted_candidate_ids.includes("SLT-3"));
   assert.equal(
-    result.filter_trace.after_predicate_class - result.filter_trace.after_source_record_id,
+    result.filter_trace.after_predicate_shape - result.filter_trace.after_predicate_class,
     1
   );
 });

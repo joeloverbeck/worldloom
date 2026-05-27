@@ -133,6 +133,12 @@ test("SLT records emit predicate, effect, and exit likely-effect edges without l
       attributeEdge("SLT-3", "obligation_open", "storylet_predicate_pred"),
       attributeEdge("SLT-3", "record_active", "storylet_predicate_pred"),
       attributeEdge("SLT-3", "secret_unrevealed", "storylet_predicate_pred"),
+      attributeEdge("SLT-3", "obligation_record", "storylet_predicate_class"),
+      attributeEdge("SLT-3", "story_character_authority_record", "storylet_predicate_class"),
+      attributeEdge("SLT-3", "story_emotion_record", "storylet_predicate_class"),
+      attributeEdge("SLT-3", "story_entity_record", "storylet_predicate_class"),
+      attributeEdge("SLT-3", "story_plan_record", "storylet_predicate_class"),
+      attributeEdge("SLT-3", "story_secret_record", "storylet_predicate_class"),
       attributeEdge("SLT-3", "signal", "storylet_action_family")
     ]);
 
@@ -143,6 +149,74 @@ test("SLT records emit predicate, effect, and exit likely-effect edges without l
       "transfers_obligation"
     ]);
     assert.equal(parsed.edges.some((row) => legacyEdgeTypes.has(row.edge_type)), false);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("SLT predicate class edges derive existential predicates from predicate names", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "world-index-storylet-class-edges-"));
+
+  try {
+    writeStoryRecord(root, "harborwatch", "storylets", "SLT-42", [
+      "id: SLT-42",
+      "story_id: STORY-50",
+      "title: NPC commits a response register to a pending offer",
+      "scope:",
+      "  visibility: global_author_pool",
+      "move_family: disclosure",
+      "preconditions:",
+      "  hard:",
+      "    - pred: any_story_question_open",
+      "      alias: pending_offer",
+      "      setup_kind: dramatic_question",
+      "    - pred: any_intention",
+      "      alias: active_intention",
+      "      holder_role: primary_actor",
+      "    - pred: any_emotion_active",
+      "      alias: response_emotion",
+      "      holder_role: primary_actor",
+      "      kind: fear",
+      "      min_intensity: medium",
+      "    - pred: any_relationship_axis",
+      "      alias: attention_axis",
+      "      axis: attention",
+      "      comparator: '>='",
+      "      value: 1",
+      "beats:",
+      "  - beat_id: setup",
+      "    function: setup",
+      "    instruction: Commit the response register.",
+      "exit_options:",
+      "  - action_family: communicate",
+      "    surface_hint: Answer the offer.",
+      "saliency:",
+      "  urgency: high",
+      "  cooldown_pages: 0",
+      "mystery_policy:",
+      "  allowed_authority: none",
+      "provenance:",
+      "  origin: manual_authoring",
+      "grounding:",
+      "  compatible_turn_drivers: [npc_action]",
+      "  reason_to_exist: Canonical response block for a pending offer."
+    ]);
+
+    const parsed = parseStoryBundleSourceFile(
+      root,
+      "fixture-world",
+      "stories/harborwatch/_source/storylets/SLT-42.yaml"
+    );
+
+    assert.deepEqual(
+      storyletEdges(parsed.edges).filter((row) => row.edge_type === "storylet_predicate_class"),
+      [
+        attributeEdge("SLT-42", "intention_record", "storylet_predicate_class"),
+        attributeEdge("SLT-42", "relationship_record_story", "storylet_predicate_class"),
+        attributeEdge("SLT-42", "story_emotion_record", "storylet_predicate_class"),
+        attributeEdge("SLT-42", "story_question_record", "storylet_predicate_class")
+      ]
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

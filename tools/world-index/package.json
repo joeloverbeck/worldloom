@@ -46,6 +46,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@worldloom/validators": "file:../validators",
     "better-sqlite3": "12.10.0",
     "remark-gfm": "4.0.1",
     "remark-parse": "11.0.0",

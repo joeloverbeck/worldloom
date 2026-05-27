@@ -6,7 +6,13 @@ import test from "node:test";
 import Ajv2020Module from "ajv/dist/2020.js";
 import type { ErrorObject, ValidateFunction } from "ajv";
 
-import { PRED_TYPES, PREDICATE_ARG_SCHEMAS } from "../src/rules/_shared/predicate-dsl-grammar.js";
+import {
+  PRED_TYPES,
+  PREDICATE_ARG_SCHEMAS,
+  PREDICATE_RECORD_PREFIX_TO_CLASS,
+  PREDICATE_REFERENCED_CLASSES,
+  predicateRecordClassForRecordId
+} from "../src/rules/_shared/predicate-dsl-grammar.js";
 import {
   STORY_ROLES,
   storyletPredicateDslParsability
@@ -199,6 +205,10 @@ function storyletWithPredicate(
     },
     provenance: {
       origin: "manual_authoring"
+    },
+    grounding: {
+      compatible_turn_drivers: ["player_action"],
+      reason_to_exist: "Predicate scope parity fixture."
     }
   };
 }
@@ -240,6 +250,22 @@ test("predicate DSL schema mirrors predicate names and required argument table",
     assert.deepEqual(entry.required, ["pred", ...PREDICATE_ARG_SCHEMAS[pred].required]);
     assert.deepEqual(entry.properties.pred, { const: pred });
   }
+});
+
+test("predicate referenced-class table mirrors predicate names and record-id prefixes", () => {
+  assert.deepEqual(Object.keys(PREDICATE_REFERENCED_CLASSES), [...PRED_TYPES]);
+  assert.deepEqual(PREDICATE_REFERENCED_CLASSES.any_story_question_open, ["story_question_record"]);
+  assert.deepEqual(PREDICATE_REFERENCED_CLASSES.any_intention, ["intention_record"]);
+  assert.deepEqual(PREDICATE_REFERENCED_CLASSES.any_emotion_active, ["story_emotion_record"]);
+  assert.deepEqual(PREDICATE_REFERENCED_CLASSES.any_relationship_axis, ["relationship_record_story"]);
+  assert.deepEqual(PREDICATE_REFERENCED_CLASSES.has_affordance, []);
+  assert.deepEqual(PREDICATE_REFERENCED_CLASSES.record_active, []);
+  assert.deepEqual(PREDICATE_REFERENCED_CLASSES.record_age, []);
+
+  assert.deepEqual(PREDICATE_RECORD_PREFIX_TO_CLASS.STQ, "story_question_record");
+  assert.deepEqual(PREDICATE_RECORD_PREFIX_TO_CLASS.STINT, "intention_record");
+  assert.equal(predicateRecordClassForRecordId("STENT-1"), "story_entity_record");
+  assert.equal(predicateRecordClassForRecordId("bound:matured_clock"), null);
 });
 
 test("predicate DSL schema accepts valid samples and rejects missing required args", () => {

@@ -172,6 +172,50 @@ function buildCandidateWorld(root: string): void {
   });
 }
 
+function buildExistentialCandidateWorld(root: string): void {
+  seedWorld(root, {
+    worldSlug: WORLD,
+    nodes: [
+      storyNode(
+        "PG-6",
+        "page_record",
+        [
+          "id: PG-6",
+          "branch_id: BR-1",
+          "branch_path: [PG-1, PG-6]",
+          "state_snapshot:",
+          "  active_records:",
+          "    STQ: [STQ-5]",
+          "    STINT: [STINT-10]",
+          "    STEMO: [STEMO-15]",
+          "    SREL: [SREL-20]",
+          ""
+        ].join("\n")
+      ),
+      storyNode("STQ-5", "story_question_record", "id: STQ-5\nstatus: open\n"),
+      storyNode("STINT-10", "intention_record", "id: STINT-10\nstatus: active\n"),
+      storyNode("STEMO-15", "story_emotion_record", "id: STEMO-15\nstatus: active\n"),
+      storyNode("SREL-20", "relationship_record_story", "id: SREL-20\nstatus: active\n"),
+      storyletNode("SLT-42")
+    ],
+    sltProjections: [
+      sltProjection("SLT-42", { urgency: "high", moveFamily: "response" })
+    ],
+    edges: [
+      edge("SLT-42", "storylet_compatible_driver", "npc_action"),
+      edge("SLT-42", "storylet_action_family", "communicate"),
+      edge("SLT-42", "storylet_predicate_pred", "any_story_question_open"),
+      edge("SLT-42", "storylet_predicate_pred", "any_intention"),
+      edge("SLT-42", "storylet_predicate_pred", "any_emotion_active"),
+      edge("SLT-42", "storylet_predicate_pred", "any_relationship_axis"),
+      edge("SLT-42", "storylet_predicate_class", "story_question_record"),
+      edge("SLT-42", "storylet_predicate_class", "intention_record"),
+      edge("SLT-42", "storylet_predicate_class", "story_emotion_record"),
+      edge("SLT-42", "storylet_predicate_class", "relationship_record_story")
+    ]
+  });
+}
+
 test("selectStoryletCandidates filters indexed SLT projections and returns only projection records", async () => {
   const root = createTempRepoRoot();
 
@@ -225,6 +269,43 @@ test("selectStoryletCandidates filters indexed SLT projections and returns only 
       result.shortlisted_projection_records.some((record) => "body" in record || "full_body" in record),
       false
     );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates keeps existential SLTs whose predicate classes intersect requested grounding classes", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildExistentialCandidateWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-6",
+        turn_driver: {
+          kind: "npc_action",
+          initiator: "STENT-2",
+          driver_records: ["STQ-5", "STINT-10", "STEMO-15", "SREL-20"]
+        },
+        intent_signature: {
+          action_families: ["communicate"],
+          grounding_record_classes: [
+            "story_question_record",
+            "intention_record",
+            "story_emotion_record",
+            "relationship_record_story"
+          ]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.filter_trace.after_predicate_class, 1);
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-42"]);
   } finally {
     destroyTempRepoRoot(root);
   }
