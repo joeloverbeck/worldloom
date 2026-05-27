@@ -1,6 +1,6 @@
 # Confidence Emission Discipline
 
-Confidence-emission rules fire at six interlocking sites across Steps 1, 2, and 3. This file consolidates them into one firing matrix so the cluster is scannable in one place rather than reconstructable from six sites in SKILL.md.
+Confidence-emission rules fire at seven interlocking sites across Steps 1, 2, 3, and 6. This file consolidates them into one firing matrix so the cluster is scannable in one place rather than reconstructable from seven sites in SKILL.md.
 
 ## Firing matrix
 
@@ -13,6 +13,7 @@ Confidence-emission rules fire at six interlocking sites across Steps 1, 2, and 
 | **Step 2 §Plan Mode Interview — Transition marker** | Moving from interview to approach proposal in plan mode | Confidence + gaps statement with visually distinct transition marker (bold heading, horizontal rule, or "I'm at 95% confidence. Moving to approaches.") | Plan mode active AND confidence reaches 95%; may be folded into approach-proposal message when the interview question IS the approach-selection question |
 | **Step 3 §Pre-recommendation confidence anchor** | Before emitting the triage recommendation | Standalone sentence on its own line (Step 1 sub-step 8's post-exploration announcement) | Triage brainstorm (every Step 3 triage emission, regardless of auto-mode / pre-authorization) |
 | **Post-redirection re-recommendation anchor** | When a user redirection causes a re-triage (verdicts reversed, deliverable shape changed, scope adjusted) | Standalone sentence on its own line, format unchanged: `Post-exploration confidence: ~X% — [revised basis naming what changed]` | Re-triage cycle (fires once per redirection-triggered re-triage, not once per individual verdict reversal); the original Step 3 §Pre-recommendation confidence anchor's audit-trail role is stale once user-identified errors surface, and this row records the operator's updated confidence in the corrected position |
+| **Follow-up cycle Pre-exploration anchor** | A Step 6 menu option spawns a new brainstorm cycle for related scope (next ticket alongside the just-written one, derivative audit on an adjacent surface, related spec the menu surfaced — NOT a re-triage of the prior cycle's verdicts) | Standalone sentence on its own line, format identical to Step 1 sub-step 8 (`Post-exploration confidence: ~X% — [basis naming what the follow-up cycle explored and what gaps remain]`) | Every follow-up cycle initiated via Step 6 menu (the Step 1 sub-step 8 anchor and the Step 3 §Pre-recommendation anchor still fire independently for the follow-up cycle's recommendation); skipping the anchor on a follow-up cycle leaves no audit-trail evidence that exploration ran for the new scope. Distinct from §Post-redirection re-recommendation anchor (which fires on user redirection invalidating the prior triage's verdicts); the follow-up-cycle anchor fires on a structurally new Step 1 entry for new scope |
 
 ## Interaction matrix
 
@@ -46,7 +47,7 @@ Confidence increases from **both user answers AND research findings**. If extern
 
 ## Why these rules cluster
 
-The six sites are mutually-reinforcing rather than redundant — they cover distinct lifecycle moments: pre-interview calibration (sub-step 5), pre-Step-2-decision anchor (sub-step 8), per-answer progression (Protocol block), mode-adapted alternative (Auto-mode prose), gate transition (Plan Mode Interview marker + Pre-recommendation anchor), and post-redirection re-anchor (Post-redirection re-recommendation anchor — refresh of the Pre-recommendation anchor when user redirection invalidates a prior triage). The cluster preserves audit-trail anchors at every gate the user might want to redirect from. The shared discipline: confidence is visibly recorded at each branch point so the user can see what drove the next action.
+The seven sites are mutually-reinforcing rather than redundant — they cover distinct lifecycle moments: pre-interview calibration (sub-step 5), pre-Step-2-decision anchor (sub-step 8), per-answer progression (Protocol block), mode-adapted alternative (Auto-mode prose), gate transition (Plan Mode Interview marker + Pre-recommendation anchor), post-redirection re-anchor (Post-redirection re-recommendation anchor — refresh of the Pre-recommendation anchor when user redirection invalidates a prior triage), and follow-up-cycle Pre-exploration anchor (Follow-up cycle Pre-exploration anchor — fires when a Step 6 menu option spawns a new brainstorm cycle for related scope). The cluster preserves audit-trail anchors at every gate the user might want to redirect from. The shared discipline: confidence is visibly recorded at each branch point so the user can see what drove the next action.
 
 ## Plan-mode fast-track interactions
 
