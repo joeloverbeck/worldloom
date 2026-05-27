@@ -1204,11 +1204,15 @@ a:hover {
 }
 
 .page-entry-jump button,
-.route-error button {
+.route-error button,
+.route-error__link {
+  display: inline-flex;
+  align-items: center;
   min-height: 2.75rem;
   padding: 0 var(--space-4);
   color: var(--color-surface-elevated);
   font-weight: 700;
+  text-decoration: none;
   background: var(--color-accent);
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-sm);
@@ -1216,7 +1220,9 @@ a:hover {
 }
 
 .page-entry-jump button:hover,
-.route-error button:hover {
+.route-error button:hover,
+.route-error__link:hover {
+  color: var(--color-surface-elevated);
   background: var(--color-accent-strong);
   border-color: var(--color-accent-strong);
 }
@@ -1297,6 +1303,43 @@ a:hover {
 .route-error p {
   margin: 0;
   color: var(--color-text-secondary);
+}
+
+.route-loading {
+  display: grid;
+  place-items: center;
+  min-height: 8rem;
+  padding: var(--space-6);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+.route-loading__mark {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  letter-spacing: 0.08em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  animation: route-loading-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes route-loading-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-loading__mark {
+    animation: none;
+  }
 }
 
 .index-status-banner {
