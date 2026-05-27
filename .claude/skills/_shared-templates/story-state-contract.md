@@ -402,7 +402,7 @@ When a player selects a `CHC` or supplies a write-in, the turn-cycle resolves it
 
 ## 7. Nine Shared Hard Gates
 
-Every PG-authoring story skill (`branching-story-bootstrap` and `branching-story-turn-cycle`) validates these nine hard gates at page-plan commit; gate results are recorded in the flat `PG.validation_trace` mapping using the nine schema keys defined in §4.2 (one entry per gate, keyed by the gate name), and each gate's pass entry requires a one-line rationale (per AGENTS.md "Validation test PASS entries require a one-line rationale"). Gate FAIL produces a direct-artifact partial failure under HARD-GATE discipline (see `docs/HARD-GATE-DISCIPLINE.md`). Non-PG story skills (`branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) preserve the same invariants — branch isolation, Mystery Reserve firewall, observer firewall, schema compliance, replay consistency, choice-set non-collapse, motivation grounding, terminal proof, and turn-driver lawfulness when they emit or audit turn-resolution state — through their own skill-local validation phases and HARD-GATE discipline. When non-PG skills emit audit-only SE records, §4.3a applies.
+Every PG-authoring story skill (`branching-story-bootstrap` and `branching-story-turn-cycle`) validates these nine hard gates at page-plan commit; gate results are recorded in the flat `PG.validation_trace` mapping using the nine schema keys defined in §4.2 (one entry per gate, keyed by the gate name), and each gate's pass entry requires a one-line rationale (per AGENTS.md "Validation test PASS entries require a one-line rationale"). The rationale prose target form is one sentence per gate, <= 30 words, with no semicolon-chained sub-clauses; `validation_trace_shape_compliance` enforces only the flat nine-key mapping shape, so rationale length is authoring-side discipline. Gate FAIL produces a direct-artifact partial failure under HARD-GATE discipline (see `docs/HARD-GATE-DISCIPLINE.md`). Non-PG story skills (`branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) preserve the same invariants — branch isolation, Mystery Reserve firewall, observer firewall, schema compliance, replay consistency, choice-set non-collapse, motivation grounding, terminal proof, and turn-driver lawfulness when they emit or audit turn-resolution state — through their own skill-local validation phases and HARD-GATE discipline. When non-PG skills emit audit-only SE records, §4.3a applies.
 
 | # | Gate | Checks |
 |---|---|---|
@@ -430,10 +430,10 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 4 | Relevant world-canon excerpt | context packet |
 | 5 | Active cast and entity statuses | `state_snapshot.entity_status` |
 | 6 | Current location and affordances | `state_snapshot.visible_affordances` |
-| 7 | Selected event and state delta | `SE` translated into renderer-facing prose direction; engine state-delta arrays and lifecycle bookkeeping live in §15 frontmatter |
+| 7 | Selected event and state delta | `SE` translated into renderer-facing prose direction, with record-id grounding allowed where it is load-bearing for state movement; engine state-delta arrays and lifecycle bookkeeping live in §15 frontmatter |
 | 7a | Turn driver / initiative trace | `SE.turn_driver` + parent-page active pressure disposition; fixed driver rows and disposition cell shape stay validator-enforced, while reason prose avoids bare record-id rationale where possible |
 | 8 | Required beats from the commitment block | selected `SLT.beats` |
-| 9 | Relationship and belief context | active `SREL`, `BEL` translated into renderer-facing relationship and knowledge prose; record ids live in §15 or §16a grounding |
+| 9 | Relationship and belief context | active `SREL`, `BEL` translated into renderer-facing relationship and knowledge prose, with record-id grounding allowed where it disambiguates load-bearing state |
 | 9b | Active actor plans / tactical agency (optional) | per-page-computed from active `STPLAN` records; preserve the structural labels, but write each field as prose-direction content |
 | 9c | Emotional causality / affective transition (optional) | per-page-computed from active `STEMO` records; preserve the structural labels, but translate affect and pressure enums into behavior prose |
 | 10 | Open obligations, consequences, threads | active `OBL`, `CNSQ`, `THR`, including each record's `urgency` |
@@ -477,7 +477,7 @@ Verbatim prior-prose quotation is permitted only when an exact line must be answ
 
 ### 7. Selected event and state delta
 
-§7 is the renderer-facing translation of the selected event and its state movement. It must tell the prose renderer what changed in the scene, pressure field, and relevant interior state in human prose. Do not expose the engine ledger as §7 body text: `state_delta.create[]`, `state_delta.supersede[]`, `state_delta.close[]`, `record_introductions[]`, `state_relations[]`, `non_propagation_facts[]`, and record-id-dense `world_logic_rationale` belong in §15 frontmatter or the underlying `SE` record, not in the body read by the external renderer.
+§7 is the renderer-facing translation of the selected event and its state movement. It must tell the prose renderer what changed in the scene, pressure field, and relevant interior state in human prose. Record IDs may appear when they are the load-bearing grounding for a state movement, but do not dump the engine ledger as §7 body text: `state_delta.create[]`, `state_delta.supersede[]`, `state_delta.close[]`, `record_introductions[]`, `state_relations[]`, `non_propagation_facts[]`, and raw field arrays belong in §15 frontmatter or the underlying `SE` record.
 
 Preferred §7 body shape is a short prose-direction packet such as:
 
@@ -488,7 +488,7 @@ What changed in <actor>'s interior this page:
 - <Any non-propagation or witness limit is expressed as what the prose may or may not show, not as YAML.>
 ```
 
-The body can mention the selected event, route, rationale, and player-visible outcome in prose, but the machine-readable record ids, lifecycle transitions, introduction triggers, relation verbs, and non-propagation arrays remain greppable from §15 frontmatter for plan grounding and validation.
+The body can mention the selected event, route, rationale, player-visible outcome, and the record IDs needed to ground those state movements, but lifecycle arrays, introduction triggers, relation verbs, and non-propagation arrays remain greppable from §15 frontmatter for plan grounding and validation.
 
 ### 7a. Turn driver / initiative trace
 
@@ -521,7 +521,7 @@ The table keeps the closed `Disposition` vocabulary and `Reason / expiry` cell s
 Jon and Ane have no prior shared history; she has still not noticed him. Jon privately believes she has been on the bench for hours, and Ane believes she is alone in the park.
 ```
 
-The record ids that ground the statement belong in §15 frontmatter and, when they modulate a character authority packet, in §16a `Current-state grounding records:`. §9 may refer to a relationship, belief, lie, suspicion, or public claim by its story meaning, but it must not make the prose renderer parse id lists as shorthand for human context.
+The record ids that ground the statement may appear in §9 when they disambiguate load-bearing state, and also belong in §15 frontmatter and, when they modulate a character authority packet, in §16a `Current-state grounding records:`. §9 must still explain the relationship, belief, lie, suspicion, or public claim by its story meaning rather than making the prose renderer parse id lists as shorthand for human context.
 
 **§9b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `STPLAN` records — one entry per active plan with sub-bullets per the template below:
 
@@ -629,7 +629,7 @@ A §16a packet is sufficient page-local authority for prose and prose-attach val
 
 **§10b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `CLK` records, active `STSEC` records, and active `STQ` records as prose pressure, secrecy, and setup/payoff direction. Numeric or closed-field details such as clock `value` / `max`, thresholds, salience, secret status, holder lists, clue-carrier counts, audience visibility, `payoff_of`, and `answer_records[]` stay greppable in §15 frontmatter and the underlying records; the §10b body translates them for the external renderer. For example: "the observation-window pressure has reached the halfway mark; the next noticeable shift comes when a third party enters the privacy of the scene." Subsections appear only for classes with relevant active records; when no `CLK`, `STSEC`, or `STQ` content matters for the render, §10b is omitted rather than emitted as an empty placeholder. `branching-story-turn-cycle` owns the rendering procedure for this section.
 
-The plan must not expose engine jargon to prose. Engine terms (record ids, gate names) may appear in §15 frontmatter and in the §16a `Current-state grounding records:` field; renderer-facing prose sections translate those records into human-readable direction. Structural enforcement: `page_plan_body_engine_vocabulary_cleanliness` scans plan body sections outside §15 / §16a `Current-state grounding records:` / §2 / §3 / §19 verbatim blocks for engine-vocabulary tokens and blocks the patch envelope at the validation phase when a section has three or more hits.
+The plan must not expose engine jargon to prose-facing sections. Record IDs and schema-field vocabulary may appear in engine-output body sections (§5, §6, §7, §7a, §8, §9, §9b, §9c, §10, §10b, §13, §14) when they are load-bearing grounding; predicate DSL terms remain prohibited outside excluded verbatim/frontmatter sections. Renderer-facing prose sections (§1, §4, §11, §12, §17, §18) translate records into human-readable direction. Structural enforcement: `page_plan_body_engine_vocabulary_cleanliness` scans plan body sections outside §15 / §2 / §3 / §19 verbatim blocks with per-section policy, preserving the §16a `Current-state grounding records:` exemption and blocking the patch envelope at the validation phase when a scanned section has three or more hits.
 
 For non-accept routes, §7 must include `SE.resolution.player_visible_feedback` so the prose renderer has the player-legible outcome receipt it must realize. For `accept`, §7 carries the selected event, route, rationale, and state delta without a `resolution` block.
 

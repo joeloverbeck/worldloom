@@ -38,11 +38,6 @@ export function RecordCardCompact({ recordCard, onExpand }: RecordCardCompactPro
           <span className="record-chip">Created at {recordCard.provenance.createdAtPage}</span>
         ) : null}
         {recordCard.links.length > 0 ? <span className="record-chip">{recordCard.links.length} related</span> : null}
-        {recordCard.chips.map((chip) => (
-          <span className="record-chip" key={`${chip.label}:${chip.value}`}>
-            {chip.label}: {chip.value}
-          </span>
-        ))}
       </div>
       {onExpand ? (
         <button className="record-card__expand" type="button" onClick={onExpand}>

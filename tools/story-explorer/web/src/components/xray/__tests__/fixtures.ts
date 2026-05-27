@@ -6,7 +6,6 @@ export function recordCard(overrides: Partial<RecordCard> = {}): RecordCard {
     recordClass: 'BEL',
     group: 'Knowledge & Truth',
     summaryLine: 'Lyra believes the gate is watched',
-    chips: [{ label: 'Mode', value: 'suspicion' }],
     primaryFields: [
       { name: 'Holder', value: 'STCHAR-1' },
       { name: 'Claim', value: 'The gate is watched' },

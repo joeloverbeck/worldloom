@@ -1,5 +1,5 @@
 import { recordClass } from "./record-io.js";
-import type { RecordCard, RecordChip, RecordField, RecordGroup, RecordProvenanceSummary } from "../view-models/record-card.js";
+import type { RecordCard, RecordField, RecordGroup, RecordProvenanceSummary } from "../view-models/record-card.js";
 import type { RecordLink } from "../view-models/record-link.js";
 
 type ParsedRecord = Record<string, unknown>;
@@ -292,12 +292,14 @@ function summaryLine(recordId: string, body: ParsedRecord, rule: SummaryRule): s
     return explicit;
   }
 
-  const classSpecific = firstMeaningfulString(body, [...rule.primaryFields, ...DEFAULT_MEANINGFUL_FIELDS]);
+  const primarySummaryFields = rule.primaryFields.filter((field) => field !== "status");
+  const classSpecificFields = [...primarySummaryFields, ...DEFAULT_MEANINGFUL_FIELDS].filter((field) => field !== "status");
+  const classSpecific = firstMeaningfulString(body, classSpecificFields);
   if (classSpecific !== null) {
     return classSpecific;
   }
 
-  const classSpecificReference = firstFieldValue(body, rule.primaryFields);
+  const classSpecificReference = firstFieldValue(body, primarySummaryFields);
   if (classSpecificReference !== null) {
     return classSpecificReference;
   }
@@ -308,23 +310,6 @@ function summaryLine(recordId: string, body: ParsedRecord, rule: SummaryRule): s
   }
 
   return `Untitled ${recordClass(recordId)} record`;
-}
-
-function chips(body: ParsedRecord, rule: SummaryRule): RecordChip[] {
-  const chipFields = [
-    ["status", rule.statusField],
-    ["visibility", rule.visibilityField],
-    ["confidence", rule.confidenceField],
-    ["urgency", rule.urgencyField],
-  ] as const;
-
-  return chipFields.flatMap(([label, field]) => {
-    if (field === undefined) {
-      return [];
-    }
-    const value = stringifyValue(nestedValue(body, field));
-    return value === null ? [] : [{ label, value }];
-  });
 }
 
 function recordIdsFrom(value: unknown): string[] {
@@ -408,7 +393,6 @@ export function buildRecordCard(
     recordClass: recordClass(recordId),
     group: rule.group,
     summaryLine: summaryLine(recordId, parsedBody, rule),
-    chips: chips(parsedBody, rule),
     primaryFields: fieldList(parsedBody, rule.primaryFields),
     secondaryFields: fieldList(parsedBody, rule.secondaryFields),
     status: rule.statusField === undefined ? null : stringifyValue(nestedValue(parsedBody, rule.statusField)),

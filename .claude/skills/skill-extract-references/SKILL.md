@@ -117,6 +117,7 @@ When a source skill is structured as Pre-flight + Phases 1-N (with optional half
 
 **Collapsing decisions** (Step 5 grouping rule applied):
 - Adjacent phases collapsed into one Procedure step when they form a natural unit AND share a reference doc: Phases 2-3 (impact analysis feeds continuation feasibility), Phases 4 + 4.5 (storylet selection produces M_resolution_claims that 4.5 routes per claim), Phases 6 + 6.5 (narrative governor recompute feeds closure-readiness detection).
+- Sequential validation phases collapsed when they form a per-record-scope + per-batch-scope pair: commitment-block-authoring Phases 3-4 (per-block 6-gate validation + per-batch 4-check diversity validation) merged into `references/phase-3-4-validation.md` — both validate authored content, differ only in scope, and the per-batch phase may be mode-conditional (carried in the thin SKILL.md Procedure step's load instruction).
 - Standalone phases kept as their own Procedure step when topically distinct (Phase 5 state mutation, Phase 7 page render, Phase 8 choice generation, Phase 9 validation gates).
 - Phase 10 + Phase 11 stay INLINE per the Commit / HARD-GATE phases rule — the safety-and-sequencing contract must be visible in the thin SKILL.md, not loaded from a reference doc.
 

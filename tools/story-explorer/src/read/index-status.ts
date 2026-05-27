@@ -7,22 +7,28 @@ import {
   versionFilePathForWorld,
 } from "@worldloom/world-index/index/open";
 import { sha256Hex } from "@worldloom/world-index/hash/content";
+import { ATOMIC_LOGICAL_WORLD_FILES } from "@worldloom/world-index/public/types";
 
 import { resolveRepoRoot, worldDirectoryPath } from "../config/repo-root.js";
 import type { IndexStatus } from "../view-models/index-status.js";
 
-const BUILD_REMEDY_PREFIX = "Run `world-index build";
+const ATOMIC_LOGICAL_WORLD_FILE_SET = new Set<string>(ATOMIC_LOGICAL_WORLD_FILES);
+
+function worldIndexCommand(command: "build" | "sync", worldSlug: string): string {
+  const quietSuffix = command === "sync" ? " --quiet" : "";
+  return `npm exec --prefix tools/story-explorer -- world-index ${command} ${worldSlug}${quietSuffix}`;
+}
 
 function missingRemedy(worldSlug: string): string {
-  return `${BUILD_REMEDY_PREFIX} ${worldSlug}\` to enable indexed reads.`;
+  return `Run \`${worldIndexCommand("build", worldSlug)}\` to enable indexed reads.`;
 }
 
 function rebuildRemedy(worldSlug: string): string {
-  return `${BUILD_REMEDY_PREFIX} ${worldSlug}\` to rebuild the index.`;
+  return `Run \`${worldIndexCommand("build", worldSlug)}\` to rebuild the index.`;
 }
 
 function staleRemedy(worldSlug: string): string {
-  return `Run \`world-index sync ${worldSlug}\` to refresh indexed reads.`;
+  return `Run \`${worldIndexCommand("sync", worldSlug)}\` to refresh indexed reads.`;
 }
 
 function versionNumberFromFile(worldRoot: string, worldSlug: string): number {
@@ -45,6 +51,10 @@ function driftedFiles(worldRoot: string, worldSlug: string, rows: Array<{ file_p
   const drifted: string[] = [];
 
   for (const row of rows) {
+    if (ATOMIC_LOGICAL_WORLD_FILE_SET.has(row.file_path)) {
+      continue;
+    }
+
     const absolutePath = path.join(worldDir, row.file_path);
     if (!existsSync(absolutePath)) {
       drifted.push(row.file_path);

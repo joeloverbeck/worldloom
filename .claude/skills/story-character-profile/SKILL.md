@@ -182,7 +182,7 @@ Before this skill acts, it MUST receive:
 - Targeted story records needed for the mode via `mcp__worldloom__get_record`, `mcp__worldloom__get_records`, or `mcp__worldloom__list_records(..., include_full_body=true)`.
 - `worlds/<world_slug>/characters/INDEX.md` and the targeted `CHAR-*` dossier only for `create_from_world_char`, or for `regenerate` when a source `CHAR` is explicitly supplied or already recorded as provenance.
 
-If `get_context_packet`, `get_record`, or `get_records` returns `delivery_status: persisted_with_summary`, retrieve the required slices before drafting. Summary-only context is not enough to author voice, appraisal, pressure behavior, or relationship-specific conduct.
+If `get_context_packet`, `get_record`, or `get_records` returns `delivery_status: persisted_with_summary`, retrieve the required slices before drafting. Summary-only context is not enough to author voice, appraisal, pressure behavior, or relationship-specific conduct. If `get_context_packet` instead errors with `code: packet_incomplete_required_classes`, follow `.claude/skills/_shared-templates/persisted-packet-recovery.md` §When Required Classes Cannot Fit (per-class `list_records(..., include_full_body=true)` plus targeted `get_records` for named seeds) before drafting.
 
 ## Pre-flight Check
 

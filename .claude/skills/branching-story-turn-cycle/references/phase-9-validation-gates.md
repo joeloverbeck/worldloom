@@ -1,17 +1,17 @@
 # Phase 9: Validate
 
-Run the 8 shared hard gates per shared contract §7 against the drafted records. Populate `PG-<integer>.validation_trace` with one-line PASS rationale per gate:
+Run the 8 shared hard gates per shared contract §7 against the drafted records. Populate `PG-<integer>.validation_trace` with one concise sentence per gate (<= 30 words; single sentence; no semicolon-chained sub-clauses) per AGENTS.md "Validation test PASS entries require a one-line rationale":
 
-1. **input legality** — action source matches `action_source_mode`: selected-choice and write-in turns use exactly one source action; `advance_initiative` uses both player-action fields absent and a non-player `SE.turn_driver.kind`; repair/start events use both-null input; chosen CHC belongs to parent and is not retired when present; bundle + parent exist.
-2. **parent snapshot compatibility** — `parent.state_hash` matches `PG-<integer>.state_hash_parent`; `parent.state_snapshot.canon_revision` has been compared against the current world-canon revision and canon-baseline drift is classified as `compatible` or `grandfathered` before proceeding.
-3. **mystery / invariant firewall** — no forbidden `M-<integer>` resolved; INV honored; selected SLT's `mystery_policy.forbidden_resolutions` respected.
-4. **branch isolation** — no sibling-branch records in new snapshot's `active_records`; no author-pool SLT references branch-local record ids.
-5. **append-only delta** — all changes in `SE.state_delta` are creates / supersessions / closes; supersession is a new record file (no in-place mutation of structural fields).
-6. **consequence capacity or terminal proof** — at least one eligible SLT (author-pool or JIT-able) OR `terminal_closed` with `terminal_rationale` covering high-salience debt closure. High-salience debt is determined from `urgency` on active `OBL`, `CNSQ`, `THR`, and `STINT` records. Choice Consequence Integrity is part of this gate: an accepted `CHC` selection or accepted write-in must produce at least one grounded consequence unless the parent page plan explicitly marked that choice as rhetorical.
-7. **plan grounding** — every required beat and every emitted `CHC` is grounded in active records or world canon. (a) Each `PG.state_snapshot.visible_affordances[].grounded_in[]` resolves to active `STLOC` or `STOBJ` records ONLY per shared contract `_shared-templates/story-record-schemas.md` §4.2 schema pattern `^(STLOC|STOBJ)-[0-9]+$` — `STENT`, `CNSQ`, `OBL`, `BEL`, and other story-bundle ids are NOT valid grounding for `visible_affordances[].grounded_in[]` and the `record_schema_compliance` validator rejects them at dry-run. (b) Each emitted `CHC.grounded_in.records[]` resolves to the new page's `state_snapshot.active_records` (any active record class is permissible — STENT, STOBJ, STLOC, CNSQ, OBL, BEL, SREL, THR, DA, etc. per shared contract §4.5.12). (c) Each emitted `CHC.grounded_in.affordance_ordinals[]` resolves to the new page's `state_snapshot.visible_affordances[].ordinal`. The Information / Observer Firewall is satisfied: selected `SLT` actor-bindings, character actions, and emitted choices rely only on information available to the acting entity or record a valid access route.
-8. **canon promotion hold** — if `outcome_route == promotion_hold` or any `SE.promotion_claims[].authority == canon_candidate`, the state delta records only the branch-local appearance. Marked `NOT_APPLICABLE` with rationale when no canon claim is in play.
+1. **input legality** — action source matches `action_source_mode`: selected-choice and write-in turns use exactly one source action; `advance_initiative` uses both player-action fields absent and a non-player `SE.turn_driver.kind`; repair/start events use both-null input; chosen CHC belongs to parent and is not retired when present; bundle + parent exist. Target form: `"PASS: action source matches mode; parent PG and selected CHC are active and valid."`
+2. **parent snapshot compatibility** — `parent.state_hash` matches `PG-<integer>.state_hash_parent`; `parent.state_snapshot.canon_revision` has been compared against the current world-canon revision and canon-baseline drift is classified as `compatible` or `grandfathered` before proceeding. Target form: `"PASS: parent state_hash matches; canon drift is compatible after CH-<integer> review."`
+3. **mystery / invariant firewall** — no forbidden `M-<integer>` resolved; INV honored; selected SLT's `mystery_policy.forbidden_resolutions` respected. Target form: `"PASS: selected SLT resolves no forbidden mystery and violates no loaded INV."`
+4. **branch isolation** — no sibling-branch records in new snapshot's `active_records`; no author-pool SLT references branch-local record ids. Target form: `"PASS: active_records and selected SLT stay within the current branch path."`
+5. **append-only delta** — all changes in `SE.state_delta` are creates / supersessions / closes; supersession is a new record file (no in-place mutation of structural fields). Target form: `"PASS: SE state_delta uses creates, supersessions, and closes only; no prior record mutates in place."`
+6. **consequence capacity or terminal proof** — at least one eligible SLT (author-pool or JIT-able) OR `terminal_closed` with `terminal_rationale` covering high-salience debt closure. High-salience debt is determined from `urgency` on active `OBL`, `CNSQ`, `THR`, and `STINT` records. Choice Consequence Integrity is part of this gate: an accepted `CHC` selection or accepted write-in must produce at least one grounded consequence unless the parent page plan explicitly marked that choice as rhetorical. Target form: `"PASS: accepted driver creates grounded consequences, and continuation remains open through SLT eligibility."`
+7. **plan grounding** — every required beat and every emitted `CHC` is grounded in active records or world canon. (a) Each `PG.state_snapshot.visible_affordances[].grounded_in[]` resolves to active `STLOC` or `STOBJ` records ONLY per shared contract `_shared-templates/story-record-schemas.md` §4.2 schema pattern `^(STLOC|STOBJ)-[0-9]+$` — `STENT`, `CNSQ`, `OBL`, `BEL`, and other story-bundle ids are NOT valid grounding for `visible_affordances[].grounded_in[]` and the `record_schema_compliance` validator rejects them at dry-run. (b) Each emitted `CHC.grounded_in.records[]` resolves to the new page's `state_snapshot.active_records` (any active record class is permissible — STENT, STOBJ, STLOC, CNSQ, OBL, BEL, SREL, THR, DA, etc. per shared contract §4.5.12). (c) Each emitted `CHC.grounded_in.affordance_ordinals[]` resolves to the new page's `state_snapshot.visible_affordances[].ordinal`. The Information / Observer Firewall is satisfied: selected `SLT` actor-bindings, character actions, and emitted choices rely only on information available to the acting entity or record a valid access route. Target form: `"PASS: beats and CHCs ground in active records, and actor access routes satisfy Observer Firewall."`
+8. **canon promotion hold** — if `outcome_route == promotion_hold` or any `SE.promotion_claims[].authority == canon_candidate`, the state delta records only the branch-local appearance. Marked `NOT_APPLICABLE` with rationale when no canon claim is in play. Target form: `"NOT_APPLICABLE: SE promotion_claims is empty, so no canon hold is in play."`
 
-Plus the page-plan body structural cleanliness gate (recorded in working memory): `page_plan_body_engine_vocabulary_cleanliness` scans the drafted plan body outside §15 / §16a `Current-state grounding records:` / §2 / §3 / §19 for engine-vocabulary tokens. A FAIL blocks the patch envelope; repair the plan prose and recompute hashes before approval.
+Plus the page-plan body structural cleanliness gate (recorded in working memory): `page_plan_body_engine_vocabulary_cleanliness` scans the drafted plan body with per-section policy. §2 / §3 / §15 / §19 are excluded; engine-output sections (§5 / §6 / §7 / §7a / §8 / §9 / §9b / §9c / §10 / §10b / §13 / §14) allow record IDs and schema-field literals but still scan predicate DSL terms; §16a preserves its `Current-state grounding records:` exemption; prose-facing sections keep the full engine-vocabulary scan. A FAIL blocks the patch envelope; repair the plan and recompute hashes before approval.
 
 Plus 15 turn-cycle-additional checks (recorded in working memory):
 
@@ -34,6 +34,8 @@ Plus 15 turn-cycle-additional checks (recorded in working memory):
 13. **Gate 13: Fresh entity status pairing** (`entity_introduction_status_pairing`) — every fresh `STENT` in `SE.state_delta.create[]` has exactly one same-event `STSTAT` in `state_delta.create[]` whose `entity` field points to the new `STENT`, and the child `PG.state_snapshot.active_records` includes both records. Existing-entity status-only updates do not trigger this requirement.
 14. **Gate 14: Relationship participant grounding and observer access** (`relationship_introduction_grounding_integrity` and `introduction_observer_firewall`) — every fresh `SREL` names participants that are parent-active or same-event-created and has non-empty `derived_from[]`; every emitted choice grounded in a freshly-introduced record has an explicit actor access route. Wave 2 observer-firewall scope is explicit-record-reference access only; inferential access remains deferred.
 15. **Gate 15: Narrative-shape field rejection** (`narrative_shape_field_rejection`) — no new `CLK`, `STSEC`, `THR`, `SREL`, or `STENT` record carries future-shape fields such as `expected_payoff_mode`, `act_position`, `midpoint`, `climax`, `dramatic_curve_position`, `tension_arc`, `expected_chapter`, or `scene_sequence`. `STQ` keeps its pre-existing narrative-shape prohibition in `record_schema_compliance`.
+
+Gate 9 `PG.validation_trace.turn_driver_lawfulness` target form: `"PASS: player_action driver has initiator=player, driver_records=[], and perceived_directly POV."` For non-turn events, use one concise `NOT_APPLICABLE` sentence naming the lawful omission.
 
 Compatibility-drift note: `compatibility_drift` may report info/warn findings for legacy optional directory or active-record key absence. It does not hard-fail Wave 2 turn-cycle commits; authors must still materialize the full current active-record map on every new child `PG`.
 
@@ -69,7 +71,7 @@ where `/tmp/page-plan-drafts.json` is `[{"path": "stories/<story_slug>/pages-pro
 
 The `path` MUST match `stories/<story-slug>/pages-prose-plans/PG-<integer>.md` exactly; the MCP arg validator rejects any other shape with `invalid_input`. The patch's `PG-<integer>` record is overlaid onto the world index in pre-apply mode, so the validators see the new `state_snapshot.active_records` (not the parent's). Common failures this gate catches that today's enumeration cannot:
 
-- `page_plan_body_engine_vocabulary_cleanliness.fail` — a renderer-facing page-plan body section outside §15 / §16a `Current-state grounding records:` / §2 / §3 / §19 contains three or more engine-vocabulary tokens. Translate the body to prose-facing direction or move engine-readable bookkeeping to §15.
+- `page_plan_body_engine_vocabulary_cleanliness.fail` — a prose-facing page-plan body section contains three or more engine-vocabulary tokens, or an engine-output section contains predicate DSL terms. Translate prose-facing sections to human direction, keep predicate DSL terms out of body text, or move raw machine-readable bookkeeping to §15.
 - `page_plan_stchar_packet_integrity.stale_current_state_reference` — a §16a packet cites a record id (typically a prior `PG-<integer>`, the just-superseded `STEMO-<integer>`, or a `BEL-<integer>` no longer in the new snapshot) that isn't active in the new page. See `references/phase-7-page-plan.md` §16a record-id token discipline.
 - `page_plan_stchar_packet_integrity.missing_packet` / `.inactive_stchar` / `.missing_voice_block` / `.unknown_role_label` — §16a packet inventory or per-packet shape failures.
 - `active_pressure_deferred_without_expiry` / `active_pressure_disposition_unknown` / `active_pressure_rejection_reason_missing` — §7a Active-pressure disposition row shape failures. See `references/phase-7-page-plan.md` §7a closed-set form.
@@ -77,3 +79,26 @@ The `path` MUST match `stories/<story-slug>/pages-prose-plans/PG-<integer>.md` e
 - `page_plan_turn_driver_consistency` failures — §7a turn driver / initiative trace lines disagree with `SE.turn_driver`.
 
 Any `fail` verdict aborts Phase 10 (do not proceed to deliverable summary or HARD-GATE approval). Repair the draft (re-running Phase 7 if necessary), recompute hashes against the new bytes, then re-run the dry-run with the updated `page_plan_drafts`.
+
+After approval, submit with the same draft bytes used for this validation run:
+
+MCP:
+```
+mcp__worldloom__submit_patch_plan(
+  patch_plan=<envelope>,
+  approval_token=<issued-token>,
+  page_plan_drafts=[{path: "stories/<story_slug>/pages-prose-plans/PG-<integer>.md",
+                     content: "<same exact UTF-8 draft bytes validated above>"}]
+)
+```
+
+CLI:
+```
+node tools/world-mcp/dist/src/cli/submit-patch-plan.js \
+  [--world-root <path>] \
+  --page-plan-drafts /tmp/page-plan-drafts.json \
+  <plan-path> \
+  <token-path>
+```
+
+Do not validate one page-plan draft and submit without it; submit-time pre-apply validators consume this side-channel and fail closed on validator errors before any write.

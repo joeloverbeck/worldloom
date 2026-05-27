@@ -114,7 +114,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` — user-supplied rendered prose; MUST exist
 - Optional: `worlds/<world_slug>/stories/<story_slug>/pages-prose/<recent-N>.md` (prior 1-2 prose pages, only when `run_craft_critic: true`)
 
-The bundle MUST exist (non-bootstrap variant); the page MUST exist; the plan + prose pair MUST exist. No context-packet retrieval is normally needed because the plan body inlines the load-bearing canon per shared contract §8 §4. Targeted `mcp__worldloom__get_firewall_content` retrieval is required when plan §11 does not inline the Mystery Reserve firewall fields used by the `forbidden_mystery_resolution` check (Phase 3 check 3). Persisted-summary recovery still applies if retrieval returns `delivery_status: persisted_with_summary` (see `.claude/skills/_shared-templates/persisted-packet-recovery.md`).
+The bundle MUST exist (non-bootstrap variant); the page MUST exist; the plan + prose pair MUST exist. No context-packet retrieval is normally needed because the plan body inlines the load-bearing canon per shared contract §8 §4. Targeted `mcp__worldloom__get_firewall_content` retrieval is required when plan §11 does not inline the Mystery Reserve firewall fields used by the `forbidden_mystery_resolution` check (Phase 3 check 3). Packet recovery still applies if retrieval returns `delivery_status: persisted_with_summary` or errors with `code: packet_incomplete_required_classes` (see `.claude/skills/_shared-templates/persisted-packet-recovery.md`).
 
 Targeted retrieval discipline: if optional retrieval or a persisted summary surfaces `story_bundle_context` entries for material `STPLAN` / `STEMO` / `STSEC` / `STQ` / `CLK` records, treat them as an index and summary surface, not full receipt authority. Retrieve the full body with `mcp__worldloom__get_record`, `mcp__worldloom__get_records`, or a filtered `mcp__worldloom__list_records(..., include_full_body=true)` before evaluating prose receipts, CHC grounding, page-plan §9b / §9c / §10b claims, or health-audit-style findings that depend on basis, blockers, appraisal, orientation, clue, payoff, or clock payload detail.
 
@@ -130,11 +130,16 @@ Before Phase 1:
 6. Create `worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/` directory if absent (idempotent `mkdir -p`).
 7. Allocate `SE` id via `mcp__worldloom__allocate_next_id(world_slug, 'SE', story_slug=<story_slug>)` only when `emit_attach_event: true`. Skip otherwise.
 
-Persisted-summary recovery: see
-`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
-`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
-`delivery_status: persisted_with_summary`, retrieve required slices via
-`mcp__worldloom__get_persisted_packet_slice` before continuing.
+Packet recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. Two failure
+modes are covered there — if `get_context_packet` (or `get_records` /
+`describe_envelope_schema`) returns `delivery_status: persisted_with_summary`,
+retrieve required slices via `mcp__worldloom__get_persisted_packet_slice`
+before continuing; if `get_context_packet` errors with
+`code: packet_incomplete_required_classes` (required full bodies exceed the
+harness ceiling), follow the shared template's §When Required Classes Cannot
+Fit fallback (per-class `list_records(..., include_full_body=true)` plus
+targeted `get_records` for named seeds).
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -395,7 +400,7 @@ No skill-local templates — the shared contract is the canonical reference per 
 | §Story Bundles §6.1 (Story-Local Character Authority) | Phase 3 checks 9-11 | Page plans and prose receipts surface the existing `no_char_authority_in_story_runtime` verdict, validate §16a STCHAR packet presence/hashes, and judge rendered voice/behavior against STCHAR authority rather than world `CHAR`. |
 | §Story Bundles §9 (Prose Length Discipline) | Phase 4 craft critic | Craft critic uses 7 qualitative axes; no word-count enforcement. |
 | Change Control Policy | N/A | Canon-reading skill emits no Change Log Entries. |
-| Tooling Recommendation | N/A | No context-packet retrieval is normally needed because the plan body inlines the load-bearing canon per shared contract §8. Targeted `mcp__worldloom__get_firewall_content` retrieval is required when plan §11 does not inline the Mystery Reserve firewall fields used by the `forbidden_mystery_resolution` check (Phase 3 check 3). Persisted-summary recovery still applies if retrieval returns `delivery_status: persisted_with_summary` (see `.claude/skills/_shared-templates/persisted-packet-recovery.md`). |
+| Tooling Recommendation | N/A | No context-packet retrieval is normally needed because the plan body inlines the load-bearing canon per shared contract §8. Targeted `mcp__worldloom__get_firewall_content` retrieval is required when plan §11 does not inline the Mystery Reserve firewall fields used by the `forbidden_mystery_resolution` check (Phase 3 check 3). Packet recovery still applies if retrieval returns `delivery_status: persisted_with_summary` or errors with `code: packet_incomplete_required_classes` (see `.claude/skills/_shared-templates/persisted-packet-recovery.md`). |
 
 ## Guardrails
 

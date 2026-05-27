@@ -161,6 +161,18 @@ test("recordCardClasses covers every SPEC-87 story-bundle record class", () => {
   assert.deepEqual(recordCardClasses(), Object.keys(REPRESENTATIVE_RECORDS).sort((left, right) => left.localeCompare(right, undefined, { numeric: true })));
 });
 
+test("buildRecordCard does not use STCHAR status as a fallback summary", () => {
+  const card = buildRecordCard("STCHAR-99", {
+    id: "STCHAR-99",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    status: "active",
+  });
+
+  assert.equal(card.summaryLine, "STCHAR-99 (STCHAR)");
+  assert.notEqual(card.summaryLine, "active");
+});
+
 for (const [recordClass, fixture] of Object.entries(REPRESENTATIVE_RECORDS)) {
   test(`buildRecordCard creates a deterministic ${recordClass} summary`, () => {
     const card = buildRecordCard(fixture.recordId, fixture.body, ["STENT-1", "BEL-1"], {
@@ -177,7 +189,7 @@ for (const [recordClass, fixture] of Object.entries(REPRESENTATIVE_RECORDS)) {
   });
 }
 
-test("buildRecordCard computes chips, participants, links, and provenance", () => {
+test("buildRecordCard computes participants, links, and provenance", () => {
   const card = buildRecordCard(
     "OBL-1",
     REPRESENTATIVE_RECORDS.OBL!.body,
@@ -185,10 +197,6 @@ test("buildRecordCard computes chips, participants, links, and provenance", () =
     { provenance: { creatingEventId: "SE-1", modifyingEventIds: ["SE-2"], evidenceRecordIds: ["BEL-1"] } }
   );
 
-  assert.deepEqual(card.chips, [
-    { label: "status", value: "open" },
-    { label: "urgency", value: "medium" },
-  ]);
   assert.deepEqual(card.participants, ["STENT-1", "STENT-2"]);
   assert.deepEqual(
     card.links.map((link) => [link.recordId, link.activeOnCurrentPage]),

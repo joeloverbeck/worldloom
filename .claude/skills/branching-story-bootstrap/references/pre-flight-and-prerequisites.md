@@ -35,10 +35,15 @@ Before the state-seed step:
 6. The allocation list must also include every remaining class to be created: `STORY` (per-world; omit `story_slug`), `BR` (will be `BR-1`), `SE` (will be `SE-1`), `PG` (will be `PG-1`), and class-specific ids for every STENT / STSTAT / STINT / SF / **BEL** / OBL / CNSQ / THR / SREL / STLOC / STOBJ / (optional CLK / STSEC / STQ / STPLAN / STEMO / DA) / CHC / (optional SLT) record to be drafted in the in-memory drafting phases. For optional new-class roots, include `{id_class: "CLK"|"STSEC"|"STQ"|"STPLAN"|"STEMO", story_slug: <story_slug>}` entries when those records are premise-warranted. The allocator returns `<CLASS>-1` for fresh story-bundle scopes when the named bundle directory does not yet exist under an existing world; no skill-side hard-coding of pre-bundle ids is required. If a batch error includes `details.successful_allocations`, reconcile those ids before retrying rather than reusing or overwriting an already-reserved id.
 7. Load world canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_bootstrap', story_slug=<story_slug>, seed_nodes=<world-scope seed ids>, token_budget=<default>)`. Include selected cast `CHAR-<integer>` ids, plus location-related world-scope anchors only when `initial_location` grounding already identifies existing `ENT`, `SEC`, `CF`, `M`, or `OQ` ids; do not pass a proposed `STLOC` label or free-text location label as a seed. Omit the location seed when no world-scope anchor exists, and treat any MCPENH-058 unresolved-seed `task_header.warnings` as a signal to reroute or continue without that location anchor rather than using the missing label as local authority. Confirm `story_bundle_context: null`; bootstrap uses the slug as the target bundle identifier before indexed story-bundle records exist.
 
-Persisted-summary recovery: see
-`.claude/skills/_shared-templates/persisted-packet-recovery.md`. If
-`get_context_packet` (or `get_records` / `describe_envelope_schema`) returns
-`delivery_status: persisted_with_summary`, retrieve required slices via
-`mcp__worldloom__get_persisted_packet_slice` before continuing.
+Packet recovery: see
+`.claude/skills/_shared-templates/persisted-packet-recovery.md`. Two failure
+modes are covered there — if `get_context_packet` (or `get_records` /
+`describe_envelope_schema`) returns `delivery_status: persisted_with_summary`,
+retrieve required slices via `mcp__worldloom__get_persisted_packet_slice`
+before continuing; if `get_context_packet` errors with
+`code: packet_incomplete_required_classes` (required full bodies exceed the
+harness ceiling), follow the shared template's §When Required Classes Cannot
+Fit fallback (per-class `list_records(..., include_full_body=true)` plus
+targeted `get_records` for named seeds).
 
 If any precondition fails, the skill aborts before the state-seed step.

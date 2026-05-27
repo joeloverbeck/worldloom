@@ -7,6 +7,7 @@ import { test } from "node:test";
 import Database from "better-sqlite3";
 import { sha256Hex } from "@worldloom/world-index/hash/content";
 import { openIndex } from "@worldloom/world-index/index/open";
+import { ATOMIC_LOGICAL_WORLD_FILES } from "@worldloom/world-index/public/types";
 
 import { resolveRepoRoot, worldDbPath } from "../src/config/repo-root.js";
 import { resolveIndexStatus } from "../src/read/index-status.js";
@@ -115,7 +116,8 @@ test("resolveIndexStatus returns missing when the world index is absent", () => 
 
   assert.deepEqual(resolveIndexStatus("fixture-world", repoRoot), {
     kind: "missing",
-    remedy: "Run `world-index build fixture-world` to enable indexed reads.",
+    remedy:
+      "Run `npm exec --prefix tools/story-explorer -- world-index build fixture-world` to enable indexed reads.",
   });
 });
 
@@ -129,7 +131,8 @@ test("resolveIndexStatus returns version_mismatch for incompatible index version
     kind: "version_mismatch",
     expected: 7,
     found: 999,
-    remedy: "Run `world-index build fixture-world` to rebuild the index.",
+    remedy:
+      "Run `npm exec --prefix tools/story-explorer -- world-index build fixture-world` to rebuild the index.",
   });
 });
 
@@ -141,7 +144,8 @@ test("resolveIndexStatus returns empty when the index has no nodes", () => {
 
   assert.deepEqual(resolveIndexStatus("fixture-world", repoRoot), {
     kind: "empty",
-    remedy: "Run `world-index build fixture-world` to rebuild the index.",
+    remedy:
+      "Run `npm exec --prefix tools/story-explorer -- world-index build fixture-world` to rebuild the index.",
   });
 });
 
@@ -157,7 +161,35 @@ test("resolveIndexStatus returns stale with drifted file paths", () => {
   assert.deepEqual(resolveIndexStatus("fixture-world", repoRoot), {
     kind: "stale",
     driftedFiles: ["WORLD_KERNEL.md"],
-    remedy: "Run `world-index sync fixture-world` to refresh indexed reads.",
+    remedy:
+      "Run `npm exec --prefix tools/story-explorer -- world-index sync fixture-world --quiet` to refresh indexed reads.",
+  });
+});
+
+test("resolveIndexStatus ignores missing atomic logical file anchors", () => {
+  const repoRoot = createTempRepo();
+  createWorld(repoRoot);
+  const db = createIndex(repoRoot, "fixture-world");
+  for (const filePath of ATOMIC_LOGICAL_WORLD_FILES) {
+    insertNode(db, "fixture-world", filePath, `synthetic-${filePath}`);
+  }
+  db.close();
+
+  assert.deepEqual(resolveIndexStatus("fixture-world", repoRoot), { kind: "fresh", version: 7 });
+});
+
+test("resolveIndexStatus returns stale for missing physical markdown files", () => {
+  const repoRoot = createTempRepo();
+  createWorld(repoRoot);
+  const db = createIndex(repoRoot, "fixture-world");
+  insertNode(db, "fixture-world", "WORLD_KERNEL.md", "old-hash");
+  db.close();
+
+  assert.deepEqual(resolveIndexStatus("fixture-world", repoRoot), {
+    kind: "stale",
+    driftedFiles: ["WORLD_KERNEL.md"],
+    remedy:
+      "Run `npm exec --prefix tools/story-explorer -- world-index sync fixture-world --quiet` to refresh indexed reads.",
   });
 });
 

@@ -10,6 +10,20 @@ import { touchedFilesInclude } from "./utils.js";
 const VALIDATOR = "page_plan_body_engine_vocabulary_cleanliness";
 const CURRENT_STATE_GROUNDING_LINE = /^\s*-\s*Current-state grounding records:\s*/i;
 const EXCLUDED_SECTION_NUMBERS = new Set(["2", "3", "15", "19"]);
+export const ENGINE_SECTION_NUMBERS = new Set([
+  "5",
+  "6",
+  "7",
+  "7a",
+  "8",
+  "9",
+  "9b",
+  "9c",
+  "10",
+  "10b",
+  "13",
+  "14"
+]);
 const SECTION_16A = "16a";
 
 interface Section {
@@ -72,7 +86,7 @@ function validatePlan(plan: PagePlanTarget): Verdict[] {
       },
       suggested_fix: section.number === SECTION_16A
         ? "Keep §16a current-state IDs only in the `Current-state grounding records:` field and translate schema or predicate vocabulary into renderer-facing prose elsewhere in the packet."
-        : "Move engine-readable IDs, schema fields, hashes, and predicate DSL terms into §15 frontmatter or translate them into renderer-facing prose."
+        : "Move engine-readable IDs into §15 frontmatter or one of the engine-output sections (§5/§6/§7/§7a/§8/§9/§9b/§9c/§10/§10b/§13/§14/§16a); translate schema-field literals or predicate DSL terms into renderer-facing prose for this prose-facing section."
     });
   }
   return verdicts;
@@ -101,10 +115,13 @@ function parseSections(content: string): Section[] {
 
 function scanSection(section: Section): Hit[] {
   const hits: Hit[] = [];
+  const isEngineSection = ENGINE_SECTION_NUMBERS.has(section.number);
   section.lines.forEach((line, offset) => {
     const lineNumber = section.startLine + offset;
     const isCurrentStateGrounding = section.number === SECTION_16A && CURRENT_STATE_GROUNDING_LINE.test(line);
-    if (section.number !== SECTION_16A && !isCurrentStateGrounding) {
+    const skipRecordIdScan = section.number === SECTION_16A || isEngineSection;
+    const skipSchemaFieldScan = isCurrentStateGrounding || isEngineSection;
+    if (!skipRecordIdScan && !isCurrentStateGrounding) {
       for (const match of line.matchAll(RECORD_ID_PATTERN)) {
         if (match[0]) {
           hits.push({ token: match[0], token_class: "record_id", line: lineNumber });
@@ -114,9 +131,11 @@ function scanSection(section: Section): Hit[] {
     if (isCurrentStateGrounding) {
       return;
     }
-    for (const token of SCHEMA_FIELD_NAME_LITERALS) {
-      if (line.includes(token)) {
-        hits.push({ token, token_class: "schema_field", line: lineNumber });
+    if (!skipSchemaFieldScan) {
+      for (const token of SCHEMA_FIELD_NAME_LITERALS) {
+        if (line.includes(token)) {
+          hits.push({ token, token_class: "schema_field", line: lineNumber });
+        }
       }
     }
     for (const token of PREDICATE_DSL_TERM_LITERALS) {

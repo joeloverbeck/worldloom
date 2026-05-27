@@ -1,10 +1,15 @@
 import type { FastifyInstance } from "fastify";
 
-import { getPageDetail } from "../../read/page-detail.js";
+import { PageDetailNotFoundError, getPageDetail } from "../../read/page-detail.js";
 import { getPageSummaries } from "../../read/story-list.js";
+import { invalidRouteParam, isValidPageId, isValidRouteSlug } from "./params.js";
 
 export interface PageRouteOptions {
   repoRoot: string;
+}
+
+export function pageDetailNotFoundMessage(error: unknown): string | null {
+  return error instanceof PageDetailNotFoundError ? error.message : null;
 }
 
 export async function registerPageRoutes(
@@ -31,6 +36,15 @@ export async function registerPageRoutes(
   server.get<{ Params: { slug: string; storySlug: string; pageId: string } }>(
     "/api/worlds/:slug/stories/:storySlug/pages/:pageId",
     async (request, reply) => {
+      if (!isValidRouteSlug(request.params.slug)) {
+        return reply.code(400).send(invalidRouteParam("slug", request.params.slug, "a lowercase world slug"));
+      }
+      if (!isValidRouteSlug(request.params.storySlug)) {
+        return reply.code(400).send(invalidRouteParam("storySlug", request.params.storySlug, "a lowercase story slug"));
+      }
+      if (!isValidPageId(request.params.pageId)) {
+        return reply.code(400).send(invalidRouteParam("pageId", request.params.pageId, "a page id like PG-12"));
+      }
       try {
         return await getPageDetail(
           request.params.slug,
@@ -39,8 +53,8 @@ export async function registerPageRoutes(
           options.repoRoot,
         );
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        if (message.includes("not found")) {
+        const message = pageDetailNotFoundMessage(error);
+        if (message !== null) {
           return reply.code(404).send({ error: "not_found", message });
         }
         throw error;

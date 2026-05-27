@@ -49,7 +49,7 @@ export function StickyRail({ pageDetail }: StickyRailProps): JSX.Element {
         </p>
       </section>
       <nav className="xray-summary-section" aria-labelledby="xray-rail-toc-title">
-        <h3 id="xray-rail-toc-title">Groups</h3>
+        <h3 id="xray-rail-toc-title">Jump to group</h3>
         <ul className="xray-summary-toc">
           {CURRENT_STATE_GROUPS.map((group) => (
             <li key={group}>

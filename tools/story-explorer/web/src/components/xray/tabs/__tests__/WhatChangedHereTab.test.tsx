@@ -66,7 +66,6 @@ function card(recordId: string, overrides: Partial<RecordCard> = {}): RecordCard
     recordClass: recordId.split('-')[0] ?? recordId,
     group: recordId.startsWith('SE-') ? 'Event Delta' : 'Pressure & Open Loops',
     summaryLine: `${recordId} summary`,
-    chips: [],
     links: [],
     rawAvailable: false,
     ...overrides,

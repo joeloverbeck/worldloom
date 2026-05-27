@@ -71,6 +71,20 @@ const STORY_RECORD_CLASSES = new Set([
 
 const RECORD_ID_PATTERN = /\b([A-Z]+-\d+)\b/g;
 
+export class PageDetailNotFoundError extends Error {
+  readonly pageId: string;
+  readonly worldSlug: string;
+  readonly storySlug: string;
+
+  constructor(worldSlug: string, storySlug: string, pageId: string) {
+    super(`Page ${pageId} not found in ${worldSlug}/${storySlug}`);
+    this.name = "PageDetailNotFoundError";
+    this.pageId = pageId;
+    this.worldSlug = worldSlug;
+    this.storySlug = storySlug;
+  }
+}
+
 function storyRecordClass(recordId: string): string {
   return recordId.split("-", 1)[0] ?? recordId;
 }
@@ -244,20 +258,28 @@ async function choiceNavigation(
 
   return Promise.all(
     choiceIds.map(async (choiceId) => {
-      const choice = (await readRecord(worldSlug, storySlug, choiceId, repoRoot)).parsed;
       const children = childrenByChoice.get(choiceId) ?? [];
       const variants = await Promise.all(
         children
           .sort((left, right) => numberValue(left.turn_index) - numberValue(right.turn_index) || pageId(left).localeCompare(pageId(right)))
           .map((child) => childVariant(worldSlug, storySlug, child, repoRoot))
       );
+      let choice: Record<string, unknown> | null = null;
+      try {
+        choice = (await readRecord(worldSlug, storySlug, choiceId, repoRoot)).parsed;
+      } catch (error) {
+        const candidate = error as NodeJS.ErrnoException;
+        if (candidate.code !== "ENOENT") {
+          throw error;
+        }
+      }
 
       return {
         choiceId,
-        surfaceLabel: stringValue(choice.surface_label) ?? choiceId,
-        playerVisibleIntent: stringValue(choice.player_visible_intent) ?? "",
-        pressure: stringList(choice.likely_state_pressure),
-        groundedInCount: recordIdArray(choice.grounded_in).length,
+        surfaceLabel: stringValue(choice?.surface_label) ?? choiceId,
+        playerVisibleIntent: stringValue(choice?.player_visible_intent) ?? "",
+        pressure: stringList(choice?.likely_state_pressure),
+        groundedInCount: recordIdArray(choice?.grounded_in).length,
         childOutcomeVariants: variants,
         isNavigable: variants.length > 0,
       };
@@ -380,15 +402,25 @@ async function rawSources(
   const uniqueIds = [...new Set(ids)].filter(Boolean);
   const sources = await Promise.all(
     uniqueIds.map(async (recordId) => {
-      const raw = await readRecord(worldSlug, storySlug, recordId, repoRoot);
-      return {
-        recordId,
-        sourcePath: raw.sourcePath,
-        contentHash: raw.contentHash,
-      };
+      try {
+        const raw = await readRecord(worldSlug, storySlug, recordId, repoRoot);
+        return {
+          recordId,
+          sourcePath: raw.sourcePath,
+          contentHash: raw.contentHash,
+        };
+      } catch (error) {
+        const candidate = error as NodeJS.ErrnoException;
+        if (candidate.code === "ENOENT") {
+          return null;
+        }
+        throw error;
+      }
     })
   );
-  return sources.sort((left, right) => left.recordId.localeCompare(right.recordId, undefined, { numeric: true }));
+  return sources
+    .filter((source): source is RawSourceReference => source !== null)
+    .sort((left, right) => left.recordId.localeCompare(right.recordId, undefined, { numeric: true }));
 }
 
 export async function getPageDetail(
@@ -400,7 +432,7 @@ export async function getPageDetail(
   const pages = (await listPageRecords(worldSlug, storySlug, repoRoot)).map((entry) => entry.parsed);
   const page = pages.find((candidate) => pageId(candidate) === targetPageId);
   if (page === undefined) {
-    throw new Error(`Page ${targetPageId} not found in ${worldSlug}/${storySlug}`);
+    throw new PageDetailNotFoundError(worldSlug, storySlug, targetPageId);
   }
 
   const base = storyDirectory(repoRoot, worldSlug, storySlug);

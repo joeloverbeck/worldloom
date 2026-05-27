@@ -11,6 +11,15 @@
   margin-block-start: var(--space-4);
 }
 
+.prose p {
+  text-indent: 1em;
+}
+
+.prose > *:first-child,
+.prose > :is(h1, h2, h3, h4, h5, h6) + p {
+  text-indent: 0;
+}
+
 .prose h1,
 .prose h2,
 .prose h3 {
