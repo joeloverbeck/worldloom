@@ -1,9 +1,9 @@
 # PPLAN-010: Repair red-bunny page-plan engine-vocabulary failures
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — direct story page-plan prose cleanup for `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-1.md` through `PG-5.md`, possible PG-6 warning cleanup, and any required plan-hash bridge restamp through the existing approved route.
+**Engine Changes**: Yes — direct story page-plan prose cleanup for `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-1.md` through `PG-6.md`, plus patch-engine-routed PG plan-hash/state-hash restamp for the six changed pages.
 **Deps**: `archive/tickets/PPENGVOC-001-per-section-policy-engine-vocabulary-cleanliness.md`, `archive/tickets/EROTICA-003-repair-red-bunny-soft-alias-workaround.md`
 
 ## Problem
@@ -99,3 +99,18 @@ After every page-plan edit, recompute the affected plan hash and use the live ap
 
 1. `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json`
 2. `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-<N>.md --pg worlds/erotica-world/stories/red-bunny/_source/pages/PG-<N>.yaml` for each changed page.
+
+## Outcome
+
+Completed: 2026-05-27
+
+Implemented. Cleaned the renderer-facing page-plan prose in `PG-1.md` through `PG-6.md` so the live `page_plan_body_engine_vocabulary_cleanliness` structural validator no longer reports failures or warnings for the red-bunny bundle. The PG-6 warning was repaired rather than classified as accepted residue.
+
+The page-plan edits changed plan bytes, so `PG-1.yaml` through `PG-6.yaml` were restamped through the patch-engine route with plan `PPLAN-010-red-bunny-page-plan-hash-restamp`; no direct `_source/pages/*.yaml` edits were made. Post-restamp verification reports `plan_hash_match: true` and `state_hash_match: true` for all six changed pages.
+
+Verification:
+
+1. `node tools/validators/dist/src/cli/world-validate.js erotica-world --story red-bunny --structural --json` -> `fail_count: 0`, `warn_count: 0`, `info_count: 3`; `page_plan_body_engine_vocabulary_cleanliness: 0`.
+2. `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --world-root /home/joeloverbeck/projects/worldloom /tmp/pplan-010-restamp-plan.json` -> `status: pass`, `116` validators run.
+3. `node tools/world-mcp/dist/src/cli/submit-patch-plan.js --world-root /home/joeloverbeck/projects/worldloom /tmp/pplan-010-restamp-plan.json /tmp/pplan-010-restamp-token.txt` -> wrote 6 files, pre-apply validators passed.
+4. `verifyPgStateHash` for `PG-1` through `PG-6` -> all `plan_hash_match: true` and `state_hash_match: true`.
