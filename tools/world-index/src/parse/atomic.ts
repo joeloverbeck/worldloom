@@ -5,7 +5,7 @@ import type { Root } from "mdast";
 import {
   PREDICATE_REFERENCED_CLASSES,
   predicateRecordClassForRecordId
-} from "@worldloom/validators/predicate-dsl-grammar";
+} from "../public/predicate-dsl-projection.js";
 
 import type { ParsedFileResult } from "../commands/shared.js";
 import { contentHashForProse, contentHashForYaml, anchorChecksum } from "./canonical.js";

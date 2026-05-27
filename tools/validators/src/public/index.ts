@@ -36,14 +36,6 @@ export {
   type VerbatimSectionNumber as PagePlanVerbatimSectionNumber
 } from "../structural/page-plan-verbatim-canonical-sources.js";
 
-export {
-  PREDICATE_RECORD_PREFIX_TO_CLASS,
-  PREDICATE_REFERENCED_CLASSES,
-  predicateRecordClassForRecordId,
-  type PredicateName,
-  type PredicateReferencedClass
-} from "../rules/_shared/predicate-dsl-grammar.js";
-
 export async function validatePatchPlan(
   envelope: PatchPlanEnvelope,
   opts: {

@@ -12,11 +12,6 @@
       "require": "./dist/src/public/index.js",
       "import": "./dist/src/public/index.js"
     },
-    "./predicate-dsl-grammar": {
-      "types": "./dist/src/rules/_shared/predicate-dsl-grammar.d.ts",
-      "require": "./dist/src/rules/_shared/predicate-dsl-grammar.js",
-      "import": "./dist/src/rules/_shared/predicate-dsl-grammar.js"
-    },
     "./public/types": {
       "types": "./dist/src/public/types.d.ts",
       "require": "./dist/src/public/types.js",

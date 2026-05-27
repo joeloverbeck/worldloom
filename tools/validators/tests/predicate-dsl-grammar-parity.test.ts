@@ -5,13 +5,15 @@ import test from "node:test";
 
 import Ajv2020Module from "ajv/dist/2020.js";
 import type { ErrorObject, ValidateFunction } from "ajv";
-
 import {
-  PRED_TYPES,
-  PREDICATE_ARG_SCHEMAS,
   PREDICATE_RECORD_PREFIX_TO_CLASS,
   PREDICATE_REFERENCED_CLASSES,
   predicateRecordClassForRecordId
+} from "@worldloom/world-index/public/predicate-dsl-projection";
+
+import {
+  PRED_TYPES,
+  PREDICATE_ARG_SCHEMAS
 } from "../src/rules/_shared/predicate-dsl-grammar.js";
 import {
   STORY_ROLES,

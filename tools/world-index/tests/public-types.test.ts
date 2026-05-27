@@ -16,6 +16,11 @@ import {
   CANONICAL_DOMAINS,
   VERDICT_ENUM
 } from "../src/public/canonical-vocabularies.js";
+import {
+  PREDICATE_RECORD_PREFIX_TO_CLASS,
+  PREDICATE_REFERENCED_CLASSES,
+  predicateRecordClassForRecordId
+} from "../src/public/predicate-dsl-projection.js";
 import type {
   AttributionEdgeType,
   CanonContradictionRisk,
@@ -118,6 +123,7 @@ test("package self-import resolves without import-time IO", () => {
   try {
     const publicTypes = require("@worldloom/world-index/public/types");
     const canonicalVocabularies = require("@worldloom/world-index/public/canonical-vocabularies");
+    const predicateDslProjection = require("@worldloom/world-index/public/predicate-dsl-projection");
     assert.equal(publicTypes.ATOMIC_LOGICAL_WORLD_FILES, ATOMIC_LOGICAL_WORLD_FILES);
     assert.equal(publicTypes.CURRENT_INDEX_VERSION, CURRENT_INDEX_VERSION);
     assert.equal(publicTypes.NODE_TYPES, NODE_TYPES);
@@ -128,6 +134,9 @@ test("package self-import resolves without import-time IO", () => {
     assert.equal(publicTypes.SCOPED_EDGE_TYPES, SCOPED_EDGE_TYPES);
     assert.equal(canonicalVocabularies.CANONICAL_DOMAINS, CANONICAL_DOMAINS);
     assert.equal(canonicalVocabularies.VERDICT_ENUM, VERDICT_ENUM);
+    assert.equal(predicateDslProjection.PREDICATE_RECORD_PREFIX_TO_CLASS, PREDICATE_RECORD_PREFIX_TO_CLASS);
+    assert.equal(predicateDslProjection.PREDICATE_REFERENCED_CLASSES, PREDICATE_REFERENCED_CLASSES);
+    assert.equal(predicateDslProjection.predicateRecordClassForRecordId, predicateRecordClassForRecordId);
   } finally {
     fs.statSync = originalStatSync;
   }

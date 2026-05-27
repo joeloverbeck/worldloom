@@ -47,6 +47,8 @@ For prior art only, see `archive/specs/SPEC-01-world-index.md` §Deliverables §
 
 `@worldloom/world-index/public/canonical-vocabularies` is the shared canonical vocabulary surface for validator and MCP consumers. It exports `CANONICAL_DOMAINS`, `VERDICT_ENUM`, `MYSTERY_STATUS_ENUM`, `MYSTERY_RESOLUTION_SAFETY_ENUM`, `INVARIANT_CATEGORY_VALUES`, `ENTITY_KIND_VALUES`, `SEC_FILE_CLASS_VALUES`, `CHANGE_TYPE_VALUES`, `REVISION_DIFFICULTY_VALUES`, and the `CF_TYPE_*` values and coupling sets. It also exports small pure helpers for canonical-domain checks and mystery-resolution-safety coupling. It does not expose a query library or broader programmatic read surface.
 
+`@worldloom/world-index/public/predicate-dsl-projection` is the shared storylet predicate projection surface for indexer, validator, and MCP consumers. It exports the closed predicate-name to `storylet_predicate_class` node-type mapping plus the record-id-prefix helper used to derive exact-id predicate classes. It does not export predicate argument schemas or validator rules.
+
 ## Output location per world
 
 `worlds/<slug>/_index/world.db` (gitignored; regenerable from root-level primary-authored markdown, `_source/*.yaml` atomic records, and story-bundle records under `stories/<story-slug>/_source/**/*.yaml`).
