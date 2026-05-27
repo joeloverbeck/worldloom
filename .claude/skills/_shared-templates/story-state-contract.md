@@ -503,6 +503,8 @@ The body can mention the selected event, route, rationale, player-visible outcom
 
 The `SE.turn_resolution` event's `world_logic_rationale` is the carrier for driver justification; §7a's `Driver kind:` and `Driver records:` lines together with `world_logic_rationale` form the complete driver provenance. Do not add a separate `why_now` field.
 
+For non-player turns, prefer `STINT` in `Driver records` when the actor's active intention fires the act, and prefer `BEL` when the actor's knowing grounds the act. `BEL` may strengthen provenance, but an `npc_action` still needs at least one pressure or stable-authority driver record such as `STPLAN`, `STEMO`, `CLK`, `THR`, `STCHAR`, or `STINT`.
+
 Active-pressure disposition appears in §7a whenever the parent `PG.state_snapshot` has high-urgency active records. Every high-urgency active record on the parent snapshot appears in exactly one row:
 
 | Record | Disposition | Reason / expiry |

@@ -157,7 +157,7 @@ function validateKindConstraints(
     }));
   }
 
-  if (kind === "npc_action" && (!isStent(initiator) || !hasAnyClass(driverRecords, ["STPLAN", "STEMO", "CLK", "THR", "STCHAR"]))) {
+  if (kind === "npc_action" && (!isStent(initiator) || !hasAnyClass(driverRecords, ["STPLAN", "STEMO", "CLK", "THR", "STCHAR", "STINT"]))) {
     verdicts.push(initiatorPatternVerdict(event, kind, initiator, driverRecords));
   }
   if (kind === "offstage_action") {

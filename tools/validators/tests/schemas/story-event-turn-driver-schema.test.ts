@@ -119,6 +119,41 @@ test("story-event schema accepts representative turn-driver kinds", () => {
   }
 });
 
+test("story-event schema accepts STINT and BEL driver records while preserving npc_action pressure root", () => {
+  const validate = compileSchema();
+
+  assert.equal(validate(validEvent({
+    turn_driver: {
+      kind: "npc_action",
+      initiator: "STENT-2",
+      driver_records: ["STINT-10", "BEL-16"],
+      player_response_mode: "responds",
+      pov_visibility: "perceived_directly"
+    }
+  })), true, JSON.stringify(validate.errors, null, 2));
+
+  assert.equal(validate(validEvent({
+    turn_driver: {
+      kind: "npc_action",
+      initiator: "STENT-2",
+      driver_records: ["STINT-10", "STEMO-15", "STQ-5", "THR-7", "BEL-16", "STCHAR-1"],
+      player_response_mode: "responds",
+      pov_visibility: "perceived_directly"
+    }
+  })), true, JSON.stringify(validate.errors, null, 2));
+
+  assert.equal(validate(validEvent({
+    turn_driver: {
+      kind: "npc_action",
+      initiator: "STENT-2",
+      driver_records: ["BEL-16"],
+      player_response_mode: "responds",
+      pov_visibility: "perceived_directly"
+    }
+  })), false);
+  assert.ok(validate.errors?.some((error) => error.keyword === "contains" && error.instancePath === "/turn_driver/driver_records"));
+});
+
 test("story-event schema rejects retired selected choice event kinds", () => {
   const validate = compileSchema();
 

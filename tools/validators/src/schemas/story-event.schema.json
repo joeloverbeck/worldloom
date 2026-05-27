@@ -108,7 +108,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(STPLAN|STEMO|CLK|THR|STSEC|STQ|OBL|CNSQ|SREL|STCHAR)-[0-9]+$"
+            "pattern": "^(STPLAN|STEMO|CLK|THR|STSEC|STQ|OBL|CNSQ|SREL|STCHAR|STINT|BEL)-[0-9]+$"
           }
         },
         "player_response_mode": {
@@ -162,7 +162,7 @@
                 "minItems": 1,
                 "contains": {
                   "type": "string",
-                  "pattern": "^(STPLAN|STEMO|CLK|THR|STCHAR)-[0-9]+$"
+                  "pattern": "^(STPLAN|STEMO|CLK|THR|STCHAR|STINT)-[0-9]+$"
                 }
               }
             }
