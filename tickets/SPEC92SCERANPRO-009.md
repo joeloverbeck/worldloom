@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new skill `.claude/skills/branching-story-scene-prose-attach/`; no impact on existing skills (additive).
-**Deps**: SPEC92SCERANPRO-004, SPEC92SCERANPRO-007
+**Deps**: archive/tickets/SPEC92SCERANPRO-004.md, SPEC92SCERANPRO-007
 
 ## Problem
 

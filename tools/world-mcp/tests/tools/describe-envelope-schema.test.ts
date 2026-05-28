@@ -155,6 +155,32 @@ test("describeEnvelopeSchema exposes STPLAN and STEMO wrapper schemas", async ()
   );
 });
 
+test("describeEnvelopeSchema exposes SCN create and supersede wrapper schemas", async () => {
+  const createManifest = await describeEnvelopeSchema({ op_kind: "create_scn_record" });
+  const supersedeManifest = await describeEnvelopeSchema({ op_kind: "supersede_scn_record" });
+
+  assert.equal(createManifest.delivery_status, "inline");
+  assert.equal(supersedeManifest.delivery_status, "inline");
+
+  for (const [kind, manifest] of [
+    ["create_scn_record", createManifest],
+    ["supersede_scn_record", supersedeManifest]
+  ] as const) {
+    const properties = manifest.op_schemas[kind]!.properties as Record<string, unknown>;
+    const payload = properties.payload as {
+      required?: string[];
+      properties?: { story_slug?: { pattern?: string }; record?: { $ref?: string } };
+    };
+    assert.deepEqual(payload.required, ["story_slug", "record"]);
+    assert.equal(payload.properties?.story_slug?.pattern, "^[a-z0-9-]+$");
+    assert.equal(payload.properties?.record?.$ref, "https://worldloom.local/schemas/story-scene.schema.json");
+    assert.equal(
+      manifest.referenced_schemas["https://worldloom.local/schemas/story-scene.schema.json"]?.$id,
+      "https://worldloom.local/schemas/story-scene.schema.json"
+    );
+  }
+});
+
 test("describeEnvelopeSchema filters to one op kind and exposes CF payload schema", async () => {
   const manifest = await describeEnvelopeSchema({ op_kind: "create_cf_record" });
 

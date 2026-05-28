@@ -112,6 +112,7 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   story_question_record: "story-question.schema.json",
   story_plan_record: "story-plan.schema.json",
   story_emotion_record: "story-emotion.schema.json",
+  story_scene_record: "story-scene.schema.json",
   story_character_authority_record: "story-character-authority.schema.json",
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 } as const;
@@ -499,6 +500,9 @@ function operationSchema(kind: OperationKind): JsonObject {
       return baseOperationProperties(kind, storyPayloadWithRecord("story_plan_record"));
     case "create_stemo_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_emotion_record"));
+    case "create_scn_record":
+    case "supersede_scn_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_scene_record"));
     case "append_story_character_authority_record":
     case "supersede_story_character_authority_record":
       return baseOperationProperties(kind, storyHybridPayloadWithRecord("story_character_authority_record"));

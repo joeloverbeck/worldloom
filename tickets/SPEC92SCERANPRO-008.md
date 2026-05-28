@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — new skill `.claude/skills/branching-story-scene-plan/`; no impact on existing skills (additive; the page-plan pipeline coexists).
-**Deps**: archive/tickets/SPEC92SCERANPRO-003.md, SPEC92SCERANPRO-004, SPEC92SCERANPRO-005, SPEC92SCERANPRO-006
+**Deps**: archive/tickets/SPEC92SCERANPRO-003.md, archive/tickets/SPEC92SCERANPRO-004.md, SPEC92SCERANPRO-005, SPEC92SCERANPRO-006
 
 ## Problem
 

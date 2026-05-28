@@ -356,6 +356,37 @@ function seedServerWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: "opening-bells:SCN-1",
+        world_slug: "seeded",
+        story_slug: "opening-bells",
+        file_path: "stories/opening-bells/_source/scenes/SCN-1.yaml",
+        heading_path: "SCN-1",
+        node_type: "scene_record",
+        body: [
+          "id: SCN-1",
+          "story_id: STORY-0003",
+          "branch_id: BR-1",
+          "supersedes: null",
+          "status: planned",
+          "pg_ids:",
+          "  - PG-3",
+          "start_page_id: PG-3",
+          "end_page_id: PG-3",
+          "previous_scene_id: null",
+          "choice_surface_page_id: PG-3",
+          "emitted_choice_ids:",
+          "  - CHC-1",
+          "title: Opening Bell Scene",
+          "slug: opening-bell-scene",
+          "scene_descriptor: The warning bell rings at the lighthouse.",
+          "boundary_rationale: One location and one continuous exchange.",
+          "prose_plan_path: scene-prose-plans/SCN-1.md",
+          "prose_path: scene-prose/SCN-1.md",
+          "receipt_path: scene-prose-receipts/SCN-1.yaml",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: "opening-bells:PG-3",
         world_slug: "seeded",
         story_slug: "opening-bells",
@@ -946,6 +977,33 @@ test("list_records accepts belief_record through the MCP boundary", async () => 
   });
 });
 
+test("list_records accepts scene_record through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.list_records,
+      arguments: {
+        world_slug: "seeded",
+        story_slug: "opening-bells",
+        record_type: "scene_record",
+        fields: ["id", "title", "choice_surface_page_id"]
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      total?: number;
+      records?: Array<{ record_id?: string; id?: string; title?: string; choice_surface_page_id?: string }>;
+    };
+    assert.equal(structured.total, 1);
+    assert.deepEqual(structured.records?.[0], {
+      record_id: "SCN-1",
+      id: "SCN-1",
+      title: "Opening Bell Scene",
+      choice_surface_page_id: "PG-3"
+    });
+  });
+});
+
 test("list_records filters through the MCP validation and dispatch boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({
@@ -1065,6 +1123,19 @@ test("BEL id_class dispatches through the MCP boundary", async () => {
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
     assert.equal(structured.next_id, "BEL-2");
+  });
+});
+
+test("SCN id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "SCN", story_slug: "opening-bells" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "SCN-2");
   });
 });
 

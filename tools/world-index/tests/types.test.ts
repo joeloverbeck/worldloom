@@ -25,7 +25,7 @@ test("node and edge type registries match the spec counts and contain no duplica
   const nodeTypes: readonly NodeType[] = NODE_TYPES;
   const edgeTypes: readonly EdgeType[] = EDGE_TYPES;
 
-  assert.equal(nodeTypes.length, 54);
+  assert.equal(nodeTypes.length, 55);
   assert.equal(new Set(nodeTypes).size, nodeTypes.length);
   assert.ok(nodeTypes.includes("pressure_event_card"));
   assert.ok(nodeTypes.includes("pressure_event_sidecar_proposal"));
@@ -37,6 +37,7 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.ok(nodeTypes.includes("story_question_record"));
   assert.ok(nodeTypes.includes("story_plan_record"));
   assert.ok(nodeTypes.includes("story_emotion_record"));
+  assert.ok(nodeTypes.includes("scene_record"));
   assert.ok(nodeTypes.includes("story_character_authority_record"));
 
   assert.equal(YAML_EDGE_TYPES.length, 10);

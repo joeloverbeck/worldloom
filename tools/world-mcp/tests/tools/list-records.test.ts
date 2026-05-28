@@ -329,6 +329,36 @@ function buildSeededRecordWorld(root: string): void {
         file_path: "character-proposals/batches/NCB-0001.md",
         node_type: "character_proposal_batch",
         body: NCB_FILE_BODY
+      },
+      {
+        node_id: "opening-bells:SCN-1",
+        world_slug: "seeded",
+        story_slug: "opening-bells",
+        file_path: "stories/opening-bells/_source/scenes/SCN-1.yaml",
+        node_type: "scene_record",
+        body: [
+          "id: SCN-1",
+          "story_id: STORY-1",
+          "branch_id: BR-1",
+          "supersedes: null",
+          "status: planned",
+          "pg_ids:",
+          "  - PG-1",
+          "start_page_id: PG-1",
+          "end_page_id: PG-1",
+          "previous_scene_id: null",
+          "choice_surface_page_id: PG-1",
+          "emitted_choice_ids:",
+          "  - CHC-1",
+          "title: Opening Bells",
+          "slug: opening-bells",
+          "scene_descriptor: The first bell rings at the harbor.",
+          "boundary_rationale: One location and one continuous exchange.",
+          "prose_plan_path: scene-prose-plans/SCN-1.md",
+          "prose_path: scene-prose/SCN-1.md",
+          "receipt_path: scene-prose-receipts/SCN-1.yaml",
+          ""
+        ].join("\n")
       }
     ]
   });
@@ -692,6 +722,34 @@ test("listRecords include_full_body covers every supported atomic record type", 
       assert.equal(typeof record.content_hash, "string");
       assert.equal(typeof record.file_path, "string");
     }
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords returns indexed SCN story records", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        story_slug: "opening-bells",
+        record_type: "scene_record",
+        fields: ["title", "pg_ids", "choice_surface_page_id"]
+      })
+    );
+
+    assert.ok("records" in result);
+    assert.equal(result.total, 1);
+    assert.deepEqual(result.records[0], {
+      record_id: "SCN-1",
+      title: "Opening Bells",
+      pg_ids: ["PG-1"],
+      choice_surface_page_id: "PG-1"
+    });
   } finally {
     destroyTempRepoRoot(root);
   }

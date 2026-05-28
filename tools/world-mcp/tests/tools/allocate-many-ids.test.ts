@@ -118,6 +118,7 @@ test("allocateManyIds supports bootstrap-shaped multi-class story allocation", a
       "STQ",
       "STPLAN",
       "STEMO",
+      "SCN",
       "BR",
       "SE",
       "PG",

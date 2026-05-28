@@ -50,6 +50,7 @@ export const NODE_TYPES = [
   "story_question_record",
   "story_plan_record",
   "story_emotion_record",
+  "scene_record",
   "story_character_authority_record",
   "story_diegetic_artifact_record",
   "audit_record_story",
