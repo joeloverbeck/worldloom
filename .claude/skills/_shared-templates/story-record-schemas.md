@@ -1,6 +1,6 @@
 # Story Record Schemas
 
-This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 21 story-bundle record classes plus the prose-receipt direct-write artifact. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the nine hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
+This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 22 story-bundle record classes plus the prose-receipt and scene-prose-receipt direct-write artifacts. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the nine hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
 
 Subsection numbering matches the original `§4.X` form (e.g. `§4.6 prose receipt`, `§4.2 PG`, `§4.4 SLT`) so cross-references in skill prose, validator source, and other shared templates continue to resolve verbatim. The split is purely structural — §4 is overwhelmingly the bulk of the contract, and the bundled file exceeded the per-call read limit of bulk-loading tools at HEAD.
 
@@ -10,7 +10,7 @@ Authority and supersession discipline live in the main contract's §1; schema-mi
 
 ## 4. Record Schemas
 
-Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 21 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 17 additional classes, and §4.6 covers the prose receipt direct-write artifact.
+Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 22 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 18 additional classes, §4.6 covers the prose receipt direct-write artifact, and §4.7 covers the scene-prose receipt direct-write artifact.
 
 ### 4.1 `BEL` (13 fields)
 
@@ -924,6 +924,30 @@ Stable source material that can lawfully shape future voice, conduct, appraisal,
 
 Normal story runtime consumes active `STCHAR` through `STENT.bound_stchar_id`, `PG.state_snapshot.active_records.STCHAR`, and grounded or derived story records. `source_char_id` is provenance only; it is not an operational shortcut for `STENT`, `CHC`, page plans, or prose receipts.
 
+#### 4.5.20 `SCN` (scene render-unit membership)
+
+```yaml
+id: SCN-<integer>*                         # consumed by index node identity, retrieval, and receipt linkage
+story_id: STORY-<integer>*                 # consumed by story-bundle scoping and retrieval
+branch_id: BR-<integer>*                   # consumed by scene-range single-branch validation and index edges
+status: planned | rendered | attached*     # publication status only; consumed by scene workflow and INDEX rendering
+pg_ids: [PG-<integer>]*                    # ordered contiguous range; consumed by range validators, receipt range-walks, and SCN->PG edges
+start_page_id: PG-<integer>*               # equals pg_ids[0]; consumed by structural validators and human review
+end_page_id: PG-<integer>*                 # equals pg_ids[-1]; consumed by choice-surface validation
+previous_scene_id: SCN-<integer> | null    # consumed by previous-scene index edges and continuity lookup
+choice_surface_page_id: PG-<integer>*      # normally end_page_id; consumed by final playable choice-surface validation
+emitted_choice_ids: [CHC-<integer>]*       # consumed by SCN->CHC edges and scene-end choice validation
+title: string*                             # consumed by scene-plan and human navigation
+slug: string*                              # consumed by deterministic artifact naming / navigation
+scene_descriptor: string                   # factual depiction label; consumed by no-narrative-shape review
+boundary_rationale: string                 # consumed by boundary review and no-narrative-shape review
+prose_plan_path: scene-prose-plans/SCN-<integer>.md*
+prose_path: scene-prose/SCN-<integer>.md*
+receipt_path: scene-prose-receipts/SCN-<integer>.yaml*
+```
+
+`SCN` is a render-unit membership record over committed `PG` records, not a causal-state record and not a narrative-shape record. Its fields are load-bearing for index membership/edges, scene-range validation, scene-plan generation, scene-prose attach, or human navigation. It must not carry a render-kind field, a source-PG fingerprint field, act/arc position, target narrative shape, future dramatic obligation, or prose byte hashes. Range/status changes use the patch engine's append-only supersession path; scene-plan and scene-prose markdown remain direct-write publication artifacts with no state consequence.
+
 ### 4.6 Prose receipt
 
 Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record). The canonical schema below is mirrored by the structural validator `prose_receipt_schema_compliance`, which validates receipt YAML in full-world runs and receipt-file incremental runs.
@@ -985,3 +1009,34 @@ node tools/validators/dist/src/cli/world-validate.js <world_slug> --structural -
 ```
 
 A failed receipt blocks publication only if the attaching skill ran with `strict=true`. **A receipt never mutates `PG` state.**
+
+### 4.7 Scene prose receipt
+
+Stored at `scene-prose-receipts/SCN-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record). The canonical schema below is mirrored by `scene_prose_receipt_schema_compliance`; receipt checks walk every `PG` included by the referenced `SCN`.
+
+```yaml
+scene_id: SCN-<integer>*
+story_id: STORY-<integer>*
+branch_id: BR-<integer>*
+plan_path: scene-prose-plans/SCN-<integer>.md*
+prose_path: scene-prose/SCN-<integer>.md*
+checked_at: iso8601*
+strict: true | false*
+verdict: PASS | WARN | FAIL*
+included_pages:
+  - page_id: PG-<integer>*
+    state_hash_at_attach: sha256*
+checks:
+  included_pg_events_rendered: PASS | WARN | FAIL
+  final_scene_choice_surface_visibility: PASS | WARN | FAIL
+  scene_range_entity_status_consistency: PASS | WARN | FAIL
+  scene_range_invented_structural_fact: PASS | WARN | FAIL
+  scene_range_forbidden_mystery_resolution: PASS | FAIL
+  scene_prose_stchar_fidelity: PASS | WARN | FAIL
+  engine_jargon_leak: PASS | WARN | FAIL
+  canon_claim_without_authority: PASS | FAIL
+notes: [<string>]
+repair_recommendation: none | revise_scene_prose | revise_scene_plan | run_turn_cycle_repair | run_story_fact_promotion_to_canon
+```
+
+`included_pages[].state_hash_at_attach` is advisory freshness evidence only. Drift between a receipt and later PG state means the receipt may be stale relative to the current scene range; it never invalidates story state and never mutates `PG`, `SCN`, or any other `_source` record. `included_pg_events_rendered`, `scene_range_entity_status_consistency`, `scene_range_invented_structural_fact`, and `scene_range_forbidden_mystery_resolution` inspect the full `SCN.pg_ids` range, not only the end page. `final_scene_choice_surface_visibility` compares the rendered ending choice surface to `SCN.choice_surface_page_id` and `SCN.emitted_choice_ids`.

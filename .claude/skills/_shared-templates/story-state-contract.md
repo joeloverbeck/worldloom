@@ -10,9 +10,11 @@ Three layers, in strict precedence:
 
 1. **World canon** — authoritative world-level truth, stored as atomic YAML under `worlds/<slug>/_source/` (CF / CH / INV / M / OQ / ENT / SEC records per FOUNDATIONS §Mandatory World Files). Story skills may read it. They never mutate it directly. The only lawful story-to-world canon mutation path is `story-fact-promotion-to-canon` → `canon-addition` → optional `story-promotion-closeout`.
 2. **Story state** — authoritative branch-local narrative state inside a story bundle at `worlds/<slug>/stories/<story-slug>/_source/`. Written through story-bundle record-ops on the patch engine.
-3. **Rendered prose** — authorial surface text at `pages-prose/PG-<integer>.md`. It can reveal, dramatize, omit, or stylize story state, but **it does not create story state by itself**. Prose is a rendering of state, not a second state engine.
+3. **Rendered prose** — authorial surface text at `pages-prose/PG-<integer>.md` or `scene-prose/SCN-<integer>.md`. It can reveal, dramatize, omit, or stylize story state, but **it does not create story state by itself**. Prose is a rendering of state, not a second state engine.
 
 **Plan-authority boundary.** Story state is authoritative at page-plan commit. A `PG` record is real the moment the patch engine accepts the page-cycle plan. Rendered prose is supplied externally (manual or LLM) and attached later via a prose receipt. The page snapshot is the fork primitive — any committed page is a valid parent for the next turn-cycle invocation, regardless of whether its prose has been rendered.
+
+**Scene render layer.** An `SCN` record is a derived render-unit membership record over committed `PG` ranges. It records which already-committed causal ticks form one reader-facing scene and where the scene-plan/prose/receipt artifacts live; it never creates causal state, never changes a `PG`, and never carries future dramatic obligation or target narrative shape.
 
 ## 2. Schema-Minimalism Doctrine
 
@@ -62,6 +64,7 @@ Auxiliary story-bundle records:
 | `SAU` | Story-bundle health audit. |
 | `SP` | Story-promotion record. |
 | `RSP` | Remediation-storylet proposal card scoped under an audit. |
+| `SCN` | Scene render-unit membership over an ordered contiguous range of committed `PG` records. |
 
 `SF` records what *is* true in the branch. `BEL` records what a holder *believes / claims / witnesses / lies about*. `STCHAR` records stable story-local persona authority, not knowledge. These classes are kept separate so that lies, secrets, betrayals, witness asymmetry, contested public claims, and character voice remain coherent without inventing plot rails.
 
@@ -69,7 +72,7 @@ Auxiliary story-bundle records:
 
 ## 4. Record Schemas
 
-The full record-schema enumeration for all 21 story-bundle record classes plus the prose-receipt direct-write artifact lives in a sibling shared template at `.claude/skills/_shared-templates/story-record-schemas.md`. That file preserves §4.X subsection numbering verbatim (so existing citations to §4.1 `BEL`, §4.2 `PG`, §4.2a deterministic PG hash computation, §4.3 `SE`, §4.3a audit-only SE events, §4.4 `SLT`, §4.4a shared `action_family` taxonomy, §4.4b `STENT` role and `SREL` axis taxonomies, §4.5.1 through §4.5.13, and §4.6 prose receipt all resolve without rewording in consumer skills, validators, and other shared templates). SPEC-42 adds `CLK` as §4.5.14, `STSEC` as §4.5.15, and `STQ` as §4.5.16 in the schema file without renumbering the existing prose-receipt §4.6 section; SPEC-56 adds `STCHAR` as §4.5.19.
+The full record-schema enumeration for all 22 story-bundle record classes plus the prose-receipt and scene-prose-receipt direct-write artifacts lives in a sibling shared template at `.claude/skills/_shared-templates/story-record-schemas.md`. That file preserves §4.X subsection numbering verbatim (so existing citations to §4.1 `BEL`, §4.2 `PG`, §4.2a deterministic PG hash computation, §4.3 `SE`, §4.3a audit-only SE events, §4.4 `SLT`, §4.4a shared `action_family` taxonomy, §4.4b `STENT` role and `SREL` axis taxonomies, §4.5.1 through §4.5.13, and §4.6 prose receipt all resolve without rewording in consumer skills, validators, and other shared templates). SPEC-42 adds `CLK` as §4.5.14, `STSEC` as §4.5.15, and `STQ` as §4.5.16 in the schema file without renumbering the existing prose-receipt §4.6 section; SPEC-56 adds `STCHAR` as §4.5.19; SPEC-92 adds `SCN` as §4.5.20 and the scene-prose receipt as §4.7.
 
 Consumers that need only the authority model (§1), schema-minimalism doctrine (§2), record class inventory (§3), closed predicate DSL (§5), action routing (§6), nine shared hard gates (§7), page-plan minimum contract (§8), branching procedure (§9), shared write order (§10), mystery and canon authority (§11), or skill-usage overview (§12) can read this main contract alone; consumers that need any record schema additionally load `story-record-schemas.md`.
 
@@ -665,6 +668,35 @@ The prior-page / prior-event prose-substitution discipline applies to **every** 
 For non-accept routes, §7 must include `SE.resolution.player_visible_feedback` so the prose renderer has the player-legible outcome receipt it must realize. For `accept`, §7 carries the selected event, route, rationale, and state delta without a `resolution` block.
 
 The plan must not include word-count targets, floors, ceilings, ranges, or budgets. Pacing is expressed structurally through beats and stop conditions. See FOUNDATIONS §Story Bundles §9.
+
+## 8a. Scene-Plan Minimum Contract
+
+Scene plans live at `scene-prose-plans/SCN-<integer>.md` and render one contiguous single-branch `SCN.pg_ids` range. They are direct-write publication-planning artifacts derived from committed `PG` records via retrieval, not from sibling prose plans. The `SCN` record remains the only engine-routed membership/status artifact; the scene plan itself has no state consequence.
+
+Scene-plan bodies are novelist-facing. They must be zero-ID, zero-hash, zero-schema, zero-validator, and zero-lifecycle in prose-facing sections: no record ids, hash strings, patch-engine terms, supersession mechanics, validator names, or state-delta arrays as body shorthand. The scene plan translates committed `PG` events, visible state, forbidden resolutions, character authority, and choice surface into prose direction. Engine fields may appear only in clearly separated frontmatter or validation metadata when a later validator requires that metadata.
+
+Minimum structure:
+
+| Section | Source / role |
+|---|---|
+| `# Scene: <Title>` | `SCN.title` / human navigation |
+| Content Policy | inlined verbatim from `docs/prose-renderer-contract/content-policy.md` |
+| Prose Craft Contract | inlined verbatim from `docs/prose-renderer-contract/prose-craft-contract.md` |
+| Render Mission | natural-language opening state to stopping point |
+| What Changes in This Scene | emotional, relational, practical, and causal turn across the included PGs |
+| Where the Scene Begins / Must End | concrete opening image, cast positions, final dramatic condition, and reader-facing choice surface |
+| Beat Chain | required moves from the included committed PGs, translated out of record language |
+| POV / Observer Firewall | what the POV may know, infer, misread, or not know |
+| Cast & Voice | STCHAR-derived scene-local voice and conduct constraints, translated without STCHAR ids in the body |
+| Emotional / Relationship Throughline | active relationship, belief, plan, and affect movement across the range |
+| Physical Continuity | location, bodies, objects, and continuity facts that must hold through the range |
+| Secrets & Forbidden Reveals | included PG forbidden resolutions and observer-firewall limits |
+| Choice Surface | end-page playable choices only; intermediate choices are historical/x-ray |
+| Render-Time Instruction | inlined verbatim from `docs/prose-renderer-contract/render-time-instruction.md` |
+
+**§2, §3, and Render-Time Instruction are inlined verbatim once per scene plan.** This preserves the cold-context renderer contract at scene granularity. Byte-equality is enforced by `scene_plan_verbatim_section_integrity`; body cleanliness is enforced by `scene_plan_body_engine_vocabulary_cleanliness`.
+
+Scene-scope validation is additive to the nine page-plan hard gates. `scene_range_contiguity`, `scene_range_single_branch`, and `scene_range_no_sibling` prove the `SCN` range is ordered, contiguous, and branch-local. `scn_no_narrative_shape_language` plus the scene-plan skill's §5c affirmation keep `scene_descriptor`, `boundary_rationale`, and plan body prose descriptive of committed beats rather than future-prescriptive act/arc shape. Scene attach is downstream and non-authoritative like prose attach: it validates rendered prose and writes a receipt, but it is not a tenth page-plan gate and it never mutates `PG` or story state.
 
 ## 9. Branching and Rewind
 

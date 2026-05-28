@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators` (new `story-scene.schema.json`, `scene-prose-receipt.schema.json`; registry + `record-schema-compliance.ts` dispatch).
-**Deps**: SPEC92SCERANPRO-001
+**Deps**: archive/tickets/SPEC92SCERANPRO-001.md
 
 ## Problem
 
