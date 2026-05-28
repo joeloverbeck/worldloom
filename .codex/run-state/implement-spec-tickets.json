@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-93-decouple-state-turn-from-prose-plan-authoring.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC93DECSTATUR-011.md",
+  "last_ticket": "archive/tickets/SPEC93DECSTATUR-012.md",
   "last_result": "completed_archived",
-  "last_work_commit": "a9266e43175e791267275288f476a2f009304ee2",
+  "last_work_commit": "e604d5db837bb61a15e26d951480f03e9f1351ae",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC93DECSTATUR-012.md",
+  "next_target": "tickets/SPEC93DECSTATUR-013.md",
   "queue": [
-    "tickets/SPEC93DECSTATUR-012.md",
     "tickets/SPEC93DECSTATUR-013.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -18,6 +17,6 @@
   "blocked": false,
   "blocker": null,
   "proof_state": null,
-  "dirty_state": "unrelated dirty paths remain: .claude/skills/mcp-integration-audit/SKILL.md, .claude/skills/skill-audit/references/audit-execution-discipline.md, .claude/skills/spec-to-tickets/SKILL.md, reports/manifest_2026-05-28.txt deleted; expected ignored package artifacts remain in tools/hooks/dist, tools/hooks/logs, tools/hooks/node_modules, tools/validators/dist, tools/validators/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, tools/world-mcp/node_modules",
+  "dirty_state": "unrelated dirty paths remain: .claude/skills/mcp-integration-audit/SKILL.md, .claude/skills/skill-audit/references/audit-execution-discipline.md, .claude/skills/spec-to-tickets/SKILL.md, reports/manifest_2026-05-28.txt deleted; expected ignored package artifacts remain in tools/hooks/dist, tools/hooks/logs, tools/hooks/node_modules, tools/story-explorer/dist, tools/story-explorer/node_modules, tools/story-explorer/web/dist, tools/story-explorer/web/node_modules, tools/validators/dist, tools/validators/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, tools/world-mcp/node_modules",
   "updated_at": "2026-05-28"
 }
