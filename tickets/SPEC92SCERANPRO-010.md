@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — docs only (`docs/FOUNDATIONS.md`, `docs/WORKFLOWS.md`, `docs/REPOSITORY-MAP.md`, `docs/prose-renderer-contract/README.md`).
-**Deps**: archive/tickets/SPEC92SCERANPRO-008.md, SPEC92SCERANPRO-009
+**Deps**: archive/tickets/SPEC92SCERANPRO-008.md, archive/tickets/SPEC92SCERANPRO-009.md
 
 ## Problem
 
