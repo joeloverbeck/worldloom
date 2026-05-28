@@ -55,7 +55,7 @@ Bundle these four cases in one ticket because they share fixture machinery (malf
 
 ## Files to Touch
 
-- `tools/world-mcp/tests/tools/select-storylet-candidates.ts` (modify — add ≥6 new tests)
+- `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts` (modify — add ≥6 new tests)
 - `tools/world-mcp/src/tools/select-storylet-candidates.ts` (conditionally modify — if §4's rename path is taken, update `mysteryPolicyRejectedSample`'s evidence-key name)
 - `tools/world-mcp/src/context-packet/shared.ts` (conditionally modify — mirror the evidence-key rename if taken)
 - `tools/world-mcp/README.md` (conditionally modify — update any textual reference to the evidence-key name)
@@ -67,7 +67,7 @@ Bundle these four cases in one ticket because they share fixture machinery (malf
 - Changes to `sourceRecordIdRejectionSample` logic (both branches are correct; only coverage is missing).
 - Adding `mystery_policy.forbidden_resolutions[]` enforcement to the selector (this is intentionally downstream-evaluator territory — the selector's job is shortlisting, not per-mystery-per-branch resolution checks).
 - Coverage for the ranking algorithm (STSELECT-004's scope).
-- Coverage for branch/scope/cooldown boundaries (STSELECT-005's scope).
+- Coverage for branch/scope/cooldown boundaries (completed under `archive/tickets/STSELECT-005.md`).
 - Coverage for the end-to-end indexer→selector pipeline (completed under `archive/tickets/STSELECT-003.md`).
 - Coverage for the `include_rejection_summary` flag defect (MCPENH-075's scope).
 

@@ -191,6 +191,35 @@ test("cooldown blocks candidates selected inside the current branch window", asy
   }
 });
 
+test("cooldown blocks candidates selected at the exact cooldown distance boundary", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedCooldownWorld(root, {
+      parentPageId: "PG-3",
+      branchPath: ["PG-1", "PG-2", "PG-3"],
+      events: [{ id: "SE-1", createdAtPage: "PG-1", selectedSltId: "SLT-1" }],
+      storylets: [{ id: "SLT-1", cooldown: 2 }]
+    });
+
+    const result = await selectFrom(root, "PG-3");
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.shortlisted_candidate_ids, []);
+    assert.equal(result.filter_trace.after_cooldown, 0);
+    assert.deepEqual(result.filter_trace.cooldown_active_samples, [
+      {
+        slt_id: "SLT-1",
+        last_selected_on_page: "PG-1",
+        distance: 2,
+        cooldown_pages: 2
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("cooldown allows candidates selected outside the numeric window", async () => {
   const root = createTempRepoRoot();
 

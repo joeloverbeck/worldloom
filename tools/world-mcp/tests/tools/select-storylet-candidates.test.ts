@@ -16,6 +16,7 @@ function sltProjection(id: string, fields: {
   visibility?: string;
   branchId?: string | null;
   branchPrefix?: string[] | null;
+  rawBranchPrefix?: string | null;
   moveFamily?: string;
   urgency?: string | null;
   cooldown?: number;
@@ -27,10 +28,11 @@ function sltProjection(id: string, fields: {
     story_slug: STORY,
     slt_scope_visibility: fields.visibility ?? "global_author_pool",
     slt_scope_branch_id: fields.branchId ?? null,
-    slt_scope_branch_path_prefix:
+    slt_scope_branch_path_prefix: fields.rawBranchPrefix ?? (
       fields.branchPrefix === undefined || fields.branchPrefix === null
         ? null
-        : JSON.stringify(fields.branchPrefix),
+        : JSON.stringify(fields.branchPrefix)
+    ),
     slt_provenance_origin: "manual_authoring",
     slt_move_family: fields.moveFamily ?? "investigation",
     slt_saliency_urgency: fields.urgency === undefined ? "medium" : fields.urgency,
@@ -177,6 +179,53 @@ function buildCandidateWorld(root: string): void {
   });
 }
 
+function buildScopeBoundaryWorld(root: string, input: {
+  pageId: string;
+  branchId: string | null;
+  branchPath: string[];
+  projections: ReturnType<typeof sltProjection>[];
+}): void {
+  const branchPath = input.branchPath.length === 0 ? "[]" : `[${input.branchPath.join(", ")}]`;
+  seedWorld(root, {
+    worldSlug: WORLD,
+    nodes: [
+      storyNode(
+        input.pageId,
+        "page_record",
+        [
+          `id: ${input.pageId}`,
+          `branch_id: ${input.branchId ?? "null"}`,
+          `branch_path: ${branchPath}`,
+          "state_snapshot:",
+          "  active_records: {}",
+          "  unresolved_mystery_claims: []",
+          ""
+        ].join("\n")
+      ),
+      ...input.projections.map((projection) => storyletNode(projection.node_id.replace(`${STORY}:`, "")))
+    ],
+    sltProjections: input.projections,
+    edges: input.projections.map((projection) =>
+      edge(projection.node_id.replace(`${STORY}:`, ""), "storylet_compatible_driver", "player_action")
+    )
+  });
+}
+
+async function selectScopeBoundaryCandidates(root: string, parentPageId: string) {
+  return withRepoRoot(root, () =>
+    selectStoryletCandidates({
+      world_slug: WORLD,
+      story_slug: STORY,
+      parent_page_id: parentPageId,
+      turn_driver: {
+        kind: "player_action",
+        driver_records: []
+      },
+      max_candidates: 24
+    })
+  );
+}
+
 function buildExistentialCandidateWorld(root: string): void {
   seedWorld(root, {
     worldSlug: WORLD,
@@ -305,6 +354,126 @@ async function selectRankingCandidates(root: string, maxCandidates = 24) {
     })
   );
 }
+
+test("selectStoryletCandidates treats an empty genesis branch path as outside every branch prefix", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildScopeBoundaryWorld(root, {
+      pageId: "PG-GENESIS",
+      branchId: null,
+      branchPath: [],
+      projections: [
+        sltProjection("SLT-1", {}),
+        sltProjection("SLT-2", {
+          visibility: "branch_prefix_scoped",
+          branchId: "BR-1",
+          branchPrefix: ["PG-1"]
+        })
+      ]
+    });
+
+    const result = await selectScopeBoundaryCandidates(root, "PG-GENESIS");
+
+    assert.ok(!("code" in result));
+    assert.equal(result.filter_trace.pool_total, 2);
+    assert.equal(result.filter_trace.after_scope, 1);
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-1"]);
+    assert.deepEqual(result.filter_trace.scope_rejected_samples, [
+      {
+        slt_id: "SLT-2",
+        reason: "candidate scope 'branch_prefix_scoped' does not match parent page branch context",
+        evidence: {
+          slt_scope_visibility: "branch_prefix_scoped",
+          branch_id: "BR-1",
+          branch_path_prefix: JSON.stringify(["PG-1"]),
+          parent_branch_id: null,
+          parent_branch_path: []
+        }
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates rejects branch-scoped SLTs when the parent branch_id is null", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildScopeBoundaryWorld(root, {
+      pageId: "PG-NULL-BRANCH",
+      branchId: null,
+      branchPath: ["PG-NULL-BRANCH"],
+      projections: [
+        sltProjection("SLT-1", {}),
+        sltProjection("SLT-2", { visibility: "branch_scoped", branchId: "BR-1" })
+      ]
+    });
+
+    const result = await selectScopeBoundaryCandidates(root, "PG-NULL-BRANCH");
+
+    assert.ok(!("code" in result));
+    assert.equal(result.filter_trace.after_scope, 1);
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-1"]);
+    assert.deepEqual(result.filter_trace.scope_rejected_samples, [
+      {
+        slt_id: "SLT-2",
+        reason: "candidate scope 'branch_scoped' does not match parent page branch context",
+        evidence: {
+          slt_scope_visibility: "branch_scoped",
+          branch_id: "BR-1",
+          branch_path_prefix: null,
+          parent_branch_id: null,
+          parent_branch_path: ["PG-NULL-BRANCH"]
+        }
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates rejects malformed branch-prefix JSON without throwing", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildScopeBoundaryWorld(root, {
+      pageId: "PG-2",
+      branchId: "BR-1",
+      branchPath: ["PG-1", "PG-2"],
+      projections: [
+        sltProjection("SLT-1", {}),
+        sltProjection("SLT-2", {
+          visibility: "branch_prefix_scoped",
+          branchId: "BR-1",
+          rawBranchPrefix: "[\"PG-1\""
+        })
+      ]
+    });
+
+    const result = await selectScopeBoundaryCandidates(root, "PG-2");
+
+    assert.ok(!("code" in result));
+    assert.equal(result.filter_trace.after_scope, 1);
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-1"]);
+    assert.deepEqual(result.filter_trace.scope_rejected_samples, [
+      {
+        slt_id: "SLT-2",
+        reason: "candidate scope 'branch_prefix_scoped' does not match parent page branch context",
+        evidence: {
+          slt_scope_visibility: "branch_prefix_scoped",
+          branch_id: "BR-1",
+          branch_path_prefix: "[\"PG-1\"",
+          parent_branch_id: "BR-1",
+          parent_branch_path: ["PG-1", "PG-2"]
+        }
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
 
 test("selectStoryletCandidates filters indexed SLT projections and returns only projection records", async () => {
   const root = createTempRepoRoot();
