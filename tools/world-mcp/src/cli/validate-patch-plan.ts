@@ -15,7 +15,6 @@ import type { PatchPlanEnvelope } from "../tools/_shared.js";
 interface CliArgs {
   planPath: string;
   worldRoot?: string;
-  pagePlanDraftsPath?: string;
 }
 
 export interface CliResult {
@@ -24,7 +23,7 @@ export interface CliResult {
   exitCode: number;
 }
 
-const HELP_TEXT = `Usage: validate-patch-plan [--world-root <path>] [--page-plan-drafts <path>] <plan-path>
+const HELP_TEXT = `Usage: validate-patch-plan [--world-root <path>] <plan-path>
 
 Validates a patch-plan envelope through the same read-only pre-apply validator
 path as mcp__worldloom__validate_patch_plan, bypassing MCP transport for large
@@ -40,11 +39,6 @@ Arguments:
 Options:
   --world-root <path>          Explicit worldloom project root. Overrides
                                WORLDLOOM_ROOT and auto-discovery.
-  --page-plan-drafts <path>    JSON file containing an array of {path, content}
-                               objects supplying candidate pages-prose-plans/
-                               PG-<integer>.md bytes for page-plan validators
-                               to exercise pre-commit. Each path must match
-                               stories/<slug>/pages-prose-plans/PG-<integer>.md.
   --help                        Show this help and exit.
 
 Output:
@@ -54,7 +48,6 @@ Output:
 Example:
   node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/plan.json
   node tools/world-mcp/dist/src/cli/validate-patch-plan.js --world-root /path/to/worldloom /tmp/plan.json
-  node tools/world-mcp/dist/src/cli/validate-patch-plan.js --page-plan-drafts /tmp/drafts.json /tmp/plan.json
 `;
 
 type ParseOutcome =
@@ -63,14 +56,13 @@ type ParseOutcome =
   | { kind: "error"; message: string };
 
 function parseCli(argv: string[]): ParseOutcome {
-  let parsed: ReturnType<typeof parseArgs<{ options: { help: { type: "boolean" }; "world-root": { type: "string" }; "page-plan-drafts": { type: "string" } }; allowPositionals: true; strict: true }>>;
+  let parsed: ReturnType<typeof parseArgs<{ options: { help: { type: "boolean" }; "world-root": { type: "string" } }; allowPositionals: true; strict: true }>>;
   try {
     parsed = parseArgs({
       args: argv,
       options: {
         help: { type: "boolean" },
-        "world-root": { type: "string" },
-        "page-plan-drafts": { type: "string" }
+        "world-root": { type: "string" }
       },
       allowPositionals: true,
       strict: true
@@ -89,13 +81,9 @@ function parseCli(argv: string[]): ParseOutcome {
   }
 
   const worldRoot = parsed.values["world-root"];
-  const pagePlanDraftsPath = parsed.values["page-plan-drafts"];
   const args: CliArgs = { planPath };
   if (worldRoot !== undefined) {
     args.worldRoot = worldRoot;
-  }
-  if (pagePlanDraftsPath !== undefined) {
-    args.pagePlanDraftsPath = pagePlanDraftsPath;
   }
   return { kind: "args", args };
 }
@@ -137,22 +125,6 @@ export async function runValidatePatchPlanCli(argv: string[]): Promise<CliResult
     return { stdout: "", stderr: `${planResult.message}\n`, exitCode: 1 };
   }
 
-  let pagePlanDrafts: ReadonlyArray<{ path: string; content: string }> | undefined;
-  if (parsed.args.pagePlanDraftsPath !== undefined) {
-    const draftsResult = readJsonFile(parsed.args.pagePlanDraftsPath);
-    if (!draftsResult.ok) {
-      return { stdout: "", stderr: `${draftsResult.message}\n`, exitCode: 1 };
-    }
-    if (!Array.isArray(draftsResult.value)) {
-      return {
-        stdout: "",
-        stderr: `Page-plan drafts file ${parsed.args.pagePlanDraftsPath} must contain a JSON array.\n`,
-        exitCode: 1
-      };
-    }
-    pagePlanDrafts = draftsResult.value as ReadonlyArray<{ path: string; content: string }>;
-  }
-
   const root = resolveWorldRoot({
     flag: parsed.args.worldRoot,
     envVar: process.env.WORLDLOOM_ROOT,
@@ -166,14 +138,10 @@ export async function runValidatePatchPlanCli(argv: string[]): Promise<CliResult
   const validateArgs: {
     patch_plan: PatchPlanEnvelope;
     worldRoot: string;
-    page_plan_drafts?: ReadonlyArray<{ path: string; content: string }>;
   } = {
     patch_plan: planResult.value as PatchPlanEnvelope,
     worldRoot: root.worldRoot
   };
-  if (pagePlanDrafts !== undefined) {
-    validateArgs.page_plan_drafts = pagePlanDrafts;
-  }
   const result = await validatePatchPlan(validateArgs);
   const output = `${JSON.stringify(result, null, 2)}\n`;
 

@@ -1,6 +1,6 @@
 # Story Record Schemas
 
-This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 22 story-bundle record classes plus the prose-receipt and scene-prose-receipt direct-write artifacts. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the nine hard gates at §7, the predicate DSL at §5, the page-plan minimum contract at §8, or the other shorter sections that remain in the main contract).
+This file holds §4 of the Story State Contract verbatim — the full schema enumeration for all 22 story-bundle record classes plus the legacy prose-receipt and current scene-prose-receipt direct-write artifacts. It is the canonical source the main contract's §4 stub points to, and the file every story-pipeline skill loads when it needs a record schema (rather than the nine hard gates at §7, the predicate DSL at §5, the retired page-plan status at §8, the scene-plan minimum contract at §8a, or the other shorter sections that remain in the main contract).
 
 Subsection numbering matches the original `§4.X` form (e.g. `§4.6 prose receipt`, `§4.2 PG`, `§4.4 SLT`) so cross-references in skill prose, validator source, and other shared templates continue to resolve verbatim. The split is purely structural — §4 is overwhelmingly the bulk of the contract, and the bundled file exceeded the per-call read limit of bulk-loading tools at HEAD.
 
@@ -10,7 +10,7 @@ Authority and supersession discipline live in the main contract's §1; schema-mi
 
 ## 4. Record Schemas
 
-Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 22 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 18 additional classes, §4.6 covers the prose receipt direct-write artifact, and §4.7 covers the scene-prose receipt direct-write artifact.
+Required fields are marked `*`. Fields not listed are not part of the schema. Optional legacy fields are explicitly marked when they survive only for grandfathered records. All YAML strings supporting natural language remain free-form unless an enum is named. All 22 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 18 additional classes, §4.6 covers the legacy prose receipt direct-write artifact, and §4.7 covers the scene-prose receipt direct-write artifact.
 
 ### 4.1 `BEL` (13 fields)
 
@@ -63,7 +63,7 @@ input:
 state_hash_parent: null | sha256       # null only for PG-1
 state_hash: sha256*
 state_snapshot:
-  canon_revision: CH-<integer> | null  # latest governing world-canon change-log id loaded at page-plan commit; null only when no CH exists
+  canon_revision: CH-<integer> | null  # latest governing world-canon change-log id loaded at PG-record commit; null only when no CH exists
   active_records:                      # *
     STENT: [STENT-<integer>]
     STCHAR: [STCHAR-<integer>]
@@ -103,9 +103,9 @@ state_snapshot:
     has_eligible_commitment_block: true | false
     terminal_status: open | branch_pause | terminal_closed
     terminal_rationale: null | string
-plan:
-  plan_hash: sha256*
-prose_plan_path: pages-prose-plans/PG-<integer>.md*   # stable plan address; included in state_hash payload
+plan:                                      # optional legacy-only block; new PG records omit it
+  plan_hash: sha256                        # optional legacy-only page-plan hash
+prose_plan_path: pages-prose-plans/PG-<integer>.md   # optional legacy-only page-plan address
 emitted_choices: [CHC-<integer>]*
 validation_trace:                      # * one entry per shared gate with PASS + one concise-sentence rationale
   input_legality: "PASS: <rationale>"
@@ -123,7 +123,7 @@ Rendered prose and prose receipts are publication artifacts discovered by determ
 
 There is no nested rendered-prose block, no `prose_status` field, no `state_delta_summary` field (`SE.state_delta` is authoritative), and no `open_debt` field on the snapshot (open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`).
 
-`state_snapshot.canon_revision` is the page's world-canon baseline. It records the latest governing `CH-<integer>` visible to the page-planning context at commit time, or `null` only for worlds with no change-log entry. A child page must compare the parent snapshot's `canon_revision` against the current world-canon revision at turn start and classify drift as `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict` before treating parent story-local assumptions as current world-valid truth.
+`state_snapshot.canon_revision` is the page's world-canon baseline. It records the latest governing `CH-<integer>` visible to the PG-authoring context at commit time, or `null` only for worlds with no change-log entry. A child page must compare the parent snapshot's `canon_revision` against the current world-canon revision at turn start and classify drift as `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict` before treating parent story-local assumptions as current world-valid truth.
 
 When `parent.state_snapshot.canon_revision != current_world_canon_revision`,
 drift classification MUST retrieve every CH entry newer than the parent
@@ -148,27 +148,26 @@ Branch-scope vocabulary:
 
 Every `PG` record must carry final lowercase sha256 values before any `create_pg_record` patch plan is validated or submitted. Placeholder, uppercase, non-hex, missing, or stale hash values are hard-stop authoring errors; the skill must repair the draft in working memory before `mcp__worldloom__validate_patch_plan`.
 
-Compute `plan.plan_hash` first. It is sha256 over the exact UTF-8 bytes of the page plan body that will later be written to `pages-prose-plans/PG-<integer>.md`. Because the page plan is a direct-write artifact after patch submission (§10), the skill drafts the complete plan bytes in working memory, hashes those exact bytes, places the hash in `PG.plan.plan_hash`, and after patch success writes the same bytes to disk without reformatting.
+New PG-authoring flows compute `state_hash` only. They do not author `pages-prose-plans/PG-<integer>.md`, do not stamp `plan.plan_hash`, and do not set `prose_plan_path`. Existing PG records that already carry `plan.plan_hash` and `prose_plan_path` are grandfathered append-only records; they keep those fields and verify from the fields they carry.
 
-Compute `state_hash` second from the PG fork-state payload after `plan.plan_hash` is final. The fork-state payload is the complete PG mapping except `state_hash` itself. Rendered prose and prose receipts are not PG fields and therefore are not hash inputs.
+Compute `state_hash` from the PG fork-state payload after all authored PG fields are final. The fork-state payload is the complete PG mapping except `state_hash` itself. Rendered prose, scene plans, scene prose, prose receipts, and scene-prose receipts are not PG fields and therefore are not hash inputs.
 
-All other PG fields are included, including `id`, `story_id`, `branch_id`, `parent_page_id`, `branch_path`, `turn_index`, `input`, `state_hash_parent`, `state_snapshot`, `plan.plan_hash`, `prose_plan_path`, `emitted_choices`, and `validation_trace`.
+All present PG fields are included, including `id`, `story_id`, `branch_id`, `parent_page_id`, `branch_path`, `turn_index`, `input`, `state_hash_parent`, `state_snapshot`, `emitted_choices`, and `validation_trace`. For grandfathered legacy PG records that still carry `plan.plan_hash` and `prose_plan_path`, those fields remain present and therefore remain in that record's `state_hash` payload. For new planless PG records, those fields are absent and therefore absent from the payload. No separate epoch selector or payload-definition machinery is used.
 
 Pre-SCAUD-001 PG records retain their original `state_hash` values, computed against the old nested prose-receipt payload. Those values are read as opaque strings; no re-hashing is performed. Post-SCAUD-001 PG records use the payload definition above. The `snapshot_replay_equality` validator must tolerate this discontinuity.
 
 The state payload serialization is deterministic canonical JSON: objects serialized with keys sorted lexicographically at every depth, arrays kept in authored order, strings emitted as UTF-8 JSON strings, no insignificant whitespace, no comments, and no YAML anchors or aliases. Hash the resulting UTF-8 bytes with sha256 and encode as 64 lowercase hex characters.
 
-For root pages, compute both hashes after `PG-1`, the final page-plan bytes, emitted `CHC` records, and `PG-1.validation_trace` are finalized in working memory, then validate/submit the patch plan. For child pages, copy `state_hash_parent` exactly from the already-committed parent PG's `state_hash`, finalize the new PG and plan bytes, compute `plan.plan_hash`, compute `state_hash`, then validate/submit. If any later edit changes an included PG field or the page-plan bytes before submission, recompute the affected hash values before validation.
+For root pages, compute `state_hash` after `PG-1`, emitted `CHC` records, and `PG-1.validation_trace` are finalized in working memory, then validate/submit the patch plan. For child pages, copy `state_hash_parent` exactly from the already-committed parent PG's `state_hash`, finalize the new PG, compute `state_hash`, then validate/submit. If any later edit changes an included PG field before submission, recompute `state_hash` before validation.
 
-**Tooling.** PG-authoring skills (`branching-story-bootstrap` Phase 7 hash steps, `branching-story-turn-cycle` Phase 9) MUST compute these hashes through the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js`, not through ad-hoc one-off scripts. The CLI's plan-file to state-hash coupling (it reads `--plan` bytes, computes `plan_hash`, overwrites `plan.plan_hash` in the PG payload, then computes `state_hash` from the coupled payload) is the correct authoring-time behavior: both hashes are stamped together at commit. `branching-story-prose-attach` Phase 2 is carved out from this mandate per SPEC-72 §2.2: it recomputes `state_hash` via `computePgStateHash` from `@worldloom/world-index/hash/content` directly on the parsed PG record (the `snapshot_replay_equality` basis), not through the CLI, because the CLI's plan-file coupling would re-introduce the over-enforcement SPEC-72 removes. Implementation source: `tools/world-mcp/src/cli/compute-pg-hashes.ts`; runtime invocation after build: `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-md-path> --pg <envelope-extracted-pg-record.json>`. The TS source path is the canonical reference for code authors; the dist JS path is the runtime invocation. Both are correct in their respective contexts. The CLI reuses the same `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator package (`snapshot_replay_equality`) uses for drift detection, so authoring-time hashes and validation-time drift comparisons are byte-identical when the CLI hashes the same JSON PG payload that will be submitted. Skill invocation pattern:
+**Tooling.** PG-authoring skills (`branching-story-bootstrap` and `branching-story-turn-cycle`) MUST compute `state_hash` through the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js`, not through ad-hoc one-off scripts. The CLI now stamps `state_hash` only for new planless PG records. Implementation source: `tools/world-mcp/src/cli/compute-pg-hashes.ts`; runtime invocation after build: `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --pg <envelope-extracted-pg-record.json>`. The TS source path is the canonical reference for code authors; the dist JS path is the runtime invocation. Both are correct in their respective contexts. The CLI reuses the same `canonicalJsonStringify` / `computePgStateHash` helpers exported from `@worldloom/world-index/hash/content` that the validator package (`snapshot_replay_equality`) uses for drift detection, so authoring-time hashes and validation-time drift comparisons are byte-identical when the CLI hashes the same JSON PG payload that will be submitted. Skill invocation pattern:
 
 ```
 node tools/world-mcp/dist/src/cli/compute-pg-hashes.js \
-  --plan <path-to-page-plan-bytes>.md \
   --pg   <path-to-envelope-extracted-pg-record>.json
 ```
 
-The CLI emits `{plan_hash, state_hash}` as JSON to stdout (exit 0 on success). JSON-only input: the CLI accepts only JSON for `--pg`; YAML drafts are rejected. The canonical workflow is to assemble the patch envelope JSON first, extract `patches[N].payload.record` to a JSON file (for example, `jq '.patches[N].payload.record' envelope.json > PG-record.json`), then pass that JSON file as `--pg`. The CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`, so a single invocation yields the pair the skill stamps back onto the final envelope record. Drafting a PG record in YAML and hashing it separately admits parity drift between the YAML-to-object and JSON-to-object code paths and is structurally forbidden. Hand-rolling the canonical-JSON serializer is a known source of drift bugs (truncated strings, locale-sensitive sort orders, accidentally-included publication artifacts) and is forbidden; if the CLI does not fit a workflow, the workflow is incomplete — open a CLI-extension ticket before bypassing it.
+The CLI emits `{state_hash}` as JSON to stdout (exit 0 on success). JSON-only input: the CLI accepts only JSON for `--pg`; YAML drafts are rejected. The canonical workflow is to assemble the patch envelope JSON first, extract `patches[N].payload.record` to a JSON file (for example, `jq '.patches[N].payload.record' envelope.json > PG-record.json`), then pass that JSON file as `--pg`. The CLI ignores the input's `state_hash` field and hashes all other fields present on that PG record. Drafting a PG record in YAML and hashing it separately admits parity drift between the YAML-to-object and JSON-to-object code paths and is structurally forbidden. Hand-rolling the canonical-JSON serializer is a known source of drift bugs (truncated strings, locale-sensitive sort orders, accidentally-included publication artifacts) and is forbidden; if the CLI does not fit a workflow, the workflow is incomplete — open a CLI-extension ticket before bypassing it.
 
 ### 4.3 `SE` (~16 sub-paths)
 
@@ -284,7 +283,7 @@ non_propagation_facts:
 
 There is no `input_surface` block on SE; the PG record's `input.resolved_event_id` is the authoritative PG-to-SE link. There is no `state_delta.no_change` list — absence from `create / supersede / close` is the no-change signal. There is no `required_action` on promotion claims — `authority == canon_candidate` implies `run_story_fact_promotion_to_canon`.
 
-`resolution` makes non-accept outcomes structurally auditable. It is required when `outcome_route` is `attempt`, `accommodate`, or `world_block`; it is absent for `accept`; it is optional for `promotion_hold` and `terminal` subject to the route consistency table below. `player_visible_feedback` is the one-sentence statement of what the player should be able to perceive about why the action resolved this way. It is consumed by page-plan §7, prose-attach, and promotion evidence review; do not add a `reason_class` field.
+`resolution` makes non-accept outcomes structurally auditable. It is required when `outcome_route` is `attempt`, `accommodate`, or `world_block`; it is absent for `accept`; it is optional for `promotion_hold` and `terminal` subject to the route consistency table below. `player_visible_feedback` is the one-sentence statement of what the player should be able to perceive about why the action resolved this way. It is consumed by scene planning, scene-prose attach, and promotion evidence review; do not add a `reason_class` field.
 
 | `outcome_route` | Allowed `resolution.result` |
 |---|---|
@@ -428,7 +427,7 @@ Commitment blocks are reusable causal moves, not dramatic acts, arcs, mini-stori
 
 | Value | Operational definition |
 |---|---|
-| `viewpoint` | The entity can anchor scene perception or page-plan point of view. |
+| `viewpoint` | The entity can anchor scene perception or scene-plan point of view. |
 | `player_proxy` | The entity is the user's primary agency surface in the story bundle. |
 | `primary_actor` | The entity can initiate major page actions or state changes. |
 | `opposing_actor` | The entity actively resists or pressures a primary actor's goals. |
@@ -478,7 +477,7 @@ bound_stchar_id: STCHAR-<integer> | null      # null only when role_in_story is 
 role_in_story: [<role>]*                       # closed list per §4.4b; one or more
 ```
 
-No `notes` field: authorial notes belong in the page plan or another load-bearing record.
+No `notes` field: authorial notes belong in the scene plan or another load-bearing record.
 No direct world-character binding field: runtime character authority flows through `STCHAR`.
 
 #### 4.5.2 `STINT` (intention)
@@ -916,13 +915,13 @@ body_schema_version: stchar.v1*
 
 When `source_kind: world_char`, `source_char_id` is required and non-null. When `source_kind: story_local`, `source_char_id` is null. `source_char_sections_used` and `source_operational_fact_map` preserve source provenance and operational-fact coverage without byte-pinning source or STCHAR content. There is no `section_hashes` map.
 
-`STCHAR` is durable story-local character authority. It must not be used as a root-page summary, opening-scene summary, or compressed current-state packet. Opening or branch-current facts belong to `STSTAT`, `STOBJ`, `STLOC`, `SE`, `BEL`, `STPLAN`, `STINT`, `STEMO`, `SREL`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `PG`, and page-plan §16a.
+`STCHAR` is durable story-local character authority. It must not be used as a root-page summary, opening-scene summary, or compressed current-state packet. Opening or branch-current facts belong to `STSTAT`, `STOBJ`, `STLOC`, `SE`, `BEL`, `STPLAN`, `STINT`, `STEMO`, `SREL`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `PG`, and scene-plan cast/voice direction.
 
 Stable source material that can lawfully shape future voice, conduct, appraisal, pressure behavior, agency, relationship behavior, perception, embodiment, capabilities, limits, or choices belongs in STCHAR operational sections, even if dormant at the story's opening page. "Not needed on page 1" is never the omission criterion.
 
 `regeneration_reason_class` records the durable profile-change reason. It is required and non-null when `source_kind: regenerated` or `supersedes` is non-null. The valid values are `source_world_char_material_change`, `durable_branch_transformation`, `profile_fidelity_failure`, `story_local_character_promotion`, and `stable_source_material_omission_repair`. Ordinary updates to active state records (`STEMO`, `BEL`, `STPLAN`, `SREL`, `STSTAT`, `STOBJ`, `STLOC`, `THR`, `OBL`, `CNSQ`, `CLK`, `STSEC`, `STQ`, `PG`, `SE`) or page-local prose are not valid reason classes unless evidence has durably consolidated into a changed character model.
 
-Normal story runtime consumes active `STCHAR` through `STENT.bound_stchar_id`, `PG.state_snapshot.active_records.STCHAR`, and grounded or derived story records. `source_char_id` is provenance only; it is not an operational shortcut for `STENT`, `CHC`, page plans, or prose receipts.
+Normal story runtime consumes active `STCHAR` through `STENT.bound_stchar_id`, `PG.state_snapshot.active_records.STCHAR`, and grounded or derived story records. `source_char_id` is provenance only; it is not an operational shortcut for `STENT`, `CHC`, scene plans, or scene-prose receipts.
 
 #### 4.5.20 `SCN` (scene render-unit membership)
 
@@ -949,9 +948,9 @@ receipt_path: scene-prose-receipts/SCN-<integer>.yaml*
 
 `SCN` is a render-unit membership record over committed `PG` records, not a causal-state record and not a narrative-shape record. Its fields are load-bearing for index membership/edges, scene-range validation, scene-plan generation, scene-prose attach, or human navigation. It must not carry a render-kind field, a source-PG fingerprint field, act/arc position, target narrative shape, future dramatic obligation, or prose byte hashes. Range/status changes use the patch engine's append-only supersession path; scene-plan and scene-prose markdown remain direct-write publication artifacts with no state consequence.
 
-### 4.6 Prose receipt
+### 4.6 Legacy prose receipt
 
-Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record). The canonical schema below is mirrored by the structural validator `prose_receipt_schema_compliance`, which validates receipt YAML in full-world runs and receipt-file incremental runs.
+Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record). This is a legacy page-prose receipt shape retained for old bundles that already carry page plans and page prose. New SPEC-93 PG-authoring flows do not create page plans or page prose receipts; current rendered-prose validation uses the scene-prose receipt in §4.7.
 
 ```yaml
 page_id: PG-<integer>*
@@ -995,15 +994,15 @@ notes: [<string>]
 repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_fact_promotion_to_canon
 ```
 
-The `checks` mapping contains eight deterministic prose/state checks, the surfaced `char_authority_leak` verdict from `no_char_authority_in_story_runtime`, plus the optional `craft_critic` result. `hash_integrity` is `PASS` when the recorded `PG.plan.plan_hash` and `PG.state_hash` are lowercase sha256-shaped and match the recomputed plan/state hashes, `WARN` when only the recorded `plan_hash` drifted from the on-disk page-plan body (plan-only drift is advisory per SPEC-72 / FOUNDATIONS §Story Bundles §4a Plan-Authority Boundary), and `FAIL` only on `state_hash` drift (genuine PG-record tamper) or a missing, placeholder, or non-sha256 `state_hash`. The `plan_hash` field is structurally validated at PG schema-compliance time (`tools/validators/src/schemas/story-page.schema.json` requires `^[0-9a-f]{64}$`), so prose-attach Phase 2 sees only well-formed `plan_hash` values; their drift is advisory regardless. `state_hash` is recomputed from the committed PG record's own stored fields (the `snapshot_replay_equality` basis: `computePgStateHash` from `@worldloom/world-index/hash/content`), not by re-reading the plan file. `required_event_rendered` includes subordinate receipt observations for committed CLK ticks, STSEC reveals, STPLAN relation movement, STEMO affective transitions, and STQ setup/payoff transitions; the STQ subcheck reads committed `STQ.status` lifecycle changes, `payoff_of`, `answer_records[]`, and page-plan §10b render requirements, records omissions as `notes[]` entries beginning `story_question_payoff_undisclosed:`, and never mutates `PG` or any STQ record. `choice_consequence_visibility` verifies that rendered prose realizes the selected action's consequence without mutating `PG` state or re-authoring the selected event. For non-accept routes it reads `SE.resolution.player_visible_feedback`; for `accept` routes, where `SE.resolution` is absent, it reads the selected `CHC.likely_state_pressure`, `CHC.grounded_in.records[]`, page-plan §13, and committed `SE.state_delta` / `SE.state_relations[]` from plan §7.
+For legacy receipts, the `checks` mapping contains eight deterministic prose/state checks, the surfaced `char_authority_leak` verdict from `no_char_authority_in_story_runtime`, plus the optional `craft_critic` result. Legacy `hash_integrity` reads the recorded `PG.plan.plan_hash` and `PG.state_hash` from a grandfathered PG record and preserves SPEC-72's advisory plan-hash behavior for old artifacts. New planless PG records omit `PG.plan.plan_hash` and `prose_plan_path`, so they do not use this receipt shape. `choice_consequence_visibility` verifies that rendered prose realizes the selected action's consequence without mutating `PG` state or re-authoring the selected event.
 
 `stchar_authority` is optional only when no §16a STCHAR packet is required for the page. When a viewpoint, speaker, major actor, direct target, emotionally salient character, or otherwise behavior/voice-shaping character requires a packet, prose-attach emits one entry per required `STCHAR`. Missing packets or inactive `STCHAR` ids in the `PG.state_snapshot.active_records.STCHAR` snapshot force that entry's `deterministic_verdict: FAIL`. The receipt may carry an empty or absent `stchar_authority` list only when the page has no qualifying character.
 
-Each entry's `required_because` must be the **verbatim** value the page-plan §16a packet declares for that `STCHAR`, including every comma-separated qualifier (e.g. `direct_target, emotionally_salient, behavior_shapes_page`), not an abbreviation to the first qualifier. The `prose_receipt_stchar_integrity` validator compares the receipt's `required_because` against the §16a packet's `Required because:` line and emits `prose_receipt_stchar_integrity.required_because_mismatch` (FAIL) on any divergence; a single-value abbreviation of a multi-value packet declaration fails this check.
+Each entry's `required_because` preserves the historical page-plan §16a packet value for that `STCHAR`, including every comma-separated qualifier (e.g. `direct_target, emotionally_salient, behavior_shapes_page`). In the retired page-plan flow, `prose_receipt_stchar_integrity` compared this field against the §16a packet's `Required because:` line; current SPEC-93 flows use scene-prose receipt checks instead.
 
 `profile_fidelity` is judgment-assisted and compares the rendered prose against the page-plan packet first. Retrieve the full STCHAR only when the packet is missing or insufficient for diagnosis. Each entry records the four fidelity axes, supporting evidence excerpts, and the local repair recommendation for that character (`revise_prose`, `revise_page_plan`, `regenerate_stchar`, or `run_turn_cycle_repair`).
 
-Receipt schema drift is checked by `prose_receipt_schema_compliance` in `tools/validators`. A receipt-specific structural smoke uses the compiled validator CLI after the receipt exists, for example:
+Legacy page receipt schema drift was historically checked by `prose_receipt_schema_compliance`; current validators no longer register that page-receipt schema check, and new rendered-prose validation uses `scene_prose_receipt_schema_compliance`. A historical receipt-specific structural smoke looked like:
 
 ```bash
 node tools/validators/dist/src/cli/world-validate.js <world_slug> --structural --file worlds/<world_slug>/stories/<story_slug>/pages-prose-receipts/PG-<integer>.yaml --json

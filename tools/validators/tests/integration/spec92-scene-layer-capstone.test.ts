@@ -48,17 +48,11 @@ const WORLD = "capstone";
 const SCENE_ID = "SCN-1";
 const ROOT_MARKER = "__ROOT__";
 
-test("SPEC-92 capstone keeps page-plan validators registered alongside scene validators", () => {
+test("SPEC-92 capstone keeps scene validators registered after SPEC-93 page-plan validator retirement", () => {
   const names = new Set(structuralValidators.map((validator) => validator.name));
 
   for (const validatorName of [
-    "page_plan_body_engine_vocabulary_cleanliness",
-    "page_plan_verbatim_section_integrity",
-    "page_plan_stchar_packet_integrity",
     "page_plan_turn_driver_consistency",
-    "prose_receipt_schema_compliance",
-    "prose_receipt_hash_integrity",
-    "prose_receipt_stchar_integrity",
     "scene_prose_receipt_schema_compliance",
     "scene_prose_receipt_content",
     "scene_range_integrity",

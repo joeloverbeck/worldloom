@@ -249,28 +249,12 @@ const getCanonicalVocabularyInputSchema = z.object({
 const patchPlanInputSchema = z.object({}).passthrough();
 
 const validatePatchPlanInputSchema = z.object({
-  patch_plan: patchPlanInputSchema,
-  page_plan_drafts: z
-    .array(
-      z.object({
-        path: z.string().min(1),
-        content: z.string()
-      })
-    )
-    .optional()
+  patch_plan: patchPlanInputSchema
 });
 
 const submitPatchPlanInputSchema = z.object({
   patch_plan: patchPlanInputSchema,
-  approval_token: z.string().min(1),
-  page_plan_drafts: z
-    .array(
-      z.object({
-        path: z.string().min(1),
-        content: z.string()
-      })
-    )
-    .optional()
+  approval_token: z.string().min(1)
 });
 
 const planStoryStateMaintenanceInputSchema = z.object({
@@ -468,7 +452,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "verify_pg_state_hash",
-    "verify_pg_state_hash: Prose-attach Phase 2 verifier for a committed PG page record. Recomputes state_hash from the parsed PG exactly as committed and does not modify plan.plan_hash before hashing; state_hash_match is verdict-driving, while plan_hash_match is SPEC-72 advisory drift against pages-prose-plans/<page_id>.md.",
+    "verify_pg_state_hash: Verifier for a committed PG page record. Recomputes state_hash from the parsed PG exactly as committed; state_hash_match is verdict-driving PG tamper evidence. It does not read page plans or report plan_hash comparisons.",
     verifyPgStateHashInputSchema,
     async (args) => verifyPgStateHash(args as unknown as Parameters<typeof verifyPgStateHash>[0])
   );

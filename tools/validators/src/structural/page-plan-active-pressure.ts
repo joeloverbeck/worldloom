@@ -2,48 +2,12 @@ import type { IndexedRecord } from "../framework/types.js";
 import { asPlainRecord, stringArray, stringValue } from "./utils.js";
 import type { StoryMaps } from "./stchar-utils.js";
 
-const ACTIVE_PRESSURE_HEADER = /^Active-pressure disposition\b/im;
-const ACTIVE_PRESSURE_TABLE_HEADER = /^\|\s*Record\s*\|\s*Disposition\s*\|\s*Reason \/ expiry\s*\|/im;
 const HIGH_URGENCY_CLASSES = new Set(["STPLAN", "STEMO", "CLK", "THR", "STSEC", "STQ", "OBL", "CNSQ"]);
-
-export interface ActivePressureRow {
-  recordId: string;
-  disposition: string;
-  reasonExpiry: string;
-}
 
 export interface HighUrgencyActiveRecord {
   id: string;
   recordClass: string;
   record: IndexedRecord | undefined;
-}
-
-export function hasActivePressureDispositionTable(section: string): boolean {
-  return ACTIVE_PRESSURE_HEADER.test(section) && ACTIVE_PRESSURE_TABLE_HEADER.test(section);
-}
-
-export function parseActivePressureDispositionRows(section: string): ActivePressureRow[] {
-  const lines = section.split(/\r?\n/);
-  const headerIndex = lines.findIndex((line) => ACTIVE_PRESSURE_TABLE_HEADER.test(line));
-  if (headerIndex === -1) {
-    return [];
-  }
-
-  const rows: ActivePressureRow[] = [];
-  for (const line of lines.slice(headerIndex + 1)) {
-    if (!line.trim().startsWith("|")) {
-      break;
-    }
-    const cells = splitTableRow(line);
-    if (cells.length < 3 || cells.every((cell) => /^-+$/.test(cell))) {
-      continue;
-    }
-    const [recordId = "", disposition = "", reasonExpiry = ""] = cells;
-    if (recordId.length > 0) {
-      rows.push({ recordId, disposition, reasonExpiry });
-    }
-  }
-  return rows;
 }
 
 export function highUrgencyActiveRecords(page: IndexedRecord, maps: StoryMaps): HighUrgencyActiveRecord[] {
@@ -61,15 +25,6 @@ export function highUrgencyActiveRecords(page: IndexedRecord, maps: StoryMaps): 
     }
   }
   return high;
-}
-
-function splitTableRow(line: string): string[] {
-  return line
-    .trim()
-    .replace(/^\|/, "")
-    .replace(/\|$/, "")
-    .split("|")
-    .map((cell) => cell.trim());
 }
 
 function isHighUrgency(recordClass: string, parsed: Record<string, unknown>): boolean {

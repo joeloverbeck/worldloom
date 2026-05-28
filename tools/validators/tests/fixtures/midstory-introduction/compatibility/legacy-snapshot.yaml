@@ -15,6 +15,48 @@ missing_optional_subdirectories:
   - _source/emotions
   - _source/artifacts
 records:
+  - node_type: story_event_record
+    node_id: midstory-introduction-test:SE-1
+    file_path: stories/midstory-introduction-test/_source/events/SE-1.yaml
+    parsed:
+      record_kind: story_event_record
+      id: SE-1
+      story_id: STORY-1
+      created_at_page: PG-1
+      parent_page_id: null
+      event_kind: story_start
+      actor: system
+      commitment:
+        selected_slt_id: null
+        selection_source: none
+        alias_bindings: {}
+      outcome_route: accept
+      world_logic_rationale: Synthetic compatibility fixture root event.
+      state_delta:
+        create: []
+        supersede: []
+        close: []
+  - node_type: story_event_record
+    node_id: midstory-introduction-test:SE-2
+    file_path: stories/midstory-introduction-test/_source/events/SE-2.yaml
+    parsed:
+      record_kind: story_event_record
+      id: SE-2
+      story_id: STORY-1
+      created_at_page: PG-2
+      parent_page_id: PG-1
+      event_kind: system_repair
+      actor: system
+      commitment:
+        selected_slt_id: null
+        selection_source: none
+        alias_bindings: {}
+      outcome_route: accept
+      world_logic_rationale: Synthetic compatibility fixture child event for legacy PG reference coverage.
+      state_delta:
+        create: []
+        supersede: []
+        close: []
   - node_type: story_page_record
     node_id: midstory-introduction-test:PG-1
     file_path: stories/midstory-introduction-test/_source/pages/PG-1.yaml
@@ -27,7 +69,7 @@ records:
       turn_index: 0
       input: { choice_id: null, manual_action_text: null, resolved_event_id: SE-1 }
       state_hash_parent: null
-      state_hash: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      state_hash: "0051769dc8fd613e4ffeb88f3b5150e4c9848764670ae2393c03945d8139a216"
       state_snapshot:
         canon_revision: null
         active_records:
@@ -76,8 +118,8 @@ records:
         choice_id: null
         manual_action_text: Continue from the legacy parent.
         resolved_event_id: SE-2
-      state_hash_parent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      state_hash: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      state_hash_parent: "0051769dc8fd613e4ffeb88f3b5150e4c9848764670ae2393c03945d8139a216"
+      state_hash: "76303d4c2a6e3e2bf28aac577cac5f41f32383c62a2142c9956a34de66627166"
       state_snapshot:
         canon_revision: null
         active_records:

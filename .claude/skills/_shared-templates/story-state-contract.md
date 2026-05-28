@@ -12,7 +12,7 @@ Three layers, in strict precedence:
 2. **Story state** — authoritative branch-local narrative state inside a story bundle at `worlds/<slug>/stories/<story-slug>/_source/`. Written through story-bundle record-ops on the patch engine.
 3. **Rendered prose** — authorial surface text at `pages-prose/PG-<integer>.md` or `scene-prose/SCN-<integer>.md`. It can reveal, dramatize, omit, or stylize story state, but **it does not create story state by itself**. Prose is a rendering of state, not a second state engine.
 
-**Plan-authority boundary.** Story state is authoritative at page-plan commit. A `PG` record is real the moment the patch engine accepts the page-cycle plan. Rendered prose is supplied externally (manual or LLM) and attached later via a prose receipt. The page snapshot is the fork primitive — any committed page is a valid parent for the next turn-cycle invocation, regardless of whether its prose has been rendered.
+**Plan-authority boundary.** Story state is authoritative at `PG`-record commit. A `PG` record is real the moment the patch engine accepts the bootstrap or turn-cycle state patch. No page-plan render artifact is part of the state turn. Rendered prose is planned and attached at scene scope after one or more committed `PG` records exist. The page snapshot is the fork primitive — any committed page is a valid parent for the next turn-cycle invocation, regardless of whether its prose has been rendered.
 
 **Scene render layer.** An `SCN` record is a derived render-unit membership record over committed `PG` ranges. It records which already-committed causal ticks form one reader-facing scene and where the scene-plan/prose/receipt artifacts live; it never creates causal state, never changes a `PG`, and never carries future dramatic obligation or target narrative shape.
 
@@ -74,7 +74,7 @@ Auxiliary story-bundle records:
 
 The full record-schema enumeration for all 22 story-bundle record classes plus the prose-receipt and scene-prose-receipt direct-write artifacts lives in a sibling shared template at `.claude/skills/_shared-templates/story-record-schemas.md`. That file preserves §4.X subsection numbering verbatim (so existing citations to §4.1 `BEL`, §4.2 `PG`, §4.2a deterministic PG hash computation, §4.3 `SE`, §4.3a audit-only SE events, §4.4 `SLT`, §4.4a shared `action_family` taxonomy, §4.4b `STENT` role and `SREL` axis taxonomies, §4.5.1 through §4.5.13, and §4.6 prose receipt all resolve without rewording in consumer skills, validators, and other shared templates). SPEC-42 adds `CLK` as §4.5.14, `STSEC` as §4.5.15, and `STQ` as §4.5.16 in the schema file without renumbering the existing prose-receipt §4.6 section; SPEC-56 adds `STCHAR` as §4.5.19; SPEC-92 adds `SCN` as §4.5.20 and the scene-prose receipt as §4.7.
 
-Consumers that need only the authority model (§1), schema-minimalism doctrine (§2), record class inventory (§3), closed predicate DSL (§5), action routing (§6), nine shared hard gates (§7), page-plan minimum contract (§8), branching procedure (§9), shared write order (§10), mystery and canon authority (§11), or skill-usage overview (§12) can read this main contract alone; consumers that need any record schema additionally load `story-record-schemas.md`.
+Consumers that need only the authority model (§1), schema-minimalism doctrine (§2), record class inventory (§3), closed predicate DSL (§5), action routing (§6), nine shared hard gates (§7), scene-plan minimum contract (§8a), branching procedure (§9), shared write order (§10), mystery and canon authority (§11), or skill-usage overview (§12) can read this main contract alone; consumers that need any record schema additionally load `story-record-schemas.md`.
 
 The split is purely structural — §4 is overwhelmingly the bulk of the contract, and the bundled file exceeded the per-call read limit of bulk-loading tools at HEAD. No schema content changed in the move; this stub is the navigational pointer.
 
@@ -397,15 +397,15 @@ When a player selects a `CHC` or supplies a write-in, the turn-cycle resolves it
 | `promotion_hold` | The action asserts a world-level truth or canon mystery resolution and pauses for `story-fact-promotion-to-canon`. |
 | `terminal` | The action coherently closes the branch. |
 
-**Silent rejection is forbidden.** Every action — including impossible ones — produces an `SE` record with `world_logic_rationale` explaining the route and a page plan that dramatizes the outcome. A skill that drops a player action without producing a page is broken.
+**Silent rejection is forbidden.** Every action — including impossible ones — produces an `SE` record with `world_logic_rationale` explaining the route and a `PG` state snapshot that records the outcome. A skill that drops a player action without producing a page is broken.
 
-**Choice Consequence Integrity.** An accepted `CHC` selection or accepted write-in must not be cosmetic-only. At page-plan commit, it must produce at least one grounded consequence: a non-empty `SE.state_delta`, a new / superseded / closed story-bundle record, a changed visibility or affordance state, or a recorded failure / refusal / block that is itself the consequence. A purely rhetorical or expressive choice is lawful only when the parent page plan explicitly marked that choice as rhetorical before selection.
+**Choice Consequence Integrity.** An accepted `CHC` selection or accepted write-in must not be cosmetic-only. At `PG`-record commit, it must produce at least one grounded consequence: a non-empty `SE.state_delta`, a new / superseded / closed story-bundle record, a changed visibility or affordance state, or a recorded failure / refusal / block that is itself the consequence. A purely rhetorical or expressive choice is lawful only when the parent `CHC` or selected commitment trace explicitly marked that choice as rhetorical before selection.
 
 `outcome_route: world_block` is still the routing value for impossible actions. It does not pair with an event-kind value named `world_block`; `SE.event_kind: turn_resolution` records ordinary turn resolution while `SE.turn_driver.kind` distinguishes player selections, write-ins, and non-player drivers. Repair flows continue to use `system_repair` or `audit_repair`.
 
 ## 7. Nine Shared Hard Gates
 
-Every PG-authoring story skill (`branching-story-bootstrap` and `branching-story-turn-cycle`) validates these nine hard gates at page-plan commit; gate results are recorded in the flat `PG.validation_trace` mapping using the nine schema keys defined in §4.2 (one entry per gate, keyed by the gate name), and each gate's pass entry requires a one-line rationale (per AGENTS.md "Validation test PASS entries require a one-line rationale"). The rationale prose target form is one sentence per gate, <= 30 words, with no semicolon-chained sub-clauses; `validation_trace_shape_compliance` enforces only the flat nine-key mapping shape, so rationale length is authoring-side discipline. Gate FAIL produces a direct-artifact partial failure under HARD-GATE discipline (see `docs/HARD-GATE-DISCIPLINE.md`). Non-PG story skills (`branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) preserve the same invariants — branch isolation, Mystery Reserve firewall, observer firewall, schema compliance, replay consistency, choice-set non-collapse, motivation grounding, terminal proof, and turn-driver lawfulness when they emit or audit turn-resolution state — through their own skill-local validation phases and HARD-GATE discipline. When non-PG skills emit audit-only SE records, §4.3a applies.
+Every PG-authoring story skill (`branching-story-bootstrap` and `branching-story-turn-cycle`) validates these nine hard gates at `PG`-record commit; gate results are recorded in the flat `PG.validation_trace` mapping using the nine schema keys defined in §4.2 (one entry per gate, keyed by the gate name), and each gate's pass entry requires a one-line rationale (per AGENTS.md "Validation test PASS entries require a one-line rationale"). The rationale prose target form is one sentence per gate, <= 30 words, with no semicolon-chained sub-clauses; `validation_trace_shape_compliance` enforces only the flat nine-key mapping shape, so rationale length is authoring-side discipline. Gate FAIL rejects the patch plan before any story `_source` record lands under HARD-GATE discipline (see `docs/HARD-GATE-DISCIPLINE.md`). Non-PG story skills (`branching-story-scene-plan`, `branching-story-scene-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) preserve the same invariants — branch isolation, Mystery Reserve firewall, observer firewall, schema compliance, replay consistency, choice-set non-collapse, motivation grounding, terminal proof, and turn-driver lawfulness when they emit or audit turn-resolution state — through their own skill-local validation phases and HARD-GATE discipline. When non-PG skills emit audit-only SE records, §4.3a applies.
 
 | # | Gate | Checks |
 |---|---|---|
@@ -414,260 +414,20 @@ Every PG-authoring story skill (`branching-story-bootstrap` and `branching-story
 | 3 | mystery / invariant firewall | No `M-<integer>` with `status: forbidden` is resolved. No INV record is violated. `mystery_policy.forbidden_resolutions` of the selected commitment block is respected. |
 | 4 | branch isolation | No record from a sibling branch appears in this page's `state_snapshot.active_records`. No author-pool commitment block references branch-local record ids. |
 | 5 | append-only delta | All changes in `SE.state_delta` are creates / supersessions / closes. No in-place mutation of a prior record. |
-| 6 | consequence capacity or terminal proof | The new page has at least one eligible commitment block OR `state_snapshot.continuation.terminal_status` is `branch_pause` / `terminal_closed` with a rationale that names how high-salience debts were closed, abandoned, or inherited. Debt salience reads `urgency` uniformly on active `OBL`, `CNSQ`, `THR`, and `STINT` records. Choice Consequence Integrity also applies here: accepted choices and accepted write-ins must produce a grounded consequence unless the parent page plan marked the choice as rhetorical. |
-| 7 | plan grounding | Every declared affordance, every required beat from the chosen commitment block, and every CHC emitted by this page is grounded in `state_snapshot.active_records` or world canon. Observer Firewall also applies here: selected `SLT` actor-bindings, emitted choices, and character actions must rely only on information available to the acting entity or record a valid access route. |
+| 6 | consequence capacity or terminal proof | The new page has at least one eligible commitment block OR `state_snapshot.continuation.terminal_status` is `branch_pause` / `terminal_closed` with a rationale that names how high-salience debts were closed, abandoned, or inherited. Debt salience reads `urgency` uniformly on active `OBL`, `CNSQ`, `THR`, and `STINT` records. Choice Consequence Integrity also applies here: accepted choices and accepted write-ins must produce a grounded consequence unless the parent `CHC` or selected commitment trace marked the choice as rhetorical. |
+| 7 | state-delta grounding | The `PG.state_snapshot`, `SE.state_delta`, selected `SLT`, and emitted `CHC[]` are grounded in active story records, loaded canon, and lawful access routes. Observer Firewall also applies here: selected `SLT` actor-bindings, emitted choices, and character actions must rely only on information available to the acting entity or record a valid access route. |
 | 8 | canon promotion hold | If `SE.outcome_route == promotion_hold` or any `promotion_claims[].authority == canon_candidate`, the world-level truth is held for promotion (not asserted in this page's state delta as if already canon). Marked `NOT_APPLICABLE` with rationale when no canon claim is in play. |
-| 9 | Turn-Driver Lawfulness | Every `turn_resolution` event carries a well-formed `turn_driver` whose driver records are active on the parent page snapshot, and whose `pov_visibility` is consistent with the actor's information access per §6b (Observer Firewall). Enforced by `turn_driver_schema_compliance` for cross-record-boundary constraints and `turn_driver_pov_observer_firewall` for POV access-route consistency at page-plan commit. Marked `NOT_APPLICABLE` with rationale for `story_start`, repair, prose-attach, and promotion-closeout events that lawfully omit `turn_driver`. |
+| 9 | Turn-Driver Lawfulness | Every `turn_resolution` event carries a well-formed `turn_driver` whose driver records are active on the parent page snapshot, whose driver kind matches the source of initiative, and whose `pov_visibility` is consistent with the actor's information access per §6b (Observer Firewall). Enforced by `turn_driver_schema_compliance`, record-only `page_plan_turn_driver_consistency`, and `turn_driver_pov_observer_firewall` for record-field and POV access-route consistency at `PG`-record commit. Marked `NOT_APPLICABLE` with rationale for `story_start`, repair, and promotion-closeout events that lawfully omit `turn_driver`. |
 
 A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-engine-only writes to `worlds/<slug>/stories/<story-slug>/_source/<class>/*.yaml`, so a malformed plan is rejected at the patch engine before any record lands.
 
-## 8. Page Plan Minimum Contract
+## 8. Retired Page-Plan Contract
 
-`pages-prose-plans/PG-<integer>.md` is a direct-write artifact (not an atomic `_source/` record). It is the prompt package for the external prose renderer. Each plan body has 19 numbered sections plus required §7a for `turn_resolution` events, and optional §9b, §9c, §10b when relevant story-state records are active or relevant:
+The former `pages-prose-plans/PG-<integer>.md` 19-section page-plan contract is retired for new `PG` authoring. `branching-story-bootstrap` and `branching-story-turn-cycle` commit story state as `SE` + `PG` + emitted `CHC` records and validate the nine shared hard gates against those records. They do not author page plans, do not stamp `plan.plan_hash`, and do not set `prose_plan_path`.
 
-| § | Section | Source |
-|---|---|---|
-| 1 | Story kernel excerpt | `STORY_KERNEL.md` slice |
-| 2 | **Content Policy** | **inlined verbatim from `docs/prose-renderer-contract/content-policy.md`** |
-| 3 | **Prose Craft Contract** | **inlined verbatim from `docs/prose-renderer-contract/prose-craft-contract.md`** |
-| 4 | Relevant world-canon excerpt | context packet |
-| 5 | Active cast and entity statuses | `state_snapshot.entity_status` |
-| 6 | Current location and affordances | `state_snapshot.visible_affordances` |
-| 7 | Selected event and state delta | `SE` translated into renderer-facing prose direction, with record-id grounding allowed where it is load-bearing for state movement; engine state-delta arrays and lifecycle bookkeeping live in §15 frontmatter |
-| 7a | Turn driver / initiative trace | `SE.turn_driver` + parent-page active pressure disposition; fixed driver rows and disposition cell shape stay validator-enforced, while reason prose avoids bare record-id rationale where possible |
-| 8 | Required beats from the commitment block | selected `SLT.beats` |
-| 9 | Relationship and belief context | active `SREL`, `BEL` translated into renderer-facing relationship and knowledge prose, with record-id grounding allowed where it disambiguates load-bearing state |
-| 9b | Active actor plans / tactical agency (optional) | per-page-computed from active `STPLAN` records; preserve the structural labels, but write each field as prose-direction content |
-| 9c | Emotional causality / affective transition (optional) | per-page-computed from active `STEMO` records; preserve the structural labels, but translate affect and pressure enums into behavior prose |
-| 10 | Open obligations, consequences, threads | active `OBL`, `CNSQ`, `THR`, including each record's `urgency` |
-| 10b | Open Setups, Active Clocks, Hidden Secrets (optional) | per-page-computed from active `STQ`, `CLK`, and `STSEC`; body uses prose pressure/setup descriptions while numeric fields stay in §15 |
-| 11 | Forbidden mystery resolutions | `mystery_policy.forbidden_resolutions` |
-| 12 | Stopping point | from commitment block + author judgment |
-| 13 | Next choices to foreshadow or make available | emitted `CHC[]` |
-| 14 | Recent prose continuity (optional, when parent rendered prose exists) | structured packet derived from parent `pages-prose/PG-<integer>.md` |
-| 15 | Plan frontmatter (engine fields, hash, page id) | engine |
-| 16 | Cast material reality projection (optional) | per-skill |
-| 16a | STCHAR-derived character authority packets (mandatory when relevant) | STCHAR profile + page state |
-| 17 | Style and register notes (optional) | per-skill |
-| 18 | Anti-pathology checklist | per-skill |
-| 19 | **Render-time instruction block** | **inlined verbatim from `docs/prose-renderer-contract/render-time-instruction.md`** |
+Legacy bundles may still contain `pages-prose-plans/`, `pages-prose/`, and `pages-prose-receipts/` artifacts. Those artifacts are read-only legacy publication surfaces for tools that serve old bundles; they are not current state-turn inputs and are not required for a committed `PG` to become a lawful parent.
 
-**§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages. Byte-equality between canonical source and inlined section is enforced by the `page_plan_verbatim_section_integrity` structural validator (`tools/validators/src/structural/page-plan-verbatim-section-integrity.ts`); drift fails the gate.
-
-### 14. Recent prose continuity
-
-§14 is optional and appears only when a parent rendered-prose artifact exists on disk at `pages-prose/PG-<parent>.md`. Bootstrap PG-1 omits §14 because it has no parent. A turn-cycle page whose parent prose has not yet been rendered also omits §14; parent page snapshots remain valid fork points with or without rendered prose.
-
-When §14 is present, do not inline full parent prose. Author a structured continuity packet:
-
-```markdown
-## 14. Recent prose continuity
-
-### Where the previous page ended
-- <Several concise continuity bullets: what happened, where the cast is, what is held.>
-
-### Facts to preserve
-- <Object, position, body, relationship, or state facts the next page must honor.>
-
-### Do not reuse these exact prior phrases, anchors, or metaphor stocks
-- <Prior phrase, sensory anchor, image, or metaphor stock to avoid repeating.>
-
-### Fresh anchor opportunities
-- <Concrete sensory, material, behavioral, dialogue, or subtext opportunity for this page.>
-```
-
-Verbatim prior-prose quotation is permitted only when an exact line must be answered in a mid-dialogue continuation, a clue phrase carries legal or social weight, or the renderer must preserve a precise lie, promise, accusation, or question. When quotation is permitted, quote only 1-3 lines and name the trigger condition in the packet. The cap is a leakage-prevention rule for quoted parent prose, not a rendered-prose length target.
-
-### 7. Selected event and state delta
-
-§7 is the renderer-facing translation of the selected event and its state movement. It must tell the prose renderer what changed in the scene, pressure field, and relevant interior state in human prose. Record IDs may appear when they are the load-bearing grounding for a state movement, but do not dump the engine ledger as §7 body text: `state_delta.create[]`, `state_delta.supersede[]`, `state_delta.close[]`, `record_introductions[]`, `state_relations[]`, `non_propagation_facts[]`, and raw field arrays belong in §15 frontmatter or the underlying `SE` record.
-
-Preferred §7 body shape is a short prose-direction packet such as:
-
-```markdown
-What changed in <actor>'s interior this page:
-- <The actor's intent, appraisal, or pressure changed in story terms.>
-- <A new belief, observation, obligation, clock, or consequence becomes renderable as situation, behavior, or perception.>
-- <Any non-propagation or witness limit is expressed as what the prose may or may not show, not as YAML.>
-```
-
-The body can mention the selected event, route, rationale, player-visible outcome, and the record IDs needed to ground those state movements, but lifecycle arrays, introduction triggers, relation verbs, and non-propagation arrays remain greppable from §15 frontmatter for plan grounding and validation.
-
-### 7a. Turn driver / initiative trace
-
-§7a is a render-side projection of `SE.turn_driver`, not a second state engine. It is required for every `SE.event_kind: turn_resolution` page plan and omitted when `SE-1` is `story_start` with no turn driver. Required content (all lines must appear; values are page-author-supplied):
-
-- Driver kind: <one of player_action | player_write_in | npc_action | offstage_action | world_pressure | clock_fire | secret_reveal | multi_actor_collision>
-- Initiator: <STENT-<integer> | player | world | system | unknown>
-- Driver records: <comma-separated record ids; matches SE.turn_driver.driver_records>
-- Player response mode: <initiates | responds | witnesses | chooses_continuation | none>
-- POV visibility: <perceived_directly | inferred_from_trace | reported | discovered_after | withheld>
-- Observer-firewall note: <one sentence on the access route for non-player drivers; "n/a" for player_action / player_write_in>
-
-The `SE.turn_resolution` event's `world_logic_rationale` is the carrier for driver justification; §7a's `Driver kind:` and `Driver records:` lines together with `world_logic_rationale` form the complete driver provenance. Do not add a separate `why_now` field.
-
-For non-player turns, prefer `STINT` in `Driver records` when the actor's active intention fires the act, and prefer `BEL` when the actor's knowing grounds the act. `BEL` may strengthen provenance, but an `npc_action` still needs at least one pressure or stable-authority driver record such as `STPLAN`, `STEMO`, `CLK`, `THR`, `STCHAR`, or `STINT`.
-
-Active-pressure disposition appears in §7a whenever the parent `PG.state_snapshot` has actively-pressuring records. Every actively-pressuring record on the parent snapshot appears in exactly one row. The class-specific criteria for "actively-pressuring" are:
-
-| Class | Criterion |
-|---|---|
-| STPLAN | `plan_status` is `active`, `blocked`, or `suspended`, and `current_step` has content |
-| STEMO | `intensity` is `high` or `extreme`, and `behavioral_pressure` is non-empty |
-| CLK | `status = active`, and `value` is at or above any `thresholds[].at` value |
-| THR | `status = active` and `urgency = high` |
-| STSEC | `status = partially_revealed` or `reveal_records` is non-empty |
-| STQ | `status = complicated` and `salience = high` |
-| OBL | `status` is `open` or `escalated`, and `urgency = high` |
-| CNSQ | `status` is `pending` or `escalated`, and `urgency = high` |
-
-The `active_pressure_handling_discipline` structural validator enforces this set; the table reproduces its per-class criteria for authoring reference.
-
-| Record | Disposition | Reason / expiry |
-|---|---|---|
-| <ID> | selected | became this turn's driver |
-| <ID> | deferred | <expires after PG-<integer> or condition> |
-| <ID> | rejected | <one-sentence reason> |
-
-The table keeps the closed `Disposition` vocabulary and `Reason / expiry` cell shape enforced by `active_pressure_handling_discipline`. Within that shape, write the reason as prose-facing pressure or scene logic rather than bare record-id rationale where possible. A deferred row may say `until the actor has a private opening to decide whether to approach`, and a selected row may say `became this turn's driver after the observed risk crossed the action threshold`; it must still satisfy the literal `PG-<integer>` or conditional-connective rule when the validator requires it.
-
-### 9. Relationship and belief context
-
-§9 is the renderer-facing account of the relationships, beliefs, suspicions, lies, witness memories, and access routes that matter on this page. Do not enumerate active `SREL` / `BEL` records as the body text. Write the relationship or knowledge state in prose, such as:
-
-```markdown
-Jon and Ane have no prior shared history; she has still not noticed him. Jon privately believes she has been on the bench for hours, and Ane believes she is alone in the park.
-```
-
-The record ids that ground the statement may appear in §9 when they disambiguate load-bearing state, and also belong in §15 frontmatter and, when they modulate a character authority packet, in §16a `Current-state grounding records:`. §9 must still explain the relationship, belief, lie, suspicion, or public claim by its story meaning rather than making the prose renderer parse id lists as shorthand for human context.
-
-**§9b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `STPLAN` records — one entry per active plan with sub-bullets per the template below:
-
-```markdown
-## 9b. Active actor plans / tactical agency
-
-- STPLAN-<integer> — Holder: STENT-<integer>.
-  - Objective:
-  - Root intention:
-  - Current step:
-  - Belief basis:
-  - Resources/leverage:
-  - Blockers:
-  - Fallbacks currently available:
-  - This page's plan movement:
-  - Prose must show:
-  - Prose must not imply:
-```
-
-§9b is omitted entirely when no active STPLANs exist on the current branch. Preserve the `STPLAN-<integer> — Holder: STENT-<integer>` heading and the sub-bullet labels above because validators and reviewer discipline depend on the shape. Inside those labels, translate engine fields into prose: `Current step:` describes what the holder is trying next rather than naming an `action_family`; `This page's plan movement:` says how the page advances, tests, blocks, revises, fulfills, abandons, or ignores the plan in story terms rather than exposing `SE.state_relations[]`.
-
-**§9c is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `STEMO` records — one entry per active emotion with sub-bullets per the template below:
-
-```markdown
-## 9c. Emotional causality / affective transition
-
-- STEMO-<integer> — Holder: STENT-<integer>.
-  - Affect (kind + intensity):
-  - Trigger event:
-  - Appraisal basis:
-  - Behavioral pressure:
-  - Transition this page (if any):
-  - Prose must render:
-  - Prose must avoid:
-```
-
-§9c is omitted entirely when no active STEMOs exist on the current branch. Preserve the `STEMO-<integer> — Holder: STENT-<integer>` heading and the sub-bullet labels above. Inside those labels, translate enum-like content into behavior and appraisal prose: `Affect (kind + intensity):` may say "an extreme moral dread"; `Behavioral pressure:` may say "the actor pulls toward staying out of notice and toward physical stillness" rather than `conceal, freeze`; `Transition this page:` names the felt or behavioral change the prose must render. `branching-story-turn-cycle` owns the rendering procedure for both §9b and §9c, parallel to its existing §10b rendering ownership.
-
-**§16a is a page-local projection, not inlined STCHAR or current-state storage.** Every page plan MUST include one STCHAR-derived character authority packet for each viewpoint character, speaker, major actor, direct target, emotionally salient character, or any character whose behavior, voice, appraisal, relationship conduct, perception, embodiment, or agency materially shapes the page. Background-only entities whose behavior and voice do not shape the page may be omitted, but the omission must not ask the prose renderer to infer persona from an id.
-
-§16a composes (1) stable STCHAR authority, (2) active current story-state records in the page snapshot, and (3) this page's rendering needs. STCHAR supplies stable voice, conduct, appraisal, pressure behavior, relationship behavior, perception, embodiment, agency tendencies, capabilities, limits, and anti-generic constraints. Active records supply current physical condition, belief, plan, emotion, relationship state, pressure, secret/question/clock state, location, objects, and causal event. A §16a packet must not imply that current state lives inside STCHAR.
-
-Semantic Preservation Contract: for any STCHAR derived from a world `CHAR` (`source_kind: world_char`), every structured operational source fact must be copied, transformed, compressed, intentionally omitted with rationale, or marked story-irrelevant. No structured operational source fact may survive only in `## Source Distillation` or other audit/commentary prose if page planning, choice grounding, state derivation, or prose rendering may need it. The STCHAR frontmatter `source_operational_fact_map` records this disposition for each present structured `dramatic_core` source field; retained facts target operational STCHAR homes, never `Source Distillation`.
-
-Each §16a packet includes:
-
-```markdown
-## 16a. STCHAR-derived character authority packets
-
-- STENT-<integer> / STCHAR-<integer> — <display name>.
-  - Required because: viewpoint | speaker | major_actor | direct_target | emotionally_salient | behavior_shapes_page | voice_shapes_page | offstage_causal.
-  - Story-facing identity for this page:
-  - Stable STCHAR seed used:
-  - Current-state grounding records: <STEMO-<integer>, BEL-<integer>, STPLAN-<integer>, SREL-<integer>, STSTAT-<integer>, STOBJ-<integer>, STLOC-<integer>, THR-<integer>, OBL-<integer>, CNSQ-<integer>, CLK-<integer>, STSEC-<integer>, STQ-<integer>, SE-<integer>, PG-<integer>; or `none; stable STCHAR authority only.`>
-  - Page-local projection:
-  - Relevant appraisal rules:
-  - Relevant pressure behavior:
-  - Relationship-specific conduct:
-  - Perception and embodiment constraints:
-  - Agency and planning tendency:
-  - Relevant capabilities / limits for this page:
-  - Prose must show:
-  - Prose must not imply:
-  - Anti-generic warnings:
-```
-
-When page-local modulation depends on active state, `Current-state grounding records:` names the active records that ground that modulation, cited by id. When no current-state record is needed, the field reads exactly: `Current-state grounding records: none; stable STCHAR authority only.` Page plans must not cite world `CHAR-*` as operational page-plan characterization authority. In §16a packet fields, any `PG-<integer>` or `SE-<integer>` token is treated as an operational current-state citation: cite only the current page's own `PG` or resolved `SE` id there. To discuss earlier pages or events as history, use prose such as "the prior observation beat" or "the parent-page action" rather than a literal page/event id unless that id is deliberately active/current for the packet.
-
-**DO / DON'T examples for prior-page / prior-event references in §16a:**
-
-| DON'T (validator FAIL) | DO (validator PASS) |
-|---|---|
-| "the disclosure from PG-6 compounds the desire" | "the disclosure on the parent page compounds the desire" |
-| "Jon's posture from PG-6 must now hold against new pressure" | "Jon's posture from the prior page must now hold against new pressure" |
-| "the trade-coded register reads back to him as evidence the PG-5 probe was about pricing" | "the trade-coded register reads back to him as evidence the earlier probe was about pricing" |
-| "the SE-6 act has paid its cost into the air" | "the parent-page act has paid its cost into the air" |
-| "the dread is sharper than at PG-6" | "the dread is sharper than on the prior page" |
-| "Current-state grounding records: STEMO-13, STEMO-14, PG-6" | "Current-state grounding records: STEMO-17, STEMO-18, PG-7" — cite the current page's own PG, not a prior page. |
-| "Trigger event: SE-6" when SE-6 is the prior resolved event | "Trigger event: SE-7" — cite the current page's resolved SE, or use prose such as "the parent-page event" for history. |
-
-The validator's strict rule is that any `PG-<integer>` or `SE-<integer>` token in a §16a packet field MUST resolve to an active record in the current page's snapshot. The current page's own `PG-<integer>` and the current page's resolved `SE-<integer>` are lawful citations; earlier page/event ids need prose substitution unless they are deliberately active/current for the packet.
-
-The canonical post-SPEC-71 §16a packet field set is:
-
-- `STENT / STCHAR / display name`
-- `Required because:`
-- `Story-facing identity for this page:`
-- `Stable STCHAR seed used`
-- `Current-state grounding records:`
-- `Page-local projection`
-- `Prose must-show`
-- `Prose must-not-imply`
-- `Anti-generic warnings`
-
-`Required because:` is parsed as a comma-separated label set drawn from the closed vocabulary above. The `page_plan_stchar_packet_integrity` validator requires voice authority in the stable seed and page-local projection when the set contains any of `speaker`, `viewpoint`, or `voice_shapes_page`, and forbids `offstage_causal` for any STENT whose `location` is not `offstage`. Voice authority is contract-conformant in either of two equivalent forms: a dedicated `- Voice/dialogue authority:` bullet with substantive content, OR substantive inline `Voice Bible` phrasing within the `- Stable STCHAR seed used:` or `- Page-local projection:` bullets. The validator accepts those forms; voice-requiring labels with NO accepted voice-authority signal in any of these surfaces still FAIL. Labels outside the closed vocabulary FAIL under the new contract. The receipt-side verbatim-composite contract in `story-record-schemas.md` §4.6 is unchanged.
-
-For an active offstage character whose offstage activity causally bears on the page, §16a may use a reduced `offstage_causal` packet:
-
-```markdown
-- STENT-<integer> / STCHAR-<integer> — <display name>.
-  - Required because: offstage_causal.
-  - Story-facing identity for this page:
-  - Stable STCHAR seed used:
-  - Current-state grounding records: <grounding records for the offstage causal projection, or `none; stable STCHAR authority only.`>
-  - Page-local projection:
-  - Relevant appraisal rules:
-  - Relevant pressure behavior:
-  - Offstage causal relevance:
-  - Relevant capabilities / limits for this page: <include only when the offstage character's capability or limit is the mechanism of their causal bearing on this page>.
-  - Prose must not imply:
-  - Anti-generic warnings:
-```
-
-The reduced packet carries only the offstage operational authority needed for this page: relevant appraisal rules, relevant pressure behavior when applicable, relevant capabilities or limits only when they are the mechanism of the offstage causal bearing, and the offstage causal relevance that explains what the character is doing off page that bears on the page. It omits the voice/dialogue authority content (in either canonical form per the full-packet contract above — dedicated `- Voice/dialogue authority:` bullet or inline `Voice Bible` phrasing within `- Stable STCHAR seed used:` / `- Page-local projection:`) and the on-page rendering lines for perception, embodiment, agency, and dialogue cues because the character is not rendered on the page.
-
-Emit/omit boundary: an active offstage character (`entity_status.location: offstage`) whose offstage activity causally bears on the page should carry an `offstage_causal` packet; an offstage character with no causal bearing on this page may be omitted as background-only. The omission must still not ask the prose renderer to infer persona from an id. Whether offstage activity causally bears on the page is authoring judgment, not validator-graded.
-
-A §16a packet is sufficient page-local authority for prose and prose-attach validation when it names why the character is required, is active in the snapshot, and carries the relevant voice/behavior authority for the page. It is not the default authority for new character-dependent state creation; that requires full or projected STCHAR section retrieval. §16a is the renderer's character voice and behavior authority; it does not replace §5 entity status, §9 relationship/belief context, §9b active plans, §9c emotional transition, §16 cast material reality projection, or §17 style/register notes. Page plans must not cite world `CHAR-*` as operational authority for characterization after STCHAR exists; world `CHAR` may appear only as non-operational provenance on the STCHAR itself or in explicit authoring/promotion/adjudication flows.
-
-**§10b is per-page-computed, not inlined verbatim.** When present, it renders the current page's relevant active `CLK` records, active `STSEC` records, and active `STQ` records as prose pressure, secrecy, and setup/payoff direction. Numeric or closed-field details such as clock `value` / `max`, thresholds, salience, secret status, holder lists, clue-carrier counts, audience visibility, `payoff_of`, and `answer_records[]` stay greppable in §15 frontmatter and the underlying records; the §10b body translates them for the external renderer. For example: "the observation-window pressure has reached the halfway mark; the next noticeable shift comes when a third party enters the privacy of the scene." Subsections appear only for classes with relevant active records; when no `CLK`, `STSEC`, or `STQ` content matters for the render, §10b is omitted rather than emitted as an empty placeholder. `branching-story-turn-cycle` owns the rendering procedure for this section.
-
-The plan must not expose engine jargon to prose-facing sections. Record IDs and schema-field vocabulary may appear in engine-output body sections (§5, §6, §7, §7a, §8, §9, §9b, §9c, §10, §10b, §13, §14) when they are load-bearing grounding; predicate DSL terms remain prohibited outside excluded verbatim/frontmatter sections. Renderer-facing prose sections (§1, §4, §11, §12, §17, §18) translate records into human-readable direction. Structural enforcement: `page_plan_body_engine_vocabulary_cleanliness` scans plan body sections outside §15 / §2 / §3 / §19 verbatim blocks with per-section policy, preserving the §16a `Current-state grounding records:` exemption and blocking the patch envelope at the validation phase when a scanned section has three or more hits.
-
-The prior-page / prior-event prose-substitution discipline applies to **every** renderer-facing prose section, not only §16a: refer to earlier pages or events with prose — "the prior page," "the parent-page act," "the earlier probe" — rather than literal `PG-<integer>` / `SE-<integer>` tokens, using the same substitution technique the §16a DO / DON'T table above illustrates. §16a is the strict case (a prior-page `PG`/`SE` token in a §16a packet field FAILs, because those fields are current-state citations that must resolve to the current page's own snapshot). In the other renderer-facing prose sections (§1, §4, §11, §12, §17, §18) the same substitution keeps a prior-page id out of the prose: a recent-page reference (for example, naming a prior page's lines in a §17 "avoid recent phrasing" note) reads as "the prior page's lines," not `PG-<integer>`. This is the common authoring slip the warn-at-one-or-two / block-at-three threshold is calibrated to catch; treat the warn as a prompt to substitute, and reserve literal page/event ids for engine-output sections or §15 frontmatter.
-
-For non-accept routes, §7 must include `SE.resolution.player_visible_feedback` so the prose renderer has the player-legible outcome receipt it must realize. For `accept`, §7 carries the selected event, route, rationale, and state delta without a `resolution` block.
-
-The plan must not include word-count targets, floors, ceilings, ranges, or budgets. Pacing is expressed structurally through beats and stop conditions. See FOUNDATIONS §Story Bundles §9.
+Current renderer-facing prose planning lives in §8a's scene-plan contract. Scene plans translate committed `PG` ranges into prose direction after state is committed; they do not create or mutate causal story state.
 
 ## 8a. Scene-Plan Minimum Contract
 
@@ -696,7 +456,7 @@ Minimum structure:
 
 **§2, §3, and Render-Time Instruction are inlined verbatim once per scene plan.** This preserves the cold-context renderer contract at scene granularity. Byte-equality is enforced by `scene_plan_verbatim_section_integrity`; body cleanliness is enforced by `scene_plan_body_engine_vocabulary_cleanliness`.
 
-Scene-scope validation is additive to the nine page-plan hard gates. `scene_range_contiguity`, `scene_range_single_branch`, and `scene_range_no_sibling` prove the `SCN` range is ordered, contiguous, and branch-local. `scn_no_narrative_shape_language` plus the scene-plan skill's §5c affirmation keep `scene_descriptor`, `boundary_rationale`, and plan body prose descriptive of committed beats rather than future-prescriptive act/arc shape. Scene attach is downstream and non-authoritative like prose attach: it validates rendered prose and writes a receipt, but it is not a tenth page-plan gate and it never mutates `PG` or story state.
+Scene-scope validation is additive to the nine PG hard gates. `scene_range_contiguity`, `scene_range_single_branch`, and `scene_range_no_sibling` prove the `SCN` range is ordered, contiguous, and branch-local. `scn_no_narrative_shape_language` plus the scene-plan skill's §5c affirmation keep `scene_descriptor`, `boundary_rationale`, and plan body prose descriptive of committed beats rather than future-prescriptive act/arc shape. Scene attach is downstream and non-authoritative: it validates rendered prose and writes a receipt, but it is not a tenth PG gate and it never mutates `PG` or story state.
 
 ## 9. Branching and Rewind
 
@@ -706,8 +466,8 @@ To advance the story from any committed page (continuation or fork):
 2. If continuing the existing branch, reuse `parent.branch_id`. If forking, allocate a new `BR-<integer>` whose `parent_branch_id` names the parent's branch and `forked_at_page_id` names the parent page.
 3. Resolve the selected `CHC` or write-in via §6 action routing.
 4. Select or JIT-create one `SLT` commitment block.
-5. Build the state delta, build the next snapshot, compute the new `state_hash`.
-6. Author the page plan, generate the next `CHC` set, validate against §7 hard gates.
+5. Build the state delta, build the next snapshot, generate the next `CHC` set, and compute the new `state_hash`.
+6. Validate the `SE` / `PG` / `CHC` record set against §7 hard gates.
 7. Submit one patch envelope (§10 write order).
 
 No sibling-branch prose may be read for state assembly. Cross-branch comparison belongs only in audit, not in turn-cycle.
@@ -720,12 +480,11 @@ Every state-changing skill follows this order at commit:
 2. Dry-run validate via `mcp__worldloom__validate_patch_plan`.
 3. Obtain approval token when execution mode requires it.
 4. Submit patch plan via `mcp__worldloom__submit_patch_plan`.
-5. Write direct-markdown artifacts: page plan (`pages-prose-plans/PG-<integer>.md`), story kernel updates, receipts, manifests.
-5a. Post-write plan-hash verification. Immediately re-read the bytes of `pages-prose-plans/PG-<integer>.md` and recompute its `plan_hash` using the canonical helper at `tools/world-mcp/src/cli/compute-pg-hashes.ts` (CLI: `compute-pg-hashes --plan <plan-md-path> --pg <envelope-extracted-pg-record.json>`). The `--pg` input is JSON-only and must be the committed PG payload from `patches[N].payload.record`, not a YAML draft. The recomputed `plan_hash` MUST equal the committed `PG.plan.plan_hash` (the value the patch plan accepted in step 4) before step 6 runs. If the values differ, this is a direct-artifact partial failure per `docs/HARD-GATE-DISCIPLINE.md`: do not update `INDEX.md`; surface the mismatch with both the committed and recomputed hashes; repair the file to the already-approved bytes or re-run approval with the corrected bytes. The step 4 patch plan and its committed PG record are unchanged; the disk state is being reconciled to them. Hook 6 also blocks direct `Edit` / `Write` attempts on `pages-prose-plans/PG-<integer>.md` when the pending body does not match the stamped hash, and blocks bundle `INDEX.md` updates while any referenced PG plan is drifted; this hook is a tool-invocation guard, while the skill-level verification remains the authoritative post-write belt-and-suspenders check.
+5. Write direct-markdown artifacts owned by the skill, such as story kernel updates, manifests, audits, storylet batches, story promotions, scene plans, scene prose, and scene-prose receipts.
 6. Update bundle `INDEX.md` last.
 7. Update per-world `stories/INDEX.md` only when story visibility changed (new bundle, archived bundle).
 
-Hook 3 blocks raw `Edit` / `Write` on `_source/<class>/*.yaml`. Story-bundle markdown surfaces (`STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `pages-prose-plans/`, `audits/`, `storylet-batches/`, `story-promotions/`, `pages-prose-receipts/`) remain direct-write surfaces, with Hook 6 adding the plan-hash guard for `pages-prose-plans/PG-<integer>.md` and bundle `INDEX.md`, and Hook 7 adding the prose-hash guard for `pages-prose-receipts/PG-<integer>.yaml`.
+Hook 3 blocks raw `Edit` / `Write` on `_source/<class>/*.yaml`. Story-bundle markdown surfaces (`STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `audits/`, `storylet-batches/`, `story-promotions/`, `scene-prose-plans/`, `scene-prose/`, `scene-prose-receipts/`) remain direct-write surfaces. Legacy `pages-prose-plans/` and `pages-prose-receipts/` may remain readable for old bundles, but current PG-authoring skills do not create them and no current hook relies on page-plan/prose-receipt hashes.
 
 If patch submission succeeds but a direct-write artifact fails, the story `_source/` records are authoritative and the artifact should be repaired directly. The skill must surface the partial-failure state to the user; silent retry is forbidden.
 
@@ -754,7 +513,7 @@ The story-skill family selects `SLT` records for a turn through a four-layer med
 
 3. **Eligibility / ranking layer (`SLT` predicates + MCP filter pipeline).** Symbolic legality is decided by the predicate DSL against active records (see §5). Character specificity enters here as **predicate / edge overlap with current state**, not as direct STCHAR predicates in the global pool.
 
-4. **Rendering / surface layer (page plan §16a + `CHC` wording).** The character-specific surface — viewpoint voice, refusal phrasing, relationship pressure, stance — is expressed at page-plan compose time and CHC authoring. §16a's `required_because` vocabulary is the authoring-time discipline for STCHAR packet inclusion.
+4. **Rendering / surface layer (scene plan + `CHC` wording).** The character-specific surface — viewpoint voice, refusal phrasing, relationship pressure, stance — is expressed through scene-plan rendering direction and CHC authoring. Scene-plan cast/voice requirements carry the renderer-facing STCHAR projection.
 
 ### Global-pool vs branch-scoped STCHAR predicate discipline
 
@@ -790,7 +549,7 @@ Under non-player initiative (`npc_action`, `offstage_action`, `world_pressure`, 
 
 ## 12. How Skills Use This Contract
 
-Each story-skill `SKILL.md` references this contract for: record schemas (§4), predicate DSL (§5), action-routing semantics (§6), the nine hard gates (§7), the page plan §19-section contract plus §7a turn-driver trace (§8), branching procedure (§9), shared write order (§10), mystery/canon authority (§11), and the character-fit selection contract (§11a).
+Each story-skill `SKILL.md` references this contract for: record schemas (§4), predicate DSL (§5), action-routing semantics (§6), the nine hard gates (§7), retired page-plan status and the scene-plan contract (§8/§8a), branching procedure (§9), shared write order (§10), mystery/canon authority (§11), and the character-fit selection contract (§11a).
 
 Skills must not duplicate the contract's content. They cite it. If a skill needs a deviation, the deviation is amended into this contract first.
 

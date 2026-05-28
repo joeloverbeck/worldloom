@@ -13,8 +13,6 @@
     "state_hash_parent",
     "state_hash",
     "state_snapshot",
-    "plan",
-    "prose_plan_path",
     "emitted_choices",
     "validation_trace"
   ],
@@ -126,7 +124,7 @@
     },
     "plan": {
       "type": "object",
-      "required": ["plan_hash"],
+      "required": [],
       "properties": {
         "plan_hash": {
           "type": "string",

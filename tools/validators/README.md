@@ -6,7 +6,7 @@ Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus story-scope predi
 
 Historical note: `archive/specs/SPEC-04-validator-framework.md` is archived prior art only. It is not current design authority.
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 107 structural validators, the 12 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 106 structural validators, the 12 rule-derived/story-scope validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
@@ -15,8 +15,8 @@ OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, proposal-card/proposal-batch
 frontmatter (including mined-from-diegetic-artifact variants), NCP
 proposal-card frontmatter, NCB proposal-batch frontmatter, DA frontmatter, and story-bundle
 atomic YAML record classes (STENT, STSTAT, SF, SE, OBL, CNSQ, THR, CLK, STSEC, STQ,
-SREL, STINT, STLOC, STOBJ, SCN, BR, PG, CHC, SLT, BEL, STPLAN, STEMO, and story-local DA). The prose receipt schemas cover
-direct-write `stories/<story-slug>/pages-prose-receipts/PG-*.yaml` and `stories/<story-slug>/scene-prose-receipts/SCN-*.yaml` artifacts. The PA
+SREL, STINT, STLOC, STOBJ, SCN, BR, PG, CHC, SLT, BEL, STPLAN, STEMO, and story-local DA). The scene prose receipt schema covers
+direct-write `stories/<story-slug>/scene-prose-receipts/SCN-*.yaml` artifacts; legacy page prose receipts remain historical artifacts and no longer have a current registered schema validator. The PA
 schema validates YAML frontmatter parsed from `adjudications/PA-NNNN-*.md`; PA body
 prose is not schema-constrained.
 
@@ -98,11 +98,7 @@ Structural validators:
 - `compatibility_drift`
 - `active_records_full_shape`
 - `page_affordance_integrity`
-- `page_plan_body_engine_vocabulary_cleanliness`
-- `page_plan_verbatim_section_integrity`
-- `page_plan_stchar_packet_integrity`
 - `page_plan_turn_driver_consistency`
-- `active_pressure_handling_discipline`
 - `story_question_payoff_integrity`
 - `story_question_setup_predates_payoff`
 - `story_question_grounding_integrity`
@@ -114,7 +110,6 @@ Structural validators:
 - `turn_cycle_output_grounding_integrity`
 - `touched_by_cf_completeness`
 - `proposal_package_shape`
-- `prose_receipt_schema_compliance`
 - `scene_prose_receipt_schema_compliance`
 - `scene_prose_receipt_content`
 - `scene_range_integrity`
@@ -122,8 +117,6 @@ Structural validators:
 - `scene_plan_verbatim_section_integrity`
 - `scene_plan_body_engine_vocabulary_cleanliness`
 - `scn_no_narrative_shape_language`
-- `prose_receipt_hash_integrity`
-- `prose_receipt_stchar_integrity`
 - `story_kernel_cast_bind_list_integrity`
 - `modification_history_retrofit`
 - `validation_trace_shape_compliance`

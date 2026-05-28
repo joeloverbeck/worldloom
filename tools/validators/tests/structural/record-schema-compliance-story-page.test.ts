@@ -80,6 +80,24 @@ test("record_schema_compliance accepts a PG record with contract-shaped snapshot
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts a planless SPEC-93 PG record", async () => {
+  const parsed = validPagePayload();
+  delete parsed.prose_plan_path;
+  delete parsed.plan;
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance accepts a legacy PG record with plan hash and prose plan path", async () => {
+  const parsed = validPagePayload();
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.deepEqual(result, []);
+});
+
 test("record_schema_compliance accepts STCHAR, STPLAN, and STEMO active_records entries", async () => {
   const parsed = validPagePayload();
   const stateSnapshot = parsed.state_snapshot as { active_records: Record<string, string[]> };
@@ -191,28 +209,22 @@ test("record_schema_compliance rejects a PG record with retired prose_receipt_pa
   )));
 });
 
-test("record_schema_compliance rejects PG records missing prose_plan_path", async () => {
+test("record_schema_compliance accepts PG records missing prose_plan_path", async () => {
   const parsed = validPagePayload();
   delete parsed.prose_plan_path;
 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
 
-  assert.ok(result.some((verdict) => (
-    verdict.code === "record_schema_compliance.required" &&
-    verdict.message.includes("must have required property 'prose_plan_path'")
-  )));
+  assert.deepEqual(result, []);
 });
 
-test("record_schema_compliance rejects PG records missing plan", async () => {
+test("record_schema_compliance accepts PG records missing plan", async () => {
   const parsed = validPagePayload();
   delete parsed.plan;
 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
 
-  assert.ok(result.some((verdict) => (
-    verdict.code === "record_schema_compliance.required" &&
-    verdict.message.includes("must have required property 'plan'")
-  )));
+  assert.deepEqual(result, []);
 });
 
 test("record_schema_compliance rejects PG records missing state_hash", async () => {

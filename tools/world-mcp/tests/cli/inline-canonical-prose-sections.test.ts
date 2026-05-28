@@ -5,8 +5,8 @@ import path from "node:path";
 import test from "node:test";
 
 import {
-  PAGE_PLAN_VERBATIM_CANONICAL_SOURCES,
-  stripPagePlanVerbatimFramingHeader
+  SCENE_PLAN_VERBATIM_CANONICAL_SOURCES,
+  stripScenePlanVerbatimFramingHeader
 } from "../../src/package-interop.js";
 import { runInlineCanonicalProseSectionsCli } from "../../src/cli/inline-canonical-prose-sections.js";
 
@@ -32,7 +32,7 @@ function makeRoot(overrides: Partial<Record<SectionNumber, string | null>> = {})
     if (overrides[section] === null) {
       continue;
     }
-    const relativePath = PAGE_PLAN_VERBATIM_CANONICAL_SOURCES[section];
+    const relativePath = SCENE_PLAN_VERBATIM_CANONICAL_SOURCES[section];
     writeFileSync(
       path.join(root, relativePath),
       overrides[section] ?? framed(section, CANONICAL[section]),
@@ -94,8 +94,8 @@ function extractSection(content: string, section: SectionNumber): string {
 }
 
 function canonicalBody(root: string, section: SectionNumber): string {
-  return stripPagePlanVerbatimFramingHeader(
-    read(path.join(root, PAGE_PLAN_VERBATIM_CANONICAL_SOURCES[section]))
+  return stripScenePlanVerbatimFramingHeader(
+    read(path.join(root, SCENE_PLAN_VERBATIM_CANONICAL_SOURCES[section]))
   );
 }
 

@@ -13,7 +13,7 @@ const FORBIDDEN_FIELDS = [
 ] as const;
 const GUARDED_CONTRACT_FILES = [
   "tools/validators/src/schemas/story-character-authority.schema.json",
-  "tools/validators/src/schemas/prose-receipt.schema.json",
+  "tools/validators/src/schemas/scene-prose-receipt.schema.json",
   ".claude/skills/_shared-templates/story-state-contract.md",
   ".claude/skills/_shared-templates/story-record-schemas.md"
 ] as const;

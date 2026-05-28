@@ -6,7 +6,6 @@ import test from "node:test";
 
 import { runValidators } from "../../src/framework/run.js";
 import type { Context, IndexedRecord, Validator, Verdict } from "../../src/framework/types.js";
-import { activePressureHandlingDiscipline } from "../../src/structural/active-pressure-handling-discipline.js";
 import { observerFirewall } from "../../src/structural/observer-firewall.js";
 import { pagePlanTurnDriverConsistency } from "../../src/structural/page-plan-turn-driver-consistency.js";
 import { turnCycleOutputGroundingIntegrity } from "../../src/structural/turn-cycle-output-grounding-integrity.js";
@@ -43,7 +42,6 @@ const SPEC76_VALIDATORS: readonly Validator[] = [
   turnDriverSchemaCompliance,
   turnDriverPovObserverFirewall,
   pagePlanTurnDriverConsistency,
-  activePressureHandlingDiscipline,
   observerFirewall,
   turnCycleOutputGroundingIntegrity
 ];
@@ -80,26 +78,6 @@ test("SPEC-76 Red Kiln Ambush variants produce the expected capstone verdicts", 
       (event(records).parsed as { turn_driver: { pov_visibility: string } }).turn_driver.pov_visibility = "perceived_directly";
     },
     ["turn_driver_hidden_state_leak"]
-  );
-
-  await assertCodes(
-    "missing pressure table",
-    undefined,
-    [
-      "page_plan_active_pressure_table_missing",
-      "high_urgency_active_record_unhandled",
-      "high_urgency_active_record_unhandled",
-      "high_urgency_active_record_unhandled",
-      "high_urgency_active_record_unhandled"
-    ],
-    planWithoutPressureTable()
-  );
-
-  await assertCodes(
-    "mismatched section 7a",
-    undefined,
-    ["page_plan_driver_kind_mismatch"],
-    replacePlanLine("- Driver kind: npc_action", "- Driver kind: offstage_action")
   );
 
   await assertCodes(
@@ -152,17 +130,6 @@ function canonicalPlan(): string {
 
 function planPath(): string {
   return fixture.files[0]?.path ?? "";
-}
-
-function replacePlanLine(before: string, after: string): string {
-  return canonicalPlan().replace(before, after);
-}
-
-function planWithoutPressureTable(): string {
-  return canonicalPlan().replace(
-    /\nActive-pressure disposition\n\n\| Record \| Disposition \| Reason \/ expiry \|\n\|---\|---\|---\|\n(?:\|.*\|\n)+/,
-    "\n"
-  );
 }
 
 function event(records: IndexedRecord[]): IndexedRecord {

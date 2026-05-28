@@ -39,6 +39,6 @@ invariants_acknowledged:
 7. `## Protected Mystery and Invariant Boundaries` — forbidden mystery resolutions and invariant constraints that the validation step's mystery / invariant firewall gate must preserve.
 8. `## Initial Continuation Contract` — expected first hinge, emitted choice surface, and seed/JIT continuation posture.
 
-The `## Player Agency Contract` is load-bearing. Downstream `branching-story-turn-cycle` uses it as the stable routing input for write-in action-source legality, and `branching-story-prose-attach` uses it to flag rendered prose that implies a broader or narrower player agency surface than the bundle permits.
+The `## Player Agency Contract` is load-bearing. Downstream `branching-story-turn-cycle` uses it as the stable routing input for write-in action-source legality, and `branching-story-scene-prose-attach` uses it to flag rendered scene prose that implies a broader or narrower player agency surface than the bundle permits.
 
 The frontmatter is authoritative for machine retrieval. Keep `cast_bind_list` in sync with `## Cast and Roles`, and keep `mysteries_in_play` / `invariants_acknowledged` in sync with `## Protected Mystery and Invariant Boundaries`; those markdown sections are the human rendering of the same data.

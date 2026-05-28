@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -21,8 +20,6 @@ function writeText(dir: string, name: string, value: string): string {
 test("compute-pg-hashes rejects YAML and hashes envelope-extracted JSON", async () => {
   const tmp = makeTmpDir();
   try {
-    const planBody = "Final PG-9 plan bytes.\nThe byte stream is the plan authority.\n";
-    const planPath = writeText(tmp, "PG-9.md", planBody);
     const pgRecord = {
       record_kind: "page_record",
       id: "PG-9",
@@ -46,10 +43,6 @@ test("compute-pg-hashes rejects YAML and hashes envelope-extracted JSON", async 
         },
         visible_affordances: []
       },
-      plan: {
-        plan_hash: "placeholder"
-      },
-      prose_plan_path: "pages-prose-plans/PG-9.md",
       emitted_choices: ["CHC-31"],
       validation_trace: {
         branch_isolation: "PASS: branch path is explicit."
@@ -74,30 +67,19 @@ test("compute-pg-hashes rejects YAML and hashes envelope-extracted JSON", async 
       ].join("\n")
     );
 
-    const yamlResult = await runComputePgHashesCli(["--plan", planPath, "--pg", yamlPath]);
+    const yamlResult = await runComputePgHashesCli(["--pg", yamlPath]);
     assert.equal(yamlResult.exitCode, 1);
     assert.equal(yamlResult.stdout, "");
     assert.match(yamlResult.stderr, /must be valid JSON/);
     assert.match(yamlResult.stderr, /no longer accepts YAML input/);
 
-    const jsonResult = await runComputePgHashesCli(["--plan", planPath, "--pg", jsonPath]);
-    const output = JSON.parse(jsonResult.stdout) as { plan_hash: string; state_hash: string };
-    const expectedPlanHash = createHash("sha256")
-      .update(Buffer.from(planBody, "utf8"))
-      .digest("hex");
+    const jsonResult = await runComputePgHashesCli(["--pg", jsonPath]);
+    const output = JSON.parse(jsonResult.stdout) as { state_hash: string; plan_hash?: string };
 
     assert.equal(jsonResult.exitCode, 0);
     assert.equal(jsonResult.stderr, "");
-    assert.equal(output.plan_hash, expectedPlanHash);
-    assert.equal(
-      output.state_hash,
-      computePgStateHash({
-        ...pgRecord,
-        plan: {
-          plan_hash: expectedPlanHash
-        }
-      })
-    );
+    assert.equal(output.plan_hash, undefined);
+    assert.equal(output.state_hash, computePgStateHash(pgRecord));
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

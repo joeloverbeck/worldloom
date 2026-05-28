@@ -41,4 +41,4 @@ Draft `SE.resolution` before leaving Phase 1:
 
 When `resolution` is present, set `player_visible_feedback` to one sentence naming what the player should be able to perceive about why the action resolved this way. Do not add `reason_class`; the route, result, rationale, and state delta are sufficient.
 
-**Silent rejection is forbidden.** Every action — including impossible ones — produces an `SE` record with `world_logic_rationale` explaining the route plus a page plan that dramatizes the outcome.
+**Silent rejection is forbidden.** Every action — including impossible ones — produces an `SE` record with `world_logic_rationale` explaining the route plus a `PG` state snapshot that records the outcome.

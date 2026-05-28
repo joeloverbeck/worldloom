@@ -6,7 +6,6 @@ import test from "node:test";
 
 import { runValidators } from "../../src/framework/run.js";
 import type { Context, IndexedRecord, Validator, Verdict } from "../../src/framework/types.js";
-import { activePressureHandlingDiscipline } from "../../src/structural/active-pressure-handling-discipline.js";
 import { observerFirewall } from "../../src/structural/observer-firewall.js";
 import { pagePlanTurnDriverConsistency } from "../../src/structural/page-plan-turn-driver-consistency.js";
 import { turnCycleOutputGroundingIntegrity } from "../../src/structural/turn-cycle-output-grounding-integrity.js";
@@ -43,7 +42,6 @@ const SPEC85_MULTI_ACTOR_VALIDATORS: readonly Validator[] = [
   turnDriverSchemaCompliance,
   turnDriverPovObserverFirewall,
   pagePlanTurnDriverConsistency,
-  activePressureHandlingDiscipline,
   observerFirewall,
   turnCycleOutputGroundingIntegrity
 ];
@@ -76,13 +74,6 @@ test("SPEC-85 multi-actor collision confrontation variants produce the expected 
       (event(records).parsed as { turn_driver: { driver_records: string[] } }).turn_driver.driver_records = ["STPLAN-1"];
     },
     ["turn_driver_initiator_pattern_violation"]
-  );
-
-  await assertCodes(
-    "missing obligation pressure row",
-    undefined,
-    ["high_urgency_active_record_unhandled"],
-    planWithoutObligationPressureRow()
   );
 
   await assertCodes(
@@ -133,10 +124,6 @@ function canonicalPlan(): string {
 
 function planPath(): string {
   return fixture.files[0]?.path ?? "";
-}
-
-function planWithoutObligationPressureRow(): string {
-  return canonicalPlan().replace("| OBL-1 | selected | open debt is the player-facing stakes of the confrontation |\n", "");
 }
 
 function event(records: IndexedRecord[]): IndexedRecord {

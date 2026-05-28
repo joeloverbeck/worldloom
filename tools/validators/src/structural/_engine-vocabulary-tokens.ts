@@ -72,10 +72,7 @@ export const SCHEMA_FIELD_NAME_LITERALS = [
   "commitment.selected_slt_id",
   "derived_from",
   "supersedes",
-  "plan_hash",
   "state_hash",
-  "prose_hash",
-  "plan.plan_hash",
   "state_hash_parent"
 ] as const;
 

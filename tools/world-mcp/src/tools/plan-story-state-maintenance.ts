@@ -1,9 +1,8 @@
 import { createMcpError, type McpError } from "../errors.js";
-import { computePgStateHash, computePlanHash } from "../package-interop.js";
+import { computePgStateHash } from "../package-interop.js";
 
 import { allocateManyIds } from "./allocate-many-ids.js";
 import { getRecord, isMcpError } from "./get-record.js";
-import { renderMaintenancePagePlan } from "./maintenance-page-plan.js";
 
 export const STORY_STATE_MAINTENANCE_RECORD_TYPES = [
   "story_emotion_record",
@@ -109,14 +108,8 @@ export interface PlanStoryStateMaintenanceResponse {
       };
     }>;
   };
-  maintenance_page_plan: {
-    target_file: string;
-    body: string;
-    content_hash: string;
-  };
   next_steps: {
     validate: "Call mcp__worldloom__validate_patch_plan with patch_plan before requesting approval.";
-    write_page_plan: "Before submit, write maintenance_page_plan.body to maintenance_page_plan.target_file exactly; its hash is stamped into the maintenance PG.";
     submit: "After explicit user approval, sign this exact patch_plan and call mcp__worldloom__submit_patch_plan with the approval token.";
   };
 }
@@ -539,21 +532,6 @@ export async function planStoryStateMaintenance(
   const nextSnapshot = cloneRecord(parentSnapshot);
   nextSnapshot.active_records = replayActiveRecords(parentActiveRecords, stateDelta);
 
-  const maintenancePagePlanBody = renderMaintenancePagePlan({
-    pageId,
-    parentPageId: args.parent_page_id,
-    eventId,
-    eventKind,
-    reason: args.reason,
-    sourceTicket: args.source_ticket,
-    records: plannedOperations.map((operation) => ({
-      action: operation.action,
-      recordType: operation.record_type,
-      recordId: operation.allocated_id,
-      ...(operation.supersedes === undefined ? {} : { supersedes: operation.supersedes })
-    }))
-  });
-  const planHash = computePlanHash(maintenancePagePlanBody);
   const pageRecordDraft: Record<string, unknown> = {
     id: pageId,
     story_id: storyId,
@@ -569,10 +547,6 @@ export async function planStoryStateMaintenance(
     state_hash_parent: parentStateHash,
     state_hash: "0".repeat(64),
     state_snapshot: nextSnapshot,
-    plan: {
-      plan_hash: planHash
-    },
-    prose_plan_path: `pages-prose-plans/${pageId}.md`,
     emitted_choices: [],
     validation_trace: {
       input_legality: "PASS: maintenance event is system-authored and has no player action input.",
@@ -581,7 +555,7 @@ export async function planStoryStateMaintenance(
       branch_isolation: "PASS: maintenance continues the parent branch path without forking.",
       append_only_delta: "PASS: maintenance records are created or superseded through patch-plan ops.",
       consequence_or_terminal: "PASS: maintenance is audit-only state repair and emits no fictional consequence.",
-      plan_grounding: "PASS: maintenance page plan names the trigger, source ticket, and record delta.",
+      plan_grounding: "PASS: maintenance SE.state_delta and PG.state_snapshot are grounded in the requested maintenance records.",
       canon_promotion_hold: "PASS: maintenance introduces no canon-candidate or promotion-hold claims.",
       turn_driver_lawfulness: "PASS: audit-only SE has no turn driver and uses selection_source none."
     }
@@ -618,14 +592,8 @@ export async function planStoryStateMaintenance(
       expected_id_allocations: expectedIdAllocations,
       patches
     },
-    maintenance_page_plan: {
-      target_file: `worlds/${args.world_slug}/stories/${args.story_slug}/pages-prose-plans/${pageId}.md`,
-      body: maintenancePagePlanBody,
-      content_hash: planHash
-    },
     next_steps: {
       validate: "Call mcp__worldloom__validate_patch_plan with patch_plan before requesting approval.",
-      write_page_plan: "Before submit, write maintenance_page_plan.body to maintenance_page_plan.target_file exactly; its hash is stamped into the maintenance PG.",
       submit: "After explicit user approval, sign this exact patch_plan and call mcp__worldloom__submit_patch_plan with the approval token."
     }
   };

@@ -143,4 +143,21 @@ describe('PlanProseTab', () => {
 
     expect(await screen.findByText('No receipt for this page.')).toBeInTheDocument();
   });
+
+  it('renders missing page-plan responses as an explicit empty state for planless PGs', async () => {
+    mockedGetPagePlan.mockRejectedValue(new ApiError(404, { error: 'not_found' }));
+    mockedGetProseReceipt.mockRejectedValue(new ApiError(404, { error: 'not_found' }));
+
+    render(
+      <PlanProseTab
+        pageDetail={pageDetail({ pagePlanSummary: null })}
+        storySlug="red-bunny"
+        worldSlug="fixture-world"
+      />
+    );
+
+    expect(await screen.findByText('No page plan for this page.')).toBeInTheDocument();
+    expect(screen.getByText('No receipt for this page.')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Page Plan (rendering instructions, not reader prose)' })).not.toBeInTheDocument();
+  });
 });
