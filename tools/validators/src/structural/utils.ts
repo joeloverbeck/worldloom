@@ -43,6 +43,7 @@ export const STRUCTURAL_NODE_TYPES = [
   "intention_record",
   "story_location_record",
   "story_object_record",
+  "scene_record",
   "branch_record",
   "page_record",
   "choice_record",
@@ -121,6 +122,7 @@ export const RECORD_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
   intention_record: "story-intention",
   story_location_record: "story-location",
   story_object_record: "story-object",
+  scene_record: "story-scene",
   branch_record: "story-branch",
   page_record: "story-page",
   choice_record: "story-choice",
@@ -359,6 +361,9 @@ function isStructuralAuthorityRecord(record: IndexedRecord): boolean {
   }
   if (record.node_type === "story_object_record") {
     return /^stories\/[^/]+\/_source\/objects\/STOBJ-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "scene_record") {
+    return /^stories\/[^/]+\/_source\/scenes\/SCN-\d+\.yaml$/.test(filePath) && /^SCN-\d+$/.test(nodeId);
   }
   if (record.node_type === "branch_record") {
     return /^stories\/[^/]+\/_source\/branches\/BR-\d+\.yaml$/.test(filePath);

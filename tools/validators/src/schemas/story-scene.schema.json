@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/story-scene.schema.json",
+  "type": "object",
+  "required": [
+    "id",
+    "story_id",
+    "branch_id",
+    "status",
+    "pg_ids",
+    "start_page_id",
+    "end_page_id",
+    "choice_surface_page_id",
+    "emitted_choice_ids",
+    "title",
+    "slug",
+    "prose_plan_path",
+    "prose_path",
+    "receipt_path"
+  ],
+  "properties": {
+    "record_kind": { "type": "string", "const": "scene_record" },
+    "id": { "type": "string", "pattern": "^SCN-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
+    "branch_id": { "type": "string", "pattern": "^BR-(0|[1-9][0-9]*)$" },
+    "status": { "type": "string", "enum": ["planned", "rendered", "attached"] },
+    "pg_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" }
+    },
+    "start_page_id": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "end_page_id": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "previous_scene_id": { "type": ["string", "null"], "pattern": "^SCN-(0|[1-9][0-9]*)$" },
+    "choice_surface_page_id": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "emitted_choice_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^CHC-(0|[1-9][0-9]*)$" }
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "scene_descriptor": { "type": "string", "minLength": 1 },
+    "boundary_rationale": { "type": "string", "minLength": 1 },
+    "prose_plan_path": { "type": "string", "pattern": "^scene-prose-plans/SCN-(0|[1-9][0-9]*)\\.md$" },
+    "prose_path": { "type": "string", "pattern": "^scene-prose/SCN-(0|[1-9][0-9]*)\\.md$" },
+    "receipt_path": { "type": "string", "pattern": "^scene-prose-receipts/SCN-(0|[1-9][0-9]*)\\.yaml$" }
+  },
+  "additionalProperties": false
+}

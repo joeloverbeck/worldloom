@@ -10,7 +10,7 @@ const STORY_SCHEMA_BY_RECORD_KIND = Object.entries(RECORD_TYPE_TO_SCHEMA)
   .sort(([left], [right]) => left.localeCompare(right));
 
 test("every schema-backed story record accepts only its matching optional record_kind", () => {
-  assert.equal(STORY_SCHEMA_BY_RECORD_KIND.length, 23);
+  assert.equal(STORY_SCHEMA_BY_RECORD_KIND.length, 24);
 
   for (const [recordKind, schemaName] of STORY_SCHEMA_BY_RECORD_KIND) {
     const schemaPath = path.resolve(process.cwd(), "src", "schemas", `${schemaName}.schema.json`);

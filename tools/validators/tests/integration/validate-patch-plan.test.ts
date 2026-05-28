@@ -215,6 +215,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "prose_receipt_schema_compliance"
     );
     assert.equal(proseReceiptExecution?.status, "skipped");
+    const sceneProseReceiptExecution = result.executions.find(
+      (execution) => execution.name === "scene_prose_receipt_schema_compliance"
+    );
+    assert.equal(sceneProseReceiptExecution?.status, "skipped");
     const proseReceiptHashExecution = result.executions.find(
       (execution) => execution.name === "prose_receipt_hash_integrity"
     );
@@ -380,6 +384,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== recordIntroductionUniquenessExecution &&
         row !== proposalPackageExecution &&
         row !== proseReceiptExecution &&
+        row !== sceneProseReceiptExecution &&
         row !== proseReceiptHashExecution &&
         row !== proseReceiptStcharExecution &&
         row !== storyKernelCastBindExecution &&

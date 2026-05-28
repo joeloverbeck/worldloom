@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-index` (enumerate the four scene directories; parse SCN as a node-type; index SCN edges).
-**Deps**: SPEC92SCERANPRO-002
+**Deps**: archive/tickets/SPEC92SCERANPRO-002.md
 
 ## Problem
 

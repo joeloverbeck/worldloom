@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/patch-engine` (new op `create_scn_record` + SCN supersession; op-spec, envelope, commit-order, apply dispatch).
-**Deps**: SPEC92SCERANPRO-002
+**Deps**: archive/tickets/SPEC92SCERANPRO-002.md
 
 ## Problem
 

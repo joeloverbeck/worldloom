@@ -69,6 +69,10 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     required: ["id", "story_id", "created_at_page", "label", "description", "owner", "current_location"],
     properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "label", "description", "owner", "current_location"]
   },
+  "story-scene": {
+    required: ["id", "story_id", "branch_id", "status", "pg_ids", "start_page_id", "end_page_id", "choice_surface_page_id", "emitted_choice_ids", "title", "slug", "prose_plan_path", "prose_path", "receipt_path"],
+    properties: ["record_kind", "id", "story_id", "branch_id", "status", "pg_ids", "start_page_id", "end_page_id", "previous_scene_id", "choice_surface_page_id", "emitted_choice_ids", "title", "slug", "scene_descriptor", "boundary_rationale", "prose_plan_path", "prose_path", "receipt_path"]
+  },
   "story-diegetic-artifact": {
     required: ["id", "story_id", "created_at_page", "title", "author", "genre", "body", "intended_audience", "circulation", "truth_relation"],
     properties: ["record_kind", "id", "story_id", "created_at_page", "supersedes", "title", "author", "genre", "body", "intended_audience", "circulation", "truth_relation", "derived_from"]
@@ -204,6 +208,25 @@ test("representative amended contract records validate against tightened schemas
       description: "A latch that can be repaired.",
       owner: "public",
       current_location: "STLOC-1"
+    }),
+    storyRecord("scene_record", "SCN-1", "scenes", {
+      id: "SCN-1",
+      story_id: "STORY-1",
+      branch_id: "BR-1",
+      status: "planned",
+      pg_ids: ["PG-1"],
+      start_page_id: "PG-1",
+      end_page_id: "PG-1",
+      previous_scene_id: null,
+      choice_surface_page_id: "PG-1",
+      emitted_choice_ids: ["CHC-1"],
+      title: "Gate repair scene",
+      slug: "gate-repair-scene",
+      scene_descriptor: "Mara studies the damaged gate.",
+      boundary_rationale: "The POV, location, cast, and exchange stay continuous.",
+      prose_plan_path: "scene-prose-plans/SCN-1.md",
+      prose_path: "scene-prose/SCN-1.md",
+      receipt_path: "scene-prose-receipts/SCN-1.yaml"
     }),
     storyRecord("story_diegetic_artifact_record", "DA-1", "artifacts", {
       id: "DA-1",

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/validators` (five new scene-plan structural validators; registry).
-**Deps**: SPEC92SCERANPRO-002
+**Deps**: archive/tickets/SPEC92SCERANPRO-002.md
 
 ## Problem
 

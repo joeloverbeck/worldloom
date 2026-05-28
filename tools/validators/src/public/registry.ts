@@ -49,6 +49,7 @@ import { criticalSecretClueCoverageWhenRevealed } from "../structural/critical-s
 import { secretIntroductionAnchorIntegrity } from "../structural/secret-introduction-anchor-integrity.js";
 import { secretCarrierExistence } from "../structural/secret-carrier-existence.js";
 import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-firewall-compliance.js";
+import { sceneProseReceiptSchemaCompliance } from "../structural/scene-prose-receipt-schema-compliance.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { sltGroundingMinimalIntegrity } from "../structural/slt-grounding-minimal-integrity.js";
@@ -192,6 +193,7 @@ export const structuralValidators: readonly Validator[] = [
   touchedByCfCompleteness,
   proposalPackageShape,
   proseReceiptSchemaCompliance,
+  sceneProseReceiptSchemaCompliance,
   proseReceiptHashIntegrity,
   proseReceiptStcharIntegrity,
   storyKernelCastBindListIntegrity,

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/scene-prose-receipt.schema.json",
+  "type": "object",
+  "required": [
+    "scene_id",
+    "story_id",
+    "branch_id",
+    "plan_path",
+    "prose_path",
+    "checked_at",
+    "strict",
+    "verdict",
+    "included_pages",
+    "checks"
+  ],
+  "properties": {
+    "scene_id": { "type": "string", "pattern": "^SCN-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
+    "branch_id": { "type": "string", "pattern": "^BR-(0|[1-9][0-9]*)$" },
+    "plan_path": { "type": "string", "pattern": "^scene-prose-plans/SCN-(0|[1-9][0-9]*)\\.md$" },
+    "prose_path": { "type": "string", "pattern": "^scene-prose/SCN-(0|[1-9][0-9]*)\\.md$" },
+    "checked_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "strict": { "type": "boolean" },
+    "verdict": { "type": "string", "enum": ["PASS", "WARN", "FAIL"] },
+    "included_pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["page_id", "state_hash_at_attach"],
+        "properties": {
+          "page_id": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+          "state_hash_at_attach": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "checks": {
+      "type": "object",
+      "required": [
+        "included_pg_events_rendered",
+        "final_scene_choice_surface_visibility",
+        "scene_range_entity_status_consistency",
+        "scene_range_invented_structural_fact",
+        "scene_range_forbidden_mystery_resolution",
+        "scene_prose_stchar_fidelity",
+        "engine_jargon_leak",
+        "canon_claim_without_authority"
+      ],
+      "properties": {
+        "included_pg_events_rendered": { "type": "string", "enum": ["PASS", "WARN", "FAIL"] },
+        "final_scene_choice_surface_visibility": { "type": "string", "enum": ["PASS", "WARN", "FAIL"] },
+        "scene_range_entity_status_consistency": { "type": "string", "enum": ["PASS", "WARN", "FAIL"] },
+        "scene_range_invented_structural_fact": { "type": "string", "enum": ["PASS", "WARN", "FAIL"] },
+        "scene_range_forbidden_mystery_resolution": { "type": "string", "enum": ["PASS", "FAIL"] },
+        "scene_prose_stchar_fidelity": { "type": "string", "enum": ["PASS", "WARN", "FAIL"] },
+        "engine_jargon_leak": { "type": "string", "enum": ["PASS", "WARN", "FAIL"] },
+        "canon_claim_without_authority": { "type": "string", "enum": ["PASS", "FAIL"] }
+      },
+      "additionalProperties": false
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "repair_recommendation": {
+      "type": "string",
+      "enum": [
+        "none",
+        "revise_scene_prose",
+        "revise_scene_plan",
+        "run_turn_cycle_repair",
+        "run_story_fact_promotion_to_canon"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

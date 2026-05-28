@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/validators` (scene-prose-receipt content validators; registry).
-**Deps**: SPEC92SCERANPRO-002
+**Deps**: archive/tickets/SPEC92SCERANPRO-002.md
 
 ## Problem
 
