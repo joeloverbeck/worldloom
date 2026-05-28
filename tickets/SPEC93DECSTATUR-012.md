@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/story-explorer` (read paths preserved; tests adjusted)
-**Deps**: SPEC93DECSTATUR-001
+**Deps**: archive/tickets/SPEC93DECSTATUR-001.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ SPEC-93 §2 (Out of scope) requires that the teardown NOT break Story Explorer's
 
 1. `tools/story-explorer/src/server/routes/prose.ts` serves `/page-plans/:pageId` (reads `pages-prose-plans/PG-<integer>.md`, returns 404 via `readOptionalBody()` on ENOENT); `src/read/page-detail.ts` is the page read path; `web/src/components/xray/tabs/PlanProseTab.tsx` catches the 404 and sets a `missing` state — all confirmed during SPEC-93 reassessment (this session): the read paths already handle absence gracefully.
 2. SPEC-93 §2 Out-of-scope constraint + §6 Story Explorer bullet (preserve read paths; verify graceful planless handling; adjust only tests that assert page-plan authoring still happens) + §8 AC8 (Story Explorer still builds + serves legacy plans/prose and handles planless new `PG`s gracefully).
-3. Cross-artifact boundary: Story Explorer reads the `PG` schema (consumes the relaxed `story-page.schema.json` from SPEC93DECSTATUR-001) and the legacy `pages-prose-plans/` directory (kept enumerated by world-index per SPEC-93 §3); this is a read-side consumer, not a mutation surface. The SPEC-87/88 read-backend fence is preserved (no new mediation surface).
+3. Cross-artifact boundary: Story Explorer reads the `PG` schema (consumes the relaxed `story-page.schema.json` from archive/tickets/SPEC93DECSTATUR-001.md) and the legacy `pages-prose-plans/` directory (kept enumerated by world-index per SPEC-93 §3); this is a read-side consumer, not a mutation surface. The SPEC-87/88 read-backend fence is preserved (no new mediation surface).
 
 ## Architecture Check
 

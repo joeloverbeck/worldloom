@@ -96,6 +96,61 @@ test("computePgStateHash excludes state_hash but keeps all other PG fields", () 
   );
 });
 
+test("computePgStateHash verifies both legacy and planless PG field-presence payloads", () => {
+  const legacyPgRecord: Record<string, unknown> = {
+    id: "PG-2",
+    story_id: "STORY-1",
+    branch_id: "BR-1",
+    parent_page_id: "PG-1",
+    branch_path: ["PG-1", "PG-2"],
+    turn_index: 1,
+    input: {
+      choice_id: "CHC-1",
+      manual_action_text: null,
+      resolved_event_id: "SE-2"
+    },
+    state_hash_parent: "0".repeat(64),
+    state_snapshot: {
+      active_records: {
+        STCHAR: ["STCHAR-1"]
+      }
+    },
+    plan: {
+      plan_hash: "1".repeat(64)
+    },
+    prose_plan_path: "pages-prose-plans/PG-2.md",
+    emitted_choices: ["CHC-2"],
+    validation_trace: {
+      input_legality: "PASS: choice CHC-1 resolves SE-2"
+    },
+    state_hash: "stale"
+  };
+  const legacyStateHash = computePgStateHash(legacyPgRecord);
+
+  assert.equal(
+    computePgStateHash({
+      ...legacyPgRecord,
+      state_hash: legacyStateHash
+    }),
+    legacyStateHash
+  );
+
+  const planlessPgRecord = { ...legacyPgRecord };
+  delete planlessPgRecord.plan;
+  delete planlessPgRecord.prose_plan_path;
+  planlessPgRecord.state_hash = "stale";
+  const planlessStateHash = computePgStateHash(planlessPgRecord);
+
+  assert.equal(
+    computePgStateHash({
+      ...planlessPgRecord,
+      state_hash: planlessStateHash
+    }),
+    planlessStateHash
+  );
+  assert.notEqual(planlessStateHash, legacyStateHash);
+});
+
 test("computePlanHash hashes the exact input bytes", () => {
   const bytes = Buffer.from("Plan body\n\nwith trailing newline\n", "utf8");
 

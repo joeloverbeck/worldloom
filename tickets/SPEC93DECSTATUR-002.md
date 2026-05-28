@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators` (`page-plan-turn-driver-consistency.ts`, `page-plan-active-pressure.ts` split; `registry.ts`; retain `turn-driver-pov-observer-firewall.ts`)
-**Deps**: SPEC93DECSTATUR-001
+**Deps**: archive/tickets/SPEC93DECSTATUR-001.md
 
 ## Problem
 

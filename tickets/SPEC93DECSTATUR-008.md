@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-bootstrap/SKILL.md` + `references/{phase-7-root-event-and-page, phase-8-9-page-plan-and-choices, phase-10-validation, governance-and-foundations}.md`
-**Deps**: SPEC93DECSTATUR-001
+**Deps**: archive/tickets/SPEC93DECSTATUR-001.md
 
 ## Problem
 
@@ -14,7 +14,7 @@
 
 1. `branching-story-bootstrap/references/phase-8-9-page-plan-and-choices.md` opens with "Phase 8: Author the root page plan — Draft ... `pages-prose-plans/PG-1.md` per shared contract §8 — the 19 numbered sections..."; bootstrap does NOT currently pass `page_plan_drafts` (verified during SPEC-93 reassessment, this session) — so no tool-argument coupling exists for bootstrap, unlike turn-cycle.
 2. SPEC-93 §2.2 + §6 skills bullet: remove root page-plan authoring; state only; §8 AC1 (bootstrap produces no `pages-prose-plans/PG-1.md`).
-3. Cross-artifact boundary: bootstrap produces the planless root `PG`, which must validate against the relaxed `story-page.schema.json` (Deps SPEC93DECSTATUR-001); the reference file `phase-8-9-page-plan-and-choices.md` bundles page-plan authoring with choice generation, so the choice-generation content is retained while the page-plan content is removed.
+3. Cross-artifact boundary: bootstrap produces the planless root `PG`, which must validate against the relaxed `story-page.schema.json` (Deps archive/tickets/SPEC93DECSTATUR-001.md); the reference file `phase-8-9-page-plan-and-choices.md` bundles page-plan authoring with choice generation, so the choice-generation content is retained while the page-plan content is removed.
 4. FOUNDATIONS §Story Bundles §4 / §4a (Plan-Authority Boundary): state is authoritative at `PG`-record commit; no page-plan render artifact is part of bootstrap's state creation — the same Pipeline-shape amendment that §5 makes to FOUNDATIONS.
 
 ## Architecture Check
@@ -49,7 +49,7 @@ In `SKILL.md`, `references/phase-7-root-event-and-page.md`, `references/phase-10
 ## Out of Scope
 
 - turn-cycle's page-plan removal (SPEC93DECSTATUR-007).
-- The PG schema relaxation itself (SPEC93DECSTATUR-001).
+- The PG schema relaxation itself (archive/tickets/SPEC93DECSTATUR-001.md).
 - Root scene creation (SPEC-92's `branching-story-scene-plan`, invoked on demand).
 - Choice-generation logic (retained; only page-plan authoring removed).
 

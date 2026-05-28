@@ -1,6 +1,6 @@
 # SPEC93DECSTATUR-001: PG schema — make plan fields optional; field-presence state-hash regression test
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators` (`schemas/story-page.schema.json` + record-schema-compliance test); `tools/world-index` (regression test only; `src/hash/content.ts` unchanged)
@@ -17,6 +17,7 @@ SPEC-93 removes the per-`PG` page-plan render artifact. New `PG` records must be
 3. Cross-artifact boundary: `story-page.schema.json` is the PG record-write gate consumed by `record-schema-compliance` (validators), the patch-engine PG create op (validates via this schema), `world-mcp` retrieval, and the story-pipeline skills. Relaxing `required` is the shared-surface change under audit.
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism) motivates removing the now-non-load-bearing `plan_hash`/`prose_plan_path` from new `PG`s; Rule 6 (No Silent Retcons) governs the grandfathering — existing records are append-only and unmodified, and the field-presence payload rule is documented, not silent.
 5. (was template item 6 — schema change) The modified schema is `story-page.schema.json` (a story-bundle record schema). Consumers: `record-schema-compliance` validator, patch-engine PG create op, `world-mcp` retrieval, story skills. The change is **non-breaking** — it relaxes `required` (every previously-valid `PG`, with the fields, stays valid; planless `PG`s become newly valid). `computePgStateHash` (`tools/world-index/src/hash/content.ts:56-68`) excludes only `state_hash` and hashes whatever fields are present, so a legacy `PG` (with `prose_plan_path`) and a new planless `PG` each verify against their own stored hash with no `content.ts` edit. Adding `prose_plan_path` to `PG_STATE_HASH_EXCLUDED_FIELDS` would false-FAIL every legacy record and is explicitly rejected (SPEC-93 §3).
+6. Implementation found a same-seam schema inventory consumer: `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` asserts the amended story-schema required field sets. That expected `story-page` required list moved with the schema relaxation so the package proof checks the new contract rather than stale pre-SPEC-93 required fields.
 
 ## Architecture Check
 
@@ -48,6 +49,7 @@ In `tools/world-index/tests/hash/content.test.ts`: add assertions that (a) a leg
 
 - `tools/validators/src/schemas/story-page.schema.json` (modify)
 - `tools/validators/tests/structural/record-schema-compliance-story-page.test.ts` (modify)
+- `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` (modify)
 - `tools/world-index/tests/hash/content.test.ts` (modify)
 
 ## Out of Scope
@@ -82,3 +84,27 @@ In `tools/world-index/tests/hash/content.test.ts`: add assertions that (a) a leg
 1. `(cd tools/validators && npm run build && npm test)`
 2. `(cd tools/world-index && npm run build && npm test)`
 3. Narrower boundary: these two packages own the schema + hash surfaces; downstream consumer behavior (patch-engine planless-PG acceptance) is exercised end-to-end in SPEC93DECSTATUR-013.
+
+## Outcome
+
+Completed: 2026-05-28
+
+Landed changes:
+
+1. `tools/validators/src/schemas/story-page.schema.json` no longer requires top-level `plan` or `prose_plan_path`; both legacy properties remain defined so existing `PG`s with plan metadata still validate. `plan.required` is now empty, keeping `plan.plan_hash` optional when a legacy-shaped `plan` block is present.
+2. `tools/validators/tests/structural/record-schema-compliance-story-page.test.ts` now proves both planless SPEC-93 `PG`s and legacy `PG`s pass `record_schema_compliance`, while malformed legacy paths/placeholders still fail when present.
+3. `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` now records the amended `story-page` required field set without `plan` / `prose_plan_path`.
+4. `tools/world-index/tests/hash/content.test.ts` now proves a legacy `PG` carrying `plan` + `prose_plan_path` and a planless `PG` each re-verify to their own stored `state_hash`, with different hashes because the payload is field-presence-driven.
+
+Deviations from plan:
+
+- Added `contract-schema-roundtrip.test.ts` to the landed file set after the first validators broad suite exposed its stale same-seam required-field inventory. This is proof-surface truthing, not a new behavior scope.
+- No production change was made to `tools/world-index/src/hash/content.ts`; the existing `computePgStateHash` behavior remains unchanged.
+
+## Verification Result
+
+1. `cd tools/world-index && npm run build` — PASS.
+2. `cd tools/world-index && npm test` — PASS (`127` non-CLI tests plus serial CLI tests passed; includes `computePgStateHash verifies both legacy and planless PG field-presence payloads`).
+3. `cd tools/validators && npm run build` — PASS.
+4. `cd tools/validators && node --test dist/tests/structural/contract-schema-roundtrip.test.js dist/tests/structural/record-schema-compliance-story-page.test.js dist/tests/integration/validate-patch-plan.test.js` — PASS (`50` tests passed), after updating the same-seam schema inventory expectation.
+5. `cd tools/validators && npm test` — PASS (`1136` tests passed).
