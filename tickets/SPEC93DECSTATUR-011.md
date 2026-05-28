@@ -61,7 +61,7 @@ Reconcile `docs/WORKFLOWS.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/MACHINE-FAC
 ## Out of Scope
 
 - The `cross-skill-consistency.md` roster reconcile (archive/tickets/SPEC93DECSTATUR-009.md — the FOUNDATIONS §7/§9 rosters are this ticket; their `cross-skill-consistency.md` mirror is 009).
-- The shared-template contract amendments (SPEC93DECSTATUR-010).
+- The shared-template contract amendments (archive/tickets/SPEC93DECSTATUR-010.md).
 - Any production-code change (docs-only ticket).
 
 ## Acceptance Criteria
