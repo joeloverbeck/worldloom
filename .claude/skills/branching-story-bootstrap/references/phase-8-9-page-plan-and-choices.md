@@ -47,6 +47,8 @@ Root §16a is the first page-local projection of STCHAR + active opening state. 
 
 Each full present-character §16a packet cites the bound `STENT-*` / `STCHAR-*` / display name, the required-because reason, stable STCHAR seed used, `Current-state grounding records:` (`none; stable STCHAR authority only` when no active current-state record is needed), page-local projection, prose must-show / must-not-imply, and anti-generic warnings. A reduced `offstage_causal` packet still cites the bound `STENT-*` / `STCHAR-*` / display name, `Required because: offstage_causal`, story-facing identity, relevant appraisal rules, relevant pressure behavior when applicable, `Offstage causal relevance:`, prose must-not-imply, and anti-generic warnings; it omits the voice/dialogue authority and on-page rendering lines because the character is not rendered on the page. Do not cite world `CHAR-*` as runtime voice authority in the page plan.
 
+When authoring §16a packets, use the DO/DON'T table in the shared contract §16a for prior-page/prior-event reference patterns; the common failure is prose-style references like "from PG-X" that trip `page_plan_stchar_packet_integrity.stale_current_state_reference`.
+
 No word-count target anywhere in the plan. Engine jargon (record ids, gate names) is confined to §15 frontmatter and the §16a `Current-state grounding records:` field; renderer-facing bodies translate it into prose direction.
 
 ## Phase 9: Generate first choices

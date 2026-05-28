@@ -358,7 +358,17 @@ test("SPEC-81 §9.3 reports deterministic filter-trace counts for a hand-counted
     );
 
     assert.ok(!("code" in result));
-    assert.deepEqual(result.filter_trace, {
+    assert.deepEqual({
+      pool_total: result.filter_trace.pool_total,
+      after_scope: result.filter_trace.after_scope,
+      after_driver_kind: result.filter_trace.after_driver_kind,
+      after_action_family: result.filter_trace.after_action_family,
+      after_predicate_shape: result.filter_trace.after_predicate_shape,
+      after_predicate_class: result.filter_trace.after_predicate_class,
+      after_source_record_id: result.filter_trace.after_source_record_id,
+      after_mystery_policy: result.filter_trace.after_mystery_policy,
+      after_cooldown: result.filter_trace.after_cooldown
+    }, {
       pool_total: 100,
       after_scope: 70,
       after_driver_kind: 40,
@@ -367,22 +377,22 @@ test("SPEC-81 §9.3 reports deterministic filter-trace counts for a hand-counted
       after_predicate_class: 20,
       after_source_record_id: 15,
       after_mystery_policy: 10,
-      after_cooldown: 8,
-      cooldown_active_samples: [
-        {
-          slt_id: "SLT-10",
-          last_selected_on_page: "PG-1",
-          distance: 1,
-          cooldown_pages: 2
-        },
-        {
-          slt_id: "SLT-9",
-          last_selected_on_page: "PG-1",
-          distance: 1,
-          cooldown_pages: 2
-        }
-      ]
+      after_cooldown: 8
     });
+    assert.deepEqual(result.filter_trace.cooldown_active_samples, [
+      {
+        slt_id: "SLT-10",
+        last_selected_on_page: "PG-1",
+        distance: 1,
+        cooldown_pages: 2
+      },
+      {
+        slt_id: "SLT-9",
+        last_selected_on_page: "PG-1",
+        distance: 1,
+        cooldown_pages: 2
+      }
+    ]);
     assert.equal(result.shortlisted_candidate_ids.length, 8);
   } finally {
     destroyTempRepoRoot(root);

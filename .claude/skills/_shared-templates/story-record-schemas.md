@@ -188,7 +188,7 @@ commitment:
 turn_driver:                            # required iff event_kind is turn_resolution; forbidden otherwise
   kind: player_action | player_write_in | npc_action | offstage_action | world_pressure | clock_fire | secret_reveal | multi_actor_collision
   initiator: STENT-<integer> | player | world | system | unknown
-  driver_records: [STPLAN-<integer> | STEMO-<integer> | CLK-<integer> | THR-<integer> | STSEC-<integer> | STQ-<integer> | OBL-<integer> | CNSQ-<integer> | SREL-<integer> | STCHAR-<integer>]
+  driver_records: [STPLAN-<integer> | STEMO-<integer> | CLK-<integer> | THR-<integer> | STSEC-<integer> | STQ-<integer> | OBL-<integer> | CNSQ-<integer> | SREL-<integer> | STCHAR-<integer> | STINT-<integer> | BEL-<integer>]
   player_response_mode: initiates | responds | witnesses | chooses_continuation | none
   pov_visibility: perceived_directly | inferred_from_trace | reported | discovered_after | withheld
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal   # *

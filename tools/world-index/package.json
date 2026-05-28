@@ -37,6 +37,11 @@
       "import": "./dist/src/public/canonical-vocabularies.js",
       "require": "./dist/src/public/canonical-vocabularies.js",
       "types": "./dist/src/public/canonical-vocabularies.d.ts"
+    },
+    "./public/predicate-dsl-projection": {
+      "import": "./dist/src/public/predicate-dsl-projection.js",
+      "require": "./dist/src/public/predicate-dsl-projection.js",
+      "types": "./dist/src/public/predicate-dsl-projection.d.ts"
     }
   },
   "scripts": {

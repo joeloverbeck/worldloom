@@ -186,8 +186,7 @@ const selectStoryletCandidatesInputSchema = z.object({
       grounding_record_ids: z.array(z.string().min(1)).optional()
     })
     .optional(),
-  max_candidates: z.number().int().min(1).default(24),
-  include_rejection_summary: z.boolean().default(true)
+  max_candidates: z.number().int().min(1).default(24)
 });
 
 const getRecordFieldInputSchema = z.object({
@@ -487,7 +486,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "select_storylet_candidates",
-    "select_storylet_candidates: Return a projection-only storylet shortlist for a parent page and turn driver from indexed SLT projection columns and edges. The response includes filter_trace counts, shortlisted_candidate_ids, compact projection records, and requires_full_body_ids for follow-up get_records calls; it never returns full SLT bodies. intent_signature.grounding_record_ids narrows SLTs with exact-id predicate refs to intersecting records; SLTs with only existential predicates have no exact refs and wildcard-pass this stage because alias binding is resolved later against active records.",
+    "select_storylet_candidates: Return a projection-only storylet shortlist for a parent page and turn driver from indexed SLT projection columns and edges. The response includes filter_trace counts plus per-stage <stage>_rejected_samples arrays capped at 3 entries for scope, driver kind, action family, predicate shape/class, source-record id, and mystery policy diagnostics; cooldown_active_samples keeps its specialized cooldown evidence. It also returns shortlisted_candidate_ids, compact projection records, and requires_full_body_ids for follow-up get_records calls; it never returns full SLT bodies. intent_signature.grounding_record_ids narrows SLTs with exact-id predicate refs to intersecting records; SLTs with only existential predicates have no exact refs and wildcard-pass this stage because alias binding is resolved later against active records.",
     selectStoryletCandidatesInputSchema,
     async (args) =>
       selectStoryletCandidates(args as unknown as Parameters<typeof selectStoryletCandidates>[0]),

@@ -43,7 +43,7 @@ For non-accept routes, render `resolution.player_visible_feedback` as the player
 
 Verbatim prior-prose quotation is allowed only when an exact line must be answered in a mid-dialogue continuation, a clue phrase carries legal or social weight, or the renderer must preserve a precise lie, promise, accusation, or question. If one of those triggers applies, quote only 1-3 lines and say which trigger justifies the quote. The cap applies only to quoted parent prose; it is not a length target for the page or for §14's own bullet lists.
 
-**§7a Active-pressure disposition table — closed-set Reason / expiry form.** Every high-urgency active record on the parent `PG.state_snapshot` MUST appear in exactly one `| Record | Disposition | Reason / expiry |` row (per shared contract §7a). The `active_pressure_handling_discipline` validator enforces the cell shape:
+**§7a Active-pressure disposition table — closed-set Reason / expiry form.** Every actively-pressuring record on the parent `PG.state_snapshot` MUST appear in exactly one `| Record | Disposition | Reason / expiry |` row (per the shared contract §7a class-specific criteria table). The `active_pressure_handling_discipline` validator enforces both that inclusion set and the cell shape:
 - `disposition` is exactly one of `selected`, `deferred`, `rejected`. Any other token fails (`active_pressure_disposition_unknown`).
 - For `deferred` rows, the `Reason / expiry` cell MUST contain either (a) a literal `PG-<integer>` reference (e.g., "remains active at PG-<N>", "expires after PG-<N>", "until PG-<N>") OR (b) at least one of the conditional connectives `after | before | if | once | until | when`. Freeform prose with neither (e.g., "continues to load on her", "remains active offstage") fails as `active_pressure_deferred_without_expiry`.
 - For `rejected` rows, the `Reason / expiry` cell MUST be non-empty.
@@ -74,6 +74,8 @@ Use the active STCHAR profile as stable authority. Use active story-state record
 - Every other listed class id must be present in the new page's `state_snapshot.active_records.<class>`. A record superseded this turn (e.g., a STEMO-N that was replaced by STEMO-M) is no longer active and must NOT appear as a packet citation — name its successor instead, or remove the cite.
 
 Common ways authors trip the rule: differential-discipline language like "unchanged from PG-3", "different from PG-3's anchors", "as PG-3", "Limits as PG-3"; carrying a prior page's grounding cite forward verbatim; referencing the just-superseded record (STEMO-N) when only its successor (STEMO-M) is active. Rewrite each such phrase in prose, drop the literal id, or replace it with the active successor id. The `Current-state grounding records:` field is the ONE exception — it is parsed as a comma-separated id list, never as prose.
+
+When authoring §16a packets, use the DO/DON'T table in the shared contract §16a for prior-page/prior-event reference patterns; the common failure is prose-style references like "from PG-X" that trip `page_plan_stchar_packet_integrity.stale_current_state_reference`.
 
 Use §10b "Open Setups, Active Clocks, Hidden Secrets" only when at least one post-delta active CLK, STSEC, or STQ record is relevant to the page render. It is per-page computed from the current `PG.state_snapshot.active_records`, not inlined verbatim from the shared contract and not copied from a prior page.
 

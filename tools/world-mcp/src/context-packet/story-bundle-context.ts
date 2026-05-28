@@ -844,8 +844,7 @@ export async function buildStoryBundleContext(
             initiator: null,
             driver_records: []
           },
-          max_candidates: STORY_BUNDLE_SHORTLIST_MAX_CANDIDATES,
-          include_rejection_summary: true
+          max_candidates: STORY_BUNDLE_SHORTLIST_MAX_CANDIDATES
         });
 
   if (selectionShortlist !== null && "code" in selectionShortlist) {

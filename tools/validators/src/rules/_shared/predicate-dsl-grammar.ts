@@ -189,3 +189,5 @@ export const PREDICATE_ARG_SCHEMAS = {
   all: { required: ["predicates"] },
   any: { required: ["predicates"] }
 } as const satisfies Record<(typeof PRED_TYPES)[number], { required: readonly string[] }>;
+
+export type PredicateName = (typeof PRED_TYPES)[number];

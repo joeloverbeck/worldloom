@@ -9,6 +9,7 @@ test("turn_driver_schema_compliance accepts valid player and non-player driver k
     driver("player_action", { initiator: "player", driver_records: [], player_response_mode: "initiates", pov_visibility: "perceived_directly" }, []),
     driver("player_write_in", { initiator: "player", driver_records: [], player_response_mode: "initiates", pov_visibility: "perceived_directly" }, []),
     driver("npc_action", { initiator: "STENT-1", driver_records: ["STPLAN-1"], player_response_mode: "responds", pov_visibility: "perceived_directly" }, ["STPLAN-1"]),
+    driver("npc_action", { initiator: "STENT-1", driver_records: ["STINT-1", "BEL-1"], player_response_mode: "responds", pov_visibility: "perceived_directly" }, ["STINT-1", "BEL-1"]),
     driver("offstage_action", { initiator: "STENT-1", driver_records: ["STPLAN-1"], player_response_mode: "responds", pov_visibility: "reported" }, ["STPLAN-1"]),
     driver("clock_fire", { initiator: "world", driver_records: ["CLK-1"], player_response_mode: "witnesses", pov_visibility: "inferred_from_trace" }, ["CLK-1"]),
     driver("world_pressure", { initiator: "world", driver_records: ["THR-1"], player_response_mode: "responds", pov_visibility: "perceived_directly" }, ["THR-1"]),
@@ -66,7 +67,9 @@ function records(turnDriver: Record<string, unknown> | undefined, active: string
     storyRecord("story_emotion_record", "STEMO-1", "emotions", { holder: "STENT-2" }),
     storyRecord("pressure_clock_record", "CLK-1", "clocks"),
     storyRecord("thread_record", "THR-1", "threads"),
-    storyRecord("story_secret_record", "STSEC-1", "secrets")
+    storyRecord("story_secret_record", "STSEC-1", "secrets"),
+    storyRecord("intention_record", "STINT-1", "intentions", { holder: "STENT-1" }),
+    storyRecord("belief_record", "BEL-1", "beliefs", { holder: "STENT-1" })
   ];
 }
 

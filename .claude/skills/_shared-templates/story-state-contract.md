@@ -210,7 +210,7 @@ Closed grammar contains 39 individual predicates plus 3 combinators (`not`, `all
 
 An existential predicate binds its `alias` to the matched active record during block selection. `SLT.effects.create`, `SLT.effects.supersede`, `SLT.effects.close`, and `SLT.exit_options[].likely_effects` may reference that matched record as `bound:<alias>`. Every `bound:<alias>` reference must resolve to an alias bound by a hard or soft precondition on the same `SLT`.
 
-When the selected block becomes an `SE`, `SE.commitment.alias_bindings` records the exact matched ids. The event schema accepts `CLK`, `STSEC`, `STQ`, `STPLAN`, and `STEMO` for the corresponding `any_clock_active`, `any_secret_unrevealed`, `any_story_question_open`, `any_plan_active`, and `any_emotion_active` aliases, in addition to the pre-existing selected-move binding classes.
+When the selected block becomes an `SE`, `SE.commitment.alias_bindings` records the exact matched ids. Soft preconditions that do not match any active record do not require a `commitment.alias_bindings` entry unless the alias is referenced by `bound:<alias>` in the SLT's `effects` or `exit_options[].likely_effects`; in that case, the binding is required to prevent a dangling downstream reference. The event schema accepts `CLK`, `STSEC`, `STQ`, `STPLAN`, and `STEMO` for the corresponding `any_clock_active`, `any_secret_unrevealed`, `any_story_question_open`, `any_plan_active`, and `any_emotion_active` aliases, in addition to the pre-existing selected-move binding classes.
 
 ### §5a. Mid-Story Introduction Structured Fields
 
@@ -503,7 +503,22 @@ The body can mention the selected event, route, rationale, player-visible outcom
 
 The `SE.turn_resolution` event's `world_logic_rationale` is the carrier for driver justification; §7a's `Driver kind:` and `Driver records:` lines together with `world_logic_rationale` form the complete driver provenance. Do not add a separate `why_now` field.
 
-Active-pressure disposition appears in §7a whenever the parent `PG.state_snapshot` has high-urgency active records. Every high-urgency active record on the parent snapshot appears in exactly one row:
+For non-player turns, prefer `STINT` in `Driver records` when the actor's active intention fires the act, and prefer `BEL` when the actor's knowing grounds the act. `BEL` may strengthen provenance, but an `npc_action` still needs at least one pressure or stable-authority driver record such as `STPLAN`, `STEMO`, `CLK`, `THR`, `STCHAR`, or `STINT`.
+
+Active-pressure disposition appears in §7a whenever the parent `PG.state_snapshot` has actively-pressuring records. Every actively-pressuring record on the parent snapshot appears in exactly one row. The class-specific criteria for "actively-pressuring" are:
+
+| Class | Criterion |
+|---|---|
+| STPLAN | `plan_status` is `active`, `blocked`, or `suspended`, and `current_step` has content |
+| STEMO | `intensity` is `high` or `extreme`, and `behavioral_pressure` is non-empty |
+| CLK | `status = active`, and `value` is at or above any `thresholds[].at` value |
+| THR | `status = active` and `urgency = high` |
+| STSEC | `status = partially_revealed` or `reveal_records` is non-empty |
+| STQ | `status = complicated` and `salience = high` |
+| OBL | `status` is `open` or `escalated`, and `urgency = high` |
+| CNSQ | `status` is `pending` or `escalated`, and `urgency = high` |
+
+The `active_pressure_handling_discipline` structural validator enforces this set; the table reproduces its per-class criteria for authoring reference.
 
 | Record | Disposition | Reason / expiry |
 |---|---|---|
@@ -589,6 +604,20 @@ Each §16a packet includes:
 ```
 
 When page-local modulation depends on active state, `Current-state grounding records:` names the active records that ground that modulation, cited by id. When no current-state record is needed, the field reads exactly: `Current-state grounding records: none; stable STCHAR authority only.` Page plans must not cite world `CHAR-*` as operational page-plan characterization authority. In §16a packet fields, any `PG-<integer>` or `SE-<integer>` token is treated as an operational current-state citation: cite only the current page's own `PG` or resolved `SE` id there. To discuss earlier pages or events as history, use prose such as "the prior observation beat" or "the parent-page action" rather than a literal page/event id unless that id is deliberately active/current for the packet.
+
+**DO / DON'T examples for prior-page / prior-event references in §16a:**
+
+| DON'T (validator FAIL) | DO (validator PASS) |
+|---|---|
+| "the disclosure from PG-6 compounds the desire" | "the disclosure on the parent page compounds the desire" |
+| "Jon's posture from PG-6 must now hold against new pressure" | "Jon's posture from the prior page must now hold against new pressure" |
+| "the trade-coded register reads back to him as evidence the PG-5 probe was about pricing" | "the trade-coded register reads back to him as evidence the earlier probe was about pricing" |
+| "the SE-6 act has paid its cost into the air" | "the parent-page act has paid its cost into the air" |
+| "the dread is sharper than at PG-6" | "the dread is sharper than on the prior page" |
+| "Current-state grounding records: STEMO-13, STEMO-14, PG-6" | "Current-state grounding records: STEMO-17, STEMO-18, PG-7" — cite the current page's own PG, not a prior page. |
+| "Trigger event: SE-6" when SE-6 is the prior resolved event | "Trigger event: SE-7" — cite the current page's resolved SE, or use prose such as "the parent-page event" for history. |
+
+The validator's strict rule is that any `PG-<integer>` or `SE-<integer>` token in a §16a packet field MUST resolve to an active record in the current page's snapshot. The current page's own `PG-<integer>` and the current page's resolved `SE-<integer>` are lawful citations; earlier page/event ids need prose substitution unless they are deliberately active/current for the packet.
 
 The canonical post-SPEC-71 §16a packet field set is:
 

@@ -125,6 +125,44 @@ export interface ContextPacketStoryBundleContext {
       after_source_record_id: number;
       after_mystery_policy: number;
       after_cooldown: number;
+      scope_rejected_samples: ReadonlyArray<{
+        slt_id: string;
+        reason: string;
+        evidence: Record<string, unknown>;
+      }>;
+      driver_kind_rejected_samples: ReadonlyArray<{
+        slt_id: string;
+        reason: string;
+        evidence: Record<string, unknown>;
+      }>;
+      action_family_rejected_samples: ReadonlyArray<{
+        slt_id: string;
+        reason: string;
+        evidence: Record<string, unknown>;
+      }>;
+      predicate_shape_rejected_samples: ReadonlyArray<{
+        slt_id: string;
+        reason: string;
+        evidence: Record<string, unknown>;
+      }>;
+      predicate_class_rejected_samples: ReadonlyArray<{
+        slt_id: string;
+        reason: string;
+        evidence: Record<string, unknown>;
+      }>;
+      source_record_id_rejected_samples: ReadonlyArray<{
+        slt_id: string;
+        reason: string;
+        evidence: Record<string, unknown>;
+      }>;
+      mystery_policy_rejected_samples: ReadonlyArray<{
+        slt_id: string;
+        reason: string;
+        evidence: {
+          allowed_authority_classes: string[];
+          unresolved_mystery_claims: string[];
+        };
+      }>;
       cooldown_active_samples: ReadonlyArray<{
         slt_id: string;
         last_selected_on_page: string;

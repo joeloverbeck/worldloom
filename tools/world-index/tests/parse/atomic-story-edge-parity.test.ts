@@ -56,6 +56,7 @@ const EDGE_PARITY_CASES = [
       "storylet_effect_ref",
       "storylet_exit_likely_effect_ref",
       "storylet_predicate_pred",
+      "storylet_predicate_class",
       "storylet_action_family"
     ]
   },

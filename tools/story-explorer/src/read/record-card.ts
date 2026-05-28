@@ -15,6 +15,17 @@ interface SummaryRule {
   participantFields?: string[];
 }
 
+export type RecordCardClassRule = Readonly<{
+  group: RecordGroup;
+  primaryFields: readonly string[];
+  secondaryFields: readonly string[];
+  statusField: string | null;
+  visibilityField: string | null;
+  confidenceField: string | null;
+  urgencyField: string | null;
+  participantFields: readonly string[];
+}>;
+
 export interface BuildRecordCardOptions {
   sourcePath?: string | null;
   contentHash?: string | null;
@@ -38,12 +49,12 @@ const SUMMARY_RULES: Record<string, SummaryRule> = {
   CHC: {
     group: "Event Delta",
     primaryFields: ["surface_label", "player_visible_intent"],
-    secondaryFields: ["target_or_action_families", "likely_state_pressure", "grounded_in"],
+    secondaryFields: ["target_or_action_families", "likely_state_pressure", "grounded_in.records"],
   },
   CLK: {
     group: "Pressure & Open Loops",
     primaryFields: ["title"],
-    secondaryFields: ["clock_kind", "current_tick", "max_tick", "stakes"],
+    secondaryFields: ["clock_kind", "value", "max", "driver", "resolution_event"],
     statusField: "status",
     visibilityField: "visibility",
     urgencyField: "salience",
@@ -96,7 +107,7 @@ const SUMMARY_RULES: Record<string, SummaryRule> = {
   },
   SF: {
     group: "Knowledge & Truth",
-    primaryFields: ["claim"],
+    primaryFields: ["statement"],
     secondaryFields: ["authority", "derived_from", "scope"],
     visibilityField: "authority",
   },
@@ -110,8 +121,8 @@ const SUMMARY_RULES: Record<string, SummaryRule> = {
   SLT: {
     group: "Plans & Emotion",
     primaryFields: ["title"],
-    secondaryFields: ["author_scope", "eligibility", "saliency"],
-    visibilityField: "author_scope.visibility",
+    secondaryFields: ["move_family", "scope.visibility", "scope.branch_id", "preconditions.hard", "preconditions.soft", "saliency.urgency", "grounding.compatible_turn_drivers"],
+    visibilityField: "scope.visibility",
     urgencyField: "saliency.urgency",
   },
   SP: {
@@ -135,11 +146,11 @@ const SUMMARY_RULES: Record<string, SummaryRule> = {
   },
   STEMO: {
     group: "Plans & Emotion",
-    primaryFields: ["emotion", "description", "holder"],
-    secondaryFields: ["target", "intensity", "reason"],
+    primaryFields: ["affect_kind", "holder"],
+    secondaryFields: ["orientation.toward_records", "intensity", "appraisal_basis", "trigger_event", "supersedes"],
     statusField: "status",
     urgencyField: "intensity",
-    participantFields: ["holder", "target"],
+    participantFields: ["holder", "orientation.toward_records"],
   },
   STENT: {
     group: "Cast & Status",
@@ -181,7 +192,7 @@ const SUMMARY_RULES: Record<string, SummaryRule> = {
   STSEC: {
     group: "Knowledge & Truth",
     primaryFields: ["secret_claim"],
-    secondaryFields: ["secret_kind", "holders", "reveal_conditions"],
+    secondaryFields: ["secret_kind", "holders", "reveal_event", "reveal_records"],
     statusField: "status",
     urgencyField: "salience",
     participantFields: ["holders"],
@@ -410,4 +421,22 @@ export function buildRecordCard(
 
 export function recordCardClasses(): string[] {
   return Object.keys(SUMMARY_RULES).sort((left, right) => left.localeCompare(right, undefined, { numeric: true }));
+}
+
+export function recordCardClassRules(): Record<string, RecordCardClassRule> {
+  return Object.fromEntries(
+    Object.entries(SUMMARY_RULES).map(([className, rule]) => [
+      className,
+      {
+        group: rule.group,
+        primaryFields: [...rule.primaryFields],
+        secondaryFields: [...(rule.secondaryFields ?? [])],
+        statusField: rule.statusField ?? null,
+        visibilityField: rule.visibilityField ?? null,
+        confidenceField: rule.confidenceField ?? null,
+        urgencyField: rule.urgencyField ?? null,
+        participantFields: [...(rule.participantFields ?? [])],
+      },
+    ])
+  );
 }
