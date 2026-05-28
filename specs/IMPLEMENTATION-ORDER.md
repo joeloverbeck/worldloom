@@ -1,9 +1,9 @@
-# Implementation Order — Story Explorer (SPEC-87 → SPEC-90) + Page-Plan Cleanliness (SPEC-91)
+# Implementation Order — Story Explorer (SPEC-87 → SPEC-90) + Page-Plan Cleanliness (SPEC-91) + Scene-Range Rendering (SPEC-92 → SPEC-93)
 
-**Origin**: triage of `reports/website-proposal.md` (2026-05-25) — SPEC-87..90; triage of `reports/page-plans-improvements-first-iteration.md` (2026-05-26) — SPEC-91
+**Origin**: triage of `reports/website-proposal.md` (2026-05-25) — SPEC-87..90; triage of `reports/page-plans-improvements-first-iteration.md` (2026-05-26) — SPEC-91; triage of `reports/scene-prose-planning-first-iteration.md` (2026-05-28) — SPEC-92..93
 **Companion triage (SPEC-87..90)**: `docs/triage/2026-05-25-website-proposal-triage.md`
 
-This file orders the four Story Explorer specs and records the named assumptions and "Should Wait" backlog that came out of the triage. All four specs together implement the v1 viewer the proposal calls for. SPEC-91 is an orthogonal page-plan body-cleanup track added 2026-05-26; it has no dependency on SPEC-87..90 and vice versa.
+This file orders three independent tracks. The sections immediately below (Order / Named assumptions / Future Enhancements / Resolved SPEC-87 decisions) concern the **Story Explorer track** (SPEC-87 → SPEC-90) plus the orthogonal **SPEC-91** page-plan body-cleanup. The **Scene-Range Rendering track** (SPEC-92 → SPEC-93) is documented in its own section at the end of this file. All four Story Explorer specs together implement the v1 viewer the proposal calls for; SPEC-91 has no dependency on SPEC-87..90 and vice versa; the Scene-Range track is independent of all of them (see its "Relationship to the Story Explorer track" note).
 
 ---
 
@@ -100,3 +100,30 @@ These were open decisions before SPEC-87 implementation. Final SPEC-87 state:
 1. **Default port**: `5174`.
 2. **Capstone smoke fixture**: the checkout-local `worlds/erotica-world/stories/red-bunny/` path was absent in this worktree, so the archived SPEC-87 capstone uses a temp-seeded red-bunny-shaped fixture and verifies no checkout-local world path is created.
 3. **Bin command**: `story-explorer`.
+
+---
+
+# Scene-Range Rendering Track (SPEC-92 → SPEC-93)
+
+**Origin**: triage of `reports/scene-prose-planning-first-iteration.md` (2026-05-28), Approach B (engine change now; scene-first Story Explorer deferred). Decision record: SPEC-92 + SPEC-93 themselves — no separate `docs/triage/` file, because the triage produced specs directly and the reassessment lives in their §1/§Source sections.
+
+Replaces the per-`PG` prose render unit with a scene/render-unit layer. `PG`s remain authoritative causal ticks; scenes are a derived, non-authoritative literary rendering over contiguous `PG` ranges.
+
+## Order
+
+| # | Spec | Subject | Depends on |
+|---|---|---|---|
+| 1 | SPEC-92 | Scene-range render layer (**additive**): `SCN` record, `branching-story-scene-plan` + `branching-story-scene-prose-attach` skills, scene directories, world-index enumeration + edges, scene validators + `scene-prose-receipt.schema.json`, FOUNDATIONS/contract amendments | — (additive; coexists with the page-plan pipeline) |
+| 2 | SPEC-93 | Decouple state turn from page-plan authoring + remove plan-hash coupling (**subtractive**): turn-cycle/bootstrap stop authoring page plans and reason from prior story records; remove `plan_hash`/`prose_plan_path` from `PG` with a `snapshot_replay_equality` discontinuity clause; rehome gates 7/9; retire 6 page-plan validators + Hook 6/7 + `branching-story-prose-attach` | SPEC-92 |
+
+**Ordering rationale**: SPEC-92 is purely additive — it stands up the scene pipeline alongside the existing page-plan pipeline. SPEC-93 is subtractive and removes page-plan authoring, so it must land *after* SPEC-92 so the scene layer can carry prose before the page plan is removed. SPEC-93 can technically stand alone (the state engine needs no prose to function), but landing SPEC-92 first avoids a window where committed pages have no renderer-facing artifact at all.
+
+**Relationship to the Story Explorer track**: independent. SPEC-90 (branch map + search) is page-first and unaffected. The **scene-first Story Explorer** rewrite (scene routes, PGs-as-x-ray, scene branch map) is **explicitly deferred** to a future spec — SPEC-93 *preserves* Story Explorer's existing page-plan/page-prose read paths for legacy bundles rather than rewriting them, and renders a graceful "no page plan" state for new planless `PG`s. A future scene-first Story Explorer spec should start with a brainstorm reassessment once SPEC-92/93 prove out.
+
+## Named assumptions (carry-overs from the 2026-05-28 triage; user can override on review)
+
+- **SR-A — Cold-paste rendering preserved.** The external renderer is cold-context; §2/§3/§render-time stay inlined verbatim in each scene plan (NOT extracted to a reusable preamble). Cost reduction comes from rendering once per scene (over N PGs) instead of per PG. The verbatim-inlining decision is preserved, not reversed.
+- **SR-B — `PG` `state_hash` chain retained.** Only the plan-byte hashes (`plan_hash` + the `prose_plan_path` payload coupling) are removed; the causal fork-replay `state_hash` chain stays (engine correctness, not author-facing).
+- **SR-C — Legacy bundles grandfathered.** Existing `PG` / page-plan / page-prose artifacts (red-bunny) are not migrated or rewritten; they remain readable as legacy. New stories use the scene pipeline.
+- **SR-D — Minimal `SCN`.** `SCN` is a render-membership record only (no act/arc/target-narrative-shape semantics), guarded by the `scn_no_narrative_shape_language` validator (FOUNDATIONS §5a/§5c).
+- **SR-E — Scene-first Story Explorer deferred** (see "Relationship to the Story Explorer track" above).
