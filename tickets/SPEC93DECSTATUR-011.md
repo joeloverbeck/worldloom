@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `docs/FOUNDATIONS.md`, `docs/WORKFLOWS.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/MACHINE-FACING-LAYER.md`, `docs/REPOSITORY-MAP.md`, `docs/prose-renderer-contract/README.md`
-**Deps**: archive/tickets/SPEC93DECSTATUR-003.md, SPEC93DECSTATUR-009
+**Deps**: archive/tickets/SPEC93DECSTATUR-003.md, archive/tickets/SPEC93DECSTATUR-009.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ SPEC-93 §5 amends FOUNDATIONS so the narrative contract matches the post-teardo
 
 1. `branching-story-prose-attach` appears at FOUNDATIONS lines 474 (Rule 7 firewall), 616 (§4 pipeline shape), 626 (§4a routing), 702 (§7 roster, 10 skills), 718 (§9 scope roster, 10 skills); the §7 and §9 rosters enumerate the same ten skills; `scene_range_forbidden_mystery_resolution` is present at `tools/validators/src/structural/scene-prose-receipt-content.ts` (the firewall reroute target) — all confirmed during SPEC-93 reassessment (this session).
 2. SPEC-93 §5 enumerates the FOUNDATIONS amendments (§4/§4a/Rule1/Rule7/§9/§7); §6 docs bullet names the five `docs/` files; §8 AC7 (FOUNDATIONS + contract amended consistently; no dangling page-plan contract references remain).
-3. Cross-artifact boundary: the §7/§9 Category 2c roster is mirrored in `cross-skill-consistency.md` (reconciled in SPEC93DECSTATUR-009); the docs reference all upstream removed surfaces (validators retired in 003, prose-attach retired in 009 — Deps), so the docs must land after those exist coherently.
+3. Cross-artifact boundary: the §7/§9 Category 2c roster is mirrored in `cross-skill-consistency.md` (reconciled in archive/tickets/SPEC93DECSTATUR-009.md); the docs reference all upstream removed surfaces (validators retired in 003, prose-attach retired in 009 — Deps), so the docs must land after those exist coherently.
 4. FOUNDATIONS Rule 1 (grounding → `PG` record), Rule 6 (the amendments are logged spec-level changes, not silent retcons — the teardown is documented), Rule 7 (gate 3 authoritative; rendered-prose firewall → scene attach) — the ticket restates all three consistently with the realized code/contract.
 5. (HARD-GATE / Canon Safety) The Rule 7 mystery-firewall paragraph (line 474) is a Canon Safety Check surface in prose — confirm the amendment keeps gate 3 authoritative on the `PG` record and reroutes the rendered-prose firewall to `scene_range_forbidden_mystery_resolution` (verified present) without weakening the MR firewall or resolving a forbidden-status `M`.
 6. (was template item 7 — reference removal blast radius) Grep FOUNDATIONS + the five docs for `branching-story-prose-attach`, `pages-prose-plans`, `page_plan_`, page-plan §11/§2/§3/§19 references; remove/reroute each; both the §7 and §9 rosters drop prose-attach (ten → nine) per reassessment M2.
@@ -60,7 +60,7 @@ Reconcile `docs/WORKFLOWS.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/MACHINE-FAC
 
 ## Out of Scope
 
-- The `cross-skill-consistency.md` roster reconcile (SPEC93DECSTATUR-009 — the FOUNDATIONS §7/§9 rosters are this ticket; their `cross-skill-consistency.md` mirror is 009).
+- The `cross-skill-consistency.md` roster reconcile (archive/tickets/SPEC93DECSTATUR-009.md — the FOUNDATIONS §7/§9 rosters are this ticket; their `cross-skill-consistency.md` mirror is 009).
 - The shared-template contract amendments (SPEC93DECSTATUR-010).
 - Any production-code change (docs-only ticket).
 
