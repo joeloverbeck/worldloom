@@ -367,6 +367,15 @@ test("prose, plan, receipt, and provenance routes expose direct-read artifacts",
     assert.equal(planResponse.statusCode, 200);
     assert.equal(planBody.data?.body, "Plan body\n");
 
+    const missingPlanResponse = await server.inject({
+      method: "GET",
+      url: "/api/worlds/fixture-world/stories/red-bunny/page-plans/PG-2",
+    });
+    const missingPlanBody = JSON.parse(missingPlanResponse.body) as { data?: { error?: string; message?: string } };
+    assert.equal(missingPlanResponse.statusCode, 404);
+    assert.equal(missingPlanBody.data?.error, "not_found");
+    assert.equal(missingPlanBody.data?.message, "Page plan not found: PG-2");
+
     const receiptResponse = await server.inject({
       method: "GET",
       url: "/api/worlds/fixture-world/stories/red-bunny/prose-receipts/PG-1",
