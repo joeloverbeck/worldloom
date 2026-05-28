@@ -67,10 +67,8 @@ function validatePlan(plan: ScenePlanTarget): Verdict[] {
 export function normalizeScenePlanSectionKey(key: string): string {
   return key
     .replace(/^\d+_/, "")
-    .replace(/^pov_/, "pov_")
     .replace(/^cast_and_voice$/, "cast_voice")
     .replace(/^emotional_and_relationship_throughline$/, "emotional_relationship_throughline")
     .replace(/^secrets_and_forbidden_reveals$/, "secrets_forbidden_reveals")
-    .replace(/^where_the_scene_begins_must_end$/, "where_the_scene_begins_must_end")
     .replace(/^render_time_instruction_block$/, "render_time_instruction");
 }
