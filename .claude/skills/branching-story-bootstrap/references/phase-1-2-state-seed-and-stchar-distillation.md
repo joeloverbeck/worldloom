@@ -29,27 +29,27 @@ Before drafting STCHAR profiles or opening state records, build a working-memory
 | Category | Route |
 |---|---|
 | Stable persona, voice, appraisal, pressure behavior, agency tendency, relationship-specific conduct, embodiment, capabilities, limits, dormant operational source material | STCHAR |
-| Current physical condition, injury, clothing state, fatigue, location, concealment, ability to act | STSTAT / STOBJ / STLOC / PG.state_snapshot / page-plan §5 / §6 / §16 |
+| Current physical condition, injury, clothing state, fatigue, location, concealment, ability to act | STSTAT / STOBJ / STLOC / PG.state_snapshot / downstream scene-plan character and setting guidance |
 | Opening event or recent causal incident | SE / THR / CNSQ / CLK / STQ / STSEC as applicable |
 | Current affective pressure, fear, shame, anger, exhaustion, suppression, dissociation | STEMO |
 | Knowledge, misunderstanding, suspicion, distrust, lie, uncertainty, witness access | BEL |
 | Current intention, tactical blockage, next step, fallback, inability to proceed | STINT / STPLAN |
 | Current relationship state or branch-local change in relation | SREL |
 | Active obligation, threat, consequence, debt, staged pressure | OBL / THR / CNSQ / CLK |
-| Page-local presentation, "who the player/protagonist sees," current voice modulation, prose must-show for this page | page-plan §16a + prose plan sections |
+| Scene-facing presentation, "who the player/protagonist sees," current voice modulation, prose must-show for the opening scene | downstream scene-plan character and prose guidance |
 | Provenance, source compression, omission rationale, validation trace | Source Distillation / Stable Source Material Inventory / Validation / Audit Anchors |
 
 Opening-page relevance is not an omission criterion. At bootstrap, future branches are unknown; stable operational source material should be retained unless it is genuinely outside the story scope or non-operational trivia.
 
-Phase 2 may draft STCHAR only from the Stable -> STCHAR row plus stable equivalents derived from transient opening facts. Phases 4 and 5 must consume the temporal rows to create the initial story-state records before root page-plan authoring.
+Phase 2 may draft STCHAR only from the Stable -> STCHAR row plus stable equivalents derived from transient opening facts. Phases 4 and 5 must consume the temporal rows to create the initial story-state records before root choice authoring.
 
 ## Phase 2: Distill selected cast into STCHAR profiles
 
 Before drafting any `STENT`, `STSTAT`, `STINT`, temporal record, page, choice, or direct-write artifact, distill every selected non-background `CHAR-*` into a story-local `STCHAR-*` profile. Bootstrap owns bundle creation, so this inline authoring is lawful here; normal runtime skills do not repeat it.
 
-Semantic Preservation Contract: for any STCHAR derived from a world `CHAR` (`source_kind: world_char`), every structured operational source fact must be copied, transformed, compressed, intentionally omitted with rationale, or marked story-irrelevant. No structured operational source fact may survive only in `## Source Distillation` or other audit/commentary prose if page planning, choice grounding, state derivation, or prose rendering may need it.
+Semantic Preservation Contract: for any STCHAR derived from a world `CHAR` (`source_kind: world_char`), every structured operational source fact must be copied, transformed, compressed, intentionally omitted with rationale, or marked story-irrelevant. No structured operational source fact may survive only in `## Source Distillation` or other audit/commentary prose if choice grounding, state derivation, or prose rendering may need it.
 
-Use only the Distillation Boundary Ledger's Stable -> STCHAR row plus stable equivalents derived from transient facts. Specifically, do not copy opening temporal state into STCHAR. For each transient opening fact that seems character-relevant, decide whether a stable dispositional equivalent exists. If yes, write only the durable equivalent in an operational STCHAR section. If no, route the fact entirely to state records or page-plan §16a.
+Use only the Distillation Boundary Ledger's Stable -> STCHAR row plus stable equivalents derived from transient facts. Specifically, do not copy opening temporal state into STCHAR. For each transient opening fact that seems character-relevant, decide whether a stable dispositional equivalent exists. If yes, write only the durable equivalent in an operational STCHAR section. If no, route the fact entirely to state records or downstream scene-plan guidance.
 
 For each selected cast member:
 
@@ -59,4 +59,4 @@ For each selected cast member:
 4. For `source_kind: world_char`, include both preservation layers: `source_operational_fact_map` for the 10 `dramatic_core` fields and `Stable Source Material Inventory` for stable operational material from all loaded sections.
 5. Validate the full STCHAR profile before proceeding. If any required selected cast member cannot produce a schema-valid STCHAR with all required body sections, abort before creating any story state or direct-write artifact.
 
-`source_char_id` is provenance only. Do not copy a `CHAR-*` id into `STENT`, `CHC`, `PG`, page-plan §16a, or any runtime characterization field as operational authority.
+`source_char_id` is provenance only. Do not copy a `CHAR-*` id into `STENT`, `CHC`, `PG`, scene-plan guidance, or any runtime characterization field as operational authority.

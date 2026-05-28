@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/tests/integration/spec93-capstone.test.ts` (new; no production code) + per-package green confirmation
-**Deps**: archive/tickets/SPEC93DECSTATUR-005.md, archive/tickets/SPEC93DECSTATUR-006.md, archive/tickets/SPEC93DECSTATUR-007.md, SPEC93DECSTATUR-008, SPEC93DECSTATUR-010, SPEC93DECSTATUR-011, SPEC93DECSTATUR-012
+**Deps**: archive/tickets/SPEC93DECSTATUR-005.md, archive/tickets/SPEC93DECSTATUR-006.md, archive/tickets/SPEC93DECSTATUR-007.md, archive/tickets/SPEC93DECSTATUR-008.md, SPEC93DECSTATUR-010, SPEC93DECSTATUR-011, SPEC93DECSTATUR-012
 
 ## Problem
 
