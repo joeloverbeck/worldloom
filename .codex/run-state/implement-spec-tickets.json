@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-93-decouple-state-turn-from-prose-plan-authoring.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC93DECSTATUR-006.md",
+  "last_ticket": "archive/tickets/SPEC93DECSTATUR-007.md",
   "last_result": "completed_archived",
-  "last_work_commit": "a9d198e27551b82ad556869d424b6e738d4e86c4",
+  "last_work_commit": "f0d5ea69d5ef5cce65b70391b25976b319c00da0",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC93DECSTATUR-007.md",
+  "next_target": "tickets/SPEC93DECSTATUR-008.md",
   "queue": [
-    "tickets/SPEC93DECSTATUR-007.md",
     "tickets/SPEC93DECSTATUR-008.md",
     "tickets/SPEC93DECSTATUR-009.md",
     "tickets/SPEC93DECSTATUR-010.md",
