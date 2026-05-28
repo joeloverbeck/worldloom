@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-92-scene-range-prose-rendering-layer.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC92SCERANPRO-009.md",
+  "last_ticket": "archive/tickets/SPEC92SCERANPRO-010.md",
   "last_result": "completed_archived",
-  "last_work_commit": "7c673f285deec3953a334b041c3d62caba41b5aa",
+  "last_work_commit": "a2d69484584a202d72b087d401163c34ccb810b3",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC92SCERANPRO-010.md",
+  "next_target": "tickets/SPEC92SCERANPRO-011.md",
   "queue": [
-    "tickets/SPEC92SCERANPRO-010.md",
     "tickets/SPEC92SCERANPRO-011.md"
   ],
   "phase": "ready_for_next_ticket",
