@@ -11,7 +11,7 @@
 **Deliverables**:
 
 - `archive/tickets/STSELECT-003.md` — End-to-end indexer→selector regression coverage for production-shape existential-predicate storylet pools
-- `tickets/STSELECT-004.md` — Regression coverage for `rankCandidates` urgency-banded round-robin, alphabetical move-family ordering, node-id tie-break, and `max_candidates` truncation order
+- `archive/tickets/STSELECT-004.md` — Regression coverage for `rankCandidates` urgency-banded round-robin, alphabetical move-family ordering, node-id tie-break, and `max_candidates` truncation order
 - `tickets/STSELECT-005.md` — Regression coverage for branch/scope/cooldown boundary cases
 - `tickets/STSELECT-006.md` — Regression coverage for page-state, source-ref, and error-path boundary cases
 - `archive/tickets/MCPENH-075.md` — Remove the declared-but-ignored `include_rejection_summary` flag

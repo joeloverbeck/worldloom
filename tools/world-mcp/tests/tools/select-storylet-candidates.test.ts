@@ -17,7 +17,7 @@ function sltProjection(id: string, fields: {
   branchId?: string | null;
   branchPrefix?: string[] | null;
   moveFamily?: string;
-  urgency?: string;
+  urgency?: string | null;
   cooldown?: number;
   mysteryAuthority?: string;
 }) {
@@ -33,7 +33,7 @@ function sltProjection(id: string, fields: {
         : JSON.stringify(fields.branchPrefix),
     slt_provenance_origin: "manual_authoring",
     slt_move_family: fields.moveFamily ?? "investigation",
-    slt_saliency_urgency: fields.urgency ?? "medium",
+    slt_saliency_urgency: fields.urgency === undefined ? "medium" : fields.urgency,
     slt_saliency_cooldown_pages: fields.cooldown ?? 0,
     slt_mystery_policy_allowed_authority: fields.mysteryAuthority ?? "none",
     candidate_projection_hash: `${id.replace("SLT-", "").padStart(64, "0")}`
@@ -252,6 +252,60 @@ function buildPredicateClassCapWorld(root: string): void {
   });
 }
 
+function buildRankingWorld(
+  root: string,
+  projections: Array<{
+    id: string;
+    moveFamily: string;
+    urgency?: string | null;
+  }>
+): void {
+  seedWorld(root, {
+    worldSlug: WORLD,
+    nodes: [
+      storyNode(
+        "PG-RANK",
+        "page_record",
+        [
+          "id: PG-RANK",
+          "branch_id: BR-RANK",
+          "branch_path: [PG-RANK]",
+          "state_snapshot:",
+          "  active_records:",
+          "    STCHAR: [STCHAR-1]",
+          ""
+        ].join("\n")
+      ),
+      storyNode("STCHAR-1", "story_character_authority_record", "---\nid: STCHAR-1\n---\n"),
+      ...projections.map(({ id }) => storyletNode(id))
+    ],
+    sltProjections: projections.map(({ id, moveFamily, urgency }) =>
+      sltProjection(id, urgency === undefined ? { moveFamily } : { moveFamily, urgency })
+    ),
+    edges: projections.flatMap(({ id }) => [
+      edge(id, "storylet_compatible_driver", "player_action"),
+      edge(id, "storylet_predicate_pred", "record_active"),
+      edge(id, "storylet_predicate_class", "story_character_authority_record")
+    ])
+  });
+}
+
+async function selectRankingCandidates(root: string, maxCandidates = 24) {
+  return withRepoRoot(root, () =>
+    selectStoryletCandidates({
+      world_slug: WORLD,
+      story_slug: STORY,
+      parent_page_id: "PG-RANK",
+      turn_driver: {
+        kind: "player_action",
+        initiator: "STENT-1",
+        driver_records: ["STCHAR-1"]
+      },
+      max_candidates: maxCandidates
+    })
+  );
+}
+
 test("selectStoryletCandidates filters indexed SLT projections and returns only projection records", async () => {
   const root = createTempRepoRoot();
 
@@ -378,6 +432,108 @@ test("selectStoryletCandidates filters indexed SLT projections and returns only 
       result.shortlisted_projection_records.some((record) => "body" in record || "full_body" in record),
       false
     );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates ranks round-robin across move families within an urgency band", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildRankingWorld(root, [
+      { id: "SLT-1", moveFamily: "alpha", urgency: "medium" },
+      { id: "SLT-2", moveFamily: "beta", urgency: "medium" },
+      { id: "SLT-3", moveFamily: "gamma", urgency: "medium" },
+      { id: "SLT-4", moveFamily: "alpha", urgency: "medium" },
+      { id: "SLT-5", moveFamily: "gamma", urgency: "medium" }
+    ]);
+
+    const result = await selectRankingCandidates(root);
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-1", "SLT-2", "SLT-3", "SLT-4", "SLT-5"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates ranks higher urgency before lower urgency regardless of family", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildRankingWorld(root, [
+      { id: "SLT-1", moveFamily: "alpha", urgency: "low" },
+      { id: "SLT-2", moveFamily: "zeta", urgency: "medium" }
+    ]);
+
+    const result = await selectRankingCandidates(root);
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-2", "SLT-1"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates breaks ties by node_id within the same urgency and family", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildRankingWorld(root, [
+      { id: "SLT-3", moveFamily: "alpha", urgency: "medium" },
+      { id: "SLT-10", moveFamily: "alpha", urgency: "medium" }
+    ]);
+
+    const result = await selectRankingCandidates(root);
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-10", "SLT-3"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates truncation preserves rank order", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildRankingWorld(root, [
+      { id: "SLT-1", moveFamily: "zeta", urgency: "low" },
+      { id: "SLT-2", moveFamily: "alpha", urgency: "high" },
+      { id: "SLT-3", moveFamily: "beta", urgency: "high" },
+      { id: "SLT-4", moveFamily: "alpha", urgency: "high" },
+      { id: "SLT-5", moveFamily: "gamma", urgency: "medium" },
+      { id: "SLT-6", moveFamily: "beta", urgency: "medium" },
+      { id: "SLT-7", moveFamily: "alpha", urgency: "medium" },
+      { id: "SLT-8", moveFamily: "delta", urgency: "low" },
+      { id: "SLT-9", moveFamily: "epsilon", urgency: "unknown" },
+      { id: "SLT-10", moveFamily: "omega", urgency: null }
+    ]);
+
+    const result = await selectRankingCandidates(root, 3);
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-2", "SLT-3", "SLT-4"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates places unknown urgency last", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildRankingWorld(root, [
+      { id: "SLT-1", moveFamily: "alpha", urgency: "unknown" },
+      { id: "SLT-2", moveFamily: "beta", urgency: null },
+      { id: "SLT-3", moveFamily: "gamma", urgency: "low" }
+    ]);
+
+    const result = await selectRankingCandidates(root);
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-3", "SLT-1", "SLT-2"]);
   } finally {
     destroyTempRepoRoot(root);
   }

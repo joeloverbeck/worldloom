@@ -1,6 +1,6 @@
 # STSELECT-004: Regression coverage for `rankCandidates` urgency-banded round-robin, alphabetical move-family ordering, node-id tie-break, and `max_candidates` truncation order
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — new fixture/test additions in `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts`. No production-code changes.
@@ -8,9 +8,9 @@
 
 ## Problem
 
-`tools/world-mcp/src/tools/select-storylet-candidates.ts:595-637` (`rankCandidates`) implements a non-trivial ranking algorithm: (a) sort by `slt_saliency_urgency` descending using `URGENCY_RANK` (high=3, medium=2, low=1, unknown=0); (b) within each urgency band, group by `slt_move_family`; (c) emit by round-robin across move-families in alphabetical order; (d) within the same urgency+family, preserve `node_id.localeCompare` ascending order (inherited from the initial sort). The shortlist is then truncated to `max_candidates` at line 823 via `slice(0, maxCandidates)`.
+At intake, `tools/world-mcp/src/tools/select-storylet-candidates.ts` (`rankCandidates`) implemented a non-trivial ranking algorithm: (a) sort by `slt_saliency_urgency` descending using `URGENCY_RANK` (high=3, medium=2, low=1, unknown=0); (b) within each urgency band, group by `slt_move_family`; (c) emit by round-robin across move-families in alphabetical order; (d) within the same urgency+family, preserve `node_id.localeCompare` ascending order (inherited from the initial sort). The shortlist is then truncated to `max_candidates` via `slice(0, maxCandidates)`.
 
-The existing test coverage does not exercise the algorithm's non-trivial branches:
+Before this ticket, the existing test coverage did not exercise the algorithm's non-trivial branches:
 
 - **No round-robin coverage.** The only ranking-aware fixture, `buildCandidateWorld` at `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts:99-178`, leaves at most one SLT per urgency band passing the filter pipeline (SLT-1 = high/investigation, SLT-2 = medium/disclosure; all others filtered out). The asserted shortlist `["SLT-1", "SLT-2"]` is satisfied by any ordering algorithm that puts higher urgency first — including a naïve sort that drops the move-family round-robin entirely.
 - **No alphabetical-family ordering coverage.** With one family per urgency band, the alphabetical sort at line 627 is never exercised. A regression that flipped to `.sort((a, b) => b.localeCompare(a))` (descending) would not be caught.
@@ -27,7 +27,7 @@ This algorithm is load-bearing for the eligibility-layer fairness contract: stor
 3. **Cross-skill / cross-artifact boundary**: this ticket audits the contract between `rankCandidates` and its callers (every story-pipeline skill that consumes `shortlisted_candidate_ids` — `branching-story-turn-cycle`, `branching-story-bootstrap`, `commitment-block-authoring`, `get_context_packet`'s `selection_shortlist` projection). The contract is "the first N entries of the shortlist are the highest-ranked N candidates by the documented urgency-band/round-robin rule"; the gap is that no test pins down "first N" as a behavior versus "any N."
 4. **FOUNDATIONS principle restatement**: §Story Bundles Validation Rules §Rule 5 (No Consequence Evasion) is engaged at the eligibility-layer fairness boundary — round-robin across move-families within an urgency band protects continuation-storylet diversity, which is the fairness primitive that lets every page leave at least one continuation eligible. §Tooling Recommendation @ runtime selection (aligns — the documented MCP retrieval surface must produce stable, fair shortlists; coverage gaps weaken the contract operators rely on).
 5. **Existing-output schema unchanged**: this ticket adds test coverage only; no production code changes. The `SelectStoryletCandidatesResponse` shape is unaffected.
-6. **Pre-edit baseline**: `cd tools/world-mcp && npm test` is expected to pass before this ticket's edits (must be verified during implementation).
+6. **Pre-edit baseline**: `cd tools/world-mcp && npm test` passed before this ticket's edits with 500 passing tests.
 
 ## Architecture Check
 
@@ -74,7 +74,7 @@ This algorithm is load-bearing for the eligibility-layer fairness contract: stor
 
 ### New/Modified Tests
 
-1. `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts` — add five focused ranking tests with dedicated fixture-builder helpers (e.g., `buildRankingFixture`) so each test isolates a single ranking dimension.
+1. `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts` — added five focused ranking tests with a dedicated `buildRankingWorld` fixture helper so each test isolates a single ranking dimension.
 
 ### Commands
 
@@ -83,8 +83,22 @@ This algorithm is load-bearing for the eligibility-layer fairness contract: stor
 
 ## Outcome
 
-(To be populated post-implementation.)
+Implemented focused regression coverage in `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts`:
+
+1. Added `buildRankingWorld` and `selectRankingCandidates` helpers that seed a minimal eligible storylet pool while varying only ranking fields.
+2. Added tests for urgency-banded move-family round-robin, higher-urgency precedence, lexicographic `node_id` tie-breaks, `max_candidates` top-N truncation, and null/unknown urgency placement.
+3. Adjusted the local `sltProjection` helper so tests can seed `null` urgency rows instead of unintentionally defaulting them to `medium`.
+4. Left `rankCandidates` production behavior unchanged.
 
 ## Verification Result
 
-(To be populated post-implementation.)
+1. Pre-edit baseline: `cd tools/world-mcp && npm test` passed with 500 passing tests.
+2. Build proof: `cd tools/world-mcp && npm run build` passed after the test helper was corrected for `exactOptionalPropertyTypes`.
+3. Focused compiled proof: `cd tools/world-mcp && node --test dist/tests/tools/select-storylet-candidates.test.js` passed with 13 passing tests, including all five new ranking regression tests.
+4. Final package proof: `cd tools/world-mcp && npm test` passed with 505 passing tests.
+5. Package docs and capability metadata were inspected (`tools/world-mcp/README.md`, `docs/MACHINE-FACING-LAYER.md`, `docs/WORKFLOWS.md`, `tools/world-mcp/src/server.ts`); no user-facing contract wording changed because this ticket only adds coverage for existing selector semantics.
+6. Pre-archive hygiene proof passed for the then-active ticket path and `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts`.
+
+## Deviations
+
+No implementation deviations. Production selector behavior and public response shape were unchanged. The package suite emitted existing non-fatal fixture diagnostics for `drifted-world` and `skewed-world`, but the suite completed green and those fixture messages are outside this test-only selector coverage ticket.
