@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `docs/FOUNDATIONS.md`, `docs/WORKFLOWS.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/MACHINE-FACING-LAYER.md`, `docs/REPOSITORY-MAP.md`, `docs/prose-renderer-contract/README.md`
-**Deps**: SPEC93DECSTATUR-003, SPEC93DECSTATUR-009
+**Deps**: archive/tickets/SPEC93DECSTATUR-003.md, SPEC93DECSTATUR-009
 
 ## Problem
 

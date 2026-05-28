@@ -5,9 +5,9 @@ import { parseArgs } from "node:util";
 
 import { isMainModule } from "../esm-main.js";
 import {
-  PAGE_PLAN_VERBATIM_CANONICAL_SOURCES,
-  stripPagePlanVerbatimFramingHeader,
-  trimPagePlanVerbatimTrailingWhitespace
+  SCENE_PLAN_VERBATIM_CANONICAL_SOURCES,
+  stripScenePlanVerbatimFramingHeader,
+  trimScenePlanVerbatimTrailingWhitespace
 } from "../package-interop.js";
 import {
   formatWorldRootFailure,
@@ -15,7 +15,7 @@ import {
   resolveWorldRoot
 } from "./_resolve-world-root.js";
 
-type VerbatimSectionNumber = keyof typeof PAGE_PLAN_VERBATIM_CANONICAL_SOURCES;
+type VerbatimSectionNumber = "2" | "3" | "19";
 type CanonicalBodies = Record<VerbatimSectionNumber, string>;
 
 export interface CliResult {
@@ -47,17 +47,15 @@ type SectionReplacement =
       changed: boolean;
     };
 
-const SECTION_NUMBERS = Object.keys(
-  PAGE_PLAN_VERBATIM_CANONICAL_SOURCES
-) as VerbatimSectionNumber[];
+const SECTION_NUMBERS = ["2", "3", "19"] as const satisfies readonly VerbatimSectionNumber[];
 
-const HELP_TEXT = `Usage: inline-canonical-prose-sections --plan <page-plan-md-path> [--out <output-md-path>] [--world-root <path>]
+const HELP_TEXT = `Usage: inline-canonical-prose-sections --plan <scene-plan-md-path> [--out <output-md-path>] [--world-root <path>]
 
-Replaces page-plan §2, §3, and §19 bodies with the canonical prose-renderer
-contract bytes used by page_plan_verbatim_section_integrity.
+Replaces scene-plan §2, §3, and §19 bodies with the canonical prose-renderer
+contract bytes used by scene_plan_verbatim_section_integrity.
 
 Arguments:
-  --plan <path>           Path to the page-plan markdown file. Relative paths
+  --plan <path>           Path to the scene-plan markdown file. Relative paths
                           resolve from cwd.
 
 Options:
@@ -162,14 +160,14 @@ function readTextFile(
 function loadCanonicalBodies(worldRoot: string): { ok: true; bodies: CanonicalBodies } | { ok: false; stderr: string } {
   const entries: Array<[VerbatimSectionNumber, string]> = [];
   for (const sectionNumber of SECTION_NUMBERS) {
-    const relativePath = PAGE_PLAN_VERBATIM_CANONICAL_SOURCES[sectionNumber];
+    const relativePath = SCENE_PLAN_VERBATIM_CANONICAL_SOURCES[sectionNumber];
     const sourcePath = path.join(worldRoot, relativePath);
     const raw = readTextFile(sourcePath, "canonical_source_unreadable", "canonical source");
     if (!raw.ok) {
       return { ok: false, stderr: raw.stderr };
     }
     try {
-      entries.push([sectionNumber, stripPagePlanVerbatimFramingHeader(raw.content)]);
+      entries.push([sectionNumber, stripScenePlanVerbatimFramingHeader(raw.content)]);
     } catch (err) {
       const cause = err instanceof Error ? err.message : String(err);
       return {
@@ -247,7 +245,7 @@ function trimSectionBody(value: string): string {
   while ((lines[0] ?? "").trim() === "") {
     lines.shift();
   }
-  return trimPagePlanVerbatimTrailingWhitespace(lines.join("\n"));
+  return trimScenePlanVerbatimTrailingWhitespace(lines.join("\n"));
 }
 
 function sectionSort(a: VerbatimSectionNumber, b: VerbatimSectionNumber): number {

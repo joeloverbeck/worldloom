@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-mcp` (`server.ts`, `tools/{validate,submit}-patch-plan.ts`, `cli/{validate,submit}-patch-plan.ts`, `PagePlanDraft`/`validatePagePlanDraftsShape`); `tools/validators` (`public/index.ts` `RunOptions.pagePlanDrafts`)
-**Deps**: SPEC93DECSTATUR-003
+**Deps**: archive/tickets/SPEC93DECSTATUR-003.md
 
 ## Problem
 
-The `page_plan_drafts` argument was the channel that fed page-plan markdown drafts into the validator run-loop so the page-plan structural validators could check them at dry-run. With those validators retired (SPEC93DECSTATUR-003), the argument and its plumbing are dead. SPEC-93 §2.1 removes the `page_plan_drafts` argument from `validate_patch_plan` / `submit_patch_plan` (MCP tools + CLIs + server registration), the `PagePlanDraft` type and `validatePagePlanDraftsShape` helper in world-mcp, and the `RunOptions.pagePlanDrafts` plumbing in the validators public API.
+The `page_plan_drafts` argument was the channel that fed page-plan markdown drafts into the validator run-loop so the page-plan structural validators could check them at dry-run. With those validators retired (archive/tickets/SPEC93DECSTATUR-003.md), the argument and its plumbing are dead. SPEC-93 §2.1 removes the `page_plan_drafts` argument from `validate_patch_plan` / `submit_patch_plan` (MCP tools + CLIs + server registration), the `PagePlanDraft` type and `validatePagePlanDraftsShape` helper in world-mcp, and the `RunOptions.pagePlanDrafts` plumbing in the validators public API.
 
 ## Assumption Reassessment (2026-05-28)
 
@@ -54,13 +54,14 @@ Update `tools/world-mcp/tests/{cli/submit-patch-plan,tools/submit-patch-plan,too
 - `tools/world-mcp/tests/cli/submit-patch-plan.test.ts` (modify)
 - `tools/world-mcp/tests/tools/submit-patch-plan.test.ts` (modify)
 - `tools/world-mcp/tests/tools/validate-patch-plan.test.ts` (modify)
+- `tools/world-mcp/tests/integration/spec42-capstone.test.ts` (modify — route-iii sibling test passes `page_plan_drafts`; drop the arg with Rule 6 attribution naming SPEC-93 as the retconning spec)
 - `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify)
 
 ## Out of Scope
 
 - The `branching-story-turn-cycle` skill's removal of its `page_plan_drafts` calls (SPEC93DECSTATUR-007).
 - `mcp-integration-audit`'s prose reference to `page_plan_drafts` as a required argument (SPEC93DECSTATUR-009).
-- The retirement of the page-plan validators themselves (SPEC93DECSTATUR-003).
+- The retirement of the page-plan validators themselves (archive/tickets/SPEC93DECSTATUR-003.md).
 
 ## Acceptance Criteria
 

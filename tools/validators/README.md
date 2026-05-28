@@ -98,9 +98,6 @@ Structural validators:
 - `compatibility_drift`
 - `active_records_full_shape`
 - `page_affordance_integrity`
-- `page_plan_body_engine_vocabulary_cleanliness`
-- `page_plan_verbatim_section_integrity`
-- `page_plan_stchar_packet_integrity`
 - `page_plan_turn_driver_consistency`
 - `story_question_payoff_integrity`
 - `story_question_setup_predates_payoff`
@@ -113,7 +110,6 @@ Structural validators:
 - `turn_cycle_output_grounding_integrity`
 - `touched_by_cf_completeness`
 - `proposal_package_shape`
-- `prose_receipt_schema_compliance`
 - `scene_prose_receipt_schema_compliance`
 - `scene_prose_receipt_content`
 - `scene_range_integrity`
@@ -121,8 +117,6 @@ Structural validators:
 - `scene_plan_verbatim_section_integrity`
 - `scene_plan_body_engine_vocabulary_cleanliness`
 - `scn_no_narrative_shape_language`
-- `prose_receipt_hash_integrity`
-- `prose_receipt_stchar_integrity`
 - `story_kernel_cast_bind_list_integrity`
 - `modification_history_retrofit`
 - `validation_trace_shape_compliance`

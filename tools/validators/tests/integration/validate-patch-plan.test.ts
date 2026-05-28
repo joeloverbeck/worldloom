@@ -211,10 +211,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "proposal_package_shape"
     );
     assert.equal(proposalPackageExecution?.status, "skipped");
-    const proseReceiptExecution = result.executions.find(
-      (execution) => execution.name === "prose_receipt_schema_compliance"
-    );
-    assert.equal(proseReceiptExecution?.status, "skipped");
     const sceneProseReceiptExecution = result.executions.find(
       (execution) => execution.name === "scene_prose_receipt_schema_compliance"
     );
@@ -243,14 +239,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "scn_no_narrative_shape_language"
     );
     assert.equal(scnNarrativeShapeExecution?.status, "skipped");
-    const proseReceiptHashExecution = result.executions.find(
-      (execution) => execution.name === "prose_receipt_hash_integrity"
-    );
-    assert.equal(proseReceiptHashExecution?.status, "skipped");
-    const proseReceiptStcharExecution = result.executions.find(
-      (execution) => execution.name === "prose_receipt_stchar_integrity"
-    );
-    assert.equal(proseReceiptStcharExecution?.status, "skipped");
     const storyKernelCastBindExecution = result.executions.find(
       (execution) => execution.name === "story_kernel_cast_bind_list_integrity"
     );
@@ -328,18 +316,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "page_affordance_integrity"
     );
     assert.equal(pageAffordanceExecution?.status, "skipped");
-    const pagePlanBodyCleanlinessExecution = result.executions.find(
-      (execution) => execution.name === "page_plan_body_engine_vocabulary_cleanliness"
-    );
-    assert.equal(pagePlanBodyCleanlinessExecution?.status, "skipped");
-    const pagePlanVerbatimExecution = result.executions.find(
-      (execution) => execution.name === "page_plan_verbatim_section_integrity"
-    );
-    assert.equal(pagePlanVerbatimExecution?.status, "skipped");
-    const pagePlanStcharExecution = result.executions.find(
-      (execution) => execution.name === "page_plan_stchar_packet_integrity"
-    );
-    assert.equal(pagePlanStcharExecution?.status, "skipped");
     const pagePlanTurnDriverExecution = result.executions.find(
       (execution) => execution.name === "page_plan_turn_driver_consistency"
     );
@@ -403,7 +379,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== midstoryIntroExecution &&
         row !== recordIntroductionUniquenessExecution &&
         row !== proposalPackageExecution &&
-        row !== proseReceiptExecution &&
         row !== sceneProseReceiptExecution &&
         row !== sceneProseReceiptContentExecution &&
         row !== sceneRangeExecution &&
@@ -411,8 +386,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== scenePlanVerbatimExecution &&
         row !== scenePlanBodyCleanlinessExecution &&
         row !== scnNarrativeShapeExecution &&
-        row !== proseReceiptHashExecution &&
-        row !== proseReceiptStcharExecution &&
         row !== storyKernelCastBindExecution &&
         row !== validationTraceExecution &&
         row !== branchIsolationExecution &&
@@ -433,9 +406,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== narrativeShapeExecution &&
         row !== compatibilityDriftExecution &&
         row !== pageAffordanceExecution &&
-        row !== pagePlanBodyCleanlinessExecution &&
-        row !== pagePlanVerbatimExecution &&
-        row !== pagePlanStcharExecution &&
         row !== pagePlanTurnDriverExecution &&
         row !== forbiddenStcharHashExecution &&
         row !== stcharTemporalReferenceExecution &&

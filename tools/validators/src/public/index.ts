@@ -30,11 +30,11 @@ export {
 } from "../structural/record-schema-compliance.js";
 
 export {
-  CANONICAL_SOURCES as PAGE_PLAN_VERBATIM_CANONICAL_SOURCES,
-  stripFramingHeader as stripPagePlanVerbatimFramingHeader,
-  trimTrailingWhitespace as trimPagePlanVerbatimTrailingWhitespace,
-  type VerbatimSectionNumber as PagePlanVerbatimSectionNumber
-} from "../structural/page-plan-verbatim-canonical-sources.js";
+  CANONICAL_SOURCES as SCENE_PLAN_VERBATIM_CANONICAL_SOURCES,
+  stripFramingHeader as stripScenePlanVerbatimFramingHeader,
+  trimTrailingWhitespace as trimScenePlanVerbatimTrailingWhitespace,
+  type VerbatimSectionNumber as ScenePlanVerbatimSectionNumber
+} from "../structural/scene-plan-verbatim-canonical-sources.js";
 
 export async function validatePatchPlan(
   envelope: PatchPlanEnvelope,

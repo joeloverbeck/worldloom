@@ -9,7 +9,7 @@ import {
   stripFramingHeader,
   trimTrailingWhitespace,
   type VerbatimSectionNumber
-} from "./page-plan-verbatim-canonical-sources.js";
+} from "./scene-plan-verbatim-canonical-sources.js";
 import { scenePlanTargets, sectionBody, type ScenePlanTarget } from "./scene-plan-section-parser.js";
 
 const VALIDATOR = "scene_plan_verbatim_section_integrity";

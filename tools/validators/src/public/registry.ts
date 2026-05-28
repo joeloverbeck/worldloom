@@ -32,14 +32,8 @@ import { noCharAuthorityInStoryRuntime } from "../structural/no-char-authority-i
 import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-place-mutation.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
 import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
-import { pagePlanBodyEngineVocabularyCleanliness } from "../structural/page-plan-body-engine-vocabulary-cleanliness.js";
-import { pagePlanVerbatimSectionIntegrity } from "../structural/page-plan-verbatim-section-integrity.js";
-import { pagePlanStcharPacketIntegrity } from "../structural/page-plan-stchar-packet-integrity.js";
 import { pagePlanTurnDriverConsistency } from "../structural/page-plan-turn-driver-consistency.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
-import { proseReceiptHashIntegrity } from "../structural/prose-receipt-hash-integrity.js";
-import { proseReceiptSchemaCompliance } from "../structural/prose-receipt-schema-compliance.js";
-import { proseReceiptStcharIntegrity } from "../structural/prose-receipt-stchar-integrity.js";
 import { recordIntroductionUniqueness } from "../structural/record-introduction-uniqueness.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
@@ -181,9 +175,6 @@ export const structuralValidators: readonly Validator[] = [
   compatibilityDrift,
   activeRecordsFullShape,
   pageAffordanceIntegrity,
-  pagePlanBodyEngineVocabularyCleanliness, // page_plan_body_engine_vocabulary_cleanliness
-  pagePlanVerbatimSectionIntegrity, // page_plan_verbatim_section_integrity
-  pagePlanStcharPacketIntegrity,
   pagePlanTurnDriverConsistency,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
@@ -196,7 +187,6 @@ export const structuralValidators: readonly Validator[] = [
   turnCycleOutputGroundingIntegrity,
   touchedByCfCompleteness,
   proposalPackageShape,
-  proseReceiptSchemaCompliance,
   sceneProseReceiptSchemaCompliance,
   sceneProseReceiptContent,
   sceneRangeIntegrity,
@@ -204,8 +194,6 @@ export const structuralValidators: readonly Validator[] = [
   scenePlanVerbatimSectionIntegrity,
   scenePlanBodyEngineVocabularyCleanliness,
   scnNoNarrativeShapeLanguage,
-  proseReceiptHashIntegrity,
-  proseReceiptStcharIntegrity,
   storyKernelCastBindListIntegrity,
   modificationHistoryRetrofit,
   validationTraceShapeCompliance,
