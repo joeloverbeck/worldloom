@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-92-scene-range-prose-rendering-layer.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC92SCERANPRO-001.md",
+  "last_ticket": "archive/tickets/SPEC92SCERANPRO-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "ce39854c70c4f9a7cc3e69bc4a25d8e65c7ad365",
+  "last_work_commit": "2104bf89fa27fc77e92e55742c97970c6b839e90",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC92SCERANPRO-002.md",
+  "next_target": "tickets/SPEC92SCERANPRO-003.md",
   "queue": [
-    "tickets/SPEC92SCERANPRO-002.md",
     "tickets/SPEC92SCERANPRO-003.md",
     "tickets/SPEC92SCERANPRO-004.md",
     "tickets/SPEC92SCERANPRO-005.md",
@@ -26,6 +25,6 @@
   "blocked": false,
   "blocker": null,
   "proof_state": null,
-  "dirty_state": "clean tracked worktree expected after state-only commit",
+  "dirty_state": "unrelated dirty path remains: .claude/skills/spec-to-tickets/SKILL.md; expected ignored artifacts remain in tools/validators/dist and tools/validators/node_modules",
   "updated_at": "2026-05-28"
 }
