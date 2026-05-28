@@ -1,9 +1,9 @@
 # SPEC93DECSTATUR-007: turn-cycle — remove page-plan authoring; compute the delta from parent PG records
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `.claude/skills/branching-story-turn-cycle/SKILL.md` + `references/{phase-6-page-snapshot, phase-7-page-plan, phase-9-validation-gates, governance-and-foundations}.md`
+**Engine Changes**: Yes — `.claude/skills/branching-story-turn-cycle/SKILL.md` + focused references under `.claude/skills/branching-story-turn-cycle/references/`
 **Deps**: archive/tickets/SPEC93DECSTATUR-004.md
 
 ## Problem
@@ -16,6 +16,7 @@ This is the primary-motive fix of SPEC-93. `branching-story-turn-cycle` currentl
 2. SPEC-93 §2.1 + §6 skills bullet: remove the page-plan authoring phase, the HARD-GATE precondition, and the `page_plan_drafts` argument; add explicit parent-`PG`-record retrieval for the delta; §8 AC1 + AC2 are the acceptance surface.
 3. Cross-artifact boundary: the skill is a consumer of the `page_plan_drafts` argument removed at the tool surface in archive/tickets/SPEC93DECSTATUR-004.md (Deps) and of the MCP retrieval surface (`get_record`/`get_records`/`get_context_packet`); the nine hard gates it populates are defined in `story-state-contract.md §7` (SPEC93DECSTATUR-010).
 4. FOUNDATIONS §Tooling Recommendation (LLM agents should never operate on prose alone): removing the page plan from the state turn forces the delta to be computed from the prior `PG`'s story records via MCP retrieval — the correctness improvement the spec names as its primary motive. Gate 7 (state-delta grounding) now grounds on the `PG` record.
+5. Reassessment correction: the live stale prose was not confined to the five originally named files. `pre-flight-and-prerequisites.md`, `phase-1-action-resolution.md`, `phase-8-choice-generation.md`, and `mid-story-record-introduction.md` also carried same-skill page-plan-era guidance that would have contradicted the new state-only flow, so this ticket absorbs those same-seam reference edits.
 
 ## Architecture Check
 
@@ -50,6 +51,10 @@ Remove the Phase 10 page-plan HARD-GATE precondition and the `page_plan_drafts=[
 - `.claude/skills/branching-story-turn-cycle/references/phase-7-page-plan.md` (modify)
 - `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` (modify)
 - `.claude/skills/branching-story-turn-cycle/references/governance-and-foundations.md` (modify)
+- `.claude/skills/branching-story-turn-cycle/references/pre-flight-and-prerequisites.md` (modify)
+- `.claude/skills/branching-story-turn-cycle/references/phase-1-action-resolution.md` (modify)
+- `.claude/skills/branching-story-turn-cycle/references/phase-8-choice-generation.md` (modify)
+- `.claude/skills/branching-story-turn-cycle/references/mid-story-record-introduction.md` (modify)
 
 ## Out of Scope
 
@@ -81,3 +86,26 @@ Remove the Phase 10 page-plan HARD-GATE precondition and the `page_plan_drafts=[
 
 1. `grep -rn "pages-prose-plans\|page_plan_drafts\|prior prose plan" .claude/skills/branching-story-turn-cycle/` — expect no live authoring/delta-from-prose references.
 2. End-to-end planless bootstrap→turn-cycle→scene flow exercised in SPEC93DECSTATUR-013.
+
+## Outcome
+
+Completed: 2026-05-28
+
+Turn-cycle is now documented as a state-only causal turn. The skill no longer produces a page plan, no longer blocks on a page-plan draft before HARD-GATE approval, and no longer passes `page_plan_drafts` to validate/submit. Phase 7 now emits choices, Phase 8 validates record-based gates, and Phase 9 submits the patch plan plus INDEX update after approval.
+
+The flow now explicitly retrieves the parent `PG` and material parent-active story records through `get_record` / `get_records` / `get_context_packet(..., story_slug=...)` before drafting the state delta or emitted choices. Gate 7 is documented as state-delta grounding over `PG.state_snapshot`, `SE.state_delta`, selected `SLT`, emitted `CHC`, active records, and loaded canon; Gate 9 is record-based turn-driver lawfulness.
+
+Same-skill supporting references were updated where leaving page-plan-era prose would have made the turn-cycle contract contradictory.
+
+## Verification Result
+
+PASS — `rg -n "pages-prose-plans|page_plan_drafts|prior prose plan|Author page plan" .claude/skills/branching-story-turn-cycle` returned no matches, proving the removed authoring/argument/delta-from-prose anchors are absent from the turn-cycle skill directory.
+
+PASS — `rg -n "get_record|get_records|get_context_packet" .claude/skills/branching-story-turn-cycle/SKILL.md` returned the HARD-GATE and procedure retrieval requirements, including `get_context_packet(..., story_slug=...)`.
+
+PASS — pre-archive `git diff --check -- .claude/skills/branching-story-turn-cycle tickets/SPEC93DECSTATUR-007.md` completed with no whitespace errors; post-archive hygiene uses `archive/tickets/SPEC93DECSTATUR-007.md`.
+
+## Deviations
+
+- The active shared contract templates still carry page-plan-era global wording; that is dependency-ordered into SPEC93DECSTATUR-010 and outside this ticket's turn-cycle-local owner boundary.
+- The end-to-end planless bootstrap→turn-cycle→scene regression remains assigned to SPEC93DECSTATUR-013.

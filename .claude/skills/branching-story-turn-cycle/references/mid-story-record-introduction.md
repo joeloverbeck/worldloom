@@ -2,7 +2,7 @@
 
 Use this reference during turn-cycle Phase 3 when deciding whether the accepted
 event creates a new persistent causal object, during Phase 4 when new state
-requires belief or visibility propagation, and during Phase 7 when page-plan
+requires belief or visibility propagation, and during Phase 7 when choice
 section 10b explains what newly introduced state may render or ground choices.
 The `SE.record_introductions[]` structured-field schema and closed trigger
 vocabularies live in `.claude/skills/_shared-templates/story-state-contract.md`
@@ -316,17 +316,17 @@ create a parallel `STCHAR` for a momentary mood, belief, or status change; use
 
 - `created_at_page` is the new `PG`.
 - The profile carries story-local persona, voice, appraisal, and pressure
-  behavior authority sufficient for page-plan §16a packets.
+  behavior authority sufficient for runtime state and later scene planning.
 - World `CHAR-*` may appear only as provenance on the `STCHAR`, not as runtime
-  operational authority on `STENT`, choices, page plans, or prose receipts.
+  operational authority on `STENT`, choices, or scene render artifacts.
 - `SE.state_delta.create[]` includes the new character authority id.
 - `SE.record_introductions[]` includes
   `{record_id: STCHAR-<N>, class: STCHAR, trigger: <closed trigger>, evidence: [...], distinct_from: [...]}`.
 
 **Required turn-cycle handling.** A fresh non-background `STENT` that needs
 character behavior or voice authority should be paired with an active `STCHAR`
-before page planning relies on that entity. Page-plan §16a renders from active
-`STCHAR`; do not ask prose to infer persona from a world `CHAR` id.
+before choices or state transitions rely on that entity. Scene planning renders
+from active `STCHAR`; do not ask prose to infer persona from a world `CHAR` id.
 
 **Validator checks.** `midstory_record_introduction_grounding` checks that
 mid-story-created `STCHAR` records are represented in `SE.record_introductions[]`
