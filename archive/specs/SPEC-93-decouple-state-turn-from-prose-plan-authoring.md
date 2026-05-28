@@ -1,6 +1,6 @@
 # SPEC-93 — Decouple the State Turn from Prose-Plan Authoring; Remove Plan-Hash Coupling
 
-**Status:** draft
+**Status:** COMPLETED
 **Date:** 2026-05-28
 **Classification:** story-canon-related (changes `branching-story-bootstrap`/`branching-story-turn-cycle` state-turn flow, the `PG` schema and its state-hash payload, the nine shared hard gates, six page-plan-era validators, Hook 6/7, `branching-story-prose-attach`; amends FOUNDATIONS §Story Bundles §4/§4a/§7/§9, Rule 1, Rule 7, and the shared story state contract §7/§8).
 **Depends on:** **SPEC-92** (the scene render layer must exist to carry prose before page-plan authoring is removed). Land SPEC-92 first.
@@ -125,3 +125,23 @@ Per-package (per-package npm, no workspace — verified): from each package dir 
 
 1. **Keep the `PG` `state_hash` chain?** Default: **keep** — it protects fork-replay determinism (engine correctness, author never edits it), distinct from the rejected plan-byte hashes. If the author later wants it gone too, that is a separate, larger replay-determinism decision.
 2. **Retire the legacy page directories from world-index enumeration once no bundle uses them?** Default: **keep enumerating for read** while any legacy bundle (red-bunny) retains page artifacts; a future janitorial spec can drop the enumeration when the last legacy bundle is gone or migrated.
+
+## Outcome
+
+Completed: 2026-05-28
+
+SPEC-93 landed across the ticket queue and is archived with all active tickets moved to `archive/tickets/`. The implemented state turn is planless for new `PG` records: bootstrap, turn-cycle, MCP maintenance, validators, patch-engine, world-index hashing, world-mcp submission/verification surfaces, hooks, docs, and skill contracts no longer require page-plan authoring or page-plan/prose-receipt hash coupling. Legacy page-plan/page-prose read paths remain for existing bundles.
+
+The final capstone is `tools/validators/tests/integration/spec93-capstone.test.ts`. It classifies removal-completeness sweep hits, proves planless and legacy `PG` schema/hash behavior, and guards against adding a `prose_plan_path`/`plan_hash` special case to `computePgStateHash`.
+
+Deviations from the original draft:
+
+- The broad grep was implemented as a classifier rather than a literal no-hit command because later valid legacy-read and historical/meta references remain by design.
+- The bootstrap -> turn-cycle -> scene-plan -> scene-prose-attach end-to-end flow remains documented as a manual dry-run runbook because those are LLM skill invocations with HARD-GATE/user-approval boundaries, not an executable package test.
+- Same-seam stale current references found during the final sweep were corrected in shared templates, bootstrap contract prose, validator docs, and existing capstone tests.
+
+Final verification:
+
+- `cd tools/validators && npm test` — 1057 tests passed.
+- `cd tools/world-mcp && npm test` — 506 tests passed.
+- Same-iteration package lanes also passed: `tools/world-index npm test`, `tools/hooks npm test`, `tools/patch-engine npm test`, and `tools/story-explorer npm test`.
