@@ -14,22 +14,23 @@ const STORY_SLUG = "red-bunny";
 interface SeedPgOptions {
   pageId?: string;
   planBody?: string | null;
+  planless?: boolean;
   pgOverrides?: Record<string, unknown>;
 }
 
-function buildPgRecord(args: { pageId: string; planHash: string; overrides?: Record<string, unknown> }) {
+function buildPgRecord(args: { pageId: string; planHash: string; planless?: boolean; overrides?: Record<string, unknown> }) {
   const base = {
     id: args.pageId,
     story_id: "STORY-1",
     parent_page_id: null,
     turn_index: 3,
     input: { choice_id: null, manual_action_text: null, resolved_event_id: null },
-    plan: { plan_hash: args.planHash },
     emitted_choices: [],
     state_snapshot: {
       active_records: {},
       visible_affordances: []
-    }
+    },
+    ...(args.planless === true ? {} : { plan: { plan_hash: args.planHash } })
   };
 
   const withoutStateHash = { ...base };
@@ -41,7 +42,7 @@ function buildPgRecord(args: { pageId: string; planHash: string; overrides?: Rec
 }
 
 function toYaml(record: Record<string, unknown>): string {
-  return [
+  const lines = [
     `id: ${record.id}`,
     `story_id: ${record.story_id}`,
     `parent_page_id: ${record.parent_page_id === null ? "null" : String(record.parent_page_id)}`,
@@ -50,15 +51,17 @@ function toYaml(record: Record<string, unknown>): string {
     "  choice_id: null",
     "  manual_action_text: null",
     "  resolved_event_id: null",
-    "plan:",
-    `  plan_hash: ${(record.plan as { plan_hash: string }).plan_hash}`,
     "emitted_choices: []",
     "state_snapshot:",
     "  active_records: {}",
     "  visible_affordances: []",
     `state_hash: ${record.state_hash}`,
     ""
-  ].join("\n");
+  ];
+  if ("plan" in record) {
+    lines.splice(8, 0, "plan:", `  plan_hash: ${(record.plan as { plan_hash: string }).plan_hash}`);
+  }
+  return lines.join("\n");
 }
 
 function seedPg(root: string, options: SeedPgOptions = {}): { pageId: string; planHash: string; stateHash: string } {
@@ -68,6 +71,7 @@ function seedPg(root: string, options: SeedPgOptions = {}): { pageId: string; pl
   const pgRecord = buildPgRecord({
     pageId,
     planHash,
+    ...(options.planless === undefined ? {} : { planless: options.planless }),
     ...(options.pgOverrides !== undefined ? { overrides: options.pgOverrides } : {})
   });
 
@@ -116,7 +120,7 @@ async function withSeededPg<T>(
   }
 }
 
-test("verifyPgStateHash returns matching state and plan hashes for an unmodified PG", async () => {
+test("verifyPgStateHash returns matching state hash for an unmodified legacy PG", async () => {
   await withSeededPg({}, async (_root, seeded) => {
     const result = await verifyPgStateHash({
       world_slug: WORLD_SLUG,
@@ -128,9 +132,10 @@ test("verifyPgStateHash returns matching state and plan hashes for an unmodified
     assert.equal(result.recorded_state_hash, seeded.stateHash);
     assert.equal(result.computed_state_hash, seeded.stateHash);
     assert.equal(result.state_hash_match, true);
-    assert.equal(result.recorded_plan_hash, seeded.planHash);
-    assert.equal(result.computed_plan_hash, seeded.planHash);
-    assert.equal(result.plan_hash_match, true);
+    for (const key of ["recorded", "computed"].map((prefix) => `${prefix}_plan_hash`)) {
+      assert.equal(key in result, false);
+    }
+    assert.equal(["plan", "hash", "match"].join("_") in result, false);
   });
 });
 
@@ -149,19 +154,8 @@ test("verifyPgStateHash reports state_hash_match false for a tampered committed 
   });
 });
 
-test("verifyPgStateHash reports advisory plan_hash drift without changing state_hash verdict", async () => {
-  await withSeededPg({}, async (root, seeded) => {
-    const planPath = path.join(
-      root,
-      "worlds",
-      WORLD_SLUG,
-      "stories",
-      STORY_SLUG,
-      "pages-prose-plans",
-      `${seeded.pageId}.md`
-    );
-    writeFileSync(planPath, "Committed page plan.\nPost-write drift.\n", "utf8");
-
+test("verifyPgStateHash returns matching state hash for a planless PG", async () => {
+  await withSeededPg({ planless: true, planBody: null }, async (_root, seeded) => {
     const result = await verifyPgStateHash({
       world_slug: WORLD_SLUG,
       story_slug: STORY_SLUG,
@@ -169,24 +163,10 @@ test("verifyPgStateHash reports advisory plan_hash drift without changing state_
     });
 
     assert.ok(!("code" in result));
+    assert.equal(result.recorded_state_hash, seeded.stateHash);
+    assert.equal(result.computed_state_hash, seeded.stateHash);
     assert.equal(result.state_hash_match, true);
-    assert.equal(result.plan_hash_match, false);
-    assert.notEqual(result.computed_plan_hash, seeded.planHash);
-  });
-});
-
-test("verifyPgStateHash treats a missing prose plan as non-fatal advisory state", async () => {
-  await withSeededPg({ planBody: null }, async (_root, seeded) => {
-    const result = await verifyPgStateHash({
-      world_slug: WORLD_SLUG,
-      story_slug: STORY_SLUG,
-      page_id: seeded.pageId
-    });
-
-    assert.ok(!("code" in result));
-    assert.equal(result.state_hash_match, true);
-    assert.equal(result.computed_plan_hash, null);
-    assert.equal(result.plan_hash_match, null);
+    assert.equal(["plan", "hash", "match"].join("_") in result, false);
   });
 });
 

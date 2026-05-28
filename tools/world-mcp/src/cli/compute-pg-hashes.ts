@@ -3,35 +3,29 @@ import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
 import { isMainModule } from "../esm-main.js";
-import { computePgStateHash, computePlanHash } from "../package-interop.js";
+import { computePgStateHash } from "../package-interop.js";
 export interface CliResult {
   stdout: string;
   stderr: string;
   exitCode: number;
 }
 
-const HELP_TEXT = `Usage: compute-pg-hashes --plan <plan-md-path> --pg <pg-record-json-path>
+const HELP_TEXT = `Usage: compute-pg-hashes --pg <pg-record-json-path>
 
-Computes the canonical sha256 hashes that every PG record requires before its
+Computes the canonical sha256 state hash that every PG record requires before its
 patch plan is validated or submitted, per the story state contract §4.2a:
 
-  plan_hash  = sha256 over the exact UTF-8 bytes of the page plan body that
-               will be written to pages-prose-plans/PG-<integer>.md.
   state_hash = sha256 over the deterministic canonical JSON serialization of
                the PG fork-state payload (the full PG record except state_hash
                itself).
 
 Story-pipeline skills that author a PG record (branching-story-bootstrap
-Phase 7, branching-story-turn-cycle Phase 9) MUST use this CLI to produce
-the values they stamp onto PG.plan.plan_hash and PG.state_hash. Hand-rolling
+and branching-story-turn-cycle) MUST use this CLI to produce the value they
+stamp onto PG.state_hash. Hand-rolling
 the canonical-JSON serializer or omitting fields by hand will produce hashes
 that disagree with the validator and the engine.
 
 Arguments:
-  --plan <path>           Path to the page plan markdown file. The file is
-                          read as raw bytes (no normalization, no trimming);
-                          the hash binds the exact bytes that will land at
-                          pages-prose-plans/PG-<integer>.md.
   --pg <path>             Path to a JSON file containing the PG record draft.
                           YAML input is rejected: the patch engine validates
                           JSON, so the CLI must hash the same JSON payload the
@@ -40,39 +34,34 @@ Arguments:
                             jq '.patches[N].payload.record' envelope.json > PG-record.json
                           and pass PG-record.json as --pg. The 'state_hash'
                           field on the input is IGNORED (it is the value being
-                          computed); the 'plan.plan_hash' field, if present,
-                          is REPLACED in the canonical payload by the value
-                          computed from --plan, so callers may pass a draft
-                          whose plan block has a placeholder or omitted hash.
+                          computed). The CLI does not compute or stamp
+                          plan_hash; new PG records omit plan/prose_plan_path.
 
 Options:
   --help                  Show this help and exit.
 
 World root:
-  This CLI reads only the --plan and --pg files and does not require a
+  This CLI reads only the --pg file and does not require a
   worldloom project root. The patch-plan CLIs and sign-approval-token support
   --world-root / WORLDLOOM_ROOT because they open the world index or HMAC
   secret; compute-pg-hashes intentionally has no --world-root option.
 
 Output (stdout, JSON):
   {
-    "plan_hash":  "<64 lowercase hex chars>",
     "state_hash": "<64 lowercase hex chars>"
   }
 
 Exit codes:
-  0   Both hashes computed successfully.
+  0   Hash computed successfully.
   1   I/O error, parse error, or missing required PG fields.
   2   CLI argument error.
 
 Example:
   node tools/world-mcp/dist/src/cli/compute-pg-hashes.js \\
-    --plan /tmp/PG-2-plan.md \\
     --pg   /tmp/PG-2-from-envelope.json
 `;
 
 interface CliArgs {
-  planPath: string;
   pgPath: string;
 }
 
@@ -86,7 +75,6 @@ function parseCli(argv: string[]): ParseOutcome {
     typeof parseArgs<{
       options: {
         help: { type: "boolean" };
-        plan: { type: "string" };
         pg: { type: "string" };
       };
       allowPositionals: true;
@@ -98,7 +86,6 @@ function parseCli(argv: string[]): ParseOutcome {
       args: argv,
       options: {
         help: { type: "boolean" },
-        plan: { type: "string" },
         pg: { type: "string" }
       },
       allowPositionals: true,
@@ -112,11 +99,7 @@ function parseCli(argv: string[]): ParseOutcome {
     return { kind: "help" };
   }
 
-  const planPath = parsed.values.plan;
   const pgPath = parsed.values.pg;
-  if (planPath === undefined || planPath.length === 0) {
-    return { kind: "error", message: "--plan <path> is required." };
-  }
   if (pgPath === undefined || pgPath.length === 0) {
     return { kind: "error", message: "--pg <path> is required." };
   }
@@ -127,16 +110,7 @@ function parseCli(argv: string[]): ParseOutcome {
     };
   }
 
-  return { kind: "args", args: { planPath, pgPath } };
-}
-
-function readPlanBytes(filePath: string): { ok: true; bytes: Buffer } | { ok: false; message: string } {
-  try {
-    return { ok: true, bytes: readFileSync(filePath) };
-  } catch (err) {
-    const cause = err instanceof Error ? err.message : String(err);
-    return { ok: false, message: `Failed to read plan file ${filePath}: ${cause}` };
-  }
+  return { kind: "args", args: { pgPath } };
 }
 
 function readPgRecord(filePath: string): { ok: true; record: Record<string, unknown> } | { ok: false; message: string } {
@@ -167,14 +141,6 @@ function readPgRecord(filePath: string): { ok: true; record: Record<string, unkn
   }
 
   const record = parsed as Record<string, unknown>;
-  const planBlock = record.plan;
-  if (planBlock === null || typeof planBlock !== "object" || Array.isArray(planBlock)) {
-    return {
-      ok: false,
-      message: `PG file ${filePath} must contain a top-level plan object; got ${describeKind(planBlock)}.`
-    };
-  }
-
   return { ok: true, record };
 }
 
@@ -182,20 +148,6 @@ function describeKind(value: unknown): string {
   if (value === null) return "null";
   if (Array.isArray(value)) return "array";
   return typeof value;
-}
-
-function applyComputedPlanHash(
-  pgRecord: Record<string, unknown>,
-  planHash: string
-): Record<string, unknown> {
-  const planBlock = pgRecord.plan;
-  const replaced: Record<string, unknown> = { ...pgRecord };
-  if (planBlock !== null && typeof planBlock === "object" && !Array.isArray(planBlock)) {
-    replaced.plan = { ...(planBlock as Record<string, unknown>), plan_hash: planHash };
-  } else {
-    replaced.plan = { plan_hash: planHash };
-  }
-  return replaced;
 }
 
 export async function runComputePgHashesCli(argv: string[]): Promise<CliResult> {
@@ -213,21 +165,14 @@ export async function runComputePgHashesCli(argv: string[]): Promise<CliResult> 
     };
   }
 
-  const planResult = readPlanBytes(parsed.args.planPath);
-  if (!planResult.ok) {
-    return { stdout: "", stderr: `${planResult.message}\n`, exitCode: 1 };
-  }
-
   const pgResult = readPgRecord(parsed.args.pgPath);
   if (!pgResult.ok) {
     return { stdout: "", stderr: `${pgResult.message}\n`, exitCode: 1 };
   }
 
-  const planHash = computePlanHash(planResult.bytes);
-  const pgWithFinalPlanHash = applyComputedPlanHash(pgResult.record, planHash);
-  const stateHash = computePgStateHash(pgWithFinalPlanHash);
+  const stateHash = computePgStateHash(pgResult.record);
 
-  const output = `${JSON.stringify({ plan_hash: planHash, state_hash: stateHash }, null, 2)}\n`;
+  const output = `${JSON.stringify({ state_hash: stateHash }, null, 2)}\n`;
   return { stdout: output, stderr: "", exitCode: 0 };
 }
 

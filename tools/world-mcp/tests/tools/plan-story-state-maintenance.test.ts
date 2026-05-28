@@ -179,11 +179,13 @@ test("planStoryStateMaintenance returns a review-only patch plan for STEMO-style
       "STEMO-3"
     ]);
     assert.deepEqual(page?.emitted_choices, []);
-    assert.match(result.maintenance_page_plan.body, /# Maintenance Page Plan PG-2/);
-    assert.equal(result.maintenance_page_plan.content_hash, (page?.plan as { plan_hash: string }).plan_hash);
+    assert.equal("maintenance_page_plan" in result, false);
+    assert.equal("plan" in (page ?? {}), false);
+    assert.equal("prose_plan_path" in (page ?? {}), false);
     assert.equal(result.affected_records[0]?.record_id, "STEMO-1");
     assert.ok(!("files_written" in result));
     assert.ok(!("approval_token" in result.next_steps));
+    assert.ok(!("write_page_plan" in result.next_steps));
   } finally {
     destroyTempRepoRoot(root);
   }
