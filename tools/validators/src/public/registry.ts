@@ -50,6 +50,7 @@ import { secretIntroductionAnchorIntegrity } from "../structural/secret-introduc
 import { secretCarrierExistence } from "../structural/secret-carrier-existence.js";
 import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-firewall-compliance.js";
 import { sceneProseReceiptSchemaCompliance } from "../structural/scene-prose-receipt-schema-compliance.js";
+import { sceneProseReceiptContent } from "../structural/scene-prose-receipt-content.js";
 import { sceneRangeIntegrity } from "../structural/scene-range-integrity.js";
 import { scenePlanStructural } from "../structural/scene-plan-structural.js";
 import { scenePlanVerbatimSectionIntegrity } from "../structural/scene-plan-verbatim-section-integrity.js";
@@ -199,6 +200,7 @@ export const structuralValidators: readonly Validator[] = [
   proposalPackageShape,
   proseReceiptSchemaCompliance,
   sceneProseReceiptSchemaCompliance,
+  sceneProseReceiptContent,
   sceneRangeIntegrity,
   scenePlanStructural,
   scenePlanVerbatimSectionIntegrity,

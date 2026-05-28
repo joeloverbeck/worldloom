@@ -101,6 +101,7 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "proposal_package_shape",
       "prose_receipt_schema_compliance",
       "scene_prose_receipt_schema_compliance",
+      "scene_prose_receipt_content",
       "scene_range_integrity",
       "scene_plan_structural",
       "scene_plan_verbatim_section_integrity",
