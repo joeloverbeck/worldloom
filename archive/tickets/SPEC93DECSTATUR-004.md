@@ -1,6 +1,6 @@
 # SPEC93DECSTATUR-004: Remove the page_plan_drafts argument and its validator-framework plumbing
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-mcp` (`server.ts`, `tools/{validate,submit}-patch-plan.ts`, `cli/{validate,submit}-patch-plan.ts`, `PagePlanDraft`/`validatePagePlanDraftsShape`); `tools/validators` (`public/index.ts` `RunOptions.pagePlanDrafts`)
@@ -12,10 +12,10 @@ The `page_plan_drafts` argument was the channel that fed page-plan markdown draf
 
 ## Assumption Reassessment (2026-05-28)
 
-1. `page_plan_drafts` is a live optional argument in `tools/world-mcp/src/tools/{validate,submit}-patch-plan.ts` (declared + `validatePagePlanDraftsShape`-checked + forwarded as `runOpts.pagePlanDrafts`), `cli/{validate,submit}-patch-plan.ts`, and `server.ts`; it is consumed by `tools/validators/src/public/index.ts:43,52` (`RunOptions.pagePlanDrafts`) — confirmed during SPEC-93 reassessment (this session, Improvement M1).
+1. `page_plan_drafts` is a live optional argument in `tools/world-mcp/src/tools/{validate,submit}-patch-plan.ts` (declared + `validatePagePlanDraftsShape`-checked + forwarded as `runOpts.pagePlanDrafts`), `cli/{validate,submit}-patch-plan.ts`, and `server.ts`; it is consumed by `tools/validators/src/public/index.ts:43,52` (`RunOptions.pagePlanDrafts`) and documented in `tools/world-mcp/README.md` — confirmed during SPEC-93 reassessment (this session, Improvement M1).
 2. SPEC-93 §2.1 + §6 (world-mcp + validators bullets, post-reassessment) enumerate the full removal surface including the validators `public/index.ts` plumbing and the `PagePlanDraft`/`validatePagePlanDraftsShape` helper.
 3. Cross-artifact boundary: `page_plan_drafts` crosses `world-mcp` (tool/CLI args) ↔ `tools/validators` (`RunOptions`); `branching-story-turn-cycle` passes it (consumer-side removal in SPEC93DECSTATUR-007). The arg is the shared surface under audit.
-4. (was template item 7 — removed-arg blast radius) Grep pipeline-wide for `page_plan_drafts` / `pagePlanDrafts` / `PagePlanDraft` / `validatePagePlanDraftsShape`: world-mcp `server.ts` + 4 tool/CLI files + 3 tests, validators `public/index.ts` + `tests/integration/validate-patch-plan.test.ts`, and `branching-story-turn-cycle` skill (007). Remove every production site; update tests; the skill consumer is reconciled in 007.
+4. (was template item 7 — removed-arg blast radius) Grep pipeline-wide for `page_plan_drafts` / `page-plan-drafts` / `pagePlanDrafts` / `PagePlanDraft` / `validatePagePlanDraftsShape`: world-mcp `server.ts`, README, 4 tool/CLI files, and 3 tests; validators `public/index.ts`; repo-level docs `docs/HARD-GATE-DISCIPLINE.md` / `docs/MACHINE-FACING-LAYER.md` (owned by SPEC93DECSTATUR-011); `branching-story-turn-cycle` skill (007); and `mcp-integration-audit` (009). Remove production/package sites and tests here; leave the named docs/skill consumers to their dependency-ordered tickets. `tools/world-mcp/tests/integration/spec42-capstone.test.ts` no longer contains `page_plan_drafts` and is not an owned file for this ticket.
 
 ## Architecture Check
 
@@ -41,7 +41,11 @@ In `tools/validators/src/public/index.ts`: remove `pagePlanDrafts?` from `RunOpt
 
 ### 3. Tests
 
-Update `tools/world-mcp/tests/{cli/submit-patch-plan,tools/submit-patch-plan,tools/validate-patch-plan}.test.ts` and `tools/validators/tests/integration/validate-patch-plan.test.ts` to drop `page_plan_drafts` cases.
+Update `tools/world-mcp/tests/{cli/submit-patch-plan,tools/submit-patch-plan,tools/validate-patch-plan}.test.ts` to drop `page_plan_drafts` cases. `tools/validators/tests/integration/validate-patch-plan.test.ts` has no `page_plan_drafts` hits in the live tree and needs no edit.
+
+### 4. Package README
+
+Update `tools/world-mcp/README.md` so the MCP tool signatures and CLI examples no longer advertise `page_plan_drafts` / `--page-plan-drafts`.
 
 ## Files to Touch
 
@@ -50,17 +54,17 @@ Update `tools/world-mcp/tests/{cli/submit-patch-plan,tools/submit-patch-plan,too
 - `tools/world-mcp/src/cli/validate-patch-plan.ts` (modify)
 - `tools/world-mcp/src/cli/submit-patch-plan.ts` (modify)
 - `tools/world-mcp/src/server.ts` (modify)
+- `tools/world-mcp/README.md` (modify)
 - `tools/validators/src/public/index.ts` (modify)
 - `tools/world-mcp/tests/cli/submit-patch-plan.test.ts` (modify)
 - `tools/world-mcp/tests/tools/submit-patch-plan.test.ts` (modify)
 - `tools/world-mcp/tests/tools/validate-patch-plan.test.ts` (modify)
-- `tools/world-mcp/tests/integration/spec42-capstone.test.ts` (modify — route-iii sibling test passes `page_plan_drafts`; drop the arg with Rule 6 attribution naming SPEC-93 as the retconning spec)
-- `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify)
 
 ## Out of Scope
 
 - The `branching-story-turn-cycle` skill's removal of its `page_plan_drafts` calls (SPEC93DECSTATUR-007).
 - `mcp-integration-audit`'s prose reference to `page_plan_drafts` as a required argument (SPEC93DECSTATUR-009).
+- Repo-level `docs/HARD-GATE-DISCIPLINE.md` / `docs/MACHINE-FACING-LAYER.md` patch-plan prose updates (SPEC93DECSTATUR-011).
 - The retirement of the page-plan validators themselves (archive/tickets/SPEC93DECSTATUR-003.md).
 
 ## Acceptance Criteria
@@ -68,7 +72,7 @@ Update `tools/world-mcp/tests/{cli/submit-patch-plan,tools/submit-patch-plan,too
 ### Tests That Must Pass
 
 1. submit/validate-patch-plan tests pass with no `page_plan_drafts` argument anywhere.
-2. `grep -rn "page_plan_drafts\|pagePlanDrafts\|PagePlanDraft\|validatePagePlanDraftsShape" tools/world-mcp/src tools/validators/src` returns zero matches.
+2. `grep -rn "page_plan_drafts\|page-plan-drafts\|pagePlanDrafts\|PagePlanDraft\|validatePagePlanDraftsShape" tools/world-mcp/src tools/world-mcp/tests tools/world-mcp/README.md tools/validators/src tools/validators/tests` returns zero matches.
 3. `(cd tools/world-mcp && npm run build && npm test)` and `(cd tools/validators && npm run build && npm test)` green.
 
 ### Invariants
@@ -81,9 +85,35 @@ Update `tools/world-mcp/tests/{cli/submit-patch-plan,tools/submit-patch-plan,too
 ### New/Modified Tests
 
 1. `tools/world-mcp/tests/{cli/submit-patch-plan,tools/submit-patch-plan,tools/validate-patch-plan}.test.ts` — drop `page_plan_drafts` cases.
-2. `tools/validators/tests/integration/validate-patch-plan.test.ts` — drop `page_plan_drafts` cases.
+2. `tools/validators/tests/integration/validate-patch-plan.test.ts` — no edit; live grep found no `page_plan_drafts` cases to remove.
 
 ### Commands
 
 1. `(cd tools/world-mcp && npm run build && npm test)`
 2. `(cd tools/validators && npm run build && npm test)`
+
+## Outcome
+
+Completed: 2026-05-28
+
+Removed the `page_plan_drafts` side channel from `tools/world-mcp` validate/submit tool args, CLI flags/help, registered server input schemas, and `tools/world-mcp/README.md`. Removed the `PagePlanDraft` type and `validatePagePlanDraftsShape` helper. `tools/validators` pre-apply validation now consumes only the files materialized from the patch-plan envelope; the dead `RunOptions.pagePlanDrafts` option and draft merge path are gone.
+
+Deleted the world-mcp tests that only proved malformed/duplicate/well-formed draft forwarding. The live validators integration test file had no `page_plan_drafts` cases, so it remained unchanged.
+
+## Verification Result
+
+PASS — `(cd tools/validators && npm run build)` completed successfully.
+
+PASS — `(cd tools/world-mcp && npm run build)` completed successfully.
+
+PASS — `(cd tools/world-mcp && node --test dist/tests/tools/validate-patch-plan.test.js dist/tests/tools/submit-patch-plan.test.js dist/tests/cli/submit-patch-plan.test.js)` passed 19/19 focused compiled tests.
+
+PASS — `(cd tools/validators && node --test dist/tests/integration/validate-patch-plan.test.js)` passed 21/21 focused compiled tests.
+
+PASS — `(cd tools/world-mcp && npm test)` passed 508/508 package tests.
+
+PASS — `rg -n "page_plan_drafts|page-plan-drafts|pagePlanDrafts|PagePlanDraft|validatePagePlanDraftsShape" tools/world-mcp/src tools/world-mcp/tests tools/world-mcp/README.md tools/validators/src tools/validators/tests` returned no matches.
+
+## Deviations
+
+- Broad `(cd tools/validators && npm test)` was rerun and remains red outside this ticket's owned seam: 1052 pass / 2 fail. The isolated representative failure is `dist/tests/integration/spec43-midstory-introduction.test.js` bullet 19, where the synthetic legacy bundle exits 1 because `page_plan_turn_driver_consistency` reports missing `SE-1` and `SE-2` records, alongside compatibility/active-record warnings. This is the pre-existing broad validators drift already recorded by archive/tickets/SPEC93DECSTATUR-003.md, not fallout from removing `page_plan_drafts`.

@@ -249,28 +249,12 @@ const getCanonicalVocabularyInputSchema = z.object({
 const patchPlanInputSchema = z.object({}).passthrough();
 
 const validatePatchPlanInputSchema = z.object({
-  patch_plan: patchPlanInputSchema,
-  page_plan_drafts: z
-    .array(
-      z.object({
-        path: z.string().min(1),
-        content: z.string()
-      })
-    )
-    .optional()
+  patch_plan: patchPlanInputSchema
 });
 
 const submitPatchPlanInputSchema = z.object({
   patch_plan: patchPlanInputSchema,
-  approval_token: z.string().min(1),
-  page_plan_drafts: z
-    .array(
-      z.object({
-        path: z.string().min(1),
-        content: z.string()
-      })
-    )
-    .optional()
+  approval_token: z.string().min(1)
 });
 
 const planStoryStateMaintenanceInputSchema = z.object({

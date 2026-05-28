@@ -130,14 +130,3 @@ test("handleSubmitPatchPlanTool rejects a missing approval token before engine d
 
   assertInvalidInput(result, "approval_token");
 });
-
-test("handleSubmitPatchPlanTool rejects malformed page_plan_drafts before engine delegation", async () => {
-  const result = await handleSubmitPatchPlanTool({
-    patch_plan: buildValidPatchPlan(),
-    approval_token: "unused-for-validation-proof",
-    page_plan_drafts: [{ path: "not-a-page-plan-path.md", content: "draft" }]
-  });
-
-  assertInvalidInput(result, "page_plan_drafts");
-  assert.match((result as { message: string }).message, /must match stories\/<slug>\/pages-prose-plans\/PG-<integer>\.md/);
-});

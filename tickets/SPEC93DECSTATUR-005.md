@@ -58,7 +58,7 @@ Update `tools/world-mcp/README.md` to describe PG hashing as `state_hash`-only.
 
 ## Out of Scope
 
-- The `page_plan_drafts` argument removal (SPEC93DECSTATUR-004) — also touches `server.ts` but at the patch-plan tool surface, not the hashing surface.
+- The `page_plan_drafts` argument removal (archive/tickets/SPEC93DECSTATUR-004.md) — also touches `server.ts` but at the patch-plan tool surface, not the hashing surface.
 - The PG schema relaxation itself (archive/tickets/SPEC93DECSTATUR-001.md).
 - The `state_hash` / `state_hash_parent` chain semantics (retained unchanged).
 

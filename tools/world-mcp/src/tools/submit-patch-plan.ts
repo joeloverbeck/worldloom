@@ -11,7 +11,6 @@ import {
   type PatchPlanEnvelope,
   validatePatchPlanEnvelopeShape
 } from "./_shared.js";
-import { type PagePlanDraft, validatePagePlanDraftsShape } from "./validate-patch-plan.js";
 
 type EnginePatchPlanEnvelope = Parameters<typeof submitPatchPlan>[0];
 
@@ -19,7 +18,6 @@ export interface SubmitPatchPlanArgs {
   patch_plan: PatchPlanEnvelope;
   approval_token: string;
   worldRoot?: string;
-  page_plan_drafts?: ReadonlyArray<PagePlanDraft>;
 }
 
 function invalidInput(message: string, field: string): McpError {
@@ -42,18 +40,10 @@ export async function handleSubmitPatchPlanTool(
     return invalidInput("approval_token must be a non-empty string.", "approval_token");
   }
 
-  const draftsShapeError = validatePagePlanDraftsShape(args.page_plan_drafts);
-  if (draftsShapeError !== null) {
-    return invalidInput(draftsShapeError, "page_plan_drafts");
-  }
-
   const envelope = args.patch_plan as unknown as EnginePatchPlanEnvelope;
-  const validatorOpts: { worldRoot?: string; pagePlanDrafts?: ReadonlyArray<PagePlanDraft> } = {};
+  const validatorOpts: { worldRoot?: string } = {};
   if (args.worldRoot !== undefined) {
     validatorOpts.worldRoot = args.worldRoot;
-  }
-  if (args.page_plan_drafts !== undefined && args.page_plan_drafts.length > 0) {
-    validatorOpts.pagePlanDrafts = args.page_plan_drafts;
   }
 
   return submitPatchPlan(envelope, args.approval_token, {

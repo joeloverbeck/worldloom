@@ -53,15 +53,6 @@ function writeText(dir: string, name: string, value: string): string {
   return filePath;
 }
 
-function writeDrafts(dir: string): string {
-  return writeJson(dir, "drafts.json", [
-    {
-      path: "stories/test-story/pages-prose-plans/PG-1.md",
-      content: "## 1. Story Kernel Excerpt\n\nMinimal CLI forwarding draft.\n"
-    }
-  ]);
-}
-
 function parseCliStderrJson(stderr: string): unknown {
   const lines = stderr.split("\n").filter((line) => line.length > 0);
   assert.match(lines[0] ?? "", /^\[world-root\] /);
@@ -130,52 +121,6 @@ test("cli-submit-patch-plan-errors: CLI rejects an empty approval token before d
     assert.equal(cliResult.exitCode, 1);
     assert.equal(cliResult.stdout, "");
     assert.match(cliResult.stderr, /Token file .* is empty/);
-  } finally {
-    rmSync(tmp, { recursive: true, force: true });
-  }
-});
-
-test("cli-submit-patch-plan: CLI forwards --page-plan-drafts to the submit handler path", async () => {
-  const tmp = makeTmpDir();
-  try {
-    const planPath = writeJson(tmp, "plan.json", buildValidPatchPlan());
-    const tokenPath = writeText(tmp, "token.txt", "unused-for-delegation-proof\n");
-    const draftsPath = writeDrafts(tmp);
-
-    const cliResult = await runSubmitPatchPlanCli(["--page-plan-drafts", draftsPath, planPath, tokenPath]);
-    const mcpResult = await handleSubmitPatchPlanTool({
-      patch_plan: buildValidPatchPlan(),
-      approval_token: "unused-for-delegation-proof",
-      page_plan_drafts: [
-        {
-          path: "stories/test-story/pages-prose-plans/PG-1.md",
-          content: "## 1. Story Kernel Excerpt\n\nMinimal CLI forwarding draft.\n"
-        }
-      ]
-    });
-
-    assert.equal(cliResult.exitCode, 1);
-    assert.ok("code" in mcpResult);
-    const cliErr = parseCliStderrJson(cliResult.stderr) as { code: string };
-    assert.equal(cliErr.code, mcpResult.code);
-    assert.equal(cliErr.code, "envelope_shape_invalid");
-  } finally {
-    rmSync(tmp, { recursive: true, force: true });
-  }
-});
-
-test("cli-submit-patch-plan-errors: CLI rejects non-array --page-plan-drafts JSON before delegation", async () => {
-  const tmp = makeTmpDir();
-  try {
-    const planPath = writeJson(tmp, "plan.json", buildValidPatchPlan());
-    const tokenPath = writeText(tmp, "token.txt", "unused-for-validation-proof");
-    const draftsPath = writeJson(tmp, "drafts.json", { path: "stories/test-story/pages-prose-plans/PG-1.md", content: "draft" });
-
-    const cliResult = await runSubmitPatchPlanCli(["--page-plan-drafts", draftsPath, planPath, tokenPath]);
-
-    assert.equal(cliResult.exitCode, 1);
-    assert.equal(cliResult.stdout, "");
-    assert.match(cliResult.stderr, /Page-plan drafts file .* must contain a JSON array/);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

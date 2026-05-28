@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-turn-cycle/SKILL.md` + `references/{phase-6-page-snapshot, phase-7-page-plan, phase-9-validation-gates, governance-and-foundations}.md`
-**Deps**: SPEC93DECSTATUR-004
+**Deps**: archive/tickets/SPEC93DECSTATUR-004.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ This is the primary-motive fix of SPEC-93. `branching-story-turn-cycle` currentl
 
 1. `branching-story-turn-cycle/SKILL.md` has a Phase 7 "Author page plan" step, a Phase 10 HARD-GATE precondition requiring the page plan be drafted (19 sections / STCHAR packets) before submission, and four `page_plan_drafts=[...]` calls to `validate_patch_plan` / `submit_patch_plan`; `references/phase-7-page-plan.md` is the page-plan authoring reference; `references/phase-9-validation-gates.md` references `page_plan_drafts` — confirmed during SPEC-93 reassessment (this session).
 2. SPEC-93 §2.1 + §6 skills bullet: remove the page-plan authoring phase, the HARD-GATE precondition, and the `page_plan_drafts` argument; add explicit parent-`PG`-record retrieval for the delta; §8 AC1 + AC2 are the acceptance surface.
-3. Cross-artifact boundary: the skill is a consumer of the `page_plan_drafts` argument removed at the tool surface in SPEC93DECSTATUR-004 (Deps) and of the MCP retrieval surface (`get_record`/`get_records`/`get_context_packet`); the nine hard gates it populates are defined in `story-state-contract.md §7` (SPEC93DECSTATUR-010).
+3. Cross-artifact boundary: the skill is a consumer of the `page_plan_drafts` argument removed at the tool surface in archive/tickets/SPEC93DECSTATUR-004.md (Deps) and of the MCP retrieval surface (`get_record`/`get_records`/`get_context_packet`); the nine hard gates it populates are defined in `story-state-contract.md §7` (SPEC93DECSTATUR-010).
 4. FOUNDATIONS §Tooling Recommendation (LLM agents should never operate on prose alone): removing the page plan from the state turn forces the delta to be computed from the prior `PG`'s story records via MCP retrieval — the correctness improvement the spec names as its primary motive. Gate 7 (state-delta grounding) now grounds on the `PG` record.
 
 ## Architecture Check
@@ -53,7 +53,7 @@ Remove the Phase 10 page-plan HARD-GATE precondition and the `page_plan_drafts=[
 
 ## Out of Scope
 
-- The tool-side `page_plan_drafts` argument removal (SPEC93DECSTATUR-004).
+- The tool-side `page_plan_drafts` argument removal (archive/tickets/SPEC93DECSTATUR-004.md).
 - The gate-7/9 validator-code rehoming (archive/tickets/SPEC93DECSTATUR-002.md) and gate definitions in `story-state-contract.md` (SPEC93DECSTATUR-010).
 - bootstrap's root page-plan removal (SPEC93DECSTATUR-008).
 - The scene-plan / scene-prose-attach flow (SPEC-92, already landed).
