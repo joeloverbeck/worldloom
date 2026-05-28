@@ -16,7 +16,7 @@ At intake, Hook 6 (`hook6-guard-story-markdown-hash`) guarded `plan_hash` drift 
 2. SPEC-93 §2.5 + §6 hooks bullet: retire both hooks + update `settings.json.example` + `tools/hooks/README.md`; §9 hooks test bullet: Hook 6/7 suites removed, remaining hooks green, settings.json.example no longer wires the two retired hooks.
 3. Cross-artifact boundary: the hooks are wired in `.claude/settings.json.example` (the shared hook-config surface) and documented in `tools/hooks/README.md`; the guarded artifacts (`pages-prose-plans/`, `pages-prose-receipts/`) become legacy-read-only.
 4. (was template item 5 — HARD-GATE / Canon Safety hooks surface) Hook 6/7 are `tools/hooks/` enforcement points, but they guard **non-canon story-bundle markdown artifacts** (page plans / page prose-receipts), not canon or story-bundle record writes — the §3.9/§4.4 non-canon-hook carve-out applies. The authoritative Mystery Reserve firewall is gate 3 on the `PG` record (untouched) plus `scene_range_forbidden_mystery_resolution` at scene attach (SPEC-92); retiring these two markdown-hash guards does NOT weaken the MR firewall.
-5. (was template item 7 — hook removal blast radius) Grep pipeline-wide for `hook6-guard-story-markdown-hash` / `hook7-guard-prose-receipt-hash`: `.claude/settings.json.example` (unwire), `tools/hooks/README.md` (remove entries), `tools/hooks/tests/` (delete suites), and any docs referencing the hook numbers (docs reconciliation in SPEC93DECSTATUR-011).
+5. (was template item 7 — hook removal blast radius) Grep pipeline-wide for `hook6-guard-story-markdown-hash` / `hook7-guard-prose-receipt-hash`: `.claude/settings.json.example` (unwire), `tools/hooks/README.md` (remove entries), `tools/hooks/tests/` (delete suites), and any docs referencing the hook numbers (docs reconciliation in archive/tickets/SPEC93DECSTATUR-011.md).
 
 ## Architecture Check
 
@@ -55,7 +55,7 @@ In `tools/hooks/README.md`, removed the Hook 6 + Hook 7 inventory rows and overr
 ## Out of Scope
 
 - Hooks 1–5 (untouched).
-- The FOUNDATIONS / docs references to the hooks (docs reconciliation in SPEC93DECSTATUR-011).
+- The FOUNDATIONS / docs references to the hooks (docs reconciliation in archive/tickets/SPEC93DECSTATUR-011.md).
 - The `pages-prose-plans/` / `pages-prose-receipts/` legacy artifacts on disk (grandfathered, not deleted).
 
 ## Acceptance Criteria
@@ -92,7 +92,7 @@ Hook 6 and Hook 7 were retired from the hooks package and Claude settings exampl
 - Removed the two `PreToolUse` entries from `.claude/settings.json.example`.
 - Updated `tools/hooks/README.md` so the live inventory, override section, and test description describe Hooks 1-5 only.
 
-No `docs/` reconciliation was performed here; that remains owned by `SPEC93DECSTATUR-011`.
+No `docs/` reconciliation was performed here; that remains owned by `archive/tickets/SPEC93DECSTATUR-011.md`.
 
 ## Verification Result
 

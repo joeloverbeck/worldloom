@@ -14,8 +14,8 @@ At intake, `branching-story-prose-attach` validated rendered page prose against 
 
 1. At intake, `branching-story-prose-attach/SKILL.md` existed; `skill-audit/references/cross-skill-consistency.md:12` listed **8** Category 2c skills ("the eight story-pipeline skills per §7") with `branching-story-prose-attach` but WITHOUT `branching-story-scene-plan` / `branching-story-scene-prose-attach`, and its shared-surface bullet (v) pointed content-policy inlining at `pages-prose-plans/…§2` / page-plan §8; `branching-story-health-audit/SKILL.md`, `commitment-block-authoring/references/governance-and-foundations.md`, `mcp-integration-audit/SKILL.md`, `story-fact-promotion-to-canon/SKILL.md` carried page-plan / prose-attach cross-references — all confirmed during SPEC-93 reassessment (this session, Improvement M2).
 2. SPEC-93 §2.5 (retire prose-attach) + §5 §7/§9 (roster) + §6 skills bullet (full cross-skill-consistency reconcile) + reassessment M2 (add the two scene skills, fix the count, retarget bullet (v)).
-3. Cross-artifact boundary: the Category 2c roster is the shared cross-skill surface (defined in FOUNDATIONS §7/§9 — amended in SPEC93DECSTATUR-011 — and mirrored in `cross-skill-consistency.md`); this ticket reconciles the `cross-skill-consistency.md` mirror to match the post-SPEC-93 FOUNDATIONS roster of nine.
-4. (was template item 7 — skill removal blast radius) Grep pipeline-wide for `branching-story-prose-attach`: `cross-skill-consistency.md` (roster + bullet v), `branching-story-health-audit/SKILL.md` (page-plan audit refs → scene/PG), `commitment-block-authoring/references/governance-and-foundations.md`, `mcp-integration-audit/SKILL.md` (drop the `page_plan_drafts` required-argument reference), `story-fact-promotion-to-canon/SKILL.md`, plus FOUNDATIONS §4a/§7/§9 (owned by SPEC93DECSTATUR-011) and `docs/WORKFLOWS.md` / `docs/REPOSITORY-MAP.md` (owned by 011).
+3. Cross-artifact boundary: the Category 2c roster is the shared cross-skill surface (defined in FOUNDATIONS §7/§9 — amended in archive/tickets/SPEC93DECSTATUR-011.md — and mirrored in `cross-skill-consistency.md`); this ticket reconciles the `cross-skill-consistency.md` mirror to match the post-SPEC-93 FOUNDATIONS roster of nine.
+4. (was template item 7 — skill removal blast radius) Grep pipeline-wide for `branching-story-prose-attach`: `cross-skill-consistency.md` (roster + bullet v), `branching-story-health-audit/SKILL.md` (page-plan audit refs → scene/PG), `commitment-block-authoring/references/governance-and-foundations.md`, `mcp-integration-audit/SKILL.md` (drop the `page_plan_drafts` required-argument reference), `story-fact-promotion-to-canon/SKILL.md`, plus FOUNDATIONS §4a/§7/§9 (owned by archive/tickets/SPEC93DECSTATUR-011.md) and `docs/WORKFLOWS.md` / `docs/REPOSITORY-MAP.md` (owned by 011).
 5. Implementation reassessment found `mcp-integration-audit/SKILL.md` already has no `page_plan_drafts` hit. Its remaining `branching-story-prose-attach` hit is a labelled worked-precedent citation inside the MCP retrieval-gap rubric, not a live invocation or required argument, so this ticket left that pre-existing unrelated hunk untouched and made no ticket-owned edit to `mcp-integration-audit/SKILL.md`.
 
 ## Architecture Check
@@ -54,8 +54,8 @@ Updated `branching-story-health-audit/SKILL.md` (page-plan audit references → 
 
 ## Out of Scope
 
-- The FOUNDATIONS §4a/§7/§9 roster amendments (SPEC93DECSTATUR-011).
-- `docs/WORKFLOWS.md` / `docs/REPOSITORY-MAP.md` prose-attach references (SPEC93DECSTATUR-011).
+- The FOUNDATIONS §4a/§7/§9 roster amendments (archive/tickets/SPEC93DECSTATUR-011.md).
+- `docs/WORKFLOWS.md` / `docs/REPOSITORY-MAP.md` prose-attach references (archive/tickets/SPEC93DECSTATUR-011.md).
 - SPEC-92's `branching-story-scene-prose-attach` skill (already landed; only referenced here).
 
 ## Acceptance Criteria

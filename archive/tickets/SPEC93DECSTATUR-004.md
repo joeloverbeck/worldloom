@@ -15,7 +15,7 @@ The `page_plan_drafts` argument was the channel that fed page-plan markdown draf
 1. `page_plan_drafts` is a live optional argument in `tools/world-mcp/src/tools/{validate,submit}-patch-plan.ts` (declared + `validatePagePlanDraftsShape`-checked + forwarded as `runOpts.pagePlanDrafts`), `cli/{validate,submit}-patch-plan.ts`, and `server.ts`; it is consumed by `tools/validators/src/public/index.ts:43,52` (`RunOptions.pagePlanDrafts`) and documented in `tools/world-mcp/README.md` — confirmed during SPEC-93 reassessment (this session, Improvement M1).
 2. SPEC-93 §2.1 + §6 (world-mcp + validators bullets, post-reassessment) enumerate the full removal surface including the validators `public/index.ts` plumbing and the `PagePlanDraft`/`validatePagePlanDraftsShape` helper.
 3. Cross-artifact boundary: `page_plan_drafts` crosses `world-mcp` (tool/CLI args) ↔ `tools/validators` (`RunOptions`); `branching-story-turn-cycle` passes it (consumer-side removal in SPEC93DECSTATUR-007). The arg is the shared surface under audit.
-4. (was template item 7 — removed-arg blast radius) Grep pipeline-wide for `page_plan_drafts` / `page-plan-drafts` / `pagePlanDrafts` / `PagePlanDraft` / `validatePagePlanDraftsShape`: world-mcp `server.ts`, README, 4 tool/CLI files, and 3 tests; validators `public/index.ts`; repo-level docs `docs/HARD-GATE-DISCIPLINE.md` / `docs/MACHINE-FACING-LAYER.md` (owned by SPEC93DECSTATUR-011); `branching-story-turn-cycle` skill (007); and `mcp-integration-audit` (009). Remove production/package sites and tests here; leave the named docs/skill consumers to their dependency-ordered tickets. `tools/world-mcp/tests/integration/spec42-capstone.test.ts` no longer contains `page_plan_drafts` and is not an owned file for this ticket.
+4. (was template item 7 — removed-arg blast radius) Grep pipeline-wide for `page_plan_drafts` / `page-plan-drafts` / `pagePlanDrafts` / `PagePlanDraft` / `validatePagePlanDraftsShape`: world-mcp `server.ts`, README, 4 tool/CLI files, and 3 tests; validators `public/index.ts`; repo-level docs `docs/HARD-GATE-DISCIPLINE.md` / `docs/MACHINE-FACING-LAYER.md` (owned by archive/tickets/SPEC93DECSTATUR-011.md); `branching-story-turn-cycle` skill (007); and `mcp-integration-audit` (009). Remove production/package sites and tests here; leave the named docs/skill consumers to their dependency-ordered tickets. `tools/world-mcp/tests/integration/spec42-capstone.test.ts` no longer contains `page_plan_drafts` and is not an owned file for this ticket.
 
 ## Architecture Check
 
@@ -64,7 +64,7 @@ Update `tools/world-mcp/README.md` so the MCP tool signatures and CLI examples n
 
 - The `branching-story-turn-cycle` skill's removal of its `page_plan_drafts` calls (SPEC93DECSTATUR-007).
 - `mcp-integration-audit`'s prose reference to `page_plan_drafts` as a required argument (SPEC93DECSTATUR-009).
-- Repo-level `docs/HARD-GATE-DISCIPLINE.md` / `docs/MACHINE-FACING-LAYER.md` patch-plan prose updates (SPEC93DECSTATUR-011).
+- Repo-level `docs/HARD-GATE-DISCIPLINE.md` / `docs/MACHINE-FACING-LAYER.md` patch-plan prose updates (archive/tickets/SPEC93DECSTATUR-011.md).
 - The retirement of the page-plan validators themselves (archive/tickets/SPEC93DECSTATUR-003.md).
 
 ## Acceptance Criteria

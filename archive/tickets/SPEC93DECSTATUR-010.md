@@ -53,7 +53,7 @@ Retired §8's page-plan 19-section enumeration and replaced it with a short lega
 ## Out of Scope
 
 - The validator-code gate-9 rehoming (archive/tickets/SPEC93DECSTATUR-002.md) and validator retirement (archive/tickets/SPEC93DECSTATUR-003.md).
-- FOUNDATIONS narrative amendments (SPEC93DECSTATUR-011).
+- FOUNDATIONS narrative amendments (archive/tickets/SPEC93DECSTATUR-011.md).
 - The skill-side gate population (SPEC93DECSTATUR-007/008).
 
 ## Acceptance Criteria
