@@ -51,7 +51,7 @@ This algorithm is load-bearing for the eligibility-layer fairness contract: stor
 - Changes to `rankCandidates` semantics (the algorithm is correct; only test coverage is missing).
 - Tie-break-by-numeric-ID enhancement if §1.3 surfaces "SLT-10 ranks before SLT-3" as undesirable — that is a separate proposal, not a coverage gap.
 - Coverage for the eight filter stages (covered by existing tests and STSELECT-005 / STSELECT-006).
-- Coverage for the end-to-end indexer→selector pipeline (STSELECT-003's scope).
+- Coverage for the end-to-end indexer→selector pipeline (completed under `archive/tickets/STSELECT-003.md`).
 - Coverage for the `include_rejection_summary` flag defect (MCPENH-075's scope).
 
 ## Acceptance Criteria

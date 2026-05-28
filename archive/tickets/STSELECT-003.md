@@ -1,14 +1,14 @@
 # STSELECT-003: End-to-end indexer→selector regression coverage for production-shape existential-predicate storylet pools
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — new fixture under `tools/world-mcp/tests/integration/` (and accompanying fixture YAML / generator), built via `@worldloom/world-index/commands/build` and exercised against `selectStoryletCandidates`. No production-code changes.
+**Engine Changes**: Yes — new generator-built integration test under `tools/world-mcp/tests/integration/`, built via `@worldloom/world-index/commands/build` and exercised against `selectStoryletCandidates`. No production-code changes.
 **Deps**: None. Complementary to `archive/tickets/STSELECT-001.md` (predicate-class indexer fix) and `tickets/MCPENH-074.md` (per-stage rejected-sample observability) — this ticket adds the integration-layer regression that closes the gap between the selector-only unit tests and the production failure shape both prior tickets remediated.
 
 ## Problem
 
-The most reliability-sensitive code path in the story system — the `mcp__worldloom__select_storylet_candidates` MCP tool that shortlists eligible SLTs at every page-cycle invocation — has comprehensive selector-only unit coverage at `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts` (7 tests, 3 fixtures) and a tightly-scoped indexer→selector integration test at `tools/world-mcp/tests/integration/spec84-replay-and-branch-scope.test.ts` (5 SLTs across 4 tests). What it lacks is a regression test that runs the **production-shape SLT distribution** through the **full indexer→selector pipeline**.
+At intake, the most reliability-sensitive code path in the story system — the `mcp__worldloom__select_storylet_candidates` MCP tool that shortlists eligible SLTs at every page-cycle invocation — had comprehensive selector-only unit coverage at `tools/world-mcp/tests/tools/select-storylet-candidates.test.ts` and a tightly-scoped indexer→selector integration test at `tools/world-mcp/tests/integration/spec84-replay-and-branch-scope.test.ts`. What it lacked was a regression test that runs the **production-shape SLT distribution** through the **full indexer→selector pipeline**.
 
 Production-shape, as observed in `worlds/erotica-world/stories/red-bunny/_source/storylets/`, has these distinguishing characteristics:
 
@@ -30,7 +30,8 @@ The STSELECT-001 production failure (red-bunny PG-6 → SE-7: shortlist `[SLT-27
 3. **Cross-skill / cross-artifact boundary**: this ticket audits the contract between (a) `@worldloom/world-index/commands/build` rebuilding storylet edges from YAML, (b) the shared `PREDICATE_REFERENCED_CLASSES` projection table at `tools/world-index/src/public/predicate-dsl-projection.ts`, and (c) the selector's eight filter stages running against the rebuilt index. The boundary under audit is the producer/consumer seam STSELECT-001 fixed; STSELECT-003 prevents future regressions at that seam under production-shape inputs.
 4. **FOUNDATIONS principle restatement**: §Tooling Recommendation ("Reading and writing canon-shaped content must happen through `mcp__worldloom__*` tools whenever such a tool exists") is the principle this ticket strengthens. The selector is the MCP retrieval surface authors depend on for storylet shortlisting; the STSELECT-001 production failure showed that authors fall back to direct file inspection when the surface degrades silently. A regression test at the production-shape end-to-end layer protects the contract operators rely on. §Story Bundles §5a (Commitment Blocks Are Causal Moves) is engaged because the predicate DSL is the schema layer this fixture exercises — every existential predicate name in the DSL must round-trip from YAML → index → projection → selector successfully.
 5. **Cross-ticket coordination**: STSELECT-001 added `selectStoryletCandidates keeps existential SLTs whose predicate classes intersect requested grounding classes` (selector unit test) and `tools/world-index/tests/parse/atomic-edges-for-choice-and-storylet.test.ts` parser coverage. SPEC-84 added 4 integration tests covering branch-scope semantics. STSELECT-003 fills the remaining diagonal: production-shape predicate-class breadth at the end-to-end pipeline layer.
-6. **Pre-edit baseline**: `cd tools/world-mcp && npm test` and `cd tools/world-index && npm test` are expected to pass before this ticket's edits (must be verified during implementation).
+6. **Pre-edit baseline**: `cd tools/world-mcp && npm test` passed before edits (499 tests, 0 failures), `cd tools/world-index && npm test` passed before edits (126 non-CLI tests plus serial CLI tests, 0 failures), and `cd tools/validators && npm test` passed before edits (1098 tests, 0 failures).
+7. **Implementation boundary**: live reassessment kept the ticket test-only and package-local. The new fixture is generated inline in `tools/world-mcp/tests/integration/stselect003-production-shape-existential-pool.test.ts` rather than materialized as a checked-in `fixture.json`; this keeps the parity assertion mechanically tied to the imported `PREDICATE_REFERENCED_CLASSES` table.
 
 ## Architecture Check
 
@@ -45,11 +46,9 @@ The STSELECT-001 production failure (red-bunny PG-6 → SE-7: shortlist `[SLT-27
 4. Per-stage filter-trace counts are deterministic and asserted in the new fixture (parallel to SPEC-81 §9.3's hand-counted approach but with predicate-class diversity as the realism axis instead of stage-count breadth) → integration assertion.
 5. Adding a new predicate name to `PREDICATE_REFERENCED_CLASSES` without extending the fixture causes the parity grep-proof to fail → meta-assertion that the fixture stays in lockstep with the projection table.
 
-## Files to Touch
+## Files Touched
 
 - `tools/world-mcp/tests/integration/stselect003-production-shape-existential-pool.test.ts` (new — integration test)
-- `tools/world-mcp/tests/integration/fixtures/stselect003-production-shape/fixture.json` (new — generator-built fixture; OR co-locate generator in the test file if simpler) — exact path subject to existing-pattern alignment with `tools/validators/tests/fixtures/spec84-replay-and-branch-scope/`
-- `tools/world-mcp/tests/integration/stselect003-production-shape-existential-pool.test.ts` (new — parity assertion: every key in `PREDICATE_REFERENCED_CLASSES` is represented in the fixture)
 
 ## Out of Scope
 
@@ -64,7 +63,7 @@ The STSELECT-001 production failure (red-bunny PG-6 → SE-7: shortlist `[SLT-27
 
 ## Acceptance Criteria
 
-### Tests That Must Pass
+### Tests That Passed
 
 1. New integration test at `tools/world-mcp/tests/integration/stselect003-production-shape-existential-pool.test.ts` builds a ~30-50 SLT fixture covering every predicate name in `PREDICATE_REFERENCED_CLASSES`, runs `world-index build`, and asserts the selector returns a non-empty shortlist that includes an SLT whose hard preconditions mix at least three existential predicates.
 2. Parity assertion: enumerate the keys of `PREDICATE_REFERENCED_CLASSES` at test time and assert each appears in at least one fixture SLT's `preconditions.hard[].pred`. A future contributor adding a predicate name to the projection table without extending the fixture fails this assertion.
@@ -84,7 +83,6 @@ The STSELECT-001 production failure (red-bunny PG-6 → SE-7: shortlist `[SLT-27
 ### New/Modified Tests
 
 1. `tools/world-mcp/tests/integration/stselect003-production-shape-existential-pool.test.ts` (new) — generator-built fixture + assertions.
-2. (Optional) `tools/world-mcp/tests/integration/fixtures/stselect003-production-shape/fixture.json` (new) — if the fixture is materialized rather than generated in-test.
 
 ### Commands
 
@@ -95,8 +93,24 @@ The STSELECT-001 production failure (red-bunny PG-6 → SE-7: shortlist `[SLT-27
 
 ## Outcome
 
-(To be populated post-implementation.)
+Implemented `tools/world-mcp/tests/integration/stselect003-production-shape-existential-pool.test.ts`.
+
+The new integration test generates a portable 42-SLT story-bundle fixture in a temp repo, including mandatory root world files, an atomic canon record, page/event records, and generated storylet YAML. The fixture represents every predicate name from `PREDICATE_REFERENCED_CLASSES`, keeps 34 of 42 storylets existential-shaped, includes an SLT-42-style multi-class existential profile, exercises cooldown rejection through a prior `SE` selection, and spans high/medium/low urgency.
+
+The proof path runs the real `@worldloom/world-index/commands/build`, directly checks the rebuilt `storylet_predicate_class` edge set in SQLite, then calls `selectStoryletCandidates` against the rebuilt index. No production code changed.
 
 ## Verification Result
 
-(To be populated post-implementation.)
+- Pre-edit `cd tools/world-mcp && npm test` passed: 499 tests, 0 failures.
+- Pre-edit `cd tools/world-index && npm test` passed: 126 non-CLI tests plus serial CLI tests, 0 failures.
+- Pre-edit `cd tools/validators && npm test` passed: 1098 tests, 0 failures.
+- `cd tools/world-mcp && npm run build` passed after adding the integration test.
+- `cd tools/world-mcp && node --test dist/tests/integration/stselect003-production-shape-existential-pool.test.js` passed: 1 test, 0 failures.
+- `cd tools/world-mcp && npm test` passed after implementation: 500 tests, 0 failures.
+- `cd tools/world-index && npm test` passed after implementation: 126 non-CLI tests plus serial CLI tests, 0 failures.
+- `cd tools/validators && npm test` passed after implementation: 1098 tests, 0 failures.
+
+## Deviations
+
+- The fixture is generated inline in the test file rather than stored as a separate `fixture.json`; this is the simpler existing-compatible path and keeps predicate-table parity dynamic.
+- The focused compiled proof initially failed before selector assertions because the generated temp world omitted mandatory root files, then failed on an order-sensitive parity assertion. Both were corrected before the accepted proof: the fixture now includes `WORLD_KERNEL.md` / `ONTOLOGY.md`, and predicate parity compares sorted sets.

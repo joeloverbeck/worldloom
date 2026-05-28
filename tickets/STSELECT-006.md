@@ -68,7 +68,7 @@ Bundle these four cases in one ticket because they share fixture machinery (malf
 - Adding `mystery_policy.forbidden_resolutions[]` enforcement to the selector (this is intentionally downstream-evaluator territory — the selector's job is shortlisting, not per-mystery-per-branch resolution checks).
 - Coverage for the ranking algorithm (STSELECT-004's scope).
 - Coverage for branch/scope/cooldown boundaries (STSELECT-005's scope).
-- Coverage for the end-to-end indexer→selector pipeline (STSELECT-003's scope).
+- Coverage for the end-to-end indexer→selector pipeline (completed under `archive/tickets/STSELECT-003.md`).
 - Coverage for the `include_rejection_summary` flag defect (MCPENH-075's scope).
 
 ## Acceptance Criteria

@@ -10,7 +10,7 @@
 
 **Deliverables**:
 
-- `tickets/STSELECT-003.md` — End-to-end indexer→selector regression coverage for production-shape existential-predicate storylet pools
+- `archive/tickets/STSELECT-003.md` — End-to-end indexer→selector regression coverage for production-shape existential-predicate storylet pools
 - `tickets/STSELECT-004.md` — Regression coverage for `rankCandidates` urgency-banded round-robin, alphabetical move-family ordering, node-id tie-break, and `max_candidates` truncation order
 - `tickets/STSELECT-005.md` — Regression coverage for branch/scope/cooldown boundary cases
 - `tickets/STSELECT-006.md` — Regression coverage for page-state, source-ref, and error-path boundary cases
@@ -71,8 +71,8 @@
 ### D2: SLT compatible with multiple driver_kinds untested
 
 - **Surface**: `tools/world-mcp/src/tools/select-storylet-candidates.ts:714` (`candidate.compatibleDrivers.includes(args.turn_driver.kind)`).
-- **Rationale**: `includes()` over a string array is trivial; multi-element fixture would cover but value is low. SLT-1 in red-bunny has multiple compatible drivers (`[player_action, player_write_in]`); production-shape coverage from STSELECT-003 will incidentally exercise this.
-- **Re-evaluate if**: STSELECT-003's production-shape fixture does not include multi-driver SLTs.
+- **Rationale**: `includes()` over a string array is trivial; multi-element fixture would cover but value is low. SLT-1 in red-bunny has multiple compatible drivers (`[player_action, player_write_in]`). STSELECT-003 landed without multi-driver SLTs; post-ticket review re-evaluated this and kept it deferred because the selector branch is still a direct `includes()` check and existing tests already cover positive/negative single-driver paths.
+- **Re-evaluate if**: Driver matching stops being a direct array membership check or a production failure involves multi-driver compatibility.
 
 ### D3: Empty `intent_signature.action_families: []` vs `undefined` untested
 
@@ -118,6 +118,6 @@
 - **Surface**: SPEC-81 §9.3 assertion at `tools/world-mcp/tests/integration/spec81-storylet-candidate-retrieval.test.ts:382-395` asserts samples emit in order `SLT-10` then `SLT-9` — i.e., storylet-table iteration order, not ranked.
 - **Observation during audit**: This ordering is incidentally deterministic but unspecified in the source. Not a coverage gap (the existing test pins it down by assertion); just an unflagged ordering invariant worth noting for any future refactor of `loadSelectedStoryletPagesByBranch`.
 
-## Update — (none)
+## Update — 2026-05-28 post-ticket review
 
-(No subsequent revisions to this triage.)
+STSELECT-003 completed and archived at `archive/tickets/STSELECT-003.md`. D2 was re-evaluated during post-ticket review because the implemented STSELECT-003 production-shape fixture did not include multi-driver SLTs; no follow-up ticket was created for the reasons recorded in D2.

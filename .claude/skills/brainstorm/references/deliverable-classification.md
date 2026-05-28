@@ -72,7 +72,7 @@ Adjust the Step 6 menu accordingly — omit the "create a spec" option and use t
 ```
 Spec(s) written: <list each produced spec with its full path>
 [Companion triage file: <path> — for a triage producing ≥2 specs or ≥3 tickets the companion triage file is MANDATORY (§Triage-file composition / §Triage producing ≥2 specs or ≥3 tickets), so this line shows the written path with no decline option. The "Companion triage file: declined — verdicts landed in spec §<sections>" form is available only at the single-deliverable count when the §Input-complexity carve-out fires (≥8 evaluated items in source report) AND you choose not to write the file. The "Companion triage file: written per §Input-complexity carve-out (<N> evaluated items: <breakdown by category — e.g., '6 SPECs + 5 skill changes + 5 validators + 7 fixtures + §20 non-goals'>); the carve-out's single-deliverable-with-rich-input shape applies." form is the WRITE counterpart to the DECLINE phrasing above; the bracketed-slot's two options at the carve-out level are then symmetric (decline OR write, each with explicit phrasing). When the spec(s) did NOT arise from a triage flow (a directed-design / analysis brainstorm producing one or more specs — at any spec count — rather than a triage evaluating a report into deliverables), there is no companion triage file at all — emit "Companion triage file: N/A — not a triage flow" or omit this slot entirely. When the spec DID arise from a triage flow but produced a single deliverable from FEWER than 8 evaluated items (so the §Input-complexity carve-out does not fire and the file is skipped by default per §Triage-file composition), emit "Companion triage file: skipped by default — triage flow producing a single deliverable below the ≥8-item carve-out threshold (<N> items evaluated); the deliverable + in-chat triage recommendation are sufficient history." When the deliverable DID arise from a triage flow but produced multiple deliverables below the mandatory triage-file threshold (e.g., 2 tickets — below the ≥3-ticket mandatory threshold; or 1 spec + 1 ticket — below both the ≥2-spec and ≥3-ticket mandatory thresholds; 2 specs is AT the ≥2-spec mandatory threshold and triggers the mandatory "<path>" disposition instead), emit "Companion triage file: skipped by default — triage flow producing <N> deliverables below the mandatory triage-file threshold (≥2 specs / ≥3 tickets); the deliverables + in-chat triage recommendation are sufficient history." Do NOT borrow the "N/A — not a triage flow" phrasing for this case either (the prior single-deliverable rule's prohibition extends to multi-deliverable sub-mandatory cases for the same reason). When the §Input-complexity carve-out does NOT fire (the source report has fewer than 8 evaluated items) but the triage records named lineage-value rationale — multi-iteration audit lineage (iteration N of M+), durable rejection-record value against re-proposal of previously-deliberately-rejected scope, or cross-batch decision-record continuity — the operator MAY override the skip-by-default; emit "Companion triage file: written despite sub-threshold default — <reason from the constrained trigger list (multi-iteration audit lineage / durable rejection-record value against re-proposal / cross-batch decision-record continuity)>; the body's rejection table records the forward-deciding-bound rationale." The constrained trigger list is exhaustive — the override is NOT an unbounded escape hatch; a triage with none of those three triggers honors the skip-by-default. Do NOT borrow the "N/A — not a triage flow" phrasing for this case — it was a triage flow]
-[Implementation order: <"updated specs/IMPLEMENTATION-ORDER.md across <region list>" | "skipped — file not present and below fresh-create threshold (<3 specs and no hard 2-spec dependency)" | "created fresh specs/IMPLEMENTATION-ORDER.md covering <N> specs"> — present per the IMPLEMENTATION-ORDER instruction below]
+[Implementation order: <"updated specs/IMPLEMENTATION-ORDER.md across <region list>" | "skipped — file not present and below fresh-create threshold (<3 specs and no hard 2-spec dependency)" | "created fresh specs/IMPLEMENTATION-ORDER.md covering <N> specs" | "N/A — deliverables are tickets only; specs/IMPLEMENTATION-ORDER.md governs spec sequencing, not tickets"> — present per the IMPLEMENTATION-ORDER instruction below]
 
 What would you like to do next?
 1. Reassess each produced spec against current codebase state
@@ -87,7 +87,7 @@ What would you like to do next?
 Spec(s) and ticket(s) written:
   - <spec path>
   - <ticket paths>
-[Implementation order: <"updated specs/IMPLEMENTATION-ORDER.md across <region list>" | "skipped — file not present and below fresh-create threshold (<3 specs and no hard 2-spec dependency)" | "created fresh specs/IMPLEMENTATION-ORDER.md covering <N> specs"> — present per the IMPLEMENTATION-ORDER instruction below]
+[Implementation order: <"updated specs/IMPLEMENTATION-ORDER.md across <region list>" | "skipped — file not present and below fresh-create threshold (<3 specs and no hard 2-spec dependency)" | "created fresh specs/IMPLEMENTATION-ORDER.md covering <N> specs" | "N/A — deliverables are tickets only; specs/IMPLEMENTATION-ORDER.md governs spec sequencing, not tickets"> — present per the IMPLEMENTATION-ORDER instruction below]
 
 What would you like to do next?
 1. Reassess the produced spec against current codebase state
@@ -189,3 +189,37 @@ Do NOT commit the file. Leave it for user review.
 ## Post-implementation plan update
 
 If the brainstorm was in plan mode and implementation changed the deliverable set (new tickets created, scope expanded beyond the original plan), update the plan file's deliverable list before the final summary to the user. The plan file should reflect what was actually delivered, not just what was planned. This applies even when the original plan was approved via ExitPlanMode — the plan is a living document during implementation.
+
+## Step 6 Disposition-Line Decision Tree
+
+When the Step 6 menu fires for a spec/ticket/triage deliverable (per SKILL.md §Step 6's "Quick reference — when must the menu fire?" table row 2), the menu carries **mandatory summary-disposition lines** beyond the four menu options. Two disposition lines fire: **Implementation-order** and **Companion-triage-file**. Emit them as prose preceding the menu; the menu itself may be inline numbered options or `AskUserQuestion` — inline is the natural fit for spec/ticket/triage deliverables because the disposition prose has no `AskUserQuestion` option slots and already breaks the AskUserQuestion-only flow, so the "use AskUserQuestion when its schema is available" preference does not force the menu into option form here.
+
+### Implementation-order disposition
+
+Choose ONE of four canonical phrasings:
+
+1. `updated specs/IMPLEMENTATION-ORDER.md across <region list>` — one or more specs were written AND the file existed AND was updated per the §System spec instruction at line 102.
+2. `skipped — file not present and below fresh-create threshold (<3 specs and no hard 2-spec dependency)` — one or more specs were written AND the file is absent AND the fresh-create threshold did not trigger.
+3. `created fresh specs/IMPLEMENTATION-ORDER.md covering <N> specs` — one or more specs were written AND the file is absent AND the fresh-create threshold triggered (≥3 specs OR exactly 2 specs with hard implementation dependency OR explicit user request).
+4. `N/A — deliverables are tickets only; specs/IMPLEMENTATION-ORDER.md governs spec sequencing, not tickets` — ZERO specs were written (ticket-only deliverable or triage-only decision record). The IMPLEMENTATION-ORDER discipline is spec-conditional per the §System spec rule at line 102 ("After writing the spec(s): if `specs/IMPLEMENTATION-ORDER.md` exists, update it..."); for ticket-only deliverables the rule structurally doesn't fire, so the menu's disposition slot reports its non-applicability rather than improvising free-form prose.
+
+### Companion-triage-file disposition
+
+The disposition depends on whether the deliverable arose from a triage flow, the deliverable count, and the source report's evaluated-item count.
+
+**Triage flow producing ≥2 specs or ≥3 tickets** (mandatory): `Companion triage file: <path>` — no decline option. Mandated by §Triage-file composition / §Triage producing ≥2 specs or ≥3 tickets.
+
+**Triage flow + single deliverable + ≥8 evaluated items in source report** (§Input-complexity carve-out fires — operator choice):
+
+- Decline: `Companion triage file: declined — verdicts landed in spec §<sections>`
+- Write: `Companion triage file: written per §Input-complexity carve-out (<N> evaluated items: <breakdown by category>)`
+
+The two options are symmetric (decline OR write, each with explicit phrasing).
+
+**Triage flow + single deliverable + fewer than 8 evaluated items** (skip-by-default): `Companion triage file: skipped by default — triage flow producing a single deliverable below the ≥8-item carve-out threshold (<N> items evaluated); the deliverable + in-chat triage recommendation are sufficient history.` Do NOT borrow the `N/A — not a triage flow` phrasing — this WAS a triage flow.
+
+**Triage flow + multiple deliverables below mandatory threshold** (e.g., 2 tickets — below the ≥3-ticket mandatory threshold; or 1 spec + 1 ticket — below both the ≥2-spec and ≥3-ticket mandatory thresholds; 2 specs is AT the ≥2-spec mandatory threshold and triggers the `<path>` mandatory disposition instead): `Companion triage file: skipped by default — triage flow producing <N> deliverables below the mandatory triage-file threshold (≥2 specs / ≥3 tickets); the deliverables + in-chat triage recommendation are sufficient history.` Do NOT borrow the `N/A — not a triage flow` phrasing — this WAS a triage flow (the prior single-deliverable rule's prohibition extends to multi-deliverable sub-mandatory cases for the same reason).
+
+**Sub-threshold override** (the §Input-complexity carve-out does NOT fire — source report has fewer than 8 evaluated items — but the triage records named lineage-value rationale): `Companion triage file: written despite sub-threshold default — <reason from the constrained trigger list (multi-iteration audit lineage / durable rejection-record value against re-proposal / cross-batch decision-record continuity)>; the body's rejection table records the forward-deciding-bound rationale.` The constrained trigger list is exhaustive — the override is NOT an unbounded escape hatch (per §System spec's Step 6 menu-template bracketed slot). The implementation-order disposition still applies in this case (a directed-design spec still updates or skips `specs/IMPLEMENTATION-ORDER.md`).
+
+**Directed-design / analysis brainstorm producing specs or tickets without triaging a report** (not a triage flow): `Companion triage file: N/A — not a triage flow` (or omit the line entirely). The ≥2-spec / ≥3-ticket mandatory rule is gated on triage origin, not deliverable count.

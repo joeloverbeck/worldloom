@@ -55,7 +55,7 @@ These cases are individually small but collectively cover the branch-isolation d
 - Changes to `matchesScope` or cooldown semantics.
 - Coverage for the eight filter stages beyond scope/cooldown (covered by existing tests and STSELECT-006).
 - Coverage for the ranking algorithm (STSELECT-004's scope).
-- Coverage for the end-to-end indexer→selector pipeline (STSELECT-003's scope).
+- Coverage for the end-to-end indexer→selector pipeline (completed under `archive/tickets/STSELECT-003.md`).
 - Coverage for the `include_rejection_summary` flag defect (MCPENH-075's scope).
 - Adding test coverage for the SQL queries themselves (those are exercised indirectly by every test that builds a fixture).
 
