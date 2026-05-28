@@ -69,7 +69,7 @@ test("SPEC-46 story-bundle edge capstone builds all Phase C edge rows", () => {
     const sourceRoot = path.join(root, "worlds", WORLD_SLUG, "stories", STORY_SLUG, "_source");
     const expected = expectedCountsFromSource(sourceRoot);
 
-    assert.equal(STORY_EDGE_TYPES.length, 79);
+    assert.equal(STORY_EDGE_TYPES.length, 83);
     assert.equal(new Set(STORY_EDGE_TYPES).size, STORY_EDGE_TYPES.length);
     assert.equal(build(root, WORLD_SLUG, { quiet: true }), 0);
 

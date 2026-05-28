@@ -1,6 +1,6 @@
 # SPEC92SCERANPRO-005: world-index SCN enumeration, node-type parsing, and edges
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-index` (enumerate the four scene directories; parse SCN as a node-type; index SCN edges).
@@ -12,7 +12,7 @@ The world index must enumerate the new scene directories and parse SCN records s
 
 ## Assumption Reassessment (2026-05-28)
 
-1. `tools/world-index/src/enumerate.ts` (story-bundle directory enumeration) and `tools/world-index/src/parse/story-directories.ts` exist at HEAD (verified). Story-bundle edge parsing lives in `tools/world-index/src/parse/structured-edges.ts` (verified present). SCN node-type + edges follow the existing story-bundle pattern.
+1. `tools/world-index/src/enumerate.ts` (story-bundle directory enumeration) and `tools/world-index/src/parse/story-directories.ts` exist at HEAD (verified). Story-bundle source-record edge parsing lives in `tools/world-index/src/parse/atomic.ts` (`edgesForStoryRecord` and record-specific helpers), while `tools/world-index/src/parse/structured-edges.ts` is only for prose/frontmatter structured-reference extraction. SCN node-type + edges follow the existing story-bundle source-record pattern in `atomic.ts`.
 2. SPEC-92 §Scope (world-index) + §Acceptance #6 define the four directories + four edge types. The SCN record shape comes from -002 (the Dep).
 3. Cross-artifact boundary under audit: the world-index node-type registration is what makes -004's `list_records` / `get_record` resolve SCN; the SCN→PG/CHC/BR/previous_scene edges are consumed by general query primitives (`get_neighbors`, context-packet edge projection) — graph-edge deliverables with a structural-consumer model (no per-edge name-greppable consumer required).
 4. FOUNDATIONS §Story Bundles §3 (Read Discipline) + the edge-vocabulary contract: SCN edges fit the existing edge vocabulary (one entry per resolved record reference; no novel semantics). The retrieval surface projects the new edges automatically.
@@ -38,7 +38,7 @@ Add `_source/scenes` (YAML) + `scene-prose-plans`, `scene-prose` (markdown) + `s
 
 Add `scenes` to the story-scoped record-type set so SCN records parse to nodes.
 
-### 3. parse/structured-edges.ts (modify)
+### 3. parse/atomic.ts (modify)
 
 Emit SCN→PG (membership, one per `pg_ids` entry), SCN→CHC (`emitted_choice_ids`), SCN→BR (`branch_id`), SCN→SCN (`previous_scene_id`) edges.
 
@@ -46,8 +46,10 @@ Emit SCN→PG (membership, one per `pg_ids` entry), SCN→CHC (`emitted_choice_i
 
 - `tools/world-index/src/enumerate.ts` (modify)
 - `tools/world-index/src/parse/story-directories.ts` (modify)
-- `tools/world-index/src/parse/structured-edges.ts` (modify)
+- `tools/world-index/src/parse/atomic.ts` (modify)
+- `tools/world-index/src/schema/types.ts` (modify)
 - `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts` (modify — add SCN node + edge-parity cases)
+- `tools/world-index/tests/types.test.ts` (modify — assert SCN edge registration/counts)
 
 ## Out of Scope
 
@@ -77,3 +79,19 @@ Emit SCN→PG (membership, one per `pg_ids` entry), SCN→CHC (`emitted_choice_i
 ### Commands
 
 1. `cd tools/world-index && npm run build && npm test`
+
+## Outcome
+
+Completed: 2026-05-28
+
+`tools/world-index` now indexes SPEC-92 scene render-layer artifacts. Story-bundle enumeration accepts `_source/scenes`, `scene-prose-plans`, `scene-prose`, and `scene-prose-receipts`. The story-source directory registry parses `_source/scenes/SCN-*.yaml` as `scene_record` nodes. The story edge registry and parser emit SCN membership/status edges for `branch_id`, `pg_ids`, `emitted_choice_ids`, and `previous_scene_id` using registered edge types `scene_branch`, `scene_includes_page`, `scene_emitted_choice`, and `scene_previous_scene`.
+
+## Verification Result
+
+1. `cd tools/world-index && npm run build` passed.
+2. `cd tools/world-index && node --test dist/tests/enumerate.test.js dist/tests/parse/atomic-story-edge-parity.test.js dist/tests/types.test.js dist/tests/integration/spec46-story-bundle-edges-integration.test.js dist/tests/integration/spec47-stplan-stemo-edges-integration.test.js` passed 8 focused tests.
+3. `cd tools/world-index && npm test` passed: 135 tests, 135 pass, 0 fail.
+
+## Deviations
+
+The drafted ticket named `tools/world-index/src/parse/structured-edges.ts` as the edge parser. Live reassessment found that source-record story-bundle edges are emitted from `tools/world-index/src/parse/atomic.ts`; `structured-edges.ts` is only for prose/frontmatter structured-reference extraction. The implementation and tests therefore updated `atomic.ts` and `tools/world-index/src/schema/types.ts` instead.

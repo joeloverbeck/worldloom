@@ -47,11 +47,13 @@ const STORY_BUNDLE_MARKDOWN_DIRECTORIES = new Set([
   "character-proposals",
   "pages-prose",
   "pages-prose-plans",
+  "scene-prose",
+  "scene-prose-plans",
   "story-characters",
   "storylet-batches",
   "story-promotions"
 ]);
-const STORY_BUNDLE_YAML_DIRECTORIES = new Set(["pages-prose-receipts"]);
+const STORY_BUNDLE_YAML_DIRECTORIES = new Set(["pages-prose-receipts", "scene-prose-receipts"]);
 const STORY_BUNDLE_CHARACTER_PROPOSAL_SUBDIRECTORIES = new Set(["batches"]);
 
 /**

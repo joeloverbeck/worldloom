@@ -80,7 +80,7 @@ const STORY_DIR_ORDER = new Map(Array.from(STORY_DIRS.keys()).map((directory, in
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
 const STORY_REF_REGEX =
-  /\b(STENT|STCHAR|STSTAT|SF|SE|BEL|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|CLK|STSEC|STQ|STPLAN|STEMO|DA)-[A-Za-z0-9-]+\b/g;
+  /\b(STENT|STCHAR|STSTAT|SF|SE|BEL|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|SCN|CHC|SLT|CLK|STSEC|STQ|STPLAN|STEMO|DA)-[A-Za-z0-9-]+\b/g;
 const CANON_FACT_REF_REGEX = /^CF-\d+$/;
 const MYSTERY_RESERVE_REF_REGEX = /^M-\d+$/;
 
@@ -707,6 +707,12 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
     }
   }
 
+  if (node.node_type === "scene_record") {
+    for (const edge of edgesForScene(node, record, storySlug)) {
+      push(edge);
+    }
+  }
+
   pushStoryRef("created_at_page", stringField(record, "created_at_page"));
   pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
 
@@ -923,6 +929,33 @@ function edgesForPage(
 
   for (const target of stringArrayField(record, "emitted_choices")) {
     pushStoryEdgeIfReference(edges, node.node_id, "page_emitted_choice", storySlug, target);
+  }
+
+  return edges;
+}
+
+function edgesForScene(
+  node: NodeRow,
+  record: Record<string, unknown>,
+  storySlug: string
+): Array<Omit<EdgeRow, "edge_id">> {
+  const edges: Array<Omit<EdgeRow, "edge_id">> = [];
+
+  pushStoryEdgeIfReference(edges, node.node_id, "scene_branch", storySlug, stringField(record, "branch_id"));
+  pushStoryEdgeIfReference(
+    edges,
+    node.node_id,
+    "scene_previous_scene",
+    storySlug,
+    stringField(record, "previous_scene_id")
+  );
+
+  for (const target of stringArrayField(record, "pg_ids")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "scene_includes_page", storySlug, target);
+  }
+
+  for (const target of stringArrayField(record, "emitted_choice_ids")) {
+    pushStoryEdgeIfReference(edges, node.node_id, "scene_emitted_choice", storySlug, target);
   }
 
   return edges;

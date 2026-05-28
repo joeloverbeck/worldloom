@@ -44,7 +44,7 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.equal(ATTRIBUTION_EDGE_TYPES.length, 2);
   assert.equal(ENTITY_EDGE_TYPES.length, 1);
   assert.equal(SCOPED_EDGE_TYPES.length, 2);
-  assert.equal(STORY_EDGE_TYPES.length, 79);
+  assert.equal(STORY_EDGE_TYPES.length, 83);
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_create"));
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_supersede"));
   assert.ok(STORY_EDGE_TYPES.includes("state_delta_close"));
@@ -55,6 +55,10 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.ok(STORY_EDGE_TYPES.includes("page_active_record"));
   assert.ok(STORY_EDGE_TYPES.includes("page_visible_affordance_record"));
   assert.ok(STORY_EDGE_TYPES.includes("page_emitted_choice"));
+  assert.ok(STORY_EDGE_TYPES.includes("scene_branch"));
+  assert.ok(STORY_EDGE_TYPES.includes("scene_includes_page"));
+  assert.ok(STORY_EDGE_TYPES.includes("scene_emitted_choice"));
+  assert.ok(STORY_EDGE_TYPES.includes("scene_previous_scene"));
   assert.ok(STORY_EDGE_TYPES.includes("belief_holder"));
   assert.ok(STORY_EDGE_TYPES.includes("belief_basis_event"));
   assert.ok(STORY_EDGE_TYPES.includes("belief_access_record"));
@@ -122,6 +126,6 @@ test("node and edge type registries match the spec counts and contain no duplica
   assert.equal(storyEdgeNames.has("pays_off_obligation"), false);
   assert.equal(storyEdgeNames.has("complicates_obligation"), false);
   assert.equal(storyEdgeNames.has("transfers_obligation"), false);
-  assert.equal(edgeTypes.length, 94);
+  assert.equal(edgeTypes.length, 98);
   assert.equal(new Set(edgeTypes).size, edgeTypes.length);
 });

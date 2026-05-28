@@ -100,6 +100,31 @@ const EDGE_PARITY_CASES = [
     expectedEdgeTypes: ["parent_page", "page_active_record", "page_visible_affordance_record", "page_emitted_choice"]
   },
   {
+    directoryName: "scenes",
+    recordId: "SCN-2",
+    lines: [
+      "id: SCN-2",
+      "story_id: STORY-50",
+      "branch_id: BR-1",
+      "supersedes: null",
+      "status: planned",
+      "pg_ids: [PG-3, PG-4]",
+      "start_page_id: PG-3",
+      "end_page_id: PG-4",
+      "previous_scene_id: SCN-1",
+      "choice_surface_page_id: PG-4",
+      "emitted_choice_ids: [CHC-2, CHC-3]",
+      "title: Harbor Bell",
+      "slug: harbor-bell",
+      "scene_descriptor: The bell keeper reaches the gate.",
+      "boundary_rationale: The scene ends at the playable bell choice.",
+      "prose_plan_path: scene-prose-plans/SCN-2.md",
+      "prose_path: scene-prose/SCN-2.md",
+      "receipt_path: scene-prose-receipts/SCN-2.yaml"
+    ],
+    expectedEdgeTypes: ["scene_branch", "scene_includes_page", "scene_emitted_choice", "scene_previous_scene"]
+  },
+  {
     directoryName: "events",
     recordId: "SE-4",
     lines: [

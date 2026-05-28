@@ -21,6 +21,7 @@ export const STORY_SOURCE_DIRECTORY_SPECS = [
   storySourceDirectorySpec("objects", "story_object_record", "id", "^STOBJ-[0-9]+$"),
   storySourceDirectorySpec("branches", "branch_record", "id", "^BR-[0-9]+$"),
   storySourceDirectorySpec("pages", "page_record", "id", "^PG-[0-9]+$"),
+  storySourceDirectorySpec("scenes", "scene_record", "id", "^SCN-[0-9]+$"),
   storySourceDirectorySpec("choices", "choice_record", "id", "^CHC-[0-9]+$"),
   storySourceDirectorySpec("storylets", "storylet_record", "id", "^SLT-[0-9]+$"),
   storySourceDirectorySpec("clocks", "pressure_clock_record", "id", "^CLK-[0-9]+$"),
