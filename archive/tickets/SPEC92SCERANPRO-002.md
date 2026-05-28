@@ -13,7 +13,7 @@ The SCN record and scene-prose receipt need machine-enforceable JSON schemas so 
 ## Assumption Reassessment (2026-05-28)
 
 1. `tools/validators/src/schemas/story-page.schema.json`, `tools/validators/src/structural/utils.ts`, `tools/validators/src/structural/record-schema-compliance.ts`, and `tools/validators/src/public/registry.ts` exist. Live dispatch maps record node types to schema names through `RECORD_TYPE_TO_SCHEMA` in `utils.ts`, not through a raw schema registry in `registry.ts`.
-2. SPEC-92 §3 / §6 and the completed contract in `archive/tickets/SPEC92SCERANPRO-001.md` define the SCN field set and scene-prose-receipt shape. `story-scene.schema.json` mirrors that contract: required routing/status/path fields, optional `previous_scene_id`, `scene_descriptor`, and `boundary_rationale`, and no `render_kind` or `source_pg_fingerprint`.
+2. SPEC-92 §3 / §6 and the completed contract in `archive/tickets/SPEC92SCERANPRO-001.md` define the SCN field set and scene-prose-receipt shape. `story-scene.schema.json` mirrors that contract: required routing/status/path fields, optional `previous_scene_id`, `scene_descriptor`, `boundary_rationale`, and, after SPEC92SCERANPRO-003, optional `supersedes` for append-only range/status supersession. It still carries no `render_kind` or `source_pg_fingerprint`.
 3. Cross-artifact boundary under audit: `record_schema_compliance` validates indexed story records by `node_type`; adding `scene_record -> story-scene` plus the `_source/scenes/SCN-*.yaml` authority-path filter makes future SCN records validate through the same structural path as PG/BR/CHC records.
 4. The scene receipt is a direct-write artifact, not an atomic `_source` record, so it needs a receipt-specific schema-compliance validator parallel to `prose_receipt_schema_compliance`. This is same-seam registry fallout from the ticket's "register both schemas" requirement, while the content validators remain owned by SPEC92SCERANPRO-007.
 5. HARD-GATE-facing validation signal: `record_schema_compliance` participates in pre-apply. The SCN dispatch remains fail-closed through `additionalProperties: false`, and the new `scene_prose_receipt_schema_compliance` explicitly skips pre-apply because scene receipts are direct-write publication artifacts, not patch-plan source records.
@@ -35,6 +35,10 @@ The SCN record and scene-prose receipt need machine-enforceable JSON schemas so 
 ### 1. story-scene.schema.json (new)
 
 Added `tools/validators/src/schemas/story-scene.schema.json`. Required fields are `id`, `story_id`, `branch_id`, `status`, `pg_ids`, `start_page_id`, `end_page_id`, `choice_surface_page_id`, `emitted_choice_ids`, `title`, `slug`, `prose_plan_path`, `prose_path`, and `receipt_path`. Optional fields are `record_kind`, `previous_scene_id`, `scene_descriptor`, and `boundary_rationale`. `additionalProperties: false` rejects `render_kind`, `source_pg_fingerprint`, and other non-contract fields.
+
+Outcome amended: 2026-05-28
+
+SPEC92SCERANPRO-003 added optional `supersedes: SCN-* | null` to the live schema and contract tests after the patch-engine supersession op exposed that the prior schema would reject schema-valid SCN range/status supersession records. The schema still rejects `render_kind`, `source_pg_fingerprint`, and other non-contract fields.
 
 ### 2. scene-prose-receipt.schema.json (new)
 

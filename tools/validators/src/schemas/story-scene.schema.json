@@ -23,6 +23,7 @@
     "id": { "type": "string", "pattern": "^SCN-(0|[1-9][0-9]*)$" },
     "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
     "branch_id": { "type": "string", "pattern": "^BR-(0|[1-9][0-9]*)$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^SCN-(0|[1-9][0-9]*)$" },
     "status": { "type": "string", "enum": ["planned", "rendered", "attached"] },
     "pg_ids": {
       "type": "array",

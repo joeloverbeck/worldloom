@@ -114,6 +114,48 @@ test("checkIdAllocationRace accepts STCHAR allocations for story-character autho
   assert.deepEqual(checkIdAllocationRace(world.db, envelope), { ok: true, failures: [] });
 });
 
+test("checkIdAllocationRace accepts SCN allocations for story-scene ops", (t) => {
+  const world = createIndexedTestWorld(t);
+  seedScnRecord(world, "red-bunny", "SCN-1");
+  const envelope = {
+    ...baseEnvelope({ scn_ids: ["SCN-2"] }),
+    target_world: world.worldSlug,
+    patches: [createScnPatch(world.worldSlug, "red-bunny", "SCN-2")]
+  };
+
+  assert.deepEqual(checkIdAllocationRace(world.db, envelope), { ok: true, failures: [] });
+});
+
+test("checkIdAllocationRace reports SCN story-bundle allocation races", (t) => {
+  const world = createIndexedTestWorld(t);
+  seedScnRecord(world, "red-bunny", "SCN-1");
+  const envelope = {
+    ...baseEnvelope({ scn_ids: ["SCN-3"] }),
+    target_world: world.worldSlug,
+    patches: [createScnPatch(world.worldSlug, "red-bunny", "SCN-3")]
+  };
+
+  const result = checkIdAllocationRace(world.db, envelope);
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "id_allocation_race");
+    assert.equal(
+      result.message,
+      "scn_ids allocation race for story 'red-bunny': expected SCN-3, current next id is SCN-2."
+    );
+    assert.deepEqual(result.failures, [
+      {
+        key: "scn_ids",
+        expected: "SCN-3",
+        current: "SCN-2",
+        story_slug: "red-bunny",
+        message: "scn_ids allocation race for story 'red-bunny': expected SCN-3, current next id is SCN-2."
+      }
+    ]);
+  }
+});
+
 test("checkIdAllocationRace returns every mismatch while preserving the first message", (t) => {
   const world = createIndexedTestWorld(t);
   seedStoryRecord(world, "red-bunny", "OBL-12");
@@ -199,6 +241,39 @@ function createStcharPatch(
   } satisfies Extract<PatchOperation, { op: "append_story_character_authority_record" }>);
 }
 
+function createScnPatch(
+  worldSlug: string,
+  storySlug: string,
+  id: string
+): Extract<PatchOperation, { op: "create_scn_record" }> {
+  return createOp({
+    op: "create_scn_record",
+    target_world: worldSlug,
+    target_file: `stories/${storySlug}/_source/scenes/${id}.yaml`,
+    payload: {
+      story_slug: storySlug,
+      record: {
+        id,
+        story_id: "STORY-1",
+        branch_id: "BR-1",
+        supersedes: null,
+        status: "planned",
+        pg_ids: ["PG-1"],
+        start_page_id: "PG-1",
+        end_page_id: "PG-1",
+        previous_scene_id: null,
+        choice_surface_page_id: "PG-1",
+        emitted_choice_ids: ["CHC-1"],
+        title: "Bench Conversation",
+        slug: "bench-conversation",
+        prose_plan_path: `scene-prose-plans/${id}.md`,
+        prose_path: `scene-prose/${id}.md`,
+        receipt_path: `scene-prose-receipts/${id}.yaml`
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_scn_record" }>);
+}
+
 function seedStcharRecord(
   world: ReturnType<typeof createIndexedTestWorld>,
   storySlug: string,
@@ -207,6 +282,34 @@ function seedStcharRecord(
   seedRecord(world, `${storySlug}:${id}`, "story_character_authority_record", `stories/${storySlug}/story-characters/${id}.md`, {
     id,
     title: `Existing STCHAR ${id}`
+  });
+  world.db
+    .prepare("UPDATE nodes SET story_slug = ?, node_id = ? WHERE node_id = ?")
+    .run(storySlug, id, `${storySlug}:${id}`);
+}
+
+function seedScnRecord(
+  world: ReturnType<typeof createIndexedTestWorld>,
+  storySlug: string,
+  id: string
+): void {
+  seedRecord(world, `${storySlug}:${id}`, "scene_record", `stories/${storySlug}/_source/scenes/${id}.yaml`, {
+    id,
+    story_id: "STORY-1",
+    branch_id: "BR-1",
+    supersedes: null,
+    status: "planned",
+    pg_ids: ["PG-1"],
+    start_page_id: "PG-1",
+    end_page_id: "PG-1",
+    previous_scene_id: null,
+    choice_surface_page_id: "PG-1",
+    emitted_choice_ids: ["CHC-1"],
+    title: "Bench Conversation",
+    slug: "bench-conversation",
+    prose_plan_path: `scene-prose-plans/${id}.md`,
+    prose_path: `scene-prose/${id}.md`,
+    receipt_path: `scene-prose-receipts/${id}.yaml`
   });
   world.db
     .prepare("UPDATE nodes SET story_slug = ?, node_id = ? WHERE node_id = ?")

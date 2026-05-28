@@ -930,6 +930,7 @@ Normal story runtime consumes active `STCHAR` through `STENT.bound_stchar_id`, `
 id: SCN-<integer>*                         # consumed by index node identity, retrieval, and receipt linkage
 story_id: STORY-<integer>*                 # consumed by story-bundle scoping and retrieval
 branch_id: BR-<integer>*                   # consumed by scene-range single-branch validation and index edges
+supersedes: SCN-<integer> | null           # default null; consumed by append-only range/status supersession
 status: planned | rendered | attached*     # publication status only; consumed by scene workflow and INDEX rendering
 pg_ids: [PG-<integer>]*                    # ordered contiguous range; consumed by range validators, receipt range-walks, and SCN->PG edges
 start_page_id: PG-<integer>*               # equals pg_ids[0]; consumed by structural validators and human review

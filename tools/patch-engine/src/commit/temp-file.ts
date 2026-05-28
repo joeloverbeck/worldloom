@@ -144,6 +144,8 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "create_pg_record":
     case "create_chc_record":
     case "create_slt_record":
+    case "create_scn_record":
+    case "supersede_scn_record":
     case "create_bel_record":
     case "create_clk_record":
     case "supersede_clk_record":
@@ -272,6 +274,8 @@ function stageOne(
     case "create_pg_record":
     case "create_chc_record":
     case "create_slt_record":
+    case "create_scn_record":
+    case "supersede_scn_record":
     case "create_bel_record":
     case "create_clk_record":
     case "supersede_clk_record":

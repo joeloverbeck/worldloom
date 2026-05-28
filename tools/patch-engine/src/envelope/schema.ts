@@ -38,6 +38,7 @@ export interface IdAllocations {
   pg_ids?: string[];
   chc_ids?: string[];
   slt_ids?: string[];
+  scn_ids?: string[];
   bel_ids?: string[];
   stchar_ids?: string[];
   story_da_ids?: string[];
@@ -94,6 +95,8 @@ export const OPERATION_KINDS = [
   "create_pg_record",
   "create_chc_record",
   "create_slt_record",
+  "create_scn_record",
+  "supersede_scn_record",
   "create_bel_record",
   "create_clk_record",
   "supersede_clk_record",
@@ -337,6 +340,8 @@ export type PatchOperation =
   | OperationBase<"create_pg_record", StoryRecordPayload>
   | OperationBase<"create_chc_record", StoryRecordPayload>
   | OperationBase<"create_slt_record", StoryRecordPayload>
+  | OperationBase<"create_scn_record", StoryRecordPayload>
+  | OperationBase<"supersede_scn_record", StoryRecordPayload>
   | OperationBase<"create_bel_record", StoryRecordPayload>
   | OperationBase<"create_clk_record", StoryRecordPayload>
   | OperationBase<"supersede_clk_record", StoryRecordPayload>

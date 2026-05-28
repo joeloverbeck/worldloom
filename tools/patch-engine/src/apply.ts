@@ -289,6 +289,8 @@ function collectNewNodes(patches: PatchOperation[]): NewNodeReceipt[] {
       case "create_pg_record":
       case "create_chc_record":
       case "create_slt_record":
+      case "create_scn_record":
+      case "supersede_scn_record":
       case "create_bel_record":
       case "create_stplan_record":
       case "create_stemo_record":

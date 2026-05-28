@@ -15,6 +15,7 @@ function validScenePayload(): Record<string, unknown> {
     id: "SCN-1",
     story_id: "STORY-1",
     branch_id: "BR-1",
+    supersedes: null,
     status: "planned",
     pg_ids: ["PG-1", "PG-2"],
     start_page_id: "PG-1",
@@ -43,6 +44,20 @@ test("record_schema_compliance accepts optional SCN descriptor fields absent", a
   delete parsed.previous_scene_id;
   delete parsed.scene_descriptor;
   delete parsed.boundary_rationale;
+
+  const result = await recordSchemaCompliance.run({}, context([sceneRecord(parsed)]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance accepts SCN supersession lineage", async () => {
+  const parsed = validScenePayload();
+  parsed.id = "SCN-2";
+  parsed.supersedes = "SCN-1";
+  parsed.status = "rendered";
+  parsed.prose_plan_path = "scene-prose-plans/SCN-2.md";
+  parsed.prose_path = "scene-prose/SCN-2.md";
+  parsed.receipt_path = "scene-prose-receipts/SCN-2.yaml";
 
   const result = await recordSchemaCompliance.run({}, context([sceneRecord(parsed)]));
 

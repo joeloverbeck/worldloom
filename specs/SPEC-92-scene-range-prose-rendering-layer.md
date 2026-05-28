@@ -53,6 +53,7 @@ Schema (authored canonical list lands in `story-record-schemas.md`; all fields l
 id: SCN-<integer>
 story_id: STORY-<integer>
 branch_id: BR-<integer>
+supersedes: SCN-<integer> | null
 status: planned | rendered | attached   # publication status ONLY; never causal
 pg_ids: [PG-<integer>, ...]   # ordered, contiguous along one PG.branch_path
 start_page_id: PG-<integer>   # == pg_ids[0]

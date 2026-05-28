@@ -24,6 +24,8 @@ export type StoryRecordOperationKind =
   | "create_pg_record"
   | "create_chc_record"
   | "create_slt_record"
+  | "create_scn_record"
+  | "supersede_scn_record"
   | "create_bel_record"
   | "create_clk_record"
   | "supersede_clk_record"
@@ -53,6 +55,8 @@ export const STORY_RECORD_OPERATION_KINDS: readonly StoryRecordOperationKind[] =
   "create_pg_record",
   "create_chc_record",
   "create_slt_record",
+  "create_scn_record",
+  "supersede_scn_record",
   "create_bel_record",
   "create_clk_record",
   "supersede_clk_record",
@@ -174,6 +178,20 @@ export const STORY_RECORD_SPECS: Readonly<Record<StoryRecordOperationKind, Story
     nodeType: "storylet_record",
     prefix: "SLT",
     sourceDir: "storylets"
+  },
+  create_scn_record: {
+    allocationKey: "scn_ids",
+    idPattern: /^SCN-\d+$/,
+    nodeType: "scene_record",
+    prefix: "SCN",
+    sourceDir: "scenes"
+  },
+  supersede_scn_record: {
+    allocationKey: "scn_ids",
+    idPattern: /^SCN-\d+$/,
+    nodeType: "scene_record",
+    prefix: "SCN",
+    sourceDir: "scenes"
   },
   create_bel_record: {
     allocationKey: "bel_ids",

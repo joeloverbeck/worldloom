@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-mcp` (SCN id_class in the allocator; SCN record_type in `list_records` / `get_record`; `create_scn_record` envelope dispatch).
-**Deps**: SPEC92SCERANPRO-003, archive/tickets/SPEC92SCERANPRO-002.md
+**Deps**: archive/tickets/SPEC92SCERANPRO-003.md, archive/tickets/SPEC92SCERANPRO-002.md
 
 ## Problem
 

@@ -23,6 +23,8 @@ const TIER_ONE = new Set<PatchOperation["op"]>([
   "create_pg_record",
   "create_chc_record",
   "create_slt_record",
+  "create_scn_record",
+  "supersede_scn_record",
   "create_bel_record",
   "create_clk_record",
   "supersede_clk_record",
@@ -58,8 +60,28 @@ const TIER_THREE = new Set<PatchOperation["op"]>([
 
 export function reorderPatches(patches: PatchOperation[]): PatchOperation[] {
   return [
-    ...patches.filter((patch) => TIER_ONE.has(patch.op)),
+    ...sortTierOne(patches.filter((patch) => TIER_ONE.has(patch.op))),
     ...patches.filter((patch) => TIER_TWO.has(patch.op)),
     ...patches.filter((patch) => TIER_THREE.has(patch.op))
   ];
+}
+
+function sortTierOne(patches: PatchOperation[]): PatchOperation[] {
+  return patches
+    .map((patch, index) => ({ patch, index }))
+    .sort((left, right) => {
+      const rankDelta = tierOneRank(left.patch.op) - tierOneRank(right.patch.op);
+      return rankDelta === 0 ? left.index - right.index : rankDelta;
+    })
+    .map(({ patch }) => patch);
+}
+
+function tierOneRank(op: PatchOperation["op"]): number {
+  if (op === "create_scn_record" || op === "supersede_scn_record") {
+    return 20;
+  }
+  if (op === "create_pg_record") {
+    return 10;
+  }
+  return 0;
 }

@@ -13,7 +13,7 @@ Before this ticket, SPEC-92 had introduced a new story-bundle record class `SCN`
 ## Assumption Reassessment (2026-05-28)
 
 1. `.claude/skills/_shared-templates/story-record-schemas.md` and `story-state-contract.md` both exist. `story-record-schemas.md` now hosts the `SCN` field list as §4.5.20 and the scene-prose receipt as §4.7; `story-state-contract.md` now lists `SCN` in the record inventory and adds §8a for scene-plan structure.
-2. SPEC-92 §3 (SCN schema), §5 (scene-plan structure), §6 (validation) define the contract content. The SCN field set is post-reassessment: the `/reassess-spec` pass dropped `render_kind` and `source_pg_fingerprint` per §5b — do NOT reintroduce them.
+2. SPEC-92 §3 (SCN schema), §5 (scene-plan structure), §6 (validation) define the contract content. The SCN field set is post-reassessment: the `/reassess-spec` pass dropped `render_kind` and `source_pg_fingerprint` per §5b — do NOT reintroduce them. Outcome amended 2026-05-28: SPEC92SCERANPRO-003 added optional `supersedes: SCN-* | null` as the load-bearing append-only lifecycle field needed for SCN range/status supersession.
 3. Cross-artifact boundary under audit: the shared-templates contract is consumed by the validators package (SPEC92SCERANPRO-002 JSON schemas must match this field list), the patch engine (-003), and the two new skills (-008 / -009). This ticket is the single authoritative source those consumers mirror.
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism) motivates this ticket: every SCN field must be load-bearing — consumed by the index (membership/edges), a validator (contiguity / choice-surface), or scene attach. The contract must carry no nice-to-have fields; the reassessment already removed `render_kind` (no consumer) and `source_pg_fingerprint` (advisory; freshness moved to the receipt).
 
@@ -33,6 +33,10 @@ Before this ticket, SPEC-92 had introduced a new story-bundle record class `SCN`
 ### 1. story-record-schemas.md — SCN record schema added
 
 Added §4.5.20 defining `SCN`: `id`, `story_id`, `branch_id`, `status` (`planned | rendered | attached`), `pg_ids`, `start_page_id`, `end_page_id`, `previous_scene_id`, `choice_surface_page_id`, `emitted_choice_ids`, `title`, `slug`, `scene_descriptor`, `boundary_rationale`, `prose_plan_path`, `prose_path`, and `receipt_path`. Each field is annotated with its load-bearing consumer. Added §4.7 for the scene-prose-receipt field set: included PG ids + their `state_hash`es at attach, advisory freshness semantics, and the scene-range content checks.
+
+Outcome amended: 2026-05-28
+
+SPEC92SCERANPRO-003 added optional `supersedes: SCN-* | null` to the live shared template as the lifecycle field required by the patch-engine `supersede_scn_record` op. This preserves the no-`render_kind` / no-`source_pg_fingerprint` decision while making the already-intended append-only range/status supersession schema-valid.
 
 ### 2. story-state-contract.md — scene-plan structure + scene-scope rules added
 

@@ -71,7 +71,7 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
   },
   "story-scene": {
     required: ["id", "story_id", "branch_id", "status", "pg_ids", "start_page_id", "end_page_id", "choice_surface_page_id", "emitted_choice_ids", "title", "slug", "prose_plan_path", "prose_path", "receipt_path"],
-    properties: ["record_kind", "id", "story_id", "branch_id", "status", "pg_ids", "start_page_id", "end_page_id", "previous_scene_id", "choice_surface_page_id", "emitted_choice_ids", "title", "slug", "scene_descriptor", "boundary_rationale", "prose_plan_path", "prose_path", "receipt_path"]
+    properties: ["record_kind", "id", "story_id", "branch_id", "supersedes", "status", "pg_ids", "start_page_id", "end_page_id", "previous_scene_id", "choice_surface_page_id", "emitted_choice_ids", "title", "slug", "scene_descriptor", "boundary_rationale", "prose_plan_path", "prose_path", "receipt_path"]
   },
   "story-diegetic-artifact": {
     required: ["id", "story_id", "created_at_page", "title", "author", "genre", "body", "intended_audience", "circulation", "truth_relation"],
@@ -213,6 +213,7 @@ test("representative amended contract records validate against tightened schemas
       id: "SCN-1",
       story_id: "STORY-1",
       branch_id: "BR-1",
+      supersedes: null,
       status: "planned",
       pg_ids: ["PG-1"],
       start_page_id: "PG-1",
