@@ -1,22 +1,20 @@
 {
-  "originating_spec": "specs/SPEC-92-scene-range-prose-rendering-layer.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC92SCERANPRO-010.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "a2d69484584a202d72b087d401163c34ccb810b3",
+  "originating_spec": "archive/specs/SPEC-92-scene-range-prose-rendering-layer.md",
+  "archived_spec": "archive/specs/SPEC-92-scene-range-prose-rendering-layer.md",
+  "last_ticket": "archive/tickets/SPEC92SCERANPRO-011.md",
+  "last_result": "completed_archived_spec_archived",
+  "last_work_commit": "33cbfe8c74805931c769f6df13b590aba7c63196",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC92SCERANPRO-011.md",
-  "queue": [
-    "tickets/SPEC92SCERANPRO-011.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
-  "post_review_material_updates": true,
-  "post_review_audit_block": "emitted",
+  "post_review_material_updates": false,
+  "post_review_audit_block": "not_applicable",
   "blocked": false,
   "blocker": null,
   "proof_state": null,
-  "dirty_state": "tracked clean after work commit; expected ignored package artifacts remain in tools/patch-engine/dist, tools/patch-engine/node_modules, tools/validators/dist, tools/validators/node_modules, tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, tools/world-mcp/node_modules",
+  "dirty_state": "tracked clean after final spec archive commit; expected ignored package artifacts remain in tools/patch-engine/dist, tools/patch-engine/node_modules, tools/validators/dist, tools/validators/node_modules, tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, tools/world-mcp/node_modules",
   "updated_at": "2026-05-28"
 }
