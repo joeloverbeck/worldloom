@@ -186,8 +186,7 @@ const selectStoryletCandidatesInputSchema = z.object({
       grounding_record_ids: z.array(z.string().min(1)).optional()
     })
     .optional(),
-  max_candidates: z.number().int().min(1).default(24),
-  include_rejection_summary: z.boolean().default(true)
+  max_candidates: z.number().int().min(1).default(24)
 });
 
 const getRecordFieldInputSchema = z.object({

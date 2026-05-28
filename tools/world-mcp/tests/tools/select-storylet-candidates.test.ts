@@ -383,6 +383,67 @@ test("selectStoryletCandidates filters indexed SLT projections and returns only 
   }
 });
 
+test("selectStoryletCandidates populates rejected samples by default", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildCandidateWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-1",
+        turn_driver: {
+          kind: "player_action",
+          initiator: "STENT-1",
+          driver_records: ["STCHAR-1"]
+        },
+        intent_signature: {
+          action_families: ["investigate", "communicate"]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(
+      result.filter_trace.scope_rejected_samples.map((sample) => sample.slt_id),
+      ["SLT-3"]
+    );
+    assert.deepEqual(
+      result.filter_trace.driver_kind_rejected_samples.map((sample) => sample.slt_id),
+      ["SLT-4"]
+    );
+    assert.deepEqual(
+      result.filter_trace.action_family_rejected_samples.map((sample) => sample.slt_id),
+      ["SLT-5"]
+    );
+    assert.deepEqual(
+      result.filter_trace.predicate_shape_rejected_samples.map((sample) => sample.slt_id),
+      ["SLT-10"]
+    );
+    assert.deepEqual(
+      result.filter_trace.predicate_class_rejected_samples.map((sample) => sample.slt_id),
+      ["SLT-6"]
+    );
+    assert.deepEqual(
+      result.filter_trace.source_record_id_rejected_samples.map((sample) => sample.slt_id),
+      ["SLT-7"]
+    );
+    assert.deepEqual(
+      result.filter_trace.mystery_policy_rejected_samples.map((sample) => sample.slt_id),
+      ["SLT-8"]
+    );
+    assert.deepEqual(
+      result.filter_trace.cooldown_active_samples.map((sample) => sample.slt_id),
+      ["SLT-9"]
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("selectStoryletCandidates keeps existential SLTs whose predicate classes intersect requested grounding classes", async () => {
   const root = createTempRepoRoot();
 

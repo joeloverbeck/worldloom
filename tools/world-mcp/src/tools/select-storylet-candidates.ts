@@ -35,7 +35,6 @@ export interface SelectStoryletCandidatesArgs {
     grounding_record_ids?: string[];
   };
   max_candidates?: number;
-  include_rejection_summary?: boolean;
 }
 
 export interface StoryletCandidateFilterTrace {
