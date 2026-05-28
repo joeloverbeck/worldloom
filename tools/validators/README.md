@@ -15,8 +15,8 @@ OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, proposal-card/proposal-batch
 frontmatter (including mined-from-diegetic-artifact variants), NCP
 proposal-card frontmatter, NCB proposal-batch frontmatter, DA frontmatter, and story-bundle
 atomic YAML record classes (STENT, STSTAT, SF, SE, OBL, CNSQ, THR, CLK, STSEC, STQ,
-SREL, STINT, STLOC, STOBJ, SCN, BR, PG, CHC, SLT, BEL, STPLAN, STEMO, and story-local DA). The prose receipt schemas cover
-direct-write `stories/<story-slug>/pages-prose-receipts/PG-*.yaml` and `stories/<story-slug>/scene-prose-receipts/SCN-*.yaml` artifacts. The PA
+SREL, STINT, STLOC, STOBJ, SCN, BR, PG, CHC, SLT, BEL, STPLAN, STEMO, and story-local DA). The scene prose receipt schema covers
+direct-write `stories/<story-slug>/scene-prose-receipts/SCN-*.yaml` artifacts; legacy page prose receipts remain historical artifacts and no longer have a current registered schema validator. The PA
 schema validates YAML frontmatter parsed from `adjudications/PA-NNNN-*.md`; PA body
 prose is not schema-constrained.
 

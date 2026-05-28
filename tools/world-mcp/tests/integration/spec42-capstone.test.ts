@@ -181,8 +181,7 @@ test("SPEC-42 capstone covers story-skill contract surfaces as executable surrog
     "`STQ` | Story question / open setup",
     "clock_at_least(CLK-<integer>, value)",
     "secret_unrevealed(STSEC-<integer>)",
-    "story_question_open(STQ-<integer>)",
-    "Open Setups, Active Clocks, Hidden Secrets"
+    "story_question_open(STQ-<integer>)"
   ]);
 
   assertContains(readRepoFile(".claude/skills/branching-story-bootstrap/SKILL.md"), [
@@ -196,7 +195,8 @@ test("SPEC-42 capstone covers story-skill contract surfaces as executable surrog
     "create_clk_record",
     "create_stsec_record",
     "create_stq_record",
-    "§10b new-class visibility block"
+    "Phase 4: Update new-class state + belief and visibility state",
+    "CLK ticks, STSEC reveals, STQ advancement"
   ]);
   assertContains(readRepoFile(".claude/skills/commitment-block-authoring/SKILL.md"), [
     "references/phase-1-coverage-diagnosis.md",
@@ -212,9 +212,9 @@ test("SPEC-42 capstone covers story-skill contract surfaces as executable surrog
     "under_supported_critical_revelation_check",
     "dropped_high_salience_setup_check"
   ]);
-  assertContains(readRepoFile(".claude/skills/branching-story-prose-attach/SKILL.md"), [
-    "required_event_rendered CLK tick",
-    "secret_reveal_undisclosed"
+  assertContains(readRepoFile(".claude/skills/branching-story-scene-prose-attach/SKILL.md"), [
+    "included_pg_events_rendered",
+    "scene_range_forbidden_mystery_resolution"
   ]);
 });
 

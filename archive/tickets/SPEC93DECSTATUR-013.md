@@ -1,6 +1,6 @@
 # SPEC93DECSTATUR-013: Capstone — removal-completeness sweep + planless end-to-end regression
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/tests/integration/spec93-capstone.test.ts` (new; no production code) + per-package green confirmation
@@ -12,10 +12,11 @@ SPEC-93 §8 + §9 require an end-to-end proof that the teardown landed with no z
 
 ## Assumption Reassessment (2026-05-28)
 
-1. The §8 removal-completeness sweep grep (over `.claude/skills/`, `tools/*/src/`, `tools/*/tests/`, `docs/` with the `scene-|SPEC-93|SPEC-92|legacy|grandfather` exclusion) and the §9 per-package test commands are defined verbatim in SPEC-93; the sibling capstone convention is `tools/validators/tests/integration/spec92-scene-layer-capstone.test.ts` (SPEC-92) — confirmed during SPEC-93 reassessment (this session).
+1. The raw §8 removal-completeness grep is too broad to use as a literal no-hit assertion after later specs added legitimate legacy-read and historical/meta references. The implemented capstone encodes the same contract as a classifier: retired authoring gates must have no unclassified current hits, while annotated historical/legacy-read references are allowed and named.
 2. SPEC-93 §8 (9 acceptance criteria + the sweep) + §9 (per-package test plan + the bootstrap→turn-cycle→scene-plan→scene-prose-attach regression); §8 AC5 (no zombie gates) + AC9 (affected packages build + test green).
 3. Cross-artifact boundary: this capstone exercises every upstream ticket's surface; its `Deps` is the parallel-branch leaf set (005, 006, 007, 008, 010, 011, 012) whose transitive `Deps` cover the foundations (001), gate rehoming (002), validator retirement (003), and arg removal (004). The §9 bootstrap/turn-cycle/scene dry-runs are LLM-driven skill invocations (not test-suite-runnable) — handled via the manual-dry-run runbook variant.
 4. FOUNDATIONS Rule 7 (Preserve Mystery Deliberately): the §9 regression must confirm the firewall holds end-to-end after the teardown — gate 3 on the `PG` record stays authoritative and `scene_range_forbidden_mystery_resolution` (SPEC-92) guards rendered scene prose; no forbidden-status `M` is resolved anywhere in the planless flow.
+5. Reassessment found same-seam stale current references outside the originally listed new test file. Those were corrected narrowly in shared story schemas, bootstrap contract prose, validator README prose, and existing capstone tests that asserted retired text.
 
 ## Architecture Check
 
@@ -46,6 +47,12 @@ Document (in the runbook) the per-package build+test commands that must pass: va
 ## Files to Touch
 
 - `tools/validators/tests/integration/spec93-capstone.test.ts` (new)
+- `.claude/skills/_shared-templates/story-record-schemas.md`
+- `.claude/skills/branching-story-bootstrap/references/story-kernel-contract.md`
+- `tools/validators/README.md`
+- `tools/validators/tests/fixtures/midstory-introduction/compatibility/legacy-snapshot.yaml`
+- `tools/validators/tests/integration/spec43-midstory-introduction.test.ts`
+- `tools/world-mcp/tests/integration/spec42-capstone.test.ts`
 
 ## Out of Scope
 
@@ -78,3 +85,31 @@ Document (in the runbook) the per-package build+test commands that must pass: va
 1. `(cd tools/validators && npm run build && npm test)` — runs the capstone sweep + schema assertions.
 2. `(cd tools/world-mcp && npm run build && npm test)`; `(cd tools/world-index && npm run build && npm test)`; `(cd tools/hooks && npm run build && npm test)`; `(cd tools/patch-engine && npm run build && npm test && npm run test:integration)`; `(cd tools/story-explorer && npm test)` — all affected packages green.
 3. Manual: the §9 bootstrap→turn-cycle→scene dry-run runbook (not test-suite-runnable; implementer checklist).
+
+## Outcome
+
+Implemented the SPEC-93 capstone as `tools/validators/tests/integration/spec93-capstone.test.ts`. The test classifies removal-completeness sweep hits, proves planless and legacy `PG` schema/hash behavior, and verifies `computePgStateHash` no longer special-cases `prose_plan_path` or `plan_hash`.
+
+During the sweep, corrected narrow same-seam stale current references:
+
+- Bootstrap/story-kernel contract now points to `branching-story-scene-prose-attach` and rendered scene prose.
+- Shared story schema notes and validators README now describe legacy page prose receipts as historical, with current validation on scene prose receipts.
+- Existing SPEC-42 and SPEC-43 capstone expectations were updated to current contract text and current validator behavior.
+- The SPEC-43 synthetic legacy compatibility fixture now includes the `SE` records its `PG.input.resolved_event_id` fields already referenced, so compatibility advisories are the only remaining diagnostics.
+
+## Verification Result
+
+Passed:
+
+1. `cd tools/validators && npm run build`
+2. `cd tools/validators && node --test dist/tests/integration/spec93-capstone.test.js`
+3. `cd tools/validators && node --test dist/tests/integration/spec43-midstory-introduction.test.js`
+4. `cd tools/validators && npm test` — 1057 tests passed.
+5. `cd tools/world-mcp && npm run build`
+6. `cd tools/world-mcp && node --test dist/tests/integration/spec42-capstone.test.js`
+7. `cd tools/world-mcp && npm test` — 506 tests passed.
+8. Earlier same-iteration package lanes also passed before the final narrow patches: `tools/world-index npm test`, `tools/hooks npm test`, `tools/patch-engine npm test`, and `tools/story-explorer npm test`.
+
+## Deviations
+
+The §9 bootstrap→turn-cycle→scene-plan→scene-prose-attach flow remains documented as a manual dry-run runbook in the capstone header because these are LLM skill invocations with HARD-GATE/user-approval boundaries, not an executable package test. The automated capstone covers the mechanized sweep/schema/hash parts and the package suites cover the affected tool contracts.
