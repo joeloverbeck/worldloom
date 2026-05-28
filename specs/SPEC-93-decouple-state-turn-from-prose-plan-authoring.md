@@ -4,7 +4,7 @@
 **Date:** 2026-05-28
 **Classification:** story-canon-related (changes `branching-story-bootstrap`/`branching-story-turn-cycle` state-turn flow, the `PG` schema and its state-hash payload, the nine shared hard gates, six page-plan-era validators, Hook 6/7, `branching-story-prose-attach`; amends FOUNDATIONS §Story Bundles §4/§4a, Rule 1, §9, and the shared story state contract §7/§8).
 **Depends on:** **SPEC-92** (the scene render layer must exist to carry prose before page-plan authoring is removed). Land SPEC-92 first.
-**Related:** `specs/IMPLEMENTATION-ORDER.md`, `specs/SPEC-92-scene-range-prose-rendering-layer.md`; supersedes the deferral in **archived SPEC-72 §3** ("Removing `plan_hash` from `PG` or from the `state_hash` payload … would force a `snapshot_replay_equality` discontinuity clause").
+**Related:** `specs/IMPLEMENTATION-ORDER.md`, `archive/specs/SPEC-92-scene-range-prose-rendering-layer.md`; supersedes the deferral in **archived SPEC-72 §3** ("Removing `plan_hash` from `PG` or from the `state_hash` payload … would force a `snapshot_replay_equality` discontinuity clause").
 **Source:** triage of `reports/scene-prose-planning-first-iteration.md` (2026-05-28), Approach B. User clarifications: (a) as sole author they want plans freely editable with zero state coupling and get no value from plan hashes ([[feedback-author-rejects-hash-coupling]]); (b) in practice the model authors the page plan *first* and reads the prior page's prose **plan** (not the authoritative story records) to compute the state delta — real contamination of state reasoning by a render artifact.
 
 ---

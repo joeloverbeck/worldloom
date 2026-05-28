@@ -1,6 +1,6 @@
 # SPEC-92 — Scene-Range Prose Rendering Layer
 
-**Status:** draft
+**Status:** COMPLETED
 **Date:** 2026-05-28
 **Classification:** story-canon-related (introduces a new story-bundle record class `SCN`, two story-pipeline skills, story-bundle directories, a patch-engine op, world-index enumeration + edges, and story-scope validators; amends FOUNDATIONS §Story Bundles and the shared story state contract).
 **Depends on:** none for logic; additive to the existing page-plan pipeline. Pairs with **SPEC-93** (which removes page-plan authoring and retires the page-plan-era surfaces *after* this layer can carry prose). Land SPEC-92 first.
@@ -180,3 +180,22 @@ Per-package (no workspace; per-package npm — verified): from each package dir 
 1. **Root scene at bootstrap?** Default: **no** — `SCN-1` is created only when the author invokes `branching-story-scene-plan` (keeps bootstrap state-only, report Q5/15.5).
 2. **`SCN` vs `RU` prefix?** Default: **`SCN`**, scene-only. Non-scene render kinds (prologue / interstitial / recap) are deferred to a future spec that adds a `render_kind` field when a concrete consumer exists (report §8).
 3. **Does scene attach emit an audit `SE`?** Default: **no** (report Open Question 15.3).
+
+## Outcome
+
+Completed: 2026-05-28
+
+Implemented and archived through tickets `archive/tickets/SPEC92SCERANPRO-001.md` through `archive/tickets/SPEC92SCERANPRO-011.md`.
+
+The additive scene-range prose rendering layer now exists across the shared story contracts, validators, patch engine, world index, world MCP retrieval/allocation surfaces, scene planning and scene prose attach skills, FOUNDATIONS, workflow docs, and the capstone integration test. `SCN` is a non-authoritative story-bundle render-membership record over committed `PG` ranges; scene plans and scene prose remain direct-write render artifacts; scene attach writes receipt/prose surfaces and does not mutate `PG` or other `_source` state.
+
+Final verification:
+
+1. `cd tools/validators && npm run build` — PASS.
+2. `cd tools/validators && node --test dist/tests/integration/spec92-scene-layer-capstone.test.js` — PASS: 3 capstone subtests passed.
+3. `cd tools/validators && npm test` — PASS: full validators package rebuilt and passed 1134 tests.
+4. `cd tools/world-index && npm test` — PASS: package test runner passed 135 tests.
+5. `cd tools/patch-engine && npm test` — PASS: package build + test passed 106 tests.
+6. `cd tools/world-mcp && npm test` — PASS: package build + test passed 516 tests.
+
+Deviations: the LLM-owned `branching-story-scene-plan` and `branching-story-scene-prose-attach` flow is documented as a manual temp-root runbook in the capstone test rather than executed from `node:test`; deterministic package surfaces cover coexistence, schema/validator composition, retrieval/allocation, and no-state-mutation assertions.

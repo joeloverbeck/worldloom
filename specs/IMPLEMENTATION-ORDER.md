@@ -105,7 +105,9 @@ These were open decisions before SPEC-87 implementation. Final SPEC-87 state:
 
 # Scene-Range Rendering Track (SPEC-92 → SPEC-93)
 
-**Origin**: triage of `reports/scene-prose-planning-first-iteration.md` (2026-05-28), Approach B (engine change now; scene-first Story Explorer deferred). Decision record: SPEC-92 + SPEC-93 themselves — no separate `docs/triage/` file, because the triage produced specs directly and the reassessment lives in their §1/§Source sections.
+**Origin**: triage of `reports/scene-prose-planning-first-iteration.md` (2026-05-28), Approach B (engine change now; scene-first Story Explorer deferred). Decision record: archived SPEC-92 + active SPEC-93 themselves — no separate `docs/triage/` file, because the triage produced specs directly and the reassessment lives in their §1/§Source sections.
+
+**Status note (2026-05-28):** SPEC-92 is complete and archived at `archive/specs/SPEC-92-scene-range-prose-rendering-layer.md`; SPEC-93 remains the active subtractive follow-up.
 
 Replaces the per-`PG` prose render unit with a scene/render-unit layer. `PG`s remain authoritative causal ticks; scenes are a derived, non-authoritative literary rendering over contiguous `PG` ranges.
 
@@ -113,7 +115,7 @@ Replaces the per-`PG` prose render unit with a scene/render-unit layer. `PG`s re
 
 | # | Spec | Subject | Depends on |
 |---|---|---|---|
-| 1 | SPEC-92 | Scene-range render layer (**additive**): `SCN` record, `branching-story-scene-plan` + `branching-story-scene-prose-attach` skills, scene directories, world-index enumeration + edges, scene validators + `scene-prose-receipt.schema.json`, FOUNDATIONS/contract amendments | — (additive; coexists with the page-plan pipeline) |
+| 1 | SPEC-92 (archived: `archive/specs/SPEC-92-scene-range-prose-rendering-layer.md`) | Scene-range render layer (**additive**): `SCN` record, `branching-story-scene-plan` + `branching-story-scene-prose-attach` skills, scene directories, world-index enumeration + edges, scene validators + `scene-prose-receipt.schema.json`, FOUNDATIONS/contract amendments | — (additive; coexists with the page-plan pipeline) |
 | 2 | SPEC-93 | Decouple state turn from page-plan authoring + remove plan-hash coupling (**subtractive**): turn-cycle/bootstrap stop authoring page plans and reason from prior story records; remove `plan_hash`/`prose_plan_path` from `PG` with a `snapshot_replay_equality` discontinuity clause; rehome gates 7/9; retire 6 page-plan validators + Hook 6/7 + `branching-story-prose-attach` | SPEC-92 |
 
 **Ordering rationale**: SPEC-92 is purely additive — it stands up the scene pipeline alongside the existing page-plan pipeline. SPEC-93 is subtractive and removes page-plan authoring, so it must land *after* SPEC-92 so the scene layer can carry prose before the page plan is removed. SPEC-93 can technically stand alone (the state engine needs no prose to function), but landing SPEC-92 first avoids a window where committed pages have no renderer-facing artifact at all.
