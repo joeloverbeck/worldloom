@@ -219,6 +219,26 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "scene_prose_receipt_schema_compliance"
     );
     assert.equal(sceneProseReceiptExecution?.status, "skipped");
+    const sceneRangeExecution = result.executions.find(
+      (execution) => execution.name === "scene_range_integrity"
+    );
+    assert.equal(sceneRangeExecution?.status, "skipped");
+    const scenePlanStructuralExecution = result.executions.find(
+      (execution) => execution.name === "scene_plan_structural"
+    );
+    assert.equal(scenePlanStructuralExecution?.status, "skipped");
+    const scenePlanVerbatimExecution = result.executions.find(
+      (execution) => execution.name === "scene_plan_verbatim_section_integrity"
+    );
+    assert.equal(scenePlanVerbatimExecution?.status, "skipped");
+    const scenePlanBodyCleanlinessExecution = result.executions.find(
+      (execution) => execution.name === "scene_plan_body_engine_vocabulary_cleanliness"
+    );
+    assert.equal(scenePlanBodyCleanlinessExecution?.status, "skipped");
+    const scnNarrativeShapeExecution = result.executions.find(
+      (execution) => execution.name === "scn_no_narrative_shape_language"
+    );
+    assert.equal(scnNarrativeShapeExecution?.status, "skipped");
     const proseReceiptHashExecution = result.executions.find(
       (execution) => execution.name === "prose_receipt_hash_integrity"
     );
@@ -385,6 +405,11 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== proposalPackageExecution &&
         row !== proseReceiptExecution &&
         row !== sceneProseReceiptExecution &&
+        row !== sceneRangeExecution &&
+        row !== scenePlanStructuralExecution &&
+        row !== scenePlanVerbatimExecution &&
+        row !== scenePlanBodyCleanlinessExecution &&
+        row !== scnNarrativeShapeExecution &&
         row !== proseReceiptHashExecution &&
         row !== proseReceiptStcharExecution &&
         row !== storyKernelCastBindExecution &&

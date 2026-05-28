@@ -50,6 +50,11 @@ import { secretIntroductionAnchorIntegrity } from "../structural/secret-introduc
 import { secretCarrierExistence } from "../structural/secret-carrier-existence.js";
 import { secretMysteryFirewallCompliance } from "../structural/secret-mystery-firewall-compliance.js";
 import { sceneProseReceiptSchemaCompliance } from "../structural/scene-prose-receipt-schema-compliance.js";
+import { sceneRangeIntegrity } from "../structural/scene-range-integrity.js";
+import { scenePlanStructural } from "../structural/scene-plan-structural.js";
+import { scenePlanVerbatimSectionIntegrity } from "../structural/scene-plan-verbatim-section-integrity.js";
+import { scenePlanBodyEngineVocabularyCleanliness } from "../structural/scene-plan-body-engine-vocabulary-cleanliness.js";
+import { scnNoNarrativeShapeLanguage } from "../structural/scn-no-narrative-shape-language.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { sltGroundingMinimalIntegrity } from "../structural/slt-grounding-minimal-integrity.js";
@@ -194,6 +199,11 @@ export const structuralValidators: readonly Validator[] = [
   proposalPackageShape,
   proseReceiptSchemaCompliance,
   sceneProseReceiptSchemaCompliance,
+  sceneRangeIntegrity,
+  scenePlanStructural,
+  scenePlanVerbatimSectionIntegrity,
+  scenePlanBodyEngineVocabularyCleanliness,
+  scnNoNarrativeShapeLanguage,
   proseReceiptHashIntegrity,
   proseReceiptStcharIntegrity,
   storyKernelCastBindListIntegrity,

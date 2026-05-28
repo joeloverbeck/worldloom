@@ -23,6 +23,7 @@ export const RECORD_ID_PREFIXES = [
   "CLK",
   "STSEC",
   "STQ",
+  "SCN",
   "M",
   "CF",
   "CH",

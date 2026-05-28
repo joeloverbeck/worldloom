@@ -148,6 +148,7 @@ test("engine vocabulary token source covers SPEC-91 record class prefixes", () =
       "CLK",
       "STSEC",
       "STQ",
+      "SCN",
       "M",
       "CF",
       "CH",
