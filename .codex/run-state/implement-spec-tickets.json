@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-93-decouple-state-turn-from-prose-plan-authoring.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC93DECSTATUR-004.md",
+  "last_ticket": "archive/tickets/SPEC93DECSTATUR-005.md",
   "last_result": "completed_archived",
-  "last_work_commit": "2240b408d13509ea96d60c0982387f49c1952beb",
+  "last_work_commit": "3f655041000312a36f53e8206ba7801c130c2d4b",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC93DECSTATUR-005.md",
+  "next_target": "tickets/SPEC93DECSTATUR-006.md",
   "queue": [
-    "tickets/SPEC93DECSTATUR-005.md",
     "tickets/SPEC93DECSTATUR-006.md",
     "tickets/SPEC93DECSTATUR-007.md",
     "tickets/SPEC93DECSTATUR-008.md",
@@ -24,7 +23,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "tools/validators npm test broad lane red outside SPEC93DECSTATUR-004 owned seam: 1052 pass / 2 fail, representative spec43-midstory-introduction missing SE-1/SE-2 drift; focused validators and world-mcp proofs plus world-mcp npm test passed, details in archive/tickets/SPEC93DECSTATUR-004.md",
+  "proof_state": null,
   "dirty_state": "unrelated dirty paths remain: .claude/skills/mcp-integration-audit/SKILL.md, .claude/skills/skill-audit/references/audit-execution-discipline.md, .claude/skills/spec-to-tickets/SKILL.md; expected ignored package artifacts remain in tools/validators/dist, tools/validators/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, tools/world-mcp/node_modules",
   "updated_at": "2026-05-28"
 }
