@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-92-scene-range-prose-rendering-layer.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC92SCERANPRO-002.md",
+  "last_ticket": "archive/tickets/SPEC92SCERANPRO-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "2104bf89fa27fc77e92e55742c97970c6b839e90",
+  "last_work_commit": "081f7c2d792cb64c5c441759eba1f4e309b53106",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC92SCERANPRO-003.md",
+  "next_target": "tickets/SPEC92SCERANPRO-004.md",
   "queue": [
-    "tickets/SPEC92SCERANPRO-003.md",
     "tickets/SPEC92SCERANPRO-004.md",
     "tickets/SPEC92SCERANPRO-005.md",
     "tickets/SPEC92SCERANPRO-006.md",
@@ -25,6 +24,6 @@
   "blocked": false,
   "blocker": null,
   "proof_state": null,
-  "dirty_state": "unrelated dirty path remains: .claude/skills/spec-to-tickets/SKILL.md; expected ignored artifacts remain in tools/validators/dist and tools/validators/node_modules",
+  "dirty_state": "tracked clean after state commit; expected ignored package artifacts remain in tools/patch-engine/dist, tools/patch-engine/node_modules, tools/validators/dist, tools/validators/node_modules, tools/world-index/dist, tools/world-index/node_modules, tools/world-mcp/.secret, tools/world-mcp/dist, tools/world-mcp/node_modules",
   "updated_at": "2026-05-28"
 }
