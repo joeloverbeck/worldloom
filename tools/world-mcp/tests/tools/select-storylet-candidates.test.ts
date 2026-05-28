@@ -97,7 +97,7 @@ function storyletNode(recordId: string) {
 }
 
 function buildCandidateWorld(root: string): void {
-  const storylets = Array.from({ length: 9 }, (_, index) => storyletNode(`SLT-${index + 1}`));
+  const storylets = Array.from({ length: 10 }, (_, index) => storyletNode(`SLT-${index + 1}`));
   seedWorld(root, {
     worldSlug: WORLD,
     nodes: [
@@ -144,28 +144,33 @@ function buildCandidateWorld(root: string): void {
       sltProjection("SLT-6", {}),
       sltProjection("SLT-7", {}),
       sltProjection("SLT-8", { mysteryAuthority: "canon_candidate" }),
-      sltProjection("SLT-9", { cooldown: 2 })
+      sltProjection("SLT-9", { cooldown: 2 }),
+      sltProjection("SLT-10", {})
     ],
     edges: [
       ...["SLT-1", "SLT-2", "SLT-3", "SLT-5", "SLT-6", "SLT-7", "SLT-8", "SLT-9"].map((id) =>
         edge(id, "storylet_compatible_driver", "player_action")
       ),
+      edge("SLT-10", "storylet_compatible_driver", "player_action"),
       edge("SLT-4", "storylet_compatible_driver", "npc_action"),
       ...["SLT-1", "SLT-3", "SLT-4", "SLT-6", "SLT-7", "SLT-8", "SLT-9"].map((id) =>
         edge(id, "storylet_action_family", "investigate")
       ),
       edge("SLT-2", "storylet_action_family", "communicate"),
       edge("SLT-5", "storylet_action_family", "harm"),
+      edge("SLT-10", "storylet_action_family", "investigate"),
       ...["SLT-1", "SLT-3", "SLT-4", "SLT-5", "SLT-7", "SLT-8", "SLT-9"].map((id) =>
         edge(id, "storylet_predicate_pred", "record_active")
       ),
       edge("SLT-2", "storylet_predicate_pred", "emotion_active"),
       edge("SLT-6", "storylet_predicate_pred", "record_active"),
+      edge("SLT-10", "storylet_predicate_pred", ""),
       ...["SLT-1", "SLT-3", "SLT-4", "SLT-5", "SLT-7", "SLT-8", "SLT-9"].map((id) =>
         edge(id, "storylet_predicate_class", "story_character_authority_record")
       ),
       edge("SLT-2", "storylet_predicate_class", "story_emotion_record"),
       edge("SLT-6", "storylet_predicate_class", "story_secret_record"),
+      edge("SLT-10", "storylet_predicate_class", "story_character_authority_record"),
       edge("SLT-2", "storylet_predicate_ref", "STEMO-1"),
       edge("SLT-7", "storylet_predicate_ref", "STOBJ-99")
     ]
@@ -216,6 +221,37 @@ function buildExistentialCandidateWorld(root: string): void {
   });
 }
 
+function buildPredicateClassCapWorld(root: string): void {
+  const sltIds = ["SLT-1", "SLT-2", "SLT-3", "SLT-4", "SLT-5"];
+  seedWorld(root, {
+    worldSlug: WORLD,
+    nodes: [
+      storyNode(
+        "PG-1",
+        "page_record",
+        [
+          "id: PG-1",
+          "branch_id: BR-1",
+          "branch_path: [PG-1]",
+          "state_snapshot:",
+          "  active_records:",
+          "    STCHAR: [STCHAR-1]",
+          ""
+        ].join("\n")
+      ),
+      storyNode("STCHAR-1", "story_character_authority_record", "---\nid: STCHAR-1\n---\n"),
+      ...sltIds.map((id) => storyletNode(id))
+    ],
+    sltProjections: sltIds.map((id) => sltProjection(id, {})),
+    edges: sltIds.flatMap((id) => [
+      edge(id, "storylet_compatible_driver", "player_action"),
+      edge(id, "storylet_action_family", "investigate"),
+      edge(id, "storylet_predicate_pred", "record_active"),
+      edge(id, "storylet_predicate_class", "story_secret_record")
+    ])
+  });
+}
+
 test("selectStoryletCandidates filters indexed SLT projections and returns only projection records", async () => {
   const root = createTempRepoRoot();
 
@@ -241,15 +277,88 @@ test("selectStoryletCandidates filters indexed SLT projections and returns only 
 
     assert.ok(!("code" in result));
     assert.deepEqual(result.filter_trace, {
-      pool_total: 9,
-      after_scope: 8,
-      after_driver_kind: 7,
-      after_action_family: 6,
+      pool_total: 10,
+      after_scope: 9,
+      after_driver_kind: 8,
+      after_action_family: 7,
       after_predicate_shape: 6,
       after_predicate_class: 5,
       after_source_record_id: 4,
       after_mystery_policy: 3,
       after_cooldown: 2,
+      scope_rejected_samples: [
+        {
+          slt_id: "SLT-3",
+          reason: "candidate scope 'branch_scoped' does not match parent page branch context",
+          evidence: {
+            slt_scope_visibility: "branch_scoped",
+            branch_id: "BR-2",
+            branch_path_prefix: null,
+            parent_branch_id: "BR-1",
+            parent_branch_path: ["PG-1", "PG-2"]
+          }
+        }
+      ],
+      driver_kind_rejected_samples: [
+        {
+          slt_id: "SLT-4",
+          reason: "candidate compatible turn drivers do not include requested driver kind",
+          evidence: {
+            compatible_drivers: ["npc_action"],
+            requested_driver_kind: "player_action"
+          }
+        }
+      ],
+      action_family_rejected_samples: [
+        {
+          slt_id: "SLT-5",
+          reason: "candidate action families do not intersect requested intent action families",
+          evidence: {
+            candidate_action_families: ["harm"],
+            requested_action_families: ["investigate", "communicate"]
+          }
+        }
+      ],
+      predicate_shape_rejected_samples: [
+        {
+          slt_id: "SLT-10",
+          reason: "no concrete predicate names indexed",
+          evidence: {
+            predicate_pred_names: [""]
+          }
+        }
+      ],
+      predicate_class_rejected_samples: [
+        {
+          slt_id: "SLT-6",
+          reason: "indexed predicate classes do not intersect requested or active record classes",
+          evidence: {
+            indexed_classes: ["story_secret_record"],
+            requested_classes: ["story_character_authority_record", "story_emotion_record"]
+          }
+        }
+      ],
+      source_record_id_rejected_samples: [
+        {
+          slt_id: "SLT-7",
+          reason: "indexed predicate source refs are not resolvable in the current world/story index",
+          evidence: {
+            indexed_source_record_ids: ["STOBJ-99"],
+            missing_source_record_ids: ["STOBJ-99"],
+            requested_grounding_record_ids: []
+          }
+        }
+      ],
+      mystery_policy_rejected_samples: [
+        {
+          slt_id: "SLT-8",
+          reason: "candidate mystery policy authority is not present in unresolved parent-page mystery claims",
+          evidence: {
+            forbidden_mystery_resolutions: ["canon_candidate"],
+            unresolved_mystery_claims: ["apparent"]
+          }
+        }
+      ],
       cooldown_active_samples: [
         {
           slt_id: "SLT-9",
@@ -305,7 +414,88 @@ test("selectStoryletCandidates keeps existential SLTs whose predicate classes in
 
     assert.ok(!("code" in result));
     assert.equal(result.filter_trace.after_predicate_class, 1);
+    assert.deepEqual(result.filter_trace.predicate_class_rejected_samples, []);
     assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-42"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates samples predicate-class rejection evidence for existential SLTs", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildExistentialCandidateWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-6",
+        turn_driver: {
+          kind: "npc_action",
+          initiator: "STENT-2",
+          driver_records: ["STCHAR-1"]
+        },
+        intent_signature: {
+          action_families: ["communicate"],
+          grounding_record_classes: ["story_character_authority_record"]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.filter_trace.after_predicate_class, 0);
+    assert.deepEqual(result.shortlisted_candidate_ids, []);
+    assert.deepEqual(result.filter_trace.predicate_class_rejected_samples, [
+      {
+        slt_id: "SLT-42",
+        reason: "indexed predicate classes do not intersect requested or active record classes",
+        evidence: {
+          indexed_classes: [
+            "intention_record",
+            "relationship_record_story",
+            "story_emotion_record",
+            "story_question_record"
+          ],
+          requested_classes: ["story_character_authority_record"]
+        }
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates caps predicate-class rejection samples at three entries", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildPredicateClassCapWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-1",
+        turn_driver: {
+          kind: "player_action",
+          driver_records: ["STCHAR-1"]
+        },
+        intent_signature: {
+          action_families: ["investigate"]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.filter_trace.after_predicate_class, 0);
+    assert.deepEqual(
+      result.filter_trace.predicate_class_rejected_samples.map((sample) => sample.slt_id),
+      ["SLT-1", "SLT-2", "SLT-3"]
+    );
   } finally {
     destroyTempRepoRoot(root);
   }

@@ -48,7 +48,20 @@ export interface StoryletCandidateFilterTrace {
   after_source_record_id: number;
   after_mystery_policy: number;
   after_cooldown: number;
+  scope_rejected_samples: ReadonlyArray<StageRejectedSample>;
+  driver_kind_rejected_samples: ReadonlyArray<StageRejectedSample>;
+  action_family_rejected_samples: ReadonlyArray<StageRejectedSample>;
+  predicate_shape_rejected_samples: ReadonlyArray<StageRejectedSample>;
+  predicate_class_rejected_samples: ReadonlyArray<StageRejectedSample>;
+  source_record_id_rejected_samples: ReadonlyArray<StageRejectedSample>;
+  mystery_policy_rejected_samples: ReadonlyArray<StageRejectedSample>;
   cooldown_active_samples: ReadonlyArray<CooldownActiveSample>;
+}
+
+export interface StageRejectedSample {
+  slt_id: string;
+  reason: string;
+  evidence: Record<string, unknown>;
 }
 
 export interface StoryletCandidateProjectionRecord {
@@ -351,6 +364,20 @@ function matchesScope(candidate: Candidate, page: PageState): boolean {
   }
 }
 
+function scopeRejectedSample(candidate: Candidate, page: PageState, storySlug: string): StageRejectedSample {
+  return {
+    slt_id: displayStoryRecordId(candidate.row.node_id, storySlug),
+    reason: `candidate scope '${candidate.row.slt_scope_visibility ?? "unknown"}' does not match parent page branch context`,
+    evidence: {
+      slt_scope_visibility: candidate.row.slt_scope_visibility,
+      branch_id: candidate.row.slt_scope_branch_id,
+      branch_path_prefix: candidate.row.slt_scope_branch_path_prefix,
+      parent_branch_id: page.branchId,
+      parent_branch_path: page.branchPath
+    }
+  };
+}
+
 function intersects(left: readonly string[], right: ReadonlySet<string> | readonly string[]): boolean {
   const rightSet: ReadonlySet<string> = right instanceof Set ? right : new Set(right);
   return left.some((value) => rightSet.has(value));
@@ -358,6 +385,18 @@ function intersects(left: readonly string[], right: ReadonlySet<string> | readon
 
 function matchesActionFamily(candidate: Candidate, actionFamilies: readonly string[] | undefined): boolean {
   return actionFamilies === undefined || actionFamilies.length === 0 || intersects(candidate.actionFamilies, actionFamilies);
+}
+
+function predicateClassEvidence(
+  candidate: Candidate,
+  page: PageState,
+  groundingRecordClasses: readonly string[] | undefined
+): { indexed_classes: string[]; requested_classes: string[] } {
+  const requestedClasses = groundingRecordClasses ?? [];
+  return {
+    indexed_classes: candidate.predicateClasses,
+    requested_classes: requestedClasses.length > 0 ? [...requestedClasses] : [...page.activeRecordClasses]
+  };
 }
 
 function matchesPredicateClass(
@@ -370,6 +409,59 @@ function matchesPredicateClass(
     requestedClasses.length > 0 ? new Set(requestedClasses) : page.activeRecordClasses;
 
   return candidate.predicateClasses.length === 0 || intersects(candidate.predicateClasses, activeOrRequested);
+}
+
+function sourceRecordIdRejectionSample(
+  db: Database.Database,
+  args: SelectStoryletCandidatesArgs,
+  candidate: Candidate
+): StageRejectedSample | null {
+  const missingSourceRecordIds = candidate.sourceRecordIds.filter(
+    (recordId) => !sourceRefExists(db, args, recordId)
+  );
+  if (missingSourceRecordIds.length > 0) {
+    return {
+      slt_id: displayStoryRecordId(candidate.row.node_id, args.story_slug),
+      reason: "indexed predicate source refs are not resolvable in the current world/story index",
+      evidence: {
+        indexed_source_record_ids: candidate.sourceRecordIds,
+        missing_source_record_ids: missingSourceRecordIds,
+        requested_grounding_record_ids: args.intent_signature?.grounding_record_ids ?? []
+      }
+    };
+  }
+
+  if (
+    candidate.row.slt_scope_visibility === "global_author_pool" &&
+    candidate.sourceRecordIds.some((recordId) => isStoryLocalRecordId(recordId))
+  ) {
+    return {
+      slt_id: displayStoryRecordId(candidate.row.node_id, args.story_slug),
+      reason: "global author-pool storylet carries story-local exact source refs",
+      evidence: {
+        indexed_source_record_ids: candidate.sourceRecordIds,
+        requested_grounding_record_ids: args.intent_signature?.grounding_record_ids ?? []
+      }
+    };
+  }
+
+  const groundingRecordIds = args.intent_signature?.grounding_record_ids ?? [];
+  if (
+    groundingRecordIds.length > 0 &&
+    candidate.sourceRecordIds.length > 0 &&
+    !intersects(candidate.sourceRecordIds, groundingRecordIds)
+  ) {
+    return {
+      slt_id: displayStoryRecordId(candidate.row.node_id, args.story_slug),
+      reason: "indexed source refs do not intersect requested grounding record ids",
+      evidence: {
+        indexed_source_record_ids: candidate.sourceRecordIds,
+        requested_grounding_record_ids: groundingRecordIds
+      }
+    };
+  }
+
+  return null;
 }
 
 function sourceRefExists(db: Database.Database, args: SelectStoryletCandidatesArgs, recordId: string): boolean {
@@ -388,42 +480,22 @@ function sourceRefExists(db: Database.Database, args: SelectStoryletCandidatesAr
   return row !== undefined;
 }
 
-function matchesSourceRecordIds(
-  db: Database.Database,
-  args: SelectStoryletCandidatesArgs,
-  candidate: Candidate
-): boolean {
-  if (!candidate.sourceRecordIds.every((recordId) => sourceRefExists(db, args, recordId))) {
-    return false;
-  }
-
-  // Defensive belt-and-suspenders: rejects all story-bundle prefixes rather than
-  // honoring bundle_genesis_record per validator-layer isBranchLocal; tracked in
-  // specs/IMPLEMENTATION-ORDER.md §Out-of-scope until a real fixture trips it.
-  if (
-    candidate.row.slt_scope_visibility === "global_author_pool" &&
-    candidate.sourceRecordIds.some((recordId) => isStoryLocalRecordId(recordId))
-  ) {
-    return false;
-  }
-
-  const groundingRecordIds = args.intent_signature?.grounding_record_ids ?? [];
-  if (groundingRecordIds.length === 0) {
-    return true;
-  }
-
-  // Existential-predicate SLTs carry no exact record refs at authoring time; the
-  // turn-cycle evaluator binds those aliases against active records later.
-  if (candidate.sourceRecordIds.length === 0) {
-    return true;
-  }
-
-  return intersects(candidate.sourceRecordIds, groundingRecordIds);
-}
-
 function matchesMysteryPolicy(candidate: Candidate, page: PageState): boolean {
   const authority = candidate.row.slt_mystery_policy_allowed_authority;
   return authority === null || authority === "none" || page.unresolvedMysteryAuthorities.has(authority);
+}
+
+function mysteryPolicyRejectedSample(candidate: Candidate, page: PageState, storySlug: string): StageRejectedSample {
+  return {
+    slt_id: displayStoryRecordId(candidate.row.node_id, storySlug),
+    reason: "candidate mystery policy authority is not present in unresolved parent-page mystery claims",
+    evidence: {
+      forbidden_mystery_resolutions: candidate.row.slt_mystery_policy_allowed_authority === null
+        ? []
+        : [candidate.row.slt_mystery_policy_allowed_authority],
+      unresolved_mystery_claims: [...page.unresolvedMysteryAuthorities]
+    }
+  };
 }
 
 function loadSelectedStoryletPagesByBranch(
@@ -576,6 +648,12 @@ function projectionRecord(candidate: Candidate, storySlug: string): StoryletCand
   };
 }
 
+function pushSample(samples: StageRejectedSample[], sample: StageRejectedSample): void {
+  if (samples.length < 3) {
+    samples.push(sample);
+  }
+}
+
 async function selectStoryletCandidatesImpl(
   args: SelectStoryletCandidatesArgs
 ): Promise<SelectStoryletCandidatesResponse | McpError> {
@@ -607,44 +685,120 @@ async function selectStoryletCandidatesImpl(
       after_source_record_id: 0,
       after_mystery_policy: 0,
       after_cooldown: 0,
+      scope_rejected_samples: [],
+      driver_kind_rejected_samples: [],
+      action_family_rejected_samples: [],
+      predicate_shape_rejected_samples: [],
+      predicate_class_rejected_samples: [],
+      source_record_id_rejected_samples: [],
+      mystery_policy_rejected_samples: [],
       cooldown_active_samples: []
     };
 
     const allCandidates = buildCandidates(opened.db, args.world_slug, args.story_slug);
     trace.pool_total = allCandidates.length;
 
-    const afterScope = allCandidates.filter((candidate) => matchesScope(candidate, page));
+    const scopeRejectedSamples: StageRejectedSample[] = [];
+    const afterScope = allCandidates.filter((candidate) => {
+      if (matchesScope(candidate, page)) {
+        return true;
+      }
+      pushSample(scopeRejectedSamples, scopeRejectedSample(candidate, page, args.story_slug));
+      return false;
+    });
     trace.after_scope = afterScope.length;
+    trace.scope_rejected_samples = scopeRejectedSamples;
 
-    const afterDriverKind = afterScope.filter((candidate) =>
-      candidate.compatibleDrivers.includes(args.turn_driver.kind)
-    );
+    const driverKindRejectedSamples: StageRejectedSample[] = [];
+    const afterDriverKind = afterScope.filter((candidate) => {
+      if (candidate.compatibleDrivers.includes(args.turn_driver.kind)) {
+        return true;
+      }
+      pushSample(driverKindRejectedSamples, {
+        slt_id: displayStoryRecordId(candidate.row.node_id, args.story_slug),
+        reason: "candidate compatible turn drivers do not include requested driver kind",
+        evidence: {
+          compatible_drivers: candidate.compatibleDrivers,
+          requested_driver_kind: args.turn_driver.kind
+        }
+      });
+      return false;
+    });
     trace.after_driver_kind = afterDriverKind.length;
+    trace.driver_kind_rejected_samples = driverKindRejectedSamples;
 
-    const afterActionFamily = afterDriverKind.filter((candidate) =>
-      matchesActionFamily(candidate, args.intent_signature?.action_families)
-    );
+    const actionFamilyRejectedSamples: StageRejectedSample[] = [];
+    const afterActionFamily = afterDriverKind.filter((candidate) => {
+      if (matchesActionFamily(candidate, args.intent_signature?.action_families)) {
+        return true;
+      }
+      pushSample(actionFamilyRejectedSamples, {
+        slt_id: displayStoryRecordId(candidate.row.node_id, args.story_slug),
+        reason: "candidate action families do not intersect requested intent action families",
+        evidence: {
+          candidate_action_families: candidate.actionFamilies,
+          requested_action_families: args.intent_signature?.action_families ?? []
+        }
+      });
+      return false;
+    });
     trace.after_action_family = afterActionFamily.length;
+    trace.action_family_rejected_samples = actionFamilyRejectedSamples;
 
-    const afterPredicateShape = afterActionFamily.filter(
-      (candidate) => candidate.predicatePreds.length === 0 || candidate.predicatePreds.some((pred) => pred.length > 0)
-    );
+    const predicateShapeRejectedSamples: StageRejectedSample[] = [];
+    const afterPredicateShape = afterActionFamily.filter((candidate) => {
+      if (candidate.predicatePreds.length === 0 || candidate.predicatePreds.some((pred) => pred.length > 0)) {
+        return true;
+      }
+      pushSample(predicateShapeRejectedSamples, {
+        slt_id: displayStoryRecordId(candidate.row.node_id, args.story_slug),
+        reason: "no concrete predicate names indexed",
+        evidence: {
+          predicate_pred_names: candidate.predicatePreds
+        }
+      });
+      return false;
+    });
     trace.after_predicate_shape = afterPredicateShape.length;
+    trace.predicate_shape_rejected_samples = predicateShapeRejectedSamples;
 
-    const afterPredicateClass = afterPredicateShape.filter((candidate) =>
-      matchesPredicateClass(candidate, page, args.intent_signature?.grounding_record_classes)
-    );
+    const predicateClassRejectedSamples: StageRejectedSample[] = [];
+    const afterPredicateClass = afterPredicateShape.filter((candidate) => {
+      if (matchesPredicateClass(candidate, page, args.intent_signature?.grounding_record_classes)) {
+        return true;
+      }
+      pushSample(predicateClassRejectedSamples, {
+        slt_id: displayStoryRecordId(candidate.row.node_id, args.story_slug),
+        reason: "indexed predicate classes do not intersect requested or active record classes",
+        evidence: predicateClassEvidence(candidate, page, args.intent_signature?.grounding_record_classes)
+      });
+      return false;
+    });
     trace.after_predicate_class = afterPredicateClass.length;
+    trace.predicate_class_rejected_samples = predicateClassRejectedSamples;
 
-    const afterSourceRecordId = afterPredicateClass.filter((candidate) =>
-      matchesSourceRecordIds(opened.db, args, candidate)
-    );
+    const sourceRecordIdRejectedSamples: StageRejectedSample[] = [];
+    const afterSourceRecordId = afterPredicateClass.filter((candidate) => {
+      const sample = sourceRecordIdRejectionSample(opened.db, args, candidate);
+      if (sample === null) {
+        return true;
+      }
+      pushSample(sourceRecordIdRejectedSamples, sample);
+      return false;
+    });
     trace.after_source_record_id = afterSourceRecordId.length;
+    trace.source_record_id_rejected_samples = sourceRecordIdRejectedSamples;
 
-    const afterMysteryPolicy = afterSourceRecordId.filter((candidate) =>
-      matchesMysteryPolicy(candidate, page)
-    );
+    const mysteryPolicyRejectedSamples: StageRejectedSample[] = [];
+    const afterMysteryPolicy = afterSourceRecordId.filter((candidate) => {
+      if (matchesMysteryPolicy(candidate, page)) {
+        return true;
+      }
+      pushSample(mysteryPolicyRejectedSamples, mysteryPolicyRejectedSample(candidate, page, args.story_slug));
+      return false;
+    });
     trace.after_mystery_policy = afterMysteryPolicy.length;
+    trace.mystery_policy_rejected_samples = mysteryPolicyRejectedSamples;
 
     const lastSelectedPagesByBranch = loadSelectedStoryletPagesByBranch(
       opened.db,
