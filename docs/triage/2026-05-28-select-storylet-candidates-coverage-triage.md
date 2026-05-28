@@ -13,7 +13,7 @@
 - `archive/tickets/STSELECT-003.md` — End-to-end indexer→selector regression coverage for production-shape existential-predicate storylet pools
 - `archive/tickets/STSELECT-004.md` — Regression coverage for `rankCandidates` urgency-banded round-robin, alphabetical move-family ordering, node-id tie-break, and `max_candidates` truncation order
 - `archive/tickets/STSELECT-005.md` — Regression coverage for branch/scope/cooldown boundary cases
-- `tickets/STSELECT-006.md` — Regression coverage for page-state, source-ref, and error-path boundary cases
+- `archive/tickets/STSELECT-006.md` — Regression coverage for page-state, source-ref, and error-path boundary cases
 - `archive/tickets/MCPENH-075.md` — Remove the declared-but-ignored `include_rejection_summary` flag
 
 **Triage origin**: triage flow producing 5 tickets (≥3 → companion triage file MANDATORY per `references/deliverable-classification.md` §Triage-file composition). **Source-item count**: 17 evaluated findings (5 accepts producing 5 tickets, 6 defers, 1 reject, 2 out-of-report adjustments, plus 3 ranking sub-cases bundled into STSELECT-004 and 4 boundary sub-cases bundled each into STSELECT-005 / STSELECT-006). The bundling factor (multiple sub-cases per ticket) reflects shared fixture machinery and shared FOUNDATIONS-principle alignment.

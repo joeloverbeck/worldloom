@@ -158,7 +158,10 @@ export interface ContextPacketStoryBundleContext {
       mystery_policy_rejected_samples: ReadonlyArray<{
         slt_id: string;
         reason: string;
-        evidence: Record<string, unknown>;
+        evidence: {
+          allowed_authority_classes: string[];
+          unresolved_mystery_claims: string[];
+        };
       }>;
       cooldown_active_samples: ReadonlyArray<{
         slt_id: string;

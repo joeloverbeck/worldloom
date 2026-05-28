@@ -53,7 +53,7 @@ export interface StoryletCandidateFilterTrace {
   predicate_shape_rejected_samples: ReadonlyArray<StageRejectedSample>;
   predicate_class_rejected_samples: ReadonlyArray<StageRejectedSample>;
   source_record_id_rejected_samples: ReadonlyArray<StageRejectedSample>;
-  mystery_policy_rejected_samples: ReadonlyArray<StageRejectedSample>;
+  mystery_policy_rejected_samples: ReadonlyArray<MysteryPolicyRejectedSample>;
   cooldown_active_samples: ReadonlyArray<CooldownActiveSample>;
 }
 
@@ -61,6 +61,15 @@ export interface StageRejectedSample {
   slt_id: string;
   reason: string;
   evidence: Record<string, unknown>;
+}
+
+export interface MysteryPolicyRejectedSample {
+  slt_id: string;
+  reason: string;
+  evidence: {
+    allowed_authority_classes: string[];
+    unresolved_mystery_claims: string[];
+  };
 }
 
 export interface StoryletCandidateProjectionRecord {
@@ -484,12 +493,12 @@ function matchesMysteryPolicy(candidate: Candidate, page: PageState): boolean {
   return authority === null || authority === "none" || page.unresolvedMysteryAuthorities.has(authority);
 }
 
-function mysteryPolicyRejectedSample(candidate: Candidate, page: PageState, storySlug: string): StageRejectedSample {
+function mysteryPolicyRejectedSample(candidate: Candidate, page: PageState, storySlug: string): MysteryPolicyRejectedSample {
   return {
     slt_id: displayStoryRecordId(candidate.row.node_id, storySlug),
     reason: "candidate mystery policy authority is not present in unresolved parent-page mystery claims",
     evidence: {
-      forbidden_mystery_resolutions: candidate.row.slt_mystery_policy_allowed_authority === null
+      allowed_authority_classes: candidate.row.slt_mystery_policy_allowed_authority === null
         ? []
         : [candidate.row.slt_mystery_policy_allowed_authority],
       unresolved_mystery_claims: [...page.unresolvedMysteryAuthorities]
@@ -653,6 +662,15 @@ function pushSample(samples: StageRejectedSample[], sample: StageRejectedSample)
   }
 }
 
+function pushMysteryPolicySample(
+  samples: MysteryPolicyRejectedSample[],
+  sample: MysteryPolicyRejectedSample
+): void {
+  if (samples.length < 3) {
+    samples.push(sample);
+  }
+}
+
 async function selectStoryletCandidatesImpl(
   args: SelectStoryletCandidatesArgs
 ): Promise<SelectStoryletCandidatesResponse | McpError> {
@@ -788,12 +806,12 @@ async function selectStoryletCandidatesImpl(
     trace.after_source_record_id = afterSourceRecordId.length;
     trace.source_record_id_rejected_samples = sourceRecordIdRejectedSamples;
 
-    const mysteryPolicyRejectedSamples: StageRejectedSample[] = [];
+    const mysteryPolicyRejectedSamples: MysteryPolicyRejectedSample[] = [];
     const afterMysteryPolicy = afterSourceRecordId.filter((candidate) => {
       if (matchesMysteryPolicy(candidate, page)) {
         return true;
       }
-      pushSample(mysteryPolicyRejectedSamples, mysteryPolicyRejectedSample(candidate, page, args.story_slug));
+      pushMysteryPolicySample(mysteryPolicyRejectedSamples, mysteryPolicyRejectedSample(candidate, page, args.story_slug));
       return false;
     });
     trace.after_mystery_policy = afterMysteryPolicy.length;

@@ -301,6 +301,68 @@ function buildPredicateClassCapWorld(root: string): void {
   });
 }
 
+function buildGlobalPoolStoryLocalSourceRefWorld(root: string): void {
+  seedWorld(root, {
+    worldSlug: WORLD,
+    nodes: [
+      storyNode(
+        "PG-SOURCE",
+        "page_record",
+        [
+          "id: PG-SOURCE",
+          "branch_id: BR-1",
+          "branch_path: [PG-SOURCE]",
+          "state_snapshot:",
+          "  active_records:",
+          "    STOBJ: [STOBJ-1]",
+          "  unresolved_mystery_claims: []",
+          ""
+        ].join("\n")
+      ),
+      storyNode("STOBJ-1", "story_object_record", "id: STOBJ-1\nstatus: active\n"),
+      storyletNode("SLT-77")
+    ],
+    sltProjections: [
+      sltProjection("SLT-77", {})
+    ],
+    edges: [
+      edge("SLT-77", "storylet_compatible_driver", "player_action"),
+      edge("SLT-77", "storylet_action_family", "investigate"),
+      edge("SLT-77", "storylet_predicate_pred", "record_active"),
+      edge("SLT-77", "storylet_predicate_class", "story_object_record"),
+      edge("SLT-77", "storylet_predicate_ref", "STOBJ-1")
+    ]
+  });
+}
+
+function buildMalformedSnapshotWorld(root: string, bodyLines: string[]): void {
+  seedWorld(root, {
+    worldSlug: WORLD,
+    nodes: [
+      storyNode("PG-MALFORMED", "page_record", [...bodyLines, ""].join("\n")),
+      storyletNode("SLT-88"),
+      storyletNode("SLT-89")
+    ],
+    sltProjections: [
+      sltProjection("SLT-88", { urgency: "high" }),
+      sltProjection("SLT-89", {
+        visibility: "branch_prefix_scoped",
+        branchId: "BR-1",
+        branchPrefix: ["PG-MALFORMED"],
+        urgency: "medium"
+      })
+    ],
+    edges: [
+      edge("SLT-88", "storylet_compatible_driver", "player_action"),
+      edge("SLT-88", "storylet_action_family", "investigate"),
+      edge("SLT-88", "storylet_predicate_pred", "record_active"),
+      edge("SLT-89", "storylet_compatible_driver", "player_action"),
+      edge("SLT-89", "storylet_action_family", "investigate"),
+      edge("SLT-89", "storylet_predicate_pred", "record_active")
+    ]
+  });
+}
+
 function buildRankingWorld(
   root: string,
   projections: Array<{
@@ -475,6 +537,187 @@ test("selectStoryletCandidates rejects malformed branch-prefix JSON without thro
   }
 });
 
+test("selectStoryletCandidates rejects global-pool SLTs that carry existing story-local source refs", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildGlobalPoolStoryLocalSourceRefWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-SOURCE",
+        turn_driver: {
+          kind: "player_action",
+          driver_records: ["STOBJ-1"]
+        },
+        intent_signature: {
+          action_families: ["investigate"],
+          grounding_record_ids: ["STOBJ-1"]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.filter_trace.after_source_record_id, 0);
+    assert.deepEqual(result.filter_trace.source_record_id_rejected_samples, [
+      {
+        slt_id: "SLT-77",
+        reason: "global author-pool storylet carries story-local exact source refs",
+        evidence: {
+          indexed_source_record_ids: ["STOBJ-1"],
+          requested_grounding_record_ids: ["STOBJ-1"]
+        }
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates degrades malformed parent-page state snapshots without throwing", async () => {
+  const cases: Array<{ name: string; bodyLines: string[]; expectedBranchPath: string[] }> = [
+    {
+      name: "null snapshot",
+      bodyLines: [
+        "id: PG-MALFORMED",
+        "branch_id: BR-1",
+        "branch_path: [PG-MALFORMED]",
+        "state_snapshot: null"
+      ],
+      expectedBranchPath: ["PG-MALFORMED"]
+    },
+    {
+      name: "array snapshot and non-string branch id",
+      bodyLines: [
+        "id: PG-MALFORMED",
+        "branch_id: [BR-1]",
+        "branch_path: [PG-MALFORMED]",
+        "state_snapshot: []"
+      ],
+      expectedBranchPath: ["PG-MALFORMED"]
+    },
+    {
+      name: "array active records and object mystery claims",
+      bodyLines: [
+        "id: PG-MALFORMED",
+        "branch_id: BR-1",
+        "branch_path: [PG-MALFORMED]",
+        "state_snapshot:",
+        "  active_records: [STCHAR-1]",
+        "  unresolved_mystery_claims:",
+        "    authority: apparent"
+      ],
+      expectedBranchPath: ["PG-MALFORMED"]
+    },
+    {
+      name: "unknown active-record prefix and malformed mystery entries",
+      bodyLines: [
+        "id: PG-MALFORMED",
+        "branch_id: BR-1",
+        "branch_path: PG-MALFORMED",
+        "state_snapshot:",
+        "  active_records:",
+        "    UNKNOWN: [UNKNOWN-1]",
+        "  unresolved_mystery_claims:",
+        "    - mystery_id: M-1",
+        "    - authority: 42"
+      ],
+      expectedBranchPath: []
+    }
+  ];
+
+  for (const testCase of cases) {
+    const root = createTempRepoRoot();
+
+    try {
+      buildMalformedSnapshotWorld(root, testCase.bodyLines);
+
+      const result = await withRepoRoot(root, () =>
+        selectStoryletCandidates({
+          world_slug: WORLD,
+          story_slug: STORY,
+          parent_page_id: "PG-MALFORMED",
+          turn_driver: {
+            kind: "player_action",
+            driver_records: []
+          },
+          intent_signature: {
+            action_families: ["investigate"]
+          },
+          max_candidates: 24
+        })
+      );
+
+      assert.ok(!("code" in result), testCase.name);
+      assert.equal(result.filter_trace.pool_total, 2, testCase.name);
+      assert.deepEqual(
+        result.shortlisted_candidate_ids,
+        testCase.expectedBranchPath.length > 0 ? ["SLT-88", "SLT-89"] : ["SLT-88"],
+        testCase.name
+      );
+      assert.deepEqual(
+        result.filter_trace.scope_rejected_samples.map((sample) => ({
+          slt_id: sample.slt_id,
+          parent_branch_id: sample.evidence.parent_branch_id,
+          parent_branch_path: sample.evidence.parent_branch_path
+        })),
+        testCase.expectedBranchPath.length > 0
+          ? []
+          : [
+              {
+                slt_id: "SLT-89",
+                parent_branch_id: "BR-1",
+                parent_branch_path: []
+              }
+            ],
+        testCase.name
+      );
+      assert.deepEqual(result.filter_trace.predicate_class_rejected_samples, [], testCase.name);
+      assert.deepEqual(result.filter_trace.mystery_policy_rejected_samples, [], testCase.name);
+      assert.deepEqual(
+        result.shortlisted_projection_records.map((record) => record.id),
+        result.shortlisted_candidate_ids,
+        testCase.name
+      );
+    } finally {
+      destroyTempRepoRoot(root);
+    }
+  }
+});
+
+test("selectStoryletCandidates returns record_not_found when the parent page is absent", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildCandidateWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-MISSING",
+        turn_driver: {
+          kind: "player_action",
+          driver_records: []
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "record_not_found");
+    assert.equal(result.details?.field, "parent_page_id");
+    assert.equal(result.details?.parent_page_id, "PG-MISSING");
+    assert.equal(result.details?.world_slug, WORLD);
+    assert.equal(result.details?.story_slug, STORY);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("selectStoryletCandidates filters indexed SLT projections and returns only projection records", async () => {
   const root = createTempRepoRoot();
 
@@ -577,7 +820,7 @@ test("selectStoryletCandidates filters indexed SLT projections and returns only 
           slt_id: "SLT-8",
           reason: "candidate mystery policy authority is not present in unresolved parent-page mystery claims",
           evidence: {
-            forbidden_mystery_resolutions: ["canon_candidate"],
+            allowed_authority_classes: ["canon_candidate"],
             unresolved_mystery_claims: ["apparent"]
           }
         }
