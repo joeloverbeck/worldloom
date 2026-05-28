@@ -27,10 +27,16 @@ Story-pipeline skills produce story-local records under `worlds/<slug>/stories/<
 
 Story state is authoritative when a page plan is committed. Bootstrap and turn-cycle author comprehensive plans at `pages-prose-plans/PG-<integer>.md`; rendered prose at `pages-prose/PG-<integer>.md` is supplied externally and attached later by `branching-story-prose-attach`, which emits a receipt at `pages-prose-receipts/PG-<integer>.yaml` without mutating page state.
 
+The scene render layer is additive to the page-plan pipeline. A planned `SCN` groups a contiguous committed `PG` range on one branch path for external prose rendering; `PG` records remain the causal authority and `SCN` remains a non-authoritative render-membership record.
+
 - **Start a new branching story bundle**: `/branching-story-bootstrap` with `world_slug`, `story_slug`, `premise_path`, and a selected cast (drawn from the world's `characters/INDEX.md`). Writes `STORY_KERNEL.md`, the atomic `_source/` ledgers, the `pages-prose-plans/PG-1.md` comprehensive plan and its first 4-6 generated choices, and seed commitment-block records / batch manifests. Rendered prose for `PG-1` is supplied externally and attached later with `branching-story-prose-attach`.
 - **Advance one tick**: `/branching-story-turn-cycle` with `world_slug`, `story_slug`, parent `page_id`, and `action_source_mode`: choose `resolve_selected_choice` with a parent-emitted `choice_id` (`CHC-<integer>`), `resolve_write_in` with a free-form `write_in`, or `advance_initiative` with both player-action fields absent so a non-player driver from parent-page pressure fires. Authors the comprehensive prose plan for the next page at `pages-prose-plans/PG-<integer>.md` (alongside the per-turn PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/CHC records). Any committed page snapshot can be a parent, whether or not rendered prose has been attached.
 - **Attach rendered prose for a page**: `/branching-story-prose-attach` with `world_slug`, `story_slug`, `page_id`, and the rendered prose already present at `pages-prose/PG-<integer>.md`. Validates the prose against the committed plan and writes `pages-prose-receipts/PG-<integer>.yaml` plus an INDEX update; if `emit_attach_event=true`, it also submits a single `SE` event with `event_kind: prose_attach`. It never mutates the PG record and never gates future page planning.
   - Example: `/branching-story-prose-attach world_slug=<slug> story_slug=<slug> page_id=PG-<integer>`
+- **Plan scene-range prose**: `/branching-story-scene-plan` with `world_slug`, `story_slug`, `start_page_id`, and `end_page_id`; optionally pass `existing_scene_id` when superseding a prior scene. Selects a contiguous single-branch `PG` range, creates or supersedes an `SCN` record through the patch engine, writes `scene-prose-plans/SCN-<integer>.md`, creates the scene publication directories as needed, and updates `INDEX.md` after explicit HARD-GATE approval.
+  - Example: `/branching-story-scene-plan world_slug=<slug> story_slug=<slug> start_page_id=PG-<integer> end_page_id=PG-<integer>`
+- **Attach rendered prose for a scene**: `/branching-story-scene-prose-attach` with `world_slug`, `story_slug`, `scene_id`, and rendered prose already present at `scene-prose/SCN-<integer>.md`. Validates the prose against every `PG` in `SCN.pg_ids`, writes `scene-prose-receipts/SCN-<integer>.yaml` plus an INDEX update, and never mutates `PG`, `SCN`, `SE`, or other story `_source` state.
+  - Example: `/branching-story-scene-prose-attach world_slug=<slug> story_slug=<slug> scene_id=SCN-<integer>`
 - **Author or expand commitment blocks**: `/commitment-block-authoring` with `world_slug`, `story_slug`, and the mode / audit handoff described by that skill. Audit mode consumes RSP cards from `branching-story-health-audit`'s output. Writes `_source/storylets/SLT-<integer>.yaml` records + `storylet-batches/SLB-<integer>.md` manifests + INDEX summary edits.
 - **Audit story-bundle health**: `/branching-story-health-audit` with `world_slug` and `story_slug`. Writes `stories/<story-slug>/audits/SAU-<integer>-<date>.md` + optional `audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-*.md` (directly consumable by `commitment-block-authoring` audit mode).
 - **Promote a story-local fact into world canon**: `/story-fact-promotion-to-canon` with `world_slug`, `story_slug`, the source-record reference, and a promotion rationale. Writes `story-promotions/SP-<integer>.md` + proposal-package sidecar, then hands the proposal package to `canon-addition` (which assembles and submits the actual CF/CH/PA world-canon patch plan under its own HARD-GATE).
@@ -48,6 +54,14 @@ turn-cycle plan PG-3 ← ...
 ```
 
 Branching is plan-first: any committed page can be a fork parent, including a non-leaf page or a page whose rendered prose has not yet been attached. Rendered prose and prose receipts are evidence / publication artifacts, not parent-page gates.
+
+Scene prose planning can be run after one or more committed pages exist:
+
+```
+committed PG range → scene-plan SCN-1 → external scene prose → scene-prose-attach receipt SCN-1
+```
+
+Only the final `PG` in the `SCN.pg_ids` range supplies the playable choice surface. Intermediate choices inside the range are historical context for the renderer, not current choices.
 
 ## Pipeline meta-work
 

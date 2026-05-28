@@ -48,10 +48,13 @@ worlds/<world-slug>/             ← generated world bundles (gitignored; folder
   ├── character-proposals/       ← NCP-<integer> cards + batches/NCB-<integer> manifests
   └── stories/<story-slug>/      ← branching-story bundles (per-bundle layout below)
        ├── STORY_KERNEL.md        ← primary-authored narrative root for the bundle
-       ├── _source/               ← atomic-YAML story-bundle records (22 subdirs: entities/STENT, status/STSTAT, intentions/STINT, facts/SF, beliefs/BEL, events/SE, obligations/OBL, consequences/CNSQ, threads/THR, clocks/CLK, secrets/STSEC, story-questions/STQ, plans/STPLAN, emotions/STEMO, relationships/SREL, locations/STLOC, objects/STOBJ, artifacts/DA, branches/BR, pages/PG, choices/CHC, storylets/SLT) — schemas canonical at `.claude/skills/_shared-templates/story-state-contract.md` §4
+       ├── _source/               ← atomic-YAML story-bundle records (23 subdirs: entities/STENT, status/STSTAT, intentions/STINT, facts/SF, beliefs/BEL, events/SE, obligations/OBL, consequences/CNSQ, threads/THR, clocks/CLK, secrets/STSEC, story-questions/STQ, plans/STPLAN, emotions/STEMO, relationships/SREL, locations/STLOC, objects/STOBJ, artifacts/DA, branches/BR, pages/PG, choices/CHC, storylets/SLT, scenes/SCN) — schemas canonical at `.claude/skills/_shared-templates/story-state-contract.md` §4
        ├── pages-prose-plans/     ← PG-<integer> comprehensive prose plans
        ├── pages-prose/           ← rendered prose; supplied externally (manual or LLM)
        ├── pages-prose-receipts/  ← PG-<integer>.yaml prose-validation receipts
+       ├── scene-prose-plans/     ← SCN-<integer> scene-range prose plans over committed PG ranges
+       ├── scene-prose/           ← rendered scene prose; supplied externally
+       ├── scene-prose-receipts/  ← SCN-<integer>.yaml scene-range prose-validation receipts
        ├── storylet-batches/      ← SLB-<integer> batch manifests
        ├── story-promotions/      ← SP-<integer>-proposal-package.yaml + SP-<integer>.md / SP-<integer>-closeout.md ledgers
        ├── audits/                ← SAU-<integer>-<date>.md reports + SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-*.md
@@ -69,7 +72,7 @@ Skills are runnable workflows under `.claude/skills/<slug>/` (each with a `SKILL
 Skills divide into three load-bearing categories by write surface, and this distinction is what keeps the canon-safety rules (see `CLAUDE.md` / `AGENTS.md` §Write boundaries) enforceable:
 
 - **Canon-mutating** — write world-level records under `_source/` via the patch engine; all begin with a `<HARD-GATE>` requiring explicit user approval (e.g. `create-base-world`, `canon-addition`).
-- **Canon-reading** — read world state; write only to scoped subdirectories (`characters/`, `diegetic-artifacts/`, `proposals/`, `audits/`, `adjudications/`, `stories/<slug>/`); never mutate `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `_source/*.yaml` record.
+- **Canon-reading / story-pipeline** — read world and story state; write only to scoped subdirectories (`characters/`, `diegetic-artifacts/`, `proposals/`, `audits/`, `adjudications/`, `stories/<slug>/`) and route any world or story `_source/*.yaml` mutation through the patch engine. Story-pipeline examples include `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `branching-story-scene-plan`, and `branching-story-scene-prose-attach`; they never mutate `WORLD_KERNEL.md`, `ONTOLOGY.md`, or world-canon `_source/*.yaml` records directly.
 - **Meta** — operate on the pipeline, not on worlds (`brainstorm`, `skill-creator`, `skill-audit`, `skill-consolidate`, `skill-extract-references`).
 
 For the machine-facing retrieval and mutation contract that sits beside the skill prose, see `docs/MACHINE-FACING-LAYER.md`.

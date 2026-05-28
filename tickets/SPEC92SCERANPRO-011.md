@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — capstone integration test (new); manual dry-run runbook + automated coexistence assertions. No production code.
-**Deps**: SPEC92SCERANPRO-010
+**Deps**: archive/tickets/SPEC92SCERANPRO-010.md
 
 ## Problem
 
@@ -12,7 +12,7 @@ SPEC-92 acceptance #9 (the page-plan pipeline is unchanged and green — coexist
 
 ## Assumption Reassessment (2026-05-28)
 
-1. All implementation tickets (-001 through -010) land before this capstone; -010 is the transitive head of the DAG (it reaches -001..-009 via -008/-009), so `Deps: SPEC92SCERANPRO-010` covers the full chain.
+1. All implementation tickets (-001 through -010) land before this capstone; -010 is the transitive head of the DAG (it reaches -001..-009 via -008/-009), so `Deps: archive/tickets/SPEC92SCERANPRO-010.md` covers the full chain.
 2. SPEC-92 §Acceptance #9 / #10 + §Test plan define the capstone matrix. The scene-plan + scene-prose-attach skills (-008 / -009) are LLM-driven and NOT runnable from test-suite code → manual-dry-run capstone variant (per §Spec-Integration Ticket Shape).
 3. Cross-artifact boundary under audit: the capstone exercises every upstream surface (SCN op / schema / validators / index / retrieval + both skills); it introduces no new production code. The fixture-world copy strategy must keep the real `worlds/<slug>/` tree untouched (`fs.cpSync` to a temp root).
 4. FOUNDATIONS §Story Bundles §4a (scene attach creates no state) + §Rule 7 (the mystery firewall holds across the scene range) + the additive-coexistence discipline (page-plan pipeline unchanged) are what the capstone verifies end-to-end.
