@@ -6,7 +6,6 @@ import test from "node:test";
 
 import { runValidators } from "../../src/framework/run.js";
 import type { Context, IndexedRecord, Validator, Verdict } from "../../src/framework/types.js";
-import { activePressureHandlingDiscipline } from "../../src/structural/active-pressure-handling-discipline.js";
 import { observerFirewall } from "../../src/structural/observer-firewall.js";
 import { pagePlanTurnDriverConsistency } from "../../src/structural/page-plan-turn-driver-consistency.js";
 import { turnCycleOutputGroundingIntegrity } from "../../src/structural/turn-cycle-output-grounding-integrity.js";
@@ -43,7 +42,6 @@ const SPEC85_SECRET_VALIDATORS: readonly Validator[] = [
   turnDriverSchemaCompliance,
   turnDriverPovObserverFirewall,
   pagePlanTurnDriverConsistency,
-  activePressureHandlingDiscipline,
   observerFirewall,
   turnCycleOutputGroundingIntegrity
 ];

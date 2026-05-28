@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/_shared-templates/story-record-schemas.md`, `.claude/skills/_shared-templates/story-state-contract.md`
-**Deps**: SPEC93DECSTATUR-002, SPEC93DECSTATUR-003
+**Deps**: archive/tickets/SPEC93DECSTATUR-002.md, SPEC93DECSTATUR-003
 
 ## Problem
 
@@ -14,7 +14,7 @@ The shared story state contract is the schema-authoritative source the story-pip
 
 1. `_shared-templates/story-record-schemas.md` defines `plan_hash: sha256*` and `prose_plan_path: ...*` (required markers) with an "included in state_hash payload" note and a `compute-pg-hashes` mandate for PG-authoring skills; `_shared-templates/story-state-contract.md §7` defines the nine hard gates (gate 7 = "plan grounding", gate 9 = "Turn-Driver Lawfulness") and §8 = "Page Plan Minimum Contract" (19 sections) — confirmed during SPEC-93 reassessment (this session).
 2. SPEC-93 §4 enumerates both contract amendments; §6 shared-templates bullet names both files; §8 AC6 (gates 7/9 validate the `PG`/`SE` record) + AC7 (contract amended consistently).
-3. Cross-artifact boundary: this is the most load-bearing shared surface — `story-state-contract.md` is read by every Category 2c skill at hard-gate validation and is the canonical schema source per FOUNDATIONS §5b; the gate-9 validator-code rehoming (SPEC93DECSTATUR-002) and the validator retirement (SPEC93DECSTATUR-003) must land first so the contract documents the realized gate set. Skills consuming the gate definitions are reconciled in SPEC93DECSTATUR-007/008.
+3. Cross-artifact boundary: this is the most load-bearing shared surface — `story-state-contract.md` is read by every Category 2c skill at hard-gate validation and is the canonical schema source per FOUNDATIONS §5b; the gate-9 validator-code rehoming (archive/tickets/SPEC93DECSTATUR-002.md) and the validator retirement (SPEC93DECSTATUR-003) must land first so the contract documents the realized gate set. Skills consuming the gate definitions are reconciled in SPEC93DECSTATUR-007/008.
 4. FOUNDATIONS Rule 1 (gate 7 grounding rehomes to the `PG` record's state delta) and Rule 7 (gate 9 retains the record-operating POV/observer firewall; gate 3 stays the authoritative plan-time MR firewall) — the contract must restate both consistently with the validator-code changes.
 5. (HARD-GATE / Canon Safety) `story-state-contract.md §7` defines the nine hard gates that gate story-bundle record writes at engine pre-apply — redefining gate 7/9 is a Canon Safety Check surface change. Confirm the redefinition leaves gate 3 (the Mystery Reserve firewall) authoritative and unweakened; the rendered-prose firewall reroutes to `scene_range_forbidden_mystery_resolution` (SPEC-92).
 6. (was template item 6 — schema field-optionality) `story-record-schemas.md` is the PG record schema-contract surface; mark `plan.plan_hash`/`prose_plan_path` optional, document the field-presence `state_hash` rule (legacy carry the fields, new omit them — no separate payload machinery), and narrow the `compute-pg-hashes` mandate to `state_hash`-only. Consumers: the story skills + validators reading the contract; the change is consistent with the relaxed `story-page.schema.json` (archive/tickets/SPEC93DECSTATUR-001.md).
@@ -52,7 +52,7 @@ Retire §8's page-plan 19-section enumeration; replace with a pointer to SPEC-92
 
 ## Out of Scope
 
-- The validator-code gate-9 rehoming (SPEC93DECSTATUR-002) and validator retirement (SPEC93DECSTATUR-003).
+- The validator-code gate-9 rehoming (archive/tickets/SPEC93DECSTATUR-002.md) and validator retirement (SPEC93DECSTATUR-003).
 - FOUNDATIONS narrative amendments (SPEC93DECSTATUR-011).
 - The skill-side gate population (SPEC93DECSTATUR-007/008).
 

@@ -6,7 +6,6 @@ import test from "node:test";
 
 import { runValidators } from "../../src/framework/run.js";
 import type { Context, IndexedRecord, Validator, Verdict } from "../../src/framework/types.js";
-import { activePressureHandlingDiscipline } from "../../src/structural/active-pressure-handling-discipline.js";
 import { observerFirewall } from "../../src/structural/observer-firewall.js";
 import { pagePlanTurnDriverConsistency } from "../../src/structural/page-plan-turn-driver-consistency.js";
 import { turnCycleOutputGroundingIntegrity } from "../../src/structural/turn-cycle-output-grounding-integrity.js";
@@ -43,7 +42,6 @@ const SPEC85_CLOCK_VALIDATORS: readonly Validator[] = [
   turnDriverSchemaCompliance,
   turnDriverPovObserverFirewall,
   pagePlanTurnDriverConsistency,
-  activePressureHandlingDiscipline,
   observerFirewall,
   turnCycleOutputGroundingIntegrity
 ];
@@ -71,13 +69,6 @@ test("SPEC-85 clock-fire route-closes variants produce the expected capstone ver
       "turn_driver_driver_records_empty_for_non_player",
       "turn_driver_initiator_pattern_violation"
     ]
-  );
-
-  await assertCodes(
-    "missing clock pressure row",
-    undefined,
-    ["high_urgency_active_record_unhandled"],
-    planWithoutClockPressureRow()
   );
 
   await assertCodes(
@@ -128,10 +119,6 @@ function canonicalPlan(): string {
 
 function planPath(): string {
   return fixture.files[0]?.path ?? "";
-}
-
-function planWithoutClockPressureRow(): string {
-  return canonicalPlan().replace("| CLK-1 | selected | toll-gate clock reached the route-closing threshold |\n", "");
 }
 
 function event(records: IndexedRecord[]): IndexedRecord {

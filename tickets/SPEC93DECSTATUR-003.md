@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/validators` (retire 6 validators + 3 support modules + `prose-receipt.schema.json`; `registry.ts` + `_engine-vocabulary-tokens.ts` cleanup; sibling integration-test cleanup)
-**Deps**: SPEC93DECSTATUR-002
+**Deps**: archive/tickets/SPEC93DECSTATUR-002.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ With page plans and the page prose-receipt path removed (SPEC-93 §2.5), the val
 
 1. Retirement targets confirmed present (this session): `page-plan-verbatim-section-integrity.ts`, `page-plan-stchar-packet-integrity.ts`, `page-plan-body-engine-vocabulary-cleanliness.ts`, `prose-receipt-hash-integrity.ts`, `prose-receipt-stchar-integrity.ts` (the six retired validators) + support modules `page-plan-section-parser.ts`, `page-plan-verbatim-canonical-sources.ts`, `prose-receipt-schema-compliance.ts` + `schemas/prose-receipt.schema.json`; registered in `public/registry.ts`; `_engine-vocabulary-tokens.ts` references `plan_hash` field-name literals.
 2. SPEC-93 §2.5 + §6 validators bullet enumerate these retirements; §5 Rule 7 amendment reroutes the rendered-prose firewall to scene attach.
-3. Cross-artifact boundary: `registry.ts` is shared with SPEC93DECSTATUR-002 (sequenced by Deps); SPEC-92's scene validators (`scene-prose-receipt-content.ts` carrying `scene_range_forbidden_mystery_resolution`, `scene-prose-receipt-schema-compliance.ts`) are the surviving replacements — verified present.
+3. Cross-artifact boundary: `registry.ts` is shared with archive/tickets/SPEC93DECSTATUR-002.md (sequenced by Deps); SPEC-92's scene validators (`scene-prose-receipt-content.ts` carrying `scene_range_forbidden_mystery_resolution`, `scene-prose-receipt-schema-compliance.ts`) are the surviving replacements — verified present.
 4. FOUNDATIONS Rule 7 (Preserve Mystery Deliberately): retiring `prose_receipt`/page-plan validators does NOT weaken the firewall — the authoritative plan-time firewall is gate 3 on the `PG` record (untouched) and the rendered-prose firewall is `scene_range_forbidden_mystery_resolution` (SPEC-92, present).
 5. (HARD-GATE / Canon Safety) The retired files are structural validators under `tools/validators/src/structural/` that gated story-bundle record/receipt writes; their retirement removes dead gates whose surface SPEC-92 already re-provides at scene scope. The MR firewall (gate 3 + scene `scene_range_forbidden_mystery_resolution`) remains intact.
 6. (was template item 7 — removal blast radius) Grep pipeline-wide for each retired validator code + `prose-receipt.schema.json`: `public/registry.ts` (de-register), `_engine-vocabulary-tokens.ts` (token cleanup), `tests/structural/*` (delete retired suites), and sibling integration tests `tests/integration/{spec57-stchar-pipeline-integration,spec76-red-kiln-ambush,spec92-scene-layer-capstone}.test.ts` that assert the retired validators (Rule 6 retcon attribution: these tests assert behavior SPEC-93 deliberately removes; no production consumer survives the teardown).
@@ -56,7 +56,7 @@ Update `tests/integration/spec57-stchar-pipeline-integration.test.ts`, `spec76-r
 - `tools/validators/src/structural/prose-receipt-schema-compliance.ts` (delete)
 - `tools/validators/src/structural/page-plan-verbatim-canonical-sources.ts` (delete — after SPEC-92 retarget)
 - `tools/validators/src/schemas/prose-receipt.schema.json` (delete)
-- `tools/validators/src/public/registry.ts` (modify — shared with SPEC93DECSTATUR-002)
+- `tools/validators/src/public/registry.ts` (modify — shared with archive/tickets/SPEC93DECSTATUR-002.md)
 - `tools/validators/src/structural/_engine-vocabulary-tokens.ts` (modify)
 - `tools/validators/tests/structural/{page-plan-verbatim-section-integrity,page-plan-stchar-packet-integrity,page-plan-body-engine-vocabulary-cleanliness,prose-receipt-hash-integrity,prose-receipt-stchar-integrity,prose-receipt-schema-compliance}.test.ts` (delete)
 - `tools/validators/tests/structural/registry.test.ts` (modify)
@@ -66,7 +66,7 @@ Update `tests/integration/spec57-stchar-pipeline-integration.test.ts`, `spec76-r
 
 ## Out of Scope
 
-- The gate-9 split (SPEC93DECSTATUR-002 — its `page-plan-turn-driver-consistency.ts` / `page-plan-active-pressure.ts` survive in modified record-only form).
+- The gate-9 split (archive/tickets/SPEC93DECSTATUR-002.md — its `page-plan-turn-driver-consistency.ts` / `page-plan-active-pressure.ts` survive in modified record-only form).
 - `prose-receipt.schema.json`'s scene replacement (`scene-prose-receipt.schema.json`, already landed by SPEC-92).
 - Hook 6/7 retirement (SPEC93DECSTATUR-006).
 - The `page_plan_drafts` argument plumbing (SPEC93DECSTATUR-004).

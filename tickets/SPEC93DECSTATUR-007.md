@@ -54,7 +54,7 @@ Remove the Phase 10 page-plan HARD-GATE precondition and the `page_plan_drafts=[
 ## Out of Scope
 
 - The tool-side `page_plan_drafts` argument removal (SPEC93DECSTATUR-004).
-- The gate-7/9 validator-code rehoming (SPEC93DECSTATUR-002) and gate definitions in `story-state-contract.md` (SPEC93DECSTATUR-010).
+- The gate-7/9 validator-code rehoming (archive/tickets/SPEC93DECSTATUR-002.md) and gate definitions in `story-state-contract.md` (SPEC93DECSTATUR-010).
 - bootstrap's root page-plan removal (SPEC93DECSTATUR-008).
 - The scene-plan / scene-prose-attach flow (SPEC-92, already landed).
 

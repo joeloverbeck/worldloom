@@ -344,10 +344,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "page_plan_turn_driver_consistency"
     );
     assert.equal(pagePlanTurnDriverExecution?.status, "skipped");
-    const activePressureExecution = result.executions.find(
-      (execution) => execution.name === "active_pressure_handling_discipline"
-    );
-    assert.equal(activePressureExecution?.status, "skipped");
     const forbiddenStcharHashExecution = result.executions.find(
       (execution) => execution.name === "forbidden_stchar_tamper_hash_fields"
     );
@@ -441,7 +437,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== pagePlanVerbatimExecution &&
         row !== pagePlanStcharExecution &&
         row !== pagePlanTurnDriverExecution &&
-        row !== activePressureExecution &&
         row !== forbiddenStcharHashExecution &&
         row !== stcharTemporalReferenceExecution &&
         row !== activeRecordsFullShapeExecution &&
