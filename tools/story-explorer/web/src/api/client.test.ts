@@ -4,10 +4,6 @@ import {
   ApiError,
   fetchEnveloped,
   getBranchTimeline,
-  getLatestPage,
-  getPageDetail,
-  getProseBody,
-  getRootPage,
   getSceneDetail,
   getScenePlan,
   getSceneProse,
@@ -17,7 +13,6 @@ import {
   getStoryOverview,
   getUnscenedRanges,
   getWorld,
-  listPages,
   listScenes,
   listStories,
   listWorlds,
@@ -74,28 +69,18 @@ describe('fetchEnveloped', () => {
 });
 
 describe('route helpers', () => {
-  it('constructs picker and page URLs', async () => {
+  it('constructs world and story picker URLs', async () => {
     mockJsonResponse({ _envelope: envelope, data: null });
 
     await listWorlds();
     await getWorld('fixture world');
     await listStories('fixture-world');
     await getStory('fixture-world', 'red bunny');
-    await listPages('fixture-world', 'red-bunny');
-    await getRootPage('fixture-world', 'red-bunny');
-    await getLatestPage('fixture-world', 'red-bunny');
-    await getPageDetail('fixture-world', 'red-bunny', 'PG-1');
-    await getProseBody('fixture-world', 'red-bunny', 'PG-1');
 
     expect(fetch).toHaveBeenNthCalledWith(1, '/api/worlds', undefined);
     expect(fetch).toHaveBeenNthCalledWith(2, '/api/worlds/fixture%20world', undefined);
     expect(fetch).toHaveBeenNthCalledWith(3, '/api/worlds/fixture-world/stories', undefined);
     expect(fetch).toHaveBeenNthCalledWith(4, '/api/worlds/fixture-world/stories/red%20bunny', undefined);
-    expect(fetch).toHaveBeenNthCalledWith(5, '/api/worlds/fixture-world/stories/red-bunny/pages?list=1', undefined);
-    expect(fetch).toHaveBeenNthCalledWith(6, '/api/worlds/fixture-world/stories/red-bunny/pages?root=1', undefined);
-    expect(fetch).toHaveBeenNthCalledWith(7, '/api/worlds/fixture-world/stories/red-bunny/pages?latest=1', undefined);
-    expect(fetch).toHaveBeenNthCalledWith(8, '/api/worlds/fixture-world/stories/red-bunny/pages/PG-1', undefined);
-    expect(fetch).toHaveBeenNthCalledWith(9, '/api/worlds/fixture-world/stories/red-bunny/prose/PG-1', undefined);
   });
 });
 

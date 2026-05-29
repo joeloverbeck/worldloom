@@ -1,12 +1,30 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { createMemoryRouter, matchRoutes, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from './api/client';
-import { AppRouteError } from './app';
+import { AppRouteError, routes } from './app';
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
+});
+
+describe('route tree', () => {
+  // AC1/AC6: the page-reader surface is gone — the FULL nested paths must not
+  // resolve to any route (a test against the bare `/entry` / `/pages/:pageId`
+  // shorthand would pass trivially against the old app too).
+  it('does not resolve the page-reader paths', () => {
+    expect(matchRoutes(routes, '/worlds/fixture-world/stories/red-bunny/entry')).toBeNull();
+    expect(matchRoutes(routes, '/worlds/fixture-world/stories/red-bunny/pages/PG-12')).toBeNull();
+  });
+
+  it('resolves the scene-first surface', () => {
+    expect(matchRoutes(routes, '/worlds/fixture-world/stories/red-bunny')).not.toBeNull();
+    expect(matchRoutes(routes, '/worlds/fixture-world/stories/red-bunny/timeline')).not.toBeNull();
+    expect(matchRoutes(routes, '/worlds/fixture-world/stories/red-bunny/scenes')).not.toBeNull();
+    expect(matchRoutes(routes, '/worlds/fixture-world/stories/red-bunny/scenes/SCN-3')).not.toBeNull();
+    expect(matchRoutes(routes, '/worlds/fixture-world/stories/red-bunny/unscened')).not.toBeNull();
+  });
 });
 
 describe('AppRouteError', () => {
@@ -27,10 +45,10 @@ describe('AppRouteError', () => {
 
     render(<RouterProvider router={router} />);
 
-    expect(await screen.findByRole('heading', { name: 'Page not found.' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Resource not found.' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Back to story root' })).toHaveAttribute(
       'href',
-      '/worlds/fixture-world/stories/red-bunny/entry',
+      '/worlds/fixture-world/stories/red-bunny',
     );
   });
 

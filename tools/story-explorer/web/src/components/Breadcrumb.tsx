@@ -1,19 +1,25 @@
 import { Link } from 'react-router-dom';
 
+export interface BreadcrumbCrumb {
+  label: string;
+  href: string;
+}
+
 interface BreadcrumbProps {
   worldSlug: string;
   worldDisplayName: string;
   storySlug: string;
   storyTitle: string;
-  branchId: string;
-  pageId: string;
-  parentPageId: string | null;
+  /**
+   * Trailing crumbs beyond the story dashboard (e.g. Timeline, Scene SCN-3).
+   * The final crumb is rendered as the current location without a link; when
+   * the trail is empty the story dashboard itself is the current location.
+   */
+  trail?: BreadcrumbCrumb[];
 }
 
-function pageHref(worldSlug: string, storySlug: string, pageId: string): string {
-  return `/worlds/${encodeURIComponent(worldSlug)}/stories/${encodeURIComponent(storySlug)}/pages/${encodeURIComponent(
-    pageId,
-  )}`;
+function storyDashboardHref(worldSlug: string, storySlug: string): string {
+  return `/worlds/${encodeURIComponent(worldSlug)}/stories/${encodeURIComponent(storySlug)}`;
 }
 
 export function Breadcrumb({
@@ -21,10 +27,10 @@ export function Breadcrumb({
   worldDisplayName,
   storySlug,
   storyTitle,
-  branchId,
-  pageId,
-  parentPageId,
+  trail = [],
 }: BreadcrumbProps): JSX.Element {
+  const storyIsCurrent = trail.length === 0;
+
   return (
     <nav className="breadcrumb" aria-label="Breadcrumb">
       <ol>
@@ -34,19 +40,22 @@ export function Breadcrumb({
         <li>
           <Link to={`/worlds/${encodeURIComponent(worldSlug)}/stories`}>{worldDisplayName}</Link>
         </li>
-        <li>
-          <Link to={`/worlds/${encodeURIComponent(worldSlug)}/stories/${encodeURIComponent(storySlug)}/entry`}>
-            {storyTitle}
-          </Link>
+        <li {...(storyIsCurrent ? { 'aria-current': 'page' as const } : {})}>
+          {storyIsCurrent ? (
+            storyTitle
+          ) : (
+            <Link to={storyDashboardHref(worldSlug, storySlug)}>{storyTitle}</Link>
+          )}
         </li>
-        <li>Branch {branchId}</li>
-        <li aria-current="page">{pageId}</li>
+        {trail.map((crumb, index) => {
+          const isLast = index === trail.length - 1;
+          return (
+            <li key={crumb.href} {...(isLast ? { 'aria-current': 'page' as const } : {})}>
+              {isLast ? crumb.label : <Link to={crumb.href}>{crumb.label}</Link>}
+            </li>
+          );
+        })}
       </ol>
-      {parentPageId === null ? null : (
-        <Link className="breadcrumb__parent" to={pageHref(worldSlug, storySlug, parentPageId)}>
-          Parent: {parentPageId}
-        </Link>
-      )}
     </nav>
   );
 }

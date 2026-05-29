@@ -7,12 +7,12 @@ interface NotFoundPageProps {
 }
 
 function storyRootPath(worldSlug: string, storySlug: string): string {
-  return `/worlds/${encodeURIComponent(worldSlug)}/stories/${encodeURIComponent(storySlug)}/entry`;
+  return `/worlds/${encodeURIComponent(worldSlug)}/stories/${encodeURIComponent(storySlug)}`;
 }
 
-export function NotFoundPage({ worldSlug, storySlug, resourceLabel = 'page' }: NotFoundPageProps): JSX.Element {
+export function NotFoundPage({ worldSlug, storySlug, resourceLabel = 'resource' }: NotFoundPageProps): JSX.Element {
   const hasStoryTarget = Boolean(worldSlug && storySlug);
-  const title = `${resourceLabel[0]?.toUpperCase() ?? 'P'}${resourceLabel.slice(1)} not found.`;
+  const title = `${resourceLabel[0]?.toUpperCase() ?? 'R'}${resourceLabel.slice(1)} not found.`;
   const target = hasStoryTarget ? storyRootPath(worldSlug as string, storySlug as string) : '/';
   const label = hasStoryTarget ? 'Back to story root' : 'Back to worlds';
 

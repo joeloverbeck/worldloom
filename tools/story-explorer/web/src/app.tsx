@@ -1,13 +1,18 @@
 import { Suspense } from 'react';
-import { createBrowserRouter, RouterProvider, useParams, useRevalidator, useRouteError } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  type RouteObject,
+  RouterProvider,
+  useParams,
+  useRevalidator,
+  useRouteError,
+} from 'react-router-dom';
 
 import { ApiError } from './api/client';
 import { BackendUnreachablePage } from './components/BackendUnreachablePage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotFoundPage } from './components/NotFoundPage';
 import { RouteLoading } from './components/RouteLoading';
-import { PageEntryRoute, pageEntryLoader } from './routes/page-entry';
-import { PageReadRoute, pageReadLoader } from './routes/page-read';
 import { SceneDetailRoute, sceneDetailLoader } from './routes/scene-detail';
 import { ScenesRoute, sceneListLoader } from './routes/scenes';
 import { StoriesRoute, storyListLoader } from './routes/stories';
@@ -51,7 +56,7 @@ export function AppRouteError(): JSX.Element {
   };
 
   if (error instanceof ApiError && error.status === 404) {
-    return <NotFoundPage worldSlug={params.slug} storySlug={params.storySlug} resourceLabel="page" />;
+    return <NotFoundPage worldSlug={params.slug} storySlug={params.storySlug} />;
   }
 
   if (isNetworkError(error)) {
@@ -62,7 +67,7 @@ export function AppRouteError(): JSX.Element {
   return <RouteFallback error={routeError} retry={retry} />;
 }
 
-const router = createBrowserRouter([
+export const routes: RouteObject[] = [
   {
     path: '/',
     loader: worldListLoader,
@@ -133,27 +138,9 @@ const router = createBrowserRouter([
       </RouteFrame>
     ),
   },
-  {
-    path: '/worlds/:slug/stories/:storySlug/entry',
-    loader: pageEntryLoader,
-    errorElement: <AppRouteError />,
-    element: (
-      <RouteFrame loadingLabel="Loading page entry...">
-        <PageEntryRoute />
-      </RouteFrame>
-    ),
-  },
-  {
-    path: '/worlds/:slug/stories/:storySlug/pages/:pageId',
-    loader: pageReadLoader,
-    errorElement: <AppRouteError />,
-    element: (
-      <RouteFrame loadingLabel="Loading page...">
-        <PageReadRoute />
-      </RouteFrame>
-    ),
-  },
-]);
+];
+
+const router = createBrowserRouter(routes);
 
 export function App(): JSX.Element {
   return <RouterProvider router={router} />;

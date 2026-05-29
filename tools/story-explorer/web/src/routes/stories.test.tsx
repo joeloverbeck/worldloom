@@ -64,7 +64,6 @@ function story(overrides: Partial<StorySummary>): StorySummary {
     pageCount: 12,
     choiceCount: 8,
     branchCount: 3,
-    renderedProseCount: 5,
     leafPageIds: ['PG-9', 'PG-12'],
     rootPageId: 'PG-1',
     latestPageId: 'PG-12',
@@ -104,8 +103,8 @@ async function renderStoriesRoute(
         element: <StoriesRoute />,
       },
       {
-        path: '/worlds/:slug/stories/:storySlug/entry',
-        element: <main>Story entry route</main>,
+        path: '/worlds/:slug/stories/:storySlug',
+        element: <main>Story dashboard route</main>,
       },
     ],
     { initialEntries: ['/worlds/fixture-world/stories'] },
@@ -129,7 +128,6 @@ describe('StoriesRoute', () => {
         title: null,
         pageCount: 1,
         leafPageIds: ['PG-1'],
-        renderedProseCount: 0,
         latestPageId: null,
       }),
     ]);
@@ -138,7 +136,6 @@ describe('StoriesRoute', () => {
     expect(screen.getByRole('link', { name: /Red Bunny/ })).toHaveTextContent('red-bunny');
     expect(screen.getByRole('link', { name: /Red Bunny/ })).toHaveTextContent('12 pages');
     expect(screen.getByRole('link', { name: /Red Bunny/ })).toHaveTextContent('2 leaves');
-    expect(screen.getByRole('link', { name: /Red Bunny/ })).toHaveTextContent('5 prose pages');
     expect(screen.getByRole('link', { name: /Red Bunny/ })).toHaveTextContent('Latest: PG-12');
     expect(screen.getByRole('link', { name: /Red Bunny/ })).toHaveTextContent('Indexed');
     expect(screen.getByRole('link', { name: /Untitled story/ })).toHaveTextContent('Latest: none indexed');
@@ -157,7 +154,7 @@ describe('StoriesRoute', () => {
     const card = await screen.findByRole('link', { name: /Red Bunny/ });
 
     expect(card).toHaveTextContent('PG-1 missing');
-    expect(card).toHaveAttribute('href', '/worlds/fixture-world/stories/red-bunny/entry');
+    expect(card).toHaveAttribute('href', '/worlds/fixture-world/stories/red-bunny');
   });
 
   it('maps every story index status to deterministic card labels', () => {
@@ -187,11 +184,11 @@ describe('StoriesRoute', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('Index could not be opened. database is locked');
   });
 
-  it('uses links to navigate to the selected story entry route', async () => {
+  it('uses links to navigate to the selected story dashboard route', async () => {
     await renderStoriesRoute([story({ storySlug: 'red bunny' })]);
 
     fireEvent.click(await screen.findByRole('link', { name: /Red Bunny/ }));
 
-    expect(await screen.findByText('Story entry route')).toBeInTheDocument();
+    expect(await screen.findByText('Story dashboard route')).toBeInTheDocument();
   });
 });

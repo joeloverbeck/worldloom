@@ -86,18 +86,20 @@ test("SPEC-89 capstone built web bundle includes the State X-Ray surface", () =>
   assert.equal(assetFiles(".js").length, 1);
   assert.equal(assetFiles(".css").length, 1);
 
+  // SPEC-97 rebound the x-ray to the scene-first StateTickXray payload: the
+  // page-level "Plan & Prose" tab was removed and the StickyRail/MobileSummaryBar
+  // are no longer reachable. The proof now asserts the surviving x-ray sources
+  // plus the scene-first StateTickDrawer entry point ship in the bundle.
   const sourceMap = readBuiltSourceMap();
   assert.deepEqual(
     [
+      "../../src/components/StateTickDrawer.tsx",
       "../../src/components/xray/XRayPanel.tsx",
       "../../src/components/xray/XRayTabs.tsx",
       "../../src/components/xray/RecordCardCompact.tsx",
       "../../src/components/xray/RecordCardExpanded.tsx",
-      "../../src/components/xray/StickyRail.tsx",
-      "../../src/components/xray/MobileSummaryBar.tsx",
       "../../src/components/xray/tabs/CurrentStateTab.tsx",
       "../../src/components/xray/tabs/WhatChangedHereTab.tsx",
-      "../../src/components/xray/tabs/PlanProseTab.tsx",
       "../../src/components/xray/tabs/ValidationIntegrityTab.tsx",
     ].filter((source) => !(sourceMap.sources ?? []).includes(source)),
     [],

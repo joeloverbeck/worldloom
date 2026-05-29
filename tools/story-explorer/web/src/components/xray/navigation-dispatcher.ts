@@ -21,8 +21,13 @@ export interface RecordLinkTarget {
   targetPageId?: string | null;
 }
 
-function pageHref({ storySlug, worldSlug }: StoryContext, pageId: string): string {
-  return `/worlds/${encodeURIComponent(worldSlug)}/stories/${encodeURIComponent(storySlug)}/pages/${encodeURIComponent(pageId)}`;
+// SPEC-97: PG is a causal tick, not a reader page. A PG record link deep-links
+// to the timeline focused on that tick (the x-ray drawer surface), never the
+// removed /pages/:pageId reader route.
+function timelineFocusHref({ storySlug, worldSlug }: StoryContext, pageId: string): string {
+  return `/worlds/${encodeURIComponent(worldSlug)}/stories/${encodeURIComponent(
+    storySlug,
+  )}/timeline?focus=${encodeURIComponent(pageId)}`;
 }
 
 function recordClass(recordId: string): string {
@@ -45,7 +50,7 @@ export function dispatchRecordLinkClick(target: RecordLinkTarget | RecordLink | 
   const classPrefix = recordClass(recordId);
 
   if (classPrefix === 'PG') {
-    context.navigateToPage(pageHref(context.storyContext, recordId));
+    context.navigateToPage(timelineFocusHref(context.storyContext, recordId));
     return;
   }
 

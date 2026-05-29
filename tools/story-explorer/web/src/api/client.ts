@@ -58,73 +58,10 @@ export interface StorySummary {
   pageCount: number;
   choiceCount: number;
   branchCount: number;
-  renderedProseCount: number;
   leafPageIds: string[];
   rootPageId: string | null;
   latestPageId: string | null;
   indexStatus: IndexStatus;
-}
-
-// Frontend mirror of tools/story-explorer/src/view-models/page-summary.ts.
-export type TerminalReason = 'no_children' | 'paused' | 'terminal' | null;
-
-export interface PageSummary {
-  pageId: string;
-  branchId: string;
-  parentPageId: string | null;
-  turnIndex: number;
-  choiceId: string | null;
-  resolvedEventId: string | null;
-  hasRenderedProse: boolean;
-  hasPlan: boolean;
-  hasReceipt: boolean;
-  activeRecordCounts: Record<string, number>;
-  childCount: number;
-  isLeaf: boolean;
-  isTerminalOrPaused: boolean;
-  terminalReason: TerminalReason;
-}
-
-// Frontend mirrors of tools/story-explorer/src/view-models/child-outcome-variant.ts and choice-navigation.ts.
-export interface ChildOutcomeVariant {
-  pageId: string;
-  branchId: string;
-  turnIndex: number;
-  resolvedEventId: string | null;
-  outcomeRoute: string | null;
-  resolutionPreview: string | null;
-  selectedStoryletId: string | null;
-  hasRenderedProse: boolean;
-  stateDeltaCounts: {
-    create: number;
-    supersede: number;
-    close: number;
-  };
-}
-
-export interface ChoiceNavigation {
-  choiceId: string;
-  surfaceLabel: string;
-  playerVisibleIntent: string;
-  pressure: string[];
-  groundedInCount: number;
-  childOutcomeVariants: ChildOutcomeVariant[];
-  isNavigable: boolean;
-}
-
-// Frontend mirror of tools/story-explorer/src/view-models/page-detail.ts.
-export type ProseStatus = 'present' | 'missing' | 'unreadable' | 'hash_mismatch';
-
-export interface PagePlanSummary {
-  path: string;
-  body: string;
-}
-
-export interface ReceiptSummary {
-  path: string;
-  verdict: string | null;
-  stateHash: string | null;
-  body: Record<string, unknown>;
 }
 
 export interface EventDeltaSummary {
@@ -134,45 +71,6 @@ export interface EventDeltaSummary {
   closeCount: number;
   introducedRecordIds: string[];
   relationCount: number;
-}
-
-export interface ValidationIntegritySummary {
-  validationTrace: Record<string, unknown>;
-  receiptVerdict: string | null;
-  proseStatus: ProseStatus;
-  receiptPresence?: 'present' | 'missing' | 'unreadable';
-  stateHashStatus?: 'match' | 'mismatch' | 'not_checked';
-  planHashStatus?: 'present' | 'missing' | 'not_checked';
-  malformedYamlWarnings?: string[];
-  skippedRecords?: string[];
-  brokenRefs?: string[];
-}
-
-export interface BranchContext {
-  branchId: string;
-  branchPath: string[];
-  parentPageId: string | null;
-  turnIndex: number;
-}
-
-export interface RawSourceReference {
-  recordId: string;
-  sourcePath: string;
-  contentHash: string;
-}
-
-export interface PageDetail {
-  page: Record<string, unknown>;
-  prose: string | null;
-  proseStatus: ProseStatus;
-  pagePlanSummary: PagePlanSummary | null;
-  receiptSummary: ReceiptSummary | null;
-  choiceNavigation: ChoiceNavigation[];
-  currentStateRecordIds: string[];
-  eventDelta: EventDeltaSummary;
-  validationIntegrity: ValidationIntegritySummary;
-  branchContext: BranchContext;
-  rawSources: RawSourceReference[];
 }
 
 // Frontend mirrors of tools/story-explorer/src/view-models/record-link.ts and record-card.ts.
@@ -266,21 +164,6 @@ export interface BranchMapEdge {
   choiceLabel: string | null;
   variantLabel: string | null;
   branchId: string;
-}
-
-export interface ProseBody {
-  body: string | null;
-  status: ProseStatus;
-}
-
-export interface PagePlanBody {
-  body: string;
-  sourcePath: string;
-}
-
-export interface ProseReceiptBody {
-  body: Record<string, unknown>;
-  sourcePath: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -607,30 +490,6 @@ export function getStory(slug: string, storySlug: string): Promise<EnvelopedResu
   return fetchEnveloped(`/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}`);
 }
 
-export function listPages(slug: string, storySlug: string): Promise<EnvelopedResult<PageSummary[]>> {
-  return fetchEnveloped(`/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/pages?list=1`);
-}
-
-export function getRootPage(slug: string, storySlug: string): Promise<EnvelopedResult<PageSummary | null>> {
-  return fetchEnveloped(`/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/pages?root=1`);
-}
-
-export function getLatestPage(slug: string, storySlug: string): Promise<EnvelopedResult<PageSummary | null>> {
-  return fetchEnveloped(`/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/pages?latest=1`);
-}
-
-export function getPageDetail(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<PageDetail>> {
-  return fetchEnveloped(
-    `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/pages/${encodeSegment(pageId)}`,
-  );
-}
-
-export function getProseBody(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<ProseBody>> {
-  return fetchEnveloped(
-    `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/prose/${encodeSegment(pageId)}`,
-  );
-}
-
 // SPEC-89/90 routes are declared here so downstream route tickets share one URL surface.
 export function getRecord(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<RecordDetail>> {
   return fetchEnveloped(
@@ -647,23 +506,6 @@ export function getRawRecord(slug: string, storySlug: string, recordId: string):
 export function getBranchMap(slug: string, storySlug: string, focus: string, depth = 3): Promise<EnvelopedResult<unknown>> {
   const query = new URLSearchParams({ focus, depth: String(depth) });
   return fetchEnveloped(`/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/branch-map?${query}`);
-}
-
-export function searchPages(slug: string, storySlug: string, q: string): Promise<EnvelopedResult<unknown>> {
-  const query = new URLSearchParams({ q });
-  return fetchEnveloped(`/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/search?${query}`);
-}
-
-export function getPagePlan(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<PagePlanBody>> {
-  return fetchEnveloped(
-    `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/page-plans/${encodeSegment(pageId)}`,
-  );
-}
-
-export function getProseReceipt(slug: string, storySlug: string, pageId: string): Promise<EnvelopedResult<ProseReceiptBody>> {
-  return fetchEnveloped(
-    `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/prose-receipts/${encodeSegment(pageId)}`,
-  );
 }
 
 export function getProvenance(slug: string, storySlug: string, recordId: string): Promise<EnvelopedResult<RecordProvenance>> {
