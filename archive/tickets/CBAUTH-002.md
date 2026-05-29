@@ -1,97 +1,112 @@
-# CBAUTH-002: Phase 6 lacks a worked create_slt_record envelope skeleton; verdict/approval_token values are guesswork
+# CBAUTH-002: Phase 1 coverage diagnosis needs grounding-strength (hard vs soft), under-representation semantics, and a saturated-pool advisory for direct_batch
 
 **Status**: ✅ COMPLETED
-**Priority**: LOW
-**Effort**: Small
-**Engine Changes**: Yes — `.claude/skills/commitment-block-authoring/SKILL.md` (Phase 6) and/or a new `references/` snippet; docs only.
+**Priority**: MEDIUM
+**Effort**: Medium
+**Engine Changes**: Yes — docs/skill only: `.claude/skills/commitment-block-authoring/references/phase-1-coverage-diagnosis.md` and a deliverable-summary line in `SKILL.md` (no validator, tool, hook, or schema change)
 **Deps**: None
 
 ## Problem
 
-Phase 6 sub-step 1 points to `describe_envelope_schema(op_kind='create_slt_record')` for "the full envelope and per-op payload schemas," but the schema alone leaves three concrete authoring decisions unspecified, forcing guesswork during this run:
+Phase 1's 17-target coverage diagnosis is **binary** (`status: covered | gap`). On a mature pool this yields no actionable signal, and the skill gives no guidance for the most common real-world `direct_batch` case: a pool that already covers every target, where the value of a new batch is *grounding-strength and lane-depth*, not absent-target filling.
 
-1. **`verdict`** — the envelope schema types it as `{string, minLength: 1}` with no enum and no prescribed value. I used `"approve"`; it passed `approval_semantics`, but the correct/expected token string is not documented anywhere in the skill.
-2. **`approval_token` before signing** — the build-then-dry-run flow needs a value in the envelope's required `approval_token` field before `sign-approval-token.js` runs. I used a `"PENDING"` placeholder; it validated and the signer/submit accepted it, but the skill never states what to place there during the dry-run, nor that the signer issues the real token out-of-band (to a token file consumed by the submit CLI's `<token-path>` arg) rather than by editing the envelope.
-3. **`expected_id_allocations`** — for a 6-SLT batch the correct key is `slt_ids: [...]` and the `SLB` id is NOT listed (it is a markdown manifest, not a patch-consumed id). This is inferable but not stated; an author could wrongly add an `slb_ids` allocation.
+Observed on the 2026-05-29 red-bunny run: the pre-batch pool (SLT-1..19) already covered all 16 `move_family` values, all 8 driver-kinds, and all 17 coverage targets. The binary model reports "everything covered." But two real problems were invisible to it:
 
-A short worked skeleton would remove all three ambiguities and reduce the risk of a malformed envelope reaching submit.
+1. **Hard vs soft grounding is not distinguished.** Causal-function target #5 (consequence-resolution — "delivering on a pending `CNSQ`") was "covered" only by blocks that reference `any_consequence_pending` in **soft** preconditions (SLT-8, SLT-12, SLT-17). No block *hard*-gates on a pending consequence, so no block is selection-guaranteed to fire to deliver matured fallout — the pool can route *around* a pending consequence indefinitely. The binary model cannot surface this; the operator must improvise a hard-vs-soft lens (this run did, authoring SLT-22 with hard `any_consequence_pending` + `effects.close: [bound:due_cost]`). A soft-only consequence coverage that never hard-fires is a latent consequence-capacity weakness — the storylet-pool analogue of the `storylet_permanently_inert` concern, and a FOUNDATIONS §Rule 5 (No Consequence Evasion) exposure.
+
+2. **No saturated-pool advisory.** With all 17 targets covered and no `focus` hint, the skill silently authored the full `target_count=6`. Mechanically adding blocks to a saturated pool risks redundant, non-load-bearing storylets — in tension with FOUNDATIONS §5b (every story-bundle field/record must be load-bearing; each block costs LLM tokens at authoring and at every retrieval). The skill should surface saturation and let the user choose a `focus` hint or a smaller `target_count`, rather than defaulting to redundancy.
+
+"Under-represented" is referenced in the existing reference ("Identify which coverage targets are absent or **under-represented**") but never defined operationally, so it cannot be applied consistently.
 
 ## Assumption Reassessment (2026-05-29)
 
-1. **Codebase/skill**: `.claude/skills/commitment-block-authoring/SKILL.md` Phase 6 sub-step 1 references `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` and the `describe_envelope_schema` tool for envelope shape, but neither prescribes a `verdict` string nor the placeholder-token convention. `describe_envelope_schema(op_kind='create_slt_record')` output confirms `verdict` is an unconstrained non-empty string and `approval_token` is required (`minLength: 1`).
-2. **Specs/docs**: `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token documents the signer/submit CLI flow but (per this run) does not give a copy-pasteable envelope skeleton with a known-good `verdict` and the pre-sign placeholder. The two existing batch manifests (`SLB-1.md`, this run's `SLB-2.md`) record the *submit result* but not the envelope authoring values.
-3. **Shared boundary under audit**: the patch-plan envelope contract (`tools/patch-engine/src/envelope/schema.ts`) and `approval_semantics` validator vs. the skill's Phase 6 authoring instructions. The skill should make the minimum legal `create_slt_record` envelope reproducible without reverse-engineering accepted values.
-6. **Schema reference (read-only)**: this ticket does not extend the envelope schema; it documents known-good values for existing required fields (`verdict`, `approval_token`, `expected_id_allocations.slt_ids`). Additive doc only.
+1. `.claude/skills/commitment-block-authoring/references/phase-1-coverage-diagnosis.md` defines the 17 coverage targets and the `coverage_diagnosis` working-memory YAML shape with `status: covered | gap` per target (verified by direct Read this session). It uses the word "under-represented" (line ~35) without an operational definition, and the `coverage_diagnosis` entry shape has no grounding-strength field.
+2. The `move_family` enum (16 values) and predicate DSL hard/soft split live in `.claude/skills/_shared-templates/story-record-schemas.md` §4.4 and `story-state-contract.md` §5 (verified). "Hard" = `preconditions.hard[]` (selection gate); "soft" = `preconditions.soft[]` (ranking preference). The hard/soft distinction the diagnosis must read is already a first-class schema concept; this ticket consumes it, it does not invent a new field.
+3. Shared boundary under audit: the Phase 1 SLT-pool projection (`list_records(record_type='storylet_record', fields=['move_family','grounding.compatible_turn_drivers','preconditions','exit_options'])`) already returns `preconditions` with the hard/soft split, so grounding-strength is computable from the projection already loaded in pre-flight step 4(i) — no new retrieval call is required.
+4. FOUNDATIONS principles under audit: §Rule 5 (No Consequence Evasion — every page must leave a continuation eligible; a pool that only soft-covers consequence delivery can evade hard-firing on a matured `CNSQ`) and §5b (Schema-Minimalism — do not author redundant non-load-bearing records). Restated before trusting the existing reference narrative: the diagnosis exists to keep the pool able to *fire* the moves the bundle's live pressure demands, not merely to enumerate that a family label is present somewhere.
+5. Adjacent contradiction classification: the existing word "under-represented" without a definition is a *required consequence* to fix here (the ticket supplies the definition). The three SPEC-42 conditional targets (#12/#13/#14) already have a "conditional authoring target" carve-out; this ticket's grounding-strength lens composes with that carve-out and does not override it (a target with no active records of its class is neither a gap nor under-represented). No separate bug uncovered.
+6. Out-of-scope creep guard: this ticket does NOT add a validator that fails a batch for not hard-covering every target — grounding-strength is *authoring guidance + deliverable disclosure*, not a hard gate (consistent with the existing Phase 4 batch-diversity checks, which gate diversity but treat coverage depth as judgment). A hard validator for soft-only consequence coverage would be a separate, larger ticket against `tools/validators/`.
 
 ## Architecture Check
 
-1. Cleaner than leaving authors to infer values from a passing run: a single canonical skeleton in the skill removes guesswork and makes dry-run/submit reproducible, lowering the chance of a malformed envelope. It documents existing behavior; it does not add a new field or mechanism.
-2. No backwards-compatibility shim: pure documentation; the skeleton mirrors what the engine already accepts.
+1. Cleaner than alternatives: extending the existing working-memory `coverage_diagnosis` shape with a grounding-strength qualifier and adding a saturation advisory reuses data already loaded (the pool projection's `preconditions`) and the existing deliverable-summary surface (HARD-GATE step presents "SLT inventory by move_family" + Phase 1 diagnosis). The alternative — a new validator enforcing hard coverage per target — over-constrains authoring (a soft-only target is sometimes the correct design) and belongs in a separate ticket if ever warranted. Authoring guidance + disclosure is the right altitude.
+2. No backwards-compatibility aliasing/shims introduced: the `coverage_diagnosis` YAML is working-memory-only (the reference explicitly says it is not copied into the SLB manifest), so extending its shape breaks no on-disk artifact and needs no migration.
 
 ## Verification Layers
 
-1. Skeleton produces a validate-clean envelope -> skill dry-run (`validate-patch-plan.js` on an envelope built from the documented skeleton returns `status: pass`).
-2. Documented `verdict`/placeholder-token match accepted values -> codebase grep-proof (the skeleton's `verdict` and token handling are consistent with `approval_semantics` and `sign-approval-token.js` behavior).
-3. `SLB` correctly excluded from `expected_id_allocations` -> manual review (skeleton lists only `slt_ids`).
+1. Invariant: Phase 1 distinguishes hard-grounded vs soft-only coverage per causal-function / source-class target → codebase grep-proof (the reference defines a grounding-strength qualifier — e.g., `coverage_strength: hard | soft_only | none` — on the `coverage_diagnosis` entry and instructs computing it from the pool projection's `preconditions.hard[]` vs `preconditions.soft[]`).
+2. Invariant: "under-represented" has an operational definition → FOUNDATIONS alignment check (the reference defines under-representation as e.g. soft-only coverage of a target whose triggering record class is active at high salience, or single-block coverage of a high-urgency active lane, and cites §Rule 5 for the consequence case).
+3. Invariant: a saturated pool surfaces an advisory before blocks are mechanically authored → skill dry-run (re-invoke commitment-block-authoring `direct_batch` on red-bunny with no `focus`; confirm the deliverable summary states the pool is target-saturated and recommends a `focus` hint or reduced `target_count`, and records which authored blocks are depth/hard-grounding additions vs absent-target fills).
 
 ## What to Change
 
-### 1. Add a worked create_slt_record envelope skeleton to Phase 6
+### 1. Add grounding-strength to the coverage diagnosis
 
-Add (in `SKILL.md` Phase 6 sub-step 1 or a small `references/phase-6-envelope-skeleton.md`) a minimal commented envelope: `plan_id`, `target_world`, the pre-sign `approval_token` placeholder convention, a known-good `verdict` value, `originating_skill: "commitment-block-authoring"`, `expected_id_allocations: { slt_ids: [...] }` (note: no `slb_ids`), and one example `create_slt_record` patch op with `target_file` set to the `_source/storylets/SLT-<n>.yaml` path.
+In `phase-1-coverage-diagnosis.md`, extend the working-memory `coverage_diagnosis` entry with a `coverage_strength` qualifier (`hard | soft_only | none`) computed from whether any pool SLT references the target's record class / move via `preconditions.hard[]` (hard), only `preconditions.soft[]` (soft_only), or not at all (none). Instruct that `status: covered` with `coverage_strength: soft_only` on a target whose triggering record class is *active in the bundle* is reported as **under-represented**, not silently "covered." Apply specifically to the consequence-resolution target (#5) and the source-class composition coverage (#17), where hard-firing capacity is the load-bearing property.
 
-### 2. State the placeholder-token → sign → submit sequencing explicitly
+### 2. Define "under-represented" operationally
 
-One sentence clarifying that the envelope carries a placeholder `approval_token` through the dry-run, and the real token is issued by `sign-approval-token.js` to a token file consumed by the submit CLI's `<token-path>` argument (not by editing the envelope).
+Add a short definition: a target is under-represented when its only pool coverage is (a) `soft_only` while its triggering record class is active, or (b) a single block while the bundle carries a high-urgency active record in that lane (e.g., a `high`-urgency `THR`/`OBL`/`CNSQ`, or a `high`-salience `CLK`/`STSEC`/`STQ`). Under-represented targets are eligible authoring lanes for `direct_batch` even though `status: covered`.
+
+### 3. Add a saturated-pool advisory
+
+Add a Phase 1 step: when all 17 targets are `covered` with `coverage_strength: hard` (no gaps, no under-representation) and no `focus` hint was supplied, surface a **pool-saturation advisory** in the Phase 6 deliverable summary recommending the user either supply a `focus` hint or reduce `target_count`, and label each authored block as a depth/hard-grounding/under-representation addition rather than an absent-target fill. This is advisory only — it does not block authoring (the user may still want depth), but it makes redundancy a conscious choice per §5b. Add a one-line pointer to this advisory in `SKILL.md` Phase 6 sub-step 3 (deliverable summary contents).
 
 ## Files to Touch
 
-- `.claude/skills/commitment-block-authoring/SKILL.md` (modify) and/or `.claude/skills/commitment-block-authoring/references/phase-6-envelope-skeleton.md` (new)
+- `.claude/skills/commitment-block-authoring/references/phase-1-coverage-diagnosis.md` (modify)
+- `.claude/skills/commitment-block-authoring/SKILL.md` (modify — Phase 6 deliverable-summary contents line: add saturation advisory + per-block depth-vs-gap labeling)
 
 ## Out of Scope
 
-- Changing the envelope schema, `verdict` semantics, or token lifecycle.
-- Other skills' envelope docs (open a sibling ticket if the same skeleton gap exists in turn-cycle/bootstrap).
+- Any new `tools/validators/` rule that hard-fails a batch for soft-only or single-block coverage (separate ticket if ever warranted; grounding-strength here is authoring guidance + disclosure, not a hard gate).
+- Phase 4 batch-diversity checks (unchanged; this ticket adds a Phase 1 lens, not a Phase 4 gate).
+- The SPEC-42 conditional-target carve-out for absent record classes (#12/#13/#14) — preserved; a class with zero active records is neither gap nor under-represented.
+- `direct_batch` `target_count` default/max (unchanged at 6/12).
 
 ## Acceptance Criteria
 
 ### Tests That Must Pass
 
-1. An envelope assembled verbatim from the documented skeleton (substituting real SLT ids) passes `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --world-root <root> <plan>` with `status: pass`.
-2. The skeleton's `expected_id_allocations` contains `slt_ids` only (no `slb_ids`).
+1. `grep -n "coverage_strength\|soft_only\|under-represented" .claude/skills/commitment-block-authoring/references/phase-1-coverage-diagnosis.md` returns the grounding-strength qualifier, its computation rule, and the operational under-representation definition.
+2. `grep -n "saturat" .claude/skills/commitment-block-authoring/references/phase-1-coverage-diagnosis.md .claude/skills/commitment-block-authoring/SKILL.md` returns the saturated-pool advisory in both the reference and the deliverable-summary contract.
+3. Skill dry-run: re-invoke commitment-block-authoring `direct_batch --target_count 6` on `erotica-world / red-bunny` (a known-saturated pool, 25 blocks post-SLB-3); confirm the deliverable summary (a) flags pool saturation, (b) reports any soft-only-covered active-class target as under-represented, and (c) labels each authored block as depth/hard-grounding vs absent-target fill — without blocking authoring.
 
 ### Invariants
 
-1. The skill documents a reproducible, validate-clean minimal `create_slt_record` envelope without requiring an author to reverse-engineer accepted `verdict`/`approval_token` values.
+1. A `direct_batch` over a target-saturated pool surfaces the saturation advisory and per-block depth-vs-gap labeling in the HARD-GATE deliverable summary before any write (FOUNDATIONS §5b — redundancy is a conscious choice, not a default).
+2. The consequence-resolution lane (#5) and source-class composition (#17) report `soft_only` coverage of an active record class as under-represented, not as plain "covered" (FOUNDATIONS §Rule 5).
+3. The `coverage_diagnosis` shape remains working-memory-only and is not written into the SLB manifest (the manifest keeps coverage as prose, per existing phase-5 contract).
 
 ## Test Plan
 
 ### New/Modified Tests
 
-1. `None — documentation-only ticket; verification is command-based via the existing validate-patch-plan CLI named below.`
+1. `None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment.`
 
 ### Commands
 
-1. Build a throwaway envelope from the skeleton and run `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --world-root /home/joeloverbeck/projects/worldloom <plan>.json 2>/dev/null`.
-2. `jq '.expected_id_allocations | keys' <plan>.json` → confirms `["slt_ids"]`.
-
+1. `grep -n "coverage_strength\|soft_only\|under-represented\|saturat" .claude/skills/commitment-block-authoring/references/phase-1-coverage-diagnosis.md`
+2. `grep -n "saturat\|under-represent\|depth" .claude/skills/commitment-block-authoring/SKILL.md`
+3. A grep + skill-dry-run boundary is correct here because the change is authoring-guidance prose and a deliverable-summary disclosure, with no envelope/schema/validator surface to exercise; the dry-run confirms the advisory and labeling actually appear in the gate summary on a saturated pool.
 
 ## Outcome
 
-**Completed**: 2026-05-29
+**Completion date**: 2026-05-29
 
-### What changed
+**What actually changed**:
+- `.claude/skills/commitment-block-authoring/references/phase-1-coverage-diagnosis.md`:
+  - Added a **"Grounding-strength and under-representation"** subsection defining `coverage_strength` (`hard | soft_only | none`, computed from the already-loaded pool projection `preconditions.hard[]` vs `preconditions.soft[]`) and an operational under-representation definition.
+  - Added a **"Saturated-pool advisory"** subsection: when every applicable target is `covered` + `hard` (no gaps, no under-representation) and no `focus` hint was supplied, surface a non-blocking advisory recommending a `focus` hint or reduced `target_count`, and label authored blocks as absent-target fills vs. depth/hard-grounding/under-representation additions.
+  - Extended the working-memory `coverage_diagnosis` YAML shape with `coverage_strength` + `under_represented` per entry and a top-level `pool_saturation` flag; added an example #5 entry illustrating foundational-capacity under-representation.
+- `.claude/skills/commitment-block-authoring/SKILL.md` Phase 6 sub-step 3: added a "Coverage-depth signal" deliverable-summary bullet (under-represented targets + pool-saturation advisory + per-block depth-vs-gap labeling).
 
-- New `.claude/skills/commitment-block-authoring/references/phase-6-envelope-skeleton.md`: a worked, validate-clean `create_slt_record` envelope skeleton resolving the three non-schema authoring decisions — `verdict: "approve"`; the `approval_token: "PENDING"` dry-run placeholder with explicit placeholder->sign->submit sequencing (the real token is issued out-of-band by `sign-approval-token.js` to a token file consumed by submit `<token-path>`, never edited into the envelope); and `expected_id_allocations: { slt_ids: [...] }` with an explicit note that `SLB` carries NO id allocation (markdown manifest, not a patch-consumed record). Includes a full minimal envelope JSON with one `create_slt_record` op, `target_file` pointing at `_source/storylets/SLT-<n>.yaml`, and `originating_skill: "commitment-block-authoring"`.
-- `SKILL.md` Phase 6 sub-step 1: added a pointer to the new skeleton reference, naming the three fixed values inline.
+**Deviations from original plan**: one refinement surfaced during edge-case testing and adopted. The original ticket gated under-representation on "triggering record class is active in the bundle" for *all* targets. The dry-run against the real red-bunny pre-SLB-3 state showed this under-flags the consequence-resolution target (#5): red-bunny had **no active `CNSQ`**, so a strict active-class gate would not flag #5 — yet hard-CNSQ coverage was genuinely needed (and was authored as SLT-22). The reference now splits targets into **foundational-capacity** (#1 recovery, #5 consequence-resolution — flagged regardless of current active records, parallel to the bundle-scoped recovery requirement in Phase 4 check 2 and FOUNDATIONS §Rule 5) vs. **contingent-pressure** (everything else — active-class gate applies, SPEC-42 zero-active carve-out preserved). This is a strict improvement over the ticket's original single-rule formulation and keeps the §Rule 5 intent intact.
 
-### Deviations
+**Verification results**:
+- AC1 (grep): `coverage_strength`, `soft_only`, the computation rule, and the operational under-representation definition are present in the reference (18 hits). PASS.
+- AC2 (grep): saturated-pool advisory present in BOTH the reference (2 hits) and `SKILL.md` (1 hit); depth-vs-gap labeling present in the SKILL.md deliverable-summary contract. PASS.
+- AC3 (logical dry-run across edge cases, applied to real pool states — no re-author/commit triggered): (1) pre-SLB-3 19-block pool → #5 `soft_only`/`under_represented: true` (foundational, flagged despite zero active CNSQ), fear & OBL lanes under-represented (contingent, classes active) — reproduces the hand-diagnosis that authored SLB-3; (2) post-SLB-3 25-block pool → #5/fear/OBL now `hard`, all families present, no focus → `pool_saturation: true`, advisory fires; (3) SPEC-42 conditional target with zero active class → `none` but not flagged; (4) contingent `soft_only` with inactive class → not under-represented. All four behave correctly. PASS.
+- Invariant 3 (coverage_diagnosis stays working-memory-only): the YAML shape change is confined to the working-memory diagnosis block; phase-5 manifest contract (coverage-as-prose) is untouched. PASS.
+- No engine/validator/tool/schema change; no engine capability gap encountered.
 
-- Implemented as a dedicated `references/` snippet (the ticket offered SKILL.md inline OR a reference; the reference keeps the already-dense Phase 6 lean and matches the skill’s reference-extraction pattern).
-
-### Verification
-
-- Built a throwaway envelope verbatim from the skeleton (substituting `target_world: erotica-world`, `story_slug: red-bunny`, `story_id: STORY-1`, and the real next id `SLT-20`).
-- `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --world-root /home/joeloverbeck/projects/worldloom <plan>.json 2>/dev/null` -> `status: pass`, zero fail verdicts (record_schema_compliance, approval_semantics, slt_grounding_minimal_integrity, storylet_predicate_dsl_parsability, and all rule validators PASS). Acceptance criterion 1 met.
-- `jq ".expected_id_allocations | keys"` -> `["slt_ids"]` (no `slb_ids`). Acceptance criterion 2 met.
-- Confirming the placeholder/verdict claims: a first run with a non-next id (SLT-900) failed ONLY on `id_allocation_race` while `approval_semantics` still PASSED with `verdict: "approve"` + `approval_token: "PENDING"`, proving those two values are accepted independently of id allocation (verification layer 2).

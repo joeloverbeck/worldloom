@@ -127,6 +127,7 @@ All SLT records in a batch share the same `provenance.origin` value: `author_bat
    3. Present the complete deliverable summary to the user:
       - Mode + source (focus hint OR audit_id + finding_ids).
       - SLT inventory by `move_family` value (Phase 1 + Phase 4 diagnosis preserved).
+      - Coverage-depth signal (`direct_batch`): any targets reported **under-represented** (covered but `soft_only` with an active triggering class, or single-block coverage of a high-salience active lane — see `references/phase-1-coverage-diagnosis.md` §Grounding-strength and under-representation), and — when the pool is target-saturated with no `focus` hint — the **pool-saturation advisory** recommending a `focus` hint or reduced `target_count`. Label each authored block as an absent-target fill vs. a depth / hard-grounding / under-representation addition.
       - Per-block one-line summary (id, move_family, title, beat count, exit-option count).
       - Per-block validation trace (6 gates → PASS / rationale).
       - Batch-diversity validation result (`direct_batch` only).
