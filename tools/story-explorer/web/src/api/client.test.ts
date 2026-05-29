@@ -12,6 +12,7 @@ import {
   getStory,
   getStoryOverview,
   getUnscenedRanges,
+  getBranchMap,
   getWorld,
   listScenes,
   listStories,
@@ -156,6 +157,30 @@ describe('SPEC-96 scene-first route helpers', () => {
 
     expect(fetch).toHaveBeenCalledWith(
       '/api/worlds/fixture-world/stories/red-bunny/search?q=bunny&kinds=scene%2Cstate_tick&domains=state&limit=10&offset=5&groupBy=scene_or_unscened_range',
+      undefined,
+    );
+  });
+
+  it('getBranchMap targets the scene-layer route with focus + depth and unwraps the graph', async () => {
+    const graph = { focus: { requested: 'SCN-1' }, nodes: [], edges: [], branchIds: ['BR-1'] };
+    mockJsonResponse({ _envelope: envelope, data: graph });
+
+    const result = await getBranchMap('fixture-world', 'red-bunny', 'SCN-1');
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/worlds/fixture-world/stories/red-bunny/branch-map?focus=SCN-1&depth=3',
+      undefined,
+    );
+    expect(result.payload).toEqual(graph);
+  });
+
+  it('getBranchMap serializes a custom depth', async () => {
+    mockJsonResponse({ _envelope: envelope, data: { nodes: [] } });
+
+    await getBranchMap('fixture-world', 'red-bunny', 'BR-2', 1);
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/worlds/fixture-world/stories/red-bunny/branch-map?focus=BR-2&depth=1',
       undefined,
     );
   });

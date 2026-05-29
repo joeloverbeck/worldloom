@@ -29,6 +29,10 @@ describe('route tree', () => {
   it('resolves the SPEC-98 search surface', () => {
     expect(matchRoutes(routes, '/worlds/fixture-world/stories/red-bunny/search')).not.toBeNull();
   });
+
+  it('resolves the SPEC-98 branch-map surface', () => {
+    expect(matchRoutes(routes, '/worlds/fixture-world/stories/red-bunny/branch-map')).not.toBeNull();
+  });
 });
 
 describe('AppRouteError', () => {

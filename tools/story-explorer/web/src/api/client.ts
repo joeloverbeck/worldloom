@@ -143,27 +143,90 @@ export interface RecordProvenance {
   evidenceRecords: string[];
 }
 
-// Frontend mirrors of tools/story-explorer/src/view-models/branch-map-node.ts and branch-map-edge.ts.
-export interface BranchMapNode {
-  pageId: string;
+// Frontend mirror of tools/story-explorer/src/view-models/branch-map-graph.ts.
+// The page-centric BranchMapNode/BranchMapEdge mirrors were removed alongside
+// the backend page-model teardown (SPEC98STOEXPSCE-002): the branch map is now
+// a single-layer scene-segment graph. `pageId` on split/choice/terminal nodes
+// is a reference to the fork/choice/leaf page, not a page-node identity.
+export interface BranchMapSceneNode {
+  kind: 'scene';
+  id: string;
   branchId: string;
-  turnIndex: number;
-  label: string;
-  hasProse: boolean;
-  isCurrent: boolean;
-  isLeaf: boolean;
-  isTerminal: boolean;
-  eventKind: string | null;
-  outcomeRoute: string | null;
+  pageIds: string[];
+  startPg: string | null;
+  endPg: string | null;
+  publicationState: ScenePublicationState;
+  focused: boolean;
 }
 
-export interface BranchMapEdge {
-  fromPageId: string;
-  toPageId: string;
-  choiceId: string | null;
-  choiceLabel: string | null;
-  variantLabel: string | null;
+export interface BranchMapUnscenedRunNode {
+  kind: 'unscened_run';
+  id: string;
   branchId: string;
+  pageIds: string[];
+  startPg: string;
+  endPg: string;
+  tickCount: number;
+  finalChoiceCount: number;
+  label: string;
+  focused: boolean;
+}
+
+export interface BranchMapBranchSplitNode {
+  kind: 'branch_split';
+  id: string;
+  branchId: string;
+  pageId: string;
+  childBranchIds: string[];
+  focused: boolean;
+}
+
+export interface BranchMapChoiceSurfaceNode {
+  kind: 'choice_surface';
+  id: string;
+  branchId: string;
+  pageId: string;
+  choiceCount: number;
+  focused: boolean;
+}
+
+export interface BranchMapTerminalNode {
+  kind: 'terminal_marker';
+  id: string;
+  branchId: string;
+  pageId: string;
+  reason: 'no_children' | 'paused' | 'terminal';
+  focused: boolean;
+}
+
+export type BranchMapNode =
+  | BranchMapSceneNode
+  | BranchMapUnscenedRunNode
+  | BranchMapBranchSplitNode
+  | BranchMapChoiceSurfaceNode
+  | BranchMapTerminalNode;
+
+export interface BranchMapEdge {
+  from: string;
+  to: string;
+  branchId: string;
+  kind: 'sequence' | 'fork';
+}
+
+export interface BranchMapFocus {
+  requested: string;
+  resolvedBranchId: string | null;
+  nodeId: string | null;
+}
+
+export interface BranchMapGraph {
+  focus: BranchMapFocus;
+  depth: number;
+  branchIds: string[];
+  nodes: BranchMapNode[];
+  edges: BranchMapEdge[];
+  indexStatus: IndexStatus;
+  degradedDirectRead: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -587,7 +650,13 @@ export function getRawRecord(slug: string, storySlug: string, recordId: string):
   );
 }
 
-export function getBranchMap(slug: string, storySlug: string, focus: string, depth = 3): Promise<EnvelopedResult<unknown>> {
+// SPEC-98 §2 item 3 — scene-layer branch map. focus accepts SCN-/PG-/CHC-/BR-.
+export function getBranchMap(
+  slug: string,
+  storySlug: string,
+  focus: string,
+  depth = 3,
+): Promise<EnvelopedResult<BranchMapGraph>> {
   const query = new URLSearchParams({ focus, depth: String(depth) });
   return fetchEnveloped(`/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/branch-map?${query}`);
 }

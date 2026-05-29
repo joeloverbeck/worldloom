@@ -13,6 +13,7 @@ import { BackendUnreachablePage } from './components/BackendUnreachablePage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotFoundPage } from './components/NotFoundPage';
 import { RouteLoading } from './components/RouteLoading';
+import { BranchMapRoute } from './routes/branch-map';
 import { SceneDetailRoute, sceneDetailLoader } from './routes/scene-detail';
 import { ScenesRoute, sceneListLoader } from './routes/scenes';
 import { SearchRoute } from './routes/search';
@@ -145,6 +146,15 @@ export const routes: RouteObject[] = [
     element: (
       <RouteFrame loadingLabel="Loading search...">
         <SearchRoute />
+      </RouteFrame>
+    ),
+  },
+  {
+    path: '/worlds/:slug/stories/:storySlug/branch-map',
+    errorElement: <AppRouteError />,
+    element: (
+      <RouteFrame loadingLabel="Loading branch map...">
+        <BranchMapRoute />
       </RouteFrame>
     ),
   },
