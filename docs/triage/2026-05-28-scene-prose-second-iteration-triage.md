@@ -10,7 +10,7 @@
 | Item (report §) | Spec | Rationale |
 |---|---|---|
 | SCN.status is a dead-enum / stale field on append-only SCN (§3/§10/§12) | `archive/specs/SPEC-94-scn-publication-status-decoupling.md` | `rendered`/`attached` unreachable; derive publication from artifact presence + receipt verdict, no hashing. |
-| Scene-coverage index + page-prose inventory removal + validator rename (§11/§13) | `specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md` | Build coverage on existing `scene_*` edges; rename 2 PG-causal validators; presence-based only. |
+| Scene-coverage index + page-prose inventory removal + validator rename (§11/§13) | `archive/specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md` | Build coverage on existing `scene_*` edges; rename 2 PG-causal validators; presence-based only. |
 | Backend scene/timeline/unscened/x-ray API (§7/§9) | `specs/SPEC-96-story-explorer-scene-backend-api.md` | Replace page-first reader routes; PG demoted to x-ray surface. |
 | Frontend scene-first / author-x-ray UI (§6/§8/§9) | `specs/SPEC-97-story-explorer-scene-first-frontend.md` | Timeline-primary; reuse x-ray infra; delete `/pages/:pageId`. |
 | Search + MVP scene branch-map (§12/§14) | `specs/SPEC-98-story-explorer-scene-search-and-branch-map.md` | Container-grouped search; single-layer scene map (dual-layer deferred); removes SPEC-90 placeholders. |

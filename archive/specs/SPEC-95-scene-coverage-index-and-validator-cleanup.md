@@ -1,6 +1,6 @@
 # SPEC-95 — World-Index Scene-Coverage Layer + Validator/Schema Cleanup
 
-**Status:** draft
+**Status:** COMPLETED
 **Date:** 2026-05-28
 **Classification:** story-canon-related (changes the world-index story-bundle inventory + a derived coverage layer over `scene_record` nodes/edges, the `tools/validators` registry naming for two surviving PG causal validators, and removes the legacy page-prose receipt schema surface; touches no canon record schema and no FOUNDATIONS principle beyond reinforcing the SPEC-92 SCN-is-membership / prose-is-non-authoritative stance).
 **Depends on:** archived **SPEC-94** (SCN carries no stored `status`; the coverage layer derives publication state from artifact presence + receipt `verdict`). SPEC-94 is landed; land this spec next.
@@ -100,3 +100,27 @@ The search paths deliberately include `tools/validators/tests` and `tools/valida
 - **§4.6 deferral leaves a legacy surface in the contract.** Retaining the legacy prose-receipt block is correct while `story-fact-promotion-to-canon` still reads `pages-prose-receipts`, but it perpetuates a page-prose-era shape in the shared template. Open question: schedule the §4.6 removal behind a future migration of `story-fact-promotion-to-canon` off legacy receipts (likely alongside the explorer scene-first cutover, SPEC-96/97), then re-run the §5 sweep to confirm zero live consumers before deleting.
 - **Unscened-run computation correctness.** The coverage layer segments a branch's committed PG chain into contiguous unscened spans by walking `branch_path` and subtracting active-SCN `scene_includes_page` membership. Edge cases to cover in tests: a branch with zero scenes (entire chain unscened), a superseded SCN whose pages must fall back to unscened, a fork point where the parent branch's coverage must not leak into the child, and an SCN spanning a non-contiguous PG set (should already be rejected upstream by `scene_range_integrity`).
 - **Validator final names.** Settled as `pg_se_turn_driver_consistency` (names the PG↔SE linkage it checks) and `pg_affordance_integrity` (parallels the `pg_` prefix); the report's `turn_driver_state_consistency` alternative was not chosen.
+
+## Outcome
+
+Completed on 2026-05-29.
+
+What changed:
+
+- Removed legacy page-prose inventory from `tools/world-index` and retained scene-prose artifact inventory.
+- Added the derived `scene_coverage` world-index layer, including active scenes, superseded scenes, unscened PG runs, PG-to-scene lookup, artifact availability, and presence-based publication indicators.
+- Renamed the two PG-causal validators to `pg_se_turn_driver_consistency` and `pg_affordance_integrity` across source, registry, tests, docs, and the story-state contract.
+- Documented the legacy §4.6 page-prose receipt deferral in `.claude/skills/_shared-templates/story-record-schemas.md`; the block is retained while `story-fact-promotion-to-canon` remains a live legacy consumer, and `prose-receipt.schema.json` remains removed.
+
+Deviations from the original plan:
+
+- The legacy `prose-receipt.schema.json` file removal was already landed by SPEC-93, so SPEC-95 closed that deliverable as documentation/truthing rather than a file deletion.
+- The §4.6 shared-template block was retained rather than removed because a live legacy consumer still reads `pages-prose-receipts/<page_id>.yaml`.
+- The final §5 sweep still reports intentional legacy compatibility, fixture, migration, historical triage, and SPEC-96-owned story-explorer page-prose hits. Those are not unexpected SPEC-95 leftovers.
+
+Verification results:
+
+- `tools/world-index`: `npm run build` PASS; `npm test` PASS with 139 tests passing across the compiled and serial CLI lanes.
+- `tools/validators`: `npm run build` PASS; `npm test` PASS with 1058 tests passing.
+- §5 sweep classified remaining `pages-prose*` / legacy receipt / old validator-name hits as intentional compatibility, historical docs/triage, SPEC-96-owned story-explorer work, or current scene-receipt surfaces; no unexpected SPEC-95 live-removal hit remains.
+- `rg -n "computePgStateHash|state_hash" tools/world-index/src/index/scene-coverage.ts tools/world-index/src/hash/content.ts` found no hash references in `scene-coverage.ts`; the only hits are the existing `hash/content.ts` PG state-hash implementation.

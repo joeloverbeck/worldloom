@@ -36,7 +36,7 @@ Inside the §4.6 "Legacy prose receipt" block, added a short note recording: the
 ## Files to Touch
 
 - `.claude/skills/_shared-templates/story-record-schemas.md` (modify)
-- `specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md` (modify — implementation note only)
+- `archive/specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md` (modify — implementation note only)
 
 ## Out of Scope
 
@@ -74,7 +74,7 @@ Inside the §4.6 "Legacy prose receipt" block, added a short note recording: the
 
 Completed on 2026-05-29. Added the SPEC-95 deferral note directly under `.claude/skills/_shared-templates/story-record-schemas.md` §4.6. The note records that the legacy page-prose receipt block is deliberately retained while `story-fact-promotion-to-canon` still consumes `pages-prose-receipts/<page_id>.yaml` and reads `verdict`, and that removal is deferred until that consumer migrates off legacy receipts and the SPEC-95 §5 sweep confirms zero live consumers. The note also records that `prose-receipt.schema.json` was already removed by SPEC-93 and must not be recreated for this retained documentation block.
 
-Added a dated implementation note to `specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md` so the active spec records that AC#5's §4.6 annotation is landed while the broader spec remains open for final archival.
+Added a dated implementation note to `archive/specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md` so the archived spec records that AC#5's §4.6 annotation landed.
 
 ## Verification Result
 
