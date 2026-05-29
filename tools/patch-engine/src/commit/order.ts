@@ -46,6 +46,7 @@ const TIER_TWO = new Set<PatchOperation["op"]>([
   "remove_story_character_authority_body_hash_note_field",
   "repair_story_character_authority_body_integrity",
   "repair_skipped_change_log_entry",
+  "repair_storylet_created_at_page",
   "remove_ch_affected_cf_ids",
   "append_extension",
   "append_touched_by_cf",
