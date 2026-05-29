@@ -1,6 +1,6 @@
 # SPEC97STOEXPSCE-003: Story dashboard route + overview + coverage panel
 
-**Status**: PENDING
+**Status**: DONE
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/story-explorer/web` new route `/worlds/:slug/stories/:storySlug` (story dashboard) + `StoryDashboard`/`BranchSelector`/coverage-panel components; one route-array entry added to `app.tsx`.

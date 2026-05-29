@@ -9,6 +9,7 @@ import { RouteLoading } from './components/RouteLoading';
 import { PageEntryRoute, pageEntryLoader } from './routes/page-entry';
 import { PageReadRoute, pageReadLoader } from './routes/page-read';
 import { StoriesRoute, storyListLoader } from './routes/stories';
+import { StoryDashboardRoute, storyDashboardLoader } from './routes/story-dashboard';
 import { WorldsRoute, worldListLoader } from './routes/worlds';
 
 function RouteFallback({ error, retry }: { error: Error; retry: () => void }): JSX.Element {
@@ -75,6 +76,16 @@ const router = createBrowserRouter([
     element: (
       <RouteFrame loadingLabel="Loading stories...">
         <StoriesRoute />
+      </RouteFrame>
+    ),
+  },
+  {
+    path: '/worlds/:slug/stories/:storySlug',
+    loader: storyDashboardLoader,
+    errorElement: <AppRouteError />,
+    element: (
+      <RouteFrame loadingLabel="Loading story dashboard...">
+        <StoryDashboardRoute />
       </RouteFrame>
     ),
   },
