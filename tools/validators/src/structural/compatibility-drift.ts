@@ -117,6 +117,9 @@ function verdictsForStory(story: StoryScope, ctx: Context, worldRoot: string | u
       continue;
     }
 
+    // Hard replay validators normalize missing optional keys to [] for legacy
+    // compatibility, but current pages still carry the full map so fork/hash
+    // review has one explicit per-class audit surface.
     const severity = isCreatedPageInPlan(pageRecord, ctx) || hasCurrentContractParent(pageRecord, pageById) ? "warn" : "info";
     const classification: CompatibilityClassification = severity === "warn"
       ? "requires_migration_patch"
