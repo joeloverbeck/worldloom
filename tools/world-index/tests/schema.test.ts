@@ -14,7 +14,7 @@ import test from "node:test";
 
 import Database from "better-sqlite3";
 
-import { parseWorldFile, syncWorldIndex } from "../src/commands/shared.js";
+import { buildWorldIndex, parseWorldFile, syncWorldIndex } from "../src/commands/shared.js";
 import { openIndex, SchemaVersionMismatchError } from "../src/index/open.js";
 import { CURRENT_INDEX_VERSION } from "../src/schema/version.js";
 import { cleanup as cleanupAtomicRoot, createAtomicRepoRoot } from "./helpers/atomic-fixture.js";
@@ -457,6 +457,93 @@ test("parser-vocabulary migrations invalidate stale file versions before sync", 
 
 test("repair migration handles indexes that already recorded the v5 no-op migration", () => {
   assertStaleWorldKernelSectionReparses(5);
+});
+
+test("sync indexes newly added STCHAR hybrid files as story-character authority records", () => {
+  const worldSlug = "fixture-world";
+  const root = createAtomicRepoRoot(worldSlug);
+
+  try {
+    const buildResult = buildWorldIndex(root, worldSlug, { quiet: true });
+    assert.equal(buildResult.exitCode, 0);
+
+    const storyCharacterDirectory = path.join(
+      root,
+      "worlds",
+      worldSlug,
+      "stories",
+      "harborwatch",
+      "story-characters"
+    );
+    mkdirSync(storyCharacterDirectory, { recursive: true });
+    writeFileSync(
+      path.join(storyCharacterDirectory, "STCHAR-1.md"),
+      [
+        "---",
+        "id: STCHAR-1",
+        "story_id: STORY-1",
+        "story_slug: harborwatch",
+        "world_slug: fixture-world",
+        "source_kind: world_char",
+        "source_char_id: CHAR-1",
+        `source_char_hash: sha256:${"a".repeat(64)}`,
+        "source_char_sections_used: [frontmatter]",
+        "generated_at_page: PG-1",
+        "created_by_skill: unit-test",
+        "supersedes: null",
+        "superseded_by: null",
+        "status: active",
+        "bound_stent_ids: [STENT-0001]",
+        "profile_revision: 1",
+        "body_schema_version: stchar.v1",
+        `profile_hash: sha256:${"b".repeat(64)}`,
+        `voice_block_hash: sha256:${"c".repeat(64)}`,
+        `page_packet_hash: sha256:${"d".repeat(64)}`,
+        "---",
+        "## Profile",
+        "",
+        "A fixture character authority record."
+      ].join("\n") + "\n",
+      "utf8"
+    );
+
+    const syncResult = syncWorldIndex(root, worldSlug, { quiet: true });
+    assert.equal(syncResult.exitCode, 0);
+
+    const db = openIndex(root, worldSlug);
+    try {
+      const row = db
+        .prepare(
+          `
+            SELECT node_id, node_type
+            FROM nodes
+            WHERE world_slug = ?
+              AND file_path = 'stories/harborwatch/story-characters/STCHAR-1.md'
+          `
+        )
+        .get(worldSlug) as { node_id: string; node_type: string } | undefined;
+      assert.deepEqual(row, {
+        node_id: "harborwatch:STCHAR-1",
+        node_type: "story_character_authority_record"
+      });
+
+      const fileVersionCount = db
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM file_versions
+            WHERE world_slug = ?
+              AND file_path = 'stories/harborwatch/story-characters/STCHAR-1.md'
+          `
+        )
+        .get(worldSlug) as { count: number };
+      assert.equal(fileVersionCount.count, 1);
+    } finally {
+      db.close();
+    }
+  } finally {
+    cleanupAtomicRoot(root);
+  }
 });
 
 test("legacy page-prose deindex migration invalidates only retired story artifact rows", () => {
