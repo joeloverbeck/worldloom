@@ -2,6 +2,8 @@
 
 Draft `SE-<integer>` per shared contract §4.3:
 
+> **Authoritative record shapes via typed schema discovery.** For the full, current field shape of the `SE` and `PG` records drafted here (and the `CHC` records emitted in Phase 7) — including the per-`turn_driver.kind` `driver_records` requirements and the `outcome_route`→`resolution` conditionals — retrieve the live schema with `mcp__worldloom__get_record_schema(node_type='story_event_record' | 'page_record' | 'choice_record')` or `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record' | 'create_pg_record' | 'create_chc_record')`. The skeleton below is a drafting aid, not the full conditional schema; prefer typed schema discovery over reading the schema JSON files directly.
+
 ```yaml
 id: SE-<integer>
 event_kind: selected_choice | write_in_attempt | system_repair | audit_repair
@@ -82,7 +84,7 @@ Draft `PG-<integer>` per shared contract §4.2:
 - `input.choice_id` OR `input.manual_action_text` (exactly one non-null), `input.resolved_event_id: SE-<integer>`.
 - `state_hash_parent: parent.state_hash` copied exactly from the already-committed parent PG; `state_hash` is the final sha256 computed per shared contract §4.2a after `validation_trace` is finalized.
 - Full `state_snapshot`: `canon_revision` copied from the current world-canon revision loaded in Pre-flight; `active_records` MUST materialize every active-record class key from shared contract §4.2 / `ACTIVE_RECORDS_CLASSES`: `STENT`, `STCHAR`, `STINT`, `SF`, `BEL`, `OBL`, `CNSQ`, `THR`, `SREL`, `STLOC`, `STOBJ`, `DA`, `STSTAT`, `CLK`, `STSEC`, `STQ`, `STPLAN`, and `STEMO`. Use `[]` for classes with no active records on this page. `active_records_full_shape.active_records_class_key_missing` and `compatibility_drift.compat_requires_migration_patch` enforce this current-contract shape. `entity_status` is derived from active `STSTAT` records, one entry per active `STENT`; `visible_affordances` are recomputed for the new location/context (each entry's `grounded_in[]` accepts only `STLOC` and `STOBJ` ids per the shared contract's `$defs.PageAffordance.grounded_in.items.pattern` `^(STLOC|STOBJ)-[0-9]+$`; STENT actors go in `available_to`; STEMO / STPLAN / CLK / STSEC / STQ are interior or temporal state and belong in CHC grounding, not in `visible_affordances.grounded_in`); `unresolved_mystery_claims` updated; `continuation` (`has_eligible_commitment_block`, `terminal_status`, `terminal_rationale`).
-- Omit `plan.plan_hash` and `prose_plan_path` for new planless `PG` records. Existing legacy `PG`s may carry those fields, but turn-cycle does not create them after SPEC-93.
+- Omit `plan.plan_hash` and `prose_plan_path` for new planless `PG` records. Existing legacy `PG`s may carry those fields, but turn-cycle no longer creates them.
 - `validation_trace`: populated by Phase 9.
 
 ### Derive `active_records` with `compute-pg-snapshot` (do not hand-compute)

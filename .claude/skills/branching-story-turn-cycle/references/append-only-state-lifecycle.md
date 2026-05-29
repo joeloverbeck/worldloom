@@ -34,8 +34,7 @@ The patch-engine definitions live in
 `tools/patch-engine/src/ops/create-story-record.ts` under
 `STORY_RECORD_SPECS`; commit staging routes those operations to
 `stageCreateStoryRecord` in `tools/patch-engine/src/commit/temp-file.ts`.
-The structural backstop is `no_story_state_in_place_mutation`, landed in
-`archive/tickets/SPEC44STOSTAAPP-003.md`.
+The structural backstop is `no_story_state_in_place_mutation`.
 
 ## CLK Lifecycle Authoring
 
@@ -164,5 +163,3 @@ pattern — no special routing or workaround is required.
   field-list and enum definitions; this reference's quick-table mirrors them.
 - `.claude/skills/branching-story-turn-cycle/references/phase-4-5-belief-and-mystery.md`:
   phase-local lifecycle and belief propagation guidance.
-- `archive/tickets/SPEC44STOSTAAPP-003.md`: structural enforcement through
-  `no_story_state_in_place_mutation`.

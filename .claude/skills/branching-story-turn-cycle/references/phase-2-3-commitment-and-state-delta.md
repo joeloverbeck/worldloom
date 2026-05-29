@@ -46,7 +46,7 @@ Avoid pre-emptive JIT creation. If a flexible author-pool block fits with slight
 
 When `SE.turn_driver.kind` is set on a `turn_resolution` event, `mcp__worldloom__select_storylet_candidates` applies the `SLT.grounding.compatible_turn_drivers[]` compatibility filter server-side as part of the projection query. The returned shortlist is already driver-kind-narrowed before local predicate eligibility checks, alias binding, ranking, or instantiation. This remains a local-salience-narrowing pass per FOUNDATIONS §Story Bundles §5c ("Driver salience is local"), and it composes with the shared hard gates in `_shared-templates/story-state-contract.md` §7 by running before those gates validate the narrowed eligible pool. FOUNDATIONS §Story Bundles §6b still applies locally: the MCP pre-filter never replaces the in-process Information / Observer Firewall or Mystery Reserve firewall on the shortlisted full bodies.
 
-The compatible driver-kind vocabulary is the SPEC-76 `SE.turn_driver.kind` enum, in this exact order:
+The compatible driver-kind vocabulary is the `SE.turn_driver.kind` enum, in this exact order:
 
 1. `player_action`
 2. `player_write_in`
@@ -59,7 +59,7 @@ The compatible driver-kind vocabulary is the SPEC-76 `SE.turn_driver.kind` enum,
 
 A `runtime_jit`-origin SLT created during Phase 2 must declare `grounding.compatible_turn_drivers` as a singleton list containing the current `SE.turn_driver.kind`, for example `[npc_action]` when the selected driver is `npc_action`.
 
-**Responsibility split with `slt_grounding_minimal_integrity` (SPEC-77 §3.4)**: the validator enforces singleton-length at storage time via the `slt_grounding_runtime_jit_driver_kind_singleton` code; a `runtime_jit` SLT with `compatible_turn_drivers.length > 1` fails the storage-time gate. The validator does not enforce singleton-value match, meaning it does not cross-check that the stored singleton equals the resolved `SE.turn_driver.kind` for the event that created the JIT. That match is enforced by this Phase 2.1 filter at selection time: a stored singleton-value mismatch makes the JIT ineligible because its `compatible_turn_drivers` does not contain the current driver kind. This split is intentional; Phase 2 creates the JIT from the resolved `SE.turn_driver.kind`, so a stored mismatch would indicate Phase 2 authoring drift, while a cross-record validator would over-couple SLT validation to SE/PG retrieval.
+**Responsibility split with `slt_grounding_minimal_integrity`**: the validator enforces singleton-length at storage time via the `slt_grounding_runtime_jit_driver_kind_singleton` code; a `runtime_jit` SLT with `compatible_turn_drivers.length > 1` fails the storage-time gate. The validator does not enforce singleton-value match, meaning it does not cross-check that the stored singleton equals the resolved `SE.turn_driver.kind` for the event that created the JIT. That match is enforced by this Phase 2.1 filter at selection time: a stored singleton-value mismatch makes the JIT ineligible because its `compatible_turn_drivers` does not contain the current driver kind. This split is intentional; Phase 2 creates the JIT from the resolved `SE.turn_driver.kind`, so a stored mismatch would indicate Phase 2 authoring drift, while a cross-record validator would over-couple SLT validation to SE/PG retrieval.
 
 ## Phase 3: Apply the state delta
 

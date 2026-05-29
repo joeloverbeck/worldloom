@@ -4,7 +4,7 @@
 
 Before belief propagation, apply any instantiated new-class state transitions from `SE.state_delta`.
 
-**Same-event creation precedence (SPEC-43 + SPEC-44).** Apply any same-event
+**Same-event creation precedence.** Apply any same-event
 creations for `CLK`, `STSEC`, and `STQ` before lifecycle transitions against
 those classes. Lifecycle transitions run on the post-creation state, not on the
 pre-creation state. A `CLK` created and ticked in the same `SE` lands through
@@ -12,7 +12,7 @@ create first; the initial tick is then represented in the new record's
 `tick_history[]`. Later advances or resolutions create a fresh `CLK` with
 `supersedes: <prior_clk_id>` via `supersede_clk_record`.
 
-**belief propagation for STSEC creation and new causal state (SPEC-43).** Any new `STSEC`,
+**belief propagation for STSEC creation and new causal state.** Any new `STSEC`,
 deceptive event, public relationship formation, new witness-bearing entity, or
 newly visible pressure must pass the belief/visibility propagation discipline
 below. Create or supersede `BEL` records through the existing Phase 4 belief
@@ -34,7 +34,7 @@ For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL
   - `indirect`: public or factional holders who would receive the event through law, ritual, bureaucracy, artifact circulation, public violence, visible environmental change, or other accessible evidence (`DA` / `STOBJ` / location-state traces).
   - `excluded`: `STENT` records that are concealed, offstage, unconscious, socially barred, lacking access, or otherwise unable to perceive or receive the event.
 - `expected_witness_coverage` activates when the `SE.state_delta` creates a public-coverage `BEL` (`visibility: public | shared | factional | rumored`), creates a `DA` with `circulation: public | factional`, creates or supersedes `STENT`, or supersedes a `STSTAT` whose `entity` is not the event actor. When active, direct witnesses are covered only by a same-event public-coverage `BEL` whose `holder` is the witness, `public`, or `group:direct_witnesses`, or by a legal `SE.non_propagation_facts[]` entry covering every computed direct witness. Private, concealed, and suppressed `BEL` records satisfy private/interior belief semantics when appropriate, but they do not discharge this validator. See shared contract §5a.3.
-- The structural validator `expected_witness_coverage` enforces the indirect-witness obligation deterministically for one specific cue: when the SE's `state_delta.create[]` produces a DA with `circulation` in `{public, factional}`, at least one BEL referencing that DA via `basis.access_records[]` MUST carry `basis.access_route` in the indirect-route set `{document, object_trace, location_trace, rumor, surveillance, institutional_channel, magic_tech}`, or the SE's `non_propagation_facts[]` MUST include `{reason: event_leaves_no_accessible_trace, group: <computed direct-group label>, records: [<DA-id>]}`. Missing coverage emits `expected_witness_coverage_missing_indirect_propagation`. Other indirect-witness obligations (multi-location supersession, STENT-death with SREL ties, environmental change) remain authorial discipline and are not yet enforced by the validator; see SPEC-37 D2 for the indirect-cue calibration roadmap.
+- The structural validator `expected_witness_coverage` enforces the indirect-witness obligation deterministically for one specific cue: when the SE's `state_delta.create[]` produces a DA with `circulation` in `{public, factional}`, at least one BEL referencing that DA via `basis.access_records[]` MUST carry `basis.access_route` in the indirect-route set `{document, object_trace, location_trace, rumor, surveillance, institutional_channel, magic_tech}`, or the SE's `non_propagation_facts[]` MUST include `{reason: event_leaves_no_accessible_trace, group: <computed direct-group label>, records: [<DA-id>]}`. Missing coverage emits `expected_witness_coverage_missing_indirect_propagation`. Other indirect-witness obligations (multi-location supersession, STENT-death with SREL ties, environmental change) remain authorial discipline and are not yet enforced by the validator.
 - `STEMO.agency_effect: constraining` has a separate Rule 1 / Rule 5 receipt: an emitted `CHC.grounded_in.records[]` entry naming the `STEMO`, a holder-matched active `STPLAN.derived_from[]` entry, or an active `SREL.derived_from[]` entry whose `participants[]` includes the holder. Do not use `SE.non_propagation_facts[]` or `SE.state_relations[]` for this affective-constraint receipt; those fields retain their witness-coverage and plan-relation meanings.
 - For the full circulation-and-propagation rule set including the `BEL` access-route enum, `SE.non_propagation_facts[]`, and worked examples, see `.claude/skills/_shared-templates/da-authoring-reference.md` §Field semantics and §Patch obligations.
 - For every relevant direct or indirect witness group, account for propagation with either a created/superseded `BEL` or an explicit non-propagation rationale from this closed set: `no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, `event_leaves_no_accessible_trace`.
