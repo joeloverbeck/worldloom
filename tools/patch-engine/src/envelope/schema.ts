@@ -72,6 +72,7 @@ export const OPERATION_KINDS = [
   "create_sec_record",
   "update_record_field",
   "repair_skipped_change_log_entry",
+  "repair_storylet_created_at_page",
   "remove_ch_affected_cf_ids",
   "append_extension",
   "append_touched_by_cf",
@@ -273,6 +274,11 @@ export interface RepairDiegeticArtifactClaimMapMetadataPayload {
   claim_map_updates: RepairDiegeticArtifactClaimMapEntry[];
 }
 
+export interface RepairStoryletCreatedAtPagePayload {
+  story_slug: string;
+  target_slt_id: string;
+}
+
 export type PatchOperation =
   | OperationBase<"create_cf_record", { cf_record: CanonFactRecord }>
   | OperationBase<"create_ch_record", { ch_record: ChangeLogEntry }>
@@ -299,6 +305,7 @@ export type PatchOperation =
         repair_reason: string;
       }
     >
+  | OperationBase<"repair_storylet_created_at_page", RepairStoryletCreatedAtPagePayload>
   | OperationBase<"remove_ch_affected_cf_ids", { target_ch_id: string }>
   | OperationBase<"append_extension", { target_record_id: string; extension: ExtensionPayload }>
   | OperationBase<"append_touched_by_cf", { target_sec_id: string; cf_id: string }>

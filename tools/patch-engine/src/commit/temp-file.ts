@@ -26,6 +26,7 @@ import {
 } from "../ops/create-story-record.js";
 import { stageRemoveChAffectedCfIds } from "../ops/remove-ch-affected-cf-ids.js";
 import { stageRepairSkippedChangeLogEntry } from "../ops/repair-skipped-change-log-entry.js";
+import { stageRepairStoryletCreatedAtPage } from "../ops/repair-storylet-created-at-page.js";
 import { nodeTypeForStoryBundlePrefix, storyBundlePrefixForRecordId } from "../ops/story-record-specs.js";
 import { stageUpdateRecordField } from "../ops/update-record-field.js";
 import type { OpContext, StagedRecord, StagedWrite } from "../ops/types.js";
@@ -169,6 +170,11 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
       return metadataForTargetRecordId(patch.payload.target_record_id);
     case "repair_skipped_change_log_entry":
       return { nodeId: patch.payload.target_ch_id, nodeType: "change_log_entry" };
+    case "repair_storylet_created_at_page":
+      return {
+        nodeId: `${patch.payload.story_slug}:${patch.payload.target_slt_id}`,
+        nodeType: "storylet_record"
+      };
     case "remove_ch_affected_cf_ids":
       return { nodeId: patch.payload.target_ch_id, nodeType: "change_log_entry" };
     case "append_touched_by_cf":
@@ -243,6 +249,8 @@ function stageOne(
       return stageUpdateRecordField(envelope, patch, ctx);
     case "repair_skipped_change_log_entry":
       return stageRepairSkippedChangeLogEntry(envelope, patch, ctx);
+    case "repair_storylet_created_at_page":
+      return stageRepairStoryletCreatedAtPage(envelope, patch, ctx);
     case "remove_ch_affected_cf_ids":
       return stageRemoveChAffectedCfIds(envelope, patch, ctx);
     case "append_extension":
