@@ -1,6 +1,6 @@
 # SPEC96STOEXPSCE-003: Timeline route — causal branch backbone
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: new `GET /api/worlds/:slug/stories/:storySlug/timeline` route + `read/timeline.ts` + `BranchTimeline` / `TimelineSegment` view-models + registration in `http.ts`. Read-only.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC-96 §2.2 (D2): the timeline is the new backbone the frontend loads before scene detail — an ordered sequence of segments along a branch path (`scene_segment` | `unscened_run` | `choice_surface` | `branch_split` | `terminal_marker`), with PG focus expressed as query state (`?focus=PG-N|SCN-N`), never as a `/pages/:pageId` reader route. Today the backend has no timeline; PGs are exposed as reader pages. This route is the orientation backbone that the scene-first model hangs off (spec §3 "Timeline is the backbone, not a page list").
+SPEC-96 §2.2 (D2): the timeline is the new backbone the frontend loads before scene detail — an ordered sequence of segments along a branch path (`scene_segment` | `unscened_run` | `choice_surface` | `branch_split` | `terminal_marker`), with PG focus expressed as query state (`?focus=PG-N|SCN-N`), never as a `/pages/:pageId` reader route. At intake the backend had no timeline; PGs were exposed as reader pages. This route is the orientation backbone that the scene-first model hangs off (spec §3 "Timeline is the backbone, not a page list").
 
 ## Assumption Reassessment (2026-05-29)
 
@@ -29,19 +29,19 @@ SPEC-96 §2.2 (D2): the timeline is the new backbone the frontend loads before s
 3. Branch-split / terminal-marker detection → route dry-run: a forked fixture yields a `branch_split` at the fork PG and `terminal_marker`s at branch leaves.
 4. Envelope reuse (cross-package) → grep-proof: timeline imports world-index only via 001's helper and returns the existing envelope.
 
-## What to Change
+## Landed Changes
 
 ### 1. Timeline read module
 
-Create `tools/story-explorer/src/read/timeline.ts`: walk a branch path (committed PG chain) and emit ordered `TimelineSegment`s — `scene_segment` for active-SCN-covered PG runs, `unscened_run` for contiguous uncovered committed PGs, `choice_surface` for end-of-segment emitted choices, `branch_split` at fork PGs, `terminal_marker` at branch leaves. Source coverage from 001's helper; accept optional `focus=PG-N|SCN-N` to annotate the focused segment.
+Created `tools/story-explorer/src/read/timeline.ts`: walks a branch path (preferring `PG.branch_path`, falling back to parent-chain traversal) and emits ordered `TimelineSegment`s — `scene_segment` for active-SCN-covered PG runs, `unscened_run` for contiguous uncovered committed PGs, `choice_surface` for end-of-segment emitted choices, `branch_split` at fork PGs, `terminal_marker` at branch leaves. Coverage comes from 001's helper; optional `focus=PG-N|SCN-N` annotates the matching segment. When the index is missing/stale, the route reports `degradedDirectRead: true` and does not fabricate scene or unscened coverage.
 
 ### 2. `BranchTimeline` + `TimelineSegment` view-models
 
-Create `tools/story-explorer/src/view-models/branch-timeline.ts`: `TimelineSegment` (a tagged union over the five `kind`s, each carrying its payload — scene id + `ScenePublicationState`, unscened run bounds, `ChoiceSurface`, split children, terminal reason) and `BranchTimeline` (branch id, ordered `segments: TimelineSegment[]`, focus annotation).
+Created `tools/story-explorer/src/view-models/branch-timeline.ts`: `TimelineSegment` is a tagged union over the five `kind`s, each carrying its payload — scene id + `ScenePublicationState`, unscened run bounds, `ChoiceSurface`, split children, or terminal reason — and `BranchTimeline` carries branch id, ordered segments, focus annotation, index status, and degraded-read posture.
 
 ### 3. Route + registration
 
-Create `tools/story-explorer/src/server/routes/timeline.ts` exporting `registerTimelineRoutes(server, options)` for `GET /api/worlds/:slug/stories/:storySlug/timeline?branchId=BR-N&focus=PG-N|SCN-N`; wire into `http.ts` behind the read-only guard + envelope.
+Created `tools/story-explorer/src/server/routes/timeline.ts` exporting `registerTimelineRoutes(server, options)` for `GET /api/worlds/:slug/stories/:storySlug/timeline?branchId=BR-N&focus=PG-N|SCN-N`; wired it into `http.ts` behind the read-only guard + envelope.
 
 ## Files to Touch
 
@@ -49,6 +49,7 @@ Create `tools/story-explorer/src/server/routes/timeline.ts` exporting `registerT
 - `tools/story-explorer/src/view-models/branch-timeline.ts` (new)
 - `tools/story-explorer/src/server/routes/timeline.ts` (new)
 - `tools/story-explorer/src/server/http.ts` (modify — register the timeline route)
+- `tools/story-explorer/test/timeline-route.test.ts` (new)
 
 ## Out of Scope
 
@@ -80,3 +81,21 @@ Create `tools/story-explorer/src/server/routes/timeline.ts` exporting `registerT
 
 1. `cd tools/story-explorer && npm run test:backend`
 2. `grep -n "registerTimelineRoutes" tools/story-explorer/src/server/http.ts`
+
+## Outcome
+
+Completed: 2026-05-29
+
+What changed:
+- Added the timeline read module, view-model, and route registration for `GET /api/worlds/:slug/stories/:storySlug/timeline`.
+- The timeline emits only the five SPEC-96 segment kinds, annotates `focus=PG-N|SCN-N` on the matching segment, builds `ChoiceSurface` from CHC records, and detects branch splits / terminal markers from committed PG structure.
+- Added `tools/story-explorer/test/timeline-route.test.ts` covering ordered scene/choice/split/unscened/terminal segments, PG focus annotation, CHC surface projection, and degraded-index honesty.
+
+Deviations from original plan:
+- The implementation includes `indexStatus` and `degradedDirectRead` directly on `BranchTimeline`, matching the existing story-explorer envelope/degraded posture used by overview.
+- When the index is unavailable, the route still reports PG structural segments such as `choice_surface` and `terminal_marker`, but intentionally emits no `scene_segment` or `unscened_run` because those are coverage-derived.
+
+Verification results:
+- Pre-edit baseline: `cd tools/story-explorer && npm run test:backend` — PASS, 17/17 backend test files.
+- Final proof: `cd tools/story-explorer && npm run test:backend` — PASS, 18/18 backend test files, including `dist/test/timeline-route.test.js`.
+- `grep -n "registerTimelineRoutes" tools/story-explorer/src/server/http.ts` — PASS; import and registration are present.

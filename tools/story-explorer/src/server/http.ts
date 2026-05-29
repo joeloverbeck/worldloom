@@ -20,6 +20,7 @@ import { registerProvenanceRoutes } from "./routes/provenance.js";
 import { registerRecordRoutes } from "./routes/records.js";
 import { registerSearchRoute } from "./routes/search.js";
 import { registerStoriesRoutes } from "./routes/stories.js";
+import { registerTimelineRoutes } from "./routes/timeline.js";
 import { registerWorldsRoutes } from "./routes/worlds.js";
 
 export interface CreateServerOptions {
@@ -126,6 +127,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerWorldsRoutes(server, { repoRoot: options.repoRoot });
   await registerStoriesRoutes(server, { repoRoot: options.repoRoot });
   await registerOverviewRoutes(server, { repoRoot: options.repoRoot });
+  await registerTimelineRoutes(server, { repoRoot: options.repoRoot });
   await registerPageRoutes(server, { repoRoot: options.repoRoot });
   await registerRecordRoutes(server, { repoRoot: options.repoRoot });
   await registerProseRoutes(server, { repoRoot: options.repoRoot });
