@@ -1,6 +1,6 @@
 # SPEC-97 — Story Explorer Frontend: Scene-First / Author-X-Ray UI
 
-**Status:** draft
+**Status:** ✅ COMPLETED
 **Date:** 2026-05-28
 **Classification:** story-canon-related (tooling that operates on story-handling logic — replaces the `tools/story-explorer/web` page-reader UI with a scene-first branch-path author dashboard + embedded PG x-ray; read-only consumer of SPEC-96's API).
 **Depends on:** **SPEC-96** (consumes the new `/overview`, `/timeline`, `/scenes`, `/unscened-ranges`, `/state-ticks/:pgId/xray` API). SPEC-96 has **landed** (archived at `archive/specs/SPEC-96-story-explorer-scene-backend-api.md`; `specs/IMPLEMENTATION-ORDER.md` row 3 = ✅ done) — its API is available to consume.
@@ -78,3 +78,24 @@ Package shape (verified): `@worldloom/story-explorer-web`, scripts `dev` (vite) 
 - **Large test-suite rewrite.** The `web/` suite is large (~76 test files): page-route / page-detail / page-`ProsePanel` tests are deleted, and scene/timeline/unscened/dashboard + x-ray-drawer + a11y tests are added. Budget for a parallel rewrite. The AC1 negative test must assert the **full nested** page-reader paths are absent (`/worlds/:slug/stories/:storySlug/{entry,pages/:pageId}`), not the bare shorthand.
 - **Shell-route retention.** `worlds.tsx` (`WorldsRoute`) and `stories.tsx` (`StoriesRoute`) are retained navigation-shell routes, not page-reader concepts; only `stories.tsx`'s page-prose-count display is stripped.
 - **Search / branch-map deferred → SPEC-98.** The `/branch-map` and `/search` routes, the `SearchHit` / `BranchMapGraph` view models, and the `BranchMapCanvas` / `SearchModal` components are out of scope here (left as stubs or omitted until SPEC-98).
+
+## Outcome
+
+**Completed:** 2026-05-29
+
+Landed across nine tickets `SPEC97STOEXPSCE-001..009` (decomposed from this spec; all archived under `archive/tickets/`). The page-reader frontend was replaced with the scene-first / author-x-ray UI, composing against the landed SPEC-96 backend.
+
+**What actually changed (by §7 acceptance criterion):**
+
+- **AC1** — Route tree exposes story dashboard / timeline / scenes (list + detail) / unscened; `/entry` + `/pages/:pageId` reader routes and `PageEntryRoute`/`PageReadRoute`/`pageReadLoader` removed; PG focus is query state (timeline `?focus=PG-N`). (tickets 001/008)
+- **AC2** — `PageDetail`/`PageSummary` + page-scoped client functions (`getPageDetail`/`getProseBody`/`getPagePlan`/`getProseReceipt`/`searchPages`) removed from `web/src/api/client.ts`; new scene/timeline/overview/x-ray view models + client functions consume the SPEC-96 endpoints. (tickets 001/008)
+- **AC3** — Scene detail is an author workbench (prose-first-when-present + co-equal x-ray + PG-tick rail); the x-ray tab infra is reused, rebound to `StateTickXray`; page-level `ProsePanel`/`PageHeader` deleted. (ticket 006)
+- **AC4** — Unscened ranges render as a normal authoring view with no reader/prose affordance; coverage panel lists unscened/planned/attached-warn/superseded with no automatic boundary recommender. (tickets 003/007)
+- **AC5** — Clicking a PG opens a state-tick x-ray drawer (deep-linkable via timeline focus), never a page reader; x-ray PG-record clicks deep-link to `timeline?focus=PG-N`. (tickets 002/004/008)
+- **AC6** — Full-tool gate green: `cd tools/story-explorer && npm test` builds backend + web and runs both suites. (capstone ticket 009)
+
+**Deviations from plan:** none of substance. The capstone (009) was verification-command-only — 008's `web/src/app.test.tsx` route suite already covered AC1 with both negative (full nested page-reader paths) and positive (scene-first surface) assertions, so no app-level smoke test was added.
+
+**Verification results (capstone full-tool gate, 2026-05-29):** backend suite **107 pass / 0 fail**; web suite **272 pass across 97 files** (a11y coverage present for the new surfaces); AC1 negative grep against `web/src/app.tsx` returns **0 matches**.
+
+**Follow-ons:** SPEC-98 (search + branch-map) is now unblocked; SPEC-99 closeout lands last.
