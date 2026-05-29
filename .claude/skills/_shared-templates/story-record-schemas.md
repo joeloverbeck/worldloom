@@ -951,6 +951,8 @@ receipt_path: scene-prose-receipts/SCN-<integer>.yaml*
 
 Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record). This is a legacy page-prose receipt shape retained for old bundles that already carry page plans and page prose. New SPEC-93 PG-authoring flows do not create page plans or page prose receipts; current rendered-prose validation uses the scene-prose receipt in §4.7.
 
+Deferral note (SPEC-95): this legacy block is deliberately retained while `story-fact-promotion-to-canon` still consumes `pages-prose-receipts/<page_id>.yaml` and reads its `verdict` for prose-evidence source kinds on legacy bundles. Removal is deferred until that consumer is migrated off legacy receipts, likely with the SPEC-96/97 scene-first cutover, and the SPEC-95 §5 sweep confirms zero live consumers. The companion `prose-receipt.schema.json` file was already removed by SPEC-93; do not recreate it for this retained documentation block.
+
 ```yaml
 page_id: PG-<integer>*
 story_id: STORY-<integer>*

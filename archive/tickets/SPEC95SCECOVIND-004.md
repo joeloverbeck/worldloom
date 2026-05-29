@@ -1,14 +1,14 @@
 # SPEC95SCECOVIND-004: Annotate the §4.6 legacy-receipt deferral in the shared story-record schemas
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
-**Engine Changes**: Yes (docs only) — `.claude/skills/_shared-templates/story-record-schemas.md` §4.6. No code, no schema, no validator change.
+**Engine Changes**: Yes (docs only) — `.claude/skills/_shared-templates/story-record-schemas.md` §4.6 plus a SPEC-95 implementation note. No code, no schema, no validator change.
 **Deps**: None
 
 ## Problem
 
-SPEC-95 D4 set out to retire the legacy page-prose receipt schema surface. Two findings from the SPEC-95 reassessment reshaped it: (a) the schema file `tools/validators/src/schemas/prose-receipt.schema.json` was **already removed by SPEC-93** (commit `04100b18`), so no file removal remains; (b) the shared-schemas §4.6 "Legacy prose receipt" block is **retained/deferred**, because the §5 sweep confirms a live consumer — `story-fact-promotion-to-canon` still reads `pages-prose-receipts/<page_id>.yaml` and its `verdict` for prose-evidence source kinds on legacy bundles. Per SPEC-95 AC#5, §4.6 is kept **with a note** documenting that live consumer and the deferral. This ticket adds that note so the retention rationale is discoverable at the §4.6 block itself rather than only in the spec. (SPEC-95 §2 D4, AC#5; reassessment findings I1+I2.)
+SPEC-95 D4 set out to retire the legacy page-prose receipt schema surface. Two findings from the SPEC-95 reassessment reshaped it: (a) the schema file `tools/validators/src/schemas/prose-receipt.schema.json` was **already removed by SPEC-93** (commit `04100b18`), so no file removal remains; (b) the shared-schemas §4.6 "Legacy prose receipt" block is **retained/deferred**, because the §5 sweep confirms a live consumer — `story-fact-promotion-to-canon` still reads `pages-prose-receipts/<page_id>.yaml` and its `verdict` for prose-evidence source kinds on legacy bundles. Per SPEC-95 AC#5, §4.6 is kept **with a note** documenting that live consumer and the deferral. This ticket added that note so the retention rationale is discoverable at the §4.6 block itself rather than only in the spec. (SPEC-95 §2 D4, AC#5; reassessment findings I1+I2.)
 
 ## Assumption Reassessment (2026-05-29)
 
@@ -27,15 +27,16 @@ SPEC-95 D4 set out to retire the legacy page-prose receipt schema surface. Two f
 1. Deferral note present at §4.6 → codebase grep-proof: `grep -n "story-fact-promotion-to-canon" .claude/skills/_shared-templates/story-record-schemas.md` returns a match inside the §4.6 block, and the note names the deferral condition (consumer migration) + cites SPEC-95.
 2. Single-layer ticket: this is a documentation annotation with no code, schema, or behavior change, so a grep-proof of the added note plus the §5 completeness sweep (no unexpected live `prose-receipt.schema` references) is the complete verification surface; no test or skill dry-run applies.
 
-## What to Change
+## Landed Changes
 
-### 1. Add the deferral note to §4.6 (`.claude/skills/_shared-templates/story-record-schemas.md`)
+### 1. Added the deferral note to §4.6 (`.claude/skills/_shared-templates/story-record-schemas.md`)
 
-Inside the §4.6 "Legacy prose receipt" block, add a short note recording: the block is deliberately retained (not dead inventory); the live consumer is `story-fact-promotion-to-canon` (reads `pages-prose-receipts/<page_id>.yaml` `verdict` for prose-evidence source kinds on legacy bundles); removal is deferred per SPEC-95 §9 until that consumer is migrated off legacy receipts (likely the SPEC-96/97 cutover), after which the §5 sweep is re-run to confirm zero live consumers before deleting. Note that the companion schema file `prose-receipt.schema.json` was already removed by SPEC-93. Do not alter the block's field definitions.
+Inside the §4.6 "Legacy prose receipt" block, added a short note recording: the block is deliberately retained (not dead inventory); the live consumer is `story-fact-promotion-to-canon` (reads `pages-prose-receipts/<page_id>.yaml` `verdict` for prose-evidence source kinds on legacy bundles); removal is deferred per SPEC-95 §9 until that consumer is migrated off legacy receipts (likely the SPEC-96/97 cutover), after which the §5 sweep is re-run to confirm zero live consumers before deleting. The note records that the companion schema file `prose-receipt.schema.json` was already removed by SPEC-93. The block's field definitions were not altered.
 
 ## Files to Touch
 
 - `.claude/skills/_shared-templates/story-record-schemas.md` (modify)
+- `specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md` (modify — implementation note only)
 
 ## Out of Scope
 
@@ -68,3 +69,20 @@ Inside the §4.6 "Legacy prose receipt" block, add a short note recording: the b
 1. `grep -n "story-fact-promotion-to-canon" .claude/skills/_shared-templates/story-record-schemas.md`
 2. `grep -rn "prose-receipt.schema" .claude/skills/ docs/ tools/world-index/src tools/validators/src tools/world-mcp/src tools/story-explorer/src | grep -v archive/` (the §5 sweep slice — expect only intentional references)
 3. A grep-only verification boundary is correct: this ticket adds documentation prose to a shared template with no code, schema, or test surface to exercise.
+
+## Outcome
+
+Completed on 2026-05-29. Added the SPEC-95 deferral note directly under `.claude/skills/_shared-templates/story-record-schemas.md` §4.6. The note records that the legacy page-prose receipt block is deliberately retained while `story-fact-promotion-to-canon` still consumes `pages-prose-receipts/<page_id>.yaml` and reads `verdict`, and that removal is deferred until that consumer migrates off legacy receipts and the SPEC-95 §5 sweep confirms zero live consumers. The note also records that `prose-receipt.schema.json` was already removed by SPEC-93 and must not be recreated for this retained documentation block.
+
+Added a dated implementation note to `specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md` so the active spec records that AC#5's §4.6 annotation is landed while the broader spec remains open for final archival.
+
+## Verification Result
+
+1. `grep -n "story-fact-promotion-to-canon" .claude/skills/_shared-templates/story-record-schemas.md` — PASS. The match is inside §4.6 and names the live consumer, deferral condition, SPEC-95, and the already-removed companion schema file.
+2. `find tools -name 'prose-receipt.schema.json'` — PASS by expected zero output. No legacy page-prose receipt schema file exists.
+3. `rg -n "prose-receipt\\.schema" .claude/skills/ docs/ tools/world-index/src tools/validators/src tools/world-mcp/src tools/story-explorer/src -g '!archive/**'` — PASS by classification. Current operational hit is the new §4.6 note; remaining hits are the live `scene-prose-receipt.schema.json` surface, historical/provenance docs, or reassessment guidance precedent, not an unexpected reintroduced legacy schema.
+
+## Deviations
+
+- The implementation also added a SPEC-95 implementation note. This is same-seam spec truthing, not a behavior change.
+- No tests were added or run because the ticket is documentation-only and changes no executable schema, validator, or tool surface.

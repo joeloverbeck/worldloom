@@ -7,6 +7,8 @@
 **Related:** archived `SPEC-92` (scene render layer; the `scene_includes_page` / `scene_previous_scene` / `scene_branch` / `scene_emitted_choice` edges already exist), archived `SPEC-93` (page-plan retirement). This spec is phase 2–3 of the second-iteration scene-first plan; consumed by **SPEC-96** (backend read model) and **SPEC-99** (MCP packet).
 **Source:** critical triage of `reports/scene-prose-planning-second-iteration.md` §11/§13/§19 phases 2–3. The report's "scene coverage computation" is built here; its hash/freshness-fingerprint proposals are **rejected** (presence-based only — see §3).
 
+**Implementation note (2026-05-29):** `archive/tickets/SPEC95SCECOVIND-004.md` completed AC#5 by adding the §4.6 deferral note to `.claude/skills/_shared-templates/story-record-schemas.md`; the legacy block remains retained while `story-fact-promotion-to-canon` is still a live consumer.
+
 ---
 
 ## 1. Context & Motivation
