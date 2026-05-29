@@ -207,13 +207,23 @@ function artifactPath(
   kind: SceneArtifactRead["kind"],
 ): string {
   const base = storyDirectory(repoRoot, worldSlug, storySlug);
-  if (kind === "plan") {
-    return path.join(base, "scene-prose-plans", `${sceneId}.md`);
+  const candidate =
+    kind === "plan"
+      ? path.join(base, "scene-prose-plans", `${sceneId}.md`)
+      : kind === "prose"
+        ? path.join(base, "scene-prose", `${sceneId}.md`)
+        : path.join(base, "scene-prose-receipts", `${sceneId}.yaml`);
+
+  // Defense in depth: the route layer already constrains worldSlug / storySlug /
+  // sceneId, but artifactPath is a reusable building block. Confine the resolved
+  // path to the repo's worlds/ tree (a root with no user-controlled segments) so
+  // no caller can traverse outside it via "..", absolute paths, or separators.
+  const worldsRoot = path.resolve(repoRoot, "worlds");
+  const resolved = path.resolve(candidate);
+  if (resolved !== worldsRoot && !resolved.startsWith(`${worldsRoot}${path.sep}`)) {
+    throw new Error(`Refusing to read scene artifact outside worlds/: ${sceneId}`);
   }
-  if (kind === "prose") {
-    return path.join(base, "scene-prose", `${sceneId}.md`);
-  }
-  return path.join(base, "scene-prose-receipts", `${sceneId}.yaml`);
+  return resolved;
 }
 
 function comparePage(left: PageRecord, right: PageRecord): number {
