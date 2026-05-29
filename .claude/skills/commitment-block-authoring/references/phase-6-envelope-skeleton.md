@@ -62,7 +62,7 @@ One `create_slt_record` op shown; real batches list one op per surviving block a
 ```
 
 Notes:
-- `provenance.origin` MUST be `author_batch` for `direct_batch` and `audit_repair` for `audit_repair` (per Phase 3 gate 1). This skill never emits `runtime_jit`, so `created_at_page` MAY be omitted/null.
+- `provenance.origin` MUST be `author_batch` for `direct_batch` and `audit_repair` for `audit_repair` (per Phase 3 gate 1). `created_at_page` MUST be present on every block and is always `null` for this skill — it never emits `runtime_jit` (the only origin carrying a `PG-<n>` page id). The field is schema-required: omitting it is a hard validate-time failure (`record_schema_compliance`) and silently breaks selection, because `recursive_reference_closure` treats an author-pool block as branch-exempt only when `created_at_page` is explicitly `null` and reads an absent field as a branch leak.
 - The `payload.record` body conforms to `story-storylet.schema.json` (retrievable via `get_record_schema(node_type='storylet_record')`); the predicate objects conform to the closed DSL grammar. The above is a recovery-family example with a record-free `has_affordance` precondition so it has no dangling references; real blocks ground on the bundle's active records and predicates per `references/phase-2-draft-blocks.md`.
 
 ## Sequencing (dry-run → sign → submit)
