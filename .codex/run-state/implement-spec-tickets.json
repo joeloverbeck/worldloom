@@ -1,9 +1,9 @@
 {
-  "originating_spec": "archive/specs/SPEC-94-scn-publication-status-decoupling.md",
-  "archived_spec": "archive/specs/SPEC-94-scn-publication-status-decoupling.md",
-  "last_ticket": "archive/tickets/SPEC94SCNPUBSTA-006.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "d6b79682419a5178bfca32eab612fc79b581f65f",
+  "originating_spec": "archive/specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md",
+  "archived_spec": "archive/specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md",
+  "last_ticket": "archive/tickets/SPEC95SCECOVIND-004.md",
+  "last_result": "completed_archived_and_spec_archived",
+  "last_work_commit": "f26195f574f9a98c4889ddf3f1b6a17fdfc8f981",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -14,7 +14,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC94 final proof passed: §6 sweep classified zero stale in-scope SCN.status hits; validators npm test 1058 pass; world-index npm test 127 non-CLI plus serial CLI pass; world-mcp npm test 506 pass",
-  "dirty_state": "expected after state commit: tracked clean; pre-existing ignored package artifacts under tools/validators, tools/world-index, and tools/world-mcp left untouched",
+  "proof_state": "clean: tools/world-index npm run build PASS and npm test PASS (139 tests); tools/validators npm run build PASS and npm test PASS (1058 tests); SPEC-95 sweeps classified remaining legacy hits as intentional/historical/SPEC-96-owned; git diff --check clean",
+  "dirty_state": "expected after state commit: tracked clean; ignored artifacts under tools/world-index/dist, tools/world-index/node_modules, tools/validators/dist, and tools/validators/node_modules left in place",
   "updated_at": "2026-05-29"
 }

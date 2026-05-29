@@ -97,8 +97,8 @@ Structural validators:
 - `narrative_shape_field_rejection`
 - `compatibility_drift`
 - `active_records_full_shape`
-- `page_affordance_integrity`
-- `page_plan_turn_driver_consistency`
+- `pg_affordance_integrity`
+- `pg_se_turn_driver_consistency`
 - `story_question_payoff_integrity`
 - `story_question_setup_predates_payoff`
 - `story_question_grounding_integrity`

@@ -30,8 +30,8 @@ const ACTION_FAMILIES = new Set([
   "decide"
 ]);
 
-export const pageAffordanceIntegrity: Validator = {
-  name: "page_affordance_integrity",
+export const pgAffordanceIntegrity: Validator = {
+  name: "pg_affordance_integrity",
   severity_mode: "fail",
   applies_to: (ctx: Context) =>
     ctx.run_mode === "full-world" ||
@@ -114,7 +114,7 @@ function isCreatedPageInPlan(page: Record<string, unknown>, ctx: Context): boole
 
 function duplicateOrdinal(page: IndexedRecord, pageId: string, ordinal: number, index: number): Verdict {
   return {
-    validator: "page_affordance_integrity",
+    validator: "pg_affordance_integrity",
     severity: "fail",
     code: "page_affordance_duplicate_ordinal",
     message: `${pageId} state_snapshot.visible_affordances[${index}] repeats ordinal ${ordinal}.`,
@@ -126,7 +126,7 @@ function duplicateOrdinal(page: IndexedRecord, pageId: string, ordinal: number, 
 
 function inactiveGrounding(page: IndexedRecord, pageId: string, id: string, index: number): Verdict {
   return {
-    validator: "page_affordance_integrity",
+    validator: "pg_affordance_integrity",
     severity: "fail",
     code: "page_affordance_inactive_grounding",
     message: `${pageId} visible_affordances[${index}].grounded_in references ${id}, but it is not active in state_snapshot.active_records.STLOC or STOBJ.`,
@@ -138,7 +138,7 @@ function inactiveGrounding(page: IndexedRecord, pageId: string, id: string, inde
 
 function inactiveAvailableTo(page: IndexedRecord, pageId: string, id: string, index: number): Verdict {
   return {
-    validator: "page_affordance_integrity",
+    validator: "pg_affordance_integrity",
     severity: "fail",
     code: "page_affordance_inactive_available_to",
     message: `${pageId} visible_affordances[${index}].available_to references ${id}, but it is not active in state_snapshot.active_records.STENT.`,
@@ -150,7 +150,7 @@ function inactiveAvailableTo(page: IndexedRecord, pageId: string, id: string, in
 
 function unknownActionFamily(page: IndexedRecord, pageId: string, family: string, index: number): Verdict {
   return {
-    validator: "page_affordance_integrity",
+    validator: "pg_affordance_integrity",
     severity: "fail",
     code: "page_affordance_unknown_action_family",
     message: `${pageId} visible_affordances[${index}].action_families includes ${family}, which is not in the PageAffordance action-family enum.`,

@@ -313,11 +313,11 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     );
     assert.equal(compatibilityDriftExecution?.status, "skipped");
     const pageAffordanceExecution = result.executions.find(
-      (execution) => execution.name === "page_affordance_integrity"
+      (execution) => execution.name === "pg_affordance_integrity"
     );
     assert.equal(pageAffordanceExecution?.status, "skipped");
     const pagePlanTurnDriverExecution = result.executions.find(
-      (execution) => execution.name === "page_plan_turn_driver_consistency"
+      (execution) => execution.name === "pg_se_turn_driver_consistency"
     );
     assert.equal(pagePlanTurnDriverExecution?.status, "skipped");
     const forbiddenStcharHashExecution = result.executions.find(

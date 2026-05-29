@@ -44,7 +44,7 @@ export function verify(worldRoot: string, worldSlug: string): number {
 
       const parsed = row.file_path.startsWith("_source/")
         ? parseAtomicSourceFile(worldRoot, worldSlug, row.file_path)
-        : row.file_path.startsWith("stories/")
+        : isStorySourceFile(row.file_path)
           ? parseStoryBundleSourceFile(worldRoot, worldSlug, row.file_path)
           : parseWorldFile(worldRoot, worldSlug, row.file_path);
       const storedNodes = loadStoredFileNodes(opened, worldSlug, row.file_path);
@@ -126,6 +126,10 @@ export function verify(worldRoot: string, worldSlug: string): number {
 
 function isAtomicLogicalFile(filePath: string): boolean {
   return (ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(filePath);
+}
+
+function isStorySourceFile(filePath: string): boolean {
+  return filePath.startsWith("stories/") && filePath.includes("/_source/");
 }
 
 function clearPreviousDriftResults(db: Database.Database, worldSlug: string): void {

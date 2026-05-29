@@ -80,7 +80,7 @@ const LEGACY_READ_PATH_PARTS = [
   "/tools/validators/src/structural/no-char-authority-in-story-runtime.ts",
   "/tools/validators/src/structural/forbidden-stchar-tamper-hash-fields.ts",
   "/tools/validators/src/structural/turn-driver-pov-observer-firewall.ts",
-  "/tools/validators/src/structural/page-plan-turn-driver-consistency.ts",
+  "/tools/validators/src/structural/pg-se-turn-driver-consistency.ts",
   "/tools/validators/src/structural/stchar-utils.ts",
   "/tools/validators/src/structural/scene-prose-receipt-content.ts",
   "/tools/validators/src/structural/scene-prose-receipt-schema-compliance.ts",

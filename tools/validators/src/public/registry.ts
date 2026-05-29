@@ -31,8 +31,8 @@ import { narrativeShapeFieldRejection } from "../structural/narrative-shape-fiel
 import { noCharAuthorityInStoryRuntime } from "../structural/no-char-authority-in-story-runtime.js";
 import { noStoryStateInPlaceMutation } from "../structural/no-story-state-in-place-mutation.js";
 import { observerFirewall } from "../structural/observer-firewall.js";
-import { pageAffordanceIntegrity } from "../structural/page-affordance-integrity.js";
-import { pagePlanTurnDriverConsistency } from "../structural/page-plan-turn-driver-consistency.js";
+import { pgAffordanceIntegrity } from "../structural/pg-affordance-integrity.js";
+import { pgSeTurnDriverConsistency } from "../structural/pg-se-turn-driver-consistency.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { recordIntroductionUniqueness } from "../structural/record-introduction-uniqueness.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
@@ -174,8 +174,8 @@ export const structuralValidators: readonly Validator[] = [
   narrativeShapeFieldRejection,
   compatibilityDrift,
   activeRecordsFullShape,
-  pageAffordanceIntegrity,
-  pagePlanTurnDriverConsistency,
+  pgAffordanceIntegrity,
+  pgSeTurnDriverConsistency,
   storyQuestionPayoffIntegrity,
   storyQuestionSetupPredatesPayoff,
   storyQuestionGroundingIntegrity,

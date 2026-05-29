@@ -7,7 +7,7 @@ import test from "node:test";
 import { runValidators } from "../../src/framework/run.js";
 import type { Context, IndexedRecord, Validator, Verdict } from "../../src/framework/types.js";
 import { observerFirewall } from "../../src/structural/observer-firewall.js";
-import { pagePlanTurnDriverConsistency } from "../../src/structural/page-plan-turn-driver-consistency.js";
+import { pgSeTurnDriverConsistency } from "../../src/structural/pg-se-turn-driver-consistency.js";
 import { turnCycleOutputGroundingIntegrity } from "../../src/structural/turn-cycle-output-grounding-integrity.js";
 import { turnDriverPovObserverFirewall } from "../../src/structural/turn-driver-pov-observer-firewall.js";
 import { turnDriverSchemaCompliance } from "../../src/structural/turn-driver-schema-compliance.js";
@@ -41,7 +41,7 @@ const fixture = JSON.parse(readFileSync(FIXTURE_PATH, "utf8")) as RedKilnFixture
 const SPEC76_VALIDATORS: readonly Validator[] = [
   turnDriverSchemaCompliance,
   turnDriverPovObserverFirewall,
-  pagePlanTurnDriverConsistency,
+  pgSeTurnDriverConsistency,
   observerFirewall,
   turnCycleOutputGroundingIntegrity
 ];

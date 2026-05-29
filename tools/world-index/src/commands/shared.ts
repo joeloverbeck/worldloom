@@ -7,6 +7,7 @@ import { enumerate } from "../enumerate.js";
 import { sha256Hex } from "../hash/content.js";
 import { insertEdges, resolveUnresolvedEdges } from "../index/edges.js";
 import { rebuildFtsIndex, shouldRebuildFts } from "../index/fts.js";
+import { refreshSceneCoverage } from "../index/scene-coverage.js";
 import {
   deleteNodesByFile,
   insertAnchorChecksums,
@@ -398,6 +399,9 @@ function reindexAllFiles(
           !(ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(filePath)
       )
     : indexable;
+  const storyArtifactFiles = atomicMode
+    ? indexable.filter((filePath) => filePath.startsWith("stories/") && !filePath.includes("/_source/"))
+    : [];
   const atomicLogicalFiles = atomicMode ? createAtomicLogicalFileResults(worldSlug) : [];
   const atomicFiles = atomicMode ? indexable.filter((filePath) => filePath.startsWith("_source/")) : [];
   const storyFiles = listStoryBundleSourceFiles(worldDirectory);
@@ -453,6 +457,27 @@ function reindexAllFiles(
 
   for (const relativeFilePath of atomicFiles) {
     const parsed = parseAtomicSourceFile(worldRoot, worldSlug, relativeFilePath);
+    const previousHash = getFileVersion(db, worldSlug, relativeFilePath);
+    const shouldProcess = fullBuild || previousHash !== parsed.contentHash;
+
+    yamlBlockCount += parsed.yamlBlockCount;
+    yamlFailureCount += parsed.yamlFailureCount;
+    skippedRecordCount += recordSkippedRecords(worldRoot, worldSlug, parsed.skippedRecords, options);
+    indexedBefore.delete(relativeFilePath);
+
+    if (!shouldProcess) {
+      continue;
+    }
+
+    db.transaction(() => {
+      insertParsedFile(db, worldSlug, parsed);
+      upsertFileVersion(db, worldSlug, relativeFilePath, parsed.contentHash);
+    })();
+    changedNodeCount += parsed.nodes.length;
+  }
+
+  for (const relativeFilePath of storyArtifactFiles) {
+    const parsed = parseWorldFile(worldRoot, worldSlug, relativeFilePath);
     const previousHash = getFileVersion(db, worldSlug, relativeFilePath);
     const shouldProcess = fullBuild || previousHash !== parsed.contentHash;
 
@@ -531,6 +556,7 @@ function reindexAllFiles(
   finalizeEntityState(db, worldRoot, worldSlug);
   resolveUnresolvedEdges(db);
   refreshUnresolvedAttributionDiagnostics(db, worldSlug);
+  refreshSceneCoverage(db, { worldRoot, worldSlug });
 
   const totalNodeCount = countAllNodes(db, worldSlug);
   if (fullBuild || shouldRebuildFts(changedNodeCount, totalNodeCount)) {

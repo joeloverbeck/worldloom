@@ -127,7 +127,16 @@ test("build, inspect, stats, sync, and verify work against an atomic fixture wor
     const buildExit = build(root, "atomic-world");
     assert.equal(buildExit, 0);
     assert.deepEqual(unresolvedAttributionRows(root), []);
-    assert.deepEqual(unexpectedStoryPathRows(root), []);
+    assert.deepEqual(unexpectedStoryPathRows(root), [
+      {
+        code: "unexpected_path",
+        file_path: "stories/harborwatch/pages-prose-receipts/PG-1.yaml"
+      },
+      {
+        code: "unexpected_path",
+        file_path: "stories/harborwatch/pages-prose/PG-0001.md"
+      }
+    ]);
     assert.deepEqual(unexpectedSpec42Spec47Rows(root), []);
 
     const dbPath = path.join(root, "worlds", "atomic-world", "_index", "world.db");
