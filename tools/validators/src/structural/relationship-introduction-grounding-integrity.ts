@@ -115,8 +115,13 @@ function validateRelationship(
     }));
   }
   for (const groundingId of derivedFrom) {
-    if (!isAllowedGroundingId(groundingId) || !activeOrCreatedGroundingIds.has(groundingId)) {
-      verdicts.push(fail(relationship, "srel_intro_grounding_missing", `${relationshipId}.derived_from entry ${groundingId} is not an allowed parent-active or same-event-created grounding record.`, {
+    if (!isAllowedGroundingId(groundingId)) {
+      verdicts.push(fail(relationship, "srel_intro_grounding_class_not_allowed", `${relationshipId}.derived_from entry ${groundingId} uses a disallowed grounding class for a fresh relationship introduction; use a present-causal record instead.`, {
+        relationship_id: relationshipId,
+        grounding_record: groundingId
+      }));
+    } else if (!activeOrCreatedGroundingIds.has(groundingId)) {
+      verdicts.push(fail(relationship, "srel_intro_grounding_missing", `${relationshipId}.derived_from entry ${groundingId} is not parent-active or same-event-created.`, {
         relationship_id: relationshipId,
         grounding_record: groundingId
       }));

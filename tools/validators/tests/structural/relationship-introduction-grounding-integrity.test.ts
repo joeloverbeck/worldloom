@@ -107,8 +107,33 @@ test("relationship_introduction_grounding_integrity rejects disallowed grounding
   const verdicts = await relationshipIntroductionGroundingIntegrity.run(undefined, testContext(records));
 
   assert.equal(verdicts.length, 1);
-  assert.equal(verdicts[0]?.code, "srel_intro_grounding_missing");
+  assert.equal(verdicts[0]?.code, "srel_intro_grounding_class_not_allowed");
   assert.deepEqual(verdicts[0]?.detail, { relationship_id: "SREL-2", grounding_record: "STCHAR-1" });
+  assert.match(verdicts[0]?.message ?? "", /disallowed grounding class/);
+  assert.doesNotMatch(verdicts[0]?.message ?? "", /not parent-active/);
+});
+
+test("relationship_introduction_grounding_integrity reports active disallowed grounding class separately from inactive grounding", async () => {
+  const records = baseRecords([
+    storyRecord("thread_record", "THR-1", `stories/${STORY_SLUG}/_source/threads/THR-1.yaml`, {
+      id: "THR-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      status: "active"
+    }),
+    page("PG-1", { STENT: ["STENT-1", "STENT-2"], THR: ["THR-1"], SREL: ["SREL-1"] }),
+    event("SE-2", { create: ["SREL-2"] }),
+    relationship("SREL-2", { derived_from: ["THR-1"] }),
+    page("PG-2", { STENT: ["STENT-1", "STENT-2"], THR: ["THR-1"], SREL: ["SREL-2"] })
+  ]);
+
+  const verdicts = await relationshipIntroductionGroundingIntegrity.run(undefined, testContext(records));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "srel_intro_grounding_class_not_allowed");
+  assert.deepEqual(verdicts[0]?.detail, { relationship_id: "SREL-2", grounding_record: "THR-1" });
+  assert.match(verdicts[0]?.message ?? "", /disallowed grounding class/);
+  assert.doesNotMatch(verdicts[0]?.message ?? "", /not parent-active/);
 });
 
 test("relationship_introduction_grounding_integrity fails on duplicate active relationship axis without supersedes", async () => {

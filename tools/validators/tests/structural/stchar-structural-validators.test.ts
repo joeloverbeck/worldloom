@@ -145,6 +145,18 @@ test("character_grounding_consistency accepts CHC/STPLAN/STEMO records grounded 
   assert.deepEqual(verdicts, []);
 });
 
+test("character_grounding_consistency accepts neutral CHCs grounded in actor STENT without STCHAR", async () => {
+  const verdicts = await characterGroundingConsistency.run(undefined, context([
+    choice("CHC-1", ["STENT-1", "BEL-1"], {
+      surface_label: "Ask what happened",
+      player_visible_intent: "Ask for the facts.",
+      likely_state_pressure: "Open a practical route through the current clue."
+    })
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("character_grounding_consistency rejects character-specific CHC/STPLAN/STEMO records without STCHAR grounding", async () => {
   const verdicts = await characterGroundingConsistency.run(undefined, context([
     choice("CHC-1", ["STENT-1"]),
@@ -224,7 +236,7 @@ function page(id: string, active_records: Record<string, string[]> = {}) {
   };
 }
 
-function choice(id: string, groundedRecords: string[]) {
+function choice(id: string, groundedRecords: string[], overrides: Record<string, unknown> = {}) {
   return storyRecord("choice_record", id, "choices", {
     id,
     story_id: "STORY-1",
@@ -233,7 +245,8 @@ function choice(id: string, groundedRecords: string[]) {
     player_visible_intent: "Ask the witness what they know.",
     target_or_action_families: ["communicate"],
     likely_state_pressure: "Character-specific social pressure.",
-    grounded_in: { records: groundedRecords }
+    grounded_in: { records: groundedRecords },
+    ...overrides
   });
 }
 

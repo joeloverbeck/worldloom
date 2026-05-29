@@ -399,12 +399,18 @@ function reindexAllFiles(
           !(ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(filePath)
       )
     : indexable;
+  const storyFiles = listStoryBundleSourceFiles(worldDirectory);
+  const storyFileSet = new Set(storyFiles);
   const storyArtifactFiles = atomicMode
-    ? indexable.filter((filePath) => filePath.startsWith("stories/") && !filePath.includes("/_source/"))
+    ? indexable.filter(
+        (filePath) =>
+          filePath.startsWith("stories/") &&
+          !filePath.includes("/_source/") &&
+          !storyFileSet.has(filePath)
+      )
     : [];
   const atomicLogicalFiles = atomicMode ? createAtomicLogicalFileResults(worldSlug) : [];
   const atomicFiles = atomicMode ? indexable.filter((filePath) => filePath.startsWith("_source/")) : [];
-  const storyFiles = listStoryBundleSourceFiles(worldDirectory);
   const indexedBefore = new Set(listIndexedFiles(db, worldSlug));
   let changedNodeCount = 0;
   let yamlBlockCount = 0;

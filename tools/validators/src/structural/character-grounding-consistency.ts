@@ -47,7 +47,7 @@ function choiceVerdicts(choice: IndexedRecord): Verdict[] {
   const parsed = asPlainRecord(choice.parsed);
   const groundedIn = asPlainRecord(parsed.grounded_in);
   const groundedRecords = stringArray(groundedIn.records);
-  if (!isCharacterSpecificChoice(parsed, groundedRecords)) {
+  if (!isCharacterSpecificChoice(parsed)) {
     return [];
   }
   if (groundedRecords.some((id) => STCHAR_ID.test(id))) {
@@ -82,10 +82,7 @@ function holderDerivedFromVerdicts(record: IndexedRecord, label: string): Verdic
   )];
 }
 
-function isCharacterSpecificChoice(choice: Record<string, unknown>, groundedRecords: readonly string[]): boolean {
-  if (groundedRecords.some((id) => id.startsWith("STENT-"))) {
-    return true;
-  }
+function isCharacterSpecificChoice(choice: Record<string, unknown>): boolean {
   const text = [
     choice.surface_label,
     choice.player_visible_intent,

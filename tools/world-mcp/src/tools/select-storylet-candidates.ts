@@ -1,4 +1,5 @@
 import type Database from "better-sqlite3";
+import { PREDICATE_RECORD_PREFIX_TO_CLASS } from "@worldloom/world-index/public/predicate-dsl-projection";
 
 import { withIndexFreshnessGuard } from "../context-packet/freshness-guard.js";
 import { openIndexDb } from "../db/index.js";
@@ -158,6 +159,9 @@ const RECORD_PREFIX_TO_CLASS: Record<string, string> = {
   THR: "thread_record"
 };
 
+const ACCEPTED_PREDICATE_CLASS_SHORT_CODES = Object.keys(PREDICATE_RECORD_PREFIX_TO_CLASS).sort();
+const ACCEPTED_PREDICATE_RECORD_KINDS = [...new Set(Object.values(PREDICATE_RECORD_PREFIX_TO_CLASS))].sort();
+
 const URGENCY_RANK: Record<string, number> = {
   high: 3,
   medium: 2,
@@ -179,6 +183,44 @@ function recordClassForId(recordId: string): string | null {
   }
 
   return RECORD_PREFIX_TO_CLASS[match[1] ?? ""] ?? null;
+}
+
+function normalizeGroundingRecordClasses(
+  groundingRecordClasses: readonly string[] | undefined
+): string[] | McpError | undefined {
+  if (groundingRecordClasses === undefined) {
+    return undefined;
+  }
+
+  const acceptedRecordKinds = new Set(ACCEPTED_PREDICATE_RECORD_KINDS);
+  const normalized: string[] = [];
+  const invalidValues: string[] = [];
+
+  for (const value of groundingRecordClasses) {
+    const normalizedValue = PREDICATE_RECORD_PREFIX_TO_CLASS[
+      value as keyof typeof PREDICATE_RECORD_PREFIX_TO_CLASS
+    ] ?? value;
+    if (!acceptedRecordKinds.has(normalizedValue)) {
+      invalidValues.push(value);
+      continue;
+    }
+    normalized.push(normalizedValue);
+  }
+
+  if (invalidValues.length > 0) {
+    return createMcpError(
+      "invalid_input",
+      "intent_signature.grounding_record_classes values must be predicate record_kind strings or recognized predicate short record codes.",
+      {
+        field: "intent_signature.grounding_record_classes",
+        invalid_values: invalidValues,
+        accepted_short_codes: ACCEPTED_PREDICATE_CLASS_SHORT_CODES,
+        accepted_record_kinds: ACCEPTED_PREDICATE_RECORD_KINDS
+      }
+    );
+  }
+
+  return normalized;
 }
 
 function isStoryLocalRecordId(recordId: string): boolean {
@@ -405,6 +447,12 @@ function predicateClassEvidence(
     indexed_classes: candidate.predicateClasses,
     requested_classes: requestedClasses.length > 0 ? [...requestedClasses] : [...page.activeRecordClasses]
   };
+}
+
+function predicateClassRejectionReason(groundingRecordClasses: readonly string[] | undefined): string {
+  return groundingRecordClasses !== undefined && groundingRecordClasses.length > 0
+    ? "indexed predicate classes do not intersect requested record classes"
+    : "indexed predicate classes do not intersect active record classes";
 }
 
 function matchesPredicateClass(
@@ -681,6 +729,11 @@ async function selectStoryletCandidatesImpl(
     });
   }
 
+  const groundingRecordClasses = normalizeGroundingRecordClasses(args.intent_signature?.grounding_record_classes);
+  if (groundingRecordClasses !== undefined && "code" in groundingRecordClasses) {
+    return groundingRecordClasses;
+  }
+
   const opened = openIndexDb(args.world_slug);
   if (!("db" in opened)) {
     return opened;
@@ -781,13 +834,13 @@ async function selectStoryletCandidatesImpl(
 
     const predicateClassRejectedSamples: StageRejectedSample[] = [];
     const afterPredicateClass = afterPredicateShape.filter((candidate) => {
-      if (matchesPredicateClass(candidate, page, args.intent_signature?.grounding_record_classes)) {
+      if (matchesPredicateClass(candidate, page, groundingRecordClasses)) {
         return true;
       }
       pushSample(predicateClassRejectedSamples, {
         slt_id: displayStoryRecordId(candidate.row.node_id, args.story_slug),
-        reason: "indexed predicate classes do not intersect requested or active record classes",
-        evidence: predicateClassEvidence(candidate, page, args.intent_signature?.grounding_record_classes)
+        reason: predicateClassRejectionReason(groundingRecordClasses),
+        evidence: predicateClassEvidence(candidate, page, groundingRecordClasses)
       });
       return false;
     });
