@@ -493,7 +493,7 @@ test("sync indexes newly added STCHAR hybrid files as story-character authority 
         "supersedes: null",
         "superseded_by: null",
         "status: active",
-        "bound_stent_ids: [STENT-0001]",
+        "bound_stent_ids: [STENT-1]",
         "profile_revision: 1",
         "body_schema_version: stchar.v1",
         `profile_hash: sha256:${"b".repeat(64)}`,
