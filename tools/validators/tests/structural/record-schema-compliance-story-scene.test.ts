@@ -16,7 +16,6 @@ function validScenePayload(): Record<string, unknown> {
     story_id: "STORY-1",
     branch_id: "BR-1",
     supersedes: null,
-    status: "planned",
     pg_ids: ["PG-1", "PG-2"],
     start_page_id: "PG-1",
     end_page_id: "PG-2",
@@ -54,7 +53,6 @@ test("record_schema_compliance accepts SCN supersession lineage", async () => {
   const parsed = validScenePayload();
   parsed.id = "SCN-2";
   parsed.supersedes = "SCN-1";
-  parsed.status = "rendered";
   parsed.prose_plan_path = "scene-prose-plans/SCN-2.md";
   parsed.prose_path = "scene-prose/SCN-2.md";
   parsed.receipt_path = "scene-prose-receipts/SCN-2.yaml";
@@ -62,6 +60,18 @@ test("record_schema_compliance accepts SCN supersession lineage", async () => {
   const result = await recordSchemaCompliance.run({}, context([sceneRecord(parsed)]));
 
   assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects stray SCN status", async () => {
+  const parsed = validScenePayload();
+  parsed.status = "rendered";
+
+  const result = await recordSchemaCompliance.run({}, context([sceneRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.additionalProperties" &&
+    verdict.message.includes("must NOT have additional properties")
+  )));
 });
 
 test("record_schema_compliance rejects SCN additional properties", async () => {
@@ -81,7 +91,6 @@ test("record_schema_compliance rejects SCN additional properties", async () => {
 test("record_schema_compliance rejects malformed SCN routing fields", async () => {
   const parsed = validScenePayload();
   parsed.id = "SCN-0001";
-  parsed.status = "draft";
   parsed.prose_path = "pages-prose/PG-1.md";
 
   const result = await recordSchemaCompliance.run({}, context([sceneRecord(parsed)]));
@@ -89,10 +98,6 @@ test("record_schema_compliance rejects malformed SCN routing fields", async () =
   assert.ok(result.some((verdict) => (
     verdict.code === "record_schema_compliance.pattern" &&
     verdict.message.includes("/id")
-  )));
-  assert.ok(result.some((verdict) => (
-    verdict.code === "record_schema_compliance.enum" &&
-    verdict.message.includes("/status")
   )));
   assert.ok(result.some((verdict) => (
     verdict.code === "record_schema_compliance.pattern" &&

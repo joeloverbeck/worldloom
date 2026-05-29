@@ -104,7 +104,7 @@ Do not bulk-read story `_source/` directories. Use `mcp__worldloom__get_record`,
 
 1. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort if missing.
 2. Load required contracts above. Abort if any required contract is unreadable.
-3. Retrieve `scene_id` through MCP record retrieval. Abort if missing or if its `status` is not `planned`, `rendered`, or `attached`.
+3. Retrieve `scene_id` through MCP record retrieval. Abort if missing or if the retrieved `SCN` is not the latest non-superseded record for its id lineage, using `supersedes` pointers to identify superseded records.
 4. Confirm `SCN.prose_plan_path`, `SCN.prose_path`, and `SCN.receipt_path` are shaped as `scene-prose-plans/<scene_id>.md`, `scene-prose/<scene_id>.md`, and `scene-prose-receipts/<scene_id>.yaml`.
 5. Verify `scene-prose-plans/<scene_id>.md` and `scene-prose/<scene_id>.md` both exist. Abort with `missing-artifact` if either is absent.
 6. Retrieve every `PG` named in `SCN.pg_ids` through `mcp__worldloom__get_records` or equivalent bounded typed retrieval. Abort if any page is missing.
