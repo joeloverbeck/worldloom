@@ -18,6 +18,8 @@ const INTRO_CREATE_OPS = new Set([
   "create_stemo_record"
 ]);
 const PUBLIC_BEL_VISIBILITIES = new Set(["public", "rumored", "shared", "faction"]);
+const PLAYER_PROXY_ROLE = "player_proxy";
+const TURN_RESOLUTION_EVENT_KIND = "turn_resolution";
 
 export const introductionObserverFirewall: Validator = {
   name: VALIDATOR,
@@ -64,24 +66,63 @@ function validateEvent(event: IndexedRecord, maps: RecordMaps): Verdict[] {
   const choices = choicesForChildPage(childPageId, emittedChoiceIds, maps);
   const verdicts: Verdict[] = [];
 
+  // Emitted choices are the player's response side (story-state-contract §11a), performed by the
+  // player-proxy acting entity (FOUNDATIONS §Story Bundles §6b) — not necessarily SE.actor, which on a
+  // non-player-driven turn_resolution is the NPC/world initiator. Resolve access against the proxy.
+  const actors = resolveChoiceActors(parsed, maps);
+  if (actors.length === 0) {
+    return [];
+  }
+
   for (const choice of choices) {
     const choiceParsed = asPlainRecord(choice.parsed);
-    const actor = actorForChoice(choiceParsed) ?? actorForEvent(parsed);
-    if (actor === undefined) {
-      continue;
-    }
 
     for (const [index, groundedId] of stringArray(asPlainRecord(choiceParsed.grounded_in).records).entries()) {
       if (!freshIds.has(groundedId)) {
         continue;
       }
-      if (!actorHasExplicitAccess(actor, groundedId, event, maps)) {
-        verdicts.push(noAccessRoute(event, actor, choice, groundedId, index));
+      if (!actors.some((actor) => actorHasExplicitAccess(actor, groundedId, event, maps))) {
+        verdicts.push(noAccessRoute(event, actors, choice, groundedId, index));
       }
     }
   }
 
   return verdicts;
+}
+
+// For a turn_resolution event, the emitted-choice acting entity is the bundle's player-proxy (the
+// active STENT whose role_in_story includes "player_proxy"). More than one proxy resolves to a
+// permissive disjunction: a choice passes if any proxy has an access route. Falls back to SE.actor
+// when no player-proxy is resolvable, and for non-turn_resolution events (e.g. system_repair).
+function resolveChoiceActors(event: Record<string, unknown>, maps: RecordMaps): string[] {
+  const eventActor = actorForEvent(event);
+  if (stringValue(event.event_kind) === TURN_RESOLUTION_EVENT_KIND) {
+    const proxies = activePlayerProxies(maps);
+    if (proxies.length > 0) {
+      return proxies;
+    }
+  }
+  return eventActor === undefined ? [] : [eventActor];
+}
+
+function activePlayerProxies(maps: RecordMaps): string[] {
+  const entities = maps.byType.get("story_entity_record") ?? [];
+  const superseded = new Set(
+    entities
+      .map((entity) => stringValue(asPlainRecord(entity.parsed).supersedes))
+      .filter((id): id is string => id !== undefined)
+  );
+  const proxies: string[] = [];
+  for (const entity of entities) {
+    const id = recordId(entity);
+    if (superseded.has(id)) {
+      continue;
+    }
+    if (stringArray(asPlainRecord(entity.parsed).role_in_story).includes(PLAYER_PROXY_ROLE)) {
+      proxies.push(id);
+    }
+  }
+  return proxies;
 }
 
 function recordMapsForStory(records: readonly IndexedRecord[], storySlug: string): RecordMaps {
@@ -119,15 +160,6 @@ function choicesForChildPage(
     const createdAtPage = stringValue(asPlainRecord(choice.parsed).created_at_page);
     return emittedChoiceIds.has(id) || (childPageId !== undefined && createdAtPage === childPageId);
   });
-}
-
-function actorForChoice(choice: Record<string, unknown>): string | undefined {
-  const actor = stringValue(choice.actor);
-  if (actor !== undefined && /^STENT-\d+$/.test(actor)) {
-    return actor;
-  }
-  const availableTo = stringArray(choice.available_to);
-  return availableTo.length === 1 && /^STENT-\d+$/.test(availableTo[0] ?? "") ? availableTo[0] : undefined;
 }
 
 function actorForEvent(event: Record<string, unknown>): string | undefined {
@@ -173,6 +205,11 @@ function actorHasRecordIntrinsicAccess(actor: string, record: IndexedRecord): bo
   if (record.node_type === "story_question_record") {
     return stringValue(parsed.audience_visibility) !== "hidden";
   }
+  if (record.node_type === "story_emotion_record") {
+    // An entity always has access to its own interior emotion (FOUNDATIONS §6b: the acting entity's
+    // own affective state is observable to it). STEMO.holder names that entity.
+    return stringValue(parsed.holder) === actor;
+  }
   return false;
 }
 
@@ -195,21 +232,22 @@ function actorHasBelAccessRecord(actor: string, freshId: string, maps: RecordMap
   return false;
 }
 
-function noAccessRoute(event: IndexedRecord, actor: string, choice: IndexedRecord, freshId: string, index: number): Verdict {
+function noAccessRoute(event: IndexedRecord, actors: readonly string[], choice: IndexedRecord, freshId: string, index: number): Verdict {
+  const actorLabel = actors.join(", ");
   return {
     validator: VALIDATOR,
     severity: "fail",
     code: "intro_observer_no_access_route",
-    message: `${recordId(choice)} grounds actor ${actor} in freshly-introduced ${freshId} without an explicit access route.`,
+    message: `${recordId(choice)} grounds acting entity ${actorLabel} in freshly-introduced ${freshId} without an explicit access route.`,
     location: locationFor(choice),
     detail: {
       event_id: recordId(event),
-      actor,
+      actor: actorLabel,
       choice_id: recordId(choice),
       fresh_record_id: freshId,
       reference_path: `grounded_in.records[${index}]`
     },
-    suggested_fix: `Add an explicit BEL/access route for ${actor} to ${freshId}, change ${recordId(choice)} grounding, or defer the choice until access is established.`
+    suggested_fix: `Add an explicit BEL/access route for ${actorLabel} to ${freshId}, change ${recordId(choice)} grounding, or defer the choice until access is established.`
   };
 }
 

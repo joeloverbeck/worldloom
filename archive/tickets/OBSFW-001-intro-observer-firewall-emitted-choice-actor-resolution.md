@@ -1,6 +1,6 @@
 # OBSFW-001: introduction_observer_firewall must resolve emitted-choice actor as the player-proxy, not the event actor
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators/src/structural/introduction-observer-firewall.ts`; new/updated validator unit test; no schema change.
@@ -78,3 +78,9 @@ Drop the `choice.actor` and `choice.available_to` branches (CHC carries neither)
 
 1. `npm test --workspace tools/validators -- introduction-observer-firewall` (or the repo's validator test runner) — targeted.
 2. `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --world-root . /tmp/<npc-turn-envelope>.json` — full pre-apply path.
+
+## Implementation Notes (2026-05-29)
+
+- `introduction-observer-firewall.ts`: emitted-choice access now resolves against `resolveChoiceActors()` — for a `turn_resolution` event the active `player_proxy` STENT(s) (resolved structurally from `STENT.role_in_story`, superseded STENTs excluded), falling back to `SE.actor` only when no proxy is resolvable or the event is not a turn resolution. Multiple proxies are a permissive disjunction (a choice passes if any proxy has access). The vestigial `actorForChoice` (`choice.actor` / `choice.available_to`) reads were removed — CHC carries neither field (`additionalProperties: false`).
+- **Engine capability gap fixed (aligned with FOUNDATIONS §6b):** `actorHasRecordIntrinsicAccess` had no `story_emotion_record` branch, so even after resolving the player-proxy a choice grounding in the proxy's *own* fresh STEMO would still fail. Added: an entity always has access to its own interior emotion (`STEMO.holder === actor`). This is required for AC#1 and is the exact `red-bunny` PG-2→PG-3 symptom (`CHC-13`/`CHC-15` grounding `STEMO-5`).
+- Tests: `tools/validators/tests/structural/introduction-observer-firewall.test.ts` rewritten to the new model (CHC fixtures no longer carry `available_to`; actors designated via player_proxy STENT records / `SE.actor`). Added AC#1 (proxy's own fresh STEMO on `npc_action` → PASS), AC#2 (third-party-held fresh STEMO → `intro_observer_no_access_route`), plus edge cases: multi-proxy disjunction, superseded-proxy exclusion, and SE.actor fallback (accept + reject). Updated integration bullet 16 in `spec43-midstory-introduction.test.ts`. Full validators suite (1077) and world-mcp suite (509) green.

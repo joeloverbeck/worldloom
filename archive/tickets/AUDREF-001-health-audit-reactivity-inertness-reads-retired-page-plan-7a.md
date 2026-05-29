@@ -1,6 +1,6 @@
 # AUDREF-001: Health-audit reactivity-inertness scan reads dispositions from the retired page-plan §7a section instead of SE.turn_driver
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `branching-story-health-audit` SKILL prose (and supporting structural-audit logic if the disposition read is implemented in code); no record-schema change.
@@ -83,3 +83,10 @@ Confirm `branching-story-bootstrap/SKILL.md:160`'s §7a mention remains accurate
 
 1. `grep -n "§7a\|active-pressure disposition" .claude/skills/branching-story-health-audit/SKILL.md` — confirms the stale read is gone.
 2. `/branching-story-health-audit --world_slug erotica-world --story_slug red-bunny --mode structural` — dry-run; inspect the reactivity-inertness finding's cited disposition source.
+
+## Implementation Notes (2026-05-29)
+
+- `branching-story-health-audit/SKILL.md` Phase 2n (Reactivity Inertness): the disposition read was repointed from "its §7a active-pressure disposition table" to "the page-resolving event's `SE.turn_driver` selected/deferred/rejected dispositions (and the event `world_logic_rationale`)", with an explicit note that §7a is retired (`story-state-contract.md` §8). The finding-citation sentence now cites "their `SE.turn_driver` dispositions". The only remaining `§7a` string is that retired-marker note (AC test 1 satisfied — no live read).
+- Candidate-criteria reconciliation: the non-player pressure candidate list now matches `branching-story-turn-cycle` Phase 0 / FOUNDATIONS §5c exactly — added `OBL` falling due, pending `CNSQ`, active high-urgency `STINT`, and tightened "active `THR`" to "active high-urgency `THR`". (turn-cycle SKILL.md:154 explicitly states the two lists mirror each other.)
+- `branching-story-bootstrap/SKILL.md:160` §7a mention (verify-on-close per ticket §3): it read as a live shared-contract section, so it was annotated as the retired page-plan §7a section (dispositions now on `SE.turn_driver`). It was descriptive, not a disposition read.
+- Verification: grep-proof (AC test 1) passing. The two structural-mode audit dry-runs (AC tests 2/3) are operator-run skill invocations; the documented input now points at the authoritative `SE.turn_driver` surface that modern planless bundles (e.g. red-bunny) actually carry.
