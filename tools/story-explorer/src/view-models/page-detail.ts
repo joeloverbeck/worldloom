@@ -1,4 +1,7 @@
 import type { ChoiceNavigation } from "./choice-navigation.js";
+import type { EventDeltaSummary } from "./event-delta-summary.js";
+
+export type { EventDeltaSummary } from "./event-delta-summary.js";
 
 export type ProseStatus = "present" | "missing" | "unreadable" | "hash_mismatch";
 
@@ -12,15 +15,6 @@ export interface ReceiptSummary {
   verdict: string | null;
   stateHash: string | null;
   body: Record<string, unknown>;
-}
-
-export interface EventDeltaSummary {
-  eventId: string | null;
-  createCount: number;
-  supersedeCount: number;
-  closeCount: number;
-  introducedRecordIds: string[];
-  relationCount: number;
 }
 
 export interface ValidationIntegritySummary {

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: new `GET /scenes`, `GET /scenes/:sceneId`, `GET /scenes/:sceneId/plan|prose|receipt` routes + `read/scene-detail.ts` + `SceneSummary` / `SceneDetail` view-models + registration in `http.ts`. Read-only.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC96STOEXPSCE-001.md
 
 ## Problem
 

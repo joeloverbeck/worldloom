@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: new `GET /api/worlds/:slug/stories/:storySlug/overview` route + `read/overview.ts` + `StoryOverview` view-model + registration in `http.ts`. Read-only; no canon/story-pipeline mutation.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC96STOEXPSCE-001.md
 
 ## Problem
 

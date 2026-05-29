@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: new `GET /api/worlds/:slug/stories/:storySlug/timeline` route + `read/timeline.ts` + `BranchTimeline` / `TimelineSegment` view-models + registration in `http.ts`. Read-only.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC96STOEXPSCE-001.md
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: new `GET /api/worlds/:slug/stories/:storySlug/unscened-ranges` route + `read/unscened.ts` + `UnscenedRange` view-model + registration in `http.ts`. Read-only.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC96STOEXPSCE-001.md
 
 ## Problem
 

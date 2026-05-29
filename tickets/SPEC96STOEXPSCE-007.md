@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: delete page-first routes + read layer + view-models + page-prose summary fields; unregister in `http.ts`; migrate backend tests. Read-only package; removal of read surfaces only.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC96STOEXPSCE-001.md
 
 ## Problem
 
