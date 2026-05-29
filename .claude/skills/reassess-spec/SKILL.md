@@ -180,7 +180,7 @@ Read ALL of these before any analysis:
 
 Parse the spec's metadata: Phase, Status, `Depends on:` / `Predecessors:` / `Blocks:` / `Related:`, Problem Statement / Approach / Deliverables / FOUNDATIONS Alignment / Verification / Out of Scope / Risks, and all deliverable sections.
 
-**Non-numbered deliverables**: If the spec uses sections instead of numbered deliverables (common for multi-part specs like SPEC-05 Hooks or SPEC-07 Docs Updates), treat each distinct implementation section as a deliverable for validation purposes. Adapt references to "deliverable numbers" throughout this skill to the spec's actual organizational scheme (section headers, part labels).
+**Non-numbered deliverables**: If the spec uses sections instead of numbered deliverables (common for multi-part specs like SPEC-05 Hooks or SPEC-07 Docs Updates), or numbered items under a `§Scope` / `§In scope` list (e.g., SPEC-96's §2 In scope items 1–7), treat each distinct implementation section (or numbered in-scope item) as a deliverable for validation purposes. Adapt references to "deliverable numbers" throughout this skill to the spec's actual organizational scheme (section headers, part labels).
 
 ## Step 2: Extract References
 

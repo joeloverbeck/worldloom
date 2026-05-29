@@ -30,6 +30,11 @@ export {
 } from "../structural/record-schema-compliance.js";
 
 export {
+  ACTIVE_RECORDS_CLASSES,
+  type ActiveRecordsClass
+} from "../_helpers/state-snapshot-replay.js";
+
+export {
   CANONICAL_SOURCES as SCENE_PLAN_VERBATIM_CANONICAL_SOURCES,
   stripFramingHeader as stripScenePlanVerbatimFramingHeader,
   trimTrailingWhitespace as trimScenePlanVerbatimTrailingWhitespace,
