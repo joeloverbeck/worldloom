@@ -494,11 +494,11 @@ test("legacy page-prose deindex migration invalidates only retired story artifac
         `
       )
       .run(
-        "harborwatch:PG-0001-prose",
+        "harborwatch:PG-1-prose",
         worldSlug,
         "harborwatch",
-        "stories/harborwatch/pages-prose/PG-0001.md",
-        "PG-0001",
+        "stories/harborwatch/pages-prose/PG-1.md",
+        "PG-1",
         "page_prose",
         "Legacy page prose.",
         "legacy-page-prose-hash",
@@ -541,12 +541,12 @@ test("legacy page-prose deindex migration invalidates only retired story artifac
       .prepare(
         "INSERT INTO edges (source_node_id, target_node_id, edge_type) VALUES (?, ?, ?)"
       )
-      .run("harborwatch:PG-0001-prose", "harborwatch:SCN-0001-prose", "test_edge");
+      .run("harborwatch:PG-1-prose", "harborwatch:SCN-0001-prose", "test_edge");
     db
       .prepare(
         "INSERT INTO anchor_checksums (node_id, anchor_form, checksum) VALUES (?, ?, ?)"
       )
-      .run("harborwatch:PG-0001-prose", "PG-0001", "legacy-page-prose-anchor");
+      .run("harborwatch:PG-1-prose", "PG-1", "legacy-page-prose-anchor");
     db
       .prepare(
         `
@@ -560,7 +560,7 @@ test("legacy page-prose deindex migration invalidates only retired story artifac
       )
       .run(
         worldSlug,
-        "stories/harborwatch/pages-prose/PG-0001.md",
+        "stories/harborwatch/pages-prose/PG-1.md",
         "legacy-page-prose-hash",
         "2026-05-29T00:00:00.000Z"
       );
@@ -621,8 +621,8 @@ test("legacy page-prose deindex migration invalidates only retired story artifac
           `
             SELECT COUNT(*) AS count
             FROM edges
-            WHERE source_node_id = 'harborwatch:PG-0001-prose'
-               OR target_node_id = 'harborwatch:PG-0001-prose'
+            WHERE source_node_id = 'harborwatch:PG-1-prose'
+               OR target_node_id = 'harborwatch:PG-1-prose'
           `
         )
         .get() as { count: number };

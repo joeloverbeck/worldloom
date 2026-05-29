@@ -6,6 +6,7 @@ import { test } from "node:test";
 
 import Database from "better-sqlite3";
 import { openIndex } from "@worldloom/world-index/index/open";
+import { CURRENT_INDEX_VERSION } from "@worldloom/world-index/public/types";
 
 import { enumerateStories, getPageSummaries } from "../src/read/story-list.js";
 import { enumerateWorlds } from "../src/read/world-list.js";
@@ -142,7 +143,7 @@ test("enumerateWorlds reports fresh index metadata when the index exists", async
   const worlds = await enumerateWorlds(repoRoot);
 
   assert.equal(worlds[0]?.indexStatus.kind, "fresh");
-  assert.equal(worlds[0]?.indexVersion, 7);
+  assert.equal(worlds[0]?.indexVersion, CURRENT_INDEX_VERSION);
   assert.equal(worlds[0]?.hasWorldDb, true);
 });
 

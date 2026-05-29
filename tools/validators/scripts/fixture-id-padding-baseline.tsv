@@ -98,6 +98,7 @@ tools/world-index/tests/atomic-source-input.test.ts	STINT-0001	9
 tools/world-index/tests/atomic-source-input.test.ts	STLOC-0001	1
 tools/world-index/tests/atomic-source-input.test.ts	STSTAT-0001	4
 tools/world-index/tests/commands.test.ts	CF-0001	8
+tools/world-index/tests/commands.test.ts	PG-0001	1
 tools/world-index/tests/commands.test.ts	SF-0001	1
 tools/world-index/tests/commands.test.ts	SLT-0001	2
 tools/world-index/tests/commands.test.ts	STENT-0001	1
@@ -151,6 +152,9 @@ tools/world-index/tests/prose-whole-file.test.ts	AU-0001	2
 tools/world-index/tests/prose-whole-file.test.ts	CH-0001	1
 tools/world-index/tests/prose-whole-file.test.ts	CHAR-0001	2
 tools/world-index/tests/prose-whole-file.test.ts	DA-0001	2
+tools/world-index/tests/scene-coverage.test.ts	BR-0001	16
+tools/world-index/tests/scene-coverage.test.ts	BR-0002	4
+tools/world-index/tests/scene-coverage.test.ts	PG-0001	19
 tools/world-index/tests/scoped.test.ts	CHAR-0001	16
 tools/world-index/tests/scoped.test.ts	CHAR-0002	1
 tools/world-index/tests/semantic.test.ts	CF-0001	4

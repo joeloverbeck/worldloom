@@ -7,7 +7,7 @@ import { test } from "node:test";
 import Database from "better-sqlite3";
 import { sha256Hex } from "@worldloom/world-index/hash/content";
 import { openIndex } from "@worldloom/world-index/index/open";
-import { ATOMIC_LOGICAL_WORLD_FILES } from "@worldloom/world-index/public/types";
+import { ATOMIC_LOGICAL_WORLD_FILES, CURRENT_INDEX_VERSION } from "@worldloom/world-index/public/types";
 
 import { resolveRepoRoot, worldDbPath } from "../src/config/repo-root.js";
 import { resolveIndexStatus } from "../src/read/index-status.js";
@@ -129,7 +129,7 @@ test("resolveIndexStatus returns version_mismatch for incompatible index version
 
   assert.deepEqual(resolveIndexStatus("fixture-world", repoRoot), {
     kind: "version_mismatch",
-    expected: 7,
+    expected: CURRENT_INDEX_VERSION,
     found: 999,
     remedy:
       "Run `npm exec --prefix tools/story-explorer -- world-index build fixture-world` to rebuild the index.",
@@ -175,7 +175,7 @@ test("resolveIndexStatus ignores missing atomic logical file anchors", () => {
   }
   db.close();
 
-  assert.deepEqual(resolveIndexStatus("fixture-world", repoRoot), { kind: "fresh", version: 7 });
+  assert.deepEqual(resolveIndexStatus("fixture-world", repoRoot), { kind: "fresh", version: CURRENT_INDEX_VERSION });
 });
 
 test("resolveIndexStatus returns stale for missing physical markdown files", () => {
@@ -203,7 +203,7 @@ test("resolveIndexStatus returns fresh with the recorded index version", () => {
   insertNode(db, "fixture-world", "WORLD_KERNEL.md", contentHash);
   db.close();
 
-  assert.deepEqual(resolveIndexStatus("fixture-world", repoRoot), { kind: "fresh", version: 7 });
+  assert.deepEqual(resolveIndexStatus("fixture-world", repoRoot), { kind: "fresh", version: CURRENT_INDEX_VERSION });
 });
 
 test("resolveIndexStatus returns open_failed for unreadable database files", () => {
