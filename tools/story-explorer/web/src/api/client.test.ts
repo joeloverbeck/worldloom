@@ -16,6 +16,7 @@ import {
   listScenes,
   listStories,
   listWorlds,
+  search,
 } from './client';
 
 const envelope = {
@@ -127,6 +128,34 @@ describe('SPEC-96 scene-first route helpers', () => {
 
     expect(fetch).toHaveBeenCalledWith(
       '/api/worlds/fixture-world/stories/red-bunny/scenes?branchId=BR-1&hasProse=false&receiptVerdict=PASS&coverage=active',
+      undefined,
+    );
+  });
+
+  it('search sends q + groupBy by default and unwraps the enveloped grouped shape', async () => {
+    mockJsonResponse({ _envelope: envelope, data: { groups: [], hits: [], total: 0 } });
+
+    const result = await search('fixture-world', 'red-bunny', 'red bunny');
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/worlds/fixture-world/stories/red-bunny/search?q=red+bunny&groupBy=scene_or_unscened_range',
+      undefined,
+    );
+    expect(result.payload).toEqual({ groups: [], hits: [], total: 0 });
+  });
+
+  it('search serializes kinds / domains / limit / offset when provided', async () => {
+    mockJsonResponse({ _envelope: envelope, data: { groups: [] } });
+
+    await search('fixture-world', 'red-bunny', 'bunny', {
+      kinds: ['scene', 'state_tick'],
+      domains: ['state'],
+      limit: 10,
+      offset: 5,
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/worlds/fixture-world/stories/red-bunny/search?q=bunny&kinds=scene%2Cstate_tick&domains=state&limit=10&offset=5&groupBy=scene_or_unscened_range',
       undefined,
     );
   });

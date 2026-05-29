@@ -448,6 +448,90 @@ export interface StateTickXray {
   degradedDirectRead: boolean;
 }
 
+// ---------------------------------------------------------------------------
+// SPEC-98 search — frontend mirror of view-models/search-hit.ts.
+// ---------------------------------------------------------------------------
+
+export type SearchResultKind =
+  | 'scene'
+  | 'scene_prose'
+  | 'scene_plan'
+  | 'scene_receipt'
+  | 'unscened_range'
+  | 'state_tick'
+  | 'event'
+  | 'choice'
+  | 'record'
+  | 'validation'
+  | 'raw_source';
+
+export type SearchDomain = 'prose' | 'plan' | 'receipt' | 'state' | 'metadata' | 'validation';
+
+export type SearchContainer =
+  | {
+      kind: 'scene';
+      sceneId: string;
+      branchId: string;
+      startPg: string | null;
+      endPg: string | null;
+      pageIds: string[];
+      label: string;
+    }
+  | {
+      kind: 'unscened_range';
+      branchId: string;
+      startPg: string;
+      endPg: string;
+      pageIds: string[];
+      label: string;
+    }
+  | { kind: 'branch_level'; branchId: string | null; label: string };
+
+export interface SearchExpandableRef {
+  recordId: string | null;
+  sceneId: string | null;
+  artifactKind: 'plan' | 'prose' | 'receipt' | null;
+  href: string;
+}
+
+export interface SearchHit {
+  kind: SearchResultKind;
+  domain: SearchDomain;
+  recordId: string | null;
+  title: string;
+  excerpt: string;
+  container: SearchContainer;
+  expandable: SearchExpandableRef;
+}
+
+export interface SearchGroup {
+  container: SearchContainer;
+  hits: SearchHit[];
+}
+
+export interface SearchResults {
+  query: {
+    q: string;
+    kinds: SearchResultKind[];
+    domains: SearchDomain[];
+    groupBy: 'scene_or_unscened_range';
+    limit: number;
+    offset: number;
+  };
+  groups: SearchGroup[];
+  hits: SearchHit[];
+  total: number;
+  indexStatus: IndexStatus;
+  degradedDirectRead: boolean;
+}
+
+export interface SearchQueryOptions {
+  kinds?: SearchResultKind[];
+  domains?: SearchDomain[];
+  limit?: number;
+  offset?: number;
+}
+
 function encodeSegment(value: string): string {
   return encodeURIComponent(value);
 }
@@ -624,5 +708,32 @@ export function getUnscenedRanges(
 export function getStateTickXray(slug: string, storySlug: string, pgId: string): Promise<EnvelopedResult<StateTickXray>> {
   return fetchEnveloped(
     `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/state-ticks/${encodeSegment(pgId)}/xray`,
+  );
+}
+
+// SPEC-98 §2 item 4 — container-grouped search. groupBy is always sent
+// (scene_or_unscened_range is the only supported grouping this iteration).
+export function search(
+  slug: string,
+  storySlug: string,
+  q: string,
+  options: SearchQueryOptions = {},
+): Promise<EnvelopedResult<SearchResults>> {
+  const query = new URLSearchParams({ q });
+  if (options.kinds !== undefined && options.kinds.length > 0) {
+    query.set('kinds', options.kinds.join(','));
+  }
+  if (options.domains !== undefined && options.domains.length > 0) {
+    query.set('domains', options.domains.join(','));
+  }
+  if (options.limit !== undefined) {
+    query.set('limit', String(options.limit));
+  }
+  if (options.offset !== undefined) {
+    query.set('offset', String(options.offset));
+  }
+  query.set('groupBy', 'scene_or_unscened_range');
+  return fetchEnveloped(
+    `/api/worlds/${encodeSegment(slug)}/stories/${encodeSegment(storySlug)}/search?${query.toString()}`,
   );
 }

@@ -15,6 +15,7 @@ import { NotFoundPage } from './components/NotFoundPage';
 import { RouteLoading } from './components/RouteLoading';
 import { SceneDetailRoute, sceneDetailLoader } from './routes/scene-detail';
 import { ScenesRoute, sceneListLoader } from './routes/scenes';
+import { SearchRoute } from './routes/search';
 import { StoriesRoute, storyListLoader } from './routes/stories';
 import { StoryDashboardRoute, storyDashboardLoader } from './routes/story-dashboard';
 import { TimelineRoute, timelineLoader } from './routes/timeline';
@@ -135,6 +136,15 @@ export const routes: RouteObject[] = [
     element: (
       <RouteFrame loadingLabel="Loading unscened ranges...">
         <UnscenedRoute />
+      </RouteFrame>
+    ),
+  },
+  {
+    path: '/worlds/:slug/stories/:storySlug/search',
+    errorElement: <AppRouteError />,
+    element: (
+      <RouteFrame loadingLabel="Loading search...">
+        <SearchRoute />
       </RouteFrame>
     ),
   },
