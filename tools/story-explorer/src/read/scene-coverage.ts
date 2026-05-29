@@ -9,6 +9,8 @@ import { resolveRepoRoot } from "../config/repo-root.js";
 import { resolveIndexStatus } from "./index-status.js";
 import type { IndexStatus } from "../view-models/index-status.js";
 
+export type { SceneCoverageBranch, SceneCoverageScene } from "@worldloom/world-index/public/types";
+
 export interface SceneCoverageReadOptions {
   worldSlug: string;
   storySlug?: string;

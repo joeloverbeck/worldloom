@@ -13,6 +13,7 @@ import type { IndexStatus } from "../view-models/index-status.js";
 import { wrapRouterReadOnly } from "./readonly-guard.js";
 import { registerBranchMapRoute } from "./routes/branch-map.js";
 import { registerHealthRoute } from "./routes/health.js";
+import { registerOverviewRoutes } from "./routes/overview.js";
 import { registerPageRoutes } from "./routes/pages.js";
 import { registerProseRoutes } from "./routes/prose.js";
 import { registerProvenanceRoutes } from "./routes/provenance.js";
@@ -124,6 +125,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerHealthRoute(server, { serverVersion });
   await registerWorldsRoutes(server, { repoRoot: options.repoRoot });
   await registerStoriesRoutes(server, { repoRoot: options.repoRoot });
+  await registerOverviewRoutes(server, { repoRoot: options.repoRoot });
   await registerPageRoutes(server, { repoRoot: options.repoRoot });
   await registerRecordRoutes(server, { repoRoot: options.repoRoot });
   await registerProseRoutes(server, { repoRoot: options.repoRoot });
