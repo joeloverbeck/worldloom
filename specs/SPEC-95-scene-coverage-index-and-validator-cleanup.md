@@ -3,7 +3,7 @@
 **Status:** draft
 **Date:** 2026-05-28
 **Classification:** story-canon-related (changes the world-index story-bundle inventory + a derived coverage layer over `scene_record` nodes/edges, the `tools/validators` registry naming for two surviving PG causal validators, and removes the legacy page-prose receipt schema surface; touches no canon record schema and no FOUNDATIONS principle beyond reinforcing the SPEC-92 SCN-is-membership / prose-is-non-authoritative stance).
-**Depends on:** **SPEC-94** (SCN carries no stored `status`; the coverage layer derives publication state from artifact presence + receipt `verdict`). Land SPEC-94 first.
+**Depends on:** archived **SPEC-94** (SCN carries no stored `status`; the coverage layer derives publication state from artifact presence + receipt `verdict`). SPEC-94 is landed; land this spec next.
 **Related:** archived `SPEC-92` (scene render layer; the `scene_includes_page` / `scene_previous_scene` / `scene_branch` / `scene_emitted_choice` edges already exist), archived `SPEC-93` (page-plan retirement). This spec is phase 2–3 of the second-iteration scene-first plan; consumed by **SPEC-96** (backend read model) and **SPEC-99** (MCP packet).
 **Source:** critical triage of `reports/scene-prose-planning-second-iteration.md` §11/§13/§19 phases 2–3. The report's "scene coverage computation" is built here; its hash/freshness-fingerprint proposals are **rejected** (presence-based only — see §3).
 

@@ -1,6 +1,6 @@
 # SPEC-94 — Decouple Scene Publication State from the Append-Only `SCN` Record
 
-**Status:** draft
+**Status:** COMPLETED
 **Date:** 2026-05-28
 **Classification:** story-canon-related (changes the `SCN` schema in `story-record-schemas.md §4.5.20`, the `story-scene.schema.json` validator schema, the `branching-story-scene-plan` and `branching-story-scene-prose-attach` skills, and INDEX/`previous_scene_id` consumption of scene status; touches FOUNDATIONS §Story Bundles only by reinforcing the existing "SCN is a render-membership record, not a publication record" principle — no new principle introduced).
 **Depends on:** **SPEC-92** (scene render layer; `SCN` + scene-plan + scene-prose-attach). SPEC-92 and SPEC-93 are landed (COMPLETED 2026-05-28).
@@ -129,3 +129,27 @@ Triage each hit: SCN-publication-status references are in scope; entity/story/cl
 - **Option A vs Option B (open for reviewer preference).** This spec implements Option A (remove `status`; derive at read time). A reviewer who prefers an explicit membership-lifecycle field may adopt Option B (`active | superseded`) per §5 without re-deriving the trade-off; if chosen, §2 items 1–4 change from *remove* to *redefine* and §3's `superseded` row reads the field instead of the `supersedes` pointer. Recommendation stands at Option A (the pointer already makes supersession derivable).
 - **Stray legacy `status` is tolerated, not migrated.** Per §4, no `SCN` records exist, so the change is migration-free. If an `SCN` is created with `status: planned` between authoring and implementation, the schema change rejects the field on re-validation and the read-time indicator ignores any stray value — there is no grandfathering clause and none is needed.
 - **Test fixtures, not the src sweep, gate the validator change.** The §6 completeness sweep is `src`-scoped; the validator test/fixture updates (§6) and a passing `npm test` are the actual gate for the schema removal. The `world-index` / `world-mcp` fixture `status` lines are non-breaking hygiene, not correctness blockers.
+
+## Outcome
+
+Completed 2026-05-29.
+
+SPEC-94 landed across six archived tickets:
+
+- `archive/tickets/SPEC94SCNPUBSTA-001.md` removed stored `SCN.status` from the shared story-record contract and documented the read-time derived publication indicator.
+- `archive/tickets/SPEC94SCNPUBSTA-002.md` removed `status` from `story-scene.schema.json` and updated validator tests so `SCN` records without `status` validate while stray `status` fields are rejected.
+- `archive/tickets/SPEC94SCNPUBSTA-003.md` updated `branching-story-scene-plan` to stop writing or ordering by publication status and to render the derived indicator.
+- `archive/tickets/SPEC94SCNPUBSTA-004.md` updated `branching-story-scene-prose-attach` to remove the `SCN.status` precondition while preserving receipt + INDEX-only writes.
+- `archive/tickets/SPEC94SCNPUBSTA-005.md` reconciled docs and world-index/world-mcp SCN fixtures with the post-status contract.
+- `archive/tickets/SPEC94SCNPUBSTA-006.md` ran the capstone §6 sweep and package gates.
+
+Final verification:
+
+- `grep -rn "planned | rendered | attached\|scn_status\|SCN\.status\|SCN status\|scene.*status" .claude/skills/ docs/ tools/validators/src tools/world-index/src tools/world-mcp/src | grep -v "archive/"` returned no stale in-scope `SCN.status` storage or consumer hit after classification; remaining hits are unrelated status vocabularies or current no-stored-publication-status/derived-indicator prose.
+- `cd tools/validators && npm test` passed: 1058 tests, 0 failures.
+- `cd tools/world-index && npm test` passed: 127 non-CLI tests plus serial CLI suites, 0 failures.
+- `cd tools/world-mcp && npm test` passed: 506 tests, 0 failures.
+- `grep -rn "state_hash_at_attach" tools/validators/src/schemas/scene-prose-receipt.schema.json` returned only the expected advisory receipt field; no SCN, scene plan, scene prose, or receipt hash/fingerprint field was added.
+- Manual FOUNDATIONS alignment confirmed `scene_range_forbidden_mystery_resolution` remains present and no Mystery Reserve firewall, scene-range validator behavior, SE/PG/CHC engine surface, or `state_hash` chain behavior changed.
+
+Deviations: none from the accepted Option A direction. The §6 sweep remains a discovery-and-classification gate rather than a literal zero-output command because broad `status` patterns intentionally match unrelated story-state classes and current contract prose.
