@@ -1,22 +1,20 @@
 {
-  "originating_spec": "specs/SPEC-94-scn-publication-status-decoupling.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC94SCNPUBSTA-005.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "03b265270bccde996d133073ccbcdbbff8009c60",
+  "originating_spec": "archive/specs/SPEC-94-scn-publication-status-decoupling.md",
+  "archived_spec": "archive/specs/SPEC-94-scn-publication-status-decoupling.md",
+  "last_ticket": "archive/tickets/SPEC94SCNPUBSTA-006.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "d6b79682419a5178bfca32eab612fc79b581f65f",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC94SCNPUBSTA-006.md",
-  "queue": [
-    "tickets/SPEC94SCNPUBSTA-006.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC94SCNPUBSTA-005 proof passed: world-index npm test, world-mcp npm test, docs/fixture stale-anchor greps returned zero in-scope hits",
+  "proof_state": "SPEC94 final proof passed: §6 sweep classified zero stale in-scope SCN.status hits; validators npm test 1058 pass; world-index npm test 127 non-CLI plus serial CLI pass; world-mcp npm test 506 pass",
   "dirty_state": "expected after state commit: tracked clean; pre-existing ignored package artifacts under tools/validators, tools/world-index, and tools/world-mcp left untouched",
   "updated_at": "2026-05-29"
 }
