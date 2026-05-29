@@ -125,9 +125,6 @@ test("story-bundle paths are recognized as indexable closed inventory", () => {
     for (const expected of [
       "stories/foo/STORY_KERNEL.md",
       ...storySourcePaths,
-      "stories/foo/pages-prose/PG-0001.md",
-      "stories/foo/pages-prose-plans/PG-0001.md",
-      "stories/foo/pages-prose-receipts/PG-0001.yaml",
       "stories/foo/scene-prose/SCN-0001.md",
       "stories/foo/scene-prose-plans/SCN-0001.md",
       "stories/foo/scene-prose-receipts/SCN-0001.yaml",
@@ -145,6 +142,9 @@ test("story-bundle paths are recognized as indexable closed inventory", () => {
     }
 
     for (const unexpected of [
+      "stories/foo/pages-prose/PG-0001.md",
+      "stories/foo/pages-prose-plans/PG-0001.md",
+      "stories/foo/pages-prose-receipts/PG-0001.yaml",
       "stories/foo/notes.md",
       "stories/foo/pages-prose-rejected/PG-0001.yaml",
       "stories/foo/scratch/draft.md",

@@ -457,6 +457,204 @@ test("repair migration handles indexes that already recorded the v5 no-op migrat
   assertStaleWorldKernelSectionReparses(5);
 });
 
+test("legacy page-prose deindex migration invalidates only retired story artifact rows", () => {
+  const root = createTempRoot();
+  const worldSlug = "fixture-world";
+  const indexDirectory = path.join(root, "worlds", worldSlug, "_index");
+  const databasePath = path.join(indexDirectory, "world.db");
+  const versionPath = path.join(indexDirectory, "index_version.txt");
+
+  mkdirSync(indexDirectory, { recursive: true });
+
+  const db = new Database(databasePath);
+  try {
+    db.exec([1, 2, 3, 4, 5, 6, 7].map((version) => readMigration(version)).join("\n"));
+    db
+      .prepare(
+        `
+          INSERT INTO nodes (
+            node_id,
+            world_slug,
+            story_slug,
+            file_path,
+            heading_path,
+            byte_start,
+            byte_end,
+            line_start,
+            line_end,
+            node_type,
+            body,
+            content_hash,
+            anchor_checksum,
+            summary,
+            created_at_index_version
+          ) VALUES (?, ?, ?, ?, ?, 0, 10, 1, 1, ?, ?, ?, ?, NULL, 7)
+        `
+      )
+      .run(
+        "harborwatch:PG-0001-prose",
+        worldSlug,
+        "harborwatch",
+        "stories/harborwatch/pages-prose/PG-0001.md",
+        "PG-0001",
+        "page_prose",
+        "Legacy page prose.",
+        "legacy-page-prose-hash",
+        "legacy-page-prose-anchor"
+      );
+    db
+      .prepare(
+        `
+          INSERT INTO nodes (
+            node_id,
+            world_slug,
+            story_slug,
+            file_path,
+            heading_path,
+            byte_start,
+            byte_end,
+            line_start,
+            line_end,
+            node_type,
+            body,
+            content_hash,
+            anchor_checksum,
+            summary,
+            created_at_index_version
+          ) VALUES (?, ?, ?, ?, ?, 0, 10, 1, 1, ?, ?, ?, ?, NULL, 7)
+        `
+      )
+      .run(
+        "harborwatch:SCN-0001-prose",
+        worldSlug,
+        "harborwatch",
+        "stories/harborwatch/scene-prose/SCN-0001.md",
+        "SCN-0001",
+        "scene_prose",
+        "Scene prose.",
+        "scene-prose-hash",
+        "scene-prose-anchor"
+      );
+    db
+      .prepare(
+        "INSERT INTO edges (source_node_id, target_node_id, edge_type) VALUES (?, ?, ?)"
+      )
+      .run("harborwatch:PG-0001-prose", "harborwatch:SCN-0001-prose", "test_edge");
+    db
+      .prepare(
+        "INSERT INTO anchor_checksums (node_id, anchor_form, checksum) VALUES (?, ?, ?)"
+      )
+      .run("harborwatch:PG-0001-prose", "PG-0001", "legacy-page-prose-anchor");
+    db
+      .prepare(
+        `
+          INSERT INTO file_versions (
+            world_slug,
+            file_path,
+            content_hash,
+            last_indexed_at
+          ) VALUES (?, ?, ?, ?)
+        `
+      )
+      .run(
+        worldSlug,
+        "stories/harborwatch/pages-prose/PG-0001.md",
+        "legacy-page-prose-hash",
+        "2026-05-29T00:00:00.000Z"
+      );
+    db
+      .prepare(
+        `
+          INSERT INTO file_versions (
+            world_slug,
+            file_path,
+            content_hash,
+            last_indexed_at
+          ) VALUES (?, ?, ?, ?)
+        `
+      )
+      .run(
+        worldSlug,
+        "stories/harborwatch/scene-prose/SCN-0001.md",
+        "scene-prose-hash",
+        "2026-05-29T00:00:00.000Z"
+      );
+  } finally {
+    db.close();
+  }
+
+  writeFileSync(versionPath, "7\n", "utf8");
+
+  try {
+    const migrated = openFixtureIndex(root);
+    try {
+      const legacyNodeCount = migrated
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM nodes
+            WHERE file_path LIKE 'stories/%/pages-prose/%'
+               OR file_path LIKE 'stories/%/pages-prose-plans/%'
+               OR file_path LIKE 'stories/%/pages-prose-receipts/%'
+          `
+        )
+        .get() as { count: number };
+      assert.equal(legacyNodeCount.count, 0);
+
+      const legacyFileVersionCount = migrated
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM file_versions
+            WHERE file_path LIKE 'stories/%/pages-prose/%'
+               OR file_path LIKE 'stories/%/pages-prose-plans/%'
+               OR file_path LIKE 'stories/%/pages-prose-receipts/%'
+          `
+        )
+        .get() as { count: number };
+      assert.equal(legacyFileVersionCount.count, 0);
+
+      const danglingEdgeCount = migrated
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM edges
+            WHERE source_node_id = 'harborwatch:PG-0001-prose'
+               OR target_node_id = 'harborwatch:PG-0001-prose'
+          `
+        )
+        .get() as { count: number };
+      assert.equal(danglingEdgeCount.count, 0);
+
+      const sceneNodeCount = migrated
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM nodes
+            WHERE file_path = 'stories/harborwatch/scene-prose/SCN-0001.md'
+          `
+        )
+        .get() as { count: number };
+      assert.equal(sceneNodeCount.count, 1);
+
+      const sceneFileVersionCount = migrated
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM file_versions
+            WHERE file_path = 'stories/harborwatch/scene-prose/SCN-0001.md'
+          `
+        )
+        .get() as { count: number };
+      assert.equal(sceneFileVersionCount.count, 1);
+    } finally {
+      migrated.close();
+    }
+  } finally {
+    cleanup(root);
+  }
+});
+
 test("version mismatches raise SchemaVersionMismatchError", () => {
   const root = createTempRoot();
 

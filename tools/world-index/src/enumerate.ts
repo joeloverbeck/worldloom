@@ -45,15 +45,13 @@ const STORY_PRIMARY_AUTHORED_FILES = new Set(["STORY_KERNEL.md"]);
 const STORY_BUNDLE_MARKDOWN_DIRECTORIES = new Set([
   "audits",
   "character-proposals",
-  "pages-prose",
-  "pages-prose-plans",
   "scene-prose",
   "scene-prose-plans",
   "story-characters",
   "storylet-batches",
   "story-promotions"
 ]);
-const STORY_BUNDLE_YAML_DIRECTORIES = new Set(["pages-prose-receipts", "scene-prose-receipts"]);
+const STORY_BUNDLE_YAML_DIRECTORIES = new Set(["scene-prose-receipts"]);
 const STORY_BUNDLE_CHARACTER_PROPOSAL_SUBDIRECTORIES = new Set(["batches"]);
 
 /**
