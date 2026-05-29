@@ -218,10 +218,13 @@ test("§Verification bullet 16: choice grounded in fresh record fails observer f
   const verdicts = await introductionObserverFirewall.run(
     undefined,
     testContext([
-      event("SE-2", { create: ["STSEC-1"] }),
+      event("SE-2", { create: ["STSEC-1"], actor: "STENT-1" }),
       page("PG-2", { emitted_choices: ["CHC-99"], resolved_event_id: "SE-2" }),
       choice("CHC-99", ["STSEC-1"], ["STENT-2"]),
-      secret("STSEC-1", ["STENT-1"])
+      // Resolved acting entity falls back to SE.actor (STENT-1); the fresh secret is held only by
+      // STENT-2, so STENT-1 has no access route. (OBSFW-001: choice access resolves against the
+      // acting entity, not a vestigial per-CHC available_to field.)
+      secret("STSEC-1", ["STENT-2"])
     ])
   );
 

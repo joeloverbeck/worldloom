@@ -8,30 +8,32 @@ import { context, record } from "./helpers.js";
 
 const STORY_SLUG = "midstory-introduction-test";
 
-test("introduction_observer_firewall accepts a choice grounded in a fresh secret the actor holds", async () => {
+test("introduction_observer_firewall accepts a choice grounded in a fresh secret the player-proxy holds", async () => {
   const verdicts = await introductionObserverFirewall.run(undefined, testContext([
-    event("SE-2", { create: ["STSEC-1"] }),
+    entity("STENT-1", ["player_proxy"]),
+    event("SE-2", { create: ["STSEC-1"], actor: "STENT-1" }),
     page("PG-2", ["CHC-1"], "SE-2"),
-    choice("CHC-1", ["STSEC-1"], ["STENT-1"]),
+    choice("CHC-1", ["STSEC-1"]),
     secret("STSEC-1", ["STENT-1"])
   ]));
 
   assert.deepEqual(verdicts, []);
 });
 
-test("introduction_observer_firewall rejects a choice grounded in a fresh secret without actor access", async () => {
+test("introduction_observer_firewall rejects a choice grounded in a fresh secret the player-proxy cannot access", async () => {
   const verdicts = await introductionObserverFirewall.run(undefined, testContext([
-    event("SE-2", { create: ["STSEC-1"] }),
+    entity("STENT-1", ["player_proxy"]),
+    event("SE-2", { create: ["STSEC-1"], actor: "STENT-1" }),
     page("PG-2", ["CHC-99"], "SE-2"),
-    choice("CHC-99", ["STSEC-1"], ["STENT-2"]),
-    secret("STSEC-1", ["STENT-1"])
+    choice("CHC-99", ["STSEC-1"]),
+    secret("STSEC-1", ["STENT-2"])
   ]));
 
   assert.equal(verdicts.length, 1);
   assert.equal(verdicts[0]?.code, "intro_observer_no_access_route");
   assert.deepEqual(verdicts[0]?.detail, {
     event_id: "SE-2",
-    actor: "STENT-2",
+    actor: "STENT-1",
     choice_id: "CHC-99",
     fresh_record_id: "STSEC-1",
     reference_path: "grounded_in.records[0]"
@@ -40,9 +42,10 @@ test("introduction_observer_firewall rejects a choice grounded in a fresh secret
 
 test("introduction_observer_firewall accepts a BEL access route to a fresh clock", async () => {
   const verdicts = await introductionObserverFirewall.run(undefined, testContext([
-    event("SE-2", { create: ["CLK-1", "BEL-1"] }),
+    entity("STENT-1", ["player_proxy"]),
+    event("SE-2", { create: ["CLK-1", "BEL-1"], actor: "STENT-1" }),
     page("PG-2", ["CHC-1"], "SE-2"),
-    choice("CHC-1", ["CLK-1"], ["STENT-1"]),
+    choice("CHC-1", ["CLK-1"]),
     clock("CLK-1", { visibility: "hidden", driver: "STENT-2" }),
     belief("BEL-1", "STENT-1", ["CLK-1"])
   ]));
@@ -52,9 +55,10 @@ test("introduction_observer_firewall accepts a BEL access route to a fresh clock
 
 test("introduction_observer_firewall accepts creating-event expected witnesses as explicit access", async () => {
   const verdicts = await introductionObserverFirewall.run(undefined, testContext([
-    event("SE-2", { create: ["CLK-1"], expected_witnesses: ["STENT-1"] }),
+    entity("STENT-1", ["player_proxy"]),
+    event("SE-2", { create: ["CLK-1"], actor: "STENT-1", expected_witnesses: ["STENT-1"] }),
     page("PG-2", ["CHC-1"], "SE-2"),
-    choice("CHC-1", ["CLK-1"], ["STENT-1"]),
+    choice("CHC-1", ["CLK-1"]),
     clock("CLK-1", { visibility: "hidden", driver: "STENT-2" })
   ]));
 
@@ -63,13 +67,117 @@ test("introduction_observer_firewall accepts creating-event expected witnesses a
 
 test("introduction_observer_firewall ignores choices grounded in existing records", async () => {
   const verdicts = await introductionObserverFirewall.run(undefined, testContext([
-    event("SE-2", { create: [] }),
+    entity("STENT-1", ["player_proxy"]),
+    event("SE-2", { create: [], actor: "STENT-1" }),
     page("PG-2", ["CHC-1"], "SE-2"),
-    choice("CHC-1", ["STSEC-1"], ["STENT-2"]),
-    secret("STSEC-1", ["STENT-1"])
+    choice("CHC-1", ["STSEC-1"]),
+    secret("STSEC-1", ["STENT-2"])
   ]));
 
   assert.deepEqual(verdicts, []);
+});
+
+// OBSFW-001 AC#1: on a non-player-driven turn the emitted choices are the player's responses; a
+// choice grounding in a STEMO the player-proxy holds passes even though SE.actor is the NPC initiator.
+test("introduction_observer_firewall accepts a player-response choice grounded in the player-proxy's own fresh STEMO on an npc_action turn", async () => {
+  const verdicts = await introductionObserverFirewall.run(undefined, testContext([
+    entity("STENT-1", ["player_proxy", "viewpoint"]),
+    entity("STENT-2", ["opposing_actor"]),
+    event("SE-2", { create: ["STEMO-5"], actor: "STENT-2", turn_driver_kind: "npc_action" }),
+    page("PG-2", ["CHC-13"], "SE-2"),
+    choice("CHC-13", ["STEMO-5"]),
+    emotion("STEMO-5", "STENT-1")
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
+// OBSFW-001 AC#2: still rejects when the fresh record is held by a third party that neither the
+// player-proxy nor the event actor can access — the firewall is tightened, not weakened.
+test("introduction_observer_firewall rejects a choice grounded in a fresh STEMO held by an inaccessible third party", async () => {
+  const verdicts = await introductionObserverFirewall.run(undefined, testContext([
+    entity("STENT-1", ["player_proxy"]),
+    entity("STENT-2", ["opposing_actor"]),
+    event("SE-2", { create: ["STEMO-5"], actor: "STENT-2", turn_driver_kind: "npc_action" }),
+    page("PG-2", ["CHC-15"], "SE-2"),
+    choice("CHC-15", ["STEMO-5"]),
+    emotion("STEMO-5", "STENT-3")
+  ]));
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "intro_observer_no_access_route");
+  assert.deepEqual(verdicts[0]?.detail, {
+    event_id: "SE-2",
+    actor: "STENT-1",
+    choice_id: "CHC-15",
+    fresh_record_id: "STEMO-5",
+    reference_path: "grounded_in.records[0]"
+  });
+});
+
+test("introduction_observer_firewall resolves multiple player-proxies as a permissive disjunction", async () => {
+  const verdicts = await introductionObserverFirewall.run(undefined, testContext([
+    entity("STENT-1", ["player_proxy"]),
+    entity("STENT-4", ["player_proxy"]),
+    entity("STENT-2", ["opposing_actor"]),
+    event("SE-2", { create: ["STEMO-5"], actor: "STENT-2", turn_driver_kind: "npc_action" }),
+    page("PG-2", ["CHC-13"], "SE-2"),
+    choice("CHC-13", ["STEMO-5"]),
+    emotion("STEMO-5", "STENT-4")
+  ]));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("introduction_observer_firewall ignores a superseded player-proxy when resolving the acting entity", async () => {
+  const verdicts = await introductionObserverFirewall.run(undefined, testContext([
+    entity("STENT-7", ["player_proxy"]),
+    entity("STENT-8", ["player_proxy"], "STENT-7"),
+    entity("STENT-2", ["opposing_actor"]),
+    event("SE-2", { create: ["STEMO-5"], actor: "STENT-2", turn_driver_kind: "npc_action" }),
+    page("PG-2", ["CHC-13"], "SE-2"),
+    choice("CHC-13", ["STEMO-5"]),
+    emotion("STEMO-5", "STENT-7")
+  ]));
+
+  // STENT-7 is superseded by the active proxy STENT-8, so the held-by-STENT-7 STEMO is not accessible
+  // to the active acting entity.
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "intro_observer_no_access_route");
+  assert.deepEqual(verdicts[0]?.detail, {
+    event_id: "SE-2",
+    actor: "STENT-8",
+    choice_id: "CHC-13",
+    fresh_record_id: "STEMO-5",
+    reference_path: "grounded_in.records[0]"
+  });
+});
+
+test("introduction_observer_firewall falls back to SE.actor when no player-proxy is resolvable", async () => {
+  const accepted = await introductionObserverFirewall.run(undefined, testContext([
+    entity("STENT-1", ["viewpoint"]),
+    event("SE-2", { create: ["STSEC-1"], actor: "STENT-1" }),
+    page("PG-2", ["CHC-1"], "SE-2"),
+    choice("CHC-1", ["STSEC-1"]),
+    secret("STSEC-1", ["STENT-1"])
+  ]));
+  assert.deepEqual(accepted, []);
+
+  const rejected = await introductionObserverFirewall.run(undefined, testContext([
+    entity("STENT-1", ["viewpoint"]),
+    event("SE-2", { create: ["STSEC-1"], actor: "STENT-1" }),
+    page("PG-2", ["CHC-1"], "SE-2"),
+    choice("CHC-1", ["STSEC-1"]),
+    secret("STSEC-1", ["STENT-2"])
+  ]));
+  assert.equal(rejected.length, 1);
+  assert.deepEqual(rejected[0]?.detail, {
+    event_id: "SE-2",
+    actor: "STENT-1",
+    choice_id: "CHC-1",
+    fresh_record_id: "STSEC-1",
+    reference_path: "grounded_in.records[0]"
+  });
 });
 
 test("introduction_observer_firewall is scoped to full-world, intro patch plans, and touched intro files", () => {
@@ -95,17 +203,36 @@ test("introduction_observer_firewall is scoped to full-world, intro patch plans,
   );
 });
 
+function entity(id: string, roles: string[], supersedes?: string) {
+  return storyRecord("story_entity_record", id, "entities", {
+    id,
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
+    display_name: id,
+    bound_stchar_id: "STCHAR-1",
+    role_in_story: roles,
+    ...(supersedes === undefined ? {} : { supersedes })
+  });
+}
+
 function event(
   id: string,
-  overrides: Partial<{ create: string[]; actor: string; expected_witnesses: string[] }>
+  overrides: Partial<{ create: string[]; actor: string; expected_witnesses: string[]; turn_driver_kind: string }>
 ) {
   return storyRecord("story_event_record", id, "events", {
     id,
     story_id: "STORY-1",
     created_at_page: "PG-2",
     parent_page_id: "PG-1",
-    event_kind: "selected_choice",
+    event_kind: "turn_resolution",
     actor: overrides.actor ?? "STENT-1",
+    turn_driver: {
+      kind: overrides.turn_driver_kind ?? "player_action",
+      initiator: overrides.actor ?? "STENT-1",
+      driver_records: [],
+      player_response_mode: "responds",
+      pov_visibility: "perceived_directly"
+    },
     commitment: { selected_slt_id: "SLT-1", selection_source: "runtime_jit", alias_bindings: {} },
     outcome_route: "accept",
     world_logic_rationale: "Structured introduction firewall test.",
@@ -148,12 +275,11 @@ function page(id: string, emittedChoices: string[], resolvedEventId: string) {
   });
 }
 
-function choice(id: string, groundedRecords: string[], availableTo: string[]) {
+function choice(id: string, groundedRecords: string[]) {
   return storyRecord("choice_record", id, "choices", {
     id,
     story_id: "STORY-1",
     created_at_page: "PG-2",
-    available_to: availableTo,
     grounded_in: { records: groundedRecords }
   });
 }
@@ -174,6 +300,18 @@ function clock(id: string, overrides: Record<string, unknown>) {
     story_id: "STORY-1",
     created_at_page: "PG-2",
     ...overrides
+  });
+}
+
+function emotion(id: string, holder: string) {
+  return storyRecord("story_emotion_record", id, "emotions", {
+    id,
+    story_id: "STORY-1",
+    created_at_page: "PG-2",
+    holder,
+    status: "active",
+    affect_kind: "fear",
+    intensity: "high"
   });
 }
 
