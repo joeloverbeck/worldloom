@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-94-scn-publication-status-decoupling.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC94SCNPUBSTA-002.md",
+  "last_ticket": "archive/tickets/SPEC94SCNPUBSTA-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "cb753ae63dbb203e7b4509a4f9d909d5b2ae7666",
+  "last_work_commit": "083bfac2c4a6653293457483909aa17298283a2e",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC94SCNPUBSTA-003.md",
+  "next_target": "tickets/SPEC94SCNPUBSTA-004.md",
   "queue": [
-    "tickets/SPEC94SCNPUBSTA-003.md",
     "tickets/SPEC94SCNPUBSTA-004.md",
     "tickets/SPEC94SCNPUBSTA-005.md",
     "tickets/SPEC94SCNPUBSTA-006.md"
@@ -19,7 +18,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC94SCNPUBSTA-002 validators package proof passed: cd tools/validators && npm test (1058 passed); schema status grep returned zero",
+  "proof_state": "SPEC94SCNPUBSTA-003 skill-prose proof passed: stale status anchor grep returned zero; manual review confirmed previous_scene_id adjacency + supersession and INDEX derived indicator",
   "dirty_state": "expected after state commit: tracked clean; pre-existing ignored package artifacts under tools/validators, tools/world-index, and tools/world-mcp left untouched",
   "updated_at": "2026-05-29"
 }
