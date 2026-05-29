@@ -1,6 +1,6 @@
 # SLTLIFE-001: Detect permanently-inert storylets and guide against over-narrow affect_kind predicates
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `branching-story-health-audit` structural-mode storylet-pool-coverage pass (skill prose + supporting validator/util if implemented as a deterministic check); authoring guidance in `commitment-block-authoring`. No record-schema change.
@@ -82,3 +82,11 @@ Note in the ticket that `red-bunny`'s `SLT-4` should be superseded via `commitme
 
 1. `/branching-story-health-audit --world_slug erotica-world --story_slug red-bunny --mode structural` (dry-run; inspect the audit report for the `SLT-4` inert finding) — targeted.
 2. `npm test --workspace tools/validators -- <inert-storylet>` — if a validator is added.
+
+## Implementation Notes (2026-05-29)
+
+- **Implemented as skill-prose audit logic, not a deterministic validator.** The `branching-story-health-audit` pipeline executes its passes in working memory against MCP retrieval (it does not run `tools/validators` structural validators — those run on the patch-engine pre-apply / full-world surface). A validator added under `tools/validators/src/structural/` would be orphaned from the audit and would change full-world validation behavior in a surface this ticket does not scope. So the inert-storylet check lives in Phase 2o prose alongside the existing `storylet_pool_coverage_gap` logic, which is the correctly-placed surface. The `tools/validators/...` "Files to Touch" entry (conditional on the validator path) and AC "Tests That Must Pass" #3 (conditional on a validator) therefore do not apply.
+- `branching-story-health-audit/SKILL.md` Phase 2o: added **Permanently-inert storylet detection** — for each `global_author_pool` / `branch_prefix_scoped` SLT (skip `branch_scoped` JIT), test eligibility against every committed page's `state_snapshot.active_records` using the bind-then-instantiate discipline; emit `storylet_permanently_inert` (WARNING, `repair_kind: commitment_block`) for any pool block eligible on no committed page. Explicit never-eligible (flagged) vs eligible-but-unused (never flagged) distinction. Sub-reason `inert_cause: unsatisfiable_affect_kind` for an exact-value `any_emotion_active(kind=…)` / `emotion_active(kind=…)` predicate whose `affect_kind` is in no active `STEMO` across scope; names the absent kind + the lifecycle-adjacent active kinds. Updated the Phase 2o intro, the Rule 5 mechanism line, and the Rule 5 alignment-table row.
+- `commitment-block-authoring/references/phase-2-draft-blocks.md` (§Plan / emotion authoring patterns): added **Affect-predicate brittleness** guidance — do not over-narrow `kind` on a hard predicate of a global-pool block (the STEMO lifecycle transitions `dread`→`fear`→`anxiety`); prefer `any_emotion_active` with no `kind`, a lifecycle-stable `kind`, or an `any[…]` over adjacent kinds, or push the `kind` narrowing into `soft`. Cites FOUNDATIONS §5a/§5b/Rule 5.
+- Verified against `red-bunny`: `SLT-4` (`any_emotion_active(kind=dread)`, `global_author_pool`) — STEMO-2 (`dread`) was superseded into STEMO-3/4 (`fear`); active STEMO affect kinds across history are {`desire`, `fear`, `anxiety`}, no active `dread`. The new pass would emit `storylet_permanently_inert` for `SLT-4` with `inert_cause: unsatisfiable_affect_kind` (absent `dread`; adjacent active `fear`/`anxiety`).
+- **Content follow-up (§3, out of engine scope):** repairing red-bunny `SLT-4` to broaden its predicate is operator-driven via `commitment-block-authoring` (HARD-GATE) and is explicitly not part of this engine change; left for a separate authoring run.
