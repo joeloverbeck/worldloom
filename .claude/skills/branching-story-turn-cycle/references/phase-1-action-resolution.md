@@ -41,4 +41,6 @@ Draft `SE.resolution` before leaving Phase 1:
 
 When `resolution` is present, set `player_visible_feedback` to one sentence naming what the player should be able to perceive about why the action resolved this way. Do not add `reason_class`; the route, result, rationale, and state delta are sufficient.
 
+When the resolved driver is a player source (`player_action` / `player_write_in`), the resulting `SE.turn_driver` uses the canonical player shape — `initiator: player`, `driver_records: []`, `player_response_mode: initiates`, `pov_visibility: perceived_directly` — drafted in Phase 6 (see `references/phase-6-page-snapshot.md` §"Turn-driver shape for player drivers" and shared schema §4.3).
+
 **Silent rejection is forbidden.** Every action — including impossible ones — produces an `SE` record with `world_logic_rationale` explaining the route plus a `PG` state snapshot that records the outcome.
