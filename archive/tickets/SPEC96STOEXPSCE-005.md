@@ -1,6 +1,6 @@
 # SPEC96STOEXPSCE-005: Unscened-ranges route — uncovered committed-PG runs
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: new `GET /api/worlds/:slug/stories/:storySlug/unscened-ranges` route + `read/unscened.ts` + `UnscenedRange` view-model + registration in `http.ts`. Read-only.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC-96 §2.4 (D4): the scene-first reader needs to surface contiguous committed-PG ranges on a branch path NOT covered by an active SCN — so the author can see what still needs scene planning. `GET /unscened-ranges?branchId=BR-N` returns each range with start/end PG, count, final choice surface, event-delta summary, active-record delta summary, validation status, and a suggested default range label (a hint, NOT an automatic scene-boundary verdict). Today the backend has no unscened surface.
+SPEC-96 §2.4 (D4): the scene-first reader needed to surface contiguous committed-PG ranges on a branch path NOT covered by an active SCN, so the author can see what still needs scene planning. This ticket added `GET /unscened-ranges?branchId=BR-N`; it returns each range with start/end PG, count, final choice surface, event-delta summary, active-record delta summary, validation status, and a suggested default range label (a hint, NOT an automatic scene-boundary verdict).
 
 ## Assumption Reassessment (2026-05-29)
 
@@ -29,19 +29,19 @@ SPEC-96 §2.4 (D4): the scene-first reader needs to surface contiguous committed
 3. Label is non-authoritative → manual review + grep-proof: the label field is documented/typed as a suggestion, and the module emits no scene-boundary decision or SCN write.
 4. Envelope reuse (cross-package) → grep-proof: imports world-index only via 001's helper; returns the existing envelope.
 
-## What to Change
+## Landed Changes
 
 ### 1. Unscened read module
 
-Create `tools/story-explorer/src/read/unscened.ts`: take `branchId`, pull `unscened_runs` from 001's coverage helper, and enrich each run with final `ChoiceSurface` (end-PG emitted choices), `EventDeltaSummary`, active-record delta summary, validation status, and a `suggestedRangeLabel` (a derived hint string). Emit no boundary verdict.
+Created `tools/story-explorer/src/read/unscened.ts`: takes `branchId`, pulls `unscened_runs` from 001's coverage helper, and enriches each run with final `ChoiceSurface` (end-PG emitted choices), `EventDeltaSummary`, active-record delta summary, validation status, and a `suggestedRangeLabel` (a derived hint string). It emits no boundary verdict and returns empty ranges with degraded status when the index is missing/stale.
 
 ### 2. `UnscenedRange` view-model
 
-Create `tools/story-explorer/src/view-models/unscened-range.ts`: `UnscenedRange` with `startPg`, `endPg`, `count`, `finalChoiceSurface: ChoiceSurface`, `eventDelta: EventDeltaSummary`, `activeRecordDelta`, `validationStatus`, `suggestedRangeLabel` (documented as a non-authoritative hint).
+Created `tools/story-explorer/src/view-models/unscened-range.ts`: `UnscenedRange` with `startPg`, `endPg`, `pageIds`, `count`, `finalChoiceSurface: ChoiceSurface`, `eventDelta: EventDeltaSummary`, `activeRecordDelta`, `validationStatus`, and `suggestedRangeLabel` documented as a non-authoritative hint.
 
 ### 3. Route + registration
 
-Create `tools/story-explorer/src/server/routes/unscened.ts` exporting `registerUnscenedRoutes(server, options)` for `GET /api/worlds/:slug/stories/:storySlug/unscened-ranges?branchId=BR-N`; wire into `http.ts` behind the read-only guard + envelope.
+Created `tools/story-explorer/src/server/routes/unscened.ts` exporting `registerUnscenedRoutes(server, options)` for `GET /api/worlds/:slug/stories/:storySlug/unscened-ranges?branchId=BR-N`; wired it into `http.ts` behind the read-only guard + envelope.
 
 ## Files to Touch
 
@@ -74,9 +74,26 @@ Create `tools/story-explorer/src/server/routes/unscened.ts` exporting `registerU
 
 ### New/Modified Tests
 
-1. `tools/story-explorer/test/unscened-route.test.ts` — new; range-membership assertions, per-range enrichment presence, label-is-hint check, degraded-index path.
+1. `tools/story-explorer/test/unscened-route.test.ts` — new; range-membership assertions, per-range enrichment presence, label-is-hint check, degraded-index path, and branch-id validation.
 
 ### Commands
 
 1. `cd tools/story-explorer && npm run test:backend`
 2. `grep -n "registerUnscenedRoutes" tools/story-explorer/src/server/http.ts`
+
+## Outcome
+
+Completed: 2026-05-29
+
+What changed:
+- Added the unscened-ranges backend read surface in `tools/story-explorer/src/read/unscened.ts`, `tools/story-explorer/src/view-models/unscened-range.ts`, and `tools/story-explorer/src/server/routes/unscened.ts`.
+- Registered `registerUnscenedRoutes` in `tools/story-explorer/src/server/http.ts`.
+- Added `tools/story-explorer/test/unscened-route.test.ts` covering the fresh-index response, degraded-index response, branch-id validation, range enrichment, and the absence of a scene-boundary verdict field.
+
+Verification results:
+- `cd tools/story-explorer && npm run test:backend` PASS — 20/20 backend test files passed.
+- `grep -n "registerUnscenedRoutes" tools/story-explorer/src/server/http.ts` PASS — import and registration are present.
+- `rg -n "sceneBoundary|boundary verdict|submit|writeFile|append|patch|_source" tools/story-explorer/src/read/unscened.ts tools/story-explorer/src/server/routes/unscened.ts tools/story-explorer/src/view-models/unscened-range.ts` PASS by manual review — the only hit is the view-model comment documenting the label as not a scene-boundary verdict; no write/submit path exists in the route/read module.
+
+Deviations:
+- The backend test lane now reports 20 backend test files rather than the previous 19 because this ticket added `unscened-route.test.ts`.
