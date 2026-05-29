@@ -107,7 +107,6 @@ const EDGE_PARITY_CASES = [
       "story_id: STORY-50",
       "branch_id: BR-1",
       "supersedes: null",
-      "status: planned",
       "pg_ids: [PG-3, PG-4]",
       "start_page_id: PG-3",
       "end_page_id: PG-4",

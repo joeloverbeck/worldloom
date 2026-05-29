@@ -341,7 +341,6 @@ function buildSeededRecordWorld(root: string): void {
           "story_id: STORY-1",
           "branch_id: BR-1",
           "supersedes: null",
-          "status: planned",
           "pg_ids:",
           "  - PG-1",
           "start_page_id: PG-1",

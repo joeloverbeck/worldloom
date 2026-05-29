@@ -367,7 +367,6 @@ function seedServerWorld(root: string): void {
           "story_id: STORY-0003",
           "branch_id: BR-1",
           "supersedes: null",
-          "status: planned",
           "pg_ids:",
           "  - PG-3",
           "start_page_id: PG-3",

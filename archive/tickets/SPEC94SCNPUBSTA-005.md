@@ -1,6 +1,6 @@
 # SPEC94SCNPUBSTA-005: Doc reconciliation + world-index/world-mcp fixture hygiene
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/FOUNDATIONS.md`, `docs/MACHINE-FACING-LAYER.md`, `docs/prose-renderer-contract/README.md` (docs), and non-breaking `status: planned` line removal in three `tools/world-index` / `tools/world-mcp` test fixtures. No production code in either tool package reads `SCN.status`.
@@ -8,11 +8,11 @@
 
 ## Problem
 
-Descriptive references to `SCN` as a "membership/status" surface survive in `docs/FOUNDATIONS.md` (L618) and possibly in `docs/MACHINE-FACING-LAYER.md` / `docs/prose-renderer-contract/README.md`. Separately, `tools/world-index` and `tools/world-mcp` carry SCN YAML test fixtures with a now-removed `status: planned` line. Neither tool package schema-validates `SCN` (both parse/retrieve only), so the fixtures do not break — but they become stale contract examples and should be cleaned for hygiene. This ticket reconciles the descriptive docs and drops the stale fixture lines.
+At intake, descriptive references to `SCN` as a "membership/status" surface survived in `docs/FOUNDATIONS.md` (L618), and `docs/MACHINE-FACING-LAYER.md` / `docs/prose-renderer-contract/README.md` needed a no-op check for the same stale surface. Separately, `tools/world-index` and `tools/world-mcp` carried SCN YAML test fixtures with a now-removed `status: planned` line. Neither tool package schema-validates `SCN` (both parse/retrieve only), so the fixtures did not break — but they were stale contract examples. This ticket reconciled the descriptive docs and dropped the stale fixture lines.
 
 ## Assumption Reassessment (2026-05-29)
 
-1. `docs/FOUNDATIONS.md` L618 describes `SCN` as "a derived, non-authoritative **membership/status** record". `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts:L110`, `tools/world-mcp/tests/tools/list-records.test.ts:L344`, `tools/world-mcp/tests/server/dispatch.test.ts:L370` embed `status: planned` in SCN YAML fixtures. The §6 sweep showed `docs/MACHINE-FACING-LAYER.md` and `docs/prose-renderer-contract/README.md` match only on out-of-scope `entity status`/`physical status` tokens — likely no `SCN.status` reference to edit (verify, no-op expected). Verified by grep this session.
+1. At intake, `docs/FOUNDATIONS.md` L618 described `SCN` as "a derived, non-authoritative **membership/status** record". `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts:L110`, `tools/world-mcp/tests/tools/list-records.test.ts:L344`, `tools/world-mcp/tests/server/dispatch.test.ts:L370` embedded `status: planned` in SCN YAML fixtures. The §6 sweep showed `docs/MACHINE-FACING-LAYER.md` and `docs/prose-renderer-contract/README.md` matched only on out-of-scope `entity status`/`physical status` tokens, so no `SCN.status` reference needed editing. Verified by grep this session.
 2. SPEC-94 §2 item 6 + §6 list these surfaces for reconciliation; the reassessed §6 added the world-index/world-mcp fixture sites and noted the §6 sweep is `src`-scoped (excludes `tests/`), so the fixture cleanup is handled here, not by the sweep.
 3. Cross-artifact boundary under audit: these are descriptive consumers of the SCN contract defined in 001; none is a producer. The fixtures are non-authoritative test inputs that neither package validates against `story-scene.schema.json`.
 4. FOUNDATIONS principle motivated: the FOUNDATIONS.md edit reconciles its own §Story Bundles scene-layer prose to the derive-don't-store contract (no stored publication status). The edit is descriptive-only; it changes no FOUNDATIONS rule or validator threshold.
@@ -30,25 +30,27 @@ Descriptive references to `SCN` as a "membership/status" surface survive in `doc
 3. world-index/world-mcp fixtures carry no `status:` line on SCN records → codebase grep-proof.
 4. Both tool suites still pass after fixture edits → test-suite run (`npm test` per package).
 
-## What to Change
+## Landed Changes
 
 ### 1. `docs/FOUNDATIONS.md` (L618)
 
-- "`SCN` is a derived, non-authoritative **membership/status** record" → "…non-authoritative **membership** record" (publication state is derived at read time, not stored). Keep the rest of the scene-render-layer paragraph intact.
+- Reconciled "`SCN` is a derived, non-authoritative **membership/status** record" to "non-authoritative **membership** record".
+- Added the current publication-state contract: publication state is derived at read time from scene artifact presence plus the scene-prose receipt verdict, never stored on append-only `SCN`.
 
 ### 2. `docs/MACHINE-FACING-LAYER.md` + `docs/prose-renderer-contract/README.md` (verify-no-op)
 
-- Confirm neither contains an `SCN.status` / stored-publication-status reference (expected: only out-of-scope `entity status` tokens). Edit only if a real reference is found; otherwise no change.
+- Confirmed neither contains an `SCN.status` / stored-publication-status reference. The only hits were out-of-scope `entity status`, `physical status`, and story/task status prose, so no edits were made.
 
 ### 3. world-index/world-mcp SCN fixture hygiene (non-breaking)
 
-- Drop the `status: planned` line from the SCN YAML fixtures at `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts` (L110), `tools/world-mcp/tests/tools/list-records.test.ts` (L344), `tools/world-mcp/tests/server/dispatch.test.ts` (L370). Adjust any assertion that read the field back (if present) so the fixtures match the post-change contract.
+- Dropped the `status: planned` line from the SCN YAML fixtures at `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts`, `tools/world-mcp/tests/tools/list-records.test.ts`, and `tools/world-mcp/tests/server/dispatch.test.ts`.
+- No assertions read the removed field back; no production code changes were needed.
 
 ## Files to Touch
 
 - `docs/FOUNDATIONS.md` (modify)
-- `docs/MACHINE-FACING-LAYER.md` (modify — verify-no-op)
-- `docs/prose-renderer-contract/README.md` (modify — verify-no-op)
+- `docs/MACHINE-FACING-LAYER.md` (verified no-op; no edit)
+- `docs/prose-renderer-contract/README.md` (verified no-op; no edit)
 - `tools/world-index/tests/parse/atomic-story-edge-parity.test.ts` (modify)
 - `tools/world-mcp/tests/tools/list-records.test.ts` (modify)
 - `tools/world-mcp/tests/server/dispatch.test.ts` (modify)
@@ -84,3 +86,21 @@ Descriptive references to `SCN` as a "membership/status" surface survive in `doc
 1. `cd tools/world-index && npm test`
 2. `cd tools/world-mcp && npm test`
 3. `grep -rn "membership/status" docs/ ; grep -rn "status: planned" tools/world-index/tests tools/world-mcp/tests` (expect zero in-scope hits)
+
+## Outcome
+
+Completed: 2026-05-29
+
+`docs/FOUNDATIONS.md` now describes `SCN` as a non-authoritative membership record and states that publication state is derived at read time from scene artifact presence plus receipt verdict, not stored on append-only `SCN`. The three non-authoritative SCN package fixtures no longer include `status: planned`. `docs/MACHINE-FACING-LAYER.md` and `docs/prose-renderer-contract/README.md` were verified as no-op surfaces for this ticket.
+
+## Verification Result
+
+1. `if grep -rn "membership/status" docs/; then exit 1; fi` passed with zero matches.
+2. `if grep -rn "status: planned" tools/world-index/tests tools/world-mcp/tests; then exit 1; fi` passed with zero matches.
+3. `rg -n 'SCN\.status|SCN status' docs/MACHINE-FACING-LAYER.md docs/prose-renderer-contract/README.md docs/FOUNDATIONS.md tools/world-index/tests tools/world-mcp/tests` returned zero matches.
+4. `cd tools/world-index && npm test` passed: 127 compiled tests plus serialized CLI tests passed.
+5. `cd tools/world-mcp && npm test` passed: build succeeded and 506 compiled tests passed.
+
+## Deviations
+
+None. The package ignored artifacts under `tools/world-index/` and `tools/world-mcp/` were pre-existing or refreshed expected verification artifacts; they remain untracked/ignored.
