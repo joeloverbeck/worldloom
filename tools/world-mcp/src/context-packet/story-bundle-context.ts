@@ -547,10 +547,18 @@ export function buildActiveEmotionalStates(
     }));
 }
 
-function buildActiveThreads(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_threads"] {
+export function buildActiveThreads(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_threads"] {
+  const supersededIds = supersededRecordIds(rows);
+
   return rows
     .map((row) => ({ row, record: parseYamlRecord(row) }))
-    .filter(({ record }) => ACTIVE_THREAD_STATUSES.has(asString(record.status, "active")))
+    .filter(({ row, record }) => {
+      const id = asString(record.id, authoredId(row));
+      return (
+        !supersededIds.has(id) &&
+        ACTIVE_THREAD_STATUSES.has(asString(record.status, "active"))
+      );
+    })
     .map(({ row, record }) => ({
       id: asString(record.id, authoredId(row)),
       type: asString(record.type, "unspecified"),
@@ -561,10 +569,18 @@ function buildActiveThreads(rows: StoryNodeRow[]): ContextPacketStoryBundleConte
     }));
 }
 
-function buildActiveClocks(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_clocks"] {
+export function buildActiveClocks(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["active_clocks"] {
+  const supersededIds = supersededRecordIds(rows);
+
   return rows
     .map((row) => ({ row, record: parseYamlRecord(row) }))
-    .filter(({ record }) => ACTIVE_CLOCK_STATUSES.has(asString(record.status, "active")))
+    .filter(({ row, record }) => {
+      const id = asString(record.id, authoredId(row));
+      return (
+        !supersededIds.has(id) &&
+        ACTIVE_CLOCK_STATUSES.has(asString(record.status, "active"))
+      );
+    })
     .map(({ row, record }) => ({
       id: asString(record.id, authoredId(row)),
       title: asString(record.title, authoredId(row)),
@@ -578,10 +594,18 @@ function buildActiveClocks(rows: StoryNodeRow[]): ContextPacketStoryBundleContex
     }));
 }
 
-function buildHiddenSecrets(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["hidden_secrets"] {
+export function buildHiddenSecrets(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["hidden_secrets"] {
+  const supersededIds = supersededRecordIds(rows);
+
   return rows
     .map((row) => ({ row, record: parseYamlRecord(row) }))
-    .filter(({ record }) => HIDDEN_SECRET_STATUSES.has(asString(record.status, "hidden")))
+    .filter(({ row, record }) => {
+      const id = asString(record.id, authoredId(row));
+      return (
+        !supersededIds.has(id) &&
+        HIDDEN_SECRET_STATUSES.has(asString(record.status, "hidden"))
+      );
+    })
     .map(({ row, record }) => {
       const clueCarriers = arrayOfObjects(record.clue_carriers);
       return {
