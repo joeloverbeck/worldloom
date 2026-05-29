@@ -1,6 +1,6 @@
 # TDPOV-001: Reconcile FOUNDATIONS §6b observer-firewall breadth with turn_driver_pov_observer_firewall's enforced scope
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/FOUNDATIONS.md` §Story Bundles §6b wording; optionally `tools/validators/src/structural/turn-driver-pov-observer-firewall.ts` comments; no behavior change unless the decision is to broaden the validator.
@@ -83,3 +83,10 @@ On landing, drop the "until it lands, follow the rule above" sentence in `phase-
 
 1. `npm test --workspace tools/validators -- turn-driver-pov-observer-firewall` — confirms no regression.
 2. `node tools/world-mcp/dist/src/cli/validate-patch-plan.js --world-root . /tmp/<npc-turn-perceived-directly-envelope>.json` — confirms the aligned posture validates.
+
+## Implementation Notes (2026-05-29)
+
+- `docs/FOUNDATIONS.md` §Story Bundles §6b: the broad "an active record the POV actor lacks an access route to" clause was replaced with a closed three-item downgrade-trigger list (hidden-status `STSEC`; offstage-scoped `STPLAN` without access route; an unwitnessed offstage driving event) plus an explicit statement that interior `STEMO`/`BEL`/`STINT`/`THR`/`SREL` driver records of an on-stage act do **not** downgrade `perceived_directly` (the POV renders its read of those motives through its own inferential `BEL`). This matches `turn_driver_pov_observer_firewall`'s `isHiddenDriverRecord` scope exactly. Mystery Reserve firewall intact: hidden `STSEC` drivers still force a downgrade (Rule 7).
+- `tools/validators/src/structural/turn-driver-pov-observer-firewall.ts`: added a doc comment above `isHiddenDriverRecord` citing the revised §6b as the authority for the STSEC/STPLAN-only scope (no behavior change).
+- `.claude/skills/branching-story-turn-cycle/references/phase-6-page-snapshot.md`: dropped the "until it lands, follow the rule above" hedge; the note now states the rule matches both the validator and §6b's closed trigger list.
+- Tests: existing `turn-driver-pov-observer-firewall.test.ts` stays green (4 → 5); added a regression test pinning the `perceived_directly` + private-interior (`STEMO`/`THR`) `npc_action` case (the red-bunny PG-2→PG-3 shape).

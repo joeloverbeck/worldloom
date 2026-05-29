@@ -179,6 +179,11 @@ function pageResolvedByEvent(event: Record<string, unknown>, maps: RecordMaps): 
   });
 }
 
+// A driver record counts as "hidden" (blocking perceived_directly) only for a hidden-status STSEC or
+// an offstage-scoped STPLAN the actor lacks access to. Interior STEMO/BEL/STINT/THR/SREL driver records
+// do NOT downgrade perceived_directly — they are the unobservable motive substrate of an observed act,
+// surfaced through the POV's own BEL. Authority: docs/FOUNDATIONS.md §Story Bundles §6b (closed
+// downgrade-trigger list).
 function isHiddenDriverRecord(recordIdValue: string, maps: RecordMaps, actor: string | undefined, parentPage: IndexedRecord | undefined): boolean {
   const record = maps.byId.get(recordIdValue);
   if (record?.node_type === "story_secret_record") {

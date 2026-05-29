@@ -20,6 +20,17 @@ test("turn_driver_pov_observer_firewall accepts non-player drivers with active B
   }
 });
 
+// TDPOV-001 regression: an on-stage npc_action the POV witnesses may declare perceived_directly even
+// when its driver_records[] are the initiator's private interior records (STEMO/THR/SREL). FOUNDATIONS
+// §6b's downgrade triggers are a closed set (hidden STSEC, offstage STPLAN, unwitnessed offstage event),
+// so interior records do not downgrade perceived_directly. This is the red-bunny PG-2→PG-3 shape.
+test("turn_driver_pov_observer_firewall accepts perceived_directly for an on-stage npc_action with private-interior driver records", async () => {
+  const item = driver("npc_action", "perceived_directly", ["STEMO-1", "THR-1"], { STEMO: ["STEMO-1"], THR: ["THR-1"] });
+  const verdicts = await turnDriverPovObserverFirewall.run(input(), context(records(item), { story_slug: "test-story" }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("turn_driver_pov_observer_firewall reports hidden-state and access-route failures", async () => {
   const cases: Array<[string, ReturnType<typeof driver>, string]> = [
     [
