@@ -9,7 +9,6 @@ export interface StorySummary {
   pageCount: number;
   choiceCount: number;
   branchCount: number;
-  renderedProseCount: number;
   leafPageIds: string[];
   rootPageId: string | null;
   latestPageId: string | null;

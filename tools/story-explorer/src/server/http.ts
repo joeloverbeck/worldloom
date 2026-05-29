@@ -14,8 +14,6 @@ import { wrapRouterReadOnly } from "./readonly-guard.js";
 import { registerBranchMapRoute } from "./routes/branch-map.js";
 import { registerHealthRoute } from "./routes/health.js";
 import { registerOverviewRoutes } from "./routes/overview.js";
-import { registerPageRoutes } from "./routes/pages.js";
-import { registerProseRoutes } from "./routes/prose.js";
 import { registerProvenanceRoutes } from "./routes/provenance.js";
 import { registerRecordRoutes } from "./routes/records.js";
 import { registerSearchRoute } from "./routes/search.js";
@@ -134,9 +132,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerScenesRoutes(server, { repoRoot: options.repoRoot });
   await registerUnscenedRoutes(server, { repoRoot: options.repoRoot });
   await registerStateTickXrayRoutes(server, { repoRoot: options.repoRoot });
-  await registerPageRoutes(server, { repoRoot: options.repoRoot });
   await registerRecordRoutes(server, { repoRoot: options.repoRoot });
-  await registerProseRoutes(server, { repoRoot: options.repoRoot });
   await registerProvenanceRoutes(server, { repoRoot: options.repoRoot });
   await registerSearchRoute(server);
   await registerBranchMapRoute(server);

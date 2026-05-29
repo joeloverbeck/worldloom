@@ -4,14 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 
-import { sha256Hex } from "@worldloom/world-index/hash/content";
 import { openIndex } from "@worldloom/world-index/index/open";
 import type Database from "better-sqlite3";
 import YAML from "yaml";
 
 import { createServer } from "../src/server/http.js";
-import { PageDetailNotFoundError } from "../src/read/page-detail.js";
-import { pageDetailNotFoundMessage } from "../src/server/routes/pages.js";
 
 interface RouteFixture {
   repoRoot: string;
@@ -26,7 +23,7 @@ function createRouteFixture(): RouteFixture {
   for (const subdir of ["pages", "choices", "events", "entities"]) {
     mkdirSync(path.join(storyRoot, "_source", subdir), { recursive: true });
   }
-  for (const subdir of ["pages-prose", "pages-prose-plans", "pages-prose-receipts", "storylet-batches", "story-promotions"]) {
+  for (const subdir of ["storylet-batches", "story-promotions"]) {
     mkdirSync(path.join(storyRoot, subdir), { recursive: true });
   }
   mkdirSync(path.join(storyRoot, "audits", "SAU-1", "remediation-storylet-proposals"), { recursive: true });
@@ -98,7 +95,6 @@ function seedFixture(): RouteFixture {
       active_records: { STENT: ["STENT-1"] },
       continuation: { terminal_status: "open", terminal_rationale: null },
     },
-    prose_plan_path: "pages-prose-plans/PG-1.md",
     emitted_choices: ["CHC-1"],
     validation_trace: { checks: [{ name: "fixture", verdict: "PASS", rationale: "Fixture route proof." }] },
   });
@@ -141,14 +137,6 @@ function seedFixture(): RouteFixture {
     id: "STENT-1",
     display_name: "Red Bunny",
   });
-  const prose = "Rendered prose for PG-1.\n";
-  writeFileSync(path.join(fixture.storyRoot, "pages-prose", "PG-1.md"), prose, "utf8");
-  writeFileSync(path.join(fixture.storyRoot, "pages-prose-plans", "PG-1.md"), "Plan body\n", "utf8");
-  writeFileSync(
-    path.join(fixture.storyRoot, "pages-prose-receipts", "PG-1.yaml"),
-    YAML.stringify({ verdict: "PASS", state_hash: sha256Hex(prose) }),
-    "utf8",
-  );
   writeFileSync(
     path.join(fixture.storyRoot, "storylet-batches", "SLB-1.md"),
     ["---", "id: SLB-1", "title: Door pressure move", "status: complete", "---", "Batch body"].join("\n"),
@@ -181,88 +169,6 @@ function seedFixture(): RouteFixture {
   fixture.db.close();
   return fixture;
 }
-
-test("page routes return page summaries and PageDetail through the HTTP envelope", async () => {
-  const fixture = seedFixture();
-  const server = await createServer({ repoRoot: fixture.repoRoot });
-
-  try {
-    const listResponse = await server.inject({
-      method: "GET",
-      url: "/api/worlds/fixture-world/stories/red-bunny/pages?list=1",
-    });
-    const listBody = JSON.parse(listResponse.body) as { data?: Array<{ pageId?: string }> };
-    assert.equal(listResponse.statusCode, 200);
-    assert.deepEqual(listBody.data?.map((page) => page.pageId), ["PG-1", "PG-2"]);
-
-    const latestResponse = await server.inject({
-      method: "GET",
-      url: "/api/worlds/fixture-world/stories/red-bunny/pages?latest=1",
-    });
-    const latestBody = JSON.parse(latestResponse.body) as { data?: { pageId?: string } };
-    assert.equal(latestResponse.statusCode, 200);
-    assert.equal(latestBody.data?.pageId, "PG-2");
-
-    const detailResponse = await server.inject({
-      method: "GET",
-      url: "/api/worlds/fixture-world/stories/red-bunny/pages/PG-1",
-    });
-    const detailBody = JSON.parse(detailResponse.body) as {
-      data?: { proseStatus?: string; choiceNavigation?: Array<{ childOutcomeVariants?: unknown[] }> };
-    };
-    assert.equal(detailResponse.statusCode, 200);
-    assert.equal(detailBody.data?.proseStatus, "present");
-    assert.equal(detailBody.data?.choiceNavigation?.[0]?.childOutcomeVariants?.length, 1);
-  } finally {
-    await server.close();
-  }
-});
-
-test("page detail route returns 404 only for the typed target-page missing error", async () => {
-  const fixture = seedFixture();
-  const server = await createServer({ repoRoot: fixture.repoRoot });
-
-  try {
-    const missingPageResponse = await server.inject({
-      method: "GET",
-      url: "/api/worlds/fixture-world/stories/red-bunny/pages/PG-404",
-    });
-    const missingPageBody = JSON.parse(missingPageResponse.body) as { data?: { error?: string; message?: string } };
-    assert.equal(missingPageResponse.statusCode, 404);
-    assert.equal(missingPageBody.data?.error, "not_found");
-    assert.equal(missingPageBody.data?.message, "Page PG-404 not found in fixture-world/red-bunny");
-
-    assert.equal(
-      pageDetailNotFoundMessage(new PageDetailNotFoundError("fixture-world", "red-bunny", "PG-404")),
-      "Page PG-404 not found in fixture-world/red-bunny"
-    );
-    assert.equal(pageDetailNotFoundMessage(new Error("Record not found while resolving page detail")), null);
-  } finally {
-    await server.close();
-  }
-});
-
-test("page and prose routes reject traversal-shaped page ids before filesystem reads", async () => {
-  const fixture = seedFixture();
-  const server = await createServer({ repoRoot: fixture.repoRoot });
-
-  try {
-    for (const url of [
-      "/api/worlds/fixture-world/stories/red-bunny/pages/..%2F..%2Fpackage",
-      "/api/worlds/fixture-world/stories/red-bunny/prose/PG-1%2F..%2F..%2Fpackage",
-      "/api/worlds/fixture-world/stories/red-bunny/page-plans/PG-1%2F..%2F..%2Fpackage",
-      "/api/worlds/fixture-world/stories/red-bunny/prose-receipts/PG-1%2F..%2F..%2Fpackage",
-    ]) {
-      const response = await server.inject({ method: "GET", url });
-      const body = JSON.parse(response.body) as { data?: { error?: string; field?: string } };
-      assert.equal(response.statusCode, 400);
-      assert.equal(body.data?.error, "invalid_input");
-      assert.equal(body.data?.field, "pageId");
-    }
-  } finally {
-    await server.close();
-  }
-});
 
 test("record routes validate all story classes and direct-read markdown classes", async () => {
   const fixture = seedFixture();
@@ -345,45 +251,11 @@ test("record routes validate all story classes and direct-read markdown classes"
   }
 });
 
-test("prose, plan, receipt, and provenance routes expose direct-read artifacts", async () => {
+test("provenance routes expose direct-read artifacts", async () => {
   const fixture = seedFixture();
   const server = await createServer({ repoRoot: fixture.repoRoot });
 
   try {
-    const proseResponse = await server.inject({
-      method: "GET",
-      url: "/api/worlds/fixture-world/stories/red-bunny/prose/PG-1",
-    });
-    const proseBody = JSON.parse(proseResponse.body) as { data?: { status?: string; body?: string } };
-    assert.equal(proseResponse.statusCode, 200);
-    assert.equal(proseBody.data?.status, "present");
-    assert.equal(proseBody.data?.body, "Rendered prose for PG-1.\n");
-
-    const planResponse = await server.inject({
-      method: "GET",
-      url: "/api/worlds/fixture-world/stories/red-bunny/page-plans/PG-1",
-    });
-    const planBody = JSON.parse(planResponse.body) as { data?: { body?: string } };
-    assert.equal(planResponse.statusCode, 200);
-    assert.equal(planBody.data?.body, "Plan body\n");
-
-    const missingPlanResponse = await server.inject({
-      method: "GET",
-      url: "/api/worlds/fixture-world/stories/red-bunny/page-plans/PG-2",
-    });
-    const missingPlanBody = JSON.parse(missingPlanResponse.body) as { data?: { error?: string; message?: string } };
-    assert.equal(missingPlanResponse.statusCode, 404);
-    assert.equal(missingPlanBody.data?.error, "not_found");
-    assert.equal(missingPlanBody.data?.message, "Page plan not found: PG-2");
-
-    const receiptResponse = await server.inject({
-      method: "GET",
-      url: "/api/worlds/fixture-world/stories/red-bunny/prose-receipts/PG-1",
-    });
-    const receiptBody = JSON.parse(receiptResponse.body) as { data?: { body?: { verdict?: string } } };
-    assert.equal(receiptResponse.statusCode, 200);
-    assert.equal(receiptBody.data?.body?.verdict, "PASS");
-
     const provenanceResponse = await server.inject({
       method: "GET",
       url: "/api/worlds/fixture-world/stories/red-bunny/provenance/STENT-1",

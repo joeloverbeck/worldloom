@@ -7,9 +7,6 @@ export interface PageSummary {
   turnIndex: number;
   choiceId: string | null;
   resolvedEventId: string | null;
-  hasRenderedProse: boolean;
-  hasPlan: boolean;
-  hasReceipt: boolean;
   activeRecordCounts: Record<string, number>;
   childCount: number;
   isLeaf: boolean;
