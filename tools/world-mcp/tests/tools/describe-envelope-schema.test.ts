@@ -10,6 +10,10 @@ import { OPERATION_KINDS } from "../../src/package-interop.js";
 import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema.js";
 
 const PREDICATE_DSL_GRAMMAR_ID = "https://worldloom.local/schemas/predicate-dsl-grammar.schema.json";
+const STCHAR_SCHEMA_PATH = path.resolve(
+  process.cwd(),
+  "../validators/src/schemas/story-character-authority.schema.json"
+);
 
 async function withHarnessCeiling<T>(ceiling: string, run: () => Promise<T>): Promise<T> {
   const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
@@ -348,6 +352,12 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
       "signature_scene_behaviors"
     )
   );
+  const repairMapItem = stcharBodyRepairPayload.properties?.source_operational_fact_map?.items;
+  const repairTargetEnum = retainedTargetSectionEnum(repairMapItem);
+  const stcharRecordTargetEnum = retainedTargetSectionEnum(readStcharRecordSourceFactMapItem());
+  assert.ok(repairTargetEnum.includes("Stable Persona Core"));
+  assert.equal(repairTargetEnum.includes("Validation / Audit Anchors"), false);
+  assert.deepEqual(repairTargetEnum, stcharRecordTargetEnum);
   const daClaimMapMaintenanceManifest = await describeEnvelopeSchema({
     op_kind: "repair_diegetic_artifact_claim_map_metadata"
   });
@@ -438,3 +448,35 @@ test("describeEnvelopeSchema persists the unfiltered manifest and returns op-kin
     destroyTempRepoRoot(root);
   }
 });
+
+function readStcharRecordSourceFactMapItem(): unknown {
+  const schema = JSON.parse(readFileSync(STCHAR_SCHEMA_PATH, "utf8")) as {
+    properties?: {
+      source_operational_fact_map?: {
+        items?: unknown;
+      };
+    };
+  };
+  return schema.properties?.source_operational_fact_map?.items;
+}
+
+function retainedTargetSectionEnum(mapItem: unknown): string[] {
+  const item = mapItem as {
+    allOf?: Array<{
+      then?: {
+        properties?: {
+          target_section?: {
+            enum?: unknown[];
+          };
+        };
+      };
+    }>;
+  };
+  for (const condition of item.allOf ?? []) {
+    const enumValues = condition.then?.properties?.target_section?.enum;
+    if (Array.isArray(enumValues) && enumValues.every((value) => typeof value === "string")) {
+      return enumValues;
+    }
+  }
+  throw new Error("retained target_section enum not found");
+}

@@ -64,6 +64,43 @@
           "target_section": { "type": "string", "minLength": 1 },
           "rationale": { "type": "string", "minLength": 1 }
         },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "disposition": {
+                  "enum": [
+                    "copied",
+                    "transformed",
+                    "compressed"
+                  ]
+                }
+              },
+              "required": ["disposition"]
+            },
+            "then": {
+              "required": ["target_section"],
+              "properties": {
+                "target_section": {
+                  "type": "string",
+                  "enum": [
+                    "Story-Facing Identity",
+                    "Stable Persona Core",
+                    "Emotional Appraisal Map",
+                    "Pressure Behavior",
+                    "Voice Bible / Dialogue Authority",
+                    "Page-Plan Voice Block",
+                    "Perception and Embodiment",
+                    "Agency and Planning Tendencies",
+                    "Relationship-Specific Behavior",
+                    "Story-State Derivation Guide",
+                    "Prose Rendering Constraints"
+                  ]
+                }
+              }
+            }
+          }
+        ],
         "additionalProperties": false
       }
     },

@@ -1,3 +1,8 @@
+import {
+  ACTIVE_RECORDS_CLASSES,
+  type ActiveRecordsClass
+} from "@worldloom/validators";
+
 import { createMcpError, type McpError } from "../errors.js";
 import { computePgStateHash } from "../package-interop.js";
 
@@ -20,29 +25,6 @@ type PatchOperationKind =
   | MaintenanceRecordSpec["operation"]
   | "create_se_record"
   | "create_pg_record";
-
-const ACTIVE_RECORDS_CLASSES = [
-  "STENT",
-  "STCHAR",
-  "STINT",
-  "SF",
-  "BEL",
-  "OBL",
-  "CNSQ",
-  "THR",
-  "SREL",
-  "STLOC",
-  "STOBJ",
-  "DA",
-  "STSTAT",
-  "CLK",
-  "STSEC",
-  "STQ",
-  "STPLAN",
-  "STEMO"
-] as const;
-
-type ActiveRecordsClass = (typeof ACTIVE_RECORDS_CLASSES)[number];
 
 interface MaintenanceRecordSpec {
   idClass: "STEMO" | "STPLAN" | "SREL" | "CHC";

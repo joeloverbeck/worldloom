@@ -172,6 +172,7 @@ Bootstrap does NOT write `pages-prose/PG-1.md` (rendered prose is supplied exter
       - **Equivalence**: same engine code, same `{ status, verdicts, validators_run }` response shape, same validator coverage; this is the dry-run analogue of the submit-path CLI named in step 5.
       - **Fresh-process escape valve**: also use the CLI path when the running MCP server holds a pre-rebuild `@worldloom/validators` bundle in memory.
       - See `docs/HARD-GATE-DISCIPLINE.md` §Validating and submitting the plan and `docs/MACHINE-FACING-LAYER.md` §troubleshooting matrix for the equivalent submit-path treatment.
+      - **Reading validate output**: on a `pass` verdict the validate CLI writes the status object to **stdout** and exits 0; on a `fail` or `skipped` verdict it writes the same status object to **stderr** and exits 1 (per `docs/HARD-GATE-DISCIPLINE.md` §Validating and submitting the plan). Capture stderr or check the exit code — a failing dry-run leaves **stdout empty**, so reading stdout alone misreads a fail as no-output.
    3. Present the complete deliverable summary to the user: bundle path, cast roster (`STENT`, bound `STCHAR`, source `CHAR` provenance, role), record inventory by class with counts, STCHAR profile inventory, emitted choices list.
    4. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
    5. On approval, run the submit sequence:

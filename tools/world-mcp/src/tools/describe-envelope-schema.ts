@@ -569,8 +569,46 @@ function sourceOperationalFactMapEntrySchema(): JsonObject {
       },
       target_section: stringSchema(),
       rationale: stringSchema()
-    }
+    },
+    allOf: [
+      {
+        if: {
+          properties: {
+            disposition: {
+              enum: ["copied", "transformed", "compressed"]
+            }
+          },
+          required: ["disposition"]
+        },
+        then: {
+          required: ["target_section"],
+          properties: {
+            target_section: stcharRetainedTargetSectionSchema()
+          }
+        }
+      }
+    ]
   };
+}
+
+function stcharRetainedTargetSectionSchema(): JsonObject {
+  const schema = readSchema("story-character-authority.schema.json");
+  const properties = schema.properties as Record<string, JsonObject> | undefined;
+  const sourceMap = properties?.source_operational_fact_map as JsonObject | undefined;
+  const sourceMapItems = sourceMap?.items as JsonObject | undefined;
+  const allOf = sourceMapItems?.allOf as JsonObject[] | undefined;
+
+  for (const condition of allOf ?? []) {
+    const thenBlock = condition.then as JsonObject | undefined;
+    const thenProperties = thenBlock?.properties as Record<string, JsonObject> | undefined;
+    const targetSection = thenProperties?.target_section as JsonObject | undefined;
+    const enumValues = targetSection?.enum;
+    if (Array.isArray(enumValues) && enumValues.every((value) => typeof value === "string")) {
+      return { type: "string", enum: [...enumValues] };
+    }
+  }
+
+  throw new Error("story-character-authority.schema.json is missing the retained target_section enum.");
 }
 
 export function createPatchOperationSchemaManifest(

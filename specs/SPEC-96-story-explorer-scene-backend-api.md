@@ -4,7 +4,7 @@
 **Date:** 2026-05-28
 **Classification:** story-canon-related (tooling that operates on story-handling logic — replaces the `tools/story-explorer` backend's page-first reader routes with scene/timeline/x-ray read APIs over story-bundle records; reads canon/story records, mutates nothing).
 **Depends on:** **SPEC-95** (consumes the world-index scene-coverage view: active SCNs, unscened PG runs, PG↔SCN lookup, per-SCN publication indicator) and **SPEC-94** (no SCN `status`). Land SPEC-95 first.
-**Related:** archived `SPEC-87/88/89` (the current page/prose/records read model + envelope), `SPEC-90` (the page-centric search/branch-map placeholders this iteration removes — handled in SPEC-98). Consumed by **SPEC-97** (frontend).
+**Related:** archived `SPEC-87/88/89` (the current page/prose/records read model + envelope), `SPEC-90` (removed this iteration — the page-centric search/branch-map spec whose live contract is carried by SPEC-98; its `specs/SPEC-90-*.md` file no longer exists, archival pending per `specs/IMPLEMENTATION-ORDER.md`). Consumed by **SPEC-97** (frontend).
 **Source:** critical triage of `reports/scene-prose-planning-second-iteration.md` §7/§9/§19 phase 4. Rejected report extras (8-state `ScenePublicationState` machine, hash freshness) are pruned — publication state comes from SPEC-95's presence-based indicator.
 
 ---
@@ -23,7 +23,7 @@ The story-explorer backend (`@worldloom/story-explorer`) is entirely page-first:
 4. **Unscened-ranges route** — `GET .../unscened-ranges?branchId=BR-N`: contiguous committed PG ranges on a branch path not covered by an active SCN, each with start/end PG, count, final choice surface, event-delta summary, active-record delta summary, validation status, a suggested default range label (NOT an automatic scene-boundary verdict).
 5. **State-tick x-ray route** — `GET .../state-ticks/:pgId/xray`: the PG inspection payload (parent PG, branch path, turn index, input mode, resolved SE, state hash + parent hash, state-snapshot summary, active records by class, visible affordances, unresolved mystery claims, continuation status, emitted choices, validation trace, raw PG YAML, event delta, created/superseded/closed records, link to containing SCN or unscened range). Technical x-ray surface, explicitly NOT a reader-page route.
 6. **Retain technical lookup surfaces** — `records/:recordId`, `records/:recordId/raw`, `provenance/:recordId` (already present) as x-ray surfaces.
-7. **Remove page-first reader surfaces** — delete `pages.ts` reader routes (`/pages`, `/pages/:pageId`) and `prose.ts` (`/prose/:pageId`, `/page-plans/:pageId`, `/prose-receipts/:pageId`); delete the `getPageDetail` / `readProse` / page-prose read-layer functions and the `PageDetail` view model (and `PageSummary.hasRenderedProse`, `StorySummary.renderedProseCount` if page-prose-derived). New `src/read/` modules: `scene-detail.ts`, `timeline.ts`, `unscened.ts`, `state-tick-xray.ts`; new view-models: `StoryOverview`, `BranchTimeline` + `TimelineSegment`, `SceneSummary`/`SceneDetail`, `ScenePublicationState`, `UnscenedRange`, `StateTickXray`, `EventDeltaSummary` (retain), `ChoiceSurface`. Register the new routes in `http.ts`; keep the response envelope (`worldIndexStatus`, degraded-direct-read flag) and the read-only guard.
+7. **Remove page-first reader surfaces** — delete `pages.ts` reader routes (`/pages`, `/pages/:pageId`) and `prose.ts` (`/prose/:pageId`, `/page-plans/:pageId`, `/prose-receipts/:pageId`); delete the `getPageDetail` / `readProse` / page-prose read-layer functions, the `PageDetail` view model, and its now-orphaned page-first choice view-models `ChoiceNavigation` and `ChildOutcomeVariant` (each consumed only via `PageDetail` assembly — superseded by the new `ChoiceSurface`), plus the page-prose-derived summary fields `PageSummary.hasRenderedProse`, `ChildOutcomeVariant.hasRenderedProse`, and `StorySummary.renderedProseCount` (confirmed page-prose-derived in `read/story-list.ts`). New `src/read/` modules: `scene-detail.ts`, `timeline.ts`, `unscened.ts`, `state-tick-xray.ts`; new view-models: `StoryOverview`, `BranchTimeline` + `TimelineSegment`, `SceneSummary`/`SceneDetail`, `ScenePublicationState`, `UnscenedRange`, `StateTickXray`, `EventDeltaSummary` (retain), `ChoiceSurface`. Register the new routes in `http.ts`; keep the response envelope (`worldIndexStatus`, degraded-direct-read flag) and the read-only guard.
 
 ### Out of scope
 
@@ -32,6 +32,7 @@ The story-explorer backend (`@worldloom/story-explorer`) is entirely page-first:
 - MCP context-packet scene surface → **SPEC-99**.
 - Triggering scene planning/rendering workflows from the explorer — out (report §17 Q3: stay read-only).
 - A patch op for scene-prose attach — none (attach is direct-write; unchanged).
+- Standalone `events/:eventId` / `choices/:choiceId` lookup routes (report §7 / §19 phase 4) → **rejected** for this iteration: event-delta and choice-surface data are already inlined in `/scenes/:sceneId` (event-delta summaries, end choice surface) and in the `/state-ticks/:pgId/xray` payload (resolved SE, emitted choices), so standalone per-event / per-choice routes are subsumed. `records/:recordId` remains the generic record-lookup x-ray surface; no `events/:eventId` or `choices/:choiceId` route exists today, and none is added.
 
 ## 3. Key decisions
 
@@ -41,8 +42,14 @@ The story-explorer backend (`@worldloom/story-explorer`) is entirely page-first:
 
 ## 4. Files to touch (backend `tools/story-explorer/src`)
 
-- `server/http.ts` (route registration), `server/routes/` (new `overview.ts`, `timeline.ts`, `scenes.ts`, `unscened.ts`, `state-tick-xray.ts`; delete `pages.ts`, `prose.ts` reader routes), `read/` (new scene/timeline/unscened/x-ray modules; delete `page-detail.ts`, `prose-direct.ts`), `view-models/` (new scene/timeline/overview/x-ray models; delete `page-detail.ts`), `read/story-list.ts` (drop page-prose-derived summary fields).
-- `test/` — delete page/prose route + page-detail tests; add scene/timeline/unscened/x-ray + degraded-index tests (see SPEC-99 fixtures).
+- `server/http.ts` (route registration), `server/routes/` (new `overview.ts`, `timeline.ts`, `scenes.ts`, `unscened.ts`, `state-tick-xray.ts`; delete `pages.ts`, `prose.ts` reader routes), `read/` (new scene/timeline/unscened/x-ray modules; delete `page-detail.ts`, `prose-direct.ts`), `view-models/` (new scene/timeline/overview/x-ray models incl. `ChoiceSurface`; delete `page-detail.ts`, `choice-navigation.ts`, `child-outcome-variant.ts` — all orphaned once `PageDetail` is removed), `read/story-list.ts` (drop page-prose-derived summary fields).
+- **Consumed world-index surface (SPEC-95):** the new read modules call `querySceneCoverage(db, { worldSlug, storySlug?, branchId? })` → `SceneCoverageBranch[]` (fields `active_scene_ids`, `superseded_scene_ids`, `unscened_runs`, `pg_scene_lookup`, `scenes`, `refreshed_at`) and read `SceneCoverageScene.publication_indicator` for the `ScenePublicationState` view-model — all from `@worldloom/world-index/public/types` (impl at `tools/world-index/src/index/scene-coverage.ts`). The backend does not recompute coverage or publication state from artifacts; it reads the derived view.
+- `test/` — three distinct actions, because removal breaks more than the page-detail tests and some affected tests also cover *retained* surfaces:
+  - **delete** the page-detail tests: `page-detail.test.ts`, `missing-prose.test.ts`.
+  - **rewrite** the multi-surface backend tests that also exercise retained surfaces: `routes.test.ts` (drop the `/pages` / `/prose` route assertions and the `pageDetailNotFoundMessage` import; keep records/provenance/params coverage) and `capstone-smoke.test.ts` (replace its `/pages`, `/pages/:id`, `/prose/:id`, `/page-plans/:id`, `/prose-receipts/:id` injections with scene/timeline/scene-detail/unscened/x-ray injections).
+  - **update** `enumeration.test.ts` (drop the `renderedProseCount` and `hasRenderedProse` assertions; repoint story/page enumeration to scene-coverage counts).
+  - **add** scene/timeline/unscened/x-ray + degraded-index tests (see SPEC-99 fixtures), including the AC2 negative test asserting the removed page/prose routes 404.
+  - (`capstone-spec88-smoke.test.ts` / `capstone-spec89-smoke.test.ts` hit only `/` + `/api/health` and frontend x-ray components — unaffected at the backend here; `sketch-routes.test.ts` covers the SPEC-90 search/branch-map sketches owned by SPEC-98, out of scope.)
 
 Verify the package shape before prescribing commands (done): package `@worldloom/story-explorer`, scripts `build` / `build:backend` / `test` / `test:backend` (Node `--test` over `dist/test/**`); no pnpm workspace.
 
@@ -67,3 +74,9 @@ Verify the package shape before prescribing commands (done): package `@worldloom
 4. State-tick x-ray returns the full PG inspection payload and is documented/typed as a technical x-ray surface, not a reader route.
 5. Responses degrade gracefully on stale/missing index (status surfaced; coverage never fabricated); covered by a test.
 6. `npm test` passes for `@worldloom/story-explorer`.
+
+## 8. Risks & Open Questions
+
+- **Staging vs. SPEC-97 (frontend).** SPEC-96 lands before SPEC-97 (per `specs/IMPLEMENTATION-ORDER.md`). Once SPEC-96 removes the page-first backend routes/fields, the still-page-first frontend under `web/` (the `pages/:pageId` route loader, `ProsePanel`, `PlanProseTab`, and `stories.tsx`'s `renderedProseCount` display) points at removed routes and 404s at runtime until SPEC-97 replaces it. **Full `npm test` can still pass green** — `web/` mirrors backend types in `web/src/api/client.ts` and mocks its API in tests, so the web build/tests are insensitive to backend removal — so a green `npm test` here must not be read as a coherent running app. Backend coherence (AC6) is SPEC-96's bar; runtime UX coherence is restored by SPEC-97.
+- **Publication-indicator source of truth.** `ScenePublicationState` is a thin wrapper over world-index's derived `SceneCoverageScene.publication_indicator` (same string set). The backend must read it from the SPEC-95 coverage view (§4), not recompute it from artifact presence directly — recomputation would reintroduce the artifact-state coupling SPEC-94/95 deliberately removed.
+- **events/choices lookup surfaces** (report §7 / §19 phase 4) are rejected for this iteration (see §2 Out of scope). Revisit only if a consumer needs per-event / per-choice lookup that scene-detail + x-ray inlining cannot serve.

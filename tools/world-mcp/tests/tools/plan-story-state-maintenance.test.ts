@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { ACTIVE_RECORDS_CLASSES } from "@worldloom/validators";
+
 import { planStoryStateMaintenance } from "../../src/tools/plan-story-state-maintenance.js";
 import { validatePatchPlan } from "../../src/tools/validate-patch-plan.js";
 import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared.js";
@@ -178,6 +180,10 @@ test("planStoryStateMaintenance returns a review-only patch plan for STEMO-style
     assert.deepEqual((page?.state_snapshot as { active_records: Record<string, string[]> }).active_records.STEMO, [
       "STEMO-3"
     ]);
+    assert.deepEqual(
+      Object.keys((page?.state_snapshot as { active_records: Record<string, string[]> }).active_records),
+      [...ACTIVE_RECORDS_CLASSES]
+    );
     assert.deepEqual(page?.emitted_choices, []);
     assert.equal("maintenance_page_plan" in result, false);
     assert.equal("plan" in (page ?? {}), false);
