@@ -8,7 +8,7 @@ Source: critical triage of `reports/scene-prose-planning-second-iteration.md` (C
 
 ## Progress (2026-05-29)
 
-The contract → index → backend → frontend half has **landed and is archived**: SPEC-94, SPEC-95, SPEC-96, and **SPEC-97** are complete (`archive/specs/`). Remaining: **SPEC-98** (search/branch-map) is now unblocked and next; **SPEC-99** (MCP packet + docs/fixtures closeout) is partially unblocked (its `scene_coverage` packet layer needs only SPEC-95) but its closeout still lands last (after 98 stabilizes).
+The contract → index → backend → frontend → search/branch-map half has **landed and is archived**: SPEC-94, SPEC-95, SPEC-96, SPEC-97, and **SPEC-98** are complete (`archive/specs/`). SPEC-98 shipped as tickets SPEC98STOEXPSCE-001..004 (search backend, branch-map backend + page-model teardown, search frontend, branch-map frontend; archived `archive/tickets/`). Remaining: **SPEC-99** (MCP `scene_coverage` packet layer + scene-first fixtures + docs closeout) is now the only open spec — its packet layer needs only SPEC-95, and its docs/fixtures closeout lands last now that 96/97/98 have stabilized.
 
 ## Dependency sequence
 
@@ -25,9 +25,10 @@ SPEC-96  ✅ done — (story-explorer backend: overview/timeline/scenes/unscened
 SPEC-97  ✅ done — (story-explorer frontend: scene-first dashboard/timeline/scene-detail/unscened + x-ray drawer)
    │
    ▼
-SPEC-98  ⬜ next — (search grouped by scene/unscened + MVP single-layer branch-map; removes SPEC-90 placeholders)
-
-SPEC-99  ⬜ pending — (MCP scene_coverage packet layer [needs SPEC-95]; scene-first fixtures; docs closeout [do last, after 96/97/98 stabilize])
+SPEC-98  ✅ done — (search grouped by scene/unscened + MVP single-layer branch-map; removed SPEC-90 placeholders)
+   │
+   ▼
+SPEC-99  ⬜ next — (MCP scene_coverage packet layer [needs SPEC-95]; scene-first fixtures; docs closeout [do last, after 96/97/98 stabilized])
 ```
 
 ## Phase table
@@ -38,12 +39,12 @@ SPEC-99  ⬜ pending — (MCP scene_coverage packet layer [needs SPEC-95]; scene
 | 2 | **SPEC-95** | World-index: remove `pages-prose*` inventory; derived scene-coverage layer over existing scene edges; rename 2 PG causal validators; retire legacy page-prose receipt schema | SPEC-94 | 2–3 | ✅ done |
 | 3 | **SPEC-96** | Backend scene/timeline/unscened/overview + state-tick x-ray API; remove page-prose reader routes + `PageDetail` | SPEC-95 | 4 | ✅ done |
 | 4 | **SPEC-97** | Frontend route/view-model/component replacement; embedded PG x-ray drawer | SPEC-96 | 5 | ✅ done |
-| 5 | **SPEC-98** | Search (scene/unscened grouping) + MVP single-layer scene branch-map; remove SPEC-90 placeholder routes | SPEC-96, SPEC-97 | 6 | ⬜ next |
-| 6 | **SPEC-99** | MCP `scene_coverage` packet layer; scene-first fixtures; docs closeout | SPEC-95 (packet); SPEC-96/97/98 (closeout) | 7–9 | ⬜ pending |
+| 5 | **SPEC-98** | Search (scene/unscened grouping) + MVP single-layer scene branch-map; remove SPEC-90 placeholder routes | SPEC-96, SPEC-97 | 6 | ✅ done |
+| 6 | **SPEC-99** | MCP `scene_coverage` packet layer; scene-first fixtures; docs closeout | SPEC-95 (packet); SPEC-96/97/98 (closeout) | 7–9 | ⬜ next |
 
 ## Notes
 
 - **Strict ordering 94 → 95 → 96 → 97** is load-bearing: each consumes the prior's contract (SCN-without-status → coverage view → backend API → frontend).
 - **SPEC-99 is partially parallelizable**: its `scene_coverage` packet layer only needs SPEC-95 and can proceed alongside SPEC-96/97; its **docs/fixtures closeout must land last** (after 96/97/98) so doc text and fixture shapes are stable.
-- **SPEC-98 removes the SPEC-90 placeholder routes/tests**; deleting the `specs/SPEC-90-*.md` file and archiving it with a supersession note is the author's separate action this iteration.
+- **SPEC-98 removed the SPEC-90 placeholder routes/tests** (and the page-centric `BranchMapNode`/`BranchMapEdge` view-models + frontend mirrors); deleting the `specs/SPEC-90-*.md` file and archiving it with a supersession note is the author's separate action this iteration.
 - Rejected report items are not specced: verbatim-contract externalization, receipt hash-fingerprints/publication profiles, PG `plan`/`prose_plan_path` removal, the 8-state publication machine, and (deferred, not rejected) the dual-layer branch-map + full focus-mode set.
