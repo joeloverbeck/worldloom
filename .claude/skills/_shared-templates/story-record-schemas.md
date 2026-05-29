@@ -119,6 +119,8 @@ validation_trace:                      # * one entry per shared gate with PASS +
   turn_driver_lawfulness: "PASS: <rationale>" | "NOT_APPLICABLE: <rationale>"
 ```
 
+For new/current-contract `PG` records, `state_snapshot.active_records` materializes the full class-key map shown above (`STENT`, `STCHAR`, `STINT`, `SF`, `BEL`, `OBL`, `CNSQ`, `THR`, `SREL`, `STLOC`, `STOBJ`, `DA`, `STSTAT`, `CLK`, `STSEC`, `STQ`, `STPLAN`, `STEMO`), using `[]` for classes with no active records. Legacy pages with missing optional keys remain grandfathered; replay/compatibility paths normalize those missing optional keys to `[]` rather than requiring historical rewrites.
+
 Rendered prose and prose receipts are publication artifacts discovered by deterministic paths: `pages-prose/PG-<integer>.md` and `pages-prose-receipts/PG-<integer>.yaml`. They are not page-state fields and are not included in `PG`. `INDEX.md` may render publication status for human navigation; `PG` remains the authoritative fork-state record.
 
 There is no nested rendered-prose block, no `prose_status` field, no `state_delta_summary` field (`SE.state_delta` is authoritative), and no `open_debt` field on the snapshot (open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`).
