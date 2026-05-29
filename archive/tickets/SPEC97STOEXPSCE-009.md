@@ -1,6 +1,6 @@
 # SPEC97STOEXPSCE-009: Capstone — full-tool gate + §7 acceptance-criteria matrix
 
-**Status**: PENDING
+**Status**: ✅ COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: None — verification-only capstone; exercises the scene-first frontend composed by 001–008 and the full-tool web+backend build/test gate. No new production code.
@@ -74,3 +74,24 @@ Run `cd tools/story-explorer && npm test` (root: builds backend + web, runs both
 1. `cd tools/story-explorer/web && npm test`
 2. `cd tools/story-explorer && npm test`
 3. `grep -nE "page-entry|page-read|/pages/:pageId" tools/story-explorer/web/src/app.tsx` (expect zero matches)
+
+## Outcome
+
+**Completed:** 2026-05-29
+
+**Verification-command-only.** No production code and no test file changes. SPEC97STOEXPSCE-008 already authored `web/src/app.test.tsx` with both halves of AC1 — a negative `does not resolve the page-reader paths` assertion using the FULL nested paths (`/worlds/fixture-world/stories/red-bunny/entry` and `/worlds/.../pages/PG-12`) and a positive `resolves the scene-first surface` assertion (dashboard root, timeline, scenes, scene detail, unscened). Per the ticket's stated fallback, the optional app-level smoke was therefore not added.
+
+**§7 AC matrix — verified end-to-end against the post-008 tree:**
+
+- **AC1** (route tree; page-reader routes removed) — 008's `route tree` suite (both assertions, full nested paths) + grep-proof: positive grep returns the scene-first route set; `grep -nE "page-entry|page-read|/pages/:pageId" web/src/app.tsx` → 0 matches.
+- **AC2** (page-scoped client surface removed; new view models consume SPEC-96 endpoints) — grep-proof: `PageDetail|PageSummary|pageReadLoader|fetchPage` absent from `web/src/api/client.ts` (only the new `ScenePageSummary` scene type remains).
+- **AC3** (scene detail = author workbench) — 006's component tests in the green web suite.
+- **AC4/AC5** (unscened authoring view + coverage panel, no recommender; PG-tick → x-ray drawer) — 002/003/004/007 tests in the green web suite.
+- **AC6** (full-tool gate) — `cd tools/story-explorer && npm test` builds backend + web and runs both suites green.
+
+**Verification results:**
+
+- Full-tool root gate (`npm test` at `@worldloom/story-explorer`): backend build OK; backend suite **107 pass / 0 fail**; web suite **272 pass across 97 files** (a11y coverage present for the new surfaces).
+- AC1 positive grep returns the scene-first route imports + paths; AC1 negative grep returns **0 matches**.
+
+**Deviations from plan:** none. The ticket anticipated this path ("If 008's route test fully covers AC1, this ticket is verification-command-only and no test file changes"); that condition held.
