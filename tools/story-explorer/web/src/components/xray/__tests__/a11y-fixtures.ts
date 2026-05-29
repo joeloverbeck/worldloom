@@ -1,19 +1,52 @@
-import type { IndexStatus, PageDetail, RecordCard, RecordGroup, RecordProvenance } from '../../../api/client';
+import type { IndexStatus, RecordCard, RecordGroup, RecordProvenance, StateTickXray } from '../../../api/client';
 import { recordCard } from './fixtures';
 
-export function demoPageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
+function recordIdsByClass(recordIds: string[]): Record<string, string[]> {
+  const byClass: Record<string, string[]> = {};
+  for (const recordId of recordIds) {
+    const recordClass = recordId.split('-')[0] ?? recordId;
+    (byClass[recordClass] ??= []).push(recordId);
+  }
+  return byClass;
+}
+
+interface DemoTickOverrides extends Partial<StateTickXray> {
+  // Convenience: callers historically passed currentStateRecordIds; map it to activeRecordsByClass.
+  currentStateRecordIds?: string[];
+}
+
+export function demoStateTickXray(overrides: DemoTickOverrides = {}): StateTickXray {
+  const { currentStateRecordIds, activeRecordsByClass: activeRecordsByClassOverride, ...rest } = overrides;
+  const activeRecordsByClass =
+    activeRecordsByClassOverride ?? (currentStateRecordIds ? recordIdsByClass(currentStateRecordIds) : {});
+
   return {
-    page: {
-      id: 'PG-12',
-      input: { resolved_event_id: null },
-      state_snapshot: { visible_affordances: ['open cellar door'] },
+    pageId: 'PG-12',
+    parentPageId: 'PG-7',
+    branchId: 'BR-3',
+    branchPath: ['BR-1', 'BR-3'],
+    turnIndex: 12,
+    inputMode: null,
+    resolvedEventId: null,
+    stateHash: 'sha256-tick',
+    parentStateHash: 'sha256-parent',
+    stateSnapshotSummary: {
+      activeRecordCounts: {},
+      continuationStatus: null,
+      unresolvedMysteryClaims: [],
     },
-    prose: null,
-    proseStatus: 'missing',
-    pagePlanSummary: null,
-    receiptSummary: null,
-    choiceNavigation: [],
-    currentStateRecordIds: [],
+    activeRecordsByClass,
+    visibleAffordances: ['open cellar door'],
+    unresolvedMysteryClaims: [],
+    continuationStatus: null,
+    emittedChoices: { pageId: 'PG-12', emittedChoices: [] },
+    validationTrace: {},
+    rawPageYaml: {
+      sourcePath: 'worlds/demo/stories/test/_source/pages/PG-12.yaml',
+      contentHash: 'sha256-demo',
+      body: 'id: PG-12\n',
+    },
+    resolvedEvent: null,
     eventDelta: {
       eventId: null,
       createCount: 0,
@@ -22,25 +55,13 @@ export function demoPageDetail(overrides: Partial<PageDetail> = {}): PageDetail 
       introducedRecordIds: [],
       relationCount: 0,
     },
-    validationIntegrity: {
-      validationTrace: {},
-      receiptVerdict: 'PASS',
-      proseStatus: 'present',
-      receiptPresence: 'present',
-      stateHashStatus: 'match',
-      planHashStatus: 'present',
-      malformedYamlWarnings: [],
-      skippedRecords: [],
-      brokenRefs: [],
-    },
-    branchContext: {
-      branchId: 'BR-3',
-      branchPath: ['BR-1', 'BR-3'],
-      parentPageId: 'PG-7',
-      turnIndex: 12,
-    },
-    rawSources: [],
-    ...overrides,
+    createdRecordIds: [],
+    supersededRecordIds: [],
+    closedRecordIds: [],
+    container: { kind: 'unknown', sceneId: null, startPg: null, endPg: null, pageIds: [] },
+    indexStatus: { kind: 'fresh', version: 1 },
+    degradedDirectRead: false,
+    ...rest,
   };
 }
 

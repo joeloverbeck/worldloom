@@ -1,40 +1,13 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import type { PageDetail } from '../../../api/client';
-import { getPagePlan, getProseReceipt } from '../../../api/client';
+import type { StateTickXray } from '../../../api/client';
 import { XRayPanel } from '../XRayPanel';
+import { demoStateTickXray } from './a11y-fixtures';
 
-vi.mock('../../../api/client', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../api/client')>();
-  return {
-    ...actual,
-    getPagePlan: vi.fn(),
-    getProseReceipt: vi.fn(),
-  };
-});
-
-beforeEach(() => {
-  vi.mocked(getPagePlan).mockResolvedValue({
-    envelope: null,
-    payload: { body: 'Plan body', sourcePath: 'pages-prose-plans/PG-12.md' },
-  });
-  vi.mocked(getProseReceipt).mockResolvedValue({
-    envelope: null,
-    payload: { body: { verdict: 'PASS', checks: {} }, sourcePath: 'pages-prose-receipts/PG-12.yaml' },
-  });
-});
-
-function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
-  return {
-    page: { id: 'PG-12' },
-    prose: null,
-    proseStatus: 'missing',
-    pagePlanSummary: null,
-    receiptSummary: null,
-    choiceNavigation: [],
-    currentStateRecordIds: [],
+function tick(overrides: Partial<StateTickXray> = {}): StateTickXray {
+  return demoStateTickXray({
     eventDelta: {
       eventId: 'SE-12',
       createCount: 1,
@@ -43,42 +16,29 @@ function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
       introducedRecordIds: ['BEL-1'],
       relationCount: 2,
     },
-    validationIntegrity: {
-      validationTrace: {},
-      receiptVerdict: 'PASS',
-      proseStatus: 'present',
-    },
-    branchContext: {
-      branchId: 'BR-3',
-      branchPath: ['BR-1', 'BR-3'],
-      parentPageId: 'PG-7',
-      turnIndex: 12,
-    },
-    rawSources: [],
     ...overrides,
-  };
+  });
 }
 
 describe('XRayPanel', () => {
-  function renderPanel(detail: PageDetail): void {
+  function renderPanel(detail: StateTickXray): void {
     render(
       <MemoryRouter>
-        <XRayPanel pageDetail={detail} storySlug="red-bunny" worldSlug="fixture-world" />
+        <XRayPanel tick={detail} storySlug="red-bunny" worldSlug="fixture-world" />
       </MemoryRouter>,
     );
   }
 
-  it('renders the four X-Ray tabs with Current State selected by default', () => {
-    renderPanel(pageDetail());
+  it('renders the three X-Ray tabs with Current State selected by default', () => {
+    renderPanel(tick());
 
     const tablist = screen.getByRole('tablist', { name: 'State X-Ray tabs' });
     const tabs = within(tablist).getAllByRole('tab');
 
-    expect(tabs).toHaveLength(4);
+    expect(tabs).toHaveLength(3);
     expect(tabs.map((tab) => tab.textContent)).toEqual([
       'Current State',
       'What Changed Here',
-      'Plan & Prose',
       'Validation & Integrity',
     ]);
     expect(screen.getByRole('tab', { name: 'Current State' })).toHaveAttribute('aria-selected', 'true');
@@ -87,16 +47,17 @@ describe('XRayPanel', () => {
 
   it('cycles keyboard focus and selection through the tabs', () => {
     renderPanel(
-      pageDetail({
-          eventDelta: {
-            eventId: null,
-            createCount: 0,
-            supersedeCount: 0,
-            closeCount: 0,
-            introducedRecordIds: [],
-            relationCount: 0,
-          },
-        }),
+      tick({
+        resolvedEventId: null,
+        eventDelta: {
+          eventId: null,
+          createCount: 0,
+          supersedeCount: 0,
+          closeCount: 0,
+          introducedRecordIds: [],
+          relationCount: 0,
+        },
+      }),
     );
 
     const currentState = screen.getByRole('tab', { name: 'Current State' });
@@ -109,9 +70,9 @@ describe('XRayPanel', () => {
     expect(screen.getByRole('tab', { name: 'Validation & Integrity' })).toHaveAttribute('aria-selected', 'true');
 
     fireEvent.keyDown(screen.getByRole('tab', { name: 'Validation & Integrity' }), { key: 'ArrowLeft' });
-    expect(screen.getByRole('tab', { name: 'Plan & Prose' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: 'What Changed Here' })).toHaveAttribute('aria-selected', 'true');
 
-    fireEvent.keyDown(screen.getByRole('tab', { name: 'Plan & Prose' }), { key: 'Home' });
+    fireEvent.keyDown(screen.getByRole('tab', { name: 'What Changed Here' }), { key: 'Home' });
     expect(screen.getByRole('tab', { name: 'Current State' })).toHaveAttribute('aria-selected', 'true');
   });
 });

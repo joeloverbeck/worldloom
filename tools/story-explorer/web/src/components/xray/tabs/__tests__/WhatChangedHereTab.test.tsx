@@ -1,9 +1,10 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { PageDetail, RecordCard } from '../../../../api/client';
+import type { RecordCard, StateTickXray } from '../../../../api/client';
 import { getRecord } from '../../../../api/client';
 import { recordCard } from '../../__tests__/fixtures';
+import { demoStateTickXray } from '../../__tests__/a11y-fixtures';
 import { WhatChangedHereTab } from '../WhatChangedHereTab';
 
 vi.mock('../../../../api/client', async (importOriginal) => {
@@ -20,22 +21,14 @@ beforeEach(() => {
   mockedGetRecord.mockReset();
 });
 
-function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
-  return {
-    page: {
-      id: 'PG-2',
-      input: {
-        choice_id: 'CHC-1',
-        manual_action_text: null,
-        resolved_event_id: 'SE-2',
-      },
-    },
-    prose: null,
-    proseStatus: 'present',
-    pagePlanSummary: null,
-    receiptSummary: null,
-    choiceNavigation: [],
-    currentStateRecordIds: [],
+function tick(overrides: Partial<StateTickXray> = {}): StateTickXray {
+  return demoStateTickXray({
+    pageId: 'PG-2',
+    parentPageId: 'PG-1',
+    branchId: 'BR-1',
+    branchPath: ['BR-1'],
+    turnIndex: 2,
+    resolvedEventId: 'SE-2',
     eventDelta: {
       eventId: 'SE-2',
       createCount: 2,
@@ -44,20 +37,8 @@ function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
       introducedRecordIds: ['BEL-2'],
       relationCount: 1,
     },
-    validationIntegrity: {
-      validationTrace: {},
-      receiptVerdict: 'accept',
-      proseStatus: 'present',
-    },
-    branchContext: {
-      branchId: 'BR-1',
-      branchPath: ['BR-1'],
-      parentPageId: 'PG-1',
-      turnIndex: 2,
-    },
-    rawSources: [],
     ...overrides,
-  };
+  });
 }
 
 function card(recordId: string, overrides: Partial<RecordCard> = {}): RecordCard {
@@ -129,7 +110,7 @@ describe('WhatChangedHereTab', () => {
       throw new Error(`Unexpected record ${recordId}`);
     });
 
-    render(<WhatChangedHereTab pageDetail={pageDetail()} storySlug="red-bunny" worldSlug="fixture-world" />);
+    render(<WhatChangedHereTab tick={tick()} storySlug="red-bunny" worldSlug="fixture-world" />);
 
     await waitFor(() => expect(mockedGetRecord).toHaveBeenCalledTimes(2));
 
@@ -157,8 +138,9 @@ describe('WhatChangedHereTab', () => {
   it('renders the root-page no-event message without fetching', () => {
     render(
       <WhatChangedHereTab
-        pageDetail={pageDetail({
-          page: { id: 'PG-1', input: { resolved_event_id: null } },
+        tick={tick({
+          pageId: 'PG-1',
+          resolvedEventId: null,
           eventDelta: {
             eventId: null,
             createCount: 0,
@@ -186,7 +168,7 @@ describe('WhatChangedHereTab', () => {
       },
     });
 
-    render(<WhatChangedHereTab pageDetail={pageDetail()} storySlug="red-bunny" worldSlug="fixture-world" />);
+    render(<WhatChangedHereTab tick={tick()} storySlug="red-bunny" worldSlug="fixture-world" />);
 
     await waitFor(() => expect(mockedGetRecord).toHaveBeenCalledTimes(1));
 

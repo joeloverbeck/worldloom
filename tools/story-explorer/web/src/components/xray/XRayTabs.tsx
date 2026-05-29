@@ -1,6 +1,6 @@
 import type { KeyboardEvent } from 'react';
 
-export type XRayTabId = 'current-state' | 'what-changed' | 'plan-prose' | 'validation';
+export type XRayTabId = 'current-state' | 'what-changed' | 'validation';
 
 export interface XRayTabDefinition {
   id: XRayTabId;
@@ -10,7 +10,6 @@ export interface XRayTabDefinition {
 export const XRAY_TABS: XRayTabDefinition[] = [
   { id: 'current-state', label: 'Current State' },
   { id: 'what-changed', label: 'What Changed Here' },
-  { id: 'plan-prose', label: 'Plan & Prose' },
   { id: 'validation', label: 'Validation & Integrity' },
 ];
 

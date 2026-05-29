@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { expectNoAxeViolations } from '../../../../lib/a11y-test-helpers';
 import { CurrentStateTab } from '../CurrentStateTab';
-import { card, demoPageDetail, recordResponse } from '../../__tests__/a11y-fixtures';
+import { card, demoStateTickXray, recordResponse } from '../../__tests__/a11y-fixtures';
 
 describe('CurrentStateTab a11y', () => {
   afterEach(() => {
@@ -15,7 +15,7 @@ describe('CurrentStateTab a11y', () => {
 
     const { container } = render(
       <CurrentStateTab
-        pageDetail={demoPageDetail({ currentStateRecordIds: ['BEL-1'] })}
+        tick={demoStateTickXray({ currentStateRecordIds: ['BEL-1'] })}
         storySlug="red-bunny"
         worldSlug="fixture-world"
       />,

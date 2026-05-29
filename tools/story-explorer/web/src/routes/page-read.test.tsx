@@ -162,15 +162,10 @@ describe('PageReadRoute', () => {
     const sectionHeadings = within(main).getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent);
 
     expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
-    expect(sectionHeadings).toEqual(['Prose', 'Choices', 'Continuation', 'State X-Ray', 'Summary']);
+    expect(sectionHeadings).toEqual(['Prose', 'Choices', 'Continuation']);
     expect(screen.getByText('Rendered prose not attached yet.')).toBeInTheDocument();
     expect(screen.getByText('No navigable choices from this page.')).toBeInTheDocument();
     expect(screen.getByText('No committed continuation from this page.')).toBeInTheDocument();
-    expect(screen.getByRole('tablist', { name: 'State X-Ray tabs' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Current State' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getAllByText('PG-12 · BR-3')).toHaveLength(1);
-    expect(screen.getByLabelText('State X-Ray summary')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Cast & Status' })).toHaveAttribute('href', '#xray-group-cast-status');
   });
 
   it('renders the page-detail index status banner before the reading layout', async () => {

@@ -1,17 +1,12 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { PageDetail } from '../../../api/client';
+import type { StateTickXray } from '../../../api/client';
 import { MobileSummaryBar } from '../MobileSummaryBar';
+import { demoStateTickXray } from './a11y-fixtures';
 
-function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
-  return {
-    page: { id: 'PG-12' },
-    prose: null,
-    proseStatus: 'present',
-    pagePlanSummary: null,
-    receiptSummary: null,
-    choiceNavigation: [],
+function tick(overrides: Partial<StateTickXray> = {}): StateTickXray {
+  return demoStateTickXray({
     currentStateRecordIds: ['STCHAR-1', 'BEL-1', 'THR-1'],
     eventDelta: {
       eventId: 'SE-12',
@@ -21,25 +16,13 @@ function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
       introducedRecordIds: [],
       relationCount: 0,
     },
-    validationIntegrity: {
-      validationTrace: {},
-      receiptVerdict: 'accept',
-      proseStatus: 'present',
-    },
-    branchContext: {
-      branchId: 'BR-3',
-      branchPath: ['BR-1', 'BR-3'],
-      parentPageId: 'PG-7',
-      turnIndex: 12,
-    },
-    rawSources: [],
     ...overrides,
-  };
+  });
 }
 
 describe('MobileSummaryBar', () => {
   it('renders compressed active and delta counts with grouped jump options', () => {
-    render(<MobileSummaryBar pageDetail={pageDetail()} />);
+    render(<MobileSummaryBar tick={tick()} />);
 
     const summary = screen.getByLabelText('State X-Ray summary');
     expect(within(summary).getByText('3 active')).toBeInTheDocument();
@@ -57,7 +40,7 @@ describe('MobileSummaryBar', () => {
     target.scrollIntoView = vi.fn();
     document.body.appendChild(target);
 
-    render(<MobileSummaryBar pageDetail={pageDetail()} />);
+    render(<MobileSummaryBar tick={tick()} />);
     fireEvent.change(screen.getByLabelText('Jump to group'), { target: { value: 'xray-group-knowledge-truth' } });
 
     expect(target.scrollIntoView).toHaveBeenCalledWith({ block: 'start' });

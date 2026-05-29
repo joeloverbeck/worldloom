@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { getRecord, type PageDetail, type RecordCard, type RecordDetail } from '../../../api/client';
+import { getRecord, type RecordCard, type RecordDetail, type StateTickXray } from '../../../api/client';
 import { RecordCardCompact } from '../RecordCardCompact';
 
 interface WhatChangedHereTabProps {
   onRecordLinkClick?: (recordId: string) => void;
-  pageDetail: PageDetail;
+  tick: StateTickXray;
   storySlug: string;
   worldSlug: string;
 }
@@ -58,14 +58,12 @@ function asStoryEventRecord(value: unknown): StoryEventRecord {
   return record(value) as StoryEventRecord;
 }
 
-function resolvedEventId(pageDetail: PageDetail): string | null {
-  const pageInput = record(pageDetail.page.input);
-  const pageResolvedEventId = pageInput.resolved_event_id;
-  if (typeof pageResolvedEventId === 'string' && pageResolvedEventId.trim().length > 0) {
-    return pageResolvedEventId;
+function resolvedEventId(tick: StateTickXray): string | null {
+  if (typeof tick.resolvedEventId === 'string' && tick.resolvedEventId.trim().length > 0) {
+    return tick.resolvedEventId;
   }
 
-  return pageDetail.eventDelta.eventId;
+  return tick.eventDelta.eventId;
 }
 
 function valueOrEmpty(value: unknown): string {
@@ -148,8 +146,8 @@ function ObjectList({
   );
 }
 
-export function WhatChangedHereTab({ onRecordLinkClick, pageDetail, storySlug, worldSlug }: WhatChangedHereTabProps): JSX.Element {
-  const eventId = useMemo(() => resolvedEventId(pageDetail), [pageDetail]);
+export function WhatChangedHereTab({ onRecordLinkClick, tick, storySlug, worldSlug }: WhatChangedHereTabProps): JSX.Element {
+  const eventId = useMemo(() => resolvedEventId(tick), [tick]);
   const [eventState, setEventState] = useState<EventLoadState>(() =>
     eventId ? { kind: 'loading', eventId } : { kind: 'idle' },
   );

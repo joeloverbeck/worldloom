@@ -1,17 +1,16 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import type { IndexStatus, PageDetail, RecordLink } from '../../api/client';
+import type { IndexStatus, RecordLink, StateTickXray } from '../../api/client';
 import { CurrentStateTab } from './tabs/CurrentStateTab';
 import { dispatchRecordLinkClick } from './navigation-dispatcher';
 import { LinkedRecordPeek } from './LinkedRecordPeek';
-import { PlanProseTab } from './tabs/PlanProseTab';
 import { ValidationIntegrityTab } from './tabs/ValidationIntegrityTab';
 import { WhatChangedHereTab } from './tabs/WhatChangedHereTab';
 import { XRayTabs, XRAY_TABS, type XRayTabId } from './XRayTabs';
 
 interface XRayPanelProps {
-  pageDetail: PageDetail;
+  tick: StateTickXray;
   storySlug: string;
   worldIndexStatus?: IndexStatus | null;
   worldSlug: string;
@@ -20,31 +19,30 @@ interface XRayPanelProps {
 function renderTabPanel(
   tabId: XRayTabId,
   onRecordLinkClick: (target: RecordLink | string) => void,
-  pageDetail: PageDetail,
+  tick: StateTickXray,
   worldSlug: string,
   storySlug: string,
   worldIndexStatus: IndexStatus | null,
 ): JSX.Element {
   switch (tabId) {
     case 'current-state':
-      return <CurrentStateTab onRecordLinkClick={onRecordLinkClick} pageDetail={pageDetail} storySlug={storySlug} worldSlug={worldSlug} />;
+      return <CurrentStateTab onRecordLinkClick={onRecordLinkClick} tick={tick} storySlug={storySlug} worldSlug={worldSlug} />;
     case 'what-changed':
-      return <WhatChangedHereTab onRecordLinkClick={onRecordLinkClick} pageDetail={pageDetail} storySlug={storySlug} worldSlug={worldSlug} />;
-    case 'plan-prose':
-      return <PlanProseTab pageDetail={pageDetail} storySlug={storySlug} worldSlug={worldSlug} />;
+      return <WhatChangedHereTab onRecordLinkClick={onRecordLinkClick} tick={tick} storySlug={storySlug} worldSlug={worldSlug} />;
     case 'validation':
-      return <ValidationIntegrityTab pageDetail={pageDetail} worldIndexStatus={worldIndexStatus} />;
+      return <ValidationIntegrityTab tick={tick} worldIndexStatus={worldIndexStatus} />;
   }
 }
 
-export function XRayPanel({ pageDetail, storySlug, worldIndexStatus = null, worldSlug }: XRayPanelProps): JSX.Element {
+export function XRayPanel({ tick, storySlug, worldIndexStatus = null, worldSlug }: XRayPanelProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<XRayTabId>('current-state');
   const [peekRecordId, setPeekRecordId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const activeRecordIds = useMemo(() => Object.values(tick.activeRecordsByClass).flat(), [tick.activeRecordsByClass]);
 
   function handleRecordLinkClick(target: RecordLink | string): void {
     dispatchRecordLinkClick(target, {
-      activeRecordIds: pageDetail.currentStateRecordIds,
+      activeRecordIds,
       navigateToPage: navigate,
       openPeek: setPeekRecordId,
       selectTab: setActiveTab,
@@ -68,7 +66,7 @@ export function XRayPanel({ pageDetail, storySlug, worldIndexStatus = null, worl
             role="tabpanel"
             tabIndex={selected ? 0 : -1}
           >
-            {selected ? renderTabPanel(tab.id, handleRecordLinkClick, pageDetail, worldSlug, storySlug, worldIndexStatus) : null}
+            {selected ? renderTabPanel(tab.id, handleRecordLinkClick, tick, worldSlug, storySlug, worldIndexStatus) : null}
           </div>
         );
       })}

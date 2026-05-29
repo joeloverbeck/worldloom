@@ -1,9 +1,10 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { PageDetail, RecordCard, RecordGroup } from '../../../../api/client';
+import type { RecordCard, RecordGroup, StateTickXray } from '../../../../api/client';
 import { getRecord } from '../../../../api/client';
 import { recordCard } from '../../__tests__/fixtures';
+import { demoStateTickXray } from '../../__tests__/a11y-fixtures';
 import { CURRENT_STATE_GROUPS, CurrentStateTab, VIRTUALIZATION_THRESHOLD } from '../CurrentStateTab';
 
 vi.mock('../../../../api/client', async (importOriginal) => {
@@ -20,42 +21,11 @@ beforeEach(() => {
   mockedGetRecord.mockReset();
 });
 
-function pageDetail(overrides: Partial<PageDetail> = {}): PageDetail {
-  return {
-    page: {
-      id: 'PG-12',
-      state_snapshot: {
-        visible_affordances: ['open cellar door', 'loose floorboard'],
-      },
-    },
-    prose: null,
-    proseStatus: 'missing',
-    pagePlanSummary: null,
-    receiptSummary: null,
-    choiceNavigation: [],
-    currentStateRecordIds: [],
-    eventDelta: {
-      eventId: 'SE-12',
-      createCount: 1,
-      supersedeCount: 0,
-      closeCount: 0,
-      introducedRecordIds: [],
-      relationCount: 0,
-    },
-    validationIntegrity: {
-      validationTrace: {},
-      receiptVerdict: 'PASS',
-      proseStatus: 'present',
-    },
-    branchContext: {
-      branchId: 'BR-3',
-      branchPath: ['BR-1', 'BR-3'],
-      parentPageId: 'PG-7',
-      turnIndex: 12,
-    },
-    rawSources: [],
-    ...overrides,
-  };
+function tick(currentStateRecordIds: string[] = []): StateTickXray {
+  return demoStateTickXray({
+    currentStateRecordIds,
+    visibleAffordances: ['open cellar door', 'loose floorboard'],
+  });
 }
 
 function card(recordId: string, group: RecordGroup, overrides: Partial<RecordCard> = {}): RecordCard {
@@ -101,7 +71,7 @@ describe('CurrentStateTab', () => {
 
     render(
       <CurrentStateTab
-        pageDetail={pageDetail({ currentStateRecordIds: cards.map((candidate) => candidate.recordId) })}
+        tick={tick(cards.map((candidate) => candidate.recordId))}
         storySlug="red-bunny"
         worldSlug="fixture-world"
       />,
@@ -128,7 +98,7 @@ describe('CurrentStateTab', () => {
 
     render(
       <CurrentStateTab
-        pageDetail={pageDetail({ currentStateRecordIds: cards.map((candidate) => candidate.recordId) })}
+        tick={tick(cards.map((candidate) => candidate.recordId))}
         storySlug="red-bunny"
         worldSlug="fixture-world"
       />,

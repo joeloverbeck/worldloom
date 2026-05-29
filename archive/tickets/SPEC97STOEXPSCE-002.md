@@ -1,6 +1,6 @@
 # SPEC97STOEXPSCE-002: X-ray infra rebind to StateTickXray + StateTickDrawer
 
-**Status**: PENDING
+**Status**: DONE
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/story-explorer/web` x-ray component tree (`components/xray/*`) rebound from the `PageDetail` view model to `StateTickXray`; new `StateTickDrawer` component; `PlanProseTab` removed.

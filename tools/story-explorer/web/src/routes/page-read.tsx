@@ -7,9 +7,6 @@ import { ChoiceCard } from '../components/ChoiceCard';
 import { PageHeader } from '../components/PageHeader';
 import { ProsePanel } from '../components/ProsePanel';
 import { TerminalCard } from '../components/TerminalCard';
-import { MobileSummaryBar } from '../components/xray/MobileSummaryBar';
-import { StickyRail } from '../components/xray/StickyRail';
-import { XRayPanel } from '../components/xray/XRayPanel';
 import { useIndexStatusBanner } from '../hooks/use-index-status-banner';
 
 interface PageReadResult {
@@ -115,21 +112,7 @@ export function PageReadRoute(): JSX.Element {
               <TerminalCard terminalReason={pageTerminalReason(pageDetail.page)} />
             </section>
           ) : null}
-          <section className="reading-section xray-section" aria-labelledby="xray-section-title">
-            <h2 id="xray-section-title">State X-Ray</h2>
-            <MobileSummaryBar pageDetail={pageDetail} />
-            <XRayPanel
-              pageDetail={pageDetail}
-              storySlug={storySlug}
-              worldIndexStatus={pageDetailEnvelope?.worldIndexStatus ?? null}
-              worldSlug={worldSlug}
-            />
-          </section>
         </div>
-        <aside className="summary-rail" aria-labelledby="summary-rail-title">
-          <h2 id="summary-rail-title">Summary</h2>
-          <StickyRail pageDetail={pageDetail} />
-        </aside>
       </div>
     </main>
   );

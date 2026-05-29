@@ -1,8 +1,8 @@
-import type { IndexStatus, PageDetail } from '../../../api/client';
+import type { IndexStatus, StateTickXray } from '../../../api/client';
 import { BrokenReferenceChip } from '../BrokenReferenceChip';
 
 interface ValidationIntegrityTabProps {
-  pageDetail: PageDetail;
+  tick: StateTickXray;
   worldIndexStatus: IndexStatus | null;
 }
 
@@ -47,6 +47,11 @@ function stringValue(value: unknown): string | null {
     return String(value);
   }
   return null;
+}
+
+function stringArrayFromTrace(trace: Record<string, unknown>, key: string): string[] {
+  const value = trace[key];
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 }
 
 function flattenTraceEntries(trace: Record<string, unknown>): Array<{ key: string; verdict: string; notes: string | null }> {
@@ -168,25 +173,29 @@ function IntegrityList({
   );
 }
 
-export function ValidationIntegrityTab({ pageDetail, worldIndexStatus }: ValidationIntegrityTabProps): JSX.Element {
-  const integrity = pageDetail.validationIntegrity;
+export function ValidationIntegrityTab({ tick, worldIndexStatus }: ValidationIntegrityTabProps): JSX.Element {
+  const trace = tick.validationTrace;
+  const stateHashStatus =
+    tick.stateHash !== null && tick.parentStateHash !== null
+      ? tick.stateHash === tick.parentStateHash
+        ? 'match'
+        : 'mismatch'
+      : 'not_checked';
 
   return (
     <section className="xray-tab-panel__body" aria-labelledby="xray-validation-title">
       <h3 id="xray-validation-title">Validation & Integrity</h3>
       <div className="record-card__chips" aria-label="Integrity summary">
-        {statusChip('Receipt presence', integrity.receiptPresence ?? (integrity.receiptVerdict === null ? 'missing' : 'present'))}
-        {statusChip('Receipt verdict', integrity.receiptVerdict)}
-        {statusChip('Prose status', integrity.proseStatus)}
-        {statusChip('State hash', integrity.stateHashStatus ?? 'not_checked')}
-        {statusChip('Plan hash', integrity.planHashStatus ?? 'not_checked')}
+        {statusChip('State hash', tick.stateHash ?? 'not available')}
+        {statusChip('Parent state hash', tick.parentStateHash ?? 'not available')}
+        {statusChip('State hash status', stateHashStatus)}
       </div>
 
-      <ValidationTrace trace={integrity.validationTrace} />
+      <ValidationTrace trace={trace} />
       <IndexState worldIndexStatus={worldIndexStatus} />
-      <IntegrityList emptyLabel="All checks passed." items={integrity.malformedYamlWarnings ?? []} title="Malformed YAML warnings" />
-      <IntegrityList emptyLabel="All checks passed." items={integrity.skippedRecords ?? []} title="Skipped records" />
-      <IntegrityList brokenReferences emptyLabel="All checks passed." items={integrity.brokenRefs ?? []} title="Broken references" />
+      <IntegrityList emptyLabel="All checks passed." items={stringArrayFromTrace(trace, 'malformed_yaml_warnings')} title="Malformed YAML warnings" />
+      <IntegrityList emptyLabel="All checks passed." items={stringArrayFromTrace(trace, 'skipped_records')} title="Skipped records" />
+      <IntegrityList brokenReferences emptyLabel="All checks passed." items={stringArrayFromTrace(trace, 'broken_refs')} title="Broken references" />
     </section>
   );
 }
