@@ -38,7 +38,7 @@ The three SPEC-42 coverage targets are conditional authoring targets: when a bun
 
 Output: a list of `target_count` planned blocks, each with a `move_family` value from the 16-value enum (per shared contract §4.4 SLT schema) and a brief draft scope (preconditions sketch, beat outline, effects shape).
 
-**Output shape** (unified Phase 1 gap-diagnosis output covering all 17 coverage targets — the per-target `coverage_diagnosis` block carries per-target status and resolution mapping for targets #1–#17; the `driver_kind_coverage` / `pressure_source_coverage` / `composition_gaps` blocks specialize targets #16 / #17 with the SPEC-80 trigger-map detail):
+**Output shape** (unified Phase 1 gap-diagnosis output covering all 17 coverage targets — the per-target `coverage_diagnosis` block carries per-target status and resolution mapping for targets #1–#17; the `driver_kind_coverage` / `pressure_source_coverage` / `composition_gaps` blocks specialize targets #16 / #17 with the SPEC-80 trigger-map detail). This YAML shape is **working-memory diagnosis only** — do not copy it verbatim into the Phase-5 SLB manifest, which records coverage as inline prose (see `phase-5-batch-manifest.md`):
 
 ```yaml
 coverage_diagnosis:
