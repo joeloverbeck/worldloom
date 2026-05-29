@@ -3,13 +3,13 @@ import { describe, expect, it } from 'vitest';
 
 import { expectNoAxeViolations, renderForAxe } from '../../../lib/a11y-test-helpers';
 import { XRayPanel } from '../XRayPanel';
-import { demoIndexStatus, demoPageDetail } from './a11y-fixtures';
+import { demoIndexStatus, demoStateTickXray } from './a11y-fixtures';
 
 describe('XRayPanel a11y', () => {
   it('renders the composed X-Ray panel without axe violations', async () => {
     const { container } = renderForAxe(
       <XRayPanel
-        pageDetail={demoPageDetail()}
+        tick={demoStateTickXray()}
         storySlug="red-bunny"
         worldIndexStatus={demoIndexStatus()}
         worldSlug="fixture-world"
@@ -28,7 +28,7 @@ describe('XRayPanel a11y', () => {
 
   it('keeps tab ARIA state in sync across keyboard navigation', async () => {
     const { container } = renderForAxe(
-      <XRayPanel pageDetail={demoPageDetail()} storySlug="red-bunny" worldSlug="fixture-world" />,
+      <XRayPanel tick={demoStateTickXray()} storySlug="red-bunny" worldSlug="fixture-world" />,
     );
 
     fireEvent.keyDown(screen.getByRole('tab', { name: 'Current State' }), { key: 'ArrowRight' });

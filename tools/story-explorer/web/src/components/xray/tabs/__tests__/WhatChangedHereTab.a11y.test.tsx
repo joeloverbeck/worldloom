@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { expectNoAxeViolations } from '../../../../lib/a11y-test-helpers';
 import { WhatChangedHereTab } from '../WhatChangedHereTab';
-import { card, demoPageDetail, recordResponse } from '../../__tests__/a11y-fixtures';
+import { card, demoStateTickXray, recordResponse } from '../../__tests__/a11y-fixtures';
 
 describe('WhatChangedHereTab a11y', () => {
   afterEach(() => {
@@ -15,8 +15,8 @@ describe('WhatChangedHereTab a11y', () => {
 
     const { container } = render(
       <WhatChangedHereTab
-        pageDetail={demoPageDetail({
-          page: { id: 'PG-12', input: { resolved_event_id: 'SE-12' } },
+        tick={demoStateTickXray({
+          resolvedEventId: 'SE-12',
           eventDelta: { eventId: 'SE-12', createCount: 1, supersedeCount: 0, closeCount: 0, introducedRecordIds: [], relationCount: 0 },
         })}
         storySlug="red-bunny"

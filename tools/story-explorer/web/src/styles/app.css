@@ -1361,3 +1361,306 @@ a:hover {
 .index-status-banner--error {
   color: var(--color-error);
 }
+
+/* Story dashboard (SPEC97STOEXPSCE-003) */
+.story-dashboard {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.story-dashboard__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.story-dashboard__empty {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.branch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.branch-card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.branch-card--active {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.branch-card__title {
+  margin: 0;
+  font-size: var(--font-size-h3);
+}
+
+.branch-card__facts {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.branch-card__facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.branch-card__facts dt {
+  color: var(--color-text-secondary);
+}
+
+.branch-card__facts dd {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+.branch-card__links {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.branch-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.branch-selector__control {
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.publication-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-2);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+}
+
+.publication-chip--success {
+  color: var(--color-success);
+}
+
+.publication-chip--warning {
+  color: var(--color-warning);
+}
+
+.publication-chip--error {
+  color: var(--color-error);
+}
+
+.publication-chip--info {
+  color: var(--color-accent-strong);
+}
+
+.publication-chip--muted {
+  color: var(--color-text-secondary);
+}
+
+.coverage-panel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.coverage-panel__group h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-h3);
+}
+
+.coverage-panel__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin: 0;
+}
+
+.coverage-panel__counts dt {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.coverage-panel__counts dd {
+  margin: 0;
+  font-family: var(--font-family-mono);
+}
+
+.coverage-panel__degraded {
+  margin: 0;
+  color: var(--color-warning);
+  font-size: var(--font-size-sm);
+}
+
+/* --- SPEC-97 branch-path timeline (SPEC97STOEXPSCE-004) --- */
+
+.timeline-segment-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.timeline-segment {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+
+.timeline-segment--focused {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.scene-segment__header,
+.unscened-run__header,
+.choice-surface__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.scene-segment__title,
+.unscened-run__title,
+.choice-surface__title,
+.branch-split__title,
+.terminal-marker__title {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+
+.scene-segment__range,
+.unscened-run__range {
+  margin: var(--space-2) 0;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+.unscened-run__count {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.pg-tick-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.pg-tick {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-muted);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.pg-tick:hover {
+  border-color: var(--color-accent);
+}
+
+.pg-tick--focused {
+  border-color: var(--color-accent);
+  background: var(--color-accent-muted, var(--color-surface-muted));
+}
+
+.choice-surface__choices {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.choice-surface__choice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.choice-surface__label {
+  font-weight: 600;
+}
+
+.choice-surface__intent {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.choice-surface__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: var(--font-size-sm);
+}
+
+.choice-surface__pressure {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+.choice-surface__empty,
+.timeline-empty {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.branch-split__children {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+.terminal-marker__reason {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}

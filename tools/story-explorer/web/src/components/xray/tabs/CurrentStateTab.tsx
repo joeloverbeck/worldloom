@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
-import { getRecord, type PageDetail, type RecordCard, type RecordGroup, type RecordLink } from '../../../api/client';
+import { getRecord, type RecordCard, type RecordGroup, type RecordLink, type StateTickXray } from '../../../api/client';
 import { CURRENT_STATE_GROUPS, emptyGroups, groupForRecordId } from '../groupActiveRecords';
 import { RecordCardCompact } from '../RecordCardCompact';
 import { RecordCardExpanded } from '../RecordCardExpanded';
@@ -11,7 +11,7 @@ export { CURRENT_STATE_GROUPS } from '../groupActiveRecords';
 
 interface CurrentStateTabProps {
   onRecordLinkClick?: (link: RecordLink | string) => void;
-  pageDetail: PageDetail;
+  tick: StateTickXray;
   storySlug: string;
   worldSlug: string;
 }
@@ -34,16 +34,6 @@ function groupRecords(records: LoadedRecord[]): Record<RecordGroup, LoadedRecord
     groups[groupForRecordId(recordCard.recordId)].push(record);
     return groups;
   }, emptyGroups<LoadedRecord>());
-}
-
-function visibleAffordances(page: Record<string, unknown>): string[] {
-  const stateSnapshot = page.state_snapshot;
-  if (typeof stateSnapshot !== 'object' || stateSnapshot === null) {
-    return [];
-  }
-
-  const affordances = (stateSnapshot as { visible_affordances?: unknown }).visible_affordances;
-  return Array.isArray(affordances) ? affordances.filter((value): value is string => typeof value === 'string') : [];
 }
 
 function RecordList({
@@ -120,25 +110,24 @@ function RecordList({
   );
 }
 
-export function CurrentStateTab({ onRecordLinkClick, pageDetail, storySlug, worldSlug }: CurrentStateTabProps): JSX.Element {
-  const [records, setRecords] = useState<RecordLoadState[]>(() =>
-    pageDetail.currentStateRecordIds.map(() => ({ kind: 'loading' })),
-  );
-  const affordances = useMemo(() => visibleAffordances(pageDetail.page), [pageDetail.page]);
+export function CurrentStateTab({ onRecordLinkClick, tick, storySlug, worldSlug }: CurrentStateTabProps): JSX.Element {
+  const activeRecordIds = useMemo(() => Object.values(tick.activeRecordsByClass).flat(), [tick.activeRecordsByClass]);
+  const [records, setRecords] = useState<RecordLoadState[]>(() => activeRecordIds.map(() => ({ kind: 'loading' })));
+  const affordances = tick.visibleAffordances;
 
   useEffect(() => {
     let cancelled = false;
 
-    if (pageDetail.currentStateRecordIds.length === 0) {
+    if (activeRecordIds.length === 0) {
       setRecords((previousRecords) => (previousRecords.length === 0 ? previousRecords : []));
       return () => {
         cancelled = true;
       };
     }
 
-    setRecords(pageDetail.currentStateRecordIds.map(() => ({ kind: 'loading' })));
+    setRecords(activeRecordIds.map(() => ({ kind: 'loading' })));
     void Promise.all(
-      pageDetail.currentStateRecordIds.map(async (recordId): Promise<RecordLoadState> => {
+      activeRecordIds.map(async (recordId): Promise<RecordLoadState> => {
         try {
           const { payload } = await getRecord(worldSlug, storySlug, recordId);
           const body = typeof payload.record.body === 'string' ? payload.record.body : null;
@@ -156,7 +145,7 @@ export function CurrentStateTab({ onRecordLinkClick, pageDetail, storySlug, worl
     return () => {
       cancelled = true;
     };
-  }, [pageDetail.currentStateRecordIds, storySlug, worldSlug]);
+  }, [activeRecordIds, storySlug, worldSlug]);
 
   const loadedRecords = records.flatMap((record) => (record.kind === 'loaded' ? [record] : []));
   const failedRecordIds = records.flatMap((record) => (record.kind === 'error' ? [record.recordId] : []));
@@ -166,7 +155,7 @@ export function CurrentStateTab({ onRecordLinkClick, pageDetail, storySlug, worl
   return (
     <section className="xray-tab-panel__body" aria-labelledby="xray-current-state-title">
       <h3 id="xray-current-state-title">Current State</h3>
-      <p>{pageDetail.currentStateRecordIds.length} active records.</p>
+      <p>{activeRecordIds.length} active records.</p>
       {loadingCount > 0 ? <p role="status">Loading {loadingCount} active records.</p> : null}
       {failedRecordIds.length > 0 ? (
         <p role="alert">Unable to load {failedRecordIds.join(', ')} for compact-card display.</p>

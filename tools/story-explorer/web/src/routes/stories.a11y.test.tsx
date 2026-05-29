@@ -43,7 +43,6 @@ function story(): StorySummary {
     pageCount: 12,
     choiceCount: 8,
     branchCount: 3,
-    renderedProseCount: 5,
     leafPageIds: ['PG-9', 'PG-12'],
     rootPageId: 'PG-1',
     latestPageId: 'PG-12',

@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { Breadcrumb } from './Breadcrumb';
 
 describe('Breadcrumb', () => {
-  it('renders the semantic world story branch and page hierarchy', () => {
+  it('renders the worlds, world, story-dashboard, and trailing scene hierarchy', () => {
     render(
       <MemoryRouter>
         <Breadcrumb
@@ -13,9 +13,10 @@ describe('Breadcrumb', () => {
           worldDisplayName="Fixture World"
           storySlug="red-bunny"
           storyTitle="Red Bunny"
-          branchId="BR-3"
-          pageId="PG-12"
-          parentPageId="PG-7"
+          trail={[
+            { label: 'Scenes', href: '/worlds/fixture-world/stories/red-bunny/scenes' },
+            { label: 'Scene SCN-3', href: '/worlds/fixture-world/stories/red-bunny/scenes/SCN-3' },
+          ]}
         />
       </MemoryRouter>,
     );
@@ -30,17 +31,17 @@ describe('Breadcrumb', () => {
     );
     expect(within(nav).getByRole('link', { name: 'Red Bunny' })).toHaveAttribute(
       'href',
-      '/worlds/fixture-world/stories/red-bunny/entry',
+      '/worlds/fixture-world/stories/red-bunny',
     );
-    expect(within(nav).getByText('Branch BR-3')).toBeInTheDocument();
-    expect(within(nav).getByText('PG-12')).toHaveAttribute('aria-current', 'page');
-    expect(within(nav).getByRole('link', { name: 'Parent: PG-7' })).toHaveAttribute(
+    expect(within(nav).getByRole('link', { name: 'Scenes' })).toHaveAttribute(
       'href',
-      '/worlds/fixture-world/stories/red-bunny/pages/PG-7',
+      '/worlds/fixture-world/stories/red-bunny/scenes',
     );
+    expect(within(nav).getByText('Scene SCN-3')).toHaveAttribute('aria-current', 'page');
+    expect(within(nav).queryByRole('link', { name: 'Scene SCN-3' })).not.toBeInTheDocument();
   });
 
-  it('omits the parent page link for root pages', () => {
+  it('marks the story dashboard as current when there is no trail', () => {
     render(
       <MemoryRouter>
         <Breadcrumb
@@ -48,13 +49,12 @@ describe('Breadcrumb', () => {
           worldDisplayName="Fixture World"
           storySlug="red-bunny"
           storyTitle="Red Bunny"
-          branchId="BR-1"
-          pageId="PG-1"
-          parentPageId={null}
         />
       </MemoryRouter>,
     );
 
-    expect(screen.queryByRole('link', { name: /Parent:/ })).not.toBeInTheDocument();
+    const nav = screen.getByRole('navigation', { name: 'Breadcrumb' });
+    expect(within(nav).getByText('Red Bunny')).toHaveAttribute('aria-current', 'page');
+    expect(within(nav).queryByRole('link', { name: 'Red Bunny' })).not.toBeInTheDocument();
   });
 });

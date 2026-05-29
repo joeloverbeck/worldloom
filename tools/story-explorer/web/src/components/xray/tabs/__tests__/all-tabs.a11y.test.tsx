@@ -3,20 +3,20 @@ import { describe, expect, it } from 'vitest';
 
 import { expectNoAxeViolations, renderForAxe } from '../../../../lib/a11y-test-helpers';
 import { XRayPanel } from '../../XRayPanel';
-import { demoIndexStatus, demoPageDetail } from '../../__tests__/a11y-fixtures';
+import { demoIndexStatus, demoStateTickXray } from '../../__tests__/a11y-fixtures';
 
 describe('all X-Ray tabs a11y', () => {
   it('cycles across all tabs with resolvable tab-panel relationships', async () => {
     const { container } = renderForAxe(
       <XRayPanel
-        pageDetail={demoPageDetail()}
+        tick={demoStateTickXray()}
         storySlug="red-bunny"
         worldIndexStatus={demoIndexStatus()}
         worldSlug="fixture-world"
       />,
     );
 
-    const tabNames = ['Current State', 'What Changed Here', 'Plan & Prose', 'Validation & Integrity'] as const;
+    const tabNames = ['Current State', 'What Changed Here', 'Validation & Integrity'] as const;
     for (const tabName of tabNames) {
       const tab = screen.getByRole('tab', { name: tabName });
       const panelId = tab.getAttribute('aria-controls');
@@ -27,8 +27,6 @@ describe('all X-Ray tabs a11y', () => {
     fireEvent.keyDown(screen.getByRole('tab', { name: 'Current State' }), { key: 'ArrowRight' });
     expect(screen.getByRole('tab', { name: 'What Changed Here' })).toHaveAttribute('aria-selected', 'true');
     fireEvent.keyDown(screen.getByRole('tab', { name: 'What Changed Here' }), { key: 'ArrowRight' });
-    expect(screen.getByRole('tab', { name: 'Plan & Prose' })).toHaveAttribute('aria-selected', 'true');
-    fireEvent.keyDown(screen.getByRole('tab', { name: 'Plan & Prose' }), { key: 'ArrowRight' });
     expect(screen.getByRole('tab', { name: 'Validation & Integrity' })).toHaveAttribute('aria-selected', 'true');
     fireEvent.keyDown(screen.getByRole('tab', { name: 'Validation & Integrity' }), { key: 'ArrowRight' });
     expect(screen.getByRole('tab', { name: 'Current State' })).toHaveAttribute('aria-selected', 'true');

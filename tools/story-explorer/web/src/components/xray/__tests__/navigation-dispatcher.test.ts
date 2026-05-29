@@ -39,12 +39,12 @@ describe('dispatchRecordLinkClick', () => {
     expect(ctx.openPeek).toHaveBeenCalledWith('SF-2');
   });
 
-  it('navigates PG links through React Router navigation', () => {
+  it('navigates PG links to the timeline focused on that tick (never the removed page reader)', () => {
     const ctx = context();
 
     dispatchRecordLinkClick('PG-3', ctx);
 
-    expect(ctx.navigateToPage).toHaveBeenCalledWith('/worlds/fixture-world/stories/red-bunny/pages/PG-3');
+    expect(ctx.navigateToPage).toHaveBeenCalledWith('/worlds/fixture-world/stories/red-bunny/timeline?focus=PG-3');
   });
 
   it('switches to What Changed Here for SE links', () => {

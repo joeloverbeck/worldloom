@@ -1,35 +1,22 @@
-import type { PageDetail } from '../../api/client';
+import type { StateTickXray } from '../../api/client';
 import { countRecordIdsByGroup, CURRENT_STATE_GROUPS, groupAnchorId } from './groupActiveRecords';
 
 interface StickyRailProps {
-  pageDetail: PageDetail;
+  tick: StateTickXray;
 }
 
-function pageId(pageDetail: PageDetail): string {
-  const id = pageDetail.page.id;
-  return typeof id === 'string' && id.length > 0 ? id : 'Unknown page';
+function activeRecordIds(tick: StateTickXray): string[] {
+  return Object.values(tick.activeRecordsByClass).flat();
 }
 
-function receiptStatus(pageDetail: PageDetail): string {
-  if (pageDetail.validationIntegrity.receiptPresence) {
-    return pageDetail.validationIntegrity.receiptPresence;
-  }
-
-  return pageDetail.receiptSummary === null ? 'missing' : 'present';
-}
-
-export function StickyRail({ pageDetail }: StickyRailProps): JSX.Element {
-  const counts = countRecordIdsByGroup(pageDetail.currentStateRecordIds);
-  const delta = pageDetail.eventDelta;
+export function StickyRail({ tick }: StickyRailProps): JSX.Element {
+  const counts = countRecordIdsByGroup(activeRecordIds(tick));
+  const delta = tick.eventDelta;
 
   return (
     <div className="xray-sticky-rail">
       <div className="xray-summary-chip xray-summary-chip--primary">
-        {pageId(pageDetail)} · {pageDetail.branchContext.branchId}
-      </div>
-      <div className="xray-summary-status" aria-label="Prose and receipt status">
-        <span className={`xray-summary-chip xray-summary-chip--${pageDetail.proseStatus}`}>Prose {pageDetail.proseStatus}</span>
-        <span className="xray-summary-chip">Receipt {receiptStatus(pageDetail)}</span>
+        {tick.pageId} · {tick.branchId}
       </div>
       <section className="xray-summary-section" aria-labelledby="xray-rail-counts-title">
         <h3 id="xray-rail-counts-title">Active Records</h3>

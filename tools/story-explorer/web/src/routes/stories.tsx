@@ -64,7 +64,7 @@ function StoryCard({ story }: { story: StorySummary }): JSX.Element {
     <li>
       <Link
         className="story-card"
-        to={`/worlds/${encodeURIComponent(story.worldSlug)}/stories/${encodeURIComponent(story.storySlug)}/entry`}
+        to={`/worlds/${encodeURIComponent(story.worldSlug)}/stories/${encodeURIComponent(story.storySlug)}`}
       >
         <span className="story-card__topline">
           <span className="story-card__title">{story.title ?? 'Untitled story'}</span>
@@ -74,7 +74,6 @@ function StoryCard({ story }: { story: StorySummary }): JSX.Element {
         <span className="story-card__stats">
           <span>{pluralize(story.pageCount, 'page')}</span>
           <span>{pluralize(story.leafPageIds.length, 'leaf', 'leaves')}</span>
-          <span>{pluralize(story.renderedProseCount, 'prose page')}</span>
         </span>
         <span className="story-card__meta">
           <span>{latestPageLabel(story)}</span>

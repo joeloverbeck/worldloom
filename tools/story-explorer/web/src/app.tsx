@@ -1,14 +1,24 @@
 import { Suspense } from 'react';
-import { createBrowserRouter, RouterProvider, useParams, useRevalidator, useRouteError } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  type RouteObject,
+  RouterProvider,
+  useParams,
+  useRevalidator,
+  useRouteError,
+} from 'react-router-dom';
 
 import { ApiError } from './api/client';
 import { BackendUnreachablePage } from './components/BackendUnreachablePage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotFoundPage } from './components/NotFoundPage';
 import { RouteLoading } from './components/RouteLoading';
-import { PageEntryRoute, pageEntryLoader } from './routes/page-entry';
-import { PageReadRoute, pageReadLoader } from './routes/page-read';
+import { SceneDetailRoute, sceneDetailLoader } from './routes/scene-detail';
+import { ScenesRoute, sceneListLoader } from './routes/scenes';
 import { StoriesRoute, storyListLoader } from './routes/stories';
+import { StoryDashboardRoute, storyDashboardLoader } from './routes/story-dashboard';
+import { TimelineRoute, timelineLoader } from './routes/timeline';
+import { UnscenedRoute, unscenedLoader } from './routes/unscened';
 import { WorldsRoute, worldListLoader } from './routes/worlds';
 
 function RouteFallback({ error, retry }: { error: Error; retry: () => void }): JSX.Element {
@@ -46,7 +56,7 @@ export function AppRouteError(): JSX.Element {
   };
 
   if (error instanceof ApiError && error.status === 404) {
-    return <NotFoundPage worldSlug={params.slug} storySlug={params.storySlug} resourceLabel="page" />;
+    return <NotFoundPage worldSlug={params.slug} storySlug={params.storySlug} />;
   }
 
   if (isNetworkError(error)) {
@@ -57,7 +67,7 @@ export function AppRouteError(): JSX.Element {
   return <RouteFallback error={routeError} retry={retry} />;
 }
 
-const router = createBrowserRouter([
+export const routes: RouteObject[] = [
   {
     path: '/',
     loader: worldListLoader,
@@ -79,26 +89,58 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/worlds/:slug/stories/:storySlug/entry',
-    loader: pageEntryLoader,
+    path: '/worlds/:slug/stories/:storySlug',
+    loader: storyDashboardLoader,
     errorElement: <AppRouteError />,
     element: (
-      <RouteFrame loadingLabel="Loading page entry...">
-        <PageEntryRoute />
+      <RouteFrame loadingLabel="Loading story dashboard...">
+        <StoryDashboardRoute />
       </RouteFrame>
     ),
   },
   {
-    path: '/worlds/:slug/stories/:storySlug/pages/:pageId',
-    loader: pageReadLoader,
+    path: '/worlds/:slug/stories/:storySlug/timeline',
+    loader: timelineLoader,
     errorElement: <AppRouteError />,
     element: (
-      <RouteFrame loadingLabel="Loading page...">
-        <PageReadRoute />
+      <RouteFrame loadingLabel="Loading timeline...">
+        <TimelineRoute />
       </RouteFrame>
     ),
   },
-]);
+  {
+    path: '/worlds/:slug/stories/:storySlug/scenes',
+    loader: sceneListLoader,
+    errorElement: <AppRouteError />,
+    element: (
+      <RouteFrame loadingLabel="Loading scenes...">
+        <ScenesRoute />
+      </RouteFrame>
+    ),
+  },
+  {
+    path: '/worlds/:slug/stories/:storySlug/scenes/:sceneId',
+    loader: sceneDetailLoader,
+    errorElement: <AppRouteError />,
+    element: (
+      <RouteFrame loadingLabel="Loading scene detail...">
+        <SceneDetailRoute />
+      </RouteFrame>
+    ),
+  },
+  {
+    path: '/worlds/:slug/stories/:storySlug/unscened',
+    loader: unscenedLoader,
+    errorElement: <AppRouteError />,
+    element: (
+      <RouteFrame loadingLabel="Loading unscened ranges...">
+        <UnscenedRoute />
+      </RouteFrame>
+    ),
+  },
+];
+
+const router = createBrowserRouter(routes);
 
 export function App(): JSX.Element {
   return <RouterProvider router={router} />;

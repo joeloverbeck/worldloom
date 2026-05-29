@@ -79,7 +79,10 @@ function createTempRepoWithWebDist(): string {
   return root;
 }
 
-test("SPEC-88 capstone built web bundle exposes the reader surface", () => {
+// SPEC-97 superseded the SPEC-88 page-reader surface (page-read/ProsePanel/
+// ChoiceCard/TerminalCard) with the scene-first authoring surface; this proof
+// now asserts the surviving scene-first sources ship in the built bundle.
+test("SPEC-88 capstone built web bundle exposes the scene-first authoring surface", () => {
   const indexHtml = path.join(webDistPath(), "index.html");
   assert.equal(existsSync(indexHtml), true);
   assert.match(readFileSync(indexHtml, "utf8"), /<div id="root"><\/div>/);
@@ -89,11 +92,11 @@ test("SPEC-88 capstone built web bundle exposes the reader surface", () => {
   const sourceMap = readBuiltSourceMap();
   assert.deepEqual(
     [
-      "../../src/components/ChoiceCard.tsx",
       "../../src/components/IndexStatusBanner.tsx",
-      "../../src/components/ProsePanel.tsx",
-      "../../src/components/TerminalCard.tsx",
-      "../../src/routes/page-read.tsx",
+      "../../src/components/SceneDetailShell.tsx",
+      "../../src/components/SceneProsePanel.tsx",
+      "../../src/routes/scene-detail.tsx",
+      "../../src/routes/scenes.tsx",
     ].filter((source) => !(sourceMap.sources ?? []).includes(source)),
     [],
   );
