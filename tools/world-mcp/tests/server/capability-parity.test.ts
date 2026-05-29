@@ -53,6 +53,31 @@ test("describe_capabilities lists every registered tool in order", async () => {
   });
 });
 
+test("describe_capabilities exposes planless story-state maintenance metadata", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.describe_capabilities,
+      arguments: {}
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      tools?: Array<{ name?: string; description?: string }>;
+    };
+    const capability = structured.tools?.find(
+      (tool) => tool.name === MCP_TOOL_NAMES.plan_story_state_maintenance
+    );
+
+    assert.ok(capability?.description);
+    assert.match(capability.description, /review-only patch-plan envelope/);
+    assert.match(capability.description, /planless forkable maintenance PG/);
+    assert.match(capability.description, /asks the operator to write a page plan/);
+    assert.doesNotMatch(capability.description, /maintenance_page_plan/);
+    assert.doesNotMatch(capability.description, /write the returned page plan/);
+    assert.doesNotMatch(capability.description, /returns? .*page-plan body/);
+  });
+});
+
 test("describe_envelope_schema covers every operation kind", async () => {
   for (const kind of OPERATION_KINDS) {
     const manifest = await describeEnvelopeSchema({ op_kind: kind });
