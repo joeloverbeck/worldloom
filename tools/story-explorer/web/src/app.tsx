@@ -13,6 +13,7 @@ import { ScenesRoute, sceneListLoader } from './routes/scenes';
 import { StoriesRoute, storyListLoader } from './routes/stories';
 import { StoryDashboardRoute, storyDashboardLoader } from './routes/story-dashboard';
 import { TimelineRoute, timelineLoader } from './routes/timeline';
+import { UnscenedRoute, unscenedLoader } from './routes/unscened';
 import { WorldsRoute, worldListLoader } from './routes/worlds';
 
 function RouteFallback({ error, retry }: { error: Error; retry: () => void }): JSX.Element {
@@ -119,6 +120,16 @@ const router = createBrowserRouter([
     element: (
       <RouteFrame loadingLabel="Loading scene detail...">
         <SceneDetailRoute />
+      </RouteFrame>
+    ),
+  },
+  {
+    path: '/worlds/:slug/stories/:storySlug/unscened',
+    loader: unscenedLoader,
+    errorElement: <AppRouteError />,
+    element: (
+      <RouteFrame loadingLabel="Loading unscened ranges...">
+        <UnscenedRoute />
       </RouteFrame>
     ),
   },
