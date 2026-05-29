@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None — verification-only ticket; exercises the surfaces changed by SPEC94SCNPUBSTA-001..005. Introduces no production code.
-**Deps**: archive/tickets/SPEC94SCNPUBSTA-001.md, archive/tickets/SPEC94SCNPUBSTA-002.md, archive/tickets/SPEC94SCNPUBSTA-003.md, SPEC94SCNPUBSTA-004, SPEC94SCNPUBSTA-005
+**Deps**: archive/tickets/SPEC94SCNPUBSTA-001.md, archive/tickets/SPEC94SCNPUBSTA-002.md, archive/tickets/SPEC94SCNPUBSTA-003.md, archive/tickets/SPEC94SCNPUBSTA-004.md, SPEC94SCNPUBSTA-005
 
 ## Problem
 

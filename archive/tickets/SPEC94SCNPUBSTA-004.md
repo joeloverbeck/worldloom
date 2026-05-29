@@ -1,6 +1,6 @@
 # SPEC94SCNPUBSTA-004: `branching-story-scene-prose-attach` — replace `SCN.status` precondition
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-scene-prose-attach/SKILL.md` HARD-GATE precondition prose. No change to the receipt schema or to any tool/validator; the skill still writes only the receipt + INDEX.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-`branching-story-scene-prose-attach` aborts at HARD-GATE step 3 (L107) if the retrieved `scene_id`'s `status` is not one of `planned | rendered | attached`. With the field removed (001/002), this precondition references a field that no longer exists. It must be replaced with the still-valid preconditions that genuinely gate attach: the `SCN` exists, is the latest non-superseded record for its id lineage, and its scene-plan + prose pair are present. Attach continues to write only the receipt + INDEX and mutates no `_source` record.
+At intake, `branching-story-scene-prose-attach` aborted at HARD-GATE step 3 if the retrieved `scene_id`'s `status` was not one of `planned | rendered | attached`. With the field removed (001/002), that precondition referenced a field that no longer exists. This ticket replaced it with the still-valid preconditions that genuinely gate attach: the `SCN` exists, is the latest non-superseded record for its id lineage, and its scene-plan + prose pair are present. Attach continues to write only the receipt + INDEX and mutates no `_source` record.
 
 ## Assumption Reassessment (2026-05-29)
 
@@ -30,21 +30,21 @@
 3. MR firewall intact → FOUNDATIONS alignment check: `scene_range_forbidden_mystery_resolution` (receipt check) is untouched; attach still mutates no `_source` record.
 4. Reference files (`receipt-checks.md`, `write-and-validation.md`) carry no `scn_status` mention (confirmed this session — only `scene_range_entity_status_consistency`, out of scope) → grep-proof verify-no-op.
 
-## What to Change
+## Landed Changes
 
 ### 1. HARD-GATE step 3 (L107)
 
-- Replace "Abort if missing or if its `status` is not `planned`, `rendered`, or `attached`" with: abort if the `SCN` is missing; abort if it is not the latest non-superseded record for its id lineage (per `supersedes`); the scene-plan + prose pair presence checks at steps 4–6 continue to gate attach. No reference to a publication status.
+- Replaced the stale publication-status precondition with: abort if the `SCN` is missing, or if it is not the latest non-superseded record for its id lineage, using `supersedes` pointers to identify superseded records. The scene-plan + prose pair presence checks at steps 4–6 continue to gate attach. No reference to a publication status remains in the precondition.
 
 ### 2. Reference files (verify-no-op)
 
-- `references/receipt-checks.md`, `references/write-and-validation.md`: confirm no `scn_status`/`SCN.status` mention requires reconciliation (expected no edit — the only `*status*` token there is `scene_range_entity_status_consistency`, an out-of-scope receipt check). If a stray reference is found, reconcile it; otherwise no change.
+- `references/receipt-checks.md`, `references/write-and-validation.md`: verified no `scn_status`/`SCN.status` mention requires reconciliation. No reference-file edit was needed; the remaining `*status*` token is `scene_range_entity_status_consistency`, an out-of-scope receipt check.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-scene-prose-attach/SKILL.md` (modify)
-- `.claude/skills/branching-story-scene-prose-attach/references/receipt-checks.md` (modify — verify-no-op; edit only if a stray `SCN.status` ref is found)
-- `.claude/skills/branching-story-scene-prose-attach/references/write-and-validation.md` (modify — verify-no-op; edit only if a stray `SCN.status` ref is found)
+- `.claude/skills/branching-story-scene-prose-attach/references/receipt-checks.md` (reviewed — no edit needed)
+- `.claude/skills/branching-story-scene-prose-attach/references/write-and-validation.md` (reviewed — no edit needed)
 
 ## Out of Scope
 
@@ -75,3 +75,17 @@
 
 1. `grep -n "status" .claude/skills/branching-story-scene-prose-attach/SKILL.md` (expect no `planned, rendered, attached` precondition)
 2. `grep -rn "scn_status\|SCN\.status" .claude/skills/branching-story-scene-prose-attach/` (expect zero)
+
+## Outcome
+
+Completed on 2026-05-29. HARD-GATE pre-flight step 3 in `.claude/skills/branching-story-scene-prose-attach/SKILL.md` now aborts when the retrieved `SCN` is missing or is not the latest non-superseded record for its id lineage, using `supersedes` pointers to identify superseded records. The scene-plan/prose artifact checks remain in steps 4-6, and the skill's no-`_source`-mutation contract remains unchanged.
+
+## Verification Result
+
+1. `! grep -n "planned.*rendered.*attached\|SCN.status" .claude/skills/branching-story-scene-prose-attach/SKILL.md` passed, proving the stale publication-status precondition is gone.
+2. `! grep -rn "scn_status\|SCN\.status" .claude/skills/branching-story-scene-prose-attach/` passed, proving the skill and its focused references carry no `SCN.status` / `scn_status` anchor.
+3. Focused `rg` review over `.claude/skills/branching-story-scene-prose-attach/SKILL.md` confirmed the replacement precondition, preserved Mystery Reserve receipt check, and preserved no-state-mutation contract.
+
+## Deviations
+
+No reference-file edits were needed. The only `status` token in the focused reference files is the existing `scene_range_entity_status_consistency` receipt check, which is out of scope for `SCN.status` publication-state removal.
