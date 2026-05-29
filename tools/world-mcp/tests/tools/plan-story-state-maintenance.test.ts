@@ -275,6 +275,63 @@ test("planStoryStateMaintenance rejects mismatched supersession records before p
   }
 });
 
+test("planStoryStateMaintenance omits a created-but-inactive STEMO from active_records", async () => {
+  const root = createTempRepoRoot();
+  buildStoryBundleWorld(root);
+
+  try {
+    const result = await withRepoRoot(root, () =>
+      planStoryStateMaintenance({
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        parent_page_id: "PG-1",
+        reason: "Create a settled STEMO that must not enter active_records.",
+        source_ticket: "tickets/TCSNAP-001.md",
+        operations: [
+          {
+            action: "create",
+            record_type: "story_emotion_record",
+            record: {
+              story_id: "STORY-1",
+              created_at_page: "PG-1",
+              created_by_event: "SE-1",
+              holder: "STENT-2",
+              status: "settled",
+              affect_kind: "anxiety",
+              intensity: "low",
+              orientation: { toward_records: ["THR-1"] },
+              appraisal_basis: ["BEL-2"],
+              trigger_event: "SE-1",
+              behavioral_pressure: ["conceal"],
+              agency_effect: "constraining",
+              expires_when: "The watcher leaves.",
+              derived_from: ["BEL-2"]
+            }
+          }
+        ]
+      })
+    );
+
+    assert.ok(!("code" in result), JSON.stringify(result, null, 2));
+    const newStemoId = result.patch_plan.expected_id_allocations.stemo_ids?.[0];
+    assert.ok(newStemoId, "expected a STEMO allocation");
+    const page = result.patch_plan.patches.at(-1)?.payload.record;
+    const active = (page?.state_snapshot as { active_records: Record<string, string[]> }).active_records;
+    // status: settled is not in STEMO's active set, so the shared
+    // replayActiveRecords excludes the created record. The pre-unification local
+    // copy lacked recordsById and the exclusion entirely, so it would have
+    // wrongly included it — and snapshot_replay_equality would then reject the
+    // maintenance plan's own page.
+    const activeStemo = active.STEMO ?? [];
+    assert.ok(
+      !activeStemo.includes(newStemoId!),
+      `settled ${newStemoId} must be omitted from active_records.STEMO: ${JSON.stringify(activeStemo)}`
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("planStoryStateMaintenance requires a parent_page_id before allocation", async () => {
   const result = await planStoryStateMaintenance({
     world_slug: STORY_FIXTURE_WORLD,

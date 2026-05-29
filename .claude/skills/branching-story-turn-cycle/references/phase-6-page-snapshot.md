@@ -85,4 +85,16 @@ Draft `PG-<integer>` per shared contract §4.2:
 - Omit `plan.plan_hash` and `prose_plan_path` for new planless `PG` records. Existing legacy `PG`s may carry those fields, but turn-cycle does not create them after SPEC-93.
 - `validation_trace`: populated by Phase 9.
 
+### Derive `active_records` with `compute-pg-snapshot` (do not hand-compute)
+
+`active_records` is a **deterministic** projection of `parent.active_records + SE.state_delta` — `create` added, `supersede ∪ close` dropped, **and** the non-obvious inactive-status exclusion (a supersession-create whose lifecycle status is inactive — `CLK status: resolved`, `STQ status: answered`, `STEMO status: settled`, `STSEC` no longer hidden, `STPLAN` no longer active — is created but omitted from `active_records`). Do not compute this by hand: it is the most error-prone field in the turn and a wrong include/exclude is only caught at dry-run by `snapshot_replay_equality`, forcing an edit → recompute-hash → re-validate loop.
+
+Instead, derive it by tool — the authoring analogue of the `compute-pg-hashes` step Phase 9 prescribes for `state_hash`:
+
+```bash
+node tools/world-mcp/dist/src/cli/compute-pg-snapshot.js <envelope.json>
+```
+
+Assemble the patch envelope JSON first (the same envelope Phase 9 uses for the hash; it must carry the single `create_pg_record` patch plus the `create_se_record` patch and every record-create patch this turn). The CLI reads the parent page's `active_records` from disk, applies `SE.state_delta` through the single canonical `replayActiveRecords` helper the validator gates on, and prints the computed `active_records` map. Paste that map onto the `PG` record. Because the CLI and `snapshot_replay_equality` call the same helper, the inactive-status exclusion is handled for you and the drafted snapshot cannot disagree with the gate.
+
 The snapshot is the future fork point — complete enough to be a valid parent for any subsequent turn-cycle invocation regardless of whether its prose is ever rendered (per FOUNDATIONS §Story Bundles §4a).
