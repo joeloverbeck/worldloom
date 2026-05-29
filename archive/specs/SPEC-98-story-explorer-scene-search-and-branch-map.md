@@ -1,6 +1,6 @@
 # SPEC-98 — Story Explorer Search + MVP Scene Branch-Map
 
-**Status:** draft
+**Status:** ✅ COMPLETED (tickets SPEC98STOEXPSCE-001..004; archived `archive/tickets/`)
 **Date:** 2026-05-28
 **Classification:** story-canon-related (tooling that operates on story-handling logic — implements scene/unscened-grouped search and an MVP single-layer scene branch-map over the SPEC-96 segment model; read-only).
 **Depends on:** **SPEC-96** (timeline segment model + scene/unscened read layer) and **SPEC-97** (frontend shell to host the search modal + branch-map route). Both have **landed and are archived** (`archive/specs/SPEC-96-story-explorer-scene-backend-api.md`, `archive/specs/SPEC-97-story-explorer-scene-first-frontend.md`); `specs/IMPLEMENTATION-ORDER.md` marks SPEC-98 next/unblocked.
