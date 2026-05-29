@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/FOUNDATIONS.md`, `docs/MACHINE-FACING-LAYER.md`, `docs/prose-renderer-contract/README.md` (docs), and non-breaking `status: planned` line removal in three `tools/world-index` / `tools/world-mcp` test fixtures. No production code in either tool package reads `SCN.status`.
-**Deps**: SPEC94SCNPUBSTA-001
+**Deps**: archive/tickets/SPEC94SCNPUBSTA-001.md
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-scene-plan/SKILL.md` prose. No change to the patch op vocabulary (`create_scn_record` / `supersede_scn_record` unchanged) or to any tool/validator.
-**Deps**: SPEC94SCNPUBSTA-001
+**Deps**: archive/tickets/SPEC94SCNPUBSTA-001.md
 
 ## Problem
 

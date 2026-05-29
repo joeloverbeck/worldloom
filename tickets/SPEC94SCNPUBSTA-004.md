@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-scene-prose-attach/SKILL.md` HARD-GATE precondition prose. No change to the receipt schema or to any tool/validator; the skill still writes only the receipt + INDEX.
-**Deps**: SPEC94SCNPUBSTA-001
+**Deps**: archive/tickets/SPEC94SCNPUBSTA-001.md
 
 ## Problem
 

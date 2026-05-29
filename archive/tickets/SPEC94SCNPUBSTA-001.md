@@ -1,6 +1,6 @@
 # SPEC94SCNPUBSTA-001: Contract — remove `SCN.status`, define derived publication indicator
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None — edits shared-template markdown contracts only (`story-record-schemas.md`, `story-state-contract.md`); no tool/skill/hook/schema code.
@@ -31,21 +31,21 @@ The `SCN` record (`story-record-schemas.md §4.5.20`) carries a required `status
 
 ## What to Change
 
-### 1. `story-record-schemas.md` §4.5.20 (`SCN`)
+### 1. `story-record-schemas.md` §4.5.20 (`SCN`) — landed
 
-- Remove the `status: planned | rendered | attached*` field line (L933).
-- Add a one-line note: scene publication state is **derived at read time** from scene-artifact presence (`prose_path` / `receipt_path` files) plus the scene-prose receipt `verdict`, and is never stored on the append-only `SCN`.
-- Reconcile the role note (L949): "**Range/status** changes use the patch engine's append-only supersession path" → "**Range** changes use the patch engine's append-only supersession path" (only the range can change now that `status` is gone).
+- Removed the `status: planned | rendered | attached*` field line.
+- Added a note that scene publication state is **derived at read time** from scene-artifact presence (`prose_path` / `receipt_path` files) plus the scene-prose receipt `verdict`, and is never stored on the append-only `SCN`.
+- Reconciled the role note from "**Range/status** changes use the patch engine's append-only supersession path" to "**Range** changes use the patch engine's append-only supersession path" (only the range can change now that `status` is gone).
 
-### 2. `story-state-contract.md`
+### 2. `story-state-contract.md` — landed
 
-- Reconcile L434: "The `SCN` record remains the only engine-routed **membership/status** artifact" → "…engine-routed **membership** artifact".
-- Add the derived publication indicator definition (the §3 table) where the contract describes scene publication, presentational-only, no stored field:
+- Reconciled "The `SCN` record remains the only engine-routed **membership/status** artifact" to "engine-routed **membership** artifact".
+- Added the derived publication indicator definition where the contract describes scene publication, presentational-only, no stored field:
   - `planned` — `prose_path` file absent.
   - `prose-present` — `prose_path` present, `receipt_path` absent.
   - `attached:PASS` / `attached:WARN` / `attached:FAIL` — `receipt_path` present; label carries the receipt `verdict`.
   - `superseded` — the `SCN` is named in another `SCN`'s `supersedes` (not the latest in its lineage).
-  - State explicitly: not a schema field, not validated, not authoritative for any state turn; deliberately omits any "stale"/freshness state (which would require hashing editable artifacts).
+  - Stated explicitly: not a schema field, not validated, not authoritative for any state turn; deliberately omits any stale/freshness state (which would require hashing editable artifacts).
 
 ## Files to Touch
 
@@ -84,3 +84,20 @@ The `SCN` record (`story-record-schemas.md §4.5.20`) carries a required `status
 1. `grep -n "status: planned\|Range/status changes" .claude/skills/_shared-templates/story-record-schemas.md` (expect zero)
 2. `grep -n "membership/status artifact" .claude/skills/_shared-templates/story-state-contract.md` (expect zero)
 3. Markdown contract files have no build step; the §6 completeness sweep in SPEC94SCNPUBSTA-006 is the cross-cutting acceptance boundary.
+
+## Outcome
+
+Completed: 2026-05-29
+
+The shared-template `SCN` contract no longer stores publication status. `story-record-schemas.md` §4.5.20 removes the `status` field, forbids publication status on append-only `SCN`, and says publication state is derived from scene artifact presence plus the receipt verdict. `story-state-contract.md` now describes `SCN` as an engine-routed membership artifact and defines the presentational derived indicator (`planned`, `prose-present`, `attached:PASS|WARN|FAIL`, `superseded`).
+
+## Verification Result
+
+1. `grep -n "status: planned\|Range/status changes" .claude/skills/_shared-templates/story-record-schemas.md` returned zero matches.
+2. `grep -n "membership/status artifact" .claude/skills/_shared-templates/story-state-contract.md` returned zero matches.
+3. `grep -n "prose-present\|attached:PASS" .claude/skills/_shared-templates/story-state-contract.md` returned the derived-indicator rows.
+4. Manual FOUNDATIONS alignment check: the derived indicator uses file presence plus receipt verdict only; no hash/freshness field or state-turn authority was added.
+
+## Deviations
+
+None. Validator schema, skill prose, docs, fixtures, and the cross-cutting §6 sweep remain owned by SPEC94SCNPUBSTA-002 through SPEC94SCNPUBSTA-006.

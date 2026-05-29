@@ -431,7 +431,18 @@ Current renderer-facing prose planning lives in §8a's scene-plan contract. Scen
 
 ## 8a. Scene-Plan Minimum Contract
 
-Scene plans live at `scene-prose-plans/SCN-<integer>.md` and render one contiguous single-branch `SCN.pg_ids` range. They are direct-write publication-planning artifacts derived from committed `PG` records via retrieval, not from sibling prose plans. The `SCN` record remains the only engine-routed membership/status artifact; the scene plan itself has no state consequence.
+Scene plans live at `scene-prose-plans/SCN-<integer>.md` and render one contiguous single-branch `SCN.pg_ids` range. They are direct-write publication-planning artifacts derived from committed `PG` records via retrieval, not from sibling prose plans. The `SCN` record remains the only engine-routed membership artifact; the scene plan itself has no state consequence.
+
+Scene publication state is a read-time indicator, not an `SCN` schema field, validator input, or state-turn authority. Read surfaces derive it as follows:
+
+| Indicator | Derivation |
+|---|---|
+| `planned` | `prose_path` file absent. |
+| `prose-present` | `prose_path` file present, `receipt_path` file absent. |
+| `attached:PASS` / `attached:WARN` / `attached:FAIL` | `receipt_path` file present; label carries the receipt `verdict`. |
+| `superseded` | The `SCN` is named in another `SCN`'s `supersedes` and is not the latest in its lineage. |
+
+The indicator is presentational only. It deliberately omits any stale/freshness state because that would require hashing editable scene plans, scene prose, or receipts.
 
 Scene-plan bodies are novelist-facing. They must be zero-ID, zero-hash, zero-schema, zero-validator, and zero-lifecycle in prose-facing sections: no record ids, hash strings, patch-engine terms, supersession mechanics, validator names, or state-delta arrays as body shorthand. The scene plan translates committed `PG` events, visible state, forbidden resolutions, character authority, and choice surface into prose direction. Engine fields may appear only in clearly separated frontmatter or validation metadata when a later validator requires that metadata.
 

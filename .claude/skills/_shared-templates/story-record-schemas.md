@@ -929,8 +929,7 @@ Normal story runtime consumes active `STCHAR` through `STENT.bound_stchar_id`, `
 id: SCN-<integer>*                         # consumed by index node identity, retrieval, and receipt linkage
 story_id: STORY-<integer>*                 # consumed by story-bundle scoping and retrieval
 branch_id: BR-<integer>*                   # consumed by scene-range single-branch validation and index edges
-supersedes: SCN-<integer> | null           # default null; consumed by append-only range/status supersession
-status: planned | rendered | attached*     # publication status only; consumed by scene workflow and INDEX rendering
+supersedes: SCN-<integer> | null           # default null; consumed by append-only range supersession
 pg_ids: [PG-<integer>]*                    # ordered contiguous range; consumed by range validators, receipt range-walks, and SCN->PG edges
 start_page_id: PG-<integer>*               # equals pg_ids[0]; consumed by structural validators and human review
 end_page_id: PG-<integer>*                 # equals pg_ids[-1]; consumed by choice-surface validation
@@ -946,7 +945,7 @@ prose_path: scene-prose/SCN-<integer>.md*
 receipt_path: scene-prose-receipts/SCN-<integer>.yaml*
 ```
 
-`SCN` is a render-unit membership record over committed `PG` records, not a causal-state record and not a narrative-shape record. Its fields are load-bearing for index membership/edges, scene-range validation, scene-plan generation, scene-prose attach, or human navigation. It must not carry a render-kind field, a source-PG fingerprint field, act/arc position, target narrative shape, future dramatic obligation, or prose byte hashes. Range/status changes use the patch engine's append-only supersession path; scene-plan and scene-prose markdown remain direct-write publication artifacts with no state consequence.
+`SCN` is a render-unit membership record over committed `PG` records, not a causal-state record and not a narrative-shape record. Its fields are load-bearing for index membership/edges, scene-range validation, scene-plan generation, scene-prose attach, or human navigation. It must not carry a render-kind field, a source-PG fingerprint field, act/arc position, target narrative shape, future dramatic obligation, publication status, or prose byte hashes. Scene publication state is derived at read time from scene-artifact presence (`prose_path` / `receipt_path` files) plus the scene-prose receipt `verdict`; it is never stored on append-only `SCN`. Range changes use the patch engine's append-only supersession path; scene-plan and scene-prose markdown remain direct-write publication artifacts with no state consequence.
 
 ### 4.6 Legacy prose receipt
 

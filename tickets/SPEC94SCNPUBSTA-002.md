@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators` story-scene record-compliance schema and its colocated structural/integration tests. No impact on the validator framework run-loop or registry (the schema is consumed by the existing `record-schema-compliance` path).
-**Deps**: SPEC94SCNPUBSTA-001
+**Deps**: archive/tickets/SPEC94SCNPUBSTA-001.md
 
 ## Problem
 
