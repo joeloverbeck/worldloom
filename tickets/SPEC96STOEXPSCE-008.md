@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: capstone integration tests exercising the scene-first routes end-to-end + rewrite of `test/capstone-smoke.test.ts`. No new production code.
-**Deps**: archive/tickets/SPEC96STOEXPSCE-002.md, archive/tickets/SPEC96STOEXPSCE-003.md, archive/tickets/SPEC96STOEXPSCE-004.md, archive/tickets/SPEC96STOEXPSCE-005.md, 006, 007
+**Deps**: archive/tickets/SPEC96STOEXPSCE-002.md, archive/tickets/SPEC96STOEXPSCE-003.md, archive/tickets/SPEC96STOEXPSCE-004.md, archive/tickets/SPEC96STOEXPSCE-005.md, archive/tickets/SPEC96STOEXPSCE-006.md, 007
 
 ## Problem
 

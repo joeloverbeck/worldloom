@@ -21,6 +21,7 @@ import { registerRecordRoutes } from "./routes/records.js";
 import { registerSearchRoute } from "./routes/search.js";
 import { registerScenesRoutes } from "./routes/scenes.js";
 import { registerStoriesRoutes } from "./routes/stories.js";
+import { registerStateTickXrayRoutes } from "./routes/state-tick-xray.js";
 import { registerTimelineRoutes } from "./routes/timeline.js";
 import { registerUnscenedRoutes } from "./routes/unscened.js";
 import { registerWorldsRoutes } from "./routes/worlds.js";
@@ -132,6 +133,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerTimelineRoutes(server, { repoRoot: options.repoRoot });
   await registerScenesRoutes(server, { repoRoot: options.repoRoot });
   await registerUnscenedRoutes(server, { repoRoot: options.repoRoot });
+  await registerStateTickXrayRoutes(server, { repoRoot: options.repoRoot });
   await registerPageRoutes(server, { repoRoot: options.repoRoot });
   await registerRecordRoutes(server, { repoRoot: options.repoRoot });
   await registerProseRoutes(server, { repoRoot: options.repoRoot });
