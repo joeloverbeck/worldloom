@@ -16,7 +16,7 @@ arguments:
     description: "PG-<integer> at the final committed page in the scene range"
     required: true
   - name: existing_scene_id
-    description: "Optional SCN-<integer> to supersede when refreshing an existing scene range/status"
+    description: "Optional SCN-<integer> to supersede when refreshing an existing scene range"
     required: false
   - name: manual_boundary_rationale
     description: "Optional author-provided boundary rationale; must describe committed continuity facts, not future narrative shape"
@@ -32,7 +32,7 @@ Do NOT write `scene-prose-plans/SCN-<integer>.md`, create or update `worlds/<wor
 
 (a) Pre-flight Check has completed: `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, and `.claude/skills/_shared-templates/story-record-schemas.md` loaded; bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `STORY_KERNEL.md` loaded; `start_page_id` and `end_page_id` resolved through `mcp__worldloom__get_record` / `get_records`; the complete candidate `PG` range loaded through typed retrieval; `SCN` id allocated via `mcp__worldloom__allocate_next_id(world_slug, 'SCN', story_slug=<story_slug>)` unless superseding an existing `SCN`; and the current end page's emitted choices loaded.
 
-(b) Phases 1-6 have completed in working memory: the proposed `pg_ids` are an ordered contiguous slice of one `PG.branch_path`; every included `PG` belongs to the same `branch_id`; no sibling alternative is included; the end page is the `choice_surface_page_id`; `emitted_choice_ids` exactly match the end page's emitted choices; the `SCN` record contains only membership, status, artifact paths, factual `scene_descriptor`, and factual `boundary_rationale`; the scene plan is derived from committed `PG` records and relevant story-state records, never from sibling prose plans; the scene plan body is renderer-facing and free of record IDs, hashes, schema, validator, patch-engine, lifecycle, and state-delta vocabulary outside verbatim contract blocks.
+(b) Phases 1-6 have completed in working memory: the proposed `pg_ids` are an ordered contiguous slice of one `PG.branch_path`; every included `PG` belongs to the same `branch_id`; no sibling alternative is included; the end page is the `choice_surface_page_id`; `emitted_choice_ids` exactly match the end page's emitted choices; the `SCN` record contains only membership, artifact paths, factual `scene_descriptor`, and factual `boundary_rationale`; the scene plan is derived from committed `PG` records and relevant story-state records, never from sibling prose plans; the scene plan body is renderer-facing and free of record IDs, hashes, schema, validator, patch-engine, lifecycle, and state-delta vocabulary outside verbatim contract blocks.
 
 (c) The SPEC-92 §5c judgment affirmation has been made explicitly: the operator confirms `scene_descriptor` and `boundary_rationale` describe what the committed range depicts and why the boundary is factual for POV/time/location/cast/exchange continuity. They must not state future dramatic obligation, act position, arc shape, midpoint, climax, rising action, or target narrative shape. The deterministic `scn_no_narrative_shape_language` validator is a backstop, not a replacement for this judgment.
 
@@ -53,7 +53,7 @@ Pre-flight Check (load FOUNDATIONS + shared contracts; resolve bundle;
 Phase 1: Select and validate range (contiguous, one branch, no siblings)
         |
         v
-Phase 2: Draft SCN membership record (planned status, paths, factual descriptor)
+Phase 2: Draft SCN membership record (paths, factual descriptor)
         |
         v
 Phase 3: Derive renderer-facing scene plan from committed PGs
@@ -108,7 +108,7 @@ Do not bulk-read story `_source/` directories. Use `mcp__worldloom__get_record`,
 5. Retrieve every `PG` in `pg_ids` through `mcp__worldloom__get_records` or equivalent bounded typed retrieval. Abort if any page is missing.
 6. Confirm every retrieved `PG.branch_id` equals the end page branch id and no included page is a sibling alternative.
 7. Retrieve the final emitted `CHC` records named by `end_page_id.emitted_choices`; these become the scene's playable choice surface.
-8. Resolve `previous_scene_id` by listing existing `SCN` records for the story and choosing the latest attached/planned scene whose `end_page_id` is immediately before the new range on the same branch path, or `null` when none exists. If ambiguous, stop for user input instead of guessing.
+8. Resolve `previous_scene_id` by listing existing `SCN` records for the story and choosing the adjacent prior scene whose `end_page_id` is immediately before the new range on the same `branch_id` and branch path, excluding superseded `SCN`s from consideration. Use `null` when none exists. If ambiguous, stop for user input instead of guessing.
 9. Allocate a new `SCN` id through `mcp__worldloom__allocate_next_id(world_slug, 'SCN', story_slug=<story_slug>)`. If `existing_scene_id` was supplied, retrieve it and set the new record's `supersedes` to that id.
 
 ## Phase 1: Select And Validate Range
@@ -136,7 +136,6 @@ id: SCN-<integer>
 story_id: STORY-<integer>
 branch_id: BR-<integer>
 supersedes: SCN-<integer> | null
-status: planned
 pg_ids: [PG-<integer>, ...]
 start_page_id: PG-<integer>
 end_page_id: PG-<integer>
@@ -234,7 +233,7 @@ After approval:
 2. If patch submission fails, write nothing else. Surface the failure.
 3. On patch success, create `scene-prose-plans/`, `scene-prose/`, and `scene-prose-receipts/` if absent.
 4. Write `scene-prose-plans/SCN-<integer>.md` using the exact validated bytes.
-5. Update `INDEX.md` with the scene row/status and artifact paths.
+5. Update `INDEX.md` with the scene row, derived publication indicator, and artifact paths. Derive the indicator from `prose_path` / `receipt_path` file presence plus the scene-prose receipt `verdict`; do not read or write publication status on `SCN`.
 6. Run post-write validation over the committed SCN record and scene plan.
 7. Report the scene id, written paths, receipt target, validation results, and next step: render `scene-prose/SCN-<integer>.md`, then invoke `branching-story-scene-prose-attach`.
 
