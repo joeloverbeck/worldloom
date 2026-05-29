@@ -1,6 +1,6 @@
 # SPEC94SCNPUBSTA-002: Validator schema + tests — drop `status` from `story-scene.schema.json`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators` story-scene record-compliance schema and its colocated structural/integration tests. No impact on the validator framework run-loop or registry (the schema is consumed by the existing `record-schema-compliance` path).
@@ -8,7 +8,7 @@
 
 ## Problem
 
-`tools/validators/src/schemas/story-scene.schema.json` requires `status` in its `required[]` array (L9) and defines it as an enum `["planned", "rendered", "attached"]` (L27). With the contract removing the field (SPEC94SCNPUBSTA-001), the JSON schema must drop it too; otherwise the validator would reject every contract-compliant `SCN`. Because the schema is `additionalProperties: false` (verified), removing the property is sufficient to make a stray `status` field rejected at validation. The colocated tests currently construct `SCN` fixtures *with* a `status` value (including one asserting the dead `rendered` value validates), so they must be updated in the same diff or the suite breaks.
+At intake, `tools/validators/src/schemas/story-scene.schema.json` required `status` in its `required[]` array and defined it as an enum `["planned", "rendered", "attached"]`. With the contract removing the field (SPEC94SCNPUBSTA-001), the JSON schema had to drop it too; otherwise the validator would reject every contract-compliant `SCN`. Because the schema is `additionalProperties: false` (verified), removing the property is sufficient to make a stray `status` field rejected at validation. The colocated tests constructed `SCN` fixtures *with* a `status` value (including one asserting the dead `rendered` value validated), so they were updated in the same diff.
 
 ## Assumption Reassessment (2026-05-29)
 
@@ -31,21 +31,21 @@
 3. The `rendered`-value assertion is inverted → codebase grep-proof + schema validation (`record-schema-compliance-story-scene.test.ts:L57` no longer asserts a `rendered` SCN validates).
 4. FOUNDATIONS alignment → schema validation: the validator continues to gate story-bundle SCN writes; no canon validator threshold changes.
 
-## What to Change
+## Landed Changes
 
 ### 1. `tools/validators/src/schemas/story-scene.schema.json`
 
-- Remove `"status"` from the `required[]` array (L9).
-- Remove the `status` property/enum definition (L27).
-- Leave `additionalProperties: false` and all other fields unchanged.
+- Removed `"status"` from the `required[]` array.
+- Removed the `status` property/enum definition.
+- Left `additionalProperties: false` and all other fields unchanged.
 
 ### 2. Colocated tests/fixtures (assert absence; invert the `rendered`-valid assertion)
 
-- `tools/validators/tests/structural/record-schema-compliance-story-scene.test.ts` — L19 fixture `status: "planned"` (drop it; assert SCN validates without status); **L57 `parsed.status = "rendered"`** (this currently asserts a `rendered` SCN validates — invert it to assert a stray `status` field is rejected under `additionalProperties: false`).
-- `tools/validators/tests/structural/scene-range-integrity.test.ts` — L71 `status: "planned"` fixture: drop.
-- `tools/validators/tests/integration/spec92-scene-layer-capstone.test.ts` — L167 `status: "attached"` fixture: drop.
-- `tools/validators/tests/structural/scene-prose-receipt-content.test.ts` — L110 `status: "attached"` and L135 `status: "forbidden"` (negative case) SCN fixtures: drop / re-base now that `status` is not a field.
-- `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` — L217 `status: "planned"` and the SCN `required`-set assertion: remove `status` from the expected SCN required-field set so the roundtrip assertion matches the new schema.
+- `tools/validators/tests/structural/record-schema-compliance-story-scene.test.ts` — dropped the positive-fixture `status`; kept supersession lineage valid without status; added a stray-SCN-status rejection assertion under `additionalProperties: false`; removed the obsolete `/status` enum assertion from the malformed-routing test.
+- `tools/validators/tests/structural/scene-range-integrity.test.ts` — dropped the SCN fixture `status`.
+- `tools/validators/tests/integration/spec92-scene-layer-capstone.test.ts` — dropped the SCN fixture `status`.
+- `tools/validators/tests/structural/scene-prose-receipt-content.test.ts` — dropped the SCN fixture `status`; preserved unrelated Mystery Reserve `status: "forbidden"` test data.
+- `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` — removed `status` from the expected SCN required/property sets and from the representative SCN fixture.
 
 ## Files to Touch
 
@@ -88,3 +88,24 @@
 
 1. `cd tools/validators && npm test`
 2. `grep -n '"status"' tools/validators/src/schemas/story-scene.schema.json` (expect zero)
+
+## Outcome
+
+Completed: 2026-05-29
+
+The validators package now enforces the SPEC-94 SCN contract: `story-scene.schema.json` no longer requires or defines `status`, while its existing `additionalProperties: false` closed-object rule rejects any stray `status` field. Validator fixtures that are positive SCN examples no longer carry `planned`, `rendered`, or `attached`; the former rendered-validity case is now an explicit rejection test for a stray SCN `status`.
+
+No backwards-compatibility shim or grandfathering was added. Other SCN fields, scene-range validator logic, the scene-prose receipt schema, and the `state_hash` chain were left unchanged.
+
+## Verification Result
+
+1. Baseline before edits: `cd tools/validators && npm test` passed (`1057` tests passed).
+2. Final package proof: `cd tools/validators && npm test` passed (`1058` tests passed).
+3. Schema negative grep: `grep -n '"status"' tools/validators/src/schemas/story-scene.schema.json` returned no matches.
+4. Touched-surface status sweep: `rg -n 'status:\s*"?(planned|rendered|attached)|parsed\.status|"status"' ...` shows no SCN positive-fixture status values; remaining hits are unrelated lifecycle/status schemas in `contract-schema-roundtrip.test.ts` plus the intentional `parsed.status = "rendered"` stray-SCN-status rejection test.
+5. Hygiene: `git diff --check -- tools/validators/src/schemas/story-scene.schema.json tools/validators/tests/structural/record-schema-compliance-story-scene.test.ts tools/validators/tests/structural/scene-range-integrity.test.ts tools/validators/tests/integration/spec92-scene-layer-capstone.test.ts tools/validators/tests/structural/scene-prose-receipt-content.test.ts tools/validators/tests/structural/contract-schema-roundtrip.test.ts` passed.
+
+## Deviations
+
+- The SCN `status: "forbidden"` mention originally listed for `scene-prose-receipt-content.test.ts` was reassessed as an unrelated Mystery Reserve `M-1.status` fixture, not an SCN field; it remains intentionally unchanged.
+- The downstream `tools/world-index` / `tools/world-mcp` fixture hygiene remains owned by SPEC94SCNPUBSTA-005, and the skill/doc stale-anchor cleanup remains owned by SPEC94SCNPUBSTA-003/004/005/006.

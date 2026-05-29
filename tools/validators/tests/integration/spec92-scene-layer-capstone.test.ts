@@ -164,7 +164,6 @@ function scene(): IndexedRecord {
     story_id: "STORY-1",
     branch_id: "BR-1",
     supersedes: null,
-    status: "attached",
     pg_ids: ["PG-1", "PG-2"],
     start_page_id: "PG-1",
     end_page_id: "PG-2",

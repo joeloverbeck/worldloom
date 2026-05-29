@@ -68,7 +68,6 @@ function scene(overrides: Record<string, unknown> = {}): IndexedRecord {
     id: "SCN-1",
     story_id: "STORY-1",
     branch_id: "BR-1",
-    status: "planned",
     pg_ids: ["PG-1", "PG-2", "PG-3"],
     start_page_id: "PG-1",
     end_page_id: "PG-3",
