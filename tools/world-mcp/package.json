@@ -6,13 +6,14 @@
   "type": "module",
   "bin": {
     "compute-pg-hashes": "dist/src/cli/compute-pg-hashes.js",
+    "compute-pg-snapshot": "dist/src/cli/compute-pg-snapshot.js",
     "inline-canonical-prose-sections": "dist/src/cli/inline-canonical-prose-sections.js",
     "sign-approval-token": "dist/src/cli/sign-approval-token.js",
     "submit-patch-plan": "dist/src/cli/submit-patch-plan.js",
     "validate-patch-plan": "dist/src/cli/validate-patch-plan.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && chmod +x dist/src/cli/compute-pg-hashes.js dist/src/cli/inline-canonical-prose-sections.js dist/src/cli/sign-approval-token.js dist/src/cli/submit-patch-plan.js dist/src/cli/validate-patch-plan.js",
+    "build": "tsc -p tsconfig.json && chmod +x dist/src/cli/compute-pg-hashes.js dist/src/cli/compute-pg-snapshot.js dist/src/cli/inline-canonical-prose-sections.js dist/src/cli/sign-approval-token.js dist/src/cli/submit-patch-plan.js dist/src/cli/validate-patch-plan.js",
     "test": "npm run build && node --test \"dist/tests/**/*.test.js\"",
     "clean": "rm -rf dist"
   },

@@ -1,6 +1,6 @@
 import {
-  ACTIVE_RECORDS_CLASSES,
-  type ActiveRecordsClass
+  activeRecordsClassOf,
+  replayActiveRecords
 } from "@worldloom/validators";
 
 import { createMcpError, type McpError } from "../errors.js";
@@ -149,40 +149,6 @@ function stringArray(value: unknown): string[] {
 
 function cloneRecord(value: Record<string, unknown>): Record<string, unknown> {
   return JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
-}
-
-function activeRecordsClassOf(id: string): ActiveRecordsClass | null {
-  const prefix = id.match(/^([A-Z]+)-\d+$/)?.[1];
-  return prefix !== undefined && (ACTIVE_RECORDS_CLASSES as readonly string[]).includes(prefix)
-    ? (prefix as ActiveRecordsClass)
-    : null;
-}
-
-function replayActiveRecords(
-  parentActiveRecords: Record<string, unknown>,
-  delta: { create: readonly string[]; supersede: readonly string[]; close: readonly string[] }
-): Record<ActiveRecordsClass, string[]> {
-  const next = {} as Record<ActiveRecordsClass, string[]>;
-  for (const cls of ACTIVE_RECORDS_CLASSES) {
-    next[cls] = stringArray(parentActiveRecords[cls]);
-  }
-
-  const dropIds = new Set([...delta.supersede, ...delta.close]);
-  for (const cls of ACTIVE_RECORDS_CLASSES) {
-    next[cls] = next[cls].filter((id) => !dropIds.has(id));
-  }
-
-  for (const id of delta.create) {
-    const cls = activeRecordsClassOf(id);
-    if (cls === null) {
-      continue;
-    }
-    if (!next[cls].includes(id)) {
-      next[cls].push(id);
-    }
-  }
-
-  return next;
 }
 
 function planIdFor(sourceTicket: string, storySlug: string): string {
@@ -511,8 +477,25 @@ export async function planStoryStateMaintenance(
     }
   });
 
+  // recordsById feeds the shared replayActiveRecords its lifecycle-status check
+  // (story state contract §4.2): a created-but-inactive successor — e.g. a STEMO
+  // with status `settled` or a STPLAN with status `completed` — must be omitted
+  // from active_records. The created record bodies (carrying `status`) live on
+  // the create patches just pushed, keyed by their allocated id.
+  const recordsById = new Map<string, Record<string, unknown>>();
+  for (const patch of patches) {
+    const recordId = stringValue(patch.payload.record.id);
+    if (recordId !== undefined) {
+      recordsById.set(recordId, patch.payload.record);
+    }
+  }
+
   const nextSnapshot = cloneRecord(parentSnapshot);
-  nextSnapshot.active_records = replayActiveRecords(parentActiveRecords, stateDelta);
+  nextSnapshot.active_records = replayActiveRecords(
+    parentActiveRecords as Record<string, readonly string[]>,
+    stateDelta,
+    recordsById
+  );
 
   const pageRecordDraft: Record<string, unknown> = {
     id: pageId,

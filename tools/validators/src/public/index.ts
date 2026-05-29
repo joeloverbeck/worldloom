@@ -31,7 +31,12 @@ export {
 
 export {
   ACTIVE_RECORDS_CLASSES,
-  type ActiveRecordsClass
+  OPTIONAL_ACTIVE_RECORDS_CLASSES,
+  activeRecordsClassOf,
+  replayActiveRecords,
+  type ActiveRecordsClass,
+  type StateDelta,
+  type StoryRecordMap
 } from "../_helpers/state-snapshot-replay.js";
 
 export {
