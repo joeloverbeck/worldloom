@@ -1,6 +1,6 @@
 # SPEC97STOEXPSCE-004: Timeline route + segment components + PG-tick x-ray drawer wiring
 
-**Status**: PENDING
+**Status**: DONE
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/story-explorer/web` new route `/worlds/:slug/stories/:storySlug/timeline` + `TimelineSegmentList`/`SceneSegmentCard`/`UnscenedRunCard`/`ChoiceSurfacePanel` components; PG-tick→`StateTickDrawer` interaction; one route-array entry added to `app.tsx`.
