@@ -593,7 +593,7 @@ derived_from: [<record_id>]                    # default []
 
 If `direction.kind: directed`, both `direction.from` and `direction.to` MUST be non-null and reference STENT records in the bundle. If `direction.kind: bidirectional`, both endpoints MUST be null; the mutual participants are documented in `participants[]`.
 
-Use `STCHAR` in `derived_from[]` when a relationship's stable conduct, voice, pressure behavior, or appraisal pattern depends on story-local character authority rather than only on present-causal state.
+Use `STCHAR` in `derived_from[]` for bootstrap, superseding, or ongoing relationship records when stable conduct, voice, pressure behavior, or appraisal pattern depends on story-local character authority. For a freshly introduced mid-story `SREL`, `derived_from[]` must name the present-causal record that makes the relationship axis lawful now; keep the STCHAR rationale in the surrounding event / scene-plan rationale or in downstream character-grounding surfaces rather than using it as the introduction ground.
 
 No `magnitude` or `trace_records` fields; use `value` and `derived_from`.
 
