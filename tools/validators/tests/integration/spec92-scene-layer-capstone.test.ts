@@ -52,7 +52,7 @@ test("SPEC-92 capstone keeps scene validators registered after SPEC-93 page-plan
   const names = new Set(structuralValidators.map((validator) => validator.name));
 
   for (const validatorName of [
-    "page_plan_turn_driver_consistency",
+    "pg_se_turn_driver_consistency",
     "scene_prose_receipt_schema_compliance",
     "scene_prose_receipt_content",
     "scene_range_integrity",

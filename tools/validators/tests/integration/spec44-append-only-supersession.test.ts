@@ -13,7 +13,7 @@ import type { Context, IndexedRecord, Validator, Verdict } from "../../src/frame
 import { activeRecordsFullShape } from "../../src/structural/active-records-full-shape.js";
 import { expectedWitnessCoverage } from "../../src/structural/expected-witness-coverage.js";
 import { noStoryStateInPlaceMutation } from "../../src/structural/no-story-state-in-place-mutation.js";
-import { pageAffordanceIntegrity } from "../../src/structural/page-affordance-integrity.js";
+import { pgAffordanceIntegrity } from "../../src/structural/pg-affordance-integrity.js";
 import { stateDeltaClassIntegrity } from "../../src/structural/state-delta-class-integrity.js";
 import { parseJsonOutput, runWorldValidate } from "../_helpers/cli.js";
 import { context, record } from "../structural/helpers.js";
@@ -23,7 +23,7 @@ const STORY_SLUG = "spec44-capstone";
 const SPEC44_VALIDATORS: readonly Validator[] = [
   noStoryStateInPlaceMutation,
   stateDeltaClassIntegrity,
-  pageAffordanceIntegrity,
+  pgAffordanceIntegrity,
   expectedWitnessCoverage,
   activeRecordsFullShape
 ];
@@ -85,12 +85,12 @@ test("SPEC-44 capstone rejects duplicate page affordance ordinals", async () => 
       affordance({ ordinal: 2, label: "second door" })
     ]
   });
-  const verdicts = await pageAffordanceIntegrity.run(undefined, testContext([pageRecord], {
+  const verdicts = await pgAffordanceIntegrity.run(undefined, testContext([pageRecord], {
     run_mode: "pre-apply",
     patch_plan: patchPlan([storyPatch("create_pg_record", "pages", pageRecord.parsed)])
   }));
 
-  assertHas(verdicts, "page_affordance_integrity", "page_affordance_duplicate_ordinal", "fail");
+  assertHas(verdicts, "pg_affordance_integrity", "page_affordance_duplicate_ordinal", "fail");
 });
 
 test("SPEC-44 capstone preserves expected_witness_coverage as the semantic propagation gate", async () => {

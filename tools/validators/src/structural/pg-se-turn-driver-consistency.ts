@@ -8,9 +8,9 @@ import {
 } from "./utils.js";
 import { allStorySlugs, recordId, storyMaps } from "./stchar-utils.js";
 
-const VALIDATOR = "page_plan_turn_driver_consistency";
+const VALIDATOR = "pg_se_turn_driver_consistency";
 
-export const pagePlanTurnDriverConsistency: Validator = {
+export const pgSeTurnDriverConsistency: Validator = {
   name: VALIDATOR,
   severity_mode: "fail",
   applies_to: (ctx: Context): boolean =>

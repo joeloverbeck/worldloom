@@ -3,20 +3,20 @@ import test from "node:test";
 
 import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
 
-import { pageAffordanceIntegrity } from "../../src/structural/page-affordance-integrity.js";
+import { pgAffordanceIntegrity } from "../../src/structural/pg-affordance-integrity.js";
 import { context, record } from "./helpers.js";
 
-test("page_affordance_integrity is scoped to full-world and pre-apply PG creates", () => {
-  assert.equal(pageAffordanceIntegrity.applies_to(context([])), true);
+test("pg_affordance_integrity is scoped to full-world and pre-apply PG creates", () => {
+  assert.equal(pgAffordanceIntegrity.applies_to(context([])), true);
   assert.equal(
-    pageAffordanceIntegrity.applies_to(context([], {
+    pgAffordanceIntegrity.applies_to(context([], {
       run_mode: "pre-apply",
       patch_plan: patchPlan([storyPatch("create_pg_record", "PG-1")])
     })),
     true
   );
   assert.equal(
-    pageAffordanceIntegrity.applies_to(context([], {
+    pgAffordanceIntegrity.applies_to(context([], {
       run_mode: "pre-apply",
       patch_plan: patchPlan([storyPatch("create_se_record", "SE-1")])
     })),
@@ -24,7 +24,7 @@ test("page_affordance_integrity is scoped to full-world and pre-apply PG creates
   );
 });
 
-test("page_affordance_integrity rejects duplicate ordinals", async () => {
+test("pg_affordance_integrity rejects duplicate ordinals", async () => {
   const ctx = context([
     page("PG-1", {
       visible_affordances: [
@@ -34,14 +34,14 @@ test("page_affordance_integrity rejects duplicate ordinals", async () => {
     })
   ]);
 
-  const verdicts = await pageAffordanceIntegrity.run({}, ctx);
+  const verdicts = await pgAffordanceIntegrity.run({}, ctx);
 
   assert.equal(verdicts.length, 1);
   assert.equal(verdicts[0]?.code, "page_affordance_duplicate_ordinal");
   assert.match(verdicts[0]?.message ?? "", /repeats ordinal 2/);
 });
 
-test("page_affordance_integrity rejects inactive grounded_in references", async () => {
+test("pg_affordance_integrity rejects inactive grounded_in references", async () => {
   const ctx = context([
     page("PG-1", {
       active_records: activeRecords({ STOBJ: [] }),
@@ -51,14 +51,14 @@ test("page_affordance_integrity rejects inactive grounded_in references", async 
     })
   ]);
 
-  const verdicts = await pageAffordanceIntegrity.run({}, ctx);
+  const verdicts = await pgAffordanceIntegrity.run({}, ctx);
 
   assert.equal(verdicts.length, 1);
   assert.equal(verdicts[0]?.code, "page_affordance_inactive_grounding");
   assert.match(verdicts[0]?.message ?? "", /STOBJ-4/);
 });
 
-test("page_affordance_integrity rejects inactive available_to references", async () => {
+test("pg_affordance_integrity rejects inactive available_to references", async () => {
   const ctx = context([
     page("PG-1", {
       active_records: activeRecords({ STENT: [] }),
@@ -68,14 +68,14 @@ test("page_affordance_integrity rejects inactive available_to references", async
     })
   ]);
 
-  const verdicts = await pageAffordanceIntegrity.run({}, ctx);
+  const verdicts = await pgAffordanceIntegrity.run({}, ctx);
 
   assert.equal(verdicts.length, 1);
   assert.equal(verdicts[0]?.code, "page_affordance_inactive_available_to");
   assert.match(verdicts[0]?.message ?? "", /STENT-1/);
 });
 
-test("page_affordance_integrity rejects unknown action families", async () => {
+test("pg_affordance_integrity rejects unknown action families", async () => {
   const ctx = context([
     page("PG-1", {
       visible_affordances: [
@@ -84,14 +84,14 @@ test("page_affordance_integrity rejects unknown action families", async () => {
     })
   ]);
 
-  const verdicts = await pageAffordanceIntegrity.run({}, ctx);
+  const verdicts = await pgAffordanceIntegrity.run({}, ctx);
 
   assert.equal(verdicts.length, 1);
   assert.equal(verdicts[0]?.code, "page_affordance_unknown_action_family");
   assert.match(verdicts[0]?.message ?? "", /fly/);
 });
 
-test("page_affordance_integrity accepts active references and enum action families", async () => {
+test("pg_affordance_integrity accepts active references and enum action families", async () => {
   const ctx = context([
     page("PG-1", {
       visible_affordances: [
@@ -101,7 +101,7 @@ test("page_affordance_integrity accepts active references and enum action famili
     })
   ]);
 
-  assert.deepEqual(await pageAffordanceIntegrity.run({}, ctx), []);
+  assert.deepEqual(await pgAffordanceIntegrity.run({}, ctx), []);
 });
 
 function patchPlan(patches: unknown[]): PatchPlanEnvelope {
