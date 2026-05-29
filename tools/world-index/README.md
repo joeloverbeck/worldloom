@@ -49,6 +49,8 @@ For prior art only, see `archive/specs/SPEC-01-world-index.md` §Deliverables §
 
 `@worldloom/world-index/public/predicate-dsl-projection` is the shared storylet predicate projection surface for indexer, validator, and MCP consumers. It exports the closed predicate-name to `storylet_predicate_class` node-type mapping plus the record-id-prefix helper used to derive exact-id predicate classes. It does not export predicate argument schemas or validator rules.
 
+`@worldloom/world-index/public/types` also exports `querySceneCoverage(db, { worldSlug, storySlug?, branchId? })`, a read-only derived scene-coverage view populated by `build` and `sync`. The view groups active SCNs, superseded SCNs, unscened PG runs, PG-to-containing-SCN lookup, and per-SCN artifact availability/publication indicators by `(world_slug, story_slug, branch_id)`. Publication indicators are derived from scene artifact presence plus scene receipt verdicts only (`planned`, `prose-present`, `attached:PASS|WARN|FAIL`, `superseded`); scene coverage does not hash editable scene prose/plan/receipt files and does not add any field to SCN records.
+
 ## Output location per world
 
 `worlds/<slug>/_index/world.db` (gitignored; regenerable from root-level primary-authored markdown, `_source/*.yaml` atomic records, and story-bundle records under `stories/<story-slug>/_source/**/*.yaml`).

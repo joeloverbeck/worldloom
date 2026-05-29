@@ -43,3 +43,11 @@ export {
 
 export { ATOMIC_LOGICAL_WORLD_FILES } from "../parse/atomic.js";
 export { CURRENT_INDEX_VERSION } from "../schema/version.js";
+export { querySceneCoverage } from "../index/scene-coverage.js";
+export type {
+  SceneArtifactAvailability,
+  SceneCoverageBranch,
+  SceneCoverageQueryOptions,
+  SceneCoverageScene,
+  UnscenedPgRun
+} from "../index/scene-coverage.js";

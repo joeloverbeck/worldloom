@@ -9,6 +9,7 @@ import {
   EDGE_TYPES,
   ENTITY_EDGE_TYPES,
   NODE_TYPES,
+  querySceneCoverage,
   SCOPED_EDGE_TYPES,
   YAML_EDGE_TYPES
 } from "../src/public/types.js";
@@ -132,6 +133,7 @@ test("package self-import resolves without import-time IO", () => {
     assert.equal(publicTypes.ATTRIBUTION_EDGE_TYPES, ATTRIBUTION_EDGE_TYPES);
     assert.equal(publicTypes.ENTITY_EDGE_TYPES, ENTITY_EDGE_TYPES);
     assert.equal(publicTypes.SCOPED_EDGE_TYPES, SCOPED_EDGE_TYPES);
+    assert.equal(publicTypes.querySceneCoverage, querySceneCoverage);
     assert.equal(canonicalVocabularies.CANONICAL_DOMAINS, CANONICAL_DOMAINS);
     assert.equal(canonicalVocabularies.VERDICT_ENUM, VERDICT_ENUM);
     assert.equal(predicateDslProjection.PREDICATE_RECORD_PREFIX_TO_CLASS, PREDICATE_RECORD_PREFIX_TO_CLASS);
