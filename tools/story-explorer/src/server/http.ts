@@ -135,7 +135,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerRecordRoutes(server, { repoRoot: options.repoRoot });
   await registerProvenanceRoutes(server, { repoRoot: options.repoRoot });
   await registerSearchRoute(server, { repoRoot: options.repoRoot });
-  await registerBranchMapRoute(server);
+  await registerBranchMapRoute(server, { repoRoot: options.repoRoot });
 
   return server;
 }

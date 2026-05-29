@@ -244,7 +244,17 @@ test("capstone smoke covers every SPEC-96 scene-first route family without mutat
 
     const branchMap = await server.inject({ method: "GET", url: `${base}/branch-map?focus=PG-1` });
     assert.equal(branchMap.statusCode, 200);
-    assert.equal(assertEnvelope<{ spec?: string }>(branchMap.body, "fresh").data?.spec, "SPEC-90");
+    const branchMapBody = assertEnvelope<{
+      degradedDirectRead?: boolean;
+      branchIds?: string[];
+      nodes?: Array<{ kind?: string; id?: string }>;
+      focus?: { resolvedBranchId?: string };
+    }>(branchMap.body, "fresh");
+    assert.equal(branchMapBody.data?.degradedDirectRead, false);
+    assert.equal(branchMapBody.data?.focus?.resolvedBranchId, "BR-1");
+    // Scene-layer nodes (not SPEC-90 page nodes); sibling branch visible.
+    assert.ok(branchMapBody.data?.nodes?.some((node) => node.kind === "scene" && node.id === "SCN-1"));
+    assert.deepEqual([...(branchMapBody.data?.branchIds ?? [])].sort(), expected.branchIds);
 
     // --- Invariant: the fixture source tree is never mutated --------------
     assert.deepEqual(sourceHashes(sourceRoot), beforeHashes);
