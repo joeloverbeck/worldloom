@@ -797,7 +797,7 @@ test("selectStoryletCandidates filters indexed SLT projections and returns only 
       predicate_class_rejected_samples: [
         {
           slt_id: "SLT-6",
-          reason: "indexed predicate classes do not intersect requested or active record classes",
+          reason: "indexed predicate classes do not intersect active record classes",
           evidence: {
             indexed_classes: ["story_secret_record"],
             requested_classes: ["story_character_authority_record", "story_emotion_record"]
@@ -1050,6 +1050,74 @@ test("selectStoryletCandidates keeps existential SLTs whose predicate classes in
   }
 });
 
+test("selectStoryletCandidates normalizes short-code grounding classes to record_kind values", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildExistentialCandidateWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-6",
+        turn_driver: {
+          kind: "npc_action",
+          initiator: "STENT-2",
+          driver_records: ["STQ-5", "STINT-10", "STEMO-15", "SREL-20"]
+        },
+        intent_signature: {
+          action_families: ["communicate"],
+          grounding_record_classes: ["STQ", "STINT", "STEMO", "SREL"]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.filter_trace.after_predicate_class, 1);
+    assert.deepEqual(result.filter_trace.predicate_class_rejected_samples, []);
+    assert.deepEqual(result.shortlisted_candidate_ids, ["SLT-42"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("selectStoryletCandidates rejects unknown grounding class vocabulary before filtering", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildExistentialCandidateWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      selectStoryletCandidates({
+        world_slug: WORLD,
+        story_slug: STORY,
+        parent_page_id: "PG-6",
+        turn_driver: {
+          kind: "npc_action",
+          initiator: "STENT-2",
+          driver_records: ["STQ-5"]
+        },
+        intent_signature: {
+          action_families: ["communicate"],
+          grounding_record_classes: ["QUESTION", "PG"]
+        },
+        max_candidates: 24
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "invalid_input");
+    assert.equal(result.details?.field, "intent_signature.grounding_record_classes");
+    assert.deepEqual(result.details?.invalid_values, ["QUESTION", "PG"]);
+    assert.ok(Array.isArray(result.details?.accepted_short_codes));
+    assert.ok(Array.isArray(result.details?.accepted_record_kinds));
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("selectStoryletCandidates samples predicate-class rejection evidence for existential SLTs", async () => {
   const root = createTempRepoRoot();
 
@@ -1080,7 +1148,7 @@ test("selectStoryletCandidates samples predicate-class rejection evidence for ex
     assert.deepEqual(result.filter_trace.predicate_class_rejected_samples, [
       {
         slt_id: "SLT-42",
-        reason: "indexed predicate classes do not intersect requested or active record classes",
+        reason: "indexed predicate classes do not intersect requested record classes",
         evidence: {
           indexed_classes: [
             "intention_record",
