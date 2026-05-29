@@ -8,6 +8,7 @@ import { NotFoundPage } from './components/NotFoundPage';
 import { RouteLoading } from './components/RouteLoading';
 import { PageEntryRoute, pageEntryLoader } from './routes/page-entry';
 import { PageReadRoute, pageReadLoader } from './routes/page-read';
+import { ScenesRoute, sceneListLoader } from './routes/scenes';
 import { StoriesRoute, storyListLoader } from './routes/stories';
 import { StoryDashboardRoute, storyDashboardLoader } from './routes/story-dashboard';
 import { TimelineRoute, timelineLoader } from './routes/timeline';
@@ -97,6 +98,16 @@ const router = createBrowserRouter([
     element: (
       <RouteFrame loadingLabel="Loading timeline...">
         <TimelineRoute />
+      </RouteFrame>
+    ),
+  },
+  {
+    path: '/worlds/:slug/stories/:storySlug/scenes',
+    loader: sceneListLoader,
+    errorElement: <AppRouteError />,
+    element: (
+      <RouteFrame loadingLabel="Loading scenes...">
+        <ScenesRoute />
       </RouteFrame>
     ),
   },
