@@ -1,10 +1,10 @@
 # SPEC96STOEXPSCE-002: Overview route — story dashboard summary
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — `@worldloom/story-explorer` backend: new `GET /api/worlds/:slug/stories/:storySlug/overview` route + `read/overview.ts` + `StoryOverview` view-model + registration in `http.ts`. Read-only; no canon/story-pipeline mutation.
-**Deps**: 001
+**Engine Changes**: Yes — `@worldloom/story-explorer` backend: new `GET /api/worlds/:slug/stories/:storySlug/overview` route + `read/overview.ts` + `StoryOverview` view-model + registration in `http.ts`; `read/scene-coverage.ts` now re-exports coverage types for the helper boundary. Read-only; no canon/story-pipeline mutation.
+**Deps**: archive/tickets/SPEC96STOEXPSCE-001.md
 
 ## Problem
 
@@ -46,9 +46,11 @@ Create `tools/story-explorer/src/server/routes/overview.ts` exporting `registerO
 ## Files to Touch
 
 - `tools/story-explorer/src/read/overview.ts` (new)
+- `tools/story-explorer/src/read/scene-coverage.ts` (modify — re-export coverage types so overview imports the world-index coverage shape only through the helper)
 - `tools/story-explorer/src/view-models/story-overview.ts` (new)
 - `tools/story-explorer/src/server/routes/overview.ts` (new)
 - `tools/story-explorer/src/server/http.ts` (modify — register the overview route)
+- `tools/story-explorer/test/overview-route.test.ts` (new)
 
 ## Out of Scope
 
@@ -80,3 +82,21 @@ Create `tools/story-explorer/src/server/routes/overview.ts` exporting `registerO
 
 1. `cd tools/story-explorer && npm run test:backend`
 2. `grep -n "registerOverviewRoutes" tools/story-explorer/src/server/http.ts`
+
+## Outcome
+
+Completed 2026-05-29.
+
+Implemented the scene-first overview endpoint for `@worldloom/story-explorer`: `read/overview.ts` composes existing story/page enumeration with SPEC96-001's scene coverage helper; `StoryOverview` models per-branch root/latest PGs, latest active scene publication state, available/degraded scene coverage counts, unscened-run counts, and index/degraded status; `routes/overview.ts` registers `GET /api/worlds/:slug/stories/:storySlug/overview`; `server/http.ts` wires the route into the existing read-only, enveloped server. `read/scene-coverage.ts` re-exports the coverage branch/scene types so overview imports the coverage shape through the helper boundary rather than directly from world-index.
+
+Added `test/overview-route.test.ts` with a fresh-index route-injection fixture and a missing-index route-injection fixture. The fresh-index test proves story metadata, branch summaries, coverage counts, unscened counts, latest active scene publication state, and envelope status. The missing-index test proves the route reports `degradedDirectRead: true` and returns degraded/null coverage counts instead of fabricating scene coverage from artifact presence.
+
+## Verification Result
+
+1. `cd tools/story-explorer && npm run test:backend` — PASS after one compile-only test-fixture type correction; final run built the backend and passed 17/17 backend test files, including `dist/test/overview-route.test.js`.
+2. `grep -n "registerOverviewRoutes" tools/story-explorer/src/server/http.ts` — PASS; import and registration are present.
+3. `rg -n "querySceneCoverage|@worldloom/world-index" tools/story-explorer/src/read/overview.ts tools/story-explorer/src/read/scene-coverage.ts` — PASS after routing overview's coverage types through `read/scene-coverage.ts`; `querySceneCoverage` is only used by the helper.
+
+## Deviations
+
+- Added a small `read/scene-coverage.ts` type re-export so the overview module can satisfy the single-helper boundary without a direct type-only import from `@worldloom/world-index/public/types`.

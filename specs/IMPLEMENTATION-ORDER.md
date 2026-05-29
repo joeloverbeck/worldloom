@@ -6,36 +6,40 @@ This iteration finally lands the scene-first Story Explorer that the first itera
 
 Source: critical triage of `reports/scene-prose-planning-second-iteration.md` (ChatGPT-Pro, 2026-05-28). Report proposals that contradicted committed decisions were rejected (verbatim-contract externalization, receipt hash-fingerprints + publication profiles, removing PG `plan`/`prose_plan_path`); the publication model throughout is **presence-based, no hashing** ([[feedback_author_rejects_hash_coupling]]).
 
+## Progress (2026-05-29)
+
+The contract → index → backend half has **landed and is archived**: SPEC-94, SPEC-95, and SPEC-96 are complete (`archive/specs/`). Remaining: **SPEC-97** (frontend) is now unblocked and next; **SPEC-98** (search/branch-map) follows once 97 lands; **SPEC-99** (MCP packet + docs/fixtures closeout) is partially unblocked (its `scene_coverage` packet layer needs only SPEC-95) but its closeout still lands last.
+
 ## Dependency sequence
 
 ```
-SPEC-94  (contract: SCN.status decoupling; derived publication indicator)
+SPEC-94  ✅ done — (contract: SCN.status decoupling; derived publication indicator)
    │
    ▼
-SPEC-95  (world-index: drop pages-prose* inventory; derived scene-coverage layer; validator rename)
+SPEC-95  ✅ done — (world-index: drop pages-prose* inventory; derived scene-coverage layer; validator rename)
    │
    ▼
-SPEC-96  (story-explorer backend: overview/timeline/scenes/unscened/state-tick-xray; remove page-prose routes)
+SPEC-96  ✅ done — (story-explorer backend: overview/timeline/scenes/unscened/state-tick-xray; remove page-prose routes)
    │
    ▼
-SPEC-97  (story-explorer frontend: scene-first dashboard/timeline/scene-detail/unscened + x-ray drawer)
+SPEC-97  ⬜ next — (story-explorer frontend: scene-first dashboard/timeline/scene-detail/unscened + x-ray drawer)
    │
    ▼
-SPEC-98  (search grouped by scene/unscened + MVP single-layer branch-map; removes SPEC-90 placeholders)
+SPEC-98  ⬜ pending — (search grouped by scene/unscened + MVP single-layer branch-map; removes SPEC-90 placeholders)
 
-SPEC-99  (MCP scene_coverage packet layer [needs SPEC-95]; scene-first fixtures; docs closeout [do last, after 96/97/98 stabilize])
+SPEC-99  ⬜ pending — (MCP scene_coverage packet layer [needs SPEC-95]; scene-first fixtures; docs closeout [do last, after 96/97/98 stabilize])
 ```
 
 ## Phase table
 
-| Order | Spec | Scope | Depends on | Phase (report §19) |
-|---|---|---|---|---|
-| 1 | **SPEC-94** | Remove SCN `status`; derive publication indicator (no hashing) | — | 1 (contract) |
-| 2 | **SPEC-95** | World-index: remove `pages-prose*` inventory; derived scene-coverage layer over existing scene edges; rename 2 PG causal validators; retire legacy page-prose receipt schema | SPEC-94 | 2–3 |
-| 3 | **SPEC-96** | Backend scene/timeline/unscened/overview + state-tick x-ray API; remove page-prose reader routes + `PageDetail` | SPEC-95 | 4 |
-| 4 | **SPEC-97** | Frontend route/view-model/component replacement; embedded PG x-ray drawer | SPEC-96 | 5 |
-| 5 | **SPEC-98** | Search (scene/unscened grouping) + MVP single-layer scene branch-map; remove SPEC-90 placeholder routes | SPEC-96, SPEC-97 | 6 |
-| 6 | **SPEC-99** | MCP `scene_coverage` packet layer; scene-first fixtures; docs closeout | SPEC-95 (packet); SPEC-96/97/98 (closeout) | 7–9 |
+| Order | Spec | Scope | Depends on | Phase (report §19) | Status |
+|---|---|---|---|---|---|
+| 1 | **SPEC-94** | Remove SCN `status`; derive publication indicator (no hashing) | — | 1 (contract) | ✅ done |
+| 2 | **SPEC-95** | World-index: remove `pages-prose*` inventory; derived scene-coverage layer over existing scene edges; rename 2 PG causal validators; retire legacy page-prose receipt schema | SPEC-94 | 2–3 | ✅ done |
+| 3 | **SPEC-96** | Backend scene/timeline/unscened/overview + state-tick x-ray API; remove page-prose reader routes + `PageDetail` | SPEC-95 | 4 | ✅ done |
+| 4 | **SPEC-97** | Frontend route/view-model/component replacement; embedded PG x-ray drawer | SPEC-96 | 5 | ⬜ next |
+| 5 | **SPEC-98** | Search (scene/unscened grouping) + MVP single-layer scene branch-map; remove SPEC-90 placeholder routes | SPEC-96, SPEC-97 | 6 | ⬜ pending |
+| 6 | **SPEC-99** | MCP `scene_coverage` packet layer; scene-first fixtures; docs closeout | SPEC-95 (packet); SPEC-96/97/98 (closeout) | 7–9 | ⬜ pending |
 
 ## Notes
 

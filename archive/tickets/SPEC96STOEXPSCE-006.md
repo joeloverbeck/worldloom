@@ -1,10 +1,10 @@
 # SPEC96STOEXPSCE-006: State-tick x-ray route — PG inspection surface
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: new `GET /api/worlds/:slug/stories/:storySlug/state-ticks/:pgId/xray` route + `read/state-tick-xray.ts` + `StateTickXray` view-model + registration in `http.ts`. Read-only.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC96STOEXPSCE-001.md
 
 ## Problem
 
@@ -29,19 +29,19 @@ SPEC-96 §2.5 (D5): PG inspection remains essential, but PGs must stop being rea
 3. Mystery firewall (read-only) → FOUNDATIONS check + manual review: `unresolved_mystery_claims` is surfaced verbatim from `PG.state_snapshot`; no resolution/narrowing occurs; no write path exists in the module.
 4. Hashes are informational only → grep-proof: state/parent hash are read from `PG.state_snapshot`, not recomputed and not feeding any publication/freshness derivation.
 
-## What to Change
+## Landed Changes
 
 ### 1. X-ray read module
 
-Create `tools/story-explorer/src/read/state-tick-xray.ts`: assemble the full PG inspection payload from the committed `PG` record (parent PG, branch path, turn index, input mode, state+parent hash, state-snapshot summary, active records by class, affordances, unresolved mystery claims, continuation status, emitted choices, validation trace), the resolved `SE` + event delta (`EventDeltaSummary`), created/superseded/closed records, raw PG YAML (via existing raw-read helper), and the containing SCN / unscened-range link (via 001's coverage helper).
+Created `tools/story-explorer/src/read/state-tick-xray.ts`: assembles the full PG inspection payload from the committed `PG` record (parent PG, branch path, turn index, input mode, state+parent hash, state-snapshot summary, active records by class, affordances, unresolved mystery claims, continuation status, emitted choices, validation trace), the resolved `SE` + event delta (`EventDeltaSummary`), created/superseded/closed records, raw PG YAML (via existing raw-read helper), and the containing SCN / unscened-range link (via 001's coverage helper). On degraded or missing index, the payload still returns the PG x-ray data but reports `container.kind: "unknown"` rather than fabricating scene or unscened coverage.
 
 ### 2. `StateTickXray` view-model
 
-Create `tools/story-explorer/src/view-models/state-tick-xray.ts`: `StateTickXray` with all §2.5 fields, documented as a technical inspection surface.
+Created `tools/story-explorer/src/view-models/state-tick-xray.ts`: `StateTickXray` with all §2.5 fields, including explicit `StateTickContainerLink` values for `scene`, `unscened_range`, or `unknown` degraded coverage.
 
 ### 3. Route + registration
 
-Create `tools/story-explorer/src/server/routes/state-tick-xray.ts` exporting `registerStateTickXrayRoutes(server, options)` for `GET /api/worlds/:slug/stories/:storySlug/state-ticks/:pgId/xray`; wire into `http.ts` behind the read-only guard + envelope.
+Created `tools/story-explorer/src/server/routes/state-tick-xray.ts` exporting `registerStateTickXrayRoutes(server, options)` for `GET /api/worlds/:slug/stories/:storySlug/state-ticks/:pgId/xray`; wired it into `http.ts` behind the read-only guard + envelope.
 
 ## Files to Touch
 
@@ -49,6 +49,7 @@ Create `tools/story-explorer/src/server/routes/state-tick-xray.ts` exporting `re
 - `tools/story-explorer/src/view-models/state-tick-xray.ts` (new)
 - `tools/story-explorer/src/server/routes/state-tick-xray.ts` (new)
 - `tools/story-explorer/src/server/http.ts` (modify — register the state-tick-xray route)
+- `tools/story-explorer/test/state-tick-xray-route.test.ts` (new)
 
 ## Out of Scope
 
@@ -63,7 +64,8 @@ Create `tools/story-explorer/src/server/routes/state-tick-xray.ts` exporting `re
 
 1. `GET /state-ticks/:pgId/xray` returns the full PG inspection payload including the link to the containing SCN or unscened range, against a seeded fixture (route-injection test).
 2. The route is `/state-ticks/:pgId/xray` (technical); no `/pages/:pageId` reader route exists; `unresolved_mystery_claims` is surfaced read-only with no resolution.
-3. `cd tools/story-explorer && npm run test:backend` passes.
+3. `cd tools/story-explorer && npm run build:backend` passes.
+4. `cd tools/story-explorer && npm run test:backend` passes.
 
 ### Invariants
 
@@ -74,9 +76,32 @@ Create `tools/story-explorer/src/server/routes/state-tick-xray.ts` exporting `re
 
 ### New/Modified Tests
 
-1. `tools/story-explorer/test/state-tick-xray-route.test.ts` — new; full-payload completeness, SCN/unscened-link resolution, read-only mystery-claim surfacing, degraded-index path.
+1. `tools/story-explorer/test/state-tick-xray-route.test.ts` — new; full-payload completeness, SCN/unscened-link resolution, read-only mystery-claim surfacing, degraded-index path, invalid-PG validation, and missing-tick 404 behavior.
 
 ### Commands
 
 1. `cd tools/story-explorer && npm run test:backend`
-2. `grep -n "registerStateTickXrayRoutes" tools/story-explorer/src/server/http.ts`
+2. `cd tools/story-explorer && node --test dist/test/state-tick-xray-route.test.js`
+3. `rg -n "registerStateTickXrayRoutes|state-ticks/.*/xray|state_hash|parent_state_hash|publication|freshness|unresolved_mystery_claims|readStateTickXray" tools/story-explorer/src tools/story-explorer/test/state-tick-xray-route.test.ts`
+
+## Outcome
+
+Completed: 2026-05-29
+
+What changed:
+- Added `StateTickXray` and `StateTickContainerLink` view-models for the technical PG inspection payload.
+- Added `readStateTickXray(...)`, which reads the PG record/raw YAML, resolved event, emitted choices, state delta ids, active records, validation trace, state snapshot fields, unresolved mystery claims, and SPEC-95 coverage links without writing story or canon records.
+- Added and registered `registerStateTickXrayRoutes(...)` for `GET /api/worlds/:slug/stories/:storySlug/state-ticks/:pgId/xray`.
+- Added `tools/story-explorer/test/state-tick-xray-route.test.ts`, covering the full payload, SCN and unscened container links, degraded-index honesty, invalid PG ids, and missing ticks.
+
+## Verification Result
+
+- `cd tools/story-explorer && npm run build:backend` — PASS.
+- `cd tools/story-explorer && node --test dist/test/state-tick-xray-route.test.js` — PASS; 4/4 x-ray route subtests passed.
+- `cd tools/story-explorer && npm run test:backend` — PASS; 21/21 backend test files passed, including `dist/test/state-tick-xray-route.test.js`.
+- `rg -n "registerStateTickXrayRoutes|state-ticks/.*/xray|state_hash|parent_state_hash|publication|freshness|unresolved_mystery_claims|readStateTickXray" tools/story-explorer/src tools/story-explorer/test/state-tick-xray-route.test.ts` — PASS/manual review; the new route is registered, the route shape is `/state-ticks/:pgId/xray`, unresolved mystery claims are surfaced read-only from `PG.state_snapshot`, and state hashes are read from `state_hash` / `parent_state_hash` without feeding publication or freshness derivation.
+
+## Deviations
+
+- The x-ray payload includes both detailed fields and a compact `stateSnapshotSummary` so the frontend can use either a detailed drawer section or summary row without recomputing counts.
+- When the coverage view is degraded or missing, the route returns the PG inspection payload with `container.kind: "unknown"` and `degradedDirectRead: true`; it does not derive scene/unscened coverage directly from artifacts.

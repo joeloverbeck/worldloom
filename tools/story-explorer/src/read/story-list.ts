@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
 import { openExistingIndex } from "@worldloom/world-index/index/open";
@@ -300,7 +300,6 @@ export async function getPageSummaries(
       const childCount = childCounts.get(page.id) ?? 0;
       const isLeaf = childCount === 0;
       const terminalReason = terminalReasonFor(page, isLeaf);
-      const base = storyDirectory(repoRoot, worldSlug, storySlug);
 
       return {
         pageId: page.id,
@@ -309,9 +308,6 @@ export async function getPageSummaries(
         turnIndex: page.turnIndex,
         choiceId: page.choiceId,
         resolvedEventId: page.resolvedEventId,
-        hasRenderedProse: existsSync(path.join(base, "pages-prose", `${page.id}.md`)),
-        hasPlan: existsSync(path.join(base, "pages-prose-plans", `${page.id}.md`)),
-        hasReceipt: existsSync(path.join(base, "pages-prose-receipts", `${page.id}.yaml`)),
         activeRecordCounts: page.activeRecordCounts,
         childCount,
         isLeaf,
@@ -353,7 +349,6 @@ export async function enumerateStories(
         pageCount: pages.length,
         choiceCount: choiceIds.size,
         branchCount: branchIds.size,
-        renderedProseCount: fileEntries(path.join(base, "pages-prose"), /^PG-[0-9]+\.md$/).length,
         leafPageIds,
         rootPageId: rootPage?.pageId ?? null,
         latestPageId: latestPage?.pageId ?? null,

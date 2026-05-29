@@ -1,6 +1,6 @@
 # SPEC96STOEXPSCE-001: Scene-read foundation — shared view-models + world-index coverage helper
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: new `read/scene-coverage.ts` helper + new shared view-models (`ScenePublicationState`, `ChoiceSurface`, relocated `EventDeltaSummary`). No impact on existing canon/story-pipeline behavior (read-only).
@@ -84,3 +84,25 @@ Create `tools/story-explorer/src/read/scene-coverage.ts`: a thin typed wrapper t
 
 1. `cd tools/story-explorer && npm run test:backend`
 2. `grep -rn "EventDeltaSummary\|ScenePublicationState\|querySceneCoverage" tools/story-explorer/src`
+
+## Outcome
+
+Completed: 2026-05-29
+
+What changed:
+- Added `tools/story-explorer/src/read/scene-coverage.ts`, a thin wrapper over `querySceneCoverage` from `@worldloom/world-index/public/types`. It returns world-index coverage rows when the index is fresh and reports `worldIndexStatus` plus `degradedDirectRead: true` with no fabricated coverage when the index is unavailable or stale.
+- Added shared view-models: `ScenePublicationState`, `ChoiceSurface`, and the relocated `EventDeltaSummary`.
+- Updated `view-models/page-detail.ts` to import and re-export the relocated `EventDeltaSummary`, preserving existing page-detail consumers until SPEC96STOEXPSCE-007 removes page-first code.
+- Added `tools/story-explorer/test/scene-coverage.test.ts` covering fresh coverage pass-through, branch filtering, publication-indicator preservation, and degraded missing-index behavior.
+
+Deviations from original plan:
+- The helper returns a `SceneCoverageReadResult` envelope (`branches`, `worldIndexStatus`, `degradedDirectRead`) plus `readSceneCoverageBranch(...)` for branch-specific callers, rather than returning a bare array only. This preserves the existing response-envelope posture required by the ticket.
+- The first `npm run test:backend` run failed in SPEC-88/89 capstone smoke tests because `tools/story-explorer/web/dist` was absent; those tests expect a prebuilt static bundle even though `test:backend` does not build it. Running `npm run build` restored the expected bundle, after which `npm run test:backend` passed.
+
+Verification results:
+- `cd tools/world-index && npm run build` — PASS.
+- `cd tools/story-explorer && npm run build:backend` — PASS.
+- `cd tools/story-explorer && npm run test:backend` — PASS after `npm run build` restored `web/dist`; 16/16 backend test files passed, including `dist/test/scene-coverage.test.js`.
+- `grep -rn "EventDeltaSummary" tools/story-explorer/src` — PASS; references resolve to `view-models/event-delta-summary.ts` directly or through the transitional `page-detail.ts` re-export.
+- `grep -rn "EventDeltaSummary\|ScenePublicationState\|querySceneCoverage" tools/story-explorer/src` — PASS; `querySceneCoverage` is imported from the public world-index surface, and `ScenePublicationState` derives from `SceneCoverageScene["publication_indicator"]`.
+- `git diff --check` over owned tracked files — PASS.

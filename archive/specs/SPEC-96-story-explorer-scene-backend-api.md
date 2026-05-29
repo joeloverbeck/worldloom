@@ -1,6 +1,6 @@
 # SPEC-96 — Story Explorer Backend: Scene / Timeline / Unscened / State-Tick X-Ray API
 
-**Status:** draft
+**Status:** COMPLETED
 **Date:** 2026-05-28
 **Classification:** story-canon-related (tooling that operates on story-handling logic — replaces the `tools/story-explorer` backend's page-first reader routes with scene/timeline/x-ray read APIs over story-bundle records; reads canon/story records, mutates nothing).
 **Depends on:** **SPEC-95** (consumes the world-index scene-coverage view: active SCNs, unscened PG runs, PG↔SCN lookup, per-SCN publication indicator) and **SPEC-94** (no SCN `status`). Land SPEC-95 first.

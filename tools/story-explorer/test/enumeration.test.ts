@@ -21,9 +21,6 @@ function createTempRepo(): string {
 function createStory(repoRoot: string, worldSlug = "fixture-world", storySlug = "red-bunny"): string {
   const storyRoot = path.join(repoRoot, "worlds", worldSlug, "stories", storySlug);
   mkdirSync(path.join(storyRoot, "_source", "pages"), { recursive: true });
-  mkdirSync(path.join(storyRoot, "pages-prose"), { recursive: true });
-  mkdirSync(path.join(storyRoot, "pages-prose-plans"), { recursive: true });
-  mkdirSync(path.join(storyRoot, "pages-prose-receipts"), { recursive: true });
   writeFileSync(
     path.join(storyRoot, "STORY_KERNEL.md"),
     ["---", "story_id: STORY-1", "title: Red Bunny", "---", ""].join("\n"),
@@ -64,7 +61,6 @@ function pageBody(args: {
       },
     },
     plan: { plan_hash: "0".repeat(64) },
-    prose_plan_path: `pages-prose-plans/${args.id}.md`,
     emitted_choices: args.emittedChoices ?? [],
     validation_trace: {},
   });
@@ -147,14 +143,13 @@ test("enumerateWorlds reports fresh index metadata when the index exists", async
   assert.equal(worlds[0]?.hasWorldDb, true);
 });
 
-test("enumerateStories derives story and page counts from a fresh index plus direct prose files", async () => {
+test("enumerateStories derives story and page counts from a fresh index", async () => {
   const repoRoot = createTempRepo();
   const storyRoot = createStory(repoRoot);
   const rootBody = pageBody({ id: "PG-1", emittedChoices: ["CHC-1"] });
   const childBody = pageBody({ id: "PG-2", parentPageId: "PG-1", choiceId: "CHC-1", turnIndex: 1 });
   writePage(storyRoot, rootBody);
   writePage(storyRoot, childBody);
-  writeFileSync(path.join(storyRoot, "pages-prose", "PG-1.md"), "Rendered prose\n", "utf8");
 
   const db = createIndex(repoRoot, "fixture-world");
   insertPageNode(db, "fixture-world", "red-bunny", "PG-1", rootBody);
@@ -169,7 +164,6 @@ test("enumerateStories derives story and page counts from a fresh index plus dir
   assert.equal(stories[0]?.pageCount, 2);
   assert.equal(stories[0]?.choiceCount, 1);
   assert.equal(stories[0]?.branchCount, 1);
-  assert.equal(stories[0]?.renderedProseCount, 1);
   assert.deepEqual(stories[0]?.leafPageIds, ["PG-2"]);
   assert.equal(stories[0]?.rootPageId, "PG-1");
   assert.equal(stories[0]?.latestPageId, "PG-2");
@@ -200,10 +194,6 @@ test("getPageSummaries derives terminalReason variants from filesystem fallback 
       terminalStatus: "terminal_closed",
     })
   );
-  writeFileSync(path.join(storyRoot, "pages-prose", "PG-2.md"), "Rendered prose\n", "utf8");
-  writeFileSync(path.join(storyRoot, "pages-prose-plans", "PG-2.md"), "Plan\n", "utf8");
-  writeFileSync(path.join(storyRoot, "pages-prose-receipts", "PG-2.yaml"), "id: receipt\n", "utf8");
-
   const pages = await getPageSummaries("fixture-world", "red-bunny", repoRoot);
   const byId = new Map(pages.map((page) => [page.pageId, page]));
 
@@ -211,8 +201,5 @@ test("getPageSummaries derives terminalReason variants from filesystem fallback 
   assert.equal(byId.get("PG-2")?.terminalReason, "no_children");
   assert.equal(byId.get("PG-3")?.terminalReason, "paused");
   assert.equal(byId.get("PG-4")?.terminalReason, "terminal");
-  assert.equal(byId.get("PG-2")?.hasRenderedProse, true);
-  assert.equal(byId.get("PG-2")?.hasPlan, true);
-  assert.equal(byId.get("PG-2")?.hasReceipt, true);
   assert.deepEqual(byId.get("PG-2")?.activeRecordCounts, { STCHAR: 1, STENT: 2 });
 });

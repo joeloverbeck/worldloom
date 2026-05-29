@@ -1,18 +1,18 @@
 # SPEC96STOEXPSCE-008: Capstone — scene-first acceptance + retained-surface verification
 
-**Status**: PENDING
+**Status**: DONE
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: capstone integration tests exercising the scene-first routes end-to-end + rewrite of `test/capstone-smoke.test.ts`. No new production code.
-**Deps**: 002, 003, 004, 005, 006, 007
+**Deps**: archive/tickets/SPEC96STOEXPSCE-002.md, archive/tickets/SPEC96STOEXPSCE-003.md, archive/tickets/SPEC96STOEXPSCE-004.md, archive/tickets/SPEC96STOEXPSCE-005.md, archive/tickets/SPEC96STOEXPSCE-006.md, archive/tickets/SPEC96STOEXPSCE-007.md
 
 ## Problem
 
-SPEC-96 §7 acceptance criteria must be proven end-to-end once the scene-first routes (002–006) exist and the page-first surfaces are removed (007): the backend exposes `/overview`, `/timeline`, `/scenes`, `/scenes/:id` (+ `/plan|/prose|/receipt`), `/unscened-ranges`, `/state-ticks/:pgId/xray`, all carrying the index-status envelope (AC1); no live route exposes `/pages/:pageId`, `/prose/:pageId`, `/page-plans/:pageId`, `/prose-receipts/:pageId`, and a test asserts they 404/are absent (AC2); scene publication state is the SPEC-95 presence-based indicator with no 8-state machine / hash freshness (AC3); the x-ray is a technical surface, not a reader route (AC4); responses degrade gracefully on stale/missing index without fabricating coverage (AC5); `npm run test:backend` passes (AC6, backend scope per spec §8 staging). This capstone also verifies the retained technical lookup surfaces (D6) still work and rewrites the legacy `capstone-smoke.test.ts` (which currently hits the removed page/prose routes) for the scene-first surface.
+SPEC-96 §7 acceptance criteria must be proven end-to-end once the scene-first routes (002–006) exist and the page-first surfaces are removed (`archive/tickets/SPEC96STOEXPSCE-007.md`): the backend exposes `/overview`, `/timeline`, `/scenes`, `/scenes/:id` (+ `/plan|/prose|/receipt`), `/unscened-ranges`, `/state-ticks/:pgId/xray`, all carrying the index-status envelope (AC1); no live route exposes `/pages/:pageId`, `/prose/:pageId`, `/page-plans/:pageId`, `/prose-receipts/:pageId`, and a test asserts they 404/are absent (AC2); scene publication state is the SPEC-95 presence-based indicator with no 8-state machine / hash freshness (AC3); the x-ray is a technical surface, not a reader route (AC4); responses degrade gracefully on stale/missing index without fabricating coverage (AC5); `npm run test:backend` passes (AC6, backend scope per spec §8 staging). This capstone also verifies the retained technical lookup surfaces (D6) still work and rewrites the legacy `capstone-smoke.test.ts` (which currently hits the removed page/prose routes) for the scene-first surface.
 
 ## Assumption Reassessment (2026-05-29)
 
-1. The routes this capstone exercises are produced by 002–006 (`registerOverviewRoutes` / `registerTimelineRoutes` / `registerScenesRoutes` / `registerUnscenedRoutes` / `registerStateTickXrayRoutes`), and the page-first removal + retained-surface preservation by 007. The retained surfaces (`records/:recordId`, `records/:recordId/raw`, `provenance/:recordId`) and the response envelope + read-only guard exist at HEAD today (verified during SPEC-96 reassessment) and are preserved by 007 — D6 is a no-change verify here. `test/capstone-smoke.test.ts` currently injects `/pages`, `/pages/:id`, `/prose/:id`, `/page-plans/:id`, `/prose-receipts/:id` (L247–284) and must be rewritten for scene routes.
+1. The routes this capstone exercises are produced by 002–006 (`registerOverviewRoutes` / `registerTimelineRoutes` / `registerScenesRoutes` / `registerUnscenedRoutes` / `registerStateTickXrayRoutes`), and the page-first removal + retained-surface preservation by `archive/tickets/SPEC96STOEXPSCE-007.md`. The retained surfaces (`records/:recordId`, `records/:recordId/raw`, `provenance/:recordId`) and the response envelope + read-only guard exist at HEAD today (verified during SPEC-96 reassessment) and are preserved by `archive/tickets/SPEC96STOEXPSCE-007.md` — D6 is a no-change verify here. `test/capstone-smoke.test.ts` currently injects `/pages`, `/pages/:id`, `/prose/:id`, `/page-plans/:id`, `/prose-receipts/:id` (L247–284) and must be rewritten for scene routes.
 2. SPEC-96 §7 enumerates AC1–6; this capstone's acceptance matrix is those six bullets. SPEC-96 §6 + §8: full `npm test` builds/tests `web/` (still page-first until SPEC-97), so this capstone's CI bar is `npm run test:backend`; full `npm test` green is not achievable until SPEC-97 lands (documented staging, not a regression).
 3. Cross-artifact boundary under audit: this capstone exercises the composed backend produced by tickets 002–007 (the leaf set whose transitive `Deps` cover 001) — it introduces no production code, only tests. It uses a fixture index (not the real `worlds/<slug>/` tree); re-enumerate expected counts from the fixture at test start rather than hardcoding, so the assertions stay valid as fixtures evolve.
 4. FOUNDATIONS Rule 7 + §Tooling Recommendation (machine-facing honesty): AC5's degraded-index assertion is the Rule-7-adjacent honesty gate — a stale/missing index must surface the degraded-read flag and must never fabricate scene coverage or surface a forbidden-status `M` as resolved. The capstone proves the backend degrades orientation without inventing coverage.
@@ -35,7 +35,7 @@ SPEC-96 §7 acceptance criteria must be proven end-to-end once the scene-first r
 
 ### 1. Rewrite the capstone smoke test for scene-first
 
-Rewrite `tools/story-explorer/test/capstone-smoke.test.ts`: replace the `/pages`, `/pages/:id`, `/prose/:id`, `/page-plans/:id`, `/prose-receipts/:id` injections with the scene-first route injections (overview, timeline, scenes + artifacts, unscened-ranges, state-tick-xray) + the retained records/provenance injections, all against a fixture-index temp copy (`fs.cpSync`, never the real `worlds/` tree). Re-enumerate expected scene/coverage counts from the fixture at test start.
+Rewrite `tools/story-explorer/test/capstone-smoke.test.ts`: replace the `/pages`, `/pages/:id`, `/prose/:id`, `/page-plans/:id`, `/prose-receipts/:id` injections with the scene-first route injections (overview, timeline, scenes + artifacts, unscened-ranges, state-tick-xray) + the retained records/provenance injections, all against a fixture index seeded programmatically into a `mkdtempSync` temp dir via `openIndex` + `insertNode`/`insertCoverage` (the convention shared by all five scene-route tests; never the real `worlds/` tree). Re-enumerate expected scene/coverage counts from the seed structures at test start, not hardcoded. (Correction 2026-05-29: the original `fs.cpSync` prescription assumed a checked-in fixture-index copy that does not exist — `test/fixtures/` holds only `.gitkeep` — and copying the real `worlds/` tree is forbidden; programmatic seeding preserves the same real-tree-untouched invariant.)
 
 ### 2. Acceptance matrix test
 
@@ -62,8 +62,8 @@ Add `tools/story-explorer/test/scene-first-acceptance.test.ts` (or fold into the
 
 ### Invariants
 
-1. Tests run against a fixture-index temp copy; the real `worlds/<slug>/` tree is never mutated.
-2. Expected counts are re-enumerated from the fixture at test start, not hardcoded.
+1. Tests run against a fixture index seeded into a `mkdtempSync` temp dir; the real `worlds/<slug>/` tree is never mutated (asserted via source-hash equality + temp-path-≠-canonical-path checks).
+2. Expected counts are re-enumerated from the seed structures at test start, not hardcoded.
 
 ## Test Plan
 
