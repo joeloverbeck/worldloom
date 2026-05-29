@@ -1,6 +1,6 @@
 # SPEC96STOEXPSCE-008: Capstone — scene-first acceptance + retained-surface verification
 
-**Status**: PENDING
+**Status**: DONE
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `@worldloom/story-explorer` backend: capstone integration tests exercising the scene-first routes end-to-end + rewrite of `test/capstone-smoke.test.ts`. No new production code.
@@ -35,7 +35,7 @@ SPEC-96 §7 acceptance criteria must be proven end-to-end once the scene-first r
 
 ### 1. Rewrite the capstone smoke test for scene-first
 
-Rewrite `tools/story-explorer/test/capstone-smoke.test.ts`: replace the `/pages`, `/pages/:id`, `/prose/:id`, `/page-plans/:id`, `/prose-receipts/:id` injections with the scene-first route injections (overview, timeline, scenes + artifacts, unscened-ranges, state-tick-xray) + the retained records/provenance injections, all against a fixture-index temp copy (`fs.cpSync`, never the real `worlds/` tree). Re-enumerate expected scene/coverage counts from the fixture at test start.
+Rewrite `tools/story-explorer/test/capstone-smoke.test.ts`: replace the `/pages`, `/pages/:id`, `/prose/:id`, `/page-plans/:id`, `/prose-receipts/:id` injections with the scene-first route injections (overview, timeline, scenes + artifacts, unscened-ranges, state-tick-xray) + the retained records/provenance injections, all against a fixture index seeded programmatically into a `mkdtempSync` temp dir via `openIndex` + `insertNode`/`insertCoverage` (the convention shared by all five scene-route tests; never the real `worlds/` tree). Re-enumerate expected scene/coverage counts from the seed structures at test start, not hardcoded. (Correction 2026-05-29: the original `fs.cpSync` prescription assumed a checked-in fixture-index copy that does not exist — `test/fixtures/` holds only `.gitkeep` — and copying the real `worlds/` tree is forbidden; programmatic seeding preserves the same real-tree-untouched invariant.)
 
 ### 2. Acceptance matrix test
 
@@ -62,8 +62,8 @@ Add `tools/story-explorer/test/scene-first-acceptance.test.ts` (or fold into the
 
 ### Invariants
 
-1. Tests run against a fixture-index temp copy; the real `worlds/<slug>/` tree is never mutated.
-2. Expected counts are re-enumerated from the fixture at test start, not hardcoded.
+1. Tests run against a fixture index seeded into a `mkdtempSync` temp dir; the real `worlds/<slug>/` tree is never mutated (asserted via source-hash equality + temp-path-≠-canonical-path checks).
+2. Expected counts are re-enumerated from the seed structures at test start, not hardcoded.
 
 ## Test Plan
 
