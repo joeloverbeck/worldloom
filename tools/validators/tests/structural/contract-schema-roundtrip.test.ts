@@ -22,7 +22,7 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     properties: ["record_kind", "id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "targets", "commitment", "turn_driver", "outcome_route", "resolution", "world_logic_rationale", "record_introductions", "state_relations", "non_propagation_facts", "state_delta", "promotion_claims"]
   },
   "story-storylet": {
-    required: ["id", "story_id", "scope", "title", "move_family", "preconditions", "beats", "exit_options", "saliency", "mystery_policy", "provenance", "grounding"],
+    required: ["id", "story_id", "scope", "title", "move_family", "preconditions", "beats", "exit_options", "saliency", "mystery_policy", "provenance", "grounding", "created_at_page"],
     properties: ["record_kind", "id", "story_id", "supersedes", "scope", "created_at_page", "title", "move_family", "preconditions", "beats", "effects", "exit_options", "saliency", "mystery_policy", "provenance", "grounding"]
   },
   "story-entity": {
