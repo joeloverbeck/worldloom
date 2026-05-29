@@ -9,7 +9,7 @@ scope:
   visibility: global_author_pool | branch_prefix_scoped | branch_scoped   # branch_scoped only when audit_repair RSP specifies it
   branch_id: BR-<integer> | null
   visible_branch_path_prefix: [PG-<integer>]       # branch_prefix_scoped only
-created_at_page: null   # nullable for direct_batch and audit_repair (origin = author_batch or audit_repair, not runtime_jit)
+created_at_page: null   # MANDATORY; always null for this skill's origins (author_batch / audit_repair, never runtime_jit)
 title: <short descriptive title>
 move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery
 preconditions:

@@ -14,7 +14,8 @@
     "saliency",
     "mystery_policy",
     "provenance",
-    "grounding"
+    "grounding",
+    "created_at_page"
   ],
   "properties": {
     "record_kind": { "type": "string", "const": "storylet_record" },

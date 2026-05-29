@@ -534,6 +534,21 @@ test("record_schema_compliance accepts complete storylet records", async () => {
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance flags storylets missing created_at_page", async () => {
+  const missing = completeStorylet();
+  delete missing.created_at_page;
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([storyletRecord(missing)])
+  );
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("created_at_page")
+  ));
+});
+
 test("record_schema_compliance enforces story fact authority", async () => {
   const valid = storyFactRecord({
     authority: "branch_local"

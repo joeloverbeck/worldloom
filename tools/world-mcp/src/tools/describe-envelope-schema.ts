@@ -347,6 +347,16 @@ function operationSchema(kind: OperationKind): JsonObject {
           repair_reason: stringSchema()
         }
       });
+    case "repair_storylet_created_at_page":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["story_slug", "target_slt_id"],
+        properties: {
+          story_slug: stringSchema("^[a-z0-9-]+$"),
+          target_slt_id: stringSchema("^SLT-[0-9]+$")
+        }
+      });
     case "remove_ch_affected_cf_ids":
       return baseOperationProperties(kind, {
         type: "object",

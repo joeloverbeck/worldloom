@@ -476,6 +476,20 @@ function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperat
     return targetId;
   }
 
+  if (patch.op === "repair_storylet_created_at_page") {
+    const targetId = `${patch.payload.story_slug}:${patch.payload.target_slt_id}`;
+    const current = byId.get(targetId);
+    if (!current || current.node_type !== "storylet_record") {
+      return null;
+    }
+    const parsed = cloneRecord(current.parsed);
+    if (!("created_at_page" in parsed)) {
+      parsed.created_at_page = null;
+    }
+    byId.set(targetId, { ...current, parsed });
+    return current.node_id;
+  }
+
   if (
     patch.op === "remove_story_character_authority_frontmatter_field" ||
     patch.op === "remove_story_character_authority_body_hash_note_field" ||

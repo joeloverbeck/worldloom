@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { PatchOperation } from "../../src/envelope/schema.js";
+import { OPERATION_KINDS, type PatchOperation } from "../../src/envelope/schema.js";
 import { reorderPatches } from "../../src/commit/order.js";
 import { baseEnvelope, canonFact, character, createOp, extension } from "../harness.js";
+
+function bareOp(kind: PatchOperation["op"]): PatchOperation {
+  return { op: kind, target_world: "test-world", payload: {} } as unknown as PatchOperation;
+}
 
 test("reorderPatches applies canonical tier ordering while preserving ordinary tier-local order", () => {
   const env = baseEnvelope();
@@ -73,5 +77,28 @@ test("reorderPatches stages SCN records after PG records in the create tier", ()
     "create_sf_record",
     "create_pg_record",
     "create_scn_record"
+  ]);
+});
+
+test("reorderPatches never silently drops a registered operation kind", () => {
+  // Footgun guard: a new op added to OPERATION_KINDS (and dispatched in
+  // temp-file.ts) but omitted from order.ts's tier sets would be silently
+  // filtered out of the staged plan, producing a no-op apply with no error.
+  const patches = OPERATION_KINDS.map((kind) => bareOp(kind));
+
+  const result = reorderPatches(patches);
+
+  const dropped = OPERATION_KINDS.filter((kind) => !result.some((patch) => patch.op === kind));
+  assert.deepEqual(dropped, [], `reorderPatches dropped op kind(s): ${dropped.join(", ")}`);
+  assert.equal(result.length, OPERATION_KINDS.length);
+});
+
+test("reorderPatches stages repair_storylet_created_at_page after create ops", () => {
+  const repair = bareOp("repair_storylet_created_at_page");
+  const create = bareOp("create_slt_record");
+
+  assert.deepEqual(reorderPatches([repair, create]).map((patch) => patch.op), [
+    "create_slt_record",
+    "repair_storylet_created_at_page"
   ]);
 });
