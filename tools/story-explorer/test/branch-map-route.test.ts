@@ -228,3 +228,27 @@ test("branch-map validates focus and depth", async () => {
   assert.equal((await runBranchMap(repoRoot, "focus=PG-1&depth=11")).status, 400);
   assert.equal((await runBranchMap(repoRoot, "focus=PG-1&depth=bad")).status, 400);
 });
+
+test("branch-map rejects path params that are not plain slugs (no path traversal)", async () => {
+  const server = await createServer({ repoRoot: seedFreshFixture() });
+  try {
+    // `..`-style traversal is collapsed by the router (404) before the handler;
+    // other non-slug params are rejected by the handler (400). Neither ever
+    // returns 200 or reaches a file read outside worlds/.
+    for (const url of [
+      "/api/worlds/%2e%2e/stories/red-bunny/branch-map?focus=PG-1",
+      "/api/worlds/fixture-world/stories/%2e%2e%2f%2e%2e/branch-map?focus=PG-1",
+    ]) {
+      const response = await server.inject({ method: "GET", url });
+      assert.ok(response.statusCode === 400 || response.statusCode === 404, `${url} → ${response.statusCode}`);
+    }
+
+    const response = await server.inject({ method: "GET", url: "/api/worlds/Fixture_World/stories/red-bunny/branch-map?focus=PG-1" });
+    const body = JSON.parse(response.body) as { data?: { error?: string; field?: string } };
+    assert.equal(response.statusCode, 400);
+    assert.equal(body.data?.error, "invalid_input");
+    assert.equal(body.data?.field, "slug");
+  } finally {
+    await server.close();
+  }
+});

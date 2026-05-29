@@ -115,6 +115,25 @@ function sceneArtifactHref(
   return `/api/worlds/${worldSlug}/stories/${storySlug}/scenes/${sceneId}/${kind}`;
 }
 
+const SCENE_ID_PATTERN = /^SCN-(0|[1-9][0-9]*)$/;
+
+// Defense in depth: the route layer constrains worldSlug / storySlug, and
+// scene ids come from the coverage table, but the artifact path is still built
+// from those values. Reject any non-canonical scene id and confine the
+// resolved path to the repo's worlds/ tree so no value can traverse outside it
+// (mirrors src/read/scene-detail.ts artifactPath).
+function safeArtifactPath(repoRoot: string, base: string, dir: string, sceneId: string, ext: string): string | null {
+  if (!SCENE_ID_PATTERN.test(sceneId)) {
+    return null;
+  }
+  const worldsRoot = path.resolve(repoRoot, "worlds");
+  const resolved = path.resolve(base, dir, `${sceneId}${ext}`);
+  if (resolved !== worldsRoot && !resolved.startsWith(`${worldsRoot}${path.sep}`)) {
+    return null;
+  }
+  return resolved;
+}
+
 class ContainerResolver {
   private readonly sceneByPage = new Map<string, { scene: SceneCoverageScene; branch: SceneCoverageBranch }>();
   private readonly runByPage = new Map<string, { branch: SceneCoverageBranch; index: number }>();
@@ -396,9 +415,13 @@ async function artifactHits(
           continue;
         }
         seen.add(key);
+        const artifactPath = safeArtifactPath(repoRoot, base, artifact.dir, scene.scene_id, artifact.ext);
+        if (artifactPath === null) {
+          continue;
+        }
         let body: string;
         try {
-          body = await readFile(path.join(base, artifact.dir, `${scene.scene_id}${artifact.ext}`), "utf8");
+          body = await readFile(artifactPath, "utf8");
         } catch {
           continue;
         }

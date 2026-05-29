@@ -324,3 +324,28 @@ test("search validates query parameters", async () => {
   const badGroupBy = await runSearch(repoRoot, "q=x&groupBy=page");
   assert.equal(badGroupBy.status, 400);
 });
+
+test("search rejects path params that are not plain slugs (no path traversal)", async () => {
+  const server = await createServer({ repoRoot: seedRichFixture() });
+  try {
+    // `..`-style traversal is collapsed by the router (404) before the handler;
+    // other non-slug params are rejected by the handler (400). Neither ever
+    // returns 200 or reaches a file read outside worlds/.
+    for (const url of [
+      "/api/worlds/%2e%2e/stories/red-bunny/search?q=x",
+      "/api/worlds/fixture-world/stories/%2e%2e%2f%2e%2e/search?q=x",
+    ]) {
+      const response = await server.inject({ method: "GET", url });
+      assert.ok(response.statusCode === 400 || response.statusCode === 404, `${url} → ${response.statusCode}`);
+    }
+
+    // An invalid (non-slug) world reaches the handler and is rejected 400.
+    const response = await server.inject({ method: "GET", url: "/api/worlds/Fixture_World/stories/red-bunny/search?q=x" });
+    const body = JSON.parse(response.body) as { data?: { error?: string; field?: string } };
+    assert.equal(response.statusCode, 400);
+    assert.equal(body.data?.error, "invalid_input");
+    assert.equal(body.data?.field, "slug");
+  } finally {
+    await server.close();
+  }
+});

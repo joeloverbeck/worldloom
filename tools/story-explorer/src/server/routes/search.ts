@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 
 import { readSearch, type SearchReadOptions } from "../../read/search.js";
 import { SEARCH_DOMAINS, SEARCH_RESULT_KINDS, type SearchDomain, type SearchResultKind } from "../../view-models/search-hit.js";
+import { invalidRouteParam, isValidRouteSlug } from "./params.js";
 
 export interface SearchRouteOptions {
   repoRoot: string;
@@ -68,6 +69,15 @@ export async function registerSearchRoute(server: FastifyInstance, options: Sear
     Params: { slug: string; storySlug: string };
     Querystring: SearchQuery;
   }>("/api/worlds/:slug/stories/:storySlug/search", async (request, reply) => {
+    // Reject path params that are not plain slugs before they reach any file
+    // path (defense in depth is also enforced in src/read/search.ts).
+    if (!isValidRouteSlug(request.params.slug)) {
+      return reply.code(400).send(invalidRouteParam("slug", request.params.slug, "a lowercase world slug"));
+    }
+    if (!isValidRouteSlug(request.params.storySlug)) {
+      return reply.code(400).send(invalidRouteParam("storySlug", request.params.storySlug, "a lowercase story slug"));
+    }
+
     const query = request.query;
     if (query.q === undefined || query.q.trim() === "") {
       return reply.code(400).send(invalidInput("Search query parameter q is required.", "q"));

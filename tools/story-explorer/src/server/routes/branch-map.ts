@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 
 import { readBranchMap } from "../../read/branch-map.js";
+import { invalidRouteParam, isValidRouteSlug } from "./params.js";
 
 export interface BranchMapRouteOptions {
   repoRoot: string;
@@ -38,6 +39,13 @@ export async function registerBranchMapRoute(server: FastifyInstance, options: B
     Params: { slug: string; storySlug: string };
     Querystring: BranchMapQuery;
   }>("/api/worlds/:slug/stories/:storySlug/branch-map", async (request, reply) => {
+    if (!isValidRouteSlug(request.params.slug)) {
+      return reply.code(400).send(invalidRouteParam("slug", request.params.slug, "a lowercase world slug"));
+    }
+    if (!isValidRouteSlug(request.params.storySlug)) {
+      return reply.code(400).send(invalidRouteParam("storySlug", request.params.storySlug, "a lowercase story slug"));
+    }
+
     const query = request.query;
     if (query.focus === undefined || query.focus.trim() === "") {
       return reply.code(400).send(invalidInput("Branch-map query parameter focus is required.", "focus"));
