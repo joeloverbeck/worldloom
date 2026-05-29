@@ -39,6 +39,21 @@ When `turn_driver.kind` is non-player, set `pov_visibility` from the POV actor's
 
 Note: this rule matches both the enforced `turn_driver_pov_observer_firewall` validator and FOUNDATIONS §Story Bundles §6b. §6b's downgrade-trigger list is a closed set — hidden `STSEC`, offstage `STPLAN`, or an unwitnessed offstage driving event — so interior `STEMO`/`BEL`/`STINT`/`THR`/`SREL` driver records of an on-stage act do not downgrade `perceived_directly`.
 
+## Turn-driver shape for player drivers
+
+When `turn_driver.kind` is a player source (`player_action` or `player_write_in`), the committed `SE.turn_driver` uses exactly the canonical player shape (shared schema §4.3):
+
+```yaml
+turn_driver:
+  kind: player_action | player_write_in
+  initiator: player
+  driver_records: []
+  player_response_mode: initiates
+  pov_visibility: perceived_directly
+```
+
+The player's motivation grounding lives in `world_logic_rationale` prose, not in `driver_records` — `driver_records` is empty for player turns. Do **not** carry over the `initiator`/`driver_records` hint values used when building the `turn_driver` argument for `mcp__worldloom__select_storylet_candidates` (those are projection-filter hints, a different shape — see `references/phase-2-3-commitment-and-state-delta.md` Phase 2). This shape is enforced by `turn_driver_schema_compliance`, `pg_se_turn_driver_consistency`, and `turn_driver_pov_observer_firewall` (Gate 9, Turn-Driver Lawfulness).
+
 ## Selection Rationale
 
 When `selected_slt_id` was chosen over one or more eligible competing blocks of equal-or-higher local salience, `SE.world_logic_rationale` MUST include a selection-rationale clause naming the selected block, at least one outranked competing block, and the reason the selected block won. Example: `selected SLT-12 over SLT-7 because SLT-7's obligation_open(OBL-3) predicate failed in the current visibility state.` When selection is uncontested because only one block was eligible, no selection-rationale clause is required.

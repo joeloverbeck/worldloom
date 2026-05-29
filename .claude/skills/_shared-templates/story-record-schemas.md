@@ -515,6 +515,8 @@ derived_from: [CF-<integer> | <story-local record id>]   # default []; non-empty
 
 No `certainty`, `scope`, `who_knows`, `derived_from_cf`, `why_it_matters_at_opening`, or `trace_records` fields. CF mirrors and branch-derived facts both use `derived_from`.
 
+For an `SF` created after `PG-1` via a turn-cycle / `turn_resolution` event, `derived_from` is effectively **required** (enforced by `turn_cycle_output_grounding_integrity`): it must name at least one parent-active-or-same-event grounding record from the allowed class set `{SE, SF, BEL, OBL, CNSQ, STINT, SREL, DA, CLK, STSEC, STQ, STSTAT, STPLAN, STEMO}`. The empty-`[]` default is lawful only for genesis (`PG-1` / `story_start`) records and for classes/contexts the validator does not target.
+
 Use `branch_local` for ordinary story-local truths, `branch_local_counterfactual` for deliberately branch-only contradictions, `canon_candidate` for claims held for promotion, and `canon_linked` only after canon acceptance. A `canon_linked` `SF` must include at least one parent `CF-<integer>` in `derived_from`; no separate canon-link field exists.
 
 **Truth-relation propagation through `derived_from`.** When a `derived_from[]` entry references a `BEL` whose `truth_relation` is anything other than `true` (i.e., `false`, `partly_true`, `unknown`, `contested`, `branch_counterfactual`, or `future_contingent`), the SF MUST use `authority: branch_local_counterfactual` — the `lie_promoted_silently` validator enforces that non-true beliefs cannot be silently promoted into branch-local-true facts. The rule preserves FOUNDATIONS Rule 4 (No Globalization by Accident) at the SF-vs-BEL boundary: a non-true belief is a holder's epistemic state, not a branch-local truth, and an SF that cites it as a source inherits its non-true authority. When a BEL's role in the fact is causal-but-not-truth-bearing (e.g., the holder's belief motivated their action but the action's outcome stands on its own as a branch-local truth), capture the BEL via `BEL.basis.access_records[]` on a downstream witness or interpretation belief rather than via `SF.derived_from[]`; the fact then carries `authority: branch_local` based on its own truth-status and the belief's role is recorded in the belief-state delta without propagating non-true authority to the fact.
@@ -555,6 +557,8 @@ urgency: low | medium | high*
 resolves_when: string*                         # natural-language supersession trigger
 derived_from: [<record_id>]                    # default []; record ids that caused this consequence
 ```
+
+For a `CNSQ` created after `PG-1` via a turn-cycle / `turn_resolution` event, `derived_from` is effectively **required** (enforced by `turn_cycle_output_grounding_integrity`): it must name at least one parent-active-or-same-event grounding record from the allowed class set `{SE, SF, BEL, OBL, CNSQ, STINT, SREL, DA, CLK, STSEC, STQ, STSTAT, STPLAN, STEMO}`. The empty-`[]` default is lawful only for genesis (`PG-1` / `story_start`) records and for classes/contexts the validator does not target.
 
 #### 4.5.6 `THR` (thread)
 
@@ -648,6 +652,8 @@ circulation: private | factional | public | concealed | suppressed*
 truth_relation: true | false | partly_true | unknown | contested | branch_counterfactual | future_contingent*
 derived_from: [<record_id>]                    # default []
 ```
+
+For a `DA` created after `PG-1` via a turn-cycle / `turn_resolution` event, `derived_from` is effectively **required** (enforced by `turn_cycle_output_grounding_integrity`): it must name at least one parent-active-or-same-event grounding record from the allowed class set `{SE, SF, BEL, OBL, CNSQ, STINT, SREL, DA, CLK, STSEC, STQ, STSTAT, STPLAN, STEMO}`. The empty-`[]` default is lawful only for genesis (`PG-1` / `story_start`) records and for classes/contexts the validator does not target.
 
 #### 4.5.11 `BR` (branch)
 
