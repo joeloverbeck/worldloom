@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC95SCECOVIND-001.md",
+  "last_ticket": "archive/tickets/SPEC95SCECOVIND-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "22faff9ab38ec4fbb03a269fc1b1ec30cae163d6",
+  "last_work_commit": "487e691c6c8b1cecba0238499513d4681548496b",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC95SCECOVIND-002.md",
+  "next_target": "tickets/SPEC95SCECOVIND-003.md",
   "queue": [
-    "tickets/SPEC95SCECOVIND-002.md",
     "tickets/SPEC95SCECOVIND-003.md",
     "tickets/SPEC95SCECOVIND-004.md"
   ],
@@ -18,7 +17,7 @@
   "post_review_audit_block": "not_applicable",
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC95SCECOVIND-001 proof passed: world-index npm run build; world-index npm test 128 non-CLI plus serial CLI compiled tests; enumerate.ts page-prose grep zero; scene-prose grep retained three entries",
+  "proof_state": "SPEC95SCECOVIND-002 proof passed: world-index npm run build; focused node --test dist/tests/schema.test.js dist/tests/scene-coverage.test.js; world-index npm test 130 non-CLI plus serial CLI compiled tests; scene-coverage computePgStateHash/state_hash grep zero",
   "dirty_state": "expected after state commit: tracked clean; pre-existing ignored package artifacts under tools/world-index/dist and tools/world-index/node_modules left untouched",
   "updated_at": "2026-05-29"
 }
