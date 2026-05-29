@@ -40,7 +40,11 @@ export function extractYamlNodes(
     const headingPath = findHeadingPathForLine(lineStart, headings);
     const rawYaml = codeNode.value;
 
-    if (section === "other" && !isNamedEntityRegistryYaml(filePath, headingPath)) {
+    if (
+      section === "other" &&
+      !isNamedEntityRegistryYaml(filePath, headingPath) &&
+      !isDirectWriteManifestYaml(filePath)
+    ) {
       parseIssues.push(
         createParseIssue({
           worldSlug,
@@ -532,6 +536,16 @@ function isNamedEntityRegistryYaml(filePath: string, headingPath: string | null)
   }
 
   return headingPath?.endsWith("Named Entity Registry") ?? false;
+}
+
+// Story-bundle direct-write manifest surfaces (story-state-contract §10) are
+// free-form markdown artifacts, not canonical-ledger files; a YAML fence inside
+// one is legitimate content, so the canonical-ledger section scan must not flag it.
+const DIRECT_WRITE_MANIFEST_SURFACE_REGEX =
+  /(?:^|\/)(?:storylet-batches|audits|scene-prose-plans|story-promotions)\//;
+
+function isDirectWriteManifestYaml(filePath: string): boolean {
+  return DIRECT_WRITE_MANIFEST_SURFACE_REGEX.test(filePath);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

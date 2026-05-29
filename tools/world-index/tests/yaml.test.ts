@@ -251,3 +251,72 @@ test("section ancestry determines CF versus CH routing even for identical raw YA
     ["missing_required_field:id", "missing_required_field:change_id"]
   );
 });
+
+test("YAML fence in a story-bundle direct-write manifest is not flagged as unexpected_yaml_section", () => {
+  const source = `# SLB-1: direct_batch batch
+
+## Coverage diagnosis (Phase 1)
+
+### Driver / source / composition specialization
+
+\`\`\`yaml
+recovery: covered
+pursuit: gap
+\`\`\`
+`;
+
+  const { tree, lines } = parseMarkdown(source);
+  const filePath = "worlds/erotica-world/stories/red-bunny/storylet-batches/SLB-1.md";
+  const { nodes, parseIssues } = extractYamlNodes(tree, lines, filePath);
+
+  assert.equal(nodes.length, 1);
+  assert.equal(nodes[0]?.node_type, "section");
+  assert.deepEqual(
+    parseIssues.filter((issue) => issue.code === "unexpected_yaml_section"),
+    []
+  );
+});
+
+test("audits, scene-prose-plans, and story-promotions manifests are likewise exempt", () => {
+  const source = `# Manifest
+
+## Notes
+
+\`\`\`yaml
+note: free-form
+\`\`\`
+`;
+
+  for (const surface of [
+    "worlds/w/stories/s/audits/SAU-1-2026-05-29.md",
+    "worlds/w/stories/s/scene-prose-plans/SCN-1.md",
+    "worlds/w/stories/s/story-promotions/SP-1.md"
+  ]) {
+    const { tree, lines } = parseMarkdown(source);
+    const { parseIssues } = extractYamlNodes(tree, lines, surface);
+    assert.deepEqual(
+      parseIssues.filter((issue) => issue.code === "unexpected_yaml_section"),
+      [],
+      `expected no unexpected_yaml_section for ${surface}`
+    );
+  }
+});
+
+test("a misplaced YAML fence in a world-canon ledger file still flags unexpected_yaml_section", () => {
+  const source = `# CANON_LEDGER
+
+## Some Other Section
+
+\`\`\`yaml
+stray: value
+\`\`\`
+`;
+
+  const { tree, lines } = parseMarkdown(source);
+  const filePath = "worlds/animalia/CANON_LEDGER.md";
+  const { parseIssues } = extractYamlNodes(tree, lines, filePath);
+
+  assert.equal(parseIssues.length, 1);
+  assert.equal(parseIssues[0]?.code, "unexpected_yaml_section");
+  assert.equal(parseIssues[0]?.severity, "info");
+});
