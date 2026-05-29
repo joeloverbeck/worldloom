@@ -34,6 +34,7 @@ const RECORD_SOURCE_DIRS: Record<string, string> = {
   DA: "artifacts",
   OBL: "obligations",
   PG: "pages",
+  SCN: "scenes",
   SE: "events",
   SF: "facts",
   SLT: "storylets",
