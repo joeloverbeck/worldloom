@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-96-story-explorer-scene-backend-api.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC96STOEXPSCE-001.md",
+  "last_ticket": "archive/tickets/SPEC96STOEXPSCE-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "89ae336efbb40a8451a6c34a805a204dfdcc6269",
+  "last_work_commit": "d7f153fc81bd35d2d2a3c26eb3a8f38635c2d427",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC96STOEXPSCE-002.md",
+  "next_target": "tickets/SPEC96STOEXPSCE-003.md",
   "queue": [
-    "tickets/SPEC96STOEXPSCE-002.md",
     "tickets/SPEC96STOEXPSCE-003.md",
     "tickets/SPEC96STOEXPSCE-004.md",
     "tickets/SPEC96STOEXPSCE-005.md",
@@ -22,7 +21,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: tools/world-index npm run build PASS; tools/story-explorer npm run build:backend PASS; npm run test:backend PASS after npm run build restored web/dist; grep proofs PASS; git diff --check PASS",
+  "proof_state": "clean: tools/story-explorer npm run test:backend PASS (17/17 backend test files); registerOverviewRoutes grep PASS; overview world-index boundary grep PASS; git diff --cached --check PASS",
   "dirty_state": "expected after state commit: tracked clean; ignored artifacts under tools/story-explorer/dist, tools/story-explorer/node_modules, tools/story-explorer/web/dist, tools/story-explorer/web/node_modules, tools/world-index/dist, and tools/world-index/node_modules left in place",
   "updated_at": "2026-05-29"
 }
