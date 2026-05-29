@@ -58,4 +58,6 @@ Classify every new resolution-like claim in the delta per shared contract §11:
 - `branch_local_counterfactual` — true only in this branch; recorded on `SF.authority` with branch-scoped truth.
 - `canon_candidate` — may be world-level truth; recorded on `SF.authority` and held for promotion via `story-fact-promotion-to-canon`.
 
+Any `SF` (or `DA`) created during Phase 4–5 is still subject to the Phase 3 `SF` / `CNSQ` / `DA` grounding requirement: a mid-story (post-`PG-1`) record MUST carry a non-empty `derived_from` drawn from the allowed grounding classes, or it fails `turn_cycle_output_grounding_integrity`. See `references/phase-2-3-commitment-and-state-delta.md` (the grounding-requirement note in Phase 3), including the lie-promotion caveat that keeps an ordinary `branch_local` `SF` from being forced counterfactual.
+
 If the action would resolve any mystery with `status: forbidden`, abort before patch submission with a mystery-firewall error. If the action asserts a `canon_candidate` claim, set `outcome_route: promotion_hold` and ensure the state delta records ONLY the branch-local appearance; emit `SE.promotion_claims[]` so the user knows to invoke `story-fact-promotion-to-canon` after this turn lands.
