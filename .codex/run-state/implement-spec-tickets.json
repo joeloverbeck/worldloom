@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-95-scene-coverage-index-and-validator-cleanup.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC95SCECOVIND-002.md",
+  "last_ticket": "archive/tickets/SPEC95SCECOVIND-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "487e691c6c8b1cecba0238499513d4681548496b",
+  "last_work_commit": "d379fbde2d1338052f584d4706b70a75e8777e8a",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC95SCECOVIND-003.md",
+  "next_target": "tickets/SPEC95SCECOVIND-004.md",
   "queue": [
-    "tickets/SPEC95SCECOVIND-003.md",
     "tickets/SPEC95SCECOVIND-004.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -17,7 +16,7 @@
   "post_review_audit_block": "not_applicable",
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC95SCECOVIND-002 proof passed: world-index npm run build; focused node --test dist/tests/schema.test.js dist/tests/scene-coverage.test.js; world-index npm test 130 non-CLI plus serial CLI compiled tests; scene-coverage computePgStateHash/state_hash grep zero",
-  "dirty_state": "expected after state commit: tracked clean; pre-existing ignored package artifacts under tools/world-index/dist and tools/world-index/node_modules left untouched",
+  "proof_state": "SPEC95SCECOVIND-003 proof passed: tools/validators npm test 1058 pass; old validator name/path rg zero excluding dist/archive; new registry symbols and README inventory names present; git diff --check clean",
+  "dirty_state": "expected after state commit: tracked clean; expected ignored package artifacts under tools/validators/dist plus pre-existing ignored tools/validators/node_modules, tools/world-index/dist, and tools/world-index/node_modules left untouched",
   "updated_at": "2026-05-29"
 }
