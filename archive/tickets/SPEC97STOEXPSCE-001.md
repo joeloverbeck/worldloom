@@ -1,6 +1,6 @@
 # SPEC97STOEXPSCE-001: API client — scene/timeline/x-ray view models + SPEC-96 client functions (additive)
 
-**Status**: PENDING
+**Status**: DONE
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/story-explorer/web` API client layer (`@worldloom/story-explorer-web`); additive only, no impact on existing page-scoped surface (its removal is owned by SPEC97STOEXPSCE-008).
