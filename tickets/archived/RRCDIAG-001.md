@@ -1,6 +1,6 @@
 # RRCDIAG-001: `recursive_reference_closure` reports a missing `created_at_page` field as a misleading `branch_leak`
 
-**Status**: PENDING
+**Status**: DONE (implemented 2026-05-30; `isAllowedReference` replaced by tri-state `classifyReference` in `tools/validators/src/structural/recursive-reference-closure.ts`; `created_at_page: undefined` on non-page targets now returns `schema_incomplete` and suppresses `branch_leak`, deferring to `record_schema_compliance`; regression test added in `tools/validators/tests/structural/recursive-reference-closure.test.ts`; full validator suite — 1072 tests — green.)
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators/src/structural/recursive-reference-closure.ts` plus tests

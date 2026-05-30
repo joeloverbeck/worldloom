@@ -60,7 +60,7 @@ export const recursiveReferenceClosure: Validator = {
 
         const parsedTarget = asPlainRecord(target.parsed);
         const createdAtPage = referenceBranchPageFor(target, parsedTarget);
-        if (!isAllowedReference(target, parsedTarget, createdAtPage, branchPath, branchPathSet)) {
+        if (classifyReference(target, parsedTarget, createdAtPage, branchPath, branchPathSet) === "branch_leak") {
           verdicts.push(branchLeak(page, current, target, createdAtPage));
         }
 
@@ -271,36 +271,44 @@ function referenceBranchPageFor(target: IndexedRecord, record: Record<string, un
   return undefined;
 }
 
-function isAllowedReference(
+type ReferenceClassification = "allow" | "branch_leak" | "schema_incomplete";
+
+function classifyReference(
   target: IndexedRecord,
   parsed: Record<string, unknown>,
   createdAtPage: string | null | undefined,
   branchPath: readonly string[],
   branchPathSet: ReadonlySet<string>
-): boolean {
+): ReferenceClassification {
   if (target.node_type === "page_record") {
     const pageIdValue = stringValue(parsed.id);
-    return pageIdValue !== undefined && branchPathSet.has(pageIdValue);
+    return pageIdValue !== undefined && branchPathSet.has(pageIdValue) ? "allow" : "branch_leak";
   }
   if (createdAtPage === null) {
     if (target.node_type === "story_character_authority_record") {
-      return true;
+      return "allow";
     }
     if (target.node_type !== "storylet_record") {
-      return false;
+      return "branch_leak";
     }
     // VALENH-012/014: SLT visibility and branch-prefix proof are schema-canonical under scope.
     const scope = asPlainRecord(parsed.scope);
     const visibility = stringValue(scope.visibility);
     if (visibility === "global_author_pool") {
-      return true;
+      return "allow";
     }
     if (visibility === "branch_prefix_scoped") {
-      return isVisibleBranchPathPrefix(scope.visible_branch_path_prefix, branchPath);
+      return isVisibleBranchPathPrefix(scope.visible_branch_path_prefix, branchPath) ? "allow" : "branch_leak";
     }
-    return false;
+    return "branch_leak";
   }
-  return createdAtPage !== undefined && branchPathSet.has(createdAtPage);
+  // RRCDIAG-001: a target missing its created_at_page (or STCHAR generated_at_page / provenance equivalent)
+  // is a schema-incomplete record, not a sibling-branch leak. record_schema_compliance owns this defect;
+  // emitting branch_leak here points authors at branch isolation when the real fix is adding the field.
+  if (createdAtPage === undefined) {
+    return "schema_incomplete";
+  }
+  return branchPathSet.has(createdAtPage) ? "allow" : "branch_leak";
 }
 
 function isVisibleBranchPathPrefix(value: unknown, branchPath: readonly string[]): boolean {
