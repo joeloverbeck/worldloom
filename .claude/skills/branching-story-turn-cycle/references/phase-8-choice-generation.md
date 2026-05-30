@@ -19,3 +19,26 @@ For every emitted `CHC`, apply the Information / Observer Firewall: the `player_
 For cross-actor STEMO/STPLAN grounding, the actor must hold an active `BEL` whose `basis.access_records[]` contains the STEMO/STPLAN holder's `STENT-<integer>` id and whose `basis.access_route` is one of `direct_observation`, `testimony`, `document`, `object_trace`, `location_trace`, `surveillance`, or `institutional_channel`. Prefer grounding cross-actor affective or tactical pressure in the actor's own `BEL` about the other actor and cite that `BEL` directly in `grounded_in.records[]`; cite the STEMO/STPLAN as the canonical pressure record only when this holder-observability route is present.
 
 Before hashes are computed, run the `choice_set_noncollapse` validator against the drafted `PG` + emitted `CHC` set. The page commit fails when `choice_set_collapse` fires: a non-terminal page with more than one emitted choice must have at least two choices that differ materially in `target_or_action_families`, `grounded_in.records`, or `likely_state_pressure`. Rhetorical or expressive variants may be surfaced in the deliverable summary as story-health context, but they do not substitute for materially distinct state-grounded choices.
+
+## Eligibility grounding and the `eligibility_background_only` rationale marker
+
+When a CHC is later resolved by an SLT selected from the live pool, the structural validator `chc_slt_selected_commitment_trace` (`tools/validators/src/structural/chc-slt-selected-commitment-trace.ts`) checks whether the CHC's `grounded_in.records[]` overlaps the resolving SLT's selecting-predicate binding records by **exact id**, not just by record class. Two failure modes:
+
+- `weak_incidental_grounding` (warn): the CHC grounds in the same record class as a selecting predicate (e.g. both cite a `SREL-*`) but not the exact selected id. Typical at cross-turn emission, where the parent skill could not anticipate which SLT — or which existential predicate binding — would later resolve the CHC.
+- `missing_eligibility_source` (FAIL): the CHC grounds in no selecting-predicate record at all AND carries no rationale marker.
+
+The escape valve is a free-form prose marker embedded inside the CHC's existing `likely_state_pressure` string: `eligibility_background_only: <natural-language reason>`. The validator parses `BACKGROUND_MARKER = /eligibility_background_only\s*:\s*([^.;\n]+)/i` (declared at `tools/validators/src/structural/chc-slt-selected-commitment-trace.ts:17`) — case-insensitive, requires the colon, captures the reason up to the next `.`, `;`, or newline. When the marker is present and the validator would otherwise emit `weak_incidental_grounding` or `missing_eligibility_source`, the verdict is suppressed.
+
+Use the marker when the grounding is **intentionally** incidental rather than load-bearing — typically because the resolving SLT is not yet known at emission time, or because the selecting predicates are all existentials that bind to records the emission could not pre-commit to. Do NOT use the marker as a substitute for genuine grounding: when the resolving SLT IS predictable at emission time (a same-turn CHC where the SLT is already selected, or a JIT-block-driven emission), prefer adding the exact selecting-predicate records to `grounded_in.records[]` directly — that path produces a stronger CHC-to-SLT trace than the marker.
+
+The marker is **prose**, not a YAML field on CHC. Authoring it as a separate `eligibility_background_only:` YAML key on the CHC record will not satisfy the validator — the regex scans the existing `likely_state_pressure` string. The CHC schema (`tools/validators/src/schemas/story-choice.schema.json`) has no `eligibility_background_only` field and accepts no additional properties.
+
+Worked example: a CHC at PG-N grounds in `SREL-2` (the canonical power-imbalance axis between the actor and the antagonist) and is later resolved at PG-N+1 by an SLT whose existential predicate binds `SREL-6` (a fear axis). Same `SREL` class, different ids: the validator would emit `weak_incidental_grounding`. The emitting turn-cycle authors `likely_state_pressure` as:
+
+```
+Pressure to stand firm against the antagonist when withholding would compound the imbalance.
+eligibility_background_only: emitted at PG-N before the resolving SLT's existential bindings were known;
+the SREL grounding is canonical-axis context for the choice's salience, not exact-binding load-bearing.
+```
+
+After the marker lands inside `likely_state_pressure`, the validator suppresses the warn and the CHC-to-SLT trace passes.

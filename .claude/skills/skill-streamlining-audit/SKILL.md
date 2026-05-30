@@ -47,7 +47,7 @@ Do NOT Edit / Write any file under `tickets/` or `docs/triage/` until ALL 5 of t
   - REJECT (ends the run).
 
 - **(e)** On the ACCEPT-and-create-tickets path only: Phase 9 has:
-  - resolved the ticket prefix via `archive/tickets/` + `tickets/` lookup;
+  - resolved the ticket prefix via `archive/tickets/` + `tickets/archived/` + `tickets/` lookup;
   - allocated the next free `<PREFIX>-NNN` integer per-tier;
   - planned one ticket write per HIGH finding + one per MEDIUM finding + one bundled janitorial-sweep ticket for all LOW findings;
   - (when ticket count ≥3) planned the triage-manifest write.
@@ -169,7 +169,7 @@ This skill operates at **pipeline scope, not world scope**. It reads under `.cla
 - `target_skill_path/SKILL.md` plus every `references/*.md` (or `examples/*.md` when the skill ships examples instead of references) and every `templates/*` (any extension) discovered via `Glob`. Read at Phase 1.
 - When `sibling_skill_paths` is supplied: each sibling's `SKILL.md`. Read at Phase 2 for the citation grep.
 - When `sibling_skill_paths` is omitted: auto-detected sibling SKILL.md files per Phase 0's resolution logic.
-- When `produce_tickets_on_approval=true`: `tickets/_TEMPLATE.md` (the per-ticket schema source); `archive/tickets/` and `tickets/` (existing-prefix lookup for namespace allocation).
+- When `produce_tickets_on_approval=true`: `tickets/_TEMPLATE.md` (the per-ticket schema source); `archive/tickets/`, `tickets/archived/`, and `tickets/` (existing-prefix lookup for namespace allocation).
 
 ### Reads NOT performed
 
@@ -473,10 +473,10 @@ Runs only when `produce_tickets_on_approval=true` AND the user explicitly chose 
 
 ### Ticket prefix resolution
 
-- Check `archive/tickets/` and `tickets/` for an existing prefix associated with the target skill (e.g., `BSBOOT-` for `branching-story-bootstrap`, `BSPAG-` / `BSPAGE-` for `branching-story-page-cycle`, `STPOOL-` for `storylet-pool-authoring`).
+- Check `archive/tickets/`, `tickets/archived/`, and `tickets/` for an existing prefix associated with the target skill (e.g., `BSBOOT-` for `branching-story-bootstrap`, `BSPAG-` / `BSPAGE-` for `branching-story-page-cycle`, `STPOOL-` for `storylet-pool-authoring`).
 - Allocate the next number after the highest existing number (active + archived).
 - **Multi-prefix tiebreaker** — when multiple legacy prefixes exist for the same target skill (e.g., `BSPAG-` and `BSPAGE-` both archive-resident for `branching-story-page-cycle`), prefer the most-recently-allocated prefix: the highest numbered ticket across both (by mtime if numbers don't disambiguate). When `docs/triage/` carries a recent audit triage for the same target whose accepted-items table names a specific prefix as the follow-up convention, that prefix WINS over the most-recently-allocated heuristic — the triage author already adjudicated the choice, and following it preserves continuity with the user's prior expectation. Surface the chosen prefix and the tiebreaker rationale in the user-facing Phase 9 ticket-paths report (e.g., *"Allocated under `BSPAGE-` per 2026-05-11 bootstrap-audit triage's stated follow-up convention; `BSPAG-` is the older alternate prefix"*) so the user can override before the Edit batch lands.
-- When no existing prefix is found in `tickets/` or `archive/tickets/`, derive one from the skill slug (uppercase letters of slug words, ≤8 chars) and start at `001`. **Legacy prefixes always win over derivation** — never auto-derive a third namespace when one or more legacy prefixes exist; the multi-prefix tiebreaker above governs which legacy prefix to extend.
+- When no existing prefix is found in `tickets/`, `tickets/archived/`, or `archive/tickets/`, derive one from the skill slug (uppercase letters of slug words, ≤8 chars) and start at `001`. **Legacy prefixes always win over derivation** — never auto-derive a third namespace when one or more legacy prefixes exist; the multi-prefix tiebreaker above governs which legacy prefix to extend.
 - Collisions abort with a specific-id error per HARD-GATE clause (e). Dropped tickets (when a Phase 8 disposition narrows the accept set) leave permanent gaps in the namespace; numbers are never reused.
 
 ### Ticket content discipline
