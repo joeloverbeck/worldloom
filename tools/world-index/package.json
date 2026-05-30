@@ -28,6 +28,11 @@
       "require": "./dist/src/index/open.js",
       "types": "./dist/src/index/open.d.ts"
     },
+    "./index/scene-coverage": {
+      "import": "./dist/src/index/scene-coverage.js",
+      "require": "./dist/src/index/scene-coverage.js",
+      "types": "./dist/src/index/scene-coverage.d.ts"
+    },
     "./public/types": {
       "import": "./dist/src/public/types.js",
       "require": "./dist/src/public/types.js",

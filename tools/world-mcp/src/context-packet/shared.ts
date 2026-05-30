@@ -91,6 +91,10 @@ export interface ContextPacketStoryBundleContextSummary {
   mystery_ids: string[];
   cast_stent_ids: string[];
   invariant_ids: string[];
+  /** Active (non-superseded) SCN ids covering the active branch path. */
+  scene_coverage_active_scene_ids: string[];
+  /** Page ids along the active branch path that no active SCN covers. */
+  scene_coverage_unscened_page_ids: string[];
 }
 
 export type RoleInStory =
@@ -368,7 +372,52 @@ export interface ContextPacketStoryBundleContext {
     role_in_story: RoleInStory[];
   }>;
   invariants_acknowledged: string[];
+  /**
+   * Bounded, prose-free projection of SPEC-95's `scene_coverage` view onto the
+   * active branch path: per-PG scene binding + unscened flag and a compact
+   * active-SCN list per branch. Trimmed first under budget pressure. `null`
+   * when the bundle has no coverage rows (or the layer was trimmed).
+   */
+  scene_coverage: ContextPacketSceneCoverage | null;
 }
+
+/**
+ * Bounded projection of the SPEC-95 `scene_coverage` view scoped to the active
+ * branch path. Carries ids / booleans / publication indicators only — never a
+ * scene prose body — and never recomputes coverage (it reads the derived view).
+ */
+export interface ContextPacketSceneCoverage {
+  /** Per-PG scene binding over the active branch path, root-to-leaf. */
+  pages: ContextPacketSceneCoveragePage[];
+  /** Compact active-SCN list for the branch(es) the active path crosses. */
+  active_scenes: ContextPacketSceneCoverageScene[];
+}
+
+/** Scene binding for one page along the active branch path. */
+export interface ContextPacketSceneCoveragePage {
+  page_id: string;
+  /** Active SCN ids covering this page (empty when unscened). */
+  scene_ids: string[];
+  /** True when no active SCN covers this page. */
+  unscened: boolean;
+}
+
+/** Compact active-SCN entry — ids / booleans / indicator only, no prose. */
+export interface ContextPacketSceneCoverageScene {
+  scene_id: string;
+  branch_id: string;
+  /** SPEC-94 presence-based publication indicator. */
+  publication_indicator: SceneCoveragePublicationIndicator;
+  superseded: boolean;
+}
+
+export type SceneCoveragePublicationIndicator =
+  | "planned"
+  | "prose-present"
+  | "attached:PASS"
+  | "attached:WARN"
+  | "attached:FAIL"
+  | "superseded";
 
 export interface ContextPacket {
   task_header: {

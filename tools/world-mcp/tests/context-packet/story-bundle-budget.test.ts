@@ -84,6 +84,122 @@ function addLargeStoryletPool(root: string): void {
   }
 }
 
+function seedSceneCoverageForBranch(root: string, sceneCount: number): void {
+  const db = new Database(
+    path.join(root, "worlds", STORY_FIXTURE_WORLD, "_index", "world.db")
+  );
+  try {
+    const sceneIds = Array.from({ length: sceneCount }, (_, index) => `SCN-${index + 1}`);
+    const scenes = sceneIds.map((sceneId) => ({
+      scene_id: sceneId,
+      branch_id: "BR-1",
+      supersedes: null,
+      superseded: false,
+      pg_ids: ["PG-1"],
+      artifact_availability: {
+        plan_present: true,
+        prose_present: true,
+        receipt_present: false,
+        receipt_verdict: null
+      },
+      publication_indicator: "prose-present"
+    }));
+
+    db.prepare(
+      `
+        INSERT INTO scene_coverage (
+          world_slug,
+          story_slug,
+          branch_id,
+          active_scene_ids_json,
+          superseded_scene_ids_json,
+          unscened_ranges_json,
+          pg_scene_lookup_json,
+          scenes_json,
+          refreshed_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `
+    ).run(
+      STORY_FIXTURE_WORLD,
+      STORY_FIXTURE_SLUG,
+      "BR-1",
+      JSON.stringify(sceneIds),
+      JSON.stringify([]),
+      JSON.stringify([]),
+      JSON.stringify({ "PG-1": sceneIds }),
+      JSON.stringify(scenes),
+      "2026-05-30T00:00:00Z"
+    );
+  } finally {
+    db.close();
+  }
+}
+
+test("scene_coverage is the first story-bundle layer trimmed under budget pressure and carries no prose", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+    seedSceneCoverageForBranch(root, 40);
+
+    // Generous budget: the layer is present and prose-free by construction.
+    const generous = await withRepoRoot(root, () =>
+      assembleContextPacket({
+        task_type: "commitment_block_authoring",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        seed_nodes: ["entity:marla-kern"],
+        token_budget: 18000
+      })
+    );
+    assert.ok(!("code" in generous));
+    assert.ok(generous.story_bundle_context?.scene_coverage !== null);
+    assert.equal(
+      /"(body|prose|prose_body)"/.test(
+        JSON.stringify(generous.story_bundle_context?.scene_coverage)
+      ),
+      false
+    );
+    assert.equal(
+      generous.truncation_summary.dropped_layers.includes("story_bundle_context.scene_coverage"),
+      false
+    );
+
+    // Tight budget: scene_coverage trims first — before any higher-priority
+    // existing layer — and that alone brings the packet under budget.
+    const tight = await withRepoRoot(root, () =>
+      assembleContextPacket({
+        task_type: "commitment_block_authoring",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        seed_nodes: ["entity:marla-kern"],
+        token_budget: 2000
+      })
+    );
+    assert.ok(!("code" in tight));
+    assert.ok(tight.story_bundle_context !== null);
+    assert.equal(tight.story_bundle_context.scene_coverage, null);
+    assert.equal(
+      tight.truncation_summary.dropped_layers[0],
+      "story_bundle_context.scene_coverage"
+    );
+    for (const higherPriorityLayer of [
+      "governing_world_context",
+      "exact_record_links",
+      "scoped_local_context",
+      "impact_surfaces"
+    ]) {
+      assert.equal(
+        tight.truncation_summary.dropped_layers.includes(higherPriorityLayer),
+        false,
+        `${higherPriorityLayer} must not trim before scene_coverage`
+      );
+    }
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("persisted context-packet summaries include story-bundle context summary", async () => {
   const root = createTempRepoRoot();
   const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
@@ -91,7 +207,7 @@ test("persisted context-packet summaries include story-bundle context summary", 
   try {
     buildStoryBundleWorld(root);
     addLargeStoryletPool(root);
-    process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "9000";
+    process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "9200";
 
     const result = await withRepoRoot(root, () =>
       assembleContextPacket({
@@ -131,7 +247,9 @@ test("persisted context-packet summaries include story-bundle context summary", 
       recent_page_ids: ["PG-1"],
       mystery_ids: ["M-1"],
       cast_stent_ids: ["STENT-2"],
-      invariant_ids: ["INV-social-intimacy"]
+      invariant_ids: ["INV-social-intimacy"],
+      scene_coverage_active_scene_ids: [],
+      scene_coverage_unscened_page_ids: []
     });
     assert.equal(result.story_bundle_context, null);
   } finally {

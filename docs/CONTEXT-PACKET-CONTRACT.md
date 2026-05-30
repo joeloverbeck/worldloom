@@ -147,6 +147,14 @@ This layer carries:
 - the longest active branch path and recent page metadata along that path
 - `STORY_KERNEL.md` `mysteries_in_play`, `cast_bind_list`, and `invariants_acknowledged`
 - per-mystery `PG.state_snapshot.unresolved_mystery_claims[]` evidence chains, including page id, authority, status, and `evidence_records[]`
+- `scene_coverage`: a bounded, prose-free projection of SPEC-95's `scene_coverage` view (see below), or `null` when the bundle has no coverage rows or the layer was trimmed under budget pressure
+
+`scene_coverage` projects SPEC-95's derived `scene_coverage` world-index view onto the `longest_active_branch_path` the packet already computes; it never recomputes coverage and never reads scene prose. Its shape is:
+
+- `pages`: one entry per page on the active branch path, root-to-leaf, each `{ page_id, scene_ids, unscened }` — `scene_ids` is the active (non-superseded) SCN ids covering that page (empty when unscened), and `unscened` is `true` when no active SCN covers the page.
+- `active_scenes`: a compact list of the SCNs whose pages intersect the active branch path, each `{ scene_id, branch_id, publication_indicator, superseded }`. `publication_indicator` is the SPEC-94 presence-based indicator (`planned` / `prose-present` / `attached:PASS` / `attached:WARN` / `attached:FAIL` / `superseded`); superseded scenes are included with `superseded: true` so health-audit consumers can flag un-resuperseded scenes. SCNs scoped to pages off the active branch path are excluded.
+
+This layer carries only ids, booleans, and publication indicators — never a scene prose body (rendered prose is non-authoritative and downstream of the packet). It is the lowest-priority story-bundle layer: under budget pressure it is **trimmed first**, before any higher-priority existing layer, set to `null` and recorded in `truncation_summary.dropped_layers` as `story_bundle_context.scene_coverage`. Its membership ids survive in the governing summary as `scene_coverage_active_scene_ids` and `scene_coverage_unscened_page_ids`. The load-bearing consumer is `branching-story-health-audit` (unscened-run / prose-debt check); `branching-story-turn-cycle` may read it only as an advisory, non-gating drift note.
 
 Scope heuristic: `active_locations_in_scope`, `active_objects_in_scope`, and `active_story_diegetic_artifacts` include records referenced by any other active record's body on the current branch path. This is the SPEC-46 Phase B id-list heuristic mirrored from the scoped-builder JSDoc and landed in `archive/tickets/SPEC46STOPIPMAC-004.md`; world-level diegetic artifacts still route through targeted `list_records(record_type='diegetic_artifact_record')` retrieval.
 

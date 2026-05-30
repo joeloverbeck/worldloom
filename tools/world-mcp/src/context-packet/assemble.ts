@@ -322,13 +322,39 @@ function packetFitsBudget(
   );
 }
 
+const SCENE_COVERAGE_LAYER = "story_bundle_context.scene_coverage";
+
+/**
+ * `scene_coverage` is the lowest-priority story-bundle layer: it is trimmed
+ * before any of the higher-priority DROP_PRIORITY layers. The projection is
+ * prose-free, so trimming only forfeits scene/unscened membership metadata
+ * (still recoverable via the governing summary's scene-coverage id fields).
+ */
+function trimSceneCoverage(packet: ContextPacket): void {
+  const storyBundleContext = packet.story_bundle_context;
+  if (storyBundleContext === null || storyBundleContext.scene_coverage === null) {
+    return;
+  }
+
+  const droppedSceneIds = storyBundleContext.scene_coverage.active_scenes.map(
+    (scene) => scene.scene_id
+  );
+  storyBundleContext.scene_coverage = null;
+  packet.truncation_summary.dropped_layers.push(SCENE_COVERAGE_LAYER);
+  packet.truncation_summary.dropped_node_ids_by_layer[SCENE_COVERAGE_LAYER] = droppedSceneIds;
+}
+
 function enforceBudget(
   packet: ContextPacket,
   requestedBudget: number,
   harnessCeilingChars: number
 ): void {
+  const effectiveHarnessCeilingChars = effectivePacketBodyCeilingChars(harnessCeilingChars);
+  if (!packetFitsBudget(packet, requestedBudget, effectiveHarnessCeilingChars)) {
+    trimSceneCoverage(packet);
+  }
+
   for (const layer of DROP_PRIORITY) {
-    const effectiveHarnessCeilingChars = effectivePacketBodyCeilingChars(harnessCeilingChars);
     if (packetFitsBudget(packet, requestedBudget, effectiveHarnessCeilingChars)) {
       return;
     }
