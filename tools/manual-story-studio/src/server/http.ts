@@ -4,6 +4,10 @@ import path from "node:path";
 import fastifyStatic from "@fastify/static";
 import Fastify, { type FastifyInstance } from "fastify";
 
+import {
+  registerManualStoriesGetRoute,
+  registerManualStoriesWriteRoutes,
+} from "./routes/manual-stories.js";
 import { registerWorldsRoutes } from "./routes/worlds.js";
 import { wrapRouterWritable } from "./write-scope-guard.js";
 
@@ -43,9 +47,12 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerStaticServe(server, options.repoRoot);
 
   await registerWorldsRoutes(server, { repoRoot: options.repoRoot });
+  await registerManualStoriesGetRoute(server, { repoRoot: options.repoRoot });
 
-  await wrapRouterWritable(server, async (_writableRouter) => {
-    // Ticket 007 registers registerManualStoriesWriteRoutes here for the POST create path.
+  await wrapRouterWritable(server, async (writableRouter) => {
+    await registerManualStoriesWriteRoutes(writableRouter, {
+      repoRoot: options.repoRoot,
+    });
   });
 
   return server;
