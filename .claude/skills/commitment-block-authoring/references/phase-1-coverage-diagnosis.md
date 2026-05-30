@@ -53,7 +53,15 @@ Identify which coverage targets are absent or under-represented in the current p
 
 Under-represented targets are eligible `direct_batch` authoring lanes even when `status: covered`.
 
-**Saturated-pool advisory.** When the diagnosis finds every applicable target at `status: covered` with `coverage_strength: hard` (no gaps and no under-representation) and no `focus` hint was supplied, the pool is target-saturated. Authoring the full `target_count` onto a saturated pool risks redundant, non-load-bearing storylets — in tension with FOUNDATIONS §Story Bundles §5b (every story-bundle record must be load-bearing; each block costs LLM tokens at authoring and at every retrieval). In this case surface a **pool-saturation advisory** in the Phase 6 deliverable summary recommending the user either supply a `focus` hint or reduce `target_count`, and label each block this batch does author as a depth / hard-grounding / under-representation addition rather than an absent-target fill. The advisory is non-blocking — the user may still want depth — but it makes batch redundancy a conscious choice rather than a silent default.
+**Saturation verdict (three-state).** Phase 1's saturation read produces a three-state `pool_saturation` enum (widened from a binary flag) combining Pass A's pool-wide 17-target diagnosis with Pass B's moment-fit-lane diagnosis (Pass B is defined below; both passes feed this verdict):
+
+- `false` — Pass A or Pass B (or both) found gaps; the saturated-pool advisory does not fire. Depth-criteria checklist lanes (below) may still apply for any under-representation found. Author normally against the gaps and under-representations surfaced by the two passes.
+- `pool_only` — Pass A clean (every applicable target at `status: covered` with `coverage_strength: hard`, no under-representation), but Pass B emitted `moment_fit_lanes[]`. Pool is target-saturated against the pool-wide check but NOT fit to the moment signature. Author against the moment-fit lanes (Phase 2 reads each lane's `lane_id` and translates to existential predicates per `references/phase-2-draft-blocks.md` §"Authoring against moment-fit lanes"); the existing depth-criteria checklist lanes apply alongside as secondary labels when a block's hard preconditions also match a depth lane.
+- `moment_and_pool` — Pass A clean AND Pass B clean (no moment_fit_lanes emitted). Pool is fit to both pool-wide check and the moment signature. Triggers the §Early-termination verdict below when the operator supplied no `focus` hint and `target_count` was defaulted.
+
+Authoring the full `target_count` onto a saturated pool risks redundant, non-load-bearing storylets — in tension with FOUNDATIONS §Story Bundles §5b (every story-bundle record must be load-bearing; each block costs LLM tokens at authoring and at every retrieval). The Phase 6 deliverable summary surfaces the verdict so the operator can choose: in the `pool_only` state, author against moment-fit lanes; in the `moment_and_pool` state, defer to the early-termination verdict (no-batch by default; operator override via `focus` or explicit `target_count` proceeds with a strong advisory).
+
+CBAUTH-005's existing depth-criteria-lane labeling is preserved alongside the new moment-fit-lane labeling — both are valid lane vocabularies; the per-block label vocabulary documented at SKILL.md Phase 6 sub-step 3 includes both families.
 
 **Depth-criteria checklist for saturated-pool authoring.** When authoring depth blocks against a target-saturated pool (no under-representation criterion firing on the target the new block addresses), each new block must map to one of the depth-criteria lanes below. The lanes are computable from the pool projection already loaded at pre-flight step 4(i) — `move_family` counts, action-family counts across `exit_options[]`, hard-vs-soft predicate distribution, and pressure-shape patterns — no new retrieval. The set is not exhaustive; author judgment may identify additional legitimate lanes, but those must carry the explicit "no documented lane; authorial judgment" flag in the Phase 6 deliverable summary (see `SKILL.md` Phase 6 sub-step 3):
 
@@ -65,6 +73,46 @@ Under-represented targets are eligible `direct_batch` authoring lanes even when 
 - **`hard_grounding_lane`**: a block that adds *hard*-grounded selection on a triggering record class currently covered only via existing pool blocks' `soft` predicates (lifts the per-target `coverage_strength` from `soft_only` to `hard` at the pool level). Overlaps with under-representation criterion (a) but extends it: any target whose pool coverage has zero hard-grounding SLTs is a hard-grounding lane regardless of whether the triggering class is active.
 
 The diagnosis may optionally extend the working-memory `coverage_diagnosis` YAML shape with a per-planned-block `depth_lanes_addressed: [<lane-name>]` field. The field is working-memory-only and is not written to the SLB manifest (the manifest keeps coverage as inline prose per the manifest's existing rule).
+
+**Pass B — Moment-fit gap diagnosis.** Pass B consumes the `moment_signature` artifact emitted by pre-flight step 4(iii) (CBAUTH-007) and walks the pool projection against it to surface moment-fit gaps. Pass B is skipped when `moment_signature_skipped: true` (no committed PG yet — post-bootstrap, pre-PG-2) and skipped entirely for `audit_repair` mode (RSP cards already prescribe targets). Pass B is computable from the pool projection already loaded at pre-flight step 4(i) + the `moment_signature` artifact from step 4(iii); no new MCP retrieval is added.
+
+The 4-step procedure:
+
+1. For each `move_family` value (16-value enum per shared contract §4.4), count pool SLTs that hard-fire on the signature's `active_high_salience_records` (i.e., hard precondition referencing one of those records' classes, urgencies, or role-filters). Under-represented move_families with active high-salience records targeting them emit a `moment_fit_lane` named `move_family_under_represented_at_moment:<move_family>`.
+
+2. For each `supersession_set` entry, check whether the pool carries a block whose hard preconditions match the *new* (post-supersession) record's shape (e.g., for a THR supersession with axis "protect/possess collapse": any pool SLT hard-gating on `any_thread_active(tag~="protect", urgency=high)` AND `any_relationship_axis(axis=desire, value=high)`). If zero, emit a `moment_fit_lane` named after the supersession axis (e.g., `protect_possess_collapse_under_desire`).
+
+3. For each `dominant_action_family` in `forward_affordance_fingerprint`, check pool SLTs whose `exit_options[].action_family` includes that family AND whose hard preconditions intersect the `active_high_salience_records` set. If under-represented, emit a `moment_fit_lane` named `<dominant_family>_under_<dominant_active_pressure_axis>` (e.g., `negotiation_under_door_or_leash_belief`).
+
+4. For each non-empty `cast_role_engagement_at_moment` entry, check whether a pool SLT names that role in a precondition role-filter (per the existing cast-role determinism rule in target #15). Augments target #15 with moment-anchored urgency: a role exercised by the signature with no engaging SLT IS a moment-fit gap; a role unengaged-by-the-moment that has a pool block hard-gating on it elsewhere is NOT (emit a `moment_fit_lane` named after the role and the active pressure shape, e.g., `authority_reach_at_offstage_pressure_source`).
+
+The signature is shape extraction, not id binding; Pass B's `lane_id` naming MUST reference predicate-class / urgency / role / axis / action-family shapes rather than branch-local record ids (preserves Character-Fit Selection Contract §11a discipline). The lane is consumed by Phase 2 authoring (see `references/phase-2-draft-blocks.md` §"Authoring against moment-fit lanes" for the lane_id → predicate-shape translation patterns).
+
+**Early-termination verdict.** When `pool_saturation == "moment_and_pool"` AND the operator supplied no `focus` hint AND `target_count` was either defaulted to 6 OR not supplied (operator gave no explicit count), Phase 1 emits an `early_termination` verdict that skips Phase 2 / Phase 3 / Phase 4 / Phase 5 / Phase 6 patch-envelope construction. The HARD-GATE still fires on the no-batch verdict — the deliverable summary surfaces the verdict, the examined lanes, and suggested overrides so the user can choose: approve "no batch authored" (HARD-GATE confirms termination), or reject and re-invoke with `focus` / `target_count` override. This preserves the single-approval-surface discipline — the user explicitly approves "no batch" rather than the skill silently terminating.
+
+Working-memory shape:
+
+```yaml
+early_termination:
+  fired: true
+  reason: moment_already_covered            # | pool_saturated_no_focus (existing advisory escalated)
+  examined:
+    pool_targets_covered_hard: 17
+    moment_fit_lanes_examined: [<lane>, ...]
+    moment_fit_lanes_already_covered: [<lane>, ...]
+  suggested_overrides:
+    - {invocation: "focus='<lane-name>'", effect: "author depth blocks targeting that moment lane"}
+    - {invocation: "target_count=<N>", effect: "author N depth blocks despite moment coverage"}
+```
+
+Firing conditions (ALL must hold):
+
+- (a) `pool_saturation == "moment_and_pool"`
+- (b) no `focus` hint supplied
+- (c) `target_count` either defaulted to 6 OR not supplied (operator gave no explicit count)
+
+When the operator supplied `focus` OR explicit `target_count`, early-termination does NOT fire — the skill proceeds normally with a strong advisory in the Phase 6 deliverable summary noting the moment is covered and the batch is depth-fill at operator override.
+
 Use the existential predicates in the predicate DSL for global-pool social-state and SPEC-42 mechanism coverage. The function-call forms below are notation only; emitted `SLT.preconditions.hard | soft` entries are flat predicate objects per shared contract §5. Prefer existential social-state predicates with `urgency?` filters such as `any_obligation_open(alias, kind?, urgency?, owed_by_role?, owed_to_role?)`, `any_consequence_pending(alias, kind?, urgency?, derived_from?)`, `any_thread_active(alias, tag?, urgency?)`, `any_relationship_axis(alias, axis, comparator, value, participant_role?)`, `any_belief(alias, holder_role?, mode?, truth_relation?, visibility?)`, and `any_intention(alias, holder_role?, urgency?)` for global-pool blocks that address high-salience debts, relationships, beliefs, threads, and intentions without naming branch-local record ids. Prefer the SPEC-42 existential predicates `any_clock_active(alias, kind?, salience?)`, `any_secret_unrevealed(alias, salience?, kind?)`, and `any_story_question_open(alias, salience?, setup_kind?)` for global-pool blocks that advance active clocks, reveal or prepare story secrets, or pay off open setups. Pick stable aliases that describe the matched record's role in the block, for example `urgent_debt`, `pending_fallout`, `trust_edge`, `public_belief`, `open_intent`, `active_clock`, `hidden_secret`, or `open_setup`.
 The three SPEC-42 coverage targets are conditional authoring targets: when a bundle has no active `CLK`, `STSEC`, or `STQ` records, do not warn merely because no block covers the absent class. When those records exist and are under-represented in the current SLT pool, surface the missing coverage in the Phase 1 diagnosis and draft at least one matching block unless the focus hint and Phase 4 diversity constraints justify deferring it.
 
@@ -89,7 +137,19 @@ coverage_diagnosis:
   - {target_id: 14, target_name: "setup_paying_off", status: gap, coverage_strength: none, under_represented: false, addressed_by_blocks: [SLT-NEW-6]}
   - {target_id: 15, target_name: "cast_role_coverage", status: covered, coverage_strength: hard, under_represented: false, addressed_by_blocks: []}
   # ... (one entry per target; covered entries also recorded with coverage_strength + under_represented for completeness)
-pool_saturation: false   # true only when every applicable target is covered + hard + not under-represented AND no focus hint was supplied; surfaces the saturated-pool advisory in the Phase 6 deliverable summary.
+moment_signature: {<echoed pre-flight artifact from CBAUTH-007 step 4(iii), for audit-trail traceability into the Phase 6 deliverable summary>}
+moment_fit_diagnosis:
+  signature: <embedded moment_signature>
+  moment_fit_lanes:
+    - {lane_id: "<name>", source: <supersession_set | forward_affordance+active_high_salience | cast_role_engagement | move_family_under_represented_at_moment>, addressed_by_blocks: [SLT-NEW-<N>, ...]}
+  moment_signature_skipped: false
+  moment_signature_skip_reason: null
+pool_saturation: false   # widened from bool to three-state enum: false | pool_only | moment_and_pool. See §Saturation verdict (three-state) above for firing rules. Truthy values ("pool_only" / "moment_and_pool") both mean "saturated against pool-wide check"; "moment_and_pool" additionally means Pass B emitted no lanes; surfaces the saturated-pool advisory in the Phase 6 deliverable summary.
+early_termination:
+  fired: <true | false>
+  reason: <moment_already_covered | pool_saturated_no_focus | null>
+  examined: {pool_targets_covered_hard: <int>, moment_fit_lanes_examined: [...], moment_fit_lanes_already_covered: [...]}
+  suggested_overrides: [...]
 driver_kind_coverage:
   triggered_kinds: [player_action, npc_action, clock_fire]
   uncovered_kinds: [npc_action]   # bundle has active STPLAN/STEMO but no SLT with grounding.compatible_turn_drivers: [..., npc_action, ...]
