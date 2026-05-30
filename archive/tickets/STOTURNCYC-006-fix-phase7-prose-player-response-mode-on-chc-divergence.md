@@ -1,6 +1,6 @@
 # STOTURNCYC-006: Fix Phase 7 prose conflating SE.turn_driver.player_response_mode with a non-existent CHC field
 
-**Status**: PENDING
+**Status**: ✅ COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None — skill-prose-only update to `.claude/skills/branching-story-turn-cycle/SKILL.md` line 168
@@ -75,3 +75,22 @@ Keep the rest of the Phase 7 sentence (about grounding STPLAN / STEMO / CLK / ST
 1. `grep -n player_response_mode .claude/skills/branching-story-turn-cycle/SKILL.md` (must return zero matches after the edit).
 2. `grep -n player_response_mode .claude/skills/branching-story-turn-cycle/references/*.md` (must continue to return exactly the two pre-existing correct matches).
 3. `grep -n chc_response_topical_grounding_missing tools/validators/src/structural/turn-cycle-output-grounding-integrity.ts` (must return a non-empty match — the validator name cited in the rewritten prose must exist).
+
+## Outcome
+
+Completed on 2026-05-30:
+
+- `.claude/skills/branching-story-turn-cycle/SKILL.md:168` Phase 7 sentence rewritten. The misleading "emitted CHCs must use `player_response_mode: responds | witnesses | chooses_continuation`" clause is gone. The non-player-driver response contract is now expressed as: ground in `initiator` STENT or one of `driver_records[]` AND carry a response action family in `target_or_action_families[]`, with `turn_cycle_output_grounding_integrity.chc_response_topical_grounding_missing` named inline as the canonical enforcement. A single-line clarifier ("CHC has no driver-response mode field — the response contract is grounding-and-action-family-shaped, not flag-shaped") replaces the previous field-existence claim without re-naming the field.
+
+### Verification Result
+
+1. `grep -n player_response_mode .claude/skills/branching-story-turn-cycle/SKILL.md` → zero matches. AC1 PASS.
+2. `grep -n player_response_mode .claude/skills/branching-story-turn-cycle/references/*.md` → exactly two matches (`phase-1-action-resolution.md:44`, `phase-6-page-snapshot.md:53`), both on `SE.turn_driver`, both pre-existing and correct. AC2 PASS.
+3. Rewritten Phase 7 names `turn_cycle_output_grounding_integrity.chc_response_topical_grounding_missing` and enumerates `oppose / protect / evade / communicate / investigate`. AC3 PASS.
+4. `grep -n chc_response_topical_grounding_missing tools/validators/src/structural/turn-cycle-output-grounding-integrity.ts` → match at line 151 (the validator name cited in the rewritten prose exists in code). Test Plan #3 PASS.
+5. Invariant 1 (SKILL.md never asserts a CHC schema field absent from `story-choice.schema.json`) holds — the rewritten prose names no CHC field that the schema does not carry.
+6. Invariant 2 (single canonical statement of the non-player-driver response-CHC contract in Phase 7) holds — Phase 7 of SKILL.md is the sole statement; `references/phase-8-choice-generation.md` does not duplicate it as a separate contract.
+
+### Deviations
+
+- The "What to Change" §1 third bullet ("Do not introduce any CHC-level `player_response_mode` (or equivalent) field") is in tension with AC1's strict zero-match grep when read as "add a disclaimer that names the field." Honoring AC1's strict reading, the rewritten prose omits the field name entirely and uses a generic "CHC has no driver-response mode field" disclaimer instead. The contract is still fully expressed and the schema-of-record disclaimer remains intact; only the literal token `player_response_mode` is absent from SKILL.md (where it would have been a docs-trap anyway).
