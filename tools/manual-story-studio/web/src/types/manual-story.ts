@@ -221,3 +221,52 @@ export interface RefViolation {
 }
 
 export type ManualRecord = RecordCommonFields & Record<string, unknown>;
+
+// ---- Prompt composer types (mirror of src/prompt/types.ts) ----
+
+export type PromptLintTier = "hard" | "soft";
+
+export interface PromptLintFinding {
+  rule: string;
+  tier: PromptLintTier;
+  message: string;
+  section?: string;
+  snippet?: string;
+}
+
+export interface PromptLintResult {
+  findings: PromptLintFinding[];
+  cleanForCopy: boolean;
+  blockingForCopy: boolean;
+}
+
+export interface PromptRunSidecarDraft {
+  manual_story_slug: string;
+  included_cast: string[];
+  included_records: string[];
+  included_template_path: string | null;
+  moment_directive: string;
+}
+
+export interface PromptRunSidecar extends PromptRunSidecarDraft {
+  id: string;
+  created_at: string;
+  prompt_sha256: string;
+  lint_override?: {
+    findings: PromptLintFinding[];
+    copied_anyway_at: string;
+  };
+}
+
+export interface PromptComposeResult {
+  markdown: string;
+  lint: PromptLintResult;
+  sidecar_draft: PromptRunSidecarDraft;
+}
+
+export interface PromptComposeRequestInput {
+  moment_directive: string;
+  included_cast: string[];
+  included_records: string[];
+  included_template_path?: string | null;
+}
