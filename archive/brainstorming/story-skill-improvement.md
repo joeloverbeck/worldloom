@@ -1,0 +1,9 @@
+# Story Skill Improvement - Skill Proposal
+
+Lately, after I run any story skill (.claude/skills/branching-story-bootstrap , .claude/skills/branching-story-turn-cycle, .claude/skills/commitment-block-authoring), as soon as the use of that skill finishes, I ask the following in a plain Claude session:
+
+"Please reflect upon your use of the [SKILL_ROUTE] skill and the possible validation failures and/or warnings you've had to deal with. For each of them, determine: was the issue your mistake, or did it evidence problems, gaps, or possible things to improve with the code, architecture, and/or skills? Did you come across some common-sense issues, for example parts of the architecture, code, and/or skills that are clearly doing something wrong? Can you come up with improvements for the skill that would make the next use of it smoother, more solid, more validated, and maybe more deterministic without breaking the purpose of the skill? If changes are warranted aligned with docs/FOUNDATIONS.md , create tickets in tickets/* with the specifications."
+
+We've done the same thing so many times that I think we should formalize it into a new skill. Note that this skill may be somewhat similar to .claude/skills/mcp-integration-audit , but that one was created at a time where the actual MCP integration was our main concern. Certainly, improving MCP integration is also a concern for the proposed new skill, but solely as part of the general purpose of making the next use of the skill smoother.
+
+The skill in question should likely be passed as a parameter to the new skill, but it should have always been used and be in session at the moment the new skill is executed.
