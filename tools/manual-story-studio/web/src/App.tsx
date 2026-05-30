@@ -1,7 +1,10 @@
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
+import { CastAndProfiles } from "./pages/CastAndProfiles.js";
 import { CreateManualStory } from "./pages/CreateManualStory.js";
+import { Dashboard } from "./pages/Dashboard.js";
 import { ManualStories } from "./pages/ManualStories.js";
+import { Records } from "./pages/Records.js";
 import { Worlds } from "./pages/Worlds.js";
 
 function Banner() {
@@ -33,6 +36,18 @@ export function App() {
           <Route
             path="/worlds/:worldSlug/manual-stories/new"
             element={<CreateManualStory />}
+          />
+          <Route
+            path="/worlds/:worldSlug/manual-stories/:msSlug/dashboard"
+            element={<Dashboard />}
+          />
+          <Route
+            path="/worlds/:worldSlug/manual-stories/:msSlug/records"
+            element={<Records />}
+          />
+          <Route
+            path="/worlds/:worldSlug/manual-stories/:msSlug/cast"
+            element={<CastAndProfiles />}
           />
         </Routes>
       </main>
