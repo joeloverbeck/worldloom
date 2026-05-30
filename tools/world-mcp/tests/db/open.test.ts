@@ -338,7 +338,7 @@ function createMinimalAtomicWorld(
   );
 
   const cfBody = [
-    "id: CF-0001",
+    "id: CF-1",
     "title: Minimal canon fact",
     "status: hard_canon",
     "type: institution",
@@ -368,7 +368,7 @@ function createMinimalAtomicWorld(
     ? `${cfBody}\n`
     : `${cfBody}   \n\n\n\n`;
 
-  writeFileSync(path.join(world, "_source", "canon", "CF-0001.yaml"), fileContent, "utf8");
+  writeFileSync(path.join(world, "_source", "canon", "CF-1.yaml"), fileContent, "utf8");
   return world;
 }
 
@@ -376,7 +376,7 @@ test("openIndexDb stays non-stale after sync bumps mtime on a non-canonical-byte
   const root = createTempRepoRoot();
   const worldSlug = "converge";
   const world = createMinimalAtomicWorld(root, worldSlug, { canonicalBytes: false });
-  const sourcePath = path.join(world, "_source", "canon", "CF-0001.yaml");
+  const sourcePath = path.join(world, "_source", "canon", "CF-1.yaml");
 
   try {
     assert.equal(buildWorldIndex(root, worldSlug, { quiet: true }), 0);
@@ -442,11 +442,11 @@ test("sync removes file_versions entries for deleted _source records (IDXSYNC-00
 
   // Add a second canon fact to delete (deleting the only file would leave the
   // world without atomic source records and short-circuit sync).
-  const cfTwoPath = path.join(world, "_source", "canon", "CF-0002.yaml");
+  const cfTwoPath = path.join(world, "_source", "canon", "CF-2.yaml");
   writeFileSync(
     cfTwoPath,
     [
-      "id: CF-0002",
+      "id: CF-2",
       "title: Secondary canon fact",
       "status: hard_canon",
       "type: institution",
@@ -476,8 +476,8 @@ test("sync removes file_versions entries for deleted _source records (IDXSYNC-00
       try {
         const present = db
           .prepare("SELECT COUNT(*) AS count FROM file_versions WHERE world_slug = ? AND file_path = ?")
-          .get(worldSlug, "_source/canon/CF-0002.yaml") as { count: number };
-        assert.equal(present.count, 1, "CF-0002 should be indexed after build");
+          .get(worldSlug, "_source/canon/CF-2.yaml") as { count: number };
+        assert.equal(present.count, 1, "CF-2 should be indexed after build");
       } finally {
         db.close();
       }
@@ -491,13 +491,13 @@ test("sync removes file_versions entries for deleted _source records (IDXSYNC-00
       try {
         const present = db
           .prepare("SELECT COUNT(*) AS count FROM file_versions WHERE world_slug = ? AND file_path = ?")
-          .get(worldSlug, "_source/canon/CF-0002.yaml") as { count: number };
-        assert.equal(present.count, 0, "sync should remove file_versions entry for deleted CF-0002");
+          .get(worldSlug, "_source/canon/CF-2.yaml") as { count: number };
+        assert.equal(present.count, 0, "sync should remove file_versions entry for deleted CF-2");
 
         const nodes = db
           .prepare("SELECT COUNT(*) AS count FROM nodes WHERE world_slug = ? AND file_path = ?")
-          .get(worldSlug, "_source/canon/CF-0002.yaml") as { count: number };
-        assert.equal(nodes.count, 0, "sync should delete nodes for removed CF-0002");
+          .get(worldSlug, "_source/canon/CF-2.yaml") as { count: number };
+        assert.equal(nodes.count, 0, "sync should delete nodes for removed CF-2");
       } finally {
         db.close();
       }
