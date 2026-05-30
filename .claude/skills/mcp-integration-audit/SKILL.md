@@ -155,7 +155,7 @@ If any check fails, abort with a clear message before Phase 1.
 
 ## Phase 1: Mandatory Reads
 
-Read in this order (skip any already in context this session):
+Read in this order (skip any already in context this session, naming the load mechanism explicitly per step 6's rule — bare "already loaded" claims are insufficient because Phase 5 verification may require the cited content, and the audit trail benefits from explicit naming for every skipped read, not only the FOUNDATIONS-specific case):
 
 1. `<target_skill_path>/SKILL.md` — entire file.
 2. `<target_skill_path>/references/*.md` — every reference doc when present (use `Glob` first to enumerate). Reference docs frequently carry phase-execution prose the SKILL.md only summarizes.

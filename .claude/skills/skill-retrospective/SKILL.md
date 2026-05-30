@@ -64,7 +64,11 @@ Phase 3: Attribute and Route — for each finding decide operator-mistake (drop)
 Phase 4: Severity-Tag and Known-Deferred-Debt Drop — CRITICAL/HIGH/MEDIUM/LOW;
          per-finding archive content-grep against archive/tickets/<NAMESPACE>-*.md;
          cross-check the target skill's Guardrails for known-deferred-debt
-         disclosures and drop matches as already-disclosed-not-a-finding.
+         disclosures and drop matches as already-disclosed-not-a-finding;
+         for drops not covered by these two primary categories, apply
+         mcp-integration-audit's broader drop-category taxonomy (design-intent /
+         skill-internal discipline, archive-grep-confirmed, pipeline-component-
+         design-intent, in-session-sibling-filed-work).
        |
        v
 Phase 5: Verification — re-confirm each surviving finding's defect is genuinely
@@ -160,10 +164,10 @@ Namespace allocation is DEFERRED to Phase 7 (per-finding ticket numbers are unkn
 
 ## Phase 1: Mandatory Reads
 
-Read in this order (skip any already in context this session):
+Read in this order (skip any already in context this session, naming the load mechanism explicitly per step 6's rule — bare "already loaded" claims are insufficient because Phase 5 verification may require the cited content, and the audit trail benefits from explicit naming for every skipped read, not only the FOUNDATIONS-specific case):
 1. `<target_skill_path>/SKILL.md` — entire file.
 2. `<target_skill_path>/references/*.md` — every reference doc when present (`Glob` first).
-3. `<target_skill_path>/templates/*.{yaml,md}` — every parse-time-schema-bearing template when present (skip pure-prompt-content templates carrying no field schema).
+3. `<target_skill_path>/templates/*.{yaml,md}` — `Glob` the directory first to enumerate what ships (skip the entire step when no `templates/` directory is present). For each template that ships, Read its frontmatter + first ~50 lines to classify as parse-time-schema-bearing (carries field-schema declarations Phase 5 will verify) vs pure-prompt-content (carries no schema). Read the full body only for the parse-time-schema-bearing ones — this sidesteps the chicken-and-egg of skipping based on a property the operator can only determine by reading.
 4. `tickets/_TEMPLATE.md`.
 5. `tickets/README.md`.
 6. `docs/FOUNDATIONS.md` — skip if read earlier this session and unmodified, naming the load mechanism.
@@ -219,6 +223,8 @@ Assign severity per finding:
 - **LOW** — coverage gap or polish; did not block progress.
 
 Then, for each candidate: (i) content-grep `archive/tickets/<NAMESPACE>-*.md` for an already-filed equivalent; (ii) cross-check the target skill's Guardrails known-deferred-debt disclosures. Drop any finding the skill ALREADY discloses as known deferred debt — a disclosed limitation is not a finding. Record the drop with its matched disclosure line.
+
+For findings that fit a drop pattern not covered by (i) and (ii) — **design-intent / skill-internal discipline** (a named skill-internal mechanism IS the intended permanent state, not a fallback for missing pipeline support); **archive-grep-confirmed completed work without prose link** (an archived ticket's Outcome explicitly resolves the gap even though the target skill prose does not link it); **pipeline-component-design-intent** (the skill's pipeline component design intent declines the surface, often surfaced via an archived ticket's explicit scope-decline rationale); **in-session-sibling-filed-work** (a sibling skill's session already filed the same gap, so re-filing would duplicate) — apply `mcp-integration-audit`'s Phase 4 drop-category taxonomy as authoritative. The sibling carries the elaborated six-category list plus same-surface ≠ same-invariant nuance, same-surface vs adjacent-surface ordering, and worked precedents; skill-retrospective shares architectural shape with `mcp-integration-audit` (per Guardrails §Relationship to `mcp-integration-audit`), and dropping under one of these categories requires the same evidence the sibling's prose names. Worked precedent: a commitment-block-authoring retrospective run — F5 (batch-diversity validator backstop) was dropped because CBAUTH-002 explicitly declined to add a validator for batch-property checks; CBAUTH-002's scope-decline rationale established the design-intent / skill-internal discipline pattern (Phase 4 batch-diversity is by-design a skill-procedure surface, not an engine-validator surface), and the drop was recorded with that precedent's rationale.
 
 ## Phase 5: Verification
 
