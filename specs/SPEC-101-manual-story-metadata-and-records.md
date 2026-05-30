@@ -3,7 +3,7 @@
 **Status:** PROPOSED
 **Date:** 2026-05-30
 **Classification:** story-canon-related (defines the per-manual-story data model that the prompt composer (SPEC-102) and prose paste flow (SPEC-103) consume; record vocabulary is deliberately segregated from world-canon and story-bundle classes via lowercase `m`-prefix discipline established in SPEC-100).
-**Depends on:** **SPEC-100** (package skeleton, write sandbox, `enumerate.ts` exclusion, web frontend shell). Land SPEC-100 first.
+**Depends on:** **SPEC-100** (package skeleton, write sandbox, `enumerate.ts` exclusion, web frontend shell). SPEC-100 landed 2026-05-30 (archived at `specs/archive/SPEC-100-manual-story-studio-package-boundary.md`); SPEC-101 is the next ticketization per `specs/IMPLEMENTATION-ORDER.md`.
 **Related:** `docs/FOUNDATIONS.md` §Story Bundles §6.1 (STCHAR profile sections borrowed for Manual Character Profile schema), `tools/world-index/src/parse/story-directories.ts` (uppercase ID patterns Manual Studio avoids by case), `archive/specs/SPEC-99-context-packet-scene-surface-and-closeout.md` and earlier (precedent for spec format).
 **Source:** critical triage of `reports/manual-story-studio-first-iteration.md` §5 / §6 / §7 / §15 milestone M2 (ChatGPT-Pro, 2026-05-30). Accepted with: enum-vocabulary gaps for `language_register` / `prose_preferences.*` resolved during ticket decomposition; "sequences" → "consequences" interpretation **confirmed by user 2026-05-30** (CNSQ-shaped `consequences/mcnsq-*.yaml` records, per §2 In scope item 2 and §3 Manual Character Profile schema below); hybrid hard-delete-vs-inactive policy ships as proposed.
 
@@ -84,7 +84,7 @@ ChatGPT-Pro's proposal §6 sketches a sensible common-fields shape and class lis
    - `agency_and_planning.default_strategy` / `risk_style` / `fallback_style` / `planning_blind_spots` (strings).
    - `relationship_behavior` (map: `mchar-<id>` → string description; plus optional `authority_figures` and `dependents` summary strings).
    - `prose_constraints.prose_must_not_imply` (string array), `forbidden_inventions` (string array), `voice_do_not_do` (string array).
-4. **Reference validation.** A record's `refs.*` and per-class typed pointers (e.g., `belief.holder`, `obligation.owed_by`) must point to existing records inside the same manual story OR to records marked `active: false` (archived but retained). Validator at `tools/manual-story-studio/src/validate/refs.ts` returns a list of broken-ref violations per record; CRUD save flow refuses to write a record with broken refs unless the author confirms an override (UI: "this record references missing IDs: <list>; save anyway?"). Reference closure is shallow (one hop, not recursive) — the goal is preventing obvious dangling refs, not enforcing engine-grade reference integrity.
+4. **Reference validation.** A record's `refs.*` and per-class typed pointers (e.g., `belief.holder`, `obligation.owed_by`) must point to existing records inside the same manual story OR to records marked `active: false` (archived but retained). Validator at `tools/manual-story-studio/src/validate/refs.ts` returns a list of broken-ref violations per record; CRUD save flow refuses to write a record with broken refs unless the author confirms an override (UI: "this record references missing IDs: <list>; save anyway?"). Reference closure is shallow (one hop, not recursive) — the goal is preventing obvious dangling refs, not enforcing engine-grade reference integrity. The `source_world_character: CHAR-*` provenance field on Manual Character Profiles is informational and explicitly outside ref-validation scope — the validator does not inspect it (resolution against world canon is M6 deferral per §8 Risks).
 5. **Hybrid deletion policy.**
    - **Unreferenced record:** allow hard delete (`DELETE /api/.../records/<class>/<id>` → `fs.unlinkSync` after the in-tool reference scan returns zero referrers).
    - **Referenced record:** default to `active: false` with `retired_reason` (PUT, not DELETE). Audit-trailed.
@@ -120,7 +120,7 @@ ChatGPT-Pro's proposal §6 sketches a sensible common-fields shape and class lis
 
 ## 3. Key decisions
 
-- **ID allocation is per-class, per-manual-story, append-only natural integer suffix.** Allocator at `tools/manual-story-studio/src/write/id-allocator.ts` scans the class directory, computes `max(existing_numeric_suffix) + 1`, and reserves the next ID inside the POST handler. The class prefix is the same letters as the directory class name's first letters where unambiguous (`mchar-`, `mbel-`, `mrel-`, etc.). The allocator is single-server (Manual Studio backend serves one client); race conditions are not a meaningful concern for a local writing cockpit.
+- **ID allocation is per-class, per-manual-story, append-only natural integer suffix.** Allocator at `tools/manual-story-studio/src/write/id-allocator.ts` scans the class directory, computes `max(existing_numeric_suffix) + 1`, and reserves the next ID inside the POST handler. Class prefixes are short memorable abbreviations chosen to minimize collision with engine-recognized uppercase ID classes (STENT/STCHAR/SLT/etc.) rather than mechanically derived from directory names; `cast/` → `mchar-` follows the proposal §6 recommendation that aligns the manual-character prefix with STCHAR's role, and the full mapping is documented in `docs/ID-ALLOCATION.md` §Manual-story-scoped. The allocator is single-server (Manual Studio backend serves one client); race conditions are not a meaningful concern for a local writing cockpit.
 - **YAML records are stored one per file, not concatenated.** Matches the proposal §6 recommendation; gives the author predictable diff surfaces in git and a stable per-record review unit.
 - **Reference integrity is shallow (one hop), not recursive.** Recursive closure (e.g., "the belief's `holder` references a character whose `relationship_behavior` references a missing character") is engine-grade discipline that doesn't pay for itself at the authoring layer; the author will fix the chain when the broken ref surfaces during their own editing.
 - **Hybrid delete policy avoids accidental destruction without forcing append-only.** The proposal's §6 recommendation matches Worldloom's FOUNDATIONS §Story Bundles §8 ("atomic YAML records remain append-only at the filesystem level, following the same record-append-only discipline that governs `_source/<world-subdir>/*.yaml`") in spirit at the inactive-record level while honoring the proposal's explicit "Append-only supersession would be overkill for the MVP" position via permitted hard-delete for unreferenced records and force-delete with audit-trailed warnings.
@@ -138,7 +138,7 @@ ChatGPT-Pro's proposal §6 sketches a sensible common-fields shape and class lis
 - `tools/manual-story-studio/src/write/manual-story-metadata.ts` — update `manual-story.yaml`.
 - `tools/manual-story-studio/src/write/id-allocator.ts` — per-class append-only allocator.
 - `tools/manual-story-studio/src/validate/refs.ts` — shallow reference-integrity validator.
-- `tools/manual-story-studio/src/validate/schema.ts` — YAML parse + required-field check per class (declarative schema definitions for the 17 MVP record classes — beat-templates land in SPEC-104).
+- `tools/manual-story-studio/src/validate/schema.ts` — YAML parse + required-field check per class (declarative schema definitions for the 18 MVP record classes — beat-templates land in SPEC-104).
 - `tools/manual-story-studio/src/schema/manual-story.ts` — TypeScript types for all classes and `manual-story.yaml`.
 - `tools/manual-story-studio/src/server/routes/records.ts` — CRUD routes.
 - `tools/manual-story-studio/src/server/routes/metadata.ts` — metadata read/update routes.
@@ -159,6 +159,7 @@ ChatGPT-Pro's proposal §6 sketches a sensible common-fields shape and class lis
 - `tools/manual-story-studio/src/server/http.ts` — register the new routes under `wrapRouterWritable`.
 - `tools/manual-story-studio/web/src/App.tsx` — add routes for `/dashboard`, `/records`, `/cast`.
 - `tools/manual-story-studio/README.md` — document the record class list and the hybrid delete policy.
+- `docs/ID-ALLOCATION.md` — add a new `### Manual-story-scoped` section after `### Story-bundle-scoped` enumerating the 18 MVP lowercase `m`-prefix classes (`mchar-`, `mbel-`, `mrel-`, etc. — see §3 Key decisions for the full list) plus the deferred `mtemplate-` class, noting that allocation is performed by the Manual Studio backend (not the `mcp__worldloom__allocate_*` family) and that gaps from hard-delete are preserved.
 
 **No modification to:**
 
@@ -185,7 +186,7 @@ ChatGPT-Pro's proposal §6 sketches a sensible common-fields shape and class lis
 ## 7. Acceptance criteria
 
 1. `manual-story.yaml` schema parses with all enum vocabularies validated; missing required fields rejected; tested for each enum.
-2. All 17 MVP record classes (beat-templates excluded) parse, validate, and CRUD-round-trip; per-class required fields enforced.
+2. All 18 MVP record classes (beat-templates excluded) parse, validate, and CRUD-round-trip; per-class required fields enforced.
 3. ID allocator is deterministic: creating N records of class X yields `<prefix>-1` through `<prefix>-N`; gaps from hard-delete are preserved (allocator does not reuse deleted IDs).
 4. Reference validator flags dangling refs; CRUD save refuses dangling refs unless explicitly overridden (tested for both paths).
 5. Hybrid delete: hard delete of unreferenced record succeeds; delete of referenced record defaults to `active: false` with `retired_reason`; force-delete requires confirmation flag and is audit-logged (in the response body for now; persistent audit log is M6 deferral).
