@@ -34,9 +34,9 @@ const ATOMIC_FIXTURE_FILES: Array<{ relativePath: string; lines: string[] }> = [
     ]
   },
   {
-    relativePath: "_source/canon/CF-0001.yaml",
+    relativePath: "_source/canon/CF-1.yaml",
     lines: [
-      "id: CF-0001",
+      "id: CF-1",
       "title: Salt wardens keep the gate",
       "status: hard_canon",
       "type: institution",
@@ -56,12 +56,12 @@ const ATOMIC_FIXTURE_FILES: Array<{ relativePath: string; lines: string[] }> = [
     ]
   },
   {
-    relativePath: "_source/change-log/CH-0001.yaml",
+    relativePath: "_source/change-log/CH-1.yaml",
     lines: [
-      "change_id: CH-0001",
+      "change_id: CH-1",
       "date: 2026-05-30",
       "change_type: clarification",
-      "affected_fact_ids: [CF-0001]",
+      "affected_fact_ids: [CF-1]",
       "summary: Initial wardens entry.",
       "reason: [Establish coverage.]",
       "scope:",
@@ -79,7 +79,7 @@ const ATOMIC_FIXTURE_FILES: Array<{ relativePath: string; lines: string[] }> = [
       "  no_stealth_diegetic_rewrite: true",
       "  net_contradictions_not_increased: true",
       "  world_identity_preserved: true",
-      "originating_cf: CF-0001"
+      "originating_cf: CF-1"
     ]
   },
   {
@@ -108,13 +108,13 @@ const ATOMIC_FIXTURE_FILES: Array<{ relativePath: string; lines: string[] }> = [
       "disallowed_cheap_answers: []",
       "domains_touched: [institutions]",
       "future_resolution_safety: medium",
-      "firewall_for: [CF-0001]"
+      "firewall_for: [CF-1]"
     ]
   },
   {
-    relativePath: "_source/open-questions/OQ-0001.yaml",
+    relativePath: "_source/open-questions/OQ-1.yaml",
     lines: [
-      "id: OQ-0001",
+      "id: OQ-1",
       "topic: Gate watch",
       "body: Who relieves the watch at midnight?",
       "when_to_resolve: When a scene needs it."
@@ -137,7 +137,7 @@ const STCHAR_BODY_VERSION_A = [
   "supersedes: null",
   "superseded_by: null",
   "status: active",
-  "bound_stent_ids: [STENT-0001]",
+  "bound_stent_ids: [STENT-1]",
   "profile_revision: 1",
   "body_schema_version: stchar.v1",
   `profile_hash: sha256:${"b".repeat(64)}`,
@@ -168,7 +168,7 @@ const STCHAR_BODY_VERSION_B = [
   "supersedes: null",
   "superseded_by: null",
   "status: active",
-  "bound_stent_ids: [STENT-0001]",
+  "bound_stent_ids: [STENT-1]",
   "profile_revision: 2",
   "body_schema_version: stchar.v1",
   `profile_hash: sha256:${"d".repeat(64)}`,
@@ -200,9 +200,9 @@ function createWorld(slug: string): string {
   const stentDirectory = path.join(world, "stories", "gatewatch", "_source", "entities");
   mkdirSync(stentDirectory, { recursive: true });
   writeFileSync(
-    path.join(stentDirectory, "STENT-0001.yaml"),
+    path.join(stentDirectory, "STENT-1.yaml"),
     [
-      "id: STENT-0001",
+      "id: STENT-1",
       "story_id: STORY-1",
       "world_ent_id: null",
       "character_id: null",
