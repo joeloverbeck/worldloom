@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, unlinkSync, utimesSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import Database from "better-sqlite3";
-import { CURRENT_INDEX_VERSION } from "../../src/package-interop.js";
+import {
+  buildWorldIndex,
+  CURRENT_INDEX_VERSION,
+  syncWorldIndex
+} from "../../src/package-interop.js";
 
 import { openIndexDb } from "../../src/db/open.js";
 
@@ -286,6 +290,222 @@ test("openIndexDb returns a read-only handle when all lifecycle checks pass", ()
     } finally {
       result.db.close();
     }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// IDXSYNC-002 convergence + soundness regression tests
+//
+// These exercise the full build/sync → openIndexDb pipeline against a real
+// minimal atomic world to verify that incremental `sync` converges to a
+// freshness-equivalent state as a full `build` (FOUNDATIONS.md §Canonical
+// Storage Layer), and that the file-level drift token is raw-bytes-based on
+// both the writer (world-index) and the reader (world-mcp staleness checker).
+// ---------------------------------------------------------------------------
+
+interface MinimalAtomicWorldOptions {
+  canonicalBytes: boolean;
+}
+
+function createMinimalAtomicWorld(
+  root: string,
+  worldSlug: string,
+  options: MinimalAtomicWorldOptions
+): string {
+  const world = path.join(root, "worlds", worldSlug);
+  mkdirSync(path.join(world, "_source", "canon"), { recursive: true });
+  writeFileSync(path.join(world, "WORLD_KERNEL.md"), "# Minimal World\n", "utf8");
+  writeFileSync(
+    path.join(world, "ONTOLOGY.md"),
+    [
+      "# Ontology",
+      "",
+      "## Categories in Use",
+      "",
+      "- institution",
+      "",
+      "## Relation Types in Use",
+      "",
+      "- governs",
+      "",
+      "## Notes on Use",
+      "",
+      "Minimal fixture for IDXSYNC-002 convergence tests."
+    ].join("\n"),
+    "utf8"
+  );
+
+  const cfBody = [
+    "id: CF-0001",
+    "title: Minimal canon fact",
+    "status: hard_canon",
+    "type: institution",
+    "statement: Minimal fixture for convergence tests.",
+    "scope:",
+    "  geographic: local",
+    "  temporal: current",
+    "  social: public",
+    "truth_scope:",
+    "  world_level: true",
+    "  diegetic_status: objective",
+    "domains_affected: [institutions]",
+    "required_world_updates: [INSTITUTIONS]",
+    "source_basis:",
+    "  direct_user_approval: true",
+    "modification_history: []"
+  ].join("\n");
+
+  // When canonicalBytes=false, write the file in a form whose raw bytes
+  // diverge from world-index's prose-whitespace-normalized basis: trailing
+  // whitespace on a line plus extra trailing newlines. The YAML still parses
+  // identically; only the bytes differ. This is the exact shape that pre-fix
+  // produced perpetual false-drift because the writer stored
+  // contentHashForProse(source) (normalized) while the MCP checker hashed
+  // raw bytes via hashFileContents.
+  const fileContent = options.canonicalBytes
+    ? `${cfBody}\n`
+    : `${cfBody}   \n\n\n\n`;
+
+  writeFileSync(path.join(world, "_source", "canon", "CF-0001.yaml"), fileContent, "utf8");
+  return world;
+}
+
+test("openIndexDb stays non-stale after sync bumps mtime on a non-canonical-bytes file (IDXSYNC-002 Fix A+B convergence)", async () => {
+  const root = createTempRepoRoot();
+  const worldSlug = "converge";
+  const world = createMinimalAtomicWorld(root, worldSlug, { canonicalBytes: false });
+  const sourcePath = path.join(world, "_source", "canon", "CF-0001.yaml");
+
+  try {
+    assert.equal(buildWorldIndex(root, worldSlug, { quiet: true }), 0);
+
+    const afterBuild = withRepoRoot(root, () => openIndexDb(worldSlug));
+    assert.ok("db" in afterBuild, JSON.stringify(afterBuild));
+    afterBuild.db.close();
+
+    // Touch the file: bump mtime past last_indexed_at without changing bytes.
+    // Pre-fix this triggered the MCP mtime gate to re-hash the file, where
+    // raw-bytes hash mismatched the stored prose-normalized hash, flagging
+    // stale_index. Sync would then be unable to clear it because its
+    // shouldProcess=false skip path neither refreshed last_indexed_at nor
+    // re-stored the hash; only a full build reset both.
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    const future = new Date(Date.now() + 60_000);
+    utimesSync(sourcePath, future, future);
+
+    assert.equal(syncWorldIndex(root, worldSlug, { quiet: true }), 0);
+
+    const afterSync = withRepoRoot(root, () => openIndexDb(worldSlug));
+    assert.ok(
+      "db" in afterSync,
+      `sync should converge to a non-stale index but got: ${JSON.stringify(afterSync)}`
+    );
+    afterSync.db.close();
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("openIndexDb stays non-stale after build under WORLDLOOM_MCP_FULL_HASH_DRIFT_CHECK=1 for non-canonical-bytes files (IDXSYNC-002 Fix B soundness)", () => {
+  const root = createTempRepoRoot();
+  const worldSlug = "soundness";
+  createMinimalAtomicWorld(root, worldSlug, { canonicalBytes: false });
+
+  const originalFlag = process.env.WORLDLOOM_MCP_FULL_HASH_DRIFT_CHECK;
+  process.env.WORLDLOOM_MCP_FULL_HASH_DRIFT_CHECK = "1";
+
+  try {
+    assert.equal(buildWorldIndex(root, worldSlug, { quiet: true }), 0);
+
+    const result = withRepoRoot(root, () => openIndexDb(worldSlug));
+    assert.ok(
+      "db" in result,
+      `with FULL_HASH=1, build should produce a non-stale index even for non-canonical bytes but got: ${JSON.stringify(result)}`
+    );
+    result.db.close();
+  } finally {
+    if (originalFlag === undefined) {
+      delete process.env.WORLDLOOM_MCP_FULL_HASH_DRIFT_CHECK;
+    } else {
+      process.env.WORLDLOOM_MCP_FULL_HASH_DRIFT_CHECK = originalFlag;
+    }
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("sync removes file_versions entries for deleted _source records (IDXSYNC-002 deletion regression)", () => {
+  const root = createTempRepoRoot();
+  const worldSlug = "deletion";
+  const world = createMinimalAtomicWorld(root, worldSlug, { canonicalBytes: true });
+
+  // Add a second canon fact to delete (deleting the only file would leave the
+  // world without atomic source records and short-circuit sync).
+  const cfTwoPath = path.join(world, "_source", "canon", "CF-0002.yaml");
+  writeFileSync(
+    cfTwoPath,
+    [
+      "id: CF-0002",
+      "title: Secondary canon fact",
+      "status: hard_canon",
+      "type: institution",
+      "statement: Secondary fixture for deletion test.",
+      "scope:",
+      "  geographic: local",
+      "  temporal: current",
+      "  social: public",
+      "truth_scope:",
+      "  world_level: true",
+      "  diegetic_status: objective",
+      "domains_affected: [institutions]",
+      "required_world_updates: [INSTITUTIONS]",
+      "source_basis:",
+      "  direct_user_approval: true",
+      "modification_history: []"
+    ].join("\n") + "\n",
+    "utf8"
+  );
+
+  try {
+    assert.equal(buildWorldIndex(root, worldSlug, { quiet: true }), 0);
+
+    const dbPath = path.join(root, "worlds", worldSlug, "_index", "world.db");
+    {
+      const db = new Database(dbPath, { readonly: true });
+      try {
+        const present = db
+          .prepare("SELECT COUNT(*) AS count FROM file_versions WHERE world_slug = ? AND file_path = ?")
+          .get(worldSlug, "_source/canon/CF-0002.yaml") as { count: number };
+        assert.equal(present.count, 1, "CF-0002 should be indexed after build");
+      } finally {
+        db.close();
+      }
+    }
+
+    unlinkSync(cfTwoPath);
+    assert.equal(syncWorldIndex(root, worldSlug, { quiet: true }), 0);
+
+    {
+      const db = new Database(dbPath, { readonly: true });
+      try {
+        const present = db
+          .prepare("SELECT COUNT(*) AS count FROM file_versions WHERE world_slug = ? AND file_path = ?")
+          .get(worldSlug, "_source/canon/CF-0002.yaml") as { count: number };
+        assert.equal(present.count, 0, "sync should remove file_versions entry for deleted CF-0002");
+
+        const nodes = db
+          .prepare("SELECT COUNT(*) AS count FROM nodes WHERE world_slug = ? AND file_path = ?")
+          .get(worldSlug, "_source/canon/CF-0002.yaml") as { count: number };
+        assert.equal(nodes.count, 0, "sync should delete nodes for removed CF-0002");
+      } finally {
+        db.close();
+      }
+    }
+
+    const result = withRepoRoot(root, () => openIndexDb(worldSlug));
+    assert.ok("db" in result, JSON.stringify(result));
+    result.db.close();
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

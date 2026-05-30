@@ -41,6 +41,28 @@ export function upsertFileVersion(
     .run(worldSlug, filePath, contentHash, new Date().toISOString());
 }
 
+// Refresh last_indexed_at without changing the stored content_hash.
+// Used by sync's skip path: a re-parsed file whose hash matches the stored
+// hash must still bump last_indexed_at so the MCP freshness check's
+// mtime gate (mtime > last_indexed_at) does not re-hash it on every call
+// and falsely flag it as drifted. This is what makes sync converge to
+// build per FOUNDATIONS.md §Canonical Storage Layer.
+export function touchFileVersion(
+  db: Database.Database,
+  worldSlug: string,
+  filePath: string
+): void {
+  db
+    .prepare(
+      `
+        UPDATE file_versions
+        SET last_indexed_at = ?
+        WHERE world_slug = ? AND file_path = ?
+      `
+    )
+    .run(new Date().toISOString(), worldSlug, filePath);
+}
+
 export function listIndexedFiles(db: Database.Database, worldSlug: string): string[] {
   return (
     db
