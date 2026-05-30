@@ -18,6 +18,11 @@
       "require": "./dist/src/commands/sync.js",
       "types": "./dist/src/commands/sync.d.ts"
     },
+    "./commands/verify": {
+      "import": "./dist/src/commands/verify.js",
+      "require": "./dist/src/commands/verify.js",
+      "types": "./dist/src/commands/verify.d.ts"
+    },
     "./hash/content": {
       "import": "./dist/src/hash/content.js",
       "require": "./dist/src/hash/content.js",

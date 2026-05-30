@@ -4,6 +4,7 @@ import type Database from "better-sqlite3";
 import { insertValidationResults } from "../index/nodes.js";
 import {
   ATOMIC_LOGICAL_WORLD_FILES,
+  listStoryBundleSourceFiles,
   parseAtomicSourceFile,
   parseStoryBundleSourceFile
 } from "../parse/atomic.js";
@@ -27,11 +28,14 @@ export function verify(worldRoot: string, worldSlug: string): number {
       `
     ).all(worldSlug) as Array<{ file_path: string; content_hash: string }>;
 
+    const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
+    const storyBundleSourceFiles = new Set(listStoryBundleSourceFiles(worldDirectory));
+
     const results: ValidationResultRow[] = [];
     let resultId = 1;
 
     for (const row of fileRows) {
-      const absolutePath = `${resolveWorldDirectory(worldRoot, worldSlug)}/${row.file_path}`;
+      const absolutePath = `${worldDirectory}/${row.file_path}`;
       if (isAtomicLogicalFile(row.file_path) && !existsSync(absolutePath)) {
         continue;
       }
@@ -44,7 +48,7 @@ export function verify(worldRoot: string, worldSlug: string): number {
 
       const parsed = row.file_path.startsWith("_source/")
         ? parseAtomicSourceFile(worldRoot, worldSlug, row.file_path)
-        : isStorySourceFile(row.file_path)
+        : isStoryBundleSourceFile(row.file_path, storyBundleSourceFiles)
           ? parseStoryBundleSourceFile(worldRoot, worldSlug, row.file_path)
           : parseWorldFile(worldRoot, worldSlug, row.file_path);
       const storedNodes = loadStoredFileNodes(opened, worldSlug, row.file_path);
@@ -128,8 +132,14 @@ function isAtomicLogicalFile(filePath: string): boolean {
   return (ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(filePath);
 }
 
-function isStorySourceFile(filePath: string): boolean {
-  return filePath.startsWith("stories/") && filePath.includes("/_source/");
+function isStoryBundleSourceFile(filePath: string, storyBundleSourceFiles: Set<string>): boolean {
+  if (!filePath.startsWith("stories/")) {
+    return false;
+  }
+  if (filePath.includes("/_source/")) {
+    return true;
+  }
+  return storyBundleSourceFiles.has(filePath);
 }
 
 function clearPreviousDriftResults(db: Database.Database, worldSlug: string): void {

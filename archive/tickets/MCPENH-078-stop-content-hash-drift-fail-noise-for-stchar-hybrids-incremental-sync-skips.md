@@ -104,3 +104,27 @@ The auto-memory entry `project_stchar_index_sync_gap` becomes obsolete after thi
 1. `npm --prefix tools/world-index test -- --grep stchar-hybrid` — targeted run for the new test.
 2. `npm --prefix tools/world-mcp test -- --grep story-character-profile` — targeted run for the modified packet test.
 3. `npm --prefix tools/world-index test && npm --prefix tools/world-mcp test` — full coverage for both packages. The two-package boundary is correct because sync coverage lives in `tools/world-index/` and packet response shape lives in `tools/world-mcp/`; both must stay green for the fix to be complete.
+
+## Outcome
+
+Completed 2026-05-30. The root cause was a parser-dispatch defect in `tools/world-index/src/commands/verify.ts`, not a gap in incremental sync as the ticket originally framed. Incremental `sync` already routed STCHAR hybrid files through `parseStoryBundleSourceFile` via the `listStoryBundleSourceFiles` set (per the storyFiles bucket in `reindexAllFiles`). But `verify` used a path-shape predicate (`isStorySourceFile` = `stories/.../_source/...`) that did NOT recognize the STCHAR hybrid path (`stories/<slug>/story-characters/STCHAR-*.md`), so it fell through to `parseWorldFile` and produced markdown-section node IDs (`<world-slug>:STCHAR-N.md:<heading>:...`) that didn't match the indexed record-level IDs (`<story-slug>:STCHAR-N`). Every healthy STCHAR profile then emitted two false-fail `content_hash_drift` rows ("Indexed node X is no longer produced by the parser" + "Node Y exists on disk but not in the index"), and those rows persisted in `validation_results` and were lifted into `governing_world_context.open_risks` on every subsequent packet call.
+
+The fix changes verify's predicate to reuse `listStoryBundleSourceFiles(worldDirectory)` (the same enumeration sync uses), so verify, sync, and full build now share the same dispatch decision for STCHAR hybrids. `@worldloom/world-index/commands/verify` was also added to the package exports map so the world-mcp integration test can drive the full build → verify → packet pipeline end-to-end.
+
+The `MEMORY.md` entry `project_stchar_index_sync_gap` (and the implied "run full build if get_record(STCHAR-N) 404s on disk-present files" guidance) is now obsolete — sync was always correct; verify was the false-fail source. Operators can delete or supersede the memory entry.
+
+## Verification Result
+
+1. `npm --prefix /home/joeloverbeck/projects/worldloom/tools/world-index run build` — PASS.
+2. `npm --prefix /home/joeloverbeck/projects/worldloom/tools/world-mcp run build` — PASS.
+3. `node --test dist/tests/sync-stchar-hybrid.test.js` (from `tools/world-index/`) — PASS (3 tests): incremental sync after an STCHAR rewrite produces both the post-rewrite raw-bytes `file_versions.content_hash` and the post-rewrite `contentHashForProse` `nodes.content_hash`; verify on a fresh build of an STCHAR-bearing bundle emits zero `drift_check` rows scoped to STCHAR files; verify still flags real STCHAR drift at severity `fail` when the file is tampered.
+4. `node --test dist/tests/context-packet/stchar-verify-drift-packet.test.js` (from `tools/world-mcp/`) — PASS (1 test): full build → verify → `getContextPacket(task_type: story_turn_cycle)` returns zero `severity: fail` `content_hash_drift` entries scoped to STCHAR in `governing_world_context.open_risks`. Reverting the verify fix locally and re-running this test fails as expected, confirming the test exercises the original defect.
+5. `npm --prefix /home/joeloverbeck/projects/worldloom/tools/world-index test` — PASS (151 tests).
+6. `npm --prefix /home/joeloverbeck/projects/worldloom/tools/world-mcp test` — PASS (539 tests).
+
+## Deviations
+
+- **Diagnosis correction.** The ticket framed the bug as incremental `sync` skipping STCHAR hybrids. Re-grepping confirmed sync already covers STCHAR via `listStoryBundleSourceFiles` (atomic.ts:166–179, sync routes them through the storyFiles bucket → `parseStoryBundleSourceFile`). The actual defect was in `verify.ts`'s parser dispatch. The fix focuses there rather than on `sync.ts`.
+- **No `createDriftResult` severity refinement.** The ticket's secondary proposal — downgrade `content_hash_drift` to `severity: info` when at-call-boundary auto-resync has neutralized the drift — turned out to be unnecessary once verify uses the correct parser, because the offending entries were never real drift (they were parser-mismatch noise). Preserving `severity: fail` for genuine drift (the third test in `sync-stchar-hybrid.test.ts` proves real STCHAR drift still flags `fail`) keeps the signal class meaningful.
+- **`verify` added to world-index exports.** `@worldloom/world-index/commands/verify` was added to `tools/world-index/package.json` `exports` so the new world-mcp integration test could call it directly. This matches the existing pattern for `commands/build` and `commands/sync`.
+- **Per the ticket's Out of Scope, `MEMORY.md` was not edited.** The Outcome above notes the entry is obsolete; the user owns the memory file.
