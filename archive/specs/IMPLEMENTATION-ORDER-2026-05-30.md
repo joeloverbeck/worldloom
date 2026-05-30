@@ -6,9 +6,9 @@ This iteration finally lands the scene-first Story Explorer that the first itera
 
 Source: critical triage of `reports/scene-prose-planning-second-iteration.md` (ChatGPT-Pro, 2026-05-28). Report proposals that contradicted committed decisions were rejected (verbatim-contract externalization, receipt hash-fingerprints + publication profiles, removing PG `plan`/`prose_plan_path`); the publication model throughout is **presence-based, no hashing** ([[feedback_author_rejects_hash_coupling]]).
 
-## Progress (2026-05-29)
+## Progress (2026-05-30) — iteration complete
 
-The contract → index → backend → frontend → search/branch-map half has **landed and is archived**: SPEC-94, SPEC-95, SPEC-96, SPEC-97, and **SPEC-98** are complete (`archive/specs/`). SPEC-98 shipped as tickets SPEC98STOEXPSCE-001..004 (search backend, branch-map backend + page-model teardown, search frontend, branch-map frontend; archived `archive/tickets/`). Remaining: **SPEC-99** (MCP `scene_coverage` packet layer + scene-first fixtures + docs closeout) is now the only open spec — its packet layer needs only SPEC-95, and its docs/fixtures closeout lands last now that 96/97/98 have stabilized.
+**All specs in this iteration have landed and are archived.** The contract → index → backend → frontend → search/branch-map half (SPEC-94, SPEC-95, SPEC-96, SPEC-97, SPEC-98) completed first; SPEC-98 shipped as tickets SPEC98STOEXPSCE-001..004 (search backend, branch-map backend + page-model teardown, search frontend, branch-map frontend). The final spec **SPEC-99** (MCP `scene_coverage` packet layer + scene-first fixtures + docs closeout) is now complete, shipped as tickets SPEC99CONPACSCE-001 (packet layer + tests + contract doc), SPEC99CONPACSCE-002 (docs scene-first closeout sweep), and SPEC99CONPACSCE-003 (scene_coverage consumption in branching-story-health-audit). All specs and tickets are in `archive/specs/` and `archive/tickets/`. This order is archived with a date suffix as the closeout of the iteration.
 
 ## Dependency sequence
 
@@ -28,7 +28,7 @@ SPEC-97  ✅ done — (story-explorer frontend: scene-first dashboard/timeline/s
 SPEC-98  ✅ done — (search grouped by scene/unscened + MVP single-layer branch-map; removed SPEC-90 placeholders)
    │
    ▼
-SPEC-99  ⬜ next — (MCP scene_coverage packet layer [needs SPEC-95]; scene-first fixtures; docs closeout [do last, after 96/97/98 stabilized])
+SPEC-99  ✅ done — (MCP scene_coverage packet layer [needs SPEC-95]; scene-first fixtures; docs closeout [done last, after 96/97/98 stabilized])
 ```
 
 ## Phase table
@@ -40,7 +40,7 @@ SPEC-99  ⬜ next — (MCP scene_coverage packet layer [needs SPEC-95]; scene-fi
 | 3 | **SPEC-96** | Backend scene/timeline/unscened/overview + state-tick x-ray API; remove page-prose reader routes + `PageDetail` | SPEC-95 | 4 | ✅ done |
 | 4 | **SPEC-97** | Frontend route/view-model/component replacement; embedded PG x-ray drawer | SPEC-96 | 5 | ✅ done |
 | 5 | **SPEC-98** | Search (scene/unscened grouping) + MVP single-layer scene branch-map; remove SPEC-90 placeholder routes | SPEC-96, SPEC-97 | 6 | ✅ done |
-| 6 | **SPEC-99** | MCP `scene_coverage` packet layer; scene-first fixtures; docs closeout | SPEC-95 (packet); SPEC-96/97/98 (closeout) | 7–9 | ⬜ next |
+| 6 | **SPEC-99** | MCP `scene_coverage` packet layer; scene-first fixtures; docs closeout | SPEC-95 (packet); SPEC-96/97/98 (closeout) | 7–9 | ✅ done |
 
 ## Notes
 
