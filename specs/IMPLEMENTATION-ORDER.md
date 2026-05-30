@@ -87,11 +87,15 @@ SPEC-104  — Beat templates, 9-stage deterministic filter, candidate cards UI, 
 
 The author can use Manual Studio productively after SPEC-103 lands (without templates); SPEC-104 is the accelerator. M6 is pure polish on a working tool.
 
+## Progress
+
+- **2026-05-30** — SPEC-100 implemented and archived. Nine tickets SPEC100MANSTOSTU-001 through SPEC100MANSTOSTU-009 landed sequentially (package skeleton; `wrapRouterWritable` registration-time fence; realpath sandbox + denylist; `enumerate.ts` `manual-stories/` exclusion; world / manual-story read backends; Fastify server + CLI + `GET /api/worlds` + banner; manual-stories `GET` / `POST` routes; Vite + React frontend shell; capstone test covering AC 1-9). Backend suite (48 tests) and world-index suite (138 + CLI tests) green. SPEC-100 source archived at `specs/archive/SPEC-100-manual-story-studio-package-boundary.md`. **Next:** SPEC-101 ticketization.
+
 ## Phase table
 
 | Order | Spec | Scope | Depends on | Proposal milestone | Status |
 |---|---|---|---|---|---|
-| 1 | **SPEC-100** | Package boundary at `tools/manual-story-studio/`, write-scope guard, realpath sandbox, `enumerate.ts` exclusion of `manual-stories/`, Hook 3 / Hook 2 / lowercase-ID posture documentation, `docs/manual-story-studio/` scaffold, world picker + manual-story list/create UI shell | — | M1 | PROPOSED |
+| 1 | **SPEC-100** | Package boundary at `tools/manual-story-studio/`, write-scope guard, realpath sandbox, `enumerate.ts` exclusion of `manual-stories/`, Hook 3 / Hook 2 / lowercase-ID posture documentation, `docs/manual-story-studio/` scaffold, world picker + manual-story list/create UI shell | — | M1 | DONE (2026-05-30, archived to `specs/archive/`; SPEC100MANSTOSTU-001..009 landed) |
 | 2 | **SPEC-101** | `manual-story.yaml` schema with closed enums; 18 manual record classes (17 MVP + beat-templates deferred to SPEC-104); Manual Character Profile schema; shallow ref validation; hybrid delete policy; record CRUD backend + frontend; Cast & Profiles editor; Dashboard cockpit | SPEC-100 | M2 | PROPOSED |
 | 3 | **SPEC-102** | Moment Composer screen; 12-stage deterministic prompt composition pipeline; content-policy verbatim reuse; 15-section Markdown prompt format; prompt lint (engine-jargon denylist + ID-leak sweep + verbatim-section check); `docs/manual-story-studio/prose-craft-contract.md`; `docs/manual-story-studio/manual-render-instruction.md`; Prompt Preview UI | SPEC-101 | M3 | PROPOSED |
 | 4 | **SPEC-103** | Paste Prose editor; segment write flow (`segments/SEG-<n>.md` + sidecar with `prompt_sha256` informational-only); deterministic `manuscript.md` compiler + Rebuild command; State Update Checklist UI (never asserts state changed); Manuscript view; Prompt History view | SPEC-102 | M4 | PROPOSED |
