@@ -67,4 +67,6 @@ not retry unless the error details include `retry_with.token_budget`; when
 `retry_with` is absent, follow the error's `fallback_advice` and use targeted
 retrieval.
 
+Stale-index auto-recovery: if any pre-flight retrieval call returns `stale_index`, the MCP freshness guard auto-recovers in two rungs — it runs `world-index sync <world_slug>` once and retries, then escalates to a full `world-index build <world_slug>` and retries once more. Since IDXSYNC-002 (file-level drift token unified on raw bytes + `last_indexed_at` refreshed for every still-present file on sync) the first `sync` rung converges to a freshness-equivalent state as a full build, so the escalation should rarely fire on routine drift. A successful response carrying `freshness_audit.pre_call_index_was_stale: true` means recovery already happened and no manual retry is needed. A surfaced `recovery_outcome: still_stale_after_build` (or `build_failed`) is now a genuine "index/disk divergence — investigate" signal: run `world-index build <world_slug>` manually and investigate why disk and index diverge before retrying.
+
 If any precondition fails, the skill aborts before Phase 1.

@@ -80,7 +80,7 @@ function loadExpectedNodeCounts(root: string): Map<NodeType, number> {
     }
   }
 
-  for (const parsed of createAtomicLogicalFileResults(WORLD_SLUG)) {
+  for (const parsed of createAtomicLogicalFileResults(root, WORLD_SLUG)) {
     for (const node of parsed.nodes) {
       counts.set(node.node_type, (counts.get(node.node_type) ?? 0) + 1);
     }
@@ -131,21 +131,6 @@ function loadContentHashes(db: Database.Database): Array<{ node_id: string; cont
       `
     )
     .all(WORLD_SLUG) as Array<{ node_id: string; content_hash: string }>;
-}
-
-function loadFileVersions(db: Database.Database): Map<string, string> {
-  const rows = db
-    .prepare(
-      `
-        SELECT file_path, last_indexed_at
-        FROM file_versions
-        WHERE world_slug = ?
-        ORDER BY file_path
-      `
-    )
-    .all(WORLD_SLUG) as Array<{ file_path: string; last_indexed_at: string }>;
-
-  return new Map(rows.map((row) => [row.file_path, row.last_indexed_at]));
 }
 
 function countValidationRows(db: Database.Database, code: string): number {
@@ -822,14 +807,24 @@ test("build preserves recovery-parsed animalia semantic edge totals", () => {
   }
 });
 
-test("sync reparses only the touched file", async () => {
+test("sync reparses only the touched file but refreshes last_indexed_at for every still-present file (IDXSYNC-002 Fix A)", async () => {
   const root = createTempRepoRoot();
 
   try {
     assert.equal(build(root, WORLD_SLUG), 0);
 
     const beforeDb = openBuiltDb(root);
-    const before = loadFileVersions(beforeDb);
+    const before = beforeDb
+      .prepare(
+        `
+          SELECT file_path, content_hash, last_indexed_at
+          FROM file_versions
+          WHERE world_slug = ?
+        `
+      )
+      .all(WORLD_SLUG) as Array<{ file_path: string; content_hash: string; last_indexed_at: string }>;
+    const beforeHashByPath = new Map(before.map((row) => [row.file_path, row.content_hash]));
+    const beforeIndexedByPath = new Map(before.map((row) => [row.file_path, row.last_indexed_at]));
     beforeDb.close();
 
     await delay(25);
@@ -842,12 +837,42 @@ test("sync reparses only the touched file", async () => {
 
     const afterDb = openBuiltDb(root);
     try {
-      const after = loadFileVersions(afterDb);
-      const changed = [...after.entries()]
-        .filter(([filePath, lastIndexedAt]) => before.get(filePath) !== lastIndexedAt)
-        .map(([filePath]) => filePath);
+      const after = afterDb
+        .prepare(
+          `
+            SELECT file_path, content_hash, last_indexed_at
+            FROM file_versions
+            WHERE world_slug = ?
+          `
+        )
+        .all(WORLD_SLUG) as Array<{ file_path: string; content_hash: string; last_indexed_at: string }>;
 
-      assert.deepEqual(changed, [relativePath]);
+      const hashChanged = after
+        .filter((row) => beforeHashByPath.get(row.file_path) !== row.content_hash)
+        .map((row) => row.file_path);
+      assert.deepEqual(
+        hashChanged,
+        [relativePath],
+        "only the touched file's content_hash should change on sync"
+      );
+
+      // Fix A: every still-present file's last_indexed_at must advance so the
+      // MCP staleness checker's mtime gate (mtime > last_indexed_at) does not
+      // re-hash unchanged files on every retrieval and falsely flag them as
+      // drifted. Without this, sync does not converge to build.
+      for (const row of after) {
+        const beforeTimestamp = beforeIndexedByPath.get(row.file_path);
+        assert.ok(beforeTimestamp !== undefined, `file_versions entry for '${row.file_path}' should pre-exist`);
+        assert.ok(
+          Date.parse(row.last_indexed_at) >= Date.parse(beforeTimestamp as string),
+          `last_indexed_at for '${row.file_path}' should not regress`
+        );
+        assert.notEqual(
+          row.last_indexed_at,
+          beforeTimestamp,
+          `last_indexed_at for '${row.file_path}' should be refreshed by sync (Fix A)`
+        );
+      }
     } finally {
       afterDb.close();
     }

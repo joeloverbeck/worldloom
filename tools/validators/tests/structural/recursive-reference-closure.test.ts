@@ -74,6 +74,32 @@ test("recursive_reference_closure accepts STCHAR records in active_records", asy
   assert.deepEqual(verdicts, []);
 });
 
+test("recursive_reference_closure does not emit branch_leak for targets missing created_at_page (RRCDIAG-001)", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      state_snapshot: {
+        ...stateSnapshot,
+        active_records: {
+          THR: ["THR-4"]
+        }
+      }
+    },
+    extra: [
+      storyRecord("threat_record", "THR-4", "threats", {
+        id: "THR-4",
+        story_id: "STORY-1"
+        // created_at_page intentionally omitted — schema-incomplete, owned by record_schema_compliance
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
+  assert.equal(leak, undefined, "missing created_at_page must not be reported as a branch_leak");
+});
+
 test("recursive_reference_closure fails for sibling-branch leakage at nested depth", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     factOverrides: {

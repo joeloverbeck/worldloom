@@ -13,4 +13,4 @@ Run a discovery interview to produce a `brainstorming/<slug>.md` file matching t
 7. **Final Rule** — one-sentence discipline.
 8. **Mandatory LLM Roles** (optional) — specialized passes if the pipeline benefits from multiple critics.
 
-Interview rules: one question per message, confidence block after each answer (see the gap-filler interview's protocol), target 90%+ for the proposal before writing. Write to `brainstorming/<slug>.md`. Show the user the written proposal and get explicit confirmation before advancing to the gap-filler interview.
+Interview rules: one question per message, confidence block after each answer (see the gap-filler interview's protocol), target 90%+ for the proposal before writing. The fresh-mode discovery interview is content-elicitation and stays strictly serial — the gap-filler protocol's §`AskUserQuestion` batching exception is for co-presenting *independent decision gaps* (charter, scope, namespacing) and does NOT extend to discovery questions; never batch discovery questions. Write to `brainstorming/<slug>.md`. Show the user the written proposal and get explicit confirmation before advancing to the gap-filler interview.

@@ -219,7 +219,7 @@ export function parseAtomicSourceFile(
   if (skip) {
     return {
       relativeFilePath,
-      contentHash: contentHashForProse(source),
+      contentHash: sha256Hex(source),
       nodes: [],
       edges: [],
       sltProjections: [],
@@ -252,7 +252,7 @@ export function parseAtomicSourceFile(
 
   return {
     relativeFilePath,
-    contentHash: contentHashForProse(source),
+    contentHash: sha256Hex(source),
     nodes: [node],
     edges,
     sltProjections: [],
@@ -296,7 +296,7 @@ export function parseStoryBundleSourceFile(
 
     return {
       relativeFilePath,
-      contentHash: spec.hybrid ? sha256Hex(source) : contentHashForProse(source),
+      contentHash: sha256Hex(source),
       nodes: [],
       edges: [],
       sltProjections: [],
@@ -314,7 +314,7 @@ export function parseStoryBundleSourceFile(
   if (skip) {
     return {
       relativeFilePath,
-      contentHash: spec.hybrid ? sha256Hex(source) : contentHashForProse(source),
+      contentHash: sha256Hex(source),
       nodes: [],
       edges: [],
       sltProjections: [],
@@ -361,7 +361,11 @@ export function parseStoryBundleSourceFile(
   };
 }
 
-export function createAtomicLogicalFileResults(worldSlug: string): ParsedFileResult[] {
+export function createAtomicLogicalFileResults(
+  worldRoot: string,
+  worldSlug: string
+): ParsedFileResult[] {
+  const worldDirectory = path.resolve(worldRoot, "worlds", worldSlug);
   return ATOMIC_LOGICAL_WORLD_FILES.map((logicalFile) => {
     const body = `Logical atomized world concern: ${logicalFile}`;
     const node = createNodeRow({
@@ -377,9 +381,21 @@ export function createAtomicLogicalFileResults(worldSlug: string): ParsedFileRes
       contentHash: contentHashForProse(body)
     });
 
+    // The node body is a synthetic placeholder (the file is a "logical"
+    // domain pointer, not parsed), but the file_versions row must track
+    // the on-disk bytes so the MCP staleness checker — which always hashes
+    // raw bytes — agrees with the index. If the file is missing, fall
+    // back to the synthetic hash; the MCP checker's missing-logical-file
+    // exemption (see world-mcp/src/db/open.ts:isSyntheticAtomicLogicalFile)
+    // skips drift checks for files that don't exist on disk.
+    const absolutePath = path.join(worldDirectory, logicalFile);
+    const fileContentHash = existsSync(absolutePath)
+      ? sha256Hex(readFileSync(absolutePath, "utf8"))
+      : node.content_hash;
+
     return {
       relativeFilePath: logicalFile,
-      contentHash: node.content_hash,
+      contentHash: fileContentHash,
       nodes: [node],
       edges: [],
       sltProjections: [],

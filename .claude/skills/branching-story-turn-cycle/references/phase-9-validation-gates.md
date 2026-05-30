@@ -2,6 +2,20 @@
 
 Run the 9 shared hard gates per shared contract §7 against the drafted records. Populate `PG-<integer>.validation_trace` with one concise sentence per gate (<= 30 words; single sentence; no semicolon-chained sub-clauses) per AGENTS.md "Validation test PASS entries require a one-line rationale":
 
+**`validation_trace` literal keys (gate-order).** The `validation_trace` mapping is a flat object with exactly these nine keys, in this order, validated by `validation_trace_shape_compliance` against `_shared-templates/story-record-schemas.md` §4.2. Two descriptive-name vs. schema-key mismatches are load-bearing and easy to author wrong: **gate 3** is keyed `mystery_invariant_firewall` (NOT `mystery_firewall`), and **gate 7** is keyed `plan_grounding` (NOT `state_delta_grounding` — the key predates the rename of the gate to "state-delta grounding" and is intentionally not changed because it is load-bearing in every committed `PG.state_hash`). Author the trace with the literal keys; the gate names below are descriptive only.
+
+| # | Gate (descriptive name)                | `validation_trace` key             |
+|---|----------------------------------------|------------------------------------|
+| 1 | input legality                         | `input_legality`                   |
+| 2 | parent snapshot compatibility          | `parent_snapshot_compatibility`    |
+| 3 | mystery / invariant firewall           | `mystery_invariant_firewall`       |
+| 4 | branch isolation                       | `branch_isolation`                 |
+| 5 | append-only delta                      | `append_only_delta`                |
+| 6 | consequence capacity or terminal proof | `consequence_or_terminal`          |
+| 7 | state-delta grounding                  | `plan_grounding`                   |
+| 8 | canon promotion hold                   | `canon_promotion_hold`             |
+| 9 | turn-driver lawfulness                 | `turn_driver_lawfulness`           |
+
 1. **input legality** — action source matches `action_source_mode`: selected-choice and write-in turns use exactly one source action; `advance_initiative` uses both player-action fields absent and a non-player `SE.turn_driver.kind`; repair/start events use both-null input; chosen CHC belongs to parent and is not retired when present; bundle + parent exist. Target form: `"PASS: action source matches mode; parent PG and selected CHC are active and valid."`
 2. **parent snapshot compatibility** — `parent.state_hash` matches `PG-<integer>.state_hash_parent`; `parent.state_snapshot.canon_revision` has been compared against the current world-canon revision and canon-baseline drift is classified as `compatible` or `grandfathered` before proceeding. Target form: `"PASS: parent state_hash matches; canon drift is compatible after CH-<integer> review."`
 3. **mystery / invariant firewall** — no forbidden `M-<integer>` resolved; INV honored; selected SLT's `mystery_policy.forbidden_resolutions` respected. Target form: `"PASS: selected SLT resolves no forbidden mystery and violates no loaded INV."`

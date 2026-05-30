@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import path from "node:path";
+
+import Database from "better-sqlite3";
 
 import { assembleContextPacket } from "../../src/context-packet/assemble.js";
 import { summarizeStoryBundleContext } from "../../src/context-packet/story-bundle-context.js";
@@ -10,6 +13,77 @@ import {
   STORY_FIXTURE_SLUG,
   STORY_FIXTURE_WORLD
 } from "../tools/story-bundle-fixture.js";
+
+interface SceneCoverageRowSeed {
+  branch_id: string;
+  active_scene_ids: string[];
+  superseded_scene_ids: string[];
+  unscened_runs: Array<{ start_pg: string; end_pg: string; pg_ids: string[] }>;
+  pg_scene_lookup: Record<string, string[]>;
+  scenes: Array<{
+    scene_id: string;
+    branch_id: string;
+    supersedes: string | null;
+    superseded: boolean;
+    pg_ids: string[];
+    publication_indicator: string;
+  }>;
+}
+
+/**
+ * Seed SPEC-95 `scene_coverage` view rows directly, in the existing
+ * tests/context-packet/ style (no shared cross-tool fixture) — the packet layer
+ * reads the derived view rather than recomputing coverage.
+ */
+function seedSceneCoverage(root: string, rows: SceneCoverageRowSeed[]): void {
+  const db = new Database(
+    path.join(root, "worlds", STORY_FIXTURE_WORLD, "_index", "world.db")
+  );
+  try {
+    const insert = db.prepare(
+      `
+        INSERT INTO scene_coverage (
+          world_slug,
+          story_slug,
+          branch_id,
+          active_scene_ids_json,
+          superseded_scene_ids_json,
+          unscened_ranges_json,
+          pg_scene_lookup_json,
+          scenes_json,
+          refreshed_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `
+    );
+    for (const row of rows) {
+      insert.run(
+        STORY_FIXTURE_WORLD,
+        STORY_FIXTURE_SLUG,
+        row.branch_id,
+        JSON.stringify(row.active_scene_ids),
+        JSON.stringify(row.superseded_scene_ids),
+        JSON.stringify(row.unscened_runs),
+        JSON.stringify(row.pg_scene_lookup),
+        JSON.stringify(
+          row.scenes.map((scene) => ({
+            ...scene,
+            artifact_availability: {
+              plan_present: true,
+              prose_present: scene.publication_indicator === "prose-present",
+              receipt_present: scene.publication_indicator.startsWith("attached:"),
+              receipt_verdict: scene.publication_indicator.startsWith("attached:")
+                ? scene.publication_indicator.slice("attached:".length)
+                : null
+            }
+          }))
+        ),
+        "2026-05-30T00:00:00Z"
+      );
+    }
+  } finally {
+    db.close();
+  }
+}
 
 test("story-pipeline context packets include indexed story-bundle context", async () => {
   const root = createTempRepoRoot();
@@ -471,6 +545,158 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     assert.deepEqual(storyBundleContextSummary?.active_plan_holders, ["STENT-2"]);
     assert.deepEqual(storyBundleContextSummary?.active_emotion_ids, ["STEMO-1", "STEMO-2"]);
     assert.deepEqual(storyBundleContextSummary?.active_emotion_holders, ["STENT-2", "STENT-3"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("scene_coverage projects the SPEC-95 view scoped to the active branch path", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+    seedSceneCoverage(root, [
+      {
+        branch_id: "BR-1",
+        active_scene_ids: ["SCN-1"],
+        superseded_scene_ids: ["SCN-0"],
+        unscened_runs: [],
+        pg_scene_lookup: { "PG-1": ["SCN-1"] },
+        scenes: [
+          {
+            scene_id: "SCN-0",
+            branch_id: "BR-1",
+            supersedes: null,
+            superseded: true,
+            pg_ids: ["PG-1"],
+            publication_indicator: "superseded"
+          },
+          {
+            scene_id: "SCN-1",
+            branch_id: "BR-1",
+            supersedes: "SCN-0",
+            superseded: false,
+            pg_ids: ["PG-1"],
+            publication_indicator: "prose-present"
+          }
+        ]
+      },
+      {
+        // Off the active branch path (PG-99 is not in longest_active_branch_path):
+        // its scene must be excluded by branch-path scoping.
+        branch_id: "BR-2",
+        active_scene_ids: ["SCN-2"],
+        superseded_scene_ids: [],
+        unscened_runs: [],
+        pg_scene_lookup: { "PG-99": ["SCN-2"] },
+        scenes: [
+          {
+            scene_id: "SCN-2",
+            branch_id: "BR-2",
+            supersedes: null,
+            superseded: false,
+            pg_ids: ["PG-99"],
+            publication_indicator: "attached:PASS"
+          }
+        ]
+      }
+    ]);
+
+    const result = await withRepoRoot(root, () =>
+      assembleContextPacket({
+        task_type: "commitment_block_authoring",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        seed_nodes: ["entity:marla-kern"],
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.ok(result.story_bundle_context !== null);
+    const sceneCoverage = result.story_bundle_context.scene_coverage;
+    assert.ok(sceneCoverage !== null);
+
+    // Per-PG binding is scoped to longest_active_branch_path (["PG-1"]); PG-99 is excluded.
+    assert.deepEqual(sceneCoverage.pages, [
+      { page_id: "PG-1", scene_ids: ["SCN-1"], unscened: false }
+    ]);
+
+    // active_scenes carries the on-path SCNs (active + superseded) with their
+    // SPEC-94 publication indicator; the off-path SCN-2 is excluded by scoping.
+    assert.deepEqual(sceneCoverage.active_scenes, [
+      {
+        scene_id: "SCN-0",
+        branch_id: "BR-1",
+        publication_indicator: "superseded",
+        superseded: true
+      },
+      {
+        scene_id: "SCN-1",
+        branch_id: "BR-1",
+        publication_indicator: "prose-present",
+        superseded: false
+      }
+    ]);
+
+    // Prose-free guarantee: only ids / booleans / indicators, no prose body.
+    assert.deepEqual(
+      sceneCoverage.pages.map((page) => Object.keys(page)),
+      [["page_id", "scene_ids", "unscened"]]
+    );
+    assert.deepEqual(
+      sceneCoverage.active_scenes.map((scene) => Object.keys(scene)),
+      [
+        ["scene_id", "branch_id", "publication_indicator", "superseded"],
+        ["scene_id", "branch_id", "publication_indicator", "superseded"]
+      ]
+    );
+    assert.equal(/"(body|prose|prose_body)"/.test(JSON.stringify(sceneCoverage)), false);
+
+    const summary = summarizeStoryBundleContext(result.story_bundle_context);
+    assert.deepEqual(summary?.scene_coverage_active_scene_ids, ["SCN-1"]);
+    assert.deepEqual(summary?.scene_coverage_unscened_page_ids, []);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("scene_coverage flags an unscened page on the active branch path", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+    seedSceneCoverage(root, [
+      {
+        branch_id: "BR-1",
+        active_scene_ids: [],
+        superseded_scene_ids: [],
+        unscened_runs: [{ start_pg: "PG-1", end_pg: "PG-1", pg_ids: ["PG-1"] }],
+        pg_scene_lookup: {},
+        scenes: []
+      }
+    ]);
+
+    const result = await withRepoRoot(root, () =>
+      assembleContextPacket({
+        task_type: "commitment_block_authoring",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        seed_nodes: ["entity:marla-kern"],
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.ok(result.story_bundle_context !== null);
+    assert.deepEqual(result.story_bundle_context.scene_coverage, {
+      pages: [{ page_id: "PG-1", scene_ids: [], unscened: true }],
+      active_scenes: []
+    });
+
+    const summary = summarizeStoryBundleContext(result.story_bundle_context);
+    assert.deepEqual(summary?.scene_coverage_unscened_page_ids, ["PG-1"]);
+    assert.deepEqual(summary?.scene_coverage_active_scene_ids, []);
   } finally {
     destroyTempRepoRoot(root);
   }

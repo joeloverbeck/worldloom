@@ -4,14 +4,19 @@ import path from "node:path";
 import type Database from "better-sqlite3";
 import YAML from "yaml";
 
+import { querySceneCoverage } from "@worldloom/world-index/index/scene-coverage";
+
 import { resolveWorldDirectory } from "../db/index.js";
 import { type McpError } from "../errors.js";
 import { selectStoryletCandidates } from "../tools/select-storylet-candidates.js";
 
 import type {
+  ContextPacketSceneCoverage,
+  ContextPacketSceneCoverageScene,
   ContextPacketStoryBundleContext,
   ContextPacketStoryBundleContextSummary,
-  RoleInStory
+  RoleInStory,
+  SceneCoveragePublicationIndicator
 } from "./shared.js";
 
 interface StoryNodeRow {
@@ -701,6 +706,82 @@ function buildBranchContext(rows: StoryNodeRow[]): Pick<
   };
 }
 
+function compareSceneRecordIds(left: string, right: string): number {
+  const leftMatch = /^(.*?)(\d+)$/.exec(left);
+  const rightMatch = /^(.*?)(\d+)$/.exec(right);
+  if (leftMatch && rightMatch && leftMatch[1] === rightMatch[1]) {
+    return Number(leftMatch[2]) - Number(rightMatch[2]);
+  }
+  return left.localeCompare(right, "en-US");
+}
+
+/**
+ * Bounded, prose-free projection of SPEC-95's `scene_coverage` view onto the
+ * active branch path. Reads the derived view (never recomputes coverage) and
+ * emits only ids / booleans / publication indicators — no scene prose body.
+ * Returns `null` when the active path is empty or the bundle has no coverage
+ * rows.
+ */
+function buildSceneCoverage(
+  db: Database.Database,
+  worldSlug: string,
+  storySlug: string,
+  activeBranchPath: string[]
+): ContextPacketSceneCoverage | null {
+  if (activeBranchPath.length === 0) {
+    return null;
+  }
+
+  const branches = querySceneCoverage(db, { worldSlug, storySlug });
+  if (branches.length === 0) {
+    return null;
+  }
+
+  const activePathSet = new Set(activeBranchPath);
+
+  const sceneIdsByPage = new Map<string, Set<string>>();
+  for (const branch of branches) {
+    for (const [pageId, sceneIds] of Object.entries(branch.pg_scene_lookup)) {
+      if (!activePathSet.has(pageId)) {
+        continue;
+      }
+      const set = sceneIdsByPage.get(pageId) ?? new Set<string>();
+      for (const sceneId of sceneIds) {
+        set.add(sceneId);
+      }
+      sceneIdsByPage.set(pageId, set);
+    }
+  }
+
+  const pages = activeBranchPath.map((pageId) => {
+    const sceneIds = [...(sceneIdsByPage.get(pageId) ?? new Set<string>())].sort(
+      compareSceneRecordIds
+    );
+    return { page_id: pageId, scene_ids: sceneIds, unscened: sceneIds.length === 0 };
+  });
+
+  const sceneEntries = new Map<string, ContextPacketSceneCoverageScene>();
+  for (const branch of branches) {
+    for (const scene of branch.scenes) {
+      if (!scene.pg_ids.some((pageId) => activePathSet.has(pageId))) {
+        continue;
+      }
+      sceneEntries.set(scene.scene_id, {
+        scene_id: scene.scene_id,
+        branch_id: scene.branch_id,
+        publication_indicator: scene.publication_indicator as SceneCoveragePublicationIndicator,
+        superseded: scene.superseded
+      });
+    }
+  }
+
+  const activeScenes = [...sceneEntries.values()].sort((left, right) =>
+    compareSceneRecordIds(left.scene_id, right.scene_id)
+  );
+
+  return { pages, active_scenes: activeScenes };
+}
+
 function parseStoryKernelFrontmatter(worldSlug: string, storySlug: string): Record<string, unknown> {
   const kernelPath = path.join(resolveWorldDirectory(worldSlug), "stories", storySlug, "STORY_KERNEL.md");
   if (!existsSync(kernelPath)) {
@@ -824,7 +905,19 @@ export function summarizeStoryBundleContext(
     recent_page_ids: context.recent_pages_along_longest_active_branch.map((page) => page.id),
     mystery_ids: context.mysteries_in_play.map((mystery) => mystery.m_id),
     cast_stent_ids: context.cast_bind_list.map((cast) => cast.stent_id),
-    invariant_ids: [...context.invariants_acknowledged]
+    invariant_ids: [...context.invariants_acknowledged],
+    scene_coverage_active_scene_ids:
+      context.scene_coverage === null
+        ? []
+        : context.scene_coverage.active_scenes
+            .filter((scene) => !scene.superseded)
+            .map((scene) => scene.scene_id),
+    scene_coverage_unscened_page_ids:
+      context.scene_coverage === null
+        ? []
+        : context.scene_coverage.pages
+            .filter((page) => page.unscened)
+            .map((page) => page.page_id)
   };
 }
 
@@ -914,6 +1007,12 @@ export async function buildStoryBundleContext(
     mysteries_in_play: buildMysteriesInPlay(frontmatter),
     mystery_evidence_chains: buildMysteryEvidenceChains(pageRows),
     cast_bind_list: buildCastBindList(frontmatter),
-    invariants_acknowledged: asStringArray(frontmatter.invariants_acknowledged)
+    invariants_acknowledged: asStringArray(frontmatter.invariants_acknowledged),
+    scene_coverage: buildSceneCoverage(
+      db,
+      worldSlug,
+      storySlug,
+      branchContext.longest_active_branch_path
+    )
   };
 }

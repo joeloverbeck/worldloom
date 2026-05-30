@@ -149,7 +149,31 @@ export function withIndexFreshnessGuard<TArgs, TResult>(
 
       const staleError = result;
       if (attemptedSync) {
-        return withRecoveryDetails(staleError, "sync", "still_stale");
+        // Incremental `sync` can under-reconcile story-bundle records (e.g. storylet
+        // drift). Escalate to a full `build` once before giving up, mirroring the
+        // index_version_mismatch recovery path, then retry one final time.
+        if (attemptedBuild) {
+          return withRecoveryDetails(staleError, "build", "still_stale_after_build");
+        }
+
+        const buildWorldSlug = getWorldSlug(args, staleError);
+        if (buildWorldSlug === undefined || buildWorldSlug.length === 0) {
+          return withRecoveryDetails(staleError, "build", "missing_world_slug");
+        }
+
+        attemptedBuild = true;
+        const buildStartedAt = performance.now();
+        const buildExitCode = runBuild(resolveRepoRoot(), buildWorldSlug);
+        const buildDurationMs = Math.round(performance.now() - buildStartedAt);
+
+        if (buildExitCode !== 0) {
+          return withRecoveryDetails(staleError, "build", "build_failed");
+        }
+
+        audit.pre_call_index_was_stale = true;
+        audit.build_duration_ms = buildDurationMs;
+        result = await handler(args);
+        continue;
       }
 
       const worldSlug = getWorldSlug(args, staleError);

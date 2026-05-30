@@ -20,7 +20,13 @@ import {
   insertSltProjections,
   insertValidationResults
 } from "../index/nodes.js";
-import { getFileVersion, listIndexedFiles, removeFileVersion, upsertFileVersion } from "../index/file-versions.js";
+import {
+  getFileVersion,
+  listIndexedFiles,
+  removeFileVersion,
+  touchFileVersion,
+  upsertFileVersion
+} from "../index/file-versions.js";
 import {
   databasePathForWorld,
   hasIndex,
@@ -409,7 +415,7 @@ function reindexAllFiles(
           !storyFileSet.has(filePath)
       )
     : [];
-  const atomicLogicalFiles = atomicMode ? createAtomicLogicalFileResults(worldSlug) : [];
+  const atomicLogicalFiles = atomicMode ? createAtomicLogicalFileResults(worldRoot, worldSlug) : [];
   const atomicFiles = atomicMode ? indexable.filter((filePath) => filePath.startsWith("_source/")) : [];
   const indexedBefore = new Set(listIndexedFiles(db, worldSlug));
   let changedNodeCount = 0;
@@ -434,6 +440,7 @@ function reindexAllFiles(
     indexedBefore.delete(relativeFilePath);
 
     if (!shouldProcess) {
+      touchFileVersion(db, worldSlug, relativeFilePath);
       continue;
     }
 
@@ -451,6 +458,7 @@ function reindexAllFiles(
     indexedBefore.delete(parsed.relativeFilePath);
 
     if (!shouldProcess) {
+      touchFileVersion(db, worldSlug, parsed.relativeFilePath);
       continue;
     }
 
@@ -472,6 +480,7 @@ function reindexAllFiles(
     indexedBefore.delete(relativeFilePath);
 
     if (!shouldProcess) {
+      touchFileVersion(db, worldSlug, relativeFilePath);
       continue;
     }
 
@@ -493,6 +502,7 @@ function reindexAllFiles(
     indexedBefore.delete(relativeFilePath);
 
     if (!shouldProcess) {
+      touchFileVersion(db, worldSlug, relativeFilePath);
       continue;
     }
 
@@ -514,6 +524,7 @@ function reindexAllFiles(
     indexedBefore.delete(relativeFilePath);
 
     if (!shouldProcess) {
+      touchFileVersion(db, worldSlug, relativeFilePath);
       continue;
     }
 
