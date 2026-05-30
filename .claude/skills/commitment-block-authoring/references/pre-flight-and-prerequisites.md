@@ -65,7 +65,13 @@ The 7-step procedure:
 4(iii).4 mcp__worldloom__list_records(record_type='choice_record',           1 retrieval → just-emitted CHCs
            filter={parent_page: PG-N})
          compute action_family_distribution from CHC.action_families[];
-         compute dominant_action_families (>= 40% threshold) and outlier_action_families
+         compute dominant_action_families (a family is dominant when >= 40%
+           of the parent page's CHCs contain it in their action_families[]
+           list — i.e., the family appears in at least ceil(0.4 * len(parent_page_choices))
+           distinct CHCs; the denominator is the CHC count, NOT the pooled
+           count of action_family entries across CHCs) and outlier_action_families
+           (a family is an outlier when it appears in exactly one CHC's
+           action_families[] list, a singleton against the parent_page CHC set)
 4(iii).5 supersession scan across window:
          for each record class in {threads, beliefs, relationships,
                                    obligations, consequences, clocks}:
@@ -102,8 +108,8 @@ moment_signature:
   forward_affordance_fingerprint:                  # from step 4(iii).4
     parent_page_choices: [CHC-<integer>, ...]
     action_family_distribution: {<action_family>: <count>, ...}
-    dominant_action_families: [<action_family>, ...]   # >= 40% of CHC.action_families[] entries
-    outlier_action_families: [<action_family>, ...]    # singleton or near-singleton entries
+    dominant_action_families: [<action_family>, ...]   # >= 40% of parent_page CHCs contain this family (per-CHC presence ratio; denominator is the CHC count)
+    outlier_action_families: [<action_family>, ...]    # appears in exactly one CHC's action_families[] (singleton against the parent_page CHC set)
   cast_role_engagement_at_moment:                  # from step 4(iii).6; non-empty roles only
     pressure_source: [STENT-<integer>, ...]
     opposing_actor: [STENT-<integer>, ...]
@@ -112,6 +118,8 @@ moment_signature:
     information_source: [STENT-<integer>, ...]
   supersession_window_pages: <integer>             # echoed from the skill arg (default 3)
 ```
+
+**Worked example (red-bunny PG-8, 5 CHCs)**: CHC-36 [communicate, protect, wait]; CHC-37 [communicate, protect]; CHC-38 [perceive, bond, control]; CHC-39 [communicate, persuade, bond]; CHC-40 [evade, protect, wait]. Per-CHC presence: communicate 3/5=60%, protect 3/5=60%, wait 2/5=40%, bond 2/5=40%, perceive 1/5=20%, control 1/5=20%, persuade 1/5=20%, evade 1/5=20%. ⌈0.4 × 5⌉ = 2 CHCs threshold. `dominant_action_families: [communicate, protect, wait, bond]`. `outlier_action_families: [perceive, control, persuade, evade]`.
 
 When `moment_signature_skipped: true` (no committed PG yet), the artifact carries only `moment_signature_skipped: true`, `moment_signature_skip_reason: "no committed PG (post-bootstrap)"`, and `supersession_window_pages` (echoed for traceability); the six content fields are omitted.
 
