@@ -18,6 +18,9 @@ arguments:
   - name: focus
     description: "direct_batch only — natural-language hint guiding which move families / action families the batch should emphasize (e.g., 'post-violence recovery', 'investigation coverage'). The Phase 4 diversity gate enforces minimum spread regardless."
     required: false
+  - name: supersession_window_pages
+    description: "direct_batch only — integer; default 3, min 1, max 8. Controls how far back the moment-signature supersession scan (pre-flight step 4(iii)) walks. Defaults match branching-story-health-audit's recent-activity scan defaults; raise for bundles with long turn cadences where superseded records may sit older than 3 pages."
+    required: false
   - name: audit_id
     description: "audit_repair only — SAU-<integer> of the source branching-story-health-audit report supplying the RSP cards."
     required: false
@@ -38,6 +41,7 @@ Do NOT write `worlds/<world_slug>/stories/<story_slug>/storylet-batches/SLB-<int
 - bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`;
 - mode validated;
 - for `direct_batch`: latest committed parent `PG-<integer>` resolved; pool-wide SLT inventory loaded as projection records keyed by `move_family`, the dotted `grounding.compatible_turn_drivers` response key, and the parent objects needed to compute predicate-class and action-family coverage for Phase 1 coverage-gap diagnosis (full retrieval call: see `references/pre-flight-and-prerequisites.md` §Pre-flight Check step 4); when existing-block mutation planning is in scope, per-page eligibility shortlist additionally loaded for `replace` / `extend` mutation targeting (full retrieval call: see `references/pre-flight-and-prerequisites.md` §Pre-flight Check step 4);
+- for `direct_batch`: moment signature computed via pre-flight step 4(iii) (latest PG state + parent SE + just-emitted CHCs + supersession scan across `supersession_window_pages`); working-memory artifact emitted to Phase 1 input (full procedure: see `references/pre-flight-and-prerequisites.md` §Pre-flight Check step 4(iii)); skipped with explicit logged reason when no committed PG exists yet (post-bootstrap, pre-PG-2);
 - for `audit_repair`: audit + RSP cards loaded from `audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md`;
 - active STCHAR summaries loaded from `story_bundle_context.active_story_characters`; full/projected STCHAR sections retrieved via `mcp__worldloom__get_record(record_id='STCHAR-<integer>', section_path='body.<section-name>')` when a block's eligibility, beats, effects, pressure behavior, relationship conduct, persona, or voice depends on a specific character;
 - SLT ids and one SLB id allocated via `mcp__worldloom__allocate_next_id`;
@@ -57,7 +61,7 @@ This gate is authoritative under Auto Mode or any other autonomous-execution con
 Pre-flight Check (load FOUNDATIONS + shared contract; resolve bundle;
   validate mode; load current SLT pool [direct_batch] OR RSP cards
   [audit_repair]; allocate SLT + SLB ids; load world canon context
-  packet)
+  packet; compute moment signature [direct_batch only — step 4(iii)])
         |
         v
 Phase 1: Diagnose coverage gaps (direct_batch) OR load RSP cards
@@ -94,6 +98,7 @@ For `direct_batch`:
 
 - `target_count` — integer; default `6`, max `12`. Number of new SLT records to create.
 - `focus` — optional natural-language hint guiding move-family / action-family emphasis.
+- `supersession_window_pages` — integer; default 3, min 1, max 8. Controls how far back the moment-signature supersession scan walks. Defaults match branching-story-health-audit's recent-activity scan defaults; raise for bundles with long turn cadences where superseded records may sit older than 3 pages.
 
 For `audit_repair`:
 
