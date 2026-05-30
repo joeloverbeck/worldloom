@@ -67,4 +67,6 @@ not retry unless the error details include `retry_with.token_budget`; when
 `retry_with` is absent, follow the error's `fallback_advice` and use targeted
 retrieval.
 
+Stale-index auto-recovery: if any pre-flight retrieval call returns `stale_index`, the MCP freshness guard auto-recovers in two rungs — it runs `world-index sync <world_slug>` once and retries, then escalates to a full `world-index build <world_slug>` and retries once more (incremental `sync` can under-reconcile story-bundle records such as storylet/STCHAR drift). A successful response carrying `freshness_audit.pre_call_index_was_stale: true` means recovery already happened and no manual retry is needed. Only a surfaced `recovery_outcome: still_stale_after_build` (or `build_failed`) means recovery is exhausted — run `world-index build <world_slug>` manually and investigate why disk and index diverge before retrying.
+
 If any precondition fails, the skill aborts before Phase 1.

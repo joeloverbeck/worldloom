@@ -72,12 +72,17 @@ test("withIndexFreshnessGuard syncs and retries once for recoverable stale_index
   try {
     let calls = 0;
     const syncCalls: Array<{ worldRoot: string; worldSlug: string }> = [];
+    let buildCalled = false;
     const guarded = withIndexFreshnessGuard<HandlerArgs, HandlerResponse>(
       async () => {
         calls += 1;
         return calls === 1 ? staleIndexError() : { value: "recovered" };
       },
       {
+        buildWorldIndex: () => {
+          buildCalled = true;
+          return 0;
+        },
         syncWorldIndex: (worldRoot, worldSlug) => {
           syncCalls.push({ worldRoot, worldSlug });
           return 0;
@@ -89,6 +94,8 @@ test("withIndexFreshnessGuard syncs and retries once for recoverable stale_index
 
     assert.equal(calls, 2);
     assert.deepEqual(syncCalls, [{ worldRoot: root, worldSlug: "seeded" }]);
+    // A successful sync must not escalate to a build.
+    assert.equal(buildCalled, false);
     if ("code" in result) {
       assert.fail(`expected recovered response, got ${result.code}`);
     }
@@ -225,28 +232,116 @@ test("withIndexFreshnessGuard can annotate version rebuild and stale sync on one
   }
 });
 
-test("withIndexFreshnessGuard preserves stale_index when sync does not repair staleness", async () => {
+test("withIndexFreshnessGuard escalates to a full build when sync does not repair staleness, then succeeds", async () => {
   const root = createTempRepoRoot();
 
   try {
     let calls = 0;
+    const buildCalls: Array<{ worldRoot: string; worldSlug: string }> = [];
+    const syncCalls: string[] = [];
+    const guarded = withIndexFreshnessGuard<HandlerArgs, HandlerResponse>(
+      async () => {
+        calls += 1;
+        // call 1: pre-flight stale; call 2: still stale after sync; call 3: fresh after build.
+        return calls <= 2 ? staleIndexError() : { value: "rebuilt-after-sync" };
+      },
+      {
+        buildWorldIndex: (worldRoot, worldSlug) => {
+          buildCalls.push({ worldRoot, worldSlug });
+          return 0;
+        },
+        syncWorldIndex: (_worldRoot, worldSlug) => {
+          syncCalls.push(worldSlug);
+          return 0;
+        }
+      }
+    );
+
+    const result = await withRepoRoot(root, () => guarded({ world_slug: "seeded" }));
+
+    assert.equal(calls, 3);
+    assert.deepEqual(syncCalls, ["seeded"]);
+    assert.deepEqual(buildCalls, [{ worldRoot: root, worldSlug: "seeded" }]);
+    if ("code" in result) {
+      assert.fail(`expected recovered response, got ${result.code}`);
+    }
+    assert.equal(result.value, "rebuilt-after-sync");
+
+    const audited = result as HandlerResponse & FreshnessAuditedResponse;
+    assert.equal(audited.freshness_audit.pre_call_index_was_stale, true);
+    assert.equal(Number.isInteger(audited.freshness_audit.build_duration_ms), true);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("withIndexFreshnessGuard surfaces still_stale_after_build when both sync and build fail to reconcile", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    let calls = 0;
+    let syncCalls = 0;
+    let buildCalls = 0;
     const guarded = withIndexFreshnessGuard<HandlerArgs, HandlerResponse>(
       async () => {
         calls += 1;
         return staleIndexError();
       },
       {
-        syncWorldIndex: () => 0
+        buildWorldIndex: () => {
+          buildCalls += 1;
+          return 0;
+        },
+        syncWorldIndex: () => {
+          syncCalls += 1;
+          return 0;
+        }
       }
     );
 
     const result = await withRepoRoot(root, () => guarded({ world_slug: "seeded" }));
 
-    assert.equal(calls, 2);
+    // Loop is bounded: exactly one sync followed by exactly one build, then surface.
+    assert.equal(calls, 3);
+    assert.equal(syncCalls, 1);
+    assert.equal(buildCalls, 1);
     assert.equal("code" in result, true);
     assert.equal((result as McpError).code, "stale_index");
-    assert.equal((result as McpError).details?.recovery_attempted, "sync");
-    assert.equal((result as McpError).details?.recovery_outcome, "still_stale");
+    assert.equal((result as McpError).details?.recovery_attempted, "build");
+    assert.equal((result as McpError).details?.recovery_outcome, "still_stale_after_build");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("withIndexFreshnessGuard surfaces build_failed when the escalation build itself errors", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    let syncCalls = 0;
+    let buildCalls = 0;
+    const guarded = withIndexFreshnessGuard<HandlerArgs, HandlerResponse>(
+      async () => staleIndexError(),
+      {
+        buildWorldIndex: () => {
+          buildCalls += 1;
+          return 1;
+        },
+        syncWorldIndex: () => {
+          syncCalls += 1;
+          return 0;
+        }
+      }
+    );
+
+    const result = await withRepoRoot(root, () => guarded({ world_slug: "seeded" }));
+
+    assert.equal(syncCalls, 1);
+    assert.equal(buildCalls, 1);
+    assert.equal("code" in result, true);
+    assert.equal((result as McpError).code, "stale_index");
+    assert.equal((result as McpError).details?.recovery_attempted, "build");
+    assert.equal((result as McpError).details?.recovery_outcome, "build_failed");
   } finally {
     destroyTempRepoRoot(root);
   }
