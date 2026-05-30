@@ -1,6 +1,6 @@
 # TCVTRACE-001: Surface the literal nine `validation_trace` keys in the turn-cycle references and flag the `plan_grounding` gate-name mismatch
 
-**Status**: PENDING
+**Status**: DONE (implemented 2026-05-30; `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md` now opens with a gate-order literal-key table flagging both descriptive-name vs. schema-key mismatches — gate 3 `mystery_invariant_firewall` and gate 7 `plan_grounding`; `_shared-templates/story-state-contract.md` §7 row 7 annotated with the literal key `plan_grounding` to make the contract table self-describing. Documentation-only change; schema key and `validation_trace_shape_compliance` unchanged. Acceptance grep returned all nine literal keys at lines 9-17 of the phase-9 reference.)
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — docs only: `.claude/skills/branching-story-turn-cycle/references/phase-9-validation-gates.md`, optionally `.claude/skills/_shared-templates/story-state-contract.md` §7
