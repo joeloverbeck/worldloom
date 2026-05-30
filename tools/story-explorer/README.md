@@ -1,6 +1,6 @@
 # Story Explorer
 
-`@worldloom/story-explorer` is the local read-only backend for the Worldloom Story Explorer web UI. It serves deterministic view models for story bundles from repository files and the `world-index` read model.
+`@worldloom/story-explorer` is the local read-only backend for the Worldloom Story Explorer web UI. It serves deterministic, scene-first view models for story bundles from repository files and the `world-index` read model — overview, timeline, scene-detail, unscened-run, and state-tick x-ray routes built on the `scene_coverage` read model rather than a page-prose surface.
 
 ## Usage
 
@@ -76,7 +76,11 @@ npm exec --prefix tools/story-explorer -- world-index build <world-slug>
 
 ## Related Specs
 
-- `specs/SPEC-87-story-explorer-backend-foundation.md`
-- `specs/SPEC-88-story-explorer-frontend-foundation.md`
-- `specs/SPEC-89-story-explorer-state-xray-layer.md`
-- `specs/SPEC-90-story-explorer-branch-map-and-search.md`
+The Story Explorer is scene-first as of SPEC-96..98. The page-centric branch-map/search spec (SPEC-90) was removed; its live contract is carried by SPEC-98. The foundational and scene-first specs are archived:
+
+- `archive/specs/SPEC-87-story-explorer-backend-foundation.md`
+- `archive/specs/SPEC-88-story-explorer-frontend-foundation.md`
+- `archive/specs/SPEC-89-story-explorer-state-xray-layer.md`
+- `archive/specs/SPEC-96-story-explorer-scene-backend-api.md`
+- `archive/specs/SPEC-97-story-explorer-scene-first-frontend.md`
+- `archive/specs/SPEC-98-story-explorer-scene-search-and-branch-map.md`

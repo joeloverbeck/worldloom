@@ -126,17 +126,17 @@ A story bundle contains story-local records such as:
 
 A committed `PG` page record is the authoritative story-state snapshot. Rendered prose is attached afterward and validated against that snapshot.
 
-### Page plans vs prose
+### State turns vs scene prose
 
-Worldloom deliberately separates page planning from prose rendering.
+Worldloom deliberately separates authoritative state turns from prose rendering. Committing a page snapshot (`PG`) is planless; rendered prose is planned and attached later at scene scope by `branching-story-scene-plan` and `branching-story-scene-prose-attach`.
 
 ```text
-pages-prose-plans/PG-<n>.md      Comprehensive plan for a page.
-pages-prose/PG-<n>.md            Rendered prose supplied externally.
-pages-prose-receipts/PG-<n>.yaml Validation receipt for attached prose.
+scene-prose-plans/SCN-<n>.md      Self-contained render prompt for a scene's committed PG range.
+scene-prose/SCN-<n>.md            Rendered scene prose supplied externally.
+scene-prose-receipts/SCN-<n>.yaml Validation receipt for attached scene prose.
 ```
 
-A story can advance from any committed page snapshot whether or not rendered prose has been attached.
+A story can advance from any committed page snapshot whether or not rendered prose has been attached. The context packet exposes a prose-free `scene_coverage` layer (active scenes, unscened pages, and publication indicators along the active branch path) so coverage can be audited without reading scene prose.
 
 ### Hard gates
 
@@ -426,21 +426,29 @@ The skill advances from a committed parent page using either a selected `CHC-<n>
 
 It writes the next page snapshot, event, updated story-local records, a new page plan, and new choices.
 
-### Attach rendered prose
+### Plan and attach scene prose
 
-Use:
+Plan a scene over a committed page range:
 
 ```text
-/branching-story-prose-attach
+/branching-story-scene-plan
+```
+
+This selects a contiguous single-branch `PG` range, creates an `SCN` record, and writes a self-contained scene plan at `scene-prose-plans/SCN-<n>.md`.
+
+Then attach the externally rendered prose:
+
+```text
+/branching-story-scene-prose-attach
 ```
 
 Rendered prose is expected to already exist at:
 
 ```text
-worlds/<world-slug>/stories/<story-slug>/pages-prose/PG-<n>.md
+worlds/<world-slug>/stories/<story-slug>/scene-prose/SCN-<n>.md
 ```
 
-The skill validates the prose against the committed page plan and writes a receipt.
+The skill validates the prose against every `PG` in the scene's range and writes `scene-prose-receipts/SCN-<n>.yaml`.
 
 ### Audit story-bundle health
 
