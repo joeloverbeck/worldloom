@@ -1,6 +1,6 @@
 # IDXSYNC-002: Incremental `world-index sync` does not converge to a full `build` — file-level drift token uses a different hash basis than the MCP staleness checker
 
-**Status**: PENDING
+**Status**: DONE (implemented 2026-05-30; file-level drift token unified on raw bytes in `parse/atomic.ts` and `createAtomicLogicalFileResults`; sync's skip path now refreshes `last_indexed_at` via a new `touchFileVersion`; convergence + soundness regressions added to `tools/world-mcp/tests/db/open.test.ts`. IDXSYNC-001 escalation kept as defense-in-depth.)
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-index/src/commands/shared.ts` (reindex bookkeeping) and the file-level hash basis in `tools/world-index/src/parse/atomic.ts` / `tools/world-index/src/parse/canonical.ts`; the drift checker in `tools/world-mcp/src/db/open.ts`; plus tests in `tools/world-index/tests/commands.test.ts`, `tools/world-index/tests/schema.test.ts`, and `tools/world-mcp/tests/db/open.test.ts`
