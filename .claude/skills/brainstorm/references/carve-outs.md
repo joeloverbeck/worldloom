@@ -1,6 +1,6 @@
 # Carve-outs
 
-The carve-out cluster — directed-design / small-deliverable / multi-artifact-bundle / template-structured / non-plan-mode fast-track / multi-deliverable triage navigation / re-emergent interview / mid-design term-clarification / Recovery/Reset register inheritance / classification pivot. SKILL.md retains the procedural skeletons that mention each carve-out; this file is the full specification per carve-out, in firing-order across Steps 1 and 4.
+The carve-out cluster — directed-design / directed-design batching / small-deliverable / multi-artifact-bundle / template-structured / non-plan-mode fast-track / multi-deliverable triage navigation / re-emergent interview / mid-design term-clarification / Recovery/Reset register inheritance / classification pivot. SKILL.md retains the procedural skeletons that mention each carve-out; this file is the full specification per carve-out, in firing-order across Steps 1 and 4.
 
 ## Step 1 — Directed design question carve-out (non-plan-mode)
 
@@ -17,6 +17,10 @@ If the design reveals a deliverable type that differs from the Step 1 classifica
 **After each section**, ask: "Does this section look right?" Wait for confirmation before presenting the next section. If the user pushes back, revise that section before continuing. If the user approves 3+ sections consecutively without pushback or revisions, batch remaining sections into groups of 2-3, pausing for approval after each group rather than each section. Under auto mode, this threshold may shift to 2 consecutive approvals to reduce round-trips. Exception: keep a remaining section standalone if it is substantially more complex or higher-risk than the prior ones. Announce the batching: "You're clearly aligned — I'll present the remaining sections in groups."
 
 Under auto mode, after 5+ consecutive approvals with no substantive pushback, single-message batches covering all remaining sections are acceptable provided no remaining section is higher-risk (the "Exception" above still applies). The "groups of 2-3" rule remains the default; the 5+-sustained-approval case is the explicit relaxation for prolonged agreement, parallel to skill-creator's convention.
+
+## Step 4 — Directed-design batching carve-out
+
+When Step 1 sub-step 5's directed-design carve-out fires (initial confidence ≥80% from a directed brief, Step 2 fully skipped) AND the design is medium-sized (5-10 sections — more than the §Small-deliverable carve-out's ≤4 decisions threshold but fewer than the §Multi-artifact-bundle carve-out's ≥5 substantive architectural deliverables), the first batch may include 3-4 sections without prior approvals, provided the operator announces the batching plan and its justification on the first batch (e.g., "Presenting in batches of ~3 sections — Auto Mode allows 2-3 sections per batch and the directed brief signals high engagement"). Subsequent batches follow the standard 2-3-section threshold from §Section batching threshold above. Distinct from the §Small-deliverable carve-out (which consolidates SMALL designs into one message) and from the §Multi-artifact-bundle carve-out (which structures LARGE designs into architectural tiers with per-tier approval); this carve-out covers medium-sized designs in directed-design flows where the user's directed brief was specific enough to signal high engagement but the design itself is too substantive to present as a single artifact. The HARD-GATE still applies — per-batch approval is required throughout, and the directed-design context does not change the per-section approval discipline; it only changes the initial-batch size.
 
 ## Step 4 — Small-deliverable carve-out
 
