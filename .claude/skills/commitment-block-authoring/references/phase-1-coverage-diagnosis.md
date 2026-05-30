@@ -80,6 +80,8 @@ The 4-step procedure:
 
 1. For each `move_family` value (16-value enum per shared contract §4.4), count pool SLTs that hard-fire on the signature's `active_high_salience_records` (i.e., hard precondition referencing one of those records' classes, urgencies, or role-filters). Under-represented move_families with active high-salience records targeting them emit a `moment_fit_lane` named `move_family_under_represented_at_moment:<move_family>`.
 
+   Additionally, for each emitted `move_family_under_represented_at_moment:<move_family>` lane, count and record on the lane: (i) `hard_firing_block_count` (pool blocks in this move_family whose hard preconditions match the signature's `active_high_salience_records`); (ii) `existing_non_hard_firing_block_count` (pool blocks in this move_family that exist but whose hard preconditions do NOT match the signature — i.e., the over-narrow / brittle pattern); (iii) derived `composition_class`: `absent_or_thin` when `existing_non_hard_firing_block_count == 0` (the move_family lacks blocks of this shape at the moment); `brittle_existing_blocks_present` when `existing_non_hard_firing_block_count >= 1` (the move_family has blocks but at least one is brittle vs. the moment's affect/state shape). The brittle-block detection mirrors `branching-story-health-audit` Phase 2o's `storylet_permanently_inert` signal scoped to the present moment. The counts are computable from the pool projection already loaded at pre-flight step 4(i); no new MCP retrieval is added.
+
 2. For each `supersession_set` entry, check whether the pool carries a block whose hard preconditions match the *new* (post-supersession) record's shape (e.g., for a THR supersession with axis "protect/possess collapse": any pool SLT hard-gating on `any_thread_active(tag~="protect", urgency=high)` AND `any_relationship_axis(axis=desire, value=high)`). If zero, emit a `moment_fit_lane` named after the supersession axis (e.g., `protect_possess_collapse_under_desire`).
 
 3. For each `dominant_action_family` in `forward_affordance_fingerprint`, check pool SLTs whose `exit_options[].action_family` includes that family AND whose hard preconditions intersect the `active_high_salience_records` set. If under-represented, emit a `moment_fit_lane` named `<dominant_family>_under_<dominant_active_pressure_axis>` (e.g., `negotiation_under_door_or_leash_belief`).
@@ -141,7 +143,13 @@ moment_signature: {<echoed pre-flight artifact from CBAUTH-007 step 4(iii), for 
 moment_fit_diagnosis:
   signature: <embedded moment_signature>
   moment_fit_lanes:
-    - {lane_id: "<name>", source: <supersession_set | forward_affordance+active_high_salience | cast_role_engagement | move_family_under_represented_at_moment>, addressed_by_blocks: [SLT-NEW-<N>, ...]}
+    - lane_id: "<name>"
+      source: <supersession_set | forward_affordance+active_high_salience | cast_role_engagement | move_family_under_represented_at_moment>
+      addressed_by_blocks: [SLT-NEW-<N>, ...]
+      # Below 3 fields populated only when source == move_family_under_represented_at_moment:
+      hard_firing_block_count: <integer>
+      existing_non_hard_firing_block_count: <integer>
+      composition_class: absent_or_thin | brittle_existing_blocks_present
   moment_signature_skipped: false
   moment_signature_skip_reason: null
 pool_saturation: false   # widened from bool to three-state enum: false | pool_only | moment_and_pool. See §Saturation verdict (three-state) above for firing rules. Truthy values ("pool_only" / "moment_and_pool") both mean "saturated against pool-wide check"; "moment_and_pool" additionally means Pass B emitted no lanes; surfaces the saturated-pool advisory in the Phase 6 deliverable summary.
