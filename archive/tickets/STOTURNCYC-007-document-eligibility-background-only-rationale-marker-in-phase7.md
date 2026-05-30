@@ -1,6 +1,6 @@
 # STOTURNCYC-007: Document the `eligibility_background_only` rationale marker for CHC.likely_state_pressure in Phase 7
 
-**Status**: PENDING
+**Status**: ✅ COMPLETED
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: None — skill-prose-only update to `.claude/skills/branching-story-turn-cycle/references/phase-8-choice-generation.md` (and optionally a one-line nudge in SKILL.md Phase 7)
@@ -86,3 +86,25 @@ Add a single sentence to the existing Phase 7 paragraph in SKILL.md instructing 
 1. `grep -rn eligibility_background_only .claude/skills/branching-story-turn-cycle/` (must return at least one match in `phase-8-choice-generation.md` after the edit).
 2. `grep -n BACKGROUND_MARKER tools/validators/src/structural/chc-slt-selected-commitment-trace.ts` (must return the line 17 declaration; the documented prose must mirror this regex shape).
 3. `grep -n 'weak_incidental_grounding\|missing_eligibility_source' tools/validators/src/structural/chc-slt-selected-commitment-trace.ts` (must return both verdict codes; the documented prose must explain both).
+
+## Outcome
+
+Completed on 2026-05-30:
+
+- `.claude/skills/branching-story-turn-cycle/references/phase-8-choice-generation.md` now carries a dedicated `## Eligibility grounding and the eligibility_background_only rationale marker` subsection appended after the `choice_set_noncollapse` paragraph. The subsection covers: (a) the two validator failure modes (`weak_incidental_grounding` warn, `missing_eligibility_source` fail), (b) the regex-form contract of the marker with the validator source pin (`chc-slt-selected-commitment-trace.ts:17`), (c) the "marker is prose, not a YAML key" guardrail with the CHC schema pin, (d) the "prefer exact grounding when the resolving SLT is predictable" steering, and (e) a worked SREL-2 / SREL-6 cross-turn example showing the marker embedded inside `likely_state_pressure`.
+- `.claude/skills/branching-story-turn-cycle/SKILL.md:168` Phase 7 carries a single-sentence inline cross-reference naming the marker, the two suppressed verdict codes, and the reference doc — so authors discover the marker from SKILL.md without having to read the full reference first.
+
+### Verification Result
+
+1. `grep -rn eligibility_background_only .claude/skills/branching-story-turn-cycle/` → 5 matches: 4 in `references/phase-8-choice-generation.md` (heading, escape-valve paragraph, prose-not-YAML paragraph, worked-example marker line) and 1 in `SKILL.md` (Phase 7 cross-reference). AC1 PASS (≥1 match in the reference).
+2. The documented marker form is `eligibility_background_only: <natural-language reason>` with the regex `/eligibility_background_only\s*:\s*([^.;\n]+)/i` quoted verbatim and the source-line pin (`chc-slt-selected-commitment-trace.ts:17`) cited. AC2 PASS.
+3. Reference doc explains both `weak_incidental_grounding` (warn: same class, different id) and `missing_eligibility_source` (FAIL: no selecting-predicate record at all), and contrasts the marker against the cleaner "add the exact selecting-predicate record to `grounded_in.records[]`" path. AC3 PASS.
+4. Invariant 1 (documented prose byte-aligned with validator regex) holds — the doc quotes the validator's literal `BACKGROUND_MARKER` regex.
+5. Invariant 2 (marker is not a YAML schema field) holds — the doc explicitly states the marker is prose embedded inside `likely_state_pressure` and that authoring it as a separate YAML key will not satisfy the validator.
+6. `grep -n BACKGROUND_MARKER tools/validators/src/structural/chc-slt-selected-commitment-trace.ts` → match at line 17 (declaration) and line 458 (use site). Test Plan #2 PASS.
+7. `grep -n 'weak_incidental_grounding\|missing_eligibility_source' tools/validators/src/structural/chc-slt-selected-commitment-trace.ts` → both codes present (lines 243, 245). Test Plan #3 PASS.
+
+### Deviations
+
+- The "optional" SKILL.md Phase 7 one-sentence cross-reference was landed (the ticket framed it as optional but cheap; chosen to land for discoverability — authors who never load `references/phase-8-choice-generation.md` can still find the marker from SKILL.md alone).
+- The worked example uses the same SREL-2 → SREL-6 cross-turn shape the ticket's Problem section already cites from the PG-7→PG-8 retrospective, so the example doubles as a cross-link to the originating incident shape without naming the specific session.
