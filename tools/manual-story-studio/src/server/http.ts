@@ -13,6 +13,10 @@ import {
   registerMetadataWriteRoute,
 } from "./routes/metadata.js";
 import {
+  registerPromptsReadRoutes,
+  registerPromptsWriteRoutes,
+} from "./routes/prompts.js";
+import {
   registerRecordsReadRoutes,
   registerRecordsWriteRoutes,
 } from "./routes/records.js";
@@ -58,6 +62,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerManualStoriesGetRoute(server, { repoRoot: options.repoRoot });
   await registerRecordsReadRoutes(server, { repoRoot: options.repoRoot });
   await registerMetadataReadRoute(server, { repoRoot: options.repoRoot });
+  await registerPromptsReadRoutes(server, { repoRoot: options.repoRoot });
 
   await wrapRouterWritable(server, async (writableRouter) => {
     await registerManualStoriesWriteRoutes(writableRouter, {
@@ -67,6 +72,9 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
       repoRoot: options.repoRoot,
     });
     await registerMetadataWriteRoute(writableRouter, {
+      repoRoot: options.repoRoot,
+    });
+    await registerPromptsWriteRoutes(writableRouter, {
       repoRoot: options.repoRoot,
     });
   });
