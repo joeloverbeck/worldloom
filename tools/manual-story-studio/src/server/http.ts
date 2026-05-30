@@ -8,6 +8,14 @@ import {
   registerManualStoriesGetRoute,
   registerManualStoriesWriteRoutes,
 } from "./routes/manual-stories.js";
+import {
+  registerMetadataReadRoute,
+  registerMetadataWriteRoute,
+} from "./routes/metadata.js";
+import {
+  registerRecordsReadRoutes,
+  registerRecordsWriteRoutes,
+} from "./routes/records.js";
 import { registerWorldsRoutes } from "./routes/worlds.js";
 import { wrapRouterWritable } from "./write-scope-guard.js";
 
@@ -48,9 +56,17 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
 
   await registerWorldsRoutes(server, { repoRoot: options.repoRoot });
   await registerManualStoriesGetRoute(server, { repoRoot: options.repoRoot });
+  await registerRecordsReadRoutes(server, { repoRoot: options.repoRoot });
+  await registerMetadataReadRoute(server, { repoRoot: options.repoRoot });
 
   await wrapRouterWritable(server, async (writableRouter) => {
     await registerManualStoriesWriteRoutes(writableRouter, {
+      repoRoot: options.repoRoot,
+    });
+    await registerRecordsWriteRoutes(writableRouter, {
+      repoRoot: options.repoRoot,
+    });
+    await registerMetadataWriteRoute(writableRouter, {
       repoRoot: options.repoRoot,
     });
   });
