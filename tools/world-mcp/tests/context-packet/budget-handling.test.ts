@@ -157,12 +157,12 @@ test("budget pressure drops impact_surfaces first while preserving local_authori
         task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
-        token_budget: 700
+        token_budget: 650
       })
     );
 
     assert.ok(!("code" in tightResult));
-    assert.ok(tightResult.task_header.token_budget.allocated <= 700);
+    assert.ok(tightResult.task_header.token_budget.allocated <= 650);
     assert.ok(tightResult.local_authority.nodes.some((node) => node.id === "DA-0002"));
     assert.ok(
       tightResult.truncation_summary.dropped_layers.includes("impact_surfaces"),

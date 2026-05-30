@@ -148,7 +148,7 @@ test("truncation_summary records every dropped layer and its emptied node-id lis
         task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
-        token_budget: 800
+        token_budget: 750
       })
     );
     assert.ok(!("code" in truncated));

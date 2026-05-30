@@ -352,20 +352,9 @@ const PROHIBITED_MOVES: Record<TaskType, string[]> = {
   other: ["Do not silently mutate canon", "Do not weaken Mystery Reserve boundaries"]
 };
 
-const PROTECTED_SURFACES = [
+export const PROTECTED_SURFACES = [
   "WORLD_KERNEL.md",
-  "INVARIANTS.md",
   "ONTOLOGY.md",
-  "TIMELINE.md",
-  "GEOGRAPHY.md",
-  "PEOPLES_AND_SPECIES.md",
-  "INSTITUTIONS.md",
-  "ECONOMY_AND_RESOURCES.md",
-  "MAGIC_OR_TECH_SYSTEMS.md",
-  "EVERYDAY_LIFE.md",
-  "CANON_LEDGER.md",
-  "OPEN_QUESTIONS.md",
-  "MYSTERY_RESERVE.md",
   "adjudications/",
   "characters/",
   "diegetic-artifacts/",

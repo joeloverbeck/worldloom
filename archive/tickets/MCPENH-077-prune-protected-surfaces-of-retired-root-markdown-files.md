@@ -112,3 +112,20 @@ Skill prose, FOUNDATIONS, and docs already reflect SPEC-13. Any drift discovered
 1. `npm --prefix tools/world-mcp test -- --grep protected-surfaces` — targeted run for the new test file.
 2. `npm --prefix tools/world-mcp test` — full world-mcp suite.
 3. The narrower world-mcp suite is the correct verification boundary because `PROTECTED_SURFACES` is local to the world-mcp package and not consumed by `tools/world-index/` or `tools/validators/`.
+
+## Outcome
+
+Completed 2026-05-30. `PROTECTED_SURFACES` in `tools/world-mcp/src/context-packet/governing-world-context.ts` now contains only the seven present-truth surfaces (`WORLD_KERNEL.md`, `ONTOLOGY.md`, and the five authored-primary directories), aligning the machine-facing `governing_world_context.protected_surfaces` and `governing_summary.protected_surfaces` outputs with FOUNDATIONS §Canonical Storage Layer. The const was promoted to `export` so the new foundations-alignment test can import it directly.
+
+## Verification Result
+
+1. `npm --prefix /home/joeloverbeck/projects/worldloom/tools/world-mcp run build` — PASS.
+2. `node --test dist/tests/context-packet/protected-surfaces-foundations-alignment.test.js` (from `tools/world-mcp`) — PASS (4 tests).
+3. `npm --prefix /home/joeloverbeck/projects/worldloom/tools/world-mcp test` — PASS (538 tests, 0 failures) after re-tightening two budget thresholds (see Deviations).
+
+## Deviations
+
+- Two budget-handling regression tests were re-tightened in lockstep with the packet-size shrink:
+  - `tools/world-mcp/tests/context-packet/budget-handling.test.ts` — `token_budget` lowered from `700` to `650` (and the matching `allocated` assertion) so the "drop impact_surfaces first under budget pressure" scenario still triggers a drop now that `protected_surfaces` is ~49 tokens smaller.
+  - `tools/world-mcp/tests/context-packet/packet-truncation-summary.test.ts` — `token_budget` lowered from `800` to `750` for the same reason.
+  Both tests assert behavior at threshold-tight budgets; the threshold moved with the packet-size reduction. No assertion semantics changed.
