@@ -117,6 +117,11 @@ function isExcludedPath(relativePath: string): boolean {
     return true;
   }
 
+  if (segments[0] === "manual-stories") {
+    // Manual Story Studio surface; intentionally outside the world-index inventory (SPEC-100 §2 item 4).
+    return true;
+  }
+
   if (segments.some((segment) => segment.startsWith("."))) {
     return true;
   }
