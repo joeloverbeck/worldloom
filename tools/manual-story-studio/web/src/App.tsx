@@ -1,5 +1,6 @@
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
+import { BeatTemplates } from "./pages/BeatTemplates.js";
 import { CastAndProfiles } from "./pages/CastAndProfiles.js";
 import { CreateManualStory } from "./pages/CreateManualStory.js";
 import { Dashboard } from "./pages/Dashboard.js";
@@ -73,6 +74,10 @@ export function App() {
           <Route
             path="/worlds/:worldSlug/manual-stories/:msSlug/prompt-history"
             element={<PromptHistory />}
+          />
+          <Route
+            path="/worlds/:worldSlug/manual-stories/:msSlug/beat-templates"
+            element={<BeatTemplates />}
           />
         </Routes>
       </main>
