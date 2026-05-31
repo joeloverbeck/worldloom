@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/write/segments.ts` (save / edit-in-place / hybrid delete) + paired test under `tools/manual-story-studio/test/write/segments.test.ts` covering all three operations.
-**Deps**: archive/tickets/SPEC103PROPASSEG-001.md, archive/tickets/SPEC103PROPASSEG-003.md, 005
+**Deps**: archive/tickets/SPEC103PROPASSEG-001.md, archive/tickets/SPEC103PROPASSEG-003.md, archive/tickets/SPEC103PROPASSEG-005.md
 
 ## Problem
 

@@ -1,6 +1,6 @@
 # SPEC103PROPASSEG-005: State Update Checklist module — pure function returning 12-class review payload
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/state-update-checklist.ts` (pure-function module at package root) + paired test under `tools/manual-story-studio/test/state-update-checklist.test.ts`.
@@ -12,7 +12,7 @@ SPEC-103 §2 item 6 requires a State Update Checklist that lists 12 record class
 
 ## Assumption Reassessment (2026-05-31)
 
-1. `MANUAL_RECORD_CLASSES` at `tools/manual-story-studio/src/schema/manual-story.ts:181-200` enumerates 18 classes. SPEC-103 §2 item 6 + §3 Key decisions specify the 12-class subset for the checklist (excluding `cast`, `entities`, `locations`, `facts`, `intentions`, `artifacts` — author-curated background per §3 Key decisions item 4 rationale). The existing record reader at `tools/manual-story-studio/src/read/records.ts` supports per-class enumeration of records (verify the exact `listRecords` export name and signature at implementation time).
+1. `MANUAL_RECORD_CLASSES` at `tools/manual-story-studio/src/schema/manual-story.ts` enumerates 18 classes. SPEC-103 §2 item 6 + §3 Key decisions specify the 12-class subset for the checklist (excluding `cast`, `entities`, `locations`, `facts`, `intentions`, `artifacts` — author-curated background per §3 Key decisions item 4 rationale). The existing record reader at `tools/manual-story-studio/src/read/records.ts` exports `listRecords(manualStoryRoot, recordClass, opts?)` for per-class summaries and `readRecord(manualStoryRoot, recordClass, id)` for the full `refs.characters` payload needed by the count.
 2. SPEC-103 §2 item 6 (12-class enumeration intent), §3 Key decisions item 4 (per-class exclusion rationale — included classes reflect state most likely to shift inside a beat cluster), §7 AC#6 ("State Update Checklist appears post-save, lists 12 review classes, never asserts state changed").
 3. Cross-skill boundary: the checklist payload's shape is consumed by ticket 004's save flow (returns it in the save response) and by ticket 012's StateUpdateChecklist frontend component (renders it). The 12-class list comes from a local constant in this module; per-class counts come from `tools/manual-story-studio/src/read/records.ts`'s per-class reader. The Records screen filter integration (per spec §2 item 6: each class has a "Review N records" button opening the Records screen filtered to that class with the involved cast pre-filtered) lives in ticket 012; this module produces only the typed payload, not the navigation handlers.
 
@@ -28,82 +28,27 @@ SPEC-103 §2 item 6 requires a State Update Checklist that lists 12 record class
 3. Function performs zero file writes — pure read + compute → unit test (filesystem inspection assertion before/after)
 4. `disclaimer` field carries the literal SPEC-required text (`"Review these categories manually. Manual Story Studio has not changed any records."`) → unit test
 
-## What to Change
+## Landed Changes
 
-### 1. Create src/state-update-checklist.ts
+### 1. Created src/state-update-checklist.ts
 
-In `tools/manual-story-studio/src/state-update-checklist.ts`, implement:
+`tools/manual-story-studio/src/state-update-checklist.ts` now exports:
 
-```typescript
-import {
-  type ManualRecordClass,
-  type SegmentSidecar,
-} from "./schema/manual-story.js";
-import { listRecords } from "./read/records.js"; // verify exact export name at impl time
+- `CHECKLIST_REVIEW_CLASSES` with the fixed 12-class review order.
+- `CHECKLIST_DISCLAIMER` with the exact SPEC-required text.
+- `StateUpdateChecklistEntry`, `StateUpdateChecklistPayload`, and `BuildChecklistOptions`.
+- `buildStateUpdateChecklist(options)`, which copies the saved segment sidecar's `included_record_summary.characters`, lists each review class, reads each full record, counts records whose `refs.characters` intersects the involved cast, and returns the payload without writing files.
 
-// 12 of the 18 manual record classes (excludes cast, entities, locations,
-// facts, intentions, artifacts per SPEC-103 §3 Key decisions item 4 — those
-// are author-curated background rarely re-reviewed per segment; included
-// classes reflect state most likely to shift inside a beat cluster).
-export const CHECKLIST_REVIEW_CLASSES: readonly ManualRecordClass[] = [
-  "statuses",
-  "emotions",
-  "beliefs",
-  "relationships",
-  "objects",
-  "plans",
-  "clocks",
-  "secrets",
-  "questions",
-  "consequences",
-  "obligations",
-  "threads",
-] as const;
+The function accepts either a raw manual-story root path or a `ManualStoryRoot`, matching the existing package write/read helper ergonomics.
 
-export const CHECKLIST_DISCLAIMER =
-  "Review these categories manually. Manual Story Studio has not changed any records.";
+### 2. Created test/state-update-checklist.test.ts
 
-export interface StateUpdateChecklistEntry {
-  record_class: ManualRecordClass;
-  total_records: number;
-  cast_referencing_count: number;
-}
+The new test file covers:
 
-export interface StateUpdateChecklistPayload {
-  segment_id: string;
-  involved_cast: string[]; // [mchar-*] from the saved segment's included_record_summary.characters
-  entries: StateUpdateChecklistEntry[]; // exactly CHECKLIST_REVIEW_CLASSES.length
-  disclaimer: string; // literal CHECKLIST_DISCLAIMER
-}
-
-export interface BuildChecklistOptions {
-  manualStoryRoot: string;
-  sidecar: SegmentSidecar;
-}
-
-export function buildStateUpdateChecklist(
-  options: BuildChecklistOptions,
-): StateUpdateChecklistPayload {
-  // 1. Derive involved_cast = sidecar.included_record_summary.characters
-  // 2. For each class in CHECKLIST_REVIEW_CLASSES:
-  //    a. Call listRecords(manualStoryRoot, class) → all records of that class
-  //    b. total_records = records.length
-  //    c. cast_referencing_count = records whose refs.characters intersects involved_cast
-  // 3. Return { segment_id, involved_cast, entries, disclaimer: CHECKLIST_DISCLAIMER }
-}
-```
-
-If `listRecords`'s actual export differs (different name or signature in `src/read/records.ts`), adapt the call shape — the contract this ticket owns is the typed payload, not a specific reader invocation.
-
-### 2. Create test/state-update-checklist.test.ts
-
-Per the existing test convention (`fs.cpSync` fixture to temp dir; `node:test` runner), cover:
-
-- Returns exactly 12 entries (`entries.length === CHECKLIST_REVIEW_CLASSES.length`)
-- `entries[i].record_class` matches `CHECKLIST_REVIEW_CLASSES[i]` in order
-- Per-class count correctness: fixture with 2 cast members (`mchar-A` + `mchar-B`) + 3 beliefs referencing `mchar-A` + 1 belief referencing `mchar-B` + 2 beliefs referencing neither cast → `entries[beliefs].cast_referencing_count === 4`; `entries[beliefs].total_records === 6`
-- `disclaimer` field exactly equals `CHECKLIST_DISCLAIMER` literal (the SPEC-required string)
-- Function performs no file writes (fixture directory `fs.statSync` mtime + size unchanged before / after call)
+- Fixed 12-entry payload and class ordering.
+- Per-class count correctness with six belief records, four of which reference the involved cast through `refs.characters`.
+- Exact disclaimer text.
+- No-write behavior by comparing recursive file snapshots before and after the checklist build.
 
 ## Files to Touch
 
@@ -140,3 +85,19 @@ Per the existing test convention (`fs.cpSync` fixture to temp dir; `node:test` r
 
 1. `cd tools/manual-story-studio && npm run build:backend && node --test "dist/test/state-update-checklist.test.js"` — targeted checklist test
 2. `cd tools/manual-story-studio && npm test` — full pipeline verification (includes the new test under the chained `node --test "dist/test/**/*.test.js"` invocation)
+
+## Outcome
+
+Completed 2026-05-31. Added the backend State Update Checklist payload module and focused compiled test coverage. The module returns the fixed 12-class review list, copies involved cast from the saved segment sidecar, counts records whose `refs.characters` intersect that cast, and returns the exact non-state-change disclaimer. No Manual Studio records, world canon, story bundles, hooks, validators, MCP, or patch-engine surfaces were changed.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run build:backend` — PASS; backend TypeScript compiled successfully.
+2. `cd tools/manual-story-studio && node --test "dist/test/state-update-checklist.test.js"` — PASS; 3 checklist tests passed.
+3. `cd tools/manual-story-studio && npm test` — PASS; backend compiled test suite reported 245 passing subtests, then `npm --prefix web test` completed successfully.
+4. Manual review against FOUNDATIONS §Story Bundles §4a — PASS; the checklist payload asks for manual review and carries the exact text "Review these categories manually. Manual Story Studio has not changed any records.", so pasted prose is not treated as authoritative state.
+
+## Deviations
+
+- The implementation reads full records with `readRecord` after `listRecords` because `ManualRecordSummary` intentionally omits `refs.characters`; this preserves the ticket's counting contract without widening the read layer.
+- The no-write invariant is tested by recursive file snapshot comparison, which is stronger than the drafted mtime/size-only check because it also detects file content changes.
