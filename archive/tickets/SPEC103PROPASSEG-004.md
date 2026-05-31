@@ -1,6 +1,6 @@
 # SPEC103PROPASSEG-004: Save Segment write flow + segment-specific operational hybrid delete
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/write/segments.ts` (save / edit-in-place / hybrid delete) + paired test under `tools/manual-story-studio/test/write/segments.test.ts` covering all three operations.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC-103 §2 item 2 requires a Save Segment write flow that allocates the next `SEG-<n>` ID, writes the prose body to `segments/SEG-<n>.md`, writes the typed sidecar to `segments/SEG-<n>.yaml`, appends `SEG-<n>` to `manual-story.yaml` `segment_order`, optionally triggers manuscript recompile when `compile_on_segment_save: true`, and returns `(segment_id, sidecar, checklist_payload)` so the frontend can render the post-save State Update Checklist modal. SPEC-103 §3 Key decisions add segment-edit (in-place update preserving `id` + `created_at`, refreshing `updated_at` + `word_count`) and segment-delete (operational hybrid keyed on `caused_by_segment` per the Q1=(a) reassessment resolution — distinct from SPEC-101's record hybrid because segments lack `active`/`retired_reason` fields).
+Before this ticket, SPEC-103 §2 item 2 still needed a Save Segment write flow that allocates the next `SEG-<n>` ID, writes the prose body to `segments/SEG-<n>.md`, writes the typed sidecar to `segments/SEG-<n>.yaml`, appends `SEG-<n>` to `manual-story.yaml` `segment_order`, optionally triggers manuscript recompile when `compile_on_segment_save: true`, and returns `(segment_id, sidecar, checklist_payload)` so the frontend can render the post-save State Update Checklist modal. SPEC-103 §3 Key decisions also required segment-edit (in-place update preserving `id` + `created_at`, refreshing `updated_at` + `word_count`) and segment-delete (operational hybrid keyed on `caused_by_segment` per the Q1=(a) reassessment resolution — distinct from SPEC-101's record hybrid because segments lack `active`/`retired_reason` fields).
 
 ## Assumption Reassessment (2026-05-31)
 
@@ -31,26 +31,23 @@ SPEC-103 §2 item 2 requires a Save Segment write flow that allocates the next `
 4. Manuscript recompile triggered when `compile_on_segment_save: true`; NOT triggered when `compile_on_segment_save: false` → unit test (compiler invocation count assertion)
 5. No record file under `records/` is mutated by any save / edit / delete operation → unit test (filesystem inspection assertion)
 
-## What to Change
+## Landed Changes
 
-### 1. Create src/write/segments.ts
+### 1. Created src/write/segments.ts
 
-Implement three exported functions, each routing through the SPEC-100 sandbox + integrating with existing scaffolding:
+Implemented three exported functions, each routing through the SPEC-100 sandbox + integrating with existing scaffolding:
 
-- **`saveSegment(options)`**: allocates the next `SEG-N` via `archive/tickets/SPEC103PROPASSEG-003.md`'s allocator; writes `segments/SEG-<n>.md` (prose body only, no frontmatter — per SPEC-103 §3 Key decisions); writes `segments/SEG-<n>.yaml` (full `SegmentSidecar` shape from ticket 001 with `created_at` = `updated_at` = current ISO 8601, `word_count` computed by splitting on whitespace, `prompt_sha256` computed from referenced prompt file's body when `prompt_id != null`); reads `manual-story.yaml`, appends `SEG-<n>` to `segment_order`, writes back; if `manuscript.compile_on_segment_save: true`, invokes ticket 006's compiler; returns `{ segment_id, sidecar, checklist_payload }` (checklist_payload from ticket 005's module).
+- **`saveSegment(options)`**: allocates the next `SEG-N` via `allocateNextSegmentId`; writes `segments/SEG-<n>.md` (prose body only, no frontmatter — per SPEC-103 §3 Key decisions); writes `segments/SEG-<n>.yaml` (full `SegmentSidecar` shape from ticket 001 with `created_at` = `updated_at` = current ISO 8601, `word_count` computed by splitting on whitespace, `prompt_sha256` computed from the referenced prompt file's body when `prompt_id != null`); reads `manual-story.yaml`, appends `SEG-<n>` to `segment_order`, writes back; if `manuscript.compile_on_segment_save: true`, invokes ticket 006's compiler; returns `{ segment_id, sidecar, checklist_payload }` (checklist_payload from ticket 005's module).
 
 - **`editSegment(options)`**: reads existing `segments/SEG-<n>.yaml`; writes new prose to `segments/SEG-<n>.md`; writes updated sidecar preserving `id` + `created_at`, refreshing `updated_at` to current ISO 8601 and `word_count` to recomputed value; leaves `segment_order` unchanged (no append); if `manuscript.compile_on_segment_save: true`, invokes ticket 006's compiler; returns `{ segment_id, sidecar, checklist_payload }`.
 
 - **`deleteSegment(options)`**: scans `<manualStoryRoot>/records/consequences/mcnsq-*.yaml` for entries with `caused_by_segment: SEG-<n>`; collects the list of referrer IDs. If empty AND `options.force !== true` → hard delete both `.md` + `.yaml` files + remove `SEG-<n>` from `segment_order` + write back manual-story.yaml + recompile if configured + return `{ outcome: "hard_deleted", referrers: [] }`. If non-empty AND `options.force !== true` → remove `SEG-<n>` from `segment_order` only (keep both files) + write back manual-story.yaml + recompile if configured + return `{ outcome: "segment_order_removed_files_preserved", referrers: [...] }`. If `options.force === true` (regardless of referrer count) → hard delete both files + remove from `segment_order` + write back + recompile + return `{ outcome: "force_deleted", referrers: [...], warning: "<message naming unresolved caused_by_segment referrers>" }`.
 
-All three functions must:
-- Resolve sandbox root via `tools/manual-story-studio/src/write/sandbox.ts`'s `resolveManualStoryRoot` (or equivalent — verify exact function name at implementation time).
-- Never write outside the sandboxed manual-story root.
-- Never touch any file under `records/` (the save flow's invariant per SPEC-103 §3 Plan-Authority Boundary).
+All three functions accept the existing `ManualStoryRoot` produced by `resolveManualStoryRoot`, write via `safeWriteFile` or `assertInsideSandbox`-guarded unlink operations, and never mutate any file under `records/`.
 
-### 2. Create test/write/segments.test.ts
+### 2. Created test/write/segments.test.ts
 
-Cover (per existing `test/write/records.test.ts` shape, using `fs.cpSync` to copy a fixture manual story to a temp directory):
+Covered with temp manual-story fixtures:
 
 - Save first segment: empty `segments/` → `SEG-1` created with `.md` + `.yaml` + `segment_order: [SEG-1]`
 - Save second segment: `SEG-1` present → `SEG-2` created with `segment_order: [SEG-1, SEG-2]`
@@ -59,7 +56,7 @@ Cover (per existing `test/write/records.test.ts` shape, using `fs.cpSync` to cop
 - Delete referenced via `caused_by_segment`: fixture has `mcnsq-X.yaml` with `caused_by_segment: SEG-1` → files preserved + `segment_order` empty + outcome includes `referrers: ["mcnsq-X"]`
 - Delete force on referenced: same fixture as above + `force: true` → files removed + warning payload includes referrers
 - Manuscript recompile triggered on save when `compile_on_segment_save: true` → compiler invocation count = 1 after one save
-- Manuscript NOT recompiled when `compile_on_segment_save: false` → compiler invocation count = 0 after one save (use a spy/mock on the compiler module import)
+- Manuscript NOT recompiled when `compile_on_segment_save: false` → compiler invocation count = 0 after one save (using an injected compiler function)
 - No record file under `records/` mutated by any operation → assert filesystem state of `records/` before and after
 
 ## Files to Touch
@@ -99,3 +96,18 @@ Cover (per existing `test/write/records.test.ts` shape, using `fs.cpSync` to cop
 
 1. `cd tools/manual-story-studio && npm run build:backend && node --test "dist/test/write/segments.test.js"` — targeted segment-write tests
 2. `cd tools/manual-story-studio && npm test` — full pipeline verification (includes new tests via chained `node --test "dist/test/**/*.test.js"`)
+
+## Outcome
+
+Completed 2026-05-31. Added `tools/manual-story-studio/src/write/segments.ts` with save, edit-in-place, and segment-specific hybrid delete functions. The save/edit flow writes segment Markdown and sidecars, updates `manual-story.yaml` `segment_order`, derives prompt-linked sidecar fields from saved prompt files, optionally recompiles `manuscript.md`, and returns the State Update Checklist payload. Delete removes segment order membership in all cases, hard-deletes unreferenced segments, preserves referenced segment files by default, and force-deletes with a warning that names unresolved `caused_by_segment` referrers.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run build:backend` — PASS; backend TypeScript compilation succeeded.
+2. `cd tools/manual-story-studio && node --test "dist/test/write/segments.test.js"` — PASS; 7 focused segment write tests passed.
+3. `cd tools/manual-story-studio && npm test` — PASS; backend compiled suite reported 258 passing subtests, then `npm --prefix web test` completed successfully.
+4. Manual review against FOUNDATIONS §Story Bundles §4a — PASS; the implementation writes only segment files, `manual-story.yaml` `segment_order`, and optionally `manuscript.md`; the record snapshot test proves save/edit/delete do not mutate `records/`.
+
+## Deviations
+
+- The focused test uses an injected compiler function to count compile calls instead of module-mocking the compiler import. This preserves the same invariant (`compile_on_segment_save` controls invocation) without adding test-only module-loader complexity.

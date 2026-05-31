@@ -26,7 +26,7 @@ SPEC-103 §2 item 7 specifies the Manuscript view: full compiled `manuscript.md`
 1. Manuscript page fetches manuscript body via `GET /manuscript` on mount; renders empty state when 404 returned → manual smoke check + component test
 2. Segment list sidebar renders entries from `listSegments` in order; each entry shows title + word count → component test (SegmentListItem props rendering)
 3. Per-segment Edit button navigates to `/paste-prose?edit=SEG-<n>` → component test (router navigation mock)
-4. Per-segment Delete button calls DELETE /segments/:id via ticket 011's API client; on confirmation prompt for referenced segments (per ticket 004's hybrid response with non-empty `referrers`), surface the warning and offer `?force=true` retry → component test
+4. Per-segment Delete button calls DELETE /segments/:id via ticket 011's API client; on confirmation prompt for referenced segments (per `archive/tickets/SPEC103PROPASSEG-004.md`'s hybrid response with non-empty `referrers`), surface the warning and offer `?force=true` retry → component test
 5. Rebuild Manuscript button calls POST /manuscript/rebuild; on success, re-fetches manuscript body → component test
 6. `manuscript.allow_reorder: false` (MVP default per ticket 001): Reorder UI is hidden — no drag handles, no reorder buttons → component test
 7. Word count summary shows per-segment word counts (from sidecars via `listSegments`) + total (sum of per-segment counts) → component test
@@ -122,7 +122,7 @@ Implement the page per SPEC-103 §2 item 7's surface enumeration:
 ### Invariants
 
 1. Reorder UI is hidden when `manuscript.allow_reorder === false` (MVP default per ticket 001); this ticket implements the gate, the M6 UI lands separately.
-2. Delete button surfaces the ticket 004 hybrid response: when `outcome === "segment_order_removed_files_preserved"` (referenced segment), the user is informed before any force-delete; the warning enumeration of unresolved `caused_by_segment` referrers is shown.
+2. Delete button surfaces the `archive/tickets/SPEC103PROPASSEG-004.md` hybrid response: when `outcome === "segment_order_removed_files_preserved"` (referenced segment), the user is informed before any force-delete; the warning enumeration of unresolved `caused_by_segment` referrers is shown.
 3. Rebuild button is idempotent (inherited from ticket 006 compiler determinism); repeated clicks produce byte-identical `manuscript.md`.
 
 ## Test Plan

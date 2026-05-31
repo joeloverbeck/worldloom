@@ -4,17 +4,17 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/server/routes/segments.ts` + paired test under `tools/manual-story-studio/test/server/segments-routes.test.ts`; modifies `tools/manual-story-studio/src/server/http.ts` to register the new routes (split between read and write registration sites per the existing convention).
-**Deps**: 004, 007
+**Deps**: archive/tickets/SPEC103PROPASSEG-004.md, 007
 
 ## Problem
 
-SPEC-103 §4 Create enumerates `src/server/routes/segments.ts` exposing four HTTP endpoints (POST save, GET list, GET single, PUT edit, DELETE hybrid). SPEC-103 §7 AC#1, #3, #7, #8 specify the behaviors. The route module wraps ticket 004's save / edit / delete write functions + ticket 005's checklist module + ticket 007's read functions in Fastify handlers behind the SPEC-100 `wrapRouterWritable` write-scope guard at `tools/manual-story-studio/src/server/http.ts`. `http.ts` is modified to register the new routes alongside the existing manual-stories / records / metadata / prompts routes — a shared-file overlap with ticket 009 (manuscript routes) governed by §Step 6 item 5 mechanical-merge discipline.
+SPEC-103 §4 Create enumerates `src/server/routes/segments.ts` exposing four HTTP endpoints (POST save, GET list, GET single, PUT edit, DELETE hybrid). SPEC-103 §7 AC#1, #3, #7, #8 specify the behaviors. The route module wraps `archive/tickets/SPEC103PROPASSEG-004.md`'s save / edit / delete write functions + ticket 005's checklist module + ticket 007's read functions in Fastify handlers behind the SPEC-100 `wrapRouterWritable` write-scope guard at `tools/manual-story-studio/src/server/http.ts`. `http.ts` is modified to register the new routes alongside the existing manual-stories / records / metadata / prompts routes — a shared-file overlap with ticket 009 (manuscript routes) governed by §Step 6 item 5 mechanical-merge discipline.
 
 ## Assumption Reassessment (2026-05-31)
 
 1. Existing `tools/manual-story-studio/src/server/http.ts:53-83` exposes `createServer` which registers read routes outside `wrapRouterWritable` (lines 61-65) and write routes inside it (lines 67-80). The pattern for adding a new route file is established by `routes/manual-stories.ts`, `routes/records.ts`, `routes/metadata.ts`, `routes/prompts.ts`: import the register functions at the top, then add `await register*ReadRoutes(...)` and `await register*WriteRoutes(...)` calls. The segments routes follow the same split (GET endpoints register on the bare server; POST/PUT/DELETE register inside `wrapRouterWritable`).
 2. SPEC-103 §2 item 2 (save flow returns segment_id + sidecar + checklist payload), §2 item 7 (per-segment actions: Edit, Delete with hybrid semantics), §4 Create includes `src/server/routes/segments.ts`, §4 Modify includes `src/server/http.ts`, §7 AC#1, #3, #7, #8 (saved segment + segment_order update + edit-in-place + hybrid delete).
-3. Cross-skill boundary: `http.ts` is modified by both this ticket (segments routes) and ticket 009 (manuscript routes) — mechanical merge per §Step 6 item 5 shared-file overlap (each ticket adds its own pair of register calls; conflicts are line-level only, no semantic overlap). The route module consumes ticket 004 (saveSegment / editSegment / deleteSegment), ticket 005 (buildStateUpdateChecklist), and ticket 007 (listSegments / readSegmentSidecar / readSegmentBody) — boundaries documented in those tickets' Cross-skill boundary notes.
+3. Cross-skill boundary: `http.ts` is modified by both this ticket (segments routes) and ticket 009 (manuscript routes) — mechanical merge per §Step 6 item 5 shared-file overlap (each ticket adds its own pair of register calls; conflicts are line-level only, no semantic overlap). The route module consumes `archive/tickets/SPEC103PROPASSEG-004.md` (saveSegment / editSegment / deleteSegment), ticket 005 (buildStateUpdateChecklist), and ticket 007 (listSegments / readSegmentSidecar / readSegmentBody) — boundaries documented in those tickets' Cross-skill boundary notes.
 
 ## Architecture Check
 
@@ -23,11 +23,11 @@ SPEC-103 §4 Create enumerates `src/server/routes/segments.ts` exposing four HTT
 
 ## Verification Layers
 
-1. POST /api/worlds/:slug/manual-stories/:msSlug/segments invokes ticket 004's `saveSegment`; returns 201 with `{ segment_id, sidecar, checklist_payload }` body → route test
+1. POST /api/worlds/:slug/manual-stories/:msSlug/segments invokes `archive/tickets/SPEC103PROPASSEG-004.md`'s `saveSegment`; returns 201 with `{ segment_id, sidecar, checklist_payload }` body → route test
 2. GET /api/worlds/:slug/manual-stories/:msSlug/segments invokes ticket 007's `listSegments`; returns 200 with `{ segments: SegmentListEntry[] }` body → route test
 3. GET /api/worlds/:slug/manual-stories/:msSlug/segments/:segmentId invokes ticket 007's `readSegmentSidecar` + `readSegmentBody`; returns 200 with `{ body, sidecar }` body or 404 when missing → route test (two sub-cases)
-4. PUT /api/worlds/:slug/manual-stories/:msSlug/segments/:segmentId invokes ticket 004's `editSegment`; returns 200 with `{ segment_id, sidecar, checklist_payload }` body → route test
-5. DELETE /api/worlds/:slug/manual-stories/:msSlug/segments/:segmentId[?force=true] invokes ticket 004's `deleteSegment`; returns 200 with `{ outcome, referrers, warning? }` body → route test (three sub-cases for the hybrid: unreferenced / referenced / force)
+4. PUT /api/worlds/:slug/manual-stories/:msSlug/segments/:segmentId invokes `archive/tickets/SPEC103PROPASSEG-004.md`'s `editSegment`; returns 200 with `{ segment_id, sidecar, checklist_payload }` body → route test
+5. DELETE /api/worlds/:slug/manual-stories/:msSlug/segments/:segmentId[?force=true] invokes `archive/tickets/SPEC103PROPASSEG-004.md`'s `deleteSegment`; returns 200 with `{ outcome, referrers, warning? }` body → route test (three sub-cases for the hybrid: unreferenced / referenced / force)
 
 ## What to Change
 
@@ -37,7 +37,7 @@ Implement `registerSegmentsReadRoutes` (GET list + GET single) and `registerSegm
 
 - Validates path params (`:slug`, `:msSlug`, and for single-segment endpoints `:segmentId` matching `^SEG-\d+$`)
 - Resolves the manual story root via the sandbox helper (parallel to `prompts.ts:54-66` `resolveRootOrNull`); returns 404 `{ error: "manual_story_not_found" }` when unresolvable
-- Invokes the corresponding write / read / state-checklist function from tickets 004 / 005 / 007
+- Invokes the corresponding write / read / state-checklist function from `archive/tickets/SPEC103PROPASSEG-004.md` / ticket 005 / ticket 007
 - Returns the typed response with appropriate HTTP status codes (200 / 201 / 400 / 404)
 
 ```typescript
@@ -114,7 +114,7 @@ Cover the five route behaviors above per the existing `test/server/records.test.
 ### Invariants
 
 1. All POST/PUT/DELETE handlers register inside `wrapRouterWritable` (SPEC-100 write-scope guard preserved); GET handlers register outside it.
-2. Routes return typed responses matching the contracts produced by tickets 004 (save/edit/delete return shapes) / 005 (checklist payload) / 007 (list + read return shapes); no field renames or extra fields beyond what those tickets define.
+2. Routes return typed responses matching the contracts produced by `archive/tickets/SPEC103PROPASSEG-004.md` (save/edit/delete return shapes) / 005 (checklist payload) / 007 (list + read return shapes); no field renames or extra fields beyond what those tickets define.
 3. `http.ts` modification is purely additive (no existing register call is removed or renamed); the order of register calls is preserved (segments before any subsequent register calls added by future tickets).
 
 ## Test Plan

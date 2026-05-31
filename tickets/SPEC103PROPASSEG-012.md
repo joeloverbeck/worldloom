@@ -96,7 +96,7 @@ Read `tools/manual-story-studio/web/src/pages/Records.tsx` to confirm it accepts
 ## Out of Scope
 
 - The State Update Checklist payload computation itself (covered by ticket 005)
-- The save flow that produces the payload (covered by ticket 004)
+- The save flow that produces the payload (covered by `archive/tickets/SPEC103PROPASSEG-004.md`)
 - The HTTP route returning the payload (covered by ticket 008)
 - The PasteProse page rendering this modal (covered by ticket 011 — imports this component)
 - Persistent log of which classes the author actually reviewed (M6 deferral per SPEC-103 §2 Out of scope)
