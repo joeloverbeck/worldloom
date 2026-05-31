@@ -4,6 +4,7 @@ import {
   MANUAL_RECORD_CLASSES,
   type ManualRecordClass,
 } from "../schema/manual-story.js";
+import { validateBeatTemplate } from "./beat-template-schema.js";
 
 export type ScalarKind = "string" | "boolean" | "number" | "stringOrNumber";
 
@@ -434,7 +435,16 @@ const ARTIFACT_SCHEMA: SchemaDef = extend(commonBase(), {
   },
 });
 
-export const MANUAL_RECORD_SCHEMAS: Record<ManualRecordClass, SchemaDef> = {
+// Beat-templates have a distinct structural shape (no common record fields;
+// nested role_slots map, closed enums for move_family / tone_fit /
+// relationship_axes / beat_guidance.function, 1-5 beat_guidance entries) and
+// route through the dedicated `validateBeatTemplate` validator rather than
+// the SchemaDef framework. This map omits beat-templates intentionally; the
+// `validateRecord` dispatch below special-cases that class.
+export const MANUAL_RECORD_SCHEMAS: Record<
+  Exclude<ManualRecordClass, "beat-templates">,
+  SchemaDef
+> = {
   cast: CAST_SCHEMA,
   entities: ENTITY_SCHEMA,
   statuses: STATUS_SCHEMA,
@@ -522,12 +532,14 @@ const PROMPT_POLICY_SCHEMA: SchemaDef = {
     "require_moment_directive",
     "default_beat_count",
     "include_recent_segments",
+    "recent_template_advisory_window",
   ],
   scalars: {
     save_prompts: "boolean",
     require_moment_directive: "boolean",
     default_beat_count: "string",
     include_recent_segments: "number",
+    recent_template_advisory_window: "number",
   },
 };
 
@@ -803,6 +815,17 @@ export function validateRecord(
   className: ManualRecordClass,
   parsed: unknown,
 ): ValidationResult {
+  if (className === "beat-templates") {
+    const result = validateBeatTemplate(parsed);
+    if (result.valid) return { ok: true };
+    return {
+      ok: false,
+      errors: result.violations.map((v) => ({
+        field: v.field,
+        message: v.message,
+      })),
+    };
+  }
   const schema = MANUAL_RECORD_SCHEMAS[className];
   return validateAgainstSchema(parsed, schema);
 }

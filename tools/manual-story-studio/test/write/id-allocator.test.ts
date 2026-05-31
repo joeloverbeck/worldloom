@@ -102,3 +102,20 @@ test("allocateNextIdForClass: convenience uses MANUAL_RECORD_CLASS_PREFIXES", ()
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("allocateNextIdForClass: beat-templates yields mtemplate-1 on empty dir", () => {
+  const root = mkTempRoot();
+  try {
+    assert.equal(
+      allocateNextIdForClass(root, "beat-templates"),
+      "mtemplate-1",
+    );
+    seedClass(root, "beat-templates", ["mtemplate-3.yaml"]);
+    assert.equal(
+      allocateNextIdForClass(root, "beat-templates"),
+      "mtemplate-4",
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

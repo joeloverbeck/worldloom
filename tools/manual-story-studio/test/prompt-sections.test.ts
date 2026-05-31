@@ -82,6 +82,7 @@ function baseMetadata(
       require_moment_directive: true,
       default_beat_count: "2-5",
       include_recent_segments: 0,
+      recent_template_advisory_window: 2,
     },
     manuscript: {
       compile_on_segment_save: false,
@@ -172,6 +173,7 @@ test("§5 parameterizes by default_beat_count", () => {
           require_moment_directive: true,
           default_beat_count: "3",
           include_recent_segments: 0,
+          recent_template_advisory_window: 2,
         },
       }),
     }),
