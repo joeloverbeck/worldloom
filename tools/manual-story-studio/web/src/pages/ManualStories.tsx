@@ -68,8 +68,12 @@ export function ManualStories() {
         <ul>
           {stories.map((story) => (
             <li key={story.manualStorySlug}>
-              <strong>{story.manualStorySlug}</strong>
-              {story.title !== null ? ` — ${story.title}` : null}
+              <Link
+                to={`/worlds/${story.worldSlug}/manual-stories/${story.manualStorySlug}/dashboard`}
+              >
+                <strong>{story.manualStorySlug}</strong>
+                {story.title !== null ? ` — ${story.title}` : null}
+              </Link>
             </li>
           ))}
         </ul>
