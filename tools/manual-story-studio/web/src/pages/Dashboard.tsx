@@ -5,6 +5,8 @@ import {
   listRecords as apiList,
   readMetadata as apiReadMetadata,
 } from "../api/records.js";
+import { readManuscript, type ManuscriptResponse } from "../api/manuscript.js";
+import { listSegments, type SegmentListEntry } from "../api/segments.js";
 import {
   MANUAL_RECORD_CLASSES,
   type ManualRecordClass,
@@ -14,6 +16,12 @@ import {
 
 const HIGH_IMPORTANCE = new Set(["high", "central"]);
 
+function segmentNumber(id: string): number {
+  const match = /^SEG-(\d+)$/u.exec(id);
+  const suffix = match?.[1];
+  return suffix ? Number.parseInt(suffix, 10) : -1;
+}
+
 export function Dashboard() {
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
@@ -22,6 +30,9 @@ export function Dashboard() {
   const [metadata, setMetadata] = useState<ManualStoryMetadata | null>(null);
   const [directiveDraft, setDirectiveDraft] = useState("");
   const [cast, setCast] = useState<ManualRecordSummary[]>([]);
+  const [segments, setSegments] = useState<SegmentListEntry[]>([]);
+  const [manuscript, setManuscript] = useState<ManuscriptResponse | null>(null);
+  const [manuscriptMissing, setManuscriptMissing] = useState(false);
   const [byClass, setByClass] = useState<
     Record<ManualRecordClass, ManualRecordSummary[]>
   >({
@@ -58,6 +69,20 @@ export function Dashboard() {
         if (!cancelled) setCast(c);
       })
       .catch(() => {});
+    listSegments(worldSlug, msSlug)
+      .then((s) => {
+        if (!cancelled) setSegments(s);
+      })
+      .catch(() => {});
+    readManuscript(worldSlug, msSlug)
+      .then((m) => {
+        if (cancelled) return;
+        setManuscript(m);
+        setManuscriptMissing(m === null);
+      })
+      .catch(() => {
+        if (!cancelled) setManuscriptMissing(true);
+      });
     Promise.all(
       MANUAL_RECORD_CLASSES.map((cls) =>
         apiList(worldSlug, msSlug, cls).then(
@@ -96,6 +121,15 @@ export function Dashboard() {
     );
     return all.slice(0, 20);
   }, [byClass]);
+
+  const latestSegment = useMemo(() => {
+    if (segments.length === 0) return null;
+    return [...segments].sort((a, b) => {
+      const byCreated = b.created_at.localeCompare(a.created_at);
+      if (byCreated !== 0) return byCreated;
+      return segmentNumber(b.id) - segmentNumber(a.id);
+    })[0];
+  }, [segments]);
 
   const clockCount = byClass.clocks.length;
   const secretCount = byClass.secrets.length;
@@ -215,12 +249,29 @@ export function Dashboard() {
 
       <section aria-label="latest-segment">
         <h2>Latest segment</h2>
-        <div>Wired in SPEC-103</div>
+        {latestSegment ? (
+          <p>
+            <Link
+              to={`/worlds/${worldSlug}/manual-stories/${msSlug}/manuscript#${latestSegment.id}`}
+            >
+              {latestSegment.title || latestSegment.id}
+            </Link>{" "}
+            <em>{latestSegment.id}</em> — {latestSegment.created_at}
+          </p>
+        ) : (
+          <p>No segments yet.</p>
+        )}
       </section>
 
       <section aria-label="manuscript-word-count">
         <h2>Manuscript word count</h2>
-        <div>Wired in SPEC-103</div>
+        {manuscript ? (
+          <p>{manuscript.word_count} words</p>
+        ) : manuscriptMissing ? (
+          <p>No manuscript yet.</p>
+        ) : (
+          <p>Loading manuscript…</p>
+        )}
       </section>
 
       <section aria-label="generate-prompt">

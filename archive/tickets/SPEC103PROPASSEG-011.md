@@ -12,7 +12,7 @@ At intake, SPEC-103 §2 item 1 specified the Paste Prose editor screen: large mo
 
 ## Assumption Reassessment (2026-05-31)
 
-1. Existing frontend convention (`tools/manual-story-studio/web/src/pages/MomentComposer.tsx` from SPEC-102; `tools/manual-story-studio/web/src/pages/Records.tsx` from SPEC-101) uses functional React components with `useParams` + `useState` + `useEffect` + `fetch`-based API helpers in `web/src/api/*.ts`. The existing `web/src/api/prompts.ts` is the closest pattern for `web/src/api/segments.ts`. App.tsx routes (modified in ticket 015) will register `/worlds/:worldSlug/manual-stories/:msSlug/paste-prose` for create mode and the same route with `?edit=SEG-<n>` query parameter for edit mode.
+1. Existing frontend convention (`tools/manual-story-studio/web/src/pages/MomentComposer.tsx` from SPEC-102; `tools/manual-story-studio/web/src/pages/Records.tsx` from SPEC-101) uses functional React components with `useParams` + `useState` + `useEffect` + `fetch`-based API helpers in `web/src/api/*.ts`. The existing `web/src/api/prompts.ts` is the closest pattern for `web/src/api/segments.ts`. App.tsx routes (modified in `archive/tickets/SPEC103PROPASSEG-015.md`) register `/worlds/:worldSlug/manual-stories/:msSlug/paste-prose` for create mode and the same route with `?edit=SEG-<n>` query parameter for edit mode.
 2. SPEC-103 §2 item 1 (PasteProse editor surface + title/note/prompt-ref/word-count/Save/Discard actions), §3 Key decisions item 7 (segment edit re-opens the same editor pre-populated), §7 AC#1 ("Author can paste prose into the editor, fill in optional title/note, and save a segment"), AC#7 ("Segment edit (in-place update) preserves the sidecar's id and created_at, updates word_count, and triggers manuscript recompile"), AC#11 ("Discarded prose (paste-then-navigate-away) is not persisted anywhere").
 3. Cross-skill boundary: PasteProse imports `archive/tickets/SPEC103PROPASSEG-012.md`'s `StateUpdateChecklist` component (rendered as a modal after save). PasteProse consumes ticket 008's segments routes via `web/src/api/segments.ts` (this ticket's API client — POST save / GET list / GET single for edit-mode pre-population / PUT edit / DELETE optional from the editor). PasteProse's typed segment sidecar comes from `web/src/types/manual-story.ts` (ticket 001 web mirror). Navigation from the Prompt Preview screen (existing SPEC-102 `PromptPreview.tsx`) currently has no "paste prose" transition; this ticket supports both `prompt_id` query parameter and React Router state when a later surface supplies it, but does not modify PromptPreview per Out of Scope.
 4. FOUNDATIONS §Story Bundles §4a Plan-Authority Boundary: PasteProse is the entry point for paste-as-publication-not-state. The page's contract is "collect prose + metadata, send to backend save endpoint, render the returned checklist modal" — it never directly mutates any record, never infers state from prose, never branches into engine logic. The save flow's no-record-mutation invariant (`archive/tickets/SPEC103PROPASSEG-004.md`) is the backend enforcement; PasteProse's no-state-inference invariant is the frontend enforcement. Combined they realize the §4a discipline at the paste-segment surface.
@@ -130,7 +130,7 @@ The page implements SPEC-103 §2 item 1's surface enumeration:
 
 - The segments HTTP routes themselves (covered by ticket 008)
 - The StateUpdateChecklist component implementation (covered by `archive/tickets/SPEC103PROPASSEG-012.md`; this ticket imports it)
-- App.tsx route registration for `/paste-prose` (covered by ticket 015)
+- App.tsx route registration for `/paste-prose` (covered by `archive/tickets/SPEC103PROPASSEG-015.md`)
 - The Manuscript view's per-segment Edit button navigation (covered by ticket 013; navigates to this page with `?edit=SEG-<n>`)
 - The Prompt Preview screen's "Use this prompt" navigation to PasteProse (existing SPEC-102 surface; this ticket consumes the navigation state but doesn't modify Prompt Preview)
 
@@ -140,7 +140,7 @@ The page implements SPEC-103 §2 item 1's surface enumeration:
 
 1. `cd tools/manual-story-studio && npm --prefix web run build` — web bundle builds with PasteProse + segments API client
 2. `cd tools/manual-story-studio && npm test` — full suite green, including backend segment-route coverage and web typecheck
-3. Manual smoke check remains deferred until ticket 015 registers the route in App.tsx: navigate to `/worlds/<slug>/manual-stories/<msSlug>/paste-prose`, paste prose, click Save → backend creates SEG-1.md + SEG-1.yaml, manuscript recompiles, StateUpdateChecklist modal renders with 12 review classes
+3. Manual smoke check was deferred to `archive/tickets/SPEC103PROPASSEG-015.md` route registration: navigate to `/worlds/<slug>/manual-stories/<msSlug>/paste-prose`, paste prose, click Save → backend creates SEG-1.md + SEG-1.yaml, manuscript recompiles, StateUpdateChecklist modal renders with 12 review classes
 
 ### Invariants
 

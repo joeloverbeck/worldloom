@@ -105,7 +105,7 @@ export function SegmentListItem(props: SegmentListItemProps) {
 
 - The manuscript HTTP routes themselves (covered by ticket 009)
 - The segments DELETE route (covered by ticket 008; this ticket consumes it via ticket 011's API client)
-- App.tsx route registration for `/manuscript` (covered by ticket 015)
+- App.tsx route registration for `/manuscript` (covered by `archive/tickets/SPEC103PROPASSEG-015.md`)
 - Reorder UI implementation (M6 deferral per SPEC-103 §2 Out of scope; this ticket honors the `allow_reorder: false` gate by hiding the UI)
 - Diff view between two segments (M6 deferral)
 - Export-to-other-format (PDF, EPUB) (M6 deferral)
@@ -116,7 +116,7 @@ export function SegmentListItem(props: SegmentListItemProps) {
 
 1. `cd tools/manual-story-studio && npm --prefix web run build` — web bundle builds with the new page + component + API client.
 2. `cd tools/manual-story-studio && npm test` — full suite green (frontend type-check exercised under `npm --prefix web test`).
-3. Manual smoke check after ticket 015 lands: navigate to `/worlds/<slug>/manual-stories/<msSlug>/manuscript` after saving ≥1 segment → page renders compiled manuscript body + segment list sidebar + per-segment Edit/Delete buttons + Rebuild button + word count summary.
+3. Manual smoke check after `archive/tickets/SPEC103PROPASSEG-015.md` lands: navigate to `/worlds/<slug>/manual-stories/<msSlug>/manuscript` after saving ≥1 segment → page renders compiled manuscript body + segment list sidebar + per-segment Edit/Delete buttons + Rebuild button + word count summary.
 
 ### Invariants
 
@@ -143,7 +143,7 @@ Completed 2026-05-31. Added the manuscript frontend API client, the `SegmentList
 
 1. `cd tools/manual-story-studio && npm --prefix web run build` — PASS; TypeScript and Vite production build completed successfully.
 2. `cd tools/manual-story-studio && npm test` — PASS; backend build, 269 backend tests, and `npm --prefix web test` completed successfully.
-3. Manual review — PASS; the page consumes only existing HTTP clients, does not mutate records directly, hides reorder controls when `metadata.manuscript.allow_reorder === false`, and leaves route registration/manual navigation smoke to ticket 015.
+3. Manual review — PASS; the page consumes only existing HTTP clients, does not mutate records directly, hides reorder controls when `metadata.manuscript.allow_reorder === false`, and leaves route registration/manual navigation smoke to `archive/tickets/SPEC103PROPASSEG-015.md`.
 
 ## Deviations
 

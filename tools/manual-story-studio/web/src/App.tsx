@@ -4,8 +4,11 @@ import { CastAndProfiles } from "./pages/CastAndProfiles.js";
 import { CreateManualStory } from "./pages/CreateManualStory.js";
 import { Dashboard } from "./pages/Dashboard.js";
 import { ManualStories } from "./pages/ManualStories.js";
+import { Manuscript } from "./pages/Manuscript.js";
 import { MomentComposer } from "./pages/MomentComposer.js";
+import { PasteProse } from "./pages/PasteProse.js";
 import { PromptPreview } from "./pages/PromptPreview.js";
+import { PromptHistory } from "./pages/PromptHistory.js";
 import { Records } from "./pages/Records.js";
 import { Worlds } from "./pages/Worlds.js";
 
@@ -58,6 +61,18 @@ export function App() {
           <Route
             path="/worlds/:worldSlug/manual-stories/:msSlug/prompts/preview"
             element={<PromptPreview />}
+          />
+          <Route
+            path="/worlds/:worldSlug/manual-stories/:msSlug/paste-prose"
+            element={<PasteProse />}
+          />
+          <Route
+            path="/worlds/:worldSlug/manual-stories/:msSlug/manuscript"
+            element={<Manuscript />}
+          />
+          <Route
+            path="/worlds/:worldSlug/manual-stories/:msSlug/prompt-history"
+            element={<PromptHistory />}
           />
         </Routes>
       </main>

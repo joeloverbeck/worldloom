@@ -36,7 +36,7 @@ Before this ticket, SPEC-103 §2 item 8 specified the Prompt History view but th
 Implemented the page per SPEC-103 §2 item 8's surface enumeration:
 
 - React functional component using `useParams`, `useState`, and `useEffect` to fetch via the extended `GET /prompts` API client.
-- Layout: list of prompt cards; each card shows id + created_at + directive snippet + linked_segments list. Segment IDs link to the Manuscript route with a `#SEG-N` hash; route registration remains ticket 015.
+- Layout: list of prompt cards; each card shows id + created_at + directive snippet + linked_segments list. Segment IDs link to the Manuscript route with a `#SEG-N` hash; route registration is covered by `archive/tickets/SPEC103PROPASSEG-015.md`.
 - Per-card actions: "View" loads inline read-only detail; "Reuse Prompt" navigates to Moment Composer.
 - Detail view: inline read-only prompt markdown and sidecar summary.
 - Empty state: when prompts list is empty, render "No saved prompts yet" placeholder.
@@ -55,7 +55,7 @@ Implemented the page per SPEC-103 §2 item 8's surface enumeration:
 - The `GET /prompts` extension to add `linked_segments` (covered by ticket 010)
 - The `GET /prompts/:promptId` detail endpoint (existing SPEC-102 surface; this page consumes it)
 - The `POST /prompts` save endpoint (existing SPEC-102 surface; not touched)
-- App.tsx route registration for `/prompt-history` (covered by ticket 015)
+- App.tsx route registration for `/prompt-history` (covered by `archive/tickets/SPEC103PROPASSEG-015.md`)
 - The Manuscript view's segment-anchoring (covered by `archive/tickets/SPEC103PROPASSEG-013.md`; this page navigates to the manuscript URL but doesn't implement anchoring)
 
 ## Acceptance Criteria
@@ -64,7 +64,7 @@ Implemented the page per SPEC-103 §2 item 8's surface enumeration:
 
 1. `cd tools/manual-story-studio && npm --prefix web run build` — web bundle builds with the new page
 2. `cd tools/manual-story-studio && npm test` — full suite green
-3. Manual smoke check after ticket 015 lands: navigate to `/worlds/<slug>/manual-stories/<msSlug>/prompt-history` after saving ≥1 prompt and ≥1 segment referencing that prompt → page renders the prompt with its linked segment under the prompt entry
+3. Manual smoke check after `archive/tickets/SPEC103PROPASSEG-015.md` lands: navigate to `/worlds/<slug>/manual-stories/<msSlug>/prompt-history` after saving ≥1 prompt and ≥1 segment referencing that prompt → page renders the prompt with its linked segment under the prompt entry
 
 ### Invariants
 
@@ -89,7 +89,7 @@ Completed: 2026-05-31
 
 Implemented `tools/manual-story-studio/web/src/pages/PromptHistory.tsx` with saved-prompt listing, linked segment rendering, inline read-only prompt detail, empty state, and graceful missing-prompt handling. Extended `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` to accept reuse router state so Prompt History can pre-populate the composer with a saved prompt's directive, included cast, and included records.
 
-Route registration for `/prompt-history` remains owned by `tickets/SPEC103PROPASSEG-015.md`.
+Route registration for `/prompt-history` was completed by `archive/tickets/SPEC103PROPASSEG-015.md`.
 
 ## Verification Result
 
