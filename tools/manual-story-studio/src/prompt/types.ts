@@ -1,0 +1,70 @@
+// Shared types for the Manual Studio prompt module — consumed by
+// compose/sections/translators/lint/write. Authoring these up front keeps
+// downstream modules free of circular imports.
+
+import type {
+  ManualCharacterRecord,
+  ManualRecord,
+  ManualStoryMetadata,
+} from "../schema/manual-story.js";
+
+export interface PromptComposeInput {
+  manualStoryRoot: string;
+  repoRoot: string;
+  moment_directive: string;
+  included_cast: string[];
+  included_records: string[];
+  included_template_path?: string;
+}
+
+export interface SectionEmitterInput {
+  metadata: ManualStoryMetadata;
+  cast: ManualCharacterRecord[];
+  records: ManualRecord[];
+  included_cast_ids: string[];
+  moment_directive: string;
+  included_template_body: string | null;
+  recent_segment_last_paragraph: string | null;
+  content_policy_body: string;
+  prose_craft_contract_body: string;
+}
+
+export type PromptLintTier = "hard" | "soft";
+
+export interface PromptLintFinding {
+  rule: string;
+  tier: PromptLintTier;
+  message: string;
+  section?: string;
+  snippet?: string;
+}
+
+export interface PromptLintResult {
+  findings: PromptLintFinding[];
+  cleanForCopy: boolean;
+  blockingForCopy: boolean;
+}
+
+export interface PromptRunSidecarDraft {
+  manual_story_slug: string;
+  included_cast: string[];
+  included_records: string[];
+  included_template_path: string | null;
+  moment_directive: string;
+}
+
+export interface PromptRunSidecar extends PromptRunSidecarDraft {
+  id: string;
+  created_at: string;
+  prompt_sha256: string;
+  lint_override?: {
+    findings: PromptLintFinding[];
+    copied_anyway_at: string;
+  };
+}
+
+export interface PromptComposeResult {
+  markdown: string;
+  lint: PromptLintResult;
+  sidecar_draft: PromptRunSidecarDraft;
+}

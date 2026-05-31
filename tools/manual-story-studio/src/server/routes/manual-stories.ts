@@ -5,6 +5,7 @@ import type { FastifyInstance } from "fastify";
 import YAML from "yaml";
 
 import { enumerateManualStories } from "../../read/manual-stories.js";
+import { makeDefaultManualStoryMetadata } from "../../write/manual-story-metadata.js";
 import {
   assertInsideSandbox,
   resolveManualStoryRoot,
@@ -90,14 +91,9 @@ export async function registerManualStoriesWriteRoutes(
       mkdirSync(root.absolutePath, { recursive: true });
 
       const now = new Date().toISOString();
-      const initialContent = YAML.stringify({
-        schema_version: "manual-story.v1",
-        world_slug: worldSlug,
-        manual_story_slug: manualStorySlug,
-        title,
-        created_at: now,
-        updated_at: now,
-      });
+      const initialContent = YAML.stringify(
+        makeDefaultManualStoryMetadata(worldSlug, manualStorySlug, title, now),
+      );
       writeFileSync(manualStoryYamlPath, initialContent);
 
       return reply.code(201).send({

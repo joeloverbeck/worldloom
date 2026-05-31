@@ -1,4 +1,4 @@
-import { realpathSync } from "node:fs";
+import { mkdirSync, realpathSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 const SLUG_PATTERN = /^[a-z0-9-]+$/;
@@ -77,6 +77,27 @@ export function assertInsideSandbox(targetPath: string, root: ManualStoryRoot): 
       );
     }
   }
+}
+
+export function safeWriteFile(
+  root: ManualStoryRoot,
+  relativePath: string,
+  contents: string,
+): string {
+  if (path.isAbsolute(relativePath)) {
+    throw new Error(`sandbox: relativePath must be relative: ${relativePath}`);
+  }
+  const target = path.join(root.absolutePath, relativePath);
+  assertInsideSandbox(target, root);
+  mkdirSync(path.dirname(target), { recursive: true });
+  writeFileSync(target, contents);
+  return target;
+}
+
+export function safeUnlinkPath(root: ManualStoryRoot, absoluteTarget: string): void {
+  // Defense-in-depth: the unlink target must resolve inside the manual-story
+  // root via realpath, paralleling sandbox discipline for writes.
+  assertInsideSandbox(absoluteTarget, root);
 }
 
 function resolveRealPath(targetPath: string): string {

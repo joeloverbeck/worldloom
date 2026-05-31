@@ -87,6 +87,32 @@ cd tools/manual-story-studio/web && npm run dev
 # Listens on http://127.0.0.1:5176, proxies /api/* to backend port 5175.
 ```
 
+## Record Classes (SPEC-101)
+
+Manual Studio maintains 18 MVP record classes per manual-story (one file per record), plus a deferred `beat-templates` class shipped in SPEC-104:
+
+`cast`, `entities`, `statuses`, `locations`, `objects`, `facts`, `beliefs`, `intentions`, `plans`, `emotions`, `relationships`, `threads`, `obligations`, `consequences`, `clocks`, `secrets`, `questions`, `artifacts` (+ deferred `beat-templates`).
+
+Canonical prefix list and per-class file layout: `docs/ID-ALLOCATION.md §Manual-story-scoped`.
+
+Every record carries common fields (`id`, `title`, `active`, `importance`, `tags`, `summary`, `details`, `refs`, `prompt_visibility`, `last_reviewed_after_segment`, `notes`, plus optional `retired_reason` when archived). Per-class additions are minimal (typically 2-4 fields beyond common); see SPEC-101 §2.2 for the full delta per class. Schema definitions live at `src/validate/schema.ts`; TypeScript types at `src/schema/manual-story.ts`.
+
+## Hybrid Delete Policy (SPEC-101)
+
+`DELETE /api/.../records/<class>/<id>` returns one of three outcomes:
+
+- **`hard_deleted`** — when the record has zero referrers. File is unlinked. The ID allocator preserves the gap: the next allocation does NOT reuse the freed ID.
+- **`inactive_default`** — when the record has referrers. The record is rewritten in place with `active: false` and `retired_reason: "force-delete-blocked-by-referrers: <id-list>"`. The file stays on disk; refs to it remain valid (the ref validator accepts refs to archived records per SPEC-101 §2.4).
+- **`force_deleted`** — when `?force=true` query OR `{confirm: true}` body flag is set. Hard-deletes the file regardless of referrers; response body returns an audit entry with timestamp + deleted ID + referrer list. Persistent audit log is M6 deferral per SPEC-101 §7 AC #5.
+
+## Reference Validation Scope (SPEC-101)
+
+Manual Studio's ref validator is **shallow** (one hop, not recursive) per SPEC-101 §3 Key decisions: every record's `refs.characters` / `refs.locations` / `refs.related_records` plus per-class typed pointers (`mbel-*.holder`, `mrel-*.between`, `mobl-*.owed_by/owed_to`, etc.) must point to a record that exists in the same manual story (including archived `active: false` records). Recursive closure is not enforced — that's engine-grade discipline. The `source_world_character: CHAR-*` field on Manual Character Profile records is informational provenance only — the ref validator does not inspect it. World-canon resolution is M6 deferral.
+
+## ID Allocation (SPEC-101)
+
+Per-class, per-manual-story, append-only natural integer suffix: the allocator scans `records/<class>/`, computes `max(existing) + 1`, and reserves that ID. Gaps from hard-delete are preserved (the allocator does NOT reuse deleted IDs). Implementation: `src/write/id-allocator.ts`. Full convention: `docs/ID-ALLOCATION.md §Manual-story-scoped`.
+
 ## Build & test
 
 `npm test` chains `build:backend` + backend tests + `web test`:

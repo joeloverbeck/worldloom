@@ -1,0 +1,89 @@
+import { listRecords, readRecord } from "./read/records.js";
+import type {
+  ManualRecord,
+  ManualRecordClass,
+  SegmentSidecar,
+} from "./schema/manual-story.js";
+import type { ManualStoryRoot } from "./write/sandbox.js";
+
+export const CHECKLIST_REVIEW_CLASSES: readonly ManualRecordClass[] = [
+  "statuses",
+  "emotions",
+  "beliefs",
+  "relationships",
+  "objects",
+  "plans",
+  "clocks",
+  "secrets",
+  "questions",
+  "consequences",
+  "obligations",
+  "threads",
+] as const;
+
+export const CHECKLIST_DISCLAIMER =
+  "Review these categories manually. Manual Story Studio has not changed any records.";
+
+export interface StateUpdateChecklistEntry {
+  record_class: ManualRecordClass;
+  total_records: number;
+  cast_referencing_count: number;
+}
+
+export interface StateUpdateChecklistPayload {
+  segment_id: string;
+  involved_cast: string[];
+  entries: StateUpdateChecklistEntry[];
+  disclaimer: string;
+}
+
+export interface BuildChecklistOptions {
+  manualStoryRoot: ManualStoryRoot | string;
+  sidecar: SegmentSidecar;
+}
+
+export function buildStateUpdateChecklist(
+  options: BuildChecklistOptions,
+): StateUpdateChecklistPayload {
+  const manualStoryRoot = rootPath(options.manualStoryRoot);
+  const involved_cast =
+    options.sidecar.included_record_summary.characters.slice();
+  const involvedCastSet = new Set(involved_cast);
+
+  const entries = CHECKLIST_REVIEW_CLASSES.map((recordClass) => {
+    const summaries = listRecords(manualStoryRoot, recordClass);
+    let cast_referencing_count = 0;
+
+    for (const summary of summaries) {
+      const record = readRecord(manualStoryRoot, recordClass, summary.id);
+      if (recordReferencesAnyCast(record, involvedCastSet)) {
+        cast_referencing_count += 1;
+      }
+    }
+
+    return {
+      record_class: recordClass,
+      total_records: summaries.length,
+      cast_referencing_count,
+    };
+  });
+
+  return {
+    segment_id: options.sidecar.id,
+    involved_cast,
+    entries,
+    disclaimer: CHECKLIST_DISCLAIMER,
+  };
+}
+
+function rootPath(root: ManualStoryRoot | string): string {
+  return typeof root === "string" ? root : root.absolutePath;
+}
+
+function recordReferencesAnyCast(
+  record: ManualRecord | null,
+  involvedCast: ReadonlySet<string>,
+): boolean {
+  if (!record || involvedCast.size === 0) return false;
+  return record.refs.characters.some((id) => involvedCast.has(id));
+}

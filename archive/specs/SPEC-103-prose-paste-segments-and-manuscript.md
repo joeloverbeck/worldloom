@@ -1,6 +1,6 @@
 # SPEC-103 — Manual Story Studio: Prose Paste, Segment Storage, Manuscript Compilation, State Update Checklist
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-05-30
 **Classification:** story-canon-related (closes the externalized-LLM loop by accepting pasted prose as durable manuscript text and prescribing the post-paste state-update discipline; preserves §Story Bundles §4a Plan-Authority Boundary by treating pasted prose as manuscript, not authoritative state).
 **Depends on:** **SPEC-100** (sandbox), **SPEC-101** (records + metadata), **SPEC-102** (prompts that segments reference). Land in order.
@@ -41,6 +41,7 @@ ChatGPT-Pro's proposal §12 / §13 is the design as accepted; this spec hardens 
 3. **Segment sidecar schema** (`segments/SEG-<n>.yaml`):
    - `id: SEG-<n>`
    - `created_at` (ISO 8601)
+   - `updated_at` (ISO 8601; populated on first save and refreshed on every in-place edit per §3 item 7).
    - `title` (string)
    - `prompt_id: PROMPT-<n>` (null if author didn't reference a prompt — manual segment authoring without prompt round-trip is permitted).
    - `prompt_sha256` (sha256 of the referenced prompt file's body at save time; informational only — never read as a precondition for any subsequent operation, per [[feedback_author_rejects_hash_coupling]]).
@@ -72,7 +73,7 @@ ChatGPT-Pro's proposal §12 / §13 is the design as accepted; this spec hardens 
 7. **Manuscript view** (frontend, `tools/manual-story-studio/web/src/pages/Manuscript.tsx`):
    - Full compiled `manuscript.md` rendered as Markdown (read-only display).
    - Segment list sidebar (linked from `manual-story.yaml` `segment_order`).
-   - Per-segment actions: Edit (opens Paste Prose editor pre-populated), Delete (hybrid policy per SPEC-101 §3), Reorder (UI affordance gated by `manuscript.allow_reorder` — default `false` for MVP; reorder is M6).
+   - Per-segment actions: Edit (opens Paste Prose editor pre-populated), Delete (operational hybrid for segments — see §3 Key decisions: *unreferenced* = no consequence cites `caused_by_segment` → hard delete both `segments/SEG-<n>.md` and `segments/SEG-<n>.yaml` and remove from `segment_order`; *referenced* = at least one consequence's `caused_by_segment` field cites it → remove from `segment_order` (hides from manuscript) but keep both files (preserves audit trail); *force-delete* with explicit confirmation flag → hard delete + warning naming unresolved `caused_by_segment` references), Reorder (UI affordance gated by `manuscript.allow_reorder` — default `false` for MVP; reorder is M6).
    - Rebuild Manuscript button.
    - Word count summary (per-segment + total).
    - "Open in Editor" hint (the file path of `manuscript.md` so the author can open it externally).
@@ -102,6 +103,9 @@ ChatGPT-Pro's proposal §12 / §13 is the design as accepted; this spec hardens 
 - **Manuscript word count is advisory.** No floor, no ceiling, no quota. Per §9 prose-length discipline applied to the author's view of their own work.
 - **Discarding without saving is the default for unwanted prose.** Pasted prose held in the editor before Save Segment is in-memory only and disappears on navigation. The author who wants to retain a discarded attempt does so manually (paste into a notes file). Manual Studio is opinionated against accumulating disposable retries.
 - **Segment edit re-opens the Paste Prose editor.** Editing an existing segment is the same flow as creating one, pre-populated with the existing prose. On save, the segment is updated in place (same id, same sidecar except `updated_at` and `word_count`); the manuscript recompiles.
+- **Segment delete is an operational hybrid keyed on `caused_by_segment` references — not the SPEC-101 record hybrid verbatim.** SPEC-101 §3 item 5 defines the hybrid policy for records that carry `active`/`retired_reason` fields and a multi-source reference graph (`refs.characters`, `refs.locations`, `refs.related_records`). Segments have neither: a segment is a Markdown body + sidecar with no `active` field, and the only references to it are (a) its singleton position in `manual-story.yaml` `segment_order` and (b) the optional `caused_by_segment` field on `consequences/mcnsq-*.yaml` records (already registered as `caused_by_segment: { kind: "segment", nullable: true }` at `tools/manual-story-studio/src/validate/refs.ts:71`). The segment-specific operational translation is: *unreferenced* (no consequence cites `caused_by_segment`) → hard delete both files + remove from `segment_order`; *referenced* (at least one consequence cites it) → remove from `segment_order` (hides from manuscript) but keep both files (preserves the consequence's referent and the segment's audit trail); *force-delete* with explicit confirmation flag → hard delete + warning naming unresolved `caused_by_segment` referrers (advisory; author cleans up the consequence records afterward via the Records screen). The hybrid spirit (avoid accidental destruction; permit deliberate hard delete) is preserved; the mechanism is segment-shaped.
+- **SPEC-103 builds on segment-aware scaffolding landed by SPEC-101/102.** Three existing surfaces already enumerate or validate segments: (1) `tools/manual-story-studio/src/prompt/compose.ts:301-304` scans `segments/` for `SEG-<n>.md` to populate recent-segment context; (2) `tools/manual-story-studio/src/validate/refs.ts:71` registers `caused_by_segment` as a segment-kind ref; (3) `tools/manual-story-studio/src/read/records.ts:81-88,166` reads `segment_order` from `manual-story.yaml` to populate the known-segments set consumed by the ref validator. The new write flow (`src/write/segments.ts`) plugs into these existing readers and validators rather than reinventing them; the new `segment-id-allocator.ts` is the only segment-bookkeeping surface that did not previously exist.
+- **State Update Checklist lists 12 of the 18 manual record classes.** The 6 excluded classes (`cast`, `entities`, `locations`, `facts`, `intentions`, `artifacts`) are author-curated background — typically established earlier in the manual story and rarely shifted by a single beat cluster. The 12 included classes (statuses, emotions, beliefs, relationships, objects, plans, clocks, secrets, questions, consequences, obligations, threads) reflect state most likely to move inside a single segment's beat cluster, which is what the post-save review prompt is for.
 
 ## 4. Files to touch
 
@@ -114,7 +118,6 @@ ChatGPT-Pro's proposal §12 / §13 is the design as accepted; this spec hardens 
 - `tools/manual-story-studio/src/read/manuscript.ts` — read compiled manuscript.
 - `tools/manual-story-studio/src/server/routes/segments.ts` — POST (save), GET (list / single), PUT (edit), DELETE (hybrid).
 - `tools/manual-story-studio/src/server/routes/manuscript.ts` — GET manuscript, POST rebuild.
-- `tools/manual-story-studio/src/server/routes/prompt-history.ts` — GET prompt list with linked segments.
 - `tools/manual-story-studio/src/state-update-checklist.ts` — pure function: (saved segment sidecar, involved cast) → checklist payload (list of record classes + per-class counts of records referencing the involved cast).
 
 **Create (frontend):**
@@ -129,18 +132,25 @@ ChatGPT-Pro's proposal §12 / §13 is the design as accepted; this spec hardens 
 
 **Modify:**
 
-- `tools/manual-story-studio/src/server/http.ts` — register segment / manuscript / prompt-history routes.
-- `tools/manual-story-studio/web/src/App.tsx` — add `/paste-prose`, `/manuscript`, `/prompt-history` routes.
-- `tools/manual-story-studio/src/schema/manual-story.ts` — extend types for segment sidecar.
-- `tools/manual-story-studio/web/src/pages/Dashboard.tsx` (from SPEC-101) — wire the manuscript word count widget to the manuscript reader.
+- `tools/manual-story-studio/src/server/http.ts` — register segment and manuscript routes (the prompt-history-with-linked-segments listing is an extension to the already-registered `routes/prompts.ts` per §3 Key decisions, not a new route file).
+- `tools/manual-story-studio/web/src/App.tsx` — add `/worlds/:worldSlug/manual-stories/:msSlug/paste-prose`, `.../manuscript`, `.../prompt-history` routes (full prefix consistent with existing route shape at `tools/manual-story-studio/web/src/App.tsx:34-61`).
+- `tools/manual-story-studio/src/schema/manual-story.ts` — extend types for segment sidecar; add `allow_reorder: boolean` to `ManualStoryManuscriptPolicy`.
+- `tools/manual-story-studio/web/src/types/manual-story.ts` — mirror the new segment sidecar types and `allow_reorder` field; the web bundle uses Vite (bundler) module resolution and cannot import from the backend's Node16 module tree, so this hand-maintained mirror must follow every backend schema extension.
+- `tools/manual-story-studio/src/write/manual-story-metadata.ts` — default `manuscript.allow_reorder` to `false` in the metadata initializer alongside the existing `compile_on_segment_save` / `include_segment_titles` defaults at lines 83-85.
+- `tools/manual-story-studio/src/server/routes/prompts.ts` — extend the existing `GET /api/worlds/:slug/manual-stories/:msSlug/prompts` listing response to include `linked_segments: string[]` (SEG ids ordered by save time, computed by scanning `segments/SEG-*.yaml` sidecars for matching `prompt_id`). The Prompt History view consumes the augmented endpoint; no new route file is introduced.
+- `tools/manual-story-studio/web/src/api/prompts.ts` — add the typed `linked_segments` field to the frontend prompt listing client.
+- `tools/manual-story-studio/web/src/pages/Dashboard.tsx` (from SPEC-101) — wire the manuscript word count widget to the manuscript reader; wire the Latest segment widget to the segments reader.
+- `docs/ID-ALLOCATION.md` — extend `### Manual-story-scoped` (lines 46-72) to enumerate the new per-manual-story `SEG-<integer>` class (segments — `segments/SEG-<integer>.md` + `segments/SEG-<integer>.yaml`; allocated by `tools/manual-story-studio/src/write/segment-id-allocator.ts`; gaps from hard-delete preserved) and to register the existing per-manual-story `PROMPT-<integer>` class landed by SPEC-102 (allocated by `tools/manual-story-studio/src/write/prompts.ts`).
 
-**Tests:**
+**Tests** (organized per existing subsystem convention — `test/server/`, `test/write/`, `test/manuscript/`, plus root for pure-function modules):
 
-- `test/segments-save-flow.test.ts` — save segment, verify sidecar shape, verify `segment_order` updated, verify manuscript recompiled.
-- `test/manuscript-compile.test.ts` — fixture segments → byte-identical compiled manuscript.
-- `test/segment-edit-and-rebuild.test.ts` — edit a segment, verify in-place update, verify manuscript regenerates.
-- `test/state-update-checklist.test.ts` — checklist payload includes all 12 review classes with correct counts for fixture cast.
-- `test/prompt-history.test.ts` — list prompts with linked segments by `prompt_id`.
+- `test/write/segments.test.ts` — save segment (verify sidecar shape, `segment_order` append, manuscript recompiled); edit in-place (verify `updated_at` and `word_count` refreshed, `id` and `created_at` preserved, manuscript regenerates); hybrid delete (unreferenced → hard delete both files + remove from `segment_order`; referenced via `caused_by_segment` → segment_order removal + file preservation; force-delete with confirmation flag → hard delete + warning naming unresolved referrers).
+- `test/write/segment-id-allocator.test.ts` — per-manual-story append-only allocation; gaps from hard-delete preserved (parallel to `test/write/id-allocator.test.ts` for records).
+- `test/manuscript/compile.test.ts` — fixture segments → byte-identical compiled manuscript across runs (determinism); `include_segment_titles` toggle behaviour; empty `segment_order` → empty manuscript.
+- `test/server/segments-routes.test.ts` — POST (save) / GET (list / single) / PUT (edit) / DELETE (hybrid) round trip; write-scope-guard adherence; manuscript recompile triggered post-save when `compile_on_segment_save: true`.
+- `test/server/manuscript-routes.test.ts` — GET manuscript + POST rebuild; rebuild on empty `segment_order` writes empty manuscript.
+- `test/server/prompts-routes.test.ts` (extend existing) — verify `linked_segments: string[]` on `GET /prompts` listing response (per the I6/Q2(a) extension to the landed SPEC-102 routes file). `GET /prompts/:promptId` remains the existing SPEC-102 prompt detail endpoint and is consumed separately by the Prompt History view.
+- `test/state-update-checklist.test.ts` — checklist payload includes all 12 review classes with correct per-class counts for fixture cast.
 
 **No modification to:**
 
@@ -156,6 +166,7 @@ ChatGPT-Pro's proposal §12 / §13 is the design as accepted; this spec hardens 
 | §Tooling Recommendation (LLM externalized via prompt packet) | aligns @ round-trip-close | Closes the SPEC-102 round trip: prompt out, prose in, segment saved, checklist prompts the author to update records. The LLM never touches Manual Studio state. |
 | §9 Prose Length Discipline | aligns @ advisory-word-count | Word count is computed and displayed; no enforcement, no floor, no ceiling, no quota. |
 | §Canonical Storage Layer engine-only-write discipline | aligns | All writes (segments, sidecars, manuscript, segment_order) land under `worlds/<slug>/manual-stories/<slug>/` via the SPEC-100 sandbox; `_source/` untouched. |
+| §Canonical Storage Layer "Per-class ID format conventions (FOUNDATIONS-002)" | aligns @ SEG-<n>-unpadded | The new per-manual-story `SEG-<integer>` class uses the unpadded natural-integer suffix (e.g., `SEG-1`, `SEG-2`), allocated append-only by `tools/manual-story-studio/src/write/segment-id-allocator.ts` with `max(existing_numeric_suffix) + 1`; gaps from hard-delete are preserved. Matches the lowercase `m`-prefix class convention SPEC-101 documented at `docs/ID-ALLOCATION.md` `### Manual-story-scoped`, and avoids the zero-padded `SEG-0007` form the source proposal §12 used. |
 | §Story Bundles §6b Information / Observer Firewall | N/A | The firewall governs which cast members know what; Manual Studio segments are author-authored prose, not engine-emitted state; the author honors the firewall by reading the prompt's §10 / §12 reveal-permission framing before approving the LLM's prose. |
 
 ## 6. Build & test
@@ -171,7 +182,7 @@ ChatGPT-Pro's proposal §12 / §13 is the design as accepted; this spec hardens 
 5. Manuscript compilation is deterministic: same inputs → byte-identical output across runs (tested).
 6. State Update Checklist appears post-save, lists 12 review classes, never asserts state changed.
 7. Segment edit (in-place update) preserves the sidecar's `id` and `created_at`, updates `word_count`, and triggers manuscript recompile.
-8. Segment delete follows the hybrid policy from SPEC-101 §3.
+8. Segment delete follows the segment-specific operational hybrid (per §3 Key decisions): unreferenced segment (no consequence cites `caused_by_segment`) hard-deletes both files and removes from `segment_order`; referenced segment removes from `segment_order` but preserves both files; force-delete with explicit confirmation flag hard-deletes and surfaces a warning naming unresolved `caused_by_segment` referrers.
 9. Manuscript view shows full compiled manuscript with segment list and word count summary.
 10. Prompt History view lists saved prompts with links to segments produced from them.
 11. Discarded prose (paste-then-navigate-away) is not persisted anywhere.
@@ -185,3 +196,16 @@ ChatGPT-Pro's proposal §12 / §13 is the design as accepted; this spec hardens 
 - **`manuscript.md` is written even when the author has not yet pasted any segments.** First-save creates the file with the one segment; first-rebuild on an empty `segment_order` writes an empty `manuscript.md`. This is acceptable; empty manuscript is a legitimate state.
 - **No invariant-check on pasted prose.** If the LLM's response violates a forbidden-invention or forbidden-reveal listed in the prompt's §12, Manual Studio has no mechanism to detect it. The author is the gate. This is the deliberate boundary — Manual Studio is an authoring cockpit, not a prose validator.
 - **No write to the prompt file from the segment save flow.** Segments reference prompts but never modify them. If a saved prompt is later deleted, the segment sidecar's `prompt_id` becomes a stale reference; the Prompt History view will not crash, but the "Reuse Prompt" action will fail with a clear "prompt no longer exists" message. Acceptable; saved prompt files are the author's to manage.
+
+## Outcome
+
+Completed 2026-05-31. SPEC-103 landed through tickets `archive/tickets/SPEC103PROPASSEG-001.md` through `archive/tickets/SPEC103PROPASSEG-016.md`.
+
+The implementation added the segment sidecar and manuscript policy schema, `SEG-<integer>` allocation and ID documentation, save/edit/delete segment write flows, deterministic manuscript compilation, segment and manuscript read helpers, State Update Checklist payload generation and modal UI, segment/manuscript/prompt-history HTTP routes, Paste Prose / Manuscript / Prompt History frontend pages, Dashboard wiring for latest segment and manuscript word count, prompt-listing `linked_segments`, and the trailing `tools/manual-story-studio/test/capstone-spec103.test.ts` capstone.
+
+Deviations from the initial spec were bounded and recorded in ticket closeouts: the Prompt History `linked_segments` proof lives on the prompts listing endpoint, the Manuscript page renders compiled Markdown in a `<pre>` MVP display because the web package has no Markdown renderer dependency, and the capstone covers frontend-only view wording with source-level route/page checks plus web TypeScript compilation rather than a browser component harness.
+
+Verification completed 2026-05-31:
+
+1. `cd tools/manual-story-studio && npm run build:backend && node --test "dist/test/capstone-spec103.test.js"` — PASS; 6/6 SPEC-103 capstone subtests passed.
+2. `cd tools/manual-story-studio && npm test` — PASS; backend build, 275/275 compiled Node tests, and web TypeScript check passed.
