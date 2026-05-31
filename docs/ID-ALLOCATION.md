@@ -45,7 +45,7 @@ For the full set of story-bundle `_source/` record classes (STENT, SF, BEL, SE, 
 
 ### Manual-story-scoped
 
-Manual Story Studio (per SPEC-100 / SPEC-101) maintains a separate non-canon authoring surface at `worlds/<slug>/manual-stories/<slug>/`. Its record IDs use a **lowercase `m`-prefix** family deliberately segregated from world-canon and story-bundle uppercase classes — engine patterns at `tools/world-index/src/parse/story-directories.ts` (`^STENT-[0-9]+$`, `^STCHAR-[0-9]+$`, etc.) cannot match any lowercase `m`-prefix by case discipline. Manual-story IDs are NOT allocated via the `mcp__worldloom__allocate_*` family; allocation is performed by the Manual Studio backend (`tools/manual-story-studio/src/write/id-allocator.ts`) which scans the class directory and assigns `max(existing_numeric_suffix) + 1`. Gaps from hard-delete are preserved (the allocator does not reuse deleted IDs).
+Manual Story Studio (per SPEC-100 / SPEC-101 / SPEC-102 / SPEC-103) maintains a separate non-canon authoring surface at `worlds/<slug>/manual-stories/<slug>/`. Its record IDs use a **lowercase `m`-prefix** family deliberately segregated from world-canon and story-bundle uppercase classes — engine patterns at `tools/world-index/src/parse/story-directories.ts` (`^STENT-[0-9]+$`, `^STCHAR-[0-9]+$`, etc.) cannot match any lowercase `m`-prefix by case discipline. Manual-story IDs are NOT allocated via the `mcp__worldloom__allocate_*` family; allocation is performed by the Manual Studio backend (`tools/manual-story-studio/src/write/id-allocator.ts`) which scans the class directory and assigns `max(existing_numeric_suffix) + 1`. Gaps from hard-delete are preserved (the allocator does not reuse deleted IDs).
 
 Records live at `worlds/<slug>/manual-stories/<manual-story-slug>/records/<class>/<prefix>-<integer>.yaml`, one file per record per class:
 
@@ -68,5 +68,7 @@ Records live at `worlds/<slug>/manual-stories/<manual-story-slug>/records/<class
 - `mq-<integer>` — open questions (`questions/`)
 - `martifact-<integer>` — artifacts (`artifacts/`)
 - `mtemplate-<integer>` — beat templates (`beat-templates/`; schema deferred to SPEC-104)
+- `SEG-<integer>` — segments (`segments/SEG-<integer>.md` prose body + `segments/SEG-<integer>.yaml` sidecar; allocated by `tools/manual-story-studio/src/write/segment-id-allocator.ts`; per-manual-story append-only; gaps from hard-delete preserved). Format follows the FOUNDATIONS-002 unpadded natural-integer convention.
+- `PROMPT-<integer>` — saved prompt artifacts (`prompts/PROMPT-<integer>.md` body + `prompt-runs/PROMPT-<integer>.yaml` sidecar; allocated by `tools/manual-story-studio/src/write/prompts.ts`; per-manual-story append-only; gaps from hard-delete preserved). Format follows the FOUNDATIONS-002 unpadded natural-integer convention.
 
 The manual-story `manual-story.yaml` metadata file is not an ID-bearing record (it is a per-manual-story control file; one per manual-story slug).

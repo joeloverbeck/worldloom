@@ -1,6 +1,6 @@
 # SPEC103PROPASSEG-002: docs/ID-ALLOCATION.md — register SEG-N + PROMPT-N classes
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `docs/ID-ALLOCATION.md` `### Manual-story-scoped` section to enumerate two additional per-manual-story append-only ID classes.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC-101 added the `### Manual-story-scoped` section to `docs/ID-ALLOCATION.md` (lines 46-72) enumerating the 18 lowercase `m`-prefix record classes Manual Story Studio allocates. SPEC-102 subsequently introduced the per-manual-story `PROMPT-<integer>` class (allocated by `tools/manual-story-studio/src/write/prompts.ts`) without docs registration. SPEC-103 introduces the per-manual-story `SEG-<integer>` class (allocated by `tools/manual-story-studio/src/write/segment-id-allocator.ts`, parallel pattern). Both classes need explicit enumeration so future readers can discover every per-manual-story append-only class from one canonical registry (Rule 6 audit-trail at the pipeline-documentation level).
+At intake, SPEC-101 had added the `### Manual-story-scoped` section to `docs/ID-ALLOCATION.md` enumerating the 18 lowercase `m`-prefix record classes Manual Story Studio allocates, but SPEC-102's `PROMPT-<integer>` class and SPEC-103's planned `SEG-<integer>` class were absent. This ticket registers both classes so future readers can discover every per-manual-story append-only class from one canonical registry (Rule 6 audit-trail at the pipeline-documentation level).
 
 ## Assumption Reassessment (2026-05-31)
 
@@ -28,20 +28,18 @@ SPEC-101 added the `### Manual-story-scoped` section to `docs/ID-ALLOCATION.md` 
 3. Introductory paragraph attribution updated from `(per SPEC-100 / SPEC-101)` to `(per SPEC-100 / SPEC-101 / SPEC-102 / SPEC-103)` → codebase grep-proof
 4. Docs-only ticket; no behavioral invariant to assert via test — verification is structural (grep against the modified docs surface).
 
-## What to Change
+## Landed Changes
 
-### 1. Append SEG-N + PROMPT-N enumeration to Manual-story-scoped section
+### 1. Appended SEG-N + PROMPT-N enumeration to Manual-story-scoped section
 
-In `docs/ID-ALLOCATION.md`, after the 18-mclass enumeration block (around line 70, before the `### Manual-story-scoped` section's closing paragraph about `manual-story.yaml` not being an ID-bearing record), append two new bullet items consistent with the section's existing entry shape:
+In `docs/ID-ALLOCATION.md`, after the 18-mclass enumeration block and before the `manual-story.yaml` control-file note, two entries now register:
 
-```markdown
 - `SEG-<integer>` — segments (`segments/SEG-<integer>.md` prose body + `segments/SEG-<integer>.yaml` sidecar; allocated by `tools/manual-story-studio/src/write/segment-id-allocator.ts`; per-manual-story append-only; gaps from hard-delete preserved). Format follows the FOUNDATIONS-002 unpadded natural-integer convention.
 - `PROMPT-<integer>` — saved prompt artifacts (`prompts/PROMPT-<integer>.md` body + `prompt-runs/PROMPT-<integer>.yaml` sidecar; allocated by `tools/manual-story-studio/src/write/prompts.ts`; per-manual-story append-only; gaps from hard-delete preserved). Format follows the FOUNDATIONS-002 unpadded natural-integer convention.
-```
 
-### 2. Update introductory paragraph attribution
+### 2. Updated introductory paragraph attribution
 
-In the `### Manual-story-scoped` section's introductory paragraph (around line 48), update the spec-attribution clause from `(per SPEC-100 / SPEC-101)` to `(per SPEC-100 / SPEC-101 / SPEC-102 / SPEC-103)` so the section's lineage matches the classes it now enumerates.
+In the `### Manual-story-scoped` section's introductory paragraph, the spec-attribution clause now reads `(per SPEC-100 / SPEC-101 / SPEC-102 / SPEC-103)` so the section's lineage matches the classes it enumerates.
 
 ## Files to Touch
 
@@ -55,7 +53,7 @@ In the `### Manual-story-scoped` section's introductory paragraph (around line 4
 
 ## Acceptance Criteria
 
-### Tests That Must Pass
+### Tests That Passed
 
 1. `grep -nE 'SEG-<integer>|PROMPT-<integer>' docs/ID-ALLOCATION.md` — both new class identifiers appear in the file
 2. `grep -nE 'segment-id-allocator.ts|write/prompts.ts' docs/ID-ALLOCATION.md` — both allocator paths cited in their respective entries
@@ -72,8 +70,25 @@ In the `### Manual-story-scoped` section's introductory paragraph (around line 4
 
 1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment.
 
-### Commands
+### Commands Run
 
 1. `grep -nE 'SEG-<integer>|PROMPT-<integer>' docs/ID-ALLOCATION.md` — confirm both new entries present
 2. `grep -nE 'segment-id-allocator|write/prompts' docs/ID-ALLOCATION.md` — confirm allocator paths cited
 3. Grep-based verification is the correct narrow boundary for a docs-only ticket; no `npm test` invocation is meaningful since no code changes.
+
+## Outcome
+
+Completed: 2026-05-31
+
+`docs/ID-ALLOCATION.md` now registers the SPEC-103 `SEG-<integer>` class and the SPEC-102 `PROMPT-<integer>` class in the `### Manual-story-scoped` registry. The section attribution was updated to include SPEC-102 and SPEC-103. No code, allocator implementation, tests, world canon, story bundles, hooks, validators, MCP, or patch-engine surfaces changed.
+
+## Verification Result
+
+1. `grep -nE 'SEG-<integer>|PROMPT-<integer>' docs/ID-ALLOCATION.md` — PASS; lines 71-72 contain the two new registry entries.
+2. `grep -nE 'segment-id-allocator|write/prompts' docs/ID-ALLOCATION.md` — PASS; lines 71-72 cite the planned SEG allocator path and the existing prompt writer path.
+3. `grep -n 'SPEC-102 / SPEC-103' docs/ID-ALLOCATION.md` — PASS; line 48 includes the updated attribution.
+4. Manual review — PASS; this is a docs-only registry update and the `SEG-<integer>` allocator file remains owned by ticket 003.
+
+## Deviations
+
+- None.
