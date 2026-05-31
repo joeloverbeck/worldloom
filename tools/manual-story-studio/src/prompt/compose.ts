@@ -9,13 +9,17 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
+import YAML from "yaml";
+
 import { readManualStoryMetadata } from "../read/manual-story-metadata.js";
 import { listRecords, readRecord } from "../read/records.js";
+import type { BeatTemplate } from "../schema/beat-template.js";
 import type {
   ManualCharacterRecord,
   ManualRecord,
   ManualRecordClass,
 } from "../schema/manual-story.js";
+import { validateBeatTemplate } from "../validate/beat-template-schema.js";
 import { lintPrompt } from "./lint.js";
 import { classifyManualRecordId } from "./record-class.js";
 import { assembleSections } from "./sections/index.js";
@@ -128,16 +132,56 @@ export async function composePrompt(
   }
 
   // Stage 5 — Load optional beat template.
+  //
+  // SPEC-104: parse the template YAML and assemble two artifacts:
+  //   (a) `includedTemplateBody` — a Markdown enumerated list of
+  //        `beat_guidance` entries keyed by `function`, surfaced as the
+  //        body of section 6.
+  //   (b) `templateForbiddenInventions` — the template's
+  //        `forbidden_inventions[]`, threaded into section 12 alongside
+  //        the existing per-cast prose_constraints.forbidden_inventions.
+  // A malformed-YAML template produces a hard lint finding rather than a
+  // silent empty body.
   let includedTemplateBody: string | null = null;
+  let templateForbiddenInventions: string[] | undefined;
+  const templateLintFindings: PromptLintFinding[] = [];
   if (input.included_template_path) {
     const tplPath = path.isAbsolute(input.included_template_path)
       ? input.included_template_path
       : path.join(input.repoRoot, input.included_template_path);
     if (existsSync(tplPath)) {
+      let rawText: string;
       try {
-        includedTemplateBody = readFileSync(tplPath, "utf8");
+        rawText = readFileSync(tplPath, "utf8");
       } catch {
-        includedTemplateBody = null;
+        rawText = "";
+      }
+      let parsed: unknown;
+      try {
+        parsed = YAML.parse(rawText);
+      } catch (err) {
+        templateLintFindings.push(
+          hardFinding(
+            "selected_template_valid",
+            `Selected beat template at ${tplPath} failed to parse as YAML: ${(err as Error).message}`,
+          ),
+        );
+      }
+      if (templateLintFindings.length === 0) {
+        const validation = validateBeatTemplate(parsed);
+        if (!validation.valid) {
+          templateLintFindings.push(
+            hardFinding(
+              "selected_template_valid",
+              `Selected beat template at ${tplPath} failed schema validation: ${validation.violations
+                .map((v) => `${v.field}: ${v.message}`)
+                .join("; ")}`,
+            ),
+          );
+        } else {
+          includedTemplateBody = renderBeatGuidance(validation.record);
+          templateForbiddenInventions = [...validation.record.forbidden_inventions];
+        }
       }
     }
   }
@@ -173,20 +217,21 @@ export async function composePrompt(
   );
 
   // Stage 9 — Compose Markdown via 15 sections.
-  const markdown = assembleSections(
-    {
-      metadata,
-      cast,
-      records,
-      included_cast_ids: input.included_cast.slice(),
-      moment_directive: input.moment_directive,
-      included_template_body: includedTemplateBody,
-      recent_segment_last_paragraph: recentSegmentLastParagraph,
-      content_policy_body: contentPolicyBody,
-      prose_craft_contract_body: proseCraftBody,
-    },
-    ctx,
-  );
+  const sectionInput: Parameters<typeof assembleSections>[0] = {
+    metadata,
+    cast,
+    records,
+    included_cast_ids: input.included_cast.slice(),
+    moment_directive: input.moment_directive,
+    included_template_body: includedTemplateBody,
+    recent_segment_last_paragraph: recentSegmentLastParagraph,
+    content_policy_body: contentPolicyBody,
+    prose_craft_contract_body: proseCraftBody,
+  };
+  if (templateForbiddenInventions) {
+    sectionInput.template_forbidden_inventions = templateForbiddenInventions;
+  }
+  const markdown = assembleSections(sectionInput, ctx);
 
   // Stage 10 — Run prompt lint over the assembled Markdown.
   const knownCastIds = new Set<string>();
@@ -208,6 +253,7 @@ export async function composePrompt(
   const allFindings = [
     ...missingCastFindings,
     ...missingRecordFindings,
+    ...templateLintFindings,
     ...lint.findings,
   ];
   const consolidated: PromptLintResult = {
@@ -280,6 +326,16 @@ function buildTranslatorContext(
       return null;
     },
   };
+}
+
+function renderBeatGuidance(template: BeatTemplate): string {
+  // Markdown enumerated list keyed by beat `function`. The 1-5 length
+  // bound is enforced by validateBeatTemplate; this renderer trusts that
+  // invariant and emits exactly as many lines as beat_guidance carries.
+  const lines = template.beat_guidance.map(
+    (beat) => `- **${beat.function}**: ${beat.instruction}`,
+  );
+  return lines.join("\n");
 }
 
 function loadRecentSegmentLastParagraph(
