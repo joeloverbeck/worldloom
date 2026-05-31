@@ -1,6 +1,6 @@
 # SPEC103PROPASSEG-016: Capstone integration test — SPEC-103 §7 AC #1-12 round-trip
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/test/capstone-spec103.test.ts` (the spec-integration capstone test exercising every prior ticket's surface end-to-end). No production code; verification only.
@@ -39,23 +39,23 @@ SPEC-103 §6 Build & test names `npm test` as the verification surface, with det
 
 **Plan-Authority invariant (§4a, FOUNDATIONS-level verification)**: snapshot `<manualStoryRoot>/records/` directory mtime + file list before each save/edit/delete operation; assert unchanged after. This is the integration-level enforcement of the no-record-mutation invariant `archive/tickets/SPEC103PROPASSEG-004.md` / ticket 008 assert at the unit level.
 
-## What to Change
+## Landed Changes
 
-### 1. Create test/capstone-spec103.test.ts
+### 1. Created test/capstone-spec103.test.ts
 
-Implement the capstone per the existing `test/capstone-spec10X.test.ts` shape:
+Implemented the capstone per the existing `test/capstone-spec10X.test.ts` shape:
 
-- File-header comment naming SPEC-103 and enumerating AC#1-12 as the test matrix
-- Setup: `fs.cpSync` a fixture manual story to a temp dir (use existing test/fixtures/ pattern); never mutate `worlds/`
-- One test sub-case per AC#1-12 per the Verification Layers above
-- Each test sub-case computes expected counts/values dynamically from the fixture (not hardcoded); per the §Spec-Integration Ticket Shape "re-enumerated expected counts" guidance
-- A final `Plan-Authority invariant` test asserting `<manualStoryRoot>/records/` is unmutated across all operations the capstone exercised
+- File-header comment names SPEC-103 and maps AC#1-12 to automated assertions.
+- Setup uses `mkdtempSync` + `fs.cpSync` for temp docs/fixture state; no writes touch repo `worlds/`.
+- Six capstone subtests cover the 12 ACs and the Plan-Authority invariant.
+- Fixture-dependent values are derived from the temp fixture at runtime; fixed SPEC constants such as the 12 checklist classes and literal disclaimer are asserted verbatim.
+- The Plan-Authority invariant snapshots `records/` file lists, mtimes, and bodies before segment operations and asserts they are unchanged afterward.
 
-The test uses the in-process Fastify server fixture per the existing `test/server/http.test.ts` pattern (or the test infrastructure SPEC-100/101/102 capstones established).
+The test uses the in-process Fastify server fixture per the existing server tests and SPEC-100/101/102 capstones.
 
-### 2. Test file header runbook (optional, per §Spec-Integration Ticket Shape)
+### 2. Test file header runbook
 
-Since SPEC-103's verification is fully programmatic, no manual dry-run runbook is needed in the test file header — the default capstone shape applies. The file-header comment names the spec, the AC list, and a brief description of the test matrix.
+No manual dry-run runbook was added. The capstone is fully programmatic for backend behavior and uses frontend source checks for the view-only wiring that this package's test harness can exercise without a browser component runner.
 
 ## Files to Touch
 
@@ -78,7 +78,7 @@ Since SPEC-103's verification is fully programmatic, no manual dry-run runbook i
 ### Invariants
 
 1. The capstone NEVER mutates real canon — `fs.cpSync` to a temp dir is the fixture strategy; no writes touch `worlds/<slug>/manual-stories/<msSlug>/` outside the temp root.
-2. Expected counts and values are computed dynamically from the fixture at test start — not hardcoded (per the §Spec-Integration Ticket Shape "re-enumerated expected counts" requirement); the capstone remains valid as the fixture grows or evolves.
+2. Fixture-dependent values are read from the temp fixture at test time; fixed SPEC constants are asserted literally so regressions in the accepted contract are visible.
 3. The Plan-Authority invariant (§4a) is asserted at integration level: no record file under `<manualStoryRoot>/records/` is mutated by any operation the capstone exercises.
 4. Manuscript determinism (§7 AC#5) is asserted by calling rebuild twice on the same fixture and asserting byte-identical output.
 
@@ -92,3 +92,20 @@ Since SPEC-103's verification is fully programmatic, no manual dry-run runbook i
 
 1. `cd tools/manual-story-studio && npm run build:backend && node --test "dist/test/capstone-spec103.test.js"` — targeted capstone test
 2. `cd tools/manual-story-studio && npm test` — full pipeline verification (the capstone is one of the tests `npm test` runs; its pass IS AC#12's assertion per the test matrix above)
+
+## Outcome
+
+Completed 2026-05-31. Added `tools/manual-story-studio/test/capstone-spec103.test.ts`, the SPEC-103 trailing capstone. The test seeds temp Manual Story Studio repos, saves prompts and segments through the in-process Fastify server, verifies segment Markdown/sidecar writes, `segment_order` updates, automatic and manual manuscript compilation, deterministic rebuilds, the 12-class State Update Checklist with the required no-record-change disclaimer, edit-in-place semantics, all three segment-delete outcomes, prompt-history `linked_segments`, and discarded/invalid-prose non-persistence. It also asserts the Plan-Authority invariant by proving `records/` files are unchanged across segment save/edit/delete operations.
+
+No production code changed.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run build:backend` — PASS; TypeScript backend compiled.
+2. `cd tools/manual-story-studio && node --test "dist/test/capstone-spec103.test.js"` — PASS; 6/6 capstone subtests passed.
+3. `cd tools/manual-story-studio && npm test` — PASS; backend build, 275/275 compiled Node tests, and `npm --prefix web test` TypeScript check all passed.
+
+## Deviations
+
+1. AC#9 and AC#10's frontend view wording is covered by source-level route/page wiring checks plus web TypeScript compilation, not a browser/component render harness. The package has no React component test runner; the backend API behavior for manuscript and prompt-history linked segments is exercised directly.
+2. The capstone intentionally does not re-test ticket 002's `docs/ID-ALLOCATION.md` grep proof; that documentation-only branch remains covered by `archive/tickets/SPEC103PROPASSEG-002.md`.
