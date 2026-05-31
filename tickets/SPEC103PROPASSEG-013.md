@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/web/src/pages/Manuscript.tsx` (the full compiled-manuscript view with segment list sidebar and per-segment actions), `tools/manual-story-studio/web/src/components/SegmentListItem.tsx` (the sidebar list-item component), and `tools/manual-story-studio/web/src/api/manuscript.ts` (typed frontend client for the manuscript HTTP routes).
-**Deps**: archive/tickets/SPEC103PROPASSEG-009.md, 011
+**Deps**: archive/tickets/SPEC103PROPASSEG-009.md, archive/tickets/SPEC103PROPASSEG-011.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ SPEC-103 §2 item 7 specifies the Manuscript view: full compiled `manuscript.md`
 
 1. Existing frontend convention (`tools/manual-story-studio/web/src/pages/Records.tsx`, `MomentComposer.tsx`, `PromptPreview.tsx`) uses functional React components with `useParams` + `useState` + `useEffect` + `fetch`-based API helpers. The existing `web/src/api/prompts.ts` is the closest pattern for `web/src/api/manuscript.ts`. The existing `RecordCard.tsx` / `RecordForm.tsx` / `RefList.tsx` are the closest patterns for `SegmentListItem.tsx` (typed-props pure presentational component). The page imports ticket 011's `web/src/api/segments.ts` for the Delete action; ticket 011 must land first.
 2. SPEC-103 §2 item 7 (Manuscript view surface enumeration: full manuscript + segment list + per-segment Edit/Delete/Reorder + Rebuild button + word count summary + "Open in Editor" hint), §7 AC#9 ("Manuscript view shows full compiled manuscript with segment list and word count summary").
-3. Cross-skill boundary: this page consumes ticket 009's manuscript HTTP routes (GET, POST rebuild) via this ticket's new `web/src/api/manuscript.ts` client; consumes ticket 011's `web/src/api/segments.ts` for Delete (DELETE /segments/:id); consumes ticket 007's `listSegments` shape via the GET /segments endpoint (already wired through ticket 008's segments-routes); navigates to ticket 011's PasteProse page via `?edit=SEG-<n>` query param for the Edit button. The `manuscript.allow_reorder` gate (from ticket 001's schema extension; defaults to `false` per ticket 001's metadata-writer default) controls Reorder UI visibility — when `false` (MVP default), the Reorder UI is hidden entirely; M6 deferral per SPEC-103 §2 Out of scope.
+3. Cross-skill boundary: this page consumes ticket 009's manuscript HTTP routes (GET, POST rebuild) via this ticket's new `web/src/api/manuscript.ts` client; consumes `archive/tickets/SPEC103PROPASSEG-011.md`'s `web/src/api/segments.ts` for Delete (DELETE /segments/:id); consumes ticket 007's `listSegments` shape via the GET /segments endpoint (already wired through ticket 008's segments-routes); navigates to `archive/tickets/SPEC103PROPASSEG-011.md`'s PasteProse page via `?edit=SEG-<n>` query param for the Edit button. The `manuscript.allow_reorder` gate (from ticket 001's schema extension; defaults to `false` per ticket 001's metadata-writer default) controls Reorder UI visibility — when `false` (MVP default), the Reorder UI is hidden entirely; M6 deferral per SPEC-103 §2 Out of scope.
 
 ## Architecture Check
 
