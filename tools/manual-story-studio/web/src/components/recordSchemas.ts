@@ -47,7 +47,14 @@ const ROLE_VALUES = [
   "background",
 ] as const;
 
-export const PER_CLASS_FIELDS: Record<ManualRecordClass, FieldDef[]> = {
+// beat-templates intentionally omitted from this map — its dedicated
+// CRUD UI (BeatTemplates.tsx + BeatTemplateForm.tsx) per SPEC-104 owns
+// the form rendering. The generic RecordForm + Records page do not
+// dispatch to beat-templates (no entry in the per-class map).
+export const PER_CLASS_FIELDS: Record<
+  Exclude<ManualRecordClass, "beat-templates">,
+  FieldDef[]
+> = {
   cast: [
     { field: "display_name", label: "Display name", required: true, kind: { kind: "string" } },
     {

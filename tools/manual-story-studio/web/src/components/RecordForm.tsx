@@ -278,7 +278,13 @@ interface CastFormState {
 
 export function RecordForm(props: RecordFormProps) {
   const { recordClass, initial, onSave, onCancel, saveError } = props;
-  const classFields = PER_CLASS_FIELDS[recordClass];
+  // beat-templates uses its own dedicated form (BeatTemplateForm); the
+  // generic RecordForm should never receive that class. The cast below
+  // narrows the index type so the per-class map lookup is safe.
+  const classFields =
+    PER_CLASS_FIELDS[
+      recordClass as Exclude<typeof recordClass, "beat-templates">
+    ];
 
   const initialRefs = ensureRefs(initial?.refs);
 
