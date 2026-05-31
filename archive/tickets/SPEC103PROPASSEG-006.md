@@ -1,6 +1,6 @@
 # SPEC103PROPASSEG-006: Deterministic manuscript.md compiler
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/manuscript/compile.ts` + paired test under `tools/manual-story-studio/test/manuscript/compile.test.ts`. Introduces a new `src/manuscript/` subdirectory under the manual-story-studio package.
@@ -30,59 +30,26 @@ SPEC-103 §2 item 4 + §7 AC#5 require a deterministic compiler that reads `manu
 4. Filesystem-listing ordering of `segments/*.md` is NOT authoritative; `segment_order` is the only source → unit test (fixture with segments whose filesystem-listing order differs from `segment_order`; compiler honors `segment_order`)
 5. Compiler reads zero record files under `records/` and writes only `manuscript.md` → unit test (`records/` directory `fs.statSync` mtime unchanged; no file under `records/` accessed)
 
-## What to Change
+## Landed Changes
 
 ### 1. Create src/manuscript/compile.ts
 
-In `tools/manual-story-studio/src/manuscript/compile.ts`, implement:
+`tools/manual-story-studio/src/manuscript/compile.ts` now exports `compileManuscript({ manualStoryRoot })`.
 
-```typescript
-import { readFileSync, writeFileSync } from "node:fs";
-import path from "node:path";
-import YAML from "yaml";
+The compiler reads `<manualStoryRoot>/manual-story.yaml`, follows `segment_order` exactly, reads each ordered `segments/SEG-<n>.md` body, optionally reads `segments/SEG-<n>.yaml` for the segment title when `manuscript.include_segment_titles` is `true`, joins segment fragments with one blank line, and writes `<manualStoryRoot>/manuscript.md` through `safeWriteFile`.
 
-import type {
-  ManualStoryMetadata,
-  SegmentSidecar,
-} from "../schema/manual-story.js";
-
-export interface CompileManuscriptOptions {
-  manualStoryRoot: string; // absolute path to the manual story root, resolved via SPEC-100 sandbox
-}
-
-export interface CompileManuscriptResult {
-  manuscript_path: string;
-  segments_compiled: number;
-  byte_count: number;
-}
-
-export function compileManuscript(
-  options: CompileManuscriptOptions,
-): CompileManuscriptResult {
-  // 1. Read <manualStoryRoot>/manual-story.yaml; parse to ManualStoryMetadata
-  // 2. Read metadata.manuscript.include_segment_titles flag
-  // 3. For each SEG-<n> in metadata.segment_order (in array order, not fs-listing order):
-  //    a. Read segments/SEG-<n>.md (prose body — pure Markdown, no frontmatter)
-  //    b. If include_segment_titles, read segments/SEG-<n>.yaml sidecar's title field
-  //       and prepend "## <title>\n\n" to the body fragment
-  //    c. Accumulate into output buffer with "\n\n" separator between segments
-  // 4. Write <manualStoryRoot>/manuscript.md (single write; respects SPEC-100 sandbox)
-  // 5. Return CompileManuscriptResult with metrics for caller logging
-}
-```
-
-The compiler must not consult any directory other than `<manualStoryRoot>` (sandbox boundary). It must not read or write any file under `<manualStoryRoot>/records/` (Plan-Authority Boundary per SPEC-103 §3 + FOUNDATIONS §Story Bundles §4a).
+The result reports `manuscript_path`, `segments_compiled`, and UTF-8 `byte_count`. The implementation does not consult filesystem ordering for segments and does not read or write record files.
 
 ### 2. Create test/manuscript/compile.test.ts
 
-Per the existing test convention (`fs.cpSync` fixture manual story to temp dir; `node:test` runner), cover:
+`tools/manual-story-studio/test/manuscript/compile.test.ts` now covers:
 
-- **Determinism**: fixture with 3 segments → call `compileManuscript` twice → `fs.readFileSync` both times → byte-equality assertion
-- **`include_segment_titles: true`**: fixture with `manuscript.include_segment_titles: true` + 3 segments with distinct titles → output contains `## <title-1>\n\n<body-1>\n\n## <title-2>\n\n<body-2>...`
-- **`include_segment_titles: false`** (default): fixture with same 3 segments and flag false → output contains `<body-1>\n\n<body-2>\n\n<body-3>` (no headings prepended)
-- **Empty `segment_order`**: fixture with `segment_order: []` → `manuscript.md` is written but empty (0 bytes or just whitespace)
-- **Ordering source-of-truth**: fixture with `segment_order: [SEG-3, SEG-1, SEG-2]` (out of numeric order on purpose) → output concatenates bodies in `segment_order` order, NOT in filesystem-listing order
-- **No record reads / no extraneous writes**: snapshot `records/` directory + `prompts/` directory mtimes before call; verify unchanged after; verify only `manuscript.md` was written (assert via `fs.readdirSync` diff before / after on `<manualStoryRoot>`)
+- determinism across repeated runs
+- `include_segment_titles: true`
+- `include_segment_titles: false`
+- empty `segment_order`
+- `segment_order` as the only ordering source
+- no record or prompt directory mutation and only `manuscript.md` added at the manual-story root
 
 ## Files to Touch
 
@@ -121,3 +88,22 @@ Per the existing test convention (`fs.cpSync` fixture manual story to temp dir; 
 
 1. `cd tools/manual-story-studio && npm run build:backend && node --test "dist/test/manuscript/compile.test.js"` — targeted compiler test
 2. `cd tools/manual-story-studio && npm test` — full pipeline verification
+
+## Outcome
+
+Completed: 2026-05-31
+
+Implemented the deterministic Manual Story Studio manuscript compiler and its focused test coverage. `compileManuscript` now compiles ordered segment Markdown into `manuscript.md`, optionally prepends sidecar titles, returns compile metrics, and writes only through the manual-story sandbox.
+
+No world canon, story bundles, hooks, validators, MCP, patch-engine, frontend, route, read-module, or segment-save flow surfaces changed.
+
+## Verification Result
+
+1. `npm run build:backend` from `tools/manual-story-studio` before source edits — PASS; baseline backend TypeScript compilation was green.
+2. `npm run build:backend` from `tools/manual-story-studio` after source edits — PASS; backend TypeScript compilation succeeded with the new compiler and test file.
+3. `node --test "dist/test/manuscript/compile.test.js"` from `tools/manual-story-studio` — PASS; 6 compiler tests passed.
+4. `npm test` from `tools/manual-story-studio` — PASS; backend build, 251 backend tests, and web typecheck completed successfully.
+
+## Deviations
+
+- The implementation takes a `ManualStoryRoot` from the existing SPEC-100 sandbox helper rather than a plain string path. This keeps the compiler's write boundary explicit and lets `safeWriteFile` enforce the manual-story sandbox for `manuscript.md`.
