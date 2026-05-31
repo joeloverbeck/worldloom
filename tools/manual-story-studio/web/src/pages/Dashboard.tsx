@@ -143,6 +143,34 @@ export function Dashboard() {
 
   return (
     <div className="manual-dashboard" style={{ display: "grid", gap: 12 }}>
+      <nav
+        aria-label="story-pages"
+        style={{ display: "flex", flexWrap: "wrap", gap: 12 }}
+      >
+        <Link to={`/worlds/${worldSlug}/manual-stories/${msSlug}/records`}>
+          Records
+        </Link>
+        <Link to={`/worlds/${worldSlug}/manual-stories/${msSlug}/cast`}>
+          Cast &amp; profiles
+        </Link>
+        <Link to={`/worlds/${worldSlug}/manual-stories/${msSlug}/manuscript`}>
+          Manuscript
+        </Link>
+        <Link
+          to={`/worlds/${worldSlug}/manual-stories/${msSlug}/beat-templates`}
+        >
+          Beat templates
+        </Link>
+        <Link
+          to={`/worlds/${worldSlug}/manual-stories/${msSlug}/prompt-history`}
+        >
+          Prompt history
+        </Link>
+        <Link to={`/worlds/${worldSlug}/manual-stories/${msSlug}/paste-prose`}>
+          Paste prose
+        </Link>
+      </nav>
+
       <section aria-label="story-contract">
         <h2>Story contract</h2>
         {metadata ? (
