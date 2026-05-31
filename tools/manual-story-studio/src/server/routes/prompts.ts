@@ -42,7 +42,14 @@ interface ComposeBody {
   moment_directive?: string;
   included_cast?: string[];
   included_records?: string[];
+  // SPEC-102 path-shaped internal composer input. Accepted directly for
+  // back-compat with the landed SPEC-102 callers.
   included_template_path?: string | null;
+  // SPEC-104 ID-shaped public API. The routes layer resolves the ID to
+  // <manualStoryRoot>/records/beat-templates/<id>.yaml and populates
+  // included_template_path internally. Mutually exclusive with
+  // included_template_path on a single request.
+  selected_template?: string | null;
 }
 
 interface SaveBody extends ComposeBody {
@@ -70,11 +77,23 @@ function badRequest(reply: FastifyReply, message: string): FastifyReply {
   return reply.code(400).send({ error: "invalid_input", message });
 }
 
+function resolveBeatTemplatePath(
+  manualStoryRoot: string,
+  templateId: string,
+): string {
+  return path.join(
+    manualStoryRoot,
+    "records",
+    "beat-templates",
+    `${templateId}.yaml`,
+  );
+}
+
 function buildComposeInput(
   root: ManualStoryRoot,
   repoRoot: string,
   body: ComposeBody,
-): PromptComposeInput | { error: string } {
+): PromptComposeInput | { error: string; code?: "not_found" } {
   if (
     !body ||
     typeof body !== "object" ||
@@ -91,8 +110,28 @@ function buildComposeInput(
       ? body.included_records
       : [],
   };
-  if (typeof body.included_template_path === "string") {
-    built.included_template_path = body.included_template_path;
+
+  const pathProvided =
+    typeof body.included_template_path === "string" &&
+    body.included_template_path.length > 0;
+  const idProvided =
+    typeof body.selected_template === "string" &&
+    body.selected_template.length > 0;
+  if (pathProvided && idProvided) {
+    return {
+      error:
+        "Pass exactly one of selected_template or included_template_path; both received",
+    };
+  }
+  if (pathProvided) {
+    built.included_template_path = body.included_template_path as string;
+  } else if (idProvided) {
+    const id = body.selected_template as string;
+    const resolved = resolveBeatTemplatePath(root.absolutePath, id);
+    if (!existsSync(resolved)) {
+      return { error: `Beat template ${id} not found`, code: "not_found" };
+    }
+    built.included_template_path = resolved;
   }
   return built;
 }
@@ -136,7 +175,12 @@ export async function registerPromptsReadRoutes(
       );
       if (!root) return reply.code(404).send({ error: "manual_story_not_found" });
       const built = buildComposeInput(root, options.repoRoot, request.body ?? {});
-      if ("error" in built) return badRequest(reply, built.error);
+      if ("error" in built) {
+        if (built.code === "not_found") {
+          return reply.code(404).send({ error: "template_not_found", message: built.error });
+        }
+        return badRequest(reply, built.error);
+      }
       const result = await composePrompt(built);
       return result;
     },
@@ -236,7 +280,12 @@ export async function registerPromptsWriteRoutes(
       if (!root) return reply.code(404).send({ error: "manual_story_not_found" });
       const body = (request.body ?? {}) as SaveBody;
       const built = buildComposeInput(root, options.repoRoot, body);
-      if ("error" in built) return badRequest(reply, built.error);
+      if ("error" in built) {
+        if (built.code === "not_found") {
+          return reply.code(404).send({ error: "template_not_found", message: built.error });
+        }
+        return badRequest(reply, built.error);
+      }
       const result: PromptComposeResult = await composePrompt(built);
       if (result.lint.blockingForCopy && !body.lint_override) {
         return reply.code(409).send({

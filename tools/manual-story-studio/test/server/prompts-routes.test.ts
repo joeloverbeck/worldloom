@@ -378,3 +378,138 @@ test("GET /prompts/:id returns markdown+sidecar; 404 for unknown id", async () =
     rmSync(repoRoot, { recursive: true, force: true });
   }
 });
+
+function seedBeatTemplate(root: ManualStoryRoot, id: string): string {
+  const body = {
+    id,
+    title: id,
+    active: true,
+    classification: {
+      move_family: "observation",
+      tags: [],
+      intensity: "general",
+      tone_fit: [],
+    },
+    role_slots: {},
+    requires: {
+      record_classes_any: [],
+      record_tags_any: [],
+      relationship_axes_any: [],
+      location_tags_any: [],
+    },
+    excludes: { record_tags_any: [], forbidden_if_secret_tags: [] },
+    beat_guidance: [{ function: "setup", instruction: "Beat" }],
+    forbidden_inventions: [],
+    author_notes: "",
+  };
+  const rel = `records/beat-templates/${id}.yaml`;
+  safeWriteFile(root, rel, YAML.stringify(body));
+  return path.join(root.absolutePath, rel);
+}
+
+test("POST /prompts/preview accepts selected_template ID and resolves to path", async () => {
+  const { repoRoot, worldSlug, msSlug, root } = mkWorld();
+  try {
+    seedBeatTemplate(root, "mtemplate-1");
+    const server = await createServer({ repoRoot });
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/prompts/preview`,
+        payload: {
+          moment_directive: "x",
+          included_cast: ["mchar-1"],
+          included_records: [],
+          selected_template: "mtemplate-1",
+        },
+      });
+      assert.equal(response.statusCode, 200);
+      const body = response.json() as { markdown: string };
+      // Section 6 should now carry the template body, not "(none selected)"
+      assert.ok(!body.markdown.includes("(none selected)"));
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("POST /prompts/preview accepts legacy included_template_path (back-compat)", async () => {
+  const { repoRoot, worldSlug, msSlug, root } = mkWorld();
+  try {
+    const fullPath = seedBeatTemplate(root, "mtemplate-2");
+    const server = await createServer({ repoRoot });
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/prompts/preview`,
+        payload: {
+          moment_directive: "x",
+          included_cast: ["mchar-1"],
+          included_records: [],
+          included_template_path: fullPath,
+        },
+      });
+      assert.equal(response.statusCode, 200);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("POST /prompts/preview rejects both selected_template AND included_template_path → 400", async () => {
+  const { repoRoot, worldSlug, msSlug, root } = mkWorld();
+  try {
+    const fullPath = seedBeatTemplate(root, "mtemplate-3");
+    const server = await createServer({ repoRoot });
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/prompts/preview`,
+        payload: {
+          moment_directive: "x",
+          included_cast: ["mchar-1"],
+          included_records: [],
+          selected_template: "mtemplate-3",
+          included_template_path: fullPath,
+        },
+      });
+      assert.equal(response.statusCode, 400);
+      const body = response.json() as { message: string };
+      assert.match(body.message, /exactly one/);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("POST /prompts/preview returns 404 when selected_template does not exist on disk", async () => {
+  const { repoRoot, worldSlug, msSlug } = mkWorld();
+  try {
+    const server = await createServer({ repoRoot });
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/prompts/preview`,
+        payload: {
+          moment_directive: "x",
+          included_cast: ["mchar-1"],
+          included_records: [],
+          selected_template: "mtemplate-99",
+        },
+      });
+      assert.equal(response.statusCode, 404);
+      const body = response.json() as { error: string };
+      assert.equal(body.error, "template_not_found");
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
