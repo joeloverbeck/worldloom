@@ -278,7 +278,7 @@ export function Dashboard() {
       <section aria-label="generate-prompt">
         <h2>Generate prompt</h2>
         <Link
-          to={`/worlds/${worldSlug}/manual-stories/${msSlug}/compose`}
+          to={`/worlds/${worldSlug}/manual-stories/${msSlug}/moment-composer`}
         >
           Open Moment Composer (SPEC-102)
         </Link>
