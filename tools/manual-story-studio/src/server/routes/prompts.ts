@@ -143,6 +143,15 @@ function snippet(text: string, maxLen = 120): string {
     : oneLine;
 }
 
+// Convert the stored absolute or repo-relative template path back to its
+// mtemplate-N id so PromptHistory can display the template the author
+// used without a second lookup.
+function deriveTemplateIdFromPath(p: string | null): string | null {
+  if (!p) return null;
+  const m = /(mtemplate-\d+)\.yaml$/.exec(p);
+  return m ? m[1] ?? null : null;
+}
+
 function linkedSegmentsByPrompt(manualStoryRoot: string): Map<string, string[]> {
   const byPrompt = new Map<string, string[]>();
   for (const segment of listSegments({ manualStoryRoot })) {
@@ -206,6 +215,7 @@ export async function registerPromptsReadRoutes(
         created_at: string;
         moment_directive_snippet: string;
         linked_segments: string[];
+        selected_template: string | null;
       }> = [];
       for (const name of entries) {
         if (!/^PROMPT-\d+\.yaml$/.test(name)) continue;
@@ -217,6 +227,9 @@ export async function registerPromptsReadRoutes(
             created_at: sidecar.created_at,
             moment_directive_snippet: snippet(sidecar.moment_directive ?? ""),
             linked_segments: linkedByPrompt.get(sidecar.id) ?? [],
+            selected_template: deriveTemplateIdFromPath(
+              sidecar.included_template_path ?? null,
+            ),
           });
         } catch {
           // skip malformed sidecars

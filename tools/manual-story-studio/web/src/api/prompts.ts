@@ -17,6 +17,10 @@ export interface PromptListEntry {
   created_at: string;
   moment_directive_snippet: string;
   linked_segments: string[];
+  // SPEC-104: derived `mtemplate-<integer>` id from the prompt sidecar's
+  // included_template_path (null if no template was selected). Surfaced
+  // by PromptHistory.tsx alongside the other per-prompt metadata.
+  selected_template: string | null;
 }
 
 export interface SavePromptResult {

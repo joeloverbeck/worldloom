@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { previewPrompt } from "../api/prompts.js";
 import { listRecords, readMetadata } from "../api/records.js";
+import { BeatTemplateCandidates } from "../components/BeatTemplateCandidates.js";
 import {
   MANUAL_RECORD_CLASSES,
   type ManualRecordClass,
@@ -48,6 +49,7 @@ export function MomentComposer() {
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!worldSlug || !msSlug) return;
@@ -131,11 +133,14 @@ export function MomentComposer() {
     setSubmitting(true);
     setError(null);
     try {
-      const composeInput = {
+      const composeInput: Parameters<typeof previewPrompt>[2] = {
         moment_directive: momentDirective,
         included_cast: includedCast,
         included_records: pinnedRecordIds,
       };
+      if (selectedTemplateId !== null) {
+        composeInput.selected_template = selectedTemplateId;
+      }
       const result = await previewPrompt(worldSlug, msSlug, composeInput);
       navigate(
         `/worlds/${worldSlug}/manual-stories/${msSlug}/prompts/preview`,
@@ -231,11 +236,18 @@ export function MomentComposer() {
         </div>
       </fieldset>
 
-      <fieldset aria-label="beat-template placeholder">
+      <fieldset aria-label="beat-template">
         <legend>Beat template</legend>
-        <p>
-          <em>Reserved for SPEC-104. No template selector in this iteration.</em>
-        </p>
+        <BeatTemplateCandidates
+          worldSlug={worldSlug}
+          msSlug={msSlug}
+          candidateInput={{
+            moment_directive: momentDirective,
+            selected_cast: includedCast,
+          }}
+          selectedTemplateId={selectedTemplateId}
+          onSelect={setSelectedTemplateId}
+        />
       </fieldset>
 
       <div>
