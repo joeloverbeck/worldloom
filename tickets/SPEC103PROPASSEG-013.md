@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/web/src/pages/Manuscript.tsx` (the full compiled-manuscript view with segment list sidebar and per-segment actions), `tools/manual-story-studio/web/src/components/SegmentListItem.tsx` (the sidebar list-item component), and `tools/manual-story-studio/web/src/api/manuscript.ts` (typed frontend client for the manuscript HTTP routes).
-**Deps**: 009, 011
+**Deps**: archive/tickets/SPEC103PROPASSEG-009.md, 011
 
 ## Problem
 

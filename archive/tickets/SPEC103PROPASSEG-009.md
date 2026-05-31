@@ -1,6 +1,6 @@
 # SPEC103PROPASSEG-009: Manuscript HTTP routes — GET manuscript + POST rebuild
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/server/routes/manuscript.ts` + paired test under `tools/manual-story-studio/test/server/manuscript-routes.test.ts`; modifies `tools/manual-story-studio/src/server/http.ts` to register the new routes (shared-file overlap with ticket 008's segments routes).
@@ -27,80 +27,24 @@ SPEC-103 §2 item 4 + §2 item 5 + §7 AC#4 require two manuscript HTTP endpoint
 2. POST /api/worlds/:slug/manual-stories/:msSlug/manuscript/rebuild invokes ticket 006's `compileManuscript`; returns 200 with `{ manuscript_path, segments_compiled, byte_count }` → route test
 3. POST /rebuild on a fixture with empty `segment_order` writes an empty `manuscript.md` (legitimate state per SPEC-103 §8 Risks) and returns 200 with `segments_compiled: 0` → route test
 
-## What to Change
+## Landed Changes
 
 ### 1. Create src/server/routes/manuscript.ts
 
-Implement `registerManuscriptReadRoute` (GET) and `registerManuscriptWriteRoute` (POST rebuild), following `tools/manual-story-studio/src/server/routes/prompts.ts:106-242` shape:
+Created `registerManuscriptReadRoute` and `registerManuscriptWriteRoute` in `tools/manual-story-studio/src/server/routes/manuscript.ts`.
 
-```typescript
-import type { FastifyInstance } from "fastify";
-import {
-  resolveManualStoryRoot,
-  type ManualStoryRoot,
-} from "../../write/sandbox.js"; // verify exact export at impl time
-import { readManuscript } from "../../read/manuscript.js";
-import { compileManuscript } from "../../manuscript/compile.js";
-
-export interface ManuscriptRouteOptions {
-  repoRoot: string;
-}
-
-export async function registerManuscriptReadRoute(
-  server: FastifyInstance,
-  options: ManuscriptRouteOptions,
-): Promise<void> {
-  server.get<{ Params: { slug: string; msSlug: string } }>(
-    "/api/worlds/:slug/manual-stories/:msSlug/manuscript",
-    async (request, reply) => {
-      // resolve root; readManuscript; return 200 + body or 404
-    },
-  );
-}
-
-export async function registerManuscriptWriteRoute(
-  server: FastifyInstance,
-  options: ManuscriptRouteOptions,
-): Promise<void> {
-  server.post<{ Params: { slug: string; msSlug: string } }>(
-    "/api/worlds/:slug/manual-stories/:msSlug/manuscript/rebuild",
-    async (request, reply) => {
-      // resolve root; compileManuscript; return 200 + result
-    },
-  );
-}
-```
+- `GET /api/worlds/:slug/manual-stories/:msSlug/manuscript` resolves the manual-story root, calls `readManuscript`, returns the manuscript body/count payload, and returns `{ error: "manuscript_not_found" }` when `manuscript.md` has not been compiled.
+- `POST /api/worlds/:slug/manual-stories/:msSlug/manuscript/rebuild` resolves the manual-story root, calls `compileManuscript`, and returns the compiler result.
 
 ### 2. Modify src/server/http.ts
 
-Add imports at the top:
-
-```typescript
-import {
-  registerManuscriptReadRoute,
-  registerManuscriptWriteRoute,
-} from "./routes/manuscript.js";
-```
-
-Inside `createServer`, after ticket 008's `registerSegmentsReadRoutes(server, ...)` call, add:
-
-```typescript
-await registerManuscriptReadRoute(server, { repoRoot: options.repoRoot });
-```
-
-Inside the `wrapRouterWritable` block, after ticket 008's `registerSegmentsWriteRoutes(...)` call, add:
-
-```typescript
-await registerManuscriptWriteRoute(writableRouter, {
-  repoRoot: options.repoRoot,
-});
-```
+Registered the GET route outside `wrapRouterWritable` and the POST rebuild route inside the existing `wrapRouterWritable` block after the segments routes.
 
 **Shared-file overlap with ticket 008**: tickets 008 + 009 each add their own pair of register calls at sibling positions in `createServer`. Implementers coordinate the line order (segments routes first, manuscript routes following the segments routes); conflicts are mechanical only.
 
 ### 3. Create test/server/manuscript-routes.test.ts
 
-Per the existing `test/server/prompts-routes.test.ts` pattern, cover:
+Added `tools/manual-story-studio/test/server/manuscript-routes.test.ts`, covering:
 
 - GET /manuscript on fixture with compiled `manuscript.md` → 200 + body + byte_count + word_count
 - GET /manuscript on fixture without `manuscript.md` → 404 + `{ error: "manuscript_not_found" }`
@@ -144,3 +88,19 @@ Per the existing `test/server/prompts-routes.test.ts` pattern, cover:
 
 1. `cd tools/manual-story-studio && npm run build:backend && node --test "dist/test/server/manuscript-routes.test.js"` — targeted manuscript-routes test
 2. `cd tools/manual-story-studio && npm test` — full pipeline verification
+
+## Outcome
+
+Completed: 2026-05-31
+
+The Manual Story Studio backend now exposes the SPEC-103 manuscript HTTP surface. `src/server/routes/manuscript.ts` adds the read and rebuild handlers, `src/server/http.ts` registers GET outside the write guard and POST rebuild inside `wrapRouterWritable`, and `test/server/manuscript-routes.test.ts` proves normal read, missing manuscript, non-empty rebuild, empty rebuild, and idempotent rebuild behavior.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run build:backend` — passed.
+2. `cd tools/manual-story-studio && node --test "dist/test/server/manuscript-routes.test.js"` — passed, 5/5 subtests.
+3. `cd tools/manual-story-studio && npm test` — passed; backend build, 268 backend tests, and web TypeScript check completed successfully.
+
+## Deviations
+
+None.
