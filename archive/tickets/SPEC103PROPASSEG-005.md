@@ -14,7 +14,7 @@ SPEC-103 §2 item 6 requires a State Update Checklist that lists 12 record class
 
 1. `MANUAL_RECORD_CLASSES` at `tools/manual-story-studio/src/schema/manual-story.ts` enumerates 18 classes. SPEC-103 §2 item 6 + §3 Key decisions specify the 12-class subset for the checklist (excluding `cast`, `entities`, `locations`, `facts`, `intentions`, `artifacts` — author-curated background per §3 Key decisions item 4 rationale). The existing record reader at `tools/manual-story-studio/src/read/records.ts` exports `listRecords(manualStoryRoot, recordClass, opts?)` for per-class summaries and `readRecord(manualStoryRoot, recordClass, id)` for the full `refs.characters` payload needed by the count.
 2. SPEC-103 §2 item 6 (12-class enumeration intent), §3 Key decisions item 4 (per-class exclusion rationale — included classes reflect state most likely to shift inside a beat cluster), §7 AC#6 ("State Update Checklist appears post-save, lists 12 review classes, never asserts state changed").
-3. Cross-skill boundary: the checklist payload's shape is consumed by ticket 004's save flow (returns it in the save response) and by ticket 012's StateUpdateChecklist frontend component (renders it). The 12-class list comes from a local constant in this module; per-class counts come from `tools/manual-story-studio/src/read/records.ts`'s per-class reader. The Records screen filter integration (per spec §2 item 6: each class has a "Review N records" button opening the Records screen filtered to that class with the involved cast pre-filtered) lives in ticket 012; this module produces only the typed payload, not the navigation handlers.
+3. Cross-skill boundary: the checklist payload's shape is consumed by ticket 004's save flow (returns it in the save response) and by `archive/tickets/SPEC103PROPASSEG-012.md`'s StateUpdateChecklist frontend component (renders it). The 12-class list comes from a local constant in this module; per-class counts come from `tools/manual-story-studio/src/read/records.ts`'s per-class reader. The Records screen filter integration (per spec §2 item 6: each class has a "Review N records" button opening the Records screen filtered to that class with the involved cast pre-filtered) lives in `archive/tickets/SPEC103PROPASSEG-012.md`; this module produces only the typed payload, not the navigation handlers.
 
 ## Architecture Check
 
@@ -57,9 +57,9 @@ The new test file covers:
 
 ## Out of Scope
 
-- Frontend rendering of the checklist (covered by ticket 012 — StateUpdateChecklist component)
+- Frontend rendering of the checklist (covered by `archive/tickets/SPEC103PROPASSEG-012.md` — StateUpdateChecklist component)
 - Save flow returning the payload in HTTP responses (covered by ticket 004 + ticket 008 — save calls this module and HTTP route returns the payload)
-- Records screen filter integration via "Review N records" buttons (covered by ticket 012; the navigation is button-driven from the rendered checklist; this module produces only the typed payload)
+- Records screen filter integration via "Review N records" buttons (covered by `archive/tickets/SPEC103PROPASSEG-012.md`; the navigation is button-driven from the rendered checklist; this module produces only the typed payload)
 - Persistent checklist log (which classes the author actually reviewed) — M6 deferral per SPEC-103 §2 Out of scope
 
 ## Acceptance Criteria

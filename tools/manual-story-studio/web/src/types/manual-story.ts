@@ -116,6 +116,19 @@ export interface SegmentSidecar {
   word_count: number;
 }
 
+export interface StateUpdateChecklistEntry {
+  record_class: ManualRecordClass;
+  total_records: number;
+  cast_referencing_count: number;
+}
+
+export interface StateUpdateChecklistPayload {
+  segment_id: string;
+  involved_cast: string[];
+  entries: StateUpdateChecklistEntry[];
+  disclaimer: string;
+}
+
 export type ManualStoryRole =
   | "viewpoint"
   | "primary_actor"

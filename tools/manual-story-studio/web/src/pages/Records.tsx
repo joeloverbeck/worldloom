@@ -35,10 +35,12 @@ export function Records() {
       ? (searchParams.get("class") as ManualRecordClass)
       : "cast";
   const initialId = searchParams.get("id");
+  const castFilter = searchParams.get("cast") ?? "";
 
   const [activeClass, setActiveClass] = useState<ManualRecordClass>(initialClass);
   const [includeArchived, setIncludeArchived] = useState(false);
   const [summaries, setSummaries] = useState<ManualRecordSummary[]>([]);
+  const [castFilteredIds, setCastFilteredIds] = useState<Set<string> | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(initialId);
   const [selectedRecord, setSelectedRecord] = useState<ManualRecord | null>(
     null,
@@ -50,13 +52,22 @@ export function Records() {
   const [tagFilter, setTagFilter] = useState("");
   const [importanceFilter, setImportanceFilter] = useState<string[]>([]);
   const [deleteOutcome, setDeleteOutcome] = useState<DeleteResult | null>(null);
+  const castFilterIds = useMemo(
+    () =>
+      castFilter
+        .split(",")
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0),
+    [castFilter],
+  );
 
   // Sync URL
   useEffect(() => {
     const next: Record<string, string> = { class: activeClass };
     if (selectedId) next.id = selectedId;
+    if (castFilterIds.length > 0) next.cast = castFilterIds.join(",");
     setSearchParams(next, { replace: true });
-  }, [activeClass, selectedId, setSearchParams]);
+  }, [activeClass, selectedId, castFilterIds, setSearchParams]);
 
   // Load list
   useEffect(() => {
@@ -73,6 +84,36 @@ export function Records() {
       cancelled = true;
     };
   }, [worldSlug, msSlug, activeClass, includeArchived, deleteOutcome, saveError]);
+
+  // Apply optional checklist-origin cast prefilter from ?cast=mchar-1,mchar-2.
+  useEffect(() => {
+    if (!worldSlug || !msSlug || castFilterIds.length === 0) {
+      setCastFilteredIds(null);
+      return;
+    }
+
+    let cancelled = false;
+    const castSet = new Set(castFilterIds);
+    Promise.all(
+      summaries.map(async (summary) => {
+        const record = await apiRead(worldSlug, msSlug, activeClass, summary.id);
+        const matches =
+          record?.refs.characters.some((id) => castSet.has(id)) ?? false;
+        return matches ? summary.id : null;
+      }),
+    )
+      .then((ids) => {
+        if (!cancelled) {
+          setCastFilteredIds(new Set(ids.filter((id): id is string => id != null)));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCastFilteredIds(new Set());
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [worldSlug, msSlug, activeClass, summaries, castFilterIds]);
 
   // Load detail when selected
   useEffect(() => {
@@ -104,9 +145,12 @@ export function Records() {
       ) {
         return false;
       }
+      if (castFilteredIds && !castFilteredIds.has(s.id)) {
+        return false;
+      }
       return true;
     });
-  }, [summaries, tagFilter, importanceFilter]);
+  }, [summaries, tagFilter, importanceFilter, castFilteredIds]);
 
   async function handleSave(
     record: ManualRecord,
@@ -235,6 +279,19 @@ export function Records() {
             value={tagFilter}
             onChange={(e) => setTagFilter(e.target.value)}
           />
+          {castFilterIds.length > 0 ? (
+            <span
+              aria-label="cast-filter"
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: 4,
+                padding: "2px 6px",
+                fontSize: 12,
+              }}
+            >
+              cast: {castFilterIds.join(", ")}
+            </span>
+          ) : null}
           <fieldset style={{ display: "flex", gap: 4, border: "none", padding: 0 }}>
             {(["low", "medium", "high", "central"] as const).map((imp) => (
               <label key={imp}>
