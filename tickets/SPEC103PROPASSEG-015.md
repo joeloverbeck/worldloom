@@ -4,17 +4,17 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/web/src/App.tsx` to register three new page routes (`/paste-prose`, `/manuscript`, `/prompt-history` under the existing `/worlds/:worldSlug/manual-stories/:msSlug/` prefix); modifies `tools/manual-story-studio/web/src/pages/Dashboard.tsx` to replace two SPEC-103 placeholders (Latest segment + Manuscript word count) with real wiring to the segments + manuscript API clients.
-**Deps**: archive/tickets/SPEC103PROPASSEG-011.md, archive/tickets/SPEC103PROPASSEG-013.md, 014
+**Deps**: archive/tickets/SPEC103PROPASSEG-011.md, archive/tickets/SPEC103PROPASSEG-013.md, archive/tickets/SPEC103PROPASSEG-014.md
 
 ## Problem
 
-SPEC-103 §4 Modify enumerates `web/src/App.tsx` (add three new routes — refined per the reassessment M2 finding to use full `/worlds/:worldSlug/manual-stories/:msSlug/` prefix consistent with the existing route shape at App.tsx:34-61) and `web/src/pages/Dashboard.tsx` (wire the manuscript word count widget — extended at reassessment time to also wire the Latest segment widget, since Dashboard.tsx already carries two SPEC-103 placeholders at L218 and L223 per existing code: `<div>Wired in SPEC-103</div>` for Latest segment and the same for Manuscript word count). This ticket is the final UI integration — the routes light up the three new pages from `archive/tickets/SPEC103PROPASSEG-011.md`, `archive/tickets/SPEC103PROPASSEG-013.md`, and ticket 014, and Dashboard becomes a real dashboard with live segment + manuscript metrics rather than placeholders.
+SPEC-103 §4 Modify enumerates `web/src/App.tsx` (add three new routes — refined per the reassessment M2 finding to use full `/worlds/:worldSlug/manual-stories/:msSlug/` prefix consistent with the existing route shape at App.tsx:34-61) and `web/src/pages/Dashboard.tsx` (wire the manuscript word count widget — extended at reassessment time to also wire the Latest segment widget, since Dashboard.tsx already carries two SPEC-103 placeholders at L218 and L223 per existing code: `<div>Wired in SPEC-103</div>` for Latest segment and the same for Manuscript word count). This ticket is the final UI integration — the routes light up the three new pages from `archive/tickets/SPEC103PROPASSEG-011.md`, `archive/tickets/SPEC103PROPASSEG-013.md`, and `archive/tickets/SPEC103PROPASSEG-014.md`, and Dashboard becomes a real dashboard with live segment + manuscript metrics rather than placeholders.
 
 ## Assumption Reassessment (2026-05-31)
 
 1. Existing `tools/manual-story-studio/web/src/App.tsx:34-61` registers all routes under the `/worlds/:worldSlug/manual-stories/:msSlug/` prefix (e.g., `.../dashboard`, `.../records`, `.../cast`, `.../moment-composer`, `.../prompts/preview`). The three new routes follow the same prefix per reassessment M2 finding. Existing `tools/manual-story-studio/web/src/pages/Dashboard.tsx:217-224` has two `<div>Wired in SPEC-103</div>` placeholders inside `<section aria-label="latest-segment">` (L217) and `<section aria-label="manuscript-word-count">` (L221) — these are the exact replace targets.
 2. SPEC-103 §4 Modify (App.tsx route additions + Dashboard.tsx wiring), §3 Key decisions item 7 (Manuscript view's segment list comes from `segment_order`), §7 AC#9 (Manuscript view shows word count summary).
-3. Cross-skill boundary: App.tsx modification imports `archive/tickets/SPEC103PROPASSEG-011.md`'s PasteProse, `archive/tickets/SPEC103PROPASSEG-013.md`'s Manuscript, and ticket 014's PromptHistory pages — all three pages must exist before this ticket compiles. Dashboard.tsx modification imports `archive/tickets/SPEC103PROPASSEG-011.md`'s `web/src/api/segments.ts` (`listSegments` or equivalent to get the latest segment) and `archive/tickets/SPEC103PROPASSEG-013.md`'s `web/src/api/manuscript.ts` (`readManuscript` to get the word count) — both API clients must exist.
+3. Cross-skill boundary: App.tsx modification imports `archive/tickets/SPEC103PROPASSEG-011.md`'s PasteProse, `archive/tickets/SPEC103PROPASSEG-013.md`'s Manuscript, and `archive/tickets/SPEC103PROPASSEG-014.md`'s PromptHistory pages — all three pages must exist before this ticket compiles. Dashboard.tsx modification imports `archive/tickets/SPEC103PROPASSEG-011.md`'s `web/src/api/segments.ts` (`listSegments` or equivalent to get the latest segment) and `archive/tickets/SPEC103PROPASSEG-013.md`'s `web/src/api/manuscript.ts` (`readManuscript` to get the word count) — both API clients must exist.
 
 ## Architecture Check
 
@@ -80,7 +80,7 @@ The existing Dashboard sections (story-contract, directive-draft, active-cast, h
 
 ## Out of Scope
 
-- The three new pages themselves (covered by `archive/tickets/SPEC103PROPASSEG-011.md`, `archive/tickets/SPEC103PROPASSEG-013.md`, 014)
+- The three new pages themselves (covered by `archive/tickets/SPEC103PROPASSEG-011.md`, `archive/tickets/SPEC103PROPASSEG-013.md`, `archive/tickets/SPEC103PROPASSEG-014.md`)
 - The segments + manuscript API clients (covered by `archive/tickets/SPEC103PROPASSEG-011.md`, `archive/tickets/SPEC103PROPASSEG-013.md`)
 - Any other Dashboard section (story-contract, directive-draft, active-cast, high-importance, open-tracking, generate-prompt all unchanged)
 - The Moment Composer link from Dashboard (existing SPEC-102 wiring at L229-233; preserved as-is)

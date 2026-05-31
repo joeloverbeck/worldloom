@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { previewPrompt } from "../api/prompts.js";
 import { listRecords, readMetadata } from "../api/records.js";
@@ -17,20 +17,35 @@ interface RecordWithClass {
   summary: ManualRecordSummary;
 }
 
+interface ComposerNavState {
+  moment_directive?: string;
+  included_cast?: string[];
+  included_records?: string[];
+  focusHint?: "directive" | "cast" | "records" | "template";
+}
+
 export function MomentComposer() {
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
     msSlug: string;
   }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const navState = (location.state ?? {}) as ComposerNavState;
 
   const [metadata, setMetadata] = useState<ManualStoryMetadata | null>(null);
   const [allCast, setAllCast] = useState<ManualRecordSummary[]>([]);
   const [allRecords, setAllRecords] = useState<RecordWithClass[]>([]);
 
-  const [momentDirective, setMomentDirective] = useState("");
-  const [includedCast, setIncludedCast] = useState<string[]>([]);
-  const [pinnedRecordIds, setPinnedRecordIds] = useState<string[]>([]);
+  const [momentDirective, setMomentDirective] = useState(
+    navState.moment_directive ?? "",
+  );
+  const [includedCast, setIncludedCast] = useState<string[]>(
+    navState.included_cast ?? [],
+  );
+  const [pinnedRecordIds, setPinnedRecordIds] = useState<string[]>(
+    navState.included_records ?? [],
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +57,9 @@ export function MomentComposer() {
         if (cancelled || !m) return;
         setMetadata(m);
         // Default involved cast = cast_order from metadata.
-        setIncludedCast(m.cast_order ?? []);
+        if (!navState.included_cast) {
+          setIncludedCast(m.cast_order ?? []);
+        }
       })
       .catch(() => {});
     listRecords(worldSlug, msSlug, "cast")
