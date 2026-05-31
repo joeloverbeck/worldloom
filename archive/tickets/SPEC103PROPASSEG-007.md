@@ -1,6 +1,6 @@
 # SPEC103PROPASSEG-007: Read modules — segments + manuscript
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/read/segments.ts` and `tools/manual-story-studio/src/read/manuscript.ts` under the existing `src/read/` directory.
@@ -28,85 +28,21 @@ SPEC-103 §4 Create enumerates two read modules: `src/read/segments.ts` (list se
 3. `read/segments.ts` exports `readSegmentBody` reading a single segment's prose body string or returning `null` → covered by ticket 008's segments-routes test
 4. `read/manuscript.ts` exports `readManuscript` reading the compiled `manuscript.md` body string + metrics or returning `null` for missing → covered by ticket 009's manuscript-routes test
 
-## What to Change
+## Landed Changes
 
-### 1. Create src/read/segments.ts
+### 1. Created src/read/segments.ts
 
-In `tools/manual-story-studio/src/read/segments.ts`, implement:
+Added `tools/manual-story-studio/src/read/segments.ts` with:
 
-```typescript
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import path from "node:path";
-import YAML from "yaml";
+- `listSegments({ manualStoryRoot })`: scans `segments/SEG-<n>.yaml`, parses valid sidecars, returns `{ id, title, created_at, updated_at, word_count }` entries sorted by numeric `SEG-N` suffix.
+- `readSegmentSidecar({ manualStoryRoot, segmentId })`: returns the parsed `SegmentSidecar` for a valid `SEG-N` id or `null` when the id/file is missing or unreadable.
+- `readSegmentBody({ manualStoryRoot, segmentId })`: returns the segment Markdown body for a valid `SEG-N` id or `null` when the id/file is missing or unreadable.
 
-import type { SegmentSidecar } from "../schema/manual-story.js";
+The module imports only read APIs from `node:fs` and the YAML parser; it performs no writes.
 
-export interface ListSegmentsOptions {
-  manualStoryRoot: string;
-}
+### 2. Created src/read/manuscript.ts
 
-export interface SegmentListEntry {
-  id: string;
-  title: string;
-  created_at: string;
-  updated_at: string;
-  word_count: number;
-}
-
-export function listSegments(options: ListSegmentsOptions): SegmentListEntry[] {
-  // Scan <manualStoryRoot>/segments/SEG-<n>.yaml; parse each sidecar;
-  // return summary list sorted by numeric suffix (SEG-1, SEG-2, ..., SEG-10, ...).
-  // Use numeric sort, not lexicographic (so SEG-10 follows SEG-9, not SEG-1).
-  // Returns empty array if segments/ doesn't exist.
-}
-
-export interface ReadSegmentOptions {
-  manualStoryRoot: string;
-  segmentId: string; // SEG-<integer>
-}
-
-export function readSegmentSidecar(
-  options: ReadSegmentOptions,
-): SegmentSidecar | null {
-  // Read <manualStoryRoot>/segments/<segmentId>.yaml and parse to SegmentSidecar.
-  // Return null if file doesn't exist.
-}
-
-export function readSegmentBody(
-  options: ReadSegmentOptions,
-): string | null {
-  // Read <manualStoryRoot>/segments/<segmentId>.md and return body string.
-  // Return null if file doesn't exist.
-}
-```
-
-### 2. Create src/read/manuscript.ts
-
-In `tools/manual-story-studio/src/read/manuscript.ts`, implement:
-
-```typescript
-import { existsSync, readFileSync, statSync } from "node:fs";
-import path from "node:path";
-
-export interface ReadManuscriptOptions {
-  manualStoryRoot: string;
-}
-
-export interface ManuscriptReadResult {
-  manuscript_path: string;
-  body: string;
-  byte_count: number;
-  word_count: number; // computed from body via whitespace split; advisory per SPEC-103 §3 Key decisions
-}
-
-export function readManuscript(
-  options: ReadManuscriptOptions,
-): ManuscriptReadResult | null {
-  // Read <manualStoryRoot>/manuscript.md; return null if file doesn't exist
-  // (legitimate state per SPEC-103 §8 Risks — first-rebuild on empty segment_order
-  // writes empty manuscript.md; a never-compiled manual story has no manuscript).
-}
-```
+Added `tools/manual-story-studio/src/read/manuscript.ts` with `readManuscript({ manualStoryRoot })`, returning `{ manuscript_path, body, byte_count, word_count }` for `manuscript.md` or `null` when the file is not yet compiled or cannot be read. `word_count` uses the same advisory whitespace-split semantics as the SPEC-103 segment/manuscript surface.
 
 ## Files to Touch
 
@@ -143,3 +79,17 @@ export function readManuscript(
 
 1. `cd tools/manual-story-studio && npm run build:backend` — type-check the new modules
 2. `cd tools/manual-story-studio && npm test` — full pipeline verification (read modules exercised indirectly via 008 + 009 tests once those land)
+
+## Outcome
+
+Completed 2026-05-31. Added the SPEC-103 read helpers for segment sidecars/prose bodies and compiled manuscript display. The implementation keeps the ticket's read-only invariant: both new modules import only `existsSync`, `readdirSync`, `readFileSync`, and `statSync` from `node:fs`; no write APIs are present.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run build:backend` — PASS; backend TypeScript compilation succeeded with the new read modules.
+2. `cd tools/manual-story-studio && npm test` — PASS; backend build succeeded, `node --test "dist/test/**/*.test.js"` reported 258 passing subtests, and `npm --prefix web test` completed successfully.
+3. Manual review of `tools/manual-story-studio/src/read/segments.ts` and `tools/manual-story-studio/src/read/manuscript.ts` — PASS; missing segment/manuscript files return `null`, list ordering is numeric by `SEG-N` suffix, and the modules do not import write-capable `fs` APIs.
+
+## Deviations
+
+- Dedicated read-module unit tests were not added, matching the ticket's original out-of-scope boundary. The modules are type-checked now and will be exercised transitively by the route tests in tickets 008 and 009.

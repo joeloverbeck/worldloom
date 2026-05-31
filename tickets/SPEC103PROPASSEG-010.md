@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — extends `tools/manual-story-studio/src/server/routes/prompts.ts` `GET /prompts` listing response to include `linked_segments: string[]`; extends `tools/manual-story-studio/test/server/prompts-routes.test.ts` with linked-segments coverage; extends `tools/manual-story-studio/web/src/api/prompts.ts` to type the new field on the client side.
-**Deps**: 007
+**Deps**: archive/tickets/SPEC103PROPASSEG-007.md
 
 ## Problem
 

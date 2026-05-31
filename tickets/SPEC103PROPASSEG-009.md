@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/server/routes/manuscript.ts` + paired test under `tools/manual-story-studio/test/server/manuscript-routes.test.ts`; modifies `tools/manual-story-studio/src/server/http.ts` to register the new routes (shared-file overlap with ticket 008's segments routes).
-**Deps**: archive/tickets/SPEC103PROPASSEG-006.md, tickets/SPEC103PROPASSEG-007.md
+**Deps**: archive/tickets/SPEC103PROPASSEG-006.md, archive/tickets/SPEC103PROPASSEG-007.md
 
 ## Problem
 

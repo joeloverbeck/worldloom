@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/server/routes/segments.ts` + paired test under `tools/manual-story-studio/test/server/segments-routes.test.ts`; modifies `tools/manual-story-studio/src/server/http.ts` to register the new routes (split between read and write registration sites per the existing convention).
-**Deps**: archive/tickets/SPEC103PROPASSEG-004.md, 007
+**Deps**: archive/tickets/SPEC103PROPASSEG-004.md, archive/tickets/SPEC103PROPASSEG-007.md
 
 ## Problem
 
