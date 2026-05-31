@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/manuscript/compile.ts` + paired test under `tools/manual-story-studio/test/manuscript/compile.test.ts`. Introduces a new `src/manuscript/` subdirectory under the manual-story-studio package.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC103PROPASSEG-001.md
 
 ## Problem
 

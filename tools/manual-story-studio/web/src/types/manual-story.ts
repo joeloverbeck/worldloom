@@ -79,6 +79,7 @@ export interface ManualStoryPromptPolicy {
 export interface ManualStoryManuscriptPolicy {
   compile_on_segment_save: boolean;
   include_segment_titles: boolean;
+  allow_reorder: boolean;
 }
 
 export interface ManualStoryMetadata {
@@ -94,6 +95,25 @@ export interface ManualStoryMetadata {
   segment_order: string[];
   prompt_policy: ManualStoryPromptPolicy;
   manuscript: ManualStoryManuscriptPolicy;
+}
+
+export interface SegmentSidecarIncludedRecordSummary {
+  characters: string[];
+  records: string[];
+}
+
+export interface SegmentSidecar {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  prompt_id: string | null;
+  prompt_sha256: string | null;
+  moment_directive: string;
+  selected_template: string | null;
+  included_record_summary: SegmentSidecarIncludedRecordSummary;
+  author_note: string;
+  word_count: number;
 }
 
 export type ManualStoryRole =

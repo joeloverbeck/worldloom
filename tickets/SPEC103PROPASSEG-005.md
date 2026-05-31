@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/state-update-checklist.ts` (pure-function module at package root) + paired test under `tools/manual-story-studio/test/state-update-checklist.test.ts`.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC103PROPASSEG-001.md
 
 ## Problem
 

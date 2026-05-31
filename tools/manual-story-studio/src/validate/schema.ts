@@ -532,10 +532,11 @@ const PROMPT_POLICY_SCHEMA: SchemaDef = {
 };
 
 const MANUSCRIPT_POLICY_SCHEMA: SchemaDef = {
-  required: ["compile_on_segment_save", "include_segment_titles"],
+  required: ["compile_on_segment_save", "include_segment_titles", "allow_reorder"],
   scalars: {
     compile_on_segment_save: "boolean",
     include_segment_titles: "boolean",
+    allow_reorder: "boolean",
   },
 };
 

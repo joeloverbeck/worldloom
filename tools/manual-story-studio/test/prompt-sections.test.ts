@@ -86,6 +86,7 @@ function baseMetadata(
     manuscript: {
       compile_on_segment_save: false,
       include_segment_titles: true,
+      allow_reorder: false,
     },
     ...overrides,
   };

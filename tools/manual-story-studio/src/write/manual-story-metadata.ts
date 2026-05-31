@@ -83,6 +83,7 @@ export function makeDefaultManualStoryMetadata(
     manuscript: {
       compile_on_segment_save: true,
       include_segment_titles: false,
+      allow_reorder: false,
     },
   };
 }

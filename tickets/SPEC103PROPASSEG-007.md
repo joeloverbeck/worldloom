@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/read/segments.ts` and `tools/manual-story-studio/src/read/manuscript.ts` under the existing `src/read/` directory.
-**Deps**: 001
+**Deps**: archive/tickets/SPEC103PROPASSEG-001.md
 
 ## Problem
 

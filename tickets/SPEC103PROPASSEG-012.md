@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `tools/manual-story-studio/web/src/components/StateUpdateChecklist.tsx` (the post-save modal component rendering ticket 005's typed checklist payload).
-**Deps**: 001
+**Deps**: archive/tickets/SPEC103PROPASSEG-001.md
 
 ## Problem
 
