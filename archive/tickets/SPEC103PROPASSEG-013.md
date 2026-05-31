@@ -1,6 +1,6 @@
 # SPEC103PROPASSEG-013: Manuscript page + SegmentListItem component + manuscript API client
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/web/src/pages/Manuscript.tsx` (the full compiled-manuscript view with segment list sidebar and per-segment actions), `tools/manual-story-studio/web/src/components/SegmentListItem.tsx` (the sidebar list-item component), and `tools/manual-story-studio/web/src/api/manuscript.ts` (typed frontend client for the manuscript HTTP routes).
@@ -23,19 +23,19 @@ SPEC-103 §2 item 7 specifies the Manuscript view: full compiled `manuscript.md`
 
 ## Verification Layers
 
-1. Manuscript page fetches manuscript body via `GET /manuscript` on mount; renders empty state when 404 returned → manual smoke check + component test
-2. Segment list sidebar renders entries from `listSegments` in order; each entry shows title + word count → component test (SegmentListItem props rendering)
-3. Per-segment Edit button navigates to `/paste-prose?edit=SEG-<n>` → component test (router navigation mock)
-4. Per-segment Delete button calls DELETE /segments/:id via ticket 011's API client; on confirmation prompt for referenced segments (per `archive/tickets/SPEC103PROPASSEG-004.md`'s hybrid response with non-empty `referrers`), surface the warning and offer `?force=true` retry → component test
-5. Rebuild Manuscript button calls POST /manuscript/rebuild; on success, re-fetches manuscript body → component test
-6. `manuscript.allow_reorder: false` (MVP default per ticket 001): Reorder UI is hidden — no drag handles, no reorder buttons → component test
-7. Word count summary shows per-segment word counts (from sidecars via `listSegments`) + total (sum of per-segment counts) → component test
+1. Manuscript page fetches manuscript body via `GET /manuscript` on mount; renders empty state when 404 returned → web TypeScript build + manual review
+2. Segment list sidebar renders entries from `listSegments` in order; each entry shows title + word count → web TypeScript build + manual review
+3. Per-segment Edit button navigates to `/paste-prose?edit=SEG-<n>` → web TypeScript build + manual review
+4. Per-segment Delete button calls DELETE /segments/:id via ticket 011's API client; on confirmation prompt for referenced segments (per `archive/tickets/SPEC103PROPASSEG-004.md`'s hybrid response with non-empty `referrers`), surface the warning and offer `?force=true` retry → web TypeScript build + manual review
+5. Rebuild Manuscript button calls POST /manuscript/rebuild; on success, re-fetches manuscript body → web TypeScript build + manual review
+6. `manuscript.allow_reorder: false` (MVP default per ticket 001): Reorder UI is hidden — no drag handles, no reorder buttons → web TypeScript build + manual review
+7. Word count summary shows per-segment word counts (from sidecars via `listSegments`) + total (sum of per-segment counts) → web TypeScript build + manual review
 
-## What to Change
+## Landed Changes
 
-### 1. Create web/src/api/manuscript.ts
+### 1. Created web/src/api/manuscript.ts
 
-In `tools/manual-story-studio/web/src/api/manuscript.ts`, implement the typed client per the existing `web/src/api/prompts.ts` pattern:
+`tools/manual-story-studio/web/src/api/manuscript.ts` now implements the typed client per the existing `web/src/api/prompts.ts` pattern:
 
 ```typescript
 export interface ManuscriptResponse {
@@ -48,7 +48,7 @@ export interface ManuscriptResponse {
 export async function readManuscript(
   worldSlug: string,
   msSlug: string,
-): Promise<ManuscriptResponse | null> { /* GET /manuscript; return null on 404 */ }
+): Promise<ManuscriptResponse | null> { /* GET /manuscript; returns null on 404 */ }
 
 export interface RebuildManuscriptResponse {
   manuscript_path: string;
@@ -62,39 +62,38 @@ export async function rebuildManuscript(
 ): Promise<RebuildManuscriptResponse> { /* POST /manuscript/rebuild */ }
 ```
 
-### 2. Create web/src/components/SegmentListItem.tsx
+### 2. Created web/src/components/SegmentListItem.tsx
 
-Implement as a typed-props pure presentational component:
+`tools/manual-story-studio/web/src/components/SegmentListItem.tsx` is a typed-props presentational component:
 
 ```typescript
-import { Link } from "react-router-dom";
-
 export interface SegmentListItemProps {
   segmentId: string;
   title: string;
   wordCount: number;
+  selected?: boolean;
+  onSelect?: (segmentId: string) => void;
   onEdit: (segmentId: string) => void;
   onDelete: (segmentId: string) => void;
-  // Reorder props omitted in MVP — wired in M6
 }
 
 export function SegmentListItem(props: SegmentListItemProps) {
-  // Render: title + word count + Edit + Delete buttons
+  // Renders title, SEG id, word count, Edit, and Delete.
 }
 ```
 
-### 3. Create web/src/pages/Manuscript.tsx
+### 3. Created web/src/pages/Manuscript.tsx
 
-Implement the page per SPEC-103 §2 item 7's surface enumeration:
+`tools/manual-story-studio/web/src/pages/Manuscript.tsx` implements SPEC-103 §2 item 7's surface enumeration:
 
-- React functional component using `useParams<{ worldSlug; msSlug }>()` + `useState` for manuscript body / segment list / metadata (for `allow_reorder` flag) + `useEffect` to fetch all three on mount
-- Layout: sidebar (left) with SegmentListItem entries; main area (right) renders manuscript body as Markdown (use existing `react-markdown` or similar — verify the package's web dependencies for a Markdown renderer at implementation time; otherwise use a `<pre>` block as MVP fallback)
+- React functional component using `useParams<{ worldSlug; msSlug }>()` + `useState` for manuscript body / segment list / metadata (`allow_reorder`) + `useEffect` to fetch all three on mount.
+- Layout: sidebar with `SegmentListItem` entries and main area rendering the compiled manuscript body in a `<pre>` block. The package has no Markdown renderer dependency, so the MVP fallback path from reassessment is the landed implementation.
 - Edit handler: navigate to `/worlds/${worldSlug}/manual-stories/${msSlug}/paste-prose?edit=${segmentId}`
 - Delete handler: call ticket 011's `deleteSegment(worldSlug, msSlug, segmentId)`; if response `outcome === "segment_order_removed_files_preserved"`, surface warning + prompt for force-delete via `deleteSegment(..., { force: true })`
 - Rebuild handler: call `rebuildManuscript`, then re-call `readManuscript` to refresh the body
 - Word count summary: per-segment (from sidebar entries' `wordCount`) + total (sum)
 - "Open in Editor" hint: render the manuscript_path as a copyable display string
-- Reorder UI: hidden when `metadata.manuscript.allow_reorder === false` (MVP default per ticket 001); when M6 lands and the flag flips, the Reorder UI activates — this ticket's contract is the gate, not the M6 UI
+- Reorder UI: hidden when `metadata.manuscript.allow_reorder === false` (MVP default per ticket 001); full reorder controls remain M6 scope.
 
 ## Files to Touch
 
@@ -115,9 +114,9 @@ Implement the page per SPEC-103 §2 item 7's surface enumeration:
 
 ### Tests That Must Pass
 
-1. `cd tools/manual-story-studio && npm --prefix web install --no-audit --no-fund && npm --prefix web run build` — web bundle builds with the new page + component + API client
-2. `cd tools/manual-story-studio && npm test` — full suite green (frontend test coverage exercised under `npm --prefix web test`)
-3. Manual smoke check after ticket 015 lands: navigate to `/worlds/<slug>/manual-stories/<msSlug>/manuscript` after saving ≥1 segment → page renders compiled manuscript body + segment list sidebar + per-segment Edit/Delete buttons + Rebuild button + word count summary
+1. `cd tools/manual-story-studio && npm --prefix web run build` — web bundle builds with the new page + component + API client.
+2. `cd tools/manual-story-studio && npm test` — full suite green (frontend type-check exercised under `npm --prefix web test`).
+3. Manual smoke check after ticket 015 lands: navigate to `/worlds/<slug>/manual-stories/<msSlug>/manuscript` after saving ≥1 segment → page renders compiled manuscript body + segment list sidebar + per-segment Edit/Delete buttons + Rebuild button + word count summary.
 
 ### Invariants
 
@@ -129,10 +128,24 @@ Implement the page per SPEC-103 §2 item 7's surface enumeration:
 
 ### New/Modified Tests
 
-1. `tools/manual-story-studio/web/src/components/SegmentListItem.tsx` — component test (if web test framework exists) covering typed-props rendering + Edit/Delete callback dispatch.
-2. `tools/manual-story-studio/web/src/pages/Manuscript.tsx` — component test (if web test framework exists) covering mount fetch + per-button handlers + reorder-gate visibility. If no web component test framework exists at this package's existing convention, defer to ticket 016 capstone for end-to-end coverage.
+1. None — this package currently has no React component test harness. `SegmentListItem`, `Manuscript`, and the manuscript API client are covered by TypeScript web build now and ticket 016's capstone after route registration.
 
 ### Commands
 
 1. `cd tools/manual-story-studio && npm --prefix web run build` — web bundle build (TypeScript type-check)
-2. `cd tools/manual-story-studio && npm test` — full pipeline verification (includes web build + any web component tests + backend tests)
+2. `cd tools/manual-story-studio && npm test` — full pipeline verification (backend tests + web TypeScript check)
+
+## Outcome
+
+Completed 2026-05-31. Added the manuscript frontend API client, the `SegmentListItem` component, and the `Manuscript` page. The page loads manuscript data, metadata, and ordered segments; renders the compiled manuscript body, path, byte count, segment sidebar, word-count summary, Edit/Delete actions, and Rebuild button; navigates Edit to PasteProse with `?edit=SEG-<n>`; handles the segment hybrid-delete response with an explicit force-delete confirmation; and refreshes after delete/rebuild.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm --prefix web run build` — PASS; TypeScript and Vite production build completed successfully.
+2. `cd tools/manual-story-studio && npm test` — PASS; backend build, 269 backend tests, and `npm --prefix web test` completed successfully.
+3. Manual review — PASS; the page consumes only existing HTTP clients, does not mutate records directly, hides reorder controls when `metadata.manuscript.allow_reorder === false`, and leaves route registration/manual navigation smoke to ticket 015.
+
+## Deviations
+
+1. The page renders manuscript Markdown in a `<pre>` block because `tools/manual-story-studio/web/package.json` has no Markdown renderer dependency. This follows the ticket's MVP fallback and avoids adding an unrequested dependency.
+2. No React component tests were added because the package currently has only a TypeScript web test command, not a component-test framework. Ticket 016 owns the end-to-end capstone coverage after App.tsx registers the route.

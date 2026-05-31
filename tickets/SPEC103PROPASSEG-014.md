@@ -56,7 +56,7 @@ Read `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` to confirm it 
 - The `GET /prompts/:promptId` detail endpoint (existing SPEC-102 surface; this page consumes it)
 - The `POST /prompts` save endpoint (existing SPEC-102 surface; not touched)
 - App.tsx route registration for `/prompt-history` (covered by ticket 015)
-- The Manuscript view's segment-anchoring (covered by ticket 013; this page navigates to the manuscript URL but doesn't implement anchoring)
+- The Manuscript view's segment-anchoring (covered by `archive/tickets/SPEC103PROPASSEG-013.md`; this page navigates to the manuscript URL but doesn't implement anchoring)
 
 ## Acceptance Criteria
 
