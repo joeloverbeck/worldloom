@@ -10,7 +10,7 @@ The full specification for Step 5's deliverable-classification rules. SKILL.md r
 
 | Deliverable shape | Output destination |
 |---|---|
-| Inline ops/setup task or mechanical-fix triage | execute inline + summary; no file persisted |
+| Inline ops/setup task or mechanical-fix triage | execute inline + summary; no file persisted (HARD-GATE still applies — explicit approval required before executing) |
 | New skill design | `.claude/skills/<name>/SKILL.md` |
 | Modify existing skill file(s) | edit in place |
 | Project documentation (`CLAUDE.md`, `docs/*.md`, etc.) | edit/create in place |

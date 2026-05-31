@@ -27,7 +27,9 @@ function Banner() {
 
 export function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
       <Banner />
       <nav>
         <Link to="/">Worlds</Link>
