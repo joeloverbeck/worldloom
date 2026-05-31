@@ -21,7 +21,7 @@ The full specification for Step 5's deliverable-classification rules. SKILL.md r
 | Triage producing 1 spec or <3 tickets | matching single-deliverable row above (`System spec` / `Implementation tickets`); triage file skipped by default — see §Spec deliverable for the input-complexity carve-out |
 | Triage producing ≥2 specs / ≥3 tickets | deliverables + `docs/triage/YYYY-MM-DD-<topic>-triage.md` |
 | Triage analysis, all deliverables deferred (durable decision record) | `docs/triage/YYYY-MM-DD-<topic>-triage.md` — full verdict content, no deliverables to reference; not the ≥2-spec companion-file shape |
-| Hybrid (code + spec) | plan file orchestrates sequence |
+| Hybrid (code + spec) | plan file orchestrates sequence — EXCEPT when the code change is small (< 50 lines), self-contained (single file, no public-interface change), and applied inline during the session: emit the spec + tickets + applied code change as parallel deliverables and skip the plan file (the spec + tickets ARE the orchestration record). See §Hybrid deliverables §Small-inline-code carve-out below. |
 | Data-gathering required first | pre-deliverable phase + final deliverable |
 | Implementation tickets | `tickets/<ID>.md` |
 | New canon-pipeline proposal | `brainstorming/<topic>.md` |
@@ -130,6 +130,8 @@ This shape sits between two adjacent rows and is distinct from both. It is NOT t
 ### Hybrid deliverables
 
 If the brainstorm produces **hybrid deliverables** (e.g., both implementation code AND a spec), the plan file describes the full implementation sequence — code changes, spec writing, and any other artifacts. The spec is still written after plan approval, but the plan may describe implementation steps for non-spec deliverables at normal detail. Keep the plan file under 100 lines when the spec is the primary deliverable; for plans with N independent deliverables, the line budget scales to approximately 100 + 20*(N-1) lines to accommodate per-deliverable summaries. Investigation findings that change the deliverable set (items added, dropped, or reframed) should be captured in the plan's Context section.
+
+**Small-inline-code carve-out**: when the code change is small (< 50 lines, self-contained to a single file, no public-interface change — mirrors the §Guardrails §Blocker discovery during implementation inline-fix threshold in SKILL.md) AND is applied inline during the brainstorm session, the plan file is unnecessary. Emit the spec + tickets + applied code change as parallel deliverables — the spec + tickets ARE the orchestration record, and the code change has already landed by the time the user reads the Step 6 disposition. The Hybrid (code + spec) Quick triage table row's `plan file orchestrates sequence` prescription assumes the code change is large enough or pending enough to need orchestration; the carve-out applies when neither is true. Worked precedent: a Manual Story Studio diagnostic brainstorm (this session) produced 1 spec + 2 tickets + 1 inline ~7-line `Dashboard.tsx` fix (verified by tsc + live browser) in response to a user's option-4 directive (`spec O1 + tickets O2/O3 + inline O2 fix`); no plan file was needed because the inline code change was already applied at the moment the Step 6 menu fired.
 
 ### Data-gathering required first
 

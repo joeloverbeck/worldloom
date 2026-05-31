@@ -87,6 +87,20 @@ For triage brainstorms, this sub-section is also where SKILL.md Step 1 sub-step 
 - **Corrections that materially reframe the triage** → place in the triage's lead OR a **verification headline** (which precedes the verdict buckets, satisfying the "prominently, before" requirement).
 - **Remaining (non-reframing) contradictions** → place in the out-of-report findings sub-section.
 
+## No-source-report diagnostic case
+
+When the user's request is a diagnostic question, exploration prompt, or finding investigation rather than a formal numbered/tiered source report (the common shape for "figure out X" / "explore Y" / "what's happening with Z" requests), there is no source report to evaluate verdicts against. In this case:
+
+- **Omit the verdict-bucket section entirely**. The seven verdict types (`accept` / `accept-with-modification` / `reject` / `defer` / `already-resolved` / `confirms-existing-position` / `refuted-by-verification`) are defined against source-report items; without a source report, none of them apply.
+- **All findings route to the out-of-report findings sub-section**, keyed `O<N>` per §Per-item identifier convention. The sub-section heading may use the canonical `## Out-of-report findings (auditor-introduced)` form, or — when emphasis on the diagnostic provenance helps the reader — a register-matching variant like `## Findings discovered during diagnosis`.
+- **The §Closing structure (deliverable-shape recommendation + named assumptions) still applies** — the absence of verdict buckets does not collapse the close-out discipline.
+
+**Why this matters**: improvising verdict-bucket headers (e.g., placing diagnostic findings under an `accept (out-of-report)` header) conflates two structures the rest of this file keeps separate — verdict buckets are for source-report items; out-of-report findings live in their own sub-section. The conflation is forbidden by SKILL.md Step 3's `not to a new verdict bucket — the 7 verdicts above are closed` rule; this sub-section names what the structure looks like when no source-report items exist at all, so operators do not have to choose between conflict and improvisation.
+
+**Common shape — answering user diagnostic questions**: when the user poses 1-2 diagnostic questions and the brainstorm produces findings that ANSWER those questions (e.g., "the bug is X" / "the contract-edit UI is missing"), the answers ARE the findings — emit them as `O1` / `O2` / ... in the out-of-report sub-section. Do NOT treat the user's questions as a synthetic source report and emit them as `R<N>` items with paired `confirms-existing-position` verdicts; the resulting `R<N>` items would just be restatements of the user's questions, which the user already knows.
+
+**Worked precedent**: a Manual Story Studio diagnostic brainstorm (this session) was triggered by two user diagnostic questions ("what's causing the browser errors?" + "where does the user edit the story contract?"). The operator improvised by emitting one `confirms-existing-position` verdict (`V1: dashboard is read-only by design`) plus four out-of-report findings (`O1`–`O4`) under verdict-bucket headers (`accept (out-of-report findings discovered during diagnosis)` and `defer`). Under this rule, the verdict-bucket headers are omitted entirely — all five findings (the answer to Q1 plus the four adjacent findings) route to the out-of-report sub-section as `O1`–`O5`, and the close-out (`Companion triage file: …`; deliverable-shape recommendation; Step 6 menu) proceeds as normal.
+
 ## Closing structure
 
 Close the triage recommendation with:

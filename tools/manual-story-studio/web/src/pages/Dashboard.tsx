@@ -85,10 +85,11 @@ export function Dashboard() {
         if (!cancelled) setManuscriptMissing(true);
       });
     Promise.all(
-      MANUAL_RECORD_CLASSES.map((cls) =>
-        apiList(worldSlug, msSlug, cls).then(
-          (records) => [cls, records] as const,
-        ),
+      MANUAL_RECORD_CLASSES.filter((cls) => cls !== "beat-templates").map(
+        (cls) =>
+          apiList(worldSlug, msSlug, cls).then(
+            (records) => [cls, records] as const,
+          ),
       ),
     )
       .then((entries) => {
