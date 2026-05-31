@@ -146,27 +146,37 @@ export function Dashboard() {
       <section aria-label="story-contract">
         <h2>Story contract</h2>
         {metadata ? (
-          <dl>
-            <dt>Premise</dt>
-            <dd>{metadata.story_contract.premise || <em>(unset)</em>}</dd>
-            <dt>Tone</dt>
-            <dd>{metadata.story_contract.tone || <em>(unset)</em>}</dd>
-            <dt>POV</dt>
-            <dd>{metadata.story_contract.pov}</dd>
-            <dt>Tense</dt>
-            <dd>{metadata.story_contract.tense}</dd>
-            <dt>Content intensity</dt>
-            <dd>{metadata.story_contract.content_intensity}</dd>
-            <dt>Language register</dt>
-            <dd>{metadata.story_contract.language_register}</dd>
-            <dt>Prose preferences</dt>
-            <dd>
-              psychic_distance={metadata.story_contract.prose_preferences.psychic_distance},{" "}
-              dialogue_density={metadata.story_contract.prose_preferences.dialogue_density},{" "}
-              interiority={metadata.story_contract.prose_preferences.interiority},{" "}
-              paragraphing={metadata.story_contract.prose_preferences.paragraphing}
-            </dd>
-          </dl>
+          <>
+            <dl>
+              <dt>Premise</dt>
+              <dd>{metadata.story_contract.premise || <em>(unset)</em>}</dd>
+              <dt>Tone</dt>
+              <dd>{metadata.story_contract.tone || <em>(unset)</em>}</dd>
+              <dt>POV</dt>
+              <dd>{metadata.story_contract.pov}</dd>
+              <dt>Tense</dt>
+              <dd>{metadata.story_contract.tense}</dd>
+              <dt>Content intensity</dt>
+              <dd>{metadata.story_contract.content_intensity}</dd>
+              <dt>Language register</dt>
+              <dd>{metadata.story_contract.language_register}</dd>
+              <dt>Prose preferences</dt>
+              <dd>
+                psychic_distance={metadata.story_contract.prose_preferences.psychic_distance},{" "}
+                dialogue_density={metadata.story_contract.prose_preferences.dialogue_density},{" "}
+                interiority={metadata.story_contract.prose_preferences.interiority},{" "}
+                paragraphing={metadata.story_contract.prose_preferences.paragraphing}
+              </dd>
+            </dl>
+            <Link
+              to={`/worlds/${worldSlug}/manual-stories/${msSlug}/contract`}
+            >
+              {metadata.story_contract.premise === "" ||
+              metadata.story_contract.tone === ""
+                ? "Set premise & tone"
+                : "Edit contract"}
+            </Link>
+          </>
         ) : (
           <p>Loading metadata…</p>
         )}

@@ -4,6 +4,7 @@ import { BeatTemplates } from "./pages/BeatTemplates.js";
 import { CastAndProfiles } from "./pages/CastAndProfiles.js";
 import { CreateManualStory } from "./pages/CreateManualStory.js";
 import { Dashboard } from "./pages/Dashboard.js";
+import { EditContract } from "./pages/EditContract.js";
 import { ManualStories } from "./pages/ManualStories.js";
 import { Manuscript } from "./pages/Manuscript.js";
 import { MomentComposer } from "./pages/MomentComposer.js";
@@ -72,6 +73,10 @@ export function App() {
           <Route
             path="/worlds/:worldSlug/manual-stories/:msSlug/manuscript"
             element={<Manuscript />}
+          />
+          <Route
+            path="/worlds/:worldSlug/manual-stories/:msSlug/contract"
+            element={<EditContract />}
           />
           <Route
             path="/worlds/:worldSlug/manual-stories/:msSlug/prompt-history"

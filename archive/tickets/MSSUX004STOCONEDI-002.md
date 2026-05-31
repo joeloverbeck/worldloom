@@ -1,6 +1,6 @@
 # MSSUX004STOCONEDI-002: Story contract editor page
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio/web/src/pages/EditContract.tsx` (new), `tools/manual-story-studio/web/src/App.tsx` (modify, registers new route), `tools/manual-story-studio/web/src/pages/Dashboard.tsx` (modify, adds cross-link)
