@@ -1,6 +1,6 @@
 # MSSUX004STOCONEDI-001: Widen `updateMetadata` error shape
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio/web/src/api/records.ts` frontend API wrapper (widens `MetadataUpdateResult` return type and `updateMetadata` body)

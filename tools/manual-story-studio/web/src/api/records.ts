@@ -45,7 +45,13 @@ export type DeleteResult =
 
 export type MetadataUpdateResult =
   | { ok: true }
-  | { ok: false; error: "validation_failed"; errors: ValidationError[] };
+  | {
+      ok: false;
+      status: number;
+      error: string;
+      message?: string;
+      errors?: ValidationError[];
+    };
 
 const enc = encodeURIComponent;
 
@@ -202,13 +208,16 @@ export async function updateMetadata(
     body: JSON.stringify({ metadata }),
   });
   if (response.status === 200) return { ok: true };
-  const errorBody = (await response.json().catch(() => ({}))) as {
+  const body = (await response.json().catch(() => ({}))) as {
     error?: string;
+    message?: string;
     errors?: ValidationError[];
   };
   return {
     ok: false,
-    error: "validation_failed",
-    errors: errorBody.errors ?? [],
+    status: response.status,
+    error: body.error ?? "error",
+    message: body.message,
+    errors: body.errors,
   };
 }
