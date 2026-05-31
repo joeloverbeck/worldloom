@@ -27,6 +27,7 @@ import type {
   PromptLintFinding,
   PromptRunSidecar,
 } from "../../prompt/types.js";
+import { listSegments, readSegmentSidecar } from "../../read/segments.js";
 import { writePrompt } from "../../write/prompts.js";
 import {
   resolveManualStoryRoot,
@@ -103,6 +104,21 @@ function snippet(text: string, maxLen = 120): string {
     : oneLine;
 }
 
+function linkedSegmentsByPrompt(manualStoryRoot: string): Map<string, string[]> {
+  const byPrompt = new Map<string, string[]>();
+  for (const segment of listSegments({ manualStoryRoot })) {
+    const sidecar = readSegmentSidecar({
+      manualStoryRoot,
+      segmentId: segment.id,
+    });
+    if (!sidecar?.prompt_id) continue;
+    const existing = byPrompt.get(sidecar.prompt_id) ?? [];
+    existing.push(segment.id);
+    byPrompt.set(sidecar.prompt_id, existing);
+  }
+  return byPrompt;
+}
+
 export async function registerPromptsReadRoutes(
   server: FastifyInstance,
   options: PromptsRouteOptions,
@@ -140,10 +156,12 @@ export async function registerPromptsReadRoutes(
       const promptRunsDir = path.join(root.absolutePath, "prompt-runs");
       if (!existsSync(promptRunsDir)) return { prompts: [] };
       const entries = readdirSync(promptRunsDir);
+      const linkedByPrompt = linkedSegmentsByPrompt(root.absolutePath);
       const prompts: Array<{
         id: string;
         created_at: string;
         moment_directive_snippet: string;
+        linked_segments: string[];
       }> = [];
       for (const name of entries) {
         if (!/^PROMPT-\d+\.yaml$/.test(name)) continue;
@@ -154,6 +172,7 @@ export async function registerPromptsReadRoutes(
             id: sidecar.id,
             created_at: sidecar.created_at,
             moment_directive_snippet: snippet(sidecar.moment_directive ?? ""),
+            linked_segments: linkedByPrompt.get(sidecar.id) ?? [],
           });
         } catch {
           // skip malformed sidecars

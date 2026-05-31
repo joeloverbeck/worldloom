@@ -1,14 +1,14 @@
 # SPEC103PROPASSEG-010: Prompts route extension — `linked_segments` on `GET /prompts` response + frontend API mirror
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — extends `tools/manual-story-studio/src/server/routes/prompts.ts` `GET /prompts` listing response to include `linked_segments: string[]`; extends `tools/manual-story-studio/test/server/prompts-routes.test.ts` with linked-segments coverage; extends `tools/manual-story-studio/web/src/api/prompts.ts` to type the new field on the client side.
+**Engine Changes**: Yes — extends `tools/manual-story-studio/src/server/routes/prompts.ts` `GET /prompts` listing response to include `linked_segments: string[]`; extends `tools/manual-story-studio/test/server/prompts-routes.test.ts` with linked-segments coverage; extends `tools/manual-story-studio/web/src/api/prompts.ts` to type the new field on the client side; truths the SPEC-103 test note that briefly implied the prompt detail endpoint also carried this field.
 **Deps**: archive/tickets/SPEC103PROPASSEG-007.md
 
 ## Problem
 
-SPEC-103 §2 item 8 specifies the Prompt History view's per-prompt content: *"id, created_at, moment_directive snippet, links to the segments produced from this prompt (computed by scanning segment sidecars for matching `prompt_id`)"*. The Q2=(a) reassessment resolution chose to extend the existing SPEC-102-landed `tools/manual-story-studio/src/server/routes/prompts.ts` `GET /prompts` response with a new `linked_segments: string[]` field rather than create a new sibling `routes/prompt-history.ts` file. This keeps prompt-related routing in one file (preserves SPEC-102's organizational shape) and avoids duplicating prompt-sidecar enumeration logic across two route files.
+Before this ticket, SPEC-103 §2 item 8 specified the Prompt History view's per-prompt content: *"id, created_at, moment_directive snippet, links to the segments produced from this prompt (computed by scanning segment sidecars for matching `prompt_id`)"*, but the existing SPEC-102-landed `GET /prompts` listing returned only prompt metadata. This ticket extends that existing listing with `linked_segments: string[]` rather than creating a sibling `routes/prompt-history.ts` file.
 
 ## Assumption Reassessment (2026-05-31)
 
@@ -16,6 +16,7 @@ SPEC-103 §2 item 8 specifies the Prompt History view's per-prompt content: *"id
 2. SPEC-103 §2 item 8 (Prompt History view per-prompt content includes linked segments), §3 reassessment decision (Q2=(a): extend `routes/prompts.ts` rather than create `routes/prompt-history.ts`), §4 Modify enumerates `src/server/routes/prompts.ts` + `web/src/api/prompts.ts` + the test extension, §7 AC#10 ("Prompt History view lists saved prompts with links to segments produced from them").
 3. Cross-skill boundary: this ticket extends SPEC-102-landed code (`src/server/routes/prompts.ts:129-169` GET listing + `web/src/api/prompts.ts` typed client). The extension is consumed by ticket 014's PromptHistory page (renders `linked_segments` as clickable links to each SEG-<integer>'s segment under the Manuscript view). The extension reuses ticket 007's `read/segments.ts` `listSegments` + `readSegmentSidecar` (each segment sidecar has the `prompt_id` field added in ticket 001's `SegmentSidecar` shape — matching is `sidecar.prompt_id === prompt.id`).
 4. Existing `GET /prompts` response schema is extended (additive: new `linked_segments` field added to each entry; no existing field renamed or removed). Per SPEC-102's listing response shape, downstream consumers (currently only the spec-time hypothesized Prompt History view — no other consumer exists in the codebase per Pre-flight grep) expect the existing `{ id, created_at, moment_directive_snippet }` fields and ignore unknown fields by default (Fastify JSON deserialization permits extra fields client-side); adding `linked_segments` does not break any existing consumer.
+5. Reassessment found one stale SPEC-103 test note at `specs/SPEC-103-prose-paste-segments-and-manuscript.md` that said to verify `linked_segments` on both `GET /prompts` and `GET /prompts/:promptId`. The live accepted boundary remains listing-only: ticket 014 consumes `GET /prompts` for `linked_segments` and uses the existing SPEC-102 prompt detail endpoint only for markdown + sidecar display. The spec note was corrected to prevent a false detail-endpoint requirement.
 
 ## Architecture Check
 
@@ -29,44 +30,41 @@ SPEC-103 §2 item 8 specifies the Prompt History view's per-prompt content: *"id
 3. `linked_segments` is sorted by numeric SEG-N suffix (save-time order proxy) → route test
 4. Frontend `web/src/api/prompts.ts` typed client surface includes `linked_segments: string[]` on the listing entry type → codebase grep-proof + type-check pass
 
-## What to Change
+## Landed Changes
 
-### 1. Extend src/server/routes/prompts.ts
+### 1. Extended src/server/routes/prompts.ts
 
-In `tools/manual-story-studio/src/server/routes/prompts.ts`, modify the `GET /prompts` handler (lines 129-169) to compute `linked_segments` per prompt:
+In `tools/manual-story-studio/src/server/routes/prompts.ts`, the `GET /prompts` handler now computes `linked_segments` per prompt:
 
-- Import `listSegments` and `readSegmentSidecar` from `../../read/segments.js`
-- After parsing the prompt sidecar inside the existing scan loop (around line 153), look up the segments referencing this prompt:
-  - Option A (simple, MVP): for each prompt, scan all segment sidecars via `listSegments` + `readSegmentSidecar` and collect IDs where `sidecar.prompt_id === prompt.id`. Per-request cost is O(prompts × segments) which is acceptable at MVP scale (manual stories typically have low dozens of each).
-  - Option B (optimized): scan all segment sidecars once before the prompt loop, build a `Map<promptId, segmentIds[]>`, then look up per prompt. Same total cost but only one segments-scan per request.
-- Add `linked_segments` to the returned entry shape: `{ id, created_at, moment_directive_snippet, linked_segments }`
+- Imports `listSegments` and `readSegmentSidecar` from `../../read/segments.js`.
+- Builds a single `Map<promptId, segmentIds[]>` before the prompt loop.
+- Adds `linked_segments` to the returned entry shape: `{ id, created_at, moment_directive_snippet, linked_segments }`.
 
-Implementation note: prefer Option B for cleanliness even at MVP scale — single segments scan keeps the code path linear and avoids re-reading the same sidecars.
+The prompt detail endpoint remains unchanged.
 
-### 2. Extend test/server/prompts-routes.test.ts
+### 2. Extended test/server/prompts-routes.test.ts
 
-In the existing prompts-routes test file, add new test cases for the `linked_segments` field:
+In the existing prompts-routes test file:
 
-- Fixture with PROMPT-1 + SEG-1 (sidecar `prompt_id: "PROMPT-1"`) + SEG-2 (sidecar `prompt_id: null`) → GET /prompts returns PROMPT-1 entry with `linked_segments: ["SEG-1"]`
-- Fixture with PROMPT-1 referenced by SEG-1 + SEG-3 (SEG-2 has `prompt_id: "PROMPT-2"`) → PROMPT-1 entry `linked_segments: ["SEG-1", "SEG-3"]`; PROMPT-2 entry `linked_segments: ["SEG-2"]`
-- Fixture with PROMPT-1 + no segments → PROMPT-1 entry `linked_segments: []`
-- Numeric sort guard: PROMPT-1 referenced by SEG-1, SEG-2, SEG-10 → `linked_segments: ["SEG-1", "SEG-2", "SEG-10"]` (numeric, not lexicographic)
+- Existing `GET /prompts lists saved prompts` coverage now asserts empty `linked_segments: []` for prompts with no linked segments.
+- Added `GET /prompts returns linked segment ids in numeric SEG order`, covering PROMPT-1 linked to `SEG-1`, `SEG-3`, and `SEG-10`; PROMPT-2 linked to `SEG-2`; and a null-prompt segment that is excluded.
 
-Preserve all existing test cases in the file unchanged (no removal or rewrite of existing prompts-routes assertions).
+All existing prompts-route test cases were preserved.
 
-### 3. Extend web/src/api/prompts.ts
+### 3. Extended web/src/api/prompts.ts
 
-In `tools/manual-story-studio/web/src/api/prompts.ts`, extend the typed listing entry to include `linked_segments`:
+`PromptListEntry` now includes `linked_segments: string[]`; `listPrompts` keeps the same function signature and returns the extended listing shape.
 
-- Locate the existing type for the `GET /prompts` listing response (likely something like `interface PromptListEntry { id: string; created_at: string; moment_directive_snippet: string; }`)
-- Add `linked_segments: string[];` to the interface
-- Existing list-fetching function consumer-side signature unchanged (just returns the extended shape)
+### 4. Truthed SPEC-103 test note
+
+Updated `specs/SPEC-103-prose-paste-segments-and-manuscript.md` so the prompts-routes test row says `linked_segments` is verified on the `GET /prompts` listing response only. `GET /prompts/:promptId` remains the existing prompt detail endpoint consumed separately by Prompt History.
 
 ## Files to Touch
 
 - `tools/manual-story-studio/src/server/routes/prompts.ts` (modify — extend GET /prompts handler with linked_segments)
 - `tools/manual-story-studio/test/server/prompts-routes.test.ts` (modify — extend with linked_segments test cases)
 - `tools/manual-story-studio/web/src/api/prompts.ts` (modify — extend client type with linked_segments field)
+- `specs/SPEC-103-prose-paste-segments-and-manuscript.md` (modify — correct stale test note to listing-only linked_segments proof)
 
 ## Out of Scope
 
@@ -99,3 +97,18 @@ In `tools/manual-story-studio/web/src/api/prompts.ts`, extend the typed listing 
 
 1. `cd tools/manual-story-studio && npm run build:backend && node --test "dist/test/server/prompts-routes.test.js"` — targeted prompts-routes test
 2. `cd tools/manual-story-studio && npm test` — full pipeline verification including web bundle build
+
+## Outcome
+
+Completed 2026-05-31. The Manual Story Studio prompts listing now returns `linked_segments: string[]` on each prompt entry by scanning segment sidecars once per request and grouping by `prompt_id`. The frontend prompt listing type mirrors the new field. The prompt detail endpoint was intentionally left unchanged, and the SPEC-103 test note was corrected to match that listing-only contract.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run build:backend` — PASS; backend TypeScript compilation succeeded after the route/test changes.
+2. `cd tools/manual-story-studio && node --test "dist/test/server/prompts-routes.test.js"` — PASS; 8 prompts-route tests passed, including empty `linked_segments` and numeric `SEG-1`, `SEG-3`, `SEG-10` ordering.
+3. `cd tools/manual-story-studio && npm --prefix web run build` — PASS; frontend type-check and Vite build succeeded with `PromptListEntry.linked_segments`.
+4. `cd tools/manual-story-studio && npm test` — PASS; backend build succeeded, `node --test "dist/test/**/*.test.js"` reported 269 passing subtests, and `npm --prefix web test` completed successfully.
+
+## Deviations
+
+- SPEC-103's test list briefly mentioned verifying `linked_segments` on `GET /prompts/:promptId`; reassessment narrowed this to the accepted listing-only boundary. Prompt detail remains the existing SPEC-102 endpoint and is consumed separately by ticket 014's PromptHistory page.

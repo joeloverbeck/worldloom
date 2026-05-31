@@ -149,7 +149,7 @@ ChatGPT-Pro's proposal §12 / §13 is the design as accepted; this spec hardens 
 - `test/manuscript/compile.test.ts` — fixture segments → byte-identical compiled manuscript across runs (determinism); `include_segment_titles` toggle behaviour; empty `segment_order` → empty manuscript.
 - `test/server/segments-routes.test.ts` — POST (save) / GET (list / single) / PUT (edit) / DELETE (hybrid) round trip; write-scope-guard adherence; manuscript recompile triggered post-save when `compile_on_segment_save: true`.
 - `test/server/manuscript-routes.test.ts` — GET manuscript + POST rebuild; rebuild on empty `segment_order` writes empty manuscript.
-- `test/server/prompts-routes.test.ts` (extend existing) — verify `linked_segments: string[]` on `GET /prompts` listing response and on `GET /prompts/:promptId` detail response (per the I6/Q2(a) extension to the landed SPEC-102 routes file).
+- `test/server/prompts-routes.test.ts` (extend existing) — verify `linked_segments: string[]` on `GET /prompts` listing response (per the I6/Q2(a) extension to the landed SPEC-102 routes file). `GET /prompts/:promptId` remains the existing SPEC-102 prompt detail endpoint and is consumed separately by the Prompt History view.
 - `test/state-update-checklist.test.ts` — checklist payload includes all 12 review classes with correct per-class counts for fixture cast.
 
 **No modification to:**

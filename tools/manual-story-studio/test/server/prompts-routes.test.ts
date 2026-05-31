@@ -16,6 +16,7 @@ import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 
 import { createServer } from "../../src/server/http.js";
+import type { SegmentSidecar } from "../../src/schema/manual-story.js";
 import { makeDefaultManualStoryMetadata } from "../../src/write/manual-story-metadata.js";
 import {
   resolveManualStoryRoot,
@@ -67,6 +68,30 @@ function mkWorld(): { repoRoot: string; worldSlug: string; msSlug: string; root:
     YAML.stringify(fixtureCast("mchar-1", "Jon")),
   );
   return { repoRoot, worldSlug, msSlug, root };
+}
+
+function seedSegmentSidecar(
+  root: ManualStoryRoot,
+  id: string,
+  promptId: string | null,
+): void {
+  const numericSuffix = Number(/^SEG-(\d+)$/.exec(id)?.[1] ?? 0);
+  const timestamp = `2026-05-31T10:${String(numericSuffix).padStart(2, "0")}:00.000Z`;
+  const sidecar: SegmentSidecar = {
+    id,
+    created_at: timestamp,
+    updated_at: timestamp,
+    title: id,
+    prompt_id: promptId,
+    prompt_sha256: promptId ? `${promptId}-sha` : null,
+    moment_directive: promptId ? `Directive for ${promptId}` : "",
+    selected_template: null,
+    included_record_summary: { characters: [], records: [] },
+    author_note: "",
+    word_count: 3,
+  };
+  safeWriteFile(root, `segments/${id}.md`, `${id} prose.\n`);
+  safeWriteFile(root, `segments/${id}.yaml`, YAML.stringify(sidecar));
 }
 
 test("POST /prompts/preview returns 200 with markdown+lint for a valid input", async () => {
@@ -247,11 +272,69 @@ test("GET /prompts lists saved prompts", async () => {
         url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/prompts`,
       });
       const body = list.json() as {
-        prompts: Array<{ id: string; moment_directive_snippet: string }>;
+        prompts: Array<{
+          id: string;
+          moment_directive_snippet: string;
+          linked_segments: string[];
+        }>;
       };
       assert.equal(body.prompts.length, 2);
       assert.equal(body.prompts[0]?.id, "PROMPT-1");
+      assert.deepEqual(body.prompts[0]?.linked_segments, []);
       assert.equal(body.prompts[1]?.id, "PROMPT-2");
+      assert.deepEqual(body.prompts[1]?.linked_segments, []);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("GET /prompts returns linked segment ids in numeric SEG order", async () => {
+  const { repoRoot, worldSlug, msSlug, root } = mkWorld();
+  try {
+    const server = await createServer({ repoRoot });
+    try {
+      await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/prompts`,
+        payload: {
+          moment_directive: "First prompt.",
+          included_cast: ["mchar-1"],
+          included_records: [],
+        },
+      });
+      await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/prompts`,
+        payload: {
+          moment_directive: "Second prompt.",
+          included_cast: ["mchar-1"],
+          included_records: [],
+        },
+      });
+      seedSegmentSidecar(root, "SEG-10", "PROMPT-1");
+      seedSegmentSidecar(root, "SEG-1", "PROMPT-1");
+      seedSegmentSidecar(root, "SEG-3", "PROMPT-1");
+      seedSegmentSidecar(root, "SEG-2", "PROMPT-2");
+      seedSegmentSidecar(root, "SEG-4", null);
+
+      const list = await server.inject({
+        method: "GET",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/prompts`,
+      });
+      assert.equal(list.statusCode, 200);
+      const body = list.json() as {
+        prompts: Array<{ id: string; linked_segments: string[] }>;
+      };
+      const byId = new Map(body.prompts.map((prompt) => [prompt.id, prompt]));
+      assert.deepEqual(byId.get("PROMPT-1")?.linked_segments, [
+        "SEG-1",
+        "SEG-3",
+        "SEG-10",
+      ]);
+      assert.deepEqual(byId.get("PROMPT-2")?.linked_segments, ["SEG-2"]);
     } finally {
       await server.close();
     }

@@ -16,6 +16,7 @@ export interface PromptListEntry {
   id: string;
   created_at: string;
   moment_directive_snippet: string;
+  linked_segments: string[];
 }
 
 export interface SavePromptResult {

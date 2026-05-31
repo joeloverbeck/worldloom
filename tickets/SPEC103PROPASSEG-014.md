@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — adds `tools/manual-story-studio/web/src/pages/PromptHistory.tsx` (the saved-prompts list view with per-prompt linked segments).
-**Deps**: 010
+**Deps**: archive/tickets/SPEC103PROPASSEG-010.md
 
 ## Problem
 
