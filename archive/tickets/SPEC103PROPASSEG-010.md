@@ -16,7 +16,7 @@ Before this ticket, SPEC-103 §2 item 8 specified the Prompt History view's per-
 2. SPEC-103 §2 item 8 (Prompt History view per-prompt content includes linked segments), §3 reassessment decision (Q2=(a): extend `routes/prompts.ts` rather than create `routes/prompt-history.ts`), §4 Modify enumerates `src/server/routes/prompts.ts` + `web/src/api/prompts.ts` + the test extension, §7 AC#10 ("Prompt History view lists saved prompts with links to segments produced from them").
 3. Cross-skill boundary: this ticket extends SPEC-102-landed code (`src/server/routes/prompts.ts:129-169` GET listing + `web/src/api/prompts.ts` typed client). The extension is consumed by ticket 014's PromptHistory page (renders `linked_segments` as clickable links to each SEG-<integer>'s segment under the Manuscript view). The extension reuses ticket 007's `read/segments.ts` `listSegments` + `readSegmentSidecar` (each segment sidecar has the `prompt_id` field added in ticket 001's `SegmentSidecar` shape — matching is `sidecar.prompt_id === prompt.id`).
 4. Existing `GET /prompts` response schema is extended (additive: new `linked_segments` field added to each entry; no existing field renamed or removed). Per SPEC-102's listing response shape, downstream consumers (currently only the spec-time hypothesized Prompt History view — no other consumer exists in the codebase per Pre-flight grep) expect the existing `{ id, created_at, moment_directive_snippet }` fields and ignore unknown fields by default (Fastify JSON deserialization permits extra fields client-side); adding `linked_segments` does not break any existing consumer.
-5. Reassessment found one stale SPEC-103 test note at `specs/SPEC-103-prose-paste-segments-and-manuscript.md` that said to verify `linked_segments` on both `GET /prompts` and `GET /prompts/:promptId`. The live accepted boundary remains listing-only: ticket 014 consumes `GET /prompts` for `linked_segments` and uses the existing SPEC-102 prompt detail endpoint only for markdown + sidecar display. The spec note was corrected to prevent a false detail-endpoint requirement.
+5. Reassessment found one stale SPEC-103 test note at `archive/specs/SPEC-103-prose-paste-segments-and-manuscript.md` that said to verify `linked_segments` on both `GET /prompts` and `GET /prompts/:promptId`. The live accepted boundary remains listing-only: ticket 014 consumes `GET /prompts` for `linked_segments` and uses the existing SPEC-102 prompt detail endpoint only for markdown + sidecar display. The spec note was corrected to prevent a false detail-endpoint requirement.
 
 ## Architecture Check
 
@@ -57,14 +57,14 @@ All existing prompts-route test cases were preserved.
 
 ### 4. Truthed SPEC-103 test note
 
-Updated `specs/SPEC-103-prose-paste-segments-and-manuscript.md` so the prompts-routes test row says `linked_segments` is verified on the `GET /prompts` listing response only. `GET /prompts/:promptId` remains the existing prompt detail endpoint consumed separately by Prompt History.
+Updated `archive/specs/SPEC-103-prose-paste-segments-and-manuscript.md` so the prompts-routes test row says `linked_segments` is verified on the `GET /prompts` listing response only. `GET /prompts/:promptId` remains the existing prompt detail endpoint consumed separately by Prompt History.
 
 ## Files to Touch
 
 - `tools/manual-story-studio/src/server/routes/prompts.ts` (modify — extend GET /prompts handler with linked_segments)
 - `tools/manual-story-studio/test/server/prompts-routes.test.ts` (modify — extend with linked_segments test cases)
 - `tools/manual-story-studio/web/src/api/prompts.ts` (modify — extend client type with linked_segments field)
-- `specs/SPEC-103-prose-paste-segments-and-manuscript.md` (modify — correct stale test note to listing-only linked_segments proof)
+- `archive/specs/SPEC-103-prose-paste-segments-and-manuscript.md` (modify — correct stale test note to listing-only linked_segments proof)
 
 ## Out of Scope
 

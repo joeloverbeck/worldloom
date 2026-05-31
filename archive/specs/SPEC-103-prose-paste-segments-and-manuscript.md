@@ -1,6 +1,6 @@
 # SPEC-103 — Manual Story Studio: Prose Paste, Segment Storage, Manuscript Compilation, State Update Checklist
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-05-30
 **Classification:** story-canon-related (closes the externalized-LLM loop by accepting pasted prose as durable manuscript text and prescribing the post-paste state-update discipline; preserves §Story Bundles §4a Plan-Authority Boundary by treating pasted prose as manuscript, not authoritative state).
 **Depends on:** **SPEC-100** (sandbox), **SPEC-101** (records + metadata), **SPEC-102** (prompts that segments reference). Land in order.
@@ -196,3 +196,16 @@ ChatGPT-Pro's proposal §12 / §13 is the design as accepted; this spec hardens 
 - **`manuscript.md` is written even when the author has not yet pasted any segments.** First-save creates the file with the one segment; first-rebuild on an empty `segment_order` writes an empty `manuscript.md`. This is acceptable; empty manuscript is a legitimate state.
 - **No invariant-check on pasted prose.** If the LLM's response violates a forbidden-invention or forbidden-reveal listed in the prompt's §12, Manual Studio has no mechanism to detect it. The author is the gate. This is the deliberate boundary — Manual Studio is an authoring cockpit, not a prose validator.
 - **No write to the prompt file from the segment save flow.** Segments reference prompts but never modify them. If a saved prompt is later deleted, the segment sidecar's `prompt_id` becomes a stale reference; the Prompt History view will not crash, but the "Reuse Prompt" action will fail with a clear "prompt no longer exists" message. Acceptable; saved prompt files are the author's to manage.
+
+## Outcome
+
+Completed 2026-05-31. SPEC-103 landed through tickets `archive/tickets/SPEC103PROPASSEG-001.md` through `archive/tickets/SPEC103PROPASSEG-016.md`.
+
+The implementation added the segment sidecar and manuscript policy schema, `SEG-<integer>` allocation and ID documentation, save/edit/delete segment write flows, deterministic manuscript compilation, segment and manuscript read helpers, State Update Checklist payload generation and modal UI, segment/manuscript/prompt-history HTTP routes, Paste Prose / Manuscript / Prompt History frontend pages, Dashboard wiring for latest segment and manuscript word count, prompt-listing `linked_segments`, and the trailing `tools/manual-story-studio/test/capstone-spec103.test.ts` capstone.
+
+Deviations from the initial spec were bounded and recorded in ticket closeouts: the Prompt History `linked_segments` proof lives on the prompts listing endpoint, the Manuscript page renders compiled Markdown in a `<pre>` MVP display because the web package has no Markdown renderer dependency, and the capstone covers frontend-only view wording with source-level route/page checks plus web TypeScript compilation rather than a browser component harness.
+
+Verification completed 2026-05-31:
+
+1. `cd tools/manual-story-studio && npm run build:backend && node --test "dist/test/capstone-spec103.test.js"` — PASS; 6/6 SPEC-103 capstone subtests passed.
+2. `cd tools/manual-story-studio && npm test` — PASS; backend build, 275/275 compiled Node tests, and web TypeScript check passed.

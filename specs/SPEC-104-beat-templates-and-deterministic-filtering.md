@@ -3,7 +3,7 @@
 **Status:** PROPOSED
 **Date:** 2026-05-30
 **Classification:** story-canon-related (introduces the manual analogue of SLT commitment blocks at a deliberately lighter scope; reuses the storylet-filtering staging pattern of `select-storylet-candidates` without engine-grade scope/predicate/effect/saliency machinery; surfaces template selection back into the SPEC-102 prompt composer).
-**Depends on:** **SPEC-100** (sandbox + package), **SPEC-101** (records that the filter consumes), **SPEC-102** (prompt composer §6 hook point for selected template), **SPEC-103** (segment sidecar's `selected_template` field). Land in order.
+**Depends on:** **SPEC-100** (sandbox + package), **SPEC-101** (records that the filter consumes), **SPEC-102** (prompt composer §6 hook point for selected template), `archive/specs/SPEC-103-prose-paste-segments-and-manuscript.md` (segment sidecar's `selected_template` field). Land in order.
 **Related:** `docs/FOUNDATIONS.md` §Story Bundles §5a (commitment blocks are causal moves, not arcs — Manual Studio borrows the discipline without the schema); `.claude/skills/commitment-block-authoring/SKILL.md` (precedent for storylet authoring); `mcp__worldloom__select_storylet_candidates` (precedent for staged deterministic filtering); proposal §8 / §9 / §15.
 **Source:** critical triage of `reports/manual-story-studio-first-iteration.md` §8 / §9 milestone M5 (ChatGPT-Pro, 2026-05-30). Accepted with one modification: enum vocabularies for `move_family`, `tone_fit`, and `relationship_axes` are explicitly defined in this spec rather than left implicit.
 
