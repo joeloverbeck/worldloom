@@ -1,6 +1,6 @@
 # SPEC103PROPASSEG-008: Segments HTTP routes — POST save / GET list & single / PUT edit / DELETE hybrid
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/src/server/routes/segments.ts` + paired test under `tools/manual-story-studio/test/server/segments-routes.test.ts`; modifies `tools/manual-story-studio/src/server/http.ts` to register the new routes (split between read and write registration sites per the existing convention).
@@ -12,7 +12,7 @@ SPEC-103 §4 Create enumerates `src/server/routes/segments.ts` exposing four HTT
 
 ## Assumption Reassessment (2026-05-31)
 
-1. Existing `tools/manual-story-studio/src/server/http.ts:53-83` exposes `createServer` which registers read routes outside `wrapRouterWritable` (lines 61-65) and write routes inside it (lines 67-80). The pattern for adding a new route file is established by `routes/manual-stories.ts`, `routes/records.ts`, `routes/metadata.ts`, `routes/prompts.ts`: import the register functions at the top, then add `await register*ReadRoutes(...)` and `await register*WriteRoutes(...)` calls. The segments routes follow the same split (GET endpoints register on the bare server; POST/PUT/DELETE register inside `wrapRouterWritable`).
+1. Existing `tools/manual-story-studio/src/server/http.ts` exposes `createServer` which registers read routes outside `wrapRouterWritable` and write routes inside it. The pattern for adding a new route file is established by `routes/manual-stories.ts`, `routes/records.ts`, `routes/metadata.ts`, `routes/prompts.ts`: import the register functions at the top, then add `await register*ReadRoutes(...)` and `await register*WriteRoutes(...)` calls. The landed segments routes follow the same split (GET endpoints register on the bare server; POST/PUT/DELETE register inside `wrapRouterWritable`).
 2. SPEC-103 §2 item 2 (save flow returns segment_id + sidecar + checklist payload), §2 item 7 (per-segment actions: Edit, Delete with hybrid semantics), §4 Create includes `src/server/routes/segments.ts`, §4 Modify includes `src/server/http.ts`, §7 AC#1, #3, #7, #8 (saved segment + segment_order update + edit-in-place + hybrid delete).
 3. Cross-skill boundary: `http.ts` is modified by both this ticket (segments routes) and ticket 009 (manuscript routes) — mechanical merge per §Step 6 item 5 shared-file overlap (each ticket adds its own pair of register calls; conflicts are line-level only, no semantic overlap). The route module consumes `archive/tickets/SPEC103PROPASSEG-004.md` (saveSegment / editSegment / deleteSegment), ticket 005 (buildStateUpdateChecklist), and ticket 007 (listSegments / readSegmentSidecar / readSegmentBody) — boundaries documented in those tickets' Cross-skill boundary notes.
 
@@ -127,3 +127,26 @@ Cover the five route behaviors above per the existing `test/server/records.test.
 
 1. `cd tools/manual-story-studio && npm run build:backend && node --test "dist/test/server/segments-routes.test.js"` — targeted segments-routes test
 2. `cd tools/manual-story-studio && npm test` — full pipeline verification (includes new test under chained `node --test "dist/test/**/*.test.js"`)
+
+## Outcome
+
+Completed: 2026-05-31
+
+Implemented the SPEC-103 segment HTTP route surface:
+
+- Added `tools/manual-story-studio/src/server/routes/segments.ts` with `GET /segments`, `GET /segments/:segmentId`, `POST /segments`, `PUT /segments/:segmentId`, and `DELETE /segments/:segmentId`.
+- Registered segment read routes outside `wrapRouterWritable` and segment write routes inside the existing write-scope guard in `tools/manual-story-studio/src/server/http.ts`.
+- Added `tools/manual-story-studio/test/server/segments-routes.test.ts` covering save, list, read, edit, unreferenced delete, referenced preserve, and forced delete behavior.
+
+No deviations from the accepted route split. Public package docs did not need a same-seam route update; `tools/manual-story-studio/README.md` already describes segments as stored artifacts rather than enumerating every HTTP endpoint.
+
+## Verification Result
+
+- `cd tools/manual-story-studio && npm run build:backend` — PASS; TypeScript compiled successfully.
+- `cd tools/manual-story-studio && node --test "dist/test/server/segments-routes.test.js"` — PASS; 5 route tests passed.
+- `cd tools/manual-story-studio && npm test` — PASS; backend suite reported 263 passing tests and the web TypeScript check passed.
+- Public-surface scan: `tools/manual-story-studio/README.md`, `docs/manual-story-studio`, `docs/WORKFLOWS.md`, and `docs/MACHINE-FACING-LAYER.md` had no current route-listing prose requiring a segment route update.
+
+## Deviations
+
+None.

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/manual-story-studio/web/src/pages/PasteProse.tsx` (the paste-and-save editor screen) + `tools/manual-story-studio/web/src/api/segments.ts` (typed frontend client for the segments HTTP routes).
-**Deps**: 008, 012
+**Deps**: archive/tickets/SPEC103PROPASSEG-008.md, 012
 
 ## Problem
 
