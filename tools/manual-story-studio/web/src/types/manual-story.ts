@@ -74,6 +74,7 @@ export interface ManualStoryPromptPolicy {
   require_moment_directive: boolean;
   default_beat_count: string;
   include_recent_segments: number;
+  recent_template_advisory_window: number;
 }
 
 export interface ManualStoryManuscriptPolicy {
@@ -187,7 +188,8 @@ export type ManualRecordClass =
   | "clocks"
   | "secrets"
   | "questions"
-  | "artifacts";
+  | "artifacts"
+  | "beat-templates";
 
 export const MANUAL_RECORD_CLASSES: ManualRecordClass[] = [
   "cast",
@@ -208,6 +210,7 @@ export const MANUAL_RECORD_CLASSES: ManualRecordClass[] = [
   "secrets",
   "questions",
   "artifacts",
+  "beat-templates",
 ];
 
 export const MANUAL_RECORD_CLASS_PREFIXES: Record<ManualRecordClass, string> = {
@@ -229,6 +232,7 @@ export const MANUAL_RECORD_CLASS_PREFIXES: Record<ManualRecordClass, string> = {
   secrets: "msecret",
   questions: "mq",
   artifacts: "martifact",
+  "beat-templates": "mtemplate",
 };
 
 export interface ManualRecordSummary {
@@ -302,4 +306,168 @@ export interface PromptComposeRequestInput {
   included_cast: string[];
   included_records: string[];
   included_template_path?: string | null;
+  // SPEC-104: ID-shaped public API; routes layer resolves to
+  // included_template_path internally. Mutually exclusive with
+  // included_template_path on a single request.
+  selected_template?: string | null;
+}
+
+// ---- Beat template types (mirror of src/schema/beat-template.ts) ----
+
+export type BeatTemplateMoveFamily =
+  | "negotiation"
+  | "confrontation"
+  | "seduction"
+  | "escape"
+  | "reveal"
+  | "concealment"
+  | "bargaining"
+  | "care"
+  | "grief"
+  | "celebration"
+  | "confession"
+  | "refusal"
+  | "observation"
+  | "travel"
+  | "preparation"
+  | "aftermath"
+  | "other";
+
+export const BEAT_TEMPLATE_MOVE_FAMILIES: BeatTemplateMoveFamily[] = [
+  "negotiation",
+  "confrontation",
+  "seduction",
+  "escape",
+  "reveal",
+  "concealment",
+  "bargaining",
+  "care",
+  "grief",
+  "celebration",
+  "confession",
+  "refusal",
+  "observation",
+  "travel",
+  "preparation",
+  "aftermath",
+  "other",
+];
+
+export type BeatTemplateToneFit =
+  | "intimate"
+  | "tender"
+  | "tense"
+  | "comic"
+  | "bleak"
+  | "wry"
+  | "reverent"
+  | "clinical"
+  | "feverish"
+  | "hushed"
+  | "ceremonial";
+
+export const BEAT_TEMPLATE_TONE_FITS: BeatTemplateToneFit[] = [
+  "intimate",
+  "tender",
+  "tense",
+  "comic",
+  "bleak",
+  "wry",
+  "reverent",
+  "clinical",
+  "feverish",
+  "hushed",
+  "ceremonial",
+];
+
+export type BeatTemplateRelationshipAxis =
+  | "trust"
+  | "fear"
+  | "attraction"
+  | "power"
+  | "respect"
+  | "familiarity";
+
+export const BEAT_TEMPLATE_RELATIONSHIP_AXES: BeatTemplateRelationshipAxis[] = [
+  "trust",
+  "fear",
+  "attraction",
+  "power",
+  "respect",
+  "familiarity",
+];
+
+export type BeatTemplateBeatFunction =
+  | "setup"
+  | "pressure"
+  | "turn"
+  | "exit"
+  | "aftermath";
+
+export const BEAT_TEMPLATE_BEAT_FUNCTIONS: BeatTemplateBeatFunction[] = [
+  "setup",
+  "pressure",
+  "turn",
+  "exit",
+  "aftermath",
+];
+
+export interface BeatTemplateClassification {
+  move_family: BeatTemplateMoveFamily;
+  tags: string[];
+  intensity: ManualStoryContentIntensity;
+  tone_fit: BeatTemplateToneFit[];
+}
+
+export interface BeatTemplateRoleSlot {
+  compatible_roles: ManualStoryRole[];
+}
+
+export interface BeatTemplateRequires {
+  record_classes_any: string[];
+  record_tags_any: string[];
+  relationship_axes_any: BeatTemplateRelationshipAxis[];
+  location_tags_any: string[];
+}
+
+export interface BeatTemplateExcludes {
+  record_tags_any: string[];
+  forbidden_if_secret_tags: string[];
+}
+
+export interface BeatTemplateBeat {
+  function: BeatTemplateBeatFunction;
+  instruction: string;
+}
+
+export interface BeatTemplate {
+  id: string;
+  title: string;
+  active: boolean;
+  classification: BeatTemplateClassification;
+  role_slots: Record<string, BeatTemplateRoleSlot>;
+  requires: BeatTemplateRequires;
+  excludes: BeatTemplateExcludes;
+  beat_guidance: BeatTemplateBeat[];
+  forbidden_inventions: string[];
+  author_notes: string;
+}
+
+export interface BeatTemplateCandidateAdvisoryFlags {
+  recently_used: boolean;
+  recently_used_at_segment?: string;
+}
+
+export interface BeatTemplateCandidate {
+  template: BeatTemplate;
+  why_suggested: string[];
+  advisory_flags: BeatTemplateCandidateAdvisoryFlags;
+}
+
+export interface CandidateRequestBody {
+  moment_directive: string;
+  selected_cast: string[];
+  optional_move_family?: BeatTemplateMoveFamily;
+  optional_tags?: string[];
+  optional_location?: string;
 }

@@ -289,12 +289,22 @@ function readPromptFields(
   return {
     prompt_sha256,
     moment_directive: sidecar.moment_directive,
-    selected_template: sidecar.included_template_path,
+    // SPEC-104 §2.6: segment sidecar's `selected_template` carries the
+    // mtemplate-<integer> id (not the path). Derive the id from the
+    // prompt sidecar's path-shaped `included_template_path`. Returns
+    // null when no template was selected.
+    selected_template: deriveTemplateIdFromPath(sidecar.included_template_path),
     included_record_summary: {
       characters: sidecar.included_cast.slice(),
       records: sidecar.included_records.slice(),
     },
   };
+}
+
+function deriveTemplateIdFromPath(p: string | null | undefined): string | null {
+  if (!p) return null;
+  const m = /(mtemplate-\d+)\.yaml$/.exec(p);
+  return m ? m[1] ?? null : null;
 }
 
 function fieldsFromExisting(

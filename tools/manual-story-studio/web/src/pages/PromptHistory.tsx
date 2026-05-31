@@ -135,6 +135,22 @@ export function PromptHistory() {
                 </p>
               </header>
               <p>{prompt.moment_directive_snippet || "No directive snippet."}</p>
+              <p style={{ margin: "4px 0", fontSize: 12, color: "#666" }}>
+                Template:{" "}
+                {prompt.selected_template ? (
+                  <span
+                    style={{
+                      background: "#dde",
+                      padding: "2px 6px",
+                      borderRadius: 3,
+                    }}
+                  >
+                    {prompt.selected_template}
+                  </span>
+                ) : (
+                  <em>(none)</em>
+                )}
+              </p>
               <div>
                 <strong>Segments</strong>
                 {prompt.linked_segments.length === 0 ? (

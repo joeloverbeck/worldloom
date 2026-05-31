@@ -173,7 +173,13 @@ function castProfileBody(): Record<string, unknown> {
   };
 }
 
-const PER_CLASS_BODY: Record<ManualRecordClass, () => Record<string, unknown>> = {
+// beat-templates omitted intentionally — its distinct schema (no common
+// record fields) is exercised by SPEC-104's capstone via the dedicated
+// CRUD routes.
+const PER_CLASS_BODY: Record<
+  Exclude<ManualRecordClass, "beat-templates">,
+  () => Record<string, unknown>
+> = {
   cast: castProfileBody,
   entities: () => ({ ...commonFields(), kind: "faction" }),
   statuses: () => ({ ...commonFields(), subject: "mchar-1", kind: "life" }),
@@ -289,11 +295,18 @@ test("SPEC-101 AC #1: manual-story.yaml metadata enum + missing required", () =>
 test("SPEC-101 AC #2: all 18 MVP classes round-trip via CRUD + per-class required rejected", () => {
   const { repoRoot, root } = mkFixture();
   try {
+    // 18 SPEC-101 MVP classes + 1 SPEC-104 beat-templates class = 19. The
+    // beat-templates class has a distinct schema (no common record fields)
+    // and its own dedicated CRUD routes per SPEC-104; the generic per-class
+    // round-trip below skips it.
     const classCount = MANUAL_RECORD_CLASSES.length;
-    assert.equal(classCount, 18);
+    assert.equal(classCount, 19);
 
     for (const cls of MANUAL_RECORD_CLASSES) {
-      const body = PER_CLASS_BODY[cls]();
+      if (cls === "beat-templates") continue;
+      const body = PER_CLASS_BODY[
+        cls as Exclude<ManualRecordClass, "beat-templates">
+      ]();
       const result = createRecord(
         root,
         cls,

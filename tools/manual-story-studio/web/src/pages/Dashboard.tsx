@@ -54,6 +54,7 @@ export function Dashboard() {
     secrets: [],
     questions: [],
     artifacts: [],
+    "beat-templates": [],
   });
 
   useEffect(() => {

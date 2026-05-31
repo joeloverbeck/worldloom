@@ -69,6 +69,7 @@ export interface ManualStoryPromptPolicy {
   require_moment_directive: boolean;
   default_beat_count: string;
   include_recent_segments: number;
+  recent_template_advisory_window: number;
 }
 
 export interface ManualStoryManuscriptPolicy {
@@ -175,7 +176,8 @@ export type ManualRecordClass =
   | "clocks"
   | "secrets"
   | "questions"
-  | "artifacts";
+  | "artifacts"
+  | "beat-templates";
 
 export const MANUAL_RECORD_CLASS_PREFIXES: Record<ManualRecordClass, string> = {
   cast: "mchar",
@@ -196,6 +198,7 @@ export const MANUAL_RECORD_CLASS_PREFIXES: Record<ManualRecordClass, string> = {
   secrets: "msecret",
   questions: "mq",
   artifacts: "martifact",
+  "beat-templates": "mtemplate",
 };
 
 export const MANUAL_RECORD_CLASSES: readonly ManualRecordClass[] = [
@@ -217,6 +220,7 @@ export const MANUAL_RECORD_CLASSES: readonly ManualRecordClass[] = [
   "secrets",
   "questions",
   "artifacts",
+  "beat-templates",
 ] as const;
 
 export interface ManualCharacterProfileIdentity {

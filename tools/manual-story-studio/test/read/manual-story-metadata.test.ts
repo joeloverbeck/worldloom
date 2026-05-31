@@ -50,6 +50,7 @@ test("readManualStoryMetadata: existing file parses to typed shape", () => {
         require_moment_directive: true,
         default_beat_count: "2-5",
         include_recent_segments: 1,
+        recent_template_advisory_window: 2,
       },
       manuscript: {
         compile_on_segment_save: true,

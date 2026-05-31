@@ -180,6 +180,38 @@ const VALID_PER_CLASS: Record<ManualRecordClass, Record<string, unknown>> = {
     current_holder: null,
     provenance: "p",
   },
+  "beat-templates": {
+    id: "mtemplate-1",
+    title: "Soft Confrontation",
+    active: true,
+    classification: {
+      move_family: "confrontation",
+      tags: ["relationship", "hurt"],
+      intensity: "general",
+      tone_fit: ["tense", "tender"],
+    },
+    role_slots: {
+      initiator: { compatible_roles: ["viewpoint", "primary_actor"] },
+      guarded_other: { compatible_roles: ["opposing_actor"] },
+    },
+    requires: {
+      record_classes_any: ["beliefs", "emotions"],
+      record_tags_any: ["hurt"],
+      relationship_axes_any: ["trust"],
+      location_tags_any: [],
+    },
+    excludes: {
+      record_tags_any: ["active-violence"],
+      forbidden_if_secret_tags: ["must-not-reveal-yet"],
+    },
+    beat_guidance: [
+      { function: "setup", instruction: "Bring them into the same room." },
+      { function: "pressure", instruction: "Let one ask the question." },
+      { function: "exit", instruction: "Allow the other to retreat." },
+    ],
+    forbidden_inventions: [],
+    author_notes: "",
+  },
 };
 
 const REQUIRED_COMMON_FIELDS = [
@@ -214,6 +246,10 @@ test("validateRecord: every class accepts a fully populated valid record", () =>
 
 test("validateRecord: missing each required common field is rejected per class", () => {
   for (const [className, fixture] of Object.entries(VALID_PER_CLASS)) {
+    // beat-templates has its own distinct schema shape (no common record
+    // fields) and routes through validateBeatTemplate; covered separately
+    // in test/templates/beat-template-schema.test.ts.
+    if (className === "beat-templates") continue;
     for (const field of REQUIRED_COMMON_FIELDS) {
       const broken = { ...fixture };
       delete broken[field];
@@ -437,6 +473,7 @@ const VALID_METADATA = {
     require_moment_directive: true,
     default_beat_count: "2-5",
     include_recent_segments: 1,
+    recent_template_advisory_window: 2,
   },
   manuscript: {
     compile_on_segment_save: true,

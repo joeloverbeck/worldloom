@@ -67,7 +67,7 @@ Records live at `worlds/<slug>/manual-stories/<manual-story-slug>/records/<class
 - `msecret-<integer>` — secrets (`secrets/`)
 - `mq-<integer>` — open questions (`questions/`)
 - `martifact-<integer>` — artifacts (`artifacts/`)
-- `mtemplate-<integer>` — beat templates (`beat-templates/`; schema deferred to SPEC-104)
+- `mtemplate-<integer>` — beat templates (`beat-templates/`; schema landed in SPEC-104)
 - `SEG-<integer>` — segments (`segments/SEG-<integer>.md` prose body + `segments/SEG-<integer>.yaml` sidecar; allocated by `tools/manual-story-studio/src/write/segment-id-allocator.ts`; per-manual-story append-only; gaps from hard-delete preserved). Format follows the FOUNDATIONS-002 unpadded natural-integer convention.
 - `PROMPT-<integer>` — saved prompt artifacts (`prompts/PROMPT-<integer>.md` body + `prompt-runs/PROMPT-<integer>.yaml` sidecar; allocated by `tools/manual-story-studio/src/write/prompts.ts`; per-manual-story append-only; gaps from hard-delete preserved). Format follows the FOUNDATIONS-002 unpadded natural-integer convention.
 

@@ -21,6 +21,10 @@ import {
   registerPromptsWriteRoutes,
 } from "./routes/prompts.js";
 import {
+  registerBeatTemplatesReadRoutes,
+  registerBeatTemplatesWriteRoutes,
+} from "./routes/beat-templates.js";
+import {
   registerRecordsReadRoutes,
   registerRecordsWriteRoutes,
 } from "./routes/records.js";
@@ -69,6 +73,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerWorldsRoutes(server, { repoRoot: options.repoRoot });
   await registerManualStoriesGetRoute(server, { repoRoot: options.repoRoot });
   await registerRecordsReadRoutes(server, { repoRoot: options.repoRoot });
+  await registerBeatTemplatesReadRoutes(server, { repoRoot: options.repoRoot });
   await registerMetadataReadRoute(server, { repoRoot: options.repoRoot });
   await registerPromptsReadRoutes(server, { repoRoot: options.repoRoot });
   await registerSegmentsReadRoutes(server, { repoRoot: options.repoRoot });
@@ -79,6 +84,9 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
       repoRoot: options.repoRoot,
     });
     await registerRecordsWriteRoutes(writableRouter, {
+      repoRoot: options.repoRoot,
+    });
+    await registerBeatTemplatesWriteRoutes(writableRouter, {
       repoRoot: options.repoRoot,
     });
     await registerMetadataWriteRoute(writableRouter, {

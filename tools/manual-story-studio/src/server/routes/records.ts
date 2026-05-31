@@ -33,6 +33,25 @@ function isManualRecordClass(value: unknown): value is ManualRecordClass {
   );
 }
 
+// SPEC-104: beat-templates owns its dedicated /beat-templates URL space
+// (see routes/beat-templates.ts). The generic /records/:class endpoint
+// returns 404 with a pointer message so client errors surface the right
+// path; the routes never double-serve the same logical CRUD operations.
+function rejectBeatTemplatesClass(
+  cls: string,
+  reply: import("fastify").FastifyReply,
+): boolean {
+  if (cls === "beat-templates") {
+    void reply.code(404).send({
+      error: "wrong_url_space",
+      message:
+        "beat-templates is served by /beat-templates URL space; the generic /records endpoint does not handle this class",
+    });
+    return true;
+  }
+  return false;
+}
+
 function resolveManualStoryRootOrNull(
   repoRoot: string,
   worldSlug: string,
@@ -64,6 +83,9 @@ export async function registerRecordsReadRoutes(
       );
       if (!root) return reply.code(404).send({ error: "not_found" });
       const cls = request.query.class;
+      if (typeof cls === "string" && rejectBeatTemplatesClass(cls, reply)) {
+        return reply;
+      }
       if (!isManualRecordClass(cls)) {
         return reply
           .code(400)
@@ -86,6 +108,9 @@ export async function registerRecordsReadRoutes(
         request.params.msSlug,
       );
       if (!root) return reply.code(404).send({ error: "not_found" });
+      if (rejectBeatTemplatesClass(request.params.class, reply)) {
+        return reply;
+      }
       if (!isManualRecordClass(request.params.class)) {
         return reply
           .code(400)
@@ -132,6 +157,9 @@ export async function registerRecordsWriteRoutes(
         request.params.msSlug,
       );
       if (!root) return reply.code(404).send({ error: "not_found" });
+      if (rejectBeatTemplatesClass(request.params.class, reply)) {
+        return reply;
+      }
       if (!isManualRecordClass(request.params.class)) {
         return reply
           .code(400)
@@ -168,6 +196,9 @@ export async function registerRecordsWriteRoutes(
         request.params.msSlug,
       );
       if (!root) return reply.code(404).send({ error: "not_found" });
+      if (rejectBeatTemplatesClass(request.params.class, reply)) {
+        return reply;
+      }
       if (!isManualRecordClass(request.params.class)) {
         return reply
           .code(400)
@@ -209,6 +240,9 @@ export async function registerRecordsWriteRoutes(
         request.params.msSlug,
       );
       if (!root) return reply.code(404).send({ error: "not_found" });
+      if (rejectBeatTemplatesClass(request.params.class, reply)) {
+        return reply;
+      }
       if (!isManualRecordClass(request.params.class)) {
         return reply
           .code(400)

@@ -38,6 +38,16 @@ export function emitSection12(input: SectionEmitterInput): string {
     }
   }
 
+  // SPEC-104: template-level forbidden_inventions[] from the selected
+  // beat template (when any). Emitted after the per-cast and per-secret
+  // entries so per-cast prose-constraint guidance reads first.
+  if (input.template_forbidden_inventions) {
+    for (const phrase of input.template_forbidden_inventions) {
+      const p = phrase.trim();
+      if (p.length > 0) lines.push(`- Template forbids inventing: ${p}`);
+    }
+  }
+
   if (lines.length === 0) {
     return "(No forbidden inventions or reveals declared for the involved cast.)";
   }

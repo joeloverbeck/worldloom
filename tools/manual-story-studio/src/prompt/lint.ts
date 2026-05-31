@@ -15,6 +15,7 @@
 // Pure function: same (markdown, expected content-policy, id sets) →
 // same result. No disk I/O, no LLM, no network.
 
+import type { BeatTemplate } from "../schema/beat-template.js";
 import type {
   PromptLintFinding,
   PromptLintResult,
@@ -286,5 +287,75 @@ export function lintPrompt(input: PromptLintInput): PromptLintResult {
     findings,
     cleanForCopy: findings.length === 0,
     blockingForCopy: findings.some((f) => f.tier === "hard"),
+  };
+}
+
+// SPEC-104 §2.7: CRUD-time lint that catches engine-jargon, internal-id,
+// schema/validator, and narrator-voice violations in a beat-template's
+// beat_guidance.instruction strings. All findings are soft-tier — the
+// author's override flow (SPEC-102 §3 key decision) applies. Reuses the
+// existing four denylist surfaces without parallel content.
+export function lintBeatTemplateGuidance(
+  template: BeatTemplate,
+): PromptLintResult {
+  const concatenated = template.beat_guidance
+    .map((b) => b.instruction)
+    .join("\n");
+  const findings: PromptLintFinding[] = [];
+
+  const idMatches = concatenated.match(INTERNAL_ID_REGEX);
+  if (idMatches) {
+    for (const snippet of Array.from(new Set(idMatches))) {
+      findings.push({
+        rule: "no_internal_record_ids",
+        tier: "soft",
+        message: `Manual Studio internal record id "${snippet}" appears in beat_guidance.instruction.`,
+        snippet,
+      });
+    }
+  }
+
+  for (const prefix of ENGINE_JARGON_DENYLIST) {
+    const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`\\b${escaped}[0-9]+\\b`, "g");
+    const matches = concatenated.match(re);
+    if (matches && matches.length > 0) {
+      for (const snippet of Array.from(new Set(matches))) {
+        findings.push({
+          rule: "no_engine_jargon",
+          tier: "soft",
+          message: `Engine record-id "${snippet}" appears in beat_guidance.instruction (denylist: ${prefix}).`,
+          snippet,
+        });
+      }
+    }
+  }
+
+  for (const term of SCHEMA_VALIDATOR_DENYLIST) {
+    if (concatenated.includes(term)) {
+      findings.push({
+        rule: "no_schema_validator_terms",
+        tier: "soft",
+        message: `Schema/validator term "${term}" appears in beat_guidance.instruction.`,
+        snippet: term,
+      });
+    }
+  }
+
+  for (const phrase of RECORD_CLASS_NARRATOR_PHRASES) {
+    if (concatenated.includes(phrase)) {
+      findings.push({
+        rule: "no_record_class_narrator_voice",
+        tier: "soft",
+        message: `Record-class narrator-voice phrasing "${phrase}" appears in beat_guidance.instruction.`,
+        snippet: phrase,
+      });
+    }
+  }
+
+  return {
+    findings,
+    cleanForCopy: findings.length === 0,
+    blockingForCopy: false,
   };
 }

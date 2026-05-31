@@ -24,6 +24,10 @@ export interface SectionEmitterInput {
   included_cast_ids: string[];
   moment_directive: string;
   included_template_body: string | null;
+  // SPEC-104: template-level forbidden_inventions[] (when a beat template
+  // is selected). Threaded by compose stage 5 into section 12 alongside
+  // the existing per-cast prose_constraints.forbidden_inventions.
+  template_forbidden_inventions?: string[];
   recent_segment_last_paragraph: string | null;
   content_policy_body: string;
   prose_craft_contract_body: string;

@@ -23,8 +23,8 @@ This spec is intentionally last in the M1-M5 sequence because beat templates are
 
 ### In scope
 
-1. **Manual Beat Template schema** (one file per template, at `worlds/<slug>/manual-stories/<slug>/records/beat-templates/mtemplate-*.yaml`):
-   - `id: mtemplate-<slug>` (slug-form ID; numeric also permitted — see §3 ID convention).
+1. **Manual Beat Template schema** (one file per template, at `worlds/<slug>/manual-stories/<slug>/records/beat-templates/mtemplate-<integer>.yaml`):
+   - `id: mtemplate-<integer>` (numeric integer suffix, matching SPEC-101's per-class allocator at `tools/manual-story-studio/src/write/id-allocator.ts` and `docs/ID-ALLOCATION.md` §Manual-story-scoped; widening the allocator to admit slug suffixes is explicitly flagged in the allocator as a deliberate single-point change and is out of scope here).
    - `title` (string).
    - `active` (bool, default `true`).
    - `classification.move_family` (closed enum: `negotiation | confrontation | seduction | escape | reveal | concealment | bargaining | care | grief | celebration | confession | refusal | observation | travel | preparation | aftermath | other`).
@@ -41,6 +41,9 @@ This spec is intentionally last in the M1-M5 sequence because beat templates are
    - `beat_guidance` (array of 1-5 objects, each `{function: "setup" | "pressure" | "turn" | "exit" | "aftermath", instruction: string}`).
    - `forbidden_inventions` (string array, copied verbatim into the SPEC-102 prompt §12 when the template is selected).
    - `author_notes` (string).
+
+   **`manual-story.yaml` `prompt_policy` extension** (extends SPEC-101 §2.1's `prompt_policy` block):
+   - `prompt_policy.recent_template_advisory_window` (int, default `2`) — number of trailing segments scanned for the §2.2 stage-8 recent-use advisory. The recent-use scan reads each segment's sidecar `selected_template` to build the per-template last-used set. The default of 2 matches the proposal §9 intent ("Recent-use advisory, not hard block") at the lightest useful window. Setting to `0` disables the advisory entirely.
 2. **Deterministic 9-stage filtering pipeline** (backend, `tools/manual-story-studio/src/templates/filter.ts`):
    - Inputs: current manual story metadata, selected cast (subset of `cast_order`), active records (per SPEC-101 active flag), moment directive (string), optional author-selected move_family / tags / location, all beat templates.
    - Stage 1: Active templates only (`active: true`).
@@ -50,7 +53,7 @@ This spec is intentionally last in the M1-M5 sequence because beat templates are
    - Stage 5: Required tags present (any active record carries any tag in `requires.record_tags_any`).
    - Stage 6: Location / tone compatibility (selected location's `tags` intersect `requires.location_tags_any` if non-empty; story-contract `tone` field — when populated — does not block but ranks via tone-fit; per stage 9 sort).
    - Stage 7: Forbidden-secret / forbidden-reveal compatibility (no active secret's `forbidden_reveal_tags` intersect `excludes.forbidden_if_secret_tags`; no active record's tags intersect `excludes.record_tags_any`).
-   - Stage 8: Recent-use advisory (template used in the last N segments — where N comes from a future setting, default 2 — surfaces as an advisory badge; NOT a hard block).
+   - Stage 8: Recent-use advisory (template used in the last `prompt_policy.recent_template_advisory_window` segments — see §2 In scope item 1's `prompt_policy` block extension — surfaces as an advisory badge; NOT a hard block).
    - Stage 9: Sort by: (a) author explicit pin first, (b) tag overlap with required + selected tags, (c) role-fit count, (d) tone-fit overlap with story-contract `tone` if populated, (e) recent-use advisory (deprioritize recently-used), (f) title alphabetical as tiebreak.
    - Output: ordered list of `{template, why_suggested, advisory_flags}` objects.
 3. **`why_suggested` trace assembly**:
@@ -68,10 +71,10 @@ This spec is intentionally last in the M1-M5 sequence because beat templates are
    - Each candidate is a card showing: title, move_family, beat count, `why_suggested` lines, "Use this template" / "Skip" actions, recent-use advisory badge.
    - "No template" is always an option — author may compose without selecting a template (the prompt composer's §6 Optional Beat Template Guidance section is then omitted from the prompt).
 6. **Wire selected template into SPEC-102 composer**:
-   - The Moment Composer passes the optional `selected_template` ID through to `POST /api/.../prompts/preview` and `POST /api/.../prompts`.
-   - The composer's stage 5 (load optional selected beat template) reads the template file and includes its `beat_guidance` and `forbidden_inventions` in §6 of the composed prompt.
-   - The composer's stage 12 (sidecar write) records `selected_template` in the prompt sidecar.
-   - The segment sidecar from SPEC-103 carries the same field.
+   - The Moment Composer passes the optional `selected_template: mtemplate-<integer>` ID through to `POST /api/.../prompts/preview` and `POST /api/.../prompts`. The prompt-routes layer (per §4 modify list) resolves the ID to `worlds/<world>/manual-stories/<msSlug>/records/beat-templates/<selected_template>.yaml` and passes the resolved path into the existing composer input field `included_template_path` (the landed SPEC-102 wire-up at `tools/manual-story-studio/src/server/routes/prompts.ts:45,94-95`); SPEC-104 introduces the ID-shaped public API while preserving the path-shaped internal composer input.
+   - The composer's stage 5 (load optional selected beat template) reads the template file at `included_template_path` and includes its `beat_guidance` and `forbidden_inventions` in §6 of the composed prompt — extending the existing stage-5 loader at `tools/manual-story-studio/src/prompt/compose.ts:130-135,183` whose output already flows into the existing §6 emitter via the `included_template_body` field.
+   - The composer's stage 12 (sidecar write) records the resolved `included_template_path` on the prompt sidecar — this is the field landed by SPEC-102 at `tools/manual-story-studio/src/write/prompts.ts:62-63`, not a new field.
+   - The segment sidecar from SPEC-103 carries the parallel `selected_template` field (an mtemplate-N ID string, not a path); `tools/manual-story-studio/src/write/segments.ts:292` already maps the prompt sidecar's `included_template_path` to the segment's `selected_template` at save time. SPEC-104's contribution is making the path-and-ID flow non-null when a template is selected; the field shapes themselves are unchanged.
 7. **Update prompt lint to handle beat-template content** (extends SPEC-102 lint):
    - Beat-template `beat_guidance.instruction` strings are subject to the same engine-jargon and Manual-Studio-internal-ID denylist as other prompt sections.
    - Lint rejects a template whose `beat_guidance` contains a forbidden term, with the violating string surfaced.
@@ -87,7 +90,7 @@ This spec is intentionally last in the M1-M5 sequence because beat templates are
 
 ## 3. Key decisions
 
-- **Templates are records, not engine constructs.** They live under `records/beat-templates/` alongside the other 17 record classes, follow the same `active` / `tags` / common-field discipline, and use the same CRUD routes (extended to support the beat-template-specific fields). Treating them as records keeps the Manual Studio data model uniform.
+- **Templates are records, not engine constructs.** They live under `records/beat-templates/` alongside the other 18 SPEC-101 MVP record classes (cast through artifacts), follow the same `active` / `tags` / common-field discipline, and use the same CRUD routes (extended to support the beat-template-specific fields). Treating them as records keeps the Manual Studio data model uniform.
 - **The `_any` filtering semantics is OR within a stage, AND across stages.** A template requires one of the listed classes (OR), one of the listed tags (OR), and one of the listed locations (OR); a template that satisfies all three stages' OR conditions is a candidate. This is the lightest filter that still narrows usefully.
 - **The 9-stage filter is the deterministic staging pattern from `select-storylet-candidates`, not the same machinery.** The discipline transfers; the scope shrinks. No predicate DSL, no scope/visibility branching, no saliency-as-stored-field, no cooldown mechanism. Recent-use advisory is computed at filter time from segment sidecars (which template each segment selected) — not stored on the template.
 - **The author may compose without a template.** Selecting no template is the default. Templates are an accelerator, not a requirement. The prompt composer omits §6 when no template is selected.
@@ -103,19 +106,23 @@ This spec is intentionally last in the M1-M5 sequence because beat templates are
 
 - `tools/manual-story-studio/src/templates/filter.ts` — 9-stage pipeline.
 - `tools/manual-story-studio/src/templates/why-suggested.ts` — `why_suggested` trace assembly.
-- `tools/manual-story-studio/src/templates/recent-use.ts` — scan segment sidecars for `selected_template`, compute per-template last-used-segment.
+- `tools/manual-story-studio/src/templates/recent-use.ts` — scan segment sidecars for `selected_template`, compute per-template last-used-segment (window size from `manual-story.yaml` `prompt_policy.recent_template_advisory_window`).
 - `tools/manual-story-studio/src/schema/beat-template.ts` — TypeScript types + zod-style schema validation.
 - `tools/manual-story-studio/src/validate/beat-template-schema.ts` — declarative schema validator (called by CRUD).
 - `tools/manual-story-studio/src/server/routes/beat-templates.ts` — CRUD routes following SPEC-101 pattern + `POST /api/.../moment-composer/template-candidates` (computes filtered candidates given a moment composer input).
-- `tools/manual-story-studio/src/prompt/sections/section-6-beat-template-guidance.ts` — assembles §6 of the prompt from a selected template.
 
 **Modify (backend):**
 
-- `tools/manual-story-studio/src/prompt/compose.ts` — wire stage 5 (load optional template) and stage 9 (include §6 in composed Markdown).
-- `tools/manual-story-studio/src/prompt/lint.ts` — extend lint to scan template guidance strings.
-- `tools/manual-story-studio/src/write/prompts.ts` — sidecar carries `selected_template`.
-- `tools/manual-story-studio/src/write/segments.ts` — segment sidecar copies `selected_template` from prompt sidecar.
-- `tools/manual-story-studio/src/validate/schema.ts` (from SPEC-101) — register beat-template class.
+- `tools/manual-story-studio/src/prompt/sections/section-6-optional-beat-template-guidance.ts` (from SPEC-102) — the file already accepts an `included_template_body` input and emits `(none selected)` when empty. SPEC-104's contribution is wiring stage 5's template load to populate `included_template_body` with the selected template's `beat_guidance` (rendered as an enumerated list keyed by `function`) and `forbidden_inventions` (rendered verbatim into the §12 assembly per existing `section-12-forbidden-inventions-and-reveals.ts` wiring). A net-new `section-6-beat-template-guidance.ts` file would collide with the existing emitter and is explicitly not introduced.
+- `tools/manual-story-studio/src/prompt/compose.ts` — extend stage 5 (load optional template) to parse `beat_guidance` + `forbidden_inventions` from the loaded YAML and pass them through the existing `included_template_body` channel; no new pipeline stage is added; stage 9 already concatenates §6 via the existing emitter.
+- `tools/manual-story-studio/src/prompt/lint.ts` — extend lint to scan template guidance strings against the existing `ENGINE_JARGON_DENYLIST`, `SCHEMA_VALIDATOR_DENYLIST`, `INTERNAL_ID_REGEX`, and `RECORD_CLASS_NARRATOR_PHRASES` surfaces at `lint.ts:23,70,88,90`; new rules ride on the existing tier system (hard vs soft) and override path.
+- `tools/manual-story-studio/src/write/prompts.ts` — no field-shape change; the existing `included_template_path` sidecar field becomes non-null when a template is selected. Spec edit is documenting this composer-side flow; no schema mutation required here.
+- `tools/manual-story-studio/src/write/segments.ts` — no field-shape change; existing `selected_template` segment-sidecar field at `segments.ts:35,47,98,157-159,259,266,292,306` is already populated from prompt sidecar's `included_template_path` via the landed mapping at `segments.ts:292`. Spec edit is documenting this flow; no schema mutation required here.
+- `tools/manual-story-studio/src/server/routes/prompts.ts` — extend the existing POST `/preview` and `/` route handlers (currently accept `included_template_path` only at `routes/prompts.ts:45,94-95`) to also accept an optional `selected_template: mtemplate-<integer>` ID; resolve the ID to `worlds/<world>/manual-stories/<msSlug>/records/beat-templates/<selected_template>.yaml` and pass through the existing `included_template_path` channel. Preserves back-compat with callers that still pass `included_template_path` directly.
+- `tools/manual-story-studio/src/server/routes/beat-templates.ts` — see Create (backend) above. (Listed here for completeness of the routes-side surface.)
+- `tools/manual-story-studio/src/validate/schema.ts` (from SPEC-101) — register beat-template class declarative validator; iterates `MANUAL_RECORD_CLASSES` per existing schema.ts:4,846 pattern.
+- `tools/manual-story-studio/src/schema/manual-story.ts` (from SPEC-101) — three-part extension: (a) add `"beat-templates"` to the `ManualRecordClass` union (line 160); (b) add `"beat-templates": "mtemplate"` to the `MANUAL_RECORD_CLASS_PREFIXES` map (line 180); (c) append `"beat-templates"` to the `MANUAL_RECORD_CLASSES` array (line 201). Required for `allocateNextIdForClass("beat-templates")` and CRUD-route schema lookup to function; the id-allocator's prefix lookup at `id-allocator.ts:60` throws on unregistered classes. Also: extend the `ManualStoryPromptPolicy` interface (line 67) with `recent_template_advisory_window: number` (default `2`); the `manual-story-metadata.ts` initializer should default the field alongside the existing `default_beat_count` / `include_recent_segments` defaults.
+- `tools/manual-story-studio/src/write/manual-story-metadata.ts` — add the `recent_template_advisory_window: 2` default to the metadata initializer alongside the existing `prompt_policy.*` defaults (parallel to SPEC-103 §4's `allow_reorder` default addition).
 
 **Create (frontend):**
 
@@ -126,16 +133,23 @@ This spec is intentionally last in the M1-M5 sequence because beat templates are
 
 **Modify (frontend):**
 
-- `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` (from SPEC-102) — render `BeatTemplateCandidates` below records picker; thread `selected_template` through to compose call.
-- `tools/manual-story-studio/web/src/App.tsx` — add `/beat-templates` route.
+- `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` (from SPEC-102) — replace the existing beat-template placeholder fieldset at `MomentComposer.tsx:234-237` (currently shows *"Reserved for SPEC-104. No template selector in this iteration."*) with the `BeatTemplateCandidates` component rendered below the records picker. Thread the selected `mtemplate-<integer>` ID through to the compose-preview call via the routes-layer's `selected_template` field (per the §4 modify `routes/prompts.ts` entry above).
+- `tools/manual-story-studio/web/src/App.tsx` — add `/worlds/:worldSlug/manual-stories/:msSlug/beat-templates` route (matching the existing full-prefix shape established by SPEC-101/102/103 at `App.tsx:34-61`).
+- `tools/manual-story-studio/web/src/types/manual-story.ts` (from SPEC-101/103) — hand-maintained mirror of the new backend `schema/beat-template.ts` types. Per SPEC-103 §4's established rule, every backend schema extension requires a parallel update here because the Vite (bundler) module resolution cannot import from the backend's Node16 module tree. Also mirror the new `prompt_policy.recent_template_advisory_window: number` field and any new typed fields on the beat-template CRUD response surface.
 
-**Tests:**
+**Modify (docs):**
 
-- `test/beat-template-schema.test.ts` — closed enums validated; missing required fields rejected; beat_guidance count 1-5 enforced.
-- `test/beat-template-filter.test.ts` — fixture manual story + fixture templates → expected candidate order across multiple input combinations.
-- `test/beat-template-why-suggested.test.ts` — trace lines match expected for fixture inputs.
-- `test/beat-template-recent-use.test.ts` — last-used-segment correctly derived from segment sidecars.
-- `test/prompt-section-6-template-guidance.test.ts` — selected template renders into §6 correctly; no template selected → §6 absent.
+- `docs/ID-ALLOCATION.md` — flip the `mtemplate-<integer>` annotation at line 70 from *"schema deferred to SPEC-104"* to *"schema landed in SPEC-104"*.
+
+**Tests** (organized per the SPEC-103 §4 per-subsystem convention — `test/server/`, `test/write/`, `test/manuscript/`, with root reserved for pure-function modules; a new `test/templates/` subdirectory groups the template-specific pure functions):
+
+- `test/templates/beat-template-schema.test.ts` — closed enums validated; missing required fields rejected; beat_guidance count 1-5 enforced.
+- `test/templates/filter.test.ts` — fixture manual story + fixture templates → expected candidate order across at least 5 distinct input combinations (covers each of the 9 stages exercising its block path).
+- `test/templates/why-suggested.test.ts` — trace lines match expected for fixture inputs; 4-line cap enforced.
+- `test/templates/recent-use.test.ts` — last-used-segment correctly derived from segment sidecars; respects `prompt_policy.recent_template_advisory_window`.
+- `test/server/beat-templates-routes.test.ts` — CRUD round-trip + `POST /api/.../moment-composer/template-candidates` returns ordered candidate set; write-scope-guard adherence verified.
+- `test/server/prompts-routes.test.ts` (extend existing SPEC-103-updated file) — verify the new `selected_template` route input resolves to `included_template_path` correctly; back-compat path (direct `included_template_path`) still works.
+- `test/prompt/section-6-template-guidance.test.ts` — selected template renders `beat_guidance` + `forbidden_inventions` into §6 correctly; no template selected → §6 emits `(none selected)` per the existing emitter contract.
 
 **No modification to:**
 

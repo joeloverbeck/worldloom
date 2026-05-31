@@ -103,6 +103,7 @@ function writeMetadata(
       require_moment_directive: true,
       default_beat_count: "2-5",
       include_recent_segments: 1,
+      recent_template_advisory_window: 2,
     },
     manuscript: {
       compile_on_segment_save: opts.compileOnSave,
@@ -131,7 +132,9 @@ function seedPrompt(root: ManualStoryRoot): void {
       manual_story_slug: "fixture-story",
       included_cast: ["mchar-1"],
       included_records: ["mbel-1"],
-      included_template_path: "mtemplate-1",
+      // Realistic path shape; the segment-write layer derives the
+      // mtemplate-N id from the path tail per SPEC-104 §2.6.
+      included_template_path: "records/beat-templates/mtemplate-1.yaml",
       moment_directive: "Write the lantern scene.",
       prompt_sha256: "historical-sidecar-sha",
     }),
