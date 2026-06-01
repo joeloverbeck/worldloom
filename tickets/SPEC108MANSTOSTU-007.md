@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/web/src/pages/RepairSegments.tsx` (new repair-mode UI surface) and modifies `tools/manual-story-studio/web/src/App.tsx` (adds the `/repair` route binding to `<RepairSegments />`).
-**Deps**: SPEC108MANSTOSTU-003
+**Deps**: archive/tickets/SPEC108MANSTOSTU-003.md
 
 ## Problem
 

@@ -107,13 +107,20 @@ export async function editSegment(
   msSlug: string,
   segmentId: string,
   request: SaveSegmentRequest,
+  options: { mode?: "repair"; force_replace?: boolean } = {},
 ): Promise<SaveSegmentResponse> {
+  const params = new URLSearchParams();
+  if (options.mode) params.set("mode", options.mode);
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const body = options.force_replace
+    ? { ...request, force_replace: true }
+    : request;
   const response = await fetch(
-    `${segmentsBase(worldSlug, msSlug)}/${enc(segmentId)}`,
+    `${segmentsBase(worldSlug, msSlug)}/${enc(segmentId)}${qs}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request),
+      body: JSON.stringify(body),
     },
   );
   if (!response.ok) {
@@ -126,9 +133,12 @@ export async function deleteSegment(
   worldSlug: string,
   msSlug: string,
   segmentId: string,
-  options: { force?: boolean } = {},
+  options: { force?: boolean; mode?: "repair" } = {},
 ): Promise<DeleteSegmentResponse | { ok: false; error: "not_found" }> {
-  const qs = options.force ? "?force=true" : "";
+  const params = new URLSearchParams();
+  if (options.mode) params.set("mode", options.mode);
+  if (options.force) params.set("force", "true");
+  const qs = params.toString() ? `?${params.toString()}` : "";
   const response = await fetch(
     `${segmentsBase(worldSlug, msSlug)}/${enc(segmentId)}${qs}`,
     { method: "DELETE" },

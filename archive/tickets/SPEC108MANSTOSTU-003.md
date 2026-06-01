@@ -1,6 +1,6 @@
 # SPEC108MANSTOSTU-003: Frontend API wrappers — mode + force_replace params
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/web/src/api/segments.ts` to extend the `editSegment` and `deleteSegment` API wrappers with `mode` and `force_replace` parameters (mirroring the route surface introduced by ticket 002).
@@ -112,3 +112,26 @@ export async function deleteSegment(
 ### Commands
 
 1. `cd tools/manual-story-studio/web && npm test` — TypeScript typecheck for the extended signatures.
+
+## Outcome
+
+Completed: 2026-06-01
+
+Extended `tools/manual-story-studio/web/src/api/segments.ts` so frontend callers can explicitly opt into the repair-mode segment routes:
+
+1. `editSegment` now accepts `options: { mode?: "repair"; force_replace?: boolean } = {}`.
+2. `editSegment` appends `?mode=repair` when requested and includes `force_replace: true` in the request body when requested.
+3. `deleteSegment` now accepts `options: { force?: boolean; mode?: "repair" } = {}`.
+4. `deleteSegment` composes `mode` and `force` with `URLSearchParams`, preserving the existing `{ force: true }` behavior while allowing repair mode.
+
+Existing call shapes remain valid; the wrappers still allow no-options calls and leave route enforcement to the backend gate.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio/web && npm test` — passed (`tsc -p tsconfig.json --noEmit`).
+2. `grep -n 'mode?: "repair"' tools/manual-story-studio/web/src/api/segments.ts` — two matches, one in each wrapper options type.
+3. `grep -n "force_replace" tools/manual-story-studio/web/src/api/segments.ts` — matches in the `editSegment` options type and request-body composition.
+
+## Deviations
+
+None.
