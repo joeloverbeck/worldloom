@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/src/read/manuscript.ts` (`readManuscript` signature change to `ReadResult<ManuscriptReadResult>`) plus 2 caller files (`src/manuscript/compile.ts` — replaces raw `readFileSync`+`YAML.parse` with typed reads, intentional throw→typed-error behavior change; `src/server/routes/manuscript.ts` — route adaptation). No impact on canon-pipeline surfaces.
-**Deps**: archive/tickets/SPEC105MANSTOSTU-002.md, SPEC105MANSTOSTU-003
+**Deps**: archive/tickets/SPEC105MANSTOSTU-002.md, archive/tickets/SPEC105MANSTOSTU-003.md
 
 ## Problem
 

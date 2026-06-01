@@ -68,7 +68,7 @@ Unit tests covering the discriminated union shape and the helpers.
 ## Out of Scope
 
 - Migrating any existing read function to use `ReadResult<T>` — SPEC105MANSTOSTU-004 through SPEC105MANSTOSTU-008.
-- The read-error → HTTP-status mapping helper — SPEC105MANSTOSTU-003.
+- The read-error → HTTP-status mapping helper — archive/tickets/SPEC105MANSTOSTU-003.md.
 - The health-report types — archive/tickets/SPEC105MANSTOSTU-001.md.
 
 ## Acceptance Criteria

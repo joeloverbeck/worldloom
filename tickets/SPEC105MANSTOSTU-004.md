@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/src/read/manual-story-metadata.ts` (signature change `ManualStoryMetadata | null` → `ReadResult<ManualStoryMetadata>`) plus three caller sites (`prompt/compose.ts` stage 2; `server/routes/metadata.ts`; `server/routes/beat-templates.ts` line 306). No impact on canon-pipeline surfaces.
-**Deps**: archive/tickets/SPEC105MANSTOSTU-002.md, SPEC105MANSTOSTU-003
+**Deps**: archive/tickets/SPEC105MANSTOSTU-002.md, archive/tickets/SPEC105MANSTOSTU-003.md
 
 ## Problem
 
@@ -17,7 +17,7 @@
    - `tools/manual-story-studio/src/server/routes/metadata.ts:41` — direct call inside the GET handler.
    - `tools/manual-story-studio/src/server/routes/beat-templates.ts:306` — `const metadata = readManualStoryMetadata(root.absolutePath);` (the beat-template candidate-generation route also reads metadata to resolve cast).
    `grep -rn "readManualStoryMetadata" tools/manual-story-studio/src/` returns exactly these 4 sites (1 definition + 3 callers) — no other callers exist.
-2. SPEC-105 §2 item 3 + §4 Modify list this signature change explicitly. The read-error vocabulary (`file_not_found`, `yaml_parse_failed`) is consumed by `mapReadErrorToHttpReply` from SPEC105MANSTOSTU-003 — routes call the helper on `ok: false` returns.
+2. SPEC-105 §2 item 3 + §4 Modify list this signature change explicitly. The read-error vocabulary (`file_not_found`, `yaml_parse_failed`) is consumed by `mapReadErrorToHttpReply` from archive/tickets/SPEC105MANSTOSTU-003.md — routes call the helper on `ok: false` returns.
 3. Cross-skill boundary: `tools/manual-story-studio` is canon-pipeline-fenced per SPEC-100; this signature change is internal to the package, no cross-package import added or modified.
 4. Rule 6 retcon attribution: the migration changes the public return type from `ManualStoryMetadata | null` to `ReadResult<ManualStoryMetadata>` — this is a non-additive signature change. Existing behavior (caller checks `if (!metadata)` and falls back) is replaced with discriminated-union narrowing (`if (!result.ok)` and explicit error dispatch via `mapReadErrorToHttpReply`). The change is warranted because the existing `T | null` shape conflates three failure conditions that need distinct HTTP outcomes per SPEC-105 §2 item 4. No backwards-compat shim or `T | null` overload is retained.
 5. Blast-radius of the signature change: 3 caller sites enumerated above. The structural impact is local — no transitive type-flow into other modules because `ManualStoryMetadata` is consumed by name, not via inference into other functions' signatures. The blast-radius grep at acceptance time confirms no orphan call sites.

@@ -8,7 +8,7 @@
 
 ## Problem
 
-`tools/manual-story-studio` has no shared backend → frontend integrity contract. Every page handles failure ad hoc; corruption is rendered as absence ("no records exist" indistinguishable from "every record file is malformed"). The first foundational piece SPEC-105 needs is a canonical health-report shape consumed by the compute pass (SPEC105MANSTOSTU-009), the `/health` route (SPEC105MANSTOSTU-010), the route 409 dispatch via the read-error-http helper (SPEC105MANSTOSTU-003), and the frontend health banner (SPEC105MANSTOSTU-011). Defining the types in isolation, with no consumers yet, keeps the foundation reviewable on its own.
+`tools/manual-story-studio` has no shared backend → frontend integrity contract. Every page handles failure ad hoc; corruption is rendered as absence ("no records exist" indistinguishable from "every record file is malformed"). The first foundational piece SPEC-105 needs is a canonical health-report shape consumed by the compute pass (SPEC105MANSTOSTU-009), the `/health` route (SPEC105MANSTOSTU-010), the route 409 dispatch via the read-error-http helper (archive/tickets/SPEC105MANSTOSTU-003.md), and the frontend health banner (SPEC105MANSTOSTU-011). Defining the types in isolation, with no consumers yet, keeps the foundation reviewable on its own.
 
 ## Assumption Reassessment (2026-06-01)
 
@@ -80,7 +80,7 @@ Unit test for `deriveHealthStatus` covering the three branches and the empty-fin
 - The 3-pass integrity compute logic — SPEC105MANSTOSTU-009.
 - The `/health` HTTP route — SPEC105MANSTOSTU-010.
 - The `ReadResult<T>` + `ReadError` types — archive/tickets/SPEC105MANSTOSTU-002.md.
-- The read-error → HTTP-status mapping helper — SPEC105MANSTOSTU-003.
+- The read-error → HTTP-status mapping helper — archive/tickets/SPEC105MANSTOSTU-003.md.
 - The frontend banner / hook / api wrapper — SPEC105MANSTOSTU-011.
 
 ## Acceptance Criteria
