@@ -161,7 +161,7 @@ import { HealthBanner } from "./components/HealthBanner.js";
 
 ## Out of Scope
 
-- The `/health` HTTP route + compute pass — SPEC105MANSTOSTU-009 + SPEC105MANSTOSTU-010.
+- The `/health` HTTP route + compute pass — archive/tickets/SPEC105MANSTOSTU-009.md + SPEC105MANSTOSTU-010.
 - Removing the existing 7 `.catch(() => {})` silent swallowers in Dashboard.tsx / MomentComposer.tsx — SPEC105MANSTOSTU-012.
 - Browser-like component tests for the banner — deferred per spec §2 item 8's *"extending it to component tests is SPEC-111's concern"*; the web subpackage's `tsc --noEmit`-only baseline is preserved.
 - The post-write `refetch()` integration in Dashboard / MomentComposer / RecordForm / EditContract — those changes land in SPEC105MANSTOSTU-012 (catch removal) + the existing forms' write-handler bodies; this ticket only ships the hook + API surface for refetch.

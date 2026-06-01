@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/src/server/routes/health.ts` (`GET /api/worlds/:world/manual-stories/:story/health`) and modifies `tools/manual-story-studio/src/server/http.ts` to register the new health route inside the read-route scope. No impact on canon-pipeline surfaces.
-**Deps**: SPEC105MANSTOSTU-009
+**Deps**: archive/tickets/SPEC105MANSTOSTU-009.md
 
 ## Problem
 
-SPEC-105 §2 item 2 specifies the `GET /api/worlds/:world/manual-stories/:story/health` route as the canonical authority for the backend → frontend integrity contract. The compute pass exists (SPEC105MANSTOSTU-009 ships `computeHealth`), but until a route exposes it, the frontend banner cannot consume it and the route-layer 409 dispatch (for blocked operations) cannot consult it. This ticket wires the route surface.
+SPEC-105 §2 item 2 specifies the `GET /api/worlds/:world/manual-stories/:story/health` route as the canonical authority for the backend → frontend integrity contract. The compute pass exists (archive/tickets/SPEC105MANSTOSTU-009.md ships `computeHealth`), but until a route exposes it, the frontend banner cannot consume it and the route-layer 409 dispatch (for blocked operations) cannot consult it. This ticket wires the route surface.
 
 ## Assumption Reassessment (2026-06-01)
 
@@ -19,7 +19,7 @@ SPEC-105 §2 item 2 specifies the `GET /api/worlds/:world/manual-stories/:story/
 
 ## Architecture Check
 
-1. The route's body is trivial — resolve the manual story root, call `computeHealth`, return the `HealthReport` with status 200. The route does NOT do its own integrity walking; that's compute.ts's job. This single-responsibility split keeps the route file small and the compute logic testable in isolation (SPEC105MANSTOSTU-009 already covers compute via unit tests).
+1. The route's body is trivial — resolve the manual story root, call `computeHealth`, return the `HealthReport` with status 200. The route does NOT do its own integrity walking; that's compute.ts's job. This single-responsibility split keeps the route file small and the compute logic testable in isolation (archive/tickets/SPEC105MANSTOSTU-009.md already covers compute via unit tests).
 2. Per SPEC-105 §7 AC#1, the route returns 200 *regardless* of the underlying health status — the *status* of the story is in the body, the request itself is well-formed. This is distinct from the per-route 409 dispatch (which fires when a route is asked to perform an operation that health would block); the `/health` route itself is purely informational.
 3. Registration in the read-route scope (not the write-route scope) at http.ts:75-80 matches the route's read-only nature.
 4. No backwards-compatibility aliasing/shims.
@@ -89,7 +89,7 @@ Place the registration as the LAST read-route registration so the existing manua
 
 ## Out of Scope
 
-- The compute pass implementation — SPEC105MANSTOSTU-009.
+- The compute pass implementation — archive/tickets/SPEC105MANSTOSTU-009.md.
 - The `/health` route's response-shape contract (HealthReport types) — SPEC105MANSTOSTU-001.
 - Per-route 409 dispatch when health is blocked (e.g., the prompts/compose route denying writes when health is blocked) — that's a route-layer integration that lands as part of the migration tickets (004–008) using the helper from 003. AC#9 of SPEC-105 (POSTing to /prompts/compose with a blocked story returns 409 with HealthReport body) is verified by SPEC105MANSTOSTU-014 against the composed system.
 - Frontend rendering — SPEC105MANSTOSTU-011.

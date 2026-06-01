@@ -1,6 +1,6 @@
 # SPEC105MANSTOSTU-009: Health compute pass
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/src/health/compute.ts` (3-pass integrity walk producing a `HealthReport`). Consumed by SPEC105MANSTOSTU-010 (the `/health` route) and indirectly by the route layer's 409 dispatch when an entire story is `blocked` for any read/write attempt.
@@ -12,9 +12,9 @@ SPEC-105 §2 item 2 specifies the `/health` route walks the manual story directo
 
 ## Assumption Reassessment (2026-06-01)
 
-1. The `tools/manual-story-studio/src/health/compute.ts` path does NOT exist at HEAD; this ticket creates it. The sibling `src/health/types.ts` exists from archive/tickets/SPEC105MANSTOSTU-001.md (provides `HealthStatus`, `HealthSeverity`, `HealthFinding`, `HealthReport`, `BlockedAction`, `deriveHealthStatus`).
+1. At intake, the `tools/manual-story-studio/src/health/compute.ts` path did NOT exist; this ticket creates it. The sibling `src/health/types.ts` exists from archive/tickets/SPEC105MANSTOSTU-001.md (provides `HealthStatus`, `HealthSeverity`, `HealthFinding`, `HealthReport`, `BlockedAction`, `deriveHealthStatus`).
 2. SPEC-105 §2 item 2 + §7 ACs #2/3/4/5 + §1 Context all define the compute pass scope. Pass 1 severities are `blocking`; Pass 2/3 severities are `error` or `warn` depending on whether the affected surface is reachable without resolution. The `blocked_actions` array follows the spec §2 item 1 derivation rule: when ANY blocking finding is present, all four entries (`prompt_copy`, `prompt_save`, `segment_save`, `manuscript_compile`) populate; when only `error`-severity findings are present, `blocked_actions` is empty but `status` is `degraded`.
-3. Cross-skill boundary: compute.ts is the load-bearing logic surface for SPEC-105's *"visible, specific, repairable failure"* model. It consumes the migrated read layer (`readManualStoryMetadata`, `listRecords`, `readRecord`, `listSegments`, `readSegmentSidecar`, `readSegmentBody`, `readManuscript`, `scanReferences`) from tickets 004–008 and surfaces every parse / schema / reference failure as a structured `HealthFinding`. Without all reads migrated, compute.ts cannot distinguish "valid absence" from "corruption" at every walked file.
+3. Cross-skill boundary: compute.ts is the load-bearing logic surface for SPEC-105's *"visible, specific, repairable failure"* model. It consumes the migrated read layer (`readManualStoryMetadata`, `listRecords`, `readRecord`, `listAllKnownIds`, `readSegmentSidecar`, `readSegmentBody`, `readManuscript`) from tickets 004–008 and the existing reference validator to surface parse / schema / reference failures as structured `HealthFinding`s. Without all reads migrated, compute.ts cannot distinguish "valid absence" from "corruption" at every walked file.
 4. Rule 5 No Consequence Evasion grounding: the compute pass's job IS to propagate second-order effects of corruption. A single corrupt `manual-story.yaml` → `status: blocked` + `blocked_actions: all four` because every cockpit operation depends on valid metadata. A single corrupt record → `status: degraded` + `blocked_actions: []` because non-affected records still load. These propagations are the spec §2 item 1 / item 4 derivation rules made concrete; the compute pass IS the Rule 5 enforcement surface for the integrity model.
 
 ## Architecture Check
@@ -31,132 +31,30 @@ SPEC-105 §2 item 2 specifies the `/health` route walks the manual story directo
 3. `blocked_actions` populates per the spec rule → unit tests assert `blocked` status fills all four actions; `degraded` status emits `[]`.
 4. End-to-end integration tested by SPEC105MANSTOSTU-014 against route + compute composition.
 
-## What to Change
+## Landed Changes
 
-### 1. Create `tools/manual-story-studio/src/health/compute.ts`
+### 1. Created `tools/manual-story-studio/src/health/compute.ts`
 
-The module exports a single function `computeHealth(manualStoryRoot: string): HealthReport`. Internal structure:
+The module exports `computeHealth(manualStoryRoot: string): HealthReport`.
 
-```ts
-import type { HealthFinding, HealthReport, BlockedAction } from "./types.js";
-import { deriveHealthStatus } from "./types.js";
-import { readManualStoryMetadata } from "../read/manual-story-metadata.js";
-import { listRecords, readRecord, scanReferences } from "../read/records.js";
-import { listSegments, readSegmentSidecar, readSegmentBody } from "../read/segments.js";
-import { readManuscript } from "../read/manuscript.js";
+The implementation preserves the three-pass structure:
 
-export function computeHealth(manualStoryRoot: string): HealthReport {
-  const findings: HealthFinding[] = [];
+1. `runFilePass` uses the migrated read layer to surface metadata parse failures, corrupt record YAML, missing segment sidecars/bodies, malformed segment sidecars, and manuscript read failures.
+2. `runSchemaPass` uses `validateManualStoryMetadata` and `validateRecord` for metadata/record schema findings, skipping entries whose prerequisite read/list step already failed so one corrupt file does not emit duplicate findings.
+3. `runReferencePass` uses `listAllKnownIds` and `validateRefs` to surface `reference-resolution-failed` findings.
 
-  // Pass 1: File integrity (YAML parses; required files exist; IDs match filenames; no duplicate IDs).
-  findings.push(...runFilePass(manualStoryRoot));
+`computeHealth` derives status through `deriveHealthStatus` and populates all four blocked actions only when status is `blocked`.
 
-  // Pass 2: Schema integrity (records / metadata / sidecars validate against their schemas).
-  findings.push(...runSchemaPass(manualStoryRoot));
+### 2. Created `tools/manual-story-studio/test/health/compute.test.ts`
 
-  // Pass 3: Reference integrity (typed refs resolve; selected prompt records exist and are active; segment evidence refs resolve).
-  findings.push(...runReferencePass(manualStoryRoot));
-
-  const status = deriveHealthStatus(findings);
-  const blocked_actions: BlockedAction[] = status === "blocked"
-    ? ["prompt_copy", "prompt_save", "segment_save", "manuscript_compile"]
-    : [];
-
-  return { status, findings, blocked_actions };
-}
-
-function runFilePass(root: string): HealthFinding[] {
-  const findings: HealthFinding[] = [];
-
-  // metadata YAML parse
-  const metadataResult = readManualStoryMetadata(root);
-  if (!metadataResult.ok) {
-    findings.push({
-      severity: "blocking",
-      code: "metadata-yaml-parse-failed",
-      path: metadataResult.error.path,
-      message: "manual-story.yaml could not be parsed",
-      repair_hint: metadataResult.error.repair_hint,
-    });
-    return findings; // early return — without metadata the rest can't sensibly run
-  }
-
-  // record YAML parses (iterate every class)
-  for (const cls of MANUAL_RECORD_CLASSES) {
-    const listResult = listRecords(root, cls, { includeArchived: true });
-    if (!listResult.ok) {
-      findings.push({
-        severity: "error",
-        code: "record-yaml-parse-failed",
-        path: listResult.error.path,
-        message: `Record class "${cls}" failed to list`,
-        repair_hint: listResult.error.repair_hint,
-      });
-    }
-  }
-
-  // segment sidecar/body pair integrity
-  const segmentsResult = listSegments({ manualStoryRoot: root });
-  if (!segmentsResult.ok) {
-    findings.push({
-      severity: "blocking",
-      code: "segment-sidecar-malformed",
-      path: segmentsResult.error.path,
-      message: "Segment sidecar failed to parse",
-      repair_hint: segmentsResult.error.repair_hint,
-    });
-  } else {
-    // for each segment in metadata.segment_order, verify both `.yaml` and `.md` exist
-    for (const segmentId of metadataResult.value.segment_order) {
-      const sidecar = readSegmentSidecar({ manualStoryRoot: root, segmentId });
-      const body = readSegmentBody({ manualStoryRoot: root, segmentId });
-      if (!sidecar.ok && sidecar.error.code === "file_not_found") {
-        findings.push({
-          severity: "blocking",
-          code: "segment-sidecar-missing",
-          path: sidecar.error.path,
-          message: `Segment ${segmentId} sidecar (.yaml) is missing`,
-          repair_hint: "Restore the segment sidecar YAML or remove the segment from segment_order.",
-        });
-      }
-      if (!body.ok && body.error.code === "file_not_found") {
-        findings.push({
-          severity: "blocking",
-          code: "segment-body-missing",
-          path: body.error.path,
-          message: `Segment ${segmentId} body (.md) is missing`,
-          repair_hint: "Restore the segment body or remove the segment from segment_order.",
-        });
-      }
-    }
-  }
-
-  return findings;
-}
-
-function runSchemaPass(root: string): HealthFinding[] {
-  // ... per-record schema validation (currently shallow at the read-layer; can extend later)
-  return [];
-}
-
-function runReferencePass(root: string): HealthFinding[] {
-  // ... scanReferences across each record class; reference-resolution-failed when an ID points at non-existent target
-  return [];
-}
-```
-
-The sketch shows Pass 1's full shape; Passes 2 and 3 follow the same pattern, walking the record classes and using `scanReferences` / per-class schema validators to surface findings. The full implementation lands all three passes; the sketch shows enough structure for the implementer to fill in the schema and reference passes against the existing per-class schema files (`src/schema/*.ts`).
-
-### 2. Create `tools/manual-story-studio/test/health/compute.test.ts`
-
-Unit tests against fixture worlds covering:
+Added unit tests against fixture worlds covering:
 - Valid story: `status: "ok"`, `findings: []`, `blocked_actions: []`.
 - Corrupt `manual-story.yaml`: `status: "blocked"`, one finding with `code: "metadata-yaml-parse-failed"`, `blocked_actions: ["prompt_copy", "prompt_save", "segment_save", "manuscript_compile"]`.
 - Corrupt single record: `status: "degraded"`, one finding with `code: "record-yaml-parse-failed"`, `blocked_actions: []`.
-- Missing segment sidecar: `status: "blocked"`, one finding with `code: "segment-sidecar-missing"`, `blocked_actions: ["..."]`.
+- Missing segment sidecar: `status: "blocked"`, one finding with `code: "segment-sidecar-missing"`, `blocked_actions` includes `manuscript_compile`.
 - Dangling typed ref: `status: "degraded"`, one finding with `code: "reference-resolution-failed"`, `blocked_actions: []`.
 
-These tests use fixtures that SPEC105MANSTOSTU-014 also ships — the fixtures may be authored as part of 009's test surface and consumed by 014, or 014 may add additional fixtures. Implementation note: the fixtures live at `tools/manual-story-studio/test/health/fixtures/` and are shared across tests for compute, route, and acceptance.
+These tests use inline temp fixtures. SPEC105MANSTOSTU-014 may still add shared route/acceptance fixtures if needed.
 
 ## Files to Touch
 
@@ -194,3 +92,24 @@ These tests use fixtures that SPEC105MANSTOSTU-014 also ships — the fixtures m
 
 1. `cd tools/manual-story-studio && npm run build:backend` — compile check.
 2. `cd tools/manual-story-studio && npm test` — full package test.
+
+## Outcome
+
+Completed on 2026-06-01.
+
+This ticket added `tools/manual-story-studio/src/health/compute.ts` with `computeHealth(manualStoryRoot)`, a three-pass health computation that returns the canonical `HealthReport` shape. It also added focused compute tests for valid story, corrupt metadata, corrupt record YAML, missing segment sidecar, and dangling typed references.
+
+## Verification Result
+
+Commands run:
+
+1. `cd tools/manual-story-studio && npm run build:backend` — passed.
+2. `cd tools/manual-story-studio && node --test dist/test/health/compute.test.js` — passed; 5 focused tests.
+3. `cd tools/manual-story-studio && npm test` — passed; backend reported 372 tests passing and web `tsc --noEmit` passed.
+4. `grep -nE "^export function computeHealth" tools/manual-story-studio/src/health/compute.ts` — passed; returned 1 match.
+5. `git diff --check` — passed.
+
+## Deviations
+
+- The ticket sketch mentioned shared fixtures under `test/health/fixtures/`; this implementation uses inline temp fixtures in `compute.test.ts`. SPEC105MANSTOSTU-014 remains free to add shared route/acceptance fixtures.
+- `runReferencePass` uses the existing `validateRefs` + `listAllKnownIds` helpers directly rather than `scanReferences`, because `scanReferences` is a reverse-referrer search for a single target ID and does not validate all dangling references by itself.
