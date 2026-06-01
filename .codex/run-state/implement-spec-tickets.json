@@ -1,16 +1,15 @@
 {
   "originating_spec": "specs/SPEC-108-manual-story-studio-segment-lifecycle-append-only.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC108MANSTOSTU-001.md",
+  "last_ticket": "archive/tickets/SPEC108MANSTOSTU-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "06b4aa34fd23f4fc5dd6e5a642026c3ca0341bc2",
+  "last_work_commit": "332e295e43571bd1498fbce6ea5ffe823802bfed",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC108MANSTOSTU-002.md",
+  "next_target": "tickets/SPEC108MANSTOSTU-008.md",
   "queue": [
-    "tickets/SPEC108MANSTOSTU-002.md",
+    "tickets/SPEC108MANSTOSTU-008.md",
     "tickets/SPEC108MANSTOSTU-003.md",
     "tickets/SPEC108MANSTOSTU-007.md",
-    "tickets/SPEC108MANSTOSTU-008.md",
     "tickets/SPEC108MANSTOSTU-004.md",
     "tickets/SPEC108MANSTOSTU-005.md",
     "tickets/SPEC108MANSTOSTU-006.md"
@@ -22,7 +21,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: SPEC108MANSTOSTU-001 archived; npm run build:backend passed in tools/manual-story-studio; anchored export greps passed for SEGMENT_REPAIR_MODE_FLAG and SegmentMode; review dependency repair updated tickets/SPEC108MANSTOSTU-002.md to archive/tickets/SPEC108MANSTOSTU-001.md",
+  "proof_state": "known non-blocking deviation: SPEC108MANSTOSTU-002 archived after npm run build:backend, focused compiled-route probe, function-level compiled test, and grep witnesses; broad npm test intentionally deferred because existing route/capstone tests need repair-mode URL updates owned by next target tickets/SPEC108MANSTOSTU-008.md",
   "dirty_state": "tracked SPEC-108 worktree clean after work commit; ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place",
   "updated_at": "2026-06-01"
 }
