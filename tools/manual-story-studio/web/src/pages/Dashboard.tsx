@@ -352,14 +352,24 @@ export function Dashboard() {
             </button>
           </p>
         ) : latestSegment ? (
-          <p>
-            <Link
-              to={`/worlds/${worldSlug}/manual-stories/${msSlug}/manuscript#${latestSegment.id}`}
-            >
-              {latestSegment.title || latestSegment.id}
-            </Link>{" "}
-            <em>{latestSegment.id}</em> — {latestSegment.created_at}
-          </p>
+          <>
+            <p>
+              <Link
+                to={`/worlds/${worldSlug}/manual-stories/${msSlug}/manuscript#${latestSegment.id}`}
+              >
+                {latestSegment.title || latestSegment.id}
+              </Link>{" "}
+              <em>{latestSegment.id}</em> — {latestSegment.created_at}
+            </p>
+            <p style={{ marginTop: 4, fontSize: "0.85em" }}>
+              <Link
+                to={`/worlds/${worldSlug}/manual-stories/${msSlug}/repair`}
+                style={{ color: "#888" }}
+              >
+                Repair this manuscript
+              </Link>
+            </p>
+          </>
         ) : (
           <p>No segments yet.</p>
         )}

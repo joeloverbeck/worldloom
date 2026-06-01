@@ -1,6 +1,6 @@
 # SPEC108MANSTOSTU-006: Dashboard add "Repair this manuscript" link in §Latest segment
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/web/src/pages/Dashboard.tsx` to add a small "Repair this manuscript" `<Link>` inside the existing `§Latest segment` section, routing to the repair page.
@@ -81,3 +81,24 @@ When `latestSegment` is null (no segments yet), do NOT render the repair link �
 ### Commands
 
 1. `cd tools/manual-story-studio/web && npm test` — TypeScript typecheck.
+
+## Outcome
+
+Completed: 2026-06-01
+
+Added the subordinate Dashboard repair entry point:
+
+1. Added `Repair this manuscript` inside the `latest-segment` branch.
+2. Routed the link to `/worlds/:worldSlug/manual-stories/:msSlug/repair`.
+3. Kept the no-segments branch unchanged, so no repair link renders without a latest segment.
+
+## Verification Result
+
+1. `npm --prefix tools/manual-story-studio/web test` — passed (`tsc -p tsconfig.json --noEmit`).
+2. `grep -n "Repair this manuscript" tools/manual-story-studio/web/src/pages/Dashboard.tsx` — one match.
+3. `grep -n "/repair" tools/manual-story-studio/web/src/pages/Dashboard.tsx` — route link match present.
+4. `git diff --check -- tools/manual-story-studio/web/src/pages/Dashboard.tsx` — passed.
+
+## Deviations
+
+None.
