@@ -20,7 +20,7 @@ The four public reads in `tools/manual-story-studio/src/read/records.ts` (`listR
    - `src/server/routes/records.ts:95` (`listRecords` in the records-list GET handler); line 119 (`readRecord` in the per-record GET handler).
    - `src/server/routes/beat-templates.ts:344` (`listRecords` for candidate-generation by class); line 314 (`readRecord` for cast resolution in candidates); line 356 (`readRecord` for secrets resolution in candidates).
 2. SPEC-105 §M1 + §4 Modify list the stage 5 template read conversion explicitly — the current `try { rawText = readFileSync(tplPath, ...) } catch { rawText = ""; }` silently swallows file-read errors. Migrating it produces a structured `selected_template_valid` lint finding instead of silently rendering an empty template body.
-3. Cross-skill boundary: this ticket's `compose.ts` and `routes/beat-templates.ts` edits SHARE the files with SPEC105MANSTOSTU-004 (which converts `compose.ts` stage 2 metadata read and `routes/beat-templates.ts:306` readManualStoryMetadata call). Different line ranges — mechanical merge if landed in different commits; if implementers prefer they can land 004 + 005 as a coordinated patch sequence with 004 first.
+3. Cross-skill boundary: this ticket's `compose.ts` and `routes/beat-templates.ts` edits SHARE the files with archive/tickets/SPEC105MANSTOSTU-004.md (which converts `compose.ts` stage 2 metadata read and `routes/beat-templates.ts:306` readManualStoryMetadata call). Different line ranges — mechanical merge if landed in different commits.
 4. Rule 6 retcon attribution: 4 public function signatures change non-additively (`T | null` → `ReadResult<T>`). Each caller adapts. The behavior shift is structurally visible: a corrupt single record file in a `listRecords` invocation now surfaces as a `HealthReport`-bearing 409 rather than as a silent skip, matching SPEC-105 §1 Context's *"biggest correctness failure"* framing. No `T | null` overload retained.
 5. Blast-radius: 6 caller files (compose, state-update-checklist, write/records, write/segments, routes/records, routes/beat-templates). The grep at acceptance time confirms no orphan call sites. Note that `compose.ts`'s `listRecords` call at line 290 is inside a lazy-load callback inside the translator context — that call site needs ReadResult narrowing too, even though it's not on the "hot" read path.
 
@@ -133,11 +133,11 @@ The function's return type changes from `StateUpdateChecklistPayload` to `ReadRe
 - `tools/manual-story-studio/src/write/records.ts` (modify)
 - `tools/manual-story-studio/src/write/segments.ts` (modify — line 209 `scanReferences` callsite only; the `readSegmentSidecar` local helper at line 324 is unaffected)
 - `tools/manual-story-studio/src/server/routes/records.ts` (modify)
-- `tools/manual-story-studio/src/server/routes/beat-templates.ts` (modify — lines 314, 344, 356; the `readManualStoryMetadata` call at line 306 is SPEC105MANSTOSTU-004's scope)
+- `tools/manual-story-studio/src/server/routes/beat-templates.ts` (modify — lines 314, 344, 356; the `readManualStoryMetadata` call at line 306 is archive/tickets/SPEC105MANSTOSTU-004.md's scope)
 
 ## Out of Scope
 
-- The `readManualStoryMetadata` migration — SPEC105MANSTOSTU-004.
+- The `readManualStoryMetadata` migration — archive/tickets/SPEC105MANSTOSTU-004.md.
 - Migrating `read/segments.ts` public reads — SPEC105MANSTOSTU-006.
 - Migrating `readManuscript` — SPEC105MANSTOSTU-007.
 - Migrating the enumerators (`read/manual-stories.ts`, `read/worlds.ts`) — SPEC105MANSTOSTU-008.

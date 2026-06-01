@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -126,6 +126,50 @@ test("metadata routes: GET on missing world → 404", async () => {
         url: `/api/worlds/missing/manual-stories/missing/metadata`,
       });
       assert.equal(response.statusCode, 404);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("metadata routes: GET with corrupt YAML returns 409 HealthReport", async () => {
+  const { repoRoot, worldSlug, msSlug } = mkWorld();
+  try {
+    writeFileSync(
+      path.join(
+        repoRoot,
+        "worlds",
+        worldSlug,
+        "manual-stories",
+        msSlug,
+        "manual-story.yaml",
+      ),
+      "title: [unterminated\n",
+    );
+    const server = await createServer({ repoRoot });
+    try {
+      const response = await server.inject({
+        method: "GET",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/metadata`,
+      });
+
+      assert.equal(response.statusCode, 409);
+      const body = response.json() as {
+        status: string;
+        findings: Array<{ code: string; severity: string }>;
+        blocked_actions: string[];
+      };
+      assert.equal(body.status, "blocked");
+      assert.equal(body.findings[0]?.code, "yaml_parse_failed");
+      assert.equal(body.findings[0]?.severity, "blocking");
+      assert.deepEqual(body.blocked_actions, [
+        "prompt_copy",
+        "prompt_save",
+        "segment_save",
+        "manuscript_compile",
+      ]);
     } finally {
       await server.close();
     }

@@ -1,6 +1,6 @@
 # SPEC105MANSTOSTU-004: Migrate `readManualStoryMetadata` + callers
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/src/read/manual-story-metadata.ts` (signature change `ManualStoryMetadata | null` → `ReadResult<ManualStoryMetadata>`) plus three caller sites (`prompt/compose.ts` stage 2; `server/routes/metadata.ts`; `server/routes/beat-templates.ts` line 306). No impact on canon-pipeline surfaces.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-`readManualStoryMetadata` at `tools/manual-story-studio/src/read/manual-story-metadata.ts:8-21` returns `ManualStoryMetadata | null` on missing file / parse exception / non-object YAML — three distinct failure conditions collapsed into one return value. Per SPEC-105 §2 item 3, the public read surface must migrate to `ReadResult<ManualStoryMetadata>` so callers can distinguish "story doesn't exist" (404) from "metadata corrupt" (409 with `HealthReport` body). This ticket migrates the read function and its three caller sites coherently, leaving the build green.
+At intake, `readManualStoryMetadata` at `tools/manual-story-studio/src/read/manual-story-metadata.ts:8-21` returned `ManualStoryMetadata | null` on missing file / parse exception / non-object YAML — three distinct failure conditions collapsed into one return value. Per SPEC-105 §2 item 3, the public read surface had to migrate to `ReadResult<ManualStoryMetadata>` so callers can distinguish "story doesn't exist" (404) from "metadata corrupt" (409 with `HealthReport` body). This ticket migrated the read function and its three caller sites coherently, leaving the build green.
 
 ## Assumption Reassessment (2026-06-01)
 
@@ -33,11 +33,11 @@
 2. Caller-site adaptations leave build green → `cd tools/manual-story-studio && npm run build:backend` compiles cleanly across the modified files.
 3. Route 404 vs 409 dispatch is correct → integration tests in SPEC105MANSTOSTU-014 cover the corrupt-metadata case end-to-end. For this ticket, route-level unit tests assert that `readManualStoryMetadata` returning `ok: false` with `code: "yaml_parse_failed"` triggers `mapReadErrorToHttpReply` and surfaces the 409 + HealthReport body.
 
-## What to Change
+## Landed Changes
 
 ### 1. `tools/manual-story-studio/src/read/manual-story-metadata.ts`
 
-Change the function to return `ReadResult<ManualStoryMetadata>`:
+Changed the function to return `ReadResult<ManualStoryMetadata>`:
 
 ```ts
 import { existsSync, readFileSync } from "node:fs";
@@ -92,7 +92,7 @@ export function readManualStoryMetadata(
 
 ### 2. `tools/manual-story-studio/src/prompt/compose.ts` — stage 2
 
-Replace the existing stage 2 (lines 80–86) with discriminated-union narrowing:
+Replaced the existing stage 2 with discriminated-union narrowing:
 
 ```ts
 const metadataResult = readManualStoryMetadata(input.manualStoryRoot);
@@ -104,7 +104,7 @@ if (!metadataResult.ok) {
 const metadata = metadataResult.value;
 ```
 
-The thrown error preserves the read-error code in its message so the route-layer caller can pattern-match in its catch handler. (The route-level migration that converts this throw into a structured 409 is SPEC105MANSTOSTU-005's stage-5/stage-3-stage-4 work, since `composePrompt` is invoked by the prompts route in 006's scope — but 004's change to `compose.ts` only converts the stage 2 metadata read.)
+The thrown error preserves the read-error code in its message. The route-level migration that converts broader prompt-compose read failures into structured 409 responses remains in later route tickets; 004 only converts the stage 2 metadata read.
 
 ### 3. `tools/manual-story-studio/src/server/routes/metadata.ts`
 
@@ -161,3 +161,21 @@ Same adaptation pattern as routes/metadata.ts.
 
 1. `cd tools/manual-story-studio && npm run build:backend` — compile check.
 2. `cd tools/manual-story-studio && npm test` — full package test.
+
+## Outcome
+
+Completed on 2026-06-01.
+
+This ticket migrated `readManualStoryMetadata` to `ReadResult<ManualStoryMetadata>`, adapted the three source callers (`compose.ts`, metadata route, beat-template candidate route), and updated read/metadata-route tests. Corrupt metadata YAML now reaches the route layer as `yaml_parse_failed` and returns the shared 409 `HealthReport` response.
+
+No deviations from the planned production file set. The test updates additionally cover the read-layer corrupt-YAML result and metadata-route 409 body.
+
+## Verification Result
+
+Commands run from the repo root unless a package directory is named:
+
+1. `cd tools/manual-story-studio && npm run build:backend` — passed.
+2. `cd tools/manual-story-studio && npm test` — passed; backend reported 358 tests passing and web `tsc --noEmit` passed.
+3. `grep -nE "readManualStoryMetadata.*ReadResult" tools/manual-story-studio/src/read/manual-story-metadata.ts` — passed.
+4. `grep -rn "readManualStoryMetadata(" tools/manual-story-studio/src/` — passed; returned exactly 4 callable sites: 1 definition and 3 callers.
+5. `grep -rnE "readManualStoryMetadata\\(.+\\)\\.[^o]" tools/manual-story-studio/src/` — passed with zero matches.

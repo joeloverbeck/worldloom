@@ -100,7 +100,7 @@ For `readSegmentBody`: dispatch `invalid_id_shape`, `file_not_found`, `io_error`
 ## Out of Scope
 
 - The local `readSegmentSidecar` in `src/write/segments.ts:324` — that is a private helper unrelated to the public `read/segments.ts` surface; its narrow consumer at `write/segments.ts:134` is not migrated as part of this ticket.
-- Migrating any other read function — SPEC105MANSTOSTU-004 (metadata), 005 (records), 007 (manuscript), 008 (enumerators).
+- Migrating any other read function — archive/tickets/SPEC105MANSTOSTU-004.md (metadata), 005 (records), 007 (manuscript), 008 (enumerators).
 - The compute pass that detects missing-`.yaml`-but-present-`.md` orphan sidecars — SPEC105MANSTOSTU-009 (the `segment-sidecar-missing` blocking finding is emitted by the compute pass, not by the read function; read functions only surface the per-call read failure).
 - Frontend rendering — SPEC105MANSTOSTU-011 / SPEC105MANSTOSTU-012.
 

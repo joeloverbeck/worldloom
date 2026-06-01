@@ -39,6 +39,7 @@ import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
 } from "../../write/sandbox.js";
+import { mapReadErrorToHttpReply } from "../read-error-http.js";
 
 export interface BeatTemplatesRouteOptions {
   repoRoot: string;
@@ -303,10 +304,11 @@ export async function registerBeatTemplatesWriteRoutes(
       );
       if (!root) return notFound(reply, "manual_story_not_found");
       const body = (request.body ?? {}) as CandidatesBody;
-      const metadata = readManualStoryMetadata(root.absolutePath);
-      if (!metadata) {
-        return reply.code(500).send({ error: "metadata_not_found" });
+      const metadataResult = readManualStoryMetadata(root.absolutePath);
+      if (!metadataResult.ok) {
+        return mapReadErrorToHttpReply(reply, metadataResult.error);
       }
+      const metadata = metadataResult.value;
       const allTemplates = listAllBeatTemplates(root.absolutePath);
       const selectedCastIds = new Set(body.selected_cast ?? []);
       const selectedCast: ManualCharacterProfile[] = [];

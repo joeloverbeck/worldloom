@@ -108,7 +108,7 @@ Unit tests covering each row of the dispatch table + the unrecognized-code fall-
 
 ## Out of Scope
 
-- Wiring routes to call the helper — that happens per-route in SPEC105MANSTOSTU-004 through SPEC105MANSTOSTU-008.
+- Wiring routes to call the helper — that happens per-route in archive/tickets/SPEC105MANSTOSTU-004.md through SPEC105MANSTOSTU-008.
 - The compute-pass-driven 409 dispatch (when an entire story is `blocked` for any read or write attempt) — that builds a different `HealthReport` from the compute pass and lands in SPEC105MANSTOSTU-009 + SPEC105MANSTOSTU-010.
 - Frontend rendering of the 409 body — SPEC105MANSTOSTU-011.
 

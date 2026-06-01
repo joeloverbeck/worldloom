@@ -78,12 +78,13 @@ export async function composePrompt(
   }
 
   // Stage 2 — Load metadata + prose preferences.
-  const metadata = readManualStoryMetadata(input.manualStoryRoot);
-  if (!metadata) {
+  const metadataResult = readManualStoryMetadata(input.manualStoryRoot);
+  if (!metadataResult.ok) {
     throw new Error(
-      `manual_story_not_found: ${input.manualStoryRoot}`,
+      `manual_story_metadata_unavailable: ${metadataResult.error.code} at ${metadataResult.error.path}`,
     );
   }
+  const metadata = metadataResult.value;
   sidecarDraft.manual_story_slug = metadata.manual_story_slug;
 
   // Stage 3 — Load selected cast profiles.

@@ -144,7 +144,7 @@ This implementation note: `compileManuscript`'s use of `readSegmentBody` + `read
 
 ## Out of Scope
 
-- Migrating any other read function — SPEC105MANSTOSTU-004 (metadata at the prompt-compose level), 005 (records), 006 (segments), 008 (enumerators).
+- Migrating any other read function — archive/tickets/SPEC105MANSTOSTU-004.md (metadata at the prompt-compose level), 005 (records), 006 (segments), 008 (enumerators).
 - The `auto-compile-on-segment-save` policy logic (which lives at the segment-save route in 006's scope) — that route adapts to compileManuscript's ReadResult return as part of the route's own ReadResult dispatch.
 - Frontend rendering — SPEC105MANSTOSTU-011 / SPEC105MANSTOSTU-012.
 

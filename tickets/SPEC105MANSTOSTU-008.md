@@ -60,7 +60,7 @@ Adapt `registerManualStoriesGetRoute` (and any GET handler in this file) to disp
 
 ## Out of Scope
 
-- Migrating any other read function — SPEC105MANSTOSTU-004 (metadata), 005 (records), 006 (segments), 007 (manuscript).
+- Migrating any other read function — archive/tickets/SPEC105MANSTOSTU-004.md (metadata), 005 (records), 006 (segments), 007 (manuscript).
 - World canon writes — out of scope by SPEC-100 design intent (Manual Studio is canon-read-only).
 - Frontend rendering — SPEC105MANSTOSTU-011 / SPEC105MANSTOSTU-012.
 
