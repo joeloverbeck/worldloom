@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/src/server/routes/segments.ts` (mode-gating on PUT/DELETE) and `tools/manual-story-studio/src/write/segments.ts` (adds `preconditions: { require_latest: boolean }` option to `EditSegmentInput`). Route-level behavior change: PUT/DELETE without `?mode=repair` (or `mode: "repair"` body field) returns `405 Method Not Allowed` with a body containing `repair-mode-required`.
-**Deps**: SPEC108MANSTOSTU-001
+**Deps**: archive/tickets/SPEC108MANSTOSTU-001.md
 
 ## Problem
 

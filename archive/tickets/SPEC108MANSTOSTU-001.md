@@ -1,6 +1,6 @@
 # SPEC108MANSTOSTU-001: Backend SEGMENT_REPAIR_MODE_FLAG constants
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — introduces a new module `tools/manual-story-studio/src/write/segment-modes.ts` exporting the repair-mode constant and a `SegmentMode` type. No impact on existing modules.
@@ -12,10 +12,11 @@ SPEC-108's append-only-by-default lifecycle gates the existing `editSegment` and
 
 ## Assumption Reassessment (2026-06-01)
 
-1. `tools/manual-story-studio/src/write/` exists (verified at HEAD — siblings `segments.ts`, `sandbox.js`, `segment-id-allocator.ts` are present). The new file `segment-modes.ts` is the only deliverable; no parent directory creation required.
+1. `tools/manual-story-studio/src/write/` exists (verified during implementation — siblings `segments.ts`, `sandbox.ts`, `segment-id-allocator.ts` are present). The new file `segment-modes.ts` is the only implementation deliverable; no parent directory creation was required.
 2. SPEC-108 §2 item 7 names this constants file and §2 item 3 wires the literal `"repair"` value into the route mode validation. SPEC-108 §4 Files to Touch lists `tools/manual-story-studio/src/write/segment-modes.ts (new)` explicitly.
 3. Cross-skill boundary: this module's exported constant is consumed by ticket 002 (routes/segments.ts mode validation) and ticket 008 (acceptance tests asserting against the constant rather than the literal string). The shared boundary is `import { SEGMENT_REPAIR_MODE_FLAG, type SegmentMode } from "../write/segment-modes.js"`. No cross-package boundary crossing (the module is private to `tools/manual-story-studio/`).
-4. FOUNDATIONS Rule 6 (No Silent Retcons) motivates the constant's existence: the rewrite of `editSegment` / `deleteSegment` access semantics is a behavior change that must be visible in the codebase as a named flag, not as an unattributed magic string. Centralizing the flag's name + value in one module makes future audits (grep for `SEGMENT_REPAIR_MODE_FLAG`) trivial and preserves the attribution chain.
+4. FOUNDATIONS Rule 6 (No Silent Retcons) motivates the constant's existence: the rewrite of `editSegment` / `deleteSegment` access semantics is a behavior change that must be visible in the codebase as a named flag, not as an unattributed magic string. Centralizing the flag's name + value in one module makes future audits straightforward.
+5. The drafted grep proof `grep -n "SEGMENT_REPAIR_MODE_FLAG" tools/manual-story-studio/src/write/segment-modes.ts` was too broad because the `SegmentMode` type alias necessarily references the constant. Closeout uses anchored export-line greps instead.
 
 ## Architecture Check
 
@@ -24,8 +25,8 @@ SPEC-108's append-only-by-default lifecycle gates the existing `editSegment` and
 
 ## Verification Layers
 
-1. Constant export presence -> codebase grep-proof (`grep -n "SEGMENT_REPAIR_MODE_FLAG" tools/manual-story-studio/src/write/segment-modes.ts` returns 1 match).
-2. `SegmentMode` type export presence -> codebase grep-proof (`grep -n "export type SegmentMode" tools/manual-story-studio/src/write/segment-modes.ts` returns 1 match).
+1. Constant export presence -> codebase grep-proof (`grep -n '^export const SEGMENT_REPAIR_MODE_FLAG' tools/manual-story-studio/src/write/segment-modes.ts` returns 1 match).
+2. `SegmentMode` type export presence -> codebase grep-proof (`grep -n '^export type SegmentMode' tools/manual-story-studio/src/write/segment-modes.ts` returns 1 match).
 3. Module compiles under the package's tsconfig -> `npm run build:backend` succeeds without TypeScript errors.
 
 ## What to Change
@@ -58,8 +59,8 @@ No other exports. Consumers in ticket 002 (routes) and ticket 008 (tests) import
 ### Tests That Must Pass
 
 1. `cd tools/manual-story-studio && npm run build:backend` succeeds.
-2. `grep -n "SEGMENT_REPAIR_MODE_FLAG" tools/manual-story-studio/src/write/segment-modes.ts` returns exactly 1 match (the export line).
-3. `grep -n "export type SegmentMode" tools/manual-story-studio/src/write/segment-modes.ts` returns exactly 1 match.
+2. `grep -n '^export const SEGMENT_REPAIR_MODE_FLAG' tools/manual-story-studio/src/write/segment-modes.ts` returns exactly 1 match (the export line).
+3. `grep -n '^export type SegmentMode' tools/manual-story-studio/src/write/segment-modes.ts` returns exactly 1 match.
 
 ### Invariants
 
@@ -75,3 +76,29 @@ No other exports. Consumers in ticket 002 (routes) and ticket 008 (tests) import
 ### Commands
 
 1. `cd tools/manual-story-studio && npm run build:backend` — typecheck-only verification; the module has no runtime tests of its own.
+2. `grep -n '^export const SEGMENT_REPAIR_MODE_FLAG' tools/manual-story-studio/src/write/segment-modes.ts` — exact constant export witness.
+3. `grep -n '^export type SegmentMode' tools/manual-story-studio/src/write/segment-modes.ts` — exact type export witness.
+
+## Outcome
+
+Completed: 2026-06-01
+
+Created `tools/manual-story-studio/src/write/segment-modes.ts` with exactly the two planned exports:
+
+```ts
+export const SEGMENT_REPAIR_MODE_FLAG = "repair" as const;
+
+export type SegmentMode = typeof SEGMENT_REPAIR_MODE_FLAG;
+```
+
+No route, frontend, or test integration was added in this ticket; those remain owned by downstream SPEC108MANSTOSTU tickets.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run build:backend` — passed.
+2. `grep -n '^export const SEGMENT_REPAIR_MODE_FLAG' tools/manual-story-studio/src/write/segment-modes.ts` — one match on the constant export line.
+3. `grep -n '^export type SegmentMode' tools/manual-story-studio/src/write/segment-modes.ts` — one match on the type export line.
+
+## Deviations
+
+The drafted broad grep for `SEGMENT_REPAIR_MODE_FLAG` was corrected to an anchored export-line grep because the type alias legitimately references the constant name. The implementation surface did not change.
