@@ -1,6 +1,6 @@
 # SPEC-107 — Manual Story Studio: Prose/State Contract Correction + Doc Cleanup
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-06-01
 **Classification:** tooling-adjacent (affects only Manual Studio's external-prompt contract docs and one stop-rule section helper; no canon-pipeline integration).
 **Depends on:** — (independent; can land in parallel with SPEC-106).
@@ -63,10 +63,12 @@ This spec is small (three textual surfaces) but load-bearing for the external pr
 4. **Adjust the in-source SPEC-102 comment in `prose-craft-contract.md` only if it references the missing file by name.** Verify by reading the existing prose-craft-contract.md (already verified: no such reference; no change needed).
 
 5. **Acceptance** under `tools/manual-story-studio/test/`:
-   - **Backend test (`test/prompt-sections/section-14-stop-rule.test.ts`)**: assert the returned stop-rule text contains the sentence `"Let meaningful action, emotional movement, relational pressure, practical consequence, or discovery occur if the directive calls for it."` (regression guard against accidental reversion).
+   - **Backend test (`test/prompt/section-14-stop-rule.test.ts`)**: assert the returned stop-rule text contains the sentence `"Let meaningful action, emotional movement, relational pressure, practical consequence, or discovery occur if the directive calls for it."` (regression guard against accidental reversion). Placed under the existing `test/prompt/` subdir alongside `section-6-template-guidance.test.ts` to match convention.
    - **Backend test (extend existing `prompt-compose.test.ts` or add a new section-14 case)**: assert the composed prompt markdown's `## 14. Stop Rule` section is non-empty and matches the new wording.
    - **Doc-existence regression check (small Node script or test)**: assert that `docs/manual-story-studio/README.md` does not reference `manual-render-instruction.md`. (This prevents a future contributor from re-introducing the README claim without also landing the file.)
    - **No new doc files created.**
+
+6. **Update `tools/manual-story-studio/test/capstone-spec100.test.ts` AC #9.** Line 238 currently asserts `assert.match(docsReadme, /manual-render-instruction\.md/);` — this test was authored by SPEC-100 to lock the README scaffold's two-file claim. SPEC-107's README edit removes that string, so the assertion must flip to a positive regression guard: replace with `assert.doesNotMatch(docsReadme, /manual-render-instruction\.md/);`. The line 237 `prose-craft-contract\.md` assertion stays (the file still exists and is still referenced in the README). The test name and surrounding lines 220-227 / 235-236 / 241+ are unchanged. This flip preserves the SPEC-100 AC #9 test's purpose — distinguishing verbatim vs Manual Studio-specific renderer files — while updating it for the SPEC-107 "fewer docs, not more" outcome.
 
 ### Out of scope
 
@@ -97,10 +99,11 @@ This spec is small (three textual surfaces) but load-bearing for the external pr
 - `docs/manual-story-studio/prose-craft-contract.md` — replace the second paragraph of the §"Prose as Manuscript, Not State" section (line 68) per §2 item 1. First paragraph unchanged.
 - `tools/manual-story-studio/src/prompt/sections/section-14-stop-rule.ts` — replace the `emitSection14()` return value per §2 item 2. `SECTION_14_TITLE` unchanged.
 - `docs/manual-story-studio/README.md` — remove the `manual-render-instruction.md` reference per §2 item 3; soften the SPEC-102 framing.
+- `tools/manual-story-studio/test/capstone-spec100.test.ts` — flip the AC #9 `manual-render-instruction.md` assertion from `assert.match` to `assert.doesNotMatch` per §2 item 6.
 
 **Create:**
 
-- `tools/manual-story-studio/test/prompt-sections/section-14-stop-rule.test.ts` — regression test asserting the key sentence is present.
+- `tools/manual-story-studio/test/prompt/section-14-stop-rule.test.ts` — regression test asserting the key sentence is present. Placed under existing `test/prompt/` subdir.
 - `tools/manual-story-studio/test/docs-consistency.test.ts` — assert `docs/manual-story-studio/README.md` does not reference `manual-render-instruction.md` (load the file as text, `assert.ok(!text.includes("manual-render-instruction.md"))`).
 
 **No modification to:**
@@ -135,10 +138,26 @@ Manual verification: read the updated `prose-craft-contract.md` end-to-end; the 
 4. `docs/manual-story-studio/README.md` no longer contains `"manual-render-instruction.md"`. (acceptance test)
 5. `docs/manual-story-studio/manual-render-instruction.md` does not exist (no file was created to "fix" the mismatch). (verified by `find docs/manual-story-studio -name manual-render-instruction.md` returning zero hits)
 6. `tools/manual-story-studio/test/docs-consistency.test.ts` exists and passes. (acceptance test)
-7. All existing tests under `tools/manual-story-studio/test/` continue to pass. The web `tsc --noEmit` step remains green.
+7. `tools/manual-story-studio/test/capstone-spec100.test.ts` AC #9 asserts `assert.doesNotMatch(docsReadme, /manual-render-instruction\.md/)` (positive regression guard against the README claim being re-introduced without the file landing). (acceptance test)
+8. All existing tests under `tools/manual-story-studio/test/` continue to pass. The web `tsc --noEmit` step remains green.
 
 ## 8. Assumption reassessment
 
-- **Assumption:** Removing the README claim about `manual-render-instruction.md` does not break any test that scans the doc directory for expected files. → Verify via `grep -rn "manual-render-instruction" tools/manual-story-studio/test/`. If a test asserts the file's presence, that test was always failing or never ran; resolve by deleting the obsolete assertion.
-- **Assumption:** No code or test in the package reads `manual-render-instruction.md` from disk at runtime. → Verify via `grep -rn "manual-render-instruction" tools/manual-story-studio/src/ tools/manual-story-studio/web/src/`. If a stub was added expecting the file, decide between removing the stub (consistent with this spec) or restoring the file (contradicts this spec — re-open the choice).
+- **Verified at reassessment (2026-06-01):** `tools/manual-story-studio/test/capstone-spec100.test.ts:238` currently asserts `assert.match(docsReadme, /manual-render-instruction\.md/);` (SPEC-100 AC #9). This test passes against the current README and will fail after SPEC-107's §2 item 3 README edit. §2 item 6 addresses this by flipping the assertion to `assert.doesNotMatch` — so the test becomes a positive regression guard for the corrected README rather than a stale presence-check. (Prior wording incorrectly assumed the test was always-failing or never-ran; the codebase verification revealed the test currently passes.)
+- **Assumption:** No code or test in the package reads `manual-render-instruction.md` from disk at runtime. → Verified via `grep -rn "manual-render-instruction" tools/manual-story-studio/src/ tools/manual-story-studio/web/src/` returning zero matches at reassessment (2026-06-01). No stub exists.
 - **Assumption:** The prompt composer's `section-14-stop-rule.ts` return value is the sole stop-rule emission site. → Verified via `grep -rn "Stop at the first materially new"` returning a single match in that file. Future-proof: the regression test in §2 item 5 catches accidental duplicate stop-rule emissions because any duplicate that re-introduces the old wording will fail the key-sentence assertion.
+- **Deferred (§31 Stage 3 sub-claim — checklist language):** The report §31 Stage 3 bundles "checklist language" with prose-craft + stop-rule under the prose/state contract repair. SPEC-107 deliberately defers this sub-claim. Verified at reassessment that `tools/manual-story-studio/src/state-update-checklist.ts:24` already reads `CHECKLIST_DISCLAIMER = "Review these categories manually. Manual Story Studio has not changed any records."` — already aligned with the corrected boundary (records changes are author-only; app does not infer state). No immediate edit warranted. A focused future spec can audit broader checklist UX copy if drift surfaces; reopening this scope here would dilute the spec's three-textual-surfaces discipline.
+
+## 9. Outcome
+
+Completed on 2026-06-01 via `archive/tickets/SPEC107MANSTOSTU-001.md`.
+
+The Manual Story Studio prose/state contract was corrected in `docs/manual-story-studio/prose-craft-contract.md`, the §14 stop-rule helper was sharpened, and `docs/manual-story-studio/README.md` no longer claims a missing `manual-render-instruction.md` file. Regression coverage landed in direct stop-rule tests, docs-consistency coverage, the SPEC-100 capstone assertion flip, and assembled §14 prompt-section coverage.
+
+Verification completed:
+
+- `cd tools/manual-story-studio && npm run test:backend` — passed with 63 tests.
+- `cd tools/manual-story-studio && npm test` — passed with 391 backend tests and the web `tsc --noEmit` step.
+- Grep/find acceptance checks proved the old prose/state prohibition and missing-file README claim are gone from current operational surfaces, the replacement prose/stop-rule wording is present, and no `manual-render-instruction.md` file was created.
+
+Deviation: `tools/manual-story-studio/test/prompt-sections.test.ts` was also updated to cover the composed §14 prompt section, satisfying this spec's composed-prompt acceptance item through the existing section assembly test surface.

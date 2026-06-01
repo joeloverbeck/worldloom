@@ -182,6 +182,22 @@ test("§5 parameterizes by default_beat_count", () => {
   assert.ok(sectionBody(md2, 5).includes("Render only the next 3 beats"));
 });
 
+test("§14 Stop Rule contains the SPEC-107 meaningful-turn wording", () => {
+  const ctx = fixtureCtx({});
+  const markdown = assembleSections(baseInput(), ctx);
+  const s14 = sectionBody(markdown, 14);
+  assert.ok(
+    s14.includes(
+      "Let meaningful action, emotional movement, relational pressure, practical consequence, or discovery occur if the directive calls for it.",
+    ),
+  );
+  assert.ok(
+    s14.includes(
+      "Do not declare durable machine-state conclusions unless the directive explicitly asks for that wording.",
+    ),
+  );
+});
+
 test("§15 contains the narrative-structure language ban", () => {
   const ctx = fixtureCtx({});
   const markdown = assembleSections(baseInput(), ctx);
