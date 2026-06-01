@@ -1,6 +1,6 @@
 # SPEC-108 — Manual Story Studio: Segment Lifecycle Append-Only by Default
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-06-01
 **Classification:** tooling-adjacent (segment write surface under `worlds/<slug>/manual-stories/<slug>/segments/`; no canon-pipeline integration).
 **Depends on:** archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (typed-error reads from `src/read/segments.ts` — the new lifecycle gates rely on `ReadResult<T>` for atomic precondition checks).
@@ -154,3 +154,25 @@ Manual verification: open Paste Prose, paste prose, observe Save and Discard but
 - **Assumption:** The existing `editSegment` test (`test/write/edit-segment.test.ts` or similar) calls the function directly, not via the HTTP route. → Verify; if it calls via HTTP, update the test to include `mode=repair`. If it calls directly, the function-level test remains unaffected (the mode gate is at the route layer).
 - **Assumption:** The `compile_on_segment_save: true` metadata default (per the report §3) still applies to the append-only save path. → Yes — the `saveSegment` implementation already calls `maybeCompile`; unchanged.
 - **Assumption:** The "no state-review record marked complete" precondition the report §15 names is deferred to SPEC-109's state-review surface. → Yes — this spec implements the "no later segment" precondition only; the state-review precondition lands when SPEC-109 introduces the tracking surface.
+
+## 9. Outcome
+
+Completed on 2026-06-01 via:
+
+- `archive/tickets/SPEC108MANSTOSTU-001.md`
+- `archive/tickets/SPEC108MANSTOSTU-002.md`
+- `archive/tickets/SPEC108MANSTOSTU-003.md`
+- `archive/tickets/SPEC108MANSTOSTU-004.md`
+- `archive/tickets/SPEC108MANSTOSTU-005.md`
+- `archive/tickets/SPEC108MANSTOSTU-006.md`
+- `archive/tickets/SPEC108MANSTOSTU-007.md`
+- `archive/tickets/SPEC108MANSTOSTU-008.md`
+
+Manual Story Studio's segment lifecycle is now append-only in the primary UX and repair-gated at destructive routes. The backend rejects segment PUT/DELETE without `mode=repair`, enforces the latest-segment replacement precondition unless `force_replace` is explicit, and preserves existing repair-mode delete outcomes. The frontend API wrappers support the repair flags, Paste Prose only appends or clears an unsaved buffer, Manuscript no longer exposes Edit/Delete buttons, Dashboard adds a subordinate repair entry point, and `/repair` provides the dedicated warning-gated repair surface.
+
+Verification completed:
+
+- `cd tools/manual-story-studio && npm test` — passed: backend build, 398 backend tests, and web `tsc --noEmit`.
+- Ticket-level grep witnesses passed for repair-mode constants, route gates, wrapper signatures, RepairSegments route/warning/calls, PasteProse edit-mode removal, Manuscript/SegmentListItem write-affordance removal, and Dashboard repair-link placement.
+
+Deviation: the state-review precondition for `force_replace` remains deferred to SPEC-109 as planned; this spec implements the no-later-segment precondition and explicit `force_replace` override only.
