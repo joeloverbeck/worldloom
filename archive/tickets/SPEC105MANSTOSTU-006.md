@@ -1,6 +1,6 @@
 # SPEC105MANSTOSTU-006: Migrate `segments.ts` public reads + callers
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/src/read/segments.ts` (3 public read signatures: `listSegments`, `readSegmentSidecar`, `readSegmentBody`) plus 2 caller files (`server/routes/segments.ts`; `server/routes/prompts.ts`). No impact on canon-pipeline surfaces.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The three public reads in `tools/manual-story-studio/src/read/segments.ts` (`listSegments` at line 27, `readSegmentSidecar` at line 53, `readSegmentBody` at line 66) silently swallow parse failures: `listSegments` silently skips invalid segment sidecars; `readSegmentSidecar` returns null for invalid-ID-shape + missing-sidecar + parse-failure; `readSegmentBody` returns null on file-read errors. Per SPEC-105 §2 item 3 + §1 Context, the public read surface migrates to `ReadResult<T>` so callers can distinguish "valid absence" from "corruption." This ticket also corrects the function-name drift caught by the SPEC-105 reassessment: an earlier spec draft named `listSegmentSidecars` and `readSegment`, neither of which exists in the live tree.
+At intake, the three public reads in `tools/manual-story-studio/src/read/segments.ts` (`listSegments`, `readSegmentSidecar`, `readSegmentBody`) silently swallowed parse failures: `listSegments` silently skipped invalid segment sidecars; `readSegmentSidecar` returned null for invalid-ID-shape + missing-sidecar + parse-failure; `readSegmentBody` returned null on file-read errors. Per SPEC-105 §2 item 3 + §1 Context, the public read surface migrated to `ReadResult<T>` so callers can distinguish "valid absence" from "corruption." This ticket also corrected the function-name drift caught by the SPEC-105 reassessment: an earlier spec draft named `listSegmentSidecars` and `readSegment`, neither of which exists in the live tree.
 
 ## Assumption Reassessment (2026-06-01)
 
@@ -34,11 +34,11 @@ The three public reads in `tools/manual-story-studio/src/read/segments.ts` (`lis
 2. Caller-site adaptations leave build green → `cd tools/manual-story-studio && npm run build:backend` compiles cleanly.
 3. The acceptance test scenario "missing segment sidecar (orphan `.md` without `.yaml`)" produces `blocked` status + `manuscript_compile` in `blocked_actions` per SPEC-105 §7 AC#4 → tested by SPEC105MANSTOSTU-014's integration fixture.
 
-## What to Change
+## Landed Changes
 
-### 1. `tools/manual-story-studio/src/read/segments.ts` — migrate 3 public reads
+### 1. `tools/manual-story-studio/src/read/segments.ts` — migrated 3 public reads
 
-Change the three public signatures to `ReadResult<T>`. Sketch for `listSegments`:
+Changed the three public signatures to `ReadResult<T>`. Sketch for `listSegments`:
 
 ```ts
 export function listSegments(
@@ -91,6 +91,10 @@ For `readSegmentBody`: dispatch `invalid_id_shape`, `file_not_found`, `io_error`
 - Update the import at line 30 (function names unchanged from the live tree).
 - Update each call site inside the prompts-history GET handler to dispatch on `!result.ok`.
 
+### 4. `tools/manual-story-studio/test/server/segments-routes.test.ts`
+
+Added a route-level corrupt-sidecar assertion: GET `/segments` now returns 409 with a `HealthReport` body when an iterated sidecar fails YAML parsing.
+
 ## Files to Touch
 
 - `tools/manual-story-studio/src/read/segments.ts` (modify)
@@ -130,3 +134,20 @@ For `readSegmentBody`: dispatch `invalid_id_shape`, `file_not_found`, `io_error`
 
 1. `cd tools/manual-story-studio && npm run build:backend` — compile check.
 2. `cd tools/manual-story-studio && npm test` — full package test.
+
+## Outcome
+
+Completed on 2026-06-01.
+
+This ticket migrated the public segment read surface to `ReadResult<T>`, adapted segment and prompt-history routes to dispatch read errors through `mapReadErrorToHttpReply`, and added focused coverage for corrupt sidecar propagation.
+
+No deviations from the planned production scope. The private segment readers in `write/segments.ts` and `manuscript/compile.ts` remain out of scope.
+
+## Verification Result
+
+Commands run from the repo root unless a package directory is named:
+
+1. `cd tools/manual-story-studio && npm run build:backend` — passed.
+2. `cd tools/manual-story-studio && npm test` — passed; backend reported 363 tests passing and web `tsc --noEmit` passed.
+3. `grep -nE "^export function (listSegments|readSegmentSidecar|readSegmentBody).*ReadResult" tools/manual-story-studio/src/read/segments.ts` — passed; returned 3 matches.
+4. `grep -rn "listSegmentSidecars\\|readSegment\\b" tools/manual-story-studio/src/` — passed with zero matches.

@@ -5,6 +5,7 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  writeFileSync,
 } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -216,6 +217,38 @@ test("GET /segments lists saved segments and GET /segments/:id reads body plus s
         url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/segments/SEG-99`,
       });
       assert.equal(missing.statusCode, 404);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(fixture.repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("GET /segments with corrupt sidecar returns 409 HealthReport", async () => {
+  const fixture = mkWorld();
+  try {
+    mkdirSync(path.join(fixture.root.absolutePath, "segments"), {
+      recursive: true,
+    });
+    writeFileSync(
+      path.join(fixture.root.absolutePath, "segments", "SEG-1.yaml"),
+      "title: [unterminated\n",
+    );
+    const server = await createServer({ repoRoot: fixture.repoRoot });
+    try {
+      const response = await server.inject({
+        method: "GET",
+        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/segments`,
+      });
+
+      assert.equal(response.statusCode, 409);
+      const body = response.json() as {
+        status: string;
+        findings: Array<{ code: string }>;
+      };
+      assert.equal(body.status, "blocked");
+      assert.equal(body.findings[0]?.code, "yaml_parse_failed");
     } finally {
       await server.close();
     }

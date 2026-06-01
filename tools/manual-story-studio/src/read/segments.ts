@@ -4,6 +4,7 @@ import path from "node:path";
 import YAML from "yaml";
 
 import type { SegmentSidecar } from "../schema/manual-story.js";
+import { err, ok, type ReadResult } from "./result.js";
 
 const SEGMENT_ID_PATTERN = /^SEG-(\d+)$/;
 
@@ -24,9 +25,9 @@ export interface ReadSegmentOptions {
   segmentId: string;
 }
 
-export function listSegments(options: ListSegmentsOptions): SegmentListEntry[] {
+export function listSegments(options: ListSegmentsOptions): ReadResult<SegmentListEntry[]> {
   const segmentsDir = path.join(options.manualStoryRoot, "segments");
-  if (!existsSync(segmentsDir)) return [];
+  if (!existsSync(segmentsDir)) return ok([]);
 
   const entries: SegmentListEntry[] = [];
   for (const entry of readdirSync(segmentsDir, { withFileTypes: true })) {
@@ -36,56 +37,108 @@ export function listSegments(options: ListSegmentsOptions): SegmentListEntry[] {
 
     const sidecarPath = path.join(segmentsDir, entry.name);
     const sidecar = parseSegmentSidecar(sidecarPath);
-    if (!sidecar) continue;
+    if (!sidecar.ok) return err(sidecar.error);
     entries.push({
-      id: sidecar.id,
-      title: sidecar.title,
-      created_at: sidecar.created_at,
-      updated_at: sidecar.updated_at,
-      word_count: sidecar.word_count,
+      id: sidecar.value.id,
+      title: sidecar.value.title,
+      created_at: sidecar.value.created_at,
+      updated_at: sidecar.value.updated_at,
+      word_count: sidecar.value.word_count,
     });
   }
 
   entries.sort((a, b) => numericSegmentSuffix(a.id) - numericSegmentSuffix(b.id));
-  return entries;
+  return ok(entries);
 }
 
-export function readSegmentSidecar(
-  options: ReadSegmentOptions,
-): SegmentSidecar | null {
-  if (!isSegmentId(options.segmentId)) return null;
+export function readSegmentSidecar(options: ReadSegmentOptions): ReadResult<SegmentSidecar> {
+  if (!isSegmentId(options.segmentId)) {
+    return err({
+      code: "invalid_id_shape",
+      path: path.join(options.manualStoryRoot, "segments", `${options.segmentId}.yaml`),
+      repair_hint: "Segment id must match SEG-<integer>.",
+    });
+  }
   const sidecarPath = path.join(
     options.manualStoryRoot,
     "segments",
     `${options.segmentId}.yaml`,
   );
-  if (!existsSync(sidecarPath)) return null;
+  if (!existsSync(sidecarPath)) {
+    return err({
+      code: "file_not_found",
+      path: sidecarPath,
+      repair_hint: `Create segments/${options.segmentId}.yaml or remove the segment reference.`,
+    });
+  }
   return parseSegmentSidecar(sidecarPath);
 }
 
-export function readSegmentBody(options: ReadSegmentOptions): string | null {
-  if (!isSegmentId(options.segmentId)) return null;
+export function readSegmentBody(options: ReadSegmentOptions): ReadResult<string> {
+  if (!isSegmentId(options.segmentId)) {
+    return err({
+      code: "invalid_id_shape",
+      path: path.join(options.manualStoryRoot, "segments", `${options.segmentId}.md`),
+      repair_hint: "Segment id must match SEG-<integer>.",
+    });
+  }
   const prosePath = path.join(
     options.manualStoryRoot,
     "segments",
     `${options.segmentId}.md`,
   );
-  if (!existsSync(prosePath)) return null;
+  if (!existsSync(prosePath)) {
+    return err({
+      code: "file_not_found",
+      path: prosePath,
+      repair_hint: `Create segments/${options.segmentId}.md or remove the segment reference.`,
+    });
+  }
   try {
-    return readFileSync(prosePath, "utf8");
-  } catch {
-    return null;
+    return ok(readFileSync(prosePath, "utf8"));
+  } catch (cause) {
+    return err({
+      code: "io_error",
+      path: prosePath,
+      cause,
+      repair_hint: `Check file permissions for segments/${options.segmentId}.md.`,
+    });
   }
 }
 
-function parseSegmentSidecar(fullPath: string): SegmentSidecar | null {
+function parseSegmentSidecar(fullPath: string): ReadResult<SegmentSidecar> {
+  let text: string;
   try {
-    const parsed = YAML.parse(readFileSync(fullPath, "utf8")) as unknown;
-    if (!isSegmentSidecar(parsed)) return null;
-    return parsed;
-  } catch {
-    return null;
+    text = readFileSync(fullPath, "utf8");
+  } catch (cause) {
+    return err({
+      code: "io_error",
+      path: fullPath,
+      cause,
+      repair_hint: `Check file permissions for ${fullPath}.`,
+    });
   }
+
+  let parsed: unknown;
+  try {
+    parsed = YAML.parse(text) as unknown;
+  } catch (cause) {
+    return err({
+      code: "yaml_parse_failed",
+      path: fullPath,
+      cause,
+      repair_hint: `Fix YAML syntax in ${fullPath}.`,
+    });
+  }
+
+  if (!isSegmentSidecar(parsed)) {
+    return err({
+      code: "schema_validation_failed",
+      path: fullPath,
+      repair_hint: `Segment sidecar at ${fullPath} is missing required fields.`,
+    });
+  }
+  return ok(parsed);
 }
 
 function isSegmentSidecar(value: unknown): value is SegmentSidecar {

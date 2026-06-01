@@ -100,7 +100,9 @@ export async function registerSegmentsReadRoutes(
         request.params.msSlug,
       );
       if (!root) return reply.code(404).send({ error: "manual_story_not_found" });
-      return { segments: listSegments({ manualStoryRoot: root.absolutePath }) };
+      const segments = listSegments({ manualStoryRoot: root.absolutePath });
+      if (!segments.ok) return mapReadErrorToHttpReply(reply, segments.error);
+      return { segments: segments.value };
     },
   );
 
@@ -127,10 +129,9 @@ export async function registerSegmentsReadRoutes(
         manualStoryRoot: root.absolutePath,
         segmentId,
       });
-      if (body === null || sidecar === null) {
-        return reply.code(404).send({ error: "segment_not_found" });
-      }
-      return { body, sidecar };
+      if (!body.ok) return mapReadErrorToHttpReply(reply, body.error);
+      if (!sidecar.ok) return mapReadErrorToHttpReply(reply, sidecar.error);
+      return { body: body.value, sidecar: sidecar.value };
     },
   );
 }
@@ -186,14 +187,11 @@ export async function registerSegmentsWriteRoutes(
       if (!isSegmentId(segmentId)) {
         return badRequest(reply, "bad segment id");
       }
-      if (
-        readSegmentSidecar({
-          manualStoryRoot: root.absolutePath,
-          segmentId,
-        }) === null
-      ) {
-        return reply.code(404).send({ error: "segment_not_found" });
-      }
+      const existing = readSegmentSidecar({
+        manualStoryRoot: root.absolutePath,
+        segmentId,
+      });
+      if (!existing.ok) return mapReadErrorToHttpReply(reply, existing.error);
       let payload: ReturnType<typeof parseSegmentPayload>;
       try {
         payload = parseSegmentPayload(request.body);

@@ -142,7 +142,7 @@ Adapted segment write/delete route error mapping for read failures propagated th
 ## Out of Scope
 
 - The `readManualStoryMetadata` migration — archive/tickets/SPEC105MANSTOSTU-004.md.
-- Migrating `read/segments.ts` public reads — SPEC105MANSTOSTU-006.
+- Migrating `read/segments.ts` public reads — archive/tickets/SPEC105MANSTOSTU-006.md.
 - Migrating `readManuscript` — SPEC105MANSTOSTU-007.
 - Migrating the enumerators (`read/manual-stories.ts`, `read/worlds.ts`) — SPEC105MANSTOSTU-008.
 - Frontend rendering of the resulting 409 bodies — SPEC105MANSTOSTU-011 / SPEC105MANSTOSTU-012.
