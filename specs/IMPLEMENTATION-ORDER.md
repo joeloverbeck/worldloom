@@ -2,6 +2,7 @@
 
 **Date:** 2026-06-01
 **Scope:** the seven specs derived from the critical triage of `reports/manual-story-studio-second-iteration.md`. All seven are Manual Story Studio (`tools/manual-story-studio`) tooling-adjacent work; none touch canon, MCP, patch engine, or world-index beyond `enumerate.ts`'s already-shipped exclusion.
+**Status:** SPEC-105 is completed and archived; this order now governs SPEC-106 through SPEC-111.
 
 ---
 
@@ -26,7 +27,7 @@ SPEC-106 and SPEC-107 have no inbound dependencies and can land in any order alo
 ## Recommended landing order
 
 1. **SPEC-105** — Fail-fast state integrity + health endpoint + build-script inclusion.
-   *Foundational.* Unblocks 108 / 109 / 110 / 111. Lands first because every downstream spec consumes its `ReadResult<T>` discriminated union or its `/health` endpoint or both.
+   *Completed and archived.* Downstream specs should treat `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` as landed. It unblocks 108 / 109 / 110 / 111 because every downstream spec consumes its `ReadResult<T>` discriminated union or its `/health` endpoint or both.
 2. **SPEC-106** — Prompt leakage hard-tier promotion.
    *Independent.* Can land in parallel with 105 or 107. Small, focused, low-risk; ship as soon as a reviewer is available.
 3. **SPEC-107** — Prose/state contract correction + doc cleanup.
@@ -44,7 +45,7 @@ SPEC-106 and SPEC-107 have no inbound dependencies and can land in any order alo
 
 A small team or a single contributor with parallel branches can ship in the following waves:
 
-- **Wave 1**: SPEC-105 alone (foundational, blocks others).
+- **Wave 1**: SPEC-105 alone (complete).
 - **Wave 2**: SPEC-106 + SPEC-107 + SPEC-108 + SPEC-109 + SPEC-110 in parallel branches off of post-105 main.
 - **Wave 3**: SPEC-111 after SPEC-109 ships.
 

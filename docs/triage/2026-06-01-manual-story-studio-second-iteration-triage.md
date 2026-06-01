@@ -40,7 +40,7 @@ Identifiers are local to this triage. `T<N>` for triage items derived from the r
 **Verdict:** ACCEPT.
 **Source:** report §§5 / 16 / 31 Stage 1.
 **Rationale:** Verified silent-null read layer + 7× silent frontend catches. Foundations Rule 6 (No Silent Retcons) and §Core Principle frame silence-as-absence as a discipline failure; Manual Studio's read layer applies the same discipline to local truth. The cockpit cannot distinguish "no records exist" from "all records malformed" without a structured health surface.
-**Deliverable:** `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`. Adds `/health` endpoint with structured findings; replaces silent-null returns with a `ReadResult<T>` discriminated union; replaces frontend `.catch(() => {})` with surfaced errors; adds `tools/manual-story-studio` to `scripts/build-all.sh` and `scripts/check-all.sh` (T10 bundled).
+**Deliverable:** `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`. Adds `/health` endpoint with structured findings; replaces silent-null returns with a `ReadResult<T>` discriminated union; replaces frontend `.catch(() => {})` with surfaced errors; adds `tools/manual-story-studio` to `scripts/build-all.sh` and `scripts/check-all.sh` (T10 bundled).
 **Modification scope:** Bundles T10 (`build-all.sh` / `check-all.sh` inclusion) — "local all-green covers Manual Studio" is integrity discipline, not a separate concern.
 
 #### T2 — Prompt leakage hard-tier promotion
@@ -163,7 +163,7 @@ The following report sub-findings did not get a top-level T<N> identifier becaus
 
 | Deliverable | Path | Purpose |
 |---|---|---|
-| SPEC-105 | `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` | Integrity foundation; `/health` endpoint; typed-error reads; build-script inclusion |
+| SPEC-105 | `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` | Integrity foundation; `/health` endpoint; typed-error reads; build-script inclusion |
 | SPEC-106 | `specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md` | 4 leakage rules to hard tier; remove copy-anyway override |
 | SPEC-107 | `specs/SPEC-107-manual-story-studio-prose-state-contract-correction.md` | Contract paragraph + stop rule + missing-doc cleanup |
 | SPEC-108 | `specs/SPEC-108-manual-story-studio-segment-lifecycle-append-only.md` | Append-only primary UX; `mode=repair` gate on lifecycle ops |

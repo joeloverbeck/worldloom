@@ -110,7 +110,7 @@ Replaced the raw `readFileSync` + `YAML.parse` path with typed reads. `compileMa
 - `tools/manual-story-studio/test/manuscript/compile.test.ts` (modify)
 - `tools/manual-story-studio/test/server/manuscript-routes.test.ts` (modify)
 - `tools/manual-story-studio/test/write/segments.test.ts` (modify)
-- `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — dated implementation note for this slice)
+- `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — dated implementation note for this slice)
 
 ## Out of Scope
 

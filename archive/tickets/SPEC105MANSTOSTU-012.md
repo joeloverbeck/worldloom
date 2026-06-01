@@ -51,7 +51,7 @@ For each of lines 66 / 71 / 89: same shape as Dashboard — replace silent `.cat
 
 - `tools/manual-story-studio/web/src/pages/Dashboard.tsx` (modify)
 - `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` (modify)
-- `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — implementation note)
+- `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — implementation note)
 
 ## Out of Scope
 

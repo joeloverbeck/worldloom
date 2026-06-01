@@ -1,10 +1,10 @@
 # SPEC-105 — Manual Story Studio: Fail-Fast State Integrity + Health Endpoint
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-06-01
 **Classification:** tooling-adjacent (`tools/manual-story-studio` explicitly disclaims `No LLM, no MCP, no patch engine`; no canon-pipeline integration). Lands per the parallel writing-cockpit tie-break in the brainstorm skill.
-**Depends on:** — (foundational; unblocks SPEC-108 / SPEC-109 / SPEC-111).
-**Blocks:** SPEC-108 (segment lifecycle relies on typed-error reads), SPEC-109 (current-context layer relies on typed-error reads), SPEC-111 (UX cockpit consumes the new `/health` endpoint).
+**Depends on:** — (foundational; unblocks SPEC-108 / SPEC-109 / SPEC-110 / SPEC-111).
+**Blocks:** SPEC-108 (segment lifecycle relies on typed-error reads), SPEC-109 (current-context layer relies on typed-error reads), SPEC-110 (beat-template fields rely on typed-error reads), SPEC-111 (UX cockpit consumes the new `/health` endpoint).
 **Related:** `tools/manual-story-studio/src/read/`, `tools/manual-story-studio/src/server/routes/`, `tools/manual-story-studio/web/src/`, `scripts/build-all.sh`, `scripts/check-all.sh`.
 **Source:** critical triage of `reports/manual-story-studio-second-iteration.md` §§5 / 7 / 16 / 17 / 18 / 19 / 31 Stage 1 (ChatGPT-Pro, 2026-06-01). Accepted with modification: scope bundles the `build-all.sh` / `check-all.sh` inclusion (report §7 / §17) into this foundational spec because "local all-green covers Manual Studio" is integrity discipline, not a separate concern.
 
@@ -244,3 +244,33 @@ Monorepo coverage: from repo root, run `bash scripts/check-all.sh` and confirm i
 - **Route layer error-code → HTTP status dispatch is a deterministic mapping** (per the table in §2 item 4). The risk: a future read-layer change that introduces a new `ReadError.code` not yet in the table will default to `500` with a logged warning until the table is extended. This is intentional — the table is the contract, and new codes require an explicit table entry — but a code added by a sibling spec (e.g., SPEC-108's segment-lifecycle change might introduce a `segment_locked` code) needs a coordinated table extension as part of that sibling's diff.
 
 - **`manuscript/compile.ts` is a throw → typed-error behavior change.** Per §3 Key decisions, the migration converts uncaught exceptions on corrupt metadata / segment YAML into `ReadResult` errors. The risk: existing callers of `compileManuscript` (the manuscript route + the auto-compile-on-segment-save logic per `manual-story.yaml`'s `compile_on_segment_save: true` default) need to handle the new error shape. The current behavior — uncaught exception bubbling up as an HTTP 500 — was implicitly "unrecoverable, log and restart"; the new behavior is "recoverable, 409 with HealthReport." Acceptance test #4 (segment-sidecar-missing) covers this transition; the spec's diff should include a manuscript-route-level test that exercises the compile path with corrupt metadata.
+
+## Outcome
+
+Completed on 2026-06-01.
+
+Implemented the Manual Story Studio fail-fast integrity foundation across tickets SPEC105MANSTOSTU-001 through SPEC105MANSTOSTU-014:
+
+- Added the shared `HealthReport` model, health derivation, and on-demand compute pass.
+- Added typed `ReadResult<T>` read-layer errors and the route-level read-error dispatch helper.
+- Migrated public metadata, record, segment, manuscript, world, and manual-story read surfaces away from silent-null failure.
+- Added `GET /api/worlds/:world/manual-stories/:story/health`.
+- Added frontend health API types, `useStoryHealth`, `HealthBanner`, persistent per-story mounting, and explicit panel-level error states for the former `.catch(() => {})` sites.
+- Added Manual Story Studio to the repo build/check scripts.
+- Added route-layer blocked-action gates so blocked health returns `409` with the computed `HealthReport` before prompt preview/save, segment save/edit, or manuscript rebuild.
+- Added focused and package-level acceptance tests for corrupt metadata, corrupt record YAML, missing segment sidecars, dangling typed refs, blocked prompt preview/save, blocked segment save, and blocked manuscript rebuild.
+
+Deviations from the original plan:
+
+- The draft prompt route name `/prompts/compose` was corrected to the live route `POST /prompts/preview`.
+- Acceptance fixtures stayed inline in existing temp-fixture tests instead of adding a static `test/health/fixtures/` directory.
+- SPEC-105 ended up owning the persistent HealthBanner mount; SPEC-111 should consume that mount rather than reintroducing it.
+
+Verification:
+
+- `cd tools/manual-story-studio && npm run build:backend`
+- `cd tools/manual-story-studio && node --test dist/test/server/health.test.js`
+- `cd tools/manual-story-studio && node --test dist/test/server/health.test.js dist/test/server/manuscript-routes.test.js`
+- `cd tools/manual-story-studio/web && npm test`
+- `cd tools/manual-story-studio && npm test`
+- `bash scripts/check-all.sh`

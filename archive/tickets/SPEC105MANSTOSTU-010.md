@@ -49,7 +49,7 @@ The route tests cover:
 - dangling typed ref -> `200` with `status: "degraded"` and `reference-resolution-failed`
 - missing manual story -> `404 { error: "not_found" }`
 
-### 4. Updated `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`
+### 4. Updated `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`
 
 Added a dated implementation note clarifying that draft-era statements saying Manual Story Studio has no `/health` endpoint are historical after this ticket.
 
@@ -58,7 +58,7 @@ Added a dated implementation note clarifying that draft-era statements saying Ma
 - `tools/manual-story-studio/src/server/routes/health.ts` (new)
 - `tools/manual-story-studio/src/server/http.ts` (modify — one import line + one registration call inside `createServer`'s read-route scope)
 - `tools/manual-story-studio/test/server/health.test.ts` (new — route tests)
-- `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — implementation note for the now-landed route)
+- `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — implementation note for the now-landed route)
 
 ## Out of Scope
 

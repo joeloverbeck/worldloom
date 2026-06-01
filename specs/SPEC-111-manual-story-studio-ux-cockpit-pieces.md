@@ -3,7 +3,7 @@
 **Status:** PROPOSED
 **Date:** 2026-06-01
 **Classification:** tooling-adjacent (web frontend changes only; no canon-pipeline integration).
-**Depends on:** SPEC-105 (consumes the `/health` endpoint + health banner component scaffold), SPEC-109 (consumes the current-context surface for the Dashboard cockpit panel).
+**Depends on:** archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (consumes the landed `/health` endpoint + App-level health banner mount), SPEC-109 (consumes the current-context surface for the Dashboard cockpit panel).
 **Blocks:** —
 **Related:** `tools/manual-story-studio/web/src/App.tsx`, `tools/manual-story-studio/web/src/pages/Dashboard.tsx`, `tools/manual-story-studio/web/src/pages/MomentComposer.tsx`, `tools/manual-story-studio/web/src/pages/Records.tsx`, `tools/manual-story-studio/web/src/pages/PromptPreview.tsx`, all pages under `web/src/pages/`.
 **Source:** critical triage of `reports/manual-story-studio-second-iteration.md` §§5 / 18 / 29 / 31 Stage 8 (ChatGPT-Pro, 2026-06-01). Accepted with modification: the report's full "single cockpit page" rewrite is scope-large; this spec captures the load-bearing pieces (persistent health banner, ID hiding from primary UI, sibling-page nav across all cockpit pages, unsaved-change handling on directive/contract/records). Keyboard shortcuts and the `/` quick-search are explicitly **deferred** to a follow-up spec when the foundational pieces are validated in use.
@@ -18,7 +18,7 @@ The current Manual Studio frontend is route-complete but workflow-incomplete. Ve
 
 - **IDs leak into the primary UI.** Per the report §5: "Dashboard renders cast IDs and `class/id` links." Inspection confirms the dashboard surfaces `mchar-3`-style IDs as user-facing labels in several panels. The author does not need to see these — they are file-management surface, not authoring surface — and the leakage compromises the prompt-leakage discipline (an author seeing IDs in the dashboard is likelier to copy IDs into the directive).
 
-- **Health banner has nowhere to live yet.** SPEC-105 introduces the `/health` endpoint and the `HealthBanner` component scaffold but does not mount it persistently across all per-story pages. Without the persistent banner, integrity findings are invisible until the author opens the specific page that reads the corrupt resource.
+- **Per-story navigation still has nowhere consistent to live.** SPEC-105 now owns the `/health` endpoint and App-level `HealthBanner` mount. SPEC-111 should place the sibling-page navigation alongside that existing banner without remounting the banner.
 
 - **Unsaved-change handling absent.** Editing the directive draft on Moment Composer, the story contract on Edit Contract, or a record on the Records page does not guard against navigating away with unsaved changes. The author loses work to a misclick or a back-button reflex.
 
@@ -30,7 +30,7 @@ This spec implements the four load-bearing cockpit pieces. The full single-page 
 
 ### In scope
 
-1. **Persistent health banner across all per-story pages.** Mount `<HealthBanner />` (from SPEC-105) in `App.tsx` so it renders above the `<Routes>` outlet whenever the URL is `/worlds/:worldSlug/manual-stories/:msSlug/*`. The banner consumes the `useStoryHealth` hook (SPEC-105). When status is `ok`, the banner is hidden; when `degraded` or `blocked`, the banner is visible at the top of every page with per-finding rows.
+1. **Respect the existing persistent health banner.** SPEC-105 already mounts `<HealthBanner />` in `App.tsx` for per-story routes. This spec must keep that mount as the single source of health rendering and should not add a duplicate banner.
 
 2. **Sibling-page nav component.** New `web/src/components/StoryPageNav.tsx` rendering tabs (or a horizontal nav strip) for the per-story pages: Dashboard, Current State (SPEC-109 page), Cast, Records, Beat Templates, Moment Composer, Prompt Preview, Prompt History, Paste Prose, Manuscript, Repair (SPEC-108). Active page highlighted; consistent ordering everywhere. Mounted by `App.tsx` just below the health banner, also conditional on the per-story URL pattern.
 
@@ -79,7 +79,7 @@ This spec implements the four load-bearing cockpit pieces. The full single-page 
 
 ## 3. Key decisions
 
-- **Mount HealthBanner and StoryPageNav at the App.tsx level, conditional on URL.** Mounting per-page would duplicate the integration cost; conditionally rendering at the App level keeps the per-page code clean. The condition is "URL matches `/worlds/:worldSlug/manual-stories/:msSlug/*`" — use `useMatch` from React Router.
+- **Mount StoryPageNav at the App.tsx level, conditional on URL, beside the existing HealthBanner.** Mounting per-page would duplicate the integration cost; conditionally rendering at the App level keeps the per-page code clean. The condition is "URL matches `/worlds/:worldSlug/manual-stories/:msSlug/*`" — reuse the route-parsing discipline landed by SPEC-105.
 
 - **Hide IDs from primary labels; keep them in form fields.** The primary cockpit surface should read like prose (title + summary); the editor surface, where the author explicitly manages typed references, can show IDs because the IDs are the authoring artifact in that context.
 
@@ -105,8 +105,8 @@ This spec implements the four load-bearing cockpit pieces. The full single-page 
 **Modify:**
 
 - `tools/manual-story-studio/web/src/App.tsx`:
-  - Mount `<HealthBanner />` (from SPEC-105) above the `<Routes>` outlet, conditional on per-story URL.
-  - Mount `<StoryPageNav />` below the health banner, also conditional.
+  - Preserve the existing `<HealthBanner />` mount from SPEC-105.
+  - Mount `<StoryPageNav />` below the health banner, conditional on per-story URL.
   - Remove the existing single-link `<nav>` block; world-level nav (back to Worlds) lives in the per-story banner.
 - `tools/manual-story-studio/web/src/pages/Dashboard.tsx`:
   - Promote `<CurrentStatePanel />` (from SPEC-109) to the top.

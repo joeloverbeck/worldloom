@@ -3,7 +3,7 @@
 **Status:** PROPOSED
 **Date:** 2026-06-01
 **Classification:** tooling-adjacent (schema extension on `BeatTemplate` records under `worlds/<slug>/manual-stories/<slug>/records/beat-templates/`; no canon-pipeline integration).
-**Depends on:** SPEC-105 (typed-error reads).
+**Depends on:** archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (typed-error reads).
 **Blocks:** —
 **Related:** `tools/manual-story-studio/src/schema/beat-template.ts`, `tools/manual-story-studio/src/templates/filter.ts`, `tools/manual-story-studio/src/templates/explain.ts`, `tools/manual-story-studio/web/src/components/BeatTemplateForm.tsx`, `tools/manual-story-studio/web/src/components/BeatTemplateCandidates.tsx`.
 **Source:** critical triage of `reports/manual-story-studio-second-iteration.md` §§11 / 12 / 27 / 31 Stage 7 (ChatGPT-Pro, 2026-06-01). Accepted with modification: the report's 7 new fields are adopted; `cooldown_segments` is dropped (the report itself classifies cooldown as "advisory only" — YAGNI under brainstorm Guardrails). Beat templates remain author-facing manual cards with no automatic state effects; the addition is semantic deepening, not storylet engine import.

@@ -3,7 +3,7 @@
 **Status:** PROPOSED
 **Date:** 2026-06-01
 **Classification:** tooling-adjacent (introduces a new per-story authoring artifact `current-context.yaml` under `worlds/<slug>/manual-stories/<slug>/`; no canon-pipeline integration).
-**Depends on:** SPEC-105 (typed-error reads — current-context consumes the read-result discriminated union for its own load path and for the records it references).
+**Depends on:** archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (typed-error reads — current-context consumes the read-result discriminated union for its own load path and for the records it references).
 **Blocks:** SPEC-111 (UX cockpit consumes the current-context surface in the dashboard).
 **Related:** `tools/manual-story-studio/src/schema/manual-story.ts`, `tools/manual-story-studio/src/prompt/compose.ts`, `tools/manual-story-studio/web/src/pages/Dashboard.tsx`, `tools/manual-story-studio/web/src/pages/MomentComposer.tsx`.
 **Source:** critical triage of `reports/manual-story-studio-second-iteration.md` §§5 / 9 / 12 / 13 / 18 / 24 / 29 / 31 Stage 5 (ChatGPT-Pro, 2026-06-01). Accepted: the prompt composer currently relies on importance/centrality heuristics over the full record corpus; an explicit `current-context.yaml` selector is qualitatively better and unblocks both the cockpit UX and meaningful prompt curation. The report's "Schema deepening" (§31 Stage 6) is DEFERRED until this layer lands and reveals concrete schema gaps in use.

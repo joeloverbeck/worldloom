@@ -57,7 +57,7 @@ Mounted `<HealthBanner />` between the existing top navigation and `<main>`, pre
 
 Added banner styling, scoped the existing generic `[role="alert"]` rule away from `.health-banner`, and added a mobile one-column layout so long paths/messages do not collide.
 
-### 7. Updated `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`
+### 7. Updated `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`
 
 Added a dated implementation note for the landed frontend health banner slice.
 
@@ -69,7 +69,7 @@ Added a dated implementation note for the landed frontend health banner slice.
 - `tools/manual-story-studio/web/src/types/health.ts` (new)
 - `tools/manual-story-studio/web/src/App.tsx` (modify)
 - `tools/manual-story-studio/web/src/index.css` (modify)
-- `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — implementation note)
+- `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — implementation note)
 
 ## Out of Scope
 

@@ -64,7 +64,7 @@ Add server tests for corrupt record YAML and blocked `409` responses from prompt
 - `tools/manual-story-studio/src/server/routes/manuscript.ts`
 - `tools/manual-story-studio/test/server/health.test.ts`
 - `tools/manual-story-studio/test/server/manuscript-routes.test.ts`
-- `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`
+- `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`
 
 ## Out of Scope
 
