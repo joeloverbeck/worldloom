@@ -1,13 +1,13 @@
 {
-  "originating_spec": "specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md",
-  "archived_spec": null,
+  "originating_spec": "archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md",
+  "archived_spec": "archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md",
   "last_ticket": "archive/tickets/SPEC105MANSTOSTU-014.md",
   "last_result": "completed_archived",
-  "last_work_commit": "e59287ef8cf96d3609ec3314e178100bb3f7f90c",
+  "last_work_commit": "4a6e60da5246d7e618115f28ec2d2f3a9f738a18",
   "last_state_commit": "self",
-  "next_target": "specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md",
+  "next_target": null,
   "queue": [],
-  "phase": "ready_for_spec_archive",
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
@@ -15,6 +15,6 @@
   "blocked": false,
   "blocker": null,
   "proof_state": "clean: cd tools/manual-story-studio && npm run build:backend; node --test dist/test/server/health.test.js; node --test dist/test/server/health.test.js dist/test/server/manuscript-routes.test.js; cd tools/manual-story-studio && npm test; bash scripts/check-all.sh; git diff --cached --check",
-  "dirty_state": "expected after state commit: tracked worktree clean; ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place",
+  "dirty_state": "expected after final state commit: tracked worktree clean; ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place",
   "updated_at": "2026-06-01"
 }
