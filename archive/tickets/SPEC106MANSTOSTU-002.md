@@ -1,9 +1,9 @@
 # SPEC106MANSTOSTU-002: Add recent_segment_required_but_unavailable hard rule
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `tools/manual-story-studio` lint module (`src/prompt/lint.ts`), prompt-types module (`src/prompt/types.ts`), composer (`src/prompt/compose.ts`), and the lint test surface (`test/prompt-lint.test.ts`).
+**Engine Changes**: Yes — `tools/manual-story-studio` lint module (`src/prompt/lint.ts`), composer (`src/prompt/compose.ts`), default metadata writer, and prompt lint/compose/metadata test surfaces (`test/prompt-lint.test.ts`, `test/prompt-compose.test.ts`, `test/write/manual-story-metadata.test.ts`).
 **Deps**: None
 
 ## Problem
@@ -12,11 +12,12 @@ Manual stories whose `prompt_policy.include_recent_segments > 0` (per `tools/man
 
 ## Assumption Reassessment (2026-06-01)
 
-1. Codebase: `loadRecentSegmentLastParagraph` at `tools/manual-story-studio/src/prompt/compose.ts:354-392` returns `null` on every failure path (`!Number.isFinite`, segments dir missing, `readdirSync` throws, no `SEG-\d+\.md` files, file is not a regular file, `readFileSync` throws, no paragraphs after parse). `PromptLintInput` at `tools/manual-story-studio/src/prompt/types.ts:104-112` has no `prompt_policy` or `latest_segment_available` field. `ManualStoryPromptPolicy.include_recent_segments` at `tools/manual-story-studio/src/schema/manual-story.ts:71`.
+1. Codebase: `loadRecentSegmentLastParagraph` at `tools/manual-story-studio/src/prompt/compose.ts:354-392` returns `null` on every failure path (`!Number.isFinite`, segments dir missing, `readdirSync` throws, no `SEG-\d+\.md` files, file is not a regular file, `readFileSync` throws, no paragraphs after parse). Live drift from the draft: `PromptLintInput` is defined in `tools/manual-story-studio/src/prompt/lint.ts` (not `src/prompt/types.ts`) and currently has no `prompt_policy` or `latest_segment_available` field. `ManualStoryPromptPolicy.include_recent_segments` is defined at `tools/manual-story-studio/src/schema/manual-story.ts:71`.
 2. Spec: `specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md` §2.5 + §4 *Files to touch* — `PromptLintInput` extension and `compose.ts` thread are accurately scoped.
 3. Cross-skill boundary: composer → lint shared input shape. The composer already calls `loadRecentSegmentLastParagraph` for the recent-prose section emission, so the boolean availability fact is already computed inside `compose.ts` at no extra cost; the change is to thread that boolean plus the relevant policy slice into the lint call.
 4. FOUNDATIONS: Rule 2 (No Pure Cosmetics). Missing recent prose under a positive `include_recent_segments` policy is structurally meaningful to the prompt's intent (the author's policy says "include N segments") — silent fallthrough is a cosmetic-warning gap; hard-tier denial closes it.
-5. Schema extension: `PromptLintInput` (interface at `tools/manual-story-studio/src/prompt/types.ts:104-112`) is extended additively with two new required fields: `latest_segment_available: boolean` and `prompt_policy: Pick<ManualStoryPromptPolicy, "include_recent_segments">`. Consumers: a single call site in `src/prompt/compose.ts` and the test surface `test/prompt-lint.test.ts`. The extension is breaking for any direct external caller of `lintPrompt`, but `lintPrompt` has no external consumer (it is package-internal; routes call `composePrompt`, which calls `lintPrompt` internally). Tests `baseInput()` factory updated to default both fields.
+5. Schema extension: `PromptLintInput` (interface at `tools/manual-story-studio/src/prompt/lint.ts`) is extended additively with two new required fields: `latest_segment_available: boolean` and `prompt_policy: Pick<ManualStoryPromptPolicy, "include_recent_segments">`. Consumers: a single production call site in `src/prompt/compose.ts` plus `test/prompt-lint.test.ts`. The extension is breaking for any direct external caller of `lintPrompt`, but `lintPrompt` has no external consumer (it is package-internal; routes call `composePrompt`, which calls `lintPrompt` internally). Tests `baseInput()` factory updated to default both fields.
+6. Same-seam default-policy fallout: `makeDefaultManualStoryMetadata` currently defaults `prompt_policy.include_recent_segments` to `1`. Once positive policy hard-blocks when no segment is available, that default makes a brand-new Manual Story unable to save its first prompt. The default policy must be `0` so first-prompt workflows stay copyable; explicit positive policy still opts into the hard requirement.
 
 ## Architecture Check
 
@@ -32,16 +33,16 @@ Manual stories whose `prompt_policy.include_recent_segments > 0` (per `tools/man
 
 ## What to Change
 
-### 1. `tools/manual-story-studio/src/prompt/types.ts` — extend `PromptLintInput`
+### 1. `tools/manual-story-studio/src/prompt/lint.ts` — extend `PromptLintInput`
 
-Add two new required fields to the `PromptLintInput` interface (currently at lines 104-112):
+Add two new required fields to the live `PromptLintInput` interface:
 
 ```
 latest_segment_available: boolean;
 prompt_policy: Pick<ManualStoryPromptPolicy, "include_recent_segments">;
 ```
 
-Import `ManualStoryPromptPolicy` from `../schema/manual-story.js` at the top of the file (or use the existing `ManualStoryMetadata` import if the policy type can be reached through it — verify at implementation time; the simpler import is preferred).
+Import `ManualStoryPromptPolicy` from `../schema/manual-story.js` at the top of `lint.ts`.
 
 ### 2. `tools/manual-story-studio/src/prompt/lint.ts` — add `checkRecentSegmentAvailability`
 
@@ -86,12 +87,18 @@ Update the `baseInput()` factory (currently at lines 37-48) to default `latest_s
 - `include_recent_segments: 2` with `latest_segment_available: true` → asserts no finding for this surface (positive policy, segments available).
 - `include_recent_segments: 0` with `latest_segment_available: true` → asserts no finding for this surface (negative policy, segments available).
 
+### 5. `tools/manual-story-studio/src/write/manual-story-metadata.ts` — default recent segments to optional
+
+Change `makeDefaultManualStoryMetadata(...).prompt_policy.include_recent_segments` from `1` to `0` so a new Manual Story can save its first prompt before any segment exists. Keep explicit positive policy as the hard requirement.
+
 ## Files to Touch
 
-- `tools/manual-story-studio/src/prompt/types.ts` (modify)
 - `tools/manual-story-studio/src/prompt/lint.ts` (modify)
 - `tools/manual-story-studio/src/prompt/compose.ts` (modify)
+- `tools/manual-story-studio/src/write/manual-story-metadata.ts` (modify)
 - `tools/manual-story-studio/test/prompt-lint.test.ts` (modify)
+- `tools/manual-story-studio/test/prompt-compose.test.ts` (modify — composer-thread regression guard)
+- `tools/manual-story-studio/test/write/manual-story-metadata.test.ts` (modify — default policy regression guard)
 
 ## Out of Scope
 
@@ -113,14 +120,37 @@ Update the `baseInput()` factory (currently at lines 37-48) to default `latest_s
 
 1. `recent_segment_required_but_unavailable` is only emitted when `prompt_policy.include_recent_segments > 0` AND `latest_segment_available === false`.
 2. `PromptLintInput.latest_segment_available` is the boolean image of `loadRecentSegmentLastParagraph(...) !== null` — the composer's existing segment-discovery work, reused.
+3. New Manual Story metadata defaults `include_recent_segments` to `0`; authors opt into required recent prose by setting a positive value.
 
 ## Test Plan
 
 ### New/Modified Tests
 
 1. `tools/manual-story-studio/test/prompt-lint.test.ts` (modify) — extend `baseInput()` factory; add four new test cases for the policy × segments matrix.
+2. `tools/manual-story-studio/test/prompt-compose.test.ts` (modify) — assert a composed prompt with `include_recent_segments > 0` and no segment files emits the new hard finding, proving the composer threads the availability boolean into lint.
+3. `tools/manual-story-studio/test/write/manual-story-metadata.test.ts` (modify) — assert default metadata keeps `include_recent_segments === 0`.
 
 ### Commands
 
 1. `cd tools/manual-story-studio && npm test`
 2. The package's `npm test` is the correct verification boundary — backend build + node --test + web tsc cover the entire change surface; no narrower command is needed.
+
+## Outcome
+
+Completed: 2026-06-01
+
+Implemented `recent_segment_required_but_unavailable` as a hard lint finding. `lintPrompt` now receives `prompt_policy.include_recent_segments` and `latest_segment_available`, and `composePrompt` threads the boolean image of `loadRecentSegmentLastParagraph(...) !== null` into lint.
+
+Same-seam reassessment corrected the drafted `PromptLintInput` path: the interface lives in `tools/manual-story-studio/src/prompt/lint.ts`, not `src/prompt/types.ts`. Full-suite proof also exposed a default-policy issue: new Manual Story metadata defaulted `include_recent_segments` to `1`, which would block the first prompt before any segment exists. The default is now `0`; explicit positive policy still opts into the hard requirement.
+
+Updated tests cover the direct lint policy matrix, composer-thread behavior, and the first-prompt-safe default metadata policy.
+
+Verification:
+
+1. `cd tools/manual-story-studio && npm run build:backend` — green.
+2. `cd tools/manual-story-studio && node --test dist/test/prompt-lint.test.js dist/test/prompt-compose.test.js` — green, 26 tests passed.
+3. `cd tools/manual-story-studio && node --test dist/test/prompt-lint.test.js dist/test/prompt-compose.test.js dist/test/write/manual-story-metadata.test.js dist/test/capstone-spec103.test.js dist/test/capstone-spec104.test.js` — green, 41 tests passed.
+4. `cd tools/manual-story-studio && npm test` — green; 387 backend tests passed and web `tsc --noEmit` passed.
+5. `git diff --check` — clean.
+
+Deviations: the ticket originally named `src/prompt/types.ts` as the `PromptLintInput` owner; live code places the interface in `src/prompt/lint.ts`. The implementation follows the live path. The default metadata change was added as same-seam fallout so the new hard rule does not make the first prompt of a new Manual Story impossible to save.

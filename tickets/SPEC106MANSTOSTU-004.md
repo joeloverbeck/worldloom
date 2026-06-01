@@ -63,7 +63,7 @@ Add a one-line comment above the `lint_override?` field declaration at lines 292
 - Frontend health banner integration — SPEC-105 (already landed; archived).
 - New soft-tier quality affordances (in-banner prompt-too-long / weak-directive / too-many-records UX) — deferred to SPEC-111.
 - Tier flips for the four leakage rules — covered by `archive/tickets/SPEC106MANSTOSTU-001.md`.
-- The `recent_segment_required_but_unavailable` rule — covered by `SPEC106MANSTOSTU-002`.
+- The `recent_segment_required_but_unavailable` rule — covered by `archive/tickets/SPEC106MANSTOSTU-002.md`.
 
 ## Acceptance Criteria
 

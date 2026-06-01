@@ -259,6 +259,10 @@ export async function composePrompt(
     resolved_cast_ids: knownCastIds,
     selected_record_ids: input.included_records.slice(),
     resolved_record_ids: knownRecordIds,
+    latest_segment_available: recentSegmentLastParagraph !== null,
+    prompt_policy: {
+      include_recent_segments: metadata.prompt_policy.include_recent_segments,
+    },
   });
 
   // Carry the upstream hard-finding short-circuits forward.

@@ -16,6 +16,7 @@
 // same result. No disk I/O, no LLM, no network.
 
 import type { BeatTemplate } from "../schema/beat-template.js";
+import type { ManualStoryPromptPolicy } from "../schema/manual-story.js";
 import type {
   PromptLintFinding,
   PromptLintResult,
@@ -109,6 +110,8 @@ export interface PromptLintInput {
   resolved_cast_ids: Set<string>;
   selected_record_ids: string[];
   resolved_record_ids: Set<string>;
+  latest_segment_available: boolean;
+  prompt_policy: Pick<ManualStoryPromptPolicy, "include_recent_segments">;
 }
 
 function findSection(markdown: string, n: number): string | null {
@@ -272,6 +275,22 @@ function checkNoRecordClassNarratorVoice(
   return out;
 }
 
+function checkRecentSegmentAvailability(
+  input: PromptLintInput,
+): PromptLintFinding[] {
+  if (input.prompt_policy.include_recent_segments <= 0) return [];
+  if (input.latest_segment_available) return [];
+  return [
+    {
+      rule: "recent_segment_required_but_unavailable",
+      tier: "hard",
+      message:
+        "prompt_policy.include_recent_segments > 0 but no recent segment was available to render.",
+      section: "§3 Current Situation",
+    },
+  ];
+}
+
 export function lintPrompt(input: PromptLintInput): PromptLintResult {
   const findings: PromptLintFinding[] = [
     ...checkMomentDirectivePresent(input),
@@ -282,6 +301,7 @@ export function lintPrompt(input: PromptLintInput): PromptLintResult {
     ...checkNoEngineJargon(input),
     ...checkNoSchemaValidatorTerms(input),
     ...checkNoRecordClassNarratorVoice(input),
+    ...checkRecentSegmentAvailability(input),
   ];
   return {
     findings,

@@ -43,6 +43,8 @@ function baseInput(overrides: Partial<PromptLintInput> = {}): PromptLintInput {
     resolved_cast_ids: new Set(["mchar-1"]),
     selected_record_ids: ["mbel-1"],
     resolved_record_ids: new Set(["mbel-1"]),
+    latest_segment_available: true,
+    prompt_policy: { include_recent_segments: 0 },
     ...overrides,
   };
 }
@@ -236,4 +238,67 @@ test("internal id regex matches lowercase m-prefix ids", () => {
 
 test("RECORD_CLASS_NARRATOR_PHRASES list is non-empty", () => {
   assert.ok(RECORD_CLASS_NARRATOR_PHRASES.length > 0);
+});
+
+test("recent segment required but unavailable → hard finding", () => {
+  const result = lintPrompt(
+    baseInput({
+      latest_segment_available: false,
+      prompt_policy: { include_recent_segments: 1 },
+    }),
+  );
+  assert.ok(
+    result.findings.some(
+      (f) =>
+        f.rule === "recent_segment_required_but_unavailable" &&
+        f.tier === "hard",
+    ),
+  );
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
+});
+
+test("recent segment unavailable is ignored when policy disables recent prose", () => {
+  const result = lintPrompt(
+    baseInput({
+      latest_segment_available: false,
+      prompt_policy: { include_recent_segments: 0 },
+    }),
+  );
+  assert.equal(
+    result.findings.some(
+      (f) => f.rule === "recent_segment_required_but_unavailable",
+    ),
+    false,
+  );
+});
+
+test("recent segment available satisfies positive recent-prose policy", () => {
+  const result = lintPrompt(
+    baseInput({
+      latest_segment_available: true,
+      prompt_policy: { include_recent_segments: 2 },
+    }),
+  );
+  assert.equal(
+    result.findings.some(
+      (f) => f.rule === "recent_segment_required_but_unavailable",
+    ),
+    false,
+  );
+});
+
+test("recent segment availability is irrelevant when recent-prose policy is disabled", () => {
+  const result = lintPrompt(
+    baseInput({
+      latest_segment_available: true,
+      prompt_policy: { include_recent_segments: 0 },
+    }),
+  );
+  assert.equal(
+    result.findings.some(
+      (f) => f.rule === "recent_segment_required_but_unavailable",
+    ),
+    false,
+  );
 });

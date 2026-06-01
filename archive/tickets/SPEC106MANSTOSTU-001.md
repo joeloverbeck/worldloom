@@ -71,7 +71,7 @@ Update the four beat-template scan tests at lines 39 / 50 / 61 / 70: flip `tier 
 
 - Denylist content changes (`ENGINE_JARGON_DENYLIST`, `SCHEMA_VALIDATOR_DENYLIST`, `RECORD_CLASS_NARRATOR_PHRASES`, `INTERNAL_ID_REGEX`) — out of scope per spec §2 Out of scope.
 - New soft-tier quality rules (prompt-too-long, weak-directive, too-many-records) — deferred to SPEC-111.
-- The `recent_segment_required_but_unavailable` rule — covered by `SPEC106MANSTOSTU-002`.
+- The `recent_segment_required_but_unavailable` rule — covered by `archive/tickets/SPEC106MANSTOSTU-002.md`.
 - `lint_override` write-path removal (backend) — covered by `SPEC106MANSTOSTU-003`.
 - `lint_override` clipboard-override path removal (frontend) — covered by `SPEC106MANSTOSTU-004`.
 

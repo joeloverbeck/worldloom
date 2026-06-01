@@ -193,6 +193,37 @@ test("no-segments-yet path produces §3 without the recent-segment paragraph", a
   }
 });
 
+test("required recent segment unavailable surfaces hard lint finding", async () => {
+  const { tempRoot, manualStoryRoot } = mkFixture();
+  try {
+    const meta = baseMetadata();
+    meta.prompt_policy.include_recent_segments = 1;
+    writeFileSync(
+      path.join(manualStoryRoot, "manual-story.yaml"),
+      YAML.stringify(meta),
+    );
+
+    const result = await composePrompt({
+      manualStoryRoot,
+      repoRoot: tempRoot,
+      moment_directive: "Jon stays in his chair.",
+      included_cast: ["mchar-1"],
+      included_records: [],
+    });
+    assert.ok(!result.markdown.includes("Most recent prose"));
+    assert.ok(
+      result.lint.findings.some(
+        (f) =>
+          f.rule === "recent_segment_required_but_unavailable" &&
+          f.tier === "hard",
+      ),
+    );
+    assert.equal(result.lint.blockingForCopy, true);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("present-segment path includes the last paragraph in §3", async () => {
   const { tempRoot, manualStoryRoot } = mkFixture();
   try {

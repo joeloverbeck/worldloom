@@ -83,7 +83,7 @@ Rewrite the test body at line 329 ("AC #9 — savePrompt with lint_override pers
 - Frontend `lint_override` removal (`PromptPreview.tsx`, `web/src/api/prompts.ts`, `web/src/types/manual-story.ts`) — covered by `SPEC106MANSTOSTU-004`.
 - On-disk migration of existing legacy sidecars that carry `lint_override` — explicitly out of scope per SPEC-106 §3 *No deprecation period for `lint_override`* (read-tolerant type handles them).
 - Tier flips for the four leakage rules — covered by `archive/tickets/SPEC106MANSTOSTU-001.md`.
-- The `recent_segment_required_but_unavailable` rule — covered by `SPEC106MANSTOSTU-002`.
+- The `recent_segment_required_but_unavailable` rule — covered by `archive/tickets/SPEC106MANSTOSTU-002.md`.
 
 ## Acceptance Criteria
 

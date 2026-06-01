@@ -78,7 +78,7 @@ export function makeDefaultManualStoryMetadata(
       save_prompts: true,
       require_moment_directive: true,
       default_beat_count: "2-5",
-      include_recent_segments: 1,
+      include_recent_segments: 0,
       recent_template_advisory_window: 2,
     },
     manuscript: {
