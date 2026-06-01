@@ -6,7 +6,6 @@ import { LintBadge } from "../components/LintBadge.js";
 import type {
   PromptComposeRequestInput,
   PromptComposeResult,
-  PromptLintFinding,
 } from "../types/manual-story.js";
 
 interface NavState {
@@ -62,6 +61,7 @@ export function PromptPreview() {
   const sectionCount = (composeResult.markdown.match(/^## /gm) ?? []).length;
 
   async function onCopy(): Promise<void> {
+    if (lint.blockingForCopy) return;
     try {
       await navigator.clipboard.writeText(composeResult!.markdown);
       setStatusMessage("Copied to clipboard.");
@@ -87,29 +87,13 @@ export function PromptPreview() {
   }
 
   async function onSave(): Promise<void> {
+    if (lint.blockingForCopy) return;
     setSubmitting(true);
     setStatusMessage(null);
     setErrorMessage(null);
     try {
-      let lint_override: { findings: PromptLintFinding[]; copied_anyway_at: string } | undefined;
-      if (!lint.cleanForCopy) {
-        if (lint.blockingForCopy) {
-          // Button should be disabled; treat as unreachable.
-          setErrorMessage("Hard lint violations block save. Edit upstream and regenerate.");
-          return;
-        }
-        const accept = window.confirm(
-          `This prompt has ${lint.findings.length} soft lint violation(s) — save anyway?`,
-        );
-        if (!accept) return;
-        lint_override = {
-          findings: lint.findings,
-          copied_anyway_at: new Date().toISOString(),
-        };
-      }
       const outcome = await savePrompt(worldSlug!, msSlug!, {
         ...composeInput!,
-        ...(lint_override ? { lint_override } : {}),
       });
       if (outcome.ok) {
         setStatusMessage(`Saved as ${outcome.saved.id}.`);

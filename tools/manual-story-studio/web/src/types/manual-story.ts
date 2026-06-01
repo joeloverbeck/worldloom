@@ -289,6 +289,7 @@ export interface PromptRunSidecar extends PromptRunSidecarDraft {
   id: string;
   created_at: string;
   prompt_sha256: string;
+  /** @deprecated SPEC-106: write-omitted; read-tolerant for legacy sidecars only. */
   lint_override?: {
     findings: PromptLintFinding[];
     copied_anyway_at: string;

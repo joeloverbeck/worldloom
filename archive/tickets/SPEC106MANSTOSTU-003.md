@@ -16,7 +16,7 @@ At intake, `lint_override` was the SPEC-102 audit-trail breadcrumb that recorded
    - `tools/manual-story-studio/src/write/prompts.ts:31-34` (`WritePromptInput.lint_override?`) and lines 67-69 (sidecar write conditional).
    - `tools/manual-story-studio/src/server/routes/prompts.ts:8` (header comment), lines 58-63 (`SaveBody.lint_override?` field), line 324 (lint-blocking guard `if (result.lint.blockingForCopy && !body.lint_override)`), lines 330-334 (branched `writePrompt` call).
    - `tools/manual-story-studio/src/prompt/types.ts:64-67` (`PromptRunSidecar.lint_override?`).
-   - Three test files: `test/write/prompts.test.ts:138`, `test/server/prompts-routes.test.ts:207`, `test/capstone-spec102.test.ts:329`. The same grep finds frontend consumers (`web/src/pages/PromptPreview.tsx`, `web/src/api/prompts.ts`, `web/src/types/manual-story.ts`) — covered by `SPEC106MANSTOSTU-004`.
+   - Three test files: `test/write/prompts.test.ts:138`, `test/server/prompts-routes.test.ts:207`, `test/capstone-spec102.test.ts:329`. The same grep finds frontend consumers (`web/src/pages/PromptPreview.tsx`, `web/src/api/prompts.ts`, `web/src/types/manual-story.ts`) — covered by `archive/tickets/SPEC106MANSTOSTU-004.md`.
 2. Spec: `specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md` §2.4 + §4 *Files to touch* (`src/write/prompts.ts`, `src/server/routes/prompts.ts:8/59-62/324/331-332`, `src/prompt/types.ts` legacy mark) + §2 Out-of-Scope retirement clause for AC #9.
 3. Cross-skill boundary: the prompt-write contract between `composePrompt` → `lintPrompt` → `writePrompt` and the HTTP route layer's lint-blocking guard. `lint_override` was the override-acceptance channel that decoupled "save despite soft findings" from the hard-block. With hard tier promotion the channel is dead; removal is in lockstep with the guard simplification.
 4. FOUNDATIONS: Rule 6 (No Silent Retcons). The archived SPEC-102 capstone AC #9 ("savePrompt with lint_override persists the override into the sidecar") asserted the override path's correctness; SPEC-106 retires it by inverting the assertion. The retirement is attributed inline at the rewritten test with a one-line comment naming SPEC-106 as the retcon source per Rule 6, preserving the SPEC-102 capstone surface as a Rule-6 traceability anchor rather than silently disappearing the test.
@@ -76,7 +76,7 @@ Rewrote the AC #9 body as a regression guard: invoke `composePrompt` + `writePro
 
 ## Out of Scope
 
-- Frontend `lint_override` removal (`PromptPreview.tsx`, `web/src/api/prompts.ts`, `web/src/types/manual-story.ts`) — covered by `SPEC106MANSTOSTU-004`.
+- Frontend `lint_override` removal (`PromptPreview.tsx`, `web/src/api/prompts.ts`, `web/src/types/manual-story.ts`) — covered by `archive/tickets/SPEC106MANSTOSTU-004.md`.
 - On-disk migration of existing legacy sidecars that carry `lint_override` — explicitly out of scope per SPEC-106 §3 *No deprecation period for `lint_override`* (read-tolerant type handles them).
 - Tier flips for the four leakage rules — covered by `archive/tickets/SPEC106MANSTOSTU-001.md`.
 - The `recent_segment_required_but_unavailable` rule — covered by `archive/tickets/SPEC106MANSTOSTU-002.md`.
@@ -116,7 +116,7 @@ Rewrote the AC #9 body as a regression guard: invoke `composePrompt` + `writePro
 6. `grep -rn "lint_override" tools/manual-story-studio/src/ || true`
 7. `grep -n "SPEC-106" tools/manual-story-studio/test/capstone-spec102.test.ts`
 8. `cd tools/manual-story-studio && npm test`
-9. The package's `npm test` is the correct verification boundary — backend build + node --test + web tsc cover the entire change surface; the web step stayed green because this ticket touches no frontend code (frontend removal is `SPEC106MANSTOSTU-004`).
+9. The package's `npm test` is the correct verification boundary — backend build + node --test + web tsc cover the entire change surface; the web step stayed green because this ticket touches no frontend code (frontend removal is `archive/tickets/SPEC106MANSTOSTU-004.md`).
 
 ## Outcome
 
