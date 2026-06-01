@@ -1,6 +1,6 @@
 # SPEC105MANSTOSTU-010: `/health` route + `http.ts` registration
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/src/server/routes/health.ts` (`GET /api/worlds/:world/manual-stories/:story/health`) and modifies `tools/manual-story-studio/src/server/http.ts` to register the new health route inside the read-route scope. No impact on canon-pipeline surfaces.
@@ -30,62 +30,35 @@ SPEC-105 §2 item 2 specifies the `GET /api/worlds/:world/manual-stories/:story/
 2. Route returns 200 for any health status → unit test asserts `GET /api/worlds/.../health` against a valid story returns `200` + `{ status: "ok", findings: [], blocked_actions: [] }`; against a corrupt-metadata story returns `200` + `{ status: "blocked", findings: [...], blocked_actions: [...] }`.
 3. End-to-end integration verified by SPEC105MANSTOSTU-014.
 
-## What to Change
+## Landed Changes
 
-### 1. Create `tools/manual-story-studio/src/server/routes/health.ts`
+### 1. Created `tools/manual-story-studio/src/server/routes/health.ts`
 
-```ts
-import { existsSync } from "node:fs";
-import type { FastifyInstance } from "fastify";
+The route resolves the requested manual story root, returns `404 { error: "not_found" }` for invalid/missing story paths, and otherwise returns `computeHealth(root.absolutePath)` with status `200` regardless of the returned `HealthReport.status`.
 
-import { computeHealth } from "../../health/compute.js";
-import { resolveManualStoryRoot } from "../../write/sandbox.js";
+### 2. Modified `tools/manual-story-studio/src/server/http.ts`
 
-export interface HealthRouteOptions {
-  repoRoot: string;
-}
+`registerHealthRoute` is imported and registered as the final read-route registration after `registerManuscriptReadRoute`, before the writable router scope.
 
-export async function registerHealthRoute(
-  server: FastifyInstance,
-  options: HealthRouteOptions,
-): Promise<void> {
-  server.get<{ Params: { slug: string; msSlug: string } }>(
-    "/api/worlds/:slug/manual-stories/:msSlug/health",
-    async (request, reply) => {
-      const { slug, msSlug } = request.params;
-      let root;
-      try {
-        root = resolveManualStoryRoot(options.repoRoot, slug, msSlug);
-      } catch {
-        return reply.code(404).send({ error: "not_found" });
-      }
-      if (!existsSync(root.absolutePath)) {
-        return reply.code(404).send({ error: "not_found" });
-      }
-      const report = computeHealth(root.absolutePath);
-      return reply.code(200).send(report);
-    },
-  );
-}
-```
+### 3. Added `tools/manual-story-studio/test/server/health.test.ts`
 
-### 2. Modify `tools/manual-story-studio/src/server/http.ts`
+The route tests cover:
+- valid story -> `200` with `status: "ok"`, empty findings, empty blocked actions
+- corrupt metadata -> `200` with `status: "blocked"` and `metadata-yaml-parse-failed`
+- missing segment sidecar -> `200` with `status: "blocked"` and `segment-sidecar-missing`
+- dangling typed ref -> `200` with `status: "degraded"` and `reference-resolution-failed`
+- missing manual story -> `404 { error: "not_found" }`
 
-Add the import + registration inside the read-route scope:
+### 4. Updated `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`
 
-```ts
-import { registerHealthRoute } from "./routes/health.js";
-// ...
-// inside createServer, after the existing read-route registrations at lines 73–80:
-await registerHealthRoute(server, { repoRoot: options.repoRoot });
-```
-
-Place the registration as the LAST read-route registration so the existing manual-stories / records / beat-templates / metadata / prompts / segments / manuscript ordering is preserved.
+Added a dated implementation note clarifying that draft-era statements saying Manual Story Studio has no `/health` endpoint are historical after this ticket.
 
 ## Files to Touch
 
 - `tools/manual-story-studio/src/server/routes/health.ts` (new)
 - `tools/manual-story-studio/src/server/http.ts` (modify — one import line + one registration call inside `createServer`'s read-route scope)
+- `tools/manual-story-studio/test/server/health.test.ts` (new — route tests)
+- `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — implementation note for the now-landed route)
 
 ## Out of Scope
 
@@ -113,9 +86,30 @@ Place the registration as the LAST read-route registration so the existing manua
 
 ### New/Modified Tests
 
-1. `tools/manual-story-studio/test/server/routes/health.test.ts` — unit tests for the route against fixture stories (valid / corrupt-metadata / missing-sidecar / dangling-ref); covers 200 status for all health states + 404 for non-existent story.
+1. `tools/manual-story-studio/test/server/health.test.ts` — unit tests for the route against fixture stories (valid / corrupt-metadata / missing-sidecar / dangling-ref); covers 200 status for all health states + 404 for non-existent story. Existing route tests in this package live directly under `test/server/*.test.ts`, not a `test/server/routes/` subdirectory.
 
 ### Commands
 
 1. `cd tools/manual-story-studio && npm run build:backend` — compile check.
 2. `cd tools/manual-story-studio && npm test` — full package test.
+
+## Outcome
+
+Completed on 2026-06-01.
+
+This ticket added the Manual Story Studio `/health` read route, registered it in `http.ts`, and added focused route tests for healthy, blocked, degraded, and not-found responses. It also added a SPEC-105 implementation note so the proposal document no longer reads as if the endpoint is absent in the current implementation.
+
+## Verification Result
+
+Commands run:
+
+1. `cd tools/manual-story-studio && npm run build:backend` — passed.
+2. `cd tools/manual-story-studio && node --test dist/test/server/health.test.js` — passed; 5 focused tests.
+3. `cd tools/manual-story-studio && npm test` — passed; backend reported 377 tests passing and web `tsc --noEmit` passed.
+4. `grep -nE "GET.*health|registerHealthRoute|/health" tools/manual-story-studio/src/server/http.ts tools/manual-story-studio/src/server/routes/health.ts` — passed; returned route import, registration, exported route function, and URL pattern.
+5. `git diff --check` — passed.
+
+## Deviations
+
+- The drafted test path `tools/manual-story-studio/test/server/routes/health.test.ts` was corrected to `tools/manual-story-studio/test/server/health.test.ts` because existing backend route tests live directly under `test/server/*.test.ts`.
+- The route delegates entirely to the `computeHealth` output from archive/tickets/SPEC105MANSTOSTU-009.md, so finding codes are compute-level codes such as `metadata-yaml-parse-failed`, not read-error dispatch codes such as `yaml_parse_failed`.

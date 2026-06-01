@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/web/src/components/HealthBanner.tsx`, `web/src/hooks/useStoryHealth.ts`, `web/src/api/health.ts`. Modifies `web/src/App.tsx` to mount the banner above the `<Routes>` outlet with per-story URL conditional rendering. No impact on canon-pipeline surfaces.
-**Deps**: SPEC105MANSTOSTU-010
+**Deps**: archive/tickets/SPEC105MANSTOSTU-010.md
 
 ## Problem
 
@@ -14,14 +14,14 @@ SPEC-105 §2 item 5 specifies the frontend health-banner component: rendered per
 
 1. The `tools/manual-story-studio/web/src/components/`, `web/src/hooks/`, and `web/src/api/` paths exist at HEAD (verified by `ls tools/manual-story-studio/web/src/` showing `App.tsx`, `api/`, `components/`, `index.css`, `main.tsx`, `pages/`, `types/`). The new files (`HealthBanner.tsx`, `useStoryHealth.ts`, `health.ts`) do not collide with existing siblings.
 2. SPEC-105 §2 item 5 + spec §9 Risks resolve the SPEC-111 ownership overlap: SPEC-105 owns the route-aware persistent mounting; SPEC-111 reframes this as "scaffold only" but the actual ownership is established here. The mounting renders the banner above the `<Routes>` outlet conditionally on the URL matching `/worlds/:worldSlug/manual-stories/:msSlug/*`. When not on a per-story route (Worlds list, Manual Stories list, Create form), the banner is hidden entirely (no fetch, no DOM mount).
-3. Cross-skill boundary: this is purely frontend; the backend contract is the `/health` route from SPEC105MANSTOSTU-010. The hook fetches via `api/health.ts`, returns the structured report, and the banner renders findings as a persistent strip at the top of every per-story page.
+3. Cross-skill boundary: this is purely frontend; the backend contract is the `/health` route from archive/tickets/SPEC105MANSTOSTU-010.md. The hook fetches via `api/health.ts`, returns the structured report, and the banner renders findings as a persistent strip at the top of every per-story page.
 4. Rule 6 retcon attribution: the migration adds a NEW component + hook + api wrapper (no existing surface is renamed/removed) AND modifies App.tsx to insert the banner mount. The existing App.tsx Banner (the `<Banner />` greeting at lines 17–27, which says "Write root: worlds/.../manual-stories/.../") is preserved; the new HealthBanner is a separate component mounted between the existing nav and the `<Routes>` outlet on per-story routes only.
 5. App.tsx route-aware mounting pattern: use a `<RouterRouteGuard>` wrapper component (or React Router's `useLocation` hook inside HealthBanner itself) to determine the current URL. The simpler implementation: HealthBanner internally calls `useStoryHealth(worldSlug, msSlug)` where worldSlug/msSlug come from `useParams()`. When `worldSlug` or `msSlug` are absent (top-level routes like Worlds), the hook returns `null` and HealthBanner renders nothing. Mount HealthBanner unconditionally; the conditional rendering happens inside the component.
 
 ## Architecture Check
 
 1. The hook-internal conditional fetch (hook returns `null` when slugs absent; banner renders nothing) is cleaner than a wrapper component that conditionally mounts the banner — it eliminates a layer of routing logic in App.tsx and pushes the "am I on a per-story route?" question to the closest possible site (the hook itself, which has access to `useParams()`). The banner is always in the React tree on per-story routes; whether it renders depends on the health state.
-2. The fetch in `api/health.ts` uses standard fetch with the route's URL pattern from SPEC105MANSTOSTU-010. No error swallowing — if the fetch fails (network error, 404), the hook returns a synthetic `HealthReport` with a single `info`-severity finding indicating the fetch failure. This is the frontend's mirror of the backend's fail-fast principle.
+2. The fetch in `api/health.ts` uses standard fetch with the route's URL pattern from archive/tickets/SPEC105MANSTOSTU-010.md. No error swallowing — if the fetch fails (network error, 404), the hook returns a synthetic `HealthReport` with a single `info`-severity finding indicating the fetch failure. This is the frontend's mirror of the backend's fail-fast principle.
 3. Polling triggers: initial page load + after any successful write. The "after any successful write" trigger is implemented via a manual `refetch()` exposed by the hook; the post-write call sites in Dashboard / MomentComposer / RecordForm / EditContract invoke `refetch()` after a successful API write returns. This is a frontend-internal coordination; the hook does not auto-poll on a timer.
 4. No backwards-compatibility aliasing/shims.
 
@@ -161,7 +161,7 @@ import { HealthBanner } from "./components/HealthBanner.js";
 
 ## Out of Scope
 
-- The `/health` HTTP route + compute pass — archive/tickets/SPEC105MANSTOSTU-009.md + SPEC105MANSTOSTU-010.
+- The `/health` HTTP route + compute pass — archive/tickets/SPEC105MANSTOSTU-009.md + archive/tickets/SPEC105MANSTOSTU-010.md.
 - Removing the existing 7 `.catch(() => {})` silent swallowers in Dashboard.tsx / MomentComposer.tsx — SPEC105MANSTOSTU-012.
 - Browser-like component tests for the banner — deferred per spec §2 item 8's *"extending it to component tests is SPEC-111's concern"*; the web subpackage's `tsc --noEmit`-only baseline is preserved.
 - The post-write `refetch()` integration in Dashboard / MomentComposer / RecordForm / EditContract — those changes land in SPEC105MANSTOSTU-012 (catch removal) + the existing forms' write-handler bodies; this ticket only ships the hook + API surface for refetch.

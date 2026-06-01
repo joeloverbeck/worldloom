@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/test/health/` directory with `health-compute.test.ts`, `health-route.test.ts`, and 4 fixture worlds (corrupt-metadata, corrupt-record, missing-segment-sidecar, dangling-typed-ref). No production code changes; exercises the composed integrity system end-to-end.
-**Deps**: SPEC105MANSTOSTU-010
+**Deps**: archive/tickets/SPEC105MANSTOSTU-010.md
 
 ## Problem
 

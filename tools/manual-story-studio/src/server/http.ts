@@ -16,6 +16,7 @@ import {
   registerManuscriptReadRoute,
   registerManuscriptWriteRoute,
 } from "./routes/manuscript.js";
+import { registerHealthRoute } from "./routes/health.js";
 import {
   registerPromptsReadRoutes,
   registerPromptsWriteRoutes,
@@ -78,6 +79,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerPromptsReadRoutes(server, { repoRoot: options.repoRoot });
   await registerSegmentsReadRoutes(server, { repoRoot: options.repoRoot });
   await registerManuscriptReadRoute(server, { repoRoot: options.repoRoot });
+  await registerHealthRoute(server, { repoRoot: options.repoRoot });
 
   await wrapRouterWritable(server, async (writableRouter) => {
     await registerManualStoriesWriteRoutes(writableRouter, {

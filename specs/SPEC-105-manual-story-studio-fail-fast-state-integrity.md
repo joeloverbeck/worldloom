@@ -10,6 +10,8 @@
 
 **Implementation note (2026-06-01, SPEC105MANSTOSTU-007):** `readManuscript` now returns `ReadResult<ManuscriptReadResult>` with an explicit `manuscript_present` flag, and `compileManuscript` now returns `ReadResult<CompileManuscriptResult>` using the migrated metadata and segment read helpers. Draft-era statements below that describe `manuscript/compile.ts` as still doing raw `readFileSync` + `YAML.parse` are historical intake context for ticket 007, not the current implementation state.
 
+**Implementation note (2026-06-01, SPEC105MANSTOSTU-010):** Manual Story Studio now exposes `GET /api/worlds/:world/manual-stories/:story/health` through `tools/manual-story-studio/src/server/routes/health.ts`, registered from `src/server/http.ts` inside the read-route scope. Draft-era statements below that say the package has no `/health` endpoint are historical intake context, not the current implementation state.
+
 ---
 
 ## 1. Context & Motivation
