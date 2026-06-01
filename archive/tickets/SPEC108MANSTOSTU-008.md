@@ -1,6 +1,6 @@
 # SPEC108MANSTOSTU-008: Acceptance tests — new mode-gate file + existing-test updates
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/test/segments/segment-lifecycle.test.ts` (new file covering the mode-gate enforcement assertions per SPEC-108 §2 item 8); modifies `tools/manual-story-studio/test/server/segments-routes.test.ts` and `tools/manual-story-studio/test/capstone-spec103.test.ts` (updates existing PUT/DELETE tests to thread `?mode=repair` so their legacy-outcome assertions continue to hold under the new gating).
@@ -36,7 +36,7 @@ Additionally, the existing route-level PUT/DELETE tests in `test/server/segments
 
 1. New test file present -> codebase grep-proof (`test -f tools/manual-story-studio/test/segments/segment-lifecycle.test.ts`).
 2. New file covers the §2 item 8 matrix -> codebase grep-proof (`grep -cE "repair-mode-required|repair-replace-non-latest-blocked|force_replace" tools/manual-story-studio/test/segments/segment-lifecycle.test.ts` returns ≥3 — at least one per finding code).
-3. Existing tests updated -> codebase grep-proof (`grep -nE "mode=repair|mode.*repair" tools/manual-story-studio/test/server/segments-routes.test.ts tools/manual-story-studio/test/capstone-spec103.test.ts` returns ≥8 — one per updated PUT/DELETE call site across the focused route tests and the SPEC-103 capstone route tests).
+3. Existing tests updated -> codebase grep-proof (`grep -n "SEGMENT_REPAIR_MODE_FLAG" tools/manual-story-studio/test/server/segments-routes.test.ts tools/manual-story-studio/test/capstone-spec103.test.ts` returns ≥8 — import plus one use per updated PUT/DELETE call site across the focused route tests and the SPEC-103 capstone route tests).
 4. Test suite passes -> `cd tools/manual-story-studio && npm test`.
 5. SPEC-108 §7 Acceptance criteria #1-#6 each map to a test in this ticket's coverage -> manual review by the implementer (the test file's docstrings name the AC numbers).
 
@@ -86,7 +86,7 @@ The assertions in each affected test remain unchanged — the repair-mode qualif
 1. `cd tools/manual-story-studio && npm test` succeeds — all backend tests pass, including the new file and the updated existing file.
 2. `cd tools/manual-story-studio && npm run build:backend` succeeds (typecheck-only run for the new test file).
 3. `test -f tools/manual-story-studio/test/segments/segment-lifecycle.test.ts` succeeds.
-4. `grep -nE "mode=repair|mode.*repair" tools/manual-story-studio/test/server/segments-routes.test.ts tools/manual-story-studio/test/capstone-spec103.test.ts` returns ≥8 matches (the updated PUT/DELETE call sites).
+4. `grep -n "SEGMENT_REPAIR_MODE_FLAG" tools/manual-story-studio/test/server/segments-routes.test.ts tools/manual-story-studio/test/capstone-spec103.test.ts` returns ≥8 matches (imports plus updated PUT/DELETE call sites).
 5. `grep -nE "repair-mode-required|repair-replace-non-latest-blocked" tools/manual-story-studio/test/segments/segment-lifecycle.test.ts` returns ≥3 matches across the new test file.
 
 ### Invariants
@@ -107,3 +107,25 @@ The assertions in each affected test remain unchanged — the repair-mode qualif
 
 1. `cd tools/manual-story-studio && npm test` — full backend + frontend test suite. This is the load-bearing verification command — passing it confirms ticket 002's route gating works, ticket 001's constants are wired correctly, and the existing-test updates were sufficient.
 2. `cd tools/manual-story-studio && node --test "dist/test/segments/**/*.test.js"` — targeted run of the new file only (after `npm run build:backend` populates `dist/`).
+
+## Outcome
+
+Completed: 2026-06-01
+
+Added `tools/manual-story-studio/test/segments/segment-lifecycle.test.ts` with route-level coverage for SPEC-108 acceptance criteria #1-#6: append-only POST, PUT/DELETE 405 gates without repair mode, latest-segment repair success, non-latest repair 422 without `force_replace`, non-latest repair success with `force_replace`, and repair-mode DELETE preserving the hard-delete outcome.
+
+Updated `tools/manual-story-studio/test/server/segments-routes.test.ts` and `tools/manual-story-studio/test/capstone-spec103.test.ts` so their existing PUT/DELETE route calls use `SEGMENT_REPAIR_MODE_FLAG` while keeping their legacy outcome assertions unchanged.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run build:backend` — passed.
+2. `cd tools/manual-story-studio && node --test "dist/test/segments/**/*.test.js"` — passed, 7 tests.
+3. `cd tools/manual-story-studio && npm test` — passed; backend reported 398 passing tests, then `web` `tsc -p tsconfig.json --noEmit` passed.
+4. `test -f tools/manual-story-studio/test/segments/segment-lifecycle.test.ts` — passed.
+5. `grep -n "SEGMENT_REPAIR_MODE_FLAG" tools/manual-story-studio/test/server/segments-routes.test.ts tools/manual-story-studio/test/capstone-spec103.test.ts` — import plus 8 updated route call sites present.
+6. `grep -nE "repair-mode-required|repair-replace-non-latest-blocked" tools/manual-story-studio/test/segments/segment-lifecycle.test.ts` — gate/error assertions present.
+7. `git diff --check -- archive/tickets/SPEC108MANSTOSTU-008.md tools/manual-story-studio/test/segments/segment-lifecycle.test.ts tools/manual-story-studio/test/server/segments-routes.test.ts tools/manual-story-studio/test/capstone-spec103.test.ts archive/tickets/SPEC108MANSTOSTU-002.md` — clean after archival/reference repairs.
+
+## Deviations
+
+The drafted existing-test grep proof originally searched for hard-coded `mode=repair` literals. The landed tests intentionally construct URLs with `SEGMENT_REPAIR_MODE_FLAG`, so the proof was corrected to grep for the constant instead. Reassessment from ticket 002 also added `test/capstone-spec103.test.ts` to this ticket's owned test-update surface.

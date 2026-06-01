@@ -66,7 +66,7 @@ In `tools/manual-story-studio/src/server/routes/segments.ts`, update `writeError
 
 - `tools/manual-story-studio/src/server/routes/segments.ts` (modify)
 - `tools/manual-story-studio/src/write/segments.ts` (modify)
-- `tickets/SPEC108MANSTOSTU-008.md` (modify — same-family proof-surface truthing for capstone route tests)
+- `archive/tickets/SPEC108MANSTOSTU-008.md` (modify — same-family proof-surface truthing for capstone route tests)
 
 ## Out of Scope
 
@@ -114,7 +114,7 @@ Implemented backend repair-mode gating for the segment rewrite/delete routes:
 1. `tools/manual-story-studio/src/server/routes/segments.ts` imports `SEGMENT_REPAIR_MODE_FLAG`, rejects PUT/DELETE without `mode=repair` using `405` + `repair-mode-required`, and maps `SegmentPreconditionError` to `422`.
 2. `tools/manual-story-studio/src/write/segments.ts` adds `preconditions?: { require_latest: boolean }` to `EditSegmentInput` and throws `SegmentPreconditionError("repair-replace-non-latest-blocked", ...)` when repair-mode callers try to replace a non-latest segment without `force_replace`.
 3. `POST /segments` and direct function-level edit/delete behavior remain unchanged unless a caller explicitly passes the new `preconditions.require_latest` option.
-4. `tickets/SPEC108MANSTOSTU-008.md` was truthed to include `test/capstone-spec103.test.ts`, because reassessment found capstone route injections in addition to `test/server/segments-routes.test.ts`.
+4. `archive/tickets/SPEC108MANSTOSTU-008.md` was truthed to include `test/capstone-spec103.test.ts`, because reassessment found capstone route injections in addition to `test/server/segments-routes.test.ts`.
 
 ## Verification Result
 
