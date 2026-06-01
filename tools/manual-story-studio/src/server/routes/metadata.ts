@@ -6,6 +6,7 @@ import { readManualStoryMetadata } from "../../read/manual-story-metadata.js";
 import type { ManualStoryMetadata } from "../../schema/manual-story.js";
 import { updateManualStoryMetadata } from "../../write/manual-story-metadata.js";
 import { resolveManualStoryRoot } from "../../write/sandbox.js";
+import { mapReadErrorToHttpReply } from "../read-error-http.js";
 
 export interface MetadataRouteOptions {
   repoRoot: string;
@@ -38,9 +39,9 @@ export async function registerMetadataReadRoute(
         request.params.msSlug,
       );
       if (!root) return reply.code(404).send({ error: "not_found" });
-      const metadata = readManualStoryMetadata(root.absolutePath);
-      if (!metadata) return reply.code(404).send({ error: "not_found" });
-      return { metadata };
+      const result = readManualStoryMetadata(root.absolutePath);
+      if (!result.ok) return mapReadErrorToHttpReply(reply, result.error);
+      return { metadata: result.value };
     },
   );
 }

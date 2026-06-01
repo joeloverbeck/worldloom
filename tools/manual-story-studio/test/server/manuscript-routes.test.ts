@@ -13,6 +13,7 @@ import test from "node:test";
 import YAML from "yaml";
 
 import { compileManuscript } from "../../src/manuscript/compile.js";
+import type { ReadResult } from "../../src/read/result.js";
 import { createServer } from "../../src/server/http.js";
 import type { SegmentSidecar } from "../../src/schema/manual-story.js";
 import { makeDefaultManualStoryMetadata } from "../../src/write/manual-story-metadata.js";
@@ -81,12 +82,17 @@ function writeSegmentOrder(root: ManualStoryRoot, segmentOrder: string[]): void 
   safeWriteFile(root, "manual-story.yaml", YAML.stringify(metadata));
 }
 
+function unwrap<T>(result: ReadResult<T>): T {
+  if (!result.ok) assert.fail(`expected ok result, got ${result.error.code}`);
+  return result.value;
+}
+
 test("GET /manuscript returns compiled manuscript body and counts", async () => {
   const fixture = mkWorld();
   try {
     seedSegment(fixture.root, "SEG-1", "Opening");
     writeSegmentOrder(fixture.root, ["SEG-1"]);
-    compileManuscript({ manualStoryRoot: fixture.root });
+    unwrap(compileManuscript({ manualStoryRoot: fixture.root }));
 
     const server = await createServer({ repoRoot: fixture.repoRoot });
     try {
@@ -123,7 +129,44 @@ test("GET /manuscript returns 404 when manuscript.md has not been compiled", asy
         url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/manuscript`,
       });
       assert.equal(response.statusCode, 404);
-      assert.deepEqual(response.json(), { error: "manuscript_not_found" });
+      assert.deepEqual(response.json(), { error: "manuscript_not_compiled_yet" });
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(fixture.repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("POST /manuscript/rebuild returns 409 HealthReport for corrupt metadata", async () => {
+  const fixture = mkWorld();
+  try {
+    safeWriteFile(
+      fixture.root,
+      "manual-story.yaml",
+      "schema_version: [unterminated",
+    );
+
+    const server = await createServer({ repoRoot: fixture.repoRoot });
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/manuscript/rebuild`,
+      });
+
+      assert.equal(response.statusCode, 409);
+      const body = response.json() as {
+        status: string;
+        findings: Array<{ code: string; path: string }>;
+        blocked_actions: string[];
+      };
+      assert.equal(body.status, "blocked");
+      assert.equal(body.findings[0]?.code, "metadata-yaml-parse-failed");
+      assert.equal(
+        body.findings[0]?.path,
+        path.join(fixture.root.absolutePath, "manual-story.yaml"),
+      );
+      assert.ok(body.blocked_actions.includes("manuscript_compile"));
     } finally {
       await server.close();
     }

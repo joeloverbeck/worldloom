@@ -11,11 +11,14 @@ import {
   deleteSegment,
   editSegment,
   saveSegment,
+  SegmentReadFailureError,
 } from "../../write/segments.js";
 import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
 } from "../../write/sandbox.js";
+import { blockIfHealthDisallows } from "../health-gate.js";
+import { mapReadErrorToHttpReply } from "../read-error-http.js";
 
 export interface SegmentsRouteOptions {
   repoRoot: string;
@@ -76,6 +79,9 @@ function parseSegmentPayload(
 }
 
 function writeError(reply: FastifyReply, error: unknown): FastifyReply {
+  if (error instanceof SegmentReadFailureError) {
+    return mapReadErrorToHttpReply(reply, error.readError);
+  }
   const message = error instanceof Error ? error.message : "segment write failed";
   return badRequest(reply, message);
 }
@@ -95,7 +101,9 @@ export async function registerSegmentsReadRoutes(
         request.params.msSlug,
       );
       if (!root) return reply.code(404).send({ error: "manual_story_not_found" });
-      return { segments: listSegments({ manualStoryRoot: root.absolutePath }) };
+      const segments = listSegments({ manualStoryRoot: root.absolutePath });
+      if (!segments.ok) return mapReadErrorToHttpReply(reply, segments.error);
+      return { segments: segments.value };
     },
   );
 
@@ -122,10 +130,9 @@ export async function registerSegmentsReadRoutes(
         manualStoryRoot: root.absolutePath,
         segmentId,
       });
-      if (body === null || sidecar === null) {
-        return reply.code(404).send({ error: "segment_not_found" });
-      }
-      return { body, sidecar };
+      if (!body.ok) return mapReadErrorToHttpReply(reply, body.error);
+      if (!sidecar.ok) return mapReadErrorToHttpReply(reply, sidecar.error);
+      return { body: body.value, sidecar: sidecar.value };
     },
   );
 }
@@ -152,6 +159,12 @@ export async function registerSegmentsWriteRoutes(
       } catch (error) {
         return writeError(reply, error);
       }
+      const blocked = blockIfHealthDisallows(
+        reply,
+        root.absolutePath,
+        "segment_save",
+      );
+      if (blocked) return blocked;
       try {
         const result = saveSegment({ root, ...payload });
         return reply.code(201).send({
@@ -181,20 +194,23 @@ export async function registerSegmentsWriteRoutes(
       if (!isSegmentId(segmentId)) {
         return badRequest(reply, "bad segment id");
       }
-      if (
-        readSegmentSidecar({
-          manualStoryRoot: root.absolutePath,
-          segmentId,
-        }) === null
-      ) {
-        return reply.code(404).send({ error: "segment_not_found" });
-      }
+      const existing = readSegmentSidecar({
+        manualStoryRoot: root.absolutePath,
+        segmentId,
+      });
+      if (!existing.ok) return mapReadErrorToHttpReply(reply, existing.error);
       let payload: ReturnType<typeof parseSegmentPayload>;
       try {
         payload = parseSegmentPayload(request.body);
       } catch (error) {
         return writeError(reply, error);
       }
+      const blocked = blockIfHealthDisallows(
+        reply,
+        root.absolutePath,
+        "segment_save",
+      );
+      if (blocked) return blocked;
       try {
         const result = editSegment({
           root,
@@ -228,11 +244,16 @@ export async function registerSegmentsWriteRoutes(
       if (!isSegmentId(segmentId)) {
         return badRequest(reply, "bad segment id");
       }
-      const result = deleteSegment({
-        root,
-        segment_id: segmentId,
-        force: request.query.force === "true",
-      });
+      let result: ReturnType<typeof deleteSegment>;
+      try {
+        result = deleteSegment({
+          root,
+          segment_id: segmentId,
+          force: request.query.force === "true",
+        });
+      } catch (error) {
+        return writeError(reply, error);
+      }
       if ("ok" in result && result.ok === false) {
         return reply.code(404).send({ error: "segment_not_found" });
       }

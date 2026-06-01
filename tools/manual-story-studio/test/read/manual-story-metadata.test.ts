@@ -8,10 +8,32 @@ import YAML from "yaml";
 
 import { readManualStoryMetadata } from "../../src/read/manual-story-metadata.js";
 
-test("readManualStoryMetadata: missing file returns null", () => {
+test("readManualStoryMetadata: missing file returns file_not_found error", () => {
   const root = mkdtempSync(path.join(os.tmpdir(), "manual-studio-readmeta-"));
   try {
-    assert.equal(readManualStoryMetadata(root), null);
+    const result = readManualStoryMetadata(root);
+    assert.equal(result.ok, false);
+    if (!result.ok) {
+      assert.equal(result.error.code, "file_not_found");
+      assert.match(result.error.path, /manual-story\.yaml$/);
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("readManualStoryMetadata: corrupt YAML returns yaml_parse_failed error", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "manual-studio-readmeta-"));
+  try {
+    writeFileSync(path.join(root, "manual-story.yaml"), "title: [unterminated\n");
+
+    const result = readManualStoryMetadata(root);
+
+    assert.equal(result.ok, false);
+    if (!result.ok) {
+      assert.equal(result.error.code, "yaml_parse_failed");
+      assert.match(result.error.repair_hint, /Fix YAML syntax/);
+    }
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -60,9 +82,11 @@ test("readManualStoryMetadata: existing file parses to typed shape", () => {
     };
     writeFileSync(path.join(root, "manual-story.yaml"), YAML.stringify(metadata));
     const parsed = readManualStoryMetadata(root);
-    assert.ok(parsed);
-    assert.equal(parsed!.title, "T");
-    assert.equal(parsed!.story_contract.pov, "first");
+    assert.equal(parsed.ok, true);
+    if (parsed.ok) {
+      assert.equal(parsed.value.title, "T");
+      assert.equal(parsed.value.story_contract.pov, "first");
+    }
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

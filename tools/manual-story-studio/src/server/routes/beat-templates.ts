@@ -39,6 +39,7 @@ import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
 } from "../../write/sandbox.js";
+import { mapReadErrorToHttpReply } from "../read-error-http.js";
 
 export interface BeatTemplatesRouteOptions {
   repoRoot: string;
@@ -303,16 +304,18 @@ export async function registerBeatTemplatesWriteRoutes(
       );
       if (!root) return notFound(reply, "manual_story_not_found");
       const body = (request.body ?? {}) as CandidatesBody;
-      const metadata = readManualStoryMetadata(root.absolutePath);
-      if (!metadata) {
-        return reply.code(500).send({ error: "metadata_not_found" });
+      const metadataResult = readManualStoryMetadata(root.absolutePath);
+      if (!metadataResult.ok) {
+        return mapReadErrorToHttpReply(reply, metadataResult.error);
       }
+      const metadata = metadataResult.value;
       const allTemplates = listAllBeatTemplates(root.absolutePath);
       const selectedCastIds = new Set(body.selected_cast ?? []);
       const selectedCast: ManualCharacterProfile[] = [];
       for (const id of selectedCastIds) {
         const c = readRecord(root.absolutePath, "cast", id);
-        if (c) selectedCast.push(c as ManualCharacterProfile);
+        if (!c.ok) return mapReadErrorToHttpReply(reply, c.error);
+        selectedCast.push(c.value as ManualCharacterProfile);
       }
 
       // Collect active records (across all classes except beat-templates,
@@ -341,9 +344,13 @@ export async function registerBeatTemplatesWriteRoutes(
         "artifacts",
       ] as const;
       for (const cls of RECORD_CLASSES_TO_SCAN) {
-        const summaries = listRecords(root.absolutePath, cls, {
+        const summariesResult = listRecords(root.absolutePath, cls, {
           includeArchived: false,
         });
+        if (!summariesResult.ok) {
+          return mapReadErrorToHttpReply(reply, summariesResult.error);
+        }
+        const summaries = summariesResult.value;
         for (const s of summaries) {
           activeRecords.push({
             id: s.id,
@@ -353,13 +360,12 @@ export async function registerBeatTemplatesWriteRoutes(
         }
         if (cls === "secrets") {
           for (const s of summaries) {
-            const full = readRecord(root.absolutePath, "secrets", s.id) as
-              | ManualSecretRecord
-              | null;
-            if (full && Array.isArray(full.forbidden_reveal_tags)) {
+            const full = readRecord(root.absolutePath, "secrets", s.id);
+            if (!full.ok) return mapReadErrorToHttpReply(reply, full.error);
+            if (Array.isArray(full.value.forbidden_reveal_tags)) {
               activeSecrets.push({
-                id: full.id,
-                forbidden_reveal_tags: [...full.forbidden_reveal_tags],
+                id: full.value.id,
+                forbidden_reveal_tags: [...full.value.forbidden_reveal_tags],
               });
             }
           }

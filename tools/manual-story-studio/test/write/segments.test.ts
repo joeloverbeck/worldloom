@@ -16,6 +16,7 @@ import test from "node:test";
 import YAML from "yaml";
 
 import type { CompileManuscriptResult } from "../../src/manuscript/compile.js";
+import type { ReadResult } from "../../src/read/result.js";
 import type {
   ManualConsequenceRecord,
   ManualStoryMetadata,
@@ -208,7 +209,7 @@ function collect(root: string, dir: string, out: FileSnapshot[]): void {
 
 function saveOne(
   root: ManualStoryRoot,
-  compile: () => CompileManuscriptResult = noopCompile,
+  compile: () => ReadResult<CompileManuscriptResult> = noopCompile,
 ): string {
   const result = saveSegment({
     root,
@@ -222,8 +223,11 @@ function saveOne(
   return result.segment_id;
 }
 
-function noopCompile(): CompileManuscriptResult {
-  return { manuscript_path: "", segments_compiled: 0, byte_count: 0 };
+function noopCompile(): ReadResult<CompileManuscriptResult> {
+  return {
+    ok: true,
+    value: { manuscript_path: "", segments_compiled: 0, byte_count: 0 },
+  };
 }
 
 test("saveSegment writes paired segment files and appends segment_order", () => {

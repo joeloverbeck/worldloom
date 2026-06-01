@@ -28,11 +28,14 @@ import type {
   PromptRunSidecar,
 } from "../../prompt/types.js";
 import { listSegments, readSegmentSidecar } from "../../read/segments.js";
+import { err, ok, type ReadResult } from "../../read/result.js";
 import { writePrompt } from "../../write/prompts.js";
 import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
 } from "../../write/sandbox.js";
+import { blockIfHealthDisallows } from "../health-gate.js";
+import { mapReadErrorToHttpReply } from "../read-error-http.js";
 
 export interface PromptsRouteOptions {
   repoRoot: string;
@@ -152,19 +155,22 @@ function deriveTemplateIdFromPath(p: string | null): string | null {
   return m ? m[1] ?? null : null;
 }
 
-function linkedSegmentsByPrompt(manualStoryRoot: string): Map<string, string[]> {
+function linkedSegmentsByPrompt(manualStoryRoot: string): ReadResult<Map<string, string[]>> {
   const byPrompt = new Map<string, string[]>();
-  for (const segment of listSegments({ manualStoryRoot })) {
+  const segments = listSegments({ manualStoryRoot });
+  if (!segments.ok) return err(segments.error);
+  for (const segment of segments.value) {
     const sidecar = readSegmentSidecar({
       manualStoryRoot,
       segmentId: segment.id,
     });
-    if (!sidecar?.prompt_id) continue;
-    const existing = byPrompt.get(sidecar.prompt_id) ?? [];
+    if (!sidecar.ok) return err(sidecar.error);
+    if (!sidecar.value.prompt_id) continue;
+    const existing = byPrompt.get(sidecar.value.prompt_id) ?? [];
     existing.push(segment.id);
-    byPrompt.set(sidecar.prompt_id, existing);
+    byPrompt.set(sidecar.value.prompt_id, existing);
   }
-  return byPrompt;
+  return ok(byPrompt);
 }
 
 export async function registerPromptsReadRoutes(
@@ -190,6 +196,12 @@ export async function registerPromptsReadRoutes(
         }
         return badRequest(reply, built.error);
       }
+      const blocked = blockIfHealthDisallows(
+        reply,
+        root.absolutePath,
+        "prompt_copy",
+      );
+      if (blocked) return blocked;
       const result = await composePrompt(built);
       return result;
     },
@@ -210,6 +222,9 @@ export async function registerPromptsReadRoutes(
       if (!existsSync(promptRunsDir)) return { prompts: [] };
       const entries = readdirSync(promptRunsDir);
       const linkedByPrompt = linkedSegmentsByPrompt(root.absolutePath);
+      if (!linkedByPrompt.ok) {
+        return mapReadErrorToHttpReply(reply, linkedByPrompt.error);
+      }
       const prompts: Array<{
         id: string;
         created_at: string;
@@ -226,7 +241,7 @@ export async function registerPromptsReadRoutes(
             id: sidecar.id,
             created_at: sidecar.created_at,
             moment_directive_snippet: snippet(sidecar.moment_directive ?? ""),
-            linked_segments: linkedByPrompt.get(sidecar.id) ?? [],
+            linked_segments: linkedByPrompt.value.get(sidecar.id) ?? [],
             selected_template: deriveTemplateIdFromPath(
               sidecar.included_template_path ?? null,
             ),
@@ -299,6 +314,12 @@ export async function registerPromptsWriteRoutes(
         }
         return badRequest(reply, built.error);
       }
+      const blocked = blockIfHealthDisallows(
+        reply,
+        root.absolutePath,
+        "prompt_save",
+      );
+      if (blocked) return blocked;
       const result: PromptComposeResult = await composePrompt(built);
       if (result.lint.blockingForCopy && !body.lint_override) {
         return reply.code(409).send({

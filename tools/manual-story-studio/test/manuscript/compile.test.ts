@@ -15,6 +15,7 @@ import test from "node:test";
 import YAML from "yaml";
 
 import { compileManuscript } from "../../src/manuscript/compile.js";
+import type { ReadResult } from "../../src/read/result.js";
 import type {
   ManualStoryMetadata,
   SegmentSidecar,
@@ -139,12 +140,17 @@ function seedSegment(
   );
 }
 
+function unwrap<T>(result: ReadResult<T>): T {
+  if (!result.ok) assert.fail(`expected ok result, got ${result.error.code}`);
+  return result.value;
+}
+
 test("compileManuscript is deterministic across repeated runs", () => {
   const { tempRoot, manualStoryRoot } = mkFixture();
   try {
-    const first = compileManuscript({ manualStoryRoot });
+    const first = unwrap(compileManuscript({ manualStoryRoot }));
     const firstBody = readFileSync(first.manuscript_path, "utf8");
-    const second = compileManuscript({ manualStoryRoot });
+    const second = unwrap(compileManuscript({ manualStoryRoot }));
     const secondBody = readFileSync(second.manuscript_path, "utf8");
 
     assert.equal(firstBody, "Lanterns rise.\n\nRain answers.\n\nDoors open.");
@@ -161,7 +167,7 @@ test("compileManuscript prepends segment titles when configured", () => {
     includeSegmentTitles: true,
   });
   try {
-    const result = compileManuscript({ manualStoryRoot });
+    const result = unwrap(compileManuscript({ manualStoryRoot }));
     assert.equal(
       readFileSync(result.manuscript_path, "utf8"),
       [
@@ -188,7 +194,7 @@ test("compileManuscript omits segment titles by default", () => {
     includeSegmentTitles: false,
   });
   try {
-    const result = compileManuscript({ manualStoryRoot });
+    const result = unwrap(compileManuscript({ manualStoryRoot }));
     assert.equal(
       readFileSync(result.manuscript_path, "utf8"),
       "Lanterns rise.\n\nRain answers.\n\nDoors open.",
@@ -201,7 +207,7 @@ test("compileManuscript omits segment titles by default", () => {
 test("compileManuscript writes an empty manuscript for empty segment_order", () => {
   const { tempRoot, manualStoryRoot } = mkFixture({ segmentOrder: [] });
   try {
-    const result = compileManuscript({ manualStoryRoot });
+    const result = unwrap(compileManuscript({ manualStoryRoot }));
     assert.equal(readFileSync(result.manuscript_path, "utf8"), "");
     assert.equal(result.segments_compiled, 0);
     assert.equal(result.byte_count, 0);
@@ -215,7 +221,7 @@ test("compileManuscript honors segment_order instead of filesystem order", () =>
     segmentOrder: ["SEG-3", "SEG-1", "SEG-2"],
   });
   try {
-    const result = compileManuscript({ manualStoryRoot });
+    const result = unwrap(compileManuscript({ manualStoryRoot }));
     assert.equal(
       readFileSync(result.manuscript_path, "utf8"),
       "Doors open.\n\nLanterns rise.\n\nRain answers.",
@@ -236,7 +242,7 @@ test("compileManuscript does not touch records or prompt directories", () => {
       path.join(manualStoryRoot.absolutePath, "prompts"),
     ).mtimeMs;
 
-    const result = compileManuscript({ manualStoryRoot });
+    const result = unwrap(compileManuscript({ manualStoryRoot }));
 
     const afterRootFiles = new Set(readdirSync(manualStoryRoot.absolutePath));
     const addedRootFiles = [...afterRootFiles].filter(
@@ -254,6 +260,27 @@ test("compileManuscript does not touch records or prompt directories", () => {
     assert.equal(
       result.manuscript_path,
       path.join(manualStoryRoot.absolutePath, "manuscript.md"),
+    );
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("compileManuscript returns typed error for corrupt manual-story.yaml", () => {
+  const { tempRoot, manualStoryRoot } = mkFixture();
+  try {
+    writeFileSync(
+      path.join(manualStoryRoot.absolutePath, "manual-story.yaml"),
+      "schema_version: [unterminated",
+    );
+
+    const result = compileManuscript({ manualStoryRoot });
+
+    if (result.ok) assert.fail("expected yaml_parse_failed result");
+    assert.equal(result.error.code, "yaml_parse_failed");
+    assert.equal(
+      result.error.path,
+      path.join(manualStoryRoot.absolutePath, "manual-story.yaml"),
     );
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });

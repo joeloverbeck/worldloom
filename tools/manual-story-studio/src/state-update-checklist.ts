@@ -1,4 +1,5 @@
 import { listRecords, readRecord } from "./read/records.js";
+import { err, ok, type ReadResult } from "./read/result.js";
 import type {
   ManualRecord,
   ManualRecordClass,
@@ -44,36 +45,40 @@ export interface BuildChecklistOptions {
 
 export function buildStateUpdateChecklist(
   options: BuildChecklistOptions,
-): StateUpdateChecklistPayload {
+): ReadResult<StateUpdateChecklistPayload> {
   const manualStoryRoot = rootPath(options.manualStoryRoot);
   const involved_cast =
     options.sidecar.included_record_summary.characters.slice();
   const involvedCastSet = new Set(involved_cast);
 
-  const entries = CHECKLIST_REVIEW_CLASSES.map((recordClass) => {
-    const summaries = listRecords(manualStoryRoot, recordClass);
+  const entries: StateUpdateChecklistEntry[] = [];
+  for (const recordClass of CHECKLIST_REVIEW_CLASSES) {
+    const summariesResult = listRecords(manualStoryRoot, recordClass);
+    if (!summariesResult.ok) return err(summariesResult.error);
+    const summaries = summariesResult.value;
     let cast_referencing_count = 0;
 
     for (const summary of summaries) {
       const record = readRecord(manualStoryRoot, recordClass, summary.id);
-      if (recordReferencesAnyCast(record, involvedCastSet)) {
+      if (!record.ok) return err(record.error);
+      if (recordReferencesAnyCast(record.value, involvedCastSet)) {
         cast_referencing_count += 1;
       }
     }
 
-    return {
+    entries.push({
       record_class: recordClass,
       total_records: summaries.length,
       cast_referencing_count,
-    };
-  });
+    });
+  }
 
-  return {
+  return ok({
     segment_id: options.sidecar.id,
     involved_cast,
     entries,
     disclaimer: CHECKLIST_DISCLAIMER,
-  };
+  });
 }
 
 function rootPath(root: ManualStoryRoot | string): string {
@@ -81,9 +86,9 @@ function rootPath(root: ManualStoryRoot | string): string {
 }
 
 function recordReferencesAnyCast(
-  record: ManualRecord | null,
+  record: ManualRecord,
   involvedCast: ReadonlySet<string>,
 ): boolean {
-  if (!record || involvedCast.size === 0) return false;
+  if (involvedCast.size === 0) return false;
   return record.refs.characters.some((id) => involvedCast.has(id));
 }

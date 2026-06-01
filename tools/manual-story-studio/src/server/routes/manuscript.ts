@@ -1,9 +1,11 @@
 import { existsSync } from "node:fs";
 
-import type { FastifyInstance, FastifyReply } from "fastify";
+import type { FastifyInstance } from "fastify";
 
 import { compileManuscript } from "../../manuscript/compile.js";
 import { readManuscript } from "../../read/manuscript.js";
+import { blockIfHealthDisallows } from "../health-gate.js";
+import { mapReadErrorToHttpReply } from "../read-error-http.js";
 import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
@@ -27,10 +29,6 @@ function resolveRootOrNull(
   }
 }
 
-function badRequest(reply: FastifyReply, message: string): FastifyReply {
-  return reply.code(400).send({ error: "invalid_input", message });
-}
-
 export async function registerManuscriptReadRoute(
   server: FastifyInstance,
   options: ManuscriptRouteOptions,
@@ -48,8 +46,11 @@ export async function registerManuscriptReadRoute(
       if (!root) return reply.code(404).send({ error: "manual_story_not_found" });
 
       const result = readManuscript({ manualStoryRoot: root.absolutePath });
-      if (!result) return reply.code(404).send({ error: "manuscript_not_found" });
-      return result;
+      if (!result.ok) return mapReadErrorToHttpReply(reply, result.error);
+      if (!result.value.manuscript_present) {
+        return reply.code(404).send({ error: "manuscript_not_compiled_yet" });
+      }
+      return result.value;
     },
   );
 }
@@ -70,13 +71,16 @@ export async function registerManuscriptWriteRoute(
       );
       if (!root) return reply.code(404).send({ error: "manual_story_not_found" });
 
-      try {
-        return compileManuscript({ manualStoryRoot: root });
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "manuscript rebuild failed";
-        return badRequest(reply, message);
-      }
+      const blocked = blockIfHealthDisallows(
+        reply,
+        root.absolutePath,
+        "manuscript_compile",
+      );
+      if (blocked) return blocked;
+
+      const result = compileManuscript({ manualStoryRoot: root });
+      if (!result.ok) return mapReadErrorToHttpReply(reply, result.error);
+      return result.value;
     },
   );
 }

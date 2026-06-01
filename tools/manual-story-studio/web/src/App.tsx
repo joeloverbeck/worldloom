@@ -1,5 +1,6 @@
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
+import { HealthBanner } from "./components/HealthBanner.js";
 import { BeatTemplates } from "./pages/BeatTemplates.js";
 import { CastAndProfiles } from "./pages/CastAndProfiles.js";
 import { CreateManualStory } from "./pages/CreateManualStory.js";
@@ -35,6 +36,7 @@ export function App() {
       <nav>
         <Link to="/">Worlds</Link>
       </nav>
+      <HealthBanner />
       <main>
         <Routes>
           <Route path="/" element={<Worlds />} />

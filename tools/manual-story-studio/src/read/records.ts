@@ -12,19 +12,16 @@ import {
   type ManualRecordSummary,
 } from "../schema/manual-story.js";
 import { emptyKnownIds, type KnownIds } from "../validate/refs.js";
+import { err, ok, type ReadResult } from "./result.js";
 
 export interface ListRecordsOptions {
   includeArchived?: boolean;
 }
 
-export function listRecords(
-  manualStoryRoot: string,
-  recordClass: ManualRecordClass,
-  opts: ListRecordsOptions = {},
-): ManualRecordSummary[] {
+export function listRecords(manualStoryRoot: string, recordClass: ManualRecordClass, opts: ListRecordsOptions = {}): ReadResult<ManualRecordSummary[]> {
   const includeArchived = opts.includeArchived === true;
   const targetDir = path.join(manualStoryRoot, "records", recordClass);
-  if (!existsSync(targetDir)) return [];
+  if (!existsSync(targetDir)) return ok([]);
   const prefix = MANUAL_RECORD_CLASS_PREFIXES[recordClass];
   const filenamePattern = new RegExp(`^${escapeRegex(prefix)}-(\\d+)\\.yaml$`);
   const out: ManualRecordSummary[] = [];
@@ -34,27 +31,33 @@ export function listRecords(
     const match = filenamePattern.exec(entry.name);
     if (!match) continue;
     const fullPath = path.join(targetDir, entry.name);
-    const parsed = parseYamlFile(fullPath);
-    if (parsed === null) continue;
-    const summary = toSummary(parsed);
-    if (!summary) continue;
+    const parsed = readYamlFile(fullPath);
+    if (!parsed.ok) return err(parsed.error);
+    const summary = toSummary(parsed.value);
+    if (!summary) {
+      return err({
+        code: "schema_validation_failed",
+        path: fullPath,
+        repair_hint: `Record at records/${recordClass}/${entry.name} is missing required fields (id, title).`,
+      });
+    }
     if (!includeArchived && summary.active === false) continue;
     out.push(summary);
   }
   out.sort((a, b) =>
     extractNumericSuffix(a.id) - extractNumericSuffix(b.id),
   );
-  return out;
+  return ok(out);
 }
 
-export function readRecord<C extends ManualRecordClass>(
-  manualStoryRoot: string,
-  recordClass: C,
-  id: string,
-): ManualRecordOfClass<C> | null {
+export function readRecord<C extends ManualRecordClass>(manualStoryRoot: string, recordClass: C, id: string): ReadResult<ManualRecordOfClass<C>> {
   const prefix = MANUAL_RECORD_CLASS_PREFIXES[recordClass];
   if (!new RegExp(`^${escapeRegex(prefix)}-\\d+$`).test(id)) {
-    return null;
+    return err({
+      code: "invalid_id_shape",
+      path: path.join(manualStoryRoot, "records", recordClass, `${id}.yaml`),
+      repair_hint: `Record id must match ${prefix}-<integer>.`,
+    });
   }
   const fullPath = path.join(
     manualStoryRoot,
@@ -62,18 +65,33 @@ export function readRecord<C extends ManualRecordClass>(
     recordClass,
     `${id}.yaml`,
   );
-  if (!existsSync(fullPath)) return null;
-  const parsed = parseYamlFile(fullPath);
-  if (parsed === null) return null;
-  return parsed as ManualRecordOfClass<C>;
+  if (!existsSync(fullPath)) {
+    return err({
+      code: "file_not_found",
+      path: fullPath,
+      repair_hint: `Create records/${recordClass}/${id}.yaml or remove the reference.`,
+    });
+  }
+  const parsed = readYamlFile(fullPath);
+  if (!parsed.ok) return err(parsed.error);
+  if (!toSummary(parsed.value)) {
+    return err({
+      code: "schema_validation_failed",
+      path: fullPath,
+      repair_hint: `Record at records/${recordClass}/${id}.yaml is missing required fields (id, title).`,
+    });
+  }
+  return ok(parsed.value as ManualRecordOfClass<C>);
 }
 
-export function listAllKnownIds(manualStoryRoot: string): KnownIds {
+export function listAllKnownIds(manualStoryRoot: string): ReadResult<KnownIds> {
   const known = emptyKnownIds();
   for (const cls of MANUAL_RECORD_CLASSES) {
-    const summaries = listRecords(manualStoryRoot, cls, {
+    const summariesResult = listRecords(manualStoryRoot, cls, {
       includeArchived: true,
     });
+    if (!summariesResult.ok) return err(summariesResult.error);
+    const summaries = summariesResult.value;
     for (const s of summaries) {
       known[cls].add(s.id);
     }
@@ -81,16 +99,19 @@ export function listAllKnownIds(manualStoryRoot: string): KnownIds {
   // Segments: read manual-story.yaml's segment_order if present
   const manualStoryYaml = path.join(manualStoryRoot, "manual-story.yaml");
   if (existsSync(manualStoryYaml)) {
-    const parsed = parseYamlFile(manualStoryYaml) as
-      | { segment_order?: unknown }
-      | null;
-    if (parsed && Array.isArray(parsed.segment_order)) {
-      for (const seg of parsed.segment_order) {
+    const parsed = readYamlFile(manualStoryYaml);
+    if (!parsed.ok) return err(parsed.error);
+    if (
+      typeof parsed.value === "object" &&
+      parsed.value !== null &&
+      Array.isArray((parsed.value as { segment_order?: unknown }).segment_order)
+    ) {
+      for (const seg of (parsed.value as { segment_order: unknown[] }).segment_order) {
         if (typeof seg === "string") known.segments.add(seg);
       }
     }
   }
-  return known;
+  return ok(known);
 }
 
 export interface ReferrerEntry {
@@ -99,22 +120,21 @@ export interface ReferrerEntry {
   field: string;
 }
 
-export function scanReferences(
-  manualStoryRoot: string,
-  targetId: string,
-): ReferrerEntry[] {
+export function scanReferences(manualStoryRoot: string, targetId: string): ReadResult<ReferrerEntry[]> {
   const referrers: ReferrerEntry[] = [];
   for (const cls of MANUAL_RECORD_CLASSES) {
-    const summaries = listRecords(manualStoryRoot, cls, {
+    const summariesResult = listRecords(manualStoryRoot, cls, {
       includeArchived: true,
     });
+    if (!summariesResult.ok) return err(summariesResult.error);
+    const summaries = summariesResult.value;
     for (const summary of summaries) {
       const record = readRecord(manualStoryRoot, cls, summary.id);
-      if (!record) continue;
-      collectReferrers(record, cls, targetId, referrers);
+      if (!record.ok) return err(record.error);
+      collectReferrers(record.value, cls, targetId, referrers);
     }
   }
-  return referrers;
+  return ok(referrers);
 }
 
 function collectReferrers(
@@ -224,12 +244,28 @@ function toSummary(parsed: unknown): ManualRecordSummary | null {
   };
 }
 
-function parseYamlFile(fullPath: string): unknown {
+function readYamlFile(fullPath: string): ReadResult<unknown> {
+  let text: string;
   try {
-    const text = readFileSync(fullPath, "utf8");
-    return YAML.parse(text) as unknown;
-  } catch {
-    return null;
+    text = readFileSync(fullPath, "utf8");
+  } catch (cause) {
+    return err({
+      code: "io_error",
+      path: fullPath,
+      cause,
+      repair_hint: `Check file permissions for ${fullPath}.`,
+    });
+  }
+
+  try {
+    return ok(YAML.parse(text) as unknown);
+  } catch (cause) {
+    return err({
+      code: "yaml_parse_failed",
+      path: fullPath,
+      cause,
+      repair_hint: `Fix YAML syntax in ${fullPath}.`,
+    });
   }
 }
 

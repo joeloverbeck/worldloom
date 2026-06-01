@@ -5,6 +5,8 @@ import path from "node:path";
 import test from "node:test";
 
 import { enumerateManualStories } from "../../src/read/manual-stories.js";
+import type { ReadResult } from "../../src/read/result.js";
+import type { ManualStoryEntry } from "../../src/read/manual-stories.js";
 
 function createFixtureRepoRoot(): string {
   return mkdtempSync(path.join(os.tmpdir(), "manual-studio-list-"));
@@ -17,23 +19,27 @@ function makeWorld(repoRoot: string, worldSlug: string): string {
   return worldRoot;
 }
 
+function unwrap(result: ReadResult<ManualStoryEntry[]>): ManualStoryEntry[] {
+  if (!result.ok) assert.fail(`expected ok result, got ${result.error.code}`);
+  return result.value;
+}
+
 test("enumerateManualStories returns [] when worlds/<slug>/manual-stories/ is absent", () => {
   const repoRoot = createFixtureRepoRoot();
   try {
     makeWorld(repoRoot, "test-world");
-    assert.deepEqual(enumerateManualStories(repoRoot, "test-world"), []);
+    assert.deepEqual(unwrap(enumerateManualStories(repoRoot, "test-world")), []);
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
   }
 });
 
-test("enumerateManualStories throws for an invalid world slug", () => {
+test("enumerateManualStories returns invalid_id_shape for an invalid world slug", () => {
   const repoRoot = createFixtureRepoRoot();
   try {
-    assert.throws(
-      () => enumerateManualStories(repoRoot, "Bad World"),
-      /invalid world slug/,
-    );
+    const result = enumerateManualStories(repoRoot, "Bad World");
+    if (result.ok) assert.fail("expected invalid_id_shape result");
+    assert.equal(result.error.code, "invalid_id_shape");
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
   }
@@ -62,7 +68,7 @@ test("enumerateManualStories lists only directories containing manual-story.yaml
     );
     mkdirSync(path.join(manualStoriesRoot, "broken"), { recursive: true });
 
-    const results = enumerateManualStories(repoRoot, "test-world");
+    const results = unwrap(enumerateManualStories(repoRoot, "test-world"));
 
     assert.equal(results.length, 2);
     assert.equal(results[0]?.manualStorySlug, "story-one");
@@ -74,7 +80,7 @@ test("enumerateManualStories lists only directories containing manual-story.yaml
   }
 });
 
-test("enumerateManualStories returns title: null when yaml is missing/malformed but still lists the entry", () => {
+test("enumerateManualStories returns title: null when yaml has no title", () => {
   const repoRoot = createFixtureRepoRoot();
   try {
     makeWorld(repoRoot, "test-world");
@@ -90,18 +96,41 @@ test("enumerateManualStories returns title: null when yaml is missing/malformed 
       path.join(manualStoriesRoot, "no-title", "manual-story.yaml"),
       "schema_version: manual-story.v1\n",
     );
-    mkdirSync(path.join(manualStoriesRoot, "malformed"), { recursive: true });
-    writeFileSync(
-      path.join(manualStoriesRoot, "malformed", "manual-story.yaml"),
-      ":::not-yaml:::\n  - invalid:::\n",
-    );
 
-    const results = enumerateManualStories(repoRoot, "test-world");
+    const results = unwrap(enumerateManualStories(repoRoot, "test-world"));
 
-    assert.equal(results.length, 2);
+    assert.equal(results.length, 1);
     const titles = Object.fromEntries(results.map((r) => [r.manualStorySlug, r.title]));
     assert.equal(titles["no-title"], null);
-    assert.equal(titles["malformed"], null);
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("enumerateManualStories fails fast when a sibling manual-story.yaml is malformed", () => {
+  const repoRoot = createFixtureRepoRoot();
+  try {
+    makeWorld(repoRoot, "test-world");
+    const manualStoriesRoot = path.join(
+      repoRoot,
+      "worlds",
+      "test-world",
+      "manual-stories",
+    );
+
+    mkdirSync(path.join(manualStoriesRoot, "malformed"), { recursive: true });
+    const yamlPath = path.join(
+      manualStoriesRoot,
+      "malformed",
+      "manual-story.yaml",
+    );
+    writeFileSync(yamlPath, "schema_version: [unterminated");
+
+    const result = enumerateManualStories(repoRoot, "test-world");
+
+    if (result.ok) assert.fail("expected yaml_parse_failed result");
+    assert.equal(result.error.code, "yaml_parse_failed");
+    assert.equal(result.error.path, yamlPath);
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
   }
@@ -129,7 +158,7 @@ test("enumerateManualStories skips directories whose names don't match the slug 
       "schema_version: manual-story.v1\ntitle: Valid\n",
     );
 
-    const results = enumerateManualStories(repoRoot, "test-world");
+    const results = unwrap(enumerateManualStories(repoRoot, "test-world"));
 
     assert.equal(results.length, 1);
     assert.equal(results[0]?.manualStorySlug, "valid-slug");

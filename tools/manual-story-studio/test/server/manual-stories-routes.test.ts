@@ -165,6 +165,44 @@ test("GET /api/worlds/:slug/manual-stories returns populated list after POSTs", 
   }
 });
 
+test("GET /api/worlds/:slug/manual-stories returns 409 for corrupt sibling metadata", async () => {
+  const repoRoot = createFixtureRepoRoot();
+  try {
+    makeWorld(repoRoot, "test-world");
+    const storyRoot = path.join(
+      repoRoot,
+      "worlds",
+      "test-world",
+      "manual-stories",
+      "broken-story",
+    );
+    mkdirSync(storyRoot, { recursive: true });
+    const yamlPath = path.join(storyRoot, "manual-story.yaml");
+    writeFileSync(yamlPath, "schema_version: [unterminated");
+
+    const server = await createServer({ repoRoot });
+    try {
+      const response = await server.inject({
+        method: "GET",
+        url: "/api/worlds/test-world/manual-stories",
+      });
+
+      assert.equal(response.statusCode, 409);
+      const body = response.json() as {
+        status: string;
+        findings: Array<{ code: string; path: string }>;
+      };
+      assert.equal(body.status, "blocked");
+      assert.equal(body.findings[0]?.code, "yaml_parse_failed");
+      assert.equal(body.findings[0]?.path, yamlPath);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
 test("GET against a world with no manual-stories/ directory returns { manualStories: [] }", async () => {
   const repoRoot = createFixtureRepoRoot();
   try {

@@ -13,6 +13,10 @@ import {
 
 const SUGGEST_IMPORTANCE = new Set(["high", "central"]);
 
+function loadErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "request failed";
+}
+
 interface RecordWithClass {
   cls: ManualRecordClass;
   summary: ManualRecordSummary;
@@ -37,6 +41,10 @@ export function MomentComposer() {
   const [metadata, setMetadata] = useState<ManualStoryMetadata | null>(null);
   const [allCast, setAllCast] = useState<ManualRecordSummary[]>([]);
   const [allRecords, setAllRecords] = useState<RecordWithClass[]>([]);
+  const [metadataError, setMetadataError] = useState<string | null>(null);
+  const [castError, setCastError] = useState<string | null>(null);
+  const [recordsError, setRecordsError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const [momentDirective, setMomentDirective] = useState(
     navState.moment_directive ?? "",
@@ -54,6 +62,9 @@ export function MomentComposer() {
   useEffect(() => {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
+    setMetadataError(null);
+    setCastError(null);
+    setRecordsError(null);
     readMetadata(worldSlug, msSlug)
       .then((m) => {
         if (cancelled || !m) return;
@@ -63,12 +74,16 @@ export function MomentComposer() {
           setIncludedCast(m.cast_order ?? []);
         }
       })
-      .catch(() => {});
+      .catch((error: unknown) => {
+        if (!cancelled) setMetadataError(loadErrorMessage(error));
+      });
     listRecords(worldSlug, msSlug, "cast")
       .then((c) => {
         if (!cancelled) setAllCast(c);
       })
-      .catch(() => {});
+      .catch((error: unknown) => {
+        if (!cancelled) setCastError(loadErrorMessage(error));
+      });
     Promise.all(
       MANUAL_RECORD_CLASSES.filter((c) => c !== "cast").map((cls) =>
         listRecords(worldSlug, msSlug, cls).then(
@@ -86,11 +101,13 @@ export function MomentComposer() {
         }
         setAllRecords(flat);
       })
-      .catch(() => {});
+      .catch((error: unknown) => {
+        if (!cancelled) setRecordsError(loadErrorMessage(error));
+      });
     return () => {
       cancelled = true;
     };
-  }, [worldSlug, msSlug]);
+  }, [worldSlug, msSlug, reloadKey]);
 
   const suggested = useMemo(() => {
     const out: RecordWithClass[] = [];
@@ -157,10 +174,23 @@ export function MomentComposer() {
     return <p role="alert">Missing world or manual story slug.</p>;
   }
 
+  function retryLoad(): void {
+    setReloadKey((current) => current + 1);
+  }
+
   return (
     <section aria-labelledby="moment-composer-heading" style={{ display: "grid", gap: 16 }}>
       <h2 id="moment-composer-heading">Moment Composer</h2>
-      {metadata ? null : <p>Loading manual story metadata…</p>}
+      {metadataError ? (
+        <p role="alert">
+          Failed to load manual story metadata: {metadataError}{" "}
+          <button type="button" onClick={retryLoad}>
+            Retry
+          </button>
+        </p>
+      ) : metadata ? null : (
+        <p>Loading manual story metadata…</p>
+      )}
 
       <label style={{ display: "block" }}>
         <span style={{ display: "block", fontWeight: 600 }}>Moment directive</span>
@@ -177,7 +207,14 @@ export function MomentComposer() {
 
       <fieldset aria-label="involved cast">
         <legend>Involved cast</legend>
-        {allCast.length === 0 ? (
+        {castError ? (
+          <p role="alert">
+            Failed to load cast: {castError}{" "}
+            <button type="button" onClick={retryLoad}>
+              Retry
+            </button>
+          </p>
+        ) : allCast.length === 0 ? (
           <p><em>No cast records on file.</em></p>
         ) : (
           <ul style={{ listStyle: "none", padding: 0 }}>
@@ -199,7 +236,15 @@ export function MomentComposer() {
 
       <fieldset aria-label="relevant records">
         <legend>Relevant records</legend>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {recordsError ? (
+          <p role="alert">
+            Failed to load records: {recordsError}{" "}
+            <button type="button" onClick={retryLoad}>
+              Retry
+            </button>
+          </p>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div>
             <h4>Suggested ({suggested.length})</h4>
             <ul style={{ listStyle: "none", padding: 0 }}>
@@ -233,7 +278,8 @@ export function MomentComposer() {
               ))}
             </ul>
           </div>
-        </div>
+          </div>
+        )}
       </fieldset>
 
       <fieldset aria-label="beat-template">
