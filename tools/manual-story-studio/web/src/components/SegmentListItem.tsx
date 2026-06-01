@@ -4,8 +4,6 @@ export interface SegmentListItemProps {
   wordCount: number;
   selected?: boolean;
   onSelect?: (segmentId: string) => void;
-  onEdit: (segmentId: string) => void;
-  onDelete: (segmentId: string) => void;
 }
 
 export function SegmentListItem({
@@ -14,8 +12,6 @@ export function SegmentListItem({
   wordCount,
   selected = false,
   onSelect,
-  onEdit,
-  onDelete,
 }: SegmentListItemProps) {
   const displayTitle = title.trim().length > 0 ? title : segmentId;
 
@@ -48,18 +44,6 @@ export function SegmentListItem({
           {wordCount} words
         </span>
       </button>
-      <div
-        role="toolbar"
-        aria-label={`${segmentId} actions`}
-        style={{ display: "flex", gap: 6, marginTop: 8 }}
-      >
-        <button type="button" onClick={() => onEdit(segmentId)}>
-          Edit
-        </button>
-        <button type="button" onClick={() => onDelete(segmentId)}>
-          Delete
-        </button>
-      </div>
     </li>
   );
 }

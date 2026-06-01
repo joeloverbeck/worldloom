@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Fragment, useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 
 import {
   readManuscript,
@@ -7,34 +7,18 @@ import {
   type ManuscriptResponse,
 } from "../api/manuscript.js";
 import {
-  deleteSegment,
   listSegments,
-  type DeleteSegmentResponse,
   type SegmentListEntry,
 } from "../api/segments.js";
 import { readMetadata } from "../api/records.js";
 import { SegmentListItem } from "../components/SegmentListItem.js";
 import type { ManualStoryMetadata } from "../types/manual-story.js";
 
-function isDeleteSegmentResponse(
-  value: DeleteSegmentResponse | { ok: false; error: "not_found" },
-): value is DeleteSegmentResponse {
-  return "outcome" in value;
-}
-
-function formatDeleteWarning(result: DeleteSegmentResponse): string {
-  const referrers = result.referrers
-    .map((ref) => `${ref.recordClass}/${ref.id}.${ref.field}`)
-    .join(", ");
-  return result.warning ?? `Segment remains referenced by: ${referrers}`;
-}
-
 export function Manuscript() {
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
     msSlug: string;
   }>();
-  const navigate = useNavigate();
   const [metadata, setMetadata] = useState<ManualStoryMetadata | null>(null);
   const [manuscript, setManuscript] = useState<ManuscriptResponse | null>(null);
   const [segments, setSegments] = useState<SegmentListEntry[]>([]);
@@ -93,54 +77,6 @@ export function Manuscript() {
       await refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "manuscript_rebuild_failed");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  function handleEdit(segmentId: string): void {
-    if (!worldSlug || !msSlug) return;
-    navigate(
-      `/worlds/${worldSlug}/manual-stories/${msSlug}/paste-prose?edit=${encodeURIComponent(
-        segmentId,
-      )}`,
-    );
-  }
-
-  async function handleDelete(segmentId: string): Promise<void> {
-    if (!worldSlug || !msSlug) return;
-    setBusy(true);
-    setError(null);
-    setNotice(null);
-    try {
-      const first = await deleteSegment(worldSlug, msSlug, segmentId);
-      if (!isDeleteSegmentResponse(first)) {
-        setError(`Segment ${segmentId} was not found.`);
-        return;
-      }
-      if (first.outcome === "segment_order_removed_files_preserved") {
-        const warning = formatDeleteWarning(first);
-        const force = window.confirm(`${warning}\n\nForce-delete segment files?`);
-        if (!force) {
-          setNotice("Segment removed from manuscript order; files preserved.");
-          await refresh();
-          return;
-        }
-        const forced = await deleteSegment(worldSlug, msSlug, segmentId, {
-          force: true,
-        });
-        if (!isDeleteSegmentResponse(forced)) {
-          setError(`Segment ${segmentId} was not found.`);
-          return;
-        }
-        setNotice(formatDeleteWarning(forced));
-        await refresh();
-        return;
-      }
-      setNotice(`Deleted ${segmentId}.`);
-      await refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "segment_delete_failed");
     } finally {
       setBusy(false);
     }
@@ -206,16 +142,33 @@ export function Manuscript() {
           ) : (
             <ul style={{ display: "grid", gap: 8, margin: 0, padding: 0 }}>
               {segments.map((segment) => (
-                <SegmentListItem
-                  key={segment.id}
-                  segmentId={segment.id}
-                  title={segment.title}
-                  wordCount={segment.word_count}
-                  selected={segment.id === selectedSegmentId}
-                  onSelect={setSelectedSegmentId}
-                  onEdit={handleEdit}
-                  onDelete={(id) => void handleDelete(id)}
-                />
+                <Fragment key={segment.id}>
+                  <SegmentListItem
+                    segmentId={segment.id}
+                    title={segment.title}
+                    wordCount={segment.word_count}
+                    selected={segment.id === selectedSegmentId}
+                    onSelect={setSelectedSegmentId}
+                  />
+                  <li
+                    key={`${segment.id}-repair`}
+                    style={{ listStyle: "none", marginTop: -4 }}
+                  >
+                    <Link
+                      to={`/worlds/${worldSlug}/manual-stories/${msSlug}/repair?segment_id=${encodeURIComponent(
+                        segment.id,
+                      )}`}
+                      style={{
+                        color: "#777",
+                        display: "block",
+                        fontSize: "0.8em",
+                        paddingLeft: 8,
+                      }}
+                    >
+                      Repair this segment
+                    </Link>
+                  </li>
+                </Fragment>
               ))}
             </ul>
           )}

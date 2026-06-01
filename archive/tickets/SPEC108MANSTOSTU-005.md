@@ -1,6 +1,6 @@
 # SPEC108MANSTOSTU-005: Manuscript + SegmentListItem remove Edit/Delete buttons
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/web/src/pages/Manuscript.tsx` (removes `handleEdit` / `handleDelete` handlers, the `deleteSegment` import, and the per-segment Edit/Delete dispatch; adds a "Repair this segment" disclosure link) and `tools/manual-story-studio/web/src/components/SegmentListItem.tsx` (drops `onEdit` / `onDelete` props from the component's API and removes the toolbar buttons block).
@@ -109,3 +109,31 @@ After the strip, `SegmentListItem`'s rendered output is the title + segment id +
 
 1. `cd tools/manual-story-studio/web && npm test` — TypeScript typecheck.
 2. `cd tools/manual-story-studio && npm test` — full backend + frontend test suite.
+
+## Outcome
+
+Completed: 2026-06-01
+
+Removed Manuscript's primary-flow segment write affordances:
+
+1. Removed the `deleteSegment` and `DeleteSegmentResponse` imports from `Manuscript.tsx`.
+2. Removed the delete-response helpers and the `handleEdit` / `handleDelete` handlers.
+3. Removed `onEdit` / `onDelete` dispatch from the `SegmentListItem` call site.
+4. Added a small per-segment `Repair this segment` link to `/repair?segment_id=<SEG-N>`.
+5. Removed `onEdit` / `onDelete` from `SegmentListItemProps`.
+6. Removed the `SegmentListItem` toolbar containing the Edit and Delete buttons.
+
+## Verification Result
+
+1. `npm --prefix tools/manual-story-studio/web test` — passed (`tsc -p tsconfig.json --noEmit`).
+2. `grep -n "deleteSegment\|handleEdit\|handleDelete" tools/manual-story-studio/web/src/pages/Manuscript.tsx` — no matches.
+3. `grep -n "onEdit\|onDelete" tools/manual-story-studio/web/src/components/SegmentListItem.tsx` — no matches.
+4. `grep -n "<button.*Edit\|<button.*Delete\|role=\"toolbar\"" tools/manual-story-studio/web/src/components/SegmentListItem.tsx` — no matches.
+5. `grep -n "Repair this segment" tools/manual-story-studio/web/src/pages/Manuscript.tsx` — one match.
+6. `grep -n "/repair\|segment_id" tools/manual-story-studio/web/src/pages/Manuscript.tsx` — repair URL with `segment_id` present.
+7. `grep -n "formatDeleteWarning\|isDeleteSegmentResponse\|?edit=" tools/manual-story-studio/web/src/pages/Manuscript.tsx` — no matches.
+8. `git diff --check -- tools/manual-story-studio/web/src/pages/Manuscript.tsx tools/manual-story-studio/web/src/components/SegmentListItem.tsx` — passed.
+
+## Deviations
+
+The repair disclosure link is rendered as a small adjacent list item beneath each `SegmentListItem`, because `SegmentListItem`'s prop API was intentionally narrowed to read-only selection props.
