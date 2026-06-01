@@ -34,6 +34,7 @@ import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
 } from "../../write/sandbox.js";
+import { blockIfHealthDisallows } from "../health-gate.js";
 import { mapReadErrorToHttpReply } from "../read-error-http.js";
 
 export interface PromptsRouteOptions {
@@ -195,6 +196,12 @@ export async function registerPromptsReadRoutes(
         }
         return badRequest(reply, built.error);
       }
+      const blocked = blockIfHealthDisallows(
+        reply,
+        root.absolutePath,
+        "prompt_copy",
+      );
+      if (blocked) return blocked;
       const result = await composePrompt(built);
       return result;
     },
@@ -307,6 +314,12 @@ export async function registerPromptsWriteRoutes(
         }
         return badRequest(reply, built.error);
       }
+      const blocked = blockIfHealthDisallows(
+        reply,
+        root.absolutePath,
+        "prompt_save",
+      );
+      if (blocked) return blocked;
       const result: PromptComposeResult = await composePrompt(built);
       if (result.lint.blockingForCopy && !body.lint_override) {
         return reply.code(409).send({

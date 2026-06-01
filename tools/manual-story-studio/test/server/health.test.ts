@@ -6,10 +6,8 @@ import test from "node:test";
 
 import YAML from "yaml";
 
+import type { HealthReport } from "../../src/health/types.js";
 import { createServer } from "../../src/server/http.js";
-import type {
-  HealthReport,
-} from "../../src/health/types.js";
 import type { ManualFactRecord } from "../../src/schema/manual-story.js";
 import { makeDefaultManualStoryMetadata } from "../../src/write/manual-story-metadata.js";
 import {
@@ -66,6 +64,17 @@ function writeFact(root: ManualStoryRoot, record: Partial<ManualFactRecord> = {}
   const dir = path.join(root.absolutePath, "records", "facts");
   mkdirSync(dir, { recursive: true });
   writeFileSync(path.join(dir, `${fact.id}.yaml`), YAML.stringify(fact));
+}
+
+function writeMissingSegmentSidecarFixture(root: ManualStoryRoot): void {
+  writeMetadata(root, ["SEG-1"]);
+  mkdirSync(path.join(root.absolutePath, "segments"), {
+    recursive: true,
+  });
+  writeFileSync(
+    path.join(root.absolutePath, "segments", "SEG-1.md"),
+    "A segment body.",
+  );
 }
 
 async function getHealth(fixture: Fixture) {
@@ -126,14 +135,7 @@ test("GET /health returns 200 blocked HealthReport for corrupt metadata", async 
 test("GET /health returns 200 blocked HealthReport for a missing segment sidecar", async () => {
   const fixture = mkFixture();
   try {
-    writeMetadata(fixture.root, ["SEG-1"]);
-    mkdirSync(path.join(fixture.root.absolutePath, "segments"), {
-      recursive: true,
-    });
-    writeFileSync(
-      path.join(fixture.root.absolutePath, "segments", "SEG-1.md"),
-      "A segment body.",
-    );
+    writeMissingSegmentSidecarFixture(fixture.root);
 
     const response = await getHealth(fixture);
 
@@ -144,6 +146,27 @@ test("GET /health returns 200 blocked HealthReport for a missing segment sidecar
     assert.equal(body.findings[0]?.code, "segment-sidecar-missing");
     assert.equal(body.findings[0]?.severity, "blocking");
     assert.ok(body.blocked_actions.includes("manuscript_compile"));
+  } finally {
+    rmSync(fixture.repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("GET /health returns 200 degraded HealthReport for corrupt record YAML", async () => {
+  const fixture = mkFixture();
+  try {
+    const dir = path.join(fixture.root.absolutePath, "records", "facts");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(path.join(dir, "mfact-1.yaml"), "id: [unterminated");
+
+    const response = await getHealth(fixture);
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json() as HealthReport;
+    assert.equal(body.status, "degraded");
+    assert.equal(body.findings.length, 1);
+    assert.equal(body.findings[0]?.code, "record-yaml-parse-failed");
+    assert.equal(body.findings[0]?.severity, "error");
+    assert.deepEqual(body.blocked_actions, []);
   } finally {
     rmSync(fixture.repoRoot, { recursive: true, force: true });
   }
@@ -191,5 +214,125 @@ test("GET /health returns 404 for a missing manual story", async () => {
     }
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("POST /prompts/preview returns 409 HealthReport when health blocks prompt_copy", async () => {
+  const fixture = mkFixture();
+  try {
+    writeFileSync(
+      path.join(fixture.root.absolutePath, "manual-story.yaml"),
+      "schema_version: [unterminated",
+    );
+
+    const server = await createServer({ repoRoot: fixture.repoRoot });
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/prompts/preview`,
+        payload: {
+          moment_directive: "Write the next beat.",
+          included_cast: [],
+          included_records: [],
+        },
+      });
+
+      assert.equal(response.statusCode, 409);
+      const body = response.json() as HealthReport;
+      assert.equal(body.status, "blocked");
+      assert.equal(body.findings[0]?.code, "metadata-yaml-parse-failed");
+      assert.ok(body.blocked_actions.includes("prompt_copy"));
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(fixture.repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("POST /prompts returns 409 HealthReport when health blocks prompt_save", async () => {
+  const fixture = mkFixture();
+  try {
+    writeFileSync(
+      path.join(fixture.root.absolutePath, "manual-story.yaml"),
+      "schema_version: [unterminated",
+    );
+
+    const server = await createServer({ repoRoot: fixture.repoRoot });
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/prompts`,
+        payload: {
+          moment_directive: "Write the next beat.",
+          included_cast: [],
+          included_records: [],
+        },
+      });
+
+      assert.equal(response.statusCode, 409);
+      const body = response.json() as HealthReport;
+      assert.equal(body.status, "blocked");
+      assert.equal(body.findings[0]?.code, "metadata-yaml-parse-failed");
+      assert.ok(body.blocked_actions.includes("prompt_save"));
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(fixture.repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("POST /segments returns 409 HealthReport when health blocks segment_save", async () => {
+  const fixture = mkFixture();
+  try {
+    writeMissingSegmentSidecarFixture(fixture.root);
+
+    const server = await createServer({ repoRoot: fixture.repoRoot });
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/segments`,
+        payload: {
+          prose: "New segment prose.",
+          title: "New segment",
+        },
+      });
+
+      assert.equal(response.statusCode, 409);
+      const body = response.json() as HealthReport;
+      assert.equal(body.status, "blocked");
+      assert.equal(body.findings[0]?.code, "segment-sidecar-missing");
+      assert.ok(body.blocked_actions.includes("segment_save"));
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(fixture.repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("POST /manuscript/rebuild returns 409 HealthReport when health blocks manuscript_compile", async () => {
+  const fixture = mkFixture();
+  try {
+    writeMissingSegmentSidecarFixture(fixture.root);
+
+    const server = await createServer({ repoRoot: fixture.repoRoot });
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/manuscript/rebuild`,
+      });
+
+      assert.equal(response.statusCode, 409);
+      const body = response.json() as HealthReport;
+      assert.equal(body.status, "blocked");
+      assert.equal(body.findings[0]?.code, "segment-sidecar-missing");
+      assert.ok(body.blocked_actions.includes("manuscript_compile"));
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(fixture.repoRoot, { recursive: true, force: true });
   }
 });

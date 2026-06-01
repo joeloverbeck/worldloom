@@ -16,6 +16,8 @@
 
 **Implementation note (2026-06-01, SPEC105MANSTOSTU-012):** The seven frontend `.catch(() => {})` silent-swallow sites in `Dashboard.tsx` and `MomentComposer.tsx` have been replaced with explicit panel-level error states and retry buttons. The Dashboard manuscript absent-vs-failed handler remains as the intentional optional-read distinction.
 
+**Implementation note (2026-06-01, SPEC105MANSTOSTU-014):** The acceptance proof uses the live prompt preview route, `POST /api/worlds/:world/manual-stories/:story/prompts/preview`, not the draft-era `/prompts/compose` name. Route-layer blocked-action checks now return `409` with the computed `HealthReport` before prompt preview/save, segment save/edit, or manuscript rebuild proceeds.
+
 ---
 
 ## 1. Context & Motivation
@@ -119,7 +121,7 @@ This spec is the foundational integrity fix. It establishes (a) a structured hea
 7. **`build-all.sh` / `check-all.sh` inclusion.** Add `tools/manual-story-studio` to both scripts. Pattern matches the existing inclusion of `tools/story-explorer` (the closest analog — Fastify + Vite, dedicated CI plus monorepo coverage).
 
 8. **Acceptance tests** at `tools/manual-story-studio/test/health/`:
-   - corrupt `manual-story.yaml` (intentional YAML syntax error in a fixture) → `/health` returns `blocked` with a `metadata-yaml-parse-failed` finding; `Dashboard` renders the banner; prompt-compose route returns `409`.
+   - corrupt `manual-story.yaml` (intentional YAML syntax error in a fixture) → `/health` returns `blocked` with a `metadata-yaml-parse-failed` finding; `Dashboard` renders the banner; prompt-preview route returns `409`.
    - corrupt single record file → `/health` returns `degraded` with a record-specific finding; non-affected records still load.
    - missing segment sidecar (orphan `.md` without `.yaml`) → `blocked` with `segment-sidecar-missing`; manuscript-compile route returns `409`.
    - dangling typed ref (record points at non-existent ID) → `degraded` with `reference-resolution-failed`.
@@ -164,9 +166,8 @@ This spec is the foundational integrity fix. It establishes (a) a structured hea
 - `tools/manual-story-studio/web/src/components/HealthBanner.tsx`.
 - `tools/manual-story-studio/web/src/hooks/useStoryHealth.ts`.
 - `tools/manual-story-studio/web/src/api/health.ts` — fetch wrapper.
-- `tools/manual-story-studio/test/health/health-compute.test.ts` — backend integrity pass tests.
-- `tools/manual-story-studio/test/health/health-route.test.ts` — route status code tests.
-- `tools/manual-story-studio/test/health/fixtures/` — corrupt-metadata, corrupt-record, missing-sidecar, dangling-ref fixtures.
+- `tools/manual-story-studio/test/health/compute.test.ts` — backend integrity pass tests.
+- `tools/manual-story-studio/test/server/health.test.ts` — route status code tests.
 
 **Modify:**
 
@@ -209,7 +210,7 @@ This spec is the foundational integrity fix. It establishes (a) a structured hea
 
 `tools/manual-story-studio`: `npm test` (from the package directory) runs `npm run build:backend && node --test "dist/test/**/*.test.js" && npm --prefix web test`. The web test step remains `tsc --noEmit` per the current package.json — extending it to component tests is **SPEC-111**'s concern.
 
-Cold-start manual verification: in a worktree with a fixture world containing a corrupted `manual-story.yaml`, launch `node tools/manual-story-studio/dist/src/cli.js --port 5175 --repo-root <worktree>`, open the dashboard for the corrupted story, confirm the health banner renders with the `metadata-yaml-parse-failed` finding and the prompt-compose button is disabled.
+Cold-start manual verification: in a worktree with a fixture world containing a corrupted `manual-story.yaml`, launch `node tools/manual-story-studio/dist/src/cli.js --port 5175 --repo-root <worktree>`, open the dashboard for the corrupted story, confirm the health banner renders with the `metadata-yaml-parse-failed` finding and the prompt preview action is blocked.
 
 Monorepo coverage: from repo root, run `bash scripts/check-all.sh` and confirm it now invokes `npm --prefix tools/manual-story-studio test`.
 
@@ -223,13 +224,13 @@ Monorepo coverage: from repo root, run `bash scripts/check-all.sh` and confirm i
 6. Every PUBLIC exported function in `tools/manual-story-studio/src/read/*.ts` returns `ReadResult<T>` rather than `T | null` to indicate failure — covering `readManualStoryMetadata`, `listRecords`, `readRecord`, `scanReferences`, `listAllKnownIds`, `listSegments`, `readSegmentSidecar`, `readSegmentBody`, `readManuscript`, and the world-list / manual-story-list enumerators. (Verified by grep: `grep -rnE "^export (async )?function.*: .*\| null" tools/manual-story-studio/src/read/` returns zero matches. Internal private helpers like `parseYamlFile` / `toSummary` / `isSegmentSidecar` may continue to return `T | null` inside their module — they are not part of the public read-layer contract and their nullability is translated to `ReadResult` `ok: false` by their public callers.)
 7. The 7 `.catch(() => {})` occurrences in the live tree are removed; `grep -rn "\.catch(() => {})" tools/manual-story-studio/web/src/` returns zero matches.
 8. `scripts/build-all.sh` and `scripts/check-all.sh` both invoke `tools/manual-story-studio` test/build steps; running `bash scripts/check-all.sh` from a clean tree exits 0 and includes the Manual Studio test output.
-9. POSTing to `/api/.../prompts/compose` with a story whose `/health` is `blocked` returns HTTP `409` with a body matching the `HealthReport` shape. (acceptance test)
+9. POSTing to `/api/.../prompts/preview` with a story whose `/health` is `blocked` returns HTTP `409` with a body matching the `HealthReport` shape. (acceptance test)
 10. All existing tests under `tools/manual-story-studio/test/` continue to pass after the read-layer signature change. Cross-cutting test updates are part of this spec's diff.
 
 ## 8. Assumption reassessment
 
 - **Assumption:** `tools/story-explorer` is currently in both `scripts/build-all.sh` and `scripts/check-all.sh` as the pattern to follow. → Verify before drafting the patch; if it is in neither, the inclusion pattern should match the closest peer that IS covered (e.g., `tools/validators` or `tools/world-mcp`).
-- **Assumption:** The corrupt-metadata acceptance test fixture can be a static YAML file with intentional syntax error checked into `test/health/fixtures/`. → Verify that `node --test` and the test harness do not fail at fixture-discovery time; if YAML parsing is attempted at test load, store the corrupt content as `.yaml.txt` and rename at test setup.
+- **Assumption:** The corrupt-metadata acceptance test fixture can be static YAML content with an intentional syntax error. → Verified during implementation via inline temp fixtures; `node --test` only loads `.test.js` modules and does not parse fixture YAML at discovery.
 - **Assumption:** The web test step's current `tsc --noEmit` continues to pass after the new `HealthBanner.tsx` and `useStoryHealth.ts` are added. → The change adds new files only and does not alter existing types; the typecheck should remain green.
 
 ## 9. Risks & Open Questions

@@ -161,7 +161,7 @@ test("POST /manuscript/rebuild returns 409 HealthReport for corrupt metadata", a
         blocked_actions: string[];
       };
       assert.equal(body.status, "blocked");
-      assert.equal(body.findings[0]?.code, "yaml_parse_failed");
+      assert.equal(body.findings[0]?.code, "metadata-yaml-parse-failed");
       assert.equal(
         body.findings[0]?.path,
         path.join(fixture.root.absolutePath, "manual-story.yaml"),

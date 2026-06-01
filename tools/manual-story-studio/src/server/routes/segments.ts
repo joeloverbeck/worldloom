@@ -17,6 +17,7 @@ import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
 } from "../../write/sandbox.js";
+import { blockIfHealthDisallows } from "../health-gate.js";
 import { mapReadErrorToHttpReply } from "../read-error-http.js";
 
 export interface SegmentsRouteOptions {
@@ -158,6 +159,12 @@ export async function registerSegmentsWriteRoutes(
       } catch (error) {
         return writeError(reply, error);
       }
+      const blocked = blockIfHealthDisallows(
+        reply,
+        root.absolutePath,
+        "segment_save",
+      );
+      if (blocked) return blocked;
       try {
         const result = saveSegment({ root, ...payload });
         return reply.code(201).send({
@@ -198,6 +205,12 @@ export async function registerSegmentsWriteRoutes(
       } catch (error) {
         return writeError(reply, error);
       }
+      const blocked = blockIfHealthDisallows(
+        reply,
+        root.absolutePath,
+        "segment_save",
+      );
+      if (blocked) return blocked;
       try {
         const result = editSegment({
           root,

@@ -4,6 +4,7 @@ import type { FastifyInstance } from "fastify";
 
 import { compileManuscript } from "../../manuscript/compile.js";
 import { readManuscript } from "../../read/manuscript.js";
+import { blockIfHealthDisallows } from "../health-gate.js";
 import { mapReadErrorToHttpReply } from "../read-error-http.js";
 import {
   resolveManualStoryRoot,
@@ -69,6 +70,13 @@ export async function registerManuscriptWriteRoute(
         request.params.msSlug,
       );
       if (!root) return reply.code(404).send({ error: "manual_story_not_found" });
+
+      const blocked = blockIfHealthDisallows(
+        reply,
+        root.absolutePath,
+        "manuscript_compile",
+      );
+      if (blocked) return blocked;
 
       const result = compileManuscript({ manualStoryRoot: root });
       if (!result.ok) return mapReadErrorToHttpReply(reply, result.error);
