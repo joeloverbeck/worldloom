@@ -56,7 +56,7 @@ Identifiers are local to this triage. `T<N>` for triage items derived from the r
 **Verdict:** ACCEPT.
 **Source:** report §§14 / 21 / 26 / 31 Stage 3.
 **Rationale:** Verified `prose-craft-contract.md:68` reads "the prose should not narrate state changes that have not happened in the record store yet" — this neuters the LLM's ability to render meaningful turns, which defeats the cockpit. The correct boundary (per the report §14): LLM may write prose where something meaningfully happens; app must not infer state from prose. Stop rule at `section-14-stop-rule.ts:4` is directionally right but too vague; report §26 wording is sharper. README's missing `manual-render-instruction.md` claim resolves via "fewer docs, not more" (report §21).
-**Deliverable:** `specs/SPEC-107-manual-story-studio-prose-state-contract-correction.md`. Revises the contract paragraph; replaces the stop-rule string; removes the README claim.
+**Deliverable:** `archive/specs/SPEC-107-manual-story-studio-prose-state-contract-correction.md`. Revises the contract paragraph; replaces the stop-rule string; removes the README claim.
 **Modification scope:** Bundles T11 (manual-render-instruction.md mismatch) — "fewer docs" applies to the same surface.
 
 #### T4 — Segment lifecycle append-only by default
@@ -165,7 +165,7 @@ The following report sub-findings did not get a top-level T<N> identifier becaus
 |---|---|---|
 | SPEC-105 | `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` | Integrity foundation; `/health` endpoint; typed-error reads; build-script inclusion |
 | SPEC-106 | `archive/specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md` | 4 leakage rules to hard tier; remove copy-anyway override |
-| SPEC-107 | `specs/SPEC-107-manual-story-studio-prose-state-contract-correction.md` | Contract paragraph + stop rule + missing-doc cleanup |
+| SPEC-107 | `archive/specs/SPEC-107-manual-story-studio-prose-state-contract-correction.md` | Contract paragraph + stop rule + missing-doc cleanup |
 | SPEC-108 | `specs/SPEC-108-manual-story-studio-segment-lifecycle-append-only.md` | Append-only primary UX; `mode=repair` gate on lifecycle ops |
 | SPEC-109 | `specs/SPEC-109-manual-story-studio-current-context-layer.md` | `current-context.yaml` selector; composer + Dashboard plumbing |
 | SPEC-110 | `specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md` | 7 new fields on BeatTemplate schema |
