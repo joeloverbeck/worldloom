@@ -1,6 +1,6 @@
 # SPEC108MANSTOSTU-007: RepairSegments page + App route binding
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/web/src/pages/RepairSegments.tsx` (new repair-mode UI surface) and modifies `tools/manual-story-studio/web/src/App.tsx` (adds the `/repair` route binding to `<RepairSegments />`).
@@ -309,3 +309,33 @@ In `tools/manual-story-studio/web/src/App.tsx`:
 
 1. `cd tools/manual-story-studio/web && npm test` — TypeScript typecheck.
 2. `cd tools/manual-story-studio && npm test` — full backend + frontend test suite (after all SPEC-108 tickets land).
+
+## Outcome
+
+Completed: 2026-06-01
+
+Added the dedicated repair-mode UI surface at `/worlds/:worldSlug/manual-stories/:msSlug/repair`:
+
+1. Created `tools/manual-story-studio/web/src/pages/RepairSegments.tsx`.
+2. Added the persistent repair-mode warning banner with the SPEC-108 text.
+3. Loaded and displayed all segments with per-row "Replace prose" and "Discard segment" actions.
+4. Wired replacement through `editSegment(..., { mode: "repair", force_replace })`.
+5. Wired discard through `deleteSegment(..., { mode: "repair", force: true })`.
+6. Added `?segment_id=` preselection with highlight and scroll into view.
+7. Rendered the `force_replace` checkbox only when the active replacement target is not the latest segment.
+8. Bound the new page route in `tools/manual-story-studio/web/src/App.tsx`.
+
+## Verification Result
+
+1. `npm --prefix tools/manual-story-studio/web test` — passed (`tsc -p tsconfig.json --noEmit`).
+2. `test -f tools/manual-story-studio/web/src/pages/RepairSegments.tsx` — passed.
+3. `grep -n "RepairSegments" tools/manual-story-studio/web/src/App.tsx` — import and route matches present.
+4. `grep -n "/repair" tools/manual-story-studio/web/src/App.tsx` — route path match present.
+5. `grep -n "Repair mode bypasses" tools/manual-story-studio/web/src/pages/RepairSegments.tsx` — one warning text match.
+6. `grep -n "mode: \"repair\"" tools/manual-story-studio/web/src/pages/RepairSegments.tsx` — two repair-mode API-call matches.
+7. `grep -n "segment_id\|useSearchParams" tools/manual-story-studio/web/src/pages/RepairSegments.tsx` — preselection wiring matches present.
+8. `git diff --check -- tools/manual-story-studio/web/src/App.tsx tools/manual-story-studio/web/src/pages/RepairSegments.tsx` — passed.
+
+## Deviations
+
+The ticket sketch allowed either an inline form or a per-segment form; the implementation uses one inline replacement form beside the segment list to keep the repair workflow explicit and avoid duplicating large textareas per row.
