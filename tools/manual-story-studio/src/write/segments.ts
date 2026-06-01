@@ -46,6 +46,7 @@ export interface EditSegmentInput {
   author_note?: string;
   prompt_id?: string | null;
   selected_template?: string | null;
+  preconditions?: { require_latest: boolean };
   now?: () => string;
   compile?: typeof compileManuscript;
 }
@@ -61,6 +62,16 @@ export interface SegmentWriteResult {
 export class SegmentReadFailureError extends Error {
   constructor(readonly readError: ReadError) {
     super(`segment_read_failed: ${readError.code} at ${readError.path}`);
+  }
+}
+
+export class SegmentPreconditionError extends Error {
+  constructor(
+    readonly code: "repair-replace-non-latest-blocked",
+    readonly segment_id: string,
+    readonly latest_segment_id: string | null,
+  ) {
+    super(`${code}: ${segment_id}`);
   }
 }
 
@@ -143,6 +154,18 @@ export function editSegment(input: EditSegmentInput): SegmentWriteResult {
   const existing = readSegmentSidecar(input.root, input.segment_id);
   if (!existing) {
     return missingEdit(input);
+  }
+  if (input.preconditions?.require_latest === true) {
+    const metadata = readMetadata(input.root);
+    const latestSegmentId =
+      metadata.segment_order[metadata.segment_order.length - 1] ?? null;
+    if (input.segment_id !== latestSegmentId) {
+      throw new SegmentPreconditionError(
+        "repair-replace-non-latest-blocked",
+        input.segment_id,
+        latestSegmentId,
+      );
+    }
   }
 
   const timestamp = input.now ? input.now() : new Date().toISOString();

@@ -20,6 +20,7 @@ import type {
   SegmentSidecar,
 } from "../../src/schema/manual-story.js";
 import { makeDefaultManualStoryMetadata } from "../../src/write/manual-story-metadata.js";
+import { SEGMENT_REPAIR_MODE_FLAG } from "../../src/write/segment-modes.js";
 import {
   resolveManualStoryRoot,
   safeWriteFile,
@@ -271,7 +272,7 @@ test("PUT /segments/:id edits an existing segment in place", async () => {
     try {
       const response = await server.inject({
         method: "PUT",
-        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/segments/SEG-1`,
+        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/segments/SEG-1?mode=${SEGMENT_REPAIR_MODE_FLAG}`,
         payload: {
           prose: "Lanterns rise again.",
           author_note: "revised",
@@ -307,7 +308,7 @@ test("DELETE /segments/:id hard-deletes unreferenced segments", async () => {
     try {
       const response = await server.inject({
         method: "DELETE",
-        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/segments/SEG-1`,
+        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/segments/SEG-1?mode=${SEGMENT_REPAIR_MODE_FLAG}`,
       });
       assert.equal(response.statusCode, 200);
       const body = response.json() as { outcome: string; referrers: unknown[] };
@@ -340,7 +341,7 @@ test("DELETE /segments/:id preserves referenced segments unless force=true", asy
     try {
       const response = await preserveServer.inject({
         method: "DELETE",
-        url: `/api/worlds/${preserveFixture.worldSlug}/manual-stories/${preserveFixture.msSlug}/segments/SEG-1`,
+        url: `/api/worlds/${preserveFixture.worldSlug}/manual-stories/${preserveFixture.msSlug}/segments/SEG-1?mode=${SEGMENT_REPAIR_MODE_FLAG}`,
       });
       assert.equal(response.statusCode, 200);
       const body = response.json() as {
@@ -366,7 +367,7 @@ test("DELETE /segments/:id preserves referenced segments unless force=true", asy
     try {
       const response = await forceServer.inject({
         method: "DELETE",
-        url: `/api/worlds/${forceFixture.worldSlug}/manual-stories/${forceFixture.msSlug}/segments/SEG-1?force=true`,
+        url: `/api/worlds/${forceFixture.worldSlug}/manual-stories/${forceFixture.msSlug}/segments/SEG-1?force=true&mode=${SEGMENT_REPAIR_MODE_FLAG}`,
       });
       assert.equal(response.statusCode, 200);
       const body = response.json() as {

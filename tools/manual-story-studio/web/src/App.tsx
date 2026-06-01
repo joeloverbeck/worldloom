@@ -13,6 +13,7 @@ import { PasteProse } from "./pages/PasteProse.js";
 import { PromptPreview } from "./pages/PromptPreview.js";
 import { PromptHistory } from "./pages/PromptHistory.js";
 import { Records } from "./pages/Records.js";
+import { RepairSegments } from "./pages/RepairSegments.js";
 import { Worlds } from "./pages/Worlds.js";
 
 function Banner() {
@@ -75,6 +76,10 @@ export function App() {
           <Route
             path="/worlds/:worldSlug/manual-stories/:msSlug/manuscript"
             element={<Manuscript />}
+          />
+          <Route
+            path="/worlds/:worldSlug/manual-stories/:msSlug/repair"
+            element={<RepairSegments />}
           />
           <Route
             path="/worlds/:worldSlug/manual-stories/:msSlug/contract"

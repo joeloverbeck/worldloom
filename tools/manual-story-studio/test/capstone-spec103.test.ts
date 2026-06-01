@@ -39,6 +39,7 @@ import type {
   SegmentSidecar,
 } from "../src/schema/manual-story.js";
 import { makeDefaultManualStoryMetadata } from "../src/write/manual-story-metadata.js";
+import { SEGMENT_REPAIR_MODE_FLAG } from "../src/write/segment-modes.js";
 import {
   resolveManualStoryRoot,
   safeWriteFile,
@@ -262,7 +263,7 @@ test("AC #1-#7 and Plan-Authority: save/edit/rebuild/checklist round trip", asyn
     try {
       const edit = await server.inject({
         method: "PUT",
-        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/segments/SEG-1`,
+        url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/segments/SEG-1?mode=${SEGMENT_REPAIR_MODE_FLAG}`,
         payload: {
           prose: "Rain ticks again.",
           title: "Rain Revised",
@@ -373,7 +374,7 @@ test("AC #8 and Plan-Authority: segment delete hybrid outcomes", async () => {
     try {
       const response = await server.inject({
         method: "DELETE",
-        url: `/api/worlds/${unreferenced.worldSlug}/manual-stories/${unreferenced.msSlug}/segments/SEG-1`,
+        url: `/api/worlds/${unreferenced.worldSlug}/manual-stories/${unreferenced.msSlug}/segments/SEG-1?mode=${SEGMENT_REPAIR_MODE_FLAG}`,
       });
       assert.equal(response.statusCode, 200);
       assert.equal((response.json() as { outcome: string }).outcome, "hard_deleted");
@@ -392,7 +393,7 @@ test("AC #8 and Plan-Authority: segment delete hybrid outcomes", async () => {
     try {
       const response = await server.inject({
         method: "DELETE",
-        url: `/api/worlds/${referenced.worldSlug}/manual-stories/${referenced.msSlug}/segments/SEG-1`,
+        url: `/api/worlds/${referenced.worldSlug}/manual-stories/${referenced.msSlug}/segments/SEG-1?mode=${SEGMENT_REPAIR_MODE_FLAG}`,
       });
       assert.equal(response.statusCode, 200);
       const body = response.json() as { outcome: string; referrers: Array<{ id: string }> };
@@ -413,7 +414,7 @@ test("AC #8 and Plan-Authority: segment delete hybrid outcomes", async () => {
     try {
       const response = await server.inject({
         method: "DELETE",
-        url: `/api/worlds/${forced.worldSlug}/manual-stories/${forced.msSlug}/segments/SEG-1?force=true`,
+        url: `/api/worlds/${forced.worldSlug}/manual-stories/${forced.msSlug}/segments/SEG-1?force=true&mode=${SEGMENT_REPAIR_MODE_FLAG}`,
       });
       assert.equal(response.statusCode, 200);
       const body = response.json() as { outcome: string; warning: string };
