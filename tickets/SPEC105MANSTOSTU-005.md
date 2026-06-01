@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/src/read/records.ts` (4 public read signatures: `listRecords`, `readRecord`, `scanReferences`, `listAllKnownIds`) plus 6 caller files (`prompt/compose.ts` stages 3+4+5; `state-update-checklist.ts`; `write/records.ts`; `write/segments.ts` scanReferences callsite; `server/routes/records.ts`; `server/routes/beat-templates.ts` listRecords + readRecord callsites). No impact on canon-pipeline surfaces.
-**Deps**: SPEC105MANSTOSTU-002, SPEC105MANSTOSTU-003
+**Deps**: archive/tickets/SPEC105MANSTOSTU-002.md, SPEC105MANSTOSTU-003
 
 ## Problem
 

@@ -1,6 +1,6 @@
 # SPEC105MANSTOSTU-002: ReadResult foundation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/src/read/result.ts` (`ReadResult<T>` discriminated union + `ReadError` interface + ok/err helper constructors). No impact on existing pipeline surfaces; foundational for SPEC-105's read-layer migration (tickets 004–008) and the route 409 dispatch helper (ticket 003).
@@ -12,8 +12,8 @@ The current `tools/manual-story-studio` read layer returns `T | null` for failur
 
 ## Assumption Reassessment (2026-06-01)
 
-1. The `tools/manual-story-studio/src/read/result.ts` path does NOT exist at HEAD (verified by `ls tools/manual-story-studio/src/read/` showing `manual-stories.ts`, `manual-story-metadata.ts`, `manuscript.ts`, `records.ts`, `segments.ts`, `worlds.ts` — no `result.ts`); this ticket creates the file. No collision risk.
-2. SPEC-105 §2 item 3 defines the discriminated union shape verbatim with the `ok: true | false` discriminator. The `ReadError.code` field is a stable kebab-case string (parallel to the `HealthFinding.code` convention in ticket 001) consumed by the route-layer mapping helper (ticket 003) to dispatch HTTP statuses per the §2 item 4 mapping table.
+1. At intake, the `tools/manual-story-studio/src/read/result.ts` path did not exist; this ticket created the file without colliding with existing read-layer modules.
+2. SPEC-105 §2 item 3 defines the discriminated union shape verbatim with the `ok: true | false` discriminator. The landed `ReadError.code` field is a stable kebab-case string (parallel to the `HealthFinding.code` convention in archive/tickets/SPEC105MANSTOSTU-001.md) consumed by the route-layer mapping helper (ticket 003) to dispatch HTTP statuses per the §2 item 4 mapping table.
 3. Cross-skill boundary: this module is consumed by every read-layer migration ticket (004–008) and by the read-error → HTTP helper (003). Defining the types now in isolation lets each migration ticket import without forcing inline definitions.
 
 ## Architecture Check
@@ -27,11 +27,11 @@ The current `tools/manual-story-studio` read layer returns `T | null` for failur
 2. `ok` and `err` helper constructors produce the correct discriminated shape → unit test asserting `ok(value).ok === true && ok(value).value === value` and `err(error).ok === false && err(error).error === error`.
 3. No production consumer yet (those land in 003–008) → single-layer ticket; additional layer mapping is not applicable until the migration tickets land.
 
-## What to Change
+## Landed Changes
 
-### 1. Create `tools/manual-story-studio/src/read/result.ts`
+### 1. Created `tools/manual-story-studio/src/read/result.ts`
 
-Define the discriminated union and the `ReadError` interface per SPEC-105 §2 item 3:
+Defined the discriminated union and the `ReadError` interface per SPEC-105 §2 item 3:
 
 ```ts
 export type ReadResult<T> =
@@ -56,7 +56,7 @@ export function err<T = never>(error: ReadError): ReadResult<T> {
 
 The `ok` and `err` helper constructors are convenience wrappers — callers may construct the literal object directly, but the helpers make the intent grep-stable across the codebase (`grep -rn "ok(\|err({"` returns the construction sites).
 
-### 2. Create `tools/manual-story-studio/test/read/result.test.ts`
+### 2. Created `tools/manual-story-studio/test/read/result.test.ts`
 
 Unit tests covering the discriminated union shape and the helpers.
 
@@ -69,7 +69,7 @@ Unit tests covering the discriminated union shape and the helpers.
 
 - Migrating any existing read function to use `ReadResult<T>` — SPEC105MANSTOSTU-004 through SPEC105MANSTOSTU-008.
 - The read-error → HTTP-status mapping helper — SPEC105MANSTOSTU-003.
-- The health-report types — SPEC105MANSTOSTU-001.
+- The health-report types — archive/tickets/SPEC105MANSTOSTU-001.md.
 
 ## Acceptance Criteria
 
@@ -94,3 +94,26 @@ Unit tests covering the discriminated union shape and the helpers.
 
 1. `cd tools/manual-story-studio && npm run build:backend` — TypeScript compile only.
 2. `cd tools/manual-story-studio && npm test` — full package test.
+
+## Outcome
+
+Completed on 2026-06-01.
+
+This ticket created the shared read-result contract module at `tools/manual-story-studio/src/read/result.ts` with the `ReadResult<T>` discriminated union, `ReadError`, and `ok` / `err` constructors. It also added `tools/manual-story-studio/test/read/result.test.ts`, covering the true and false discriminants, helper payload preservation, and narrowing through `if (result.ok)`.
+
+No deviations from the planned file set. The closeout updated dependency wording to point at the archived health-types prerequisite.
+
+## Verification Result
+
+Commands run from `tools/manual-story-studio/`:
+
+1. `npm run build:backend` — passed; TypeScript compiled the new read result module and test.
+2. `npm test` — passed; backend build, 349 compiled Node tests, and web `tsc --noEmit` all completed successfully. The new read-result tests ran in the compiled backend suite.
+
+Additional grep proof from the repo root:
+
+```sh
+grep -nE "^export (type|interface|function)" tools/manual-story-studio/src/read/result.ts
+```
+
+Result: listed exactly `ReadResult`, `ReadError`, `ok`, and `err`.

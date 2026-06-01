@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/src/server/read-error-http.ts` (`mapReadErrorToHttpReply(error)` shared route adapter). Consumed by every route ticket (004–008) for the per-`ReadError.code` → HTTP status dispatch from SPEC-105 §2 item 4.
-**Deps**: archive/tickets/SPEC105MANSTOSTU-001.md, SPEC105MANSTOSTU-002
+**Deps**: archive/tickets/SPEC105MANSTOSTU-001.md, archive/tickets/SPEC105MANSTOSTU-002.md
 
 ## Problem
 

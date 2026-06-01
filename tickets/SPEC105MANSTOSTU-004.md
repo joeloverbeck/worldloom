@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/src/read/manual-story-metadata.ts` (signature change `ManualStoryMetadata | null` → `ReadResult<ManualStoryMetadata>`) plus three caller sites (`prompt/compose.ts` stage 2; `server/routes/metadata.ts`; `server/routes/beat-templates.ts` line 306). No impact on canon-pipeline surfaces.
-**Deps**: SPEC105MANSTOSTU-002, SPEC105MANSTOSTU-003
+**Deps**: archive/tickets/SPEC105MANSTOSTU-002.md, SPEC105MANSTOSTU-003
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/src/read/manual-stories.ts` and `tools/manual-story-studio/src/read/worlds.ts` (top-level enumerators) plus 2 caller files (`server/routes/worlds.ts`; `server/routes/manual-stories.ts`). No impact on canon-pipeline surfaces.
-**Deps**: SPEC105MANSTOSTU-002, SPEC105MANSTOSTU-003
+**Deps**: archive/tickets/SPEC105MANSTOSTU-002.md, SPEC105MANSTOSTU-003
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/src/read/segments.ts` (3 public read signatures: `listSegments`, `readSegmentSidecar`, `readSegmentBody`) plus 2 caller files (`server/routes/segments.ts`; `server/routes/prompts.ts`). No impact on canon-pipeline surfaces.
-**Deps**: SPEC105MANSTOSTU-002, SPEC105MANSTOSTU-003
+**Deps**: archive/tickets/SPEC105MANSTOSTU-002.md, SPEC105MANSTOSTU-003
 
 ## Problem
 

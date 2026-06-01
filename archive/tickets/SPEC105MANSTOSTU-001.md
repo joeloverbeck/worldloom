@@ -79,7 +79,7 @@ Unit test for `deriveHealthStatus` covering the three branches and the empty-fin
 
 - The 3-pass integrity compute logic — SPEC105MANSTOSTU-009.
 - The `/health` HTTP route — SPEC105MANSTOSTU-010.
-- The `ReadResult<T>` + `ReadError` types — SPEC105MANSTOSTU-002.
+- The `ReadResult<T>` + `ReadError` types — archive/tickets/SPEC105MANSTOSTU-002.md.
 - The read-error → HTTP-status mapping helper — SPEC105MANSTOSTU-003.
 - The frontend banner / hook / api wrapper — SPEC105MANSTOSTU-011.
 
