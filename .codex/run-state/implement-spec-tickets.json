@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC105MANSTOSTU-003.md",
+  "last_ticket": "archive/tickets/SPEC105MANSTOSTU-004.md",
   "last_result": "completed_archived",
-  "last_work_commit": "bc29392af407541930d5f7a5360d5a9387211a34",
+  "last_work_commit": "ffef588259c0e598c8bab7bbb31baff2fed5ef9a",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC105MANSTOSTU-004.md",
+  "next_target": "tickets/SPEC105MANSTOSTU-005.md",
   "queue": [
-    "tickets/SPEC105MANSTOSTU-004.md",
     "tickets/SPEC105MANSTOSTU-005.md",
     "tickets/SPEC105MANSTOSTU-006.md",
     "tickets/SPEC105MANSTOSTU-007.md",
@@ -25,7 +24,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: cd tools/manual-story-studio && npm run build:backend; cd tools/manual-story-studio && npm test; grep -nE \"^export function\" tools/manual-story-studio/src/server/read-error-http.ts",
+  "proof_state": "clean: cd tools/manual-story-studio && npm run build:backend; cd tools/manual-story-studio && npm test; grep -nE \"readManualStoryMetadata.*ReadResult\" tools/manual-story-studio/src/read/manual-story-metadata.ts; grep -rn \"readManualStoryMetadata(\" tools/manual-story-studio/src/; grep -rnE \"readManualStoryMetadata\\\\(.+\\\\)\\\\.[^o]\" tools/manual-story-studio/src/",
   "dirty_state": "expected after state commit: tracked worktree clean; ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place",
   "updated_at": "2026-06-01"
 }
