@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/src/health/compute.ts` (3-pass integrity walk producing a `HealthReport`). Consumed by SPEC105MANSTOSTU-010 (the `/health` route) and indirectly by the route layer's 409 dispatch when an entire story is `blocked` for any read/write attempt.
-**Deps**: archive/tickets/SPEC105MANSTOSTU-001.md, archive/tickets/SPEC105MANSTOSTU-004.md, archive/tickets/SPEC105MANSTOSTU-005.md, archive/tickets/SPEC105MANSTOSTU-006.md, SPEC105MANSTOSTU-007, SPEC105MANSTOSTU-008
+**Deps**: archive/tickets/SPEC105MANSTOSTU-001.md, archive/tickets/SPEC105MANSTOSTU-004.md, archive/tickets/SPEC105MANSTOSTU-005.md, archive/tickets/SPEC105MANSTOSTU-006.md, archive/tickets/SPEC105MANSTOSTU-007.md, SPEC105MANSTOSTU-008
 
 ## Problem
 

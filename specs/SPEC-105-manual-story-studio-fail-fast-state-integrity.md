@@ -8,6 +8,8 @@
 **Related:** `tools/manual-story-studio/src/read/`, `tools/manual-story-studio/src/server/routes/`, `tools/manual-story-studio/web/src/`, `scripts/build-all.sh`, `scripts/check-all.sh`.
 **Source:** critical triage of `reports/manual-story-studio-second-iteration.md` §§5 / 7 / 16 / 17 / 18 / 19 / 31 Stage 1 (ChatGPT-Pro, 2026-06-01). Accepted with modification: scope bundles the `build-all.sh` / `check-all.sh` inclusion (report §7 / §17) into this foundational spec because "local all-green covers Manual Studio" is integrity discipline, not a separate concern.
 
+**Implementation note (2026-06-01, SPEC105MANSTOSTU-007):** `readManuscript` now returns `ReadResult<ManuscriptReadResult>` with an explicit `manuscript_present` flag, and `compileManuscript` now returns `ReadResult<CompileManuscriptResult>` using the migrated metadata and segment read helpers. Draft-era statements below that describe `manuscript/compile.ts` as still doing raw `readFileSync` + `YAML.parse` are historical intake context for ticket 007, not the current implementation state.
+
 ---
 
 ## 1. Context & Motivation

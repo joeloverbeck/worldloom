@@ -369,7 +369,8 @@ function maybeCompile(
 ): void {
   const metadata = readMetadata(root);
   if (metadata.manuscript.compile_on_segment_save) {
-    compile({ manualStoryRoot: root });
+    const result = compile({ manualStoryRoot: root });
+    if (!result.ok) throw new SegmentReadFailureError(result.error);
   }
 }
 
