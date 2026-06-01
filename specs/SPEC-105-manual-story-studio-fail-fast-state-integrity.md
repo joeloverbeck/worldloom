@@ -12,6 +12,8 @@
 
 **Implementation note (2026-06-01, SPEC105MANSTOSTU-010):** Manual Story Studio now exposes `GET /api/worlds/:world/manual-stories/:story/health` through `tools/manual-story-studio/src/server/routes/health.ts`, registered from `src/server/http.ts` inside the read-route scope. Draft-era statements below that say the package has no `/health` endpoint are historical intake context, not the current implementation state.
 
+**Implementation note (2026-06-01, SPEC105MANSTOSTU-011):** The web frontend now has a local `HealthReport` type mirror, `/health` API wrapper, `useStoryHealth` hook, and `HealthBanner` mounted at App level. The banner parses the per-story URL prefix with `useLocation()` because the App-level mount sits outside the matched `<Routes>` element.
+
 ---
 
 ## 1. Context & Motivation

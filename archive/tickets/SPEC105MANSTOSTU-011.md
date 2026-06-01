@@ -1,6 +1,6 @@
 # SPEC105MANSTOSTU-011: Frontend health-banner + `useStoryHealth` hook + `api/health` wrapper + `App.tsx` per-story mount
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/web/src/components/HealthBanner.tsx`, `web/src/hooks/useStoryHealth.ts`, `web/src/api/health.ts`. Modifies `web/src/App.tsx` to mount the banner above the `<Routes>` outlet with per-story URL conditional rendering. No impact on canon-pipeline surfaces.
@@ -12,15 +12,15 @@ SPEC-105 §2 item 5 specifies the frontend health-banner component: rendered per
 
 ## Assumption Reassessment (2026-06-01)
 
-1. The `tools/manual-story-studio/web/src/components/`, `web/src/hooks/`, and `web/src/api/` paths exist at HEAD (verified by `ls tools/manual-story-studio/web/src/` showing `App.tsx`, `api/`, `components/`, `index.css`, `main.tsx`, `pages/`, `types/`). The new files (`HealthBanner.tsx`, `useStoryHealth.ts`, `health.ts`) do not collide with existing siblings.
+1. The `tools/manual-story-studio/web/src/components/`, `web/src/api/`, and `web/src/types/` paths exist at HEAD; `web/src/hooks/` does not exist yet and is created by this ticket. The new files (`HealthBanner.tsx`, `useStoryHealth.ts`, `api/health.ts`, `types/health.ts`) do not collide with existing siblings.
 2. SPEC-105 §2 item 5 + spec §9 Risks resolve the SPEC-111 ownership overlap: SPEC-105 owns the route-aware persistent mounting; SPEC-111 reframes this as "scaffold only" but the actual ownership is established here. The mounting renders the banner above the `<Routes>` outlet conditionally on the URL matching `/worlds/:worldSlug/manual-stories/:msSlug/*`. When not on a per-story route (Worlds list, Manual Stories list, Create form), the banner is hidden entirely (no fetch, no DOM mount).
 3. Cross-skill boundary: this is purely frontend; the backend contract is the `/health` route from archive/tickets/SPEC105MANSTOSTU-010.md. The hook fetches via `api/health.ts`, returns the structured report, and the banner renders findings as a persistent strip at the top of every per-story page.
 4. Rule 6 retcon attribution: the migration adds a NEW component + hook + api wrapper (no existing surface is renamed/removed) AND modifies App.tsx to insert the banner mount. The existing App.tsx Banner (the `<Banner />` greeting at lines 17–27, which says "Write root: worlds/.../manual-stories/.../") is preserved; the new HealthBanner is a separate component mounted between the existing nav and the `<Routes>` outlet on per-story routes only.
-5. App.tsx route-aware mounting pattern: use a `<RouterRouteGuard>` wrapper component (or React Router's `useLocation` hook inside HealthBanner itself) to determine the current URL. The simpler implementation: HealthBanner internally calls `useStoryHealth(worldSlug, msSlug)` where worldSlug/msSlug come from `useParams()`. When `worldSlug` or `msSlug` are absent (top-level routes like Worlds), the hook returns `null` and HealthBanner renders nothing. Mount HealthBanner unconditionally; the conditional rendering happens inside the component.
+5. App.tsx route-aware mounting pattern: `HealthBanner` uses React Router's `useLocation()` and parses the per-story URL prefix (`/worlds/:worldSlug/manual-stories/:msSlug/...`) before calling `useStoryHealth(worldSlug, msSlug)`. A banner mounted above `<Routes>` is inside the router but outside a route match, so `useParams()` would not receive the page route params there. When `worldSlug` or `msSlug` are absent (top-level routes like Worlds), the hook returns `null` and HealthBanner renders nothing.
 
 ## Architecture Check
 
-1. The hook-internal conditional fetch (hook returns `null` when slugs absent; banner renders nothing) is cleaner than a wrapper component that conditionally mounts the banner — it eliminates a layer of routing logic in App.tsx and pushes the "am I on a per-story route?" question to the closest possible site (the hook itself, which has access to `useParams()`). The banner is always in the React tree on per-story routes; whether it renders depends on the health state.
+1. The hook-internal conditional fetch (hook returns `null` when slugs absent; banner renders nothing) is cleaner than a wrapper component that conditionally mounts the banner — it eliminates a layer of routing logic in App.tsx and keeps the "am I on a per-story route?" question inside the banner. Because the App-level mount is outside `<Routes>`, the banner derives slugs from `useLocation()` rather than `useParams()`.
 2. The fetch in `api/health.ts` uses standard fetch with the route's URL pattern from archive/tickets/SPEC105MANSTOSTU-010.md. No error swallowing — if the fetch fails (network error, 404), the hook returns a synthetic `HealthReport` with a single `info`-severity finding indicating the fetch failure. This is the frontend's mirror of the backend's fail-fast principle.
 3. Polling triggers: initial page load + after any successful write. The "after any successful write" trigger is implemented via a manual `refetch()` exposed by the hook; the post-write call sites in Dashboard / MomentComposer / RecordForm / EditContract invoke `refetch()` after a successful API write returns. This is a frontend-internal coordination; the hook does not auto-poll on a timer.
 4. No backwards-compatibility aliasing/shims.
@@ -31,133 +31,45 @@ SPEC-105 §2 item 5 specifies the frontend health-banner component: rendered per
 2. Hook conditionally fetches → unit test asserting `useStoryHealth(undefined, undefined)` returns `null` and does not call fetch.
 3. App.tsx mounting integrates → static type-check via `tsc --noEmit` passes; manual verification in §6 Build & test (start the dev server, open a per-story dashboard with corrupt metadata, observe the banner renders).
 
-## What to Change
+## Landed Changes
 
-### 1. Create `tools/manual-story-studio/web/src/api/health.ts`
+### 1. Created `tools/manual-story-studio/web/src/types/health.ts`
 
-```ts
-import type { HealthReport } from "../../../src/health/types.js"; // shared between backend + frontend
+Added the local web mirror of `HealthStatus`, `HealthSeverity`, `HealthFinding`, `BlockedAction`, and `HealthReport`. This matches the existing web pattern in `web/src/types/manual-story.ts`: the frontend does not import backend Node-module source directly.
 
-export async function fetchStoryHealth(
-  worldSlug: string,
-  msSlug: string,
-): Promise<HealthReport> {
-  const response = await fetch(
-    `/api/worlds/${encodeURIComponent(worldSlug)}/manual-stories/${encodeURIComponent(msSlug)}/health`,
-  );
-  if (!response.ok) {
-    // synthesize a single-finding HealthReport for the fetch failure itself
-    return {
-      status: "degraded",
-      findings: [{
-        severity: "warn",
-        code: "health-fetch-failed",
-        path: response.url,
-        message: `Failed to fetch health (${response.status})`,
-        repair_hint: "Check backend connectivity and reload.",
-      }],
-      blocked_actions: [],
-    };
-  }
-  return (await response.json()) as HealthReport;
-}
-```
+### 2. Created `tools/manual-story-studio/web/src/api/health.ts`
 
-Note: the import path `../../../src/health/types.js` assumes the web subpackage's tsconfig includes the parent src/ types as a path alias OR the types are duplicated. If the web subpackage's tsconfig doesn't currently support cross-package import, the implementation duplicates the HealthReport type locally in `web/src/types/health.ts` and points the import there. The decision lands at implementation time per the actual tsconfig setup; the spec doesn't prescribe the path-alias mechanism.
+Added `fetchStoryHealth(worldSlug, msSlug)`, which calls `/api/worlds/:world/manual-stories/:story/health`. Non-OK HTTP responses and network failures return a degraded synthetic `HealthReport` with `code: "health-fetch-failed"` rather than silently dropping the problem.
 
-### 2. Create `tools/manual-story-studio/web/src/hooks/useStoryHealth.ts`
+### 3. Created `tools/manual-story-studio/web/src/hooks/useStoryHealth.ts`
 
-```ts
-import { useEffect, useState, useCallback } from "react";
-import { fetchStoryHealth } from "../api/health.js";
-import type { HealthReport } from "../types/health.js";
+Added an initial-load fetch hook plus a manual `refetch()` function. When slugs are absent, the hook returns `report: null` and performs no fetch. There is no timer or daemon-style polling.
 
-export function useStoryHealth(
-  worldSlug: string | undefined,
-  msSlug: string | undefined,
-): { report: HealthReport | null; refetch: () => void } {
-  const [report, setReport] = useState<HealthReport | null>(null);
+### 4. Created `tools/manual-story-studio/web/src/components/HealthBanner.tsx`
 
-  const refetch = useCallback(() => {
-    if (!worldSlug || !msSlug) {
-      setReport(null);
-      return;
-    }
-    fetchStoryHealth(worldSlug, msSlug).then(setReport);
-  }, [worldSlug, msSlug]);
+Added the persistent banner component. It parses `worldSlug` / `msSlug` from the current URL via `useLocation()`, calls `useStoryHealth`, renders nothing for non-story routes or `status: "ok"`, and renders a `role="alert"` strip for degraded/blocked reports with finding code, path, message, and repair hint.
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+### 5. Modified `tools/manual-story-studio/web/src/App.tsx`
 
-  return { report, refetch };
-}
-```
+Mounted `<HealthBanner />` between the existing top navigation and `<main>`, preserving all existing routes.
 
-### 3. Create `tools/manual-story-studio/web/src/components/HealthBanner.tsx`
+### 6. Modified `tools/manual-story-studio/web/src/index.css`
 
-```tsx
-import { useParams } from "react-router-dom";
-import { useStoryHealth } from "../hooks/useStoryHealth.js";
+Added banner styling, scoped the existing generic `[role="alert"]` rule away from `.health-banner`, and added a mobile one-column layout so long paths/messages do not collide.
 
-export function HealthBanner() {
-  const { worldSlug, msSlug } = useParams<{ worldSlug?: string; msSlug?: string }>();
-  const { report } = useStoryHealth(worldSlug, msSlug);
+### 7. Updated `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`
 
-  if (!report || report.status === "ok") return null;
-
-  return (
-    <aside
-      role="alert"
-      aria-live="polite"
-      className="manual-studio-health-banner"
-      style={{
-        background: report.status === "blocked" ? "#7a1f1f" : "#5a4a1f",
-        color: "white",
-        padding: 12,
-        marginBottom: 12,
-      }}
-    >
-      <strong>Story health: {report.status}</strong>
-      {report.blocked_actions.length > 0 ? (
-        <p>Blocked operations: {report.blocked_actions.join(", ")}</p>
-      ) : null}
-      <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-        {report.findings.map((f, i) => (
-          <li key={i}>
-            <span style={{ fontWeight: 600 }}>[{f.severity}]</span> <code>{f.code}</code>{" "}
-            <span style={{ fontFamily: "monospace" }}>{f.path}</span>: {f.message} — <em>{f.repair_hint}</em>
-          </li>
-        ))}
-      </ul>
-    </aside>
-  );
-}
-```
-
-### 4. Modify `tools/manual-story-studio/web/src/App.tsx`
-
-Insert the `<HealthBanner />` between the existing `<nav>` and `<main><Routes>...` (around line 38). The component renders `null` when not on a per-story route, so this single mount point covers all cases:
-
-```tsx
-import { HealthBanner } from "./components/HealthBanner.js";
-// ...
-<BrowserRouter ...>
-  <Banner />
-  <nav>...</nav>
-  <HealthBanner />
-  <main>
-    <Routes>...</Routes>
-  </main>
-</BrowserRouter>
-```
+Added a dated implementation note for the landed frontend health banner slice.
 
 ## Files to Touch
 
 - `tools/manual-story-studio/web/src/api/health.ts` (new)
 - `tools/manual-story-studio/web/src/hooks/useStoryHealth.ts` (new)
 - `tools/manual-story-studio/web/src/components/HealthBanner.tsx` (new)
+- `tools/manual-story-studio/web/src/types/health.ts` (new)
 - `tools/manual-story-studio/web/src/App.tsx` (modify)
+- `tools/manual-story-studio/web/src/index.css` (modify)
+- `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — implementation note)
 
 ## Out of Scope
 
@@ -172,7 +84,7 @@ import { HealthBanner } from "./components/HealthBanner.js";
 
 1. `cd tools/manual-story-studio && npm test` runs (which includes web subpackage `tsc --noEmit`) and passes — the new files compile cleanly.
 2. Manual verification per SPEC-105 §6 cold-start: launch dev server on a fixture world with corrupted `manual-story.yaml`, navigate to the corrupted story's dashboard, confirm the banner renders with the `metadata-yaml-parse-failed` finding.
-3. `grep -nE "HealthBanner|useStoryHealth" tools/manual-story-studio/web/src/App.tsx` returns the import + mount sites.
+3. `grep -nE "HealthBanner|useStoryHealth" tools/manual-story-studio/web/src/App.tsx tools/manual-story-studio/web/src/components/HealthBanner.tsx tools/manual-story-studio/web/src/hooks/useStoryHealth.ts` returns the App import/mount plus hook usage/export sites.
 
 ### Invariants
 
@@ -191,4 +103,26 @@ import { HealthBanner } from "./components/HealthBanner.js";
 
 1. `cd tools/manual-story-studio/web && tsc --noEmit` — web subpackage type check.
 2. `cd tools/manual-story-studio && npm test` — full package test (includes web subpackage typecheck).
-3. Cold-start manual verification per SPEC-105 §6 (corrupted-metadata banner render).
+3. `grep -nE "HealthBanner|useStoryHealth" tools/manual-story-studio/web/src/App.tsx tools/manual-story-studio/web/src/components/HealthBanner.tsx tools/manual-story-studio/web/src/hooks/useStoryHealth.ts` — static integration proof for mount + hook wiring.
+
+## Outcome
+
+Completed on 2026-06-01.
+
+This ticket added the frontend health contract surface: local web health types, `/health` fetch wrapper, `useStoryHealth`, `HealthBanner`, the App-level mount, and banner CSS. A corrupt-metadata browser smoke confirmed the banner renders the backend finding from `/health`.
+
+## Verification Result
+
+Commands run:
+
+1. `cd tools/manual-story-studio/web && npm test` — passed; `tsc --noEmit`.
+2. `cd tools/manual-story-studio && npm test` — passed; backend reported 377 tests passing and web `tsc --noEmit` passed.
+3. `grep -nE "HealthBanner|useStoryHealth" tools/manual-story-studio/web/src/App.tsx tools/manual-story-studio/web/src/components/HealthBanner.tsx tools/manual-story-studio/web/src/hooks/useStoryHealth.ts` — passed; returned App import/mount, banner hook import/use, and hook export.
+4. `grep -nE "useLocation|parseStoryPath|manual-stories" tools/manual-story-studio/web/src/components/HealthBanner.tsx` — passed; confirmed App-level route parsing seam.
+5. Browser smoke via backend `node dist/src/cli.js --port 5175 --repo-root /tmp/mss-health-xZuzYJ`, Vite `npm run dev -- --host 127.0.0.1`, and Playwright against `/worlds/fixture-world/manual-stories/fixture-story/dashboard` — passed; `/health` returned 200 and page text contained `Story health: blocked` plus `metadata-yaml-parse-failed`.
+6. `git diff --check` — passed.
+
+## Deviations
+
+- The ticket draft suggested `useParams()` inside `HealthBanner`; the live App-level mount is outside matched route elements, so `HealthBanner` uses `useLocation()` and parses the route prefix instead.
+- The web package does not import backend Node-module types directly. `HealthReport` is mirrored locally in `web/src/types/health.ts`, matching the existing frontend type-mirror pattern.

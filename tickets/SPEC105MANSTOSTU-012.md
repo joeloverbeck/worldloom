@@ -3,8 +3,8 @@
 **Status**: PENDING
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — modifies `tools/manual-story-studio/web/src/pages/Dashboard.tsx` (4 `.catch(() => {})` removals at lines 67, 72, 77, 101) and `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` (3 `.catch(() => {})` removals at lines 66, 71, 89). Replaces silent swallowing with the `useStoryHealth → banner` pattern from SPEC105MANSTOSTU-011. No impact on canon-pipeline surfaces.
-**Deps**: SPEC105MANSTOSTU-011
+**Engine Changes**: Yes — modifies `tools/manual-story-studio/web/src/pages/Dashboard.tsx` (4 `.catch(() => {})` removals at lines 67, 72, 77, 101) and `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` (3 `.catch(() => {})` removals at lines 66, 71, 89). Replaces silent swallowing with the `useStoryHealth → banner` pattern from archive/tickets/SPEC105MANSTOSTU-011.md. No impact on canon-pipeline surfaces.
+**Deps**: archive/tickets/SPEC105MANSTOSTU-011.md
 
 ## Problem
 
@@ -17,7 +17,7 @@ SPEC-105 §1 Context flags 7 `.catch(() => {})` occurrences across the live fron
    - MomentComposer.tsx line 66 (after `readMetadata`); line 71 (after `listRecords "cast"`); line 89 (after `Promise.all(...records)`).
    The Dashboard.tsx line 84–86 `.catch(() => { if (!cancelled) setManuscriptMissing(true); })` is a DIFFERENT pattern (typed empty-vs-failed handling) that's preserved unchanged — it's the absent-vs-failed handling per spec §2 item 6 pattern (b).
 2. SPEC-105 §2 item 6 + §7 AC#7 specify the verification: `grep -rn "\.catch(() => {})" tools/manual-story-studio/web/src/` returns zero matches after the removal.
-3. Cross-skill boundary: this ticket consumes `useStoryHealth` from SPEC105MANSTOSTU-011. The replacement pattern is: instead of `.catch(() => {})`, surface the failure to the banner via the natural HTTP error path (the backend route returns 409 with HealthReport when corrupt; the frontend API wrapper returns a rejected promise; the page's `.catch` either (a) calls `refetch()` on the health hook to surface the banner OR (b) sets a panel-level error state if the read is genuinely panel-local).
+3. Cross-skill boundary: this ticket consumes `useStoryHealth` from archive/tickets/SPEC105MANSTOSTU-011.md. The replacement pattern is: instead of `.catch(() => {})`, surface the failure to the banner via the natural HTTP error path (the backend route returns 409 with HealthReport when corrupt; the frontend API wrapper returns a rejected promise; the page's `.catch` either (a) calls `refetch()` on the health hook to surface the banner OR (b) sets a panel-level error state if the read is genuinely panel-local).
 4. The Dashboard/MomentComposer pages' existing `.then(...).catch(...)` chains run inside `useEffect` cleanup blocks — preserving the `cancelled` ref pattern is important for race-condition safety. The replacement removes the catch's silent-no-op but preserves the early-return-on-cancelled guard.
 
 ## Architecture Check
@@ -55,7 +55,7 @@ For each of lines 66 / 71 / 89: same shape as Dashboard — replace silent `.cat
 ## Out of Scope
 
 - Other `.catch` patterns elsewhere in `web/src/` (e.g., `.catch(() => ({}))` inside fetch error JSON parsing — those are valid defensive idioms, not silent integrity swallowing).
-- The frontend health-banner component / hook / api — SPEC105MANSTOSTU-011.
+- The frontend health-banner component / hook / api — archive/tickets/SPEC105MANSTOSTU-011.md.
 - Removing `.catch` from form-submission paths (record save / contract edit / prompt save) — those have their own error-display surfaces in the calling form, and aren't on the 7 silent-swallow list.
 
 ## Acceptance Criteria
