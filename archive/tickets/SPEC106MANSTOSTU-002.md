@@ -105,7 +105,7 @@ Change `makeDefaultManualStoryMetadata(...).prompt_policy.include_recent_segment
 - Other soft-tier quality rules from the report §26 lint table (Overlong prompt, Weak directive, Too many selected records) — deferred to SPEC-111 per spec §3 *Key decisions*.
 - Denylist content changes — out of scope per SPEC-106 §2 Out of scope.
 - Tier flips for the four leakage rules — covered by `archive/tickets/SPEC106MANSTOSTU-001.md`.
-- `lint_override` write-path removal — covered by `SPEC106MANSTOSTU-003` (backend) and `SPEC106MANSTOSTU-004` (frontend).
+- `lint_override` write-path removal — covered by `archive/tickets/SPEC106MANSTOSTU-003.md` (backend) and `tickets/SPEC106MANSTOSTU-004.md` (frontend).
 
 ## Acceptance Criteria
 

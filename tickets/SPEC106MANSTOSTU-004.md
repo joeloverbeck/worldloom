@@ -4,19 +4,19 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` web frontend: `web/src/pages/PromptPreview.tsx`, `web/src/api/prompts.ts`, `web/src/types/manual-story.ts`.
-**Deps**: SPEC106MANSTOSTU-003
+**Deps**: archive/tickets/SPEC106MANSTOSTU-003.md
 
 ## Problem
 
-`web/src/pages/PromptPreview.tsx` (lines 89-126) constructs a `lint_override` body field on save when soft findings are present and the author clicks through a confirm dialog (`window.confirm(... save anyway?)`), and forwards it via `savePrompt(...)`. Per SPEC-106 §2.3 and §3 *Disabled-button is the primary guard; early return is defense-in-depth*, this construction must be removed: the disabled-button at line 154 (`disabled={lint.blockingForCopy}`) and line 160 (Save) is the primary UI guard, supplemented by an early-return defense-in-depth at the top of `onCopy` and `onSave` against programmatic clicks (future tests, keyboard shortcuts that bypass the disabled state). The frontend's `savePrompt` request type at `web/src/api/prompts.ts:71-79` declares `lint_override?` on the input; it must drop the field in lockstep so the type-system enforces the removal. The frontend's duplicate `PromptRunSidecar.lint_override?` field at `web/src/types/manual-story.ts:288-296` is marked legacy (read-tolerant, write-omitted) mirroring the backend type from `SPEC106MANSTOSTU-003`.
+`web/src/pages/PromptPreview.tsx` (lines 89-126) constructs a `lint_override` body field on save when soft findings are present and the author clicks through a confirm dialog (`window.confirm(... save anyway?)`), and forwards it via `savePrompt(...)`. Per SPEC-106 §2.3 and §3 *Disabled-button is the primary guard; early return is defense-in-depth*, this construction must be removed: the disabled-button at line 154 (`disabled={lint.blockingForCopy}`) and line 160 (Save) is the primary UI guard, supplemented by an early-return defense-in-depth at the top of `onCopy` and `onSave` against programmatic clicks (future tests, keyboard shortcuts that bypass the disabled state). The frontend's `savePrompt` request type at `web/src/api/prompts.ts:71-79` declares `lint_override?` on the input; it must drop the field in lockstep so the type-system enforces the removal. The frontend's duplicate `PromptRunSidecar.lint_override?` field at `web/src/types/manual-story.ts:288-296` is marked legacy (read-tolerant, write-omitted) mirroring the backend type from `archive/tickets/SPEC106MANSTOSTU-003.md`.
 
 ## Assumption Reassessment (2026-06-01)
 
 1. Codebase: `web/src/pages/PromptPreview.tsx` lines 94-112 construct `lint_override`; line 154 declares `disabled={lint.blockingForCopy}` on Copy; line 160 declares `disabled={lint.blockingForCopy || submitting}` on Save. `web/src/api/prompts.ts:71-79` declares `lint_override?` on the `savePrompt` input intersection type. `web/src/types/manual-story.ts:288-296` declares `PromptRunSidecar.lint_override?`. `web/src/components/LintBadge.tsx` consumes `lint.findings` tier-agnostically (split into `hardFindings`/`softFindings` at lines 19-20) — no lint_override-specific code path.
 2. Spec: `specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md` §2.3 + §3 *Disabled-button is the primary guard; early return is defense-in-depth* + §4 *Files to touch* — line citations match the codebase exactly.
-3. Cross-skill boundary: the web ↔ backend save-request shape. The `savePrompt` request's `lint_override?` field is the channel SPEC106MANSTOSTU-003 closes on the backend; this ticket closes the symmetric frontend send. Both must land for the path to be fully gone; landing order is 003 → 004 to keep the type system clean between the two diffs.
+3. Cross-skill boundary: the web ↔ backend save-request shape. The `savePrompt` request's `lint_override?` field is the channel `archive/tickets/SPEC106MANSTOSTU-003.md` closes on the backend; this ticket closes the symmetric frontend send. Both must land for the path to be fully gone; landing order is 003 → 004 to keep the type system clean between the two diffs.
 4. FOUNDATIONS: §Tooling Recommendation (least-agency LLM packets, "agents never operate on prose alone"). The disabled-button primary guard + early-return defense-in-depth are the realization of the least-agency principle at the prompt-clipboard boundary: the UI denies the copy/save action when any hard finding fires, and the handler's early-return guards against programmatic-click bypasses (future tests, keyboard shortcuts). Together they make the clipboard a deterministic write surface in the same sense FOUNDATIONS expects for canon-write surfaces.
-5. Schema extension: frontend `PromptRunSidecar.lint_override?` (type at `web/src/types/manual-story.ts:288-296`) transitions from read-and-write to read-tolerant + write-omitted (mirrors backend treatment in `SPEC106MANSTOSTU-003`). Consumers of the type in the frontend: `PromptPreview.tsx` (no longer constructs it after this ticket), `web/src/api/prompts.ts` (`getPrompt` returns `{ markdown; sidecar: PromptRunSidecar }`, but no caller inspects `sidecar.lint_override`). Backward compatibility preserved: legacy on-disk sidecars carrying the field still parse into the type cleanly.
+5. Schema extension: frontend `PromptRunSidecar.lint_override?` (type at `web/src/types/manual-story.ts:288-296`) transitions from read-and-write to read-tolerant + write-omitted (mirrors backend treatment in `archive/tickets/SPEC106MANSTOSTU-003.md`). Consumers of the type in the frontend: `PromptPreview.tsx` (no longer constructs it after this ticket), `web/src/api/prompts.ts` (`getPrompt` returns `{ markdown; sidecar: PromptRunSidecar }`, but no caller inspects `sidecar.lint_override`). Backward compatibility preserved: legacy on-disk sidecars carrying the field still parse into the type cleanly.
 6. Rename/remove blast radius: `lint_override` clipboard-override path removal. Frontend pipeline grep (`grep -rn "lint_override\|copied_anyway" tools/manual-story-studio/web/`) returns matches only at the three Files-to-Touch paths above; no other web/component path consults the field.
 
 ## Architecture Check
@@ -48,7 +48,7 @@ Drop the `lint_override?` field from the `savePrompt(...)` input intersection ty
 
 ### 3. `tools/manual-story-studio/web/src/types/manual-story.ts` — mark `PromptRunSidecar.lint_override?` legacy
 
-Add a one-line comment above the `lint_override?` field declaration at lines 292-295 naming SPEC-106 as the deprecation source, e.g. `/** @deprecated SPEC-106: write-omitted; read-tolerant for legacy sidecars only. */`. The field itself stays optional and parses silently on read; this mirrors the backend treatment in `SPEC106MANSTOSTU-003`.
+Add a one-line comment above the `lint_override?` field declaration at lines 292-295 naming SPEC-106 as the deprecation source, e.g. `/** @deprecated SPEC-106: write-omitted; read-tolerant for legacy sidecars only. */`. The field itself stays optional and parses silently on read; this mirrors the backend treatment in `archive/tickets/SPEC106MANSTOSTU-003.md`.
 
 ## Files to Touch
 
@@ -58,7 +58,7 @@ Add a one-line comment above the `lint_override?` field declaration at lines 292
 
 ## Out of Scope
 
-- Backend `lint_override` removal (`src/write/prompts.ts`, `src/server/routes/prompts.ts`, `src/prompt/types.ts`) — covered by `SPEC106MANSTOSTU-003`.
+- Backend `lint_override` removal (`src/write/prompts.ts`, `src/server/routes/prompts.ts`, `src/prompt/types.ts`) — covered by `archive/tickets/SPEC106MANSTOSTU-003.md`.
 - A new "lint history" view for debugging — explicitly out of scope per SPEC-106 §2 Out of scope.
 - Frontend health banner integration — SPEC-105 (already landed; archived).
 - New soft-tier quality affordances (in-banner prompt-too-long / weak-directive / too-many-records UX) — deferred to SPEC-111.

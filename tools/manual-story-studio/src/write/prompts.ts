@@ -3,7 +3,8 @@
 // Persists author-saved prompts as two paired files inside the manual-story
 // sandbox: prompts/PROMPT-<n>.md (the Markdown) and prompt-runs/PROMPT-<n>.yaml
 // (the sidecar carrying id, created_at, included cast/records/template,
-// moment_directive, prompt_sha256, and an optional lint_override). The
+// moment_directive, and prompt_sha256). SPEC-106 removed the old override
+// write path; legacy sidecars remain read-tolerant at the type layer. The
 // prompt_sha256 is informational only per [[feedback_author_rejects_hash_coupling]]
 // and SPEC-102 §3 Key Decisions — no downstream code reads it as a
 // precondition.
@@ -13,11 +14,7 @@ import path from "node:path";
 
 import YAML from "yaml";
 
-import type {
-  PromptComposeResult,
-  PromptLintFinding,
-  PromptRunSidecar,
-} from "../prompt/types.js";
+import type { PromptComposeResult, PromptRunSidecar } from "../prompt/types.js";
 import { allocateNextPromptId } from "./id-allocator.js";
 import {
   assertInsideSandbox,
@@ -28,10 +25,6 @@ import {
 export interface WritePromptInput {
   root: ManualStoryRoot;
   composeResult: PromptComposeResult;
-  lint_override?: {
-    findings: PromptLintFinding[];
-    copied_anyway_at: string;
-  };
   // Override the created_at timestamp for deterministic tests. Default
   // is new Date().toISOString() at write time.
   now?: () => string;
@@ -64,9 +57,6 @@ export function writePrompt(input: WritePromptInput): WritePromptResult {
     moment_directive: input.composeResult.sidecar_draft.moment_directive,
     prompt_sha256: promptSha256,
   };
-  if (input.lint_override) {
-    sidecar.lint_override = input.lint_override;
-  }
 
   const markdownRel = path.join("prompts", `${id}.md`);
   const sidecarRel = path.join("prompt-runs", `${id}.yaml`);

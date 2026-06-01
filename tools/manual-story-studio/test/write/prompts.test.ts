@@ -93,7 +93,7 @@ test("Markdown file and sidecar both land inside manual-story root", () => {
   }
 });
 
-test("sidecar carries all 8 mandatory fields, omits lint_override when not supplied", () => {
+test("sidecar carries mandatory fields and omits legacy lint_override", () => {
   const { tempRoot, manualStoryRoot } = mkFixture();
   try {
     const r = writePrompt({
@@ -110,6 +110,7 @@ test("sidecar carries all 8 mandatory fields, omits lint_override when not suppl
     assert.equal(onDisk.included_template_path, null);
     assert.equal(onDisk.moment_directive, "Jon waits.");
     assert.equal(typeof onDisk.prompt_sha256, "string");
+    // SPEC-106: lint_override is read-tolerant legacy state, not written by new saves.
     assert.equal(onDisk.lint_override, undefined);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
@@ -130,35 +131,6 @@ test("prompt_sha256 equals sha256(markdown) byte-for-byte", () => {
       now: () => "2026-05-30T12:00:00Z",
     });
     assert.equal(r.sidecar.prompt_sha256, expected);
-  } finally {
-    rmSync(tempRoot, { recursive: true, force: true });
-  }
-});
-
-test("lint_override field round-trips when provided", () => {
-  const { tempRoot, manualStoryRoot } = mkFixture();
-  try {
-    const r = writePrompt({
-      root: manualStoryRoot,
-      composeResult: fixtureComposeResult(),
-      now: () => "2026-05-30T12:00:00Z",
-      lint_override: {
-        findings: [
-          {
-            rule: "no_engine_jargon",
-            tier: "soft",
-            message: "STCHAR-7 in body",
-            snippet: "STCHAR-7",
-          },
-        ],
-        copied_anyway_at: "2026-05-30T12:00:05Z",
-      },
-    });
-    const onDisk = YAML.parse(readFileSync(r.sidecar_path, "utf8")) as Record<string, unknown>;
-    assert.ok(onDisk.lint_override);
-    const o = onDisk.lint_override as { findings: unknown[]; copied_anyway_at: string };
-    assert.equal(o.findings.length, 1);
-    assert.equal(o.copied_anyway_at, "2026-05-30T12:00:05Z");
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }

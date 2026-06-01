@@ -16,8 +16,8 @@
  *            a clean fixture.
  *   - AC #8: no engine-jargon denylist term in the composed body for
  *            a clean fixture.
- *   - AC #9: savePrompt with lint_override persists the override into
- *            the sidecar.
+ *   - AC #9: SPEC-106 retires lint_override writes; savePrompt omits
+ *            the legacy field from new sidecars.
  *   - AC #10: this test is part of `npm test`.
  *
  * Manual dry-run runbook (AC #4 — frontend UI flow):
@@ -50,17 +50,10 @@
  *     Click "Regenerate"; confirm Markdown re-renders identically.
  *     Click "Edit Cast"; confirm navigation back to /moment-composer.
  *
- *   Step 5 (AC #9 manual portion — soft-override save):
- *     Type a moment directive containing the substring "STCHAR-7"
- *     (triggers the engine-jargon soft denylist via the lint sweep
- *     over the assembled body — the directive flows into §4 and the
- *     STCHAR-7 substring is sweep-visible).
- *     Click "Generate Prompt". Confirm the lint badge shows the soft
- *     violation.
- *     Click "Save Prompt". Confirm a confirm() dialog appears asking
- *     "save anyway?". Accept; confirm the save proceeds and
+ *   Step 5 (AC #9 manual portion — retired by SPEC-106):
+ *     Save a clean prompt and confirm
  *     `cat worlds/<world>/manual-stories/<story>/prompt-runs/PROMPT-N.yaml`
- *     shows a populated lint_override field.
+ *     does not show a lint_override field.
  *
  *   Step 6. Cleanup any temp fixture roots if you seeded one.
  */
@@ -326,7 +319,7 @@ test("AC #8 — no engine-jargon prefix in composed body for clean fixture", asy
   }
 });
 
-test("AC #9 — savePrompt with lint_override persists the override into the sidecar", async () => {
+test("AC #9 — SPEC-106 retires lint_override writes from new sidecars", async () => {
   const { tempRoot, root } = mkFixture();
   try {
     const result = await composePrompt({
@@ -340,17 +333,6 @@ test("AC #9 — savePrompt with lint_override persists the override into the sid
       root,
       composeResult: result,
       now: () => "2026-05-30T12:00:00Z",
-      lint_override: {
-        findings: [
-          {
-            rule: "no_engine_jargon",
-            tier: "soft",
-            message: "fixture override",
-            snippet: "STCHAR-7",
-          },
-        ],
-        copied_anyway_at: "2026-05-30T12:00:05Z",
-      },
     });
     const sidecarPath = path.join(
       root.absolutePath,
@@ -360,9 +342,8 @@ test("AC #9 — savePrompt with lint_override persists the override into the sid
     const onDisk = YAML.parse(readFileSync(sidecarPath, "utf8")) as {
       lint_override?: { findings: unknown[]; copied_anyway_at: string };
     };
-    assert.ok(onDisk.lint_override);
-    assert.equal(onDisk.lint_override?.findings?.length, 1);
-    assert.equal(onDisk.lint_override?.copied_anyway_at, "2026-05-30T12:00:05Z");
+    // SPEC-106 is the Rule-6 retcon source for retiring SPEC-102 AC #9 persistence.
+    assert.equal(onDisk.lint_override, undefined);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
