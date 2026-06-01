@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC105MANSTOSTU-006.md",
+  "last_ticket": "archive/tickets/SPEC105MANSTOSTU-007.md",
   "last_result": "completed_archived",
-  "last_work_commit": "b6b95baa11e156bdec0a09ed0c63b2a22779c6d7",
+  "last_work_commit": "e971f9bde0094ec83e9a1f9a0d6b463cdce2c5ec",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC105MANSTOSTU-007.md",
+  "next_target": "tickets/SPEC105MANSTOSTU-008.md",
   "queue": [
-    "tickets/SPEC105MANSTOSTU-007.md",
     "tickets/SPEC105MANSTOSTU-008.md",
     "tickets/SPEC105MANSTOSTU-009.md",
     "tickets/SPEC105MANSTOSTU-010.md",
@@ -22,7 +21,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: cd tools/manual-story-studio && npm run build:backend; cd tools/manual-story-studio && npm test; grep -nE \"^export function (listSegments|readSegmentSidecar|readSegmentBody).*ReadResult\" tools/manual-story-studio/src/read/segments.ts; grep -rn \"listSegmentSidecars\\\\|readSegment\\\\b\" tools/manual-story-studio/src/",
+  "proof_state": "clean: cd tools/manual-story-studio && npm run build:backend; cd tools/manual-story-studio && node --test dist/test/manuscript/compile.test.js dist/test/server/manuscript-routes.test.js dist/test/write/segments.test.js; cd tools/manual-story-studio && npm test; grep -nE \"ReadResult<ManuscriptReadResult>|ReadResult<CompileManuscriptResult>\" tools/manual-story-studio/src/read/manuscript.ts tools/manual-story-studio/src/manuscript/compile.ts; ! grep -nE \"YAML\\\\.parse\" tools/manual-story-studio/src/manuscript/compile.ts; git diff --check",
   "dirty_state": "expected after state commit: tracked worktree clean; ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place",
   "updated_at": "2026-06-01"
 }
