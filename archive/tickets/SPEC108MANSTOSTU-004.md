@@ -1,6 +1,6 @@
 # SPEC108MANSTOSTU-004: PasteProse strip edit-mode + Discard buffer-clear
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/web/src/pages/PasteProse.tsx` to remove the `?edit=SEG-N` URL parameter handling, the `readSegment` useEffect, the `editSegment` branch of `handleSave`, and the `editSegment` / `readSegment` imports. Repurposes the existing Discard button from navigate-to-dashboard to a client-side state reset.
@@ -132,3 +132,31 @@ Remove the `loading` state usage at line 131 (`{loading ? <p>Loading segment...<
 
 1. `cd tools/manual-story-studio/web && npm test` — TypeScript typecheck.
 2. `cd tools/manual-story-studio && npm test` — full backend + frontend test suite (run after all SPEC-108 tickets land to verify no cross-ticket regression).
+
+## Outcome
+
+Completed: 2026-06-01
+
+Converted PasteProse back to a single append-only workflow:
+
+1. Removed `editSegment` and `readSegment` imports.
+2. Removed `useSearchParams`, edit-mode URL parsing, nav-state prompt prefill, and the segment prefill `useEffect`.
+3. Simplified `handleSave` to always call `saveSegment`.
+4. Changed Discard from dashboard navigation to local buffer clearing.
+5. Replaced the conditional edit/paste header with a fixed `Paste Prose` header.
+6. Removed the edit-mode loading state and disabled-button dependency.
+
+## Verification Result
+
+1. `npm --prefix tools/manual-story-studio/web test` — passed (`tsc -p tsconfig.json --noEmit`).
+2. `grep -n "editSegment\|readSegment" tools/manual-story-studio/web/src/pages/PasteProse.tsx` — no matches.
+3. `grep -n "useSearchParams\|editSegmentId\|isEditMode" tools/manual-story-studio/web/src/pages/PasteProse.tsx` — no matches.
+4. `grep -n "useEffect" tools/manual-story-studio/web/src/pages/PasteProse.tsx` — no matches.
+5. `grep -n "Edit Segment" tools/manual-story-studio/web/src/pages/PasteProse.tsx` — no matches.
+6. `grep -n "saveSegment\|editSegment" tools/manual-story-studio/web/src/pages/PasteProse.tsx` — `saveSegment` import and call only.
+7. `grep -n "handleDiscard\|navigate" tools/manual-story-studio/web/src/pages/PasteProse.tsx` — `handleDiscard` matches only; no navigation matches.
+8. `git diff --check -- tools/manual-story-studio/web/src/pages/PasteProse.tsx` — passed.
+
+## Deviations
+
+None.
