@@ -1,6 +1,6 @@
 # SPEC105MANSTOSTU-001: Health types foundation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/src/health/types.ts` (HealthStatus / HealthSeverity / HealthFinding / HealthReport interfaces + `deriveHealthStatus` pure function). No impact on existing pipeline surfaces; foundational for SPEC-105's `/health` endpoint, compute pass, and route 409 dispatch.
@@ -12,9 +12,9 @@
 
 ## Assumption Reassessment (2026-06-01)
 
-1. The `tools/manual-story-studio/src/health/` directory does NOT exist at HEAD (verified by `ls tools/manual-story-studio/src/` showing no `health/` subdirectory in the prior reassess-spec session); this ticket creates the directory and its first module. No file collision risk.
-2. SPEC-105 §2 item 1 defines the canonical shape with explicit `status` derivation rule (any `blocking` finding → `blocked`; otherwise any `error` → `degraded`; otherwise `ok`). The pure derivation function lives in the types module so the compute pass (009) and any other consumer can call it without instantiating the full compute walker.
-3. Cross-skill boundary: `tools/manual-story-studio` is canon-pipeline-fenced per SPEC-100 (package.json excludes `@worldloom/patch-engine` + `@worldloom/world-mcp` + `better-sqlite3`; realpath sandbox + denylist prevent canon writes). This ticket introduces only new TypeScript types within the existing fence; no canon-pipeline integration, no cross-package import added.
+1. At intake, `tools/manual-story-studio/src/health/` did not exist; this ticket created the directory and its first module without colliding with existing source.
+2. SPEC-105 §2 item 1 defines the canonical shape with explicit `status` derivation rule (any `blocking` finding → `blocked`; otherwise any `error` → `degraded`; otherwise `ok`). The landed pure derivation function lives in the types module so the compute pass (009) and any other consumer can call it without instantiating the full compute walker.
+3. Cross-skill boundary: `tools/manual-story-studio` is canon-pipeline-fenced per SPEC-100 (package.json excludes `@worldloom/patch-engine` + `@worldloom/world-mcp` + `better-sqlite3`; realpath sandbox + denylist prevent canon writes). This ticket introduced only new TypeScript types within the existing fence; no canon-pipeline integration, no cross-package import was added.
 
 ## Architecture Check
 
@@ -27,11 +27,11 @@
 2. `deriveHealthStatus` matches the spec §2 item 1 derivation rule exactly → unit test asserting all three branches (`blocking` → `blocked`; `error` → `degraded`; otherwise → `ok`).
 3. No production consumer yet (those land in 003 / 009 / 011) → single-layer ticket; additional layer mapping is not applicable until consumers exist.
 
-## What to Change
+## Landed Changes
 
-### 1. Create `tools/manual-story-studio/src/health/types.ts`
+### 1. Created `tools/manual-story-studio/src/health/types.ts`
 
-Define the canonical types per SPEC-105 §2 item 1:
+Defined the canonical types per SPEC-105 §2 item 1:
 
 ```ts
 export type HealthStatus = "ok" | "degraded" | "blocked";
@@ -66,7 +66,7 @@ export function deriveHealthStatus(findings: ReadonlyArray<HealthFinding>): Heal
 
 The `BlockedAction` type is extracted from the spec's inline literal-union in §2 item 1 so consumers (009 compute, 003 helper) can reference the named type instead of duplicating the literal-union.
 
-### 2. Create `tools/manual-story-studio/test/health/types.test.ts`
+### 2. Created `tools/manual-story-studio/test/health/types.test.ts`
 
 Unit test for `deriveHealthStatus` covering the three branches and the empty-findings case (returns `ok`).
 
@@ -107,3 +107,26 @@ Unit test for `deriveHealthStatus` covering the three branches and the empty-fin
 
 1. `cd tools/manual-story-studio && npm run build:backend` — TypeScript compile only.
 2. `cd tools/manual-story-studio && npm test` — full package test (build + Node tests + web subpackage typecheck).
+
+## Outcome
+
+Completed on 2026-06-01.
+
+This ticket created the shared health contract module at `tools/manual-story-studio/src/health/types.ts` with closed `HealthStatus` / `HealthSeverity` unions, `HealthFinding`, `BlockedAction`, `HealthReport`, and the pure `deriveHealthStatus` helper. It also added `tools/manual-story-studio/test/health/types.test.ts`, covering blocked, degraded, warn/info-ok, and empty-ok derivation behavior.
+
+No deviations from the planned file set. The only scope correction during closeout was historicalizing intake-era "does not exist at HEAD" wording now that the health directory exists.
+
+## Verification Result
+
+Commands run from `tools/manual-story-studio/`:
+
+1. `npm run build:backend` — passed; TypeScript compiled the new health module and test.
+2. `npm test` — passed; backend build, 346 compiled Node tests, and web `tsc --noEmit` all completed successfully. The new `deriveHealthStatus` tests ran as subtests 40-43.
+
+Additional grep proof from the repo root:
+
+```sh
+grep -nE "^export (type|interface|function)" tools/manual-story-studio/src/health/types.ts
+```
+
+Result: listed exactly `HealthStatus`, `HealthSeverity`, `HealthFinding`, `BlockedAction`, `HealthReport`, and `deriveHealthStatus`.

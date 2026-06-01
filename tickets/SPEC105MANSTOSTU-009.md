@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/src/health/compute.ts` (3-pass integrity walk producing a `HealthReport`). Consumed by SPEC105MANSTOSTU-010 (the `/health` route) and indirectly by the route layer's 409 dispatch when an entire story is `blocked` for any read/write attempt.
-**Deps**: SPEC105MANSTOSTU-001, SPEC105MANSTOSTU-004, SPEC105MANSTOSTU-005, SPEC105MANSTOSTU-006, SPEC105MANSTOSTU-007, SPEC105MANSTOSTU-008
+**Deps**: archive/tickets/SPEC105MANSTOSTU-001.md, SPEC105MANSTOSTU-004, SPEC105MANSTOSTU-005, SPEC105MANSTOSTU-006, SPEC105MANSTOSTU-007, SPEC105MANSTOSTU-008
 
 ## Problem
 
@@ -12,7 +12,7 @@ SPEC-105 §2 item 2 specifies the `/health` route walks the manual story directo
 
 ## Assumption Reassessment (2026-06-01)
 
-1. The `tools/manual-story-studio/src/health/compute.ts` path does NOT exist at HEAD; this ticket creates it. The sibling `src/health/types.ts` exists from SPEC105MANSTOSTU-001 (provides `HealthStatus`, `HealthSeverity`, `HealthFinding`, `HealthReport`, `BlockedAction`, `deriveHealthStatus`).
+1. The `tools/manual-story-studio/src/health/compute.ts` path does NOT exist at HEAD; this ticket creates it. The sibling `src/health/types.ts` exists from archive/tickets/SPEC105MANSTOSTU-001.md (provides `HealthStatus`, `HealthSeverity`, `HealthFinding`, `HealthReport`, `BlockedAction`, `deriveHealthStatus`).
 2. SPEC-105 §2 item 2 + §7 ACs #2/3/4/5 + §1 Context all define the compute pass scope. Pass 1 severities are `blocking`; Pass 2/3 severities are `error` or `warn` depending on whether the affected surface is reachable without resolution. The `blocked_actions` array follows the spec §2 item 1 derivation rule: when ANY blocking finding is present, all four entries (`prompt_copy`, `prompt_save`, `segment_save`, `manuscript_compile`) populate; when only `error`-severity findings are present, `blocked_actions` is empty but `status` is `degraded`.
 3. Cross-skill boundary: compute.ts is the load-bearing logic surface for SPEC-105's *"visible, specific, repairable failure"* model. It consumes the migrated read layer (`readManualStoryMetadata`, `listRecords`, `readRecord`, `listSegments`, `readSegmentSidecar`, `readSegmentBody`, `readManuscript`, `scanReferences`) from tickets 004–008 and surfaces every parse / schema / reference failure as a structured `HealthFinding`. Without all reads migrated, compute.ts cannot distinguish "valid absence" from "corruption" at every walked file.
 4. Rule 5 No Consequence Evasion grounding: the compute pass's job IS to propagate second-order effects of corruption. A single corrupt `manual-story.yaml` → `status: blocked` + `blocked_actions: all four` because every cockpit operation depends on valid metadata. A single corrupt record → `status: degraded` + `blocked_actions: []` because non-affected records still load. These propagations are the spec §2 item 1 / item 4 derivation rules made concrete; the compute pass IS the Rule 5 enforcement surface for the integrity model.
