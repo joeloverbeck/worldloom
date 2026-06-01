@@ -6,6 +6,7 @@ import YAML from "yaml";
 
 import { enumerateManualStories } from "../../read/manual-stories.js";
 import { makeDefaultManualStoryMetadata } from "../../write/manual-story-metadata.js";
+import { mapReadErrorToHttpReply } from "../read-error-http.js";
 import {
   assertInsideSandbox,
   resolveManualStoryRoot,
@@ -27,17 +28,14 @@ export async function registerManualStoriesGetRoute(
   server.get<{ Params: { slug: string } }>(
     "/api/worlds/:slug/manual-stories",
     async (request, reply) => {
-      try {
-        const manualStories = enumerateManualStories(
-          options.repoRoot,
-          request.params.slug,
-        );
-        return { manualStories };
-      } catch (error) {
-        return reply
-          .code(400)
-          .send({ error: "invalid_slug", message: (error as Error).message });
+      const manualStories = enumerateManualStories(
+        options.repoRoot,
+        request.params.slug,
+      );
+      if (!manualStories.ok) {
+        return mapReadErrorToHttpReply(reply, manualStories.error);
       }
+      return { manualStories: manualStories.value };
     },
   );
 }
