@@ -1,6 +1,6 @@
 # SPEC105MANSTOSTU-012: Frontend silent-catch removal in Dashboard + MomentComposer
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/web/src/pages/Dashboard.tsx` (4 `.catch(() => {})` removals at lines 67, 72, 77, 101) and `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` (3 `.catch(() => {})` removals at lines 66, 71, 89). Replaces silent swallowing with the `useStoryHealth → banner` pattern from archive/tickets/SPEC105MANSTOSTU-011.md. No impact on canon-pipeline surfaces.
@@ -51,6 +51,7 @@ For each of lines 66 / 71 / 89: same shape as Dashboard — replace silent `.cat
 
 - `tools/manual-story-studio/web/src/pages/Dashboard.tsx` (modify)
 - `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` (modify)
+- `specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` (modify — implementation note)
 
 ## Out of Scope
 
@@ -83,3 +84,24 @@ For each of lines 66 / 71 / 89: same shape as Dashboard — replace silent `.cat
 1. `cd tools/manual-story-studio && npm test` — full package test (includes web subpackage typecheck).
 2. `grep -rn "\.catch(() => {})" tools/manual-story-studio/web/src/` — verify zero matches.
 3. Cold-start manual verification per SPEC-105 §6 (corrupt-metadata banner + panel error state).
+
+## Outcome
+
+Completed on 2026-06-01.
+
+This ticket removed all seven `.catch(() => {})` silent-swallow patterns from `Dashboard.tsx` and `MomentComposer.tsx`. Each affected read now records an explicit panel-level error and exposes a retry button. The Dashboard manuscript optional-read handler was preserved unchanged because it distinguishes "not compiled yet" from the page's other health-relevant reads.
+
+## Verification Result
+
+Commands run:
+
+1. `cd tools/manual-story-studio/web && npm test` — passed; `tsc --noEmit`.
+2. `cd tools/manual-story-studio && npm test` — passed; backend reported 377 tests passing and web `tsc --noEmit` passed.
+3. `grep -rn "\.catch(() => {})" tools/manual-story-studio/web/src/` — passed; returned no matches (exit 1 expected for zero matches).
+4. `grep -n "setManuscriptMissing(true)" tools/manual-story-studio/web/src/pages/Dashboard.tsx` — passed; confirmed the preserved manuscript optional-read handler remains.
+5. Browser smoke via backend `node dist/src/cli.js --port 5175 --repo-root /tmp/mss-health-xZuzYJ`, Vite `npm run dev -- --host 127.0.0.1`, and Playwright against `/worlds/fixture-world/manual-stories/fixture-story/dashboard` — passed; page text contained `Story health: blocked`, `metadata-yaml-parse-failed`, and `Failed to load metadata: readMetadata → 409 Retry`.
+6. `git diff --check` — passed.
+
+## Deviations
+
+- The implementation uses one retry trigger per page rather than separate retry functions per panel. Each retry re-runs the page's read batch, which is simpler and keeps panel errors synchronized after a repair.

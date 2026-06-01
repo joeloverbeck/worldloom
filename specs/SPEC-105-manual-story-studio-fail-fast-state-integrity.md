@@ -14,6 +14,8 @@
 
 **Implementation note (2026-06-01, SPEC105MANSTOSTU-011):** The web frontend now has a local `HealthReport` type mirror, `/health` API wrapper, `useStoryHealth` hook, and `HealthBanner` mounted at App level. The banner parses the per-story URL prefix with `useLocation()` because the App-level mount sits outside the matched `<Routes>` element.
 
+**Implementation note (2026-06-01, SPEC105MANSTOSTU-012):** The seven frontend `.catch(() => {})` silent-swallow sites in `Dashboard.tsx` and `MomentComposer.tsx` have been replaced with explicit panel-level error states and retry buttons. The Dashboard manuscript absent-vs-failed handler remains as the intentional optional-read distinction.
+
 ---
 
 ## 1. Context & Motivation

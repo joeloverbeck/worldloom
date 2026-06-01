@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — introduces `tools/manual-story-studio/test/health/` directory with `health-compute.test.ts`, `health-route.test.ts`, and 4 fixture worlds (corrupt-metadata, corrupt-record, missing-segment-sidecar, dangling-typed-ref). No production code changes; exercises the composed integrity system end-to-end.
-**Deps**: archive/tickets/SPEC105MANSTOSTU-010.md
+**Deps**: archive/tickets/SPEC105MANSTOSTU-012.md
 
 ## Problem
 
@@ -20,7 +20,7 @@ These tests verify the spec's promise (visible, specific, repairable failure) en
 
 1. The `tools/manual-story-studio/test/health/` directory does NOT exist at HEAD (verified by `ls tools/manual-story-studio/test/` from the reassess-spec session); this ticket creates the directory + 2 test files + 4 fixture subtrees. No collision risk.
 2. SPEC-105 §8 Assumption reassessment notes that fixture YAML files MUST NOT be parsed at test-discovery time — if `node --test`'s loader parses YAML files at fixture-discovery, store the corrupt content as `.yaml.txt` and rename to `.yaml` at test setup. Standard Node test runner does NOT parse fixture YAML at discovery (it only loads `.test.js` modules), so fixture YAML files can carry intentional syntax errors directly. This is verified during implementation.
-3. Cross-skill boundary: the tests exercise the FULL stack from compute → route → HTTP response. The `Deps: 010` declaration is the transitive head — the DAG composes (010 → 009 → {001, 004–008} → {002, 003}), so 014 transitively depends on every upstream ticket per the §Spec-Integration Ticket Shape's transitive-head convention.
+3. Cross-skill boundary: the tests exercise the FULL stack from compute → route → HTTP response and frontend banner/error surfacing where applicable. The `Deps: archive/tickets/SPEC105MANSTOSTU-012.md` declaration is the transitive head — the DAG composes (012 → 011 → 010 → 009 → {001, 004–008} → {002, 003}), so 014 transitively depends on every upstream ticket per the §Spec-Integration Ticket Shape's transitive-head convention.
 4. FOUNDATIONS Rule 1 No Floating Facts grounding: the acceptance tests are the spec's structural proof surface — they verify that the integrity model has scope (per-pass coverage), prerequisites (corrupted-fixture inputs), limits (which findings emit which severities), and consequences (route status codes + HealthReport bodies). Without these tests landing, AC#2-5 + AC#9 of SPEC-105 §7 are unredeemed.
 
 ## Architecture Check

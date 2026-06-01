@@ -16,6 +16,10 @@ import {
 
 const HIGH_IMPORTANCE = new Set(["high", "central"]);
 
+function loadErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "request failed";
+}
+
 function segmentNumber(id: string): number {
   const match = /^SEG-(\d+)$/u.exec(id);
   const suffix = match?.[1];
@@ -33,6 +37,11 @@ export function Dashboard() {
   const [segments, setSegments] = useState<SegmentListEntry[]>([]);
   const [manuscript, setManuscript] = useState<ManuscriptResponse | null>(null);
   const [manuscriptMissing, setManuscriptMissing] = useState(false);
+  const [metadataError, setMetadataError] = useState<string | null>(null);
+  const [castError, setCastError] = useState<string | null>(null);
+  const [segmentsError, setSegmentsError] = useState<string | null>(null);
+  const [recordsError, setRecordsError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [byClass, setByClass] = useState<
     Record<ManualRecordClass, ManualRecordSummary[]>
   >({
@@ -60,21 +69,31 @@ export function Dashboard() {
   useEffect(() => {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
+    setMetadataError(null);
+    setCastError(null);
+    setSegmentsError(null);
+    setRecordsError(null);
     apiReadMetadata(worldSlug, msSlug)
       .then((m) => {
         if (!cancelled) setMetadata(m);
       })
-      .catch(() => {});
+      .catch((error: unknown) => {
+        if (!cancelled) setMetadataError(loadErrorMessage(error));
+      });
     apiList(worldSlug, msSlug, "cast")
       .then((c) => {
         if (!cancelled) setCast(c);
       })
-      .catch(() => {});
+      .catch((error: unknown) => {
+        if (!cancelled) setCastError(loadErrorMessage(error));
+      });
     listSegments(worldSlug, msSlug)
       .then((s) => {
         if (!cancelled) setSegments(s);
       })
-      .catch(() => {});
+      .catch((error: unknown) => {
+        if (!cancelled) setSegmentsError(loadErrorMessage(error));
+      });
     readManuscript(worldSlug, msSlug)
       .then((m) => {
         if (cancelled) return;
@@ -98,12 +117,14 @@ export function Dashboard() {
         for (const [cls, records] of entries) next[cls] = records;
         setByClass(next);
       })
-      .catch(() => {});
+      .catch((error: unknown) => {
+        if (!cancelled) setRecordsError(loadErrorMessage(error));
+      });
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [worldSlug, msSlug]);
+  }, [worldSlug, msSlug, reloadKey]);
 
   const highImportance = useMemo(() => {
     const all: Array<{ cls: ManualRecordClass; record: ManualRecordSummary }> = [];
@@ -141,6 +162,10 @@ export function Dashboard() {
     return <p role="alert">Missing world or manual story slug.</p>;
   }
 
+  function retryLoad(): void {
+    setReloadKey((current) => current + 1);
+  }
+
   return (
     <div className="manual-dashboard" style={{ display: "grid", gap: 12 }}>
       <nav
@@ -173,7 +198,14 @@ export function Dashboard() {
 
       <section aria-label="story-contract">
         <h2>Story contract</h2>
-        {metadata ? (
+        {metadataError ? (
+          <p role="alert">
+            Failed to load metadata: {metadataError}{" "}
+            <button type="button" onClick={retryLoad}>
+              Retry
+            </button>
+          </p>
+        ) : metadata ? (
           <>
             <dl>
               <dt>Premise</dt>
@@ -224,7 +256,14 @@ export function Dashboard() {
 
       <section aria-label="active-cast">
         <h2>Active cast</h2>
-        {cast.length === 0 ? (
+        {castError ? (
+          <p role="alert">
+            Failed to load cast: {castError}{" "}
+            <button type="button" onClick={retryLoad}>
+              Retry
+            </button>
+          </p>
+        ) : cast.length === 0 ? (
           <p>No cast yet.</p>
         ) : (
           <ul>
@@ -239,7 +278,14 @@ export function Dashboard() {
 
       <section aria-label="high-importance">
         <h2>High-importance records</h2>
-        {highImportance.length === 0 ? (
+        {recordsError ? (
+          <p role="alert">
+            Failed to load records: {recordsError}{" "}
+            <button type="button" onClick={retryLoad}>
+              Retry
+            </button>
+          </p>
+        ) : highImportance.length === 0 ? (
           <p>None.</p>
         ) : (
           <ul>
@@ -259,37 +305,53 @@ export function Dashboard() {
 
       <section aria-label="open-tracking">
         <h2>Open tracking</h2>
-        <ul>
-          <li>
-            <Link
-              to={`/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=clocks`}
-            >
-              Clocks
-            </Link>
-            : {clockCount}
-          </li>
-          <li>
-            <Link
-              to={`/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=secrets`}
-            >
-              Secrets
-            </Link>
-            : {secretCount}
-          </li>
-          <li>
-            <Link
-              to={`/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=questions`}
-            >
-              Questions
-            </Link>
-            : {questionCount}
-          </li>
-        </ul>
+        {recordsError ? (
+          <p role="alert">
+            Failed to load tracking records: {recordsError}{" "}
+            <button type="button" onClick={retryLoad}>
+              Retry
+            </button>
+          </p>
+        ) : (
+          <ul>
+            <li>
+              <Link
+                to={`/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=clocks`}
+              >
+                Clocks
+              </Link>
+              : {clockCount}
+            </li>
+            <li>
+              <Link
+                to={`/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=secrets`}
+              >
+                Secrets
+              </Link>
+              : {secretCount}
+            </li>
+            <li>
+              <Link
+                to={`/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=questions`}
+              >
+                Questions
+              </Link>
+              : {questionCount}
+            </li>
+          </ul>
+        )}
       </section>
 
       <section aria-label="latest-segment">
         <h2>Latest segment</h2>
-        {latestSegment ? (
+        {segmentsError ? (
+          <p role="alert">
+            Failed to load segments: {segmentsError}{" "}
+            <button type="button" onClick={retryLoad}>
+              Retry
+            </button>
+          </p>
+        ) : latestSegment ? (
           <p>
             <Link
               to={`/worlds/${worldSlug}/manual-stories/${msSlug}/manuscript#${latestSegment.id}`}
