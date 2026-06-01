@@ -1,6 +1,6 @@
 # SPEC105MANSTOSTU-005: Migrate `records.ts` public reads + callers
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/src/read/records.ts` (4 public read signatures: `listRecords`, `readRecord`, `scanReferences`, `listAllKnownIds`) plus 6 caller files (`prompt/compose.ts` stages 3+4+5; `state-update-checklist.ts`; `write/records.ts`; `write/segments.ts` scanReferences callsite; `server/routes/records.ts`; `server/routes/beat-templates.ts` listRecords + readRecord callsites). No impact on canon-pipeline surfaces.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The four public reads in `tools/manual-story-studio/src/read/records.ts` (`listRecords` at line 20, `readRecord` at line 50, `listAllKnownIds` at line 71, `scanReferences` at line 102) silently swallow parse failures: `listRecords` continues past records with `parsed === null` (line 37–38); `readRecord` returns null on invalid-ID-shape + missing-file + parse-exception; `scanReferences` silently calls `readRecord` and `continue`s on null, making any unreadable record invisible to write-time integrity checks; `listAllKnownIds` parses the metadata's segment_order list silently. Per SPEC-105 §2 item 3, the public read surface migrates to `ReadResult<T>` so callers can distinguish absence from corruption. This ticket is larger than ticket 004 because `records.ts` is the package's most-used read module (6 caller files versus metadata's 3).
+At intake, the four public reads in `tools/manual-story-studio/src/read/records.ts` (`listRecords`, `readRecord`, `listAllKnownIds`, `scanReferences`) silently swallowed parse failures: `listRecords` continued past records with `parsed === null`; `readRecord` returned null on invalid-ID-shape + missing-file + parse-exception; `scanReferences` silently called `readRecord` and continued on null, making any unreadable record invisible to write-time integrity checks; `listAllKnownIds` parsed the metadata's segment_order list silently. Per SPEC-105 §2 item 3, the public read surface migrated to `ReadResult<T>` so callers can distinguish absence from corruption. This ticket was larger than ticket 004 because `records.ts` is the package's most-used read module.
 
 ## Assumption Reassessment (2026-06-01)
 
@@ -38,11 +38,11 @@ The four public reads in `tools/manual-story-studio/src/read/records.ts` (`listR
 3. Route 404 vs 409 dispatch is correct → integration tests in SPEC105MANSTOSTU-014 cover the corrupt-single-record case end-to-end. For this ticket, unit tests at the route layer assert that a corrupt record file produces 409 with a `record-yaml-parse-failed` finding, and a missing record ID produces 404.
 4. `scanReferences` no longer silently drops referrers from corrupt records → unit test fixture with one corrupt record asserts the result is `ok: false` with `yaml_parse_failed`, not a partial list missing the corrupt record's references.
 
-## What to Change
+## Landed Changes
 
-### 1. `tools/manual-story-studio/src/read/records.ts` — migrate 4 public reads
+### 1. `tools/manual-story-studio/src/read/records.ts` — migrated 4 public reads
 
-Change the four public signatures to `ReadResult<T>`. The internal `parseYamlFile` helper continues to return `unknown | null`; each public read translates the null to a typed `ReadError`. For `listRecords` and `scanReferences`, a corruption in any single record under iteration produces `ok: false` for the entire call (the spec's intent: fail-fast on corruption, not partial results).
+Changed the four public signatures to `ReadResult<T>`. For `listRecords` and `scanReferences`, a corruption in any single record under iteration now produces `ok: false` for the entire call (the spec's intent: fail-fast on corruption, not partial results). The old private null-returning parse helper was replaced with a private `readYamlFile` helper returning `ReadResult<unknown>` so public error codes distinguish YAML parse failures from I/O failures.
 
 Sketched conversion for `listRecords`:
 
@@ -92,10 +92,10 @@ Apply analogous conversions for `readRecord` (file_not_found / invalid_id_shape 
 
 ### 2. `tools/manual-story-studio/src/prompt/compose.ts` — stages 3, 4, 5
 
-- **Stage 3 cast loop** (line 92–104): change `const rec = readRecord(..., "cast", id);` to a `ReadResult`-aware loop. When `!result.ok`, push a hard lint finding with the `ReadError.code` as the lint code's basis (e.g., `selected_cast_exists` for `file_not_found`, `selected_cast_valid` for `yaml_parse_failed`); when `result.ok && result.value.active === false`, the existing skip semantics apply.
-- **Stage 4 records loop** (line 109–132): same shape as stage 3.
-- **Stage 5 template read** (lines 152–158): replace the raw `readFileSync` + `catch { rawText = ""; }` with a `ReadResult`-aware read. On `!result.ok`, push a hard lint finding `selected_template_valid` with the read-error message. The current behavior (silent empty body) is replaced.
-- **Stage 8 translator context** (line 290): the `listRecords(manualStoryRoot, "cast", ...)` call inside `loadCastSummariesOnce` adapts to `ReadResult`. A corruption here triggers a silent fallback (the translator can survive without the lazy cache because the cast titles cached at stage 3 cover the pinned set); log a warning and continue.
+- **Stage 3 cast loop**: changed `readRecord(..., "cast", id)` to a `ReadResult`-aware loop. Missing records still produce `selected_cast_exists`; corrupt/unreadable records produce `selected_cast_valid`.
+- **Stage 4 records loop**: same shape as stage 3, using `selected_records_exists` / `selected_records_valid`.
+- **Stage 5 template read**: replaced the `catch { rawText = ""; }` behavior with a hard `selected_template_valid` lint finding when the file cannot be read.
+- **Stage 8 translator context**: adapted lazy `listRecords` and one-off `readRecord` calls to tolerate read errors without throwing from title resolution.
 
 ### 3. `tools/manual-story-studio/src/state-update-checklist.ts`
 
@@ -124,6 +124,10 @@ The function's return type changes from `StateUpdateChecklistPayload` to `ReadRe
 - Line 314: `readRecord("cast", id)` returns `ReadResult`; dispatch.
 - Line 344: `listRecords(cls, ...)` returns `ReadResult`; dispatch.
 - Line 356: `readRecord("secrets", id)` returns `ReadResult`; dispatch.
+
+### 8. `tools/manual-story-studio/src/server/routes/segments.ts`
+
+Adapted segment write/delete route error mapping for read failures propagated through `buildStateUpdateChecklist` / `scanReferences`, so segment write paths can return the shared 409 `HealthReport` instead of a generic bad request or unhandled 500.
 
 ## Files to Touch
 
@@ -172,3 +176,20 @@ The function's return type changes from `StateUpdateChecklistPayload` to `ReadRe
 
 1. `cd tools/manual-story-studio && npm run build:backend` — compile check.
 2. `cd tools/manual-story-studio && npm test` — full package test.
+
+## Outcome
+
+Completed on 2026-06-01.
+
+This ticket migrated the records read surface to `ReadResult<T>`, adapted all source callers, added read-failure propagation through write/segment paths, and updated tests for fail-fast corrupt-record behavior. The route layer now dispatches corrupt record reads through `mapReadErrorToHttpReply`.
+
+Deviation: the route-level finding code remains the shared read-error code `yaml_parse_failed` from SPEC-105 §2 item 4 / archive/tickets/SPEC105MANSTOSTU-003.md rather than introducing a separate route-only `record-yaml-parse-failed` code. The record-specific `record-yaml-parse-failed` vocabulary remains appropriate for the later health compute pass.
+
+## Verification Result
+
+Commands run from the repo root unless a package directory is named:
+
+1. `cd tools/manual-story-studio && npm run build:backend` — passed.
+2. `cd tools/manual-story-studio && npm test` — passed; backend reported 362 tests passing and web `tsc --noEmit` passed.
+3. `grep -nE "^export function (listRecords|readRecord|scanReferences|listAllKnownIds).*ReadResult" tools/manual-story-studio/src/read/records.ts` — passed; returned 4 matches.
+4. `rg -n "(readRecord|listRecords|scanReferences|listAllKnownIds)\\([^\\n]*\\)\\." tools/manual-story-studio/src` — passed with zero matches.

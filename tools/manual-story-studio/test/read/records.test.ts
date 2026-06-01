@@ -12,6 +12,7 @@ import {
   readRecord,
   scanReferences,
 } from "../../src/read/records.js";
+import type { ReadResult } from "../../src/read/result.js";
 import type {
   ManualBeliefRecord,
   ManualCharacterRecord,
@@ -58,10 +59,22 @@ function writeRecord(root: string, classDir: string, id: string, body: unknown):
   writeFileSync(path.join(dir, `${id}.yaml`), YAML.stringify(body));
 }
 
+function unwrap<T>(result: ReadResult<T>): T {
+  assert.equal(result.ok, true);
+  if (!result.ok) throw new Error("expected ok");
+  return result.value;
+}
+
+function assertReadError(result: ReadResult<unknown>, code: string): void {
+  assert.equal(result.ok, false);
+  if (result.ok) throw new Error("expected read error");
+  assert.equal(result.error.code, code);
+}
+
 test("listRecords: empty class returns []", () => {
   const root = mkRoot();
   try {
-    assert.deepEqual(listRecords(root, "beliefs"), []);
+    assert.deepEqual(unwrap(listRecords(root, "beliefs")), []);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -88,7 +101,7 @@ test("listRecords: populated class returns ordered summaries", () => {
       truth_relation: "true",
       confidence: "high",
     });
-    const summaries = listRecords(root, "beliefs");
+    const summaries = unwrap(listRecords(root, "beliefs"));
     assert.equal(summaries.length, 3);
     assert.equal(summaries[0]?.id, "mbel-1");
     assert.equal(summaries[1]?.id, "mbel-2");
@@ -109,24 +122,23 @@ test("listRecords: default omits archived; includeArchived returns all", () => {
       active: false,
       retired_reason: "retired",
     });
-    assert.equal(listRecords(root, "facts").length, 1);
-    assert.equal(listRecords(root, "facts", { includeArchived: true }).length, 2);
+    assert.equal(unwrap(listRecords(root, "facts")).length, 1);
+    assert.equal(unwrap(listRecords(root, "facts", { includeArchived: true })).length, 2);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
 });
 
-test("readRecord: round-trip; missing returns null; wrong-prefix returns null", () => {
+test("readRecord: round-trip; missing and wrong-prefix return read errors", () => {
   const root = mkRoot();
   try {
     writeRecord(root, "facts", "mfact-5", commonFields("mfact-5"));
-    const r = readRecord(root, "facts", "mfact-5");
-    assert.ok(r);
-    assert.equal(r!.id, "mfact-5");
+    const r = unwrap(readRecord(root, "facts", "mfact-5"));
+    assert.equal(r.id, "mfact-5");
 
-    assert.equal(readRecord(root, "facts", "mfact-99"), null);
+    assertReadError(readRecord(root, "facts", "mfact-99"), "file_not_found");
     // wrong prefix: validator should reject without disk read
-    assert.equal(readRecord(root, "facts", "mbel-5"), null);
+    assertReadError(readRecord(root, "facts", "mbel-5"), "invalid_id_shape");
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -138,7 +150,7 @@ test("listAllKnownIds: assembles per-class IDs including archived", () => {
     writeRecord(root, "cast", "mchar-1", castProfile("mchar-1"));
     writeRecord(root, "cast", "mchar-2", { ...castProfile("mchar-2"), active: false });
     writeRecord(root, "facts", "mfact-1", commonFields("mfact-1"));
-    const known = listAllKnownIds(root);
+    const known = unwrap(listAllKnownIds(root));
     assert.deepEqual([...known.cast].sort(), ["mchar-1", "mchar-2"]);
     assert.deepEqual([...known.facts], ["mfact-1"]);
   } finally {
@@ -153,7 +165,7 @@ test("listAllKnownIds: pulls segments from manual-story.yaml's segment_order", (
       path.join(root, "manual-story.yaml"),
       YAML.stringify({ segment_order: ["SEG-1", "SEG-2"] }),
     );
-    const known = listAllKnownIds(root);
+    const known = unwrap(listAllKnownIds(root));
     assert.deepEqual([...known.segments].sort(), ["SEG-1", "SEG-2"]);
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -180,16 +192,43 @@ test("scanReferences: finds refs.characters / per-class pointer / refs.related_r
       },
     });
 
-    const targetReferrers = scanReferences(root, "mchar-1");
+    const targetReferrers = unwrap(scanReferences(root, "mchar-1"));
     // mbel-1 references mchar-1 in TWO places: refs.characters[0] AND holder
     assert.equal(targetReferrers.length, 2);
     const fields = targetReferrers.map((r) => r.field).sort();
     assert.deepEqual(fields, ["holder", "refs.characters[0]"]);
 
-    const belReferrers = scanReferences(root, "mbel-1");
+    const belReferrers = unwrap(scanReferences(root, "mbel-1"));
     assert.equal(belReferrers.length, 1);
     assert.equal(belReferrers[0]?.field, "refs.related_records[0]");
     assert.equal(belReferrers[0]?.recordClass, "facts");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("listRecords fails fast on corrupt YAML", () => {
+  const root = mkRoot();
+  try {
+    const dir = path.join(root, "records", "facts");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(path.join(dir, "mfact-1.yaml"), "title: [unterminated\n");
+
+    assertReadError(listRecords(root, "facts"), "yaml_parse_failed");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("scanReferences fails fast on corrupt iterated records", () => {
+  const root = mkRoot();
+  try {
+    writeRecord(root, "facts", "mfact-1", commonFields("mfact-1"));
+    const dir = path.join(root, "records", "beliefs");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(path.join(dir, "mbel-1.yaml"), "title: [unterminated\n");
+
+    assertReadError(scanReferences(root, "mchar-1"), "yaml_parse_failed");
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

@@ -11,11 +11,13 @@ import {
   deleteSegment,
   editSegment,
   saveSegment,
+  SegmentReadFailureError,
 } from "../../write/segments.js";
 import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
 } from "../../write/sandbox.js";
+import { mapReadErrorToHttpReply } from "../read-error-http.js";
 
 export interface SegmentsRouteOptions {
   repoRoot: string;
@@ -76,6 +78,9 @@ function parseSegmentPayload(
 }
 
 function writeError(reply: FastifyReply, error: unknown): FastifyReply {
+  if (error instanceof SegmentReadFailureError) {
+    return mapReadErrorToHttpReply(reply, error.readError);
+  }
   const message = error instanceof Error ? error.message : "segment write failed";
   return badRequest(reply, message);
 }
@@ -228,11 +233,16 @@ export async function registerSegmentsWriteRoutes(
       if (!isSegmentId(segmentId)) {
         return badRequest(reply, "bad segment id");
       }
-      const result = deleteSegment({
-        root,
-        segment_id: segmentId,
-        force: request.query.force === "true",
-      });
+      let result: ReturnType<typeof deleteSegment>;
+      try {
+        result = deleteSegment({
+          root,
+          segment_id: segmentId,
+          force: request.query.force === "true",
+        });
+      } catch (error) {
+        return writeError(reply, error);
+      }
       if ("ok" in result && result.ok === false) {
         return reply.code(404).send({ error: "segment_not_found" });
       }

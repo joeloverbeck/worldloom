@@ -92,16 +92,18 @@ export async function composePrompt(
   const missingCastFindings: PromptLintFinding[] = [];
   for (const id of input.included_cast) {
     const rec = readRecord(input.manualStoryRoot, "cast", id);
-    if (!rec) {
+    if (!rec.ok) {
       missingCastFindings.push(
         hardFinding(
-          "selected_cast_exists",
-          `Selected cast member ${id} was not found on disk.`,
+          rec.error.code === "file_not_found"
+            ? "selected_cast_exists"
+            : "selected_cast_valid",
+          `Selected cast member ${id} could not be read: ${rec.error.code} at ${rec.error.path}. ${rec.error.repair_hint}`,
         ),
       );
       continue;
     }
-    cast.push(rec);
+    cast.push(rec.value);
   }
 
   // Stage 4 — Load selected / active relevant records.
@@ -119,17 +121,19 @@ export async function composePrompt(
       continue;
     }
     const rec = readRecord(input.manualStoryRoot, cls, id);
-    if (!rec) {
+    if (!rec.ok) {
       missingRecordFindings.push(
         hardFinding(
-          "selected_records_exist",
-          `Selected record ${id} was not found on disk.`,
+          rec.error.code === "file_not_found"
+            ? "selected_records_exist"
+            : "selected_records_valid",
+          `Selected record ${id} could not be read: ${rec.error.code} at ${rec.error.path}. ${rec.error.repair_hint}`,
         ),
       );
       continue;
     }
-    if (rec.active === false) continue;
-    records.push(rec as ManualRecord);
+    if (rec.value.active === false) continue;
+    records.push(rec.value as ManualRecord);
   }
 
   // Stage 5 — Load optional beat template.
@@ -151,22 +155,29 @@ export async function composePrompt(
       ? input.included_template_path
       : path.join(input.repoRoot, input.included_template_path);
     if (existsSync(tplPath)) {
-      let rawText: string;
+      let rawText: string | null = null;
       try {
         rawText = readFileSync(tplPath, "utf8");
-      } catch {
-        rawText = "";
-      }
-      let parsed: unknown;
-      try {
-        parsed = YAML.parse(rawText);
       } catch (err) {
         templateLintFindings.push(
           hardFinding(
             "selected_template_valid",
-            `Selected beat template at ${tplPath} failed to parse as YAML: ${(err as Error).message}`,
+            `Selected beat template at ${tplPath} could not be read: ${(err as Error).message}`,
           ),
         );
+      }
+      let parsed: unknown;
+      if (rawText !== null) {
+        try {
+          parsed = YAML.parse(rawText);
+        } catch (err) {
+          templateLintFindings.push(
+            hardFinding(
+              "selected_template_valid",
+              `Selected beat template at ${tplPath} failed to parse as YAML: ${(err as Error).message}`,
+            ),
+          );
+        }
       }
       if (templateLintFindings.length === 0) {
         const validation = validateBeatTemplate(parsed);
@@ -291,7 +302,8 @@ function buildTranslatorContext(
     const summaries = listRecords(manualStoryRoot, "cast", {
       includeArchived: true,
     });
-    for (const s of summaries) {
+    if (!summaries.ok) return;
+    for (const s of summaries.value) {
       if (!castTitles.has(s.id)) castTitles.set(s.id, s.title);
     }
   }
@@ -316,9 +328,9 @@ function buildTranslatorContext(
             cls as ManualRecordClass,
             id,
           );
-          if (rec) {
-            recordTitles.set(id, rec.title);
-            return rec.title;
+          if (rec.ok) {
+            recordTitles.set(id, rec.value.title);
+            return rec.value.title;
           }
         } catch {
           // fall through

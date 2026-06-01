@@ -18,6 +18,7 @@ import {
   updateRecord,
 } from "../../write/records.js";
 import { resolveManualStoryRoot } from "../../write/sandbox.js";
+import { mapReadErrorToHttpReply } from "../read-error-http.js";
 
 export interface RecordsRouteOptions {
   repoRoot: string;
@@ -93,7 +94,8 @@ export async function registerRecordsReadRoutes(
       }
       const includeArchived = request.query.includeArchived === "true";
       const records = listRecords(root.absolutePath, cls, { includeArchived });
-      return { records };
+      if (!records.ok) return mapReadErrorToHttpReply(reply, records.error);
+      return { records: records.value };
     },
   );
 
@@ -121,8 +123,8 @@ export async function registerRecordsReadRoutes(
         request.params.class,
         request.params.id,
       );
-      if (!record) return reply.code(404).send({ error: "not_found" });
-      return { record };
+      if (!record.ok) return mapReadErrorToHttpReply(reply, record.error);
+      return { record: record.value };
     },
   );
 }
@@ -260,8 +262,11 @@ export async function registerRecordsWriteRoutes(
         request.params.id,
         { force },
       );
-      if ("ok" in result && result.ok === false) {
+      if ("ok" in result && result.ok === false && result.error === "not_found") {
         return reply.code(404).send({ error: "not_found" });
+      }
+      if ("ok" in result && result.ok === false && result.error === "read_failed") {
+        return mapReadErrorToHttpReply(reply, result.read_error);
       }
       return result;
     },
@@ -272,7 +277,8 @@ function mapWriteFailure(
   reply: import("fastify").FastifyReply,
   result: {
     ok: false;
-    error: "validation_failed" | "broken_refs" | "not_found";
+    error: "validation_failed" | "broken_refs" | "not_found" | "read_failed";
+    read_error?: import("../../read/result.js").ReadError;
     errors?: unknown;
     violations?: unknown;
     needsOverride?: boolean;
@@ -280,6 +286,9 @@ function mapWriteFailure(
 ): unknown {
   if (result.error === "not_found") {
     return reply.code(404).send({ error: "not_found" });
+  }
+  if (result.error === "read_failed" && result.read_error) {
+    return mapReadErrorToHttpReply(reply, result.read_error);
   }
   if (result.error === "validation_failed") {
     return reply

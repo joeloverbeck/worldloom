@@ -19,6 +19,7 @@ import {
   CHECKLIST_DISCLAIMER,
   CHECKLIST_REVIEW_CLASSES,
 } from "../src/state-update-checklist.js";
+import type { ReadResult } from "../src/read/result.js";
 import type {
   ManualBeliefRecord,
   RecordCommonFields,
@@ -96,6 +97,12 @@ function snapshotFiles(root: string): FileSnapshot[] {
   return out.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
 }
 
+function unwrap<T>(result: ReadResult<T>): T {
+  assert.equal(result.ok, true);
+  if (!result.ok) throw new Error("expected ok");
+  return result.value;
+}
+
 function collect(root: string, dir: string, out: FileSnapshot[]): void {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const fullPath = path.join(dir, entry.name);
@@ -117,10 +124,10 @@ function collect(root: string, dir: string, out: FileSnapshot[]): void {
 test("state update checklist returns the fixed 12-class payload in order", () => {
   const root = mkManualStoryRoot();
   try {
-    const payload = buildStateUpdateChecklist({
+    const payload = unwrap(buildStateUpdateChecklist({
       manualStoryRoot: root,
       sidecar: segmentSidecar(),
-    });
+    }));
 
     assert.equal(payload.segment_id, "SEG-1");
     assert.deepEqual(payload.involved_cast, ["mchar-A", "mchar-B"]);
@@ -147,10 +154,10 @@ test("state update checklist counts records referencing involved cast", () => {
       belief("mbel-6", []),
     ].forEach((record) => writeYamlRecord(root, record));
 
-    const payload = buildStateUpdateChecklist({
+    const payload = unwrap(buildStateUpdateChecklist({
       manualStoryRoot: root,
       sidecar: segmentSidecar(),
-    });
+    }));
     const beliefsEntry = payload.entries.find(
       (entry) => entry.record_class === "beliefs",
     );
@@ -169,12 +176,31 @@ test("state update checklist performs no file writes", () => {
     writeYamlRecord(root, belief("mbel-1", ["mchar-A"]));
     const before = snapshotFiles(root);
 
-    buildStateUpdateChecklist({
+    unwrap(buildStateUpdateChecklist({
+      manualStoryRoot: root,
+      sidecar: segmentSidecar(),
+    }));
+
+    assert.deepEqual(snapshotFiles(root), before);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("state update checklist returns read error for corrupt records", () => {
+  const root = mkManualStoryRoot();
+  try {
+    const dir = path.join(root, "records", "beliefs");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(path.join(dir, "mbel-1.yaml"), "title: [unterminated\n");
+
+    const result = buildStateUpdateChecklist({
       manualStoryRoot: root,
       sidecar: segmentSidecar(),
     });
 
-    assert.deepEqual(snapshotFiles(root), before);
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.equal(result.error.code, "yaml_parse_failed");
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

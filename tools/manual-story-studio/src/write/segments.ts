@@ -19,6 +19,7 @@ import {
   type StateUpdateChecklistPayload,
 } from "../state-update-checklist.js";
 import { scanReferences, type ReferrerEntry } from "../read/records.js";
+import type { ReadError } from "../read/result.js";
 import { allocateNextSegmentId } from "./segment-id-allocator.js";
 import {
   assertInsideSandbox,
@@ -55,6 +56,12 @@ export interface SegmentWriteResult {
   sidecar_path: string;
   sidecar: SegmentSidecar;
   checklist_payload: StateUpdateChecklistPayload;
+}
+
+export class SegmentReadFailureError extends Error {
+  constructor(readonly readError: ReadError) {
+    super(`segment_read_failed: ${readError.code} at ${readError.path}`);
+  }
 }
 
 export type DeleteSegmentResult =
@@ -119,10 +126,12 @@ export function saveSegment(input: SaveSegmentInput): SegmentWriteResult {
   });
   maybeCompile(input.root, input.compile);
 
-  const checklist_payload = buildStateUpdateChecklist({
+  const checklistResult = buildStateUpdateChecklist({
     manualStoryRoot: input.root,
     sidecar,
   });
+  if (!checklistResult.ok) throw new SegmentReadFailureError(checklistResult.error);
+  const checklist_payload = checklistResult.value;
   return { segment_id, prose_path, sidecar_path, sidecar, checklist_payload };
 }
 
@@ -174,10 +183,12 @@ export function editSegment(input: EditSegmentInput): SegmentWriteResult {
   );
   maybeCompile(input.root, input.compile);
 
-  const checklist_payload = buildStateUpdateChecklist({
+  const checklistResult = buildStateUpdateChecklist({
     manualStoryRoot: input.root,
     sidecar,
   });
+  if (!checklistResult.ok) throw new SegmentReadFailureError(checklistResult.error);
+  const checklist_payload = checklistResult.value;
   return {
     segment_id: input.segment_id,
     prose_path,
@@ -206,8 +217,9 @@ export function deleteSegment(input: DeleteSegmentInput): DeleteSegmentResult {
     return { ok: false, error: "not_found" };
   }
 
-  const referrers = scanReferences(input.root.absolutePath, input.segment_id)
-    .filter((entry) =>
+  const referrersResult = scanReferences(input.root.absolutePath, input.segment_id);
+  if (!referrersResult.ok) throw new SegmentReadFailureError(referrersResult.error);
+  const referrers = referrersResult.value.filter((entry) =>
       entry.recordClass === "consequences" &&
       entry.field === "caused_by_segment",
     );

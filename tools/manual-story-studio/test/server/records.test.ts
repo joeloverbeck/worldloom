@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -254,6 +254,38 @@ test("records routes: GET missing → 404", async () => {
         url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/records/facts/mfact-99`,
       });
       assert.equal(response.statusCode, 404);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("records routes: GET list with corrupt record → 409 HealthReport", async () => {
+  const { repoRoot, worldSlug, msSlug, root } = mkWorld();
+  try {
+    mkdirSync(path.join(root.absolutePath, "records", "facts"), {
+      recursive: true,
+    });
+    writeFileSync(
+      path.join(root.absolutePath, "records", "facts", "mfact-1.yaml"),
+      "title: [unterminated\n",
+    );
+    const server = await createServer({ repoRoot });
+    try {
+      const response = await server.inject({
+        method: "GET",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=facts`,
+      });
+
+      assert.equal(response.statusCode, 409);
+      const body = response.json() as {
+        status: string;
+        findings: Array<{ code: string }>;
+      };
+      assert.equal(body.status, "blocked");
+      assert.equal(body.findings[0]?.code, "yaml_parse_failed");
     } finally {
       await server.close();
     }

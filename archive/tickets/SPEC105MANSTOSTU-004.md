@@ -125,14 +125,14 @@ Same adaptation pattern as routes/metadata.ts.
 ## Files to Touch
 
 - `tools/manual-story-studio/src/read/manual-story-metadata.ts` (modify)
-- `tools/manual-story-studio/src/prompt/compose.ts` (modify — stage 2 only; stages 3+4+5 are SPEC105MANSTOSTU-005's scope)
+- `tools/manual-story-studio/src/prompt/compose.ts` (modify — stage 2 only; stages 3+4+5 are archive/tickets/SPEC105MANSTOSTU-005.md's scope)
 - `tools/manual-story-studio/src/server/routes/metadata.ts` (modify)
 - `tools/manual-story-studio/src/server/routes/beat-templates.ts` (modify — readManualStoryMetadata call at line 306 only; listRecords/readRecord calls are 005's scope)
 
 ## Out of Scope
 
-- Migrating any other read function — SPEC105MANSTOSTU-005 (records), 006 (segments), 007 (manuscript), 008 (enumerators).
-- The `compose.ts` stages 3+4+5 adaptations (readRecord cast/records loops; raw template read) — SPEC105MANSTOSTU-005.
+- Migrating any other read function — archive/tickets/SPEC105MANSTOSTU-005.md (records), 006 (segments), 007 (manuscript), 008 (enumerators).
+- The `compose.ts` stages 3+4+5 adaptations (readRecord cast/records loops; raw template read) — archive/tickets/SPEC105MANSTOSTU-005.md.
 - Frontend rendering of the resulting 409 body — SPEC105MANSTOSTU-011 / SPEC105MANSTOSTU-012.
 
 ## Acceptance Criteria

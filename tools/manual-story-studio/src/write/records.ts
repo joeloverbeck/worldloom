@@ -9,6 +9,7 @@ import {
   scanReferences,
   type ReferrerEntry,
 } from "../read/records.js";
+import type { ReadError } from "../read/result.js";
 import {
   MANUAL_RECORD_CLASS_PREFIXES,
   type ManualRecord,
@@ -34,6 +35,7 @@ export interface CreateOptions {
 
 export type CreateRecordResult<C extends ManualRecordClass> =
   | { ok: true; id: string; record: ManualRecordOfClass<C> }
+  | { ok: false; error: "read_failed"; read_error: ReadError }
   | { ok: false; error: "validation_failed"; errors: ValidationError[] }
   | {
       ok: false;
@@ -45,6 +47,7 @@ export type CreateRecordResult<C extends ManualRecordClass> =
 export type UpdateRecordResult<C extends ManualRecordClass> =
   | { ok: true; id: string; record: ManualRecordOfClass<C> }
   | { ok: false; error: "not_found" }
+  | { ok: false; error: "read_failed"; read_error: ReadError }
   | { ok: false; error: "validation_failed"; errors: ValidationError[] }
   | {
       ok: false;
@@ -55,6 +58,7 @@ export type UpdateRecordResult<C extends ManualRecordClass> =
 
 export type DeleteResult =
   | { ok: false; error: "not_found" }
+  | { ok: false; error: "read_failed"; read_error: ReadError }
   | { outcome: "hard_deleted"; id: string }
   | {
       outcome: "inactive_default";
@@ -146,7 +150,11 @@ function writeWithValidators<C extends ManualRecordClass>(
     return { ok: false, error: "validation_failed", errors: schemaResult.errors };
   }
 
-  const known = listAllKnownIds(root.absolutePath);
+  const knownResult = listAllKnownIds(root.absolutePath);
+  if (!knownResult.ok) {
+    return { ok: false, error: "read_failed", read_error: knownResult.error };
+  }
+  const known = knownResult.value;
   // Ensure the in-progress record's own ID is counted as known (relevant
   // for self-references in mrel-* between or refs.related_records).
   known[recordClass].add(id);
@@ -180,11 +188,18 @@ export function deleteRecord(
   }
 
   const existing = readRecord(root.absolutePath, recordClass, id);
-  if (!existing) {
+  if (!existing.ok && existing.error.code === "file_not_found") {
     return { ok: false, error: "not_found" };
   }
+  if (!existing.ok) {
+    return { ok: false, error: "read_failed", read_error: existing.error };
+  }
 
-  const referrers = scanReferences(root.absolutePath, id).filter(
+  const referrersResult = scanReferences(root.absolutePath, id);
+  if (!referrersResult.ok) {
+    return { ok: false, error: "read_failed", read_error: referrersResult.error };
+  }
+  const referrers = referrersResult.value.filter(
     (r) => !(r.recordClass === recordClass && r.id === id),
   );
   const now = opts.now ? opts.now() : new Date().toISOString();
@@ -219,7 +234,7 @@ export function deleteRecord(
     .map((r) => r.id)
     .join(", ")}`;
   const supersededRecord = {
-    ...(existing as unknown as Record<string, unknown>),
+    ...(existing.value as unknown as Record<string, unknown>),
     active: false,
     retired_reason: retiredReason,
   };
