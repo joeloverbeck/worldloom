@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC105MANSTOSTU-008.md",
+  "last_ticket": "archive/tickets/SPEC105MANSTOSTU-009.md",
   "last_result": "completed_archived",
-  "last_work_commit": "b6e2d5bff2ea2c56c530ad2b63111e14b32032f9",
+  "last_work_commit": "067f646dda54fbb781e2929b0600cb9b0ed87a4d",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC105MANSTOSTU-009.md",
+  "next_target": "tickets/SPEC105MANSTOSTU-010.md",
   "queue": [
-    "tickets/SPEC105MANSTOSTU-009.md",
     "tickets/SPEC105MANSTOSTU-010.md",
     "tickets/SPEC105MANSTOSTU-011.md",
     "tickets/SPEC105MANSTOSTU-012.md",
@@ -20,7 +19,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: cd tools/manual-story-studio && npm run build:backend; cd tools/manual-story-studio && node --test dist/test/read/manual-stories.test.js dist/test/read/worlds.test.js dist/test/server/manual-stories-routes.test.js; cd tools/manual-story-studio && npm test; grep -nE \"^export function.*ReadResult\" tools/manual-story-studio/src/read/manual-stories.ts tools/manual-story-studio/src/read/worlds.ts; git diff --check",
+  "proof_state": "clean: cd tools/manual-story-studio && npm run build:backend; cd tools/manual-story-studio && node --test dist/test/health/compute.test.js; cd tools/manual-story-studio && npm test; grep -nE \"^export function computeHealth\" tools/manual-story-studio/src/health/compute.ts; git diff --check",
   "dirty_state": "expected after state commit: tracked worktree clean; ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place",
   "updated_at": "2026-06-01"
 }
