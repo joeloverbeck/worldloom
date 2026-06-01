@@ -8,7 +8,7 @@
 
 ## Problem
 
-`lint_override` is the SPEC-102 audit-trail breadcrumb that records "the author clicked through a soft-tier warning and copied/saved anyway." Once SPEC106MANSTOSTU-001 promotes the four leakage rules to hard tier, the override is reachable only for the qualitatively-different quality warnings the spec defers to SPEC-111 — and the four currently-soft rules become unreachable through it. Per SPEC-106 §2.4 and §3 *No deprecation period for `lint_override`*, the write-side construction must be removed: new sidecars never carry the field. Read-side stays tolerant (legacy on-disk sidecars that carry the field continue to parse). Three backend file edits land together to keep the type, route, and write layer self-consistent; three test-surface edits invert existing override-persistence assertions into regression guards; the archived SPEC-102 capstone's AC #9 (`test/capstone-spec102.test.ts:329`) is rewritten as a regression guard naming SPEC-106 as the retcon source per Rule 6 attribution.
+`lint_override` is the SPEC-102 audit-trail breadcrumb that records "the author clicked through a soft-tier warning and copied/saved anyway." Once `archive/tickets/SPEC106MANSTOSTU-001.md` promotes the four leakage rules to hard tier, the override is reachable only for the qualitatively-different quality warnings the spec defers to SPEC-111 — and the four currently-soft rules become unreachable through it. Per SPEC-106 §2.4 and §3 *No deprecation period for `lint_override`*, the write-side construction must be removed: new sidecars never carry the field. Read-side stays tolerant (legacy on-disk sidecars that carry the field continue to parse). Three backend file edits land together to keep the type, route, and write layer self-consistent; three test-surface edits invert existing override-persistence assertions into regression guards; the archived SPEC-102 capstone's AC #9 (`test/capstone-spec102.test.ts:329`) is rewritten as a regression guard naming SPEC-106 as the retcon source per Rule 6 attribution.
 
 ## Assumption Reassessment (2026-06-01)
 
@@ -82,7 +82,7 @@ Rewrite the test body at line 329 ("AC #9 — savePrompt with lint_override pers
 
 - Frontend `lint_override` removal (`PromptPreview.tsx`, `web/src/api/prompts.ts`, `web/src/types/manual-story.ts`) — covered by `SPEC106MANSTOSTU-004`.
 - On-disk migration of existing legacy sidecars that carry `lint_override` — explicitly out of scope per SPEC-106 §3 *No deprecation period for `lint_override`* (read-tolerant type handles them).
-- Tier flips for the four leakage rules — covered by `SPEC106MANSTOSTU-001`.
+- Tier flips for the four leakage rules — covered by `archive/tickets/SPEC106MANSTOSTU-001.md`.
 - The `recent_segment_required_but_unavailable` rule — covered by `SPEC106MANSTOSTU-002`.
 
 ## Acceptance Criteria

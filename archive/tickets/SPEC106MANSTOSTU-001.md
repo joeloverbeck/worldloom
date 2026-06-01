@@ -1,9 +1,9 @@
 # SPEC106MANSTOSTU-001: Promote four leakage rules to hard tier
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `tools/manual-story-studio` lint module (`src/prompt/lint.ts`) and two test surfaces (`test/prompt-lint.test.ts`, `test/prompt/beat-template-lint.test.ts`).
+**Engine Changes**: Yes — `tools/manual-story-studio` lint module (`src/prompt/lint.ts`), Manual Studio prose-craft prompt contract, and three test surfaces (`test/prompt-lint.test.ts`, `test/prompt/beat-template-lint.test.ts`, `test/prompt-compose.test.ts`).
 **Deps**: None
 
 ## Problem
@@ -64,6 +64,8 @@ Update the four beat-template scan tests at lines 39 / 50 / 61 / 70: flip `tier 
 - `tools/manual-story-studio/src/prompt/lint.ts` (modify)
 - `tools/manual-story-studio/test/prompt-lint.test.ts` (modify)
 - `tools/manual-story-studio/test/prompt/beat-template-lint.test.ts` (modify)
+- `docs/manual-story-studio/prose-craft-contract.md` (modify — same-seam proof fallout: remove raw denylist terms from the fixed §13 prompt contract)
+- `tools/manual-story-studio/test/prompt-compose.test.ts` (modify — regression guard that a clean composed prompt has no hard lint findings)
 
 ## Out of Scope
 
@@ -99,3 +101,27 @@ Update the four beat-template scan tests at lines 39 / 50 / 61 / 70: flip `tier 
 1. `cd tools/manual-story-studio && npm test`
 2. `grep -n 'tier: "soft"' tools/manual-story-studio/src/prompt/lint.ts` (must return zero matches)
 3. The package's `npm test` is the correct verification boundary — it runs `npm run build:backend && node --test "dist/test/**/*.test.js" && npm --prefix web test`, which covers backend tests AND the web `tsc -p tsconfig.json --noEmit` typecheck; this ticket's changes are backend-only but the web step is included in the same script and stays green incidentally.
+
+## Outcome
+
+Completed: 2026-06-01
+
+The four prompt-leakage rules now emit `tier: "hard"` from both `lintPrompt` and `lintBeatTemplateGuidance`. `lintBeatTemplateGuidance` now derives `blockingForCopy` with the same `findings.some((f) => f.tier === "hard")` predicate as the main prompt lint, and the lint module header documents the SPEC-106 8-hard-rule posture with soft tier reserved for future quality warnings.
+
+Updated tests in `tools/manual-story-studio/test/prompt-lint.test.ts` and `tools/manual-story-studio/test/prompt/beat-template-lint.test.ts` assert hard-tier findings, `blockingForCopy === true`, and `cleanForCopy === false` for the promoted leakage surfaces.
+
+Full package proof exposed same-seam fallout: the fixed Manual Studio §13 prose-craft contract itself contained raw denylist terms (`validator`, `supersession`) and therefore self-blocked otherwise clean prompt saves after the tier promotion. `docs/manual-story-studio/prose-craft-contract.md` now expresses the same rule without those raw terms, and `tools/manual-story-studio/test/prompt-compose.test.ts` asserts a clean composed prompt has no lint findings.
+
+Verification:
+
+1. `cd tools/manual-story-studio && npm test` — green before implementation baseline.
+2. `cd tools/manual-story-studio && npm run build:backend` — green after implementation.
+3. `cd tools/manual-story-studio && node --test dist/test/prompt-lint.test.js dist/test/prompt/beat-template-lint.test.js` — green, 20 tests passed after implementation.
+4. `grep -n 'tier: "soft"' tools/manual-story-studio/src/prompt/lint.ts` — zero matches after implementation.
+5. `rg -n 'validator|supersession|patch_plan|submit_patch_plan|state_snapshot|validation_trace|append_only|schema_version|record_version|provenance.origin|bootstrap|mystery_policy|superseded|state_delta|state_hash' docs/manual-story-studio/prose-craft-contract.md` — zero matches after same-seam contract cleanup.
+6. `cd tools/manual-story-studio && npm run build:backend` — green after same-seam contract cleanup.
+7. `cd tools/manual-story-studio && node --test dist/test/prompt-lint.test.js dist/test/prompt/beat-template-lint.test.js dist/test/prompt-compose.test.js dist/test/capstone-spec103.test.js dist/test/capstone-spec104.test.js` — green, 38 tests passed after same-seam contract cleanup.
+8. `cd tools/manual-story-studio && npm test` — green after same-seam contract cleanup; 382 backend tests passed and web `tsc --noEmit` passed.
+9. `git diff --check` — clean.
+
+Deviations: the full package suite initially failed in SPEC-103/SPEC-104 capstone save paths with `409 lint_blocks_save` because the fixed Manual Studio §13 contract contained newly hard-denied raw terms. This was treated as same-seam fallout and repaired in this ticket because a clean composed prompt must remain copyable under the promoted hard-tier rules.

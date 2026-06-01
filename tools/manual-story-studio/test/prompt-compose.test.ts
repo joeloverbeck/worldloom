@@ -118,6 +118,9 @@ test("AC #1 — composePrompt is byte-deterministic across 5 invocations", async
     };
     const first = await composePrompt(input);
     assert.ok(first.markdown.length > 0);
+    assert.equal(first.lint.cleanForCopy, true);
+    assert.equal(first.lint.blockingForCopy, false);
+    assert.deepEqual(first.lint.findings, []);
     for (let i = 0; i < 4; i++) {
       const next = await composePrompt(input);
       assert.equal(

@@ -36,52 +36,62 @@ test("lintBeatTemplateGuidance: clean template → no findings", () => {
   assert.equal(result.cleanForCopy, true);
 });
 
-test("lintBeatTemplateGuidance: engine record-id PG-2 triggers soft finding", () => {
+test("lintBeatTemplateGuidance: engine record-id PG-2 triggers hard finding", () => {
   const result = lintBeatTemplateGuidance(
     tpl("advance PG-2 to next scene"),
   );
   assert.ok(
     result.findings.some(
-      (f) => f.rule === "no_engine_jargon" && f.tier === "soft",
+      (f) => f.rule === "no_engine_jargon" && f.tier === "hard",
     ),
   );
 });
 
-test("lintBeatTemplateGuidance: internal id mchar-7 triggers soft finding", () => {
+test("lintBeatTemplateGuidance: internal id mchar-7 triggers hard finding", () => {
   const result = lintBeatTemplateGuidance(
     tpl("the actor in mchar-7 should respond"),
   );
   assert.ok(
     result.findings.some(
-      (f) => f.rule === "no_internal_record_ids" && f.snippet === "mchar-7",
+      (f) =>
+        f.rule === "no_internal_record_ids" &&
+        f.tier === "hard" &&
+        f.snippet === "mchar-7",
     ),
   );
 });
 
-test("lintBeatTemplateGuidance: schema/validator term triggers soft finding", () => {
+test("lintBeatTemplateGuidance: schema/validator term triggers hard finding", () => {
   const result = lintBeatTemplateGuidance(tpl("use submit_patch_plan to save"));
   assert.ok(
     result.findings.some(
-      (f) => f.rule === "no_schema_validator_terms" && f.snippet === "submit_patch_plan",
+      (f) =>
+        f.rule === "no_schema_validator_terms" &&
+        f.tier === "hard" &&
+        f.snippet === "submit_patch_plan",
     ),
   );
 });
 
-test("lintBeatTemplateGuidance: narrator-voice phrase triggers soft finding", () => {
+test("lintBeatTemplateGuidance: narrator-voice phrase triggers hard finding", () => {
   const result = lintBeatTemplateGuidance(tpl("update the STCHAR profile here"));
   assert.ok(
     result.findings.some(
-      (f) => f.rule === "no_record_class_narrator_voice",
+      (f) =>
+        f.rule === "no_record_class_narrator_voice" &&
+        f.tier === "hard",
     ),
   );
 });
 
-test("lintBeatTemplateGuidance: never produces hard findings (override always works)", () => {
+test("lintBeatTemplateGuidance: leakage findings block copy", () => {
+  // SPEC-106 retires the soft override path for prompt-leakage findings.
   const t = tpl("advance PG-2 with mchar-7 via submit_patch_plan");
   const result = lintBeatTemplateGuidance(t);
   assert.ok(result.findings.length > 0);
-  assert.equal(result.blockingForCopy, false);
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
   for (const f of result.findings) {
-    assert.equal(f.tier, "soft");
+    assert.equal(f.tier, "hard");
   }
 });

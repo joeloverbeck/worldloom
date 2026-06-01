@@ -1,16 +1,16 @@
 // Prompt lint module.
 //
-// SPEC-102 §Scope item 4 — eight rules across two tiers:
-//   hard (structural input-presence; blocks Copy):
+// SPEC-106 promotes all eight SPEC-102 prompt-safety rules to hard tier:
 //     1. moment_directive_present
 //     2. content_policy_byte_equal
 //     3. selected_cast_exists
 //     4. selected_records_exist
-//   soft (conservative denylist; UI shows "copy anyway?"):
 //     5. no_internal_record_ids
 //     6. no_engine_jargon
 //     7. no_schema_validator_terms
 //     8. no_record_class_narrator_voice
+// Soft tier is reserved for future quality warnings (SPEC-111-adjacent) and
+// intentionally empty until such warnings exist.
 //
 // Pure function: same (markdown, expected content-policy, id sets) →
 // same result. No disk I/O, no LLM, no network.
@@ -209,7 +209,7 @@ function checkNoInternalRecordIds(
   const uniq = Array.from(new Set(matches));
   return uniq.map((snippet) => ({
     rule: "no_internal_record_ids",
-    tier: "soft" as const,
+    tier: "hard",
     message: `Manual Studio internal record id "${snippet}" appears in the prompt body.`,
     snippet,
   }));
@@ -228,7 +228,7 @@ function checkNoEngineJargon(
       for (const snippet of Array.from(new Set(matches))) {
         out.push({
           rule: "no_engine_jargon",
-          tier: "soft",
+          tier: "hard",
           message: `Engine record-id "${snippet}" appears in the prompt body (denylist: ${prefix}).`,
           snippet,
         });
@@ -246,7 +246,7 @@ function checkNoSchemaValidatorTerms(
     if (input.markdown.includes(term)) {
       out.push({
         rule: "no_schema_validator_terms",
-        tier: "soft",
+        tier: "hard",
         message: `Schema/validator term "${term}" appears in the prompt body.`,
         snippet: term,
       });
@@ -263,7 +263,7 @@ function checkNoRecordClassNarratorVoice(
     if (input.markdown.includes(phrase)) {
       out.push({
         rule: "no_record_class_narrator_voice",
-        tier: "soft",
+        tier: "hard",
         message: `Record-class narrator-voice phrasing "${phrase}" appears in the prompt body.`,
         snippet: phrase,
       });
@@ -292,9 +292,8 @@ export function lintPrompt(input: PromptLintInput): PromptLintResult {
 
 // SPEC-104 §2.7: CRUD-time lint that catches engine-jargon, internal-id,
 // schema/validator, and narrator-voice violations in a beat-template's
-// beat_guidance.instruction strings. All findings are soft-tier — the
-// author's override flow (SPEC-102 §3 key decision) applies. Reuses the
-// existing four denylist surfaces without parallel content.
+// beat_guidance.instruction strings. SPEC-106 makes these leakage findings
+// hard-tier here too, mirroring the main prompt lint boundary.
 export function lintBeatTemplateGuidance(
   template: BeatTemplate,
 ): PromptLintResult {
@@ -308,7 +307,7 @@ export function lintBeatTemplateGuidance(
     for (const snippet of Array.from(new Set(idMatches))) {
       findings.push({
         rule: "no_internal_record_ids",
-        tier: "soft",
+        tier: "hard",
         message: `Manual Studio internal record id "${snippet}" appears in beat_guidance.instruction.`,
         snippet,
       });
@@ -323,7 +322,7 @@ export function lintBeatTemplateGuidance(
       for (const snippet of Array.from(new Set(matches))) {
         findings.push({
           rule: "no_engine_jargon",
-          tier: "soft",
+          tier: "hard",
           message: `Engine record-id "${snippet}" appears in beat_guidance.instruction (denylist: ${prefix}).`,
           snippet,
         });
@@ -335,7 +334,7 @@ export function lintBeatTemplateGuidance(
     if (concatenated.includes(term)) {
       findings.push({
         rule: "no_schema_validator_terms",
-        tier: "soft",
+        tier: "hard",
         message: `Schema/validator term "${term}" appears in beat_guidance.instruction.`,
         snippet: term,
       });
@@ -346,7 +345,7 @@ export function lintBeatTemplateGuidance(
     if (concatenated.includes(phrase)) {
       findings.push({
         rule: "no_record_class_narrator_voice",
-        tier: "soft",
+        tier: "hard",
         message: `Record-class narrator-voice phrasing "${phrase}" appears in beat_guidance.instruction.`,
         snippet: phrase,
       });
@@ -356,6 +355,6 @@ export function lintBeatTemplateGuidance(
   return {
     findings,
     cleanForCopy: findings.length === 0,
-    blockingForCopy: false,
+    blockingForCopy: findings.some((f) => f.tier === "hard"),
   };
 }

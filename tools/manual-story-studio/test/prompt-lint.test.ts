@@ -113,7 +113,7 @@ test("rule 4: unresolved record id → hard finding", () => {
   );
 });
 
-test("rule 5: internal id leak in prompt body → soft finding", () => {
+test("rule 5: internal id leak in prompt body → hard finding", () => {
   const dirty = cleanPrompt().replace(
     "A quiet moment.",
     "A quiet moment with mchar-3 in the room.",
@@ -121,14 +121,17 @@ test("rule 5: internal id leak in prompt body → soft finding", () => {
   const result = lintPrompt(baseInput({ markdown: dirty }));
   assert.ok(
     result.findings.some(
-      (f) => f.rule === "no_internal_record_ids" && f.tier === "soft" && f.snippet === "mchar-3",
+      (f) =>
+        f.rule === "no_internal_record_ids" &&
+        f.tier === "hard" &&
+        f.snippet === "mchar-3",
     ),
   );
-  // Soft only → not blocking
-  assert.equal(result.blockingForCopy, false);
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
 });
 
-test("rule 6: engine jargon (STCHAR-7) in body → soft finding", () => {
+test("rule 6: engine jargon (STCHAR-7) in body → hard finding", () => {
   const dirty = cleanPrompt().replace(
     "A scribe.",
     "A scribe linked to STCHAR-7.",
@@ -137,12 +140,16 @@ test("rule 6: engine jargon (STCHAR-7) in body → soft finding", () => {
   assert.ok(
     result.findings.some(
       (f) =>
-        f.rule === "no_engine_jargon" && f.tier === "soft" && f.snippet === "STCHAR-7",
+        f.rule === "no_engine_jargon" &&
+        f.tier === "hard" &&
+        f.snippet === "STCHAR-7",
     ),
   );
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
 });
 
-test("rule 7: schema/validator term → soft finding", () => {
+test("rule 7: schema/validator term → hard finding", () => {
   const dirty = cleanPrompt().replace(
     "POV discipline.",
     "POV discipline; respects the validation_trace.",
@@ -150,12 +157,14 @@ test("rule 7: schema/validator term → soft finding", () => {
   const result = lintPrompt(baseInput({ markdown: dirty }));
   assert.ok(
     result.findings.some(
-      (f) => f.rule === "no_schema_validator_terms" && f.tier === "soft",
+      (f) => f.rule === "no_schema_validator_terms" && f.tier === "hard",
     ),
   );
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
 });
 
-test("rule 8: record-class narrator-voice phrase → soft finding", () => {
+test("rule 8: record-class narrator-voice phrase → hard finding", () => {
   const dirty = cleanPrompt().replace(
     "A scribe.",
     "A scribe whose SF authority is at stake.",
@@ -163,13 +172,21 @@ test("rule 8: record-class narrator-voice phrase → soft finding", () => {
   const result = lintPrompt(baseInput({ markdown: dirty }));
   assert.ok(
     result.findings.some(
-      (f) => f.rule === "no_record_class_narrator_voice" && f.tier === "soft",
+      (f) =>
+        f.rule === "no_record_class_narrator_voice" &&
+        f.tier === "hard",
     ),
   );
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
 });
 
 test("blockingForCopy is true iff any finding has tier=hard", () => {
-  const onlySoft = lintPrompt(
+  const clean = lintPrompt(baseInput());
+  assert.equal(clean.blockingForCopy, false);
+  assert.equal(clean.cleanForCopy, true);
+
+  const promotedLeak = lintPrompt(
     baseInput({
       markdown: cleanPrompt().replace(
         "A scribe.",
@@ -177,9 +194,9 @@ test("blockingForCopy is true iff any finding has tier=hard", () => {
       ),
     }),
   );
-  assert.equal(onlySoft.blockingForCopy, false);
-  assert.equal(onlySoft.cleanForCopy, false);
-  assert.ok(onlySoft.findings.every((f) => f.tier === "soft"));
+  assert.equal(promotedLeak.blockingForCopy, true);
+  assert.equal(promotedLeak.cleanForCopy, false);
+  assert.ok(promotedLeak.findings.some((f) => f.tier === "hard"));
 
   const hardPlus = lintPrompt(
     baseInput({
