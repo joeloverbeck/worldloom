@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-01
 **Scope:** the seven specs derived from the critical triage of `reports/manual-story-studio-second-iteration.md`. All seven are Manual Story Studio (`tools/manual-story-studio`) tooling-adjacent work; none touch canon, MCP, patch engine, or world-index beyond `enumerate.ts`'s already-shipped exclusion.
-**Status:** SPEC-105 is completed and archived; this order now governs SPEC-106 through SPEC-111.
+**Status:** SPEC-105 and SPEC-106 are completed and archived; this order now governs SPEC-107 through SPEC-111.
 
 ---
 
@@ -15,21 +15,21 @@ SPEC-105 (integrity foundation)
   ├─→ SPEC-110 (beat template fields — depends on typed-error reads)
   └─→ SPEC-111 (UX cockpit pieces — depends on /health endpoint + HealthBanner scaffold)
 
-SPEC-106 (prompt leakage hard-tier) — independent
+SPEC-106 (prompt leakage hard-tier) — complete
 SPEC-107 (prose/state contract correction) — independent
 
 SPEC-109 (current-context layer)
   └─→ SPEC-111 (UX cockpit pieces — Dashboard CurrentStatePanel consumes current-context)
 ```
 
-SPEC-106 and SPEC-107 have no inbound dependencies and can land in any order alongside the SPEC-105 chain.
+SPEC-107 has no inbound dependencies and can land alongside the SPEC-105 chain. SPEC-106 had no inbound dependencies and is complete.
 
 ## Recommended landing order
 
 1. **SPEC-105** — Fail-fast state integrity + health endpoint + build-script inclusion.
    *Completed and archived.* Downstream specs should treat `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` as landed. It unblocks 108 / 109 / 110 / 111 because every downstream spec consumes its `ReadResult<T>` discriminated union or its `/health` endpoint or both.
 2. **SPEC-106** — Prompt leakage hard-tier promotion.
-   *Independent.* Can land in parallel with 105 or 107. Small, focused, low-risk; ship as soon as a reviewer is available.
+   *Completed and archived.* Downstream references should treat `archive/specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md` as landed. Ticket evidence lives in `archive/tickets/SPEC106MANSTOSTU-001.md` through `archive/tickets/SPEC106MANSTOSTU-004.md`.
 3. **SPEC-107** — Prose/state contract correction + doc cleanup.
    *Independent.* Can land in parallel with 105 or 106. Smallest spec; three textual surfaces. Ship whenever convenient.
 4. **SPEC-108** — Segment lifecycle append-only by default.
@@ -46,10 +46,10 @@ SPEC-106 and SPEC-107 have no inbound dependencies and can land in any order alo
 A small team or a single contributor with parallel branches can ship in the following waves:
 
 - **Wave 1**: SPEC-105 alone (complete).
-- **Wave 2**: SPEC-106 + SPEC-107 + SPEC-108 + SPEC-109 + SPEC-110 in parallel branches off of post-105 main.
+- **Wave 2**: SPEC-106 complete; SPEC-107 + SPEC-108 + SPEC-109 + SPEC-110 can continue in parallel branches off of post-105 main.
 - **Wave 3**: SPEC-111 after SPEC-109 ships.
 
-A solo contributor working serially follows the numbered list above (105 → 106 → 107 → 108 → 109 → 110 → 111). The numeric order is one valid implementation sequence and the recommended default; the dependency graph above is authoritative.
+A solo contributor working serially follows the remaining numbered list above (107 → 108 → 109 → 110 → 111). The numeric order is one valid implementation sequence and the recommended default; the dependency graph above is authoritative.
 
 ## Notes
 

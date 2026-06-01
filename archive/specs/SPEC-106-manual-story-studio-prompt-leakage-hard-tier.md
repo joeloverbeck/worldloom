@@ -1,12 +1,14 @@
 # SPEC-106 — Manual Story Studio: Prompt Leakage Hard-Tier Promotion
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-06-01
 **Classification:** tooling-adjacent (no canon-pipeline integration; affects only the external-LLM prompt boundary).
 **Depends on:** — (independent; can land in parallel with SPEC-107).
 **Blocks:** — (no downstream spec depends on the lint tier change).
 **Related:** `tools/manual-story-studio/src/prompt/lint.ts`, `tools/manual-story-studio/src/prompt/types.ts`, `tools/manual-story-studio/web/src/pages/PromptPreview.tsx`.
 **Source:** critical triage of `reports/manual-story-studio-second-iteration.md` §§5 / 13 / 22 / 26 / 31 Stage 2 (ChatGPT-Pro, 2026-06-01). Accepted: the four leakage rules (`no_internal_record_ids` / `no_engine_jargon` / `no_schema_validator_terms` / `no_record_class_narrator_voice`) move from `soft` to `hard`; the `lint_override` "copy anyway" path is removed for them.
+
+**Implementation note (2026-06-01):** Completed via `archive/tickets/SPEC106MANSTOSTU-001.md`, `archive/tickets/SPEC106MANSTOSTU-002.md`, `archive/tickets/SPEC106MANSTOSTU-003.md`, and `archive/tickets/SPEC106MANSTOSTU-004.md`. The body below is the accepted proposal and remains useful as historical implementation context; the outcome section records the landed state and verification.
 
 ---
 
@@ -161,3 +163,18 @@ Manual verification: in a worktree with a manual story whose prompt composer wou
 - **Assumption:** The 4 main-lint emission sites and the 4 beat-template-scan emission sites are the only sites in the package emitting these four rule names. → Verify via `grep -n 'rule: "no_internal_record_ids"\|rule: "no_engine_jargon"\|rule: "no_schema_validator_terms"\|rule: "no_record_class_narrator_voice"' tools/manual-story-studio/src/`. If additional sites exist, include them in the tier promotion.
 - **Assumption:** The composer can supply `latest_segment_available` cheaply (a boolean derived from listing the segments directory). → Verified: the composer already reads segment data for the recent-prose section; reusing that data for the lint input is a no-cost addition.
 - **Assumption (closed at reassessment, 2026-06-01):** No on-disk sidecar consumer downstream of the package reads `lint_override` to drive behavior. → Verified via `grep -rn lint_override` from repo root: zero non-package, non-test consumers exist. The field is purely a per-package audit-trail breadcrumb. No deprecation period needed; the read-tolerant path on the type is sufficient for the few on-disk sidecars that may carry the field from the legacy write path.
+
+## Outcome
+
+Completed: 2026-06-01.
+
+Landed the four-ticket implementation:
+
+1. `archive/tickets/SPEC106MANSTOSTU-001.md` promoted the four leakage rules to hard tier in both main prompt lint and beat-template guidance lint, updated the lint header, and replaced the beat-template "override always works" witness with a hard-blocking guard.
+2. `archive/tickets/SPEC106MANSTOSTU-002.md` added `recent_segment_required_but_unavailable` as a hard finding when recent prose is required but unavailable, and changed the default prompt policy to keep first prompts copyable unless recent prose is explicitly enabled.
+3. `archive/tickets/SPEC106MANSTOSTU-003.md` removed the backend `lint_override` write path, simplified the save route hard-block guard, kept backend sidecar read tolerance, and retired SPEC-102 capstone AC #9 as a SPEC-106 Rule-6 regression guard.
+4. `archive/tickets/SPEC106MANSTOSTU-004.md` removed the frontend clipboard/save override path, added `onCopy`/`onSave` blocking-lint early returns, dropped the frontend save-request field, and kept frontend sidecar read tolerance.
+
+Verification: each ticket passed its focused grep/type/test checks, and both final ticket iterations passed `cd tools/manual-story-studio && npm test` (backend build, 386 backend tests, and web `tsc --noEmit`). Final hygiene passed `git diff --check` / `git diff --cached --check` before ticket commits.
+
+Deviations: `archive/tickets/SPEC106MANSTOSTU-002.md` changed the default `prompt_policy.include_recent_segments` from `1` to `0` so a brand-new manual story without segments remains copyable unless the author explicitly requires recent prose. This preserves the spec's required-recent-prose hard gate while avoiding a first-prompt self-block.

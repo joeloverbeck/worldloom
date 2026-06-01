@@ -48,7 +48,7 @@ Identifiers are local to this triage. `T<N>` for triage items derived from the r
 **Verdict:** ACCEPT.
 **Source:** report §§5 / 13 / 22 / 26 / 31 Stage 2.
 **Rationale:** Verified four leakage rules emit at `soft` tier (`lint.ts:211, 230, 248, 265`) with a `lint_override` "copy anyway" path in `PromptPreview.tsx:94-112`. For an external-LLM cockpit, OWASP LLM01 (prompt injection) / LLM08 (excessive agency) treat internal-ID/jargon leakage as exactly the surface that must be denied, not warned about. FOUNDATIONS §Tooling Recommendation's least-agency posture maps directly to the prompt boundary.
-**Deliverable:** `specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md`. Promotes 4 leakage rules to hard tier; removes the lint_override path; adds `recent_segment_required_but_unavailable` rule when `include_recent_segments > 0`.
+**Deliverable:** `archive/specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md`. Promotes 4 leakage rules to hard tier; removes the lint_override path; adds `recent_segment_required_but_unavailable` rule when `include_recent_segments > 0`.
 **Modification scope:** Keep length/weak-directive/too-many-records as `soft` (quality, not safety); promote only the four leakage rules. Quality-warning rules land alongside SPEC-111's cockpit UX.
 
 #### T3 — Prose/state contract correction
@@ -164,7 +164,7 @@ The following report sub-findings did not get a top-level T<N> identifier becaus
 | Deliverable | Path | Purpose |
 |---|---|---|
 | SPEC-105 | `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md` | Integrity foundation; `/health` endpoint; typed-error reads; build-script inclusion |
-| SPEC-106 | `specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md` | 4 leakage rules to hard tier; remove copy-anyway override |
+| SPEC-106 | `archive/specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md` | 4 leakage rules to hard tier; remove copy-anyway override |
 | SPEC-107 | `specs/SPEC-107-manual-story-studio-prose-state-contract-correction.md` | Contract paragraph + stop rule + missing-doc cleanup |
 | SPEC-108 | `specs/SPEC-108-manual-story-studio-segment-lifecycle-append-only.md` | Append-only primary UX; `mode=repair` gate on lifecycle ops |
 | SPEC-109 | `specs/SPEC-109-manual-story-studio-current-context-layer.md` | `current-context.yaml` selector; composer + Dashboard plumbing |
