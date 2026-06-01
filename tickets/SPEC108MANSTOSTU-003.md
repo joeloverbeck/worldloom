@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/manual-story-studio/web/src/api/segments.ts` to extend the `editSegment` and `deleteSegment` API wrappers with `mode` and `force_replace` parameters (mirroring the route surface introduced by ticket 002).
-**Deps**: SPEC108MANSTOSTU-002
+**Deps**: archive/tickets/SPEC108MANSTOSTU-002.md
 
 ## Problem
 

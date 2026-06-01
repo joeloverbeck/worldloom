@@ -11,8 +11,10 @@ import {
   deleteSegment,
   editSegment,
   saveSegment,
+  SegmentPreconditionError,
   SegmentReadFailureError,
 } from "../../write/segments.js";
+import { SEGMENT_REPAIR_MODE_FLAG } from "../../write/segment-modes.js";
 import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
@@ -32,7 +34,19 @@ interface SaveSegmentBody {
   selected_template?: string | null;
 }
 
-interface EditSegmentBody extends SaveSegmentBody {}
+interface SegmentModeBody {
+  mode?: string;
+}
+
+interface EditSegmentBody extends SaveSegmentBody, SegmentModeBody {
+  force_replace?: boolean;
+}
+
+interface SegmentModeQuery {
+  mode?: string;
+}
+
+interface DeleteSegmentBody extends SegmentModeBody {}
 
 function resolveRootOrNull(
   repoRoot: string,
@@ -54,6 +68,28 @@ function isSegmentId(value: string): boolean {
 
 function badRequest(reply: FastifyReply, message: string): FastifyReply {
   return reply.code(400).send({ error: "invalid_input", message });
+}
+
+function extractMode(
+  query: SegmentModeQuery | undefined,
+  body: SegmentModeBody | undefined,
+): string | null {
+  if (body && typeof body.mode === "string") return body.mode;
+  if (query && typeof query.mode === "string") return query.mode;
+  return null;
+}
+
+function repairModeRequired(
+  reply: FastifyReply,
+  method: "PUT" | "DELETE",
+): FastifyReply {
+  return reply
+    .code(405)
+    .header("Allow", "POST")
+    .send({
+      error: "repair-mode-required",
+      message: `${method} requires ?mode=repair or body { mode: "repair" }; see the repair-mode UI affordance.`,
+    });
 }
 
 function parseSegmentPayload(
@@ -81,6 +117,13 @@ function parseSegmentPayload(
 function writeError(reply: FastifyReply, error: unknown): FastifyReply {
   if (error instanceof SegmentReadFailureError) {
     return mapReadErrorToHttpReply(reply, error.readError);
+  }
+  if (error instanceof SegmentPreconditionError) {
+    return reply.code(422).send({
+      error: error.code,
+      segment_id: error.segment_id,
+      latest_segment_id: error.latest_segment_id,
+    });
   }
   const message = error instanceof Error ? error.message : "segment write failed";
   return badRequest(reply, message);
@@ -180,6 +223,7 @@ export async function registerSegmentsWriteRoutes(
 
   server.put<{
     Params: { slug: string; msSlug: string; segmentId: string };
+    Querystring: SegmentModeQuery;
     Body: EditSegmentBody;
   }>(
     "/api/worlds/:slug/manual-stories/:msSlug/segments/:segmentId",
@@ -193,6 +237,9 @@ export async function registerSegmentsWriteRoutes(
       const segmentId = request.params.segmentId;
       if (!isSegmentId(segmentId)) {
         return badRequest(reply, "bad segment id");
+      }
+      if (extractMode(request.query, request.body) !== SEGMENT_REPAIR_MODE_FLAG) {
+        return repairModeRequired(reply, "PUT");
       }
       const existing = readSegmentSidecar({
         manualStoryRoot: root.absolutePath,
@@ -216,6 +263,7 @@ export async function registerSegmentsWriteRoutes(
           root,
           segment_id: segmentId,
           ...payload,
+          preconditions: { require_latest: request.body?.force_replace !== true },
         });
         return {
           segment_id: result.segment_id,
@@ -230,7 +278,8 @@ export async function registerSegmentsWriteRoutes(
 
   server.delete<{
     Params: { slug: string; msSlug: string; segmentId: string };
-    Querystring: { force?: string };
+    Querystring: { force?: string } & SegmentModeQuery;
+    Body: DeleteSegmentBody;
   }>(
     "/api/worlds/:slug/manual-stories/:msSlug/segments/:segmentId",
     async (request, reply) => {
@@ -243,6 +292,9 @@ export async function registerSegmentsWriteRoutes(
       const segmentId = request.params.segmentId;
       if (!isSegmentId(segmentId)) {
         return badRequest(reply, "bad segment id");
+      }
+      if (extractMode(request.query, request.body) !== SEGMENT_REPAIR_MODE_FLAG) {
+        return repairModeRequired(reply, "DELETE");
       }
       let result: ReturnType<typeof deleteSegment>;
       try {
