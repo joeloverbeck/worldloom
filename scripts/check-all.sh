@@ -3,10 +3,10 @@ set -euo pipefail
 
 # Build and test every tools/ package in dependency order, failing fast on the
 # first non-zero exit. Manual invocation: ./scripts/check-all.sh
-# Dependency order is: world-index → patch-engine → validators → hooks → world-mcp → story-explorer.
+# Dependency order is: world-index → patch-engine → validators → hooks → world-mcp → story-explorer → manual-story-studio.
 
 ROOT="$(git rev-parse --show-toplevel)"
-PACKAGES=(world-index patch-engine validators hooks world-mcp story-explorer)
+PACKAGES=(world-index patch-engine validators hooks world-mcp story-explorer manual-story-studio)
 
 for pkg in "${PACKAGES[@]}"; do
   dir="$ROOT/tools/$pkg"

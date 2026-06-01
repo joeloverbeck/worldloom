@@ -124,7 +124,7 @@ test("POST /api/worlds/.../prompts/compose returns 409 + HealthReport body when 
 
 - Frontend component tests for the HealthBanner — deferred per spec §2 item 8's *"extending it to component tests is SPEC-111's concern"*.
 - Sandbox-escape tests, full-workflow tests, prompt-safety acceptance suite — those are §31 Stage 9 (acceptance test layer beyond Stage 1's slice) deferred per the spec's Out of scope.
-- Modifying production code — every production change lands in SPEC105MANSTOSTU-001 through SPEC105MANSTOSTU-013.
+- Modifying production code — every production change lands in SPEC105MANSTOSTU-001 through archive/tickets/SPEC105MANSTOSTU-013.md.
 
 ## Acceptance Criteria
 
@@ -133,7 +133,7 @@ test("POST /api/worlds/.../prompts/compose returns 409 + HealthReport body when 
 1. `cd tools/manual-story-studio && npm test` runs and the new `test/health/health-compute.test.ts` + `test/health/health-route.test.ts` pass.
 2. The four fixture scenarios produce the expected HealthReport shape per SPEC-105 §7 ACs #2-5: corrupt-metadata → blocked + all four blocked_actions; corrupt-record → degraded + empty blocked_actions; missing-segment-sidecar → blocked + manuscript_compile in blocked_actions; dangling-typed-ref → degraded.
 3. AC#9 is verified: POSTing to `/prompts/compose` against a blocked story returns 409 + HealthReport-shaped body.
-4. `bash scripts/check-all.sh` (after SPEC105MANSTOSTU-013 lands) exits 0 with the new tests included in the Manual Studio test output.
+4. `bash scripts/check-all.sh` (after archive/tickets/SPEC105MANSTOSTU-013.md lands) exits 0 with the new tests included in the Manual Studio test output.
 
 ### Invariants
 
@@ -151,4 +151,4 @@ test("POST /api/worlds/.../prompts/compose returns 409 + HealthReport body when 
 ### Commands
 
 1. `cd tools/manual-story-studio && npm test` — full package test (includes new health tests).
-2. `bash scripts/check-all.sh` — monorepo all-green verification (after SPEC105MANSTOSTU-013).
+2. `bash scripts/check-all.sh` — monorepo all-green verification (after archive/tickets/SPEC105MANSTOSTU-013.md).
