@@ -5,7 +5,7 @@
 **Classification:** tooling-adjacent (segment write surface under `worlds/<slug>/manual-stories/<slug>/segments/`; no canon-pipeline integration).
 **Depends on:** archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (typed-error reads from `src/read/segments.ts` — the new lifecycle gates rely on `ReadResult<T>` for atomic precondition checks).
 **Blocks:** —
-**Related:** `tools/manual-story-studio/src/write/segments.ts`, `tools/manual-story-studio/src/server/routes/segments.ts`, `tools/manual-story-studio/web/src/pages/PasteProse.tsx`, `tools/manual-story-studio/web/src/pages/Manuscript.tsx`.
+**Related:** `tools/manual-story-studio/src/write/segments.ts`, `tools/manual-story-studio/src/server/routes/segments.ts`, `tools/manual-story-studio/web/src/pages/PasteProse.tsx`, `tools/manual-story-studio/web/src/pages/Manuscript.tsx`; SPEC-109 (state-review precondition for `force_replace` lands as a follow-up edit to this spec's repair-mode route when SPEC-109 ships).
 **Source:** critical triage of `reports/manual-story-studio-second-iteration.md` §§5 / 15 / 19 / 31 Stage 4 (ChatGPT-Pro, 2026-06-01). Accepted with modification: the report's "remove ordinary delete/reorder" instinct is right; the modification is to *gate* the existing edit/delete code paths behind an explicit `repair_mode` flag rather than delete them outright, so existing tests and code paths remain reachable for genuine repair scenarios while the primary UX presents append-only semantics.
 
 ---
@@ -14,9 +14,9 @@
 
 The current segment lifecycle is too broad for a writer's cockpit. Verified in `tools/manual-story-studio/src/write/segments.ts`:
 
-- `saveSegment` (lines 86-127) — appends a new segment with auto-allocated ID. Correct.
-- `editSegment` (lines 129-188) — rewrites prose and sidecar of an existing segment in place. Used by the primary "Paste Prose" UI to re-paste over a saved segment.
-- `deleteSegment` (lines 190-246) — three distinct outcomes depending on referrers and force flag:
+- `saveSegment` — appends a new segment with auto-allocated ID. Correct.
+- `editSegment` — rewrites prose and sidecar of an existing segment in place. Reached from the primary "Paste Prose" UI via a `?edit=SEG-N` URL parameter (set by the Manuscript page's per-segment Edit button), not a visible button on the Paste Prose page itself.
+- `deleteSegment` — three distinct outcomes depending on referrers and force flag:
   - `hard_deleted`: no referrers; files unlinked.
   - `force_deleted`: referrers exist but caller passed `force: true`; files unlinked anyway, warning returned.
   - `segment_order_removed_files_preserved`: referrers exist, no force; segment removed from `manuscript.md` order while files survive.
@@ -41,11 +41,11 @@ This spec keeps the lifecycle code paths intact and gates them behind explicit m
 
 5. **`deleteSegment` repair-mode preconditions.** When `mode=repair` is set, `deleteSegment` keeps its three existing outcomes (`hard_deleted` / `force_deleted` / `segment_order_removed_files_preserved`) — these are the genuine repair-shaped cases. Without `mode=repair`, the route returns `405`.
 
-6. **New repair-mode UI surface.** A new page at `/worlds/:worldSlug/manual-stories/:msSlug/repair` lists all segments with per-row affordances: "Replace prose" (calls `editSegment` with `mode=repair`), "Discard segment" (calls `deleteSegment` with `mode=repair`). The page carries a persistent warning banner: "Repair mode bypasses the cockpit's append-only discipline; use only for corrupted or accidentally-saved segments." The page is accessible from a small "Repair" link in the dashboard's segment panel, not from the primary navigation.
+6. **New repair-mode UI surface.** A new page at `/worlds/:worldSlug/manual-stories/:msSlug/repair` lists all segments with per-row affordances: "Replace prose" (calls `editSegment` with `mode=repair`), "Discard segment" (calls `deleteSegment` with `mode=repair`). The page carries a persistent warning banner: "Repair mode bypasses the cockpit's append-only discipline; use only for corrupted or accidentally-saved segments." The page is accessible from a small "Repair this manuscript" link rendered inside the Dashboard's `§Latest segment` section (lines 345-366 of the current `Dashboard.tsx`), alongside the existing manuscript link — not from the primary navigation.
 
 7. **Backend constants for the mode.** New `src/write/segment-modes.ts` exporting `SEGMENT_REPAIR_MODE_FLAG = "repair"` and a `SegmentMode` type. Routes consume the constant; tests assert against it.
 
-8. **Acceptance tests** under `tools/manual-story-studio/test/segments/`:
+8. **Acceptance tests for the new mode-gate behavior**, under `tools/manual-story-studio/test/segments/`:
    - `POST /api/.../segments` (no mode flag) accepts a save; segment appended.
    - `PUT /api/.../segments/SEG-3` (no mode flag) returns `405` with `repair-mode-required` finding.
    - `PUT /api/.../segments/SEG-3?mode=repair` succeeds when SEG-3 is the latest segment.
@@ -53,9 +53,11 @@ This spec keeps the lifecycle code paths intact and gates them behind explicit m
    - `DELETE /api/.../segments/SEG-3` (no mode flag) returns `405`.
    - `DELETE /api/.../segments/SEG-3?mode=repair` proceeds; outcomes (`hard_deleted` / `force_deleted` / `segment_order_removed_files_preserved`) unchanged from current behavior.
 
-9. **PasteProse UI changes.** Remove any UI affordances that map to `editSegment` or `deleteSegment` from the Paste Prose page. The Save button submits via the append-only path; the Discard button clears the client buffer.
+   The existing route-level PUT / DELETE tests in `tools/manual-story-studio/test/server/segments-routes.test.ts` (PUT edit at line 270, DELETE hard at line 302, DELETE preserved/force around lines 333-380) currently call the routes without a mode flag and expect `200`; under the new gating they would receive `405`. Update each in place to thread `?mode=repair` so they continue to validate the legacy outcomes under repair mode. The new file at `test/segments/segment-lifecycle.test.ts` owns the mode-gate enforcement assertions; the existing file remains the canonical home for HTTP-level segment route behavior.
 
-10. **Manuscript page changes.** The Manuscript page (`web/src/pages/Manuscript.tsx`) loses any per-segment "Edit" or "Delete" affordances; segments render as immutable manuscript text. A small "Repair this segment" disclosure-style link routes to the repair page with the segment pre-selected.
+9. **PasteProse UI changes.** Strip the page of its existing edit-mode plumbing — the `?edit=SEG-N` URL parameter handling (`useSearchParams` + `editSegmentId` + `isEditMode`), the `readSegment` useEffect that pre-fills the form when edit-mode is active, the `editSegment` branch inside `handleSave`, and the `editSegment` / `readSegment` imports from `../api/segments.js`. After the rewrite the Save button submits unconditionally via the append-only `saveSegment` path. Repurpose the existing Discard button: today it navigates to the dashboard; rewire it to a client-side React-state reset (`setProse("")` + `setTitle("")` + `setAuthorNote("")` + `setPromptId("")`) so unsaved drafts can be cleared without leaving the page.
+
+10. **Manuscript page changes.** The Manuscript page (`web/src/pages/Manuscript.tsx`) loses its per-segment Edit and Delete affordances. Remove the `handleEdit` / `handleDelete` handlers and the `deleteSegment` import. The `SegmentListItem` component (`web/src/components/SegmentListItem.tsx`) must also change: drop the `onEdit` and `onDelete` props from `SegmentListItemProps` and remove the toolbar `<div role="toolbar">` block (currently lines 51-62) that renders the Edit / Delete buttons; segments render as immutable manuscript text with the selection affordance only. A small "Repair this segment" disclosure-style link in `Manuscript.tsx` routes to the repair page with the segment pre-selected.
 
 ### Out of scope
 
@@ -64,6 +66,7 @@ This spec keeps the lifecycle code paths intact and gates them behind explicit m
 - Adding "retire segment" as a fourth lifecycle mode (the report §15 mentions it as "rare explicit repair mode, never silent deletion") — the existing `segment_order_removed_files_preserved` outcome already covers this case in repair mode; no new mode needed.
 - Lowercase ID rename (`seg-1` instead of `SEG-1`) — explicitly rejected per the triage; uppercase IDs preserved.
 - Same-basename sidecar collapse (`prompts/` + `prompt-runs/` merge) — explicitly rejected per the triage.
+- Manuscript-vs-segment-order byte-content validation (source report §15: *"manuscript.md should be derived and rebuildable. Persist it for convenience, but validate it against segment order."*) — `defer→spec-bundle`. The Manuscript page already supports a "Rebuild Manuscript" affordance (`Manuscript.tsx:174`), satisfying the "derived and rebuildable" portion. The byte-content validation portion is integrity-shaped but not health-shaped (SPEC-105's `/health` surface is per-file integrity, not manuscript-vs-order reconciliation); no sibling spec in the SPEC-105..SPEC-111 bundle explicitly owns it. Recorded here per §3.12 bundle-deferred discipline so the audit trail is honest about non-adoption.
 - Health endpoint and read-error typing — **SPEC-105** (prerequisite).
 - Prompt-leakage hard-tier promotion — **SPEC-106**.
 - Current-context layer — **SPEC-109**.
@@ -101,10 +104,12 @@ This spec keeps the lifecycle code paths intact and gates them behind explicit m
   - `editSegment` — add a `preconditions: { require_latest: boolean }` option to its input; honor at the gate.
   - No behavior change to `deleteSegment`; the gating happens at the route layer.
 - `tools/manual-story-studio/web/src/App.tsx` — add `/worlds/:worldSlug/manual-stories/:msSlug/repair` route binding to `<RepairSegments />`.
-- `tools/manual-story-studio/web/src/pages/PasteProse.tsx` — remove any UI that maps to `editSegment` or `deleteSegment`; ensure the Save button submits via the append-only path; add the client-side Discard button.
-- `tools/manual-story-studio/web/src/pages/Manuscript.tsx` — remove per-segment Edit/Delete affordances; add a "Repair this segment" disclosure link routing to the repair page.
-- `tools/manual-story-studio/web/src/pages/Dashboard.tsx` — add a small "Repair" link in the segment panel routing to the repair page.
+- `tools/manual-story-studio/web/src/pages/PasteProse.tsx` — remove the `?edit=SEG-N` URL parameter handling (`useSearchParams` + `editSegmentId` + `isEditMode`), the `readSegment` useEffect, the `editSegment` branch of `handleSave`, and the `editSegment` / `readSegment` imports; Save submits unconditionally via `saveSegment`. Rewire the existing Discard button from navigate-to-dashboard to a client-side state reset (clear `prose` / `title` / `authorNote` / `promptId`).
+- `tools/manual-story-studio/web/src/pages/Manuscript.tsx` — remove the `handleEdit` / `handleDelete` handlers and the `deleteSegment` import; segments render as immutable manuscript text. Add a "Repair this segment" disclosure link routing to the repair page with the segment pre-selected.
+- `tools/manual-story-studio/web/src/components/SegmentListItem.tsx` — drop `onEdit` and `onDelete` from `SegmentListItemProps` and remove the `<div role="toolbar">` Edit / Delete buttons block (currently lines 51-62). The component keeps only the selection rendering.
+- `tools/manual-story-studio/web/src/pages/Dashboard.tsx` — add a small "Repair this manuscript" link inside the `§Latest segment` section (lines 345-366), alongside the existing manuscript link, routing to the repair page.
 - `tools/manual-story-studio/web/src/api/segments.ts` — extend `editSegment`/`deleteSegment` API wrappers with the `mode` and `force_replace` parameters.
+- `tools/manual-story-studio/test/server/segments-routes.test.ts` — update the existing PUT-edit test (line 270) and DELETE tests (line 302 hard-delete; lines 333-380 preserved + force) to pass `?mode=repair` so their legacy-outcome assertions continue to hold under the new gating. New mode-gate enforcement assertions (405 without flag, 422 for non-latest replace, etc.) live in `test/segments/segment-lifecycle.test.ts`.
 
 **No modification to:**
 
@@ -126,7 +131,7 @@ This spec keeps the lifecycle code paths intact and gates them behind explicit m
 
 ## 6. Build & test
 
-`tools/manual-story-studio`: `npm test`. The new route-level tests in `test/segments/segment-lifecycle.test.ts` cover the mode-gate behavior; existing tests under `test/write/` continue to cover the underlying `editSegment` / `deleteSegment` implementations.
+`tools/manual-story-studio`: `npm test`. The new route-level tests in `test/segments/segment-lifecycle.test.ts` cover the mode-gate behavior (405 without flag, 422 for non-latest replace, gated outcomes). Existing function-level tests under `test/write/segments.test.ts` (which call `editSegment` / `deleteSegment` directly, not via HTTP) continue to cover the underlying implementations unchanged. The existing HTTP route tests in `test/server/segments-routes.test.ts` are updated in place to thread `?mode=repair` so their legacy-outcome assertions continue to validate that repair-mode behavior is unchanged from the pre-spec behavior.
 
 Manual verification: open Paste Prose, paste prose, observe Save and Discard buttons; saving creates a new segment, discarding clears the buffer without backend call. Open Manuscript page; the per-segment Edit/Delete affordances are absent; the "Repair this segment" link routes to the repair page. Open the repair page; the warning banner is visible; replacing a non-latest segment without `force_replace` returns the structured `422` error.
 
@@ -147,5 +152,5 @@ Manual verification: open Paste Prose, paste prose, observe Save and Discard but
 
 - **Assumption:** No external tool or CI step currently posts to `editSegment` or `deleteSegment` without a mode flag. → Verify via `grep -rn "editSegment\|deleteSegment" .` from repo root, excluding `tools/manual-story-studio/`. If a tool exists (unlikely), update it as part of this spec's diff.
 - **Assumption:** The existing `editSegment` test (`test/write/edit-segment.test.ts` or similar) calls the function directly, not via the HTTP route. → Verify; if it calls via HTTP, update the test to include `mode=repair`. If it calls directly, the function-level test remains unaffected (the mode gate is at the route layer).
-- **Assumption:** The `compile_on_segment_save: true` metadata default (per the report §3) still applies to the append-only save path. → Yes — the `saveSegment` implementation already calls `maybeCompile` at line 120; unchanged.
+- **Assumption:** The `compile_on_segment_save: true` metadata default (per the report §3) still applies to the append-only save path. → Yes — the `saveSegment` implementation already calls `maybeCompile`; unchanged.
 - **Assumption:** The "no state-review record marked complete" precondition the report §15 names is deferred to SPEC-109's state-review surface. → Yes — this spec implements the "no later segment" precondition only; the state-review precondition lands when SPEC-109 introduces the tracking surface.
