@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC105MANSTOSTU-002.md",
+  "last_ticket": "archive/tickets/SPEC105MANSTOSTU-013.md",
   "last_result": "completed_archived",
-  "last_work_commit": "7f8d38f04fa655bc7532889c28a8ee517ede1f84",
+  "last_work_commit": "d75f678ec87816237568a1e1c2eceb46d80e1ba1",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC105MANSTOSTU-013.md",
+  "next_target": "tickets/SPEC105MANSTOSTU-003.md",
   "queue": [
-    "tickets/SPEC105MANSTOSTU-013.md",
     "tickets/SPEC105MANSTOSTU-003.md",
     "tickets/SPEC105MANSTOSTU-004.md",
     "tickets/SPEC105MANSTOSTU-005.md",
@@ -27,7 +26,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: npm run build:backend; npm test; grep -nE \"^export (type|interface|function)\" tools/manual-story-studio/src/read/result.ts",
-  "dirty_state": "expected after state commit: tracked worktree clean; ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place",
+  "proof_state": "clean: grep \"manual-story-studio\" scripts/build-all.sh scripts/check-all.sh; bash scripts/build-all.sh; bash scripts/check-all.sh",
+  "dirty_state": "expected after state commit: tracked worktree clean; ignored artifacts under tools/* dist/node_modules/web dist and tools/world-mcp/.secret left in place after broad build/check",
   "updated_at": "2026-06-01"
 }
