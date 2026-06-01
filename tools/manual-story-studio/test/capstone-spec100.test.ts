@@ -235,7 +235,7 @@ test("AC #9: docs/manual-story-studio/README.md distinguishes verbatim vs Manual
   assert.match(docsReadme, /content-policy\.md/);
   assert.match(docsReadme, /verbatim/);
   assert.match(docsReadme, /prose-craft-contract\.md/);
-  assert.match(docsReadme, /manual-render-instruction\.md/);
+  assert.doesNotMatch(docsReadme, /manual-render-instruction\.md/);
 });
 
 test("AC invariant: Manual Studio's package.json forbids @worldloom/patch-engine, @worldloom/world-mcp, better-sqlite3", () => {
