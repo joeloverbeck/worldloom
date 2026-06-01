@@ -43,6 +43,8 @@ function baseInput(overrides: Partial<PromptLintInput> = {}): PromptLintInput {
     resolved_cast_ids: new Set(["mchar-1"]),
     selected_record_ids: ["mbel-1"],
     resolved_record_ids: new Set(["mbel-1"]),
+    latest_segment_available: true,
+    prompt_policy: { include_recent_segments: 0 },
     ...overrides,
   };
 }
@@ -113,7 +115,7 @@ test("rule 4: unresolved record id → hard finding", () => {
   );
 });
 
-test("rule 5: internal id leak in prompt body → soft finding", () => {
+test("rule 5: internal id leak in prompt body → hard finding", () => {
   const dirty = cleanPrompt().replace(
     "A quiet moment.",
     "A quiet moment with mchar-3 in the room.",
@@ -121,14 +123,17 @@ test("rule 5: internal id leak in prompt body → soft finding", () => {
   const result = lintPrompt(baseInput({ markdown: dirty }));
   assert.ok(
     result.findings.some(
-      (f) => f.rule === "no_internal_record_ids" && f.tier === "soft" && f.snippet === "mchar-3",
+      (f) =>
+        f.rule === "no_internal_record_ids" &&
+        f.tier === "hard" &&
+        f.snippet === "mchar-3",
     ),
   );
-  // Soft only → not blocking
-  assert.equal(result.blockingForCopy, false);
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
 });
 
-test("rule 6: engine jargon (STCHAR-7) in body → soft finding", () => {
+test("rule 6: engine jargon (STCHAR-7) in body → hard finding", () => {
   const dirty = cleanPrompt().replace(
     "A scribe.",
     "A scribe linked to STCHAR-7.",
@@ -137,12 +142,16 @@ test("rule 6: engine jargon (STCHAR-7) in body → soft finding", () => {
   assert.ok(
     result.findings.some(
       (f) =>
-        f.rule === "no_engine_jargon" && f.tier === "soft" && f.snippet === "STCHAR-7",
+        f.rule === "no_engine_jargon" &&
+        f.tier === "hard" &&
+        f.snippet === "STCHAR-7",
     ),
   );
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
 });
 
-test("rule 7: schema/validator term → soft finding", () => {
+test("rule 7: schema/validator term → hard finding", () => {
   const dirty = cleanPrompt().replace(
     "POV discipline.",
     "POV discipline; respects the validation_trace.",
@@ -150,12 +159,14 @@ test("rule 7: schema/validator term → soft finding", () => {
   const result = lintPrompt(baseInput({ markdown: dirty }));
   assert.ok(
     result.findings.some(
-      (f) => f.rule === "no_schema_validator_terms" && f.tier === "soft",
+      (f) => f.rule === "no_schema_validator_terms" && f.tier === "hard",
     ),
   );
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
 });
 
-test("rule 8: record-class narrator-voice phrase → soft finding", () => {
+test("rule 8: record-class narrator-voice phrase → hard finding", () => {
   const dirty = cleanPrompt().replace(
     "A scribe.",
     "A scribe whose SF authority is at stake.",
@@ -163,13 +174,21 @@ test("rule 8: record-class narrator-voice phrase → soft finding", () => {
   const result = lintPrompt(baseInput({ markdown: dirty }));
   assert.ok(
     result.findings.some(
-      (f) => f.rule === "no_record_class_narrator_voice" && f.tier === "soft",
+      (f) =>
+        f.rule === "no_record_class_narrator_voice" &&
+        f.tier === "hard",
     ),
   );
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
 });
 
 test("blockingForCopy is true iff any finding has tier=hard", () => {
-  const onlySoft = lintPrompt(
+  const clean = lintPrompt(baseInput());
+  assert.equal(clean.blockingForCopy, false);
+  assert.equal(clean.cleanForCopy, true);
+
+  const promotedLeak = lintPrompt(
     baseInput({
       markdown: cleanPrompt().replace(
         "A scribe.",
@@ -177,9 +196,9 @@ test("blockingForCopy is true iff any finding has tier=hard", () => {
       ),
     }),
   );
-  assert.equal(onlySoft.blockingForCopy, false);
-  assert.equal(onlySoft.cleanForCopy, false);
-  assert.ok(onlySoft.findings.every((f) => f.tier === "soft"));
+  assert.equal(promotedLeak.blockingForCopy, true);
+  assert.equal(promotedLeak.cleanForCopy, false);
+  assert.ok(promotedLeak.findings.some((f) => f.tier === "hard"));
 
   const hardPlus = lintPrompt(
     baseInput({
@@ -219,4 +238,67 @@ test("internal id regex matches lowercase m-prefix ids", () => {
 
 test("RECORD_CLASS_NARRATOR_PHRASES list is non-empty", () => {
   assert.ok(RECORD_CLASS_NARRATOR_PHRASES.length > 0);
+});
+
+test("recent segment required but unavailable → hard finding", () => {
+  const result = lintPrompt(
+    baseInput({
+      latest_segment_available: false,
+      prompt_policy: { include_recent_segments: 1 },
+    }),
+  );
+  assert.ok(
+    result.findings.some(
+      (f) =>
+        f.rule === "recent_segment_required_but_unavailable" &&
+        f.tier === "hard",
+    ),
+  );
+  assert.equal(result.blockingForCopy, true);
+  assert.equal(result.cleanForCopy, false);
+});
+
+test("recent segment unavailable is ignored when policy disables recent prose", () => {
+  const result = lintPrompt(
+    baseInput({
+      latest_segment_available: false,
+      prompt_policy: { include_recent_segments: 0 },
+    }),
+  );
+  assert.equal(
+    result.findings.some(
+      (f) => f.rule === "recent_segment_required_but_unavailable",
+    ),
+    false,
+  );
+});
+
+test("recent segment available satisfies positive recent-prose policy", () => {
+  const result = lintPrompt(
+    baseInput({
+      latest_segment_available: true,
+      prompt_policy: { include_recent_segments: 2 },
+    }),
+  );
+  assert.equal(
+    result.findings.some(
+      (f) => f.rule === "recent_segment_required_but_unavailable",
+    ),
+    false,
+  );
+});
+
+test("recent segment availability is irrelevant when recent-prose policy is disabled", () => {
+  const result = lintPrompt(
+    baseInput({
+      latest_segment_available: true,
+      prompt_policy: { include_recent_segments: 0 },
+    }),
+  );
+  assert.equal(
+    result.findings.some(
+      (f) => f.rule === "recent_segment_required_but_unavailable",
+    ),
+    false,
+  );
 });

@@ -4,8 +4,7 @@
 // /api/worlds/:slug/manual-stories/:msSlug/...:
 //
 //   POST   .../prompts/preview     — compose + lint, no write
-//   POST   .../prompts             — compose + lint + write (with optional
-//                                     lint_override for soft-finding saves)
+//   POST   .../prompts             — compose + lint + write
 //   GET    .../prompts             — list saved prompts (id / created_at /
 //                                     directive snippet)
 //   GET    .../prompts/:promptId   — read one saved prompt + sidecar
@@ -24,7 +23,6 @@ import { composePrompt } from "../../prompt/compose.js";
 import type {
   PromptComposeInput,
   PromptComposeResult,
-  PromptLintFinding,
   PromptRunSidecar,
 } from "../../prompt/types.js";
 import { listSegments, readSegmentSidecar } from "../../read/segments.js";
@@ -55,12 +53,7 @@ interface ComposeBody {
   selected_template?: string | null;
 }
 
-interface SaveBody extends ComposeBody {
-  lint_override?: {
-    findings: PromptLintFinding[];
-    copied_anyway_at: string;
-  };
-}
+interface SaveBody extends ComposeBody {}
 
 function resolveRootOrNull(
   repoRoot: string,
@@ -321,17 +314,13 @@ export async function registerPromptsWriteRoutes(
       );
       if (blocked) return blocked;
       const result: PromptComposeResult = await composePrompt(built);
-      if (result.lint.blockingForCopy && !body.lint_override) {
+      if (result.lint.blockingForCopy) {
         return reply.code(409).send({
           error: "lint_blocks_save",
           findings: result.lint.findings,
         });
       }
-      const saved = writePrompt(
-        body.lint_override
-          ? { root, composeResult: result, lint_override: body.lint_override }
-          : { root, composeResult: result },
-      );
+      const saved = writePrompt({ root, composeResult: result });
       return reply.code(201).send({
         id: saved.id,
         markdown_path: saved.markdown_path,

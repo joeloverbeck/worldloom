@@ -71,12 +71,7 @@ export type SavePromptOutcome =
 export async function savePrompt(
   worldSlug: string,
   msSlug: string,
-  input: PromptComposeRequestInput & {
-    lint_override?: {
-      findings: PromptLintFinding[];
-      copied_anyway_at: string;
-    };
-  },
+  input: PromptComposeRequestInput,
 ): Promise<SavePromptOutcome> {
   const response = await fetch(promptsBase(worldSlug, msSlug), {
     method: "POST",

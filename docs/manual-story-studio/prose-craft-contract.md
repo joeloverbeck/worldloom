@@ -39,7 +39,7 @@ Move down and up the ladder of abstraction. Don't dwell at either rung. A whole 
 
 ## No Ledger Jargon
 
-The character does not know they live inside a ledger. Do not use Worldloom record-class names or schema vocabulary in narrator voice or interiority. No record-id-shaped tokens (uppercase class prefix followed by a hyphen and digits), no validator vocabulary, no lifecycle or supersession terminology, no patch or engine or op vocabulary.
+The character does not know they live inside a ledger. Do not use Worldloom record-class names or data-model vocabulary in narrator voice or interiority. No record-id-shaped tokens (uppercase class prefix followed by a hyphen and digits), no tool-check vocabulary, no lifecycle or replacement-history terminology, no engine-operation vocabulary.
 
 The POV's interior may name a *secret*, a *promise*, a *debt*, a *bruise*, a *suspicion* — never a record id. The composer translates record content into novelist-facing prose for §3 through §12 of the prompt; this rule restates that translation discipline as a craft rule the LLM must honor in its output.
 

@@ -81,7 +81,7 @@ test("updateManualStoryMetadata: schema-fail rejects invalid enum; file not writ
   }
 });
 
-test("makeDefaultManualStoryMetadata: prompt_policy.recent_template_advisory_window defaults to 2", () => {
+test("makeDefaultManualStoryMetadata: prompt_policy defaults keep first prompt copyable", () => {
   const metadata = makeDefaultManualStoryMetadata(
     "test-world",
     "test-story",
@@ -89,6 +89,7 @@ test("makeDefaultManualStoryMetadata: prompt_policy.recent_template_advisory_win
     "2026-05-31T00:00:00.000Z",
   );
   assert.equal(metadata.prompt_policy.recent_template_advisory_window, 2);
+  assert.equal(metadata.prompt_policy.include_recent_segments, 0);
 });
 
 test("updateManualStoryMetadata: rejects absolute relativePath via safeWriteFile guard", async () => {

@@ -204,11 +204,12 @@ test("POST /prompts returns 409 lint_blocks_save when hard finding + no override
   }
 });
 
-test("POST /prompts with lint_override persists the override into the sidecar", async () => {
+test("POST /prompts ignores lint_override and still blocks hard findings", async () => {
   const { repoRoot, worldSlug, msSlug, root } = mkWorld();
   try {
     const server = await createServer({ repoRoot });
     try {
+      // SPEC-106: lint_override no longer bypasses the save-blocking lint gate.
       const r = await server.inject({
         method: "POST",
         url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/prompts`,
@@ -224,18 +225,16 @@ test("POST /prompts with lint_override persists the override into the sidecar", 
           },
         },
       });
-      assert.equal(r.statusCode, 201);
-      const body = r.json() as { id: string };
+      assert.equal(r.statusCode, 409);
+      const body = r.json() as { error: string; findings: Array<{ tier: string }> };
+      assert.equal(body.error, "lint_blocks_save");
+      assert.ok(body.findings.some((f) => f.tier === "hard"));
       const sidecarPath = path.join(
         root.absolutePath,
         "prompt-runs",
-        `${body.id}.yaml`,
+        "PROMPT-1.yaml",
       );
-      const sidecar = YAML.parse(
-        readFileSync(sidecarPath, "utf8"),
-      ) as { lint_override?: { findings: unknown[] } };
-      assert.ok(sidecar.lint_override);
-      assert.equal(sidecar.lint_override?.findings?.length, 1);
+      assert.equal(existsSync(sidecarPath), false);
     } finally {
       await server.close();
     }

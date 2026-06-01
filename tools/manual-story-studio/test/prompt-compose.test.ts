@@ -118,6 +118,9 @@ test("AC #1 — composePrompt is byte-deterministic across 5 invocations", async
     };
     const first = await composePrompt(input);
     assert.ok(first.markdown.length > 0);
+    assert.equal(first.lint.cleanForCopy, true);
+    assert.equal(first.lint.blockingForCopy, false);
+    assert.deepEqual(first.lint.findings, []);
     for (let i = 0; i < 4; i++) {
       const next = await composePrompt(input);
       assert.equal(
@@ -185,6 +188,37 @@ test("no-segments-yet path produces §3 without the recent-segment paragraph", a
       included_records: [],
     });
     assert.ok(!result.markdown.includes("Most recent prose"));
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("required recent segment unavailable surfaces hard lint finding", async () => {
+  const { tempRoot, manualStoryRoot } = mkFixture();
+  try {
+    const meta = baseMetadata();
+    meta.prompt_policy.include_recent_segments = 1;
+    writeFileSync(
+      path.join(manualStoryRoot, "manual-story.yaml"),
+      YAML.stringify(meta),
+    );
+
+    const result = await composePrompt({
+      manualStoryRoot,
+      repoRoot: tempRoot,
+      moment_directive: "Jon stays in his chair.",
+      included_cast: ["mchar-1"],
+      included_records: [],
+    });
+    assert.ok(!result.markdown.includes("Most recent prose"));
+    assert.ok(
+      result.lint.findings.some(
+        (f) =>
+          f.rule === "recent_segment_required_but_unavailable" &&
+          f.tier === "hard",
+      ),
+    );
+    assert.equal(result.lint.blockingForCopy, true);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
