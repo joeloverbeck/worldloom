@@ -24,6 +24,10 @@ function isManualRecordClass(value: string | null): value is ManualRecordClass {
   return (MANUAL_RECORD_CLASSES as readonly string[]).includes(value);
 }
 
+function loadErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export function Records() {
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
@@ -52,6 +56,9 @@ export function Records() {
   const [tagFilter, setTagFilter] = useState("");
   const [importanceFilter, setImportanceFilter] = useState<string[]>([]);
   const [deleteOutcome, setDeleteOutcome] = useState<DeleteResult | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
+  const [castFilterError, setCastFilterError] = useState<string | null>(null);
+  const [detailError, setDetailError] = useState<string | null>(null);
   const castFilterIds = useMemo(
     () =>
       castFilter
@@ -73,12 +80,19 @@ export function Records() {
   useEffect(() => {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
+    setListError(null);
     apiList(worldSlug, msSlug, activeClass, { includeArchived })
       .then((records) => {
-        if (!cancelled) setSummaries(records);
+        if (!cancelled) {
+          setSummaries(records);
+          setListError(null);
+        }
       })
-      .catch(() => {
-        if (!cancelled) setSummaries([]);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setSummaries([]);
+          setListError(loadErrorMessage(error));
+        }
       });
     return () => {
       cancelled = true;
@@ -89,10 +103,12 @@ export function Records() {
   useEffect(() => {
     if (!worldSlug || !msSlug || castFilterIds.length === 0) {
       setCastFilteredIds(null);
+      setCastFilterError(null);
       return;
     }
 
     let cancelled = false;
+    setCastFilterError(null);
     const castSet = new Set(castFilterIds);
     Promise.all(
       summaries.map(async (summary) => {
@@ -105,10 +121,14 @@ export function Records() {
       .then((ids) => {
         if (!cancelled) {
           setCastFilteredIds(new Set(ids.filter((id): id is string => id != null)));
+          setCastFilterError(null);
         }
       })
-      .catch(() => {
-        if (!cancelled) setCastFilteredIds(new Set());
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setCastFilteredIds(new Set());
+          setCastFilterError(loadErrorMessage(error));
+        }
       });
     return () => {
       cancelled = true;
@@ -119,15 +139,23 @@ export function Records() {
   useEffect(() => {
     if (!worldSlug || !msSlug || !selectedId) {
       setSelectedRecord(null);
+      setDetailError(null);
       return;
     }
     let cancelled = false;
+    setDetailError(null);
     apiRead(worldSlug, msSlug, activeClass, selectedId)
       .then((rec) => {
-        if (!cancelled) setSelectedRecord(rec);
+        if (!cancelled) {
+          setSelectedRecord(rec);
+          setDetailError(null);
+        }
       })
-      .catch(() => {
-        if (!cancelled) setSelectedRecord(null);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setSelectedRecord(null);
+          setDetailError(loadErrorMessage(error));
+        }
       });
     return () => {
       cancelled = true;
@@ -155,18 +183,19 @@ export function Records() {
   async function handleSave(
     record: ManualRecord,
     opts?: { overrideBrokenRefs?: boolean },
-  ) {
-    if (!worldSlug || !msSlug) return;
+  ): Promise<boolean> {
+    if (!worldSlug || !msSlug) return false;
     setSaveError(null);
     if (creating) {
       const result = await apiCreate(worldSlug, msSlug, activeClass, record, opts);
       if (result.ok) {
         setCreating(false);
         setSelectedId(result.id);
+        return true;
       } else {
         setSaveError(result);
+        return false;
       }
-      return;
     }
     if (selectedId) {
       const result = await apiUpdate(
@@ -179,10 +208,13 @@ export function Records() {
       );
       if (result.ok) {
         setSelectedRecord(result.record);
+        return true;
       } else if (result.error !== "not_found") {
         setSaveError(result);
       }
+      return false;
     }
+    return false;
   }
 
   async function handleDelete() {
@@ -311,7 +343,11 @@ export function Records() {
             ))}
           </fieldset>
         </header>
-        {filteredSummaries.length === 0 ? (
+        {listError ? (
+          <p role="alert">Failed to load records: {listError}</p>
+        ) : castFilterError ? (
+          <p role="alert">Failed to apply cast filter: {castFilterError}</p>
+        ) : filteredSummaries.length === 0 ? (
           <p>No records.</p>
         ) : (
           filteredSummaries.map((s) => (
@@ -323,6 +359,7 @@ export function Records() {
                 setCreating(false);
                 setSaveError(null);
                 setDeleteOutcome(null);
+                setDetailError(null);
               }}
             />
           ))
@@ -375,6 +412,8 @@ export function Records() {
                 <p>Force-deleted at {deleteOutcome.auditEntry.deletedAt}.</p>
               ) : null}
             </>
+          ) : detailError ? (
+            <p role="alert">Failed to load record: {detailError}</p>
           ) : (
             <p>Loading record…</p>
           )

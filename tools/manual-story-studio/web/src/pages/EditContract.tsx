@@ -5,6 +5,7 @@ import {
   readMetadata as apiReadMetadata,
   updateMetadata as apiUpdateMetadata,
 } from "../api/records.js";
+import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import type {
   ManualStoryContentIntensity,
   ManualStoryDialogueDensity,
@@ -72,6 +73,10 @@ const PARAGRAPHING_OPTIONS: ManualStoryParagraphing[] = [
   "mixed",
 ];
 
+function loadErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export function EditContract() {
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
@@ -81,6 +86,7 @@ export function EditContract() {
   const [metadata, setMetadata] = useState<ManualStoryMetadata | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<
@@ -92,17 +98,23 @@ export function EditContract() {
     let cancelled = false;
     setLoading(true);
     setLoadFailed(false);
+    setLoadError(null);
     apiReadMetadata(worldSlug, msSlug)
       .then((m) => {
         if (cancelled) return;
         if (m === null) {
           setLoadFailed(true);
+          setLoadError("metadata was not found");
         } else {
           setMetadata(m);
+          setLoadError(null);
         }
       })
-      .catch(() => {
-        if (!cancelled) setLoadFailed(true);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setLoadFailed(true);
+          setLoadError(loadErrorMessage(error));
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -111,6 +123,11 @@ export function EditContract() {
       cancelled = true;
     };
   }, [worldSlug, msSlug]);
+
+  const unsavedChanges = useUnsavedChanges(metadata?.story_contract ?? null, {
+    enabled: metadata !== null && !loading && !loadFailed,
+    resetKeys: [worldSlug, msSlug, metadata?.updated_at ?? "unloaded"],
+  });
 
   if (!worldSlug || !msSlug) {
     return <p role="alert">Missing world or manual story slug.</p>;
@@ -121,7 +138,11 @@ export function EditContract() {
   }
 
   if (loadFailed || metadata === null) {
-    return <p role="alert">Failed to load metadata.</p>;
+    return (
+      <p role="alert">
+        Failed to load metadata{loadError ? `: ${loadError}` : "."}
+      </p>
+    );
   }
 
   const contract = metadata.story_contract;
@@ -164,6 +185,7 @@ export function EditContract() {
     try {
       const result = await apiUpdateMetadata(worldSlug, msSlug, metadata);
       if (result.ok) {
+        unsavedChanges.reset();
         navigate(`/worlds/${worldSlug}/manual-stories/${msSlug}/dashboard`);
         return;
       }

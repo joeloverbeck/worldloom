@@ -6,6 +6,7 @@ import {
   saveCurrentContext,
 } from "../api/current-context.js";
 import { RefList } from "../components/RefList.js";
+import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import {
   MANUAL_RECORD_CLASS_PREFIXES,
   type CurrentContext,
@@ -243,6 +244,10 @@ export function EditCurrentContext() {
   const serverErrors = useMemo(() => errorsByField(saveFindings), [saveFindings]);
   const canSave =
     clientErrors.size === 0 && !saving && !loading && loadError === null;
+  const unsavedChanges = useUnsavedChanges(ctx, {
+    enabled: !loading && loadError === null,
+    resetKeys: [worldSlug, msSlug, loading ? "loading" : "loaded"],
+  });
 
   if (!worldSlug || !msSlug) {
     return <p role="alert">Missing world or manual story slug.</p>;
@@ -271,6 +276,7 @@ export function EditCurrentContext() {
     try {
       const result = await saveCurrentContext(world, story, ctx);
       if (result.ok) {
+        unsavedChanges.reset();
         navigate(`${routeBase}/dashboard`);
       } else {
         setSaveFindings(result.findings);

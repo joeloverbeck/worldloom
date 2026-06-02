@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-01
 **Scope:** the seven specs derived from the critical triage of `reports/manual-story-studio-second-iteration.md`. All seven are Manual Story Studio (`tools/manual-story-studio`) tooling-adjacent work; none touch canon, MCP, patch engine, or world-index beyond `enumerate.ts`'s already-shipped exclusion.
-**Status:** SPEC-105, SPEC-106, SPEC-107, SPEC-108, SPEC-109, and SPEC-110 are completed and archived; this order now governs SPEC-111.
+**Status:** COMPLETED — SPEC-105, SPEC-106, SPEC-107, SPEC-108, SPEC-109, SPEC-110, and SPEC-111 are completed and archived.
 
 ---
 
@@ -13,13 +13,13 @@ SPEC-105 (integrity foundation)
   ├─→ SPEC-108 (segment lifecycle — depends on typed-error reads)
   ├─→ SPEC-109 (current-context layer — depends on typed-error reads)
   ├─→ SPEC-110 (beat template fields — complete)
-  └─→ SPEC-111 (UX cockpit pieces — depends on /health endpoint + HealthBanner scaffold)
+  └─→ SPEC-111 (UX cockpit pieces — complete)
 
 SPEC-106 (prompt leakage hard-tier) — complete
 SPEC-107 (prose/state contract correction) — complete
 
 SPEC-109 (current-context layer) — complete
-  └─→ SPEC-111 (UX cockpit pieces — Dashboard CurrentStatePanel consumes current-context)
+  └─→ SPEC-111 (UX cockpit pieces — complete)
 ```
 
 SPEC-107 had no inbound dependencies and is complete. SPEC-106 had no inbound dependencies and is complete.
@@ -39,7 +39,7 @@ SPEC-107 had no inbound dependencies and is complete. SPEC-106 had no inbound de
 6. **SPEC-110** — Beat template pressure/turn card fields.
    *Completed and archived.* Downstream references should treat `archive/specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md` as landed. Ticket evidence lives in `archive/tickets/SPEC110MANSTOSTU-001.md` through `archive/tickets/SPEC110MANSTOSTU-007.md`.
 7. **SPEC-111** — UX cockpit pieces (health banner persistence, sibling-page nav, ID hiding, unsaved-change handling).
-   *Depends on 105 + 109.* Lands last; consumes both the health-banner scaffold from 105 and the current-context surface from 109 for the Dashboard cockpit reshape.
+   *Completed and archived.* Downstream references should treat `archive/specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md` as landed. Ticket evidence lives in `archive/tickets/SPEC111MANSTOSTU-001.md` through `archive/tickets/SPEC111MANSTOSTU-005.md`.
 
 ## Concurrency hint
 
@@ -47,9 +47,9 @@ A small team or a single contributor with parallel branches can ship in the foll
 
 - **Wave 1**: SPEC-105 alone (complete).
 - **Wave 2**: SPEC-106, SPEC-107, SPEC-108, SPEC-109, and SPEC-110 complete.
-- **Wave 3**: SPEC-111 after archived SPEC-109 and SPEC-110.
+- **Wave 3**: SPEC-111 after archived SPEC-109 and SPEC-110 (complete).
 
-A solo contributor working serially follows the remaining numbered list above (111). The numeric order is one valid implementation sequence and the recommended default; the dependency graph above is authoritative.
+A solo contributor working serially has completed the numbered list above. The numeric order was one valid implementation sequence and the recommended default; the dependency graph above is authoritative.
 
 ## Notes
 
@@ -61,3 +61,18 @@ A solo contributor working serially follows the remaining numbered list above (1
 ## Triage reference
 
 Full per-finding verdicts and rationale: `docs/triage/2026-06-01-manual-story-studio-second-iteration-triage.md`.
+
+## Outcome
+
+Completed on 2026-06-02. The full SPEC-105 through SPEC-111 Manual Story Studio implementation batch is complete and archived. SPEC-111 landed last, consuming the archived SPEC-105 health/banner foundation and archived SPEC-109 current-context surface.
+
+Archived specs:
+- `archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md`
+- `archive/specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md`
+- `archive/specs/SPEC-107-manual-story-studio-prose-state-contract-correction.md`
+- `archive/specs/SPEC-108-manual-story-studio-segment-lifecycle-append-only.md`
+- `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md`
+- `archive/specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md`
+- `archive/specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md`
+
+Verification: each spec's archived tickets carry its implementation evidence. SPEC-111 final proof included `cd tools/manual-story-studio && npm test`, zero exact `.catch(() => {})` grep, static route/hook/ID proofs, and Playwright dirty-navigation smoke.

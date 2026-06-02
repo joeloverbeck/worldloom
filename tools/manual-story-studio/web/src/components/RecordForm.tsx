@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import type { CreateResult } from "../api/records.js";
+import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import type {
   ManualRecord,
   ManualRecordClass,
@@ -17,7 +18,7 @@ export interface RecordFormProps {
   onSave: (
     record: ManualRecord,
     opts?: { overrideBrokenRefs?: boolean },
-  ) => void | Promise<void>;
+  ) => boolean | void | Promise<boolean | void>;
   onCancel: () => void;
   saveError?: Exclude<CreateResult, { ok: true }> | null;
 }
@@ -493,13 +494,23 @@ export function RecordForm(props: RecordFormProps) {
     return base as ManualRecord;
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const draftRecord = useMemo(
+    () => buildRecord(),
+    [common, perClass, axes, castNested, relationshipBehavior, recordClass],
+  );
+  const unsavedChanges = useUnsavedChanges(draftRecord, {
+    resetKeys: [recordClass, initial?.id ?? "new"],
+  });
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    void onSave(buildRecord());
+    const result = await onSave(draftRecord);
+    if (result !== false) unsavedChanges.reset();
   }
 
-  function handleSaveAnyway() {
-    void onSave(buildRecord(), { overrideBrokenRefs: true });
+  async function handleSaveAnyway() {
+    const result = await onSave(draftRecord, { overrideBrokenRefs: true });
+    if (result !== false) unsavedChanges.reset();
   }
 
   return (

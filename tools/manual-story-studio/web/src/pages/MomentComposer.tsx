@@ -5,6 +5,7 @@ import { fetchCurrentContext } from "../api/current-context.js";
 import { previewPrompt } from "../api/prompts.js";
 import { listRecords, readMetadata } from "../api/records.js";
 import { BeatTemplateCandidates } from "../components/BeatTemplateCandidates.js";
+import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import {
   BEAT_TEMPLATE_PRESSURE_TYPES,
   MANUAL_RECORD_CLASSES,
@@ -18,6 +19,10 @@ const SUGGEST_IMPORTANCE = new Set(["high", "central"]);
 
 function loadErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "request failed";
+}
+
+function IdSubscript({ id }: { id: string }) {
+  return <span className="id-subscript">{id}</span>;
 }
 
 interface RecordWithClass {
@@ -161,6 +166,17 @@ export function MomentComposer() {
     [allRecords, pinnedRecordIds],
   );
 
+  const unsavedChanges = useUnsavedChanges(
+    {
+      momentDirective,
+      includedCast,
+      pinnedRecordIds,
+      selectedTemplateId,
+      desiredPressureType,
+    },
+    { resetKeys: [worldSlug, msSlug] },
+  );
+
   const canGenerate =
     momentDirective.trim().length > 0 && includedCast.length > 0;
 
@@ -194,6 +210,7 @@ export function MomentComposer() {
         composeInput.selected_template = selectedTemplateId;
       }
       const result = await previewPrompt(worldSlug, msSlug, composeInput);
+      unsavedChanges.reset();
       navigate(
         `/worlds/${worldSlug}/manual-stories/${msSlug}/prompts/preview`,
         { state: { composeResult: result, composeInput } },
@@ -269,7 +286,7 @@ export function MomentComposer() {
                     checked={includedCast.includes(c.id)}
                     onChange={() => toggleCast(c.id)}
                   />{" "}
-                  {c.title}
+                  {c.title} <IdSubscript id={c.id} />
                 </label>
               </li>
             ))}
@@ -299,7 +316,7 @@ export function MomentComposer() {
                   <span style={{ fontFamily: "monospace", fontSize: "0.85em" }}>
                     [{cls}]
                   </span>{" "}
-                  {summary.title}{" "}
+                  {summary.title} <IdSubscript id={summary.id} />{" "}
                   <em>({summary.importance})</em>
                 </li>
               ))}
@@ -316,7 +333,7 @@ export function MomentComposer() {
                   <span style={{ fontFamily: "monospace", fontSize: "0.85em" }}>
                     [{cls}]
                   </span>{" "}
-                  {summary.title}
+                  {summary.title} <IdSubscript id={summary.id} />
                 </li>
               ))}
             </ul>

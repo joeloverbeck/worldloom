@@ -112,14 +112,52 @@ select:focus-visible {
   font-style: italic;
 }
 
-nav {
+.story-page-nav {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   padding: var(--space-3) var(--space-5);
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  overflow-x: auto;
 }
 
-nav a {
+.story-page-nav a {
   font-weight: 600;
+}
+
+.story-page-nav__home {
+  flex: 0 0 auto;
+  padding-right: var(--space-4);
+  border-right: 1px solid var(--border);
+}
+
+.story-page-nav__tabs {
+  display: flex;
+  flex: 1 1 auto;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.story-page-nav__tab {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: var(--space-1) var(--space-2);
+  white-space: nowrap;
+}
+
+.story-page-nav__tab:hover,
+.story-page-nav__tab:focus-visible {
+  border-color: var(--border);
+  text-decoration: none;
+}
+
+.story-page-nav__tab--active {
+  color: var(--text);
+  background: var(--surface-muted);
+  border-color: var(--border);
 }
 
 .health-banner {
@@ -216,6 +254,91 @@ main ul,
 main ol {
   margin: 0;
   padding-left: var(--space-5);
+}
+
+.manual-dashboard {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.dashboard-cockpit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-4);
+}
+
+.dashboard-compact-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dashboard-item-meta,
+.id-subscript {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.id-subscript {
+  display: inline-block;
+  margin-left: var(--space-1);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.dashboard-link-row,
+.status-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  border: 1px solid var(--warning-border);
+  border-radius: 4px;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.status-chip--ok {
+  border-color: #94b49f;
+  background: #eef8f0;
+  color: #255333;
+}
+
+.dashboard-contract-summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-3);
+}
+
+.dashboard-contract-summary dt {
+  color: var(--text-muted);
+}
+
+.dashboard-contract-summary dd {
+  margin: 0;
+}
+
+.importance-disclosure {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: var(--space-4) var(--space-5);
+}
+
+.importance-disclosure > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.importance-disclosure > section {
+  margin-top: var(--space-4);
 }
 
 main ul li + li,

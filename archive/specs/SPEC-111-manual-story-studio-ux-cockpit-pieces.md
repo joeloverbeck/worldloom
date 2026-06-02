@@ -1,12 +1,14 @@
 # SPEC-111 — Manual Story Studio: UX Cockpit Pieces — Health Banner, ID Hiding, Sibling Nav, Unsaved-Change Handling
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-06-01
 **Classification:** tooling-adjacent (web frontend changes only; no canon-pipeline integration).
-**Depends on:** archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (consumes the landed `/health` endpoint + App-level health banner mount), SPEC-109 (consumes the current-context surface for the Dashboard cockpit panel).
+**Depends on:** archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (consumes the landed `/health` endpoint + App-level health banner mount), archive/specs/SPEC-109-manual-story-studio-current-context-layer.md (consumes the current-context surface for the Dashboard cockpit panel).
 **Blocks:** —
 **Related:** `tools/manual-story-studio/web/src/App.tsx`, `tools/manual-story-studio/web/src/pages/Dashboard.tsx`, `tools/manual-story-studio/web/src/pages/MomentComposer.tsx`, `tools/manual-story-studio/web/src/pages/Records.tsx`, `tools/manual-story-studio/web/src/pages/PromptPreview.tsx`, all pages under `web/src/pages/`.
 **Source:** critical triage of `reports/manual-story-studio-second-iteration.md` §§5 / 18 / 29 / 31 Stage 8 (ChatGPT-Pro, 2026-06-01). Accepted with modification: the report's full "single cockpit page" rewrite is scope-large; this spec captures the load-bearing pieces (persistent health banner, ID hiding from primary UI, sibling-page nav across all cockpit pages, unsaved-change handling on directive/contract/records). Keyboard shortcuts and the `/` quick-search are explicitly **deferred** to a follow-up spec when the foundational pieces are validated in use.
+
+**Implementation note (2026-06-02):** Completed through archive/tickets/SPEC111MANSTOSTU-001.md through archive/tickets/SPEC111MANSTOSTU-005.md. The implementation preserved SPEC-105's single HealthBanner mount, added App-level StoryPageNav, reshaped Dashboard, hid primary-surface IDs, wired unsaved-change protection to the five save-backed editor forms, converted App to a React Router data router for `useBlocker`, and added a no-silent-catch regression guard. Ticket 005 broadened from confirmatory sweep to same-seam cleanup after live reassessment found non-exact silent promise fallbacks in four list/detail pages.
 
 ---
 
@@ -32,7 +34,7 @@ This spec implements the four load-bearing cockpit pieces. The full single-page 
 
 1. **Respect the existing persistent health banner.** SPEC-105 already mounts `<HealthBanner />` in `App.tsx` for per-story routes. This spec must keep that mount as the single source of health rendering and should not add a duplicate banner.
 
-2. **Sibling-page nav component.** New `web/src/components/StoryPageNav.tsx` rendering tabs (or a horizontal nav strip) for the per-story pages: Dashboard, Current State (SPEC-109 page), Cast, Records, Beat Templates, Moment Composer, Prompt Preview, Prompt History, Paste Prose, Manuscript, Repair (SPEC-108). Active page highlighted; consistent ordering everywhere. Mounted by `App.tsx` just below the health banner, also conditional on the per-story URL pattern.
+2. **Sibling-page nav component.** New `web/src/components/StoryPageNav.tsx` rendering tabs (or a horizontal nav strip) for the per-story pages: Dashboard, Current State (SPEC-109 page), Cast, Records, Beat Templates, Moment Composer, Prompt Preview, Prompt History, Paste Prose, Manuscript, Edit Contract, Repair (SPEC-108). Active page highlighted; consistent ordering everywhere. Mounted by `App.tsx` just below the health banner, also conditional on the per-story URL pattern. This App-level strip **supersedes** the per-page sibling nav MSSUX-006 added to `Dashboard.tsx` (the `<nav aria-label="story-pages">` block at `Dashboard.tsx:184–210`) — that block must be removed when `StoryPageNav` lands, otherwise both navs render. No other page carries a local sibling nav (grep-confirmed), so Dashboard is the only removal site.
 
 3. **Hide internal IDs from primary UI.** Survey every page under `web/src/pages/` and audit each surface where a record ID is rendered. For each:
    - If the ID is the *primary label* (e.g., a Records-page row): replace the ID with the record's `title`; the ID becomes a small grey subscript visible on hover or in a "Show details" disclosure.
@@ -41,7 +43,7 @@ This spec implements the four load-bearing cockpit pieces. The full single-page 
 
    The Dashboard's cast and record summary panels (verified to surface IDs at the row-label level) are the primary target.
 
-4. **Replace remaining silent-error patterns.** SPEC-105 removes the 7 explicit `.catch(() => {})` occurrences in Dashboard and MomentComposer. This spec scans the full `web/src/` tree for further silent-error patterns (`try {} catch {}`, swallowed promise rejections, `?? []` after a failed fetch) and replaces them with surfaced error states. This is a frontend hygiene pass complementing SPEC-105's backend integrity work.
+4. **Confirm silent-error cleanup is complete (regression guard).** SPEC-105 removed the 7 explicit `.catch(() => {})` occurrences in Dashboard and MomentComposer. A tree-wide grep at reassessment time (2026-06-02) confirms **zero** `.catch(() => {})` remain anywhere in `web/src/`, and the surviving `catch {}` blocks (`api/manuscript.ts`, `api/segments.ts`, `api/prompts.ts`) are legitimate `readErrorBody` fallbacks that return a typed message rather than silent swallows — Dashboard already surfaces every fetch error through an `*Error` state with a Retry button. This spec therefore performs a confirmatory sweep of the full `web/src/` tree (no genuine swallow targets are expected; surface any newly-discovered `try {} catch {}` / swallowed rejection / `?? []`-after-failed-fetch as an error state if found) and keeps AC#6 as a regression guard. The active cleanup landed with SPEC-105 — this deliverable does not re-do it.
 
 5. **Unsaved-change handling.** New hook `web/src/hooks/useUnsavedChanges.ts`:
    - Tracks a "dirty" flag derived from comparing the current form state to the last-saved snapshot.
@@ -50,12 +52,13 @@ This spec implements the four load-bearing cockpit pieces. The full single-page 
    - Reset on successful save.
    
    Apply the hook to:
-   - `Dashboard.tsx`'s directive draft input.
    - `MomentComposer.tsx`'s directive + selected cast/records.
    - `EditContract.tsx`'s contract fields.
    - `RecordForm.tsx`'s record editor.
    - `BeatTemplateForm.tsx`'s template editor.
    - `EditCurrentContext.tsx`'s context form (SPEC-109).
+
+   **Not** applied to `Dashboard.tsx`'s directive draft: that input is unsaved-by-design scratch state (`Dashboard.tsx:38`, no save handler — the placeholder reads "saved by SPEC-102" but nothing persists it here), so the hook's reset-on-save can never fire and an in-app blocker would prompt on every navigation after typing. `MomentComposer.tsx` is where the directive is actually consumed and is covered above.
 
 6. **Dashboard cockpit reshape.** The Dashboard's primary surface becomes the Current State panel from SPEC-109. Below it:
    - "Recent segments" panel (last 3 segments by ID + title + word count + timestamp).
@@ -99,7 +102,7 @@ This spec implements the four load-bearing cockpit pieces. The full single-page 
 
 - `tools/manual-story-studio/web/src/components/StoryPageNav.tsx` — tab/nav strip per §2 item 2.
 - `tools/manual-story-studio/web/src/hooks/useUnsavedChanges.ts` — dirty-flag hook + navigation blocker per §2 item 5.
-- `tools/manual-story-studio/web/src/hooks/useStoryRouteMatch.ts` — small helper for the App-level mount condition.
+- `tools/manual-story-studio/web/src/hooks/useStoryRouteMatch.ts` — small helper for the App-level mount condition. **Extract** the existing `parseStoryPath` route-matcher from `HealthBanner.tsx` (lines 18–34, landed by SPEC-105) into this shared helper rather than authoring a parallel matcher, and refactor `HealthBanner` to consume it, so there is a single source of the per-story URL match (`StoryPageNav` + `HealthBanner` both use it).
 - `tools/manual-story-studio/test/web/useUnsavedChanges.test.ts` — hook unit test (or static-analysis check per §2 item 7).
 
 **Modify:**
@@ -109,11 +112,12 @@ This spec implements the four load-bearing cockpit pieces. The full single-page 
   - Mount `<StoryPageNav />` below the health banner, conditional on per-story URL.
   - Remove the existing single-link `<nav>` block; world-level nav (back to Worlds) lives in the per-story banner.
 - `tools/manual-story-studio/web/src/pages/Dashboard.tsx`:
-  - Promote `<CurrentStatePanel />` (from SPEC-109) to the top.
+  - Remove the MSSUX-006 Dashboard-local `<nav aria-label="story-pages">` block (`Dashboard.tsx:184–210`); the App-level `<StoryPageNav />` (§2 item 2) supersedes it.
+  - Promote `<CurrentStatePanel />` (already imported and rendered at `Dashboard.tsx:212`) to the top of the page.
   - Add Recent Segments, Active Prompt Artifacts, Contract Status panels.
   - Move importance-bucketed records into a disclosure block.
   - Hide cast/record IDs from primary labels per §2 item 3.
-  - Apply `useUnsavedChanges` to the directive draft input.
+  - (The directive draft input is **not** wrapped in `useUnsavedChanges` — see §2 item 5's exclusion note.)
 - `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` — apply `useUnsavedChanges`; audit ID rendering in record-selection panels and hide as primary labels.
 - `tools/manual-story-studio/web/src/pages/Records.tsx` — audit; record row labels render `title` primarily, ID as small disclosure.
 - `tools/manual-story-studio/web/src/pages/CastAndProfiles.tsx` — audit; cast row labels render `title` (character name) primarily, ID as small disclosure.
@@ -123,6 +127,7 @@ This spec implements the four load-bearing cockpit pieces. The full single-page 
 - `tools/manual-story-studio/web/src/components/RecordForm.tsx` — apply `useUnsavedChanges`.
 - `tools/manual-story-studio/web/src/components/BeatTemplateForm.tsx` — apply `useUnsavedChanges`.
 - `tools/manual-story-studio/web/src/pages/EditCurrentContext.tsx` (from SPEC-109) — apply `useUnsavedChanges`.
+- `tools/manual-story-studio/web/src/components/HealthBanner.tsx` — refactor to consume the extracted `useStoryRouteMatch` helper (per §4 Create); behavior-preserving (no change to when the banner shows/hides).
 - `tools/manual-story-studio/web/src/index.css` — styles for the new nav strip, health banner positioning, ID-disclosure subscript visual treatment.
 
 **Survey + selective fixes (silent-error sweep):**
@@ -160,19 +165,41 @@ Manual verification scenarios (each gates a §7 acceptance criterion):
 
 ## 7. Acceptance criteria
 
-1. `<HealthBanner />` mounts persistently when URL matches `/worlds/:worldSlug/manual-stories/:msSlug/*` and hides outside that pattern. (verified by manual scenario 1)
+1. `<HealthBanner />` renders on per-story URLs matching `/worlds/:worldSlug/manual-stories/:msSlug/*` when health is degraded or blocked, and is hidden when status is `ok` or the URL is off-pattern (its landed behavior — `HealthBanner.tsx:41` returns `null` unless on a per-story path and `status !== "ok"`). (verified by manual scenario 1)
 2. `<StoryPageNav />` mounts under the same condition; tabs link to all per-story pages; active tab reflects current route. (manual scenario 2)
-3. Dashboard's primary cast/record labels render `title` strings; IDs hidden by default and visible only as disclosure subscript or on hover. (manual scenario 3; verified by grep for `{record.id}` or `{cast.id}` as a primary label in `Dashboard.tsx` returning zero matches in the body of primary panels)
-4. `useUnsavedChanges` is applied to Dashboard directive, MomentComposer directive+selections, EditContract form, RecordForm, BeatTemplateForm, EditCurrentContext form. (verified by grep)
+3. Dashboard's primary cast/record labels render `title` strings; IDs hidden by default and visible only as disclosure subscript or on hover. (manual scenario 3; verified by grep that the current primary-label ID tokens in `Dashboard.tsx` — `{c.id}` in the cast panel (line 299), `{cls}/{record.id}` as the high-importance link text (lines 322–328), and `{latestSegment.id}` (line 391) — no longer appear as primary labels)
+4. `useUnsavedChanges` is applied to MomentComposer directive+selections, EditContract form, RecordForm, BeatTemplateForm, EditCurrentContext form. The Dashboard directive draft is intentionally excluded (unsaved-by-design — see §2 item 5). (verified by grep)
 5. In-app navigation with unsaved changes triggers a confirmation modal; tab close triggers the browser's native dialog; successful save resets the dirty flag. (manual scenario 4)
-6. No `.catch(() => {})` patterns remain in `tools/manual-story-studio/web/src/`. (verified by grep)
+6. No `.catch(() => {})` patterns remain in `tools/manual-story-studio/web/src/` — a regression guard confirming SPEC-105's cleanup stays intact (already zero at reassessment time, 2026-06-02; this spec adds none). (verified by grep)
 7. Dashboard renders Current State panel (from SPEC-109) at top, followed by Recent Segments, Active Prompt Artifacts, Contract Status; importance-bucketed records moves to a disclosure block. (manual verification)
 8. The `web/` `tsc --noEmit` step remains green; existing backend tests pass.
 
 ## 8. Assumption reassessment
 
-- **Assumption:** React Router's `useBlocker` is available in the version this package uses. → Verify via `cat tools/manual-story-studio/web/package.json | grep react-router`. If the version predates `useBlocker`, either upgrade as part of this spec or fall back to `unstable_usePrompt` / `history.block` patterns; document the choice in the spec implementation.
-- **Assumption:** Every page that should show the sibling-page nav is enumerated by the `StoryPageNav` tab list. → Verify by enumerating every `<Route>` under the per-story prefix in `App.tsx`. Any page missing from the tab list (e.g., a future per-story page added without nav update) will be invisible.
+- **Resolved (2026-06-02):** React Router's `useBlocker` is available — `tools/manual-story-studio/web/package.json` declares `react-router-dom: ^6.27.0` (installed 6.30.4), and `useBlocker` is present in the built package. No upgrade or `unstable_usePrompt` / `history.block` fallback is needed.
+- **Assumption:** Every page that should show the sibling-page nav is enumerated by the `StoryPageNav` tab list. → Verify by enumerating every `<Route>` under the per-story prefix in `App.tsx`. Any page missing from the tab list (e.g., a future per-story page added without nav update) will be invisible. Reassessment (2026-06-02) found the `/contract` route (`App.tsx:86`, `EditContract`) absent from the §2 item 2 list and added it; re-verify against `App.tsx` at implementation time in case further per-story routes have landed.
 - **Assumption:** Hiding IDs from primary labels does not break any test that asserts a specific text. → Verify by searching test assertions for ID-shaped substrings; update any tests that previously matched on `mchar-N` text to match on title text instead.
 - **Assumption:** The Dashboard's `useEffect` data fetches do not implicitly assume the order of panels. → Verified by reading `Dashboard.tsx` — the four data fetches are independent; reordering panels does not affect data flow.
 - **Assumption:** The current SPEC-109 `EditCurrentContext.tsx` page is present when this spec lands. → Spec ordering: this spec depends on SPEC-109; if SPEC-109 has not landed, defer this spec's EditCurrentContext changes until it does. The other pieces (banner, nav, ID hiding, unsaved-change hook on other forms) land independently.
+
+## Outcome
+
+Completed on 2026-06-02.
+
+What changed:
+- Added a shared per-story route matcher and App-level `StoryPageNav`, preserving the existing HealthBanner as the single health surface.
+- Reshaped Dashboard around `CurrentStatePanel`, Recent Segments, Active Prompt Artifacts, Story Contract Status, and secondary importance-bucketed records.
+- Hid internal IDs from primary labels across Dashboard, Moment Composer, Records, Cast, and Beat Templates while retaining IDs in editor/reference surfaces.
+- Added `useUnsavedChanges` and applied it to Moment Composer, Edit Contract, RecordForm, BeatTemplateForm, and Edit Current Context; Dashboard directive draft remains excluded by design.
+- Converted `App.tsx` to `createBrowserRouter`/`RouterProvider` because React Router `useBlocker` requires a data-router provider.
+- Confirmed the SPEC-105 `.catch(() => {})` cleanup with a static guard and surfaced additional list/detail fetch failures found during the sweep.
+
+Deviations from original plan:
+- The HealthBanner mount was already owned by SPEC-105, so SPEC-111 consumed and preserved it rather than remounting it.
+- `useUnsavedChanges` used a static backend test and Playwright smoke rather than a committed browser/component harness, matching the current web package's `tsc --noEmit` test baseline.
+- Silent-error ticket 005 changed production pages after live reassessment found broader silent fallbacks beyond the original exact `.catch(() => {})` pattern.
+
+Verification:
+- `cd tools/manual-story-studio && npm test` passed on the final ticket slice: backend build, 446 backend/static tests, and web `tsc --noEmit`.
+- Focused grep/static proofs covered StoryPageNav route coverage, ID hiding/Dashboard ID-token classification, unsaved-change applications with Dashboard exclusion, data-router provider use, and zero exact `.catch(() => {})` matches.
+- Playwright smoke verified route rendering and dirty-navigation confirm dismiss/accept behavior for Moment Composer.

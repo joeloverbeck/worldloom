@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import {
   BEAT_TEMPLATE_BEAT_FUNCTIONS,
   BEAT_TEMPLATE_MOVE_FAMILIES,
@@ -79,7 +80,9 @@ function defaultTemplate(): Omit<BeatTemplate, "id"> {
 
 export interface BeatTemplateFormProps {
   initial?: BeatTemplate;
-  onSave: (template: Omit<BeatTemplate, "id"> | BeatTemplate) => Promise<void>;
+  onSave: (
+    template: Omit<BeatTemplate, "id"> | BeatTemplate,
+  ) => Promise<boolean | void>;
   onCancel: () => void;
   saveErrors?: ValidationError[];
 }
@@ -107,6 +110,9 @@ export function BeatTemplateForm(props: BeatTemplateFormProps) {
   const [draft, setDraft] = useState<Omit<BeatTemplate, "id">>(
     initial ? { ...initial } : defaultTemplate(),
   );
+  const unsavedChanges = useUnsavedChanges(draft, {
+    resetKeys: [initial?.id ?? "new"],
+  });
 
   function setField<K extends keyof Omit<BeatTemplate, "id">>(
     key: K,
@@ -189,11 +195,13 @@ export function BeatTemplateForm(props: BeatTemplateFormProps) {
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
+    let result: boolean | void;
     if (initial) {
-      await onSave({ ...draft, id: initial.id });
+      result = await onSave({ ...draft, id: initial.id });
     } else {
-      await onSave(draft);
+      result = await onSave(draft);
     }
+    if (result !== false) unsavedChanges.reset();
   }
 
   return (

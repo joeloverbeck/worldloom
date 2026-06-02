@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
+import { fetchCurrentContext } from "../api/current-context.js";
+import { readManuscript, type ManuscriptResponse } from "../api/manuscript.js";
+import { listPrompts, type PromptListEntry } from "../api/prompts.js";
 import {
   listRecords as apiList,
   readMetadata as apiReadMetadata,
 } from "../api/records.js";
-import { fetchCurrentContext } from "../api/current-context.js";
-import { readManuscript, type ManuscriptResponse } from "../api/manuscript.js";
 import { listSegments, type SegmentListEntry } from "../api/segments.js";
 import { CurrentStatePanel } from "../components/CurrentStatePanel.js";
 import {
@@ -29,6 +30,28 @@ function segmentNumber(id: string): number {
   return suffix ? Number.parseInt(suffix, 10) : -1;
 }
 
+function recordClassLabel(cls: ManualRecordClass): string {
+  return cls.replaceAll("-", " ");
+}
+
+function IdSubscript({ id }: { id: string }) {
+  return <span className="id-subscript">{id}</span>;
+}
+
+function StatusChip({
+  label,
+  ok,
+}: {
+  label: string;
+  ok: boolean;
+}) {
+  return (
+    <span className={ok ? "status-chip status-chip--ok" : "status-chip"}>
+      {label}
+    </span>
+  );
+}
+
 export function Dashboard() {
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
@@ -38,13 +61,19 @@ export function Dashboard() {
   const [directiveDraft, setDirectiveDraft] = useState("");
   const [cast, setCast] = useState<ManualRecordSummary[]>([]);
   const [segments, setSegments] = useState<SegmentListEntry[]>([]);
+  const [prompts, setPrompts] = useState<PromptListEntry[]>([]);
   const [manuscript, setManuscript] = useState<ManuscriptResponse | null>(null);
-  const [currentContext, setCurrentContext] = useState<CurrentContext | null>(null);
+  const [currentContext, setCurrentContext] = useState<CurrentContext | null>(
+    null,
+  );
   const [manuscriptMissing, setManuscriptMissing] = useState(false);
   const [metadataError, setMetadataError] = useState<string | null>(null);
-  const [currentContextError, setCurrentContextError] = useState<string | null>(null);
+  const [currentContextError, setCurrentContextError] = useState<string | null>(
+    null,
+  );
   const [castError, setCastError] = useState<string | null>(null);
   const [segmentsError, setSegmentsError] = useState<string | null>(null);
+  const [promptsError, setPromptsError] = useState<string | null>(null);
   const [recordsError, setRecordsError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [byClass, setByClass] = useState<
@@ -78,6 +107,7 @@ export function Dashboard() {
     setCurrentContextError(null);
     setCastError(null);
     setSegmentsError(null);
+    setPromptsError(null);
     setRecordsError(null);
     apiReadMetadata(worldSlug, msSlug)
       .then((m) => {
@@ -106,6 +136,13 @@ export function Dashboard() {
       })
       .catch((error: unknown) => {
         if (!cancelled) setSegmentsError(loadErrorMessage(error));
+      });
+    listPrompts(worldSlug, msSlug)
+      .then((result) => {
+        if (!cancelled) setPrompts(result.prompts);
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) setPromptsError(loadErrorMessage(error));
       });
     readManuscript(worldSlug, msSlug)
       .then((m) => {
@@ -140,7 +177,8 @@ export function Dashboard() {
   }, [worldSlug, msSlug, reloadKey]);
 
   const highImportance = useMemo(() => {
-    const all: Array<{ cls: ManualRecordClass; record: ManualRecordSummary }> = [];
+    const all: Array<{ cls: ManualRecordClass; record: ManualRecordSummary }> =
+      [];
     for (const cls of MANUAL_RECORD_CLASSES) {
       for (const record of byClass[cls]) {
         if (HIGH_IMPORTANCE.has(record.importance)) {
@@ -151,21 +189,29 @@ export function Dashboard() {
     all.sort((a, b) =>
       a.record.importance === "central" && b.record.importance !== "central"
         ? -1
-        : a.record.importance !== "central" && b.record.importance === "central"
+        : a.record.importance !== "central" &&
+            b.record.importance === "central"
           ? 1
           : a.record.title.localeCompare(b.record.title),
     );
     return all.slice(0, 20);
   }, [byClass]);
 
-  const latestSegment = useMemo(() => {
-    if (segments.length === 0) return null;
-    return [...segments].sort((a, b) => {
-      const byCreated = b.created_at.localeCompare(a.created_at);
-      if (byCreated !== 0) return byCreated;
-      return segmentNumber(b.id) - segmentNumber(a.id);
-    })[0];
+  const recentSegments = useMemo(() => {
+    return [...segments]
+      .sort((a, b) => {
+        const byCreated = b.created_at.localeCompare(a.created_at);
+        if (byCreated !== 0) return byCreated;
+        return segmentNumber(b.id) - segmentNumber(a.id);
+      })
+      .slice(0, 3);
   }, [segments]);
+
+  const recentPrompts = useMemo(() => {
+    return [...prompts]
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .slice(0, 3);
+  }, [prompts]);
 
   const clockCount = byClass.clocks.length;
   const secretCount = byClass.secrets.length;
@@ -180,35 +226,7 @@ export function Dashboard() {
   }
 
   return (
-    <div className="manual-dashboard" style={{ display: "grid", gap: 12 }}>
-      <nav
-        aria-label="story-pages"
-        style={{ display: "flex", flexWrap: "wrap", gap: 12 }}
-      >
-        <Link to={`/worlds/${worldSlug}/manual-stories/${msSlug}/records`}>
-          Records
-        </Link>
-        <Link to={`/worlds/${worldSlug}/manual-stories/${msSlug}/cast`}>
-          Cast &amp; profiles
-        </Link>
-        <Link to={`/worlds/${worldSlug}/manual-stories/${msSlug}/manuscript`}>
-          Manuscript
-        </Link>
-        <Link
-          to={`/worlds/${worldSlug}/manual-stories/${msSlug}/beat-templates`}
-        >
-          Beat templates
-        </Link>
-        <Link
-          to={`/worlds/${worldSlug}/manual-stories/${msSlug}/prompt-history`}
-        >
-          Prompt history
-        </Link>
-        <Link to={`/worlds/${worldSlug}/manual-stories/${msSlug}/paste-prose`}>
-          Paste prose
-        </Link>
-      </nav>
-
+    <div className="manual-dashboard">
       <CurrentStatePanel
         ctx={currentContext}
         worldSlug={worldSlug}
@@ -223,51 +241,129 @@ export function Dashboard() {
         </p>
       ) : null}
 
-      <section aria-label="story-contract">
-        <h2>Story contract</h2>
-        {metadataError ? (
-          <p role="alert">
-            Failed to load metadata: {metadataError}{" "}
-            <button type="button" onClick={retryLoad}>
-              Retry
-            </button>
-          </p>
-        ) : metadata ? (
-          <>
-            <dl>
-              <dt>Premise</dt>
-              <dd>{metadata.story_contract.premise || <em>(unset)</em>}</dd>
-              <dt>Tone</dt>
-              <dd>{metadata.story_contract.tone || <em>(unset)</em>}</dd>
-              <dt>POV</dt>
-              <dd>{metadata.story_contract.pov}</dd>
-              <dt>Tense</dt>
-              <dd>{metadata.story_contract.tense}</dd>
-              <dt>Content intensity</dt>
-              <dd>{metadata.story_contract.content_intensity}</dd>
-              <dt>Language register</dt>
-              <dd>{metadata.story_contract.language_register}</dd>
-              <dt>Prose preferences</dt>
-              <dd>
-                psychic_distance={metadata.story_contract.prose_preferences.psychic_distance},{" "}
-                dialogue_density={metadata.story_contract.prose_preferences.dialogue_density},{" "}
-                interiority={metadata.story_contract.prose_preferences.interiority},{" "}
-                paragraphing={metadata.story_contract.prose_preferences.paragraphing}
-              </dd>
-            </dl>
+      <div className="dashboard-cockpit-grid">
+        <section aria-label="recent-segments">
+          <h2>Recent segments</h2>
+          {segmentsError ? (
+            <p role="alert">
+              Failed to load segments: {segmentsError}{" "}
+              <button type="button" onClick={retryLoad}>
+                Retry
+              </button>
+            </p>
+          ) : recentSegments.length === 0 ? (
+            <p>No segments yet.</p>
+          ) : (
+            <ol className="dashboard-compact-list">
+              {recentSegments.map((segment) => (
+                <li key={segment.id}>
+                  <Link
+                    to={`/worlds/${worldSlug}/manual-stories/${msSlug}/manuscript#${segment.id}`}
+                  >
+                    {segment.title || "Untitled segment"}
+                  </Link>{" "}
+                  <IdSubscript id={segment.id} />
+                  <div className="dashboard-item-meta">
+                    {segment.word_count} words · {segment.created_at}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+
+        <section aria-label="active-prompt-artifacts">
+          <h2>Active prompt artifacts</h2>
+          {promptsError ? (
+            <p role="alert">
+              Failed to load prompts: {promptsError}{" "}
+              <button type="button" onClick={retryLoad}>
+                Retry
+              </button>
+            </p>
+          ) : recentPrompts.length === 0 ? (
+            <p>No saved prompts yet.</p>
+          ) : (
+            <ol className="dashboard-compact-list">
+              {recentPrompts.map((prompt) => (
+                <li key={prompt.id}>
+                  <Link
+                    to={`/worlds/${worldSlug}/manual-stories/${msSlug}/prompt-history`}
+                  >
+                    {prompt.moment_directive_snippet || "Saved prompt"}
+                  </Link>{" "}
+                  <IdSubscript id={prompt.id} />
+                  <div className="dashboard-item-meta">
+                    {prompt.created_at}
+                    {prompt.linked_segments.length > 0
+                      ? ` · ${prompt.linked_segments.length} segment(s)`
+                      : ""}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+          <div className="dashboard-link-row">
             <Link
-              to={`/worlds/${worldSlug}/manual-stories/${msSlug}/contract`}
+              to={`/worlds/${worldSlug}/manual-stories/${msSlug}/prompts/preview`}
             >
-              {metadata.story_contract.premise === "" ||
-              metadata.story_contract.tone === ""
-                ? "Set premise & tone"
-                : "Edit contract"}
+              Prompt Preview
             </Link>
-          </>
-        ) : (
-          <p>Loading metadata…</p>
-        )}
-      </section>
+            <Link
+              to={`/worlds/${worldSlug}/manual-stories/${msSlug}/prompt-history`}
+            >
+              Prompt History
+            </Link>
+          </div>
+        </section>
+
+        <section aria-label="story-contract-status">
+          <h2>Story contract status</h2>
+          {metadataError ? (
+            <p role="alert">
+              Failed to load metadata: {metadataError}{" "}
+              <button type="button" onClick={retryLoad}>
+                Retry
+              </button>
+            </p>
+          ) : metadata ? (
+            <>
+              <div className="status-chip-row">
+                <StatusChip
+                  label="Premise filled"
+                  ok={metadata.story_contract.premise.trim().length > 0}
+                />
+                <StatusChip
+                  label="Tone set"
+                  ok={metadata.story_contract.tone.trim().length > 0}
+                />
+                <StatusChip
+                  label="Content policy locked"
+                  ok={metadata.story_contract.explicitness.trim().length > 0}
+                />
+              </div>
+              <dl className="dashboard-contract-summary">
+                <dt>POV</dt>
+                <dd>{metadata.story_contract.pov}</dd>
+                <dt>Tense</dt>
+                <dd>{metadata.story_contract.tense}</dd>
+                <dt>Intensity</dt>
+                <dd>{metadata.story_contract.content_intensity}</dd>
+              </dl>
+              <Link
+                to={`/worlds/${worldSlug}/manual-stories/${msSlug}/contract`}
+              >
+                {metadata.story_contract.premise === "" ||
+                metadata.story_contract.tone === ""
+                  ? "Set premise & tone"
+                  : "Edit contract"}
+              </Link>
+            </>
+          ) : (
+            <p>Loading metadata…</p>
+          )}
+        </section>
+      </div>
 
       <section aria-label="directive-draft">
         <h2>Directive draft</h2>
@@ -293,39 +389,10 @@ export function Dashboard() {
         ) : cast.length === 0 ? (
           <p>No cast yet.</p>
         ) : (
-          <ul>
+          <ul className="dashboard-compact-list">
             {cast.map((c) => (
               <li key={c.id}>
-                <strong>{c.title}</strong> <em>{c.id}</em>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section aria-label="high-importance">
-        <h3 style={{ fontSize: "1em", fontWeight: 600 }}>
-          High-importance records
-        </h3>
-        {recordsError ? (
-          <p role="alert">
-            Failed to load records: {recordsError}{" "}
-            <button type="button" onClick={retryLoad}>
-              Retry
-            </button>
-          </p>
-        ) : highImportance.length === 0 ? (
-          <p>None.</p>
-        ) : (
-          <ul>
-            {highImportance.map(({ cls, record }) => (
-              <li key={`${cls}/${record.id}`}>
-                <Link
-                  to={`/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=${cls}&id=${record.id}`}
-                >
-                  {cls}/{record.id}
-                </Link>{" "}
-                — {record.title} ({record.importance})
+                <strong>{c.title}</strong> <IdSubscript id={c.id} />
               </li>
             ))}
           </ul>
@@ -371,39 +438,6 @@ export function Dashboard() {
         )}
       </section>
 
-      <section aria-label="latest-segment">
-        <h2>Latest segment</h2>
-        {segmentsError ? (
-          <p role="alert">
-            Failed to load segments: {segmentsError}{" "}
-            <button type="button" onClick={retryLoad}>
-              Retry
-            </button>
-          </p>
-        ) : latestSegment ? (
-          <>
-            <p>
-              <Link
-                to={`/worlds/${worldSlug}/manual-stories/${msSlug}/manuscript#${latestSegment.id}`}
-              >
-                {latestSegment.title || latestSegment.id}
-              </Link>{" "}
-              <em>{latestSegment.id}</em> — {latestSegment.created_at}
-            </p>
-            <p style={{ marginTop: 4, fontSize: "0.85em" }}>
-              <Link
-                to={`/worlds/${worldSlug}/manual-stories/${msSlug}/repair`}
-                style={{ color: "#888" }}
-              >
-                Repair this manuscript
-              </Link>
-            </p>
-          </>
-        ) : (
-          <p>No segments yet.</p>
-        )}
-      </section>
-
       <section aria-label="manuscript-word-count">
         <h2>Manuscript word count</h2>
         {manuscript ? (
@@ -423,6 +457,39 @@ export function Dashboard() {
           Open Moment Composer (SPEC-102)
         </Link>
       </section>
+
+      <details className="importance-disclosure">
+        <summary>Browse records by importance</summary>
+        <section aria-label="high-importance">
+          <h2>High-importance records</h2>
+          {recordsError ? (
+            <p role="alert">
+              Failed to load records: {recordsError}{" "}
+              <button type="button" onClick={retryLoad}>
+                Retry
+              </button>
+            </p>
+          ) : highImportance.length === 0 ? (
+            <p>None.</p>
+          ) : (
+            <ul className="dashboard-compact-list">
+              {highImportance.map(({ cls, record }) => (
+                <li key={`${cls}/${record.id}`}>
+                  <Link
+                    to={`/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=${cls}&id=${record.id}`}
+                  >
+                    {record.title}
+                  </Link>{" "}
+                  <IdSubscript id={`${recordClassLabel(cls)} / ${record.id}`} />
+                  <div className="dashboard-item-meta">
+                    {record.importance}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </details>
     </div>
   );
 }

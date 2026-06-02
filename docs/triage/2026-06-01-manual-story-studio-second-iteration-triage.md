@@ -3,7 +3,7 @@
 **Date:** 2026-06-01
 **Source report:** `reports/manual-story-studio-second-iteration.md` (ChatGPT-Pro, 2026-06-01; 31 sections, 1103 lines).
 **Triage classification:** tooling-adjacent (`tools/manual-story-studio` explicitly disclaims `No LLM, no MCP, no patch engine`; no canon-pipeline integration).
-**Deliverables produced:** SPEC-105 through SPEC-111 (7 specs) + `specs/IMPLEMENTATION-ORDER.md` + this companion triage file.
+**Deliverables produced:** SPEC-105 through SPEC-111 (7 specs) + `archive/specs/IMPLEMENTATION-ORDER-2026-06-02.md` + this companion triage file.
 
 ---
 
@@ -87,7 +87,7 @@ Identifiers are local to this triage. `T<N>` for triage items derived from the r
 **Verdict:** ACCEPT WITH MODIFICATION.
 **Source:** report §§18 / 29 / 31 Stage 8.
 **Rationale:** Verified one-link nav at `App.tsx:37-41` + ID-leaking dashboard + absent unsaved-change handling. The full single-cockpit-page rewrite is scope-large; the load-bearing pieces are health banner persistence + sibling-page nav + ID hiding + unsaved-change handling.
-**Deliverable:** `specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md`. Ships the four load-bearing pieces; defers keyboard shortcuts, `/` quick-search, and the full single-page cockpit to a follow-up spec when the foundational pieces validate in use.
+**Deliverable:** `archive/specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md`. Ships the four load-bearing pieces; defers keyboard shortcuts, `/` quick-search, and the full single-page cockpit to a follow-up spec when the foundational pieces validate in use.
 **Modification scope:** Bundles T_dashboard_IDs (report §5) under the ID-hiding piece; bundles T7's MSSUX-006 sibling-nav into the systematic `StoryPageNav` component.
 
 ### DEFER (real concerns; not now)
@@ -145,7 +145,7 @@ Identifiers are local to this triage. `T<N>` for triage items derived from the r
 
 **Source:** verified during exploration.
 **Significance:** these are the first new specs since archive/SPEC-104. ID allocation starts at SPEC-105.
-**Action:** the new `specs/IMPLEMENTATION-ORDER.md` is the first such file under `specs/` since prior batches' files were archived. The companion implementation-order file pattern continues.
+**Action:** the new implementation order was archived as `archive/specs/IMPLEMENTATION-ORDER-2026-06-02.md` after the SPEC-105 through SPEC-111 batch completed. The companion implementation-order file pattern continues.
 
 #### O3 — Bundled subordinate findings
 
@@ -169,8 +169,8 @@ The following report sub-findings did not get a top-level T<N> identifier becaus
 | SPEC-108 | `specs/SPEC-108-manual-story-studio-segment-lifecycle-append-only.md` | Append-only primary UX; `mode=repair` gate on lifecycle ops |
 | SPEC-109 | `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md` | `current-context.yaml` selector; composer + Dashboard plumbing |
 | SPEC-110 | `archive/specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md` | 7 new fields on BeatTemplate schema |
-| SPEC-111 | `specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md` | Health banner persistence + sibling nav + ID hiding + unsaved-change hook |
-| Implementation order | `specs/IMPLEMENTATION-ORDER.md` | Dependency graph + recommended landing waves |
+| SPEC-111 | `archive/specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md` | Health banner persistence + sibling nav + ID hiding + unsaved-change hook |
+| Implementation order | `archive/specs/IMPLEMENTATION-ORDER-2026-06-02.md` | Dependency graph + recommended landing waves |
 | This triage | `docs/triage/2026-06-01-manual-story-studio-second-iteration-triage.md` | Verdict + rationale per finding |
 
 ---
