@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Large
 **Engine Changes**: Yes — `tools/manual-story-studio` prompt section emitters + `assembleSections` + compose wiring. No canon-pipeline impact (package is canon-fenced per SPEC-100).
-**Deps**: 002
+**Deps**: archive/tickets/SPEC113MANSTOSTU-002.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ The inclusion ledger (002) emits `section_map: {}` as a placeholder. SPEC-113 §
 
 1. `assembleSections` (`src/prompt/sections/index.ts:50`) returns a `string`; the 15 emitters (`section-1` … `section-15`) each return a markdown string. Translator-driven sections 7–11 (cast / emotion / intentions / beliefs / physical) carry most of the per-record attribution; `section-3-current-situation.ts:68` filters `input.records` by `isCentralOrHigh || referencesIncludedCast` and is **skipped entirely when a handoff summary exists** — so a record in `input.records` may feed §7/§8/§9/§10 rather than §3. The emitter signature must change to also return consumed ids.
 2. SPEC-113 §2 item 2 (`section_map`) + §4 (`sections/*.ts` each reports consumed ids; `section-3` records its "Pinned situation context" membership) + §8 Risks ("`section_map` requires touching all 15 section emitters") fix the contract.
-3. Cross-artifact boundary under audit: the `section_map` contract spans every emitter's return shape, `assembleSections`'s aggregation, and the `resolution.section_map` field defined in 002's `src/prompt/types.ts`. The aggregation must stay insertion-ordered for determinism. The shared test file `test/prompt/inclusion-ledger.test.ts` is created by 002 and extended here (Deps:002).
+3. Cross-artifact boundary under audit: the `section_map` contract spans every emitter's return shape, `assembleSections`'s aggregation, and the `resolution.section_map` field defined by archive/tickets/SPEC113MANSTOSTU-002.md in `src/prompt/types.ts`. The aggregation must stay insertion-ordered for determinism. The shared test file `test/prompt/inclusion-ledger.test.ts` was created by archive/tickets/SPEC113MANSTOSTU-002.md and is extended here.
 4. FOUNDATIONS §Tooling Recommendation (determinism): emitting `section_map` as side-output must not change emitted markdown and must be byte-identical for identical inputs (insertion-ordered structures, no wall-clock).
 
 ## Architecture Check
@@ -55,7 +55,7 @@ Extend `test/prompt/inclusion-ledger.test.ts` with `section_map` attribution ass
 
 ## Out of Scope
 
-- The ledger bucket logic (002).
+- The ledger bucket logic (archive/tickets/SPEC113MANSTOSTU-002.md).
 - Any change to emitted markdown text.
 - The frontend inspector rendering of `section_map` (004).
 

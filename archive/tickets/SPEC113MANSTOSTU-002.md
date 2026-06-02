@@ -1,6 +1,6 @@
 # SPEC113MANSTOSTU-002: Inclusion-ledger core — `resolution` shape + compose buckets + excluded suppression
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/manual-story-studio` prompt module (`src/prompt/types.ts`, `src/prompt/compose.ts`). No canon-pipeline impact (package is canon-fenced per SPEC-100).
@@ -20,7 +20,7 @@
 ## Architecture Check
 
 1. The ledger is derived during the existing stages (each stage records its decision as it fires) rather than via a second pass — guaranteeing the ledger describes the *actual* composition, not a re-derivation that could drift from the markdown. `excluded_records` suppression is applied at the seeding stage so an excluded record never reaches the markdown and is reported once, in `excluded`.
-2. No backwards-compat shim: `resolution` is a new required field on `PromptComposeResult`; the sole producer (compose) and the in-batch consumer (004) are updated together.
+2. No backwards-compat shim: `resolution` is a new required field on the backend `PromptComposeResult`; the sole backend producer (`composePrompt`) is updated here. The frontend mirror and inspector remain the explicitly deferred consumer work in 004.
 
 ## Verification Layers
 
@@ -33,11 +33,11 @@
 
 ### 1. `resolution` type (`src/prompt/types.ts`)
 
-Add a `PromptResolution` interface (the spec accepts `inclusion_ledger` as an alias name): `included: { id; title; class; reason; section }[]` with `reason` the §3 union `"explicitly_selected" | "pinned" | "active_secret_question" | "current_cast"`; `excluded: { id; title; class; reason }[]` with `reason` `"inactive" | "working_set_excluded"`; `suppressed: { id; title; reason: "must_not_reveal" }[]`; `blocked: { ref; reason }[]`; `section_map: Record<string, string[]>` (populated by 003 — emit `{}` here). Add `resolution: PromptResolution` to `PromptComposeResult`.
+Add a `PromptResolution` interface (the spec accepts `inclusion_ledger` as an alias name): `included: { id; title; class; reason; section }[]` with `reason` the §3 union `"explicitly_selected" | "pinned" | "active_secret_question" | "current_cast"` and `section: string | null` until 003 populates section attribution; `excluded: { id; title; class; reason }[]` with `reason` `"inactive" | "working_set_excluded"`; `suppressed: { id; title; reason: "must_not_reveal" }[]`; `blocked: { ref; reason }[]`; `section_map: Record<string, string[]>` (populated by 003 — emit `{}` here). Add `resolution: PromptResolution` to `PromptComposeResult`.
 
 ### 2. Compose ledger threading + excluded suppression (`src/prompt/compose.ts`)
 
-At stage 2.5, drop every `excluded_records` id from `seededRecordIds` and record each dropped id as `excluded` with reason `working_set_excluded`. At stage 4: record `active === false` drops as `excluded` reason `inactive`; record must-not-reveal records as `suppressed`; record each surviving included record with its seeding-path reason (`explicitly_selected` for `input.included_records`, `pinned` for `pinned_records`, `active_secret_question` for `active_secrets_questions`, `current_cast` for cast seeded from `current_cast`). Map the existing `missingCastFindings` / `missingRecordFindings` / `templateLintFindings` into `blocked` (group, do not re-lint). A record in BOTH `excluded_records` and `must_not_reveal` → `excluded` (exclusion wins, per §3). Initialize `resolution.section_map = {}` (003 fills it). Return `resolution` on the result, including the early-exit path.
+At stage 2.5, drop every `excluded_records` id from `seededRecordIds` and record each dropped id as `excluded` with reason `working_set_excluded`. At stage 4: record `active === false` drops as `excluded` reason `inactive`; record must-not-reveal records as `suppressed`; record each surviving included record with its seeding-path reason (`explicitly_selected` for `input.included_records`, `pinned` for `pinned_records`, `active_secret_question` for `active_secrets_questions`, `current_cast` for cast seeded from `current_cast`) and `section: null` until 003 fills section attribution. Map the existing `missingCastFindings` / `missingRecordFindings` / `templateLintFindings` into `blocked` (group, do not re-lint). A record in BOTH `excluded_records` and `must_not_reveal` → `excluded` (exclusion wins, per §3). Initialize `resolution.section_map = {}` (003 fills it). Return `resolution` on the result, including the early-exit path.
 
 ### 3. Ledger test
 
@@ -79,3 +79,23 @@ Create `test/prompt/inclusion-ledger.test.ts` asserting determinism + AC#2/#3/#4
 
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm test`
+
+## Outcome
+
+Completed: 2026-06-02
+
+What changed:
+- Added the backend `PromptResolution` / `resolution` result shape with `included`, `excluded`, `suppressed`, `blocked`, and placeholder `section_map`.
+- Threaded resolution recording through `composePrompt`: current cast entries are included with reason `current_cast`; seeded active records are included with their source reason; `excluded_records` drops are reported as `working_set_excluded`; inactive seeded records are reported as `inactive`; must-not-reveal records are reported as `suppressed`.
+- Preserved the existing markdown and sidecar behavior for non-excluded inputs while removing explicitly excluded records before record loading and sidecar draft population.
+- Added `tools/manual-story-studio/test/prompt/inclusion-ledger.test.ts` for deterministic bucket ordering, exclusion absence from markdown, inactive/suppressed buckets, early-exit blocked output, and unresolved seeded-record blocked output.
+- Updated the prompt-write fixture to include the new required `resolution` field.
+
+Deviations from original plan:
+- `included[].section` is `string | null` in this ticket because section attribution and `section_map` population are owned by SPEC113MANSTOSTU-003. This ticket emits `section: null` and `section_map: {}`.
+- The web `PromptComposeResult` mirror is intentionally unchanged here; SPEC113MANSTOSTU-004 owns the frontend type and inspector consumer.
+
+Verification results:
+- PASS: `cd tools/manual-story-studio && npm run test:backend` — backend build plus 77 compiled tests passed after adding the first ledger suite.
+- PASS: `cd tools/manual-story-studio && npm test` — backend build, 462 compiled tests, and web `tsc --noEmit` passed after adding early-exit and blocked-input ledger assertions.
+- PASS: `git diff --check -- archive/tickets/SPEC113MANSTOSTU-002.md tools/manual-story-studio/src/prompt/types.ts tools/manual-story-studio/src/prompt/compose.ts tools/manual-story-studio/test/prompt/inclusion-ledger.test.ts tools/manual-story-studio/test/write/prompts.test.ts` — no whitespace errors.
