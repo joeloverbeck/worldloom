@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-112-manual-story-studio-record-pickers.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC112MANSTOSTU-006.md",
+  "last_ticket": "archive/tickets/SPEC112MANSTOSTU-007.md",
   "last_result": "completed_archived",
-  "last_work_commit": "58e2717ee28232463257587794bdcc14f5610699",
+  "last_work_commit": "d78e5151d9a2a5856a4e410e5b425427d0f4dd17",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC112MANSTOSTU-007.md",
+  "next_target": "tickets/SPEC112MANSTOSTU-008.md",
   "queue": [
-    "tickets/SPEC112MANSTOSTU-007.md",
     "tickets/SPEC112MANSTOSTU-008.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -17,7 +16,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: SPEC112MANSTOSTU-006 archived; CurrentStatePanel resolves displayed current-context references through listRecordsForClasses titles with id fallback; helper/title grep, npm --prefix web test, npm run build, npm test, and diff hygiene passed",
-  "dirty_state": "tracked worktree clean after SPEC112MANSTOSTU-006 work commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
+  "proof_state": "clean: SPEC112MANSTOSTU-007 archived; MomentComposer cast and relevant-record selection replaced with RecordPicker mounts while previewPrompt included_cast/included_records contract stayed unchanged; structural grep, npm --prefix web test, npm run build, npm test, and diff hygiene passed",
+  "dirty_state": "tracked worktree clean after SPEC112MANSTOSTU-007 work commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-02"
 }
