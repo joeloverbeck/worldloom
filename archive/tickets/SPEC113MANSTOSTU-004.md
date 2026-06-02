@@ -1,6 +1,6 @@
 # SPEC113MANSTOSTU-004: Prompt Preview two-pane inspector
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/manual-story-studio` web (`PromptPreview.tsx` rebuild, web `resolution` types, `api/prompts.ts` passthrough). No canon-pipeline impact (package is canon-fenced per SPEC-100).
@@ -82,3 +82,22 @@ Create `test/web/prompt-inspector.test.ts` asserting the inspector renders inclu
 
 1. `cd tools/manual-story-studio/web && npm test`
 2. `cd tools/manual-story-studio && npm test`
+
+## Outcome
+
+Completed: 2026-06-02
+
+What changed:
+- Mirrored the backend `PromptResolution` shape into the web `PromptComposeResult` type, including included/excluded/suppressed/blocked buckets and `section_map`.
+- Rebuilt `PromptPreview` into a responsive two-pane preview: markdown/copy-save controls on the left, Prompt Inspector on the right.
+- Rendered copy status, hard lint, selected cast/template, working set, included/excluded/suppressed records with reasons, generated section map, and blocked inputs.
+- Reused `RecordCard` for ledger record entries and routed included/excluded/suppressed records to the Records page when their class is known.
+- Added `test/web/prompt-inspector.test.ts` to assert the web type mirror and inspector groups.
+
+Deviations from original plan:
+- The inspector renders ledger-derived lightweight record summaries instead of fetching full record summaries; this keeps the ticket in the existing preview response boundary and avoids new API calls.
+
+Verification results:
+- PASS: `cd tools/manual-story-studio/web && npm test` — web `tsc --noEmit` passed.
+- PASS: `cd tools/manual-story-studio && npm test` — backend build, 464 compiled tests including `prompt-inspector.test.ts`, and web `tsc --noEmit` passed.
+- PASS: `git diff --check -- tickets/SPEC113MANSTOSTU-004.md tools/manual-story-studio/web/src/pages/PromptPreview.tsx tools/manual-story-studio/web/src/types/manual-story.ts tools/manual-story-studio/web/src/api/prompts.ts tools/manual-story-studio/test/web/prompt-inspector.test.ts` — no whitespace errors.

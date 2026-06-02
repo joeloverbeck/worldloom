@@ -3,10 +3,17 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { previewPrompt, savePrompt } from "../api/prompts.js";
 import { LintBadge } from "../components/LintBadge.js";
+import { RecordCard } from "../components/RecordCard.js";
 import type {
+  ManualRecordClass,
+  ManualRecordSummary,
   PromptComposeRequestInput,
   PromptComposeResult,
+  PromptExcludedRecord,
+  PromptIncludedRecord,
+  PromptSuppressedRecord,
 } from "../types/manual-story.js";
+import { MANUAL_RECORD_CLASS_PREFIXES } from "../types/manual-story.js";
 
 interface NavState {
   composeResult?: PromptComposeResult;
@@ -14,6 +21,55 @@ interface NavState {
 }
 
 type FocusHint = "directive" | "cast" | "records" | "template";
+
+function reasonLabel(reason: string): string {
+  return reason.replaceAll("_", " ");
+}
+
+function ledgerSummary(
+  record: PromptIncludedRecord | PromptExcludedRecord | PromptSuppressedRecord,
+): ManualRecordSummary {
+  return {
+    id: record.id,
+    title: record.title,
+    active: !("reason" in record && record.reason === "inactive"),
+    importance: "medium",
+    tags: [],
+    summary: `Reason: ${reasonLabel(record.reason)}`,
+    prompt_visibility: "include_when_relevant",
+  };
+}
+
+function classFromLedgerId(id: string): ManualRecordClass | null {
+  for (const [recordClass, prefix] of Object.entries(MANUAL_RECORD_CLASS_PREFIXES)) {
+    if (id.startsWith(`${prefix}-`)) {
+      return recordClass as ManualRecordClass;
+    }
+  }
+  return null;
+}
+
+function SuppressedRecordEntry(props: {
+  record: PromptSuppressedRecord;
+  onOpen: (recordClass: ManualRecordClass, id: string) => void;
+}) {
+  const recordClass = classFromLedgerId(props.record.id);
+  return (
+    <div>
+      <RecordCard
+        summary={ledgerSummary(props.record)}
+        recordClass={recordClass ?? undefined}
+        compact
+        onOpen={(id) => {
+          if (recordClass) props.onOpen(recordClass, id);
+        }}
+      />
+      <p style={{ marginTop: -4 }}>
+        Reason: {reasonLabel(props.record.reason)}
+      </p>
+    </div>
+  );
+}
 
 export function PromptPreview() {
   const { worldSlug, msSlug } = useParams<{
@@ -115,55 +171,215 @@ export function PromptPreview() {
     });
   }
 
+  function openRecord(recordClass: ManualRecordClass, id: string): void {
+    const params = new URLSearchParams({ class: recordClass, id });
+    navigate(
+      `/worlds/${worldSlug}/manual-stories/${msSlug}/records?${params.toString()}`,
+    );
+  }
+
+  const hardFindings = lint.findings.filter((finding) => finding.tier === "hard");
+  const sectionEntries = Object.entries(composeResult.resolution.section_map);
+
   return (
     <section
       aria-labelledby="prompt-preview-heading"
       style={{ display: "grid", gap: 16 }}
     >
       <h2 id="prompt-preview-heading">Prompt Preview</h2>
-      <LintBadge lint={lint} sectionCount={sectionCount} />
-      <pre
+      <div
         style={{
-          whiteSpace: "pre-wrap",
-          fontFamily: "monospace",
-          background: "#f6f6f6",
-          padding: 12,
-          maxHeight: "60vh",
-          overflow: "auto",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
+          gap: 16,
+          alignItems: "start",
         }}
       >
-        {composeResult.markdown}
-      </pre>
-      <div role="toolbar" aria-label="prompt actions" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <button type="button" onClick={onCopy} disabled={lint.blockingForCopy}>
-          Copy to clipboard
-        </button>
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={lint.blockingForCopy || submitting}
+        <section aria-label="prompt markdown" style={{ display: "grid", gap: 12 }}>
+          <LintBadge lint={lint} sectionCount={sectionCount} />
+          <pre
+            style={{
+              whiteSpace: "pre-wrap",
+              fontFamily: "monospace",
+              background: "#f6f6f6",
+              padding: 12,
+              maxHeight: "60vh",
+              overflow: "auto",
+              margin: 0,
+            }}
+          >
+            {composeResult.markdown}
+          </pre>
+          <div
+            role="toolbar"
+            aria-label="prompt actions"
+            style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
+          >
+            <button
+              type="button"
+              onClick={onCopy}
+              disabled={lint.blockingForCopy}
+            >
+              Copy to clipboard
+            </button>
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={lint.blockingForCopy || submitting}
+            >
+              Save Prompt
+            </button>
+            <button type="button" onClick={onRegenerate} disabled={submitting}>
+              Regenerate
+            </button>
+            <button type="button" onClick={() => onEditBack("directive")}>
+              Edit Directive
+            </button>
+            <button type="button" onClick={() => onEditBack("cast")}>
+              Edit Cast
+            </button>
+            <button type="button" onClick={() => onEditBack("records")}>
+              Edit Records
+            </button>
+            <button
+              type="button"
+              onClick={() => onEditBack("template")}
+              disabled
+            >
+              Edit Template (SPEC-104)
+            </button>
+          </div>
+        </section>
+        <aside
+          aria-labelledby="prompt-inspector-heading"
+          style={{
+            display: "grid",
+            gap: 12,
+            alignContent: "start",
+          }}
         >
-          Save Prompt
-        </button>
-        <button type="button" onClick={onRegenerate} disabled={submitting}>
-          Regenerate
-        </button>
-        <button type="button" onClick={() => onEditBack("directive")}>
-          Edit Directive
-        </button>
-        <button type="button" onClick={() => onEditBack("cast")}>
-          Edit Cast
-        </button>
-        <button type="button" onClick={() => onEditBack("records")}>
-          Edit Records
-        </button>
-        <button
-          type="button"
-          onClick={() => onEditBack("template")}
-          disabled
-        >
-          Edit Template (SPEC-104)
-        </button>
+          <h3 id="prompt-inspector-heading" style={{ margin: 0 }}>
+            Prompt Inspector
+          </h3>
+          <section aria-label="copy status">
+            <h4>Copy status</h4>
+            <p>{lint.blockingForCopy ? "Blocked by hard lint" : "Allowed"}</p>
+          </section>
+          <section aria-label="hard lint findings">
+            <h4>Hard lint findings</h4>
+            {hardFindings.length === 0 ? (
+              <p>None</p>
+            ) : (
+              <ul>
+                {hardFindings.map((finding) => (
+                  <li key={`${finding.rule}:${finding.message}`}>
+                    {finding.rule}: {finding.message}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+          <section aria-label="selected cast">
+            <h4>Selected cast</h4>
+            <p>{composeResult.sidecar_draft.included_cast.join(", ") || "None"}</p>
+          </section>
+          <section aria-label="selected template">
+            <h4>Selected template</h4>
+            <p>
+              {composeInput.selected_template ??
+                composeResult.sidecar_draft.included_template_path ??
+                "None"}
+            </p>
+          </section>
+          <section aria-label="working set">
+            <h4>Working set</h4>
+            <p>{composeResult.sidecar_draft.included_records.join(", ") || "None"}</p>
+          </section>
+          <section aria-label="included records">
+            <h4>Included records</h4>
+            {composeResult.resolution.included.length === 0 ? (
+              <p>None</p>
+            ) : (
+              composeResult.resolution.included.map((record) => (
+                <div key={record.id}>
+                  <RecordCard
+                    summary={ledgerSummary(record)}
+                    recordClass={record.class}
+                    compact
+                    onOpen={(id) => openRecord(record.class, id)}
+                  />
+                  <p style={{ marginTop: -4 }}>
+                    Reason: {reasonLabel(record.reason)}
+                    {record.section ? `; section: ${record.section}` : ""}
+                  </p>
+                </div>
+              ))
+            )}
+          </section>
+          <section aria-label="excluded records">
+            <h4>Excluded records</h4>
+            {composeResult.resolution.excluded.length === 0 ? (
+              <p>None</p>
+            ) : (
+              composeResult.resolution.excluded.map((record) => (
+                <div key={record.id}>
+                  <RecordCard
+                    summary={ledgerSummary(record)}
+                    recordClass={record.class}
+                    compact
+                    onOpen={(id) => openRecord(record.class, id)}
+                  />
+                  <p style={{ marginTop: -4 }}>
+                    Reason: {reasonLabel(record.reason)}
+                  </p>
+                </div>
+              ))
+            )}
+          </section>
+          <section aria-label="suppressed reveals">
+            <h4>Suppressed reveals</h4>
+            {composeResult.resolution.suppressed.length === 0 ? (
+              <p>None</p>
+            ) : (
+              composeResult.resolution.suppressed.map((record) => (
+                <SuppressedRecordEntry
+                  key={record.id}
+                  record={record}
+                  onOpen={openRecord}
+                />
+              ))
+            )}
+          </section>
+          <section aria-label="sections generated">
+            <h4>Sections generated</h4>
+            {sectionEntries.length === 0 ? (
+              <p>None</p>
+            ) : (
+              <dl>
+                {sectionEntries.map(([section, ids]) => (
+                  <div key={section}>
+                    <dt>{section}</dt>
+                    <dd>{ids.join(", ") || "No record ids consumed"}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </section>
+          <section aria-label="blocked inputs">
+            <h4>Blocked inputs</h4>
+            {composeResult.resolution.blocked.length === 0 ? (
+              <p>None</p>
+            ) : (
+              <ul>
+                {composeResult.resolution.blocked.map((entry) => (
+                  <li key={`${entry.ref}:${entry.reason}`}>
+                    {entry.ref}: {entry.reason}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </aside>
       </div>
       {statusMessage ? (
         <p role="status" style={{ color: "green" }}>

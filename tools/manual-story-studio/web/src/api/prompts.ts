@@ -56,6 +56,8 @@ export async function previewPrompt(
   if (!response.ok) {
     throw new Error(`previewPrompt → ${await readErrorBody(response)}`);
   }
+  // The preview response includes the prompt markdown plus the inclusion
+  // ledger; PromptComposeResult mirrors that backend JSON shape.
   return (await response.json()) as PromptComposeResult;
 }
 
