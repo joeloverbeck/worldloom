@@ -1,6 +1,6 @@
 # SPEC-113 — Manual Story Studio: Prompt Inclusion Ledger, Prompt Preview Inspector, and Working-Set Explicit Exclusion
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (backend compose-result extension + frontend Prompt Preview rebuild + one working-set schema field; no canon-pipeline integration).
 **Depends on:** archive/specs/SPEC-102-prompt-composer-and-renderer-contract.md (extends the deterministic compose result), archive/specs/SPEC-109-manual-story-studio-current-context-layer.md (adds `excluded_records` to the current-context/working-set surface), archive/specs/SPEC-112-manual-story-studio-record-pickers.md (the Prompt Preview inspector reuses the archived `RecordPicker` / extended `RecordCard` presentation).
@@ -111,3 +111,20 @@ Two report proposals are trimmed before acceptance:
 - **`section_map` requires touching all 15 section emitters.** `assembleSections` (`src/prompt/sections/index.ts`) currently returns markdown strings only; recording which record ids fed each section means each emitter must also return its consumed-id set (or an equivalent side-channel). This is a signature/return-shape change across `section-3` … `section-12` (translator-driven sections 7–11 carry most of the per-record attribution). Determinism must be preserved (insertion-ordered structures, no wall-clock).
 - **must-not-reveal / `excluded_records` overlap.** Resolved in §3: exclusion wins (record dropped, reported under `excluded`). The implementation must apply `excluded_records` suppression at the seeding stage (`compose.ts` stage 2.5 / stage 4) before the must-not-reveal `suppressed` bucket is populated, so a doubly-listed record never reaches `suppressed`.
 - **`last_reviewed_after_segment` retained.** Per §3, the report §13 demotion is declined (SPEC-108 repair precondition depends on it). Any future workflow-status refactor that revisits this field is out of scope here.
+
+## 9. Outcome
+
+Completed: 2026-06-02
+
+Archived implementation tickets:
+- `archive/tickets/SPEC113MANSTOSTU-001.md` — `excluded_records` schema, validation, API, and picker surface.
+- `archive/tickets/SPEC113MANSTOSTU-002.md` — backend resolution ledger buckets and excluded-record suppression.
+- `archive/tickets/SPEC113MANSTOSTU-003.md` — section emitter consumed-id reporting and `section_map`.
+- `archive/tickets/SPEC113MANSTOSTU-004.md` — Prompt Preview two-pane inspector and web resolution mirror.
+- `archive/tickets/SPEC113MANSTOSTU-005.md` — Prompt Working Set display relabel.
+
+Verification:
+- PASS: `cd tools/manual-story-studio && npm run build` — web install check, web production build, and backend TypeScript build passed.
+- PASS: `cd tools/manual-story-studio && npm test` — backend build, 464 compiled tests, and web `tsc --noEmit` passed.
+- PASS: `rg "Current State|Current Context" tools/manual-story-studio/web/src -n` — no matches after the relabel.
+- PASS: `node .codex/skills/implement-spec-tickets/scripts/validate-state-handoff.mjs` passed at the final ticket handoff before spec archival.
