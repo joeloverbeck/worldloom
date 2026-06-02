@@ -20,6 +20,10 @@ function loadErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "request failed";
 }
 
+function IdSubscript({ id }: { id: string }) {
+  return <span className="id-subscript">{id}</span>;
+}
+
 interface RecordWithClass {
   cls: ManualRecordClass;
   summary: ManualRecordSummary;
@@ -269,7 +273,7 @@ export function MomentComposer() {
                     checked={includedCast.includes(c.id)}
                     onChange={() => toggleCast(c.id)}
                   />{" "}
-                  {c.title}
+                  {c.title} <IdSubscript id={c.id} />
                 </label>
               </li>
             ))}
@@ -299,7 +303,7 @@ export function MomentComposer() {
                   <span style={{ fontFamily: "monospace", fontSize: "0.85em" }}>
                     [{cls}]
                   </span>{" "}
-                  {summary.title}{" "}
+                  {summary.title} <IdSubscript id={summary.id} />{" "}
                   <em>({summary.importance})</em>
                 </li>
               ))}
@@ -316,7 +320,7 @@ export function MomentComposer() {
                   <span style={{ fontFamily: "monospace", fontSize: "0.85em" }}>
                     [{cls}]
                   </span>{" "}
-                  {summary.title}
+                  {summary.title} <IdSubscript id={summary.id} />
                 </li>
               ))}
             </ul>

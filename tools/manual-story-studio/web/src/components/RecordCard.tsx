@@ -57,8 +57,10 @@ export function RecordCard(props: RecordCardProps) {
           {summary.importance}
         </span>
       </header>
-      <p style={{ fontSize: 12, color: "#666", margin: "4px 0" }}>
-        {summary.id} {summary.active ? "" : "(archived)"}
+      <p style={{ margin: "4px 0" }}>
+        <span className="id-subscript">
+          {summary.id} {summary.active ? "" : "(archived)"}
+        </span>
       </p>
       {summary.summary ? (
         <p style={{ margin: "4px 0" }}>{summary.summary}</p>

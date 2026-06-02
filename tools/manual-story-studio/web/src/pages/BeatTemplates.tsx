@@ -210,7 +210,8 @@ export function BeatTemplates() {
                   }}
                 >
                   <div>
-                    <strong>{tpl.title || tpl.id}</strong>{" "}
+                    <strong>{tpl.title || "Untitled template"}</strong>{" "}
+                    <span className="id-subscript">{tpl.id}</span>{" "}
                     <span
                       style={{
                         background: "#dde",

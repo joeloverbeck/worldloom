@@ -12,7 +12,7 @@ Per SPEC-111 §2 item 5: editing the directive/contract/record/template/context 
 
 ## Assumption Reassessment (2026-06-02)
 
-1. Codebase: `react-router-dom` is `^6.27.0` (installed 6.30.4) — `useBlocker` is available (verified present in the built package); target forms exist — `MomentComposer.tsx` (directive + selected cast/records), `EditContract.tsx` (contract fields), `RecordForm.tsx` (record editor), `BeatTemplateForm.tsx` (template editor), `EditCurrentContext.tsx` (context form); `MomentComposer.tsx` is also modified by SPEC111MANSTOSTU-003 (distinct edits). `Dashboard.tsx:38` `directiveDraft` has no save handler → excluded.
+1. Codebase: `react-router-dom` is `^6.27.0` (installed 6.30.4) — `useBlocker` is available (verified present in the built package); target forms exist — `MomentComposer.tsx` (directive + selected cast/records), `EditContract.tsx` (contract fields), `RecordForm.tsx` (record editor), `BeatTemplateForm.tsx` (template editor), `EditCurrentContext.tsx` (context form); `MomentComposer.tsx` was also modified by archive/tickets/SPEC111MANSTOSTU-003.md (distinct edits). `Dashboard.tsx:38` `directiveDraft` has no save handler → excluded.
 2. Specs/docs: SPEC-111 §2 item 5 + §3 third/fourth key decisions + §8 assumption 1 (resolved — `useBlocker` available; no upgrade/fallback needed) + M4 (Dashboard directive excluded).
 3. Cross-artifact boundary under audit: the React Router `useBlocker` contract (in-app nav blocking) + `window.beforeunload` (tab close); `MomentComposer.tsx` shared with 003 (mechanical overlap, distinct regions).
 4. FOUNDATIONS Rule 6 No Silent Retcons (per SPEC-111 §5): the hook makes in-progress authoring change visible at the moment of potential loss, preventing silent loss of work — the UI-layer analogue of the canon-layer no-silent-retcon discipline.
@@ -56,7 +56,7 @@ Create `tools/manual-story-studio/test/web/useUnsavedChanges.test.ts`. Prefer th
 ## Out of Scope
 
 - The Dashboard directive draft (excluded — no save handler, M4).
-- ID hiding (→ SPEC111MANSTOSTU-003).
+- ID hiding (→ archive/tickets/SPEC111MANSTOSTU-003.md).
 - Modal visual styling beyond a minimal confirm dialog.
 - Backend.
 
