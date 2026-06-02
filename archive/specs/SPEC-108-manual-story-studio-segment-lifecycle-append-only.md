@@ -5,7 +5,7 @@
 **Classification:** tooling-adjacent (segment write surface under `worlds/<slug>/manual-stories/<slug>/segments/`; no canon-pipeline integration).
 **Depends on:** archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (typed-error reads from `src/read/segments.ts` — the new lifecycle gates rely on `ReadResult<T>` for atomic precondition checks).
 **Blocks:** —
-**Related:** `tools/manual-story-studio/src/write/segments.ts`, `tools/manual-story-studio/src/server/routes/segments.ts`, `tools/manual-story-studio/web/src/pages/PasteProse.tsx`, `tools/manual-story-studio/web/src/pages/Manuscript.tsx`; SPEC-109 (state-review precondition for `force_replace` lands as a follow-up edit to this spec's repair-mode route when SPEC-109 ships).
+**Related:** `tools/manual-story-studio/src/write/segments.ts`, `tools/manual-story-studio/src/server/routes/segments.ts`, `tools/manual-story-studio/web/src/pages/PasteProse.tsx`, `tools/manual-story-studio/web/src/pages/Manuscript.tsx`; `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md` (state-review precondition for `force_replace` landed through the current-context state-review surface).
 **Source:** critical triage of `reports/manual-story-studio-second-iteration.md` §§5 / 15 / 19 / 31 Stage 4 (ChatGPT-Pro, 2026-06-01). Accepted with modification: the report's "remove ordinary delete/reorder" instinct is right; the modification is to *gate* the existing edit/delete code paths behind an explicit `repair_mode` flag rather than delete them outright, so existing tests and code paths remain reachable for genuine repair scenarios while the primary UX presents append-only semantics.
 
 ---

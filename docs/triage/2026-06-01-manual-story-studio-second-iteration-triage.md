@@ -65,14 +65,14 @@ Identifiers are local to this triage. `T<N>` for triage items derived from the r
 **Source:** report §§5 / 15 / 31 Stage 4.
 **Rationale:** Verified three delete modes + `editSegment` in `tools/manual-story-studio/src/write/segments.ts`. The report's instinct is correct — append-only matches the writer's cockpit model. But removing the code paths outright would (a) regress existing tests, (b) eliminate the legitimate corrupted-file repair path, (c) preclude the "replace latest accepted segment" workflow the report itself acknowledges as legitimate.
 **Deliverable:** `specs/SPEC-108-manual-story-studio-segment-lifecycle-append-only.md`. Gates `editSegment`/`deleteSegment` behind explicit `mode=repair` route flag; introduces a dedicated repair-mode UI page with a warning banner; adds client-side `discardBeforeSave` path. Code paths preserved, primary UX append-only.
-**Modification scope:** *Gate* don't *delete*; preserve repair-mode escape valve. The "state-review-marked-complete" precondition the report §15 names depends on SPEC-109's state-review tracking surface, so it lands as a follow-up edit to SPEC-108's repair-mode route when SPEC-109 ships.
+**Modification scope:** *Gate* don't *delete*; preserve repair-mode escape valve. The "state-review-marked-complete" precondition the report §15 names depends on SPEC-109's state-review tracking surface, now landed in `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md`.
 
 #### T5a — Current-context selector layer
 
 **Verdict:** ACCEPT.
 **Source:** report §§9 / 13 / 18 / 24 / 29 / 31 Stage 5.
 **Rationale:** The composer's importance/centrality heuristics over the full record corpus produce a selection but not the *current* selection. An explicit `current-context.yaml` selector (current location, POV holder, current cast, active pressure clocks, active secrets, pinned records, must-not-reveal, current handoff summary, last-accepted-segment, last-reviewed-after-segment) is qualitatively better and unblocks both the dashboard cockpit and SPEC-108's `force_replace` precondition.
-**Deliverable:** `specs/SPEC-109-manual-story-studio-current-context-layer.md`. Adds the schema, read/write/validate paths, GET/PUT routes, prompt composer plumbing (additive — heuristic fallback when context absent), and Dashboard + Edit Current Context UI.
+**Deliverable:** `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md`. Adds the schema, read/write/validate paths, GET/PUT routes, prompt composer plumbing (additive — heuristic fallback when context absent), and Dashboard + Edit Current Context UI.
 
 #### T6 — Beat template pressure/turn card fields
 
@@ -96,7 +96,7 @@ Identifiers are local to this triage. `T<N>` for triage items derived from the r
 
 **Verdict:** DEFER.
 **Source:** report §§9 / 25 / 31 Stage 6.
-**Deferred to:** a follow-up spec after SPEC-109 (current-context) ships and the author's first round of cockpit use surfaces concrete schema gaps.
+**Deferred to:** a follow-up spec after archived SPEC-109 (current-context) and the author's first round of cockpit use surface concrete schema gaps.
 **Rationale:** The report itself orders schema deepening *after* current-context. Adding all 8 class-specific field expansions now would couple SPEC-109 to a much larger surface. Once SPEC-109 forces the author to confront "what matters now", the right schema shape becomes clearer.
 **Reversal condition:** if SPEC-109's first round of cockpit use surfaces concrete schema gaps the author hits repeatedly, file a follow-up spec capturing those.
 
@@ -167,7 +167,7 @@ The following report sub-findings did not get a top-level T<N> identifier becaus
 | SPEC-106 | `archive/specs/SPEC-106-manual-story-studio-prompt-leakage-hard-tier.md` | 4 leakage rules to hard tier; remove copy-anyway override |
 | SPEC-107 | `archive/specs/SPEC-107-manual-story-studio-prose-state-contract-correction.md` | Contract paragraph + stop rule + missing-doc cleanup |
 | SPEC-108 | `specs/SPEC-108-manual-story-studio-segment-lifecycle-append-only.md` | Append-only primary UX; `mode=repair` gate on lifecycle ops |
-| SPEC-109 | `specs/SPEC-109-manual-story-studio-current-context-layer.md` | `current-context.yaml` selector; composer + Dashboard plumbing |
+| SPEC-109 | `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md` | `current-context.yaml` selector; composer + Dashboard plumbing |
 | SPEC-110 | `specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md` | 7 new fields on BeatTemplate schema |
 | SPEC-111 | `specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md` | Health banner persistence + sibling nav + ID hiding + unsaved-change hook |
 | Implementation order | `specs/IMPLEMENTATION-ORDER.md` | Dependency graph + recommended landing waves |

@@ -6,6 +6,7 @@ import { CastAndProfiles } from "./pages/CastAndProfiles.js";
 import { CreateManualStory } from "./pages/CreateManualStory.js";
 import { Dashboard } from "./pages/Dashboard.js";
 import { EditContract } from "./pages/EditContract.js";
+import { EditCurrentContext } from "./pages/EditCurrentContext.js";
 import { ManualStories } from "./pages/ManualStories.js";
 import { Manuscript } from "./pages/Manuscript.js";
 import { MomentComposer } from "./pages/MomentComposer.js";
@@ -84,6 +85,10 @@ export function App() {
           <Route
             path="/worlds/:worldSlug/manual-stories/:msSlug/contract"
             element={<EditContract />}
+          />
+          <Route
+            path="/worlds/:worldSlug/manual-stories/:msSlug/current-context/edit"
+            element={<EditCurrentContext />}
           />
           <Route
             path="/worlds/:worldSlug/manual-stories/:msSlug/prompt-history"

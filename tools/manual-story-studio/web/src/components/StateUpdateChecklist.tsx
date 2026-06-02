@@ -1,8 +1,14 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import {
+  fetchCurrentContext,
+  saveCurrentContext,
+} from "../api/current-context.js";
 import type {
   ManualRecordClass,
   StateUpdateChecklistPayload,
+  ValidationError,
 } from "../types/manual-story.js";
 
 export interface StateUpdateChecklistProps {
@@ -19,6 +25,9 @@ export function StateUpdateChecklist({
     msSlug: string;
   }>();
   const navigate = useNavigate();
+  const [marking, setMarking] = useState(false);
+  const [markError, setMarkError] = useState<string | null>(null);
+  const [markFindings, setMarkFindings] = useState<ValidationError[]>([]);
 
   function handleReview(recordClass: ManualRecordClass) {
     if (!worldSlug || !msSlug) return;
@@ -33,6 +42,33 @@ export function StateUpdateChecklist({
         msSlug,
       )}/records?${searchParams.toString()}`,
     );
+  }
+
+  async function handleMarkReviewed(): Promise<void> {
+    if (!worldSlug || !msSlug || payload.last_accepted_segment === null) return;
+    setMarking(true);
+    setMarkError(null);
+    setMarkFindings([]);
+    try {
+      const currentContext = await fetchCurrentContext(worldSlug, msSlug);
+      if (currentContext === null) {
+        setMarkError("Set current context before marking state reviewed.");
+        return;
+      }
+      const result = await saveCurrentContext(worldSlug, msSlug, {
+        ...currentContext,
+        last_reviewed_after_segment: payload.last_accepted_segment,
+      });
+      if (result.ok) {
+        onClose();
+      } else {
+        setMarkFindings(result.findings);
+      }
+    } catch (error: unknown) {
+      setMarkError(error instanceof Error ? error.message : "request failed");
+    } finally {
+      setMarking(false);
+    }
   }
 
   return (
@@ -97,7 +133,43 @@ export function StateUpdateChecklist({
           ))}
         </ul>
 
-        <footer style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+        {markError ? (
+          <p role="alert" style={{ color: "crimson" }}>
+            {markError}
+          </p>
+        ) : null}
+        {markFindings.length > 0 ? (
+          <section role="alert" style={{ background: "#fee", padding: 8 }}>
+            <p>Current context validation failed.</p>
+            <ul>
+              {markFindings.map((finding, index) => (
+                <li key={`${finding.field}-${index}`}>
+                  {finding.field}: {finding.message}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        <footer
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 8,
+            marginTop: 16,
+          }}
+        >
+          {payload.last_accepted_segment !== null ? (
+            <button
+              type="button"
+              onClick={handleMarkReviewed}
+              disabled={marking}
+            >
+              {marking
+                ? "Marking..."
+                : `Mark state reviewed after ${payload.last_accepted_segment}`}
+            </button>
+          ) : null}
           <button type="button" onClick={onClose}>
             Skip review
           </button>

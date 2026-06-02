@@ -11,6 +11,7 @@ import path from "node:path";
 
 import YAML from "yaml";
 
+import { readCurrentContext } from "../read/current-context.js";
 import { readManualStoryMetadata } from "../read/manual-story-metadata.js";
 import { listRecords, readRecord } from "../read/records.js";
 import type { BeatTemplate } from "../schema/beat-template.js";
@@ -87,10 +88,33 @@ export async function composePrompt(
   const metadata = metadataResult.value;
   sidecarDraft.manual_story_slug = metadata.manual_story_slug;
 
+  // Stage 2.5 — Load optional current-context selector.
+  const currentContextResult = readCurrentContext(input.manualStoryRoot);
+  if (!currentContextResult.ok) {
+    throw new Error(
+      `current_context_unavailable: ${currentContextResult.error.code} at ${currentContextResult.error.path}`,
+    );
+  }
+  const currentContext = currentContextResult.value;
+  const seededCastIds =
+    currentContext && currentContext.current_cast.length > 0
+      ? currentContext.current_cast.slice()
+      : input.included_cast.slice();
+  const seededRecordIds = mergeIds(
+    input.included_records,
+    [
+      ...(currentContext?.pinned_records ?? []),
+      ...(currentContext?.active_secrets_questions ?? []),
+      ...(currentContext?.must_not_reveal ?? []),
+    ],
+  );
+  sidecarDraft.included_cast = seededCastIds.slice();
+  sidecarDraft.included_records = seededRecordIds.slice();
+
   // Stage 3 — Load selected cast profiles.
   const cast: ManualCharacterRecord[] = [];
   const missingCastFindings: PromptLintFinding[] = [];
-  for (const id of input.included_cast) {
+  for (const id of seededCastIds) {
     const rec = readRecord(input.manualStoryRoot, "cast", id);
     if (!rec.ok) {
       missingCastFindings.push(
@@ -109,7 +133,7 @@ export async function composePrompt(
   // Stage 4 — Load selected / active relevant records.
   const records: ManualRecord[] = [];
   const missingRecordFindings: PromptLintFinding[] = [];
-  for (const id of input.included_records) {
+  for (const id of seededRecordIds) {
     const cls = classifyManualRecordId(id);
     if (!cls) {
       missingRecordFindings.push(
@@ -233,9 +257,13 @@ export async function composePrompt(
     metadata,
     cast,
     records,
-    included_cast_ids: input.included_cast.slice(),
+    included_cast_ids: seededCastIds.slice(),
     moment_directive: input.moment_directive,
     included_template_body: includedTemplateBody,
+    current_handoff_summary: currentContext?.current_handoff_summary ?? null,
+    pov_holder: currentContext?.pov_holder ?? null,
+    must_not_reveal: currentContext?.must_not_reveal ?? [],
+    active_secrets_questions: currentContext?.active_secrets_questions ?? [],
     recent_segment_last_paragraph: recentSegmentLastParagraph,
     content_policy_body: contentPolicyBody,
     prose_craft_contract_body: proseCraftBody,
@@ -255,9 +283,9 @@ export async function composePrompt(
     markdown,
     moment_directive: input.moment_directive,
     expected_content_policy_body: contentPolicyBody,
-    selected_cast_ids: input.included_cast.slice(),
+    selected_cast_ids: seededCastIds.slice(),
     resolved_cast_ids: knownCastIds,
-    selected_record_ids: input.included_records.slice(),
+    selected_record_ids: seededRecordIds.slice(),
     resolved_record_ids: knownRecordIds,
     latest_segment_available: recentSegmentLastParagraph !== null,
     prompt_policy: {
@@ -283,6 +311,17 @@ export async function composePrompt(
 
   // Stage 12 — "Save Prompt" is the write side; lives in ../write/prompts.ts
   // and is invoked by the HTTP route layer, not by compose itself.
+}
+
+function mergeIds(primary: string[], secondary: string[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const id of [...primary, ...secondary]) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  return out;
 }
 
 function buildTranslatorContext(

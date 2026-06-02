@@ -4,6 +4,7 @@ import {
   MANUAL_RECORD_CLASSES,
   type ManualRecordClass,
 } from "../schema/manual-story.js";
+import { readCurrentContext } from "../read/current-context.js";
 import { readManualStoryMetadata } from "../read/manual-story-metadata.js";
 import {
   listAllKnownIds,
@@ -13,6 +14,7 @@ import {
 import { readSegmentBody, readSegmentSidecar } from "../read/segments.js";
 import { readManuscript } from "../read/manuscript.js";
 import { validateRecord, validateManualStoryMetadata } from "../validate/schema.js";
+import { validateCurrentContext } from "../validate/current-context.js";
 import { validateRefs } from "../validate/refs.js";
 import {
   deriveHealthStatus,
@@ -82,6 +84,17 @@ function runFilePass(root: string): HealthFinding[] {
     });
   }
 
+  const currentContext = readCurrentContext(root);
+  if (!currentContext.ok) {
+    findings.push({
+      severity: "blocking",
+      code: "current-context-yaml-parse-failed",
+      path: currentContext.error.path,
+      message: "current-context.yaml could not be read",
+      repair_hint: currentContext.error.repair_hint,
+    });
+  }
+
   return findings;
 }
 
@@ -146,6 +159,29 @@ function runReferencePass(root: string): HealthFinding[] {
           message: `${violation.recordId} references missing ${violation.missingId} at ${violation.field}`,
           repair_hint: `Create ${violation.missingId} or remove the reference from ${violation.field}.`,
         });
+      }
+    }
+  }
+
+  const currentContext = readCurrentContext(root);
+  if (currentContext.ok && currentContext.value !== null) {
+    const metadata = readManualStoryMetadata(root);
+    if (metadata.ok) {
+      const result = validateCurrentContext(
+        currentContext.value,
+        known.value,
+        metadata.value.segment_order,
+      );
+      if (!result.ok) {
+        for (const error of result.errors) {
+          findings.push({
+            severity: "error",
+            code: error.code ?? "current-context-reference-broken",
+            path: path.join(root, "current-context.yaml"),
+            message: error.message,
+            repair_hint: `${error.field}: ${error.message}`,
+          });
+        }
       }
     }
   }

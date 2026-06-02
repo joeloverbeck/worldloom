@@ -24,6 +24,7 @@ export interface SchemaDef {
 export interface ValidationError {
   field: string;
   message: string;
+  code?: string;
 }
 
 export type ValidationResult =
