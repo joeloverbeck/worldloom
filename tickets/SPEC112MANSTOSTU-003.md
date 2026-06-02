@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — new `tools/manual-story-studio` web component `RecordPicker.tsx` + a client-side multi-class fetch helper in `web/src/api/records.ts` + picker/popup styling in `web/src/index.css`. New shared component; no impact on existing components until the mount tickets (004-007) consume it.
-**Deps**: archive/tickets/SPEC112MANSTOSTU-001.md, tickets/SPEC112MANSTOSTU-002.md
+**Deps**: archive/tickets/SPEC112MANSTOSTU-001.md, archive/tickets/SPEC112MANSTOSTU-002.md
 
 ## Problem
 
@@ -13,7 +13,7 @@ SPEC-112 replaces every author-facing ID-typing surface with a searchable, card-
 ## Assumption Reassessment (2026-06-02)
 
 1. No combobox/picker exists today (`RecordPicker.tsx` absent, verified). The web client `listRecords` (`web/src/api/records.ts:66`) fetches one class per call via `?class=`+`?includeArchived`; `MomentComposer.tsx:120-146` already fetches all classes client-side and filters in memory — the pattern this picker generalizes. `MANUAL_RECORD_CLASSES` is exported from `web/src/types/manual-story.js`.
-2. SPEC-112 §2 items 1-2-7 and §4 (`RecordPicker.tsx` new, `api/records.ts` modify, `index.css` modify) define this ticket; §2.7 decided client-side filter for v1 (no `?classes=`/`?q=` route). Involved-cast on cards depends on `archive/tickets/SPEC112MANSTOSTU-001.md`; the extended card on `tickets/SPEC112MANSTOSTU-002.md`.
+2. SPEC-112 §2 items 1-2-7 and §4 (`RecordPicker.tsx` new, `api/records.ts` modify, `index.css` modify) define this ticket; §2.7 decided client-side filter for v1 (no `?classes=`/`?q=` route). Involved-cast on cards depends on `archive/tickets/SPEC112MANSTOSTU-001.md`; the extended card on `archive/tickets/SPEC112MANSTOSTU-002.md`.
 3. Cross-artifact boundary under audit: `RecordPicker`'s prop contract (`classes`, `mode: single|multi`, `seed`/pre-surfaced ids, `value`/`onChange`) is the shared surface that SPEC112MANSTOSTU-004/005/006/007 consume; the multi-class fetch helper in `api/records.ts` is shared with the CurrentStatePanel title-resolution (006). Lock the prop names here so the mount tickets bind against a stable contract.
 4. FOUNDATIONS §Tooling Recommendation (least-privilege / ID-free entry, SPEC-112 §5): the picker is the mechanism that removes the author's need to ever type or read an internal id in the normal flow. The card shows the ID only in a disclosure. This ticket must not introduce any path that requires typing a raw id.
 
@@ -41,7 +41,7 @@ Build the editable-combobox: an editable search `<input>`, a suggestion popup of
 
 ### 3. Picker/popup styling in `index.css`
 
-Add the popup + option-list styling for the combobox (the card itself keeps inline styles per 002).
+Add the popup + option-list styling for the combobox (the card itself keeps inline styles per `archive/tickets/SPEC112MANSTOSTU-002.md`).
 
 ## Files to Touch
 

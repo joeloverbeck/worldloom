@@ -1,6 +1,6 @@
 # SPEC112MANSTOSTU-002: Extend RecordCard for picker use (class, prompt-visibility, involved-cast)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` web component `RecordCard.tsx`; additive props only, no impact on existing `RecordCard` consumers (`CastAndProfiles.tsx`, `Records.tsx`).
@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC-112's picker renders results as record cards showing title, class, one-line summary, active/inactive, tags, involved cast, and current prompt-visibility (§2 item 1). A card component already exists — `RecordCard.tsx` (consumed by `CastAndProfiles.tsx` + `Records.tsx`) — rendering title, importance, id-subscript, summary, and tags. The reassessment (2026-06-02, Q3) decided to **extend** this card rather than create a near-name `RecordCardMini` duplicate. This ticket adds the missing card fields and makes the card embeddable inside the picker popup.
+SPEC-112's picker renders results as record cards showing title, class, one-line summary, active/inactive, tags, involved cast, and current prompt-visibility (§2 item 1). At intake, `RecordCard.tsx` already existed and was consumed by `CastAndProfiles.tsx` + `Records.tsx`, but it rendered only title, importance, id-subscript, summary, and tags. The reassessment (2026-06-02, Q3) decided to **extend** this card rather than create a near-name `RecordCardMini` duplicate. This ticket added the missing card fields and made the card embeddable inside the picker popup.
 
 ## Assumption Reassessment (2026-06-02)
 
@@ -27,15 +27,15 @@ SPEC-112's picker renders results as record cards showing title, class, one-line
 2. Existing consumers compile unchanged (additive props) → web `tsc --noEmit` over `CastAndProfiles.tsx` + `Records.tsx`.
 3. Single-layer note: this is a presentational component with no canon/schema surface; type-check + the 008 structural assertion are the proof surfaces.
 
-## What to Change
+## Landed Changes
 
-### 1. Add the missing card fields
+### 1. Added the missing card fields
 
-In `RecordCard.tsx`, render class label, current prompt-visibility, and involved-cast (from the `involved_cast` field added by `archive/tickets/SPEC112MANSTOSTU-001.md`) alongside the existing title / summary / tags / active styling. Keep the ID in the existing id-subscript disclosure only.
+In `RecordCard.tsx`, the card now renders an optional class label, current prompt-visibility, and involved-cast ids from the `involved_cast` field added by `archive/tickets/SPEC112MANSTOSTU-001.md`. It keeps the ID in the existing id-subscript disclosure line, not as the primary label.
 
-### 2. Make the card picker-embeddable
+### 2. Made the card picker-embeddable
 
-Add optional props so the picker can mount the card as a selectable option: e.g., an optional `recordClass` (for the class label), an optional `onSelect`/`selected` pair, and a `compact`/`embedded` flag if the picker popup needs tighter chrome. All new props optional; `onOpen` and the existing render path stay the default.
+Added optional `recordClass`, `selected`, `compact`, `onSelect`, and `interactionRole` props. Existing callers still pass only `summary` and `onOpen`; when `onSelect` is absent, click/keyboard activation still calls `onOpen(summary.id)`. Picker consumers can use compact selected cards with `role="option"` without changing the existing Records/Cast pages.
 
 ## Files to Touch
 
@@ -71,3 +71,21 @@ Add optional props so the picker can mount the card as a selectable option: e.g.
 1. `(cd tools/manual-story-studio && npm --prefix web test)`
 2. `(cd tools/manual-story-studio && npm run build)`
 3. Web `tsc --noEmit` is the correct boundary for an additive presentational prop change; runtime rendering is exercised by the picker mount tickets.
+
+## Outcome
+
+Completed: 2026-06-02
+
+`RecordCard.tsx` now has the missing picker-ready display metadata and optional selection/embedding props. The existing `CastAndProfiles.tsx` and `Records.tsx` call sites were left unchanged and continue to compile against the default open-card behavior. No new card component, alias, storage change, or route change was introduced.
+
+## Verification Result
+
+1. Pre-edit baseline: `npm --prefix web test` from `tools/manual-story-studio` — passed before source edits.
+2. `npm --prefix web test` from `tools/manual-story-studio` — passed after implementation; web `tsc -p tsconfig.json --noEmit` accepted the optional prop extension and unchanged existing call sites.
+3. `npm run build` from `tools/manual-story-studio` — passed; web install check, web production build, and backend build succeeded.
+4. `npm test` from `tools/manual-story-studio` — passed; backend build plus 454 compiled backend tests plus web type check.
+5. Ignored artifact check: verification refreshed existing ignored package artifacts under `tools/manual-story-studio/dist/`, `tools/manual-story-studio/web/dist/`, `tools/manual-story-studio/node_modules/`, and `tools/manual-story-studio/web/node_modules/`; these are expected verification artifacts, not tracked ticket output.
+
+## Deviations
+
+None. The implementation used the drafted optional-prop approach and left existing `RecordCard` consumers behaviorally unchanged.
