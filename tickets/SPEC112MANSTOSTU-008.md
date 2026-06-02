@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — new `tools/manual-story-studio/test/web/record-picker.test.ts` (a `node --test` source-structure test); no production code.
-**Deps**: archive/tickets/SPEC112MANSTOSTU-004.md, archive/tickets/SPEC112MANSTOSTU-005.md, 006, 007
+**Deps**: archive/tickets/SPEC112MANSTOSTU-004.md, archive/tickets/SPEC112MANSTOSTU-005.md, archive/tickets/SPEC112MANSTOSTU-006.md, 007
 
 ## Problem
 
@@ -14,7 +14,7 @@ SPEC-112 AC#1 requires a grep of `web/src/` to find **zero** remaining raw-ID en
 
 1. The existing `tools/manual-story-studio/test/web/useUnsavedChanges.test.ts` is a `node --test` file that `readFileSync`s web source files and regex-asserts their structure (it does NOT render React). It is compiled to `dist/test/web/` by `build:backend` and run by `npm run test:backend`. The web package `test` script is `tsc -p tsconfig.json --noEmit` only — no vitest/jsdom/testing-library (verified: web `devDependencies` carry none).
 2. SPEC-112 §4 (test create) and §7 AC#1, plus §8 (test harness is source-structure + type-check only), define this ticket; the reassessment (Q2=a) chose the source-structure approach over adding a DOM harness.
-3. Cross-artifact boundary under audit: this test asserts the post-implementation state of four surfaces modified by `archive/tickets/SPEC112MANSTOSTU-004.md` (EditCurrentContext), `archive/tickets/SPEC112MANSTOSTU-005.md` (RecordForm), -006 (CurrentStatePanel), and -007 (MomentComposer), plus the presence of the `archive/tickets/SPEC112MANSTOSTU-003.md` `RecordPicker`. Its Deps are those four mount tickets (the leaf set — each transitively reaches `archive/tickets/SPEC112MANSTOSTU-003.md` → `archive/tickets/SPEC112MANSTOSTU-001.md` / `archive/tickets/SPEC112MANSTOSTU-002.md`).
+3. Cross-artifact boundary under audit: this test asserts the post-implementation state of four surfaces modified by `archive/tickets/SPEC112MANSTOSTU-004.md` (EditCurrentContext), `archive/tickets/SPEC112MANSTOSTU-005.md` (RecordForm), `archive/tickets/SPEC112MANSTOSTU-006.md` (CurrentStatePanel), and -007 (MomentComposer), plus the presence of the `archive/tickets/SPEC112MANSTOSTU-003.md` `RecordPicker`. Its Deps are those four mount tickets (the leaf set — each transitively reaches `archive/tickets/SPEC112MANSTOSTU-003.md` → `archive/tickets/SPEC112MANSTOSTU-001.md` / `archive/tickets/SPEC112MANSTOSTU-002.md`).
 4. FOUNDATIONS §Tooling Recommendation (ID-free entry, SPEC-112 §5): this test is the structural proof that the ID-elimination is complete — the "zero raw-ID entry surfaces" sweep AC#1 names.
 
 ## Architecture Check

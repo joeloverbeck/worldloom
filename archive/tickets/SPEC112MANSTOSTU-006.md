@@ -1,6 +1,6 @@
 # SPEC112MANSTOSTU-006: Title-bearing display in CurrentStatePanel
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` web component `CurrentStatePanel.tsx`; replaces raw-ID display with title-bearing display and adds a per-class summary fetch to resolve titles.
@@ -28,15 +28,32 @@
 2. The panel resolves titles from the shared summary fetch helper (`archive/tickets/SPEC112MANSTOSTU-003.md`) → `grep` the import of the helper from `api/records.ts`; web `tsc --noEmit`.
 3. Graceful fallback when an id has no summary (archived/missing) → manual review (display the id as a last resort, never crash).
 
-## What to Change
+## Landed Changes
 
 ### 1. Fetch per-class summaries and build an id→title map
 
-On mount (with `worldSlug`/`msSlug`), call the multi-class fetch helper (`archive/tickets/SPEC112MANSTOSTU-003.md`) for the classes the panel displays, and build an `id → title` lookup.
+`CurrentStatePanel` now calls `listRecordsForClasses` for `cast`, `locations`, `clocks`, `secrets`, and `questions` with archived records included, then builds an id-to-title lookup for the current-state display.
 
 ### 2. Render titles for all five reference surfaces
 
-Replace `chipList`'s raw-ID chips (current_cast, active_pressure_clocks, active_secrets_questions) with title-bearing chips, and replace the raw `<dd>` text for `current_location` and `pov_holder` with their resolved titles. Fall back to the id when no summary resolves.
+`current_location`, `pov_holder`, `current_cast`, `active_pressure_clocks`, and `active_secrets_questions` now render through the title lookup. Missing summaries fall back to the id instead of crashing, and a load error is surfaced with an alert.
+
+## Outcome
+
+The current-state panel now displays title-bearing references for all record-backed current-context fields while continuing to read the unchanged `CurrentContext` id strings and arrays.
+
+## Verification Result
+
+1. `grep -n 'chipList\|title\|listRecordsForClasses' tools/manual-story-studio/web/src/components/CurrentStatePanel.tsx` confirmed the shared helper import and title-resolution rendering path.
+2. `(cd tools/manual-story-studio && npm --prefix web test)` passed.
+3. `(cd tools/manual-story-studio && npm run build)` passed.
+4. `(cd tools/manual-story-studio && npm test)` passed: 454 backend tests plus web `tsc --noEmit`.
+5. `git diff --check` passed.
+6. Ignored verification artifacts remained under `tools/manual-story-studio/dist/`, `tools/manual-story-studio/node_modules/`, `tools/manual-story-studio/web/dist/`, and `tools/manual-story-studio/web/node_modules/`.
+
+## Deviations
+
+None. No backend endpoint was added.
 
 ## Files to Touch
 
