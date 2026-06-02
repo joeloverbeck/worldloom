@@ -133,6 +133,13 @@ function mkFixture(): Fixture {
     id: "mtemplate-1",
     title: "Soft Confrontation",
     active: true,
+    pressure_type: "intimacy",
+    turn_type: "escalation",
+    preconditions_text: "",
+    do_not_resolve: [],
+    expected_state_review: ["relationships"],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "confrontation",
       tags: [],
@@ -169,6 +176,9 @@ function mkFixture(): Fixture {
     ...template1,
     id: "mtemplate-2",
     title: "Z Joyful Reunion",
+    pressure_type: "choice",
+    turn_type: "commitment",
+    expected_state_review: ["emotions"],
     classification: {
       ...template1.classification,
       move_family: "celebration",

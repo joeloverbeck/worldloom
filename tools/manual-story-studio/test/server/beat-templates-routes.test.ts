@@ -41,6 +41,13 @@ function validTemplateBody(): Record<string, unknown> {
   return {
     title: "Soft Confrontation",
     active: true,
+    pressure_type: "intimacy",
+    turn_type: "escalation",
+    preconditions_text: "",
+    do_not_resolve: [],
+    expected_state_review: ["relationships"],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "confrontation",
       tags: ["hurt"],

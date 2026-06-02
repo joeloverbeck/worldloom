@@ -7,10 +7,13 @@ import {
   BEAT_TEMPLATE_BEAT_FUNCTIONS,
   BEAT_TEMPLATE_ID_PATTERN,
   BEAT_TEMPLATE_MOVE_FAMILIES,
+  BEAT_TEMPLATE_PRESSURE_TYPES,
   BEAT_TEMPLATE_RELATIONSHIP_AXES,
   BEAT_TEMPLATE_TONE_FITS,
+  BEAT_TEMPLATE_TURN_TYPES,
   type BeatTemplate,
 } from "../schema/beat-template.js";
+import { MANUAL_RECORD_CLASSES } from "../schema/manual-story.js";
 
 const ROLE_VALUES = new Set<string>([
   "viewpoint",
@@ -33,9 +36,12 @@ const CONTENT_INTENSITY_VALUES = new Set<string>([
 ]);
 
 const MOVE_FAMILY_SET = new Set<string>(BEAT_TEMPLATE_MOVE_FAMILIES);
+const PRESSURE_TYPE_SET = new Set<string>(BEAT_TEMPLATE_PRESSURE_TYPES);
 const TONE_FIT_SET = new Set<string>(BEAT_TEMPLATE_TONE_FITS);
+const TURN_TYPE_SET = new Set<string>(BEAT_TEMPLATE_TURN_TYPES);
 const RELATIONSHIP_AXES_SET = new Set<string>(BEAT_TEMPLATE_RELATIONSHIP_AXES);
 const BEAT_FUNCTION_SET = new Set<string>(BEAT_TEMPLATE_BEAT_FUNCTIONS);
+const MANUAL_RECORD_CLASS_SET = new Set<string>(MANUAL_RECORD_CLASSES);
 
 export interface BeatTemplateViolation {
   field: string;
@@ -135,6 +141,33 @@ function validateEnumStringArray(
       violations.push({
         field: `${field}[${i}]`,
         message: `value '${entry}' not in allowed set: ${[...allowed].join(", ")}`,
+      });
+    }
+  }
+}
+
+function validateExpectedStateReview(
+  violations: BeatTemplateViolation[],
+  value: unknown,
+): void {
+  if (!isStringArray(value)) {
+    violations.push({
+      field: "expected_state_review",
+      message: "expected array of strings",
+    });
+    return;
+  }
+  for (let i = 0; i < value.length; i++) {
+    const entry = value[i] as string;
+    if (!MANUAL_RECORD_CLASS_SET.has(entry)) {
+      violations.push({
+        field: `expected_state_review[${i}]`,
+        message: `value '${entry}' not in allowed set: ${[...MANUAL_RECORD_CLASS_SET].join(", ")}`,
+      });
+    } else if (entry === "beat-templates") {
+      violations.push({
+        field: `expected_state_review[${i}]`,
+        message: "beat-templates is not a state-review class",
       });
     }
   }
@@ -270,6 +303,13 @@ const TOP_LEVEL_REQUIRED = [
   "id",
   "title",
   "active",
+  "pressure_type",
+  "turn_type",
+  "preconditions_text",
+  "do_not_resolve",
+  "expected_state_review",
+  "stop_after",
+  "anti_patterns",
   "classification",
   "role_slots",
   "requires",
@@ -279,16 +319,7 @@ const TOP_LEVEL_REQUIRED = [
   "author_notes",
 ] as const;
 
-const TOP_LEVEL_ALLOWED = new Set<string>([
-  ...TOP_LEVEL_REQUIRED,
-  "pressure_type",
-  "turn_type",
-  "preconditions_text",
-  "do_not_resolve",
-  "expected_state_review",
-  "stop_after",
-  "anti_patterns",
-]);
+const TOP_LEVEL_ALLOWED = new Set<string>(TOP_LEVEL_REQUIRED);
 
 export function validateBeatTemplate(raw: unknown): BeatTemplateValidationResult {
   const violations: BeatTemplateViolation[] = [];
@@ -321,6 +352,19 @@ export function validateBeatTemplate(raw: unknown): BeatTemplateValidationResult
   }
   if ("title" in raw) validateString(violations, "title", raw.title);
   if ("active" in raw) validateBoolean(violations, "active", raw.active);
+  if ("pressure_type" in raw)
+    validateEnumString(violations, "pressure_type", raw.pressure_type, PRESSURE_TYPE_SET);
+  if ("turn_type" in raw)
+    validateEnumString(violations, "turn_type", raw.turn_type, TURN_TYPE_SET);
+  if ("preconditions_text" in raw)
+    validateString(violations, "preconditions_text", raw.preconditions_text);
+  if ("do_not_resolve" in raw)
+    validateStringArray(violations, "do_not_resolve", raw.do_not_resolve);
+  if ("expected_state_review" in raw)
+    validateExpectedStateReview(violations, raw.expected_state_review);
+  if ("stop_after" in raw) validateString(violations, "stop_after", raw.stop_after);
+  if ("anti_patterns" in raw)
+    validateStringArray(violations, "anti_patterns", raw.anti_patterns);
   if ("classification" in raw) validateClassification(violations, raw.classification);
   if ("role_slots" in raw) validateRoleSlots(violations, raw.role_slots);
   if ("requires" in raw) validateRequires(violations, raw.requires);

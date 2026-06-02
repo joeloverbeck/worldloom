@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new test file `tools/manual-story-studio/test/templates/beat-template-spec110-fields.test.ts`
-**Deps**: 002, 003, 004
+**Deps**: archive/tickets/SPEC110MANSTOSTU-002.md, 003, 004
 
 ## Problem
 

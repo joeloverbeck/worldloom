@@ -128,6 +128,91 @@ test("validateBeatTemplate: move_family closed-enum violation rejected", () => {
   }
 });
 
+test("validateBeatTemplate: missing pressure/turn fields rejected", () => {
+  const broken: Record<string, unknown> = { ...validTemplate() };
+  delete broken.pressure_type;
+  delete broken.turn_type;
+  delete broken.preconditions_text;
+  delete broken.do_not_resolve;
+  delete broken.expected_state_review;
+  delete broken.stop_after;
+  delete broken.anti_patterns;
+  const result = validateBeatTemplate(broken);
+  assert.equal(result.valid, false);
+  if (!result.valid) {
+    for (const field of [
+      "pressure_type",
+      "turn_type",
+      "preconditions_text",
+      "do_not_resolve",
+      "expected_state_review",
+      "stop_after",
+      "anti_patterns",
+    ]) {
+      assert.ok(result.violations.some((v) => v.field === field), field);
+    }
+  }
+});
+
+test("validateBeatTemplate: pressure_type closed-enum violation rejected", () => {
+  const broken = validTemplate();
+  (broken.pressure_type as unknown) = "trust_test";
+  const result = validateBeatTemplate(broken);
+  assert.equal(result.valid, false);
+  if (!result.valid) {
+    assert.ok(result.violations.some((v) => v.field === "pressure_type"));
+  }
+});
+
+test("validateBeatTemplate: turn_type closed-enum violation rejected", () => {
+  const broken = validTemplate();
+  (broken.turn_type as unknown) = "reluctant_concession";
+  const result = validateBeatTemplate(broken);
+  assert.equal(result.valid, false);
+  if (!result.valid) {
+    assert.ok(result.violations.some((v) => v.field === "turn_type"));
+  }
+});
+
+test("validateBeatTemplate: expected_state_review unknown class rejected", () => {
+  const broken = validTemplate();
+  (broken.expected_state_review as unknown[])[0] = "memories";
+  const result = validateBeatTemplate(broken);
+  assert.equal(result.valid, false);
+  if (!result.valid) {
+    assert.ok(
+      result.violations.some(
+        (v) =>
+          v.field === "expected_state_review[0]" &&
+          /not in allowed set/.test(v.message),
+      ),
+    );
+  }
+});
+
+test("validateBeatTemplate: expected_state_review excludes beat-templates", () => {
+  const broken = validTemplate();
+  broken.expected_state_review = ["beat-templates"];
+  const result = validateBeatTemplate(broken);
+  assert.equal(result.valid, false);
+  if (!result.valid) {
+    assert.ok(
+      result.violations.some(
+        (v) =>
+          v.field === "expected_state_review[0]" &&
+          /not a state-review class/.test(v.message),
+      ),
+    );
+    assert.ok(
+      !result.violations.some(
+        (v) =>
+          v.field === "expected_state_review[0]" &&
+          /not in allowed set/.test(v.message),
+      ),
+    );
+  }
+});
+
 test("validateBeatTemplate: tone_fit[0] closed-enum violation rejected", () => {
   const broken = validTemplate();
   (broken.classification.tone_fit as unknown[])[0] = "joyful";
