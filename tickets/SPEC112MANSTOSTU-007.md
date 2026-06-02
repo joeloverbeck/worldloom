@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` web page `MomentComposer.tsx`; replaces the ID-toggle cast checkbox list and the +Pin/−Unpin record toggles with `<RecordPicker>` (multi-select); the compose API call is unchanged.
-**Deps**: 003
+**Deps**: archive/tickets/SPEC112MANSTOSTU-003.md
 
 ## Problem
 
@@ -14,7 +14,7 @@
 
 1. `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` builds `includedCast` (a `string[]` toggled by a checkbox list over `allCast`, line ~280-294) and `pinnedRecordIds` (a `string[]` toggled by +Pin/−Unpin over `suggested`/`pinned`, line ~310-339); it fetches all classes client-side via `listRecords` (line ~120-146) — the pattern the picker generalizes. `onGenerate` passes `included_cast` + `included_records` (the id arrays) to `previewPrompt` (line ~204-212).
 2. SPEC-112 §2 item 6 and §4 (MomentComposer modify) define this ticket; the reassessment confirmed the compose call shape is unchanged (id arrays in, prompt out).
-3. Cross-artifact boundary under audit: this page consumes the `RecordPicker` prop contract from SPEC112MANSTOSTU-003 (multi-select mode for both cast and records). The picker writes the same `includedCast` / `pinnedRecordIds` arrays the page already passes to the compose API.
+3. Cross-artifact boundary under audit: this page consumes the `RecordPicker` prop contract from `archive/tickets/SPEC112MANSTOSTU-003.md` (multi-select mode for both cast and records). The picker writes the same `includedCast` / `pinnedRecordIds` arrays the page already passes to the compose API.
 4. FOUNDATIONS §Tooling Recommendation (ID-free entry, SPEC-112 §5): the composer's cast/record selection is the last normal-flow surface keyed by id-toggle; after this ticket selection is card-based.
 
 ## Architecture Check
@@ -44,7 +44,7 @@ Mount a multi-select `<RecordPicker>` (any class, or the relevant record classes
 
 ## Out of Scope
 
-- The picker component (SPEC112MANSTOSTU-003).
+- The picker component (`archive/tickets/SPEC112MANSTOSTU-003.md`).
 - The beat-template `<select>` / template picker (SPEC-112 §2 Out of scope — deferred; not id-typed).
 - Any change to the compose API contract or `previewPrompt` call shape.
 

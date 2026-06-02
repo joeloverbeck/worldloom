@@ -1,6 +1,6 @@
 # SPEC112MANSTOSTU-003: RecordPicker combobox component + client-side multi-class fetch helper
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — new `tools/manual-story-studio` web component `RecordPicker.tsx` + a client-side multi-class fetch helper in `web/src/api/records.ts` + picker/popup styling in `web/src/index.css`. New shared component; no impact on existing components until the mount tickets (004-007) consume it.
@@ -29,19 +29,35 @@ SPEC-112 replaces every author-facing ID-typing surface with a searchable, card-
 3. The fetch helper returns class-scoped summaries from the existing route (no new route) → grep-proof that `api/records.ts` adds no new endpoint path and `server/routes/records.ts` is untouched.
 4. Keyboard navigation (arrow/Enter/Escape) and single-vs-multi modes are present → type-level + structural assertion in 008 (no DOM harness exists; behavioral runtime testing is out of scope per SPEC-112 §8).
 
-## What to Change
+## Landed Changes
 
 ### 1. Multi-class fetch helper in `api/records.ts`
 
-Add a helper that fetches summaries for a set of classes (looping the existing per-class `listRecords`) and returns the merged list, so the picker (and CurrentStatePanel) get one call for an arbitrary class set. No new route; reuse `?class=`+`?includeArchived`.
+Added `ManualRecordSummaryWithClass` and `listRecordsForClasses`, which loops the existing per-class `listRecords` helper and returns merged `{ recordClass, summary }` entries. No server route changed; the helper still uses the existing `?class=` and optional `?includeArchived=true` route shape.
 
 ### 2. `RecordPicker.tsx` component
 
-Build the editable-combobox: an editable search `<input>`, a suggestion popup of `RecordCard` options, keyboard navigation (arrow keys + Enter + Escape), and selection. Props: `classes` (allowed class set), `mode` (`single`|`multi`), `value`/`onChange` (id array), optional `seed` (ids to pre-surface, e.g. current-cast first for POV). Affordances: free-text search over title+summary+tags, filter by class, filter by active/inactive, "recently used" and "pinned" quick sections. ID shown only in the card's disclosure.
+Added the reusable editable-combobox component with `classes`, `mode`, `value`/`onChange`, `seed`, `pinnedIds`, and `recentlyUsedIds` props. It fetches summaries through `listRecordsForClasses`, searches title/summary/tags client-side, supports class and active/inactive/all filters, sections seeded/pinned/recent/match results with duplicate suppression, handles ArrowUp/ArrowDown/Enter/Escape, and renders selectable `RecordCard` options. Selection remains an id-array contract for both single and multi modes, and the ID stays inside the card disclosure rather than becoming the primary label.
 
 ### 3. Picker/popup styling in `index.css`
 
-Add the popup + option-list styling for the combobox (the card itself keeps inline styles per `archive/tickets/SPEC112MANSTOSTU-002.md`).
+Added the picker layout, selected-chip, popup, option, and section-label styles. The card styling remains owned by `RecordCard`.
+
+## Outcome
+
+`RecordPicker` is now available as the stable shared picker surface for SPEC112MANSTOSTU-004/005/006/007, and `listRecordsForClasses` provides the client-side multi-class summary fetch needed by those mounts without expanding backend search/filter routes.
+
+## Verification Result
+
+1. `(cd tools/manual-story-studio && npm --prefix web test)` passed.
+2. `(cd tools/manual-story-studio && npm run build)` passed.
+3. `grep -n '?classes=\|?q=' tools/manual-story-studio/web/src/api/records.ts` returned no matches, which is the expected zero-match proof that no `?classes=` or `?q=` route-filter shape was introduced.
+4. `(cd tools/manual-story-studio && npm test)` passed: 454 backend tests plus web `tsc --noEmit`.
+5. Ignored verification artifacts remained under `tools/manual-story-studio/dist/`, `tools/manual-story-studio/node_modules/`, `tools/manual-story-studio/web/dist/`, and `tools/manual-story-studio/web/node_modules/`.
+
+## Deviations
+
+None. The ticket intentionally did not add a DOM harness or mount the picker; those remain downstream/spec-owned.
 
 ## Files to Touch
 

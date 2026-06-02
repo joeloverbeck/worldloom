@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` web component `RecordForm.tsx`; replaces `ChipInput` on the three `refs` fields with `<RecordPicker>`, leaving `ChipInput` in place for `tags` and the cast nested string-array fields.
-**Deps**: 003
+**Deps**: archive/tickets/SPEC112MANSTOSTU-003.md
 
 ## Problem
 
@@ -14,7 +14,7 @@
 
 1. `tools/manual-story-studio/web/src/components/RecordForm.tsx` defines a local `ChipInput` (line ~81) used for `refs.characters` / `refs.locations` / `refs.related_records` (lines ~569-598) AND for `tags` (line ~549), cast nested `chipArray` fields (anti_generic_warnings, prose constraints), and `stringArray` per-class fields (line ~873). The `refs` shape is `{ characters, locations, related_records }` (the `ensureRefs` helper). So `ChipInput` must NOT be removed wholesale — only the three ref-field mounts swap to the picker.
 2. SPEC-112 §2 item 4 and §4 (RecordForm modify) define this ticket; the reassessment confirmed `ChipInput` stays for tags/cast-nested (it is not an id-typed surface there).
-3. Cross-artifact boundary under audit: this component consumes the `RecordPicker` prop contract from SPEC112MANSTOSTU-003. The picker writes the same id array into `common.refs.<field>` the form already persists.
+3. Cross-artifact boundary under audit: this component consumes the `RecordPicker` prop contract from `archive/tickets/SPEC112MANSTOSTU-003.md`. The picker writes the same id array into `common.refs.<field>` the form already persists.
 4. FOUNDATIONS §Tooling Recommendation (ID-free entry, SPEC-112 §5): record refs are the second ID-typing surface; after this ticket the author picks referenced records from cards, never typing an id.
 
 ## Architecture Check
@@ -44,7 +44,7 @@ Do not touch the `tags`, cast nested `chipArray`, or `stringArray` `ChipInput` m
 
 ## Out of Scope
 
-- The picker component (SPEC112MANSTOSTU-003).
+- The picker component (`archive/tickets/SPEC112MANSTOSTU-003.md`).
 - Removing `ChipInput` (it stays for tags + cast-nested string arrays).
 - Any change to the record schema or the form's persisted `refs` shape.
 

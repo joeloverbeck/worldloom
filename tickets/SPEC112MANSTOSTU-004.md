@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` web page `EditCurrentContext.tsx`; removes the local `IdTextArea` and the raw `current_location` input + `pov_holder` select, replacing them with constrained `<RecordPicker>` mounts.
-**Deps**: 003
+**Deps**: archive/tickets/SPEC112MANSTOSTU-003.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ The current-context editor is the densest ID-typing surface: five fields use the
 
 1. `tools/manual-story-studio/web/src/pages/EditCurrentContext.tsx` defines a local `IdTextArea` (line ~112) used for the five list fields; `current_location` is a plain `<input>` (line ~322); `pov_holder` is a `<select>` over `current_cast` (lines ~341-351). Client-side validators in this file constrain `pinned_records` via `allManualPrefixes()` (any class, line ~203) and `must_not_reveal` via `allowedPrefixes(["secrets"])` (secrets only, line ~210). `IdTextArea` is local to this file (no other consumer) — removing it has no cross-file blast radius.
 2. SPEC-112 §2 item 3 gives the exact per-field class constraints; the reassessment corrected the spec premise (`current_location`/`pov_holder` are not `IdTextArea`) and the `must_not_reveal` constraint (secrets-only, **not** any class).
-3. Cross-artifact boundary under audit: this page consumes the `RecordPicker` prop contract (`classes`, `mode`, `value`/`onChange`, `seed`) from SPEC112MANSTOSTU-003. The picker stores the same id arrays this page already persists to `current-context.yaml` — only the entry UX changes.
+3. Cross-artifact boundary under audit: this page consumes the `RecordPicker` prop contract (`classes`, `mode`, `value`/`onChange`, `seed`) from `archive/tickets/SPEC112MANSTOSTU-003.md`. The picker stores the same id arrays this page already persists to `current-context.yaml` — only the entry UX changes.
 4. FOUNDATIONS §Tooling Recommendation (ID-free entry, SPEC-112 §5): this is the highest-value ID-elimination surface; after this ticket no current-context field requires typing an id.
 
 ## Architecture Check
@@ -44,7 +44,7 @@ The current-context editor is the densest ID-typing surface: five fields use the
 
 ## Out of Scope
 
-- The picker component (SPEC112MANSTOSTU-003).
+- The picker component (`archive/tickets/SPEC112MANSTOSTU-003.md`).
 - Segment fields (`last_accepted_segment` / `last_reviewed_after_segment`) — stay SEG-* text inputs (SPEC-112 §2 Out of scope).
 - Changing the persisted `current-context.yaml` shape or the save-time validators' contracts.
 
