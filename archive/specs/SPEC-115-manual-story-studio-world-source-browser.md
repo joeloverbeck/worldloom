@@ -1,6 +1,6 @@
 # SPEC-115 — Manual Story Studio: Deterministic Read-Only World Source Browser
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (new read-only world-read layer + new frontend browser pane; no canon-pipeline integration, read-only, no MCP).
 **Depends on:** archive/specs/SPEC-100-manual-story-studio-package-boundary.md (the read/write sandbox; this spec adds a *read-only* world-source reader strictly outside the write sandbox), archive/specs/SPEC-112-manual-story-studio-record-pickers.md (the copy-into-story-record form reuses `RecordForm`, `RecordPicker`, and the extended `RecordCard` surface).
@@ -96,3 +96,24 @@ The repo's general rule "never read `_source/` subdirectories in bulk; use typed
 5. No automatic extraction/transformation/provenance-write occurs — copy is literal and author-initiated; nothing is auto-promoted to a story fact.
 6. An unparseable world file surfaces a structured error (SPEC-105 discipline), not a crash or silent skip.
 7. `npm test` is green; `npm run build` succeeds.
+
+## Outcome
+
+Completed on 2026-06-02 through:
+
+- `archive/tickets/SPEC115MANSTOSTU-001.md` — read-only `readWorldSource` layer, fixture coverage, fail-soft missing directories, malformed YAML item errors, and no-write-path proof.
+- `archive/tickets/SPEC115MANSTOSTU-002.md` — GET-only world-source list/item routes, HTTP registration outside the writable scope, selector containment tests, and route read-only proof.
+- `archive/tickets/SPEC115MANSTOSTU-003.md` — per-story Source Browser page, GET-only web client, deterministic client-side search, copy-into-`RecordForm` prefill, route/nav entry, and responsive styling.
+
+Verification:
+
+1. PASS: `cd tools/manual-story-studio && npm run test:backend` passed after the read-layer and route tickets.
+2. PASS: `cd tools/manual-story-studio/web && npm test` passed after the Source Browser page.
+3. PASS: `cd tools/manual-story-studio && npm run build` passed after each implementation slice.
+4. PASS: `cd tools/manual-story-studio && npm test` passed after the final frontend slice with 482 backend/static tests plus web `tsc --noEmit`.
+
+Deviations from the draft:
+
+1. `tools/manual-story-studio/src/read/worlds.ts` was not modified; the existing exported `enumerateWorlds` function was sufficient and was reused unchanged.
+2. The world-source list route returns summaries without `raw_text`; the item route returns raw text on demand. The frontend fetches raw text after summary load to support deterministic literal-text search without making the list endpoint a bulk raw-text payload.
+3. The Source Browser workbench is create-focused for the spec-named classes (`facts`, `beliefs`, `locations`, `objects`, `cast`); existing-record editing remains on the existing Records/Cast pages.

@@ -7,6 +7,7 @@ const STORY_PAGES = [
   { label: "Prompt Working Set", path: "current-context/edit" },
   { label: "Cast", path: "cast" },
   { label: "Records", path: "records" },
+  { label: "Source Browser", path: "source-browser" },
   { label: "Beat Templates", path: "beat-templates" },
   { label: "Moment Composer", path: "moment-composer" },
   { label: "Prompt Preview", path: "prompts/preview" },

@@ -37,6 +37,7 @@ import {
   registerSegmentsReadRoutes,
   registerSegmentsWriteRoutes,
 } from "./routes/segments.js";
+import { registerWorldSourceReadRoutes } from "./routes/world-source.js";
 import { registerWorldsRoutes } from "./routes/worlds.js";
 import { wrapRouterWritable } from "./write-scope-guard.js";
 
@@ -76,6 +77,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerStaticServe(server, options.repoRoot);
 
   await registerWorldsRoutes(server, { repoRoot: options.repoRoot });
+  await registerWorldSourceReadRoutes(server, { repoRoot: options.repoRoot });
   await registerManualStoriesGetRoute(server, { repoRoot: options.repoRoot });
   await registerRecordsReadRoutes(server, { repoRoot: options.repoRoot });
   await registerBeatTemplatesReadRoutes(server, { repoRoot: options.repoRoot });
