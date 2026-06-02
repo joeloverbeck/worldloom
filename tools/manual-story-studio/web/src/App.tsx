@@ -20,6 +20,7 @@ import { PromptPreview } from "./pages/PromptPreview.js";
 import { PromptHistory } from "./pages/PromptHistory.js";
 import { Records } from "./pages/Records.js";
 import { RepairSegments } from "./pages/RepairSegments.js";
+import { SourceBrowser } from "./pages/SourceBrowser.js";
 import { Worlds } from "./pages/Worlds.js";
 
 function Banner() {
@@ -68,6 +69,10 @@ const router = createBrowserRouter(
         {
           path: "/worlds/:worldSlug/manual-stories/:msSlug/records",
           element: <Records />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/source-browser",
+          element: <SourceBrowser />,
         },
         {
           path: "/worlds/:worldSlug/manual-stories/:msSlug/cast",

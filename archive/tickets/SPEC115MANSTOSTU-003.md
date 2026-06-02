@@ -1,6 +1,6 @@
 # SPEC115MANSTOSTU-003: Source Browser two-pane UI + copy-into-record
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Large
 **Engine Changes**: Yes — new frontend page `web/src/pages/SourceBrowser.tsx` + read-only API client `web/src/api/world-source.ts`; per-story routing + nav entry (`App.tsx`, `StoryPageNav.tsx`) + two-pane styling (`index.css`). No new write surface.
@@ -86,3 +86,26 @@ Authors have no in-tool way to browse world source and ground a story record in 
 1. `cd tools/manual-story-studio/web && npm test`
 2. `cd tools/manual-story-studio && npm run build`
 3. Full pipeline: `cd tools/manual-story-studio && npm test` (backend `node --test` + web type-check).
+
+## Outcome
+
+Completed on 2026-06-02.
+
+Added the read-only web client `tools/manual-story-studio/web/src/api/world-source.ts` for `archive/tickets/SPEC115MANSTOSTU-002.md`'s GET endpoints. The client lists source summaries and fetches raw item text by contained item path; it defines no write method and sends no request body.
+
+Added `tools/manual-story-studio/web/src/pages/SourceBrowser.tsx`, mounted it at `/worlds/:worldSlug/manual-stories/:msSlug/source-browser`, and added the per-story `StoryPageNav` entry. The page has a world-source list, deterministic client-side search over path/kind/title/name/tags/class/raw text, read-only raw item view, copy-selection/copy-title controls, and a `RecordForm` workbench for creating story-local `facts`, `beliefs`, `locations`, `objects`, or `cast` records through the existing records API. Copying only seeds the form; persistence still requires the author to submit the existing validated record form.
+
+Added responsive two-pane/three-pane styling under `tools/manual-story-studio/web/src/index.css`. No changes were made to `Worlds.tsx`.
+
+## Verification Result
+
+1. PASS: `cd tools/manual-story-studio/web && npm test` — web `tsc --noEmit` passed.
+2. PASS: `cd tools/manual-story-studio && npm run build` — web install/build, Vite production build, and backend compile all succeeded.
+3. PASS: `cd tools/manual-story-studio && npm test` — full package lane passed 482 backend/static tests plus web `tsc --noEmit`.
+4. PASS: `rg -n "method:|fetch\\(|POST|PUT|PATCH|DELETE" tools/manual-story-studio/web/src/api/world-source.ts tools/manual-story-studio/web/src/pages/SourceBrowser.tsx` — `api/world-source.ts` contains only GET-style fetch calls; no new world-source write client surface exists. The page reuses the existing `createRecord` path for story-local record creation.
+5. PASS: `rg -n "SourceBrowser|source-browser|Source Browser|world-source" ...` — confirmed page import/route, nav entry, page/client files, and styling are present.
+
+## Deviations
+
+1. The page fetches raw text for listed items after loading summaries so deterministic client-side search can include literal source text. This keeps the server list endpoint summary-only while satisfying the frontend search invariant.
+2. The workbench is create-focused for the five spec-named story record classes (`facts`, `beliefs`, `locations`, `objects`, `cast`); editing existing records remains on the existing Records/Cast pages.
