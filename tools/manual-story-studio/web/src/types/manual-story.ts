@@ -369,6 +369,60 @@ export const BEAT_TEMPLATE_MOVE_FAMILIES: BeatTemplateMoveFamily[] = [
   "other",
 ];
 
+export type BeatTemplatePressureType =
+  | "threat"
+  | "temptation"
+  | "misunderstanding"
+  | "deadline"
+  | "debt"
+  | "intimacy"
+  | "exposure"
+  | "reversal"
+  | "choice"
+  | "loss"
+  | "discovery";
+
+export const BEAT_TEMPLATE_PRESSURE_TYPES: BeatTemplatePressureType[] = [
+  "threat",
+  "temptation",
+  "misunderstanding",
+  "deadline",
+  "debt",
+  "intimacy",
+  "exposure",
+  "reversal",
+  "choice",
+  "loss",
+  "discovery",
+];
+
+export type BeatTemplateTurnType =
+  | "reveal"
+  | "refusal"
+  | "concession"
+  | "escalation"
+  | "reversal_turn"
+  | "commitment"
+  | "misread"
+  | "sacrifice"
+  | "boundary_crossing"
+  | "discovery_turn"
+  | "consequence_arrives";
+
+export const BEAT_TEMPLATE_TURN_TYPES: BeatTemplateTurnType[] = [
+  "reveal",
+  "refusal",
+  "concession",
+  "escalation",
+  "reversal_turn",
+  "commitment",
+  "misread",
+  "sacrifice",
+  "boundary_crossing",
+  "discovery_turn",
+  "consequence_arrives",
+];
+
 export type BeatTemplateToneFit =
   | "intimate"
   | "tender"
@@ -460,6 +514,13 @@ export interface BeatTemplate {
   id: string;
   title: string;
   active: boolean;
+  pressure_type: BeatTemplatePressureType;
+  turn_type: BeatTemplateTurnType;
+  preconditions_text: string;
+  do_not_resolve: string[];
+  expected_state_review: ManualRecordClass[];
+  stop_after: string;
+  anti_patterns: string[];
   classification: BeatTemplateClassification;
   role_slots: Record<string, BeatTemplateRoleSlot>;
   requires: BeatTemplateRequires;
@@ -484,6 +545,7 @@ export interface CandidateRequestBody {
   moment_directive: string;
   selected_cast: string[];
   optional_move_family?: BeatTemplateMoveFamily;
+  optional_desired_pressure_type?: BeatTemplatePressureType;
   optional_tags?: string[];
   optional_location?: string;
 }

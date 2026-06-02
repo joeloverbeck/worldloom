@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-01
 **Scope:** the seven specs derived from the critical triage of `reports/manual-story-studio-second-iteration.md`. All seven are Manual Story Studio (`tools/manual-story-studio`) tooling-adjacent work; none touch canon, MCP, patch engine, or world-index beyond `enumerate.ts`'s already-shipped exclusion.
-**Status:** SPEC-105, SPEC-106, SPEC-107, SPEC-108, and SPEC-109 are completed and archived; this order now governs SPEC-110 through SPEC-111.
+**Status:** SPEC-105, SPEC-106, SPEC-107, SPEC-108, SPEC-109, and SPEC-110 are completed and archived; this order now governs SPEC-111.
 
 ---
 
@@ -12,7 +12,7 @@
 SPEC-105 (integrity foundation)
   ├─→ SPEC-108 (segment lifecycle — depends on typed-error reads)
   ├─→ SPEC-109 (current-context layer — depends on typed-error reads)
-  ├─→ SPEC-110 (beat template fields — depends on typed-error reads)
+  ├─→ SPEC-110 (beat template fields — complete)
   └─→ SPEC-111 (UX cockpit pieces — depends on /health endpoint + HealthBanner scaffold)
 
 SPEC-106 (prompt leakage hard-tier) — complete
@@ -37,7 +37,7 @@ SPEC-107 had no inbound dependencies and is complete. SPEC-106 had no inbound de
 5. **SPEC-109** — Current-context selector layer.
    *Completed and archived.* Downstream references should treat `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md` as landed. It introduces the `current-context.yaml` authoring artifact, prompt-composer selector preference, Dashboard Current State panel, Moment Composer seeding, Edit Current Context page, and state-review marker.
 6. **SPEC-110** — Beat template pressure/turn card fields.
-   *Depends on 105.* Lands after 105. Independent of 108 / 109 in implementation; can land in parallel with either of them. (When SPEC-109's current-context is present, SPEC-110's filter tie-breaker engages — but the filter changes ship as a SPEC-110-internal concern; SPEC-109 does not need to land first for SPEC-110 to be useful.)
+   *Completed and archived.* Downstream references should treat `archive/specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md` as landed. Ticket evidence lives in `archive/tickets/SPEC110MANSTOSTU-001.md` through `archive/tickets/SPEC110MANSTOSTU-007.md`.
 7. **SPEC-111** — UX cockpit pieces (health banner persistence, sibling-page nav, ID hiding, unsaved-change handling).
    *Depends on 105 + 109.* Lands last; consumes both the health-banner scaffold from 105 and the current-context surface from 109 for the Dashboard cockpit reshape.
 
@@ -46,10 +46,10 @@ SPEC-107 had no inbound dependencies and is complete. SPEC-106 had no inbound de
 A small team or a single contributor with parallel branches can ship in the following waves:
 
 - **Wave 1**: SPEC-105 alone (complete).
-- **Wave 2**: SPEC-106, SPEC-107, SPEC-108, and SPEC-109 complete; SPEC-110 can continue off post-105 main.
-- **Wave 3**: SPEC-111 after archived SPEC-109.
+- **Wave 2**: SPEC-106, SPEC-107, SPEC-108, SPEC-109, and SPEC-110 complete.
+- **Wave 3**: SPEC-111 after archived SPEC-109 and SPEC-110.
 
-A solo contributor working serially follows the remaining numbered list above (110 → 111). The numeric order is one valid implementation sequence and the recommended default; the dependency graph above is authoritative.
+A solo contributor working serially follows the remaining numbered list above (111). The numeric order is one valid implementation sequence and the recommended default; the dependency graph above is authoritative.
 
 ## Notes
 

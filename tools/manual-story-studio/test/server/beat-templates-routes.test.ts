@@ -41,6 +41,13 @@ function validTemplateBody(): Record<string, unknown> {
   return {
     title: "Soft Confrontation",
     active: true,
+    pressure_type: "intimacy",
+    turn_type: "escalation",
+    preconditions_text: "",
+    do_not_resolve: [],
+    expected_state_review: ["relationships"],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "confrontation",
       tags: ["hurt"],
@@ -177,6 +184,79 @@ test("beat-templates: candidate route returns filter output shape", async () => 
       // (but stage 3 role-slot fit may exclude due to needing viewpoint
       // cast). Without cast, the initiator slot fails — assert 0.
       assert.equal(body.candidates.length, 0);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("beat-templates: candidate route threads optional_desired_pressure_type", async () => {
+  const { repoRoot, worldSlug, msSlug } = mkWorld();
+  try {
+    const server = await createServer({ repoRoot });
+    try {
+      const nonMatch = {
+        ...validTemplateBody(),
+        title: "A Nonmatching Pressure",
+        pressure_type: "choice",
+        role_slots: {},
+      };
+      const match = {
+        ...validTemplateBody(),
+        title: "Z Matching Pressure",
+        pressure_type: "intimacy",
+        role_slots: {},
+      };
+      await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/beat-templates`,
+        payload: { record: nonMatch },
+      });
+      await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/beat-templates`,
+        payload: { record: match },
+      });
+
+      const noPin = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/moment-composer/template-candidates`,
+        payload: {
+          moment_directive: "x",
+          selected_cast: [],
+        },
+      });
+      assert.equal(noPin.statusCode, 200);
+      const noPinBody = noPin.json() as {
+        candidates: Array<{ template: { title: string } }>;
+      };
+      assert.deepEqual(
+        noPinBody.candidates.map((c) => c.template.title),
+        ["A Nonmatching Pressure", "Z Matching Pressure"],
+      );
+
+      const withPin = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/moment-composer/template-candidates`,
+        payload: {
+          moment_directive: "x",
+          selected_cast: [],
+          optional_desired_pressure_type: "intimacy",
+        },
+      });
+      assert.equal(withPin.statusCode, 200);
+      const withPinBody = withPin.json() as {
+        candidates: Array<{ template: { title: string }; why_suggested: string[] }>;
+      };
+      assert.deepEqual(
+        withPinBody.candidates.map((c) => c.template.title),
+        ["Z Matching Pressure", "A Nonmatching Pressure"],
+      );
+      assert.ok(
+        withPinBody.candidates[0]!.why_suggested.includes("pressure: intimacy"),
+      );
     } finally {
       await server.close();
     }

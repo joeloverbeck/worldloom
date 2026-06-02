@@ -5,6 +5,7 @@
 
 import type {
   ManualStoryContentIntensity,
+  ManualRecordClass,
   ManualStoryRole,
 } from "./manual-story.js";
 
@@ -45,6 +46,62 @@ export const BEAT_TEMPLATE_MOVE_FAMILIES: readonly BeatTemplateMoveFamily[] = [
   "preparation",
   "aftermath",
   "other",
+] as const;
+
+export type BeatTemplatePressureType =
+  | "threat"
+  | "temptation"
+  | "misunderstanding"
+  | "deadline"
+  | "debt"
+  | "intimacy"
+  | "exposure"
+  | "reversal"
+  | "choice"
+  | "loss"
+  | "discovery";
+
+export const BEAT_TEMPLATE_PRESSURE_TYPES: readonly BeatTemplatePressureType[] = [
+  "threat",
+  "temptation",
+  "misunderstanding",
+  "deadline",
+  "debt",
+  "intimacy",
+  "exposure",
+  "reversal",
+  "choice",
+  "loss",
+  "discovery",
+] as const;
+
+// `reversal_turn` and `discovery_turn` intentionally disambiguate these
+// turn-type values from the same-named pressure-type values.
+export type BeatTemplateTurnType =
+  | "reveal"
+  | "refusal"
+  | "concession"
+  | "escalation"
+  | "reversal_turn"
+  | "commitment"
+  | "misread"
+  | "sacrifice"
+  | "boundary_crossing"
+  | "discovery_turn"
+  | "consequence_arrives";
+
+export const BEAT_TEMPLATE_TURN_TYPES: readonly BeatTemplateTurnType[] = [
+  "reveal",
+  "refusal",
+  "concession",
+  "escalation",
+  "reversal_turn",
+  "commitment",
+  "misread",
+  "sacrifice",
+  "boundary_crossing",
+  "discovery_turn",
+  "consequence_arrives",
 ] as const;
 
 export type BeatTemplateToneFit =
@@ -138,6 +195,13 @@ export interface BeatTemplate {
   id: string;
   title: string;
   active: boolean;
+  pressure_type: BeatTemplatePressureType;
+  turn_type: BeatTemplateTurnType;
+  preconditions_text: string;
+  do_not_resolve: string[];
+  expected_state_review: ManualRecordClass[];
+  stop_after: string;
+  anti_patterns: string[];
   classification: BeatTemplateClassification;
   role_slots: Record<string, BeatTemplateRoleSlot>;
   requires: BeatTemplateRequires;

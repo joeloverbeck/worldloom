@@ -9,6 +9,13 @@ function tpl(instruction: string): BeatTemplate {
     id: "mtemplate-1",
     title: "T",
     active: true,
+    pressure_type: "discovery",
+    turn_type: "discovery_turn",
+    preconditions_text: "",
+    do_not_resolve: [],
+    expected_state_review: [],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "observation",
       tags: [],

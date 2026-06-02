@@ -6,7 +6,9 @@ import { previewPrompt } from "../api/prompts.js";
 import { listRecords, readMetadata } from "../api/records.js";
 import { BeatTemplateCandidates } from "../components/BeatTemplateCandidates.js";
 import {
+  BEAT_TEMPLATE_PRESSURE_TYPES,
   MANUAL_RECORD_CLASSES,
+  type BeatTemplatePressureType,
   type ManualRecordClass,
   type ManualRecordSummary,
   type ManualStoryMetadata,
@@ -62,6 +64,9 @@ export function MomentComposer() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [desiredPressureType, setDesiredPressureType] = useState<
+    BeatTemplatePressureType | ""
+  >("");
 
   useEffect(() => {
     if (!worldSlug || !msSlug) return;
@@ -322,12 +327,31 @@ export function MomentComposer() {
 
       <fieldset aria-label="beat-template">
         <legend>Beat template</legend>
+        <label style={{ display: "block", marginBottom: 8 }}>
+          Desired pressure type{" "}
+          <select
+            value={desiredPressureType}
+            onChange={(e) =>
+              setDesiredPressureType(e.target.value as BeatTemplatePressureType | "")
+            }
+          >
+            <option value="">Any</option>
+            {BEAT_TEMPLATE_PRESSURE_TYPES.map((pt) => (
+              <option key={pt} value={pt}>
+                {pt}
+              </option>
+            ))}
+          </select>
+        </label>
         <BeatTemplateCandidates
           worldSlug={worldSlug}
           msSlug={msSlug}
           candidateInput={{
             moment_directive: momentDirective,
             selected_cast: includedCast,
+            ...(desiredPressureType
+              ? { optional_desired_pressure_type: desiredPressureType }
+              : {}),
           }}
           selectedTemplateId={selectedTemplateId}
           onSelect={setSelectedTemplateId}

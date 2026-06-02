@@ -79,7 +79,7 @@ Identifiers are local to this triage. `T<N>` for triage items derived from the r
 **Verdict:** ACCEPT WITH MODIFICATION.
 **Source:** report §§11 / 12 / 27 / 31 Stage 7.
 **Rationale:** Verified current `BeatTemplate` schema lacks explicit pressure-type / turn-type axes; rich on classification/constraint, thin on pressure semantics. Adding the seven proposed fields deepens authoring without importing storylet engine effects (the report correctly resists SLT predicate DSL).
-**Deliverable:** `specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md`. Adds 7 fields with closed-enum types where applicable; migrates existing fixtures with a one-shot script; extends filter "why" rendering.
+**Deliverable:** `archive/specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md`. Adds 7 fields with closed-enum types where applicable; migrates existing fixtures with a one-shot script; extends filter "why" rendering.
 **Modification scope:** Drop `cooldown_segments` — the report itself classifies it as "advisory only", and `recent_template_advisory_window` already provides story-level cooldown. YAGNI under brainstorm Guardrails.
 
 #### T7 — UX cockpit consolidation (load-bearing pieces only)
@@ -168,7 +168,7 @@ The following report sub-findings did not get a top-level T<N> identifier becaus
 | SPEC-107 | `archive/specs/SPEC-107-manual-story-studio-prose-state-contract-correction.md` | Contract paragraph + stop rule + missing-doc cleanup |
 | SPEC-108 | `specs/SPEC-108-manual-story-studio-segment-lifecycle-append-only.md` | Append-only primary UX; `mode=repair` gate on lifecycle ops |
 | SPEC-109 | `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md` | `current-context.yaml` selector; composer + Dashboard plumbing |
-| SPEC-110 | `specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md` | 7 new fields on BeatTemplate schema |
+| SPEC-110 | `archive/specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md` | 7 new fields on BeatTemplate schema |
 | SPEC-111 | `specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md` | Health banner persistence + sibling nav + ID hiding + unsaved-change hook |
 | Implementation order | `specs/IMPLEMENTATION-ORDER.md` | Dependency graph + recommended landing waves |
 | This triage | `docs/triage/2026-06-01-manual-story-studio-second-iteration-triage.md` | Verdict + rationale per finding |

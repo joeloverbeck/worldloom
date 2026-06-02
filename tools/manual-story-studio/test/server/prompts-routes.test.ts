@@ -383,6 +383,13 @@ function seedBeatTemplate(root: ManualStoryRoot, id: string): string {
     id,
     title: id,
     active: true,
+    pressure_type: "discovery",
+    turn_type: "discovery_turn",
+    preconditions_text: "",
+    do_not_resolve: [],
+    expected_state_review: [],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "observation",
       tags: [],

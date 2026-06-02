@@ -147,6 +147,13 @@ function softConfrontation(): BeatTemplate {
     id: "mtemplate-1",
     title: "Soft Confrontation",
     active: true,
+    pressure_type: "intimacy",
+    turn_type: "escalation",
+    preconditions_text: "",
+    do_not_resolve: [],
+    expected_state_review: ["relationships"],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "confrontation",
       tags: [],
@@ -178,6 +185,13 @@ function gentleCelebration(): BeatTemplate {
     id: "mtemplate-2",
     title: "Gentle Celebration",
     active: true,
+    pressure_type: "choice",
+    turn_type: "commitment",
+    preconditions_text: "",
+    do_not_resolve: [],
+    expected_state_review: ["emotions"],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "celebration",
       tags: [],
@@ -224,6 +238,13 @@ function parkScene(): BeatTemplate {
     id: "mtemplate-5",
     title: "Park Scene",
     active: true,
+    pressure_type: "discovery",
+    turn_type: "discovery_turn",
+    preconditions_text: "",
+    do_not_resolve: [],
+    expected_state_review: [],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "observation",
       tags: [],
@@ -347,6 +368,66 @@ test("filter scenario E: optional move_family pin ranks matching template first"
     const result = filterBeatTemplates(input);
     assert.equal(result.length, 2);
     assert.equal(result[0]!.template.id, "mtemplate-2");
+  } finally {
+    rmSync(input.manualStoryRoot, { recursive: true, force: true });
+  }
+});
+
+test("filter: desiredPressureType pin ranks matching otherwise-equal template first", () => {
+  const nonMatch = {
+    ...softConfrontation(),
+    id: "mtemplate-10",
+    title: "A Nonmatching Pressure",
+    pressure_type: "choice" as const,
+  };
+  const match = {
+    ...softConfrontation(),
+    id: "mtemplate-11",
+    title: "Z Matching Pressure",
+    pressure_type: "intimacy" as const,
+  };
+  const input = makeInput({
+    optionalAuthorPins: { desiredPressureType: "intimacy" },
+    allTemplates: [nonMatch, match],
+  });
+  try {
+    const result = filterBeatTemplates(input);
+    assert.equal(result.length, 2);
+    assert.deepEqual(
+      result.map((c) => c.template.id),
+      ["mtemplate-11", "mtemplate-10"],
+    );
+    assert.ok(result[0]!.why_suggested.includes("pressure: intimacy"));
+  } finally {
+    rmSync(input.manualStoryRoot, { recursive: true, force: true });
+  }
+});
+
+test("filter: absent desiredPressureType preserves previous title fallback ordering", () => {
+  const nonMatch = {
+    ...softConfrontation(),
+    id: "mtemplate-10",
+    title: "A Nonmatching Pressure",
+    pressure_type: "choice" as const,
+  };
+  const match = {
+    ...softConfrontation(),
+    id: "mtemplate-11",
+    title: "Z Matching Pressure",
+    pressure_type: "intimacy" as const,
+  };
+  const input = makeInput({
+    optionalAuthorPins: {},
+    allTemplates: [nonMatch, match],
+  });
+  try {
+    const result = filterBeatTemplates(input);
+    assert.equal(result.length, 2);
+    assert.deepEqual(
+      result.map((c) => c.template.id),
+      ["mtemplate-10", "mtemplate-11"],
+    );
+    assert.ok(!result.some((c) => c.why_suggested.includes("pressure: intimacy")));
   } finally {
     rmSync(input.manualStoryRoot, { recursive: true, force: true });
   }

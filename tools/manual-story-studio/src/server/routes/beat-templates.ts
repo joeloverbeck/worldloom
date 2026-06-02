@@ -14,6 +14,7 @@ import { readManualStoryMetadata } from "../../read/manual-story-metadata.js";
 import type {
   BeatTemplate,
   BeatTemplateMoveFamily,
+  BeatTemplatePressureType,
 } from "../../schema/beat-template.js";
 import type {
   ManualCharacterProfile,
@@ -21,6 +22,7 @@ import type {
 } from "../../schema/manual-story.js";
 import {
   filterBeatTemplates,
+  type FilterOptionalPins,
   type FilterLocationEntry,
   type FilterRecordEntry,
   type FilterSecretEntry,
@@ -120,6 +122,7 @@ interface CandidatesBody {
   moment_directive?: string;
   selected_cast?: string[];
   optional_move_family?: BeatTemplateMoveFamily;
+  optional_desired_pressure_type?: BeatTemplatePressureType;
   optional_tags?: string[];
   optional_location?: string;
 }
@@ -377,13 +380,13 @@ export async function registerBeatTemplatesWriteRoutes(
         }
       }
 
-      const optionalAuthorPins: {
-        moveFamily?: BeatTemplateMoveFamily;
-        tags?: string[];
-        location?: string;
-      } = {};
+      const optionalAuthorPins: FilterOptionalPins = {};
       if (body.optional_move_family !== undefined) {
         optionalAuthorPins.moveFamily = body.optional_move_family;
+      }
+      if (body.optional_desired_pressure_type !== undefined) {
+        optionalAuthorPins.desiredPressureType =
+          body.optional_desired_pressure_type;
       }
       if (body.optional_tags !== undefined) {
         optionalAuthorPins.tags = body.optional_tags;

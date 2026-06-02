@@ -9,6 +9,13 @@ function fixtureTemplate(): BeatTemplate {
     id: "mtemplate-1",
     title: "Soft Confrontation",
     active: true,
+    pressure_type: "intimacy",
+    turn_type: "escalation",
+    preconditions_text: "",
+    do_not_resolve: [],
+    expected_state_review: ["relationships"],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "confrontation",
       tags: ["hurt"],
@@ -40,6 +47,7 @@ test("assembleWhySuggested: all 7 dimensions matched returns top-4 by priority",
       requiredClassesPresent: ["beliefs"],
       intensityFit: true,
       intensityValue: "general",
+      pressureTypeMatch: false,
       toneFitOverlap: ["tense"],
     },
   });
@@ -60,6 +68,7 @@ test("assembleWhySuggested: tag overlap + role-slot returns 2 lines in priority 
       relationshipAxesMatch: [],
       requiredClassesPresent: [],
       intensityFit: false,
+      pressureTypeMatch: false,
       toneFitOverlap: [],
     },
   });
@@ -78,6 +87,7 @@ test("assembleWhySuggested: no matches returns empty array", () => {
       relationshipAxesMatch: [],
       requiredClassesPresent: [],
       intensityFit: false,
+      pressureTypeMatch: false,
       toneFitOverlap: [],
     },
   });
@@ -94,6 +104,7 @@ test("assembleWhySuggested: deterministic — same input twice yields same array
       relationshipAxesMatch: [],
       requiredClassesPresent: [],
       intensityFit: false,
+      pressureTypeMatch: false,
       toneFitOverlap: [],
     },
   };
@@ -113,6 +124,7 @@ test("assembleWhySuggested: hard 4-line cap drops lowest-priority entries", () =
       requiredClassesPresent: ["beliefs"],
       intensityFit: true,
       intensityValue: "general",
+      pressureTypeMatch: false,
       toneFitOverlap: ["tense"],
     },
   });
@@ -132,8 +144,27 @@ test("assembleWhySuggested: intensity skipped without intensityValue", () => {
       relationshipAxesMatch: [],
       requiredClassesPresent: [],
       intensityFit: true,
+      pressureTypeMatch: false,
       toneFitOverlap: [],
     },
   });
   assert.equal(lines.length, 0);
+});
+
+test("assembleWhySuggested: pressure match emits terse pressure line", () => {
+  const lines = assembleWhySuggested({
+    template: fixtureTemplate(),
+    matches: {
+      tagOverlap: [],
+      roleSlotFit: [],
+      locationMatch: [],
+      relationshipAxesMatch: [],
+      requiredClassesPresent: [],
+      intensityFit: false,
+      pressureTypeMatch: true,
+      pressureTypeValue: "intimacy",
+      toneFitOverlap: [],
+    },
+  });
+  assert.deepEqual(lines, ["pressure: intimacy"]);
 });
