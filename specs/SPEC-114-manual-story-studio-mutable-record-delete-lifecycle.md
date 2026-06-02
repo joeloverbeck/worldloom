@@ -3,7 +3,7 @@
 **Status:** DRAFT
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (backend delete-flow correction + frontend delete UX; no canon-pipeline integration).
-**Depends on:** archive/specs/SPEC-101-manual-story-metadata-and-records.md (the record read/write layer whose delete path this spec corrects), SPEC-112 (referrer cards in the block-on-referrer flow reuse `RecordCardMini`).
+**Depends on:** archive/specs/SPEC-101-manual-story-metadata-and-records.md (the record read/write layer whose delete path this spec corrects), archive/specs/SPEC-112-manual-story-studio-record-pickers.md (referrer cards in the block-on-referrer flow reuse the archived extended `RecordCard` surface).
 **Blocks:** —
 **Related:** `tools/manual-story-studio/src/write/records.ts`, `tools/manual-story-studio/src/read/records.ts`, `tools/manual-story-studio/src/schema/manual-story.ts`, `tools/manual-story-studio/src/server/routes/records.ts`, `tools/manual-story-studio/web/src/pages/Records.tsx`, `tools/manual-story-studio/web/src/api/records.ts`.
 **Source:** critical triage of `reports/manual-story-studio-third-iteration.md` §10 / §30 / §39 Stage 5 (ChatGPT-Pro, 2026-06-02). Accepted on **product-coherence grounds, not FOUNDATIONS grounds** — see §1.1. The report's §7 framing of this as a FOUNDATIONS "drift" is corrected: the tool writes only under `manual-stories/`, never world canon, so there is no canon-integrity violation; the issue is that the delete lifecycle contradicts the clarified product brief ("records are mutable current truth").
@@ -35,9 +35,9 @@ FOUNDATIONS (line 105 / §598 / §614) governs **world canon not encoding story-
    - Hard-deletes (unlink) the record when it has **no referrers**.
    - **Blocks** with a structured result listing referrers when it **has** referrers — and does **not** set `active:false`. The blocked result returns each referrer's id + class + title + summary so the UI can render referrer cards with edit links.
    - The `inactive_default` outcome (auto-archive on blocked delete) is **removed** from the normal path.
-2. **Referrer resolution.** Provide a "who references record X" pass: scan record `refs` (characters/locations/related_records) plus current-context references (`pinned_records`, `must_not_reveal`, `excluded_records`, `current_cast`, etc.) for the target id, returning referrer summaries. (This pass is also the backend SPEC-112's deferred referenced-by count consumes.)
+2. **Referrer resolution.** Provide a "who references record X" pass: scan record `refs` (characters/locations/related_records) plus current-context references (`pinned_records`, `must_not_reveal`, `excluded_records`, `current_cast`, etc.) for the target id, returning referrer summaries. (This pass is also what archived SPEC-112's deferred referenced-by count consumes.)
 3. **Repair-mode force-delete + active toggle.** Confine `force_deleted` (unlink despite referrers) to an explicit repair surface, gated behind a warning, and recorded in a `repair-log.yaml` audit entry (id, timestamp, referrers-at-deletion). Keep `active`/`retired_reason` writable only as an explicit author action (repair surface or an explicit "mark inactive" control), never as an automatic consequence of delete.
-4. **Records-page delete UX.** `Records.tsx`: the normal **Delete** button either hard-deletes (no referrers) or shows a **block dialog** listing referrer cards (`RecordCardMini`, SPEC-112) with edit links and the message "Resolve these references first." The "Force delete anyway" affordance moves out of the normal flow into the repair surface (or a clearly-marked, warning-gated disclosure), never the default next click.
+4. **Records-page delete UX.** `Records.tsx`: the normal **Delete** button either hard-deletes (no referrers) or shows a **block dialog** listing referrer cards via the extended `RecordCard` surface from archived SPEC-112, with edit links and the message "Resolve these references first." The "Force delete anyway" affordance moves out of the normal flow into the repair surface (or a clearly-marked, warning-gated disclosure), never the default next click.
 
 ### Out of scope
 
@@ -52,7 +52,7 @@ FOUNDATIONS (line 105 / §598 / §614) governs **world canon not encoding story-
 - **Block by referrers, with cards, not just an id list.** The author needs to *act* on the block — the referrer cards carry edit links so the author can clear the reference and retry. An id-only error forces the author to go hunting.
 - **Retain `active`, demote its auto-setting.** `active:false` as deliberate "temporarily not current truth" is useful; `active:false` as a delete side effect is the lifecycle residue. Keeping the field while removing the automatic write resolves the tension without losing a genuinely-useful affordance.
 - **Force-delete is repair, and repair is logged.** A destructive override that ignores referrers belongs behind a warning with an audit trail (`repair-log.yaml`), consistent with the segment repair model SPEC-108 already established.
-- **Reuse the referrer pass as SPEC-112's count source.** One backend pass serves both the delete-block flow and the deferred referenced-by count, avoiding a second corpus scan.
+- **Reuse the referrer pass as archived SPEC-112's count source.** One backend pass serves both the delete-block flow and the deferred referenced-by count, avoiding a second corpus scan.
 
 ## 4. Files to touch
 

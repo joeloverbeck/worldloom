@@ -1,6 +1,6 @@
 # SPEC-112 — Manual Story Studio: First-Class Record Pickers (Replace ID Entry With Searchable Selectors)
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (web frontend + a thin read-API summary; no canon-pipeline integration).
 **Depends on:** archive/specs/SPEC-109-manual-story-studio-current-context-layer.md (the current-context/working-set surface whose ID textareas this spec replaces with pickers), archive/specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md (SPEC-111 hid primary-label IDs from *display*; this spec replaces ID *input* — the two are complementary, not overlapping).
@@ -116,3 +116,15 @@ The backend already supports most of this cheaply: `listRecords` (`src/read/reco
 - **Client-side filter for v1 (no route filter).** The picker fetches per-class summaries and filters in-memory (matching `MomentComposer`). Revisit only if a real few-hundred-record story proves the page unresponsive (report §38).
 - **Segment / template pickers and the prompt-included/excluded filter are deferred** (see §2 Out of scope): segment selectors need a segment summary feed not built here; the beat-template `<select>` already shows titles; the prompt-incl/excl filter depends on SPEC-113's inclusion ledger.
 - **`CurrentStatePanel` gains a data dependency.** Resolving titles requires the panel to fetch per-class summaries (it currently receives only id arrays). Keep this within the read path already used elsewhere; do not introduce a new aggregate endpoint.
+
+## Outcome
+
+Completed 2026-06-02.
+
+SPEC-112 landed through `archive/tickets/SPEC112MANSTOSTU-001.md` through `archive/tickets/SPEC112MANSTOSTU-008.md`. The Manual Story Studio web client now has a reusable `RecordPicker`, extended `RecordCard` picker display props, client-side multi-class summary fetching, picker styling, current-context picker mounts, record-reference picker mounts, current-state title resolution, Moment Composer picker mounts, and a source-structure capstone test for the migration.
+
+The persisted shapes stayed unchanged: current-context fields and record refs still store id strings/arrays, and the compose request still passes `included_cast` and `included_records` id arrays to `previewPrompt`. No `?classes=` or `?q=` server route shape was introduced.
+
+Deviations from the original plan: the summary projection landed as a derived `involved_cast` field rather than raw `refs`, and the card implementation extended `RecordCard` directly rather than introducing a separate `RecordCardMini`. Referenced-by counts, segment/template pickers, prompt-included filters, and DOM/runtime interaction tests remain out of scope as specified.
+
+Verification: `npm run test:backend`, `npm run build`, and `npm test` passed from `tools/manual-story-studio/`; `grep -rn IdTextArea tools/manual-story-studio/web/src/` returned no matches; `grep -n '?classes=\|?q=' tools/manual-story-studio/web/src/api/records.ts` returned no matches; `git diff --check` passed during the capstone closeout.
