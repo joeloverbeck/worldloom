@@ -19,6 +19,7 @@ function mkWorld(): { repoRoot: string; root: ManualStoryRoot } {
   const repoRoot = mkdtempSync(
     path.join(os.tmpdir(), "manual-studio-current-context-health-"),
   );
+  writeComposeDocs(repoRoot);
   const root = resolveManualStoryRoot(repoRoot, "test-world", "test-story");
   mkdirSync(root.absolutePath, { recursive: true });
   const metadata = makeDefaultManualStoryMetadata(
@@ -30,6 +31,21 @@ function mkWorld(): { repoRoot: string; root: ManualStoryRoot } {
   safeWriteFile(root, "manual-story.yaml", YAML.stringify(metadata));
   writeRecordFixtures(root);
   return { repoRoot, root };
+}
+
+function writeComposeDocs(repoRoot: string): void {
+  const contentPolicyPath = path.join(
+    repoRoot,
+    "docs/prose-renderer-contract/content-policy.md",
+  );
+  const proseCraftPath = path.join(
+    repoRoot,
+    "docs/manual-story-studio/prose-craft-contract.md",
+  );
+  mkdirSync(path.dirname(contentPolicyPath), { recursive: true });
+  mkdirSync(path.dirname(proseCraftPath), { recursive: true });
+  writeFileSync(contentPolicyPath, "Content policy\n");
+  writeFileSync(proseCraftPath, "Prose craft contract\n");
 }
 
 function writeRecordFixtures(root: ManualStoryRoot): void {
@@ -208,8 +224,6 @@ test("health: corrupt current-context blocks downstream actions", () => {
     assert.deepEqual(report.blocked_actions, [
       "prompt_copy",
       "prompt_save",
-      "segment_save",
-      "manuscript_compile",
     ]);
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });

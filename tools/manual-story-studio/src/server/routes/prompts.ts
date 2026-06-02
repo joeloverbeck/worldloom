@@ -29,6 +29,7 @@ import { listSegments, readSegmentSidecar } from "../../read/segments.js";
 import { err, ok, type ReadResult } from "../../read/result.js";
 import { writePrompt } from "../../write/prompts.js";
 import {
+  assertInsideSandbox,
   resolveManualStoryRoot,
   type ManualStoryRoot,
 } from "../../write/sandbox.js";
@@ -43,13 +44,9 @@ interface ComposeBody {
   moment_directive?: string;
   included_cast?: string[];
   included_records?: string[];
-  // SPEC-102 path-shaped internal composer input. Accepted directly for
-  // back-compat with the landed SPEC-102 callers.
-  included_template_path?: string | null;
   // SPEC-104 ID-shaped public API. The routes layer resolves the ID to
   // <manualStoryRoot>/records/beat-templates/<id>.yaml and populates
-  // included_template_path internally. Mutually exclusive with
-  // included_template_path on a single request.
+  // included_template_path internally.
   selected_template?: string | null;
 }
 
@@ -85,6 +82,10 @@ function resolveBeatTemplatePath(
   );
 }
 
+function validateBeatTemplateId(templateId: string): boolean {
+  return /^mtemplate-\d+$/.test(templateId);
+}
+
 function buildComposeInput(
   root: ManualStoryRoot,
   repoRoot: string,
@@ -107,23 +108,33 @@ function buildComposeInput(
       : [],
   };
 
-  const pathProvided =
-    typeof body.included_template_path === "string" &&
-    body.included_template_path.length > 0;
+  if ("included_template_path" in body) {
+    return {
+      error:
+        "included_template_path is not accepted; pass selected_template as an mtemplate-<integer> id",
+    };
+  }
+
   const idProvided =
     typeof body.selected_template === "string" &&
     body.selected_template.length > 0;
-  if (pathProvided && idProvided) {
-    return {
-      error:
-        "Pass exactly one of selected_template or included_template_path; both received",
-    };
-  }
-  if (pathProvided) {
-    built.included_template_path = body.included_template_path as string;
-  } else if (idProvided) {
+  if (idProvided) {
     const id = body.selected_template as string;
+    if (!validateBeatTemplateId(id)) {
+      return {
+        error:
+          "selected_template must be a beat-template id matching mtemplate-<integer>",
+      };
+    }
     const resolved = resolveBeatTemplatePath(root.absolutePath, id);
+    try {
+      assertInsideSandbox(resolved, root);
+    } catch {
+      return {
+        error:
+          "selected_template must resolve inside the manual-story sandbox",
+      };
+    }
     if (!existsSync(resolved)) {
       return { error: `Beat template ${id} not found`, code: "not_found" };
     }

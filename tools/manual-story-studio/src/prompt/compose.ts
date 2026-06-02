@@ -25,6 +25,7 @@ import { lintPrompt } from "./lint.js";
 import { classifyManualRecordId } from "./record-class.js";
 import { assembleSections } from "./sections/index.js";
 import type { TranslatorContext } from "./translators/index.js";
+import { assertInsideSandbox, type ManualStoryRoot } from "../write/sandbox.js";
 import type {
   PromptComposeInput,
   PromptComposeResult,
@@ -37,6 +38,19 @@ const CONTENT_POLICY_REL =
   "docs/prose-renderer-contract/content-policy.md";
 const PROSE_CRAFT_CONTRACT_REL =
   "docs/manual-story-studio/prose-craft-contract.md";
+
+function manualStoryRootForInput(input: PromptComposeInput): ManualStoryRoot {
+  const relative = path.relative(input.repoRoot, input.manualStoryRoot);
+  const segments = relative.split(path.sep);
+  const worldSlug = segments[1] ?? "";
+  const manualStorySlug = segments[3] ?? "";
+  return {
+    repoRoot: input.repoRoot,
+    worldSlug,
+    manualStorySlug,
+    absolutePath: input.manualStoryRoot,
+  };
+}
 
 function hardFinding(rule: string, message: string): PromptLintFinding {
   return { rule, tier: "hard", message };
@@ -178,7 +192,17 @@ export async function composePrompt(
     const tplPath = path.isAbsolute(input.included_template_path)
       ? input.included_template_path
       : path.join(input.repoRoot, input.included_template_path);
-    if (existsSync(tplPath)) {
+    try {
+      assertInsideSandbox(tplPath, manualStoryRootForInput(input));
+    } catch (err) {
+      templateLintFindings.push(
+        hardFinding(
+          "selected_template_valid",
+          `Selected beat template at ${tplPath} is outside the manual-story sandbox: ${(err as Error).message}`,
+        ),
+      );
+    }
+    if (templateLintFindings.length === 0 && existsSync(tplPath)) {
       let rawText: string | null = null;
       try {
         rawText = readFileSync(tplPath, "utf8");

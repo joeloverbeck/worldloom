@@ -24,12 +24,28 @@ interface Fixture {
 
 function mkFixture(): Fixture {
   const repoRoot = mkdtempSync(path.join(os.tmpdir(), "health-route-"));
+  writeComposeDocs(repoRoot);
   const worldSlug = "fixture-world";
   const msSlug = "fixture-story";
   const root = resolveManualStoryRoot(repoRoot, worldSlug, msSlug);
   mkdirSync(root.absolutePath, { recursive: true });
   writeMetadata(root, []);
   return { repoRoot, worldSlug, msSlug, root };
+}
+
+function writeComposeDocs(repoRoot: string): void {
+  const contentPolicyPath = path.join(
+    repoRoot,
+    "docs/prose-renderer-contract/content-policy.md",
+  );
+  const proseCraftPath = path.join(
+    repoRoot,
+    "docs/manual-story-studio/prose-craft-contract.md",
+  );
+  mkdirSync(path.dirname(contentPolicyPath), { recursive: true });
+  mkdirSync(path.dirname(proseCraftPath), { recursive: true });
+  writeFileSync(contentPolicyPath, "Content policy\n");
+  writeFileSync(proseCraftPath, "Prose craft contract\n");
 }
 
 function writeMetadata(root: ManualStoryRoot, segmentOrder: string[]): void {
@@ -145,7 +161,10 @@ test("GET /health returns 200 blocked HealthReport for a missing segment sidecar
     assert.equal(body.findings.length, 1);
     assert.equal(body.findings[0]?.code, "segment-sidecar-missing");
     assert.equal(body.findings[0]?.severity, "blocking");
-    assert.ok(body.blocked_actions.includes("manuscript_compile"));
+    assert.deepEqual(body.blocked_actions, [
+      "segment_save",
+      "manuscript_compile",
+    ]);
   } finally {
     rmSync(fixture.repoRoot, { recursive: true, force: true });
   }
@@ -303,6 +322,8 @@ test("POST /segments returns 409 HealthReport when health blocks segment_save", 
       const body = response.json() as HealthReport;
       assert.equal(body.status, "blocked");
       assert.equal(body.findings[0]?.code, "segment-sidecar-missing");
+      assert.ok(!body.blocked_actions.includes("prompt_copy"));
+      assert.ok(!body.blocked_actions.includes("prompt_save"));
       assert.ok(body.blocked_actions.includes("segment_save"));
     } finally {
       await server.close();
@@ -328,6 +349,8 @@ test("POST /manuscript/rebuild returns 409 HealthReport when health blocks manus
       const body = response.json() as HealthReport;
       assert.equal(body.status, "blocked");
       assert.equal(body.findings[0]?.code, "segment-sidecar-missing");
+      assert.ok(!body.blocked_actions.includes("prompt_copy"));
+      assert.ok(!body.blocked_actions.includes("prompt_save"));
       assert.ok(body.blocked_actions.includes("manuscript_compile"));
     } finally {
       await server.close();

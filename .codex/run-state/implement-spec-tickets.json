@@ -1,9 +1,9 @@
 {
-  "originating_spec": "specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md",
-  "archived_spec": "archive/specs/SPEC-111-manual-story-studio-ux-cockpit-pieces.md",
-  "last_ticket": "archive/tickets/SPEC111MANSTOSTU-005.md",
+  "originating_spec": "specs/SPEC-116-manual-story-studio-backend-integrity-hardening.md",
+  "archived_spec": "archive/specs/SPEC-116-manual-story-studio-backend-integrity-hardening.md",
+  "last_ticket": "archive/tickets/SPEC116MANSTOSTU-002.md",
   "last_result": "spec_completed_archived",
-  "last_work_commit": "358cf67a436bc80561c0070239f740dff0f46780",
+  "last_work_commit": "beab091141f6057f33c9fba6c5275cfeda9bfef2",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -14,7 +14,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: SPEC-111 and IMPLEMENTATION-ORDER archived after all SPEC111MANSTOSTU tickets completed, SPEC-111 outcome truthing, triage path repair, stale active-path sweeps, and diff hygiene",
-  "dirty_state": "tracked dirty path reports/manifest_2026-06-01.txt is unrelated deletion left unstaged; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from prior runs",
+  "proof_state": "clean: SPEC116MANSTOSTU-001 and SPEC116MANSTOSTU-002 archived, SPEC-116 archived, IMPLEMENTATION-ORDER updated to SPEC-112 next, package backend/full/build proofs passed, and stale active-path sweeps classified",
+  "dirty_state": "tracked worktree clean after SPEC-116 archive work commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-02"
 }

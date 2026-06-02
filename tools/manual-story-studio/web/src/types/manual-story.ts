@@ -321,10 +321,8 @@ export interface PromptComposeRequestInput {
   moment_directive: string;
   included_cast: string[];
   included_records: string[];
-  included_template_path?: string | null;
-  // SPEC-104: ID-shaped public API; routes layer resolves to
-  // included_template_path internally. Mutually exclusive with
-  // included_template_path on a single request.
+  // SPEC-104: ID-shaped public API; routes layer resolves to the
+  // persisted included_template_path internally.
   selected_template?: string | null;
 }
 
