@@ -1,6 +1,6 @@
 # SPEC-109 — Manual Story Studio: Current-Context Selector Layer
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-06-01
 **Classification:** tooling-adjacent (introduces a new per-story authoring artifact `current-context.yaml` under `worlds/<slug>/manual-stories/<slug>/`; no canon-pipeline integration).
 **Depends on:** archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (typed-error reads — current-context consumes the read-result discriminated union for its own load path and for the records it references).
@@ -195,3 +195,25 @@ Manual verification: create a fixture story with a `current-context.yaml` naming
 - **Assumption:** Manual Studio's IDs are stable enough that pinning specific IDs into `current-context.yaml` will not break under casual refactors. → Verified: SPEC-101 / SPEC-104 establish per-class ID allocators with append-only semantics; references survive renames at the prefix level. The `validateCurrentContext` pass catches genuine breakage.
 - **Assumption:** The state-update checklist component (SPEC-103) is in place to host the "Mark state reviewed" button. → Verified: `tools/manual-story-studio/web/src/components/StateUpdateChecklist.tsx` exists.
 - **Assumption:** The composer's existing 15-section structure does not require restructure to accept current-context as a primary selector. → Verified by reading `tools/manual-story-studio/src/prompt/sections/`: each section helper takes a translator-context argument, and the composer constructs that context. Threading current-context-derived selections through to the existing context object is additive.
+
+## Outcome
+
+Completed on 2026-06-02 through archived tickets `archive/tickets/SPEC109MANSTOSTU-001.md` through `archive/tickets/SPEC109MANSTOSTU-011.md`.
+
+Landed the current-context layer across Manual Story Studio:
+
+- Added the `CurrentContext` schema, read/write/validate surfaces, health integration, and GET/PUT current-context routes.
+- Plumbed current-context through prompt composition so current handoff, cast order, POV, pinned records, active secrets/questions, and must-not-reveal guidance affect the generated prompt when present.
+- Added the dashboard Current State panel, Moment Composer default seeding, the Edit Current Context route/page, and the explicit state-review marker button.
+- Added backend/current-context tests and focused state-update checklist coverage; UI-only pieces are verified by web TypeScript plus manual code review recorded in the completed tickets.
+
+Verification results:
+
+- `cd tools/manual-story-studio && npm run test:backend` passed after the final ticket with 70 compiled backend test files.
+- `cd tools/manual-story-studio/web && npm test` passed after the final ticket.
+- `cd tools/manual-story-studio && npm test` passed after the final ticket with 429 backend tests plus web `tsc --noEmit`.
+
+Deviations from the draft plan:
+
+- UI component interaction tests were not added because the package currently uses TypeScript and manual review as the UI proof lane; backend route, compose, health, and checklist payload behavior are covered by executable tests.
+- The state-review button closes the existing checklist dialog on success rather than adding a new toast system, matching the current component conventions.

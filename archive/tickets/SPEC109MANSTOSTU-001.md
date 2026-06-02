@@ -42,8 +42,8 @@ Corrected SPEC-109 and the downstream validator ticket to name the live `msecret
 ## Files to Touch
 
 - `tools/manual-story-studio/src/schema/current-context.ts` (new)
-- `specs/SPEC-109-manual-story-studio-current-context-layer.md` (modify — truth secret-ID prefix to live `msecret-`)
-- `tickets/SPEC109MANSTOSTU-003.md` (modify — truth downstream validator-ticket prefix reference)
+- `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md` (modify — truth secret-ID prefix to live `msecret-`)
+- `archive/tickets/SPEC109MANSTOSTU-003.md` (modify — truth downstream validator-ticket prefix reference)
 
 ## Out of Scope
 
@@ -84,7 +84,7 @@ Completed on 2026-06-02. Added `tools/manual-story-studio/src/schema/current-con
 
 1. `cd tools/manual-story-studio && npm run build:backend` — PASS; backend TypeScript compile completed successfully before and after the schema edit.
 2. `rg -n 'export interface CurrentContext|current_location|current_cast|pov_holder|active_pressure_clocks|active_secrets_questions|pinned_records|must_not_reveal|current_handoff_summary|last_accepted_segment|last_reviewed_after_segment' tools/manual-story-studio/src/schema/current-context.ts` — PASS; export and all 10 fields are present.
-3. Manual review of the current-context secret-ID references in `specs/SPEC-109-manual-story-studio-current-context-layer.md`, `tickets/SPEC109MANSTOSTU-003.md`, and `tools/manual-story-studio/src/schema/current-context.ts` — PASS; current contract prose uses the live `msecret-<n>` prefix.
+3. Manual review of the current-context secret-ID references in `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md`, `archive/tickets/SPEC109MANSTOSTU-003.md`, and `tools/manual-story-studio/src/schema/current-context.ts` — PASS; current contract prose uses the live `msecret-<n>` prefix.
 
 ## Deviations
 

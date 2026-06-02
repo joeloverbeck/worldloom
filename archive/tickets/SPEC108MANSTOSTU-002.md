@@ -70,7 +70,7 @@ In `tools/manual-story-studio/src/server/routes/segments.ts`, update `writeError
 
 ## Out of Scope
 
-- The state-review precondition for `force_replace` — deferred to SPEC-109 per SPEC-108 §3 Key decisions; will land as a follow-up edit to this same route when SPEC-109 ships.
+- The state-review precondition for `force_replace` — deferred to SPEC-109 per SPEC-108 §3 Key decisions; landed through `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md`.
 - Frontend API wrapper changes (ticket 003).
 - RepairSegments page UI (ticket 007).
 - Acceptance test additions (ticket 008).

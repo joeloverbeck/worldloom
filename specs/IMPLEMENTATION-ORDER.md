@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-01
 **Scope:** the seven specs derived from the critical triage of `reports/manual-story-studio-second-iteration.md`. All seven are Manual Story Studio (`tools/manual-story-studio`) tooling-adjacent work; none touch canon, MCP, patch engine, or world-index beyond `enumerate.ts`'s already-shipped exclusion.
-**Status:** SPEC-105, SPEC-106, SPEC-107, and SPEC-108 are completed and archived; this order now governs SPEC-109 through SPEC-111.
+**Status:** SPEC-105, SPEC-106, SPEC-107, SPEC-108, and SPEC-109 are completed and archived; this order now governs SPEC-110 through SPEC-111.
 
 ---
 
@@ -18,7 +18,7 @@ SPEC-105 (integrity foundation)
 SPEC-106 (prompt leakage hard-tier) — complete
 SPEC-107 (prose/state contract correction) — complete
 
-SPEC-109 (current-context layer)
+SPEC-109 (current-context layer) — complete
   └─→ SPEC-111 (UX cockpit pieces — Dashboard CurrentStatePanel consumes current-context)
 ```
 
@@ -35,7 +35,7 @@ SPEC-107 had no inbound dependencies and is complete. SPEC-106 had no inbound de
 4. **SPEC-108** — Segment lifecycle append-only by default.
    *Completed and archived.* Downstream references should treat `archive/specs/SPEC-108-manual-story-studio-segment-lifecycle-append-only.md` as landed. Ticket evidence lives in `archive/tickets/SPEC108MANSTOSTU-001.md` through `archive/tickets/SPEC108MANSTOSTU-008.md`.
 5. **SPEC-109** — Current-context selector layer.
-   *Depends on 105.* Lands after 105; introduces a new authoring artifact (`current-context.yaml`) and plumbs the prompt composer.
+   *Completed and archived.* Downstream references should treat `archive/specs/SPEC-109-manual-story-studio-current-context-layer.md` as landed. It introduces the `current-context.yaml` authoring artifact, prompt-composer selector preference, Dashboard Current State panel, Moment Composer seeding, Edit Current Context page, and state-review marker.
 6. **SPEC-110** — Beat template pressure/turn card fields.
    *Depends on 105.* Lands after 105. Independent of 108 / 109 in implementation; can land in parallel with either of them. (When SPEC-109's current-context is present, SPEC-110's filter tie-breaker engages — but the filter changes ship as a SPEC-110-internal concern; SPEC-109 does not need to land first for SPEC-110 to be useful.)
 7. **SPEC-111** — UX cockpit pieces (health banner persistence, sibling-page nav, ID hiding, unsaved-change handling).
@@ -46,10 +46,10 @@ SPEC-107 had no inbound dependencies and is complete. SPEC-106 had no inbound de
 A small team or a single contributor with parallel branches can ship in the following waves:
 
 - **Wave 1**: SPEC-105 alone (complete).
-- **Wave 2**: SPEC-106, SPEC-107, and SPEC-108 complete; SPEC-109 + SPEC-110 can continue in parallel branches off of post-105 main.
-- **Wave 3**: SPEC-111 after SPEC-109 ships.
+- **Wave 2**: SPEC-106, SPEC-107, SPEC-108, and SPEC-109 complete; SPEC-110 can continue off post-105 main.
+- **Wave 3**: SPEC-111 after archived SPEC-109.
 
-A solo contributor working serially follows the remaining numbered list above (109 → 110 → 111). The numeric order is one valid implementation sequence and the recommended default; the dependency graph above is authoritative.
+A solo contributor working serially follows the remaining numbered list above (110 → 111). The numeric order is one valid implementation sequence and the recommended default; the dependency graph above is authoritative.
 
 ## Notes
 
