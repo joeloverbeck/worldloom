@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `src/read/current-context.ts` and `test/current-context/{current-context-read.test.ts, fixtures/*}` to `@worldloom/manual-story-studio`; no impact on existing read paths.
-**Deps**: SPEC109MANSTOSTU-001
+**Deps**: archive/tickets/SPEC109MANSTOSTU-001.md
 
 ## Problem
 

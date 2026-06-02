@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `src/validate/current-context.ts` and `test/current-context/current-context-validate.test.ts` to `@worldloom/manual-story-studio`; no impact on existing validators.
-**Deps**: SPEC109MANSTOSTU-001
+**Deps**: archive/tickets/SPEC109MANSTOSTU-001.md
 
 ## Problem
 
@@ -13,7 +13,7 @@ Every ID referenced inside a `current-context.yaml` (`pov_holder`, `current_cast
 ## Assumption Reassessment (2026-06-01)
 
 1. **Codebase**: `tools/manual-story-studio/src/validate/schema.ts:29` exports `ValidationResult = { ok: true } | { ok: false; errors: ValidationError[] }` — reusable by this ticket. `tools/manual-story-studio/src/validate/refs.ts:131` exports `validateRefs(...)` and `tools/manual-story-studio/src/read/records.ts:87` exports `listAllKnownIds(manualStoryRoot)` returning `KnownIds` keyed by `ManualRecordClass`. `KnownIds` does NOT enumerate segments — segment IDs are surfaced via `metadata.segment_order` (the array tail).
-2. **Spec**: SPEC-109 §2 item 5 specifies the dual-source known-IDs lookup explicitly: record-class IDs (mchar-, mloc-, mclock-, msec-, mq-, mrel-, mobl-, …) resolve against `KnownIds` from `listAllKnownIds`; SEG- IDs in `last_accepted_segment` / `last_reviewed_after_segment` resolve against `metadata.segment_order` (passed as `knownSegmentIds`). Finding codes are fixed by SPEC-109: `current-context-reference-broken` (unknown record ID in any reference field) and `current-context-pov-not-in-cast` (cross-field invariant violation).
+2. **Spec**: SPEC-109 §2 item 5 specifies the dual-source known-IDs lookup explicitly: record-class IDs (mchar-, mloc-, mclock-, msecret-, mq-, mrel-, mobl-, …) resolve against `KnownIds` from `listAllKnownIds`; SEG- IDs in `last_accepted_segment` / `last_reviewed_after_segment` resolve against `metadata.segment_order` (passed as `knownSegmentIds`). Finding codes are fixed by SPEC-109: `current-context-reference-broken` (unknown record ID in any reference field) and `current-context-pov-not-in-cast` (cross-field invariant violation).
 3. **Cross-skill boundary**: This validator's `ValidationResult` shape is consumed by two downstream surfaces: (a) the PUT route handler (005) that maps validation failures to HTTP 422 with structured findings; (b) the health-integration pass (006) that surfaces the same findings under SPEC-105's existing `current-context-yaml-parse-failed` / `current-context-reference-broken` health-finding codes (the spec routes the validator's finding codes into the health report directly). The shared contract is the `ValidationResult.errors[].field` + `errors[].message` shape that both consumers parse.
 
 ## Architecture Check

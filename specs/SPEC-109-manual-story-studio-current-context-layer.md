@@ -23,9 +23,9 @@ current_location: mloc-2
 current_cast: [mchar-1, mchar-3]
 pov_holder: mchar-1
 active_pressure_clocks: [mclock-1]
-active_secrets_questions: [msec-2, mq-1]
+active_secrets_questions: [msecret-2, mq-1]
 pinned_records: [mrel-4, mobl-1]
-must_not_reveal: [msec-2]
+must_not_reveal: [msecret-2]
 current_handoff_summary: |
   Mara is in the kitchen of the riverhouse waiting for Iven. The
   bread on the counter has not been touched. She has decided to ask
@@ -50,9 +50,9 @@ This spec is the highest-leverage data-layer improvement after SPEC-105's integr
      current_cast: string[];                     // ordered list of mchar-<n>
      pov_holder: string | null;                  // mchar-<n>; one of current_cast
      active_pressure_clocks: string[];           // mclock-<n>
-     active_secrets_questions: string[];         // msec-<n> or mq-<n>
+     active_secrets_questions: string[];         // msecret-<n> or mq-<n>
      pinned_records: string[];                   // typed mixed IDs (any manual class)
-     must_not_reveal: string[];                  // subset of active_secrets_questions OR any msec-<n>
+     must_not_reveal: string[];                  // subset of active_secrets_questions OR any msecret-<n>
      current_handoff_summary: string;            // freeform prose; the author's "what's happening right now" paragraph
      last_accepted_segment: string | null;       // SEG-<n>; mirrors metadata.segment_order tail
      last_reviewed_after_segment: string | null; // SEG-<n>; set when author marks state-review complete
@@ -66,7 +66,7 @@ This spec is the highest-leverage data-layer improvement after SPEC-105's integr
 
 4. **Write path.** Add `src/write/current-context.ts` exposing `writeCurrentContext(root, ctx): void` — full-file replace (the file is small and hand-edited; merging is unnecessary). Atomic write via the existing `safeWriteFile` sandbox. Return-shape parallels the closest existing single-file metadata writer (`writeManualStoryMetadata`): the function returns nothing on success and throws on a sandbox / I/O failure; route-level validation failures map to `422` with structured findings at the route handler, not at the writer.
 
-5. **Schema validation.** Add `src/validate/current-context.ts` exposing `validateCurrentContext(ctx, knownIds, knownSegmentIds): ValidationResult` — asserts every referenced ID exists in the corpus and is the right shape. Record-class IDs (`mchar-`, `mloc-`, `mclock-`, `msec-`, `mq-`, `mrel-`, `mobl-`, …) are resolved against `KnownIds` from `listAllKnownIds` (`src/read/records.ts`); `SEG-` IDs in `last_accepted_segment` / `last_reviewed_after_segment` are resolved against `metadata.segment_order` (passed as `knownSegmentIds`), since `KnownIds` is keyed by `ManualRecordClass` and does not enumerate segments. Validation failures route into the health report from SPEC-105 as findings under code `current-context-reference-broken` / `current-context-pov-not-in-cast`.
+5. **Schema validation.** Add `src/validate/current-context.ts` exposing `validateCurrentContext(ctx, knownIds, knownSegmentIds): ValidationResult` — asserts every referenced ID exists in the corpus and is the right shape. Record-class IDs (`mchar-`, `mloc-`, `mclock-`, `msecret-`, `mq-`, `mrel-`, `mobl-`, …) are resolved against `KnownIds` from `listAllKnownIds` (`src/read/records.ts`); `SEG-` IDs in `last_accepted_segment` / `last_reviewed_after_segment` are resolved against `metadata.segment_order` (passed as `knownSegmentIds`), since `KnownIds` is keyed by `ManualRecordClass` and does not enumerate segments. Validation failures route into the health report from SPEC-105 as findings under code `current-context-reference-broken` / `current-context-pov-not-in-cast`.
 
 6. **Backend routes.** New `src/server/routes/current-context.ts` exports two registration functions that the parent http.ts wires in their proper scopes — `registerCurrentContextReadRoute` (mounts outside `wrapRouterWritable`) and `registerCurrentContextWriteRoute` (mounts inside `wrapRouterWritable`), parallel to the existing `routes/metadata.ts` / `routes/prompts.ts` / `routes/segments.ts` patterns.
    - `GET /api/worlds/:world/manual-stories/:story/current-context` — returns the parsed `CurrentContext` or `null` if the file is absent; `409` if the file is corrupted (health-integrated).
@@ -162,7 +162,7 @@ This spec is the highest-leverage data-layer improvement after SPEC-105's integr
 | --- | --- | --- |
 | §Soft Canon / Local Truth (must be explicit and author-controlled) | aligns @ current-context file | `current-context.yaml` is the cockpit's most explicit, most author-controlled local-truth surface: a named, hand-edited file naming exactly what the author considers current. |
 | §Story Bundles §4a Plan-Authority Boundary (authoring authority is explicit, not derived) | aligns by analogy @ current-context file | Branching pipelines derive plan-authority via STPLAN; Manual Studio's analog is the hand-authored current-context. The principle (authoring authority is named, not inferred) maps cleanly. |
-| §Story Bundles §6 Story-Bundle ID Classes (uppercase patterns) | aligns @ case-discipline | All IDs referenced in current-context are lowercase Manual Studio classes (`mchar-`, `mloc-`, `mclock-`, `msec-`, `mq-`, `mrel-`, `mobl-`, ...) plus uppercase `SEG-` (Manual Studio's segment class); no collision with world-index story-directory regexes. |
+| §Story Bundles §6 Story-Bundle ID Classes (uppercase patterns) | aligns @ case-discipline | All IDs referenced in current-context are lowercase Manual Studio classes (`mchar-`, `mloc-`, `mclock-`, `msecret-`, `mq-`, `mrel-`, `mobl-`, ...) plus uppercase `SEG-` (Manual Studio's segment class); no collision with world-index story-directory regexes. |
 | Rule 6 No Silent Retcons | aligns @ last_reviewed_after_segment | The explicit state-review-marked surface prevents a future spec from silently inferring "state was reviewed" from prose or from segment count; it is set only by author action. |
 | §Tooling Recommendation (least-privilege LLM packets) | aligns @ prompt composer | The composer's `current-context`-aware curation narrows the LLM packet to exactly the records relevant to the moment, increasing precision of the external request. |
 | Rule 1 No Floating Facts | N/A @ tooling-adjacent | No canon facts engaged. |

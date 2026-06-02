@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `src/write/current-context.ts` and `test/current-context/current-context-write.test.ts` to `@worldloom/manual-story-studio`; no impact on existing write paths.
-**Deps**: SPEC109MANSTOSTU-001
+**Deps**: archive/tickets/SPEC109MANSTOSTU-001.md
 
 ## Problem
 
