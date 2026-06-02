@@ -373,6 +373,66 @@ test("filter scenario E: optional move_family pin ranks matching template first"
   }
 });
 
+test("filter: desiredPressureType pin ranks matching otherwise-equal template first", () => {
+  const nonMatch = {
+    ...softConfrontation(),
+    id: "mtemplate-10",
+    title: "A Nonmatching Pressure",
+    pressure_type: "choice" as const,
+  };
+  const match = {
+    ...softConfrontation(),
+    id: "mtemplate-11",
+    title: "Z Matching Pressure",
+    pressure_type: "intimacy" as const,
+  };
+  const input = makeInput({
+    optionalAuthorPins: { desiredPressureType: "intimacy" },
+    allTemplates: [nonMatch, match],
+  });
+  try {
+    const result = filterBeatTemplates(input);
+    assert.equal(result.length, 2);
+    assert.deepEqual(
+      result.map((c) => c.template.id),
+      ["mtemplate-11", "mtemplate-10"],
+    );
+    assert.ok(result[0]!.why_suggested.includes("pressure: intimacy"));
+  } finally {
+    rmSync(input.manualStoryRoot, { recursive: true, force: true });
+  }
+});
+
+test("filter: absent desiredPressureType preserves previous title fallback ordering", () => {
+  const nonMatch = {
+    ...softConfrontation(),
+    id: "mtemplate-10",
+    title: "A Nonmatching Pressure",
+    pressure_type: "choice" as const,
+  };
+  const match = {
+    ...softConfrontation(),
+    id: "mtemplate-11",
+    title: "Z Matching Pressure",
+    pressure_type: "intimacy" as const,
+  };
+  const input = makeInput({
+    optionalAuthorPins: {},
+    allTemplates: [nonMatch, match],
+  });
+  try {
+    const result = filterBeatTemplates(input);
+    assert.equal(result.length, 2);
+    assert.deepEqual(
+      result.map((c) => c.template.id),
+      ["mtemplate-10", "mtemplate-11"],
+    );
+    assert.ok(!result.some((c) => c.why_suggested.includes("pressure: intimacy")));
+  } finally {
+    rmSync(input.manualStoryRoot, { recursive: true, force: true });
+  }
+});
+
 test("filter: determinism — same input twice yields byte-identical output", () => {
   const input = makeInput({ segmentOrder: ["SEG-1"] });
   try {

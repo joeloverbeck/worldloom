@@ -8,6 +8,7 @@
 import type {
   BeatTemplate,
   BeatTemplateMoveFamily,
+  BeatTemplatePressureType,
   BeatTemplateRelationshipAxis,
 } from "../schema/beat-template.js";
 import type {
@@ -43,6 +44,7 @@ export interface FilterSecretEntry {
 
 export interface FilterOptionalPins {
   moveFamily?: BeatTemplateMoveFamily;
+  desiredPressureType?: BeatTemplatePressureType;
   tags?: string[];
   location?: string;
 }
@@ -170,6 +172,9 @@ function buildMatchState(
   const intensityFit =
     rankIntensity(template.classification.intensity) <=
     rankIntensity(input.storyContract.content_intensity);
+  const pressureTypeMatch =
+    input.optionalAuthorPins.desiredPressureType !== undefined &&
+    template.pressure_type === input.optionalAuthorPins.desiredPressureType;
 
   // Relationship axes — informational for the trace; spec §2.2 stage 6
   // covers location/tone explicitly. relationship_axes_any does not have
@@ -194,6 +199,8 @@ function buildMatchState(
       requiredClassesPresent,
       intensityFit,
       intensityValue: template.classification.intensity,
+      pressureTypeMatch,
+      ...(pressureTypeMatch ? { pressureTypeValue: template.pressure_type } : {}),
       toneFitOverlap,
     },
   };
@@ -320,7 +327,12 @@ export function filterBeatTemplates(input: FilterInput): BeatTemplateCandidate[]
     const bRecent = recentUse.recentTemplates.has(b.template.id) ? 1 : 0;
     if (aRecent !== bRecent) return aRecent - bRecent;
 
-    // (f) title alphabetical
+    // (f) author desired pressure-type pin as a final semantic tie-breaker
+    if (a.matches.pressureTypeMatch !== b.matches.pressureTypeMatch) {
+      return a.matches.pressureTypeMatch ? -1 : 1;
+    }
+
+    // (g) title alphabetical
     return compareStrings(a.template.title, b.template.title);
   });
 

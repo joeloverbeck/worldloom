@@ -20,12 +20,12 @@ SPEC-110 §2 item 8 plus the frontend-send portion of item 9. The candidate card
 ## Architecture Check
 
 1. The card additions are display-only reads of the already-typed `BeatTemplateCandidate.template` fields (ticket 005's mirror); the `desired_pressure_type` input is a single controlled `<select>` whose value flows into `candidateInput.optional_desired_pressure_type`, mirroring the existing optional-pin inputs.
-2. No backwards-compatibility shim: the input is optional; omitting it sends no `optional_desired_pressure_type`, which the route (004) and filter (003) already treat as "no pin".
+2. No backwards-compatibility shim: the input is optional; omitting it sends no `optional_desired_pressure_type`, which the route (004) and archived filter ticket `archive/tickets/SPEC110MANSTOSTU-003.md` already treat as "no pin".
 
 ## Verification Layers
 
 1. The card renders `pressure_type` / `turn_type` chips + the expanded `do_not_resolve` / `anti_patterns` / `expected_state_review` view → component render assertion / manual verification (SPEC-110 AC#9).
-2. Setting the `desired_pressure_type` input causes the api client to send `optional_desired_pressure_type`, and matching templates rank higher → manual verification (SPEC-110 §6) backed by the route/filter tests (tickets 003/004).
+2. Setting the `desired_pressure_type` input causes the api client to send `optional_desired_pressure_type`, and matching templates rank higher → manual verification (SPEC-110 §6) backed by the route/filter tests (`archive/tickets/SPEC110MANSTOSTU-003.md` / ticket 004).
 3. The `why_suggested` list shows the `pressure: <type>` line when the pin matches → manual verification, asserted programmatically in ticket 007.
 
 ## What to Change
@@ -46,7 +46,7 @@ Ensure `getCandidates` forwards `optional_desired_pressure_type` from the `Candi
 ## Out of Scope
 
 - The `CandidateRequestBody` type definition (ticket 005's mirror) and the backend route (ticket 004).
-- The filter tie-breaker and why-suggested trace logic (ticket 003).
+- The filter tie-breaker and why-suggested trace logic (`archive/tickets/SPEC110MANSTOSTU-003.md`).
 
 ## Acceptance Criteria
 

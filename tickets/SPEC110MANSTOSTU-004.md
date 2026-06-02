@@ -4,22 +4,22 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio/src/server/routes/beat-templates.ts`
-**Deps**: 003
+**Deps**: archive/tickets/SPEC110MANSTOSTU-003.md
 
 ## Problem
 
-SPEC-110 §2 item 9 (route portion). The candidate route must accept an optional `desired_pressure_type` directive in its request body and thread it into `FilterOptionalPins.desiredPressureType` so the filter's stage-9 tie-breaker (ticket 003) fires. Without this, the pin field added to `FilterOptionalPins` has no producer.
+SPEC-110 §2 item 9 (route portion). The candidate route must accept an optional `desired_pressure_type` directive in its request body and thread it into `FilterOptionalPins.desiredPressureType` so the filter's stage-9 tie-breaker (`archive/tickets/SPEC110MANSTOSTU-003.md`) fires. Without this, the pin field added to `FilterOptionalPins` has no producer.
 
 ## Assumption Reassessment (2026-06-02)
 
 1. `src/server/routes/beat-templates.ts:380-404` builds `optionalAuthorPins` (`{ moveFamily?, tags?, location? }`) from `body.optional_move_family` / `optional_tags` / `optional_location` and passes it to `filterBeatTemplates`; the request-body type at line ~122 declares `optional_move_family?: BeatTemplateMoveFamily` (and siblings). This is the single backend site where the candidate request maps to `FilterOptionalPins`.
 2. SPEC-110 §2 item 9 + §4 Files to Touch ("the candidate route handler + `CandidateRequestBody` type — thread the new `optional_desired_pressure_type` directive pin … through to `FilterOptionalPins`").
-3. Cross-artifact boundary: route ↔ filter (`FilterOptionalPins.desiredPressureType` defined by ticket 003) ↔ frontend send (ticket 006 sends `optional_desired_pressure_type`). This ticket is the backend half of that wire; it must land after 003 (the `desiredPressureType` field must exist on `FilterOptionalPins`).
+3. Cross-artifact boundary: route ↔ filter (`FilterOptionalPins.desiredPressureType` defined by `archive/tickets/SPEC110MANSTOSTU-003.md`) ↔ frontend send (ticket 006 sends `optional_desired_pressure_type`). This ticket is the backend half of that wire; it must land after `archive/tickets/SPEC110MANSTOSTU-003.md` (the `desiredPressureType` field must exist on `FilterOptionalPins`).
 
 ## Architecture Check
 
 1. Mirrors the existing `optional_move_family → optionalAuthorPins.moveFamily` mapping exactly — one additional guarded assignment, no new request-handling shape.
-2. No backwards-compatibility shim: the new request field is optional; its absence means no `desiredPressureType` is set, which the filter already treats as "no pin" (ticket 003).
+2. No backwards-compatibility shim: the new request field is optional; its absence means no `desiredPressureType` is set, which the filter already treats as "no pin" (`archive/tickets/SPEC110MANSTOSTU-003.md`).
 
 ## Verification Layers
 
@@ -42,7 +42,7 @@ In the route handler (lines ~380-404), after the existing `optional_move_family`
 
 ## Out of Scope
 
-- The `FilterOptionalPins.desiredPressureType` field and the tie-breaker logic (ticket 003).
+- The `FilterOptionalPins.desiredPressureType` field and the tie-breaker logic (`archive/tickets/SPEC110MANSTOSTU-003.md`).
 - The frontend send of `optional_desired_pressure_type` and the author input control (ticket 006).
 
 ## Acceptance Criteria

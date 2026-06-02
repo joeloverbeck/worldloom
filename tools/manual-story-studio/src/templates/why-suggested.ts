@@ -7,6 +7,7 @@
 
 import type {
   BeatTemplate,
+  BeatTemplatePressureType,
   BeatTemplateRelationshipAxis,
   BeatTemplateToneFit,
 } from "../schema/beat-template.js";
@@ -19,6 +20,8 @@ export interface WhySuggestedMatches {
   requiredClassesPresent: string[];
   intensityFit: boolean;
   intensityValue?: string;
+  pressureTypeMatch: boolean;
+  pressureTypeValue?: BeatTemplatePressureType;
   toneFitOverlap: BeatTemplateToneFit[];
 }
 
@@ -31,7 +34,7 @@ const MAX_LINES = 4;
 
 // Priority order matches the spec §2.3 informativeness ranking:
 // tag overlap > role-slot fit > location match > relationship axes >
-// required classes > intensity > tone fit.
+// required classes > desired pressure type > intensity > tone fit.
 export function assembleWhySuggested(input: AssembleWhySuggestedInput): string[] {
   const { matches } = input;
   const lines: string[] = [];
@@ -50,6 +53,9 @@ export function assembleWhySuggested(input: AssembleWhySuggestedInput): string[]
   }
   if (matches.requiredClassesPresent.length > 0) {
     lines.push(`requires: ${matches.requiredClassesPresent.join(", ")}`);
+  }
+  if (matches.pressureTypeMatch && matches.pressureTypeValue) {
+    lines.push(`pressure: ${matches.pressureTypeValue}`);
   }
   if (matches.intensityFit && matches.intensityValue) {
     lines.push(`intensity: ${matches.intensityValue}`);
