@@ -22,6 +22,10 @@ type DeleteOutcome =
   | { ok: false; error: "not_found"; templateId: string }
   | null;
 
+function loadErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export function BeatTemplates() {
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
@@ -39,16 +43,25 @@ export function BeatTemplates() {
   const [creating, setCreating] = useState(false);
   const [saveErrors, setSaveErrors] = useState<ValidationError[]>([]);
   const [deleteOutcome, setDeleteOutcome] = useState<DeleteOutcome>(null);
+  const [listError, setListError] = useState<string | null>(null);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
+    setListError(null);
     listBeatTemplates(worldSlug, msSlug, { includeArchived })
       .then((all) => {
-        if (!cancelled) setTemplates(all);
+        if (!cancelled) {
+          setTemplates(all);
+          setListError(null);
+        }
       })
-      .catch(() => {
-        if (!cancelled) setTemplates([]);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setTemplates([]);
+          setListError(loadErrorMessage(error));
+        }
       });
     return () => {
       cancelled = true;
@@ -58,15 +71,23 @@ export function BeatTemplates() {
   useEffect(() => {
     if (!worldSlug || !msSlug || !selectedId) {
       setSelectedTemplate(null);
+      setDetailError(null);
       return;
     }
     let cancelled = false;
+    setDetailError(null);
     getBeatTemplate(worldSlug, msSlug, selectedId)
       .then((tpl) => {
-        if (!cancelled) setSelectedTemplate(tpl);
+        if (!cancelled) {
+          setSelectedTemplate(tpl);
+          setDetailError(null);
+        }
       })
-      .catch(() => {
-        if (!cancelled) setSelectedTemplate(null);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setSelectedTemplate(null);
+          setDetailError(loadErrorMessage(error));
+        }
       });
     return () => {
       cancelled = true;
@@ -184,9 +205,16 @@ export function BeatTemplates() {
           </label>
         </header>
         {filtered.length === 0 ? (
-          <p>No beat templates.</p>
+          listError ? (
+            <p role="alert">Failed to load beat templates: {listError}</p>
+          ) : (
+            <p>No beat templates.</p>
+          )
         ) : (
           <ul style={{ listStyle: "none", padding: 0 }}>
+            {listError ? (
+              <li role="alert">Failed to refresh beat templates: {listError}</li>
+            ) : null}
             {filtered.map((tpl) => (
               <li
                 key={tpl.id}
@@ -292,6 +320,8 @@ export function BeatTemplates() {
                 <p>Force-deleted.</p>
               ) : null}
             </>
+          ) : detailError ? (
+            <p role="alert">Failed to load beat template: {detailError}</p>
           ) : (
             <p>Loading template…</p>
           )

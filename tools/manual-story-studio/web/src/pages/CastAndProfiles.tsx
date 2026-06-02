@@ -15,6 +15,10 @@ import type {
   ManualRecordSummary,
 } from "../types/manual-story.js";
 
+function loadErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export function CastAndProfiles() {
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
@@ -30,6 +34,8 @@ export function CastAndProfiles() {
   const [saveError, setSaveError] = useState<
     Exclude<CreateResult, { ok: true }> | null
   >(null);
+  const [listError, setListError] = useState<string | null>(null);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   useEffect(() => {
     const next: Record<string, string> = {};
@@ -40,12 +46,19 @@ export function CastAndProfiles() {
   useEffect(() => {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
+    setListError(null);
     apiList(worldSlug, msSlug, "cast", { includeArchived: true })
       .then((records) => {
-        if (!cancelled) setSummaries(records);
+        if (!cancelled) {
+          setSummaries(records);
+          setListError(null);
+        }
       })
-      .catch(() => {
-        if (!cancelled) setSummaries([]);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setSummaries([]);
+          setListError(loadErrorMessage(error));
+        }
       });
     return () => {
       cancelled = true;
@@ -55,15 +68,23 @@ export function CastAndProfiles() {
   useEffect(() => {
     if (!worldSlug || !msSlug || !selectedId) {
       setSelectedRecord(null);
+      setDetailError(null);
       return;
     }
     let cancelled = false;
+    setDetailError(null);
     apiRead(worldSlug, msSlug, "cast", selectedId)
       .then((rec) => {
-        if (!cancelled) setSelectedRecord(rec);
+        if (!cancelled) {
+          setSelectedRecord(rec);
+          setDetailError(null);
+        }
       })
-      .catch(() => {
-        if (!cancelled) setSelectedRecord(null);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setSelectedRecord(null);
+          setDetailError(loadErrorMessage(error));
+        }
       });
     return () => {
       cancelled = true;
@@ -138,19 +159,29 @@ export function CastAndProfiles() {
           </button>
         </header>
         {summaries.length === 0 ? (
-          <p>No cast records.</p>
+          listError ? (
+            <p role="alert">Failed to load cast records: {listError}</p>
+          ) : (
+            <p>No cast records.</p>
+          )
         ) : (
-          summaries.map((s) => (
-            <RecordCard
-              key={s.id}
-              summary={s}
-              onOpen={(id) => {
-                setSelectedId(id);
-                setCreating(false);
-                setSaveError(null);
-              }}
-            />
-          ))
+          <>
+            {listError ? (
+              <p role="alert">Failed to refresh cast records: {listError}</p>
+            ) : null}
+            {summaries.map((s) => (
+              <RecordCard
+                key={s.id}
+                summary={s}
+                onOpen={(id) => {
+                  setSelectedId(id);
+                  setCreating(false);
+                  setSaveError(null);
+                  setDetailError(null);
+                }}
+              />
+            ))}
+          </>
         )}
       </section>
       <section aria-label="cast-detail">
@@ -176,6 +207,8 @@ export function CastAndProfiles() {
               onCancel={() => setSelectedId(null)}
               saveError={saveError}
             />
+          ) : detailError ? (
+            <p role="alert">Failed to load cast record: {detailError}</p>
           ) : (
             <p>Loading…</p>
           )

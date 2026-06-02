@@ -73,6 +73,10 @@ const PARAGRAPHING_OPTIONS: ManualStoryParagraphing[] = [
   "mixed",
 ];
 
+function loadErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export function EditContract() {
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
@@ -82,6 +86,7 @@ export function EditContract() {
   const [metadata, setMetadata] = useState<ManualStoryMetadata | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<
@@ -93,17 +98,23 @@ export function EditContract() {
     let cancelled = false;
     setLoading(true);
     setLoadFailed(false);
+    setLoadError(null);
     apiReadMetadata(worldSlug, msSlug)
       .then((m) => {
         if (cancelled) return;
         if (m === null) {
           setLoadFailed(true);
+          setLoadError("metadata was not found");
         } else {
           setMetadata(m);
+          setLoadError(null);
         }
       })
-      .catch(() => {
-        if (!cancelled) setLoadFailed(true);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setLoadFailed(true);
+          setLoadError(loadErrorMessage(error));
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -127,7 +138,11 @@ export function EditContract() {
   }
 
   if (loadFailed || metadata === null) {
-    return <p role="alert">Failed to load metadata.</p>;
+    return (
+      <p role="alert">
+        Failed to load metadata{loadError ? `: ${loadError}` : "."}
+      </p>
+    );
   }
 
   const contract = metadata.story_contract;
