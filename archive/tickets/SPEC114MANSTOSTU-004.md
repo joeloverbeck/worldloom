@@ -1,6 +1,6 @@
 # SPEC114MANSTOSTU-004: Beat-template delete parity
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` beat-template surfaces (`web/src/pages/BeatTemplates.tsx`, `web/src/api/beat-templates.ts`, `src/server/routes/beat-templates.ts`); no impact on world canon or story-bundle pipeline (canon-fenced package).
@@ -28,19 +28,24 @@
 2. Template referenced by a segment `selected_template` is blocked (not hard-deleted) → backend assertion (relies on 001's sidecar scan) exercised through the template route.
 3. `BeatTemplates.tsx` no longer references `inactive_default` → grep-proof zero matches.
 
-## What to Change
+## Landed Changes
 
-### 1. Update `BeatTemplateDeleteResult` (`web/src/api/beat-templates.ts`)
+### 1. Updated `BeatTemplateDeleteResult` (`web/src/api/beat-templates.ts`)
 
-Remove `inactive_default` from the outcome union; add the `blocked` member carrying `referrers: Array<{recordClass, summary}>` mirroring the records client (archive/tickets/SPEC114MANSTOSTU-003.md §1).
+Removed `inactive_default` from the outcome union and added the `blocked` member carrying `referrers: Array<{recordClass, summary}>` mirroring the records client (archive/tickets/SPEC114MANSTOSTU-003.md §1). The client force path now sends `?force=true&mode=repair`.
 
-### 2. Rework the template delete UX (`web/src/pages/BeatTemplates.tsx`)
+### 2. Reworked the template delete UX (`web/src/pages/BeatTemplates.tsx`)
 
-Replace the `inactive_default` branch with the block-dialog + referrer-card pattern from `Records.tsx` (archive/tickets/SPEC114MANSTOSTU-003.md §2); move any force affordance behind the same warning-gated repair disclosure.
+Replaced the `inactive_default` branch with the block-dialog + referrer-card pattern from `Records.tsx` (archive/tickets/SPEC114MANSTOSTU-003.md §2). Referrer cards open the corresponding Records route with `class` and `id` query params. "Force delete anyway" now lives inside a collapsed repair disclosure.
 
-### 3. Confine force in the template route (`src/server/routes/beat-templates.ts`)
+### 3. Confined force in the template route (`src/server/routes/beat-templates.ts`)
 
-Require the explicit repair flag for force-delete (matching archive/tickets/SPEC114MANSTOSTU-002.md §2), and pass the structured `blocked` result through.
+The template delete route now requires the explicit repair flag for force-delete (matching archive/tickets/SPEC114MANSTOSTU-002.md §2), rejects plain `?force=true` with `405 repair-mode-required`, and passes the structured `blocked` result through.
+
+### 4. Added route and source-level regression coverage
+
+- `test/server/beat-templates-routes.test.ts` now asserts a template referenced by a segment sidecar's `selected_template` blocks normal delete, plain force is rejected, repair-mode force deletes, and `repair-log.yaml` records `beat-templates/mtemplate-1`.
+- `test/web/beat-template-delete-ux.test.ts` now asserts the beat-template API/page no longer reference `inactive_default`, the page renders `RecordCard` referrers, and the force action is inside the blocked repair disclosure.
 
 ## Files to Touch
 
@@ -78,3 +83,20 @@ Require the explicit repair flag for force-delete (matching archive/tickets/SPEC
 1. `cd tools/manual-story-studio && npm test`
 2. `grep -rn "inactive_default" tools/manual-story-studio/web/src/pages/BeatTemplates.tsx tools/manual-story-studio/web/src/api/beat-templates.ts` → expect zero matches.
 3. Full `npm test` is the correct boundary — beat-template parity spans the web `tsc --noEmit` (frontend) and the shared backend lifecycle, both run by `npm test`.
+
+## Outcome
+
+Completed on 2026-06-02.
+
+Beat-template deletion now follows the records lifecycle: unreferenced templates hard-delete, referenced templates return `blocked` with referrer summaries, the template UI shows referrer cards instead of archive messaging, and repair-mode force-delete is gated by `mode=repair` and persists the shared `repair-log.yaml` audit entry.
+
+## Verification Result
+
+- `cd tools/manual-story-studio && npm run test` — PASS: 472 backend/static tests passed, followed by web `tsc -p tsconfig.json --noEmit`.
+- `rg -n "inactive_default" tools/manual-story-studio/web/src/pages/BeatTemplates.tsx tools/manual-story-studio/web/src/api/beat-templates.ts` — PASS: no matches.
+- `rg -n 'repair-mode-required|selected_template|Force delete anyway|<details|deleteOutcome\.outcome === "blocked"|<RecordCard' tools/manual-story-studio/src/server/routes/beat-templates.ts tools/manual-story-studio/test/server/beat-templates-routes.test.ts tools/manual-story-studio/web/src/pages/BeatTemplates.tsx tools/manual-story-studio/test/web/beat-template-delete-ux.test.ts` — PASS: route gate, selected-template route fixture, block branch, referrer-card render, collapsed repair disclosure, and force action are present.
+- `git diff --check` — PASS.
+
+## Deviations
+
+- The template block-card UI navigates referrer cards to the Records route (`/records?class=...&id=...`) because BeatTemplates cannot locally select arbitrary referrer classes. This preserves the edit-link affordance without widening the template page into a records editor.

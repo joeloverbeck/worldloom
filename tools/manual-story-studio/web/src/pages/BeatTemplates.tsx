@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import {
   createBeatTemplate,
@@ -10,6 +10,7 @@ import {
   type BeatTemplateDeleteResult,
 } from "../api/beat-templates.js";
 import { BeatTemplateForm } from "../components/BeatTemplateForm.js";
+import { RecordCard } from "../components/RecordCard.js";
 import {
   BEAT_TEMPLATE_MOVE_FAMILIES,
   type BeatTemplate,
@@ -27,6 +28,7 @@ function loadErrorMessage(error: unknown): string {
 }
 
 export function BeatTemplates() {
+  const navigate = useNavigate();
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
     msSlug: string;
@@ -145,6 +147,7 @@ export function BeatTemplates() {
     if (!worldSlug || !msSlug || !selectedId) return;
     const result = await deleteBeatTemplate(worldSlug, msSlug, selectedId, {
       force,
+      mode: force ? "repair" : undefined,
     });
     setDeleteOutcome({ ...result, templateId: selectedId });
     if (
@@ -303,15 +306,47 @@ export function BeatTemplates() {
               </button>
               {deleteOutcome &&
               "outcome" in deleteOutcome &&
-              deleteOutcome.outcome === "inactive_default" ? (
-                <section role="alert" style={{ background: "#ffe", padding: 8 }}>
-                  <p>
-                    Template archived because it has referrers. Force delete
-                    will destroy audit trail.
-                  </p>
-                  <button type="button" onClick={() => handleDelete(true)}>
-                    Force delete anyway
-                  </button>
+              deleteOutcome.outcome === "blocked" ? (
+                <section
+                  role="alert"
+                  aria-labelledby="template-delete-blocked-heading"
+                  style={{
+                    background: "#fff7e6",
+                    border: "1px solid #d6822a",
+                    padding: 10,
+                    marginTop: 8,
+                  }}
+                >
+                  <h4 id="template-delete-blocked-heading" style={{ margin: "0 0 8px" }}>
+                    Resolve these references first.
+                  </h4>
+                  <div>
+                    {deleteOutcome.referrers.map((referrer) => (
+                      <RecordCard
+                        key={`${referrer.recordClass}:${referrer.summary.id}`}
+                        summary={referrer.summary}
+                        recordClass={referrer.recordClass}
+                        compact
+                        onOpen={(id) => {
+                          navigate(
+                            `/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=${encodeURIComponent(
+                              referrer.recordClass,
+                            )}&id=${encodeURIComponent(id)}`,
+                          );
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <details style={{ marginTop: 8 }}>
+                    <summary>Repair: force delete this template</summary>
+                    <p>
+                      This removes the template despite live references and writes a
+                      repair-log entry.
+                    </p>
+                    <button type="button" onClick={() => handleDelete(true)}>
+                      Force delete anyway
+                    </button>
+                  </details>
                 </section>
               ) : null}
               {deleteOutcome &&

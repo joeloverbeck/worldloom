@@ -264,7 +264,7 @@ export async function registerBeatTemplatesWriteRoutes(
 
   server.delete<{
     Params: { slug: string; msSlug: string; id: string };
-    Querystring: { force?: string };
+    Querystring: { force?: string; mode?: string };
     Body: DeleteBody;
   }>(
     "/api/worlds/:slug/manual-stories/:msSlug/beat-templates/:id",
@@ -279,13 +279,22 @@ export async function registerBeatTemplatesWriteRoutes(
         return badRequest(reply, "bad id");
       }
       const queryForce = request.query.force === "true";
-      const bodyConfirm =
+      const bodyMode =
         request.body && typeof request.body === "object"
-          ? Boolean((request.body as DeleteBody).confirm)
-          : false;
-      const force = queryForce || bodyConfirm;
+          ? (request.body as { mode?: unknown }).mode
+          : undefined;
+      const repairMode = request.query.mode === "repair" || bodyMode === "repair";
+      if (queryForce && !repairMode) {
+        return reply
+          .code(405)
+          .send({
+            error: "repair-mode-required",
+            message:
+              'force delete requires ?mode=repair or body { mode: "repair" }; see the repair-mode UI affordance.',
+          });
+      }
       const result = deleteRecord(root, "beat-templates", request.params.id, {
-        force,
+        force: queryForce,
       });
       if ("ok" in result && result.ok === false) {
         return notFound(reply, "template_not_found");
