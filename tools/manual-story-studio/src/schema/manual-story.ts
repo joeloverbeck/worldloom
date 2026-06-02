@@ -501,6 +501,7 @@ export interface ManualRecordSummary {
   tags: string[];
   summary: string;
   prompt_visibility: PromptVisibility;
+  involved_cast?: string[];
 }
 
 export type ManualRecordOfClass<C extends ManualRecordClass> = C extends "cast"

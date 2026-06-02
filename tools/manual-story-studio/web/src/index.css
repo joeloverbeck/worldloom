@@ -214,6 +214,77 @@ select:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.record-picker {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  max-width: 42rem;
+}
+
+.record-picker__label,
+.record-picker__filters label {
+  display: grid;
+  gap: var(--space-1);
+  font-weight: 600;
+}
+
+.record-picker__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.record-picker__selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.record-picker__selected li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-muted);
+}
+
+.record-picker__selected button {
+  padding: 0 var(--space-2);
+}
+
+.record-picker__popup {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  right: 0;
+  max-height: 28rem;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: var(--space-2);
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 18%);
+}
+
+.record-picker__option {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.record-picker__section-label {
+  margin: var(--space-2) 0 var(--space-1);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 @media (max-width: 720px) {
   .health-banner__findings li {
     grid-template-columns: 1fr;

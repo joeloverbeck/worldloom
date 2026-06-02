@@ -6,8 +6,10 @@ import {
   saveCurrentContext,
 } from "../api/current-context.js";
 import { RefList } from "../components/RefList.js";
+import { RecordPicker } from "../components/RecordPicker.js";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import {
+  MANUAL_RECORD_CLASSES,
   MANUAL_RECORD_CLASS_PREFIXES,
   type CurrentContext,
   type ManualRecordClass,
@@ -35,17 +37,6 @@ function loadErrorMessage(error: unknown): string {
 function nullableText(value: string): string | null {
   const trimmed = value.trim();
   return trimmed.length === 0 ? null : trimmed;
-}
-
-function parseIdList(value: string): string[] {
-  return value
-    .split(/[,\n]/)
-    .map((part) => part.trim())
-    .filter((part) => part.length > 0);
-}
-
-function listText(ids: string[]): string {
-  return ids.join("\n");
 }
 
 function allManualPrefixes(): string[] {
@@ -109,28 +100,27 @@ function FieldRow(props: {
   );
 }
 
-function IdTextArea(props: {
-  label: string;
-  value: string[];
-  onChange: (next: string[]) => void;
-  allowedPrefixes: string[];
+function PickerRow(props: {
   error?: string;
-  rows?: number;
+  children: React.ReactNode;
 }) {
   return (
-    <FieldRow
-      label={props.label}
-      error={props.error}
-      hint={`Comma- or newline-separated IDs. Allowed prefixes: ${props.allowedPrefixes.join(", ")}`}
-    >
-      <textarea
-        rows={props.rows ?? 3}
-        value={listText(props.value)}
-        onChange={(event) => props.onChange(parseIdList(event.target.value))}
-        style={{ width: "100%", fontFamily: "inherit" }}
-      />
-    </FieldRow>
+    <div style={{ margin: "10px 0" }}>
+      {props.children}
+      {props.error ? (
+        <span
+          role="alert"
+          style={{ display: "block", color: "#b00", fontSize: 12 }}
+        >
+          {props.error}
+        </span>
+      ) : null}
+    </div>
   );
+}
+
+function firstId(ids: string[]): string | null {
+  return ids[0] ?? null;
 }
 
 function pinnedRefs(ids: string[]): RecordRefs {
@@ -314,79 +304,113 @@ export function EditCurrentContext() {
         />
       </FieldRow>
 
-      <FieldRow
-        label="Current location"
+      <PickerRow
         error={fieldError("current_location", serverErrors, clientErrors)}
-        hint="mloc-* or empty"
       >
-        <input
-          type="text"
-          value={ctx.current_location ?? ""}
-          onChange={(event) => update({ current_location: nullableText(event.target.value) })}
+        <RecordPicker
+          worldSlug={world}
+          msSlug={story}
+          label="Current location"
+          classes={["locations"]}
+          mode="single"
+          value={ctx.current_location ? [ctx.current_location] : []}
+          onChange={(current_location) =>
+            update({ current_location: firstId(current_location) })
+          }
         />
-      </FieldRow>
+      </PickerRow>
 
-      <IdTextArea
-        label="Current cast"
-        value={ctx.current_cast}
-        onChange={(current_cast) => update({ current_cast })}
-        allowedPrefixes={allowedPrefixes(["cast"])}
+      <PickerRow
         error={fieldError("current_cast", serverErrors, clientErrors)}
-      />
+      >
+        <RecordPicker
+          worldSlug={world}
+          msSlug={story}
+          label="Current cast"
+          classes={["cast"]}
+          mode="multi"
+          value={ctx.current_cast}
+          onChange={(current_cast) => update({ current_cast })}
+        />
+      </PickerRow>
 
-      <FieldRow
-        label="POV holder"
+      <PickerRow
         error={fieldError("pov_holder", serverErrors, clientErrors)}
       >
-        <select
-          value={ctx.pov_holder ?? ""}
-          onChange={(event) => update({ pov_holder: nullableText(event.target.value) })}
-        >
-          <option value="">None</option>
-          {ctx.current_cast.map((id) => (
-            <option key={id} value={id}>
-              {id}
-            </option>
-          ))}
-        </select>
-      </FieldRow>
+        <RecordPicker
+          worldSlug={world}
+          msSlug={story}
+          label="POV holder"
+          classes={["cast"]}
+          mode="single"
+          value={ctx.pov_holder ? [ctx.pov_holder] : []}
+          seed={ctx.current_cast}
+          onChange={(pov_holder) => update({ pov_holder: firstId(pov_holder) })}
+        />
+      </PickerRow>
 
-      <IdTextArea
-        label="Active pressure clocks"
-        value={ctx.active_pressure_clocks}
-        onChange={(active_pressure_clocks) => update({ active_pressure_clocks })}
-        allowedPrefixes={allowedPrefixes(["clocks"])}
+      <PickerRow
         error={fieldError("active_pressure_clocks", serverErrors, clientErrors)}
-      />
+      >
+        <RecordPicker
+          worldSlug={world}
+          msSlug={story}
+          label="Active pressure clocks"
+          classes={["clocks"]}
+          mode="multi"
+          value={ctx.active_pressure_clocks}
+          onChange={(active_pressure_clocks) => update({ active_pressure_clocks })}
+        />
+      </PickerRow>
 
-      <IdTextArea
-        label="Active secrets and questions"
-        value={ctx.active_secrets_questions}
-        onChange={(active_secrets_questions) => update({ active_secrets_questions })}
-        allowedPrefixes={allowedPrefixes(["secrets", "questions"])}
+      <PickerRow
         error={fieldError("active_secrets_questions", serverErrors, clientErrors)}
-      />
+      >
+        <RecordPicker
+          worldSlug={world}
+          msSlug={story}
+          label="Active secrets and questions"
+          classes={["secrets", "questions"]}
+          mode="multi"
+          value={ctx.active_secrets_questions}
+          onChange={(active_secrets_questions) =>
+            update({ active_secrets_questions })
+          }
+        />
+      </PickerRow>
 
-      <IdTextArea
-        label="Pinned records"
-        value={ctx.pinned_records}
-        onChange={(pinned_records) => update({ pinned_records })}
-        allowedPrefixes={allManualPrefixes()}
+      <PickerRow
         error={fieldError("pinned_records", serverErrors, clientErrors)}
-      />
+      >
+        <RecordPicker
+          worldSlug={world}
+          msSlug={story}
+          label="Pinned records"
+          classes={MANUAL_RECORD_CLASSES}
+          mode="multi"
+          value={ctx.pinned_records}
+          onChange={(pinned_records) => update({ pinned_records })}
+        />
+      </PickerRow>
 
       <section aria-label="pinned-record-preview">
         <h3>Pinned record preview</h3>
         <RefList refs={pinnedRefs(ctx.pinned_records)} onRefClick={openRef} />
       </section>
 
-      <IdTextArea
-        label="Must not reveal"
-        value={ctx.must_not_reveal}
-        onChange={(must_not_reveal) => update({ must_not_reveal })}
-        allowedPrefixes={allowedPrefixes(["secrets"])}
+      <PickerRow
         error={fieldError("must_not_reveal", serverErrors, clientErrors)}
-      />
+      >
+        <RecordPicker
+          worldSlug={world}
+          msSlug={story}
+          label="Must not reveal"
+          classes={["secrets"]}
+          mode="multi"
+          value={ctx.must_not_reveal}
+          onChange={(must_not_reveal) => update({ must_not_reveal })}
+        />
+      </PickerRow>
 
       <FieldRow
         label="Last accepted segment"

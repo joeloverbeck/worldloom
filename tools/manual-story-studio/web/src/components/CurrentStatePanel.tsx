@@ -1,7 +1,12 @@
 import { Link } from "react-router-dom";
 
-import type { ReactNode } from "react";
-import type { CurrentContext } from "../types/manual-story.js";
+import { useEffect, useState, type ReactNode } from "react";
+
+import { listRecordsForClasses } from "../api/records.js";
+import type {
+  CurrentContext,
+  ManualRecordClass,
+} from "../types/manual-story.js";
 
 export interface CurrentStatePanelProps {
   ctx: CurrentContext | null;
@@ -9,7 +14,19 @@ export interface CurrentStatePanelProps {
   msSlug: string;
 }
 
-function chipList(ids: string[]): ReactNode {
+const DISPLAY_RECORD_CLASSES: ManualRecordClass[] = [
+  "cast",
+  "locations",
+  "clocks",
+  "secrets",
+  "questions",
+];
+
+function displayTitle(id: string, titleById: Record<string, string>): string {
+  return titleById[id] ?? id;
+}
+
+function chipList(ids: string[], titleById: Record<string, string>): ReactNode {
   if (ids.length === 0) return <em>None</em>;
   return (
     <span style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -23,7 +40,7 @@ function chipList(ids: string[]): ReactNode {
             fontSize: "0.85em",
           }}
         >
-          {id}
+          {displayTitle(id, titleById)}
         </span>
       ))}
     </span>
@@ -35,6 +52,34 @@ export function CurrentStatePanel({
   worldSlug,
   msSlug,
 }: CurrentStatePanelProps) {
+  const [titleById, setTitleById] = useState<Record<string, string>>({});
+  const [titleLoadError, setTitleLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setTitleLoadError(null);
+    listRecordsForClasses(worldSlug, msSlug, DISPLAY_RECORD_CLASSES, {
+      includeArchived: true,
+    })
+      .then((records) => {
+        if (cancelled) return;
+        const next: Record<string, string> = {};
+        for (const entry of records) {
+          next[entry.summary.id] = entry.summary.title;
+        }
+        setTitleById(next);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setTitleLoadError(
+          error instanceof Error ? error.message : "record title load failed",
+        );
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [worldSlug, msSlug]);
+
   if (ctx === null) {
     return (
       <section aria-label="current-state">
@@ -52,17 +97,28 @@ export function CurrentStatePanel({
   return (
     <section aria-label="current-state">
       <h2>Current State</h2>
+      {titleLoadError ? (
+        <p role="alert">Failed to load record titles: {titleLoadError}</p>
+      ) : null}
       <dl>
         <dt>Current location</dt>
-        <dd>{ctx.current_location ?? <em>Unset</em>}</dd>
+        <dd>
+          {ctx.current_location ? (
+            displayTitle(ctx.current_location, titleById)
+          ) : (
+            <em>Unset</em>
+          )}
+        </dd>
         <dt>POV holder</dt>
-        <dd>{ctx.pov_holder ?? <em>Unset</em>}</dd>
+        <dd>
+          {ctx.pov_holder ? displayTitle(ctx.pov_holder, titleById) : <em>Unset</em>}
+        </dd>
         <dt>Current cast</dt>
-        <dd>{chipList(ctx.current_cast)}</dd>
+        <dd>{chipList(ctx.current_cast, titleById)}</dd>
         <dt>Active pressure clocks</dt>
-        <dd>{chipList(ctx.active_pressure_clocks)}</dd>
+        <dd>{chipList(ctx.active_pressure_clocks, titleById)}</dd>
         <dt>Active secrets and questions</dt>
-        <dd>{chipList(ctx.active_secrets_questions)}</dd>
+        <dd>{chipList(ctx.active_secrets_questions, titleById)}</dd>
       </dl>
       {ctx.current_handoff_summary.trim().length > 0 ? (
         <p>{ctx.current_handoff_summary}</p>

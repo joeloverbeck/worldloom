@@ -1,33 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { fetchCurrentContext } from "../api/current-context.js";
 import { previewPrompt } from "../api/prompts.js";
-import { listRecords, readMetadata } from "../api/records.js";
+import { readMetadata } from "../api/records.js";
 import { BeatTemplateCandidates } from "../components/BeatTemplateCandidates.js";
+import { RecordPicker } from "../components/RecordPicker.js";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import {
   BEAT_TEMPLATE_PRESSURE_TYPES,
   MANUAL_RECORD_CLASSES,
   type BeatTemplatePressureType,
   type ManualRecordClass,
-  type ManualRecordSummary,
   type ManualStoryMetadata,
 } from "../types/manual-story.js";
 
-const SUGGEST_IMPORTANCE = new Set(["high", "central"]);
+const COMPOSER_RECORD_CLASSES: ManualRecordClass[] = MANUAL_RECORD_CLASSES.filter(
+  (recordClass) => recordClass !== "cast",
+);
 
 function loadErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "request failed";
-}
-
-function IdSubscript({ id }: { id: string }) {
-  return <span className="id-subscript">{id}</span>;
-}
-
-interface RecordWithClass {
-  cls: ManualRecordClass;
-  summary: ManualRecordSummary;
 }
 
 interface ComposerNavState {
@@ -47,14 +40,10 @@ export function MomentComposer() {
   const navState = (location.state ?? {}) as ComposerNavState;
 
   const [metadata, setMetadata] = useState<ManualStoryMetadata | null>(null);
-  const [allCast, setAllCast] = useState<ManualRecordSummary[]>([]);
-  const [allRecords, setAllRecords] = useState<RecordWithClass[]>([]);
   const [metadataError, setMetadataError] = useState<string | null>(null);
   const [currentContextError, setCurrentContextError] = useState<string | null>(
     null,
   );
-  const [castError, setCastError] = useState<string | null>(null);
-  const [recordsError, setRecordsError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
   const [momentDirective, setMomentDirective] = useState(
@@ -78,8 +67,6 @@ export function MomentComposer() {
     let cancelled = false;
     setMetadataError(null);
     setCurrentContextError(null);
-    setCastError(null);
-    setRecordsError(null);
     Promise.all([
       readMetadata(worldSlug, msSlug)
         .then((value) => ({ ok: true as const, value }))
@@ -117,54 +104,10 @@ export function MomentComposer() {
         }
       }
     });
-    listRecords(worldSlug, msSlug, "cast")
-      .then((c) => {
-        if (!cancelled) setAllCast(c);
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) setCastError(loadErrorMessage(error));
-      });
-    Promise.all(
-      MANUAL_RECORD_CLASSES.filter((c) => c !== "cast").map((cls) =>
-        listRecords(worldSlug, msSlug, cls).then(
-          (records) => ({ cls, records }),
-        ),
-      ),
-    )
-      .then((entries) => {
-        if (cancelled) return;
-        const flat: RecordWithClass[] = [];
-        for (const { cls, records } of entries) {
-          for (const r of records) {
-            if (r.active) flat.push({ cls, summary: r });
-          }
-        }
-        setAllRecords(flat);
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) setRecordsError(loadErrorMessage(error));
-      });
     return () => {
       cancelled = true;
     };
   }, [worldSlug, msSlug, reloadKey]);
-
-  const suggested = useMemo(() => {
-    const out: RecordWithClass[] = [];
-    for (const entry of allRecords) {
-      if (pinnedRecordIds.includes(entry.summary.id)) continue;
-      if (SUGGEST_IMPORTANCE.has(entry.summary.importance)) {
-        out.push(entry);
-      }
-    }
-    return out;
-  }, [allRecords, pinnedRecordIds]);
-
-  const pinned = useMemo(
-    () =>
-      allRecords.filter((entry) => pinnedRecordIds.includes(entry.summary.id)),
-    [allRecords, pinnedRecordIds],
-  );
 
   const unsavedChanges = useUnsavedChanges(
     {
@@ -179,22 +122,6 @@ export function MomentComposer() {
 
   const canGenerate =
     momentDirective.trim().length > 0 && includedCast.length > 0;
-
-  function toggleCast(id: string): void {
-    setIncludedCast((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  }
-
-  function pinRecord(id: string): void {
-    setPinnedRecordIds((prev) =>
-      prev.includes(id) ? prev : [...prev, id],
-    );
-  }
-
-  function unpinRecord(id: string): void {
-    setPinnedRecordIds((prev) => prev.filter((x) => x !== id));
-  }
 
   async function onGenerate(): Promise<void> {
     if (!canGenerate || !worldSlug || !msSlug) return;
@@ -267,79 +194,29 @@ export function MomentComposer() {
 
       <fieldset aria-label="involved cast">
         <legend>Involved cast</legend>
-        {castError ? (
-          <p role="alert">
-            Failed to load cast: {castError}{" "}
-            <button type="button" onClick={retryLoad}>
-              Retry
-            </button>
-          </p>
-        ) : allCast.length === 0 ? (
-          <p><em>No cast records on file.</em></p>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {allCast.map((c) => (
-              <li key={c.id}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={includedCast.includes(c.id)}
-                    onChange={() => toggleCast(c.id)}
-                  />{" "}
-                  {c.title} <IdSubscript id={c.id} />
-                </label>
-              </li>
-            ))}
-          </ul>
-        )}
+        <RecordPicker
+          worldSlug={worldSlug}
+          msSlug={msSlug}
+          label="Involved cast"
+          classes={["cast"]}
+          mode="multi"
+          value={includedCast}
+          onChange={setIncludedCast}
+        />
       </fieldset>
 
       <fieldset aria-label="relevant records">
         <legend>Relevant records</legend>
-        {recordsError ? (
-          <p role="alert">
-            Failed to load records: {recordsError}{" "}
-            <button type="button" onClick={retryLoad}>
-              Retry
-            </button>
-          </p>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <div>
-            <h4>Suggested ({suggested.length})</h4>
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {suggested.map(({ cls, summary }) => (
-                <li key={summary.id}>
-                  <button type="button" onClick={() => pinRecord(summary.id)}>
-                    + Pin
-                  </button>{" "}
-                  <span style={{ fontFamily: "monospace", fontSize: "0.85em" }}>
-                    [{cls}]
-                  </span>{" "}
-                  {summary.title} <IdSubscript id={summary.id} />{" "}
-                  <em>({summary.importance})</em>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h4>Pinned ({pinned.length})</h4>
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {pinned.map(({ cls, summary }) => (
-                <li key={summary.id}>
-                  <button type="button" onClick={() => unpinRecord(summary.id)}>
-                    − Unpin
-                  </button>{" "}
-                  <span style={{ fontFamily: "monospace", fontSize: "0.85em" }}>
-                    [{cls}]
-                  </span>{" "}
-                  {summary.title} <IdSubscript id={summary.id} />
-                </li>
-              ))}
-            </ul>
-          </div>
-          </div>
-        )}
+        <RecordPicker
+          worldSlug={worldSlug}
+          msSlug={msSlug}
+          label="Relevant records"
+          classes={COMPOSER_RECORD_CLASSES}
+          mode="multi"
+          value={pinnedRecordIds}
+          onChange={setPinnedRecordIds}
+          pinnedIds={pinnedRecordIds}
+        />
       </fieldset>
 
       <fieldset aria-label="beat-template">

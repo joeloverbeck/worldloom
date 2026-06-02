@@ -1,8 +1,16 @@
-import type { ManualRecordSummary } from "../types/manual-story.js";
+import type {
+  ManualRecordClass,
+  ManualRecordSummary,
+} from "../types/manual-story.js";
 
 export interface RecordCardProps {
   summary: ManualRecordSummary;
   onOpen: (id: string) => void;
+  recordClass?: ManualRecordClass;
+  selected?: boolean;
+  compact?: boolean;
+  onSelect?: (id: string) => void;
+  interactionRole?: "button" | "option";
 }
 
 const IMPORTANCE_COLOR: Record<ManualRecordSummary["importance"], string> = {
@@ -13,25 +21,43 @@ const IMPORTANCE_COLOR: Record<ManualRecordSummary["importance"], string> = {
 };
 
 export function RecordCard(props: RecordCardProps) {
-  const { summary, onOpen } = props;
+  const {
+    summary,
+    onOpen,
+    recordClass,
+    selected,
+    compact = false,
+    onSelect,
+    interactionRole = "button",
+  } = props;
+  const activate = () => {
+    if (onSelect) {
+      onSelect(summary.id);
+      return;
+    }
+    onOpen(summary.id);
+  };
   return (
     <article
-      className="manual-record-card"
-      onClick={() => onOpen(summary.id)}
+      className={`manual-record-card${selected ? " manual-record-card--selected" : ""}`}
+      onClick={activate}
       style={{
-        border: "1px solid #ccc",
+        border: selected ? "2px solid #2a82d6" : "1px solid #ccc",
         borderRadius: 4,
-        padding: 12,
+        padding: compact ? 8 : 12,
         cursor: "pointer",
-        marginBottom: 8,
+        marginBottom: compact ? 4 : 8,
         opacity: summary.active ? 1 : 0.55,
+        background: selected ? "#eef6ff" : "white",
       }}
-      role="button"
+      role={interactionRole}
       tabIndex={0}
+      aria-selected={interactionRole === "option" ? selected : undefined}
+      aria-pressed={interactionRole === "button" && selected !== undefined ? selected : undefined}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          onOpen(summary.id);
+          activate();
         }
       }}
     >
@@ -62,6 +88,30 @@ export function RecordCard(props: RecordCardProps) {
           {summary.id} {summary.active ? "" : "(archived)"}
         </span>
       </p>
+      <dl
+        style={{
+          display: "grid",
+          gridTemplateColumns: "max-content 1fr",
+          gap: "2px 8px",
+          margin: "6px 0",
+          fontSize: 12,
+        }}
+      >
+        {recordClass ? (
+          <>
+            <dt style={{ fontWeight: 600 }}>Class</dt>
+            <dd style={{ margin: 0 }}>{recordClass}</dd>
+          </>
+        ) : null}
+        <dt style={{ fontWeight: 600 }}>Prompt</dt>
+        <dd style={{ margin: 0 }}>{summary.prompt_visibility}</dd>
+        {summary.involved_cast && summary.involved_cast.length > 0 ? (
+          <>
+            <dt style={{ fontWeight: 600 }}>Cast</dt>
+            <dd style={{ margin: 0 }}>{summary.involved_cast.join(", ")}</dd>
+          </>
+        ) : null}
+      </dl>
       {summary.summary ? (
         <p style={{ margin: "4px 0" }}>{summary.summary}</p>
       ) : null}

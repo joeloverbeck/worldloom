@@ -241,7 +241,15 @@ function toSummary(parsed: unknown): ManualRecordSummary | null {
       typeof obj.prompt_visibility === "string"
         ? (obj.prompt_visibility as ManualRecordSummary["prompt_visibility"])
         : "always",
+    involved_cast: involvedCastFromRefs(obj.refs),
   };
+}
+
+function involvedCastFromRefs(refs: unknown): string[] {
+  if (typeof refs !== "object" || refs === null) return [];
+  const characters = (refs as Record<string, unknown>).characters;
+  if (!Array.isArray(characters)) return [];
+  return characters.filter((id): id is string => typeof id === "string");
 }
 
 function readYamlFile(fullPath: string): ReadResult<unknown> {

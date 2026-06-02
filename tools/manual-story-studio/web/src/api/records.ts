@@ -80,6 +80,30 @@ export async function listRecords(
   return body.records;
 }
 
+export interface ManualRecordSummaryWithClass {
+  recordClass: ManualRecordClass;
+  summary: ManualRecordSummary;
+}
+
+export async function listRecordsForClasses(
+  worldSlug: string,
+  msSlug: string,
+  classes: readonly ManualRecordClass[],
+  opts: { includeArchived?: boolean } = {},
+): Promise<ManualRecordSummaryWithClass[]> {
+  const entries = await Promise.all(
+    classes.map((recordClass) =>
+      listRecords(worldSlug, msSlug, recordClass, opts).then((records) => ({
+        recordClass,
+        records,
+      })),
+    ),
+  );
+  return entries.flatMap(({ recordClass, records }) =>
+    records.map((summary) => ({ recordClass, summary })),
+  );
+}
+
 export async function readRecord(
   worldSlug: string,
   msSlug: string,
