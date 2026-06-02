@@ -1,6 +1,6 @@
 # SPEC114MANSTOSTU-005: Docs — delete-outcomes + repair-log registration
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — documentation only (`tools/manual-story-studio/README.md`, `docs/ID-ALLOCATION.md`); no code, no canon, no story-bundle pipeline.
@@ -27,15 +27,15 @@ Two docs surfaces describe the old delete lifecycle and must land coherently onc
 2. `docs/ID-ALLOCATION.md` §Manual-story-scoped registers `repair-log.yaml` as a non-ID control file → grep-proof for `repair-log.yaml` in that section.
 3. Single docs surface set → additional layer mapping N/A; both invariants are grep-provable against the tree.
 
-## What to Change
+## Landed Changes
 
-### 1. README delete-outcomes (`tools/manual-story-studio/README.md`)
+### 1. Updated README delete-outcomes (`tools/manual-story-studio/README.md`)
 
-Replace the `inactive_default` bullet (line ~107) with the post-SPEC-114 outcomes: `hard_deleted` (unreferenced), `blocked` (referenced — returns referrer summaries; UI shows referrer cards with edit links), and repair-mode `force_deleted` (explicit repair flag; appends `{deleted_class_and_id, deleted_at, referrers_at_deletion}` to `repair-log.yaml`). Note that `active`/`retired_reason` are no longer written by delete.
+Replaced the old `inactive_default` auto-archive bullet with the post-SPEC-114 outcomes: `hard_deleted` (unreferenced), `blocked` (referenced — returns referrer summaries; UI shows referrer cards with edit links), and repair-mode `force_deleted` (explicit repair flag; appends `{deleted_class_and_id, deleted_at, referrers_at_deletion}` to `repair-log.yaml`). The section now states that Delete no longer writes `active:false` or `retired_reason` and that beat-template deletion follows the same hard-delete-or-block lifecycle.
 
-### 2. ID-ALLOCATION repair-log note (`docs/ID-ALLOCATION.md`)
+### 2. Added the ID-ALLOCATION repair-log note (`docs/ID-ALLOCATION.md`)
 
-In §Manual-story-scoped, add a one-line note registering `repair-log.yaml` as a non-ID-bearing per-manual-story control file (parallel to the existing `manual-story.yaml` note), written append-only by repair-mode force-delete.
+In §Manual-story-scoped, registered `repair-log.yaml` as a non-ID-bearing per-manual-story control file, parallel to the existing `manual-story.yaml` note, appended by repair-mode force-delete.
 
 ## Files to Touch
 
@@ -71,3 +71,20 @@ In §Manual-story-scoped, add a one-line note registering `repair-log.yaml` as a
 1. `grep -n "inactive_default" tools/manual-story-studio/README.md` (expect zero)
 2. `grep -nE "blocked|repair-log\.yaml" tools/manual-story-studio/README.md docs/ID-ALLOCATION.md`
 3. Grep-proofs are the correct boundary — a docs-only ticket has no compile/test surface of its own; coherence with code is guaranteed by the `Deps` on 002/003/004.
+
+## Outcome
+
+Completed on 2026-06-02.
+
+The README now documents the implemented delete lifecycle instead of the removed auto-archive outcome, and `docs/ID-ALLOCATION.md` registers `repair-log.yaml` as a non-ID manual-story control file.
+
+## Verification Result
+
+- `grep -n "inactive_default" tools/manual-story-studio/README.md` — PASS: no matches.
+- `grep -nE "blocked|repair-log\.yaml|hard-delete" tools/manual-story-studio/README.md` — PASS: matches the new delete lifecycle.
+- `grep -n "repair-log.yaml" docs/ID-ALLOCATION.md` — PASS: §Manual-story-scoped now documents the control file.
+- `git diff --check` — PASS.
+
+## Deviations
+
+- None.
