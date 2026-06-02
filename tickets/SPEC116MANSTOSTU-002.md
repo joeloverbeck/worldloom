@@ -69,7 +69,7 @@ No logic change expected — `blockIfHealthDisallows` already checks `report.blo
 - Prompt-sidecar / prompt-markdown existence validation in health (report §22 rec. 1) — explicitly out of scope per SPEC-116 §Out of scope; the hard-tier lint runs at compose/save.
 - Working-set shape validation at route read time (report §22 rec. 4) — out of scope; current-context refs are already validated in the health reference pass (`validateCurrentContext`).
 - Health-banner UI / repair-link rendering (SPEC-112 / SPEC-113 frontend territory).
-- Template-path containment (SPEC116MANSTOSTU-001).
+- Template-path containment (archive/tickets/SPEC116MANSTOSTU-001.md).
 
 ## Acceptance Criteria
 

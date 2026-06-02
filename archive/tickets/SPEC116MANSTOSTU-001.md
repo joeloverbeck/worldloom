@@ -1,6 +1,6 @@
 # SPEC116MANSTOSTU-001: Contain template selection; remove raw-path body field
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` (prompts route, compose pipeline, write sandbox, web request types). No impact on canon pipeline (the package is canon-fenced; this strengthens the read-side fence).
@@ -100,3 +100,37 @@ Rewrite the two `included_template_path` body-field tests (line 444 "accepts leg
 1. `cd tools/manual-story-studio && npm run test:backend` (backend `node --test` over the new + migrated suites)
 2. `cd tools/manual-story-studio && npm test` (full: backend + `npm --prefix web test` `tsc --noEmit`)
 3. `cd tools/manual-story-studio && npm run build` (chains web build + `tsc -p tsconfig.json`)
+
+## Outcome
+
+Completed: 2026-06-02
+
+The prompts route now rejects any request body containing `included_template_path`, making `selected_template` the only public template input. `selected_template` is validated as `mtemplate-<integer>`, resolved under `records/beat-templates/`, and checked with `assertInsideSandbox` before existence/read handoff. `composePrompt` also performs defense-in-depth sandbox containment before reading the internal `included_template_path`, so a future internal caller cannot leak an out-of-sandbox file into the prompt. The web compose request type no longer declares `included_template_path`, while the internal compose input and persisted sidecar field remain intact.
+
+Implemented files:
+
+- `tools/manual-story-studio/src/server/routes/prompts.ts`
+- `tools/manual-story-studio/src/prompt/compose.ts`
+- `tools/manual-story-studio/web/src/types/manual-story.ts`
+- `tools/manual-story-studio/test/server/prompts-routes.test.ts`
+- `tools/manual-story-studio/test/server/prompt-template-path-containment.test.ts`
+
+Deviation from the draft: the removed `included_template_path` request field now hard-rejects with `400 invalid_input` instead of being silently ignored as an unknown field. This is stricter than the no-template-applied interpretation and better satisfies the security acceptance criterion that raw path request input is rejected.
+
+## Verification Result
+
+PASS — pre-edit backend baseline was green: `cd tools/manual-story-studio && npm run test:backend` passed 73 compiled backend tests before implementation.
+
+PASS — focused containment proof passed after implementation: `cd tools/manual-story-studio && node --test dist/test/server/prompt-template-path-containment.test.js dist/test/server/prompts-routes.test.js` passed 16 compiled route/containment tests, including absolute-path rejection, traversal rejection, valid `mtemplate-1` composition, and compose-time internal sandbox refusal without leaking the outside template marker.
+
+PASS — backend package proof passed after implementation: `cd tools/manual-story-studio && npm run test:backend` passed 74 compiled backend tests, including the new containment suite.
+
+PASS — full package proof passed after implementation: `cd tools/manual-story-studio && npm test` passed 450 backend tests and `npm --prefix web test` (`tsc --noEmit`).
+
+PASS — build proof passed after implementation: `cd tools/manual-story-studio && npm run build` completed the web install check, web production build, and backend TypeScript build.
+
+PASS — request-surface grep proof showed no `included_template_path` field on `ComposeBody` or `PromptComposeRequestInput`; remaining hits are the internal compose/sidecar contract or tests asserting rejection/defense-in-depth.
+
+## Deviations
+
+- No separate `assertReadableInsideSandbox` helper was added because the existing `assertInsideSandbox` primitive is path-shape agnostic and can be reused directly for read containment without changing write-side behavior.

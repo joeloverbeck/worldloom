@@ -441,7 +441,7 @@ test("POST /prompts/preview accepts selected_template ID and resolves to path", 
   }
 });
 
-test("POST /prompts/preview accepts legacy included_template_path (back-compat)", async () => {
+test("POST /prompts/preview rejects removed included_template_path request field", async () => {
   const { repoRoot, worldSlug, msSlug, root } = mkWorld();
   try {
     const fullPath = seedBeatTemplate(root, "mtemplate-2");
@@ -457,7 +457,9 @@ test("POST /prompts/preview accepts legacy included_template_path (back-compat)"
           included_template_path: fullPath,
         },
       });
-      assert.equal(response.statusCode, 200);
+      assert.equal(response.statusCode, 400);
+      const body = response.json() as { message: string };
+      assert.match(body.message, /included_template_path is not accepted/);
     } finally {
       await server.close();
     }
@@ -466,10 +468,10 @@ test("POST /prompts/preview accepts legacy included_template_path (back-compat)"
   }
 });
 
-test("POST /prompts/preview rejects both selected_template AND included_template_path → 400", async () => {
+test("POST /prompts/preview rejects invalid selected_template ID → 400", async () => {
   const { repoRoot, worldSlug, msSlug, root } = mkWorld();
   try {
-    const fullPath = seedBeatTemplate(root, "mtemplate-3");
+    seedBeatTemplate(root, "mtemplate-3");
     const server = await createServer({ repoRoot });
     try {
       const response = await server.inject({
@@ -479,13 +481,12 @@ test("POST /prompts/preview rejects both selected_template AND included_template
           moment_directive: "x",
           included_cast: ["mchar-1"],
           included_records: [],
-          selected_template: "mtemplate-3",
-          included_template_path: fullPath,
+          selected_template: "../../../_source/canon/CF-1",
         },
       });
       assert.equal(response.statusCode, 400);
       const body = response.json() as { message: string };
-      assert.match(body.message, /exactly one/);
+      assert.match(body.message, /mtemplate-<integer>/);
     } finally {
       await server.close();
     }
