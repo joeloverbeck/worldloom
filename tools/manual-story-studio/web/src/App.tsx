@@ -1,6 +1,7 @@
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { HealthBanner } from "./components/HealthBanner.js";
+import { StoryPageNav } from "./components/StoryPageNav.js";
 import { BeatTemplates } from "./pages/BeatTemplates.js";
 import { CastAndProfiles } from "./pages/CastAndProfiles.js";
 import { CreateManualStory } from "./pages/CreateManualStory.js";
@@ -35,10 +36,8 @@ export function App() {
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
       <Banner />
-      <nav>
-        <Link to="/">Worlds</Link>
-      </nav>
       <HealthBanner />
+      <StoryPageNav />
       <main>
         <Routes>
           <Route path="/" element={<Worlds />} />

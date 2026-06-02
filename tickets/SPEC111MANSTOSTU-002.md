@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — manual-story-studio web `Dashboard` page + `index.css`. No backend, no canon-pipeline impact.
-**Deps**: SPEC111MANSTOSTU-001
+**Deps**: archive/tickets/SPEC111MANSTOSTU-001.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ Per SPEC-111 §1 / §2 item 6: the Dashboard is a summary list, not a cockpit; i
 
 1. Codebase: `tools/manual-story-studio/web/src/pages/Dashboard.tsx` — the MSSUX-006 `<nav aria-label="story-pages">` block is at lines 184–210 (6 links); `CurrentStatePanel` is already imported (line 11) and rendered (line 212); cast renders `{c.id}` (line 299); the high-importance link text is `{cls}/{record.id}` (lines 322–328); latest-segment shows `{latestSegment.id}` (line 391); `directiveDraft` is local-only state (line 38) with no save handler; the page currently has 8 sections.
 2. Specs/docs: SPEC-111 §2 item 6 + §2 item 3 (Dashboard portion; the other-pages portion → 003) + reassessment I1 (nav removal) + M4 (directive draft NOT wrapped in `useUnsavedChanges`).
-3. Cross-artifact boundary under audit: Dashboard ↔ `StoryPageNav` (001). Removing the Dashboard-local nav requires the App-level `StoryPageNav` to exist first (Deps: 001), otherwise the Dashboard has no nav transiently. `CurrentStatePanel` (SPEC-109) is consumed as-is.
+3. Cross-artifact boundary under audit: Dashboard ↔ `StoryPageNav` (archive/tickets/SPEC111MANSTOSTU-001.md). Removing the Dashboard-local nav requires the App-level `StoryPageNav` to exist first (Deps: archive/tickets/SPEC111MANSTOSTU-001.md), otherwise the Dashboard has no nav transiently. `CurrentStatePanel` (SPEC-109) is consumed as-is.
 4. FOUNDATIONS §Tooling Recommendation (least-privilege LLM packets): hiding internal IDs from the cockpit's primary surface reduces the chance the author copies an ID into the directive — defense-in-depth against the prompt-leakage surface (SPEC-111 §5).
 5. (was template item 7 — removal blast radius): the Dashboard-local `<nav aria-label="story-pages">` (lines 184–210) is removed. Grep-confirmed Dashboard is the sole page carrying a local sibling nav, so removal has no other consumer; `StoryPageNav` (001) supersedes it.
 
@@ -34,7 +34,7 @@ Per SPEC-111 §1 / §2 item 6: the Dashboard is a summary list, not a cockpit; i
 
 ### 1. Remove the Dashboard-local nav
 
-Delete the `<nav aria-label="story-pages">` block (`Dashboard.tsx:184–210`); the App-level `StoryPageNav` (001) supersedes it.
+Delete the `<nav aria-label="story-pages">` block (`Dashboard.tsx:184–210`); the App-level `StoryPageNav` (archive/tickets/SPEC111MANSTOSTU-001.md) supersedes it.
 
 ### 2. Promote CurrentStatePanel
 
@@ -65,7 +65,7 @@ Render `title` as the primary label across the cast panel, high-importance panel
 
 - Directive-draft persistence/save (no save exists) and `useUnsavedChanges` on the directive (excluded per M4).
 - Other pages' ID hiding (→ SPEC111MANSTOSTU-003).
-- `StoryPageNav` itself (→ SPEC111MANSTOSTU-001).
+- `StoryPageNav` itself (→ archive/tickets/SPEC111MANSTOSTU-001.md).
 - Backend; new record fields.
 
 ## Acceptance Criteria
