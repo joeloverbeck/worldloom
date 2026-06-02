@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-112-manual-story-studio-record-pickers.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC112MANSTOSTU-002.md",
+  "last_ticket": "archive/tickets/SPEC112MANSTOSTU-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "ae72fea5119c2637b55d6f2be8266e7fa49a7b61",
+  "last_work_commit": "207e01f91e6393c43bcdbaa625c34561e8e5ee47",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC112MANSTOSTU-003.md",
+  "next_target": "tickets/SPEC112MANSTOSTU-004.md",
   "queue": [
-    "tickets/SPEC112MANSTOSTU-003.md",
     "tickets/SPEC112MANSTOSTU-004.md",
     "tickets/SPEC112MANSTOSTU-005.md",
     "tickets/SPEC112MANSTOSTU-006.md",
@@ -21,7 +20,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: SPEC112MANSTOSTU-002 archived; RecordCard optional picker display/selection props implemented; npm --prefix web test, npm run build, npm test, and diff hygiene passed",
-  "dirty_state": "tracked worktree clean after SPEC112MANSTOSTU-002 work commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
+  "proof_state": "clean: SPEC112MANSTOSTU-003 archived; RecordPicker component, listRecordsForClasses helper, picker CSS, and active dependency repairs landed; npm --prefix web test, npm run build, no ?classes=/?q= grep, npm test, and diff hygiene passed",
+  "dirty_state": "tracked worktree clean after SPEC112MANSTOSTU-003 work commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-02"
 }
