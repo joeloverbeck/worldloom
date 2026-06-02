@@ -13,10 +13,10 @@ The manual-story-studio world read layer (`src/read/worlds.ts` `enumerateWorlds`
 ## Assumption Reassessment (2026-06-02)
 
 1. `src/read/worlds.ts` exports `enumerateWorlds(repoRoot): ReadResult<WorldEntry[]>` with `WorldEntry = { worldSlug, absolutePath, hasWorldKernel }` (verified); it skips worlds lacking `WORLD_KERNEL.md`. The new reader IMPORTS `enumerateWorlds` to resolve the validated world root — **no edit to `worlds.ts` is required** (spec §4's "Modify worlds.ts — no behavior change" is satisfied by import-only reuse; `enumerateWorlds` is already exported, so the deliverable's intent is met without a `(modify)` entry).
-2. Spec §2 item 1 + §4 (`specs/SPEC-115-manual-story-studio-world-source-browser.md`) name the read surface: root files `WORLD_KERNEL.md` / `ONTOLOGY.md`; the 11 `_source/` subdirs (canon, invariants, mystery-reserve, open-questions, timeline, geography, peoples-and-species, institutions, economy-and-resources, magic-or-tech-systems, everyday-life); `characters/`; `diegetic-artifacts/`. Matches FOUNDATIONS §Mandatory World Files storage form.
+2. Spec §2 item 1 + §4 (`archive/specs/SPEC-115-manual-story-studio-world-source-browser.md`) name the read surface: root files `WORLD_KERNEL.md` / `ONTOLOGY.md`; the 11 `_source/` subdirs (canon, invariants, mystery-reserve, open-questions, timeline, geography, peoples-and-species, institutions, economy-and-resources, magic-or-tech-systems, everyday-life); `characters/`; `diegetic-artifacts/`. Matches FOUNDATIONS §Mandatory World Files storage form.
 3. Shared boundary under audit: the `ReadResult<T>` / `ok` / `err` structured-error contract in `src/read/result.ts` (SPEC-105) — the reader returns `ReadResult` and surfaces a structured error (not a throw) for an unparseable file. The reader reuses `yaml` (the package's existing parse dependency) for best-effort title/name/tags/class extraction.
 4. FOUNDATIONS §Tooling Recommendation / §Canonical Storage Layer read discipline: the general "never read `_source/` in bulk; use typed retrieval" rule + Hook 2 govern the Claude Code agent/skill layer operating inside the canon-mutation pipeline; manual-story-studio is a separate, standalone, read-only app the report (§8) argues must NOT take an MCP/world-index runtime dependency. A read-only direct-filesystem reader is the sanctioned design here (spec §1.1) — this reader introduces no canon write path.
-5. Canon Safety / Mystery Reserve firewall (read-side): the reader reads `_source/mystery-reserve/M-*.yaml` and other canon records as **literal text only** — it performs no semantic extraction, no transformation, and no promotion of any content to a fact. It cannot resolve a forbidden-status `M`, because it neither writes canon nor writes story records; copied text lands (later, by author action in SPEC115MANSTOSTU-003) only in `manual-stories/` records, which are neither world canon nor story-bundle records. The Diegetic-to-World firewall is preserved at the read layer by surfacing raw text without inference.
+5. Canon Safety / Mystery Reserve firewall (read-side): the reader reads `_source/mystery-reserve/M-*.yaml` and other canon records as **literal text only** — it performs no semantic extraction, no transformation, and no promotion of any content to a fact. It cannot resolve a forbidden-status `M`, because it neither writes canon nor writes story records; copied text lands (later, by author action in `archive/tickets/SPEC115MANSTOSTU-003.md`) only in `manual-stories/` records, which are neither world canon nor story-bundle records. The Diegetic-to-World firewall is preserved at the read layer by surfacing raw text without inference.
 
 ## Architecture Check
 
@@ -53,7 +53,7 @@ The manual-story-studio world read layer (`src/read/worlds.ts` `enumerateWorlds`
 
 ## Out of Scope
 
-- HTTP routes (SPEC115MANSTOSTU-002), frontend (SPEC115MANSTOSTU-003).
+- HTTP routes (`archive/tickets/SPEC115MANSTOSTU-002.md`), frontend (`archive/tickets/SPEC115MANSTOSTU-003.md`).
 - Any write to world canon, characters, diegetic-artifacts, or `_source/`.
 - Semantic extraction / fact distillation / transformation / provenance pointers.
 - MCP / world-index runtime dependency.
