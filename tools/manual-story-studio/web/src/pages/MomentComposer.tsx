@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
+import { fetchCurrentContext } from "../api/current-context.js";
 import { previewPrompt } from "../api/prompts.js";
 import { listRecords, readMetadata } from "../api/records.js";
 import { BeatTemplateCandidates } from "../components/BeatTemplateCandidates.js";
@@ -42,6 +43,9 @@ export function MomentComposer() {
   const [allCast, setAllCast] = useState<ManualRecordSummary[]>([]);
   const [allRecords, setAllRecords] = useState<RecordWithClass[]>([]);
   const [metadataError, setMetadataError] = useState<string | null>(null);
+  const [currentContextError, setCurrentContextError] = useState<string | null>(
+    null,
+  );
   const [castError, setCastError] = useState<string | null>(null);
   const [recordsError, setRecordsError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
@@ -63,20 +67,46 @@ export function MomentComposer() {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
     setMetadataError(null);
+    setCurrentContextError(null);
     setCastError(null);
     setRecordsError(null);
-    readMetadata(worldSlug, msSlug)
-      .then((m) => {
-        if (cancelled || !m) return;
-        setMetadata(m);
-        // Default involved cast = cast_order from metadata.
-        if (!navState.included_cast) {
-          setIncludedCast(m.cast_order ?? []);
+    Promise.all([
+      readMetadata(worldSlug, msSlug)
+        .then((value) => ({ ok: true as const, value }))
+        .catch((error: unknown) => ({ ok: false as const, error })),
+      fetchCurrentContext(worldSlug, msSlug)
+        .then((value) => ({ ok: true as const, value }))
+        .catch((error: unknown) => ({ ok: false as const, error })),
+    ]).then(([metadataResult, currentContextResult]) => {
+      if (cancelled) return;
+      if (!metadataResult.ok) {
+        setMetadataError(loadErrorMessage(metadataResult.error));
+        return;
+      }
+      const m = metadataResult.value;
+      if (!m) return;
+      setMetadata(m);
+
+      const currentContext = currentContextResult.ok
+        ? currentContextResult.value
+        : null;
+      if (!currentContextResult.ok) {
+        setCurrentContextError(loadErrorMessage(currentContextResult.error));
+      }
+
+      if (!navState.included_cast) {
+        const contextCast = currentContext?.current_cast ?? [];
+        setIncludedCast(
+          contextCast.length > 0 ? contextCast : (m.cast_order ?? []),
+        );
+      }
+      if (!navState.included_records) {
+        const contextPins = currentContext?.pinned_records ?? [];
+        if (contextPins.length > 0) {
+          setPinnedRecordIds(contextPins);
         }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) setMetadataError(loadErrorMessage(error));
-      });
+      }
+    });
     listRecords(worldSlug, msSlug, "cast")
       .then((c) => {
         if (!cancelled) setAllCast(c);
@@ -191,6 +221,14 @@ export function MomentComposer() {
       ) : metadata ? null : (
         <p>Loading manual story metadata…</p>
       )}
+      {currentContextError ? (
+        <p role="alert">
+          Failed to load current context: {currentContextError}{" "}
+          <button type="button" onClick={retryLoad}>
+            Retry
+          </button>
+        </p>
+      ) : null}
 
       <label style={{ display: "block" }}>
         <span style={{ display: "block", fontWeight: 600 }}>Moment directive</span>

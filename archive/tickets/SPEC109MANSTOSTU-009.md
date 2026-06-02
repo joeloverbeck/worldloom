@@ -1,6 +1,6 @@
 # SPEC109MANSTOSTU-009: MomentComposer seeding
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `web/src/pages/MomentComposer.tsx` to seed picker defaults from current-context when present.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The Moment Composer currently defaults its "involved cast" picker to `metadata.cast_order` and its "relevant records" picker to records matching `SUGGEST_IMPORTANCE` (high / central importance). When current-context.yaml is present, the cockpit's intent is that the author's explicit `current_cast` seeds the involved-cast picker and `pinned_records` seeds the relevant-records picker — without removing the importance-based fallback for stories without current-context. This ticket lands the composer-page seeding change so the prompt-generation loop honors the author's current point of view by default.
+Before this ticket, the Moment Composer defaulted its "involved cast" picker to `metadata.cast_order` and its "relevant records" picker to records matching `SUGGEST_IMPORTANCE` (high / central importance). With current-context.yaml present, the cockpit's intent is that the author's explicit `current_cast` seeds the involved-cast picker and `pinned_records` seeds the relevant-records picker — without removing the importance-based fallback for stories without current-context. This ticket landed the composer-page seeding change so the prompt-generation loop honors the author's current point of view by default.
 
 ## Assumption Reassessment (2026-06-01)
 
@@ -30,15 +30,16 @@ The Moment Composer currently defaults its "involved cast" picker to `metadata.c
 4. With nav-state present (e.g., from a previous "Compose a fresh prompt" navigation): nav-state wins over current-context → manual verification.
 5. Web tsc-only test passes → AC #12.
 
-## What to Change
+## Landed Changes
 
 ### 1. Moment Composer seeding at `web/src/pages/MomentComposer.tsx`
 
-- Import `fetchCurrentContext` from `web/src/api/current-context.ts` (005).
-- Add a parallel `useEffect` data-loading block that fetches the current-context payload alongside the existing metadata / cast / records loaders.
-- In the existing metadata-effect at line ~72 (the `if (!navState.included_cast)` branch), additionally check whether the current-context payload is present and non-empty before falling back to `m.cast_order`. Priority order: `navState.included_cast` → `currentContext.current_cast` (when present and non-empty) → `m.cast_order`.
-- Similarly seed `pinnedRecordIds`: `navState.included_records` → `currentContext.pinned_records` (when present and non-empty) → `[]`.
-- Leave the `SUGGEST_IMPORTANCE` filter unchanged for the `suggested` records list — the picker still surfaces high/central importance records as ad-hoc affordances; current-context just changes the default pre-selected pins.
+- Imported `fetchCurrentContext` from `web/src/api/current-context.ts` (005).
+- Updated the dashboard-style loading effect in `MomentComposer` to fetch current-context together with metadata before applying initial picker defaults.
+- Seeded `includedCast` with priority `navState.included_cast` → non-empty `currentContext.current_cast` → `metadata.cast_order`.
+- Seeded `pinnedRecordIds` with priority `navState.included_records` → non-empty `currentContext.pinned_records` → existing empty default.
+- Added a current-context load error alert with the existing retry pattern.
+- Left the `SUGGEST_IMPORTANCE` filter unchanged for the suggested records list, preserving the high/central ad-hoc picker affordance.
 
 ## Files to Touch
 
@@ -74,3 +75,17 @@ The Moment Composer currently defaults its "involved cast" picker to `metadata.c
 
 1. `cd tools/manual-story-studio/web && npm test`
 2. `cd tools/manual-story-studio && npm test` (full pipeline).
+
+## Outcome
+
+Moment Composer now seeds its initial cast and relevant-record selections from `current-context.yaml` when the page has no explicit router navigation state. Explicit nav-state selections still win, and stories without current-context continue to fall back to metadata cast order and the existing empty pinned-record default while retaining the high/central suggested-record list.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio/web && npm test` — PASS (`tsc -p tsconfig.json --noEmit`).
+2. `cd tools/manual-story-studio && npm test` — PASS (427 backend tests plus web `tsc --noEmit`).
+3. Manual code review of `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` — PASS: nav-state remains the highest-priority source, non-empty `current_cast` and `pinned_records` seed defaults only when nav-state is absent, metadata cast order remains the absent-context fallback, and `SUGGEST_IMPORTANCE` is unchanged.
+
+## Deviations
+
+No new component-level UI test was added. This ticket kept the drafted proof boundary: web TypeScript, full package proof, and manual review of the seeding priority order.
