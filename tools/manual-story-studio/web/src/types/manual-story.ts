@@ -105,6 +105,7 @@ export interface CurrentContext {
   active_pressure_clocks: string[];
   active_secrets_questions: string[];
   pinned_records: string[];
+  excluded_records?: string[];
   must_not_reveal: string[];
   current_handoff_summary: string;
   last_accepted_segment: string | null;
@@ -312,10 +313,53 @@ export interface PromptRunSidecar extends PromptRunSidecarDraft {
   };
 }
 
+export type PromptIncludedReason =
+  | "explicitly_selected"
+  | "pinned"
+  | "active_secret_question"
+  | "current_cast";
+
+export type PromptExcludedReason = "inactive" | "working_set_excluded";
+
+export interface PromptIncludedRecord {
+  id: string;
+  title: string;
+  class: ManualRecordClass;
+  reason: PromptIncludedReason;
+  section: string | null;
+}
+
+export interface PromptExcludedRecord {
+  id: string;
+  title: string;
+  class: ManualRecordClass;
+  reason: PromptExcludedReason;
+}
+
+export interface PromptSuppressedRecord {
+  id: string;
+  title: string;
+  reason: "must_not_reveal";
+}
+
+export interface PromptBlockedInput {
+  ref: string;
+  reason: string;
+}
+
+export interface PromptResolution {
+  included: PromptIncludedRecord[];
+  excluded: PromptExcludedRecord[];
+  suppressed: PromptSuppressedRecord[];
+  blocked: PromptBlockedInput[];
+  section_map: Record<string, string[]>;
+}
+
 export interface PromptComposeResult {
   markdown: string;
   lint: PromptLintResult;
   sidecar_draft: PromptRunSidecarDraft;
+  resolution: PromptResolution;
 }
 
 export interface PromptComposeRequestInput {

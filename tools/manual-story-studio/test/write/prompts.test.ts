@@ -41,6 +41,13 @@ function fixtureComposeResult(): PromptComposeResult {
       included_template_path: null,
       moment_directive: "Jon waits.",
     },
+    resolution: {
+      included: [],
+      excluded: [],
+      suppressed: [],
+      blocked: [],
+      section_map: {},
+    },
   };
 }
 

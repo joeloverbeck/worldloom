@@ -1,9 +1,9 @@
 {
-  "originating_spec": "specs/SPEC-112-manual-story-studio-record-pickers.md",
-  "archived_spec": "archive/specs/SPEC-112-manual-story-studio-record-pickers.md",
-  "last_ticket": "archive/tickets/SPEC112MANSTOSTU-008.md",
+  "originating_spec": "specs/SPEC-113-manual-story-studio-prompt-inclusion-ledger.md",
+  "archived_spec": "archive/specs/SPEC-113-manual-story-studio-prompt-inclusion-ledger.md",
+  "last_ticket": "archive/tickets/SPEC113MANSTOSTU-005.md",
   "last_result": "completed_archived",
-  "last_work_commit": "42f315f3fe8250528d92c7d089e42686ebe8c301",
+  "last_work_commit": "d369a506883ffcad2925b0e8cfd25568ffb01830",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -14,7 +14,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: SPEC112MANSTOSTU-008 archived; SPEC-112 archived to archive/specs/SPEC-112-manual-story-studio-record-pickers.md; specs/IMPLEMENTATION-ORDER.md updated so SPEC-113/114/115 depend on the archived picker/card surface; npm run test:backend, npm test, grep -rn IdTextArea tools/manual-story-studio/web/src/ (zero matches), and diff hygiene passed",
-  "dirty_state": "tracked worktree clean after SPEC-112 archive/order work commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
+  "proof_state": "clean: SPEC113MANSTOSTU-005 archived; SPEC-113 archived to archive/specs/SPEC-113-manual-story-studio-prompt-inclusion-ledger.md; specs/IMPLEMENTATION-ORDER.md updated; npm run build, npm test, grep proofs, and diff hygiene passed",
+  "dirty_state": "tracked worktree clean after SPEC-113 spec/archive commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-02"
 }

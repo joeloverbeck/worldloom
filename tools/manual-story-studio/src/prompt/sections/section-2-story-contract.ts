@@ -1,8 +1,8 @@
-import type { SectionEmitterInput } from "../types.js";
+import type { SectionEmitterInput, SectionEmitResult } from "../types.js";
 
 export const SECTION_2_TITLE = "Story Contract";
 
-export function emitSection2(input: SectionEmitterInput): string {
+export function emitSection2(input: SectionEmitterInput): SectionEmitResult {
   const m = input.metadata;
   const sc = m.story_contract;
   const pp = sc.prose_preferences;
@@ -22,5 +22,5 @@ export function emitSection2(input: SectionEmitterInput): string {
     `- Interiority: ${pp.interiority}`,
     `- Paragraphing: ${pp.paragraphing}`,
   ];
-  return lines.join("\n");
+  return { body: lines.join("\n"), consumed: [] };
 }

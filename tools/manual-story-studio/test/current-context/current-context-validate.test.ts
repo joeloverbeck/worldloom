@@ -32,6 +32,7 @@ function validContext(overrides: Partial<CurrentContext> = {}): CurrentContext {
     active_pressure_clocks: ["mclock-1"],
     active_secrets_questions: ["msecret-2", "mq-1"],
     pinned_records: ["mrel-4", "mobl-1"],
+    excluded_records: ["mrel-4"],
     must_not_reveal: ["msecret-2"],
     current_handoff_summary: "Mara waits in the riverhouse kitchen.",
     last_accepted_segment: "SEG-7",
@@ -102,6 +103,24 @@ test("validateCurrentContext: unknown pinned record is rejected", () => {
   expectSingleError(
     validContext({ pinned_records: ["mrel-4", "mobl-99"] }),
     "pinned_records[1]",
+    CURRENT_CONTEXT_REFERENCE_BROKEN,
+  );
+});
+
+test("validateCurrentContext: known excluded record is accepted", () => {
+  const result = validateCurrentContext(
+    validContext({ excluded_records: ["mrel-4", "mobl-1"] }),
+    knownIds(),
+    KNOWN_SEGMENTS,
+  );
+
+  assert.equal(result.ok, true);
+});
+
+test("validateCurrentContext: unknown excluded record is rejected", () => {
+  expectSingleError(
+    validContext({ excluded_records: ["mrel-4", "mobl-99"] }),
+    "excluded_records[1]",
     CURRENT_CONTEXT_REFERENCE_BROKEN,
   );
 });

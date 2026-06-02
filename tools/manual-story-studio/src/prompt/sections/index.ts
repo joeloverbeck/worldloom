@@ -7,7 +7,11 @@
 // file and SPEC-102 §Scope item 3 in the same diff.
 
 import type { TranslatorContext } from "../translators/index.js";
-import type { SectionEmitterInput } from "../types.js";
+import type {
+  SectionAssemblyResult,
+  SectionEmitterInput,
+  SectionEmitResult,
+} from "../types.js";
 import { emitSection1, SECTION_1_TITLE } from "./section-1-content-policy.js";
 import { emitSection2, SECTION_2_TITLE } from "./section-2-story-contract.js";
 import { emitSection3, SECTION_3_TITLE } from "./section-3-current-situation.js";
@@ -50,8 +54,8 @@ export const SECTION_DESCRIPTORS: readonly SectionDescriptor[] = [
 export function assembleSections(
   input: SectionEmitterInput,
   ctx: TranslatorContext,
-): string {
-  const bodies: string[] = [
+): SectionAssemblyResult {
+  const sections: SectionEmitResult[] = [
     emitSection1(input),
     emitSection2(input),
     emitSection3(input, ctx),
@@ -68,16 +72,22 @@ export function assembleSections(
     emitSection14(),
     emitSection15(),
   ];
-  if (bodies.length !== SECTION_DESCRIPTORS.length) {
+  if (sections.length !== SECTION_DESCRIPTORS.length) {
     throw new Error(
-      `assembleSections invariant: bodies.length (${bodies.length}) != SECTION_DESCRIPTORS.length (${SECTION_DESCRIPTORS.length})`,
+      `assembleSections invariant: sections.length (${sections.length}) != SECTION_DESCRIPTORS.length (${SECTION_DESCRIPTORS.length})`,
     );
   }
   const chunks: string[] = [];
+  const section_map: Record<string, string[]> = {};
   for (let i = 0; i < SECTION_DESCRIPTORS.length; i++) {
     const d = SECTION_DESCRIPTORS[i]!;
-    const body = bodies[i]!;
+    const section = sections[i]!;
+    const body = section.body;
     chunks.push(`## ${d.number}. ${d.title}\n\n${body}`);
+    section_map[`§${d.number}`] = section.consumed.slice();
   }
-  return chunks.join("\n\n");
+  return {
+    markdown: chunks.join("\n\n"),
+    section_map,
+  };
 }

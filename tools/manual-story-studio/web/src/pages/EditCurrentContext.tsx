@@ -24,6 +24,7 @@ const EMPTY_CONTEXT: CurrentContext = {
   active_pressure_clocks: [],
   active_secrets_questions: [],
   pinned_records: [],
+  excluded_records: [],
   must_not_reveal: [],
   current_handoff_summary: "",
   last_accepted_segment: null,
@@ -151,7 +152,7 @@ export function EditCurrentContext() {
     fetchCurrentContext(worldSlug, msSlug)
       .then((loaded) => {
         if (cancelled) return;
-        setCtx(loaded ?? EMPTY_CONTEXT);
+        setCtx(loaded ? { ...EMPTY_CONTEXT, ...loaded } : EMPTY_CONTEXT);
       })
       .catch((error: unknown) => {
         if (!cancelled) setLoadError(loadErrorMessage(error));
@@ -195,6 +196,13 @@ export function EditCurrentContext() {
       errors.set(
         "pinned_records",
         `Invalid pinned IDs: ${pinnedInvalid.join(", ")}`,
+      );
+    }
+    const excludedInvalid = invalidIds(ctx.excluded_records ?? [], allManualPrefixes());
+    if (excludedInvalid.length > 0) {
+      errors.set(
+        "excluded_records",
+        `Invalid excluded IDs: ${excludedInvalid.join(", ")}`,
       );
     }
     const mustNotRevealInvalid = invalidIds(
@@ -283,7 +291,7 @@ export function EditCurrentContext() {
       aria-labelledby="edit-current-context-heading"
       style={{ display: "grid", gap: 12 }}
     >
-      <h2 id="edit-current-context-heading">Edit Current Context</h2>
+      <h2 id="edit-current-context-heading">Edit Prompt Working Set</h2>
 
       {loadError ? (
         <p role="alert">
@@ -399,6 +407,20 @@ export function EditCurrentContext() {
       </section>
 
       <PickerRow
+        error={fieldError("excluded_records", serverErrors, clientErrors)}
+      >
+        <RecordPicker
+          worldSlug={world}
+          msSlug={story}
+          label="Excluded records"
+          classes={MANUAL_RECORD_CLASSES}
+          mode="multi"
+          value={ctx.excluded_records ?? []}
+          onChange={(excluded_records) => update({ excluded_records })}
+        />
+      </PickerRow>
+
+      <PickerRow
         error={fieldError("must_not_reveal", serverErrors, clientErrors)}
       >
         <RecordPicker
@@ -458,7 +480,7 @@ export function EditCurrentContext() {
 
       <div style={{ display: "flex", gap: 8 }}>
         <button type="button" onClick={onSave} disabled={!canSave}>
-          {saving ? "Saving..." : "Save Current Context"}
+          {saving ? "Saving..." : "Save Prompt Working Set"}
         </button>
         <button
           type="button"

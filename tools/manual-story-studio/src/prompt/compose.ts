@@ -15,6 +15,7 @@ import { readCurrentContext } from "../read/current-context.js";
 import { readManualStoryMetadata } from "../read/manual-story-metadata.js";
 import { listRecords, readRecord } from "../read/records.js";
 import type { BeatTemplate } from "../schema/beat-template.js";
+import type { CurrentContext } from "../schema/current-context.js";
 import type {
   ManualCharacterRecord,
   ManualRecord,
@@ -29,6 +30,9 @@ import { assertInsideSandbox, type ManualStoryRoot } from "../write/sandbox.js";
 import type {
   PromptComposeInput,
   PromptComposeResult,
+  PromptExcludedRecord,
+  PromptIncludedReason,
+  PromptResolution,
   PromptLintFinding,
   PromptLintResult,
 } from "./types.js";
@@ -65,7 +69,12 @@ function earlyExit(
     cleanForCopy: false,
     blockingForCopy: findings.some((f) => f.tier === "hard"),
   };
-  return { markdown: "", lint, sidecar_draft: sidecarDraft };
+  return {
+    markdown: "",
+    lint,
+    sidecar_draft: sidecarDraft,
+    resolution: resolutionFromFindings(findings),
+  };
 }
 
 export async function composePrompt(
@@ -114,7 +123,7 @@ export async function composePrompt(
     currentContext && currentContext.current_cast.length > 0
       ? currentContext.current_cast.slice()
       : input.included_cast.slice();
-  const seededRecordIds = mergeIds(
+  const unfilteredSeededRecordIds = mergeIds(
     input.included_records,
     [
       ...(currentContext?.pinned_records ?? []),
@@ -122,6 +131,30 @@ export async function composePrompt(
       ...(currentContext?.must_not_reveal ?? []),
     ],
   );
+  const seedReasons = seedReasonMap(input, currentContext);
+  const excludedRecordIds = new Set(currentContext?.excluded_records ?? []);
+  const resolution: PromptResolution = {
+    included: [],
+    excluded: [],
+    suppressed: [],
+    blocked: [],
+    section_map: {},
+  };
+  const seededRecordIds: string[] = [];
+  for (const id of unfilteredSeededRecordIds) {
+    if (excludedRecordIds.has(id)) {
+      const excluded = describeExistingRecord(
+        input.manualStoryRoot,
+        id,
+        "working_set_excluded",
+      );
+      if (excluded) {
+        resolution.excluded.push(excluded);
+      }
+      continue;
+    }
+    seededRecordIds.push(id);
+  }
   sidecarDraft.included_cast = seededCastIds.slice();
   sidecarDraft.included_records = seededRecordIds.slice();
 
@@ -142,11 +175,19 @@ export async function composePrompt(
       continue;
     }
     cast.push(rec.value);
+    resolution.included.push({
+      id: rec.value.id,
+      title: rec.value.title,
+      class: "cast",
+      reason: "current_cast",
+      section: null,
+    });
   }
 
   // Stage 4 — Load selected / active relevant records.
   const records: ManualRecord[] = [];
   const missingRecordFindings: PromptLintFinding[] = [];
+  const mustNotRevealIds = new Set(currentContext?.must_not_reveal ?? []);
   for (const id of seededRecordIds) {
     const cls = classifyManualRecordId(id);
     if (!cls) {
@@ -170,8 +211,32 @@ export async function composePrompt(
       );
       continue;
     }
-    if (rec.value.active === false) continue;
-    records.push(rec.value as ManualRecord);
+    if (rec.value.active === false) {
+      resolution.excluded.push({
+        id: rec.value.id,
+        title: rec.value.title,
+        class: cls,
+        reason: "inactive",
+      });
+      continue;
+    }
+    const record = rec.value as ManualRecord;
+    records.push(record);
+    if (mustNotRevealIds.has(id)) {
+      resolution.suppressed.push({
+        id: record.id,
+        title: record.title,
+        reason: "must_not_reveal",
+      });
+    } else {
+      resolution.included.push({
+        id: record.id,
+        title: record.title,
+        class: cls,
+        reason: seedReasons.get(id) ?? "explicitly_selected",
+        section: null,
+      });
+    }
   }
 
   // Stage 5 — Load optional beat template.
@@ -295,7 +360,10 @@ export async function composePrompt(
   if (templateForbiddenInventions) {
     sectionInput.template_forbidden_inventions = templateForbiddenInventions;
   }
-  const markdown = assembleSections(sectionInput, ctx);
+  const assembled = assembleSections(sectionInput, ctx);
+  const markdown = assembled.markdown;
+  resolution.section_map = assembled.section_map;
+  applyIncludedSections(resolution);
 
   // Stage 10 — Run prompt lint over the assembled Markdown.
   const knownCastIds = new Set<string>();
@@ -324,6 +392,11 @@ export async function composePrompt(
     ...templateLintFindings,
     ...lint.findings,
   ];
+  resolution.blocked = findingsToBlocked([
+    ...missingCastFindings,
+    ...missingRecordFindings,
+    ...templateLintFindings,
+  ]);
   const consolidated: PromptLintResult = {
     findings: allFindings,
     cleanForCopy: allFindings.length === 0,
@@ -331,7 +404,12 @@ export async function composePrompt(
   };
 
   // Stage 11 — Return composed Markdown + lint + sidecar draft.
-  return { markdown, lint: consolidated, sidecar_draft: sidecarDraft };
+  return {
+    markdown,
+    lint: consolidated,
+    sidecar_draft: sidecarDraft,
+    resolution,
+  };
 
   // Stage 12 — "Save Prompt" is the write side; lives in ../write/prompts.ts
   // and is invoked by the HTTP route layer, not by compose itself.
@@ -346,6 +424,71 @@ function mergeIds(primary: string[], secondary: string[]): string[] {
     out.push(id);
   }
   return out;
+}
+
+function seedReasonMap(
+  input: PromptComposeInput,
+  currentContext: CurrentContext | null,
+): Map<string, PromptIncludedReason> {
+  const reasons = new Map<string, PromptIncludedReason>();
+  for (const id of input.included_records) {
+    if (!reasons.has(id)) reasons.set(id, "explicitly_selected");
+  }
+  for (const id of currentContext?.pinned_records ?? []) {
+    if (!reasons.has(id)) reasons.set(id, "pinned");
+  }
+  for (const id of currentContext?.active_secrets_questions ?? []) {
+    if (!reasons.has(id)) reasons.set(id, "active_secret_question");
+  }
+  return reasons;
+}
+
+function describeExistingRecord(
+  manualStoryRoot: string,
+  id: string,
+  reason: PromptExcludedRecord["reason"],
+): PromptExcludedRecord | null {
+  const cls = classifyManualRecordId(id);
+  if (!cls) return null;
+  const rec = readRecord(manualStoryRoot, cls, id);
+  if (!rec.ok) return null;
+  return {
+    id: rec.value.id,
+    title: rec.value.title,
+    class: cls,
+    reason,
+  };
+}
+
+function findingsToBlocked(findings: PromptLintFinding[]): PromptResolution["blocked"] {
+  return findings.map((finding) => ({
+    ref: finding.rule,
+    reason: finding.message,
+  }));
+}
+
+function applyIncludedSections(resolution: PromptResolution): void {
+  const firstSectionById = new Map<string, string>();
+  for (const [section, ids] of Object.entries(resolution.section_map)) {
+    for (const id of ids) {
+      if (!firstSectionById.has(id)) {
+        firstSectionById.set(id, section);
+      }
+    }
+  }
+  for (const entry of resolution.included) {
+    entry.section = firstSectionById.get(entry.id) ?? null;
+  }
+}
+
+function resolutionFromFindings(findings: PromptLintFinding[]): PromptResolution {
+  return {
+    included: [],
+    excluded: [],
+    suppressed: [],
+    blocked: findingsToBlocked(findings),
+    section_map: {},
+  };
 }
 
 function buildTranslatorContext(

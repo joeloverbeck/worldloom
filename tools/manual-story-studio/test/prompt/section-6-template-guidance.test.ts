@@ -243,7 +243,7 @@ test("emitSection12: template_forbidden_inventions emitted when present", () => 
     recent_segment_last_paragraph: null,
     content_policy_body: "",
     prose_craft_contract_body: "",
-  });
+  }).body;
   assert.match(body, /Template forbids inventing: off-screen confession/);
 });
 
@@ -258,7 +258,7 @@ test("emitSection12: omitted template_forbidden_inventions preserves back-compat
     recent_segment_last_paragraph: null,
     content_policy_body: "",
     prose_craft_contract_body: "",
-  });
+  }).body;
   // Default "no constraints" message preserved
   assert.match(body, /No forbidden inventions or reveals declared/);
 });
