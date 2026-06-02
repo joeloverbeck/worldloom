@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — adds `web/src/pages/EditCurrentContext.tsx`; modifies `web/src/App.tsx` to bind the new route.
-**Deps**: SPEC109MANSTOSTU-005
+**Deps**: archive/tickets/SPEC109MANSTOSTU-005.md
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `web/src/components/StateUpdateChecklist.tsx` to add the "Mark state reviewed after SEG-N" button; extends the `StateUpdateChecklistPayload` type in both `src/state-update-checklist.ts` (backend) and `web/src/types/manual-story.ts` (frontend mirror) to carry the latest accepted segment.
-**Deps**: SPEC109MANSTOSTU-005
+**Deps**: archive/tickets/SPEC109MANSTOSTU-005.md
 
 ## Problem
 

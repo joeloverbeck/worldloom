@@ -26,6 +26,10 @@ import {
   registerBeatTemplatesWriteRoutes,
 } from "./routes/beat-templates.js";
 import {
+  registerCurrentContextReadRoute,
+  registerCurrentContextWriteRoute,
+} from "./routes/current-context.js";
+import {
   registerRecordsReadRoutes,
   registerRecordsWriteRoutes,
 } from "./routes/records.js";
@@ -79,6 +83,7 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerPromptsReadRoutes(server, { repoRoot: options.repoRoot });
   await registerSegmentsReadRoutes(server, { repoRoot: options.repoRoot });
   await registerManuscriptReadRoute(server, { repoRoot: options.repoRoot });
+  await registerCurrentContextReadRoute(server, { repoRoot: options.repoRoot });
   await registerHealthRoute(server, { repoRoot: options.repoRoot });
 
   await wrapRouterWritable(server, async (writableRouter) => {
@@ -101,6 +106,9 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
       repoRoot: options.repoRoot,
     });
     await registerManuscriptWriteRoute(writableRouter, {
+      repoRoot: options.repoRoot,
+    });
+    await registerCurrentContextWriteRoute(writableRouter, {
       repoRoot: options.repoRoot,
     });
   });

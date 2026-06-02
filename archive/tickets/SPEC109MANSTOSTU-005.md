@@ -1,6 +1,6 @@
 # SPEC109MANSTOSTU-005: Backend routes + frontend API wrapper + route tests
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `src/server/routes/current-context.ts`, `web/src/api/current-context.ts`, `test/current-context/routes-current-context.test.ts`; modifies `src/server/http.ts` to wire the read + write registration functions in their proper scopes.
@@ -16,6 +16,7 @@ The Edit Current Context page (010), Mark-state-reviewed button (011), Dashboard
 2. **Spec**: SPEC-109 §2 item 6 (rewritten per `/reassess-spec`) declares the route file exports `registerCurrentContextReadRoute` + `registerCurrentContextWriteRoute`. GET semantics: returns parsed `CurrentContext` or `null` if absent; `409` if corrupted (health-integrated). PUT semantics: accepts full body, runs `validateCurrentContext` (003), returns `422` on validation failure with structured findings, otherwise calls `writeCurrentContext` (004) and returns `200`. The inferred `routes-current-context.test.ts` is attributed to SPEC-109 §Approach §2 item 6 + AC #4 ("PUT with valid body writes the file and returns 200") + AC #5 ("PUT with invalid POV holder returns 422") per §Step 3 Inferred deliverable rule — the AC names route-level behavior but the spec's §4 Files-to-touch named test list does not allocate a dedicated route test file.
 3. **Cross-skill boundary**: SPEC-100's package fence is the load-bearing invariant — the route file must NOT import `@worldloom/patch-engine` or `@worldloom/world-mcp`, and all writes route through `safeWriteFile` via 004. The PUT handler's validation step calls 003's `validateCurrentContext` with `KnownIds` + `metadata.segment_order` it constructs at request time (via `listAllKnownIds` + `readManualStoryMetadata`).
 4. **FOUNDATIONS Rule 6 (preserves SPEC-100 fence)**: the new HTTP routes mediate `current-context.yaml` reads and writes only. They introduce no canon-pipeline surface — no patch-engine dependency, no world-mcp dependency, no `_source/` read or write — and remain inside the SPEC-100 realpath sandbox. Per the §Write-enabled-but-canon-fenced package carve-out at `references/foundations-alignment.md` §4.4, this ticket does NOT trigger Canon-Pipeline Impact Rule scrutiny.
+5. **Live read-error mapping correction (2026-06-02)**: `readCurrentContext` returns `current-context-yaml-parse-failed`, which the generic `mapReadErrorToHttpReply` dispatcher does not currently classify. The route lands a route-local mapper for that code to preserve the ticket's required `409` corrupt-file response; broader health integration remains 006 scope.
 
 ## Architecture Check
 
@@ -33,11 +34,11 @@ The Edit Current Context page (010), Mark-state-reviewed button (011), Dashboard
 6. PUT 422 with unknown record ID in `pinned_records` → route test asserts status + structured `current-context-reference-broken` finding.
 7. Frontend API wrapper compiles under `tsc --noEmit` (web) → `cd tools/manual-story-studio/web && npm test`.
 
-## What to Change
+## Landed Changes
 
 ### 1. New routes file at `src/server/routes/current-context.ts`
 
-Export `registerCurrentContextReadRoute(server, {repoRoot})` (mounts `GET /api/worlds/:world/manual-stories/:story/current-context`) and `registerCurrentContextWriteRoute(server, {repoRoot})` (mounts `PUT /api/worlds/:world/manual-stories/:story/current-context`). The PUT handler:
+Exported `registerCurrentContextReadRoute(server, {repoRoot})` (mounts `GET /api/worlds/:world/manual-stories/:story/current-context`) and `registerCurrentContextWriteRoute(server, {repoRoot})` (mounts `PUT /api/worlds/:world/manual-stories/:story/current-context`). The PUT handler:
 - Resolves the manual-story root via the existing sandbox utility.
 - Reads metadata (via `readManualStoryMetadata`) to obtain `segment_order`.
 - Builds `KnownIds` via `listAllKnownIds(manualStoryRoot)`.
@@ -52,24 +53,26 @@ The GET handler:
 - `{ok: true, value: null}` → `200` with body `null`.
 - `{ok: true, value: <ctx>}` → `200` with body `<ctx>`.
 - `{ok: false, error: <ReadError>}` → `409` with `{error: "<error.code>", message: <error.message>, path: <error.path>}`.
+- Maps `current-context-yaml-parse-failed` locally to `409`, because that new read-error code is not yet part of the generic read-error HTTP dispatcher.
 
 ### 2. Wire the new registrations in `src/server/http.ts`
 
-Add the two `register` calls — read alongside the other `registerXxxReadRoute` lines outside `wrapRouterWritable`; write alongside the other `registerXxxWriteRoute` lines inside `wrapRouterWritable`.
+Added the two `register` calls — read alongside the other `registerXxxReadRoute` lines outside `wrapRouterWritable`; write alongside the other `registerXxxWriteRoute` lines inside `wrapRouterWritable`.
 
 ### 3. New frontend API wrapper at `web/src/api/current-context.ts`
 
-Export typed `fetchCurrentContext(worldSlug, msSlug): Promise<CurrentContext | null>` and `saveCurrentContext(worldSlug, msSlug, ctx: CurrentContext): Promise<SaveResult>` where `SaveResult = { ok: true } | { ok: false; findings: ValidationError[] }`. Use the same `loadErrorMessage` / `fetch` conventions as `web/src/api/records.ts`.
+Exported typed `fetchCurrentContext(worldSlug, msSlug): Promise<CurrentContext | null>` and `saveCurrentContext(worldSlug, msSlug, ctx: CurrentContext): Promise<SaveResult>` where `SaveResult = { ok: true } | { ok: false; findings: ValidationError[] }`. Added the `CurrentContext` web type mirror and optional validation `code` field needed by downstream UI consumers.
 
 ### 4. New route-integration test at `test/current-context/routes-current-context.test.ts`
 
-Hybrid test using `tools/manual-story-studio`'s in-process Fastify server pattern (see existing `test/server/*.test.ts` for the harness shape). Covers all 6 cases in Verification Layers above against a fixture story root built per `tools/manual-story-studio/test/current-context/fixtures/`.
+Added hybrid tests using `tools/manual-story-studio`'s in-process Fastify server pattern. Covers all 6 cases in Verification Layers above against a temp fixture story root with minimal record ID fixtures.
 
 ## Files to Touch
 
 - `tools/manual-story-studio/src/server/routes/current-context.ts` (new)
 - `tools/manual-story-studio/src/server/http.ts` (modify)
 - `tools/manual-story-studio/web/src/api/current-context.ts` (new)
+- `tools/manual-story-studio/web/src/types/manual-story.ts` (modify)
 - `tools/manual-story-studio/test/current-context/routes-current-context.test.ts` (new)
 
 ## Out of Scope
@@ -106,3 +109,20 @@ Hybrid test using `tools/manual-story-studio`'s in-process Fastify server patter
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio/web && npm test`
 3. `cd tools/manual-story-studio && npm test`
+
+## Outcome
+
+Ticket complete. Manual Story Studio now exposes typed current-context GET/PUT HTTP routes, wires them into the correct read/write scopes, and provides a typed web API wrapper for downstream UI tickets.
+
+## Verification Result
+
+1. Baseline before implementation: `cd tools/manual-story-studio && npm run test:backend` passed with 67 compiled backend test files.
+2. Focused/backend proof after implementation: `cd tools/manual-story-studio && npm run test:backend` passed with 68 compiled backend test files, including `routes-current-context.test.js`.
+3. Frontend proof after implementation: `cd tools/manual-story-studio/web && npm test` passed.
+4. Full package proof after implementation: `cd tools/manual-story-studio && npm test` passed with 420 backend tests and web TypeScript.
+5. Fence proof: `rg -n "@worldloom/patch-engine|@worldloom/world-mcp|better-sqlite3|_source" tools/manual-story-studio/src/server/routes/current-context.ts tools/manual-story-studio/web/src/api/current-context.ts tools/manual-story-studio/test/current-context/routes-current-context.test.ts` returned no matches.
+
+## Deviations
+
+1. Added a route-local `current-context-yaml-parse-failed` to `409` mapper because the generic read-error HTTP dispatcher does not know that new code yet. Health-wide mapping remains the next ticket's scope.
+2. Added `tools/manual-story-studio/web/src/types/manual-story.ts` to mirror `CurrentContext` and expose optional validation finding codes for the new API wrapper.

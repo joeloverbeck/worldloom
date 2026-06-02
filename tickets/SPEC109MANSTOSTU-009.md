@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `web/src/pages/MomentComposer.tsx` to seed picker defaults from current-context when present.
-**Deps**: SPEC109MANSTOSTU-005
+**Deps**: archive/tickets/SPEC109MANSTOSTU-005.md
 
 ## Problem
 

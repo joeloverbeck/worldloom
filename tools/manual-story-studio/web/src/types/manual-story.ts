@@ -98,6 +98,19 @@ export interface ManualStoryMetadata {
   manuscript: ManualStoryManuscriptPolicy;
 }
 
+export interface CurrentContext {
+  current_location: string | null;
+  current_cast: string[];
+  pov_holder: string | null;
+  active_pressure_clocks: string[];
+  active_secrets_questions: string[];
+  pinned_records: string[];
+  must_not_reveal: string[];
+  current_handoff_summary: string;
+  last_accepted_segment: string | null;
+  last_reviewed_after_segment: string | null;
+}
+
 export interface SegmentSidecarIncludedRecordSummary {
   characters: string[];
   records: string[];
@@ -248,6 +261,7 @@ export interface ManualRecordSummary {
 export interface ValidationError {
   field: string;
   message: string;
+  code?: string;
 }
 
 export interface RefViolation {

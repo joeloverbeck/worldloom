@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — adds `web/src/components/CurrentStatePanel.tsx`; modifies `web/src/pages/Dashboard.tsx` to mount the panel at the top and de-emphasize the existing importance-bucketed records panel.
-**Deps**: SPEC109MANSTOSTU-005
+**Deps**: archive/tickets/SPEC109MANSTOSTU-005.md
 
 ## Problem
 
