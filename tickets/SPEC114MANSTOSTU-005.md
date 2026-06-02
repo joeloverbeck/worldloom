@@ -4,17 +4,17 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — documentation only (`tools/manual-story-studio/README.md`, `docs/ID-ALLOCATION.md`); no code, no canon, no story-bundle pipeline.
-**Deps**: SPEC114MANSTOSTU-002, SPEC114MANSTOSTU-003, SPEC114MANSTOSTU-004
+**Deps**: archive/tickets/SPEC114MANSTOSTU-002.md, SPEC114MANSTOSTU-003, SPEC114MANSTOSTU-004
 
 ## Problem
 
-Two docs surfaces describe the old delete lifecycle and must land coherently once the implementation tickets ship. `README.md:107` documents the `inactive_default` outcome ("rewritten in place with `active: false` …") which no longer exists after SPEC114MANSTOSTU-002. And the new persisted `repair-log.yaml` control file (SPEC-114 §3, M3) is unregistered in `docs/ID-ALLOCATION.md` §Manual-story-scoped, which documents `manual-story.yaml` as a non-ID-bearing control file but not `repair-log.yaml`. SPEC-114 §4 commits both edits; they are grouped here as a cross-cutting docs ticket so the README delete-outcomes section reflects the full landed lifecycle (backend + records UX + beat-template parity) without a staleness window.
+Two docs surfaces describe the old delete lifecycle and must land coherently once the implementation tickets ship. `README.md:107` documents the `inactive_default` outcome ("rewritten in place with `active: false` …") which no longer exists after archive/tickets/SPEC114MANSTOSTU-002.md. And the new persisted `repair-log.yaml` control file (SPEC-114 §3, M3) is unregistered in `docs/ID-ALLOCATION.md` §Manual-story-scoped, which documents `manual-story.yaml` as a non-ID-bearing control file but not `repair-log.yaml`. SPEC-114 §4 commits both edits; they are grouped here as a cross-cutting docs ticket so the README delete-outcomes section reflects the full landed lifecycle (backend + records UX + beat-template parity) without a staleness window.
 
 ## Assumption Reassessment (2026-06-02)
 
-1. `tools/manual-story-studio/README.md:107` documents the `inactive_default` delete outcome (`active: false` + `retired_reason`), now removed by SPEC114MANSTOSTU-002. `docs/ID-ALLOCATION.md` §Manual-story-scoped (around line 74) documents `manual-story.yaml` as a per-manual-story non-ID-bearing control file; `repair-log.yaml` is absent. The post-implementation delete outcomes are `hard_deleted`, `blocked` (with referrer summaries), and repair-mode `force_deleted` (with a `repair-log.yaml` append).
+1. `tools/manual-story-studio/README.md:107` documents the `inactive_default` delete outcome (`active: false` + `retired_reason`), now removed by archive/tickets/SPEC114MANSTOSTU-002.md. `docs/ID-ALLOCATION.md` §Manual-story-scoped (around line 74) documents `manual-story.yaml` as a per-manual-story non-ID-bearing control file; `repair-log.yaml` is absent. The post-implementation delete outcomes are `hard_deleted`, `blocked` (with referrer summaries), and repair-mode `force_deleted` (with a `repair-log.yaml` append).
 2. SPEC-114 §4 Files-to-touch commits both edits (README delete-outcomes rewrite; ID-ALLOCATION `repair-log.yaml` note) and §8 Risks routes the ID-ALLOCATION note as a §4 deliverable rather than a separate docs spec. No FOUNDATIONS principle gates this docs-only surface beyond the Rule 6 audit-trail spirit already carried by the implementation tickets.
-3. **Cross-artifact shared boundary under audit**: the README delete-outcomes section must describe the outcomes produced by SPEC114MANSTOSTU-002 (backend), reflected in SPEC114MANSTOSTU-003 (records UX) and SPEC114MANSTOSTU-004 (beat-template parity) coherently — hence the dependency on all three. The ID-ALLOCATION note must match the `repair-log.yaml` path/shape established in SPEC114MANSTOSTU-002 §1.
+3. **Cross-artifact shared boundary under audit**: the README delete-outcomes section must describe the outcomes produced by archive/tickets/SPEC114MANSTOSTU-002.md (backend), reflected in SPEC114MANSTOSTU-003 (records UX) and SPEC114MANSTOSTU-004 (beat-template parity) coherently — hence the dependency on all three. The ID-ALLOCATION note must match the `repair-log.yaml` path/shape established in archive/tickets/SPEC114MANSTOSTU-002.md §1.
 
 ## Architecture Check
 

@@ -293,7 +293,7 @@ test("deleteRecord: unreferenced → hard_deleted; file gone", () => {
   }
 });
 
-test("deleteRecord: referenced → inactive_default; file still on disk with active:false + retired_reason", () => {
+test("deleteRecord: referenced → blocked; file remains unchanged", () => {
   const { repoRoot, manualStoryRoot } = mkWorld();
   try {
     const cast = createRecord(manualStoryRoot, "cast", castProfileBody());
@@ -308,10 +308,10 @@ test("deleteRecord: referenced → inactive_default; file still on disk with act
     if (!("ok" in belief) || !belief.ok) throw new Error("belief create failed");
 
     const result = deleteRecord(manualStoryRoot, "cast", cast.id);
-    assert.equal("outcome" in result && result.outcome, "inactive_default");
-    if ("outcome" in result && result.outcome === "inactive_default") {
-      assert.match(result.retiredReason, new RegExp(belief.id));
+    assert.equal("outcome" in result && result.outcome, "blocked");
+    if ("outcome" in result && result.outcome === "blocked") {
       assert.ok(result.referrers.length > 0);
+      assert.equal(result.referrers[0]?.summary.id, belief.id);
     }
     const onDisk = path.join(
       manualStoryRoot.absolutePath,
@@ -324,8 +324,8 @@ test("deleteRecord: referenced → inactive_default; file still on disk with act
       string,
       unknown
     >;
-    assert.equal(parsed.active, false);
-    assert.match(String(parsed.retired_reason), new RegExp(belief.id));
+    assert.equal(parsed.active, true);
+    assert.equal(parsed.retired_reason, undefined);
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
   }
@@ -355,6 +355,17 @@ test("deleteRecord: force on referenced → force_deleted with audit entry; file
       assert.equal(result.auditEntry.deletedClassAndId, `cast/${cast.id}`);
       assert.ok(result.auditEntry.referrers.length > 0);
     }
+    const repairLog = YAML.parse(
+      readFileSync(path.join(manualStoryRoot.absolutePath, "repair-log.yaml"), "utf8"),
+    ) as Array<{
+      deleted_class_and_id: string;
+      deleted_at: string;
+      referrers_at_deletion: unknown[];
+    }>;
+    assert.equal(repairLog.length, 1);
+    assert.equal(repairLog[0]?.deleted_class_and_id, `cast/${cast.id}`);
+    assert.equal(repairLog[0]?.deleted_at, "2026-05-30T12:00:00.000Z");
+    assert.ok((repairLog[0]?.referrers_at_deletion ?? []).length > 0);
     assert.equal(
       existsSync(
         path.join(

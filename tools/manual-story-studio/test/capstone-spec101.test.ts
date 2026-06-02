@@ -6,7 +6,8 @@
  *   - AC #2: every MVP class round-trips via CRUD; required-field rejection.
  *   - AC #3: ID allocator gap preservation after hard-delete.
  *   - AC #4: ref validator flags dangling refs; override flow works.
- *   - AC #5: all three hybrid-delete outcomes.
+ *   - AC #5: delete lifecycle covers hard-delete, block-on-referrer,
+ *     and repair-mode force-delete.
  *   - AC #9: package-level `npm test` invokes this file.
  *
  * Manual dry-run runbook (AC #6 / #7 / #8 — frontend visual checks):
@@ -407,7 +408,7 @@ test("SPEC-101 AC #4: ref validator flags dangling refs; override flow works", (
   }
 });
 
-test("SPEC-101 AC #5: hybrid delete — hard_deleted, inactive_default, force_deleted", () => {
+test("SPEC-101 AC #5: hybrid delete — hard_deleted, blocked, force_deleted", () => {
   const { repoRoot, root } = mkFixture();
   try {
     // hard_deleted
@@ -420,7 +421,8 @@ test("SPEC-101 AC #5: hybrid delete — hard_deleted, inactive_default, force_de
     const dHard = deleteRecord(root, "facts", fact.id);
     assert.equal("outcome" in dHard && dHard.outcome, "hard_deleted");
 
-    // inactive_default
+    // SPEC-114 updates the landed SPEC-101 hybrid-delete capstone:
+    // referenced records now block instead of auto-archiving as active:false.
     const cast1 = createRecord(
       root,
       "cast",
@@ -439,13 +441,13 @@ test("SPEC-101 AC #5: hybrid delete — hard_deleted, inactive_default, force_de
       } as never,
     );
     if (!("ok" in ref) || !ref.ok) throw new Error("belief create failed");
-    const dInactive = deleteRecord(root, "cast", cast1.id);
+    const dBlocked = deleteRecord(root, "cast", cast1.id);
     assert.equal(
-      "outcome" in dInactive && dInactive.outcome,
-      "inactive_default",
+      "outcome" in dBlocked && dBlocked.outcome,
+      "blocked",
     );
-    if ("outcome" in dInactive && dInactive.outcome === "inactive_default") {
-      assert.match(dInactive.retiredReason, new RegExp(ref.id));
+    if ("outcome" in dBlocked && dBlocked.outcome === "blocked") {
+      assert.equal(dBlocked.referrers[0]?.summary.id, ref.id);
     }
     const castFile = path.join(
       root.absolutePath,
@@ -458,7 +460,8 @@ test("SPEC-101 AC #5: hybrid delete — hard_deleted, inactive_default, force_de
       string,
       unknown
     >;
-    assert.equal(castAfter.active, false);
+    assert.equal(castAfter.active, true);
+    assert.equal(castAfter.retired_reason, undefined);
 
     // force_deleted
     const dForce = deleteRecord(root, "cast", cast1.id, {
@@ -471,6 +474,12 @@ test("SPEC-101 AC #5: hybrid delete — hard_deleted, inactive_default, force_de
       assert.equal(dForce.auditEntry.deletedClassAndId, `cast/${cast1.id}`);
       assert.ok(dForce.auditEntry.referrers.length > 0);
     }
+    const repairLog = YAML.parse(
+      readFileSync(path.join(root.absolutePath, "repair-log.yaml"), "utf8"),
+    ) as Array<{ deleted_class_and_id: string; deleted_at: string }>;
+    assert.equal(repairLog.length, 1);
+    assert.equal(repairLog[0]?.deleted_class_and_id, `cast/${cast1.id}`);
+    assert.equal(repairLog[0]?.deleted_at, "2026-05-30T10:00:00.000Z");
     assert.equal(existsSync(castFile), false);
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });

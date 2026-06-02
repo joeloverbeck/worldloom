@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -215,7 +215,7 @@ test("records routes: DELETE without force on unreferenced → hard_deleted", as
   }
 });
 
-test("records routes: DELETE with ?force=true returns force_deleted + audit", async () => {
+test("records routes: DELETE force requires repair mode and writes repair log", async () => {
   const { repoRoot, worldSlug, msSlug } = mkWorld();
   try {
     const server = await createServer({ repoRoot });
@@ -225,9 +225,31 @@ test("records routes: DELETE with ?force=true returns force_deleted + audit", as
         url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/records/facts`,
         payload: { record: validFactBody() },
       });
-      const response = await server.inject({
+      const blocked = await server.inject({
         method: "DELETE",
         url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/records/facts/mfact-1?force=true`,
+      });
+      assert.equal(blocked.statusCode, 405);
+      assert.equal(blocked.json().error, "repair-mode-required");
+      assert.equal(
+        existsSync(
+          path.join(
+            repoRoot,
+            "worlds",
+            worldSlug,
+            "manual-stories",
+            msSlug,
+            "records",
+            "facts",
+            "mfact-1.yaml",
+          ),
+        ),
+        true,
+      );
+
+      const response = await server.inject({
+        method: "DELETE",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/records/facts/mfact-1?force=true&mode=repair`,
       });
       assert.equal(response.statusCode, 200);
       const body = response.json() as {
@@ -236,6 +258,20 @@ test("records routes: DELETE with ?force=true returns force_deleted + audit", as
       };
       assert.equal(body.outcome, "force_deleted");
       assert.equal(body.auditEntry.deletedClassAndId, "facts/mfact-1");
+      const repairLog = YAML.parse(
+        readFileSync(
+          path.join(
+            repoRoot,
+            "worlds",
+            worldSlug,
+            "manual-stories",
+            msSlug,
+            "repair-log.yaml",
+          ),
+          "utf8",
+        ),
+      ) as Array<{ deleted_class_and_id: string }>;
+      assert.equal(repairLog[0]?.deleted_class_and_id, "facts/mfact-1");
     } finally {
       await server.close();
     }

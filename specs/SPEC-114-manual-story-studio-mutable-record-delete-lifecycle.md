@@ -10,6 +10,10 @@
 
 ---
 
+## Implementation Notes
+
+- **2026-06-02:** `archive/tickets/SPEC114MANSTOSTU-001.md` and `archive/tickets/SPEC114MANSTOSTU-002.md` landed the backend/read-layer portion: `scanReferences` now covers current-context and template sidecar referrers, `deleteRecord` now hard-deletes unreferenced records, blocks referenced records with referrer summaries, and persists repair-mode force-deletes to `repair-log.yaml`. Remaining frontend, beat-template UI/route parity, and docs bullets below are still active until their tickets land. Historical prose below may still describe the pre-implementation `inactive_default` behavior as intake evidence.
+
 ## 1. Context & Motivation
 
 Verified from the tree: the records page exposes a normal **Delete** that, when the record has referrers, **archives it as `active:false`** (outcome `inactive_default`, populating `retired_reason: force-delete-blocked-by-referrers: <ids>`) and then offers a **"Force delete anyway"** button. So the default normal-flow behavior is soft-delete-as-archive with a force-delete escape hatch (`src/write/records.ts` `deleteRecord` + `Records.tsx`).

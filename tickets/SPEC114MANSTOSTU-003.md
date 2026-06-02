@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` web client (`web/src/api/records.ts`, `web/src/pages/Records.tsx`); no impact on world canon or story-bundle pipeline (canon-fenced package).
-**Deps**: SPEC114MANSTOSTU-002
+**Deps**: archive/tickets/SPEC114MANSTOSTU-002.md
 
 ## Problem
 
@@ -12,7 +12,7 @@ The Records page (`web/src/pages/Records.tsx`) currently surfaces the `inactive_
 
 ## Assumption Reassessment (2026-06-02)
 
-1. `Records.tsx` `handleDelete` (line 220) calls `apiDelete`; the result branches on `outcome === "inactive_default"` (line 398, the alert + force button) and `"force_deleted"` (line 411). The web `DeleteResult` union (`web/src/api/records.ts:23`) carries `inactive_default` (line 26). `RecordCard` (`web/src/components/RecordCard.tsx`) accepts `{summary: ManualRecordSummary, onOpen, recordClass?}` and renders title/class/summary with an `onOpen(id)` activation — the edit-link affordance for referrer cards. The backend now returns a `blocked` outcome with `referrers: Array<{recordClass, summary}>` (SPEC114MANSTOSTU-002).
+1. `Records.tsx` `handleDelete` (line 220) calls `apiDelete`; the result branches on `outcome === "inactive_default"` (line 398, the alert + force button) and `"force_deleted"` (line 411). The web `DeleteResult` union (`web/src/api/records.ts:23`) carries `inactive_default` (line 26). `RecordCard` (`web/src/components/RecordCard.tsx`) accepts `{summary: ManualRecordSummary, onOpen, recordClass?}` and renders title/class/summary with an `onOpen(id)` activation — the edit-link affordance for referrer cards. The backend now returns a `blocked` outcome with `referrers: Array<{recordClass, summary}>` (archive/tickets/SPEC114MANSTOSTU-002.md).
 2. SPEC-114 §2 item 4 + §7 AC 6 define the target UX. No FOUNDATIONS principle gates this frontend surface (canon-fenced package; the spec's §5 marks the canon principles N/A).
 3. **Cross-artifact shared boundary under audit**: `web/src/api/records.ts`'s `DeleteResult` union ↔ `Records.tsx`'s `deleteOutcome` branching ↔ the reused `RecordCard` component contract. The union change (drop `inactive_default`, add `blocked` with referrer summaries) and the page's consumption of it must stay in lockstep; `RecordCard` is reused as-is (its `onOpen` provides the edit link).
 
@@ -31,7 +31,7 @@ The Records page (`web/src/pages/Records.tsx`) currently surfaces the `inactive_
 
 ### 1. Update the web `DeleteResult` union (`web/src/api/records.ts`)
 
-Remove the `inactive_default` member; add the `blocked` member carrying `referrers: Array<{recordClass: ManualRecordClass; summary: ManualRecordSummary}>` mirroring the backend (SPEC114MANSTOSTU-002). Keep the `force` call separated behind the repair flag (the existing `opts.force` path).
+Remove the `inactive_default` member; add the `blocked` member carrying `referrers: Array<{recordClass: ManualRecordClass; summary: ManualRecordSummary}>` mirroring the backend (archive/tickets/SPEC114MANSTOSTU-002.md). Keep the `force` call separated behind the repair flag (the existing `opts.force` path).
 
 ### 2. Rework the delete UX (`web/src/pages/Records.tsx`)
 
@@ -46,7 +46,7 @@ Remove the `inactive_default` member; add the `blocked` member carrying `referre
 
 ## Out of Scope
 
-- Backend delete behavior and `repair-log.yaml` (SPEC114MANSTOSTU-002).
+- Backend delete behavior and `repair-log.yaml` (archive/tickets/SPEC114MANSTOSTU-002.md).
 - Beat-template delete UX (SPEC114MANSTOSTU-004).
 - Any new "mark inactive" control — `active` remains editable via the existing `RecordForm` (SPEC-114 §1.1); no new toggle widget is required here.
 

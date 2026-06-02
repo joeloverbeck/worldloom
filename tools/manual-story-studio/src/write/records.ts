@@ -1,4 +1,4 @@
-import { existsSync, unlinkSync } from "node:fs";
+import { existsSync, readFileSync, unlinkSync } from "node:fs";
 import path from "node:path";
 
 import YAML from "yaml";
@@ -6,7 +6,9 @@ import YAML from "yaml";
 import {
   listAllKnownIds,
   readRecord,
+  resolveReferrerSummaries,
   scanReferences,
+  type ManualRecordSummaryWithClass,
   type ReferrerEntry,
 } from "../read/records.js";
 import type { ReadError } from "../read/result.js";
@@ -61,10 +63,9 @@ export type DeleteResult =
   | { ok: false; error: "read_failed"; read_error: ReadError }
   | { outcome: "hard_deleted"; id: string }
   | {
-      outcome: "inactive_default";
+      outcome: "blocked";
       id: string;
-      retiredReason: string;
-      referrers: ReferrerEntry[];
+      referrers: ManualRecordSummaryWithClass[];
     }
   | {
       outcome: "force_deleted";
@@ -79,6 +80,12 @@ export type DeleteResult =
 export interface DeleteOptions {
   force?: boolean;
   now?: () => string;
+}
+
+interface RepairLogEntry {
+  deleted_class_and_id: string;
+  deleted_at: string;
+  referrers_at_deletion: ReferrerEntry[];
 }
 
 function classRoot(
@@ -212,6 +219,11 @@ export function deleteRecord(
 
   if (opts.force === true) {
     assertInsideSandbox(fullPath, root);
+    appendRepairLog(root, {
+      deleted_class_and_id: `${recordClass}/${id}`,
+      deleted_at: now,
+      referrers_at_deletion: referrers,
+    });
     unlinkSync(fullPath);
     return {
       outcome: "force_deleted",
@@ -230,25 +242,33 @@ export function deleteRecord(
     return { outcome: "hard_deleted", id };
   }
 
-  const retiredReason = `force-delete-blocked-by-referrers: ${referrers
-    .map((r) => r.id)
-    .join(", ")}`;
-  const supersededRecord = {
-    ...(existing.value as unknown as Record<string, unknown>),
-    active: false,
-    retired_reason: retiredReason,
-  };
-  safeWriteFile(
-    root,
-    recordRelativePath(recordClass, id),
-    YAML.stringify(supersededRecord),
-  );
+  const summaries = resolveReferrerSummaries(root.absolutePath, id);
+  if (!summaries.ok) {
+    return { ok: false, error: "read_failed", read_error: summaries.error };
+  }
   return {
-    outcome: "inactive_default",
+    outcome: "blocked",
     id,
-    retiredReason,
-    referrers,
+    referrers: summaries.value.filter(
+      (entry) =>
+        !(entry.recordClass === recordClass && entry.summary.id === id),
+    ),
   };
+}
+
+function appendRepairLog(root: ManualStoryRoot, entry: RepairLogEntry): void {
+  const relativePath = "repair-log.yaml";
+  const fullPath = path.join(root.absolutePath, relativePath);
+  let entries: RepairLogEntry[] = [];
+  if (existsSync(fullPath)) {
+    assertInsideSandbox(fullPath, root);
+    const parsed = YAML.parse(readFileSync(fullPath, "utf8")) as unknown;
+    if (Array.isArray(parsed)) {
+      entries = parsed as RepairLogEntry[];
+    }
+  }
+  entries.push(entry);
+  safeWriteFile(root, relativePath, YAML.stringify(entries));
 }
 
 function escapeRegex(s: string): string {
