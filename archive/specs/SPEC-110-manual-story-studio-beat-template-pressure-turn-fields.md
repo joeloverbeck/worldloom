@@ -1,6 +1,6 @@
 # SPEC-110 — Manual Story Studio: Beat Template Pressure/Turn Card Fields
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-06-01
 **Classification:** tooling-adjacent (schema extension on `BeatTemplate` records under `worlds/<slug>/manual-stories/<slug>/records/beat-templates/`; no canon-pipeline integration).
 **Depends on:** archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (typed-error reads).
@@ -213,3 +213,27 @@ Manual verification: open Beat Templates page; create a new template; verify the
 - **Fixture default mapping is one-per-family, not authoritative.** The `move_family → pressure_type / turn_type` default used to fill the updated inline fixtures is a *default* — some move families fit multiple pressures (`bargaining → debt` or `temptation`). The fixture picks one per move family; the author refines per template later.
 - **Filter determinism is preserved.** The new tie-breaker is deterministic (string-equality match of a template's `pressure_type` against the author's `desired_pressure_type` pin), not stochastic. Templates ordered identically under the existing 9-stage filter remain ordered identically; only ties where one template's `pressure_type` matches the pin are broken by the new criterion.
 - **Pressure-type match input is author-supplied.** Items 6/9 do not depend on SPEC-109's current-context: `CurrentContext` (`src/schema/current-context.ts`) has no relationship-axis or pressure-type field, and `filter.ts` does not consume `CurrentContext`. The match input is the author's `desired_pressure_type` directive pin, threaded through `FilterOptionalPins` + the candidate request body.
+
+## Outcome
+
+Completed 2026-06-02. SPEC-110 landed through `archive/tickets/SPEC110MANSTOSTU-001.md` through `archive/tickets/SPEC110MANSTOSTU-007.md`.
+
+What changed:
+
+- Added backend `BeatTemplatePressureType` / `BeatTemplateTurnType` enums, required the 7 new `BeatTemplate` fields, and updated inline fixtures.
+- Extended beat-template validation for pressure/turn enums and `expected_state_review`, including the distinct `beat-templates` rejection.
+- Added `desiredPressureType` filtering, the pressure tie-breaker, and the `pressure: <type>` why-suggested line.
+- Threaded `optional_desired_pressure_type` through the candidate route and frontend request type.
+- Updated the Beat Template form and candidate card surfaces for the 7 new fields.
+- Added `test/templates/beat-template-spec110-fields.test.ts` as the focused SPEC-110 acceptance suite.
+
+Verification:
+
+- `cd tools/manual-story-studio && npm test` — PASS after final ticket, 443 backend tests plus `web` TypeScript check.
+- Focused compiled acceptance lane — PASS: `node --test dist/test/templates/beat-template-spec110-fields.test.js`, 5 tests.
+- Web package checks during UI tickets — PASS: `cd tools/manual-story-studio/web && npm test` and `cd tools/manual-story-studio/web && npm run build`.
+
+Deviations:
+
+- No browser session or component-test runner was available in the package, so AC#8 / AC#9 UI round-trip and card-display verification were proven by TypeScript, Vite build, package tests, and source review rather than an interactive browser run.
+- The optional `target_relationship_axis` pin named in §2 item 9 was not added; no downstream consumer required it, and the implemented pressure pin satisfies the SPEC-110 acceptance surface.
