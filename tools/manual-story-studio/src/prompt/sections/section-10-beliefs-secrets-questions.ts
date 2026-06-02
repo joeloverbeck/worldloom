@@ -20,6 +20,7 @@ export function emitSection10(
   const beliefs: string[] = [];
   const secrets: string[] = [];
   const questions: string[] = [];
+  const activeSecretQuestionIds = new Set(input.active_secrets_questions ?? []);
   for (const r of input.records) {
     if (!r.active) continue;
     const cls = classifyManualRecord(r as ManualRecord);
@@ -38,17 +39,31 @@ export function emitSection10(
       const refsHit = (rec.refs?.characters ?? []).some((id) =>
         input.included_cast_ids.includes(id),
       );
-      if (holderHit || refsHit) {
+      if (holderHit || refsHit || activeSecretQuestionIds.has(rec.id)) {
         secrets.push(secretsTranslator(rec, ctx));
       }
     } else if (cls === "questions") {
-      questions.push(questionsTranslator(r as ManualQuestionRecord));
+      const rec = r as ManualQuestionRecord;
+      if (
+        activeSecretQuestionIds.size === 0 ||
+        activeSecretQuestionIds.has(rec.id)
+      ) {
+        questions.push(questionsTranslator(rec));
+      }
     }
   }
   const blocks: string[] = [];
   if (beliefs.length > 0) blocks.push(`**Beliefs:**\n${beliefs.join("\n")}`);
   if (secrets.length > 0) blocks.push(`**Secrets:**\n${secrets.join("\n")}`);
   if (questions.length > 0) blocks.push(`**Open questions:**\n${questions.join("\n\n")}`);
+  const mustNotReveal = input.must_not_reveal ?? [];
+  if (mustNotReveal.length > 0) {
+    blocks.push(
+      `**Must not reveal:**\n${mustNotReveal
+        .map((id) => `- ${ctx.getRecordTitle(id) ?? id}`)
+        .join("\n")}`,
+    );
+  }
   return blocks.length > 0
     ? blocks.join("\n\n")
     : "(No active beliefs, secrets, or open questions to surface.)";

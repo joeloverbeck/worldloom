@@ -1,6 +1,6 @@
 # SPEC109MANSTOSTU-007: Composer plumbing + compose tests
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `src/prompt/compose.ts` to load current-context after metadata and reshape selector behavior for prompt sections §3 / §7 / §8 / §10 / §11; adds `test/current-context/compose-prefers-context.test.ts`.
@@ -32,34 +32,35 @@ SPEC-109's current-context layer is purely additive at the composer level — wh
 5. Current-context-absent: §7 / §8 / §10 / §11 render against caller-supplied `included_cast` / `included_records` unchanged → compose test (regression).
 6. Byte-identical determinism: same fixture story → same compose output across two runs → compose test (existing-determinism regression).
 
-## What to Change
+## Landed Changes
 
 ### 1. Composer pipeline insertion at `src/prompt/compose.ts`
 
-After Stage 2 (load metadata, line 81-88) and before Stage 3 (load selected cast, line 90), add Stage 2.5: call `readCurrentContext(input.manualStoryRoot)` (from 002). On `{ok: false}` (corrupt), throw with a structured error (parallel to the existing `manual_story_metadata_unavailable` throw at line 83) — the route layer or test harness handles it. On `{ok: true, value: null}`, leave the existing pipeline behavior untouched. On `{ok: true, value: <ctx>}`:
-- Override `input.included_cast` with `ctx.current_cast` when `ctx.current_cast.length > 0` (preserves order).
-- Merge `ctx.pinned_records` into `input.included_records` (deduped) for §8/§10/§11 pickup.
-- Pass `ctx.current_handoff_summary`, `ctx.pov_holder`, `ctx.must_not_reveal`, `ctx.active_secrets_questions` into the `SectionEmitterInput` via new optional fields.
+After Stage 2, added Stage 2.5: call `readCurrentContext(input.manualStoryRoot)` (from 002). On `{ok: false}` (corrupt), throws a structured `current_context_unavailable` error. On `{ok: true, value: null}`, leaves existing pipeline behavior untouched. On `{ok: true, value: <ctx>}`:
+- Uses `ctx.current_cast` as the effective cast selection when non-empty, preserving order.
+- Merges `ctx.pinned_records`, `ctx.active_secrets_questions`, and `ctx.must_not_reveal` into the effective selected records list, deduped.
+- Threads `ctx.current_handoff_summary`, `ctx.pov_holder`, `ctx.must_not_reveal`, and `ctx.active_secrets_questions` into `SectionEmitterInput`.
+- Updates the prompt sidecar draft to reflect effective selections, matching the prompt actually composed.
 
 ### 2. Section-emitter input extension at `src/prompt/types.ts` (or wherever `SectionEmitterInput` is defined)
 
-Add four optional fields to `SectionEmitterInput`: `current_handoff_summary?: string | null`, `pov_holder?: string | null`, `must_not_reveal?: string[]`, `active_secrets_questions?: string[]`. Emitters that don't consume them are unaffected.
+Added four optional fields to `SectionEmitterInput`: `current_handoff_summary?: string | null`, `pov_holder?: string | null`, `must_not_reveal?: string[]`, `active_secrets_questions?: string[]`. Emitters that do not consume them are unaffected.
 
 ### 3. §3 emitter at `src/prompt/sections/section-3-current-situation.ts`
 
-When `input.current_handoff_summary` is set and non-empty: render a "**Author's current handoff:**" sub-block with the verbatim text instead of "**In the moment:**" + "**Pinned situation context:**". Preserve the existing "**Most recent prose (last paragraph):**" sub-block as a trailing fallback. When `current_handoff_summary` is empty / undefined, retain the existing `isCentralOrHigh || referencesIncludedCast` filter unchanged.
+When `input.current_handoff_summary` is set and non-empty, renders a "**Author's current handoff:**" sub-block with the authored text instead of "**In the moment:**" + "**Pinned situation context:**". Preserves the existing "**Most recent prose (last paragraph):**" sub-block as a trailing fallback. When `current_handoff_summary` is empty / undefined, retains the existing `isCentralOrHigh || referencesIncludedCast` filter unchanged.
 
 ### 4. §7 emitter at `src/prompt/sections/section-7-cast-and-voice.ts`
 
-When `input.pov_holder` is set: render a "**POV:**" sub-bullet at the top of the section with the POV holder's title; cast members render in `input.included_cast_ids` order (which the composer has already seeded from `current_cast`).
+When `input.pov_holder` is set, renders a "**POV:**" line at the top of the section with the POV holder's title; cast members render in effective `input.included_cast_ids` order seeded by the composer.
 
 ### 5. §10 emitter at `src/prompt/sections/section-10-beliefs-secrets-questions.ts`
 
-When `input.active_secrets_questions` is non-empty: surface those records explicitly in the beliefs/secrets/questions blocks (intersecting with the existing per-cast filter). When `input.must_not_reveal` is non-empty: append a "**Must not reveal:**" sub-block listing the forbidden-reveal IDs (resolved to titles via the existing translator).
+When `input.active_secrets_questions` is non-empty, surfaces active secrets explicitly even if their holder does not overlap involved cast, and keeps active questions visible from the effective selected records. When `input.must_not_reveal` is non-empty, appends a "**Must not reveal:**" sub-block listing those records by title when resolvable.
 
 ### 6. New acceptance test at `test/current-context/compose-prefers-context.test.ts`
 
-Hybrid test using fixture stories from `test/current-context/fixtures/`. Cover all six verification layers above. Assert byte-identical output across two runs with the same fixture.
+Added a hybrid compose test using a temp fixture story. Covers current-context handoff replacement, §7 cast order + POV, §10 active secret/question + must-not-reveal behavior, absent-context fallback, effective sidecar selections, and byte-identical output across two runs.
 
 ## Files to Touch
 
@@ -103,3 +104,19 @@ Hybrid test using fixture stories from `test/current-context/fixtures/`. Cover a
 
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm test`
+
+## Outcome
+
+Ticket complete. The prompt composer now treats `current-context.yaml` as the primary selector when present while preserving existing selected-input behavior when absent.
+
+## Verification Result
+
+1. Baseline before implementation: `cd tools/manual-story-studio && npm run test:backend` passed with 69 compiled backend test files.
+2. Focused proof after implementation: `cd tools/manual-story-studio && npm run build:backend && node --test dist/test/current-context/compose-prefers-context.test.js` passed.
+3. Backend proof after implementation: `cd tools/manual-story-studio && npm run test:backend` passed with 70 compiled backend test files.
+4. Full package proof after implementation: `cd tools/manual-story-studio && npm test` passed with 427 backend tests and web TypeScript.
+
+## Deviations
+
+1. The composer records effective seeded selections in the prompt sidecar draft when current-context is present, so saved prompt metadata matches the cast and records actually used.
+2. Effective selected records include `active_secrets_questions` and `must_not_reveal` in addition to `pinned_records`; this is required for §10 to render those explicit selector surfaces even when the caller did not manually include them.

@@ -14,5 +14,10 @@ export function emitSection7(
   if (involved.length === 0) {
     return "(No cast members are involved in this moment.)";
   }
-  return involved.map((c) => castTranslator(c, ctx)).join("\n\n");
+  const blocks: string[] = [];
+  if (input.pov_holder) {
+    blocks.push(`**POV:** ${ctx.getCastTitle(input.pov_holder) ?? input.pov_holder}`);
+  }
+  blocks.push(...involved.map((c) => castTranslator(c, ctx)));
+  return blocks.join("\n\n");
 }

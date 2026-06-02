@@ -63,12 +63,18 @@ export function emitSection3(
   input: SectionEmitterInput,
   ctx: TranslatorContext,
 ): string {
+  const currentHandoffRaw = input.current_handoff_summary ?? "";
+  const currentHandoff = currentHandoffRaw.trim();
   const pinned = input.records.filter(
     (r) =>
       isCentralOrHigh(r) || referencesIncludedCast(r, input.included_cast_ids),
   );
   const lines: string[] = [];
-  if (input.included_cast_ids.length > 0) {
+  if (currentHandoff.length > 0) {
+    lines.push("**Author's current handoff:**");
+    lines.push("");
+    lines.push(currentHandoffRaw);
+  } else if (input.included_cast_ids.length > 0) {
     const castTitles = input.cast
       .filter((c) => input.included_cast_ids.includes(c.id))
       .map((c) => c.title);
@@ -76,7 +82,7 @@ export function emitSection3(
       lines.push(`**In the moment:** ${castTitles.join(", ")}.`);
     }
   }
-  if (pinned.length > 0) {
+  if (currentHandoff.length === 0 && pinned.length > 0) {
     lines.push("");
     lines.push("**Pinned situation context:**");
     for (const r of pinned) {
