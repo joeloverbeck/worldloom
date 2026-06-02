@@ -1,3 +1,4 @@
+import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 
 import {
@@ -24,12 +25,41 @@ import {
 } from "./types.js";
 import type { ReadError } from "../read/result.js";
 
-const ALL_BLOCKED_ACTIONS: BlockedAction[] = [
+const CONTENT_POLICY_REL =
+  "docs/prose-renderer-contract/content-policy.md";
+const PROSE_CRAFT_CONTRACT_REL =
+  "docs/manual-story-studio/prose-craft-contract.md";
+
+const ALL_ACTIONS: readonly BlockedAction[] = [
   "prompt_copy",
   "prompt_save",
   "segment_save",
   "manuscript_compile",
-];
+] as const;
+
+const PROMPT_ACTIONS: readonly BlockedAction[] = [
+  "prompt_copy",
+  "prompt_save",
+] as const;
+
+const SEGMENT_ACTIONS: readonly BlockedAction[] = [
+  "segment_save",
+  "manuscript_compile",
+] as const;
+
+const FINDING_DEPENDENCIES: Readonly<Record<string, readonly BlockedAction[]>> = {
+  "metadata-yaml-parse-failed": ALL_ACTIONS,
+  "metadata-read-failed": ALL_ACTIONS,
+  "current-context-yaml-parse-failed": PROMPT_ACTIONS,
+  "content-policy-missing": PROMPT_ACTIONS,
+  "content-policy-unreadable": PROMPT_ACTIONS,
+  "prose-craft-contract-missing": PROMPT_ACTIONS,
+  "prose-craft-contract-unreadable": PROMPT_ACTIONS,
+  "segment-sidecar-missing": SEGMENT_ACTIONS,
+  "segment-sidecar-malformed": SEGMENT_ACTIONS,
+  "segment-body-missing": SEGMENT_ACTIONS,
+  "segment-body-read-failed": SEGMENT_ACTIONS,
+};
 
 export function computeHealth(manualStoryRoot: string): HealthReport {
   const findings: HealthFinding[] = [];
@@ -42,7 +72,7 @@ export function computeHealth(manualStoryRoot: string): HealthReport {
   return {
     status,
     findings,
-    blocked_actions: status === "blocked" ? ALL_BLOCKED_ACTIONS : [],
+    blocked_actions: deriveBlockedActions(findings),
   };
 }
 
@@ -61,15 +91,18 @@ function runFilePass(root: string): HealthFinding[] {
     }
   }
 
+  let segmentFilesHealthy = true;
   for (const segmentId of metadata.value.segment_order) {
     const sidecar = readSegmentSidecar({ manualStoryRoot: root, segmentId });
     if (!sidecar.ok) {
       findings.push(segmentSidecarFinding(sidecar.error, segmentId));
+      segmentFilesHealthy = false;
     }
 
     const body = readSegmentBody({ manualStoryRoot: root, segmentId });
     if (!body.ok) {
       findings.push(segmentBodyFinding(body.error, segmentId));
+      segmentFilesHealthy = false;
     }
   }
 
@@ -82,6 +115,16 @@ function runFilePass(root: string): HealthFinding[] {
       message: "manuscript.md could not be read",
       repair_hint: manuscript.error.repair_hint,
     });
+  }
+  if (segmentFilesHealthy && metadata.value.segment_order.length > 0) {
+    const freshnessFinding = manuscriptFreshnessFinding(
+      root,
+      metadata.value.segment_order,
+      manuscript.ok && manuscript.value.manuscript_present
+        ? manuscript.value.manuscript_path
+        : null,
+    );
+    if (freshnessFinding) findings.push(freshnessFinding);
   }
 
   const currentContext = readCurrentContext(root);
@@ -145,6 +188,8 @@ function runReferencePass(root: string): HealthFinding[] {
   if (!known.ok) return [];
 
   const findings: HealthFinding[] = [];
+  findings.push(...composeRequiredDocFindings(root));
+
   for (const cls of MANUAL_RECORD_CLASSES) {
     const summaries = listRecords(root, cls, { includeArchived: true });
     if (!summaries.ok) continue;
@@ -186,6 +231,123 @@ function runReferencePass(root: string): HealthFinding[] {
     }
   }
   return findings;
+}
+
+function deriveBlockedActions(
+  findings: ReadonlyArray<HealthFinding>,
+): BlockedAction[] {
+  const blocked = new Set<BlockedAction>();
+  for (const finding of findings) {
+    if (finding.severity !== "blocking") continue;
+    for (const action of FINDING_DEPENDENCIES[finding.code] ?? []) {
+      blocked.add(action);
+    }
+  }
+  return ALL_ACTIONS.filter((action) => blocked.has(action));
+}
+
+function composeRequiredDocFindings(root: string): HealthFinding[] {
+  const repoRoot = path.resolve(root, "../../../..");
+  return [
+    composeRequiredDocFinding(
+      repoRoot,
+      CONTENT_POLICY_REL,
+      "content-policy",
+      "Content policy document",
+    ),
+    composeRequiredDocFinding(
+      repoRoot,
+      PROSE_CRAFT_CONTRACT_REL,
+      "prose-craft-contract",
+      "Prose craft contract document",
+    ),
+  ].filter((finding): finding is HealthFinding => finding !== null);
+}
+
+function composeRequiredDocFinding(
+  repoRoot: string,
+  relativePath: string,
+  codePrefix: "content-policy" | "prose-craft-contract",
+  label: string,
+): HealthFinding | null {
+  const absolutePath = path.join(repoRoot, relativePath);
+  if (!existsSync(absolutePath)) {
+    return {
+      severity: "blocking",
+      code: `${codePrefix}-missing`,
+      path: absolutePath,
+      message: `${label} is missing`,
+      repair_hint: `Restore ${relativePath}; prompt copy/save depends on this document.`,
+    };
+  }
+  try {
+    statSync(absolutePath);
+  } catch {
+    return {
+      severity: "blocking",
+      code: `${codePrefix}-unreadable`,
+      path: absolutePath,
+      message: `${label} could not be inspected`,
+      repair_hint: `Check file permissions for ${relativePath}; prompt copy/save depends on this document.`,
+    };
+  }
+  return null;
+}
+
+function manuscriptFreshnessFinding(
+  root: string,
+  segmentOrder: readonly string[],
+  manuscriptPath: string | null,
+): HealthFinding | null {
+  if (!manuscriptPath) {
+    return {
+      severity: "error",
+      code: "manuscript-stale",
+      path: path.join(root, "manuscript.md"),
+      message: "manuscript.md has not been compiled for the current segment order",
+      repair_hint: "Run manuscript compile to regenerate manuscript.md from segment_order.",
+    };
+  }
+
+  let manuscriptMtime: number;
+  try {
+    manuscriptMtime = statSync(manuscriptPath).mtimeMs;
+  } catch {
+    return {
+      severity: "error",
+      code: "manuscript-stale",
+      path: manuscriptPath,
+      message: "manuscript.md could not be checked for freshness",
+      repair_hint: "Run manuscript compile to regenerate manuscript.md from segment_order.",
+    };
+  }
+
+  let newestSegmentMtime = 0;
+  for (const segmentId of segmentOrder) {
+    for (const suffix of [".md", ".yaml"] as const) {
+      const segmentPath = path.join(root, "segments", `${segmentId}${suffix}`);
+      try {
+        newestSegmentMtime = Math.max(
+          newestSegmentMtime,
+          statSync(segmentPath).mtimeMs,
+        );
+      } catch {
+        // Missing/malformed segment files are reported by the file pass. Do
+        // not duplicate those as freshness findings.
+      }
+    }
+  }
+
+  if (newestSegmentMtime > manuscriptMtime) {
+    return {
+      severity: "error",
+      code: "manuscript-stale",
+      path: manuscriptPath,
+      message: "manuscript.md is older than one or more ordered segments",
+      repair_hint: "Run manuscript compile to regenerate manuscript.md from segment_order.",
+    };
+  }
+  return null;
 }
 
 function metadataFinding(error: ReadError): HealthFinding {

@@ -15,6 +15,7 @@ type FixtureRoot = ReturnType<typeof resolveManualStoryRoot>;
 
 function mkFixture(): { tempRoot: string; manualStoryRoot: FixtureRoot } {
   const tempRoot = mkdtempSync(path.join(os.tmpdir(), "manual-health-"));
+  writeComposeDocs(tempRoot);
   const manualStoryRoot = resolveManualStoryRoot(
     tempRoot,
     "fixture-world",
@@ -23,6 +24,21 @@ function mkFixture(): { tempRoot: string; manualStoryRoot: FixtureRoot } {
   mkdirSync(manualStoryRoot.absolutePath, { recursive: true });
   writeMetadata(manualStoryRoot, []);
   return { tempRoot, manualStoryRoot };
+}
+
+function writeComposeDocs(repoRoot: string): void {
+  const contentPolicyPath = path.join(
+    repoRoot,
+    "docs/prose-renderer-contract/content-policy.md",
+  );
+  const proseCraftPath = path.join(
+    repoRoot,
+    "docs/manual-story-studio/prose-craft-contract.md",
+  );
+  mkdirSync(path.dirname(contentPolicyPath), { recursive: true });
+  mkdirSync(path.dirname(proseCraftPath), { recursive: true });
+  writeFileSync(contentPolicyPath, "Content policy\n");
+  writeFileSync(proseCraftPath, "Prose craft contract\n");
 }
 
 function writeMetadata(root: FixtureRoot, segmentOrder: string[]): void {
@@ -134,7 +150,10 @@ test("computeHealth blocks on missing segment sidecar", () => {
     assert.equal(report.findings.length, 1);
     assert.equal(report.findings[0]?.code, "segment-sidecar-missing");
     assert.equal(report.findings[0]?.severity, "blocking");
-    assert.ok(report.blocked_actions.includes("manuscript_compile"));
+    assert.deepEqual(report.blocked_actions, [
+      "segment_save",
+      "manuscript_compile",
+    ]);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
