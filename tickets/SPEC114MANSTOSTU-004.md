@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` beat-template surfaces (`web/src/pages/BeatTemplates.tsx`, `web/src/api/beat-templates.ts`, `src/server/routes/beat-templates.ts`); no impact on world canon or story-bundle pipeline (canon-fenced package).
-**Deps**: archive/tickets/SPEC114MANSTOSTU-001.md, archive/tickets/SPEC114MANSTOSTU-002.md
+**Deps**: archive/tickets/SPEC114MANSTOSTU-001.md, archive/tickets/SPEC114MANSTOSTU-002.md, archive/tickets/SPEC114MANSTOSTU-003.md
 
 ## Problem
 
@@ -19,7 +19,7 @@
 
 ## Architecture Check
 
-1. Mirroring the Records-page block dialog (SPEC114MANSTOSTU-003) for templates keeps one delete-lifecycle mental model across both surfaces and prevents the split-surface bug where a shared backend returns an outcome the template UI cannot handle — cleaner than carving `beat-templates` out of the shared `deleteRecord` to preserve the rejected `inactive_default` behavior (which would re-fork the lifecycle).
+1. Mirroring the Records-page block dialog (archive/tickets/SPEC114MANSTOSTU-003.md) for templates keeps one delete-lifecycle mental model across both surfaces and prevents the split-surface bug where a shared backend returns an outcome the template UI cannot handle — cleaner than carving `beat-templates` out of the shared `deleteRecord` to preserve the rejected `inactive_default` behavior (which would re-fork the lifecycle).
 2. No backwards-compatibility shim: `inactive_default` is removed from `BeatTemplateDeleteResult` outright; the template route's force handling is tightened to the repair flag, not aliased.
 
 ## Verification Layers
@@ -32,11 +32,11 @@
 
 ### 1. Update `BeatTemplateDeleteResult` (`web/src/api/beat-templates.ts`)
 
-Remove `inactive_default` from the outcome union; add the `blocked` member carrying `referrers: Array<{recordClass, summary}>` mirroring the records client (SPEC114MANSTOSTU-003 §1).
+Remove `inactive_default` from the outcome union; add the `blocked` member carrying `referrers: Array<{recordClass, summary}>` mirroring the records client (archive/tickets/SPEC114MANSTOSTU-003.md §1).
 
 ### 2. Rework the template delete UX (`web/src/pages/BeatTemplates.tsx`)
 
-Replace the `inactive_default` branch with the block-dialog + referrer-card pattern from `Records.tsx` (SPEC114MANSTOSTU-003 §2); move any force affordance behind the same warning-gated repair disclosure.
+Replace the `inactive_default` branch with the block-dialog + referrer-card pattern from `Records.tsx` (archive/tickets/SPEC114MANSTOSTU-003.md §2); move any force affordance behind the same warning-gated repair disclosure.
 
 ### 3. Confine force in the template route (`src/server/routes/beat-templates.ts`)
 
@@ -51,7 +51,7 @@ Require the explicit repair flag for force-delete (matching archive/tickets/SPEC
 ## Out of Scope
 
 - Backend `deleteRecord` rework and `repair-log.yaml` (archive/tickets/SPEC114MANSTOSTU-002.md) and the archived referrer-scan extension (archive/tickets/SPEC114MANSTOSTU-001.md) — consumed here, not re-implemented.
-- Records-page UX (SPEC114MANSTOSTU-003).
+- Records-page UX (archive/tickets/SPEC114MANSTOSTU-003.md).
 - Beat-template create/edit/list behavior — only delete is in scope.
 
 ## Acceptance Criteria

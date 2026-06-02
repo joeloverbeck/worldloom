@@ -1,6 +1,6 @@
 # SPEC114MANSTOSTU-003: Records-page delete UX — block dialog with referrer cards
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` web client (`web/src/api/records.ts`, `web/src/pages/Records.tsx`); no impact on world canon or story-bundle pipeline (canon-fenced package).
@@ -27,17 +27,19 @@ The Records page (`web/src/pages/Records.tsx`) currently surfaces the `inactive_
 2. Normal Delete with referrers shows referrer cards with edit links + "Resolve these references first" → component render assertion (cards mount from `blocked.referrers`).
 3. "Force delete anyway" is not the default next click → grep-proof that the force affordance is rendered only inside the warning-gated repair disclosure, not in the primary block dialog.
 
-## What to Change
+## Landed Changes
 
-### 1. Update the web `DeleteResult` union (`web/src/api/records.ts`)
+### 1. Updated the web `DeleteResult` union (`web/src/api/records.ts`)
 
-Remove the `inactive_default` member; add the `blocked` member carrying `referrers: Array<{recordClass: ManualRecordClass; summary: ManualRecordSummary}>` mirroring the backend (archive/tickets/SPEC114MANSTOSTU-002.md). Keep the `force` call separated behind the repair flag (the existing `opts.force` path).
+Removed the `inactive_default` member and added the `blocked` member carrying `referrers: Array<{recordClass: ManualRecordClass; summary: ManualRecordSummary}>` mirroring the backend (archive/tickets/SPEC114MANSTOSTU-002.md). The client force path now sends `?force=true&mode=repair`, keeping force-delete behind the explicit repair flag established by the backend route.
 
-### 2. Rework the delete UX (`web/src/pages/Records.tsx`)
+### 2. Reworked the delete UX (`web/src/pages/Records.tsx`)
 
-- Replace the `inactive_default` alert + inline force button with a **block dialog**: render each `blocked.referrers` entry as a `RecordCard` (title, class, summary) whose `onOpen` navigates to that referrer for editing; header message "Resolve these references first."
-- Move "Force delete anyway" out of the default flow into a clearly-marked, warning-gated repair disclosure (e.g., a collapsed "Repair: force delete…" affordance), never the default next click after a block.
-- Keep the `force_deleted` confirmation surface.
+Replaced the `inactive_default` alert + inline force button with a block panel headed "Resolve these references first." Each `blocked.referrers` entry renders through the existing `RecordCard` with class/title/summary and opens the referrer for editing. "Force delete anyway" now lives inside a collapsed repair disclosure; the `force_deleted` confirmation surface remains.
+
+### 3. Added a source-level UX regression (`test/web/records-delete-ux.test.ts`)
+
+Added a focused static regression matching this package's existing web test style. It asserts the records client/page no longer reference `inactive_default`, the block branch renders `RecordCard` referrers, and the force-delete button is inside the blocked repair disclosure.
 
 ## Files to Touch
 
@@ -73,3 +75,20 @@ Remove the `inactive_default` member; add the `blocked` member carrying `referre
 1. `cd tools/manual-story-studio && npm test`
 2. `grep -n "inactive_default" tools/manual-story-studio/web/src/pages/Records.tsx tools/manual-story-studio/web/src/api/records.ts` → expect zero matches.
 3. Full `npm test` (not `test:backend`) is the correct boundary — this ticket's surface is the web `tsc --noEmit` pass, which `test:backend` does not run.
+
+## Outcome
+
+Completed on 2026-06-02.
+
+The Records page now consumes the SPEC-114 backend delete contract: unreferenced deletes clear the selection after `hard_deleted`, referenced deletes show a referrer-card blocker instead of auto-archive messaging, and force-delete is only reachable from a collapsed repair disclosure that sends the repair mode required by the records route.
+
+## Verification Result
+
+- `cd tools/manual-story-studio && npm run test` — PASS: 470 backend/static tests passed, followed by web `tsc -p tsconfig.json --noEmit`.
+- `rg -n "inactive_default" tools/manual-story-studio/web/src/pages/Records.tsx tools/manual-story-studio/web/src/api/records.ts` — PASS: no matches.
+- `rg -n 'Force delete anyway|<details|deleteOutcome\.outcome === "blocked"|<RecordCard' tools/manual-story-studio/web/src/pages/Records.tsx tools/manual-story-studio/test/web/records-delete-ux.test.ts` — PASS: block branch, referrer-card render, collapsed repair disclosure, and force action are present.
+- `git diff --check` — PASS.
+
+## Deviations
+
+- The requested block-dialog proof landed as a source-level regression test rather than a runtime RTL/browser test because this package's current web test boundary is TypeScript plus source assertions; no component test harness is present.

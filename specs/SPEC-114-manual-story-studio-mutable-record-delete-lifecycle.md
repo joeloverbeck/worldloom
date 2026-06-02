@@ -12,7 +12,7 @@
 
 ## Implementation Notes
 
-- **2026-06-02:** `archive/tickets/SPEC114MANSTOSTU-001.md` and `archive/tickets/SPEC114MANSTOSTU-002.md` landed the backend/read-layer portion: `scanReferences` now covers current-context and template sidecar referrers, `deleteRecord` now hard-deletes unreferenced records, blocks referenced records with referrer summaries, and persists repair-mode force-deletes to `repair-log.yaml`. Remaining frontend, beat-template UI/route parity, and docs bullets below are still active until their tickets land. Historical prose below may still describe the pre-implementation `inactive_default` behavior as intake evidence.
+- **2026-06-02:** `archive/tickets/SPEC114MANSTOSTU-001.md`, `archive/tickets/SPEC114MANSTOSTU-002.md`, and `archive/tickets/SPEC114MANSTOSTU-003.md` landed the read/backend/records-page portion: `scanReferences` now covers current-context and template sidecar referrers, `deleteRecord` now hard-deletes unreferenced records, blocks referenced records with referrer summaries, persists repair-mode force-deletes to `repair-log.yaml`, and the Records page now shows a referrer-card blocker with repair force-delete behind a collapsed disclosure. Remaining beat-template UI/route parity and docs bullets below are still active until their tickets land. Historical prose below may still describe the pre-implementation `inactive_default` behavior as intake evidence.
 
 ## 1. Context & Motivation
 

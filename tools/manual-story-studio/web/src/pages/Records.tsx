@@ -230,6 +230,7 @@ export function Records() {
     if (!worldSlug || !msSlug || !selectedId) return;
     const result = await apiDelete(worldSlug, msSlug, activeClass, selectedId, {
       force: true,
+      mode: "repair",
     });
     setDeleteOutcome(result);
     if ("outcome" in result && result.outcome === "force_deleted") {
@@ -395,15 +396,48 @@ export function Records() {
               </button>
               {deleteOutcome &&
               "outcome" in deleteOutcome &&
-              deleteOutcome.outcome === "inactive_default" ? (
-                <section role="alert" style={{ background: "#ffe", padding: 8 }}>
-                  <p>
-                    Record was archived (active:false) because it has referrers:{" "}
-                    {deleteOutcome.referrers.map((r) => r.id).join(", ")}
-                  </p>
-                  <button type="button" onClick={handleForceDelete}>
-                    Force delete anyway
-                  </button>
+              deleteOutcome.outcome === "blocked" ? (
+                <section
+                  role="alert"
+                  aria-labelledby="record-delete-blocked-heading"
+                  style={{
+                    background: "#fff7e6",
+                    border: "1px solid #d6822a",
+                    padding: 10,
+                    marginTop: 8,
+                  }}
+                >
+                  <h4 id="record-delete-blocked-heading" style={{ margin: "0 0 8px" }}>
+                    Resolve these references first.
+                  </h4>
+                  <div>
+                    {deleteOutcome.referrers.map((referrer) => (
+                      <RecordCard
+                        key={`${referrer.recordClass}:${referrer.summary.id}`}
+                        summary={referrer.summary}
+                        recordClass={referrer.recordClass}
+                        compact
+                        onOpen={(id) => {
+                          setActiveClass(referrer.recordClass);
+                          setSelectedId(id);
+                          setCreating(false);
+                          setSaveError(null);
+                          setDeleteOutcome(null);
+                          setDetailError(null);
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <details style={{ marginTop: 8 }}>
+                    <summary>Repair: force delete this record</summary>
+                    <p>
+                      This removes the record despite live references and writes a
+                      repair-log entry.
+                    </p>
+                    <button type="button" onClick={handleForceDelete}>
+                      Force delete anyway
+                    </button>
+                  </details>
                 </section>
               ) : null}
               {deleteOutcome &&
