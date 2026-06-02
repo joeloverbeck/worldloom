@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-109-manual-story-studio-current-context-layer.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC109MANSTOSTU-002.md",
+  "last_ticket": "archive/tickets/SPEC109MANSTOSTU-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "460f1447cc38903bc3de5152b3c4da4af867dfcf",
+  "last_work_commit": "c68b83a92920a134eb56ff2c610f3f31c6186245",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC109MANSTOSTU-003.md",
+  "next_target": "tickets/SPEC109MANSTOSTU-004.md",
   "queue": [
-    "tickets/SPEC109MANSTOSTU-003.md",
     "tickets/SPEC109MANSTOSTU-004.md",
     "tickets/SPEC109MANSTOSTU-005.md",
     "tickets/SPEC109MANSTOSTU-006.md",
@@ -24,7 +23,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: SPEC109MANSTOSTU-002 archived; cd tools/manual-story-studio && npm run test:backend passed after TS test-narrowing fix; cd tools/manual-story-studio && npm test passed with 401 backend tests and web tsc",
+  "proof_state": "clean: SPEC109MANSTOSTU-003 archived; cd tools/manual-story-studio && npm run test:backend passed with 66 backend files; cd tools/manual-story-studio && npm test passed with 411 backend tests and web tsc",
   "dirty_state": "tracked worktree clean after state commit; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from prior runs",
   "updated_at": "2026-06-02"
 }
