@@ -1,6 +1,6 @@
 # SPEC115MANSTOSTU-002: GET-only world-source routes + read-only guarantee
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new route module `tools/manual-story-studio/src/server/routes/world-source.ts` (GET-only) + registration in `src/server/http.ts`. No new write surface.
@@ -80,3 +80,28 @@ The manual-story-studio server registers no route for browsing world source. Exp
 
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm run build`
+
+## Outcome
+
+Completed on 2026-06-02.
+
+Added `tools/manual-story-studio/src/server/routes/world-source.ts` and registered it from `tools/manual-story-studio/src/server/http.ts` alongside the existing read routes, outside `wrapRouterWritable`. The route surface is GET-only:
+
+1. `GET /api/worlds/:worldSlug/source` returns world-source item summaries without `raw_text`.
+2. `GET /api/worlds/:worldSlug/source/item?path=<relative item path>` returns one raw source item.
+
+Both endpoints validate the world slug before filesystem lookup and resolve world content through the archived `readWorldSource` reader. The item endpoint rejects missing paths, absolute paths, backslash traversal, and any raw `..` path segment before matching the selector against enumerated in-world source items. No request body is consumed and no write route or copy-to-world path was added.
+
+Added `tools/manual-story-studio/test/server/world-source-readonly.test.ts` covering GET-only registration via the write-scope guard, list summaries, raw item reads, absolute/traversal selector rejection, and invalid slug rejection.
+
+## Verification Result
+
+1. PASS: `cd tools/manual-story-studio && npm run build:backend` — TypeScript backend compile succeeded.
+2. PASS: `cd tools/manual-story-studio && node --test dist/test/server/world-source-readonly.test.js` — focused route suite passed 5/5 tests.
+3. PASS: `cd tools/manual-story-studio && npm run test:backend` — backend/static suite passed 84/84 compiled tests, including the new route test.
+4. PASS: `cd tools/manual-story-studio && npm run build` — web install/build, Vite production build, and backend compile all succeeded.
+
+## Deviations
+
+1. The list endpoint intentionally omits `raw_text` and the item endpoint returns raw text on demand. This implements the ticket's "summaries + on-demand raw text" route contract and avoids eager raw-text loading for the frontend.
+2. Slash-bearing traversal such as `/api/worlds/../test-world/source` is rejected by Fastify routing before this handler runs; the route-level invalid-slug test uses a malformed single segment (`Bad%20Slug`) to prove handler validation.
