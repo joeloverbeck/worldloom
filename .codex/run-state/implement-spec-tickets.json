@@ -1,22 +1,20 @@
 {
   "originating_spec": "specs/SPEC-110-manual-story-studio-beat-template-pressure-turn-fields.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC110MANSTOSTU-006.md",
+  "last_ticket": "archive/tickets/SPEC110MANSTOSTU-007.md",
   "last_result": "completed_archived",
-  "last_work_commit": "3cb56d80e36a8997ebeeea692c4ab474565bd1cd",
+  "last_work_commit": "d9d1bfc8bcc4d764a6162e083e4c224056519942",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC110MANSTOSTU-007.md",
-  "queue": [
-    "tickets/SPEC110MANSTOSTU-007.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "ready_for_spec_archive",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: SPEC110MANSTOSTU-006 archived after web npm test, web npm run build, and package npm test passed; active downstream dep repaired to archive/tickets/SPEC110MANSTOSTU-006.md",
+  "proof_state": "clean: SPEC110MANSTOSTU-007 archived after npm run build:backend, focused acceptance test, and package npm test passed; ticket queue empty and ready for SPEC-110 archival",
   "dirty_state": "tracked worktree expected clean after state commit; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from prior runs",
   "updated_at": "2026-06-02"
 }
