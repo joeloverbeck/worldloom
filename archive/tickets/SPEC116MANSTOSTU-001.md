@@ -72,7 +72,7 @@ Rewrite the two `included_template_path` body-field tests (line 444 "accepts leg
 - Any change to the write-scope guard or to `assertInsideSandbox`'s existing write-side behavior (correct; this ticket reuses them on a read surface).
 - The 5-value `prompt_mode` redesign and the inclusion ledger (SPEC-113).
 - Frontend template-picker UX (SPEC-112 / SPEC-113); the frontend already composes via `selected_template`.
-- Dependency-scoped health gating and compose-doc presence checks (SPEC116MANSTOSTU-002).
+- Dependency-scoped health gating and compose-doc presence checks (archive/tickets/SPEC116MANSTOSTU-002.md).
 
 ## Acceptance Criteria
 

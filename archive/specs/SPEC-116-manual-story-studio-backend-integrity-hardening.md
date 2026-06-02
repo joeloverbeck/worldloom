@@ -1,6 +1,6 @@
 # SPEC-116 — Manual Story Studio: Backend Integrity Hardening — Template-Path Containment, Scoped Health Gating, Prompt-Input Validation
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (backend route + health + sandbox changes only; no canon-pipeline integration).
 **Depends on:** archive/specs/SPEC-100-manual-story-studio-package-boundary.md (consumes the write-sandbox `assertInsideSandbox` containment primitive), archive/specs/SPEC-105-manual-story-studio-fail-fast-state-integrity.md (consumes the `/health` compute + blocked-actions gate it now refines).
@@ -111,3 +111,24 @@ This spec fixes 1.1 (mandatory; security) and the load-bearing parts of 1.2 (dep
 5. A blocking finding on a segment sidecar blocks `segment_save`/`manuscript_compile` but leaves the prompt actions allowed when prompt inputs are healthy.
 6. A stale or missing `manuscript.md` (with non-empty `segment_order`) produces a `degraded` finding and blocks nothing.
 7. `npm test` is green end to end; `npm run build` succeeds; `web/src/types/manual-story.ts` no longer declares `included_template_path` (the frontend already composes via `selected_template`).
+
+## 8. Outcome
+
+Completed: 2026-06-02
+
+Implemented through:
+
+- `archive/tickets/SPEC116MANSTOSTU-001.md` — removed the raw `included_template_path` request-body surface, validated `selected_template` as `mtemplate-<integer>`, contained route-resolved template reads with `assertInsideSandbox`, added compose-time read containment, removed the dead web request field, and added containment tests.
+- `archive/tickets/SPEC116MANSTOSTU-002.md` — replaced all-or-nothing health blocking with per-action dependency mapping, added health findings for missing/unreadable content-policy and prose-craft contract docs, added advisory manuscript freshness findings, and added dependency-scoped health tests.
+
+Verification:
+
+- PASS — `cd tools/manual-story-studio && npm run test:backend` passed after each ticket (`74` compiled backend tests after ticket 001; `75` after ticket 002).
+- PASS — `cd tools/manual-story-studio && npm test` passed after each ticket (`450` backend tests plus web typecheck after ticket 001; `454` backend tests plus web typecheck after ticket 002).
+- PASS — `cd tools/manual-story-studio && npm run build` passed after each ticket, including web production build and backend TypeScript build.
+- PASS — archive/reference sweeps found no stale active-path references for SPEC116MANSTOSTU-001 or SPEC116MANSTOSTU-002 after ticket archival.
+
+Deviations:
+
+- No separate read-side sandbox helper was introduced; the existing `assertInsideSandbox` primitive was reused directly for route and compose read containment.
+- Health dependency surfaces are derived from stable finding `code` values rather than a new public `HealthFinding.surface` field, preserving the health response shape while making the dependency map explicit and test-covered.

@@ -55,7 +55,7 @@ The backend already supports this cheaply: `listRecords` (`src/read/records.ts`)
 - **One reusable picker, many constrained mounts.** A single `<RecordPicker>` with `classes`, `mode (single|multi)`, and `seed (pre-surface ids)` props avoids per-field bespoke selectors and keeps the card presentation consistent (the same card SPEC-113 and SPEC-114 reuse).
 - **Cards, not bare options.** Per report §12, "Pick a consequence should be as good as pick a character" — non-cast records need the same card richness (summary, tags, involved cast) cast records get, or the author cannot tell two consequences apart.
 - **Client-side filter for v1.** A manual story is a few-hundred records at most; fetching class summaries (the data SPEC-109 / SPEC-111 already load) and filtering in-memory avoids a new search backend and keeps the no-index discipline. Revisit only if a real story proves it slow (report §38).
-- **IDs survive as the stored value and as a disclosure.** The picker changes the *entry* surface, not the persisted shape — `current-context.yaml` and record `refs` still store id arrays. This keeps the artifact freely hand-editable (consistent with the author's editable-artifact preference) and keeps SPEC-116 / health validation unchanged.
+- **IDs survive as the stored value and as a disclosure.** The picker changes the *entry* surface, not the persisted shape — `current-context.yaml` and record `refs` still store id arrays. This keeps the artifact freely hand-editable (consistent with the author's editable-artifact preference) and keeps archived SPEC-116 / health validation unchanged.
 - **Referenced-by count is deferred, not faked.** Showing a wrong/zero count is worse than showing none; defer to SPEC-114's referrer pass.
 
 ## 4. Files to touch
