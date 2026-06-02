@@ -84,8 +84,8 @@ export function BeatTemplates() {
 
   async function handleSave(
     template: Omit<BeatTemplate, "id"> | BeatTemplate,
-  ): Promise<void> {
-    if (!worldSlug || !msSlug) return;
+  ): Promise<boolean> {
+    if (!worldSlug || !msSlug) return false;
     setSaveErrors([]);
     if (creating) {
       const result = await createBeatTemplate(
@@ -96,10 +96,11 @@ export function BeatTemplates() {
       if (result.ok) {
         setCreating(false);
         setSelectedId(result.id);
+        return true;
       } else if (result.error === "validation_failed") {
         setSaveErrors(result.violations);
       }
-      return;
+      return false;
     }
     if (selectedId && "id" in template) {
       const result = await updateBeatTemplate(
@@ -110,10 +111,13 @@ export function BeatTemplates() {
       );
       if (result.ok) {
         setSelectedTemplate(result.template);
+        return true;
       } else if (result.error === "validation_failed") {
         setSaveErrors(result.violations);
       }
+      return false;
     }
+    return false;
   }
 
   async function handleDelete(force = false): Promise<void> {

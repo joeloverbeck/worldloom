@@ -1,4 +1,8 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import {
+  Outlet,
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router-dom";
 
 import { HealthBanner } from "./components/HealthBanner.js";
 import { StoryPageNav } from "./components/StoryPageNav.js";
@@ -30,75 +34,89 @@ function Banner() {
   );
 }
 
-export function App() {
+function Shell() {
   return (
-    <BrowserRouter
-      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-    >
+    <>
       <Banner />
       <HealthBanner />
       <StoryPageNav />
       <main>
-        <Routes>
-          <Route path="/" element={<Worlds />} />
-          <Route
-            path="/worlds/:worldSlug/manual-stories"
-            element={<ManualStories />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/new"
-            element={<CreateManualStory />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/dashboard"
-            element={<Dashboard />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/records"
-            element={<Records />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/cast"
-            element={<CastAndProfiles />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/moment-composer"
-            element={<MomentComposer />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/prompts/preview"
-            element={<PromptPreview />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/paste-prose"
-            element={<PasteProse />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/manuscript"
-            element={<Manuscript />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/repair"
-            element={<RepairSegments />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/contract"
-            element={<EditContract />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/current-context/edit"
-            element={<EditCurrentContext />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/prompt-history"
-            element={<PromptHistory />}
-          />
-          <Route
-            path="/worlds/:worldSlug/manual-stories/:msSlug/beat-templates"
-            element={<BeatTemplates />}
-          />
-        </Routes>
+        <Outlet />
       </main>
-    </BrowserRouter>
+    </>
   );
+}
+
+const router = createBrowserRouter(
+  [
+    {
+      element: <Shell />,
+      children: [
+        { path: "/", element: <Worlds /> },
+        {
+          path: "/worlds/:worldSlug/manual-stories",
+          element: <ManualStories />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/new",
+          element: <CreateManualStory />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/dashboard",
+          element: <Dashboard />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/records",
+          element: <Records />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/cast",
+          element: <CastAndProfiles />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/moment-composer",
+          element: <MomentComposer />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/prompts/preview",
+          element: <PromptPreview />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/paste-prose",
+          element: <PasteProse />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/manuscript",
+          element: <Manuscript />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/repair",
+          element: <RepairSegments />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/contract",
+          element: <EditContract />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/current-context/edit",
+          element: <EditCurrentContext />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/prompt-history",
+          element: <PromptHistory />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/beat-templates",
+          element: <BeatTemplates />,
+        },
+      ],
+    },
+  ],
+  {
+    future: { v7_relativeSplatPath: true },
+  },
+);
+
+export function App() {
+  return <RouterProvider router={router} future={{ v7_startTransition: true }} />;
 }

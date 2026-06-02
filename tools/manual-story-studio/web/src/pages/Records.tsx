@@ -155,18 +155,19 @@ export function Records() {
   async function handleSave(
     record: ManualRecord,
     opts?: { overrideBrokenRefs?: boolean },
-  ) {
-    if (!worldSlug || !msSlug) return;
+  ): Promise<boolean> {
+    if (!worldSlug || !msSlug) return false;
     setSaveError(null);
     if (creating) {
       const result = await apiCreate(worldSlug, msSlug, activeClass, record, opts);
       if (result.ok) {
         setCreating(false);
         setSelectedId(result.id);
+        return true;
       } else {
         setSaveError(result);
+        return false;
       }
-      return;
     }
     if (selectedId) {
       const result = await apiUpdate(
@@ -179,10 +180,13 @@ export function Records() {
       );
       if (result.ok) {
         setSelectedRecord(result.record);
+        return true;
       } else if (result.error !== "not_found") {
         setSaveError(result);
       }
+      return false;
     }
+    return false;
   }
 
   async function handleDelete() {

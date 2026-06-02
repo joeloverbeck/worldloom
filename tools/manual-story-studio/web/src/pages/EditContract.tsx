@@ -5,6 +5,7 @@ import {
   readMetadata as apiReadMetadata,
   updateMetadata as apiUpdateMetadata,
 } from "../api/records.js";
+import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import type {
   ManualStoryContentIntensity,
   ManualStoryDialogueDensity,
@@ -112,6 +113,11 @@ export function EditContract() {
     };
   }, [worldSlug, msSlug]);
 
+  const unsavedChanges = useUnsavedChanges(metadata?.story_contract ?? null, {
+    enabled: metadata !== null && !loading && !loadFailed,
+    resetKeys: [worldSlug, msSlug, metadata?.updated_at ?? "unloaded"],
+  });
+
   if (!worldSlug || !msSlug) {
     return <p role="alert">Missing world or manual story slug.</p>;
   }
@@ -164,6 +170,7 @@ export function EditContract() {
     try {
       const result = await apiUpdateMetadata(worldSlug, msSlug, metadata);
       if (result.ok) {
+        unsavedChanges.reset();
         navigate(`/worlds/${worldSlug}/manual-stories/${msSlug}/dashboard`);
         return;
       }

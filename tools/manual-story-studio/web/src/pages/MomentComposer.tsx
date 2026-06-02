@@ -5,6 +5,7 @@ import { fetchCurrentContext } from "../api/current-context.js";
 import { previewPrompt } from "../api/prompts.js";
 import { listRecords, readMetadata } from "../api/records.js";
 import { BeatTemplateCandidates } from "../components/BeatTemplateCandidates.js";
+import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import {
   BEAT_TEMPLATE_PRESSURE_TYPES,
   MANUAL_RECORD_CLASSES,
@@ -165,6 +166,17 @@ export function MomentComposer() {
     [allRecords, pinnedRecordIds],
   );
 
+  const unsavedChanges = useUnsavedChanges(
+    {
+      momentDirective,
+      includedCast,
+      pinnedRecordIds,
+      selectedTemplateId,
+      desiredPressureType,
+    },
+    { resetKeys: [worldSlug, msSlug] },
+  );
+
   const canGenerate =
     momentDirective.trim().length > 0 && includedCast.length > 0;
 
@@ -198,6 +210,7 @@ export function MomentComposer() {
         composeInput.selected_template = selectedTemplateId;
       }
       const result = await previewPrompt(worldSlug, msSlug, composeInput);
+      unsavedChanges.reset();
       navigate(
         `/worlds/${worldSlug}/manual-stories/${msSlug}/prompts/preview`,
         { state: { composeResult: result, composeInput } },
