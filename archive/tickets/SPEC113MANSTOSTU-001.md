@@ -1,6 +1,6 @@
 # SPEC113MANSTOSTU-001: Working-set `excluded_records` field (data model + authoring UI)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` (current-context schema + validator + web types + EditCurrentContext form). No impact on the canon pipeline (package is canon-fenced per SPEC-100).
@@ -12,7 +12,7 @@ The manual-story working set (current-context) has no way to explicitly exclude 
 
 ## Assumption Reassessment (2026-06-02)
 
-1. `CurrentContext` is defined at `tools/manual-story-studio/src/schema/current-context.ts` (backend) and `tools/manual-story-studio/web/src/types/manual-story.ts:101` (frontend); the two interfaces are maintained in parallel. `validateCurrentContext` (`src/validate/current-context.ts:15`) validates `pinned_records` via `checkAnyManualRecordList` (any manual record class) — `excluded_records` takes the same treatment. `readCurrentContext` (`src/read/current-context.ts`) returns `parsed as CurrentContext` (whole-object cast) and `writeCurrentContext` serializes the whole object — neither field-maps, so no per-field read/write/route change is needed once both interfaces carry the new field. `EditCurrentContext.tsx` already mounts `<RecordPicker classes={MANUAL_RECORD_CLASSES} mode="multi">` for `pinned_records` (line 385) — the excluded_records picker is symmetric.
+1. `CurrentContext` is defined at `tools/manual-story-studio/src/schema/current-context.ts` (backend) and `tools/manual-story-studio/web/src/types/manual-story.ts:101` (frontend); the two interfaces are maintained in parallel. `validateCurrentContext` (`src/validate/current-context.ts:15`) validates `pinned_records` via `checkAnyManualRecordList` (any manual record class) — `excluded_records` takes the same treatment. `readCurrentContext` (`src/read/current-context.ts`) returns `parsed as CurrentContext` (whole-object cast) and `writeCurrentContext` serializes the whole object — neither field-maps, so no per-field read/write/route change is needed once both interfaces carry the new field. `EditCurrentContext.tsx` already mounts `<RecordPicker classes={MANUAL_RECORD_CLASSES} mode="multi">` for `pinned_records` (line 385) — the excluded_records picker is symmetric. Implementation note: the backend and web API types make `excluded_records` optional to preserve legacy YAML/API payloads, while the editor merges loaded data over `EMPTY_CONTEXT` and binds the picker to `ctx.excluded_records ?? []`.
 2. SPEC-113 §2 item 1 + §4 specify the field as optional, edited via `RecordPicker`. §3 "must-not-reveal stays separate from `excluded_records`" governs the field's semantics (exclusion drops a record entirely); the compose-side enforcement of that semantics is SPEC113MANSTOSTU-002's scope, not this ticket's.
 3. Cross-artifact boundary under audit: the `CurrentContext` contract spans backend schema (`src/schema/current-context.ts`), backend validator (`src/validate/current-context.ts`), the whole-object read/write round-trip, the server route (`src/server/routes/current-context.ts`, which passes the typed object through `validateCurrentContext` + `writeCurrentContext`), and the frontend type + form (`web/src/types/manual-story.ts`, `EditCurrentContext.tsx`). Both interface copies must gain `excluded_records` or the frontend form cannot bind it. (The web-type addition is the `(g)` schema-paired site not separately enumerated in SPEC-113 §4 — see Files to Touch.)
 4. FOUNDATIONS §Tooling Recommendation (least-privilege packets): `excluded_records` lets the author *narrow* what reaches the external LLM, tightening the deterministic context packet — SPEC-113 §5's alignment for this field. Adding it as an *explicit + validated* selector (not an inferred heuristic) preserves the author-controlled, deterministic packet contract.
@@ -32,7 +32,7 @@ The manual-story working set (current-context) has no way to explicitly exclude 
 
 ### 1. Backend schema
 
-Add `excluded_records: string[]` to the `CurrentContext` interface in `src/schema/current-context.ts` (optional in YAML; treated as `[]` when absent).
+Add optional `excluded_records?: string[]` to the `CurrentContext` interface in `src/schema/current-context.ts` (optional in YAML; treated as `[]` when absent by validation and UI normalization).
 
 ### 2. Backend validator
 
@@ -40,7 +40,7 @@ In `src/validate/current-context.ts`, add `checkAnyManualRecordList(errors, "exc
 
 ### 3. Frontend type + form
 
-Add `excluded_records: string[]` to the web `CurrentContext` interface (`web/src/types/manual-story.ts`), add `excluded_records: []` to `EMPTY_CONTEXT` in `EditCurrentContext.tsx`, and mount a `<RecordPicker classes={MANUAL_RECORD_CLASSES} mode="multi" label="Excluded records">` bound to `ctx.excluded_records` (parallel to the pinned-records picker).
+Add optional `excluded_records?: string[]` to the web `CurrentContext` interface (`web/src/types/manual-story.ts`), add `excluded_records: []` to `EMPTY_CONTEXT` in `EditCurrentContext.tsx`, normalize loaded legacy payloads through `EMPTY_CONTEXT`, and mount a `<RecordPicker classes={MANUAL_RECORD_CLASSES} mode="multi" label="Excluded records">` bound to `ctx.excluded_records ?? []` (parallel to the pinned-records picker).
 
 ### 4. Validator test
 
@@ -83,3 +83,20 @@ Extend `test/current-context/current-context-validate.test.ts`: a known-ref `exc
 
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio/web && npm test`
+
+## Outcome
+
+Completed: 2026-06-02
+
+What changed:
+- Added optional `excluded_records` to the backend and web `CurrentContext` contracts.
+- Validated `excluded_records` through the same any-manual-record reference path as `pinned_records`, including known-ref and broken-ref tests.
+- Added an `Excluded records` multi-record picker to `EditCurrentContext.tsx` with client prefix validation and legacy-payload normalization.
+
+Deviations from original plan:
+- The implementation uses `excluded_records?: string[]` in the TypeScript API/disk contracts rather than a required property, because existing `current-context.yaml` files may omit the key. The editor still materializes `[]` for form state.
+
+Verification results:
+- PASS: `cd tools/manual-story-studio && npm run test:backend` — backend build plus 76 compiled tests passed, including the new current-context validation cases.
+- PASS: `cd tools/manual-story-studio/web && npm test` — web `tsc --noEmit` passed with the new optional field and picker binding.
+- PASS: `git diff --check -- tools/manual-story-studio/src/schema/current-context.ts tools/manual-story-studio/src/validate/current-context.ts tools/manual-story-studio/web/src/types/manual-story.ts tools/manual-story-studio/web/src/pages/EditCurrentContext.tsx tools/manual-story-studio/test/current-context/current-context-validate.test.ts archive/tickets/SPEC113MANSTOSTU-001.md` — no whitespace errors.

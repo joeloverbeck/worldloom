@@ -24,6 +24,7 @@ const EMPTY_CONTEXT: CurrentContext = {
   active_pressure_clocks: [],
   active_secrets_questions: [],
   pinned_records: [],
+  excluded_records: [],
   must_not_reveal: [],
   current_handoff_summary: "",
   last_accepted_segment: null,
@@ -151,7 +152,7 @@ export function EditCurrentContext() {
     fetchCurrentContext(worldSlug, msSlug)
       .then((loaded) => {
         if (cancelled) return;
-        setCtx(loaded ?? EMPTY_CONTEXT);
+        setCtx(loaded ? { ...EMPTY_CONTEXT, ...loaded } : EMPTY_CONTEXT);
       })
       .catch((error: unknown) => {
         if (!cancelled) setLoadError(loadErrorMessage(error));
@@ -195,6 +196,13 @@ export function EditCurrentContext() {
       errors.set(
         "pinned_records",
         `Invalid pinned IDs: ${pinnedInvalid.join(", ")}`,
+      );
+    }
+    const excludedInvalid = invalidIds(ctx.excluded_records ?? [], allManualPrefixes());
+    if (excludedInvalid.length > 0) {
+      errors.set(
+        "excluded_records",
+        `Invalid excluded IDs: ${excludedInvalid.join(", ")}`,
       );
     }
     const mustNotRevealInvalid = invalidIds(
@@ -397,6 +405,20 @@ export function EditCurrentContext() {
         <h3>Pinned record preview</h3>
         <RefList refs={pinnedRefs(ctx.pinned_records)} onRefClick={openRef} />
       </section>
+
+      <PickerRow
+        error={fieldError("excluded_records", serverErrors, clientErrors)}
+      >
+        <RecordPicker
+          worldSlug={world}
+          msSlug={story}
+          label="Excluded records"
+          classes={MANUAL_RECORD_CLASSES}
+          mode="multi"
+          value={ctx.excluded_records ?? []}
+          onChange={(excluded_records) => update({ excluded_records })}
+        />
+      </PickerRow>
 
       <PickerRow
         error={fieldError("must_not_reveal", serverErrors, clientErrors)}

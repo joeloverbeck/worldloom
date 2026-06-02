@@ -105,6 +105,7 @@ export interface CurrentContext {
   active_pressure_clocks: string[];
   active_secrets_questions: string[];
   pinned_records: string[];
+  excluded_records?: string[];
   must_not_reveal: string[];
   current_handoff_summary: string;
   last_accepted_segment: string | null;

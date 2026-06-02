@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/manual-story-studio` prompt module (`src/prompt/types.ts`, `src/prompt/compose.ts`). No canon-pipeline impact (package is canon-fenced per SPEC-100).
-**Deps**: 001
+**Deps**: archive/tickets/SPEC113MANSTOSTU-001.md
 
 ## Problem
 
@@ -13,7 +13,7 @@
 ## Assumption Reassessment (2026-06-02)
 
 1. `composePrompt` (`src/prompt/compose.ts:71`) seeds records at stage 2.5 as `mergeIds(input.included_records, [...pinned_records, ...active_secrets_questions, ...must_not_reveal])` and drops `active === false` records at stage 4 (line 173). There is **no** `prompt_visibility` consultation and **no** relevance gate — `current_location` / `active_pressure_clocks` are not seeded as records at all. `PromptComposeResult` is at `src/prompt/types.ts:75`. The ledger reasons must therefore be *descriptive* of these actual seeding paths per SPEC-113 §3 "Descriptive ledger, not evaluative" — not the richer report-§14 model.
-2. SPEC-113 §2 item 2 fixes the bucket shape; §3 fixes the descriptive reason vocabulary (`included ∈ {explicitly_selected, pinned, active_secret_question, current_cast}`; `excluded ∈ {inactive, working_set_excluded}`; `suppressed` reason `must_not_reveal`); §Acceptance #1–4 fix the test contract. The `excluded_records` field consumed here is added by SPEC113MANSTOSTU-001 (hence Deps:001).
+2. SPEC-113 §2 item 2 fixes the bucket shape; §3 fixes the descriptive reason vocabulary (`included ∈ {explicitly_selected, pinned, active_secret_question, current_cast}`; `excluded ∈ {inactive, working_set_excluded}`; `suppressed` reason `must_not_reveal`); §Acceptance #1–4 fix the test contract. The `excluded_records` field consumed here is added by archive/tickets/SPEC113MANSTOSTU-001.md.
 3. Cross-artifact boundary under audit: the `resolution` type in `src/prompt/types.ts` is the contract consumed downstream by the frontend inspector (004, which adds the mirrored web type) and extended by 003 (`section_map` population). The buckets must be insertion-ordered for byte-identical determinism.
 4. FOUNDATIONS §Tooling Recommendation (deterministic packets) + Rule 6 (No Silent Retcons): the ledger is computed deterministically inside the existing pipeline (no LLM, no network) and makes each inclusion/exclusion decision explicit, so a change in what the prompt asserts between runs becomes visible in the ledger rather than silent.
 

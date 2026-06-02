@@ -36,6 +36,12 @@ export function validateCurrentContext(
     ["secrets", "questions"],
   );
   checkAnyManualRecordList(errors, "pinned_records", ctx.pinned_records, knownIds);
+  checkAnyManualRecordList(
+    errors,
+    "excluded_records",
+    ctx.excluded_records ?? [],
+    knownIds,
+  );
   checkRecordList(errors, "must_not_reveal", ctx.must_not_reveal, knownIds, [
     "secrets",
     "questions",
