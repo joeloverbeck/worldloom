@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import type { CreateResult } from "../api/records.js";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
-import type {
-  ManualRecord,
-  ManualRecordClass,
+import {
+  MANUAL_RECORD_CLASSES,
+  type ManualRecord,
+  type ManualRecordClass,
 } from "../types/manual-story.js";
+import { RecordPicker } from "./RecordPicker.js";
 import {
   PER_CLASS_FIELDS,
   RELATIONSHIP_AXIS_FIELDS,
@@ -159,6 +162,10 @@ function FieldRow(props: {
   );
 }
 
+function FormGroup(props: { children: React.ReactNode }) {
+  return <div style={{ margin: "8px 0" }}>{props.children}</div>;
+}
+
 const CAST_NESTED_SECTIONS: Array<{
   key: keyof CastFormState["nested"];
   title: string;
@@ -279,6 +286,10 @@ interface CastFormState {
 
 export function RecordForm(props: RecordFormProps) {
   const { recordClass, initial, onSave, onCancel, saveError } = props;
+  const { worldSlug, msSlug } = useParams<{
+    worldSlug: string;
+    msSlug: string;
+  }>();
   // beat-templates uses its own dedicated form (BeatTemplateForm); the
   // generic RecordForm should never receive that class. The cast below
   // narrows the index type so the per-class map lookup is safe.
@@ -513,6 +524,10 @@ export function RecordForm(props: RecordFormProps) {
     if (result !== false) unsavedChanges.reset();
   }
 
+  if (!worldSlug || !msSlug) {
+    return <p role="alert">Missing world or manual story slug.</p>;
+  }
+
   return (
     <form onSubmit={handleSubmit} className="manual-record-form">
       <FieldRow label="Title" required error={errorsByField.get("title")}>
@@ -566,27 +581,39 @@ export function RecordForm(props: RecordFormProps) {
           rows={4}
         />
       </FieldRow>
-      <FieldRow label="Refs (characters)" required={false}>
-        <ChipInput
-          ariaLabel="refs-characters"
+      <FormGroup>
+        <RecordPicker
+          worldSlug={worldSlug}
+          msSlug={msSlug}
+          label="Refs (characters)"
+          classes={["cast"]}
+          mode="multi"
           value={common.refs.characters}
           onChange={(next) =>
             setCommon({ ...common, refs: { ...common.refs, characters: next } })
           }
         />
-      </FieldRow>
-      <FieldRow label="Refs (locations)" required={false}>
-        <ChipInput
-          ariaLabel="refs-locations"
+      </FormGroup>
+      <FormGroup>
+        <RecordPicker
+          worldSlug={worldSlug}
+          msSlug={msSlug}
+          label="Refs (locations)"
+          classes={["locations"]}
+          mode="multi"
           value={common.refs.locations}
           onChange={(next) =>
             setCommon({ ...common, refs: { ...common.refs, locations: next } })
           }
         />
-      </FieldRow>
-      <FieldRow label="Refs (related records)" required={false}>
-        <ChipInput
-          ariaLabel="refs-related"
+      </FormGroup>
+      <FormGroup>
+        <RecordPicker
+          worldSlug={worldSlug}
+          msSlug={msSlug}
+          label="Refs (related records)"
+          classes={MANUAL_RECORD_CLASSES}
+          mode="multi"
           value={common.refs.related_records}
           onChange={(next) =>
             setCommon({
@@ -595,7 +622,7 @@ export function RecordForm(props: RecordFormProps) {
             })
           }
         />
-      </FieldRow>
+      </FormGroup>
       <FieldRow label="Prompt visibility" required>
         <select
           aria-label="prompt_visibility"

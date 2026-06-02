@@ -1,6 +1,6 @@
 # SPEC112MANSTOSTU-005: Replace ChipInput with RecordPicker on RecordForm ref fields
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` web component `RecordForm.tsx`; replaces `ChipInput` on the three `refs` fields with `<RecordPicker>`, leaving `ChipInput` in place for `tags` and the cast nested string-array fields.
@@ -28,15 +28,38 @@
 2. `ChipInput` still present for tags/cast-nested → `grep -n "ChipInput" RecordForm.tsx` returns >0 (it is retained), and the three ref mounts use `RecordPicker`.
 3. Persisted refs shape unchanged → web `tsc --noEmit` (the form still builds `common.refs` as the same `{characters, locations, related_records}` id arrays).
 
-## What to Change
+## Landed Changes
 
 ### 1. Swap the three ref-field mounts to RecordPicker
 
-`refs.characters`→single/multi picker class-filtered to `cast` (characters); `refs.locations`→picker class-filtered to `locations`; `refs.related_records`→any-class picker. Each writes back into `common.refs.<field>` exactly as the current `ChipInput.onChange` does.
+Replaced the three record-reference `ChipInput` mounts with `RecordPicker`:
+
+- `refs.characters` uses `classes={["cast"]}` in multi-select mode.
+- `refs.locations` uses `classes={["locations"]}` in multi-select mode.
+- `refs.related_records` uses `classes={MANUAL_RECORD_CLASSES}` in multi-select mode.
+
+Each picker writes back into the same `common.refs.<field>` id-array shape the form already persists. `RecordForm` reads `worldSlug` and `msSlug` from the current route so the picker can fetch summaries without widening the component's parent prop contract.
 
 ### 2. Leave ChipInput for non-reference fields
 
-Do not touch the `tags`, cast nested `chipArray`, or `stringArray` `ChipInput` mounts — those are free-text, not record references.
+Left `ChipInput` intact for tags, cast nested chip arrays, and per-class `stringArray` fields.
+
+## Outcome
+
+Record reference entry in `RecordForm` is now card-based and class-constrained while the persisted record schema remains unchanged. Free-text chip entry remains available only for non-reference string arrays.
+
+## Verification Result
+
+1. `grep -n 'ChipInput\|RecordPicker\|Refs (characters)\|Refs (locations)\|Refs (related records)' tools/manual-story-studio/web/src/components/RecordForm.tsx` showed `RecordPicker` on the three ref fields and retained `ChipInput` for non-reference fields.
+2. `(cd tools/manual-story-studio && npm --prefix web test)` passed.
+3. `(cd tools/manual-story-studio && npm run build)` passed.
+4. `(cd tools/manual-story-studio && npm test)` passed: 454 backend tests plus web `tsc --noEmit`.
+5. `git diff --check` passed.
+6. Ignored verification artifacts remained under `tools/manual-story-studio/dist/`, `tools/manual-story-studio/node_modules/`, `tools/manual-story-studio/web/dist/`, and `tools/manual-story-studio/web/node_modules/`.
+
+## Deviations
+
+None. No schema or save-contract changes were made.
 
 ## Files to Touch
 
