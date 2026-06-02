@@ -1,3 +1,4 @@
+import { readManualStoryMetadata } from "./read/manual-story-metadata.js";
 import { listRecords, readRecord } from "./read/records.js";
 import { err, ok, type ReadResult } from "./read/result.js";
 import type {
@@ -33,6 +34,7 @@ export interface StateUpdateChecklistEntry {
 
 export interface StateUpdateChecklistPayload {
   segment_id: string;
+  last_accepted_segment: string | null;
   involved_cast: string[];
   entries: StateUpdateChecklistEntry[];
   disclaimer: string;
@@ -47,6 +49,11 @@ export function buildStateUpdateChecklist(
   options: BuildChecklistOptions,
 ): ReadResult<StateUpdateChecklistPayload> {
   const manualStoryRoot = rootPath(options.manualStoryRoot);
+  const metadata = readManualStoryMetadata(manualStoryRoot);
+  if (!metadata.ok) return err(metadata.error);
+  const last_accepted_segment =
+    metadata.value.segment_order[metadata.value.segment_order.length - 1] ??
+    null;
   const involved_cast =
     options.sidecar.included_record_summary.characters.slice();
   const involvedCastSet = new Set(involved_cast);
@@ -75,6 +82,7 @@ export function buildStateUpdateChecklist(
 
   return ok({
     segment_id: options.sidecar.id,
+    last_accepted_segment,
     involved_cast,
     entries,
     disclaimer: CHECKLIST_DISCLAIMER,

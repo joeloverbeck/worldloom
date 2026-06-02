@@ -1,6 +1,6 @@
 # SPEC109MANSTOSTU-011: Mark-state-reviewed button
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `web/src/components/StateUpdateChecklist.tsx` to add the "Mark state reviewed after SEG-N" button; extends the `StateUpdateChecklistPayload` type in both `src/state-update-checklist.ts` (backend) and `web/src/types/manual-story.ts` (frontend mirror) to carry the latest accepted segment.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The state-update checklist (landed by SPEC-103) prompts the author to review record categories after each accepted segment. SPEC-109 introduces the `last_reviewed_after_segment` surface that SPEC-108's repair-mode `force_replace` precondition consults to decide whether a non-latest segment may be silently replaced. The checklist needs a "Mark state reviewed after SEG-N" button that updates the current-context's `last_reviewed_after_segment` field via the PUT route, providing the explicit author action that gates SPEC-108's silent-replacement check. Without this button, `last_reviewed_after_segment` is set-once-via-form-edit (010) and never updated mid-loop, which defeats the SPEC-108 integration.
+The state-update checklist (landed by SPEC-103) prompts the author to review record categories after each accepted segment. SPEC-109 introduces the `last_reviewed_after_segment` surface that SPEC-108's repair-mode `force_replace` precondition consults to decide whether a non-latest segment may be silently replaced. This ticket landed the "Mark state reviewed after SEG-N" button that updates the current-context's `last_reviewed_after_segment` field via the PUT route, providing the explicit author action that gates SPEC-108's silent-replacement check.
 
 ## Assumption Reassessment (2026-06-01)
 
@@ -30,31 +30,39 @@ The state-update checklist (landed by SPEC-103) prompts the author to review rec
 3. Button click PUTs the full context with `last_reviewed_after_segment = payload.last_accepted_segment` → manual verification + (if test infrastructure permits) an acceptance test asserting the PUT request body via the existing routes-test harness from 005.
 4. AC #10 (state-update checklist's "Mark state reviewed after SEG-N" button updates `last_reviewed_after_segment` correctly) — covered by the verification at layer 3.
 
-## What to Change
+## Landed Changes
 
 ### 1. Extend `StateUpdateChecklistPayload` at `src/state-update-checklist.ts`
 
-Add `last_accepted_segment: string | null` to the interface. Update the `buildStateUpdateChecklist` builder to populate this field from `metadata.segment_order` tail (or `null` if `segment_order` is empty). Existing callers of the builder will see the new field as required at the type level — flow it through the existing payload-construction path.
+Added `last_accepted_segment: string | null` to the backend payload interface. `buildStateUpdateChecklist` now reads `manual-story.yaml` through `readManualStoryMetadata` and populates the field from the `metadata.segment_order` tail, or `null` when the order is empty.
 
 ### 2. Mirror the type at `web/src/types/manual-story.ts`
 
-Add the same `last_accepted_segment: string | null` field to the frontend `StateUpdateChecklistPayload` interface. No behavioral change at the type-mirror level; the field flows through the existing JSON serialization at the route boundary.
+Added the same `last_accepted_segment: string | null` field to the frontend `StateUpdateChecklistPayload` mirror.
 
 ### 3. Add the button at `web/src/components/StateUpdateChecklist.tsx`
 
-When `payload.last_accepted_segment` is non-null, render a new button labeled "Mark state reviewed after `<payload.last_accepted_segment>`" in the footer (alongside the existing "Skip review" button). The button's `onClick`:
-- Call `fetchCurrentContext(worldSlug, msSlug)` to load the current payload.
-- If the payload is `null`, surface an error to the user (e.g., disable the button with a tooltip "Set current context first" — or auto-create a minimal payload; the spec doesn't dictate). Recommended: render an inline error message, do not auto-create.
-- Patch the loaded payload's `last_reviewed_after_segment` to `payload.last_accepted_segment`.
-- Call `saveCurrentContext(worldSlug, msSlug, patchedCtx)`.
-- On success: close the dialog (calls `onClose()`) and surface a brief "State review marked" toast (or equivalent visual confirmation; follow existing component conventions).
-- On failure (422 or other): render the structured findings inline.
+When `payload.last_accepted_segment` is non-null, the checklist footer now renders a button labeled `Mark state reviewed after SEG-N`. The button:
+
+- Calls `fetchCurrentContext(worldSlug, msSlug)`.
+- Refuses to auto-create current-context when the payload is absent and renders an inline error instead.
+- Patches the loaded payload's `last_reviewed_after_segment` to `payload.last_accepted_segment`.
+- Calls `saveCurrentContext(worldSlug, msSlug, patchedCtx)`.
+- Closes the dialog on success through the existing `onClose` convention.
+- Renders structured validation findings or request errors inline on failure.
+
+### 4. Focused tests
+
+- Extended `tools/manual-story-studio/test/state-update-checklist.test.ts` to seed `manual-story.yaml` and assert `last_accepted_segment` is populated from the metadata `segment_order` tail.
+- Extended `tools/manual-story-studio/test/current-context/routes-current-context.test.ts` to assert a PUT body with `last_reviewed_after_segment = SEG-1` writes the reviewed marker to disk.
 
 ## Files to Touch
 
 - `tools/manual-story-studio/src/state-update-checklist.ts` (modify — add field + populate in builder)
 - `tools/manual-story-studio/web/src/types/manual-story.ts` (modify — mirror field)
 - `tools/manual-story-studio/web/src/components/StateUpdateChecklist.tsx` (modify — add button + handler)
+- `tools/manual-story-studio/test/state-update-checklist.test.ts` (modify — payload-tail coverage)
+- `tools/manual-story-studio/test/current-context/routes-current-context.test.ts` (modify — reviewed-marker PUT coverage)
 
 ## Out of Scope
 
@@ -80,11 +88,26 @@ When `payload.last_accepted_segment` is non-null, render a new button labeled "M
 
 ### New/Modified Tests
 
-1. `tools/manual-story-studio/test/state-update-checklist/builder.test.ts` (if it exists; otherwise extend the existing state-update-checklist coverage) — assert the new field is populated from `metadata.segment_order` tail.
-2. Extension to `tools/manual-story-studio/test/current-context/routes-current-context.test.ts` (from 005) — assert the PUT body matching `last_reviewed_after_segment = SEG-N` writes correctly.
+1. `tools/manual-story-studio/test/state-update-checklist.test.ts` — asserts the new field is populated from `metadata.segment_order` tail.
+2. `tools/manual-story-studio/test/current-context/routes-current-context.test.ts` — asserts the PUT body matching `last_reviewed_after_segment = SEG-N` writes correctly.
 
 ### Commands
 
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio/web && npm test`
 3. `cd tools/manual-story-studio && npm test`
+
+## Outcome
+
+Ticket complete. The state-update checklist payload now carries the latest accepted segment, and the checklist dialog exposes an explicit mark-reviewed action that writes `last_reviewed_after_segment` through the full current-context PUT route. The action is visible only when there is a latest accepted segment, refuses to auto-create current-context, and keeps `last_reviewed_after_segment` as an explicit author-click surface.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run test:backend` — PASS (70 compiled backend test files).
+2. `cd tools/manual-story-studio/web && npm test` — PASS (`tsc -p tsconfig.json --noEmit`).
+3. `cd tools/manual-story-studio && npm test` — PASS (429 backend tests plus web `tsc --noEmit`).
+4. Manual code review of `tools/manual-story-studio/web/src/components/StateUpdateChecklist.tsx` — PASS: the button renders only with `payload.last_accepted_segment`, fetches current-context, refuses absent context, PUTs a patched full payload, and renders findings/errors inline.
+
+## Deviations
+
+The success path closes the existing checklist dialog via `onClose()` rather than adding a new toast system; this follows the component's current UI convention and avoids introducing a one-off notification mechanism.

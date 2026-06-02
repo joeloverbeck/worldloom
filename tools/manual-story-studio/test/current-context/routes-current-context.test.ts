@@ -198,6 +198,30 @@ test("current-context route: PUT invalid POV holder returns 422", async () => {
   }
 });
 
+test("current-context route: PUT state-reviewed segment writes reviewed marker", async () => {
+  const { repoRoot, worldSlug, msSlug, root } = mkWorld();
+  try {
+    const ctx = context({ last_reviewed_after_segment: "SEG-1" });
+    const server = await createServer({ repoRoot });
+    try {
+      const response = await server.inject({
+        method: "PUT",
+        url: route(worldSlug, msSlug),
+        payload: ctx,
+      });
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.json().last_reviewed_after_segment, "SEG-1");
+      const fullPath = path.join(root.absolutePath, "current-context.yaml");
+      const onDisk = YAML.parse(readFileSync(fullPath, "utf8")) as CurrentContext;
+      assert.equal(onDisk.last_reviewed_after_segment, "SEG-1");
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
 test("current-context route: PUT unknown pinned record returns 422", async () => {
   const { repoRoot, worldSlug, msSlug } = mkWorld();
   try {

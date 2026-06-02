@@ -138,6 +138,7 @@ export interface StateUpdateChecklistEntry {
 
 export interface StateUpdateChecklistPayload {
   segment_id: string;
+  last_accepted_segment: string | null;
   involved_cast: string[];
   entries: StateUpdateChecklistEntry[];
   disclaimer: string;

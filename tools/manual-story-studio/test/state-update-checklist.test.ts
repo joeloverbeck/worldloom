@@ -25,9 +25,23 @@ import type {
   RecordCommonFields,
   SegmentSidecar,
 } from "../src/schema/manual-story.js";
+import { makeDefaultManualStoryMetadata } from "../src/write/manual-story-metadata.js";
 
 function mkManualStoryRoot(): string {
-  return mkdtempSync(path.join(os.tmpdir(), "manual-studio-checklist-"));
+  const root = mkdtempSync(path.join(os.tmpdir(), "manual-studio-checklist-"));
+  writeMetadata(root, ["SEG-1"]);
+  return root;
+}
+
+function writeMetadata(root: string, segmentOrder: string[]): void {
+  const metadata = makeDefaultManualStoryMetadata(
+    "test-world",
+    "test-story",
+    "Test Story",
+    "2026-06-02T00:00:00.000Z",
+  );
+  metadata.segment_order = segmentOrder;
+  writeFileSync(path.join(root, "manual-story.yaml"), YAML.stringify(metadata));
 }
 
 function commonFields(id: string, refsCharacters: string[]): RecordCommonFields {
@@ -130,6 +144,7 @@ test("state update checklist returns the fixed 12-class payload in order", () =>
     }));
 
     assert.equal(payload.segment_id, "SEG-1");
+    assert.equal(payload.last_accepted_segment, "SEG-1");
     assert.deepEqual(payload.involved_cast, ["mchar-A", "mchar-B"]);
     assert.equal(payload.entries.length, CHECKLIST_REVIEW_CLASSES.length);
     assert.deepEqual(
@@ -137,6 +152,23 @@ test("state update checklist returns the fixed 12-class payload in order", () =>
       CHECKLIST_REVIEW_CLASSES,
     );
     assert.equal(payload.disclaimer, CHECKLIST_DISCLAIMER);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("state update checklist reports the metadata segment_order tail", () => {
+  const root = mkManualStoryRoot();
+  try {
+    writeMetadata(root, ["SEG-1", "SEG-2"]);
+
+    const payload = unwrap(buildStateUpdateChecklist({
+      manualStoryRoot: root,
+      sidecar: segmentSidecar(),
+    }));
+
+    assert.equal(payload.segment_id, "SEG-1");
+    assert.equal(payload.last_accepted_segment, "SEG-2");
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
