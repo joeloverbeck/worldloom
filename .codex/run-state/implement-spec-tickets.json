@@ -1,20 +1,23 @@
 {
-  "originating_spec": "archive/specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md",
-  "archived_spec": "archive/specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md",
-  "last_ticket": "archive/tickets/SPEC114MANSTOSTU-005.md",
+  "originating_spec": "specs/SPEC-115-manual-story-studio-world-source-browser.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC115MANSTOSTU-001.md",
   "last_result": "completed_archived",
-  "last_work_commit": "1882a25ad0e26ca2630ca06ac5ab55bfddeeeb76",
+  "last_work_commit": "2f96f6b281c81f4bd4e5fb82d5e44e423af164fd",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "complete",
+  "next_target": "tickets/SPEC115MANSTOSTU-002.md",
+  "queue": [
+    "tickets/SPEC115MANSTOSTU-002.md",
+    "tickets/SPEC115MANSTOSTU-003.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: SPEC-114 archived; all SPEC114MANSTOSTU tickets archived; npm run test passed with 472 backend/static tests plus web tsc --noEmit; README/ID-ALLOCATION grep proofs passed; git diff --check passed; IMPLEMENTATION-ORDER marks only SPEC-115 active",
-  "dirty_state": "tracked worktree clean after SPEC-114 archive commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
+  "proof_state": "clean: SPEC115MANSTOSTU-001 archived; readWorldSource implemented; focused reader test passed 5/5; npm run test:backend passed 83/83; npm run build passed",
+  "dirty_state": "tracked worktree clean after ticket 001 work commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-02"
 }
