@@ -1,6 +1,6 @@
 # SPEC110MANSTOSTU-007: Focused acceptance tests for the new field validation, filter tie-breaker, and why-suggested line
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new test file `tools/manual-story-studio/test/templates/beat-template-spec110-fields.test.ts`
@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC-110 §2 item 10 / AC#4-7. Add a focused test file covering the new behavior end-to-end at the unit level: validator rejection of bad enums and the `beat-templates` `expected_state_review` entry; the filter's `desired_pressure_type` stage-9 tie-breaker; and the `pressure: <type>` why-suggested line. This complements the fixture migration (ticket 001) and the per-surface assertions in tickets 002 / `archive/tickets/SPEC110MANSTOSTU-003.md` with a single spec-traceable acceptance suite.
+SPEC-110 §2 item 10 / AC#4-7 required a focused test file covering the new behavior end-to-end at the unit level: validator rejection of bad enums and the `beat-templates` `expected_state_review` entry; the filter's `desired_pressure_type` stage-9 tie-breaker; and the `pressure: <type>` why-suggested line. This ticket added that single spec-traceable acceptance suite, complementing the fixture migration (ticket 001) and the per-surface assertions in tickets 002 / `archive/tickets/SPEC110MANSTOSTU-003.md`.
 
 ## Assumption Reassessment (2026-06-02)
 
@@ -26,6 +26,12 @@ SPEC-110 §2 item 10 / AC#4-7. Add a focused test file covering the new behavior
 1. Validator rejects unknown `pressure_type`, unknown `turn_type`, and `expected_state_review: ["beat-templates"]` with distinct findings → assertions in the new file.
 2. Filter ranks a `desired_pressure_type`-matching template above an otherwise-equal non-match; unpinned ordering is unchanged → ordering assertions.
 3. `assembleWhySuggested` includes the `pressure: <type>` line when the pin matches → trace assertion.
+
+## Landed Changes
+
+### 1. Focused SPEC-110 acceptance suite
+
+Added `tools/manual-story-studio/test/templates/beat-template-spec110-fields.test.ts`. The file asserts invalid `pressure_type`, invalid `turn_type`, unknown `expected_state_review`, and template-only `beat-templates` review-class validation findings; desired-pressure filter ordering with and without the pin; and why-suggested pressure-line presence/absence through public exports only.
 
 ## What to Change
 
@@ -66,3 +72,17 @@ SPEC-110 §2 item 10 / AC#4-7. Add a focused test file covering the new behavior
 
 1. `cd tools/manual-story-studio && npm test`
 2. `cd tools/manual-story-studio && npm run build:backend && node --test dist/test/templates/beat-template-spec110-fields.test.js` — narrower run of just the new file after build.
+
+## Outcome
+
+Completed 2026-06-02. SPEC-110 AC#4-7 now have a single focused regression file that exercises validator, filter, and why-suggested surfaces without adding production code.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run build:backend` — PASS.
+2. `cd tools/manual-story-studio && node --test dist/test/templates/beat-template-spec110-fields.test.js` — PASS, 5 tests.
+3. `cd tools/manual-story-studio && npm test` — PASS, 443 backend tests plus `web` TypeScript check.
+
+## Deviations
+
+None.
