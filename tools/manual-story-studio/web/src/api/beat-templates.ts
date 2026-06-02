@@ -6,6 +6,8 @@ import type {
   BeatTemplate,
   BeatTemplateCandidate,
   CandidateRequestBody,
+  ManualRecordClass,
+  ManualRecordSummary,
   ValidationError,
 } from "../types/manual-story.js";
 
@@ -25,11 +27,29 @@ export type CreateOrUpdateResult =
   | { ok: false; error: "not_found" }
   | { ok: false; error: "bad_request"; message: string };
 
-export interface BeatTemplateDeleteResult {
-  outcome?: "hard_deleted" | "inactive_default" | "force_deleted";
-  archived?: boolean;
-  deleted?: boolean;
-}
+export type BeatTemplateDeleteResult =
+  | { outcome: "hard_deleted"; id: string }
+  | {
+      outcome: "blocked";
+      id: string;
+      referrers: Array<{
+        recordClass: ManualRecordClass;
+        summary: ManualRecordSummary;
+      }>;
+    }
+  | {
+      outcome: "force_deleted";
+      id: string;
+      auditEntry: {
+        deletedAt: string;
+        deletedClassAndId: string;
+        referrers: Array<{
+          recordClass: ManualRecordClass;
+          id: string;
+          field: string;
+        }>;
+      };
+    };
 
 export async function listBeatTemplates(
   worldSlug: string,
@@ -92,12 +112,14 @@ export async function deleteBeatTemplate(
   worldSlug: string,
   msSlug: string,
   id: string,
-  opts: { force?: boolean } = {},
+  opts: { force?: boolean; mode?: "repair" } = {},
 ): Promise<BeatTemplateDeleteResult | { ok: false; error: "not_found" }> {
-  const qs = opts.force ? "?force=true" : "";
-  const response = await fetch(`${baseUrl(worldSlug, msSlug)}/${enc(id)}${qs}`, {
-    method: "DELETE",
-  });
+  const url = new URL(`${baseUrl(worldSlug, msSlug)}/${enc(id)}`, window.location.origin);
+  if (opts.force) {
+    url.searchParams.set("force", "true");
+    url.searchParams.set("mode", opts.mode ?? "repair");
+  }
+  const response = await fetch(url.pathname + url.search, { method: "DELETE" });
   if (response.status === 404) return { ok: false, error: "not_found" };
   if (!response.ok) {
     throw new Error(`deleteBeatTemplate → ${response.status}`);

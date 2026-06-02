@@ -23,10 +23,12 @@ export type UpdateResult = CreateResult | { ok: false; error: "not_found" };
 export type DeleteResult =
   | { outcome: "hard_deleted"; id: string }
   | {
-      outcome: "inactive_default";
+      outcome: "blocked";
       id: string;
-      retiredReason: string;
-      referrers: Array<{ recordClass: ManualRecordClass; id: string; field: string }>;
+      referrers: Array<{
+        recordClass: ManualRecordClass;
+        summary: ManualRecordSummary;
+      }>;
     }
   | {
       outcome: "force_deleted";
@@ -196,11 +198,18 @@ export async function deleteRecord(
   msSlug: string,
   recordClass: ManualRecordClass,
   id: string,
-  opts: { force?: boolean } = {},
+  opts: { force?: boolean; mode?: "repair" } = {},
 ): Promise<DeleteResult> {
-  const qs = opts.force ? "?force=true" : "";
+  const url = new URL(
+    `${recordsBase(worldSlug, msSlug)}/${enc(recordClass)}/${enc(id)}`,
+    window.location.origin,
+  );
+  if (opts.force) {
+    url.searchParams.set("force", "true");
+    url.searchParams.set("mode", opts.mode ?? "repair");
+  }
   const response = await fetch(
-    `${recordsBase(worldSlug, msSlug)}/${enc(recordClass)}/${enc(id)}${qs}`,
+    url.pathname + url.search,
     { method: "DELETE" },
   );
   if (response.status === 404) return { ok: false, error: "not_found" };

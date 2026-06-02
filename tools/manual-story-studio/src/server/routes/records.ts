@@ -24,6 +24,8 @@ export interface RecordsRouteOptions {
   repoRoot: string;
 }
 
+const RECORD_REPAIR_MODE_FLAG = "repair";
+
 function isManualRecordClass(value: unknown): value is ManualRecordClass {
   return (
     typeof value === "string" &&
@@ -140,7 +142,12 @@ interface UpdateBody {
 }
 
 interface DeleteBody {
-  confirm?: boolean;
+  mode?: string;
+}
+
+interface DeleteQuery {
+  force?: string;
+  mode?: string;
 }
 
 export async function registerRecordsWriteRoutes(
@@ -231,7 +238,7 @@ export async function registerRecordsWriteRoutes(
 
   server.delete<{
     Params: { slug: string; msSlug: string; class: string; id: string };
-    Querystring: { force?: string };
+    Querystring: DeleteQuery;
     Body: DeleteBody;
   }>(
     "/api/worlds/:slug/manual-stories/:msSlug/records/:class/:id",
@@ -251,16 +258,26 @@ export async function registerRecordsWriteRoutes(
           .send({ error: "bad_request", message: "unknown class" });
       }
       const queryForce = request.query.force === "true";
-      const bodyConfirm =
-        request.body && typeof request.body === "object"
-          ? Boolean((request.body as DeleteBody).confirm)
-          : false;
-      const force = queryForce || bodyConfirm;
+      const repairMode =
+        request.query.mode === RECORD_REPAIR_MODE_FLAG ||
+        (request.body &&
+          typeof request.body === "object" &&
+          (request.body as DeleteBody).mode === RECORD_REPAIR_MODE_FLAG);
+      if (queryForce && !repairMode) {
+        return reply
+          .code(405)
+          .header("Allow", "DELETE")
+          .send({
+            error: "repair-mode-required",
+            message:
+              'force delete requires ?mode=repair or body { mode: "repair" }; see the repair-mode UI affordance.',
+          });
+      }
       const result = deleteRecord(
         root,
         request.params.class,
         request.params.id,
-        { force },
+        { force: queryForce },
       );
       if ("ok" in result && result.ok === false && result.error === "not_found") {
         return reply.code(404).send({ error: "not_found" });

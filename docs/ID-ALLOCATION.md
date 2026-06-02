@@ -72,3 +72,5 @@ Records live at `worlds/<slug>/manual-stories/<manual-story-slug>/records/<class
 - `PROMPT-<integer>` — saved prompt artifacts (`prompts/PROMPT-<integer>.md` body + `prompt-runs/PROMPT-<integer>.yaml` sidecar; allocated by `tools/manual-story-studio/src/write/prompts.ts`; per-manual-story append-only; gaps from hard-delete preserved). Format follows the FOUNDATIONS-002 unpadded natural-integer convention.
 
 The manual-story `manual-story.yaml` metadata file is not an ID-bearing record (it is a per-manual-story control file; one per manual-story slug).
+
+The manual-story `repair-log.yaml` file is not an ID-bearing record (it is a per-manual-story control file appended by repair-mode force-delete).

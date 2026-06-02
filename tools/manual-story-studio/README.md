@@ -99,13 +99,15 @@ Canonical prefix list and per-class file layout: `docs/ID-ALLOCATION.md §Manual
 
 Every record carries common fields (`id`, `title`, `active`, `importance`, `tags`, `summary`, `details`, `refs`, `prompt_visibility`, `last_reviewed_after_segment`, `notes`, plus optional `retired_reason` when archived). Per-class additions are minimal (typically 2-4 fields beyond common); see SPEC-101 §2.2 for the full delta per class. Schema definitions live at `src/validate/schema.ts`; TypeScript types at `src/schema/manual-story.ts`.
 
-## Hybrid Delete Policy (SPEC-101)
+## Delete Policy (SPEC-101 + SPEC-114)
 
 `DELETE /api/.../records/<class>/<id>` returns one of three outcomes:
 
 - **`hard_deleted`** — when the record has zero referrers. File is unlinked. The ID allocator preserves the gap: the next allocation does NOT reuse the freed ID.
-- **`inactive_default`** — when the record has referrers. The record is rewritten in place with `active: false` and `retired_reason: "force-delete-blocked-by-referrers: <id-list>"`. The file stays on disk; refs to it remain valid (the ref validator accepts refs to archived records per SPEC-101 §2.4).
-- **`force_deleted`** — when `?force=true` query OR `{confirm: true}` body flag is set. Hard-deletes the file regardless of referrers; response body returns an audit entry with timestamp + deleted ID + referrer list. Persistent audit log is M6 deferral per SPEC-101 §7 AC #5.
+- **`blocked`** — when the record has referrers. The file stays unchanged, and the response returns referrer summaries (`recordClass`, title, id, summary) so the UI can show referrer cards with edit links. Delete does not write `active: false` or `retired_reason`.
+- **`force_deleted`** — only from the explicit repair-mode force path (`?force=true&mode=repair`). The file is unlinked despite referrers, the response returns an audit entry, and the same entry is appended to the per-manual-story `repair-log.yaml` as `{deleted_class_and_id, deleted_at, referrers_at_deletion}`.
+
+Beat-template deletion follows the same hard-delete-or-block lifecycle through `/beat-templates/:id`. The `active` and `retired_reason` fields remain available for explicit author intent, but Delete no longer auto-archives records.
 
 ## Reference Validation Scope (SPEC-101)
 

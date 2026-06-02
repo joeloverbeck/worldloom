@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+} from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -284,6 +290,79 @@ test("beat-templates: GET /records/beat-templates returns 404 with pointer", asy
         url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/records?class=beat-templates`,
       });
       assert.equal(list.statusCode, 404);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("beat-templates: referenced template blocks and force-delete requires repair mode", async () => {
+  const { repoRoot, worldSlug, msSlug, root } = mkWorld();
+  try {
+    const server = await createServer({ repoRoot });
+    try {
+      const create = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/beat-templates`,
+        payload: { record: validTemplateBody() },
+      });
+      assert.equal(create.statusCode, 201);
+
+      mkdirSync(path.join(root.absolutePath, "segments"), { recursive: true });
+      safeWriteFile(
+        root,
+        "segments/SEG-1.yaml",
+        YAML.stringify({ selected_template: "mtemplate-1" }),
+      );
+      const templatePath = path.join(
+        root.absolutePath,
+        "records",
+        "beat-templates",
+        "mtemplate-1.yaml",
+      );
+
+      const blocked = await server.inject({
+        method: "DELETE",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/beat-templates/mtemplate-1`,
+      });
+      assert.equal(blocked.statusCode, 200);
+      const blockedBody = blocked.json() as {
+        outcome: string;
+        referrers: Array<{ recordClass: string; summary: { id: string } }>;
+      };
+      assert.equal(blockedBody.outcome, "blocked");
+      assert.deepEqual(
+        blockedBody.referrers.map((r) => `${r.recordClass}:${r.summary.id}`),
+        ["beat-templates:SEG-1"],
+      );
+      assert.equal(existsSync(templatePath), true);
+
+      const ungatedForce = await server.inject({
+        method: "DELETE",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/beat-templates/mtemplate-1?force=true`,
+      });
+      assert.equal(ungatedForce.statusCode, 405);
+      assert.equal(ungatedForce.json().error, "repair-mode-required");
+      assert.equal(existsSync(templatePath), true);
+
+      const force = await server.inject({
+        method: "DELETE",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/beat-templates/mtemplate-1?force=true&mode=repair`,
+      });
+      assert.equal(force.statusCode, 200);
+      const forceBody = force.json() as { outcome: string };
+      assert.equal(forceBody.outcome, "force_deleted");
+      assert.equal(existsSync(templatePath), false);
+
+      const repairLog = YAML.parse(
+        readFileSync(path.join(root.absolutePath, "repair-log.yaml"), "utf8"),
+      ) as Array<{ deleted_class_and_id: string }>;
+      assert.deepEqual(
+        repairLog.map((entry) => entry.deleted_class_and_id),
+        ["beat-templates/mtemplate-1"],
+      );
     } finally {
       await server.close();
     }
