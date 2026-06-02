@@ -1,6 +1,6 @@
 # SPEC115MANSTOSTU-001: World-source read layer
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new read-only module `tools/manual-story-studio/src/read/world-source.ts` (reuses `result.ts` `ReadResult` + `worlds.ts` `enumerateWorlds`). No impact on existing readers, schemas, or write paths.
@@ -81,3 +81,25 @@ The manual-story-studio world read layer (`src/read/worlds.ts` `enumerateWorlds`
 
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm run build`
+
+## Outcome
+
+Completed on 2026-06-02.
+
+Added `tools/manual-story-studio/src/read/world-source.ts`, exporting `readWorldSource(repoRoot, worldSlug): ReadResult<WorldSourceItem[]>`. The reader resolves worlds exclusively through `enumerateWorlds`, enumerates `WORLD_KERNEL.md`, `ONTOLOGY.md`, present `_source/` subdirectories, `characters/`, and `diegetic-artifacts/`, and returns literal raw text plus best-effort `title` / `name` / `tags` / `class` metadata. Missing source subdirectories are skipped fail-soft. Malformed YAML stays visible as raw text and carries a structured `yaml_parse_failed` item error instead of crashing or silently disappearing.
+
+Added `tools/manual-story-studio/test/read/world-source.test.ts` covering enumeration, missing subdirectory fail-soft behavior, malformed YAML item errors, slug-only world resolution, and the module-level no-write-path invariant.
+
+No changes were made to `tools/manual-story-studio/src/read/worlds.ts`; the existing exported `enumerateWorlds` function was sufficient and is reused unchanged.
+
+## Verification Result
+
+1. PASS: `cd tools/manual-story-studio && npm run build:backend` — TypeScript backend compile succeeded after the exact-optional-property fix.
+2. PASS: `cd tools/manual-story-studio && node --test dist/test/read/world-source.test.js` — focused reader suite passed 5/5 tests after rebuilding compiled output.
+3. PASS: `cd tools/manual-story-studio && npm run test:backend` — backend/static suite passed 83/83 compiled tests, including `dist/test/read/world-source.test.js`.
+4. PASS: `cd tools/manual-story-studio && npm run build` — web install/build, Vite production build, and backend compile all succeeded.
+
+## Deviations
+
+1. The reader keeps malformed YAML files in the item list with `raw_text` plus an embedded structured `error`; this matches the ticket's "structured-error item" wording while preserving browse continuity.
+2. `WORLD_KERNEL.md` is emitted before `ONTOLOGY.md`, following the spec's root-file order rather than global lexical order.

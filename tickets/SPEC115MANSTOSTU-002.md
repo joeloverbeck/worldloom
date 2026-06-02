@@ -4,17 +4,17 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — new route module `tools/manual-story-studio/src/server/routes/world-source.ts` (GET-only) + registration in `src/server/http.ts`. No new write surface.
-**Deps**: SPEC115MANSTOSTU-001
+**Deps**: archive/tickets/SPEC115MANSTOSTU-001.md
 
 ## Problem
 
-The manual-story-studio server registers no route for browsing world source. Expose the SPEC115MANSTOSTU-001 reader over GET-only HTTP routes for listing/reading world source material, registered outside any writable scope, with world paths resolved from a validated slug and no request-body value able to cause a read outside the resolved world root.
+The manual-story-studio server registers no route for browsing world source. Expose the `archive/tickets/SPEC115MANSTOSTU-001.md` reader over GET-only HTTP routes for listing/reading world source material, registered outside any writable scope, with world paths resolved from a validated slug and no request-body value able to cause a read outside the resolved world root.
 
 ## Assumption Reassessment (2026-06-02)
 
 1. `src/server/http.ts` registers read routes directly on `server` (e.g. `registerWorldsRoutes(server, { repoRoot })` at line 78) and wraps write routes in `wrapRouterWritable` (line 89+). The new world-source read route registers on `server` (outside the writable wrapper), matching the existing read-route pattern. `src/server/routes/worlds.ts` exports `registerWorldsRoutes(server, { repoRoot })` — the new `routes/world-source.ts` follows the same `register*(server, { repoRoot })` signature.
 2. Spec §2 item 4 + §4 (`specs/SPEC-115-manual-story-studio-world-source-browser.md`): GET-only routes outside the writable scope; world paths resolved from a validated world slug, never a raw filesystem path in a request body (SPEC-116 containment discipline applied on the read side).
-3. Shared boundary under audit: the route write-scope guard `wrapRouterWritable` in `src/server/write-scope-guard.ts` (throws `write-scope fence violation` when a write method is registered outside the writable scope). The readonly test reuses this to assert the world-source routes register only GET. The route consumes SPEC115MANSTOSTU-001's `ReadResult`-returning reader.
+3. Shared boundary under audit: the route write-scope guard `wrapRouterWritable` in `src/server/write-scope-guard.ts` (throws `write-scope fence violation` when a write method is registered outside the writable scope). The readonly test reuses this to assert the world-source routes register only GET. The route consumes `archive/tickets/SPEC115MANSTOSTU-001.md`'s `ReadResult`-returning reader.
 4. FOUNDATIONS §Canonical Storage Layer / Hook 3 write discipline: the routes are strictly read-only (GET only); they add no write path to `_source/`, characters, or diegetic-artifacts. The existing write-sandbox denylist remains the write authority; these routes live outside the writable scope.
 5. Canon Safety / read-side containment (SPEC-116 precedent): SPEC-116 fixed an arbitrary-file-read where a request-body path (`included_template_path` / `selected_template: "../../../_source/canon/CF-1"`) traversed into `_source/`. These routes deliberately read `_source/` — so every request-body value (the world slug AND any per-item selector for on-demand raw text) MUST be validated/contained: the slug resolved via `enumerateWorlds`; any item selector resolved to a path provably under the resolved world root; absolute paths and `..` traversal rejected with a structured 400. No raw filesystem path is accepted in any request body. This does not weaken any Mystery Reserve firewall — the route only reads literal text and writes nothing.
 
@@ -34,7 +34,7 @@ The manual-story-studio server registers no route for browsing world source. Exp
 ### 1. New route module `src/server/routes/world-source.ts`
 
 - Export `registerWorldSourceReadRoutes(server, { repoRoot })` (name at implementer discretion; `register*(server, { repoRoot })` shape).
-- GET endpoints to (a) list/enumerate a world's source items (summaries + metadata) and (b) fetch on-demand raw text for a single item. Both resolve the world via `enumerateWorlds` (SPEC115MANSTOSTU-001) and reject any selector that escapes the world root.
+- GET endpoints to (a) list/enumerate a world's source items (summaries + metadata) and (b) fetch on-demand raw text for a single item. Both resolve the world via `enumerateWorlds` (`archive/tickets/SPEC115MANSTOSTU-001.md`) and reject any selector that escapes the world root.
 - Structured 400 on an invalid slug / absolute path / `..` traversal; structured error surfaced for unparseable items (from the reader).
 
 ### 2. Register in `src/server/http.ts`
@@ -53,7 +53,7 @@ The manual-story-studio server registers no route for browsing world source. Exp
 
 ## Out of Scope
 
-- The reader logic (SPEC115MANSTOSTU-001), frontend (SPEC115MANSTOSTU-003).
+- The reader logic (`archive/tickets/SPEC115MANSTOSTU-001.md`), frontend (SPEC115MANSTOSTU-003).
 - Any write/edit/copy-to-world route; any non-GET method on this surface.
 - A server-side search index (filtering is client-side in SPEC115MANSTOSTU-003, mirroring SPEC-112's no-index decision per spec §2 item 2).
 
