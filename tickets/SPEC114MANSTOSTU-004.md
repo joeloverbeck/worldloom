@@ -4,15 +4,15 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` beat-template surfaces (`web/src/pages/BeatTemplates.tsx`, `web/src/api/beat-templates.ts`, `src/server/routes/beat-templates.ts`); no impact on world canon or story-bundle pipeline (canon-fenced package).
-**Deps**: SPEC114MANSTOSTU-001, SPEC114MANSTOSTU-002
+**Deps**: archive/tickets/SPEC114MANSTOSTU-001.md, SPEC114MANSTOSTU-002
 
 ## Problem
 
-`deleteRecord` is the shared backend for the `beat-templates` class — `src/server/routes/beat-templates.ts:287` calls `deleteRecord(root, "beat-templates", …)` and `beat-templates` ∈ `MANUAL_RECORD_CLASSES`. So SPEC114MANSTOSTU-002's rework changes beat-template delete behavior automatically, but the beat-template frontend still branches on the now-removed `inactive_default` outcome (`web/src/pages/BeatTemplates.tsx:306`, `web/src/api/beat-templates.ts:29`) — dead branches that would never fire and would mis-handle the new `blocked` outcome. SPEC-114 §2 item 5 requires bringing the beat-template UX into line: hard-delete-or-block with referrer cards. Because templates are referenced via segment/prompt sidecars' `selected_template` (not record `refs`), the referrer pass extended in SPEC114MANSTOSTU-001 is what makes block-on-referrer correct for templates.
+`deleteRecord` is the shared backend for the `beat-templates` class — `src/server/routes/beat-templates.ts:287` calls `deleteRecord(root, "beat-templates", …)` and `beat-templates` ∈ `MANUAL_RECORD_CLASSES`. So SPEC114MANSTOSTU-002's rework changes beat-template delete behavior automatically, but the beat-template frontend still branches on the now-removed `inactive_default` outcome (`web/src/pages/BeatTemplates.tsx:306`, `web/src/api/beat-templates.ts:29`) — dead branches that would never fire and would mis-handle the new `blocked` outcome. SPEC-114 §2 item 5 requires bringing the beat-template UX into line: hard-delete-or-block with referrer cards. Because templates are referenced via segment sidecars' `selected_template` and prompt-run sidecars' `included_template_path` (not record `refs`), the referrer pass extended in archive/tickets/SPEC114MANSTOSTU-001.md is what makes block-on-referrer correct for templates.
 
 ## Assumption Reassessment (2026-06-02)
 
-1. `web/src/api/beat-templates.ts` declares its OWN `BeatTemplateDeleteResult` type (line 28) carrying `inactive_default` (line 29) — independent of the records `DeleteResult`. `BeatTemplates.tsx` consumes it (lines 10, 21) and branches on `outcome === "inactive_default"` (line 306). The backend delete route for templates is `src/server/routes/beat-templates.ts:287` (`deleteRecord(root, "beat-templates", …)` with a `force` option). After SPEC114MANSTOSTU-002, the shared `deleteRecord` returns `blocked` for referenced templates and appends to `repair-log.yaml` on force; after SPEC114MANSTOSTU-001, `selected_template` sidecar referrers are discoverable.
+1. `web/src/api/beat-templates.ts` declares its OWN `BeatTemplateDeleteResult` type (line 28) carrying `inactive_default` (line 29) — independent of the records `DeleteResult`. `BeatTemplates.tsx` consumes it (lines 10, 21) and branches on `outcome === "inactive_default"` (line 306). The backend delete route for templates is `src/server/routes/beat-templates.ts:287` (`deleteRecord(root, "beat-templates", …)` with a `force` option). After SPEC114MANSTOSTU-002, the shared `deleteRecord` returns `blocked` for referenced templates and appends to `repair-log.yaml` on force; after archive/tickets/SPEC114MANSTOSTU-001.md, segment `selected_template` and prompt-run `included_template_path` sidecar referrers are discoverable.
 2. SPEC-114 §2 item 5 + §7 AC 7 (beat-template delete follows the same lifecycle; a template referenced by a segment sidecar's `selected_template` is blocked, not hard-deleted). The spec's §5 marks canon principles N/A (canon-fenced); the cited tooling-layer alignment is Rule 6 (per AR item 4).
 3. **Cross-artifact shared boundary under audit**: `BeatTemplateDeleteResult` (`web/src/api/beat-templates.ts`) ↔ `BeatTemplates.tsx` branching ↔ the shared backend `deleteRecord` via `src/server/routes/beat-templates.ts`. The template delete route's force handling must match the records route's repair-flag confinement (SPEC114MANSTOSTU-002 §2) for parity.
 4. **FOUNDATIONS Rule 6 (No Silent Retcons)** motivates this ticket: it changes the delete behavior of the landed SPEC-104 beat-template surface. Dropping `inactive_default` and adopting block-on-referrer is an attributed behavior change (this ticket + SPEC-114 §8), not a silent edit; no production consumer depends on the old `inactive_default` template outcome.
@@ -50,7 +50,7 @@ Require the explicit repair flag for force-delete (matching SPEC114MANSTOSTU-002
 
 ## Out of Scope
 
-- Backend `deleteRecord` rework and `repair-log.yaml` (SPEC114MANSTOSTU-002) and the referrer-scan extension (SPEC114MANSTOSTU-001) — consumed here, not re-implemented.
+- Backend `deleteRecord` rework and `repair-log.yaml` (SPEC114MANSTOSTU-002) and the archived referrer-scan extension (archive/tickets/SPEC114MANSTOSTU-001.md) — consumed here, not re-implemented.
 - Records-page UX (SPEC114MANSTOSTU-003).
 - Beat-template create/edit/list behavior — only delete is in scope.
 
@@ -71,7 +71,7 @@ Require the explicit repair flag for force-delete (matching SPEC114MANSTOSTU-002
 ### New/Modified Tests
 
 1. `tools/manual-story-studio/web` `tsc --noEmit` (via `npm test`) — type-level proof the `BeatTemplateDeleteResult` change is consumed coherently.
-2. Backend `selected_template`-referrer blocking for `beat-templates` is covered by SPEC114MANSTOSTU-001's `test/read/referrers.test.ts` (`mtemplate-*` sidecar case) + 002's `delete-lifecycle.test.ts`; if a template-route integration assertion is added, it lives under `test/`.
+2. Backend template-referrer blocking for `beat-templates` is covered by archive/tickets/SPEC114MANSTOSTU-001.md's `test/read/referrers.test.ts` (`mtemplate-*` sidecar case) + 002's `delete-lifecycle.test.ts`; if a template-route integration assertion is added, it lives under `test/`.
 
 ### Commands
 

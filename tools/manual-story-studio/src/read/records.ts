@@ -3,6 +3,7 @@ import path from "node:path";
 
 import YAML from "yaml";
 
+import { readCurrentContext } from "./current-context.js";
 import {
   MANUAL_RECORD_CLASSES,
   MANUAL_RECORD_CLASS_PREFIXES,
@@ -120,6 +121,11 @@ export interface ReferrerEntry {
   field: string;
 }
 
+export interface ManualRecordSummaryWithClass {
+  recordClass: ManualRecordClass;
+  summary: ManualRecordSummary;
+}
+
 export function scanReferences(manualStoryRoot: string, targetId: string): ReadResult<ReferrerEntry[]> {
   const referrers: ReferrerEntry[] = [];
   for (const cls of MANUAL_RECORD_CLASSES) {
@@ -134,7 +140,70 @@ export function scanReferences(manualStoryRoot: string, targetId: string): ReadR
       collectReferrers(record.value, cls, targetId, referrers);
     }
   }
+  const currentContextResult = collectCurrentContextReferrers(
+    manualStoryRoot,
+    targetId,
+    referrers,
+  );
+  if (!currentContextResult.ok) return currentContextResult;
+  const templateSidecarResult = collectTemplateSidecarReferrers(
+    manualStoryRoot,
+    targetId,
+    referrers,
+  );
+  if (!templateSidecarResult.ok) return templateSidecarResult;
   return ok(referrers);
+}
+
+export function resolveReferrerSummaries(
+  manualStoryRoot: string,
+  targetId: string,
+): ReadResult<ManualRecordSummaryWithClass[]> {
+  const referrersResult = scanReferences(manualStoryRoot, targetId);
+  if (!referrersResult.ok) return err(referrersResult.error);
+
+  const grouped = new Map<string, ReferrerEntry[]>();
+  for (const referrer of referrersResult.value) {
+    const key = `${referrer.recordClass}\0${referrer.id}`;
+    const entries = grouped.get(key);
+    if (entries) {
+      entries.push(referrer);
+    } else {
+      grouped.set(key, [referrer]);
+    }
+  }
+
+  const out: ManualRecordSummaryWithClass[] = [];
+  for (const entries of grouped.values()) {
+    const first = entries[0];
+    if (!first) continue;
+    if (isRecordIdForClass(first.recordClass, first.id)) {
+      const record = readRecord(manualStoryRoot, first.recordClass, first.id);
+      if (!record.ok) return err(record.error);
+      const summary = toSummary(record.value);
+      if (!summary) {
+        return err({
+          code: "schema_validation_failed",
+          path: path.join(
+            manualStoryRoot,
+            "records",
+            first.recordClass,
+            `${first.id}.yaml`,
+          ),
+          repair_hint: `Record at records/${first.recordClass}/${first.id}.yaml is missing required fields (id, title).`,
+        });
+      }
+      out.push({ recordClass: first.recordClass, summary });
+      continue;
+    }
+
+    out.push({
+      recordClass: first.recordClass,
+      summary: syntheticReferrerSummary(first.id, targetId, entries),
+    });
+  }
+
+  return ok(out);
 }
 
 function collectReferrers(
@@ -222,6 +291,116 @@ function collectReferrers(
   }
 }
 
+function collectCurrentContextReferrers(
+  manualStoryRoot: string,
+  targetId: string,
+  out: ReferrerEntry[],
+): ReadResult<void> {
+  const contextResult = readCurrentContext(manualStoryRoot);
+  if (!contextResult.ok) return err(contextResult.error);
+  const context = contextResult.value;
+  if (!context) return ok(undefined);
+  const recordClass = inferRecordClassFromId(targetId) ?? "facts";
+
+  collectOptionalString(context.current_location, recordClass, "current-context", "current-context.current_location", targetId, out);
+  collectOptionalString(context.pov_holder, recordClass, "current-context", "current-context.pov_holder", targetId, out);
+  collectOptionalString(context.last_accepted_segment, recordClass, "current-context", "current-context.last_accepted_segment", targetId, out);
+  collectOptionalString(context.last_reviewed_after_segment, recordClass, "current-context", "current-context.last_reviewed_after_segment", targetId, out);
+  collectStringArray(context.current_cast, recordClass, "current-context", "current-context.current_cast", targetId, out);
+  collectStringArray(context.active_pressure_clocks, recordClass, "current-context", "current-context.active_pressure_clocks", targetId, out);
+  collectStringArray(context.active_secrets_questions, recordClass, "current-context", "current-context.active_secrets_questions", targetId, out);
+  collectStringArray(context.pinned_records, recordClass, "current-context", "current-context.pinned_records", targetId, out);
+  collectStringArray(context.excluded_records ?? [], recordClass, "current-context", "current-context.excluded_records", targetId, out);
+  collectStringArray(context.must_not_reveal, recordClass, "current-context", "current-context.must_not_reveal", targetId, out);
+
+  return ok(undefined);
+}
+
+function collectTemplateSidecarReferrers(
+  manualStoryRoot: string,
+  targetId: string,
+  out: ReferrerEntry[],
+): ReadResult<void> {
+  if (!/^mtemplate-\d+$/.test(targetId)) return ok(undefined);
+
+  const segmentsResult = collectSelectedTemplateSidecars(
+    manualStoryRoot,
+    "segments",
+    targetId,
+    "selected_template",
+    out,
+  );
+  if (!segmentsResult.ok) return segmentsResult;
+  const promptRunsResult = collectSelectedTemplateSidecars(
+    manualStoryRoot,
+    "prompt-runs",
+    targetId,
+    "included_template_path",
+    out,
+  );
+  if (!promptRunsResult.ok) return promptRunsResult;
+
+  return ok(undefined);
+}
+
+function collectSelectedTemplateSidecars(
+  manualStoryRoot: string,
+  subdir: "segments" | "prompt-runs",
+  targetId: string,
+  sourceField: "selected_template" | "included_template_path",
+  out: ReferrerEntry[],
+): ReadResult<void> {
+  const dir = path.join(manualStoryRoot, subdir);
+  if (!existsSync(dir)) return ok(undefined);
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith(".yaml")) continue;
+    const fullPath = path.join(dir, entry.name);
+    const parsed = readYamlFile(fullPath);
+    if (!parsed.ok) return err(parsed.error);
+    const obj = parsed.value as Record<string, unknown>;
+    const raw = obj[sourceField];
+    const selectedTemplate = sourceField === "included_template_path"
+      ? deriveTemplateIdFromPath(raw)
+      : raw;
+    if (selectedTemplate === targetId) {
+      out.push({
+        recordClass: "beat-templates",
+        id: path.basename(entry.name, ".yaml"),
+        field: `${subdir}/${entry.name}:${sourceField}`,
+      });
+    }
+  }
+  return ok(undefined);
+}
+
+function collectOptionalString(
+  value: string | null | undefined,
+  recordClass: ManualRecordClass,
+  id: string,
+  field: string,
+  targetId: string,
+  out: ReferrerEntry[],
+): void {
+  if (value === targetId) {
+    out.push({ recordClass, id, field });
+  }
+}
+
+function collectStringArray(
+  value: readonly string[],
+  recordClass: ManualRecordClass,
+  id: string,
+  field: string,
+  targetId: string,
+  out: ReferrerEntry[],
+): void {
+  value.forEach((entry, i) => {
+    if (entry === targetId) {
+      out.push({ recordClass, id, field: `${field}[${i}]` });
+    }
+  });
+}
+
 function toSummary(parsed: unknown): ManualRecordSummary | null {
   if (typeof parsed !== "object" || parsed === null) return null;
   const obj = parsed as Record<string, unknown>;
@@ -286,4 +465,44 @@ function extractNumericSuffix(id: string): number {
 
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function isRecordIdForClass(recordClass: ManualRecordClass, id: string): boolean {
+  const prefix = MANUAL_RECORD_CLASS_PREFIXES[recordClass];
+  return new RegExp(`^${escapeRegex(prefix)}-\\d+$`).test(id);
+}
+
+function inferRecordClassFromId(id: string): ManualRecordClass | null {
+  for (const cls of MANUAL_RECORD_CLASSES) {
+    const prefix = MANUAL_RECORD_CLASS_PREFIXES[cls];
+    if (new RegExp(`^${escapeRegex(prefix)}-\\d+$`).test(id)) {
+      return cls;
+    }
+  }
+  return null;
+}
+
+function deriveTemplateIdFromPath(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const match = /(?:^|[/\\])(mtemplate-\d+)\.yaml$/.exec(value);
+  return match?.[1] ?? null;
+}
+
+function syntheticReferrerSummary(
+  id: string,
+  targetId: string,
+  referrers: ReferrerEntry[],
+): ManualRecordSummary {
+  const fields = referrers.map((r) => r.field).sort();
+  const title = id === "current-context" ? "Current context" : `${id} sidecar`;
+  return {
+    id,
+    title,
+    active: true,
+    importance: "medium",
+    tags: [],
+    summary: `References ${targetId} via ${fields.join(", ")}.`,
+    prompt_visibility: "always",
+    involved_cast: [],
+  };
 }
