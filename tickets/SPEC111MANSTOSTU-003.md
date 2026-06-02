@@ -8,7 +8,7 @@
 
 ## Problem
 
-Per SPEC-111 §2 item 3: internal record IDs (`mchar-3`-style) leak as primary user-facing labels across the per-story pages. They are file-management surface, not authoring surface, and the leakage raises the chance the author copies an ID into the directive (prompt-leakage discipline). Audit each page: render `title` as the primary label, the ID as a disclosure subscript; keep IDs visible in form fields (the `RefList` typed-references editor) and where a page IS the artifact-management surface (PromptHistory). The Dashboard portion of this deliverable is owned by SPEC111MANSTOSTU-002.
+Per SPEC-111 §2 item 3: internal record IDs (`mchar-3`-style) leak as primary user-facing labels across the per-story pages. They are file-management surface, not authoring surface, and the leakage raises the chance the author copies an ID into the directive (prompt-leakage discipline). Audit each page: render `title` as the primary label, the ID as a disclosure subscript; keep IDs visible in form fields (the `RefList` typed-references editor) and where a page IS the artifact-management surface (PromptHistory). The Dashboard portion of this deliverable is owned by archive/tickets/SPEC111MANSTOSTU-002.md.
 
 ## Assumption Reassessment (2026-06-02)
 
@@ -65,7 +65,7 @@ Prompt IDs may remain visible (this page IS the artifact-management surface) but
 
 ## Out of Scope
 
-- Dashboard ID hiding (→ SPEC111MANSTOSTU-002).
+- Dashboard ID hiding (→ archive/tickets/SPEC111MANSTOSTU-002.md).
 - `RefList` form-field IDs (kept visible by design — editor surface).
 - Unsaved-change handling (→ SPEC111MANSTOSTU-004).
 - Backend; record schema.

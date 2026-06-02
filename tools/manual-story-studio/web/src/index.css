@@ -256,6 +256,91 @@ main ol {
   padding-left: var(--space-5);
 }
 
+.manual-dashboard {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.dashboard-cockpit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-4);
+}
+
+.dashboard-compact-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dashboard-item-meta,
+.id-subscript {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.id-subscript {
+  display: inline-block;
+  margin-left: var(--space-1);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.dashboard-link-row,
+.status-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  border: 1px solid var(--warning-border);
+  border-radius: 4px;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.status-chip--ok {
+  border-color: #94b49f;
+  background: #eef8f0;
+  color: #255333;
+}
+
+.dashboard-contract-summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-3);
+}
+
+.dashboard-contract-summary dt {
+  color: var(--text-muted);
+}
+
+.dashboard-contract-summary dd {
+  margin: 0;
+}
+
+.importance-disclosure {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: var(--space-4) var(--space-5);
+}
+
+.importance-disclosure > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.importance-disclosure > section {
+  margin-top: var(--space-4);
+}
+
 main ul li + li,
 main ol li + li {
   margin-top: var(--space-1);
