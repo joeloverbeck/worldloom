@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `src/health/compute.ts` to extend Pass 2 (schema integrity) and Pass 3 (reference integrity) with current-context coverage.
-**Deps**: SPEC109MANSTOSTU-003
+**Deps**: archive/tickets/SPEC109MANSTOSTU-003.md
 
 ## Problem
 

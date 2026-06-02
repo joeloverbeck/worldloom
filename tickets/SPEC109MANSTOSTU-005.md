@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `src/server/routes/current-context.ts`, `web/src/api/current-context.ts`, `test/current-context/routes-current-context.test.ts`; modifies `src/server/http.ts` to wire the read + write registration functions in their proper scopes.
-**Deps**: archive/tickets/SPEC109MANSTOSTU-002.md, SPEC109MANSTOSTU-003, SPEC109MANSTOSTU-004
+**Deps**: archive/tickets/SPEC109MANSTOSTU-002.md, archive/tickets/SPEC109MANSTOSTU-003.md, SPEC109MANSTOSTU-004
 
 ## Problem
 
