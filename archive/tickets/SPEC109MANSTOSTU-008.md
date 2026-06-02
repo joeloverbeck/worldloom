@@ -1,6 +1,6 @@
 # SPEC109MANSTOSTU-008: CurrentStatePanel + Dashboard wire-up
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — adds `web/src/components/CurrentStatePanel.tsx`; modifies `web/src/pages/Dashboard.tsx` to mount the panel at the top and de-emphasize the existing importance-bucketed records panel.
@@ -30,19 +30,21 @@ The Dashboard is currently a list of summaries (cast, segments, high-importance 
 4. Dashboard's existing high-importance panel still renders (de-emphasized, not removed) → manual verification.
 5. `cd tools/manual-story-studio/web && npm test` (tsc --noEmit) → AC #12.
 
-## What to Change
+## Landed Changes
 
 ### 1. New component at `web/src/components/CurrentStatePanel.tsx`
 
-Props: `{ ctx: CurrentContext | null; worldSlug: string; msSlug: string }`. Behavior:
-- If `ctx === null`: render an empty-state with heading "Current State" + paragraph "No current context set yet" + button "Set current context" navigating to `/worlds/<worldSlug>/manual-stories/<msSlug>/current-context/edit`.
-- Else: render heading + content blocks for `current_location`, `pov_holder`, `current_cast` (chips), `active_pressure_clocks` (chips), `active_secrets_questions` (chips), `current_handoff_summary` (paragraph). Use existing chip / heading styles from sibling components.
+Added `CurrentStatePanel` with props `{ ctx: CurrentContext | null; worldSlug: string; msSlug: string }`.
+
+- When `ctx === null`, the panel renders the "Current State" empty state plus a "Set current context" link to `/worlds/<worldSlug>/manual-stories/<msSlug>/current-context/edit`.
+- When context is present, the panel renders current location, POV holder, current cast chips, active pressure clock chips, active secrets/questions chips, and the current handoff summary paragraph.
 
 ### 2. Dashboard wire-up at `web/src/pages/Dashboard.tsx`
 
-- Import `fetchCurrentContext` from `web/src/api/current-context.ts` (005); add a `useEffect` data-loading block parallel to the existing metadata / cast / segments loaders.
-- Import `CurrentStatePanel`; render it at the top of the Dashboard's main return, above the existing high-importance section.
-- De-emphasize the existing `<section aria-label="high-importance">`: move it below the Current State panel and reduce its heading visual weight (e.g., demote from `<h2>` to `<h3>`; if the dashboard uses heading-level styling, follow that convention). Preserve the existing `highImportance` memo logic — no behavior change to the data, only visual placement and emphasis.
+- Imported `fetchCurrentContext` from `web/src/api/current-context.ts` and loads current context in the existing dashboard data-loading effect alongside the other dashboard surfaces.
+- Imported and mounted `CurrentStatePanel` near the top of the dashboard, before the story contract and high-importance records sections.
+- Added a current-context load error alert with the dashboard's existing retry pattern.
+- De-emphasized the high-importance records section by demoting the heading from `<h2>` to a smaller `<h3>` while preserving the existing high-importance data flow.
 
 ## Files to Touch
 
@@ -79,3 +81,17 @@ Props: `{ ctx: CurrentContext | null; worldSlug: string; msSlug: string }`. Beha
 
 1. `cd tools/manual-story-studio/web && npm test`
 2. `cd tools/manual-story-studio && npm test` (full pipeline includes web tsc).
+
+## Outcome
+
+Implemented the dashboard current-state glance for SPEC-109. The web UI now fetches current-context data, renders a primary Current State panel with the required context fields when present, and offers the future Edit Current Context route when the context file is absent. The existing high-importance records panel remains available below the primary current-state surface with reduced heading weight.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio/web && npm test` — PASS (`tsc -p tsconfig.json --noEmit`).
+2. `cd tools/manual-story-studio && npm test` — PASS (427 backend tests plus web `tsc --noEmit`).
+3. `git diff --check -- archive/tickets/SPEC109MANSTOSTU-008.md tools/manual-story-studio/web/src/components/CurrentStatePanel.tsx tools/manual-story-studio/web/src/pages/Dashboard.tsx` — PASS.
+
+## Deviations
+
+The panel renders IDs directly as chips for cast, pressure clocks, and secrets/questions. Title resolution is not part of this ticket's owned seam and can remain a future UI enhancement.

@@ -5,10 +5,13 @@ import {
   listRecords as apiList,
   readMetadata as apiReadMetadata,
 } from "../api/records.js";
+import { fetchCurrentContext } from "../api/current-context.js";
 import { readManuscript, type ManuscriptResponse } from "../api/manuscript.js";
 import { listSegments, type SegmentListEntry } from "../api/segments.js";
+import { CurrentStatePanel } from "../components/CurrentStatePanel.js";
 import {
   MANUAL_RECORD_CLASSES,
+  type CurrentContext,
   type ManualRecordClass,
   type ManualRecordSummary,
   type ManualStoryMetadata,
@@ -36,8 +39,10 @@ export function Dashboard() {
   const [cast, setCast] = useState<ManualRecordSummary[]>([]);
   const [segments, setSegments] = useState<SegmentListEntry[]>([]);
   const [manuscript, setManuscript] = useState<ManuscriptResponse | null>(null);
+  const [currentContext, setCurrentContext] = useState<CurrentContext | null>(null);
   const [manuscriptMissing, setManuscriptMissing] = useState(false);
   const [metadataError, setMetadataError] = useState<string | null>(null);
+  const [currentContextError, setCurrentContextError] = useState<string | null>(null);
   const [castError, setCastError] = useState<string | null>(null);
   const [segmentsError, setSegmentsError] = useState<string | null>(null);
   const [recordsError, setRecordsError] = useState<string | null>(null);
@@ -70,6 +75,7 @@ export function Dashboard() {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
     setMetadataError(null);
+    setCurrentContextError(null);
     setCastError(null);
     setSegmentsError(null);
     setRecordsError(null);
@@ -79,6 +85,13 @@ export function Dashboard() {
       })
       .catch((error: unknown) => {
         if (!cancelled) setMetadataError(loadErrorMessage(error));
+      });
+    fetchCurrentContext(worldSlug, msSlug)
+      .then((ctx) => {
+        if (!cancelled) setCurrentContext(ctx);
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) setCurrentContextError(loadErrorMessage(error));
       });
     apiList(worldSlug, msSlug, "cast")
       .then((c) => {
@@ -196,6 +209,20 @@ export function Dashboard() {
         </Link>
       </nav>
 
+      <CurrentStatePanel
+        ctx={currentContext}
+        worldSlug={worldSlug}
+        msSlug={msSlug}
+      />
+      {currentContextError ? (
+        <p role="alert">
+          Failed to load current context: {currentContextError}{" "}
+          <button type="button" onClick={retryLoad}>
+            Retry
+          </button>
+        </p>
+      ) : null}
+
       <section aria-label="story-contract">
         <h2>Story contract</h2>
         {metadataError ? (
@@ -277,7 +304,9 @@ export function Dashboard() {
       </section>
 
       <section aria-label="high-importance">
-        <h2>High-importance records</h2>
+        <h3 style={{ fontSize: "1em", fontWeight: 600 }}>
+          High-importance records
+        </h3>
         {recordsError ? (
           <p role="alert">
             Failed to load records: {recordsError}{" "}
