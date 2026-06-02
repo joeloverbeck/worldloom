@@ -1,6 +1,6 @@
 # SPEC-114 — Manual Story Studio: Mutable-Record Delete Lifecycle (Block-on-Referrer, Repair-Mode Force-Delete)
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (backend delete-flow correction + frontend delete UX; no canon-pipeline integration).
 **Depends on:** archive/specs/SPEC-101-manual-story-metadata-and-records.md (the record read/write layer whose delete path this spec corrects), archive/specs/SPEC-112-manual-story-studio-record-pickers.md (referrer cards in the block-on-referrer flow reuse the archived extended `RecordCard` surface).
@@ -12,7 +12,7 @@
 
 ## Implementation Notes
 
-- **2026-06-02:** `archive/tickets/SPEC114MANSTOSTU-001.md`, `archive/tickets/SPEC114MANSTOSTU-002.md`, `archive/tickets/SPEC114MANSTOSTU-003.md`, and `archive/tickets/SPEC114MANSTOSTU-004.md` landed the read/backend/UI parity portion: `scanReferences` now covers current-context and template sidecar referrers, `deleteRecord` now hard-deletes unreferenced records, blocks referenced records with referrer summaries, persists repair-mode force-deletes to `repair-log.yaml`, and both Records and Beat Templates now show referrer-card blockers with repair force-delete behind collapsed disclosures. Remaining docs bullets below are still active until their ticket lands. Historical prose below may still describe the pre-implementation `inactive_default` behavior as intake evidence.
+- **2026-06-02:** `archive/tickets/SPEC114MANSTOSTU-001.md`, `archive/tickets/SPEC114MANSTOSTU-002.md`, `archive/tickets/SPEC114MANSTOSTU-003.md`, `archive/tickets/SPEC114MANSTOSTU-004.md`, and `archive/tickets/SPEC114MANSTOSTU-005.md` landed the full read/backend/UI/docs scope: `scanReferences` now covers current-context and template sidecar referrers, `deleteRecord` now hard-deletes unreferenced records, blocks referenced records with referrer summaries, persists repair-mode force-deletes to `repair-log.yaml`, both Records and Beat Templates now show referrer-card blockers with repair force-delete behind collapsed disclosures, README delete outcomes describe the implemented lifecycle, and `docs/ID-ALLOCATION.md` registers `repair-log.yaml`.
 
 ## 1. Context & Motivation
 
@@ -116,3 +116,31 @@ FOUNDATIONS (line 105 / §598 / §614) governs **world canon not encoding story-
 - **`repair-log.yaml` is net-new infrastructure this spec establishes (Q2 → persist).** It is **not** inherited from SPEC-108 (whose force-delete returns only an in-memory audit message). Decision: persist, on Rule 6 (No Silent Retcons) durability grounds. Open sub-decisions deferred to implementation: exact field naming (snake_case keys above are the proposed shape), and whether the log is per-manual-story (chosen) vs per-world. The append path must read-modify-write under the existing `safeWriteFile` sandbox; concurrent force-deletes from two browser tabs are an accepted last-writer-wins risk (single-user local tool).
 - **`docs/ID-ALLOCATION.md` doc-gap.** `repair-log.yaml` should be registered as a non-ID-bearing control file in §Manual-story-scoped (parallel to `manual-story.yaml`). Routed as a §4 deliverable rather than a separate docs spec.
 - **Existing-test churn.** The SPEC-101 AC #5 capstone (`test/capstone-spec101.test.ts`) and `test/write/records.test.ts` assert the old `inactive_default` behavior; they are rewritten, not merely supplemented. The capstone rewrite is a deliberate, attributed change to a landed spec's acceptance test (Rule 6 visibility), not a silent edit.
+
+## Outcome
+
+Completed on 2026-06-02.
+
+SPEC-114 landed through `archive/tickets/SPEC114MANSTOSTU-001.md` through `archive/tickets/SPEC114MANSTOSTU-005.md`.
+
+What changed:
+
+- `scanReferences` now includes current-context references plus segment/prompt template sidecars, with `resolveReferrerSummaries` returning summary-bearing referrers for delete-block UI.
+- Record and beat-template delete now follow hard-delete-or-block semantics. Referenced deletes return `blocked` and leave files unchanged; normal delete no longer writes `active:false` or `retired_reason`.
+- Repair-mode force-delete is gated by `mode=repair`, unlinks despite referrers, and appends durable entries to per-manual-story `repair-log.yaml`.
+- Records and Beat Templates show referrer-card blockers and keep "Force delete anyway" behind collapsed repair disclosures.
+- `tools/manual-story-studio/README.md` documents the implemented delete lifecycle, and `docs/ID-ALLOCATION.md` registers `repair-log.yaml` as a non-ID control file.
+
+Deviations:
+
+- The UI block-card proofs landed as source-level regressions (`test/web/records-delete-ux.test.ts`, `test/web/beat-template-delete-ux.test.ts`) because the package has no runtime component-test harness; web behavior is otherwise covered by `tsc --noEmit`.
+- Beat-template referrer cards navigate to the Records route with `class` and `id` query params instead of opening inline, because the Beat Templates page does not own arbitrary record editing.
+
+Verification:
+
+- `cd tools/manual-story-studio && npm run test:backend` — PASS during backend slice.
+- `cd tools/manual-story-studio && npm run build` — PASS during backend slice.
+- `cd tools/manual-story-studio && npm run test` — PASS after UI parity: 472 backend/static tests plus web `tsc -p tsconfig.json --noEmit`.
+- `grep -n "inactive_default" tools/manual-story-studio/README.md` — PASS: no matches.
+- `grep -nE "blocked|repair-log\.yaml|hard-delete" tools/manual-story-studio/README.md` and `grep -n "repair-log.yaml" docs/ID-ALLOCATION.md` — PASS.
+- `git diff --check` — PASS across ticket and archival steps.

@@ -11,18 +11,18 @@ These active specs implement the remaining accepted findings of the third-iterat
 - **SPEC-116** — Backend integrity hardening is complete and archived at `archive/specs/SPEC-116-manual-story-studio-backend-integrity-hardening.md`. It landed first because it closed the live `included_template_path` arbitrary-file-read vulnerability and scoped health blocking.
 - **SPEC-112** — Record pickers are complete and archived at `archive/specs/SPEC-112-manual-story-studio-record-pickers.md`. The landed surface is `RecordPicker` plus extended `RecordCard` presentation, current-context/record-form/current-state/Moment Composer mounts, and the source-structure capstone test.
 - **SPEC-113** — Inclusion ledger and Prompt Preview inspector are complete and archived at `archive/specs/SPEC-113-manual-story-studio-prompt-inclusion-ledger.md`. The landed surface is `excluded_records`, backend resolution ledger buckets, `section_map`, the two-pane inspector, and the Prompt Working Set relabel.
+- **SPEC-114** — Mutable-record delete lifecycle is complete and archived at `archive/specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md`. The landed surface is hard-delete-or-block for records and beat templates, summary-bearing referrer blockers, repair-mode force-delete with persisted `repair-log.yaml`, and updated delete/ID-allocation docs.
 
 ## Order
 
 | # | Spec | Why here | Hard dependency |
 |---|------|----------|-----------------|
-| 1 | **SPEC-114** — Mutable-record delete lifecycle | Corrects the soft-delete-as-archive default to block-on-referrer; referrer cards reuse the archived SPEC-112 picker/card surface, and its referrer-resolution pass also backs SPEC-112's deferred referenced-by count. | SPEC-101 (landed); archive/specs/SPEC-112-manual-story-studio-record-pickers.md |
-| 2 | **SPEC-115** — World source browser | Largest single build; no downstream blocker. The copy-into-story-record form reuses SPEC-112's pickers/cards and forms, so it lands after they exist. | SPEC-100 (landed); archive/specs/SPEC-112-manual-story-studio-record-pickers.md |
+| 1 | **SPEC-115** — World source browser | Largest single build; no downstream blocker. The copy-into-story-record form reuses SPEC-112's pickers/cards and forms, so it lands after they exist. | SPEC-100 (landed); archive/specs/SPEC-112-manual-story-studio-record-pickers.md |
 
 ## Dependency notes
 
 - **SPEC-112 is landed and archived**: 113, 114, and 115 all reuse its `RecordPicker` / extended `RecordCard` surface.
-- **114 and 115 remain mutually independent** now that 112 and 113 have landed; they may be implemented in parallel. The numeric order above reflects descending value-per-effort, not a hard chain.
+- **SPEC-115 remains active** now that SPEC-114 is archived. It reuses the archived SPEC-112 picker/card surface and does not depend on the SPEC-114 delete lifecycle.
 - SPEC-112/113 composer-caller changes must use the archived SPEC-116 contained form: `selected_template` as an `mtemplate-<integer>` id. The raw `included_template_path` request field is no longer accepted.
 
 ## Explicitly deferred (not specs in this batch)

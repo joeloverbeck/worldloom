@@ -50,7 +50,7 @@ Added an exported `resolveReferrerSummaries(manualStoryRoot, targetId): ReadResu
 ## Out of Scope
 
 - Any change to `ReferrerEntry`'s struct shape or `scanReferences`'s signature (would ripple into SPEC-108's `segments.ts`).
-- The delete write-path rework (SPEC114MANSTOSTU-002) and any UI (003/004).
+- The delete write-path rework (archive/tickets/SPEC114MANSTOSTU-002.md) and UI work (archive/tickets/SPEC114MANSTOSTU-003.md / archive/tickets/SPEC114MANSTOSTU-004.md).
 - Renaming `current-context.yaml` to "Prompt Working Set" (report §6/§39 Stage 1 — a separate concern, not this spec).
 
 ## Acceptance Criteria

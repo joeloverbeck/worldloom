@@ -12,12 +12,12 @@ At intake, the normal `deleteRecord` flow (`src/write/records.ts`) archived a re
 
 ## Assumption Reassessment (2026-06-02)
 
-1. At intake, `deleteRecord` (`src/write/records.ts`) and its `DeleteResult` union included the `inactive_default` outcome writing `active:false` + `retired_reason` for referenced records, and a `force_deleted` outcome returning an in-memory `auditEntry`. `deleteRecord` already called `scanReferences`; this ticket switched the block branch to consume the archived SPEC114MANSTOSTU-001 `resolveReferrerSummaries` implementation. The delete route (`src/server/routes/records.ts`) derived `force` from `queryForce || bodyConfirm`; this ticket replaced that loose trigger with `?force=true&mode=repair`. `safeWriteFile` (`src/write/sandbox.ts`) is the sandbox-bounded write primitive for the new `repair-log.yaml`.
+1. At intake, `deleteRecord` (`src/write/records.ts`) and its `DeleteResult` union included the `inactive_default` outcome writing `active:false` + `retired_reason` for referenced records, and a `force_deleted` outcome returning an in-memory `auditEntry`. `deleteRecord` already called `scanReferences`; this ticket switched the block branch to consume the archived `archive/tickets/SPEC114MANSTOSTU-001.md` `resolveReferrerSummaries` implementation. The delete route (`src/server/routes/records.ts`) derived `force` from `queryForce || bodyConfirm`; this ticket replaced that loose trigger with `?force=true&mode=repair`. `safeWriteFile` (`src/write/sandbox.ts`) is the sandbox-bounded write primitive for the new `repair-log.yaml`.
 2. SPEC-114 §2 items 1+3, §3 ("Force-delete is repair, and repair is logged durably" — `repair-log.yaml` schema `{deleted_class_and_id, deleted_at, referrers_at_deletion}`), and §7 AC 1-5 define the target behavior. `docs/FOUNDATIONS.md` §Rule 6 (No Silent Retcons) is the cited alignment.
 3. **Cross-artifact shared boundary under audit**: the `DeleteResult` union is mirrored by the web client type (`web/src/api/records.ts:23`) and the beat-template client type (`web/src/api/beat-templates.ts:28`); `deleteRecord` is the shared backend for `beat-templates` too (`src/server/routes/beat-templates.ts:287`). This ticket owns the backend contract; the frontend mirrors land in 003/004.
 4. **FOUNDATIONS Rule 6 (No Silent Retcons)** motivates this ticket: a delete that silently archives a record as inactive is an unexplained state change. Hard-delete-or-block makes the outcome explicit, and the persisted `repair-log.yaml` gives force-delete a durable audit trail — the tooling-layer analogue of the no-silent-retcon discipline. An in-memory-only audit entry (SPEC-108's pattern) does not honor it.
-5. (was template item 7 — `inactive_default` removal blast radius) Removing the `inactive_default` outcome from the normal backend path has consumers beyond `src/write/records.ts`: `README.md:107` (docs → SPEC114MANSTOSTU-005), `web/src/api/records.ts:26` + `web/src/pages/Records.tsx:398` (→ 003), `web/src/api/beat-templates.ts:29` + `web/src/pages/BeatTemplates.tsx:306` and `src/server/routes/beat-templates.ts` (→ 004), plus the asserting tests `test/write/records.test.ts`, `test/server/records.test.ts`, and `test/capstone-spec101.test.ts` (rewritten in this ticket). The capstone is SPEC-101's AC#5 hybrid-delete test; rewriting it is a deliberate, attributed change to a landed spec's tested behavior (Rule 6), not a silent edit.
-6. `specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md` had current-state prose that became partially historical once the backend landed. This ticket added a dated implementation note instead of rewriting the whole proposal, leaving remaining frontend/docs wording for 003-005.
+5. (was template item 7 — `inactive_default` removal blast radius) Removing the `inactive_default` outcome from the normal backend path has consumers beyond `src/write/records.ts`: `README.md:107` (docs → archive/tickets/SPEC114MANSTOSTU-005.md), `web/src/api/records.ts:26` + `web/src/pages/Records.tsx:398` (→ archive/tickets/SPEC114MANSTOSTU-003.md), `web/src/api/beat-templates.ts:29` + `web/src/pages/BeatTemplates.tsx:306` and `src/server/routes/beat-templates.ts` (→ archive/tickets/SPEC114MANSTOSTU-004.md), plus the asserting tests `test/write/records.test.ts`, `test/server/records.test.ts`, and `test/capstone-spec101.test.ts` (rewritten in this ticket). The capstone is SPEC-101's AC#5 hybrid-delete test; rewriting it is a deliberate, attributed change to a landed spec's tested behavior (Rule 6), not a silent edit.
+6. `archive/specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md` had current-state prose that became partially historical once the backend landed. This ticket added a dated implementation note instead of rewriting the whole proposal, leaving remaining frontend/docs wording for 003-005.
 
 ## Architecture Check
 
@@ -36,7 +36,7 @@ At intake, the normal `deleteRecord` flow (`src/write/records.ts`) archived a re
 
 ### 1. Reworked `deleteRecord` (`src/write/records.ts`)
 
-- Removed the `inactive_default` branch and its member from the backend `DeleteResult` union. Default path is now: unreferenced → `hard_deleted` (unlink); referenced → `blocked` carrying `referrers: Array<{recordClass, summary}>` from the archived SPEC114MANSTOSTU-001 `resolveReferrerSummaries` implementation. Delete no longer writes `active:false` or `retired_reason`.
+- Removed the `inactive_default` branch and its member from the backend `DeleteResult` union. Default path is now: unreferenced → `hard_deleted` (unlink); referenced → `blocked` carrying `referrers: Array<{recordClass, summary}>` from the archived `archive/tickets/SPEC114MANSTOSTU-001.md` `resolveReferrerSummaries` implementation. Delete no longer writes `active:false` or `retired_reason`.
 - Force path (`opts.force === true`) unlinks despite referrers and appends an entry `{deleted_class_and_id, deleted_at, referrers_at_deletion}` to `repair-log.yaml` through `safeWriteFile`. Existing HTTP `auditEntry` remains camelCase for the current caller surface; persisted YAML uses the SPEC-114 snake_case schema.
 - Timestamp still uses the injectable `opts.now` for deterministic tests.
 
@@ -59,7 +59,7 @@ The route now accepts force-delete only as `?force=true&mode=repair` or with bod
 - `tools/manual-story-studio/test/server/records.test.ts` (modify)
 - `tools/manual-story-studio/test/capstone-spec101.test.ts` (modify)
 - `tools/manual-story-studio/test/write/delete-lifecycle.test.ts` (new)
-- `specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md` (modify — dated implementation note)
+- `archive/specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md` (modify — dated implementation note)
 
 ## Out of Scope
 
@@ -110,7 +110,7 @@ The backend delete lifecycle now matches SPEC-114 for records:
 - force-delete appends durable audit entries to `repair-log.yaml` and then unlinks the record;
 - the records delete route requires explicit repair mode for force-delete.
 
-`specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md` received a dated implementation note to mark the backend slice as landed while leaving frontend/docs work to active follow-up tickets.
+`archive/specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md` received a dated implementation note to mark the backend slice as landed while leaving frontend/docs work to active follow-up tickets.
 
 ## Verification Result
 
@@ -122,5 +122,5 @@ The backend delete lifecycle now matches SPEC-114 for records:
 ## Deviations
 
 - The route-level explicit repair flag landed as the package's existing repair-mode pattern: `?force=true&mode=repair` (or body `mode: "repair"` with the force query). The old `{confirm:true}` body no longer triggers force-delete.
-- The persisted `repair-log.yaml` uses the SPEC-114 snake_case fields. The HTTP `force_deleted.auditEntry` remains camelCase for the current API surface; frontend type/UX cleanup is owned by SPEC114MANSTOSTU-003.
-- Beat-template route force gating is still active scope in SPEC114MANSTOSTU-004, so `src/server/routes/beat-templates.ts` still contains the old force trigger until that ticket lands.
+- The persisted `repair-log.yaml` uses the SPEC-114 snake_case fields. The HTTP `force_deleted.auditEntry` remains camelCase for the current API surface; frontend type/UX cleanup was owned by archive/tickets/SPEC114MANSTOSTU-003.md.
+- Beat-template route force gating was owned by archive/tickets/SPEC114MANSTOSTU-004.md.

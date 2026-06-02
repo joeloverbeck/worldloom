@@ -49,7 +49,7 @@ Added a focused static regression matching this package's existing web test styl
 ## Out of Scope
 
 - Backend delete behavior and `repair-log.yaml` (archive/tickets/SPEC114MANSTOSTU-002.md).
-- Beat-template delete UX (SPEC114MANSTOSTU-004).
+- Beat-template delete UX (archive/tickets/SPEC114MANSTOSTU-004.md).
 - Any new "mark inactive" control — `active` remains editable via the existing `RecordForm` (SPEC-114 §1.1); no new toggle widget is required here.
 
 ## Acceptance Criteria
