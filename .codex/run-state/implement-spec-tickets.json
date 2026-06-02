@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-112-manual-story-studio-record-pickers.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC112MANSTOSTU-005.md",
+  "last_ticket": "archive/tickets/SPEC112MANSTOSTU-006.md",
   "last_result": "completed_archived",
-  "last_work_commit": "99089b439ec7bb167f8174c6f1961431847cbab2",
+  "last_work_commit": "58e2717ee28232463257587794bdcc14f5610699",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC112MANSTOSTU-006.md",
+  "next_target": "tickets/SPEC112MANSTOSTU-007.md",
   "queue": [
-    "tickets/SPEC112MANSTOSTU-006.md",
     "tickets/SPEC112MANSTOSTU-007.md",
     "tickets/SPEC112MANSTOSTU-008.md"
   ],
@@ -18,7 +17,7 @@
   "post_review_audit_block": "emitted",
   "blocked": false,
   "blocker": null,
-  "proof_state": "clean: SPEC112MANSTOSTU-005 archived; RecordForm refs.characters, refs.locations, and refs.related_records replaced with constrained RecordPicker mounts while ChipInput remains for non-reference fields; structural grep, npm --prefix web test, npm run build, npm test, and diff hygiene passed",
-  "dirty_state": "tracked worktree clean after SPEC112MANSTOSTU-005 work commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
+  "proof_state": "clean: SPEC112MANSTOSTU-006 archived; CurrentStatePanel resolves displayed current-context references through listRecordsForClasses titles with id fallback; helper/title grep, npm --prefix web test, npm run build, npm test, and diff hygiene passed",
+  "dirty_state": "tracked worktree clean after SPEC112MANSTOSTU-006 work commit except this state update; existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-02"
 }
