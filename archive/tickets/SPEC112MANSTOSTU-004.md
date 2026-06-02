@@ -1,6 +1,6 @@
 # SPEC112MANSTOSTU-004: Mount RecordPicker in EditCurrentContext
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` web page `EditCurrentContext.tsx`; removes the local `IdTextArea` and the raw `current_location` input + `pov_holder` select, replacing them with constrained `<RecordPicker>` mounts.
@@ -28,15 +28,40 @@ The current-context editor is the densest ID-typing surface: five fields use the
 2. Per-field constraints correct (esp. `must_not_reveal`→secrets, `pinned_records`→any) → web `tsc --noEmit` + manual review against §2 item 3 mapping.
 3. POV picker surfaces current-cast first and the "POV must be in current cast" validation still holds → manual review + the existing current-context validator unchanged (grep it is untouched).
 
-## What to Change
+## Landed Changes
 
 ### 1. Replace the five IdTextArea fields with multi-select pickers
 
-`current_cast`→`cast`; `active_pressure_clocks`→`clocks`; `active_secrets_questions`→`secrets`+`questions`; `pinned_records`→any class; `must_not_reveal`→`secrets` only. Remove the local `IdTextArea` function once unused.
+Replaced all five `IdTextArea` mounts with `<RecordPicker>` controls:
+
+- `current_cast` uses `classes={["cast"]}` in multi-select mode.
+- `active_pressure_clocks` uses `classes={["clocks"]}` in multi-select mode.
+- `active_secrets_questions` uses `classes={["secrets", "questions"]}` in multi-select mode.
+- `pinned_records` uses `classes={MANUAL_RECORD_CLASSES}` in multi-select mode.
+- `must_not_reveal` uses `classes={["secrets"]}` in multi-select mode.
+
+The local `IdTextArea`, `parseIdList`, and `listText` helpers were removed.
 
 ### 2. Replace current_location and pov_holder
 
-`current_location`→single-select picker class-filtered to `locations`; `pov_holder`→single-select picker class-filtered to `cast`, with `seed` set to `current_cast` so members surface first (preserving the "POV in current cast" intent the validator still enforces).
+Replaced `current_location` with a single-select location picker and `pov_holder` with a single-select cast picker. The POV picker receives `seed={ctx.current_cast}` so current-cast records surface first while the existing "POV must be in current cast" validator remains the save-time backstop.
+
+## Outcome
+
+The current-context editor no longer exposes raw ID entry for current location, current cast, POV holder, active clocks, active secrets/questions, pinned records, or must-not-reveal records. The persisted `CurrentContext` shape is unchanged: single selections still write nullable strings, and multi selections still write the existing id arrays.
+
+## Verification Result
+
+1. `grep -n IdTextArea tools/manual-story-studio/web/src/pages/EditCurrentContext.tsx` returned no matches, which is the expected zero-match proof.
+2. `(cd tools/manual-story-studio && npm --prefix web test)` passed.
+3. `(cd tools/manual-story-studio && npm run build)` passed.
+4. `(cd tools/manual-story-studio && npm test)` passed: 454 backend tests plus web `tsc --noEmit`.
+5. `git diff --check` passed.
+6. Ignored verification artifacts remained under `tools/manual-story-studio/dist/`, `tools/manual-story-studio/node_modules/`, `tools/manual-story-studio/web/dist/`, and `tools/manual-story-studio/web/node_modules/`.
+
+## Deviations
+
+None. Segment fields stayed as text inputs, and no runtime DOM harness was added.
 
 ## Files to Touch
 
