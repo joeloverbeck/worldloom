@@ -3,16 +3,21 @@ import { useState } from "react";
 import {
   BEAT_TEMPLATE_BEAT_FUNCTIONS,
   BEAT_TEMPLATE_MOVE_FAMILIES,
+  BEAT_TEMPLATE_PRESSURE_TYPES,
   BEAT_TEMPLATE_RELATIONSHIP_AXES,
+  BEAT_TEMPLATE_TURN_TYPES,
   BEAT_TEMPLATE_TONE_FITS,
   MANUAL_RECORD_CLASSES,
   type BeatTemplate,
   type BeatTemplateBeat,
   type BeatTemplateBeatFunction,
   type BeatTemplateMoveFamily,
+  type BeatTemplatePressureType,
   type BeatTemplateRelationshipAxis,
   type BeatTemplateRoleSlot,
   type BeatTemplateToneFit,
+  type BeatTemplateTurnType,
+  type ManualRecordClass,
   type ManualStoryContentIntensity,
   type ManualStoryRole,
   type ValidationError,
@@ -38,10 +43,20 @@ const CONTENT_INTENSITIES: ManualStoryContentIntensity[] = [
   "explicit",
 ];
 
+const STATE_REVIEW_RECORD_CLASSES: ManualRecordClass[] =
+  MANUAL_RECORD_CLASSES.filter((cls) => cls !== "beat-templates");
+
 function defaultTemplate(): Omit<BeatTemplate, "id"> {
   return {
     title: "",
     active: true,
+    pressure_type: "discovery",
+    turn_type: "discovery_turn",
+    preconditions_text: "",
+    do_not_resolve: [],
+    expected_state_review: [],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "observation",
       tags: [],
@@ -78,6 +93,13 @@ function splitCsv(value: string): string[] {
 
 function joinCsv(values: string[]): string {
   return values.join(", ");
+}
+
+function splitLines(value: string): string[] {
+  return value
+    .split("\n")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 }
 
 export function BeatTemplateForm(props: BeatTemplateFormProps) {
@@ -200,6 +222,36 @@ export function BeatTemplateForm(props: BeatTemplateFormProps) {
       <fieldset>
         <legend>Classification</legend>
         <label>
+          Pressure type{" "}
+          <select
+            value={draft.pressure_type}
+            onChange={(e) =>
+              setField("pressure_type", e.target.value as BeatTemplatePressureType)
+            }
+          >
+            {BEAT_TEMPLATE_PRESSURE_TYPES.map((pt) => (
+              <option key={pt} value={pt}>
+                {pt}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Turn type{" "}
+          <select
+            value={draft.turn_type}
+            onChange={(e) =>
+              setField("turn_type", e.target.value as BeatTemplateTurnType)
+            }
+          >
+            {BEAT_TEMPLATE_TURN_TYPES.map((tt) => (
+              <option key={tt} value={tt}>
+                {tt}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
           Move family{" "}
           <select
             value={draft.classification.move_family}
@@ -267,6 +319,68 @@ export function BeatTemplateForm(props: BeatTemplateFormProps) {
                 }
               />{" "}
               {tf}
+            </label>
+          ))}
+        </fieldset>
+      </fieldset>
+
+      <fieldset>
+        <legend>Template constraints</legend>
+        <label>
+          Preconditions{" "}
+          <textarea
+            value={draft.preconditions_text}
+            onChange={(e) => setField("preconditions_text", e.target.value)}
+            rows={3}
+            cols={60}
+          />
+        </label>
+        <label>
+          Stop after{" "}
+          <textarea
+            value={draft.stop_after}
+            onChange={(e) => setField("stop_after", e.target.value)}
+            rows={3}
+            cols={60}
+          />
+        </label>
+        <label>
+          Do not resolve (one per line){" "}
+          <textarea
+            value={draft.do_not_resolve.join("\n")}
+            onChange={(e) => setField("do_not_resolve", splitLines(e.target.value))}
+            rows={4}
+            cols={60}
+          />
+        </label>
+        <label>
+          Anti-patterns (one per line){" "}
+          <textarea
+            value={draft.anti_patterns.join("\n")}
+            onChange={(e) => setField("anti_patterns", splitLines(e.target.value))}
+            rows={4}
+            cols={60}
+          />
+        </label>
+        <fieldset>
+          <legend>Expected state review</legend>
+          {STATE_REVIEW_RECORD_CLASSES.map((cls) => (
+            <label key={cls} style={{ marginRight: 8 }}>
+              <input
+                type="checkbox"
+                checked={draft.expected_state_review.includes(cls)}
+                onChange={(e) =>
+                  setField(
+                    "expected_state_review",
+                    e.target.checked
+                      ? [...draft.expected_state_review, cls]
+                      : draft.expected_state_review.filter(
+                          (x: ManualRecordClass) => x !== cls,
+                        ),
+                  )
+                }
+              />{" "}
+              {cls}
             </label>
           ))}
         </fieldset>
@@ -464,13 +578,7 @@ export function BeatTemplateForm(props: BeatTemplateFormProps) {
         <textarea
           value={draft.forbidden_inventions.join("\n")}
           onChange={(e) =>
-            setField(
-              "forbidden_inventions",
-              e.target.value
-                .split("\n")
-                .map((s) => s.trim())
-                .filter((s) => s.length > 0),
-            )
+            setField("forbidden_inventions", splitLines(e.target.value))
           }
           rows={4}
           cols={60}

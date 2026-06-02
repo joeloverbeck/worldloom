@@ -42,7 +42,7 @@ SPEC-110 §2 item 10 / AC#4-7. Add a focused test file covering the new behavior
 ## Out of Scope
 
 - Production code (tickets 001-006).
-- Manual-verification-only surfaces (form round-trip AC#8, card display AC#9) — those are exercised in tickets 005/006 per SPEC-110 §6.
+- Manual-verification-only surfaces (form round-trip AC#8, card display AC#9) — those are exercised in `archive/tickets/SPEC110MANSTOSTU-005.md` / ticket 006 per SPEC-110 §6.
 
 ## Acceptance Criteria
 
