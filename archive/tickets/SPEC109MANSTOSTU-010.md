@@ -1,6 +1,6 @@
 # SPEC109MANSTOSTU-010: EditCurrentContext page + App.tsx route
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — adds `web/src/pages/EditCurrentContext.tsx`; modifies `web/src/App.tsx` to bind the new route.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The cockpit needs an author-facing form to author and edit `current-context.yaml`. Without a dedicated page, the author would have to hand-edit the YAML file via an external editor, which defeats the cockpit's "one-loop" UX goal. The Dashboard "Set current context" affordance (008) and the explicit edit affordances surfaced elsewhere in the cockpit all route to this page. The page presents typed-ID inputs for record references, a POV dropdown populated from `current_cast`, and a textarea for `current_handoff_summary`; on save it PUTs the full body and renders structured 422 findings inline when validation fails.
+The cockpit needed an author-facing form to author and edit `current-context.yaml`. Without a dedicated page, the author would have to hand-edit the YAML file via an external editor, which defeats the cockpit's "one-loop" UX goal. The Dashboard "Set current context" affordance (008) and the explicit edit affordances surfaced elsewhere in the cockpit all route to this page. This ticket landed that page: typed-ID inputs for record references, a POV dropdown populated from `current_cast`, and a textarea for `current_handoff_summary`; on save it PUTs the full body and renders structured 422 findings inline when validation fails.
 
 ## Assumption Reassessment (2026-06-01)
 
@@ -30,27 +30,25 @@ The cockpit needs an author-facing form to author and edit `current-context.yaml
 4. Saving a valid body navigates back to the Dashboard (or stays on the page with a success indicator — implementer's choice; either is consistent with the existing form-page pattern) → manual verification.
 5. App.tsx route binding compiles under `tsc --noEmit` → AC #12.
 
-## What to Change
+## Landed Changes
 
 ### 1. New page at `web/src/pages/EditCurrentContext.tsx`
 
-Component shape:
-- `useParams<{ worldSlug, msSlug }>()` to read the route params.
-- `useEffect` to `fetchCurrentContext(worldSlug, msSlug)` on mount; populate form state from the result.
-- Form state: a typed `CurrentContext` object initialized from the loaded payload (or sensible defaults when null).
-- Inputs:
-  - `current_handoff_summary` — `<textarea>`.
-  - `current_location` — `<input type="text">` with `mloc-` prefix hint.
-  - `current_cast` — typed-ID input idiom from `RecordForm.tsx` (textarea+parser; comma or newline separators; validated client-side against `MANUAL_RECORD_CLASS_PREFIXES.cast`).
-  - `pov_holder` — `<select>` populated from `current_cast` field state (live).
-  - `active_pressure_clocks`, `active_secrets_questions`, `pinned_records`, `must_not_reveal` — typed-ID input idiom (each with its own prefix validation).
-  - `last_accepted_segment`, `last_reviewed_after_segment` — `<input type="text">` with `SEG-` prefix hint.
-- Save button calls `saveCurrentContext(worldSlug, msSlug, formState)` from 005's API wrapper. On `{ok: true}`, navigate to `/worlds/<world>/manual-stories/<ms>` (the Dashboard). On `{ok: false}`, render the `findings: ValidationError[]` inline using the existing `RecordForm.tsx` validation-error rendering pattern.
-- Read-only display of `pinned_records` resolution: reuse `<RefList>` directly to show the current pinned-records list with click-to-navigate behavior (separate visual block from the typed-ID textarea input above; the textarea is the editor, RefList is the resolved preview).
+Added `EditCurrentContext`, which:
+
+- Reads `worldSlug` and `msSlug` from route params.
+- Loads the existing current-context payload with `fetchCurrentContext`; when absent, initializes a default `CurrentContext`.
+- Renders textarea/text/select controls for every `CurrentContext` field.
+- Uses comma- or newline-separated textarea parsers for typed-ID arrays, with client-side prefix checks derived from `MANUAL_RECORD_CLASS_PREFIXES`.
+- Keeps `pov_holder` as a live `<select>` whose options are derived from current `current_cast` state.
+- Calls `saveCurrentContext(worldSlug, msSlug, formState)` on save.
+- Navigates back to the Dashboard route on successful save.
+- Renders route-level `ValidationError[]` findings inline when the PUT route returns validation findings.
+- Reuses `<RefList>` as a read-only pinned-record preview.
 
 ### 2. Route binding at `web/src/App.tsx`
 
-Add a `<Route path="/worlds/:worldSlug/manual-stories/:msSlug/current-context/edit" element={<EditCurrentContext />} />` entry alongside the existing route declarations.
+Added `<Route path="/worlds/:worldSlug/manual-stories/:msSlug/current-context/edit" element={<EditCurrentContext />} />` alongside the existing Manual Story Studio routes.
 
 ## Files to Touch
 
@@ -88,3 +86,18 @@ Add a `<Route path="/worlds/:worldSlug/manual-stories/:msSlug/current-context/ed
 
 1. `cd tools/manual-story-studio/web && npm test`
 2. `cd tools/manual-story-studio && npm test` (full pipeline).
+
+## Outcome
+
+Ticket complete. Manual Story Studio now has an Edit Current Context page at `/worlds/:worldSlug/manual-stories/:msSlug/current-context/edit`, and Dashboard's 008 empty-state link has a live route target. The page loads or initializes current-context state, provides typed-ID editing for every reference list, previews pinned records with `RefList`, saves through the 005 API wrapper, and returns to the Dashboard after a valid save.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio/web && npm test` — PASS (`tsc -p tsconfig.json --noEmit`).
+2. `cd tools/manual-story-studio && npm test` — PASS (427 backend tests plus web `tsc --noEmit`).
+3. Manual code review of `tools/manual-story-studio/web/src/pages/EditCurrentContext.tsx` — PASS: load populates existing or default context state; `pov_holder` options derive from live `current_cast`; client-side prefix validation covers typed-ID textareas; backend `ValidationError[]` findings render inline; successful saves navigate to `/dashboard`; pinned records render through `RefList`.
+4. Manual code review of `tools/manual-story-studio/web/src/App.tsx` — PASS: the current-context edit route is imported and bound.
+
+## Deviations
+
+No component-level interaction test was added. This ticket kept the drafted proof boundary: web TypeScript, full package proof, and manual review of the form behavior and route binding.
