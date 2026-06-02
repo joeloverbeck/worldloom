@@ -1,6 +1,6 @@
 # SPEC109MANSTOSTU-002: Read path + fixtures + read tests
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `src/read/current-context.ts` and `test/current-context/{current-context-read.test.ts, fixtures/*}` to `@worldloom/manual-story-studio`; no impact on existing read paths.
@@ -14,7 +14,7 @@ SPEC-109's `current-context.yaml` artifact needs a fail-fast read path that dist
 
 1. **Codebase**: `tools/manual-story-studio/src/read/result.ts` exports `ReadResult<T>` / `ReadError` / `ok` / `err` (the SPEC-105-landed typed-error discipline). Existing read modules (`manual-story-metadata.ts`, `manuscript.ts`, `segments.ts`, `records.ts`, `manual-stories.ts`, `worlds.ts`) follow the `ReadResult<T>` return pattern. `tools/manual-story-studio/src/read/manual-stories.ts:65` carries a `ReadResult<string | null>` precedent for the `T | null` discriminated-union shape this ticket needs.
 2. **Spec**: SPEC-109 §2 item 3 specifies `readCurrentContext(manualStoryRoot): ReadResult<CurrentContext | null>` where `null` is the typed "file absent" value distinct from a `ReadError` for a corrupted file; AC #1 + AC #2 define the test cases.
-3. **Cross-skill boundary**: This ticket's `current-context-read.test.ts` and its `fixtures/` directory are shared infrastructure. The fixtures directory hosts `present.yaml` (valid CurrentContext payload), `absent/` (a story dir with no current-context.yaml), and `corrupted.yaml` (a malformed-YAML file); sibling tickets 003 / 004 / 005 / 007 each construct their own fixtures inline or reference this directory's `present.yaml` for round-trip tests.
+3. **Cross-skill boundary**: This ticket's `current-context-read.test.ts` and its `fixtures/` directory are shared infrastructure. The fixtures directory hosts `present/current-context.yaml` (valid CurrentContext payload), `absent/` (a story dir with no current-context.yaml), and `corrupted/current-context.yaml` (a malformed-YAML file); sibling tickets 003 / 004 / 005 / 007 can construct their own fixtures inline or reference this directory's `present/` root for round-trip tests.
 
 ## Architecture Check
 
@@ -28,25 +28,25 @@ SPEC-109's `current-context.yaml` artifact needs a fail-fast read path that dist
 3. Valid-file case returns `{ok: true, value: <ctx>}` with the parsed CurrentContext payload → acceptance test.
 4. Read function honors SPEC-105's typed-error discipline (no thrown exceptions for absence or parse failure) → manual review against `tools/manual-story-studio/src/read/result.ts` shape.
 
-## What to Change
+## Landed Changes
 
 ### 1. New read function at `src/read/current-context.ts`
 
-Implement `readCurrentContext(manualStoryRoot: string): ReadResult<CurrentContext | null>`:
+Implemented `readCurrentContext(manualStoryRoot: string): ReadResult<CurrentContext | null>`:
 - Resolve `current-context.yaml` relative to the manual story root.
 - If the file does not exist, return `ok(null)`.
-- If the file exists, read its contents and `YAML.parse` it. On parse failure, return `err({code: "current-context-yaml-parse-failed", path, message, repair_hint})`.
+- If the file exists, read its contents and `YAML.parse` it. On parse failure, return `err({code: "current-context-yaml-parse-failed", path, cause, repair_hint})`.
 - On success, return `ok(parsed as CurrentContext)`.
 
 ### 2. New fixtures directory at `test/current-context/fixtures/`
 
 - `fixtures/present/current-context.yaml` — a valid CurrentContext payload (Mara as POV holder, etc., per SPEC-109 §1 worked example).
 - `fixtures/absent/.gitkeep` — empty manual-story root with no current-context.yaml.
-- `fixtures/corrupted/current-context.yaml` — malformed YAML (e.g., unterminated string).
+- `fixtures/corrupted/current-context.yaml` — malformed YAML.
 
 ### 3. New acceptance test at `test/current-context/current-context-read.test.ts`
 
-Function-level tests covering AC #1 + AC #2:
+Function-level tests cover AC #1 + AC #2:
 - Read of `fixtures/absent/` returns `{ok: true, value: null}`.
 - Read of `fixtures/corrupted/` returns `{ok: false, error: {code: "current-context-yaml-parse-failed"}}`.
 - Read of `fixtures/present/` returns `{ok: true, value: <ctx>}` with all 10 fields present.
@@ -89,3 +89,18 @@ Function-level tests covering AC #1 + AC #2:
 
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm test`
+
+## Outcome
+
+Completed on 2026-06-02. Added `readCurrentContext` with the SPEC-109 typed read-result behavior, plus fixture-backed read tests for absent, corrupted, and valid `current-context.yaml` files.
+
+## Verification Result
+
+1. Pre-edit baseline: `cd tools/manual-story-studio && npm run test:backend` — PASS; 64 compiled backend test files passed before this ticket's edits.
+2. First post-edit attempt: `cd tools/manual-story-studio && npm run test:backend` — FAIL at TypeScript compile because the valid-fixture test did not narrow `CurrentContext | null` before inspecting fields. The test was corrected with an explicit null guard.
+3. Final backend proof: `cd tools/manual-story-studio && npm run test:backend` — PASS; 65 compiled backend test files passed, including `dist/test/current-context/current-context-read.test.js`.
+4. Full package proof: `cd tools/manual-story-studio && npm test` — PASS; 401 backend tests passed and `web` `tsc --noEmit` passed.
+
+## Deviations
+
+- The ticket's draft fixture summary used short names like `present.yaml`; the landed fixture layout uses manual-story-root directories (`fixtures/present/`, `fixtures/absent/`, `fixtures/corrupted/`) with `current-context.yaml` where present.

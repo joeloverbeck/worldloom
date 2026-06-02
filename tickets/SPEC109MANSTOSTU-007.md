@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `src/prompt/compose.ts` to load current-context after metadata and reshape selector behavior for prompt sections §3 / §7 / §8 / §10 / §11; adds `test/current-context/compose-prefers-context.test.ts`.
-**Deps**: SPEC109MANSTOSTU-002
+**Deps**: archive/tickets/SPEC109MANSTOSTU-002.md
 
 ## Problem
 
