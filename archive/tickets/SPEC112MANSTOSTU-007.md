@@ -1,6 +1,6 @@
 # SPEC112MANSTOSTU-007: Mount RecordPicker in MomentComposer
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` web page `MomentComposer.tsx`; replaces the ID-toggle cast checkbox list and the +Pin/−Unpin record toggles with `<RecordPicker>` (multi-select); the compose API call is unchanged.
@@ -28,15 +28,32 @@
 2. The compose call still passes `included_cast` + `included_records` id arrays unchanged → `grep` `previewPrompt` call shape; web `tsc --noEmit`.
 3. The beat-template `<select>` is unchanged (out of scope) → `grep` confirms it remains.
 
-## What to Change
+## Landed Changes
 
 ### 1. Replace the involved-cast checkbox list
 
-Mount a multi-select `<RecordPicker>` class-filtered to `cast`, bound to `includedCast` (same `string[]`, same `toggleCast`/setter semantics).
+Replaced the involved-cast checkbox list with a multi-select `RecordPicker` constrained to `cast` and bound directly to the existing `includedCast` id array.
 
 ### 2. Replace the +Pin/−Unpin record selection
 
-Mount a multi-select `<RecordPicker>` (any class, or the relevant record classes) bound to `pinnedRecordIds`, replacing the suggested/pinned +Pin/−Unpin lists. Keep the `onGenerate` → `previewPrompt` call passing the same `included_cast` + `included_records` arrays.
+Replaced the suggested/pinned `+ Pin` / `- Unpin` lists with a multi-select `RecordPicker` bound to the existing `pinnedRecordIds` array. The picker uses all non-cast manual record classes; beat-template selection remains in its existing out-of-scope selector.
+
+## Outcome
+
+Moment Composer cast and record selection is now card-based while `onGenerate` still passes the unchanged `included_cast` and `included_records` id arrays to `previewPrompt`.
+
+## Verification Result
+
+1. `grep -n 'RecordPicker\|previewPrompt\|toggleCast\|Pin\|Unpin\|checkbox' tools/manual-story-studio/web/src/pages/MomentComposer.tsx` showed the two `RecordPicker` mounts and unchanged `previewPrompt` call, with no `toggleCast`, `Pin`, `Unpin`, or checkbox hits.
+2. `(cd tools/manual-story-studio && npm --prefix web test)` passed.
+3. `(cd tools/manual-story-studio && npm run build)` passed.
+4. `(cd tools/manual-story-studio && npm test)` passed: 454 backend tests plus web `tsc --noEmit`.
+5. `git diff --check` passed.
+6. Ignored verification artifacts remained under `tools/manual-story-studio/dist/`, `tools/manual-story-studio/node_modules/`, `tools/manual-story-studio/web/dist/`, and `tools/manual-story-studio/web/node_modules/`.
+
+## Deviations
+
+None. The beat-template selector and compose API contract were left unchanged.
 
 ## Files to Touch
 
