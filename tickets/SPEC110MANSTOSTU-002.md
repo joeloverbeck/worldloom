@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio/src/validate/beat-template-schema.ts`
-**Deps**: 001
+**Deps**: archive/tickets/SPEC110MANSTOSTU-001.md
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio/web/src/types/manual-story.ts`, `tools/manual-story-studio/web/src/components/BeatTemplateForm.tsx`
-**Deps**: 001
+**Deps**: archive/tickets/SPEC110MANSTOSTU-001.md
 
 ## Problem
 

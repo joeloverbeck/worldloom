@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio/src/templates/filter.ts`, `tools/manual-story-studio/src/templates/why-suggested.ts`
-**Deps**: 001
+**Deps**: archive/tickets/SPEC110MANSTOSTU-001.md
 
 ## Problem
 

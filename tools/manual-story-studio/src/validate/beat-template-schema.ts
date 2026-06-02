@@ -279,7 +279,16 @@ const TOP_LEVEL_REQUIRED = [
   "author_notes",
 ] as const;
 
-const TOP_LEVEL_ALLOWED = new Set<string>(TOP_LEVEL_REQUIRED);
+const TOP_LEVEL_ALLOWED = new Set<string>([
+  ...TOP_LEVEL_REQUIRED,
+  "pressure_type",
+  "turn_type",
+  "preconditions_text",
+  "do_not_resolve",
+  "expected_state_review",
+  "stop_after",
+  "anti_patterns",
+]);
 
 export function validateBeatTemplate(raw: unknown): BeatTemplateValidationResult {
   const violations: BeatTemplateViolation[] = [];

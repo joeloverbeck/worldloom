@@ -9,6 +9,13 @@ function validTemplate(): BeatTemplate {
     id: "mtemplate-1",
     title: "Soft Confrontation",
     active: true,
+    pressure_type: "intimacy",
+    turn_type: "escalation",
+    preconditions_text: "A relationship wound is already active.",
+    do_not_resolve: [],
+    expected_state_review: ["relationships", "emotions"],
+    stop_after: "",
+    anti_patterns: [],
     classification: {
       move_family: "confrontation",
       tags: ["relationship", "hurt"],
