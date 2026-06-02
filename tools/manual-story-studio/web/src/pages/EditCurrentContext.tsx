@@ -291,7 +291,7 @@ export function EditCurrentContext() {
       aria-labelledby="edit-current-context-heading"
       style={{ display: "grid", gap: 12 }}
     >
-      <h2 id="edit-current-context-heading">Edit Current Context</h2>
+      <h2 id="edit-current-context-heading">Edit Prompt Working Set</h2>
 
       {loadError ? (
         <p role="alert">
@@ -480,7 +480,7 @@ export function EditCurrentContext() {
 
       <div style={{ display: "flex", gap: 8 }}>
         <button type="button" onClick={onSave} disabled={!canSave}>
-          {saving ? "Saving..." : "Save Current Context"}
+          {saving ? "Saving..." : "Save Prompt Working Set"}
         </button>
         <button
           type="button"

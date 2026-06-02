@@ -82,21 +82,21 @@ export function CurrentStatePanel({
 
   if (ctx === null) {
     return (
-      <section aria-label="current-state">
-        <h2>Current State</h2>
-        <p>No current context set yet.</p>
+      <section aria-label="prompt-working-set">
+        <h2>Prompt Working Set</h2>
+        <p>No prompt working set has been saved yet.</p>
         <Link
           to={`/worlds/${worldSlug}/manual-stories/${msSlug}/current-context/edit`}
         >
-          Set current context
+          Set prompt working set
         </Link>
       </section>
     );
   }
 
   return (
-    <section aria-label="current-state">
-      <h2>Current State</h2>
+    <section aria-label="prompt-working-set">
+      <h2>Prompt Working Set</h2>
       {titleLoadError ? (
         <p role="alert">Failed to load record titles: {titleLoadError}</p>
       ) : null}

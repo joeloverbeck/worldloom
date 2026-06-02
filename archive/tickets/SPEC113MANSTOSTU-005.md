@@ -1,6 +1,6 @@
 # SPEC113MANSTOSTU-005: UI relabel "Current State" → "Prompt Working Set"
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` web (3 user-facing label sites). No behavior change; display strings only. No canon-pipeline impact.
@@ -74,3 +74,21 @@ The page heading "Edit Current Context" → "Edit Prompt Working Set".
 
 1. `cd tools/manual-story-studio/web && npm test`
 2. `grep -rn "Current State\|Current Context" tools/manual-story-studio/web/src`
+
+## Outcome
+
+Completed: 2026-06-02
+
+What changed:
+- Relabelled the Manual Story Studio current-context surface to "Prompt Working Set" in the dashboard panel, story navigation, edit page heading, and save button.
+- Preserved the `current-context/edit` route path and did not rename `current-context.yaml`.
+- Updated the empty-panel link/prose and aria label to use prompt-working-set wording.
+
+Deviations from original plan:
+- Also changed the visible save-button label from "Save Current Context" to "Save Prompt Working Set"; live grep showed it would otherwise fail the ticket's `Current Context` acceptance sweep.
+
+Verification results:
+- PASS: `rg "Current State|Current Context" tools/manual-story-studio/web/src -n` — no matches.
+- PASS: `rg "current-context/edit" tools/manual-story-studio/web/src/components/StoryPageNav.tsx tools/manual-story-studio/web/src/App.tsx -n` — route path remains present in nav and router.
+- PASS: `cd tools/manual-story-studio/web && npm test` — web `tsc --noEmit` passed.
+- PASS: `git diff --check -- tickets/SPEC113MANSTOSTU-005.md tools/manual-story-studio/web/src/components/CurrentStatePanel.tsx tools/manual-story-studio/web/src/components/StoryPageNav.tsx tools/manual-story-studio/web/src/pages/EditCurrentContext.tsx` — no whitespace errors.
