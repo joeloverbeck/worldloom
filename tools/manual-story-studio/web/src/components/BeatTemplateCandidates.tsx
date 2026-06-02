@@ -31,6 +31,7 @@ export function BeatTemplateCandidates(props: BeatTemplateCandidatesProps) {
       ? [...candidateInput.optional_tags].sort()
       : undefined,
     optional_location: candidateInput.optional_location,
+    optional_desired_pressure_type: candidateInput.optional_desired_pressure_type,
   });
 
   useEffect(() => {
@@ -116,6 +117,26 @@ export function BeatTemplateCandidates(props: BeatTemplateCandidatesProps) {
             >
               {c.template.classification.move_family}
             </span>
+            <span
+              style={{
+                background: "#e8f4e8",
+                padding: "2px 6px",
+                fontSize: 11,
+                borderRadius: 3,
+              }}
+            >
+              {c.template.pressure_type}
+            </span>
+            <span
+              style={{
+                background: "#eef0ff",
+                padding: "2px 6px",
+                fontSize: 11,
+                borderRadius: 3,
+              }}
+            >
+              {c.template.turn_type}
+            </span>
             <span style={{ color: "#666", fontSize: 12 }}>
               {c.template.beat_guidance.length} beat
               {c.template.beat_guidance.length === 1 ? "" : "s"}
@@ -137,6 +158,21 @@ export function BeatTemplateCandidates(props: BeatTemplateCandidatesProps) {
               </span>
             ) : null}
           </header>
+          {c.template.preconditions_text.trim().length > 0 ? (
+            <p
+              title={c.template.preconditions_text}
+              style={{
+                color: "#555",
+                fontSize: 12,
+                margin: "4px 0",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {c.template.preconditions_text}
+            </p>
+          ) : null}
           {c.why_suggested.length > 0 ? (
             <ul style={{ fontSize: 12, color: "#444", margin: "4px 0" }}>
               {c.why_suggested.map((line, i) => (
@@ -144,6 +180,61 @@ export function BeatTemplateCandidates(props: BeatTemplateCandidatesProps) {
               ))}
             </ul>
           ) : null}
+          <details style={{ margin: "6px 0" }}>
+            <summary>Details</summary>
+            <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+              {c.template.preconditions_text.trim().length > 0 ? (
+                <p style={{ margin: 0 }}>
+                  <strong>Preconditions:</strong> {c.template.preconditions_text}
+                </p>
+              ) : null}
+              {c.template.stop_after.trim().length > 0 ? (
+                <p style={{ margin: 0 }}>
+                  <strong>Stop after:</strong> {c.template.stop_after}
+                </p>
+              ) : null}
+              {c.template.expected_state_review.length > 0 ? (
+                <p style={{ margin: 0 }}>
+                  <strong>After prose, review:</strong>{" "}
+                  {c.template.expected_state_review.map((cls) => (
+                    <span
+                      key={cls}
+                      style={{
+                        background: "#eee",
+                        borderRadius: 3,
+                        display: "inline-block",
+                        fontSize: 11,
+                        marginRight: 4,
+                        padding: "1px 5px",
+                      }}
+                    >
+                      {cls}
+                    </span>
+                  ))}
+                </p>
+              ) : null}
+              {c.template.do_not_resolve.length > 0 ? (
+                <section>
+                  <strong>Do not resolve</strong>
+                  <ul style={{ margin: "4px 0" }}>
+                    {c.template.do_not_resolve.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+              {c.template.anti_patterns.length > 0 ? (
+                <section>
+                  <strong>Anti-patterns</strong>
+                  <ul style={{ margin: "4px 0" }}>
+                    {c.template.anti_patterns.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+            </div>
+          </details>
           {selectedTemplateId === c.template.id ? (
             <div>
               <span style={{ color: "#44a", fontWeight: 600 }}>Selected ✓</span>{" "}

@@ -1,18 +1,18 @@
 # SPEC110MANSTOSTU-006: Candidate card surfaces new fields + desired_pressure_type input + api send
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — `tools/manual-story-studio/web/src/components/BeatTemplateCandidates.tsx`, `tools/manual-story-studio/web/src/api/beat-templates.ts`
+**Engine Changes**: Yes — `tools/manual-story-studio/web/src/components/BeatTemplateCandidates.tsx`, `tools/manual-story-studio/web/src/pages/MomentComposer.tsx`
 **Deps**: archive/tickets/SPEC110MANSTOSTU-004.md, archive/tickets/SPEC110MANSTOSTU-005.md
 
 ## Problem
 
-SPEC-110 §2 item 8 plus the frontend-send portion of item 9. The candidate card must show `pressure_type` / `turn_type` chips, `preconditions_text` as a one-line summary, and `do_not_resolve` / `anti_patterns` / `expected_state_review` in an expanded view; the Moment Composer must expose a `desired_pressure_type` directive input and the api client must send it as `optional_desired_pressure_type` in the candidate request.
+Before this ticket, the candidate card did not surface the new SPEC-110 template fields, and Moment Composer had no `desired_pressure_type` directive input. This ticket added the card display surfaces and a controlled Moment Composer selector that sends `optional_desired_pressure_type` in the candidate request only when the author supplies a value.
 
 ## Assumption Reassessment (2026-06-02)
 
-1. `web/src/components/BeatTemplateCandidates.tsx` renders the candidate card head (move_family chip, beat count, recently-used advisory at lines ~107-139) and the `why_suggested` list (lines ~140-146); it consumes `CandidateRequestBody` via `props.candidateInput`. `web/src/api/beat-templates.ts:111` defines `getCandidates(worldSlug, msSlug, input: CandidateRequestBody)` — the single frontend site that POSTs the candidate request body.
+1. `web/src/components/BeatTemplateCandidates.tsx` renders the candidate card head, `why_suggested` list, and fetch request key; it consumes `CandidateRequestBody` via `props.candidateInput`. `web/src/api/beat-templates.ts` posts the whole typed `CandidateRequestBody`, so no field-by-field API edit was required after `archive/tickets/SPEC110MANSTOSTU-005.md` added the type field.
 2. SPEC-110 §2 item 8 + item 9 (frontend send); §6 manual verification (set `desired_pressure_type` to `intimacy`; verify matching templates rank higher and the why-suggested trace shows the pressure line).
 3. Cross-artifact boundary: candidate card ↔ api client (`CandidateRequestBody.optional_desired_pressure_type` defined by `archive/tickets/SPEC110MANSTOSTU-005.md`) ↔ candidate route (`archive/tickets/SPEC110MANSTOSTU-004.md` receives the field). This ticket is the frontend producer of the pin; it must land after `archive/tickets/SPEC110MANSTOSTU-005.md` (the request-body type carries the field) and `archive/tickets/SPEC110MANSTOSTU-004.md` (the backend accepts it).
 4. FOUNDATIONS §Story Bundles §4a Plan-Authority Boundary (by analogy) / the SPEC-107 prose/state boundary: the candidate card and the `desired_pressure_type` input are display-and-curation surfaces only — they read template fields and set a filter pin; they never mutate manual-story state. Restating this before implementation guards against the card acquiring an automatic state effect; SPEC-110 keeps the new fields author-facing with no automatic effects.
@@ -28,20 +28,20 @@ SPEC-110 §2 item 8 plus the frontend-send portion of item 9. The candidate card
 2. Setting the `desired_pressure_type` input causes the api client to send `optional_desired_pressure_type`, and matching templates rank higher → manual verification (SPEC-110 §6) backed by the route/filter tests (`archive/tickets/SPEC110MANSTOSTU-003.md` / `archive/tickets/SPEC110MANSTOSTU-004.md`).
 3. The `why_suggested` list shows the `pressure: <type>` line when the pin matches → manual verification, asserted programmatically in ticket 007.
 
-## What to Change
+## Landed Changes
 
 ### 1. Candidate card (`BeatTemplateCandidates.tsx`)
 
-Add `pressure_type` / `turn_type` chips at the card head; `preconditions_text` as a one-line summary (full prose on hover/expand); `do_not_resolve` / `anti_patterns` as bulleted lists and `expected_state_review` as an "After prose, review: [chips]" line in the expanded view. Add a `desired_pressure_type` `<select>` (from the enum const) that sets `candidateInput.optional_desired_pressure_type`.
+Added `pressure_type` / `turn_type` chips at the card head; `preconditions_text` as a one-line summary with full text available in details; `stop_after`, `do_not_resolve`, `anti_patterns`, and `expected_state_review` in a details view. Added `optional_desired_pressure_type` to the candidate request key so changing the pin refetches candidates.
 
-### 2. Api send (`web/src/api/beat-templates.ts`)
+### 2. Moment Composer directive input (`MomentComposer.tsx`)
 
-Ensure `getCandidates` forwards `optional_desired_pressure_type` from the `CandidateRequestBody` to the POST body (typically already covered once the type field exists; add the explicit field if the body is constructed field-by-field).
+Added a `desired_pressure_type` select populated from `BEAT_TEMPLATE_PRESSURE_TYPES`. The candidate request object includes `optional_desired_pressure_type` only when the selected value is non-empty.
 
 ## Files to Touch
 
 - `tools/manual-story-studio/web/src/components/BeatTemplateCandidates.tsx` (modify)
-- `tools/manual-story-studio/web/src/api/beat-templates.ts` (modify)
+- `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` (modify)
 
 ## Out of Scope
 
@@ -65,9 +65,25 @@ Ensure `getCandidates` forwards `optional_desired_pressure_type` from the `Candi
 
 ### New/Modified Tests
 
-1. `None — frontend display + request-field change; verification is the web build/test in `npm test` plus the manual round-trip in SPEC-110 §6. The pin's filter effect is asserted programmatically in ticket 007.`
+1. None — the package has a web TypeScript check but no component test runner. Verification is `npm --prefix web test`, `npm --prefix web run build`, package `npm test`, and manual source review of display/request wiring. The pin's filter effect is asserted programmatically in `archive/tickets/SPEC110MANSTOSTU-003.md` / `archive/tickets/SPEC110MANSTOSTU-004.md` and remains covered by ticket 007.
 
 ### Commands
 
 1. `cd tools/manual-story-studio && npm test`
-2. `cd tools/manual-story-studio/web && npm run build` — narrower check that the card + api client compile.
+2. `cd tools/manual-story-studio/web && npm test`
+3. `cd tools/manual-story-studio/web && npm run build` — narrower check that the card + Moment Composer compile.
+
+## Outcome
+
+Completed 2026-06-02. Candidate cards now show pressure/turn chips, preconditions, stop cues, expected state-review chips, and do-not-resolve / anti-pattern lists. Moment Composer now exposes a desired-pressure selector and includes `optional_desired_pressure_type` only when the author chooses a pressure type.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio/web && npm test` — PASS.
+2. `cd tools/manual-story-studio/web && npm run build` — PASS.
+3. `cd tools/manual-story-studio && npm test` — PASS, 438 backend tests plus `web` TypeScript check.
+4. Manual source review — PASS: card display reads template fields only; candidate request key includes `optional_desired_pressure_type`; Moment Composer conditionally spreads the request field only for non-empty selections; `getCandidates` posts the full typed request body.
+
+## Deviations
+
+No browser session or component-test runner was available in the package. Display and request wiring were verified by TypeScript, Vite build, package tests, and source review.
