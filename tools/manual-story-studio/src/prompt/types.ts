@@ -38,6 +38,16 @@ export interface SectionEmitterInput {
   prose_craft_contract_body: string;
 }
 
+export interface SectionEmitResult {
+  body: string;
+  consumed: string[];
+}
+
+export interface SectionAssemblyResult {
+  markdown: string;
+  section_map: Record<string, string[]>;
+}
+
 export type PromptLintTier = "hard" | "soft";
 
 export interface PromptLintFinding {

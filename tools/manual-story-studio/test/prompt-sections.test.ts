@@ -115,7 +115,7 @@ function baseInput(
 
 test("assembleSections emits 15 headings in strict order 1..15", () => {
   const ctx = fixtureCtx({ "mchar-1": "Jon", "mchar-2": "Ane" });
-  const markdown = assembleSections(baseInput(), ctx);
+  const markdown = assembleMarkdown(baseInput(), ctx);
   const headings = [...markdown.matchAll(/^## (\d+)\. /gm)].map((m) =>
     Number(m[1]),
   );
@@ -125,7 +125,7 @@ test("assembleSections emits 15 headings in strict order 1..15", () => {
 
 test("§1 body equals content-policy.md byte-for-byte", () => {
   const ctx = fixtureCtx({});
-  const markdown = assembleSections(baseInput(), ctx);
+  const markdown = assembleMarkdown(baseInput(), ctx);
   const contentPolicy = readFileSync(CONTENT_POLICY_PATH, "utf8").trim();
   assert.ok(
     markdown.includes(contentPolicy),
@@ -135,7 +135,7 @@ test("§1 body equals content-policy.md byte-for-byte", () => {
 
 test("§13 body equals prose-craft-contract.md byte-for-byte", () => {
   const ctx = fixtureCtx({});
-  const markdown = assembleSections(baseInput(), ctx);
+  const markdown = assembleMarkdown(baseInput(), ctx);
   const proseCraft = readFileSync(PROSE_CRAFT_PATH, "utf8").trim();
   assert.ok(
     markdown.includes(proseCraft),
@@ -145,14 +145,14 @@ test("§13 body equals prose-craft-contract.md byte-for-byte", () => {
 
 test("§6 emits '(none selected)' when no template body provided", () => {
   const ctx = fixtureCtx({});
-  const markdown = assembleSections(baseInput(), ctx);
+  const markdown = assembleMarkdown(baseInput(), ctx);
   const section6 = sectionBody(markdown, 6);
   assert.equal(section6.trim(), "(none selected)");
 });
 
 test("§6 emits template body when provided", () => {
   const ctx = fixtureCtx({});
-  const markdown = assembleSections(
+  const markdown = assembleMarkdown(
     baseInput({ included_template_body: "Use the wait-and-respond beat." }),
     ctx,
   );
@@ -162,10 +162,10 @@ test("§6 emits template body when provided", () => {
 
 test("§5 parameterizes by default_beat_count", () => {
   const ctx = fixtureCtx({});
-  const md1 = assembleSections(baseInput(), ctx);
+  const md1 = assembleMarkdown(baseInput(), ctx);
   assert.ok(sectionBody(md1, 5).includes("Render only the next 2-5 beats"));
 
-  const md2 = assembleSections(
+  const md2 = assembleMarkdown(
     baseInput({
       metadata: baseMetadata({
         prompt_policy: {
@@ -184,7 +184,7 @@ test("§5 parameterizes by default_beat_count", () => {
 
 test("§14 Stop Rule contains the SPEC-107 meaningful-turn wording", () => {
   const ctx = fixtureCtx({});
-  const markdown = assembleSections(baseInput(), ctx);
+  const markdown = assembleMarkdown(baseInput(), ctx);
   const s14 = sectionBody(markdown, 14);
   assert.ok(
     s14.includes(
@@ -200,7 +200,7 @@ test("§14 Stop Rule contains the SPEC-107 meaningful-turn wording", () => {
 
 test("§15 contains the narrative-structure language ban", () => {
   const ctx = fixtureCtx({});
-  const markdown = assembleSections(baseInput(), ctx);
+  const markdown = assembleMarkdown(baseInput(), ctx);
   const s15 = sectionBody(markdown, 15);
   assert.ok(s15.includes("'page'"));
   assert.ok(s15.includes("'scene'"));
@@ -224,7 +224,7 @@ test("§12 collects forbidden-reveal tags from secrets + cast constraints", () =
     audience_visibility: "hidden",
     forbidden_reveal_tags: ["the meeting at the granary"],
   });
-  const markdown = assembleSections(
+  const markdown = assembleMarkdown(
     baseInput({
       cast: [cast],
       included_cast_ids: ["mchar-1"],
@@ -251,4 +251,11 @@ function sectionBody(markdown: string, n: number): string {
     }
   }
   return "";
+}
+
+function assembleMarkdown(
+  input: SectionEmitterInput,
+  ctx: Parameters<typeof assembleSections>[1],
+): string {
+  return assembleSections(input, ctx).markdown;
 }

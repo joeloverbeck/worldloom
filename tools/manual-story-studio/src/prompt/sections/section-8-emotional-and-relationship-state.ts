@@ -7,7 +7,7 @@ import { classifyManualRecord } from "../record-class.js";
 import { emotionsTranslator } from "../translators/emotions.js";
 import { relationshipsTranslator } from "../translators/relationships.js";
 import type { TranslatorContext } from "../translators/index.js";
-import type { SectionEmitterInput } from "../types.js";
+import type { SectionEmitterInput, SectionEmitResult } from "../types.js";
 
 export const SECTION_8_TITLE = "Emotional and Relationship State";
 
@@ -28,19 +28,22 @@ function relevantRelationship(
 export function emitSection8(
   input: SectionEmitterInput,
   ctx: TranslatorContext,
-): string {
+): SectionEmitResult {
   const emotions: string[] = [];
   const relationships: string[] = [];
+  const consumed: string[] = [];
   for (const r of input.records) {
     if (!r.active) continue;
     const cls = classifyManualRecord(r as ManualRecord);
     if (cls === "emotions" && relevantEmotion(r as ManualEmotionRecord, input.included_cast_ids)) {
       emotions.push(emotionsTranslator(r as ManualEmotionRecord, ctx));
+      consumed.push(r.id);
     } else if (
       cls === "relationships" &&
       relevantRelationship(r as ManualRelationshipRecord, input.included_cast_ids)
     ) {
       relationships.push(relationshipsTranslator(r as ManualRelationshipRecord, ctx));
+      consumed.push(r.id);
     }
   }
   const blocks: string[] = [];
@@ -50,7 +53,8 @@ export function emitSection8(
   if (relationships.length > 0) {
     blocks.push(`**Relationships:**\n\n${relationships.join("\n\n")}`);
   }
-  return blocks.length > 0
+  const body = blocks.length > 0
     ? blocks.join("\n\n")
     : "(No active emotion or relationship records for the involved cast.)";
+  return { body, consumed };
 }

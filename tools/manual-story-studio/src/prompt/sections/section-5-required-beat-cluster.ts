@@ -1,13 +1,13 @@
-import type { SectionEmitterInput } from "../types.js";
+import type { SectionEmitterInput, SectionEmitResult } from "../types.js";
 
 export const SECTION_5_TITLE = "Required Beat Cluster";
 
 const DEFAULT_BEAT_COUNT = "2-5";
 
-export function emitSection5(input: SectionEmitterInput): string {
+export function emitSection5(input: SectionEmitterInput): SectionEmitResult {
   const raw = input.metadata.prompt_policy.default_beat_count;
   const beatCount = raw && raw.trim().length > 0 ? raw.trim() : DEFAULT_BEAT_COUNT;
-  return [
+  const body = [
     `Render only the next ${beatCount} beats as continuous prose.`,
     "Begin from the current situation.",
     "Follow the manual moment directive.",
@@ -17,4 +17,5 @@ export function emitSection5(input: SectionEmitterInput): string {
     "Do not add headings.",
     "Do not explain the prose.",
   ].join(" ");
+  return { body, consumed: [] };
 }

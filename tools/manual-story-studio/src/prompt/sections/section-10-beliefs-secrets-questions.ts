@@ -9,17 +9,18 @@ import { beliefsTranslator } from "../translators/beliefs.js";
 import { questionsTranslator } from "../translators/questions.js";
 import { secretsTranslator } from "../translators/secrets.js";
 import type { TranslatorContext } from "../translators/index.js";
-import type { SectionEmitterInput } from "../types.js";
+import type { SectionEmitterInput, SectionEmitResult } from "../types.js";
 
 export const SECTION_10_TITLE = "Relevant Beliefs, Secrets, and Open Questions";
 
 export function emitSection10(
   input: SectionEmitterInput,
   ctx: TranslatorContext,
-): string {
+): SectionEmitResult {
   const beliefs: string[] = [];
   const secrets: string[] = [];
   const questions: string[] = [];
+  const consumed = new Set<string>();
   const activeSecretQuestionIds = new Set(input.active_secrets_questions ?? []);
   for (const r of input.records) {
     if (!r.active) continue;
@@ -28,6 +29,7 @@ export function emitSection10(
       const rec = r as ManualBeliefRecord;
       if (input.included_cast_ids.includes(rec.holder)) {
         beliefs.push(beliefsTranslator(rec, ctx));
+        consumed.add(r.id);
       }
     } else if (cls === "secrets") {
       const rec = r as ManualSecretRecord;
@@ -41,6 +43,7 @@ export function emitSection10(
       );
       if (holderHit || refsHit || activeSecretQuestionIds.has(rec.id)) {
         secrets.push(secretsTranslator(rec, ctx));
+        consumed.add(r.id);
       }
     } else if (cls === "questions") {
       const rec = r as ManualQuestionRecord;
@@ -49,6 +52,7 @@ export function emitSection10(
         activeSecretQuestionIds.has(rec.id)
       ) {
         questions.push(questionsTranslator(rec));
+        consumed.add(r.id);
       }
     }
   }
@@ -58,13 +62,15 @@ export function emitSection10(
   if (questions.length > 0) blocks.push(`**Open questions:**\n${questions.join("\n\n")}`);
   const mustNotReveal = input.must_not_reveal ?? [];
   if (mustNotReveal.length > 0) {
+    for (const id of mustNotReveal) consumed.add(id);
     blocks.push(
       `**Must not reveal:**\n${mustNotReveal
         .map((id) => `- ${ctx.getRecordTitle(id) ?? id}`)
         .join("\n")}`,
     );
   }
-  return blocks.length > 0
+  const body = blocks.length > 0
     ? blocks.join("\n\n")
     : "(No active beliefs, secrets, or open questions to surface.)";
+  return { body, consumed: [...consumed] };
 }

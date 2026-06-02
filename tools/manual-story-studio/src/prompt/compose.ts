@@ -360,7 +360,10 @@ export async function composePrompt(
   if (templateForbiddenInventions) {
     sectionInput.template_forbidden_inventions = templateForbiddenInventions;
   }
-  const markdown = assembleSections(sectionInput, ctx);
+  const assembled = assembleSections(sectionInput, ctx);
+  const markdown = assembled.markdown;
+  resolution.section_map = assembled.section_map;
+  applyIncludedSections(resolution);
 
   // Stage 10 — Run prompt lint over the assembled Markdown.
   const knownCastIds = new Set<string>();
@@ -462,6 +465,20 @@ function findingsToBlocked(findings: PromptLintFinding[]): PromptResolution["blo
     ref: finding.rule,
     reason: finding.message,
   }));
+}
+
+function applyIncludedSections(resolution: PromptResolution): void {
+  const firstSectionById = new Map<string, string>();
+  for (const [section, ids] of Object.entries(resolution.section_map)) {
+    for (const id of ids) {
+      if (!firstSectionById.has(id)) {
+        firstSectionById.set(id, section);
+      }
+    }
+  }
+  for (const entry of resolution.included) {
+    entry.section = firstSectionById.get(entry.id) ?? null;
+  }
 }
 
 function resolutionFromFindings(findings: PromptLintFinding[]): PromptResolution {

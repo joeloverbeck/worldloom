@@ -192,9 +192,26 @@ test("composePrompt returns deterministic inclusion ledger buckets", async () =>
     const first = await composePrompt(input);
     const second = await composePrompt(input);
 
+    assert.equal(second.markdown, first.markdown);
     assert.deepEqual(second.resolution, first.resolution);
     assert.equal(JSON.stringify(second.resolution), JSON.stringify(first.resolution));
-    assert.deepEqual(first.resolution.section_map, {});
+    assert.deepEqual(first.resolution.section_map, {
+      "§1": [],
+      "§2": [],
+      "§3": ["mfact-1", "msecret-1"],
+      "§4": [],
+      "§5": [],
+      "§6": [],
+      "§7": ["mchar-1"],
+      "§8": [],
+      "§9": [],
+      "§10": ["msecret-1"],
+      "§11": ["mfact-1", "mchar-1"],
+      "§12": [],
+      "§13": [],
+      "§14": [],
+      "§15": [],
+    });
 
     assert.deepEqual(
       first.resolution.included.map((entry) => ({
@@ -204,8 +221,8 @@ test("composePrompt returns deterministic inclusion ledger buckets", async () =>
         section: entry.section,
       })),
       [
-        { id: "mchar-1", class: "cast", reason: "current_cast", section: null },
-        { id: "mfact-1", class: "facts", reason: "pinned", section: null },
+        { id: "mchar-1", class: "cast", reason: "current_cast", section: "§7" },
+        { id: "mfact-1", class: "facts", reason: "pinned", section: "§3" },
       ],
     );
 

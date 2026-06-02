@@ -1,7 +1,7 @@
 import type { ManualRecord } from "../../schema/manual-story.js";
 import { classifyManualRecord } from "../record-class.js";
 import { getTranslator, type TranslatorContext } from "../translators/index.js";
-import type { SectionEmitterInput } from "../types.js";
+import type { SectionEmitterInput, SectionEmitResult } from "../types.js";
 
 export const SECTION_3_TITLE = "Current Situation";
 
@@ -62,7 +62,7 @@ function translateRecord(
 export function emitSection3(
   input: SectionEmitterInput,
   ctx: TranslatorContext,
-): string {
+): SectionEmitResult {
   const currentHandoffRaw = input.current_handoff_summary ?? "";
   const currentHandoff = currentHandoffRaw.trim();
   const pinned = input.records.filter(
@@ -96,7 +96,13 @@ export function emitSection3(
     lines.push(input.recent_segment_last_paragraph.trim());
   }
   if (lines.length === 0) {
-    return "(No pinned context. The author has not selected involved cast or relevant records.)";
+    return {
+      body: "(No pinned context. The author has not selected involved cast or relevant records.)",
+      consumed: [],
+    };
   }
-  return lines.join("\n");
+  return {
+    body: lines.join("\n"),
+    consumed: currentHandoff.length === 0 ? pinned.map((r) => r.id) : [],
+  };
 }

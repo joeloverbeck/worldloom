@@ -10,7 +10,7 @@ import { factsTranslator } from "../translators/facts.js";
 import { locationsTranslator } from "../translators/locations.js";
 import { objectsTranslator } from "../translators/objects.js";
 import type { TranslatorContext } from "../translators/index.js";
-import type { SectionEmitterInput } from "../types.js";
+import type { SectionEmitterInput, SectionEmitResult } from "../types.js";
 
 export const SECTION_11_TITLE = "Physical Continuity";
 
@@ -30,25 +30,30 @@ function bodyAndPresenceForCast(record: ManualCharacterRecord): string {
 export function emitSection11(
   input: SectionEmitterInput,
   ctx: TranslatorContext,
-): string {
+): SectionEmitResult {
   const locations: string[] = [];
   const objects: string[] = [];
   const facts: string[] = [];
+  const consumed: string[] = [];
   for (const r of input.records) {
     if (!r.active) continue;
     const cls = classifyManualRecord(r as ManualRecord);
     if (cls === "locations") {
       locations.push(locationsTranslator(r as ManualLocationRecord));
+      consumed.push(r.id);
     } else if (cls === "objects") {
       objects.push(objectsTranslator(r as ManualObjectRecord, ctx));
+      consumed.push(r.id);
     } else if (cls === "facts") {
       facts.push(factsTranslator(r as ManualFactRecord));
+      consumed.push(r.id);
     }
   }
   const bodies: string[] = [];
   for (const c of input.cast) {
     if (input.included_cast_ids.includes(c.id)) {
       bodies.push(bodyAndPresenceForCast(c));
+      consumed.push(c.id);
     }
   }
   const blocks: string[] = [];
@@ -60,7 +65,8 @@ export function emitSection11(
     blocks.push(`**Objects/props:**\n${objects.join("\n")}`);
   if (facts.length > 0)
     blocks.push(`**Recent concrete facts:**\n${facts.join("\n")}`);
-  return blocks.length > 0
+  const body = blocks.length > 0
     ? blocks.join("\n\n")
     : "(No physical-continuity records pinned for this moment.)";
+  return { body, consumed };
 }

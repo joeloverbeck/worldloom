@@ -7,7 +7,7 @@ import {
 } from "../../src/prompt/sections/section-14-stop-rule.js";
 
 test("emitSection14 contains the key meaningful-action sentence (SPEC-107 regression guard)", () => {
-  const text = emitSection14();
+  const text = emitSection14().body;
   assert.ok(
     text.includes(
       "Let meaningful action, emotional movement, relational pressure, practical consequence, or discovery occur if the directive calls for it.",
@@ -17,7 +17,7 @@ test("emitSection14 contains the key meaningful-action sentence (SPEC-107 regres
 });
 
 test("emitSection14 contains the durable-machine-state caveat (SPEC-107 regression guard)", () => {
-  const text = emitSection14();
+  const text = emitSection14().body;
   assert.ok(
     text.includes(
       "Do not declare durable machine-state conclusions unless the directive explicitly asks for that wording.",

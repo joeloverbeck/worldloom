@@ -1,11 +1,11 @@
-import type { SectionEmitterInput } from "../types.js";
+import type { SectionEmitterInput, SectionEmitResult } from "../types.js";
 
 export const SECTION_6_TITLE = "Optional Beat Template Guidance";
 
-export function emitSection6(input: SectionEmitterInput): string {
+export function emitSection6(input: SectionEmitterInput): SectionEmitResult {
   const body = input.included_template_body;
   if (body === null || body.trim().length === 0) {
-    return "(none selected)";
+    return { body: "(none selected)", consumed: [] };
   }
-  return body.trim();
+  return { body: body.trim(), consumed: [] };
 }

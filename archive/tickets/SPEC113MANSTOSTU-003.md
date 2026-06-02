@@ -1,6 +1,6 @@
 # SPEC113MANSTOSTU-003: Ledger `section_map` — emitter consumed-id reporting
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Large
 **Engine Changes**: Yes — `tools/manual-story-studio` prompt section emitters + `assembleSections` + compose wiring. No canon-pipeline impact (package is canon-fenced per SPEC-100).
@@ -81,3 +81,22 @@ Extend `test/prompt/inclusion-ledger.test.ts` with `section_map` attribution ass
 
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm test`
+
+## Outcome
+
+Completed: 2026-06-02
+
+What changed:
+- Added structured section emitter results with `{ body, consumed }` for all 15 prompt sections.
+- Updated `assembleSections` to return `{ markdown, section_map }`, preserving heading injection and markdown joining while adding deterministic `§N` consumed-id arrays.
+- Threaded `section_map` into `composePrompt().resolution` and populated each included record's `section` from its first consumed-section membership.
+- Extended inclusion-ledger coverage for deterministic `section_map`, included-section attribution, and unchanged markdown across identical inputs.
+- Updated direct section tests to read `.body` from the structured emitter result.
+
+Deviations from original plan:
+- None. The emitter signature changed internally; no frontend inspector work was included.
+
+Verification results:
+- PASS: `cd tools/manual-story-studio && npm run test:backend` — backend build plus 77 compiled tests passed.
+- PASS: `cd tools/manual-story-studio && npm test` — backend build, 462 compiled tests, and web `tsc --noEmit` passed.
+- PASS: `git diff --check -- tools/manual-story-studio/src/prompt tools/manual-story-studio/test/prompt-sections.test.ts tools/manual-story-studio/test/prompt/inclusion-ledger.test.ts tools/manual-story-studio/test/prompt/section-6-template-guidance.test.ts tools/manual-story-studio/test/prompt/section-14-stop-rule.test.ts` — no whitespace errors.

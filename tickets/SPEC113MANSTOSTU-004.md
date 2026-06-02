@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/manual-story-studio` web (`PromptPreview.tsx` rebuild, web `resolution` types, `api/prompts.ts` passthrough). No canon-pipeline impact (package is canon-fenced per SPEC-100).
-**Deps**: 003
+**Deps**: archive/tickets/SPEC113MANSTOSTU-003.md
 
 ## Problem
 
-`PromptPreview.tsx` is a `<pre>` block of the composed markdown plus a lint badge and a toolbar; it cannot show *why* each record was included, excluded, suppressed, or blocked. SPEC-113 §2 item 3 rebuilds it into a two-pane inspector: the markdown on the left, a card-based **Prompt Inspector** on the right rendering the ledger produced by 002 (buckets) and 003 (`section_map`). This ticket needs the full ledger including `section_map`, hence Deps:003.
+`PromptPreview.tsx` is a `<pre>` block of the composed markdown plus a lint badge and a toolbar; it cannot show *why* each record was included, excluded, suppressed, or blocked. SPEC-113 §2 item 3 rebuilds it into a two-pane inspector: the markdown on the left, a card-based **Prompt Inspector** on the right rendering the ledger produced by 002 (buckets) and archive/tickets/SPEC113MANSTOSTU-003.md (`section_map`). This ticket needs the full ledger including `section_map`, hence Deps:archive/tickets/SPEC113MANSTOSTU-003.md.
 
 ## Assumption Reassessment (2026-06-02)
 
