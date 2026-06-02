@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` web component `RecordCard.tsx`; additive props only, no impact on existing `RecordCard` consumers (`CastAndProfiles.tsx`, `Records.tsx`).
-**Deps**: 001
+**Deps**: archive/tickets/SPEC112MANSTOSTU-001.md
 
 ## Problem
 
@@ -13,7 +13,7 @@ SPEC-112's picker renders results as record cards showing title, class, one-line
 ## Assumption Reassessment (2026-06-02)
 
 1. `tools/manual-story-studio/web/src/components/RecordCard.tsx` exists and renders title / importance badge / id-subscript / summary / tags from a `ManualRecordSummary` prop (`RecordCardProps = { summary, onOpen }`); it uses inline styles and `className="manual-record-card"`. It is consumed by `web/src/pages/CastAndProfiles.tsx` and `web/src/pages/Records.tsx`.
-2. SPEC-112 §4 changes the original `RecordCardMini` Create into "extend `RecordCard.tsx`" (reassessment Q3); §2 item 1 lists the card field set. Involved-cast on the card depends on SPEC112MANSTOSTU-001's summary field.
+2. SPEC-112 §4 changes the original `RecordCardMini` Create into "extend `RecordCard.tsx`" (reassessment Q3); §2 item 1 lists the card field set. Involved-cast on the card depends on the summary field landed by `archive/tickets/SPEC112MANSTOSTU-001.md`.
 3. Cross-artifact boundary under audit: `RecordCardProps` is consumed by two existing pages (`CastAndProfiles.tsx`, `Records.tsx`) and will be consumed by the new picker (SPEC112MANSTOSTU-003). New props MUST be optional so the two existing call sites compile unchanged; the picker passes the new props.
 
 ## Architecture Check
@@ -31,7 +31,7 @@ SPEC-112's picker renders results as record cards showing title, class, one-line
 
 ### 1. Add the missing card fields
 
-In `RecordCard.tsx`, render class label, current prompt-visibility, and involved-cast (from the `involved_cast` field added by SPEC112MANSTOSTU-001) alongside the existing title / summary / tags / active styling. Keep the ID in the existing id-subscript disclosure only.
+In `RecordCard.tsx`, render class label, current prompt-visibility, and involved-cast (from the `involved_cast` field added by `archive/tickets/SPEC112MANSTOSTU-001.md`) alongside the existing title / summary / tags / active styling. Keep the ID in the existing id-subscript disclosure only.
 
 ### 2. Make the card picker-embeddable
 

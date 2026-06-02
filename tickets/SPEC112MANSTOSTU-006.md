@@ -14,7 +14,7 @@
 
 1. `tools/manual-story-studio/web/src/components/CurrentStatePanel.tsx` defines a local `chipList` (line ~12) rendering raw IDs for three fields; `current_location` (line ~57) and `pov_holder` (line ~59) render as raw `<dd>` text. The component receives only `ctx` (`CurrentContext`, id arrays) + `worldSlug`/`msSlug` — it has no record summaries today, so it cannot resolve titles without fetching them.
 2. SPEC-112 §2 item 5 and §8 (CurrentStatePanel gains a data dependency) define this ticket; the reassessment surfaced that `chipList` covers only three of the five displayed reference fields and that title resolution needs a summary fetch.
-3. Cross-artifact boundary under audit: this component reuses the client-side multi-class fetch helper added to `web/src/api/records.ts` by SPEC112MANSTOSTU-003 to build an id→title map. Titles are present on `ManualRecordSummary` today (no dependency on the 001 involved-cast field); the helper is the only cross-ticket import.
+3. Cross-artifact boundary under audit: this component reuses the client-side multi-class fetch helper added to `web/src/api/records.ts` by SPEC112MANSTOSTU-003 to build an id→title map. Titles are present on `ManualRecordSummary` today (no dependency on the `archive/tickets/SPEC112MANSTOSTU-001.md` involved-cast field); the helper is the only cross-ticket import.
 4. FOUNDATIONS §Tooling Recommendation (ID-free surface, SPEC-112 §5): the panel is the *display* counterpart to the picker's *entry* surface — after this ticket the author neither types nor reads a raw id in the normal flow.
 
 ## Architecture Check

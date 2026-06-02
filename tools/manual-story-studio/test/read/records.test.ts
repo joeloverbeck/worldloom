@@ -85,6 +85,7 @@ test("listRecords: populated class returns ordered summaries", () => {
   try {
     writeRecord(root, "beliefs", "mbel-2", {
       ...commonFields("mbel-2"),
+      refs: { characters: ["mchar-2"], locations: [], related_records: [] },
       holder: "mchar-1",
       truth_relation: "true",
       confidence: "high",
@@ -108,6 +109,8 @@ test("listRecords: populated class returns ordered summaries", () => {
     assert.equal(summaries[2]?.id, "mbel-3");
     assert.equal(summaries[0]?.title, "T-mbel-1");
     assert.equal(summaries[0]?.importance, "medium");
+    assert.deepEqual(summaries[0]?.involved_cast, []);
+    assert.deepEqual(summaries[1]?.involved_cast, ["mchar-2"]);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
