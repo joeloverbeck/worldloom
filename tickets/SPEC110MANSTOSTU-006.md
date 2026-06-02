@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio/web/src/components/BeatTemplateCandidates.tsx`, `tools/manual-story-studio/web/src/api/beat-templates.ts`
-**Deps**: 004, archive/tickets/SPEC110MANSTOSTU-005.md
+**Deps**: archive/tickets/SPEC110MANSTOSTU-004.md, archive/tickets/SPEC110MANSTOSTU-005.md
 
 ## Problem
 
@@ -14,18 +14,18 @@ SPEC-110 §2 item 8 plus the frontend-send portion of item 9. The candidate card
 
 1. `web/src/components/BeatTemplateCandidates.tsx` renders the candidate card head (move_family chip, beat count, recently-used advisory at lines ~107-139) and the `why_suggested` list (lines ~140-146); it consumes `CandidateRequestBody` via `props.candidateInput`. `web/src/api/beat-templates.ts:111` defines `getCandidates(worldSlug, msSlug, input: CandidateRequestBody)` — the single frontend site that POSTs the candidate request body.
 2. SPEC-110 §2 item 8 + item 9 (frontend send); §6 manual verification (set `desired_pressure_type` to `intimacy`; verify matching templates rank higher and the why-suggested trace shows the pressure line).
-3. Cross-artifact boundary: candidate card ↔ api client (`CandidateRequestBody.optional_desired_pressure_type` defined by `archive/tickets/SPEC110MANSTOSTU-005.md`) ↔ candidate route (ticket 004 receives the field). This ticket is the frontend producer of the pin; it must land after `archive/tickets/SPEC110MANSTOSTU-005.md` (the request-body type carries the field) and 004 (the backend accepts it).
+3. Cross-artifact boundary: candidate card ↔ api client (`CandidateRequestBody.optional_desired_pressure_type` defined by `archive/tickets/SPEC110MANSTOSTU-005.md`) ↔ candidate route (`archive/tickets/SPEC110MANSTOSTU-004.md` receives the field). This ticket is the frontend producer of the pin; it must land after `archive/tickets/SPEC110MANSTOSTU-005.md` (the request-body type carries the field) and `archive/tickets/SPEC110MANSTOSTU-004.md` (the backend accepts it).
 4. FOUNDATIONS §Story Bundles §4a Plan-Authority Boundary (by analogy) / the SPEC-107 prose/state boundary: the candidate card and the `desired_pressure_type` input are display-and-curation surfaces only — they read template fields and set a filter pin; they never mutate manual-story state. Restating this before implementation guards against the card acquiring an automatic state effect; SPEC-110 keeps the new fields author-facing with no automatic effects.
 
 ## Architecture Check
 
 1. The card additions are display-only reads of the already-typed `BeatTemplateCandidate.template` fields (`archive/tickets/SPEC110MANSTOSTU-005.md`); the `desired_pressure_type` input is a single controlled `<select>` whose value flows into `candidateInput.optional_desired_pressure_type`, mirroring the existing optional-pin inputs.
-2. No backwards-compatibility shim: the input is optional; omitting it sends no `optional_desired_pressure_type`, which the route (004) and archived filter ticket `archive/tickets/SPEC110MANSTOSTU-003.md` already treat as "no pin".
+2. No backwards-compatibility shim: the input is optional; omitting it sends no `optional_desired_pressure_type`, which the route (`archive/tickets/SPEC110MANSTOSTU-004.md`) and archived filter ticket `archive/tickets/SPEC110MANSTOSTU-003.md` already treat as "no pin".
 
 ## Verification Layers
 
 1. The card renders `pressure_type` / `turn_type` chips + the expanded `do_not_resolve` / `anti_patterns` / `expected_state_review` view → component render assertion / manual verification (SPEC-110 AC#9).
-2. Setting the `desired_pressure_type` input causes the api client to send `optional_desired_pressure_type`, and matching templates rank higher → manual verification (SPEC-110 §6) backed by the route/filter tests (`archive/tickets/SPEC110MANSTOSTU-003.md` / ticket 004).
+2. Setting the `desired_pressure_type` input causes the api client to send `optional_desired_pressure_type`, and matching templates rank higher → manual verification (SPEC-110 §6) backed by the route/filter tests (`archive/tickets/SPEC110MANSTOSTU-003.md` / `archive/tickets/SPEC110MANSTOSTU-004.md`).
 3. The `why_suggested` list shows the `pressure: <type>` line when the pin matches → manual verification, asserted programmatically in ticket 007.
 
 ## What to Change
@@ -45,7 +45,7 @@ Ensure `getCandidates` forwards `optional_desired_pressure_type` from the `Candi
 
 ## Out of Scope
 
-- The `CandidateRequestBody` type definition (`archive/tickets/SPEC110MANSTOSTU-005.md`) and the backend route (ticket 004).
+- The `CandidateRequestBody` type definition (`archive/tickets/SPEC110MANSTOSTU-005.md`) and the backend route (`archive/tickets/SPEC110MANSTOSTU-004.md`).
 - The filter tie-breaker and why-suggested trace logic (`archive/tickets/SPEC110MANSTOSTU-003.md`).
 
 ## Acceptance Criteria

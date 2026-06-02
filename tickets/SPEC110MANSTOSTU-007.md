@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — new test file `tools/manual-story-studio/test/templates/beat-template-spec110-fields.test.ts`
-**Deps**: archive/tickets/SPEC110MANSTOSTU-002.md, archive/tickets/SPEC110MANSTOSTU-003.md, 004
+**Deps**: archive/tickets/SPEC110MANSTOSTU-002.md, archive/tickets/SPEC110MANSTOSTU-003.md, archive/tickets/SPEC110MANSTOSTU-004.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ SPEC-110 §2 item 10 / AC#4-7. Add a focused test file covering the new behavior
 
 1. `validateBeatTemplate` (`src/validate/beat-template-schema.ts`, ticket 002) emits field-keyed findings; `filterBeatTemplates` (`src/templates/filter.ts`, `archive/tickets/SPEC110MANSTOSTU-003.md`) accepts `FilterOptionalPins.desiredPressureType`; `assembleWhySuggested` (`src/templates/why-suggested.ts`, `archive/tickets/SPEC110MANSTOSTU-003.md`) emits terse lines. The existing `test/templates/*.test.ts` files build inline `BeatTemplate` literals via helper functions (e.g. `validTemplate()` in `beat-template-schema.test.ts`) — the new test reuses that construction style. Tests run via `node --test "dist/test/**/*.test.js"` after `build:backend`.
 2. SPEC-110 §2 item 10 + AC#4 (distinct finding codes), AC#5 (fixtures green — covered by ticket 001), AC#6 (tie-breaker), AC#7 (why-suggested pressure line).
-3. Cross-artifact boundary: this ticket exercises the contracts of ticket 002 (validator findings), `archive/tickets/SPEC110MANSTOSTU-003.md` (filter ordering + why-suggested line), and ticket 004 (route pin → filter). It must land after all three so the surfaces it asserts exist; it introduces no production code.
+3. Cross-artifact boundary: this ticket exercises the contracts of ticket 002 (validator findings), `archive/tickets/SPEC110MANSTOSTU-003.md` (filter ordering + why-suggested line), and `archive/tickets/SPEC110MANSTOSTU-004.md` (route pin → filter). It must land after all three so the surfaces it asserts exist; it introduces no production code.
 
 ## Architecture Check
 
