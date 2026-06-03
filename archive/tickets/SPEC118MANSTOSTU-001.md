@@ -1,6 +1,6 @@
 # SPEC118MANSTOSTU-001: `never_prompt` prompt-visibility mode (end-to-end)
 
-**Status**: PENDING
+**Status**: ✅ COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` (schema enum, validator literal, composer, prompt ledger reason, web type mirror, record-form selector); no impact on the canon pipeline (the package is SPEC-100 canon-fenced).
@@ -8,11 +8,11 @@
 
 ## Problem
 
-The per-record visibility enum (`PromptVisibility`) has exactly three values — `always | include_when_relevant | only_if_pinned` — with no way to mark a record as "must never reach the external LLM in any form." `only_if_pinned` still permits inclusion once a record is pinned, and `must_not_reveal` renders the record's *title* into the prompt by design (section-10's "Must not reveal:" block). So author-only answers, the true resolution of a mystery, spoiler metadata, and private notes have no permanent per-record guard (`excluded_records` is per-focus, not per-record). Add `never_prompt` as a fourth, absolute, per-record suppression primitive that overrides pin / relevance / `active` / `must_not_reveal`, and surface it in the resolution ledger as `excluded`/`never_prompt`.
+At intake, the per-record visibility enum (`PromptVisibility`) had exactly three values — `always | include_when_relevant | only_if_pinned` — with no way to mark a record as "must never reach the external LLM in any form." `only_if_pinned` still permitted inclusion once a record was pinned, and `must_not_reveal` rendered the record's *title* into the prompt by design (section-10's "Must not reveal:" block). So author-only answers, the true resolution of a mystery, spoiler metadata, and private notes had no permanent per-record guard (`excluded_records` is per-focus, not per-record). This ticket added `never_prompt` as a fourth, absolute, per-record suppression primitive that overrides pin / relevance / `active` / `must_not_reveal`, and surfaces it in the resolution ledger as `excluded`/`never_prompt`.
 
 ## Assumption Reassessment (2026-06-03)
 
-1. `PromptVisibility` is at `tools/manual-story-studio/src/schema/manual-story.ts:135-138` (3 values), used by `ManualRecordSummary` (`:155`, `:502`). The closed-set is enforced NOT in `manual-story.ts` but at the validator literal `tools/manual-story-studio/src/validate/schema.ts:65` (required-field list at `:43`). A web mirror is at `web/src/types/manual-story.ts:162-165`; the form options array is `PROMPT_VISIBILITY_VALUES` at `web/src/components/RecordForm.tsx:30-34`. No exhaustive `switch`/`case` consumes the enum values (only `typeof === "string"` guards at `RecordForm.tsx:318` and `src/read/records.ts:420`), so the addition is structurally additive.
+1. At intake, `PromptVisibility` was at `tools/manual-story-studio/src/schema/manual-story.ts` with 3 values, used by `ManualRecordSummary`; after this ticket it includes `never_prompt`. The closed-set is enforced at the validator literal in `tools/manual-story-studio/src/validate/schema.ts` (required-field list unchanged). A web mirror is at `web/src/types/manual-story.ts`; the form options array is `PROMPT_VISIBILITY_VALUES` in `web/src/components/RecordForm.tsx`. No exhaustive `switch`/`case` consumes the enum values (only `typeof === "string"` guards at `RecordForm.tsx` and `src/read/records.ts`), so the addition stayed structurally additive.
 2. Spec SPEC-118 §2 items 1–3 + §4 + §8 Risks (the dual-mirror discipline). SPEC-119 (`specs/SPEC-119-manual-story-studio-prompt-inspector-confidence-cockpit.md`) Depends-on SPEC-118 and owns the inspector *rendering* of the `never_prompt` reason — its §Out-of-scope carves out "the `never_prompt` value itself (SPEC-118)"; this ticket produces the value + ledger reason, SPEC-119 renders it.
 3. Cross-artifact boundaries under audit: **(a)** the backend↔web type-mirror boundary — `PromptVisibility` (`manual-story.ts:135` ↔ `web/src/types/manual-story.ts:162`) AND `PromptExcludedReason` (`src/prompt/types.ts:92` ↔ `web/src/types/manual-story.ts:321`); **(b)** the composer↔section-10 contract — section-10's "Must not reveal:" block (`sections/section-10-beliefs-secrets-questions.ts:63-71`) renders titles from `input.must_not_reveal` (passed at `compose.ts:354`), **independent of `SectionEmitterInput.records`**, so suppression requires stripping `never_prompt` IDs from BOTH the `records` path and the `must_not_reveal` list.
 4. FOUNDATIONS principle: §Tooling Recommendation (least-agency at the prompt boundary) + prose/state prompt-boundary safety (SPEC-118 §5) — a permanent per-record suppression is the deterministic, least-surprising guard for "this never leaves the tool"; no heuristic/LLM judgment is added. The package is canon-fenced (SPEC-100), so no Canon Fact Record or Mystery Reserve surface is touched and no canon-write gate is altered.
@@ -31,29 +31,29 @@ The per-record visibility enum (`PromptVisibility`) has exactly three values —
 4. Backend↔web mirror parity -> codebase grep-proof that `never_prompt` is present in both `PromptVisibility` mirrors and both `PromptExcludedReason` mirrors.
 5. Prompt-boundary safety (no `never_prompt` record crosses into the prompt) -> FOUNDATIONS alignment check against SPEC-118 §5.
 
-## What to Change
+## Landed Changes
 
 ### 1. Add `never_prompt` to the visibility enum (4 sites)
 
-- `src/schema/manual-story.ts:135-138` — add `| "never_prompt"` to `PromptVisibility`.
-- `src/validate/schema.ts:65` — add `"never_prompt"` to the `prompt_visibility` value-enum array (required-field list at `:43` unchanged).
-- `web/src/types/manual-story.ts:162-165` — add `"never_prompt"` to the web `PromptVisibility` mirror.
-- `web/src/components/RecordForm.tsx:30-34` — add `"never_prompt"` to `PROMPT_VISIBILITY_VALUES` (the selector at `:628` then offers it).
+- `src/schema/manual-story.ts` — added `| "never_prompt"` to `PromptVisibility`.
+- `src/validate/schema.ts` — added `"never_prompt"` to the `prompt_visibility` value-enum array; the required-field list is unchanged.
+- `web/src/types/manual-story.ts` — added `"never_prompt"` to the web `PromptVisibility` mirror.
+- `web/src/components/RecordForm.tsx` — added `"never_prompt"` to `PROMPT_VISIBILITY_VALUES`; the selector now offers it.
 
 ### 2. Add the `never_prompt` ledger reason (backend + web mirror)
 
-- `src/prompt/types.ts:92` — extend `PromptExcludedReason` with `"never_prompt"`.
-- `web/src/types/manual-story.ts:321` — add `"never_prompt"` to the web `PromptExcludedReason` mirror (type-honesty with the backend ledger; the inspector consumes this type).
+- `src/prompt/types.ts` — extended `PromptExcludedReason` with `"never_prompt"`.
+- `web/src/types/manual-story.ts` — added `"never_prompt"` to the web `PromptExcludedReason` mirror (type-honesty with the backend ledger; the inspector consumes this type).
 
 ### 3. Composer enforcement (`src/prompt/compose.ts`)
 
-- In the seeded-record loop (~`:214-240`), before pushing an active record into `records[]`, if `record.prompt_visibility === "never_prompt"`, push it to `resolution.excluded` with `reason: "never_prompt"` and `continue` (skip `records[]`) — overriding pin / `included_records` / `active`.
-- Strip `never_prompt` IDs from the `must_not_reveal` surface: `mustNotRevealIds` (`:190`) and the list passed to `assembleSections` (`:354`). Because `must_not_reveal` is an ID list, read each listed record's `prompt_visibility` (via `readRecord`) and drop the `never_prompt` ones, recording each as `excluded`/`never_prompt`. This is the load-bearing correctness step — excluding from `records` alone does not suppress section-10's title block.
+- In the seeded-record loop, before pushing an active record into `records[]`, records with `prompt_visibility === "never_prompt"` are pushed to `resolution.excluded` with `reason: "never_prompt"` and skipped from `records[]`, overriding pin / `included_records` / `active`.
+- The composer now strips `never_prompt` IDs from the `must_not_reveal` surface before calling `assembleSections`. Because `must_not_reveal` is an ID list, the composer reads each seeded record's `prompt_visibility`, drops the `never_prompt` ones from the section input, and records each as `excluded`/`never_prompt`. This is the load-bearing correctness step — excluding from `records` alone does not suppress section-10's title block.
 
 ### 4. Tests
 
 - New `test/prompt/never-prompt.test.ts` (Verification Layers 2–3).
-- Update `test/validate/schema.test.ts:433` enum-membership assertion to include `never_prompt`.
+- Updated `test/validate/schema.test.ts` enum-membership assertion to include `never_prompt`.
 
 ## Files to Touch
 
@@ -65,6 +65,8 @@ The per-record visibility enum (`PromptVisibility`) has exactly three values —
 - `tools/manual-story-studio/web/src/components/RecordForm.tsx` (modify)
 - `tools/manual-story-studio/test/prompt/never-prompt.test.ts` (new)
 - `tools/manual-story-studio/test/validate/schema.test.ts` (modify)
+- `tools/manual-story-studio/test/web/prompt-inspector.test.ts` (modify)
+- `specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md` (modify — dated implementation note for the completed slice)
 
 ## Out of Scope
 
@@ -98,3 +100,21 @@ The per-record visibility enum (`PromptVisibility`) has exactly three values —
 
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm test`  (full run — includes the web typecheck for the mirrors + RecordForm)
+
+## Outcome
+
+Completed on 2026-06-03.
+
+The Manual Story Studio backend and web prompt visibility contract now includes `never_prompt`. The validator accepts the new visibility value, the prompt resolution ledger can report `excluded` / `never_prompt`, the composer excludes `never_prompt` records before section emission, and it also removes those IDs from `must_not_reveal` before section-10 can render their titles. The web type mirror and record form selector carry the same value. A dated SPEC-118 implementation note records that this slice is complete while the rest of the draft remains active for sibling tickets.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm test` before source edits passed: 482 backend/static tests plus `npm --prefix web test`.
+2. `cd tools/manual-story-studio && npm run test:backend` after source edits passed: 85 compiled test files, including `dist/test/prompt/never-prompt.test.js`, all green.
+3. `cd tools/manual-story-studio && npm test` after source edits passed: 483 backend/static tests plus `npm --prefix web test`.
+4. Manual/grep review confirmed `never_prompt` appears in both backend and web `PromptVisibility` mirrors, both backend and web `PromptExcludedReason` mirrors, the validator enum, `RecordForm` options, and the focused prompt test. The only remaining active sibling-ticket references are out-of-scope mentions in SPEC118MANSTOSTU-002/003/004.
+
+## Deviations
+
+- The web prompt-inspector mirror test was updated in addition to the originally named files because the backend/web `PromptExcludedReason` mirror is part of the owned type-honesty boundary.
+- SPEC-118 received a dated implementation note rather than a row-by-row rewrite; the overall spec remains active until sibling tickets 002-004 complete.

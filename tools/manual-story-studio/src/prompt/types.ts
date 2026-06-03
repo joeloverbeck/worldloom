@@ -89,7 +89,10 @@ export type PromptIncludedReason =
   | "active_secret_question"
   | "current_cast";
 
-export type PromptExcludedReason = "inactive" | "working_set_excluded";
+export type PromptExcludedReason =
+  | "inactive"
+  | "working_set_excluded"
+  | "never_prompt";
 
 export interface PromptIncludedRecord {
   id: string;

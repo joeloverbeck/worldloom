@@ -188,6 +188,7 @@ export async function composePrompt(
   const records: ManualRecord[] = [];
   const missingRecordFindings: PromptLintFinding[] = [];
   const mustNotRevealIds = new Set(currentContext?.must_not_reveal ?? []);
+  const visibleMustNotRevealIds = new Set(mustNotRevealIds);
   for (const id of seededRecordIds) {
     const cls = classifyManualRecordId(id);
     if (!cls) {
@@ -209,6 +210,16 @@ export async function composePrompt(
           `Selected record ${id} could not be read: ${rec.error.code} at ${rec.error.path}. ${rec.error.repair_hint}`,
         ),
       );
+      continue;
+    }
+    if (rec.value.prompt_visibility === "never_prompt") {
+      visibleMustNotRevealIds.delete(id);
+      resolution.excluded.push({
+        id: rec.value.id,
+        title: rec.value.title,
+        class: cls,
+        reason: "never_prompt",
+      });
       continue;
     }
     if (rec.value.active === false) {
@@ -351,7 +362,7 @@ export async function composePrompt(
     included_template_body: includedTemplateBody,
     current_handoff_summary: currentContext?.current_handoff_summary ?? null,
     pov_holder: currentContext?.pov_holder ?? null,
-    must_not_reveal: currentContext?.must_not_reveal ?? [],
+    must_not_reveal: [...visibleMustNotRevealIds],
     active_secrets_questions: currentContext?.active_secrets_questions ?? [],
     recent_segment_last_paragraph: recentSegmentLastParagraph,
     content_policy_body: contentPolicyBody,

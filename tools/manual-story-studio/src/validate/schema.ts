@@ -62,7 +62,12 @@ const COMMON_STRING_ARRAYS: string[] = ["tags"];
 
 const COMMON_ENUMS: Record<string, readonly string[]> = {
   importance: ["low", "medium", "high", "central"] as const,
-  prompt_visibility: ["always", "include_when_relevant", "only_if_pinned"] as const,
+  prompt_visibility: [
+    "always",
+    "include_when_relevant",
+    "only_if_pinned",
+    "never_prompt",
+  ] as const,
 };
 
 const REFS_SCHEMA: SchemaDef = {

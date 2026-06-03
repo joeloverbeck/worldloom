@@ -135,7 +135,8 @@ export type RecordImportance = "low" | "medium" | "high" | "central";
 export type PromptVisibility =
   | "always"
   | "include_when_relevant"
-  | "only_if_pinned";
+  | "only_if_pinned"
+  | "never_prompt";
 
 export interface RecordRefs {
   characters: string[];

@@ -162,7 +162,8 @@ export type RecordImportance = "low" | "medium" | "high" | "central";
 export type PromptVisibility =
   | "always"
   | "include_when_relevant"
-  | "only_if_pinned";
+  | "only_if_pinned"
+  | "never_prompt";
 
 export interface RecordRefs {
   characters: string[];
@@ -318,7 +319,10 @@ export type PromptIncludedReason =
   | "active_secret_question"
   | "current_cast";
 
-export type PromptExcludedReason = "inactive" | "working_set_excluded";
+export type PromptExcludedReason =
+  | "inactive"
+  | "working_set_excluded"
+  | "never_prompt";
 
 export interface PromptIncludedRecord {
   id: string;
