@@ -143,7 +143,7 @@ test("post-segment workbench route returns segment context and broad referrer ca
           included_record_summary: { characters: string[]; records: string[] };
         };
         reminder: string;
-        touched_records: Array<{
+        linked_record_candidates: Array<{
           recordClass: string;
           id: string;
           title: string;
@@ -164,7 +164,7 @@ test("post-segment workbench route returns segment context and broad referrer ca
       assert.match(body.segment.body, /riverhouse kitchen/);
       assert.match(body.reminder, /did not infer record changes/);
 
-      const holderCandidate = body.touched_records.find((entry) => entry.id === "mbel-1");
+      const holderCandidate = body.linked_record_candidates.find((entry) => entry.id === "mbel-1");
       assert.deepEqual(holderCandidate, {
         recordClass: "beliefs",
         id: "mbel-1",

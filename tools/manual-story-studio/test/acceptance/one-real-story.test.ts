@@ -322,7 +322,7 @@ test("SPEC-121: one synthetic Glass Orchard author loop completes end-to-end", a
       });
       assert.equal(response.statusCode, 200);
       const body = response.json() as {
-        touched_records: Array<{
+        linked_record_candidates: Array<{
           recordClass: string;
           id: string;
           fields: string[];
@@ -330,7 +330,7 @@ test("SPEC-121: one synthetic Glass Orchard author loop completes end-to-end", a
         }>;
       };
       assert.equal(
-        body.touched_records.some(
+        body.linked_record_candidates.some(
           (entry) =>
             entry.id === belief.id &&
             entry.recordClass === "beliefs" &&
@@ -340,7 +340,7 @@ test("SPEC-121: one synthetic Glass Orchard author loop completes end-to-end", a
         true,
       );
       assert.equal(
-        body.touched_records.some(
+        body.linked_record_candidates.some(
           (entry) =>
             entry.id === relationship.id &&
             entry.recordClass === "relationships" &&
@@ -349,7 +349,7 @@ test("SPEC-121: one synthetic Glass Orchard author loop completes end-to-end", a
         true,
       );
       assert.equal(
-        body.touched_records.some(
+        body.linked_record_candidates.some(
           (entry) =>
             entry.id === secret.id &&
             entry.recordClass === "secrets" &&

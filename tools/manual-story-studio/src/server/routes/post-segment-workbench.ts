@@ -203,7 +203,7 @@ export async function registerPostSegmentWorkbenchReadRoute(
           included_record_summary: sidecar.value.included_record_summary,
         },
         reminder: REMINDER,
-        touched_records: candidates.value,
+        linked_record_candidates: candidates.value,
       };
     },
   );

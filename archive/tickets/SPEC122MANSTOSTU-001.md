@@ -48,7 +48,7 @@ Add an explicit control to the rendered-prose surface that, when the author has 
 ## Out of Scope
 
 - Any backend / payload change — `last_paragraph` and `body` stay in the payload (retained for the segment-meta display row + prose render; reassessment M1).
-- The `touched_records` → `linked_record_candidates` rename and reason-line/cardify work (SPEC122MANSTOSTU-002 / -003).
+- The `touched_records` → `linked_record_candidates` rename and reason-line/cardify work (archive/tickets/SPEC122MANSTOSTU-002.md / tickets/SPEC122MANSTOSTU-003.md).
 - Any inference of record changes from prose (the app must continue to do none).
 
 ## Acceptance Criteria

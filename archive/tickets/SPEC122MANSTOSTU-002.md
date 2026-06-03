@@ -1,6 +1,6 @@
 # SPEC122MANSTOSTU-002: Rename `touched_records` → `linked_record_candidates` + reword rail heading
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` backend route + web frontend + tests. No schema/canon change.
@@ -12,7 +12,7 @@ The post-segment workbench's candidate payload field is named `touched_records` 
 
 ## Assumption Reassessment (2026-06-03)
 
-1. The payload key `touched_records` is produced at `tools/manual-story-studio/src/server/routes/post-segment-workbench.ts:206` and consumed in the frontend at `web/src/pages/PostSegmentWorkbench.tsx:44` (the `WorkbenchPayload` interface field) and `:213` (`payload?.touched_records`). The rail heading + `aria-label` are at `:351-352`. The scan logic (`:71-82`, `:182-189`) is correct and is NOT changed by this ticket — only the name/heading.
+1. The payload key `touched_records` was produced at `tools/manual-story-studio/src/server/routes/post-segment-workbench.ts:206` and consumed in the frontend at `web/src/pages/PostSegmentWorkbench.tsx` (`WorkbenchPayload` and grouped candidate read). The rail heading + `aria-label` were in the post-workbench rail. The scan logic (`uniqueTargets`, `scanReferences`, `buildCandidates`) is correct and is NOT changed by this ticket — only the name/heading.
 2. Spec SPEC-122 §2 item 2 + §4 + §8 specify the lockstep rename and the heading reword; §8 warns a half-rename compiles on the unchanged side but breaks the workbench rail at runtime.
 3. Cross-artifact boundary under audit: the client↔server payload contract for the post-segment-workbench GET route. Backend route key and every frontend/test consumer must rename together — a half-rename leaves the frontend reading a key the backend no longer sends (empty rail).
 4. FOUNDATIONS principle motivating this ticket: the prose/state boundary (product invariant; §Tooling Recommendation analogue) — "linked," not "touched," because the candidate set is provably link-derived, not prose-derived. Truthful naming is the Rule-6-analogue here.
@@ -82,3 +82,25 @@ In `test/post-segment-workbench.test.ts` (`:146`, `:167`) and `test/acceptance/o
 1. `cd tools/manual-story-studio && npm run test:backend` (backend route + acceptance)
 2. `cd tools/manual-story-studio && npm --prefix web test` (web typecheck catches the frontend half of the lockstep)
 3. `cd tools/manual-story-studio && npm test` (full pipeline)
+
+## Outcome
+
+Completed: 2026-06-03
+
+Renamed the post-segment workbench payload key from `touched_records` to `linked_record_candidates` in `tools/manual-story-studio/src/server/routes/post-segment-workbench.ts`, `tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx`, `tools/manual-story-studio/test/post-segment-workbench.test.ts`, and `tools/manual-story-studio/test/acceptance/one-real-story.test.ts`. The deterministic scan logic was left unchanged; only the payload name and consuming assertions moved.
+
+Updated the post-segment rail heading and `aria-label` to `Records linked to this segment's prompt`, changed the empty state to `No linked records.`, and changed the empty detail prompt to `Select a linked record or create a new post-segment record.` This removes the user-facing "touch" framing from the current web source.
+
+Verification:
+
+1. `rg -n "touched_records" tools/manual-story-studio --glob '*.{ts,tsx}' --glob '!dist/**'` returned no matches.
+2. `rg -ni "records that touch this segment" tools/manual-story-studio/web/src` returned no matches.
+3. `rg -n "linked_record_candidates|Records linked to this segment's prompt|No linked records|Select a linked record" tools/manual-story-studio/src tools/manual-story-studio/web/src tools/manual-story-studio/test --glob '*.{ts,tsx}' --glob '!dist/**'` found the expected producer, frontend consumer/wording, and test consumers.
+4. `cd tools/manual-story-studio && npm run test:backend` passed.
+5. `cd tools/manual-story-studio && npm --prefix web test` passed.
+6. `cd tools/manual-story-studio && npm test` passed: backend build, 490 backend tests, and web typecheck all green.
+7. `git diff --check -- tools/manual-story-studio/src/server/routes/post-segment-workbench.ts tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx tools/manual-story-studio/test/post-segment-workbench.test.ts tools/manual-story-studio/test/acceptance/one-real-story.test.ts archive/tickets/SPEC122MANSTOSTU-002.md` passed.
+
+Deviations:
+
+- None.

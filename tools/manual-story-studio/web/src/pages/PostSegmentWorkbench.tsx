@@ -41,7 +41,7 @@ interface WorkbenchCandidate {
 interface WorkbenchPayload {
   segment: WorkbenchSegment;
   reminder: string;
-  touched_records: WorkbenchCandidate[];
+  linked_record_candidates: WorkbenchCandidate[];
 }
 
 const QUICK_ADD_CLASSES: ManualRecordClass[] = [
@@ -227,7 +227,7 @@ export function PostSegmentWorkbench() {
 
   const groupedCandidates = useMemo(() => {
     const groups = new Map<ManualRecordClass, WorkbenchCandidate[]>();
-    for (const candidate of payload?.touched_records ?? []) {
+    for (const candidate of payload?.linked_record_candidates ?? []) {
       const entries = groups.get(candidate.recordClass);
       if (entries) {
         entries.push(candidate);
@@ -410,10 +410,13 @@ export function PostSegmentWorkbench() {
           </button>
         </article>
 
-        <aside className="post-workbench-rail" aria-label="records that touch this segment">
-          <h3>Records that touch this segment</h3>
+        <aside
+          className="post-workbench-rail"
+          aria-label="records linked to this segment's prompt"
+        >
+          <h3>Records linked to this segment's prompt</h3>
           {groupedCandidates.length === 0 ? (
-            <p>No candidate records.</p>
+            <p>No linked records.</p>
           ) : (
             groupedCandidates.map(([recordClass, candidates]) => (
               <section key={recordClass} className="post-workbench-candidate-group">
@@ -575,7 +578,7 @@ export function PostSegmentWorkbench() {
           ) : (
             <section className="post-workbench-empty">
               <h3>{activeClass}</h3>
-              <p>Select a candidate record or create a new post-segment record.</p>
+              <p>Select a linked record or create a new post-segment record.</p>
             </section>
           )}
         </section>

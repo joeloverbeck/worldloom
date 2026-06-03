@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` backend route (payload enrichment) + web frontend (card rendering + reason phrasing). No schema/canon change.
-**Deps**: SPEC122MANSTOSTU-002
+**Deps**: archive/tickets/SPEC122MANSTOSTU-002.md
 
 ## Problem
 
@@ -47,7 +47,7 @@ In `PostSegmentWorkbench.tsx`: replace the raw `.join(", ")` ID lists at `:334-3
 ## Out of Scope
 
 - The candidate scanning logic (`:71-82`, `:182-189`) — unchanged.
-- The payload-key rename and heading reword (SPEC122MANSTOSTU-002 — this ticket depends on it).
+- The payload-key rename and heading reword (archive/tickets/SPEC122MANSTOSTU-002.md — this ticket depends on it).
 - The R1 prose-seeding removal (archive/tickets/SPEC122MANSTOSTU-001.md).
 - Introducing any second/frontend on-disk ID→card resolver.
 
