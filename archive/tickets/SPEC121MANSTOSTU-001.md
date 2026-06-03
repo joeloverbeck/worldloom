@@ -1,14 +1,14 @@
 # SPEC121MANSTOSTU-001: Synthetic one-real-story acceptance test (Glass Orchard)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
-**Engine Changes**: None — adds a backend acceptance test + an inline test-fixture helper under `tools/manual-story-studio/test/acceptance/`; no production code change. (If a step reveals a missing read-only seam, prefer a minimal additive test-friendly export over duplicating logic, and note it — per SPEC-121 §4; this contingency is judged unlikely to fire, see Assumption Reassessment item 1.)
+**Engine Changes**: None — added a backend acceptance test + an inline test-fixture helper under `tools/manual-story-studio/test/acceptance/`; no production code change or engine-routed world-content write. Also truthed same-seam SPEC-121 / implementation-order status notes.
 **Deps**: None — exercises only already-landed SPEC-112…SPEC-118 surfaces (all COMPLETED + archived); no in-batch or pending ticket blocks it.
 
 ## Problem
 
-`tools/manual-story-studio/` has broad unit/route coverage but **no single end-to-end proof that one real author loop completes** (SPEC-121 §1; report `reports/manual-story-studio-fourth-iteration.md` §28: "That one flow matters more than another dozen isolated tests"). Now that the core-loop features have landed (SPEC-112 pickers, SPEC-113 inclusion ledger, SPEC-114 delete lifecycle, SPEC-115 source browser, SPEC-116 health gating, SPEC-117 post-segment workbench, SPEC-118 `never_prompt`/beat default), a deliberately tiny, **world-agnostic** acceptance flow over a synthetic "Glass Orchard" fixture locks the loop against regression. The test must not be tied to a real world (e.g., `animalia`); it uses a synthetic, self-contained fixture built inline under a temp root so the test is hermetic and stable.
+At intake, `tools/manual-story-studio/` had broad unit/route coverage but **no single end-to-end proof that one real author loop completes** (SPEC-121 §1; report `reports/manual-story-studio-fourth-iteration.md` §28: "That one flow matters more than another dozen isolated tests"). With the core-loop features landed (SPEC-112 pickers, SPEC-113 inclusion ledger, SPEC-114 delete lifecycle, SPEC-115 source browser, SPEC-116 health gating, SPEC-117 post-segment workbench, SPEC-118 `never_prompt`/beat default), this ticket added a deliberately tiny, **world-agnostic** acceptance flow over a synthetic "Glass Orchard" fixture. The test is not tied to a real world (e.g., `animalia`); it uses a synthetic, self-contained fixture built inline under a temp root so the test is hermetic and stable.
 
 ## Assumption Reassessment (2026-06-03)
 
@@ -16,6 +16,7 @@
 2. **Spec + landed predecessor surfaces** (verified): SPEC-121 (this spec, reassessed 2026-06-03); SPEC-112…SPEC-118 all COMPLETED + archived under `archive/specs/`. SPEC-117 and SPEC-118 both carry `Blocks: SPEC-121`. The fixture-construction approach follows the established sibling-test precedent in `test/capstone-spec104.test.ts` (`mkFixture()` → `mkdtempSync` temp `repoRoot` + `resolveManualStoryRoot` + `safeWriteFile` + `cpSync`) and `test/read/world-source.test.ts` (inline `worlds/<slug>/WORLD_KERNEL.md` writes).
 3. **Cross-artifact boundary under audit**: the manual-story-studio **service/route API contract** spanning the read / write / prompt / health / segment layers. This ticket audits that the contract is exercisable end-to-end at the API/service level (browser-like, not DOM-level — SPEC-121 §3) without duplicating production logic and without a real DOM/Playwright harness. The test consumes the layers' exported functions and the existing HTTP routes (via Fastify `inject`); it must not reach into module internals or re-implement composition/scan/health logic.
 4. **FOUNDATIONS §Canonical Storage Layer / Hook 3 + prompt-boundary safety** motivate this ticket. §Canonical Storage Layer: `_source/*.yaml` is engine-only; the test therefore builds its synthetic world **inline at runtime under a `mkdtempSync` temp `repoRoot`** (via `fs`/`safeWriteFile`) and tears it down (`rmSync`), never writing or mutating a real `worlds/<slug>/` or `_source/` surface — and committing static `_source/*.yaml` fixture files is avoided (no static `_source/*.yaml` fixtures exist in the package's test trees today, and authoring engine-only `_source/<subdir>/*.yaml` via the editor trips Hook 3). Prompt-boundary safety: the test asserts the working-set-`excluded_records` true answer never reaches the composed markdown and that no internal `mXXX-n` ID appears. Both are honesty/boundary assertions, not canon mutations — manual-story-studio is the SPEC-100 write-enabled-but-canon-fenced package; this ticket adds no canon-mediation surface.
+5. **Final implementation boundary**: no production seam was missing, so no production code changed. Closeout added a dated implementation note to `archive/specs/SPEC-121-manual-story-studio-synthetic-acceptance-flow.md` and updated `archive/specs/IMPLEMENTATION-ORDER-2026-06-03.md` so same-seam status prose no longer says SPEC-121 is still only last-to-land pending work.
 
 ## Architecture Check
 
@@ -31,18 +32,18 @@
 5. Hard-delete of an unreferenced fact succeeds; delete of a referenced secret blocks with referrer information; force path is repair-gated (force → `force_deleted` + `repair-log.yaml` entry) → `deleteRecord` service assertions (parallels `test/write/delete-lifecycle.test.ts`).
 6. A corrupted current-context blocks only dependent actions, not all actions → health-compute assertion (parallels `test/health/dependency-scoped-blocking.test.ts`).
 
-## What to Change
+## Landed Changes
 
 ### 1. Inline Glass Orchard fixture helper
 
-Add `tools/manual-story-studio/test/acceptance/glass-orchard-fixture.ts`: a helper that, given a `mkdtempSync` temp `repoRoot`, builds the synthetic world inline (NOT as committed static files) —
+Added `tools/manual-story-studio/test/acceptance/glass-orchard-fixture.ts`: a helper that, given a `mkdtempSync` temp `repoRoot`, builds the synthetic world inline (NOT as committed static files) —
 - `worlds/glass-orchard/WORLD_KERNEL.md` (minimal), a couple of `_source` facts (orchard trees hold memories; a guild taxes memory-fruit), and two `characters/*.md` (Mira — tax-guild inspector; Len — orchard keeper), written via `fs`/`safeWriteFile` so the read layer can browse them read-only (`readWorldSource` reads `<repoRoot>/worlds/<slug>/`).
 - A temp manual-story root via `resolveManualStoryRoot(repoRoot, worldSlug, msSlug)` + `safeWriteFile("manual-story.yaml", …)`.
-Follow the `test/capstone-spec104.test.ts` `mkFixture()` pattern. Provide a teardown helper (`rmSync(repoRoot, {recursive, force})`).
+It follows the `test/capstone-spec104.test.ts` temp-root pattern and provides a teardown helper (`rmSync(repoRoot, {recursive, force})`).
 
 ### 2. End-to-end acceptance test
 
-Add `tools/manual-story-studio/test/acceptance/one-real-story.test.ts` driving the report §45 flow condensed to load-bearing assertions:
+Added `tools/manual-story-studio/test/acceptance/one-real-story.test.ts` driving the report §45 flow condensed to load-bearing assertions:
 - create manual story; browse synthetic world source (read-only); create Mira/Len story-local cast + facts from literal source;
 - create belief / emotion / plan / relationship / clock / secret / question via the record layer; link non-cast records through the selector data (`holder`/`between`/`held_by`);
 - set the Prompt Working Set; **exclude the true answer** via the working-set `excluded_records` list; compose prompt for 3-5 beats; inspect included/excluded/suppressed (resolution ledger reflects the working set); assert the excluded answer is absent from the composed markdown and no internal `mXXX-n` ID appears; save/copy prompt (no hard lint);
@@ -53,10 +54,16 @@ Add `tools/manual-story-studio/test/acceptance/one-real-story.test.ts` driving t
 - corrupt current-context and assert scoped health blocking (only dependent actions blocked).
 Hermetic setup/teardown: create + remove the synthetic world/story in the temp location; never leave artifacts under any real `worlds/<slug>/`.
 
+### 3. Same-seam spec/order truthing
+
+Updated `archive/specs/SPEC-121-manual-story-studio-synthetic-acceptance-flow.md` with `Status: COMPLETED` and a dated implementation note. Updated `archive/specs/IMPLEMENTATION-ORDER-2026-06-03.md` so the SPEC-121 row reflects completion and archival.
+
 ## Files to Touch
 
 - `tools/manual-story-studio/test/acceptance/one-real-story.test.ts` (new)
 - `tools/manual-story-studio/test/acceptance/glass-orchard-fixture.ts` (new)
+- `archive/specs/SPEC-121-manual-story-studio-synthetic-acceptance-flow.md` (modify)
+- `archive/specs/IMPLEMENTATION-ORDER-2026-06-03.md` (modify)
 
 ## Out of Scope
 
@@ -96,3 +103,19 @@ Hermetic setup/teardown: create + remove the synthetic world/story in the temp l
 1. `cd tools/manual-story-studio && npm run test:backend` — compiles backend + runs `node --test "dist/test/**/*.test.js"` (includes the new acceptance test).
 2. `cd tools/manual-story-studio && npm test` — full suite (backend + web) green.
 3. The package-local `cd <pkg> && npm test` form is the correct boundary: tests compile to `dist/test/**/*.test.js` and the new `test/acceptance/*.test.ts` files match that glob without further wiring.
+
+## Outcome
+
+Implemented the synthetic Glass Orchard acceptance lane without production code changes. The new fixture helper creates temp-only prompt docs, world source, and manual-story metadata; the acceptance test creates story-local records, composes and saves a prompt, saves and compiles prose, exercises the post-segment workbench route, updates records, verifies hard/block/force delete behavior, performs a repair-mode segment replacement, and asserts current-context health scoping. Same-seam SPEC-121 and implementation-order status prose was truthed after the package proof passed.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run test:backend` — PASS on 2026-06-03; compiled backend and ran 87 backend tests, including `dist/test/acceptance/one-real-story.test.js`.
+2. `cd tools/manual-story-studio && npm test` — PASS on 2026-06-03; compiled backend, ran 489 backend/web-adjacent Node tests, then ran `npm --prefix web test`.
+3. Package README/user-facing surface inspected: no README or command/documentation change required because this ticket adds private package test coverage and no new user-facing command/API.
+4. Post-ticket review archived this ticket to `archive/tickets/SPEC121MANSTOSTU-001.md` and repaired active SPEC-121 / implementation-order references to the archived path.
+
+## Deviations
+
+- No production code change was needed; the contingency for a minimal additive read-only test seam did not fire.
+- Closeout added `archive/specs/SPEC-121-manual-story-studio-synthetic-acceptance-flow.md` and `archive/specs/IMPLEMENTATION-ORDER-2026-06-03.md` to the touched file set because their same-seam status prose would otherwise remain stale. Archival was performed later by `$post-ticket-review` and the user's finished-spec archival request.

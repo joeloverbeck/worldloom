@@ -1,6 +1,6 @@
 # SPEC-121 — Manual Story Studio: Synthetic One-Real-Story Acceptance Flow
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; a single end-to-end acceptance test over an existing, synthetic, world-agnostic fixture; no LLM/MCP/patch-engine; no production code change required beyond test scaffolding).
 **Depends on:** `archive/specs/SPEC-117-manual-story-studio-post-segment-record-workbench.md` (post-segment workbench — step 19), `archive/specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md` (`never_prompt`/exclusion — step 13), and the landed core-loop specs SPEC-112…SPEC-116 (pickers, inclusion ledger, delete lifecycle, source browser, health gating).
@@ -9,6 +9,10 @@
 **Source:** critical triage of `reports/manual-story-studio-fourth-iteration.md` §§28 / 45 + Stage 8 (ChatGPT-Pro, 2026-06-02). Deferred in iterations 2–3 (lift-condition "until the core-loop feature specs land"); the user selected it for this batch (AskUserQuestion, 2026-06-02) now that the loop is complete.
 
 ---
+
+## Implementation Note (2026-06-03)
+
+Implemented by `archive/tickets/SPEC121MANSTOSTU-001.md`: `tools/manual-story-studio/test/acceptance/glass-orchard-fixture.ts` builds the synthetic Glass Orchard temp world/story inline, and `tools/manual-story-studio/test/acceptance/one-real-story.test.ts` drives the real read/write/prompt/health/segment layers plus Fastify `inject` for the post-segment workbench. The package proof lanes `cd tools/manual-story-studio && npm run test:backend` and `cd tools/manual-story-studio && npm test` passed on 2026-06-03. Remaining report/triage prose is historical intake context unless a later ticket reopens it.
 
 ## 1. Context & Motivation
 
@@ -79,3 +83,22 @@ The flow must **not** be tied to a real world (e.g., `animalia`); it uses a synt
 
 - Backend (includes the acceptance test): `cd tools/manual-story-studio && npm run test:backend`
 - Full: `cd tools/manual-story-studio && npm test`
+
+## Outcome
+
+**Completed:** 2026-06-03
+
+Implemented by `archive/tickets/SPEC121MANSTOSTU-001.md`.
+
+What changed:
+- Added `tools/manual-story-studio/test/acceptance/glass-orchard-fixture.ts`, which builds the synthetic Glass Orchard world and manual-story root under a temp repo root.
+- Added `tools/manual-story-studio/test/acceptance/one-real-story.test.ts`, which drives the real read/write/prompt/health/segment layers and the post-segment workbench route.
+- Truthed same-seam implementation-order references during ticket closeout and post-ticket review.
+
+Deviations:
+- No production code change was needed; all required seams were already exported and directly testable.
+- The acceptance proof stayed service/API-level rather than DOM/Playwright-level, as intended by the spec.
+
+Verification:
+- `cd tools/manual-story-studio && npm run test:backend` passed on 2026-06-03.
+- `cd tools/manual-story-studio && npm test` passed on 2026-06-03.
