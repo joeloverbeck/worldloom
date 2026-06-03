@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-119-manual-story-studio-prompt-inspector-confidence-cockpit.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC119MANSTOSTU-001.md",
+  "last_ticket": "archive/tickets/SPEC119MANSTOSTU-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "f0b95d4f134ecd4d838c64ed6091568caa486282",
+  "last_work_commit": "ad27aa84f8dafc679755cd3c433c3f406a199476",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC119MANSTOSTU-002.md",
+  "next_target": "tickets/SPEC119MANSTOSTU-003.md",
   "queue": [
-    "tickets/SPEC119MANSTOSTU-002.md",
     "tickets/SPEC119MANSTOSTU-003.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -15,7 +14,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC119MANSTOSTU-001 archived; npm run test:backend passed 86 Node tests; npm --prefix web test passed; npm test passed 486 backend/static tests plus web typecheck",
+  "proof_state": "SPEC119MANSTOSTU-002 archived; npm --prefix web test passed; npm run test:backend passed 86 Node/static tests; npm test passed 487 backend/static tests plus web typecheck",
   "dirty_state": "expected ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "post_review_material_updates": true,
   "post_review_audit_block": "emitted",
