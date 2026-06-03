@@ -1,6 +1,6 @@
 # SPEC-117 — Manual Story Studio: Post-Segment Record Workbench (replace checklist modal)
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; no LLM/MCP/patch-engine; replaces a post-save UI modal + removes one current-context field; no canon-pipeline integration).
 **Depends on:** archive/specs/SPEC-112-manual-story-studio-record-pickers.md (reuses `RecordForm`, `RecordCard`, `RecordPicker`), archive/specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md (reuses the broad referrer scanner + block-on-referrer delete).

@@ -57,7 +57,7 @@ Deleted `test/state-update-checklist.test.ts`. Updated segment route/write/capst
 - `tools/manual-story-studio/test/server/segments-routes.test.ts` / `test/write/segments.test.ts` — drop `checklist_payload` assertions (modify)
 - `tools/manual-story-studio/test/capstone-spec103.test.ts` (modify)
 - `tools/manual-story-studio/web/src/pages/Records.tsx` (modify stale checklist-origin comment)
-- `specs/SPEC-117-manual-story-studio-post-segment-record-workbench.md` (modify implementation note)
+- `archive/specs/SPEC-117-manual-story-studio-post-segment-record-workbench.md` (modify implementation note)
 
 ## Out of Scope
 
