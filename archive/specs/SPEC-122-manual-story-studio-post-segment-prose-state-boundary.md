@@ -1,12 +1,14 @@
 # SPEC-122 — Manual Story Studio: Post-Segment Prose/State Boundary Cleanup
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-06-03
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; no LLM/MCP/patch-engine; writes only under `worlds/<slug>/manual-stories/`). The change directly engages the prose/state boundary (FOUNDATIONS §Tooling Recommendation), so the §5 alignment table is load-bearing rather than defensive.
 **Depends on:** archive/specs/SPEC-117-manual-story-studio-post-segment-record-workbench.md (this corrects a regression SPEC-117 introduced in the post-segment workbench it created).
 **Blocks:** —
 **Related:** `tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx`, `tools/manual-story-studio/src/server/routes/post-segment-workbench.ts`, `tools/manual-story-studio/web/src/pages/PasteProse.tsx`, `tools/manual-story-studio/test/post-segment-workbench.test.ts`.
 **Source:** critical triage of `reports/manual-story-studio-fifth-iteration.md` §§1.3 / 5 / 13 / 17 / 24 / 35 (ChatGPT-Pro, 2026-06-03). See `docs/triage/2026-06-03-manual-story-studio-fifth-iteration-triage.md` items R1 / R2 / R10. All code-state claims verified against the live tree.
+
+**Implementation note (2026-06-03):** Completed and archived through `archive/tickets/SPEC122MANSTOSTU-004.md`, `archive/tickets/SPEC122MANSTOSTU-001.md`, `archive/tickets/SPEC122MANSTOSTU-002.md`, and `archive/tickets/SPEC122MANSTOSTU-003.md`. The final package proof was `cd tools/manual-story-studio && npm run test:backend`, `cd tools/manual-story-studio && npm --prefix web test`, `cd tools/manual-story-studio && npm test`, plus targeted grep checks for the retired prose-seeding, `touched_records`, old rail heading, raw segment-meta included-record joins, and `paste or draft` placeholder.
 
 ---
 
