@@ -1,0 +1,67 @@
+# SPEC117MANSTOSTU-005: PasteProse — route to workbench after save
+
+**Status**: PENDING
+**Priority**: HIGH
+**Effort**: Small
+**Engine Changes**: Yes — `tools/manual-story-studio` (`web/src/pages/PasteProse.tsx` post-save navigation). No canon-mediation surface (package is canon-fenced per SPEC-100).
+**Deps**: SPEC117MANSTOSTU-002, SPEC117MANSTOSTU-004
+
+## Problem
+
+After SPEC117MANSTOSTU-002 removes the checklist modal, PasteProse saves a segment and shows nothing. This ticket completes the routed-not-modal flow: after a successful save, PasteProse navigates to the Post-Segment Workbench route (carrying the just-saved segment ID), so the author lands *in* the maintenance surface instead of dismissing a dialog to reach it.
+
+## Assumption Reassessment (2026-06-03)
+
+1. After SPEC117MANSTOSTU-002, `web/src/pages/PasteProse.tsx` no longer imports/renders `StateUpdateChecklist` and the save response no longer carries `checklist_payload`; the save handler still has the saved `segment_id` from the response. The workbench route (segment-id param) is registered in `web/src/App.tsx` by SPEC117MANSTOSTU-004. Confirmed by grep at reassessment + decomposition time.
+2. Per the spec (SPEC-117 §2 item 1 + §3 Routed-not-modal + §6 AC1), saving a segment routes to the Post-Segment Workbench and no modal is shown.
+3. **Cross-artifact boundary under audit**: the workbench route contract (segment-id param) registered by SPEC117MANSTOSTU-004 (hence `Deps: 004`), and the post-checklist PasteProse save handler shape left by SPEC117MANSTOSTU-002 (hence `Deps: 002`). This ticket modifies `PasteProse.tsx`, which SPEC117MANSTOSTU-002 also modifies (modal removal) — independent regions; `Deps: 002` orders them so the modifier lands after the modal is removed.
+
+## Architecture Check
+
+1. Navigating on save keeps the post-save flow a single forward motion into the maintenance surface, with no intermediate dialog. Reusing the saved `segment_id` from the existing response avoids any new backend round-trip.
+2. No backwards-compatibility alias/shim: the navigation replaces the deleted modal outright; no compatibility branch for the old checklist path remains.
+
+## Verification Layers
+
+1. Saving a segment routes to the workbench and shows no modal → web typecheck + manual review against AC1 (no remaining `StateUpdateChecklist` import — already guaranteed by -002; this ticket adds the navigation).
+2. The navigation targets the workbench route with the just-saved segment ID → web typecheck (route param shape matches `App.tsx` registration) + manual review.
+3. Single-layer note: this is a frontend-only navigation change; verification is web typecheck + manual smoke per SPEC-117 §7. No backend or schema layer is touched.
+
+## What to Change
+
+### 1. PasteProse post-save navigation
+
+In `web/src/pages/PasteProse.tsx`, after a successful save, navigate to the Post-Segment Workbench route (the route registered by SPEC117MANSTOSTU-004) using the saved `segment_id` as the route param. Remove any residual "saved, do nothing" intermediate state left after -002.
+
+## Files to Touch
+
+- `tools/manual-story-studio/web/src/pages/PasteProse.tsx` (modify)
+
+## Out of Scope
+
+- The workbench page/route itself — SPEC117MANSTOSTU-004.
+- Removing the modal render — already done in SPEC117MANSTOSTU-002.
+- Any change to the segment-save backend or response shape.
+
+## Acceptance Criteria
+
+### Tests That Must Pass
+
+1. Saving a segment via PasteProse routes to the Post-Segment Workbench for the just-saved segment; no modal is shown (AC1).
+2. `npm --prefix web test` (web typecheck) is green; `cd tools/manual-story-studio && npm test` is green.
+
+### Invariants
+
+1. PasteProse renders no post-save modal and consumes no `checklist_payload`.
+2. The post-save navigation carries the saved segment ID to the workbench route.
+
+## Test Plan
+
+### New/Modified Tests
+
+1. `None — frontend navigation change; verification is `tsc --noEmit` typecheck (`npm --prefix web test`) plus the SPEC-117 §7 manual save→workbench smoke check. AC1's "no modal" guarantee is structurally enforced by SPEC117MANSTOSTU-002's component deletion.`
+
+### Commands
+
+1. `npm --prefix web test` (run from `tools/manual-story-studio`; web typecheck)
+2. `cd tools/manual-story-studio && npm test` (full backend + web)
