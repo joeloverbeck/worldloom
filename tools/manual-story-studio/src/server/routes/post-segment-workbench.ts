@@ -13,8 +13,11 @@ import {
 } from "../../read/records.js";
 import type { ReadError } from "../../read/result.js";
 import {
+  MANUAL_RECORD_CLASSES,
   MANUAL_RECORD_CLASS_PREFIXES,
+  type ManualRecord,
   type ManualRecordClass,
+  type ManualRecordSummary,
 } from "../../schema/manual-story.js";
 import {
   resolveManualStoryRoot,
@@ -32,7 +35,18 @@ interface PostSegmentWorkbenchCandidate {
   title: string;
   active: boolean;
   target_ids: string[];
+  target_summaries: ResolvedManualRecordSummary[];
   fields: string[];
+}
+
+interface ResolvedManualRecordSummary {
+  recordClass: ManualRecordClass;
+  summary: ManualRecordSummary;
+}
+
+interface ResolvedIncludedRecordSummary {
+  characters: ResolvedManualRecordSummary[];
+  records: ResolvedManualRecordSummary[];
 }
 
 const REMINDER =
@@ -84,6 +98,77 @@ function uniqueTargets(sidecar: {
 function isManualRecordReferrer(referrer: ReferrerEntry): boolean {
   const prefix = MANUAL_RECORD_CLASS_PREFIXES[referrer.recordClass];
   return new RegExp(`^${prefix}-\\d+$`).test(referrer.id);
+}
+
+function recordClassForId(id: string): ManualRecordClass | null {
+  for (const recordClass of MANUAL_RECORD_CLASSES) {
+    const prefix = MANUAL_RECORD_CLASS_PREFIXES[recordClass];
+    if (new RegExp(`^${prefix}-\\d+$`).test(id)) return recordClass;
+  }
+  return null;
+}
+
+function summaryFromRecord(record: ManualRecord): ManualRecordSummary {
+  return {
+    id: record.id,
+    title: record.title,
+    active: record.active,
+    importance: record.importance,
+    tags: record.tags,
+    summary: record.summary,
+    prompt_visibility: record.prompt_visibility,
+    involved_cast: record.refs.characters,
+  };
+}
+
+function resolveManualRecordSummary(
+  manualStoryRoot: string,
+  id: string,
+): { ok: true; value: ResolvedManualRecordSummary | null } | { ok: false; error: ReadError } {
+  const recordClass = recordClassForId(id);
+  if (!recordClass) return { ok: true, value: null };
+  const record = readRecord(manualStoryRoot, recordClass, id);
+  if (!record.ok) return { ok: false, error: record.error };
+  return {
+    ok: true,
+    value: {
+      recordClass,
+      summary: summaryFromRecord(record.value),
+    },
+  };
+}
+
+function resolveManualRecordSummaries(
+  manualStoryRoot: string,
+  ids: string[],
+): { ok: true; value: ResolvedManualRecordSummary[] } | { ok: false; error: ReadError } {
+  const out: ResolvedManualRecordSummary[] = [];
+  for (const id of ids) {
+    const resolved = resolveManualRecordSummary(manualStoryRoot, id);
+    if (!resolved.ok) return resolved;
+    if (resolved.value) out.push(resolved.value);
+  }
+  return { ok: true, value: out };
+}
+
+function resolveIncludedRecordSummary(
+  manualStoryRoot: string,
+  included: { characters: string[]; records: string[] },
+): { ok: true; value: ResolvedIncludedRecordSummary } | { ok: false; error: ReadError } {
+  const characters = resolveManualRecordSummaries(
+    manualStoryRoot,
+    included.characters,
+  );
+  if (!characters.ok) return characters;
+  const records = resolveManualRecordSummaries(manualStoryRoot, included.records);
+  if (!records.ok) return records;
+  return {
+    ok: true,
+    value: {
+      characters: characters.value,
+      records: records.value,
+    },
+  };
 }
 
 function candidateKey(referrer: ReferrerEntry): string {
@@ -141,8 +226,17 @@ function buildCandidates(
       title: record.value.title,
       active: record.value.active,
       target_ids: sortedUnique(grouped.targetIds),
+      target_summaries: [],
       fields: sortedUnique(grouped.fields),
     });
+  }
+  for (const candidate of candidates) {
+    const targetSummaries = resolveManualRecordSummaries(
+      manualStoryRoot,
+      candidate.target_ids,
+    );
+    if (!targetSummaries.ok) return targetSummaries;
+    candidate.target_summaries = targetSummaries.value;
   }
   candidates.sort((a, b) => candidateSortKey(a).localeCompare(candidateSortKey(b)));
   return { ok: true, value: candidates };
@@ -190,6 +284,13 @@ export async function registerPostSegmentWorkbenchReadRoute(
 
       const candidates = buildCandidates(root.absolutePath, targetReferrers);
       if (!candidates.ok) return mapReadErrorToHttpReply(reply, candidates.error);
+      const includedRecordSummary = resolveIncludedRecordSummary(
+        root.absolutePath,
+        sidecar.value.included_record_summary,
+      );
+      if (!includedRecordSummary.ok) {
+        return mapReadErrorToHttpReply(reply, includedRecordSummary.error);
+      }
 
       return {
         segment: {
@@ -200,7 +301,7 @@ export async function registerPostSegmentWorkbenchReadRoute(
           moment_directive: sidecar.value.moment_directive,
           word_count: sidecar.value.word_count,
           last_paragraph: lastParagraph(body.value),
-          included_record_summary: sidecar.value.included_record_summary,
+          included_record_summary: includedRecordSummary.value,
         },
         reminder: REMINDER,
         linked_record_candidates: candidates.value,

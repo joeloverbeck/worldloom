@@ -1,6 +1,6 @@
 # SPEC122MANSTOSTU-003: Cardify segment-meta cast/records (backend ID→summary enrichment) + humanize reason lines
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` backend route (payload enrichment) + web frontend (card rendering + reason phrasing). No schema/canon change.
@@ -75,3 +75,20 @@ In `PostSegmentWorkbench.tsx`: replace the raw `.join(", ")` ID lists at `:334-3
 1. `cd tools/manual-story-studio && npm run test:backend` (payload enrichment)
 2. `cd tools/manual-story-studio && npm --prefix web test` (web typecheck — card rendering + reason phrasing)
 3. `cd tools/manual-story-studio && npm test` (full pipeline)
+
+## Outcome
+
+Completed on 2026-06-03.
+
+- Backend `post-segment-workbench` now resolves included cast/records and candidate `target_ids` into `ManualRecordSummary` payload entries through the existing `readRecord` path. Segment IDs remain non-record targets and are left as raw fallback labels in reason strings.
+- Frontend `PostSegmentWorkbench` now renders segment-meta included cast/records with `RecordCard`, derives prompt-link defaults from the enriched summaries, and humanizes candidate reason lines such as `Linked through holder -> Mara`.
+- `tools/manual-story-studio/test/post-segment-workbench.test.ts` now asserts included cast/record title enrichment plus candidate target summary enrichment.
+
+Verification:
+
+- `rg -n "included_record_summary\\.(characters|records)\\.join" tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx` returned no matches.
+- `rg -n "Linked through holder|Referenced by relationship|target_summaries|renderIncludedRecordCards" tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx tools/manual-story-studio/src/server/routes/post-segment-workbench.ts tools/manual-story-studio/test/post-segment-workbench.test.ts` found the expected implementation/test sites.
+- `cd tools/manual-story-studio && npm run test:backend` passed.
+- `cd tools/manual-story-studio && npm --prefix web test` passed.
+- `cd tools/manual-story-studio && npm test` passed.
+- `git diff --check` passed.

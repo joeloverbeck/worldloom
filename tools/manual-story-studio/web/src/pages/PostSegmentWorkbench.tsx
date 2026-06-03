@@ -15,8 +15,17 @@ import type {
   ManualRecord,
   ManualRecordClass,
   ManualRecordSummary,
-  SegmentSidecarIncludedRecordSummary,
 } from "../types/manual-story.js";
+
+interface WorkbenchRecordSummary {
+  recordClass: ManualRecordClass;
+  summary: ManualRecordSummary;
+}
+
+interface WorkbenchIncludedRecordSummary {
+  characters: WorkbenchRecordSummary[];
+  records: WorkbenchRecordSummary[];
+}
 
 interface WorkbenchSegment {
   id: string;
@@ -26,7 +35,7 @@ interface WorkbenchSegment {
   moment_directive: string;
   word_count: number;
   last_paragraph: string;
-  included_record_summary: SegmentSidecarIncludedRecordSummary;
+  included_record_summary: WorkbenchIncludedRecordSummary;
 }
 
 interface WorkbenchCandidate {
@@ -35,6 +44,7 @@ interface WorkbenchCandidate {
   title: string;
   active: boolean;
   target_ids: string[];
+  target_summaries: WorkbenchRecordSummary[];
   fields: string[];
 }
 
@@ -88,8 +98,51 @@ function candidateSummary(candidate: WorkbenchCandidate): ManualRecordSummary {
   };
 }
 
+function targetTitleMap(candidate: WorkbenchCandidate): Map<string, string> {
+  return new Map(
+    candidate.target_summaries.map((entry) => [
+      entry.summary.id,
+      entry.summary.title,
+    ]),
+  );
+}
+
+function humanizeField(field: string): string {
+  if (field === "holder") return "Linked through holder";
+  if (field === "subject") return "Linked through subject";
+  if (field === "owed_by") return "Linked through owed by";
+  if (field === "owed_to") return "Linked through owed to";
+  if (field === "current_holder") return "Linked through current holder";
+  if (field === "current_location") return "Linked through current location";
+  if (field === "caused_by_segment") return "Linked through caused-by segment";
+  if (/^between\[\d+\]$/.test(field)) return "Referenced by relationship";
+  if (/^held_by\[\d+\]$/.test(field)) return "Linked through holder";
+  if (/^refs\.characters\[\d+\]$/.test(field)) {
+    return "Referenced by character ref";
+  }
+  if (/^refs\.locations\[\d+\]$/.test(field)) {
+    return "Referenced by location ref";
+  }
+  if (/^refs\.related_records\[\d+\]$/.test(field)) {
+    return "Referenced by related-record ref";
+  }
+  if (field.startsWith("prompt-working-set.")) {
+    return `Referenced by ${field.slice("prompt-working-set.".length).replace(/_/g, " ")}`;
+  }
+  return `Linked through ${field.replace(/\[\d+\]/g, "").replace(/[._]/g, " ")}`;
+}
+
 function reasonForCandidate(candidate: WorkbenchCandidate): string {
-  return `${candidate.fields.join(", ")} -> ${candidate.target_ids.join(", ")}`;
+  const titles = targetTitleMap(candidate);
+  const fields = candidate.fields.map(humanizeField).join("; ");
+  const targets = candidate.target_ids
+    .map((id) => titles.get(id) ?? id)
+    .join(", ");
+  return targets ? `${fields} -> ${targets}` : fields;
+}
+
+function summaryIds(entries: WorkbenchRecordSummary[]): string[] {
+  return entries.map((entry) => entry.summary.id);
 }
 
 function initialRecordForSegment(
@@ -100,12 +153,12 @@ function initialRecordForSegment(
     refs: {
       characters:
         includePromptLinks
-          ? (payload?.segment.included_record_summary.characters ?? [])
+          ? summaryIds(payload?.segment.included_record_summary.characters ?? [])
           : [],
       locations: [],
       related_records:
         includePromptLinks
-          ? (payload?.segment.included_record_summary.records ?? [])
+          ? summaryIds(payload?.segment.included_record_summary.records ?? [])
           : [],
     },
     summary: "",
@@ -336,6 +389,32 @@ export function PostSegmentWorkbench() {
     }
   }
 
+  function openRecord(recordClass: ManualRecordClass, id: string) {
+    setSelected({ recordClass, id });
+    setActiveClass(recordClass);
+    setCreatingClass(null);
+    setLinkPromptRecordsToNewRecord(false);
+    setSaveError(null);
+    setDeleteOutcome(null);
+  }
+
+  function renderIncludedRecordCards(entries: WorkbenchRecordSummary[]) {
+    if (entries.length === 0) return "none";
+    return entries.map((entry) => (
+      <RecordCard
+        key={`${entry.recordClass}:${entry.summary.id}`}
+        summary={entry.summary}
+        recordClass={entry.recordClass}
+        compact
+        selected={
+          selected?.recordClass === entry.recordClass &&
+          selected.id === entry.summary.id
+        }
+        onOpen={(id) => openRecord(entry.recordClass, id)}
+      />
+    ));
+  }
+
   if (!worldSlug || !msSlug || !segmentId) {
     return <p role="alert">Missing world, manual story, or segment id.</p>;
   }
@@ -382,15 +461,17 @@ export function PostSegmentWorkbench() {
             <div>
               <dt>Included cast</dt>
               <dd>
-                {payload.segment.included_record_summary.characters.join(", ") ||
-                  "none"}
+                {renderIncludedRecordCards(
+                  payload.segment.included_record_summary.characters,
+                )}
               </dd>
             </div>
             <div>
               <dt>Included records</dt>
               <dd>
-                {payload.segment.included_record_summary.records.join(", ") ||
-                  "none"}
+                {renderIncludedRecordCards(
+                  payload.segment.included_record_summary.records,
+                )}
               </dd>
             </div>
           </dl>
@@ -432,14 +513,7 @@ export function PostSegmentWorkbench() {
                       selected?.recordClass === candidate.recordClass &&
                       selected.id === candidate.id
                     }
-                    onOpen={(id) => {
-                      setSelected({ recordClass: candidate.recordClass, id });
-                      setActiveClass(candidate.recordClass);
-                      setCreatingClass(null);
-                      setLinkPromptRecordsToNewRecord(false);
-                      setSaveError(null);
-                      setDeleteOutcome(null);
-                    }}
+                    onOpen={(id) => openRecord(candidate.recordClass, id)}
                   />
                 ))}
               </section>

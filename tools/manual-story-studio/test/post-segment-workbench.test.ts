@@ -140,7 +140,16 @@ test("post-segment workbench route returns segment context and broad referrer ca
           moment_directive: string;
           word_count: number;
           last_paragraph: string;
-          included_record_summary: { characters: string[]; records: string[] };
+          included_record_summary: {
+            characters: Array<{
+              recordClass: string;
+              summary: { id: string; title: string; active: boolean };
+            }>;
+            records: Array<{
+              recordClass: string;
+              summary: { id: string; title: string; active: boolean };
+            }>;
+          };
         };
         reminder: string;
         linked_record_candidates: Array<{
@@ -149,6 +158,10 @@ test("post-segment workbench route returns segment context and broad referrer ca
           title: string;
           active: boolean;
           target_ids: string[];
+          target_summaries: Array<{
+            recordClass: string;
+            summary: { id: string; title: string; active: boolean };
+          }>;
           fields: string[];
         }>;
       };
@@ -159,20 +172,64 @@ test("post-segment workbench route returns segment context and broad referrer ca
       assert.equal(body.segment.moment_directive, "Let Mara decide what to reveal.");
       assert.equal(body.segment.word_count, 14);
       assert.equal(body.segment.last_paragraph, "Iven arrives with rain on his coat.");
-      assert.deepEqual(body.segment.included_record_summary.characters, ["mchar-1"]);
-      assert.deepEqual(body.segment.included_record_summary.records, ["mfact-1"]);
+      assert.deepEqual(
+        body.segment.included_record_summary.characters.map((entry) => ({
+          recordClass: entry.recordClass,
+          id: entry.summary.id,
+          title: entry.summary.title,
+          active: entry.summary.active,
+        })),
+        [
+          {
+            recordClass: "cast",
+            id: "mchar-1",
+            title: "Mara",
+            active: true,
+          },
+        ],
+      );
+      assert.deepEqual(
+        body.segment.included_record_summary.records.map((entry) => ({
+          recordClass: entry.recordClass,
+          id: entry.summary.id,
+          title: entry.summary.title,
+          active: entry.summary.active,
+        })),
+        [
+          {
+            recordClass: "facts",
+            id: "mfact-1",
+            title: "Debt fact",
+            active: true,
+          },
+        ],
+      );
       assert.match(body.segment.body, /riverhouse kitchen/);
       assert.match(body.reminder, /did not infer record changes/);
 
       const holderCandidate = body.linked_record_candidates.find((entry) => entry.id === "mbel-1");
-      assert.deepEqual(holderCandidate, {
-        recordClass: "beliefs",
-        id: "mbel-1",
-        title: "Mara knows the debt is due",
-        active: true,
-        target_ids: ["mchar-1"],
-        fields: ["holder"],
-      });
+      assert.equal(holderCandidate?.recordClass, "beliefs");
+      assert.equal(holderCandidate?.id, "mbel-1");
+      assert.equal(holderCandidate?.title, "Mara knows the debt is due");
+      assert.equal(holderCandidate?.active, true);
+      assert.deepEqual(holderCandidate?.target_ids, ["mchar-1"]);
+      assert.deepEqual(
+        holderCandidate?.target_summaries.map((entry) => ({
+          recordClass: entry.recordClass,
+          id: entry.summary.id,
+          title: entry.summary.title,
+          active: entry.summary.active,
+        })),
+        [
+          {
+            recordClass: "cast",
+            id: "mchar-1",
+            title: "Mara",
+            active: true,
+          },
+        ],
+      );
+      assert.deepEqual(holderCandidate?.fields, ["holder"]);
       assert.equal(
         holderCandidate?.fields.includes("refs.characters[0]"),
         false,
