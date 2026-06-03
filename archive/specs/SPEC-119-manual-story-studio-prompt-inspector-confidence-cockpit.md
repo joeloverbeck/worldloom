@@ -1,6 +1,6 @@
 # SPEC-119 — Manual Story Studio: Prompt Inspector Confidence Cockpit
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; frontend-only rendering change to the Prompt Preview/Inspector + a read-only payload enrichment; no LLM/MCP/patch-engine).
 **Depends on:** archive/specs/SPEC-113-manual-story-studio-prompt-inclusion-ledger.md (the inspector + resolution ledger this spec upgrades), archive/specs/SPEC-112-manual-story-studio-record-pickers.md (reuses `RecordCard`).
@@ -88,3 +88,23 @@ Target (report §40): the inspector should read as an **author confidence panel*
 - **"Why is this missing?" data source (resolved).** §2.4 is scoped to the resolution ledger: ledger-present records get their deterministic reason; titles absent from the ledger get the generic "not in the working set" answer. The composer does not load never-seeded records, so a full title→record index is intentionally **not** introduced. If a future iteration wants per-record reasons for never-seeded records, it must add a record-list source (e.g., `listRecords`) — tracked as a follow-up, not this spec.
 - **Selected-cast / working-set identity routing.** Those panels read `sidecar_draft` ID arrays, not the ledger (§2 item 2). The implementer must resolve those IDs against the enriched ledger entries, covering working-set IDs that resolved to excluded/suppressed. Getting this wrong reintroduces raw IDs for the pre-filter set.
 - **Determinism.** The composer is byte-identical per SPEC-102 (`compose.ts:1-7`). Ledger-entry enrichment adds fields to `resolution` only, never to `markdown`, so prompt determinism is preserved; the payload-enrichment test should assert the rendered markdown is unchanged by enrichment.
+
+## Outcome
+
+Completed on 2026-06-03.
+
+- Implemented and archived `archive/tickets/SPEC119MANSTOSTU-001.md`, `archive/tickets/SPEC119MANSTOSTU-002.md`, and `archive/tickets/SPEC119MANSTOSTU-003.md`.
+- Enriched the prompt resolution ledger with real record identity fields for included, excluded, and suppressed entries, while preserving prompt markdown determinism.
+- Rendered the Prompt Preview inspector as a confidence panel: real summaries/propositions, separate reason lines, cardified selected-cast and working-set panels, protected suppressed records, collapsed identity-based section map, and confidence framing copy.
+- Added the read-only "Why is this missing?" lookup over `composeResult.resolution` only, with deterministic included/excluded/suppressed/blocked answers and the generic not-in-working-set fallback.
+
+Verification:
+
+- `cd tools/manual-story-studio && npm --prefix web test` — PASS; web TypeScript compiled with `tsc --noEmit`.
+- `cd tools/manual-story-studio && npm run test:backend` — PASS; backend build plus 86 Node/static tests passed after the final ticket.
+- `cd tools/manual-story-studio && npm test` — PASS; backend/static suite reported 488 passing tests and the web typecheck passed after the final ticket.
+
+Deviations:
+
+- `PromptSuppressedRecord` gained `class: ManualRecordClass` so suppressed entries can render record-class identity; live composer suppression is not secret-only.
+- The blocked lookup path matches `PromptBlockedInput.ref`, not title, because blocked entries carry `ref` / `reason` rather than enriched record identity.
