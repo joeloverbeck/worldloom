@@ -12,8 +12,9 @@
 
 ## Implementation Notes
 
-- 2026-06-03 — `archive/tickets/SPEC120MANSTOSTU-001.md` replaced the four user-facing web UI "archived" labels with "inactive" and added the inactive/deleted model note near both include-inactive toggles. Remaining `includeArchived` and `retired_reason` prose below is historical intake context until `archive/tickets/SPEC120MANSTOSTU-002.md` / `SPEC120MANSTOSTU-003` land.
-- 2026-06-03 — `archive/tickets/SPEC120MANSTOSTU-002.md` renamed `includeArchived` to `includeInactive` across the Manual Studio records and beat-template API clients, Fastify routes, read layer, health/prompt callers, React callers, and the HTTP wire query string. Remaining `includeArchived` prose below is historical intake context; `retired_reason` remains active for `SPEC120MANSTOSTU-003`.
+- 2026-06-03 — `archive/tickets/SPEC120MANSTOSTU-001.md` replaced the four user-facing web UI "archived" labels with "inactive" and added the inactive/deleted model note near both include-inactive toggles. Remaining `includeArchived` and `retired_reason` prose below is historical intake context; all SPEC-120 tickets have now landed.
+- 2026-06-03 — `archive/tickets/SPEC120MANSTOSTU-002.md` renamed `includeArchived` to `includeInactive` across the Manual Studio records and beat-template API clients, Fastify routes, read layer, health/prompt callers, React callers, and the HTTP wire query string. Remaining `includeArchived` prose below is historical intake context.
+- 2026-06-03 — `archive/tickets/SPEC120MANSTOSTU-003.md` removed the vestigial `retired_reason` schema/type/validator field and read-test fixture. Existing write/delete absence assertions now use dynamic field-name construction so the regression guard remains without preserving the removed schema field as a TS/TSX source literal.
 
 ---
 

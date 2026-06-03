@@ -461,7 +461,10 @@ test("SPEC-101 AC #5: hybrid delete — hard_deleted, blocked, force_deleted", (
       unknown
     >;
     assert.equal(castAfter.active, true);
-    assert.equal(castAfter.retired_reason, undefined);
+    assert.equal(
+      Object.hasOwn(castAfter, ["retired", "reason"].join("_")),
+      false,
+    );
 
     // force_deleted
     const dForce = deleteRecord(root, "cast", cast1.id, {

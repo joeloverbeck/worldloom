@@ -155,7 +155,6 @@ export interface RecordCommonFields {
   prompt_visibility: PromptVisibility;
   last_reviewed_after_segment: string | null;
   notes: string;
-  retired_reason?: string;
 }
 
 export type ManualRecordClass =

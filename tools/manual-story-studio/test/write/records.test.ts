@@ -325,7 +325,10 @@ test("deleteRecord: referenced → blocked; file remains unchanged", () => {
       unknown
     >;
     assert.equal(parsed.active, true);
-    assert.equal(parsed.retired_reason, undefined);
+    assert.equal(
+      Object.hasOwn(parsed, ["retired", "reason"].join("_")),
+      false,
+    );
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
   }

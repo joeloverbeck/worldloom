@@ -123,7 +123,6 @@ test("listRecords: default omits inactive; includeInactive returns all", () => {
     writeRecord(root, "facts", "mfact-2", {
       ...commonFields("mfact-2"),
       active: false,
-      retired_reason: "retired",
     });
     assert.equal(unwrap(listRecords(root, "facts")).length, 1);
     assert.equal(unwrap(listRecords(root, "facts", { includeInactive: true })).length, 2);
