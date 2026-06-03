@@ -1,20 +1,18 @@
 {
   "originating_spec": "specs/SPEC-120-manual-story-studio-lifecycle-vocabulary-cleanup.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC120MANSTOSTU-002.md",
+  "last_ticket": "archive/tickets/SPEC120MANSTOSTU-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "9dbbef2f53819bec545cf3886db8d9c8669ce2a6",
+  "last_work_commit": "723d754640c8fc2534041ab4491bac217482c3b6",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC120MANSTOSTU-003.md",
-  "queue": [
-    "tickets/SPEC120MANSTOSTU-003.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "final_spec_archive",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC120MANSTOSTU-002 archived; baseline and post-change npm test passed with 482 backend/static tests plus web tsc --noEmit; rg -n 'includeArchived' tools/manual-story-studio --glob '*.ts' --glob '*.tsx' returned no hits; git diff --check passed after archive reference repair",
-  "dirty_state": "tracked worktree clean after 002 work commit except this state update; pre-existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
+  "proof_state": "SPEC120MANSTOSTU-003 archived; baseline and post-change npm test passed with 482 backend/static tests plus web tsc --noEmit; rg -n 'retired_reason' tools/manual-story-studio --glob '*.ts' --glob '*.tsx' returned no hits; git diff --check passed after archive reference repair",
+  "dirty_state": "tracked worktree clean after 003 work commit except this state update; pre-existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-03"
 }
