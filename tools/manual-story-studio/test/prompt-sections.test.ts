@@ -80,7 +80,7 @@ function baseMetadata(
     prompt_policy: {
       save_prompts: true,
       require_moment_directive: true,
-      default_beat_count: "2-5",
+      default_beat_count: "",
       include_recent_segments: 0,
       recent_template_advisory_window: 2,
     },
@@ -163,7 +163,7 @@ test("§6 emits template body when provided", () => {
 test("§5 parameterizes by default_beat_count", () => {
   const ctx = fixtureCtx({});
   const md1 = assembleMarkdown(baseInput(), ctx);
-  assert.ok(sectionBody(md1, 5).includes("Render only the next 2-5 beats"));
+  assert.ok(sectionBody(md1, 5).includes("Render only the next 3-5 beats"));
 
   const md2 = assembleMarkdown(
     baseInput({
@@ -171,7 +171,7 @@ test("§5 parameterizes by default_beat_count", () => {
         prompt_policy: {
           save_prompts: true,
           require_moment_directive: true,
-          default_beat_count: "3",
+          default_beat_count: "4-6",
           include_recent_segments: 0,
           recent_template_advisory_window: 2,
         },
@@ -179,7 +179,7 @@ test("§5 parameterizes by default_beat_count", () => {
     }),
     ctx,
   );
-  assert.ok(sectionBody(md2, 5).includes("Render only the next 3 beats"));
+  assert.ok(sectionBody(md2, 5).includes("Render only the next 4-6 beats"));
 });
 
 test("§14 Stop Rule contains the SPEC-107 meaningful-turn wording", () => {

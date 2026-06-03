@@ -88,6 +88,7 @@ test("makeDefaultManualStoryMetadata: prompt_policy defaults keep first prompt c
     "Title",
     "2026-05-31T00:00:00.000Z",
   );
+  assert.equal(metadata.prompt_policy.default_beat_count, "3-5");
   assert.equal(metadata.prompt_policy.recent_template_advisory_window, 2);
   assert.equal(metadata.prompt_policy.include_recent_segments, 0);
 });
