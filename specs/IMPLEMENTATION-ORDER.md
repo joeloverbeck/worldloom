@@ -7,7 +7,7 @@
 ## Dependency graph
 
 ```
-SPEC-120 (vocabulary)        independent, trivial — land first to clear the lifecycle-language smell
+SPEC-120 (vocabulary)        completed + archived — cleared lifecycle-language smell
 SPEC-118 (prompt visibility) independent — adds never_prompt, 3-5 beats, wires existing fields
 SPEC-119 (inspector cockpit) independent (reads SPEC-118's new reason if present; not blocking)
 SPEC-117 (post-segment workbench)  largest; removes checklist + last_reviewed_after_segment
@@ -18,7 +18,7 @@ Only **SPEC-121** has hard prerequisites (SPEC-117 and SPEC-118). SPEC-117/118/1
 
 ## Recommended landing order
 
-1. **SPEC-120 — Lifecycle vocabulary cleanup.** Smallest, no behavior change; lands the "inactive" model immediately.
+1. **SPEC-120 — Lifecycle vocabulary cleanup.** Completed and archived as `archive/specs/SPEC-120-manual-story-studio-lifecycle-vocabulary-cleanup.md`; inactive vocabulary is now landed.
 2. **SPEC-118 — Prompt visibility & language.** Adds `never_prompt`, `3-5` beat default, removes engine jargon, wires `confidence`/`answer_known` translators. Independent; needed by SPEC-121.
 3. **SPEC-119 — Prompt Inspector confidence cockpit.** Cardifies the two raw-ID panels + real reasons + why-here/why-missing. Independent; benefits from (but does not require) SPEC-118's `never_prompt` reason.
 4. **SPEC-117 — Post-segment record workbench.** Replaces the checklist modal, removes `last_reviewed_after_segment`, adopts the broad referrer scan. Largest blast radius; needed by SPEC-121.

@@ -1,6 +1,6 @@
 # SPEC-120 — Manual Story Studio: Lifecycle Vocabulary Cleanup (archived → inactive)
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; user-facing label/vocabulary change + optional internal-param rename; no LLM/MCP/patch-engine; no behavior change to the delete lifecycle).
 **Depends on:** archive/specs/SPEC-114-manual-story-studio-mutable-record-delete-lifecycle.md (this completes the *vocabulary* half of the mutable-current-truth lifecycle whose *logic* SPEC-114 fixed).
@@ -114,3 +114,17 @@ Distinguish user-facing strings (must change) from internal identifiers (rename 
 - **Two parallel API surfaces (item 2).** `includeArchived` exists independently on both the records surface and the beat-templates surface. Renaming only `web/src/api/records.ts` (the sole file the pre-reassessment spec named) leaves the beat-templates chain half-renamed. Both surfaces are in scope.
 - **`retired_reason` removal touches the validator, not just a type (item 3).** Dropping the field from `web/src/types/manual-story.ts` alone leaves it declared in `src/schema/manual-story.ts` and live in `src/validate/schema.ts` (`COMMON_OPTIONAL_FIELDS` + `COMMON_SCALARS`). The removal is only complete when all five sites + the test fixture are updated. Assumption: no on-disk authored record carries `retired_reason` (verified — no production code ever wrote it); if a stray record did, it would begin failing validation as an unknown field after removal.
 - **Assumption: `active` stays.** Only the *word* "archived" is wrong; the `active`/inactive boolean concept and field are correct and untouched (per §Out of scope).
+
+## Outcome
+
+Completed: 2026-06-03
+
+SPEC-120 landed through three archived tickets:
+
+- `archive/tickets/SPEC120MANSTOSTU-001.md` changed the Manual Studio web UI labels from "archived" to "inactive" and added the inactive/deleted model note near both include-inactive toggles.
+- `archive/tickets/SPEC120MANSTOSTU-002.md` renamed `includeArchived` to `includeInactive` across both records and beat-template API surfaces, callers, routes, read layer, tests, and the HTTP query string.
+- `archive/tickets/SPEC120MANSTOSTU-003.md` removed `retired_reason` from backend/web record types, validator allowlists, and the read-test fixture while preserving absence regression checks without keeping the removed snake-case field as a source literal.
+
+Deviations: the inactive/deleted model note was mirrored on both Records and Beat Templates because both pages expose an include-inactive toggle. Three additional write/delete tests moved with SPEC120MANSTOSTU-003 so the zero-hit `retired_reason` proof could be true without losing absence coverage.
+
+Verification: each ticket recorded its own before/after proof. Final package proof for the family used `npm test` from `tools/manual-story-studio`, passing backend build, 482 backend/static tests, and web `tsc --noEmit`; final source greps for `includeArchived` and `retired_reason` over TS/TSX files returned no hits.
