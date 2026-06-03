@@ -52,7 +52,7 @@ Add `test/post-segment-workbench.test.ts` asserting the broad-scan candidate pil
 ## Out of Scope
 
 - The frontend workbench page — SPEC117MANSTOSTU-004.
-- Removing the checklist surface — SPEC117MANSTOSTU-002.
+- Removing the checklist surface — archive/tickets/SPEC117MANSTOSTU-002.md.
 - Any inference of what changed from the prose (the rail is a referrer-based candidate pile, not a diff — spec §Out of scope).
 - Any "mark reviewed" affordance (spec §Out of scope).
 

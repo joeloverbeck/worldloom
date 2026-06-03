@@ -99,7 +99,7 @@ export function Records() {
     };
   }, [worldSlug, msSlug, activeClass, includeInactive, deleteOutcome, saveError]);
 
-  // Apply optional checklist-origin cast prefilter from ?cast=mchar-1,mchar-2.
+  // Apply optional cast prefilter from ?cast=mchar-1,mchar-2.
   useEffect(() => {
     if (!worldSlug || !msSlug || castFilterIds.length === 0) {
       setCastFilteredIds(null);

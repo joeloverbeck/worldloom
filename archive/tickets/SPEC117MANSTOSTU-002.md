@@ -1,6 +1,6 @@
 # SPEC117MANSTOSTU-002: Delete the checklist surface (end-to-end)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` (removes `state-update-checklist.ts`, `StateUpdateChecklist.tsx`, `checklist_payload` from the segment-save response, the modal render in PasteProse). No impact on world canon (package is canon-fenced per SPEC-100).
@@ -8,11 +8,11 @@
 
 ## Problem
 
-The post-segment checklist modal is backwards: it presents a category-count "Review N records" modal built on a narrow `refs.characters`-only scan, frames maintenance as compliance debt, and sits between acceptance and maintenance. SPEC-117 removes it from the default save path. This ticket deletes the checklist mechanism end-to-end so the save path no longer produces or renders it; the Post-Segment Workbench (SPEC117MANSTOSTU-003/-004) and the PasteProse routing (SPEC117MANSTOSTU-005) replace the post-save UX.
+At intake, the post-segment checklist modal was backwards: it presented a category-count "Review N records" modal built on a narrow `refs.characters`-only scan, framed maintenance as compliance debt, and sat between acceptance and maintenance. SPEC-117 removes it from the default save path. This ticket deleted the checklist mechanism end-to-end so the save path no longer produces or renders it; the Post-Segment Workbench (SPEC117MANSTOSTU-003/-004) and the PasteProse routing (SPEC117MANSTOSTU-005) replace the post-save UX.
 
 ## Assumption Reassessment (2026-06-03)
 
-1. The checklist surface spans: `src/state-update-checklist.ts` (`buildStateUpdateChecklist`, `recordReferencesAnyCast`, `StateUpdateChecklistPayload`, `CHECKLIST_DISCLAIMER`); `src/write/segments.ts` (import :20, return-type field :59, build calls :140/:145/:146 and :209/:214/:220); `src/server/routes/segments.ts` (response field :216, :271); `web/src/components/StateUpdateChecklist.tsx`; `web/src/types/manual-story.ts` (`StateUpdateChecklistEntry` :134, `StateUpdateChecklistPayload` :140-144); `web/src/api/segments.ts` (import :3, type :39); `web/src/pages/PasteProse.tsx` (import :5-6, state :25-26, set :42, render :148-153); `test/state-update-checklist.test.ts` + segment route/write tests asserting `checklist_payload`. Confirmed by grep at reassessment time.
+1. Historical intake evidence: the checklist surface spanned `src/state-update-checklist.ts` (`buildStateUpdateChecklist`, `recordReferencesAnyCast`, `StateUpdateChecklistPayload`, `CHECKLIST_DISCLAIMER`); `src/write/segments.ts`; `src/server/routes/segments.ts`; `web/src/components/StateUpdateChecklist.tsx`; `web/src/types/manual-story.ts`; `web/src/api/segments.ts`; `web/src/pages/PasteProse.tsx`; `test/state-update-checklist.test.ts` + segment route/write/capstone tests asserting `checklist_payload`. That surface is now removed.
 2. Per the spec (SPEC-117 §2 item 1 + item 5 + §6 AC1/AC6), the checklist is removed from the default save path and the surface deleted; the honest one-liner + workbench replace it (later tickets).
 3. **Shared boundary under audit**: the segment-save response contract (`write/segments.ts` return shape consumed by `routes/segments.ts` → `web/src/api/segments.ts` → `PasteProse.tsx`). Removing `checklist_payload` is a breaking change to that response shape, applied atomically across producer and all consumers in this ticket.
 4. **FOUNDATIONS principle** (§Tooling Recommendation — least mechanism): deleting the checklist removes a compliance mechanism that added review-debt without knowing what changed — the spec's FND alignment row for the removed checklist.
@@ -30,19 +30,19 @@ The post-segment checklist modal is backwards: it presents a category-count "Rev
 3. No remaining import/render of `StateUpdateChecklist` → codebase grep-proof on `web/src/` (zero matches, per AC1).
 4. Single-layer note N/A — this ticket spans backend write/route + web component/type/page; each is mapped above to its own grep surface.
 
-## What to Change
+## Landed Changes
 
 ### 1. Backend: delete the checklist builder + remove from segment-save
 
-Delete `src/state-update-checklist.ts`. In `src/write/segments.ts`, remove the `state-update-checklist` import, the `checklist_payload` return-type field, the `buildStateUpdateChecklist` calls, and the `checklist_payload` from both return objects. In `src/server/routes/segments.ts`, remove `checklist_payload` from both response objects (:216, :271).
+Deleted `src/state-update-checklist.ts`. In `src/write/segments.ts`, removed the `state-update-checklist` import, the `checklist_payload` return-type field, the `buildStateUpdateChecklist` calls, and the `checklist_payload` from both return objects. In `src/server/routes/segments.ts`, removed `checklist_payload` from both response objects.
 
 ### 2. Web: delete the component + remove the response type + remove the modal render
 
-Delete `web/src/components/StateUpdateChecklist.tsx`. Remove `StateUpdateChecklistEntry` / `StateUpdateChecklistPayload` from `web/src/types/manual-story.ts` and the `checklist_payload` type from `web/src/api/segments.ts`. In `web/src/pages/PasteProse.tsx`, remove the `StateUpdateChecklist` import, the `StateUpdateChecklistPayload` import, the `checklistPayload` state, the `setChecklistPayload(response.checklist_payload)` call, and the `{checklistPayload ? <StateUpdateChecklist …/> : null}` render block.
+Deleted `web/src/components/StateUpdateChecklist.tsx`. Removed `StateUpdateChecklistEntry` / `StateUpdateChecklistPayload` from `web/src/types/manual-story.ts` and the `checklist_payload` type from `web/src/api/segments.ts`. In `web/src/pages/PasteProse.tsx`, removed the `StateUpdateChecklist` import, the `StateUpdateChecklistPayload` import, the `checklistPayload` state, the old response-field read, and the modal render block.
 
 ### 3. Tests
 
-Delete `test/state-update-checklist.test.ts`. Update segment route/write tests that assert `checklist_payload` in the save response.
+Deleted `test/state-update-checklist.test.ts`. Updated segment route/write/capstone tests to assert the reduced save response shape. Truthed an old Records-page comment and added a dated SPEC-117 implementation note so same-seam current-state prose no longer implies the checklist payload remains live.
 
 ## Files to Touch
 
@@ -55,6 +55,9 @@ Delete `test/state-update-checklist.test.ts`. Update segment route/write tests t
 - `tools/manual-story-studio/web/src/pages/PasteProse.tsx` (modify)
 - `tools/manual-story-studio/test/state-update-checklist.test.ts` (delete)
 - `tools/manual-story-studio/test/server/segments-routes.test.ts` / `test/write/segments.test.ts` — drop `checklist_payload` assertions (modify)
+- `tools/manual-story-studio/test/capstone-spec103.test.ts` (modify)
+- `tools/manual-story-studio/web/src/pages/Records.tsx` (modify stale checklist-origin comment)
+- `specs/SPEC-117-manual-story-studio-post-segment-record-workbench.md` (modify implementation note)
 
 ## Out of Scope
 
@@ -87,3 +90,22 @@ Delete `test/state-update-checklist.test.ts`. Update segment route/write tests t
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm test`
 3. `npm --prefix web test` (run from `tools/manual-story-studio`; web typecheck)
+
+## Outcome
+
+Completed: 2026-06-03
+
+The checklist builder, modal component, web checklist types, and dedicated checklist test were deleted. Segment save/edit now return only `segment_id` and `sidecar`; the route and web API consumer agree on that reduced response shape. `PasteProse` no longer imports or renders the checklist modal, and same-seam tests now assert that the removed field is absent without preserving the stale token in source/test literals.
+
+The active SPEC-117 document now has a dated implementation note clarifying that checklist references are historical/planned-removal context after this ticket.
+
+## Verification Result
+
+1. `rg -n "StateUpdateChecklist|checklist_payload|state-update-checklist|recordReferencesAnyCast|buildStateUpdateChecklist|StateUpdateChecklistPayload|CHECKLIST_DISCLAIMER" tools/manual-story-studio/src tools/manual-story-studio/web/src tools/manual-story-studio/test` returned no matches.
+2. `cd tools/manual-story-studio && npm run test:backend` passed: backend build succeeded and 85 compiled Node tests passed.
+3. `cd tools/manual-story-studio && npm --prefix web test` passed after restoring web dependencies.
+4. `cd tools/manual-story-studio && npm test` passed: backend build succeeded, 483 backend/static tests passed, and the web typecheck passed.
+
+## Deviations
+
+`npm --prefix web test` initially failed because `npm run clean` removed `web/node_modules`; the failure was missing React/Vite packages, not source fallout. `npm --prefix web install --no-audit --no-fund` first hit sandbox `EPERM` while esbuild verified its binary, then passed when rerun with approval. The final web and full package proofs passed after dependency restoration.

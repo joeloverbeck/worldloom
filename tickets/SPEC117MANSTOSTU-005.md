@@ -4,17 +4,17 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` (`web/src/pages/PasteProse.tsx` post-save navigation). No canon-mediation surface (package is canon-fenced per SPEC-100).
-**Deps**: SPEC117MANSTOSTU-002, SPEC117MANSTOSTU-004
+**Deps**: archive/tickets/SPEC117MANSTOSTU-002.md, SPEC117MANSTOSTU-004
 
 ## Problem
 
-After SPEC117MANSTOSTU-002 removes the checklist modal, PasteProse saves a segment and shows nothing. This ticket completes the routed-not-modal flow: after a successful save, PasteProse navigates to the Post-Segment Workbench route (carrying the just-saved segment ID), so the author lands *in* the maintenance surface instead of dismissing a dialog to reach it.
+After archive/tickets/SPEC117MANSTOSTU-002.md removed the checklist modal, PasteProse saves a segment and shows nothing. This ticket completes the routed-not-modal flow: after a successful save, PasteProse navigates to the Post-Segment Workbench route (carrying the just-saved segment ID), so the author lands *in* the maintenance surface instead of dismissing a dialog to reach it.
 
 ## Assumption Reassessment (2026-06-03)
 
-1. After SPEC117MANSTOSTU-002, `web/src/pages/PasteProse.tsx` no longer imports/renders `StateUpdateChecklist` and the save response no longer carries `checklist_payload`; the save handler still has the saved `segment_id` from the response. The workbench route (segment-id param) is registered in `web/src/App.tsx` by SPEC117MANSTOSTU-004. Confirmed by grep at reassessment + decomposition time.
+1. After archive/tickets/SPEC117MANSTOSTU-002.md, `web/src/pages/PasteProse.tsx` no longer imports/renders `StateUpdateChecklist` and the save response no longer carries `checklist_payload`; the save handler still has the saved `segment_id` from the response. The workbench route (segment-id param) is registered in `web/src/App.tsx` by SPEC117MANSTOSTU-004. Confirmed by grep at reassessment + decomposition time.
 2. Per the spec (SPEC-117 §2 item 1 + §3 Routed-not-modal + §6 AC1), saving a segment routes to the Post-Segment Workbench and no modal is shown.
-3. **Cross-artifact boundary under audit**: the workbench route contract (segment-id param) registered by SPEC117MANSTOSTU-004 (hence `Deps: 004`), and the post-checklist PasteProse save handler shape left by SPEC117MANSTOSTU-002 (hence `Deps: 002`). This ticket modifies `PasteProse.tsx`, which SPEC117MANSTOSTU-002 also modifies (modal removal) — independent regions; `Deps: 002` orders them so the modifier lands after the modal is removed.
+3. **Cross-artifact boundary under audit**: the workbench route contract (segment-id param) registered by SPEC117MANSTOSTU-004 (hence `Deps: 004`), and the post-checklist PasteProse save handler shape left by archive/tickets/SPEC117MANSTOSTU-002.md (hence `Deps: archive/tickets/SPEC117MANSTOSTU-002.md`). This ticket modifies `PasteProse.tsx`, which archive/tickets/SPEC117MANSTOSTU-002.md also modified for modal removal — independent regions; the archived dependency orders this modifier after the modal is removed.
 
 ## Architecture Check
 
@@ -40,7 +40,7 @@ In `web/src/pages/PasteProse.tsx`, after a successful save, navigate to the Post
 ## Out of Scope
 
 - The workbench page/route itself — SPEC117MANSTOSTU-004.
-- Removing the modal render — already done in SPEC117MANSTOSTU-002.
+- Removing the modal render — already done in archive/tickets/SPEC117MANSTOSTU-002.md.
 - Any change to the segment-save backend or response shape.
 
 ## Acceptance Criteria
@@ -59,7 +59,7 @@ In `web/src/pages/PasteProse.tsx`, after a successful save, navigate to the Post
 
 ### New/Modified Tests
 
-1. `None — frontend navigation change; verification is `tsc --noEmit` typecheck (`npm --prefix web test`) plus the SPEC-117 §7 manual save→workbench smoke check. AC1's "no modal" guarantee is structurally enforced by SPEC117MANSTOSTU-002's component deletion.`
+1. `None — frontend navigation change; verification is `tsc --noEmit` typecheck (`npm --prefix web test`) plus the SPEC-117 §7 manual save→workbench smoke check. AC1's "no modal" guarantee is structurally enforced by archive/tickets/SPEC117MANSTOSTU-002.md's component deletion.`
 
 ### Commands
 

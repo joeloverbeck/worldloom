@@ -2,8 +2,6 @@ import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { saveSegment } from "../api/segments.js";
-import { StateUpdateChecklist } from "../components/StateUpdateChecklist.js";
-import type { StateUpdateChecklistPayload } from "../types/manual-story.js";
 
 function countWords(value: string): number {
   const trimmed = value.trim();
@@ -22,8 +20,6 @@ export function PasteProse() {
   const [promptId, setPromptId] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [checklistPayload, setChecklistPayload] =
-    useState<StateUpdateChecklistPayload | null>(null);
 
   const wordCount = useMemo(() => countWords(prose), [prose]);
 
@@ -38,8 +34,7 @@ export function PasteProse() {
         author_note: authorNote,
         prompt_id: promptId.trim().length > 0 ? promptId.trim() : null,
       };
-      const response = await saveSegment(worldSlug, msSlug, request);
-      setChecklistPayload(response.checklist_payload);
+      await saveSegment(worldSlug, msSlug, request);
     } catch (e) {
       setError(e instanceof Error ? e.message : "segment_save_failed");
     } finally {
@@ -143,13 +138,6 @@ export function PasteProse() {
         <p role="alert" style={{ color: "crimson" }}>
           {error}
         </p>
-      ) : null}
-
-      {checklistPayload ? (
-        <StateUpdateChecklist
-          payload={checklistPayload}
-          onClose={() => setChecklistPayload(null)}
-        />
       ) : null}
     </section>
   );

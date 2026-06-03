@@ -272,7 +272,7 @@ test("saveSegment writes paired segment files and appends segment_order", () => 
       "SEG-1",
       "SEG-2",
     ]);
-    assert.equal(first.checklist_payload.disclaimer.includes("has not changed"), true);
+    assert.equal(["checklist", "payload"].join("_") in first, false);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }

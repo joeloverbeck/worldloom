@@ -8,6 +8,8 @@
 **Related:** `tools/manual-story-studio/src/state-update-checklist.ts`, `tools/manual-story-studio/src/read/records.ts`, `tools/manual-story-studio/src/schema/current-context.ts`, `tools/manual-story-studio/web/src/pages/PasteProse.tsx`, `tools/manual-story-studio/web/src/components/StateUpdateChecklist.tsx`, `tools/manual-story-studio/web/src/pages/Records.tsx`.
 **Source:** critical triage of `reports/manual-story-studio-fourth-iteration.md` §§13 / 14 / 42 + Stage 2 (ChatGPT-Pro, 2026-06-02). This **reverses the iteration-3 DEFER** of the post-segment workbench (lift-condition "pickers validated in use" — SPEC-112 pickers landed); the user confirmed the reversal (AskUserQuestion, 2026-06-02). The verdict rests on verified design-level defects in the current checklist, not on the report's untested use claims.
 
+**Implementation note (2026-06-03):** SPEC117MANSTOSTU-002 removed the checklist builder/component, `checklist_payload` save response field, and PasteProse modal render. Remaining checklist references in this spec are historical problem statement / planned-removal context unless superseded by later SPEC-117 tickets.
+
 ---
 
 ## 1. Context & Motivation
