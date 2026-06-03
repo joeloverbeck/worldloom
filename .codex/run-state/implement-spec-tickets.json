@@ -1,9 +1,9 @@
 {
-  "originating_spec": "archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md",
-  "archived_spec": "archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md",
-  "last_ticket": "archive/tickets/SPEC123MANSTOSTU-002.md",
+  "originating_spec": "specs/SPEC-122-manual-story-studio-post-segment-prose-state-boundary.md",
+  "archived_spec": "archive/specs/SPEC-122-manual-story-studio-post-segment-prose-state-boundary.md",
+  "last_ticket": "archive/tickets/SPEC122MANSTOSTU-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "29609dc1f5099173d1aaa97d47c3721569be3fd6",
+  "last_work_commit": "1768cbe64d89f0f896840f9228592b9e28bc0c80",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -12,7 +12,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "All SPEC123MANSTOSTU tickets archived; SPEC-123 archived; specs/IMPLEMENTATION-ORDER.md reviewed/updated; final proof passed: current-context/current-context.yaml/current_handoff_summary grep gates zero outside ignored output; npm run test:backend; web npm test; package npm test; git diff --check",
-  "dirty_state": "tracked worktree clean; expected ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, and tools/manual-story-studio/web/node_modules from verification",
+  "proof_state": "SPEC-122 completed: tickets 004, 001, 002, and 003 are archived; originating spec is archived; implementation order marks only SPEC-124 active. Ticket proof included npm run test:backend, npm --prefix web test, npm test, targeted zero-hit/positive greps, and git diff --check.",
+  "dirty_state": "tracked worktree expected clean after state commit; pre-existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, and tools/manual-story-studio/web/node_modules from package verification",
   "updated_at": "2026-06-03"
 }

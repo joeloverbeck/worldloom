@@ -18,6 +18,8 @@ import {
 export interface RecordFormProps {
   recordClass: ManualRecordClass;
   initial?: Partial<ManualRecord>;
+  noteInsertion?: { id: number; targetKey: string; text: string } | null;
+  noteInsertionTargetKey?: string;
   onSave: (
     record: ManualRecord,
     opts?: { overrideBrokenRefs?: boolean },
@@ -286,7 +288,7 @@ interface CastFormState {
 }
 
 export function RecordForm(props: RecordFormProps) {
-  const { recordClass, initial, onSave, onCancel, saveError } = props;
+  const { recordClass, initial, noteInsertion, onSave, onCancel, saveError } = props;
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
     msSlug: string;
@@ -321,6 +323,24 @@ export function RecordForm(props: RecordFormProps) {
         : "always",
     notes: typeof initial?.notes === "string" ? initial.notes : "",
   });
+
+  useEffect(() => {
+    if (
+      !noteInsertion ||
+      noteInsertion.targetKey !== props.noteInsertionTargetKey
+    ) {
+      return;
+    }
+    const text = noteInsertion?.text.trim();
+    if (!text) return;
+    setCommon((current) => ({
+      ...current,
+      notes:
+        current.notes.trim().length > 0
+          ? `${current.notes.trimEnd()}\n\n${text}`
+          : text,
+    }));
+  }, [noteInsertion, props.noteInsertionTargetKey]);
 
   const initialPerClass = useMemo<Record<string, unknown>>(() => {
     const seed: Record<string, unknown> = {};

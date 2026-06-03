@@ -1,21 +1,21 @@
 # Implementation Order — Manual Story Studio Fifth Iteration
 
-**Status:** PROPOSED (SPEC-123 completed; SPEC-122/SPEC-124 remain active)
+**Status:** PROPOSED (SPEC-122 and SPEC-123 completed; SPEC-124 remains active)
 **Date:** 2026-06-03
 **Source:** triage of `reports/manual-story-studio-fifth-iteration.md` (ChatGPT-Pro) → `docs/triage/2026-06-03-manual-story-studio-fifth-iteration-triage.md`
-**Active specs:** SPEC-122 and SPEC-124 (both `tools/manual-story-studio`, tooling-adjacent).
-**Completed in this batch:** SPEC-123 — archived at `archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md` after `archive/tickets/SPEC123MANSTOSTU-001.md` and `archive/tickets/SPEC123MANSTOSTU-002.md`.
+**Active specs:** SPEC-124 (`tools/manual-story-studio`, tooling-adjacent).
+**Completed in this batch:** SPEC-122 — archived at `archive/specs/SPEC-122-manual-story-studio-post-segment-prose-state-boundary.md` after `archive/tickets/SPEC122MANSTOSTU-004.md`, `archive/tickets/SPEC122MANSTOSTU-001.md`, `archive/tickets/SPEC122MANSTOSTU-002.md`, and `archive/tickets/SPEC122MANSTOSTU-003.md`; SPEC-123 — archived at `archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md` after `archive/tickets/SPEC123MANSTOSTU-001.md` and `archive/tickets/SPEC123MANSTOSTU-002.md`.
 
 ## Dependency graph
 
 ```
-SPEC-122 (post-segment prose/state boundary)    active — independent — PostSegmentWorkbench + post-segment route + PasteProse
+SPEC-122 (post-segment prose/state boundary)    completed/archived — independent — PostSegmentWorkbench + post-segment route + PasteProse
 SPEC-123 (current-context → prompt-working-set) completed/archived — independent — current-context surface; no file overlap with 122/124
 SPEC-124 (source browser narrowing)             active — independent — SourceBrowser creation paths
 ```
 
-The three original specs touch **disjoint file sets** (verified against the rename surface enumerated in SPEC-123 §4):
-- SPEC-122: `PostSegmentWorkbench.tsx`, `server/routes/post-segment-workbench.ts`, `PasteProse.tsx`, `test/post-segment-workbench.test.ts`.
+The three original specs touch **disjoint production file sets** (verified against the rename surface enumerated in SPEC-123 §4). One shared end-to-end test harness — `test/acceptance/one-real-story.test.ts` — is touched by SPEC-122's `touched_records` → `linked_record_candidates` payload-key rename (it asserts on `body.touched_records`); SPEC-122's production surfaces remain disjoint from SPEC-124's.
+- SPEC-122: completed and archived at `archive/specs/SPEC-122-manual-story-studio-post-segment-prose-state-boundary.md`; touched `PostSegmentWorkbench.tsx`, `server/routes/post-segment-workbench.ts`, `PasteProse.tsx`, `test/post-segment-workbench.test.ts`, and `test/acceptance/one-real-story.test.ts`.
 - SPEC-123: completed and archived at `archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md`; the `current-context` modules + `compose.ts`/`health/compute.ts`/`read/records.ts`/`http.ts` + web `current-context` files + `Dashboard.tsx`/`MomentComposer.tsx`/`StoryPageNav.tsx`/`App.tsx`/`types` + `test/current-context/`.
 - SPEC-124: `SourceBrowser.tsx` + source-derived creation client path.
 
@@ -24,11 +24,11 @@ There are **no hard prerequisites** between them; they can land in any order or 
 ## Recommended landing order
 
 Completed:
+- **SPEC-122 — Post-segment prose/state boundary cleanup.** Landed after SPEC-123 and archived at `archive/specs/SPEC-122-manual-story-studio-post-segment-prose-state-boundary.md`.
 - **SPEC-123 — `current-context` → `prompt-working-set` rename.** Landed first as planned and archived at `archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md`.
 
 Remaining active order:
-1. **SPEC-122 — Post-segment prose/state boundary cleanup.** The highest-value, FOUNDATIONS-aligned fix (removes a prose→record seeding regression introduced by SPEC-117). Land next so the boundary fix is in place early.
-2. **SPEC-124 — Source browser creation narrowing.** Lifts the iter-4 D3 deferral now that the user confirmed real friction; smallest blast radius.
+1. **SPEC-124 — Source browser creation narrowing.** Lifts the iter-4 D3 deferral now that the user confirmed real friction; smallest blast radius.
 
 ## Deferred (not in this batch — see triage)
 

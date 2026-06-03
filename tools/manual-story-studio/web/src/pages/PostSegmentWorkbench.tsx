@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import {
@@ -15,8 +15,17 @@ import type {
   ManualRecord,
   ManualRecordClass,
   ManualRecordSummary,
-  SegmentSidecarIncludedRecordSummary,
 } from "../types/manual-story.js";
+
+interface WorkbenchRecordSummary {
+  recordClass: ManualRecordClass;
+  summary: ManualRecordSummary;
+}
+
+interface WorkbenchIncludedRecordSummary {
+  characters: WorkbenchRecordSummary[];
+  records: WorkbenchRecordSummary[];
+}
 
 interface WorkbenchSegment {
   id: string;
@@ -26,7 +35,7 @@ interface WorkbenchSegment {
   moment_directive: string;
   word_count: number;
   last_paragraph: string;
-  included_record_summary: SegmentSidecarIncludedRecordSummary;
+  included_record_summary: WorkbenchIncludedRecordSummary;
 }
 
 interface WorkbenchCandidate {
@@ -35,13 +44,14 @@ interface WorkbenchCandidate {
   title: string;
   active: boolean;
   target_ids: string[];
+  target_summaries: WorkbenchRecordSummary[];
   fields: string[];
 }
 
 interface WorkbenchPayload {
   segment: WorkbenchSegment;
   reminder: string;
-  touched_records: WorkbenchCandidate[];
+  linked_record_candidates: WorkbenchCandidate[];
 }
 
 const QUICK_ADD_CLASSES: ManualRecordClass[] = [
@@ -88,21 +98,71 @@ function candidateSummary(candidate: WorkbenchCandidate): ManualRecordSummary {
   };
 }
 
+function targetTitleMap(candidate: WorkbenchCandidate): Map<string, string> {
+  return new Map(
+    candidate.target_summaries.map((entry) => [
+      entry.summary.id,
+      entry.summary.title,
+    ]),
+  );
+}
+
+function humanizeField(field: string): string {
+  if (field === "holder") return "Linked through holder";
+  if (field === "subject") return "Linked through subject";
+  if (field === "owed_by") return "Linked through owed by";
+  if (field === "owed_to") return "Linked through owed to";
+  if (field === "current_holder") return "Linked through current holder";
+  if (field === "current_location") return "Linked through current location";
+  if (field === "caused_by_segment") return "Linked through caused-by segment";
+  if (/^between\[\d+\]$/.test(field)) return "Referenced by relationship";
+  if (/^held_by\[\d+\]$/.test(field)) return "Linked through holder";
+  if (/^refs\.characters\[\d+\]$/.test(field)) {
+    return "Referenced by character ref";
+  }
+  if (/^refs\.locations\[\d+\]$/.test(field)) {
+    return "Referenced by location ref";
+  }
+  if (/^refs\.related_records\[\d+\]$/.test(field)) {
+    return "Referenced by related-record ref";
+  }
+  if (field.startsWith("prompt-working-set.")) {
+    return `Referenced by ${field.slice("prompt-working-set.".length).replace(/_/g, " ")}`;
+  }
+  return `Linked through ${field.replace(/\[\d+\]/g, "").replace(/[._]/g, " ")}`;
+}
+
 function reasonForCandidate(candidate: WorkbenchCandidate): string {
-  return `${candidate.fields.join(", ")} -> ${candidate.target_ids.join(", ")}`;
+  const titles = targetTitleMap(candidate);
+  const fields = candidate.fields.map(humanizeField).join("; ");
+  const targets = candidate.target_ids
+    .map((id) => titles.get(id) ?? id)
+    .join(", ");
+  return targets ? `${fields} -> ${targets}` : fields;
+}
+
+function summaryIds(entries: WorkbenchRecordSummary[]): string[] {
+  return entries.map((entry) => entry.summary.id);
 }
 
 function initialRecordForSegment(
   payload: WorkbenchPayload | null,
+  includePromptLinks: boolean,
 ): Partial<ManualRecord> {
   return {
     refs: {
-      characters: payload?.segment.included_record_summary.characters ?? [],
+      characters:
+        includePromptLinks
+          ? summaryIds(payload?.segment.included_record_summary.characters ?? [])
+          : [],
       locations: [],
-      related_records: payload?.segment.included_record_summary.records ?? [],
+      related_records:
+        includePromptLinks
+          ? summaryIds(payload?.segment.included_record_summary.records ?? [])
+          : [],
     },
-    summary: payload?.segment.last_paragraph ?? "",
-    details: payload?.segment.body ?? "",
+    summary: "",
+    details: "",
     tags: payload ? [`segment:${payload.segment.id.toLowerCase()}`] : [],
   };
 }
@@ -151,6 +211,15 @@ export function PostSegmentWorkbench() {
   >(null);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [deleteOutcome, setDeleteOutcome] = useState<DeleteResult | null>(null);
+  const [linkPromptRecordsToNewRecord, setLinkPromptRecordsToNewRecord] =
+    useState(false);
+  const proseRef = useRef<HTMLDivElement | null>(null);
+  const [selectedProse, setSelectedProse] = useState("");
+  const [noteInsertion, setNoteInsertion] = useState<{
+    id: number;
+    targetKey: string;
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!worldSlug || !msSlug || !segmentId) return;
@@ -169,6 +238,7 @@ export function PostSegmentWorkbench() {
           setSelected(null);
           setSelectedRecord(null);
           setCreatingClass(null);
+          setLinkPromptRecordsToNewRecord(false);
         }
       })
       .catch((error: unknown) => {
@@ -210,7 +280,7 @@ export function PostSegmentWorkbench() {
 
   const groupedCandidates = useMemo(() => {
     const groups = new Map<ManualRecordClass, WorkbenchCandidate[]>();
-    for (const candidate of payload?.touched_records ?? []) {
+    for (const candidate of payload?.linked_record_candidates ?? []) {
       const entries = groups.get(candidate.recordClass);
       if (entries) {
         entries.push(candidate);
@@ -220,6 +290,38 @@ export function PostSegmentWorkbench() {
     }
     return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [payload]);
+  const activeRecordFormKey = creatingClass
+    ? `new:${creatingClass}`
+    : selectedRecord && selected
+      ? `${selected.recordClass}:${selectedRecord.id}`
+      : null;
+  const recordFormOpen = activeRecordFormKey !== null;
+
+  function refreshSelectedProse() {
+    const selection = window.getSelection();
+    const text = selection?.toString().trim() ?? "";
+    const range =
+      selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    const proseRoot = proseRef.current;
+    if (!text || !range || !proseRoot) {
+      setSelectedProse("");
+      return;
+    }
+    const selectedInsideProse =
+      proseRoot.contains(range.commonAncestorContainer) ||
+      proseRoot.contains(range.startContainer) ||
+      proseRoot.contains(range.endContainer);
+    setSelectedProse(selectedInsideProse ? text : "");
+  }
+
+  function copySelectedProseIntoNotes() {
+    if (!selectedProse || !activeRecordFormKey) return;
+    setNoteInsertion({
+      id: Date.now(),
+      targetKey: activeRecordFormKey,
+      text: selectedProse,
+    });
+  }
 
   async function handleSave(
     record: ManualRecord,
@@ -287,6 +389,32 @@ export function PostSegmentWorkbench() {
     }
   }
 
+  function openRecord(recordClass: ManualRecordClass, id: string) {
+    setSelected({ recordClass, id });
+    setActiveClass(recordClass);
+    setCreatingClass(null);
+    setLinkPromptRecordsToNewRecord(false);
+    setSaveError(null);
+    setDeleteOutcome(null);
+  }
+
+  function renderIncludedRecordCards(entries: WorkbenchRecordSummary[]) {
+    if (entries.length === 0) return "none";
+    return entries.map((entry) => (
+      <RecordCard
+        key={`${entry.recordClass}:${entry.summary.id}`}
+        summary={entry.summary}
+        recordClass={entry.recordClass}
+        compact
+        selected={
+          selected?.recordClass === entry.recordClass &&
+          selected.id === entry.summary.id
+        }
+        onOpen={(id) => openRecord(entry.recordClass, id)}
+      />
+    ));
+  }
+
   if (!worldSlug || !msSlug || !segmentId) {
     return <p role="alert">Missing world, manual story, or segment id.</p>;
   }
@@ -333,25 +461,43 @@ export function PostSegmentWorkbench() {
             <div>
               <dt>Included cast</dt>
               <dd>
-                {payload.segment.included_record_summary.characters.join(", ") ||
-                  "none"}
+                {renderIncludedRecordCards(
+                  payload.segment.included_record_summary.characters,
+                )}
               </dd>
             </div>
             <div>
               <dt>Included records</dt>
               <dd>
-                {payload.segment.included_record_summary.records.join(", ") ||
-                  "none"}
+                {renderIncludedRecordCards(
+                  payload.segment.included_record_summary.records,
+                )}
               </dd>
             </div>
           </dl>
-          <RenderedProse markdown={payload.segment.body} />
+          <div
+            ref={proseRef}
+            onMouseUp={refreshSelectedProse}
+            onKeyUp={refreshSelectedProse}
+          >
+            <RenderedProse markdown={payload.segment.body} />
+          </div>
+          <button
+            type="button"
+            onClick={copySelectedProseIntoNotes}
+            disabled={!selectedProse || !recordFormOpen}
+          >
+            Copy selected prose into notes
+          </button>
         </article>
 
-        <aside className="post-workbench-rail" aria-label="records that touch this segment">
-          <h3>Records that touch this segment</h3>
+        <aside
+          className="post-workbench-rail"
+          aria-label="records linked to this segment's prompt"
+        >
+          <h3>Records linked to this segment's prompt</h3>
           {groupedCandidates.length === 0 ? (
-            <p>No candidate records.</p>
+            <p>No linked records.</p>
           ) : (
             groupedCandidates.map(([recordClass, candidates]) => (
               <section key={recordClass} className="post-workbench-candidate-group">
@@ -367,13 +513,7 @@ export function PostSegmentWorkbench() {
                       selected?.recordClass === candidate.recordClass &&
                       selected.id === candidate.id
                     }
-                    onOpen={(id) => {
-                      setSelected({ recordClass: candidate.recordClass, id });
-                      setActiveClass(candidate.recordClass);
-                      setCreatingClass(null);
-                      setSaveError(null);
-                      setDeleteOutcome(null);
-                    }}
+                    onOpen={(id) => openRecord(candidate.recordClass, id)}
                   />
                 ))}
               </section>
@@ -394,6 +534,7 @@ export function PostSegmentWorkbench() {
                   setSelectedRecord(null);
                   setSaveError(null);
                   setDeleteOutcome(null);
+                  setLinkPromptRecordsToNewRecord(false);
                 }}
               >
                 New {recordClass}
@@ -404,12 +545,31 @@ export function PostSegmentWorkbench() {
           {creatingClass ? (
             <section className="post-workbench-drawer">
               <h3>New {creatingClass}</h3>
+              <label style={{ display: "block", marginBottom: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={linkPromptRecordsToNewRecord}
+                  onChange={(event) =>
+                    setLinkPromptRecordsToNewRecord(event.target.checked)
+                  }
+                />{" "}
+                Link prompt cast/records to this new record
+              </label>
               <RecordForm
+                key={`${creatingClass}:${
+                  linkPromptRecordsToNewRecord ? "prompt-links" : "blank-links"
+                }`}
                 recordClass={creatingClass}
-                initial={initialRecordForSegment(payload)}
+                initial={initialRecordForSegment(
+                  payload,
+                  linkPromptRecordsToNewRecord,
+                )}
+                noteInsertion={noteInsertion}
+                noteInsertionTargetKey={`new:${creatingClass}`}
                 onSave={handleSave}
                 onCancel={() => {
                   setCreatingClass(null);
+                  setLinkPromptRecordsToNewRecord(false);
                   setSaveError(null);
                 }}
                 saveError={saveError}
@@ -423,6 +583,8 @@ export function PostSegmentWorkbench() {
                   <RecordForm
                     recordClass={selected.recordClass}
                     initial={selectedRecord}
+                    noteInsertion={noteInsertion}
+                    noteInsertionTargetKey={`${selected.recordClass}:${selectedRecord.id}`}
                     onSave={handleSave}
                     onCancel={() => {
                       setSelected(null);
@@ -457,6 +619,7 @@ export function PostSegmentWorkbench() {
                             });
                             setActiveClass(referrer.recordClass);
                             setCreatingClass(null);
+                            setLinkPromptRecordsToNewRecord(false);
                             setSaveError(null);
                             setDeleteOutcome(null);
                           }}
@@ -489,7 +652,7 @@ export function PostSegmentWorkbench() {
           ) : (
             <section className="post-workbench-empty">
               <h3>{activeClass}</h3>
-              <p>Select a candidate record or create a new post-segment record.</p>
+              <p>Select a linked record or create a new post-segment record.</p>
             </section>
           )}
         </section>
