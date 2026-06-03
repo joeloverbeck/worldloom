@@ -88,7 +88,7 @@ Per the decision on this ticket, the field is removed entirely. This aligns with
 ## Out of Scope
 
 - Editing `specs/SPEC-101-manual-story-metadata-and-records.md` (historical spec; reversal is documented in this ticket).
-- The RecordPicker popup-dismissal fix (separate ticket MSSUX-008).
+- The RecordPicker popup-dismissal fix (completed separately in `archive/tickets/MSSUX-008-record-picker-popup-dismissal.md`).
 - Any data migration of existing saved cast records that already carry `source_world_character` — the field becomes ignored/unknown; since nothing reads it, no migration is required (existing files retain the key harmlessly unless re-saved).
 
 ## Acceptance Criteria

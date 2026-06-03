@@ -108,3 +108,46 @@ test("SPEC-112 AC#1: IdTextArea is absent from web source", () => {
     );
   }
 });
+
+test("MSSUX-008 RecordPicker dismisses its popup on outside mousedown only", () => {
+  const source = readRepoFile(
+    "tools/manual-story-studio/web/src/components/RecordPicker.tsx",
+  );
+
+  assert.match(source, /const containerRef = useRef<HTMLDivElement \| null>\(null\);/);
+  assert.match(source, /<div className="record-picker" ref=\{containerRef\}>/);
+  assert.match(source, /document\.addEventListener\("mousedown", handleDocumentMouseDown\);/);
+  assert.match(
+    source,
+    /document\.removeEventListener\("mousedown", handleDocumentMouseDown\);/,
+  );
+  assert.match(source, /container\.contains\(event\.target\)/);
+  assert.match(source, /setOpen\(false\);/);
+
+  const dismissalEffectIndex = source.indexOf("function handleDocumentMouseDown");
+  const popupIndex = source.indexOf('className="record-picker__popup"');
+  assert.notEqual(dismissalEffectIndex, -1, "missing document dismissal handler");
+  assert.notEqual(popupIndex, -1, "missing popup render surface");
+  assert.ok(
+    dismissalEffectIndex < popupIndex,
+    "dismissal handler should be defined before the popup render surface",
+  );
+});
+
+test("MSSUX-008 RecordPicker preserves option selection inside the popup", () => {
+  const source = readRepoFile(
+    "tools/manual-story-studio/web/src/components/RecordPicker.tsx",
+  );
+  const optionSection = source.slice(
+    source.indexOf('className="record-picker__option"'),
+    source.indexOf("</div>", source.indexOf('className="record-picker__option"')),
+  );
+
+  assert.match(optionSection, /<RecordCard/);
+  assert.match(optionSection, /interactionRole="option"/);
+  assert.match(optionSection, /onSelect=\{commitSelection\}/);
+  assert.match(
+    source,
+    /if \(event\.target instanceof Node && container\.contains\(event\.target\)\) return;/,
+  );
+});
