@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC118MANSTOSTU-001.md",
+  "last_ticket": "archive/tickets/SPEC118MANSTOSTU-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "784f5d59c3d26552501491fb2e18e38c7d7ac31a",
+  "last_work_commit": "df5c8bbc7639ed916fb13d076fc638afdb970712",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC118MANSTOSTU-002.md",
+  "next_target": "tickets/SPEC118MANSTOSTU-003.md",
   "queue": [
-    "tickets/SPEC118MANSTOSTU-002.md",
     "tickets/SPEC118MANSTOSTU-003.md",
     "tickets/SPEC118MANSTOSTU-004.md"
   ],
@@ -16,7 +15,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC118MANSTOSTU-001 archived after npm test passed with 483 backend/static tests plus web tsc --noEmit; no stale active ticket path refs remain outside run-state update; SPEC-118 has a dated implementation note for the completed never_prompt slice",
+  "proof_state": "SPEC118MANSTOSTU-002 archived after npm run test:backend passed with 85 compiled test files; first post-edit backend proof exposed same-seam metadata default fallout, which was fixed in the archived ticket; no stale active ticket path refs remain outside this state update",
   "dirty_state": "tracked worktree clean after work commit except this state update; pre-existing/generated ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-03"
 }
