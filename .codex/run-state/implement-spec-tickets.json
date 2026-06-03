@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-117-manual-story-studio-post-segment-record-workbench.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC117MANSTOSTU-001.md",
+  "last_ticket": "archive/tickets/SPEC117MANSTOSTU-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "4364e88879b6ed719d501558e078ee3287fd6715",
+  "last_work_commit": "2365d662208bcd8d92f095ec1174e525c45cd1bb",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC117MANSTOSTU-003.md",
+  "next_target": "tickets/SPEC117MANSTOSTU-004.md",
   "queue": [
-    "tickets/SPEC117MANSTOSTU-003.md",
     "tickets/SPEC117MANSTOSTU-004.md",
     "tickets/SPEC117MANSTOSTU-005.md"
   ],
@@ -16,7 +15,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC117MANSTOSTU-001 archived; rg last_reviewed_after_segment tools/manual-story-studio excluding node_modules returned no matches; cd tools/manual-story-studio && npm test passed backend build, 486 backend tests, and web TypeScript check; git diff --check passed",
+  "proof_state": "SPEC117MANSTOSTU-003 archived; npm run test:backend passed backend build plus 86 compiled Node test files including post-segment-workbench; npm test passed backend build, 488 backend tests, and web TypeScript check; stale-token route/test sweep and git diff --check passed",
   "dirty_state": "expected ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-03"
 }
