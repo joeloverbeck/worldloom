@@ -213,7 +213,6 @@ export async function registerSegmentsWriteRoutes(
         return reply.code(201).send({
           segment_id: result.segment_id,
           sidecar: result.sidecar,
-          checklist_payload: result.checklist_payload,
         });
       } catch (error) {
         return writeError(reply, error);
@@ -268,7 +267,6 @@ export async function registerSegmentsWriteRoutes(
         return {
           segment_id: result.segment_id,
           sidecar: result.sidecar,
-          checklist_payload: result.checklist_payload,
         };
       } catch (error) {
         return writeError(reply, error);

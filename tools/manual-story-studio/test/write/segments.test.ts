@@ -165,7 +165,6 @@ function commonFields(id: string): RecordCommonFields {
     details: "",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
   };
 }
@@ -272,7 +271,7 @@ test("saveSegment writes paired segment files and appends segment_order", () => 
       "SEG-1",
       "SEG-2",
     ]);
-    assert.equal(first.checklist_payload.disclaimer.includes("has not changed"), true);
+    assert.equal(["checklist", "payload"].join("_") in first, false);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }

@@ -24,7 +24,6 @@ function commonFields(id: string): Record<string, unknown> {
     details: "details",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
   };
 }
@@ -231,7 +230,6 @@ const REQUIRED_COMMON_FIELDS = [
   "details",
   "refs",
   "prompt_visibility",
-  "last_reviewed_after_segment",
   "notes",
 ];
 
@@ -399,7 +397,6 @@ refs:
   locations: []
   related_records: []
 prompt_visibility: always
-last_reviewed_after_segment: null
 notes: ""
 `;
   const result = parseAndValidateYaml(
@@ -415,7 +412,6 @@ notes: ""
         "details",
         "refs",
         "prompt_visibility",
-        "last_reviewed_after_segment",
         "notes",
       ],
       scalars: {
@@ -426,7 +422,7 @@ notes: ""
         details: "string",
         notes: "string",
       },
-      nullable: ["last_reviewed_after_segment"],
+      nullable: [],
       stringArrays: ["tags"],
       enums: {
         importance: ["low", "medium", "high", "central"],

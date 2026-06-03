@@ -32,7 +32,6 @@ function commonFields(id: string): Pick<
   | "details"
   | "refs"
   | "prompt_visibility"
-  | "last_reviewed_after_segment"
   | "notes"
 > {
   return {
@@ -45,7 +44,6 @@ function commonFields(id: string): Pick<
     details: "",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
   };
 }
@@ -152,7 +150,6 @@ test("scanReferences: finds record refs, current-context refs, and selected-temp
       must_not_reveal: [],
       current_handoff_summary: "",
       last_accepted_segment: "SEG-1",
-      last_reviewed_after_segment: null,
     } satisfies CurrentContext);
     writeYaml(root, "segments/SEG-1.yaml", {
       id: "SEG-1",
@@ -222,7 +219,6 @@ test("resolveReferrerSummaries: dedupes by referrer and returns populated summar
       must_not_reveal: [],
       current_handoff_summary: "",
       last_accepted_segment: null,
-      last_reviewed_after_segment: null,
     } satisfies CurrentContext);
 
     const summaries = unwrap(resolveReferrerSummaries(root, "mchar-1"));

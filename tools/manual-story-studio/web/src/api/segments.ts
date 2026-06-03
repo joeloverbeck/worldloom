@@ -1,7 +1,4 @@
-import type {
-  SegmentSidecar,
-  StateUpdateChecklistPayload,
-} from "../types/manual-story.js";
+import type { SegmentSidecar } from "../types/manual-story.js";
 
 const enc = encodeURIComponent;
 
@@ -36,7 +33,6 @@ export interface SaveSegmentRequest {
 export interface SaveSegmentResponse {
   segment_id: string;
   sidecar: SegmentSidecar;
-  checklist_payload: StateUpdateChecklistPayload;
 }
 
 export interface ReadSegmentResponse {

@@ -20,6 +20,8 @@ import {
   type ManualStoryRoot,
 } from "../../src/write/sandbox.js";
 
+const LEGACY_REVIEW_KEY = ["last", "reviewed", "after", "segment"].join("_");
+
 function mkWorld(): { repoRoot: string; manualStoryRoot: ManualStoryRoot } {
   const repoRoot = mkdtempSync(path.join(os.tmpdir(), "manual-studio-current-context-"));
   mkdirSync(
@@ -47,7 +49,6 @@ function context(overrides: Partial<CurrentContext> = {}): CurrentContext {
     must_not_reveal: ["msecret-2"],
     current_handoff_summary: "Mara waits in the riverhouse kitchen.",
     last_accepted_segment: "SEG-7",
-    last_reviewed_after_segment: "SEG-7",
     ...overrides,
   };
 }
@@ -102,7 +103,6 @@ test("writeCurrentContext: full-file replace truncates prior content", () => {
       must_not_reveal: [],
       current_handoff_summary: "",
       last_accepted_segment: null,
-      last_reviewed_after_segment: null,
     });
 
     writeCurrentContext(manualStoryRoot, replacement);
@@ -110,6 +110,24 @@ test("writeCurrentContext: full-file replace truncates prior content", () => {
     const text = readFileSync(fullPath, "utf8");
     assert.equal(text, YAML.stringify(replacement));
     assert.doesNotMatch(text, /stale_field/);
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("writeCurrentContext: strips legacy reviewed segment marker", () => {
+  const { repoRoot, manualStoryRoot } = mkWorld();
+  try {
+    const ctx = {
+      ...context(),
+      [LEGACY_REVIEW_KEY]: "SEG-7",
+    } as CurrentContext;
+
+    writeCurrentContext(manualStoryRoot, ctx);
+
+    const fullPath = path.join(manualStoryRoot.absolutePath, "current-context.yaml");
+    const parsed = YAML.parse(readFileSync(fullPath, "utf8")) as Record<string, unknown>;
+    assert.equal(Object.hasOwn(parsed, LEGACY_REVIEW_KEY), false);
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
   }

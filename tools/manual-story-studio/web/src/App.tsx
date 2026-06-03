@@ -16,6 +16,7 @@ import { ManualStories } from "./pages/ManualStories.js";
 import { Manuscript } from "./pages/Manuscript.js";
 import { MomentComposer } from "./pages/MomentComposer.js";
 import { PasteProse } from "./pages/PasteProse.js";
+import { PostSegmentWorkbench } from "./pages/PostSegmentWorkbench.js";
 import { PromptPreview } from "./pages/PromptPreview.js";
 import { PromptHistory } from "./pages/PromptHistory.js";
 import { Records } from "./pages/Records.js";
@@ -89,6 +90,10 @@ const router = createBrowserRouter(
         {
           path: "/worlds/:worldSlug/manual-stories/:msSlug/paste-prose",
           element: <PasteProse />,
+        },
+        {
+          path: "/worlds/:worldSlug/manual-stories/:msSlug/segments/:segmentId/post-segment-workbench",
+          element: <PostSegmentWorkbench />,
         },
         {
           path: "/worlds/:worldSlug/manual-stories/:msSlug/manuscript",

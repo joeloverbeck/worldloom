@@ -41,7 +41,6 @@ const COMMON_RECORD_FIELDS: string[] = [
   "details",
   "refs",
   "prompt_visibility",
-  "last_reviewed_after_segment",
   "notes",
 ];
 
@@ -56,7 +55,7 @@ const COMMON_SCALARS: Record<string, ScalarKind> = {
   notes: "string",
 };
 
-const COMMON_NULLABLE: string[] = ["last_reviewed_after_segment"];
+const COMMON_NULLABLE: string[] = [];
 
 const COMMON_STRING_ARRAYS: string[] = ["tags"];
 

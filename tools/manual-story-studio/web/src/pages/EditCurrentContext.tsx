@@ -28,7 +28,6 @@ const EMPTY_CONTEXT: CurrentContext = {
   must_not_reveal: [],
   current_handoff_summary: "",
   last_accepted_segment: null,
-  last_reviewed_after_segment: null,
 };
 
 function loadErrorMessage(error: unknown): string {
@@ -225,15 +224,6 @@ export function EditCurrentContext() {
       errors.set(
         "last_accepted_segment",
         "Last accepted segment must use the SEG- prefix.",
-      );
-    }
-    if (
-      ctx.last_reviewed_after_segment &&
-      !ctx.last_reviewed_after_segment.startsWith("SEG-")
-    ) {
-      errors.set(
-        "last_reviewed_after_segment",
-        "Last reviewed after segment must use the SEG- prefix.",
       );
     }
     return errors;
@@ -444,20 +434,6 @@ export function EditCurrentContext() {
           value={ctx.last_accepted_segment ?? ""}
           onChange={(event) =>
             update({ last_accepted_segment: nullableText(event.target.value) })
-          }
-        />
-      </FieldRow>
-
-      <FieldRow
-        label="Last reviewed after segment"
-        error={fieldError("last_reviewed_after_segment", serverErrors, clientErrors)}
-        hint="SEG-* or empty"
-      >
-        <input
-          type="text"
-          value={ctx.last_reviewed_after_segment ?? ""}
-          onChange={(event) =>
-            update({ last_reviewed_after_segment: nullableText(event.target.value) })
           }
         />
       </FieldRow>

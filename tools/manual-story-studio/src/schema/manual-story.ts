@@ -154,7 +154,6 @@ export interface RecordCommonFields {
   details: string;
   refs: RecordRefs;
   prompt_visibility: PromptVisibility;
-  last_reviewed_after_segment: string | null;
   notes: string;
 }
 

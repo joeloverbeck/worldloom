@@ -97,7 +97,7 @@ Manual Studio maintains 18 MVP record classes per manual-story (one file per rec
 
 Canonical prefix list and per-class file layout: `docs/ID-ALLOCATION.md §Manual-story-scoped`.
 
-Every record carries common fields (`id`, `title`, `active`, `importance`, `tags`, `summary`, `details`, `refs`, `prompt_visibility`, `last_reviewed_after_segment`, `notes`, plus optional `retired_reason` when archived). Per-class additions are minimal (typically 2-4 fields beyond common); see SPEC-101 §2.2 for the full delta per class. Schema definitions live at `src/validate/schema.ts`; TypeScript types at `src/schema/manual-story.ts`.
+Every record carries common fields (`id`, `title`, `active`, `importance`, `tags`, `summary`, `details`, `refs`, `prompt_visibility`, `notes`, plus optional `retired_reason` when archived). Per-class additions are minimal (typically 2-4 fields beyond common); see SPEC-101 §2.2 for the full delta per class. Schema definitions live at `src/validate/schema.ts`; TypeScript types at `src/schema/manual-story.ts`.
 
 ## Delete Policy (SPEC-101 + SPEC-114)
 

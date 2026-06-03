@@ -73,7 +73,6 @@ function writeFact(root: ManualStoryRoot, record: Partial<ManualFactRecord> = {}
     details: "",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
     ...record,
   };

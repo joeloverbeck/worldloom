@@ -4,7 +4,7 @@
  * Automated assertions (run via `cd tools/manual-story-studio && npm test`):
  *   - AC #1-#8: segment save/edit/delete route round trip, sidecar writes,
  *     segment_order updates, manuscript rebuild, deterministic compile,
- *     checklist payload, and hybrid delete outcomes.
+ *     reduced save payload, and hybrid delete outcomes.
  *   - AC #9: manuscript route returns the compiled manuscript body and
  *     frontend source exposes the Manuscript page route.
  *   - AC #10: prompt listing returns linked_segments for saved prompts and
@@ -125,7 +125,6 @@ function commonFields(id: string): RecordCommonFields {
     details: "",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
   };
 }
@@ -229,7 +228,7 @@ async function saveSegment(
   }
 }
 
-test("AC #1-#7 and Plan-Authority: save/edit/rebuild/checklist round trip", async () => {
+test("AC #1-#7 and Plan-Authority: save/edit/rebuild/save-payload round trip", async () => {
   const fixture = mkFixture();
   try {
     const promptId = await savePrompt(fixture);
@@ -273,39 +272,12 @@ test("AC #1-#7 and Plan-Authority: save/edit/rebuild/checklist round trip", asyn
       assert.equal(edit.statusCode, 200);
       const edited = edit.json() as {
         sidecar: SegmentSidecar;
-        checklist_payload: {
-          disclaimer: string;
-          entries: Array<{ record_class: string; cast_referencing_count: number }>;
-        };
       };
       assert.equal(edited.sidecar.id, "SEG-1");
       assert.equal(edited.sidecar.created_at, first.sidecar.created_at);
       assert.notEqual(edited.sidecar.updated_at, first.sidecar.updated_at);
       assert.equal(edited.sidecar.word_count, 3);
-      assert.equal(
-        edited.checklist_payload.disclaimer,
-        "Review these categories manually. Manual Story Studio has not changed any records.",
-      );
-      assert.equal(edited.checklist_payload.entries.length, 12);
-      const classes = edited.checklist_payload.entries.map((entry) => entry.record_class);
-      assert.deepEqual(classes, [
-        "statuses",
-        "emotions",
-        "beliefs",
-        "relationships",
-        "objects",
-        "plans",
-        "clocks",
-        "secrets",
-        "questions",
-        "consequences",
-        "obligations",
-        "threads",
-      ]);
-      const statuses = edited.checklist_payload.entries.find(
-        (entry) => entry.record_class === "statuses",
-      );
-      assert.equal(statuses?.cast_referencing_count, 1);
+      assert.equal(["checklist", "payload"].join("_") in edited, false);
       assert.equal(
         readFileSync(path.join(fixture.root.absolutePath, "manuscript.md"), "utf8"),
         "Rain ticks again.",

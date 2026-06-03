@@ -37,6 +37,7 @@ import {
   registerSegmentsReadRoutes,
   registerSegmentsWriteRoutes,
 } from "./routes/segments.js";
+import { registerPostSegmentWorkbenchReadRoute } from "./routes/post-segment-workbench.js";
 import { registerWorldSourceReadRoutes } from "./routes/world-source.js";
 import { registerWorldsRoutes } from "./routes/worlds.js";
 import { wrapRouterWritable } from "./write-scope-guard.js";
@@ -84,6 +85,9 @@ export async function createServer(options: CreateServerOptions): Promise<Fastif
   await registerMetadataReadRoute(server, { repoRoot: options.repoRoot });
   await registerPromptsReadRoutes(server, { repoRoot: options.repoRoot });
   await registerSegmentsReadRoutes(server, { repoRoot: options.repoRoot });
+  await registerPostSegmentWorkbenchReadRoute(server, {
+    repoRoot: options.repoRoot,
+  });
   await registerManuscriptReadRoute(server, { repoRoot: options.repoRoot });
   await registerCurrentContextReadRoute(server, { repoRoot: options.repoRoot });
   await registerHealthRoute(server, { repoRoot: options.repoRoot });

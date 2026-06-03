@@ -66,7 +66,6 @@ function writeFact(root: FixtureRoot, record: Partial<ManualFactRecord> = {}): v
     details: "",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
     ...record,
   };

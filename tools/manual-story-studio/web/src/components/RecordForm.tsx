@@ -319,10 +319,6 @@ export function RecordForm(props: RecordFormProps) {
       typeof initial?.prompt_visibility === "string"
         ? initial.prompt_visibility
         : "always",
-    last_reviewed_after_segment:
-      typeof initial?.last_reviewed_after_segment === "string"
-        ? initial.last_reviewed_after_segment
-        : (null as string | null),
     notes: typeof initial?.notes === "string" ? initial.notes : "",
   });
 
@@ -641,19 +637,6 @@ export function RecordForm(props: RecordFormProps) {
             </option>
           ))}
         </select>
-      </FieldRow>
-      <FieldRow label="Last reviewed after segment (SEG-* or empty)" required={false}>
-        <input
-          type="text"
-          value={common.last_reviewed_after_segment ?? ""}
-          onChange={(e) =>
-            setCommon({
-              ...common,
-              last_reviewed_after_segment:
-                e.target.value.trim() === "" ? null : e.target.value,
-            })
-          }
-        />
       </FieldRow>
       <FieldRow label="Notes" required={false}>
         <textarea

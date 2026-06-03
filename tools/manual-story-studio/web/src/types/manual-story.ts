@@ -109,7 +109,6 @@ export interface CurrentContext {
   must_not_reveal: string[];
   current_handoff_summary: string;
   last_accepted_segment: string | null;
-  last_reviewed_after_segment: string | null;
 }
 
 export interface SegmentSidecarIncludedRecordSummary {
@@ -129,20 +128,6 @@ export interface SegmentSidecar {
   included_record_summary: SegmentSidecarIncludedRecordSummary;
   author_note: string;
   word_count: number;
-}
-
-export interface StateUpdateChecklistEntry {
-  record_class: ManualRecordClass;
-  total_records: number;
-  cast_referencing_count: number;
-}
-
-export interface StateUpdateChecklistPayload {
-  segment_id: string;
-  last_accepted_segment: string | null;
-  involved_cast: string[];
-  entries: StateUpdateChecklistEntry[];
-  disclaimer: string;
 }
 
 export type ManualStoryRole =
@@ -181,7 +166,6 @@ export interface RecordCommonFields {
   details: string;
   refs: RecordRefs;
   prompt_visibility: PromptVisibility;
-  last_reviewed_after_segment: string | null;
   notes: string;
 }
 

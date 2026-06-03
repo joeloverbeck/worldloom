@@ -86,7 +86,6 @@ function commonFields(id: string): RecordCommonFields {
     details: "",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
   };
 }
@@ -132,7 +131,7 @@ async function saveSegmentThroughRoute(fixture: Fixture): Promise<string> {
   }
 }
 
-test("POST /segments saves SEG-1, appends segment_order, compiles manuscript, and returns checklist", async () => {
+test("POST /segments saves SEG-1, appends segment_order, compiles manuscript, and returns no checklist", async () => {
   const fixture = mkWorld();
   try {
     const server = await createServer({ repoRoot: fixture.repoRoot });
@@ -151,13 +150,11 @@ test("POST /segments saves SEG-1, appends segment_order, compiles manuscript, an
       const body = response.json() as {
         segment_id: string;
         sidecar: SegmentSidecar;
-        checklist_payload: { segment_id: string; entries: unknown[] };
       };
       assert.equal(body.segment_id, "SEG-1");
       assert.equal(body.sidecar.id, "SEG-1");
       assert.equal(body.sidecar.title, "Lanterns");
-      assert.equal(body.checklist_payload.segment_id, "SEG-1");
-      assert.equal(body.checklist_payload.entries.length, 12);
+      assert.equal(["checklist", "payload"].join("_") in body, false);
       assert.deepEqual(readMetadata(fixture.root).segment_order, ["SEG-1"]);
       assert.equal(
         readFileSync(

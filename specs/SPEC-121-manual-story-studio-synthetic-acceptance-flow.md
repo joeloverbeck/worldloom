@@ -3,7 +3,7 @@
 **Status:** DRAFT
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; a single end-to-end acceptance test over an existing, synthetic, world-agnostic fixture; no LLM/MCP/patch-engine; no production code change required beyond test scaffolding).
-**Depends on:** SPEC-117 (post-segment workbench — step 19), `archive/specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md` (`never_prompt`/exclusion — step 13), and the landed core-loop specs SPEC-112…SPEC-116 (pickers, inclusion ledger, delete lifecycle, source browser, health gating).
+**Depends on:** `archive/specs/SPEC-117-manual-story-studio-post-segment-record-workbench.md` (post-segment workbench — step 19), `archive/specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md` (`never_prompt`/exclusion — step 13), and the landed core-loop specs SPEC-112…SPEC-116 (pickers, inclusion ledger, delete lifecycle, source browser, health gating).
 **Blocks:** —
 **Related:** `tools/manual-story-studio/test/`, the read/write/prompt/health/segment layers exercised end-to-end, a new synthetic fixture world.
 **Source:** critical triage of `reports/manual-story-studio-fourth-iteration.md` §§28 / 45 + Stage 8 (ChatGPT-Pro, 2026-06-02). Deferred in iterations 2–3 (lift-condition "until the core-loop feature specs land"); the user selected it for this batch (AskUserQuestion, 2026-06-02) now that the loop is complete.
@@ -45,7 +45,7 @@ The flow must **not** be tied to a real world (e.g., `animalia`); it uses a synt
 - **Synthetic and hermetic.** A self-contained fixture world keeps the test stable and world-agnostic (report §28 explicitly: "do not tie this to `animalia`").
 - **Service-level, not necessarily DOM-level.** Drive the real read/write/prompt/health/segment code paths; only reach for a browser harness if the service layer cannot express a step. Lower ceremony, less flake.
 - **One flow, load-bearing assertions.** Condense the 23-step script to the assertions that prove the loop (exclusion holds, prompt composes clean, workbench uses broad scan, referenced delete blocks, health scoping works) rather than mechanically scripting every UI click.
-- **Sequenced last.** It exercises SPEC-117 and archived SPEC-118 and the landed loop; it lands after them.
+- **Sequenced last.** It exercises archived SPEC-117 and archived SPEC-118 and the landed loop; it lands after them.
 
 ## 4. Files to touch
 

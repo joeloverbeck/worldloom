@@ -36,7 +36,6 @@ function validContext(overrides: Partial<CurrentContext> = {}): CurrentContext {
     must_not_reveal: ["msecret-2"],
     current_handoff_summary: "Mara waits in the riverhouse kitchen.",
     last_accepted_segment: "SEG-7",
-    last_reviewed_after_segment: "SEG-7",
     ...overrides,
   };
 }
@@ -137,14 +136,6 @@ test("validateCurrentContext: unknown accepted segment is rejected", () => {
   expectSingleError(
     validContext({ last_accepted_segment: "SEG-99" }),
     "last_accepted_segment",
-    CURRENT_CONTEXT_REFERENCE_BROKEN,
-  );
-});
-
-test("validateCurrentContext: unknown reviewed segment is rejected", () => {
-  expectSingleError(
-    validContext({ last_reviewed_after_segment: "SEG-99" }),
-    "last_reviewed_after_segment",
     CURRENT_CONTEXT_REFERENCE_BROKEN,
   );
 });

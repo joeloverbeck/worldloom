@@ -46,7 +46,6 @@ export function common(
     details: "",
     refs: { ...EMPTY_REFS, ...(overrides.refs ?? {}) },
     prompt_visibility: "include_when_relevant",
-    last_reviewed_after_segment: null,
     notes: "",
     ...overrides,
   };

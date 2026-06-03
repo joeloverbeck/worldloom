@@ -14,10 +14,6 @@ import {
   type ManualStoryMetadata,
   type SegmentSidecar,
 } from "../schema/manual-story.js";
-import {
-  buildStateUpdateChecklist,
-  type StateUpdateChecklistPayload,
-} from "../state-update-checklist.js";
 import { scanReferences, type ReferrerEntry } from "../read/records.js";
 import type { ReadError } from "../read/result.js";
 import { allocateNextSegmentId } from "./segment-id-allocator.js";
@@ -56,7 +52,6 @@ export interface SegmentWriteResult {
   prose_path: string;
   sidecar_path: string;
   sidecar: SegmentSidecar;
-  checklist_payload: StateUpdateChecklistPayload;
 }
 
 export class SegmentReadFailureError extends Error {
@@ -137,13 +132,7 @@ export function saveSegment(input: SaveSegmentInput): SegmentWriteResult {
   });
   maybeCompile(input.root, input.compile);
 
-  const checklistResult = buildStateUpdateChecklist({
-    manualStoryRoot: input.root,
-    sidecar,
-  });
-  if (!checklistResult.ok) throw new SegmentReadFailureError(checklistResult.error);
-  const checklist_payload = checklistResult.value;
-  return { segment_id, prose_path, sidecar_path, sidecar, checklist_payload };
+  return { segment_id, prose_path, sidecar_path, sidecar };
 }
 
 export function editSegment(input: EditSegmentInput): SegmentWriteResult {
@@ -206,18 +195,11 @@ export function editSegment(input: EditSegmentInput): SegmentWriteResult {
   );
   maybeCompile(input.root, input.compile);
 
-  const checklistResult = buildStateUpdateChecklist({
-    manualStoryRoot: input.root,
-    sidecar,
-  });
-  if (!checklistResult.ok) throw new SegmentReadFailureError(checklistResult.error);
-  const checklist_payload = checklistResult.value;
   return {
     segment_id: input.segment_id,
     prose_path,
     sidecar_path,
     sidecar,
-    checklist_payload,
   };
 }
 

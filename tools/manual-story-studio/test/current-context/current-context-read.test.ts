@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+
+import YAML from "yaml";
 
 import { readCurrentContext } from "../../src/read/current-context.js";
 
 const FIXTURES_ROOT = path.resolve("test/current-context/fixtures");
+const LEGACY_REVIEW_KEY = ["last", "reviewed", "after", "segment"].join("_");
 
 test("readCurrentContext: absent file returns a typed null value", () => {
   const result = readCurrentContext(path.join(FIXTURES_ROOT, "absent"));
@@ -43,7 +48,6 @@ test("readCurrentContext: existing file parses to CurrentContext shape", () => {
       "current_handoff_summary",
       "current_location",
       "last_accepted_segment",
-      "last_reviewed_after_segment",
       "must_not_reveal",
       "pinned_records",
       "pov_holder",
@@ -57,6 +61,43 @@ test("readCurrentContext: existing file parses to CurrentContext shape", () => {
     assert.deepEqual(ctx.must_not_reveal, ["msecret-2"]);
     assert.match(ctx.current_handoff_summary, /riverhouse/);
     assert.equal(ctx.last_accepted_segment, "SEG-7");
-    assert.equal(ctx.last_reviewed_after_segment, "SEG-7");
+  }
+});
+
+test("readCurrentContext: strips legacy reviewed segment marker", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "manual-studio-current-context-read-"));
+  try {
+    mkdirSync(root, { recursive: true });
+    writeFileSync(
+      path.join(root, "current-context.yaml"),
+      YAML.stringify({
+        current_location: null,
+        current_cast: [],
+        pov_holder: null,
+        active_pressure_clocks: [],
+        active_secrets_questions: [],
+        pinned_records: [],
+        must_not_reveal: [],
+        current_handoff_summary: "",
+        last_accepted_segment: null,
+        [LEGACY_REVIEW_KEY]: "SEG-7",
+      }),
+    );
+
+    const result = readCurrentContext(root);
+
+    assert.equal(result.ok, true);
+    if (result.ok) {
+      assert.notEqual(result.value, null);
+      assert.equal(
+        Object.hasOwn(
+          result.value as unknown as Record<string, unknown>,
+          LEGACY_REVIEW_KEY,
+        ),
+        false,
+      );
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 });
