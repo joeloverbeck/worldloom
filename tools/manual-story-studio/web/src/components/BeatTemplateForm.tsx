@@ -9,6 +9,7 @@ import {
   BEAT_TEMPLATE_TURN_TYPES,
   BEAT_TEMPLATE_TONE_FITS,
   MANUAL_RECORD_CLASSES,
+  PICKABLE_RECORD_CLASSES,
   type BeatTemplate,
   type BeatTemplateBeat,
   type BeatTemplateBeatFunction,
@@ -45,7 +46,7 @@ const CONTENT_INTENSITIES: ManualStoryContentIntensity[] = [
 ];
 
 const STATE_REVIEW_RECORD_CLASSES: ManualRecordClass[] =
-  MANUAL_RECORD_CLASSES.filter((cls) => cls !== "beat-templates");
+  PICKABLE_RECORD_CLASSES;
 
 function defaultTemplate(): Omit<BeatTemplate, "id"> {
   return {

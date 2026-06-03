@@ -12,6 +12,7 @@ import { listSegments, type SegmentListEntry } from "../api/segments.js";
 import { CurrentStatePanel } from "../components/CurrentStatePanel.js";
 import {
   MANUAL_RECORD_CLASSES,
+  PICKABLE_RECORD_CLASSES,
   type PromptWorkingSet,
   type ManualRecordClass,
   type ManualRecordSummary,
@@ -154,11 +155,10 @@ export function Dashboard() {
         if (!cancelled) setManuscriptMissing(true);
       });
     Promise.all(
-      MANUAL_RECORD_CLASSES.filter((cls) => cls !== "beat-templates").map(
-        (cls) =>
-          apiList(worldSlug, msSlug, cls).then(
-            (records) => [cls, records] as const,
-          ),
+      PICKABLE_RECORD_CLASSES.map((cls) =>
+        apiList(worldSlug, msSlug, cls).then(
+          (records) => [cls, records] as const,
+        ),
       ),
     )
       .then((entries) => {
