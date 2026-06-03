@@ -47,7 +47,7 @@ function context(overrides: Partial<PromptWorkingSet> = {}): PromptWorkingSet {
     active_secrets_questions: ["msecret-2", "mq-1"],
     pinned_records: ["mrel-4", "mobl-1"],
     must_not_reveal: ["msecret-2"],
-    current_handoff_summary: "Mara waits in the riverhouse kitchen.",
+    handoff_summary: "Mara waits in the riverhouse kitchen.",
     last_accepted_segment: "SEG-7",
     ...overrides,
   };
@@ -101,7 +101,7 @@ test("writePromptWorkingSet: full-file replace truncates prior content", () => {
       active_secrets_questions: [],
       pinned_records: [],
       must_not_reveal: [],
-      current_handoff_summary: "",
+      handoff_summary: "",
       last_accepted_segment: null,
     });
 

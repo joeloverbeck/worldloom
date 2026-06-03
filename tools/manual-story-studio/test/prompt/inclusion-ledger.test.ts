@@ -168,7 +168,7 @@ function writePromptWorkingSet(manualStoryRoot: string): void {
     pinned_records: ["mfact-1", "mfact-2", "mfact-3"],
     excluded_records: ["mfact-2"],
     must_not_reveal: ["msecret-1"],
-    current_handoff_summary: "",
+    handoff_summary: "",
     last_accepted_segment: null,
   };
   writeFileSync(

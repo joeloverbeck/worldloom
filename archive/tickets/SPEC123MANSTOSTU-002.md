@@ -1,6 +1,6 @@
 # SPEC123MANSTOSTU-002: Rename field `current_handoff_summary` → `handoff_summary` (incl. prompt-payload cascade)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` schema + web types + prompt-payload layer; no impact on any other tool/package.
@@ -90,3 +90,24 @@ SPEC-123 §2 item 7 renames the one clearly-justified working-set field, `curren
 1. `grep -rn "current_handoff_summary" tools/manual-story-studio --include=*.ts --include=*.tsx` (expect zero outside `dist/`)
 2. `cd tools/manual-story-studio/web && npm test`
 3. `cd tools/manual-story-studio && npm test` — full suite; the correct end-to-end boundary since the field flows through both backend prompt assembly and web typecheck.
+
+## Outcome
+
+Completed: 2026-06-03
+
+What changed:
+- Renamed the working-set field `current_handoff_summary` to `handoff_summary` in the backend `PromptWorkingSet` schema, web `PromptWorkingSet` type, prompt payload type, prompt composition mapping, section 3 emitter, web display/edit consumers, fixtures, and tests.
+- Kept `must_not_reveal` unchanged.
+
+Deviations:
+- The section 3 local variables were renamed from `currentHandoff*` to `handoff*` so the code no longer carries the old field wording.
+- One read-test expected-key list was reordered because `handoff_summary` sorts after `current_location`; this was assertion truthing only.
+
+Verification:
+- `rg -n "current_handoff_summary" tools/manual-story-studio -g '!dist/**' -g '!web/node_modules/**'` returned zero hits.
+- `rg -n "handoff_summary" tools/manual-story-studio/src/schema/prompt-working-set.ts tools/manual-story-studio/web/src/types/manual-story.ts tools/manual-story-studio/src/prompt/types.ts tools/manual-story-studio/src/prompt/compose.ts tools/manual-story-studio/src/prompt/sections/section-3-current-situation.ts` confirmed the schema, web type, and prompt-payload declarations/consumers.
+- `rg -n "must_not_reveal" tools/manual-story-studio/src/schema/prompt-working-set.ts tools/manual-story-studio/web/src/types/manual-story.ts tools/manual-story-studio/src/prompt/compose.ts` confirmed the field remains.
+- `cd tools/manual-story-studio && npm run test:backend` passed.
+- `cd tools/manual-story-studio/web && npm test` passed.
+- `cd tools/manual-story-studio && npm test` passed.
+- `git diff --check` passed.

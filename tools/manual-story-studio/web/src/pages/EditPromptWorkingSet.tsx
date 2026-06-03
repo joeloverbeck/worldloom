@@ -26,7 +26,7 @@ const EMPTY_CONTEXT: PromptWorkingSet = {
   pinned_records: [],
   excluded_records: [],
   must_not_reveal: [],
-  current_handoff_summary: "",
+  handoff_summary: "",
   last_accepted_segment: null,
 };
 
@@ -292,12 +292,12 @@ export function EditPromptWorkingSet() {
 
       <FieldRow
         label="Current handoff summary"
-        error={fieldError("current_handoff_summary", serverErrors, clientErrors)}
+        error={fieldError("handoff_summary", serverErrors, clientErrors)}
       >
         <textarea
           rows={6}
-          value={ctx.current_handoff_summary}
-          onChange={(event) => update({ current_handoff_summary: event.target.value })}
+          value={ctx.handoff_summary}
+          onChange={(event) => update({ handoff_summary: event.target.value })}
           style={{ width: "100%", fontFamily: "inherit" }}
         />
       </FieldRow>

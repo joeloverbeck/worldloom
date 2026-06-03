@@ -367,7 +367,7 @@ export async function composePrompt(
     included_cast_ids: seededCastIds.slice(),
     moment_directive: input.moment_directive,
     included_template_body: includedTemplateBody,
-    current_handoff_summary: promptWorkingSet?.current_handoff_summary ?? null,
+    handoff_summary: promptWorkingSet?.handoff_summary ?? null,
     pov_holder: promptWorkingSet?.pov_holder ?? null,
     must_not_reveal: [...visibleMustNotRevealIds],
     active_secrets_questions: promptWorkingSet?.active_secrets_questions ?? [],

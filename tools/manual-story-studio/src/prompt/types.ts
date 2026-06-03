@@ -31,7 +31,7 @@ export interface SectionEmitterInput {
   // is selected). Threaded by compose stage 5 into section 12 alongside
   // the existing per-cast prose_constraints.forbidden_inventions.
   template_forbidden_inventions?: string[];
-  current_handoff_summary?: string | null;
+  handoff_summary?: string | null;
   pov_holder?: string | null;
   must_not_reveal?: string[];
   active_secrets_questions?: string[];

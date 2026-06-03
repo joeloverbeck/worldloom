@@ -120,8 +120,8 @@ export function CurrentStatePanel({
         <dt>Active secrets and questions</dt>
         <dd>{chipList(ctx.active_secrets_questions, titleById)}</dd>
       </dl>
-      {ctx.current_handoff_summary.trim().length > 0 ? (
-        <p>{ctx.current_handoff_summary}</p>
+      {ctx.handoff_summary.trim().length > 0 ? (
+        <p>{ctx.handoff_summary}</p>
       ) : (
         <p>
           <em>No handoff summary.</em>

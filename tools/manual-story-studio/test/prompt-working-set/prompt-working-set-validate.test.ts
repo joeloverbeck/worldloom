@@ -34,7 +34,7 @@ function validContext(overrides: Partial<PromptWorkingSet> = {}): PromptWorkingS
     pinned_records: ["mrel-4", "mobl-1"],
     excluded_records: ["mrel-4"],
     must_not_reveal: ["msecret-2"],
-    current_handoff_summary: "Mara waits in the riverhouse kitchen.",
+    handoff_summary: "Mara waits in the riverhouse kitchen.",
     last_accepted_segment: "SEG-7",
     ...overrides,
   };

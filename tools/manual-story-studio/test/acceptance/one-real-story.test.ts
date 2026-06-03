@@ -265,7 +265,7 @@ test("SPEC-121: one synthetic Glass Orchard author loop completes end-to-end", a
       ],
       excluded_records: [trueAnswer.id],
       must_not_reveal: [secret.id, question.id],
-      current_handoff_summary: "Mira has reached Len's oldest row of trees.",
+      handoff_summary: "Mira has reached Len's oldest row of trees.",
       last_accepted_segment: null,
     });
 

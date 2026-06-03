@@ -10,6 +10,6 @@ export interface PromptWorkingSet {
   pinned_records: string[]; // typed mixed IDs from any manual record class
   excluded_records?: string[]; // typed mixed IDs from any manual record class
   must_not_reveal: string[]; // subset of active_secrets_questions or any msecret-<n>
-  current_handoff_summary: string; // author's "what's happening right now"
+  handoff_summary: string; // author's "what's happening right now"
   last_accepted_segment: string | null; // SEG-<n>
 }

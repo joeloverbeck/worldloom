@@ -45,8 +45,8 @@ test("readPromptWorkingSet: existing file parses to PromptWorkingSet shape", () 
       "active_pressure_clocks",
       "active_secrets_questions",
       "current_cast",
-      "current_handoff_summary",
       "current_location",
+      "handoff_summary",
       "last_accepted_segment",
       "must_not_reveal",
       "pinned_records",
@@ -59,7 +59,7 @@ test("readPromptWorkingSet: existing file parses to PromptWorkingSet shape", () 
     assert.deepEqual(ctx.active_secrets_questions, ["msecret-2", "mq-1"]);
     assert.deepEqual(ctx.pinned_records, ["mrel-4", "mobl-1"]);
     assert.deepEqual(ctx.must_not_reveal, ["msecret-2"]);
-    assert.match(ctx.current_handoff_summary, /riverhouse/);
+    assert.match(ctx.handoff_summary, /riverhouse/);
     assert.equal(ctx.last_accepted_segment, "SEG-7");
   }
 });
@@ -78,7 +78,7 @@ test("readPromptWorkingSet: strips legacy reviewed segment marker", () => {
         active_secrets_questions: [],
         pinned_records: [],
         must_not_reveal: [],
-        current_handoff_summary: "",
+        handoff_summary: "",
         last_accepted_segment: null,
         [LEGACY_REVIEW_KEY]: "SEG-7",
       }),

@@ -107,7 +107,7 @@ export interface PromptWorkingSet {
   pinned_records: string[];
   excluded_records?: string[];
   must_not_reveal: string[];
-  current_handoff_summary: string;
+  handoff_summary: string;
   last_accepted_segment: string | null;
 }
 

@@ -173,7 +173,7 @@ function context(overrides: Partial<PromptWorkingSet> = {}): PromptWorkingSet {
     active_secrets_questions: ["msecret-1", "mq-1"],
     pinned_records: ["mfact-1"],
     must_not_reveal: ["msecret-1"],
-    current_handoff_summary: "Mara waits in the riverhouse kitchen.",
+    handoff_summary: "Mara waits in the riverhouse kitchen.",
     last_accepted_segment: null,
     ...overrides,
   };

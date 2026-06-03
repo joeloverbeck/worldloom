@@ -148,7 +148,7 @@ test("scanReferences: finds record refs, prompt-working-set refs, and selected-t
       pinned_records: ["mfact-1"],
       excluded_records: [],
       must_not_reveal: [],
-      current_handoff_summary: "",
+      handoff_summary: "",
       last_accepted_segment: "SEG-1",
     } satisfies PromptWorkingSet);
     writeYaml(root, "segments/SEG-1.yaml", {
@@ -217,7 +217,7 @@ test("resolveReferrerSummaries: dedupes by referrer and returns populated summar
       pinned_records: [],
       excluded_records: [],
       must_not_reveal: [],
-      current_handoff_summary: "",
+      handoff_summary: "",
       last_accepted_segment: null,
     } satisfies PromptWorkingSet);
 
