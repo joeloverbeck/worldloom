@@ -1,22 +1,18 @@
 {
-  "originating_spec": "specs/SPEC-119-manual-story-studio-prompt-inspector-confidence-cockpit.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC119MANSTOSTU-002.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "ad27aa84f8dafc679755cd3c433c3f406a199476",
+  "originating_spec": "archive/specs/SPEC-119-manual-story-studio-prompt-inspector-confidence-cockpit.md",
+  "archived_spec": "archive/specs/SPEC-119-manual-story-studio-prompt-inspector-confidence-cockpit.md",
+  "last_ticket": "archive/tickets/SPEC119MANSTOSTU-003.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "7175d44380e72077000a0a74b7fe4f66db90a76b",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC119MANSTOSTU-003.md",
-  "queue": [
-    "tickets/SPEC119MANSTOSTU-003.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC119MANSTOSTU-002 archived; npm --prefix web test passed; npm run test:backend passed 86 Node/static tests; npm test passed 487 backend/static tests plus web typecheck",
+  "proof_state": "SPEC-119 archived; all SPEC119MANSTOSTU tickets archived; npm --prefix web test passed; npm run test:backend passed 86 Node/static tests; npm test passed 488 backend/static tests plus web typecheck; IMPLEMENTATION-ORDER marks SPEC-119 completed and archived",
   "dirty_state": "expected ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
-  "post_review_material_updates": true,
-  "post_review_audit_block": "emitted",
   "updated_at": "2026-06-03"
 }
