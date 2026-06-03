@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` web frontend (`web/src/pages/PromptPreview.tsx`); a read-only search affordance over the resolution ledger. No backend change.
-**Deps**: SPEC119MANSTOSTU-002
+**Deps**: archive/tickets/SPEC119MANSTOSTU-002.md
 
 ## Problem
 

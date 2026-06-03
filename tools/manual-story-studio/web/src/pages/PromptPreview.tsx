@@ -13,7 +13,6 @@ import type {
   PromptIncludedRecord,
   PromptSuppressedRecord,
 } from "../types/manual-story.js";
-import { MANUAL_RECORD_CLASS_PREFIXES } from "../types/manual-story.js";
 
 interface NavState {
   composeResult?: PromptComposeResult;
@@ -26,48 +25,49 @@ function reasonLabel(reason: string): string {
   return reason.replaceAll("_", " ");
 }
 
+type LedgerRecord =
+  | PromptIncludedRecord
+  | PromptExcludedRecord
+  | PromptSuppressedRecord;
+
 function ledgerSummary(
-  record: PromptIncludedRecord | PromptExcludedRecord | PromptSuppressedRecord,
+  record: LedgerRecord,
 ): ManualRecordSummary {
   return {
     id: record.id,
     title: record.title,
     active: !("reason" in record && record.reason === "inactive"),
-    importance: "medium",
-    tags: [],
-    summary: `Reason: ${reasonLabel(record.reason)}`,
-    prompt_visibility: "include_when_relevant",
+    importance: record.importance,
+    tags: record.tags,
+    summary: record.summary,
+    prompt_visibility: record.prompt_visibility,
+    involved_cast: record.involved_cast,
   };
 }
 
-function classFromLedgerId(id: string): ManualRecordClass | null {
-  for (const [recordClass, prefix] of Object.entries(MANUAL_RECORD_CLASS_PREFIXES)) {
-    if (id.startsWith(`${prefix}-`)) {
-      return recordClass as ManualRecordClass;
-    }
-  }
-  return null;
+function reasonLine(record: LedgerRecord): string {
+  const label = reasonLabel(record.reason);
+  return record.reason === "must_not_reveal"
+    ? `suppressed because ${label}`
+    : `${record.reason === "inactive" || record.reason === "working_set_excluded" || record.reason === "never_prompt" ? "excluded" : "included"} because ${label}`;
 }
 
-function SuppressedRecordEntry(props: {
-  record: PromptSuppressedRecord;
+function LedgerRecordCard(props: {
+  record: LedgerRecord;
   onOpen: (recordClass: ManualRecordClass, id: string) => void;
+  showSection?: boolean;
 }) {
-  const recordClass = classFromLedgerId(props.record.id);
+  const reason = props.showSection && "section" in props.record && props.record.section
+    ? `${reasonLine(props.record)}; section: ${props.record.section}`
+    : reasonLine(props.record);
   return (
-    <div>
-      <RecordCard
-        summary={ledgerSummary(props.record)}
-        recordClass={recordClass ?? undefined}
-        compact
-        onOpen={(id) => {
-          if (recordClass) props.onOpen(recordClass, id);
-        }}
-      />
-      <p style={{ marginTop: -4 }}>
-        Reason: {reasonLabel(props.record.reason)}
-      </p>
-    </div>
+    <RecordCard
+      summary={ledgerSummary(props.record)}
+      recordClass={props.record.class}
+      compact
+      reason={reason}
+      onOpen={(id) => props.onOpen(props.record.class, id)}
+    />
   );
 }
 
@@ -180,6 +180,40 @@ export function PromptPreview() {
 
   const hardFindings = lint.findings.filter((finding) => finding.tier === "hard");
   const sectionEntries = Object.entries(composeResult.resolution.section_map);
+  const ledgerById = new Map<string, LedgerRecord>();
+  for (const record of [
+    ...composeResult.resolution.included,
+    ...composeResult.resolution.excluded,
+    ...composeResult.resolution.suppressed,
+  ]) {
+    ledgerById.set(record.id, record);
+  }
+
+  function renderLedgerIdList(ids: string[], emptyLabel: string): JSX.Element {
+    if (ids.length === 0) {
+      return <p>{emptyLabel}</p>;
+    }
+    return (
+      <div style={{ display: "grid", gap: 6 }}>
+        {ids.map((id) => {
+          const record = ledgerById.get(id);
+          return record ? (
+            <LedgerRecordCard
+              key={id}
+              record={record}
+              onOpen={openRecord}
+              showSection
+            />
+          ) : (
+            <p key={id} style={{ margin: 0 }}>
+              Identity unavailable{" "}
+              <span className="id-subscript">{id}</span>
+            </p>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <section
@@ -259,10 +293,10 @@ export function PromptPreview() {
           }}
         >
           <h3 id="prompt-inspector-heading" style={{ margin: 0 }}>
-            Prompt Inspector
+            Prompt Confidence
           </h3>
           <section aria-label="copy status">
-            <h4>Copy status</h4>
+            <h4>This is safe to copy</h4>
             <p>{lint.blockingForCopy ? "Blocked by hard lint" : "Allowed"}</p>
           </section>
           <section aria-label="hard lint findings">
@@ -280,8 +314,8 @@ export function PromptPreview() {
             )}
           </section>
           <section aria-label="selected cast">
-            <h4>Selected cast</h4>
-            <p>{composeResult.sidecar_draft.included_cast.join(", ") || "None"}</p>
+            <h4>These cast members anchor the prompt</h4>
+            {renderLedgerIdList(composeResult.sidecar_draft.included_cast, "None")}
           </section>
           <section aria-label="selected template">
             <h4>Selected template</h4>
@@ -292,57 +326,45 @@ export function PromptPreview() {
             </p>
           </section>
           <section aria-label="working set">
-            <h4>Working set</h4>
-            <p>{composeResult.sidecar_draft.included_records.join(", ") || "None"}</p>
+            <h4>These records were considered</h4>
+            {renderLedgerIdList(composeResult.sidecar_draft.included_records, "None")}
           </section>
           <section aria-label="included records">
-            <h4>Included records</h4>
+            <h4>These records will shape the prompt</h4>
             {composeResult.resolution.included.length === 0 ? (
               <p>None</p>
             ) : (
               composeResult.resolution.included.map((record) => (
-                <div key={record.id}>
-                  <RecordCard
-                    summary={ledgerSummary(record)}
-                    recordClass={record.class}
-                    compact
-                    onOpen={(id) => openRecord(record.class, id)}
-                  />
-                  <p style={{ marginTop: -4 }}>
-                    Reason: {reasonLabel(record.reason)}
-                    {record.section ? `; section: ${record.section}` : ""}
-                  </p>
-                </div>
+                <LedgerRecordCard
+                  key={record.id}
+                  record={record}
+                  onOpen={openRecord}
+                  showSection
+                />
               ))
             )}
           </section>
           <section aria-label="excluded records">
-            <h4>Excluded records</h4>
+            <h4>These were deliberately excluded</h4>
             {composeResult.resolution.excluded.length === 0 ? (
               <p>None</p>
             ) : (
               composeResult.resolution.excluded.map((record) => (
-                <div key={record.id}>
-                  <RecordCard
-                    summary={ledgerSummary(record)}
-                    recordClass={record.class}
-                    compact
-                    onOpen={(id) => openRecord(record.class, id)}
-                  />
-                  <p style={{ marginTop: -4 }}>
-                    Reason: {reasonLabel(record.reason)}
-                  </p>
-                </div>
+                <LedgerRecordCard
+                  key={record.id}
+                  record={record}
+                  onOpen={openRecord}
+                />
               ))
             )}
           </section>
           <section aria-label="suppressed reveals">
-            <h4>Suppressed reveals</h4>
+            <h4>These secrets are protected</h4>
             {composeResult.resolution.suppressed.length === 0 ? (
               <p>None</p>
             ) : (
               composeResult.resolution.suppressed.map((record) => (
-                <SuppressedRecordEntry
+                <LedgerRecordCard
                   key={record.id}
                   record={record}
                   onOpen={openRecord}
@@ -355,14 +377,19 @@ export function PromptPreview() {
             {sectionEntries.length === 0 ? (
               <p>None</p>
             ) : (
-              <dl>
-                {sectionEntries.map(([section, ids]) => (
-                  <div key={section}>
-                    <dt>{section}</dt>
-                    <dd>{ids.join(", ") || "No record ids consumed"}</dd>
-                  </div>
-                ))}
-              </dl>
+              <details>
+                <summary>Show section map</summary>
+                <dl>
+                  {sectionEntries.map(([section, ids]) => (
+                    <div key={section}>
+                      <dt>{section}</dt>
+                      <dd>
+                        {renderLedgerIdList(ids, "No records consumed")}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </details>
             )}
           </section>
           <section aria-label="blocked inputs">

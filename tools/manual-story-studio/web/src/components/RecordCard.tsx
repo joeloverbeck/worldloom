@@ -11,6 +11,7 @@ export interface RecordCardProps {
   compact?: boolean;
   onSelect?: (id: string) => void;
   interactionRole?: "button" | "option";
+  reason?: string;
 }
 
 const IMPORTANCE_COLOR: Record<ManualRecordSummary["importance"], string> = {
@@ -29,6 +30,7 @@ export function RecordCard(props: RecordCardProps) {
     compact = false,
     onSelect,
     interactionRole = "button",
+    reason,
   } = props;
   const activate = () => {
     if (onSelect) {
@@ -114,6 +116,11 @@ export function RecordCard(props: RecordCardProps) {
       </dl>
       {summary.summary ? (
         <p style={{ margin: "4px 0" }}>{summary.summary}</p>
+      ) : null}
+      {reason ? (
+        <p style={{ margin: "4px 0", fontSize: 12 }}>
+          <span style={{ fontWeight: 600 }}>Reason</span>: {reason}
+        </p>
       ) : null}
       {summary.tags.length > 0 ? (
         <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
