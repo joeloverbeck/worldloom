@@ -1,18 +1,18 @@
 {
   "originating_spec": "specs/SPEC-120-manual-story-studio-lifecycle-vocabulary-cleanup.md",
-  "archived_spec": null,
+  "archived_spec": "archive/specs/SPEC-120-manual-story-studio-lifecycle-vocabulary-cleanup.md",
   "last_ticket": "archive/tickets/SPEC120MANSTOSTU-003.md",
   "last_result": "completed_archived",
-  "last_work_commit": "723d754640c8fc2534041ab4491bac217482c3b6",
+  "last_work_commit": "c7661c716e90c228f42515d51f15531593ae2884",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
-  "phase": "final_spec_archive",
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC120MANSTOSTU-003 archived; baseline and post-change npm test passed with 482 backend/static tests plus web tsc --noEmit; rg -n 'retired_reason' tools/manual-story-studio --glob '*.ts' --glob '*.tsx' returned no hits; git diff --check passed after archive reference repair",
-  "dirty_state": "tracked worktree clean after 003 work commit except this state update; pre-existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
+  "proof_state": "SPEC-120 archived; all SPEC120MANSTOSTU tickets archived; final package proof passed with npm test (482 backend/static tests plus web tsc --noEmit); final source greps for includeArchived and retired_reason over Manual Studio TS/TSX returned no hits; IMPLEMENTATION-ORDER marks SPEC-120 completed and archived",
+  "dirty_state": "tracked worktree clean after final spec archive commit except this state update; pre-existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-03"
 }
