@@ -85,7 +85,7 @@ function runFilePass(root: string): HealthFinding[] {
   }
 
   for (const cls of MANUAL_RECORD_CLASSES) {
-    const result = listRecords(root, cls, { includeArchived: true });
+    const result = listRecords(root, cls, { includeInactive: true });
     if (!result.ok) {
       findings.push(recordReadFinding(result.error, cls));
     }
@@ -160,7 +160,7 @@ function runSchemaPass(root: string): HealthFinding[] {
   }
 
   for (const cls of MANUAL_RECORD_CLASSES) {
-    const summaries = listRecords(root, cls, { includeArchived: true });
+    const summaries = listRecords(root, cls, { includeInactive: true });
     if (!summaries.ok) continue;
     for (const summary of summaries.value) {
       const record = readRecord(root, cls, summary.id);
@@ -191,7 +191,7 @@ function runReferencePass(root: string): HealthFinding[] {
   findings.push(...composeRequiredDocFindings(root));
 
   for (const cls of MANUAL_RECORD_CLASSES) {
-    const summaries = listRecords(root, cls, { includeArchived: true });
+    const summaries = listRecords(root, cls, { includeInactive: true });
     if (!summaries.ok) continue;
     for (const summary of summaries.value) {
       const record = readRecord(root, cls, summary.id);

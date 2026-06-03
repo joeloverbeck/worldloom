@@ -133,7 +133,7 @@ export async function registerBeatTemplatesReadRoutes(
 ): Promise<void> {
   server.get<{
     Params: { slug: string; msSlug: string };
-    Querystring: { includeArchived?: string };
+    Querystring: { includeInactive?: string };
   }>(
     "/api/worlds/:slug/manual-stories/:msSlug/beat-templates",
     async (request, reply) => {
@@ -143,9 +143,9 @@ export async function registerBeatTemplatesReadRoutes(
         request.params.msSlug,
       );
       if (!root) return notFound(reply, "manual_story_not_found");
-      const includeArchived = request.query.includeArchived === "true";
+      const includeInactive = request.query.includeInactive === "true";
       const all = listAllBeatTemplates(root.absolutePath);
-      const filtered = includeArchived ? all : all.filter((t) => t.active);
+      const filtered = includeInactive ? all : all.filter((t) => t.active);
       return { templates: filtered };
     },
   );
@@ -357,7 +357,7 @@ export async function registerBeatTemplatesWriteRoutes(
       ] as const;
       for (const cls of RECORD_CLASSES_TO_SCAN) {
         const summariesResult = listRecords(root.absolutePath, cls, {
-          includeArchived: false,
+          includeInactive: false,
         });
         if (!summariesResult.ok) {
           return mapReadErrorToHttpReply(reply, summariesResult.error);

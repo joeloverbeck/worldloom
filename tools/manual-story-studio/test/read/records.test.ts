@@ -116,17 +116,16 @@ test("listRecords: populated class returns ordered summaries", () => {
   }
 });
 
-test("listRecords: default omits archived; includeArchived returns all", () => {
+test("listRecords: default omits inactive; includeInactive returns all", () => {
   const root = mkRoot();
   try {
     writeRecord(root, "facts", "mfact-1", commonFields("mfact-1"));
     writeRecord(root, "facts", "mfact-2", {
       ...commonFields("mfact-2"),
       active: false,
-      retired_reason: "retired",
     });
     assert.equal(unwrap(listRecords(root, "facts")).length, 1);
-    assert.equal(unwrap(listRecords(root, "facts", { includeArchived: true })).length, 2);
+    assert.equal(unwrap(listRecords(root, "facts", { includeInactive: true })).length, 2);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

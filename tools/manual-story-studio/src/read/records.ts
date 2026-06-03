@@ -16,11 +16,11 @@ import { emptyKnownIds, type KnownIds } from "../validate/refs.js";
 import { err, ok, type ReadResult } from "./result.js";
 
 export interface ListRecordsOptions {
-  includeArchived?: boolean;
+  includeInactive?: boolean;
 }
 
 export function listRecords(manualStoryRoot: string, recordClass: ManualRecordClass, opts: ListRecordsOptions = {}): ReadResult<ManualRecordSummary[]> {
-  const includeArchived = opts.includeArchived === true;
+  const includeInactive = opts.includeInactive === true;
   const targetDir = path.join(manualStoryRoot, "records", recordClass);
   if (!existsSync(targetDir)) return ok([]);
   const prefix = MANUAL_RECORD_CLASS_PREFIXES[recordClass];
@@ -42,7 +42,7 @@ export function listRecords(manualStoryRoot: string, recordClass: ManualRecordCl
         repair_hint: `Record at records/${recordClass}/${entry.name} is missing required fields (id, title).`,
       });
     }
-    if (!includeArchived && summary.active === false) continue;
+    if (!includeInactive && summary.active === false) continue;
     out.push(summary);
   }
   out.sort((a, b) =>
@@ -89,7 +89,7 @@ export function listAllKnownIds(manualStoryRoot: string): ReadResult<KnownIds> {
   const known = emptyKnownIds();
   for (const cls of MANUAL_RECORD_CLASSES) {
     const summariesResult = listRecords(manualStoryRoot, cls, {
-      includeArchived: true,
+      includeInactive: true,
     });
     if (!summariesResult.ok) return err(summariesResult.error);
     const summaries = summariesResult.value;
@@ -130,7 +130,7 @@ export function scanReferences(manualStoryRoot: string, targetId: string): ReadR
   const referrers: ReferrerEntry[] = [];
   for (const cls of MANUAL_RECORD_CLASSES) {
     const summariesResult = listRecords(manualStoryRoot, cls, {
-      includeArchived: true,
+      includeInactive: true,
     });
     if (!summariesResult.ok) return err(summariesResult.error);
     const summaries = summariesResult.value;

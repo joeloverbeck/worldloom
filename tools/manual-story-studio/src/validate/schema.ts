@@ -45,7 +45,7 @@ const COMMON_RECORD_FIELDS: string[] = [
   "notes",
 ];
 
-const COMMON_OPTIONAL_FIELDS: string[] = ["retired_reason"];
+const COMMON_OPTIONAL_FIELDS: string[] = [];
 
 const COMMON_SCALARS: Record<string, ScalarKind> = {
   id: "string",
@@ -54,7 +54,6 @@ const COMMON_SCALARS: Record<string, ScalarKind> = {
   summary: "string",
   details: "string",
   notes: "string",
-  retired_reason: "string",
 };
 
 const COMMON_NULLABLE: string[] = ["last_reviewed_after_segment"];

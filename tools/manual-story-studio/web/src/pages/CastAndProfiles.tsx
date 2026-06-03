@@ -47,7 +47,7 @@ export function CastAndProfiles() {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
     setListError(null);
-    apiList(worldSlug, msSlug, "cast", { includeArchived: true })
+    apiList(worldSlug, msSlug, "cast", { includeInactive: true })
       .then((records) => {
         if (!cancelled) {
           setSummaries(records);

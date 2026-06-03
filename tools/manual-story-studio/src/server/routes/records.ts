@@ -75,7 +75,7 @@ export async function registerRecordsReadRoutes(
 ): Promise<void> {
   server.get<{
     Params: { slug: string; msSlug: string };
-    Querystring: { class?: string; includeArchived?: string };
+    Querystring: { class?: string; includeInactive?: string };
   }>(
     "/api/worlds/:slug/manual-stories/:msSlug/records",
     async (request, reply) => {
@@ -94,8 +94,8 @@ export async function registerRecordsReadRoutes(
           .code(400)
           .send({ error: "bad_request", message: "class query param required" });
       }
-      const includeArchived = request.query.includeArchived === "true";
-      const records = listRecords(root.absolutePath, cls, { includeArchived });
+      const includeInactive = request.query.includeInactive === "true";
+      const records = listRecords(root.absolutePath, cls, { includeInactive });
       if (!records.ok) return mapReadErrorToHttpReply(reply, records.error);
       return { records: records.value };
     },

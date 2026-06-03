@@ -54,10 +54,10 @@ export type BeatTemplateDeleteResult =
 export async function listBeatTemplates(
   worldSlug: string,
   msSlug: string,
-  opts: { includeArchived?: boolean } = {},
+  opts: { includeInactive?: boolean } = {},
 ): Promise<BeatTemplate[]> {
   const url = new URL(baseUrl(worldSlug, msSlug), window.location.origin);
-  if (opts.includeArchived) url.searchParams.set("includeArchived", "true");
+  if (opts.includeInactive) url.searchParams.set("includeInactive", "true");
   const response = await fetch(url.pathname + url.search);
   if (!response.ok) {
     throw new Error(`listBeatTemplates → ${response.status}`);

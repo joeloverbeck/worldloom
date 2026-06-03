@@ -99,7 +99,7 @@ export function RecordPicker(props: RecordPickerProps) {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    listRecordsForClasses(worldSlug, msSlug, classes, { includeArchived: true })
+    listRecordsForClasses(worldSlug, msSlug, classes, { includeInactive: true })
       .then((nextRecords) => {
         if (cancelled) return;
         setRecords(nextRecords);

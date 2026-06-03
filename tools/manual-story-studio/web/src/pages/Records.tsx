@@ -42,7 +42,7 @@ export function Records() {
   const castFilter = searchParams.get("cast") ?? "";
 
   const [activeClass, setActiveClass] = useState<ManualRecordClass>(initialClass);
-  const [includeArchived, setIncludeArchived] = useState(false);
+  const [includeInactive, setIncludeInactive] = useState(false);
   const [summaries, setSummaries] = useState<ManualRecordSummary[]>([]);
   const [castFilteredIds, setCastFilteredIds] = useState<Set<string> | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(initialId);
@@ -81,7 +81,7 @@ export function Records() {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
     setListError(null);
-    apiList(worldSlug, msSlug, activeClass, { includeArchived })
+    apiList(worldSlug, msSlug, activeClass, { includeInactive })
       .then((records) => {
         if (!cancelled) {
           setSummaries(records);
@@ -97,7 +97,7 @@ export function Records() {
     return () => {
       cancelled = true;
     };
-  }, [worldSlug, msSlug, activeClass, includeArchived, deleteOutcome, saveError]);
+  }, [worldSlug, msSlug, activeClass, includeInactive, deleteOutcome, saveError]);
 
   // Apply optional checklist-origin cast prefilter from ?cast=mchar-1,mchar-2.
   useEffect(() => {
@@ -252,11 +252,15 @@ export function Records() {
         <label style={{ display: "block", marginBottom: 8 }}>
           <input
             type="checkbox"
-            checked={includeArchived}
-            onChange={(e) => setIncludeArchived(e.target.checked)}
+            checked={includeInactive}
+            onChange={(e) => setIncludeInactive(e.target.checked)}
           />{" "}
-          include archived
+          include inactive
         </label>
+        <p style={{ color: "#666", fontSize: 12, margin: "0 0 8px" }}>
+          Inactive = kept for reference, hidden from normal selection. Deleted =
+          file gone.
+        </p>
         <ul style={{ listStyle: "none", padding: 0 }}>
           {MANUAL_RECORD_CLASSES.map((cls) => (
             <li key={cls}>

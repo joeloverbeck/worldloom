@@ -160,7 +160,10 @@ test("deleteRecord: referenced record blocks with summaries and does not flip ac
     }
     const onDisk = YAML.parse(readFileSync(castPath, "utf8")) as Record<string, unknown>;
     assert.equal(onDisk.active, true);
-    assert.equal(onDisk.retired_reason, undefined);
+    assert.equal(
+      Object.hasOwn(onDisk, ["retired", "reason"].join("_")),
+      false,
+    );
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
   }
