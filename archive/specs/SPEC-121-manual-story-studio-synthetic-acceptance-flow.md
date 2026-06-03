@@ -1,6 +1,6 @@
 # SPEC-121 — Manual Story Studio: Synthetic One-Real-Story Acceptance Flow
 
-**Status:** DRAFT
+**Status:** COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; a single end-to-end acceptance test over an existing, synthetic, world-agnostic fixture; no LLM/MCP/patch-engine; no production code change required beyond test scaffolding).
 **Depends on:** `archive/specs/SPEC-117-manual-story-studio-post-segment-record-workbench.md` (post-segment workbench — step 19), `archive/specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md` (`never_prompt`/exclusion — step 13), and the landed core-loop specs SPEC-112…SPEC-116 (pickers, inclusion ledger, delete lifecycle, source browser, health gating).
@@ -9,6 +9,10 @@
 **Source:** critical triage of `reports/manual-story-studio-fourth-iteration.md` §§28 / 45 + Stage 8 (ChatGPT-Pro, 2026-06-02). Deferred in iterations 2–3 (lift-condition "until the core-loop feature specs land"); the user selected it for this batch (AskUserQuestion, 2026-06-02) now that the loop is complete.
 
 ---
+
+## Implementation Note (2026-06-03)
+
+Implemented by `archive/tickets/SPEC121MANSTOSTU-001.md`: `tools/manual-story-studio/test/acceptance/glass-orchard-fixture.ts` builds the synthetic Glass Orchard temp world/story inline, and `tools/manual-story-studio/test/acceptance/one-real-story.test.ts` drives the real read/write/prompt/health/segment layers plus Fastify `inject` for the post-segment workbench. The package proof lanes `cd tools/manual-story-studio && npm run test:backend` and `cd tools/manual-story-studio && npm test` passed on 2026-06-03. Remaining report/triage prose is historical intake context unless a later ticket reopens it.
 
 ## 1. Context & Motivation
 
@@ -24,7 +28,7 @@ The flow must **not** be tied to a real world (e.g., `animalia`); it uses a synt
 2. **One end-to-end acceptance test** driving the actual read/write/prompt/health/segment layers (browser-like at the API/service level; no live external LLM — pasted prose is a fixture) through the report §45 steps, condensed to the load-bearing assertions:
    - create manual story; browse synthetic world source (read-only); create Mira/Len cast + facts from literal source;
    - create belief / emotion / plan / relationship / clock / secret / question / consequence via the record layer; link non-cast records through the selector data;
-   - set the Prompt Working Set; **exclude the true answer from the prompt** (assert it does not appear — exercising archived SPEC-118 `never_prompt`/`excluded_records`);
+   - set the Prompt Working Set; **exclude the true answer from the prompt** via the working-set `excluded_records` list (assert it does not appear in the composed markdown). `never_prompt` is a distinct mechanism — per-record absolute suppression, higher in SPEC-118's precedence chain (`never_prompt` → `excluded_records` → `must_not_reveal` → inclusion) — and is already covered in isolation by `test/prompt/never-prompt.test.ts`, so this flow asserts the working-set exclusion rather than re-scripting SPEC-118 precedence;
    - compose prompt for **3-5 beats** (assert archived SPEC-118 default); inspect included/excluded/suppressed (assert the resolution ledger reflects the working set); save/copy prompt (assert no hard lint, no internal IDs in markdown);
    - paste an accepted segment; read compiled manuscript;
    - land on the **post-segment workbench** (SPEC-117) and assert the broad-referrer "touches this segment" pile (not the deleted checklist); update records (plan changes, belief changes, clock advances, new consequence);
@@ -50,9 +54,8 @@ The flow must **not** be tied to a real world (e.g., `animalia`); it uses a synt
 ## 4. Files to touch
 
 **Create:**
-- `tools/manual-story-studio/test/fixtures/glass-orchard/` — the synthetic world (WORLD_KERNEL + a couple of `_source` facts + two characters), minimal and read-only.
-- `tools/manual-story-studio/test/acceptance/one-real-story.test.ts` — the end-to-end flow with the §2 assertions and hermetic setup/teardown.
-- (if needed) a small test helper to spin a temp manual-story root + temp world root.
+- `tools/manual-story-studio/test/acceptance/one-real-story.test.ts` — the end-to-end flow with the §2 assertions and hermetic setup/teardown. (New `acceptance/` subdir — a deliberate departure from the package's `capstone-spec1NN.test.ts` root-level convention, since a product-acceptance flow is conceptually distinct from a per-spec capstone.)
+- A small test helper to spin a temp world root + temp manual-story root. **Build the synthetic Glass Orchard world inline at runtime** under a `mkdtempSync` temp `repoRoot` — write `worlds/glass-orchard/WORLD_KERNEL.md`, a couple of `_source` facts, and two `characters/*.md` via `fs`/`safeWriteFile` — following the established sibling-test pattern in `test/capstone-spec104.test.ts` (`mkFixture()` → `resolveManualStoryRoot` + `safeWriteFile`) and `test/read/world-source.test.ts`. Do **not** commit static `test/fixtures/glass-orchard/_source/*.yaml` files: no static `_source/*.yaml` fixtures exist anywhere in the package's test trees today, and authoring engine-only `_source/<subdir>/*.yaml` files via the editor trips the project's Hook 3 guard. The read layer (`readWorldSource(repoRoot, slug)`) browses `<repoRoot>/worlds/<slug>/`, so the inline-built world is fully real and read-only for the source-browser step.
 
 **Modify:**
 - none expected in production code; if a step reveals a missing read-only seam (e.g., the test needs a service entry point that only the route exposes), prefer a minimal additive test-friendly export over duplicating logic, and note it.
@@ -63,13 +66,13 @@ The flow must **not** be tied to a real world (e.g., `animalia`); it uses a synt
 | --- | --- | --- |
 | Fail-fast / validated state at the boundary | aligns @ health-scoping assertion | The test asserts the health layer blocks only *dependent* actions on a corrupted current-context, proving the fail-fast rail is scoped, not blanket (report §27). |
 | Prose/state separation | aligns @ pasted-fixture prose | Prose is an external fixture; the test never has the tool infer state from prose — it asserts the post-segment workbench surfaces candidates without inferring changes. |
-| Prompt-boundary safety | aligns @ exclusion + no-ID assertions | The test asserts the excluded/`never_prompt` true answer never reaches the prompt and that no internal ID appears in the composed markdown. |
+| Prompt-boundary safety | aligns @ exclusion + no-ID assertions | The test asserts the working-set-`excluded_records` true answer never reaches the prompt and that no internal ID appears in the composed markdown. |
 | §Canonical Storage Layer / Hook 3 | aligns @ hermetic teardown | The synthetic world lives in a temp/test location and is torn down; the test never writes a real `worlds/<slug>/` or any `_source/` surface. |
 
 ## 6. Acceptance criteria
 
 1. One test creates the synthetic Glass Orchard world + a manual story, runs the full loop, and tears everything down hermetically (no leftover artifacts under real `worlds/`).
-2. The excluded/`never_prompt` "true answer" record is asserted absent from the composed prompt markdown; no internal `mXXX-n` ID appears in the markdown.
+2. The working-set-`excluded_records` "true answer" record is asserted absent from the composed prompt markdown; no internal `mXXX-n` ID appears in the markdown. (Per-record `never_prompt` absolute suppression is covered separately by `test/prompt/never-prompt.test.ts`.)
 3. Composed prompt uses the `3-5` beat default.
 4. Post-segment step lands on the workbench and asserts the broad-referrer "touches this segment" pile (a record linked via `holder`/`between`/`held_by` appears).
 5. Hard-delete of an unreferenced fact succeeds; delete of a referenced secret blocks with referrer information; force path is repair-gated.
@@ -80,3 +83,22 @@ The flow must **not** be tied to a real world (e.g., `animalia`); it uses a synt
 
 - Backend (includes the acceptance test): `cd tools/manual-story-studio && npm run test:backend`
 - Full: `cd tools/manual-story-studio && npm test`
+
+## Outcome
+
+**Completed:** 2026-06-03
+
+Implemented by `archive/tickets/SPEC121MANSTOSTU-001.md`.
+
+What changed:
+- Added `tools/manual-story-studio/test/acceptance/glass-orchard-fixture.ts`, which builds the synthetic Glass Orchard world and manual-story root under a temp repo root.
+- Added `tools/manual-story-studio/test/acceptance/one-real-story.test.ts`, which drives the real read/write/prompt/health/segment layers and the post-segment workbench route.
+- Truthed same-seam implementation-order references during ticket closeout and post-ticket review.
+
+Deviations:
+- No production code change was needed; all required seams were already exported and directly testable.
+- The acceptance proof stayed service/API-level rather than DOM/Playwright-level, as intended by the spec.
+
+Verification:
+- `cd tools/manual-story-studio && npm run test:backend` passed on 2026-06-03.
+- `cd tools/manual-story-studio && npm test` passed on 2026-06-03.

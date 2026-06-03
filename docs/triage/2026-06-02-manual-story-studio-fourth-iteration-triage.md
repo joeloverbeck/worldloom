@@ -3,7 +3,7 @@
 **Date:** 2026-06-02
 **Source report:** `reports/manual-story-studio-fourth-iteration.md` (ChatGPT-Pro, produced after the third implementation pass; 47 sections, 997 lines)
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; package declares "No LLM, no MCP, no patch engine"; writes only under `worlds/<slug>/manual-stories/`). The parallel-writing-cockpit tie-break routes this here regardless of the `manual-story` record vocabulary.
-**Deliverables:** `specs/SPEC-117` … `specs/SPEC-121`, `specs/IMPLEMENTATION-ORDER.md`
+**Deliverables:** `archive/specs/SPEC-117` … `archive/specs/SPEC-121`, `archive/specs/IMPLEMENTATION-ORDER-2026-06-03.md`
 **Prior triages:** `docs/triage/2026-06-01-manual-story-studio-second-iteration-triage.md` (SPEC-100…111), `docs/triage/2026-06-02-manual-story-studio-third-iteration-triage.md` (SPEC-112…116, all landed/archived).
 
 ## Verification method
@@ -73,7 +73,7 @@ User pre-authorized "create specs in specs/*" + `IMPLEMENTATION-ORDER.md` contin
 - **Q1 → "Workbench now, schema stays deferred"**: SPEC-117 written; broad schema (D1) kept deferred; only existing-but-ignored fields wired (A5 → SPEC-118).
 - **Q2 → "Glass-Orchard acceptance test"** selected (→ SPEC-121); source-browser hierarchy (D3) kept deferred.
 
-Implementation order: SPEC-120 → SPEC-118 → SPEC-119 → SPEC-117 → SPEC-121 (only SPEC-121 has hard prerequisites: SPEC-117 + SPEC-118). See `specs/IMPLEMENTATION-ORDER.md`.
+Implementation order: SPEC-120 → SPEC-118 → SPEC-119 → SPEC-117 → SPEC-121 (only SPEC-121 has hard prerequisites: SPEC-117 + SPEC-118). See `archive/specs/IMPLEMENTATION-ORDER-2026-06-03.md`.
 
 Spec-ID allocation: prior batch ended at SPEC-116 (archived); `specs/` was empty; this batch starts at SPEC-117.
 
