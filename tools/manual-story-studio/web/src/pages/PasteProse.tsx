@@ -112,7 +112,7 @@ export function PasteProse() {
             lineHeight: 1.5,
             resize: "vertical",
           }}
-          placeholder="Paste or draft the next manuscript segment here."
+          placeholder="Paste the accepted prose for the next segment here."
         />
       </label>
 

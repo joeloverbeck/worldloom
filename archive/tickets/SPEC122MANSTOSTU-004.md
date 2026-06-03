@@ -1,6 +1,6 @@
 # SPEC122MANSTOSTU-004: Paste Prose placeholder — "Paste accepted prose"
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` web frontend (`PasteProse.tsx`); one-line placeholder string. No backend/schema change.
@@ -64,3 +64,20 @@ In `PasteProse.tsx:115`, replace `placeholder="Paste or draft the next manuscrip
 
 1. `cd tools/manual-story-studio && npm --prefix web test` (web typecheck)
 2. `cd tools/manual-story-studio && npm test` (full pipeline)
+
+## Outcome
+
+Completed: 2026-06-03
+
+Changed `tools/manual-story-studio/web/src/pages/PasteProse.tsx` so the prose textarea now says `Paste the accepted prose for the next segment here.` The change is intentionally limited to the author-facing placeholder copy; no textarea behavior, paste/save flow, backend route, schema, or record format changed.
+
+Verification:
+
+1. `rg -ni "paste or draft" tools/manual-story-studio/web/src` returned no matches, proving the stale draft wording is gone from current web source.
+2. `rg -n "Paste the accepted prose for the next segment here\\." tools/manual-story-studio/web/src/pages/PasteProse.tsx` found the new placeholder at line 115.
+3. `cd tools/manual-story-studio && npm --prefix web test` passed.
+4. `cd tools/manual-story-studio && npm test` passed: backend build, 489 backend tests, and web typecheck all green.
+
+Deviations:
+
+- None.
