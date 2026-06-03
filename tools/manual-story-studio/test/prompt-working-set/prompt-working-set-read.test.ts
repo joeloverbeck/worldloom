@@ -6,13 +6,13 @@ import test from "node:test";
 
 import YAML from "yaml";
 
-import { readCurrentContext } from "../../src/read/current-context.js";
+import { readPromptWorkingSet } from "../../src/read/prompt-working-set.js";
 
-const FIXTURES_ROOT = path.resolve("test/current-context/fixtures");
+const FIXTURES_ROOT = path.resolve("test/prompt-working-set/fixtures");
 const LEGACY_REVIEW_KEY = ["last", "reviewed", "after", "segment"].join("_");
 
-test("readCurrentContext: absent file returns a typed null value", () => {
-  const result = readCurrentContext(path.join(FIXTURES_ROOT, "absent"));
+test("readPromptWorkingSet: absent file returns a typed null value", () => {
+  const result = readPromptWorkingSet(path.join(FIXTURES_ROOT, "absent"));
 
   assert.equal(result.ok, true);
   if (result.ok) {
@@ -20,24 +20,24 @@ test("readCurrentContext: absent file returns a typed null value", () => {
   }
 });
 
-test("readCurrentContext: corrupt YAML returns current-context-yaml-parse-failed", () => {
-  const result = readCurrentContext(path.join(FIXTURES_ROOT, "corrupted"));
+test("readPromptWorkingSet: corrupt YAML returns prompt-working-set-yaml-parse-failed", () => {
+  const result = readPromptWorkingSet(path.join(FIXTURES_ROOT, "corrupted"));
 
   assert.equal(result.ok, false);
   if (!result.ok) {
-    assert.equal(result.error.code, "current-context-yaml-parse-failed");
-    assert.match(result.error.path, /current-context\.yaml$/);
+    assert.equal(result.error.code, "prompt-working-set-yaml-parse-failed");
+    assert.match(result.error.path, /prompt-working-set\.yaml$/);
     assert.match(result.error.repair_hint, /Fix YAML syntax/);
   }
 });
 
-test("readCurrentContext: existing file parses to CurrentContext shape", () => {
-  const result = readCurrentContext(path.join(FIXTURES_ROOT, "present"));
+test("readPromptWorkingSet: existing file parses to PromptWorkingSet shape", () => {
+  const result = readPromptWorkingSet(path.join(FIXTURES_ROOT, "present"));
 
   assert.equal(result.ok, true);
   if (result.ok) {
     if (result.value === null) {
-      assert.fail("Expected present fixture to parse to CurrentContext.");
+      assert.fail("Expected present fixture to parse to PromptWorkingSet.");
     }
     const ctx = result.value;
 
@@ -64,12 +64,12 @@ test("readCurrentContext: existing file parses to CurrentContext shape", () => {
   }
 });
 
-test("readCurrentContext: strips legacy reviewed segment marker", () => {
-  const root = mkdtempSync(path.join(os.tmpdir(), "manual-studio-current-context-read-"));
+test("readPromptWorkingSet: strips legacy reviewed segment marker", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "manual-studio-prompt-working-set-read-"));
   try {
     mkdirSync(root, { recursive: true });
     writeFileSync(
-      path.join(root, "current-context.yaml"),
+      path.join(root, "prompt-working-set.yaml"),
       YAML.stringify({
         current_location: null,
         current_cast: [],
@@ -84,7 +84,7 @@ test("readCurrentContext: strips legacy reviewed segment marker", () => {
       }),
     );
 
-    const result = readCurrentContext(root);
+    const result = readPromptWorkingSet(root);
 
     assert.equal(result.ok, true);
     if (result.ok) {

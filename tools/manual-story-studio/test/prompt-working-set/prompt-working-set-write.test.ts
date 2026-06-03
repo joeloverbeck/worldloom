@@ -13,8 +13,8 @@ import test from "node:test";
 
 import YAML from "yaml";
 
-import type { CurrentContext } from "../../src/schema/current-context.js";
-import { writeCurrentContext } from "../../src/write/current-context.js";
+import type { PromptWorkingSet } from "../../src/schema/prompt-working-set.js";
+import { writePromptWorkingSet } from "../../src/write/prompt-working-set.js";
 import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
@@ -23,7 +23,7 @@ import {
 const LEGACY_REVIEW_KEY = ["last", "reviewed", "after", "segment"].join("_");
 
 function mkWorld(): { repoRoot: string; manualStoryRoot: ManualStoryRoot } {
-  const repoRoot = mkdtempSync(path.join(os.tmpdir(), "manual-studio-current-context-"));
+  const repoRoot = mkdtempSync(path.join(os.tmpdir(), "manual-studio-prompt-working-set-"));
   mkdirSync(
     path.join(repoRoot, "worlds", "test-world", "manual-stories", "test-story"),
     { recursive: true },
@@ -38,7 +38,7 @@ function mkWorld(): { repoRoot: string; manualStoryRoot: ManualStoryRoot } {
   };
 }
 
-function context(overrides: Partial<CurrentContext> = {}): CurrentContext {
+function context(overrides: Partial<PromptWorkingSet> = {}): PromptWorkingSet {
   return {
     current_location: "mloc-2",
     current_cast: ["mchar-1", "mchar-3"],
@@ -53,23 +53,23 @@ function context(overrides: Partial<CurrentContext> = {}): CurrentContext {
   };
 }
 
-test("writeCurrentContext: writes current-context.yaml round trip", () => {
+test("writePromptWorkingSet: writes prompt-working-set.yaml round trip", () => {
   const { repoRoot, manualStoryRoot } = mkWorld();
   try {
     const ctx = context();
 
-    writeCurrentContext(manualStoryRoot, ctx);
+    writePromptWorkingSet(manualStoryRoot, ctx);
 
-    const fullPath = path.join(manualStoryRoot.absolutePath, "current-context.yaml");
+    const fullPath = path.join(manualStoryRoot.absolutePath, "prompt-working-set.yaml");
     assert.equal(existsSync(fullPath), true);
-    const parsed = YAML.parse(readFileSync(fullPath, "utf8")) as CurrentContext;
+    const parsed = YAML.parse(readFileSync(fullPath, "utf8")) as PromptWorkingSet;
     assert.deepEqual(parsed, ctx);
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
   }
 });
 
-test("writeCurrentContext: rejects sandbox escapes through ManualStoryRoot", () => {
+test("writePromptWorkingSet: rejects sandbox escapes through ManualStoryRoot", () => {
   const { repoRoot, manualStoryRoot } = mkWorld();
   try {
     const outsideRoot = path.join(repoRoot, "worlds", "test-world", "characters");
@@ -80,7 +80,7 @@ test("writeCurrentContext: rejects sandbox escapes through ManualStoryRoot", () 
     };
 
     assert.throws(
-      () => writeCurrentContext(doctoredRoot, context()),
+      () => writePromptWorkingSet(doctoredRoot, context()),
       /sandbox denylist hit/,
     );
   } finally {
@@ -88,10 +88,10 @@ test("writeCurrentContext: rejects sandbox escapes through ManualStoryRoot", () 
   }
 });
 
-test("writeCurrentContext: full-file replace truncates prior content", () => {
+test("writePromptWorkingSet: full-file replace truncates prior content", () => {
   const { repoRoot, manualStoryRoot } = mkWorld();
   try {
-    const fullPath = path.join(manualStoryRoot.absolutePath, "current-context.yaml");
+    const fullPath = path.join(manualStoryRoot.absolutePath, "prompt-working-set.yaml");
     writeFileSync(fullPath, "stale_field: should disappear\n");
     const replacement = context({
       current_location: null,
@@ -105,7 +105,7 @@ test("writeCurrentContext: full-file replace truncates prior content", () => {
       last_accepted_segment: null,
     });
 
-    writeCurrentContext(manualStoryRoot, replacement);
+    writePromptWorkingSet(manualStoryRoot, replacement);
 
     const text = readFileSync(fullPath, "utf8");
     assert.equal(text, YAML.stringify(replacement));
@@ -115,17 +115,17 @@ test("writeCurrentContext: full-file replace truncates prior content", () => {
   }
 });
 
-test("writeCurrentContext: strips legacy reviewed segment marker", () => {
+test("writePromptWorkingSet: strips legacy reviewed segment marker", () => {
   const { repoRoot, manualStoryRoot } = mkWorld();
   try {
     const ctx = {
       ...context(),
       [LEGACY_REVIEW_KEY]: "SEG-7",
-    } as CurrentContext;
+    } as PromptWorkingSet;
 
-    writeCurrentContext(manualStoryRoot, ctx);
+    writePromptWorkingSet(manualStoryRoot, ctx);
 
-    const fullPath = path.join(manualStoryRoot.absolutePath, "current-context.yaml");
+    const fullPath = path.join(manualStoryRoot.absolutePath, "prompt-working-set.yaml");
     const parsed = YAML.parse(readFileSync(fullPath, "utf8")) as Record<string, unknown>;
     assert.equal(Object.hasOwn(parsed, LEGACY_REVIEW_KEY), false);
   } finally {

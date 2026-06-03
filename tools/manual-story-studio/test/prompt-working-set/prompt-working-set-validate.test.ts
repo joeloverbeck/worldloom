@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { CurrentContext } from "../../src/schema/current-context.js";
+import type { PromptWorkingSet } from "../../src/schema/prompt-working-set.js";
 import { emptyKnownIds, type KnownIds } from "../../src/validate/refs.js";
 import {
   CURRENT_CONTEXT_POV_NOT_IN_CAST,
   CURRENT_CONTEXT_REFERENCE_BROKEN,
-  validateCurrentContext,
-} from "../../src/validate/current-context.js";
+  validatePromptWorkingSet,
+} from "../../src/validate/prompt-working-set.js";
 
 const KNOWN_SEGMENTS = ["SEG-1", "SEG-7"];
 
@@ -24,7 +24,7 @@ function knownIds(): KnownIds {
   return known;
 }
 
-function validContext(overrides: Partial<CurrentContext> = {}): CurrentContext {
+function validContext(overrides: Partial<PromptWorkingSet> = {}): PromptWorkingSet {
   return {
     current_location: "mloc-2",
     current_cast: ["mchar-1", "mchar-3"],
@@ -41,11 +41,11 @@ function validContext(overrides: Partial<CurrentContext> = {}): CurrentContext {
 }
 
 function expectSingleError(
-  ctx: CurrentContext,
+  ctx: PromptWorkingSet,
   field: string,
   code: string,
 ): void {
-  const result = validateCurrentContext(ctx, knownIds(), KNOWN_SEGMENTS);
+  const result = validatePromptWorkingSet(ctx, knownIds(), KNOWN_SEGMENTS);
   assert.equal(result.ok, false);
   if (!result.ok) {
     assert.equal(result.errors.length, 1);
@@ -54,19 +54,19 @@ function expectSingleError(
   }
 }
 
-test("validateCurrentContext: valid payload returns ok", () => {
-  const result = validateCurrentContext(validContext(), knownIds(), KNOWN_SEGMENTS);
+test("validatePromptWorkingSet: valid payload returns ok", () => {
+  const result = validatePromptWorkingSet(validContext(), knownIds(), KNOWN_SEGMENTS);
 
   assert.equal(result.ok, true);
 });
 
-test("validateCurrentContext: pov_holder must be included in current_cast", () => {
+test("validatePromptWorkingSet: pov_holder must be included in current_cast", () => {
   const ctx = validContext({ pov_holder: "mchar-3", current_cast: ["mchar-1"] });
 
   expectSingleError(ctx, "pov_holder", CURRENT_CONTEXT_POV_NOT_IN_CAST);
 });
 
-test("validateCurrentContext: unknown current_location is rejected", () => {
+test("validatePromptWorkingSet: unknown current_location is rejected", () => {
   expectSingleError(
     validContext({ current_location: "mloc-99" }),
     "current_location",
@@ -74,7 +74,7 @@ test("validateCurrentContext: unknown current_location is rejected", () => {
   );
 });
 
-test("validateCurrentContext: unknown current_cast entry is rejected", () => {
+test("validatePromptWorkingSet: unknown current_cast entry is rejected", () => {
   expectSingleError(
     validContext({ current_cast: ["mchar-1", "mchar-99"] }),
     "current_cast[1]",
@@ -82,7 +82,7 @@ test("validateCurrentContext: unknown current_cast entry is rejected", () => {
   );
 });
 
-test("validateCurrentContext: unknown active pressure clock is rejected", () => {
+test("validatePromptWorkingSet: unknown active pressure clock is rejected", () => {
   expectSingleError(
     validContext({ active_pressure_clocks: ["mclock-99"] }),
     "active_pressure_clocks[0]",
@@ -90,7 +90,7 @@ test("validateCurrentContext: unknown active pressure clock is rejected", () => 
   );
 });
 
-test("validateCurrentContext: unknown active secret/question is rejected", () => {
+test("validatePromptWorkingSet: unknown active secret/question is rejected", () => {
   expectSingleError(
     validContext({ active_secrets_questions: ["mq-99"] }),
     "active_secrets_questions[0]",
@@ -98,7 +98,7 @@ test("validateCurrentContext: unknown active secret/question is rejected", () =>
   );
 });
 
-test("validateCurrentContext: unknown pinned record is rejected", () => {
+test("validatePromptWorkingSet: unknown pinned record is rejected", () => {
   expectSingleError(
     validContext({ pinned_records: ["mrel-4", "mobl-99"] }),
     "pinned_records[1]",
@@ -106,8 +106,8 @@ test("validateCurrentContext: unknown pinned record is rejected", () => {
   );
 });
 
-test("validateCurrentContext: known excluded record is accepted", () => {
-  const result = validateCurrentContext(
+test("validatePromptWorkingSet: known excluded record is accepted", () => {
+  const result = validatePromptWorkingSet(
     validContext({ excluded_records: ["mrel-4", "mobl-1"] }),
     knownIds(),
     KNOWN_SEGMENTS,
@@ -116,7 +116,7 @@ test("validateCurrentContext: known excluded record is accepted", () => {
   assert.equal(result.ok, true);
 });
 
-test("validateCurrentContext: unknown excluded record is rejected", () => {
+test("validatePromptWorkingSet: unknown excluded record is rejected", () => {
   expectSingleError(
     validContext({ excluded_records: ["mrel-4", "mobl-99"] }),
     "excluded_records[1]",
@@ -124,7 +124,7 @@ test("validateCurrentContext: unknown excluded record is rejected", () => {
   );
 });
 
-test("validateCurrentContext: unknown must-not-reveal record is rejected", () => {
+test("validatePromptWorkingSet: unknown must-not-reveal record is rejected", () => {
   expectSingleError(
     validContext({ must_not_reveal: ["msecret-99"] }),
     "must_not_reveal[0]",
@@ -132,7 +132,7 @@ test("validateCurrentContext: unknown must-not-reveal record is rejected", () =>
   );
 });
 
-test("validateCurrentContext: unknown accepted segment is rejected", () => {
+test("validatePromptWorkingSet: unknown accepted segment is rejected", () => {
   expectSingleError(
     validContext({ last_accepted_segment: "SEG-99" }),
     "last_accepted_segment",

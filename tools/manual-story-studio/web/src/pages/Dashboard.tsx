@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { fetchCurrentContext } from "../api/current-context.js";
+import { fetchPromptWorkingSet } from "../api/prompt-working-set.js";
 import { readManuscript, type ManuscriptResponse } from "../api/manuscript.js";
 import { listPrompts, type PromptListEntry } from "../api/prompts.js";
 import {
@@ -12,7 +12,7 @@ import { listSegments, type SegmentListEntry } from "../api/segments.js";
 import { CurrentStatePanel } from "../components/CurrentStatePanel.js";
 import {
   MANUAL_RECORD_CLASSES,
-  type CurrentContext,
+  type PromptWorkingSet,
   type ManualRecordClass,
   type ManualRecordSummary,
   type ManualStoryMetadata,
@@ -63,12 +63,12 @@ export function Dashboard() {
   const [segments, setSegments] = useState<SegmentListEntry[]>([]);
   const [prompts, setPrompts] = useState<PromptListEntry[]>([]);
   const [manuscript, setManuscript] = useState<ManuscriptResponse | null>(null);
-  const [currentContext, setCurrentContext] = useState<CurrentContext | null>(
+  const [promptWorkingSet, setPromptWorkingSet] = useState<PromptWorkingSet | null>(
     null,
   );
   const [manuscriptMissing, setManuscriptMissing] = useState(false);
   const [metadataError, setMetadataError] = useState<string | null>(null);
-  const [currentContextError, setCurrentContextError] = useState<string | null>(
+  const [promptWorkingSetError, setPromptWorkingSetError] = useState<string | null>(
     null,
   );
   const [castError, setCastError] = useState<string | null>(null);
@@ -104,7 +104,7 @@ export function Dashboard() {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
     setMetadataError(null);
-    setCurrentContextError(null);
+    setPromptWorkingSetError(null);
     setCastError(null);
     setSegmentsError(null);
     setPromptsError(null);
@@ -116,12 +116,12 @@ export function Dashboard() {
       .catch((error: unknown) => {
         if (!cancelled) setMetadataError(loadErrorMessage(error));
       });
-    fetchCurrentContext(worldSlug, msSlug)
+    fetchPromptWorkingSet(worldSlug, msSlug)
       .then((ctx) => {
-        if (!cancelled) setCurrentContext(ctx);
+        if (!cancelled) setPromptWorkingSet(ctx);
       })
       .catch((error: unknown) => {
-        if (!cancelled) setCurrentContextError(loadErrorMessage(error));
+        if (!cancelled) setPromptWorkingSetError(loadErrorMessage(error));
       });
     apiList(worldSlug, msSlug, "cast")
       .then((c) => {
@@ -228,13 +228,13 @@ export function Dashboard() {
   return (
     <div className="manual-dashboard">
       <CurrentStatePanel
-        ctx={currentContext}
+        ctx={promptWorkingSet}
         worldSlug={worldSlug}
         msSlug={msSlug}
       />
-      {currentContextError ? (
+      {promptWorkingSetError ? (
         <p role="alert">
-          Failed to load current context: {currentContextError}{" "}
+          Failed to load prompt working set: {promptWorkingSetError}{" "}
           <button type="button" onClick={retryLoad}>
             Retry
           </button>

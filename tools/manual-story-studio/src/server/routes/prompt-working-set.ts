@@ -2,20 +2,20 @@ import { existsSync } from "node:fs";
 
 import type { FastifyInstance, FastifyReply } from "fastify";
 
-import { dropLegacyReviewKey, readCurrentContext } from "../../read/current-context.js";
+import { dropLegacyReviewKey, readPromptWorkingSet } from "../../read/prompt-working-set.js";
 import { readManualStoryMetadata } from "../../read/manual-story-metadata.js";
 import { listAllKnownIds } from "../../read/records.js";
 import type { ReadError } from "../../read/result.js";
-import type { CurrentContext } from "../../schema/current-context.js";
-import { validateCurrentContext } from "../../validate/current-context.js";
-import { writeCurrentContext } from "../../write/current-context.js";
+import type { PromptWorkingSet } from "../../schema/prompt-working-set.js";
+import { validatePromptWorkingSet } from "../../validate/prompt-working-set.js";
+import { writePromptWorkingSet } from "../../write/prompt-working-set.js";
 import {
   resolveManualStoryRoot,
   type ManualStoryRoot,
 } from "../../write/sandbox.js";
 import { mapReadErrorToHttpReply } from "../read-error-http.js";
 
-export interface CurrentContextRouteOptions {
+export interface PromptWorkingSetRouteOptions {
   repoRoot: string;
 }
 
@@ -37,11 +37,11 @@ function badRequest(reply: FastifyReply, message: string): FastifyReply {
   return reply.code(400).send({ error: "bad_request", message });
 }
 
-function mapCurrentContextReadError(
+function mapPromptWorkingSetReadError(
   reply: FastifyReply,
   error: ReadError,
 ): FastifyReply {
-  if (error.code === "current-context-yaml-parse-failed") {
+  if (error.code === "prompt-working-set-yaml-parse-failed") {
     return reply.code(409).send({
       error: error.code,
       message: error.repair_hint,
@@ -51,12 +51,12 @@ function mapCurrentContextReadError(
   return mapReadErrorToHttpReply(reply, error);
 }
 
-export async function registerCurrentContextReadRoute(
+export async function registerPromptWorkingSetReadRoute(
   server: FastifyInstance,
-  options: CurrentContextRouteOptions,
+  options: PromptWorkingSetRouteOptions,
 ): Promise<void> {
   server.get<{ Params: { slug: string; msSlug: string } }>(
-    "/api/worlds/:slug/manual-stories/:msSlug/current-context",
+    "/api/worlds/:slug/manual-stories/:msSlug/prompt-working-set",
     async (request, reply) => {
       const root = resolveRootOrNull(
         options.repoRoot,
@@ -65,22 +65,22 @@ export async function registerCurrentContextReadRoute(
       );
       if (!root) return reply.code(404).send({ error: "not_found" });
 
-      const result = readCurrentContext(root.absolutePath);
-      if (!result.ok) return mapCurrentContextReadError(reply, result.error);
+      const result = readPromptWorkingSet(root.absolutePath);
+      if (!result.ok) return mapPromptWorkingSetReadError(reply, result.error);
       return result.value;
     },
   );
 }
 
-export async function registerCurrentContextWriteRoute(
+export async function registerPromptWorkingSetWriteRoute(
   server: FastifyInstance,
-  options: CurrentContextRouteOptions,
+  options: PromptWorkingSetRouteOptions,
 ): Promise<void> {
   server.put<{
     Params: { slug: string; msSlug: string };
-    Body: CurrentContext;
+    Body: PromptWorkingSet;
   }>(
-    "/api/worlds/:slug/manual-stories/:msSlug/current-context",
+    "/api/worlds/:slug/manual-stories/:msSlug/prompt-working-set",
     async (request, reply) => {
       const root = resolveRootOrNull(
         options.repoRoot,
@@ -91,7 +91,7 @@ export async function registerCurrentContextWriteRoute(
 
       const body = dropLegacyReviewKey(request.body);
       if (!body || typeof body !== "object") {
-        return badRequest(reply, "current context body required");
+        return badRequest(reply, "prompt working set body required");
       }
 
       const metadata = readManualStoryMetadata(root.absolutePath);
@@ -99,7 +99,7 @@ export async function registerCurrentContextWriteRoute(
       const knownIds = listAllKnownIds(root.absolutePath);
       if (!knownIds.ok) return mapReadErrorToHttpReply(reply, knownIds.error);
 
-      const validation = validateCurrentContext(
+      const validation = validatePromptWorkingSet(
         body,
         knownIds.value,
         metadata.value.segment_order,
@@ -111,7 +111,7 @@ export async function registerCurrentContextWriteRoute(
         });
       }
 
-      writeCurrentContext(root, body);
+      writePromptWorkingSet(root, body);
       return reply.code(200).send(body);
     },
   );

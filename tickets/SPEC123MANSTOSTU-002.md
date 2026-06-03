@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` schema + web types + prompt-payload layer; no impact on any other tool/package.
-**Deps**: SPEC123MANSTOSTU-001
+**Deps**: archive/tickets/SPEC123MANSTOSTU-001.md
 
 ## Problem
 

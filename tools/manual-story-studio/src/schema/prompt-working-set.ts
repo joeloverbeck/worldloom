@@ -1,7 +1,7 @@
 // Author-controlled per-story selector for the cockpit's current point of view
 // onto a manual story's record corpus.
 
-export interface CurrentContext {
+export interface PromptWorkingSet {
   current_location: string | null; // mloc-<n> or null
   current_cast: string[]; // ordered list of mchar-<n>
   pov_holder: string | null; // mchar-<n>; one of current_cast when set

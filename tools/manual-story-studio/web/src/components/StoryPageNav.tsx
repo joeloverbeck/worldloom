@@ -4,7 +4,7 @@ import { useStoryRouteMatch } from "../hooks/useStoryRouteMatch.js";
 
 const STORY_PAGES = [
   { label: "Dashboard", path: "dashboard" },
-  { label: "Prompt Working Set", path: "current-context/edit" },
+  { label: "Prompt Working Set", path: "prompt-working-set/edit" },
   { label: "Cast", path: "cast" },
   { label: "Records", path: "records" },
   { label: "Source Browser", path: "source-browser" },

@@ -7,7 +7,7 @@ import test from "node:test";
 import YAML from "yaml";
 
 import { computeHealth } from "../../src/health/compute.js";
-import type { CurrentContext } from "../../src/schema/current-context.js";
+import type { PromptWorkingSet } from "../../src/schema/prompt-working-set.js";
 import { makeDefaultManualStoryMetadata } from "../../src/write/manual-story-metadata.js";
 import {
   resolveManualStoryRoot,
@@ -17,7 +17,7 @@ import {
 
 function mkWorld(): { repoRoot: string; root: ManualStoryRoot } {
   const repoRoot = mkdtempSync(
-    path.join(os.tmpdir(), "manual-studio-current-context-health-"),
+    path.join(os.tmpdir(), "manual-studio-prompt-working-set-health-"),
   );
   writeComposeDocs(repoRoot);
   const root = resolveManualStoryRoot(repoRoot, "test-world", "test-story");
@@ -164,7 +164,7 @@ function castProfile(id: string): Record<string, unknown> {
   };
 }
 
-function context(overrides: Partial<CurrentContext> = {}): CurrentContext {
+function context(overrides: Partial<PromptWorkingSet> = {}): PromptWorkingSet {
   return {
     current_location: "mloc-1",
     current_cast: ["mchar-1"],
@@ -179,7 +179,7 @@ function context(overrides: Partial<CurrentContext> = {}): CurrentContext {
   };
 }
 
-test("health: absent current-context produces no finding", () => {
+test("health: absent prompt-working-set produces no finding", () => {
   const { repoRoot, root } = mkWorld();
   try {
     const report = computeHealth(root.absolutePath);
@@ -191,10 +191,10 @@ test("health: absent current-context produces no finding", () => {
   }
 });
 
-test("health: valid current-context produces no finding", () => {
+test("health: valid prompt-working-set produces no finding", () => {
   const { repoRoot, root } = mkWorld();
   try {
-    safeWriteFile(root, "current-context.yaml", YAML.stringify(context()));
+    safeWriteFile(root, "prompt-working-set.yaml", YAML.stringify(context()));
 
     const report = computeHealth(root.absolutePath);
 
@@ -205,11 +205,11 @@ test("health: valid current-context produces no finding", () => {
   }
 });
 
-test("health: corrupt current-context blocks downstream actions", () => {
+test("health: corrupt prompt-working-set blocks downstream actions", () => {
   const { repoRoot, root } = mkWorld();
   try {
     writeFileSync(
-      path.join(root.absolutePath, "current-context.yaml"),
+      path.join(root.absolutePath, "prompt-working-set.yaml"),
       "current_location: [unterminated\n",
     );
 
@@ -217,7 +217,7 @@ test("health: corrupt current-context blocks downstream actions", () => {
 
     assert.equal(report.status, "blocked");
     assert.equal(report.findings.length, 1);
-    assert.equal(report.findings[0]?.code, "current-context-yaml-parse-failed");
+    assert.equal(report.findings[0]?.code, "prompt-working-set-yaml-parse-failed");
     assert.equal(report.findings[0]?.severity, "blocking");
     assert.deepEqual(report.blocked_actions, [
       "prompt_copy",
@@ -228,12 +228,12 @@ test("health: corrupt current-context blocks downstream actions", () => {
   }
 });
 
-test("health: broken current-context references degrade health", () => {
+test("health: broken prompt-working-set references degrade health", () => {
   const { repoRoot, root } = mkWorld();
   try {
     safeWriteFile(
       root,
-      "current-context.yaml",
+      "prompt-working-set.yaml",
       YAML.stringify(context({ pinned_records: ["mfact-99"] })),
     );
 
@@ -241,9 +241,9 @@ test("health: broken current-context references degrade health", () => {
 
     assert.equal(report.status, "degraded");
     assert.equal(report.findings.length, 1);
-    assert.equal(report.findings[0]?.code, "current-context-reference-broken");
+    assert.equal(report.findings[0]?.code, "prompt-working-set-reference-broken");
     assert.equal(report.findings[0]?.severity, "error");
-    assert.match(report.findings[0]?.path ?? "", /current-context\.yaml$/);
+    assert.match(report.findings[0]?.path ?? "", /prompt-working-set\.yaml$/);
     assert.deepEqual(report.blocked_actions, []);
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });

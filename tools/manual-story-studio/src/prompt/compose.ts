@@ -11,11 +11,11 @@ import path from "node:path";
 
 import YAML from "yaml";
 
-import { readCurrentContext } from "../read/current-context.js";
+import { readPromptWorkingSet } from "../read/prompt-working-set.js";
 import { readManualStoryMetadata } from "../read/manual-story-metadata.js";
 import { listRecords, readRecord } from "../read/records.js";
 import type { BeatTemplate } from "../schema/beat-template.js";
-import type { CurrentContext } from "../schema/current-context.js";
+import type { PromptWorkingSet } from "../schema/prompt-working-set.js";
 import type {
   ManualCharacterRecord,
   ManualRecord,
@@ -112,28 +112,28 @@ export async function composePrompt(
   const metadata = metadataResult.value;
   sidecarDraft.manual_story_slug = metadata.manual_story_slug;
 
-  // Stage 2.5 — Load optional current-context selector.
-  const currentContextResult = readCurrentContext(input.manualStoryRoot);
-  if (!currentContextResult.ok) {
+  // Stage 2.5 — Load optional prompt-working-set selector.
+  const promptWorkingSetResult = readPromptWorkingSet(input.manualStoryRoot);
+  if (!promptWorkingSetResult.ok) {
     throw new Error(
-      `current_context_unavailable: ${currentContextResult.error.code} at ${currentContextResult.error.path}`,
+      `prompt_working_set_unavailable: ${promptWorkingSetResult.error.code} at ${promptWorkingSetResult.error.path}`,
     );
   }
-  const currentContext = currentContextResult.value;
+  const promptWorkingSet = promptWorkingSetResult.value;
   const seededCastIds =
-    currentContext && currentContext.current_cast.length > 0
-      ? currentContext.current_cast.slice()
+    promptWorkingSet && promptWorkingSet.current_cast.length > 0
+      ? promptWorkingSet.current_cast.slice()
       : input.included_cast.slice();
   const unfilteredSeededRecordIds = mergeIds(
     input.included_records,
     [
-      ...(currentContext?.pinned_records ?? []),
-      ...(currentContext?.active_secrets_questions ?? []),
-      ...(currentContext?.must_not_reveal ?? []),
+      ...(promptWorkingSet?.pinned_records ?? []),
+      ...(promptWorkingSet?.active_secrets_questions ?? []),
+      ...(promptWorkingSet?.must_not_reveal ?? []),
     ],
   );
-  const seedReasons = seedReasonMap(input, currentContext);
-  const excludedRecordIds = new Set(currentContext?.excluded_records ?? []);
+  const seedReasons = seedReasonMap(input, promptWorkingSet);
+  const excludedRecordIds = new Set(promptWorkingSet?.excluded_records ?? []);
   const resolution: PromptResolution = {
     included: [],
     excluded: [],
@@ -189,7 +189,7 @@ export async function composePrompt(
   // Stage 4 — Load selected / active relevant records.
   const records: ManualRecord[] = [];
   const missingRecordFindings: PromptLintFinding[] = [];
-  const mustNotRevealIds = new Set(currentContext?.must_not_reveal ?? []);
+  const mustNotRevealIds = new Set(promptWorkingSet?.must_not_reveal ?? []);
   const visibleMustNotRevealIds = new Set(mustNotRevealIds);
   for (const id of seededRecordIds) {
     const cls = classifyManualRecordId(id);
@@ -367,10 +367,10 @@ export async function composePrompt(
     included_cast_ids: seededCastIds.slice(),
     moment_directive: input.moment_directive,
     included_template_body: includedTemplateBody,
-    current_handoff_summary: currentContext?.current_handoff_summary ?? null,
-    pov_holder: currentContext?.pov_holder ?? null,
+    current_handoff_summary: promptWorkingSet?.current_handoff_summary ?? null,
+    pov_holder: promptWorkingSet?.pov_holder ?? null,
     must_not_reveal: [...visibleMustNotRevealIds],
-    active_secrets_questions: currentContext?.active_secrets_questions ?? [],
+    active_secrets_questions: promptWorkingSet?.active_secrets_questions ?? [],
     recent_segment_last_paragraph: recentSegmentLastParagraph,
     content_policy_body: contentPolicyBody,
     prose_craft_contract_body: proseCraftBody,
@@ -446,16 +446,16 @@ function mergeIds(primary: string[], secondary: string[]): string[] {
 
 function seedReasonMap(
   input: PromptComposeInput,
-  currentContext: CurrentContext | null,
+  promptWorkingSet: PromptWorkingSet | null,
 ): Map<string, PromptIncludedReason> {
   const reasons = new Map<string, PromptIncludedReason>();
   for (const id of input.included_records) {
     if (!reasons.has(id)) reasons.set(id, "explicitly_selected");
   }
-  for (const id of currentContext?.pinned_records ?? []) {
+  for (const id of promptWorkingSet?.pinned_records ?? []) {
     if (!reasons.has(id)) reasons.set(id, "pinned");
   }
-  for (const id of currentContext?.active_secrets_questions ?? []) {
+  for (const id of promptWorkingSet?.active_secrets_questions ?? []) {
     if (!reasons.has(id)) reasons.set(id, "active_secret_question");
   }
   return reasons;

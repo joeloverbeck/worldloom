@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 
 import { composePrompt } from "../../src/prompt/compose.js";
-import type { CurrentContext } from "../../src/schema/current-context.js";
+import type { PromptWorkingSet } from "../../src/schema/prompt-working-set.js";
 import type {
   ManualRecord,
   ManualRecordClass,
@@ -127,7 +127,7 @@ function mkFixture(): { tempRoot: string; manualStoryRoot: string } {
       held_by: ["mchar-1"],
     }),
   );
-  writeCurrentContext(manualStoryRoot);
+  writePromptWorkingSet(manualStoryRoot);
   return { tempRoot, manualStoryRoot };
 }
 
@@ -141,8 +141,8 @@ function writeRecord(
   writeFileSync(path.join(dir, `${record.id}.yaml`), YAML.stringify(record));
 }
 
-function writeCurrentContext(manualStoryRoot: string): void {
-  const ctx: CurrentContext = {
+function writePromptWorkingSet(manualStoryRoot: string): void {
+  const ctx: PromptWorkingSet = {
     current_location: null,
     current_cast: ["mchar-1"],
     pov_holder: "mchar-1",
@@ -155,7 +155,7 @@ function writeCurrentContext(manualStoryRoot: string): void {
     last_accepted_segment: null,
   };
   writeFileSync(
-    path.join(manualStoryRoot, "current-context.yaml"),
+    path.join(manualStoryRoot, "prompt-working-set.yaml"),
     YAML.stringify(ctx),
   );
 }

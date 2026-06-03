@@ -5,7 +5,7 @@ import {
   MANUAL_RECORD_CLASSES,
   type ManualRecordClass,
 } from "../schema/manual-story.js";
-import { readCurrentContext } from "../read/current-context.js";
+import { readPromptWorkingSet } from "../read/prompt-working-set.js";
 import { readManualStoryMetadata } from "../read/manual-story-metadata.js";
 import {
   listAllKnownIds,
@@ -15,7 +15,7 @@ import {
 import { readSegmentBody, readSegmentSidecar } from "../read/segments.js";
 import { readManuscript } from "../read/manuscript.js";
 import { validateRecord, validateManualStoryMetadata } from "../validate/schema.js";
-import { validateCurrentContext } from "../validate/current-context.js";
+import { validatePromptWorkingSet } from "../validate/prompt-working-set.js";
 import { validateRefs } from "../validate/refs.js";
 import {
   deriveHealthStatus,
@@ -50,7 +50,7 @@ const SEGMENT_ACTIONS: readonly BlockedAction[] = [
 const FINDING_DEPENDENCIES: Readonly<Record<string, readonly BlockedAction[]>> = {
   "metadata-yaml-parse-failed": ALL_ACTIONS,
   "metadata-read-failed": ALL_ACTIONS,
-  "current-context-yaml-parse-failed": PROMPT_ACTIONS,
+  "prompt-working-set-yaml-parse-failed": PROMPT_ACTIONS,
   "content-policy-missing": PROMPT_ACTIONS,
   "content-policy-unreadable": PROMPT_ACTIONS,
   "prose-craft-contract-missing": PROMPT_ACTIONS,
@@ -127,14 +127,14 @@ function runFilePass(root: string): HealthFinding[] {
     if (freshnessFinding) findings.push(freshnessFinding);
   }
 
-  const currentContext = readCurrentContext(root);
-  if (!currentContext.ok) {
+  const promptWorkingSet = readPromptWorkingSet(root);
+  if (!promptWorkingSet.ok) {
     findings.push({
       severity: "blocking",
-      code: "current-context-yaml-parse-failed",
-      path: currentContext.error.path,
-      message: "current-context.yaml could not be read",
-      repair_hint: currentContext.error.repair_hint,
+      code: "prompt-working-set-yaml-parse-failed",
+      path: promptWorkingSet.error.path,
+      message: "prompt-working-set.yaml could not be read",
+      repair_hint: promptWorkingSet.error.repair_hint,
     });
   }
 
@@ -208,12 +208,12 @@ function runReferencePass(root: string): HealthFinding[] {
     }
   }
 
-  const currentContext = readCurrentContext(root);
-  if (currentContext.ok && currentContext.value !== null) {
+  const promptWorkingSet = readPromptWorkingSet(root);
+  if (promptWorkingSet.ok && promptWorkingSet.value !== null) {
     const metadata = readManualStoryMetadata(root);
     if (metadata.ok) {
-      const result = validateCurrentContext(
-        currentContext.value,
+      const result = validatePromptWorkingSet(
+        promptWorkingSet.value,
         known.value,
         metadata.value.segment_order,
       );
@@ -221,8 +221,8 @@ function runReferencePass(root: string): HealthFinding[] {
         for (const error of result.errors) {
           findings.push({
             severity: "error",
-            code: error.code ?? "current-context-reference-broken",
-            path: path.join(root, "current-context.yaml"),
+            code: error.code ?? "prompt-working-set-reference-broken",
+            path: path.join(root, "prompt-working-set.yaml"),
             message: error.message,
             repair_hint: `${error.field}: ${error.message}`,
           });

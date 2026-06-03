@@ -1,6 +1,6 @@
 # SPEC123MANSTOSTU-001: Rename `current-context` → `prompt-working-set` (identifiers, files, routes, filename, tests)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/manual-story-studio` backend + web; no impact on any other tool/package (the package is canon-fenced and has no external consumers).
@@ -124,3 +124,25 @@ Manual Story Studio's prompt-working-set selector was introduced as `current-con
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio/web && npm test`
 3. `cd tools/manual-story-studio && npm test` — full suite (backend build + `node --test` + web typecheck), the correct end-to-end verification boundary for a package-scoped rename.
+
+## Outcome
+
+Completed: 2026-06-03
+
+What changed:
+- Renamed the Manual Story Studio working-set concept from `current-context` to `prompt-working-set` across backend schema/read/write/validate/routes, server registration, prompt composition, health, record referrers, web API/page/routing/type imports, and tests.
+- Renamed the persisted sidecar filename from `current-context.yaml` to `prompt-working-set.yaml`.
+- Renamed `test/current-context/` to `test/prompt-working-set/`, including fixture filenames and per-file basenames.
+
+Deviations:
+- Preserved the `current_handoff_summary` field as planned for SPEC123MANSTOSTU-002.
+- Preserved the explicitly out-of-scope English UI copy `"active in the current context"` in `PromptPreview.tsx`.
+- Updated referrer-test sorted expectations because `prompt-working-set` sorts after record ids where `current-context` previously sorted before them; this is assertion truthing for the renamed key, not a behavior change.
+
+Verification:
+- `rg -n "current-context|currentContext|CurrentContext|current_context" tools/manual-story-studio -g '!dist/**' -g '!web/node_modules/**'` returned zero hits.
+- `rg -n "current-context\\.yaml" tools/manual-story-studio -g '!dist/**' -g '!web/node_modules/**'` returned zero hits.
+- `cd tools/manual-story-studio && npm run test:backend` passed.
+- `cd tools/manual-story-studio/web && npm test` passed.
+- `cd tools/manual-story-studio && npm test` passed.
+- `git diff --check` passed.
