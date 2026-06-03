@@ -57,7 +57,7 @@ Next-steps menu (user chooses)
 
 **In plan mode**: design doc writes to the plan file instead of `docs/plans/`, and `ExitPlanMode` replaces the next-steps menu.
 
-**Triage/analysis brainstorms**: the interview loop and the propose-approaches + present-design-section-by-section steps are replaced by a single triage recommendation — see Step 1 sub-step 5 (triage carve-out) and Step 3 §"For triage/analysis brainstorms".
+**Triage/analysis brainstorms**: the interview loop and the propose-approaches + present-design-section-by-section steps are replaced by a single triage recommendation — see Step 1 sub-step 5 (triage carve-out) and Step 3 §"For triage/analysis brainstorms". **A bare diagnostic/exploration request with no pre-authorized work-item deliverable — "figure out why X", "is X widespread", "what's happening with Z" — is itself a triage/analysis brainstorm of the no-source-report kind**, even when it first reads like a standard discovery→approaches brainstorm. Its findings (the answers) route to an out-of-report `O<N>` sub-section rather than a Step 3 propose-approaches table; see `references/triage-recommendation-structure.md` §No-source-report diagnostic case for the structure (omit verdict buckets; key findings `O<N>`; close with deliverable-shape recommendation + named assumptions). Fix-shape options for the diagnosed problem are the close-out's deliverable-shape recommendation, not a substitute for the `O<N>` findings.
 
 ## Step 1: Read Context
 
@@ -232,7 +232,7 @@ After design approval, do NOT apply changes or implement the design until the us
 | Triage analysis, all deliverables deferred (durable decision record) | `docs/triage/YYYY-MM-DD-<topic>-triage.md` — full verdict content, no deliverables to reference |
 | Hybrid (code + spec) | plan file orchestrates sequence — EXCEPT when the code change is small (< 50 lines), self-contained (single file, no public-interface change), and applied inline during the session: emit the spec + tickets + applied code change as parallel deliverables and skip the plan file (the spec + tickets ARE the orchestration record). See `references/deliverable-classification.md` §Hybrid deliverables §Small-inline-code carve-out. |
 | Data-gathering required first | pre-deliverable phase + final deliverable |
-| Implementation tickets | `tickets/<ID>.md` |
+| Implementation tickets | `tickets/<ID>.md` — for ID/namespace selection (esp. fresh-namespace derivation: scan `git log --oneline` for an existing namespace to reuse before inventing one, first ticket `<PREFIX>-001`, cite the namespace choice in the deliverable lead) see `references/deliverable-classification.md` §Ticket-namespace assignment |
 | New canon-pipeline proposal | `brainstorming/<topic>.md` |
 | Modify canon-pipeline proposal(s) | edit in place |
 | Reconcile existing spec(s) / ticket(s) / triage file(s) in place | edit in place |
