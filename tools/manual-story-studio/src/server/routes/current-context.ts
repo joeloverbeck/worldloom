@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 
 import type { FastifyInstance, FastifyReply } from "fastify";
 
-import { readCurrentContext } from "../../read/current-context.js";
+import { dropLegacyReviewKey, readCurrentContext } from "../../read/current-context.js";
 import { readManualStoryMetadata } from "../../read/manual-story-metadata.js";
 import { listAllKnownIds } from "../../read/records.js";
 import type { ReadError } from "../../read/result.js";
@@ -89,7 +89,7 @@ export async function registerCurrentContextWriteRoute(
       );
       if (!root) return reply.code(404).send({ error: "not_found" });
 
-      const body = request.body;
+      const body = dropLegacyReviewKey(request.body);
       if (!body || typeof body !== "object") {
         return badRequest(reply, "current context body required");
       }

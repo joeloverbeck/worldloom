@@ -63,7 +63,6 @@ function buildInitialRecord(
     tags: sourceItem?.tags ?? [],
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
   };
   initial[field] = text;
   if (field !== "title") {

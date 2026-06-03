@@ -47,12 +47,6 @@ export function validateCurrentContext(
     "questions",
   ]);
   checkSegment(errors, "last_accepted_segment", ctx.last_accepted_segment, knownSegments);
-  checkSegment(
-    errors,
-    "last_reviewed_after_segment",
-    ctx.last_reviewed_after_segment,
-    knownSegments,
-  );
 
   if (ctx.pov_holder !== null && !ctx.current_cast.includes(ctx.pov_holder)) {
     errors.push({

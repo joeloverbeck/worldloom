@@ -97,7 +97,6 @@ function commonFields(id: string): Record<string, unknown> {
     details: "details",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
   };
 }
@@ -176,7 +175,6 @@ function context(overrides: Partial<CurrentContext> = {}): CurrentContext {
     must_not_reveal: ["msecret-1"],
     current_handoff_summary: "Mara waits in the riverhouse kitchen.",
     last_accepted_segment: null,
-    last_reviewed_after_segment: null,
     ...overrides,
   };
 }

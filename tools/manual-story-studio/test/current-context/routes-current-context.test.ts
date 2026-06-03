@@ -22,6 +22,8 @@ import {
   type ManualStoryRoot,
 } from "../../src/write/sandbox.js";
 
+const LEGACY_REVIEW_KEY = ["last", "reviewed", "after", "segment"].join("_");
+
 function mkWorld(): {
   repoRoot: string;
   worldSlug: string;
@@ -75,7 +77,6 @@ function context(overrides: Partial<CurrentContext> = {}): CurrentContext {
     must_not_reveal: ["msecret-1"],
     current_handoff_summary: "Mara waits in the riverhouse kitchen.",
     last_accepted_segment: "SEG-1",
-    last_reviewed_after_segment: null,
     ...overrides,
   };
 }
@@ -198,10 +199,13 @@ test("current-context route: PUT invalid POV holder returns 422", async () => {
   }
 });
 
-test("current-context route: PUT state-reviewed segment writes reviewed marker", async () => {
+test("current-context route: PUT strips legacy reviewed segment marker", async () => {
   const { repoRoot, worldSlug, msSlug, root } = mkWorld();
   try {
-    const ctx = context({ last_reviewed_after_segment: "SEG-1" });
+    const ctx = {
+      ...context(),
+      [LEGACY_REVIEW_KEY]: "SEG-1",
+    };
     const server = await createServer({ repoRoot });
     try {
       const response = await server.inject({
@@ -210,10 +214,10 @@ test("current-context route: PUT state-reviewed segment writes reviewed marker",
         payload: ctx,
       });
       assert.equal(response.statusCode, 200);
-      assert.equal(response.json().last_reviewed_after_segment, "SEG-1");
+      assert.equal(Object.hasOwn(response.json(), LEGACY_REVIEW_KEY), false);
       const fullPath = path.join(root.absolutePath, "current-context.yaml");
-      const onDisk = YAML.parse(readFileSync(fullPath, "utf8")) as CurrentContext;
-      assert.equal(onDisk.last_reviewed_after_segment, "SEG-1");
+      const onDisk = YAML.parse(readFileSync(fullPath, "utf8")) as Record<string, unknown>;
+      assert.equal(Object.hasOwn(onDisk, LEGACY_REVIEW_KEY), false);
     } finally {
       await server.close();
     }

@@ -10,6 +10,8 @@
 
 **Implementation note (2026-06-03):** SPEC117MANSTOSTU-002 removed the checklist builder/component, `checklist_payload` save response field, and PasteProse modal render. Remaining checklist references in this spec are historical problem statement / planned-removal context unless superseded by later SPEC-117 tickets.
 
+**Implementation note (2026-06-03):** archive/tickets/SPEC117MANSTOSTU-001.md removed `last_reviewed_after_segment` from current-context and manual-record schemas, validation, read/write/route handling, web types/UI, README common-field prose, and package fixtures. Existing files carrying the legacy key are sanitized on current-context and record read/write so the key loads but does not round-trip. Remaining references in this spec are historical requirement/proof context unless superseded by later SPEC-117 tickets.
+
 ---
 
 ## 1. Context & Motivation

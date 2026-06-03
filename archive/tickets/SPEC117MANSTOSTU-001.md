@@ -1,6 +1,6 @@
 # SPEC117MANSTOSTU-001: Remove `last_reviewed_after_segment` (both schemas + all paths + UI + fixtures)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/manual-story-studio` (schema, validate, read, route, web types, web components/pages, test fixtures). No impact on world canon or `_source/` (package is canon-fenced per SPEC-100).
@@ -30,23 +30,23 @@
 3. Back-compat: a current-context fixture AND a manual-record fixture each carrying the old field load with it dropped and round-trip without it → schema-validation / test (`test/current-context/` round-trip + `test/validate/schema.test.ts`).
 4. `last_accepted_segment` retained → codebase grep-proof (still present in `src/schema/current-context.ts`).
 
-## What to Change
+## Landed Changes
 
 ### 1. Backend schemas + validation
 
-Remove `last_reviewed_after_segment` from `CurrentContext` (`src/schema/current-context.ts`, including the stale SPEC-108 comment) and from `RecordCommonFields` (`src/schema/manual-story.ts`). Drop it from `src/validate/current-context.ts` (the validated-field entry) and `src/validate/schema.ts` (the common-field list at :44 and `COMMON_NULLABLE` at :59).
+Removed `last_reviewed_after_segment` from `CurrentContext` (`src/schema/current-context.ts`, including the stale SPEC-108 comment) and from `RecordCommonFields` (`src/schema/manual-story.ts`). Dropped it from `src/validate/current-context.ts` and from the common-field / nullable lists in `src/validate/schema.ts`.
 
 ### 2. Backend read/write/route
 
-Drop the field from `src/read/current-context.ts` and the current-context write path; remove it from the GET/PUT route in `src/server/routes/current-context.ts`. Remove the `current-context.last_reviewed_after_segment` referrer line in `src/read/records.ts:308` (`collectCurrentContextReferrers`) — `scanReferences` itself is unchanged.
+Added legacy-key sanitization to current-context read/write and record read/write so old YAML containing the field loads but the key is dropped before validation, API response, and disk output. Removed the current-context referrer line in `src/read/records.ts`; `scanReferences` itself is unchanged.
 
 ### 3. Web types + UI
 
-Drop both declarations from `web/src/types/manual-story.ts`. Remove the "Last reviewed after segment" input + its `common`-state wiring from `web/src/components/RecordForm.tsx`. Remove the field input from `web/src/pages/EditCurrentContext.tsx`. Remove the field default from `web/src/pages/SourceBrowser.tsx`.
+Dropped both web type declarations, removed the "Last reviewed after segment" inputs/state from `RecordForm.tsx` and `EditCurrentContext.tsx`, and removed the default from `SourceBrowser.tsx`.
 
 ### 4. Test fixtures
 
-Drop `last_reviewed_after_segment` from every test fixture/setup that sets it (~27 files under `test/`), and add a back-compat assertion: a current-context fixture and a record fixture each containing the old field load with it dropped and round-trip without it.
+Dropped the field from package test fixtures/helpers and added compatibility assertions for current-context read/write, current-context PUT, record read, and record create round-trips.
 
 ## Files to Touch
 
@@ -57,11 +57,14 @@ Drop `last_reviewed_after_segment` from every test fixture/setup that sets it (~
 - `tools/manual-story-studio/src/read/current-context.ts` (modify)
 - `tools/manual-story-studio/src/read/records.ts` (modify)
 - `tools/manual-story-studio/src/server/routes/current-context.ts` (modify)
+- `tools/manual-story-studio/src/write/current-context.ts` (modify)
+- `tools/manual-story-studio/src/write/records.ts` (modify)
 - `tools/manual-story-studio/web/src/types/manual-story.ts` (modify)
 - `tools/manual-story-studio/web/src/components/RecordForm.tsx` (modify)
 - `tools/manual-story-studio/web/src/pages/EditCurrentContext.tsx` (modify)
 - `tools/manual-story-studio/web/src/pages/SourceBrowser.tsx` (modify)
-- `tools/manual-story-studio/test/**` — fixtures setting `last_reviewed_after_segment` (~27 files) + a new back-compat round-trip assertion (modify)
+- `tools/manual-story-studio/README.md` (modify)
+- `tools/manual-story-studio/test/**` — fixtures setting `last_reviewed_after_segment` + compatibility round-trip assertions (modify)
 
 ## Out of Scope
 
@@ -96,3 +99,18 @@ Drop `last_reviewed_after_segment` from every test fixture/setup that sets it (~
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm test`
 3. `npm --prefix web test` (run from `tools/manual-story-studio`; web typecheck per the repo's root-script convention)
+
+## Outcome
+
+`last_reviewed_after_segment` is no longer part of Manual Story Studio's current-context schema, record common schema, validators, referrer scanner, read/write paths, HTTP current-context response, web types, record form, current-context form, source-browser defaults, README common-field list, or package fixtures. `last_accepted_segment` remains intact.
+
+Legacy YAML compatibility is explicit: current-context read/write, current-context PUT, record read, and record create tests pass old-shaped payloads using a computed legacy key and assert the key does not survive API/disk round-trip.
+
+## Verification Result
+
+1. `rg -n "last_reviewed_after_segment" tools/manual-story-studio -g '!node_modules/**' -g '!web/node_modules/**'` — no matches.
+2. `cd tools/manual-story-studio && npm test` — PASS; backend build, 486 backend tests, and web TypeScript check passed.
+
+## Deviations
+
+None.

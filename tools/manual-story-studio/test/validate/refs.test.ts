@@ -33,7 +33,6 @@ function commonBase(id: string): Pick<
   | "details"
   | "refs"
   | "prompt_visibility"
-  | "last_reviewed_after_segment"
   | "notes"
 > {
   return {
@@ -46,7 +45,6 @@ function commonBase(id: string): Pick<
     details: "",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
   };
 }

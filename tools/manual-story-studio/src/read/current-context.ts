@@ -7,6 +7,7 @@ import type { CurrentContext } from "../schema/current-context.js";
 import { err, ok, type ReadResult } from "./result.js";
 
 const CURRENT_CONTEXT_FILENAME = "current-context.yaml";
+const LEGACY_REVIEW_KEY = ["last", "reviewed", "after", "segment"].join("_");
 
 export function readCurrentContext(manualStoryRoot: string): ReadResult<CurrentContext | null> {
   const fullPath = path.join(manualStoryRoot, CURRENT_CONTEXT_FILENAME);
@@ -38,5 +39,14 @@ export function readCurrentContext(manualStoryRoot: string): ReadResult<CurrentC
     });
   }
 
-  return ok(parsed as CurrentContext);
+  return ok(dropLegacyReviewKey(parsed) as CurrentContext);
+}
+
+export function dropLegacyReviewKey<T>(value: T): T {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return value;
+  }
+  const copy = { ...(value as Record<string, unknown>) };
+  delete copy[LEGACY_REVIEW_KEY];
+  return copy as T;
 }

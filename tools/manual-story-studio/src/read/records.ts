@@ -3,7 +3,7 @@ import path from "node:path";
 
 import YAML from "yaml";
 
-import { readCurrentContext } from "./current-context.js";
+import { dropLegacyReviewKey, readCurrentContext } from "./current-context.js";
 import {
   MANUAL_RECORD_CLASSES,
   MANUAL_RECORD_CLASS_PREFIXES,
@@ -82,7 +82,7 @@ export function readRecord<C extends ManualRecordClass>(manualStoryRoot: string,
       repair_hint: `Record at records/${recordClass}/${id}.yaml is missing required fields (id, title).`,
     });
   }
-  return ok(parsed.value as ManualRecordOfClass<C>);
+  return ok(dropLegacyReviewKey(parsed.value) as ManualRecordOfClass<C>);
 }
 
 export function listAllKnownIds(manualStoryRoot: string): ReadResult<KnownIds> {
@@ -305,7 +305,6 @@ function collectCurrentContextReferrers(
   collectOptionalString(context.current_location, recordClass, "current-context", "current-context.current_location", targetId, out);
   collectOptionalString(context.pov_holder, recordClass, "current-context", "current-context.pov_holder", targetId, out);
   collectOptionalString(context.last_accepted_segment, recordClass, "current-context", "current-context.last_accepted_segment", targetId, out);
-  collectOptionalString(context.last_reviewed_after_segment, recordClass, "current-context", "current-context.last_reviewed_after_segment", targetId, out);
   collectStringArray(context.current_cast, recordClass, "current-context", "current-context.current_cast", targetId, out);
   collectStringArray(context.active_pressure_clocks, recordClass, "current-context", "current-context.active_pressure_clocks", targetId, out);
   collectStringArray(context.active_secrets_questions, recordClass, "current-context", "current-context.active_secrets_questions", targetId, out);

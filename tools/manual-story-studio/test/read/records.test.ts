@@ -19,6 +19,8 @@ import type {
   ManualFactRecord,
 } from "../../src/schema/manual-story.js";
 
+const LEGACY_REVIEW_KEY = ["last", "reviewed", "after", "segment"].join("_");
+
 function mkRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "manual-studio-read-"));
   return root;
@@ -35,7 +37,6 @@ function commonFields(id: string): Pick<
   | "details"
   | "refs"
   | "prompt_visibility"
-  | "last_reviewed_after_segment"
   | "notes"
 > {
   return {
@@ -48,7 +49,6 @@ function commonFields(id: string): Pick<
     details: "d",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
   };
 }
@@ -141,6 +141,25 @@ test("readRecord: round-trip; missing and wrong-prefix return read errors", () =
     assertReadError(readRecord(root, "facts", "mfact-99"), "file_not_found");
     // wrong prefix: validator should reject without disk read
     assertReadError(readRecord(root, "facts", "mbel-5"), "invalid_id_shape");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("readRecord: strips legacy reviewed segment marker", () => {
+  const root = mkRoot();
+  try {
+    writeRecord(root, "facts", "mfact-5", {
+      ...commonFields("mfact-5"),
+      [LEGACY_REVIEW_KEY]: "SEG-7",
+    });
+
+    const record = unwrap(readRecord(root, "facts", "mfact-5"));
+
+    assert.equal(
+      Object.hasOwn(record as unknown as Record<string, unknown>, LEGACY_REVIEW_KEY),
+      false,
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

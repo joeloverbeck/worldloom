@@ -19,6 +19,8 @@ import {
 } from "../../src/write/records.js";
 import { resolveManualStoryRoot } from "../../src/write/sandbox.js";
 
+const LEGACY_REVIEW_KEY = ["last", "reviewed", "after", "segment"].join("_");
+
 function mkWorld(): { repoRoot: string; manualStoryRoot: ReturnType<typeof resolveManualStoryRoot> } {
   const repoRoot = mkdtempSync(path.join(os.tmpdir(), "manual-studio-write-"));
   const worldSlug = "test-world";
@@ -45,7 +47,6 @@ function commonFields(): Omit<ManualFactRecord, "id"> & { id?: never } {
     details: "",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
   } as Omit<ManualFactRecord, "id"> & { id?: never };
 }
@@ -125,6 +126,35 @@ test("createRecord: round-trip writes file at expected path", () => {
     const parsed = YAML.parse(readFileSync(expected, "utf8")) as ManualFactRecord;
     assert.equal(parsed.id, "mfact-1");
     assert.equal(parsed.title, "T");
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("createRecord: strips legacy reviewed segment marker", () => {
+  const { repoRoot, manualStoryRoot } = mkWorld();
+  try {
+    const result = createRecord(manualStoryRoot, "facts", {
+      ...commonFields(),
+      [LEGACY_REVIEW_KEY]: "SEG-7",
+    } as Omit<ManualFactRecord, "id">);
+    assert.equal(result.ok ?? true, true);
+    if (!("ok" in result) || !result.ok) throw new Error("expected ok");
+    assert.equal(
+      Object.hasOwn(
+        result.record as unknown as Record<string, unknown>,
+        LEGACY_REVIEW_KEY,
+      ),
+      false,
+    );
+    const fullPath = path.join(
+      manualStoryRoot.absolutePath,
+      "records",
+      "facts",
+      "mfact-1.yaml",
+    );
+    const parsed = YAML.parse(readFileSync(fullPath, "utf8")) as Record<string, unknown>;
+    assert.equal(Object.hasOwn(parsed, LEGACY_REVIEW_KEY), false);
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
   }

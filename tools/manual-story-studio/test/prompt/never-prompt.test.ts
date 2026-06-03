@@ -153,7 +153,6 @@ function writeCurrentContext(manualStoryRoot: string): void {
     must_not_reveal: ["msecret-1", "msecret-2"],
     current_handoff_summary: "",
     last_accepted_segment: null,
-    last_reviewed_after_segment: null,
   };
   writeFileSync(
     path.join(manualStoryRoot, "current-context.yaml"),

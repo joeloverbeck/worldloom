@@ -159,7 +159,6 @@ function writeCurrentContext(
     must_not_reveal: ["msecret-1"],
     current_handoff_summary: "Mara waits in the kitchen while Iven chooses whether to lie.",
     last_accepted_segment: null,
-    last_reviewed_after_segment: null,
     ...overrides,
   };
   writeFileSync(

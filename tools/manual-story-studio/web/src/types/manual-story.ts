@@ -109,7 +109,6 @@ export interface CurrentContext {
   must_not_reveal: string[];
   current_handoff_summary: string;
   last_accepted_segment: string | null;
-  last_reviewed_after_segment: string | null;
 }
 
 export interface SegmentSidecarIncludedRecordSummary {
@@ -167,7 +166,6 @@ export interface RecordCommonFields {
   details: string;
   refs: RecordRefs;
   prompt_visibility: PromptVisibility;
-  last_reviewed_after_segment: string | null;
   notes: string;
 }
 

@@ -12,6 +12,4 @@ export interface CurrentContext {
   must_not_reveal: string[]; // subset of active_secrets_questions or any msecret-<n>
   current_handoff_summary: string; // author's "what's happening right now"
   last_accepted_segment: string | null; // SEG-<n>
-  // Whole-story state-review attestation used by the SPEC-108 repair precondition.
-  last_reviewed_after_segment: string | null; // SEG-<n>
 }

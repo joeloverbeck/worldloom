@@ -86,7 +86,6 @@ function commonFields(id: string): RecordCommonFields {
     details: "",
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
-    last_reviewed_after_segment: null,
     notes: "",
   };
 }

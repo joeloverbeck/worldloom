@@ -3,6 +3,7 @@ import path from "node:path";
 
 import YAML from "yaml";
 
+import { dropLegacyReviewKey } from "../read/current-context.js";
 import {
   listAllKnownIds,
   readRecord,
@@ -152,7 +153,8 @@ function writeWithValidators<C extends ManualRecordClass>(
   composed: ManualRecordOfClass<C>,
   opts: CreateOptions,
 ): CreateRecordResult<C> {
-  const schemaResult = validateRecord(recordClass, composed);
+  const sanitized = dropLegacyReviewKey(composed) as ManualRecordOfClass<C>;
+  const schemaResult = validateRecord(recordClass, sanitized);
   if (!schemaResult.ok) {
     return { ok: false, error: "validation_failed", errors: schemaResult.errors };
   }
@@ -166,7 +168,7 @@ function writeWithValidators<C extends ManualRecordClass>(
   // for self-references in mrel-* between or refs.related_records).
   known[recordClass].add(id);
 
-  const violations = validateRefs(composed as ManualRecord, recordClass, known);
+  const violations = validateRefs(sanitized as ManualRecord, recordClass, known);
   if (violations.length > 0 && opts.overrideBrokenRefs !== true) {
     return {
       ok: false,
@@ -176,9 +178,9 @@ function writeWithValidators<C extends ManualRecordClass>(
     };
   }
 
-  const yamlText = YAML.stringify(composed);
+  const yamlText = YAML.stringify(sanitized);
   safeWriteFile(root, recordRelativePath(recordClass, id), yamlText);
-  return { ok: true, id, record: composed };
+  return { ok: true, id, record: sanitized };
 }
 
 export function deleteRecord(
