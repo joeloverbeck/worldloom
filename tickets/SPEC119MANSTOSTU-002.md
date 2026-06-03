@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` web frontend (`web/src/pages/PromptPreview.tsx`, `web/src/components/RecordCard.tsx`); rendering change only. No backend or compose change.
-**Deps**: SPEC119MANSTOSTU-001
+**Deps**: archive/tickets/SPEC119MANSTOSTU-001.md
 
 ## Problem
 

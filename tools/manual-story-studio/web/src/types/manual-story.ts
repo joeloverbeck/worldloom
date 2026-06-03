@@ -328,6 +328,11 @@ export interface PromptIncludedRecord {
   id: string;
   title: string;
   class: ManualRecordClass;
+  summary: string;
+  importance: RecordImportance;
+  prompt_visibility: PromptVisibility;
+  involved_cast: string[];
+  tags: string[];
   reason: PromptIncludedReason;
   section: string | null;
 }
@@ -336,12 +341,23 @@ export interface PromptExcludedRecord {
   id: string;
   title: string;
   class: ManualRecordClass;
+  summary: string;
+  importance: RecordImportance;
+  prompt_visibility: PromptVisibility;
+  involved_cast: string[];
+  tags: string[];
   reason: PromptExcludedReason;
 }
 
 export interface PromptSuppressedRecord {
   id: string;
   title: string;
+  class: ManualRecordClass;
+  summary: string;
+  importance: RecordImportance;
+  prompt_visibility: PromptVisibility;
+  involved_cast: string[];
+  tags: string[];
   reason: "must_not_reveal";
 }
 

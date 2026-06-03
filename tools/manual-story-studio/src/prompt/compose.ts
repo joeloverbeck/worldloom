@@ -20,6 +20,7 @@ import type {
   ManualCharacterRecord,
   ManualRecord,
   ManualRecordClass,
+  RecordCommonFields,
 } from "../schema/manual-story.js";
 import { validateBeatTemplate } from "../validate/beat-template-schema.js";
 import { lintPrompt } from "./lint.js";
@@ -179,6 +180,7 @@ export async function composePrompt(
       id: rec.value.id,
       title: rec.value.title,
       class: "cast",
+      ...ledgerIdentity(rec.value),
       reason: "current_cast",
       section: null,
     });
@@ -218,6 +220,7 @@ export async function composePrompt(
         id: rec.value.id,
         title: rec.value.title,
         class: cls,
+        ...ledgerIdentity(rec.value),
         reason: "never_prompt",
       });
       continue;
@@ -227,6 +230,7 @@ export async function composePrompt(
         id: rec.value.id,
         title: rec.value.title,
         class: cls,
+        ...ledgerIdentity(rec.value),
         reason: "inactive",
       });
       continue;
@@ -237,6 +241,8 @@ export async function composePrompt(
       resolution.suppressed.push({
         id: record.id,
         title: record.title,
+        class: cls,
+        ...ledgerIdentity(record),
         reason: "must_not_reveal",
       });
     } else {
@@ -244,6 +250,7 @@ export async function composePrompt(
         id: record.id,
         title: record.title,
         class: cls,
+        ...ledgerIdentity(record),
         reason: seedReasons.get(id) ?? "explicitly_selected",
         section: null,
       });
@@ -467,7 +474,21 @@ function describeExistingRecord(
     id: rec.value.id,
     title: rec.value.title,
     class: cls,
+    ...ledgerIdentity(rec.value),
     reason,
+  };
+}
+
+function ledgerIdentity(record: RecordCommonFields): Pick<
+  PromptExcludedRecord,
+  "summary" | "importance" | "prompt_visibility" | "involved_cast" | "tags"
+> {
+  return {
+    summary: record.summary,
+    importance: record.importance,
+    prompt_visibility: record.prompt_visibility,
+    involved_cast: record.refs.characters.slice(),
+    tags: record.tags.slice(),
   };
 }
 

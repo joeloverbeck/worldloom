@@ -1,6 +1,6 @@
 # SPEC119MANSTOSTU-001: Enrich resolution-ledger payload with real record identity
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` prompt composer (`src/prompt/types.ts`, `src/prompt/compose.ts`) + web type mirror (`web/src/types/manual-story.ts`); read-only payload enrichment, no composition-logic change. No impact on the external prompt (markdown is unchanged).
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The Prompt Inspector's resolution-ledger entries (`PromptIncludedRecord` / `PromptExcludedRecord` / `PromptSuppressedRecord`) carry only `{id, title, class, reason, section}`. The frontend's `ledgerSummary()` therefore fabricates a `ManualRecordSummary` whose `summary` is `"Reason: <label>"` and whose `importance` / `prompt_visibility` / `involved_cast` / `tags` are hardcoded placeholders. The author sees the inclusion *reason* in place of the record's real proposition/state. The data already exists on every record (`RecordCommonFields` carries `summary` / `importance` / `prompt_visibility` / `tags` / `refs.characters`), and the composer already holds the full record (`rec.value`) for every ledger entry — so the fix is to carry the real identity into each ledger entry at compose time (SPEC-119 §2 item 1 data side + §4 compose.ts bullet). This ticket is the data foundation that SPEC119MANSTOSTU-002 (rendering) and -003 (why-missing lookup) consume.
+At intake, the Prompt Inspector's resolution-ledger entries (`PromptIncludedRecord` / `PromptExcludedRecord` / `PromptSuppressedRecord`) carried only `{id, title, class, reason, section}`. The frontend's `ledgerSummary()` therefore fabricated a `ManualRecordSummary` whose `summary` was `"Reason: <label>"` and whose `importance` / `prompt_visibility` / `involved_cast` / `tags` were hardcoded placeholders. The author saw the inclusion *reason* in place of the record's real proposition/state. The data already existed on every record (`RecordCommonFields` carries `summary` / `importance` / `prompt_visibility` / `tags` / `refs.characters`), and the composer already held the full record (`rec.value`) for every ledger entry, so the implemented fix carries the real identity into each ledger entry at compose time (SPEC-119 §2 item 1 data side + §4 compose.ts bullet). This ticket is the data foundation that SPEC119MANSTOSTU-002 (rendering) and -003 (why-missing lookup) consume.
 
 ## Assumption Reassessment (2026-06-03)
 
@@ -28,23 +28,23 @@ The Prompt Inspector's resolution-ledger entries (`PromptIncludedRecord` / `Prom
 2. Determinism preserved -> assertion that the assembled `markdown` is byte-identical before/after enrichment for a fixed fixture (the enrichment changes `resolution` only).
 3. Backend↔web type-mirror parity -> codebase grep-proof: the enriched field set in `src/prompt/types.ts` matches `web/src/types/manual-story.ts` (same field names on `PromptIncludedRecord`/`PromptExcludedRecord`/`PromptSuppressedRecord`).
 
-## What to Change
+## Landed Changes
 
 ### 1. Extend the ledger-entry interfaces (`src/prompt/types.ts`)
 
-Add the real-identity fields to `PromptIncludedRecord`, `PromptExcludedRecord`, and `PromptSuppressedRecord`: `summary: string`, `importance: RecordImportance`, `prompt_visibility: PromptVisibility`, `involved_cast: string[]`, `tags: string[]`. (`PromptIncludedRecord` already has `section`; do not add `section` to the excluded/suppressed interfaces — SPEC-119 §2.1 notes those classes have no `section`, and the renderer shows section only where present.) Import `RecordImportance` / `PromptVisibility` from the schema module as needed.
+Added the real-identity fields to `PromptIncludedRecord`, `PromptExcludedRecord`, and `PromptSuppressedRecord`: `summary: string`, `importance: RecordImportance`, `prompt_visibility: PromptVisibility`, `involved_cast: string[]`, `tags: string[]`. `PromptSuppressedRecord` also now carries `class: ManualRecordClass`, because the live composer can suppress any seeded record class, not only secrets, and SPEC-119 requires class identity in every ledger-backed panel. `PromptIncludedRecord` keeps `section`; excluded/suppressed records still do not gain `section`.
 
 ### 2. Populate the fields at every push site (`src/prompt/compose.ts`)
 
-At each `resolution.included.push` / `.excluded.push` / `.suppressed.push` and inside `describeExistingRecord`, populate the new fields from `rec.value`: `summary: rec.value.summary`, `importance: rec.value.importance`, `prompt_visibility: rec.value.prompt_visibility`, `tags: rec.value.tags`, and `involved_cast` from `rec.value.refs.characters`. Note `involvedCastFromRefs` (`src/read/records.ts:427`) is **not currently exported** — either export it and reuse, or read `rec.value.refs.characters` directly (the helper's underlying source). Do not alter any control flow, ordering, or the `assembleSections` input — `markdown` must be unchanged.
+At each `resolution.included.push` / `.excluded.push` / `.suppressed.push` and inside `describeExistingRecord`, the composer populates the new fields from the already-loaded record via `ledgerIdentity()`: `summary`, `importance`, `prompt_visibility`, copied `tags`, and copied `refs.characters` as `involved_cast`. No control flow, ordering, or `assembleSections` input changed, so prompt markdown remains unchanged by the enrichment.
 
 ### 3. Mirror the enriched interfaces in the web bundle (`web/src/types/manual-story.ts`)
 
-Add the identical fields to the mirrored `PromptIncludedRecord` / `PromptExcludedRecord` / `PromptSuppressedRecord` (`:327-346`) so the frontend compiles against the real payload. `RecordImportance` (`:161`) and `PromptVisibility` (`:162-166`) already exist in this file.
+Added the identical fields to the mirrored `PromptIncludedRecord` / `PromptExcludedRecord` / `PromptSuppressedRecord` so the frontend compiles against the real payload. `RecordImportance` and `PromptVisibility` already existed in the mirror.
 
 ### 4. Backend payload test (`test/prompt/inspector-payload.test.ts`, new)
 
-Compose a fixture manual story and assert: (a) each `resolution.included` / `excluded` / `suppressed` entry exposes the record's real `summary` (not `"Reason: …"`), `class`, `involved_cast` (from refs), and `prompt_visibility`; (b) the assembled `markdown` is byte-identical to a pre-enrichment baseline for the same fixture (determinism).
+Added `test/prompt/inspector-payload.test.ts`, which composes a fixture manual story and asserts each `resolution.included` / `excluded` / `suppressed` entry exposes the record's real `summary` (not `"Reason: …"`), `class`, `involved_cast` from `refs.characters`, and `prompt_visibility`. The test also composes the same input twice and asserts byte-identical markdown.
 
 ## Files to Touch
 
@@ -52,6 +52,8 @@ Compose a fixture manual story and assert: (a) each `resolution.included` / `exc
 - `tools/manual-story-studio/src/prompt/compose.ts` (modify)
 - `tools/manual-story-studio/web/src/types/manual-story.ts` (modify)
 - `tools/manual-story-studio/test/prompt/inspector-payload.test.ts` (new)
+- `tools/manual-story-studio/test/prompt/inclusion-ledger.test.ts` (modify)
+- `tools/manual-story-studio/test/prompt/never-prompt.test.ts` (modify)
 
 ## Out of Scope
 
@@ -78,9 +80,31 @@ Compose a fixture manual story and assert: (a) each `resolution.included` / `exc
 ### New/Modified Tests
 
 1. `tools/manual-story-studio/test/prompt/inspector-payload.test.ts` (new) — asserts per-entry real identity and markdown determinism.
+2. `tools/manual-story-studio/test/prompt/inclusion-ledger.test.ts` (modify) — updates existing ledger shape assertions for enriched excluded and suppressed entries.
+3. `tools/manual-story-studio/test/prompt/never-prompt.test.ts` (modify) — updates `never_prompt` and suppressed ledger assertions for enriched entries.
 
 ### Commands
 
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm test`
 3. `cd tools/manual-story-studio && npm --prefix web test` (web typecheck — confirms the mirror parity compiles)
+
+## Outcome
+
+Completed on 2026-06-03.
+
+- Enriched `PromptIncludedRecord`, `PromptExcludedRecord`, and `PromptSuppressedRecord` with real record identity fields consumed by the inspector: summary, importance, prompt visibility, involved cast, and tags.
+- Added `class` to suppressed ledger entries so every ledger-backed row can render real record class identity.
+- Populated the enriched fields from records already loaded by the composer; no new disk reads, no inclusion-rule changes, and no markdown assembly changes.
+- Mirrored the enriched backend contract into `web/src/types/manual-story.ts`.
+- Added `test/prompt/inspector-payload.test.ts` and updated existing ledger tests to assert the enriched shapes.
+
+## Verification Result
+
+- `cd tools/manual-story-studio && npm run test:backend` — PASS; backend build plus 86 Node tests passed, including `dist/test/prompt/inspector-payload.test.js`.
+- `cd tools/manual-story-studio && npm --prefix web test` — PASS; web TypeScript mirror compiled with `tsc --noEmit`.
+- `cd tools/manual-story-studio && npm test` — PASS; backend/static suite reported 486 passing tests and the web typecheck passed.
+
+## Deviations
+
+- `PromptSuppressedRecord` gained `class: ManualRecordClass` in addition to the drafted enriched field list. Live reassessment showed suppression is not secret-only, so this is required to satisfy SPEC-119's "class identity in every panel" acceptance boundary.
