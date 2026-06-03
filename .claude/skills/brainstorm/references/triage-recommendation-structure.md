@@ -82,10 +82,11 @@ Group items by verdict bucket so the user can scan by verdict shape:
 
 When the auditor surfaces findings that were NOT in the source report (e.g., pre-existing contract/schema drift discovered during codebase exploration), add a separate **pre-deliverable cleanup** or **out-of-report findings** sub-section AFTER the verdict buckets. These findings have different provenance from source-report items and benefit from being named distinctly.
 
-For triage brainstorms, this sub-section is also where SKILL.md Step 1 sub-step 1's **Diagnostic/analysis reference files** rule lands ("communicate these corrections prominently to the user before proceeding to triage"):
+For triage brainstorms, this sub-section is also where SKILL.md Step 1 sub-step 1's **Diagnostic/analysis reference files** rule lands ("communicate these corrections prominently to the user before proceeding to triage"). Route by whether the correction's target is a source-report item:
 
-- **Corrections that materially reframe the triage** → place in the triage's lead OR a **verification headline** (which precedes the verdict buckets, satisfying the "prominently, before" requirement).
-- **Remaining (non-reframing) contradictions** → place in the out-of-report findings sub-section.
+- **A correction that refutes a *source-report item's* premise** (the report proposed X on a premise codebase verification disproves — e.g., the report says "X is broken / missing" but X is already enforced, or already resolved by a prior spec/commit) is a verdict on that source-report item → use the `refuted-by-verification` verdict (or `already-resolved` when a prior spec/commit closed it between iterations), keyed `R<N>` in the verdict buckets, NOT an out-of-report `O<N>` finding. Out-of-report is defined above for findings with NO presence in the source report; a refuted source-report item HAS presence there, so routing it to out-of-report makes it unreconcilable to the report. Quote the refuting evidence in the verdict's `verification source` field. (This is the common case where the diagnostic-reference verify-claims discipline and the `refuted-by-verification` verdict overlap — the verdict bucket wins because the item is a source item.)
+- **Corrections that materially reframe the triage as a whole** (not attached to a single source-report item — e.g., the report's framing assumption is wrong) → place in the triage's lead OR a **verification headline** (which precedes the verdict buckets, satisfying the "prominently, before" requirement).
+- **Auditor-discovered findings with no source-report presence** (pre-existing bugs encountered while reading cited files, schema drift) → place in the out-of-report findings sub-section as `O<N>`.
 
 ## No-source-report diagnostic case
 
