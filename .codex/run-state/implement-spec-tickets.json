@@ -1,18 +1,22 @@
 {
-  "originating_spec": "archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md",
-  "archived_spec": "archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md",
-  "last_ticket": "archive/tickets/SPEC123MANSTOSTU-002.md",
+  "originating_spec": "specs/SPEC-122-manual-story-studio-post-segment-prose-state-boundary.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC122MANSTOSTU-004.md",
   "last_result": "completed_archived",
-  "last_work_commit": "29609dc1f5099173d1aaa97d47c3721569be3fd6",
+  "last_work_commit": "606cb5454fbcf91c01f5d71f75c502980006d666",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "complete",
+  "next_target": "tickets/SPEC122MANSTOSTU-001.md",
+  "queue": [
+    "tickets/SPEC122MANSTOSTU-001.md",
+    "tickets/SPEC122MANSTOSTU-002.md",
+    "tickets/SPEC122MANSTOSTU-003.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "All SPEC123MANSTOSTU tickets archived; SPEC-123 archived; specs/IMPLEMENTATION-ORDER.md reviewed/updated; final proof passed: current-context/current-context.yaml/current_handoff_summary grep gates zero outside ignored output; npm run test:backend; web npm test; package npm test; git diff --check",
-  "dirty_state": "tracked worktree clean; expected ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, and tools/manual-story-studio/web/node_modules from verification",
+  "proof_state": "SPEC122MANSTOSTU-004 archived after passing grep proof, npm --prefix web test, and npm test. Remaining active queue is dependency ordered: 001 and 002 are independent; 003 depends on 002.",
+  "dirty_state": "tracked worktree expected clean after state commit; pre-existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, and tools/manual-story-studio/web/node_modules from package verification",
   "updated_at": "2026-06-03"
 }
