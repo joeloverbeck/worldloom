@@ -1,30 +1,34 @@
 # Implementation Order — Manual Story Studio Fifth Iteration
 
-**Status:** PROPOSED
+**Status:** PROPOSED (SPEC-123 completed; SPEC-122/SPEC-124 remain active)
 **Date:** 2026-06-03
 **Source:** triage of `reports/manual-story-studio-fifth-iteration.md` (ChatGPT-Pro) → `docs/triage/2026-06-03-manual-story-studio-fifth-iteration-triage.md`
-**Specs:** SPEC-122 … SPEC-124 (all `tools/manual-story-studio`, tooling-adjacent).
+**Active specs:** SPEC-122 and SPEC-124 (both `tools/manual-story-studio`, tooling-adjacent).
+**Completed in this batch:** SPEC-123 — archived at `archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md` after `archive/tickets/SPEC123MANSTOSTU-001.md` and `archive/tickets/SPEC123MANSTOSTU-002.md`.
 
 ## Dependency graph
 
 ```
-SPEC-122 (post-segment prose/state boundary)   independent — PostSegmentWorkbench + post-segment route + PasteProse
-SPEC-123 (current-context → prompt-working-set) independent — current-context surface (35 files); no file overlap with 122/124
-SPEC-124 (source browser narrowing)             independent — SourceBrowser creation paths
+SPEC-122 (post-segment prose/state boundary)    active — independent — PostSegmentWorkbench + post-segment route + PasteProse
+SPEC-123 (current-context → prompt-working-set) completed/archived — independent — current-context surface; no file overlap with 122/124
+SPEC-124 (source browser narrowing)             active — independent — SourceBrowser creation paths
 ```
 
-All three specs touch **disjoint file sets** (verified against the rename surface enumerated in SPEC-123 §4):
+The three original specs touch **disjoint file sets** (verified against the rename surface enumerated in SPEC-123 §4):
 - SPEC-122: `PostSegmentWorkbench.tsx`, `server/routes/post-segment-workbench.ts`, `PasteProse.tsx`, `test/post-segment-workbench.test.ts`.
-- SPEC-123: the `current-context` modules + `compose.ts`/`health/compute.ts`/`read/records.ts`/`http.ts` + web `current-context` files + `Dashboard.tsx`/`MomentComposer.tsx`/`StoryPageNav.tsx`/`App.tsx`/`types` + `test/current-context/`.
+- SPEC-123: completed and archived at `archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md`; the `current-context` modules + `compose.ts`/`health/compute.ts`/`read/records.ts`/`http.ts` + web `current-context` files + `Dashboard.tsx`/`MomentComposer.tsx`/`StoryPageNav.tsx`/`App.tsx`/`types` + `test/current-context/`.
 - SPEC-124: `SourceBrowser.tsx` + source-derived creation client path.
 
 There are **no hard prerequisites** between them; they can land in any order or in parallel.
 
 ## Recommended landing order
 
-1. **SPEC-123 — `current-context` → `prompt-working-set` rename.** Land first as a tidiness measure: it is the widest (35 files) and purely mechanical, and landing it before the others avoids any later diff having to reason about the dual naming. (Strictly optional — no file overlap forces this.)
-2. **SPEC-122 — Post-segment prose/state boundary cleanup.** The highest-value, FOUNDATIONS-aligned fix (removes a prose→record seeding regression introduced by SPEC-117). Land second so the boundary fix is in place early.
-3. **SPEC-124 — Source browser creation narrowing.** Lifts the iter-4 D3 deferral now that the user confirmed real friction; smallest blast radius.
+Completed:
+- **SPEC-123 — `current-context` → `prompt-working-set` rename.** Landed first as planned and archived at `archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md`.
+
+Remaining active order:
+1. **SPEC-122 — Post-segment prose/state boundary cleanup.** The highest-value, FOUNDATIONS-aligned fix (removes a prose→record seeding regression introduced by SPEC-117). Land next so the boundary fix is in place early.
+2. **SPEC-124 — Source browser creation narrowing.** Lifts the iter-4 D3 deferral now that the user confirmed real friction; smallest blast radius.
 
 ## Deferred (not in this batch — see triage)
 

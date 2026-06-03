@@ -1,6 +1,6 @@
 # SPEC-123 — Manual Story Studio: `current-context` → `prompt-working-set` Rename
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-06-03
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; mechanical identifier/storage/route rename; no LLM/MCP/patch-engine; no behavior change).
 **Depends on:** — (independent surface; no file overlap with SPEC-122 or SPEC-124).
@@ -121,3 +121,27 @@ A complete rename of the `current-context` concept to `prompt-working-set`, no b
 - **No on-disk migration (verified).** No `current-context.yaml` exists under `worlds/*/manual-stories/`; the clean break loses no data. **Assumption:** the author has no un-committed local manual story carrying a `current-context.yaml`; if one exists, it must be renamed manually (a one-line `mv`), since there is no read-fallback by design.
 - **`reorderPatches`/engine surfaces are not involved** — Manual Studio does not route through the patch engine; this is a plain file rename.
 - **Scope discipline.** This is a rename only. The speculative new fields and `active_reveal_controls` rename are explicitly deferred; do not fold them in.
+
+## Outcome
+
+Completed: 2026-06-03
+
+What changed:
+- `current-context` was renamed to `prompt-working-set` across Manual Story Studio backend files, type names, route registration and wire path, read/write filename, prompt composition, health, record referrers, web API/page/routing/type consumers, and tests.
+- The persisted sidecar is now `prompt-working-set.yaml`; no compatibility shim or read fallback for `current-context.yaml` was introduced.
+- The narrow field rename `current_handoff_summary` to `handoff_summary` landed across the backend schema, web type, prompt-payload type, prompt composition mapping, section 3 emitter, UI consumers, fixtures, and tests. `must_not_reveal` was left unchanged.
+- The active implementation tickets were completed and archived as `archive/tickets/SPEC123MANSTOSTU-001.md` and `archive/tickets/SPEC123MANSTOSTU-002.md`.
+
+Deviations:
+- No manual browser smoke was run; the accepted proof boundary is the package's backend route tests, web typecheck, full package test suite, and grep gates.
+- The explicitly out-of-scope PromptPreview English copy `"active in the current context"` remains unchanged.
+- Test assertion ordering was updated where the renamed keys sort differently from the old names.
+
+Verification:
+- `rg -n "current-context|currentContext|CurrentContext|current_context" tools/manual-story-studio -g '!dist/**' -g '!web/node_modules/**'` returned zero hits.
+- `rg -n "current-context\\.yaml" tools/manual-story-studio -g '!dist/**' -g '!web/node_modules/**'` returned zero hits.
+- `rg -n "current_handoff_summary" tools/manual-story-studio -g '!dist/**' -g '!web/node_modules/**'` returned zero hits.
+- `cd tools/manual-story-studio && npm run test:backend` passed after both ticket slices.
+- `cd tools/manual-story-studio/web && npm test` passed after both ticket slices.
+- `cd tools/manual-story-studio && npm test` passed after both ticket slices.
+- `git diff --check` passed for the final spec archival edit set.
