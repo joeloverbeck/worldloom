@@ -193,9 +193,10 @@ test("§14 Stop Rule contains the SPEC-107 meaningful-turn wording", () => {
   );
   assert.ok(
     s14.includes(
-      "Do not declare durable machine-state conclusions unless the directive explicitly asks for that wording.",
+      "Do not declare durable continuity changes outside the prose. The author will update story records manually after accepting or rejecting this segment.",
     ),
   );
+  assert.doesNotMatch(s14, /machine-state conclusions/);
 });
 
 test("§15 contains the narrative-structure language ban", () => {

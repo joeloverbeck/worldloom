@@ -16,14 +16,15 @@ test("emitSection14 contains the key meaningful-action sentence (SPEC-107 regres
   );
 });
 
-test("emitSection14 contains the durable-machine-state caveat (SPEC-107 regression guard)", () => {
+test("emitSection14 contains the durable-continuity handoff wording", () => {
   const text = emitSection14().body;
   assert.ok(
     text.includes(
-      "Do not declare durable machine-state conclusions unless the directive explicitly asks for that wording.",
+      "Do not declare durable continuity changes outside the prose. The author will update story records manually after accepting or rejecting this segment.",
     ),
-    "stop rule must caveat durable machine-state declarations per SPEC-107",
+    "stop rule must keep durable continuity changes out of author-facing prose",
   );
+  assert.doesNotMatch(text, /machine-state conclusions/);
 });
 
 test("SECTION_14_TITLE remains 'Stop Rule'", () => {
