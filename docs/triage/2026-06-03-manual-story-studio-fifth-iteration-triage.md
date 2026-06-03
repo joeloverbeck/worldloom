@@ -3,7 +3,7 @@
 **Date:** 2026-06-03
 **Source report:** `reports/manual-story-studio-fifth-iteration.md` (ChatGPT-Pro, produced after the fourth implementation pass; 38 sections, 936 lines, with a 7-item priority list + 7-stage staged strategy).
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; package declares "No LLM, no MCP, no patch engine"; writes only under `worlds/<slug>/manual-stories/`). The parallel-writing-cockpit tie-break routes this here regardless of the `manual-story` record vocabulary.
-**Deliverables:** `specs/SPEC-122`, `specs/SPEC-123`, `specs/SPEC-124`, `specs/IMPLEMENTATION-ORDER.md`.
+**Deliverables:** `archive/specs/SPEC-122-manual-story-studio-post-segment-prose-state-boundary.md`, `archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md`, `archive/specs/SPEC-124-manual-story-studio-source-browser-narrowing.md`, `archive/specs/IMPLEMENTATION-ORDER-2026-06-03-2.md`.
 **Prior triages:** `docs/triage/2026-06-01-…-second-iteration-triage.md` (SPEC-100…111), `docs/triage/2026-06-02-…-third-iteration-triage.md` (SPEC-112…116), `docs/triage/2026-06-02-…-fourth-iteration-triage.md` (SPEC-117…121). All prior specs landed/archived; `specs/` was empty before this batch.
 
 ## Verification method
@@ -80,7 +80,7 @@ User pre-authorized "create specs in specs/*" + `IMPLEMENTATION-ORDER.md` contin
 
 SPEC-122 was written unconditionally (the one clearly-warranted, FOUNDATIONS-aligned, verified-regression fix).
 
-Implementation order: SPEC-123 → SPEC-122 → SPEC-124 (all independent / disjoint file sets; the order is a tidiness preference, not a hard dependency). See `specs/IMPLEMENTATION-ORDER.md`.
+Implementation order: SPEC-123 → SPEC-122 → SPEC-124 (all independent / disjoint file sets; the order is a tidiness preference, not a hard dependency). See `archive/specs/IMPLEMENTATION-ORDER-2026-06-03-2.md`.
 
 Spec-ID allocation: prior batch ended at SPEC-121 (archived); `specs/` was empty; this batch starts at SPEC-122.
 

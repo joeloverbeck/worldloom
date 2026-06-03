@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 
-import path from "node:path";
-
+import { resolveRepoRoot } from "./repo-root.js";
 import { createServer } from "./server/http.js";
+import { assertRepoRootBootPreflight, formatStartupReadError } from "./server/preflight.js";
 
 const DEFAULT_PORT = 5175;
 
 interface Args {
   port: number;
-  repoRoot: string;
+  explicitRepoRoot?: string;
 }
 
 function parseArgs(argv: string[]): Args {
   let port = DEFAULT_PORT;
-  let repoRoot = process.cwd();
+  let explicitRepoRoot: string | undefined;
 
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
@@ -29,15 +29,26 @@ function parseArgs(argv: string[]): Args {
       if (raw === undefined || raw.trim() === "") {
         throw new Error("Invalid repo root: <missing>");
       }
-      repoRoot = path.resolve(raw);
+      explicitRepoRoot = raw;
     }
   }
 
-  return { port, repoRoot };
+  return explicitRepoRoot === undefined ? { port } : { port, explicitRepoRoot };
 }
 
 async function main(): Promise<void> {
-  const { port, repoRoot } = parseArgs(process.argv.slice(2));
+  const { port, explicitRepoRoot } = parseArgs(process.argv.slice(2));
+  const resolveOptions =
+    explicitRepoRoot === undefined
+      ? { cwd: process.cwd(), entryPointUrl: import.meta.url }
+      : { explicit: explicitRepoRoot, cwd: process.cwd(), entryPointUrl: import.meta.url };
+  const resolved = resolveRepoRoot(resolveOptions);
+  if (!resolved.ok) {
+    throw new Error(formatStartupReadError(resolved.error));
+  }
+
+  const repoRoot = resolved.value;
+  assertRepoRootBootPreflight(repoRoot);
   const server = await createServer({ repoRoot, port });
 
   const shutdown = async () => {
