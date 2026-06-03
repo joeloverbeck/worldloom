@@ -48,7 +48,7 @@ In `PostSegmentWorkbench.tsx`: replace the raw `.join(", ")` ID lists at `:334-3
 
 - The candidate scanning logic (`:71-82`, `:182-189`) — unchanged.
 - The payload-key rename and heading reword (SPEC122MANSTOSTU-002 — this ticket depends on it).
-- The R1 prose-seeding removal (SPEC122MANSTOSTU-001).
+- The R1 prose-seeding removal (archive/tickets/SPEC122MANSTOSTU-001.md).
 - Introducing any second/frontend on-disk ID→card resolver.
 
 ## Acceptance Criteria

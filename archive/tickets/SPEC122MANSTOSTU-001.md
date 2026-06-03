@@ -1,6 +1,6 @@
 # SPEC122MANSTOSTU-001: Remove post-segment prose-seeding; add copy-selected-prose-into-notes
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` web frontend (`PostSegmentWorkbench.tsx`); no backend or schema change.
@@ -16,6 +16,7 @@ When the author creates a new record in the post-segment workbench, the new-reco
 2. Spec SPEC-122 §2 item 1 + §3 specify: empty `title`/`summary`/`details`; keep the `segment:<id>` tag; `refs` only on explicit link action; an explicit live-selection "Copy selected prose into notes" affordance. The reassessment (M1) confirmed `last_paragraph` is RETAINED in the payload for the segment-meta display row (`:330-332`) — this ticket changes only the seeding use at `:104-105`, not the backend field.
 3. Cross-artifact boundary under audit: the frontend → records write API (`apiCreate`/`apiUpdate` in `web/src/api/records.js`). The new-record default object and the copy-into-notes affordance must write only `notes` (free-text), never `summary`/`details`/`title`, preserving the prose/state boundary at the write surface.
 4. FOUNDATIONS principle motivating this ticket: §Tooling Recommendation least-agency posture — the deterministic layer must never extract record meaning from prose. Manual Studio has no LLM, but the same posture forbids prose→record inference in its UI. Removing the seeding restores that discipline.
+5. Implementation reassessment found that `refs` were also still prefilled by default in `initialRecordForSegment()`. The final implementation corrects that same ticket-owned boundary: new records start with empty `refs.characters` and `refs.related_records` unless the author explicitly checks the prompt-link option in the new-record drawer.
 
 ## Architecture Check
 
@@ -41,6 +42,7 @@ Add an explicit control to the rendered-prose surface that, when the author has 
 ## Files to Touch
 
 - `tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx` (modify)
+- `tools/manual-story-studio/web/src/components/RecordForm.tsx` (modify)
 - `tools/manual-story-studio/test/post-segment-workbench.test.ts` (modify)
 
 ## Out of Scope
@@ -72,3 +74,26 @@ Add an explicit control to the rendered-prose surface that, when the author has 
 
 1. `cd tools/manual-story-studio && npm --prefix web test` (web typecheck — the web package's `test` script is `tsc --noEmit`)
 2. `cd tools/manual-story-studio && npm test` (full pipeline)
+
+## Outcome
+
+Completed: 2026-06-03
+
+Changed `tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx` so new post-segment records no longer seed `summary` from `last_paragraph`, no longer seed `details` from the full segment body, and no longer prefill prompt cast/record refs by default. The deterministic `segment:<id>` tag remains. Prompt cast/record refs are now behind an explicit new-record drawer checkbox, preserving the author-chosen provenance path without making it automatic.
+
+Added an explicit `Copy selected prose into notes` button on the accepted-prose surface. It reads the author's live browser selection only when the selection is inside the rendered accepted prose, is enabled only while a record form is open, scopes the insertion to the current form, and routes the selected text through `RecordForm` into `notes` only. `RecordForm` gained a narrow `noteInsertion` prop for that notes-only append path.
+
+Added `tools/manual-story-studio/test/post-segment-workbench.test.ts` coverage that source-checks the new-record defaults, blocks the old `summary: payload?.segment.last_paragraph` / `details: payload?.segment.body` seeding expressions, verifies the explicit prompt-link option, and checks the note insertion effect writes to `notes` without touching `summary`, `details`, or `title`.
+
+Verification:
+
+1. `rg -n "summary:\\s*payload\\?\\.segment\\.last_paragraph|details:\\s*payload\\?\\.segment\\.body" tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx` returned no matches.
+2. `rg -n "last_paragraph" tools/manual-story-studio/web/src tools/manual-story-studio/src` showed only allowed non-seeding consumers: the Workbench type/display row, backend payload field, and unrelated prompt recent-segment prompt context.
+3. `cd tools/manual-story-studio && npm run test:backend` passed.
+4. `cd tools/manual-story-studio && npm --prefix web test` passed.
+5. `cd tools/manual-story-studio && npm test` passed: backend build, 490 backend tests, and web typecheck all green.
+6. `git diff --check -- tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx tools/manual-story-studio/web/src/components/RecordForm.tsx tools/manual-story-studio/test/post-segment-workbench.test.ts archive/tickets/SPEC122MANSTOSTU-001.md` passed.
+
+Deviations:
+
+- The original `Files to Touch` list omitted `RecordForm.tsx`; implementation needed a narrow optional notes-insertion prop there so the explicit copy affordance could write into the existing form state without adding any summary/details/title path.

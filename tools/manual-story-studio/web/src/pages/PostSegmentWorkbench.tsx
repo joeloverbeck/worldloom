@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import {
@@ -94,15 +94,22 @@ function reasonForCandidate(candidate: WorkbenchCandidate): string {
 
 function initialRecordForSegment(
   payload: WorkbenchPayload | null,
+  includePromptLinks: boolean,
 ): Partial<ManualRecord> {
   return {
     refs: {
-      characters: payload?.segment.included_record_summary.characters ?? [],
+      characters:
+        includePromptLinks
+          ? (payload?.segment.included_record_summary.characters ?? [])
+          : [],
       locations: [],
-      related_records: payload?.segment.included_record_summary.records ?? [],
+      related_records:
+        includePromptLinks
+          ? (payload?.segment.included_record_summary.records ?? [])
+          : [],
     },
-    summary: payload?.segment.last_paragraph ?? "",
-    details: payload?.segment.body ?? "",
+    summary: "",
+    details: "",
     tags: payload ? [`segment:${payload.segment.id.toLowerCase()}`] : [],
   };
 }
@@ -151,6 +158,15 @@ export function PostSegmentWorkbench() {
   >(null);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [deleteOutcome, setDeleteOutcome] = useState<DeleteResult | null>(null);
+  const [linkPromptRecordsToNewRecord, setLinkPromptRecordsToNewRecord] =
+    useState(false);
+  const proseRef = useRef<HTMLDivElement | null>(null);
+  const [selectedProse, setSelectedProse] = useState("");
+  const [noteInsertion, setNoteInsertion] = useState<{
+    id: number;
+    targetKey: string;
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!worldSlug || !msSlug || !segmentId) return;
@@ -169,6 +185,7 @@ export function PostSegmentWorkbench() {
           setSelected(null);
           setSelectedRecord(null);
           setCreatingClass(null);
+          setLinkPromptRecordsToNewRecord(false);
         }
       })
       .catch((error: unknown) => {
@@ -220,6 +237,38 @@ export function PostSegmentWorkbench() {
     }
     return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [payload]);
+  const activeRecordFormKey = creatingClass
+    ? `new:${creatingClass}`
+    : selectedRecord && selected
+      ? `${selected.recordClass}:${selectedRecord.id}`
+      : null;
+  const recordFormOpen = activeRecordFormKey !== null;
+
+  function refreshSelectedProse() {
+    const selection = window.getSelection();
+    const text = selection?.toString().trim() ?? "";
+    const range =
+      selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    const proseRoot = proseRef.current;
+    if (!text || !range || !proseRoot) {
+      setSelectedProse("");
+      return;
+    }
+    const selectedInsideProse =
+      proseRoot.contains(range.commonAncestorContainer) ||
+      proseRoot.contains(range.startContainer) ||
+      proseRoot.contains(range.endContainer);
+    setSelectedProse(selectedInsideProse ? text : "");
+  }
+
+  function copySelectedProseIntoNotes() {
+    if (!selectedProse || !activeRecordFormKey) return;
+    setNoteInsertion({
+      id: Date.now(),
+      targetKey: activeRecordFormKey,
+      text: selectedProse,
+    });
+  }
 
   async function handleSave(
     record: ManualRecord,
@@ -345,7 +394,20 @@ export function PostSegmentWorkbench() {
               </dd>
             </div>
           </dl>
-          <RenderedProse markdown={payload.segment.body} />
+          <div
+            ref={proseRef}
+            onMouseUp={refreshSelectedProse}
+            onKeyUp={refreshSelectedProse}
+          >
+            <RenderedProse markdown={payload.segment.body} />
+          </div>
+          <button
+            type="button"
+            onClick={copySelectedProseIntoNotes}
+            disabled={!selectedProse || !recordFormOpen}
+          >
+            Copy selected prose into notes
+          </button>
         </article>
 
         <aside className="post-workbench-rail" aria-label="records that touch this segment">
@@ -371,6 +433,7 @@ export function PostSegmentWorkbench() {
                       setSelected({ recordClass: candidate.recordClass, id });
                       setActiveClass(candidate.recordClass);
                       setCreatingClass(null);
+                      setLinkPromptRecordsToNewRecord(false);
                       setSaveError(null);
                       setDeleteOutcome(null);
                     }}
@@ -394,6 +457,7 @@ export function PostSegmentWorkbench() {
                   setSelectedRecord(null);
                   setSaveError(null);
                   setDeleteOutcome(null);
+                  setLinkPromptRecordsToNewRecord(false);
                 }}
               >
                 New {recordClass}
@@ -404,12 +468,31 @@ export function PostSegmentWorkbench() {
           {creatingClass ? (
             <section className="post-workbench-drawer">
               <h3>New {creatingClass}</h3>
+              <label style={{ display: "block", marginBottom: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={linkPromptRecordsToNewRecord}
+                  onChange={(event) =>
+                    setLinkPromptRecordsToNewRecord(event.target.checked)
+                  }
+                />{" "}
+                Link prompt cast/records to this new record
+              </label>
               <RecordForm
+                key={`${creatingClass}:${
+                  linkPromptRecordsToNewRecord ? "prompt-links" : "blank-links"
+                }`}
                 recordClass={creatingClass}
-                initial={initialRecordForSegment(payload)}
+                initial={initialRecordForSegment(
+                  payload,
+                  linkPromptRecordsToNewRecord,
+                )}
+                noteInsertion={noteInsertion}
+                noteInsertionTargetKey={`new:${creatingClass}`}
                 onSave={handleSave}
                 onCancel={() => {
                   setCreatingClass(null);
+                  setLinkPromptRecordsToNewRecord(false);
                   setSaveError(null);
                 }}
                 saveError={saveError}
@@ -423,6 +506,8 @@ export function PostSegmentWorkbench() {
                   <RecordForm
                     recordClass={selected.recordClass}
                     initial={selectedRecord}
+                    noteInsertion={noteInsertion}
+                    noteInsertionTargetKey={`${selected.recordClass}:${selectedRecord.id}`}
                     onSave={handleSave}
                     onCancel={() => {
                       setSelected(null);
@@ -457,6 +542,7 @@ export function PostSegmentWorkbench() {
                             });
                             setActiveClass(referrer.recordClass);
                             setCreatingClass(null);
+                            setLinkPromptRecordsToNewRecord(false);
                             setSaveError(null);
                             setDeleteOutcome(null);
                           }}

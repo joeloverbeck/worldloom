@@ -54,7 +54,7 @@ In `test/post-segment-workbench.test.ts` (`:146`, `:167`) and `test/acceptance/o
 
 - The candidate scanning logic (`:71-82`, `:182-189`) — correct and unchanged; only its name/presentation change.
 - Reason-line human phrasing and cardification of segment-meta cast/records (SPEC122MANSTOSTU-003).
-- The R1 prose-seeding removal (SPEC122MANSTOSTU-001).
+- The R1 prose-seeding removal (archive/tickets/SPEC122MANSTOSTU-001.md).
 - Renaming `touched_records` mentions in `docs/` or `specs/` (descriptive references; intentionally retained).
 
 ## Acceptance Criteria

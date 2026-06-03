@@ -194,6 +194,47 @@ test("post-segment workbench route returns segment context and broad referrer ca
   }
 });
 
+test("SPEC-122: post-segment new-record defaults do not seed prose into structured fields", () => {
+  const workbenchSource = readFileSync(
+    path.join(process.cwd(), "web", "src", "pages", "PostSegmentWorkbench.tsx"),
+    "utf8",
+  );
+  const recordFormSource = readFileSync(
+    path.join(process.cwd(), "web", "src", "components", "RecordForm.tsx"),
+    "utf8",
+  );
+
+  assert.match(
+    workbenchSource,
+    /function initialRecordForSegment[\s\S]*summary: "",[\s\S]*details: "",[\s\S]*tags:/,
+  );
+  assert.match(workbenchSource, /includePromptLinks[\s\S]*characters:/);
+  assert.match(workbenchSource, /includePromptLinks[\s\S]*related_records:/);
+  assert.match(workbenchSource, /Link prompt cast\/records to this new record/);
+  assert.doesNotMatch(
+    workbenchSource,
+    /summary:\s*payload\?\.segment\.last_paragraph/,
+  );
+  assert.doesNotMatch(workbenchSource, /details:\s*payload\?\.segment\.body/);
+  assert.match(workbenchSource, /Copy selected prose into notes/);
+  const noteInsertionStart = recordFormSource.indexOf(
+    "useEffect(() => {\n    if (\n      !noteInsertion",
+  );
+  const noteInsertionEnd = recordFormSource.indexOf(
+    "  }, [noteInsertion, props.noteInsertionTargetKey]);",
+  );
+  assert.notEqual(noteInsertionStart, -1);
+  assert.notEqual(noteInsertionEnd, -1);
+  const noteInsertionEffect = recordFormSource.slice(
+    noteInsertionStart,
+    noteInsertionEnd,
+  );
+  assert.match(noteInsertionEffect, /notes:/);
+  assert.doesNotMatch(noteInsertionEffect, /summary:/);
+  assert.doesNotMatch(noteInsertionEffect, /details:/);
+  assert.doesNotMatch(noteInsertionEffect, /title:/);
+});
+
 test("post-segment workbench route rejects malformed segment ids", async () => {
   const { repoRoot, worldSlug, msSlug } = mkWorld();
   try {
