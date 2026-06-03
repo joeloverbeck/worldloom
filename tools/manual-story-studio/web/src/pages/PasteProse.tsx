@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { saveSegment } from "../api/segments.js";
 
@@ -13,6 +13,7 @@ export function PasteProse() {
     worldSlug: string;
     msSlug: string;
   }>();
+  const navigate = useNavigate();
 
   const [prose, setProse] = useState("");
   const [title, setTitle] = useState("");
@@ -34,7 +35,12 @@ export function PasteProse() {
         author_note: authorNote,
         prompt_id: promptId.trim().length > 0 ? promptId.trim() : null,
       };
-      await saveSegment(worldSlug, msSlug, request);
+      const result = await saveSegment(worldSlug, msSlug, request);
+      navigate(
+        `/worlds/${encodeURIComponent(worldSlug)}/manual-stories/${encodeURIComponent(
+          msSlug,
+        )}/segments/${encodeURIComponent(result.segment_id)}/post-segment-workbench`,
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "segment_save_failed");
     } finally {

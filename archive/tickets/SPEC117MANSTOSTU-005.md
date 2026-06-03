@@ -1,6 +1,6 @@
 # SPEC117MANSTOSTU-005: PasteProse — route to workbench after save
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` (`web/src/pages/PasteProse.tsx` post-save navigation). No canon-mediation surface (package is canon-fenced per SPEC-100).
@@ -27,11 +27,11 @@ After archive/tickets/SPEC117MANSTOSTU-002.md removed the checklist modal, Paste
 2. The navigation targets the workbench route with the just-saved segment ID → web typecheck (route param shape matches `App.tsx` registration) + manual review.
 3. Single-layer note: this is a frontend-only navigation change; verification is web typecheck + manual smoke per SPEC-117 §7. No backend or schema layer is touched.
 
-## What to Change
+## Landed Changes
 
 ### 1. PasteProse post-save navigation
 
-In `web/src/pages/PasteProse.tsx`, after a successful save, navigate to the Post-Segment Workbench route (the route registered by archive/tickets/SPEC117MANSTOSTU-004.md) using the saved `segment_id` as the route param. Remove any residual "saved, do nothing" intermediate state left after -002.
+In `web/src/pages/PasteProse.tsx`, the successful save handler now uses the returned `segment_id` from `saveSegment(...)` and navigates to `/worlds/:worldSlug/manual-stories/:msSlug/segments/:segmentId/post-segment-workbench`. The page still has no post-save modal, no checklist component, and no `checklist_payload` branch.
 
 ## Files to Touch
 
@@ -65,3 +65,18 @@ In `web/src/pages/PasteProse.tsx`, after a successful save, navigate to the Post
 
 1. `npm --prefix web test` (run from `tools/manual-story-studio`; web typecheck)
 2. `cd tools/manual-story-studio && npm test` (full backend + web)
+
+## Outcome
+
+PasteProse now routes directly from a successful segment save into the Post-Segment Workbench using the saved segment ID. The segment-save backend/response shape is unchanged.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm --prefix web test` — PASS; web TypeScript check passed.
+2. `cd tools/manual-story-studio && npm test` — PASS; backend build, 488 backend tests, and web TypeScript check passed.
+3. `rg -n "StateUpdateChecklist|checklist_payload|post-segment-workbench|navigate|segment_id" tools/manual-story-studio/web/src/pages/PasteProse.tsx` — PASS; only expected `navigate`, `segment_id`, and workbench route hits remain.
+4. `git diff --check` — PASS.
+
+## Deviations
+
+No browser save-to-workbench smoke was run; this ticket's planned proof boundary was web typecheck plus full package test. The route target itself is covered by archive/tickets/SPEC117MANSTOSTU-004.md.

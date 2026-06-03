@@ -16,6 +16,8 @@
 
 **Implementation note (2026-06-03):** archive/tickets/SPEC117MANSTOSTU-004.md added the route-only frontend workbench page at `/worlds/:worldSlug/manual-stories/:msSlug/segments/:segmentId/post-segment-workbench`. The page consumes archive/tickets/SPEC117MANSTOSTU-003.md's payload, renders segment context/prose, the honest reminder, broad-referrer candidate cards, quick-add buttons, `RecordForm` editing, and SPEC-114 blocked/force delete handling. No `StoryPageNav` tab was added.
 
+**Implementation note (2026-06-03):** archive/tickets/SPEC117MANSTOSTU-005.md changed PasteProse's successful save flow to navigate directly to the route-only Post-Segment Workbench for the returned `segment_id`. No checklist modal or `checklist_payload` branch was reintroduced.
+
 ---
 
 ## 1. Context & Motivation
