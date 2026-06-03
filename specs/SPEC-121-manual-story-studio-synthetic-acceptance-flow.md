@@ -3,7 +3,7 @@
 **Status:** DRAFT
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; a single end-to-end acceptance test over an existing, synthetic, world-agnostic fixture; no LLM/MCP/patch-engine; no production code change required beyond test scaffolding).
-**Depends on:** SPEC-117 (post-segment workbench — step 19), SPEC-118 (`never_prompt`/exclusion — step 13), and the landed core-loop specs SPEC-112…SPEC-116 (pickers, inclusion ledger, delete lifecycle, source browser, health gating).
+**Depends on:** SPEC-117 (post-segment workbench — step 19), `archive/specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md` (`never_prompt`/exclusion — step 13), and the landed core-loop specs SPEC-112…SPEC-116 (pickers, inclusion ledger, delete lifecycle, source browser, health gating).
 **Blocks:** —
 **Related:** `tools/manual-story-studio/test/`, the read/write/prompt/health/segment layers exercised end-to-end, a new synthetic fixture world.
 **Source:** critical triage of `reports/manual-story-studio-fourth-iteration.md` §§28 / 45 + Stage 8 (ChatGPT-Pro, 2026-06-02). Deferred in iterations 2–3 (lift-condition "until the core-loop feature specs land"); the user selected it for this batch (AskUserQuestion, 2026-06-02) now that the loop is complete.
@@ -24,8 +24,8 @@ The flow must **not** be tied to a real world (e.g., `animalia`); it uses a synt
 2. **One end-to-end acceptance test** driving the actual read/write/prompt/health/segment layers (browser-like at the API/service level; no live external LLM — pasted prose is a fixture) through the report §45 steps, condensed to the load-bearing assertions:
    - create manual story; browse synthetic world source (read-only); create Mira/Len cast + facts from literal source;
    - create belief / emotion / plan / relationship / clock / secret / question / consequence via the record layer; link non-cast records through the selector data;
-   - set the Prompt Working Set; **exclude the true answer from the prompt** (assert it does not appear — exercising SPEC-118 `never_prompt`/`excluded_records`);
-   - compose prompt for **3-5 beats** (assert SPEC-118 default); inspect included/excluded/suppressed (assert the resolution ledger reflects the working set); save/copy prompt (assert no hard lint, no internal IDs in markdown);
+   - set the Prompt Working Set; **exclude the true answer from the prompt** (assert it does not appear — exercising archived SPEC-118 `never_prompt`/`excluded_records`);
+   - compose prompt for **3-5 beats** (assert archived SPEC-118 default); inspect included/excluded/suppressed (assert the resolution ledger reflects the working set); save/copy prompt (assert no hard lint, no internal IDs in markdown);
    - paste an accepted segment; read compiled manuscript;
    - land on the **post-segment workbench** (SPEC-117) and assert the broad-referrer "touches this segment" pile (not the deleted checklist); update records (plan changes, belief changes, clock advances, new consequence);
    - delete an unreferenced obsolete fact (hard delete); attempt to delete a referenced secret and assert it **blocks with referrer cards**;
@@ -45,7 +45,7 @@ The flow must **not** be tied to a real world (e.g., `animalia`); it uses a synt
 - **Synthetic and hermetic.** A self-contained fixture world keeps the test stable and world-agnostic (report §28 explicitly: "do not tie this to `animalia`").
 - **Service-level, not necessarily DOM-level.** Drive the real read/write/prompt/health/segment code paths; only reach for a browser harness if the service layer cannot express a step. Lower ceremony, less flake.
 - **One flow, load-bearing assertions.** Condense the 23-step script to the assertions that prove the loop (exclusion holds, prompt composes clean, workbench uses broad scan, referenced delete blocks, health scoping works) rather than mechanically scripting every UI click.
-- **Sequenced last.** It exercises SPEC-117 and SPEC-118 and the landed loop; it lands after them.
+- **Sequenced last.** It exercises SPEC-117 and archived SPEC-118 and the landed loop; it lands after them.
 
 ## 4. Files to touch
 

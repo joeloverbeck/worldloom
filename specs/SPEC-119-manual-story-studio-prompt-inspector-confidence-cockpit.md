@@ -28,7 +28,7 @@ Target (report §40): the inspector should read as an **author confidence panel*
 
 1. **Real record identity in every panel.** Replace the fabricated `ledgerSummary()` `"Reason: …"` summary with the record's actual summary/proposition + class + involved cast + prompt mode (the data already exists in the record store; the composer payload should carry enough identity per ledger entry, or the inspector fetches it). The **reason** becomes a separate labeled line/badge on the card, not the card's summary.
 2. **Cards for selected-cast and working-set panels.** Replace the raw `.join(", ")` ID lists (`:284`, `:296`) with `RecordCard` (or a compact identity chip rendering title + class), so no raw `mXXX-n` strings are shown as primary evidence. A small copyable technical-ID chip is acceptable (report §16 compromise), but not the primary line.
-3. **"Why is this here?" per record row.** Each included/excluded/suppressed row shows its deterministic reason in author-readable form (e.g., "included because pinned," "included because active pressure clock," "excluded because working-set excluded," "suppressed because must-not-reveal," "excluded because `never_prompt`" once SPEC-118 lands, "blocked because missing/unsafe").
+3. **"Why is this here?" per record row.** Each included/excluded/suppressed row shows its deterministic reason in author-readable form (e.g., "included because pinned," "included because active pressure clock," "excluded because working-set excluded," "suppressed because must-not-reveal," "excluded because `never_prompt`" from `archive/specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md`, "blocked because missing/unsafe").
 4. **"Why is this missing?" lookup.** A search affordance: type a record title and the inspector reports why it was not included (inactive / not relevant / not pinned / `never_prompt` / excluded), using the same deterministic resolution data.
 5. **Collapse section-map detail by default** (keep it available); render its entries with record identity rather than bare ID lists.
 6. **Confidence-panel framing copy** for the panel headers per report §40.
@@ -36,7 +36,7 @@ Target (report §40): the inspector should read as an **author confidence panel*
 ### Out of scope
 
 - Any change to the deterministic resolution logic in `compose.ts` beyond ensuring each ledger entry carries (or the inspector can resolve) the record's real identity. No new inclusion rules.
-- The `never_prompt` value itself (SPEC-118); this spec only renders its reason when present.
+- The `never_prompt` value itself (completed in `archive/specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md`); this spec only renders its reason when present.
 - Backend prompt-leakage changes (already correct).
 
 ## 3. Key decisions
@@ -70,7 +70,7 @@ Target (report §40): the inspector should read as an **author confidence panel*
 
 1. No inspector panel renders a raw `mXXX-n` ID list as primary evidence; selected-cast and working-set panels show record identity (cards/chips). A copyable technical-ID chip may appear as a de-emphasized detail.
 2. Record cards in the inspector show the record's **real** summary/proposition (not `"Reason: …"`); the inclusion/exclusion reason appears as a separate labeled line/badge.
-3. Each included/excluded/suppressed/blocked row carries an author-readable deterministic reason; when SPEC-118 has landed, `never_prompt` exclusions render their reason.
+3. Each included/excluded/suppressed/blocked row carries an author-readable deterministic reason; `never_prompt` exclusions from archived SPEC-118 render their reason.
 4. A "why is this missing?" search returns the deterministic reason a named record was not included.
 5. Section-map detail is collapsed by default and renders identity, not bare IDs.
 6. `cd tools/manual-story-studio && npm --prefix web test` passes; `npm run test:backend` passes for the payload-enrichment test; full `npm test` green.

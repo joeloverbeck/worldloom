@@ -1,6 +1,6 @@
 # SPEC-118 — Manual Story Studio: Prompt Visibility (`never_prompt`), Language, and Translator Wiring
 
-**Status:** DRAFT
+**Status:** ✅ COMPLETED
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; no LLM/MCP/patch-engine; touches the per-record visibility enum, deterministic composer, prompt section emitters, and existing translators).
 **Depends on:** archive/specs/SPEC-113-manual-story-studio-prompt-inclusion-ledger.md (the resolution ledger this spec extends with the `never_prompt` reason).
@@ -99,3 +99,25 @@ Three verified, related gaps in the deterministic prompt layer:
 - **Dual `PromptVisibility` mirror.** The enum lives in four places that must change together: backend type (`src/schema/manual-story.ts:135-138`), validator literal (`src/validate/schema.ts:65`), web mirror (`web/src/types/manual-story.ts:162-165`), and the form options array (`RecordForm.tsx:30-34`). A missed mirror passes backend tests but fails `npm --prefix web test` or silently hides the new option in the selector.
 - **`must_not_reveal` precedence (load-bearing).** `never_prompt` suppression must strip IDs from the working-set `must_not_reveal` list, not only from `SectionEmitterInput.records` — section-10's "Must not reveal:" block reads that list directly (`compose.ts:354` → `section-10:63-71`). This is the correctness case the never-prompt test must cover; see §2.2 and AC #2.
 - No open questions: confidence-clause phrasing resolved to per-value scaling (every value emits a clause).
+
+## Outcome
+
+Completed on 2026-06-03.
+
+SPEC-118 landed through four archived tickets:
+
+1. `archive/tickets/SPEC118MANSTOSTU-001.md` added `never_prompt` across backend/web visibility, validation, composer suppression, resolution ledger reason, RecordForm option, and prompt/schema/web mirror tests.
+2. `archive/tickets/SPEC118MANSTOSTU-002.md` changed the beat default to `3-5` in both section-5 fallback and newly-created manual-story metadata while preserving explicit metadata overrides.
+3. `archive/tickets/SPEC118MANSTOSTU-003.md` replaced the section-14 "machine-state conclusions" wording with plain durable-continuity handoff language and proved the old phrase is absent from Manual Studio source.
+4. `archive/tickets/SPEC118MANSTOSTU-004.md` wired belief `confidence` and question `answer_known` into translator output with dedicated translator coverage.
+
+Verification:
+
+- `cd tools/manual-story-studio && npm run test:backend` passed for tickets 002, 003, and 004 after their source edits.
+- `cd tools/manual-story-studio && npm test` passed for ticket 001 after the backend/web enum and composer changes: 483 backend/static tests plus `npm --prefix web test`.
+- Final spec-archive verification reran `cd tools/manual-story-studio && npm test` successfully after all SPEC-118 source/test changes.
+
+Deviations:
+
+- Ticket 002 widened from the drafted one-line section fallback to include `makeDefaultManualStoryMetadata()`, because backend proof showed new stories otherwise still seeded `2-5`.
+- Ticket 003 widened its test file set to include the assembled section-14 assertion in `test/prompt-sections.test.ts`.
