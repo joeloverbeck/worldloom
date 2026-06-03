@@ -32,14 +32,14 @@ const REPO_ROOT = path.resolve(HERE, "../../../../..");
 function baseMetadata(): ManualStoryMetadata {
   return {
     schema_version: "manual-story.v1",
-    world_slug: "never-prompt-fixture",
+    world_slug: "inspector-payload-fixture",
     manual_story_slug: "first-story",
-    title: "Never prompt fixture",
+    title: "Inspector payload fixture",
     created_at: "2026-06-03T00:00:00Z",
     updated_at: "2026-06-03T00:00:00Z",
     source: { world_commit: null, notes: "" },
     story_contract: {
-      premise: "Mara decides what the prompt may see",
+      premise: "Mara checks why each record shaped the prompt",
       tone: "Measured",
       pov: "close third",
       tense: "past",
@@ -71,11 +71,11 @@ function baseMetadata(): ManualStoryMetadata {
 }
 
 function mkFixture(): { tempRoot: string; manualStoryRoot: string } {
-  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "never-prompt-fixture-"));
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "inspector-payload-"));
   const manualStoryRoot = path.join(
     tempRoot,
     "worlds",
-    "never-prompt-fixture",
+    "inspector-payload-fixture",
     "manual-stories",
     "first-story",
   );
@@ -95,14 +95,35 @@ function mkFixture(): { tempRoot: string; manualStoryRoot: string } {
     path.join(manualStoryRoot, "manual-story.yaml"),
     YAML.stringify(baseMetadata()),
   );
-  writeRecord(manualStoryRoot, "cast", fixtureCast("mchar-1", "Mara"));
+  writeRecord(
+    manualStoryRoot,
+    "cast",
+    fixtureCast("mchar-1", "Mara", {
+      summary: "Mara is the viewpoint pressure holder.",
+      importance: "central",
+      tags: ["viewpoint"],
+    }),
+  );
   writeRecord(
     manualStoryRoot,
     "facts",
-    fixtureFact("mfact-1", "Pinned author answer", {
-      prompt_visibility: "never_prompt",
+    fixtureFact("mfact-1", "Included fact", {
       importance: "high",
-      summary: "The author-only answer must never reach the prompt.",
+      tags: ["ledger"],
+      summary: "The included fact's real proposition reaches the inspector.",
+      refs: {
+        characters: ["mchar-1"],
+        locations: [],
+        related_records: [],
+      },
+    }),
+  );
+  writeRecord(
+    manualStoryRoot,
+    "facts",
+    fixtureFact("mfact-2", "Excluded fact", {
+      prompt_visibility: "never_prompt",
+      summary: "The excluded fact's real proposition stays out of markdown.",
       refs: {
         characters: ["mchar-1"],
         locations: [],
@@ -113,18 +134,13 @@ function mkFixture(): { tempRoot: string; manualStoryRoot: string } {
   writeRecord(
     manualStoryRoot,
     "secrets",
-    fixtureSecret("msecret-1", "Never title", {
-      prompt_visibility: "never_prompt",
-      summary: "This never-prompt secret must not be named.",
-      held_by: ["mchar-1"],
-    }),
-  );
-  writeRecord(
-    manualStoryRoot,
-    "secrets",
-    fixtureSecret("msecret-2", "Visible suppressed title", {
-      summary: "This ordinary must-not-reveal record may be named.",
-      held_by: ["mchar-1"],
+    fixtureSecret("msecret-1", "Suppressed secret", {
+      summary: "The suppressed secret's real state is still inspectable.",
+      refs: {
+        characters: ["mchar-1"],
+        locations: [],
+        related_records: [],
+      },
     }),
   );
   writeCurrentContext(manualStoryRoot);
@@ -147,10 +163,10 @@ function writeCurrentContext(manualStoryRoot: string): void {
     current_cast: ["mchar-1"],
     pov_holder: "mchar-1",
     active_pressure_clocks: [],
-    active_secrets_questions: ["msecret-1"],
-    pinned_records: ["mfact-1", "msecret-1", "msecret-2"],
+    active_secrets_questions: [],
+    pinned_records: ["mfact-1", "mfact-2", "msecret-1"],
     excluded_records: [],
-    must_not_reveal: ["msecret-1", "msecret-2"],
+    must_not_reveal: ["msecret-1"],
     current_handoff_summary: "",
     last_accepted_segment: null,
     last_reviewed_after_segment: null,
@@ -161,64 +177,75 @@ function writeCurrentContext(manualStoryRoot: string): void {
   );
 }
 
-test("composePrompt keeps never_prompt records out of markdown and the reveal block", async () => {
+test("composePrompt enriches inspector ledger entries with real record identity", async () => {
   const { tempRoot, manualStoryRoot } = mkFixture();
   try {
-    const result = await composePrompt({
+    const input = {
       manualStoryRoot,
       repoRoot: tempRoot,
-      moment_directive: "Let Mara decide what can be said.",
+      moment_directive: "Let Mara decide what can be safely disclosed.",
       included_cast: [],
-      included_records: ["mfact-1", "msecret-1"],
+      included_records: [],
+    };
+
+    const first = await composePrompt(input);
+    const second = await composePrompt(input);
+
+    assert.equal(second.markdown, first.markdown);
+
+    const includedFact = first.resolution.included.find(
+      (entry) => entry.id === "mfact-1",
+    );
+    assert.deepEqual(includedFact, {
+      id: "mfact-1",
+      title: "Included fact",
+      class: "facts",
+      summary: "The included fact's real proposition reaches the inspector.",
+      importance: "high",
+      prompt_visibility: "include_when_relevant",
+      involved_cast: ["mchar-1"],
+      tags: ["ledger"],
+      reason: "pinned",
+      section: "§3",
     });
 
-    assert.doesNotMatch(result.markdown, /Pinned author answer/);
-    assert.doesNotMatch(result.markdown, /author-only answer/);
-    assert.doesNotMatch(result.markdown, /Never title/);
-    assert.doesNotMatch(result.markdown, /never-prompt secret/);
-    assert.match(result.markdown, /Visible suppressed title/);
-    assert.match(result.markdown, /This ordinary must-not-reveal record may be named\./);
-
-    assert.deepEqual(
-      result.resolution.excluded.filter((entry) => entry.reason === "never_prompt"),
-      [
-        {
-          id: "mfact-1",
-          title: "Pinned author answer",
-          class: "facts",
-          summary: "The author-only answer must never reach the prompt.",
-          importance: "high",
-          prompt_visibility: "never_prompt",
-          involved_cast: ["mchar-1"],
-          tags: [],
-          reason: "never_prompt",
-        },
-        {
-          id: "msecret-1",
-          title: "Never title",
-          class: "secrets",
-          summary: "This never-prompt secret must not be named.",
-          importance: "medium",
-          prompt_visibility: "never_prompt",
-          involved_cast: [],
-          tags: [],
-          reason: "never_prompt",
-        },
-      ],
+    const excludedFact = first.resolution.excluded.find(
+      (entry) => entry.id === "mfact-2",
     );
-    assert.deepEqual(result.resolution.suppressed, [
-      {
-        id: "msecret-2",
-        title: "Visible suppressed title",
-        class: "secrets",
-        summary: "This ordinary must-not-reveal record may be named.",
-        importance: "medium",
-        prompt_visibility: "include_when_relevant",
-        involved_cast: [],
-        tags: [],
-        reason: "must_not_reveal",
-      },
-    ]);
+    assert.deepEqual(excludedFact, {
+      id: "mfact-2",
+      title: "Excluded fact",
+      class: "facts",
+      summary: "The excluded fact's real proposition stays out of markdown.",
+      importance: "medium",
+      prompt_visibility: "never_prompt",
+      involved_cast: ["mchar-1"],
+      tags: [],
+      reason: "never_prompt",
+    });
+
+    const suppressedSecret = first.resolution.suppressed.find(
+      (entry) => entry.id === "msecret-1",
+    );
+    assert.deepEqual(suppressedSecret, {
+      id: "msecret-1",
+      title: "Suppressed secret",
+      class: "secrets",
+      summary: "The suppressed secret's real state is still inspectable.",
+      importance: "medium",
+      prompt_visibility: "include_when_relevant",
+      involved_cast: ["mchar-1"],
+      tags: [],
+      reason: "must_not_reveal",
+    });
+
+    for (const entry of [
+      includedFact,
+      excludedFact,
+      suppressedSecret,
+    ]) {
+      assert.notEqual(entry?.summary, `Reason: ${entry?.reason}`);
+    }
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
