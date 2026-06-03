@@ -3,7 +3,7 @@
 **Status:** DRAFT
 **Date:** 2026-06-02
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; no LLM/MCP/patch-engine; touches the per-record visibility enum, deterministic composer, prompt section emitters, and existing translators).
-**Depends on:** archive/specs/SPEC-113-manual-story-studio-inclusion-ledger-inspector.md (the resolution ledger this spec extends with the `never_prompt` reason).
+**Depends on:** archive/specs/SPEC-113-manual-story-studio-prompt-inclusion-ledger.md (the resolution ledger this spec extends with the `never_prompt` reason).
 **Blocks:** SPEC-121 (the acceptance test excludes the true answer from the prompt at step 13, exercising `never_prompt`/exclusion).
 **Related:** `tools/manual-story-studio/src/schema/manual-story.ts`, `tools/manual-story-studio/src/prompt/compose.ts`, `tools/manual-story-studio/src/prompt/sections/section-5-required-beat-cluster.ts`, `tools/manual-story-studio/src/prompt/sections/section-14-stop-rule.ts`, `tools/manual-story-studio/src/prompt/translators/beliefs.ts`, `.../translators/questions.ts`.
 **Source:** critical triage of `reports/manual-story-studio-fourth-iteration.md` §§18 / 19 / 39 + Stages 3/4 (ChatGPT-Pro, 2026-06-02). Bundles three cohesive, low-risk prompt-layer fixes.
@@ -26,18 +26,19 @@ Three verified, related gaps in the deterministic prompt layer:
 
 ### In scope
 
-1. **Add `never_prompt` to `PromptVisibility`** (`manual-story.ts:135-138`) as a fourth value. Update the schema validator and `ManualRecordSummary`.
-2. **Composer enforcement (`compose.ts`).** A `never_prompt` record is **excluded from `SectionEmitterInput.records` entirely** — it must not reach any section emitter, including section-10's "Must not reveal:" block. It is recorded in the resolution ledger as `excluded` with reason `never_prompt`. `never_prompt` **overrides** pin/relevance/`active`: even an explicitly pinned or `included_records`-seeded `never_prompt` record is suppressed (with a distinct ledger reason so the inspector can explain it).
+1. **Add `never_prompt` to `PromptVisibility`** (`manual-story.ts:135-138`) as a fourth value. Update `ManualRecordSummary`, the schema validator (`src/validate/schema.ts:65` value enum; the required-field list at `:43` is unchanged), and the web-side `PromptVisibility` mirror (`web/src/types/manual-story.ts:162-165`). The validator literal — **not** `manual-story.ts` — is where the closed enum is enforced.
+2. **Composer enforcement (`compose.ts`).** A `never_prompt` record is **excluded from `SectionEmitterInput.records` entirely** — it must not reach any section emitter. Crucially, excluding from `records` alone is **insufficient**: section-10's "Must not reveal:" block renders titles from the working-set `must_not_reveal` ID list passed at `compose.ts:354` (→ `section-10:63-71`), **independent of `records`**. The composer must therefore **also strip `never_prompt` record IDs from the `must_not_reveal` list** (`mustNotRevealIds` at `compose.ts:190` and the list passed at `:354`), which requires reading each `must_not_reveal`-listed record's `prompt_visibility`. The suppression is recorded in the resolution ledger as `excluded` with reason `never_prompt` (extend the `PromptExcludedReason` union at `src/prompt/types.ts:92`). `never_prompt` **overrides** pin/relevance/`active`/`must_not_reveal`: even an explicitly pinned, `included_records`-seeded, or `must_not_reveal`-listed `never_prompt` record is suppressed (with a distinct ledger reason so the inspector can explain it).
 3. **Deterministic precedence (documented + tested):** `never_prompt` (per-record, absolute) → `excluded_records` (per working set) → `must_not_reveal` (rendered-but-flagged) → inclusion logic (`always`/relevant/pinned). No record that is `never_prompt` appears anywhere in the markdown.
 4. **Beat default `"2-5"` → `"3-5"`** (`section-5-required-beat-cluster.ts:5`); author override path unchanged.
 5. **Replace the "machine-state conclusions" sentence** (`section-14-stop-rule.ts:7`) with the plain-wording replacement above.
-6. **Wire existing typed fields into translators:** `beliefs.ts` emits a confidence clause when `confidence` is set; `questions.ts` reflects `answer_known` (e.g., flags author-known vs open) in its emitted guidance. Both remain graceful when the field is absent.
+6. **Wire existing typed fields into translators:** `beliefs.ts` emits a confidence clause for every `confidence` value (`low | medium | high | certain`), with phrasing **scaled to the value** (e.g., tentative for `low` → with-certainty for `certain`); `questions.ts` reflects `answer_known` (boolean: author-known vs open) in its emitted guidance. Both fields are **required** on valid records (`manual-story.ts:350`, `:463`), so there is no absent-field path — the translators handle every enum/boolean value rather than a missing field.
 
 ### Out of scope
 
 - The broad non-cast schema field expansion (deferred — triage D1). Only the two already-present fields are wired.
 - Any change to the existing hard ID-leakage lint (`no_internal_record_ids`) — already correct (triage C1); not touched.
 - A per-record UI redesign beyond exposing the new enum value in the record form's visibility selector.
+- **The source report's rename of the existing enum values** (§18.2 / §39: `relevant_by_default`, `only_when_pinned`) is **declined** — renaming live enum values is a breaking change across the backend type, web mirror, validator literal, and test fixtures; only the additive `never_prompt` value is adopted. The report's §18.1 lifecycle-gate clarification and the Stage-5 Inspector-explainability upgrade (§18.5 / §39.2) are **deferred to the spec bundle** (later stages), not addressed here.
 
 ## 3. Key decisions
 
@@ -49,18 +50,22 @@ Three verified, related gaps in the deterministic prompt layer:
 ## 4. Files to touch
 
 **Modify:**
-- `tools/manual-story-studio/src/schema/manual-story.ts` — add `never_prompt` to `PromptVisibility` (lines ~135-138) + validator + summary type.
-- `tools/manual-story-studio/src/prompt/compose.ts` — exclude `never_prompt` records from emitter input with override precedence + ledger reason `never_prompt`.
+- `tools/manual-story-studio/src/schema/manual-story.ts` — add `never_prompt` to `PromptVisibility` (lines ~135-138) + `ManualRecordSummary` summary type.
+- `tools/manual-story-studio/src/validate/schema.ts` — add `never_prompt` to the `prompt_visibility` value enum (`:65`); required-field list at `:43` unchanged. (This is the validator AC #1 depends on.)
+- `tools/manual-story-studio/web/src/types/manual-story.ts` — add `never_prompt` to the web-side `PromptVisibility` mirror (`:162-165`) so the web typecheck (`npm --prefix web test`) and the form selector accept it.
+- `tools/manual-story-studio/src/prompt/types.ts` — extend `PromptExcludedReason` (`:92`) with `never_prompt` for the ledger reason.
+- `tools/manual-story-studio/src/prompt/compose.ts` — exclude `never_prompt` records from emitter input **and** strip `never_prompt` IDs from the `must_not_reveal` list (`:190`, `:354`; requires reading each listed record's `prompt_visibility`), with override precedence + ledger reason `never_prompt`.
 - `tools/manual-story-studio/src/prompt/sections/section-5-required-beat-cluster.ts` — default `"2-5"` → `"3-5"`.
 - `tools/manual-story-studio/src/prompt/sections/section-14-stop-rule.ts` — replace the "machine-state conclusions" sentence.
 - `tools/manual-story-studio/src/prompt/translators/beliefs.ts` — emit `confidence` clause when present.
 - `tools/manual-story-studio/src/prompt/translators/questions.ts` — reflect `answer_known` in emitted guidance.
-- `tools/manual-story-studio/web/src/components/RecordForm.tsx` (or the visibility selector component) — offer `never_prompt`.
+- `tools/manual-story-studio/web/src/components/RecordForm.tsx` — add `never_prompt` to `PROMPT_VISIBILITY_VALUES` (`:30-34`); the selector at `:628` then offers it.
 
 **Create / extend tests:**
-- `tools/manual-story-studio/test/prompt/never-prompt.test.ts` — a `never_prompt` record that is also pinned/seeded/`active` never appears in the composed markdown (incl. section-10), and is logged `excluded`/`never_prompt`; a `must_not_reveal` record still renders its title in the "Must not reveal:" block (precedence intact).
+- `tools/manual-story-studio/test/prompt/never-prompt.test.ts` — a `never_prompt` record that is also pinned/seeded/`active`, **and** a `never_prompt` record also listed in the working-set `must_not_reveal`, both appear nowhere in the composed markdown (incl. section-10's "Must not reveal:" block), and are logged `excluded`/`never_prompt`; a `must_not_reveal` (non-`never_prompt`) record still renders its title in the "Must not reveal:" block (precedence intact).
+- update `tools/manual-story-studio/test/validate/schema.test.ts` — the enum-membership assertion at `:433` (`["always", "include_when_relevant", "only_if_pinned"]`) must include `never_prompt`, or `npm test` fails.
 - extend prompt-section tests for the `"3-5"` default and the new stop-rule wording.
-- extend translator tests: belief with `confidence` emits the clause; question reflects `answer_known`.
+- extend translator tests: belief emits a confidence clause scaled per `confidence` value; question reflects `answer_known` (author-known vs open).
 
 ## 5. FOUNDATIONS alignment
 
@@ -74,11 +79,11 @@ Three verified, related gaps in the deterministic prompt layer:
 ## 6. Acceptance criteria
 
 1. `PromptVisibility` includes `never_prompt`; the validator accepts it and rejects unknown values.
-2. A `never_prompt` record — even when pinned and `active` — appears **nowhere** in the composed markdown (asserted incl. section-10) and is logged `excluded` with reason `never_prompt`.
+2. A `never_prompt` record — even when pinned, `active`, or listed in the working-set `must_not_reveal` — appears **nowhere** in the composed markdown (asserted incl. section-10's "Must not reveal:" block) and is logged `excluded` with reason `never_prompt`.
 3. A `must_not_reveal` (non-`never_prompt`) record still renders its title in the "Must not reveal:" block — precedence test confirms the two mechanisms coexist.
 4. Composed prompt default beat language reads `3-5` (not `2-5`); author override still works.
 5. The phrase "machine-state conclusions" no longer appears in any author-facing section; the plain replacement is present. (`grep -rn "machine-state conclusions" tools/manual-story-studio/src` returns nothing.)
-6. A belief with `confidence` set emits a confidence clause; a question reflects `answer_known`; both degrade gracefully when absent.
+6. The belief translator emits a confidence clause scaled to each `confidence` value (`low | medium | high | certain`); the question translator reflects `answer_known` (author-known vs open). Both fields are required, so every value is handled (no absent-field path).
 7. `cd tools/manual-story-studio && npm run test:backend` and `npm --prefix web test` pass; full `npm test` green.
 
 ## 7. Test plan
@@ -86,3 +91,9 @@ Three verified, related gaps in the deterministic prompt layer:
 - Backend: `cd tools/manual-story-studio && npm run test:backend`
 - Web typecheck: `cd tools/manual-story-studio && npm --prefix web test`
 - Full: `cd tools/manual-story-studio && npm test`
+
+## 8. Risks & Open Questions
+
+- **Dual `PromptVisibility` mirror.** The enum lives in four places that must change together: backend type (`src/schema/manual-story.ts:135-138`), validator literal (`src/validate/schema.ts:65`), web mirror (`web/src/types/manual-story.ts:162-165`), and the form options array (`RecordForm.tsx:30-34`). A missed mirror passes backend tests but fails `npm --prefix web test` or silently hides the new option in the selector.
+- **`must_not_reveal` precedence (load-bearing).** `never_prompt` suppression must strip IDs from the working-set `must_not_reveal` list, not only from `SectionEmitterInput.records` — section-10's "Must not reveal:" block reads that list directly (`compose.ts:354` → `section-10:63-71`). This is the correctness case the never-prompt test must cover; see §2.2 and AC #2.
+- No open questions: confidence-clause phrasing resolved to per-value scaling (every value emits a clause).
