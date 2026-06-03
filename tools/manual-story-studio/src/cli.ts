@@ -2,6 +2,7 @@
 
 import { resolveRepoRoot } from "./repo-root.js";
 import { createServer } from "./server/http.js";
+import { assertRepoRootBootPreflight, formatStartupReadError } from "./server/preflight.js";
 
 const DEFAULT_PORT = 5175;
 
@@ -43,10 +44,11 @@ async function main(): Promise<void> {
       : { explicit: explicitRepoRoot, cwd: process.cwd(), entryPointUrl: import.meta.url };
   const resolved = resolveRepoRoot(resolveOptions);
   if (!resolved.ok) {
-    throw new Error(`${resolved.error.code}: ${resolved.error.repair_hint}`);
+    throw new Error(formatStartupReadError(resolved.error));
   }
 
   const repoRoot = resolved.value;
+  assertRepoRootBootPreflight(repoRoot);
   const server = await createServer({ repoRoot, port });
 
   const shutdown = async () => {
