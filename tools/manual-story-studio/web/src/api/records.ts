@@ -6,6 +6,14 @@ import type {
   RefViolation,
   ValidationError,
 } from "../types/manual-story.js";
+import { PICKABLE_RECORD_CLASSES } from "../types/manual-story.js";
+
+// Classes the generic /records endpoint actually serves. SPEC-104 moved
+// beat-templates to its own /beat-templates URL space, so a class=beat-templates
+// hit on /records 404s by design. PICKABLE_RECORD_CLASSES already encodes that
+// set; we reuse it as a structural guard so no fan-out caller can reintroduce
+// the 404 by handing in an unfiltered class list.
+const GENERIC_RECORDS_CLASSES = new Set<ManualRecordClass>(PICKABLE_RECORD_CLASSES);
 
 export type CreateResult =
   | { ok: true; id: string; record: ManualRecord }
@@ -93,8 +101,14 @@ export async function listRecordsForClasses(
   classes: readonly ManualRecordClass[],
   opts: { includeInactive?: boolean } = {},
 ): Promise<ManualRecordSummaryWithClass[]> {
+  // Defensive guard: silently drop classes the generic /records endpoint does
+  // not serve (e.g. beat-templates, served by /beat-templates) so a caller that
+  // hands in an unfiltered list cannot trigger a guaranteed 404.
+  const servedClasses = classes.filter((recordClass) =>
+    GENERIC_RECORDS_CLASSES.has(recordClass),
+  );
   const entries = await Promise.all(
-    classes.map((recordClass) =>
+    servedClasses.map((recordClass) =>
       listRecords(worldSlug, msSlug, recordClass, opts).then((records) => ({
         recordClass,
         records,

@@ -9,13 +9,15 @@ import { RecordPicker } from "../components/RecordPicker.js";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import {
   BEAT_TEMPLATE_PRESSURE_TYPES,
-  MANUAL_RECORD_CLASSES,
+  PICKABLE_RECORD_CLASSES,
   type BeatTemplatePressureType,
   type ManualRecordClass,
   type ManualStoryMetadata,
 } from "../types/manual-story.js";
 
-const COMPOSER_RECORD_CLASSES: ManualRecordClass[] = MANUAL_RECORD_CLASSES.filter(
+// Cast has its own dedicated picker; beat-templates is excluded by
+// PICKABLE_RECORD_CLASSES (it is served by /beat-templates, not /records).
+const COMPOSER_RECORD_CLASSES: ManualRecordClass[] = PICKABLE_RECORD_CLASSES.filter(
   (recordClass) => recordClass !== "cast",
 );
 

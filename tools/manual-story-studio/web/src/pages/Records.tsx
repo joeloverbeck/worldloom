@@ -13,15 +13,18 @@ import {
 import { RecordCard } from "../components/RecordCard.js";
 import { RecordForm } from "../components/RecordForm.js";
 import {
-  MANUAL_RECORD_CLASSES,
+  PICKABLE_RECORD_CLASSES,
   type ManualRecord,
   type ManualRecordClass,
   type ManualRecordSummary,
 } from "../types/manual-story.js";
 
-function isManualRecordClass(value: string | null): value is ManualRecordClass {
+// Records only browses classes served by the generic /records endpoint.
+// beat-templates is excluded (it has its own /beat-templates URL space and
+// dedicated page); a ?class=beat-templates deep link falls back to "cast".
+function isPickableRecordClass(value: string | null): value is ManualRecordClass {
   if (!value) return false;
-  return (MANUAL_RECORD_CLASSES as readonly string[]).includes(value);
+  return (PICKABLE_RECORD_CLASSES as readonly string[]).includes(value);
 }
 
 function loadErrorMessage(error: unknown): string {
@@ -35,7 +38,7 @@ export function Records() {
   }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialClass =
-    isManualRecordClass(searchParams.get("class"))
+    isPickableRecordClass(searchParams.get("class"))
       ? (searchParams.get("class") as ManualRecordClass)
       : "cast";
   const initialId = searchParams.get("id");
@@ -262,7 +265,7 @@ export function Records() {
           file gone.
         </p>
         <ul style={{ listStyle: "none", padding: 0 }}>
-          {MANUAL_RECORD_CLASSES.map((cls) => (
+          {PICKABLE_RECORD_CLASSES.map((cls) => (
             <li key={cls}>
               <button
                 type="button"
