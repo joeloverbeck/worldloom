@@ -13,16 +13,18 @@ import type {
   ManualRecord,
   ManualRecordClass,
 } from "../types/manual-story.js";
+import { MANUAL_RECORD_CLASSES } from "../types/manual-story.js";
 
-const SOURCE_RECORD_CLASSES = [
-  "facts",
-  "beliefs",
-  "locations",
-  "objects",
-  "cast",
-] as const satisfies readonly ManualRecordClass[];
+const ADVANCED_NOTE_RECORD_CLASSES = MANUAL_RECORD_CLASSES.filter(
+  (recordClass) => recordClass !== "beliefs" && recordClass !== "beat-templates",
+);
 
-type CopyField = "title" | "summary" | "details" | "notes";
+type SeedDefaults = Pick<
+  Partial<ManualRecord>,
+  "active" | "importance" | "tags" | "refs" | "prompt_visibility"
+>;
+
+type NoteOnlySeed = SeedDefaults & Pick<Partial<ManualRecord>, "notes">;
 
 function displayTitle(item: WorldSourceItemSummary): string {
   return item.title ?? item.name ?? item.path;
@@ -51,27 +53,41 @@ function matchesSearch(
   return haystack.includes(trimmed);
 }
 
-function buildInitialRecord(
-  recordClass: ManualRecordClass,
-  field: CopyField,
-  text: string,
-  sourceItem: WorldSourceItemSummary | null,
-): Partial<ManualRecord> {
-  const initial: Partial<ManualRecord> = {
+function baseRecordSeed(sourceItem: WorldSourceItemSummary | null): SeedDefaults {
+  return {
     active: true,
     importance: "medium",
     tags: sourceItem?.tags ?? [],
     refs: { characters: [], locations: [], related_records: [] },
     prompt_visibility: "always",
   };
-  initial[field] = text;
-  if (field !== "title") {
-    initial.title = sourceItem ? displayTitle(sourceItem) : "";
-  }
-  if (recordClass === "cast" && sourceItem?.kind === "characters") {
-    initial.source_world_character = sourceItem.path;
-  }
-  return initial;
+}
+
+function sourceNote(
+  sourceItem: WorldSourceItemSummary | null,
+  text: string,
+): string {
+  const sourceLine = sourceItem ? `Source: ${sourceItem.path}` : "Source: selected text";
+  const trimmed = text.trim();
+  return trimmed ? `${sourceLine}\n\n${trimmed}` : sourceLine;
+}
+
+function buildNoteSeed(
+  text: string,
+  sourceItem: WorldSourceItemSummary | null,
+): NoteOnlySeed {
+  return {
+    ...baseRecordSeed(sourceItem),
+    notes: sourceNote(sourceItem, text),
+  };
+}
+
+function buildCastSeed(sourceItem: WorldSourceItemSummary): Partial<ManualRecord> {
+  return {
+    ...baseRecordSeed(sourceItem),
+    title: displayTitle(sourceItem),
+    source_world_character: sourceItem.path,
+  };
 }
 
 export function SourceBrowser() {
@@ -85,9 +101,11 @@ export function SourceBrowser() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [activeClass, setActiveClass] = useState<ManualRecordClass>("facts");
-  const [copyField, setCopyField] = useState<CopyField>("details");
+  const [advancedClass, setAdvancedClass] =
+    useState<ManualRecordClass>("locations");
   const [formSeed, setFormSeed] = useState<Partial<ManualRecord>>({});
   const [formVersion, setFormVersion] = useState(0);
+  const [copyNotice, setCopyNotice] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<
     Exclude<CreateResult, { ok: true }> | null
   >(null);
@@ -163,16 +181,44 @@ export function SourceBrowser() {
     items.find((item) => item.path === selectedPath) ?? null;
   const selectedItem = selectedPath ? rawByPath[selectedPath] : undefined;
 
-  function copyText(text: string) {
-    if (!text.trim()) return;
-    setFormSeed(buildInitialRecord(activeClass, copyField, text.trim(), selectedSummary));
+  function selectedSourceText(): string {
+    const selectedText = window.getSelection()?.toString().trim();
+    if (selectedText) return selectedText;
+    return selectedItem?.raw_text.trim() ?? "";
+  }
+
+  function seedForm(recordClass: ManualRecordClass, seed: Partial<ManualRecord>) {
+    setActiveClass(recordClass);
+    setFormSeed(seed);
     setFormVersion((version) => version + 1);
     setSaveError(null);
     setSavedId(null);
   }
 
-  function copySelection() {
-    copyText(window.getSelection()?.toString() ?? "");
+  async function copyLiteral(text: string, label: string) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    try {
+      await navigator.clipboard.writeText(trimmed);
+      setCopyNotice(`Copied ${label}.`);
+    } catch (error) {
+      setCopyNotice(`Could not copy ${label}: ${loadErrorMessage(error)}`);
+    }
+  }
+
+  function createStoryFact() {
+    if (!selectedSummary) return;
+    seedForm("facts", buildNoteSeed(selectedSourceText(), selectedSummary));
+  }
+
+  function createStoryCast() {
+    if (!selectedSummary || selectedSummary.kind !== "characters") return;
+    seedForm("cast", buildCastSeed(selectedSummary));
+  }
+
+  function createAdvancedNoteRecord() {
+    if (!selectedSummary) return;
+    seedForm(advancedClass, buildNoteSeed(selectedSourceText(), selectedSummary));
   }
 
   async function handleSave(
@@ -243,27 +289,21 @@ export function SourceBrowser() {
                 <p>{selectedSummary.path}</p>
               </div>
               <div className="source-browser__copy-controls">
-                <select
-                  aria-label="copy-target-field"
-                  value={copyField}
-                  onChange={(event) => setCopyField(event.target.value as CopyField)}
+                <button
+                  type="button"
+                  onClick={() => copyLiteral(selectedSourceText(), "selected source text")}
                 >
-                  <option value="title">title</option>
-                  <option value="summary">summary</option>
-                  <option value="details">details</option>
-                  <option value="notes">notes</option>
-                </select>
-                <button type="button" onClick={copySelection}>
-                  Copy selection
+                  Copy selected source text
                 </button>
                 <button
                   type="button"
-                  onClick={() => copyText(displayTitle(selectedSummary))}
+                  onClick={() => copyLiteral(selectedSummary.path, "source path")}
                 >
-                  Copy title
+                  Copy source path
                 </button>
               </div>
             </header>
+            {copyNotice ? <p>{copyNotice}</p> : null}
             {selectedSummary.tags.length > 0 || selectedSummary.class ? (
               <div className="source-browser__metadata">
                 {selectedSummary.class ? <span>{selectedSummary.class}</span> : null}
@@ -287,23 +327,48 @@ export function SourceBrowser() {
       <section className="source-browser__workbench" aria-label="record-workbench">
         <header className="source-browser__workbench-header">
           <h2>Record Workbench</h2>
-          <select
-            aria-label="record-class"
-            value={activeClass}
-            onChange={(event) => {
-              setActiveClass(event.target.value as ManualRecordClass);
-              setSaveError(null);
-              setSavedId(null);
-              setFormVersion((version) => version + 1);
-            }}
-          >
-            {SOURCE_RECORD_CLASSES.map((recordClass) => (
-              <option key={recordClass} value={recordClass}>
-                {recordClass}
-              </option>
-            ))}
-          </select>
         </header>
+        <div className="source-browser__workbench-actions">
+          <button
+            type="button"
+            onClick={createStoryCast}
+            disabled={selectedSummary?.kind !== "characters"}
+          >
+            Create story cast from world character
+          </button>
+          <button
+            type="button"
+            onClick={createStoryFact}
+            disabled={!selectedSummary}
+          >
+            Create story fact from selected text
+          </button>
+          <label>
+            <span>Advanced note record</span>
+            <select
+              aria-label="advanced-note-record-class"
+              value={advancedClass}
+              onChange={(event) => {
+                setAdvancedClass(event.target.value as ManualRecordClass);
+                setSaveError(null);
+                setSavedId(null);
+              }}
+            >
+              {ADVANCED_NOTE_RECORD_CLASSES.map((recordClass) => (
+                <option key={recordClass} value={recordClass}>
+                  {recordClass}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={createAdvancedNoteRecord}
+            disabled={!selectedSummary}
+          >
+            Create manual record using selected text as note
+          </button>
+        </div>
         {savedId ? <p>Saved {savedId}.</p> : null}
         <RecordForm
           key={`${activeClass}-${formVersion}`}

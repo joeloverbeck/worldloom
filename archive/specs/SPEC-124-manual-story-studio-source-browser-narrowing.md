@@ -1,6 +1,6 @@
 # SPEC-124 — Manual Story Studio: Source Browser Creation Narrowing (Cast + Fact primary)
 
-**Status:** PROPOSED
+**Status:** COMPLETED
 **Date:** 2026-06-03
 **Classification:** tooling-adjacent (`tools/manual-story-studio`; source-to-story creation surface; no LLM/MCP/patch-engine; world canon read-only). The change touches how world source seeds story-local records, so the §5 alignment table records the read-only and prose/state boundaries.
 **Depends on:** — (independent surface; no file overlap with SPEC-122 or SPEC-123).
@@ -8,11 +8,13 @@
 **Related:** `tools/manual-story-studio/web/src/pages/SourceBrowser.tsx`, the source-derived record-creation client path, and any backend that attaches `source_world_character` (cast) or a `notes` backlink (fact).
 **Source:** critical triage of `reports/manual-story-studio-fifth-iteration.md` §§1.2 / 9 / 34 (ChatGPT-Pro, 2026-06-03). See `docs/triage/2026-06-03-manual-story-studio-fifth-iteration-triage.md` item R7. **Lifts a prior deferral** (iter-4 D3, lift-condition "when source-distillation friction is observed"): the user confirmed via `AskUserQuestion` on 2026-06-03 that they hit this friction in real use.
 
+**Implementation note (2026-06-03):** Implemented by `archive/tickets/SPEC124MANSTOSTU-001.md`. `SourceBrowser.tsx` now exposes primary cast-from-character and fact-from-source-text actions, an advanced non-belief note-seed action, copy-selected-text and copy-source-path helpers, and no `SOURCE_RECORD_CLASSES` dropdown. The pre-implementation references below to the five-class dropdown are historical intake context.
+
 ---
 
 ## 1. Context & Motivation
 
-The Source Browser lets the author pull world material into mutable story-local records. It currently offers **five** source-derived creation classes (verified `SourceBrowser.tsx:17-23`):
+The Source Browser lets the author pull world material into mutable story-local records. At intake, it offered **five** source-derived creation classes (then verified in `SourceBrowser.tsx`):
 
 ```ts
 const SOURCE_RECORD_CLASSES = ["facts", "beliefs", "locations", "objects", "cast"] as const;
@@ -80,7 +82,7 @@ The first impression the five-class dropdown gives — "the app distills world s
 
 ## 6. Acceptance criteria
 
-1. The Source Browser no longer exposes belief, location, or object as source-derived creation classes; `grep -n "SOURCE_RECORD_CLASSES" tools/manual-story-studio/web/src` returns no five-class array (the construct is removed or reduced to the two primary actions).
+1. The Source Browser no longer exposes belief, location, or object as source-derived creation classes; `grep -n "SOURCE_RECORD_CLASSES" tools/manual-story-studio/web/src/pages/SourceBrowser.tsx` returns no matches.
 2. Two primary actions exist and are keyed to selection type: "Create story cast from world character" (attaches `source_world_character`) and "Create story fact from selected text" (attaches a `notes` backlink).
 3. A generic "Create manual record using selected text as note" advanced action exists; the selected text it carries lands in `notes` only (never `summary`/`details`/`title`). Because no frontend test runner exists (web `test` is `tsc --noEmit`), this is enforced at the **type level**: the generic-note path routes through a typed note-seed helper whose return type permits only `notes`, so a violation fails `npm --prefix web test` (the typecheck).
 4. Copy-selected-text and copy-source-path helpers are present.
@@ -101,3 +103,11 @@ The first impression the five-class dropdown gives — "the app distills world s
 - **Assumption: the read-only world-source read layer is unchanged.** This spec changes creation paths, not source enumeration/reading.
 - **Assumption: beliefs have a complete manual-creation path** in the normal records UI (they do — belief is a standard record class). Removing the source-derived belief path must not be the only way to create a belief; confirm the manual path exists before removing.
 - **Scope discipline.** The tabbed "World Source → Story Seeds" IA and the scale fixes are explicitly deferred; do not fold them in. This spec's correctness goal is achieved by narrowing creation paths alone.
+
+## Outcome
+
+Completed on 2026-06-03. `tools/manual-story-studio/web/src/pages/SourceBrowser.tsx` now exposes cast-from-character and fact-from-source-text primary actions, an advanced note-only creation action for non-belief `RecordForm` classes, and deterministic copy helpers for selected source text and source path. The five-class `SOURCE_RECORD_CLASSES` dropdown was removed, copied source text is routed to `notes` only, fact provenance uses the existing `notes` field, cast provenance uses existing `source_world_character`, and no schema/backend/world-canon changes were made.
+
+Deviation from the original plan: the advanced note action excludes `beliefs` to preserve the stronger invariant that no source-derived path creates a belief, and excludes `beat-templates` because the generic `RecordForm` is not the beat-template editor. The implementation ticket was archived at `archive/tickets/SPEC124MANSTOSTU-001.md`.
+
+Verification recorded in `archive/tickets/SPEC124MANSTOSTU-001.md`: `cd tools/manual-story-studio && npm --prefix web test`, `cd tools/manual-story-studio && npm run test:backend`, `cd tools/manual-story-studio && npm test`, `grep -n "SOURCE_RECORD_CLASSES" tools/manual-story-studio/web/src/pages/SourceBrowser.tsx`, and `grep -rn "source_paths" tools/manual-story-studio`.
