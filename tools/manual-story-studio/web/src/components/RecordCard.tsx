@@ -85,7 +85,7 @@ export function RecordCard(props: RecordCardProps) {
       </header>
       <p style={{ margin: "4px 0" }}>
         <span className="id-subscript">
-          {summary.id} {summary.active ? "" : "(archived)"}
+          {summary.id} {summary.active ? "" : "(inactive)"}
         </span>
       </p>
       <dl

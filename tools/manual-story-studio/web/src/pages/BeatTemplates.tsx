@@ -186,8 +186,12 @@ export function BeatTemplates() {
               checked={includeArchived}
               onChange={(e) => setIncludeArchived(e.target.checked)}
             />{" "}
-            Include archived
+            Include inactive
           </label>
+          <span style={{ color: "#666", fontSize: 12 }}>
+            Inactive = kept for reference, hidden from normal selection. Deleted
+            = file gone.
+          </span>
           <label>
             Filter by move:{" "}
             <select
@@ -263,7 +267,7 @@ export function BeatTemplates() {
                     </span>
                     {!tpl.active ? (
                       <span style={{ color: "#a00", marginLeft: 4 }}>
-                        (archived)
+                        (inactive)
                       </span>
                     ) : null}
                   </div>

@@ -70,7 +70,7 @@ Rename the option key at every call site: `src/health/compute.ts`, `src/prompt/c
 
 ## Out of Scope
 
-- User-facing display strings (ticket SPEC120MANSTOSTU-001).
+- User-facing display strings (completed in `archive/tickets/SPEC120MANSTOSTU-001.md`).
 - `retired_reason` removal (ticket SPEC120MANSTOSTU-003).
 - The `active` boolean field and filtering semantics — only the param NAME changes; the include/exclude behavior is byte-identical.
 

@@ -10,6 +10,12 @@
 
 ---
 
+## Implementation Notes
+
+- 2026-06-03 — `archive/tickets/SPEC120MANSTOSTU-001.md` replaced the four user-facing web UI "archived" labels with "inactive" and added the inactive/deleted model note near both include-inactive toggles. Remaining `includeArchived` and `retired_reason` prose below is historical intake context until `SPEC120MANSTOSTU-002` / `SPEC120MANSTOSTU-003` land.
+
+---
+
 ## 1. Context & Motivation
 
 Manual Studio's records are **mutable current truth**, not an append-only ledger (report §6/§8/§11). The delete lifecycle is now correct (SPEC-114), but "archived" lifecycle vocabulary still leaks into the UI, implying a retirement/archive model the tool deliberately rejects. Verified user-facing occurrences:

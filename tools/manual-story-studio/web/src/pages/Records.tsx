@@ -255,8 +255,12 @@ export function Records() {
             checked={includeArchived}
             onChange={(e) => setIncludeArchived(e.target.checked)}
           />{" "}
-          include archived
+          include inactive
         </label>
+        <p style={{ color: "#666", fontSize: 12, margin: "0 0 8px" }}>
+          Inactive = kept for reference, hidden from normal selection. Deleted =
+          file gone.
+        </p>
         <ul style={{ listStyle: "none", padding: 0 }}>
           {MANUAL_RECORD_CLASSES.map((cls) => (
             <li key={cls}>

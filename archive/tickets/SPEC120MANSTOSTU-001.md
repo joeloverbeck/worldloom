@@ -1,6 +1,6 @@
 # SPEC120MANSTOSTU-001: User-facing "archived" → "inactive" labels + model tooltip
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` web UI (`RecordCard`, `Records`, `BeatTemplates`). No backend, no schema, no canon surface.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-Manual Studio records are mutable current truth, not an append-only ledger, but the web UI still shows "archived" lifecycle vocabulary — implying a retirement/archive model the tool deliberately rejects. Replace the user-facing "archived" wording with "inactive" at all four sites, and state the lifecycle model once near the inactive toggle so the author sees what "inactive" vs "deleted" means.
+At intake, Manual Studio records were mutable current truth, not an append-only ledger, but the web UI still showed "archived" lifecycle vocabulary — implying a retirement/archive model the tool deliberately rejects. This ticket replaced the user-facing "archived" wording with "inactive" at all four sites, and states the lifecycle model near the inactive toggles so the author sees what "inactive" vs "deleted" means.
 
 ## Assumption Reassessment (2026-06-02)
 
@@ -23,7 +23,7 @@ Manual Studio records are mutable current truth, not an append-only ledger, but 
 
 ## Verification Layers
 
-1. No user-facing "archived" display string remains -> codebase grep-proof (`grep -rni "archived" tools/manual-story-studio/web/src` shows only non-user-facing identifier hits such as `includeArchived`, pending ticket 002).
+1. No user-facing "archived" display string remains -> codebase grep-proof (`rg -n 'archived' tools/manual-story-studio/web/src` returns no hits).
 2. All four sites render "inactive" -> codebase grep-proof + manual review of the rendered badge/checkbox.
 3. Lifecycle model statement present near the inactive toggle -> manual review.
 4. Single-package UI ticket — FOUNDATIONS-alignment and schema-validation layers are not applicable (no canon, schema, or enforcement surface touched); the three layers above fully cover the change.
@@ -83,3 +83,24 @@ Add a one-line affordance/tooltip near the inactive toggle (Records page; mirror
 1. `cd tools/manual-story-studio && npm --prefix web test`
 2. `grep -rni "archived" tools/manual-story-studio/web/src` (expect zero user-facing display-string hits)
 3. A narrower web-only typecheck is the correct boundary here because the ticket touches no backend code; the full `npm test` is unnecessary for a display-string change.
+
+## Outcome
+
+Completed: 2026-06-03
+
+The Manual Studio web UI now renders inactive record/template labels as `(inactive)`, changes both include toggles to "include inactive" / "Include inactive", and shows the one-line model statement near the Records and Beat Templates inactive toggles: "Inactive = kept for reference, hidden from normal selection. Deleted = file gone."
+
+No filtering, selection, delete behavior, backend code, schema code, or `active` boolean contract changed. The active SPEC-120 spec now has an implementation note marking the UI-label slice as complete while leaving `includeArchived` and `retired_reason` as historical intake context for sibling tickets.
+
+## Verification Result
+
+Commands run from the repository checkout:
+
+1. `npm --prefix web test` from `tools/manual-story-studio` — PASS; web TypeScript compile completed with `tsc -p tsconfig.json --noEmit`.
+2. `rg -n 'archived' tools/manual-story-studio/web/src` — PASS; no hits, so no user-facing web UI `archived` display string remains.
+
+Manual review confirmed the four owned sites now say `inactive` and the lifecycle model statement appears next to both inactive toggles.
+
+## Deviations
+
+- The model statement was mirrored on both Records and Beat Templates because both pages have an include-inactive toggle. This keeps the symmetric UI controls self-explanatory without adding behavior or a new component.
