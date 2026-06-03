@@ -1,4 +1,4 @@
-import type { CurrentContext } from "../schema/current-context.js";
+import type { PromptWorkingSet } from "../schema/prompt-working-set.js";
 import {
   MANUAL_RECORD_CLASSES,
   MANUAL_RECORD_CLASS_PREFIXES,
@@ -8,12 +8,12 @@ import type { KnownIds } from "./refs.js";
 import type { ValidationError, ValidationResult } from "./schema.js";
 
 export const CURRENT_CONTEXT_REFERENCE_BROKEN =
-  "current-context-reference-broken";
+  "prompt-working-set-reference-broken";
 export const CURRENT_CONTEXT_POV_NOT_IN_CAST =
-  "current-context-pov-not-in-cast";
+  "prompt-working-set-pov-not-in-cast";
 
-export function validateCurrentContext(
-  ctx: CurrentContext,
+export function validatePromptWorkingSet(
+  ctx: PromptWorkingSet,
   knownIds: KnownIds,
   knownSegmentIds: string[],
 ): ValidationResult {

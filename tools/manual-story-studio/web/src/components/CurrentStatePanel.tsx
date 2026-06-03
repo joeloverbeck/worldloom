@@ -4,12 +4,12 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { listRecordsForClasses } from "../api/records.js";
 import type {
-  CurrentContext,
+  PromptWorkingSet,
   ManualRecordClass,
 } from "../types/manual-story.js";
 
 export interface CurrentStatePanelProps {
-  ctx: CurrentContext | null;
+  ctx: PromptWorkingSet | null;
   worldSlug: string;
   msSlug: string;
 }
@@ -86,7 +86,7 @@ export function CurrentStatePanel({
         <h2>Prompt Working Set</h2>
         <p>No prompt working set has been saved yet.</p>
         <Link
-          to={`/worlds/${worldSlug}/manual-stories/${msSlug}/current-context/edit`}
+          to={`/worlds/${worldSlug}/manual-stories/${msSlug}/prompt-working-set/edit`}
         >
           Set prompt working set
         </Link>
@@ -120,8 +120,8 @@ export function CurrentStatePanel({
         <dt>Active secrets and questions</dt>
         <dd>{chipList(ctx.active_secrets_questions, titleById)}</dd>
       </dl>
-      {ctx.current_handoff_summary.trim().length > 0 ? (
-        <p>{ctx.current_handoff_summary}</p>
+      {ctx.handoff_summary.trim().length > 0 ? (
+        <p>{ctx.handoff_summary}</p>
       ) : (
         <p>
           <em>No handoff summary.</em>

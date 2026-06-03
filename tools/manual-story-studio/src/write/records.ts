@@ -3,7 +3,7 @@ import path from "node:path";
 
 import YAML from "yaml";
 
-import { dropLegacyReviewKey } from "../read/current-context.js";
+import { dropLegacyReviewKey } from "../read/prompt-working-set.js";
 import {
   listAllKnownIds,
   readRecord,

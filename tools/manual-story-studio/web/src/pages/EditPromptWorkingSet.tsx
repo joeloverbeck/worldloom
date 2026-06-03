@@ -2,22 +2,22 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
-  fetchCurrentContext,
-  saveCurrentContext,
-} from "../api/current-context.js";
+  fetchPromptWorkingSet,
+  savePromptWorkingSet,
+} from "../api/prompt-working-set.js";
 import { RefList } from "../components/RefList.js";
 import { RecordPicker } from "../components/RecordPicker.js";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import {
   MANUAL_RECORD_CLASSES,
   MANUAL_RECORD_CLASS_PREFIXES,
-  type CurrentContext,
+  type PromptWorkingSet,
   type ManualRecordClass,
   type RecordRefs,
   type ValidationError,
 } from "../types/manual-story.js";
 
-const EMPTY_CONTEXT: CurrentContext = {
+const EMPTY_CONTEXT: PromptWorkingSet = {
   current_location: null,
   current_cast: [],
   pov_holder: null,
@@ -26,7 +26,7 @@ const EMPTY_CONTEXT: CurrentContext = {
   pinned_records: [],
   excluded_records: [],
   must_not_reveal: [],
-  current_handoff_summary: "",
+  handoff_summary: "",
   last_accepted_segment: null,
 };
 
@@ -127,14 +127,14 @@ function pinnedRefs(ids: string[]): RecordRefs {
   return { characters: [], locations: [], related_records: ids };
 }
 
-export function EditCurrentContext() {
+export function EditPromptWorkingSet() {
   const { worldSlug, msSlug } = useParams<{
     worldSlug: string;
     msSlug: string;
   }>();
   const navigate = useNavigate();
 
-  const [ctx, setCtx] = useState<CurrentContext>(EMPTY_CONTEXT);
+  const [ctx, setCtx] = useState<PromptWorkingSet>(EMPTY_CONTEXT);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -148,7 +148,7 @@ export function EditCurrentContext() {
     setLoadError(null);
     setSaveError(null);
     setSaveFindings([]);
-    fetchCurrentContext(worldSlug, msSlug)
+    fetchPromptWorkingSet(worldSlug, msSlug)
       .then((loaded) => {
         if (cancelled) return;
         setCtx(loaded ? { ...EMPTY_CONTEXT, ...loaded } : EMPTY_CONTEXT);
@@ -244,7 +244,7 @@ export function EditCurrentContext() {
   const story = msSlug;
   const routeBase = `/worlds/${world}/manual-stories/${story}`;
 
-  function update(next: Partial<CurrentContext>): void {
+  function update(next: Partial<PromptWorkingSet>): void {
     setCtx((current) => ({ ...current, ...next }));
     setSaveError(null);
     setSaveFindings([]);
@@ -262,7 +262,7 @@ export function EditCurrentContext() {
     setSaveError(null);
     setSaveFindings([]);
     try {
-      const result = await saveCurrentContext(world, story, ctx);
+      const result = await savePromptWorkingSet(world, story, ctx);
       if (result.ok) {
         unsavedChanges.reset();
         navigate(`${routeBase}/dashboard`);
@@ -278,26 +278,26 @@ export function EditCurrentContext() {
 
   return (
     <section
-      aria-labelledby="edit-current-context-heading"
+      aria-labelledby="edit-prompt-working-set-heading"
       style={{ display: "grid", gap: 12 }}
     >
-      <h2 id="edit-current-context-heading">Edit Prompt Working Set</h2>
+      <h2 id="edit-prompt-working-set-heading">Edit Prompt Working Set</h2>
 
       {loadError ? (
         <p role="alert">
-          Failed to load current context: {loadError}
+          Failed to load prompt working set: {loadError}
         </p>
       ) : null}
-      {loading ? <p>Loading current context...</p> : null}
+      {loading ? <p>Loading prompt working set...</p> : null}
 
       <FieldRow
         label="Current handoff summary"
-        error={fieldError("current_handoff_summary", serverErrors, clientErrors)}
+        error={fieldError("handoff_summary", serverErrors, clientErrors)}
       >
         <textarea
           rows={6}
-          value={ctx.current_handoff_summary}
-          onChange={(event) => update({ current_handoff_summary: event.target.value })}
+          value={ctx.handoff_summary}
+          onChange={(event) => update({ handoff_summary: event.target.value })}
           style={{ width: "100%", fontFamily: "inherit" }}
         />
       </FieldRow>
@@ -440,7 +440,7 @@ export function EditCurrentContext() {
 
       {saveFindings.length > 0 ? (
         <section role="alert" style={{ background: "#fee", padding: 8 }}>
-          <p>Current context validation failed.</p>
+          <p>Prompt working set validation failed.</p>
           <ul>
             {saveFindings.map((finding, index) => (
               <li key={`${finding.field}-${index}`}>
@@ -451,7 +451,7 @@ export function EditCurrentContext() {
         </section>
       ) : null}
       {saveError ? (
-        <p role="alert">Failed to save current context: {saveError}</p>
+        <p role="alert">Failed to save prompt working set: {saveError}</p>
       ) : null}
 
       <div style={{ display: "flex", gap: 8 }}>

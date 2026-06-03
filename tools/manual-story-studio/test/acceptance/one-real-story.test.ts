@@ -28,7 +28,7 @@ import type {
   ManualSecretRecord,
 } from "../../src/schema/manual-story.js";
 import { createServer } from "../../src/server/http.js";
-import { writeCurrentContext } from "../../src/write/current-context.js";
+import { writePromptWorkingSet } from "../../src/write/prompt-working-set.js";
 import {
   createRecord,
   deleteRecord,
@@ -246,7 +246,7 @@ test("SPEC-121: one synthetic Glass Orchard author loop completes end-to-end", a
       fixture.root,
     );
 
-    writeCurrentContext(fixture.root, {
+    writePromptWorkingSet(fixture.root, {
       current_location: null,
       current_cast: [mira.id, len.id],
       pov_holder: mira.id,
@@ -265,7 +265,7 @@ test("SPEC-121: one synthetic Glass Orchard author loop completes end-to-end", a
       ],
       excluded_records: [trueAnswer.id],
       must_not_reveal: [secret.id, question.id],
-      current_handoff_summary: "Mira has reached Len's oldest row of trees.",
+      handoff_summary: "Mira has reached Len's oldest row of trees.",
       last_accepted_segment: null,
     });
 
@@ -412,7 +412,7 @@ test("SPEC-121: one synthetic Glass Orchard author loop completes end-to-end", a
     assert.equal(
       "outcome" in blockedDelete &&
         blockedDelete.outcome === "blocked" &&
-        blockedDelete.referrers.some((entry) => entry.summary.id === "current-context"),
+        blockedDelete.referrers.some((entry) => entry.summary.id === "prompt-working-set"),
       true,
     );
     const forcedDelete = deleteRecord(fixture.root, "secrets", secret.id, {
@@ -439,7 +439,7 @@ test("SPEC-121: one synthetic Glass Orchard author loop completes end-to-end", a
     assert.equal(repaired.segment_id, "SEG-2");
 
     writeFileSync(
-      path.join(fixture.root.absolutePath, "current-context.yaml"),
+      path.join(fixture.root.absolutePath, "prompt-working-set.yaml"),
       "current_cast: [\n",
     );
     const health = computeHealth(fixture.root.absolutePath);

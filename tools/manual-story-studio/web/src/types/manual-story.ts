@@ -98,7 +98,7 @@ export interface ManualStoryMetadata {
   manuscript: ManualStoryManuscriptPolicy;
 }
 
-export interface CurrentContext {
+export interface PromptWorkingSet {
   current_location: string | null;
   current_cast: string[];
   pov_holder: string | null;
@@ -107,7 +107,7 @@ export interface CurrentContext {
   pinned_records: string[];
   excluded_records?: string[];
   must_not_reveal: string[];
-  current_handoff_summary: string;
+  handoff_summary: string;
   last_accepted_segment: string | null;
 }
 

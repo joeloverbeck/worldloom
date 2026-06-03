@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 
 import { composePrompt } from "../../src/prompt/compose.js";
-import type { CurrentContext } from "../../src/schema/current-context.js";
+import type { PromptWorkingSet } from "../../src/schema/prompt-working-set.js";
 import type {
   ManualRecord,
   ManualRecordClass,
@@ -145,11 +145,11 @@ function writeRecord(
   writeFileSync(path.join(dir, `${record.id}.yaml`), YAML.stringify(record));
 }
 
-function writeCurrentContext(
+function writePromptWorkingSet(
   manualStoryRoot: string,
-  overrides: Partial<CurrentContext> = {},
+  overrides: Partial<PromptWorkingSet> = {},
 ): void {
-  const ctx: CurrentContext = {
+  const ctx: PromptWorkingSet = {
     current_location: null,
     current_cast: ["mchar-2", "mchar-1"],
     pov_holder: "mchar-2",
@@ -157,12 +157,12 @@ function writeCurrentContext(
     active_secrets_questions: ["msecret-1", "mq-1"],
     pinned_records: ["mfact-1"],
     must_not_reveal: ["msecret-1"],
-    current_handoff_summary: "Mara waits in the kitchen while Iven chooses whether to lie.",
+    handoff_summary: "Mara waits in the kitchen while Iven chooses whether to lie.",
     last_accepted_segment: null,
     ...overrides,
   };
   writeFileSync(
-    path.join(manualStoryRoot, "current-context.yaml"),
+    path.join(manualStoryRoot, "prompt-working-set.yaml"),
     YAML.stringify(ctx),
   );
 }
@@ -174,10 +174,10 @@ function section(markdown: string, number: number): string {
   return next === -1 ? markdown.slice(start) : markdown.slice(start, next);
 }
 
-test("compose prefers current-context handoff, cast order, and reveal limits", async () => {
+test("compose prefers prompt-working-set handoff, cast order, and reveal limits", async () => {
   const { tempRoot, manualStoryRoot } = mkFixture();
   try {
-    writeCurrentContext(manualStoryRoot);
+    writePromptWorkingSet(manualStoryRoot);
 
     const result = await composePrompt({
       manualStoryRoot,
@@ -216,7 +216,7 @@ test("compose prefers current-context handoff, cast order, and reveal limits", a
   }
 });
 
-test("compose without current-context preserves selected-input fallback", async () => {
+test("compose without prompt-working-set preserves selected-input fallback", async () => {
   const { tempRoot, manualStoryRoot } = mkFixture();
   try {
     const result = await composePrompt({
@@ -239,10 +239,10 @@ test("compose without current-context preserves selected-input fallback", async 
   }
 });
 
-test("compose with current-context remains byte deterministic", async () => {
+test("compose with prompt-working-set remains byte deterministic", async () => {
   const { tempRoot, manualStoryRoot } = mkFixture();
   try {
-    writeCurrentContext(manualStoryRoot);
+    writePromptWorkingSet(manualStoryRoot);
     const input = {
       manualStoryRoot,
       repoRoot: tempRoot,

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-import { fetchCurrentContext } from "../api/current-context.js";
+import { fetchPromptWorkingSet } from "../api/prompt-working-set.js";
 import { previewPrompt } from "../api/prompts.js";
 import { readMetadata } from "../api/records.js";
 import { BeatTemplateCandidates } from "../components/BeatTemplateCandidates.js";
@@ -41,7 +41,7 @@ export function MomentComposer() {
 
   const [metadata, setMetadata] = useState<ManualStoryMetadata | null>(null);
   const [metadataError, setMetadataError] = useState<string | null>(null);
-  const [currentContextError, setCurrentContextError] = useState<string | null>(
+  const [promptWorkingSetError, setPromptWorkingSetError] = useState<string | null>(
     null,
   );
   const [reloadKey, setReloadKey] = useState(0);
@@ -66,15 +66,15 @@ export function MomentComposer() {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
     setMetadataError(null);
-    setCurrentContextError(null);
+    setPromptWorkingSetError(null);
     Promise.all([
       readMetadata(worldSlug, msSlug)
         .then((value) => ({ ok: true as const, value }))
         .catch((error: unknown) => ({ ok: false as const, error })),
-      fetchCurrentContext(worldSlug, msSlug)
+      fetchPromptWorkingSet(worldSlug, msSlug)
         .then((value) => ({ ok: true as const, value }))
         .catch((error: unknown) => ({ ok: false as const, error })),
-    ]).then(([metadataResult, currentContextResult]) => {
+    ]).then(([metadataResult, promptWorkingSetResult]) => {
       if (cancelled) return;
       if (!metadataResult.ok) {
         setMetadataError(loadErrorMessage(metadataResult.error));
@@ -84,21 +84,21 @@ export function MomentComposer() {
       if (!m) return;
       setMetadata(m);
 
-      const currentContext = currentContextResult.ok
-        ? currentContextResult.value
+      const promptWorkingSet = promptWorkingSetResult.ok
+        ? promptWorkingSetResult.value
         : null;
-      if (!currentContextResult.ok) {
-        setCurrentContextError(loadErrorMessage(currentContextResult.error));
+      if (!promptWorkingSetResult.ok) {
+        setPromptWorkingSetError(loadErrorMessage(promptWorkingSetResult.error));
       }
 
       if (!navState.included_cast) {
-        const contextCast = currentContext?.current_cast ?? [];
+        const contextCast = promptWorkingSet?.current_cast ?? [];
         setIncludedCast(
           contextCast.length > 0 ? contextCast : (m.cast_order ?? []),
         );
       }
       if (!navState.included_records) {
-        const contextPins = currentContext?.pinned_records ?? [];
+        const contextPins = promptWorkingSet?.pinned_records ?? [];
         if (contextPins.length > 0) {
           setPinnedRecordIds(contextPins);
         }
@@ -170,9 +170,9 @@ export function MomentComposer() {
       ) : metadata ? null : (
         <p>Loading manual story metadata…</p>
       )}
-      {currentContextError ? (
+      {promptWorkingSetError ? (
         <p role="alert">
-          Failed to load current context: {currentContextError}{" "}
+          Failed to load prompt working set: {promptWorkingSetError}{" "}
           <button type="button" onClick={retryLoad}>
             Retry
           </button>

@@ -17,7 +17,7 @@ const REQUIRED_APPLICATIONS = [
   "tools/manual-story-studio/web/src/pages/EditContract.tsx",
   "tools/manual-story-studio/web/src/components/RecordForm.tsx",
   "tools/manual-story-studio/web/src/components/BeatTemplateForm.tsx",
-  "tools/manual-story-studio/web/src/pages/EditCurrentContext.tsx",
+  "tools/manual-story-studio/web/src/pages/EditPromptWorkingSet.tsx",
 ];
 
 function readRepoFile(relativePath: string): string {

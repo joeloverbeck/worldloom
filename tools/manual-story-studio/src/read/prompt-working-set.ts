@@ -3,14 +3,14 @@ import path from "node:path";
 
 import YAML from "yaml";
 
-import type { CurrentContext } from "../schema/current-context.js";
+import type { PromptWorkingSet } from "../schema/prompt-working-set.js";
 import { err, ok, type ReadResult } from "./result.js";
 
-const CURRENT_CONTEXT_FILENAME = "current-context.yaml";
+const PROMPT_WORKING_SET_FILENAME = "prompt-working-set.yaml";
 const LEGACY_REVIEW_KEY = ["last", "reviewed", "after", "segment"].join("_");
 
-export function readCurrentContext(manualStoryRoot: string): ReadResult<CurrentContext | null> {
-  const fullPath = path.join(manualStoryRoot, CURRENT_CONTEXT_FILENAME);
+export function readPromptWorkingSet(manualStoryRoot: string): ReadResult<PromptWorkingSet | null> {
+  const fullPath = path.join(manualStoryRoot, PROMPT_WORKING_SET_FILENAME);
   if (!existsSync(fullPath)) {
     return ok(null);
   }
@@ -23,7 +23,7 @@ export function readCurrentContext(manualStoryRoot: string): ReadResult<CurrentC
       code: "io_error",
       path: fullPath,
       cause,
-      repair_hint: "Check file permissions on current-context.yaml.",
+      repair_hint: "Check file permissions on prompt-working-set.yaml.",
     });
   }
 
@@ -32,14 +32,14 @@ export function readCurrentContext(manualStoryRoot: string): ReadResult<CurrentC
     parsed = YAML.parse(text) as unknown;
   } catch (cause) {
     return err({
-      code: "current-context-yaml-parse-failed",
+      code: "prompt-working-set-yaml-parse-failed",
       path: fullPath,
       cause,
-      repair_hint: "Fix YAML syntax errors in current-context.yaml.",
+      repair_hint: "Fix YAML syntax errors in prompt-working-set.yaml.",
     });
   }
 
-  return ok(dropLegacyReviewKey(parsed) as CurrentContext);
+  return ok(dropLegacyReviewKey(parsed) as PromptWorkingSet);
 }
 
 export function dropLegacyReviewKey<T>(value: T): T {

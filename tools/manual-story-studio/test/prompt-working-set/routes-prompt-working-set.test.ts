@@ -14,7 +14,7 @@ import test from "node:test";
 import YAML from "yaml";
 
 import { createServer } from "../../src/server/http.js";
-import type { CurrentContext } from "../../src/schema/current-context.js";
+import type { PromptWorkingSet } from "../../src/schema/prompt-working-set.js";
 import { makeDefaultManualStoryMetadata } from "../../src/write/manual-story-metadata.js";
 import {
   resolveManualStoryRoot,
@@ -31,7 +31,7 @@ function mkWorld(): {
   root: ManualStoryRoot;
 } {
   const repoRoot = mkdtempSync(
-    path.join(os.tmpdir(), "manual-studio-current-context-route-"),
+    path.join(os.tmpdir(), "manual-studio-prompt-working-set-route-"),
   );
   const worldSlug = "test-world";
   const msSlug = "test-story";
@@ -66,7 +66,7 @@ function writeRecordFixtures(root: ManualStoryRoot): void {
   }
 }
 
-function context(overrides: Partial<CurrentContext> = {}): CurrentContext {
+function context(overrides: Partial<PromptWorkingSet> = {}): PromptWorkingSet {
   return {
     current_location: "mloc-1",
     current_cast: ["mchar-1"],
@@ -75,21 +75,21 @@ function context(overrides: Partial<CurrentContext> = {}): CurrentContext {
     active_secrets_questions: ["msecret-1", "mq-1"],
     pinned_records: ["mrel-1", "mobj-1"],
     must_not_reveal: ["msecret-1"],
-    current_handoff_summary: "Mara waits in the riverhouse kitchen.",
+    handoff_summary: "Mara waits in the riverhouse kitchen.",
     last_accepted_segment: "SEG-1",
     ...overrides,
   };
 }
 
 function route(worldSlug: string, msSlug: string): string {
-  return `/api/worlds/${worldSlug}/manual-stories/${msSlug}/current-context`;
+  return `/api/worlds/${worldSlug}/manual-stories/${msSlug}/prompt-working-set`;
 }
 
-test("current-context route: GET valid file returns parsed payload", async () => {
+test("prompt-working-set route: GET valid file returns parsed payload", async () => {
   const { repoRoot, worldSlug, msSlug, root } = mkWorld();
   try {
     const ctx = context();
-    safeWriteFile(root, "current-context.yaml", YAML.stringify(ctx));
+    safeWriteFile(root, "prompt-working-set.yaml", YAML.stringify(ctx));
     const server = await createServer({ repoRoot });
     try {
       const response = await server.inject({
@@ -106,7 +106,7 @@ test("current-context route: GET valid file returns parsed payload", async () =>
   }
 });
 
-test("current-context route: GET absent file returns null", async () => {
+test("prompt-working-set route: GET absent file returns null", async () => {
   const { repoRoot, worldSlug, msSlug } = mkWorld();
   try {
     const server = await createServer({ repoRoot });
@@ -125,11 +125,11 @@ test("current-context route: GET absent file returns null", async () => {
   }
 });
 
-test("current-context route: GET corrupt file returns 409", async () => {
+test("prompt-working-set route: GET corrupt file returns 409", async () => {
   const { repoRoot, worldSlug, msSlug, root } = mkWorld();
   try {
     writeFileSync(
-      path.join(root.absolutePath, "current-context.yaml"),
+      path.join(root.absolutePath, "prompt-working-set.yaml"),
       "current_location: [unterminated\n",
     );
     const server = await createServer({ repoRoot });
@@ -140,8 +140,8 @@ test("current-context route: GET corrupt file returns 409", async () => {
       });
       assert.equal(response.statusCode, 409);
       const body = response.json() as { error: string; path: string };
-      assert.equal(body.error, "current-context-yaml-parse-failed");
-      assert.match(body.path, /current-context\.yaml$/);
+      assert.equal(body.error, "prompt-working-set-yaml-parse-failed");
+      assert.match(body.path, /prompt-working-set\.yaml$/);
     } finally {
       await server.close();
     }
@@ -150,7 +150,7 @@ test("current-context route: GET corrupt file returns 409", async () => {
   }
 });
 
-test("current-context route: PUT valid body writes file and returns 200", async () => {
+test("prompt-working-set route: PUT valid body writes file and returns 200", async () => {
   const { repoRoot, worldSlug, msSlug, root } = mkWorld();
   try {
     const ctx = context();
@@ -163,7 +163,7 @@ test("current-context route: PUT valid body writes file and returns 200", async 
       });
       assert.equal(response.statusCode, 200);
       assert.deepEqual(response.json(), ctx);
-      const fullPath = path.join(root.absolutePath, "current-context.yaml");
+      const fullPath = path.join(root.absolutePath, "prompt-working-set.yaml");
       assert.equal(existsSync(fullPath), true);
       assert.deepEqual(YAML.parse(readFileSync(fullPath, "utf8")), ctx);
     } finally {
@@ -174,7 +174,7 @@ test("current-context route: PUT valid body writes file and returns 200", async 
   }
 });
 
-test("current-context route: PUT invalid POV holder returns 422", async () => {
+test("prompt-working-set route: PUT invalid POV holder returns 422", async () => {
   const { repoRoot, worldSlug, msSlug } = mkWorld();
   try {
     const server = await createServer({ repoRoot });
@@ -190,7 +190,7 @@ test("current-context route: PUT invalid POV holder returns 422", async () => {
         findings: Array<{ code?: string }>;
       };
       assert.equal(body.error, "validation_failed");
-      assert.equal(body.findings[0]?.code, "current-context-pov-not-in-cast");
+      assert.equal(body.findings[0]?.code, "prompt-working-set-pov-not-in-cast");
     } finally {
       await server.close();
     }
@@ -199,7 +199,7 @@ test("current-context route: PUT invalid POV holder returns 422", async () => {
   }
 });
 
-test("current-context route: PUT strips legacy reviewed segment marker", async () => {
+test("prompt-working-set route: PUT strips legacy reviewed segment marker", async () => {
   const { repoRoot, worldSlug, msSlug, root } = mkWorld();
   try {
     const ctx = {
@@ -215,7 +215,7 @@ test("current-context route: PUT strips legacy reviewed segment marker", async (
       });
       assert.equal(response.statusCode, 200);
       assert.equal(Object.hasOwn(response.json(), LEGACY_REVIEW_KEY), false);
-      const fullPath = path.join(root.absolutePath, "current-context.yaml");
+      const fullPath = path.join(root.absolutePath, "prompt-working-set.yaml");
       const onDisk = YAML.parse(readFileSync(fullPath, "utf8")) as Record<string, unknown>;
       assert.equal(Object.hasOwn(onDisk, LEGACY_REVIEW_KEY), false);
     } finally {
@@ -226,7 +226,7 @@ test("current-context route: PUT strips legacy reviewed segment marker", async (
   }
 });
 
-test("current-context route: PUT unknown pinned record returns 422", async () => {
+test("prompt-working-set route: PUT unknown pinned record returns 422", async () => {
   const { repoRoot, worldSlug, msSlug } = mkWorld();
   try {
     const server = await createServer({ repoRoot });
@@ -242,7 +242,7 @@ test("current-context route: PUT unknown pinned record returns 422", async () =>
         findings: Array<{ code?: string; field: string }>;
       };
       assert.equal(body.error, "validation_failed");
-      assert.equal(body.findings[0]?.code, "current-context-reference-broken");
+      assert.equal(body.findings[0]?.code, "prompt-working-set-reference-broken");
       assert.equal(body.findings[0]?.field, "pinned_records[0]");
     } finally {
       await server.close();

@@ -10,7 +10,7 @@ import {
   resolveReferrerSummaries,
   scanReferences,
 } from "../../src/read/records.js";
-import type { CurrentContext } from "../../src/schema/current-context.js";
+import type { PromptWorkingSet } from "../../src/schema/prompt-working-set.js";
 import type {
   ManualBeliefRecord,
   ManualCharacterRecord,
@@ -119,7 +119,7 @@ function unwrap<T>(result: { ok: true; value: T } | { ok: false; error: unknown 
   return result.value;
 }
 
-test("scanReferences: finds record refs, current-context refs, and selected-template sidecars", () => {
+test("scanReferences: finds record refs, prompt-working-set refs, and selected-template sidecars", () => {
   const root = mkRoot();
   try {
     writeYaml(root, "records/cast/mchar-1.yaml", castProfile("mchar-1"));
@@ -139,7 +139,7 @@ test("scanReferences: finds record refs, current-context refs, and selected-temp
       ...commonFields("mtemplate-1"),
       template_body: "Template text",
     });
-    writeYaml(root, "current-context.yaml", {
+    writeYaml(root, "prompt-working-set.yaml", {
       current_location: null,
       current_cast: ["mchar-1"],
       pov_holder: "mchar-1",
@@ -148,9 +148,9 @@ test("scanReferences: finds record refs, current-context refs, and selected-temp
       pinned_records: ["mfact-1"],
       excluded_records: [],
       must_not_reveal: [],
-      current_handoff_summary: "",
+      handoff_summary: "",
       last_accepted_segment: "SEG-1",
-    } satisfies CurrentContext);
+    } satisfies PromptWorkingSet);
     writeYaml(root, "segments/SEG-1.yaml", {
       id: "SEG-1",
       selected_template: "mtemplate-1",
@@ -169,18 +169,18 @@ test("scanReferences: finds record refs, current-context refs, and selected-temp
       .map((r) => `${r.id}:${r.field}`)
       .sort();
     assert.deepEqual(characterFields, [
-      "current-context:current-context.current_cast[0]",
-      "current-context:current-context.pov_holder",
       "mbel-1:holder",
       "mbel-1:refs.characters[0]",
+      "prompt-working-set:prompt-working-set.current_cast[0]",
+      "prompt-working-set:prompt-working-set.pov_holder",
     ]);
 
     const factFields = unwrap(scanReferences(root, "mfact-1"))
       .map((r) => `${r.id}:${r.field}`)
       .sort();
     assert.deepEqual(factFields, [
-      "current-context:current-context.pinned_records[0]",
       "mbel-1:refs.related_records[0]",
+      "prompt-working-set:prompt-working-set.pinned_records[0]",
     ]);
 
     const templateFields = unwrap(scanReferences(root, "mtemplate-1"))
@@ -208,7 +208,7 @@ test("resolveReferrerSummaries: dedupes by referrer and returns populated summar
       truth_relation: "true",
       confidence: "high",
     } satisfies ManualBeliefRecord);
-    writeYaml(root, "current-context.yaml", {
+    writeYaml(root, "prompt-working-set.yaml", {
       current_location: null,
       current_cast: ["mchar-1"],
       pov_holder: null,
@@ -217,24 +217,24 @@ test("resolveReferrerSummaries: dedupes by referrer and returns populated summar
       pinned_records: [],
       excluded_records: [],
       must_not_reveal: [],
-      current_handoff_summary: "",
+      handoff_summary: "",
       last_accepted_segment: null,
-    } satisfies CurrentContext);
+    } satisfies PromptWorkingSet);
 
     const summaries = unwrap(resolveReferrerSummaries(root, "mchar-1"));
 
     assert.equal(summaries.length, 2);
     assert.deepEqual(
       summaries.map((entry) => entry.summary.id).sort(),
-      ["current-context", "mbel-1"],
+      ["mbel-1", "prompt-working-set"],
     );
     const belief = summaries.find((entry) => entry.summary.id === "mbel-1");
     assert.equal(belief?.recordClass, "beliefs");
     assert.equal(belief?.summary.title, "Belief Referrer");
     assert.equal(belief?.summary.summary, "A belief summary");
-    const context = summaries.find((entry) => entry.summary.id === "current-context");
-    assert.equal(context?.summary.title, "Current context");
-    assert.match(context?.summary.summary ?? "", /current-context\.current_cast/);
+    const context = summaries.find((entry) => entry.summary.id === "prompt-working-set");
+    assert.equal(context?.summary.title, "Prompt working set");
+    assert.match(context?.summary.summary ?? "", /prompt-working-set\.current_cast/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

@@ -3,7 +3,7 @@ import path from "node:path";
 
 import YAML from "yaml";
 
-import { dropLegacyReviewKey, readCurrentContext } from "./current-context.js";
+import { dropLegacyReviewKey, readPromptWorkingSet } from "./prompt-working-set.js";
 import {
   MANUAL_RECORD_CLASSES,
   MANUAL_RECORD_CLASS_PREFIXES,
@@ -140,12 +140,12 @@ export function scanReferences(manualStoryRoot: string, targetId: string): ReadR
       collectReferrers(record.value, cls, targetId, referrers);
     }
   }
-  const currentContextResult = collectCurrentContextReferrers(
+  const promptWorkingSetResult = collectPromptWorkingSetReferrers(
     manualStoryRoot,
     targetId,
     referrers,
   );
-  if (!currentContextResult.ok) return currentContextResult;
+  if (!promptWorkingSetResult.ok) return promptWorkingSetResult;
   const templateSidecarResult = collectTemplateSidecarReferrers(
     manualStoryRoot,
     targetId,
@@ -291,26 +291,26 @@ function collectReferrers(
   }
 }
 
-function collectCurrentContextReferrers(
+function collectPromptWorkingSetReferrers(
   manualStoryRoot: string,
   targetId: string,
   out: ReferrerEntry[],
 ): ReadResult<void> {
-  const contextResult = readCurrentContext(manualStoryRoot);
+  const contextResult = readPromptWorkingSet(manualStoryRoot);
   if (!contextResult.ok) return err(contextResult.error);
   const context = contextResult.value;
   if (!context) return ok(undefined);
   const recordClass = inferRecordClassFromId(targetId) ?? "facts";
 
-  collectOptionalString(context.current_location, recordClass, "current-context", "current-context.current_location", targetId, out);
-  collectOptionalString(context.pov_holder, recordClass, "current-context", "current-context.pov_holder", targetId, out);
-  collectOptionalString(context.last_accepted_segment, recordClass, "current-context", "current-context.last_accepted_segment", targetId, out);
-  collectStringArray(context.current_cast, recordClass, "current-context", "current-context.current_cast", targetId, out);
-  collectStringArray(context.active_pressure_clocks, recordClass, "current-context", "current-context.active_pressure_clocks", targetId, out);
-  collectStringArray(context.active_secrets_questions, recordClass, "current-context", "current-context.active_secrets_questions", targetId, out);
-  collectStringArray(context.pinned_records, recordClass, "current-context", "current-context.pinned_records", targetId, out);
-  collectStringArray(context.excluded_records ?? [], recordClass, "current-context", "current-context.excluded_records", targetId, out);
-  collectStringArray(context.must_not_reveal, recordClass, "current-context", "current-context.must_not_reveal", targetId, out);
+  collectOptionalString(context.current_location, recordClass, "prompt-working-set", "prompt-working-set.current_location", targetId, out);
+  collectOptionalString(context.pov_holder, recordClass, "prompt-working-set", "prompt-working-set.pov_holder", targetId, out);
+  collectOptionalString(context.last_accepted_segment, recordClass, "prompt-working-set", "prompt-working-set.last_accepted_segment", targetId, out);
+  collectStringArray(context.current_cast, recordClass, "prompt-working-set", "prompt-working-set.current_cast", targetId, out);
+  collectStringArray(context.active_pressure_clocks, recordClass, "prompt-working-set", "prompt-working-set.active_pressure_clocks", targetId, out);
+  collectStringArray(context.active_secrets_questions, recordClass, "prompt-working-set", "prompt-working-set.active_secrets_questions", targetId, out);
+  collectStringArray(context.pinned_records, recordClass, "prompt-working-set", "prompt-working-set.pinned_records", targetId, out);
+  collectStringArray(context.excluded_records ?? [], recordClass, "prompt-working-set", "prompt-working-set.excluded_records", targetId, out);
+  collectStringArray(context.must_not_reveal, recordClass, "prompt-working-set", "prompt-working-set.must_not_reveal", targetId, out);
 
   return ok(undefined);
 }
@@ -493,7 +493,7 @@ function syntheticReferrerSummary(
   referrers: ReferrerEntry[],
 ): ManualRecordSummary {
   const fields = referrers.map((r) => r.field).sort();
-  const title = id === "current-context" ? "Current context" : `${id} sidecar`;
+  const title = id === "prompt-working-set" ? "Prompt working set" : `${id} sidecar`;
   return {
     id,
     title,

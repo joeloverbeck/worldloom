@@ -52,14 +52,14 @@ test("SPEC-112 RecordPicker component and mount surfaces exist", () => {
     /export function RecordPicker/,
   );
 
-  const editCurrentContext = readRepoFile(
-    "tools/manual-story-studio/web/src/pages/EditCurrentContext.tsx",
+  const editPromptWorkingSet = readRepoFile(
+    "tools/manual-story-studio/web/src/pages/EditPromptWorkingSet.tsx",
   );
-  assert.match(editCurrentContext, /import \{ RecordPicker \}/);
-  assert.match(editCurrentContext, /label="Current location"/);
-  assert.match(editCurrentContext, /label="POV holder"/);
-  assert.match(editCurrentContext, /label="Must not reveal"[\s\S]*classes=\{\["secrets"\]\}/);
-  assert.doesNotMatch(editCurrentContext, /IdTextArea/);
+  assert.match(editPromptWorkingSet, /import \{ RecordPicker \}/);
+  assert.match(editPromptWorkingSet, /label="Current location"/);
+  assert.match(editPromptWorkingSet, /label="POV holder"/);
+  assert.match(editPromptWorkingSet, /label="Must not reveal"[\s\S]*classes=\{\["secrets"\]\}/);
+  assert.doesNotMatch(editPromptWorkingSet, /IdTextArea/);
 
   const currentStatePanel = readRepoFile(
     "tools/manual-story-studio/web/src/components/CurrentStatePanel.tsx",

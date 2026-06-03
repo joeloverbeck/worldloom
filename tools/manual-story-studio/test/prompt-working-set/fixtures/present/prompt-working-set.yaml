@@ -13,7 +13,7 @@ pinned_records:
   - mobl-1
 must_not_reveal:
   - msecret-2
-current_handoff_summary: |
+handoff_summary: |
   Mara is in the kitchen of the riverhouse waiting for Iven. The bread on
   the counter has not been touched. She has decided to ask about the debt
   directly if he stays past the second cup.
