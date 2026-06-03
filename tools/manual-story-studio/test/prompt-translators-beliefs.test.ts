@@ -20,7 +20,7 @@ test("beliefs translator resolves holder title", () => {
   const out = beliefsTranslator(record, ctx);
   assert.equal(
     out,
-    "- Jon thinks: Ane is hurt and is trying not to scare him off",
+    "- Jon thinks: Ane is hurt and is trying not to scare him off. Confidence: moderate.",
   );
   assertNoInternalIds(out, "beliefs");
 });
@@ -34,6 +34,28 @@ test("beliefs translator appends truth-relation clause when not unknown", () => 
   const ctx = fixtureCtx({ "mchar-1": "Jon" });
   const out = beliefsTranslator(record, ctx);
   assert.ok(out.includes("the belief is mistaken"));
+});
+
+test("beliefs translator emits scaled confidence clauses", () => {
+  const ctx = fixtureCtx({ "mchar-1": "Jon" });
+  const cases = [
+    ["low", "Confidence: tentative."],
+    ["medium", "Confidence: moderate."],
+    ["high", "Confidence: strong."],
+    ["certain", "Confidence: certain."],
+  ] as const;
+
+  for (const [confidence, expected] of cases) {
+    const out = beliefsTranslator(
+      fixtureBelief(`mbel-${confidence}`, "Belief", {
+        holder: "mchar-1",
+        details: "she is hiding the knife",
+        confidence,
+      }),
+      ctx,
+    );
+    assert.ok(out.includes(expected), `${confidence} should emit ${expected}`);
+  }
 });
 
 test("beliefs translator is registered", () => {

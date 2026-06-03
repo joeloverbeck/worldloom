@@ -9,6 +9,11 @@ export const questionsTranslator = (
   if (summary.length > 0) lines.push(`  Context: ${summary}`);
   const details = record.details.trim();
   if (details.length > 0) lines.push(`  Detail: ${details}`);
+  lines.push(
+    record.answer_known
+      ? "  Answer status: the author knows the answer."
+      : "  Answer status: open; the answer is not author-known yet.",
+  );
   const conditions = record.must_not_resolve_unless.filter(
     (s) => s.trim().length > 0,
   );
