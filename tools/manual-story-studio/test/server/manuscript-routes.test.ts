@@ -106,7 +106,9 @@ test("GET /manuscript returns compiled manuscript body and counts", async () => 
         byte_count: number;
         word_count: number;
         manuscript_path: string;
+        manuscript_present: boolean;
       };
+      assert.equal(body.manuscript_present, true);
       assert.equal(body.body, "Opening body 1.");
       assert.equal(body.byte_count, statSync(body.manuscript_path).size);
       assert.equal(body.word_count, 3);
@@ -119,7 +121,7 @@ test("GET /manuscript returns compiled manuscript body and counts", async () => 
   }
 });
 
-test("GET /manuscript returns 404 when manuscript.md has not been compiled", async () => {
+test("GET /manuscript returns 200 when manuscript.md has not been compiled", async () => {
   const fixture = mkWorld();
   try {
     const server = await createServer({ repoRoot: fixture.repoRoot });
@@ -128,8 +130,19 @@ test("GET /manuscript returns 404 when manuscript.md has not been compiled", asy
         method: "GET",
         url: `/api/worlds/${fixture.worldSlug}/manual-stories/${fixture.msSlug}/manuscript`,
       });
-      assert.equal(response.statusCode, 404);
-      assert.deepEqual(response.json(), { error: "manuscript_not_compiled_yet" });
+      assert.equal(response.statusCode, 200);
+      const body = response.json() as {
+        body: string;
+        byte_count: number;
+        word_count: number;
+        manuscript_path: string;
+        manuscript_present: boolean;
+      };
+      assert.equal(body.manuscript_present, false);
+      assert.equal(body.body, "");
+      assert.equal(body.byte_count, 0);
+      assert.equal(body.word_count, 0);
+      assert.equal(body.manuscript_path, path.join(fixture.root.absolutePath, "manuscript.md"));
     } finally {
       await server.close();
     }

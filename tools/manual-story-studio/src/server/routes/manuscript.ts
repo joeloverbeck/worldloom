@@ -47,9 +47,6 @@ export async function registerManuscriptReadRoute(
 
       const result = readManuscript({ manualStoryRoot: root.absolutePath });
       if (!result.ok) return mapReadErrorToHttpReply(reply, result.error);
-      if (!result.value.manuscript_present) {
-        return reply.code(404).send({ error: "manuscript_not_compiled_yet" });
-      }
       return result.value;
     },
   );

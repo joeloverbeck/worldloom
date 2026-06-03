@@ -15,6 +15,7 @@ async function readErrorBody(response: Response): Promise<string> {
 
 export interface ManuscriptResponse {
   manuscript_path: string;
+  manuscript_present: boolean;
   body: string;
   byte_count: number;
   word_count: number;
@@ -35,7 +36,8 @@ export async function readManuscript(
   if (!response.ok) {
     throw new Error(`readManuscript -> ${await readErrorBody(response)}`);
   }
-  return (await response.json()) as ManuscriptResponse;
+  const body = (await response.json()) as ManuscriptResponse;
+  return body.manuscript_present ? body : null;
 }
 
 export async function rebuildManuscript(
