@@ -39,6 +39,7 @@ test("SPEC-119 PromptPreview renders confidence panels with identity and reasons
   for (const label of [
     "copy status",
     "hard lint findings",
+    "why is this missing",
     "selected cast",
     "selected template",
     "working set",
@@ -66,6 +67,26 @@ test("SPEC-119 PromptPreview renders confidence panels with identity and reasons
   assert.match(source, /<summary>Show section map<\/summary>/);
   assert.doesNotMatch(source, /ids\.join/);
   assert.match(source, /lint\.blockingForCopy \? "Blocked by hard lint" : "Allowed"/);
+});
+
+test("SPEC-119 PromptPreview answers why-missing from the resolution ledger", () => {
+  const source = readRepoFile(
+    "tools/manual-story-studio/web/src/pages/PromptPreview.tsx",
+  );
+
+  assert.match(source, /const \[missingQuery, setMissingQuery\] = useState\(""\);/);
+  assert.match(source, /function whyMissingAnswer\(query: string\): string \| null/);
+  assert.match(source, /\.\.\.composeResult!\.resolution\.included/);
+  assert.match(source, /\.\.\.composeResult!\.resolution\.excluded/);
+  assert.match(source, /\.\.\.composeResult!\.resolution\.suppressed/);
+  assert.match(source, /composeResult!\.resolution\.blocked\.find/);
+  assert.match(source, /is included: \$\{reasonLine\(matchedRecord\)\}/);
+  assert.match(source, /is not included: \$\{reasonLine\(matchedRecord\)\}/);
+  assert.match(source, /is blocked: \$\{matchedBlocked\.reason\}/);
+  assert.match(source, /Not in the working set \(not selected, pinned, or active in the current context\)\./);
+  assert.match(source, /type="search"/);
+  assert.match(source, /onChange=\{\(event\) => setMissingQuery\(event\.currentTarget\.value\)\}/);
+  assert.doesNotMatch(source, /listRecords|fetch\(|previewPrompt\([^w]|api\/records/);
 });
 
 test("SPEC-119 RecordCard reason prop is additive", () => {

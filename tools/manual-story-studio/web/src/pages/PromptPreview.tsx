@@ -52,6 +52,10 @@ function reasonLine(record: LedgerRecord): string {
     : `${record.reason === "inactive" || record.reason === "working_set_excluded" || record.reason === "never_prompt" ? "excluded" : "included"} because ${label}`;
 }
 
+function normalizeLookupQuery(value: string): string {
+  return value.trim().toLowerCase();
+}
+
 function LedgerRecordCard(props: {
   record: LedgerRecord;
   onOpen: (recordClass: ManualRecordClass, id: string) => void;
@@ -89,6 +93,7 @@ export function PromptPreview() {
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [missingQuery, setMissingQuery] = useState("");
 
   if (!worldSlug || !msSlug) {
     return <p role="alert">Missing world or manual story slug.</p>;
@@ -215,6 +220,31 @@ export function PromptPreview() {
     );
   }
 
+  function whyMissingAnswer(query: string): string | null {
+    const normalized = normalizeLookupQuery(query);
+    if (!normalized) return null;
+    const matchedRecord = [
+      ...composeResult!.resolution.included,
+      ...composeResult!.resolution.excluded,
+      ...composeResult!.resolution.suppressed,
+    ].find((record) => normalizeLookupQuery(record.title) === normalized);
+    if (matchedRecord) {
+      if (composeResult!.resolution.included.some((entry) => entry.id === matchedRecord.id)) {
+        return `${matchedRecord.title} is included: ${reasonLine(matchedRecord)}.`;
+      }
+      return `${matchedRecord.title} is not included: ${reasonLine(matchedRecord)}.`;
+    }
+    const matchedBlocked = composeResult!.resolution.blocked.find(
+      (entry) => normalizeLookupQuery(entry.ref) === normalized,
+    );
+    if (matchedBlocked) {
+      return `${matchedBlocked.ref} is blocked: ${matchedBlocked.reason}.`;
+    }
+    return "Not in the working set (not selected, pinned, or active in the current context).";
+  }
+
+  const missingAnswer = whyMissingAnswer(missingQuery);
+
   return (
     <section
       aria-labelledby="prompt-preview-heading"
@@ -312,6 +342,20 @@ export function PromptPreview() {
                 ))}
               </ul>
             )}
+          </section>
+          <section aria-label="why is this missing">
+            <h4>Why is this missing?</h4>
+            <label>
+              Record title
+              <input
+                type="search"
+                value={missingQuery}
+                onChange={(event) => setMissingQuery(event.currentTarget.value)}
+                placeholder="Type a record title"
+                style={{ display: "block", width: "100%", marginTop: 4 }}
+              />
+            </label>
+            {missingAnswer ? <p>{missingAnswer}</p> : null}
           </section>
           <section aria-label="selected cast">
             <h4>These cast members anchor the prompt</h4>
