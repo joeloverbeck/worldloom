@@ -14,8 +14,8 @@ SPEC-123 (current-context → prompt-working-set) completed/archived — indepen
 SPEC-124 (source browser narrowing)             active — independent — SourceBrowser creation paths
 ```
 
-The three original specs touch **disjoint file sets** (verified against the rename surface enumerated in SPEC-123 §4):
-- SPEC-122: `PostSegmentWorkbench.tsx`, `server/routes/post-segment-workbench.ts`, `PasteProse.tsx`, `test/post-segment-workbench.test.ts`.
+The three original specs touch **disjoint production file sets** (verified against the rename surface enumerated in SPEC-123 §4). One shared end-to-end test harness — `test/acceptance/one-real-story.test.ts` — is touched by SPEC-122's `touched_records` → `linked_record_candidates` payload-key rename (it asserts on `body.touched_records`); SPEC-122's production surfaces remain disjoint from SPEC-124's.
+- SPEC-122: `PostSegmentWorkbench.tsx`, `server/routes/post-segment-workbench.ts`, `PasteProse.tsx`, `test/post-segment-workbench.test.ts`, `test/acceptance/one-real-story.test.ts`.
 - SPEC-123: completed and archived at `archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md`; the `current-context` modules + `compose.ts`/`health/compute.ts`/`read/records.ts`/`http.ts` + web `current-context` files + `Dashboard.tsx`/`MomentComposer.tsx`/`StoryPageNav.tsx`/`App.tsx`/`types` + `test/current-context/`.
 - SPEC-124: `SourceBrowser.tsx` + source-derived creation client path.
 
