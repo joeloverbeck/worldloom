@@ -1,20 +1,18 @@
 {
-  "originating_spec": "specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md",
-  "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC123MANSTOSTU-001.md",
+  "originating_spec": "archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md",
+  "archived_spec": "archive/specs/SPEC-123-manual-story-studio-prompt-working-set-rename.md",
+  "last_ticket": "archive/tickets/SPEC123MANSTOSTU-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "3a9ed83db76aeaa8ce0b681024a32dc6c591d329",
+  "last_work_commit": "29609dc1f5099173d1aaa97d47c3721569be3fd6",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC123MANSTOSTU-002.md",
-  "queue": [
-    "tickets/SPEC123MANSTOSTU-002.md"
-  ],
-  "phase": "ready_for_next_ticket",
+  "next_target": null,
+  "queue": [],
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC123MANSTOSTU-001 proof passed: current-context/current-context.yaml grep gates zero outside ignored output; npm run test:backend; web npm test; package npm test; git diff --check",
+  "proof_state": "All SPEC123MANSTOSTU tickets archived; SPEC-123 archived; specs/IMPLEMENTATION-ORDER.md reviewed/updated; final proof passed: current-context/current-context.yaml/current_handoff_summary grep gates zero outside ignored output; npm run test:backend; web npm test; package npm test; git diff --check",
   "dirty_state": "tracked worktree clean; expected ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, and tools/manual-story-studio/web/node_modules from verification",
   "updated_at": "2026-06-03"
 }
