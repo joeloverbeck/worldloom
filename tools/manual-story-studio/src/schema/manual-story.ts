@@ -287,7 +287,6 @@ export interface ManualCharacterProseConstraints {
 export interface ManualCharacterRecord extends RecordCommonFields {
   display_name: string;
   roles: ManualStoryRole[];
-  source_world_character?: string;
   identity: ManualCharacterProfileIdentity;
   world_pressure_core: ManualCharacterWorldPressureCore;
   body_and_presence: ManualCharacterBodyAndPresence;

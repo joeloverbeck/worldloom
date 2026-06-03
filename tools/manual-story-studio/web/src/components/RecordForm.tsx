@@ -265,7 +265,6 @@ const CAST_NESTED_SECTIONS: Array<{
 interface CastFormState {
   display_name: string;
   roles: string[];
-  source_world_character?: string;
   identity: Record<string, string>;
   world_pressure_core: Record<string, string>;
   body_and_presence: Record<string, string>;

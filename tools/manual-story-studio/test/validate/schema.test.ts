@@ -366,24 +366,6 @@ test("validateManualStoryMetadata: missing required nested field rejected", () =
   assert.equal(result.ok, false);
 });
 
-test("Manual Character Profile: source_world_character pattern accepted as CHAR-*", () => {
-  const fixture = castProfile("mchar-1", { source_world_character: "CHAR-7" });
-  const result = validateAgainstSchema(fixture, MANUAL_CHARACTER_PROFILE_SCHEMA);
-  assert.equal(result.ok, true);
-});
-
-test("Manual Character Profile: source_world_character pattern rejects STCHAR-*", () => {
-  const fixture = castProfile("mchar-1", { source_world_character: "STCHAR-7" });
-  const result = validateAgainstSchema(fixture, MANUAL_CHARACTER_PROFILE_SCHEMA);
-  assert.equal(result.ok, false);
-});
-
-test("Manual Character Profile: source_world_character absence is accepted", () => {
-  const fixture = castProfile("mchar-1");
-  const result = validateAgainstSchema(fixture, MANUAL_CHARACTER_PROFILE_SCHEMA);
-  assert.equal(result.ok, true);
-});
-
 test("parseAndValidateYaml: returns parsed value when valid", () => {
   const yamlText = `id: mfact-1
 title: T

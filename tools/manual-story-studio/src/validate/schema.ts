@@ -257,12 +257,10 @@ const CAST_SCHEMA: SchemaDef = extend(commonBase(), {
     "relationship_behavior",
     "prose_constraints",
   ],
-  optional: ["source_world_character"],
   scalars: { display_name: "string" },
   enums: { roles: ROLE_ENUM },
   stringArrays: ["roles"],
   recordOfStrings: ["relationship_behavior"],
-  pattern: { source_world_character: /^CHAR-[0-9]+$/ },
   nested: {
     identity: CAST_PROFILE_IDENTITY_SCHEMA,
     world_pressure_core: CAST_PROFILE_WORLD_PRESSURE_CORE_SCHEMA,

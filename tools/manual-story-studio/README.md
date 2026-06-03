@@ -113,7 +113,7 @@ Beat-template deletion follows the same hard-delete-or-block lifecycle through `
 
 ## Reference Validation Scope (SPEC-101)
 
-Manual Studio's ref validator is **shallow** (one hop, not recursive) per SPEC-101 §3 Key decisions: every record's `refs.characters` / `refs.locations` / `refs.related_records` plus per-class typed pointers (`mbel-*.holder`, `mrel-*.between`, `mobl-*.owed_by/owed_to`, etc.) must point to a record that exists in the same manual story (including archived `active: false` records). Recursive closure is not enforced — that's engine-grade discipline. The `source_world_character: CHAR-*` field on Manual Character Profile records is informational provenance only — the ref validator does not inspect it. World-canon resolution is M6 deferral.
+Manual Studio's ref validator is **shallow** (one hop, not recursive) per SPEC-101 §3 Key decisions: every record's `refs.characters` / `refs.locations` / `refs.related_records` plus per-class typed pointers (`mbel-*.holder`, `mrel-*.between`, `mobl-*.owed_by/owed_to`, etc.) must point to a record that exists in the same manual story (including archived `active: false` records). Recursive closure is not enforced — that's engine-grade discipline. World-canon character provenance is not stored on cast records, so the ref validator only checks same-manual-story record IDs. World-canon resolution is M6 deferral.
 
 ## ID Allocation (SPEC-101)
 

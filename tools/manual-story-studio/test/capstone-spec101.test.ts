@@ -28,8 +28,7 @@
  *
  *   Step 4 (AC #6 — Cast & Profile editor):
  *     Open http://127.0.0.1:5176/worlds/<world>/manual-stories/<story>/cast.
- *     Confirm: Manual Character Profile renders with the 8 nested §3 sections,
- *     and `source_world_character: CHAR-*` is rendered READ-ONLY (input disabled).
+ *     Confirm: Manual Character Profile renders with the 8 nested §3 sections.
  *
  *   Step 5 (AC #7 — Dashboard widgets):
  *     Open http://127.0.0.1:5176/worlds/<world>/manual-stories/<story>/dashboard.
@@ -497,17 +496,6 @@ test("SPEC-101 AC #6 (backend half): Manual Character Profile §3 nested section
       castProfileBody() as never,
     );
     assert.equal("ok" in result && result.ok, true);
-    if (!("ok" in result) || !result.ok) return;
-    // source_world_character: pattern check is the read-only contract surface
-    const withProvenance = createRecord(
-      root,
-      "cast",
-      {
-        ...castProfileBody(),
-        source_world_character: "CHAR-42",
-      } as never,
-    );
-    assert.equal("ok" in withProvenance && withProvenance.ok, true);
   } finally {
     rmSync(repoRoot, { recursive: true, force: true });
   }

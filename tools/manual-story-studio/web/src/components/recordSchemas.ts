@@ -63,12 +63,6 @@ export const PER_CLASS_FIELDS: Record<
       required: true,
       kind: { kind: "enumArray", values: ROLE_VALUES },
     },
-    {
-      field: "source_world_character",
-      label: "Source world character (CHAR-*)",
-      required: false,
-      kind: { kind: "readonlyString" },
-    },
   ],
   entities: [
     {
