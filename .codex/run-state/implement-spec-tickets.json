@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-120-manual-story-studio-lifecycle-vocabulary-cleanup.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC120MANSTOSTU-001.md",
+  "last_ticket": "archive/tickets/SPEC120MANSTOSTU-002.md",
   "last_result": "completed_archived",
-  "last_work_commit": "5a750fc2deac9c4399b56f8d9ecab45c1973c00e",
+  "last_work_commit": "9dbbef2f53819bec545cf3886db8d9c8669ce2a6",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC120MANSTOSTU-002.md",
+  "next_target": "tickets/SPEC120MANSTOSTU-003.md",
   "queue": [
-    "tickets/SPEC120MANSTOSTU-002.md",
     "tickets/SPEC120MANSTOSTU-003.md"
   ],
   "phase": "ready_for_next_ticket",
@@ -15,7 +14,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC120MANSTOSTU-001 archived; npm --prefix web test passed; rg -n 'archived' tools/manual-story-studio/web/src returned no hits; git diff --check passed after archive reference repair",
-  "dirty_state": "tracked worktree clean after 001 work commit except this state update; pre-existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from earlier package work",
+  "proof_state": "SPEC120MANSTOSTU-002 archived; baseline and post-change npm test passed with 482 backend/static tests plus web tsc --noEmit; rg -n 'includeArchived' tools/manual-story-studio --glob '*.ts' --glob '*.tsx' returned no hits; git diff --check passed after archive reference repair",
+  "dirty_state": "tracked worktree clean after 002 work commit except this state update; pre-existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-03"
 }
