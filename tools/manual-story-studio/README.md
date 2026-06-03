@@ -74,13 +74,13 @@ Build:
 cd tools/manual-story-studio && npm run build
 ```
 
-Boot backend (run from the repo root; `--repo-root` defaults to `process.cwd()`):
+Boot backend:
 
 ```
 node tools/manual-story-studio/dist/src/cli.js --port 5175
 ```
 
-To launch from any other directory, pass `--repo-root <absolute-path-to-worldloom-repo>` explicitly.
+By default the backend auto-detects the worldloom repo root by walking up from the launch directory, then by checking the compiled CLI's repo-relative location. To override detection, pass `--repo-root <absolute-path-to-worldloom-repo>` explicitly.
 
 Boot Vite dev server (separate terminal):
 
