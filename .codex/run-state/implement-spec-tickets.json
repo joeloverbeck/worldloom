@@ -1,18 +1,23 @@
 {
-  "originating_spec": "specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md",
-  "archived_spec": "archive/specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md",
-  "last_ticket": "archive/tickets/SPEC118MANSTOSTU-004.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "117442cebf8d59ea81539be2094d955a53225f12",
+  "originating_spec": "specs/SPEC-119-manual-story-studio-prompt-inspector-confidence-cockpit.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC119MANSTOSTU-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "f0b95d4f134ecd4d838c64ed6091568caa486282",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
-  "phase": "complete",
+  "next_target": "tickets/SPEC119MANSTOSTU-002.md",
+  "queue": [
+    "tickets/SPEC119MANSTOSTU-002.md",
+    "tickets/SPEC119MANSTOSTU-003.md"
+  ],
+  "phase": "ready_for_next_ticket",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC-118 archived; all SPEC118MANSTOSTU tickets archived; final npm test passed with 485 backend/static tests plus web tsc --noEmit; IMPLEMENTATION-ORDER marks SPEC-118 completed and archived; active SPEC-119/SPEC-121 refs point to archived SPEC-118",
-  "dirty_state": "tracked worktree clean after final spec archive commit except this state update; pre-existing/generated ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
+  "proof_state": "SPEC119MANSTOSTU-001 archived; npm run test:backend passed 86 Node tests; npm --prefix web test passed; npm test passed 486 backend/static tests plus web typecheck",
+  "dirty_state": "expected ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
+  "post_review_material_updates": true,
+  "post_review_audit_block": "emitted",
   "updated_at": "2026-06-03"
 }
