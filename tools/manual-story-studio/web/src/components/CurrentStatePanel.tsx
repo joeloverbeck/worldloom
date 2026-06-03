@@ -59,7 +59,7 @@ export function CurrentStatePanel({
     let cancelled = false;
     setTitleLoadError(null);
     listRecordsForClasses(worldSlug, msSlug, DISPLAY_RECORD_CLASSES, {
-      includeArchived: true,
+      includeInactive: true,
     })
       .then((records) => {
         if (cancelled) return;

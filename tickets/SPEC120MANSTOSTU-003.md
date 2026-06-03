@@ -54,7 +54,7 @@
 ## Out of Scope
 
 - The `active` boolean field (stays — it is the legitimate inactive marker).
-- Display strings (completed in `archive/tickets/SPEC120MANSTOSTU-001.md`) and the `includeArchived` rename (ticket SPEC120MANSTOSTU-002).
+- Display strings (completed in `archive/tickets/SPEC120MANSTOSTU-001.md`) and the `includeArchived` rename (completed in `archive/tickets/SPEC120MANSTOSTU-002.md`).
 - On-disk record migration — no authored record carries `retired_reason` (never written by production), so no data migration is required.
 
 ## Acceptance Criteria

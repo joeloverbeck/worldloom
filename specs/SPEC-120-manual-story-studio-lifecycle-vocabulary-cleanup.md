@@ -12,7 +12,8 @@
 
 ## Implementation Notes
 
-- 2026-06-03 — `archive/tickets/SPEC120MANSTOSTU-001.md` replaced the four user-facing web UI "archived" labels with "inactive" and added the inactive/deleted model note near both include-inactive toggles. Remaining `includeArchived` and `retired_reason` prose below is historical intake context until `SPEC120MANSTOSTU-002` / `SPEC120MANSTOSTU-003` land.
+- 2026-06-03 — `archive/tickets/SPEC120MANSTOSTU-001.md` replaced the four user-facing web UI "archived" labels with "inactive" and added the inactive/deleted model note near both include-inactive toggles. Remaining `includeArchived` and `retired_reason` prose below is historical intake context until `archive/tickets/SPEC120MANSTOSTU-002.md` / `SPEC120MANSTOSTU-003` land.
+- 2026-06-03 — `archive/tickets/SPEC120MANSTOSTU-002.md` renamed `includeArchived` to `includeInactive` across the Manual Studio records and beat-template API clients, Fastify routes, read layer, health/prompt callers, React callers, and the HTTP wire query string. Remaining `includeArchived` prose below is historical intake context; `retired_reason` remains active for `SPEC120MANSTOSTU-003`.
 
 ---
 

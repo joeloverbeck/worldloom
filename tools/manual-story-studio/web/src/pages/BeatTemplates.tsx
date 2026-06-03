@@ -34,7 +34,7 @@ export function BeatTemplates() {
     msSlug: string;
   }>();
   const [templates, setTemplates] = useState<BeatTemplate[]>([]);
-  const [includeArchived, setIncludeArchived] = useState(false);
+  const [includeInactive, setIncludeInactive] = useState(false);
   const [moveFamilyFilter, setMoveFamilyFilter] = useState<
     "all" | BeatTemplateMoveFamily
   >("all");
@@ -52,7 +52,7 @@ export function BeatTemplates() {
     if (!worldSlug || !msSlug) return;
     let cancelled = false;
     setListError(null);
-    listBeatTemplates(worldSlug, msSlug, { includeArchived })
+    listBeatTemplates(worldSlug, msSlug, { includeInactive })
       .then((all) => {
         if (!cancelled) {
           setTemplates(all);
@@ -68,7 +68,7 @@ export function BeatTemplates() {
     return () => {
       cancelled = true;
     };
-  }, [worldSlug, msSlug, includeArchived, deleteOutcome, saveErrors]);
+  }, [worldSlug, msSlug, includeInactive, deleteOutcome, saveErrors]);
 
   useEffect(() => {
     if (!worldSlug || !msSlug || !selectedId) {
@@ -183,8 +183,8 @@ export function BeatTemplates() {
           <label>
             <input
               type="checkbox"
-              checked={includeArchived}
-              onChange={(e) => setIncludeArchived(e.target.checked)}
+              checked={includeInactive}
+              onChange={(e) => setIncludeInactive(e.target.checked)}
             />{" "}
             Include inactive
           </label>

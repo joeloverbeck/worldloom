@@ -69,11 +69,11 @@ export async function listRecords(
   worldSlug: string,
   msSlug: string,
   recordClass: ManualRecordClass,
-  opts: { includeArchived?: boolean } = {},
+  opts: { includeInactive?: boolean } = {},
 ): Promise<ManualRecordSummary[]> {
   const url = new URL(recordsBase(worldSlug, msSlug), window.location.origin);
   url.searchParams.set("class", recordClass);
-  if (opts.includeArchived) url.searchParams.set("includeArchived", "true");
+  if (opts.includeInactive) url.searchParams.set("includeInactive", "true");
   const response = await fetch(url.pathname + url.search);
   if (!response.ok) {
     throw new Error(`listRecords ${recordClass} → ${response.status}`);
@@ -91,7 +91,7 @@ export async function listRecordsForClasses(
   worldSlug: string,
   msSlug: string,
   classes: readonly ManualRecordClass[],
-  opts: { includeArchived?: boolean } = {},
+  opts: { includeInactive?: boolean } = {},
 ): Promise<ManualRecordSummaryWithClass[]> {
   const entries = await Promise.all(
     classes.map((recordClass) =>

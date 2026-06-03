@@ -510,7 +510,7 @@ function buildTranslatorContext(
     if (castSummariesLoaded) return;
     castSummariesLoaded = true;
     const summaries = listRecords(manualStoryRoot, "cast", {
-      includeArchived: true,
+      includeInactive: true,
     });
     if (!summaries.ok) return;
     for (const s of summaries.value) {

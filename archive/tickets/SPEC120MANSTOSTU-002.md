@@ -1,6 +1,6 @@
 # SPEC120MANSTOSTU-002: Rename `includeArchived` → `includeInactive` end-to-end
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` web API clients, Fastify routes, read layer, health/prompt callers, and the HTTP query-param wire string. No canon record schema change.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The internal `includeArchived` request param reinforces the wrong append-only / retirement mental model. Rename it to `includeInactive` end-to-end so the vocabulary is coherent with the user-facing "inactive" model. The rename is mechanical TypeScript everywhere except the HTTP query-param string, which is a client↔server contract that must change in lockstep — a half-rename breaks include-inactive filtering silently.
+At intake, the internal `includeArchived` request param reinforced the wrong append-only / retirement mental model. This ticket renamed it to `includeInactive` end-to-end so the vocabulary is coherent with the user-facing "inactive" model. The TypeScript identifiers and the HTTP query-param string now use the same `includeInactive` spelling on both client and server.
 
 ## Assumption Reassessment (2026-06-02)
 
@@ -97,3 +97,31 @@ Rename the option key at every call site: `src/health/compute.ts`, `src/prompt/c
 1. `cd tools/manual-story-studio && npm test`
 2. `cd tools/manual-story-studio && npm run test:backend` (faster backend-only loop while iterating on the route/read rename)
 3. `grep -rn "includeArchived" tools/manual-story-studio --include=*.ts --include=*.tsx` (expect 0 outside `dist/`)
+
+## Outcome
+
+Completed: 2026-06-03
+
+The `includeArchived` option/query vocabulary was renamed to `includeInactive` across both Manual Studio API surfaces:
+
+- records: `web/src/api/records.ts`, `src/server/routes/records.ts`, and `src/read/records.ts`
+- beat templates: `web/src/api/beat-templates.ts` and `src/server/routes/beat-templates.ts`
+- callers: health, prompt composition, current-state panel, record picker, cast/profile loading, Records page state, Beat Templates page state, and the read-layer test
+
+The client/server wire string is now `includeInactive` in the web API clients and Fastify route query reads. Filtering behavior is unchanged: default list calls still omit inactive records/templates, and `includeInactive: true` still returns them.
+
+The active SPEC-120 spec now has an implementation note marking the param/wire rename slice complete while preserving older spec prose as historical intake context until final spec archival.
+
+## Verification Result
+
+Commands run from `tools/manual-story-studio` unless otherwise noted:
+
+1. Baseline `npm test` before edits — PASS; backend build, 482 backend/static tests, and web typecheck were green.
+2. Post-change `npm test` — PASS; backend build, 482 backend/static tests, and web typecheck were green.
+3. `rg -n 'includeArchived' tools/manual-story-studio --glob '*.ts' --glob '*.tsx'` from the repo root — PASS; no TypeScript/TSX hits remain.
+4. Manual review confirmed both wire halves now use `includeInactive`: `url.searchParams.set("includeInactive", "true")` in both web API clients and `request.query.includeInactive === "true"` in both route files.
+
+## Deviations
+
+- No separate `npm run test:backend` rerun was needed after the final change because the stronger package-wide `npm test` lane includes `npm run build:backend`, the compiled backend/static tests, and the web typecheck.
+- Broad discovery still finds unrelated historical/test vocabulary such as `archived (active: false) records still satisfy refs`; those hits do not use the owned `includeArchived` param or wire string and are outside this ticket.
