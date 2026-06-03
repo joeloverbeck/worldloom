@@ -12,6 +12,8 @@
 
 **Implementation note (2026-06-03):** archive/tickets/SPEC117MANSTOSTU-001.md removed `last_reviewed_after_segment` from current-context and manual-record schemas, validation, read/write/route handling, web types/UI, README common-field prose, and package fixtures. Existing files carrying the legacy key are sanitized on current-context and record read/write so the key loads but does not round-trip. Remaining references in this spec are historical requirement/proof context unless superseded by later SPEC-117 tickets.
 
+**Implementation note (2026-06-03):** archive/tickets/SPEC117MANSTOSTU-003.md added the read-only backend workbench payload route at `GET /api/worlds/:slug/manual-stories/:msSlug/segments/:segmentId/post-segment-workbench`. The route returns accepted segment context, the honest no-inference reminder, and a deduped broad-referrer candidate list grouped from `scanReferences`.
+
 ---
 
 ## 1. Context & Motivation

@@ -1,6 +1,6 @@
 # SPEC117MANSTOSTU-003: Post-Segment Workbench backend route + payload test
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/manual-story-studio` introduces `src/server/routes/post-segment-workbench.ts` and registers it in `src/server/http.ts`. No impact on existing routes; no canon-mediation surface (package is canon-fenced per SPEC-100).
@@ -29,19 +29,19 @@ The post-segment UX needs a backend payload that gives the workbench (a) the acc
 3. No `last_reviewed_after_segment` is read or written by the route → codebase grep-proof on `routes/post-segment-workbench.ts`.
 4. Route registered → codebase grep-proof on `src/server/http.ts` (`registerPostSegmentWorkbench*` present).
 
-## What to Change
+## Landed Changes
 
 ### 1. New route module
 
-Add `src/server/routes/post-segment-workbench.ts` exporting a `register*Routes(server, { repoRoot })` function with a GET endpoint keyed by world/story/segment ID. The handler reads the accepted segment body + sidecar (`readSegmentBody` / `readSegmentSidecar`), derives the segment's involved cast/locations/records, calls `scanReferences` per involved id, and unions the `ReferrerEntry` results into a deduplicated candidate list. Response: accepted segment text + title + prompt ID + moment directive + word count + last paragraph + sidecar included-records (left pane) and the "touches this segment" candidate pile (rail). No inference, no `checklist_payload`, no `last_reviewed_after_segment`.
+Added `src/server/routes/post-segment-workbench.ts` exporting `registerPostSegmentWorkbenchReadRoute(server, { repoRoot })` with `GET /api/worlds/:slug/manual-stories/:msSlug/segments/:segmentId/post-segment-workbench`. The handler reads the accepted segment body + sidecar, iterates the segment ID plus sidecar included characters/records through `scanReferences`, and returns a deduped candidate list with record class, id, title, active state, target IDs, and fields. The payload includes accepted prose, title, prompt ID, moment directive, word count, last paragraph, sidecar included-record summary, and the honest no-inference reminder.
 
 ### 2. Register the route
 
-Import and call the new `register*Routes` in `src/server/http.ts` alongside the existing read-route registrations.
+Imported and called the new read-route registration in `src/server/http.ts` alongside the existing segment read routes.
 
 ### 3. Payload test
 
-Add `test/post-segment-workbench.test.ts` asserting the broad-scan candidate pile (a `holder`/`between`/`held_by`-linked record appears; a narrow-scan-only result would miss it), no `last_reviewed_after_segment` read/written, reminder context present, and no inference of changes.
+Added `test/post-segment-workbench.test.ts` proving the broad-scan candidate pile with a `beliefs.holder` record that a narrow `refs.characters` scan would miss, the no-inference reminder, absence of stale payload keys, read-only behavior for fixture files, and malformed segment-id rejection.
 
 ## Files to Touch
 
@@ -80,3 +80,18 @@ Add `test/post-segment-workbench.test.ts` asserting the broad-scan candidate pil
 1. `cd tools/manual-story-studio && npm run test:backend`
 2. `cd tools/manual-story-studio && npm test`
 3. `node --test "dist/test/post-segment-workbench.test.js"` (run from `tools/manual-story-studio` after `npm run build:backend`; narrower boundary targeting just this route's payload test)
+
+## Outcome
+
+The backend workbench payload route is registered and read-only. It returns the accepted segment context plus `touched_records`, a deterministic candidate list built from the existing broad `scanReferences` coverage. The payload does not include inferred state-delta fields or stale checklist/review fields.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm run test:backend` — PASS; backend build plus 86 compiled Node test files passed, including `dist/test/post-segment-workbench.test.js`.
+2. `cd tools/manual-story-studio && npm test` — PASS; backend build, 488 backend tests, and web TypeScript check passed.
+3. `rg -n "last_reviewed_after_segment|checklist_payload" tools/manual-story-studio/src/server/routes/post-segment-workbench.ts tools/manual-story-studio/test/post-segment-workbench.test.ts` — no matches.
+4. `git diff --check` — PASS.
+
+## Deviations
+
+The route also includes the segment ID itself as a scan target, in addition to sidecar included characters/records. This keeps `caused_by_segment` referrers visible in the same candidate rail while preserving the spec-required sidecar target scan.
