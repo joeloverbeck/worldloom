@@ -22,7 +22,7 @@ test("SPEC-113 PromptComposeResult web type mirrors backend resolution shape", (
   );
 
   assert.match(types, /export type PromptIncludedReason =[\s\S]*"current_cast";/);
-  assert.match(types, /export type PromptExcludedReason = "inactive" \| "working_set_excluded";/);
+  assert.match(types, /export type PromptExcludedReason =[\s\S]*"never_prompt";/);
   assert.match(types, /export interface PromptIncludedRecord \{[\s\S]*section: string \| null;/);
   assert.match(types, /export interface PromptResolution \{[\s\S]*included: PromptIncludedRecord\[\];[\s\S]*excluded: PromptExcludedRecord\[\];[\s\S]*suppressed: PromptSuppressedRecord\[\];[\s\S]*blocked: PromptBlockedInput\[\];[\s\S]*section_map: Record<string, string\[\]>;/);
   assert.match(types, /export interface PromptComposeResult \{[\s\S]*resolution: PromptResolution;/);

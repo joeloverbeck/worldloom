@@ -31,6 +31,7 @@ const PROMPT_VISIBILITY_VALUES = [
   "always",
   "include_when_relevant",
   "only_if_pinned",
+  "never_prompt",
 ] as const;
 
 function defaultForKind(kind: { kind: string; values?: readonly string[] }): unknown {

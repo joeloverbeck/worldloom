@@ -1,9 +1,9 @@
 {
-  "originating_spec": "specs/SPEC-120-manual-story-studio-lifecycle-vocabulary-cleanup.md",
-  "archived_spec": "archive/specs/SPEC-120-manual-story-studio-lifecycle-vocabulary-cleanup.md",
-  "last_ticket": "archive/tickets/SPEC120MANSTOSTU-003.md",
-  "last_result": "completed_archived",
-  "last_work_commit": "c7661c716e90c228f42515d51f15531593ae2884",
+  "originating_spec": "specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md",
+  "archived_spec": "archive/specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md",
+  "last_ticket": "archive/tickets/SPEC118MANSTOSTU-004.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "117442cebf8d59ea81539be2094d955a53225f12",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
@@ -12,7 +12,7 @@
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "proof_state": "SPEC-120 archived; all SPEC120MANSTOSTU tickets archived; final package proof passed with npm test (482 backend/static tests plus web tsc --noEmit); final source greps for includeArchived and retired_reason over Manual Studio TS/TSX returned no hits; IMPLEMENTATION-ORDER marks SPEC-120 completed and archived",
-  "dirty_state": "tracked worktree clean after final spec archive commit except this state update; pre-existing ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
+  "proof_state": "SPEC-118 archived; all SPEC118MANSTOSTU tickets archived; final npm test passed with 485 backend/static tests plus web tsc --noEmit; IMPLEMENTATION-ORDER marks SPEC-118 completed and archived; active SPEC-119/SPEC-121 refs point to archived SPEC-118",
+  "dirty_state": "tracked worktree clean after final spec archive commit except this state update; pre-existing/generated ignored artifacts under tools/manual-story-studio/dist, tools/manual-story-studio/node_modules, tools/manual-story-studio/web/dist, and tools/manual-story-studio/web/node_modules left in place from package verification",
   "updated_at": "2026-06-03"
 }

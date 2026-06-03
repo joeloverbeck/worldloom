@@ -8,21 +8,21 @@
 
 ```
 SPEC-120 (vocabulary)        completed + archived — cleared lifecycle-language smell
-SPEC-118 (prompt visibility) independent — adds never_prompt, 3-5 beats, wires existing fields
-SPEC-119 (inspector cockpit) independent (reads SPEC-118's new reason if present; not blocking)
+SPEC-118 (prompt visibility) completed + archived — added never_prompt, 3-5 beats, plain stop-rule wording, and translator field wiring
+SPEC-119 (inspector cockpit) independent (can render SPEC-118's archived never_prompt reason; not blocking)
 SPEC-117 (post-segment workbench)  largest; removes checklist + last_reviewed_after_segment
-SPEC-121 (acceptance flow)   LAST — exercises SPEC-117 (workbench) + SPEC-118 (exclusion/3-5 beats)
+SPEC-121 (acceptance flow)   LAST — exercises SPEC-117 (workbench) + archived SPEC-118 (exclusion/3-5 beats)
 ```
 
-Only **SPEC-121** has hard prerequisites (SPEC-117 and SPEC-118). SPEC-117/118/119/120 are mutually independent and may be implemented or parallelized in any order; the sequence below is risk-ordered (trivial → contained → large → end-to-end).
+Only **SPEC-121** has hard prerequisites (SPEC-117 and archived SPEC-118). SPEC-117/119 are currently active and may be implemented in risk order; SPEC-118 and SPEC-120 are completed and archived.
 
 ## Recommended landing order
 
 1. **SPEC-120 — Lifecycle vocabulary cleanup.** Completed and archived as `archive/specs/SPEC-120-manual-story-studio-lifecycle-vocabulary-cleanup.md`; inactive vocabulary is now landed.
-2. **SPEC-118 — Prompt visibility & language.** Adds `never_prompt`, `3-5` beat default, removes engine jargon, wires `confidence`/`answer_known` translators. Independent; needed by SPEC-121.
-3. **SPEC-119 — Prompt Inspector confidence cockpit.** Cardifies the two raw-ID panels + real reasons + why-here/why-missing. Independent; benefits from (but does not require) SPEC-118's `never_prompt` reason.
+2. **SPEC-118 — Prompt visibility & language.** Completed and archived as `archive/specs/SPEC-118-manual-story-studio-prompt-visibility-and-language.md`; `never_prompt`, `3-5` beat default, plain stop-rule wording, and `confidence`/`answer_known` translator wiring are now landed.
+3. **SPEC-119 — Prompt Inspector confidence cockpit.** Cardifies the two raw-ID panels + real reasons + why-here/why-missing. Independent; can now render the archived SPEC-118 `never_prompt` reason.
 4. **SPEC-117 — Post-segment record workbench.** Replaces the checklist modal, removes `last_reviewed_after_segment`, adopts the broad referrer scan. Largest blast radius; needed by SPEC-121.
-5. **SPEC-121 — Synthetic acceptance flow.** End-to-end Glass-Orchard test exercising the completed loop. Lands last.
+5. **SPEC-121 — Synthetic acceptance flow.** End-to-end Glass-Orchard test exercising the completed loop, including archived SPEC-118 behavior. Lands last.
 
 ## Deferred (not in this batch — see triage)
 

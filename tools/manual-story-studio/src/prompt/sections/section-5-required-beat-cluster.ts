@@ -2,7 +2,7 @@ import type { SectionEmitterInput, SectionEmitResult } from "../types.js";
 
 export const SECTION_5_TITLE = "Required Beat Cluster";
 
-const DEFAULT_BEAT_COUNT = "2-5";
+const DEFAULT_BEAT_COUNT = "3-5";
 
 export function emitSection5(input: SectionEmitterInput): SectionEmitResult {
   const raw = input.metadata.prompt_policy.default_beat_count;

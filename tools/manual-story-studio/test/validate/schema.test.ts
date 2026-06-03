@@ -430,7 +430,12 @@ notes: ""
       stringArrays: ["tags"],
       enums: {
         importance: ["low", "medium", "high", "central"],
-        prompt_visibility: ["always", "include_when_relevant", "only_if_pinned"],
+        prompt_visibility: [
+          "always",
+          "include_when_relevant",
+          "only_if_pinned",
+          "never_prompt",
+        ],
       },
       nested: {
         refs: {
