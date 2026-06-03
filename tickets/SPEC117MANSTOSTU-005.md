@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/manual-story-studio` (`web/src/pages/PasteProse.tsx` post-save navigation). No canon-mediation surface (package is canon-fenced per SPEC-100).
-**Deps**: archive/tickets/SPEC117MANSTOSTU-002.md, SPEC117MANSTOSTU-004
+**Deps**: archive/tickets/SPEC117MANSTOSTU-002.md, archive/tickets/SPEC117MANSTOSTU-004.md
 
 ## Problem
 
@@ -12,9 +12,9 @@ After archive/tickets/SPEC117MANSTOSTU-002.md removed the checklist modal, Paste
 
 ## Assumption Reassessment (2026-06-03)
 
-1. After archive/tickets/SPEC117MANSTOSTU-002.md, `web/src/pages/PasteProse.tsx` no longer imports/renders `StateUpdateChecklist` and the save response no longer carries `checklist_payload`; the save handler still has the saved `segment_id` from the response. The workbench route (segment-id param) is registered in `web/src/App.tsx` by SPEC117MANSTOSTU-004. Confirmed by grep at reassessment + decomposition time.
+1. After archive/tickets/SPEC117MANSTOSTU-002.md, `web/src/pages/PasteProse.tsx` no longer imports/renders `StateUpdateChecklist` and the save response no longer carries `checklist_payload`; the save handler still has the saved `segment_id` from the response. The workbench route (segment-id param) is registered in `web/src/App.tsx` by archive/tickets/SPEC117MANSTOSTU-004.md. Confirmed by grep at reassessment + decomposition time.
 2. Per the spec (SPEC-117 §2 item 1 + §3 Routed-not-modal + §6 AC1), saving a segment routes to the Post-Segment Workbench and no modal is shown.
-3. **Cross-artifact boundary under audit**: the workbench route contract (segment-id param) registered by SPEC117MANSTOSTU-004 (hence `Deps: 004`), and the post-checklist PasteProse save handler shape left by archive/tickets/SPEC117MANSTOSTU-002.md (hence `Deps: archive/tickets/SPEC117MANSTOSTU-002.md`). This ticket modifies `PasteProse.tsx`, which archive/tickets/SPEC117MANSTOSTU-002.md also modified for modal removal — independent regions; the archived dependency orders this modifier after the modal is removed.
+3. **Cross-artifact boundary under audit**: the workbench route contract (segment-id param) registered by archive/tickets/SPEC117MANSTOSTU-004.md (hence `Deps: archive/tickets/SPEC117MANSTOSTU-004.md`), and the post-checklist PasteProse save handler shape left by archive/tickets/SPEC117MANSTOSTU-002.md (hence `Deps: archive/tickets/SPEC117MANSTOSTU-002.md`). This ticket modifies `PasteProse.tsx`, which archive/tickets/SPEC117MANSTOSTU-002.md also modified for modal removal — independent regions; the archived dependency orders this modifier after the modal is removed.
 
 ## Architecture Check
 
@@ -31,7 +31,7 @@ After archive/tickets/SPEC117MANSTOSTU-002.md removed the checklist modal, Paste
 
 ### 1. PasteProse post-save navigation
 
-In `web/src/pages/PasteProse.tsx`, after a successful save, navigate to the Post-Segment Workbench route (the route registered by SPEC117MANSTOSTU-004) using the saved `segment_id` as the route param. Remove any residual "saved, do nothing" intermediate state left after -002.
+In `web/src/pages/PasteProse.tsx`, after a successful save, navigate to the Post-Segment Workbench route (the route registered by archive/tickets/SPEC117MANSTOSTU-004.md) using the saved `segment_id` as the route param. Remove any residual "saved, do nothing" intermediate state left after -002.
 
 ## Files to Touch
 
@@ -39,7 +39,7 @@ In `web/src/pages/PasteProse.tsx`, after a successful save, navigate to the Post
 
 ## Out of Scope
 
-- The workbench page/route itself — SPEC117MANSTOSTU-004.
+- The workbench page/route itself — archive/tickets/SPEC117MANSTOSTU-004.md.
 - Removing the modal render — already done in archive/tickets/SPEC117MANSTOSTU-002.md.
 - Any change to the segment-save backend or response shape.
 

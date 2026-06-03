@@ -1,6 +1,6 @@
 # SPEC117MANSTOSTU-004: Post-Segment Workbench frontend page
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/manual-story-studio` adds `web/src/pages/PostSegmentWorkbench.tsx`, registers its route in `web/src/App.tsx`, and adds two-pane styling to `web/src/index.css`. No canon-mediation surface (package is canon-fenced per SPEC-100).
@@ -29,19 +29,19 @@ The author wants to *see the accepted prose and update records* after a segment 
 3. The single honest reminder line is present and no "mark reviewed" control exists anywhere → codebase grep-proof (reminder text present; zero "mark reviewed" matches).
 4. The "touches this segment" rail renders the broad-referrer candidates from the -003 payload → web typecheck (consumes the typed payload) + manual review.
 
-## What to Change
+## Landed Changes
 
 ### 1. New workbench page
 
-Add `web/src/pages/PostSegmentWorkbench.tsx`: a two-pane per-story page keyed by segment ID. Left pane (read-only): accepted segment text (rendered Markdown), title, prompt ID, moment directive, word count, last paragraph, sidecar included-records. Right pane: quick-add buttons for the post-segment classes (Fact, Belief, Emotion, Plan, Relationship, Clock, Secret, Question, Consequence, Status), inline-edit common fields via `RecordForm`, detail drawer for complex fields, delete with referrer cards (SPEC-114 block-on-referrer path). Side/bottom rail: "Records that touch this segment" — the broad-referrer candidate pile from the -003 payload, pre-filtered to involved cast but not limited to cast-linked records, presented as a working pile (not a required checklist). Top reminder (single line): the honest no-inference statement.
+Added `web/src/pages/PostSegmentWorkbench.tsx`: a segment-scoped workbench page that fetches the backend payload from archive/tickets/SPEC117MANSTOSTU-003.md, renders accepted prose, title, prompt ID, moment directive, word count, last paragraph, sidecar included cast/records, the honest no-inference reminder, and a "Records that touch this segment" candidate rail. The record workbench reuses `RecordCard` and `RecordForm`, includes quick-add buttons for the post-segment record classes, seeds new-record refs from the segment payload, and carries SPEC-114 blocked/force-delete handling.
 
 ### 2. Route registration
 
-Register the workbench route in `web/src/App.tsx` (segment-id param). Do **not** add a `StoryPageNav` tab (route-only).
+Registered `/worlds/:worldSlug/manual-stories/:msSlug/segments/:segmentId/post-segment-workbench` in `web/src/App.tsx`. No `StoryPageNav` tab was added.
 
 ### 3. Styling
 
-Add two-pane layout styling to `web/src/index.css`.
+Added responsive workbench layout/styling to `web/src/index.css`.
 
 ## Files to Touch
 
@@ -81,3 +81,19 @@ Add two-pane layout styling to `web/src/index.css`.
 1. `npm --prefix web test` (run from `tools/manual-story-studio`; web typecheck)
 2. `cd tools/manual-story-studio && npm test` (full backend + web)
 3. `grep -rn "mark reviewed\|last_reviewed" tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx` returns zero (no review-debt control re-introduced)
+
+## Outcome
+
+The frontend workbench page is route-only, consumes the backend payload, and exposes an author-maintenance surface without a review checkbox/control or nav-tab entry. It shows accepted prose/segment metadata, the backend candidate rail, quick-add record buttons, existing record edit forms, and SPEC-114 delete repair handling.
+
+## Verification Result
+
+1. `cd tools/manual-story-studio && npm --prefix web test` — PASS; web TypeScript check passed.
+2. `cd tools/manual-story-studio && npm test` — PASS; backend build, 488 backend tests, and web TypeScript check passed.
+3. `rg -n "mark reviewed|last_reviewed|last reviewed" tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx` — no matches.
+4. `rg -n "Segment saved\\. Manual Studio did not infer record changes" tools/manual-story-studio/web/src/pages/PostSegmentWorkbench.tsx` — PASS; reminder text present in page source.
+5. `git diff --check` — PASS.
+
+## Deviations
+
+No browser smoke was run; this ticket's planned proof boundary was web typecheck plus full package test. The page is composed from existing tested record components and the backend payload test from archive/tickets/SPEC117MANSTOSTU-003.md.

@@ -14,6 +14,8 @@
 
 **Implementation note (2026-06-03):** archive/tickets/SPEC117MANSTOSTU-003.md added the read-only backend workbench payload route at `GET /api/worlds/:slug/manual-stories/:msSlug/segments/:segmentId/post-segment-workbench`. The route returns accepted segment context, the honest no-inference reminder, and a deduped broad-referrer candidate list grouped from `scanReferences`.
 
+**Implementation note (2026-06-03):** archive/tickets/SPEC117MANSTOSTU-004.md added the route-only frontend workbench page at `/worlds/:worldSlug/manual-stories/:msSlug/segments/:segmentId/post-segment-workbench`. The page consumes archive/tickets/SPEC117MANSTOSTU-003.md's payload, renders segment context/prose, the honest reminder, broad-referrer candidate cards, quick-add buttons, `RecordForm` editing, and SPEC-114 blocked/force delete handling. No `StoryPageNav` tab was added.
+
 ---
 
 ## 1. Context & Motivation
