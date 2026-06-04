@@ -22,7 +22,9 @@ import type {
 } from "../../src/schema/manual-story.js";
 import {
   fixtureCast,
+  fixtureClock,
   fixtureFact,
+  fixtureLocation,
   fixtureSecret,
 } from "./fixtures.js";
 
@@ -98,6 +100,36 @@ function mkFixture(): { tempRoot: string; manualStoryRoot: string } {
   writeRecord(manualStoryRoot, "cast", fixtureCast("mchar-1", "Mara"));
   writeRecord(
     manualStoryRoot,
+    "locations",
+    fixtureLocation("mloc-1", "Park Threshold", {
+      importance: "high",
+      summary: "A pocket of shelter near the school gate.",
+      details: "Benches, trees, and a visible route back to class.",
+      refs: {
+        characters: ["mchar-1"],
+        locations: [],
+        related_records: [],
+      },
+    }),
+  );
+  writeRecord(
+    manualStoryRoot,
+    "clocks",
+    fixtureClock("mclock-1", "Bell Before Discovery", {
+      importance: "high",
+      summary: "The school day is running out of cover.",
+      axis: "exposure",
+      value: 3,
+      direction: "rising",
+      refs: {
+        characters: ["mchar-1"],
+        locations: ["mloc-1"],
+        related_records: [],
+      },
+    }),
+  );
+  writeRecord(
+    manualStoryRoot,
     "facts",
     fixtureFact("mfact-1", "Included fact", {
       importance: "high",
@@ -158,7 +190,10 @@ function writeRecord(
   writeFileSync(path.join(dir, `${record.id}.yaml`), YAML.stringify(record));
 }
 
-function writePromptWorkingSet(manualStoryRoot: string): void {
+function writePromptWorkingSet(
+  manualStoryRoot: string,
+  overrides: Partial<PromptWorkingSet> = {},
+): void {
   const ctx: PromptWorkingSet = {
     current_location: null,
     current_cast: ["mchar-1"],
@@ -170,6 +205,7 @@ function writePromptWorkingSet(manualStoryRoot: string): void {
     must_not_reveal: ["msecret-1"],
     handoff_summary: "",
     last_accepted_segment: null,
+    ...overrides,
   };
   writeFileSync(
     path.join(manualStoryRoot, "prompt-working-set.yaml"),
@@ -272,6 +308,114 @@ test("composePrompt returns deterministic inclusion ledger buckets", async () =>
       first.resolution.excluded.some((entry) => entry.id === "msecret-1"),
       false,
     );
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("composePrompt seeds current location and active pressure clocks from the working set", async () => {
+  const { tempRoot, manualStoryRoot } = mkFixture();
+  try {
+    writePromptWorkingSet(manualStoryRoot, {
+      current_location: "mloc-1",
+      active_pressure_clocks: ["mclock-1"],
+      pinned_records: [],
+      excluded_records: [],
+      must_not_reveal: [],
+    });
+
+    const result = await composePrompt({
+      manualStoryRoot,
+      repoRoot: tempRoot,
+      moment_directive: "Let Mara orient herself before the bell.",
+      included_cast: [],
+      included_records: [],
+    });
+
+    assert.deepEqual(
+      result.resolution.included.map((entry) => ({
+        id: entry.id,
+        class: entry.class,
+        reason: entry.reason,
+      })),
+      [
+        { id: "mchar-1", class: "cast", reason: "current_cast" },
+        { id: "mloc-1", class: "locations", reason: "current_location" },
+        { id: "mclock-1", class: "clocks", reason: "active_pressure_clock" },
+      ],
+    );
+    assert.match(result.markdown, /### Park Threshold/);
+    assert.match(result.markdown, /A pocket of shelter near the school gate\./);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("composePrompt lets working-set exclusions override current location", async () => {
+  const { tempRoot, manualStoryRoot } = mkFixture();
+  try {
+    writePromptWorkingSet(manualStoryRoot, {
+      current_location: "mloc-1",
+      pinned_records: [],
+      excluded_records: ["mloc-1"],
+      must_not_reveal: [],
+    });
+
+    const result = await composePrompt({
+      manualStoryRoot,
+      repoRoot: tempRoot,
+      moment_directive: "Let Mara avoid the park.",
+      included_cast: [],
+      included_records: [],
+    });
+
+    assert.equal(
+      result.resolution.included.some((entry) => entry.id === "mloc-1"),
+      false,
+    );
+    assert.deepEqual(
+      result.resolution.excluded.find((entry) => entry.id === "mloc-1"),
+      {
+        id: "mloc-1",
+        title: "Park Threshold",
+        class: "locations",
+        summary: "A pocket of shelter near the school gate.",
+        importance: "high",
+        prompt_visibility: "include_when_relevant",
+        involved_cast: ["mchar-1"],
+        tags: [],
+        reason: "working_set_excluded",
+      },
+    );
+    assert.doesNotMatch(result.markdown, /### Park Threshold/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("composePrompt treats null current location as no additional record seed", async () => {
+  const { tempRoot, manualStoryRoot } = mkFixture();
+  try {
+    writePromptWorkingSet(manualStoryRoot, {
+      current_location: null,
+      pinned_records: [],
+      excluded_records: [],
+      must_not_reveal: [],
+    });
+
+    const result = await composePrompt({
+      manualStoryRoot,
+      repoRoot: tempRoot,
+      moment_directive: "Let Mara stay focused.",
+      included_cast: [],
+      included_records: [],
+    });
+
+    assert.deepEqual(
+      result.resolution.included.map((entry) => entry.id),
+      ["mchar-1"],
+    );
+    assert.equal(result.sidecar_draft.included_records.length, 0);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }

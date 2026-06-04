@@ -1,6 +1,6 @@
 # MSSUX-013: Compose seeds `current_location` and `active_pressure_clocks` from the prompt working set
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None for canon/MCP/patch-engine. Touches the Manual Story Studio prompt-composition layer only (`tools/manual-story-studio/src/prompt/compose.ts`, `src/prompt/types.ts`) plus tests. No HTTP-route signature change.
@@ -8,9 +8,9 @@
 
 ## Problem
 
-The author sets a **Current location** in the prompt working set (`prompt-working-set/edit`), saves it, and expects it to be honored as an active record by the Moment Composer and the generated prompt. It is not. Observed on `worlds/erotica-world/manual-stories/red-bunny`: `current_location: mloc-1` ("park near the Leka-Enea school") is saved, the involved cast (`mchar-1`, `mchar-2`) appears correctly, but the location is absent from the generated prompt ("Generate prompt" confirms it).
+At intake, the author set a **Current location** in the prompt working set (`prompt-working-set/edit`), saved it, and expected it to be honored as an active record by the Moment Composer and the generated prompt. Observed on `worlds/erotica-world/manual-stories/red-bunny`: `current_location: mloc-1` ("park near the Leka-Enea school") was saved, the involved cast (`mchar-1`, `mchar-2`) appeared correctly, but the location was absent from the generated prompt ("Generate prompt" confirmed it).
 
-Root cause is in compose's working-set seeding stage. `composePrompt` **does** independently read the working set (`compose.ts` Stage 2.5) and merge several of its fields into the relevant-record set — but the merge list is incomplete:
+Root cause was in compose's working-set seeding stage. `composePrompt` independently read the working set (`compose.ts` Stage 2.5) and merged several of its fields into the relevant-record set, but the merge list was incomplete before this ticket:
 
 ```ts
 // src/prompt/compose.ts:127-134
@@ -24,9 +24,9 @@ const unfilteredSeededRecordIds = mergeIds(
 );
 ```
 
-`current_location` (an `mloc-<n>`) and `active_pressure_clocks` (`mclock-<n>[]`) are **not** in that list. A pipeline grep confirms the working-set `current_location` is consumed only by schema (`src/schema/prompt-working-set.ts`), validation (`src/validate/prompt-working-set.ts`), and the read-side ref graph (`src/read/records.ts`) — **never by `compose.ts`**. `active_pressure_clocks` is likewise consumed only by schema/validation/ref-graph. So a saved location is never added to `records`, never reaches Section 11 ("Physical Continuity", `src/prompt/sections/section-11-physical-continuity.ts`, which renders `locations` from `input.records` only), and never appears in the prompt. Active pressure clocks are dropped the same way (clocks render via `src/prompt/translators/clocks.ts`).
+Before this ticket, `current_location` (an `mloc-<n>`) and `active_pressure_clocks` (`mclock-<n>[]`) were **not** in that list. A pipeline grep confirmed the working-set `current_location` was consumed only by schema (`src/schema/prompt-working-set.ts`), validation (`src/validate/prompt-working-set.ts`), and the read-side ref graph (`src/read/records.ts`) — **never by `compose.ts`**. `active_pressure_clocks` was likewise consumed only by schema/validation/ref-graph. So a saved location was never added to `records`, never reached Section 11 ("Physical Continuity", `src/prompt/sections/section-11-physical-continuity.ts`, which renders `locations` from `input.records` only), and never appeared in the prompt. Active pressure clocks were dropped the same way (clocks render via `src/prompt/translators/clocks.ts`).
 
-Cast works because `current_cast` is seeded at Stage 2.5 (lines 123-126); `pinned_records` / `active_secrets_questions` work because they are in the merge list above — which is exactly why the author sees cast but not location.
+Cast already worked because `current_cast` is seeded at Stage 2.5; `pinned_records` / `active_secrets_questions` already worked because they were in the merge list above — which is exactly why the author saw cast but not location at intake.
 
 This ticket makes compose honor the working set's active spatial state and active pressure clocks, matching the existing treatment of every other active working-set field.
 
@@ -54,11 +54,11 @@ This ticket makes compose honor the working set's active spatial state and activ
 4. `null` location is a no-op -> unit test: `current_location: null` adds nothing to the seeded set (regression guard for the existing `inclusion-ledger.test.ts` fixture).
 5. No regression -> existing `test/prompt/inclusion-ledger.test.ts`, `test/prompt-compose.test.ts`, `test/capstone-spec102.test.ts`, and `npm run test:backend` pass.
 
-## What to Change
+## Landed Changes
 
 ### 1. Add `current_location` + `active_pressure_clocks` to the Stage 2.5 merge
 
-`src/prompt/compose.ts` — extend the secondary array passed to `mergeIds` so it includes the working set's current location (wrapped + null-filtered) and active pressure clocks:
+`src/prompt/compose.ts` extends the secondary array passed to `mergeIds` so it includes the working set's current location (wrapped + null-filtered) and active pressure clocks:
 
 ```ts
 const unfilteredSeededRecordIds = mergeIds(
@@ -77,11 +77,11 @@ const unfilteredSeededRecordIds = mergeIds(
 
 ### 2. Give the new seeds correct provenance
 
-`src/prompt/compose.ts` `seedReasonMap` — set `reason: "current_location"` for the current-location id and `reason: "active_pressure_clock"` for each `active_pressure_clocks` id (only when not already assigned a higher-precedence reason such as `explicitly_selected` or `pinned`).
+`src/prompt/compose.ts` `seedReasonMap` sets `reason: "current_location"` for the current-location id and `reason: "active_pressure_clock"` for each `active_pressure_clocks` id (only when not already assigned a higher-precedence reason such as `explicitly_selected` or `pinned`).
 
 ### 3. Extend the reason enum (additive)
 
-`src/prompt/types.ts` — add `"current_location"` and `"active_pressure_clock"` to `PromptIncludedReason`.
+`src/prompt/types.ts` adds `"current_location"` and `"active_pressure_clock"` to `PromptIncludedReason`.
 
 ## Files to Touch
 
@@ -115,9 +115,26 @@ const unfilteredSeededRecordIds = mergeIds(
 
 ### New/Modified Tests
 
-1. `tools/manual-story-studio/test/prompt/inclusion-ledger.test.ts` — extend the working-set fixture (currently `current_location: null`, `active_pressure_clocks: []`) with active `current_location` + `active_pressure_clocks` cases and an `excluded_records` case; assert `resolution.included`/`excluded` reasons and §11 rendering.
+1. `tools/manual-story-studio/test/prompt/inclusion-ledger.test.ts` — extended the working-set fixture (baseline `current_location: null`, `active_pressure_clocks: []`) with active `current_location` + `active_pressure_clocks` cases and an `excluded_records` case; asserts `resolution.included`/`excluded` reasons and §11 rendering.
 
 ### Commands
 
 1. `npm run test:backend` (from `tools/manual-story-studio/`) — builds the backend and runs `node --test dist/test/**/*.test.js`, the correct boundary for a compose-layer change.
 2. `npm test` (from `tools/manual-story-studio/`) — full package (backend tests + web `tsc --noEmit`) as the final pipeline check.
+
+## Outcome
+
+Completed 2026-06-04.
+
+`composePrompt` now seeds `promptWorkingSet.current_location` and `promptWorkingSet.active_pressure_clocks` through the same Stage 2.5 record pipeline used by pinned records and active secret/question records. The inclusion ledger now reports the additive reasons `"current_location"` and `"active_pressure_clock"` without renaming or removing existing reason values. `test/prompt/inclusion-ledger.test.ts` now covers active current-location rendering, active pressure-clock inclusion, working-set exclusion precedence, and `current_location: null` as a no-op.
+
+## Verification Result
+
+1. `npm run build:backend` (from `tools/manual-story-studio/`) — passed.
+2. `node --test dist/test/prompt/inclusion-ledger.test.js` (from `tools/manual-story-studio/`) — passed: 6 tests, including the new current-location / active-clock / exclusion / null-location cases.
+3. `npm run test:backend` (from `tools/manual-story-studio/`) — passed: 89 backend compiled test files.
+4. `npm test` (from `tools/manual-story-studio/`) — passed: 505 backend tests plus `npm --prefix web test` (`tsc -p tsconfig.json --noEmit`).
+
+## Deviations
+
+None. `MSSUX-014` remains the separate UI-visibility follow-up and was not absorbed into this backend compose ticket.

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None for canon/MCP/patch-engine. Touches the Manual Story Studio web layer only (`tools/manual-story-studio/web/src/pages/MomentComposer.tsx`). No backend or HTTP-route change.
-**Deps**: `tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md` is the backend half of the same reported defect (makes the active location actually enter the prompt). MSSUX-014 is the UI-visibility half; the two are independent diffs and can land in either order.
+**Deps**: `archive/tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md` is the completed backend half of the same reported defect (makes the active location actually enter the prompt). MSSUX-014 is the UI-visibility half; the two are independent diffs and can land in either order.
 
 ## Problem
 
@@ -30,9 +30,9 @@ This ticket makes the "Relevant records" initial selection reflect the full acti
 
 1. `web/src/pages/MomentComposer.tsx:96-107` seeds two pieces of state from the working set: `includedCast` from `current_cast` (falling back to `m.cast_order`), and `pinnedRecordIds` from `pinned_records` only. The `navState.included_records` / `navState.included_cast` overrides (in-session navigation from another page) are preserved and must remain authoritative when present.
 2. The "Relevant records" `RecordPicker` uses `COMPOSER_RECORD_CLASSES` (`MomentComposer.tsx:20-22` = `PICKABLE_RECORD_CLASSES` minus `cast`), which includes `locations` (`mloc`), `clocks` (`mclock`), and `secrets`/`questions` (`msecret`/`mq`) — verified in `web/src/types/manual-story.ts`. So those ids are valid selections for that picker; pre-selecting them will not produce an out-of-class value.
-3. Cross-layer boundary: this is a *display/initial-selection* change. The backend (`src/prompt/compose.ts`, after MSSUX-013) is the authoritative seeder of what enters the prompt and already dedupes via `mergeIds`. Passing these ids through `included_records` is therefore harmless (deduped) and does not double-count. The UI seed must not become a second, divergent definition of "active" — it should mirror the same working-set fields the backend honors.
+3. Cross-layer boundary: this is a *display/initial-selection* change. The backend (`src/prompt/compose.ts`, completed in `archive/tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md`) is the authoritative seeder of what enters the prompt and already dedupes via `mergeIds`. Passing these ids through `included_records` is therefore harmless (deduped) and does not double-count. The UI seed must not become a second, divergent definition of "active" — it should mirror the same working-set fields the backend honors.
 4. `PromptWorkingSet` fields available on the client come from `fetchPromptWorkingSet` (`web/src/api/prompt-working-set.js`); `current_location` is `string | null`, `active_pressure_clocks` / `active_secrets_questions` / `pinned_records` are `string[]`. The seed must null-filter `current_location` and dedupe across all four with a stable, deterministic order.
-5. Adjacent contradiction classification: the backend dropping these records from the prompt is the **separate** defect in `tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md`. This ticket is UI-only; without MSSUX-013, the picker would show the records as selected but they still would not render in the prompt — so the two should ship together for a coherent fix, but they are independent reviewable diffs.
+5. Adjacent contradiction classification: the backend dropping these records from the prompt was the **separate** defect completed in `archive/tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md`. This ticket is UI-only; before MSSUX-013, the picker could show the records as selected but they still would not render in the prompt — so the two should ship together for a coherent fix, but they are independent reviewable diffs.
 
 ## Architecture Check
 
@@ -78,7 +78,7 @@ if (!navState.included_records) {
 
 ## Out of Scope
 
-- Backend compose seeding of `current_location` / `active_pressure_clocks` (`tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md`).
+- Backend compose seeding of `current_location` / `active_pressure_clocks` (`archive/tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md`).
 - Pre-selecting `must_not_reveal` records in the visible picker (a suppression directive, deliberately not surfaced as a "relevant record").
 - Adding a web component-test harness: the `web/` package has no runtime test runner today (`web` `test` script is `tsc --noEmit`); introducing Vitest/Testing-Library is a separate infrastructure ticket. Verification here is typecheck + manual/Puppeteer.
 - Changing the `RecordPicker` component or its class list.

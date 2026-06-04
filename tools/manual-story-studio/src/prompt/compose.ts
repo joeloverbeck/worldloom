@@ -127,6 +127,8 @@ export async function composePrompt(
   const unfilteredSeededRecordIds = mergeIds(
     input.included_records,
     [
+      ...(promptWorkingSet?.current_location ? [promptWorkingSet.current_location] : []),
+      ...(promptWorkingSet?.active_pressure_clocks ?? []),
       ...(promptWorkingSet?.pinned_records ?? []),
       ...(promptWorkingSet?.active_secrets_questions ?? []),
       ...(promptWorkingSet?.must_not_reveal ?? []),
@@ -451,6 +453,14 @@ function seedReasonMap(
   const reasons = new Map<string, PromptIncludedReason>();
   for (const id of input.included_records) {
     if (!reasons.has(id)) reasons.set(id, "explicitly_selected");
+  }
+  if (promptWorkingSet?.current_location) {
+    if (!reasons.has(promptWorkingSet.current_location)) {
+      reasons.set(promptWorkingSet.current_location, "current_location");
+    }
+  }
+  for (const id of promptWorkingSet?.active_pressure_clocks ?? []) {
+    if (!reasons.has(id)) reasons.set(id, "active_pressure_clock");
   }
   for (const id of promptWorkingSet?.pinned_records ?? []) {
     if (!reasons.has(id)) reasons.set(id, "pinned");
