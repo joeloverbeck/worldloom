@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None. Data-only repair of one Manual Story Studio record file under `worlds/erotica-world/manual-stories/red-bunny/`. Not a `_source/` canon record, so not engine-routed; manual-story records are studio-owned files.
-**Deps**: None to stand alone (a direct field edit is sufficient). Landing MSSUX-010 first is preferable so re-saving the record through the studio's update path auto-corrects and re-validates it.
+**Deps**: None to stand alone (a direct field edit is sufficient). `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` has landed, so the studio write path now prevents recurrence.
 
 ## Problem
 
@@ -15,7 +15,7 @@ id: ""              # corrupt — must be "mchar-1" to match the filename
 title: Ane Arrieta
 ```
 
-MSSUX-010 fixes the code that allowed this, but a code fix does **not** retroactively repair already-persisted data. Until this record's `id` is corrected, Ane Arrieta remains unselectable across all four surfaces (prompt working set "Invalid cast IDs:", cast card no-op, records card no-op, moment-composer 400). This ticket is the immediate live unblock.
+`archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` fixes the code that allowed this, but a code fix does **not** retroactively repair already-persisted data. Until this record's `id` is corrected, Ane Arrieta remains unselectable across all four surfaces (prompt working set "Invalid cast IDs:", cast card no-op, records card no-op, moment-composer 400). This ticket is the immediate live unblock.
 
 Live confirmation of the broken state (server on :5176):
 - `GET /api/worlds/erotica-world/manual-stories/red-bunny/records?class=cast` → `{"id":"","title":"Ane Arrieta",…}`
@@ -31,12 +31,12 @@ Live confirmation of the broken state (server on :5176):
 
 ## Architecture Check
 
-1. Repairing the data is orthogonal to the code fix (MSSUX-010) and must happen regardless — MSSUX-010 prevents recurrence but cannot heal existing files. Keeping it a separate, data-only ticket preserves a clean reviewable diff (one YAML field vs. backend logic).
+1. Repairing the data is orthogonal to the completed code fix (`archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md`) and must happen regardless — MSSUX-010 prevents recurrence but cannot heal existing files. Keeping it a separate, data-only ticket preserves a clean reviewable diff (one YAML field vs. backend logic).
 2. No shim/migration framework: this is a single-field, single-file correction. A general "scan-and-repair-all-empty-ids" migration is unwarranted (only one corrupt file exists); if MSSUX-012's read-path guard later surfaces others, repair them individually then.
 
 ## Verification Layers
 
-1. Record id correct on disk -> `id: mchar-1` in `mchar-1.yaml` (and the file still validates under MSSUX-010's tightened `validateRecord`).
+1. Record id correct on disk -> `id: mchar-1` in `mchar-1.yaml` (and the file still validates under the tightened `validateRecord` from `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md`).
 2. List API surfaces a valid id -> `GET …/records?class=cast` returns `"id":"mchar-1"` for Ane Arrieta.
 3. Cast selectable in moment-composer -> `POST …/moment-composer/template-candidates {"selected_cast":["mchar-1"]}` returns `200` with candidates (no `invalid_id_shape`).
 4. UI surfaces work -> manual/Puppeteer: the cast card and records card open on click; `EditPromptWorkingSet` selecting Ane shows no "Invalid cast IDs" warning.
@@ -45,7 +45,7 @@ Live confirmation of the broken state (server on :5176):
 
 ### 1. Repair the `id` field
 
-Preferred (post-MSSUX-010): open the Ane Arrieta cast record in the studio and re-save it — the update path (`updateRecord`, which sets `id` from the URL = `mchar-1`) auto-corrects and re-validates the record through the tightened validator.
+Preferred after `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md`: open the Ane Arrieta cast record in the studio and re-save it — the update path (`updateRecord`, which sets `id` from the URL = `mchar-1`) auto-corrects and re-validates the record through the tightened validator.
 
 Direct alternative (works without MSSUX-010): edit `worlds/erotica-world/manual-stories/red-bunny/records/cast/mchar-1.yaml`, changing `id: ""` to `id: mchar-1`. Leave every other field unchanged.
 
@@ -55,7 +55,7 @@ Direct alternative (works without MSSUX-010): edit `worlds/erotica-world/manual-
 
 ## Out of Scope
 
-- Any code change (write path / validator / read path — MSSUX-010 and MSSUX-012).
+- Any code change (write path / validator / read path — MSSUX-010 is complete; MSSUX-012 remains active).
 - `cast_order` population in `manual-story.yaml` (author-controlled; not part of this defect).
 - A generalized empty-id repair migration (only one corrupt file exists).
 
@@ -76,7 +76,7 @@ Direct alternative (works without MSSUX-010): edit `worlds/erotica-world/manual-
 
 ### New/Modified Tests
 
-1. `None — data-only repair; verification is command-based (curl against the running studio) plus the regression coverage added by MSSUX-010, which prevents the corruption from recurring.`
+1. `None — data-only repair; verification is command-based (curl against the running studio) plus the regression coverage added by archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md, which prevents the corruption from recurring.`
 
 ### Commands
 

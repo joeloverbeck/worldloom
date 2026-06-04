@@ -272,6 +272,22 @@ test("validateRecord: missing each required common field is rejected per class",
   }
 });
 
+test("validateRecord: generic record id must match the class prefix", () => {
+  const valid = validateRecord("cast", castProfile("mchar-1"));
+  assert.equal(valid.ok, true);
+
+  for (const id of ["", "wrong-1"]) {
+    const result = validateRecord("cast", castProfile(id));
+    assert.equal(result.ok, false, `cast should reject id=${JSON.stringify(id)}`);
+    if (!result.ok) {
+      const err = result.errors.find(
+        (entry) => entry.field === "id" && entry.code === "invalid_id_shape",
+      );
+      assert.ok(err, `expected invalid_id_shape for id=${JSON.stringify(id)}`);
+    }
+  }
+});
+
 test("validateRecord: enum mismatch yields error naming bad value and allowed set", () => {
   const broken = { ...VALID_PER_CLASS.beliefs, truth_relation: "almost_true" };
   const result = validateRecord("beliefs", broken);

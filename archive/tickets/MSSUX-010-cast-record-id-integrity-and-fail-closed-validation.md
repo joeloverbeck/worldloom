@@ -1,6 +1,6 @@
 # MSSUX-010: Guarantee a well-formed record `id` on create, and fail validation closed on malformed ids
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None for canon/MCP/patch-engine. Touches the Manual Story Studio package only (`tools/manual-story-studio`): the record write path and the schema validator, plus their tests. No public HTTP-route signature change.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-A cast record was written to disk with an **empty `id` field** while its filename was correct:
+At intake, a cast record had been written to disk with an **empty `id` field** while its filename was correct:
 
 ```
 worlds/erotica-world/manual-stories/red-bunny/records/cast/mchar-1.yaml
@@ -16,7 +16,7 @@ worlds/erotica-world/manual-stories/red-bunny/records/cast/mchar-1.yaml
   title: Ane Arrieta
 ```
 
-This single corrupt field is the upstream cause of every reported Manual Story Studio symptom for this cast member: `EditPromptWorkingSet` shows `Invalid cast IDs:` (empty), the cast card and the records card no-op on click, and `moment-composer` → `template-candidates` returns **HTTP 400** `{"error":"bad_request","reason":"invalid_id_shape"}`. The front end is not at fault — every consumer correctly keys off the record's `id`, which is `""`.
+That single corrupt field was the upstream cause of every reported Manual Story Studio symptom for this cast member: `EditPromptWorkingSet` showed `Invalid cast IDs:` (empty), the cast card and the records card no-oped on click, and `moment-composer` → `template-candidates` returned **HTTP 400** `{"error":"bad_request","reason":"invalid_id_shape"}`. The front end was not at fault — every consumer correctly keyed off the record's `id`, which was `""`.
 
 Two backend defects let this happen, and this ticket fixes both:
 
@@ -46,42 +46,19 @@ Two backend defects let this happen, and this ticket fixes both:
 3. Pattern derives from the canonical prefix map -> grep-proof that the validator references `MANUAL_RECORD_CLASS_PREFIXES` rather than a literal `"mchar"`.
 4. No regression for valid records -> existing `test/server/records.test.ts` happy-path (POST → 201) and `test/validate/schema.test.ts` suites pass unchanged.
 
-## What to Change
+## Landed Changes
 
 ### 1. Make the allocated id authoritative in `createRecord`
 
-`src/write/records.ts` — change:
+`src/write/records.ts` now spreads the request body before the allocated `id`, so the engine-allocated value always wins:
 
 ```ts
-const composed = { id, ...body } as ManualRecordOfClass<C>;
-```
-
-to spread the body first so the allocated `id` always wins (mirroring `updateRecord`):
-
-```ts
-// id is allocated by the engine and is authoritative; spread body first so a
-// client-supplied id (e.g. RecordForm's initial id: "") can never clobber it.
 const composed = { ...body, id } as ManualRecordOfClass<C>;
 ```
 
 ### 2. Add a fail-closed id-shape check to `validateRecord`
 
-`src/validate/schema.ts` — import `MANUAL_RECORD_CLASS_PREFIXES`. After the existing `validateAgainstSchema(parsed, schema)` call for non-beat-template classes (and before returning), assert the record's `id` matches `^<prefix>-[0-9]+$` for the class, pushing a `ValidationError` on the `id` field when it does not (including the empty-string and wrong-prefix cases). Beat-templates keep their existing `validateBeatTemplate` id check and are unaffected. Reuse a local `escapeRegex` (as `readRecord` does) so the prefix is regex-safe.
-
-Sketch:
-
-```ts
-const prefix = MANUAL_RECORD_CLASS_PREFIXES[className];
-const idResult = validateAgainstSchema(parsed, schema);
-const errors = idResult.ok ? [] : [...idResult.errors];
-const id = (parsed as { id?: unknown }).id;
-if (typeof id !== "string" || !new RegExp(`^${escapeRegex(prefix)}-\\d+$`).test(id)) {
-  errors.push({ field: "id", message: `id must match ^${prefix}-<integer>$`, code: "invalid_id_shape" });
-}
-return errors.length === 0 ? { ok: true } : { ok: false, errors };
-```
-
-(Exact wiring is implementer's choice as long as the empty-string and wrong-prefix cases fail and a correct `mchar-1` passes.)
+`src/validate/schema.ts` imports `MANUAL_RECORD_CLASS_PREFIXES`, derives `^<prefix>-\d+$` for every non-beat-template class, and appends an `invalid_id_shape` error when `id` is empty, missing, non-string, or wrong-prefix. Beat-templates remain on their dedicated validator.
 
 ## Files to Touch
 
@@ -123,3 +100,23 @@ return errors.length === 0 ? { ok: true } : { ok: false, errors };
 1. From `tools/manual-story-studio/`: `npm run build:backend`
 2. From `tools/manual-story-studio/`: `node --test dist/test/server/records.test.js dist/test/validate/schema.test.js`
 3. From `tools/manual-story-studio/`: `npm test`
+
+## Outcome
+
+Completed on 2026-06-04.
+
+- `createRecord` now composes records as `{ ...body, id }`, matching `updateRecord` and preventing request-body `id` values from clobbering the engine-allocated id.
+- `validateRecord` now enforces the per-class id pattern for all generic Manual Story Studio record classes, deriving the prefix from `MANUAL_RECORD_CLASS_PREFIXES` and returning an `invalid_id_shape` error for malformed ids.
+- Added a route regression proving cast POST bodies with `id: ""` or `id: "garbage"` cannot clobber allocated ids.
+- Added validator regressions proving `cast` accepts `mchar-1` and rejects `""` / `wrong-1`.
+
+## Verification Result
+
+- Pre-edit baseline: `npm test` from `tools/manual-story-studio/` passed with 496 backend tests plus the web TypeScript gate.
+- `npm run build:backend` from `tools/manual-story-studio/` passed.
+- `node --test dist/test/server/records.test.js dist/test/validate/schema.test.js` from `tools/manual-story-studio/` passed: 25 tests, including the new allocated-id and id-shape regressions.
+- `npm test` from `tools/manual-story-studio/` passed after the change: 498 backend tests plus the web TypeScript gate.
+
+## Deviations
+
+- None. The data repair remains MSSUX-011, and the read-side guard remains MSSUX-012.

@@ -50,7 +50,7 @@ Confirmed at three levels:
 
 | Ticket | Scope | Priority |
 |---|---|---|
-| `tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` | O1+O2 — create-path id authority + fail-closed id validation | HIGH |
+| `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` | O1+O2 — create-path id authority + fail-closed id validation | HIGH — completed |
 | `tickets/MSSUX-011-repair-corrupt-cast-record-id.md` | O3 — data repair (`id: "" → mchar-1`) | HIGH |
 | `tickets/MSSUX-012-read-path-filename-authoritative-id-guard.md` | O4 — read-path filename-authoritative id (defense-in-depth) | MEDIUM |
 
