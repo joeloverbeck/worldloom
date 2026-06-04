@@ -23,8 +23,13 @@ export const secretsTranslator = (
   record: ManualSecretRecord,
   ctx: TranslatorContext,
 ): string => {
-  const body = record.details.trim() || record.summary.trim() || record.title;
+  const summary = record.summary.trim();
+  const details = record.details.trim();
+  const body = summary || details || record.title;
   const lines: string[] = [`- Secret: ${body}`];
+  if (summary.length > 0 && details.length > 0) {
+    lines.push(`  Detail: ${details}`);
+  }
   if (record.held_by.length > 0) {
     const holderTitles = record.held_by.map(
       (id) => ctx.getCastTitle(id) ?? id,

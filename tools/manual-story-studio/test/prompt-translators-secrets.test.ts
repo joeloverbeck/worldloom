@@ -25,6 +25,89 @@ test("secrets translator hidden → do-not-reveal language", () => {
   assertNoInternalIds(out, "secrets-hidden");
 });
 
+test("secrets translator renders summary and details without dropping either", () => {
+  const record = fixtureSecret("msecret-1", "Fallback title", {
+    held_by: ["mchar-2"],
+    audience_visibility: "known_to_holders",
+    forbidden_reveal_tags: ["occupation"],
+    summary: "Ane conceals her station-area sex work from strangers.",
+    details:
+      "Her provocative pink outfit reads as sex-worker street-signaling to anyone who knows the register.",
+  });
+  const ctx = fixtureCtx({ "mchar-2": "Ane Arrieta" });
+
+  const out = secretsTranslator(record, ctx);
+
+  assert.equal(
+    out,
+    [
+      "- Secret: Ane conceals her station-area sex work from strangers.",
+      "  Detail: Her provocative pink outfit reads as sex-worker street-signaling to anyone who knows the register.",
+      "  Held by: Ane Arrieta",
+      "  Audience: Known only to the listed holders; do not disclose to other characters",
+      "  Forbidden reveals: occupation",
+    ].join("\n"),
+  );
+});
+
+test("secrets translator renders summary-only secret without empty detail line", () => {
+  const record = fixtureSecret("msecret-1", "Fallback title", {
+    held_by: [],
+    audience_visibility: "known_to_holders",
+    summary: "Ane conceals her station-area sex work from strangers.",
+    details: "",
+  });
+  const out = secretsTranslator(record, fixtureCtx({}));
+
+  assert.equal(
+    out,
+    [
+      "- Secret: Ane conceals her station-area sex work from strangers.",
+      "  Audience: Known only to the listed holders; do not disclose to other characters",
+    ].join("\n"),
+  );
+  assert.ok(!out.includes("Detail:"));
+});
+
+test("secrets translator renders details-only secret as headline", () => {
+  const record = fixtureSecret("msecret-1", "Fallback title", {
+    held_by: [],
+    audience_visibility: "known_to_holders",
+    summary: "",
+    details:
+      "Her provocative pink outfit reads as sex-worker street-signaling to anyone who knows the register.",
+  });
+  const out = secretsTranslator(record, fixtureCtx({}));
+
+  assert.equal(
+    out,
+    [
+      "- Secret: Her provocative pink outfit reads as sex-worker street-signaling to anyone who knows the register.",
+      "  Audience: Known only to the listed holders; do not disclose to other characters",
+    ].join("\n"),
+  );
+  assert.ok(!out.includes("Detail:"));
+});
+
+test("secrets translator falls back to title when summary and details are empty", () => {
+  const record = fixtureSecret("msecret-1", "Fallback title", {
+    held_by: [],
+    audience_visibility: "known_to_holders",
+    summary: "",
+    details: "",
+  });
+  const out = secretsTranslator(record, fixtureCtx({}));
+
+  assert.equal(
+    out,
+    [
+      "- Secret: Fallback title",
+      "  Audience: Known only to the listed holders; do not disclose to other characters",
+    ].join("\n"),
+  );
+  assert.ok(!out.includes("Detail:"));
+});
+
 test("secrets translator revealed → permissive language", () => {
   const record = fixtureSecret("msecret-2", "Public", {
     held_by: ["mchar-1"],
