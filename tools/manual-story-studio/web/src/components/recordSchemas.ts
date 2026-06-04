@@ -13,6 +13,7 @@ export type FieldKind =
   | { kind: "enum"; values: readonly string[] }
   | { kind: "stringArray" }
   | { kind: "enumArray"; values: readonly string[] }
+  | { kind: "recordRefArray"; classes: readonly ManualRecordClass[] }
   | { kind: "pair"; class: ManualRecordClass }
   | { kind: "recordOfStrings" }
   | { kind: "nullableString" }
@@ -221,7 +222,12 @@ export const PER_CLASS_FIELDS: Record<
     },
   ],
   secrets: [
-    { field: "held_by", label: "Held by (mchar list)", required: true, kind: { kind: "stringArray" } },
+    {
+      field: "held_by",
+      label: "Held by",
+      required: true,
+      kind: { kind: "recordRefArray", classes: ["cast"] },
+    },
     {
       field: "audience_visibility",
       label: "Audience visibility",

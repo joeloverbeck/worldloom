@@ -46,6 +46,14 @@ function pickerSnippetBetween(source: string, label: string, end: string): strin
   return source.slice(startIndex, endIndex);
 }
 
+function snippetBetween(source: string, start: string, end: string): string {
+  const startIndex = source.indexOf(start);
+  assert.notEqual(startIndex, -1, `missing start marker: ${start}`);
+  const endIndex = source.indexOf(end, startIndex + start.length);
+  assert.notEqual(endIndex, -1, `missing end marker: ${end}`);
+  return source.slice(startIndex, endIndex);
+}
+
 test("SPEC-112 RecordPicker component and mount surfaces exist", () => {
   assert.match(
     readRepoFile("tools/manual-story-studio/web/src/components/RecordPicker.tsx"),
@@ -83,10 +91,24 @@ test("SPEC-112 RecordForm refs use RecordPicker while ChipInput remains for non-
   const recordForm = readRepoFile(
     "tools/manual-story-studio/web/src/components/RecordForm.tsx",
   );
+  const recordSchemas = readRepoFile(
+    "tools/manual-story-studio/web/src/components/recordSchemas.ts",
+  );
 
   assert.match(recordForm, /function ChipInput/);
   assert.match(recordForm, /ariaLabel="tags"/);
   assert.match(recordForm, /case "stringArray"[\s\S]*<ChipInput/);
+  assert.match(recordForm, /case "recordRefArray"[\s\S]*<RecordPicker/);
+  assert.match(recordForm, /label=\{label\}/);
+  assert.match(recordForm, /classes=\{kind\.classes\}/);
+  const heldBySchema = snippetBetween(
+    recordSchemas,
+    'field: "held_by"',
+    'field: "audience_visibility"',
+  );
+  assert.match(heldBySchema, /label: "Held by"/);
+  assert.match(heldBySchema, /kind: \{ kind: "recordRefArray", classes: \["cast"\] \}/);
+  assert.doesNotMatch(heldBySchema, /kind: \{ kind: "stringArray" \}/);
 
   for (const [start, end] of [
     ['label="Refs (characters)"', 'label="Refs (locations)"'],

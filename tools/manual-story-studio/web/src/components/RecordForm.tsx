@@ -13,6 +13,7 @@ import {
   PER_CLASS_FIELDS,
   RELATIONSHIP_AXIS_FIELDS,
   RELATIONSHIP_AXIS_VALUES,
+  type FieldKind,
 } from "./recordSchemas.js";
 
 export interface RecordFormProps {
@@ -36,7 +37,7 @@ const PROMPT_VISIBILITY_VALUES = [
   "never_prompt",
 ] as const;
 
-function defaultForKind(kind: { kind: string; values?: readonly string[] }): unknown {
+function defaultForKind(kind: FieldKind): unknown {
   switch (kind.kind) {
     case "string":
     case "readonlyString":
@@ -50,6 +51,8 @@ function defaultForKind(kind: { kind: string; values?: readonly string[] }): unk
     case "enum":
       return kind.values?.[0] ?? "";
     case "enumArray":
+      return [];
+    case "recordRefArray":
       return [];
     case "stringArray":
       return [];
@@ -673,10 +676,13 @@ export function RecordForm(props: RecordFormProps) {
           error={errorsByField.get(fd.field)}
         >
           {renderFieldControl(
+            fd.label,
             fd.field,
             fd.kind,
             perClass[fd.field],
             (v) => setPerClass({ ...perClass, [fd.field]: v }),
+            worldSlug,
+            msSlug,
           )}
         </FieldRow>
       ))}
@@ -799,14 +805,13 @@ export function RecordForm(props: RecordFormProps) {
 }
 
 function renderFieldControl(
+  label: string,
   field: string,
-  kind: {
-    kind: string;
-    values?: readonly string[];
-    class?: string;
-  },
+  kind: FieldKind,
   value: unknown,
   onChange: (next: unknown) => void,
+  worldSlug: string,
+  msSlug: string,
 ): React.ReactNode {
   switch (kind.kind) {
     case "string":
@@ -902,6 +907,18 @@ function renderFieldControl(
       return (
         <ChipInput
           ariaLabel={field}
+          value={Array.isArray(value) ? (value as string[]) : []}
+          onChange={onChange as (next: string[]) => void}
+        />
+      );
+    case "recordRefArray":
+      return (
+        <RecordPicker
+          worldSlug={worldSlug}
+          msSlug={msSlug}
+          label={label}
+          classes={kind.classes}
+          mode="multi"
           value={Array.isArray(value) ? (value as string[]) : []}
           onChange={onChange as (next: string[]) => void}
         />
