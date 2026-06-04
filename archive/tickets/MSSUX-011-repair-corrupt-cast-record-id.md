@@ -1,6 +1,6 @@
 # MSSUX-011: Repair the corrupt `mchar-1` cast record id (Ane Arrieta)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None. Data-only repair of one Manual Story Studio record file under `worlds/erotica-world/manual-stories/red-bunny/`. Not a `_source/` canon record, so not engine-routed; manual-story records are studio-owned files.
@@ -8,16 +8,16 @@
 
 ## Problem
 
-`worlds/erotica-world/manual-stories/red-bunny/records/cast/mchar-1.yaml` was written with an empty `id` field:
+At intake, `worlds/erotica-world/manual-stories/red-bunny/records/cast/mchar-1.yaml` had been written with an empty `id` field:
 
 ```yaml
 id: ""              # corrupt — must be "mchar-1" to match the filename
 title: Ane Arrieta
 ```
 
-`archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` fixes the code that allowed this, but a code fix does **not** retroactively repair already-persisted data. Until this record's `id` is corrected, Ane Arrieta remains unselectable across all four surfaces (prompt working set "Invalid cast IDs:", cast card no-op, records card no-op, moment-composer 400). This ticket is the immediate live unblock.
+`archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` fixes the code that allowed this, but a code fix does **not** retroactively repair already-persisted data. Until this ticket's repair, Ane Arrieta remained unselectable across all four surfaces (prompt working set "Invalid cast IDs:", cast card no-op, records card no-op, moment-composer 400).
 
-Live confirmation of the broken state (server on :5176):
+Historical live confirmation of the broken state (server on :5176, before this repair):
 - `GET /api/worlds/erotica-world/manual-stories/red-bunny/records?class=cast` → `{"id":"","title":"Ane Arrieta",…}`
 - `POST …/moment-composer/template-candidates {"selected_cast":[""]}` → `400 {"error":"bad_request","reason":"invalid_id_shape"}`
 
@@ -41,13 +41,11 @@ Live confirmation of the broken state (server on :5176):
 3. Cast selectable in moment-composer -> `POST …/moment-composer/template-candidates {"selected_cast":["mchar-1"]}` returns `200` with candidates (no `invalid_id_shape`).
 4. UI surfaces work -> manual/Puppeteer: the cast card and records card open on click; `EditPromptWorkingSet` selecting Ane shows no "Invalid cast IDs" warning.
 
-## What to Change
+## Landed Changes
 
 ### 1. Repair the `id` field
 
-Preferred after `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md`: open the Ane Arrieta cast record in the studio and re-save it — the update path (`updateRecord`, which sets `id` from the URL = `mchar-1`) auto-corrects and re-validates the record through the tightened validator.
-
-Direct alternative (works without MSSUX-010): edit `worlds/erotica-world/manual-stories/red-bunny/records/cast/mchar-1.yaml`, changing `id: ""` to `id: mchar-1`. Leave every other field unchanged.
+`worlds/erotica-world/manual-stories/red-bunny/records/cast/mchar-1.yaml` was repaired by changing only the top-level `id` field from `""` to `mchar-1`. The repair was committed in the nested `worlds` content repo as `c1bcef1`.
 
 ## Files to Touch
 
@@ -83,3 +81,21 @@ Direct alternative (works without MSSUX-010): edit `worlds/erotica-world/manual-
 1. `rg -n '^id:' worlds/erotica-world/manual-stories/red-bunny/records/cast/mchar-1.yaml` → `id: mchar-1`
 2. `curl -s 'http://localhost:5176/api/worlds/erotica-world/manual-stories/red-bunny/records?class=cast'` → id is `mchar-1`
 3. `curl -s -o /dev/null -w '%{http_code}\n' -X POST 'http://localhost:5176/api/worlds/erotica-world/manual-stories/red-bunny/moment-composer/template-candidates' -H 'Content-Type: application/json' -d '{"selected_cast":["mchar-1"]}'` → `200`
+
+## Outcome
+
+Completed on 2026-06-04.
+
+- Repaired `worlds/erotica-world/manual-stories/red-bunny/records/cast/mchar-1.yaml` so its body `id` equals the filename stem `mchar-1`.
+- Left `manual-story.yaml` / `cast_order` and all non-`id` record fields unchanged during the local repair.
+- Committed the world-content repair in the nested `worlds` repo as `c1bcef1` (`Repair MSSUX-011 cast record id`).
+
+## Verification Result
+
+- `rg -n '^id:' worlds/erotica-world/manual-stories/red-bunny/records/cast/mchar-1.yaml` returned `1:id: mchar-1`.
+- `curl -s 'http://localhost:5176/api/worlds/erotica-world/manual-stories/red-bunny/records?class=cast'` returned the Ane Arrieta summary with `"id":"mchar-1"`.
+- `curl -s -o /tmp/mssux-011-template-candidates.out -w '%{http_code}\n' -X POST 'http://localhost:5176/api/worlds/erotica-world/manual-stories/red-bunny/moment-composer/template-candidates' -H 'Content-Type: application/json' -d '{"selected_cast":["mchar-1"]}'` returned `200`; the response body was `{"candidates":[]}`.
+
+## Deviations
+
+- The repaired record lives in the nested `worlds` content repo, not the public pipeline repo. The pipeline repo ignores `worlds/*`, so this ticket archive commit records the handoff while the actual data repair is committed separately in `worlds` as `c1bcef1`.

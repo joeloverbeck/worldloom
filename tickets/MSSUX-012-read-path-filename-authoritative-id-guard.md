@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None for canon/MCP/patch-engine. Touches the Manual Story Studio read layer (`tools/manual-story-studio/src/read/records.ts`) plus tests. No HTTP-route signature change.
-**Deps**: `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` for the completed write-side guarantee. Complements that ticket by adding read-side enforcement of the same FOUNDATIONS-002 invariant. Independent of MSSUX-011.
+**Deps**: `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` for the completed write-side guarantee. `archive/tickets/MSSUX-011-repair-corrupt-cast-record-id.md` has repaired the observed corrupt record. Complements those tickets by adding read-side enforcement of the same FOUNDATIONS-002 invariant.
 
 ## Problem
 
@@ -18,11 +18,11 @@ FOUNDATIONS-002 establishes that the filename and the `id` field must be identic
 2. The package already cares about not masking errors: `test/read/no-silent-catch.test.ts` exists. A filename/body id mismatch that is silently normalized would violate that spirit, so the chosen design surfaces the mismatch (see Architecture Check) rather than hiding it.
 3. Cross-artifact boundary: the filename pattern (`^${prefix}-(\\d+)\\.yaml$`) and the id pattern (`^${prefix}-\\d+$`) are both built from `MANUAL_RECORD_CLASS_PREFIXES`. The read-side normalization must use the filename stem the read layer already extracts; it must not introduce a second, divergent source of truth for the id.
 4. FOUNDATIONS principle: FOUNDATIONS-002 (filename ≡ `id`) plus the §Machine-Facing Layer Validator-Framework expectation that structural invariants (id integrity) are enforced, not assumed. `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` enforces this on write; this ticket enforces it on read, closing the loop for files that bypass the studio's write path (manual edits, `SourceBrowser` import, files predating MSSUX-010).
-5. Adjacent contradiction classification: this ticket is **defense-in-depth**, deliberately separate from the completed root-cause fix (`archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md`) and the data repair (MSSUX-011). It is not required to make the reported symptoms go away (MSSUX-010 + MSSUX-011 do that); it prevents the *class* of silent failure from recurring.
+5. Adjacent contradiction classification: this ticket is **defense-in-depth**, deliberately separate from the completed root-cause fix (`archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md`) and the completed data repair (`archive/tickets/MSSUX-011-repair-corrupt-cast-record-id.md`). It is not required to make the reported symptoms go away (MSSUX-010 + MSSUX-011 do that); it prevents the *class* of silent failure from recurring.
 
 ## Architecture Check
 
-1. **Chosen design — filename-authoritative id, with a visible mismatch signal.** `listRecords`/`toSummary` set the summary `id` to the filename stem (already parsed and pattern-checked), guaranteeing every summary carries a well-formed id and the UI never breaks from this corruption class. `readRecord` normalizes the returned record's `.id` to the requested (filename-derived) id. When the body `id` is a **non-empty** string that disagrees with the filename stem, the read layer surfaces it as a structured signal (a `ReadError` from `readRecord`, consistent with the existing `schema_validation_failed` / `invalid_id_shape` error model; and for `listRecords`, the existing `err(...)` path) rather than silently rewriting — honoring `no-silent-catch`. The empty-string body id (`""`, the observed corruption) is treated as "use the filename" so the list still renders, since after MSSUX-010 + MSSUX-011 it should not occur anyway.
+1. **Chosen design — filename-authoritative id, with a visible mismatch signal.** `listRecords`/`toSummary` set the summary `id` to the filename stem (already parsed and pattern-checked), guaranteeing every summary carries a well-formed id and the UI never breaks from this corruption class. `readRecord` normalizes the returned record's `.id` to the requested (filename-derived) id. When the body `id` is a **non-empty** string that disagrees with the filename stem, the read layer surfaces it as a structured signal (a `ReadError` from `readRecord`, consistent with the existing `schema_validation_failed` / `invalid_id_shape` error model; and for `listRecords`, the existing `err(...)` path) rather than silently rewriting — honoring `no-silent-catch`. The empty-string body id (`""`, the observed corruption) is treated as "use the filename" so the list still renders, even though `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` and `archive/tickets/MSSUX-011-repair-corrupt-cast-record-id.md` make that case unlikely in normal studio use.
 2. **Rejected alternative — hard fail-closed on any list read.** Erroring the entire `listRecords` call when one file is corrupt would 500 the whole cast page on a single bad record — poor cockpit UX for a local writing tool. Filename-authoritative read keeps the surface usable while still surfacing the inconsistency.
 3. **Rejected alternative — do nothing (rely on completed MSSUX-010 only).** Write-side validation does not run on read; a file created outside the studio write path (import, manual edit) would still silently break every consumer. The read guard is the only enforcement at that boundary.
 4. No backwards-compatibility shim: the id source flips to the filename in one place; no alias or opt-out.
@@ -53,7 +53,7 @@ FOUNDATIONS-002 establishes that the filename and the `id` field must be identic
 ## Out of Scope
 
 - Write-path / validator changes (`archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md`).
-- Repairing the existing corrupt record (MSSUX-011).
+- Repairing the existing corrupt record (`archive/tickets/MSSUX-011-repair-corrupt-cast-record-id.md`).
 - A repository-wide scan-and-repair migration for divergent ids.
 - Wiring the mismatch into the HealthBanner/LintBadge surfaces — the structured `ReadError` is sufficient signal; richer health-panel integration can be its own ticket if a need emerges.
 
