@@ -108,3 +108,74 @@ test("SPEC-112 AC#1: IdTextArea is absent from web source", () => {
     );
   }
 });
+
+test("MSSUX-008 RecordPicker dismisses its popup on outside mousedown only", () => {
+  const source = readRepoFile(
+    "tools/manual-story-studio/web/src/components/RecordPicker.tsx",
+  );
+
+  assert.match(source, /const containerRef = useRef<HTMLDivElement \| null>\(null\);/);
+  assert.match(source, /<div className="record-picker" ref=\{containerRef\}>/);
+  assert.match(source, /document\.addEventListener\("mousedown", handleDocumentMouseDown\);/);
+  assert.match(
+    source,
+    /document\.removeEventListener\("mousedown", handleDocumentMouseDown\);/,
+  );
+  assert.match(source, /container\.contains\(event\.target\)/);
+  assert.match(source, /setOpen\(false\);/);
+
+  const dismissalEffectIndex = source.indexOf("function handleDocumentMouseDown");
+  const popupIndex = source.indexOf('className="record-picker__popup"');
+  assert.notEqual(dismissalEffectIndex, -1, "missing document dismissal handler");
+  assert.notEqual(popupIndex, -1, "missing popup render surface");
+  assert.ok(
+    dismissalEffectIndex < popupIndex,
+    "dismissal handler should be defined before the popup render surface",
+  );
+});
+
+test("MSSUX-008 RecordPicker preserves option selection inside the popup", () => {
+  const source = readRepoFile(
+    "tools/manual-story-studio/web/src/components/RecordPicker.tsx",
+  );
+  const optionSection = source.slice(
+    source.indexOf('className="record-picker__option"'),
+    source.indexOf("</div>", source.indexOf('className="record-picker__option"')),
+  );
+
+  assert.match(optionSection, /<RecordCard/);
+  assert.match(optionSection, /interactionRole="option"/);
+  assert.match(optionSection, /onSelect=\{commitSelection\}/);
+  assert.match(
+    source,
+    /if \(event\.target instanceof Node && container\.contains\(event\.target\)\) return;/,
+  );
+});
+
+test("MSSUX-014 MomentComposer seeds relevant records from the full active working set", () => {
+  const source = readRepoFile(
+    "tools/manual-story-studio/web/src/pages/MomentComposer.tsx",
+  );
+  const helperStart = source.indexOf("function activeWorkingSetRecordIds");
+  assert.notEqual(helperStart, -1, "missing active working-set record helper");
+  const helperEnd = source.indexOf("interface ComposerNavState", helperStart);
+  assert.notEqual(helperEnd, -1, "missing helper end marker");
+  const helper = source.slice(helperStart, helperEnd);
+
+  assert.match(helper, /promptWorkingSet\?\.current_location/);
+  assert.match(helper, /promptWorkingSet\?\.active_pressure_clocks/);
+  assert.match(helper, /promptWorkingSet\?\.active_secrets_questions/);
+  assert.match(helper, /promptWorkingSet\?\.pinned_records/);
+  assert.match(helper, /return \[\.\.\.new Set\(seeded\)\];/);
+  assert.doesNotMatch(helper, /must_not_reveal/);
+
+  const navOverrideIndex = source.indexOf("if (!navState.included_records)");
+  assert.notEqual(navOverrideIndex, -1, "missing included_records nav override guard");
+  const seedCallIndex = source.indexOf(
+    "activeWorkingSetRecordIds(promptWorkingSet)",
+    navOverrideIndex,
+  );
+  assert.notEqual(seedCallIndex, -1, "missing active working-set seed call");
+  const setPinnedIndex = source.indexOf("setPinnedRecordIds(activeRecordIds)", seedCallIndex);
+  assert.notEqual(setPinnedIndex, -1, "missing active working-set state update");
+});

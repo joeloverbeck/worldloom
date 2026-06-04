@@ -106,6 +106,19 @@ test("schema_validation_failed maps to 409 degraded HealthReport", () => {
   assert.deepEqual(body.blocked_actions, []);
 });
 
+test("id_filename_mismatch maps to 409 degraded HealthReport", () => {
+  const error = readError("id_filename_mismatch");
+  const reply = dispatch(error);
+  const body = reply.body as HealthReport;
+
+  assert.equal(reply.statusCode, 409);
+  assert.equal(body.status, "degraded");
+  assert.equal(body.findings.length, 1);
+  assert.equal(body.findings[0]?.severity, "error");
+  assert.equal(body.findings[0]?.code, error.code);
+  assert.deepEqual(body.blocked_actions, []);
+});
+
 test("reference_unresolved maps to 409 degraded HealthReport", () => {
   const error = readError("reference_unresolved");
   const reply = dispatch(error);

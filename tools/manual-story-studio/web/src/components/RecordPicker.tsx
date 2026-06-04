@@ -78,6 +78,7 @@ export function RecordPicker(props: RecordPickerProps) {
     placeholder = "Search records...",
     disabled = false,
   } = props;
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const popupId = useId();
   const [records, setRecords] = useState<ManualRecordSummaryWithClass[]>([]);
@@ -208,8 +209,24 @@ export function RecordPicker(props: RecordPickerProps) {
     }
   }
 
+  useEffect(() => {
+    if (!open) return;
+
+    function handleDocumentMouseDown(event: MouseEvent): void {
+      const container = containerRef.current;
+      if (!container) return;
+      if (event.target instanceof Node && container.contains(event.target)) return;
+      setOpen(false);
+    }
+
+    document.addEventListener("mousedown", handleDocumentMouseDown);
+    return () => {
+      document.removeEventListener("mousedown", handleDocumentMouseDown);
+    };
+  }, [open]);
+
   return (
-    <div className="record-picker">
+    <div className="record-picker" ref={containerRef}>
       <label className="record-picker__label">
         <span>{label}</span>
         <input

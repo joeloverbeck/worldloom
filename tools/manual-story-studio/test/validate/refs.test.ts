@@ -344,15 +344,6 @@ test("archived (active: false) records still satisfy refs", () => {
   assert.equal(validateRefs(r, "beliefs", known).length, 0);
 });
 
-test("Manual Character Profile: source_world_character is NOT inspected by the validator", () => {
-  const profile = castProfile("mchar-1");
-  profile.source_world_character = "CHAR-99";
-  // No world-canon knownIds threaded; if the validator inspected it,
-  // we would see a violation. Empty violations proves the explicit skip.
-  const violations = validateRefs(profile, "cast", emptyKnownIds());
-  assert.equal(violations.length, 0);
-});
-
 test("empty refs / no per-class pointers: zero violations", () => {
   const r: ManualFactRecord = commonBase("mfact-1");
   const violations = validateRefs(r, "facts", emptyKnownIds());

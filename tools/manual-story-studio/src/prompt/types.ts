@@ -89,6 +89,8 @@ export type PromptIncludedReason =
   | "explicitly_selected"
   | "pinned"
   | "active_secret_question"
+  | "current_location"
+  | "active_pressure_clock"
   | "current_cast";
 
 export type PromptExcludedReason =

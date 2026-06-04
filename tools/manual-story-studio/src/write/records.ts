@@ -120,7 +120,7 @@ export function createRecord<C extends ManualRecordClass>(
 ): CreateRecordResult<C> {
   const root = classRoot(manualStoryRoot);
   const id = allocateNextIdForClass(root.absolutePath, recordClass);
-  const composed = { id, ...body } as ManualRecordOfClass<C>;
+  const composed = { ...body, id } as ManualRecordOfClass<C>;
   return writeWithValidators(root, recordClass, id, composed, opts);
 }
 

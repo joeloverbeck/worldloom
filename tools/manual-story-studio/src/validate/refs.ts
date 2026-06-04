@@ -186,13 +186,6 @@ export function validateRefs(
     }
   }
 
-  // Skip rule: source_world_character on cast records is informational only.
-  // The validator explicitly does NOT inspect it (M4 reassess-spec
-  // clarification per SPEC-101 §2.4).
-  if (recordClass === "cast") {
-    // No-op: this branch documents the skip explicitly.
-  }
-
   // Per-class typed pointer refs
   const specs = PER_CLASS_REF_SPECS[recordClass];
   if (!specs) {

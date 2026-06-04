@@ -9,7 +9,7 @@ import { RefList } from "../components/RefList.js";
 import { RecordPicker } from "../components/RecordPicker.js";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import {
-  MANUAL_RECORD_CLASSES,
+  PICKABLE_RECORD_CLASSES,
   MANUAL_RECORD_CLASS_PREFIXES,
   type PromptWorkingSet,
   type ManualRecordClass,
@@ -384,7 +384,7 @@ export function EditPromptWorkingSet() {
           worldSlug={world}
           msSlug={story}
           label="Pinned records"
-          classes={MANUAL_RECORD_CLASSES}
+          classes={PICKABLE_RECORD_CLASSES}
           mode="multi"
           value={ctx.pinned_records}
           onChange={(pinned_records) => update({ pinned_records })}
@@ -403,7 +403,7 @@ export function EditPromptWorkingSet() {
           worldSlug={world}
           msSlug={story}
           label="Excluded records"
-          classes={MANUAL_RECORD_CLASSES}
+          classes={PICKABLE_RECORD_CLASSES}
           mode="multi"
           value={ctx.excluded_records ?? []}
           onChange={(excluded_records) => update({ excluded_records })}

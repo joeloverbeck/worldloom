@@ -49,6 +49,69 @@ function validFactBody(): Record<string, unknown> {
   };
 }
 
+function validCastBody(): Record<string, unknown> {
+  return {
+    ...validFactBody(),
+    display_name: "Ane Arrieta",
+    roles: ["viewpoint"],
+    identity: {
+      one_line: "one",
+      public_face: "pf",
+      private_pressure: "pp",
+    },
+    world_pressure_core: {
+      world_produced_wound: "w",
+      active_appetite: "a",
+      self_mythology: "s",
+      irreconcilable_contradiction: "i",
+      relational_charge: "r",
+      moral_psychological_edge: "m",
+      cannot_be_swapped_out_because: "c",
+    },
+    body_and_presence: {
+      physicality: "p",
+      body_limits: "b",
+      habitual_gestures: "h",
+      clothing_or_presentation: "c",
+      social_presentation: "s",
+    },
+    voice: {
+      baseline: "b",
+      under_pressure: "u",
+      intimacy: "i",
+      evasion: "e",
+      anger: "a",
+      lying: "l",
+      anti_generic_warnings: [],
+    },
+    pressure_behavior: {
+      cornered: "c",
+      tempted: "t",
+      humiliated: "h",
+      protecting_attachment: "p",
+      offered_power: "o",
+    },
+    perception_and_embodiment: {
+      notices: "n",
+      misses: "m",
+      misreads: "mr",
+      sensory_bias: "s",
+    },
+    agency_and_planning: {
+      default_strategy: "d",
+      risk_style: "r",
+      fallback_style: "f",
+      planning_blind_spots: "p",
+    },
+    relationship_behavior: {},
+    prose_constraints: {
+      prose_must_not_imply: [],
+      forbidden_inventions: [],
+      voice_do_not_do: [],
+    },
+  };
+}
+
 test("records routes: POST happy path → 201 with id+record", async () => {
   const { repoRoot, worldSlug, msSlug } = mkWorld();
   try {
@@ -63,6 +126,48 @@ test("records routes: POST happy path → 201 with id+record", async () => {
       const body = response.json() as { id: string; record: { id: string } };
       assert.equal(body.id, "mfact-1");
       assert.equal(body.record.id, "mfact-1");
+    } finally {
+      await server.close();
+    }
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test("records routes: POST allocated id wins over body id", async () => {
+  const { repoRoot, worldSlug, msSlug, root } = mkWorld();
+  try {
+    const server = await createServer({ repoRoot });
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/records/cast`,
+        payload: { record: { ...validCastBody(), id: "" } },
+      });
+      assert.equal(response.statusCode, 201);
+      const body = response.json() as { id: string; record: { id: string } };
+      assert.equal(body.id, "mchar-1");
+      assert.equal(body.record.id, "mchar-1");
+      const persisted = YAML.parse(
+        readFileSync(
+          path.join(root.absolutePath, "records", "cast", "mchar-1.yaml"),
+          "utf8",
+        ),
+      ) as { id: string };
+      assert.equal(persisted.id, "mchar-1");
+
+      const wrongIdResponse = await server.inject({
+        method: "POST",
+        url: `/api/worlds/${worldSlug}/manual-stories/${msSlug}/records/cast`,
+        payload: { record: { ...validCastBody(), id: "garbage" } },
+      });
+      assert.equal(wrongIdResponse.statusCode, 201);
+      const wrongIdBody = wrongIdResponse.json() as {
+        id: string;
+        record: { id: string };
+      };
+      assert.equal(wrongIdBody.id, "mchar-2");
+      assert.equal(wrongIdBody.record.id, "mchar-2");
     } finally {
       await server.close();
     }

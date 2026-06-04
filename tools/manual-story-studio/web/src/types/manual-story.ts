@@ -212,6 +212,16 @@ export const MANUAL_RECORD_CLASSES: ManualRecordClass[] = [
   "beat-templates",
 ];
 
+// Manual record classes that are pickable / listable through the generic
+// /records endpoint. Excludes "beat-templates": SPEC-104 gave beat-templates a
+// dedicated /beat-templates URL space, and the generic /records endpoint
+// returns 404 for class=beat-templates by design. Passing the full
+// MANUAL_RECORD_CLASSES list to a generic record fetch (e.g. RecordPicker,
+// dashboard state review) therefore triggers a 404 that rejects the whole
+// batch — use this list for any generic /records consumer instead.
+export const PICKABLE_RECORD_CLASSES: ManualRecordClass[] =
+  MANUAL_RECORD_CLASSES.filter((cls) => cls !== "beat-templates");
+
 export const MANUAL_RECORD_CLASS_PREFIXES: Record<ManualRecordClass, string> = {
   cast: "mchar",
   entities: "ment",

@@ -2,6 +2,7 @@ import YAML from "yaml";
 
 import {
   MANUAL_RECORD_CLASSES,
+  MANUAL_RECORD_CLASS_PREFIXES,
   type ManualRecordClass,
 } from "../schema/manual-story.js";
 import { validateBeatTemplate } from "./beat-template-schema.js";
@@ -257,12 +258,10 @@ const CAST_SCHEMA: SchemaDef = extend(commonBase(), {
     "relationship_behavior",
     "prose_constraints",
   ],
-  optional: ["source_world_character"],
   scalars: { display_name: "string" },
   enums: { roles: ROLE_ENUM },
   stringArrays: ["roles"],
   recordOfStrings: ["relationship_behavior"],
-  pattern: { source_world_character: /^CHAR-[0-9]+$/ },
   nested: {
     identity: CAST_PROFILE_IDENTITY_SCHEMA,
     world_pressure_core: CAST_PROFILE_WORLD_PRESSURE_CORE_SCHEMA,
@@ -603,6 +602,10 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((entry) => typeof entry === "string");
 }
 
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function describePath(fieldPath: string, field: string): string {
   return fieldPath ? `${fieldPath}.${field}` : field;
 }
@@ -831,7 +834,22 @@ export function validateRecord(
     };
   }
   const schema = MANUAL_RECORD_SCHEMAS[className];
-  return validateAgainstSchema(parsed, schema);
+  const result = validateAgainstSchema(parsed, schema);
+  const errors = result.ok ? [] : [...result.errors];
+  const id = isPlainObject(parsed) ? parsed.id : undefined;
+  const prefix = MANUAL_RECORD_CLASS_PREFIXES[className];
+  const idPattern = new RegExp(`^${escapeRegex(prefix)}-\\d+$`);
+  if (typeof id !== "string" || !idPattern.test(id)) {
+    errors.push({
+      field: "id",
+      message: `id must match ^${prefix}-<integer>$`,
+      code: "invalid_id_shape",
+    });
+  }
+  if (errors.length === 0) {
+    return { ok: true };
+  }
+  return { ok: false, errors };
 }
 
 export function validateManualStoryMetadata(

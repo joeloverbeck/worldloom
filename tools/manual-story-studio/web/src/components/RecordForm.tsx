@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import type { CreateResult } from "../api/records.js";
 import { useUnsavedChanges } from "../hooks/useUnsavedChanges.js";
 import {
-  MANUAL_RECORD_CLASSES,
+  PICKABLE_RECORD_CLASSES,
   type ManualRecord,
   type ManualRecordClass,
 } from "../types/manual-story.js";
@@ -265,7 +265,6 @@ const CAST_NESTED_SECTIONS: Array<{
 interface CastFormState {
   display_name: string;
   roles: string[];
-  source_world_character?: string;
   identity: Record<string, string>;
   world_pressure_core: Record<string, string>;
   body_and_presence: Record<string, string>;
@@ -629,7 +628,7 @@ export function RecordForm(props: RecordFormProps) {
           worldSlug={worldSlug}
           msSlug={msSlug}
           label="Refs (related records)"
-          classes={MANUAL_RECORD_CLASSES}
+          classes={PICKABLE_RECORD_CLASSES}
           mode="multi"
           value={common.refs.related_records}
           onChange={(next) =>

@@ -86,7 +86,6 @@ function buildCastSeed(sourceItem: WorldSourceItemSummary): Partial<ManualRecord
   return {
     ...baseRecordSeed(sourceItem),
     title: displayTitle(sourceItem),
-    source_world_character: sourceItem.path,
   };
 }
 
