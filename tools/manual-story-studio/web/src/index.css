@@ -727,6 +727,11 @@ form label select {
   max-width: 28rem;
 }
 
+form label textarea {
+  width: 100%;
+  resize: vertical;
+}
+
 [role="alert"]:not(.health-banner) {
   background: var(--warning-bg);
   border: 1px solid var(--warning-border);
