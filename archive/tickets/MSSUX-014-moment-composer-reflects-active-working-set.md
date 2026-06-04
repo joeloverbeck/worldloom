@@ -1,16 +1,16 @@
 # MSSUX-014: Moment Composer "Relevant records" reflects the full active working set
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None for canon/MCP/patch-engine. Touches the Manual Story Studio web layer only (`tools/manual-story-studio/web/src/pages/MomentComposer.tsx`). No backend or HTTP-route change.
-**Deps**: `archive/tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md` is the completed backend half of the same reported defect (makes the active location actually enter the prompt). MSSUX-014 is the UI-visibility half; the two are independent diffs and can land in either order.
+**Deps**: `archive/tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md` is the completed backend half of the same reported defect (makes the active location actually enter the prompt). MSSUX-014 is the completed UI-visibility half; the two were independent diffs.
 
 ## Problem
 
-In `moment-composer`, the **Involved cast** picker correctly pre-selects the working set's `current_cast`, but the **Relevant records** picker does not reflect the working set's other active records. An author who set `current_location` in `prompt-working-set/edit` sees the location absent from "Relevant records" — it "isn't considered active there." Observed on `worlds/erotica-world/manual-stories/red-bunny` (`current_location: mloc-1`).
+At intake in `moment-composer`, the **Involved cast** picker correctly pre-selected the working set's `current_cast`, but the **Relevant records** picker did not reflect the working set's other active records. An author who set `current_location` in `prompt-working-set/edit` saw the location absent from "Relevant records" — it "isn't considered active there." Observed on `worlds/erotica-world/manual-stories/red-bunny` (`current_location: mloc-1`).
 
-Cause: `MomentComposer.tsx` pre-fills the records picker **only** from `pinned_records`:
+Cause: `MomentComposer.tsx` pre-filled the records picker **only** from `pinned_records` before this ticket:
 
 ```tsx
 // web/src/pages/MomentComposer.tsx:102-107
@@ -22,9 +22,9 @@ if (!navState.included_records) {
 }
 ```
 
-It ignores `current_location`, `active_pressure_clocks`, and `active_secrets_questions`. (Cast is handled separately at lines 96-101 from `current_cast`, which is why cast appears and the rest does not.) The result is a transparency gap: the author cannot see, in the composer, which non-cast records the saved working set treats as active.
+Before this ticket, it ignored `current_location`, `active_pressure_clocks`, and `active_secrets_questions`. (Cast was handled separately from `current_cast`, which is why cast appeared and the rest did not.) The result was a transparency gap: the author could not see, in the composer, which non-cast records the saved working set treated as active.
 
-This ticket makes the "Relevant records" initial selection reflect the full active working set, so what the author marked active is visible (and adjustable) before generating. It is the UI complement to MSSUX-013, which makes those same records actually reach the prompt.
+This ticket makes the "Relevant records" initial selection reflect the full active working set, so what the author marked active is visible (and adjustable) before generating. It is the UI complement to MSSUX-013, which made those same records actually reach the prompt.
 
 ## Assumption Reassessment (2026-06-04)
 
@@ -32,7 +32,7 @@ This ticket makes the "Relevant records" initial selection reflect the full acti
 2. The "Relevant records" `RecordPicker` uses `COMPOSER_RECORD_CLASSES` (`MomentComposer.tsx:20-22` = `PICKABLE_RECORD_CLASSES` minus `cast`), which includes `locations` (`mloc`), `clocks` (`mclock`), and `secrets`/`questions` (`msecret`/`mq`) — verified in `web/src/types/manual-story.ts`. So those ids are valid selections for that picker; pre-selecting them will not produce an out-of-class value.
 3. Cross-layer boundary: this is a *display/initial-selection* change. The backend (`src/prompt/compose.ts`, completed in `archive/tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md`) is the authoritative seeder of what enters the prompt and already dedupes via `mergeIds`. Passing these ids through `included_records` is therefore harmless (deduped) and does not double-count. The UI seed must not become a second, divergent definition of "active" — it should mirror the same working-set fields the backend honors.
 4. `PromptWorkingSet` fields available on the client come from `fetchPromptWorkingSet` (`web/src/api/prompt-working-set.js`); `current_location` is `string | null`, `active_pressure_clocks` / `active_secrets_questions` / `pinned_records` are `string[]`. The seed must null-filter `current_location` and dedupe across all four with a stable, deterministic order.
-5. Adjacent contradiction classification: the backend dropping these records from the prompt was the **separate** defect completed in `archive/tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md`. This ticket is UI-only; before MSSUX-013, the picker could show the records as selected but they still would not render in the prompt — so the two should ship together for a coherent fix, but they are independent reviewable diffs.
+5. Adjacent contradiction classification: the backend dropping these records from the prompt was the **separate** defect completed in `archive/tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md`. This ticket is UI-only; before MSSUX-013, the picker could show the records as selected but they still would not render in the prompt. With MSSUX-013 complete, this ticket completes the UI half of the coherent fix.
 
 ## Architecture Check
 
@@ -43,16 +43,16 @@ This ticket makes the "Relevant records" initial selection reflect the full acti
 
 ## Verification Layers
 
-1. Active location pre-selected -> manual/Puppeteer: with `current_location: mloc-1` saved and `pinned_records: []`, the "Relevant records" picker shows `mloc-1` selected on Moment Composer load.
-2. All active non-cast classes pre-selected -> manual/Puppeteer: with `current_location`, `active_pressure_clocks`, `active_secrets_questions`, and `pinned_records` all populated, each appears selected (deduped, no duplicates).
-3. Navigation override respected -> manual/Puppeteer: arriving with `navState.included_records` set (e.g. from a prior page) uses that list, not the working-set union.
+1. Active location pre-selection path -> source-level regression test: `activeWorkingSetRecordIds` includes `current_location` before `pinned_records`.
+2. All active non-cast classes pre-selection path -> source-level regression test: `activeWorkingSetRecordIds` includes `current_location`, `active_pressure_clocks`, `active_secrets_questions`, and `pinned_records`, deduped through `new Set(...)`, and intentionally excludes `must_not_reveal`.
+3. Navigation override respected -> source-level regression test: `MomentComposer.tsx` keeps the active-working-set seed behind `if (!navState.included_records)`, so arriving with `navState.included_records` uses that list, not the working-set union.
 4. Type/compile integrity -> `npm test` in `web/` (`tsc -p tsconfig.json --noEmit`) passes.
 
-## What to Change
+## Landed Changes
 
 ### 1. Seed the records picker from the full active working set
 
-`web/src/pages/MomentComposer.tsx` — replace the `pinned_records`-only seed (lines 102-107) with a deduped, null-filtered union of the active working-set record fields, retaining the `navState.included_records` override:
+`web/src/pages/MomentComposer.tsx` replaces the `pinned_records`-only seed with a deduped, null-filtered union of the active working-set record fields, retaining the `navState.included_records` override:
 
 ```tsx
 if (!navState.included_records) {
@@ -75,21 +75,22 @@ if (!navState.included_records) {
 ## Files to Touch
 
 - `tools/manual-story-studio/web/src/pages/MomentComposer.tsx` (modify)
+- `tools/manual-story-studio/test/web/record-picker.test.ts` (modify — source-level regression for the active working-set union and nav override)
 
 ## Out of Scope
 
 - Backend compose seeding of `current_location` / `active_pressure_clocks` (`archive/tickets/MSSUX-013-compose-seeds-current-location-and-pressure-clocks.md`).
 - Pre-selecting `must_not_reveal` records in the visible picker (a suppression directive, deliberately not surfaced as a "relevant record").
-- Adding a web component-test harness: the `web/` package has no runtime test runner today (`web` `test` script is `tsc --noEmit`); introducing Vitest/Testing-Library is a separate infrastructure ticket. Verification here is typecheck + manual/Puppeteer.
+- Adding a web component-test harness: the `web/` package has no runtime test runner today (`web` `test` script is `tsc --noEmit`); introducing Vitest/Testing-Library is a separate infrastructure ticket. Verification here is typecheck + the existing source-level web regression lane in the backend package.
 - Changing the `RecordPicker` component or its class list.
 
 ## Acceptance Criteria
 
 ### Tests That Must Pass
 
-1. Manual/Puppeteer: on `worlds/erotica-world/manual-stories/red-bunny/moment-composer`, with `current_location: mloc-1` and empty `pinned_records`, `mloc-1` shows as selected in "Relevant records" on load.
-2. Manual/Puppeteer: a working set with populated `current_location`, `active_pressure_clocks`, `active_secrets_questions`, and `pinned_records` shows each id selected exactly once (no duplicates).
-3. Manual/Puppeteer: navigating in with `navState.included_records` set uses that list, not the working-set union.
+1. Source-level regression test: `MomentComposer.tsx` builds the Relevant-record initial seed from `current_location`, `active_pressure_clocks`, `active_secrets_questions`, and `pinned_records`.
+2. Source-level regression test: the seed is deduped with `new Set(...)`.
+3. Source-level regression test: the seed is applied only inside the `!navState.included_records` branch, preserving navigation override precedence.
 4. `npm test` from `tools/manual-story-studio/web/` (`tsc -p tsconfig.json --noEmit`) passes.
 
 ### Invariants
@@ -101,10 +102,27 @@ if (!navState.included_records) {
 
 ### New/Modified Tests
 
-1. `None — the web package has no runtime component-test harness (web test = tsc --noEmit); verification is typecheck + manual/Puppeteer steps enumerated in Acceptance Criteria.`
+1. `tools/manual-story-studio/test/web/record-picker.test.ts` — adds a source-level regression over `MomentComposer.tsx` because the web package has no runtime component-test harness (web test = `tsc --noEmit`).
 
 ### Commands
 
 1. `npm test` (from `tools/manual-story-studio/web/`) — typechecks the changed page.
 2. `npm test` (from `tools/manual-story-studio/`) — full package (backend tests + web typecheck) as the final pipeline check.
-3. Manual/Puppeteer walkthrough of the Acceptance Criteria against the running studio (no automated UI runner exists, so manual verification is the correct boundary here).
+3. `node --test dist/test/web/record-picker.test.js` (from `tools/manual-story-studio/`, after `npm run build:backend`) — focused source-level web regression.
+
+## Outcome
+
+Completed 2026-06-04.
+
+`MomentComposer` now derives the Relevant-record initial selection from the active working-set union: `current_location`, `active_pressure_clocks`, `active_secrets_questions`, and `pinned_records`, in deterministic deduped order. The seed remains inside the `!navState.included_records` branch, so navigation state remains authoritative. `must_not_reveal` remains intentionally excluded from the visible picker.
+
+## Verification Result
+
+1. `npm run build:backend` (from `tools/manual-story-studio/`) — passed.
+2. `node --test dist/test/web/record-picker.test.js` (from `tools/manual-story-studio/`) — passed: 6 tests, including the new `MSSUX-014` source-level regression.
+3. `npm test` (from `tools/manual-story-studio/web/`) — passed: `tsc -p tsconfig.json --noEmit`.
+4. `npm test` (from `tools/manual-story-studio/`) — passed: 506 backend tests plus `npm --prefix web test` (`tsc -p tsconfig.json --noEmit`).
+
+## Deviations
+
+The drafted manual/Puppeteer proof was replaced with a source-level regression in the package's existing web-source test lane plus the web typecheck. The repo does not currently have a runtime web component harness, and adding one remains out of scope.

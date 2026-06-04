@@ -13,6 +13,7 @@ import {
   type BeatTemplatePressureType,
   type ManualRecordClass,
   type ManualStoryMetadata,
+  type PromptWorkingSet,
 } from "../types/manual-story.js";
 
 // Cast has its own dedicated picker; beat-templates is excluded by
@@ -23,6 +24,18 @@ const COMPOSER_RECORD_CLASSES: ManualRecordClass[] = PICKABLE_RECORD_CLASSES.fil
 
 function loadErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "request failed";
+}
+
+function activeWorkingSetRecordIds(
+  promptWorkingSet: PromptWorkingSet | null,
+): string[] {
+  const seeded = [
+    ...(promptWorkingSet?.current_location ? [promptWorkingSet.current_location] : []),
+    ...(promptWorkingSet?.active_pressure_clocks ?? []),
+    ...(promptWorkingSet?.active_secrets_questions ?? []),
+    ...(promptWorkingSet?.pinned_records ?? []),
+  ];
+  return [...new Set(seeded)];
 }
 
 interface ComposerNavState {
@@ -100,9 +113,9 @@ export function MomentComposer() {
         );
       }
       if (!navState.included_records) {
-        const contextPins = promptWorkingSet?.pinned_records ?? [];
-        if (contextPins.length > 0) {
-          setPinnedRecordIds(contextPins);
+        const activeRecordIds = activeWorkingSetRecordIds(promptWorkingSet);
+        if (activeRecordIds.length > 0) {
+          setPinnedRecordIds(activeRecordIds);
         }
       }
     });

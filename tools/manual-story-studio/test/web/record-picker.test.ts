@@ -151,3 +151,31 @@ test("MSSUX-008 RecordPicker preserves option selection inside the popup", () =>
     /if \(event\.target instanceof Node && container\.contains\(event\.target\)\) return;/,
   );
 });
+
+test("MSSUX-014 MomentComposer seeds relevant records from the full active working set", () => {
+  const source = readRepoFile(
+    "tools/manual-story-studio/web/src/pages/MomentComposer.tsx",
+  );
+  const helperStart = source.indexOf("function activeWorkingSetRecordIds");
+  assert.notEqual(helperStart, -1, "missing active working-set record helper");
+  const helperEnd = source.indexOf("interface ComposerNavState", helperStart);
+  assert.notEqual(helperEnd, -1, "missing helper end marker");
+  const helper = source.slice(helperStart, helperEnd);
+
+  assert.match(helper, /promptWorkingSet\?\.current_location/);
+  assert.match(helper, /promptWorkingSet\?\.active_pressure_clocks/);
+  assert.match(helper, /promptWorkingSet\?\.active_secrets_questions/);
+  assert.match(helper, /promptWorkingSet\?\.pinned_records/);
+  assert.match(helper, /return \[\.\.\.new Set\(seeded\)\];/);
+  assert.doesNotMatch(helper, /must_not_reveal/);
+
+  const navOverrideIndex = source.indexOf("if (!navState.included_records)");
+  assert.notEqual(navOverrideIndex, -1, "missing included_records nav override guard");
+  const seedCallIndex = source.indexOf(
+    "activeWorkingSetRecordIds(promptWorkingSet)",
+    navOverrideIndex,
+  );
+  assert.notEqual(seedCallIndex, -1, "missing active working-set seed call");
+  const setPinnedIndex = source.indexOf("setPinnedRecordIds(activeRecordIds)", seedCallIndex);
+  assert.notEqual(setPinnedIndex, -1, "missing active working-set state update");
+});

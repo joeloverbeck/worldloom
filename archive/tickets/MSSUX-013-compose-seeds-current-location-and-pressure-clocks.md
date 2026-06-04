@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None for canon/MCP/patch-engine. Touches the Manual Story Studio prompt-composition layer only (`tools/manual-story-studio/src/prompt/compose.ts`, `src/prompt/types.ts`) plus tests. No HTTP-route signature change.
-**Deps**: None. Complemented by `tickets/MSSUX-014-moment-composer-reflects-active-working-set.md` (the UI-visibility half of the same reported defect); the two are independent diffs.
+**Deps**: None. Complemented by `archive/tickets/MSSUX-014-moment-composer-reflects-active-working-set.md` (the completed UI-visibility half of the same reported defect); the two were independent diffs.
 
 ## Problem
 
@@ -37,7 +37,7 @@ This ticket makes compose honor the working set's active spatial state and activ
 3. Cross-artifact boundary: `mloc` (locations) and `mclock` (clocks) are both registered classes in `MANUAL_RECORD_CLASS_PREFIXES` (`web/src/types/manual-story.ts`) and classifiable by `classifyManualRecordId` (`src/prompt/record-class.ts`), and both have translators (`src/prompt/translators/locations.ts`, `src/prompt/translators/clocks.ts`). So seeding these ids is safe — Stage 4 will resolve and render them, not emit a `selected_records_exist` hard finding.
 4. The existing `excluded_records` and `active === false` / `never_prompt` filtering (`compose.ts:145-158`, `:217-237`) runs over `unfilteredSeededRecordIds` and per-record. Adding `current_location`/`active_pressure_clocks` to the merge means an author who explicitly excludes the location, or whose location record is inactive/`never_prompt`, still has that respected — no special-casing needed.
 5. Schema/enum extension: `PromptIncludedReason` (`src/prompt/types.ts:88-92`) currently = `"explicitly_selected" | "pinned" | "active_secret_question" | "current_cast"`. To give the newly-seeded ids correct provenance in the inclusion ledger, this ticket adds `"current_location"` and `"active_pressure_clock"`. Consumers of `PromptIncludedReason`: `resolution.included[].reason` in `compose.ts`, the inclusion-ledger / inspector payload (`test/prompt/inclusion-ledger.test.ts`, `test/prompt/inspector-payload.test.ts`, and the `PromptPreview` UI surface). The extension is **additive-only** (no existing reason renamed or removed).
-6. Adjacent contradiction classification: the Moment Composer UI not *displaying* these records as pre-selected (`MomentComposer.tsx:102-107` seeds the picker only from `pinned_records`) is a **separate, complementary defect** tracked in `tickets/MSSUX-014-moment-composer-reflects-active-working-set.md`. Fixing compose (this ticket) makes the location appear in the *prompt* regardless of the UI; fixing the UI (MSSUX-014) makes it appear as *selected* in the picker. Neither subsumes the other.
+6. Adjacent contradiction classification: the Moment Composer UI not *displaying* these records as pre-selected (`MomentComposer.tsx:102-107` seeded the picker only from `pinned_records` at intake) was the **separate, complementary defect** completed in `archive/tickets/MSSUX-014-moment-composer-reflects-active-working-set.md`. Fixing compose (this ticket) made the location appear in the *prompt* regardless of the UI; fixing the UI (MSSUX-014) made it appear as *selected* in the picker. Neither subsumed the other.
 
 ## Architecture Check
 
@@ -91,7 +91,7 @@ const unfilteredSeededRecordIds = mergeIds(
 
 ## Out of Scope
 
-- Moment Composer UI pre-selection / display of active working-set records (`tickets/MSSUX-014-moment-composer-reflects-active-working-set.md`).
+- Moment Composer UI pre-selection / display of active working-set records (`archive/tickets/MSSUX-014-moment-composer-reflects-active-working-set.md`).
 - Any change to how `pov_holder`, `active_secrets_questions`, `must_not_reveal`, or `pinned_records` are seeded (already correct).
 - New prompt sections or changes to Section 11 / clock rendering.
 - Changing the prompt-working-set schema (the fields already exist; only compose's consumption changes).
