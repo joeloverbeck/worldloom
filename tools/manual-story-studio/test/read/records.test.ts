@@ -116,6 +116,22 @@ test("listRecords: populated class returns ordered summaries", () => {
   }
 });
 
+test("listRecords: summaries use filename id over body id", () => {
+  const root = mkRoot();
+  try {
+    writeRecord(root, "cast", "mchar-1", castProfile(""));
+    writeRecord(root, "cast", "mchar-2", castProfile("mchar-9"));
+
+    const summaries = unwrap(listRecords(root, "cast"));
+
+    assert.equal(summaries.length, 2);
+    assert.equal(summaries[0]?.id, "mchar-1");
+    assert.equal(summaries[1]?.id, "mchar-2");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("listRecords: default omits inactive; includeInactive returns all", () => {
   const root = mkRoot();
   try {
@@ -141,6 +157,30 @@ test("readRecord: round-trip; missing and wrong-prefix return read errors", () =
     assertReadError(readRecord(root, "facts", "mfact-99"), "file_not_found");
     // wrong prefix: validator should reject without disk read
     assertReadError(readRecord(root, "facts", "mbel-5"), "invalid_id_shape");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("readRecord: empty body id normalizes to filename id", () => {
+  const root = mkRoot();
+  try {
+    writeRecord(root, "cast", "mchar-1", castProfile(""));
+
+    const record = unwrap(readRecord(root, "cast", "mchar-1"));
+
+    assert.equal(record.id, "mchar-1");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("readRecord: non-empty body id mismatch is a read error", () => {
+  const root = mkRoot();
+  try {
+    writeRecord(root, "cast", "mchar-1", castProfile("mchar-9"));
+
+    assertReadError(readRecord(root, "cast", "mchar-1"), "id_filename_mismatch");
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

@@ -34,7 +34,8 @@ export function listRecords(manualStoryRoot: string, recordClass: ManualRecordCl
     const fullPath = path.join(targetDir, entry.name);
     const parsed = readYamlFile(fullPath);
     if (!parsed.ok) return err(parsed.error);
-    const summary = toSummary(parsed.value);
+    const fileId = path.basename(entry.name, ".yaml");
+    const summary = toSummary(parsed.value, fileId);
     if (!summary) {
       return err({
         code: "schema_validation_failed",
@@ -75,14 +76,30 @@ export function readRecord<C extends ManualRecordClass>(manualStoryRoot: string,
   }
   const parsed = readYamlFile(fullPath);
   if (!parsed.ok) return err(parsed.error);
-  if (!toSummary(parsed.value)) {
+  if (!toSummary(parsed.value, id)) {
     return err({
       code: "schema_validation_failed",
       path: fullPath,
       repair_hint: `Record at records/${recordClass}/${id}.yaml is missing required fields (id, title).`,
     });
   }
-  return ok(dropLegacyReviewKey(parsed.value) as ManualRecordOfClass<C>);
+  if (
+    typeof parsed.value === "object" &&
+    parsed.value !== null &&
+    typeof (parsed.value as { id?: unknown }).id === "string" &&
+    (parsed.value as { id: string }).id !== "" &&
+    (parsed.value as { id: string }).id !== id
+  ) {
+    return err({
+      code: "id_filename_mismatch",
+      path: fullPath,
+      repair_hint: `Record body id must match filename id ${id}.`,
+    });
+  }
+  return ok({
+    ...(dropLegacyReviewKey(parsed.value) as ManualRecordOfClass<C>),
+    id,
+  });
 }
 
 export function listAllKnownIds(manualStoryRoot: string): ReadResult<KnownIds> {
@@ -400,13 +417,17 @@ function collectStringArray(
   });
 }
 
-function toSummary(parsed: unknown): ManualRecordSummary | null {
+function toSummary(
+  parsed: unknown,
+  authoritativeId?: string,
+): ManualRecordSummary | null {
   if (typeof parsed !== "object" || parsed === null) return null;
   const obj = parsed as Record<string, unknown>;
-  if (typeof obj.id !== "string") return null;
+  const id = authoritativeId ?? obj.id;
+  if (typeof id !== "string") return null;
   if (typeof obj.title !== "string") return null;
   return {
-    id: obj.id,
+    id,
     title: obj.title,
     active: typeof obj.active === "boolean" ? obj.active : true,
     importance:

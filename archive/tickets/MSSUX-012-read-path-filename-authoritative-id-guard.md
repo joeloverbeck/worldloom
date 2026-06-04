@@ -1,6 +1,6 @@
 # MSSUX-012: Make the filename the authoritative record id at the read boundary (defense-in-depth)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None for canon/MCP/patch-engine. Touches the Manual Story Studio read layer (`tools/manual-story-studio/src/read/records.ts`) plus tests. No HTTP-route signature change.
@@ -8,9 +8,9 @@
 
 ## Problem
 
-When `records/cast/mchar-1.yaml` carried `id: ""`, the read layer **silently propagated** that empty id to every consumer. `listRecords` → `toSummary` (`src/read/records.ts`) builds the summary's `id` from the record **body** (`obj.id`), not from the filename stem — even though the file is already gated by a `^mchar-\d+$` **filename** pattern at read time. So one corrupt-on-disk record silently broke the entire cast UI (empty ids in pickers, no-op card clicks, a 400 in moment-composer) with no diagnostic signal anywhere.
+At intake, when `records/cast/mchar-1.yaml` carried `id: ""`, the read layer **silently propagated** that empty id to every consumer. `listRecords` → `toSummary` (`src/read/records.ts`) built the summary's `id` from the record **body** (`obj.id`), not from the filename stem — even though the file was already gated by a `^mchar-\d+$` **filename** pattern at read time. So one corrupt-on-disk record silently broke the entire cast UI (empty ids in pickers, no-op card clicks, a 400 in moment-composer) with no diagnostic signal anywhere.
 
-FOUNDATIONS-002 establishes that the filename and the `id` field must be identical. The read boundary does not enforce this: it trusts the body id and ignores the filename it already parsed. This ticket makes the **filename authoritative** for the id consumers see, and surfaces a mismatch loudly instead of swallowing it — so a hand-edited, imported, or otherwise-divergent record can never again silently degrade the whole UI.
+FOUNDATIONS-002 establishes that the filename and the `id` field must be identical. Before this ticket, the read boundary did not enforce this: it trusted the body id and ignored the filename it already parsed. This ticket makes the **filename authoritative** for the id consumers see, and surfaces non-empty body/filename mismatches loudly at full-record read instead of swallowing them — so a hand-edited, imported, or otherwise-divergent record can never again silently degrade the whole UI.
 
 ## Assumption Reassessment (2026-06-04)
 
@@ -22,7 +22,7 @@ FOUNDATIONS-002 establishes that the filename and the `id` field must be identic
 
 ## Architecture Check
 
-1. **Chosen design — filename-authoritative id, with a visible mismatch signal.** `listRecords`/`toSummary` set the summary `id` to the filename stem (already parsed and pattern-checked), guaranteeing every summary carries a well-formed id and the UI never breaks from this corruption class. `readRecord` normalizes the returned record's `.id` to the requested (filename-derived) id. When the body `id` is a **non-empty** string that disagrees with the filename stem, the read layer surfaces it as a structured signal (a `ReadError` from `readRecord`, consistent with the existing `schema_validation_failed` / `invalid_id_shape` error model; and for `listRecords`, the existing `err(...)` path) rather than silently rewriting — honoring `no-silent-catch`. The empty-string body id (`""`, the observed corruption) is treated as "use the filename" so the list still renders, even though `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` and `archive/tickets/MSSUX-011-repair-corrupt-cast-record-id.md` make that case unlikely in normal studio use.
+1. **Chosen design — filename-authoritative summaries, with a visible mismatch signal on full record read.** `listRecords`/`toSummary` set the summary `id` to the filename stem (already parsed and pattern-checked), guaranteeing every summary carries a well-formed id and the UI never breaks from this corruption class. `readRecord` normalizes the returned record's `.id` to the requested (filename-derived) id. When the body `id` is a **non-empty** string that disagrees with the filename stem, `readRecord` surfaces it as a structured `ReadError` rather than silently rewriting — honoring `no-silent-catch` at the full-record boundary. List summaries remain usable and filename-authoritative for both empty and mismatched body ids. The empty-string body id (`""`, the observed corruption) is treated as "use the filename" so the list and full read still render, even though `archive/tickets/MSSUX-010-cast-record-id-integrity-and-fail-closed-validation.md` and `archive/tickets/MSSUX-011-repair-corrupt-cast-record-id.md` make that case unlikely in normal studio use.
 2. **Rejected alternative — hard fail-closed on any list read.** Erroring the entire `listRecords` call when one file is corrupt would 500 the whole cast page on a single bad record — poor cockpit UX for a local writing tool. Filename-authoritative read keeps the surface usable while still surfacing the inconsistency.
 3. **Rejected alternative — do nothing (rely on completed MSSUX-010 only).** Write-side validation does not run on read; a file created outside the studio write path (import, manual edit) would still silently break every consumer. The read guard is the only enforcement at that boundary.
 4. No backwards-compatibility shim: the id source flips to the filename in one place; no alias or opt-out.
@@ -30,25 +30,30 @@ FOUNDATIONS-002 establishes that the filename and the `id` field must be identic
 ## Verification Layers
 
 1. Summary id comes from the filename -> unit test: a `cast/mchar-1.yaml` whose body has `id: ""` (and one with `id: "mchar-9"`) is listed with `id: "mchar-1"`.
-2. Mismatch surfaced, not swallowed -> unit test: a record whose body `id` is a non-empty wrong value (`mchar-9` in `mchar-1.yaml`) causes `readRecord` to return a structured `ReadError` (not a silently-normalized success).
+2. Mismatch surfaced, not swallowed at full-record read -> unit test: a record whose body `id` is a non-empty wrong value (`mchar-9` in `mchar-1.yaml`) causes `readRecord` to return a structured `ReadError` (not a silently-normalized success).
 3. Empty-id record still renders -> unit test: `listRecords` over a directory containing the empty-id `mchar-1.yaml` returns it with id `mchar-1` (no thrown error, list non-empty).
 4. No regression -> existing `test/read/records.test.ts`, `test/read/no-silent-catch.test.ts`, and `npm test` pass.
 
-## What to Change
+## Landed Changes
 
 ### 1. Filename-authoritative id in `listRecords`
 
-`src/read/records.ts` — in `listRecords`, derive the id from the already-matched filename stem (`match[1]` → `${prefix}-${n}`, or `path.basename(entry.name, ".yaml")`) and pass it to `toSummary` (or set `summary.id` to the stem after building the summary), instead of trusting `obj.id`. Keep the existing `toSummary` null-check for `title`.
+`src/read/records.ts` now derives the summary id from the matched filename stem and passes that authoritative id into `toSummary`, instead of trusting `obj.id`.
 
 ### 2. Normalize / guard the id in `readRecord`
 
-`src/read/records.ts` — `readRecord` already receives the filename-derived `id`. Set the returned record's `id` to that value. If the parsed body `id` is a **non-empty string** that differs from the requested id, return a structured `ReadError` (new code e.g. `id_filename_mismatch`, or reuse `schema_validation_failed` with a clear `repair_hint`) rather than returning the record. An empty-string body id is normalized to the filename id (no error), matching the list behavior.
+`src/read/records.ts` now returns records with the requested filename-derived `id`. If the parsed body `id` is a **non-empty string** that differs from the requested id, it returns an `id_filename_mismatch` `ReadError`. An empty-string body id is normalized to the filename id, matching the list behavior.
+
+### 3. Map the new read error through HTTP
+
+`src/server/read-error-http.ts` maps `id_filename_mismatch` to a degraded 409 `HealthReport`, and `test/server/read-error-http.test.ts` proves that route-level projection.
 
 ## Files to Touch
 
 - `tools/manual-story-studio/src/read/records.ts` (modify)
-- `tools/manual-story-studio/src/read/result.ts` (modify — only if adding a new `id_filename_mismatch` ReadError code)
+- `tools/manual-story-studio/src/server/read-error-http.ts` (modify — map `id_filename_mismatch`)
 - `tools/manual-story-studio/test/read/records.test.ts` (modify — add filename-authoritative + mismatch cases)
+- `tools/manual-story-studio/test/server/read-error-http.test.ts` (modify — add `id_filename_mismatch` mapping case)
 
 ## Out of Scope
 
@@ -76,9 +81,30 @@ FOUNDATIONS-002 establishes that the filename and the `id` field must be identic
 ### New/Modified Tests
 
 1. `tools/manual-story-studio/test/read/records.test.ts` — add (a) empty-body-id → filename-authoritative summary/read, (b) non-empty mismatched-body-id → structured ReadError.
+2. `tools/manual-story-studio/test/server/read-error-http.test.ts` — add the `id_filename_mismatch` HTTP projection case.
 
 ### Commands
 
 1. From `tools/manual-story-studio/`: `npm run build:backend`
-2. From `tools/manual-story-studio/`: `node --test dist/test/read/records.test.js dist/test/read/no-silent-catch.test.js`
+2. From `tools/manual-story-studio/`: `node --test dist/test/read/records.test.js dist/test/read/no-silent-catch.test.js dist/test/server/read-error-http.test.js`
 3. From `tools/manual-story-studio/`: `npm test`
+
+## Outcome
+
+Completed on 2026-06-04.
+
+- `listRecords` now emits filename-authoritative summary ids for empty or mismatched body ids.
+- `readRecord` now normalizes empty body ids to the requested filename id, but returns `id_filename_mismatch` for non-empty body ids that disagree with the filename.
+- `id_filename_mismatch` is mapped through HTTP as a degraded 409 `HealthReport`, avoiding an unrecognized-code 500.
+- Added focused read and HTTP mapping tests for the new behavior.
+
+## Verification Result
+
+- `npm run build:backend` from `tools/manual-story-studio/` passed.
+- `node --test dist/test/read/records.test.js dist/test/read/no-silent-catch.test.js dist/test/server/read-error-http.test.js` from `tools/manual-story-studio/` passed: 22 tests.
+- `npm test` from `tools/manual-story-studio/` passed: 502 backend tests plus the web TypeScript gate.
+- Manual closeout sweep found no existing package README or repo doc error-code inventory requiring a same-seam update.
+
+## Deviations
+
+- Reassessment corrected one ticket-internal wording mismatch: list summaries remain filename-authoritative and usable for both empty and mismatched body ids; the visible structured mismatch signal is enforced at the full-record `readRecord` boundary.

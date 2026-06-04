@@ -25,6 +25,7 @@ const DISPATCH: Record<string, DispatchEntry> = {
   invalid_id_shape: { status: 400, severity: "warn" },
   yaml_parse_failed: { status: 409, severity: "blocking" },
   schema_validation_failed: { status: 409, severity: "error" },
+  id_filename_mismatch: { status: 409, severity: "error" },
   reference_unresolved: { status: 409, severity: "error" },
   io_error: { status: 500, severity: "error" },
 };
