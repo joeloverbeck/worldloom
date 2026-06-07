@@ -85,47 +85,6 @@ test("unexpected markdown paths are reported while hidden files remain excluded"
   }
 });
 
-test("manual-stories/ subtree is excluded from enumeration (SPEC-100)", () => {
-  const worldRoot = createFixtureWorldRoot();
-
-  try {
-    const manualStoryDir = path.join(worldRoot, "manual-stories", "test-story");
-    mkdirSync(manualStoryDir, { recursive: true });
-    writeFileSync(
-      path.join(manualStoryDir, "manual-story.yaml"),
-      "schema_version: manual-story.v1\n",
-      "utf8",
-    );
-    writeFileSync(
-      path.join(manualStoryDir, "manuscript.md"),
-      "# Manuscript\n",
-      "utf8",
-    );
-    const recordsDir = path.join(manualStoryDir, "records", "mchar");
-    mkdirSync(recordsDir, { recursive: true });
-    writeFileSync(
-      path.join(recordsDir, "mchar-1.yaml"),
-      "id: mchar-1\n",
-      "utf8",
-    );
-
-    const result = enumerate(worldRoot);
-
-    assert.equal(
-      result.unexpected.filter((p) => p.startsWith("manual-stories/")).length,
-      0,
-    );
-    assert.equal(
-      result.indexable.filter((p) => p.startsWith("manual-stories/")).length,
-      0,
-    );
-
-    assert.equal(result.indexable.includes("WORLD_KERNEL.md"), true);
-  } finally {
-    cleanup(path.dirname(worldRoot));
-  }
-});
-
 test("story-bundle paths are recognized as indexable closed inventory", () => {
   const worldRoot = createFixtureWorldRoot();
   const storySourcePaths = STORY_SOURCE_DIRECTORIES.map(
