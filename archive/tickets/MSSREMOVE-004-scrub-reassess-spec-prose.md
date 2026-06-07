@@ -1,6 +1,10 @@
 # MSSREMOVE-004: Scrub manual-story-studio mentions from the `reassess-spec` skill (keep generalized rules)
 
-**Status**: PENDING
+**Status**: COMPLETED
+
+> **Correction (2026-06-07):** The reassessment table enumerated sites via a literal `manual-story` grep and so missed four additional MSS worked-precedent sites that reference MSS only via MSS SPEC IDs / MSS file paths (no literal `manual-story` token): `SKILL.md` §Redesign-count checkpoint (SPEC-102 precedent + `manual-render-instruction.md` example), `codebase-validation.md` §Name-collision check (SPEC-104 + `section-6-*beat-template-guidance.ts`), §Bundle-deferred (SPEC-106 precedent), and §Surface source-internal inconsistency (SPEC-110 precedent). Invariant 2 ("no MSS SPEC/ticket IDs, MSS file paths remain") requires these excised too; same treatment — keep the general rule, drop the MSS worked precedent/example. Folded into this ticket. AC1's grep token set is widened to include `SPEC-10`/`SPEC-11`/`SPEC-12` and `beat-template`/`manual-render` so the additional sites are caught.
+>
+> **Correction 2 (2026-06-07):** Assumption 1's "confined to three files" was also wrong — two further reference files carried MSS worked precedents reachable only via `manual-render-instruction.md` / MSS SPEC IDs: `references/spec-writing-rules.md` §Cross-finding token UNION grep (SPEC-102 / `manual-render-instruction` precedent) and `references/findings-and-questions.md` §Downstream-dependent deliverable (SPEC-110 precedent). Both excised with the same keep-rule/drop-precedent treatment. Final AC1 sweep runs over the whole skill directory with the widened token set.
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — edits the `reassess-spec` skill prose (`SKILL.md` + two reference files). These are directly-editable skill files (not canon-write surfaces).
