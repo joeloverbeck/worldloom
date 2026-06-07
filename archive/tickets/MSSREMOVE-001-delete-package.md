@@ -1,6 +1,6 @@
 # MSSREMOVE-001: Delete the `tools/manual-story-studio/` package in full
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — removes the entire `tools/manual-story-studio` package (its own standalone npm package; no `@worldloom/*` consumer depends on it). No canon/MCP/patch-engine/validator/hook surface is touched.
