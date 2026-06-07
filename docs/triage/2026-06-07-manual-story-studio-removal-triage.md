@@ -24,6 +24,8 @@ Remove every trace of the `tools/manual-story-studio/*` package (implemented acr
 | `archive/specs/SPEC-100..124`, `archive/specs/MSSUX-004` (~26 specs) | **Retain** — immutable history (see decision 1) |
 | `archive/tickets/{MANSTOSTUFIX,MSSUX,SPEC1xxMANSTOSTU}-*` (~200 tickets) | **Retain** — immutable history |
 | `archive/specs/IMPLEMENTATION-ORDER-*.md` (5 dated, mixed-content snapshots) | **Retain** — immutable history |
+| `docs/triage/2026-06-0{1..4}-manual-story-studio-*-triage.md` (5 iteration/cast-id triages) | **Remove** — residue (folded into MSSREMOVE-003; user-confirmed 2026-06-07) |
+| `docs/triage/2026-06-07-manual-story-studio-removal-triage.md` (this decision record) | **Retain** — living retention authority cited by MSSREMOVE-006; excluded from the residue sweep |
 
 No root workspace manifest exists (`tools/<pkg>` packages are standalone), so the package is self-contained — no workspace member edit is needed. `CLAUDE.md`, `README.md`, `docs/REPOSITORY-MAP.md`, `docs/WORKFLOWS.md`, and `docs/MACHINE-FACING-LAYER.md` carry zero MSS references.
 

@@ -1,6 +1,8 @@
 # MSSREMOVE-003: Remove MSS documentation (`docs/manual-story-studio/` + ID-ALLOCATION section)
 
-**Status**: PENDING
+**Status**: COMPLETED
+
+> **Correction (2026-06-07, user-confirmed):** The original footprint omitted the six `docs/triage/manual-story-*.md` files. Per user decision, the five iteration triages (`2026-06-01-...-second-`, `2026-06-02-...-third-`, `2026-06-02-...-fourth-`, `2026-06-03-...-fifth-iteration-triage.md`, `2026-06-04-...-cast-id-triage.md`) are deleted as residue under this ticket; the `2026-06-07-manual-story-studio-removal-triage.md` decision record is **retained** (it is the living retention authority cited by MSSREMOVE-006). AC3 below is corrected to allow the retained removal record.
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — removes a docs directory and edits `docs/ID-ALLOCATION.md` (a directly-editable doc, not an engine-only surface).
