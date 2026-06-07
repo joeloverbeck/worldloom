@@ -1,6 +1,6 @@
 # MSSREMOVE-005: Remove MSS reports, transient run-state, and produced local data
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — deletes report artifacts and one codex run-state file; removes untracked produced data. No code/contract surface.
