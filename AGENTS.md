@@ -4,7 +4,7 @@ Guidance for Codex when working in this repository. Keep this file lean — it i
 
 ## What This Repo Is
 
-Worldloom is a **prose-and-YAML worldbuilding pipeline backed by a TypeScript tools layer**. The pipeline is the skills in `.codex/skills/` and `.claude/skills/`; the machine layer lives under `tools/<package>/`, each shipping its own `npm run build` / `npm test`. Skill output is files on disk — read them to verify. For the full directory layout, see `docs/REPOSITORY-MAP.md`.
+Worldloom is a **prose-and-YAML worldbuilding pipeline backed by a TypeScript tools layer**. The pipeline is the skills in `.agents/skills/` and `.claude/skills/`; the machine layer lives under `tools/<package>/`, each shipping its own `npm run build` / `npm test`. Skill output is files on disk — read them to verify. For the full directory layout, see `docs/REPOSITORY-MAP.md`.
 
 ## Authoritative Contract
 
@@ -34,8 +34,8 @@ Treat world-level canon as a high-trust surface. Engine-only (never edit directl
 - `docs/ID-ALLOCATION.md` — ID conventions and the per-class registry
 - `docs/MACHINE-FACING-LAYER.md` — retrieval / patch-engine / validator contract
 - `docs/CONTEXT-PACKET-CONTRACT.md` — context-packet assembly contract
-- `.codex/skills/<slug>/SKILL.md` and `.claude/skills/<slug>/SKILL.md` — workflow-specific instructions and templates
+- `.agents/skills/<slug>/SKILL.md` and `.claude/skills/<slug>/SKILL.md` — workflow-specific instructions and templates
 
 ## Harness Notes (Codex)
 
-Codex does **not** run the Claude Code enforcement hooks (those live in `.claude/settings.json` and apply only under Claude Code). Under Codex the Core Rules above — especially "never bypass the patch engine for `_source/` writes" and "never read `_source/` subdirectories in bulk" — are **prescriptive discipline, not mechanically enforced**: honor them by hand. Codex-side implementation skills live under `.codex/skills/` (e.g. `implement-ticket`, which reads this file at pre-flight); read a skill's `SKILL.md` for behavior.
+Codex does **not** run the Claude Code enforcement hooks (those live in `.claude/settings.json` and apply only under Claude Code). Under Codex the Core Rules above — especially "never bypass the patch engine for `_source/` writes" and "never read `_source/` subdirectories in bulk" — are **prescriptive discipline, not mechanically enforced**: honor them by hand. Codex-side implementation skills live under `.agents/skills/` (e.g. `implement-ticket`, which reads this file at pre-flight); read a skill's `SKILL.md` for behavior.

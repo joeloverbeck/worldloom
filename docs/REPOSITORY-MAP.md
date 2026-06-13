@@ -11,7 +11,7 @@ docs/CONTEXT-PACKET-CONTRACT.md  ← context-packet assembly contract
 docs/ID-ALLOCATION.md            ← ID conventions and the per-class registry
 docs/plans/                      ← design docs output by the brainstorm skill
 .claude/skills/<slug>/           ← runnable skills; each has SKILL.md + optional templates/references/
-.codex/skills/<slug>/            ← Codex-side implementation skills (implement-ticket, etc.)
+.agents/skills/<slug>/           ← Codex-side implementation skills (implement-ticket, etc.)
 tools/                           ← machine-facing layer (compiled dist/ gitignored)
   ├── world-index/               ← SQLite-backed index builder + CLI
   ├── world-mcp/                 ← retrieval MCP server + context packets

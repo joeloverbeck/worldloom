@@ -1,20 +1,19 @@
 ---
 name: audit-world-index
-description: "Audit a rebuilt world-index database for a specific world and create bounded follow-up tickets when real index defects remain. Use when the user wants Codex to rebuild `tools/world-index`, rebuild `worlds/<slug>/_index/world.db`, query the fresh SQLite artifact extensively, identify structural or semantic indexing problems, and draft new tickets in `tickets/` aligned with `docs/FOUNDATIONS.md`."
-user-invocable: true
-arguments:
-  - name: world_slug
-    description: "World slug under `worlds/` to audit, for example `animalia`."
-    required: true
+description: "Audit a rebuilt world-index database for a specific world and create bounded follow-up tickets when real index defects remain. Use when the user wants Codex to rebuild `tools/world-index`, rebuild a world's `_index/world.db`, query the fresh SQLite artifact extensively, identify structural or semantic indexing problems, and draft new tickets in `tickets/` aligned with `docs/FOUNDATIONS.md`."
 ---
 
 # Audit World Index
+
+## Arguments
+
+- `world_slug` (required): World slug under `worlds/` to audit, for example `animalia`.
 
 Audit the live world-index output for one world by rebuilding first, querying the fresh SQLite artifact, and creating only evidence-backed follow-up tickets.
 
 Read `AGENTS.md` and `docs/FOUNDATIONS.md` before starting the audit. Read `tickets/_TEMPLATE.md` and `tickets/README.md` only if a reproduced defect actually warrants drafting a new ticket. For World Index work, also read the recent active/archived ticket family relevant to the seam you uncover so you do not reopen already-fixed issues or duplicate an active owner. In this repo that often means both older `SPEC-01*` cleanup tickets, the archived `SPEC10ENTSUR-*` / `SPEC-10` redesign records, and for authority-surface or registry-validation seams the archived `SPEC11CANENT-*` tickets plus `archive/specs/SPEC-11-canonical-entity-authority-surfaces.md`.
 
-In this checkout, prefer live `.codex/skills/...` paths when you need to inspect sibling Codex workflow skills. Do not assume a parallel `.claude/skills/...` copy exists unless you verify it.
+In this checkout, prefer live `.agents/skills/...` paths when you need to inspect sibling Codex workflow skills. Do not assume a parallel `.claude/skills/...` copy exists unless you verify it.
 If you consult `docs/WORKFLOWS.md` as a quick-reference index, treat any `.claude/skills/...` wording there as a stale pointer unless the path is verified live in this checkout.
 
 This skill is audit-and-ticket only. Do not modify `worlds/<slug>/` canon files, and do not implement indexer fixes as part of this workflow unless the user explicitly pivots to implementation.

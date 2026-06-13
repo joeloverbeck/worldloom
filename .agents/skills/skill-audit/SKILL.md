@@ -1,14 +1,13 @@
 ---
 name: skill-audit
-description: "Audit a skill under `.codex/skills/` or `.claude/skills/` against the current Codex session's actual work. Use when asked to review skill quality, missing guidance, unclear steps, or repo-rule alignment without editing the target skill."
-user-invocable: true
-arguments:
-  - name: skill_path
-    description: "Path to the target skill directory or its `SKILL.md`."
-    required: true
+description: "Audit a skill under `.agents/skills/` or `.claude/skills/` against the current Codex session's actual work. Use when asked to review skill quality, missing guidance, unclear steps, or repo-rule alignment without editing the target skill."
 ---
 
 # Skill Audit
+
+## Arguments
+
+- `skill_path` (required): Path to the target skill directory or its `SKILL.md`.
 
 Audit a Worldloom skill against the work done in the current Codex session and report where the skill is unclear, incomplete, inconsistent, or misaligned with repo rules. Report only. Do not edit the target skill unless the user explicitly asks for follow-up changes after the audit.
 
@@ -27,7 +26,7 @@ Read `AGENTS.md` and `docs/FOUNDATIONS.md` before producing findings if they wer
 1. Read `AGENTS.md` if it was not already read earlier in this session.
 2. Read `docs/FOUNDATIONS.md` if it was not already read earlier in this session.
 3. If the target is a workflow skill, keep `docs/WORKFLOWS.md` in mind as the repo's quick-reference contract.
-4. For Codex skills under `.codex/skills/`, check basic fit:
+4. For Codex skills under `.agents/skills/`, check basic fit:
    - concise `SKILL.md`
    - trigger text that clearly states when to use the skill
    - references or scripts only when they reduce repeated agent work

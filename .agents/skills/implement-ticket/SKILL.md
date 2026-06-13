@@ -1,14 +1,13 @@
 ---
 name: implement-ticket
 description: "Implement or reassess a worldloom ticket. Use when asked to work from a ticket in `tickets/`, `archive/tickets/`, or a worktree ticket path: read the ticket, validate its assumptions against the live repo and `docs/FOUNDATIONS.md`, correct mismatches before coding, implement the owned change, verify it at the right boundary, and close out the ticket honestly."
-user-invocable: true
-arguments:
-  - name: ticket_path
-    description: "Path to the ticket file (for example `tickets/SPEC-01-004.md`). Globs or obvious near-matches must be resolved to the exact live path before use."
-    required: true
 ---
 
 # Implement Ticket
+
+## Arguments
+
+- `ticket_path` (required): Path to the ticket file, for example `tickets/SPEC-01-004.md`. Resolve globs or obvious near-matches to the exact live path before use.
 
 Implement a worldloom ticket against the live repository, not against stale assumptions.
 
@@ -115,7 +114,7 @@ Use this compact index during closeout so common proof/story drifts do not hide 
 
 ### 0. Classify the ticket shape
 
-Load `references/ticket-classification.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
+Load `references/ticket-classification.md` from this skill directory (`.agents/skills/implement-ticket/references/`).
 
 Classify the ticket before coding:
 
@@ -162,8 +161,8 @@ For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and
 5. If an explicit user-supplied reference path uses a glob, shorthand, or near-match typo, resolve the first exact live path before trusting or reading it.
 6. If an explicit user-supplied reference glob or shorthand resolves to zero live paths, do not block the run by default. Record the miss in `Assumption Reassessment`, name the fallback live authority surface you are using instead, and continue.
 7. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path inside the active repo/worktree before doing anything else. If no target ticket resolves there, stop and ask for a corrected target instead of falling back to a sibling repo.
-8. If ticket prose names a bare `references/<file>.md` path and the local-relative lookup fails, search `.codex/skills/*/references/` and `.claude/skills/*/references/` before treating it as missing. Prefer the skill context implied by the cited rule or section name, and record the resolved authority in `Assumption Reassessment` when it affects scope, proof, or ownership.
-9. If ticket prose names a full skill/reference path such as `.claude/skills/<skill>/references/<file>.md` or `.codex/skills/<skill>/references/<file>.md` and that exact path is missing, do not stop at the missing file. Inspect the owning skill directory with `rg --files`, then use the live equivalent reference or the parent `SKILL.md` section as authority when the current checkout clearly moved or inlined that material. Record the stale path, fallback authority, and effect on scope/proof in `Assumption Reassessment`; if no live authority is clear, treat it as a real reassessment blocker or escalate.
+8. If ticket prose names a bare `references/<file>.md` path and the local-relative lookup fails, search `.agents/skills/*/references/` and `.claude/skills/*/references/` before treating it as missing. Prefer the skill context implied by the cited rule or section name, and record the resolved authority in `Assumption Reassessment` when it affects scope, proof, or ownership.
+9. If ticket prose names a full skill/reference path such as `.claude/skills/<skill>/references/<file>.md`, `.agents/skills/<skill>/references/<file>.md`, or legacy `.codex/skills/<skill>/references/<file>.md` and that exact path is missing, do not stop at the missing file. Inspect the owning skill directory with `rg --files`, then use the live equivalent reference or the parent `SKILL.md` section as authority when the current checkout clearly moved or inlined that material. Record the stale path, fallback authority, and effect on scope/proof in `Assumption Reassessment`; if no live authority is clear, treat it as a real reassessment blocker or escalate.
 10. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
 11. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
 12. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
@@ -207,7 +206,7 @@ For non-trivial tickets, load `references/reassessment-checks.md` after classifi
 
 For engine-only canon writes where `mcp__worldloom__submit_patch_plan` is unavailable in the Codex toolset, load `references/patch-engine-codex-fallback.md` and use the local patch-engine fallback only if it preserves the same source-write boundary. Do not direct-edit `_source/*.yaml` as a convenience fallback.
 
-Load `references/mismatch-handling.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
+Load `references/mismatch-handling.md` from this skill directory (`.agents/skills/implement-ticket/references/`).
 
 Before any reassessment edit to the ticket itself, emit the pre-edit checkpoint from §1.15.
 
@@ -304,7 +303,7 @@ For skill tickets, verify:
 
 ### 5. Verify at the right boundary
 
-Load `references/verification-closeout.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
+Load `references/verification-closeout.md` from this skill directory (`.agents/skills/implement-ticket/references/`).
 
 Run the narrowest correct verification first, then broaden as needed.
 

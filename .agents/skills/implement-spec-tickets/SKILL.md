@@ -1,17 +1,14 @@
 ---
 name: implement-spec-tickets
 description: "Run the standard Worldloom implementation loop for a spec: repeatedly select the next active ticket, invoke implement-ticket with the originating spec as authority, apply implement-ticket audit suggestions, post-review completed tickets, apply post-ticket-review audit suggestions when review creates follow-up work, commit each iteration, continue through follow-up tickets first, archive the originating spec, then create and push a final branch."
-user-invocable: true
-arguments:
-  - name: spec_path
-    description: "Path or glob for the originating spec in specs/ that the ticket family implements."
-    required: true
-  - name: ticket_path
-    description: "Optional first ticket path or glob. If omitted, choose the first active tickets/*.md entry that belongs to the originating spec family."
-    required: false
 ---
 
 # Implement Spec Tickets
+
+## Arguments
+
+- `spec_path` (required): Path or glob for the originating spec in `specs/` that the ticket family implements.
+- `ticket_path` (optional): First ticket path or glob. If omitted, choose the first active `tickets/*.md` entry that belongs to the originating spec family.
 
 Run the full Worldloom ticket-family loop without making the user manually reissue the same skill commands.
 
@@ -37,9 +34,9 @@ Before the first loop iteration, read:
 - `docs/archival-workflow.md`
 - `tickets/README.md`
 - `tickets/_TEMPLATE.md`
-- `.codex/skills/implement-ticket/SKILL.md`
-- `.codex/skills/skill-audit/SKILL.md`
-- `.codex/skills/post-ticket-review/SKILL.md`
+- `.agents/skills/implement-ticket/SKILL.md`
+- `.agents/skills/skill-audit/SKILL.md`
+- `.agents/skills/post-ticket-review/SKILL.md`
 - the resolved originating spec
 
 When a phase invokes one of the child skills, read any focused references that child skill requires. Do not rely on this harness as a substitute for those reads.
@@ -155,7 +152,7 @@ If implementation ends blocked:
 Run the audit phase as if the user had said:
 
 ```text
-$skill-audit .codex/skills/implement-ticket
+$skill-audit .agents/skills/implement-ticket
 ```
 
 Then apply every audit suggestion that is specific, evidence-backed, and compatible with `AGENTS.md` and `docs/FOUNDATIONS.md`. This harness is the user's explicit authorization to implement those suggestions; do not wait for a separate "Implement suggestions" prompt.
@@ -166,7 +163,7 @@ Before applying or rejecting suggestions, print a compact visible audit result f
 
 ```text
 Child skill audit:
-- Target skill: .codex/skills/implement-ticket
+- Target skill: .agents/skills/implement-ticket
 - Findings: <N issues, N improvements, N features>
 - Evidence basis: <one-line session evidence checked, especially when Findings is 0>
 - Apply: <specific suggestions to patch, or "none">
@@ -179,7 +176,7 @@ For zero-finding harness-internal audits, a focused evidence check against the j
 
 For harness-internal child phases, this compact block is the required visible report. Apply the child skill's evidence standards, guardrails, and edit rules, but do not emit the child skill's full report template unless the phase blocks, creates material follow-up decisions that need the full structure, or the extra detail is necessary for a truthful handoff.
 
-After editing the skill, rerun a focused hygiene check over changed skill files, usually `git diff --check -- .codex/skills/implement-ticket`.
+After editing the skill, rerun a focused hygiene check over changed skill files, usually `git diff --check -- .agents/skills/implement-ticket`.
 
 If compaction, interruption, or resume recovery prevents a required compact child-phase block from being emitted at its original phase boundary, emit the missing compact block in the next visible handoff or final response before the harness handoff.
 
@@ -220,12 +217,12 @@ If `post-ticket-review` creates or materially updates a follow-up ticket, active
 Archive-path and dependency repairs in active specs, active sibling tickets, or same-family archived tickets count as material handoff updates for this trigger, even when the repairs are mechanical.
 
 ```text
-$skill-audit .codex/skills/post-ticket-review
+$skill-audit .agents/skills/post-ticket-review
 ```
 
 Apply every sound, evidence-backed suggestion under the same rules as the `implement-ticket` audit. Rerun focused hygiene over changed post-review skill files.
 
-Before applying or rejecting suggestions, print the same compact visible child-audit result block for `.codex/skills/post-ticket-review`, even when there are no findings or no applicable suggestions.
+Before applying or rejecting suggestions, print the same compact visible child-audit result block for `.agents/skills/post-ticket-review`, even when there are no findings or no applicable suggestions.
 
 Put any review-created follow-up ticket at the front of the queue, ahead of the original lexical next ticket. If review only truthed a spec, ticket dependency, or current contract doc and created no follow-up, keep the existing queue order.
 
@@ -239,7 +236,7 @@ Before committing:
 2. Inspect `git diff --cached --name-status` before staging owned paths. If pre-existing staged entries are unrelated to the current iteration, unstage those paths or stop for approval before committing; path-scoped `git add` will not protect the commit from unrelated entries already in the index.
 3. Verify all dirty paths are either owned by this iteration, previously approved for inclusion, or generated/ignored artifacts that should remain unstaged.
 4. Run `git diff --check` or the child skills' stronger equivalent over tracked and newly created owned files. If owned files are newly untracked, plain `git diff --check` will not inspect their content; cover each new file with `git diff --check --no-index /dev/null <path>`, temporary `git add -N <path>` plus cleanup before final status, or `git diff --check --cached` after path-scoped staging when the staged set has been inspected and confirmed owned.
-5. If review changed or created follow-up tickets, active dependencies, active specs, current contract docs, or same-family archive references, confirm the `.codex/skills/post-ticket-review` audit block was already emitted. If compaction or interruption skipped it, emit the compact child-audit block before staging.
+5. If review changed or created follow-up tickets, active dependencies, active specs, current contract docs, or same-family archive references, confirm the `.agents/skills/post-ticket-review` audit block was already emitted. If compaction or interruption skipped it, emit the compact child-audit block before staging.
 6. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
 7. Re-run `git diff --cached --name-status` after staging and confirm every staged path is owned by this iteration, explicitly approved, or intentional same-family state needed for the queue/handoff.
 8. Emit the required-visible-block checkpoint below before committing or stopping at a reset-boundary handoff.
@@ -315,7 +312,7 @@ Before creating a state-file-only commit, re-read the staged JSON or run `git di
 
 Do not create a chain of state-only commits just to update the previous state-only commit sha. A commit cannot embed its own final sha without changing that sha again, so do not try to make `last_state_commit` self-referential. One state-only commit per iteration is enough; if exact current `HEAD` matters, use the handoff's `State commit` line.
 
-The helper `node .codex/skills/implement-spec-tickets/scripts/validate-state-handoff.mjs` can be run from the repo root after the state-file persistence step to print the committed state summary, validate reachable commit fields, and identify the actual state commit sha for handoff. Treat it as a convenience check; still inspect the output before reporting.
+The helper `node .agents/skills/implement-spec-tickets/scripts/validate-state-handoff.mjs` can be run from the repo root after the state-file persistence step to print the committed state summary, validate reachable commit fields, and identify the actual state commit sha for handoff. Treat it as a convenience check; still inspect the output before reporting.
 
 Then print a short handoff in the conversation that mirrors the state file:
 
