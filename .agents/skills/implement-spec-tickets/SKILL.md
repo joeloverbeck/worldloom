@@ -1,0 +1,412 @@
+---
+name: implement-spec-tickets
+description: "Run the standard Worldloom implementation loop for a spec: repeatedly select the next active ticket, invoke implement-ticket with the originating spec as authority, apply implement-ticket audit suggestions, post-review completed tickets, apply post-ticket-review audit suggestions when review creates follow-up work, commit each iteration, continue through follow-up tickets first, archive the originating spec, then create and push a final branch."
+---
+
+# Implement Spec Tickets
+
+## Arguments
+
+- `spec_path` (required): Path or glob for the originating spec in `specs/` that the ticket family implements.
+- `ticket_path` (optional): First ticket path or glob. If omitted, choose the first active `tickets/*.md` entry that belongs to the originating spec family.
+
+Run the full Worldloom ticket-family loop without making the user manually reissue the same skill commands.
+
+This is an orchestration skill. Do not reimplement `implement-ticket`, `skill-audit`, or `post-ticket-review` inside this skill. Load and obey those skills at the moment each phase calls for them, and let their narrower guardrails control the phase they own.
+
+Prefer a fresh context boundary between ticket iterations. The manual workflow uses `/new` for a reason: each ticket should start from the live repo, current spec, current ticket, and current child-skill guidance rather than from assumptions accumulated during the previous ticket. The harness may run several phases for one ticket in one context, but after an iteration commit it must write a repo-local state file, print a compact handoff summary, and request/perform context compaction or a fresh-session restart when the Codex surface supports it.
+
+The persisted state file is the source of truth for resuming after `/new`; the printed handoff is only a readable mirror.
+
+Non-follow-up reset boundary checklist:
+
+1. Finish the iteration work commit and any separate state-file-only commit.
+2. Read the committed state JSON back from `HEAD` and verify the chosen `last_state_commit` mode.
+3. Confirm `last_work_commit` is reachable, collect the actual state commit sha when `last_state_commit` is `"self"`, and refresh tracked plus relevant ignored-aware status.
+4. Emit the exact `Harness handoff:` block from this skill before any prose summary or final response.
+
+## Required Reads
+
+Before the first loop iteration, read:
+
+- `AGENTS.md`
+- `docs/FOUNDATIONS.md`
+- `docs/archival-workflow.md`
+- `tickets/README.md`
+- `tickets/_TEMPLATE.md`
+- `.agents/skills/implement-ticket/SKILL.md`
+- `.agents/skills/skill-audit/SKILL.md`
+- `.agents/skills/post-ticket-review/SKILL.md`
+- the resolved originating spec
+
+When a phase invokes one of the child skills, read any focused references that child skill requires. Do not rely on this harness as a substitute for those reads.
+
+## State File
+
+Use `.codex/run-state/implement-spec-tickets.json` as the harness state file. Create `.codex/run-state/` if needed.
+
+Keep the file small and machine-readable. Update it after intake, after every iteration commit, after blockers, and after final spec archival. A useful shape is:
+
+```json
+{
+  "originating_spec": "specs/SPEC-31-example.md",
+  "archived_spec": null,
+  "last_ticket": "tickets/SPEC31EXAMPLE-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "0123456789abcdef0123456789abcdef01234567",
+  "last_state_commit": "89abcdef0123456789abcdef0123456789abcdef",
+  "next_target": "tickets/SPEC31EXAMPLE-002.md",
+  "queue": [
+    "tickets/SPEC31EXAMPLE-002.md"
+  ],
+  "phase": "ready_for_next_ticket",
+  "in_progress_ticket": null,
+  "owned_dirty_summary": null,
+  "blocked": false,
+  "blocker": null,
+  "proof_state": null,
+  "dirty_state": "clean",
+  "updated_at": "YYYY-MM-DD"
+}
+```
+
+`phase`, `in_progress_ticket`, and `owned_dirty_summary` are optional but useful when a long implementation, proof, review, or archive step may be interrupted before the iteration commit. Use concise values such as `implementing`, `implementation_done_review_pending`, `review_done_commit_pending`, `ready_for_next_ticket`, `final_spec_archive`, or `blocked`. If substantial owned dirty work exists before a long proof or review boundary, refresh these fields before continuing; do not commit only to checkpoint them.
+
+`proof_state` is optional and should stay concise. Use it when a broad proof lane remains red, unavailable, or superseded while the ticket is still truthfully complete on focused proof. Name the lane, its classification, and where the durable closeout records the detail. Leave it `null` when all relevant proof lanes passed or no special resume-facing proof context exists.
+
+On resume after `/new`, read this state file first, then verify every important field against live repo state before continuing:
+
+- `originating_spec` still exists unless `archived_spec` is set
+- `next_target` exists and is still active, unless the next action is final spec archival
+- queued ticket paths still exist and still belong to the originating spec family
+- `last_work_commit` is reachable from `HEAD`
+- `last_state_commit` is either `null` / `"none"`, `"self"`, or reachable from `HEAD`
+- optional `phase`, `in_progress_ticket`, and `owned_dirty_summary` are consistent with the live ticket and worktree when present
+- `git status --short` matches or safely supersedes `dirty_state`
+
+After resume validation, state the checked fields compactly before invoking a child skill, for example:
+
+```text
+Resume validation checked: spec, next_target, queue, last_work_commit, last_state_commit, dirty_state.
+```
+
+If the state file conflicts with the live repo, trust the live repo and patch the state file before continuing. If the conflict changes the next target or archival readiness, state that explicitly before invoking a child skill.
+
+If the only conflict is stale `dirty_state` text and live `git status --short` proves the tracked worktree is clean or safely supersedes the old classification, state the stale classification explicitly and refresh it in the next state-file update. Do not create a pre-work state-only commit solely to correct stale dirt text when target selection, queue validity, ownership classification, and archival readiness are unaffected.
+
+If live `git status --short` shows dirty owned paths for `next_target` or `in_progress_ticket`, do not restart the target from the top just because the last committed state points to the previous checkpoint. Inspect the dirty diff, ticket closeout, and available proof artifacts; infer the next uncompleted phase, state that recovery decision, refresh the optional phase fields in the next state-file update, and continue from that phase. Treat unrelated or ambiguous dirty paths under the intake dirty-path rules instead of absorbing them silently.
+
+If compaction, interruption, or resume recovery happens while a proof command or test session may still be running, identify and poll or close the outstanding session before rerunning proof, editing closeout, committing, or finalizing. If the recorded session id is no longer known or the tool reports it cannot be found after compaction, report the lost session, mark that proof lane unverified, and rerun the proof before closeout or commit. Do not claim a lane passed, failed, or needs rerun while an earlier invocation is still unresolved.
+
+`last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. Record full commit SHAs in the JSON state file; short SHAs are acceptable in printed handoffs only. `last_state_commit` identifies how the state update was persisted: the same sha as `last_work_commit` when amended into that commit, `"self"` when committed separately as a state-file-only commit, or `"none"` when intentionally left uncommitted. Do not overload one field for both meanings. When `last_state_commit` is `"self"`, the printed handoff must report the actual state-only commit sha. On resume, validate `"self"` by checking the state file's containing commit or latest state-only commit in `git log`, not by expecting the JSON value to contain its own sha.
+
+## Intake
+
+1. Resolve `spec_path` to exactly one live file under `specs/`. If it is missing, ambiguous, or already archived, stop and ask for the exact active spec path.
+2. Snapshot the worktree with `git status --short`.
+3. Classify pre-existing dirty paths before doing any work:
+   - ticket/spec family state for the active run
+   - existing user work that the run must not absorb silently
+   - unrelated noise
+   If `git status --short` reports a submodule/gitlink/worktree marker such as lowercase `m <path>`, inspect it separately with a path-scoped command such as `git diff -- <path>` or `git status --short <path>`. Classify it as owned, unrelated, or ambiguous submodule/worktree dirt; leave it unstaged unless explicitly owned or approved, and record the classification in `dirty_state`.
+4. If the initial snapshot shows staged/index entries, inspect `git diff --cached --name-status` and classify them separately from unstaged dirt. Pre-existing staged unrelated work must not be absorbed by a harness commit. Either leave it staged and avoid committing until it is explicitly approved for inclusion, or unstage it before the harness commit while leaving the working-tree content intact. Record the choice in the dirty-state classification.
+5. If `.codex/run-state/implement-spec-tickets.json` already exists, read and validate it even on a normal first invocation. If it conflicts with live repo state, trust the live repo and refresh the state file before invoking child skills.
+6. If unrelated dirty paths exist and the invocation expects this harness to stage and commit all uncommitted files, stop and ask whether those paths should be included in the harness commits. Do not silently commit unrelated user work.
+7. Resolve the first ticket:
+   - if `ticket_path` is supplied, resolve it to exactly one active ticket under `tickets/`
+   - otherwise inspect active `tickets/*.md`, choose the first ticket in lexical order whose filename, `Deps`, problem statement, or explicit spec reference ties it to the originating spec, and state the selection
+8. Build the initial pending queue from active tickets that clearly belong to the same originating spec family. Parse active same-family `Deps` before freezing the order:
+   - Resolve dependency entries that name active same-family ticket ids, active ticket paths, or archived ticket paths.
+   - Treat archived/completed dependencies as already satisfied.
+   - Order active prerequisites before their active dependents, using lexical order only within each ready set.
+   - If the supplied first ticket has unsatisfied active same-family prerequisites, retarget to the first prerequisite before invoking `implement-ticket`, refresh the state file, and state the retarget.
+   - If active same-family dependencies form a cycle or name an unresolved active prerequisite, stop and report the dependency problem instead of guessing.
+   Keep the queue append-only after this dependency-aware ordering; do not jump ahead of a follow-up created by the current iteration.
+9. Decide how to handle pre-existing untracked same-family ticket/spec files before implementation. If they are required to define the active family queue, dependency chain, or truthful handoff for the current iteration, they may be included in the first iteration commit and named as pre-existing same-family state. If they are not required for the current iteration, either leave them uncommitted or split them into a separate intake/state commit; state the choice in the handoff.
+10. Write or refresh `.codex/run-state/implement-spec-tickets.json` with the resolved spec, initial target, initial queue, dirty-state classification, and `blocked: false`.
+
+If an old state file exists, no reset or blocker will occur before the first target is processed, and refreshing the state file immediately would create noisy pre-work dirt while ownership is still being classified, the state refresh may be deferred until the first iteration state commit. This deferral is allowed only when the next target, queue, ownership classification, and archival readiness have been validated against live repo state before invoking child skills. State the deferral explicitly if it affects resume expectations.
+
+## Loop
+
+Repeat until there is no active ticket left in the queue and no newly created follow-up ticket takes priority.
+
+### 1. Implement The Target Ticket
+
+Invoke the implementation phase as if the user had said:
+
+```text
+$implement-ticket <ticket> . Rely on <originating-spec>
+```
+
+Use the live `implement-ticket` skill exactly. The child skill owns reassessment, implementation, proof, closeout wording, and any decision to create a follow-up ticket needed for an honest closeout.
+
+If implementation ends blocked:
+
+- if a concrete follow-up ticket was created or named as the next owner, put that follow-up at the front of the queue and continue the loop
+- if reassessment proves the current ticket is blocked only by existing active prerequisite tickets, truth the current ticket's `Deps` / reassessment / queue notes as needed, move those prerequisite tickets ahead of it, commit the retarget plus state update, print a harness handoff, and resume at the first prerequisite after the reset boundary
+- if no follow-up exists, stop the harness and report the blocker, current ticket, proof gap, and next required action
+
+### 2. Audit And Apply Implement-Ticket Suggestions
+
+Run the audit phase as if the user had said:
+
+```text
+$skill-audit .agents/skills/implement-ticket
+```
+
+Then apply every audit suggestion that is specific, evidence-backed, and compatible with `AGENTS.md` and `docs/FOUNDATIONS.md`. This harness is the user's explicit authorization to implement those suggestions; do not wait for a separate "Implement suggestions" prompt.
+
+Reject or defer only suggestions that are clearly wrong, speculative, duplicate already-live guidance, or would weaken Worldloom's hard gates, canon discipline, or ticket truthing.
+
+Before applying or rejecting suggestions, print a compact visible audit result for the child-skill phase:
+
+```text
+Child skill audit:
+- Target skill: .agents/skills/implement-ticket
+- Findings: <N issues, N improvements, N features>
+- Evidence basis: <one-line session evidence checked, especially when Findings is 0>
+- Apply: <specific suggestions to patch, or "none">
+- Reject/defer: <specific suggestions and reason, or "none">
+```
+
+If the audit has no findings or no applicable suggestions, still print the block with `Apply: none` and continue. When `Findings` is `0 issues, 0 improvements, 0 features`, include a concrete one-line `Evidence basis` naming the observed session surfaces checked, such as reassessment, proof substitution, closeout, archival handoff, state persistence, or reset behavior. Keep this to one line; do not expand a zero-finding audit into the full child-skill report template.
+
+For zero-finding harness-internal audits, a focused evidence check against the just-exercised child-skill surfaces is sufficient; do not generate the full child audit report unless a finding, blocker, or material follow-up decision exists.
+
+For harness-internal child phases, this compact block is the required visible report. Apply the child skill's evidence standards, guardrails, and edit rules, but do not emit the child skill's full report template unless the phase blocks, creates material follow-up decisions that need the full structure, or the extra detail is necessary for a truthful handoff.
+
+After editing the skill, rerun a focused hygiene check over changed skill files, usually `git diff --check -- .agents/skills/implement-ticket`.
+
+If compaction, interruption, or resume recovery prevents a required compact child-phase block from being emitted at its original phase boundary, emit the missing compact block in the next visible handoff or final response before the harness handoff.
+
+### 3. Review Completed Tickets
+
+If the target ticket is marked `COMPLETED`, run the review phase as if the user had said:
+
+```text
+$post-ticket-review <completed-ticket>
+```
+
+Use the live `post-ticket-review` skill exactly. The child skill owns closeout truthing, archival, dependency/path repairs, and follow-up ticket creation.
+
+After the review phase, print a compact visible review result:
+
+```text
+Post-ticket review:
+- Target ticket: <ticket path or archived path>
+- Archival status: <archived | already archived | blocked>
+- Closeout truthing: <validated unchanged | factually corrected | blocked>
+- Reference sweep: <paths repaired or "no stale active-path refs found">
+- Follow-ups: <created/updated ticket paths or "none">
+- Verification: <rerun proof command/result or why rerun was not needed>
+```
+
+When reporting the reference sweep after archiving a ticket, distinguish stale active-path references from valid archived-path references that contain the old active path as a substring. A literal search for `tickets/<id>.md` can match `archive/tickets/<id>.md`; classify those archived-path hits as repaired/current archive references unless they still instruct future work to use the active path. Prefer an exact active-path check that excludes `archive/tickets/`, or explicitly report the substring classification before saying stale refs remain.
+
+If `post-ticket-review` blocks archival because same-seam work remains, put the active ticket back at the front of the queue and continue through `implement-ticket` unless the review says a user decision is required. Do not archive a blocked ticket.
+
+For harness-internal review phases, this compact block is the required visible report. Apply the child skill's closeout truthing, archival, dependency-repair, and follow-up rules, but do not emit the full `post-ticket-review` report template unless archival blocks, a user decision is required, or the fuller structure is needed to make the handoff truthful.
+
+If compaction, interruption, or resume recovery prevents this compact review block from being emitted at the review boundary, emit it in the next visible handoff or final response before the harness handoff.
+
+### 4. Audit Post-Ticket Review When It Changes Handoff Surfaces
+
+If `post-ticket-review` creates or materially updates a follow-up ticket, active spec, active ticket dependency, or current contract doc, run:
+
+Archive-path and dependency repairs in active specs, active sibling tickets, or same-family archived tickets count as material handoff updates for this trigger, even when the repairs are mechanical.
+
+```text
+$skill-audit .agents/skills/post-ticket-review
+```
+
+Apply every sound, evidence-backed suggestion under the same rules as the `implement-ticket` audit. Rerun focused hygiene over changed post-review skill files.
+
+Before applying or rejecting suggestions, print the same compact visible child-audit result block for `.agents/skills/post-ticket-review`, even when there are no findings or no applicable suggestions.
+
+Put any review-created follow-up ticket at the front of the queue, ahead of the original lexical next ticket. If review only truthed a spec, ticket dependency, or current contract doc and created no follow-up, keep the existing queue order.
+
+If this trigger fires, record that fact in the next visible checkpoint or state update before committing, using a compact marker such as `post_review_material_updates: true` in the handoff notes or state file. Also record whether the post-review audit block is `emitted`, `not_applicable`, or `blocked`. This marker exists to catch missed audit blocks after archive-path repairs, dependency repairs, or compaction.
+
+### 5. Commit The Iteration
+
+Before committing:
+
+1. Refresh `git status --short`.
+2. Inspect `git diff --cached --name-status` before staging owned paths. If pre-existing staged entries are unrelated to the current iteration, unstage those paths or stop for approval before committing; path-scoped `git add` will not protect the commit from unrelated entries already in the index.
+3. Verify all dirty paths are either owned by this iteration, previously approved for inclusion, or generated/ignored artifacts that should remain unstaged.
+4. Run `git diff --check` or the child skills' stronger equivalent over tracked and newly created owned files. If owned files are newly untracked, plain `git diff --check` will not inspect their content; cover each new file with `git diff --check --no-index /dev/null <path>`, temporary `git add -N <path>` plus cleanup before final status, or `git diff --check --cached` after path-scoped staging when the staged set has been inspected and confirmed owned.
+5. If review changed or created follow-up tickets, active dependencies, active specs, current contract docs, or same-family archive references, confirm the `.agents/skills/post-ticket-review` audit block was already emitted. If compaction or interruption skipped it, emit the compact child-audit block before staging.
+6. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
+7. Re-run `git diff --cached --name-status` after staging and confirm every staged path is owned by this iteration, explicitly approved, or intentional same-family state needed for the queue/handoff.
+8. Emit the required-visible-block checkpoint below before committing or stopping at a reset-boundary handoff.
+9. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening. Prefer a concise truthful shape such as `SPEC35STOPIPEIG-001 implement and archive observer firewall fix`. Mention `follow-up` or `skill hardening` only when the committed iteration actually created or updated a follow-up ticket or changed a skill.
+
+If `.codex/run-state/implement-spec-tickets.json` was refreshed during intake or mid-iteration but the chosen persistence mode is a separate state-file-only commit, leave that state file unstaged for the work commit unless it has already been updated to the final post-iteration state. The work commit should not accidentally preserve pre-work state such as the just-archived ticket still listed as `next_target`; update and commit the state file in §6 after the work commit sha is known.
+
+Before the final commit or reset-boundary handoff for an iteration, run a required-visible-block checkpoint. Emit this compact block visibly; after compaction or resume, emit it even when the individual child blocks were already printed earlier, so the commit/handoff boundary has an explicit checklist:
+
+```text
+Required-visible-block checkpoint:
+- implement-ticket audit block: <emitted | not_applicable: reason>
+- post-ticket-review block: <emitted | not_applicable: reason>
+- post-ticket-review audit block: <emitted | not_applicable: reason | blocked: reason>
+- Harness handoff: <ready_to_emit | not_applicable: reason>
+```
+
+The checkpoint values must cover:
+
+- `implement-ticket` audit block: `emitted` or `not_applicable` with reason
+- `post-ticket-review` block: `emitted` or `not_applicable` with reason
+- `post-ticket-review` audit block: `emitted`, `not_applicable` with reason, or `blocked`
+- `Harness handoff` block: `ready_to_emit` or `not_applicable` with reason
+
+If compaction, interruption, or resume recovery caused any required block to be missed at its phase boundary, emit the missing compact block before staging, committing, or sending the final response. Do not rely on the final prose summary as an implicit substitute for these blocks.
+
+When `post-ticket-review` archived a ticket with `git mv`, do not try to stage the now-missing active ticket path by name. Stage the archive destination and other edited owned paths, then confirm the source deletion or rename is staged with `git diff --cached --name-status` before committing.
+
+If non-destructive git index commands needed for this harness step fail because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun the same staging or commit command with the required approval/escalation and record the retry in the handoff or final report. Do not use this as permission for destructive commands or for staging unrelated paths.
+
+If nothing changed after an iteration, do not create an empty commit. Record that there was no commit for that iteration and why.
+
+### 6. Persist State And Prepare Context Reset
+
+After each iteration work commit, update `.codex/run-state/implement-spec-tickets.json` before context compaction or a fresh-session restart. Include:
+
+- originating spec path or archived spec path
+- last ticket processed and result
+- `last_work_commit`: the ticket iteration work commit sha, or `"none"` if no work commit was created
+- `last_state_commit`: `"self"` when the state update is committed separately as a state-file-only commit, the same sha as `last_work_commit` when amended into the work commit, or `"none"` when the state file remains intentionally uncommitted
+- next target, or `"final_spec_archive"` / `"blocked"`
+- remaining queue
+- blocker summary when blocked
+- proof-state summary when a known non-blocking proof deviation remains
+- dirty-state classification
+- `updated_at`
+
+Normalize `dirty_state` after committing owned paths: refresh `git status --short` and record only remaining uncommitted paths. When package/tool commands ran, or prior state already names ignored artifacts, also refresh package-scoped ignored-aware status such as `git status --short --ignored <affected-package-dirs>` before writing `dirty_state`. Classify remaining paths as `unrelated dirty`, `expected ignored artifacts`, or `blocked owned leftovers`. If remaining dirt is only a submodule/gitlink/worktree marker, name it explicitly as unrelated or owned submodule/worktree dirt rather than collapsing it into ordinary file edits. Do not leave stale phrases such as `owned ticket-family edits` after those owned edits have already been committed. If blocked owned leftovers remain, set `next_target: "blocked"` and describe the blocker.
+
+If the state file itself changes after the work commit, either:
+
+- amend it into the work commit before reporting the sha, then set `last_work_commit` and `last_state_commit` to that amended commit sha; or
+- commit it separately as a harness-state commit, then set `last_work_commit` to the implementation/archive commit and `last_state_commit` to `"self"`. Report the actual state-only commit sha in the handoff after the commit succeeds.
+
+After any state-only commit succeeds, verify the committed JSON still matches the chosen persistence mode:
+
+- if the state file was committed separately, `last_state_commit` must be `"self"`
+- if the state file was amended into the work commit, `last_state_commit` must equal `last_work_commit`
+- if the state file was intentionally left uncommitted, `last_state_commit` must be `"none"` and the handoff must say why
+- `last_work_commit` must be `"none"` or a full reachable commit SHA; if `last_state_commit` stores a commit value instead of `"self"` / `"none"`, it must also be a full reachable commit SHA
+
+Run this as an explicit post-commit check, such as reading `.codex/run-state/implement-spec-tickets.json` from `HEAD`. If the check fails, fix or amend before reporting a clean handoff.
+
+When the remaining queue is empty and the next action is immediate final spec archival in the same context, a separate post-ticket state-only commit may be deferred until after the final spec archive commit. This deferral is allowed only when the tracked worktree is clean except for the state file, no reset boundary is being requested, no blocker exists, and the harness prints a compact checkpoint stating that it is proceeding directly to final spec archival. The final archived-spec state must still be persisted and committed before branch creation or push.
+
+When committing the state file separately with `last_state_commit: "self"`, write `dirty_state` as the expected state after that state-only commit succeeds. Do not record transient dirt for `.codex/run-state/implement-spec-tickets.json` itself unless intentionally leaving the state file uncommitted.
+
+For state-file-only persistence, run the index-mutating steps serially: stage `.codex/run-state/implement-spec-tickets.json`, inspect the staged JSON/diff, then commit. If staging, staged inspection, or commit fails because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun that exact failed step with the required approval/escalation before continuing. Do not bundle the state-file `git add`, staged inspection, and `git commit` into one command when a failure would obscure which step actually needs retry.
+
+If resume finds only `.codex/run-state/implement-spec-tickets.json` already staged for the state-file-only commit, inspect the cached diff or staged JSON and proceed with the state-only commit instead of restaging or treating the staged state file as unrelated dirt.
+
+Before creating a state-file-only commit, re-read the staged JSON or run `git diff --cached -- .codex/run-state/implement-spec-tickets.json` and confirm `last_state_commit` is already `"self"`. The actual state-only commit sha belongs in the printed handoff's `State commit` line, not inside the JSON.
+
+Do not create a chain of state-only commits just to update the previous state-only commit sha. A commit cannot embed its own final sha without changing that sha again, so do not try to make `last_state_commit` self-referential. One state-only commit per iteration is enough; if exact current `HEAD` matters, use the handoff's `State commit` line.
+
+The helper `node .agents/skills/implement-spec-tickets/scripts/validate-state-handoff.mjs` can be run from the repo root after the state-file persistence step to print the committed state summary, validate reachable commit fields, and identify the actual state commit sha for handoff. Treat it as a convenience check; still inspect the output before reporting.
+
+Then print a short handoff in the conversation that mirrors the state file:
+
+```text
+Harness handoff:
+- Originating spec: <active or archived path>
+- Last ticket processed: <ticket id and result>
+- Work commit: <sha or "none">
+- State commit: <sha or "none" | same as work commit>
+- Next target: <follow-up ticket path | next queued ticket path | final spec archive | blocked>
+- Queue: <remaining active ticket paths>
+- Proof state: <clean | known non-blocking deviation with lane and closeout path | blocked>
+- Dirty state: <clean | expected ignored artifacts | owned/unrelated paths still present>
+- State file: .codex/run-state/implement-spec-tickets.json
+- Required next invocation: $implement-spec-tickets <spec> <next-target-if-any>
+- Reset boundary: <fresh context recommended before next non-follow-up ticket | continuing same-seam follow-up/direct dependent with reason | not_applicable: final/blocked>
+```
+
+For an intentional reset-boundary stop between non-follow-up tickets, this `Harness handoff` is the required interim report; reserve the full `Final Report` checklist for blocked or final-family exits.
+
+Then prefer one of these reset paths:
+
+- If Codex exposes context compaction or the user can issue `/new`, request it before starting the next ticket.
+- If compaction is unavailable but the context is still small and the next target is an immediate follow-up from the just-finished ticket, continuing in the same context is acceptable.
+- If the next target is an active direct dependent that consumes the just-landed seam, continuing in the same context is acceptable only when the dependency relation is explicit in `Deps`, the queue was recomputed from live tickets, and the harness states why this is a same-seam continuation. Otherwise treat it as a non-follow-up reset boundary.
+- If the context is large, proof output was noisy, or the next queued ticket is not a direct same-seam follow-up or explicit direct-dependent continuation, stop after the handoff instead of starting the next ticket in a saturated context.
+
+The next session must reload this skill and the child skills from disk, then resume from the state file and live repo state. Do not rely on remembered queue state without rechecking active `tickets/*.md` and `git status --short`.
+
+## Queue And Follow-Up Rules
+
+- A follow-up ticket created by `implement-ticket` or `post-ticket-review` is always the next target.
+- If multiple follow-ups are created in one iteration, choose the one explicitly identified as the next owner. If none is identified, choose the lowest lexical path and record the ordering.
+- Between non-follow-up tickets, keep active same-family prerequisites ahead of active dependents. Recompute this from live `Deps` after archive/dependency repairs, treating archived/completed deps as satisfied and lexical order as the tie-breaker among currently ready tickets.
+- Do not skip active tickets in the originating spec family unless their `Deps`, status, or review result proves they are not currently valid next work.
+- If a sibling ticket is absorbed into the current ticket, update the queue after the child skill has made that sibling truthful.
+- If a ticket is archived, remove its old active path from the queue and replace dependency references according to `post-ticket-review`.
+
+## Final Spec Archive
+
+When all originating-spec tickets are completed, reviewed, archived, and committed:
+
+1. Re-read the originating spec.
+2. Confirm no active `tickets/*.md` still names the spec as active implementation work.
+3. Inspect the spec's final verification or close-proof section. Run the final proof lanes it names, or explicitly classify why a named lane is superseded, unavailable, or not part of the accepted close boundary. If final proof exposes a small same-seam mismatch in already-completed deliverables, make the minimal repair before archival, update affected archived ticket/spec closeout text if the repair changes their truth, rerun focused hygiene, and include those repairs in the final archive commit. Do not widen into new behavior; if the mismatch needs new ownership, create or surface a follow-up ticket instead of archiving the spec green. Record the final proof results in `## Outcome` so the archived spec is self-contained.
+4. Update the spec status and `## Outcome` according to `docs/archival-workflow.md`.
+5. Move the spec to `archive/specs/`, preferring `git mv` when tracked and plain `mv` when untracked.
+6. Confirm the original `specs/` path no longer exists.
+7. Sweep active tickets, docs, specs, same-family archived tickets, same-seam triage/report docs, and `.codex/run-state/implement-spec-tickets.json` for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, direct implementation-reference snippets, and state-file `originating_spec` / `archived_spec` fields that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
+8. Run hygiene over the spec archive move and reference repairs.
+9. Commit the spec archive as its own finalization commit unless it is already included in the last ticket-family commit for a clear reason.
+10. Update `.codex/run-state/implement-spec-tickets.json` with `archived_spec`, `next_target: null`, an empty queue, `blocked: false`, the final commit sha, and clean dirty-state classification.
+
+When staging a spec archived with `git mv`, do not try to stage the now-missing active `specs/...` path by name. Stage the archive destination and other edited owned paths, then confirm the source deletion or rename is staged with `git diff --cached --name-status` before committing.
+
+If `git mv`, `git add`, or `git commit` fails during final archival because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun the same non-destructive command with the required approval/escalation and record the first failure plus retry result. Do not widen the staged set while retrying.
+
+## Branch And Push
+
+After the final archive commit and any required final state-file persistence commit:
+
+1. Refresh `git status --short`. Stop if uncommitted owned changes remain.
+2. Create a new branch from the current HEAD with a concise family name derived from the spec id or filename, for example `spec-31-story-contract-hardening`.
+3. Push the new branch to the configured remote.
+4. Report the branch name, pushed remote, commits created by the harness, archived spec path, archived ticket paths, and any follow-up tickets left active.
+
+This branch step labels the already-committed final `HEAD`. If preserving the starting local branch pointer matters for the repository, create or switch to the family branch before the first harness commit instead of waiting until finalization. Otherwise, creating the branch here is acceptable but the original local branch may already contain the harness commits.
+
+If branch creation or push fails because Codex cannot write the git ref in the sandbox, cannot resolve the remote host, or otherwise hits a clear sandbox/network restriction, rerun the same branch/push command with the required approval or escalation. Record both the first failure and the successful retry, or the remaining blocker if escalation still fails.
+
+Do not create or push a branch if the implementation loop stopped blocked or if the worktree still contains unapproved dirty paths.
+
+After a successful push, either leave the final state file as a durable run record or remove it in a final housekeeping commit only if the user wants ephemeral harness state excluded from the branch. Do not delete it silently if it is the only record of the harness queue and decisions.
+
+## Hard Stops
+
+- `docs/FOUNDATIONS.md` wins over spec prose, ticket prose, and this harness.
+- Do not bypass `implement-ticket`, `skill-audit`, or `post-ticket-review` guardrails.
+- Do not commit unrelated pre-existing dirty paths unless the user explicitly approves their inclusion.
+- Do not treat a blocked ticket as completed just to let the loop continue.
+- Do not archive the originating spec while any active ticket still owns required work for it.
+- Do not push a branch with uncommitted owned changes or unresolved blockers.
+- Do not start a new non-follow-up ticket in a context that is already carrying substantial implementation, proof, review, or audit history from a previous ticket; write the handoff and reset first.
+- Do not use the printed handoff as the only resume record. Persist or refresh `.codex/run-state/implement-spec-tickets.json` before asking for `/new`.
+
+## Final Report
+
+End with:
+
+- originating spec path and archived path, if archived
+- tickets implemented, blocked, archived, or left active
+- follow-up retargeting decisions
+- skill audit suggestions applied or rejected
+- commits created
+- final branch and push result, if reached
+- verification commands or review surfaces that proved the final state
+- final state-file status
