@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — upgrades/fixes the `tools/story-explorer/web` test toolchain (dev dependencies, and whatever test-setup/test code the upgrade requires) and then edits `.github/workflows/ci-story-explorer.yml` to add the `node-version: ['22', '24']` matrix. No canon/MCP/patch-engine/validator/hook/skill surface is touched; story-explorer is a read-only inspector and its web suite is a test harness.
-**Deps**: Pairs with NODE24CI-001 (same Node-24 CI rollout). No hard code dependency, but the matrix edit in this ticket **must not land until** the web suite is green on both Node 22 and Node 24 — adding story-explorer to the matrix before the fix would put a known-red `test (24)` leg on `main`.
+**Deps**: Pairs with `archive/tickets/NODE24CI-001-add-node24-matrix-clean-packages.md` (same Node-24 CI rollout). No hard code dependency, but the matrix edit in this ticket **must not land until** the web suite is green on both Node 22 and Node 24 — adding story-explorer to the matrix before the fix would put a known-red `test (24)` leg on `main`.
 
 ## Problem
 
@@ -57,7 +57,7 @@ Only after steps 1–2 verify green on both Node versions, mirror NODE24CI-001's
 
 ## Out of Scope
 
-- The five other `ci-*.yml` workflows — NODE24CI-001.
+- The five other `ci-*.yml` workflows — completed in `archive/tickets/NODE24CI-001-add-node24-matrix-clean-packages.md`.
 - Any non-test change to story-explorer frontend behavior or UX; this ticket only makes the existing tests pass on Node 24, it does not alter what they assert (no assertion weakening, no `skip`/`only` to paper over failures).
 - Fallback if the upgrade proves intractable: splitting the web Vitest segment to a Node-22-only step while the backend runs on `['22','24']`. This is a **deliberate, surfaced** decision — if reached, stop and present it; do not implement it silently to force a green check.
 
